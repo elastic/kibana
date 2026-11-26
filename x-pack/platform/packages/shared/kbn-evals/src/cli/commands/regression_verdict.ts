@@ -140,28 +140,28 @@ const formatGateChange = (relativeChange: number | null): string =>
 /**
  * The regression verdict for the PR comment: the headline answer ("regression or not")
  * ahead of the full comparison table, listing only the slices that tripped a gate.
- * Report-only — the verdict never fails the command. Baseline datasets absent from the
- * target run are called out and qualify a passing headline, since their slices were never
+ * Report-only — the verdict never fails the command. Baseline (dataset, evaluator) slices absent from the
+ * gated results are called out and qualify a passing headline, since their slices were never
  * gated at all.
  */
 export const formatRegressionReportMarkdown = (
   report: RegressionReport,
-  { missingBaselineDatasets = [] }: { missingBaselineDatasets?: string[] } = {}
+  { missingBaselineSlices = [] }: { missingBaselineSlices?: string[] } = {}
 ): string => {
   const lines: string[] = [];
   if (report.verdict === 'fail') {
     lines.push(`### ${GATE_ICONS.fail} Regression detected (report-only)`);
   } else if (report.verdict === 'warn') {
     lines.push(`### ${GATE_ICONS.warn} No regression, with warnings`);
-  } else if (missingBaselineDatasets.length > 0) {
+  } else if (missingBaselineSlices.length > 0) {
     lines.push(`### ${GATE_ICONS.warn} No regression in the compared slices (partial coverage)`);
   } else {
     lines.push(`### ${GATE_ICONS.pass} No regression against the pinned baseline`);
   }
-  if (missingBaselineDatasets.length > 0) {
+  if (missingBaselineSlices.length > 0) {
     lines.push('');
     lines.push(
-      `> **Warning**: baseline dataset(s) ${missingBaselineDatasets
+      `> **Warning**: baseline slice(s) ${missingBaselineSlices
         .map((name) => `\`${name}\``)
         .join(', ')} are missing from this run, so the verdict does not cover them.`
     );
@@ -187,7 +187,7 @@ export const formatRegressionReportMarkdown = (
 export const logRegressionReport = (
   log: SomeDevLog,
   report: RegressionReport,
-  { missingBaselineDatasets = [] }: { missingBaselineDatasets?: string[] } = {}
+  { missingBaselineSlices = [] }: { missingBaselineSlices?: string[] } = {}
 ): void => {
   const summary = `Regression gates (report-only): ${report.verdict.toUpperCase()} — ${
     report.regressions.length
@@ -199,11 +199,9 @@ export const logRegressionReport = (
   } else {
     log.info(summary);
   }
-  if (missingBaselineDatasets.length > 0) {
+  if (missingBaselineSlices.length > 0) {
     log.warning(
-      `  Baseline dataset(s) missing from this run (not gated): ${missingBaselineDatasets.join(
-        ', '
-      )}`
+      `  Baseline slice(s) missing from this run (not gated): ${missingBaselineSlices.join(', ')}`
     );
   }
   for (const gate of [...report.regressions, ...report.warnings]) {

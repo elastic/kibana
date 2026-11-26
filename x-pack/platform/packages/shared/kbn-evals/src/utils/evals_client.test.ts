@@ -329,7 +329,7 @@ describe('EvalsClient', () => {
     );
   });
 
-  it('getExperimentScores returns [] and logs when response exceeds MAX_SCORES_PER_QUERY', async () => {
+  it('getExperimentScores throws rather than hand back a truncated subset', async () => {
     const kbnClient = createMockKbnClient();
     const log = createLog();
     kbnClient.request.mockResolvedValue(
@@ -340,9 +340,20 @@ describe('EvalsClient', () => {
     );
     const client = new EvalsClient(kbnClient, log);
 
-    await expect(client.getExperimentScores('experiment-123')).resolves.toEqual([]);
+    // A subset must not degrade to [] either: empty reads as "the run exported nothing".
+    await expect(client.getExperimentScores('experiment-123')).rejects.toThrow(
+      /refusing to compare a subset/
+    );
+  });
 
-    expect(log.error).toHaveBeenCalledWith(expect.stringContaining('exceeds MAX_SCORES_PER_QUERY'));
+  it('getExperimentScores rethrows request failures instead of returning []', async () => {
+    const kbnClient = createMockKbnClient();
+    const log = createLog();
+    kbnClient.request.mockRejectedValue(new Error('socket hang up'));
+    const client = new EvalsClient(kbnClient, log);
+
+    await expect(client.getExperimentScores('experiment-123')).rejects.toThrow('socket hang up');
+    expect(log.error).toHaveBeenCalledWith(expect.stringContaining('socket hang up'));
   });
 
   it('upsertDataset posts to the upsert route', async () => {

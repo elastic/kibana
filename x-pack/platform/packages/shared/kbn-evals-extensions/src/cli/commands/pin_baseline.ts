@@ -110,15 +110,25 @@ export const pinBaselineCmd: Command<void> = {
     }
 
     if (expectedScores === undefined) {
-      const liveScores = await evalsClient.getExperimentScores(executionId, {
-        suiteId,
-        executionId,
-      });
-      if (liveScores.length > 0 && liveScores.length !== baseline.score_count) {
+      // Advisory only: the pin already succeeded, so a failed live read must not turn
+      // a published baseline into a failed command.
+      try {
+        const liveScores = await evalsClient.getExperimentScores(executionId, {
+          suiteId,
+          executionId,
+        });
+        if (liveScores.length > 0 && liveScores.length !== baseline.score_count) {
+          log.warning(
+            `The execution has ${liveScores.length} live score(s) but the pinned snapshot holds ` +
+              `${baseline.score_count}. A re-pin promotes the stored snapshot untouched; if the ` +
+              `live scores are the intended baseline, pin a fresh execution instead.`
+          );
+        }
+      } catch (error) {
         log.warning(
-          `The execution has ${liveScores.length} live score(s) but the pinned snapshot holds ` +
-            `${baseline.score_count}. A re-pin promotes the stored snapshot untouched; if the ` +
-            `live scores are the intended baseline, pin a fresh execution instead.`
+          `Could not read the live scores to sanity-check the snapshot count: ${
+            error instanceof Error ? error.message : String(error)
+          }`
         );
       }
     }

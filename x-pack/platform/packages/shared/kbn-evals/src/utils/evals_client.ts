@@ -296,20 +296,26 @@ export class EvalsClient {
       });
       const parsed = GetEvaluationExperimentScoresResponse.parse(getResponseData(response));
 
-      if (parsed.total > MAX_SCORES_PER_QUERY) {
+      // A subset must never pass as the evidence: a comparison (and its regression
+      // verdict) computed over a truncated read looks complete and can pass wrongly.
+      if (parsed.total > parsed.scores.length) {
         throw new Error(
-          `Experiment ${experimentId} returned ${parsed.total} scores, which exceeds MAX_SCORES_PER_QUERY (${MAX_SCORES_PER_QUERY})`
+          `Experiment ${experimentId} has ${parsed.total} scores but the scores API returned ` +
+            `${parsed.scores.length} (over the ${MAX_SCORES_PER_QUERY} per-query cap); refusing ` +
+            `to compare a subset.`
         );
       }
 
       return parsed.scores;
     } catch (error: unknown) {
+      // Rethrow rather than degrade to []: an empty result reads as "the run exported
+      // nothing", which sends callers down the wrong path when the read itself failed.
       this.log.error(
         `Failed to retrieve scores for experiment ID ${experimentId}: ${
           error instanceof Error ? error.message : String(error)
         }`
       );
-      return [];
+      throw error;
     }
   }
 

@@ -139,12 +139,12 @@ describe('formatRegressionReportMarkdown', () => {
     expect(row?.split(/(?<!\\)\|/).filter((cell) => cell.trim() !== '')).toHaveLength(5);
   });
 
-  it('qualifies a passing verdict when baseline datasets are missing from the run', () => {
+  it('qualifies a passing verdict when baseline slices are missing from the gated results', () => {
     const markdown = formatRegressionReportMarkdown(report({}), {
-      missingBaselineDatasets: ['BrowseComp-Plus'],
+      missingBaselineSlices: ['BrowseComp-Plus / Factuality'],
     });
     expect(markdown).toContain('partial coverage');
-    expect(markdown).toContain('`BrowseComp-Plus`');
+    expect(markdown).toContain('`BrowseComp-Plus / Factuality`');
     expect(markdown).not.toContain('No regression against the pinned baseline');
   });
 

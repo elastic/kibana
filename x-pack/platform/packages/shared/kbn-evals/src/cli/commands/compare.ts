@@ -285,6 +285,7 @@ export const compareCmd: Command<void> = {
     let baselineMetadata: BaselineExperiment | undefined;
     let pinnedBaselineId: string | undefined;
     let pinnedJudgeModelId: string | null | undefined;
+    let pinnedScoreCount: number | undefined;
 
     if (baselinePinned) {
       if (!suiteId) {
@@ -350,6 +351,7 @@ export const compareCmd: Command<void> = {
 
       pinnedBaselineId = pinned.baseline_id;
       pinnedJudgeModelId = pinned.judge_model_id;
+      pinnedScoreCount = pinned.score_count;
       baselineExperimentId = pinned.execution_id;
       baselineMetadata = {
         executionId: pinned.execution_id,
@@ -493,6 +495,21 @@ export const compareCmd: Command<void> = {
       return;
     }
 
+    // The snapshot read must hand back exactly what was pinned: a partial read would
+    // gate the verdict on a subset of the baseline and look complete while doing it.
+    if (
+      pinnedBaselineId &&
+      pinnedScoreCount != null &&
+      baselineExperimentScores.length !== pinnedScoreCount
+    ) {
+      abortComparison(
+        '⚠️ Pinned-baseline comparison unavailable',
+        `The pinned baseline holds ${pinnedScoreCount} score(s) but the registry returned ` +
+          `${baselineExperimentScores.length}; refusing to compare against a partial snapshot.`
+      );
+      return;
+    }
+
     // An empty target is a missing-run problem, not a judge problem: handle it before
     // the judge match, or a run that exported nothing would be reported as a judge
     // mismatch and point reviewers at the baseline instead of at the missing scores. For
@@ -551,15 +568,6 @@ export const compareCmd: Command<void> = {
       throw new Error('No overlapping datasets found between the two experiments.');
     }
 
-    // Baseline datasets with no counterpart in this run never reach the gates: name them
-    // and qualify the verdict rather than reporting an unqualified "no regression".
-    const missingBaselineDatasets = pinnedBaselineId
-      ? [...baselineExperimentDatasets]
-          .filter(([id]) => !targetExperimentDatasets.has(id))
-          .map(([, name]) => name)
-          .sort()
-      : [];
-
     log.info(`Found ${overlappingDatasetIds.length} overlapping dataset(s).`);
 
     const overlappingDatasetSet = new Set(overlappingDatasetIds);
@@ -604,6 +612,25 @@ export const compareCmd: Command<void> = {
       return;
     }
 
+    // Coverage is checked per (dataset, evaluator) slice against what was actually
+    // gated, not per dataset: a dataset that lost one evaluator (all-null scores, a
+    // rejected slice, a removed metric) would otherwise still read as covered and
+    // produce an unqualified pass.
+    let missingBaselineSlices: string[] = [];
+    if (pinnedBaselineId) {
+      const gatedSlices = new Set(
+        results.map(({ datasetId, evaluatorName }) => `${datasetId}|${evaluatorName}`)
+      );
+      const missing = new Map<string, string>();
+      for (const score of baselineExperimentScores) {
+        const key = `${score.example.dataset.id}|${score.evaluator.name}`;
+        if (!gatedSlices.has(key) && !missing.has(key)) {
+          missing.set(key, `${score.example.dataset.name} / ${score.evaluator.name}`);
+        }
+      }
+      missingBaselineSlices = [...missing.values()].sort();
+    }
+
     // The regression report, only against a pinned baseline: a branch-mode baseline is
     // whatever happened to run last, not a reference anyone promoted. Report-only —
     // verdicts never change the exit code until the suite's noise floor is known.
@@ -611,7 +638,7 @@ export const compareCmd: Command<void> = {
       ? buildRegressionReport(results, reportConfig)
       : undefined;
     if (regressionReport) {
-      logRegressionReport(log, regressionReport, { missingBaselineDatasets });
+      logRegressionReport(log, regressionReport, { missingBaselineSlices });
     }
 
     const regressionGateVerdict = regressionGate
@@ -644,7 +671,7 @@ export const compareCmd: Command<void> = {
       }
 
       const verdictMarkdown = regressionReport
-        ? formatRegressionReportMarkdown(regressionReport, { missingBaselineDatasets }) + '\n\n'
+        ? formatRegressionReportMarkdown(regressionReport, { missingBaselineSlices }) + '\n\n'
         : '';
       const markdown = formatMarkdownCompareReport({
         targetExperimentId,
