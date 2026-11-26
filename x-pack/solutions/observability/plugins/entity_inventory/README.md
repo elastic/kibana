@@ -60,7 +60,7 @@ The optional presentation fields come from the definition's `dynamic` block as d
 
 | Field | Meaning |
 | --- | --- |
-| `category` | The inventory page the type is listed under, such as `hosts` or `kubernetes`. A type without one is listed only under All resources |
+| `category` | The inventory page the type is listed under, such as `hosts` or `kubernetes`. The app does not read it yet and still picks a page by type ID prefix. Once it does, a type without one is listed only under All resources |
 | `icon` | The EUI icon token shown beside the entity name |
 | `nameFields` | The columns tried in order for the entity name: the first non-null value names the entity |
 | `defaultColumns` | The columns visible by default, in display order. They may include `last_seen` |
