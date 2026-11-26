@@ -10,14 +10,18 @@ import { EuiFormRow, EuiRadioGroup, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { otlpCompressionType, otlpProtocol } from '../../../../../../../common/constants';
+import { useStartServices } from '../../../../hooks';
 
 import type { OutputFormInputsType } from './use_output_form';
-import { changeOtlpProtocol, isOtlpGrpc } from './use_otlp_inputs';
+import { changeOtlpProtocol, getOtlpInputEndpoints, isOtlpGrpc } from './use_otlp_inputs';
 import { OtlpDefaultHint, OtlpSpecLinks } from './otlp_spec';
 import { OtlpSelectSetting, OtlpTextSetting } from './otlp_setting_fields';
 import { OtlpHeaders } from './output_form_otlp_headers';
+import { OtlpAuthentication } from './output_form_otlp_auth';
+import { isOtlpAuthAvailable, isOtlpAuthSelected } from './use_otlp_auth_inputs';
 import { OtlpGrpcSettings } from './output_form_otlp_grpc';
 import { OtlpHttpSettings } from './output_form_otlp_http';
+import { OtlpRetrySettings, OtlpSendingQueueSettings } from './output_form_otlp_queue_retry';
 
 const GRPC_COMPRESSION_OPTIONS = [
   otlpCompressionType.Gzip,
@@ -83,6 +87,11 @@ export const OutputFormOtlpSection: React.FunctionComponent<{ inputs: OutputForm
   inputs,
 }) => {
   const isGrpc = isOtlpGrpc(inputs);
+  const { cloud } = useStartServices();
+  const isAuthAvailable = isOtlpAuthAvailable(
+    getOtlpInputEndpoints(inputs),
+    cloud?.managedOtlp?.url
+  );
 
   return (
     <>
@@ -139,7 +148,15 @@ export const OutputFormOtlpSection: React.FunctionComponent<{ inputs: OutputForm
       />
       <OtlpHeaders inputs={inputs} />
       <EuiSpacer size="m" />
+      {/* an authentication that is kept for the managed OTLP endpoint stays shown, to be removed */}
+      {(isAuthAvailable || isOtlpAuthSelected(inputs)) && (
+        <OtlpAuthentication inputs={inputs} isManagedEndpoint={!isAuthAvailable} />
+      )}
       {isGrpc ? <OtlpGrpcSettings inputs={inputs} /> : <OtlpHttpSettings inputs={inputs} />}
+      <EuiSpacer size="m" />
+      <OtlpSendingQueueSettings inputs={inputs} />
+      <EuiSpacer size="m" />
+      <OtlpRetrySettings inputs={inputs} />
       <EuiSpacer size="m" />
     </>
   );

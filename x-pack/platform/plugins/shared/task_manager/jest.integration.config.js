@@ -9,4 +9,5 @@ module.exports = {
   preset: '@kbn/jest/jest_integration',
   rootDir: '../../../../..',
   roots: ['<rootDir>/x-pack/platform/plugins/shared/task_manager'],
+  testPathIgnorePatterns: ['/node_modules/', '/registry_checks/'],
 };

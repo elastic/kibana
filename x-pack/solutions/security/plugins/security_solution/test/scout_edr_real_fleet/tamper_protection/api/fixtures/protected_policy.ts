@@ -12,6 +12,7 @@ import type { IndexedFleetEndpointPolicyResponse } from '../../../../../common/e
 import { catchHttpErrorFormatAndThrow } from '../../../../../common/endpoint/format_http_error';
 import {
   fetchAgentPolicy,
+  fetchIntegrationPolicy,
   updateAgentPolicy,
 } from '../../../../../scripts/endpoint/common/fleet_services';
 import {
@@ -25,6 +26,10 @@ export interface EndpointAgentPolicy {
   agentPolicyId: string;
   /** Agent policy revision once its tamper protection setting is read back. */
   revision: number;
+  /** The Elastic Defend package policy, which Endpoint reports as `Endpoint.policy.applied.id`. */
+  packagePolicyId: string;
+  /** Package policy revision after it is configured, reported as `endpoint_policy_version`. */
+  packagePolicyRevision: number;
   indexedPolicy: IndexedFleetEndpointPolicyResponse;
 }
 
@@ -110,8 +115,15 @@ const createConfiguredEndpointPolicy = async (
 
     await configure({ agentPolicyId, packagePolicyId });
     const revision = await readBackRevision(kbnClient, log, agentPolicyId, expectedProtection);
+    const { revision: packagePolicyRevision } = await fetchIntegrationPolicy(
+      kbnClient,
+      packagePolicyId
+    );
+    log.info(
+      `[edr_real_fleet] package policy ${packagePolicyId}: revision=${packagePolicyRevision}`
+    );
 
-    return { agentPolicyId, revision, indexedPolicy };
+    return { agentPolicyId, revision, packagePolicyId, packagePolicyRevision, indexedPolicy };
   } catch (error) {
     await deleteEndpointAgentPolicy(kbnClient, log, indexedPolicy);
     throw error;

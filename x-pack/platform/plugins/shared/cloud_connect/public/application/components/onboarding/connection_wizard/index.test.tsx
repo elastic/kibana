@@ -185,6 +185,31 @@ describe('ConnectionWizard', () => {
       expect(screen.getByTestId('connectionWizardError')).toBeInTheDocument();
     });
 
+    expect(screen.getByText('Authentication failed')).toBeInTheDocument();
+    expect(screen.getByText('Invalid API key')).toBeInTheDocument();
+    expect(mockOnConnect).not.toHaveBeenCalled();
+  });
+
+  it('should show a connectivity error when Kibana cannot reach the Cloud API', async () => {
+    const message =
+      "Kibana couldn't reach https://cloud.elastic.co/api/v1/saas/user?show_role_assignments=true.";
+    mockApiService.authenticate = jest.fn().mockResolvedValue({
+      data: null,
+      error: { message, attributes: { code: 'CLOUD_API_UNREACHABLE' } },
+    });
+
+    renderWithIntl(<ConnectionWizard onConnect={mockOnConnect} />);
+
+    await userEvent.type(screen.getByTestId('connectionWizardApiKeyInput'), 'some-key');
+    await userEvent.click(screen.getByTestId('connectionWizardConnectButton'));
+
+    await waitFor(() => {
+      expect(screen.getByTestId('connectionWizardError')).toBeInTheDocument();
+    });
+
+    expect(screen.getByText("Can't reach Elastic Cloud")).toBeInTheDocument();
+    expect(screen.queryByText('Authentication failed')).not.toBeInTheDocument();
+    expect(screen.getByText(message)).toBeInTheDocument();
     expect(mockOnConnect).not.toHaveBeenCalled();
   });
 
