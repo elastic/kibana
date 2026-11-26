@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { DataView } from '@kbn/data-views-plugin/common';
+import type { Filter } from '@kbn/es-query';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type { DefaultEmbeddableApi, HasDrilldowns } from '@kbn/embeddable-plugin/public';
 import type { HasInspectorAdapters } from '@kbn/inspector-plugin/public';
@@ -20,7 +22,7 @@ import type {
   PublishesBlockingError,
   PublishesDataLoading,
   PublishesDescription,
-  PublishesEsqlUsage,
+  PublishesEsql,
   PublishesProjectRoutingOverrides,
   PublishesSavedObjectId,
   PublishesWritableTitle,
@@ -28,15 +30,17 @@ import type {
   PublishingSubject,
   SerializedTimeRange,
   SerializedTitles,
+  SupportsJsonExport,
 } from '@kbn/presentation-publishing';
 import type {
-  DiscoverSessionTab,
-  SavedSearch,
-  SerializableSavedSearch,
-} from '@kbn/saved-search-plugin/common/types';
-import type { DataTableColumnsMeta } from '@kbn/unified-data-table';
+  DiscoverSessionApiEmbeddableOverrides,
+  DiscoverSessionApiEmbeddableTab,
+} from '@kbn/as-code-discover-schema';
+import type { SavedSearch, SerializableSavedSearch } from '@kbn/saved-search-plugin/common/types';
+import type { EsqlSource } from '@kbn/data-source';
 import type { BehaviorSubject } from 'rxjs';
-import type { PublishesWritableDataViews } from '@kbn/presentation-publishing/interfaces/publishes_data_views';
+import type { IDslPagination } from '@kbn/search-types';
+import type { PublishesWritableDataSources } from '@kbn/presentation-publishing/interfaces/publishes_data_sources';
 import type { SerializedDrilldowns } from '@kbn/embeddable-plugin/server';
 import type {
   NonPersistedDisplayOptions,
@@ -67,9 +71,12 @@ export type SearchEmbeddablePublicState = Pick<
   | 'jsonModeSettings'
 > & {
   rows: DataTableRecord[];
-  columnsMeta: DataTableColumnsMeta | undefined;
+  /** The ES|QL source of the fetched rows, with the result columns. */
+  resultDataSource: EsqlSource | undefined;
   totalHitCount: number | undefined;
   inspectorAdapters: Record<string, unknown>;
+  pagination: IDslPagination | undefined;
+  isLoadingMore: boolean;
 };
 
 export type SearchEmbeddableStateManager = {
@@ -80,9 +87,27 @@ export type SearchEmbeddableStateManager = {
 
 export type SearchEmbeddableSerializedAttributes = Omit<
   SearchEmbeddablePublicState,
-  'rows' | 'columnsMeta' | 'totalHitCount' | 'searchSource' | 'inspectorAdapters'
+  | 'rows'
+  | 'resultDataSource'
+  | 'totalHitCount'
+  | 'searchSource'
+  | 'inspectorAdapters'
+  | 'pagination'
+  | 'isLoadingMore'
 > &
-  Pick<SerializableSavedSearch, 'serializedSearchSource'>;
+  Pick<SerializableSavedSearch, 'serializedSearchSource' | 'tabTypeState'>;
+
+/** A session tab as a linked panel shows it. */
+export interface SearchEmbeddableSessionTab {
+  id: string;
+  label: string;
+  /** Undefined for a Classic tab saved without a Data View, which the panel cannot show */
+  tab?: DiscoverSessionApiEmbeddableTab;
+  /** ID of the tab's inline Data View, so filters that reference the view still match it */
+  inlineDataViewId?: string;
+  /** Stored filters of a Classic tab, which the public format cannot always represent */
+  filters?: Filter[];
+}
 
 export type SearchEmbeddableRuntimeState = SearchEmbeddableSerializedAttributes &
   SerializedTitles &
@@ -92,8 +117,13 @@ export type SearchEmbeddableRuntimeState = SearchEmbeddableSerializedAttributes 
     savedObjectId?: string;
     savedObjectDescription?: string;
     nonPersistedDisplayOptions?: NonPersistedDisplayOptions;
+    /** Tab of a by-value panel */
+    tab?: DiscoverSessionApiEmbeddableTab;
     selectedTabId?: string;
-    tabs?: DiscoverSessionTab[];
+    /** Session tabs of a linked panel */
+    tabs?: SearchEmbeddableSessionTab[];
+    /** Overrides of a linked panel, as stored by the dashboard */
+    overrides?: DiscoverSessionApiEmbeddableOverrides;
   };
 
 export type SearchEmbeddableApi = DefaultEmbeddableApi<SearchEmbeddablePanelApiState> &
@@ -103,10 +133,10 @@ export type SearchEmbeddableApi = DefaultEmbeddableApi<SearchEmbeddablePanelApiS
   Required<PublishesWritableTitle> &
   Required<PublishesDescription> &
   PublishesWritableSavedSearch &
-  PublishesWritableDataViews &
+  PublishesWritableDataSources<DataView> &
   PublishesWritableUnifiedSearch &
   PublishesProjectRoutingOverrides &
-  PublishesEsqlUsage &
+  PublishesEsql &
   HasLibraryTransforms &
   HasTimeRange &
   HasInspectorAdapters &
@@ -115,7 +145,8 @@ export type SearchEmbeddableApi = DefaultEmbeddableApi<SearchEmbeddablePanelApiS
   Partial<HasEditCapabilities & PublishesSavedObjectId> &
   Partial<CanOverrideHoverActions> &
   HasDrilldowns &
-  HasSupportedTriggers;
+  HasSupportedTriggers &
+  SupportsJsonExport;
 
 export interface PublishesSavedSearch {
   savedSearch$: PublishingSubject<SavedSearch>;

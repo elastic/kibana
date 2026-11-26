@@ -1,0 +1,116 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+import expect from '@kbn/expect';
+import pRetry from 'p-retry';
+import type { FtrProviderContext } from '../../../../../ftr_provider_context';
+import { defaultOriginalRule, ruleMigrationRouteHelpersFactory } from '../../../utils';
+import { createConnector, deleteConnector } from '../../../../detections_response/utils/connectors';
+
+/**
+ * This connector is created at runtime rather than relying on a preconfigured
+ * fixture, because MKI projects do not accept `--xpack.actions.preconfigured`
+ * as a Kibana server arg (it is an FTR-only mechanism). The apiUrl is
+ * deliberately unreachable so every inference call fails at the network layer:
+ * these tests only need a migration to reach `running` status, they must
+ * never make a real (billable) LLM call.
+ */
+const MOCK_BEDROCK_CONNECTOR = {
+  name: 'siem-migrations-mock-bedrock',
+  connector_type_id: '.bedrock',
+  config: {
+    apiUrl: 'https://mock-bedrock.invalid.example.com',
+  },
+  secrets: {
+    accessKey: 'mock-access-key',
+    secret: 'mock-secret-key',
+  },
+};
+
+export default ({ getService }: FtrProviderContext) => {
+  const supertest = getService('supertest');
+  const migrationRulesRoutes = ruleMigrationRouteHelpersFactory(supertest);
+
+  describe('@ess @serverless @serverlessQA Stop Migration', () => {
+    let migrationId: string;
+    let connectorId: string;
+
+    before(async () => {
+      connectorId = await createConnector(supertest, MOCK_BEDROCK_CONNECTOR);
+    });
+
+    after(async () => {
+      await deleteConnector(supertest, connectorId).expect(204);
+    });
+
+    beforeEach(async () => {
+      const createMigrationRespose = await migrationRulesRoutes.create({});
+      migrationId = createMigrationRespose.body.migration_id;
+      await migrationRulesRoutes.addRulesToMigration({
+        migrationId,
+        payload: [defaultOriginalRule],
+      });
+    });
+
+    afterEach(async () => {
+      await migrationRulesRoutes.stop({ migrationId });
+    });
+    it('should stop a running migration successfully', async () => {
+      // start migration
+      const { body } = await migrationRulesRoutes.start({
+        migrationId,
+        payload: {
+          settings: {
+            connector_id: connectorId,
+          },
+        },
+      });
+      expect(body).to.eql({ started: true });
+
+      // check if it running correctly
+      const statsResponse = await migrationRulesRoutes.stats({ migrationId });
+      expect(statsResponse.body.status).to.eql('running');
+
+      // Stop Migration
+      const response = await migrationRulesRoutes.stop({ migrationId });
+      expect(response.body).to.eql({ stopped: true });
+
+      await pRetry(
+        async () => {
+          const currentStatsResponse = await migrationRulesRoutes.stats({ migrationId });
+          if (currentStatsResponse.body.status !== 'stopped') {
+            throw new Error('Retry until migration is stopped');
+          }
+          return currentStatsResponse;
+        },
+        {
+          retries: 3,
+        }
+      );
+
+      const migrationResponse = await migrationRulesRoutes.get({ migrationId });
+      expect(migrationResponse.body?.last_execution?.is_stopped).to.eql(true);
+      expect(migrationResponse.body?.last_execution?.finished_at).to.be.ok();
+      expect(migrationResponse.body?.last_execution?.total_execution_time_ms).to.be.greaterThan(0);
+    });
+
+    describe('error scenarios', () => {
+      it('should return 404 if migration id is invalid and non-existent', async () => {
+        await migrationRulesRoutes.start({
+          migrationId: 'invalid_migration_id',
+          expectStatusCode: 404,
+          payload: { settings: { connector_id: connectorId } },
+        });
+      });
+
+      it('should return correct output when migration is not even running', async () => {
+        const stopResponse = await migrationRulesRoutes.stop({ migrationId });
+
+        expect(stopResponse.body).to.eql({ stopped: true });
+      });
+    });
+  });
+};

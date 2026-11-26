@@ -43,7 +43,6 @@ import { merge } from 'lodash';
 import React, { Component } from 'react';
 import { i18n } from '@kbn/i18n';
 import { XJsonLang } from '@kbn/monaco';
-import type { DataView } from '@kbn/data-views-plugin/common';
 import type { DataViewsContract } from '@kbn/data-views-plugin/public';
 import { getIndexPatternFromFilter } from '@kbn/data-plugin/public';
 import { CodeEditor } from '@kbn/code-editor';
@@ -54,6 +53,7 @@ import { css } from '@emotion/react';
 import { euiThemeVars } from '@kbn/ui-theme';
 import type { SuggestionsAbstraction } from '@kbn/kql/public';
 import { Subject } from 'rxjs';
+import type { FilterableSource } from '@kbn/data-source';
 import { GenericComboBox } from './generic_combo_box';
 import {
   getFieldFromFilter,
@@ -133,7 +133,7 @@ interface QueryDslFilter {
 
 export interface FilterEditorComponentProps {
   filter: Filter;
-  indexPatterns: DataView[];
+  indexPatterns: FilterableSource[];
   onSubmit: (filter: Filter) => void;
   onCancel: () => void;
   onLocalFilterCreate?: (initialState: { filter: Filter; queryDslFilter: QueryDslFilter }) => void;
@@ -150,8 +150,8 @@ export interface FilterEditorComponentProps {
 export type FilterEditorProps = WithEuiThemeProps & FilterEditorComponentProps;
 
 interface State {
-  indexPatterns: DataView[];
-  selectedDataView?: DataView;
+  indexPatterns: FilterableSource[];
+  selectedDataView?: FilterableSource;
   customLabel: string | null;
   queryDsl: string;
   isCustomEditorOpen: boolean;
@@ -218,7 +218,7 @@ class FilterEditorComponent extends Component<FilterEditorProps, State> {
     }
   }
 
-  private parseFilterToQueryDsl(filter: Filter, indexPatterns: DataView[]) {
+  private parseFilterToQueryDsl(filter: Filter, indexPatterns: FilterableSource[]) {
     const dsl = filterToQueryDsl(filter, indexPatterns);
     return JSON.stringify(dsl, null, 2);
   }
@@ -523,7 +523,7 @@ class FilterEditorComponent extends Component<FilterEditorProps, State> {
     );
   }
 
-  private onIndexPatternChange = ([selectedDataView]: DataView[]) => {
+  private onIndexPatternChange = ([selectedDataView]: FilterableSource[]) => {
     this.setState({
       selectedDataView,
       localFilter: buildEmptyFilter(false, selectedDataView.id),

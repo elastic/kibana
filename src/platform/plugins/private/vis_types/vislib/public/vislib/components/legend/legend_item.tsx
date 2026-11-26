@@ -28,6 +28,7 @@ interface Props {
   onUnhighlight: (event: BaseSyntheticEvent) => void;
   setColor: (label: string, color: string | null, event: BaseSyntheticEvent) => void;
   getColor: (label: string) => string;
+  isInteractive?: boolean;
 }
 
 const VisLegendItemComponent = ({
@@ -41,6 +42,7 @@ const VisLegendItemComponent = ({
   onUnhighlight,
   setColor,
   getColor,
+  isInteractive = true,
 }: Props) => {
   const [idToSelectedMap, setIdToSelectedMap] = useState({});
   /**
@@ -109,7 +111,7 @@ const VisLegendItemComponent = ({
       onKeyDown={onLegendEntryKeydown}
       onMouseEnter={onHighlight}
       onFocus={onHighlight}
-      onClick={onSelect(item.label)}
+      onClick={isInteractive ? onSelect(item.label) : undefined}
       onMouseLeave={onUnhighlight}
       onBlur={onUnhighlight}
       data-label={item.label}

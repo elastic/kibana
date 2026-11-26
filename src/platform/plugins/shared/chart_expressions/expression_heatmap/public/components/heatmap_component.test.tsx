@@ -18,6 +18,7 @@ import { Settings, TooltipType, Heatmap, Tooltip } from '@elastic/charts';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { EmptyPlaceholder } from '@kbn/charts-plugin/public';
 import { createDatatableUtilitiesMock } from '@kbn/data-plugin/common/mocks';
+import { ESQL_TABLE_TYPE } from '@kbn/data-plugin/common';
 import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
 import type { Datatable } from '@kbn/expressions-plugin/public';
 import { mountWithIntl, shallowWithIntl } from '@kbn/test-jest-helpers';
@@ -29,6 +30,7 @@ import HeatmapComponent, {
   getDateFormatPattern,
 } from './heatmap_component';
 import { LegendSize } from '@kbn/chart-expressions-common';
+import { ChartTooltipFooterMessage } from '@kbn/visualizations-components';
 import type { FieldFormat } from '@kbn/field-formats-plugin/common';
 
 const actWithTimeout = (action: Function, timer: number = 1) =>
@@ -470,6 +472,134 @@ describe('HeatmapComponent', function () {
     expect(component.find(Tooltip).prop('type')).toBe(TooltipType.None);
   });
 
+  describe('ES|QL computed column tooltip footer', () => {
+    const computedYData: Datatable = {
+      ...data,
+      meta: { type: ESQL_TABLE_TYPE },
+      columns: [
+        data.columns[0],
+        data.columns[1],
+        {
+          id: 'col-2-3',
+          name: 'Distance Range',
+          meta: {
+            type: 'string',
+            sourceParams: { sourceField: 'Distance Range', isSourceFieldFilterable: false },
+          },
+          isComputedColumn: true,
+        },
+      ],
+    };
+
+    const renderFooter = (items: TooltipValue[]) => {
+      const component = shallowWithIntl(
+        <HeatmapComponent {...wrapperProps} data={computedYData} />
+      );
+      const Footer = component.find(Tooltip).prop('footer');
+      if (typeof Footer !== 'function') {
+        throw new Error('Expected a tooltip footer component');
+      }
+      return shallowWithIntl(<Footer items={items} header={null} />);
+    };
+
+    it('shows the disclaimer on a cell tooltip when the y column is computed', () => {
+      const cellDatum = { x: 'a', y: '0-1000', value: 1, originalIndex: 0 };
+      const footer = renderFooter([
+        { label: 'Dest', datum: cellDatum } as TooltipValue,
+        { label: 'Distance Range', datum: cellDatum } as TooltipValue,
+        { label: 'Count', datum: cellDatum } as TooltipValue,
+      ]);
+      expect(footer.find(ChartTooltipFooterMessage).prop('message')).toContain('Distance Range');
+    });
+
+    it('hides the disclaimer on a y-axis label tooltip', () => {
+      const footer = renderFooter([{ label: '', datum: '0-1000' } as TooltipValue]);
+      expect(footer.find(ChartTooltipFooterMessage)).toHaveLength(0);
+    });
+
+    it('uses the default footer when the y column is not a computed field', () => {
+      const esqlData: Datatable = {
+        ...data,
+        meta: { type: ESQL_TABLE_TYPE },
+      };
+      const component = shallowWithIntl(<HeatmapComponent {...wrapperProps} data={esqlData} />);
+      expect(component.find(Tooltip).prop('footer')).toBe('default');
+    });
+  });
+
+  describe('missing numeric Y buckets', () => {
+    const row = (y: number | string, value: number) => ({
+      'col-0-1': value,
+      'col-1-2': 'a',
+      'col-2-3': y,
+    });
+    const table = (
+      rows: Datatable['rows'],
+      yMeta: Datatable['columns'][number]['meta'],
+      esql = false
+    ): Datatable => ({
+      type: 'datatable',
+      ...(esql ? { meta: { type: ESQL_TABLE_TYPE } } : {}),
+      rows,
+      columns: [
+        { id: 'col-0-1', name: 'Count', meta: { type: 'number' } },
+        { id: 'col-1-2', name: 'Dest', meta: { type: 'string' } },
+        { id: 'col-2-3', name: 'Bytes', meta: yMeta },
+      ],
+    });
+    const heatmap = (datatable: Datatable, ySortPredicate?: 'asc' | 'desc') =>
+      shallowWithIntl(
+        <HeatmapComponent
+          {...wrapperProps}
+          data={datatable}
+          args={{
+            ...wrapperProps.args,
+            gridConfig: { ...wrapperProps.args.gridConfig, ySortPredicate },
+          }}
+        />
+      ).find(Heatmap);
+
+    it('fills a missing ES|QL histogram step from the column interval', () => {
+      const chart = heatmap(
+        table([row(0, 1), row(2, 2)], { type: 'number', esMeta: { bucket: { interval: 1 } } }, true)
+      );
+      const chartData = chart.prop('data') as Datatable['rows'];
+
+      expect(chartData.map((entry) => entry['col-2-3'])).toEqual([0, 1, 2]);
+      expect(chartData[1]['col-0-1']).toBeNull();
+    });
+
+    it('leaves a DSL histogram gap for the agg empty-row toggle', () => {
+      const rows = [row(0, 1), row(2, 2)];
+      const chart = heatmap(
+        table(rows, {
+          type: 'number',
+          source: 'esaggs',
+          sourceParams: { type: 'histogram', params: { used_interval: 1 } },
+        })
+      );
+
+      expect(chart.prop('data')).toEqual(rows);
+    });
+
+    it('fills a 9-to-11 range gap and tells the chart to keep that row order', () => {
+      // Alphabetical descending would put "9..10" first and "10..11" last.
+      const chart = heatmap(
+        table(
+          [row('9..10', 1), row('11..12', 2)],
+          { type: 'number_range', esMeta: { bucket: { interval: 1 } } },
+          true
+        ),
+        'desc'
+      );
+      const chartData = chart.prop('data') as Datatable['rows'];
+
+      expect(chartData.map((entry) => entry['col-2-3'])).toEqual(['11..12', '10..11', '9..10']);
+      expect(chartData[1]['col-0-1']).toBeNull();
+      expect(chart.prop('ySortPredicate')).toBe('dataIndex');
+    });
+  });
+
   it('not renders the component if no value accessor is given', () => {
     const newProps = { ...wrapperProps, valueAccessor: undefined } as unknown as HeatmapRenderProps;
     const component = mountWithIntl(<HeatmapComponent {...newProps} />);
@@ -695,7 +825,7 @@ describe('HeatmapComponent', function () {
       timestampMeta: Datatable['columns'][number]['meta'] = { type: 'date' }
     ): Datatable => ({
       type: 'datatable',
-      meta: { type: 'esql' },
+      meta: { type: ESQL_TABLE_TYPE },
       columns: [
         { id: 'timestamp', name: 'timestamp', meta: timestampMeta },
         { id: 'category', name: 'category', meta: { type: 'string' } },
@@ -704,14 +834,19 @@ describe('HeatmapComponent', function () {
       rows,
     });
 
-    const renderXScale = async (timeData: Datatable) => {
+    const renderHeatmap = async (timeData: Datatable, heatmapArgs: HeatmapArguments = timeArgs) => {
       const component = mountWithIntl(
-        <HeatmapComponent {...wrapperProps} data={timeData} args={timeArgs} />
+        <HeatmapComponent {...wrapperProps} data={timeData} args={heatmapArgs} />
       );
       await act(async () => {
         await component.update();
       });
-      return component.find(Heatmap).prop('xScale');
+      return component.find(Heatmap);
+    };
+
+    const renderXScale = async (timeData: Datatable) => {
+      const heatmap = await renderHeatmap(timeData);
+      return heatmap.prop('xScale');
     };
 
     it('renders time-based heatmap with ES|QL data using the bucket interval', async () => {
@@ -793,6 +928,36 @@ describe('HeatmapComponent', function () {
       );
 
       expect(xScale).toEqual({ type: 'ordinal' });
+    });
+
+    it('forces a Time scale for an ES|QL date x-axis even when xScaleType is not "time"', async () => {
+      // Regression coverage for the reload case: after reload gridConfig.xScaleType is no longer
+      // 'time' (here 'ordinal'), but an ES|QL date x-column is inherently chronological, so the
+      // component must still force a Time scale and drop the configured xSortPredicate.
+      const ordinalArgs: HeatmapArguments = {
+        ...timeArgs,
+        gridConfig: {
+          ...timeArgs.gridConfig,
+          xScaleType: 'ordinal',
+          xSortPredicate: 'asc',
+        },
+      };
+
+      const fiveMinutesMs = 5 * 60 * 1000;
+      const heatmap = await renderHeatmap(
+        buildTimeData([
+          { timestamp: '2024-01-01T00:00:00.000Z', category: 'A', value: 10 },
+          { timestamp: '2024-01-01T00:05:00.000Z', category: 'A', value: 20 },
+          { timestamp: '2024-01-01T00:10:00.000Z', category: 'B', value: 15 },
+        ]),
+        ordinalArgs
+      );
+
+      expect(heatmap.prop('xScale')).toEqual({
+        type: 'time',
+        interval: { type: 'fixed', unit: 'ms', value: fiveMinutesMs },
+      });
+      expect(heatmap.prop('xSortPredicate')).toBeUndefined();
     });
 
     it('brushes a time range filter even when no bucket metadata is available', async () => {

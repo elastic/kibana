@@ -3,7 +3,7 @@
 exports[`IndicesList should render normally 1`] = `
 <div>
   <div
-    class="emotion-euiContainerCSS"
+    class="euiTable__wrapper emotion-euiContainerCSS"
   >
     <table
       class="euiTable emotion-euiTable-auto-uncompressed-hasBackground-desktop"
@@ -100,6 +100,7 @@ exports[`IndicesList should render normally 1`] = `
               10
             </span>
             <span
+              aria-hidden="true"
               color="inherit"
               data-euiicon-type="chevronSingleDown"
             />

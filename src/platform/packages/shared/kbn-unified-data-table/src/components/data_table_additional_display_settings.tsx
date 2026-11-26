@@ -195,7 +195,11 @@ const LinesShownSetting = ({
   });
 
   return (
-    <EuiFormRow label={linesShownLabel} display="columnCompressed">
+    <EuiFormRow
+      label={linesShownLabel}
+      display="columnCompressed"
+      data-test-subj="unifiedDataTableRenderedNodesSettings"
+    >
       <EuiRange
         compressed
         fullWidth

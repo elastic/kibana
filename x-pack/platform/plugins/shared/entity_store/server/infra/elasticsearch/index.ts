@@ -13,13 +13,16 @@ import type {
   ClusterPutComponentTemplateRequest,
   MappingTypeMapping,
 } from '@elastic/elasticsearch/lib/api/types';
+import { signalRequestOptions } from './signal_request_options';
 
-export { assertReindexSucceeded, reindex } from './reindex';
+export { assertReindexSucceeded, reindex, startReindex, toReindexResult } from './reindex';
+export { chunkByUrlLength } from './chunk_by_url_length';
 export type { ReindexOptions, ReindexResult } from './reindex';
 export { updateByQueryWithScript } from './ingest';
 export type { UpdateByQueryWithScriptOptions } from './ingest';
-export { waitForTaskToComplete } from './wait_for_task';
-export type { WaitForTaskOptions } from './wait_for_task';
+export { clearRelationshipIdsByEntitySource } from './entity_relationships';
+export { cancelTask, pollTaskUntil, waitForTaskToComplete } from './wait_for_task';
+export type { PollTaskUntilResult, WaitForTaskOptions } from './wait_for_task';
 export { retryOnConflict } from './retry_on_conflict';
 export type { RetryOnConflictOptions } from './retry_on_conflict';
 
@@ -51,16 +54,20 @@ export const deleteIndex = (esClient: EsClient, index: IndexName) =>
 
 export const putComponentTemplate = async (
   esClient: EsClient,
-  request: ClusterPutComponentTemplateRequest
+  request: ClusterPutComponentTemplateRequest,
+  signal?: AbortSignal
 ) => {
-  await esClient.cluster.putComponentTemplate(request);
+  await esClient.cluster.putComponentTemplate(request, ...signalRequestOptions(signal));
 };
 
 export const deleteComponentTemplate = (esClient: EsClient, name: Names) =>
   esClient.cluster.deleteComponentTemplate({ name }, { ignore: [404] });
 
-export const putIndexTemplate = (esClient: EsClient, template: IndicesPutIndexTemplateRequest) =>
-  esClient.indices.putIndexTemplate(template);
+export const putIndexTemplate = (
+  esClient: EsClient,
+  template: IndicesPutIndexTemplateRequest,
+  signal?: AbortSignal
+) => esClient.indices.putIndexTemplate(template, ...signalRequestOptions(signal));
 
 // Applies mappings in place to an index or data stream (its write index and future
 // backing indices). Adding fields is allowed; changing an existing field's type throws.

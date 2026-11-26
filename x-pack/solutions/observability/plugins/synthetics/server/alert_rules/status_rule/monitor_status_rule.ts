@@ -52,7 +52,7 @@ export const registerSyntheticsStatusCheckRule = (
     },
     defaultActionGroupId: MONITOR_STATUS.id,
     actionGroups: [MONITOR_STATUS],
-    actionVariables: getActionVariables({ plugins }),
+    actionVariables: getActionVariables({ plugins, ruleType: 'monitorStatus' }),
     isExportable: true,
     minimumLicenseRequired: 'basic',
     doesSetRecoveryContext: true,
@@ -86,18 +86,21 @@ export const registerSyntheticsStatusCheckRule = (
 
       const statusRule = new StatusRuleExecutor(esClient, server, syntheticsMonitorClient, options);
 
+      const prevDownConfigs = ruleState.meta?.downConfigs as AlertOverviewStatus['downConfigs'];
+      const prevPendingConfigs = ruleState.meta
+        ?.pendingConfigs as AlertOverviewStatus['pendingConfigs'];
+
       const { downConfigs, staleDownConfigs, upConfigs, pendingConfigs, stalePendingConfigs } =
         await statusRule.getConfigs({
-          prevDownConfigs: ruleState.meta?.downConfigs as AlertOverviewStatus['downConfigs'],
-          prevPendingConfigs: ruleState.meta
-            ?.pendingConfigs as AlertOverviewStatus['pendingConfigs'],
+          prevDownConfigs,
+          prevPendingConfigs,
         });
 
       await statusRule.handleDownMonitorThresholdAlert({
         downConfigs,
       });
 
-      await statusRule.handlePendingMonitorAlert({
+      const firingPendingConfigs = await statusRule.handlePendingMonitorAlert({
         pendingConfigs,
       });
 
@@ -111,11 +114,14 @@ export const registerSyntheticsStatusCheckRule = (
         groupByLocation,
         staleDownConfigs,
         stalePendingConfigs,
+        prevDownConfigs,
+        prevPendingConfigs,
+        downConfigs,
         upConfigs,
       });
 
       return {
-        state: updateState(ruleState, !isEmpty(downConfigs) || !isEmpty(pendingConfigs), {
+        state: updateState(ruleState, !isEmpty(downConfigs) || !isEmpty(firingPendingConfigs), {
           downConfigs,
           pendingConfigs,
         }),

@@ -6,12 +6,25 @@
  */
 
 import type { Boom } from '@hapi/boom';
-import { boomify, isBoom } from '@hapi/boom';
+import { badRequest as boomBadRequest, boomify, isBoom } from '@hapi/boom';
 import { schema } from '@kbn/config-schema';
-import type { CustomHttpResponseOptions, ResponseError, Logger } from '@kbn/core/server';
+import type {
+  CustomHttpResponseOptions,
+  ResponseError,
+  Logger,
+  RouteValidationFunction,
+} from '@kbn/core/server';
+import type { ZodType } from '@kbn/zod/v4';
 import type { CaseError, HTTPError } from '../../common/error';
 import { isCaseError, isHTTPError } from '../../common/error';
 import { getTypedApiErrorAttributes } from '../../common/api_errors';
+import { decodeWithExcessOrThrowZod } from '../../common/runtime_types';
+import type { AttachmentRequestV2 } from '../../../common/types/api';
+import { CASE_FILES_URL, FILE_ATTACHMENT_TYPE } from '../../../common/constants';
+import {
+  isCommentRequestTypeExternalReference,
+  isCommentRequestTypePersistableState,
+} from '../../../common/utils/attachments';
 
 /**
  * Transforms an error into the correct format for a kibana response.
@@ -44,6 +57,17 @@ export function wrapError(
 
 export const escapeHatch = schema.object({}, { unknowns: 'allow' });
 
+/** Same zod decode as the client, run as Core `validate.body` / `validate.query`. */
+export const createZodRouteValidation =
+  <A>(schemaType: ZodType<A>): RouteValidationFunction<A> =>
+  (inputValue, { ok, badRequest }) => {
+    try {
+      return ok(decodeWithExcessOrThrowZod(schemaType)(inputValue));
+    } catch (error) {
+      return badRequest(isBoom(error) || error instanceof Error ? error.message : error);
+    }
+  };
+
 /**
  * Creates a warning header with a message formatted according to RFC7234.
  * We follow the same formatting as Elasticsearch
@@ -72,4 +96,31 @@ export const extractWarningValueFromWarningHeader = (warningHeader: string) => {
   const lastQuote = warningHeader.length - 1;
   const warningValue = warningHeader.substring(firstQuote + 1, lastQuote);
   return warningValue;
+};
+
+/**
+ * Returns the attachment type as sent by the caller. Legacy external reference and persistable
+ * state attachments include their subtype id, for example `persistableState:.lens`.
+ */
+export const getAttachmentRequestType = (attachment: AttachmentRequestV2): string => {
+  if (isCommentRequestTypeExternalReference(attachment)) {
+    return `${attachment.type}:${attachment.externalReferenceAttachmentTypeId}`;
+  }
+
+  if (isCommentRequestTypePersistableState(attachment)) {
+    return `${attachment.type}:${attachment.persistableStateAttachmentTypeId}`;
+  }
+
+  return attachment.type;
+};
+
+/**
+ * Throws a 400 for file attachments, which must be uploaded through the case files route.
+ */
+export const throwIfFileAttachment = ({ type }: { type: string }): void => {
+  if (type === FILE_ATTACHMENT_TYPE) {
+    throw boomBadRequest(
+      `This API doesn't support file attachments. To attach a file, use POST ${CASE_FILES_URL}.`
+    );
+  }
 };

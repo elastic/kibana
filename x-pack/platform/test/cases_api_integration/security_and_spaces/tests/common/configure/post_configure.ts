@@ -11,7 +11,10 @@ import {
   ConnectorTypes,
   CustomFieldTypes,
 } from '@kbn/cases-plugin/common/types/domain';
-import { MAX_CUSTOM_FIELD_LABEL_LENGTH } from '@kbn/cases-plugin/common/constants';
+import {
+  MAX_CUSTOM_FIELD_LABEL_LENGTH,
+  MAX_WORKFLOW_TAGS_PER_CONFIGURATION,
+} from '@kbn/cases-plugin/common/constants';
 import { ObjectRemover as ActionsRemover } from '../../../../../alerting_api_integration/common/lib';
 import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
@@ -54,6 +57,143 @@ export default ({ getService }: FtrProviderContext): void => {
 
       const data = removeServerGeneratedPropertiesFromSavedObject(configuration);
       expect(data).to.eql(getConfigurationOutput());
+    });
+
+    it('should default extractObservables to false when omitted for unknown owners', async () => {
+      const configuration = await createConfiguration(supertest);
+      expect(configuration.extractObservables).to.be(false);
+    });
+
+    it('should persist extractObservables when explicitly set to false', async () => {
+      const configuration = await createConfiguration(
+        supertest,
+        getConfigurationRequest({ overrides: { extractObservables: false } })
+      );
+      expect(configuration.extractObservables).to.be(false);
+    });
+
+    describe('extractObservables owner rule', () => {
+      const ownersThatCannotAutoExtract = ['cases', 'observability'];
+      const getExpectedError = (owner: string) => ({
+        error: 'Bad Request',
+        message: `Setting extractObservables to true is not allowed for the "${owner}" owner. Only owners that support automatic observable extraction can enable it.`,
+        statusCode: 400,
+      });
+
+      const getTemplate = (extractObservables: boolean) => ({
+        key: 'template_1',
+        name: 'Template 1',
+        caseFields: { settings: { syncAlerts: true, extractObservables } },
+      });
+
+      for (const owner of ownersThatCannotAutoExtract) {
+        describe(`owner ${owner}`, () => {
+          it('rejects extractObservables true with a 400 and creates no configuration', async () => {
+            const response = await createConfiguration(
+              supertest,
+              getConfigurationRequest({ overrides: { owner, extractObservables: true } }),
+              400
+            );
+
+            expect(response).to.eql(getExpectedError(owner));
+            expect(await getConfiguration({ supertest, query: { owner } })).to.have.length(0);
+          });
+
+          it('rejects a template with extractObservables true with a 400', async () => {
+            const response = await createConfiguration(
+              supertest,
+              getConfigurationRequest({ overrides: { owner, templates: [getTemplate(true)] } }),
+              400
+            );
+
+            expect(response).to.eql(getExpectedError(owner));
+            expect(await getConfiguration({ supertest, query: { owner } })).to.have.length(0);
+          });
+
+          it('keeps the existing configuration when the replacement is rejected', async () => {
+            const existing = await createConfiguration(
+              supertest,
+              getConfigurationRequest({ overrides: { owner } })
+            );
+
+            await createConfiguration(
+              supertest,
+              getConfigurationRequest({ overrides: { owner, extractObservables: true } }),
+              400
+            );
+
+            const configurations = await getConfiguration({ supertest, query: { owner } });
+            expect(configurations).to.have.length(1);
+            expect(configurations[0].id).to.be(existing.id);
+          });
+
+          it('accepts extractObservables false and an omitted value', async () => {
+            const withFalse = await createConfiguration(
+              supertest,
+              getConfigurationRequest({
+                overrides: { owner, extractObservables: false, templates: [getTemplate(false)] },
+              })
+            );
+            expect(withFalse.extractObservables).to.be(false);
+
+            const omitted = await createConfiguration(
+              supertest,
+              getConfigurationRequest({ overrides: { owner } })
+            );
+            expect(omitted.extractObservables).to.be(false);
+          });
+        });
+      }
+
+      describe('owner securitySolution', () => {
+        it('accepts extractObservables true, also in a template', async () => {
+          const configuration = await createConfiguration(
+            supertest,
+            getConfigurationRequest({
+              overrides: {
+                owner: 'securitySolution',
+                extractObservables: true,
+                templates: [getTemplate(true)],
+              },
+            })
+          );
+
+          expect(configuration.extractObservables).to.be(true);
+        });
+      });
+    });
+
+    it('should create a configuration with workflowTags', async () => {
+      const configuration = await createConfiguration(
+        supertest,
+        getConfigurationRequest({ overrides: { workflowTags: ['soc-triage', 'enrichment'] } })
+      );
+
+      expect(configuration.workflowTags).to.eql(['soc-triage', 'enrichment']);
+
+      const [persisted] = await getConfiguration({ supertest });
+      expect(persisted.workflowTags).to.eql(['soc-triage', 'enrichment']);
+    });
+
+    it(`should not create a configuration with more than ${MAX_WORKFLOW_TAGS_PER_CONFIGURATION} workflowTags`, async () => {
+      const workflowTags = Array.from(
+        { length: MAX_WORKFLOW_TAGS_PER_CONFIGURATION + 1 },
+        (_, index) => `tag-${index}`
+      );
+
+      await createConfiguration(
+        supertest,
+        getConfigurationRequest({ overrides: { workflowTags } }),
+        400
+      );
+    });
+
+    it('should not create a configuration with an empty workflow tag', async () => {
+      await createConfiguration(
+        supertest,
+        getConfigurationRequest({ overrides: { workflowTags: ['  '] } }),
+        400
+      );
     });
 
     it('should create a configuration with no customFields', async () => {

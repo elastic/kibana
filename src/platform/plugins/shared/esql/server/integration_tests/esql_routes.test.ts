@@ -11,8 +11,12 @@ import {
   LOOKUP_INDEX_RECREATE_ROUTE,
   JOIN_INDICES_AUTOCOMPLETE_ROUTE,
   TIMESERIES_INDICES_AUTOCOMPLETE_ROUTE,
+  VIEWS_BULK_DELETE_ROUTE,
+  VIEWS_ROUTE,
 } from '@kbn/esql-types';
 import { EsqlServiceTestbed } from './testbed';
+
+const getViewRoute = (name: string) => `${VIEWS_ROUTE}/${encodeURIComponent(name)}`;
 
 describe('ESQL routes', () => {
   const testbed = new EsqlServiceTestbed();
@@ -119,6 +123,91 @@ describe('ESQL routes', () => {
       expect(typeof view.name).toBe('string');
       expect(typeof view.query).toBe('string');
     });
+  });
+
+  it('can strictly load ES|QL views for management (GET /internal/esql/views)', async () => {
+    const url = '/internal/esql/views?strict=true';
+    const result = await testbed.GET(url).send().expect(200);
+
+    expect(result.body).toHaveProperty('views');
+    expect(Array.isArray(result.body.views)).toBe(true);
+    result.body.views.forEach((view: { name: string; query: string }) => {
+      expect(view).toHaveProperty('name');
+      expect(view).toHaveProperty('query');
+      expect(typeof view.name).toBe('string');
+      expect(typeof view.query).toBe('string');
+    });
+  });
+
+  it('supports the ES|QL view CRUD lifecycle with descriptions', async () => {
+    const viewName = 'kibana-esql-route-test';
+    const viewRoute = getViewRoute(viewName);
+
+    try {
+      await testbed
+        .PUT(viewRoute)
+        .send({
+          query: 'ROW value = 1',
+          description: 'Integration test view',
+        })
+        .expect(200, { acknowledged: true });
+
+      const createdView = await testbed.GET(viewRoute).send().expect(200);
+      expect(createdView.body).toEqual({
+        name: viewName,
+        query: 'ROW value = 1',
+        description: 'Integration test view',
+      });
+
+      await testbed
+        .PUT(viewRoute)
+        .send({
+          query: 'ROW value = 2',
+          description: 'Updated integration test view',
+        })
+        .expect(200, { acknowledged: true });
+
+      const updatedView = await testbed.GET(viewRoute).send().expect(200);
+      expect(updatedView.body).toEqual({
+        name: viewName,
+        query: 'ROW value = 2',
+        description: 'Updated integration test view',
+      });
+
+      await testbed.DELETE(viewRoute).send().expect(200, { acknowledged: true });
+      await testbed.GET(viewRoute).send().expect(404);
+    } finally {
+      await testbed
+        .esClient()
+        .esql.deleteView({ name: viewName })
+        .catch(() => undefined);
+    }
+  });
+
+  it('bulk deletes ES|QL views', async () => {
+    const viewNames = ['kibana-esql-bulk-route-test-1', 'kibana-esql-bulk-route-test-2'];
+
+    try {
+      await Promise.all(
+        viewNames.map((name) =>
+          testbed.PUT(getViewRoute(name)).send({ query: 'ROW value = 1' }).expect(200)
+        )
+      );
+
+      await testbed
+        .POST(VIEWS_BULK_DELETE_ROUTE)
+        .send({ names: viewNames })
+        .expect(200, { acknowledged: true });
+
+      await Promise.all(
+        viewNames.map((name) => testbed.GET(getViewRoute(name)).send().expect(404))
+      );
+    } finally {
+      await testbed
+        .esClient()
+        .esql.deleteView({ name: viewNames })
+        .catch(() => undefined);
+    }
   });
 
   it('can load ES|QL datasets (GET /internal/esql/datasets)', async () => {

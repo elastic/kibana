@@ -49,7 +49,8 @@ export interface ProjectPickerProps
     Pick<
       ComponentProps<typeof ProjectPickerFrame>,
       'customHeaderContextMenuItems' | 'maxBodyHeight'
-    > {
+    >,
+    Pick<ComponentProps<typeof ProjectPickerButton>, 'customTooltipContent'> {
   isReadonly?: boolean;
   isDisabled?: boolean;
   settingsComponent?: React.ReactNode;
@@ -86,6 +87,7 @@ export const ProjectPicker = ({
   customHeaderContextMenuItems,
   projectRoutingStrategy,
   maxBodyHeight = 400,
+  customTooltipContent,
 }: ProjectPickerProps) => {
   const [showPopover, setShowPopover] = useState(false);
   const styles = useMemoCss(projectPickerStyles);
@@ -153,7 +155,11 @@ export const ProjectPicker = ({
   const originProject = projects!.origin!;
 
   const projectPickerPopoverTriggerButton = (
-    <ProjectPickerButton size="s" onClick={() => setShowPopover(!showPopover)} />
+    <ProjectPickerButton
+      size="s"
+      onClick={() => setShowPopover(!showPopover)}
+      customTooltipContent={customTooltipContent}
+    />
   );
 
   const projectPickerPopover = (

@@ -1,5 +1,5 @@
 {
-  "sha1": "fe900321d33104e2389d5c82d90f1c3d36456e03",
+  "sha1": "0855d73f0c0e88fe54f0a09f64fdc29a52155e60",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -7,7 +7,7 @@
     {
       "id": "5060bc123105c69-842632def2d4e28",
       "title": "Bulk close with a runtime field on an ML rule closes ML rule alerts when the exception references a runtime field on the anomaly index",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -16,8 +16,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/exceptions/ui/parallel_tests/bulk_close_runtime_field_ml.spec.ts",
-        "line": 225,
-        "column": 26
+        "line": 226,
+        "column": 24
       }
     },
     {
@@ -34,6 +34,54 @@
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/exceptions/ui/parallel_tests/bulk_close_runtime_field.spec.ts",
         "line": 106,
         "column": 15
+      }
+    },
+    {
+      "id": "9b9a37529e02a2b-82c1cf9f2cdfaf3",
+      "title": "Exceptions flyout builder lists the fields of the rule index",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/exceptions/ui/parallel_tests/flyout_validation.spec.ts",
+        "line": 92,
+        "column": 43
+      }
+    },
+    {
+      "id": "9b9a37529e02a2b-591e920be345650",
+      "title": "Exceptions flyout builder nests the condition of a field that is mapped as nested",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/exceptions/ui/parallel_tests/flyout_validation.spec.ts",
+        "line": 94,
+        "column": 79
+      }
+    },
+    {
+      "id": "9b9a37529e02a2b-50aba22c21c62bc",
+      "title": "Exceptions flyout builder suggests values of the selected field",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/exceptions/ui/parallel_tests/flyout_validation.spec.ts",
+        "line": 101,
+        "column": 31
       }
     }
   ]

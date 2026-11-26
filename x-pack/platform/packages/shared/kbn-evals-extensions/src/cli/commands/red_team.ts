@@ -16,6 +16,7 @@ import {
   buildEvalRunEnv,
   buildEvalRunArgs,
   formatEvalCliCommand,
+  formatProfilesSummary,
   evalRunFlags,
 } from '@kbn/evals';
 import {
@@ -108,10 +109,11 @@ export const redTeamCmd: Command<void> = {
       evaluationConnectorId,
       projects,
       profileEnvOverrides,
-      exportProfile,
-      datasetsProfile,
+      suiteScoutEnv,
+      tracingProfile,
+      evaluationsKbnProfile,
       requiresEisCcm,
-    } = await resolveEvalRunContext({ repoRoot, log, flagsReader, profile });
+    } = await resolveEvalRunContext({ repoRoot, log, flagsReader, profile, suite });
 
     const skipServer = flagsReader.boolean('skip-server');
 
@@ -121,15 +123,13 @@ export const redTeamCmd: Command<void> = {
     if (projects.length > 0) {
       log.info(`Models:    ${projects.join(', ')}`);
     } else {
-      log.info(`Models:    all (from KIBANA_TESTING_AI_CONNECTORS)`);
+      log.info(`Models:    all (from KIBANA_TESTING_INFERENCE_ENDPOINTS)`);
     }
     log.info(`Server:    ${skipServer ? 'skip (using existing)' : 'managed'}`);
     if (suite?.serverConfigSet) {
       log.info(`Config:    ${suite.serverConfigSet}`);
     }
-    log.info(
-      `Profiles:  datasets=${datasetsProfile ?? 'config'} export=${exportProfile ?? 'none'}`
-    );
+    log.info(`Profiles:  ${formatProfilesSummary({ evaluationsKbnProfile, tracingProfile })}`);
     if (redTeamConfig.modules?.length) {
       log.info(`Modules:   ${redTeamConfig.modules.join(', ')}`);
     }
@@ -159,6 +159,7 @@ export const redTeamCmd: Command<void> = {
         repoRoot,
         log,
         profileEnvOverrides,
+        suiteScoutEnv,
         serverConfigSet: suite?.serverConfigSet,
         requiresEisCcm,
       });
@@ -176,6 +177,7 @@ export const redTeamCmd: Command<void> = {
       skipServer,
       suite,
       profileEnvOverrides,
+      suiteScoutEnv,
       flagsReader,
       log,
     });

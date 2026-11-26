@@ -30,7 +30,7 @@ export class AnnotationListingPage {
 
   constructor(private readonly page: ScoutPage) {
     this.contentList = new ContentListWrapper(page);
-    this.tabbedPageHeader = this.page.testSubj.locator('top-nav');
+    this.tabbedPageHeader = this.page.testSubj.locator('appHeader');
     this.emptyPromptCreateButton = this.page.locator('button', {
       hasText: 'Create annotation in Lens',
     });
@@ -44,8 +44,10 @@ export class AnnotationListingPage {
    * the tab body is in place.
    */
   async goto() {
-    await this.page.gotoApp('visualize', { hash: '/annotations' });
-    await this.contentList.searchBox.waitFor({ state: 'visible' });
+    await this.page.gotoApp('visualize', {
+      hash: '/annotations',
+      readyWhen: this.contentList.searchBox,
+    });
   }
 
   async selectTag(tagName: string) {

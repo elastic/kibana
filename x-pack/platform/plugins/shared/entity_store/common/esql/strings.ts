@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { castField } from './cast';
+import { castField, referenceField } from './cast';
+import type { CastFieldOptions } from './cast';
 
-export function esqlIsNotNullOrEmpty(field: string) {
-  const ref = castField(field);
+export function esqlIsNotNullOrEmpty(field: string, options?: CastFieldOptions) {
+  const ref = referenceField(field, options);
   return `${ref} IS NOT NULL AND ${ref} != ""`;
 }
 
@@ -40,7 +41,16 @@ export function esqlIsNullOrEmpty(field: string) {
   return `(${ref} IS NULL OR ${ref} == "")`;
 }
 
-/** Escape a string for use inside double-quoted ESQL string literals (backslash and double-quote). */
+/**
+ * Escape a string for use inside double-quoted ESQL string literals. The lexer
+ * rejects a raw newline or carriage return there, so those and tabs are escaped
+ * along with backslash and double-quote.
+ */
 export function escapeEsqlStringLiteral(s: string): string {
-  return s.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+  return s
+    .replace(/\\/g, '\\\\')
+    .replace(/"/g, '\\"')
+    .replace(/\n/g, '\\n')
+    .replace(/\r/g, '\\r')
+    .replace(/\t/g, '\\t');
 }

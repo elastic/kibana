@@ -19,11 +19,12 @@ export const TRUSTED_APP_HASH = 'a4370c0cf81686c0b696fa6261c9d3e0d810ae704ab8301
 /**
  * Policy-details tab cases for Scout. Cypress `getArtifactsListTestsData()` in
  * `public/management/cypress/fixtures/artifacts_page.ts` is a live fork used
- * by `artifacts.cy.ts`. If you change a criteriaConditions string here, update
- * the other.
+ * by the artifact RBAC specs. If you change a criteriaConditions string here,
+ * update the other.
  *
  * Event Filters / Endpoint Exceptions autocomplete fields (`@timestamp`,
- * `agent.version`, `process.name`) are seeded in `seed_endpoint_field_caps.ts`.
+ * `agent.version`, `agent.type`, `process.name`) are seeded in
+ * `seed_endpoint_field_caps.ts`.
  */
 export interface ArtifactTabCase {
   kind: PolicyArtifactKind;
@@ -41,6 +42,16 @@ export interface ArtifactTabCase {
   createCriteria: {
     selector: string;
     value: string;
+  };
+  /**
+   * Condition the list-page edit replaces the created one with. Only set for
+   * event filters, whose form `replaceEventFiltersCondition` drives.
+   */
+  updateCriteria?: {
+    field: string;
+    value: string;
+    selector: string;
+    expected: string;
   };
 }
 
@@ -113,6 +124,12 @@ export const ARTIFACT_TAB_CASES: ArtifactTabCase[] = [
     createCriteria: {
       selector: 'EventFiltersListPage-card-criteriaConditions-condition',
       value: 'AND @timestampIS 1234',
+    },
+    updateCriteria: {
+      field: 'agent.name',
+      value: 'test',
+      selector: 'EventFiltersListPage-card-criteriaConditions-condition',
+      expected: 'AND agent.nameIS test',
     },
   },
   {

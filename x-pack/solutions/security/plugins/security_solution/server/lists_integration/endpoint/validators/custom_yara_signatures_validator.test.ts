@@ -257,7 +257,7 @@ describe('YARA Signatures API validations', () => {
   //  API TESTS FOR THIS ARTIFACT TYPE SHOULD BE COVERED WITH INTEGRATION TESTS.
   //  ADD THEM HERE:
   //
-  //  `x-pack/solutions/security/test/security_solution_api_integration/test_suites/edr_workflows`
+  //  `x-pack/solutions/security/test_suites/test-suites-security-solution-apis/test_suites/edr_workflows`
   //
   // -----------------------------------------------------------------------------
 
@@ -320,9 +320,7 @@ describe('YARA Signatures API validations', () => {
         .catch((err) => err);
 
       expect(error).toBeInstanceOf(EndpointArtifactExceptionValidationError);
-      expect(error.message).toContain(
-        'Unable to validate YARA rule due to an internal error. Please try again later.'
-      );
+      expect(error.message).toContain('Unable to validate YARA rule due to an internal error.');
       expect(error.message).not.toContain('memory access out of bounds');
       expect(error.getStatusCode()).toBe(500);
 

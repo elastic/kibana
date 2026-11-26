@@ -6,8 +6,12 @@
  */
 
 import type { Logger } from '@kbn/logging';
+import type { SecurityServiceStart } from '@kbn/core-security-server';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { HooksServiceSetup, HooksServiceStart } from '@kbn/agent-builder-server';
 import { createHooksRunner } from './hooks_runner';
+import { AGENT_WORKLOAD_TYPE } from '../agents/service_account_binding';
+import { getCurrentSpaceId } from '../../utils/spaces';
 import { createHookRegistry } from './hooks_registry';
 import type { HookRegistry } from './hooks_registry';
 
@@ -29,10 +33,17 @@ export class HooksService {
 
     return {
       register: (bundle) => this.registry.register(bundle),
+      registerCycleHook: (definition) => this.registry.registerCycleHook(definition),
     };
   }
 
-  start(): HooksServiceStart {
+  start({
+    security,
+    spaces,
+  }: {
+    security?: SecurityServiceStart;
+    spaces?: SpacesPluginStart;
+  } = {}): HooksServiceStart {
     if (!this.setupDeps) {
       throw new Error('#start called before #setup');
     }
@@ -40,6 +51,19 @@ export class HooksService {
     return createHooksRunner({
       logger: this.setupDeps.logger.get('hooks'),
       getHooksForLifecycle: (lifecycle) => this.registry.getHooksForLifecycle(lifecycle),
+      getCycleHooks: () => this.registry.getCycleHooks(),
+      withAgentServiceAccountRequest: security
+        ? ({ agentId, runAs, request }, fn) =>
+            security.serviceAccounts.withScopedRequestForWorkload(
+              {
+                workloadType: AGENT_WORKLOAD_TYPE,
+                workloadId: agentId,
+                spaceId: getCurrentSpaceId({ request, spaces }),
+                expectedServiceAccountId: runAs,
+              },
+              fn
+            )
+        : undefined,
     });
   }
 }

@@ -8,13 +8,13 @@
  */
 
 import { parse as yamlParse } from 'yaml';
-import { DEFAULT_AGENT_IMAGE_CONFIG } from '../../pipeline-utils/agent_images';
 import {
   getEvalPipeline,
   getEvalTriggerStep,
   getForwardablePrLabels,
+  getRunnableEvalSuites,
   shouldRunEvals,
-} from './eval_pipeline';
+} from './eval_pipeline.ts';
 
 // `jest.mock` calls are hoisted above the imports above, so `eval_pipeline` sees
 // the mocked `fs` / `child_process` when it is first evaluated.
@@ -38,6 +38,40 @@ const SUITES = {
       ciLabels: ['evals:smoke-tests'],
       configPath: 'x-pack/smoke-tests/playwright.config.ts',
       defaultModelGroups: ['eis/anthropic-claude-4.5-haiku'],
+    },
+    {
+      id: 'nightshift-investigations',
+      name: 'Nightshift Investigations',
+      ciLabels: ['evals:nightshift-investigations'],
+      configPath: 'x-pack/nightshift-investigations/playwright.config.ts',
+      serverConfigSet: 'evals_nightshift_investigations',
+      scoutArch: 'serverless',
+      scoutDomain: 'observability_complete',
+    },
+    {
+      id: 'pinned-judge',
+      name: 'Pinned Judge',
+      ciLabels: ['evals:pinned-judge'],
+      configPath: 'x-pack/pinned-judge/playwright.config.ts',
+      defaultJudge: 'eis-abc-1',
+    },
+    {
+      id: 'gated',
+      name: 'Gated',
+      ciLabels: ['evals:gated'],
+      configPath: 'x-pack/gated/playwright.config.ts',
+      defaultModelGroups: ['eis/anthropic-claude-5.5-sonnet'],
+      requireDecisionOnPaths: {
+        include: ['x-pack/gated/server/**'],
+        exclude: ['**/*.test.ts'],
+      },
+      regressionGate: {
+        dataset: 'golden',
+        evaluator: 'goal_pass',
+        minAbsoluteDrop: 0.1,
+        alpha: 0.05,
+        maxBaselineAgeDays: 3,
+      },
     },
   ],
 };
@@ -97,6 +131,50 @@ describe('eval_pipeline', () => {
       expect(yaml).toContain('EVAL_CONNECTOR_ID: "openrouter-anthropic-claude-sonnet-4-6"');
     });
 
+    describe('the suite `defaultJudge`', () => {
+      const LABELS = 'evals:pinned-judge,models:openrouter/openai-gpt-5.4';
+
+      const suiteEnvs = (labels: string): Record<string, Record<string, string>> =>
+        Object.fromEntries(
+          (parseStep(getEvalPipeline(labels) as string).steps as Array<Record<string, any>>).map(
+            (step) => [step.key, step.env]
+          )
+        );
+
+      it('sets EVAL_CONNECTOR_ID and EIS models for a suite that pins an EIS judge', () => {
+        const env = suiteEnvs(LABELS)['kbn-evals-pinned-judge'];
+
+        expect(env.EVAL_CONNECTOR_ID).toBe('eis-abc-1');
+        expect(env.EVAL_INCLUDE_EIS_MODELS).toBe('1');
+      });
+
+      it('lets a `models:judge:` label win over the pin', () => {
+        const env = suiteEnvs(`${LABELS},models:judge:openrouter/openai-gpt-5.4`)[
+          'kbn-evals-pinned-judge'
+        ];
+
+        expect(env.EVAL_CONNECTOR_ID).toBe('openrouter-openai-gpt-5-4');
+        expect(env).not.toHaveProperty('EVAL_INCLUDE_EIS_MODELS');
+      });
+
+      it('leaves EVAL_CONNECTOR_ID to the Vault default for a suite without a pin', () => {
+        const env = suiteEnvs('evals:agent-builder,models:eis/openai-gpt-5.4')[
+          'kbn-evals-agent-builder'
+        ];
+
+        expect(env).not.toHaveProperty('EVAL_CONNECTOR_ID');
+      });
+
+      it('applies the pin per suite, not to the other selected suites', () => {
+        const envs = suiteEnvs(
+          'evals:pinned-judge,evals:agent-builder,models:openrouter/openai-gpt-5.4'
+        );
+
+        expect(envs['kbn-evals-pinned-judge'].EVAL_CONNECTOR_ID).toBe('eis-abc-1');
+        expect(envs['kbn-evals-agent-builder']).not.toHaveProperty('EVAL_CONNECTOR_ID');
+      });
+    });
+
     it('does not trigger when the only model label is dropped by forwarding (gate parity)', () => {
       expect(getEvalTriggerStep('evals:agent-builder,models:gpt 5')).toBeNull();
     });
@@ -140,6 +218,98 @@ describe('eval_pipeline', () => {
       expect(getForwardablePrLabels('evals:smoke-tests,evals:skip-smoke-tests')).toBe(
         'evals:smoke-tests,evals:skip-smoke-tests'
       );
+    });
+  });
+
+  describe('the generic skip label (`evals:skip`)', () => {
+    it('drops a suite that requires a decision, even alongside its run label', () => {
+      expect(shouldRunEvals('evals:gated,evals:skip')).toBe(false);
+      expect(getEvalPipeline('evals:gated,evals:skip')).toBeNull();
+    });
+
+    it('leaves suites that do not require a decision running', () => {
+      const yaml = getEvalPipeline('evals:smoke-tests,evals:skip') as string;
+      expect(yaml).toContain('kbn-evals-smoke-tests');
+    });
+
+    it('drops decision suites from `evals:all` too', () => {
+      const yaml = getEvalPipeline('evals:all,models:eis/openai-gpt-5.4,evals:skip') as string;
+      expect(yaml).toContain('kbn-evals-agent-builder');
+      expect(yaml).not.toContain('kbn-evals-gated');
+    });
+
+    it('short-circuits before reading suite metadata when it is the only eval label', () => {
+      expect(shouldRunEvals('evals:skip')).toBe(false);
+      expect(readFileSync).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('the judge of a suite with a regression gate', () => {
+    const env = (labels: string, key: string): Record<string, string> =>
+      (parseStep(getEvalPipeline(labels) as string).steps as Array<Record<string, any>>).find(
+        (step) => step.key === key
+      )?.env;
+
+    it('ignores a `models:judge:` label, which would score against a different baseline', () => {
+      expect(
+        env('evals:gated,models:judge:openrouter/openai-gpt-5.4', 'kbn-evals-gated')
+      ).not.toHaveProperty('EVAL_CONNECTOR_ID');
+    });
+
+    it('still applies the label to ungated suites in the same run', () => {
+      expect(
+        env(
+          'evals:gated,evals:smoke-tests,models:judge:openrouter/openai-gpt-5.4',
+          'kbn-evals-smoke-tests'
+        ).EVAL_CONNECTOR_ID
+      ).toBe('openrouter-openai-gpt-5-4');
+    });
+  });
+
+  describe('model groups of a suite with a regression gate', () => {
+    const modelGroups = (labels: string, key: string): string =>
+      (parseStep(getEvalPipeline(labels) as string).steps as Array<Record<string, any>>).find(
+        (step) => step.key === key
+      )?.env.EVAL_MODEL_GROUPS;
+
+    it('keeps the default (gate) model when a `models:*` label adds another', () => {
+      expect(modelGroups('evals:gated,models:eis/openai-gpt-5.4', 'kbn-evals-gated')).toBe(
+        'eis/anthropic-claude-5.5-sonnet,eis/openai-gpt-5.4'
+      );
+    });
+
+    it('still lets a `models:*` label replace the defaults of an ungated suite', () => {
+      expect(
+        modelGroups('evals:smoke-tests,models:eis/openai-gpt-5.4', 'kbn-evals-smoke-tests')
+      ).toBe('eis/openai-gpt-5.4');
+    });
+  });
+
+  describe('getRunnableEvalSuites', () => {
+    it('returns the suites that would run, without skipped ones', () => {
+      expect(getRunnableEvalSuites('evals:gated,evals:smoke-tests').map(({ id }) => id)).toEqual([
+        'smoke-tests',
+        'gated',
+      ]);
+      expect(getRunnableEvalSuites('evals:gated,evals:skip')).toEqual([]);
+    });
+  });
+
+  describe('getEvalTriggerStep with changed files', () => {
+    it('emits the trigger without eval labels when a decision path changed', () => {
+      expect(getEvalTriggerStep('', ['x-pack/gated/server/prompt.md.text'])).not.toBeNull();
+      // Reads the config but skips the per-suite `git ls-tree` that label selection runs.
+      expect(execFileSync).not.toHaveBeenCalled();
+    });
+
+    it('does not emit the trigger for unrelated or excluded files', () => {
+      expect(
+        getEvalTriggerStep('', ['x-pack/gated/server/a.test.ts', 'x-pack/other/index.ts'])
+      ).toBeNull();
+    });
+
+    it('emits the trigger when GitHub capped the file list, since decision paths may be missing', () => {
+      expect(getEvalTriggerStep('', ['x-pack/other/index.ts'], true)).not.toBeNull();
     });
   });
 
@@ -206,11 +376,9 @@ describe('eval_pipeline', () => {
     });
 
     it('parses the JSON-array label form too (matches the child parser)', () => {
-      expect(
-        getForwardablePrLabels(
-          '["evals:smoke-tests","help wanted","ci:build-with-rspack-optimizer"]'
-        )
-      ).toBe('evals:smoke-tests,ci:build-with-rspack-optimizer');
+      expect(getForwardablePrLabels('["evals:smoke-tests","help wanted","ci:cloud-deploy"]')).toBe(
+        'evals:smoke-tests,ci:cloud-deploy'
+      );
     });
 
     it('returns an empty string when every label contains whitespace', () => {
@@ -249,11 +417,27 @@ describe('eval_pipeline', () => {
     });
   });
 
-  describe('getEvalPipeline agent disk', () => {
-    it('requests an explicit boot disk so ES stays above its merge disk watermark', () => {
+  describe('getEvalPipeline Scout arch/domain', () => {
+    it("passes the suite's scoutArch/scoutDomain to run_suite.sh", () => {
+      const yaml = getEvalPipeline(
+        'evals:nightshift-investigations,models:eis/openai-gpt-5.4'
+      ) as string;
+      const { env } = parseStep(yaml).steps[0];
+
+      expect(env).toEqual(
+        expect.objectContaining({
+          EVAL_SERVER_CONFIG_SET: 'evals_nightshift_investigations',
+          EVAL_SCOUT_ARCH: 'serverless',
+          EVAL_SCOUT_DOMAIN: 'observability_complete',
+        })
+      );
+    });
+
+    it('leaves suites without Scout settings on the run_suite.sh default (stateful/classic)', () => {
       const yaml = getEvalPipeline('evals:agent-builder,models:eis/openai-gpt-5.4') as string;
 
-      expect(yaml).toContain(`diskSizeGb: ${DEFAULT_AGENT_IMAGE_CONFIG.diskSizeGb}`);
+      expect(yaml).not.toContain('EVAL_SCOUT_ARCH');
+      expect(yaml).not.toContain('EVAL_SCOUT_DOMAIN');
     });
   });
 });

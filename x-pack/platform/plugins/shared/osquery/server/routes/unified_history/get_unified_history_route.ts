@@ -40,7 +40,7 @@ import type { LiveActionHit } from './map_live_hit_to_row';
 
 import { unifiedHistoryResponseSchema } from './response_schemas';
 
-const VALID_SOURCE_FILTERS = new Set(['live', 'rule', 'scheduled']);
+const VALID_SOURCE_FILTERS = new Set(['live', 'rule', 'scheduled', 'workflow']);
 
 export const getUnifiedHistoryRoute = (router: IRouter, osqueryContext: OsqueryAppContext) => {
   const logger: Logger = osqueryContext.logFactory.get('unifiedHistory');
@@ -72,7 +72,7 @@ export const getUnifiedHistoryRoute = (router: IRouter, osqueryContext: OsqueryA
                     if (invalid.length) {
                       return `invalid sourceFilter values: ${invalid.join(
                         ', '
-                      )}. Allowed: live, rule, scheduled`;
+                      )}. Allowed: live, rule, scheduled, workflow`;
                     }
                   },
                 })
@@ -103,7 +103,8 @@ export const getUnifiedHistoryRoute = (router: IRouter, osqueryContext: OsqueryA
           const clusterClient = coreStart.elasticsearch.client;
           const internalEsClient = clusterClient.asInternalUser;
           const readEsClient = getReadEsClient(clusterClient, request, cpsActive);
-          const ccsEnabled = await hasConnectedRemoteClusters(internalEsClient);
+          // A fanned-out CPS read does not also add CCS `*:` remote expressions.
+          const ccsEnabled = !cpsActive && (await hasConnectedRemoteClusters(internalEsClient));
 
           const spaceId = osqueryContext?.service?.getActiveSpace
             ? (await osqueryContext.service.getActiveSpace(request))?.id || DEFAULT_SPACE_ID
@@ -139,7 +140,10 @@ export const getUnifiedHistoryRoute = (router: IRouter, osqueryContext: OsqueryA
           const hasUserFilter = userIds && userIds.length > 0;
           const hasTagsFilter = tags && tags.length > 0;
           const includeLive =
-            !activeFilters || activeFilters.has('live') || activeFilters.has('rule');
+            !activeFilters ||
+            activeFilters.has('live') ||
+            activeFilters.has('rule') ||
+            activeFilters.has('workflow');
           // Scheduled queries are excluded when user or tags filters are active because
           // scheduled execution docs don't carry user_id or tags fields.
           const includeScheduled =
@@ -265,7 +269,6 @@ export const getUnifiedHistoryRoute = (router: IRouter, osqueryContext: OsqueryA
             liveHits,
             osqueryContext,
             request,
-            spaceId,
             integrationNamespaces,
             ccsEnabled,
             cpsActive,

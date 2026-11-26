@@ -19,7 +19,9 @@ export const checkAnalyticsEventsExist = async ({
   indexName,
 }: AnalyticsEventsExistApiLogicArgs): Promise<AnalyticsEventsExistApiLogicResponse> => {
   const { http } = HttpLogic.values;
-  const route = `/internal/elasticsearch/analytics/collection/${indexName}/events/exist`;
+  const route = `/internal/elasticsearch/analytics/collection/${encodeURIComponent(
+    indexName
+  )}/events/exist`;
   const response = await http.get<AnalyticsEventsExist>(route);
 
   return response;

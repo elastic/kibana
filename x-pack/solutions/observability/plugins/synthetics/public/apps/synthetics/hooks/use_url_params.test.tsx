@@ -6,43 +6,28 @@
  */
 
 import DateMath from '@kbn/datemath';
-import userEvent from '@testing-library/user-event';
-import { render } from '../utils/testing';
-import React, { useState, Fragment } from 'react';
-import type { SyntheticsUrlParamsHook } from './use_url_params';
+import { Router } from '@kbn/shared-ux-router';
+import { act, renderHook } from '@testing-library/react';
+import { createMemoryHistory } from 'history';
+import React from 'react';
 import { useUrlParams } from './use_url_params';
-import { SyntheticsRefreshContext } from '../contexts';
-import { CLIENT_DEFAULTS_SYNTHETICS } from '../../../../common/constants/synthetics/client_defaults';
-const { AUTOREFRESH_INTERVAL_SECONDS } = CLIENT_DEFAULTS_SYNTHETICS;
 
-interface MockUrlParamsComponentProps {
-  hook: SyntheticsUrlParamsHook;
-  updateParams?: { [key: string]: any } | null;
-}
+const renderUseUrlParams = () => {
+  const history = createMemoryHistory();
 
-const UseUrlParamsTestComponent = ({
-  hook,
-  updateParams = { dateRangeStart: 'now-12d', dateRangeEnd: 'now' },
-}: MockUrlParamsComponentProps) => {
-  const [params, setParams] = useState({});
-  const [getUrlParams, updateUrlParams] = hook();
-  const queryParams = getUrlParams();
-  return (
-    <Fragment>
-      {Object.keys(params).length > 0 ? <div>{JSON.stringify(params)}</div> : null}
-      <button
-        id="setUrlParams"
-        onClick={() => {
-          updateUrlParams(updateParams as any);
-        }}
-      >
-        Set url params
-      </button>
-      <button id="getUrlParams" onClick={() => setParams(queryParams)}>
-        Get url params
-      </button>
-    </Fragment>
+  const { result } = renderHook(
+    () => {
+      const [getUrlParams, updateUrlParams] = useUrlParams();
+      return { urlParams: getUrlParams(), updateUrlParams };
+    },
+    {
+      wrapper: ({ children }: { children: React.ReactNode }) => (
+        <Router history={history}>{children}</Router>
+      ),
+    }
   );
+
+  return { history, result };
 };
 
 describe('useUrlParams', () => {
@@ -54,55 +39,33 @@ describe('useUrlParams', () => {
     dateMathSpy.mockReturnValue(MOCK_DATE_VALUE);
   });
 
-  it('accepts router props, updates URL params, and returns the current params', async () => {
-    const { findByText, history } = render(
-      <SyntheticsRefreshContext.Provider
-        value={
-          {
-            lastRefresh: 123,
-            refreshApp: jest.fn(),
-            refreshInterval: AUTOREFRESH_INTERVAL_SECONDS,
-          } as any
-        }
-      >
-        <UseUrlParamsTestComponent hook={useUrlParams} />
-      </SyntheticsRefreshContext.Provider>
-    );
+  it('accepts router props, updates URL params, and returns the current params', () => {
+    const { history, result } = renderUseUrlParams();
 
     const pushSpy = jest.spyOn(history, 'push');
 
-    const setUrlParamsButton = await findByText('Set url params');
-    await userEvent.click(setUrlParamsButton);
+    act(() => {
+      result.current.updateUrlParams({ dateRangeStart: 'now-12d', dateRangeEnd: 'now' });
+    });
+
     expect(pushSpy).toHaveBeenCalledWith({
       pathname: '/',
       search: 'dateRangeEnd=now&dateRangeStart=now-12d',
     });
-    pushSpy.mockClear();
   });
 
-  it('clears search when null is passed to params', async () => {
-    const { findByText, history } = render(
-      <SyntheticsRefreshContext.Provider
-        value={
-          {
-            lastRefresh: 123,
-            refreshApp: jest.fn(),
-            refreshInterval: AUTOREFRESH_INTERVAL_SECONDS,
-          } as any
-        }
-      >
-        <UseUrlParamsTestComponent hook={useUrlParams} updateParams={null} />
-      </SyntheticsRefreshContext.Provider>
-    );
+  it('clears search when null is passed to params', () => {
+    const { history, result } = renderUseUrlParams();
 
     const pushSpy = jest.spyOn(history, 'push');
 
-    const setUrlParamsButton = await findByText('Set url params');
-    await userEvent.click(setUrlParamsButton);
+    act(() => {
+      result.current.updateUrlParams(null);
+    });
+
     expect(pushSpy).toHaveBeenCalledWith({
       pathname: '/',
       search: undefined,
     });
-    pushSpy.mockClear();
   });
 });

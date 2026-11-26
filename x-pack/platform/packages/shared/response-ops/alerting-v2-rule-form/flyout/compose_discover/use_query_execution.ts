@@ -7,10 +7,12 @@
 
 import { useCallback, useMemo, useRef, useState } from 'react';
 import { useQuery, useQueryClient } from '@kbn/react-query';
-import { getESQLResults } from '@kbn/esql-utils';
 import { Parser } from '@elastic/esql';
 import type { EuiDataGridColumn } from '@elastic/eui';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { CPSPluginStart } from '@kbn/cps/public';
+import type { ProjectRouting } from '@kbn/es-query';
+import { getRuleProjectRouting } from '../../utils/get_rule_project_routing';
 
 export interface QueryColumn extends EuiDataGridColumn {
   esType: string;
@@ -39,6 +41,7 @@ interface UseQueryExecutionParams {
   timeField: string;
   timeRange: TimeRange;
   data: DataPublicPluginStart;
+  cps?: CPSPluginStart;
   /**
    * The active tab. Each tab remembers its own last-executed query/time
    * range/time field, so switching tabs shows that tab's own cached result —
@@ -52,6 +55,7 @@ interface TabExecution {
   query: string;
   timeRange: TimeRange;
   timeField: string;
+  projectRouting: ProjectRouting;
 }
 
 const DEFAULT_TAB = 'default';
@@ -94,6 +98,7 @@ export const useQueryExecution = ({
   timeField,
   timeRange,
   data,
+  cps,
   tab = DEFAULT_TAB,
 }: UseQueryExecutionParams): QueryExecutionResult => {
   const queryClient = useQueryClient();
@@ -103,6 +108,7 @@ export const useQueryExecution = ({
   const executionQuery = activeExecution?.query ?? null;
   const executionTimeRange = activeExecution?.timeRange ?? null;
   const executionTimeField = activeExecution?.timeField ?? null;
+  const executionProjectRouting = activeExecution?.projectRouting;
 
   const canExecute = Boolean(executionQuery?.trim() && executionTimeField?.trim());
 
@@ -113,15 +119,21 @@ export const useQueryExecution = ({
 
     const queryWithTime = injectTimeFilter(executionQuery, executionTimeField);
 
-    const result = await getESQLResults({
-      esqlQuery: queryWithTime,
-      search: data.search.search,
+    const { rawResponse } = await data.search.esql({
+      query: queryWithTime,
       dropNullColumns: true,
-      timeRange: executionTimeRange,
+      kibanaQueryContext: { timeRange: executionTimeRange },
+      projectRouting: executionProjectRouting,
     });
 
-    return result.response;
-  }, [executionQuery, executionTimeRange, executionTimeField, data.search.search]);
+    return rawResponse;
+  }, [
+    executionQuery,
+    executionTimeRange,
+    executionTimeField,
+    executionProjectRouting,
+    data.search,
+  ]);
 
   const {
     data: response,
@@ -129,7 +141,13 @@ export const useQueryExecution = ({
     isError,
     error,
   } = useQuery({
-    queryKey: ['composeDiscoverQuery', executionQuery, executionTimeRange, executionTimeField],
+    queryKey: [
+      'composeDiscoverQuery',
+      executionQuery,
+      executionTimeRange,
+      executionTimeField,
+      executionProjectRouting,
+    ],
     queryFn: fetchResults,
     enabled: canExecute,
     keepPreviousData: true,
@@ -153,20 +171,30 @@ export const useQueryExecution = ({
     const trimmed = q.trim();
     if (!trimmed) return;
 
+    // Resolved on each run since the CPS space default loads asynchronously
+    const projectRouting = getRuleProjectRouting(trimmed, cps);
+
     const rangeChanged = exec?.timeRange.from !== tr.from || exec?.timeRange.to !== tr.to;
     const fieldChanged = exec?.timeField !== tf;
-    if (exec && trimmed === exec.query && !rangeChanged && !fieldChanged) {
+    const routingChanged = exec?.projectRouting !== projectRouting;
+    if (exec && trimmed === exec.query && !rangeChanged && !fieldChanged && !routingChanged) {
       queryClient.invalidateQueries({
-        queryKey: ['composeDiscoverQuery', exec.query, exec.timeRange, exec.timeField],
+        queryKey: [
+          'composeDiscoverQuery',
+          exec.query,
+          exec.timeRange,
+          exec.timeField,
+          exec.projectRouting,
+        ],
         exact: true,
       });
     } else {
       setExecutionsByTab((prev) => ({
         ...prev,
-        [activeTab]: { query: trimmed, timeRange: { ...tr }, timeField: tf },
+        [activeTab]: { query: trimmed, timeRange: { ...tr }, timeField: tf, projectRouting },
       }));
     }
-  }, [queryClient]);
+  }, [queryClient, cps]);
 
   const columns: QueryColumn[] = useMemo(
     () =>

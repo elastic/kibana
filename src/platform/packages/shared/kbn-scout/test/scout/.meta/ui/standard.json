@@ -1,5 +1,5 @@
 {
-  "sha1": "00842f1b0efbe1a2eb72c71375f2c3fa953089e0",
+  "sha1": "3ebd4e7199282f0a98fd9cecf7df434c17e1d3e5",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -41,6 +41,8 @@
       "title": "Serverless project should successfully load home page",
       "expectedStatus": "passed",
       "tags": [
+        "@local-serverless-search",
+        "@cloud-serverless-search",
         "@local-serverless-observability_complete",
         "@cloud-serverless-observability_complete",
         "@local-serverless-observability_logs_essentials",
@@ -51,13 +53,15 @@
         "@cloud-serverless-security_essentials",
         "@local-serverless-security_ease",
         "@cloud-serverless-security_ease",
-        "@local-serverless-search",
-        "@cloud-serverless-search"
+        "@local-serverless-workplaceai",
+        "@cloud-serverless-workplaceai",
+        "@local-serverless-vectordb",
+        "@cloud-serverless-vectordb"
       ],
       "location": {
         "file": "src/platform/packages/shared/kbn-scout/test/scout/ui/tests/sanity_check/home_serverless.spec.ts",
-        "line": 23,
-        "column": 68
+        "line": 18,
+        "column": 9
       }
     },
     {

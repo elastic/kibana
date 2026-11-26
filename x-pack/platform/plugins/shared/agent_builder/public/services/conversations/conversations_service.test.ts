@@ -9,10 +9,70 @@ import {
   ConversationAccessControlMode,
   ConversationAccessControlRole,
 } from '@kbn/agent-builder-common';
-import { publicApiPath } from '../../../common/constants';
+import { publicApiPath, internalApiPath } from '../../../common/constants';
 import { ConversationsService } from './conversations_service';
 
 describe('ConversationsService', () => {
+  it('creates an empty conversation for an agent', async () => {
+    const post = jest.fn().mockResolvedValue({ id: 'conv-1' });
+    const service = new ConversationsService({ http: { post } as never });
+
+    const created = await service.create({ agentId: 'agent-1' });
+
+    expect(post).toHaveBeenCalledWith(`${publicApiPath}/conversations`, {
+      body: JSON.stringify({ agent_id: 'agent-1' }),
+    });
+    expect(created).toEqual({ id: 'conv-1' });
+  });
+
+  it('requests _search with the snake_case query mapping', async () => {
+    const get = jest.fn().mockResolvedValue({
+      pagination: { total: 0, page: 1, per_page: 25 },
+      results: [],
+    });
+    const service = new ConversationsService({ http: { get } as never });
+
+    await service.search({ query: 'sales', agentId: 'agent-1', page: 2, perPage: 25 });
+
+    expect(get).toHaveBeenCalledWith(`${internalApiPath}/conversations/_search`, {
+      query: {
+        query: 'sales',
+        agent_id: 'agent-1',
+        page: 2,
+        per_page: 25,
+      },
+    });
+  });
+
+  it('posts events to the _add_events endpoint', async () => {
+    const event = {
+      type: 'text_note',
+      data: { text: 'this is a note' },
+    };
+    const responseBody = {
+      events: [
+        {
+          id: 'aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee',
+          created_at: '2026-09-14T10:00:00.000Z',
+          actor: { type: 'user', id: 'u_1', username: 'alice' },
+          ...event,
+        },
+      ],
+    };
+    const post = jest.fn().mockResolvedValue(responseBody);
+    const service = new ConversationsService({ http: { post } as never });
+
+    const result = await service.addEvents({
+      conversationId: 'conv-1',
+      events: [event],
+    });
+
+    expect(post).toHaveBeenCalledWith(`${publicApiPath}/conversations/conv-1/_add_events`, {
+      body: JSON.stringify({ events: [event] }),
+    });
+    expect(result).toEqual(responseBody);
+  });
+
   it('updates conversation access control', async () => {
     const put = jest.fn().mockResolvedValue({
       access_mode: ConversationAccessControlMode.Private,

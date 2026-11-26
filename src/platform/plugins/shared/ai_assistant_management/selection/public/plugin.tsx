@@ -47,7 +47,7 @@ export interface SetupDependencies {
 }
 
 export interface StartDependencies {
-  licensing: LicensingPluginStart;
+  licensing?: LicensingPluginStart;
   spaces?: SpacesPluginStart;
 }
 
@@ -246,7 +246,7 @@ export class AIAssistantManagementPlugin
         };
       };
 
-      coreStart.chrome.next.aiButton.register({
+      coreStart.chrome.controls.aiButton.register({
         content: mountAiPicker,
       });
     }

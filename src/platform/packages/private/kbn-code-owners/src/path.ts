@@ -16,6 +16,19 @@ import { REPO_ROOT } from '@kbn/repo-info';
 export const CODE_OWNERS_FILE = path.join(REPO_ROOT, '.github', 'CODEOWNERS');
 
 /**
+ * Normalize a path so that it is relative to the repo root, independently of the current working directory.
+ *
+ * Absolute paths are made relative to the repo root. Relative paths are assumed to already be relative
+ * to the repo root (they are never resolved against `process.cwd()`), which is what every caller passes
+ * and what CODEOWNERS patterns are matched against.
+ */
+export function getRepoRelativePath(targetPath: string): string {
+  return path.isAbsolute(targetPath)
+    ? path.relative(REPO_ROOT, targetPath)
+    : path.normalize(targetPath);
+}
+
+/**
  * Throw an error if the given path does not exist
  *
  * @param targetPath Path to check
@@ -39,9 +52,9 @@ export function throwIfPathIsMissing(
  * @param cli Whether this function is called from a CLI context
  */
 export function throwIfPathNotInRepo(targetPath: fs.PathLike, cli: boolean = false) {
-  const relativePath = path.relative(REPO_ROOT, targetPath.toString());
+  const relativePath = getRepoRelativePath(targetPath.toString());
 
-  if (relativePath.includes('../')) {
+  if (relativePath === '..' || relativePath.startsWith(`..${path.sep}`)) {
     const msg = `Path ${targetPath} is not part of this repository.`;
     throw cli ? createFailError(msg) : new Error(msg);
   }

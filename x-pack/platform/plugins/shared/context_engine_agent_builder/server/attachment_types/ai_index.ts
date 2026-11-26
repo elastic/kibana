@@ -12,10 +12,9 @@ import {
   type AiIndexAttachmentData,
 } from '../../common/agent_builder_attachment_schemas';
 import {
-  KI_AUTOMATION_GENERATION_SKILL_ID,
-  KI_RETRIEVAL_SKILL_ID,
-} from '../../common/agent_builder_skills';
-import { CONTEXT_ENGINE_SAVE_AUTOMATION_TOOL_ID } from '../../common/agent_builder_tools';
+  CONTEXT_ENGINE_INSTALL_AUTOMATION_TEMPLATE_TOOL_ID,
+  CONTEXT_ENGINE_SAVE_AUTOMATION_TOOL_ID,
+} from '../../common/agent_builder_tools';
 
 /**
  * Server-side definition for the `ai_index` attachment type — a read-only snapshot
@@ -44,23 +43,28 @@ export const createAiIndexAttachmentType = (): AttachmentTypeDefinition<
       getRepresentation: () => ({ type: 'text', value: formatAiIndex(attachment.data) }),
     };
   },
+  // The attachment carries the index snapshot and the authority to write to it, nothing more.
+  // How a setup conversation goes and how the agent talks live in the Context Engine agent's
+  // instructions (server/agent/instructions/context_engine_setup.md.text): there they are part of
+  // the system prompt, instead of arriving in a user message for whichever agent has the attachment.
   getAgentDescription: () =>
     [
       'An `ai_index` attachment is a read-only snapshot of a Context Engine AI index (destination,',
-      'sources, and workflow automations). Use it to scope the conversation to this index — do not',
+      'sources, workflow automations, and traces). Use it to scope the conversation to this index — do not',
       're-run discovery for destination or sources already listed here.',
-      `For querying KIs in this index, load the \`${KI_RETRIEVAL_SKILL_ID}\` skill.`,
-      `To draft or edit workflow automations, load \`${KI_AUTOMATION_GENERATION_SKILL_ID}\` (or follow`,
-      "the user's initial message if it already references that skill).",
-      'When automations are listed and the user wants to edit one, use `ask_user_question` before',
-      '`generate_workflow`. When editing, ask what should change before calling `generate_workflow`.',
-      `After \`generate_workflow\`, render the diff in chat first, then call \`${CONTEXT_ENGINE_SAVE_AUTOMATION_TOOL_ID}\``,
-      'with the workflow attachment id — in the same assistant turn but a separate model step after',
-      'the diff is visible. Do not batch save with generate_workflow. If save runs in a later turn,',
-      're-render the diff first. Platform confirms before persisting.',
-      'If the user saved manually from the diff card, pass `workflowId` instead.',
+      'When a source carries `fields` or `sample_documents`, an automation carries `yaml`, or',
+      '`signals_summary`/a trace carries `row_count`, that is already the result of inspecting it —',
+      'use it directly rather than calling `get_index_mapping`, `execute_esql` or `get_workflow` for',
+      'the same thing again. A field that is absent was not gathered, so inspect it yourself. An',
+      '`inspection_error`/`fetch_error`/`count_error` means the attempt was made and failed.',
+      'This attachment authorizes you to apply changes to this index, not only to propose them: it',
+      `provides \`${CONTEXT_ENGINE_INSTALL_AUTOMATION_TEMPLATE_TOOL_ID}\` and`,
+      `\`${CONTEXT_ENGINE_SAVE_AUTOMATION_TOOL_ID}\` for this index.`,
     ].join(' '),
-  getTools: () => [CONTEXT_ENGINE_SAVE_AUTOMATION_TOOL_ID],
+  getTools: () => [
+    CONTEXT_ENGINE_INSTALL_AUTOMATION_TEMPLATE_TOOL_ID,
+    CONTEXT_ENGINE_SAVE_AUTOMATION_TOOL_ID,
+  ],
 });
 
 const formatAiIndex = (data: AiIndexAttachmentData): string => {
@@ -74,17 +78,76 @@ const formatAiIndex = (data: AiIndexAttachmentData): string => {
 
   parts.push(
     data.sources.length > 0
-      ? `Sources: ${data.sources.map((source) => `${source.type}:${source.value}`).join(', ')}`
+      ? `Sources:\n${data.sources.map((source) => `- ${formatSource(source)}`).join('\n')}`
       : 'Sources: none configured'
   );
 
   parts.push(
     data.automations.length > 0
-      ? `Existing automations (workflow ids): ${data.automations
-          .map((automation) => automation.value)
-          .join(', ')}`
+      ? `Existing automations:\n${data.automations
+          .map((automation) => `- ${formatAutomation(automation)}`)
+          .join('\n')}`
       : 'Existing automations: none'
   );
 
+  parts.push(
+    data.traces.length > 0
+      ? `Traces:\n${data.traces.map((trace) => `- ${formatTrace(trace)}`).join('\n')}`
+      : 'Traces: none configured'
+  );
+
+  if (data.signals_summary) {
+    parts.push(formatSignalsSummary(data.signals_summary));
+  }
+
   return parts.join('\n');
+};
+
+const formatSource = (source: AiIndexAttachmentData['sources'][number]): string => {
+  const header = `${source.type}:${source.value}`;
+  if (source.inspection_error) {
+    return `${header} (could not be inspected: ${source.inspection_error})`;
+  }
+  if (source.row_count === undefined) {
+    return header;
+  }
+  const fields = (source.fields ?? []).map((field) => `${field.path}: ${field.type}`).join(', ');
+  const sample =
+    source.sample_documents && source.sample_documents.length > 0
+      ? `\n  sample: ${JSON.stringify(source.sample_documents)}`
+      : '';
+  return `${header} — ${source.row_count} row(s)${fields ? `, fields: ${fields}` : ''}${sample}`;
+};
+
+const formatAutomation = (automation: AiIndexAttachmentData['automations'][number]): string => {
+  if (automation.fetch_error) {
+    return `${automation.value} (definition could not be read: ${automation.fetch_error})`;
+  }
+  if (!automation.yaml) {
+    return automation.value;
+  }
+  return `${automation.value}:\n${automation.yaml
+    .split('\n')
+    .map((line) => `  ${line}`)
+    .join('\n')}`;
+};
+
+// For 'esql' traces, value is already the query, so showing both would just repeat it.
+const formatTrace = (trace: AiIndexAttachmentData['traces'][number]): string => {
+  const base =
+    trace.type === 'esql'
+      ? `esql: ${trace.query.replace(/\n/g, ' ')}`
+      : `${trace.type}:${trace.value} -> ${trace.query.replace(/\n/g, ' ')}`;
+  if (trace.count_error) {
+    return `${base} (count failed: ${trace.count_error})`;
+  }
+  return trace.row_count === undefined ? base : `${base} — ${trace.row_count} row(s)`;
+};
+
+const formatSignalsSummary = (summary: NonNullable<AiIndexAttachmentData['signals_summary']>) => {
+  if (summary.total === 0) {
+    return 'Signals: none yet.';
+  }
+  const byTag = summary.by_tag.map(({ tag, count }) => `${tag}: ${count}`).join(', ');
+  return `Signals: ${summary.total} (${byTag})`;
 };

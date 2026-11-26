@@ -8,7 +8,10 @@
 import type { ESQLSearchResponse } from '@kbn/es-types';
 import { conditionToESQL } from '@kbn/streamlang';
 import { recentData } from '../../../common/domain/definitions/esql';
-import { getEntityDefinition } from '../../../common/domain/definitions/registry';
+import {
+  getEntityDefinition,
+  getBuiltInEntityDefinition,
+} from '../../../common/domain/definitions/registry';
 import type {
   EntityField,
   SetFieldsByCondition,
@@ -25,7 +28,8 @@ import {
   aggregationStats,
   buildExtractionSourceClause,
   buildFieldEvaluations,
-  buildPaginationSection,
+  buildPaginationCursorFilter,
+  buildPaginationSortAndLimit,
   buildPostStatsLogicalToColumnMap,
   buildSetFieldsByCondition,
   extractPaginationParams,
@@ -50,7 +54,7 @@ describe('exported field name constants', () => {
 describe('buildExtractionSourceClause', () => {
   const baseParams = {
     indexPatterns: ['logs-*', 'metrics-*'],
-    type: 'host' as const,
+    entityDefinition: getEntityDefinition('host', 'default'),
     fromDateISO: '2024-01-01T00:00:00.000Z',
     toDateISO: '2024-01-02T00:00:00.000Z',
   };
@@ -64,7 +68,9 @@ describe('buildExtractionSourceClause', () => {
     expect(withCursor).not.toContain('METADATA');
     expect(withCursor).toContain(`${TIMESTAMP_FIELD} >= TO_DATETIME("2024-01-01T00:00:00.000Z")`);
     expect(withCursor).toContain(`${TIMESTAMP_FIELD} <= TO_DATETIME("2024-01-02T00:00:00.000Z")`);
-    expect(withCursor).toContain(getEuidEsqlDocumentsContainsIdFilter('host'));
+    expect(withCursor).toContain(
+      getEuidEsqlDocumentsContainsIdFilter(getBuiltInEntityDefinition('host'))
+    );
 
     const withoutCursor = buildExtractionSourceClause({ ...baseParams });
     expect(withoutCursor).toContain(
@@ -417,46 +423,40 @@ describe('buildSetFieldsByCondition post-STATS context', () => {
   });
 });
 
-describe('buildPaginationSection', () => {
+describe('pagination query fragments', () => {
   const paginationFields: PaginationFields = {
     idFieldInQuery: 'recent.id',
     finalIdField: 'final.id',
   };
 
-  it('should emit SORT and LIMIT only when pagination is absent', () => {
-    expect(buildPaginationSection(25, paginationFields)).toEqual([
-      '| SORT recent.id ASC',
-      '| LIMIT 25',
-    ]);
+  it('should emit no cursor filter on the first page', () => {
+    expect(buildPaginationCursorFilter(paginationFields)).toEqual([]);
   });
 
-  it('should sort by the id field alone, never by a timestamp', () => {
-    const parts = buildPaginationSection(25, paginationFields, { idCursor: 'cursor-id' });
-    expect(parts[0]).toBe('| SORT recent.id ASC');
+  it('should add an id-only WHERE cursor clause when pagination is provided', () => {
+    const parts = buildPaginationCursorFilter(paginationFields, { idCursor: 'cursor-id' });
+    expect(parts).toEqual(['| WHERE recent.id > "cursor-id"']);
     expect(parts.join('\n')).not.toContain('@timestamp');
     expect(parts.join('\n')).not.toContain('TO_DATETIME');
   });
 
-  it('should add an id-only WHERE cursor clause when pagination is provided', () => {
-    const parts = buildPaginationSection(25, paginationFields, { idCursor: 'cursor-id' });
-    expect(parts).toEqual([
-      '| SORT recent.id ASC',
-      '| WHERE recent.id > "cursor-id"',
-      '| LIMIT 25',
-    ]);
-  });
-
   it('should escape double quotes and backslashes in idCursor to prevent ESQL injection', () => {
-    const parts = buildPaginationSection(25, paginationFields, {
+    const parts = buildPaginationCursorFilter(paginationFields, {
       idCursor: 'evil"id\\with"chars',
     });
-    expect(parts[1]).toBe('| WHERE recent.id > "evil\\"id\\\\with\\"chars"');
+    expect(parts).toEqual(['| WHERE recent.id > "evil\\"id\\\\with\\"chars"']);
+  });
+
+  it('should sort by the id field alone, never by a timestamp, and cap at docsLimit', () => {
+    const parts = buildPaginationSortAndLimit(25, paginationFields);
+    expect(parts).toEqual(['| SORT recent.id ASC', '| LIMIT 25']);
+    expect(parts.join('\n')).not.toContain('@timestamp');
   });
 });
 
 describe('statsFieldDestinations', () => {
   it('should collect all field destinations for user definition', () => {
-    const { fields } = getEntityDefinition('user', 'default');
+    const { fields } = getEntityDefinition('user', 'default').extraction;
     const dest = statsFieldDestinations(fields);
     expect(dest.has('event.kind')).toBe(true);
     expect(dest.has('user.name')).toBe(true);
@@ -485,8 +485,11 @@ describe('statsFieldDestinations', () => {
 describe('mapPostAggFilterFieldsToRecentForEsql', () => {
   it('should prefix STATS destinations with recent. and leave entity.id plain', () => {
     const userDef = getEntityDefinition('user', 'default');
-    expect(userDef.postAggFilter).toBeDefined();
-    const mapped = mapPostAggFilterFieldsToRecentForEsql(userDef.postAggFilter!, userDef);
+    expect(userDef.extraction.postAggFilter).toBeDefined();
+    const mapped = mapPostAggFilterFieldsToRecentForEsql(
+      userDef.extraction.postAggFilter!,
+      userDef
+    );
     const esql = conditionToESQL(mapped);
     expect(esql).toContain(recentData('event.kind'));
     expect(esql).toContain('entity.id');
@@ -495,7 +498,7 @@ describe('mapPostAggFilterFieldsToRecentForEsql', () => {
 
   it('should be idempotent when fields are already recent.*', () => {
     const userDef = getEntityDefinition('user', 'default');
-    const once = mapPostAggFilterFieldsToRecentForEsql(userDef.postAggFilter!, userDef);
+    const once = mapPostAggFilterFieldsToRecentForEsql(userDef.extraction.postAggFilter!, userDef);
     const twice = mapPostAggFilterFieldsToRecentForEsql(once, userDef);
     expect(twice).toEqual(once);
   });

@@ -77,7 +77,7 @@ export class SearchAssistantPlugin
       };
     };
 
-    coreStart.chrome.next.aiButton.register({
+    coreStart.chrome.controls.aiButton.register({
       content: mountSearchAssistant,
     });
 

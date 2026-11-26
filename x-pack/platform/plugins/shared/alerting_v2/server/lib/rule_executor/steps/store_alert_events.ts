@@ -38,7 +38,7 @@ export class StoreAlertEventsStep implements RuleExecutionStep {
 
       return {
         type: 'continue',
-        state,
+        state: { ...state, storedAlertEvents: bulkResult.docs },
         meta: {
           observations: {
             bulkIndexResult: bulkResult,

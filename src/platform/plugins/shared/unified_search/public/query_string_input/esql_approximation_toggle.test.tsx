@@ -127,4 +127,55 @@ describe('EsqlApproximationToggle', () => {
       expect(screen.queryByTestId('esqlApproximationToggleSwitch')).not.toBeInTheDocument();
     });
   });
+
+  describe('additionalDisabledText', () => {
+    const getTooltipText = async () => {
+      await userEvent.hover(screen.getByTestId('esqlApproximationToggleButton'), {
+        pointerEventsCheck: 0,
+      });
+      return screen.findByRole('tooltip');
+    };
+
+    it('shows additionalDisabledText in the tooltip when disabled', async () => {
+      renderToggle({
+        isApproximate: false,
+        onChange,
+        disabled: true,
+        additionalText: 'Popover text',
+        additionalDisabledText: 'Disabled text',
+      });
+      const tooltip = await getTooltipText();
+      expect(tooltip).toHaveTextContent('Disabled text');
+      expect(tooltip).not.toHaveTextContent('Popover text');
+    });
+
+    it('falls back to additionalText in the tooltip when additionalDisabledText is not set', async () => {
+      renderToggle({
+        isApproximate: false,
+        onChange,
+        disabled: true,
+        additionalText: 'Popover text',
+      });
+      expect(await getTooltipText()).toHaveTextContent('Popover text');
+    });
+  });
+
+  describe('disabledReason', () => {
+    const disabledReason = 'Enter an ES|QL query to enable this.';
+
+    beforeEach(() => {
+      renderToggle({ isApproximate: false, onChange, disabledReason });
+    });
+
+    it('renders the button as disabled without a separate disabled flag', () => {
+      expect(screen.getByTestId('esqlApproximationToggleButton')).toBeDisabled();
+    });
+
+    it('shows the consumer reason in the tooltip', async () => {
+      await userEvent.hover(screen.getByTestId('esqlApproximationToggleButton'), {
+        pointerEventsCheck: 0,
+      });
+      expect(await screen.findByText(disabledReason)).toBeInTheDocument();
+    });
+  });
 });

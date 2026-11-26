@@ -14,6 +14,7 @@ import { ruleDeprecatedStatusSchema } from './schemas/detection_rule_deprecated_
 import { changesHistoryUsageSchema } from './schemas/changes_history_usage';
 import type { RuleAdoption } from './types';
 import { ruleCustomizedFieldsCounts } from './schemas/detection_rule_customization_status';
+import { ruleCustomizedFieldsMissingBaseVersionCounts } from './schemas/detection_rule_customization_status_missing_base_version';
 
 export const rulesMetricsSchema: MakeSchemaFrom<RuleAdoption> = {
   spaces_usage: {
@@ -37,6 +38,8 @@ export const rulesMetricsSchema: MakeSchemaFrom<RuleAdoption> = {
   detection_rule_status: ruleStatusMetricsSchema,
   elastic_detection_rule_upgrade_status: ruleUpgradeStatusSchema,
   elastic_detection_rule_customization_status: ruleCustomizedFieldsCounts,
+  elastic_detection_rule_customization_status_missing_base_version:
+    ruleCustomizedFieldsMissingBaseVersionCounts,
   elastic_detection_rule_deprecated_status: ruleDeprecatedStatusSchema,
   ai_created_rules: {
     total: {

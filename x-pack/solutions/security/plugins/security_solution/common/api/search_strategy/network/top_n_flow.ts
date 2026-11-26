@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { NetworkQueries } from '../model/factory_query_type';
 import { requestBasicOptionsSchema } from '../model/request_basic_options';
 import { requestOptionsPaginatedSchema } from '../model/request_paginated_options';
@@ -13,22 +13,26 @@ import { sort } from '../model/sort';
 import { timerange } from '../model/timerange';
 import { flowTarget } from './model/flow_target';
 
-export const networkTopNFlowSchema = requestOptionsPaginatedSchema.extend({
-  ip: z.ipv4().or(z.ipv6()).nullish(),
-  flowTarget,
-  sort,
-  timerange,
-  factoryQueryType: z.literal(NetworkQueries.topNFlow),
-});
+export const networkTopNFlowSchema = lazySchema(() =>
+  requestOptionsPaginatedSchema.extend({
+    ip: z.ipv4().or(z.ipv6()).nullish(),
+    flowTarget,
+    sort,
+    timerange,
+    factoryQueryType: z.literal(NetworkQueries.topNFlow),
+  })
+);
 
 export type NetworkTopNFlowRequestOptionsInput = z.input<typeof networkTopNFlowSchema>;
 export type NetworkTopNFlowRequestOptions = z.infer<typeof networkTopNFlowSchema>;
 
-export const networkTopNFlowCountSchema = requestBasicOptionsSchema.extend({
-  ip: z.ipv4().or(z.ipv6()).nullish(),
-  flowTarget,
-  timerange,
-  factoryQueryType: z.literal(NetworkQueries.topNFlowCount),
-});
+export const networkTopNFlowCountSchema = lazySchema(() =>
+  requestBasicOptionsSchema.extend({
+    ip: z.ipv4().or(z.ipv6()).nullish(),
+    flowTarget,
+    timerange,
+    factoryQueryType: z.literal(NetworkQueries.topNFlowCount),
+  })
+);
 export type NetworkTopNFlowCountRequestOptionsInput = z.input<typeof networkTopNFlowCountSchema>;
 export type NetworkTopNFlowCountRequestOptions = z.infer<typeof networkTopNFlowCountSchema>;

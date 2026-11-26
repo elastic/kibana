@@ -20,3 +20,17 @@ export const ALERTZERO_RULE_WORKFLOW_MANAGEMENT = {
   lifecycle: 'static',
   versionStrategy: 'auto',
 } as const;
+
+/**
+ * Sub-workflows a Worker invokes via `workflow.execute`.
+ *
+ * Enablement is enforced rather than restorable: they own no trigger, so a
+ * disabled one cannot be invoked at all and would silently break its parent.
+ * `restorable` would also pin the installed value across upgrades, so a
+ * workflow installed while disabled could never be re-enabled by a new version.
+ */
+export const ALERTZERO_INTERNAL_WORKFLOW_MANAGEMENT = {
+  enablement: 'enforced',
+  lifecycle: 'static',
+  versionStrategy: 'auto',
+} as const;

@@ -12,24 +12,19 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyoutFooter,
-  EuiLink,
-  EuiPopover,
   EuiResizableContainer,
   EuiSplitPanel,
-  EuiText,
   EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import type { Streams } from '@kbn/streams-schema';
 import type { Pipeline } from '@kbn/ingest-pipelines-plugin/common/types';
-import { isDraftStream } from '@kbn/streams-schema';
 import { useUnsavedChangesPrompt } from '@kbn/unsaved-changes-prompt';
-import React, { useCallback, useEffect, useState } from 'react';
-import { usePerformanceContext } from '@kbn/ebt-tools';
+import React, { useCallback, useEffect } from 'react';
+import { usePerformanceContext } from '@kbn/ebt-tools/react';
 import { getStreamTypeFromDefinition } from '../../../../util/get_stream_type_from_definition';
 import { useKbnUrlStateStorageFromRouterContext } from '../../../../util/kbn_url_state_context';
 import { StreamsAppContextProvider } from '../../../streams_app_context_provider';
@@ -37,9 +32,14 @@ import { getDefinitionFields } from '../schema_editor/hooks/use_schema_fields';
 import { SchemaChangesReviewModal, getChanges } from '../schema_editor/schema_changes_review_modal';
 import type { SchemaEditorField } from '../schema_editor/types';
 import { isFieldUncommitted } from '../schema_editor/utils';
+import { AddStepButtons } from './add_step_buttons';
 import { EditModeToggle } from './edit_mode_toggle';
 import { SimulationPlayground } from './simulation_playground';
-import { stepUnderEditSelector } from './state_management/interactive_mode_machine/selectors';
+import {
+  selectHasSteps,
+  selectIsSuggestionVisible,
+  stepUnderEditSelector,
+} from './state_management/interactive_mode_machine/selectors';
 import { selectFieldsInSamples } from './state_management/simulation_state_machine/selectors';
 import {
   StreamEnrichmentContextProvider,
@@ -130,6 +130,7 @@ export function StreamDetailEnrichmentContentImpl() {
   const isReady = useStreamEnrichmentSelector((state) => state.matches('ready'));
   const hasJsonModeRef = useStreamEnrichmentSelector((state) => Boolean(state.context.jsonModeRef));
   const showJsonEditor = hasJsonModeRef;
+  const hasSteps = useOptionalInteractiveModeSelector(selectHasSteps, false);
   const definition = useStreamEnrichmentSelector((state) => state.context.definition);
   const detectedFields = useSimulatorSelector((state) => state.context.detectedSchemaFields);
   const definitionFields = React.useMemo(() => getDefinitionFields(definition), [definition]);
@@ -239,8 +240,6 @@ export function StreamDetailEnrichmentContentImpl() {
 
   const hasChanges = useStreamEnrichmentSelector((state) => state.context.hasChanges);
 
-  const isWiredDraft = isDraftStream(definition.stream);
-
   useUnsavedChangesPrompt({
     hasUnsavedChanges: hasChanges,
     history: appParams.history,
@@ -255,7 +254,13 @@ export function StreamDetailEnrichmentContentImpl() {
   }
 
   return (
-    <EuiSplitPanel.Outer grow hasShadow={false} css={fullHeightCss}>
+    <EuiSplitPanel.Outer
+      grow
+      hasShadow={false}
+      hasBorder={false}
+      borderRadius="none"
+      css={fullHeightCss}
+    >
       <EuiSplitPanel.Inner
         paddingSize="none"
         css={css`
@@ -271,14 +276,13 @@ export function StreamDetailEnrichmentContentImpl() {
                 initialSize={40}
                 minSize="480px"
                 tabIndex={0}
-                paddingSize="none"
+                paddingSize="m"
                 css={[verticalFlexCss, fullHeightCss]}
               >
                 <EuiFlexGroup
                   direction="column"
                   gutterSize="m"
                   css={css`
-                    padding: ${euiTheme.size.l} ${euiTheme.size.l} ${euiTheme.size.l} 0;
                     height: 100%;
                   `}
                 >
@@ -292,14 +296,6 @@ export function StreamDetailEnrichmentContentImpl() {
                       <EuiFlexItem grow={false}>
                         <EditModeToggle />
                       </EuiFlexItem>
-                      {isWiredDraft && (
-                        <EuiFlexItem
-                          grow={false}
-                          data-test-subj="streamsAppProcessingDraftSimulationTipAnchor"
-                        >
-                          <DraftSimulationInfoPopover />
-                        </EuiFlexItem>
-                      )}
                       <EuiFlexItem grow />
                       {showJsonEditor && (
                         <EuiFlexItem grow={false}>
@@ -319,6 +315,11 @@ export function StreamDetailEnrichmentContentImpl() {
                           </EuiToolTip>
                         </EuiFlexItem>
                       )}
+                      {hasSteps && (
+                        <EuiFlexItem grow={false}>
+                          <AddStepButtons />
+                        </EuiFlexItem>
+                      )}
                     </EuiFlexGroup>
                   </EuiFlexItem>
                   <EuiFlexItem grow style={{ minHeight: 0, overflow: 'auto' }}>
@@ -331,8 +332,15 @@ export function StreamDetailEnrichmentContentImpl() {
                 initialSize={60}
                 minSize="300px"
                 tabIndex={0}
-                paddingSize="l"
-                css={[verticalFlexCss, fullHeightCss]}
+                paddingSize="none"
+                css={[
+                  verticalFlexCss,
+                  fullHeightCss,
+                  // Reduced top padding compensates for the height of the playground tabs.
+                  css`
+                    padding: ${euiTheme.size.s} ${euiTheme.size.base} ${euiTheme.size.base};
+                  `,
+                ]}
               >
                 <MemoSimulationPlayground schemaEditorFields={schemaEditorFields} />
               </EuiResizablePanel>
@@ -384,13 +392,7 @@ export function StreamDetailEnrichmentFooter() {
   );
   const hasChanges = useStreamEnrichmentSelector((state) => state.context.hasChanges);
   const streamType = useStreamEnrichmentSelector((snapshot) => selectStreamType(snapshot.context));
-  const isSuggestionVisible = useOptionalInteractiveModeSelector(
-    (snapshot) =>
-      snapshot.matches({ pipelineSuggestion: 'generatingSuggestion' }) ||
-      snapshot.matches({ pipelineSuggestion: 'viewingSuggestion' }) ||
-      snapshot.matches({ pipelineSuggestion: 'noSuggestionsFound' }),
-    false
-  );
+  const isSuggestionVisible = useOptionalInteractiveModeSelector(selectIsSuggestionVisible, false);
   const {
     isRequestPreviewFlyoutOpen,
     requestPreviewFlyoutCodeContent,
@@ -619,56 +621,3 @@ const discardUnsavedChangesMessage = i18n.translate(
   'xpack.streams.streamDetailView.managementTab.pipelineProcessing.discardUnsavedChangesMessage',
   { defaultMessage: 'Changes that you have made will be discarded.' }
 );
-
-const DRAFT_SIMULATION_INFO_LABEL = i18n.translate(
-  'xpack.streams.enrichment.draftSimulationInfo.ariaLabel',
-  { defaultMessage: 'Draft simulation info' }
-);
-
-const DraftSimulationInfoPopover = () => {
-  const [isOpen, setIsOpen] = useState(false);
-
-  return (
-    <EuiPopover
-      button={
-        <EuiToolTip content={DRAFT_SIMULATION_INFO_LABEL} disableScreenReaderOutput>
-          <EuiButtonIcon
-            iconType="info"
-            color="text"
-            size="xs"
-            aria-label={DRAFT_SIMULATION_INFO_LABEL}
-            onClick={() => setIsOpen((prev) => !prev)}
-            data-test-subj="streamsAppProcessingDraftSimulationInfoButton"
-          />
-        </EuiToolTip>
-      }
-      isOpen={isOpen}
-      closePopover={() => setIsOpen(false)}
-      anchorPosition="downLeft"
-      panelPaddingSize="s"
-      panelStyle={{ maxWidth: 320 }}
-      aria-label={DRAFT_SIMULATION_INFO_LABEL}
-    >
-      <EuiText size="s">
-        <FormattedMessage
-          id="xpack.streams.enrichment.draftSimulationPopover.content"
-          defaultMessage="Draft stream simulation combines read-time ES|QL with ingest pipeline simulation. Results may differ slightly from materialized streams. {learnMore}"
-          values={{
-            learnMore: (
-              <EuiLink
-                href="https://www.elastic.co/docs/solutions/observability/streams/management/extract#streams-processor-inconsistencies"
-                target="_blank"
-                external
-              >
-                <FormattedMessage
-                  id="xpack.streams.enrichment.draftSimulationPopover.learnMore"
-                  defaultMessage="Learn more"
-                />
-              </EuiLink>
-            ),
-          }}
-        />
-      </EuiText>
-    </EuiPopover>
-  );
-};

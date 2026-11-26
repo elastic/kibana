@@ -180,4 +180,26 @@ describe('assertToolSpansReachable', () => {
       })
     ).resolves.toBeUndefined();
   });
+
+  it('demands the SAME span predicate the evaluators score on, not just TOOL kind', async () => {
+    // Inner-tool spans are TOOL-kind with no call id; accepting them would arm evaluators
+    // that then score N/A on every example.
+    const queries: string[] = [];
+    const client = esWith((q) => {
+      queries.push(q);
+      return spans(3);
+    });
+    await assertToolSpansReachable({ traceEsClient: client, probe: result(), log });
+    expect(queries[0]).toContain('attributes.gen_ai.tool.call.id IS NOT NULL');
+  });
+
+  it('THROWS when the only reachable spans carry no tool.call.id', async () => {
+    // Inner-tool spans only: TOOL kind matches, the call-id filter does not.
+    const client = esWith((q) =>
+      q.includes('attributes.gen_ai.tool.call.id IS NOT NULL') ? spans(0) : spans(7)
+    );
+    await expect(
+      assertToolSpansReachable({ traceEsClient: client, probe: result(), log })
+    ).rejects.toThrow(/No agent TOOL spans are reachable/);
+  });
 });

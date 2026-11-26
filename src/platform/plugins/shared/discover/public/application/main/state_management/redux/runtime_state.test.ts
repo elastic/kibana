@@ -7,13 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DiscoverTabType } from '@kbn/discover-utils';
+import { DiscoverTabType } from '@kbn/discover-session-constants';
 import { DataSourceCategory } from '../../../../context_awareness/profiles';
 import { createContextAwarenessMocks } from '../../../../context_awareness/__mocks__/context_awareness';
 import { createDiscoverServicesMock } from '../../../../__mocks__/services';
 import { getDiscoverInternalStateMock } from '../../../../__mocks__/discover_state.mock';
 import { getTabStateMock } from './__mocks__/internal_state.mocks';
-import { selectCurrentTabType, selectTabTypeForPersistence } from './runtime_state';
+import { getTabRuntimeStateMock } from './__mocks__/runtime_state.mocks';
+import {
+  createRuntimeStateManager,
+  selectCurrentTabType,
+  selectTabTypeForPersistence,
+  setTabChartBreakdownFieldNames,
+} from './runtime_state';
 
 const TAB_ID = 'tab-1';
 
@@ -100,5 +106,25 @@ describe('selectTabTypeForPersistence', () => {
     });
 
     expect(selectTabTypeForPersistence({ runtimeStateManager, tabState })).toBeUndefined();
+  });
+});
+
+describe('setTabChartBreakdownFieldNames', () => {
+  it('sets the breakdown fields of the tab', () => {
+    const runtimeStateManager = createRuntimeStateManager();
+    const tabRuntimeState = getTabRuntimeStateMock();
+    runtimeStateManager.tabs.byId[TAB_ID] = tabRuntimeState;
+
+    setTabChartBreakdownFieldNames(runtimeStateManager, TAB_ID, ['host.name']);
+
+    expect(tabRuntimeState.chartBreakdownFieldNames$.getValue()).toEqual(['host.name']);
+  });
+
+  it('does not throw when the tab has already been removed', () => {
+    const runtimeStateManager = createRuntimeStateManager();
+
+    expect(() =>
+      setTabChartBreakdownFieldNames(runtimeStateManager, TAB_ID, undefined)
+    ).not.toThrow();
   });
 });

@@ -8,7 +8,6 @@
  */
 
 import { run } from '../../lib/spawn.mjs';
-import { moonRun } from '../../lib/moon.mjs';
 import External from '../../lib/external_packages.js';
 
 import { pnpmInstallDeps, ensurePnpmAvailable, hasYarnInstallLeftovers } from './pnpm.mjs';
@@ -21,7 +20,7 @@ import { discovery } from './discovery.mjs';
 import { updatePackageJson } from './update_package_json.mjs';
 import { bootstrapBuildkite } from './buildkite.mjs';
 
-const IS_CI = process.env.CI?.match(/(1|true)/i);
+const IS_CI = !!process.env.CI?.match(/(1|true)/i);
 
 /** @type {import('../../lib/command').Command} */
 export const command = {
@@ -46,9 +45,8 @@ export const command = {
     --no-vscode          By default bootstrap updates the .vscode directory to include commonly useful vscode
                           settings for local development. Disable this process either pass this flag or set
                           the KBN_BOOTSTRAP_NO_VSCODE=true environment variable.
-    --no-prebuilt        Skip building shared webpack bundles (ui-shared-deps, monaco). Use when a
-                          subsequent distribution build will rebuild them in production mode anyway.
-                          Also settable via KBN_BOOTSTRAP_NO_PREBUILT=true.
+    --no-frozen-lockfile Skip the frozen lockfile check. This is useful when you want to force a clean install
+                          of dependencies.
     --allow-root         Required supplementary flag if you're running bootstrap as root.
     --quiet              Prevent logging more than basic success/error messages
   `,
@@ -66,6 +64,8 @@ export const command = {
     }
     const validate = args.getBooleanValue('validate') ?? true;
     const quiet = args.getBooleanValue('quiet') ?? false;
+    const frozenLockfileFlag = args.getBooleanValue('frozen-lockfile');
+    const frozenLockfile = !!(frozenLockfileFlag ?? IS_CI);
     const vscodeConfig =
       !IS_CI && (args.getBooleanValue('vscode') ?? !process.env.KBN_BOOTSTRAP_NO_VSCODE);
     let forceInstall = args.getBooleanValue('force-install');
@@ -75,9 +75,6 @@ export const command = {
       );
       forceInstall = true;
     }
-    const skipPrebuilt =
-      args.getBooleanValue('prebuilt') === false || !!process.env.KBN_BOOTSTRAP_NO_PREBUILT;
-
     const { packageManifestPaths, tsConfigRepoRels } = await time('discovery', discovery);
 
     // generate the package map and update package.json file, if necessary
@@ -112,22 +109,9 @@ export const command = {
         offline,
         quiet,
         force: forceInstall,
-        frozenLockfile: !!IS_CI,
+        frozenLockfile,
       });
     });
-
-    if (skipPrebuilt) {
-      log.info('skipping pre-built webpack bundles (--no-prebuilt)');
-    } else {
-      await time('prepare webpack bundles for packages', async () => {
-        log.info('pre-build webpack bundles');
-        await moonRun([':build-webpack'], {
-          pipe: !quiet,
-          quiet,
-          noCache: forceInstall,
-        });
-      });
-    }
 
     await time('sort package json', async () => {
       await sortPackageJson(log);

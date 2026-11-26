@@ -9,15 +9,19 @@ import {
   isMetricsHostDetailPath,
   isMetricsHostsPath,
   isMetricsInventoryPath,
+  isMetricsSettingsPath,
 } from './metrics_header_paths';
 
 export interface MetricsHeaderMenuVisibility {
   showAnomalyDetection: boolean;
   showHostsOnboarding: boolean;
+  showSettings: boolean;
 }
 
 /**
- * Path-gated Metrics header actions shared by the Chrome portal and later AppHeader menus.
+ * Path-gated Metrics header actions.
+ * Chrome portal reads anomaly detection and hosts onboarding.
+ * AppHeader also reads showSettings; Chrome always shows its Settings link.
  */
 export function getMetricsHeaderMenuVisibility(pathname: string): MetricsHeaderMenuVisibility {
   return {
@@ -26,5 +30,6 @@ export function getMetricsHeaderMenuVisibility(pathname: string): MetricsHeaderM
       isMetricsHostsPath(pathname) ||
       isMetricsHostDetailPath(pathname),
     showHostsOnboarding: isMetricsHostsPath(pathname) || isMetricsHostDetailPath(pathname),
+    showSettings: !isMetricsSettingsPath(pathname),
   };
 }

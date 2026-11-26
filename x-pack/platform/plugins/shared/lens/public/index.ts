@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { PluginInitializerContext } from '@kbn/core/public';
 import { LensPlugin } from './plugin';
 
 // Embeddable types
@@ -121,6 +122,8 @@ export type { InlineEditLensEmbeddableContext } from './trigger_actions/open_len
 
 export type { ChartInfo } from './chart_info_api';
 
+export type { LensTelemetrySource } from './lens_ui_telemetry';
+
 export { LENS_LAYER_TYPES as layerTypes } from '@kbn/lens-common';
 
 export {
@@ -131,4 +134,5 @@ export type { EditorFrameServiceProviderProps } from './editor_frame_service/edi
 
 export type { LensPublicStart, LensPublicSetup, LensSuggestionsApi } from './plugin';
 
-export const plugin = () => new LensPlugin();
+export const plugin = (initializerContext: PluginInitializerContext) =>
+  new LensPlugin(initializerContext);

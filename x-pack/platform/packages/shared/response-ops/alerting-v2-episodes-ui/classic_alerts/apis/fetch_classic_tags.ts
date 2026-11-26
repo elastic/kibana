@@ -8,7 +8,7 @@
 import type { estypes } from '@elastic/elasticsearch';
 import type { HttpStart } from '@kbn/core-http-browser';
 import type { TimeRange } from '@kbn/es-query';
-import { ALERT_RULE_TAGS } from '@kbn/rule-data-utils';
+import { ALERT_WORKFLOW_TAGS } from '@kbn/rule-data-utils';
 import { buildClassicAlertsQuery } from '../utils/query';
 import { CLASSIC_ALERTS_TAGS_LIMIT } from '../constants';
 import {
@@ -28,7 +28,7 @@ export const buildClassicAlertsTagsAggs = (
   size: number
 ): Record<string, estypes.AggregationsAggregationContainer> => ({
   tags: {
-    terms: { field: ALERT_RULE_TAGS, size },
+    terms: { field: ALERT_WORKFLOW_TAGS, size },
   },
 });
 

@@ -6,6 +6,7 @@
  */
 
 import { ACTION_TYPE_SOURCES } from '@kbn/actions-types';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { actionsAuthorizationMock } from '../../../../authorization/actions_authorization.mock';
 import type { ActionsAuthorization } from '../../../../authorization/actions_authorization';
@@ -18,12 +19,31 @@ import type { Logger } from '@kbn/logging';
 import type { ActionTypeRegistry } from '../../../../action_type_registry';
 import type { AuthTypeRegistry } from '../../../../auth_types/auth_type_registry';
 import { authTypeRegistryMock } from '../../../../auth_types/auth_type_registry.mock';
+import { actionsConfigMock } from '../../../../actions_config.mock';
 import { update } from './update';
 import { getConnectorType } from '../../../../fixtures';
 import type { ActionsClientContext } from '../../../../actions_client';
 import { actionExecutorMock } from '../../../../lib/action_executor.mock';
 import { connectorTokenClientMock } from '../../../../lib/connector_token_client.mock';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
+import { securityServiceMock } from '@kbn/core/server/mocks';
+import { encodeApiKey } from '../../../../inbound/event_identity/encode_api_key';
+import { CONNECTOR_INGRESS_CREDENTIAL_SAVED_OBJECT_TYPE } from '../../../../constants/saved_objects';
+import { connectorTypeHasInboundEvents, connectorTypeIsDual } from '@kbn/connector-specs';
+import type { ConnectorSpec } from '@kbn/connector-specs';
+
+jest.mock('@kbn/connector-specs', () => {
+  const actual = jest.requireActual('@kbn/connector-specs');
+  return {
+    ...actual,
+    connectorTypeHasInboundEvents: jest.fn((actionTypeId: string) =>
+      actual.connectorTypeHasInboundEvents(actionTypeId)
+    ),
+    connectorTypeIsDual: jest.fn((actionTypeId: string) =>
+      actual.connectorTypeIsDual(actionTypeId)
+    ),
+  };
+});
 const unsecuredSavedObjectsClient = savedObjectsClientMock.create();
 const scopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
 const authorization = actionsAuthorizationMock.create();
@@ -47,6 +67,7 @@ const actionTypeRegistry: ActionTypeRegistry = {
   getUtils: jest.fn().mockReturnValue({
     isHostnameAllowed: jest.fn().mockReturnValue(true),
     isUriAllowed: jest.fn().mockReturnValue(true),
+    isCatalogEnabled: jest.fn().mockReturnValue(false),
     getMicrosoftGraphApiUrl: jest.fn(),
     getProxySettings: jest.fn(),
   }),
@@ -140,6 +161,395 @@ describe('update()', () => {
           params: { schema: z.object({}) },
         },
       })
+    );
+  });
+
+  describe('spec versions', () => {
+    const firstSpec: ConnectorSpec = {
+      metadata: {
+        id: 'my-connector-type',
+        displayName: 'Versioned connector',
+        description: 'A connector with versioned schemas',
+        minimumLicense: 'basic',
+        supportedFeatureIds: ['alerting'],
+      },
+      schema: z.object({
+        endpoint: z.string().meta({ validate: { allowedHosts: true } }),
+        retries: z.number().default(3),
+      }),
+      auth: { types: ['api_key_header'] },
+      actions: {},
+      test: { enabled: false, handler: jest.fn() },
+    };
+    const secondSpec: ConnectorSpec = {
+      ...firstSpec,
+      schema: z.object({ region: z.string() }),
+      auth: { types: ['basic'] },
+    };
+    const action = {
+      name: 'Versioned connector',
+      config: { endpoint: 'https://example.com' },
+      secrets: { authType: 'api_key_header', apiKey: 'secret' },
+    };
+    const configurationUtilities = actionsConfigMock.create();
+    const originalConfigurationUtilities = actionTypeRegistry.getUtils();
+    let registeredActionType: ReturnType<typeof getConnectorType>;
+
+    beforeEach(() => {
+      configurationUtilities.ensureUriAllowed.mockReset();
+      configurationUtilities.isCatalogEnabled.mockReturnValue(true);
+      jest.mocked(actionTypeRegistry.getUtils).mockReturnValue(configurationUtilities);
+      registeredActionType = getConnectorType({
+        source: ACTION_TYPE_SOURCES.spec,
+        spec: secondSpec,
+        specs: new Map([
+          ['2.0', secondSpec],
+          ['1.10', firstSpec],
+          ['1.9', firstSpec],
+          ['1.3', firstSpec],
+        ]),
+        validate: {
+          config: { schema: z.object({ unrelated: z.string() }) },
+          secrets: { schema: z.object({ unrelated: z.string() }) },
+          params: { schema: z.object({}) },
+        },
+        preSaveHook,
+        postSaveHook,
+      });
+      jest.mocked(actionTypeRegistry.get).mockReturnValue(registeredActionType);
+      unsecuredSavedObjectsClient.get.mockResolvedValue({
+        ...existingRawAction,
+        attributes: { ...existingRawAction.attributes, specVersion: '1.3' },
+      });
+      unsecuredSavedObjectsClient.create.mockImplementation(async (_type, attributes, options) => ({
+        id: options?.id ?? 'connector-id',
+        type: 'action',
+        attributes,
+        references: [],
+      }));
+    });
+
+    afterEach(() => {
+      jest.mocked(actionTypeRegistry.getUtils).mockReturnValue(originalConfigurationUtilities);
+    });
+
+    test('does not overwritethe version pinned on the saved object with a newer minor when the connector catalog is disabled', async () => {
+      configurationUtilities.isCatalogEnabled.mockReturnValue(false);
+      const storedConnector = {
+        ...existingRawAction,
+        attributes: { ...existingRawAction.attributes, specVersion: '1.3' },
+      };
+      unsecuredSavedObjectsClient.get.mockResolvedValue(storedConnector);
+
+      const result = await update({
+        context: mockContext,
+        id: 'connector-id',
+        action: {
+          name: action.name,
+          config: { unrelated: 'config' },
+          secrets: { unrelated: 'secret' },
+          specVersion: '1.5',
+        },
+      });
+
+      expect(result.specVersion).toEqual('1.3');
+    });
+
+    test('does not default to major 1 when the saved object has no version and the connector catalog is disabled', async () => {
+      configurationUtilities.isCatalogEnabled.mockReturnValue(false);
+      const unversionedAction = {
+        name: action.name,
+        config: { unrelated: 'config' },
+        secrets: { unrelated: 'secret' },
+      };
+      unsecuredSavedObjectsClient.get.mockResolvedValue(existingRawAction);
+
+      const result = await update({
+        context: mockContext,
+        id: 'connector-id',
+        action: unversionedAction,
+      });
+
+      expect(result).not.toHaveProperty('specVersion');
+      expect(unsecuredSavedObjectsClient.create).toHaveBeenCalled();
+      expect(unsecuredSavedObjectsClient.create.mock.calls[0][1]).not.toHaveProperty('specVersion');
+    });
+
+    test.each([
+      [undefined, '1.10'],
+      ['1', '1.10'],
+      ['1.9', '1.9'],
+    ])(
+      'resolves %s to %s and saves parsed config and secrets together',
+      async (requested, exact) => {
+        const result = await update({
+          context: mockContext,
+          id: 'connector-id',
+          action: { ...action, specVersion: requested },
+        });
+
+        expect(result.specVersion).toBe(exact);
+        expect(result).not.toHaveProperty('secrets');
+        expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith(
+          'action',
+          expect.objectContaining({
+            specVersion: exact,
+            config: { ...action.config, retries: 3, authType: 'api_key_header' },
+            secrets: { ...action.secrets, headerField: 'Api-Key' },
+          }),
+          { id: 'connector-id', overwrite: true, references: [], version: '1' }
+        );
+        expect(configurationUtilities.ensureUriAllowed).toHaveBeenCalledWith(
+          action.config.endpoint
+        );
+      }
+    );
+
+    test('defaults an unpinned versioned connector to the latest minor of major 1', async () => {
+      unsecuredSavedObjectsClient.get.mockResolvedValue(existingRawAction);
+
+      const result = await update({ context: mockContext, id: 'connector-id', action });
+
+      expect(result.specVersion).toBe('1.10');
+      expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith(
+        'action',
+        expect.objectContaining({ specVersion: '1.10' }),
+        expect.any(Object)
+      );
+    });
+
+    test.each(['2', '2.0'])('uses the requested major schema for %s', async (specVersion) => {
+      const result = await update({
+        context: mockContext,
+        id: 'connector-id',
+        action: {
+          ...action,
+          config: { region: 'west' },
+          secrets: { authType: 'basic', username: 'user', password: 'secret' },
+          specVersion,
+        },
+      });
+
+      expect(result).toMatchObject({
+        specVersion: '2.0',
+        config: { region: 'west', authType: 'basic' },
+      });
+      expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith(
+        'action',
+        expect.objectContaining({
+          specVersion: '2.0',
+          config: { region: 'west', authType: 'basic' },
+          secrets: { authType: 'basic', username: 'user', password: 'secret' },
+        }),
+        expect.any(Object)
+      );
+    });
+
+    test('keeps a pinned major other than 1 when no version is requested', async () => {
+      unsecuredSavedObjectsClient.get.mockResolvedValue({
+        ...existingRawAction,
+        attributes: { ...existingRawAction.attributes, specVersion: '2.0' },
+      });
+
+      const result = await update({
+        context: mockContext,
+        id: 'connector-id',
+        action: {
+          ...action,
+          config: { region: 'west' },
+          secrets: { authType: 'basic', username: 'user', password: 'secret' },
+        },
+      });
+
+      expect(result.specVersion).toBe('2.0');
+    });
+
+    test.each(['3', '1.8'])(
+      'rejects unknown version %s before hooks or writes',
+      async (specVersion) => {
+        await expect(
+          update({ context: mockContext, id: 'connector-id', action: { ...action, specVersion } })
+        ).rejects.toMatchObject({
+          output: {
+            statusCode: 400,
+            payload: {
+              message: `Unknown spec_version "${specVersion}" for connector type "my-connector-type".`,
+            },
+          },
+        });
+        expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
+        expect(preSaveHook).not.toHaveBeenCalled();
+        expect(postSaveHook).not.toHaveBeenCalled();
+      }
+    );
+
+    test('downgrades a versioned connector if the requested version is lower than the stored version', async () => {
+      unsecuredSavedObjectsClient.get.mockResolvedValue({
+        ...existingRawAction,
+        attributes: { ...existingRawAction.attributes, specVersion: '1.7' },
+      });
+
+      const result = await update({
+        context: mockContext,
+        id: 'connector-id',
+        action: { ...action, specVersion: '1.3' },
+      });
+
+      expect(result.specVersion).toBe('1.3');
+      expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith(
+        'action',
+        expect.objectContaining({
+          specVersion: '1.3',
+          config: { ...action.config, retries: 3, authType: 'api_key_header' },
+        }),
+        expect.any(Object)
+      );
+    });
+
+    test('overwrites the stored config and secrets when an empty config is valid for the target', async () => {
+      const emptySpec: ConnectorSpec = {
+        ...firstSpec,
+        schema: z.object({ region: z.string().optional() }),
+        auth: { types: ['none'] },
+      };
+      registeredActionType.specs?.set('3.0', emptySpec);
+
+      const result = await update({
+        context: mockContext,
+        id: 'connector-id',
+        action: { name: action.name, config: {}, secrets: { authType: 'none' }, specVersion: '3' },
+      });
+
+      expect(result.specVersion).toBe('3.0');
+      expect(encryptedSavedObjectsClient.getDecryptedAsInternalUser).not.toHaveBeenCalled();
+      const savedAttributes = unsecuredSavedObjectsClient.create.mock.calls[0][1];
+      expect(savedAttributes).toMatchObject({
+        specVersion: '3.0',
+        config: { authType: 'none' },
+        secrets: { authType: 'none' },
+      });
+    });
+
+    test('rejects empty config and secrets that the target requires and writes nothing', async () => {
+      await expect(
+        update({
+          context: mockContext,
+          id: 'connector-id',
+          action: { name: action.name, config: {}, secrets: {}, specVersion: '2' },
+        })
+      ).rejects.toMatchObject({
+        output: {
+          statusCode: 400,
+          payload: { message: expect.stringContaining('error validating connector type config') },
+        },
+      });
+      expect(encryptedSavedObjectsClient.getDecryptedAsInternalUser).not.toHaveBeenCalled();
+      expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
+      expect(preSaveHook).not.toHaveBeenCalled();
+      expect(postSaveHook).not.toHaveBeenCalled();
+    });
+
+    test('rejects an update when the pinned major has no accepted version left', async () => {
+      for (const version of ['1.3', '1.9', '1.10']) {
+        registeredActionType.specs?.delete(version);
+      }
+
+      await expect(
+        update({ context: mockContext, id: 'connector-id', action })
+      ).rejects.toMatchObject({
+        output: {
+          statusCode: 400,
+          payload: {
+            message: 'Unknown spec_version "1" for connector type "my-connector-type".',
+          },
+        },
+      });
+      expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
+      expect(preSaveHook).not.toHaveBeenCalled();
+      expect(postSaveHook).not.toHaveBeenCalled();
+    });
+
+    test.each(['', 'latest', '1.3.0', '01', '1'.repeat(33)])(
+      'rejects malformed selector %j before hooks or writes',
+      async (specVersion) => {
+        await expect(
+          update({ context: mockContext, id: 'connector-id', action: { ...action, specVersion } })
+        ).rejects.toMatchObject({
+          output: {
+            statusCode: 400,
+            payload: { message: expect.stringContaining('Invalid spec_version') },
+          },
+        });
+        expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
+        expect(preSaveHook).not.toHaveBeenCalled();
+        expect(postSaveHook).not.toHaveBeenCalled();
+      }
+    );
+
+    test.each([
+      { config: { region: 'west' }, secrets: action.secrets, field: 'config' },
+      {
+        config: action.config,
+        secrets: { authType: 'basic', username: 'user', password: 'secret' },
+        field: 'secrets',
+      },
+    ])('rejects $field valid only for another version', async ({ config, secrets, field }) => {
+      await expect(
+        update({
+          context: mockContext,
+          id: 'connector-id',
+          action: { ...action, config, secrets },
+        })
+      ).rejects.toMatchObject({
+        output: {
+          statusCode: 400,
+          payload: { message: expect.stringContaining(`error validating connector type ${field}`) },
+        },
+      });
+      expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
+      expect(preSaveHook).not.toHaveBeenCalled();
+      expect(postSaveHook).not.toHaveBeenCalled();
+    });
+
+    test.each([undefined, firstSpec])('preserves unversioned updates for spec %p', async (spec) => {
+      unsecuredSavedObjectsClient.get.mockResolvedValue(existingRawAction);
+      jest.mocked(actionTypeRegistry.get).mockReturnValue(
+        getConnectorType({
+          spec,
+          source: spec ? ACTION_TYPE_SOURCES.spec : ACTION_TYPE_SOURCES.stack,
+        })
+      );
+
+      const result = await update({
+        context: mockContext,
+        id: 'connector-id',
+        action: { ...action, config: {}, secrets: {} },
+      });
+
+      expect(result).not.toHaveProperty('specVersion');
+      expect(unsecuredSavedObjectsClient.create.mock.calls[0][1]).not.toHaveProperty('specVersion');
+    });
+
+    test.each([undefined, firstSpec])(
+      'rejects explicit versions without a version map',
+      async (spec) => {
+        unsecuredSavedObjectsClient.get.mockResolvedValue(existingRawAction);
+        jest.mocked(actionTypeRegistry.get).mockReturnValue(
+          getConnectorType({
+            spec,
+            source: spec ? ACTION_TYPE_SOURCES.spec : ACTION_TYPE_SOURCES.stack,
+          })
+        );
+
+        await expect(
+          update({
+            context: mockContext,
+            id: 'connector-id',
+            action: { ...action, specVersion: '1' },
+          })
+        ).rejects.toMatchObject({ output: { statusCode: 400 } });
+        expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
+      }
     );
   });
 
@@ -902,14 +1312,37 @@ describe('update()', () => {
   });
 
   describe('inbound ingress credentials', () => {
+    const securityService = securityServiceMock.createStart();
     const inboundContext: ActionsClientContext = {
       ...mockContext,
-      spaceId: 'default',
+      spaceId: DEFAULT_SPACE_ID,
+      securityService,
     };
 
-    const storedHash = 'b'.repeat(64);
+    const previousApiKey = encodeApiKey('old-id', 'old-secret');
+    const nextApiKey = encodeApiKey('es-id', 'es-secret');
 
     beforeEach(() => {
+      (securityService.authc.apiKeys as { uiam?: unknown }).uiam = undefined;
+      securityService.authc.apiKeys.grantAsInternalUser.mockResolvedValue({
+        id: 'es-id',
+        name: 'Actions: connector event identity connector-id',
+        api_key: 'es-secret',
+      });
+      securityService.authc.apiKeys.invalidateAsInternalUser.mockResolvedValue({
+        invalidated_api_keys: ['old-id'],
+        previously_invalidated_api_keys: [],
+        error_count: 0,
+      });
+      encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue({
+        ...existingRawAction,
+        attributes: {
+          ...existingRawAction.attributes,
+          actionTypeId: '.inboundWebhook',
+          config: {},
+          apiKey: previousApiKey,
+        },
+      } as never);
       (actionTypeRegistry.get as jest.Mock).mockReturnValue(
         getConnectorType({
           id: '.inboundWebhook',
@@ -929,53 +1362,468 @@ describe('update()', () => {
       }));
     });
 
-    test('keeps the stored hash and does not return a new token', async () => {
+    test('remints the last-saver API key and invalidates the previous framework key', async () => {
       unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
         ...existingRawAction,
         attributes: {
           ...existingRawAction.attributes,
           actionTypeId: '.inboundWebhook',
-          config: { ingestTokenHash: storedHash },
-        },
-      } as never);
-
-      const result = await update({
-        context: inboundContext,
-        id: 'connector-id',
-        action: { name: 'renamed', config: {}, secrets: {} },
-      });
-
-      const saved = unsecuredSavedObjectsClient.create.mock.calls[0][1] as {
-        config: { ingestTokenHash: string };
-      };
-      expect(saved.config.ingestTokenHash).toBe(storedHash);
-      expect(result).not.toHaveProperty('secrets');
-    });
-
-    test('ignores a client-supplied ingestTokenHash', async () => {
-      unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
-        ...existingRawAction,
-        attributes: {
-          ...existingRawAction.attributes,
-          actionTypeId: '.inboundWebhook',
-          config: { ingestTokenHash: storedHash },
+          config: {},
         },
       } as never);
 
       await update({
         context: inboundContext,
         id: 'connector-id',
-        action: {
-          name: 'renamed',
-          config: { ingestTokenHash: 'c'.repeat(64) },
-          secrets: {},
-        },
+        action: { name: 'renamed', config: {}, secrets: {} },
       });
 
       const saved = unsecuredSavedObjectsClient.create.mock.calls[0][1] as {
-        config: { ingestTokenHash: string };
+        apiKey?: string;
+        secrets: Record<string, unknown>;
       };
-      expect(saved.config.ingestTokenHash).toBe(storedHash);
+      expect(saved.apiKey).toBe(nextApiKey);
+      expect(saved.secrets).toEqual({});
+      expect(securityService.authc.apiKeys.invalidateAsInternalUser).toHaveBeenCalledWith({
+        ids: ['old-id'],
+      });
+    });
+
+    test('ignores a client-supplied apiKey on update', async () => {
+      unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
+        ...existingRawAction,
+        attributes: {
+          ...existingRawAction.attributes,
+          actionTypeId: '.inboundWebhook',
+          config: {},
+          apiKey: 'from-client',
+        },
+      } as never);
+
+      await update({
+        context: inboundContext,
+        id: 'connector-id',
+        action: { name: 'renamed', config: {}, secrets: {} },
+      });
+
+      const saved = unsecuredSavedObjectsClient.create.mock.calls[0][1] as {
+        apiKey?: string;
+      };
+      expect(saved.apiKey).toBe(nextApiKey);
+    });
+
+    test('returns 400 when encryption is unavailable', async () => {
+      unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
+        ...existingRawAction,
+        attributes: {
+          ...existingRawAction.attributes,
+          actionTypeId: '.inboundWebhook',
+          config: {},
+        },
+      } as never);
+
+      await expect(
+        update({
+          context: { ...inboundContext, isESOCanEncrypt: false },
+          id: 'connector-id',
+          action: { name: 'renamed', config: {}, secrets: {} },
+        })
+      ).rejects.toThrow('encrypted saved objects are not available');
+      expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('dual connector inbound events', () => {
+    const securityService = securityServiceMock.createStart();
+    const dualContext: ActionsClientContext = {
+      ...mockContext,
+      spaceId: DEFAULT_SPACE_ID,
+      securityService,
+    };
+
+    const dualExisting = {
+      ...existingRawAction,
+      attributes: {
+        ...existingRawAction.attributes,
+        actionTypeId: '.dual',
+        config: {},
+      },
+    };
+
+    beforeEach(() => {
+      (connectorTypeIsDual as jest.Mock).mockImplementation(
+        (actionTypeId: string) => actionTypeId === '.dual'
+      );
+      (connectorTypeHasInboundEvents as jest.Mock).mockImplementation(
+        (actionTypeId: string) => actionTypeId === '.dual' || actionTypeId === '.inboundWebhook'
+      );
+      (securityService.authc.apiKeys as { uiam?: unknown }).uiam = undefined;
+      securityService.authc.apiKeys.grantAsInternalUser.mockResolvedValue({
+        id: 'es-id',
+        name: 'Actions: connector event identity connector-id',
+        api_key: 'es-secret',
+      });
+      securityService.authc.apiKeys.invalidateAsInternalUser.mockResolvedValue({
+        invalidated_api_keys: ['old-id'],
+        previously_invalidated_api_keys: [],
+        error_count: 0,
+      });
+      encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(
+        dualExisting as never
+      );
+      (actionTypeRegistry.get as jest.Mock).mockReturnValue(
+        getConnectorType({
+          id: '.dual',
+          source: ACTION_TYPE_SOURCES.spec,
+          validate: {
+            config: { schema: z.any() },
+            secrets: { schema: z.any() },
+            params: { schema: z.object({}) },
+          },
+        })
+      );
+      unsecuredSavedObjectsClient.get.mockResolvedValue(dualExisting as never);
+      unsecuredSavedObjectsClient.find.mockResolvedValue({
+        saved_objects: [],
+        total: 0,
+        page: 1,
+        per_page: 10,
+      } as never);
+      unsecuredSavedObjectsClient.create.mockImplementation(async (type, attributes, options) => ({
+        id: options?.id ?? 'connector-id',
+        type,
+        attributes,
+        references: options?.references ?? [],
+      }));
+      unsecuredSavedObjectsClient.bulkDelete.mockResolvedValue({
+        statuses: [],
+      } as never);
+    });
+
+    test('omitted flag keeps inbound off and does not mint identity', async () => {
+      const result = await update({
+        context: dualContext,
+        id: 'connector-id',
+        action: { name: 'renamed', config: {}, secrets: {} },
+      });
+
+      const actionCreates = unsecuredSavedObjectsClient.create.mock.calls.filter(
+        (call) => call[0] === 'action'
+      );
+      expect((actionCreates[0][1] as { apiKey?: string }).apiKey).toBeUndefined();
+      expect(
+        (actionCreates[0][1] as { hasInboundEventIdentity?: boolean }).hasInboundEventIdentity
+      ).toBe(false);
+      expect(result.isInboundEventsEnabled).toBe(false);
+    });
+
+    test('omitted flag keeps inbound on and remints identity', async () => {
+      unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
+        ...dualExisting,
+        attributes: {
+          ...dualExisting.attributes,
+          hasInboundEventIdentity: true,
+        },
+      } as never);
+      encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue({
+        ...dualExisting,
+        attributes: {
+          ...dualExisting.attributes,
+          hasInboundEventIdentity: true,
+          apiKey: encodeApiKey('old-id', 'old-secret'),
+        },
+      } as never);
+
+      const result = await update({
+        context: dualContext,
+        id: 'connector-id',
+        action: { name: 'renamed', config: {}, secrets: {} },
+      });
+
+      expect(result.isInboundEventsEnabled).toBe(true);
+      expect(securityService.authc.apiKeys.grantAsInternalUser).toHaveBeenCalled();
+      expect(unsecuredSavedObjectsClient.bulkDelete).not.toHaveBeenCalled();
+      const saved = unsecuredSavedObjectsClient.create.mock.calls.find(
+        (call) => call[0] === 'action'
+      )?.[1] as { apiKey?: string; hasInboundEventIdentity?: boolean };
+      expect(saved.apiKey).toBe(encodeApiKey('es-id', 'es-secret'));
+      expect(saved.hasInboundEventIdentity).toBe(true);
+      expect(securityService.authc.apiKeys.invalidateAsInternalUser).toHaveBeenCalledWith({
+        ids: ['old-id'],
+      });
+    });
+
+    test('enabling mints identity only', async () => {
+      const result = await update({
+        context: dualContext,
+        id: 'connector-id',
+        action: { name: 'renamed', config: {}, secrets: {}, isInboundEventsEnabled: true },
+      });
+
+      expect(result.isInboundEventsEnabled).toBe(true);
+      expect(securityService.authc.apiKeys.grantAsInternalUser).toHaveBeenCalled();
+      const saved = unsecuredSavedObjectsClient.create.mock.calls.find(
+        (call) => call[0] === 'action'
+      )?.[1] as { apiKey?: string; hasInboundEventIdentity?: boolean };
+      expect(saved.apiKey).toBe(encodeApiKey('es-id', 'es-secret'));
+      expect(saved.hasInboundEventIdentity).toBe(true);
+      expect(
+        unsecuredSavedObjectsClient.create.mock.calls.every((call) => call[0] === 'action')
+      ).toBe(true);
+    });
+
+    test('disabling deletes credentials and does not remint identity', async () => {
+      unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
+        ...dualExisting,
+        attributes: {
+          ...dualExisting.attributes,
+          hasInboundEventIdentity: true,
+        },
+      } as never);
+      encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue({
+        ...dualExisting,
+        attributes: {
+          ...dualExisting.attributes,
+          hasInboundEventIdentity: true,
+          apiKey: encodeApiKey('old-id', 'old-secret'),
+        },
+      } as never);
+      unsecuredSavedObjectsClient.find.mockResolvedValue({
+        saved_objects: [
+          {
+            id: 'cred-1',
+            type: CONNECTOR_INGRESS_CREDENTIAL_SAVED_OBJECT_TYPE,
+            attributes: { connectorId: 'connector-id' },
+            references: [],
+          },
+        ],
+        total: 1,
+        page: 1,
+        per_page: 10,
+      } as never);
+      unsecuredSavedObjectsClient.bulkDelete.mockResolvedValue({
+        statuses: [{ id: 'cred-1', success: true }],
+      } as never);
+
+      const result = await update({
+        context: dualContext,
+        id: 'connector-id',
+        action: { name: 'renamed', config: {}, secrets: {}, isInboundEventsEnabled: false },
+      });
+
+      expect(result.isInboundEventsEnabled).toBe(false);
+      expect(unsecuredSavedObjectsClient.bulkDelete).toHaveBeenCalled();
+      const actionCreates = unsecuredSavedObjectsClient.create.mock.calls.filter(
+        (call) => call[0] === 'action'
+      );
+      expect((actionCreates[0][1] as { apiKey?: string }).apiKey).toBeUndefined();
+      expect(
+        (actionCreates[0][1] as { hasInboundEventIdentity?: boolean }).hasInboundEventIdentity
+      ).toBe(false);
+      const bulkDeleteOrder = unsecuredSavedObjectsClient.bulkDelete.mock.invocationCallOrder[0];
+      const actionCreateOrder = unsecuredSavedObjectsClient.create.mock.invocationCallOrder.find(
+        (_, index) => unsecuredSavedObjectsClient.create.mock.calls[index][0] === 'action'
+      );
+      expect(actionCreateOrder).toBeLessThan(bulkDeleteOrder ?? Number.POSITIVE_INFINITY);
+    });
+
+    test('disabling deletes credentials when the previous identity cannot be decrypted', async () => {
+      unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
+        ...dualExisting,
+        attributes: {
+          ...dualExisting.attributes,
+          hasInboundEventIdentity: true,
+        },
+      } as never);
+      encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockRejectedValue(
+        new Error('unable to decrypt')
+      );
+      unsecuredSavedObjectsClient.find.mockResolvedValue({
+        saved_objects: [
+          {
+            id: 'cred-1',
+            type: CONNECTOR_INGRESS_CREDENTIAL_SAVED_OBJECT_TYPE,
+            attributes: { connectorId: 'connector-id' },
+            references: [],
+          },
+        ],
+        total: 1,
+        page: 1,
+        per_page: 10,
+      } as never);
+      unsecuredSavedObjectsClient.bulkDelete.mockResolvedValue({
+        statuses: [{ id: 'cred-1', success: true }],
+      } as never);
+
+      const result = await update({
+        context: dualContext,
+        id: 'connector-id',
+        action: { name: 'renamed', config: {}, secrets: {}, isInboundEventsEnabled: false },
+      });
+
+      expect(result.isInboundEventsEnabled).toBe(false);
+      expect(unsecuredSavedObjectsClient.bulkDelete).toHaveBeenCalledWith([
+        { type: CONNECTOR_INGRESS_CREDENTIAL_SAVED_OBJECT_TYPE, id: 'cred-1' },
+      ]);
+      const actionCreateOrder = unsecuredSavedObjectsClient.create.mock.invocationCallOrder.find(
+        (_, index) => unsecuredSavedObjectsClient.create.mock.calls[index][0] === 'action'
+      );
+      expect(actionCreateOrder).toBeLessThan(
+        unsecuredSavedObjectsClient.bulkDelete.mock.invocationCallOrder[0]
+      );
+      expect(securityService.authc.apiKeys.invalidateAsInternalUser).not.toHaveBeenCalled();
+      const saved = unsecuredSavedObjectsClient.create.mock.calls.find(
+        (call) => call[0] === 'action'
+      )?.[1] as { hasInboundEventIdentity?: boolean };
+      expect(saved.hasInboundEventIdentity).toBe(false);
+    });
+
+    test('a failed disable leaves the existing ingress credential in place', async () => {
+      unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
+        ...dualExisting,
+        attributes: {
+          ...dualExisting.attributes,
+          hasInboundEventIdentity: true,
+        },
+      } as never);
+      encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue({
+        ...dualExisting,
+        attributes: {
+          ...dualExisting.attributes,
+          hasInboundEventIdentity: true,
+          apiKey: encodeApiKey('old-id', 'old-secret'),
+        },
+      } as never);
+      unsecuredSavedObjectsClient.find.mockResolvedValue({
+        saved_objects: [
+          {
+            id: 'cred-1',
+            type: CONNECTOR_INGRESS_CREDENTIAL_SAVED_OBJECT_TYPE,
+            attributes: { connectorId: 'connector-id' },
+            references: [],
+          },
+        ],
+        total: 1,
+        page: 1,
+        per_page: 10,
+      } as never);
+      unsecuredSavedObjectsClient.create.mockRejectedValueOnce(new Error('version conflict'));
+
+      await expect(
+        update({
+          context: dualContext,
+          id: 'connector-id',
+          action: { name: 'renamed', config: {}, secrets: {}, isInboundEventsEnabled: false },
+        })
+      ).rejects.toThrow('version conflict');
+      expect(unsecuredSavedObjectsClient.bulkDelete).not.toHaveBeenCalled();
+    });
+
+    test('a failed credential delete still invalidates the previous identity', async () => {
+      unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
+        ...dualExisting,
+        attributes: {
+          ...dualExisting.attributes,
+          hasInboundEventIdentity: true,
+        },
+      } as never);
+      encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue({
+        ...dualExisting,
+        attributes: {
+          ...dualExisting.attributes,
+          hasInboundEventIdentity: true,
+          apiKey: encodeApiKey('old-id', 'old-secret'),
+        },
+      } as never);
+      unsecuredSavedObjectsClient.find.mockResolvedValue({
+        saved_objects: [
+          {
+            id: 'cred-1',
+            type: CONNECTOR_INGRESS_CREDENTIAL_SAVED_OBJECT_TYPE,
+            attributes: { connectorId: 'connector-id' },
+            references: [],
+          },
+        ],
+        total: 1,
+        page: 1,
+        per_page: 10,
+      } as never);
+      unsecuredSavedObjectsClient.bulkDelete.mockResolvedValue({
+        statuses: [{ id: 'cred-1', success: false }],
+      } as never);
+
+      await expect(
+        update({
+          context: dualContext,
+          id: 'connector-id',
+          action: { name: 'renamed', config: {}, secrets: {}, isInboundEventsEnabled: false },
+        })
+      ).rejects.toThrow('Failed to delete 1 ingest credential(s) for connector "connector-id"');
+      expect(securityService.authc.apiKeys.invalidateAsInternalUser).toHaveBeenCalledWith({
+        ids: ['old-id'],
+      });
+    });
+
+    test('an explicit disable deletes credentials when inbound events are already off', async () => {
+      unsecuredSavedObjectsClient.find.mockResolvedValue({
+        saved_objects: [
+          {
+            id: 'cred-1',
+            type: CONNECTOR_INGRESS_CREDENTIAL_SAVED_OBJECT_TYPE,
+            attributes: { connectorId: 'connector-id' },
+            references: [],
+          },
+        ],
+        total: 1,
+        page: 1,
+        per_page: 10,
+      } as never);
+      unsecuredSavedObjectsClient.bulkDelete.mockResolvedValue({
+        statuses: [{ id: 'cred-1', success: true }],
+      } as never);
+
+      const result = await update({
+        context: dualContext,
+        id: 'connector-id',
+        action: { name: 'renamed', config: {}, secrets: {}, isInboundEventsEnabled: false },
+      });
+
+      expect(result.isInboundEventsEnabled).toBe(false);
+      expect(unsecuredSavedObjectsClient.bulkDelete).toHaveBeenCalledWith([
+        { type: CONNECTOR_INGRESS_CREDENTIAL_SAVED_OBJECT_TYPE, id: 'cred-1' },
+      ]);
+    });
+
+    test('rejects the flag on a non-dual type', async () => {
+      unsecuredSavedObjectsClient.get.mockResolvedValue({
+        ...dualExisting,
+        attributes: {
+          ...dualExisting.attributes,
+          actionTypeId: '.slack',
+        },
+      } as never);
+      (actionTypeRegistry.get as jest.Mock).mockReturnValue(
+        getConnectorType({
+          id: '.slack',
+          preSaveHook,
+          validate: {
+            config: { schema: z.any() },
+            secrets: { schema: z.any() },
+            params: { schema: z.object({}) },
+          },
+        })
+      );
+
+      await expect(
+        update({
+          context: dualContext,
+          id: 'connector-id',
+          action: { name: 'renamed', config: {}, secrets: {}, isInboundEventsEnabled: true },
+        })
+      ).rejects.toThrow(
+        'Inbound events can only be turned on for connectors that both send and receive.'
+      );
+      expect(preSaveHook).not.toHaveBeenCalled();
     });
   });
 });

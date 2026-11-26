@@ -32,15 +32,16 @@ describe('When a Console command is entered by the user', () => {
 
   it('should clear the command output history when `clear` is entered', async () => {
     render();
-    await enterCommand('help');
-    await enterCommand('help');
+    await enterCommand('cmd1');
+    await enterCommand('cmd1');
 
     expect(renderResult.getByTestId('test-historyOutput').childElementCount).toBe(2);
 
     await enterCommand('clear');
 
     expect(renderResult.getByTestId('test-historyOutput').childElementCount).toBe(0);
-  });
+    // Only test in this file that executes three commands, so it needs more than the 5s default
+  }, 30_000);
 
   it('should show individual command help when `--help` option is used', async () => {
     render();
@@ -117,10 +118,46 @@ describe('When a Console command is entered by the user', () => {
 
   it('should show error if unknown arguments are used along with the `--help` argument', async () => {
     render();
-    await enterCommand('cmd2 one two three --help');
+    await enterCommand('cmd2 --foo --bar --help');
 
     expect(renderResult.getByTestId('test-badArgument').textContent).toMatch(
       /Unsupported argument/
+    );
+  });
+
+  it('should show error if a positional (un-prefixed) argument is entered', async () => {
+    render();
+    await enterCommand('cmd2 foo --file test');
+
+    expect(renderResult.getByTestId('test-badArgument-message').textContent).toEqual(
+      "Positional arguments (foo) are not supported. All command arguments must be prefixed with '--'"
+    );
+  });
+
+  it('should show error if a positional argument is entered even when no named arguments follow', async () => {
+    render();
+    await enterCommand('cmd1 foo');
+
+    expect(renderResult.getByTestId('test-badArgument-message').textContent).toEqual(
+      "Positional arguments (foo) are not supported. All command arguments must be prefixed with '--'"
+    );
+  });
+
+  it('should list all positional arguments entered before the first named argument in the error', async () => {
+    render();
+    await enterCommand('cmd2 one two --file test');
+
+    expect(renderResult.getByTestId('test-badArgument-message').textContent).toEqual(
+      "Positional arguments (one two) are not supported. All command arguments must be prefixed with '--'"
+    );
+  });
+
+  it('should show the positional argument error before any `--help` handling', async () => {
+    render();
+    await enterCommand('cmd2 foo --help');
+
+    expect(renderResult.getByTestId('test-badArgument-message').textContent).toEqual(
+      "Positional arguments (foo) are not supported. All command arguments must be prefixed with '--'"
     );
   });
 

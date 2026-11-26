@@ -8,11 +8,11 @@
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import type { SortResults } from '@elastic/elasticsearch/lib/api/types';
-import { resolveLatestEntitiesIndexName } from '../../../../asset_manager/resolve_entity_store_indices';
 import type { ResolutionClient } from '../../..';
 import { NAMESPACE_PRIORITY } from '../../..';
 import { getFieldValue } from '../../../../../../common/domain/euid/commons';
 import { ENTITY_ID_FIELD } from '../../../../../../common/domain/definitions/common_fields';
+import { RESOLUTION_RULE_IDS } from '../../../../../../common/domain/resolution_rules/constants';
 import type { MaintainerTelemetryClient } from '../../../../../tasks/entity_maintainers/maintainer_telemetry_client';
 import type { PerRuleState } from '../automated_resolution/types';
 import { getFieldStringValues, readRelatedUserBundleForSeed } from './left';
@@ -25,6 +25,7 @@ import {
 
 const ENTITY_TYPE = 'user';
 const PAGE_SIZE = 10_000;
+const CANDIDATES_SIZE = 100;
 const ENGINE_METADATA_TYPE_FIELD = 'entity.EngineMetadata.Type';
 const RESOLVED_TO_FIELD = 'entity.relationships.resolution.resolved_to';
 const ENTITY_NAMESPACE_FIELD = 'entity.namespace';
@@ -42,12 +43,12 @@ const GENERIC_SERVICE_ACCOUNTS = new Set([
 
 export interface RunRelatedUserAliasResolutionDeps {
   state: PerRuleState;
-  namespace: string;
   esClient: ElasticsearchClient;
   logger: Logger;
   resolutionClient: ResolutionClient;
   signal: AbortSignal;
   telemetry: MaintainerTelemetryClient;
+  index: string;
 }
 
 const normalize = (value: string): string => value.trim().toLowerCase();
@@ -161,11 +162,12 @@ const findCandidates = async ({
   index: string;
   value: string;
   abortSignal: AbortSignal;
-}): Promise<CandidateEntity[]> => {
+}): Promise<{ candidates: CandidateEntity[]; truncated: boolean }> => {
   const response = await esClient.search<Record<string, unknown>>(
     {
       index,
-      size: 100,
+      // one extra hit tells a full page apart from a truncated one
+      size: CANDIDATES_SIZE + 1,
       query: {
         bool: {
           filter: [
@@ -194,7 +196,7 @@ const findCandidates = async ({
   );
 
   const candidates = new Map<string, CandidateEntity>();
-  for (const hit of response.hits.hits) {
+  for (const hit of response.hits.hits.slice(0, CANDIDATES_SIZE)) {
     const source = hit._source;
     if (!source || !matchesValue(source, value)) {
       continue;
@@ -209,7 +211,10 @@ const findCandidates = async ({
     candidates.set(entityId, { entityId, namespace, source });
   }
 
-  return [...candidates.values()];
+  return {
+    candidates: [...candidates.values()],
+    truncated: response.hits.hits.length > CANDIDATES_SIZE,
+  };
 };
 
 /**
@@ -225,14 +230,14 @@ const findCandidates = async ({
 export async function runRelatedUserAliasResolution(
   deps: RunRelatedUserAliasResolutionDeps
 ): Promise<PerRuleState> {
-  const { state, namespace, esClient, logger, resolutionClient, signal, telemetry } = deps;
-  const index = await resolveLatestEntitiesIndexName(esClient, namespace);
+  const { state, esClient, logger, resolutionClient, signal, telemetry, index } = deps;
   const seeds = await collectSeeds({ esClient, index, abortSignal: signal });
   const lastRun: RelatedUserAliasResolutionLastRun = {
     seedsScanned: seeds.length,
     linksCreated: 0,
     cascadeRetargeted: 0,
     skippedAmbiguous: 0,
+    truncatedValues: 0,
     cascadesBlocked: 0,
     failedGroups: 0,
   };
@@ -262,12 +267,15 @@ export async function runRelatedUserAliasResolution(
       }
 
       try {
-        const candidates = await findCandidates({
+        const { candidates, truncated } = await findCandidates({
           esClient,
           index,
           value,
           abortSignal: signal,
         });
+        if (truncated) {
+          lastRun.truncatedValues++;
+        }
         const candidatesExcludingSeed = candidates.filter(
           (candidate) => candidate.entityId !== seed.entityId
         );
@@ -308,6 +316,7 @@ export async function runRelatedUserAliasResolution(
   }
 
   telemetry.report({
+    scope: { kind: 'rule', value: RESOLUTION_RULE_IDS.RELATED_USER_ALIAS_RESOLUTION },
     funnel: {
       scanned: lastRun.seedsScanned,
       qualified: lastRun.linksCreated + lastRun.skippedAmbiguous,
@@ -327,6 +336,7 @@ export async function runRelatedUserAliasResolution(
       { name: 'links_created', count: lastRun.linksCreated },
       { name: 'cascade_retargeted', count: lastRun.cascadeRetargeted },
       { name: 'cascades_blocked', count: lastRun.cascadesBlocked },
+      { name: 'truncated_candidate_values', count: lastRun.truncatedValues },
     ],
   });
 

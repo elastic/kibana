@@ -12,7 +12,6 @@ import type { MaintainerTelemetryClient } from '../../../../../tasks/entity_main
 import type { PerRuleState } from '../automated_resolution/types';
 import { collectSeeds, runRelatedUserAliasResolution } from './run';
 
-const NAMESPACE = 'default';
 const INITIAL_STATE: PerRuleState = { lastProcessedTimestamp: null, lastRun: null };
 
 const createSearchResponse = (sources: Array<Record<string, unknown>>) => ({
@@ -69,7 +68,7 @@ const createDeps = ({
   telemetry?: MaintainerTelemetryClient;
 }) => ({
   state: INITIAL_STATE,
-  namespace: NAMESPACE,
+  index: '.entities.v2.latest.default',
   esClient,
   logger: loggerMock.create(),
   resolutionClient,
@@ -321,6 +320,69 @@ describe('runRelatedUserAliasResolution', () => {
     expect(cascadeLinkEntities).toHaveBeenCalledTimes(1);
     expect(cascadeLinkEntities).toHaveBeenCalledWith('user:seed@example.com@entra_id', ['user:ad']);
     expect(result.lastRun).toMatchObject({ skippedAmbiguous: 1, linksCreated: 1 });
+  });
+
+  it('reports a run summary scoped to the rule', async () => {
+    esClient.search
+      .mockResolvedValueOnce(createSearchResponse([createSeed()]) as never)
+      .mockResolvedValueOnce(createSearchResponse([createSourceDoc(['T03KX1Z'])]) as never)
+      .mockResolvedValueOnce(createSearchResponse([createCandidate('user:ad')]) as never);
+    const telemetry = { report: jest.fn() };
+
+    await runRelatedUserAliasResolution(createDeps({ esClient, resolutionClient, telemetry }));
+
+    expect(telemetry.report).toHaveBeenCalledWith(
+      expect.objectContaining({
+        scope: { kind: 'rule', value: 'related_user_alias_resolution' },
+        funnel: { scanned: 1, qualified: 1, applied: 1, skipped: 0, failed: 0 },
+        breakdown: expect.arrayContaining([
+          { name: 'links_created', count: 1 },
+          { name: 'truncated_candidate_values', count: 0 },
+        ]),
+      })
+    );
+  });
+
+  it('does not count a value with exactly as many candidates as the size cap', async () => {
+    const candidates = Array.from({ length: 100 }, (_, index) =>
+      createCandidate(`user:ad-${index}`)
+    );
+    esClient.search
+      .mockResolvedValueOnce(createSearchResponse([createSeed()]) as never)
+      .mockResolvedValueOnce(createSearchResponse([createSourceDoc(['T03KX1Z'])]) as never)
+      .mockResolvedValueOnce(createSearchResponse(candidates) as never);
+
+    const result = await runRelatedUserAliasResolution(createDeps({ esClient, resolutionClient }));
+
+    expect(esClient.search).toHaveBeenNthCalledWith(
+      3,
+      expect.objectContaining({ size: 101 }),
+      expect.anything()
+    );
+    expect(result.lastRun).toMatchObject({ skippedAmbiguous: 1, truncatedValues: 0 });
+  });
+
+  it('counts a value whose candidate search goes over the size cap', async () => {
+    const candidates = Array.from({ length: 101 }, (_, index) =>
+      createCandidate(`user:ad-${index}`)
+    );
+    esClient.search
+      .mockResolvedValueOnce(createSearchResponse([createSeed()]) as never)
+      .mockResolvedValueOnce(createSearchResponse([createSourceDoc(['T03KX1Z'])]) as never)
+      .mockResolvedValueOnce(createSearchResponse(candidates) as never);
+    const telemetry = { report: jest.fn() };
+
+    const result = await runRelatedUserAliasResolution(
+      createDeps({ esClient, resolutionClient, telemetry })
+    );
+
+    expect(cascadeLinkEntities).not.toHaveBeenCalled();
+    expect(result.lastRun).toMatchObject({ skippedAmbiguous: 1, truncatedValues: 1 });
+    expect(telemetry.report).toHaveBeenCalledWith(
+      expect.objectContaining({
+        breakdown: expect.arrayContaining([{ name: 'truncated_candidate_values', count: 1 }]),
+      })
+    );
   });
 
   it('dedupes a candidate matched by multiple values before cascading', async () => {

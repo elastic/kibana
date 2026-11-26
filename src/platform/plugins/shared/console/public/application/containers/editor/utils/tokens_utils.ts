@@ -29,7 +29,8 @@ export const parseLine = (line: string, parseUrlIntoTokens: boolean = true): Par
   const firstWhitespaceIndex = line.indexOf(' ');
   if (firstWhitespaceIndex < 0) {
     // there is no url, only method
-    return { method: line, url: '', urlPathTokens: [], urlParamsTokens: [] };
+    // Endpoint definitions are keyed by upper-case method, so `get` must match like `GET`.
+    return { method: line.toUpperCase(), url: '', urlPathTokens: [], urlParamsTokens: [] };
   }
   // 1st part is the method
   const method = line.slice(0, firstWhitespaceIndex).trim().toUpperCase();
@@ -138,6 +139,14 @@ export const parseBody = (value: string): string[] => {
       }
     }
   };
+  const skipWhitespaceAndComments = () => {
+    let previousIndex = -1;
+    while (index !== previousIndex) {
+      previousIndex = index;
+      skipWhitespace();
+      skipComments();
+    }
+  };
   const parseString = () => {
     // first check if it's a triple quote
     if (isTripleQuote(char, peek(1), peek(2))) {
@@ -161,6 +170,10 @@ export const parseBody = (value: string): string[] => {
       // skip the opening double quote
       next();
       while (char && !isDoubleQuote(char)) {
+        // skip the escaped char so that \" doesn't close the string
+        if (isBackslash(char)) {
+          next();
+        }
         next();
       }
       if (isDoubleQuote(char)) {
@@ -264,6 +277,11 @@ export const parseBody = (value: string): string[] => {
     next();
     let propertyName = '';
     while (char && !isDoubleQuote(char)) {
+      // keep the escaped char so that \" doesn't close the property name
+      if (isBackslash(char)) {
+        propertyName = propertyName + char;
+        next();
+      }
       propertyName = propertyName + char;
       next();
     }
@@ -282,8 +300,7 @@ export const parseBody = (value: string): string[] => {
       // the value in currentToken determines the state of the parser
       if (!currentToken) {
         // the start of the object
-        skipWhitespace();
-        skipComments();
+        skipWhitespaceAndComments();
         // look for opening curly bracket
         if (char === '{') {
           tokens.push(char);
@@ -296,14 +313,13 @@ export const parseBody = (value: string): string[] => {
         // inside an object
         currentToken === '{'
       ) {
-        skipWhitespace();
-        skipComments();
+        skipWhitespaceAndComments();
         // inspect the current char
         if (isDoubleQuote(char)) {
           // property name: parse the string and add to tokens
           const propertyName = parsePropertyName();
-          // allow whitespace
-          skipWhitespace();
+          // allow whitespace and comments
+          skipWhitespaceAndComments();
           // expecting a colon, otherwise the parser fails
           if (!isColon(char)) {
             throw new Error('Not able to parse');
@@ -335,8 +351,7 @@ export const parseBody = (value: string): string[] => {
         // inside an array
         currentToken === '['
       ) {
-        skipWhitespace();
-        skipComments();
+        skipWhitespaceAndComments();
 
         // inspect the current char
         if (char === ']') {
@@ -380,8 +395,7 @@ export const parseBody = (value: string): string[] => {
         // parsing property value after a property name was found
         isPropertyName(currentToken)
       ) {
-        skipWhitespace();
-        skipComments();
+        skipWhitespaceAndComments();
         if (char === '{' || char === '[') {
           // nested object or array
           tokens.push(char);
@@ -495,6 +509,9 @@ const isNewLine = (char: string): boolean => {
 };
 const isDoubleQuote = (char: string): boolean => {
   return char === '"';
+};
+const isBackslash = (char: string): boolean => {
+  return char === '\\';
 };
 const isColon = (char: string): boolean => {
   return char === ':';

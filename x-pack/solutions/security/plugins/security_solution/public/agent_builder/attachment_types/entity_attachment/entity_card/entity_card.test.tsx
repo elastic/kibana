@@ -21,6 +21,10 @@ jest.mock('../../entity_analytics_agent_navigation_context', () => ({
   useEntityAnalyticsAgentNavigation: jest.fn(),
 }));
 
+jest.mock('../../../../entity_analytics/hooks/use_new_entity_analytics_page', () => ({
+  useNewEntityAnalyticsPage: jest.fn().mockReturnValue(false),
+}));
+
 jest.mock('./resolution_mini', () => ({
   ResolutionMini: (props: Record<string, unknown>) => (
     <div

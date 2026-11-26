@@ -7,39 +7,50 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useGeneratedHtmlId, useMutationObserver } from '@elastic/eui';
-import { useCallback, useState } from 'react';
+import { useGeneratedHtmlId } from '@elastic/eui';
+import { useEffect, useState } from 'react';
 import { css } from '@emotion/css';
 
 export const useFullScreenWatcher = () => {
   const dataGridId = useGeneratedHtmlId({ prefix: 'unifiedDataTable' });
   const [dataGridWrapper, setDataGridWrapper] = useState<HTMLElement | null>(null);
-  const [dataGrid, setDataGrid] = useState<HTMLElement | null>(null);
 
-  const checkForDataGrid = useCallback<MutationCallback>(
-    (_, observer) => {
-      const foundDataGrid = document.getElementById(dataGridId);
-
-      if (foundDataGrid) {
-        setDataGrid(foundDataGrid);
-        observer.disconnect();
-      }
-    },
-    [dataGridId]
-  );
-
-  const watchForFullScreen = useCallback<MutationCallback>(() => {
-    if (dataGrid) {
-      toggleFullScreen(dataGrid);
+  useEffect(() => {
+    if (!dataGridWrapper) {
+      return;
     }
-  }, [dataGrid]);
 
-  useMutationObserver(dataGridWrapper, checkForDataGrid, { childList: true, subtree: true });
+    // Only touch the body classes when this data grid's full screen state changes,
+    // so data grids sharing the page don't reset each other's full screen styles
+    let isFullScreen = false;
+    const syncFullScreen = (nextIsFullScreen: boolean) => {
+      if (nextIsFullScreen === isFullScreen) {
+        return;
+      }
+      isFullScreen = nextIsFullScreen;
+      toggleFullScreen(isFullScreen);
+    };
 
-  useMutationObserver(dataGrid, watchForFullScreen, {
-    attributes: true,
-    attributeFilter: ['class'],
-  });
+    // Look up the data grid on every change instead of holding on to its element,
+    // this allows to handle the case where the data grid is remounted.
+    const observer = new MutationObserver(() => {
+      const dataGrid = document.getElementById(dataGridId);
+      syncFullScreen(Boolean(dataGrid?.classList.contains(EUI_DATA_GRID_FULL_SCREEN_CLASS)));
+    });
+
+    observer.observe(dataGridWrapper, {
+      childList: true,
+      subtree: true,
+      attributes: true,
+      attributeFilter: ['class'],
+    });
+
+    return () => {
+      observer.disconnect();
+      // Don't leave the full screen styles behind if the data grid goes away while in full screen
+      syncFullScreen(false);
+    };
+  }, [dataGridId, dataGridWrapper]);
 
   return { dataGridId, dataGridWrapper, setDataGridWrapper };
 };
@@ -63,10 +74,8 @@ const fullScreenStyles = css`
 `;
 
 const classesToToggle = [UNIFIED_DATA_TABLE_FULL_SCREEN_CLASS, fullScreenStyles];
-const toggleFullScreen = (dataGrid: HTMLElement) => {
-  const fullScreenClass = dataGrid.classList.contains(EUI_DATA_GRID_FULL_SCREEN_CLASS);
-
-  if (fullScreenClass) {
+const toggleFullScreen = (isFullScreen: boolean) => {
+  if (isFullScreen) {
     document.body.classList.add(...classesToToggle);
   } else {
     document.body.classList.remove(...classesToToggle);

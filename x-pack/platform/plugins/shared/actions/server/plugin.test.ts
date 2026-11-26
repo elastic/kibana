@@ -7,7 +7,9 @@
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
+import { errors } from '@elastic/elasticsearch';
 import moment from 'moment';
+import { BehaviorSubject, of } from 'rxjs';
 import { ByteSizeValue } from '@kbn/config-schema';
 import { z } from '@kbn/zod/v4';
 import type { PluginInitializerContext, RequestHandlerContext } from '@kbn/core/server';
@@ -31,15 +33,25 @@ import type {
 } from './plugin';
 import { ActionsPlugin } from './plugin';
 import {
+  ACTIONS_CONNECTOR_CATALOG_ENABLED_FLAG,
   AlertHistoryEsIndexConnectorId,
   DEFAULT_MICROSOFT_EXCHANGE_URL,
   DEFAULT_MICROSOFT_GRAPH_API_SCOPE,
   DEFAULT_MICROSOFT_GRAPH_API_URL,
 } from '../common';
 import { cloudMock } from '@kbn/cloud-plugin/server/mocks';
+import { slack2HitlAction } from '@kbn/connector-topics';
 import { getConnectorType } from './fixtures';
-import { USER_CONNECTOR_TOKEN_SAVED_OBJECT_TYPE } from './constants/saved_objects';
+import {
+  CONNECTOR_INGRESS_CREDENTIAL_SAVED_OBJECT_TYPE,
+  USER_CONNECTOR_TOKEN_SAVED_OBJECT_TYPE,
+} from './constants/saved_objects';
 import { LeasePool } from './lib';
+import { defaultInboundEventsLimitConfigs } from './config';
+import { registerConnectorEventTopics } from './inbound/register_connector_event_topics';
+import * as publishConnectorEvent from './inbound/publish_connector_event';
+import { CONNECTOR_TYPE_CATALOG_INDEX } from './lib/connector_catalog';
+import { loadFixture } from './lib/declarative_connectors/__fixtures__/load_fixture';
 
 function getConfig(overrides = {}) {
   return {
@@ -78,7 +90,10 @@ function getConfig(overrides = {}) {
       enabled: false,
       maxBodyBytes: new ByteSizeValue(1024 * 1024),
       maxEmitted: 25,
+      ...defaultInboundEventsLimitConfigs,
     },
+    connectorSigningKeys: { enabled: false },
+    catalog: { enabled: false },
     ...overrides,
   };
 }
@@ -108,6 +123,10 @@ const casesConnectorType = getConnectorType({
 });
 
 describe('Actions Plugin', () => {
+  afterEach(() => {
+    publishConnectorEvent.setConnectorEventPublisher(undefined);
+  });
+
   describe('setup()', () => {
     let context: PluginInitializerContext;
     let plugin: ActionsPlugin;
@@ -141,7 +160,10 @@ describe('Actions Plugin', () => {
           enabled: false,
           maxBodyBytes: new ByteSizeValue(1024 * 1024),
           maxEmitted: 25,
+          ...defaultInboundEventsLimitConfigs,
         },
+        connectorSigningKeys: { enabled: false },
+        catalog: { enabled: false },
       });
       plugin = new ActionsPlugin(context);
       coreSetup = coreMock.createSetup();
@@ -184,6 +206,16 @@ describe('Actions Plugin', () => {
       );
     });
 
+    it('should always register connector_ingress_credential without encryption', async () => {
+      await plugin.setup(coreSetup, pluginsSetup);
+      expect(coreSetup.savedObjects.registerType).toHaveBeenCalledWith(
+        expect.objectContaining({ name: CONNECTOR_INGRESS_CREDENTIAL_SAVED_OBJECT_TYPE })
+      );
+      expect(pluginsSetup.encryptedSavedObjects.registerType).not.toHaveBeenCalledWith(
+        expect.objectContaining({ type: CONNECTOR_INGRESS_CREDENTIAL_SAVED_OBJECT_TYPE })
+      );
+    });
+
     it('should expose the same client lease pool before start', async () => {
       const setupContract = await plugin.setup(coreSetup, pluginsSetup);
 
@@ -200,6 +232,37 @@ describe('Actions Plugin', () => {
       expect(() => setupContract.registerConnectorEventEmitter({ emit: jest.fn() })).toThrow(
         /only one emitter is supported/
       );
+    });
+
+    it('does not register connector event topics while inbound events are disabled', async () => {
+      await plugin.setup(coreSetup, pluginsSetup);
+
+      expect(coreSetup.pubsub.registerTopic).not.toHaveBeenCalled();
+    });
+
+    it('registers connector event topics when inbound events are enabled', async () => {
+      const enabledPlugin = new ActionsPlugin(
+        coreMock.createPluginInitializerContext<ActionsConfig>(
+          getConfig({
+            inboundEvents: {
+              enabled: true,
+              maxBodyBytes: new ByteSizeValue(1024 * 1024),
+              maxEmitted: 25,
+              ...defaultInboundEventsLimitConfigs,
+            },
+          })
+        )
+      );
+      const topics = registerConnectorEventTopics(jest.fn());
+
+      await enabledPlugin.setup(coreSetup, pluginsSetup);
+
+      const registeredNames = coreSetup.pubsub.registerTopic.mock.calls.map(
+        ([topic]) => topic.name
+      );
+      expect(registeredNames).toEqual([...topics.values()].map((topic) => topic.name));
+      expect([...topics.keys()]).not.toContain(slack2HitlAction.name);
+      expect(registeredNames).not.toContain(slack2HitlAction.name);
     });
 
     describe('routeHandlerContext.getActionsClient()', () => {
@@ -576,7 +639,10 @@ describe('Actions Plugin', () => {
           enabled: false,
           maxBodyBytes: new ByteSizeValue(1024 * 1024),
           maxEmitted: 25,
+          ...defaultInboundEventsLimitConfigs,
         },
+        connectorSigningKeys: { enabled: false },
+        catalog: { enabled: false },
       });
       plugin = new ActionsPlugin(context);
       coreSetup = coreMock.createSetup();
@@ -620,6 +686,278 @@ describe('Actions Plugin', () => {
       ).rejects.toThrowErrorMatchingInlineSnapshot(
         `"Action type \\"non-existing\\" is not registered."`
       );
+    });
+
+    describe('connector event publisher', () => {
+      let setPublisher: jest.SpiedFunction<typeof publishConnectorEvent.setConnectorEventPublisher>;
+
+      beforeEach(() => {
+        setPublisher = jest.spyOn(publishConnectorEvent, 'setConnectorEventPublisher');
+      });
+
+      afterEach(() => {
+        setPublisher.mockRestore();
+      });
+
+      it('does not install a publisher while inbound events are disabled', async () => {
+        await plugin.setup(coreSetup, pluginsSetup);
+        plugin.start(coreStart, pluginsStart);
+
+        expect(setPublisher).not.toHaveBeenCalled();
+      });
+
+      it('installs the publisher with the topics registered in setup', async () => {
+        const enabledPlugin = new ActionsPlugin(
+          coreMock.createPluginInitializerContext<ActionsConfig>(
+            getConfig({
+              inboundEvents: {
+                enabled: true,
+                maxBodyBytes: new ByteSizeValue(1024 * 1024),
+                maxEmitted: 25,
+                ...defaultInboundEventsLimitConfigs,
+              },
+            })
+          )
+        );
+        const topics = registerConnectorEventTopics(jest.fn());
+
+        await enabledPlugin.setup(coreSetup, pluginsSetup);
+        enabledPlugin.start(coreStart, pluginsStart);
+
+        expect(setPublisher).toHaveBeenCalledTimes(1);
+        const [publisher] = setPublisher.mock.calls[0];
+        expect(publisher).toEqual(
+          expect.objectContaining({
+            pubsub: coreStart.pubsub,
+          })
+        );
+        if (publisher) {
+          expect([...publisher.topics.keys()]).toEqual([...topics.keys()]);
+        }
+      });
+    });
+
+    describe('connector catalog feature flag', () => {
+      it('subscribes to the connector catalog feature flag with a false fallback', async () => {
+        await plugin.setup(coreSetup, pluginsSetup);
+        plugin.start(coreStart, pluginsStart);
+
+        expect(coreStart.featureFlags.getBooleanValue$).toHaveBeenCalledWith(
+          ACTIONS_CONNECTOR_CATALOG_ENABLED_FLAG,
+          false
+        );
+      });
+
+      it('unsubscribes from the connector catalog feature flag on stop', async () => {
+        const connectorCatalogEnabled$ = new BehaviorSubject(false);
+        coreStart.featureFlags.getBooleanValue$.mockReturnValue(connectorCatalogEnabled$);
+
+        await plugin.setup(coreSetup, pluginsSetup);
+        plugin.start(coreStart, pluginsStart);
+        expect(connectorCatalogEnabled$.observed).toBe(true);
+
+        plugin.stop();
+        expect(connectorCatalogEnabled$.observed).toBe(false);
+      });
+    });
+
+    describe('connector catalog', () => {
+      const SPEC_TYPE_ID = '.abuseipdb';
+      const flush = () => new Promise((resolve) => setImmediate(resolve));
+
+      const manifestDoc = {
+        _index: CONNECTOR_TYPE_CATALOG_INDEX,
+        _id: 'manifest',
+        found: true,
+        _source: {
+          type: 'manifest',
+          raw: JSON.stringify({ connectors: [{ id: SPEC_TYPE_ID, version: '1.1.0' }] }),
+        },
+      };
+
+      const getEsClient = () => coreStart.elasticsearch.client.asInternalUser as jest.Mocked<any>;
+
+      const seedCatalog = () => {
+        const esClient = getEsClient();
+        esClient.get.mockResolvedValue(manifestDoc);
+        esClient.mget.mockResolvedValue({
+          docs: [
+            {
+              _index: CONNECTOR_TYPE_CATALOG_INDEX,
+              _id: `definition:${SPEC_TYPE_ID}@1.1.0`,
+              found: true,
+              _source: {
+                type: 'definition',
+                connectorId: SPEC_TYPE_ID,
+                version: '1.1.0',
+                yaml: loadFixture('abuseipdb-1.1.0.yaml'),
+                contentHash: 'sha256:abuseipdb',
+                catalogVersion: '2026.11.1',
+              },
+            },
+          ],
+        });
+      };
+
+      const setupPlugin = async (
+        enabledActionTypes?: string[],
+        { catalogEnabled = true }: { catalogEnabled?: boolean } = {}
+      ) => {
+        context = coreMock.createPluginInitializerContext<ActionsConfig>({
+          ...getConfig({ catalog: { enabled: catalogEnabled } }),
+          ...(enabledActionTypes && { enabledActionTypes }),
+        });
+        plugin = new ActionsPlugin(context);
+        return plugin.setup(coreSetup, {
+          ...pluginsSetup,
+          encryptedSavedObjects: { ...pluginsSetup.encryptedSavedObjects, canEncrypt: true },
+          ...(enabledActionTypes && { serverless: serverlessPluginMock.createSetupContract() }),
+        });
+      };
+
+      const startServerlessPlugin = () =>
+        plugin.start(coreStart, {
+          ...pluginsStart,
+          serverless: serverlessPluginMock.createStartContract(),
+        });
+
+      const getTypeIds = (pluginStart: PluginStartContract) => pluginStart.getAllTypes();
+
+      describe('config on', () => {
+        it('knows in-tree types only before ready, and the spec type after', async () => {
+          seedCatalog();
+          const catalogRead = Promise.withResolvers<object>();
+          getEsClient().get.mockReturnValue(catalogRead.promise);
+          await setupPlugin();
+          const registerSpy = jest.spyOn(ActionTypeRegistry.prototype, 'register');
+
+          const pluginStart = plugin.start(coreStart, pluginsStart);
+          await flush();
+
+          expect(getTypeIds(pluginStart)).not.toContain(SPEC_TYPE_ID);
+          expect(() => pluginStart.isActionTypeEnabled(SPEC_TYPE_ID)).toThrow(
+            `Action type "${SPEC_TYPE_ID}" is not registered.`
+          );
+
+          catalogRead.resolve(manifestDoc);
+          await pluginStart.whenCatalogReady();
+
+          expect(registerSpy).toHaveBeenCalledWith(expect.objectContaining({ id: SPEC_TYPE_ID }));
+          expect(getTypeIds(pluginStart)).toContain(SPEC_TYPE_ID);
+          expect(() => pluginStart.isActionTypeEnabled(SPEC_TYPE_ID)).not.toThrow();
+          registerSpy.mockRestore();
+        });
+
+        it('registers no catalog types and writes nothing when the catalog index is missing', async () => {
+          seedCatalog();
+          const missing = new errors.ResponseError({
+            statusCode: 404,
+            body: { found: false },
+            headers: {},
+            warnings: [],
+            meta: {} as never,
+          });
+          getEsClient().get.mockRejectedValue(missing);
+          await setupPlugin();
+
+          const pluginStart = plugin.start(coreStart, pluginsStart);
+
+          await expect(pluginStart.whenCatalogReady()).resolves.toBeUndefined();
+          expect(getTypeIds(pluginStart)).not.toContain(SPEC_TYPE_ID);
+          expect(getEsClient().mget).not.toHaveBeenCalled();
+          expect(getEsClient().index).not.toHaveBeenCalled();
+          expect(getEsClient().indices.create).not.toHaveBeenCalled();
+          expect(getEsClient().indices.putIndexTemplate).not.toHaveBeenCalled();
+        });
+
+        it('resolves whenCatalogReady() when the read fails', async () => {
+          seedCatalog();
+          getEsClient().get.mockRejectedValue(new Error('read failed'));
+          await setupPlugin();
+
+          const pluginStart = plugin.start(coreStart, pluginsStart);
+
+          await expect(pluginStart.whenCatalogReady()).resolves.toBeUndefined();
+          expect(getTypeIds(pluginStart)).not.toContain(SPEC_TYPE_ID);
+        });
+
+        it('starts synchronously and accepts a configured type after a delayed catalog load', async () => {
+          seedCatalog();
+
+          await setupPlugin([SPEC_TYPE_ID]);
+          const pluginStart = startServerlessPlugin();
+
+          await pluginStart.whenCatalogReady();
+          await flush();
+
+          expect(getTypeIds(pluginStart)).toContain(SPEC_TYPE_ID);
+          expect(context.logger.get().warn).not.toHaveBeenCalledWith(
+            expect.stringContaining('are not registered')
+          );
+        });
+
+        it('does not warn about a configured type when the plugin stops before the catalog load ends', async () => {
+          const read = Promise.withResolvers<object>();
+          getEsClient().get.mockReturnValue(read.promise);
+
+          await setupPlugin([SPEC_TYPE_ID]);
+          const pluginStart = startServerlessPlugin();
+          plugin.stop();
+          await pluginStart.whenCatalogReady();
+          await flush();
+
+          expect(context.logger.get().warn).not.toHaveBeenCalledWith(
+            expect.stringContaining('are not registered')
+          );
+        });
+
+        it('warns about a configured type that is still missing after the catalog load', async () => {
+          getEsClient().get.mockResolvedValue({
+            _index: CONNECTOR_TYPE_CATALOG_INDEX,
+            _id: 'manifest',
+            found: false,
+          });
+
+          await setupPlugin(['non-existing']);
+          const pluginStart = startServerlessPlugin();
+
+          await pluginStart.whenCatalogReady();
+
+          expect(context.logger.get().warn).toHaveBeenCalledWith(
+            'Connector types [non-existing] in xpack.actions.enabledActionTypes are not registered.'
+          );
+        });
+      });
+
+      describe('config off', () => {
+        beforeEach(() => {
+          coreStart.featureFlags.getBooleanValue$.mockReturnValue(of(true));
+        });
+
+        it('throws on start when a catalog type is in the allowlist', async () => {
+          await setupPlugin([SPEC_TYPE_ID], { catalogEnabled: false });
+
+          expect(() => startServerlessPlugin()).toThrow(
+            `Action type "${SPEC_TYPE_ID}" is not registered.`
+          );
+        });
+
+        it('does not call Elasticsearch for the catalog index, even when the flag is on', async () => {
+          seedCatalog();
+          await setupPlugin(undefined, { catalogEnabled: false });
+
+          const pluginStart = plugin.start(coreStart, pluginsStart);
+          await pluginStart.whenCatalogReady();
+
+          const esClient = getEsClient();
+          expect(esClient.get).not.toHaveBeenCalled();
+          expect(esClient.mget).not.toHaveBeenCalled();
+          expect(esClient.index).not.toHaveBeenCalled();
+          expect(esClient.indices.create).not.toHaveBeenCalled();
+          expect(esClient.indices.putIndexTemplate).not.toHaveBeenCalled();
+          expect(getTypeIds(pluginStart)).not.toContain(SPEC_TYPE_ID);
+        });
+      });
     });
 
     describe('getActionsClientWithRequest()', () => {
@@ -933,6 +1271,56 @@ describe('Actions Plugin', () => {
           expect(pluginStart.inMemoryConnectors[1].id).toBe(newDynamicConnector.id);
           expect(pluginStart.inMemoryConnectors[1].isPreconfigured).toBe(true);
           expect(pluginStart.inMemoryConnectors[1].isDynamic).toBe(true);
+        });
+        it('drops inbound events on a dynamic connector when inbound events are disabled', () => {
+          const newDynamicConnector: InMemoryConnector = {
+            id: 'dynamic-slack',
+            actionTypeId: '.slack2',
+            name: 'Slack',
+            config: {},
+            secrets: {},
+            isPreconfigured: true,
+            isDeprecated: false,
+            isSystemAction: false,
+            isConnectorTypeDeprecated: false,
+            isInboundEventsEnabled: true,
+          };
+          expect(pluginStart.registerDynamicConnector(newDynamicConnector)).toEqual(true);
+
+          expect(pluginStart.inMemoryConnectors[1]).not.toHaveProperty('isInboundEventsEnabled');
+        });
+        it('keeps inbound events on a dynamic connector when inbound events are enabled', async () => {
+          setup(
+            getConfig({
+              inboundEvents: {
+                enabled: true,
+                maxBodyBytes: new ByteSizeValue(1024 * 1024),
+                maxEmitted: 25,
+                ...defaultInboundEventsLimitConfigs,
+              },
+              connectorSigningKeys: { enabled: false },
+              catalog: { enabled: false },
+            })
+          );
+          const enabledPluginSetup = await plugin.setup(coreSetup as any, pluginsSetup);
+          enabledPluginSetup.registerType(serverLogConnectorType);
+          const enabledPluginStart = await plugin.start(coreStart, pluginsStart);
+          const newDynamicConnector: InMemoryConnector = {
+            id: 'dynamic-slack',
+            actionTypeId: '.slack2',
+            name: 'Slack',
+            config: {},
+            secrets: {},
+            isPreconfigured: true,
+            isDeprecated: false,
+            isSystemAction: false,
+            isConnectorTypeDeprecated: false,
+            isInboundEventsEnabled: true,
+          };
+
+          expect(enabledPluginStart.registerDynamicConnector(newDynamicConnector)).toEqual(true);
+
+          expect(enabledPluginStart.inMemoryConnectors[1].isInboundEventsEnabled).toBe(true);
         });
         it('should not allow adding a dynamic connector for an existing connector id', () => {
           const existingConnector = pluginStart.inMemoryConnectors[0];

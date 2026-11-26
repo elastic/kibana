@@ -26,6 +26,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiToolTip,
+  EuiBetaBadge,
   type EuiSwitchEvent,
   EuiSwitch,
   EuiHorizontalRule,
@@ -170,21 +171,41 @@ export function ManagedExportFlyout({
   const draftModeCallout = shareObjectTypeMeta.config?.[exportIntegration.id]?.draftModeCallOut;
   const draftModeCalloutContent = typeof draftModeCallout === 'object' ? draftModeCallout : {};
 
+  const { badge } = exportIntegration.config;
+  const flyoutTitle = (
+    <EuiTitle>
+      <h2>
+        <FormattedMessage
+          id="share.export.flyoutTitle"
+          defaultMessage="Export {objectType} as {type}"
+          values={{
+            objectType: shareObjectTypeAlias ?? shareObjectType.toLocaleLowerCase(),
+            type: exportIntegration.config.label,
+          }}
+        />
+      </h2>
+    </EuiTitle>
+  );
+
   return (
     <React.Fragment>
       <EuiFlyoutHeader hasBorder>
-        <EuiTitle>
-          <h2>
-            <FormattedMessage
-              id="share.export.flyoutTitle"
-              defaultMessage="Export {objectType} as {type}"
-              values={{
-                objectType: shareObjectTypeAlias ?? shareObjectType.toLocaleLowerCase(),
-                type: exportIntegration.config.label,
-              }}
-            />
-          </h2>
-        </EuiTitle>
+        {badge ? (
+          <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+            <EuiFlexItem grow={false}>{flyoutTitle}</EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiBetaBadge
+                size="s"
+                alignment="middle"
+                label={badge.label}
+                tooltipContent={badge.tooltipContent}
+                data-test-subj="exportFlyoutTitleBadge"
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        ) : (
+          flyoutTitle
+        )}
       </EuiFlyoutHeader>
       <EuiFlyoutBody data-test-subj="exportItemDetailsFlyoutBody">
         <EuiFlexGroup direction="column">

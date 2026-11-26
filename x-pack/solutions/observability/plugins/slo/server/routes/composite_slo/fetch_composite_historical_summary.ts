@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import { fetchCompositeHistoricalSummaryParamsSchema } from '@kbn/slo-schema';
+import {
+  fetchCompositeHistoricalSummaryParamsSchema,
+  fetchCompositeHistoricalSummaryResponseSchema,
+} from '@kbn/slo-schema';
 import { CompositeHistoricalSummaryClient } from '../../services';
 import { createCompositeSloServerRoute } from './create_composite_slo_server_route';
 
@@ -18,6 +21,12 @@ export const fetchCompositeHistoricalSummaryRoute = createCompositeSloServerRout
     },
   },
   params: fetchCompositeHistoricalSummaryParamsSchema,
+  responses: {
+    200: {
+      description: 'Successful request',
+      body: () => fetchCompositeHistoricalSummaryResponseSchema,
+    },
+  },
   handler: async ({ request, logger, params, getScopedClients }) => {
     const { scopedClusterClient, repository, compositeRepository, spaceId } =
       await getScopedClients({

@@ -15,9 +15,13 @@ export function registerConnectorTypesFromSpecs({
 }: {
   actions: ActionsPluginSetupContract;
 }) {
-  const inboundEventsEnabled = actions.getActionsConfigurationUtilities().isInboundEventsEnabled();
+  const configUtils = actions.getActionsConfigurationUtilities();
+  const inboundEventsEnabled = configUtils.isInboundEventsEnabled();
+  const connectorSigningKeysEnabled = configUtils.isConnectorSigningKeysEnabled();
   const specsToRegister = Object.values(connectorsSpecs).filter(
-    (spec) => inboundEventsEnabled || !isInboundOnlyConnectorSpec(spec)
+    (spec) =>
+      (inboundEventsEnabled || !isInboundOnlyConnectorSpec(spec)) &&
+      (connectorSigningKeysEnabled || !spec.signingKey)
   );
 
   for (const spec of specsToRegister) {

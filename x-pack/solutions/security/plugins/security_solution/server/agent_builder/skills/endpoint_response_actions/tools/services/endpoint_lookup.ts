@@ -1,0 +1,918 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { escapeQuotes } from '@kbn/es-query';
+import type { AgentStatus } from '@kbn/fleet-plugin/common';
+import { RESPONSE_ACTIONS_SUPPORTED_INTEGRATION_TYPES } from '../../../../../../common/endpoint/service/response_actions/constants';
+import type { ResponseActionAgentType } from '../../../../../../common/endpoint/service/response_actions/constants';
+import type {
+  EndpointAppContextService,
+  ScopedEndpointServices,
+} from '../../../../../endpoint/endpoint_app_context_services';
+import { NotFoundError } from '../../../../../endpoint/errors';
+import {
+  MAX_AMBIGUOUS_CANDIDATES,
+  collectPages,
+  getMetadataAgentId,
+  isLiveFleetStatus,
+  isLiveHostStatus,
+  selectEndpointHost,
+  toHostStatus,
+} from '../../../../../endpoint/services/endpoint_host_selection';
+import { canonicalizeIp, resolveAgentTypeFromPackages } from '../types';
+
+/**
+ * Agent records fetched per page while resolving a hostname. A host keeps one
+ * record per enrollment (reinstall, upgrade, re-enrollment), so several can
+ * share a hostname; the lookup walks pages instead of trusting one.
+ */
+export const LOOKUP_PAGE_SIZE = 25;
+
+/**
+ * Hard cap on pages walked per hostname (500 candidate records). With the
+ * per-page batched space check this is effectively unreachable for any real
+ * host; it exists so a pathological hostname cannot turn into unbounded
+ * Fleet/metadata queries. Beyond the cap the lookup reports ambiguity among
+ * the visible candidates rather than a cross-space count (see
+ * `resolveByHostName`).
+ */
+export const MAX_LOOKUP_PAGES = 20;
+
+export { MAX_AMBIGUOUS_CANDIDATES };
+
+export interface ResolvedEndpoint {
+  agentId: string;
+  agentType: ResponseActionAgentType;
+  packages: string[];
+  /**
+   * The hostname Fleet records for the agent (`local_metadata.host.name`).
+   * Set only by `resolveByAgentId`, where the caller supplied an ID rather
+   * than a name, so the audit label and confirmation can name the host that
+   * will really be acted on. Under an agent policy whose hostname format is
+   * FQDN this is the FQDN, not the short name Defend reports — see
+   * {@link defendHostNames}.
+   */
+  hostName?: string;
+  /**
+   * Other hostnames the same agent is known by in the Defend united metadata
+   * index (`host.hostname`, the name `list_endpoints` shows). Set only by
+   * `resolveByAgentId`, from a read keyed on that agent's own id, so these can
+   * only ever be this machine's names — never another agent's alias.
+   */
+  defendHostNames?: string[];
+  /**
+   * Status of the resolved agent in the `HostStatus` vocabulary (Fleet's
+   * `unenrolled` / `uninstalled` both report `unenrolled`). Lets a write tool
+   * refuse an agent that can no longer receive actions without changing what
+   * the read-only status tool resolves.
+   */
+  status?: string;
+  /** Agent policy assigned to this Fleet agent, used for policy-aware action preflight. */
+  policyId?: string;
+  /**
+   * Agent policy id without its version suffix, when Fleet reports one
+   * (`policy_base_id`). Package policies are keyed by the unversioned agent
+   * policy id, so the policy preflight reads this in preference to `policyId`.
+   */
+  policyBaseId?: string;
+  /**
+   * Operating system the endpoint runs, normalised to `linux`, `windows` or
+   * `macos`. Defend's `host.os.type` wins where the metadata is read; Fleet's
+   * `local_metadata.os` (no `type` field: `family` is the distribution family,
+   * e.g. `debian`) is the fallback. Used to interpret platform-specific
+   * endpoint policy settings (the Linux isolation gate). Undefined when the
+   * OS is unknown or unrecognised: callers must not refuse on an unknown OS.
+   */
+  osType?: string;
+}
+
+/** A Fleet agent record that matched the hostname but could not be selected. */
+export interface EndpointCandidate {
+  agentId: string;
+  status: string;
+}
+
+/**
+ * Outcome of a hostname lookup.
+ *
+ * `ambiguous` is a first-class outcome, not an error: two distinct live
+ * machines can legitimately share a hostname, so silently picking one would
+ * report — or isolate — the wrong host. Callers must surface the ambiguity
+ * and ask for an agent ID instead of guessing.
+ *
+ * `truncated` marks the case where more agent records match the hostname than
+ * the lookup examined, so even a single visible live candidate cannot be
+ * reported as the answer.
+ */
+export type EndpointLookupResult =
+  | { kind: 'found'; endpoint: ResolvedEndpoint }
+  | { kind: 'not_found' }
+  | {
+      kind: 'ambiguous';
+      candidates: EndpointCandidate[];
+      /** Set when the candidate set is known to be incomplete. */
+      truncated?: true;
+      /** Total matching agent records, when the backend reported it. */
+      totalCandidates?: number;
+    };
+
+export interface EndpointLookupService {
+  resolveByHostName(hostName: string): Promise<EndpointLookupResult>;
+  /** Resolves an exact IP from the space-scoped united Endpoint metadata index. */
+  resolveByIp(ip: string): Promise<EndpointLookupResult>;
+  /**
+   * Resolves one specific agent by its Fleet agent ID, behind the same space
+   * and supported-integration gates as the hostname walk. Never `ambiguous`:
+   * an ID names exactly one agent.
+   */
+  resolveByAgentId(agentId: string): Promise<EndpointLookupResult>;
+}
+
+/** Structural view of the metadata-index fields this lookup reads. */
+interface MetadataCandidate {
+  metadata?: {
+    /** Endpoint's own id — differs from the Fleet agent id. */
+    agent?: { id?: string };
+    /** Fleet agent id — the identity actions and Fleet candidates key on. */
+    elastic?: { agent?: { id?: string } };
+    /** Names and OS Defend reports for the host. */
+    host?: {
+      hostname?: string;
+      name?: string;
+      ip?: string | readonly string[];
+      os?: { type?: string; family?: string };
+    };
+  };
+  host_status?: string;
+  policy_info?: { agent?: { configured?: { id?: string } } };
+  /** HostInfo `last_checkin` — ISO timestamp used for the recency tiebreak. */
+  last_checkin?: string;
+}
+
+/**
+ * Totals to report for an incomplete candidate set.
+ *
+ * Only the collections that were actually truncated contribute: a non-truncated
+ * collection was fully examined, so its `total` describes a set already merged
+ * into the result rather than a set of unexamined records. Summing just the
+ * truncated ones also avoids Fleet's misleading `total: 0` — in the linked
+ * project case Fleet sees none of the agents while metadata sees hundreds, so
+ * preferring Fleet's number would report `totalCandidates: 0` next to a
+ * candidate list that is plainly not empty.
+ */
+function totalCandidatesOf(...collections: Array<{ truncated: boolean; total?: number }>): {
+  totalCandidates?: number;
+} {
+  const totals = collections
+    .filter((collection) => collection.truncated && collection.total !== undefined)
+    .map((collection) => collection.total as number);
+
+  if (!totals.length) {
+    return {};
+  }
+
+  return { totalCandidates: totals.reduce((sum, total) => sum + total, 0) };
+}
+
+/**
+ * Linux distribution families and ids as go-sysinfo (Elastic Agent's OS
+ * source) reports them. On Linux Fleet's `local_metadata.os.family` is the
+ * distribution family (`debian`) and `platform` the distribution id
+ * (`ubuntu`), while `name` is the distribution's pretty name (`Ubuntu`), so
+ * none of them is the literal `linux`.
+ */
+const LINUX_OS_IDS = new Set([
+  'linux',
+  'alpine',
+  'arch',
+  'antergos',
+  'manjaro',
+  'redhat',
+  'fedora',
+  'centos',
+  'scientific',
+  'oraclelinux',
+  'ol',
+  'amzn',
+  'rhel',
+  'almalinux',
+  'openeuler',
+  'rocky',
+  'debian',
+  'ubuntu',
+  'raspbian',
+  'linuxmint',
+  'suse',
+  'sles',
+  'opensuse',
+]);
+
+const classifyOsValue = (value: unknown): 'linux' | 'windows' | 'macos' | undefined => {
+  if (typeof value !== 'string') {
+    return undefined;
+  }
+  const normalized = value.trim().toLowerCase();
+  if (LINUX_OS_IDS.has(normalized)) {
+    return 'linux';
+  }
+  if (normalized.startsWith('windows')) {
+    return 'windows';
+  }
+  if (normalized === 'darwin' || normalized === 'macos' || normalized.startsWith('mac os')) {
+    return 'macos';
+  }
+  return undefined;
+};
+
+/**
+ * Classifies an OS block as `linux`, `windows` or `macos`; anything else is
+ * `undefined` and must never cause a refusal. Reads Defend's `host.os.type`
+ * first, then the Fleet fields (`family`, `platform`, `name`) — Fleet has no
+ * `type`. See {@link ResolvedEndpoint.osType}.
+ */
+const osTypeOf = (
+  os: { type?: string; family?: string; platform?: string; name?: string } | undefined
+): ResolvedEndpoint['osType'] => {
+  if (!os) {
+    return undefined;
+  }
+  return [os.type, os.family, os.platform, os.name].map(classifyOsValue).find(Boolean);
+};
+
+/**
+ * Resolves a hostname to a single Fleet agent + its response-action `agentType`.
+ *
+ * Why this service exists:
+ * - All five host-lookup tools in this skill repeat the same `listAgents` +
+ *   `ensureInCurrentSpace` flow. Consolidating it mirrors the Endpoint team's
+ *   own “single search-strategy point” refactor in Osquery/Defend Workflows
+ *   (`#274308`) and keeps hostname escaping, space validation, and multi-vendor
+ *   `agentType` resolution in one place.
+ * - A host can have MULTIPLE agent records over its lifetime (reinstall,
+ *   agent upgrade, re-enrollment after a broken install) — Fleet keeps prior
+ *   (offline/uninstalled) enrollments around alongside the current one, all
+ *   matching the same `local_metadata.host.name`. We walk every matching page
+ *   and pick the best match (online first, most recently enrolled as tiebreak)
+ *   rather than trusting Fleet's default sort to always put the live agent
+ *   first — otherwise isolate/unisolate/status tools can silently act on a
+ *   dead agent while reporting success.
+ * - Fleet itself is an origin-only service: under cross-project search a host
+ *   enrolled in a linked project is absent from it, yet the Endpoint UI (which
+ *   reads the united metadata index with request-scoped services) shows it.
+ *   When CPS reads are active we ALWAYS also query the scoped metadata index
+ *   and reconcile the two candidate sets — not just as a fallback when Fleet
+ *   returns zero matches. Two reasons that narrower fallback is wrong:
+ *     1. An origin agent can be filtered out by Space visibility, leaving
+ *        zero *visible* Fleet matches even though Fleet technically has a
+ *        record — the fallback needs to run in that case too.
+ *     2. An origin-project agent and a same-named linked-project endpoint can
+ *        coexist; querying metadata only when Fleet is empty would silently
+ *        prefer the origin host and never detect the collision.
+ */
+export function createEndpointLookupService(
+  endpointAppContextService: EndpointAppContextService,
+  spaceId: string,
+  scoped?: ScopedEndpointServices,
+  options?: {
+    /**
+     * Response-action agent types this lookup may resolve. Defaults to every
+     * type in `RESPONSE_ACTIONS_SUPPORTED_INTEGRATION_TYPES`. Tools whose
+     * downstream read only covers Elastic Defend (e.g. a status read backed by
+     * the Defend metadata index) MUST pass `['endpoint']` — otherwise a
+     * SentinelOne/CrowdStrike/MDE agent can win resolution and the follow-up
+     * Defend-metadata read reports a live, healthy host as not-found.
+     */
+    agentTypes?: ResponseActionAgentType[];
+    /**
+     * `'dispatch'` tightens hostname resolution for write actions; read tools
+     * keep the default. Two differences:
+     *
+     * 1. Any two visible candidates are ambiguous, regardless of liveness.
+     *    Read tools treat several same-named records with one live agent as
+     *    normal Fleet bookkeeping (re-enrollment history) and resolve to the
+     *    live one; a write must not guess between two offline duplicates
+     *    either — which of two stale records is the real machine is exactly
+     *    as unknowable as between two live ones.
+     * 2. Resolution stays origin-only. The request-scoped metadata read still
+     *    runs, but only to WIDEN the collision set: a same-named endpoint in
+     *    a linked project must surface as ambiguity instead of the origin
+     *    host being offered on a card. A host only a linked project has can
+     *    never win resolution, because the response-actions client dispatches
+     *    through origin Fleet (an action issued here would sit pending
+     *    forever on an agent enrolled elsewhere).
+     */
+    resolutionMode?: 'dispatch';
+  }
+): EndpointLookupService {
+  const fleetServices = endpointAppContextService.getInternalFleetServices(spaceId);
+  const supportedAgentTypes = options?.agentTypes;
+  const dispatchMode = options?.resolutionMode === 'dispatch';
+
+  // Packages of the response-action integrations this lookup may resolve.
+  // When the caller scopes the lookup (`agentTypes`), the set narrows
+  // accordingly. Shared by the hostname walk and the agent-ID lookup so both
+  // paths agree on which agents are response-action targets.
+  const supportedPackages = new Set(
+    Object.entries(RESPONSE_ACTIONS_SUPPORTED_INTEGRATION_TYPES)
+      .filter(
+        ([agentType]) =>
+          !supportedAgentTypes || supportedAgentTypes.includes(agentType as ResponseActionAgentType)
+      )
+      .flatMap(([, packageNames]) => packageNames)
+  );
+
+  interface DefendHostIdentity {
+    names: string[];
+    osType?: string;
+  }
+
+  interface NormalizedCandidate {
+    agentId: string;
+    isLive: boolean;
+    status: string;
+    packages?: string[];
+    policyId?: string;
+    policyBaseId?: string;
+    hostName?: string;
+    osType?: string;
+    /**
+     * Set when the candidate was admitted on Defend's own metadata rather than
+     * Fleet `packages`; it then always resolves as Elastic Defend.
+     */
+    agentType?: ResponseActionAgentType;
+    /**
+     * ISO timestamp for the newest-first tiebreak. The source differs by
+     * candidate origin: `enrolled_at` for Fleet agents, `last_checkin` for
+     * Defend metadata entries, so it is only an ordering key, not a
+     * last-seen or enrollment time.
+     */
+    sortKey?: string;
+  }
+
+  interface RawFleetAgent {
+    id: string;
+    status?: string;
+    packages?: string[];
+    enrolled_at?: string;
+    policy_id?: string;
+    policy_base_id?: string;
+    // The OS block sits beside `host`, not under it (`local_metadata.os.*`).
+    local_metadata?: {
+      host?: { name?: string };
+      os?: { type?: string; family?: string };
+    };
+  }
+
+  interface CandidateCollection {
+    candidates: NormalizedCandidate[];
+    truncated: boolean;
+    /**
+     * Fleet agent ids that matched the hostname but are not response-action
+     * targets (no supported integration in `packages`). They are dropped from
+     * `candidates`, but a Defend metadata document for the same agent id can
+     * still match the hostname, so the metadata merge has to know about them —
+     * otherwise the id is offered as an ambiguity candidate and then rejected
+     * as `endpoint_not_found` when the model retries with it.
+     */
+    unsupportedAgentIds?: Set<string>;
+    total?: number;
+  }
+
+  // Space-check each page as it is fetched: the underlying Fleet API takes
+  // agentIds[], so one call per page keeps the check cheap. A rejected batch
+  // (at least one hidden agent) falls back per-agent WITHIN that page only —
+  // a mixed-visibility page costs page-size checks, not the whole walk.
+  const listVisibleFleetCandidates = async (hostName: string): Promise<CandidateCollection> => {
+    const { items, truncated } = await collectPages<RawFleetAgent>(
+      async (page) => {
+        const response = await fleetServices.agent.listAgents({
+          showInactive: true,
+          kuery: `local_metadata.host.name.keyword: "${escapeQuotes(hostName)}"`,
+          page,
+          perPage: LOOKUP_PAGE_SIZE,
+        });
+        const pageCandidates = response?.agents ?? [];
+
+        const pageIds = pageCandidates.map((candidate) => candidate.id);
+        let visibleIds: Set<string>;
+        try {
+          await fleetServices.ensureInCurrentSpace({ agentIds: pageIds });
+          visibleIds = new Set(pageIds);
+        } catch (e) {
+          if (!(e instanceof NotFoundError)) {
+            throw e;
+          }
+
+          visibleIds = new Set();
+          for (const candidate of pageCandidates) {
+            try {
+              await fleetServices.ensureInCurrentSpace({ agentIds: [candidate.id] });
+              visibleIds.add(candidate.id);
+            } catch (perAgentError) {
+              if (!(perAgentError instanceof NotFoundError)) {
+                throw perAgentError;
+              }
+            }
+          }
+        }
+
+        return {
+          items: pageCandidates.filter((candidate) => visibleIds.has(candidate.id)),
+          total: response?.total,
+          fetchedCount: pageCandidates.length,
+        };
+      },
+      { pageSize: LOOKUP_PAGE_SIZE, maxPages: MAX_LOOKUP_PAGES }
+    );
+
+    // This skill acts on response-action-capable endpoints, so agents that
+    // merely share the hostname without a supported integration (e.g. an
+    // auditing agent) must not surface as candidates — they would otherwise
+    // inflate the ambiguity set or win the tiebreak over a real endpoint.
+    // An agent Defend reports metadata for is a Defend endpoint whatever its
+    // Fleet `packages` say (see `listDefendMetadataAgentIds`), so it stays a
+    // candidate instead of being dropped as an auditing-only agent.
+    const hasSupportedPackage = (candidate: RawFleetAgent) =>
+      (candidate.packages ?? []).some((p) => supportedPackages.has(p));
+    const vouchedByDefend = await listDefendMetadataAgentIds(
+      items.filter((candidate) => !hasSupportedPackage(candidate)).map((candidate) => candidate.id)
+    );
+    const isSupported = (candidate: RawFleetAgent) =>
+      hasSupportedPackage(candidate) || vouchedByDefend.has(candidate.id);
+    const unsupportedAgentIds = new Set(
+      items.filter((candidate) => !isSupported(candidate)).map((candidate) => candidate.id)
+    );
+    const visible: NormalizedCandidate[] = items.filter(isSupported).map((candidate) => ({
+      agentId: candidate.id,
+      // Mirror Fleet's own ActiveAgentStatuses: only records that are
+      // definitively gone count as not live — `updating`, `degraded`,
+      // `enrolling` and `error` are active machines, so two same-named agents
+      // in those states must still surface as `ambiguous` rather than one
+      // being silently picked.
+      isLive: isLiveFleetStatus(candidate.status ?? ''),
+      // Reported in the `HostStatus` vocabulary every other status the tool
+      // returns uses (metadata candidates, the found result); `isLive`
+      // above stays on the raw Fleet status, where the active/gone
+      // distinction is defined.
+      status: candidate.status ? toHostStatus(candidate.status as AgentStatus) : 'unknown',
+      packages: candidate.packages,
+      policyId: candidate.policy_id,
+      policyBaseId: candidate.policy_base_id,
+      hostName: candidate.local_metadata?.host?.name,
+      osType: osTypeOf(candidate.local_metadata?.os),
+      // Defend's metadata outranks Fleet `packages`, which may be stale or name
+      // another vendor; routing by it would leave the Defend-only dispatch path.
+      ...(hasSupportedPackage(candidate) ? {} : { agentType: 'endpoint' as const }),
+      sortKey: candidate.enrolled_at,
+    }));
+
+    // `truncated` is safe to keep: it says only "there were more pages", which
+    // the caller already learns from the space-filtered candidate list being
+    // full. `total` is NOT: `listAgents` counts every matching agent before
+    // `ensureInCurrentSpace` drops the ones this caller cannot see, so returning
+    // it would let a hostname probe learn how many matching agent records exist
+    // in other Spaces. Drop it and let the count be derived from visible data.
+    return { candidates: visible, truncated, unsupportedAgentIds };
+  };
+
+  /**
+   * Hostnames Defend itself reports for one agent, read from the united
+   * metadata index keyed on *that agent's id*. Keying on the id is the point:
+   * the read can only return documents belonging to the agent the caller
+   * already named, so a hostname that is another machine's alias can never be
+   * accepted through it.
+   *
+   * Needed because Fleet and Defend disagree about the name of the same host
+   * when the agent policy's hostname format is FQDN: Fleet's
+   * `local_metadata.host.name` is then the FQDN while Defend keeps writing the
+   * short OS hostname that `list_endpoints` shows. Without these names a
+   * correct `{ hostName: <short name>, agentId: <that same agent> }` call is
+   * refused as ambiguous.
+   *
+   * Best effort by design: the names only *widen* what counts as a match for
+   * the agent the caller already named, so an outage here leaves them with
+   * Fleet's hostname alone (the stricter, pre-existing behaviour) instead of
+   * failing a dispatch that Fleet resolved fine.
+   */
+  const listDefendHostIdentity = async (agentId: string): Promise<DefendHostIdentity> => {
+    try {
+      // Fleet agent id first, endpoint's own id as the legacy fallback — the
+      // same join `getAgentHostNamesWithIds` and the status read use.
+      const quotedAgentId = `"${escapeQuotes(agentId)}"`;
+      const { data } = await endpointAppContextService
+        .getEndpointMetadataService(spaceId)
+        .getHostMetadataList(
+          {
+            page: 0,
+            pageSize: LOOKUP_PAGE_SIZE,
+            kuery: `(united.agent.agent.id: ${quotedAgentId} OR agent.id: ${quotedAgentId})`,
+          },
+          // Dispatch mode keeps every read origin-only: the alias check must
+          // not adopt a linked-project record for a host origin Fleet holds.
+          dispatchMode ? undefined : scoped
+        );
+
+      const names = (data ?? []).flatMap((entry) => [
+        entry.metadata?.host?.hostname,
+        entry.metadata?.host?.name,
+      ]);
+      const osType = (data ?? []).map((entry) => osTypeOf(entry.metadata?.host?.os)).find(Boolean);
+
+      return {
+        names: [...new Set(names.filter((name): name is string => Boolean(name)))],
+        ...(osType ? { osType } : {}),
+      };
+    } catch {
+      return { names: [] };
+    }
+  };
+
+  /**
+   * Ids, among `agentIds`, that Defend itself reports metadata for. The united
+   * metadata read is bounded to this space's Defend policies, so an id in the
+   * result is proof the agent runs Elastic Defend here even when the Fleet agent
+   * document carries no (or a stale) `packages` list — Fleet populates that
+   * field from the agent's own check-in, and `list_endpoints` / the status read
+   * never consult it. Best effort: on failure no id is vouched for, which
+   * keeps the stricter Fleet-only behaviour.
+   */
+  const listDefendMetadataAgentIds = async (agentIds: string[]): Promise<Set<string>> => {
+    if (!agentIds.length || (supportedAgentTypes && !supportedAgentTypes.includes('endpoint'))) {
+      return new Set();
+    }
+
+    try {
+      const idList = `(${agentIds.map((id) => `"${escapeQuotes(id)}"`).join(' OR ')})`;
+      const kuery = `united.agent.agent.id: ${idList} OR agent.id: ${idList}`;
+      const { data } = await endpointAppContextService
+        .getEndpointMetadataService(spaceId)
+        .getHostMetadataList(
+          { page: 0, pageSize: Math.max(agentIds.length, 1), kuery },
+          dispatchMode ? undefined : scoped
+        );
+
+      return new Set(
+        (data ?? []).flatMap((entry) => {
+          const id = getMetadataAgentId(entry);
+          return id && agentIds.includes(id) ? [id] : [];
+        })
+      );
+    } catch {
+      return new Set();
+    }
+  };
+
+  /**
+   * Candidates from the Defend united metadata index, matched exactly on
+   * `united.endpoint.host.hostname` — the hostname `list_endpoints` returns
+   * and the status read filters on. Read on origin as well as under CPS:
+   * Fleet's `local_metadata.host.name` holds the FQDN when the agent policy
+   * hostname format is FQDN, while Defend keeps writing the short OS
+   * hostname, so a Fleet-only origin read misses the short name that
+   * `list_endpoints` shows. Under CPS the request-scoped read also covers
+   * endpoints enrolled in a linked project, which origin Fleet cannot see.
+   * Space isolation holds on both paths: `getHostMetadataList` filters to the
+   * Defend policies visible in this space. Callers merge this with
+   * `listVisibleFleetCandidates` rather than treating it as an exclusive
+   * fallback.
+   */
+  const listMetadataCandidates = async (
+    field: 'hostname' | 'ip',
+    value: string,
+    scopedServices?: ScopedEndpointServices
+  ): Promise<CandidateCollection> => {
+    // The metadata index only holds Elastic Defend hosts.
+    if (supportedAgentTypes && !supportedAgentTypes.includes('endpoint')) {
+      return { candidates: [], truncated: false };
+    }
+
+    const metadataService = endpointAppContextService.getEndpointMetadataService(spaceId);
+
+    const { items, truncated, total } = await collectPages<MetadataCandidate>(
+      async (page) => {
+        const { data, total: pageTotal } = await metadataService.getHostMetadataList(
+          {
+            // The metadata service pages from 0, unlike Fleet's 1-based pages.
+            page: page - 1,
+            pageSize: LOOKUP_PAGE_SIZE,
+            // `keyword` field (`strings_as_keyword` in metrics-metadata-united.json): the quoted
+            // value is an exact match, so `web-01` cannot match `web-01-copy`.
+            kuery: `united.endpoint.host.${field}: "${escapeQuotes(value)}"`,
+          },
+          scopedServices
+        );
+
+        return { items: data ?? [], total: pageTotal, fetchedCount: data?.length ?? 0 };
+      },
+      { pageSize: LOOKUP_PAGE_SIZE, maxPages: MAX_LOOKUP_PAGES }
+    );
+
+    const candidates: NormalizedCandidate[] = items.flatMap((entry) => {
+      // Identity: report the FLEET agent id (`elastic.agent.id`), not the
+      // endpoint's own `agent.id`. Fleet candidates key on `candidate.id`
+      // (the Fleet id), so carrying the endpoint id here makes the same
+      // host appear as TWO distinct candidates when the ids differ (false
+      // ambiguity), and downstream reads filtering on the Fleet id miss the
+      // metadata doc. Fleet-id-first with the endpoint id as fallback
+      // mirrors `EndpointMetadataService.getEnrichedHostMetadata()`.
+      const agentId = getMetadataAgentId(entry);
+      if (!agentId) {
+        return [];
+      }
+      return [
+        {
+          agentId,
+          // Metadata `host_status` is the HostStatus enum, not Fleet's
+          // agent-level `online`. Only records that are definitively gone
+          // (offline / inactive / unenrolled) count as not live; `updating` and
+          // `unhealthy` are still potentially-reachable machines.
+          isLive: isLiveHostStatus(entry.host_status as string),
+          status: entry.host_status as string,
+          hostName: entry.metadata?.host?.hostname ?? entry.metadata?.host?.name,
+          osType: osTypeOf(entry.metadata?.host?.os),
+          policyId: entry.policy_info?.agent?.configured?.id,
+          sortKey: entry.last_checkin,
+        },
+      ];
+    });
+
+    return { candidates, truncated, total };
+  };
+
+  /**
+   * Merges Fleet candidates with one or more metadata candidate
+   * collections, de-duplicated by agent id. Metadata docs of agents Fleet
+   * already rejected for lacking a supported integration are dropped:
+   * `resolveByAgentId` would answer `not_found` for the id this result
+   * offers.
+   */
+  const mergeCandidates = (
+    fleet: CandidateCollection,
+    ...metadataCollections: CandidateCollection[]
+  ): NormalizedCandidate[] => {
+    const seen = new Set(fleet.candidates.map((c) => c.agentId));
+    return [
+      ...fleet.candidates,
+      ...metadataCollections.flatMap((collection) =>
+        collection.candidates.filter((c) => {
+          if (seen.has(c.agentId) || fleet.unsupportedAgentIds?.has(c.agentId)) {
+            return false;
+          }
+          seen.add(c.agentId);
+          return true;
+        })
+      ),
+    ];
+  };
+
+  const resolveIpMetadataCandidates = async (value: string) => {
+    // Same CPS rule as the hostname path (see `resolutionMode`): dispatch
+    // resolves on origin only, and the request-scoped read only widens the
+    // collision set, so a linked-project host sharing the IP is ambiguity.
+    const [origin, scopedMetadata] = await Promise.all([
+      listMetadataCandidates('ip', value, dispatchMode ? undefined : scoped),
+      dispatchMode && scoped?.isCpsRead() ? listMetadataCandidates('ip', value, scoped) : undefined,
+    ]);
+    const metadata = {
+      candidates: [...origin.candidates, ...(scopedMetadata?.candidates ?? [])],
+      truncated: origin.truncated || Boolean(scopedMetadata?.truncated),
+      total:
+        origin.total === undefined && scopedMetadata?.total === undefined
+          ? undefined
+          : (origin.total ?? 0) + (scopedMetadata?.total ?? 0),
+    };
+    const sorted = [...metadata.candidates].sort((a, b) => {
+      const aLive = a.isLive ? 1 : 0;
+      const bLive = b.isLive ? 1 : 0;
+      if (aLive !== bLive) return bLive - aLive;
+      return (b.sortKey ?? '').localeCompare(a.sortKey ?? '');
+    });
+    // United metadata can retain more than one document for the same agent.
+    // Keep its best (live/newest) document so history is not mistaken for two
+    // distinct machines sharing an address.
+    const seenAgentIds = new Set<string>();
+    const distinct = sorted.filter((candidate) => {
+      if (seenAgentIds.has(candidate.agentId)) return false;
+      seenAgentIds.add(candidate.agentId);
+      return true;
+    });
+
+    if (!distinct.length) {
+      return { kind: 'not_found' } as const;
+    }
+
+    // Dispatch resolves on the origin project: linked projects only widen the
+    // ambiguity set, and a host found there alone cannot be dispatched to from
+    // here (the response-actions client goes through origin Fleet). Origin
+    // presence is therefore checked before ambiguity is reported, matching the
+    // hostname rule: no origin match means `not_found`, never a choice among
+    // agents this project cannot act on.
+    if (
+      dispatchMode &&
+      !distinct.some((c) => origin.candidates.some((o) => o.agentId === c.agentId))
+    ) {
+      return { kind: 'not_found' } as const;
+    }
+
+    // The list is also incomplete when it is cut to the candidate cap, not
+    // only when the metadata walk stopped early: without the flag a model
+    // would read the first 10 of 11 holders as the whole set.
+    const listCut = distinct.length > MAX_AMBIGUOUS_CANDIDATES;
+    if (metadata.truncated || distinct.length > 1) {
+      return {
+        kind: 'ambiguous' as const,
+        candidates: distinct
+          .slice(0, MAX_AMBIGUOUS_CANDIDATES)
+          .map((candidate) => ({ agentId: candidate.agentId, status: candidate.status })),
+        ...(metadata.truncated || listCut ? { truncated: true as const } : {}),
+        ...(metadata.truncated && metadata.total !== undefined
+          ? { totalCandidates: metadata.total }
+          : listCut
+          ? { totalCandidates: distinct.length }
+          : {}),
+      };
+    }
+
+    const chosen = distinct[0];
+    // The united transform can lag a policy reassignment, and the policy
+    // decides whether an isolation is allowed, so the assignment is read from
+    // the Fleet agent itself — the same source the agent-ID path uses. Best
+    // effort: an agent Fleet cannot return (e.g. enrolled in a linked
+    // project) keeps the metadata values rather than failing the lookup.
+    const fleetAgent = await fleetServices.agent.getAgent(chosen.agentId).catch(() => undefined);
+    const policyId = fleetAgent?.policy_id ?? chosen.policyId;
+    const policyBaseId = fleetAgent?.policy_base_id ?? chosen.policyBaseId;
+    // Defend's `host.os.type` (already on `chosen`) outranks Fleet's distro-shaped OS block.
+    const osType = chosen.osType ?? osTypeOf(fleetAgent?.local_metadata?.os);
+
+    return {
+      kind: 'found' as const,
+      endpoint: {
+        agentId: chosen.agentId,
+        agentType: 'endpoint' as const,
+        packages: ['endpoint'],
+        status: chosen.status,
+        ...(chosen.hostName ? { hostName: chosen.hostName } : {}),
+        ...(policyId ? { policyId } : {}),
+        ...(policyBaseId ? { policyBaseId } : {}),
+        ...(osType ? { osType } : {}),
+      },
+    };
+  };
+
+  return {
+    async resolveByIp(ip: string): Promise<EndpointLookupResult> {
+      // IP targeting is Defend-only: Fleet has no response-action-safe mapping
+      // from a host IP to third-party EDR agent identity. The metadata service
+      // applies the caller's Space and cross-project scope.
+      if (supportedAgentTypes && !supportedAgentTypes.includes('endpoint')) {
+        return { kind: 'not_found' };
+      }
+      return resolveIpMetadataCandidates(canonicalizeIp(ip));
+    },
+
+    async resolveByAgentId(agentId: string): Promise<EndpointLookupResult> {
+      // The same space gate the hostname walk applies per page: an agent
+      // outside the caller's space answers `not_found`, so an ID probe cannot
+      // reveal that an agent exists in another space.
+      try {
+        await fleetServices.ensureInCurrentSpace({ agentIds: [agentId] });
+      } catch (e) {
+        if (e instanceof NotFoundError) {
+          return { kind: 'not_found' };
+        }
+        throw e;
+      }
+
+      const agent = await fleetServices.agent.getAgent(agentId);
+      const packages = agent.packages ?? [];
+
+      // An agent without a supported (or, when scoped, requested) integration
+      // is not a response-action target — same filter as the hostname path.
+      const hasSupportedPackage = packages.some((p) => supportedPackages.has(p));
+      if (!hasSupportedPackage && !(await listDefendMetadataAgentIds([agent.id])).has(agent.id)) {
+        return { kind: 'not_found' };
+      }
+
+      const fleetHostName = agent.local_metadata?.host?.name;
+      // Admitted on Defend's metadata alone: Fleet `packages` are stale or name
+      // another vendor, and a vendor type would leave the Defend-only dispatch path.
+      const agentType = hasSupportedPackage ? resolveAgentTypeFromPackages(packages) : 'endpoint';
+      // Fleet's name for the agent is not the only identity a correct caller
+      // can supply — see `listDefendHostIdentity`. Only a Defend agent has
+      // documents in the metadata index, so only it needs that read.
+      const defendIdentity: DefendHostIdentity =
+        agentType === 'endpoint' ? await listDefendHostIdentity(agent.id) : { names: [] };
+      const defendHostNames = defendIdentity.names;
+      // Defend's own `host.os.type` outranks Fleet's distro-shaped OS block.
+      const agentOsType = defendIdentity.osType ?? osTypeOf(agent.local_metadata?.os);
+
+      return {
+        kind: 'found',
+        endpoint: {
+          agentId: agent.id,
+          agentType,
+          packages,
+          ...(agent.status ? { status: toHostStatus(agent.status) } : {}),
+          ...(agent.policy_id ? { policyId: agent.policy_id } : {}),
+          ...(agent.policy_base_id ? { policyBaseId: agent.policy_base_id } : {}),
+          ...(agentOsType ? { osType: agentOsType } : {}),
+          ...(typeof fleetHostName === 'string' && fleetHostName
+            ? { hostName: fleetHostName }
+            : {}),
+          ...(defendHostNames.length ? { defendHostNames } : {}),
+        },
+      };
+    },
+
+    async resolveByHostName(hostName: string): Promise<EndpointLookupResult> {
+      // Read tools pass the request-scoped services straight through, so
+      // linked-project hosts resolve like origin ones. Dispatch mode resolves
+      // on ORIGIN sources only and — when CPS reads are active — ALSO fetches
+      // the scoped candidate set, used solely to widen collision detection
+      // (see `resolutionMode` in `createEndpointLookupService`).
+      const [fleet, resolutionMetadata, scopedMetadata] = await Promise.all([
+        listVisibleFleetCandidates(hostName),
+        listMetadataCandidates('hostname', hostName, dispatchMode ? undefined : scoped),
+        dispatchMode && scoped?.isCpsRead()
+          ? listMetadataCandidates('hostname', hostName, scoped)
+          : undefined,
+      ]);
+
+      // Fleet is the authority when it has the record — prefer it (it carries
+      // `packages`, needed for `agentType`) and only add metadata candidates
+      // Fleet doesn't already know about, so a host isn't double-counted.
+      // Accepted legacy ambiguity: a legacy metadata doc without
+      // `elastic.agent.id` falls back to the endpoint's own `agent.id`,
+      // which differs from Fleet's id, so one physical host can surface here
+      // as two candidates and trip `ambiguous_hostname` even though it's a
+      // single machine. Accepted because the failure mode is safe (the
+      // analyst disambiguates; no wrong-host read, no leak), legacy docs are
+      // transient, and joining on hostname instead would risk merging two
+      // genuinely different hosts that happen to share a name.
+      const merged = mergeCandidates(
+        fleet,
+        resolutionMetadata,
+        ...(scopedMetadata ? [scopedMetadata] : [])
+      );
+
+      // Space isolation first: when the walk hit the hard cap and nothing
+      // visible was found, answer `not_found`. Spaces are a security boundary —
+      // reporting "we found records but cannot show them" (or a cross-space
+      // count) would leak that matching records exist in other Spaces. A
+      // false-negative for a visible agent living beyond the cap is accepted
+      // for that isolation; the cap is high enough (500 records) that real
+      // hostnames never reach it.
+      const truncated =
+        fleet.truncated || resolutionMetadata.truncated || Boolean(scopedMetadata?.truncated);
+      const selection = selectEndpointHost(merged, {
+        truncated,
+        ...(dispatchMode
+          ? { dispatch: { originCandidates: mergeCandidates(fleet, resolutionMetadata) } }
+          : {}),
+      });
+
+      if (selection.kind === 'not_found') {
+        return { kind: 'not_found' };
+      }
+
+      if (selection.kind === 'ambiguous') {
+        return {
+          kind: 'ambiguous',
+          candidates: selection.candidates.map((c) => ({ agentId: c.agentId, status: c.status })),
+          ...(selection.truncated ? { truncated: true as const } : {}),
+          ...totalCandidatesOf(
+            fleet,
+            resolutionMetadata,
+            ...(scopedMetadata ? [scopedMetadata] : [])
+          ),
+        };
+      }
+
+      const chosen = selection.candidate;
+      // Fleet wins the candidate merge, but Defend's `host.os.type` is the
+      // better OS signal when its metadata holds the same agent.
+      const defendOsType = resolutionMetadata.candidates.find(
+        (c) => c.agentId === chosen.agentId
+      )?.osType;
+      const osType = defendOsType ?? chosen.osType;
+
+      return {
+        kind: 'found',
+        endpoint: {
+          agentId: chosen.agentId,
+          agentType: chosen.agentType ?? resolveAgentTypeFromPackages(chosen.packages ?? []),
+          packages: chosen.packages ?? [],
+          status: chosen.status,
+          ...(chosen.policyId ? { policyId: chosen.policyId } : {}),
+          ...(chosen.policyBaseId ? { policyBaseId: chosen.policyBaseId } : {}),
+          ...(osType ? { osType } : {}),
+        },
+      };
+    },
+  };
+}

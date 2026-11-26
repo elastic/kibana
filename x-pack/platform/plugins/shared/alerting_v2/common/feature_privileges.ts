@@ -20,6 +20,7 @@ import {
 import { ACTION_POLICY_KI_TYPE, RULE_KI_TYPE } from '@kbn/agent-builder-elastic-ai-index-ki-types';
 import {
   ACTION_POLICY_SAVED_OBJECT_TYPE,
+  EXTERNAL_SOURCE_SAVED_OBJECT_TYPE,
   RULE_SAVED_OBJECT_TYPE,
   RULE_TEMPLATE_SAVED_OBJECT_TYPE,
 } from './saved_object_types';
@@ -127,8 +128,10 @@ export interface AlertingV2FeatureDefinition {
   readonly name: string;
   readonly managementApp: string;
   /**
-   * Extra management apps granted by this feature. Used when a feature owns
-   * more than one Stack Management page (e.g. Rules also owns Rule library).
+   * Extra Stack Management apps this feature owns. Granted only by the `all`
+   * privilege (e.g. Rules also owns the write-only Rule library page).
+   * Still listed on the feature `management` block so Core does not treat
+   * them as unowned/public.
    */
   readonly additionalManagementApps?: readonly string[];
   readonly privileges: {
@@ -182,7 +185,8 @@ export const ALERTING_V2_FEATURES = {
         api: [ALERTING_V2_API_PRIVILEGES.alerts.read, ALERTING_V2_API_PRIVILEGES.alerts.write],
         ui: [ALERTING_V2_UI_CAPABILITIES.alerts.all, ALERTING_V2_UI_CAPABILITIES.alerts.read],
         savedObject: {
-          all: [],
+          // Alert imports configure how alerts are written into the system from 3rd parties, so they require alerts access.
+          all: [EXTERNAL_SOURCE_SAVED_OBJECT_TYPE],
           read: [],
         },
       },
@@ -192,7 +196,7 @@ export const ALERTING_V2_FEATURES = {
         ui: [ALERTING_V2_UI_CAPABILITIES.alerts.read],
         savedObject: {
           all: [],
-          read: [],
+          read: [EXTERNAL_SOURCE_SAVED_OBJECT_TYPE],
         },
       },
     },

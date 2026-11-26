@@ -367,13 +367,15 @@ export function mlApiProvider(httpService: HttpService) {
       start,
       end,
       overallScore,
+      signal,
     }: {
       jobId: string[];
-      topN: string;
+      topN: number;
       bucketSpan: string;
       start: number;
       end: number;
       overallScore?: number;
+      signal?: AbortSignal;
     }): Promise<estypes.MlGetOverallBucketsResponse> {
       const body = JSON.stringify({
         topN,
@@ -395,6 +397,7 @@ export function mlApiProvider(httpService: HttpService) {
             method: 'POST',
             body,
             version: '1',
+            signal,
           });
         })
       ).then((responses) => {
@@ -678,6 +681,7 @@ export function mlApiProvider(httpService: HttpService) {
       earliestMs,
       latestMs,
       datafeed,
+      signal,
     }: {
       index: string;
       fieldNames: string[];
@@ -686,6 +690,7 @@ export function mlApiProvider(httpService: HttpService) {
       earliestMs: number;
       latestMs: number;
       datafeed?: Datafeed;
+      signal?: AbortSignal;
     }) {
       const body = JSON.stringify({
         index,
@@ -702,6 +707,7 @@ export function mlApiProvider(httpService: HttpService) {
         method: 'POST',
         body,
         version: '1',
+        signal,
       });
     },
 

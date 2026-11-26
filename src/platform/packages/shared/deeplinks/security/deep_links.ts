@@ -82,6 +82,7 @@ export enum SecurityPageName {
   siemMigrationsLanding = 'siem_migrations',
   siemMigrationsRules = 'siem_migrations-rules',
   siemMigrationsDashboards = 'siem_migrations-dashboards',
+  siemMigrationsWorkflows = 'siem_migrations-workflows',
   siemMigrationsManage = 'siem_migrations-manage',
   /*
    * Warning: Computed values are not permitted in an enum with string valued members
@@ -92,6 +93,7 @@ export enum SecurityPageName {
   timelinesTemplates = 'timelines-templates',
   trustedApps = 'trusted_apps',
   trustedDevices = 'trusted_devices',
+  customYaraSignatures = 'custom_yara_signatures',
   users = 'users',
   usersAll = 'users-all',
   usersAnomalies = 'users-anomalies',
@@ -101,7 +103,6 @@ export enum SecurityPageName {
   entityAnalytics = 'entity_analytics', // This is the first Entity Analytics page, that is why the name is too generic.
   entityAnalyticsManagement = 'entity_analytics-management',
   entityAnalyticsLanding = 'entity_analytics-landing',
-  entityAnalyticsPrivilegedUserMonitoring = 'entity_analytics-privileged_user_monitoring',
   entityAnalyticsOverview = 'entity_analytics-overview',
   entityAnalyticsHomePage = 'entity_analytics-home_page',
   entityAnalyticsEntityStoreManagement = 'entity_analytics-entity_store_management',
@@ -124,6 +125,7 @@ export enum SecurityPageName {
    * external links
    */
   externalLinkAgentBuilder = 'external_link-agent_builder',
+  externalLinkAlertZero = 'external_link-alertzero',
   externalLinkDiscover = 'external_link-discover',
   externalLinkWorkflows = 'external_link-workflows',
 
@@ -136,19 +138,17 @@ export enum SecurityPageName {
    * AlertZero pages.
    *
    * These live on the `alertzero` plugin rather than `securitySolutionUI`, so their link ids are built with
-   * `alertZeroLink()` instead of `securityLink()`. `alerts` and `attacks` are reused from above — the page
-   * name is the same concept, and the app prefix is what distinguishes the two links.
+   * `alertZeroLink()` instead of `securityLink()`.
    */
-  alertZeroChats = 'chats',
-  alertZeroRecords = 'records',
-  alertZeroThreatHunt = 'threat_hunt',
-  alertZeroStreams = 'streams',
+  alertZeroHome = 'home',
+  alertZeroEscalations = 'escalations',
   alertZeroWatches = 'watches',
   alertZeroWatchesWorkers = 'watches_workers',
   alertZeroWatchesSkills = 'watches_skills',
   alertZeroWatchFloor = 'watch_floor',
   alertZeroWatchOfficer = 'watch_officer',
-  alertZeroWatchDark = 'watch_dark',
+  alertZeroWatchHunt = 'watch_hunt',
   alertZeroWatchDeep = 'watch_deep',
   alertZeroWatchDetection = 'watch_detection',
+  alertZeroWatchForensics = 'watch_forensics',
 }

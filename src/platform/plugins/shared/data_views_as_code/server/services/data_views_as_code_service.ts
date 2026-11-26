@@ -28,15 +28,18 @@ export class DataViewsAsCodeService {
   private dataViewsService: DataViewsService;
   private savedObjectsClient: SavedObjectsClientContract;
   private fieldFormats: FieldFormatsRegistry;
+  private scriptedFieldsEnabled: boolean;
 
   constructor(
     dataViewsService: DataViewsService,
     savedObjectsClient: SavedObjectsClientContract,
-    fieldFormats: FieldFormatsRegistry
+    fieldFormats: FieldFormatsRegistry,
+    scriptedFieldsEnabled: boolean
   ) {
     this.dataViewsService = dataViewsService;
     this.savedObjectsClient = savedObjectsClient;
     this.fieldFormats = fieldFormats;
+    this.scriptedFieldsEnabled = scriptedFieldsEnabled;
   }
 
   private validateFieldFormatTypes(spec: AsCodeSavedDataView) {
@@ -65,7 +68,20 @@ export class DataViewsAsCodeService {
     if (dataView.getFieldAttrs().size > 0)
       dataViewSpec.fieldAttrs = Object.fromEntries(dataView.getFieldAttrs().entries());
 
-    const dataViewAsCode = fromStoredDataViewToAsCodeSavedSchema(dataViewSpec);
+    // `toMinimalSpec` omits the field list, scripted fields are the only ones persisted in it.
+    // Like the rest of the data views APIs, they are hidden when scripted fields are disabled.
+    const scriptedFields = this.scriptedFieldsEnabled
+      ? Object.values(dataView.getScriptedFields({ fieldName: ['*'] })).map((field) =>
+          field.toSpec()
+        )
+      : [];
+
+    const dataViewAsCode = fromStoredDataViewToAsCodeSavedSchema({
+      ...dataViewSpec,
+      ...(scriptedFields.length > 0 && {
+        fields: Object.fromEntries(scriptedFields.map((field) => [field.name, field])),
+      }),
+    });
 
     return {
       id: dataView.id,
@@ -73,7 +89,7 @@ export class DataViewsAsCodeService {
       meta: {
         managed: dataView.managed,
         version: dataView.version,
-        namespaces: dataView.namespaces,
+        spaces: dataView.namespaces,
       },
     };
   }
@@ -179,7 +195,7 @@ export class DataViewsAsCodeService {
         },
         meta: {
           ...getMeta(so),
-          namespaces: so.namespaces,
+          spaces: so.namespaces,
         },
       };
     });

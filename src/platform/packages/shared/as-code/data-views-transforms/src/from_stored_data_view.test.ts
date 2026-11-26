@@ -107,7 +107,7 @@ describe('fromStoredDataView', () => {
       time_field: '@timestamp',
       field_settings: {
         bytes_field: {
-          format: { type: 'bytes', params: undefined },
+          format: { type: 'bytes', params: {} },
         },
         host_name: {
           custom_label: 'Host',
@@ -155,11 +155,11 @@ describe('fromStoredDataView', () => {
       field_settings: {
         rt: {
           type: 'keyword',
-          format: { type: 'string', params: undefined },
+          format: { type: 'string', params: {} },
           custom_label: 'Runtime',
         },
         mapped: {
-          format: { type: 'bytes', params: undefined },
+          format: { type: 'bytes', params: {} },
           custom_label: 'Mapped',
         },
       },
@@ -186,13 +186,13 @@ describe('fromStoredDataView', () => {
           fields: {
             child: {
               type: 'keyword',
-              format: { type: 'string', params: undefined },
+              format: { type: 'string', params: {} },
               custom_label: 'Runtime subfield',
             },
           },
         },
         mapped: {
-          format: { type: 'bytes', params: undefined },
+          format: { type: 'bytes', params: {} },
         },
       },
     });
@@ -261,5 +261,89 @@ describe('fromStoredDataViewToAsCodeSavedSchema', () => {
     });
 
     expect(result).not.toHaveProperty('field_filters');
+  });
+
+  describe('scripted fields', () => {
+    const doubleBytes = {
+      name: 'double_bytes',
+      type: 'number',
+      scripted: true,
+      searchable: true,
+      aggregatable: true,
+      lang: 'painless',
+      script: "doc['bytes'].value * 2",
+    };
+
+    it('maps scripted fields to scripted_fields', () => {
+      const result = fromStoredDataViewToAsCodeSavedSchema({
+        title: 'logs-*',
+        fields: { double_bytes: doubleBytes },
+      });
+
+      expect(result.scripted_fields).toEqual({
+        double_bytes: { type: 'number', lang: 'painless', script: "doc['bytes'].value * 2" },
+      });
+    });
+
+    it('includes the format, attributes and popularity in the scripted field entry', () => {
+      const result = fromStoredDataViewToAsCodeSavedSchema({
+        title: 'logs-*',
+        fields: { double_bytes: doubleBytes },
+        fieldFormats: {
+          double_bytes: { id: 'bytes', params: { pattern: '0,0.0b' } },
+          other: { id: 'number', params: { pattern: '0,0' } },
+        },
+        fieldAttrs: {
+          double_bytes: { customLabel: 'Double', customDescription: 'Bytes x2', count: 2 },
+        },
+      });
+
+      expect(result.scripted_fields?.double_bytes).toEqual({
+        type: 'number',
+        lang: 'painless',
+        script: "doc['bytes'].value * 2",
+        custom_label: 'Double',
+        custom_description: 'Bytes x2',
+        format: { type: 'bytes', params: { pattern: '0,0.0b' } },
+        popularity: 2,
+      });
+      // The overrides are stored by field name, so they are kept in `field_settings` too
+      expect(result.field_settings).toEqual({
+        double_bytes: {
+          custom_label: 'Double',
+          custom_description: 'Bytes x2',
+          format: { type: 'bytes', params: { pattern: '0,0.0b' } },
+          popularity: 2,
+        },
+        other: { format: { type: 'number', params: { pattern: '0,0' } } },
+      });
+    });
+
+    it('ignores scripted fields without a script', () => {
+      const result = fromStoredDataViewToAsCodeSavedSchema({
+        title: 'logs-*',
+        fields: {
+          empty: { ...doubleBytes, name: 'empty', script: '' },
+          missing: { ...doubleBytes, name: 'missing', script: undefined },
+        },
+      });
+
+      expect(result).not.toHaveProperty('scripted_fields');
+    });
+
+    it('ignores non scripted fields', () => {
+      const result = fromStoredDataViewToAsCodeSavedSchema({
+        title: 'logs-*',
+        fields: { bytes: { name: 'bytes', type: 'number', searchable: true, aggregatable: true } },
+      });
+
+      expect(result).not.toHaveProperty('scripted_fields');
+    });
+
+    it('omits scripted_fields when there are no fields', () => {
+      expect(fromStoredDataViewToAsCodeSavedSchema({ title: 'logs-*' })).not.toHaveProperty(
+        'scripted_fields'
+      );
+    });
   });
 });

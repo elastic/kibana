@@ -69,9 +69,9 @@ export class DatasetQualityDetailsPage {
     this.headerButton = page.testSubj.locator('datasetQualityDetailsHeaderButton');
     this.emptyPrompt = page.testSubj.locator('datasetQualityDetailsEmptyPrompt');
     this.qualityIssuesTable = page.testSubj.locator('datasetQualityDetailsDegradedFieldTable');
-    this.qualityIssuesTableNoData = page.testSubj.locator(
-      'datasetQualityDetailsDegradedTableNoData'
-    );
+    this.qualityIssuesTableNoData = page
+      .getByRole('cell')
+      .getByTestId('datasetQualityDetailsDegradedTableNoData');
     this.degradedFieldFlyout = page.testSubj.locator('datasetQualityDetailsDegradedFieldFlyout');
     this.linkToDiscover = page.testSubj.locator('datasetQualityDetailsLinkToDiscover');
     this.flyoutCloseButton = page.testSubj.locator('euiFlyoutCloseButton');
@@ -306,7 +306,8 @@ export class DatasetQualityDetailsPage {
    *
    * Narrows via the search box first because the list is virtualised, then picks by the
    * `value` attribute — labels carry a screen-reader suffix and "No breakdown" has no
-   * field name. Waiting on `data-is-searching` avoids clicking mid-filter.
+   * field name. The committed search term is awaited so the click can't land on a list
+   * that the debounced filter is about to re-render.
    */
   async selectBreakdownField(field: string | null): Promise<void> {
     const selectable = this.page.testSubj.locator('unifiedHistogramBreakdownSelectorSelectable');
@@ -317,11 +318,7 @@ export class DatasetQualityDetailsPage {
     await selectable.waitFor({ state: 'visible' });
 
     await this.page.testSubj.fill('unifiedHistogramBreakdownSelectorSelectorSearch', searchTerm);
-    await this.page
-      .locator(
-        '[data-test-subj="unifiedHistogramBreakdownSelectorSelectable"][data-is-searching="false"]'
-      )
-      .waitFor({ state: 'attached' });
+    await expect(selectable).toHaveAttribute('data-search-term', searchTerm);
 
     await selectable.locator(`.euiSelectableListItem[value="${optionValue}"]`).click();
 
@@ -407,6 +404,8 @@ export class DatasetQualityDetailsPage {
   }
 
   async openIntegrationActionsMenu(): Promise<void> {
+    // The details section is a skeleton, so the button is absent, until the Fleet check resolves.
+    await this.getIntegrationRow('integration').waitFor({ state: 'visible', timeout: 30_000 });
     await this.integrationActionsButton.click();
   }
 

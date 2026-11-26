@@ -10,16 +10,14 @@ import React from 'react';
 
 import { useKbnFullScreenBgCss } from '@kbn/css-utils/public/full_screen_bg_css';
 
+import * as styles from '../space_selector.styles';
+
 // portal the fixed background graphic so it doesn't affect page positioning or overlap on top of global banners
 export const BackgroundPortal = React.memo(function BackgroundPortal() {
   const kbnFullScreenBgCss = useKbnFullScreenBgCss();
   return (
     <EuiPortal>
-      <div
-        className="spcSelectorBackground spcSelectorBackground__nonMixinAttributes"
-        css={kbnFullScreenBgCss}
-        role="presentation"
-      />
+      <div css={[kbnFullScreenBgCss, styles.backgroundStyles]} role="presentation" />
     </EuiPortal>
   );
 });

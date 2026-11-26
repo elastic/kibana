@@ -21,6 +21,7 @@ export const createMockedAgentRegistry = (): AgentRegistryMock => {
     get: jest.fn(),
     create: jest.fn(),
     update: jest.fn(),
+    setServiceAccount: jest.fn(),
     list: jest.fn(),
     getIds: jest.fn(),
     delete: jest.fn(),
@@ -62,6 +63,7 @@ export const createMockedInternalAgent = (
     permissions: {
       update_agent: true,
       update_access_control: true,
+      update_approvals: true,
     },
     isAvailable: jest.fn(async () => ({ status: 'available' as const })) as any,
     ...parts,

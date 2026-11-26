@@ -61,7 +61,7 @@ export class DataDrift {
 
   async waitForDataViewTitle(expectedTitle: string) {
     await this.dataSourceSelectorButton.waitFor({ state: 'visible' });
-    await expect(this.dataSourceSelectorButton).toHaveAttribute('title', expectedTitle, {
+    await expect(this.dataSourceSelectorButton).toHaveAccessibleName(expectedTitle, {
       timeout: 5000,
     });
   }
@@ -247,7 +247,8 @@ export class DataDrift {
   async waitForIndexPatternNotEmptyFormError(id: SubjectId) {
     const row = this.indexPatternFormRow(id);
     await row.waitFor({ state: 'visible', timeout: 5000 });
-    await row.locator('.euiFormErrorText').waitFor({ state: 'visible' });
+    // EuiFormRow gives each error the id `<rowId>-error-<index>`
+    await row.locator('[id*="-error-"]').waitFor({ state: 'visible' });
   }
 
   indexPatternInput(id: SubjectId) {

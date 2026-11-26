@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { StepCategory } from '@kbn/workflows';
 import type { BaseStepDefinition } from '@kbn/workflows';
 import { i18n } from '@kbn/i18n';
@@ -13,19 +13,23 @@ import { MAX_NOTE_ID_LENGTH, MAX_WORKFLOW_MESSAGE_LENGTH } from '../common/const
 
 export const DeleteNoteStepId = 'security.deleteNote' as const;
 
-export const deleteNoteInputSchema = z.object({
-  ids: z
-    .union([
-      z.string().min(1).max(MAX_NOTE_ID_LENGTH),
-      z.array(z.string().min(1).max(MAX_NOTE_ID_LENGTH)).min(1),
-    ])
-    .describe('A single note `savedObjectId` or a list of IDs to support bulk deletion.'),
-});
+export const deleteNoteInputSchema = lazySchema(() =>
+  z.object({
+    ids: z
+      .union([
+        z.string().min(1).max(MAX_NOTE_ID_LENGTH),
+        z.array(z.string().min(1).max(MAX_NOTE_ID_LENGTH)).min(1),
+      ])
+      .describe('A single note `savedObjectId` or a list of IDs to support bulk deletion.'),
+  })
+);
 
-export const deleteNoteOutputSchema = z.object({
-  success: z.boolean(),
-  message: z.string().max(MAX_WORKFLOW_MESSAGE_LENGTH).optional(),
-});
+export const deleteNoteOutputSchema = lazySchema(() =>
+  z.object({
+    success: z.boolean(),
+    message: z.string().max(MAX_WORKFLOW_MESSAGE_LENGTH).optional(),
+  })
+);
 
 export const deleteNoteStepCommonDefinition: BaseStepDefinition<
   typeof deleteNoteInputSchema,

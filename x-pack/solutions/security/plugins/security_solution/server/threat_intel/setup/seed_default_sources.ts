@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import type { estypes } from '@elastic/elasticsearch';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import {
   GLOBAL_SPACE_ID,
   THREAT_INTEL_SOURCES_INDEX,
   APPROVED_SOURCE_IDS,
+  type APPROVED_CATALOG_SOURCE_IDS,
   type FetchAdapterType,
 } from '../../../common/threat_intel';
 
@@ -18,64 +18,34 @@ import {
  * Approved sources seeded into `.kibana-threat-intel-sources` on first boot.
  *
  * Fetch URLs live in `common/threat_intel/catalog_source_urls.ts`, not in the
- * sources index. This is a fixed, approved catalog. Eight sources ship enabled;
- * the optional AWS and FortiGuard packs ship disabled for an operator to turn
- * on per design partner. Operators can only list and enable / disable entries.
+ * sources index. This fixed catalog contains Elastic Security Labs reporting,
+ * CISA advisories, and publications from the UK NCSC, CERT-FR, and CERT-EU.
+ * Operators can only list and enable / disable entries. CISA KEV is left out for
+ * MVP (see `APPROVED_CATALOG_SOURCE_IDS`); a previously seeded KEV row is disabled
+ * by `disableLegacySources` on the next boot like any other retired source.
  */
 interface DefaultSource {
-  id: string;
+  /**
+   * Typed against the approved id list so a seeded row outside the catalog fails
+   * to compile instead of being disabled again by `disableLegacySources` on every boot.
+   */
+  id: (typeof APPROVED_CATALOG_SOURCE_IDS)[number];
   adapter_type: FetchAdapterType;
   name: string;
   tags: string[];
   /**
-   * Declared default state. Eight approved sources ship `true`; the optional
-   * AWS and FortiGuard packs ship `false` so an operator opts in per design
-   * partner. Reconciliation preserves an operator's later choice across boots.
+   * Declared default state. Reconciliation preserves an operator's later choice
+   * across boots.
    */
   enabled: boolean;
 }
 
 export const DEFAULT_SOURCES: readonly DefaultSource[] = [
   {
-    id: 'kev:cisa-known-exploited-vulnerabilities',
-    adapter_type: 'kev',
-    name: 'CISA Known Exploited Vulnerabilities',
-    tags: ['vulnerability', 'cisa', 'kev', 'government'],
-    enabled: true,
-  },
-  {
     id: 'vendor_api:elastic-security-labs',
     adapter_type: 'rss',
     name: 'Elastic Security Labs',
     tags: ['vendor', 'elastic', 'research', 'research-tools'],
-    enabled: true,
-  },
-  {
-    id: 'rss:mandiant-research',
-    adapter_type: 'rss',
-    name: 'Mandiant / Google Cloud Threat Intelligence',
-    tags: ['vendor', 'research', 'apt'],
-    enabled: true,
-  },
-  {
-    id: 'rss:unit42',
-    adapter_type: 'rss',
-    name: 'Palo Alto Networks Unit 42',
-    tags: ['vendor', 'research', 'malware', 'apt'],
-    enabled: true,
-  },
-  {
-    id: 'rss:talos',
-    adapter_type: 'rss',
-    name: 'Cisco Talos Intelligence',
-    tags: ['vendor', 'research', 'malware'],
-    enabled: true,
-  },
-  {
-    id: 'rss:crowdstrike',
-    adapter_type: 'rss',
-    name: 'CrowdStrike Blog',
-    tags: ['vendor', 'research', 'apt'],
     enabled: true,
   },
   {
@@ -86,41 +56,39 @@ export const DEFAULT_SOURCES: readonly DefaultSource[] = [
     enabled: true,
   },
   {
-    id: 'text_indicator_list:maltrail-cobaltstrike',
-    adapter_type: 'text_indicator_list',
-    name: 'Maltrail — CobaltStrike C2 indicators',
-    tags: ['malware', 'research-tools', 'feed'],
+    id: 'rss:uk-ncsc',
+    adapter_type: 'rss',
+    name: 'UK National Cyber Security Centre',
+    tags: ['government', 'uk', 'advisories', 'news'],
     enabled: true,
   },
-  // Optional technology packs, seeded disabled. An operator enables a pack for a
-  // design partner (e.g. the AWS IAM pair) without turning on any other pack.
   {
-    id: 'rss:aws-security',
+    id: 'rss:cert-fr-alerts',
     adapter_type: 'rss',
-    name: 'AWS Security Blog',
-    tags: ['vendor', 'aws', 'cloud', 'iam', 'pack:aws-iam'],
-    enabled: false,
+    name: 'CERT-FR Security Alerts',
+    tags: ['government', 'france', 'advisories', 'vulnerability'],
+    enabled: true,
   },
   {
-    id: 'rss:aws-security-bulletins',
+    id: 'rss:cert-fr-threats',
     adapter_type: 'rss',
-    name: 'AWS Security Bulletins',
-    tags: ['vendor', 'aws', 'cloud', 'iam', 'advisories', 'pack:aws-iam'],
-    enabled: false,
+    name: 'CERT-FR Threats and Incidents',
+    tags: ['government', 'france', 'research', 'threat-report'],
+    enabled: true,
   },
   {
-    id: 'rss:fortiguard-advisories',
+    id: 'rss:cert-eu-advisories',
     adapter_type: 'rss',
-    name: 'FortiGuard Advisories',
-    tags: ['vendor', 'fortinet', 'fortigate', 'advisories', 'pack:fortigate'],
-    enabled: false,
+    name: 'CERT-EU Security Advisories',
+    tags: ['government', 'eu', 'advisories', 'vulnerability'],
+    enabled: true,
   },
   {
-    id: 'rss:fortiguard-threat-signal',
+    id: 'rss:cert-eu-threat-intelligence',
     adapter_type: 'rss',
-    name: 'FortiGuard Threat Signal',
-    tags: ['vendor', 'fortinet', 'fortigate', 'pack:fortigate'],
-    enabled: false,
+    name: 'CERT-EU Threat Intelligence',
+    tags: ['government', 'eu', 'research', 'threat-report'],
+    enabled: true,
   },
 ];
 
@@ -327,9 +295,6 @@ export const seedDefaultSources = async ({
   return result;
 };
 
-/** Page size for disabling out-of-catalog enabled sources. Exported for multi-page tests. */
-export const LEGACY_SOURCE_DISABLE_PAGE_SIZE = 1000;
-
 const disableLegacySources = async ({
   esClient,
   logger,
@@ -340,61 +305,62 @@ const disableLegacySources = async ({
   now: string;
 }): Promise<{ disabled: number; failed: number }> => {
   const log = logger.get('seed-default-sources');
-  let disabled = 0;
-  let failed = 0;
-  let searchAfter: estypes.SortResults | undefined;
 
-  for (;;) {
-    const response = await esClient.search<{ enabled?: boolean }>({
+  try {
+    const response = await esClient.updateByQuery({
       index: THREAT_INTEL_SOURCES_INDEX,
-      size: LEGACY_SOURCE_DISABLE_PAGE_SIZE,
-      sort: [{ _id: 'asc' }],
-      ...(searchAfter ? { search_after: searchAfter } : {}),
-      _source: ['enabled'],
+      refresh: false,
+      conflicts: 'proceed',
+      wait_for_completion: true,
       query: {
         bool: {
           filter: [{ term: { enabled: true } }],
           must_not: [{ ids: { values: [...APPROVED_SOURCE_IDS] } }],
         },
       },
+      script: {
+        source: `
+          ctx._source.enabled = false;
+          ctx._source.updated_at = params.now;
+        `,
+        lang: 'painless',
+        params: { now },
+      },
     });
 
-    const hits = (response.hits.hits ?? []).filter((document) => document._id);
-    if (hits.length === 0) {
-      break;
+    const disabled = response.updated ?? 0;
+    // Only real per-document failures count as `failed`. The caller escalates a
+    // non-zero `failed` into a bootstrap retry and eventually a bootstrap
+    // rejection, which gates every route behind a 503 and leaves both tasks
+    // unscheduled, so it has to mean "something is actually wrong".
+    //
+    // `version_conflicts` is not that. Under `conflicts: 'proceed'` a conflict
+    // means an operator wrote to the source document between the scan and the
+    // update; the row is skipped, still matches the same query, and is picked up
+    // on the next boot. Reporting it as `failed` made a benign race able to fail
+    // bootstrap, while the failures that do mean something were dropped entirely.
+    const failures = response.failures ?? [];
+    const versionConflicts = response.version_conflicts ?? 0;
+
+    if (disabled > 0) {
+      log.info(`Disabled ${disabled} legacy source(s) outside the fixed catalog`);
+    }
+    if (failures.length > 0) {
+      log.warn(
+        `${failures.length} legacy source(s) outside the fixed catalog could not be disabled and ` +
+          `are still eligible for fetch (first failure: ${JSON.stringify(failures[0])})`
+      );
+    }
+    if (versionConflicts > 0) {
+      log.debug(
+        `${versionConflicts} legacy source(s) were skipped due to version conflicts; the next ` +
+          `boot's scan re-selects them.`
+      );
     }
 
-    for (const hit of hits) {
-      const sourceId = hit._id as string;
-      try {
-        await esClient.update({
-          index: THREAT_INTEL_SOURCES_INDEX,
-          id: sourceId,
-          doc: { enabled: false, updated_at: now },
-          refresh: false,
-        });
-        disabled += 1;
-        log.info(`Disabled legacy source outside the fixed catalog: ${sourceId}`);
-      } catch (err) {
-        failed += 1;
-        log.warn(`Failed to disable legacy source ${sourceId}: ${(err as Error).message}`);
-      }
-    }
-
-    if (hits.length < LEGACY_SOURCE_DISABLE_PAGE_SIZE) {
-      break;
-    }
-
-    const lastSort = hits[hits.length - 1]?.sort;
-    if (!lastSort) {
-      throw new Error('Legacy source search page is missing sort values for search_after');
-    }
-    searchAfter = lastSort;
+    return { disabled, failed: failures.length };
+  } catch (err) {
+    log.warn(`Failed to disable legacy sources: ${(err as Error).message}`);
+    return { disabled: 0, failed: 1 };
   }
-
-  if (disabled > 0) {
-    await esClient.indices.refresh({ index: THREAT_INTEL_SOURCES_INDEX });
-  }
-
-  return { disabled, failed };
 };

@@ -165,7 +165,7 @@
               "id": "coverage-overview",
               "href": "/jom/app/security/rules_coverage_overview",
               "path": "securityGroup:rules.node-1.coverage-overview",
-              "title": "MITRE ATT&CK® Coverage",
+              "title": "MITRE coverage",
               "deepLink": {},
               "isExternalLink": false,
               "sideNavStatus": "visible"
@@ -263,15 +263,6 @@
           "href": "/jom/app/security/entity_analytics_overview",
           "path": "securityGroup:entityAnalytics.entity_analytics-overview",
           "title": "Overview",
-          "deepLink": {},
-          "isExternalLink": false,
-          "sideNavStatus": "visible"
-        },
-        {
-          "id": "entity_analytics-privileged_user_monitoring",
-          "href": "/jom/app/security/entity_analytics_privileged_user_monitoring",
-          "path": "securityGroup:entityAnalytics.entity_analytics-privileged_user_monitoring",
-          "title": "Privileged user monitoring",
           "deepLink": {},
           "isExternalLink": false,
           "sideNavStatus": "visible"

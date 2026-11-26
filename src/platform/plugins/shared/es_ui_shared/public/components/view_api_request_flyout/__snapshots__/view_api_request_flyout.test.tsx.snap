@@ -35,7 +35,7 @@ exports[`ViewApiRequestFlyout is rendered 1`] = `
           class="euiFlyoutBody__overflowContent"
         >
           <div
-            class="euiText emotion-euiText-m"
+            class="euiText emotion-euiText-s"
           >
             <p
               data-test-subj="apiRequestFlyoutDescription"
@@ -65,6 +65,7 @@ exports[`ViewApiRequestFlyout is rendered 1`] = `
                   class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
                 >
                   <span
+                    aria-hidden="true"
                     color="inherit"
                     data-euiicon-type="copy"
                   />
@@ -120,6 +121,7 @@ exports[`ViewApiRequestFlyout is rendered 1`] = `
           class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
         >
           <span
+            aria-hidden="true"
             color="inherit"
             data-euiicon-type="cross"
           />

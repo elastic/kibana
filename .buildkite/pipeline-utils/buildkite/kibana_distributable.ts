@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { BuildkiteClient } from './client';
-import type { Build } from './types/build';
+import { BuildkiteClient } from './client.ts';
+import type { Build } from './types/build.ts';
 
 export const KIBANA_DISTRIBUTABLE_ARTIFACT = 'kibana-default.tar.zst';
 

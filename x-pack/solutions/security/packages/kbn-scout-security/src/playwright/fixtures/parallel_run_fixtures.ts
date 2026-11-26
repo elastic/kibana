@@ -21,6 +21,7 @@ import {
   getAttackDiscoveryApiService,
   getCorrelationsApiService,
   getPrevalenceApiService,
+  getThreatIntelligenceApiService,
   getAnalyzerApiService,
   getNetworkApiService,
   getHostApiService,
@@ -110,6 +111,10 @@ export const spaceTest = securityParallelFixtures.extend<
         esClient,
         log,
       });
+      extendedApiServices.threatIntelligence = getThreatIntelligenceApiService({
+        esClient,
+        log,
+      });
       extendedApiServices.analyzer = getAnalyzerApiService({
         esClient,
         log,
@@ -128,6 +133,7 @@ export const spaceTest = securityParallelFixtures.extend<
       });
       extendedApiServices.endpointArtifacts = getEndpointArtifactsApiService({
         kbnClient,
+        esClient,
         log,
         scoutSpace,
       });

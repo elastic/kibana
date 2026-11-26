@@ -137,10 +137,10 @@ export {
   type PublishesDataLoading,
 } from './interfaces/publishes_data_loading';
 export {
-  apiPublishesDataViews,
-  type PublishesDataViews,
-  type PublishesWritableDataViews,
-} from './interfaces/publishes_data_views';
+  apiPublishesDataSources,
+  type PublishesDataSources,
+  type PublishesWritableDataSources,
+} from './interfaces/publishes_data_sources';
 export {
   apiPublishesDisabledActionIds,
   type PublishesDisabledActionIds,
@@ -299,8 +299,12 @@ export {
 } from './interfaces/containers/publishes_settings';
 
 export { apiCanFocusPanel, type CanFocusPanel } from './interfaces/containers/can_focus_panel';
+export {
+  apiCanSelectPanels,
+  getSelectionApi,
+  type CanSelectPanels,
+} from './interfaces/containers/can_select_panels';
 
-export { apiPublishesESQLQuery, type PublishesESQLQuery } from './interfaces/publishes_esql_query';
-export { apiPublishesEsqlUsage, type PublishesEsqlUsage } from './interfaces/publishes_esql_usage';
+export { apiPublishesEsql, type PublishesEsql, useHasEsqlPanel } from './interfaces/publishes_esql';
 
 export { apiSupportsJsonExport, type SupportsJsonExport } from './interfaces/supports_json_export';

@@ -12,13 +12,19 @@ import { getMockMitreTactic } from './mocks/mitre_entities.mock';
 import type { SavedObjectsBulkResponse } from '@kbn/core/server';
 import { loadMitreArtifact } from '@kbn/security-mitre-attack-server';
 import { MitreAttackPlugin } from './plugin';
-import { MITRE_ATTACK_ENTITY_SO_TYPE } from './saved_objects';
+import { MITRE_ATTACK_ENTITY_SO_TYPE } from '@kbn/security-mitre-attack-common';
+import { registerRoutes } from './routes';
 
 jest.mock('@kbn/security-mitre-attack-server', () => ({
   loadMitreArtifact: jest.fn(),
 }));
 
+jest.mock('./routes', () => ({
+  registerRoutes: jest.fn(),
+}));
+
 const mockLoadMitreArtifact = jest.mocked(loadMitreArtifact);
+const mockRegisterRoutes = jest.mocked(registerRoutes);
 
 const flushPromises = (): Promise<void> => new Promise<void>((resolve) => setTimeout(resolve, 0));
 
@@ -45,6 +51,11 @@ describe('MitreAttackPlugin', () => {
       // No population with flag off
       expect(coreStart.savedObjects.createInternalRepository).not.toHaveBeenCalled();
       expect(mockLoadMitreArtifact).not.toHaveBeenCalled();
+
+      // No router created, no context registered, and no routes registered with flag off
+      expect(coreSetup.http.createRouter).not.toHaveBeenCalled();
+      expect(coreSetup.http.registerRouteHandlerContext).not.toHaveBeenCalled();
+      expect(mockRegisterRoutes).not.toHaveBeenCalled();
     });
   });
 
@@ -79,6 +90,16 @@ describe('MitreAttackPlugin', () => {
       // SO type registered
       expect(coreSetup.savedObjects.registerType).toHaveBeenCalledWith(
         expect.objectContaining({ name: MITRE_ATTACK_ENTITY_SO_TYPE })
+      );
+
+      // Router created, context registered, and routes wired in setup()
+      expect(coreSetup.http.createRouter).toHaveBeenCalled();
+      expect(coreSetup.http.registerRouteHandlerContext).toHaveBeenCalledWith(
+        'mitreAttack',
+        expect.any(Function)
+      );
+      expect(mockRegisterRoutes).toHaveBeenCalledWith(
+        expect.objectContaining({ router: expect.any(Object), logger: expect.any(Object) })
       );
 
       // Repository created for the right type

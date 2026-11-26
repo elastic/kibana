@@ -11,6 +11,7 @@ import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import type { DatatableColumn } from '@kbn/expressions-plugin/public';
 import {
   applyPaletteParams,
+  fillMissingHeatmapYBuckets,
   getDataMinMax,
   remapStopsByNewInterval,
   getSortPredicate,
@@ -224,5 +225,152 @@ describe('getSortPredicate', () => {
       },
     } as DatatableColumn;
     expect(getSortPredicate(column, 'asc')).toEqual('alphaAsc');
+  });
+
+  it('should return dataIndex for number_range columns, as their rows are sorted beforehand', () => {
+    const column = {
+      id: 'range',
+      name: 'bucket',
+      meta: { type: 'number_range' },
+    } as DatatableColumn;
+    expect(getSortPredicate(column, 'asc')).toEqual('dataIndex');
+  });
+});
+
+describe('fillMissingHeatmapYBuckets', () => {
+  const row = (y: number, value: number, x = 'a') => ({ x, y, value });
+
+  it('fills a wide hole with the original bucket width and leaves existing keys unchanged', () => {
+    const rows = [row(0, 1), row(0.05, 2), row(0.15, 3, 'b'), row(0.35, 4)];
+
+    const filled = fillMissingHeatmapYBuckets(rows, 'y', 'value', 0.05);
+
+    expect(filled.map((entry) => entry.y)).toEqual([
+      0,
+      0.05,
+      2 * 0.05,
+      0.15,
+      4 * 0.05,
+      5 * 0.05,
+      6 * 0.05,
+      0.35,
+    ]);
+    expect(filled.filter((entry) => entry.value == null).map((entry) => entry.y)).toEqual([
+      2 * 0.05,
+      4 * 0.05,
+      5 * 0.05,
+      6 * 0.05,
+    ]);
+    expect(filled.find((entry) => entry.y === 0)).toBe(rows[0]);
+    expect(filled.find((entry) => entry.y === 0.15)).toBe(rows[2]);
+    expect(filled.find((entry) => entry.y === 0.1)).toMatchObject({ x: 'a', value: null });
+  });
+
+  it('does not add buckets outside the returned min and max', () => {
+    const filled = fillMissingHeatmapYBuckets([row(0.05, 1), row(0.15, 2)], 'y', 'value', 0.05);
+
+    expect(filled.map((entry) => entry.y)).toEqual([0.05, 0.1, 0.15]);
+  });
+
+  it('leaves already-contiguous buckets unchanged', () => {
+    const rows = [row(0, 1), row(0.05, 2), row(0.1, 3)];
+
+    expect(fillMissingHeatmapYBuckets(rows, 'y', 'value', 0.05)).toBe(rows);
+  });
+
+  it('fills one missing ES|QL range step at the same width', () => {
+    const rows = [
+      { x: 'a', y: '0.35..0.4', value: 1 },
+      { x: 'a', y: '0.45..0.5', value: 2 },
+    ];
+
+    const filled = fillMissingHeatmapYBuckets(rows, 'y', 'value', 0.05);
+
+    expect(filled.map((entry) => entry.y)).toEqual(['0.35..0.4', '0.4..0.45', '0.45..0.5']);
+    expect(filled[1]).toMatchObject({ x: 'a', value: null });
+    expect(filled[0]).toBe(rows[0]);
+  });
+
+  it('does nothing when the Y values are not numeric histogram keys', () => {
+    const rows = [
+      { x: 'a', y: 'low', value: 1 },
+      { x: 'a', y: 'high', value: 2 },
+    ];
+
+    expect(fillMissingHeatmapYBuckets(rows, 'y', 'value', 0.05)).toBe(rows);
+  });
+
+  it('does nothing when the interval is missing', () => {
+    const rows = [row(0, 1), row(0.35, 2)];
+
+    expect(fillMissingHeatmapYBuckets(rows, 'y', 'value', undefined)).toBe(rows);
+  });
+
+  it('does nothing when a bucket index is past the safe integer range', () => {
+    const rows = [row(2 ** 53, 1), row(2 ** 53 + 2, 2)];
+
+    expect(fillMissingHeatmapYBuckets(rows, 'y', 'value', 1)).toBe(rows);
+  });
+
+  const firstAppearance = (filled: Array<Record<string, unknown>>, key: string) => [
+    ...new Set(filled.map((entry) => entry[key])),
+  ];
+
+  it('keeps the X order when a Y gap is filled', () => {
+    const rows = [
+      { x: 'a', y: 0, value: 1 },
+      { x: 'b', y: 2, value: 2 },
+      { x: 'c', y: 0, value: 3 },
+    ];
+    const filled = fillMissingHeatmapYBuckets(rows, 'y', 'value', 1);
+
+    expect(firstAppearance(filled, 'x')).toEqual(['a', 'b', 'c']);
+    expect(filled.find((entry) => entry.y === 1)).toMatchObject({ x: 'a', value: null });
+  });
+
+  it('keeps rows that are not histogram keys in place', () => {
+    const rows = [
+      { x: 'z', y: null, value: 9 },
+      { x: 'a', y: 0, value: 1 },
+      { x: 'b', y: 3, value: 2 },
+      { x: 'c', y: 0, value: 3 },
+    ];
+    const filled = fillMissingHeatmapYBuckets(rows, 'y', 'value', 1);
+
+    expect(firstAppearance(filled, 'x')).toEqual(['z', 'a', 'b', 'c']);
+    expect(filled.map((entry) => entry.y)).toEqual([null, 0, 1, 2, 3, 0]);
+  });
+
+  it('inserts a descending gap between the surrounding buckets', () => {
+    const rows = [
+      { x: 'a', y: 2, value: 1 },
+      { x: 'b', y: 0, value: 2 },
+    ];
+    const filled = fillMissingHeatmapYBuckets(rows, 'y', 'value', 1);
+
+    expect(filled.map((entry) => entry.y)).toEqual([2, 1, 0]);
+    expect(firstAppearance(filled, 'x')).toEqual(['a', 'b']);
+    expect(filled.find((entry) => entry.y === 1)).toMatchObject({ x: 'a', value: null });
+  });
+
+  it('fills a wider descending gap in the direction of the rows', () => {
+    const rows = [row(3, 1), row(0, 2, 'b')];
+    const filled = fillMissingHeatmapYBuckets(rows, 'y', 'value', 1);
+
+    expect(filled.map((entry) => entry.y)).toEqual([3, 2, 1, 0]);
+    expect(firstAppearance(filled, 'x')).toEqual(['a', 'b']);
+  });
+
+  it('leaves a NaN Y key in place and still fills a real gap', () => {
+    const rows = [
+      { x: 'a', y: NaN, value: 9 },
+      { x: 'b', y: 0, value: 1 },
+      { x: 'c', y: 2, value: 2 },
+    ];
+    const filled = fillMissingHeatmapYBuckets(rows, 'y', 'value', 1);
+
+    expect(filled[0]).toBe(rows[0]);
+    expect(filled.map((entry) => entry.y)).toEqual([NaN, 0, 1, 2]);
+    expect(filled.find((entry) => entry.y === 1)).toMatchObject({ x: 'b', value: null });
   });
 });

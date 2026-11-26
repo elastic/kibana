@@ -11,16 +11,20 @@ import type { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-obje
 import {
   actionPolicyModelVersions,
   apiKeyPendingInvalidationModelVersions,
+  externalSourceModelVersions,
   ruleModelVersions,
 } from './model_versions';
 import { apiKeyPendingInvalidationMappings } from './api_key_pending_invalidation_mappings';
 import { actionPolicyMappings } from './action_policy_mappings';
+import { externalSourceMappings } from './external_source_mappings';
 import { ruleMappings } from './rule_mappings';
 import type { ActionPolicySavedObjectAttributes } from './schemas/action_policy_saved_object_attributes';
+import type { ExternalSourceSavedObjectAttributes } from './schemas/external_source_attributes';
 import type { RuleSavedObjectAttributes } from './schemas/rule_saved_object_attributes';
 import {
   ACTION_POLICY_SAVED_OBJECT_TYPE,
   API_KEY_PENDING_INVALIDATION_TYPE,
+  EXTERNAL_SOURCE_SAVED_OBJECT_TYPE,
   RULE_SAVED_OBJECT_TYPE,
 } from '../../common/saved_object_types';
 import { ALERTING_LOG_CODES } from '../lib/errors/error_codes';
@@ -30,6 +34,7 @@ export {
   RULE_SAVED_OBJECT_TYPE,
   ACTION_POLICY_SAVED_OBJECT_TYPE,
   API_KEY_PENDING_INVALIDATION_TYPE,
+  EXTERNAL_SOURCE_SAVED_OBJECT_TYPE,
 };
 
 export const ActionPolicyAttributesToEncrypt = ['apiKey'];
@@ -45,9 +50,13 @@ export type ActionPolicyAttributesNotPartiallyUpdatable =
   | 'apiKeyOwner'
   | 'apiKeyCreatedByUser';
 
+/**
+ * The encrypted attribute and its AAD are banned as `never` rather than just omitted, because an
+ * `Omit` alone is defeated by a spread, which skips the excess property check.
+ */
 export type PartiallyUpdateableActionPolicyAttributes = Partial<
   Omit<ActionPolicySavedObjectAttributes, ActionPolicyAttributesNotPartiallyUpdatable>
->;
+> & { [K in ActionPolicyAttributesNotPartiallyUpdatable]?: never };
 
 const registerType = ({
   resource,
@@ -123,6 +132,27 @@ export function registerSavedObjects({
   });
 
   registerType({
+    resource: EXTERNAL_SOURCE_SAVED_OBJECT_TYPE,
+    logger,
+    register: () => {
+      savedObjects.registerType({
+        name: EXTERNAL_SOURCE_SAVED_OBJECT_TYPE,
+        indexPattern: ALERTING_CASES_SAVED_OBJECT_INDEX,
+        hidden: true,
+        namespaceType: 'multiple-isolated',
+        mappings: externalSourceMappings,
+        management: {
+          importableAndExportable: false,
+          getTitle(so: SavedObject<ExternalSourceSavedObjectAttributes>) {
+            return `External source: [${so.attributes.metadata.name}]`;
+          },
+        },
+        modelVersions: externalSourceModelVersions,
+      });
+    },
+  });
+
+  registerType({
     resource: API_KEY_PENDING_INVALIDATION_TYPE,
     logger,
     register: () => {
@@ -152,4 +182,5 @@ export function registerSavedObjects({
 }
 
 export type { ActionPolicySavedObjectAttributes } from './schemas/action_policy_saved_object_attributes';
+export type { ExternalSourceSavedObjectAttributes } from './schemas/external_source_attributes';
 export type { RuleSavedObjectAttributes } from './schemas/rule_saved_object_attributes';

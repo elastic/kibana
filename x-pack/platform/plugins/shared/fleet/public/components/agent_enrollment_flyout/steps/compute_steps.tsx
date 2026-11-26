@@ -168,6 +168,10 @@ export const ManagedSteps: React.FunctionComponent<InstructionProps> = ({
   isK8s,
   cloudSecurityIntegration,
   installedPackagePolicy,
+  hideIncomingDataStep,
+  onAgentPolicyCreated,
+  defaultAgentPolicyName,
+  forceCreatePolicy,
 }) => {
   const core = useStartServices();
   const { docLinks } = core;
@@ -212,6 +216,9 @@ export const ManagedSteps: React.FunctionComponent<InstructionProps> = ({
             setSelectedAPIKeyId,
             setSelectedPolicyId,
             refreshAgentPolicies,
+            onAgentPolicyCreated,
+            defaultAgentPolicyName,
+            forceCreatePolicy,
           }),
         ]
       : [
@@ -285,7 +292,7 @@ export const ManagedSteps: React.FunctionComponent<InstructionProps> = ({
         })
       );
     }
-    if (selectedPolicy) {
+    if (selectedPolicy && !hideIncomingDataStep) {
       steps.push(
         IncomingDataConfirmationStep({
           agentIds: enrolledAgentIds,
@@ -322,6 +329,10 @@ export const ManagedSteps: React.FunctionComponent<InstructionProps> = ({
     enrolledAgentIds,
     agentDataConfirmed,
     installedPackagePolicy,
+    hideIncomingDataStep,
+    onAgentPolicyCreated,
+    defaultAgentPolicyName,
+    forceCreatePolicy,
   ]);
 
   if (!agentVersion) {

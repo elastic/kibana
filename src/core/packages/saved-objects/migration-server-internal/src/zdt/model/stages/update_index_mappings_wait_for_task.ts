@@ -26,7 +26,12 @@ export const updateIndexMappingsWaitForTask: ModelStage<
       // exponential delay.  We will basically keep polling forever until the
       // Elasticsearch task succeeds or fails.
       return delayRetryState(state, left.message, Number.MAX_SAFE_INTEGER);
-    } else if (isTypeof(left, 'task_completed_with_retriable_error')) {
+    } else if (
+      isTypeof(left, 'task_completed_with_retriable_error') ||
+      isTypeof(left, 'task_not_found')
+    ) {
+      // A lost task is neither running nor stored, so polling its id cannot succeed.
+      // Re-run UPDATE_INDEX_MAPPINGS, which creates a new task. Retries are bounded.
       return delayRetryState(
         {
           ...state,

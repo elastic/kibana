@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { CommonTriggerDefinition } from '@kbn/workflows-extensions/common';
 import { EntityType } from '../../domain/definitions/entity_schema';
 
@@ -15,20 +15,22 @@ export const ENTITY_ASSET_CRITICALITY_UPDATED_TRIGGER_ID =
 
 export const ASSET_CRITICALITY_UPDATED_WATCHED_FIELDS = ['asset.criticality'] as const;
 
-export const entityAssetCriticalityUpdatedEventSchema = z.object({
-  entityId: z
-    .string()
-    .max(1000)
-    .describe('The unique EUID of the entity whose asset criticality changed.'),
-  entityType: EntityType.describe('The type of entity (e.g. host, user, service, generic).'),
-  criticalityLevel: z
-    .string()
-    .max(20)
-    .nullable()
-    .describe(
-      'The new asset criticality level (low_impact, medium_impact, high_impact, extreme_impact), or null when criticality is unassigned.'
-    ),
-});
+export const entityAssetCriticalityUpdatedEventSchema = lazySchema(() =>
+  z.object({
+    entityId: z
+      .string()
+      .max(1000)
+      .describe('The unique EUID of the entity whose asset criticality changed.'),
+    entityType: EntityType.describe('The type of entity (e.g. host, user, service, generic).'),
+    criticalityLevel: z
+      .string()
+      .max(20)
+      .nullable()
+      .describe(
+        'The new asset criticality level (low_impact, medium_impact, high_impact, extreme_impact), or null when criticality is unassigned.'
+      ),
+  })
+);
 
 export type EntityAssetCriticalityUpdatedEvent = z.infer<
   typeof entityAssetCriticalityUpdatedEventSchema

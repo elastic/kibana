@@ -7,8 +7,9 @@
 
 import path from 'path';
 import expect from '@kbn/expect';
-import { byIdAscComparator } from '@kbn/core-saved-objects-import-export-server-internal/src/export/utils';
 import type { FtrProviderContext } from '../../ftr_provider_context';
+
+const byIdAscComparator = (a: { id: string }, b: { id: string }) => (a.id > b.id ? 1 : -1);
 
 const fixturePaths = {
   hiddenImportable: path.join(__dirname, 'exports', '_import_hidden_importable.ndjson'),
@@ -86,7 +87,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.savedObjects.clickCheckboxByTitle('hidden object 1');
 
         await PageObjects.savedObjects.clickDelete({ confirmDelete: false });
-        expect(await testSubjects.exists('cannotDeleteObjectsConfirmWarning')).to.eql(true);
+        await testSubjects.existOrFail('cannotDeleteObjectsConfirmWarning', { timeout: 5000 });
       });
 
       it('should not delete the hidden objects when performing the operation', async () => {

@@ -15,6 +15,7 @@ export { getElasticsearchConnectors } from './spec/elasticsearch';
 export { getKibanaConnectors } from './spec/kibana';
 export { resolveKibanaStepTypeAlias } from './spec/kibana/aliases';
 export * from './spec/schema';
+export * from './spec/ignored_kibana_fetcher';
 export {
   builtInStepDefinitions,
   getBuiltInStepDefinition,
@@ -22,14 +23,16 @@ export {
 } from './spec/builtin_step_definitions';
 export type { BuiltInStepDefinition } from './spec/builtin_step_definitions';
 export {
-  builtInTriggerDefinitions,
+  getBuiltInTriggerDefinitions,
   getBuiltInTriggerDefinition,
 } from './spec/builtin_trigger_definitions';
+export { getTriggerName } from './common/get_trigger_name';
 export {
   builtinWorkflowInputDefinitions,
   builtinWorkflowInputDefinitionRefValuesForZod,
   KIBANA_WORKFLOW_INPUT_DEFINITION_REF_PREFIX,
   ALERTING_V2_NOTIFICATION_GROUP_INPUT_DEFINITION_ID,
+  SECURITY_ALERT_ANALYSIS_CALLER_ALERTS_INPUT_DEFINITION_ID,
   mergeKibanaBuiltinWorkflowInputDefinitionsIntoRootSchema,
 } from './spec/builtin_workflow_input_definitions';
 export type { JsonSchema } from './spec/schema/common/json_model_shape_schema';
@@ -60,6 +63,7 @@ export * from './common/privileges';
 export * from './common/utils';
 export * from './common/step_types';
 export * from './common/hitl';
+export * from './common/hitl_slack_interactive';
 export * from './common/wait_for_approval';
 export {
   getManagedWorkflowSelectorVisibilityContext,
@@ -90,6 +94,11 @@ export {
   SCHEDULED_INTERVAL_ERROR,
   SCHEDULED_INTERVAL_PATTERN,
   ManualTriggerSchema,
+  DEFAULT_PAGE_TRIGGER_ID,
+  getPageTriggerId,
+  isPageTrigger,
+  PageTriggerSchema,
+  type PageTrigger,
   TriggerSchema,
   getCustomTriggerZodSchema,
   getTriggerSchema,
@@ -101,12 +110,33 @@ export {
   type CustomTriggerOn,
   type CustomTriggerSchemaConfig,
   type CustomTriggerSchemaInput,
+  type TriggerSchemaOptions,
   type TriggerType,
   type WorkflowEventsValue,
 } from './spec/schema/triggers';
 
 // Export specific types that are commonly used
 export type { BuiltInStepType } from './spec/schema';
+
+// The action-workflow contract. Exported from the root entry (rather than only
+// from `./managed`) so a consumer can validate `consts.actionMetadata` without
+// pulling every managed workflow definition into its bundle.
+export {
+  ACTION_WORKFLOW_INPUT,
+  ACTION_WORKFLOW_TAG,
+  actionApprovalPolicySchema,
+  actionCategorySchema,
+  actionImpactSchema,
+  actionMetadataSchema,
+  actionSubjectKindSchema,
+} from './managed/action_workflow';
+export type {
+  ActionApprovalPolicy,
+  ActionCategory,
+  ActionImpact,
+  ActionMetadata,
+  ActionSubjectKind,
+} from './managed/action_workflow';
 
 export {
   isWorkflowValidationRuleId,
@@ -118,3 +148,19 @@ export type {
   WorkflowValidationRuleOwner,
   WorkflowValidationRules,
 } from './validation/rules';
+
+export {
+  WORKFLOW_ACCESS_CONTROL_ROLES,
+  workflowAccessControlSchema,
+  storedWorkflowAccessControlSchema,
+  getWorkflowPermissions,
+  getWorkflowAccessDecisions,
+  toWorkflowPermissions,
+} from './common/access_control';
+export type {
+  WorkflowAccessControl,
+  WorkflowAccessControlRole,
+  WorkflowAccessOperation,
+  WorkflowPermissions,
+  WorkflowAccessSubject,
+} from './common/access_control';

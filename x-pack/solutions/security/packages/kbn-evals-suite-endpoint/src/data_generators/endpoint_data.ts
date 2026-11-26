@@ -14,12 +14,12 @@ import {
   METADATA_UNITED_INDEX,
   METADATA_UNITED_TRANSFORM,
 } from '@kbn/security-solution-plugin/common/endpoint/constants';
+import { buildBaseEndpointMetadataFilter } from '@kbn/security-solution-plugin/common/endpoint/utils/endpoint_metadata_filter';
 
 const POLL_INTERVAL_MS = 5_000;
 
 /** Disjoint from the forensic suite's `eval-agent-forensic-` ids (see cleanup.ts). */
 const EVAL_AGENT_ID_PREFIX = 'eval-agent-ts-';
-const EVAL_SEEDED_QUERY = { prefix: { 'agent.id': EVAL_AGENT_ID_PREFIX } };
 
 export async function waitForEndpointPackage(
   kbnClient: KbnClient,
@@ -30,6 +30,12 @@ export async function waitForEndpointPackage(
   const start = Date.now();
   log.info('Waiting for endpoint package to be installed...');
 
+  let packageInstalled = false;
+  // A failed transform is not terminal: Kibana's metadata health task force-stops
+  // and restarts it, so keep polling and only report the details on timeout.
+  let lastFailure: string | undefined;
+  let lastStates = 'no transforms reported';
+
   while (Date.now() - start < maxWaitMs) {
     try {
       const response = await kbnClient.request<{ item: { status: string } }>({
@@ -38,45 +44,50 @@ export async function waitForEndpointPackage(
       });
 
       if (response.data.item.status === 'installed') {
+        packageInstalled = true;
         log.info('Endpoint package is installed. Verifying transforms are started...');
 
-        const statsResponse = await esClient.transform.getTransformStats({
+        const { transforms } = await esClient.transform.getTransformStats({
           transform_id: 'endpoint*',
         });
 
-        const stoppedTransforms = statsResponse.transforms.filter((t) => t.state === 'stopped');
+        const failedTransforms = transforms.filter((t) => t.state === 'failed');
+        lastFailure = failedTransforms.length
+          ? failedTransforms.map((t) => `${t.id}: ${t.reason ?? 'no reason reported'}`).join('; ')
+          : undefined;
 
-        for (const t of stoppedTransforms) {
-          log.info(`Restarting stopped transform: ${t.id}`);
-          try {
-            await esClient.transform.startTransform({ transform_id: t.id });
-          } catch (e) {
-            log.debug(`Failed to restart transform ${t.id}: ${e}`);
+        // With a failed transform in the same stats, skip the restarts: a hanging
+        // start request must not delay the next poll, which re-reads the stats.
+        if (!lastFailure) {
+          for (const t of transforms.filter((tr) => tr.state === 'stopped')) {
+            log.info(`Restarting stopped transform: ${t.id}`);
+            try {
+              await esClient.transform.startTransform({ transform_id: t.id });
+            } catch (e) {
+              log.debug(`Failed to restart transform ${t.id}: ${e}`);
+            }
           }
         }
 
-        const hasCurrentTransform = statsResponse.transforms.some((t) =>
+        const hasCurrentTransform = transforms.some((t) =>
           t.id.startsWith(metadataTransformPrefix)
         );
-        const hasUnitedTransform = statsResponse.transforms.some((t) =>
+        const hasUnitedTransform = transforms.some((t) =>
           t.id.startsWith(METADATA_UNITED_TRANSFORM)
         );
         const allStarted =
-          statsResponse.transforms.length > 0 &&
-          statsResponse.transforms.every((t) => t.state === 'started' || t.state === 'indexing');
+          transforms.length > 0 &&
+          transforms.every((t) => t.state === 'started' || t.state === 'indexing');
 
         if (hasCurrentTransform && hasUnitedTransform && allStarted) {
-          log.info(
-            `All endpoint transforms are running (${statsResponse.transforms.length} total)`
-          );
+          log.info(`All endpoint transforms are running (${transforms.length} total)`);
           return;
         }
 
-        log.debug(
-          `Waiting for endpoint transforms (current=${hasCurrentTransform}, united=${hasUnitedTransform}): ${statsResponse.transforms
-            .map((t) => `${t.id}=${t.state}`)
-            .join(', ')}`
-        );
+        lastStates = `current=${hasCurrentTransform}, united=${hasUnitedTransform}: ${transforms
+          .map((t) => `${t.id}=${t.state}`)
+          .join(', ')}`;
+        log.debug(`Waiting for endpoint transforms (${lastStates})`);
       } else {
         log.debug(`Endpoint package status: ${response.data.item.status}`);
       }
@@ -87,17 +98,31 @@ export async function waitForEndpointPackage(
     await new Promise((resolve) => setTimeout(resolve, POLL_INTERVAL_MS));
   }
 
-  throw new Error(`Timed out waiting for endpoint package to be installed after ${maxWaitMs}ms`);
+  if (!packageInstalled) {
+    throw new Error(`Timed out waiting for endpoint package to be installed after ${maxWaitMs}ms`);
+  }
+  throw new Error(
+    `Timed out after ${maxWaitMs}ms waiting for endpoint transforms; ${
+      lastFailure ? `last failure: ${lastFailure}` : `last observed states (${lastStates})`
+    }`
+  );
 }
 
 export async function waitForTransformPropagation(
   esClient: Client,
   log: ToolingLog,
   expectedCounts: { metadataCurrent: number; metadataUnited: number },
-  maxWaitMs = 180_000
+  maxWaitMs = 180_000,
+  agentIdPrefix: string = EVAL_AGENT_ID_PREFIX
 ): Promise<void> {
   const start = Date.now();
   let lastCounts = { metadataCurrent: 0, metadataUnited: 0 };
+  const seededQuery = { prefix: { 'agent.id': agentIdPrefix } };
+  // A half-merged united doc matches the prefix but not the base filter the
+  // lookup tools apply, so the first scenarios would see an empty inventory.
+  const seededUnitedQuery = {
+    bool: { filter: [seededQuery, buildBaseEndpointMetadataFilter()] },
+  };
   log.info(
     `Waiting for transform propagation: metadataCurrent >= ${expectedCounts.metadataCurrent}, metadataUnited >= ${expectedCounts.metadataUnited}`
   );
@@ -107,12 +132,12 @@ export async function waitForTransformPropagation(
       const [currentCount, unitedCount] = await Promise.all([
         esClient.count({
           index: metadataCurrentIndexPattern,
-          query: EVAL_SEEDED_QUERY,
+          query: seededQuery,
           ignore_unavailable: true,
         }),
         esClient.count({
           index: METADATA_UNITED_INDEX,
-          query: EVAL_SEEDED_QUERY,
+          query: seededUnitedQuery,
           ignore_unavailable: true,
         }),
       ]);
@@ -156,9 +181,11 @@ interface ExtraDocument {
   document: Record<string, unknown>;
 }
 
-interface EndpointScenario {
+export interface EndpointScenario {
   agentId: string;
   hostName: string;
+  /** IP addresses written to endpoint metadata for exact-IP target resolution. */
+  hostIp?: string[];
   os: {
     name: string;
     version: string;
@@ -173,6 +200,10 @@ interface EndpointScenario {
   endpointStatus?: string;
   agentVersion?: string;
   extraDocuments?: ExtraDocument[];
+  /** Fleet package names written to the `.fleet-agents` doc (`packages` field). */
+  agentPackages?: string[];
+  /** Overrides `last_checkin` on the Fleet agent doc (ISO timestamp). */
+  lastCheckin?: string;
 }
 
 const DEFAULT_POLICY_NAME = 'manual eval policy';
@@ -188,6 +219,18 @@ const createPolicyResponseDocument = ({
   endpointStatus = 'enrolled',
   agentVersion = DEFAULT_AGENT_VERSION,
   message = 'agent_connectivity: Successfully connected to Agent; workflow: Successfully executed all workflows',
+  actions = [
+    {
+      name: 'agent_connectivity',
+      status: 'success',
+      message: 'Successfully connected to Agent',
+    },
+    {
+      name: 'workflow',
+      status: 'success',
+      message: 'Successfully executed all workflows',
+    },
+  ],
   scenario,
 }: Pick<EndpointScenario, 'agentId' | 'hostName' | 'os'> & {
   policyId: string;
@@ -196,6 +239,8 @@ const createPolicyResponseDocument = ({
   endpointStatus?: string;
   agentVersion?: string;
   message?: string;
+  /** Overrides the applied-policy actions; defaults to fully successful actions. */
+  actions?: Array<{ name: string; status: string; message: string }>;
   scenario: string;
 }): ExtraDocument => ({
   index: 'metrics-endpoint.policy-default',
@@ -234,18 +279,7 @@ const createPolicyResponseDocument = ({
           name: policyName,
           endpoint_policy_version: '1',
           status: policyStatus,
-          actions: [
-            {
-              name: 'agent_connectivity',
-              status: 'success',
-              message: 'Successfully connected to Agent',
-            },
-            {
-              name: 'workflow',
-              status: 'success',
-              message: 'Successfully executed all workflows',
-            },
-          ],
+          actions,
           response: {
             configurations: {
               manual_eval: {
@@ -281,11 +315,83 @@ const createEndpointSecurityLogDocument = ({
   },
 });
 
+const ISOLATION_FAILURE_MESSAGE =
+  'isolate action failed: agent unreachable - endpoint has not checked in recently';
+
+/** Failed isolate action request in the response-actions index the troubleshooting skill reads. */
+const createIsolationActionDocument = ({
+  agentId,
+  actionId,
+}: {
+  agentId: string;
+  actionId: string;
+}): ExtraDocument => ({
+  index: '.logs-endpoint.actions-default',
+  document: {
+    agent: {
+      id: agentId,
+      policy: [{ agentId, elasticAgentId: agentId }],
+    },
+    originSpaceId: 'default',
+    tags: [],
+    EndpointActions: {
+      action_id: actionId,
+      expiration: new Date(Date.now() + 1000 * 60 * 60 * 24).toISOString(),
+      type: 'INPUT_ACTION',
+      input_type: 'endpoint',
+      data: {
+        command: 'isolate',
+        comment: 'isolate eval-routing-unhealthy',
+        parameters: undefined,
+      },
+    },
+    error: { message: ISOLATION_FAILURE_MESSAGE },
+    user: { id: 'eval' },
+  },
+});
+
+/** Failed isolate action response carrying the error the troubleshooting skill should find. */
+const createIsolationActionResponseDocument = ({
+  agentId,
+  actionId,
+}: {
+  agentId: string;
+  actionId: string;
+}): ExtraDocument => ({
+  index: '.logs-endpoint.action.responses-default',
+  document: {
+    agent: { id: agentId },
+    EndpointActions: {
+      action_id: actionId,
+      completed_at: new Date().toISOString(),
+      started_at: new Date().toISOString(),
+      data: {
+        command: 'isolate',
+        comment: '',
+        output: undefined,
+      },
+    },
+    error: { message: ISOLATION_FAILURE_MESSAGE },
+  },
+});
+
+/**
+ * Writes one host as Endpoint and Fleet would: a metadata doc and an agent doc
+ * sharing `agent.id`.
+ *
+ * The agent doc carries `updated_at` because the `metadata_united` transform
+ * syncs on it; without it the host is merged from the Endpoint side only and
+ * the lookup tools (which require both) never see it. The metadata doc must
+ * not carry the key: `metrics-endpoint.metadata_current` maps it as an alias of
+ * `event.ingested`, and the `metadata_current` transform fails permanently
+ * ("Cannot write to a field alias") when it copies the key through.
+ */
 export async function seedScenario(clients: SeedClients, scenario: EndpointScenario) {
   const now = new Date().toISOString();
   const {
     agentId,
     hostName,
+    hostIp,
     os,
     policyName,
     policyStatus,
@@ -293,6 +399,8 @@ export async function seedScenario(clients: SeedClients, scenario: EndpointScena
     endpointStatus = 'enrolled',
     agentVersion = DEFAULT_AGENT_VERSION,
     extraDocuments = [],
+    agentPackages,
+    lastCheckin,
   } = scenario;
 
   await clients.esClient.create({
@@ -312,7 +420,7 @@ export async function seedScenario(clients: SeedClients, scenario: EndpointScena
         namespace: 'default',
       },
       agent: { id: agentId, type: 'endpoint', version: agentVersion },
-      host: { name: hostName, hostname: hostName, os },
+      host: { name: hostName, hostname: hostName, ...(hostIp ? { ip: hostIp } : {}), os },
       Endpoint: {
         status: endpointStatus,
         policy: { applied: { status: policyStatus, name: policyName, id: policyId } },
@@ -323,7 +431,11 @@ export async function seedScenario(clients: SeedClients, scenario: EndpointScena
   });
 
   const agentStatus =
-    endpointStatus === 'failed' ? 'error' : endpointStatus === 'degraded' ? 'degraded' : 'online';
+    endpointStatus === 'failed' || endpointStatus === 'unhealthy'
+      ? 'error'
+      : endpointStatus === 'degraded'
+      ? 'degraded'
+      : 'online';
 
   await clients.internalEsClient.index({
     index: '.fleet-agents',
@@ -332,15 +444,17 @@ export async function seedScenario(clients: SeedClients, scenario: EndpointScena
     document: {
       '@timestamp': now,
       agent: { id: agentId, version: agentVersion },
-      local_metadata: { host: { name: hostName } },
+      local_metadata: { host: { name: hostName, ...(hostIp ? { ip: hostIp } : {}) } },
       active: true,
       enrolled_at: now,
-      last_checkin: now,
+      last_checkin: lastCheckin ?? now,
       status: agentStatus,
       last_known_status: agentStatus,
       last_checkin_status: agentStatus,
+      ...(agentPackages ? { packages: agentPackages } : {}),
       policy_revision_idx: 1,
       policy_id: policyId,
+      updated_at: now,
     },
   });
 
@@ -412,6 +526,51 @@ export const SCENARIOS = {
           message: 'Endpoint policy application failed: kernel extension could not be loaded',
         },
       },
+    ],
+  },
+
+  routingUnhealthyHost: {
+    agentId: 'eval-agent-ts-routing-unhealthy-001',
+    hostName: 'eval-routing-unhealthy',
+    os: { name: 'Windows', version: '10', type: 'windows', full: 'Windows 10' },
+    policyName: 'eval-policy-routing-unhealthy',
+    policyStatus: 'success',
+    endpointStatus: 'unhealthy',
+    agentPackages: ['endpoint'],
+    // Stale check-in so the seeded data agrees with "offline / missed check-ins"
+    // questions asked about this host.
+    lastCheckin: new Date(Date.now() - 1000 * 60 * 60 * 24).toISOString(),
+    extraDocuments: [
+      createPolicyResponseDocument({
+        agentId: 'eval-agent-ts-routing-unhealthy-001',
+        hostName: 'eval-routing-unhealthy',
+        os: { name: 'Windows', version: '10', type: 'windows', full: 'Windows 10' },
+        policyId: 'eval-policy-routing-unhealthy',
+        policyName: 'eval-policy-routing-unhealthy',
+        endpointStatus: 'unhealthy',
+        message: 'agent_connectivity: missed check-ins; endpoint has not checked in with the agent',
+        actions: [
+          {
+            name: 'agent_connectivity',
+            status: 'warning',
+            message: 'Endpoint has not checked in recently',
+          },
+          {
+            name: 'workflow',
+            status: 'success',
+            message: 'Successfully executed all workflows',
+          },
+        ],
+        scenario: 'routing_unhealthy_host',
+      }),
+      createIsolationActionDocument({
+        agentId: 'eval-agent-ts-routing-unhealthy-001',
+        actionId: 'eval-routing-unhealthy-isolate-001',
+      }),
+      createIsolationActionResponseDocument({
+        agentId: 'eval-agent-ts-routing-unhealthy-001',
+        actionId: 'eval-routing-unhealthy-isolate-001',
+      }),
     ],
   },
 

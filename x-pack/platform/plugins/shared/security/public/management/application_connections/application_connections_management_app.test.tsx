@@ -15,6 +15,10 @@ import { applicationConnectionsManagementApp } from './application_connections_m
 import { mockAuthenticatedUser } from '../../../common/model/authenticated_user.mock';
 import { securityMock } from '../../mocks';
 
+jest.mock('./application_connections_page', () => ({
+  ApplicationConnectionsPage: () => 'Application Connections Page',
+}));
+
 const element = document.body.appendChild(document.createElement('div'));
 
 describe('applicationConnectionsManagementApp', () => {
@@ -26,8 +30,6 @@ describe('applicationConnectionsManagementApp', () => {
     authc.getCurrentUser.mockResolvedValue(mockAuthenticatedUser());
     const setBreadcrumbs = jest.fn();
     const history = scopedHistoryMock.create({ pathname: '/' });
-
-    coreStartMock.http.get.mockResolvedValue({ clients: [], connections: [] });
 
     let unmount: Unmount = noop;
     await act(async () => {

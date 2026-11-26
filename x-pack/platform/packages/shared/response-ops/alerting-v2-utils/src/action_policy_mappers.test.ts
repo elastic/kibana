@@ -14,7 +14,6 @@ describe('attachmentDataToActionPolicyPayload', () => {
 
     expect(result).toEqual({
       name: '',
-      description: '',
       destinations: [],
     });
   });
@@ -24,10 +23,8 @@ describe('attachmentDataToActionPolicyPayload', () => {
       name: 'My Policy',
       description: 'desc',
       destinations: [{ type: 'workflow', id: 'wf-1' }],
-      matcher: 'rule.tags: "prod"',
-      group_by: ['host.name'],
-      tags: ['tag1'],
-      grouping_mode: 'per_field',
+      matcher: { tags: ['prod'] },
+      grouping: { mode: 'per_field', fields: ['host.name'] },
       throttle: { strategy: 'time_interval', interval: '5m' },
     };
 
@@ -37,10 +34,8 @@ describe('attachmentDataToActionPolicyPayload', () => {
       name: 'My Policy',
       description: 'desc',
       destinations: [{ type: 'workflow', id: 'wf-1' }],
-      matcher: 'rule.tags: "prod"',
-      group_by: ['host.name'],
-      tags: ['tag1'],
-      grouping_mode: 'per_field',
+      matcher: { tags: ['prod'] },
+      grouping: { mode: 'per_field', fields: ['host.name'] },
       throttle: { strategy: 'time_interval', interval: '5m' },
     });
   });
@@ -49,12 +44,22 @@ describe('attachmentDataToActionPolicyPayload', () => {
     const data: Partial<ActionPolicyAttachmentData> = {
       name: 'Rule-scoped Policy',
       description: '',
-      matcher: 'rule.id: "rule-123"',
+      matcher: { tags: ['critical'] },
       destinations: [{ type: 'workflow', id: 'wf-1' }],
     };
 
     const result = attachmentDataToActionPolicyPayload(data);
 
-    expect(result.matcher).toBe('rule.id: "rule-123"');
+    expect(result.matcher).toEqual({ tags: ['critical'] });
+  });
+
+  it.each([{}, { tags: [] }, { expression: '' }])('omits a matcher set to %p', (matcher) => {
+    const result = attachmentDataToActionPolicyPayload({
+      name: 'Catch-all Policy',
+      destinations: [{ type: 'workflow', id: 'wf-1' }],
+      matcher,
+    });
+
+    expect(result).not.toHaveProperty('matcher');
   });
 });

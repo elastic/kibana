@@ -13,9 +13,10 @@
 
 import {
   LENS_METRIC_BREAKDOWN_DEFAULT_MAX_COLUMNS,
+  LENS_METRIC_DEFAULT_COLOR_STEPS,
+  type DataType,
   type MetricVisualizationState,
 } from '@kbn/lens-common';
-
 import type { LensAttributes } from '../../../../types';
 import {
   DEFAULT_PRIMARY_ICON_ALIGNMENT,
@@ -36,7 +37,7 @@ import {
 } from './common';
 import { getMetricAccessor } from '../../../../transforms/charts/utils';
 import { iconCompat } from '../../../../transforms/charts/metric';
-import { getRangeValue } from '../../../../transforms/coloring';
+import { getRangeValue, getSingleValuePercentColor } from '../../../../transforms/coloring';
 
 type MetricAttributes = Extract<LensAttributes, { visualizationType: 'lnsMetric' }>;
 
@@ -128,7 +129,7 @@ const alignVisualizationDefaults: NormalizerConfig<MetricAttributes> = {
       }
     }
 
-    // Icons with no API mapping (e.g. legacy `empty`/`popout`) are dropped by the transform.
+    // Icons with no API mapping (e.g. legacy `empty`) are dropped by the transform.
     if (viz.icon && iconCompat.toAPI(viz.icon) === undefined) {
       delete viz.icon;
     }
@@ -138,7 +139,7 @@ const alignVisualizationDefaults: NormalizerConfig<MetricAttributes> = {
       delete viz.applyColorTo;
     }
 
-    // The transform derives `showBar` purely from the presence of a max-accessor background bar.
+    // The transform shows the bar exactly when a max remains (a hidden bar's max is dropped above).
     viz.showBar = Boolean(viz.maxAccessor);
     viz.titlesTextAlign = viz.titlesTextAlign ?? DEFAULT_PRIMARY_LABELS_ALIGNMENT;
 
@@ -251,13 +252,6 @@ const alignMetricColumns: NormalizerConfig<MetricAttributes> = {
     }
     return attributes;
   },
-  ignore: [
-    // ES|QL column display format (`params`) is not preserved through the API round-trip,
-    // consistent with the already-ignored `meta` / `inMetricDimension` text-based fields.
-    'state.datasourceStates.textBased.layers.*.columns.*.params',
-    // Runtime-only ES|QL fields not produced by the transform.
-    'state.datasourceStates.textBased.initialContext',
-  ],
 };
 
 /**
@@ -344,7 +338,10 @@ const alignMetricPaletteNormalizer: NormalizerConfig<MetricAttributes> = {
 
     const isAbsoluteRange = palette.params.rangeType === 'number';
     if (!viz.breakdownByAccessor && !viz.maxAccessor && !isAbsoluteRange) {
+      // The transform turns a percent palette on a single value into the static color of the band at 50%.
+      const staticColor = getSingleValuePercentColor(palette);
       delete viz.palette;
+      if (staticColor) viz.color = staticColor;
       return attributes;
     }
     // There are 4 metric tests that were failing because of this, since they had the same values stored in both `stops` and `colorStops`.
@@ -376,6 +373,33 @@ const alignTextBasedColumns: NormalizerConfig<MetricAttributes> = {
     for (const layer of Object.values(textBased?.layers ?? {})) {
       layer.columns = layer.columns.filter((c) => canonicalMetricColumns.has(c.columnId));
     }
+    return attributes;
+  },
+};
+
+/**
+ * The transform only carries the max when the bar is shown (`showBar` and a max): the runtime
+ * draws nothing for a hidden bar, and the API has the max only inside the bar. Drop the max of a
+ * hidden bar from the original.
+ */
+const alignHiddenBarMax: NormalizerConfig<MetricAttributes> = {
+  original: (attributes) => {
+    const viz = attributes.state.visualization;
+    const maxAccessor = viz.maxAccessor;
+    if (viz.showBar || !maxAccessor) {
+      return attributes;
+    }
+
+    const formBased = getFormBasedDatasourceState(attributes.state.datasourceStates);
+    for (const layer of Object.values(formBased?.layers ?? {})) {
+      delete layer.columns[maxAccessor];
+      layer.columnOrder = layer.columnOrder.filter((id: string) => id !== maxAccessor);
+    }
+    for (const layer of Object.values(attributes.state.datasourceStates.textBased?.layers ?? {})) {
+      layer.columns = layer.columns.filter((column) => column.columnId !== maxAccessor);
+    }
+    delete viz.maxAccessor;
+    delete viz.progressDirection;
     return attributes;
   },
 };
@@ -475,6 +499,27 @@ const alignIds: NormalizerConfig<MetricAttributes> = {
   },
 };
 
+function inferColumnDataType(
+  newColumnId: string,
+  { isTextBased }: { isTextBased: boolean }
+): DataType | undefined {
+  if (!isTextBased) {
+    return;
+  }
+  if (
+    newColumnId === 'metric_accessor_breakdown' ||
+    newColumnId === `${ACCESSOR}_breakdown_trendline`
+  ) {
+    return 'string';
+  }
+  if (newColumnId === 'x_date_histogram') {
+    return 'date';
+  }
+  if (canonicalMetricColumns.has(newColumnId)) {
+    return 'number';
+  }
+}
+
 export const normalizeMetric = mergeNormalizers([
   getCommonNormalizer<MetricAttributes>(({ state: { visualization } }) => ({
     layerRemapping: [
@@ -482,9 +527,15 @@ export const normalizeMetric = mergeNormalizers([
       [visualization.trendlineLayerId, TRENDLINE_LAYER_ID],
     ],
     columnRemapping: getColumnRemapping(visualization),
+    inferColumnDataType,
   })),
-  getPaletteNormalizer<MetricAttributes>('state.visualization.palette', isSingleValueMetric),
+  getPaletteNormalizer<MetricAttributes>(
+    'state.visualization.palette',
+    LENS_METRIC_DEFAULT_COLOR_STEPS,
+    isSingleValueMetric
+  ),
   alignIds,
+  alignHiddenBarMax,
   alignStaticValueMax,
   alignEmptyLinkedLayers,
   alignVisualizationDefaults,

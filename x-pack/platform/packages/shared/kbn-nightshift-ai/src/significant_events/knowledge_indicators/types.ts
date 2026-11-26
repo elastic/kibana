@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import type { Feature, StreamQuery } from '@kbn/significant-events-schema';
+import type { AggregatedFeature, Feature, StreamQuery } from '@kbn/significant-events-schema';
 
 export type SearchKnowledgeIndicatorsKind = 'feature' | 'query';
 
 export interface SearchKnowledgeIndicatorsInput {
   /**
-   * Optional: if omitted, search across all accessible streams.
+   * Optional: if omitted, search across all accessible sources.
    */
-  stream_names?: string[];
+  source_ids?: string[];
 
   /**
    * Optional: free-text search (best-effort across stored fields).
@@ -58,11 +58,16 @@ export interface SearchKnowledgeIndicatorsOutput {
   next_page: number | null;
 }
 
+export interface TopologySeedResolution {
+  featureIds: string[];
+  selectedFeatureUuids: string[];
+}
+
 export type KnowledgeIndicator = KnowledgeIndicatorFeature | KnowledgeIndicatorQuery;
 
 export interface KnowledgeIndicatorFeature {
   kind: 'feature';
-  feature: Feature;
+  feature: AggregatedFeature;
 }
 
 export interface KnowledgeIndicatorQuery {
@@ -72,5 +77,5 @@ export interface KnowledgeIndicatorQuery {
     backed: boolean;
     id: string;
   };
-  stream_name: string;
+  source_id: string;
 }

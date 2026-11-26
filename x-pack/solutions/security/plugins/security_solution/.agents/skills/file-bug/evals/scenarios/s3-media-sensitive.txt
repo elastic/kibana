@@ -1,0 +1,1 @@
+File a bug: the Security Alerts table shows 0 results although 12 alerts exist in the time range. Screenshot: $FIXTURES/shot-sensitive.png . Kibana 9.3.0 on ECH, default space, role superuser, no feature flag. Steps: 1) open Security > Alerts, 2) set the date picker to Last 24 hours. Current: "0 results" and an empty table. Expected: 12 rows.

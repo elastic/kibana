@@ -11,6 +11,10 @@ export const EVALS_EXPERIMENTS_URL = `${EVALS_INTERNAL_URL}/experiments` as cons
 export const EVALS_EXPERIMENT_URL = `${EVALS_INTERNAL_URL}/experiments/{experimentId}` as const;
 export const EVALS_EXPERIMENT_SCORES_URL =
   `${EVALS_INTERNAL_URL}/experiments/{experimentId}/scores` as const;
+export const EVALS_EXPERIMENT_RUNS_URL =
+  `${EVALS_INTERNAL_URL}/experiments/{experimentId}/runs` as const;
+export const EVALS_EXPERIMENT_TRACES_URL =
+  `${EVALS_INTERNAL_URL}/experiments/{experimentId}/traces` as const;
 export const EVALS_SCORES_URL = `${EVALS_INTERNAL_URL}/scores` as const;
 export const EVALS_EXPERIMENTS_COMPARE_URL = `${EVALS_INTERNAL_URL}/experiments/compare` as const;
 export const EVALS_EXPERIMENTS_RUN_URL = `${EVALS_INTERNAL_URL}/experiments/_run` as const;
@@ -25,15 +29,19 @@ export const EVALS_EXPERIMENT_EXECUTION_CANCEL_URL =
   `${EVALS_INTERNAL_URL}/experiments/executions/{workflowExecutionId}/_cancel` as const;
 export const EVALS_EXPERIMENT_DATASET_EXAMPLES_URL =
   `${EVALS_INTERNAL_URL}/experiments/{experimentId}/datasets/{datasetId}/examples` as const;
+export const EVALS_EXPERIMENT_EXAMPLE_DETAILS_URL =
+  `${EVALS_EXPERIMENT_DATASET_EXAMPLES_URL}/{exampleId}/repetitions/{repetitionIndex}` as const;
 export const EVALS_EXAMPLE_SCORES_URL =
   `${EVALS_INTERNAL_URL}/examples/{exampleId}/scores` as const;
 export const EVALS_ONLINE_SCORES_URL = `${EVALS_INTERNAL_URL}/online_scores` as const;
 export const EVALS_TRACE_URL = `${EVALS_INTERNAL_URL}/traces/{traceId}` as const;
+export const EVALS_TRACE_EVIDENCE_URL = `${EVALS_TRACE_URL}/evidence` as const;
 export const EVALS_RESOLVE_INSTRUMENTATION_URL =
   `${EVALS_INTERNAL_URL}/traces/_resolve_instrumentation` as const;
 export const EVALS_EVALUATORS_URL = `${EVALS_INTERNAL_URL}/evaluators` as const;
 export const EVALS_EVALUATOR_URL = `${EVALS_EVALUATORS_URL}/{name}` as const;
 export const EVALS_VALIDATE_URL = `${EVALS_INTERNAL_URL}/evaluators/_validate` as const;
+export const EVALS_TEST_EVALUATOR_URL = `${EVALS_INTERNAL_URL}/evaluators/_test` as const;
 export const EVALS_EVALUATE_URL = `${EVALS_INTERNAL_URL}/_evaluate` as const;
 export const EVALS_TRACING_PROJECTS_URL = `${EVALS_INTERNAL_URL}/tracing/projects` as const;
 export const EVALS_TRACING_PROJECT_TRACES_URL =
@@ -45,6 +53,33 @@ export const EVALS_DATASET_COPY_URL = `${EVALS_DATASET_URL}/_copy` as const;
 export const EVALS_DATASET_EXAMPLE_URL = `${EVALS_DATASET_EXAMPLES_URL}/{exampleId}` as const;
 export const EVALS_DATASET_UPSERT_URL = `${EVALS_DATASETS_URL}/_upsert` as const;
 export const EVALS_DATASET_RESOLVE_URL = `${EVALS_DATASETS_URL}/_resolve` as const;
+/**
+ * The pinned-baseline registry is served by the agent_builder plugin, so these routes live
+ * under its internal namespace (it must match `internalApiPath` in that plugin). They are
+ * defined here, next to the rest of the wire contract (schemas, index name), so the server
+ * routes and the CLI client share a single definition.
+ */
+export const EVAL_BASELINES_URL = '/internal/agent_builder/evals/baselines' as const;
+export const EVAL_BASELINES_PIN_URL = `${EVAL_BASELINES_URL}/_pin` as const;
+export const EVAL_BASELINES_LATEST_URL = `${EVAL_BASELINES_URL}/latest` as const;
+export const EVAL_BASELINE_SCORES_URL = `${EVAL_BASELINES_URL}/{baselineId}/scores` as const;
+
+/**
+ * Upper bound on the scores one pinned baseline can snapshot; a pin of a larger execution
+ * is refused rather than truncated, because a partial snapshot would silently lose the
+ * overflow once the source scores age out of the scores stream's retention.
+ */
+export const MAX_PINNABLE_SCORES = 10000;
+
+// These fields are unbounded (additionalProperties: true, no ingest-time size limit)
+// and can hold ~100 KB+ of raw data per document. Exclude them from bulk fetches
+// to avoid exceeding Kibana's 100 MB max response size.
+export const UNBOUNDED_SCORE_FIELDS = [
+  'task.output',
+  'example.input',
+  'example.metadata',
+  'evaluator.metadata',
+];
 
 const EVALUATION_INDEX_PREFIX = '.evaluation' as const;
 
@@ -54,10 +89,19 @@ export const EvaluationIndices = {
   DATASETS: `${EVALUATION_INDEX_PREFIX}-datasets`,
   DATASET_EXAMPLES: `${EVALUATION_INDEX_PREFIX}-dataset-examples`,
   EVALUATORS: `${EVALUATION_INDEX_PREFIX}-evaluators`,
+  // Pinned regression baselines: score snapshots + pointer docs that must outlive the
+  // 90-day retention on the scores data stream (365-day retention on this stream).
+  PINNED_BASELINES: `${EVALUATION_INDEX_PREFIX}-pinned-baselines`,
 } as const;
 
 export const TRACES_INDEX_PATTERN = 'traces-*' as const;
 export const LOGS_INDEX_PATTERN = 'logs-*' as const;
+export const EVALS_EVIDENCE_LOG_EVENT_NAMES = {
+  OTEL_GENAI_USER_MESSAGE: 'gen_ai.user.message',
+  OTEL_GENAI_CHOICE: 'gen_ai.choice',
+  CLAUDE_CODE_USER_PROMPT: 'user_prompt',
+  CLAUDE_CODE_API_RESPONSE_BODY: 'api_response_body',
+} as const;
 
 export const API_VERSIONS = {
   internal: {
@@ -71,6 +115,7 @@ export const DATASET_UUID_NAMESPACE = 'f77b3ee3-7bc6-4bf8-9e43-d7fca9e69ae0' as 
 export const EVALUATOR_UUID_NAMESPACE = 'c1d6a0f2-8b4e-4a17-9c3d-5f2e7a9b0c41' as const;
 
 export const MAX_EXAMPLES_PER_DATASET = 10_000 as const;
+export const EXPERIMENT_EXAMPLE_PREVIEW_MAX_LENGTH = 2048 as const;
 export const MAX_DATASET_EXAMPLES_REQUEST_BYTES = 5 * 1024 * 1024;
 export const MAX_SCORES_PER_QUERY = 10_000 as const;
 
@@ -81,5 +126,6 @@ export const MAX_DATASET_NAME_LENGTH = 256 as const;
 export const MAX_DATASET_DESCRIPTION_LENGTH = 2048 as const;
 
 export const MAX_EVALUATOR_NAME_LENGTH = 128 as const;
+export const MAX_EVALUATOR_VERSION_LENGTH = 64 as const;
 
 export const MAX_DATASET_TAG_FACETS = 100 as const;

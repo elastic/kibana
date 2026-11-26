@@ -5,12 +5,22 @@
  * 2.0.
  */
 
-import { SYSTEM_SECURITY_WATCH_CATALOG, SYSTEM_SECURITY_WATCH_FLOOR_ID } from '../../constants';
+import {
+  SYSTEM_SECURITY_WATCH_CATALOG,
+  SYSTEM_SECURITY_WATCH_FORENSICS_ID,
+  SYSTEM_SECURITY_WATCH_DETECTION_ID,
+  SYSTEM_SECURITY_WATCH_FLOOR_ID,
+  SYSTEM_SECURITY_WATCH_HUNT_ID,
+  SYSTEM_SECURITY_WATCH_IDS,
+  SYSTEM_SECURITY_WATCH_OFFICER_ID,
+  WATCH_TIER_TAGS,
+} from '../../constants';
 import {
   compareWatchesForDisplay,
   coverageFromSchedule,
   createCatalogWatchPlaceholder,
   isOnDutyNow,
+  resolveWatchAccent,
 } from './watch_helpers';
 import type { WatchScheduleCoverageInput } from './watch_helpers';
 
@@ -90,14 +100,14 @@ describe('compareWatchesForDisplay', () => {
   it('orders by sortOrder then name', () => {
     const watches = [
       { sortOrder: Number.MAX_SAFE_INTEGER, name: 'Custom' },
-      { sortOrder: 30, name: 'Dark Watch' },
-      { sortOrder: 10, name: 'Watch Floor' },
+      { sortOrder: 30, name: 'Hunt Watch' },
+      { sortOrder: 10, name: 'Triage Watch' },
       { sortOrder: 20, name: 'Watch Officer' },
     ];
     expect(watches.sort(compareWatchesForDisplay).map((w) => w.name)).toEqual([
-      'Watch Floor',
+      'Triage Watch',
       'Watch Officer',
-      'Dark Watch',
+      'Hunt Watch',
       'Custom',
     ]);
   });
@@ -124,5 +134,48 @@ describe('createCatalogWatchPlaceholder', () => {
     );
     expect(placeholder.schedule.set).toBe(false);
     expect(placeholder.lifecycle).toBeUndefined();
+  });
+
+  it('orders the catalog Triage, Officer, Hunt, Detection, Forensics', () => {
+    expect([...SYSTEM_SECURITY_WATCH_IDS]).toEqual([
+      SYSTEM_SECURITY_WATCH_FLOOR_ID,
+      SYSTEM_SECURITY_WATCH_OFFICER_ID,
+      SYSTEM_SECURITY_WATCH_HUNT_ID,
+      SYSTEM_SECURITY_WATCH_DETECTION_ID,
+      SYSTEM_SECURITY_WATCH_FORENSICS_ID,
+    ]);
+  });
+
+  it('pairs each catalog id with the same-index name, color, and tier tag', () => {
+    expect(SYSTEM_SECURITY_WATCH_CATALOG.map((entry) => entry.id)).toEqual([
+      ...SYSTEM_SECURITY_WATCH_IDS,
+    ]);
+    expect(WATCH_TIER_TAGS).toHaveLength(SYSTEM_SECURITY_WATCH_IDS.length);
+
+    for (const [index, watchId] of SYSTEM_SECURITY_WATCH_IDS.entries()) {
+      const placeholder = createCatalogWatchPlaceholder(watchId);
+      const catalog = SYSTEM_SECURITY_WATCH_CATALOG[index];
+      expect(placeholder.id).toBe(watchId);
+      expect(placeholder.name).toBe(catalog.name);
+      expect(placeholder.color).toBe(catalog.color);
+      expect(placeholder.tags).toEqual(['watch', WATCH_TIER_TAGS[index]]);
+      expect(placeholder.sortOrder).toBe((index + 1) * 10);
+    }
+  });
+});
+
+describe('resolveWatchAccent', () => {
+  const colors = {
+    vis: { euiColorVis0: 'rgb(vis-0)', euiColorVis8: 'rgb(vis-8)' },
+    textAssistance: 'rgb(assistance)',
+  };
+
+  it('resolves vis tokens and textAssistance', () => {
+    expect(resolveWatchAccent(colors, 'euiColorVis0')).toBe('rgb(vis-0)');
+    expect(resolveWatchAccent(colors, 'textAssistance')).toBe('rgb(assistance)');
+  });
+
+  it('falls back to textAssistance for an unknown token', () => {
+    expect(resolveWatchAccent(colors, '#16b3a6')).toBe('rgb(assistance)');
   });
 });

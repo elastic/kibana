@@ -7,7 +7,7 @@ exports[`TransactionActionMenu  matches the snapshot 1`] = `
     id="transactionActionMenu"
   >
     <button
-      class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-base-primary"
+      class="euiButton emotion-euiButtonDisplay-m-base-primary"
       data-test-subj="apmActionMenuButtonInvestigateButton"
       type="button"
     >
@@ -20,6 +20,7 @@ exports[`TransactionActionMenu  matches the snapshot 1`] = `
           Investigate
         </span>
         <span
+          aria-hidden="true"
           color="inherit"
           data-euiicon-type="chevronSingleDown"
         />

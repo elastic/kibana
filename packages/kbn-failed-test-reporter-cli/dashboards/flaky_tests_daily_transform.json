@@ -1,0 +1,45 @@
+{
+  "description": "Daily passed and failed attempts per FTR, Jest, and Scout test, team, and pipeline. Summaries are retained for 12 months.",
+  "source": {
+    "index": "scout-test-events-kibana",
+    "query": {
+      "bool": {
+        "filter": [
+          { "range": { "@timestamp": { "gte": "2026-09-23T00:00:00.000Z" } } },
+          {
+            "terms": {
+              "buildkite.pipeline.slug": ["kibana-pull-request", "kibana-on-merge"]
+            }
+          },
+          { "term": { "event.action": "test-end" } },
+          { "terms": { "reporter.type": ["ftr", "jest", "playwright"] } },
+          { "terms": { "test.status": ["passed", "failed", "timedOut"] } }
+        ]
+      }
+    }
+  },
+  "dest": { "index": "flaky_tests_daily" },
+  "frequency": "1h",
+  "settings": { "max_page_search_size": 5000 },
+  "sync": { "time": { "field": "@timestamp", "delay": "5m" } },
+  "pivot": {
+    "group_by": {
+      "day": { "date_histogram": { "field": "@timestamp", "calendar_interval": "1d" } },
+      "test_id": { "terms": { "field": "test.id" } },
+      "team": { "terms": { "field": "test.file.owner" } },
+      "pipeline": { "terms": { "field": "buildkite.pipeline.slug" } },
+      "test_title": { "terms": { "field": "test.title.keyword" } },
+      "file_path": { "terms": { "field": "test.file.path" } },
+      "framework": { "terms": { "field": "reporter.type" } }
+    },
+    "aggregations": {
+      "failed_attempts": {
+        "sum": { "script": { "source": "doc['test.status'].value == 'passed' ? 0 : 1" } }
+      },
+      "passed_attempts": {
+        "sum": { "script": { "source": "doc['test.status'].value == 'passed' ? 1 : 0" } }
+      }
+    }
+  },
+  "retention_policy": { "time": { "field": "day", "max_age": "365d" } }
+}

@@ -10,7 +10,9 @@ import type {
   Rule,
   PartialRule,
   RawRule,
+  RawRuleLastRun,
   IntervalSchedule,
+  RuleLastRun,
   RuleTypeParams,
   RuleWithLegacyId,
   PartialRuleWithLegacyId,
@@ -23,6 +25,7 @@ import {
 } from '../../lib';
 import type { UntypedNormalizedRuleType } from '../../rule_type_registry';
 import { getActiveScheduledSnoozes } from '../../lib/is_rule_snoozed';
+import { normalizeLastRunWarning } from '../../lib/normalize_rule_execution_reasons';
 import { injectReferencesIntoParams } from '../common';
 import {
   transformRawActionsToDomainActions,
@@ -50,6 +53,15 @@ interface GetAlertFromRawOpts {
 type GetPartialRuleFromRawOpts = Omit<GetAlertFromRawOpts, 'ruleTypeRegistry'> & {
   ruleType: UntypedNormalizedRuleType;
 };
+
+const lastRunFromRaw = ({ warning, ...lastRun }: RawRuleLastRun): RuleLastRun => ({
+  ...lastRun,
+  ...(lastRun.outcomeMsg && !Array.isArray(lastRun.outcomeMsg)
+    ? { outcomeMsg: lastRun.outcomeMsg ? [lastRun.outcomeMsg] : null }
+    : { outcomeMsg: lastRun.outcomeMsg }),
+  ...(warning !== undefined ? { warning: normalizeLastRunWarning(warning) } : {}),
+});
+
 /**
  * @deprecated in favor of transformRuleAttributesToRuleDomain
  */
@@ -162,16 +174,7 @@ function getPartialRuleFromRaw<Params extends RuleTypeParams>(
       ? { monitoring: convertMonitoringFromRawAndVerify(opts.logger, opts.id, monitoring) }
       : {}),
     ...(nextRun ? { nextRun: new Date(nextRun) } : {}),
-    ...(lastRun
-      ? {
-          lastRun: {
-            ...lastRun,
-            ...(lastRun.outcomeMsg && !Array.isArray(lastRun.outcomeMsg)
-              ? { outcomeMsg: lastRun.outcomeMsg ? [lastRun.outcomeMsg] : null }
-              : { outcomeMsg: lastRun.outcomeMsg }),
-          },
-        }
-      : {}),
+    ...(lastRun ? { lastRun: lastRunFromRaw(lastRun) } : {}),
   };
 
   // Need the `rule` object to build a URL

@@ -43,7 +43,7 @@ import { createFeatureFlagsMock } from '../../../test_utils/create_feature_flags
 import { EventBasedTelemetryProvider } from '../../../context/ebt_telemetry_context';
 
 jest.mock('./context/metrics_experience_state_provider');
-jest.mock('@kbn/ebt-tools', () => ({
+jest.mock('@kbn/ebt-tools/react', () => ({
   PerformanceContextProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
   usePerformanceContext: () => ({
     onPageReady: jest.fn(),
@@ -158,6 +158,8 @@ jest.mock('lodash', () => {
     debounce: (fn: any) => {
       const debounced = (...args: any[]) => fn(...args);
       debounced.cancel = jest.fn();
+      // This mock invokes synchronously, so there is never a pending call to flush.
+      debounced.flush = jest.fn();
       return debounced;
     },
   };
@@ -215,8 +217,8 @@ const TestWrapper = ({
   </EuiProvider>
 );
 
-// The "Edit grid of metrics" button is gated behind a feature flag (disabled by
-// default); this mock resolves it to `true` for tests that exercise the button.
+// The "Edit grid of metrics" button falls back to enabled; this mock resolves it
+// explicitly to `true` for tests that exercise the button.
 const editGridSettingsEnabledFeatureFlags = createFeatureFlagsMock({
   [FEATURE_FLAGS.IS_EDIT_GRID_SETTINGS_ENABLED]: true,
 });
@@ -250,7 +252,6 @@ describe('MetricsExperienceGrid', () => {
     jest.clearAllMocks();
 
     fetchParams = getFetchParamsMock({
-      dataView: { getIndexPattern: () => 'metrics-*', isTimeBased: () => true } as any,
       filters: [],
       query: { esql: 'TS metrics-*' },
       esqlVariables: [],
@@ -339,6 +340,20 @@ describe('MetricsExperienceGrid', () => {
     expect(getByTestId('metricsExperienceBreakdownSelectorButton')).toBeInTheDocument();
     expect(getByTestId(METRICS_TOOLBAR_SEARCH_BUTTON_DATA_TEST_SUBJ)).toBeInTheDocument();
     expect(getByTestId('metricsExperienceToolbarFullScreen')).toBeInTheDocument();
+  });
+
+  it('reports the dimensions as the only breakdown fields and clears them on unmount', () => {
+    const setBreakdownFieldNames = jest.fn();
+    const { unmount } = render(
+      <MetricsExperienceGrid {...defaultProps} setBreakdownFieldNames={setBreakdownFieldNames} />,
+      { wrapper: TestWrapper }
+    );
+
+    expect(setBreakdownFieldNames).toHaveBeenLastCalledWith(['foo', 'qux']);
+
+    unmount();
+
+    expect(setBreakdownFieldNames).toHaveBeenLastCalledWith(undefined);
   });
 
   it('renders Discover ErrorCallout when METRICS_INFO fetch fails with a network error', () => {
@@ -755,15 +770,57 @@ describe('MetricsExperienceGrid', () => {
       // to the selectedDimensions change -- not by the toolbar handler directly.
       expect(onPageChange).not.toHaveBeenCalled();
     });
+
+    it('clears the Discover breakdown field when it is deselected via the toolbar', () => {
+      const onDimensionsChange = jest.fn();
+      const onBreakdownFieldChange = jest.fn();
+
+      useMetricsExperienceStateMock.mockReturnValue({
+        currentPage: 0,
+        selectedDimensions: [dimensions[0]],
+        onDimensionsChange,
+        onPageChange: jest.fn(),
+        isFullscreen: false,
+        searchTerm: '',
+        onSearchTermChange: jest.fn(),
+        onToggleFullscreen: jest.fn(),
+        onExitFullscreen: jest.fn(),
+        flyoutState: undefined,
+        onFlyoutStateChange: jest.fn(),
+        onFlyoutSelectedTabChange: jest.fn(),
+        metricsSort: METRICS_GRID_SORT_DEFAULTS,
+        onMetricsSortChange: jest.fn(),
+        profileId: 'test-profile-id',
+        gridSettings: METRICS_GRID_SETTINGS_DEFAULTS,
+        recentlyExploredMetrics: [],
+        onGridSettingsChange: jest.fn(),
+      });
+
+      const { getByTestId } = render(
+        <MetricsExperienceGrid
+          {...defaultProps}
+          breakdownField="foo"
+          onBreakdownFieldChange={onBreakdownFieldChange}
+        />,
+        { wrapper: TestWrapper }
+      );
+
+      act(() => {
+        getByTestId('metricsExperienceBreakdownSelectorOption-foo').click();
+      });
+
+      expect(onBreakdownFieldChange).toHaveBeenCalledWith(undefined);
+      expect(onDimensionsChange).toHaveBeenCalledWith([]);
+    });
   });
 
   describe('grid settings flyout', () => {
-    it('hides the edit button when the host does not provide featureFlags (safe default)', () => {
+    it('shows the edit button when the host does not provide featureFlags (fallback enabled)', () => {
       const { queryByTestId } = render(<MetricsExperienceGrid {...defaultProps} />, {
         wrapper: TestWrapper,
       });
 
-      expect(queryByTestId('metricsExperienceEditGridButton')).not.toBeInTheDocument();
+      expect(queryByTestId('metricsExperienceEditGridButton')).toBeInTheDocument();
     });
 
     it('opens the flyout when the edit button is clicked and forwards its callbacks to state', () => {
@@ -817,6 +874,51 @@ describe('MetricsExperienceGrid', () => {
       });
 
       expect(queryByTestId('metricsExperienceGridSettingsFlyout')).not.toBeInTheDocument();
+    });
+
+    it('closes the metric insights flyout when the edit button is clicked', () => {
+      const onFlyoutStateChange = jest.fn();
+
+      useMetricsExperienceStateMock.mockReturnValue({
+        currentPage: 0,
+        selectedDimensions: [],
+        onDimensionsChange: jest.fn(),
+        onPageChange: jest.fn(),
+        isFullscreen: false,
+        searchTerm: '',
+        onSearchTermChange: jest.fn(),
+        onToggleFullscreen: jest.fn(),
+        onExitFullscreen: jest.fn(),
+        flyoutState: {
+          gridPosition: 0,
+          metricUniqueKey: 'metrics-*:field1',
+          esqlQuery: 'TS metrics-*',
+          selectedTabId: 'overview',
+        },
+        onFlyoutStateChange,
+        onFlyoutSelectedTabChange: jest.fn(),
+        profileId: 'test-profile-id',
+        gridSettings: METRICS_GRID_SETTINGS_DEFAULTS,
+        recentlyExploredMetrics: [],
+        onGridSettingsChange: jest.fn(),
+        metricsSort: METRICS_GRID_SORT_DEFAULTS,
+        onMetricsSortChange: jest.fn(),
+      });
+
+      const { getByTestId } = render(<MetricsExperienceGrid {...defaultProps} />, {
+        wrapper: ({ children }) => (
+          <TestWrapper externalServices={{ featureFlags: editGridSettingsEnabledFeatureFlags }}>
+            {children}
+          </TestWrapper>
+        ),
+      });
+
+      act(() => {
+        getByTestId('metricsExperienceEditGridButton').click();
+      });
+
+      expect(onFlyoutStateChange).toHaveBeenCalledWith(undefined);
+      expect(getByTestId('metricsExperienceGridSettingsFlyout')).toBeInTheDocument();
     });
   });
 });

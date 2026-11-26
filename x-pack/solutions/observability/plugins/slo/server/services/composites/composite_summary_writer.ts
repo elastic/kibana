@@ -7,6 +7,7 @@
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { CompositeSLOMemberWithSummary, CompositeSLOSummaryDocument } from '@kbn/slo-schema';
+import { compositeSloSummaryDocumentSchema } from '@kbn/slo-schema';
 import { COMPOSITE_SUMMARY_INDEX_NAME } from '../../../common/constants';
 import type { CompositeSLODefinition } from '../../domain/models';
 import { retryTransientEsErrors } from '../../utils/retry';
@@ -23,7 +24,7 @@ export function buildCompositeSummaryDoc(
   spaceId: string,
   unresolvedMemberIds: string[]
 ): CompositeSLOSummaryDocument {
-  return {
+  return compositeSloSummaryDocumentSchema.encode({
     spaceId,
     summaryUpdatedAt: new Date().toISOString(),
     compositeSlo: {
@@ -43,7 +44,7 @@ export function buildCompositeSummaryDoc(
     summary,
     unresolvedMemberIds,
     members,
-  };
+  });
 }
 
 interface Dependencies {

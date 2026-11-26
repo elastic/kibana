@@ -22,6 +22,7 @@ import { uniqBy } from 'lodash';
 import {
   DEFAULT_ROW_HEIGHT_LINES,
   DEFAULT_HEADER_ROW_HEIGHT_LINES,
+  LENS_DATATABLE_DEFAULT_COLOR_STEPS,
 } from '@kbn/lens-common/visualizations/datatable/constants';
 
 import type { LensAttributes } from '../../../../types';
@@ -38,11 +39,12 @@ import {
 } from './common';
 import {
   getAccessorName,
-  inferDatatypeFromColor,
+  inferColumnDatatype,
   isMetricColumnNoESQL,
   isMetricColumnESQL,
 } from '../../../../transforms/charts/datatable/helpers';
 import { buildColorProps } from '../../../../transforms/charts/datatable/to_api/columns';
+import { getClosestPageSize } from '../../../../transforms/charts/datatable/to_api/styling';
 
 type DatatableAttributes = Extract<LensAttributes, { visualizationType: 'lnsDatatable' }>;
 
@@ -309,11 +311,29 @@ export const normalizeDatatable: AttributesNormalizer<DatatableAttributes> = (at
     })
   );
 
-  // For DSL datatable, we infer the DSL metric column dataType from the color config.
-  // 'last_value' operation type can produce a number or a string, so we need to infer the dataType from the color config.
+  // Form-based: only last_value metrics need color to pick number vs string; other ops
+  // have a fixed dataType and fall through to `normalizeDataTypes`.
+  // Text-based: `getValueColumn` uses the same color hint for metrics/rows, and splits
+  // are always string. Bucket dates must not be forced to string on the form-based path.
+  const inferColumnDataType = (
+    newColumnId: string,
+    { isTextBased }: { isTextBased: boolean }
+  ): DataType | undefined => {
+    if (isTextBased) {
+      if (isSplitMetricColumnId(newColumnId)) {
+        return;
+      }
+      const visCol = visColumnByNewId.get(newColumnId);
+      const colorProps = visCol ? buildColorProps(visCol) : {};
+      if (isMetricColumnId(newColumnId)) {
+        return inferColumnDatatype(colorProps, 'number');
+      }
+      if (isRowColumnId(newColumnId)) {
+        return inferColumnDatatype(colorProps, 'string');
+      }
+      return;
+    }
 
-  // Every other DSL operation type produces a fixed dataType regardless of color, so we let the common fallback handle them.
-  const inferColumnDataType = (newColumnId: string): DataType | undefined => {
     if (!isMetricColumnId(newColumnId)) {
       return;
     }
@@ -323,7 +343,7 @@ export const normalizeDatatable: AttributesNormalizer<DatatableAttributes> = (at
       return;
     }
 
-    return inferDatatypeFromColor(buildColorProps(visCol).color, 'number');
+    return inferColumnDatatype(buildColorProps(visCol), 'number');
   };
 
   // Filter out visualization columns that only exist in the visualization state
@@ -420,9 +440,9 @@ export const normalizeDatatable: AttributesNormalizer<DatatableAttributes> = (at
       if (vis.paging && !vis.paging.enabled) {
         delete vis.paging;
       }
-      // The API schema only supports paging sizes [10, 20, 30, 50, 100] -> non-standard sizes are normalized to 10
-      if (vis.paging?.enabled && ![10, 20, 30, 50, 100].includes(vis.paging.size)) {
-        vis.paging.size = 10;
+      // The API schema only supports the datatable's page sizes -> other sizes map to the closest one
+      if (vis.paging?.enabled) {
+        vis.paging.size = getClosestPageSize(vis.paging.size);
       }
       // If the sorting direction is not set, set it to 'asc'
       if (vis.sorting && vis.sorting.columnId && !vis.sorting.direction) {
@@ -473,6 +493,39 @@ export const normalizeDatatable: AttributesNormalizer<DatatableAttributes> = (at
     },
   };
 
+  const alignProgressBarColumns: NormalizerConfig<DatatableAttributes> = {
+    original: (attrs) => {
+      for (const col of attrs.state.visualization.columns) {
+        const { colorMode, fillStyle } = col;
+        if (colorMode !== 'progress' || !fillStyle) {
+          continue;
+        }
+        // The toAPI path drops the values the editor keeps for another fill mode (the palette behind
+        // a single fill, the color behind a palette fill) instead of persisting them. They are editor
+        // memory rather than chart configuration, and persisting them would need a second color field.
+        // After a dashboard save, switching fill mode in the editor restores the defaults.
+        if (fillStyle.fillMode === 'single') {
+          delete col.palette;
+        } else {
+          delete fillStyle.color;
+        }
+        // The editor seeds palette fills with a bare named palette, which renders as the
+        // distributed palette with the default band count. The toAPI path exports it as a
+        // `distributed_palette`, and the palette normalizer below rebuilds the params the in
+        // path writes.
+        if (col.palette && !col.palette.params) {
+          col.palette.params = {};
+        }
+        // The editor leaves the alignment unset, which renders `right`, and the toAPI path outputs
+        // it explicitly
+        if (col.alignment === undefined) {
+          col.alignment = 'right';
+        }
+      }
+      return attrs;
+    },
+  };
+
   // Remove duplicate visualization columns by columnId.
   const deduplicateColumns: NormalizerConfig<DatatableAttributes> = {
     original: (attrs) => {
@@ -485,6 +538,27 @@ export const normalizeDatatable: AttributesNormalizer<DatatableAttributes> = (at
   const sortColumns: NormalizerConfig<DatatableAttributes> = {
     original: (attrs) => {
       attrs.state.visualization.columns.sort(sortByColumnType);
+      return attrs;
+    },
+  };
+
+  // The transform always sets `inMetricDimension: true` on metric columns.
+  // there are integration panels that have `isMetric: true` on the viz column
+  // but were never tagged by the suggestion engine, so the layer column lacks
+  // the flag. Fill it in when the remapped column ID confirms it's a metric.
+  const alignEsqlInMetricDimension: NormalizerConfig<DatatableAttributes> = {
+    original: (attrs) => {
+      const textBasedLayer = Object.values(attrs.state.datasourceStates.textBased?.layers ?? {})[0];
+      if (!textBasedLayer) {
+        return attrs;
+      }
+
+      for (const column of textBasedLayer.columns) {
+        if (isMetricColumnId(column.columnId) && column.inMetricDimension === undefined) {
+          column.inMetricDimension = true;
+        }
+      }
+
       return attrs;
     },
   };
@@ -515,11 +589,16 @@ export const normalizeDatatable: AttributesNormalizer<DatatableAttributes> = (at
     filterOrphanColumns,
     alignColumnTypes,
     alignId,
+    alignEsqlInMetricDimension,
     deduplicateColumns,
     sortColumns,
     sortEsqlDatasourceColumns,
     alignLegacyTypes,
+    alignProgressBarColumns,
     getColorMappingNormalizer<DatatableAttributes>('state.visualization.columns.*.colorMapping'),
-    getPaletteNormalizer<DatatableAttributes>('state.visualization.columns.*.palette'),
+    getPaletteNormalizer<DatatableAttributes>(
+      'state.visualization.columns.*.palette',
+      LENS_DATATABLE_DEFAULT_COLOR_STEPS
+    ),
   ])(attributes);
 };

@@ -72,6 +72,7 @@ export const kafkaAuthType = {
   Userpass: 'user_pass',
   Ssl: 'ssl',
   Kerberos: 'kerberos',
+  OAuth2: 'oauth2',
   None: 'none',
 } as const;
 
@@ -85,6 +86,33 @@ export const kafkaSaslMechanism = {
   ScramSha256: 'SCRAM-SHA-256',
   ScramSha512: 'SCRAM-SHA-512',
 } as const;
+
+// SASL mechanism sent to the agent for the OAuth2 authentication method. It is not part of
+// `kafkaSaslMechanism` because users never select it: it comes with `auth_type: oauth2`.
+export const KAFKA_OAUTHBEARER_SASL_MECHANISM = 'OAUTHBEARER';
+
+export const kafkaOAuth2GrantType = {
+  ClientCredentials: 'client_credentials',
+  JwtBearer: 'urn:ietf:params:oauth:grant-type:jwt-bearer',
+} as const;
+
+export const kafkaOAuth2SignatureAlgorithm = {
+  Rs256: 'RS256',
+  Rs384: 'RS384',
+  Rs512: 'RS512',
+} as const;
+
+// Elastic Agent supports OAUTHBEARER for the Kafka output from this version.
+export const KAFKA_OAUTH2_MINIMUM_FLEET_SERVER_VERSION = '9.6.0';
+
+// How the agent authenticates to the Kerberos server: with a keytab file or with a password.
+export const kafkaKerberosAuthType = {
+  Keytab: 'keytab',
+  Password: 'password',
+} as const;
+
+// The longest Kerberos username (principal) accepted, by the API and by the form.
+export const KAFKA_KERBEROS_USERNAME_MAX_LENGTH = 256;
 
 export const kafkaPartitionType = {
   Random: 'random',
@@ -127,6 +155,27 @@ export const otlpCompressionType = {
   Zstd: 'zstd',
   None: 'none',
 } as const;
+
+/** How an OTLP output authenticates with an endpoint that is not the managed OTLP endpoint. */
+export const otlpAuthType = {
+  // `Authorization: <scheme> <credential>`
+  AuthHeader: 'auth_header',
+  // `<name>: <credential>`
+  CustomHeader: 'custom_header',
+} as const;
+
+export const otlpAuthScheme = {
+  ApiKey: 'api_key',
+  BearerToken: 'bearer_token',
+} as const;
+
+/** The literal prefix of the `Authorization` header of each scheme. */
+export const OTLP_AUTH_SCHEME_PREFIX: Readonly<Record<ValueOf<typeof otlpAuthScheme>, string>> = {
+  [otlpAuthScheme.ApiKey]: 'ApiKey',
+  [otlpAuthScheme.BearerToken]: 'Bearer',
+};
+
+export const OTLP_AUTHORIZATION_HEADER = 'Authorization';
 
 // snappy and zstd are gRPC-only; HTTP/protobuf only supports gzip and none
 export const OTLP_GRPC_ONLY_COMPRESSION_TYPES: ReadonlyArray<string> = [
@@ -221,6 +270,10 @@ export const BEATS_OUTPUT_TYPES: Array<ValueOf<OutputType>> = [
   outputType.RemoteElasticsearch,
 ];
 
+// Output types valid for agent policies that mix OTel and Beats inputs, and that carry the
+// `otel_exporter_config_yaml` / `otel_disable_beatsauth` settings ("OpenTelemetry exporter" UI section).
+// otlp is excluded: Beats inputs cannot ship to it, and it is configured through `otlp_exporter`.
+// OTel-only policies can use otlp, see OUTPUT_TYPES_FOR_OTEL_ONLY_POLICIES.
 export const OUTPUT_TYPES_WITH_OTEL_EXPORTER_SUPPORT: Array<ValueOf<OutputType>> = [
   outputType.Elasticsearch,
   outputType.RemoteElasticsearch,
@@ -233,6 +286,26 @@ export const OUTPUT_TYPES_FOR_OTEL_ONLY_POLICIES: Array<ValueOf<OutputType>> = [
 ];
 
 export const OUTPUT_HEALTH_DATA_STREAM = 'logs-fleet_server.output_health-default';
+
+/**
+ * Recommended sending_queue settings for outputs pointed at the managed OTLP endpoint.
+ * Source: https://www.elastic.co/docs/reference/opentelemetry/managed-inputs/managed-otlp-endpoint#otlp-client-configuration
+ * Applied automatically at SO creation time when isManagedOtlpEndpoint() matches.
+ */
+export const MANAGED_OTLP_EXPORTER_DEFAULTS = {
+  sending_queue: {
+    enabled: true,
+    sizer: 'bytes' as const,
+    queue_size: 50_000_000,
+    block_on_overflow: true,
+    batch: {
+      flush_timeout: '1s',
+      min_size: 1_000_000,
+      max_size: 4_000_000,
+      sizer: 'bytes' as const,
+    },
+  },
+};
 
 export const LOGSTASH_API_KEY_CLUSTER_PERMISSIONS = ['monitor', 'manage_own_api_key'];
 

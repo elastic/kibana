@@ -44,7 +44,6 @@ export {
 
 export type { AnonymizationEntityClass, NerEntityClass, TokenSourceType } from './src/schemas';
 
-export { generateToken } from './src/generate_token';
 export { replaceTokensWithOriginals } from './src/replace_tokens_with_originals';
 export { resolveEffectivePolicy } from './src/resolve_effective_policy';
 export {

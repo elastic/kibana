@@ -203,7 +203,7 @@ const instanceofZodTypeLikeString = (_type: z.ZodTypeAny, allowMixedUnion: boole
     return true;
   }
 
-  // "string" covers both z.string() and z.iso.datetime(), z.email(), etc.
+  // "string" covers both z.string() and isoDateTime(), z.email(), etc.
   return defType === 'string';
 };
 
@@ -457,7 +457,9 @@ interface ZodSchemaMeta {
 }
 
 const getZodMeta = (schema: z.ZodType): ZodSchemaMeta =>
-  (z.globalRegistry.get(schema) ?? {}) as ZodSchemaMeta;
+  ((typeof schema.meta === 'function' ? schema.meta() : undefined) ??
+    z.globalRegistry.get(schema) ??
+    {}) as ZodSchemaMeta;
 
 const getStableComponentName = (schema: z.ZodType): string | undefined =>
   zodV4OasComponentRegistry.get(schema as object) ?? getZodMeta(schema).id;
@@ -501,34 +503,29 @@ function normalizeOasMetaExtensions(
 }
 
 /**
- * For `z.discriminatedUnion` schemas, auto-generate an OAS discriminator
- * with property name and (when every variant has a stable component name) a
- * mapping.  Returns `null` for non-discriminated schemas.
+ * For `z.discriminatedUnion` schemas, auto-generate an OAS discriminator whose
+ * mapping covers every variant. OAS 3.0 resolves discriminator values only to
+ * named schemas through string mapping keys, so returns `null` unless every
+ * variant has a stable component name and a required string discriminator.
  */
 function buildAutoDiscriminator(schema: z.ZodType): OasMetaExtensions | null {
   const { discriminator: key, options } = (schema as any)._zod?.def ?? {};
   if (typeof key !== 'string' || !Array.isArray(options)) return null;
 
   const mapping: Record<string, string> = {};
-  let allNamed = true;
 
   for (const opt of options) {
     const name = getStableComponentName(opt);
-    if (!name) {
-      allNamed = false;
-      continue;
-    }
-    const litValues = opt._zod?.def?.shape?.[key]?._zod?.def?.values;
-    if (Array.isArray(litValues) && litValues.length === 1) {
-      mapping[String(litValues[0])] = `#/components/schemas/${name}`;
+    const values: z.core.util.PropValues[string] | undefined = opt._zod?.propValues?.[key];
+    if (!name || !values?.size) return null;
+
+    for (const value of values) {
+      if (typeof value !== 'string') return null;
+      mapping[value] = `#/components/schemas/${name}`;
     }
   }
 
-  const disc: OpenAPIV3.DiscriminatorObject = { propertyName: key };
-  if (allNamed && Object.keys(mapping).length > 0) {
-    disc.mapping = mapping;
-  }
-  return { discriminator: disc };
+  return { discriminator: { propertyName: key, mapping } };
 }
 
 /**
@@ -642,6 +639,11 @@ function hoistMarkedSchemas(
   const name = obj[COMPONENT_ID_MARKER];
 
   if (typeof name === 'string') {
+    // Keep an existing definition (e.g. extracted from `$defs`) rather than
+    // overwriting it with a partial inline copy of the same component.
+    if (Object.hasOwn(shared, name)) {
+      return { $ref: `#/components/schemas/${name}` };
+    }
     const {
       [COMPONENT_ID_MARKER]: _idMarker,
       [OAS_EXTENSIONS_MARKER]: oasExt,
@@ -806,6 +808,24 @@ function jsonSchemaToOpenApi30(node: Record<string, unknown>): Record<string, un
     result.nullable = true;
   }
 
+  // Zod 4.5+ compacts simple nullable unions into a type array,
+  // e.g. `type: ['string', 'null']` — OAS 3.0 does not support type arrays.
+  if (Array.isArray(result.type)) {
+    const types = (result.type as unknown[]).filter((t) => t !== 'null');
+    const isNullable = types.length !== (result.type as unknown[]).length;
+    if (types.length === 1) {
+      result.type = types[0];
+    } else {
+      delete result.type;
+      if (types.length > 1) {
+        result.anyOf = types.map((t) => ({ type: t }));
+      }
+    }
+    if (isNullable) {
+      result.nullable = true;
+    }
+  }
+
   if (nullable) {
     result.nullable = true;
   }
@@ -844,6 +864,11 @@ export const convert = (schema: z.ZodTypeAny, opts: ConvertOptions = {}) => {
       const oasExtensions = normalizeOasMetaExtensions(zSchema, opts.env);
       if (oasExtensions) {
         (js as any)[OAS_EXTENSIONS_MARKER] = oasExtensions;
+      }
+
+      // `format: date-time` already documents the contract; the regex only bloats the OAS docs.
+      if ((js as any).format === 'date-time') {
+        delete (js as any).pattern;
       }
     },
   }) as Record<string, any>;

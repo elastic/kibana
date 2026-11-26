@@ -17,22 +17,42 @@ post_evals_status() { # $1=state $2=description
     --silent || true
 }
 
-# ERR traps don't run on SIGTERM (the 10-min timeout), agent loss, or `set -u` aborts, so post
-# pending up front: any death then leaves a visible kibana-evals. The child overwrites it on success.
-post_evals_status pending "Triggering the LLM Evals pipeline"
-
 # Only mark failure on the final attempt (retry limit is 1); an earlier transient failure is
-# retried and the pending status above holds until then. Best-effort; never mask the original error.
+# retried and the pending status below holds until then. Set before resolving the suites, so an
+# unexpected failure there is visible too. Best-effort; never mask the original error.
 on_trigger_error() {
   if [[ "${BUILDKITE_RETRY_COUNT:-0}" -ge 1 ]]; then
     post_evals_status failure "Failed to trigger the LLM Evals pipeline"
+    # Settle the gated suites as inconclusive, so the evals gate doesn't wait for verdicts that
+    # will never come. GITHUB_PR_LABELS holds the resolved labels once resolving got that far,
+    # and the build-time snapshot otherwise.
+    node .buildkite/scripts/steps/evals/regression_gate.ts fail-runnable "${GITHUB_PR_LABELS:-}" || true
   fi
 }
 trap on_trigger_error ERR
 
+echo "--- Resolving the eval suites to run"
+# Re-reads the PR labels live (a decision label added while CI ran still counts) and skips gated
+# suites whose earlier verdict still holds. This step is also emitted for PRs that touch a suite's
+# requireDecisionOnPaths without eval labels, so finding nothing to run is normal.
+RESOLVED_PR_LABELS="$(node .buildkite/scripts/steps/evals/resolve_pr_eval_labels.ts)"
+if [[ -z "$RESOLVED_PR_LABELS" ]]; then
+  echo "No eval suites to run for the current PR labels; not triggering."
+  exit 0
+fi
+export GITHUB_PR_LABELS="$RESOLVED_PR_LABELS"
+
+# ERR traps don't run on SIGTERM (the 10-min timeout), agent loss, or `set -u` aborts, so post
+# pending up front: any death then leaves a visible kibana-evals. The child overwrites it on success.
+post_evals_status pending "Triggering the LLM Evals pipeline"
+# After kibana-evals is pending, mark each gated suite as started on this commit: if the child build
+# then dies before posting a verdict, the evals gate settles it as inconclusive once kibana-evals
+# turns terminal, instead of waiting forever.
+node .buildkite/scripts/steps/evals/regression_gate.ts pending-runnable "$RESOLVED_PR_LABELS" || true
+
 echo "--- Triggering LLM Evals pipeline (kibana-evals-pr-llm-evals)"
 
-# GITHUB_PR_LABELS is pre-filtered to whitespace-free labels by getEvalTriggerStep
+# GITHUB_PR_LABELS is filtered to whitespace-free labels by resolve_pr_eval_labels.ts
 # (getForwardablePrLabels in eval_pipeline.ts), so it forwards safely alongside the scalar
 # PR-context vars. trigger_pipeline.ts splits its extra-env arg on spaces, so every forwarded
 # value must be whitespace-free — we defensively skip any that isn't.
@@ -61,7 +81,7 @@ KIBANA_BUILD_ID_ARG="${KIBANA_BUILD_ID:-${BUILDKITE_BUILD_ID:-}}"
 # includeBuildkitePrVars=true forwards BUILDKITE_PULL_REQUEST* so the child build checks out
 # refs/pull/<N>/head — required for fork PRs, whose branch isn't a ref in elastic/kibana.
 # ${GITHUB_ENV_VARS[*]:-} guards against an empty array under `set -u`.
-ts-node .buildkite/scripts/steps/trigger_pipeline.ts \
+node .buildkite/scripts/steps/trigger_pipeline.ts \
   kibana-evals-pr-llm-evals \
   "$BUILDKITE_BRANCH" \
   "$BUILDKITE_COMMIT" \

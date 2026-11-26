@@ -7,10 +7,17 @@
 
 import { spawnSync, type SpawnSyncReturns } from 'child_process';
 
-export const dockerContainerName = (kind: 'fleet-server' | 'agent', runId: string): string =>
-  `scout-synthetics-agent-e2e-${kind}-${runId}`;
+export const dockerContainerName = (
+  kind: 'fleet-server' | 'agent',
+  runId: string,
+  index?: number
+): string =>
+  index === undefined
+    ? `scout-synthetics-agent-e2e-${kind}-${runId}`
+    : `scout-synthetics-agent-e2e-${kind}-${index}-${runId}`;
 
 const DOCKER_TIMEOUT_MS = 15 * 60 * 1000;
+const MANIFEST_INSPECT_TIMEOUT_MS = 60 * 1000;
 const ERROR_TAIL_CHARS = 4000;
 const SECRET_ENV_RE = /(FLEET_SERVER_SERVICE_TOKEN|FLEET_ENROLLMENT_TOKEN)=[^\s]+/g;
 
@@ -36,8 +43,26 @@ export const pullImage = (image: string): void => {
   runDocker(['pull', image]);
 };
 
+export const isImageAvailableInRegistry = (image: string): boolean => {
+  const result = spawnSync('docker', ['manifest', 'inspect', image], {
+    encoding: 'utf8',
+    timeout: MANIFEST_INSPECT_TIMEOUT_MS,
+  });
+  return result.status === 0;
+};
+
 export const removeContainer = (name: string): void => {
   spawnSync('docker', ['rm', '-f', name], { encoding: 'utf8' });
+};
+
+/** Stops a container without removing it (agent stays in Fleet as a stale check-in). */
+export const stopContainer = (name: string): void => {
+  runDocker(['stop', '-t', '10', name]);
+};
+
+/** Restarts a previously stopped container (same enrollment / agent id). */
+export const startContainer = (name: string): void => {
+  runDocker(['start', name]);
 };
 
 export const publishedHostPort = (name: string, containerPort: number): number => {

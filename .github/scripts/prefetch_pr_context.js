@@ -13,6 +13,13 @@ const path = require('path');
 const DEFAULT_OUTPUT_DIR = '/tmp/pr-context';
 const DEFAULT_GRAPHQL_ATTEMPTS = 3;
 const DEFAULT_GRAPHQL_RETRY_DELAY_MS = 1000;
+const TRUSTED_AUTHOR_ASSOCIATIONS = new Set(['OWNER', 'MEMBER']);
+// GitHub Apps comment as CONTRIBUTOR/NONE, so the ones we rely on are trusted by login.
+const TRUSTED_BOT_LOGINS = new Set([
+  'github-actions[bot]',
+  'infra-vault-gh-plugin-prod[bot]',
+  'elastic-vault-github-plugin-prod[bot]',
+]);
 
 const parseRepo = (repoFullName) => {
   const [owner, repo] = repoFullName.split('/');
@@ -70,6 +77,23 @@ const getBotAwareLogin = (author) => {
 
   return author.login;
 };
+
+/**
+ * Keeps comments from org members, known automation bots and the PR author, so agents don't act on text from anyone else.
+ */
+const filterTrustedComments = ({ comments, prAuthorLogin }) =>
+  comments.filter(({ user, author_association: association }) => {
+    const login = user?.login;
+    if (!login) {
+      return false;
+    }
+
+    return (
+      TRUSTED_AUTHOR_ASSOCIATIONS.has(association) ||
+      TRUSTED_BOT_LOGINS.has(login) ||
+      login === prAuthorLogin
+    );
+  });
 
 const buildPrDiffFromFiles = (files) =>
   `${files
@@ -129,6 +153,17 @@ const metadataQuery = `
         }
         mergedAt
         state
+        closingIssuesReferences(first: 10) {
+          nodes {
+            number
+            repository {
+              owner {
+                login
+              }
+              name
+            }
+          }
+        }
         timelineItems(first: 100, itemTypes: [CROSS_REFERENCED_EVENT]) {
           nodes {
             ... on CrossReferencedEvent {
@@ -278,6 +313,11 @@ const getPrMetadata = async ({ github, owner, repo, pullNumber }) => {
     state: pullRequest.state,
     title: pullRequest.title,
     url: pullRequest.url,
+    // GitHub can close issues in other repositories; keep only same-repo issues so the
+    // number-only REST lookup below can't pull an unrelated issue's comments.
+    closingIssues: pullRequest.closingIssuesReferences.nodes
+      .filter((node) => node.repository?.owner?.login === owner && node.repository?.name === repo)
+      .map(({ number }) => number),
     crossReferencedPulls,
   };
 };
@@ -410,6 +450,28 @@ const getReviewComments = async ({ github, owner, repo, repoFullName, pullNumber
   }
 };
 
+// Verifier-only extra; the shared artifact (and its other consumers, e.g. the Failed Backport
+// Resolver) must still be written even if a linked issue's comments can't be fetched, so each
+// issue's failure is isolated and never rejects the prefetch.
+const getLinkedIssueComments = async ({ github, core, owner, repo, issueNumbers }) =>
+  Promise.all(
+    issueNumbers.map(async (issueNumber) => {
+      try {
+        const comments = await github.paginate(github.rest.issues.listComments, {
+          owner,
+          repo,
+          issue_number: issueNumber,
+          per_page: 100,
+        });
+
+        return { number: issueNumber, comments: filterTrustedComments({ comments }) };
+      } catch (error) {
+        core.warning(`Could not fetch comments for linked issue #${issueNumber}: ${error.message}`);
+        return { number: issueNumber, comments: [] };
+      }
+    })
+  );
+
 const prefetchPrContext = async ({
   github,
   core,
@@ -452,19 +514,36 @@ const prefetchPrContext = async ({
     }),
   ]);
 
-  const reviewComments = await getReviewComments({
-    github,
-    owner,
-    repo,
-    repoFullName,
-    pullNumber,
-  });
+  const [reviewComments, linkedIssueComments] = await Promise.all([
+    getReviewComments({ github, owner, repo, repoFullName, pullNumber }),
+    getLinkedIssueComments({ github, core, owner, repo, issueNumbers: metadata.closingIssues }),
+  ]);
+
+  const prAuthorLogin = metadata.author?.is_bot
+    ? `${metadata.author.login}[bot]`
+    : metadata.author?.login;
+  const trusted = {
+    issueComments: filterTrustedComments({ comments: issueComments, prAuthorLogin }),
+    reviewComments: filterTrustedComments({ comments: reviewComments, prAuthorLogin }),
+    reviews: filterTrustedComments({ comments: reviews, prAuthorLogin }),
+  };
+  const droppedCount =
+    issueComments.length +
+    reviewComments.length +
+    reviews.length -
+    trusted.issueComments.length -
+    trusted.reviewComments.length -
+    trusted.reviews.length;
+  if (droppedCount > 0) {
+    core.info(`Skipped ${droppedCount} comment(s) and review(s) from untrusted authors`);
+  }
 
   writeJson({ outputDir, filename: 'pr-metadata.json', value: metadata });
   writeJson({ outputDir, filename: 'pr-files.json', value: filesWithPatch.map(withoutPatch) });
-  writeJson({ outputDir, filename: 'pr-issue-comments.json', value: issueComments });
-  writeJson({ outputDir, filename: 'pr-review-comments.json', value: reviewComments });
-  writeJson({ outputDir, filename: 'pr-reviews.json', value: reviews });
+  writeJson({ outputDir, filename: 'pr-issue-comments.json', value: trusted.issueComments });
+  writeJson({ outputDir, filename: 'pr-review-comments.json', value: trusted.reviewComments });
+  writeJson({ outputDir, filename: 'pr-reviews.json', value: trusted.reviews });
+  writeJson({ outputDir, filename: 'linked-issue-comments.json', value: linkedIssueComments });
   writeText({ outputDir, filename: 'pr-diff.txt', value: buildPrDiffFromFiles(filesWithPatch) });
 
   core.info(`Wrote PR context to ${outputDir}`);
@@ -472,6 +551,8 @@ const prefetchPrContext = async ({
 
 module.exports = {
   buildPrDiffFromFiles,
+  filterTrustedComments,
+  getLinkedIssueComments,
   getPrMetadata,
   getReviewComments,
   graphqlWithRetry,

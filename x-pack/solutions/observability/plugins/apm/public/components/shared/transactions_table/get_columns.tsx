@@ -85,7 +85,8 @@ export function getColumns({
                   content={i18n.translate(
                     'xpack.apm.home.transactionsTableColumnName.tooltip.activeAlertsExplanation',
                     {
-                      defaultMessage: 'Active alerts',
+                      defaultMessage:
+                        'Active alerts for this transaction, regardless of latency aggregation.',
                     }
                   )}
                 >
@@ -96,8 +97,10 @@ export function getColumns({
                       path: { serviceName },
                       query: {
                         ...query,
+                        rangeTo: 'now',
+                        // Badge counts ignore page kuery; scope click-through to
+                        // this transaction only so the Alerts list matches the badge.
                         kuery: [
-                          query.kuery,
                           ...fieldValuePairToKql(TRANSACTION_NAME, name),
                           ...fieldValuePairToKql(TRANSACTION_TYPE, transactionType),
                         ]

@@ -12,3 +12,13 @@ export {
   ESQL_VALID_RUNTIME_VERIFIER_ID,
   ESQL_EXECUTION_ROW_LIMIT,
 } from './esql_valid_runtime';
+export {
+  createWorkflowVerifier,
+  readKiVerifierChain,
+  resolveKiVerifierChain,
+  KI_VERIFIER_CHAIN_METADATA_KEY,
+  MAX_KI_VERIFIER_WORKFLOW_DEPTH,
+  WORKFLOW_VERIFIER_ID_PREFIX,
+  WORKFLOW_VERIFIER_TRIGGERED_BY,
+} from './workflow_verifier';
+export type { KiVerifierWorkflowRunner, WorkflowVerifierDependencies } from './workflow_verifier';

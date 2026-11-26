@@ -42,7 +42,7 @@ const getConfiguredMaximumOpenCases = () => {
 export function getConnectorType(): ConnectorTypeModel<{}, {}, CasesActionParams> {
   return {
     id: CASES_CONNECTOR_ID,
-    iconClass: 'casesApp',
+    iconClass: 'briefcase',
     selectMessage: i18n.CASE_ACTION_DESC,
     actionTypeTitle: CASES_CONNECTOR_TITLE,
     actionConnectorFields: null,

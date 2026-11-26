@@ -6,11 +6,12 @@
  */
 
 import React from 'react';
-import { AGENT_BUILDER_NAV_AT_TOP_FLAG } from '@kbn/navigation-plugin/public';
 import { render } from '@testing-library/react';
 import { BehaviorSubject } from 'rxjs';
+import type { PublicAppInfo } from '@kbn/core/public';
 import { SecurityPageName } from '../../../../app/types';
-import type { createMockStore } from '../../../mock/create_store';
+import { createMockStore } from '../../../mock/create_store';
+import { mockGlobalState } from '../../../mock/global_state';
 import { TestProviders } from '../../../mock';
 import { BOTTOM_BAR_HEIGHT, EUI_HEADER_HEIGHT, SecuritySideNav } from './security_side_nav';
 import type { SolutionSideNavProps } from '@kbn/security-solution-side-nav';
@@ -59,6 +60,12 @@ const alertsNavLink: NavigationLink = {
   description: 'alerts description',
 };
 
+const alertZeroApp = (homeVisibleIn: string[]) =>
+  ({
+    visibleIn: [],
+    deepLinks: [{ id: 'home', visibleIn: homeVisibleIn }],
+  } as unknown as PublicAppInfo);
+
 const mockSolutionSideNav = jest.fn((_: SolutionSideNavProps) => <></>);
 jest.mock('@kbn/security-solution-side-nav', () => ({
   ...jest.requireActual('@kbn/security-solution-side-nav'),
@@ -98,12 +105,17 @@ jest.mock('../../../../management/pages/policy/view/policy_hooks', () => ({
   useIsPolicySettingsBarVisible: () => mockUseIsPolicySettingsBarVisible(),
 }));
 
-const mockUseIsExperimentalFeatureEnabled = jest.fn().mockReturnValue(false);
-jest.mock('../../../hooks/use_experimental_features', () => ({
-  ...jest.requireActual('../../../hooks/use_experimental_features'),
-  useIsExperimentalFeatureEnabled: (feature: string) =>
-    mockUseIsExperimentalFeatureEnabled(feature),
-}));
+const createStoreWithAlignment = (enableAlertsAndAttacksAlignment: boolean) =>
+  createMockStore({
+    ...mockGlobalState,
+    app: {
+      ...mockGlobalState.app,
+      enableExperimental: {
+        ...mockGlobalState.app.enableExperimental,
+        enableAlertsAndAttacksAlignment,
+      },
+    },
+  });
 
 const renderNav = (options?: { store?: ReturnType<typeof createMockStore> }) =>
   render(<SecuritySideNav />, {
@@ -117,6 +129,7 @@ describe('SecuritySideNav', () => {
     useKibana().services.chrome.hasHeaderBanner$ = jest.fn(() =>
       new BehaviorSubject(false).asObservable()
     );
+    useKibana().services.application.applications$ = new BehaviorSubject(new Map());
     useKibana().services.serverless = undefined;
   });
 
@@ -142,10 +155,39 @@ describe('SecuritySideNav', () => {
             position: 'top',
           }),
         ],
-        categories: getNavCategories(AIChatExperience.Classic, false, false, false),
+        categories: getNavCategories(AIChatExperience.Classic, true),
         tracker: track,
       })
     );
+  });
+
+  it("should render the AlertZero external link when AlertZero's deep links are in the Classic nav", () => {
+    useKibana().services.application.applications$ = new BehaviorSubject(
+      new Map([['alertzero', alertZeroApp(['classicSideNav'])]])
+    );
+    mockUseNavLinks.mockReturnValue([alertsNavLink]);
+    renderNav();
+    expect(mockSolutionSideNav).toHaveBeenCalledWith(
+      expect.objectContaining({
+        items: expect.arrayContaining([
+          expect.objectContaining({
+            id: SecurityPageName.externalLinkAlertZero,
+            label: 'AlertZero',
+            position: 'top',
+          }),
+        ]),
+      })
+    );
+  });
+
+  it("should not render the AlertZero external link when AlertZero's deep links are not in the Classic nav", () => {
+    useKibana().services.application.applications$ = new BehaviorSubject(
+      new Map([['alertzero', alertZeroApp([])]])
+    );
+    mockUseNavLinks.mockReturnValue([alertsNavLink]);
+    renderNav();
+    const [{ items }] = mockSolutionSideNav.mock.calls[mockSolutionSideNav.mock.calls.length - 1];
+    expect(items.map(({ id }) => id)).not.toContain(SecurityPageName.externalLinkAlertZero);
   });
 
   it('should render the loader if items are still empty', () => {
@@ -336,52 +378,21 @@ describe('SecuritySideNav', () => {
     });
   });
 
-  describe('enableAlertsAndAttacksAlignment setting', () => {
-    beforeEach(() => {
-      mockUseIsExperimentalFeatureEnabled.mockImplementation(
-        (feature: string) => feature === 'enableAlertsAndAttacksAlignment'
-      );
-    });
-    it('should call getNavCategories with true when setting is enabled', () => {
-      useKibana().services.uiSettings.get = jest.fn().mockReturnValue(true);
-      renderNav();
+  describe('enableAlertsAndAttacksAlignment experimental feature', () => {
+    it('should call getNavCategories with true when the feature is enabled', () => {
+      renderNav({ store: createStoreWithAlignment(true) });
       expect(mockSolutionSideNav).toHaveBeenCalledWith(
         expect.objectContaining({
-          categories: getNavCategories(AIChatExperience.Classic, true, false, false),
+          categories: getNavCategories(AIChatExperience.Classic, true),
         })
       );
     });
 
-    it('should call getNavCategories with false when setting is disabled', () => {
-      useKibana().services.uiSettings.get = jest.fn().mockReturnValue(false);
-      renderNav();
+    it('should call getNavCategories with false when the feature is disabled', () => {
+      renderNav({ store: createStoreWithAlignment(false) });
       expect(mockSolutionSideNav).toHaveBeenCalledWith(
         expect.objectContaining({
-          categories: getNavCategories(AIChatExperience.Classic, false, false, false),
-        })
-      );
-    });
-  });
-
-  describe('isNewEAHomePageEnabled feature flag', () => {
-    it('should call getNavCategories with true when feature flag is enabled', () => {
-      mockUseIsExperimentalFeatureEnabled.mockImplementation(
-        (feature: string) => feature === 'entityAnalyticsNewHomePageEnabled'
-      );
-      renderNav();
-      expect(mockSolutionSideNav).toHaveBeenCalledWith(
-        expect.objectContaining({
-          categories: getNavCategories(AIChatExperience.Classic, false, true, false),
-        })
-      );
-    });
-
-    it('should call getNavCategories with false when feature flag is disabled', () => {
-      mockUseIsExperimentalFeatureEnabled.mockImplementation(() => false);
-      renderNav();
-      expect(mockSolutionSideNav).toHaveBeenCalledWith(
-        expect.objectContaining({
-          categories: getNavCategories(AIChatExperience.Classic, false, false, false),
+          categories: getNavCategories(AIChatExperience.Classic, false),
         })
       );
     });
@@ -411,47 +422,7 @@ describe('SecuritySideNav', () => {
             position: 'top',
           }),
         ],
-        categories: getNavCategories(AIChatExperience.Classic, false, false, false),
-      })
-    );
-  });
-
-  it('should render agentBuilder external link at top when chat experience is Agent and isAgentBuilderNavAtTop is true', () => {
-    (useKibana().services.settings.client.get$ as jest.Mock).mockImplementation(() =>
-      new BehaviorSubject(AIChatExperience.Agent).asObservable()
-    );
-    (useKibana().services.featureFlags.getBooleanValue as jest.Mock).mockImplementation(
-      (flag: string) => flag === AGENT_BUILDER_NAV_AT_TOP_FLAG
-    );
-    mockUseNavLinks.mockReturnValue([alertsNavLink]);
-    renderNav();
-    expect(mockSolutionSideNav).toHaveBeenCalledWith(
-      expect.objectContaining({
-        selectedId: SecurityPageName.alerts,
-        items: [
-          expect.objectContaining({
-            id: SecurityPageName.externalLinkAgentBuilder,
-            label: 'Agents',
-            position: 'top',
-          }),
-          expect.objectContaining({
-            id: SecurityPageName.externalLinkDiscover,
-            label: 'Discover',
-            position: 'top',
-          }),
-          expect.objectContaining({
-            id: SecurityPageName.externalLinkWorkflows,
-            label: 'Workflows',
-            position: 'top',
-          }),
-          expect.objectContaining({
-            href: '/alerts',
-            id: SecurityPageName.alerts,
-            label: 'alerts',
-            position: 'top',
-          }),
-        ],
-        categories: getNavCategories(AIChatExperience.Agent, false, false, true),
+        categories: getNavCategories(AIChatExperience.Classic, true),
       })
     );
   });
@@ -464,9 +435,15 @@ describe('SecuritySideNav', () => {
     (useKibana().services.settings.client.get$ as jest.Mock).mockImplementation(() =>
       new BehaviorSubject(AIChatExperience.Agent).asObservable()
     );
+    useKibana().services.application.applications$ = new BehaviorSubject(
+      new Map([['alertzero', alertZeroApp(['classicSideNav'])]])
+    );
     mockUseNavLinks.mockReturnValue([alertsNavLink]);
     renderNav();
 
+    expect(useKibana().services.application.getUrlForApp as jest.Mock).toHaveBeenCalledWith(
+      'alertzero'
+    );
     expect(useKibana().services.application.getUrlForApp as jest.Mock).toHaveBeenCalledWith(
       'agent_builder',
       {
@@ -483,6 +460,10 @@ describe('SecuritySideNav', () => {
     expect(mockSolutionSideNav).toHaveBeenCalledWith(
       expect.objectContaining({
         items: expect.arrayContaining([
+          expect.objectContaining({
+            id: SecurityPageName.externalLinkAlertZero,
+            href: '/test-basepath/s/my-space/app/alertzero',
+          }),
           expect.objectContaining({
             id: SecurityPageName.externalLinkAgentBuilder,
             href: '/test-basepath/s/my-space/app/agent_builder/agents',

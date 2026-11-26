@@ -7,6 +7,7 @@
 
 import type { estypes } from '@elastic/elasticsearch';
 import type { AuthenticatedUser } from '@kbn/core-security-common';
+import { getAttackDiscoveryEventOwnerFilter } from '@kbn/discoveries';
 
 import {
   ATTACK_DISCOVERY_EVENT_PROVIDER,
@@ -85,11 +86,8 @@ export const getSuccessfulGenerationsQuery = ({
             'event.provider': ATTACK_DISCOVERY_EVENT_PROVIDER,
           },
         },
-        {
-          term: {
-            'user.name': authenticatedUser.username,
-          },
-        },
+        // the user's own events, plus events written by a service account (e.g. an AlertZero Worker)
+        getAttackDiscoveryEventOwnerFilter(authenticatedUser.username),
         {
           term: {
             'kibana.space_ids': spaceId,

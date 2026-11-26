@@ -19,6 +19,7 @@ import type {
 } from '@kbn/task-manager-plugin/server';
 import type { SpacesPluginSetup, SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { InferenceServerSetup, InferenceServerStart } from '@kbn/inference-plugin/server';
+import type { IsomerPluginStart } from '@kbn/isomer-plugin/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type {
   WorkflowsExtensionsServerPluginSetup,
@@ -36,6 +37,7 @@ import type {
   AgentBuilderSmlPluginStart,
 } from '@kbn/agent-builder-sml-plugin/server';
 import type { FilesSetup, FilesStart } from '@kbn/files-plugin/server';
+import type { EvalsPluginSetup, EvalsPluginStart } from '@kbn/evals-plugin/server';
 
 export type {
   AgentBuilderPluginSetup,
@@ -44,6 +46,7 @@ export type {
   ToolsSetup,
   ToolsStart,
   AttachmentsSetup,
+  ConversationEventsSetup,
   SkillsSetup,
   SkillsStart,
   AgentsSetup,
@@ -71,6 +74,8 @@ export interface AgentBuilderSetupDependencies {
   searchInferenceEndpoints: SearchInferenceEndpointsPluginSetup;
   agentBuilderSml: AgentBuilderSmlPluginSetup;
   files: FilesSetup;
+  /** Present when the evals plugin is enabled; the eval-baselines registry loads only in `full` mode. */
+  evals?: EvalsPluginSetup;
 }
 
 export interface AgentBuilderStartDependencies {
@@ -86,4 +91,7 @@ export interface AgentBuilderStartDependencies {
   agentBuilderSml: AgentBuilderSmlPluginStart;
   workflowsExtensions: WorkflowsExtensionsServerPluginStart;
   files: FilesStart;
+  isomer: IsomerPluginStart;
+  /** Present when the evals plugin is enabled; its score services exist only in `full` mode. */
+  evals?: EvalsPluginStart;
 }

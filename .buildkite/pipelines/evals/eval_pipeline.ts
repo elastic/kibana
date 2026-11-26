@@ -10,9 +10,16 @@
 import { execFileSync } from 'child_process';
 import Fs from 'fs';
 import Path from 'path';
-import { DEFAULT_AGENT_IMAGE_CONFIG } from '../../pipeline-utils/agent_images';
+import type { EvalsDecisionPaths, EvalsRegressionGate } from './evals_gate_rules.ts';
+import {
+  EVALS_ALL_LABEL,
+  EVALS_SKIP_LABEL,
+  EVALS_SKIP_LABEL_PREFIX,
+  getDecisionPathMatches,
+  isSuiteSkipped,
+} from './evals_gate_rules.ts';
 
-const EVALS_SUITES_METADATA_RELATIVE_PATH = '.buildkite/pipelines/evals/evals.suites.json';
+export const EVALS_SUITES_METADATA_RELATIVE_PATH = '.buildkite/pipelines/evals/evals.suites.json';
 
 // Consumed by `run_suite.sh` (via jq) rather than here, but declared so this type describes the
 // whole file. Each shard becomes its own fanout step running the spec files it lists, resolved
@@ -20,6 +27,13 @@ const EVALS_SUITES_METADATA_RELATIVE_PATH = '.buildkite/pipelines/evals/evals.su
 export interface EvalsSuiteShard {
   id: string;
   specFiles: string[];
+  /** Evaluation connector for this shard's steps, overriding the suite-wide judge. */
+  judge?: string;
+}
+
+export interface EvalsSuiteSpecModelGroup {
+  files: string[];
+  models?: string[];
 }
 
 export interface EvalsSuiteMetadataEntry {
@@ -28,10 +42,18 @@ export interface EvalsSuiteMetadataEntry {
   ciLabels?: string[];
   configPath?: string;
   serverConfigSet?: string;
+  scoutArch?: string;
+  scoutDomain?: string;
   weeklyEisModelGroups?: string[];
   defaultModelGroups?: string[] | null;
+  defaultJudge?: string;
   shards?: EvalsSuiteShard[];
   stepTimeoutInMinutes?: number;
+  specModelGroups?: EvalsSuiteSpecModelGroup[];
+  /** PRs changing these paths need an evals decision label (enforced by the `evals gate` status). */
+  requireDecisionOnPaths?: EvalsDecisionPaths;
+  /** Blocks the `evals gate` on a regression of one pre-registered metric. */
+  regressionGate?: EvalsRegressionGate;
 }
 
 function pathExistsInGitTree(repoRelativePath: string): boolean {
@@ -44,13 +66,17 @@ function pathExistsInGitTree(repoRelativePath: string): boolean {
   return output.length > 0;
 }
 
+/** Every suite in `evals.suites.json`, without the git-tree filter label selection applies. */
+export function readRawEvalsSuites(): EvalsSuiteMetadataEntry[] {
+  const filePath = Path.resolve(process.cwd(), EVALS_SUITES_METADATA_RELATIVE_PATH);
+  const raw = Fs.readFileSync(filePath, 'utf-8');
+  const parsed = JSON.parse(raw) as { suites?: EvalsSuiteMetadataEntry[] };
+  return Array.isArray(parsed.suites) ? parsed.suites : [];
+}
+
 function readEvalsSuiteMetadata(): EvalsSuiteMetadataEntry[] {
   try {
-    const filePath = Path.resolve(process.cwd(), EVALS_SUITES_METADATA_RELATIVE_PATH);
-    const raw = Fs.readFileSync(filePath, 'utf-8');
-    const parsed = JSON.parse(raw) as { suites?: EvalsSuiteMetadataEntry[] };
-    const suites = Array.isArray(parsed.suites) ? parsed.suites : [];
-    return suites.filter((suite) => {
+    return readRawEvalsSuites().filter((suite) => {
       if (!suite?.configPath) return true;
       return pathExistsInGitTree(suite.configPath);
     });
@@ -116,13 +142,6 @@ const DEFAULT_WEEKLY_EIS_MODELS: string[] = [
 const WEEKLY_EIS_MODELS_ALIAS = 'weekly-eis-models';
 
 /**
- * `evals:skip-<suite-id>` drops a suite even when its `evals:<suite-id>` label is present. Needed
- * because `.github/paths-labeller.yml` auto-applies `evals:smoke-tests` and re-adds it on every
- * push, so removing that label by hand doesn't stick.
- */
-const EVALS_SKIP_LABEL_PREFIX = 'evals:skip-';
-
-/**
  * Model-group aliases: one `models:<alias>` label expands to several model groups for the fanout.
  * `weekly-eis-models` is handled separately (resolved per-suite; see above).
  */
@@ -149,13 +168,12 @@ function normalizeEvaluationConnectorId(raw: string): string {
 }
 
 /**
- * Boot disk for eval agents. Eval steps bootstrap the workspace, unpack the Kibana distributable
- * and run a local ES + Kibana; on the image default ES ends up under its merge disk watermark and
- * stops merging segments. These steps spell out their own agent block, so the repo-wide default
- * has to be requested explicitly. `eval_agent_disk_size.test.ts` pins the copies in
- * `steps/evals/run_suite.sh` and `llm_evals.yml`, which cannot import it, to this value.
+ * Boot disk (GB) for eval agents. These steps spell out their own agent block, so they do not
+ * inherit the repo-wide agent defaults. `undefined` uses the agent manager default; set a number
+ * to override it. Keep `EVAL_AGENT_DISK_SIZE_GB` in `steps/evals/run_suite.sh` and
+ * `llm_evals.yml` in sync.
  */
-const EVAL_AGENT_DISK_SIZE_GB = DEFAULT_AGENT_IMAGE_CONFIG.diskSizeGb;
+const EVAL_AGENT_DISK_SIZE_GB: number | undefined = undefined;
 
 /**
  * Whether heavy eval steps run on preemptible (spot) agents. Defaults to `true` (weekly/on-demand);
@@ -176,13 +194,11 @@ function toBuildkiteYamlString(value: string): string {
 function buildEvalsYaml({
   selectedSuites,
   resolveModelGroups,
-  evaluationConnectorId,
-  hasEisJudge,
+  resolveJudge,
 }: {
   selectedSuites: EvalsSuiteMetadataEntry[];
   resolveModelGroups: (suite: EvalsSuiteMetadataEntry) => string[];
-  evaluationConnectorId: string | undefined;
-  hasEisJudge: boolean;
+  resolveJudge: (suite: EvalsSuiteMetadataEntry) => EvalJudge;
 }): string {
   const preemptible = isPreemptibleEnabled();
   const suiteSteps = selectedSuites
@@ -190,6 +206,7 @@ function buildEvalsYaml({
       const key = `kbn-evals-${normalizeBuildkiteKey(suite.id)}`;
       const label = suite.name ? `Evals: ${suite.name}` : `Evals: ${suite.id}`;
       const suiteModelGroups = resolveModelGroups(suite);
+      const { evaluationConnectorId, hasEisJudge } = resolveJudge(suite);
       // Label-derived values cross a pipeline boundary; serialize as `$`-safe YAML.
       const modelGroupsEnv =
         suiteModelGroups.length > 0
@@ -206,6 +223,14 @@ function buildEvalsYaml({
       const evalServerConfigSetEnv = suite.serverConfigSet
         ? `          EVAL_SERVER_CONFIG_SET: ${toBuildkiteYamlString(suite.serverConfigSet)}`
         : null;
+      const evalScoutTargetEnv = [
+        ...(suite.scoutArch
+          ? [`          EVAL_SCOUT_ARCH: ${toBuildkiteYamlString(suite.scoutArch)}`]
+          : []),
+        ...(suite.scoutDomain
+          ? [`          EVAL_SCOUT_DOMAIN: ${toBuildkiteYamlString(suite.scoutDomain)}`]
+          : []),
+      ];
       return [
         `      - label: ${toBuildkiteYamlString(label)}`,
         `        key: ${key}`,
@@ -219,13 +244,14 @@ function buildEvalsYaml({
         ...(includeEisModelsEnv ? [includeEisModelsEnv] : []),
         ...(modelGroupsEnv ? [modelGroupsEnv] : []),
         ...(evalServerConfigSetEnv ? [evalServerConfigSetEnv] : []),
+        ...evalScoutTargetEnv,
         `        timeout_in_minutes: 60`,
         `        agents:`,
         `          image: family/kibana-ubuntu-2404`,
         `          imageProject: elastic-images-prod`,
         `          provider: gcp`,
         `          machineType: n2-standard-8`,
-        `          diskSizeGb: ${EVAL_AGENT_DISK_SIZE_GB}`,
+        ...(EVAL_AGENT_DISK_SIZE_GB ? [`          diskSizeGb: ${EVAL_AGENT_DISK_SIZE_GB}`] : []),
         ...(preemptible ? [`          preemptible: true`] : []),
         `        retry:`,
         `          automatic:`,
@@ -249,11 +275,15 @@ function buildEvalsYaml({
   ].join('\n');
 }
 
+interface EvalJudge {
+  evaluationConnectorId: string | undefined;
+  hasEisJudge: boolean;
+}
+
 interface EvalSelection {
   runnableSuites: EvalsSuiteMetadataEntry[];
   resolveModelGroups: (suite: EvalsSuiteMetadataEntry) => string[];
-  evaluationConnectorId: string | undefined;
-  hasEisJudge: boolean;
+  resolveJudge: (suite: EvalsSuiteMetadataEntry) => EvalJudge;
 }
 
 /**
@@ -263,18 +293,13 @@ interface EvalSelection {
 function resolveEvalSelection(githubPrLabels: string): EvalSelection | null {
   const parsedLabels = parseGithubPrLabels(githubPrLabels);
 
-  const skippedSuiteIds = new Set(
-    parsedLabels
-      .filter((label) => label.startsWith(EVALS_SKIP_LABEL_PREFIX))
-      .map((label) => label.slice(EVALS_SKIP_LABEL_PREFIX.length).trim())
-      .filter(Boolean)
-  );
-
   // Most PRs carry no eval labels; bail before reading suite metadata so we don't spawn a
   // `git ls-tree` per suite on every kibana-pull-request pipeline generation.
   const hasSelectionLabel = parsedLabels.some(
     (label) =>
-      (label.startsWith('evals:') && !label.startsWith(EVALS_SKIP_LABEL_PREFIX)) ||
+      (label.startsWith('evals:') &&
+        label !== EVALS_SKIP_LABEL &&
+        !label.startsWith(EVALS_SKIP_LABEL_PREFIX)) ||
       label.startsWith('models:')
   );
   if (!hasSelectionLabel) {
@@ -283,7 +308,7 @@ function resolveEvalSelection(githubPrLabels: string): EvalSelection | null {
 
   // Run eval suite(s) when their GH label(s) are present (see `evals.suites.json`).
   const evalSuites = readEvalsSuiteMetadata();
-  const runAllEvals = parsedLabels.includes('evals:all');
+  const runAllEvals = parsedLabels.includes(EVALS_ALL_LABEL);
   const selectedEvalSuites = (
     runAllEvals
       ? evalSuites
@@ -291,14 +316,14 @@ function resolveEvalSelection(githubPrLabels: string): EvalSelection | null {
           const labels = suite.ciLabels?.length ? suite.ciLabels : [`evals:${suite.id}`];
           return labels.some((label) => parsedLabels.includes(label));
         })
-  ).filter((suite) => !skippedSuiteIds.has(suite.id));
+  ).filter((suite) => !isSuiteSkipped(parsedLabels, suite));
   // Model filtering (models:* labels): none => skip (explicit selection required);
   // `models:<group>` => run those groups; aliases (e.g. `models:weekly-eis-models`) expand.
   const rawEvaluationConnectorId = parsedLabels
     .find((label) => label.startsWith('models:judge:'))
     ?.slice('models:judge:'.length)
     ?.trim();
-  const evaluationConnectorId = rawEvaluationConnectorId
+  const labelEvaluationConnectorId = rawEvaluationConnectorId
     ? normalizeEvaluationConnectorId(rawEvaluationConnectorId)
     : undefined;
 
@@ -321,15 +346,30 @@ function resolveEvalSelection(githubPrLabels: string): EvalSelection | null {
     const weeklyModels = useWeeklyEisModels
       ? suite.weeklyEisModelGroups ?? DEFAULT_WEEKLY_EIS_MODELS
       : [];
+    const defaultModels = suite.defaultModelGroups ?? [];
     const resolved = [...new Set([...explicitModelGroups, ...weeklyModels])];
-    if (resolved.length > 0) {
-      return resolved;
+    if (resolved.length === 0) {
+      return defaultModels;
     }
-    return suite.defaultModelGroups ?? [];
+    // A gated suite's verdict comes from its default model, so `models:*` labels add to it rather
+    // than replace it; otherwise a model label would bypass the regression gate.
+    return suite.regressionGate ? [...new Set([...defaultModels, ...resolved])] : resolved;
   };
 
-  const hasEisJudge =
-    !!rawEvaluationConnectorId?.startsWith('eis/') || !!evaluationConnectorId?.startsWith('eis-');
+  const resolveJudge = (suite: EvalsSuiteMetadataEntry): EvalJudge => {
+    // Baselines are matched on the task model only, so a different judge on a gated run could
+    // fake or hide a regression; gated suites keep their configured judge.
+    const labelJudge = suite.regressionGate ? undefined : labelEvaluationConnectorId;
+    const evaluationConnectorId =
+      labelJudge ??
+      (suite.defaultJudge ? normalizeEvaluationConnectorId(suite.defaultJudge) : undefined);
+    return {
+      evaluationConnectorId,
+      hasEisJudge:
+        (labelJudge !== undefined && !!rawEvaluationConnectorId?.startsWith('eis/')) ||
+        !!evaluationConnectorId?.startsWith('eis-'),
+    };
+  };
 
   if (selectedEvalSuites.length === 0) {
     return null;
@@ -349,14 +389,18 @@ function resolveEvalSelection(githubPrLabels: string): EvalSelection | null {
   return {
     runnableSuites,
     resolveModelGroups,
-    evaluationConnectorId,
-    hasEisJudge,
+    resolveJudge,
   };
 }
 
 /** Whether any eval suite should run for the given PR labels. */
 export function shouldRunEvals(githubPrLabels: string): boolean {
   return resolveEvalSelection(githubPrLabels) !== null;
+}
+
+/** The suites that would run for the given PR labels; empty when none. */
+export function getRunnableEvalSuites(githubPrLabels: string): EvalsSuiteMetadataEntry[] {
+  return resolveEvalSelection(githubPrLabels)?.runnableSuites ?? [];
 }
 
 /** Buildkite YAML group for the eval suites matching the PR labels, or `null`. */
@@ -369,9 +413,25 @@ export function getEvalPipeline(githubPrLabels: string): string | null {
   return buildEvalsYaml({
     selectedSuites: selection.runnableSuites,
     resolveModelGroups: selection.resolveModelGroups,
-    evaluationConnectorId: selection.evaluationConnectorId,
-    hasEisJudge: selection.hasEisJudge,
+    resolveJudge: selection.resolveJudge,
   });
+}
+
+/** Whether any changed file falls under a suite's `requireDecisionOnPaths`. */
+export function touchesEvalsDecisionPaths(changedFiles: readonly string[]): boolean {
+  if (changedFiles.length === 0) {
+    return false;
+  }
+  try {
+    // No `git ls-tree` filtering here: this runs on every PR, and a suite missing from the tree
+    // only means the trigger step later finds nothing to run.
+    return readRawEvalsSuites().some(
+      (suite) => getDecisionPathMatches(changedFiles, suite).length > 0
+    );
+  } catch (error) {
+    console.error('Failed to read eval suite metadata:', error);
+    return false;
+  }
 }
 
 /**
@@ -380,12 +440,26 @@ export function getEvalPipeline(githubPrLabels: string): string | null {
  * creates the child build (forwarding PR context for fork checkout + `KIBANA_BUILD_ID` for artifact
  * reuse). Fire-and-forget: `depends_on: build` gates on the artifact, `soft_fail` keeps a trigger
  * hiccup off the PR.
+ *
+ * Also emitted when `changedFiles` touch a suite's `requireDecisionOnPaths`, even without eval
+ * labels: `trigger_pr_evals.sh` re-reads the live labels after the build, so a decision label added
+ * while CI runs still starts the suite.
  */
-export function getEvalTriggerStep(githubPrLabels: string): string | null {
+export function getEvalTriggerStep(
+  githubPrLabels: string,
+  changedFiles: readonly string[] = [],
+  changedFilesCapped = false
+): string | null {
   // Gate on the SAME filtered set we forward, so the parent's decision matches what the child
   // re-selects from (a spaced/`=` selection label can't pass here yet vanish before the child).
   const forwardableLabels = getForwardablePrLabels(githubPrLabels);
-  if (!shouldRunEvals(forwardableLabels)) {
+  // A capped file list may leave out decision paths, so emit the step and let it decide from the
+  // live labels.
+  if (
+    !shouldRunEvals(forwardableLabels) &&
+    !changedFilesCapped &&
+    !touchesEvalsDecisionPaths(changedFiles)
+  ) {
     return null;
   }
 

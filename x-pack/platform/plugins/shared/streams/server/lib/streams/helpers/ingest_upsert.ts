@@ -15,8 +15,7 @@ import type { AttachmentClient } from '../attachments/attachment_client';
 
 /**
  * Returns the dashboard and rule attachment ids linked to a stream, partitioned by type.
- * Significant-event queries are not attachments and are not returned here; they are managed
- * through the `/api/streams/{name}/queries` endpoints.
+ * Significant-event queries are not attachments and are not returned here.
  */
 export async function getStreamAttachmentIds({
   name,
@@ -62,18 +61,12 @@ export async function updateWiredIngest({
     throw badData(`Can't update wired capabilities of a non-wired stream`);
   }
 
-  const {
-    name: _name,
-    updated_at: _updatedAt,
-    query_streams: queryStreams,
-    ...stream
-  } = definition;
+  const { name: _name, updated_at: _updatedAt, ...stream } = definition;
 
   const upsertRequest: Streams.WiredStream.UpsertRequest = {
     dashboards,
     stream: {
       ...stream,
-      ...(queryStreams !== undefined && { query_streams: queryStreams }),
       ...(description !== undefined && { description }),
       ingest,
     },
@@ -110,18 +103,12 @@ export async function updateClassicIngest({
     throw badData(`Can't update classic capabilities of a non-classic stream`);
   }
 
-  const {
-    name: _name,
-    updated_at: _updatedAt,
-    query_streams: queryStreams,
-    ...stream
-  } = definition;
+  const { name: _name, updated_at: _updatedAt, ...stream } = definition;
 
   const upsertRequest: Streams.ClassicStream.UpsertRequest = {
     dashboards,
     stream: {
       ...stream,
-      ...(queryStreams !== undefined && { query_streams: queryStreams }),
       ...(description !== undefined && { description }),
       ingest,
     },

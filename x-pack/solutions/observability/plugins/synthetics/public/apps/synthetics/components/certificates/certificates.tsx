@@ -9,11 +9,18 @@ import { useDispatch, useSelector } from 'react-redux-v7';
 import { EuiFilterGroup, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import React, { useEffect, useMemo, useState } from 'react';
 import { useTrackPageview } from '@kbn/observability-shared-plugin/public';
+import { i18n } from '@kbn/i18n';
 import type { CertFacetCount } from '../../../../../common/runtime_types';
 import { MonitorTypeEnum } from '../../../../../common/runtime_types';
-import { setCertificatesTotalAction } from '../../state/certificates/certificates';
+import {
+  certificatesSelector,
+  setCertificatesTotalAction,
+} from '../../state/certificates/certificates';
 import { selectOverviewPageState } from '../../state';
 import { ShowAllSpaces } from '../monitors_page/common/show_all_spaces';
+import { LastRefreshed } from '../common/components/last_refreshed';
+import { AutoRefreshButton } from '../common/components/auto_refresh_button';
+import { SyntheticsHeaderToolbar, SyntheticsPage } from '../common/app_header';
 import { CertificateSearch } from './cert_search';
 import { CertStats } from './cert_stats';
 import { CertQuickFilter } from './cert_quick_filter';
@@ -30,6 +37,7 @@ import { useCertSearch } from './use_cert_search';
 import type { CertSort } from './certificates_list';
 import { CertificateList } from './certificates_list';
 import { useBreadcrumbs } from '../../hooks';
+import { CertRefreshBtn } from './cert_refresh_btn';
 
 const DEFAULT_PAGE_SIZE = 10;
 const LOCAL_STORAGE_KEY = 'xpack.uptime.certList.pageSize';
@@ -60,6 +68,11 @@ export const CertificatesPage: React.FC = () => {
   useTrackPageview({ app: 'synthetics', path: 'certificates', delay: 15000 });
 
   useBreadcrumbs([{ text: 'Certificates' }]);
+  const total = useSelector(certificatesSelector);
+  const title = i18n.translate('xpack.synthetics.certificates.heading', {
+    defaultMessage: 'TLS Certificates ({total})',
+    values: { total: total ?? 0 },
+  });
 
   const [page, setPage] = useState({ index: 0, size: getPageSizeValue() });
   const [sort, setSort] = useState<CertSort>({
@@ -150,8 +163,16 @@ export const CertificatesPage: React.FC = () => {
   }, [certificates.total, dispatch]);
 
   return (
-    <>
-      <EuiSpacer size="m" />
+    <SyntheticsPage
+      title={title}
+      toolbar={
+        <SyntheticsHeaderToolbar>
+          <LastRefreshed />
+          <AutoRefreshButton />
+          <CertRefreshBtn />
+        </SyntheticsHeaderToolbar>
+      }
+    >
       <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} wrap>
         <EuiFlexItem>
           <CertificateSearch
@@ -248,6 +269,6 @@ export const CertificatesPage: React.FC = () => {
         sort={sort}
         certificates={certificates}
       />
-    </>
+    </SyntheticsPage>
   );
 };

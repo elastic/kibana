@@ -278,7 +278,7 @@ export const TemplateList: React.FunctionComponent<RouteComponentProps<MatchPara
   } else if (!hasTemplates) {
     content = (
       <EuiEmptyPrompt
-        iconType="managementApp"
+        iconType="gear"
         title={
           <h1 data-test-subj="title">
             <FormattedMessage

@@ -199,8 +199,8 @@ async function getApmServices(
   retrySvc: RetryService,
   expected: { latency: number; throughput: number; transactionErrorRate: number }
 ) {
-  return await retrySvc.tryWithRetries(
-    'getApmServices',
+  return await retrySvc.tryForTime(
+    20_000,
     async () => {
       const res = await apmApiClient.readUser({
         endpoint: 'GET /internal/apm/services',
@@ -232,10 +232,7 @@ async function getApmServices(
 
       return res.body.items;
     },
-    {
-      retryCount: 10,
-      timeout: 20_000,
-    }
+    { description: 'getApmServices' }
   );
 }
 

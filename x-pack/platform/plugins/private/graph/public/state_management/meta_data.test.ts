@@ -7,14 +7,14 @@
 
 import type { MockedGraphEnvironment } from './mocks';
 import { createMockGraphStore } from './mocks';
-import { syncBreadcrumbSaga, updateMetaData } from './meta_data';
+import { registerMetaDataListeners, updateMetaData } from './meta_data';
 
-describe('breadcrumb sync saga', () => {
+describe('breadcrumb sync listener', () => {
   let env: MockedGraphEnvironment;
 
   beforeEach(() => {
     env = createMockGraphStore({
-      sagas: [syncBreadcrumbSaga],
+      listeners: [registerMetaDataListeners],
     });
   });
 

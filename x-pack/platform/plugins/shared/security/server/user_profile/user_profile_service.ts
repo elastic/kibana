@@ -13,7 +13,11 @@ import pLimit from 'p-limit';
 
 import type { IClusterClient, KibanaRequest, Logger } from '@kbn/core/server';
 import type { AuthenticatedUser } from '@kbn/core-security-common';
-import { extractApiKeyIdFromAuthzHeader } from '@kbn/core-security-server';
+import {
+  extractApiKeyIdFromAuthzHeader,
+  HTTPAuthorizationHeader,
+  isUiamCredential,
+} from '@kbn/core-security-server';
 import type {
   CheckUserProfilesPrivilegesResponse,
   UserProfileBulkGetParams,
@@ -25,6 +29,10 @@ import type {
 } from '@kbn/security-plugin-types-server';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 
+import {
+  createUiamApiKeyProfileIdResolver,
+  type UiamApiKeyProfileIdResolver,
+} from './uiam_api_key_profile_id_resolver';
 import type { UserProfileGrant } from './user_profile_grant';
 import type {
   SecurityLicense,
@@ -36,6 +44,7 @@ import type { AuthorizationServiceSetupInternal } from '../authorization';
 import { getDetailedErrorMessage, getErrorStatusCode } from '../errors';
 import { securityTelemetry } from '../otel/instrumentation';
 import { getPrintableSessionId, type Session } from '../session_management';
+import type { UiamServicePublic } from '../uiam';
 
 const KIBANA_DATA_ROOT = 'kibana';
 const ACTIVATION_MAX_RETRIES = 10;
@@ -60,6 +69,17 @@ export interface UserProfileServiceStartInternal extends UserProfileServiceStart
    * @param data Application data to be written (merged with existing data).
    */
   update<D extends UserProfileData>(uid: string, data: D): Promise<void>;
+
+  /**
+   * Resolves the profile ID of the user who created the API key a request carries: a Stack key
+   * through Elasticsearch, and a UIAM key through UIAM. Unlike `getCurrentProfileId`, it reads only
+   * the key, never a session or the user bound to a fake request.
+   * @param request The request that carries the API key.
+   * @returns The profile ID, or `undefined` when the request carries no API key, the key no longer
+   *   authenticates or can't read itself, or no user created it.
+   * @throws When the lookup fails for any other reason.
+   */
+  getApiKeyProfileId(request: KibanaRequest): Promise<string | undefined>;
 }
 
 export interface UserProfileServiceSetupParams {
@@ -71,6 +91,8 @@ export interface UserProfileServiceStartParams {
   clusterClient: IClusterClient;
   session: PublicMethodsOf<Session>;
   getCurrentUser: (request: KibanaRequest) => AuthenticatedUser | null;
+  /** Only present when UIAM is enabled. */
+  uiam?: UiamServicePublic;
 }
 
 function parseUserProfile<D extends UserProfileData>(
@@ -117,6 +139,9 @@ interface GetCurrentTelemetry {
 
 interface ResolvedCurrentUserProfileId {
   profileId?: string;
+  // Set when `profileId` was derived from the creator of a UIAM API key instead of read from a profile, so the
+  // profile may not exist yet: `getCurrent` returns `null` for it, as for an Elasticsearch API key without one.
+  profileIdIsDerived?: boolean;
   sessionId?: string;
   // Only set when the profile was resolved via Basic auth activation, since activation returns the full profile.
   // `getCurrent` uses it to avoid a redundant `getUserProfile` re-fetch; `getCurrentProfileId` ignores it.
@@ -130,6 +155,7 @@ interface ResolvedCurrentUserProfileId {
 export class UserProfileService {
   private authz?: AuthorizationServiceSetupInternal;
   private license?: SecurityLicense;
+  private resolveUiamApiKeyProfileId?: UiamApiKeyProfileIdResolver;
   constructor(private readonly logger: Logger) {}
 
   setup({ authz, license }: UserProfileServiceSetupParams) {
@@ -137,7 +163,15 @@ export class UserProfileService {
     this.license = license;
   }
 
-  start({ clusterClient, session, getCurrentUser }: UserProfileServiceStartParams) {
+  start({ clusterClient, session, getCurrentUser, uiam }: UserProfileServiceStartParams) {
+    this.resolveUiamApiKeyProfileId =
+      uiam &&
+      createUiamApiKeyProfileIdResolver({
+        uiam,
+        clusterClient,
+        logger: this.logger,
+      });
+
     return {
       activate: this.activate.bind(this, clusterClient),
       getCurrent: this.getCurrent.bind(this, clusterClient, session, getCurrentUser),
@@ -148,6 +182,7 @@ export class UserProfileService {
         getCurrentUser
       ),
       bulkGet: this.bulkGet.bind(this, clusterClient),
+      getApiKeyProfileId: this.getApiKeyProfileId.bind(this, clusterClient),
       update: this.update.bind(this, clusterClient),
       suggest: this.suggest.bind(this, clusterClient),
     } as UserProfileServiceStartInternal;
@@ -307,39 +342,96 @@ export class UserProfileService {
   }
 
   /**
-   * Retrieves the user profile ID from an API key authenticated request by retrieving the API Key itself.
+   * Retrieves the user profile ID from an API key authenticated request. A UIAM API key is resolved through UIAM, which
+   * derives the ID from the key's creator, and any other key by retrieving the API Key itself. A failed lookup is logged
+   * and gives no ID.
    * @param clusterClient The cluster client
    * @param request The HTTP request
-   * @returns The profile ID if found, undefined otherwise
+   * @returns The profile ID if found, and whether it was derived from the creator of a UIAM API key
    */
   private async getCurrentUserProfileIdViaApiKey(
     clusterClient: IClusterClient,
     request: UserProfileGetCurrentParams['request']
-  ): Promise<string | undefined> {
+  ): Promise<Pick<ResolvedCurrentUserProfileId, 'profileId' | 'profileIdIsDerived'>> {
+    const isUiamApiKey = this.isUiamApiKeyRequest(request);
     try {
-      const id = extractApiKeyIdFromAuthzHeader(request.headers.authorization);
-      if (!id) {
-        this.logger.debug(`Failed to decode API key ID from Authorization header.`);
-        return undefined;
-      }
+      return {
+        profileId: await this.getApiKeyProfileId(clusterClient, request),
+        profileIdIsDerived: isUiamApiKey,
+      };
+    } catch (error) {
+      const message = getDetailedErrorMessage(error);
+      this.logger.error(
+        isUiamApiKey
+          ? `Failed to resolve the creator of a UIAM API key for user profile retrieval: ${message}`
+          : `Failed to retrieve API key for user profile retrieval: ${message}`
+      );
+      return {};
+    }
+  }
 
-      const response = await clusterClient.asScoped(request).asCurrentUser.security.getApiKey({
-        with_profile_uid: true,
-        id,
-      });
+  /**
+   * See {@link UserProfileServiceStartInternal} for documentation.
+   */
+  private async getApiKeyProfileId(
+    clusterClient: IClusterClient,
+    request: KibanaRequest
+  ): Promise<string | undefined> {
+    // Elasticsearch authenticates UIAM API keys but can't look them up (`with_profile_uid`), so
+    // those are resolved through UIAM instead.
+    if (this.isUiamApiKeyRequest(request)) {
+      return await this.resolveUiamApiKeyProfileId?.(request);
+    }
 
-      if (response.api_keys && response.api_keys.length > 0) {
-        return response.api_keys[0].profile_uid;
-      } else {
+    const id = extractApiKeyIdFromAuthzHeader(request.headers.authorization);
+    if (!id) {
+      this.logger.debug(`Failed to decode API key ID from Authorization header.`);
+      return;
+    }
+
+    try {
+      const { api_keys: apiKeys } = await clusterClient
+        .asScoped(request)
+        .asCurrentUser.security.getApiKey({ with_profile_uid: true, id });
+      if (!apiKeys || apiKeys.length === 0) {
         this.logger.debug(
           `No API keys were returned from query, cannot retrieve associated profile id.`
         );
+        return;
       }
+      return apiKeys[0].profile_uid;
     } catch (error) {
-      this.logger.error(
-        `Failed to retrieve API key for user profile retrieval: ${getDetailedErrorMessage(error)}`
-      );
+      // A key that no longer authenticates, for example because it was invalidated, has no profile.
+      // That is expected for a task that outlives its key, and the task's own calls fail the same way.
+      const statusCode = getErrorStatusCode(error);
+      if (statusCode === 401) {
+        this.logger.debug(`The API key no longer authenticates, cannot retrieve profile id.`);
+        return;
+      }
+
+      // An API key can always read itself, so this is unexpected. The request itself still works,
+      // but without a profile, so it is logged where an operator can see it.
+      if (statusCode === 403 || statusCode === 404) {
+        this.logger.warn(
+          `API key cannot read itself to retrieve its profile id: ${getDetailedErrorMessage(error)}`
+        );
+        return;
+      }
+      throw error;
     }
+  }
+
+  /**
+   * Whether a request carries a UIAM API key that UIAM can resolve.
+   */
+  private isUiamApiKeyRequest(request: KibanaRequest) {
+    const authorization = HTTPAuthorizationHeader.parseFromRequest(request);
+    return (
+      !!this.resolveUiamApiKeyProfileId &&
+      !!authorization &&
+      authorization.scheme.toLowerCase() === 'apikey' &&
+      isUiamCredential(authorization)
+    );
   }
 
   private recordGetCurrentSuccess(params: GetCurrentTelemetry) {
@@ -409,6 +501,7 @@ export class UserProfileService {
     }
 
     let profileId: string | undefined;
+    let profileIdIsDerived: boolean | undefined;
     let sessionId: string | undefined;
     let activatedProfile: UserProfileWithSecurity | undefined;
     let profileActivationRequired: boolean | undefined;
@@ -465,12 +558,17 @@ export class UserProfileService {
         this.logger.debug(
           `Request to get current user profile is authenticated via API key [fake=${!!fakeRequestProfileResolution}].`
         );
-        profileId = await this.getCurrentUserProfileIdViaApiKey(clusterClient, request);
+
+        ({ profileId, profileIdIsDerived } = await this.getCurrentUserProfileIdViaApiKey(
+          clusterClient,
+          request
+        ));
       }
     }
 
     return {
       profileId,
+      profileIdIsDerived,
       sessionId,
       activatedProfile,
       telemetry: {
@@ -502,7 +600,7 @@ export class UserProfileService {
       return null;
     }
 
-    const { profileId, sessionId, activatedProfile, telemetry } = resolved;
+    const { profileId, profileIdIsDerived, sessionId, activatedProfile, telemetry } = resolved;
 
     // It is not possible to select/filter profile data when activating, so unless the dataPath is empty,
     // we will need to re-fetch the profile like in the other cases (session, API key).
@@ -538,6 +636,13 @@ export class UserProfileService {
 
     if (body.profiles.length === 0) {
       this.recordGetCurrentFailure(telemetry);
+      if (profileIdIsDerived) {
+        this.logger.debug(
+          `The user profile for the current user${requestDescriptor} has not been created yet.`
+        );
+        return null;
+      }
+
       this.logger.error(`The user profile for the current user${requestDescriptor} is not found.`);
       throw new Error(`User profile is not found.`);
     }

@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 
 import {
@@ -20,9 +21,9 @@ import { test } from '../fixtures';
 
 test.describe(
   'Interactive setup - manual configuration',
-  { tag: ['@local-stateful-classic'] },
+  // Interactive setup reconfigures Kibana's crypto and reboots, which FIPS mode doesn't support.
+  { tag: ['@local-stateful-classic', tags.limit.except.fips] },
   () => {
-    // Pre-migration tag 'skipFIPS'
     test('configures Kibana against a TLS-enabled cluster', async ({
       pageObjects,
       apiClient,

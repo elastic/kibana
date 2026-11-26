@@ -22,3 +22,5 @@ export { rawRuleSchema as rawRuleSchemaV12 } from './v12';
 export { rawRuleSchema as rawRuleSchemaV13 } from './v13';
 export { rawRuleSchema as rawRuleSchemaV14 } from './v14';
 export { rawRuleSchema as rawRuleSchemaV15 } from './v15';
+export { rawRuleSchema as rawRuleSchemaV16 } from './v16';
+export { rawRuleSchema as rawRuleSchemaV17 } from './v17';

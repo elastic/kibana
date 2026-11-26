@@ -6,11 +6,11 @@
  */
 
 /**
- * API integration tests for the OTLP output type (managedOtlpOutput feature flag).
+ * API integration tests for the OTLP output type (`fleet.enableOtlpOutput` feature flag).
  *
  * These tests live in the managed_inputs suite because `config.managed_inputs.ts` already
  * provisions `xpack.cloud.managed_otlp.url` and the managed-bulk infrastructure, and its
- * comment anticipated this addition. Enabling `managedOtlpOutput` only in this config keeps
+ * comment anticipated this addition. Enabling `fleet.enableOtlpOutput` only in this config keeps
  * the flag scoped to where it is meaningful.
  */
 
@@ -30,6 +30,7 @@ export default function (providerContext: FtrProviderContext) {
     const supertest = getService('supertest');
     const es = getService('es');
     const kibanaServer = getService('kibanaServer');
+    const retry = getService('retry');
 
     skipIfNoDockerRegistry(providerContext);
 
@@ -38,6 +39,11 @@ export default function (providerContext: FtrProviderContext) {
         index: '.fleet-secrets',
         id,
       });
+
+    const expectSecretDeleted = async (id: string) => {
+      const exists = await es.exists({ index: '.fleet-secrets', id });
+      expect(exists).to.be(false);
+    };
 
     const deleteAllSecrets = async () => {
       try {
@@ -269,9 +275,107 @@ export default function (providerContext: FtrProviderContext) {
         const authSecret = await getSecretById(authSecretId);
         expect((authSecret._source as Record<string, string>).value).to.be('test-tpm-auth-value');
       });
+
+      it('stores the authentication credential as a secret and only returns its reference', async () => {
+        const { body } = await supertest
+          .post('/api/fleet/outputs')
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: `otlp-auth-${uuidv4()}`,
+            type: 'otlp',
+            otlp_exporter: { endpoint: 'https://otlp.example.com:4317', protocol: 'grpc' },
+            auth: { type: 'auth_header', scheme: 'api_key' },
+            secrets: { auth: { credential: 'test-credential-value' } },
+          })
+          .expect(200);
+
+        expect(body.item.auth).to.eql({ type: 'auth_header', scheme: 'api_key' });
+        const credentialSecretId: string = body.item.secrets?.auth?.credential?.id;
+        expect(credentialSecretId).to.be.a('string');
+
+        const credentialSecret = await getSecretById(credentialSecretId);
+        expect((credentialSecret._source as Record<string, string>).value).to.be(
+          'test-credential-value'
+        );
+
+        const { body: getBody } = await supertest
+          .get(`/api/fleet/outputs/${body.item.id}`)
+          .expect(200);
+        expect(getBody.item.secrets.auth.credential).to.eql({ id: credentialSecretId });
+      });
+
+      it('returns 400 when auth is set without a credential', async () => {
+        const { body } = await supertest
+          .post('/api/fleet/outputs')
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: `otlp-auth-${uuidv4()}`,
+            type: 'otlp',
+            otlp_exporter: { endpoint: 'https://otlp.example.com:4317', protocol: 'grpc' },
+            auth: { type: 'custom_header', name: 'x-api-key' },
+          })
+          .expect(400);
+
+        expect(body.message).to.contain('secrets.auth.credential is required when auth is set');
+      });
+
+      it('returns 400 when the custom header name is not a valid header name', async () => {
+        const { body } = await supertest
+          .post('/api/fleet/outputs')
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: `otlp-auth-${uuidv4()}`,
+            type: 'otlp',
+            otlp_exporter: { endpoint: 'https://otlp.example.com:4317', protocol: 'grpc' },
+            auth: { type: 'custom_header', name: 'x api key' },
+            secrets: { auth: { credential: 'test-credential-value' } },
+          })
+          .expect(400);
+
+        expect(body.message).to.contain('Invalid header name');
+      });
     });
 
     describe('PUT /api/fleet/outputs/{id}', () => {
+      it('replaces the authentication credential and removes the previous secret', async () => {
+        const { body: createBody } = await supertest
+          .post('/api/fleet/outputs')
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: `otlp-auth-${uuidv4()}`,
+            type: 'otlp',
+            otlp_exporter: { endpoint: 'https://otlp.example.com:4317', protocol: 'grpc' },
+            auth: { type: 'auth_header', scheme: 'bearer_token' },
+            secrets: { auth: { credential: 'first-credential' } },
+          })
+          .expect(200);
+        const { id } = createBody.item;
+        const firstSecretId: string = createBody.item.secrets.auth.credential.id;
+
+        const { body: updateBody } = await supertest
+          .put(`/api/fleet/outputs/${id}`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({ secrets: { auth: { credential: 'second-credential' } } })
+          .expect(200);
+        const secondSecretId: string = updateBody.item.secrets.auth.credential.id;
+        expect(secondSecretId).not.to.be(firstSecretId);
+        expect(updateBody.item.auth).to.eql({ type: 'auth_header', scheme: 'bearer_token' });
+
+        const secondSecret = await getSecretById(secondSecretId);
+        expect((secondSecret._source as Record<string, string>).value).to.be('second-credential');
+        await expectSecretDeleted(firstSecretId);
+
+        // removing the authentication removes its credential
+        const { body: clearedBody } = await supertest
+          .put(`/api/fleet/outputs/${id}`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({ auth: null })
+          .expect(200);
+        expect(clearedBody.item.auth).to.be(undefined);
+        expect(clearedBody.item.secrets?.auth?.credential).to.be(undefined);
+        await expectSecretDeleted(secondSecretId);
+      });
+
       it('updates the otlp_exporter on an existing OTLP output', async () => {
         const { body: createBody } = await supertest
           .post('/api/fleet/outputs')
@@ -293,6 +397,64 @@ export default function (providerContext: FtrProviderContext) {
           .expect(200);
 
         expect(updateBody.item.otlp_exporter).to.eql(newExporter);
+      });
+
+      it('removes the headers that an update leaves out', async () => {
+        const { body: createBody } = await supertest
+          .post('/api/fleet/outputs')
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: `otlp-headers-${uuidv4()}`,
+            type: 'otlp',
+            otlp_exporter: {
+              endpoint: 'https://otlp.example.com:4317',
+              protocol: 'grpc',
+              headers: { 'x-a': '1', 'x-b': '2' },
+            },
+          })
+          .expect(200);
+        const { id } = createBody.item;
+
+        const { body: updateBody } = await supertest
+          .put(`/api/fleet/outputs/${id}`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            otlp_exporter: {
+              endpoint: 'https://otlp.example.com:4317',
+              protocol: 'grpc',
+              headers: { 'x-a': '1', 'x-c': '3' },
+            },
+          })
+          .expect(200);
+        expect(updateBody.item.otlp_exporter.headers).to.eql({ 'x-a': '1', 'x-c': '3' });
+
+        const { body: getBody } = await supertest.get(`/api/fleet/outputs/${id}`).expect(200);
+        expect(getBody.item.otlp_exporter.headers).to.eql({ 'x-a': '1', 'x-c': '3' });
+
+        // an update without headers keeps them
+        await supertest
+          .put(`/api/fleet/outputs/${id}`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            otlp_exporter: { endpoint: 'https://otlp-v2.example.com:4317', protocol: 'grpc' },
+          })
+          .expect(200);
+        const { body: getAfterBody } = await supertest.get(`/api/fleet/outputs/${id}`).expect(200);
+        expect(getAfterBody.item.otlp_exporter.headers).to.eql({ 'x-a': '1', 'x-c': '3' });
+
+        // headers: null removes them all
+        const { body: clearBody } = await supertest
+          .put(`/api/fleet/outputs/${id}`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            otlp_exporter: {
+              endpoint: 'https://otlp-v2.example.com:4317',
+              protocol: 'grpc',
+              headers: null,
+            },
+          })
+          .expect(200);
+        expect(clearBody.item.otlp_exporter.headers).to.be(null);
       });
 
       it('rejects changing a non-OTLP output to OTLP when a using policy has non-OTel inputs', async () => {
@@ -397,6 +559,143 @@ export default function (providerContext: FtrProviderContext) {
         expect(updateBody.item.type).to.be('elasticsearch');
         expect(updateBody.item.otlp_exporter).to.be(null);
         expect(updateBody.item.hosts).to.eql(['https://es.example.com:9200']);
+      });
+    });
+
+    describe('sending queue', () => {
+      // matches xpack.cloud.managed_otlp.url in config.managed_inputs.ts
+      const MANAGED_ENDPOINT = 'managed-otlp.ftr-test.invalid:443';
+      const OTHER_ENDPOINT = 'https://otlp.example.com:4317';
+
+      const createOutput = async (endpoint: string, sendingQueue: unknown) => {
+        const { body } = await supertest
+          .post('/api/fleet/outputs')
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: `otlp-queue-${uuidv4()}`,
+            type: 'otlp',
+            otlp_exporter: { endpoint, protocol: 'grpc', sending_queue: sendingQueue },
+          })
+          .expect(200);
+        return body.item.id as string;
+      };
+
+      const updateQueue = (id: string, endpoint: string, sendingQueue: unknown) =>
+        supertest
+          .put(`/api/fleet/outputs/${id}`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({ otlp_exporter: { endpoint, protocol: 'grpc', sending_queue: sendingQueue } });
+
+      const getQueue = async (id: string) => {
+        const { body } = await supertest.get(`/api/fleet/outputs/${id}`).expect(200);
+        return body.item.otlp_exporter.sending_queue;
+      };
+
+      it('fills the settings that are null or left out with the Elastic defaults on the managed endpoint', async () => {
+        const id = await createOutput(MANAGED_ENDPOINT, {
+          queue_size: null,
+          batch: { min_size: null },
+        });
+
+        expect(await getQueue(id)).to.eql({
+          enabled: true,
+          sizer: 'bytes',
+          queue_size: 50_000_000,
+          block_on_overflow: true,
+          batch: { flush_timeout: '1s', min_size: 1_000_000, max_size: 4_000_000, sizer: 'bytes' },
+        });
+      });
+
+      it('resets a setting to the Elastic default when an update sets it to null', async () => {
+        const id = await createOutput(MANAGED_ENDPOINT, { queue_size: 10_000_000 });
+        expect((await getQueue(id)).queue_size).to.be(10_000_000);
+
+        await updateQueue(id, MANAGED_ENDPOINT, { queue_size: null }).expect(200);
+
+        expect((await getQueue(id)).queue_size).to.be(50_000_000);
+      });
+
+      it('does not fill the Elastic queue size, in bytes, for a queue that counts requests', async () => {
+        const id = await createOutput(MANAGED_ENDPOINT, { sizer: 'requests', batch: null });
+
+        expect(await getQueue(id)).to.eql({
+          enabled: true,
+          sizer: 'requests',
+          block_on_overflow: true,
+          batch: null,
+        });
+      });
+
+      it('keeps the stored settings that a partial update leaves out', async () => {
+        const id = await createOutput(MANAGED_ENDPOINT, {
+          queue_size: 10_000_000,
+          block_on_overflow: false,
+        });
+
+        await updateQueue(id, MANAGED_ENDPOINT, { batch: { min_size: 2_000_000 } }).expect(200);
+
+        expect(await getQueue(id)).to.eql({
+          enabled: true,
+          sizer: 'bytes',
+          queue_size: 10_000_000,
+          block_on_overflow: false,
+          batch: { flush_timeout: '1s', min_size: 2_000_000, max_size: 4_000_000, sizer: 'bytes' },
+        });
+      });
+
+      it('keeps a null sending queue as an opt-out on the managed endpoint', async () => {
+        const id = await createOutput(MANAGED_ENDPOINT, null);
+
+        expect(await getQueue(id)).to.be(null);
+      });
+
+      it('clears a stored queue with null, and keeps it cleared through a later update', async () => {
+        const id = await createOutput(MANAGED_ENDPOINT, undefined);
+        expect((await getQueue(id)).queue_size).to.be(50_000_000);
+
+        await updateQueue(id, MANAGED_ENDPOINT, null).expect(200);
+        expect(await getQueue(id)).to.be(null);
+
+        // an update that leaves the queue out does not bring back the managed defaults
+        await updateQueue(id, MANAGED_ENDPOINT, undefined).expect(200);
+        expect(await getQueue(id)).to.be(null);
+      });
+
+      it('returns 400 when creating an output with sizes that the collector rejects', async () => {
+        const { body } = await supertest
+          .post('/api/fleet/outputs')
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: `otlp-queue-${uuidv4()}`,
+            type: 'otlp',
+            otlp_exporter: {
+              endpoint: OTHER_ENDPOINT,
+              protocol: 'grpc',
+              sending_queue: { sizer: 'items', queue_size: 100, batch: { sizer: 'items' } },
+            },
+          })
+          .expect(400);
+
+        expect(body.message).to.contain(
+          'sending_queue.batch.min_size (8192) can not be more than sending_queue.queue_size (100)'
+        );
+      });
+
+      it('returns 400 when an update makes the stored sizes invalid', async () => {
+        const id = await createOutput(OTHER_ENDPOINT, {
+          sizer: 'items',
+          queue_size: 10_000,
+          batch: { sizer: 'items', min_size: 500 },
+        });
+
+        // the stored minimum of 500 does not fit in a queue of 100
+        const { body } = await updateQueue(id, OTHER_ENDPOINT, { queue_size: 100 }).expect(400);
+        expect(body.message).to.contain(
+          'sending_queue.batch.min_size (500) can not be more than sending_queue.queue_size (100)'
+        );
+
+        // the stored queue is unchanged
+        expect((await getQueue(id)).queue_size).to.be(10_000);
       });
     });
 
@@ -586,6 +885,540 @@ export default function (providerContext: FtrProviderContext) {
           .set('kbn-xsrf', 'xxxx')
           .send({ name: policyName, namespace: 'default', data_output_id: otlpOutputId })
           .expect(400);
+      });
+    });
+
+    describe('policy compilation', () => {
+      beforeEach(async () => {
+        await supertest
+          .post(`/api/fleet/epm/packages/${DYNAMIC_PKG}/${DYNAMIC_PKG_VERSION}`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({ force: true })
+          .expect(200);
+      });
+
+      it('compiles an OTel-only policy with an OTLP data output into a valid otelcol block', async () => {
+        // Create the OTLP output (gRPC)
+        const { body: outputBody } = await supertest
+          .post('/api/fleet/outputs')
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: `otlp-compile-${uuidv4()}`,
+            type: 'otlp',
+            otlp_exporter: { endpoint: 'otlp.example.com:4317', protocol: 'grpc' },
+          })
+          .expect(200);
+        const otlpOutputId: string = outputBody.item.id;
+
+        // Create an OTel-only agent policy using the OTLP output, no agent monitoring
+        const { body: policyBody } = await supertest
+          .post('/api/fleet/agent_policies')
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: `otlp-compile-${uuidv4()}`,
+            namespace: 'default',
+            data_output_id: otlpOutputId,
+            monitoring_enabled: [],
+          })
+          .expect(200);
+        const policyId: string = policyBody.item.id;
+
+        // Add an OTel-only package policy
+        await supertest
+          .post('/api/fleet/package_policies')
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: `otel-pkg-${uuidv4()}`,
+            namespace: 'default',
+            policy_id: policyId,
+            package: { name: DYNAMIC_PKG, version: DYNAMIC_PKG_VERSION },
+            inputs: {
+              'otlpreceiver-otelcol': {
+                enabled: true,
+                streams: { 'test_otel_dynamic.otlpreceiver': { enabled: true, vars: {} } },
+              },
+            },
+          })
+          .expect(200);
+
+        // Compile the full policy — must succeed (was throwing before this fix)
+        const { body } = await supertest
+          .get(`/api/fleet/agent_policies/${policyId}/full`)
+          .set('kbn-xsrf', 'xxxx')
+          .expect(200);
+
+        const fullPolicy = body.item;
+        const exporterKey = `otlp/${otlpOutputId}`;
+
+        // Exporter: endpoint only — protocol is stripped; no SO metadata leaks in
+        expect(fullPolicy.exporters[exporterKey]).to.eql({
+          endpoint: 'otlp.example.com:4317',
+        });
+
+        // No beatsauth or other extensions for an OTLP-only policy; extensions is omitted when empty
+        expect(fullPolicy.extensions).to.be(undefined);
+
+        // forward/ connector is always empty — it's a built-in OTel bridge with no config of its own
+        expect(fullPolicy.connectors[`forward/${otlpOutputId}`]).to.eql({});
+
+        // outputs entry: type only — no name, is_default, created_at, or other SO fields
+        expect(fullPolicy.outputs[otlpOutputId]).to.eql({ type: 'otlp' });
+      });
+
+      it('does not include the headers that an update removed in the compiled exporter', async () => {
+        const { body: outputBody } = await supertest
+          .post('/api/fleet/outputs')
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: `otlp-compile-headers-${uuidv4()}`,
+            type: 'otlp',
+            otlp_exporter: {
+              endpoint: 'otlp.example.com:4317',
+              protocol: 'grpc',
+              headers: { 'x-a': '1', 'x-b': '2' },
+            },
+          })
+          .expect(200);
+        const otlpOutputId: string = outputBody.item.id;
+
+        const { body: policyBody } = await supertest
+          .post('/api/fleet/agent_policies')
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: `otlp-compile-headers-${uuidv4()}`,
+            namespace: 'default',
+            data_output_id: otlpOutputId,
+            monitoring_enabled: [],
+          })
+          .expect(200);
+        const policyId: string = policyBody.item.id;
+
+        await supertest
+          .post('/api/fleet/package_policies')
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: `otel-pkg-${uuidv4()}`,
+            namespace: 'default',
+            policy_id: policyId,
+            package: { name: DYNAMIC_PKG, version: DYNAMIC_PKG_VERSION },
+            inputs: {
+              'otlpreceiver-otelcol': {
+                enabled: true,
+                streams: { 'test_otel_dynamic.otlpreceiver': { enabled: true, vars: {} } },
+              },
+            },
+          })
+          .expect(200);
+
+        await supertest
+          .put(`/api/fleet/outputs/${otlpOutputId}`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            otlp_exporter: {
+              endpoint: 'otlp.example.com:4317',
+              protocol: 'grpc',
+              headers: { 'x-a': '1' },
+            },
+          })
+          .expect(200);
+
+        const { body } = await supertest
+          .get(`/api/fleet/agent_policies/${policyId}/full`)
+          .set('kbn-xsrf', 'xxxx')
+          .expect(200);
+
+        expect(body.item.exporters[`otlp/${otlpOutputId}`]).to.eql({
+          endpoint: 'otlp.example.com:4317',
+          headers: { 'x-a': '1' },
+        });
+      });
+
+      describe('with authentication', () => {
+        const createOutput = async (output: Record<string, unknown>) => {
+          const { body } = await supertest
+            .post('/api/fleet/outputs')
+            .set('kbn-xsrf', 'xxxx')
+            .send({ name: `otlp-compile-auth-${uuidv4()}`, type: 'otlp', ...output })
+            .expect(200);
+          return { id: body.item.id as string, credentialId: body.item.secrets.auth.credential.id };
+        };
+
+        const createOtelPolicy = async (outputId: string) => {
+          const { body: policyBody } = await supertest
+            .post('/api/fleet/agent_policies')
+            .set('kbn-xsrf', 'xxxx')
+            .send({
+              name: `otlp-compile-auth-${uuidv4()}`,
+              namespace: 'default',
+              data_output_id: outputId,
+              monitoring_enabled: [],
+            })
+            .expect(200);
+          const policyId: string = policyBody.item.id;
+
+          await supertest
+            .post('/api/fleet/package_policies')
+            .set('kbn-xsrf', 'xxxx')
+            .send({
+              name: `otel-pkg-${uuidv4()}`,
+              namespace: 'default',
+              policy_id: policyId,
+              package: { name: DYNAMIC_PKG, version: DYNAMIC_PKG_VERSION },
+              inputs: {
+                'otlpreceiver-otelcol': {
+                  enabled: true,
+                  streams: { 'test_otel_dynamic.otlpreceiver': { enabled: true, vars: {} } },
+                },
+              },
+            })
+            .expect(200);
+          return policyId;
+        };
+
+        const getFullPolicy = async (policyId: string) => {
+          const { body } = await supertest
+            .get(`/api/fleet/agent_policies/${policyId}/full`)
+            .set('kbn-xsrf', 'xxxx')
+            .expect(200);
+          return body.item;
+        };
+
+        // the policy as Fleet published it for agents, rather than one compiled on request. An update
+        // deploys the policy from a Task Manager task: wait until the current revision is published.
+        const getPublishedPolicy = async (policyId: string) => {
+          const {
+            body: { item: agentPolicy },
+          } = await supertest.get(`/api/fleet/agent_policies/${policyId}`).expect(200);
+
+          let published: { revision_idx: number; data: Record<string, any> } | undefined;
+          await retry.tryForTime(30_000, async () => {
+            const res = await es.search<{ revision_idx: number; data: Record<string, any> }>({
+              index: '.fleet-policies',
+              query: { bool: { filter: [{ term: { policy_id: policyId } }] } },
+              sort: [{ revision_idx: { order: 'desc' } }],
+              size: 1,
+            });
+            published = res.hits.hits[0]?._source;
+            expect(published?.revision_idx).to.be(agentPolicy.revision);
+          });
+          return published!;
+        };
+
+        it('compiles the Authorization header with a reference to the credential secret', async () => {
+          const { id: outputId, credentialId } = await createOutput({
+            otlp_exporter: {
+              endpoint: 'otlp.example.com:4317',
+              protocol: 'grpc',
+              headers: { 'x-tenant': 'tenant-1' },
+            },
+            auth: { type: 'auth_header', scheme: 'bearer_token' },
+            secrets: { auth: { credential: 'test-credential-value' } },
+          });
+          const fullPolicy = await getFullPolicy(await createOtelPolicy(outputId));
+
+          expect(fullPolicy.exporters[`otlp/${outputId}`]).to.eql({
+            endpoint: 'otlp.example.com:4317',
+            headers: {
+              'x-tenant': 'tenant-1',
+              Authorization: `Bearer $co.elastic.secret{${credentialId}}`,
+            },
+          });
+          expect(fullPolicy.secret_references).to.eql([{ id: credentialId }]);
+          // the credential value never reaches the policy
+          expect(JSON.stringify(fullPolicy)).not.to.contain('test-credential-value');
+        });
+
+        it('compiles a custom header with a reference to the credential secret', async () => {
+          const { id: outputId, credentialId } = await createOutput({
+            otlp_exporter: { endpoint: 'https://otlp.example.com:4318', protocol: 'http/protobuf' },
+            auth: { type: 'custom_header', name: 'x-api-key' },
+            secrets: { auth: { credential: 'test-credential-value' } },
+          });
+          const fullPolicy = await getFullPolicy(await createOtelPolicy(outputId));
+
+          expect(fullPolicy.exporters[`otlphttp/${outputId}`].headers).to.eql({
+            'x-api-key': `$co.elastic.secret{${credentialId}}`,
+          });
+          expect(fullPolicy.secret_references).to.eql([{ id: credentialId }]);
+        });
+
+        it('references the new secret after the credential is replaced', async () => {
+          const { id: outputId, credentialId } = await createOutput({
+            otlp_exporter: { endpoint: 'otlp.example.com:4317', protocol: 'grpc' },
+            auth: { type: 'auth_header', scheme: 'api_key' },
+            secrets: { auth: { credential: 'test-credential-value' } },
+          });
+          const policyId = await createOtelPolicy(outputId);
+          const { revision_idx: previousRevision } = await getPublishedPolicy(policyId);
+
+          const { body: updateBody } = await supertest
+            .put(`/api/fleet/outputs/${outputId}`)
+            .set('kbn-xsrf', 'xxxx')
+            .send({ secrets: { auth: { credential: 'new-credential-value' } } })
+            .expect(200);
+          const newCredentialId: string = updateBody.item.secrets.auth.credential.id;
+          expect(newCredentialId).not.to.be(credentialId);
+
+          // the update publishes a new revision, so agents stop using the replaced secret
+          const { revision_idx: revision, data: publishedPolicy } = await getPublishedPolicy(
+            policyId
+          );
+          expect(revision).to.be.greaterThan(previousRevision);
+          expect(publishedPolicy.exporters[`otlp/${outputId}`].headers).to.eql({
+            Authorization: `ApiKey $co.elastic.secret{${newCredentialId}}`,
+          });
+          expect(publishedPolicy.secret_references).to.eql([{ id: newCredentialId }]);
+        });
+
+        it('compiles neither the header nor the reference once the authentication is removed', async () => {
+          const { id: outputId } = await createOutput({
+            otlp_exporter: { endpoint: 'otlp.example.com:4317', protocol: 'grpc' },
+            auth: { type: 'auth_header', scheme: 'api_key' },
+            secrets: { auth: { credential: 'test-credential-value' } },
+          });
+          const policyId = await createOtelPolicy(outputId);
+          const { revision_idx: previousRevision } = await getPublishedPolicy(policyId);
+
+          await supertest
+            .put(`/api/fleet/outputs/${outputId}`)
+            .set('kbn-xsrf', 'xxxx')
+            .send({ auth: null })
+            .expect(200);
+
+          const { revision_idx: revision, data: publishedPolicy } = await getPublishedPolicy(
+            policyId
+          );
+          expect(revision).to.be.greaterThan(previousRevision);
+          expect(publishedPolicy.exporters[`otlp/${outputId}`]).to.eql({
+            endpoint: 'otlp.example.com:4317',
+          });
+          expect(publishedPolicy.secret_references).to.eql([]);
+        });
+      });
+
+      it('does not include null HTTP-only fields in the compiled exporter after an HTTP→gRPC protocol switch', async () => {
+        // Create an HTTP output with several HTTP-exclusive fields set.
+        const { body: createBody } = await supertest
+          .post('/api/fleet/outputs')
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: `otlp-http-to-grpc-${uuidv4()}`,
+            type: 'otlp',
+            otlp_exporter: {
+              endpoint: 'https://otlp.example.com:4318',
+              protocol: 'http/protobuf',
+              encoding: 'proto',
+              traces_endpoint: '/v1/traces',
+              metrics_endpoint: '/v1/metrics',
+              logs_endpoint: '/v1/logs',
+              proxy_url: 'http://proxy.example.com:8080',
+            },
+          })
+          .expect(200);
+        const { id } = createBody.item;
+
+        // Switch to gRPC — removeOtlpHttpFields nulls out the HTTP-exclusive keys in the SO.
+        await supertest
+          .put(`/api/fleet/outputs/${id}`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            type: 'otlp',
+            otlp_exporter: { endpoint: 'otlp.example.com:4317', protocol: 'grpc' },
+          })
+          .expect(200);
+
+        // GET-back: the SO null cleanup fields ARE returned by the API (SO persistence behavior —
+        // null means "unset" at the application layer but is stored and returned as-is).
+        const { body: getBody } = await supertest
+          .get(`/api/fleet/outputs/${id}`)
+          .set('kbn-xsrf', 'xxxx')
+          .expect(200);
+        expect(getBody.item.otlp_exporter.encoding).to.be(null);
+        expect(getBody.item.otlp_exporter.traces_endpoint).to.be(null);
+        expect(getBody.item.otlp_exporter.proxy_url).to.be(null);
+
+        // Wire up an OTel-only policy so we can compile a full policy.
+        const { body: policyBody } = await supertest
+          .post('/api/fleet/agent_policies')
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: `http-to-grpc-policy-${uuidv4()}`,
+            namespace: 'default',
+            data_output_id: id,
+            monitoring_enabled: [],
+          })
+          .expect(200);
+        const policyId: string = policyBody.item.id;
+
+        await supertest
+          .post('/api/fleet/package_policies')
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: `otel-pkg-${uuidv4()}`,
+            namespace: 'default',
+            policy_id: policyId,
+            package: { name: DYNAMIC_PKG, version: DYNAMIC_PKG_VERSION },
+            inputs: {
+              'otlpreceiver-otelcol': {
+                enabled: true,
+                streams: { 'test_otel_dynamic.otlpreceiver': { enabled: true, vars: {} } },
+              },
+            },
+          })
+          .expect(200);
+
+        const { body } = await supertest
+          .get(`/api/fleet/agent_policies/${policyId}/full`)
+          .set('kbn-xsrf', 'xxxx')
+          .expect(200);
+
+        const exporter = body.item.exporters[`otlp/${id}`];
+        expect(exporter).to.be.ok();
+
+        // HTTP-only cleanup fields must not appear in the compiled gRPC exporter — the OTel Collector
+        // strict decoder rejects unknown keys, and null is never a valid exporter config value.
+        const exporterKeys = Object.keys(exporter);
+        expect(exporterKeys).to.not.contain('encoding');
+        expect(exporterKeys).to.not.contain('traces_endpoint');
+        expect(exporterKeys).to.not.contain('metrics_endpoint');
+        expect(exporterKeys).to.not.contain('logs_endpoint');
+        expect(exporterKeys).to.not.contain('proxy_url');
+        expect(exporter.endpoint).to.be('otlp.example.com:4317');
+      });
+
+      it('does not include null gRPC-only fields in the compiled exporter after a gRPC→HTTP protocol switch', async () => {
+        // Create a gRPC output with gRPC-exclusive fields set.
+        const { body: createBody } = await supertest
+          .post('/api/fleet/outputs')
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: `otlp-grpc-to-http-${uuidv4()}`,
+            type: 'otlp',
+            otlp_exporter: {
+              endpoint: 'otlp.example.com:4317',
+              protocol: 'grpc',
+              balancer_name: 'round_robin',
+              wait_for_ready: true,
+            },
+          })
+          .expect(200);
+        const { id } = createBody.item;
+
+        // Switch to HTTP — removeOtlpGrpcFields nulls out the gRPC-exclusive keys in the SO.
+        await supertest
+          .put(`/api/fleet/outputs/${id}`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            type: 'otlp',
+            otlp_exporter: { endpoint: 'https://otlp.example.com:4318', protocol: 'http/protobuf' },
+          })
+          .expect(200);
+
+        // GET-back: gRPC-exclusive fields come back as null from the SO.
+        const { body: getBody } = await supertest
+          .get(`/api/fleet/outputs/${id}`)
+          .set('kbn-xsrf', 'xxxx')
+          .expect(200);
+        expect(getBody.item.otlp_exporter.balancer_name).to.be(null);
+        expect(getBody.item.otlp_exporter.wait_for_ready).to.be(null);
+
+        // Wire up an OTel-only policy.
+        const { body: policyBody } = await supertest
+          .post('/api/fleet/agent_policies')
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: `grpc-to-http-policy-${uuidv4()}`,
+            namespace: 'default',
+            data_output_id: id,
+            monitoring_enabled: [],
+          })
+          .expect(200);
+        const policyId: string = policyBody.item.id;
+
+        await supertest
+          .post('/api/fleet/package_policies')
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: `otel-pkg-${uuidv4()}`,
+            namespace: 'default',
+            policy_id: policyId,
+            package: { name: DYNAMIC_PKG, version: DYNAMIC_PKG_VERSION },
+            inputs: {
+              'otlpreceiver-otelcol': {
+                enabled: true,
+                streams: { 'test_otel_dynamic.otlpreceiver': { enabled: true, vars: {} } },
+              },
+            },
+          })
+          .expect(200);
+
+        const { body } = await supertest
+          .get(`/api/fleet/agent_policies/${policyId}/full`)
+          .set('kbn-xsrf', 'xxxx')
+          .expect(200);
+
+        const exporter = body.item.exporters[`otlphttp/${id}`];
+        expect(exporter).to.be.ok();
+
+        // gRPC-only cleanup fields must not appear in the compiled HTTP exporter.
+        const exporterKeys = Object.keys(exporter);
+        expect(exporterKeys).to.not.contain('balancer_name');
+        expect(exporterKeys).to.not.contain('keepalive');
+        expect(exporterKeys).to.not.contain('wait_for_ready');
+        expect(exporter.endpoint).to.be('https://otlp.example.com:4318');
+      });
+
+      it('compiles an OTel-only policy with an HTTP/protobuf OTLP output using otlphttp exporter key', async () => {
+        const { body: outputBody } = await supertest
+          .post('/api/fleet/outputs')
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: `otlp-http-compile-${uuidv4()}`,
+            type: 'otlp',
+            otlp_exporter: { endpoint: 'https://otlp.example.com', protocol: 'http/protobuf' },
+          })
+          .expect(200);
+        const otlpOutputId: string = outputBody.item.id;
+
+        const { body: policyBody } = await supertest
+          .post('/api/fleet/agent_policies')
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: `otlp-http-compile-${uuidv4()}`,
+            namespace: 'default',
+            data_output_id: otlpOutputId,
+            monitoring_enabled: [],
+          })
+          .expect(200);
+        const policyId: string = policyBody.item.id;
+
+        await supertest
+          .post('/api/fleet/package_policies')
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: `otel-pkg-${uuidv4()}`,
+            namespace: 'default',
+            policy_id: policyId,
+            package: { name: DYNAMIC_PKG, version: DYNAMIC_PKG_VERSION },
+            inputs: {
+              'otlpreceiver-otelcol': {
+                enabled: true,
+                streams: { 'test_otel_dynamic.otlpreceiver': { enabled: true, vars: {} } },
+              },
+            },
+          })
+          .expect(200);
+
+        const { body } = await supertest
+          .get(`/api/fleet/agent_policies/${policyId}/full`)
+          .set('kbn-xsrf', 'xxxx')
+          .expect(200);
+
+        const fullPolicy = body.item;
+
+        // HTTP/protobuf uses otlphttp/<id> exporter key
+        expect(fullPolicy.exporters).to.have.property(`otlphttp/${otlpOutputId}`);
+        expect(fullPolicy.exporters).not.to.have.property(`otlp/${otlpOutputId}`);
       });
     });
   });

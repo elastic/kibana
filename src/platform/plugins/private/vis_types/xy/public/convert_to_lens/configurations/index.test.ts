@@ -93,6 +93,7 @@ describe('getConfiguration', () => {
       axisTitlesVisibilitySettings: { x: true, yLeft: true, yRight: true },
       curveType: 'LINEAR',
       fillOpacity: 0.5,
+      areaFill: 'solid',
       fittingFunction: undefined,
       gridlinesVisibilitySettings: { x: false, yLeft: false, yRight: true },
       labelsOrientation: { x: -0, yLeft: -0, yRight: -90 },
@@ -160,5 +161,17 @@ describe('getConfiguration', () => {
       yTitle: 'Sum of total_quantity',
       showCurrentTimeMarker: false,
     });
+  });
+
+  test('should not set an area fill when there are no area layers', () => {
+    const barSeries = series.map((serie) => ({
+      ...serie,
+      type: ChartType.Histogram,
+      mode: ChartMode.Normal,
+    }));
+
+    expect(getConfiguration(layers, barSeries, sampleAreaVis as any)).not.toHaveProperty(
+      'areaFill'
+    );
   });
 });

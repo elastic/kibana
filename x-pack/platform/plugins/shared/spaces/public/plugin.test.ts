@@ -196,7 +196,7 @@ describe('Spaces plugin', () => {
         cloud: cloudMock.createStart(),
       });
 
-      expect(coreStart.chrome.next.contextSwitcher.set).toHaveBeenCalled();
+      expect(coreStart.chrome.controls.contextSwitcher.set).toHaveBeenCalled();
     });
   });
 

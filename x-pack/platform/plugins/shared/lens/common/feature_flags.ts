@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { type Observable } from 'rxjs';
+import { firstValueFrom, type Observable } from 'rxjs';
 
 import type { FeatureFlagsStart as FeatureFlagsStartPublic } from '@kbn/core/public';
 import type { FeatureFlagsStart as FeatureFlagsStartServer } from '@kbn/core/server';
@@ -26,6 +26,10 @@ interface FeatureFlagBase {
 type BooleanFeatureFlag = FeatureFlagBase & {
   type: 'boolean';
   fallback: boolean;
+  /**
+   * Fallback used instead of `fallback` when Kibana runs in dev mode (`env.mode.dev`)
+   */
+  devFallback?: boolean;
 };
 type NumberFeatureFlag = FeatureFlagBase & {
   type: 'number';
@@ -46,6 +50,7 @@ export const lensFeatureFlags = {
     id: 'lens.apiFormat',
     type: 'boolean',
     fallback: false as boolean,
+    devFallback: true as boolean,
   },
   /**
    * Enables ES|QL mode for form-based datasources, allowing Lens to generate
@@ -70,9 +75,10 @@ export const lensFeatureFlags = {
 export type LensFeatureFlags = GetFlagTypes<typeof lensFeatureFlags>;
 
 export async function fetchLensFeatureFlags(
-  service: FeatureFlagsStartPublic | FeatureFlagsStartServer
+  service: FeatureFlagsStartPublic | FeatureFlagsStartServer,
+  isDev: boolean = false
 ): Promise<LensFeatureFlags> {
-  const getFeatureFlag = getFeatureFlagFn(service);
+  const getFeatureFlag = getFeatureFlagFn(service, isDev);
   const flags = (
     await Promise.all(
       Object.entries(lensFeatureFlags).map(async ([key, flag]) => {
@@ -88,22 +94,28 @@ export async function fetchLensFeatureFlags(
   return Object.fromEntries(flags) as LensFeatureFlags;
 }
 
-function getFeatureFlagFn(service: FeatureFlagsStartPublic | FeatureFlagsStartServer) {
+function getFeatureFlagFn(
+  service: FeatureFlagsStartPublic | FeatureFlagsStartServer,
+  isDev: boolean
+) {
   return async function getFeatureFlag(
     flag: LensFeatureFlag
   ): Promise<[boolean | number | string, Observable<boolean | number | string>]> {
     switch (flag.type) {
       case 'boolean': {
-        const value = await service.getBooleanValue(flag.id, flag.fallback);
-        return [value, service.getBooleanValue$(flag.id, value)];
+        const value$ = service.getBooleanValue$(
+          flag.id,
+          isDev ? flag.devFallback ?? flag.fallback : flag.fallback
+        );
+        return [await firstValueFrom(value$), value$];
       }
       case 'number': {
-        const value = await service.getNumberValue(flag.id, flag.fallback);
-        return [value, service.getNumberValue$(flag.id, value)];
+        const value$ = service.getNumberValue$(flag.id, flag.fallback);
+        return [await firstValueFrom(value$), value$];
       }
       case 'string': {
-        const value = await service.getStringValue(flag.id, flag.fallback);
-        return [value, service.getStringValue$(flag.id, value)];
+        const value$ = service.getStringValue$(flag.id, flag.fallback);
+        return [await firstValueFrom(value$), value$];
       }
       default: {
         throw new Error('unsupported flag type');
@@ -112,10 +124,10 @@ function getFeatureFlagFn(service: FeatureFlagsStartPublic | FeatureFlagsStartSe
   };
 }
 
-export function getLensFeatureFlagDefaults(): LensFeatureFlags {
+export function getLensFeatureFlagDefaults(isDev: boolean = false): LensFeatureFlags {
   return Object.entries(lensFeatureFlags).reduce((acc, [k, flag]) => {
     const key = k as keyof typeof lensFeatureFlags;
-    acc[key] = flag.fallback;
+    acc[key] = isDev && 'devFallback' in flag ? flag.devFallback : flag.fallback;
     return acc;
   }, {} as LensFeatureFlags);
 }

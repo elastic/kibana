@@ -303,6 +303,13 @@ describe('useMetricsAppHeaderMenu', () => {
     ]);
   });
 
+  it('omits the Settings overflow item on Settings', () => {
+    const { result } = renderMenuHook('/settings');
+
+    expect(findItem(result.current.menu.items, 'settings')).toBeUndefined();
+    expect(result.current.menu.primaryActionItem?.id).toBe('addData');
+  });
+
   it('sets Add data ebt.detail to host on Hosts', () => {
     const { result } = renderMenuHook('/hosts');
 

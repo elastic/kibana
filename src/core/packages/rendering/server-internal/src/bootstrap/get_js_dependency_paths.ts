@@ -9,25 +9,12 @@
 
 import UiSharedDepsNpm from '@kbn/ui-shared-deps-npm';
 import * as UiSharedDepsSrc from '@kbn/ui-shared-deps-src';
-import type { PluginInfo } from './get_plugin_bundle_paths';
-
-export const getJsDependencyPaths = (
-  regularBundlePath: string,
-  bundlePaths: Map<string, PluginInfo>
-) => {
-  return [
-    `${regularBundlePath}/kbn-ui-shared-deps-npm/${UiSharedDepsNpm.dllFilename}`,
-    `${regularBundlePath}/kbn-ui-shared-deps-src/${UiSharedDepsSrc.jsFilename}`,
-    `${regularBundlePath}/core/core.entry.js`,
-    ...[...bundlePaths.values()].map((plugin) => plugin.bundlePath),
-  ];
-};
 
 /**
- * Get JS dependency paths for RSPack unified compilation mode.
+ * Get JS dependency paths for the unified Rspack compilation.
  *
  * Load order:
- * 1. Webpack shared deps (kbn-ui-shared-deps) — npm externals (React, lodash, etc.)
+ * 1. Rspack shared deps (kbn-ui-shared-deps) — npm externals (React, lodash, etc.)
  * 2. Rspack async chunks (shared + plugin entries) — JSONP modules queue into
  *    `globalThis.rspackChunkkibana_bundle` (Rspack v2 default) before the runtime loads
  * 3. kibana.bundle.js (LAST) — Rspack runtime drains the JSONP queue, then
@@ -36,7 +23,6 @@ export const getJsDependencyPaths = (
  */
 export const getRspackDependencyPaths = (
   regularBundlePath: string,
-  _bundlePaths: Map<string, PluginInfo>,
   externalPluginPaths: string[] = [],
   chunkPaths: string[] = []
 ) => {

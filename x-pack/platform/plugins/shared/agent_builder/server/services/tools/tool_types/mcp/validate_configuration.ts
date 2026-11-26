@@ -10,7 +10,7 @@ import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plu
 import { createBadRequestError } from '@kbn/agent-builder-common';
 import { CONNECTOR_ID as MCP_CONNECTOR_TYPE_ID } from '@kbn/connector-schemas/mcp/constants';
 import type { McpToolConfig } from '@kbn/agent-builder-common/tools';
-import { listMcpTools } from './tool_type';
+import { getNotMcpConnectorMessage, listMcpTools } from './tool_type';
 
 /**
  * Validates that the connector exists and is an MCP connector.
@@ -34,9 +34,7 @@ export async function validateConnector({
   }
 
   if (connector.actionTypeId !== MCP_CONNECTOR_TYPE_ID) {
-    throw createBadRequestError(
-      `Connector '${connectorId}' is not an MCP connector. Expected type '${MCP_CONNECTOR_TYPE_ID}', got '${connector.actionTypeId}'`
-    );
+    throw createBadRequestError(getNotMcpConnectorMessage(connectorId, connector.actionTypeId));
   }
 }
 

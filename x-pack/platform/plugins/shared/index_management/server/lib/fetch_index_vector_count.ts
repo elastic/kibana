@@ -31,6 +31,11 @@ const shardVectorCount = (shard: IndicesStatsShardStats): number =>
  * Counts indexed dense + sparse vectors, counting each logical shard exactly once.
  * In stateless 'total' and 'primaries' can both return the wrong counts because they might not be loaded onto nodes.
  * Returns null when not all shards responded.
+ *
+ * Currently unused in production: Elasticsearch reports dense vector counts as 0 on
+ * stateless (https://github.com/elastic/elasticsearch/pull/158563), so
+ * `xpack.index_management.enableVectorCount` is off. Kept so the route can be
+ * re-enabled or reused for a replacement stat.
  */
 export const fetchIndexVectorCount = async (
   client: IScopedClusterClient,

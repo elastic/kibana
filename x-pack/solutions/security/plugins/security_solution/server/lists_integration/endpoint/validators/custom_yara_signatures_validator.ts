@@ -18,27 +18,23 @@ import { getYaraEngineVersion } from '../../../endpoint/lib/libyara';
 import {
   validateCustomYaraRule,
   validateYaraRuleContentByteLength,
+  YARA_ENGINE_INTERNAL_ERROR_MESSAGE,
 } from '../../../endpoint/lib/custom_yara_signatures';
 import { CUSTOM_YARA_SIGNATURE_FIELD_TYPE } from '../../../../common/endpoint/service/artifacts/constants';
 import { BaseValidator } from './base_validator';
 import { EndpointArtifactExceptionValidationError } from './errors';
 import type { ExceptionItemLikeOptions } from '../types';
 
-export {
-  MAX_YARA_RULE_CONTENT_BYTE_LENGTH,
-  MAXIMUM_RULE_IDENTIFIER_LENGTH,
-} from '../../../endpoint/lib/custom_yara_signatures';
+export { MAX_YARA_RULE_CONTENT_BYTE_LENGTH } from '../../../endpoint/lib/custom_yara_signatures';
 
 const YaraEntrySchema = schema.object({
   field: schema.literal(CUSTOM_YARA_SIGNATURE_FIELD_TYPE),
   operator: schema.literal('included'),
   type: schema.literal('match'),
-  value: schema.string({
+  value: schema.unboundedString({
+    reason:
+      'Size is enforced in bytes by validateYaraRuleContentByteLength; a character-based maxLength would return a misleading error message',
     minLength: 1,
-    // maxLength is only set for auditing purposes, the actual validation is done by validateYaraRuleContentByteLength.
-    // We set it to Infinity in order to not mix error messages between the two validatiors: this way we always show the
-    // correct error message mentioning `bytes` instead of `characters` coming from validateYaraRuleContentByteLength.
-    maxLength: Number.POSITIVE_INFINITY,
     validate: validateYaraRuleContentByteLength,
   }),
 });
@@ -209,10 +205,7 @@ export class CustomYaraSignaturesValidator extends BaseValidator {
       ({ errors, errorCount } = await validateCustomYaraRule(ruleText, item.osTypes));
     } catch (error) {
       this.logger.error(error);
-      throw new EndpointArtifactExceptionValidationError(
-        'Unable to validate YARA rule due to an internal error. Please try again later.',
-        500
-      );
+      throw new EndpointArtifactExceptionValidationError(YARA_ENGINE_INTERNAL_ERROR_MESSAGE, 500);
     }
 
     if (errors.length > 0) {

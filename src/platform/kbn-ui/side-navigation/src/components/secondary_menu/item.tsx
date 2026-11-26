@@ -9,22 +9,22 @@
 
 import React from 'react';
 import type { ReactNode } from 'react';
-import { EuiButton, EuiButtonEmpty, useEuiTheme } from '@elastic/eui';
+import {
+  EuiButtonEmpty,
+  EuiIcon,
+  EuiToolTip,
+  useEuiButtonColorCSS,
+  useEuiTheme,
+} from '@elastic/eui';
 import type { IconType } from '@elastic/eui';
 import { css } from '@emotion/react';
 
-import { SIDE_PANEL_CONTENT_GAP } from '@kbn/ui-chrome-layout';
 import type { SecondaryMenuItem } from '../../../types';
 import { BetaBadge } from '../beta_badge';
 import { useHighContrastModeStyles } from '../../hooks/use_high_contrast_mode_styles';
 import { useScrollToActive } from '../../hooks/use_scroll_to_active';
-import {
-  BADGE_SPACING_OFFSET,
-  ITEM_HORIZONTAL_SPACING_OFFSET,
-  NAVIGATION_SELECTOR_PREFIX,
-  SUB_MENU_ICON_SPACING_OFFSET,
-} from '../../constants';
-import { SIDE_PANEL_WIDTH } from '../../hooks/use_layout_width';
+import { useLabelMarquee } from '../../hooks/use_label_marquee';
+import { NAVIGATION_SELECTOR_PREFIX, TOOLTIP_OFFSET } from '../../constants';
 
 export interface SecondaryMenuItemProps extends Omit<SecondaryMenuItem, 'href'> {
   children: ReactNode;
@@ -39,8 +39,8 @@ export interface SecondaryMenuItemProps extends Omit<SecondaryMenuItem, 'href'> 
 }
 
 /**
- * `EuiButton` and `EuiButtonEmpty` are used for consistency with the component library.
- * The only style overrides are making the button labels left-aligned.
+ * `EuiButtonEmpty` is used for consistency with the component library. When highlighted, it
+ * takes `EuiButton`'s colors instead of switching components, so the item does not remount.
  */
 export const SecondaryMenuItemComponent = ({
   badgeType,
@@ -57,6 +57,7 @@ export const SecondaryMenuItemComponent = ({
   ...props
 }: SecondaryMenuItemProps): JSX.Element => {
   const { euiTheme } = useEuiTheme();
+  const highlightedColorStyles = useEuiButtonColorCSS({ display: 'base' }).primary;
   const highContrastModeStyles = useHighContrastModeStyles();
   const activeItemRef = useScrollToActive<HTMLLIElement>(isCurrent);
   const resolvedTestSubjPrefix = testSubjPrefix ?? `${NAVIGATION_SELECTOR_PREFIX}-secondaryItem`;
@@ -67,6 +68,7 @@ export const SecondaryMenuItemComponent = ({
     iconType: isExternal ? 'external' : iconType,
     ...(isExternal && { target: '_blank' }),
   };
+  const submenuIconClassName = `${NAVIGATION_SELECTOR_PREFIX}-submenuIcon`;
 
   const buttonStyles = css`
     font-weight: ${isHighlighted ? euiTheme.font.weight.semiBold : euiTheme.font.weight.regular};
@@ -78,7 +80,7 @@ export const SecondaryMenuItemComponent = ({
       justify-content: ${iconSide === 'left' ? 'flex-start' : 'space-between'};
     }
 
-    svg:not(.euiBetaBadge__icon) {
+    svg:not(.euiBetaBadge__icon):not(.${submenuIconClassName}) {
       color: ${iconSide === 'right' ? euiTheme.colors.textDisabled : 'inherit'};
     }
 
@@ -91,26 +93,15 @@ export const SecondaryMenuItemComponent = ({
   const labelAndBadgeStyles = css`
     align-items: center;
     display: flex;
+    flex: 1;
     gap: ${euiTheme.size.xs};
+    min-width: 0;
   `;
 
-  const getMaxWidth = () => {
-    const isInSidePanel = testSubjPrefix?.includes('sidePanel');
-    let maxWidth = SIDE_PANEL_WIDTH - ITEM_HORIZONTAL_SPACING_OFFSET;
-    // Secondary item label inside side panel (narrower)
-    if (isInSidePanel) maxWidth -= SIDE_PANEL_CONTENT_GAP;
-    // Secondary item label + badge
-    if (isNew || badgeType) maxWidth -= BADGE_SPACING_OFFSET;
-    // Secondary item label + right arrow (More menu)
-    if (hasSubmenu) maxWidth -= SUB_MENU_ICON_SPACING_OFFSET;
-    return maxWidth;
-  };
-
-  const labelTextStyles = css`
-    white-space: nowrap;
-    text-overflow: ellipsis;
-    overflow: hidden;
-    max-width: ${getMaxWidth()}px;
+  const submenuIconStyles = css`
+    flex-shrink: 0;
+    margin-left: auto;
+    opacity: 0.6;
   `;
 
   /* Always show non-new badges. Show new ones if isNew check allows it
@@ -120,41 +111,54 @@ export const SecondaryMenuItemComponent = ({
     if (badgeType && badgeType !== 'new') return <BetaBadge type={badgeType} />;
     if (isNew) return <BetaBadge type="new" />;
   };
+  const badge = getBadge();
+
+  const {
+    isOverflowing: isLabelOverflowing,
+    labelProps,
+    trackProps,
+  } = useLabelMarquee({
+    gutter: euiTheme.size.s,
+    isLabelFirst: !iconType,
+    isLabelLast: !badge && !hasSubmenu && !isExternal,
+  });
 
   const content = (
     <div css={labelAndBadgeStyles}>
-      <span css={labelTextStyles} title={typeof children === 'string' ? children : undefined}>
-        {children}
+      <span {...labelProps}>
+        <span {...trackProps}>{children}</span>
       </span>
-      {getBadge()}
+      {badge}
+      {hasSubmenu && (
+        <EuiIcon
+          aria-hidden={true}
+          className={submenuIconClassName}
+          color={euiTheme.colors.textDisabled}
+          css={submenuIconStyles}
+          size="m"
+          type="chevronSingleRight"
+        />
+      )}
     </div>
   );
 
   return (
     <li ref={activeItemRef} role="none">
-      {isHighlighted ? (
-        <EuiButton
-          id={id}
-          aria-current={isCurrent ? 'page' : undefined}
-          css={buttonStyles}
-          data-highlighted="true"
-          data-test-subj={`${resolvedTestSubjPrefix}-${id}`}
-          fullWidth
-          href={hasSubmenu ? undefined : href}
-          size="s"
-          textProps={false}
-          {...iconProps}
-          {...props}
-        >
-          {content}
-        </EuiButton>
-      ) : (
+      {/* Always rendered so the measured label never remounts; empty content never shows. */}
+      <EuiToolTip
+        content={isLabelOverflowing ? children : undefined}
+        disableScreenReaderOutput
+        display="block"
+        offset={TOOLTIP_OFFSET}
+        position="right"
+        repositionOnScroll
+      >
         <EuiButtonEmpty
           id={id}
           aria-current={isCurrent ? 'page' : undefined}
-          color="text"
-          css={buttonStyles}
-          data-highlighted="false"
+          color={isHighlighted ? 'primary' : 'text'}
+          css={[isHighlighted && highlightedColorStyles, buttonStyles]}
+          data-highlighted={isHighlighted ? 'true' : 'false'}
           data-test-subj={`${resolvedTestSubjPrefix}-${id}`}
           href={hasSubmenu ? undefined : href}
           size="s"
@@ -164,7 +168,7 @@ export const SecondaryMenuItemComponent = ({
         >
           {content}
         </EuiButtonEmpty>
-      )}
+      </EuiToolTip>
     </li>
   );
 };

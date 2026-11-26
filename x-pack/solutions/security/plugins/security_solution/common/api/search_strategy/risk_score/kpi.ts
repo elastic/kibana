@@ -5,16 +5,18 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 import { requestBasicOptionsSchema } from '../model/request_basic_options';
 import { riskScoreEntity, riskScoreEntityArray } from './model/risk_score_entity';
 import { EntityRiskQueries } from '../model/factory_query_type';
 
-export const riskScoreKpiRequestOptionsSchema = requestBasicOptionsSchema.extend({
-  entity: z.union([riskScoreEntity, riskScoreEntityArray]),
-  factoryQueryType: z.literal(EntityRiskQueries.kpi),
-});
+export const riskScoreKpiRequestOptionsSchema = lazySchema(() =>
+  requestBasicOptionsSchema.extend({
+    entity: z.union([riskScoreEntity, riskScoreEntityArray]),
+    factoryQueryType: z.literal(EntityRiskQueries.kpi),
+  })
+);
 
 export type RiskScoreKpiRequestOptionsInput = z.input<typeof riskScoreKpiRequestOptionsSchema>;
 

@@ -61,13 +61,16 @@ export interface TimeRangeBoundsOption extends TimeRangeBounds {
   isEditable?: boolean;
 }
 
+/** Zero-based weekday index: 0 for Sunday through 6 for Saturday. */
+export type FirstDayOfWeek = 0 | 1 | 2 | 3 | 4 | 5 | 6;
+
 /** Calendar-specific configuration options. */
 export interface CalendarOptions {
   /**
-   * First day of the week: 0 for Sunday, 1 for Monday.
+   * First day of the week: 0 for Sunday through 6 for Saturday.
    * @default 0
    */
-  firstDayOfWeek?: 0 | 1;
+  firstDayOfWeek?: FirstDayOfWeek;
 }
 
 export interface TimeRangeTransformOptions {
@@ -92,7 +95,8 @@ export interface TimeRangeTransformOptions {
    */
   roundRelativeTime?: boolean;
   /**
-   * Sub-minute precision applied when formatting absolute timestamps.
+   * Sub-minute precision applied when formatting absolute timestamps for display.
+   * Never affects the resolved range bounds.
    * @default 's'
    */
   timePrecision?: TimePrecision;
@@ -159,6 +163,9 @@ export interface DateRangePickerSettings {
    *
    * When set, a toggle is shown in the Settings panel. When omitted the
    * toggle is hidden and seconds are shown by default.
+   *
+   * Display only: the resolved range bounds always keep full millisecond
+   * precision, so selecting a day in the calendar still ends at `23:59:59.999`.
    */
   timePrecision?: TimePrecision;
   /**

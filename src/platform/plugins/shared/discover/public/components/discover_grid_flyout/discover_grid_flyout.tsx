@@ -13,7 +13,7 @@ import type { AggregateQuery, Filter, Query } from '@kbn/es-query';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
-import type { DataTableColumnsMeta } from '@kbn/unified-data-table';
+import type { DataSource } from '@kbn/data-source';
 import type { DocViewerProps, DocViewsRegistry } from '@kbn/unified-doc-viewer';
 import { DiscoverFlyouts, dismissAllFlyoutsExceptFor } from '@kbn/discover-utils';
 import type { UnifiedDocViewerFlyoutProps } from '@kbn/unified-doc-viewer-plugin/public';
@@ -32,16 +32,19 @@ export interface DiscoverGridFlyoutProps
     | 'initialDocViewerState'
     | 'onInitialDocViewerStateChange'
     | 'onUpdateSelectedTabId'
+    | 'initialShareableState'
+    | 'onShareableStateChange'
     | 'requestState'
     | 'requestStateMeta'
     | 'notice'
     | 'flyoutMenuTrailingActions'
+    | 'flyoutType'
   > {
   savedSearchId?: string;
   filters?: Filter[];
   query?: Query | AggregateQuery;
   columns: string[];
-  columnsMeta?: DataTableColumnsMeta;
+  dataSource?: DataSource;
   hit?: DataTableRecord;
   hits?: DataTableRecord[];
   dataView: DataView;
@@ -69,7 +72,7 @@ export function DiscoverGridFlyout({
   hits,
   dataView,
   columns,
-  columnsMeta,
+  dataSource,
   savedSearchId,
   filters,
   query,
@@ -83,11 +86,14 @@ export function DiscoverGridFlyout({
   initialDocViewerState,
   onInitialDocViewerStateChange,
   onUpdateSelectedTabId,
+  initialShareableState,
+  onShareableStateChange,
   hideFilteringOnComputedColumns,
   requestState,
   requestStateMeta,
   notice,
   flyoutMenuTrailingActions,
+  flyoutType,
 }: DiscoverGridFlyoutProps) {
   const services = useDiscoverServices();
   const isEsqlQuery = isOfAggregateQueryType(query);
@@ -133,6 +139,7 @@ export function DiscoverGridFlyout({
       }
       flyoutMenuTrailingActions={flyoutMenuTrailingActions}
       flyoutWidthLocalStorageKey={FLYOUT_WIDTH_KEY}
+      flyoutType={flyoutType}
       services={services}
       docViewsRegistry={docViewer?.docViewsRegistry}
       renderCustomHeader={docViewer?.renderHeader}
@@ -145,7 +152,7 @@ export function DiscoverGridFlyout({
       hits={hits}
       dataView={dataView}
       columns={columns}
-      columnsMeta={columnsMeta}
+      dataSource={dataSource}
       onAddColumn={onAddColumn}
       onRemoveColumn={onRemoveColumn}
       onClose={onClose}
@@ -156,6 +163,8 @@ export function DiscoverGridFlyout({
       initialDocViewerState={initialDocViewerState}
       onInitialDocViewerStateChange={onInitialDocViewerStateChange}
       onUpdateSelectedTabId={onUpdateSelectedTabId}
+      initialShareableState={initialShareableState}
+      onShareableStateChange={onShareableStateChange}
       hideFilteringOnComputedColumns={hideFilteringOnComputedColumns}
     />
   );

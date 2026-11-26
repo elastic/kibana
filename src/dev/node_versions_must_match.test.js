@@ -13,17 +13,8 @@ import { promisify } from 'util';
 const readFile = promisify(fs.readFile);
 
 describe('All configs should use a single version of Node', () => {
-  it('should compare .node-version and .nvmrc', async () => {
-    const [nodeVersion, nvmrc] = await Promise.all([
-      readFile('./.node-version', { encoding: 'utf-8' }),
-      readFile('./.nvmrc', { encoding: 'utf-8' }),
-    ]);
-
-    expect(nodeVersion.trim()).toBe(nvmrc.trim());
-  });
-
-  it('should compare .node-version and engines.node from package.json', async () => {
-    const nodeVersion = await readFile('./.node-version', {
+  it('should compare .nvmrc and engines.node from package.json', async () => {
+    const nodeVersion = await readFile('./.nvmrc', {
       encoding: 'utf-8',
     });
     expect(nodeVersion.trim()).toBe(engines.node);

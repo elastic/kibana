@@ -19,11 +19,13 @@ import type { UserMessageGetterProps } from './get_application_user_messages';
 import {
   filterAndSortUserMessages,
   getApplicationUserMessages,
+  getLoadErrorMessage,
   handleMessageOverwriteFromConsumer,
 } from './get_application_user_messages';
 import { cleanup, render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
-import { FIELD_NOT_FOUND, FIELD_WRONG_TYPE } from '../user_messages_ids';
+import { LENS_ERROR_CODES, LENS_ERROR_TYPE } from '@kbn/lens-embeddable-utils';
+import { EDITOR_LOAD_ERROR, FIELD_NOT_FOUND, FIELD_WRONG_TYPE } from '../user_messages_ids';
 import { getLongMessage } from '../user_messages_utils';
 
 jest.mock('@kbn/shared-ux-link-redirect-app', () => {
@@ -32,6 +34,42 @@ jest.mock('@kbn/shared-ux-link-redirect-app', () => {
     ...original,
     RedirectAppLinks: () => <a>RedirectAppLinks</a>,
   };
+});
+
+describe('getLoadErrorMessage', () => {
+  const httpError = (code: string) =>
+    Object.assign(new Error('Internal Server Error'), {
+      body: { attributes: { type: LENS_ERROR_TYPE, code } },
+    });
+
+  it.each(Object.values(LENS_ERROR_CODES))(
+    'replaces the raw error message with a translated one for "%s"',
+    (code) => {
+      const message = getLoadErrorMessage(httpError(code));
+      expect(message).toEqual(
+        expect.objectContaining({
+          uniqueId: EDITOR_LOAD_ERROR,
+          severity: 'error',
+          displayLocations: [{ id: 'visualizationOnEmbeddable' }],
+        })
+      );
+      expect(message.longMessage).toEqual(expect.any(String));
+      expect(message.longMessage).not.toBe('Internal Server Error');
+    }
+  );
+
+  it('uses the datasource message for a missing datasource', () => {
+    expect(getLoadErrorMessage(httpError(LENS_ERROR_CODES.DATASOURCE_NOT_FOUND)).longMessage).toBe(
+      'Could not find datasource for the visualization'
+    );
+  });
+
+  it('falls back to the error message for unknown or missing codes', () => {
+    expect(getLoadErrorMessage(httpError('not_a_lens_code')).longMessage).toBe(
+      'Internal Server Error'
+    );
+    expect(getLoadErrorMessage(new Error('boom')).longMessage).toBe('boom');
+  });
 });
 
 describe('application-level user messages', () => {

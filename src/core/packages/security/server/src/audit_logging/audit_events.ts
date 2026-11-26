@@ -31,6 +31,26 @@ export interface AuditKibana {
     name?: string;
   };
   /**
+   * Workload a service account is bound to, or is executing for, as part of this event.
+   */
+  workload?: {
+    plugin_id: string;
+    type: string;
+    id: string;
+    /** The run of the workload, when the plugin executing it supplied one. */
+    execution_id?: string;
+  };
+  /**
+   * What issued a sandbox RPC, as part of this event.
+   */
+  sandbox_caller?: {
+    plugin_id: string;
+    type: string;
+    id: string;
+    /** The run of the caller, when it has one, such as a tool call or a workflow run. */
+    execution_id?: string;
+  };
+  /**
    * Name of authentication provider associated with a login event.
    */
   authentication_provider?: string;

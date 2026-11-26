@@ -14,10 +14,13 @@ import {
   parseStatsAggregationResponse,
   buildEvaluatorModelsAggregation,
   parseEvaluatorModelsAggregation,
+  buildExperimentEvaluatorsAggregation,
+  parseExperimentEvaluatorsAggregation,
   buildModelDisplayId,
   GetEvaluationExperimentRequestParams,
   GetEvaluationExperimentRequestQuery,
 } from '@kbn/evals-common';
+import type { Model, ScoreMetadata } from '@kbn/evals-common';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { EVALS_API_PRIVILEGES } from '../../../common';
@@ -25,26 +28,8 @@ import type { RouteDependencies } from '../register_routes';
 
 interface EvalDocSource {
   experiment_name?: string;
-  task?: { model?: { id?: string; family?: string; provider?: string } };
-  metadata?: {
-    execution_id?: string;
-    suite_id?: string;
-    total_repetitions?: number;
-    git?: {
-      branch?: string | null;
-      commit_sha?: string | null;
-    };
-    ci?: {
-      build_url?: string;
-      pull_request?: string;
-      pipeline_slug?: string;
-      build_id?: string;
-      job_id?: string;
-      branch?: string;
-      commit?: string;
-    };
-  };
-  '@timestamp'?: string;
+  task?: { model?: Partial<Model> };
+  metadata?: Partial<ScoreMetadata>;
 }
 
 export const registerGetExperimentRoute = ({ router, logger, getSpaceId }: RouteDependencies) => {
@@ -102,11 +87,20 @@ export const registerGetExperimentRoute = ({ router, logger, getSpaceId }: Route
             aggs: {
               ...buildStatsAggregation(),
               evaluator_models: buildEvaluatorModelsAggregation(),
+              evaluators: buildExperimentEvaluatorsAggregation(),
+              first_score: { min: { field: '@timestamp' } },
+              last_score: { max: { field: '@timestamp' } },
             },
           });
 
-          const aggregations = aggResponse.aggregations as Record<string, unknown> | undefined;
+          const aggregations = aggResponse.aggregations as
+            | (Record<string, unknown> & {
+                first_score?: { value_as_string?: string };
+                last_score?: { value_as_string?: string };
+              })
+            | undefined;
           const stats = parseStatsAggregationResponse(aggregations);
+          const evaluators = parseExperimentEvaluatorsAggregation(aggregations);
           // Every distinct judge, most scores first; empty when only code evaluators ran. Derived
           // from the same aggregation as the listing so both agree on the predominant judge,
           // unlike `firstDoc`, which reflects whichever judge the unsorted search happens to hit.
@@ -127,14 +121,17 @@ export const registerGetExperimentRoute = ({ router, logger, getSpaceId }: Route
               experiment_name: firstDoc.experiment_name ?? null,
               execution_id: firstDoc.metadata?.execution_id,
               suite_id: firstDoc.metadata?.suite_id ?? null,
-              timestamp: firstDoc['@timestamp'],
               task_model: toModelDisplay(firstDoc.task?.model),
               evaluator_model: evaluatorModels[0],
               evaluator_models: evaluatorModels,
               git_branch: firstDoc.metadata?.git?.branch ?? null,
               git_commit_sha: firstDoc.metadata?.git?.commit_sha ?? null,
               ci: firstDoc.metadata?.ci,
+              hostname: firstDoc.metadata?.hostname,
+              first_score_at: aggregations?.first_score?.value_as_string,
+              last_score_at: aggregations?.last_score?.value_as_string,
               total_repetitions: firstDoc.metadata?.total_repetitions ?? 1,
+              evaluators,
               stats,
             },
           });

@@ -6,11 +6,13 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
+import { validate as isUuid } from 'uuid';
 import type { FeedbackChipId } from '@kbn/agent-builder-common';
 import {
   CONVERSATION_ID_MAX_LENGTH,
   CONVERSATION_TITLE_MAX_LENGTH,
+  STEER_MESSAGE_MAX_LENGTH,
+  agentIdMaxLength,
 } from '@kbn/agent-builder-common';
 import type { RouteDependencies } from '../types';
 import { getHandlerWrapper } from '../wrap_handler';
@@ -18,11 +20,19 @@ import type {
   MarkPinnedConversationResponse,
   MarkReadConversationResponse,
   RenameConversationResponse,
+  SearchConversationsResponse,
+  SteerConversationResponse,
 } from '../../../common/http_api/conversations';
+import { currentUserActor } from '../../services/conversation/client/rounds_to_events';
 import type { ApplyTemplateResponse } from '../../../common/http_api/apply_template';
 import type { PatchConversationMetadataResponse } from '../../../common/http_api/patch_metadata';
 import { apiPrivileges } from '../../../common/features';
-import { internalApiPath } from '../../../common/constants';
+import {
+  internalApiPath,
+  MAX_CONVERSATION_SEARCH_PER_PAGE,
+  MAX_RESULT_WINDOW,
+  CONVERSATION_SEARCH_QUERY_MAX_LENGTH,
+} from '../../../common/constants';
 
 export function registerInternalConversationRoutes({
   router,
@@ -56,7 +66,7 @@ export function registerInternalConversationRoutes({
       const client = await conversationsService.getScopedClient({ request });
       const updatedConversation = await client.update(
         { id: conversationId, title },
-        { access: 'rename', retryOnConflict: true }
+        { access: 'rename', retryOnConflict: true, source: 'http_api' }
       );
 
       return response.ok<RenameConversationResponse>({
@@ -84,21 +94,20 @@ export function registerInternalConversationRoutes({
         authz: { requiredPrivileges: [apiPrivileges.readAgentBuilder] },
       },
     },
-    wrapHandler(
-      async (ctx, request, response) => {
-        const { conversations: conversationsService } = getInternalServices();
-        const { conversation_id: conversationId } = request.params;
-        const { template_id: templateId } = request.body;
+    wrapHandler(async (ctx, request, response) => {
+      const { conversations: conversationsService } = getInternalServices();
+      const { conversation_id: conversationId } = request.params;
+      const { template_id: templateId } = request.body;
 
-        const client = await conversationsService.getScopedClient({ request });
-        const updatedConversation = await client.applyTemplate(conversationId, templateId);
+      const client = await conversationsService.getScopedClient({ request });
+      const updatedConversation = await client.applyTemplate(conversationId, templateId, {
+        source: 'http_api',
+      });
 
-        return response.ok<ApplyTemplateResponse>({
-          body: { id: updatedConversation.id },
-        });
-      },
-      { featureFlag: AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID }
-    )
+      return response.ok<ApplyTemplateResponse>({
+        body: { id: updatedConversation.id },
+      });
+    })
   );
 
   router.patch(
@@ -132,27 +141,25 @@ export function registerInternalConversationRoutes({
         authz: { requiredPrivileges: [apiPrivileges.readAgentBuilder] },
       },
     },
-    wrapHandler(
-      async (ctx, request, response) => {
-        const { conversations: conversationsService } = getInternalServices();
-        const { conversation_id: conversationId } = request.params;
-        const { metadata } = request.body;
+    wrapHandler(async (ctx, request, response) => {
+      const { conversations: conversationsService } = getInternalServices();
+      const { conversation_id: conversationId } = request.params;
+      const { metadata } = request.body;
 
-        const client = await conversationsService.getScopedClient({ request });
-        const { conversation: updatedConversation } = await client.patchMetadata(
-          conversationId,
-          metadata
-        );
+      const client = await conversationsService.getScopedClient({ request });
+      const { conversation: updatedConversation } = await client.patchMetadata(
+        conversationId,
+        metadata,
+        { source: 'http_api' }
+      );
 
-        return response.ok<PatchConversationMetadataResponse>({
-          body: {
-            id: updatedConversation.id,
-            metadata: updatedConversation.metadata ?? {},
-          },
-        });
-      },
-      { featureFlag: AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID }
-    )
+      return response.ok<PatchConversationMetadataResponse>({
+        body: {
+          id: updatedConversation.id,
+          metadata: updatedConversation.metadata ?? {},
+        },
+      });
+    })
   );
 
   router.post(
@@ -191,11 +198,11 @@ export function registerInternalConversationRoutes({
   // submit round feedback
   router.post(
     {
-      path: `${internalApiPath}/conversations/{conversation_id}/rounds/{round_id}/_feedback`,
+      path: `${internalApiPath}/conversations/{conversation_id}/executions/{execution_id}/_feedback`,
       validate: {
         params: schema.object({
           conversation_id: schema.string({ maxLength: 256 }),
-          round_id: schema.string({ maxLength: 256 }),
+          execution_id: schema.string({ maxLength: 256 }),
         }),
         body: schema.object({
           vote: schema.nullable(schema.oneOf([schema.literal('up'), schema.literal('down')])),
@@ -222,11 +229,11 @@ export function registerInternalConversationRoutes({
     },
     wrapHandler(async (ctx, request, response) => {
       const { conversations: conversationsService } = getInternalServices();
-      const { conversation_id: conversationId, round_id: roundId } = request.params;
+      const { conversation_id: conversationId, execution_id: executionId } = request.params;
       const { vote, chips, comment } = request.body;
 
       const client = await conversationsService.getScopedClient({ request });
-      await client.updateRoundFeedback(conversationId, roundId, {
+      await client.updateRoundFeedback(conversationId, executionId, {
         vote,
         chips: chips as FeedbackChipId[] | undefined,
         comment,
@@ -265,6 +272,103 @@ export function registerInternalConversationRoutes({
           id: updatedConversation.id,
           pinned: updatedConversation.pinned ?? false,
         },
+      });
+    })
+  );
+
+  router.get(
+    {
+      path: `${internalApiPath}/conversations/_search`,
+      validate: {
+        query: schema.object(
+          {
+            query: schema.string({
+              minLength: 1,
+              maxLength: CONVERSATION_SEARCH_QUERY_MAX_LENGTH,
+              validate: (value) =>
+                value.trim().length === 0 ? 'query must not be blank' : undefined,
+            }),
+            agent_id: schema.maybe(
+              schema.string({
+                maxLength: agentIdMaxLength,
+              })
+            ),
+            page: schema.number({ defaultValue: 1, min: 1 }),
+            per_page: schema.number({
+              defaultValue: MAX_CONVERSATION_SEARCH_PER_PAGE,
+              min: 1,
+              max: MAX_CONVERSATION_SEARCH_PER_PAGE,
+            }),
+          },
+          {
+            validate: ({ page, per_page: perPage }) => {
+              if (page * perPage > MAX_RESULT_WINDOW) {
+                return `page * per_page must not exceed ${MAX_RESULT_WINDOW}; conversations beyond that are not reachable through this API`;
+              }
+            },
+          }
+        ),
+      },
+      options: { access: 'internal' },
+      security: {
+        authz: { requiredPrivileges: [apiPrivileges.readAgentBuilder] },
+      },
+    },
+    wrapHandler(async (ctx, request, response) => {
+      const { conversations: conversationsService } = getInternalServices();
+      const { query, agent_id: agentId, page, per_page: perPage } = request.query;
+
+      const client = await conversationsService.getScopedClient({ request });
+      const { results, total } = await client.search({ query, agentId, page, perPage });
+
+      return response.ok<SearchConversationsResponse>({
+        body: {
+          pagination: { total, page, per_page: perPage },
+          results,
+        },
+      });
+    })
+  );
+
+  router.post(
+    {
+      path: `${internalApiPath}/conversations/{conversation_id}/_steer`,
+      validate: {
+        params: schema.object({
+          conversation_id: schema.string({ maxLength: CONVERSATION_ID_MAX_LENGTH }),
+        }),
+        body: schema.object({
+          message: schema.string({ minLength: 1, maxLength: STEER_MESSAGE_MAX_LENGTH }),
+          // Client-generated idempotency key.
+          event_id: schema.string({
+            minLength: 36,
+            maxLength: 36,
+            validate: (value) => (isUuid(value) ? undefined : 'must be a UUID'),
+          }),
+        }),
+      },
+      options: { access: 'internal' },
+      security: {
+        authz: { requiredPrivileges: [apiPrivileges.readAgentBuilder] },
+      },
+    },
+    wrapHandler(async (ctx, request, response) => {
+      const { conversations: conversationsService, execution: executionService } =
+        getInternalServices();
+      const { conversation_id: conversationId } = request.params;
+      const { message, event_id: eventId } = request.body;
+
+      const client = await conversationsService.getScopedClient({ request });
+      // A steer is admitted for whoever could start the run: a member the agent refuses, or one
+      // without the invoke privilege on a bound agent, is turned away as converse turns them away.
+      const { agent_id: agentId } = await client.get(conversationId);
+      await executionService.assertCanRunAgent({ request, agentId });
+      const { event, alreadyStored } = await client.appendSteer(
+        { id: conversationId, message, eventId, actor: currentUserActor(client.getUser()) },
+        { source: 'http_api' }
+      );
+      return response.ok<SteerConversationResponse>({
+        body: { event, ...(alreadyStored ? { already_stored: true } : {}) },
       });
     })
   );

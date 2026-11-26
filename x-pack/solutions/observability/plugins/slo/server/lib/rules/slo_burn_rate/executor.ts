@@ -13,6 +13,7 @@ import type { ObservabilitySloAlert } from '@kbn/alerts-as-data-utils';
 import { addTransactionLabels, withSpan } from '@kbn/apm-utils';
 import { addSpaceIdToPath } from '@kbn/core-spaces-common';
 import type { IBasePath } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { PROJECT_ROUTING_ORIGIN } from '@kbn/cps-server-utils';
 import { i18n } from '@kbn/i18n';
 import { flattenObject } from '@kbn/object-utils';
@@ -43,12 +44,14 @@ import {
   SUPPRESSED_PRIORITY_ACTION,
 } from '../../../../common/constants';
 import type { Duration, SLODefinition } from '../../../domain/models';
+import { SLONotFound } from '../../../errors';
 import { DefaultSLODefinitionRepository } from '../../../services';
 import type { EsSummaryDocument } from '../../../services/summary_transform_generator/helpers/create_temp_summary';
 import { getSloApmLabels } from '../../../services/utils';
 import { BURN_RATE_EXECUTOR_SPAN_NAMES } from './constants';
 import { evaluate } from './lib/evaluate';
 import { evaluateDependencies } from './lib/evaluate_dependencies';
+import { getAuthenticationFailure } from './lib/get_authentication_failure';
 import { shouldSuppressInstanceId } from './lib/should_suppress_instance_id';
 import { getSloSummary } from './lib/summary_repository';
 import type {
@@ -102,18 +105,34 @@ export const getRuleExecutor = (basePath: IBasePath, isCpsEnabled: boolean = fal
         () => sloRepository.findById(params.sloId)
       );
     } catch (err) {
-      // `cause` is what lets the alerting framework act on *why* the lookup failed. This fetch
-      // authenticates with the rule's API key, so a missing SLO is only one possible cause: when UIAM
-      // no longer knows that key, Elasticsearch answers 401 with an `authentication_error_code`, and
-      // the framework's healer re-grants the key off that structured error. Interpolating only
-      // `err.message` leaves the code in prose that nothing can match, stranding the rule on a
-      // credential no scheduled run can repair.
-      throw createTaskRunError(
-        new Error(
-          `Rule "${options.rule.name}" ${options.rule.id} is referencing an SLO which cannot be found: "${params.sloId}": ${err.message}`,
-          { cause: err }
-        ),
-        TaskErrorSource.USER
+      // Classify the lookup failure (missing SLO, rejected rule API key, or anything else) and keep
+      // the original failure as `cause` so callers can still inspect it.
+      const { name, id } = options.rule;
+      const ruleLabel = `Rule "${name}" ${id}`;
+      const lookupError = (message: string, source = TaskErrorSource.USER) =>
+        createTaskRunError(new Error(message, { cause: err }), source);
+
+      if (err instanceof SLONotFound) {
+        throw lookupError(
+          `${ruleLabel} is referencing an SLO which cannot be found: "${params.sloId}": ${err.message}`
+        );
+      }
+
+      const authFailure = getAuthenticationFailure(err);
+      if (authFailure) {
+        const { statusCode = 'unknown', type = 'unknown' } = authFailure;
+        const reason =
+          statusCode === 403
+            ? `because the rule's API key is not authorized to read SLOs (403 ${type}). Re-save the rule as a user with SLO read privileges.`
+            : `because the rule's API key was rejected (${statusCode} ${type}). Re-save or re-enable the rule to regenerate its API key.`;
+        throw lookupError(`${ruleLabel} could not load SLO "${params.sloId}" ${reason}`);
+      }
+
+      throw lookupError(
+        `${ruleLabel} could not load SLO "${params.sloId}": ${err.message}`,
+        SavedObjectsErrorHelpers.isEsUnavailableError(err)
+          ? TaskErrorSource.FRAMEWORK
+          : TaskErrorSource.USER
       );
     }
 
@@ -128,8 +147,14 @@ export const getRuleExecutor = (basePath: IBasePath, isCpsEnabled: boolean = fal
     // We only need the end timestamp to base all of queries on. The length of the time range
     // doesn't matter for our use case since we allow the user to customize the window sizes,
     const { dateEnd } = getTimeRange('1m');
-    const results = await withSpan({ name: BURN_RATE_EXECUTOR_SPAN_NAMES.EVAL, type: 'rule' }, () =>
-      evaluate(esClient.asCurrentUser, slo, params, new Date(dateEnd), projectRouting)
+    const alertLimit = alertsClient.getAlertLimitValue();
+    const { results, hasReachedLimit } = await withSpan(
+      { name: BURN_RATE_EXECUTOR_SPAN_NAMES.EVAL, type: 'rule' },
+      () =>
+        evaluate(esClient.asCurrentUser, slo, params, new Date(dateEnd), {
+          projectRouting,
+          maxResults: alertLimit,
+        })
     );
 
     const dependencies = params.dependencies;
@@ -155,9 +180,6 @@ export const getRuleExecutor = (basePath: IBasePath, isCpsEnabled: boolean = fal
       { name: BURN_RATE_EXECUTOR_SPAN_NAMES.ACTION_DISPATCH, type: 'rule' },
       async () => {
         if (results.length > 0) {
-          const alertLimit = alertsClient.getAlertLimitValue();
-          let hasReachedLimit = false;
-          let scheduledActionsCount = 0;
           for (const result of results) {
             const {
               instanceId,
@@ -181,12 +203,6 @@ export const getRuleExecutor = (basePath: IBasePath, isCpsEnabled: boolean = fal
             );
             if (shouldAlert) {
               const shouldSuppress = shouldSuppressInstanceId(suppressResults, instanceId);
-              if (scheduledActionsCount >= alertLimit) {
-                // need to set this so that warning is displayed in the UI and in the logs
-                hasReachedLimit = true;
-                break; // once limit is reached, we break out of the loop and don't schedule any more alerts
-              }
-
               const sloSummary = await getSloSummary(
                 esClient.asCurrentUser,
                 slo,
@@ -259,12 +275,12 @@ export const getRuleExecutor = (basePath: IBasePath, isCpsEnabled: boolean = fal
               };
 
               alertsClient.setAlertData({ id: alertId, context });
-              scheduledActionsCount++;
             }
           }
-
-          alertsClient.setAlertLimitReached(hasReachedLimit);
         }
+
+        // The framework requires the limit to be reported once its value has been requested.
+        alertsClient.setAlertLimitReached(hasReachedLimit);
 
         const recoveredAlerts = alertsClient.getRecoveredAlerts() ?? [];
 

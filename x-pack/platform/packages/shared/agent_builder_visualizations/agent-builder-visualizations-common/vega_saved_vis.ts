@@ -7,19 +7,11 @@
 
 /**
  * The `vega` type string — both the `savedVis.type` Kibana's legacy-vis
- * embeddable renders and the panel `type` for a Vega panel in the (future)
- * dashboard API / attachment shape. Until the native vega embeddable API ships,
- * a temporary converter maps the attachment shape to the legacy-vis embeddable
- * (see `agent-builder-dashboards-common/converters`).
+ * embeddable renders and the native `vega` dashboard panel type.
  */
 export const VEGA_VIS_TYPE = 'vega';
 
-/**
- * Canonical Vega config carried by Agent Builder attachments. This is the
- * shared "future native Vega API" payload used by both surfaces — the standalone
- * visualization attachment (`visualization`) and the dashboard Vega panel
- * (`config`) — so a single {@link buildVegaSavedVis} transform can render either.
- */
+/** Vega config carried by the standalone visualization attachment (`visualization`). */
 export interface VegaConfig {
   /** The serialized Vega/Vega-Lite spec. */
   spec: string;
@@ -30,9 +22,9 @@ export interface VegaConfig {
 /**
  * The by-value `savedVis` shape a Kibana legacy-vis (`visualization`) embeddable
  * expects for a Vega/Vega-Lite spec. Kept minimal (no persisted saved object) so
- * the same spec can be rendered inline in chat and embedded in a dashboard panel.
+ * the spec can be rendered inline in chat.
  */
-export interface VegaSavedVis {
+interface VegaSavedVis {
   title: string;
   description: string;
   type: typeof VEGA_VIS_TYPE;
@@ -41,11 +33,7 @@ export interface VegaSavedVis {
   data: { aggs: unknown[]; searchSource: Record<string, unknown> };
 }
 
-/**
- * Build the by-value `savedVis` for a Vega/Vega-Lite spec. Shared by the browser
- * inline renderer and the server dashboard-panel converter so both surfaces embed
- * an identical legacy-vis embeddable for the same spec.
- */
+/** Build the by-value `savedVis` the inline chat renderer embeds for a Vega/Vega-Lite spec. */
 export const buildVegaSavedVis = ({
   spec,
   title = '',
@@ -83,22 +71,13 @@ export const normalizeVegaConfig = (input: unknown): VegaConfig | undefined => {
   return config;
 };
 
-export const prettyPrintVegaSpec = (spec: string): string => {
-  try {
-    const parsed = JSON.parse(spec);
-    if (parsed && typeof parsed === 'object') {
-      return JSON.stringify(parsed, null, 2);
-    }
-  } catch {
-    // fall through
-  }
-  return spec;
-};
+/** The longest spec a native `vega` panel accepts. */
+const MAX_NATIVE_VEGA_SPEC_LENGTH = 1_000_000;
 
 /**
  * Read the serialized Vega spec out of a legacy-vis (`visualization`) panel's
  * by-value `config`, i.e. `config.savedVis.params.spec`. Returns `undefined` when
- * the config is not a Vega legacy-vis panel.
+ * the config is not a Vega legacy-vis panel, or its spec does not fit a native `vega` panel.
  */
 export const extractVegaSpecFromSavedVis = (
   config: unknown
@@ -110,11 +89,11 @@ export const extractVegaSpecFromSavedVis = (
     return undefined;
   }
   const spec = savedVis.params?.spec;
-  if (typeof spec !== 'string') {
+  if (typeof spec !== 'string' || spec.length === 0 || spec.length > MAX_NATIVE_VEGA_SPEC_LENGTH) {
     return undefined;
   }
   return {
-    spec: prettyPrintVegaSpec(spec),
+    spec,
     title: typeof savedVis.title === 'string' ? savedVis.title : '',
     description: typeof savedVis.description === 'string' ? savedVis.description : '',
   };

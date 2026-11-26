@@ -8,4 +8,4 @@
  */
 
 require('@kbn/setup-node-env');
-require('@kbn/test').runCheckJestConfigsCli();
+require('@kbn/jest').runCheckJestConfigsCli();

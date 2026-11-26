@@ -10,7 +10,11 @@ import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 
 import { createAppContextStartContractMock } from '../../../mocks';
+
+import { FleetUnauthorizedError } from '../../../errors';
+
 import { appContextService } from '../../app_context';
+import { packagePolicyService } from '../../package_policy';
 
 import { getInstalledPackageWithAssets } from './get';
 import { installPackageWithStateMachine } from './install';
@@ -131,6 +135,72 @@ describe('updateCustomIntegration', () => {
         esClient,
       })
     );
+  });
+
+  // This route replays the stored archive with force: true, so an integration that was
+  // originally uploaded has its real transforms recreated here. Passing a request would bind
+  // those caller-authored transforms to the editing user and start them, turning a README edit
+  // into an alternate reauthorization path around the install-source gate.
+  it('does not forward a request, so replayed transforms cannot be rebound to the editor', async () => {
+    await updateCustomIntegration(esClient, savedObjectsClient, 'test-integration', {
+      readMeData: '# Updated',
+      categories: ['custom'],
+    });
+
+    expect(mockInstallPackageWithStateMachine).toHaveBeenCalledWith(
+      expect.objectContaining({ installSource: 'custom', request: undefined })
+    );
+  });
+
+  it('logs the package policies that failed to upgrade, without throwing', async () => {
+    const mockPackagePolicyService = packagePolicyService as jest.Mocked<
+      typeof packagePolicyService
+    >;
+    mockPackagePolicyService.listIds.mockResolvedValueOnce({
+      items: ['policy-1', 'policy-2'],
+    } as any);
+    mockPackagePolicyService.bulkUpgrade.mockResolvedValueOnce([
+      { id: 'policy-1', success: true },
+      { id: 'policy-2', success: false, statusCode: 400, body: { message: 'Invalid input' } },
+    ]);
+
+    await updateCustomIntegration(esClient, savedObjectsClient, 'test-integration', {
+      readMeData: '# Updated',
+      categories: ['custom'],
+    });
+
+    expect(appContextService.getLogger().warn).toHaveBeenCalledWith(
+      'Failed to upgrade 1 of 2 package policies of package test-integration: policy-2: Invalid input'
+    );
+  });
+
+  // Rejecting up front matters: the state machine would overwrite the installation saved object
+  // before the transform step failed, and it resolves with { error } rather than throwing, so the
+  // route would answer 200 over a damaged installation.
+  it('refuses an archive containing transforms without touching the installation', async () => {
+    mockGetInstalledPackageWithAssets.mockResolvedValueOnce({
+      packageInfo: { name: 'test-integration', version: '1.0.0', title: 'Test Integration' },
+      installation: { install_version: '1.0.0', install_source: 'upload', installed_es: [] },
+      assetsMap: new Map([
+        [
+          'test-integration-1.0.0/manifest.yml',
+          Buffer.from('name: test-integration\nversion: 1.0.0'),
+        ],
+        [
+          'test-integration-1.0.0/elasticsearch/transform/probe/transform.yml',
+          Buffer.from('source:\n  index: ["logs-*"]\ndest:\n  index: "d"\n'),
+        ],
+      ]),
+    } as any);
+
+    await expect(
+      updateCustomIntegration(esClient, savedObjectsClient, 'test-integration', {
+        readMeData: '# Updated',
+        categories: ['custom'],
+      })
+    ).rejects.toThrow(FleetUnauthorizedError);
+
+    expect(mockInstallPackageWithStateMachine).not.toHaveBeenCalled();
   });
 
   it('should increment version and update correctly', async () => {

@@ -22,6 +22,7 @@ exports[`ScopeSection false canGetFilters privilege show NoPermissionCallOut whe
         class="euiCheckboxControl emotion-euiCheckboxControl-selected"
       >
         <span
+          aria-hidden="true"
           class="emotion-euiCheckbox__icon-check"
           data-euiicon-type="check"
           role="presentation"
@@ -48,7 +49,6 @@ exports[`ScopeSection false canGetFilters privilege show NoPermissionCallOut whe
   <div
     class="euiPanel euiPanel--primary euiCallOut euiCallOut--primary emotion-euiPanel-none-primary-euiCallOut-primary"
     data-size="m"
-    style="--euiCallOutTypeColor: #0B64DD;"
   >
     <div
       class="css-1slkmya-wrapper"
@@ -100,6 +100,7 @@ exports[`ScopeSection renders when enabled with no scope supplied 1`] = `
         class="euiCheckboxControl emotion-euiCheckboxControl-selected"
       >
         <span
+          aria-hidden="true"
           class="emotion-euiCheckbox__icon-check"
           data-euiicon-type="check"
           role="presentation"
@@ -139,6 +140,7 @@ exports[`ScopeSection renders when enabled with no scope supplied 1`] = `
             class="euiCheckboxControl emotion-euiCheckboxControl-unselected"
           >
             <span
+              aria-hidden="true"
               class="emotion-euiCheckbox__icon-check"
               data-euiicon-type="empty"
               role="presentation"
@@ -157,7 +159,7 @@ exports[`ScopeSection renders when enabled with no scope supplied 1`] = `
       class="euiFlexItem emotion-euiFlexItem-growZero"
     >
       <button
-        class="euiExpression emotion-euiExpression-isClickable-success-ScopeExpression"
+        class="euiExpression emotion-euiExpression-isClickable-success"
       >
         <span
           class="euiExpression__description emotion-euiExpression__description-success-isUppercase"
@@ -224,6 +226,7 @@ exports[`ScopeSection renders when enabled with scope supplied 1`] = `
         class="euiCheckboxControl emotion-euiCheckboxControl-selected"
       >
         <span
+          aria-hidden="true"
           class="emotion-euiCheckbox__icon-check"
           data-euiicon-type="check"
           role="presentation"
@@ -263,6 +266,7 @@ exports[`ScopeSection renders when enabled with scope supplied 1`] = `
             class="euiCheckboxControl emotion-euiCheckboxControl-selected"
           >
             <span
+              aria-hidden="true"
               class="emotion-euiCheckbox__icon-check"
               data-euiicon-type="check"
               role="presentation"
@@ -282,7 +286,7 @@ exports[`ScopeSection renders when enabled with scope supplied 1`] = `
       class="euiFlexItem emotion-euiFlexItem-growZero"
     >
       <button
-        class="euiExpression emotion-euiExpression-isClickable-success-ScopeExpression"
+        class="euiExpression emotion-euiExpression-isClickable-success"
       >
         <span
           class="euiExpression__description emotion-euiExpression__description-success-isUppercase"
@@ -349,6 +353,7 @@ exports[`ScopeSection renders when not enabled 1`] = `
         class="euiCheckboxControl emotion-euiCheckboxControl-unselected"
       >
         <span
+          aria-hidden="true"
           class="emotion-euiCheckbox__icon-check"
           data-euiicon-type="empty"
           role="presentation"
@@ -397,6 +402,7 @@ exports[`ScopeSection show NoFilterListsCallOut when no filter list IDs 1`] = `
         class="euiCheckboxControl emotion-euiCheckboxControl-selected"
       >
         <span
+          aria-hidden="true"
           class="emotion-euiCheckbox__icon-check"
           data-euiicon-type="check"
           role="presentation"
@@ -423,7 +429,6 @@ exports[`ScopeSection show NoFilterListsCallOut when no filter list IDs 1`] = `
   <div
     class="euiPanel euiPanel--primary euiCallOut euiCallOut--primary emotion-euiPanel-none-primary-euiCallOut-primary"
     data-size="m"
-    style="--euiCallOutTypeColor: #0B64DD;"
   >
     <div
       class="css-1slkmya-wrapper"
@@ -451,7 +456,7 @@ exports[`ScopeSection show NoFilterListsCallOut when no filter list IDs 1`] = `
             <p>
               To configure scope, you must first use the 
               <button
-                class="euiLink emotion-euiLink-primary"
+                class="euiLink emotion-euiLink-text"
                 data-test-subj="mlScopeNoFilterListsLink"
                 type="button"
               >
