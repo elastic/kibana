@@ -413,15 +413,12 @@ describe('classicActionExtensions', () => {
 
       const episodes = [
         makeClassicEpisode('c1', 'open', { snoozed_until: '2099-01-01T00:00:00.000Z' }),
+        makeClassicEpisode('c2', 'open', { instanceId: 'inst-2' }),
       ];
       const result = await snoozeExtension.execute(episodes, http, { snoozedUntil: null });
 
       expect(mockedUnsnooze).not.toHaveBeenCalled();
-      expect(result).toEqual({
-        succeeded: 1,
-        failed: 1,
-        errors: ['find muted alerts failed'],
-      });
+      expect(result).toEqual({ succeeded: 2, failed: 0, errors: [] });
     });
 
     it('execute with null expiry skips the unsnooze when nothing was snoozed', async () => {

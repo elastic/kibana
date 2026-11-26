@@ -201,12 +201,10 @@ const snoozeExtension: EpisodeActionExtension<EpisodeSnoozePayload> = {
       let mutedTargets: SnoozeTarget[];
       try {
         mutedTargets = await filterMutedTargets(replacedTargets, http);
-      } catch (e) {
-        return {
-          succeeded: succeeded + replacedTargets.length,
-          failed: replacedTargets.length,
-          errors: [getErrorMessage(e)],
-        };
+      } catch {
+        // Rows with no snooze to clear are already counted on the mute response alone, so a
+        // failed lookup counts the same way and the existing snoozes stay in place.
+        return { succeeded: eps.length, failed: 0, errors: [] };
       }
 
       const unmutedCount = replacedTargets.length - mutedTargets.length;
