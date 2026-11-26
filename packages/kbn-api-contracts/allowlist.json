@@ -1166,6 +1166,20 @@
       "oasdiffId": "new-required-request-parameter",
       "prUrl": "https://github.com/elastic/kibana/pull/298431",
       "expiresAt": "2026-12-02"
+    },
+    {
+      "path": "/api/dashboards",
+      "method": "post",
+      "reason": "False positive: the pinned options list and range slider control config schemas were renamed (`kbn-controls-schemas-pinned-*`) so they can accept the new optional `required` boolean (default `false`). oasdiff reports the old `$ref` names as removed from the request `oneOf`, but the accepted request shape only gains that optional property, so existing requests remain valid.",
+      "approvedBy": "@elastic/kibana-dashboards",
+      "oasdiffId": "request-property-one-of-removed"
+    },
+    {
+      "path": "/api/dashboards/{id}",
+      "method": "put",
+      "reason": "False positive: the pinned options list and range slider control config schemas were renamed (`kbn-controls-schemas-pinned-*`) so they can accept the new optional `required` boolean (default `false`). oasdiff reports the old `$ref` names as removed from the request `oneOf`, but the accepted request shape only gains that optional property, so existing requests remain valid.",
+      "approvedBy": "@elastic/kibana-dashboards",
+      "oasdiffId": "request-property-one-of-removed"
     }
   ]
 }
