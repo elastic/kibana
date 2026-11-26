@@ -1747,6 +1747,34 @@ describe('triage match decisions step in on mode', () => {
       expect(output).toEqual(expect.objectContaining({ close_failures: 1, deferred: 0 }));
     });
 
+    it('starts no close once the verdict read passes the work deadline, so the notes keep their time', async () => {
+      const { run, callKibanaApi, closes, tags, notes } = setup({
+        mode: 'on',
+        alerts: [['a', source('C:\\x.exe')]],
+        decisions: approved('C:\\x.exe'),
+      });
+      const inner = callKibanaApi.getMockImplementation()!;
+      callKibanaApi.mockImplementation(
+        async (params: { path: string; body?: Record<string, any> }) => {
+          if (params.path.endsWith('/signals/search') && params.body?.aggs) {
+            // The lookup finds no verdict, but it ends after the work budget.
+            jest.setSystemTime(NOW + DECISION_MATCH_WORK_BUDGET_MS + 1);
+            return { body: { aggregations: { keys: { buckets: [] } } } };
+          }
+          return inner(params);
+        }
+      );
+
+      const { output } = await run();
+
+      expect(closes()).toEqual([]);
+      expect(tags()).toEqual([]);
+      expect(notes()).toEqual([]);
+      expect(output).toEqual(
+        expect.objectContaining({ closed: 0, close_failures: 0, deferred: 1, out_of_time: true })
+      );
+    });
+
     it('tags the matches of a decision blocked by a verdict even if the deadline passes while it is handled', async () => {
       const id = idOf('C:\\x.exe');
       const { run, get, tags } = setup({

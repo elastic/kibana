@@ -422,6 +422,9 @@ export const createDecisionSweep = ({
         return;
       }
       if (await hasConflictingVerdict(id)) return await blockByVerdict(id, alertIds);
+      // The reads can pass the work deadline, and the notes are written in what is left of the
+      // total budget, so no close starts after it.
+      if (outOfTime()) return countDeferred(id);
       const allowed = await closeAllowance(id, alertIds);
       if (allowed.length === 0) return;
       tagged = allowed;
