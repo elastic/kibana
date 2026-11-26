@@ -153,19 +153,17 @@ export const setupSuperUserProfile = async (getService: CommonFtrProviderContext
     Cookie: cookies[0].cookieString(),
   };
 
-  const profiles = await suggestUserProfiles({
-    supertest: supertestWithoutAuth,
-    req: {
-      name: 'superUser',
-      owners: ['securitySolutionFixture'],
-      size: 1,
-    },
-    auth: { user: superUser, space: null },
-  });
+  // The expected uid must come from the same session the tests push with: a profile search
+  // over the near-real-time .security-profile index can miss or rank another profile first.
+  const { body: userWithProfileId } = await supertestWithoutAuth
+    .get('/internal/security/me')
+    .set('kbn-xsrf', 'true')
+    .set(headers)
+    .expect(200);
 
   const superUserWithProfile = {
     ...getUserInfo(superUser),
-    profile_uid: profiles[0].uid,
+    profile_uid: userWithProfileId.profile_uid as string,
   };
 
   return {
