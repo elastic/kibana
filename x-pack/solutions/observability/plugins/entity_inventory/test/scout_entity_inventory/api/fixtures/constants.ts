@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { KibanaRole } from '@kbn/scout-oblt';
+
 export const K8S_ARCHIVE =
   'x-pack/solutions/observability/plugins/entity_inventory/test/scout_entity_inventory/common/es_archives/k8s_deployment';
 
@@ -12,6 +14,33 @@ export const K8S_ARCHIVE =
 export const K8S_TSDS_INDEX = 'metrics-k8sclusterreceiver.otel-tsds';
 export const K8S_STATE_TSDS_INDEX = 'metrics-kubernetes.state_container_ts-tsds';
 export const K8S_TSDS_INDEX_TEMPLATE = 'entity-inventory-scout-k8s-tsds-index';
+
+// Everything the archive creates that a source pattern reaches: data streams, plain indices and the
+// filtered alias.
+const K8S_FIXTURE_INDICES = [
+  'metrics-kubernetes.state_deployment-default',
+  'metrics-kubernetes.state_container-default',
+  K8S_STATE_TSDS_INDEX,
+  'metrics-k8sclusterreceiver.otel-default',
+  K8S_TSDS_INDEX,
+  'metrics-k8sclusterreceiver.otel-filtered',
+];
+
+const readerRole = (names: string[]): KibanaRole => ({
+  elasticsearch: {
+    cluster: [],
+    indices: [{ names, privileges: ['read', 'view_index_metadata'] }],
+  },
+  kibana: [{ base: ['read'], feature: {}, spaces: ['*'] }],
+});
+
+/** Reads only the archive, so indices other suites leave on the cluster cannot add rows. */
+export const K8S_FIXTURE_READER_ROLE = readerRole(K8S_FIXTURE_INDICES);
+
+/** Reads the archive except the Agent time-series index, so the Agent source has no `TS` plan. */
+export const K8S_FIXTURE_READER_WITHOUT_AGENT_TSDS_ROLE = readerRole(
+  K8S_FIXTURE_INDICES.filter((name) => name !== K8S_STATE_TSDS_INDEX)
+);
 
 export const TYPES_PATH = 'internal/entity_inventory/types';
 export const LIST_PATH = 'internal/entity_inventory/entities/{type}/_list';

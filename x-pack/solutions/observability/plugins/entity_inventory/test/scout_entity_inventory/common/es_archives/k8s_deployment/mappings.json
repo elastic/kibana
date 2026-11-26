@@ -313,6 +313,10 @@
             },
             "container": {
               "properties": {
+                "name": {
+                  "type": "keyword",
+                  "time_series_dimension": true
+                },
                 "restarts": {
                   "type": "long",
                   "time_series_metric": "gauge"
@@ -329,7 +333,8 @@
         "routing_path": [
           "k8s.cluster.name",
           "k8s.namespace.name",
-          "k8s.deployment.name"
+          "k8s.deployment.name",
+          "k8s.container.name"
         ],
         "time_series": {
           "start_time": "2026-11-05T00:00:00.000Z",

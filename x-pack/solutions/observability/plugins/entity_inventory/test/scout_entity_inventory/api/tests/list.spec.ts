@@ -8,7 +8,14 @@
 import type { ApiClientFixture } from '@kbn/scout-oblt';
 import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/api';
-import { apiTest, INTERNAL_HEADERS, listPath, TYPES_PATH } from '../fixtures';
+import {
+  apiTest,
+  INTERNAL_HEADERS,
+  K8S_FIXTURE_READER_ROLE,
+  K8S_FIXTURE_READER_WITHOUT_AGENT_TSDS_ROLE,
+  listPath,
+  TYPES_PATH,
+} from '../fixtures';
 
 // The archive writes every deployment at 10:00:00 and 10:01:00 on 2026-11-01.
 const K8S_DEPLOYMENT_LIST_PATH = listPath('k8s.deployment');
@@ -105,10 +112,11 @@ apiTest.describe(
     const postList = (
       apiClient: ApiClientFixture,
       body: Record<string, unknown>,
-      path: string = K8S_DEPLOYMENT_LIST_PATH
+      path: string = K8S_DEPLOYMENT_LIST_PATH,
+      cookieHeader: Record<string, string> = adminCookieHeader
     ) =>
       apiClient.post(path, {
-        headers: { ...INTERNAL_HEADERS, ...adminCookieHeader },
+        headers: { ...INTERNAL_HEADERS, ...cookieHeader },
         body,
         responseType: 'json',
       });
@@ -328,6 +336,28 @@ apiTest.describe(
         ]);
         expect(rows.map((row) => row['entity.id']).sort()).toStrictEqual(DEPLOYMENT_IDS);
         expect(provenance[CART_API_ID]['k8s.deployment.label.app']).toBe(STATE_PATTERN);
+      }
+    );
+
+    apiTest(
+      'gives a source only a FROM plan when the caller can read none of its time-series indices',
+      async ({ apiClient, samlAuth }) => {
+        // The role reads the archive except `metrics-kubernetes.state_container_ts-tsds`, the Agent
+        // pattern's only time-series index, so the probe finds none the caller can read.
+        const { cookieHeader } = await samlAuth.asInteractiveUser(
+          K8S_FIXTURE_READER_WITHOUT_AGENT_TSDS_ROLE
+        );
+        const response = await postList(apiClient, WINDOW, K8S_DEPLOYMENT_LIST_PATH, cookieHeader);
+
+        expect(response).toHaveStatusCode(200);
+        const { queries, rows, provenance, errors }: ListResponse = response.body;
+
+        expect(
+          summarizeQueries(queries).filter(({ indexPattern }) => indexPattern === STATE_PATTERN)
+        ).toStrictEqual([{ indexPattern: STATE_PATTERN, engine: 'FROM', rowCount: 3 }]);
+        expect(rows.map((row) => row['entity.id']).sort()).toStrictEqual(DEPLOYMENT_IDS);
+        expect(provenance[CART_API_ID]['k8s.deployment.label.app']).toBe(STATE_PATTERN);
+        expect(errors).toStrictEqual([]);
       }
     );
 
@@ -593,14 +623,19 @@ apiTest.describe(
 
     apiTest(
       'sums the INCREASE of the Agent restarts counter over the containers of each deployment',
-      async ({ apiClient }) => {
+      async ({ apiClient, samlAuth }) => {
+        // A role that reads only the archive, so the plan row counts do not depend on other data
+        // on the cluster.
+        const { cookieHeader } = await samlAuth.asInteractiveUser(K8S_FIXTURE_READER_ROLE);
         // Only the Agent time-series index holds 2026-11-09 documents, namespace `counters`.
         // two-containers: app 1, 2, 4 and sidecar 5, 6, 6. counter-reset: app 3, 5, 0, 2 (reset at
         // 10:02:00). steady: app 7, 7, 7.
-        const response = await postList(apiClient, {
-          from: '2026-11-09T09:00:00.000Z',
-          to: '2026-11-09T11:00:00.000Z',
-        });
+        const response = await postList(
+          apiClient,
+          { from: '2026-11-09T09:00:00.000Z', to: '2026-11-09T11:00:00.000Z' },
+          K8S_DEPLOYMENT_LIST_PATH,
+          cookieHeader
+        );
 
         expect(response).toHaveStatusCode(200);
         const { rows, errors, queries, unsupportedMetrics }: ListResponse = response.body;
@@ -635,13 +670,18 @@ apiTest.describe(
 
     apiTest(
       'counts only the Agent restarts that happened inside the window',
-      async ({ apiClient }) => {
+      async ({ apiClient, samlAuth }) => {
+        // A role that reads only the archive, so the plan row counts do not depend on other data
+        // on the cluster.
+        const { cookieHeader } = await samlAuth.asInteractiveUser(K8S_FIXTURE_READER_ROLE);
         // Ends before the 10:02:00 samples: two-containers reads app 1, 2 and sidecar 5, 6,
         // counter-reset reads 3, 5 (before its reset), steady reads 7, 7.
-        const response = await postList(apiClient, {
-          from: '2026-11-09T09:00:00.000Z',
-          to: '2026-11-09T10:01:30.000Z',
-        });
+        const response = await postList(
+          apiClient,
+          { from: '2026-11-09T09:00:00.000Z', to: '2026-11-09T10:01:30.000Z' },
+          K8S_DEPLOYMENT_LIST_PATH,
+          cookieHeader
+        );
 
         expect(response).toHaveStatusCode(200);
         const { rows }: ListResponse = response.body;
@@ -656,15 +696,20 @@ apiTest.describe(
 
     apiTest(
       'reports the DELTA of the OpenTelemetry restarts gauge, negative when the gauge drops',
-      async ({ apiClient }) => {
+      async ({ apiClient, samlAuth }) => {
+        // A role that reads only the archive, so the plan row counts do not depend on other data
+        // on the cluster.
+        const { cookieHeader } = await samlAuth.asInteractiveUser(K8S_FIXTURE_READER_ROLE);
         // `gauges/restarts-drop` in the OpenTelemetry time-series index: 9, 9, 4 at 16:00:00 to
         // 16:02:00 on 2026-11-05. A gauge has no reset handling, so the drop is a negative change.
         // Its available and desired replicas are 2, 2, 1 in the same window, so `last` is 1 where
         // `max` would be 2.
-        const response = await postList(apiClient, {
-          from: '2026-11-05T15:30:00.000Z',
-          to: '2026-11-05T16:30:00.000Z',
-        });
+        const response = await postList(
+          apiClient,
+          { from: '2026-11-05T15:30:00.000Z', to: '2026-11-05T16:30:00.000Z' },
+          K8S_DEPLOYMENT_LIST_PATH,
+          cookieHeader
+        );
 
         expect(response).toHaveStatusCode(200);
         const { rows, errors, queries }: ListResponse = response.body;
@@ -683,6 +728,44 @@ apiTest.describe(
           'k8s.deployment.desired': 1,
           'k8s.container.restarts': -5,
           last_seen: '2026-11-05T16:02:00.000Z',
+        });
+      }
+    );
+
+    apiTest(
+      'sums the DELTA of the OpenTelemetry restarts gauge over the containers of each deployment',
+      async ({ apiClient, samlAuth }) => {
+        // A role that reads only the archive, so the plan row counts do not depend on other data
+        // on the cluster.
+        const { cookieHeader } = await samlAuth.asInteractiveUser(K8S_FIXTURE_READER_ROLE);
+        // `gauges/two-containers` in the OpenTelemetry time-series index, one time series per
+        // container: app 1, 3 and sidecar 4, 9 at 17:00:00 and 17:01:00 on 2026-11-05. It carries no
+        // available or desired replicas.
+        const response = await postList(
+          apiClient,
+          { from: '2026-11-05T16:45:00.000Z', to: '2026-11-05T17:30:00.000Z' },
+          K8S_DEPLOYMENT_LIST_PATH,
+          cookieHeader
+        );
+
+        expect(response).toHaveStatusCode(200);
+        const { rows, errors, queries }: ListResponse = response.body;
+
+        expect(errors).toStrictEqual([]);
+        expect(summarizeQueries(queries)).toStrictEqual([
+          { indexPattern: STATE_PATTERN, engine: 'TS', rowCount: 0 },
+          { indexPattern: STATE_PATTERN, engine: 'FROM', rowCount: 0 },
+          { indexPattern: OTEL_PATTERN, engine: 'TS', rowCount: 1 },
+          { indexPattern: OTEL_PATTERN, engine: 'FROM', rowCount: 0 },
+        ]);
+        // (3 - 1) + (9 - 4) = 7. Taking the largest container's change instead would give 5.
+        expect(rows).toHaveLength(1);
+        expect(rows[0]).toMatchObject({
+          'entity.id': 'k8s.deployment:gauges/two-containers',
+          'k8s.deployment.available': null,
+          'k8s.deployment.desired': null,
+          'k8s.container.restarts': 7,
+          last_seen: '2026-11-05T17:01:00.000Z',
         });
       }
     );
