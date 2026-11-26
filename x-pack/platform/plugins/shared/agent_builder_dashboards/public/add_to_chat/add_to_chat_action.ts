@@ -31,7 +31,8 @@ import { CUSTOM_CONTENT_EMBEDDABLE_TYPE } from '@kbn/custom-content-common';
 import { getAbsoluteTimeRange } from '@kbn/data-plugin/common';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { MARKDOWN_EMBEDDABLE_TYPE } from '@kbn/dashboard-markdown-schemas';
-import { SEARCH_EMBEDDABLE_TYPE } from '@kbn/discover-utils';
+import { CHANGE_POINT_GRID_EMBEDDABLE_TYPE } from '@kbn/discover-plugin/common';
+import { LEGACY_LOG_STREAM_EMBEDDABLE, SEARCH_EMBEDDABLE_TYPE } from '@kbn/discover-utils';
 import { MAP_SAVED_OBJECT_TYPE } from '@kbn/maps-plugin/common';
 import { VISUALIZE_EMBEDDABLE_TYPE } from '@kbn/visualizations-common';
 import type { DashboardApi, DashboardStart } from '@kbn/dashboard-plugin/public';
@@ -146,6 +147,8 @@ const TIMESLICE_PANEL_TYPES: ReadonlySet<string> = new Set([
   LENS_EMBEDDABLE_TYPE,
   VISUALIZE_EMBEDDABLE_TYPE,
   SEARCH_EMBEDDABLE_TYPE,
+  LEGACY_LOG_STREAM_EMBEDDABLE,
+  CHANGE_POINT_GRID_EMBEDDABLE_TYPE,
   MAP_SAVED_OBJECT_TYPE,
 ]);
 

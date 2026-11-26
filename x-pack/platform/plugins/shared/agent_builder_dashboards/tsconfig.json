@@ -32,6 +32,7 @@
     "@kbn/core-elasticsearch-server",
     "@kbn/core-elasticsearch-server-mocks",
     "@kbn/lens-common",
+    "@kbn/discover-plugin",
     "@kbn/discover-utils",
     "@kbn/maps-plugin",
     "@kbn/visualizations-common",
