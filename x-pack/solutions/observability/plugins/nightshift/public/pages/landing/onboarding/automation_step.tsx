@@ -28,6 +28,7 @@ import {
   EuiTitle,
   EuiToolTip,
   useEuiTheme,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { connectedPowerPlug } from '@elastic/eui-illustrations';
 import { getEbtProps } from '@kbn/ebt-click';
@@ -520,7 +521,7 @@ function AutomationCards({
             onClick: () => onEdit(automation),
             'data-test-subj': 'nightshiftOnboardingEditAutomation',
             ebt: {
-              action: NIGHTSHIFT_EBT_ACTIONS.EDIT_AUTOMATION,
+              action: NIGHTSHIFT_EBT_ACTIONS.OPEN_AUTOMATION,
               element: NIGHTSHIFT_EBT_ELEMENTS.ONBOARDING_AUTOMATION,
             },
           }}
@@ -581,6 +582,7 @@ function EditAutomationFlyout({
   const cloneAutomation = useCreateAutomation(true);
   const runAutomation = useRunAutomation();
   const [automationToDelete, setAutomationToDelete] = useState<Automation>();
+  const deleteBodyId = useGeneratedHtmlId({ prefix: 'nightshiftOnboardingDeleteAutomationBody' });
   const [refreshedAt, setRefreshedAt] = useState(() => Date.now());
   const { runRange, usedToday } = useAutomationUsage(
     automations,
@@ -625,6 +627,7 @@ function EditAutomationFlyout({
         <EuiModal
           onClose={() => setAutomationToDelete(undefined)}
           aria-label={getDeleteConfirmTitle(automationToDelete.name)}
+          aria-describedby={deleteBodyId}
         >
           <EuiModalHeader>
             <EuiModalHeaderTitle>
@@ -632,7 +635,7 @@ function EditAutomationFlyout({
             </EuiModalHeaderTitle>
           </EuiModalHeader>
           <EuiModalBody>
-            <p>{listLabels.deleteBody}</p>
+            <p id={deleteBodyId}>{listLabels.deleteBody}</p>
           </EuiModalBody>
           <EuiModalFooter>
             <EuiButtonEmpty
@@ -662,7 +665,7 @@ function EditAutomationFlyout({
               }}
               data-test-subj="nightshiftOnboardingDeleteAutomationConfirm"
               {...getEbtProps({
-                action: NIGHTSHIFT_EBT_ACTIONS.DELETE_AUTOMATION,
+                action: NIGHTSHIFT_EBT_ACTIONS.CONFIRM_AUTOMATION_DELETE,
                 element: NIGHTSHIFT_EBT_ELEMENTS.ONBOARDING_DELETE_AUTOMATION_MODAL,
               })}
             >

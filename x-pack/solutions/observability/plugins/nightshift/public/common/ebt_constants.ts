@@ -12,6 +12,7 @@ export const NIGHTSHIFT_EBT_ACTIONS = {
   ASSIGN_INVESTIGATION: 'assignInvestigation',
   CANCEL_AUTOMATION_DELETE: 'cancelAutomationDelete',
   CANCEL_AUTOMATION_EDIT: 'cancelAutomationEdit',
+  CONFIRM_AUTOMATION_DELETE: 'confirmAutomationDelete',
   VIEW_INVESTIGATION: EBT_CLICK_ACTIONS.VIEW_INVESTIGATION,
   CLEAR_AUTOMATION_FILTERS: 'clearAutomationFilters',
   CANCEL_DETECTION_ENGINE_CHANGE: 'cancelDetectionEngineChange',
