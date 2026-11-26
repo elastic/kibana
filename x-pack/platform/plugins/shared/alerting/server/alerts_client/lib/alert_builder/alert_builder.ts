@@ -364,7 +364,7 @@ export class AlertBuilder<
 
     if (untrackedInstanceIds.length > 0) {
       this.logger.warn(
-        `Untracked ${
+        `Untracking ${
           untrackedInstanceIds.length
         } active alert document(s) that this run does not track ${
           this.ruleInfoMessage

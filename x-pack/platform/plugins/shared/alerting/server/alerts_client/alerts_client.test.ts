@@ -2098,7 +2098,7 @@ describe('Alerts Client', () => {
             expect.objectContaining({ [ALERT_STATUS]: 'recovered' })
           );
           expect(logger.warn).toHaveBeenCalledWith(
-            `Untracked 1 active alert document(s) that this run does not track ${ruleInfo}: duplicated`,
+            `Untracking 1 active alert document(s) that this run does not track ${ruleInfo}: duplicated`,
             logTags
           );
         });
