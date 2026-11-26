@@ -682,12 +682,12 @@ describe('actOnAlert', () => {
 describe('actOnAlertsBulk', () => {
   const ALERT_ID_2 = '22223333-4444-5555-6666-777788889999';
 
-  it('iterates over all IDs and returns successCount + failureCount', async () => {
+  it('iterates over all IDs and returns acceptedCount + failureCount, forwarding result', async () => {
     const client = makeClient();
     // whoami is resolved once before the loop
     stubWhoami(client);
     client.request
-      .mockResolvedValueOnce({ data: { status: 'completed' } }) // ALERT_ID succeeds, Sophos reports completed
+      .mockResolvedValueOnce({ data: { status: 'completed', result: 'success' } }) // ALERT_ID succeeds
       .mockRejectedValueOnce(
         Object.assign(new Error('Not Found'), { response: { status: 404, data: {} } })
       ); // ALERT_ID_2 fails
@@ -698,14 +698,18 @@ describe('actOnAlertsBulk', () => {
       action: 'acknowledge',
     });
 
-    expect(result.successCount).toBe(1);
+    expect(result.acceptedCount).toBe(1);
     expect(result.failureCount).toBe(1);
     expect(result.results).toHaveLength(2);
-    expect(result.results[0]).toMatchObject({ alertId: ALERT_ID, status: 'completed' });
+    expect(result.results[0]).toMatchObject({
+      alertId: ALERT_ID,
+      status: 'completed',
+      result: 'success',
+    });
     expect(result.results[1]).toMatchObject({ alertId: ALERT_ID_2, status: 'failed' });
   });
 
-  it('returns all successes when no failures occur', async () => {
+  it('returns all acceptedCount when no failures occur', async () => {
     const client = makeClient();
     stubWhoami(client);
     client.request.mockResolvedValue({ data: {} });
@@ -716,7 +720,7 @@ describe('actOnAlertsBulk', () => {
       action: 'clearThreat',
     });
 
-    expect(result.successCount).toBe(2);
+    expect(result.acceptedCount).toBe(2);
     expect(result.failureCount).toBe(0);
   });
 
@@ -936,6 +940,29 @@ describe('updateTamperProtection', () => {
         data: { enabled: false, regeneratePassword: true },
       })
     );
+  });
+
+  it('strips password fields from the response — only enabled is returned', async () => {
+    // The Sophos response includes `password` and `previousPasswords` when regeneratePassword is
+    // true. These must never be forwarded to API callers.
+    const client = makeClient();
+    stubWhoami(client);
+    client.request.mockResolvedValue({
+      data: {
+        enabled: true,
+        password: 's3cr3t-recovery-password',
+        previousPasswords: ['old-password-1', 'old-password-2'],
+      },
+    });
+    const ctx = makeCtx(client);
+
+    const result = await SophosCentral.actions.updateTamperProtection.handler(ctx as never, {
+      endpointId: ENDPOINT_ID,
+      enabled: true,
+      regeneratePassword: true,
+    });
+
+    expect(result).toEqual({ enabled: true });
   });
 });
 

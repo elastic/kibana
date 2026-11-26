@@ -371,28 +371,34 @@ export const SophosCentral: ConnectorSpec = {
       scope: 'write',
       description:
         'Apply a single lifecycle action to multiple Sophos Central alerts. ' +
-        'The connector iterates over each alert ID in turn and returns the Sophos action ' +
-        'status per alert ("requested", "started", or "completed"). A status of "requested" ' +
-        'or "started" means Sophos accepted the action but has not finished processing it yet — ' +
-        'do not report the alert as remediated until the status is "completed". ' +
+        'The connector iterates over each alert ID in turn and returns, per alert, ' +
+        'the lifecycle status ("requested", "started", or "completed") and the outcome ' +
+        'result (e.g. "success", "notNeeded", "alreadyDone") from Sophos. ' +
+        'A status of "requested" or "started" means Sophos accepted the action but has not ' +
+        'finished processing it yet — do not report the alert as remediated until the status ' +
+        'is "completed" and result is "success". ' +
         'Partial failures are returned alongside successes — a non-zero failureCount does not throw. ' +
+        'acceptedCount is the number of HTTP 2xx responses; it does not mean every alert was remediated. ' +
         'Rate limit: 100 calls/min — keep batches under 50 during peak hours.',
       input: ActOnAlertsBulkInputSchema,
       handler: async (ctx, input: ActOnAlertsBulkInput) => {
         // Resolve tenant and region once before iterating over IDs
         const { tenantId, dataRegion } = await whoami(ctx);
-        const results: Array<{ alertId: string; status: string; error?: string }> = [];
-        let successCount = 0;
+        const results: Array<{ alertId: string; status: string; result?: string; error?: string }> =
+          [];
+        let acceptedCount = 0;
         let failureCount = 0;
 
         for (const alertId of input.ids) {
           try {
-            // Capture the Sophos response so its `status` field is forwarded.
-            // Sophos returns HTTP 201 with status "requested" or "started" while the action is
-            // still being processed, and "completed" only once it finishes. Discarding the
-            // response and reporting "success" would cause an agent to announce remediation
-            // before Sophos has finished acting on the alert.
-            const res = await request<{ status?: string }>(
+            // Capture the Sophos response so its `status` (lifecycle) and `result` (outcome)
+            // fields are both forwarded. Sophos returns HTTP 201 with status "requested" or
+            // "started" while the action is still being processed, and "completed" only once it
+            // finishes. `result` (e.g. "success", "notNeeded") describes the actual outcome and
+            // must be preserved — an alert with status "completed" and result "notNeeded" was
+            // not remediated. Discarding the response and reporting "success" would make an
+            // unsuccessful completion indistinguishable from successful remediation.
+            const res = await request<{ status?: string; result?: string }>(
               ctx,
               'POST',
               `/common/v1/alerts/${alertId}/actions`,
@@ -405,8 +411,12 @@ export const SophosCentral: ConnectorSpec = {
                 },
               }
             );
-            results.push({ alertId, status: res?.status ?? 'accepted' });
-            successCount++;
+            results.push({
+              alertId,
+              status: res?.status ?? 'accepted',
+              ...(res?.result !== undefined && { result: res.result }),
+            });
+            acceptedCount++;
           } catch (err) {
             const axiosErr = err as AxiosError<{ error?: string; message?: string }>;
             const status = axiosErr?.response?.status;
@@ -424,7 +434,7 @@ export const SophosCentral: ConnectorSpec = {
           }
         }
 
-        return { results, successCount, failureCount };
+        return { results, acceptedCount, failureCount };
       },
     },
 
