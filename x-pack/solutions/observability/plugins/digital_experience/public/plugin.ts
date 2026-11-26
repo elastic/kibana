@@ -32,6 +32,13 @@ export class DigitalExperiencePlugin
     // Also registered on the server, which creates the short URLs that name it.
     plugins.share.url.locators.create(new DigitalExperienceLocatorDefinition());
 
+    // The loader keeps the step, and zod with it, out of the plugin's main bundle.
+    plugins.workflowsExtensions?.registerStepDefinition(() =>
+      import('./step_types/get_scorecard_report_step').then(
+        ({ getScorecardReportStepDefinition }) => getScorecardReportStepDefinition
+      )
+    );
+
     plugins.observabilityShared.navigation.registerSections(
       this.isVisible$.pipe(
         map((isVisible) =>

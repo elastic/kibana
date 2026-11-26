@@ -21,6 +21,7 @@ import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
+import type { WorkflowsExtensionsServerPluginSetup } from '@kbn/workflows-extensions/server';
 import { DigitalExperienceLocatorDefinition } from '../common/locator';
 import type { DigitalExperienceConfig } from './config';
 import { registerDigitalExperienceFeature } from './register_feature';
@@ -29,6 +30,7 @@ import { savedViewSavedObjectType } from './saved_objects/saved_view';
 import { SESSIONS_PLATFORMS } from './services/sessions/sessions_platforms';
 import { createSessionsSetUpBackoff } from './services/sessions/sessions_set_up_backoff';
 import { registerSessionsTask } from './services/sessions/sessions_task';
+import { getScorecardReportStepDefinition } from './step_types/get_scorecard_report_step';
 
 interface DigitalExperienceSetupDeps {
   features: FeaturesPluginSetup;
@@ -41,6 +43,8 @@ interface DigitalExperienceSetupDeps {
   taskManager?: TaskManagerSetupContract;
   /** Optional: without it, or without an encryption key, the task's API key can't be stored. */
   encryptedSavedObjects?: EncryptedSavedObjectsPluginSetup;
+  /** Optional: the scorecard step is only registered where Workflows is. */
+  workflowsExtensions?: WorkflowsExtensionsServerPluginSetup;
 }
 
 interface DigitalExperienceStartDeps {
@@ -66,6 +70,13 @@ export class Plugin
     core.savedObjects.registerType(savedViewSavedObjectType);
     // A short URL names its locator, and the server looks it up to create one.
     plugins.share.url.locators.create(new DigitalExperienceLocatorDefinition());
+
+    plugins.workflowsExtensions?.registerStepDefinition(
+      getScorecardReportStepDefinition(this.logger, async () => {
+        const [, pluginsStart] = await core.getStartServices();
+        return pluginsStart.security?.authz;
+      })
+    );
 
     const { taskManager, encryptedSavedObjects } = plugins;
     const canEncrypt = encryptedSavedObjects?.canEncrypt === true;
