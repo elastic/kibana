@@ -155,7 +155,15 @@ const PackFormComponent: React.FC<PackFormProps> = ({
     notifications: { toasts },
   } = useKibana().services;
 
-  const { data: { agentPoliciesById, groupsByPackagePolicyId } = {} } = useAgentPolicies();
+  const {
+    data: { agentPoliciesById, groupsByPackagePolicyId } = {},
+    isFetching: isFetchingAgentPolicies,
+    isError: isAgentPoliciesError,
+  } = useAgentPolicies();
+  // `useAgentPolicies` starts from `initialData: []`, so "no policies yet" alone is not an
+  // answer. Until Fleet answers, the shared-integration groups and agent counts are unknown.
+  const isAgentPoliciesLoading =
+    isFetchingAgentPolicies && isEmpty(agentPoliciesById) && !isAgentPoliciesError;
 
   // Cancel returns to the Packs list. The read-only Pack details page was
   // removed, so edit mode no longer navigates back to `packs/:packId`.
@@ -232,9 +240,14 @@ const PackFormComponent: React.FC<PackFormProps> = ({
       queries: convertPackQueriesToSO(payload.queries),
       // The server only targets `policy_ids`; a shard keyed by any other agent policy is
       // never applied. Drop it, or the form would treat it as a target and save it as one.
+      // Keep a shard Fleet still delivers (a legacy pack whose saved references drifted),
+      // or an untouched save would send empty targets and detach the live schedule.
       shards: pickBy(
         omit(payload.shards, '*') ?? {},
-        (_, policyId) => !payload.policy_ids || payload.policy_ids.includes(policyId)
+        (_, policyId) =>
+          !payload.policy_ids ||
+          payload.policy_ids.includes(policyId) ||
+          Boolean(payload.effective_policy_ids?.includes(policyId))
       ),
       schedule: deserializedSchedule,
       min_osquery_version: payloadMinOsqueryVersion ? [payloadMinOsqueryVersion] : [],
@@ -521,14 +534,27 @@ const PackFormComponent: React.FC<PackFormProps> = ({
       return;
     }
 
-    if (agentCount) {
+    // A failed policy lookup leaves the agent count unknown: ask rather than deploy blind.
+    if (
+      agentCount ||
+      (isAgentPoliciesError && getSubmittedPolicyIds(policyIds ?? [], shards).length > 0)
+    ) {
       setShowConfirmationModal(true);
 
       return;
     }
 
     handleSubmitForm();
-  }, [agentCount, handleSubmitForm, scheduleErrors, showScheduleErrorsToast, trigger]);
+  }, [
+    agentCount,
+    handleSubmitForm,
+    isAgentPoliciesError,
+    policyIds,
+    scheduleErrors,
+    shards,
+    showScheduleErrorsToast,
+    trigger,
+  ]);
 
   const handleConfirmConfirmationClick = useCallback(async () => {
     setShowConfirmationModal(false);
@@ -774,7 +800,7 @@ const PackFormComponent: React.FC<PackFormProps> = ({
                   // Prebuilt packs keep an enabled save so writePacks users can
                   // persist scheduled-policy/shards changes; only a read-only
                   // (readPacks-only) user has saving disabled.
-                  isDisabled={isReadOnly}
+                  isDisabled={isReadOnly || isAgentPoliciesLoading}
                   color="primary"
                   fill
                   size="m"
@@ -803,7 +829,7 @@ const PackFormComponent: React.FC<PackFormProps> = ({
         <ConfirmDeployAgentPolicyModal
           onCancel={handleHideConfirmationModal}
           onConfirm={handleConfirmConfirmationClick}
-          agentCount={agentCount}
+          agentCount={isAgentPoliciesError ? undefined : agentCount}
           agentPolicyCount={deliveredPolicyIds.length}
         />
       )}

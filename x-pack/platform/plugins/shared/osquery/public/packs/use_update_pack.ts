@@ -85,6 +85,7 @@ export const useUpdatePack = ({ withRedirect, options }: UseUpdatePackProps) => 
           toasts,
           queryClient,
           getUrlForApp,
+          navigateToApp,
           startServices,
         });
       },

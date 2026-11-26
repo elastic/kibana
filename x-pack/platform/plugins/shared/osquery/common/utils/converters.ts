@@ -71,16 +71,27 @@ export type Shard = Record<string, number>;
 
 export type ShardIntegrationGroups = Record<string, { policyIds: string[] }>;
 
+/**
+ * @param selectedPolicyIds agent policies selected without a shard. A group row also
+ * writes its shard for the members of its integration selected after the row was loaded,
+ * so "Select all" never leaves a member to the server's 100% default while the form
+ * shows a lower value.
+ */
 export const convertShardsToObject = (
   shards: ShardsArray,
-  groups: ShardIntegrationGroups = {}
+  groups: ShardIntegrationGroups = {},
+  selectedPolicyIds: readonly string[] = []
 ): Shard =>
   reduce(
     shards,
     (acc, value) => {
       if (value?.policy?.key) {
-        for (const policyId of value.policy.memberIds ??
-          groups[value.policy.key]?.policyIds ?? [value.policy.key]) {
+        const group = groups[value.policy.key];
+        const members = value.policy.memberIds ?? group?.policyIds ?? [value.policy.key];
+        const selectedMembers = value.policy.memberIds
+          ? (group?.policyIds ?? []).filter((id) => selectedPolicyIds.includes(id))
+          : [];
+        for (const policyId of new Set([...members, ...selectedMembers])) {
           acc[policyId] = value.percentage;
         }
       }

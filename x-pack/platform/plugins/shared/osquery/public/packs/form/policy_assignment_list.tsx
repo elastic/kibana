@@ -917,7 +917,7 @@ const PolicyAssignmentListComponent: React.FC<PolicyAssignmentListProps> = ({
       })}
       helpText={
         <FormattedMessage
-          id="xpack.osquery.pack.form.agentPoliciesFieldHelpText"
+          id="xpack.osquery.pack.form.agentPoliciesFieldHelpTextSharedIntegrations"
           defaultMessage="Queries in this pack are scheduled for agents in the selected agent policies and any that share their integration."
         />
       }

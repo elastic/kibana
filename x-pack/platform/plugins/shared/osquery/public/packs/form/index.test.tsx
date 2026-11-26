@@ -347,6 +347,129 @@ describe('PackForm', () => {
     expect(mockUpdateAsync.mock.calls[0][0].shards).toEqual({ A: 25 });
   });
 
+  it('disables saving until Fleet has answered the agent policies lookup', () => {
+    mockUseAgentPolicies.mockReturnValue({
+      data: { agentPoliciesById: {}, groupsByPackagePolicyId: {}, groupIdByPolicyId: {} },
+      isFetching: true,
+      isError: false,
+    });
+    const { getByTestId } = renderWithContext(<PackForm />);
+
+    expect(getByTestId('save-pack-button')).toBeDisabled();
+  });
+
+  it('asks for confirmation instead of saving blind when the agent policies lookup failed', async () => {
+    mockUseAgentPolicies.mockReturnValue({
+      data: { agentPoliciesById: {}, groupsByPackagePolicyId: {}, groupIdByPolicyId: {} },
+      isFetching: false,
+      isError: true,
+    });
+    const { getByTestId } = renderWithContext(
+      <PackForm
+        editMode
+        defaultValue={{
+          saved_object_id: 'unknown-count-pack',
+          id: 'unknown-count-pack',
+          name: 'unknown-count-pack',
+          description: '',
+          created_at: '2024-01-01',
+          created_by: 'test-user',
+          updated_at: '2024-01-01',
+          updated_by: 'test-user',
+          references: [],
+          enabled: true,
+          queries: {},
+          policy_ids: ['A'],
+        }}
+      />
+    );
+
+    fireEvent.click(getByTestId('update-pack-button'));
+    await waitFor(() => expect(getByTestId('confirmModalConfirmButton')).toBeInTheDocument());
+    expect(mockUpdateAsync).not.toHaveBeenCalled();
+  });
+
+  it('keeps an edit that sets a shard back to its loaded value', async () => {
+    mockUseAgentPolicies.mockReturnValue({
+      data: {
+        agentPoliciesById: { A: { id: 'A', name: 'Alpha', agents: 0 } },
+        groupsByPackagePolicyId: {},
+        groupIdByPolicyId: {},
+      },
+      isFetching: false,
+      isError: false,
+    });
+    const { getByTestId } = renderWithContext(
+      <PackForm
+        editMode
+        defaultValue={{
+          saved_object_id: 'undo-pack',
+          id: 'undo-pack',
+          name: 'undo-pack',
+          description: '',
+          created_at: '2024-01-01',
+          created_by: 'test-user',
+          updated_at: '2024-01-01',
+          updated_by: 'test-user',
+          references: [],
+          enabled: true,
+          queries: {},
+          policy_ids: ['A'],
+          shards: { A: 25 },
+        }}
+      />
+    );
+
+    const percentage = within(getByTestId('packShardsForm-0')).getByRole('spinbutton');
+    fireEvent.change(percentage, { target: { value: '50' } });
+    await waitFor(() => expect(percentage).toHaveValue(50));
+    fireEvent.change(percentage, { target: { value: '25' } });
+    await waitFor(() => expect(percentage).toHaveValue(25));
+
+    fireEvent.click(getByTestId('update-pack-button'));
+    await waitFor(() => expect(mockUpdateAsync).toHaveBeenCalled());
+    expect(mockUpdateAsync.mock.calls[0][0].shards).toEqual({ A: 25 });
+  });
+
+  it('keeps the shard of a policy Fleet still delivers when saved policy_ids is empty', async () => {
+    mockUseAgentPolicies.mockReturnValue({
+      data: {
+        agentPoliciesById: { A: { id: 'A', name: 'Alpha', agents: 0 } },
+        groupsByPackagePolicyId: {},
+        groupIdByPolicyId: {},
+      },
+      isFetching: false,
+      isError: false,
+    });
+    const { getByTestId } = renderWithContext(
+      <PackForm
+        editMode
+        defaultValue={{
+          saved_object_id: 'drifted-shard-pack',
+          id: 'drifted-shard-pack',
+          name: 'drifted-shard-pack',
+          description: '',
+          created_at: '2024-01-01',
+          created_by: 'test-user',
+          updated_at: '2024-01-01',
+          updated_by: 'test-user',
+          references: [],
+          enabled: true,
+          queries: {},
+          // Legacy pack: references lost A, but Fleet still runs the pack on A at 25%.
+          policy_ids: [],
+          effective_policy_ids: ['A'],
+          shards: { A: 25 },
+        }}
+      />
+    );
+
+    fireEvent.click(getByTestId('update-pack-button'));
+    await waitFor(() => expect(mockUpdateAsync).toHaveBeenCalled());
+    expect(mockUpdateAsync.mock.calls[0][0].policy_ids).toEqual(['A']);
+    expect(mockUpdateAsync.mock.calls[0][0].shards).toEqual({ A: 25 });
+  });
+
   it('sets 25% for a shared integration and submits member shards', async () => {
     mockUseAgentPolicies.mockReturnValue({
       data: {

@@ -290,15 +290,19 @@ const PacksTableComponent = ({ hasAssetsToInstall }: { hasAssetsToInstall?: bool
               ? item.effective_policy_ids ?? policyIds
               : policyIds;
           const effectiveCount = effectiveIds?.length ?? 0;
+          // Count by identity, not by length: an effective set can drop a saved policy
+          // and add others without changing its size.
+          const savedIds = new Set(policyIds ?? []);
+          const extraCount = (effectiveIds ?? []).filter((id) => !savedIds.has(id)).length;
 
-          if (effectiveCount > (policyIds?.length ?? 0)) {
+          if (extraCount > 0) {
             const breakdown = i18n.translate(
               'xpack.osquery.packs.table.effectivePoliciesBreakdownTooltip',
               {
                 defaultMessage: '{selected} selected + {extra} via shared integration',
                 values: {
-                  selected: policyIds?.length ?? 0,
-                  extra: effectiveCount - (policyIds?.length ?? 0),
+                  selected: effectiveCount - extraCount,
+                  extra: extraCount,
                 },
               }
             );

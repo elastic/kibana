@@ -75,6 +75,7 @@ export const useCreatePack = ({ withRedirect }: UseCreatePackProps) => {
           toasts,
           queryClient,
           getUrlForApp,
+          navigateToApp,
           startServices,
         });
       },

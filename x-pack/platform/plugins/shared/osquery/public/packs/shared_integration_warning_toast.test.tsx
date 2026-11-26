@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import { QueryClient } from '@kbn/react-query';
 import { I18nProvider } from '@kbn/i18n-react';
 
@@ -21,6 +21,8 @@ jest.mock('@kbn/react-kibana-mount', () => ({
 const getUrlForApp = jest.fn(
   (app: string, { path }: { path?: string } = {}) => `/app/${app}${path}`
 );
+
+const navigateToApp = jest.fn();
 
 const names: Record<string, string> = {
   'policy-a': 'Policy A',
@@ -52,6 +54,7 @@ describe('addSharedIntegrationWarningToasts', () => {
       toasts,
       queryClient,
       getUrlForApp: getUrlForApp as never,
+      navigateToApp: navigateToApp as never,
       startServices: {} as never,
     });
 
@@ -127,7 +130,7 @@ describe('addSharedIntegrationWarningToasts', () => {
     expect(getUrlForApp).not.toHaveBeenCalled();
   });
 
-  it('shows one capped toast per warning, each naming its own integration', () => {
+  it('shows every warning in one toast, each naming its own integration', () => {
     run(
       [
         warning(['policy-a', 'policy-b', 'policy-c', 'policy-d'], {
@@ -141,13 +144,21 @@ describe('addSharedIntegrationWarningToasts', () => {
       'pack-1'
     );
 
-    expect(toasts.addWarning).toHaveBeenCalledTimes(2);
-    const first = renderToast(0).container.textContent;
-    expect(first).toContain('Integration One');
-    expect(first).toContain('and 1 more');
-    const second = renderToast(1).container.textContent;
-    expect(second).toContain('Integration Two');
-    expect(second).toContain('Policy E');
-    expect(second).not.toContain('more');
+    // Kibana merges toasts with the same title and mount-function source, so one toast
+    // must carry both integrations.
+    expect(toasts.addWarning).toHaveBeenCalledTimes(1);
+    const text = renderToast(0).container.textContent;
+    expect(text).toContain('Integration One');
+    expect(text).toContain('Policy A, Policy B, Policy C and 1 more');
+    expect(text).toContain('Integration Two');
+    expect(text).toContain('Policy E');
+  });
+
+  it('navigates in the app when the pack link is clicked', () => {
+    run([warning(['policy-a'])], 'pack-1');
+    renderToast();
+
+    fireEvent.click(screen.getByTestId('sharedIntegrationWarningToastPackLink'));
+    expect(navigateToApp).toHaveBeenCalledWith('osquery', { path: '/packs/pack-1/edit' });
   });
 });

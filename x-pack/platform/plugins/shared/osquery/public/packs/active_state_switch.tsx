@@ -36,6 +36,7 @@ const ActiveStateSwitchComponent: React.FC<ActiveStateSwitchProps> = ({ item }) 
     application: {
       capabilities: { osquery: permissions },
       getUrlForApp,
+      navigateToApp,
     },
     notifications: { toasts },
     analytics,
@@ -101,6 +102,7 @@ const ActiveStateSwitchComponent: React.FC<ActiveStateSwitchProps> = ({ item }) 
           toasts,
           queryClient,
           getUrlForApp,
+          navigateToApp,
           startServices,
         });
       },

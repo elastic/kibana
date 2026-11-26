@@ -86,6 +86,15 @@ describe('shared integration shards', () => {
     expect(convertShardsToObject(rows, groups)).toEqual({ A: 10 });
   });
 
+  it('also writes the row shard for a member selected after the row was loaded', () => {
+    const rows = convertShardsToArray({ A: 10 }, policies, groups);
+    expect(rows[0].policy.memberIds).toEqual(['A']);
+    const edited = [{ ...rows[0], percentage: 25 }];
+
+    expect(convertShardsToObject(edited, groups, ['B'])).toEqual({ A: 25, B: 25 });
+    expect(convertShardsToObject(edited, groups, [])).toEqual({ A: 25 });
+  });
+
   it('serializes member ids, not the integration id, when the group disappears mid-edit', () => {
     expect(
       convertShardsToObject(
