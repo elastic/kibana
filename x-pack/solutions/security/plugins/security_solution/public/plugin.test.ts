@@ -7,6 +7,7 @@
 
 import { Subject } from 'rxjs';
 import type { App, AppDeepLink, AppUpdater } from '@kbn/core/public';
+import type { NavigationTreeDefinition } from '@kbn/core-chrome-browser';
 import { coreMock } from '@kbn/core/public/mocks';
 import type { ILicense } from '@kbn/licensing-types';
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
@@ -42,7 +43,10 @@ jest.mock('./app/links', () => ({
 
 const LEGACY_SIEM_APP_ID = 'siem';
 
-const startPlugin = ({ accessible = true }: { accessible?: boolean } = {}) => {
+const startPlugin = ({
+  accessible = true,
+  navigationTree,
+}: { accessible?: boolean; navigationTree?: NavigationTreeDefinition } = {}) => {
   const coreSetup = coreMock.createSetup();
   const coreStart = coreMock.createStart();
 
@@ -88,7 +92,12 @@ const startPlugin = ({ accessible = true }: { accessible?: boolean } = {}) => {
     }
   });
 
-  plugin.start(coreStart, { licensing: { license$ } } as unknown as StartPlugins);
+  const { setSolutionNavigationTree } = plugin.start(coreStart, {
+    licensing: { license$ },
+  } as unknown as StartPlugins);
+  if (navigationTree) {
+    setSolutionNavigationTree(navigationTree);
+  }
 
   return { legacySiemApp, license$, registeredDeepLinks };
 };
@@ -140,9 +149,16 @@ describe('Security Solution plugin', () => {
   });
 
   describe('deepLinks', () => {
-    it('registers the alerts and attacks alignment links while the filtered links are still pending', async () => {
+    it('shows Detections and hides Attack Discovery in the project side nav while the filtered links are still pending', async () => {
       (getFilteredLinks as jest.Mock).mockReturnValue(new Promise(() => {}));
-      const { license$, registeredDeepLinks } = startPlugin();
+      const { license$, registeredDeepLinks } = startPlugin({
+        navigationTree: {
+          body: [
+            { id: SecurityPageName.alertDetections },
+            { id: SecurityPageName.attackDiscovery },
+          ],
+        },
+      });
       await jest.advanceTimersByTimeAsync(1000);
       const registeredBeforeLicense = registeredDeepLinks.length;
 
@@ -153,8 +169,11 @@ describe('Security Solution plugin', () => {
       expect(registeredDeepLinks.length).toBeGreaterThan(registeredBeforeLicense);
       const deepLinks = registeredDeepLinks[registeredDeepLinks.length - 1];
       const deepLinkIds = deepLinks.map(({ id }) => id);
-      expect(deepLinkIds).toContain(SecurityPageName.alertDetections);
       expect(deepLinkIds).not.toContain(SecurityPageName.alerts);
+      const detectionsDeepLink = deepLinks.find(
+        ({ id }) => id === SecurityPageName.alertDetections
+      );
+      expect(detectionsDeepLink?.visibleIn).toContain('projectSideNav');
       const attackDiscoveryDeepLink = deepLinks.find(
         ({ id }) => id === SecurityPageName.attackDiscovery
       );
