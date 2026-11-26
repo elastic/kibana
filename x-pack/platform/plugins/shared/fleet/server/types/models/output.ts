@@ -17,6 +17,7 @@ import {
   kafkaPartitionType,
   kafkaSaslMechanism,
   kafkaVerificationModes,
+  KAFKA_KERBEROS_USERNAME_MAX_LENGTH,
   MAX_HOSTS,
   otlpCompressionType,
   otlpProtocol,
@@ -363,14 +364,14 @@ const KafkaKerberosSchema = schema.object({
       },
     })
   ),
-  username: schema.maybe(
-    schema.string({
-      meta: {
-        description:
-          'Kerberos username. Required when `auth_type` is `password`; the password is set in `secrets.kerberos.password`.',
-      },
-    })
-  ),
+  username: schema.string({
+    minLength: 1,
+    maxLength: KAFKA_KERBEROS_USERNAME_MAX_LENGTH,
+    meta: {
+      description:
+        'Kerberos username (the principal). Required. When `auth_type` is `keytab`, it is the principal to look up in the keytab file; when it is `password`, the password is set in `secrets.kerberos.password`.',
+    },
+  }),
   service_name: schema.maybe(
     schema.string({ meta: { description: 'Kerberos service name of the Kafka brokers.' } })
   ),

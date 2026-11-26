@@ -18,7 +18,8 @@ import {
   mockManagedIntegrations,
 } from '../helpers/policy_updates';
 
-test.describe(
+// Failing: See https://github.com/elastic/kibana/issues/306675
+test.describe.skip(
   'Onboarding — managed integrations add a service to the existing package policy',
   { tag: tags.stateful.classic },
   () => {
