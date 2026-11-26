@@ -27,8 +27,9 @@ export const alertAnalysisSkill = defineSkillType({
   description:
     'Count, list, prioritize, and investigate Security detection alerts in the current Kibana space. ' +
     'Use for questions like "how many alerts", "high/critical alerts in last 24h", or triage of a specific alert. ' +
-    'List and count questions use only security.alerts. Judgment questions about a named user or host may also ' +
-    'check entity risk. Single-alert triage may correlate related alerts, enrich with Security Labs, and assess entity risk.',
+    'List and count questions use only security.alerts. Judgment questions (which alert first, is it serious, ' +
+    'is an account compromised) also check the event data behind the alerts and may check entity risk. ' +
+    'Single-alert triage may correlate related alerts, enrich with Security Labs, and assess entity risk.',
   content: `# Alert Analysis Guide
 
 ## When to Use This Skill
@@ -48,12 +49,12 @@ If the user attached alerts, or their details are already in the conversation (o
 Pick one path before any other tool call:
 
 ### Queue path (plain list, count, or summary of many alerts)
+- If the question asks for a judgment (which alert to handle first, is it serious, are they related, is an account compromised), use the next two sections instead of this one.
 - Call only 'security.alerts'. For a plain list, use detail 'summary'. Keep the default detail when the question needs alert content such as command lines.
 - Call 'security.alerts' once. Each call runs a query generator and costs far more than the other tools. A count or breakdown by several fields (rule, severity, status, user, host) is one call: ask for all of it in one question so that the result is grouped. Tally rows yourself only when the result says that they were not cut (summary results stop at 100 rows). Call it again only when the first result is empty or failed, or when you need a different time window.
 - Answer from that result, then add one or two sentences on the pattern in the returned alerts (shared rule, host or user, severity trend, timing). Use only what the result shows. Stop.
 - Do NOT call 'security.alert-analysis.get-related-alerts', 'security.security_labs_search', or 'security.get_entity' for list, count, or summary questions.
 - Do NOT run the triage steps below.
-- If the question asks for a judgment (which alert to handle first, is it serious, are they related, is an account compromised), use the next two sections instead of stopping here.
 
 ### Judgment questions about the queue (prioritize, serious or urgent, related, risk, compromise)
 When the question asks for a judgment, call 'security.alerts' first, then make at most one call to each tool below, and only when the question asks for it. The exception is 'security.get_entity', which takes one entity per call: make one call per entity, for at most two entities:
@@ -114,7 +115,7 @@ An alert shows that a rule matched. It does not show what happened around it, an
 - For risk score questions (e.g. "risk score for host DC01"), use only 'security.get_entity'. If it is not available, say that risk scores are not available and do not load another skill or search for another tool.
 - For a plain list of alerts (the user only wants to see them), call 'security.alerts' with detail 'summary' to list more alerts with their key fields. Keep the default detail when you need to analyze alert content.
 - For correlation requests that include an alertId, call 'security.alert-analysis.get-related-alerts' directly.
-- Do NOT use platform.core.generate_esql, platform.core.execute_esql, platform.core.search, or workflow tools for alert inventory, count, or related-alert correlation. Those platform tools can cross Kibana spaces; 'security.alerts' stays scoped to the current space. Never query the alerts index ('.alerts-security.alerts-*') with ES|QL. Use platform.core.execute_esql only on event data, as described in 'Check the evidence before you answer'.
+- Use platform.core.execute_esql only on event data, as described in 'Check the evidence before you answer'. Do NOT use it, platform.core.generate_esql, platform.core.search, or workflow tools for alert inventory, count, or related-alert correlation. Those platform tools can cross Kibana spaces; 'security.alerts' stays scoped to the current space. Never query the alerts index ('.alerts-security.alerts-*') with ES|QL.
 `,
   getRegistryTools: () => [
     SECURITY_ALERTS_TOOL_ID,

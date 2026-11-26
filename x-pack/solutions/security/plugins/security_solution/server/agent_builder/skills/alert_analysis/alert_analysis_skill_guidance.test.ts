@@ -27,6 +27,15 @@ jest.mock('@kbn/agent-builder-genai-utils/tools', () => ({
   runSearchTool: jest.fn(),
 }));
 
+/** Returns the text between two headings. Fails the test when a heading was renamed, so that the checks on the slice cannot pass on an empty string. */
+const sliceBetween = (content: string, startHeading: string, endHeading?: string): string => {
+  const start = content.indexOf(startHeading);
+  const end = endHeading === undefined ? content.length : content.indexOf(endHeading);
+  expect(start).toBeGreaterThanOrEqual(0);
+  expect(end).toBeGreaterThan(start);
+  return content.slice(start, end);
+};
+
 /**
  * Reproduction for https://github.com/elastic/security-team/issues/20696
  *
@@ -45,7 +54,7 @@ describe('alertAnalysisSkill guidance for literal-following models (security-tea
 
   it('does not tell the model to refetch an alert that is already attached', () => {
     const { content } = alertAnalysisSkill;
-    const step1 = content.slice(content.indexOf('### 1.'), content.indexOf('### 2.'));
+    const step1 = sliceBetween(content, '### 1.', '### 2.');
 
     // Why: an unconditional "fetch the alert using security.alerts" makes GPT turn an attached
     // alert into an NL -> ES|QL `_id` lookup, a full scan that timed out for ~260s in the thread.
@@ -62,10 +71,7 @@ describe('alertAnalysisSkill guidance for literal-following models (security-tea
   // security.alerts.
   it('tells the model to stop after security.alerts on list/count questions', () => {
     const { content } = alertAnalysisSkill;
-    const queuePath = content.slice(
-      content.indexOf('### Queue path'),
-      content.indexOf('### Judgment questions')
-    );
+    const queuePath = sliceBetween(content, '### Queue path', '### Judgment questions');
 
     expect(queuePath).toMatch(/call only 'security\.alerts'/i);
     expect(queuePath).toMatch(/\bStop\./);
@@ -78,10 +84,7 @@ describe('alertAnalysisSkill guidance for literal-following models (security-tea
   // live queue results.
   it('keeps attached alerts, one or a set, out of the queue lookup', () => {
     const { content } = alertAnalysisSkill;
-    const chooser = content.slice(
-      content.indexOf('## Choose a Path First'),
-      content.indexOf('### Queue path')
-    );
+    const chooser = sliceBetween(content, '## Choose a Path First', '### Queue path');
 
     expect(chooser).toMatch(
       /attached alerts[^\n]*\(one alert or a set\)[^\n]*do not fetch them again/i
@@ -93,10 +96,7 @@ describe('alertAnalysisSkill guidance for literal-following models (security-tea
   // same time, so the model had two opposite instructions for "which alert do I handle first".
   it('sends judgment questions out of the queue path instead of stopping', () => {
     const { content } = alertAnalysisSkill;
-    const queuePath = content.slice(
-      content.indexOf('### Queue path'),
-      content.indexOf('### Judgment questions')
-    );
+    const queuePath = sliceBetween(content, '### Queue path', '### Judgment questions');
 
     expect(content).toMatch(/### Queue path \(plain list, count, or summary/i);
     expect(queuePath).not.toMatch(/prioritize/i);
@@ -107,7 +107,7 @@ describe('alertAnalysisSkill guidance for literal-following models (security-tea
   // the evidence step for "which alert do I handle first".
   it('does not tell the guardrails to answer prioritization from security.alerts alone', () => {
     const { content } = alertAnalysisSkill;
-    const guardrails = content.slice(content.indexOf('## Tool Selection Guardrails'));
+    const guardrails = sliceBetween(content, '## Tool Selection Guardrails');
 
     expect(guardrails).not.toMatch(/prioritization/i);
     expect(guardrails).toMatch(/judgment questions[^\n]*check the evidence before you answer/i);
@@ -117,10 +117,7 @@ describe('alertAnalysisSkill guidance for literal-following models (security-tea
   // was ~70% of the extra input tokens, and the model called the tool ~2.8 times per run.
   it('tells the model to call security.alerts once and ask for grouped breakdowns', () => {
     const { content } = alertAnalysisSkill;
-    const queuePath = content.slice(
-      content.indexOf('### Queue path'),
-      content.indexOf('### Judgment questions')
-    );
+    const queuePath = sliceBetween(content, '### Queue path', '### Judgment questions');
 
     expect(queuePath).toMatch(/call 'security\.alerts' once/i);
     expect(queuePath).toMatch(/ask for all of it in one question so that the result is grouped/i);
@@ -133,9 +130,10 @@ describe('alertAnalysisSkill guidance for literal-following models (security-tea
   // alert severity alone (security-team#21037, question 14). Threshold alerts also carry no host or IP.
   it('tells the model to check the events behind the alerts on judgment questions', () => {
     const { content } = alertAnalysisSkill;
-    const evidence = content.slice(
-      content.indexOf('### Check the evidence before you answer'),
-      content.indexOf('### Triage path')
+    const evidence = sliceBetween(
+      content,
+      '### Check the evidence before you answer',
+      '### Triage path'
     );
 
     expect(evidence).toMatch(/"on fire"/i);
@@ -150,9 +148,10 @@ describe('alertAnalysisSkill guidance for literal-following models (security-tea
   // on fire" (question 14).
   it('bounds the ES|QL evidence step and keeps it off the alerts index', () => {
     const { content } = alertAnalysisSkill;
-    const evidence = content.slice(
-      content.indexOf('### Check the evidence before you answer'),
-      content.indexOf('### Triage path')
+    const evidence = sliceBetween(
+      content,
+      '### Check the evidence before you answer',
+      '### Triage path'
     );
 
     expect(evidence).toMatch(/never the alerts index/i);
@@ -171,10 +170,7 @@ describe('alertAnalysisSkill guidance for literal-following models (security-tea
 
   it('limits entity and related-alert lookups on judgment questions', () => {
     const { content } = alertAnalysisSkill;
-    const judgment = content.slice(
-      content.indexOf('### Judgment questions'),
-      content.indexOf('### Check the evidence')
-    );
+    const judgment = sliceBetween(content, '### Judgment questions', '### Check the evidence');
 
     expect(judgment).toMatch(/at most one call to each tool/i);
     expect(judgment).toMatch(/exception is 'security\.get_entity'[^\n]*one call per entity/i);
@@ -187,10 +183,7 @@ describe('alertAnalysisSkill guidance for literal-following models (security-tea
   // from checking both the user and the host.
   it('allows one get_entity call per entity on the triage path', () => {
     const { content } = alertAnalysisSkill;
-    const triage = content.slice(
-      content.indexOf('### Triage path'),
-      content.indexOf('## Triage Steps')
-    );
+    const triage = sliceBetween(content, '### Triage path', '## Triage Steps');
 
     expect(triage).toMatch(
       /exception is 'security\.get_entity'[^\n]*one call for each involved user or host/i
@@ -202,7 +195,7 @@ describe('alertAnalysisSkill guidance for literal-following models (security-tea
   // PR #304299 made Claude call it on every triage run (0.07 → 2.0); keep it triage-only.
   it('says what to do when security.get_entity is not available', () => {
     const { content } = alertAnalysisSkill;
-    const step4 = content.slice(content.indexOf('### 4.'), content.indexOf('### 5.'));
+    const step4 = sliceBetween(content, '### 4.', '### 5.');
 
     expect(step4).toMatch(/on the triage path\. skip it for list, count/i);
     expect(step4).toMatch(/if 'security\.get_entity' is available/i);
