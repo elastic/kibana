@@ -318,6 +318,41 @@ apiTest.describe('Index templates API', { tag: tags.deploymentAgnostic }, () => 
     }
   );
 
+  apiTest(
+    'creates and updates a data stream template with data_stream_options',
+    async ({ apiClient }) => {
+      const payload = getTemplatePayload({
+        name: TEMPLATE_NAME,
+        indexPatterns: INDEX_PATTERNS,
+        serverless,
+      });
+      const dataStreamOptions = { failure_store: { enabled: true } };
+      expect(
+        await createTemplate(apiClient, {
+          ...payload,
+          dataStream: {},
+          template: { ...payload.template, data_stream_options: dataStreamOptions },
+          _kbnMeta: { ...payload._kbnMeta, hasDatastream: true },
+        })
+      ).toHaveStatusCode(200);
+
+      const created = await getTemplate(apiClient, TEMPLATE_NAME);
+      expect(created).toHaveStatusCode(200);
+      expect(created.body.template.data_stream_options).toStrictEqual(dataStreamOptions);
+
+      // The UI sends back the full template, including data_stream_options, when editing.
+      const response = await apiClient.put(`${API_BASE_PATH}/index_templates/${TEMPLATE_NAME}`, {
+        headers: { ...COMMON_HEADERS, ...credentials.apiKeyHeader },
+        responseType: 'json',
+        body: JSON.stringify({ ...created.body, version: 2 }),
+      });
+      expect(response).toHaveStatusCode(200);
+
+      const updated = await getTemplate(apiClient, TEMPLATE_NAME);
+      expect(updated.body.template.data_stream_options).toStrictEqual(dataStreamOptions);
+    }
+  );
+
   apiTest('updates a deprecated index template', async ({ apiClient }) => {
     const payload: TemplateDeserialized = {
       _kbnMeta: { hasDatastream: false, type: 'default' },
