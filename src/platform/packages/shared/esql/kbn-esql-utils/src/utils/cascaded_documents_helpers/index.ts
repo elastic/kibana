@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type AggregateQuery } from '@kbn/es-query';
+import { getDataViewFieldSubtypeMulti, type AggregateQuery } from '@kbn/es-query';
 import {
   BasicPrettyPrinter,
   Builder,
@@ -381,6 +381,7 @@ export const constructCascadeQuery = ({
             EditorESQLQuery,
             operatingStatsCommandIndex,
             groupValue,
+            dataView.fields,
             esqlVariables,
             nodePathMap
           );
@@ -510,6 +511,7 @@ function handleStatsByCategorizeLeafOperation(
   editorQuery: EsqlQuery,
   operatingStatsCommandIndex: number,
   categorizeCommandNode: FieldSummary,
+  dataViewFields: DataView['fields'],
   esqlVariables: ESQLControlVariable[] | undefined,
   nodePathMap: Record<string, string>
 ): AggregateQuery {
@@ -568,10 +570,21 @@ function handleStatsByCategorizeLeafOperation(
   }
 
   const matchValue = nodePathMap[removeBackticks(categorizeCommandNode.field)];
-  // Strip the keyword multi-field suffix to search the text field for individual tokens.
-  const matchField = Builder.identifier({ name: categorizedFieldName.replace(/\.keyword\b/i, '') });
-  // An indexed MATCH cannot run after LIMIT. Convert through keyword to search the remaining rows as text.
-  const matchTarget = cascadeOperationQuery.ast.commands.some(({ name }) => name === 'limit')
+  const field = dataViewFields.getByName(categorizedFieldName);
+  const isKeywordSuffix =
+    /\.keyword$/i.test(categorizedFieldName) && field?.esTypes?.includes('keyword');
+  const parentName =
+    isKeywordSuffix && field ? getDataViewFieldSubtypeMulti(field)?.multi.parent : undefined;
+  const parentTypes = parentName ? dataViewFields.getByName(parentName)?.esTypes : undefined;
+  const textParent = parentTypes?.some((type) => type === 'text' || type === 'match_only_text')
+    ? parentName
+    : undefined;
+  const matchField = Builder.identifier({ name: textParent ?? categorizedFieldName });
+  // Runtime matching searches after LIMIT and can tokenize keyword fields whose text parent is unknown.
+  const requiresRuntimeMatch =
+    (isKeywordSuffix && !textParent) ||
+    cascadeOperationQuery.ast.commands.some(({ name }) => name === 'limit');
+  const matchTarget = requiresRuntimeMatch
     ? Builder.expression.func.call('to_text', [
         Builder.expression.func.call('to_string', [matchField]),
       ])

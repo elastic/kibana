@@ -10,7 +10,7 @@
 import { EsqlQuery } from '@elastic/esql';
 import type { AggregateQuery } from '@kbn/es-query';
 import { type ESQLControlVariable, ESQLVariableType } from '@kbn/esql-types';
-import type { DataViewField } from '@kbn/data-views-plugin/common';
+import type { DataViewField, FieldSpec } from '@kbn/data-views-plugin/common';
 import { createStubDataView } from '@kbn/data-views-plugin/common/stubs';
 import {
   getESQLStatsQueryMeta,
@@ -629,6 +629,14 @@ describe('cascaded documents helpers utils', () => {
 
       describe('function group operations', () => {
         describe('categorize operation', () => {
+          const messageField: FieldSpec = {
+            name: 'message',
+            type: 'string',
+            esTypes: ['text'],
+            searchable: true,
+            aggregatable: false,
+          };
+
           it('should throw an error if we attempt to construct a cascade query if the query contains a categorize function with a function argument', () => {
             const editorQuery: AggregateQuery = {
               esql: `
@@ -764,10 +772,24 @@ describe('cascaded documents helpers utils', () => {
 
             const nodePath = ['Pattern'];
             const nodePathMap = { Pattern: 'some random pattern' };
+            const dataView = createStubDataView({
+              spec: {
+                fields: {
+                  message: messageField,
+                  'message.keyword': {
+                    ...messageField,
+                    name: 'message.keyword',
+                    esTypes: ['keyword'],
+                    aggregatable: true,
+                    subType: { multi: { parent: 'message' } },
+                  },
+                },
+              },
+            });
 
             const cascadeQuery = constructCascadeQuery({
               query: editorQuery,
-              dataView: dataViewMock,
+              dataView,
               esqlVariables: [],
               nodeType,
               nodePath,
@@ -779,6 +801,42 @@ describe('cascaded documents helpers utils', () => {
               'FROM kibana_sample_data_logs | WHERE MATCH(message, "some random pattern", {"auto_generate_synonyms_phrase_query": FALSE, "fuzziness": 0, "operator": "AND"})'
             );
           });
+
+          it.each([
+            ['event.keyword.message', 'text', '`event.keyword.message`'],
+            ['message.keyword', 'text', '`message.keyword`'],
+            ['message.keyword', 'keyword', 'TO_TEXT(TO_STRING(`message.keyword`))'],
+          ])(
+            'matches the original field %s of type %s without multi-field metadata',
+            (name, esType, target) => {
+              const dataView = createStubDataView({
+                spec: {
+                  fields: {
+                    message: messageField,
+                    [name]: {
+                      ...messageField,
+                      name,
+                      esTypes: [esType],
+                      aggregatable: esType === 'keyword',
+                    },
+                  },
+                },
+              });
+
+              const cascadeQuery = constructCascadeQuery({
+                query: {
+                  esql: `FROM logs-* | STATS Count = COUNT(*) BY Pattern = CATEGORIZE(${name})`,
+                },
+                dataView,
+                esqlVariables: [],
+                nodeType,
+                nodePath: ['Pattern'],
+                nodePathMap: { Pattern: '.*?payment.*?' },
+              });
+
+              expect(cascadeQuery?.esql).toContain(`WHERE MATCH(${target}, "payment",`);
+            }
+          );
 
           it('generates a valid cascade leaf query for a valid stats command that has a parameter value for a grouping option in an un-named categorize function', () => {
             const editorQuery: AggregateQuery = {
