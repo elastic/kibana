@@ -60,7 +60,7 @@
   "sources": {
     "v1": {
       "apiVersion": "1.0.0",
-      "fetchedAt": "2026-10-07T20:21:06.970Z",
+      "fetchedAt": "2026-11-23T11:10:33.026Z",
       "format": "openapi",
       "url": "https://developers.notion.com/openapi.json"
     }

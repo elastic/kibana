@@ -15,6 +15,8 @@ import {
   EuiFlexItem,
   EuiLoadingSpinner,
   EuiSpacer,
+  EuiTab,
+  EuiTabs,
   EuiText,
 } from '@elastic/eui';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
@@ -24,10 +26,19 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { Adapters, Request } from '@kbn/inspector-plugin/public';
 import type { ISearchStart } from '../../search';
 import type { QueryProfileView as QueryProfileViewModel } from './profile/types';
+import { ByCommandTab, computeCommandHeat, hasCommandBreakdown } from './by_command/by_command_tab';
+import type { QueryHeat } from './by_command/map_operators_to_commands';
 import { listEsqlInspectorRequests } from './esql_inspector_requests';
 import { loadEsqlQueryProfile } from './profile/load_esql_query_profile';
 import { ProfileSummary } from './profile_summary';
+import { readRequestQuery } from './shared/json_helpers';
 import { TimelineTab } from './timeline/timeline_tab';
+
+type TabId = 'timeline' | 'byCommand';
+
+/** The query of a logged request, or nothing when it has none or an empty one. */
+const readQuery = (request: Request | undefined): string | undefined =>
+  readRequestQuery(request?.json) || undefined;
 
 /** The message of a caught error, or the fallback when it has none. */
 const readErrorMessage = (caught: unknown, fallback: string): string =>
@@ -192,30 +203,74 @@ const ProfileLoading = () => (
   </EuiFlexGroup>
 );
 
-/** The timeline, or a note when the profile has no timing for its drivers. */
+/** The timeline and by-command tabs, or a note when the profile has nothing to show in them. */
 const ProfileDetails = ({
   view,
+  heat,
+  activeTab,
+  showByCommand,
   requestId,
+  onTabChange,
 }: {
   view: QueryProfileViewModel;
+  heat?: QueryHeat;
+  activeTab: TabId;
+  showByCommand: boolean;
   requestId?: string;
-}) => (
-  <>
-    <EuiSpacer size="m" />
-    {view.hasTimeline ? (
-      <TimelineTab key={requestId} view={view} />
-    ) : (
-      <EuiText size="s" color="subdued">
-        <p>
-          <FormattedMessage
-            id="data.inspector.queryProfile.noTimelineDescription"
-            defaultMessage="This profile did not include timing for individual drivers."
-          />
-        </p>
-      </EuiText>
-    )}
-  </>
-);
+  onTabChange: (tab: TabId) => void;
+}) => {
+  if (!view.hasTimeline && !showByCommand) {
+    return (
+      <>
+        <EuiSpacer size="m" />
+        <EuiText size="s" color="subdued">
+          <p>
+            <FormattedMessage
+              id="data.inspector.queryProfile.noTimelineDescription"
+              defaultMessage="This profile did not include timing for individual drivers."
+            />
+          </p>
+        </EuiText>
+      </>
+    );
+  }
+
+  return (
+    <>
+      <EuiSpacer size="m" />
+      <EuiTabs size="s" bottomBorder>
+        {view.hasTimeline ? (
+          <EuiTab
+            isSelected={activeTab === 'timeline'}
+            onClick={() => onTabChange('timeline')}
+            data-test-subj="esqlQueryProfileTimelineTab"
+          >
+            {i18n.translate('data.inspector.queryProfile.timelineTabLabel', {
+              defaultMessage: 'Timeline',
+            })}
+          </EuiTab>
+        ) : null}
+        {showByCommand ? (
+          <EuiTab
+            isSelected={activeTab === 'byCommand'}
+            onClick={() => onTabChange('byCommand')}
+            data-test-subj="esqlQueryProfileByCommandTab"
+          >
+            {i18n.translate('data.inspector.queryProfile.byCommandTabLabel', {
+              defaultMessage: 'By command',
+            })}
+          </EuiTab>
+        ) : null}
+      </EuiTabs>
+      <EuiSpacer size="m" />
+      {activeTab === 'byCommand' && heat ? (
+        <ByCommandTab heat={heat} />
+      ) : view.hasTimeline ? (
+        <TimelineTab key={requestId} view={view} />
+      ) : null}
+    </>
+  );
+};
 
 /** Re-runs a logged ES|QL request with profiling and shows where the time went. */
 export const QueryProfileView = ({
@@ -236,6 +291,7 @@ export const QueryProfileView = ({
     [requests, picked]
   );
   const [reloadKey, setReloadKey] = useState(0);
+  const [tab, setTab] = useState<TabId>('timeline');
   const { view, error, profiledRequest, loading } = useQueryProfile(
     search,
     selected,
@@ -248,6 +304,15 @@ export const QueryProfileView = ({
   );
   // The inspected panel fetched again since the profile was taken, or its request is gone.
   const hasRequestChanged = Boolean(profiledRequest && selected?.json !== profiledRequest.json);
+  // The commands have to be those of the query that was profiled, which can differ from the selected one.
+  const query = readQuery(profiledRequest);
+  const heat = useMemo(
+    () => (view && query ? computeCommandHeat(view, query) : undefined),
+    [view, query]
+  );
+  const showByCommand = hasCommandBreakdown(heat);
+  const activeTab =
+    showByCommand && (tab === 'byCommand' || !view?.hasTimeline) ? 'byCommand' : 'timeline';
 
   return (
     <div data-test-subj="esqlQueryProfile">
@@ -325,7 +390,14 @@ export const QueryProfileView = ({
       ) : view ? (
         <>
           <ProfileSummary view={view} />
-          <ProfileDetails view={view} requestId={profiledRequest?.id} />
+          <ProfileDetails
+            view={view}
+            heat={heat}
+            activeTab={activeTab}
+            showByCommand={showByCommand}
+            requestId={profiledRequest?.id}
+            onTabChange={setTab}
+          />
         </>
       ) : !selected?.json && !loading ? (
         <EuiText size="s" color="subdued" data-test-subj="esqlQueryProfileNoRequest">

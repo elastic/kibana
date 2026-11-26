@@ -35,9 +35,9 @@ const JOURNEY_EVENT_NAMES = [
   'browser.user_action.click',
   'exception',
   'browser.web_vital',
-  'browser.frustration.rage_click',
-  'browser.frustration.dead_click',
-  'browser.frustration.error_click',
+  'elastic.frustration.rage_click',
+  'elastic.frustration.dead_click',
+  'elastic.frustration.error_click',
 ];
 
 /** Raw events as the `fields` option returns them: arrays of values by dotted name. */
@@ -184,11 +184,11 @@ describe('buildTimeline frustration signals', () => {
   it('lists them as frustration events with the selector and, for rage clicks, the click count', () => {
     const timeline = buildTimeline(
       [
-        frustration('browser.frustration.rage_click', {
-          'attributes.browser.frustration.click_count': [5],
+        frustration('elastic.frustration.rage_click', {
+          'attributes.elastic.frustration.click_count': [5],
         }),
-        frustration('browser.frustration.dead_click'),
-        frustration('browser.frustration.error_click', {
+        frustration('elastic.frustration.dead_click'),
+        frustration('elastic.frustration.error_click', {
           'attributes.exception.message': ['x is undefined'],
         }),
         {
@@ -206,19 +206,19 @@ describe('buildTimeline frustration signals', () => {
     ).toEqual([
       {
         kind: 'frustration',
-        name: 'browser.frustration.rage_click',
+        name: 'elastic.frustration.rage_click',
         detail: '#pay',
         clickCount: 5,
       },
       {
         kind: 'frustration',
-        name: 'browser.frustration.dead_click',
+        name: 'elastic.frustration.dead_click',
         detail: '#pay',
         clickCount: null,
       },
       {
         kind: 'frustration',
-        name: 'browser.frustration.error_click',
+        name: 'elastic.frustration.error_click',
         detail: '#pay',
         clickCount: null,
       },
@@ -230,7 +230,7 @@ describe('buildTimeline frustration signals', () => {
   it('falls back to the XPath when there is no selector', () => {
     const [event] = buildTimeline(
       [
-        frustration('browser.frustration.dead_click', {
+        frustration('elastic.frustration.dead_click', {
           'attributes.browser.css_selector': undefined,
           'attributes.target_xpath': ['//*[@id="pay"]'],
         }),
@@ -244,7 +244,7 @@ describe('buildTimeline frustration signals', () => {
   it('carries the exception of an error click, and its trace, but none for the others', () => {
     const [errorClick, rageClick] = buildTimeline(
       [
-        frustration('browser.frustration.error_click', {
+        frustration('elastic.frustration.error_click', {
           'attributes.exception.type': ['TypeError'],
           'attributes.exception.message': ['cart is undefined'],
           'attributes.exception.stacktrace': [
@@ -253,7 +253,7 @@ describe('buildTimeline frustration signals', () => {
           trace_id: ['t1'],
           span_id: ['s1'],
         }),
-        frustration('browser.frustration.rage_click'),
+        frustration('elastic.frustration.rage_click'),
       ],
       startMs
     );
@@ -274,7 +274,7 @@ describe('buildTimeline frustration signals', () => {
   it('keeps an exception without a type or stack trace, as a thrown string reports it', () => {
     const [event] = buildTimeline(
       [
-        frustration('browser.frustration.error_click', {
+        frustration('elastic.frustration.error_click', {
           'attributes.exception.message': ['out of stock'],
         }),
       ],
@@ -299,8 +299,8 @@ describe('buildPageVisits', () => {
           event_name: ['browser.user_action.click'],
           'attributes.browser.css_selector': ['#pay'],
         },
-        frustration('browser.frustration.rage_click'),
-        frustration('browser.frustration.dead_click'),
+        frustration('elastic.frustration.rage_click'),
+        frustration('elastic.frustration.dead_click'),
       ],
       startMs,
       at(10_000)
@@ -515,7 +515,7 @@ describe('getSession', () => {
         'attributes.browser.web_vital.value',
         'attributes.exception.message',
         'resource.attributes.exception.message',
-        'attributes.browser.frustration.click_count',
+        'attributes.elastic.frustration.click_count',
       ])
     );
   });
