@@ -149,6 +149,30 @@ describe('Security Solution plugin', () => {
   });
 
   describe('deepLinks', () => {
+    it('shows Detections and hides Attack Discovery in the classic side nav while the filtered links are still pending', async () => {
+      (getFilteredLinks as jest.Mock).mockReturnValue(new Promise(() => {}));
+      const { license$, registeredDeepLinks } = startPlugin();
+      await jest.advanceTimersByTimeAsync(1000);
+      const registeredBeforeLicense = registeredDeepLinks.length;
+
+      license$.next(licensingMock.createLicense({ license: { type: 'enterprise' } }));
+      await jest.advanceTimersByTimeAsync(1000);
+
+      expect(getFilteredLinks).toHaveBeenCalledTimes(1);
+      expect(registeredDeepLinks.length).toBeGreaterThan(registeredBeforeLicense);
+      const deepLinks = registeredDeepLinks[registeredDeepLinks.length - 1];
+      const deepLinkIds = deepLinks.map(({ id }) => id);
+      expect(deepLinkIds).not.toContain(SecurityPageName.alerts);
+      const detectionsDeepLink = deepLinks.find(
+        ({ id }) => id === SecurityPageName.alertDetections
+      );
+      expect(detectionsDeepLink?.visibleIn).toContain('classicSideNav');
+      const attackDiscoveryDeepLink = deepLinks.find(
+        ({ id }) => id === SecurityPageName.attackDiscovery
+      );
+      expect(attackDiscoveryDeepLink?.visibleIn).toEqual([]);
+    });
+
     it('shows Detections and hides Attack Discovery in the project side nav while the filtered links are still pending', async () => {
       (getFilteredLinks as jest.Mock).mockReturnValue(new Promise(() => {}));
       const { license$, registeredDeepLinks } = startPlugin({
