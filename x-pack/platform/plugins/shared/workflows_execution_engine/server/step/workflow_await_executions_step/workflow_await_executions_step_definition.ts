@@ -32,6 +32,7 @@ import type { WorkflowExecutionRepository } from '../../repositories/workflow_ex
 import { hasExecutionChain } from '../../utils';
 import {
   areParallelBranchesCompatible,
+  buildStepIoContextId,
   getScopeInstances,
 } from '../../workflow_context_manager/parallel_branch_scope';
 import type { StepExecutionRuntime } from '../../workflow_context_manager/step_execution_runtime';
@@ -75,10 +76,7 @@ type AwaitExecutionsPhaseResult = DurablePhaseResult<
 >;
 
 export interface AwaitExecutionsStepDependencies {
-  stepExecutionRuntime: Pick<
-    StepExecutionRuntime,
-    'workflowExecution' | 'stepExecutionId' | 'rehydrateStepOutputs' | 'releaseReadOutputPins'
-  >;
+  stepExecutionRuntime: Pick<StepExecutionRuntime, 'workflowExecution' | 'stepExecutionId'>;
   workflowExecutionRepository: Pick<
     WorkflowExecutionRepository,
     'getWorkflowExecutionStatusesByIds' | 'getWorkflowExecutionsByIds'
@@ -86,7 +84,7 @@ export interface AwaitExecutionsStepDependencies {
   stepExecutionRepository: StepExecutionRepository;
   workflowGraph: Pick<WorkflowRuntimeGraph, 'hasStep' | 'getInnerStepIds'>;
   workflowExecutionState: Pick<WorkflowExecutionState, 'getAllStepExecutions' | 'getStepExecution'>;
-  stepIoService: Pick<StepIoService, 'getStepOutput'>;
+  stepIoService: Pick<StepIoService, 'readBatch'>;
   spaceId: string;
   workflowLogger: IWorkflowEventLogger;
 }
@@ -334,15 +332,23 @@ const resolveExecutionIdsFromSteps = async (
     );
   }
 
-  await stepExecutionRuntime.rehydrateStepOutputs(startStepExecutionIds);
-  try {
-    return normalizeExecutionIds(
-      startStepExecutionIds.map((id) => stepIoService.getStepOutput(id)),
-      'from-steps'
-    );
-  } finally {
-    stepExecutionRuntime.releaseReadOutputPins();
-  }
+  const refs = startStepExecutionIds.map((executionId) => {
+    const stepExecution = workflowExecutionState.getStepExecution(executionId);
+    if (!stepExecution) {
+      throw new Error(
+        `Missing step execution metadata for workflow.executeAsync run ${executionId}.`
+      );
+    }
+    return {
+      executionId,
+      contextId: buildStepIoContextId(stepExecution.stepId, stepExecution.scopeStack ?? []),
+    };
+  });
+  const outputs = await stepIoService.readBatch({ type: 'output', refs });
+  return normalizeExecutionIds(
+    startStepExecutionIds.map((id) => outputs.get(id)),
+    'from-steps'
+  );
 };
 
 const formatStepNames = (stepNames: string[]): string =>
