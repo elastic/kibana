@@ -2552,6 +2552,8 @@ paths:
                     end_date: '2025-03-10T23:59:59.999Z'
                     start_date: '2025-03-01T00:00:00.000Z'
             schema:
+              discriminator:
+                propertyName: action
               oneOf:
                 - $ref: '#/components/schemas/BulkDeleteRules'
                 - $ref: '#/components/schemas/BulkDisableRules'
@@ -5219,12 +5221,11 @@ components:
         - $ref: '#/components/schemas/BulkActionEditPayloadTimeline'
         - $ref: '#/components/schemas/BulkActionEditPayloadRuleActions'
         - $ref: '#/components/schemas/BulkActionEditPayloadSchedule'
-        - $ref: '#/components/schemas/BulkActionEditPayloadAlertSuppression'
-    BulkActionEditPayloadAlertSuppression:
-      anyOf:
         - $ref: '#/components/schemas/BulkActionEditPayloadSetAlertSuppression'
         - $ref: '#/components/schemas/BulkActionEditPayloadSetAlertSuppressionForThreshold'
         - $ref: '#/components/schemas/BulkActionEditPayloadDeleteAlertSuppression'
+      discriminator:
+        propertyName: type
     BulkActionEditPayloadDeleteAlertSuppression:
       type: object
       properties:
