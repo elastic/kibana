@@ -28,6 +28,44 @@ interface InferenceSettings {
   data?: { features?: Array<{ feature_id: string }> };
 }
 
+/** Points the space's AlertZero models at an inference endpoint or connector. */
+export const pinModelToEndpoint = async ({
+  apiClient,
+  headers,
+  spaceId,
+  endpointId,
+}: RuleTuningSpaceArgs & { endpointId: string }): Promise<void> => {
+  // The diagnosis runs on the balanced feature. The parent feature is pinned too, so enabling the
+  // worker is not blocked for lack of a model.
+  const settingsUrl = spaceUrl(SEARCH_INFERENCE_SETTINGS_PATH, spaceId);
+  const current = await apiClient.get<InferenceSettings>(settingsUrl, {
+    headers: { ...headers, ...INTERNAL_V1_HEADERS },
+    responseType: 'json',
+  });
+  expectStatus('Read the inference settings', current);
+  const pinned = new Set<string>([
+    ALERTZERO_INFERENCE_PARENT_FEATURE_ID,
+    ALERTZERO_BALANCED_INFERENCE_FEATURE_ID,
+  ]);
+  const features = (current.body.data?.features ?? []).filter(
+    ({ feature_id: featureId }) => !pinned.has(featureId)
+  );
+  const put = await apiClient.put(settingsUrl, {
+    headers: { ...headers, ...INTERNAL_V1_HEADERS },
+    responseType: 'json',
+    body: {
+      features: [
+        ...features,
+        ...[...pinned].map((featureId) => ({
+          feature_id: featureId,
+          endpoints: [{ id: endpointId }],
+        })),
+      ],
+    },
+  });
+  expectStatus('Pin the AlertZero features to the model', put);
+};
+
 /** Points the space's AlertZero models at the LLM proxy and returns the connector id. */
 export const pinModelToProxy = async ({
   apiClient,
@@ -54,36 +92,7 @@ export const pinModelToProxy = async ({
   );
   expectStatus('Create the proxy connector', connector);
   const { id: connectorId } = connector.body;
-
-  // The diagnosis runs on the balanced feature. The parent feature is pinned too, so enabling the
-  // worker is not blocked for lack of a model.
-  const settingsUrl = spaceUrl(SEARCH_INFERENCE_SETTINGS_PATH, spaceId);
-  const current = await apiClient.get<InferenceSettings>(settingsUrl, {
-    headers: { ...headers, ...INTERNAL_V1_HEADERS },
-    responseType: 'json',
-  });
-  expectStatus('Read the inference settings', current);
-  const pinned = new Set<string>([
-    ALERTZERO_INFERENCE_PARENT_FEATURE_ID,
-    ALERTZERO_BALANCED_INFERENCE_FEATURE_ID,
-  ]);
-  const features = (current.body.data?.features ?? []).filter(
-    ({ feature_id: featureId }) => !pinned.has(featureId)
-  );
-  const put = await apiClient.put(settingsUrl, {
-    headers: { ...headers, ...INTERNAL_V1_HEADERS },
-    responseType: 'json',
-    body: {
-      features: [
-        ...features,
-        ...[...pinned].map((featureId) => ({
-          feature_id: featureId,
-          endpoints: [{ id: connectorId }],
-        })),
-      ],
-    },
-  });
-  expectStatus('Pin the AlertZero features to the proxy connector', put);
+  await pinModelToEndpoint({ apiClient, headers, spaceId, endpointId: connectorId });
   return connectorId;
 };
 

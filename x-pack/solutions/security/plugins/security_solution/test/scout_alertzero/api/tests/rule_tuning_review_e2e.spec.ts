@@ -13,31 +13,24 @@ import { ExecutionStatus, type WorkflowExecutionDto } from '@kbn/workflows';
 import {
   APPLIED_TAG,
   apiTest,
-  cancelExecution,
+  cleanUpReviewCase,
   createWorkerServiceAccount,
-  decidePendingProposal,
-  deleteServiceAccount,
-  deleteSpaceAlertsIndex,
   DISMISSED_TAG,
+  driveReview,
   enableAlertZeroInSpace,
   FP_ALERT_COUNT,
   FP_PROCESS_NAME,
   pinModelToProxy,
-  pollFor,
-  readAlertTags,
   readBacktest,
   readRule,
   readRuleExceptionItems,
-  runCleanupSteps,
   SEEDED_EVENT_COUNT,
   seedRuleWithFalsePositives,
   setRuleTuningWorker,
   startScriptedModel,
   tags,
   TP_EVENT_COUNT,
-  waitForExecution,
-  waitForInvestigation,
-  waitForReviewExecution,
+  waitForAlertTag,
   type BacktestOutcome,
   type RuleState,
   type ScriptedModel,
@@ -167,7 +160,6 @@ apiTest.describe('Rule Tuning review - end to end', { tag: [...tags.stateful.cla
     const space = { apiClient, headers: adminHeaders, spaceId };
     let model: ScriptedModel | undefined;
     let serviceAccountId: string | undefined;
-    let reviewId: string | undefined;
     let eventsIndex: string | undefined;
 
     try {
@@ -192,31 +184,11 @@ apiTest.describe('Rule Tuning review - end to end', { tag: [...tags.stateful.cla
         enabled: true,
         settings: { serviceAccountId, autonomy },
       });
-      reviewId = await waitForReviewExecution({ ...space, timeoutMs: STEP_TIMEOUT_MS });
-      const conversationId = await waitForInvestigation({
+      const review = await driveReview({
         ...space,
-        executionId: reviewId,
-        timeoutMs: STEP_TIMEOUT_MS,
+        decisions,
+        stepTimeoutMs: STEP_TIMEOUT_MS,
       });
-      const decidedIds: string[] = [];
-      for (const decision of decisions) {
-        decidedIds.push(
-          await decidePendingProposal({
-            ...space,
-            conversationId,
-            decision,
-            decidedIds,
-            timeoutMs: STEP_TIMEOUT_MS,
-          })
-        );
-      }
-      const review = await waitForExecution(
-        apiClient,
-        adminHeaders,
-        reviewId,
-        STEP_TIMEOUT_MS,
-        spaceId
-      );
 
       // Checked before the review status: a model call the scripted model could not answer
       // fails the review, and these messages say what to change.
@@ -239,54 +211,15 @@ apiTest.describe('Rule Tuning review - end to end', { tag: [...tags.stateful.cla
       await check({ review, model, rule, ruleAfter, space });
     } finally {
       model?.stop();
-      await runCleanupSteps([
-        {
-          name: 'cancel the review',
-          run: async () => {
-            if (reviewId) await cancelExecution({ ...space, executionId: reviewId });
-          },
-        },
-        {
-          name: 'disable the rule tuning worker',
-          run: () => setRuleTuningWorker({ ...space, enabled: false }),
-        },
-        {
-          name: 'delete the worker service account',
-          run: async () => {
-            if (serviceAccountId) {
-              await deleteServiceAccount({ apiClient, headers: adminHeaders, serviceAccountId });
-            }
-          },
-        },
-        { name: `delete space ${spaceId}`, run: () => apiServices.spaces.delete(spaceId) },
-        {
-          name: 'delete the space alerts index',
-          run: () => deleteSpaceAlertsIndex(esClient, spaceId),
-        },
-        {
-          name: 'delete the source events',
-          run: async () => {
-            if (eventsIndex) {
-              await esClient.indices.deleteDataStream({ name: eventsIndex }, { ignore: [404] });
-            }
-          },
-        },
-      ]);
+      await cleanUpReviewCase({
+        ...space,
+        apiServices,
+        esClient,
+        serviceAccountId,
+        eventsIndex,
+      });
     }
   };
-
-  /** Waits until every alert of the rule carries `tag`, and returns the tags of each alert. */
-  const waitForAlertTag = (esClient: EsClient, spaceId: string, ruleId: string, tag: string) =>
-    pollFor(
-      `every alert to carry ${tag}`,
-      async () => {
-        const found = await readAlertTags({ esClient, spaceId, ruleId });
-        return found.length > 0 && found.every((alertTags) => alertTags.includes(tag))
-          ? found
-          : undefined;
-      },
-      { timeoutMs: 60_000 }
-    );
 
   apiTest.beforeAll(async ({ samlAuth, log }) => {
     const { cookieHeader } = await samlAuth.asInteractiveUser('admin');

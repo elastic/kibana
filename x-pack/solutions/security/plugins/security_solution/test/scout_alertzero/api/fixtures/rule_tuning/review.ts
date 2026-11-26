@@ -13,6 +13,7 @@ import {
 import type { WorkflowExecutionDto } from '@kbn/workflows';
 import { isTerminalStatus } from '@kbn/workflows';
 import { pollFor, spaceUrl } from '../helpers';
+import { waitForExecution } from '../workflow_runs';
 import {
   expectStatus,
   findStepOutputObject,
@@ -168,8 +169,49 @@ export const decidePendingProposal = async ({
   }
 };
 
+/**
+ * Waits for the review the worker starts, decides its proposals in order, and returns the review
+ * once it ended. In manual mode the first decision answers the entry gate, which the analyst sees
+ * before any diagnosis, and the second answers the tuning proposal.
+ */
+export const driveReview = async ({
+  apiClient,
+  headers,
+  spaceId,
+  decisions,
+  stepTimeoutMs,
+  decisionTimeoutMs = stepTimeoutMs,
+}: RuleTuningSpaceArgs & {
+  decisions: Array<'approve' | 'dismiss'>;
+  /** Budget of the review's start, its investigation and its end. */
+  stepTimeoutMs: number;
+  /** Budget of each decision, which waits for the proposal to exist. Defaults to a step. */
+  decisionTimeoutMs?: number;
+}): Promise<WorkflowExecutionDto> => {
+  const space = { apiClient, headers, spaceId };
+  const executionId = await waitForReviewExecution({ ...space, timeoutMs: stepTimeoutMs });
+  const conversationId = await waitForInvestigation({
+    ...space,
+    executionId,
+    timeoutMs: stepTimeoutMs,
+  });
+  const decidedIds: string[] = [];
+  for (const decision of decisions) {
+    decidedIds.push(
+      await decidePendingProposal({
+        ...space,
+        conversationId,
+        decision,
+        decidedIds,
+        timeoutMs: decisionTimeoutMs,
+      })
+    );
+  }
+  return waitForExecution(apiClient, headers, executionId, stepTimeoutMs, spaceId);
+};
+
 /** Cancels the execution, and succeeds when it already ended. */
-export const cancelExecution = async ({
+const cancelExecution = async ({
   apiClient,
   headers,
   spaceId,
@@ -178,4 +220,22 @@ export const cancelExecution = async ({
   await apiClient.post(spaceUrl(`api/workflows/executions/${executionId}/cancel`, spaceId), {
     headers,
   });
+};
+
+/** Cancels the reviews of the space, and succeeds when there are none. */
+export const cancelReviews = async ({
+  apiClient,
+  headers,
+  spaceId,
+}: RuleTuningSpaceArgs): Promise<void> => {
+  const response = await apiClient.get<{ results?: Array<{ id: string }> }>(
+    spaceUrl(`api/workflows/workflow/${RULE_TUNING_REVIEW_WORKFLOW_ID}/executions`, spaceId),
+    { headers, responseType: 'json' }
+  );
+  if (response.statusCode !== 200) {
+    return;
+  }
+  for (const { id } of response.body.results ?? []) {
+    await cancelExecution({ apiClient, headers, spaceId, executionId: id });
+  }
 };

@@ -13,6 +13,7 @@ import {
   type DetectionsApi,
 } from '@kbn/security-solution-test-api-clients/scout';
 import type { WorkflowExecutionDto } from '@kbn/workflows';
+import { pollFor } from '../helpers';
 import { expectStatus, findStepOutputObject, type RuleTuningSpaceArgs } from './common';
 import { FP_ALERT_COUNT } from './seed';
 
@@ -118,3 +119,21 @@ export const readAlertTags = async ({
   });
   return response.hits.hits.map(({ _source }) => _source?.['kibana.alert.workflow_tags'] ?? []);
 };
+
+/** Waits until every alert of the rule carries `tag`, and returns the tags of each alert. */
+export const waitForAlertTag = (
+  esClient: EsClient,
+  spaceId: string,
+  ruleId: string,
+  tag: string
+): Promise<string[][]> =>
+  pollFor(
+    `every alert to carry ${tag}`,
+    async () => {
+      const found = await readAlertTags({ esClient, spaceId, ruleId });
+      return found.length > 0 && found.every((alertTags) => alertTags.includes(tag))
+        ? found
+        : undefined;
+    },
+    { timeoutMs: 60_000 }
+  );

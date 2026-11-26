@@ -6,9 +6,10 @@
  */
 
 export { APPLIED_TAG, DISMISSED_TAG } from './common';
+export { cleanUpReviewCase } from './cleanup';
 export {
   createWorkerServiceAccount,
-  deleteServiceAccount,
+  pinModelToEndpoint,
   pinModelToProxy,
   setRuleTuningWorker,
 } from './setup';
@@ -20,17 +21,12 @@ export {
   TP_EVENT_COUNT,
   type SeededRule,
 } from './seed';
+export { driveReview } from './review';
 export {
-  cancelExecution,
-  decidePendingProposal,
-  waitForInvestigation,
-  waitForReviewExecution,
-} from './review';
-export {
-  readAlertTags,
   readBacktest,
   readRule,
   readRuleExceptionItems,
+  waitForAlertTag,
   type BacktestOutcome,
   type RuleState,
 } from './results';
