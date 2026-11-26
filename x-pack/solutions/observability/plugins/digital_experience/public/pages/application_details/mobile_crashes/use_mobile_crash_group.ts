@@ -24,11 +24,19 @@ export const useMobileCrashGroup = (
   fingerprint: string
 ): MobileCrashGroupState => {
   const apiClient = useApiClient();
-  const { toQuery } = useMobileFiltersQuery();
+  const { toQuery, key } = useMobileFiltersQuery();
+  // The group and the URL's params, so another group never shows the last one's detail.
+  const paramsKey = JSON.stringify([serviceName, fingerprint, key]);
 
-  const { value, loading, error, refresh } = useAbortableAsync(
-    async ({ signal }) =>
-      apiClient.fetch(
+  const {
+    value: fetched,
+    loading,
+    error,
+    refresh,
+  } = useAbortableAsync(
+    async ({ signal }) => ({
+      paramsKey,
+      response: await apiClient.fetch(
         'GET /internal/digital_experience/mobile_applications/{serviceName}/crash_groups/{fingerprint}',
         {
           signal,
@@ -38,12 +46,15 @@ export const useMobileCrashGroup = (
           },
         }
       ),
-    [apiClient, serviceName, fingerprint, toQuery],
+    }),
+    [apiClient, serviceName, fingerprint, toQuery, paramsKey],
     { unsetValueOnError: true }
   );
-  const isLoading = loading || (!value && !error);
+  // Loading from the render the group or params change in, so no frame shows the last detail.
+  const isCurrent = fetched?.paramsKey === paramsKey;
+  const isLoading = loading || (!isCurrent && !error);
   return {
-    detail: isLoading ? undefined : value,
+    detail: isLoading ? undefined : fetched?.response,
     isLoading,
     error: loading ? undefined : error,
     refresh,

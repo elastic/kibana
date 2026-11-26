@@ -9,6 +9,7 @@ import React, { useMemo } from 'react';
 import {
   EuiBadge,
   EuiButton,
+  EuiCodeBlock,
   EuiDescriptionList,
   EuiFlexGroup,
   EuiFlexItem,
@@ -24,7 +25,6 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { getEbtProps } from '@kbn/ebt-click';
-import { PlaintextStacktrace } from '@kbn/event-stacktrace';
 import { KbnInfoCallout, KbnWarningCallout } from '@kbn/ui-callout';
 import { SESSIONS_MAX_SESSION_MS } from '../../../../common/sessions';
 import type { MobileCrash, MobileCrashGroup } from '../../../../common/types/mobile';
@@ -69,6 +69,23 @@ const NO_STACKTRACE_TITLE = i18n.translate(
   { defaultMessage: 'This crash has no stack trace' }
 );
 
+const CRASH_DETAILS_TITLE = i18n.translate(
+  'xpack.digitalExperience.mobile.crashes.flyout.crashDetailsTitle',
+  { defaultMessage: 'Crash details' }
+);
+
+const RELEASE_LABEL = i18n.translate('xpack.digitalExperience.mobile.crashes.flyout.release', {
+  defaultMessage: 'App version',
+});
+
+const OS_VERSION_LABEL = i18n.translate('xpack.digitalExperience.mobile.crashes.flyout.osVersion', {
+  defaultMessage: 'OS version',
+});
+
+const DEVICE_LABEL = i18n.translate('xpack.digitalExperience.mobile.crashes.flyout.device', {
+  defaultMessage: 'Device',
+});
+
 const STACKTRACE_TITLE = i18n.translate(
   'xpack.digitalExperience.mobile.crashes.flyout.stacktrace',
   { defaultMessage: 'Stack trace of the latest crash' }
@@ -76,7 +93,7 @@ const STACKTRACE_TITLE = i18n.translate(
 
 const BREAKDOWNS_TITLE = i18n.translate(
   'xpack.digitalExperience.mobile.crashes.flyout.breakdowns',
-  { defaultMessage: 'Who it affects' }
+  { defaultMessage: 'Crashes by app version, OS and device' }
 );
 
 const BEFORE_CRASH_TITLE = i18n.translate(
@@ -168,8 +185,34 @@ function OpenSessionButton({ serviceName, crash }: { serviceName: string; crash:
   return disabledReason ? <EuiToolTip content={disabledReason}>{button}</EuiToolTip> : button;
 }
 
-/** The latest crash's stack trace, or its message under a note when it has none. */
-function CrashStacktrace({ type, message, stacktrace }: MobileCrash) {
+/** Where the latest crash happened: its release, OS version and device, those it has. */
+function LatestCrashContext({ release, osVersion, deviceModel }: MobileCrash) {
+  const items = [
+    { title: RELEASE_LABEL, value: release },
+    { title: OS_VERSION_LABEL, value: osVersion },
+    { title: DEVICE_LABEL, value: deviceModel },
+  ].flatMap(({ title, value }) => (value ? [{ title, description: value }] : []));
+  if (items.length === 0) {
+    return null;
+  }
+  return (
+    <>
+      <EuiDescriptionList
+        type="inline"
+        compressed
+        listItems={items}
+        data-test-subj="digitalExperienceMobileCrashContext"
+      />
+      <EuiSpacer size="s" />
+    </>
+  );
+}
+
+/**
+ * The latest crash's stack trace, or its message under a note when it has none. The header shows
+ * the type and message already, and a JVM stack trace starts with them.
+ */
+function CrashStacktrace({ message, stacktrace }: MobileCrash) {
   if (!stacktrace) {
     return (
       <KbnInfoCallout size="s" title={NO_STACKTRACE_TITLE}>
@@ -177,15 +220,11 @@ function CrashStacktrace({ type, message, stacktrace }: MobileCrash) {
       </KbnInfoCallout>
     );
   }
-  // `PlaintextStacktrace` takes no `data-test-subj`.
+  // The code block alone: `PlaintextStacktrace` would add an empty heading without its title.
   return (
-    <div data-test-subj="digitalExperienceMobileCrashStacktrace">
-      <PlaintextStacktrace
-        type={type ?? undefined}
-        message={message ?? undefined}
-        stacktrace={stacktrace}
-      />
-    </div>
+    <EuiCodeBlock isCopyable data-test-subj="digitalExperienceMobileCrashStacktrace">
+      {stacktrace}
+    </EuiCodeBlock>
   );
 }
 
@@ -209,7 +248,12 @@ export function MobileCrashFlyout({
   const titleId = useGeneratedHtmlId({ prefix: 'digitalExperienceMobileCrashFlyoutTitle' });
   const { detail, error, refresh } = useMobileCrashGroup(serviceName, fingerprint);
   const latestCrash = detail?.latestCrash ?? null;
-  const type = group?.type ?? latestCrash?.type ?? null;
+  // A neutral title until there is a crash to name, so a link to a missing group doesn't look like
+  // a crash without a type.
+  const title =
+    group || latestCrash
+      ? group?.type ?? latestCrash?.type ?? UNKNOWN_ERROR_TYPE_LABEL
+      : CRASH_DETAILS_TITLE;
   const counts = group
     ? [
         { title: USERS_LABEL, description: formatNumber(group.users) },
@@ -260,6 +304,7 @@ export function MobileCrashFlyout({
         <EuiSpacer size="l" />
         <SectionTitle title={STACKTRACE_TITLE} />
         <EuiSpacer size="s" />
+        <LatestCrashContext {...latestCrash} />
         <CrashStacktrace {...latestCrash} />
         <EuiSpacer size="l" />
         <SectionTitle title={BREAKDOWNS_TITLE} />
@@ -285,15 +330,15 @@ export function MobileCrashFlyout({
   return (
     <EuiFlyout
       onClose={onClose}
-      size="m"
+      size="l"
       aria-labelledby={titleId}
       data-test-subj="digitalExperienceMobileCrashFlyout"
     >
       <EuiFlyoutHeader hasBorder>
-        <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-          <EuiFlexItem grow={false}>
+        <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} wrap>
+          <EuiFlexItem grow={false} css={{ minWidth: 0, wordBreak: 'break-word' }}>
             <EuiTitle size="s">
-              <h2 id={titleId}>{type ?? UNKNOWN_ERROR_TYPE_LABEL}</h2>
+              <h2 id={titleId}>{title}</h2>
             </EuiTitle>
           </EuiFlexItem>
           {group?.newInRelease && (

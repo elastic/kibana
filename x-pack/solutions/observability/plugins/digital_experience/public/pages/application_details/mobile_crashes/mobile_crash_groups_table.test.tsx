@@ -96,22 +96,50 @@ describe('MobileCrashGroupsTable', () => {
     );
   });
 
-  it('sorts by events', () => {
+  it('sorts by events, the most first, then the fewest', () => {
     renderTable();
 
     fireEvent.click(screen.getByRole('button', { name: /Events/ }));
-    fireEvent.click(screen.getByRole('button', { name: /Events/ }));
-
     expect(rowTypes()[0]).toBe('java.lang.IllegalStateException');
+    fireEvent.click(screen.getByRole('button', { name: /Events/ }));
+    expect(rowTypes()[0]).toBe('java.lang.NullPointerException');
   });
 
-  it('sorts by first seen, so the newest groups can lead', () => {
+  it('sorts by first seen, the newest first, then the oldest', () => {
     renderTable();
 
     fireEvent.click(screen.getByRole('button', { name: /First seen/ }));
-    expect(rowTypes()[0]).toBe('java.lang.NullPointerException');
-    fireEvent.click(screen.getByRole('button', { name: /First seen/ }));
     expect(rowTypes()[0]).toBe('java.lang.IllegalStateException');
+    fireEvent.click(screen.getByRole('button', { name: /First seen/ }));
+    expect(rowTypes()[0]).toBe('java.lang.NullPointerException');
+  });
+
+  it('keeps the sort and the page when the list reloads', () => {
+    const many = Array.from({ length: 15 }, (_, index) =>
+      group({ fingerprint: `g${index}`, type: `Type${index}`, users: index, events: 100 - index })
+    );
+    const onSelect = jest.fn();
+    const { rerender } = renderTable(many, onSelect);
+    fireEvent.click(screen.getByRole('button', { name: /Events/ }));
+    fireEvent.click(screen.getByTestId('pagination-button-next'));
+    expect(rowTypes()[0]).toBe('Type10');
+
+    // The panel unmounts the table while the list reloads.
+    rerender(<MobileCrashGroupsTable crashGroups={many} isLoading onSelect={onSelect} />);
+    rerender(
+      <MobileCrashGroupsTable crashGroups={[...many]} isLoading={false} onSelect={onSelect} />
+    );
+
+    expect(rowTypes()[0]).toBe('Type10');
+  });
+
+  it('truncates a long type, with the whole type as its title', () => {
+    renderTable([group({ type: 'com.example.app.ui.HomeFragment$Companion$LoadException' })]);
+
+    expect(screen.getByTestId('digitalExperienceMobileCrashGroup')).toHaveAttribute(
+      'title',
+      'com.example.app.ui.HomeFragment$Companion$LoadException'
+    );
   });
 
   it("opens a group's detail by its fingerprint", () => {

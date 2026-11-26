@@ -23,11 +23,19 @@ export interface MobileCrashGroupsState {
 /** A mobile application's crash groups, over the URL's filters and range. */
 export const useMobileCrashGroups = (serviceName: string): MobileCrashGroupsState => {
   const apiClient = useApiClient();
-  const { toQuery } = useMobileFiltersQuery();
+  const { toQuery, key } = useMobileFiltersQuery();
+  // The URL's params, not the times they resolve to, so a refresh resolves "now" again.
+  const paramsKey = JSON.stringify([serviceName, key]);
 
-  const { value, loading, error, refresh } = useAbortableAsync(
-    async ({ signal }) =>
-      apiClient.fetch(
+  const {
+    value: fetched,
+    loading,
+    error,
+    refresh,
+  } = useAbortableAsync(
+    async ({ signal }) => ({
+      paramsKey,
+      response: await apiClient.fetch(
         'GET /internal/digital_experience/mobile_applications/{serviceName}/crash_groups',
         {
           signal,
@@ -37,14 +45,16 @@ export const useMobileCrashGroups = (serviceName: string): MobileCrashGroupsStat
           },
         }
       ),
-    [apiClient, serviceName, toQuery],
+    }),
+    [apiClient, serviceName, toQuery, paramsKey],
     { unsetValueOnError: true }
   );
-  // Nothing has been fetched before the first request starts.
-  const isLoading = loading || (!value && !error);
+  // Loading from the render the params change in, so no frame shows the last response's rows.
+  const isCurrent = fetched?.paramsKey === paramsKey;
+  const isLoading = loading || (!isCurrent && !error);
   return {
-    response: isLoading ? undefined : value,
-    lastResponse: value,
+    response: isLoading ? undefined : fetched?.response,
+    lastResponse: fetched?.response,
     isLoading,
     error: loading ? undefined : error,
     refresh,

@@ -33,9 +33,8 @@ export const mobilePanelDiscoverEsql = (
 
 /**
  * The ES|QL that Discover opens for the Crashes tab: the crashes it lists, by when they happened
- * and the release that crashed, newest first, with the values written into the text. Its time
- * range has to reach `MOBILE_MAX_CRASH_DELAY_HOURS` past the tab's, as `crashEventsInDiscoverRange`
- * reads it.
+ * and the release that crashed, newest first, with the values written into the text, over the
+ * tab's own time range.
  */
 export const mobileCrashesDiscoverEsql = (
   filters: MobilePanelFilters,

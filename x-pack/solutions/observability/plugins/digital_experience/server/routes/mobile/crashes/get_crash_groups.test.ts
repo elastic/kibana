@@ -128,8 +128,12 @@ describe('getCrashGroups', () => {
       },
     });
     expect(groupsRequest.params).toEqual(expect.arrayContaining([{ release: '4.2.0' }]));
-    // The first crash and the new check look 30 days back on every release, whatever the filter.
+    // The first crash and the new check look 30 days back on every release, whatever the filter,
+    // fingerprinting only the crashes of the groups' types.
     expect(historyRequest.query).toContain('WHERE fingerprint IN ("npe", "oom")');
+    expect(historyRequest.query).toContain(
+      '`attributes.exception.type` IN ("java.lang.NullPointerException", "java.lang.OutOfMemoryError")'
+    );
     expect(historyRequest.params).not.toEqual(expect.arrayContaining([{ release: '4.2.0' }]));
     expect(historyRequest.params).toEqual(
       expect.arrayContaining([{ crash_start: new Date(END - 30 * DAY).toISOString() }])

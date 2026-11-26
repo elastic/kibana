@@ -56,11 +56,11 @@ describe('mobileCrashesDiscoverEsql', () => {
     { environment: 'production' }
   );
 
-  it("filters `@timestamp` as Discover's time field, and the crash times by its time picker", () => {
-    // Discover filters the column first compared with `?_tstart` on its own range, which the link
-    // makes a day longer than the tab's, for the crashes sent late.
+  it("filters `observed_timestamp` as Discover's time field, over the tab's range", () => {
+    // Discover filters the column first compared with `?_tstart` on its own range: when the SDK
+    // observed the crash, which EDOT iOS sets to the crash's time, whenever it is sent.
     expect(esql).toContain(
-      'WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend AND crash_time >= ?_tstart AND crash_time < TO_DATETIME(?_tend) - 24 hours'
+      'WHERE observed_timestamp >= ?_tstart AND observed_timestamp < ?_tend AND @timestamp >= ?_tstart AND @timestamp < TO_DATETIME(?_tend) + 24 hours AND crash_time >= ?_tstart AND crash_time < ?_tend'
     );
     expect(esql).not.toContain('crash_start');
     expect(esql).toContain('SORT crash_time DESC');

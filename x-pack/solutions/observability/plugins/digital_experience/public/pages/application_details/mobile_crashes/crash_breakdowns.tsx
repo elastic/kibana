@@ -11,6 +11,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiProgress,
+  EuiSpacer,
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
@@ -47,41 +48,47 @@ const OTHER_LABEL = i18n.translate('xpack.digitalExperience.mobile.crashes.flyou
 
 /** One breakdown: its values with their crashes and share, and the rest as "Other". */
 function Breakdown({ name, breakdown }: { name: BreakdownName; breakdown: CrashBreakdown }) {
-  const { formatNumber, formatPercent } = useFormatters();
+  const { formatNumber, formatKpiPercent } = useFormatters();
+  // Keyed apart from the values, which can be named "Other" too.
   const rows = [
-    ...breakdown.top,
-    ...(breakdown.other > 0 ? [{ key: OTHER_LABEL, count: breakdown.other }] : []),
+    ...breakdown.top.map(({ key, count }) => ({ id: `value-${key}`, label: key, count })),
+    ...(breakdown.other > 0 ? [{ id: 'other', label: OTHER_LABEL, count: breakdown.other }] : []),
   ];
   const total = rows.reduce((sum, { count }) => sum + count, 0);
 
   return (
     <div data-test-subj={`digitalExperienceMobileCrashBreakdown-${name}`}>
       <EuiTitle size="xxs">
-        <h3>{BREAKDOWN_TITLES[name]}</h3>
+        <h4>{BREAKDOWN_TITLES[name]}</h4>
       </EuiTitle>
-      {rows.map(({ key, count }) => (
-        <div key={key}>
-          <EuiFlexGroup justifyContent="spaceBetween" gutterSize="s" responsive={false}>
-            <EuiFlexItem className="eui-textTruncate">
-              <EuiText size="xs" className="eui-textTruncate" title={key}>
-                {key}
-              </EuiText>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiText size="xs" color="subdued">
-                {`${formatNumber(count)} · ${formatPercent(total ? count / total : 0)}`}
-              </EuiText>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-          <EuiProgress
-            value={count}
-            max={total || 1}
-            size="xs"
-            color="primary"
-            aria-label={shareLabel(key, formatPercent(total ? count / total : 0))}
-          />
-        </div>
-      ))}
+      <EuiSpacer size="s" />
+      {rows.map(({ id, label, count }) => {
+        const share = formatKpiPercent(total ? count / total : 0);
+        return (
+          <div key={id}>
+            <EuiFlexGroup justifyContent="spaceBetween" gutterSize="s" responsive={false}>
+              <EuiFlexItem css={{ minWidth: 0 }}>
+                <EuiText size="xs" className="eui-textTruncate" title={label}>
+                  {label}
+                </EuiText>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiText size="xs" color="subdued">
+                  {`${formatNumber(count)} · ${share}`}
+                </EuiText>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+            <EuiProgress
+              value={count}
+              max={total || 1}
+              size="xs"
+              color="primary"
+              aria-label={shareLabel(label, share)}
+            />
+            <EuiSpacer size="s" />
+          </div>
+        );
+      })}
     </div>
   );
 }
@@ -95,7 +102,8 @@ export function CrashBreakdowns({
   return (
     <EuiFlexGrid columns={3} gutterSize="l">
       {(['releases', 'osVersions', 'deviceModels'] as const).map((name) => (
-        <EuiFlexItem key={name}>
+        // Columns of the same width, whatever their values' lengths.
+        <EuiFlexItem key={name} css={{ minWidth: 0 }}>
           <Breakdown name={name} breakdown={detail[name]} />
         </EuiFlexItem>
       ))}

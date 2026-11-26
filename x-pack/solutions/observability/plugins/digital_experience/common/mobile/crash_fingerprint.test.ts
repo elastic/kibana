@@ -74,6 +74,13 @@ describe('crash fingerprint rules', () => {
     );
   });
 
+  it('ignores the address of a symbolicated iOS frame, which changes per launch', () => {
+    expect(fingerprintOf('iosSymbolicatedA')).toBe(fingerprintOf('iosSymbolicatedB'));
+    expect(crashFramesOf(CRASH_FINGERPRINT_CASES.iosSymbolicatedA)).toBe(
+      '0 CoreFoundation __exceptionPreprocess + 164\n1 RideIos RideViewController.start() + 88'
+    );
+  });
+
   it('groups React Native JavaScript errors by message, numbers aside', () => {
     expect(fingerprintOf('javascriptIndex5')).toBe(fingerprintOf('javascriptIndex7'));
     expect(fingerprintOf('javascriptIban')).not.toBe(fingerprintOf('javascriptMap'));

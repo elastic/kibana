@@ -47,7 +47,7 @@ interface Crash {
   sessionId?: string;
   /** When the SDK sent it: EDOT iOS sends a crash on the next launch. */
   timestamp: string;
-  /** When it happened, which EDOT iOS only sets here. */
+  /** When the SDK observed it, when not when it was sent: EDOT iOS sets the crash's time. */
   observedTimestamp?: string;
   /** EDOT iOS with legacy names sends `crash`. */
   eventName?: 'app.crash' | 'crash';
@@ -359,7 +359,8 @@ const documents = [
     afterRollover: false,
     document: {
       '@timestamp': crash.timestamp,
-      ...(crash.observedTimestamp ? { observed_timestamp: crash.observedTimestamp } : {}),
+      // OTel sets it on every log record; EDOT iOS to the crash's time, before it is sent.
+      observed_timestamp: crash.observedTimestamp ?? crash.timestamp,
       event_name: crash.eventName ?? 'app.crash',
       resource: {
         attributes: mobileResource(

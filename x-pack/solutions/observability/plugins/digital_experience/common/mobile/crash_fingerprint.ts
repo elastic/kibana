@@ -37,6 +37,8 @@ export const CRASH_FRAME_RULES = {
       dotAll: true,
     },
     { pattern: '0x[0-9a-f]+ 0x[0-9a-f]+ ', replacement: '' },
+    // A symbolicated frame has one address before its symbol, which also moves with every launch
+    { pattern: '0x[0-9a-f]+ ', replacement: '' },
     { pattern: ' +', replacement: ' ' },
   ],
   // JVM traces: the first line repeats the message, a cause's message and how many frames it shares

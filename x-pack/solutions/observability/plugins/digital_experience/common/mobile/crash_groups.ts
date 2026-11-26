@@ -69,18 +69,21 @@ export const crashEvents = ({ start, end, ...filters }: CrashEventsParams): Comp
   );
 
 /**
- * The crashes as Discover lists them. Discover filters its time field, the column first compared
- * with `?_tstart`, on its time range itself, so `@timestamp` is that field and the range a link
- * opens reaches `MOBILE_MAX_CRASH_DELAY_HOURS` past the crashes' end, for the crashes sent late.
- * The crashes are the ones that happened from `?_tstart` to that long before `?_tend`, so they
- * follow Discover's time picker.
+ * The crashes as Discover lists them, in its time range. Discover filters its time field, the
+ * column first compared with `?_tstart`, on that range itself, so it is `observed_timestamp`: when
+ * the SDK observed the crash, which OTel sets on every log record and EDOT iOS sets to the crash's
+ * time, while `@timestamp` can be the next launch's. The crashes are the Crashes tab's: they
+ * happened in the range, and were sent up to `MOBILE_MAX_CRASH_DELAY_HOURS` after it.
  */
 export const crashEventsInDiscoverRange = (filters: MobilePanelFilters): ComposerQuery =>
   crashesInRange(
     filters,
-    (query, crashTime) => query.pipe`WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend
-      AND ${crashTime} >= ?_tstart
-      AND ${crashTime} < TO_DATETIME(?_tend) - ${esql.exp(`${MOBILE_MAX_CRASH_DELAY_HOURS} hours`)}`
+    (query, crashTime) => query.pipe`WHERE ${mobileColumn(
+      'observedTimestamp'
+    )} >= ?_tstart AND ${mobileColumn('observedTimestamp')} < ?_tend
+      AND @timestamp >= ?_tstart
+      AND @timestamp < TO_DATETIME(?_tend) + ${esql.exp(`${MOBILE_MAX_CRASH_DELAY_HOURS} hours`)}
+      AND ${crashTime} >= ?_tstart AND ${crashTime} < ?_tend`
   );
 
 /** How many releases the Crashes tab's picker lists, at most. */
@@ -98,6 +101,30 @@ export interface CrashReleaseRow {
   [RESULT_COLUMNS.release]?: string | null;
   [RESULT_COLUMNS.events]: number;
 }
+
+/**
+ * Keeps the crashes that can be in a group of one of `types`, before the costly fingerprint: a
+ * computed fingerprint hashes the type, so all of its crashes have it (`null` for none), while a
+ * stored one can be of any type.
+ */
+export const withCrashTypes = (
+  query: ComposerQuery,
+  types: ReadonlyArray<string | null>
+): ComposerQuery => {
+  const exceptionType = mobileColumn('exceptionType');
+  const named = [...new Set(types.filter((type): type is string => Boolean(type)))];
+  const conditions = [
+    esql.exp`${mobileColumn('exceptionFingerprint')} IS NOT NULL`,
+    ...(named.length > 0 ? [inValues('exceptionType', named)] : []),
+    // The fingerprint reads a missing type as an empty one.
+    ...(types.some((type) => !type)
+      ? [esql.exp`${exceptionType} IS NULL OR ${exceptionType} == ""`]
+      : []),
+  ];
+  return query.pipe`WHERE ${conditions.reduce(
+    (either, condition) => esql.exp`${either} OR ${condition}`
+  )}`;
+};
 
 /** Adds each crash's group as `fingerprint`. */
 export const withCrashFingerprint = (query: ComposerQuery): ComposerQuery =>
@@ -181,6 +208,8 @@ export const withLatestCrash = (query: ComposerQuery): ComposerQuery =>
       ${resultColumn('message')} = ${mobileColumn('exceptionMessage')},
       ${resultColumn('stacktrace')} = ${mobileColumn('exceptionStacktrace')},
       ${resultColumn('release')} = ${resultColumn('crashRelease')},
+      ${resultColumn('osVersion')} = ${CRASH_BREAKDOWNS.osVersions()},
+      ${resultColumn('deviceModel')} = ${CRASH_BREAKDOWNS.deviceModels()},
       ${resultColumn('sessionId')} = ${mobileColumn('sessionId')},
       ${resultColumn('reportedAt')} = @timestamp`.pipe`KEEP ${[
     resultColumn('crashTime'),
@@ -189,6 +218,8 @@ export const withLatestCrash = (query: ComposerQuery): ComposerQuery =>
     resultColumn('message'),
     resultColumn('stacktrace'),
     resultColumn('release'),
+    resultColumn('osVersion'),
+    resultColumn('deviceModel'),
     resultColumn('sessionId'),
   ]}`;
 
@@ -235,6 +266,8 @@ export interface LatestCrashRow {
   [RESULT_COLUMNS.message]?: string | null;
   [RESULT_COLUMNS.stacktrace]?: string | null;
   [RESULT_COLUMNS.release]?: string | null;
+  [RESULT_COLUMNS.osVersion]?: string | null;
+  [RESULT_COLUMNS.deviceModel]?: string | null;
   [RESULT_COLUMNS.sessionId]?: string | null;
 }
 

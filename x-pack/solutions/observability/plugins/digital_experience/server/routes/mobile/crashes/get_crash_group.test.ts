@@ -24,6 +24,8 @@ const LATEST = {
   message: 'TRAP_BRKPT at 4385823488',
   stacktrace: CRASH_FINGERPRINT_CASES.iosLaunchA.stacktrace,
   release: '8.5.0',
+  os_version: '18.1',
+  device_model: 'iPhone 12',
   session_id: 'DF831C22-A367',
 };
 
@@ -105,6 +107,8 @@ describe('getCrashGroup', () => {
       message: 'TRAP_BRKPT at 4385823488',
       stacktrace: LATEST.stacktrace,
       release: '8.5.0',
+      osVersion: '18.1',
+      deviceModel: 'iPhone 12',
       sessionId: 'DF831C22-A367',
     });
     // The top 5, the rest and the crashes without a release as "Other".
@@ -179,6 +183,16 @@ describe('getCrashGroup', () => {
     const requests = client.esql.query.mock.calls.map(([request]) => request);
     // Each query has its own commands: none piped onto another's.
     expect(requests.filter(({ query }) => query.includes('| LIMIT 1 |'))).toHaveLength(1);
+    // The breakdowns only fingerprint the crashes of the latest one's type, or stored ones; the
+    // latest crash, which finds that type, fingerprints them all.
+    const breakdownRequests = requests.filter(({ query }) => query.includes('BY value ='));
+    expect(breakdownRequests).toHaveLength(3);
+    breakdownRequests.forEach(({ query }) =>
+      expect(query).toContain(
+        'WHERE `attributes.exception.fingerprint` IS NOT NULL OR (`attributes.exception.type` IN ("SIGTRAP"))'
+      )
+    );
+    expect(requests[0].query).not.toContain('`attributes.exception.type` IN');
     // The session is read over its longest length before the crash, in every environment.
     const eventsRequest = requests[requests.length - 1];
     const crashMs = Date.parse(CRASH_TIME);
@@ -197,7 +211,29 @@ describe('getCrashGroup', () => {
     );
   });
 
-  it('has no events before a crash without a session, and nothing without a crash', async () => {
+  it('runs nothing after the latest crash query when the group has no crash', async () => {
+    const { client, esClient } = createTracedEsClientMock();
+    client.esql.query.mockResolvedValue(esqlResponse([]));
+
+    const detail = await getCrashGroup({
+      esClient,
+      filters: { serviceName: 'ride-ios' },
+      fingerprint: 'abc',
+      start: START,
+      end: END,
+    });
+
+    expect(detail).toEqual({
+      latestCrash: null,
+      releases: { top: [], other: 0 },
+      osVersions: { top: [], other: 0 },
+      deviceModels: { top: [], other: 0 },
+      beforeCrash: [],
+    });
+    expect(client.esql.query).toHaveBeenCalledTimes(1);
+  });
+
+  it('has no events before a crash without a session', async () => {
     const { client, esClient } = createTracedEsClientMock();
     client.esql.query.mockImplementation(async ({ query }) =>
       esqlResponse(query.includes('LIMIT 1 |') ? [{ ...LATEST, session_id: null }] : [])

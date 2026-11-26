@@ -15,6 +15,7 @@ import {
   withCrashGroupHistory,
   withCrashGroupStats,
   withCrashReleaseCounts,
+  withCrashTypes,
   type CrashGroupHistoryRow,
   type CrashGroupRow,
   type CrashReleaseRow,
@@ -98,7 +99,13 @@ export const getCrashGroups = async ({
       esClient,
       'get_mobile_crash_group_history',
       withCrashGroupHistory(
-        withCrashFingerprint(crashEvents({ ...allReleases, start: lookbackStart, end })),
+        withCrashFingerprint(
+          // Only the crashes that can be in the listed groups are fingerprinted, over 30 days.
+          withCrashTypes(
+            crashEvents({ ...allReleases, start: lookbackStart, end }),
+            rows.map((row) => row[RESULT_COLUMNS.exceptionType] ?? null)
+          )
+        ),
         rows.map((row) => row[RESULT_COLUMNS.fingerprint])
       ),
       timeFilter(lookbackStart, end + CRASH_DELAY_MS, environment)

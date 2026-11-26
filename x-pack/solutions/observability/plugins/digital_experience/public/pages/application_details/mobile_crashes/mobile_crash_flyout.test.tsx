@@ -64,6 +64,8 @@ const LATEST_CRASH: MobileCrash = {
   stacktrace:
     'java.lang.NullPointerException: TrackRecorder is null\n\tat com.example.MainActivity.onResume(MainActivity.kt:88)',
   release: '4.2.0',
+  osVersion: '15',
+  deviceModel: 'Pixel 8',
   sessionId: '7f4b0c7e',
 };
 
@@ -144,12 +146,33 @@ describe('MobileCrashFlyout', () => {
     expect(useMobileCrashGroup).toHaveBeenCalledWith('trailmap-android', 'npe');
   });
 
-  it('shows the stack trace of the latest crash', () => {
+  it('shows the stack trace of the latest crash, after where it crashed', () => {
     renderFlyout();
 
     expect(screen.getByTestId('digitalExperienceMobileCrashStacktrace')).toHaveTextContent(
       'MainActivity.onResume'
     );
+    const context = screen.getByTestId('digitalExperienceMobileCrashContext');
+    expect(context).toHaveTextContent('App version4.2.0');
+    expect(context).toHaveTextContent('OS version15');
+    expect(context).toHaveTextContent('DevicePixel 8');
+  });
+
+  it('shows the message once in the header, not again above the stack trace', () => {
+    renderFlyout();
+
+    // The JVM stack trace starts with it; the header says it otherwise.
+    const stacktrace = screen.getByTestId('digitalExperienceMobileCrashStacktrace');
+    expect(within(stacktrace).queryByRole('heading')).toBeNull();
+    expect(within(stacktrace).getAllByText(/TrackRecorder is null/)).toHaveLength(1);
+  });
+
+  it('titles a link to a group with no crash in the range neutrally, not as an unknown type', () => {
+    mockDetail({ detail: { ...DETAIL, latestCrash: null, beforeCrash: [] } });
+    renderFlyout({ group: null });
+
+    expect(screen.getByRole('heading', { level: 2 })).toHaveTextContent('Crash details');
+    expect(screen.queryByText('Unknown error type')).toBeNull();
   });
 
   it('breaks the crashes down by app version, OS version and device model, the rest as Other', () => {
@@ -169,6 +192,19 @@ describe('MobileCrashFlyout', () => {
     expect(
       screen.getByTestId('digitalExperienceMobileCrashBreakdown-deviceModels')
     ).toHaveTextContent('Pixel 8');
+    // Under the section's heading, as the KPIs format a share.
+    expect(within(osVersions).getByRole('heading', { level: 4 })).toHaveTextContent('OS version');
+    expect(osVersions).not.toHaveTextContent(/\.\d{2,}%/);
+  });
+
+  it('keeps a value named "Other" apart from the rest', () => {
+    mockDetail({
+      detail: { ...DETAIL, deviceModels: { top: [{ key: 'Other', count: 3 }], other: 2 } },
+    });
+    renderFlyout();
+
+    const deviceModels = screen.getByTestId('digitalExperienceMobileCrashBreakdown-deviceModels');
+    expect(within(deviceModels).getAllByRole('progressbar')).toHaveLength(2);
   });
 
   it('lists the session before the crash, oldest first, ending with the crash', () => {

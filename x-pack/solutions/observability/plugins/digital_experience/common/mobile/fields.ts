@@ -102,6 +102,8 @@ export const RESULT_COLUMNS = {
   exceptions: 'exceptions',
   lastSeen: 'last_seen',
   release: 'release',
+  osVersion: 'os_version',
+  deviceModel: 'device_model',
   latestRelease: 'latest_release',
   numericRelease: 'numeric_release',
   newestRelease: 'newest_release',

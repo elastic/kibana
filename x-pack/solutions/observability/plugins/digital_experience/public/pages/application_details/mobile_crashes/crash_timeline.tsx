@@ -12,7 +12,7 @@ import { i18n } from '@kbn/i18n';
 import type { MobileSessionEventKind, SessionTimelineEvent } from '../../../../common/sessions';
 import type { MobileCrash } from '../../../../common/types/mobile';
 import { formatDurationMs } from '../../../utils/format_duration';
-import { formatElapsed, urlWithoutQuery } from '../../session_detail/utils/visit_activity';
+import { urlWithoutQuery } from '../../session_detail/utils/visit_activity';
 
 type CrashTimelineKind = MobileSessionEventKind | 'crash';
 
@@ -42,8 +42,12 @@ const KIND_COLORS: Partial<Record<CrashTimelineKind, string>> = {
   crash: 'danger',
 };
 
+const CAPTION = i18n.translate('xpack.digitalExperience.mobile.crashes.timeline.caption', {
+  defaultMessage: 'Events before the crash',
+});
+
 const WHEN_LABEL = i18n.translate('xpack.digitalExperience.mobile.crashes.timeline.when', {
-  defaultMessage: 'Before the crash',
+  defaultMessage: 'When',
 });
 
 const EVENT_LABEL = i18n.translate('xpack.digitalExperience.mobile.crashes.timeline.event', {
@@ -59,11 +63,32 @@ const CRASH_MOMENT_LABEL = i18n.translate(
   { defaultMessage: 'At the crash' }
 );
 
-const elapsedBefore = (elapsed: string) =>
-  i18n.translate('xpack.digitalExperience.mobile.crashes.timeline.elapsedBefore', {
-    defaultMessage: '{elapsed} before',
-    values: { elapsed },
+/** How long before the crash, at the precision that matters at that distance, e.g. "4 min 15 s". */
+export const formatBefore = (ms: number): string => {
+  const seconds = Math.round(Math.max(0, ms) / 1_000);
+  if (ms < 1_000) {
+    return i18n.translate('xpack.digitalExperience.mobile.crashes.timeline.beforeMs', {
+      defaultMessage: '{ms} ms before',
+      values: { ms: Math.round(Math.max(0, ms)) },
+    });
+  }
+  if (seconds < 60) {
+    return i18n.translate('xpack.digitalExperience.mobile.crashes.timeline.beforeSeconds', {
+      defaultMessage: '{seconds} s before',
+      values: { seconds },
+    });
+  }
+  if (seconds < 3_600) {
+    return i18n.translate('xpack.digitalExperience.mobile.crashes.timeline.beforeMinutes', {
+      defaultMessage: '{minutes} min {seconds} s before',
+      values: { minutes: Math.floor(seconds / 60), seconds: seconds % 60 },
+    });
+  }
+  return i18n.translate('xpack.digitalExperience.mobile.crashes.timeline.beforeHours', {
+    defaultMessage: '{hours} h {minutes} min before',
+    values: { hours: Math.floor(seconds / 3_600), minutes: Math.floor((seconds % 3_600) / 60) },
   });
+};
 
 interface TimelineRow {
   id: string;
@@ -94,7 +119,8 @@ const toRows = (events: SessionTimelineEvent[], crash: MobileCrash): TimelineRow
           kind,
           beforeMs: crashMs - Date.parse(event.timestamp),
           name: event.name,
-          page: event.page,
+          // A screen's name is its page, as is a tap's without a widget name.
+          page: kind === 'screen' || event.page === event.name ? null : event.page,
           detail: kind === 'request' && event.detail ? urlWithoutQuery(event.detail) : event.detail,
           statusCode: event.statusCode ?? null,
           durationMs: event.durationMs ?? null,
@@ -118,10 +144,9 @@ const columns: Array<EuiBasicTableColumn<TimelineRow>> = [
   {
     field: 'beforeMs',
     name: WHEN_LABEL,
-    width: '9em',
+    width: '11em',
     className: 'eui-textNoWrap',
-    render: (beforeMs: number) =>
-      beforeMs === 0 ? CRASH_MOMENT_LABEL : elapsedBefore(formatElapsed(beforeMs)),
+    render: (beforeMs: number) => (beforeMs === 0 ? CRASH_MOMENT_LABEL : formatBefore(beforeMs)),
   },
   {
     field: 'kind',
@@ -137,7 +162,7 @@ const columns: Array<EuiBasicTableColumn<TimelineRow>> = [
     render: (name: string, { detail, page, statusCode, durationMs }: TimelineRow) => (
       <div className="eui-textTruncate">
         <EuiText size="xs" className="eui-textTruncate">
-          <strong>{name}</strong>
+          <strong title={name}>{name}</strong>
           {statusCode !== null && (
             <>
               {' '}
@@ -172,7 +197,7 @@ export function CrashTimeline({
 }) {
   return (
     <EuiBasicTable<TimelineRow>
-      tableCaption={WHEN_LABEL}
+      tableCaption={CAPTION}
       items={toRows(events, crash)}
       itemId="id"
       columns={columns}

@@ -125,7 +125,10 @@ export interface MobileCrash {
   type: string | null;
   message: string | null;
   stacktrace: string | null;
+  /** The release that crashed, an EDOT iOS report's own. */
   release: string | null;
+  osVersion: string | null;
+  deviceModel: string | null;
   sessionId: string | null;
 }
 

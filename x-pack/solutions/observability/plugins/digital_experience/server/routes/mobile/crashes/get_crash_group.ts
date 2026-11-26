@@ -14,6 +14,7 @@ import {
   withCrashBreakdown,
   withCrashFingerprint,
   withCrashGroup,
+  withCrashTypes,
   withLatestCrash,
   type CrashBreakdownName,
   type CrashBreakdownRow,
@@ -59,6 +60,8 @@ const toCrash = (row: LatestCrashRow): MobileCrash => ({
   message: row[RESULT_COLUMNS.message] ?? null,
   stacktrace: row[RESULT_COLUMNS.stacktrace] ?? null,
   release: row[RESULT_COLUMNS.release] ?? null,
+  osVersion: row[RESULT_COLUMNS.osVersion] ?? null,
+  deviceModel: row[RESULT_COLUMNS.deviceModel] ?? null,
   sessionId: row[RESULT_COLUMNS.sessionId] ?? null,
 });
 
@@ -118,32 +121,46 @@ export const getCrashGroup = async ({
   environment,
 }: GetCrashGroupParams): Promise<Omit<MobileCrashGroupDetailResponse, 'isPartial'>> => {
   // `pipe` appends to the query it's called on, so each query starts from its own.
-  const groupCrashes = () =>
-    withCrashGroup(withCrashFingerprint(crashEvents({ ...filters, start, end })), fingerprint);
+  const groupCrashes = (types?: ReadonlyArray<string | null>) => {
+    const crashes = crashEvents({ ...filters, start, end });
+    return withCrashGroup(
+      withCrashFingerprint(types ? withCrashTypes(crashes, types) : crashes),
+      fingerprint
+    );
+  };
   const filter = timeFilter(start, end + CRASH_DELAY_MS, environment);
+  const [latestRow] = await runEsql<LatestCrashRow>(
+    esClient,
+    'get_mobile_crash_group_latest',
+    withLatestCrash(groupCrashes()),
+    filter
+  );
+  if (!latestRow) {
+    const none: CrashBreakdown = { top: [], other: 0 };
+    return {
+      latestCrash: null,
+      releases: none,
+      osVersions: none,
+      deviceModels: none,
+      beforeCrash: [],
+    };
+  }
+  const latestCrash = toCrash(latestRow);
+  // The group's crashes have the latest one's type, unless it has a stored fingerprint, so the
+  // breakdowns only fingerprint the crashes of that type.
   const breakdown = (name: CrashBreakdownName) =>
     runEsql<CrashBreakdownRow>(
       esClient,
       `get_mobile_crash_group_${name}`,
-      withCrashBreakdown(groupCrashes(), name),
+      withCrashBreakdown(groupCrashes([latestCrash.type]), name),
       filter
     ).then(toBreakdown);
 
-  const [[latestRow], releases, osVersions, deviceModels] = await Promise.all([
-    runEsql<LatestCrashRow>(
-      esClient,
-      'get_mobile_crash_group_latest',
-      withLatestCrash(groupCrashes()),
-      filter
-    ),
+  const [releases, osVersions, deviceModels, beforeCrash] = await Promise.all([
     breakdown('releases'),
     breakdown('osVersions'),
     breakdown('deviceModels'),
+    getEventsBefore(esClient, filters.serviceName, latestCrash),
   ]);
-  const latestCrash = latestRow ? toCrash(latestRow) : null;
-  const beforeCrash = latestCrash
-    ? await getEventsBefore(esClient, filters.serviceName, latestCrash)
-    : [];
-
   return { latestCrash, releases, osVersions, deviceModels, beforeCrash };
 };

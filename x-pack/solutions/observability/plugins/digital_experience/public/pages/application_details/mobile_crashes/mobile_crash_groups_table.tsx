@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import {
   EuiBadge,
   EuiFlexGroup,
@@ -14,7 +14,7 @@ import {
   EuiLink,
   EuiText,
 } from '@elastic/eui';
-import type { EuiBasicTableColumn } from '@elastic/eui';
+import type { Criteria, EuiBasicTableColumn, PropertySort } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedRelative } from '@kbn/i18n-react';
 import { EBT_CLICK_ACTIONS, getEbtProps } from '@kbn/ebt-click';
@@ -58,7 +58,7 @@ const CRASH_LABEL = i18n.translate('xpack.digitalExperience.mobile.crashes.table
 
 const CRASH_TOOLTIP = i18n.translate('xpack.digitalExperience.mobile.crashes.table.crashTooltip', {
   defaultMessage:
-    '"New in" marks a group only the newest release had in the {days, plural, one {# day} other {# days}} before the end of the time range, or in the whole range when it is longer. iOS groups are never marked: their stack traces have no symbols yet, so each build changes them.',
+    '"New in" marks a group only the newest release had in the {days, plural, one {# day} other {# days}} before the end of the time range, or in the whole range when it is longer. Groups of iOS crash reports are never marked: their frames are unsymbolicated addresses, which each build changes.',
   values: { days: CRASH_NEW_LOOKBACK_DAYS },
 });
 
@@ -90,6 +90,20 @@ const NEW_IN_RELEASE_TOOLTIP = i18n.translate(
 
 const PAGE_SIZE = 10;
 
+/** Wide enough for a release and how long ago, e.g. "4.12.0 · 23 hours ago". */
+const SEEN_COLUMN_WIDTH = '13em';
+
+/** Counts and times: a first click puts the most, or the latest, on top. */
+const DESCENDING_FIRST: ReadonlySet<string> = new Set([
+  'users',
+  'events',
+  'sessions',
+  'firstSeen',
+  'lastSeen',
+]);
+
+const INITIAL_SORT: PropertySort = { field: 'users', direction: 'desc' };
+
 /** When a group crashed, and on which release: the release, then how long ago. */
 function Seen({ seen: { time, release } }: { seen: CrashGroupSeen }) {
   const { formatDate } = useFormatters();
@@ -115,6 +129,23 @@ export function MobileCrashGroupsTable({
   onSelect: (fingerprint: string) => void;
 }) {
   const { formatNumber } = useFormatters();
+  // Kept here, as the table remounts while a refresh loads, which would reset them.
+  const [sort, setSort] = useState<PropertySort>(INITIAL_SORT);
+  const [pageIndex, setPageIndex] = useState(0);
+  const lastPageIndex = Math.max(0, Math.ceil(crashGroups.length / PAGE_SIZE) - 1);
+  const onTableChange = ({ sort: nextSort, page }: Criteria<MobileCrashGroup>) => {
+    if (nextSort) {
+      const field = String(nextSort.field);
+      const isNewField = field !== sort.field;
+      setSort({
+        field,
+        direction: isNewField && DESCENDING_FIRST.has(field) ? 'desc' : nextSort.direction,
+      });
+    }
+    if (page) {
+      setPageIndex(page.index);
+    }
+  };
 
   const columns: Array<EuiBasicTableColumn<MobileCrashGroup>> = [
     {
@@ -124,8 +155,11 @@ export function MobileCrashGroupsTable({
       render: (type: string | null, { fingerprint, message, newInRelease }: MobileCrashGroup) => (
         <div className="eui-textTruncate">
           <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-            <EuiFlexItem grow={false} className="eui-textTruncate">
+            {/* Shrinks below its text, so a long type ends in an ellipsis before the badge. */}
+            <EuiFlexItem grow={false} css={{ minWidth: 0 }}>
               <EuiLink
+                className="eui-textTruncate"
+                title={type ?? UNKNOWN_ERROR_TYPE_LABEL}
                 onClick={() => onSelect(fingerprint)}
                 data-test-subj="digitalExperienceMobileCrashGroup"
                 {...getEbtProps({
@@ -182,6 +216,7 @@ export function MobileCrashGroupsTable({
       field: 'firstSeen',
       name: FIRST_SEEN_LABEL,
       nameTooltip: { content: FIRST_SEEN_TOOLTIP },
+      width: SEEN_COLUMN_WIDTH,
       className: 'eui-textNoWrap',
       sortable: ({ firstSeen }: MobileCrashGroup) => firstSeen.time,
       render: (firstSeen: CrashGroupSeen) => <Seen seen={firstSeen} />,
@@ -189,6 +224,7 @@ export function MobileCrashGroupsTable({
     {
       field: 'lastSeen',
       name: LAST_SEEN_LABEL,
+      width: SEEN_COLUMN_WIDTH,
       className: 'eui-textNoWrap',
       sortable: ({ lastSeen }: MobileCrashGroup) => lastSeen.time,
       render: (lastSeen: CrashGroupSeen) => <Seen seen={lastSeen} />,
@@ -208,8 +244,15 @@ export function MobileCrashGroupsTable({
         items={crashGroups}
         itemId="fingerprint"
         columns={columns}
-        sorting={{ sort: { field: 'users', direction: 'desc' } }}
-        pagination={{ pageSize: PAGE_SIZE, showPerPageOptions: false }}
+        sorting={{ sort }}
+        // A second click reverses the order rather than dropping it.
+        allowNeutralSort={false}
+        pagination={{
+          pageIndex: Math.min(pageIndex, lastPageIndex),
+          pageSize: PAGE_SIZE,
+          showPerPageOptions: false,
+        }}
+        onTableChange={onTableChange}
       />
     </DataPanel>
   );

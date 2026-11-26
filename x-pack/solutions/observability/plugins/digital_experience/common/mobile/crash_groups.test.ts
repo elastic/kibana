@@ -13,6 +13,7 @@ import {
   withCrashGroup,
   withCrashGroupHistory,
   withCrashGroupStats,
+  withCrashTypes,
   withLatestCrash,
 } from './crash_groups';
 
@@ -114,6 +115,27 @@ describe('withCrashGroupHistory', () => {
   });
 });
 
+describe('withCrashTypes', () => {
+  const crashes = () => crashEvents({ serviceName: 'ride-ios', start: START, end: END });
+
+  it('keeps the crashes of the types, and those with a stored fingerprint, of any type', () => {
+    expect(withCrashTypes(crashes(), ['SIGSEGV', 'SIGABRT', 'SIGSEGV']).print('basic')).toContain(
+      '| WHERE `attributes.exception.fingerprint` IS NOT NULL OR (`attributes.exception.type` IN ("SIGSEGV", "SIGABRT"))'
+    );
+  });
+
+  it('keeps the crashes without a type for a group without one, as the fingerprint reads them', () => {
+    const query = withCrashTypes(crashes(), ['SIGSEGV', null]).print('basic');
+
+    expect(query).toContain(
+      'OR `attributes.exception.type` IS NULL OR `attributes.exception.type` == ""'
+    );
+    expect(withCrashTypes(crashes(), ['SIGSEGV']).print('basic')).not.toContain(
+      '`attributes.exception.type` IS NULL'
+    );
+  });
+});
+
 describe('crash group detail', () => {
   const groupCrashes = () =>
     withCrashGroup(
@@ -130,7 +152,7 @@ describe('crash group detail', () => {
 
   it('reads the latest crash with its stack trace and session', () => {
     expect(withLatestCrash(groupCrashes()).print('basic')).toContain(
-      '| SORT crash_time DESC | LIMIT 1 | EVAL exception_type = `attributes.exception.type`, message = `attributes.exception.message`, stacktrace = `attributes.exception.stacktrace`, release = crash_release, session_id = `attributes.session.id`, reported_at = @timestamp | KEEP crash_time, reported_at, exception_type, message, stacktrace, release, session_id'
+      '| SORT crash_time DESC | LIMIT 1 | EVAL exception_type = `attributes.exception.type`, message = `attributes.exception.message`, stacktrace = `attributes.exception.stacktrace`, release = crash_release, os_version = `resource.attributes.os.version`, device_model = COALESCE(`resource.attributes.device.model.name`, `resource.attributes.device.model.identifier`), session_id = `attributes.session.id`, reported_at = @timestamp | KEEP crash_time, reported_at, exception_type, message, stacktrace, release, os_version, device_model, session_id'
     );
   });
 

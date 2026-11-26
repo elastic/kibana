@@ -93,6 +93,27 @@ const iosReport = ({
   ].join('\n');
 };
 
+/** An iOS report whose frames are symbolicated: one address, then the symbol and its offset. */
+const symbolicatedIosReport = (slide: number): string => {
+  const address = (base: number) => `0x${(base + slide).toString(16).padStart(16, '0')}`;
+  return [
+    `Incident Identifier: ${slide
+      .toString(16)
+      .toUpperCase()
+      .padStart(8, '0')}-0000-0000-0000-000000000000`,
+    'Version:         8.5.0 (850)',
+    '',
+    'Last Exception Backtrace:',
+    `0   CoreFoundation                      ${address(0x1803f4d88)} __exceptionPreprocess + 164`,
+    `1   RideIos                             ${address(
+      0x1003a2b10
+    )} RideViewController.start() + 88`,
+    '',
+    'Thread 0 Crashed:',
+    `0   libsystem_kernel.dylib              ${address(0x1eab9a91c)} __pthread_kill + 8`,
+  ].join('\n');
+};
+
 const jvmTrace = (type: string, message: string, line: number): string =>
   [
     `${type}: ${message}`,
@@ -169,6 +190,14 @@ export const CRASH_FINGERPRINT_CASES = {
       lastExceptionBacktrace: true,
     }),
   },
+  iosSymbolicatedA: {
+    type: 'NSInvalidArgumentException',
+    stacktrace: symbolicatedIosReport(0x4000),
+  },
+  iosSymbolicatedB: {
+    type: 'NSInvalidArgumentException',
+    stacktrace: symbolicatedIosReport(0x2c8000),
+  },
   javascriptIndex5: javascriptCrash('TypeError: index 5 out of range at 0x7f3a, js engine: hermes'),
   javascriptIndex7: javascriptCrash('TypeError: index 7 out of range at 0x9b10, js engine: hermes'),
   javascriptIban: javascriptCrash(
@@ -206,6 +235,8 @@ export const EXPECTED_CRASH_FINGERPRINTS: Record<keyof typeof CRASH_FINGERPRINT_
   iosLaunchB: '2ff3f68c306a93625ec7cfe1d2db4587704a34b76bbfa9ed31afd8f69e8a0014',
   iosExceptionA: 'b514cfbd8ddc65d16c3b79fb02481d43247ac3fb6860d3ecdb3058af88ecf709',
   iosExceptionB: 'b514cfbd8ddc65d16c3b79fb02481d43247ac3fb6860d3ecdb3058af88ecf709',
+  iosSymbolicatedA: 'f5a8725a56365c22ec6ee0aa21420567f609035ed6c378035cf881a4cf2c737b',
+  iosSymbolicatedB: 'f5a8725a56365c22ec6ee0aa21420567f609035ed6c378035cf881a4cf2c737b',
   javascriptIndex5: '6fa897602de144d6484f9c78f7c7b442366dc466558d05a95c0c33b4d33190c2',
   javascriptIndex7: '6fa897602de144d6484f9c78f7c7b442366dc466558d05a95c0c33b4d33190c2',
   javascriptIban: '9cd1dde79ac088d104d51199ed83de21adee4505e4618b2df6e9221aa9bea494',
