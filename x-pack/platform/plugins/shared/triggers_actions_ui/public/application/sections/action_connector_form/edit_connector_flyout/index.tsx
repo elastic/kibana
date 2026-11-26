@@ -196,6 +196,10 @@ export const EditConnectorFlyoutContent: React.FC<EditConnectorFlyoutContentProp
     connectorContext?.services
   );
 
+  const isCatalogEnabled =
+    connectorContext?.services.isCatalogEnabled ?? services.actions?.isCatalogEnabled;
+  const specVersion = isCatalogEnabled ? connector.specVersion : undefined;
+
   const isMounted = useRef(false);
   const canSave = hasSaveActionsCapability(capabilities);
   const { isLoading: isUpdatingConnector, updateConnector } = useUpdateConnector();
@@ -267,6 +271,7 @@ export const EditConnectorFlyoutContent: React.FC<EditConnectorFlyoutContentProp
     http,
     docLinks,
     uiSettings,
+    specVersion,
   });
 
   const isSpecConnector = !actionTypeRegistry.has(connector.actionTypeId);
@@ -420,6 +425,7 @@ export const EditConnectorFlyoutContent: React.FC<EditConnectorFlyoutContentProp
         name: name ?? '',
         config: config ?? {},
         secrets: secrets ?? {},
+        ...(specVersion !== undefined ? { specVersion } : {}),
         ...isInboundEventsEnabledPayload(
           connector.actionTypeId,
           isInboundEventsEnabled,
@@ -492,6 +498,7 @@ export const EditConnectorFlyoutContent: React.FC<EditConnectorFlyoutContentProp
     preSubmitValidator,
     connector,
     isClusterInboundEventsEnabled,
+    specVersion,
     updateConnector,
     onFormModifiedChange,
     revealedInboundConnector,

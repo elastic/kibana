@@ -89,6 +89,205 @@ describe('spec connector edit flyout Test tab', () => {
     });
   });
 
+  describe('spec version', () => {
+    it('loads and saves pinned version when catalog is enabled', async () => {
+      const pinnedVersion = '1.3';
+      const expectedVersion = '1.3';
+      const spec = mockSpecResponse(true);
+
+      appMockRenderer.coreStart.actions = {
+        ...appMockRenderer.coreStart.actions,
+        isCatalogEnabled: true,
+      };
+      appMockRenderer.coreStart.http.get = jest.fn().mockResolvedValue({
+        ...spec,
+        metadata: { ...spec.metadata, spec_version: pinnedVersion },
+      });
+      appMockRenderer.coreStart.http.put = jest.fn().mockResolvedValue({
+        id: specConnector.id,
+        name: 'Updated connector',
+        connector_type_id: specConnector.actionTypeId,
+        config: {},
+        is_preconfigured: false,
+        is_deprecated: false,
+        is_missing_secrets: false,
+        is_system_action: false,
+        spec_version: expectedVersion,
+      });
+
+      appMockRenderer.render(
+        <EditConnectorFlyout
+          actionTypeRegistry={actionTypeRegistry}
+          connector={{ ...specConnector, specVersion: pinnedVersion }}
+          onClose={onClose}
+          onConnectorUpdated={onConnectorUpdated}
+        />
+      );
+
+      const nameInput = await screen.findByTestId('nameInput');
+      await userEvent.clear(nameInput);
+      await userEvent.type(nameInput, 'Updated connector');
+      await userEvent.type(
+        await screen.findByTestId('generator-field-secrets-apiKey'),
+        'my-api-key'
+      );
+      await userEvent.click(screen.getByTestId('edit-connector-flyout-save-btn'));
+
+      const [getPath, getOptions] = (appMockRenderer.coreStart.http.get as jest.Mock).mock.calls[0];
+      expect(getPath).toBe('/internal/actions/connector_types/spec-connector-test/spec');
+      expect(getOptions.query).toEqual({ spec_version: expectedVersion });
+
+      await waitFor(() => expect(onConnectorUpdated).toHaveBeenCalledTimes(1));
+      expect(appMockRenderer.coreStart.http.put).toHaveBeenCalledTimes(1);
+
+      const [putPath, { body }] = (appMockRenderer.coreStart.http.put as jest.Mock).mock.calls[0];
+      expect(putPath).toBe('/api/actions/connector/spec-connector-id');
+
+      expect(JSON.parse(body).name).toBe('Updated connector');
+      expect(JSON.parse(body).spec_version).toBe(expectedVersion);
+      expect(onConnectorUpdated).toHaveBeenCalledWith(
+        expect.objectContaining({ specVersion: expectedVersion })
+      );
+    });
+
+    it('loads and saves unversioned spec when catalog is enabled and no pinned version', async () => {
+      const pinnedVersion = undefined;
+      const expectedVersion = undefined;
+      const spec = mockSpecResponse(true);
+
+      appMockRenderer.coreStart.actions = {
+        ...appMockRenderer.coreStart.actions,
+        isCatalogEnabled: true,
+      };
+      appMockRenderer.coreStart.http.get = jest.fn().mockResolvedValue({
+        ...spec,
+        metadata: { ...spec.metadata, spec_version: pinnedVersion },
+      });
+      appMockRenderer.coreStart.http.put = jest.fn().mockResolvedValue({
+        id: specConnector.id,
+        name: 'Updated connector',
+        connector_type_id: specConnector.actionTypeId,
+        config: {},
+        is_preconfigured: false,
+        is_deprecated: false,
+        is_missing_secrets: false,
+        is_system_action: false,
+        spec_version: expectedVersion,
+      });
+
+      appMockRenderer.render(
+        <EditConnectorFlyout
+          actionTypeRegistry={actionTypeRegistry}
+          connector={{ ...specConnector, specVersion: pinnedVersion }}
+          onClose={onClose}
+          onConnectorUpdated={onConnectorUpdated}
+        />
+      );
+
+      const nameInput = await screen.findByTestId('nameInput');
+      await userEvent.clear(nameInput);
+      await userEvent.type(nameInput, 'Updated connector');
+      await userEvent.type(
+        await screen.findByTestId('generator-field-secrets-apiKey'),
+        'my-api-key'
+      );
+      await userEvent.click(screen.getByTestId('edit-connector-flyout-save-btn'));
+
+      const [getPath, getOptions] = (appMockRenderer.coreStart.http.get as jest.Mock).mock.calls[0];
+      expect(getPath).toBe('/internal/actions/connector_types/spec-connector-test/spec');
+      expect(getOptions).not.toHaveProperty(['query', 'spec_version']);
+
+      await waitFor(() => expect(onConnectorUpdated).toHaveBeenCalledTimes(1));
+      expect(appMockRenderer.coreStart.http.put).toHaveBeenCalledTimes(1);
+
+      const [putPath, { body }] = (appMockRenderer.coreStart.http.put as jest.Mock).mock.calls[0];
+      expect(putPath).toBe('/api/actions/connector/spec-connector-id');
+
+      expect(JSON.parse(body).name).toBe('Updated connector');
+      expect(JSON.parse(body)).not.toHaveProperty('spec_version');
+      expect(onConnectorUpdated.mock.calls[0][0]).not.toHaveProperty('specVersion');
+    });
+
+    it('loads and saves unversioned spec when catalog is disabled and a pinned version is available', async () => {
+      const pinnedVersion = '1.3';
+      const expectedVersion = undefined;
+      const spec = mockSpecResponse(true);
+
+      appMockRenderer.coreStart.actions = {
+        ...appMockRenderer.coreStart.actions,
+        isCatalogEnabled: false,
+      };
+      appMockRenderer.coreStart.http.get = jest.fn().mockResolvedValue({
+        ...spec,
+        metadata: { ...spec.metadata, spec_version: pinnedVersion },
+      });
+      appMockRenderer.coreStart.http.put = jest.fn().mockResolvedValue({
+        id: specConnector.id,
+        name: 'Updated connector',
+        connector_type_id: specConnector.actionTypeId,
+        config: {},
+        is_preconfigured: false,
+        is_deprecated: false,
+        is_missing_secrets: false,
+        is_system_action: false,
+        spec_version: expectedVersion,
+      });
+
+      appMockRenderer.render(
+        <EditConnectorFlyout
+          actionTypeRegistry={actionTypeRegistry}
+          connector={{ ...specConnector, specVersion: pinnedVersion }}
+          onClose={onClose}
+          onConnectorUpdated={onConnectorUpdated}
+        />
+      );
+
+      const nameInput = await screen.findByTestId('nameInput');
+      await userEvent.clear(nameInput);
+      await userEvent.type(nameInput, 'Updated connector');
+      await userEvent.type(
+        await screen.findByTestId('generator-field-secrets-apiKey'),
+        'my-api-key'
+      );
+      await userEvent.click(screen.getByTestId('edit-connector-flyout-save-btn'));
+
+      const [getPath, getOptions] = (appMockRenderer.coreStart.http.get as jest.Mock).mock.calls[0];
+      expect(getPath).toBe('/internal/actions/connector_types/spec-connector-test/spec');
+      expect(getOptions).not.toHaveProperty(['query', 'spec_version']);
+
+      await waitFor(() => expect(onConnectorUpdated).toHaveBeenCalledTimes(1));
+      expect(appMockRenderer.coreStart.http.put).toHaveBeenCalledTimes(1);
+
+      const [putPath, { body }] = (appMockRenderer.coreStart.http.put as jest.Mock).mock.calls[0];
+      expect(putPath).toBe('/api/actions/connector/spec-connector-id');
+
+      expect(JSON.parse(body).name).toBe('Updated connector');
+      expect(JSON.parse(body)).not.toHaveProperty('spec_version');
+      expect(onConnectorUpdated.mock.calls[0][0]).not.toHaveProperty('specVersion');
+    });
+
+    it('loads the pinned spec on the Test tab', async () => {
+      appMockRenderer.coreStart.actions = {
+        ...appMockRenderer.coreStart.actions,
+        isCatalogEnabled: true,
+      };
+      appMockRenderer.render(
+        <EditConnectorFlyout
+          actionTypeRegistry={actionTypeRegistry}
+          connector={{ ...specConnector, specVersion: '2.1' }}
+          onClose={onClose}
+          tab={EditConnectorTabs.Test}
+        />
+      );
+
+      expect(await screen.findByTestId('test-connector-form')).toBeInTheDocument();
+      expect(appMockRenderer.coreStart.http.get).toHaveBeenCalledWith(
+        '/internal/actions/connector_types/spec-connector-test/spec',
+        expect.objectContaining({ query: { spec_version: '2.1' } })
+      );
+    });
+  });
+
   it('renders the test form for an opted-in spec connector without throwing', async () => {
     appMockRenderer.render(
       <EditConnectorFlyout

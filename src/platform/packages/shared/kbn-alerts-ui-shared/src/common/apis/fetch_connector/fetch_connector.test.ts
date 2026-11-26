@@ -57,6 +57,20 @@ describe('fetchConnector', () => {
     `);
   });
 
+  it('maps the pinned spec_version to specVersion', async () => {
+    http.get.mockResolvedValueOnce({
+      id: 'test-connector',
+      name: 'Test',
+      connector_type_id: 'test',
+      config: {},
+      spec_version: '1.3',
+    });
+
+    const result = await fetchConnector('test-connector', { http });
+
+    expect(result).toMatchObject({ specVersion: '1.3' });
+  });
+
   it('should map auth_mode from the API response to authMode', async () => {
     const apiResponseValue = {
       id: 'test-connector',
