@@ -101,9 +101,9 @@ export class DataViewsAsCodeService {
     return this.mapDataView(result);
   }
 
-  public async create(spec: AsCodeSavedDataView, urlSpaceId: string) {
+  public async create(spec: AsCodeSavedDataView, currentSpaceId: string) {
     this.validateFieldFormatTypes(spec);
-    this.validateSpaces([], spec.spaces, urlSpaceId);
+    this.validateSpaces([], spec.spaces, currentSpaceId);
 
     const dataViewSpec = toStoredDataView(spec);
 
@@ -116,11 +116,11 @@ export class DataViewsAsCodeService {
     return this.dataViewsService.delete(id);
   }
 
-  public async upsert(id: string, spec: Omit<AsCodeSavedDataView, 'id'>, urlSpaceId: string) {
+  public async upsert(id: string, spec: Omit<AsCodeSavedDataView, 'id'>, currentSpaceId: string) {
     this.validateFieldFormatTypes(spec);
 
     const existingDataView = await this.getDataViewLazy(id);
-    this.validateSpaces(existingDataView?.namespaces ?? [], spec.spaces, urlSpaceId);
+    this.validateSpaces(existingDataView?.namespaces ?? [], spec.spaces, currentSpaceId);
 
     if (!!existingDataView) {
       // The id can be a legacy alias, for that we use the resolved id.
@@ -132,7 +132,7 @@ export class DataViewsAsCodeService {
       );
 
       // 2. Update the spaces of the data view
-      await this.updateSpaces(resolvedId, existingDataView, spec.spaces, urlSpaceId);
+      await this.updateSpaces(resolvedId, existingDataView, spec.spaces, currentSpaceId);
 
       // 3. Update the saved object with the new data view instance.
       await this.savedObjectsClient.update(
@@ -162,7 +162,7 @@ export class DataViewsAsCodeService {
   private validateSpaces(
     existingSpaces: string[],
     requestedSpaces: string[] | undefined,
-    urlSpaceId: string
+    currentSpaceId: string
   ) {
     // An unknown space means the data view is shared with a space the user has no access to,
     // either currently or in the request, so it can't be written.
@@ -173,10 +173,10 @@ export class DataViewsAsCodeService {
 
     // `*` makes the data view available in every space, including the url one.
     const includesUrlSpace =
-      requestedSpaces.includes(urlSpaceId) || requestedSpaces.includes(ALL_SPACES_ID);
+      requestedSpaces.includes(currentSpaceId) || requestedSpaces.includes(ALL_SPACES_ID);
     if (!includesUrlSpace)
       throw badRequest(
-        `The requested spaces must include the current space. Make sure that the spaces array includes ${urlSpaceId}.`
+        `The requested spaces must include the current space. Make sure that the spaces array includes ${currentSpaceId}.`
       );
   }
 
@@ -184,10 +184,10 @@ export class DataViewsAsCodeService {
     id: string,
     existingDataView: DataViewLazy,
     bodySpaces: string[] | undefined,
-    urlSpaceId: string
+    currentSpaceId: string
   ) {
     const hasBodySpaces = bodySpaces && bodySpaces.length > 0;
-    const spacesToUpdate = hasBodySpaces ? bodySpaces : [urlSpaceId];
+    const spacesToUpdate = hasBodySpaces ? bodySpaces : [currentSpaceId];
 
     // Body spaces have priority over the url space when updating.
     const spacesToAdd = spacesToUpdate.filter(
