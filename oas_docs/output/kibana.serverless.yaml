@@ -178977,7 +178977,7 @@ components:
           maxItems: 1000
           type: array
         auth:
-          description: How the output authenticates with the OTLP endpoint. `auth_header` and `custom_header` send the credential set in `secrets.auth.credential` in a request header. `azure` sends a Microsoft Entra ID token that the collector requests itself, it requires the `http/protobuf` protocol. Not accepted for the managed OTLP endpoint.
+          description: 'How the output authenticates with the OTLP endpoint. `auth_header` and `custom_header` send the credential set in `secrets.auth.credential` in a request header. `azure` sends a Microsoft Entra ID token that the collector requests itself: it requires the `http/protobuf` protocol, an `https://` URL for `endpoint`, and for the signal endpoints that are set, and cannot be used with `otlp_exporter.tls.insecure_skip_verify`. Not accepted for the managed OTLP endpoint.'
           discriminator:
             mapping:
               auth_header: '#/components/schemas/Kibana_HTTP_APIs_otlp_auth_header'
@@ -180039,12 +180039,12 @@ components:
           minLength: 1
           type: string
         scopes:
-          description: The scopes of the token. By default `https://<host of the endpoint>/.default`, set them when the endpoint expects another audience, e.g. `https://monitor.azure.com/.default`. A managed identity accepts a single scope.
+          description: The scope of the token, a single one. By default `https://<host of the endpoint>/.default`, set it when the endpoint expects another audience, e.g. `https://monitor.azure.com/.default`.
           items:
             maxLength: 2048
             minLength: 1
             type: string
-          maxItems: 10
+          maxItems: 1
           minItems: 1
           type: array
         tenant_id:
@@ -180622,12 +180622,12 @@ components:
           minLength: 1
           type: string
         scopes:
-          description: The scopes of the token. By default `https://<host of the endpoint>/.default`, set them when the endpoint expects another audience, e.g. `https://monitor.azure.com/.default`. A managed identity accepts a single scope.
+          description: The scope of the token, a single one. By default `https://<host of the endpoint>/.default`, set it when the endpoint expects another audience, e.g. `https://monitor.azure.com/.default`.
           items:
             maxLength: 2048
             minLength: 1
             type: string
-          maxItems: 10
+          maxItems: 1
           minItems: 1
           type: array
         tenant_id:
@@ -181721,7 +181721,7 @@ components:
           maxItems: 1000
           type: array
         auth:
-          description: How the output authenticates with the OTLP endpoint. `auth_header` and `custom_header` send the credential set in `secrets.auth.credential` in a request header. `azure` sends a Microsoft Entra ID token that the collector requests itself, it requires the `http/protobuf` protocol. Not accepted for the managed OTLP endpoint.
+          description: 'How the output authenticates with the OTLP endpoint. `auth_header` and `custom_header` send the credential set in `secrets.auth.credential` in a request header. `azure` sends a Microsoft Entra ID token that the collector requests itself: it requires the `http/protobuf` protocol, an `https://` URL for `endpoint`, and for the signal endpoints that are set, and cannot be used with `otlp_exporter.tls.insecure_skip_verify`. Not accepted for the managed OTLP endpoint.'
           discriminator:
             mapping:
               auth_header: '#/components/schemas/Kibana_HTTP_APIs_otlp_response_auth_header'
@@ -189577,7 +189577,7 @@ components:
           maxItems: 1000
           type: array
         auth:
-          description: How the output authenticates with the OTLP endpoint. `auth_header` and `custom_header` send the credential set in `secrets.auth.credential` in a request header. `azure` sends a Microsoft Entra ID token that the collector requests itself, it requires the `http/protobuf` protocol. Not accepted for the managed OTLP endpoint.
+          description: 'How the output authenticates with the OTLP endpoint. `auth_header` and `custom_header` send the credential set in `secrets.auth.credential` in a request header. `azure` sends a Microsoft Entra ID token that the collector requests itself: it requires the `http/protobuf` protocol, an `https://` URL for `endpoint`, and for the signal endpoints that are set, and cannot be used with `otlp_exporter.tls.insecure_skip_verify`. Not accepted for the managed OTLP endpoint.'
           discriminator:
             mapping:
               auth_header: '#/components/schemas/Kibana_HTTP_APIs_otlp_auth_header'
