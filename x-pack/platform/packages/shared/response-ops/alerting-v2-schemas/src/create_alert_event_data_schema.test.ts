@@ -82,6 +82,31 @@ describe('create alert event body schemas', () => {
     ).toBe(false);
   });
 
+  it('accepts optional routing tags and rejects an empty, oversized, or too-long list', () => {
+    expect(
+      createAlertEventDataSchema.safeParse({
+        ...baseWithSource,
+        routing_tags: ['sre', 'payments'],
+      }).data?.routing_tags
+    ).toEqual(['sre', 'payments']);
+
+    expect(
+      createAlertEventDataSchema.safeParse({ ...baseWithSource, routing_tags: [] }).success
+    ).toBe(false);
+    expect(
+      createAlertEventDataSchema.safeParse({
+        ...baseWithSource,
+        routing_tags: Array.from({ length: 21 }, (_, i) => `route-${i}`),
+      }).success
+    ).toBe(false);
+    expect(
+      createAlertEventDataSchema.safeParse({
+        ...baseWithSource,
+        routing_tags: ['a'.repeat(129)],
+      }).success
+    ).toBe(false);
+  });
+
   it('allows vendor dimensions under data with explicit fingerprint_fields paths', () => {
     expect(
       createAlertEventDataSchema.safeParse({

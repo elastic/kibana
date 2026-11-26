@@ -7,6 +7,7 @@
 
 import { z, isoDateTime, lazySchema } from '@kbn/zod/v4';
 import { ALERT_EPISODE_STATUS } from './alert_action_schema';
+import { tagsSchema } from './common';
 import {
   ID_MAX_LENGTH,
   MAX_ALERT_EVENT_DATA_KEYS,
@@ -114,6 +115,12 @@ export const createAlertEventDataSchema = lazySchema(() =>
   createAlertEventBodyBaseObjectSchema
     .extend({
       source: externalEventSourceSchema,
+      routing_tags: tagsSchema
+        .min(1)
+        .optional()
+        .describe(
+          'Routing tags stored on this alert event. An action policy applies when its matcher.tags contains at least one of these tags. Omit to leave the field unset.'
+        ),
     })
     .strict()
     .superRefine(refineIdentityFields)

@@ -264,6 +264,24 @@ describe('AlertEventsClient.createAlertEvent episode lifecycle', () => {
     expect(docs[0]).toHaveProperty('scheduled_timestamp', expect.any(String));
   });
 
+  it('writes routing_tags onto the event and omits the field when none are sent', async () => {
+    const { client, storageService } = createClient([]);
+
+    await client.createAlertEvent({
+      source: 'datadog',
+      fingerprint: 'tags-fp',
+      routing_tags: ['sre', 'payments'],
+    });
+
+    const [{ docs }] = storageService.bulkIndexDocs.mock.calls[0];
+    expect(docs[0]).toEqual(expect.objectContaining({ routing_tags: ['sre', 'payments'] }));
+
+    await client.createAlertEvent({ source: 'datadog', fingerprint: 'plain-fp' });
+
+    const [{ docs: plainDocs }] = storageService.bulkIndexDocs.mock.calls[1];
+    expect(plainDocs[0]).not.toHaveProperty('routing_tags');
+  });
+
   it('passes a caller-supplied timestamp through as @timestamp and scheduled_timestamp', async () => {
     const { client, storageService } = createClient([]);
     const timestamp = '2026-07-29T12:00:00.000Z';

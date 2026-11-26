@@ -166,6 +166,9 @@ export class AlertEventsClient {
       },
       space_id: this.spaceId,
       ...(event.severity != null ? { severity: event.severity } : {}),
+      ...(event.routing_tags != null && event.routing_tags.length > 0
+        ? { routing_tags: event.routing_tags }
+        : {}),
     };
 
     // The doc may omit `@timestamp`, so the ingest pipeline must be in place before writing.
