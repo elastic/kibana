@@ -39,17 +39,13 @@ import {
 const MINUTE_MS = 60_000;
 /**
  * How far back the history read reaches before the window: the newest minutes a run returns start
- * before the window, and before them come the hour their normal level is measured over, whose
- * reported minutes are left out of it, and the quiet period of an event that may still be open. Two
+ * before the window, and before them comes the quiet period of an event that may still be open. Two
  * more minutes because a run is stamped when its row is indexed, which can be a while after its
  * query read `NOW()`.
  */
 const HISTORY_LOOKBACK_MS =
   (KNOWN_FAILURES_SETTINGS.newest_minutes +
-    Math.max(
-      KNOWN_FAILURES_SETTINGS.baseline_minutes,
-      KNOWN_FAILURES_SETTINGS.quiet_period_minutes
-    ) +
+    KNOWN_FAILURES_SETTINGS.quiet_period_minutes +
     KNOWN_FAILURES_SETTINGS.end_margin_minutes +
     2) *
   MINUTE_MS;
@@ -261,7 +257,7 @@ async function judgeMeasuredFailures({
   return Promise.all(
     measured.map(async (failure, index) => {
       const { measurements } = failure;
-      const { reported, reportedCounts, open } = readPastMinutes({
+      const { reported, open } = readPastMinutes({
         readings: history.get(getSeriesKey(seriesOf[index].unusual)) ?? [],
         ruleId: measurements[0].rule_id,
       });
@@ -273,7 +269,7 @@ async function judgeMeasuredFailures({
       // The oldest run reaches furthest back, so the data start lookup covers every run's window.
       const { start } = getRunWindow(measurements[measurements.length - 1]);
       const judge = (dataFrom?: number) => ({
-        unusual: findUnusualMinutes({ measurements, open, reported, reportedCounts, dataFrom }),
+        unusual: findUnusualMinutes({ measurements, open, reported, dataFrom }),
         rises: findRises({ measurements, reported: reportedRises, dataFrom }),
       });
 
@@ -365,11 +361,11 @@ function memoizeDataStart({ esClient, cpsEnabled, abortSignal }: GeneratorContex
 }
 
 /**
- * The unusual minutes already reported for a knowledge indicator, their counts, and the event they
- * left open. Every reported minute counts, whichever rule reported it: the store keeps one reading
- * per series and minute, so a second one would hide the first. The counts and the open event count
- * only when the same rule reported them: an edited query gets a new rule, and what the old query
- * counted says nothing about the new one.
+ * The unusual minutes already reported for a knowledge indicator, and the event they left open.
+ * Every reported minute counts, whichever rule reported it: the store keeps one reading per series
+ * and minute, so a second one would hide the first. The open event counts only when the same rule
+ * reported it: an edited query gets a new rule, and the threshold saved for the old query says
+ * nothing about the new one.
  */
 function readPastMinutes({
   readings,
@@ -377,7 +373,7 @@ function readPastMinutes({
 }: {
   readings: DetectionSignalReading[];
   ruleId: string;
-}): { reported: Set<number>; reportedCounts: Map<number, number>; open?: OpenKnownFailure } {
+}): { reported: Set<number>; open?: OpenKnownFailure } {
   const breached = readings.filter(({ status }) => status === 'breached');
   const unusual = breached.filter(({ details }) => details.check === 'unusual_minute');
   const last = sortBy(
@@ -390,12 +386,6 @@ function readPastMinutes({
 
   return {
     reported: new Set(breached.map(({ bucket_start: bucketStart }) => bucketStart)),
-    // The same rule only: an edited query's old rule counted other lines.
-    reportedCounts: new Map(
-      unusual.flatMap(({ rule_id: readingRuleId, bucket_start: bucketStart, value }) =>
-        readingRuleId === ruleId && typeof value === 'number' ? [[bucketStart, value] as const] : []
-      )
-    ),
     open: last && { threshold: last.details.threshold as number, last_minute: last.bucket_start },
   };
 }

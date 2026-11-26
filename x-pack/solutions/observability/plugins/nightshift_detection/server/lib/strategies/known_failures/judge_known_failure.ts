@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { KNOWN_FAILURES_SETTINGS } from './constants';
+import { KNOWN_FAILURES_SETTINGS, MAD_SCALE } from './constants';
 import type {
   KnownFailureBaseline,
   KnownFailureChange,
@@ -13,8 +13,6 @@ import type {
 } from './known_failure_row';
 
 const MINUTE_MS = 60_000;
-/** Scales a median absolute deviation to a standard deviation for normally distributed values. */
-const MAD_SCALE = 1.4826;
 const LEVEL_CHANGE_TYPES = new Set(['step_change', 'trend_change']);
 
 /** A minute judged unusual, with the threshold it was judged against. */
@@ -79,57 +77,21 @@ export function getRunWindow({ minutes }: Pick<KnownFailureMeasurement, 'minutes
 /**
  * The prototype's baseline check: a minute is unusual above both the median plus `mad_k` scaled
  * median absolute deviations (at least `min_delta` more matches) and a count floor that widens with
- * the indicator's burstiness, its variance over its mean. The mean and variance leave out the
- * `excluded` counts, the hour's minutes already reported as unusual, so one reported spike cannot
- * raise the floor for the hour after it.
+ * the indicator's burstiness, its variance over its mean. The rule leaves the hour's spikes out of
+ * the mean and variance, so one incident cannot raise the floor for the hour after it.
  */
-export function getBaselineThreshold({
-  baseline,
-  excluded = [],
-}: {
-  baseline: KnownFailureBaseline;
-  excluded?: number[];
-}): number {
-  const { median, mad } = baseline;
+export function getBaselineThreshold(baseline: KnownFailureBaseline): number {
+  const { median, mad, mean, std_dev: stdDev } = baseline;
   const {
     mad_k: madK,
     min_delta: minDelta,
     count_noise_k: noiseK,
     max_dispersion: maxDispersion,
   } = KNOWN_FAILURES_SETTINGS.baseline;
-  const { mean, variance } = withoutCounts({ baseline, excluded });
+  const variance = stdDev ** 2;
   const dispersion = mean > 0 ? Math.min(maxDispersion, Math.max(1, variance / mean)) : 1;
   const countFloor = mean + noiseK * Math.sqrt(dispersion * mean + 1);
   return Math.max(median + Math.max(madK * MAD_SCALE * mad, minDelta), countFloor);
-}
-
-/**
- * The hour's mean and population variance without the `excluded` counts. The rule zero-fills the
- * hour, so it always holds `baseline_minutes` minutes. With more than half of it excluded, what is
- * left is no normal level, so the whole hour counts.
- */
-function withoutCounts({
-  baseline: { mean, std_dev: stdDev },
-  excluded,
-}: {
-  baseline: KnownFailureBaseline;
-  excluded: number[];
-}) {
-  const minutes = KNOWN_FAILURES_SETTINGS.baseline_minutes;
-  const restMinutes = minutes - excluded.length;
-  if (excluded.length === 0 || restMinutes < minutes / 2) {
-    return { mean, variance: stdDev ** 2 };
-  }
-  const restSum = minutes * mean - sum(excluded);
-  const restSumOfSquares =
-    minutes * (stdDev ** 2 + mean ** 2) - sum(excluded.map((count) => count ** 2));
-  const restMean = Math.max(0, restSum / restMinutes);
-  // Rounding can take a flat hour's variance a hair below zero.
-  return { mean: restMean, variance: Math.max(0, restSumOfSquares / restMinutes - restMean ** 2) };
-}
-
-function sum(values: number[]): number {
-  return values.reduce((total, value) => total + value, 0);
 }
 
 /**
@@ -152,7 +114,6 @@ export function findUnusualMinutes({
   measurements,
   open,
   reported,
-  reportedCounts = new Map(),
   dataFrom,
 }: {
   /** Newest run first, as the rows are read. */
@@ -160,8 +121,6 @@ export function findUnusualMinutes({
   open?: OpenKnownFailure;
   /** Minutes an earlier tick already reported, by any check. */
   reported: Set<number>;
-  /** The counts of the minutes an earlier tick reported as unusual, by minute. */
-  reportedCounts?: Map<number, number>;
   /** Start of the minute the source's data begins in, when known. */
   dataFrom?: number;
 }): UnusualMinute[] {
@@ -177,13 +136,8 @@ export function findUnusualMinutes({
     .filter(
       (measurement) => dataFrom === undefined || getRunWindow(measurement).baselineStart >= dataFrom
     )
-    .forEach((measurement) => {
-      const { baseline, minutes: runMinutes } = measurement;
-      const { baselineStart } = getRunWindow(measurement);
-      const excluded = [...reportedCounts]
-        .filter(([minute]) => minute >= baselineStart && minute < runMinutes[0].minute)
-        .map(([, count]) => count);
-      const threshold = getBaselineThreshold({ baseline, excluded });
+    .forEach(({ baseline, minutes: runMinutes }) => {
+      const threshold = getBaselineThreshold(baseline);
       runMinutes.forEach(({ minute, count }) =>
         byMinute.set(minute, { count, baseline, threshold })
       );

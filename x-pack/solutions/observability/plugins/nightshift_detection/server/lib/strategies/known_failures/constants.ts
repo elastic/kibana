@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+/** Scales a median absolute deviation to a standard deviation for normally distributed values. */
+export const MAD_SCALE = 1.4826;
+
 /** Id of the Known failures strategy; stamped on its signals and its rules' ownership tags. */
 export const KNOWN_FAILURES_STRATEGY_ID = 'known_failures';
 
@@ -64,6 +67,11 @@ export const KNOWN_FAILURES_SETTINGS = {
     count_noise_k: 3,
     /** Most the count floor widens for burstiness, so one huge burst cannot hide everything. */
     max_dispersion: 25,
+    /**
+     * Times the median-and-deviation cut above which a minute of the hour is a spike, left out of
+     * the mean and spread the count floor is built on.
+     */
+    trim_factor: 4,
   },
   /**
    * When an unusual minute opens an event. A single unusual minute does only when it is far above

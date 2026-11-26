@@ -28,6 +28,8 @@ type Level = typeof BASE | typeof HIGH | number;
 const SCENARIOS: Record<string, (minutesAgo: number) => Level> = {
   quiet: () => 0,
   spike: (minutesAgo) => (minutesAgo === 3 ? 80 : BASE),
+  // A spike inside the hour the normal level is measured over, as an incident an hour ago leaves.
+  spike_in_baseline: (minutesAgo) => (minutesAgo === 40 ? 48 : BASE),
   step_up: (minutesAgo) => (minutesAgo <= 20 ? HIGH : BASE),
   // A one-minute spike after a step up, so the spike is the newest change `CHANGE_POINT` marks.
   step_then_spike: (minutesAgo) => {
@@ -211,6 +213,17 @@ describe('compileKnownFailureQuery against Elasticsearch', () => {
       [80, new Date(spikeMinute).toISOString()],
       [expect.any(Number), new Date(spikeMinute + MINUTE_MS).toISOString()],
     ]);
+  });
+
+  // Live, one minute of 48 against a normal of 2 raised the threshold from 7 to 21 for the hour
+  // after it, and a burst of 11 went unreported.
+  it('leaves a spike out of the mean and spread of the hour it measures the normal level over', async () => {
+    const [row] = await runCompiledQuery(esClient, 'spike_in_baseline');
+
+    // The wobble of one around 2, as if the spike were not there.
+    expect(row.baseline_mean).toBeCloseTo(2, 0);
+    expect(row.baseline_std_dev as number).toBeLessThan(1);
+    expect(row).toEqual(expect.objectContaining({ baseline_median: 2, baseline_mad: 1 }));
   });
 
   it('keeps reporting a step up after a later one-minute spike', async () => {

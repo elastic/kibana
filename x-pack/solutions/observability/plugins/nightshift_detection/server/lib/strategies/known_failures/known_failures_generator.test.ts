@@ -337,41 +337,6 @@ describe('KnownFailuresGenerator', () => {
     expect(result.notes).toEqual([expect.stringMatching(/found no data/)]);
   });
 
-  // Live, one reported spike of 48 against a normal of 2 hid a burst of 11 for the hour after it.
-  // The run is the oldest a window can hold: its query read NOW() two minutes before the window,
-  // so its hour starts 70 minutes back, and the spike sits on that hour's first minute, as far back
-  // as the history read must go.
-  it('leaves a spike the same rule reported out of the normal level of the hour after it', async () => {
-    const mean = (59 * 2 + 48) / 60;
-    const row = createRow(-10, [2, 2, 2, 11, 11, 2, 2], {
-      baseline_median: 2,
-      baseline_mad: 0,
-      baseline_mean: mean,
-      baseline_std_dev: Math.sqrt((59 * 4 + 48 ** 2) / 60 - mean ** 2),
-    });
-    const reportedSpike = {
-      status: 'breached',
-      rule_id: RULE_ID,
-      bucket_start: WINDOW.from - 70 * MINUTE_MS,
-      value: 48,
-      details: { check: 'unusual_minute', threshold: 7 },
-    } as unknown as DetectionSignalReading;
-
-    const sameRule = await new KnownFailuresGenerator().generate(
-      createContext({ rows: [row], history: [reportedSpike] })
-    );
-    // An edited query's old rule counted other lines.
-    const oldRule = await new KnownFailuresGenerator().generate(
-      createContext({ rows: [row], history: [{ ...reportedSpike, rule_id: 'old-rule' }] })
-    );
-
-    expect(sameRule.readings).toEqual([
-      expect.objectContaining({ value: 11, bucket_start: WINDOW.from - 7 * MINUTE_MS }),
-      expect.objectContaining({ value: 11, bucket_start: WINDOW.from - 6 * MINUTE_MS }),
-    ]);
-    expect(oldRule.readings).toEqual([]);
-  });
-
   it('reads when the source’s data begins only when a check found something', async () => {
     const readDataStart = jest.fn();
 

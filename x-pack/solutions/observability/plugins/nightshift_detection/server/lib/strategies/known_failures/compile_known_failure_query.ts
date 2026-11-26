@@ -10,7 +10,7 @@ import { Parser, Walker } from '@elastic/esql';
 import type { ESQLCommand } from '@elastic/esql/types';
 import { withAllProjectsRouting } from '@kbn/cps-server-utils';
 import { MAX_TEXT_LENGTH } from '../../../../common/detection_signal';
-import { KNOWN_FAILURES_SETTINGS } from './constants';
+import { KNOWN_FAILURES_SETTINGS, MAD_SCALE } from './constants';
 
 /** Commands that decide which lines a knowledge indicator matches. */
 const FILTER_COMMANDS = new Set(['from', 'where']);
@@ -177,6 +177,7 @@ export function compileKnownFailureQuery({
   const end = `DATE_TRUNC(1 minute, NOW()) - ${settings.end_margin_minutes} minutes`;
   const start = `${end} - ${settings.window_minutes} minutes`;
   const inBaseline = 'minute >= baseline_start AND minute < newest_start';
+  const { mad_k: madK, min_delta: minDelta, trim_factor: trimFactor } = settings.baseline;
   const beforeChange = 'minute >= before_change_start AND minute < change_point_at';
 
   const query = toQuery([
@@ -221,14 +222,26 @@ export function compileKnownFailureQuery({
       ],
     },
     {
+      // Spikes left out of the hour's mean and spread, so one incident does not widen the
+      // threshold for the hour after it. The median and its deviation shrug off a few spikes.
+      comment: 'The normal level of the hour before the newest minutes, without its spikes.',
+      commands: [
+        [
+          `INLINE STATS${COLUMN_BREAK}baseline_median = MEDIAN(count) WHERE ${inBaseline}`,
+          `baseline_mad = MEDIAN_ABSOLUTE_DEVIATION(count) WHERE ${inBaseline}`,
+        ].join(`,${COLUMN_BREAK}`),
+        `EVAL is_spike = count > baseline_median + ${trimFactor} * GREATEST(${madK} * ${MAD_SCALE} * baseline_mad, ${minDelta})`,
+      ],
+    },
+    {
       comment: 'One row: the newest minutes, the normal level, the latest change, and the levels.',
       commands: [
         [
           `STATS${COLUMN_BREAK}newest_minute_counts = MV_SORT(VALUES(minute_count)) WHERE minute >= newest_start`,
-          `baseline_median = MEDIAN(count) WHERE ${inBaseline}`,
-          `baseline_mad = MEDIAN_ABSOLUTE_DEVIATION(count) WHERE ${inBaseline}`,
-          `baseline_mean = AVG(count) WHERE ${inBaseline}`,
-          `baseline_std_dev = STD_DEV(count) WHERE ${inBaseline}`,
+          'baseline_median = MAX(baseline_median)',
+          'baseline_mad = MAX(baseline_mad)',
+          `baseline_mean = AVG(count) WHERE ${inBaseline} AND NOT is_spike`,
+          `baseline_std_dev = STD_DEV(count) WHERE ${inBaseline} AND NOT is_spike`,
           'change_point_at = MAX(change_point_at)',
           'change_point_type = MAX(change_point_type) WHERE minute == change_point_at',
           'change_point_pvalue = MIN(change_point_pvalue) WHERE minute == change_point_at',
