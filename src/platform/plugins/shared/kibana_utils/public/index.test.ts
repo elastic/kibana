@@ -7,9 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { createStateContainer, createStateContainerReactHelpers } from '.';
+import { hashedItemStore as packageHashedItemStore } from '@kbn/kibana-utils-browser';
+import {
+  createStateContainer,
+  createStateContainerReactHelpers,
+  hashedItemStore as pluginHashedItemStore,
+} from '.';
 
 test('exports store methods', () => {
   expect(typeof createStateContainer).toBe('function');
   expect(typeof createStateContainerReactHelpers).toBe('function');
+});
+
+test('re-exports the package hashed item store singleton', () => {
+  expect(pluginHashedItemStore).toBe(packageHashedItemStore);
 });
