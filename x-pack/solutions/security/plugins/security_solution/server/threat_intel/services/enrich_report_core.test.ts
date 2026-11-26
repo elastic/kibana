@@ -430,4 +430,59 @@ describe('enrichReportCore', () => {
     expect(String(invoke.mock.calls[1][0])).not.toContain(uniqueMarker);
     expect(String(invoke.mock.calls[1][0])).not.toContain('\nSource:\n');
   });
+
+  describe('prose email candidates', () => {
+    const manyEmails = Array.from({ length: 320 }, (_, index) => ({
+      type: 'email' as const,
+      value: `actor${index}@evil-corp.com`,
+      tier: 'uncertain' as const,
+      tier_heuristic: 'uncertain' as const,
+      tier_basis: 'uncertain_default',
+      context: `The phishing sender was actor${index}@evil-corp.com.`,
+    }));
+    const emailText = manyEmails.map((ioc) => `The phishing sender was ${ioc.value}.`).join(' ');
+
+    it('names email addresses in both the core and the follow-up adjudication prompts', async () => {
+      const invoke = jest.fn().mockImplementation((prompt: string) =>
+        Promise.resolve({
+          raw: { response_metadata: {} },
+          parsed: String(prompt).includes('taxonomy')
+            ? { ...OUTPUT, approved_ioc_candidate_ids: [0] }
+            : { approved_ioc_candidate_ids: [300] },
+        })
+      );
+
+      await enrichReportCore(buildModel(invoke), logger, { text: emailText, iocs: manyEmails });
+
+      expect(invoke).toHaveBeenCalledTimes(2);
+      for (const [prompt] of invoke.mock.calls) {
+        expect(String(prompt)).toContain('URLs, domains, file hashes, or email addresses');
+        expect(String(prompt)).toContain('phishing or');
+        expect(String(prompt)).toContain('contact, reporting, support, or press addresses');
+        expect(String(prompt)).toContain('victim or recipient addresses');
+        expect(String(prompt)).not.toMatch(/reject an address .*(log|header)/i);
+      }
+    });
+
+    it('leaves a prose email deferred and out of anchors when a follow-up batch fails', async () => {
+      const invoke = jest.fn().mockImplementation((prompt: string) =>
+        String(prompt).includes('taxonomy')
+          ? Promise.resolve({
+              raw: { response_metadata: {} },
+              parsed: { ...OUTPUT, approved_ioc_candidate_ids: [0] },
+            })
+          : Promise.reject(new Error('model returned an unparseable response'))
+      );
+
+      const result = await enrichReportCore(buildModel(invoke), logger, {
+        text: emailText,
+        iocs: manyEmails,
+      });
+
+      expect(result.severity.level).toBe('high');
+      expect(result.iocs[300].tier).toBe('uncertain');
+      expect(result.iocs[300].deferred_unreviewed).toBe(true);
+      expect(result.anchor_iocs.some((ioc) => ioc.value === 'actor300@evil-corp.com')).toBe(false);
+    });
+  });
 });

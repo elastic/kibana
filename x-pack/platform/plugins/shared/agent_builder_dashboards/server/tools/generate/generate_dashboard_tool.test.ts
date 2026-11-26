@@ -217,6 +217,27 @@ describe('generateDashboardTool handler', () => {
     });
   });
 
+  it('returns the stored options in the summary', async () => {
+    mockRetrieveLatestVersion.mockReturnValue(undefined);
+    const options = { hide_panel_borders: true, use_margins: true };
+    mockExecuteDashboardUpsert.mockResolvedValue({
+      dashboardData: { ...generatedDashboard, options },
+      created: [],
+      updated: [],
+      removed: [],
+      failures: [],
+      panelAuthoringNotes: [],
+      panelHeightHints: [],
+    });
+
+    const { results } = await callHandler();
+
+    expect(results[0]).toMatchObject({
+      type: ToolResultType.dashboard,
+      data: { dashboard: { options } },
+    });
+  });
+
   it.each([
     [
       'a new dashboard is missing its metadata',

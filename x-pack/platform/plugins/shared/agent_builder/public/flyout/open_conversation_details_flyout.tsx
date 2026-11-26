@@ -15,10 +15,7 @@ import { CONVERSATION_DETAILS_FLYOUT_HISTORY_KEY } from '@kbn/agent-builder-brow
 import type { ConversationsService } from '../services/conversations/conversations_service';
 import type { ConversationTemplatesService } from '../services/conversation_templates';
 import { ConversationDetailsFlyoutSnapshot, FLYOUT_TITLE } from './conversation_details_flyout';
-import {
-  CONVERSATION_DETAILS_FLYOUT_DEFAULT_WIDTH,
-  getConversationDetailsFlyoutWidthProps,
-} from './conversation_details_flyout_width';
+import { getConversationDetailsFlyoutWidthProps } from './conversation_details_flyout_width';
 
 const notFoundMessage = (conversationId: string) =>
   i18n.translate('xpack.agentBuilder.conversationDetailsFlyout.notFoundToast', {
@@ -27,7 +24,6 @@ const notFoundMessage = (conversationId: string) =>
     values: { conversationId },
   });
 
-const generateTitleId = htmlIdGenerator('agentBuilderConversationDetailsFlyoutTitle');
 const generateFlyoutId = htmlIdGenerator('agentBuilderConversationDetailsFlyout');
 
 /**
@@ -69,7 +65,6 @@ export const openConversationDetailsFlyout = async ({
   onConversationUpdated,
   trailingActions,
 }: OpenConversationDetailsFlyoutOptions): Promise<() => void> => {
-  const titleId = generateTitleId();
   const flyoutId = generateFlyoutId();
   const queryClient = new QueryClient();
 
@@ -78,33 +73,29 @@ export const openConversationDetailsFlyout = async ({
     core.notifications.toasts.addDanger(notFoundMessage(conversationId));
   };
 
-  const flyoutRef = core.overlays.openSystemFlyout(
-    <QueryClientProvider client={queryClient}>
-      <ConversationDetailsFlyoutSnapshot
-        conversationId={conversationId}
-        conversationsService={conversationsService}
-        conversationTemplatesService={conversationTemplatesService}
-        titleId={titleId}
-        onNotFound={onNotFound}
-        onConversationUpdated={onConversationUpdated}
-      />
-    </QueryClientProvider>,
+  const flyoutRef = core.overlays.openFlyoutTemplate(
     {
       id: flyoutId,
       session: 'start',
       historyKey: CONVERSATION_DETAILS_FLYOUT_HISTORY_KEY,
-      title: FLYOUT_TITLE,
+      flyoutMenuProps: { title: FLYOUT_TITLE, trailingActions },
       ...getConversationDetailsFlyoutWidthProps(),
-      // Lets the flyout menu's reset action return to the default, not to the remembered width.
-      defaultSize: CONVERSATION_DETAILS_FLYOUT_DEFAULT_WIDTH,
-      flyoutMenuDisplayMode: 'always',
-      flyoutMenuProps: { trailingActions },
       type: 'push',
-      paddingSize: 'm',
       role: 'region',
       'data-test-subj': 'agentBuilderConversationDetailsFlyout-snapshot',
-      'aria-labelledby': titleId,
-    }
+    },
+    ({ onClose: dismiss }) => (
+      <QueryClientProvider client={queryClient}>
+        <ConversationDetailsFlyoutSnapshot
+          conversationId={conversationId}
+          conversationsService={conversationsService}
+          conversationTemplatesService={conversationTemplatesService}
+          onNotFound={onNotFound}
+          onConversationUpdated={onConversationUpdated}
+          onClose={dismiss}
+        />
+      </QueryClientProvider>
+    )
   );
 
   flyoutRef.onClose.then(() => {

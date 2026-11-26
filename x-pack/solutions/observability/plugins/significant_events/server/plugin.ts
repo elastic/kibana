@@ -74,7 +74,10 @@ import { createSignificantEventsAlertingContextResolver } from './lib/significan
 import type { SignificantEventsAlertingContext } from './lib/significant_events/alerting/significant_events_alerting_context';
 
 import { EbtTelemetryService } from './lib/telemetry/ebt';
-import { getDetectionSnapshotKnowledgeCounts } from './lib/telemetry/detection_snapshot_contributor';
+import {
+  getDetectionSnapshotKnowledgeCounts,
+  getSlackSnapshotCounts,
+} from './lib/telemetry/detection_snapshot_contributor';
 import { significantEventsRouteRepository } from './routes';
 import type {
   GetScopedClients,
@@ -200,19 +203,47 @@ export class SignificantEventsPlugin
     core.savedObjects.registerType(runQuotaSettingsSavedObjectType);
     core.savedObjects.registerType(runQuotaLedgerSavedObjectType);
 
+    const { server: eventsServer } = this;
+    plugins.nightshiftInvestigations?.registerSlackChannelBindingChecker((request, channelId) =>
+      new SlackAppService(eventsServer).isChannelBound(request, channelId)
+    );
+
+    const slackCountsByRun = new WeakMap<
+      AbortSignal,
+      Promise<Partial<Awaited<ReturnType<typeof getSlackSnapshotCounts>>>>
+    >();
     plugins.nightshiftInvestigations?.registerDetectionSnapshotContributor(
       async ({ spaceId, request, signal }) => {
-        const [coreStart, pluginsStart] = await core.getStartServices();
-        return getDetectionSnapshotKnowledgeCounts({
-          signal,
-          esClient: coreStart.elasticsearch.client.asInternalUser,
-          rulesClient: await pluginsStart.alertingVTwo.getRulesClientWithRequestInSpace(
+        const readSlackCountsOncePerRun = () => {
+          const cached = slackCountsByRun.get(signal);
+          if (cached) return cached;
+          const counts = getSlackSnapshotCounts(
+            new SlackAppService(eventsServer),
             request,
-            asSpaceId(spaceId)
-          ),
-          space: spaceId,
-          logger: this.logger.get('knowledge_indicators'),
-        });
+            signal
+          ).catch((error: Error) => {
+            if (signal.aborted) throw error;
+            this.logger.warn(`Failed to read the Slack snapshot counts: ${error.message}`);
+            return {};
+          });
+          slackCountsByRun.set(signal, counts);
+          return counts;
+        };
+        const [coreStart, pluginsStart] = await core.getStartServices();
+        const [knowledgeCounts, slackCounts] = await Promise.all([
+          getDetectionSnapshotKnowledgeCounts({
+            signal,
+            esClient: coreStart.elasticsearch.client.asInternalUser,
+            rulesClient: await pluginsStart.alertingVTwo.getRulesClientWithRequestInSpace(
+              request,
+              asSpaceId(spaceId)
+            ),
+            space: spaceId,
+            logger: this.logger.get('knowledge_indicators'),
+          }),
+          readSlackCountsOncePerRun(),
+        ]);
+        return { ...knowledgeCounts, ...slackCounts };
       }
     );
 

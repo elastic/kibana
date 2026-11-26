@@ -35,7 +35,12 @@ const setup = ({
       rules: rules.slice((page - 1) * perPage, page * perPage),
       total: rules.length,
     })),
-    listExternalConnectorSources: jest.fn().mockResolvedValue(['datadog', 'datadog', 'other']),
+    listConnectors: jest.fn().mockResolvedValue([
+      { actionTypeId: '.datadog', isInboundEventsEnabled: true },
+      { actionTypeId: '.datadog', isInboundEventsEnabled: true },
+      { actionTypeId: '.datadog', isInboundEventsEnabled: false },
+      { actionTypeId: '.slack2', isInboundEventsEnabled: true },
+    ]),
     getAlertActivity: jest.fn().mockResolvedValue({
       activeConnectorSources: ['datadog'],
       external_sources_active_24h: 2,
@@ -88,7 +93,12 @@ describe('reportDetectionSnapshots', () => {
       automations_schedule_enabled: 0,
       automations_slack_total: 0,
       automations_slack_enabled: 0,
-      external_connectors_configured: 3,
+      connectors_configured: 4,
+      connectors_by_type: [
+        { connector_type: '.datadog', count: 3 },
+        { connector_type: '.slack2', count: 1 },
+      ],
+      external_connectors_configured: 2,
       external_connectors_active_24h: 2,
       external_sources_active_24h: 2,
       external_alerts_24h: 7,

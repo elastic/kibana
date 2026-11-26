@@ -21,6 +21,7 @@ import { Home } from './home';
 let mockHasIntegrationsPermission = true;
 const mockNavigateToUrl = jest.fn();
 const mockSetBreadcrumbs = jest.fn();
+const mockDocTitleChange = jest.fn();
 const mockTrackUiMetric = jest.fn();
 const mockWelcomeOnRendered = jest.fn();
 
@@ -31,6 +32,7 @@ jest.mock('../kibana_services', () => ({
     homeConfig: { disableWelcomeScreen: false },
     chrome: {
       setBreadcrumbs: mockSetBreadcrumbs,
+      docTitle: { change: mockDocTitleChange },
     },
     application: {
       navigateToUrl: mockNavigateToUrl,
@@ -124,6 +126,7 @@ describe('home', () => {
   beforeEach(() => {
     mockHasIntegrationsPermission = true;
     mockSetBreadcrumbs.mockClear();
+    mockDocTitleChange.mockClear();
     mockTrackUiMetric.mockClear();
     mockWelcomeOnRendered.mockClear();
     defaultProps = {
@@ -317,6 +320,13 @@ describe('home', () => {
 
       await expectHomePage();
       expect(mockSetBreadcrumbs).toHaveBeenCalledWith([{ text: 'Home' }]);
+    });
+
+    test('sets the document title to Home on mount', async () => {
+      renderHome();
+
+      await expectHomePage();
+      expect(mockDocTitleChange).toHaveBeenCalledWith('Home');
     });
   });
 });

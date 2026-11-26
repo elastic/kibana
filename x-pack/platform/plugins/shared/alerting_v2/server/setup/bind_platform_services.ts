@@ -10,6 +10,7 @@ import { OnStart, PluginSetup } from '@kbn/core-di';
 import { CoreStart, SavedObjectsClientFactory } from '@kbn/core-di-server';
 import type { ContainerModuleLoadOptions } from 'inversify';
 import { ArtifactTypeRegistry } from '../lib/artifact_types';
+import { BuilderTypeRegistry } from '../lib/builder_types';
 import { getKibanaBaseUrl } from '../lib/dispatcher/kibana_base_url';
 import { KibanaBaseUrlToken } from '../lib/dispatcher/tokens';
 import { ACTION_POLICY_EVENT_PROVIDER } from '../lib/services/event_log_service/constants';
@@ -51,6 +52,7 @@ import type { AlertingServerSetupDependencies } from '../types';
  */
 export function bindPlatformServices({ bind }: ContainerModuleLoadOptions) {
   bind(ArtifactTypeRegistry).toSelf();
+  bind(BuilderTypeRegistry).toSelf();
   bind(SpacesService).toSelf();
   bind(UserService).toSelf().inRequestScope();
   bind(ApiKeyService).toSelf().inRequestScope();
