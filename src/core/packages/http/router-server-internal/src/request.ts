@@ -101,18 +101,20 @@ const getReusablePhaseSeed = (
     return undefined;
   }
 
-  const urlSeed: KibanaRequestPhaseSeed = {
-    url: snapshot.url,
-    rewrittenUrl: snapshot.rewrittenUrl,
-  };
-
   // Hapi selects the route between pre-routing and pre-auth. Authentication can then update
   // headers used to resolve versioned route security, so refresh the route after auth.
   if (snapshot.phase !== 'preRouting' && snapshot.phase !== 'auth' && stage !== 'preRouting') {
-    return { ...urlSeed, route: snapshot.route };
+    return {
+      url: snapshot.url,
+      rewrittenUrl: snapshot.rewrittenUrl,
+      route: snapshot.route,
+    };
   }
 
-  return urlSeed;
+  return {
+    url: snapshot.url,
+    rewrittenUrl: snapshot.rewrittenUrl,
+  };
 };
 
 const isRouteSecurityGetter = (
