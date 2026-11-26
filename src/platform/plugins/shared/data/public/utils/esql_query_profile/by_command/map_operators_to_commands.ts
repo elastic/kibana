@@ -86,23 +86,28 @@ const offsetOf = (
 
 /**
  * The commands of a query, with the commands of the subqueries of each command listed just before
- * the command that holds them. Subqueries are numbered in the order they are listed, so a subquery
- * inside another comes first, and the numbers read from the top as the work runs.
+ * the command that holds them. Subqueries are numbered in the order their first row is listed, so
+ * a subquery inside another can come first, and the numbers read from the top as the work runs.
  */
 const listEntries = (commands: QueryCommand[]): Entry[] => {
   let nextSubquery = 0;
-  const list = (inCommands: QueryCommand[]): Entry[] =>
+  const list = (inCommands: QueryCommand[], subquery?: number): Entry[] =>
     inCommands.flatMap((command): Entry[] => [
-      ...(command.branches ?? []).flatMap(listBranch),
-      { command },
+      ...(command.branches ?? []).flatMap((branch) => list(branch, nextSubquery++)),
+      { command, subquery },
     ]);
-  // The subqueries inside a branch are listed, and so numbered, before the branch itself.
-  const listBranch = (branch: QueryCommand[]): Entry[] => {
-    const entries = list(branch);
-    const subquery = nextSubquery++;
-    return entries.map((entry) => (entry.subquery === undefined ? { ...entry, subquery } : entry));
-  };
-  return list(commands);
+  const entries = list(commands);
+
+  const numberOfSubquery = new Map<number, number>();
+  entries.forEach(({ subquery }) => {
+    if (subquery !== undefined && !numberOfSubquery.has(subquery)) {
+      numberOfSubquery.set(subquery, numberOfSubquery.size);
+    }
+  });
+  return entries.map(({ command, subquery }) => ({
+    command,
+    subquery: subquery === undefined ? undefined : numberOfSubquery.get(subquery),
+  }));
 };
 
 /** The names of a map of operator time, the slowest first. */
