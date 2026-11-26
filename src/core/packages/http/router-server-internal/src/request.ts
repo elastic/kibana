@@ -134,6 +134,7 @@ export class CoreKibanaRequest<
   Method extends RouteMethod = any
 > implements KibanaRequest<Params, Query, Body, Method>
 {
+  #events?: KibanaRequestEvents;
   readonly #eventsFactory: KibanaRequestEventsFactory;
 
   /** Creates a fresh lifecycle facade backed by request- and phase-scoped snapshots. */
@@ -446,13 +447,8 @@ export class CoreKibanaRequest<
   }
 
   private materializeEvents(): KibanaRequestEvents {
-    const events = this.#eventsFactory.create();
-    Object.defineProperty(this, 'events', {
-      configurable: false,
-      enumerable: true,
-      value: events,
-    });
-    return events;
+    this.#events ??= this.#eventsFactory.create();
+    return this.#events;
   }
 
   /**

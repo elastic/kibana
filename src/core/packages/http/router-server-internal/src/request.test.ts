@@ -159,7 +159,7 @@ describe('CoreKibanaRequest', () => {
         ).toBeUndefined();
       });
 
-      it('materializes each facade event container only when first accessed', () => {
+      it('materializes and caches facade events after the request is frozen', () => {
         const request = hapiMocks.createRequest();
         const kibanaRequest = CoreKibanaRequest.fromForLifecycle(request, 'preAuth');
         const lazyDescriptor = Object.getOwnPropertyDescriptor(kibanaRequest, 'events');
@@ -168,11 +168,13 @@ describe('CoreKibanaRequest', () => {
         expect(lazyDescriptor?.get).toEqual(expect.any(Function));
         expect(lazyDescriptor?.value).toBeUndefined();
 
+        Object.freeze(kibanaRequest);
         const events = kibanaRequest.events;
         const materializedDescriptor = Object.getOwnPropertyDescriptor(kibanaRequest, 'events');
 
-        expect(materializedDescriptor?.get).toBeUndefined();
-        expect(materializedDescriptor?.value).toBe(events);
+        expect(materializedDescriptor?.get).toBe(lazyDescriptor?.get);
+        expect(materializedDescriptor?.value).toBeUndefined();
+        expect(materializedDescriptor?.configurable).toBe(false);
         expect(kibanaRequest.events).toBe(events);
       });
 
