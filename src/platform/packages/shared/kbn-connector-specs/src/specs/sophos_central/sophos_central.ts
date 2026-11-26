@@ -372,13 +372,15 @@ export const SophosCentral: ConnectorSpec = {
       description:
         'Apply a single lifecycle action to multiple Sophos Central alerts. ' +
         'The connector iterates over each alert ID in turn and returns, per alert, ' +
-        'the lifecycle status ("requested", "started", or "completed") and the outcome ' +
+        'the lifecycle status ("requested", "started", or "completed") and the optional outcome ' +
         'result (e.g. "success", "notNeeded", "alreadyDone") from Sophos. ' +
-        'A status of "requested" or "started" means Sophos accepted the action but has not ' +
-        'finished processing it yet — do not report the alert as remediated until the status ' +
-        'is "completed" and result is "success". ' +
-        'Partial failures are returned alongside successes — a non-zero failureCount does not throw. ' +
+        'result is absent for pending actions (status "requested" or "started"). ' +
+        'A failed request produces status "failed" with an error string instead of a result. ' +
         'acceptedCount is the number of HTTP 2xx responses; it does not mean every alert was remediated. ' +
+        'status "completed" with result "success" means Sophos carried out the requested action — ' +
+        'it does not mean the threat was eliminated. ' +
+        'For example, "acknowledge" and "sendMsgThreat" can return both values without removing the threat. ' +
+        'Partial failures are returned alongside successes — a non-zero failureCount does not throw. ' +
         'Rate limit: 100 calls/min — keep batches under 50 during peak hours.',
       input: ActOnAlertsBulkInputSchema,
       handler: async (ctx, input: ActOnAlertsBulkInput) => {
