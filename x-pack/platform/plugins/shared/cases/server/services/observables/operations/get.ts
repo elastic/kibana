@@ -15,113 +15,25 @@ import type {
   FindObservablesPageArgs,
   ObservableKey,
   ObservableServiceContext,
-  ObservableSortField,
   ObservablesPageItem,
   ObservablesPreview,
 } from '../types';
-import { logged, throwOnErrors } from '../utils';
+import type { PreviewAggregations } from '../utils';
+import {
+  buildPreviewAggregations,
+  buildSort,
+  caseObservablesQuery,
+  getTotal,
+  keysQuery,
+  logged,
+  observableField,
+  OLDEST_FIRST,
+  throwOnErrors,
+  toObservable,
+} from '../utils';
 
 /** Hits one search reads when it walks every match. */
 const SCAN_PAGE_SIZE = 5_000;
-
-interface PreviewAggregations {
-  refs: {
-    cases: {
-      caseIds: {
-        buckets: Array<{
-          key: string;
-          reverse: { doc_count: number; oldest?: { hits: { hits: SavedObjectsRawDoc[] } } };
-        }>;
-      };
-    };
-  };
-}
-
-const observableField = (name: keyof ObservablePersistedAttributes): string =>
-  `${CASE_OBSERVABLE_SAVED_OBJECT}.${name}`;
-
-const SORT_FIELDS: Readonly<Record<ObservableSortField, string>> = {
-  createdAt: observableField('created_at'),
-  value: observableField('value'),
-  typeKey: observableField('type_key'),
-};
-
-/**
- * Tie-breakers after the requested sort field. A type key and value are unique within a case, a
- * repeat added at the same moment aside, so the sort orders a case's observables. Elasticsearch
- * cannot sort on `_id`.
- */
-const TIE_BREAKERS: Readonly<Record<ObservableSortField, ObservableSortField[]>> = {
-  createdAt: ['typeKey', 'value'],
-  value: ['typeKey'],
-  typeKey: ['value'],
-};
-
-const buildSort = (
-  sortField: ObservableSortField,
-  sortOrder: estypes.SortOrder
-): estypes.SortCombinations[] => [
-  { [SORT_FIELDS[sortField]]: { order: sortOrder } },
-  ...TIE_BREAKERS[sortField].map((tieBreaker) => ({
-    [SORT_FIELDS[tieBreaker]]: { order: 'asc' as const },
-  })),
-];
-
-const OLDEST_FIRST = buildSort('createdAt', 'asc');
-
-const caseReferenceQuery = (caseIds: string[]): estypes.QueryDslQueryContainer => ({
-  nested: {
-    path: 'references',
-    query: {
-      bool: {
-        filter: [
-          { term: { 'references.type': CASE_SAVED_OBJECT } },
-          { terms: { 'references.id': caseIds } },
-        ],
-      },
-    },
-  },
-});
-
-/**
- * One clause per type key holding its values as a set, so the clause count follows the number of
- * types, not the number of observables, and stays far below Elasticsearch's clause limit.
- */
-const keysQuery = (keys: ObservableKey[]): estypes.QueryDslQueryContainer => {
-  const valuesByTypeKey = new Map<string, Set<string>>();
-  for (const { typeKey, value } of keys) {
-    valuesByTypeKey.set(typeKey, (valuesByTypeKey.get(typeKey) ?? new Set()).add(value));
-  }
-
-  return {
-    bool: {
-      should: [...valuesByTypeKey].map(([typeKey, values]) => ({
-        bool: {
-          filter: [
-            { term: { [observableField('type_key')]: typeKey } },
-            { terms: { [observableField('value')]: [...values] } },
-          ],
-        },
-      })),
-      minimum_should_match: 1,
-    },
-  };
-};
-
-const getTotal = (total: estypes.SearchTotalHits | number | undefined): number =>
-  typeof total === 'number' ? total : total?.value ?? 0;
-
-const toObservable = ({
-  id,
-  attributes,
-}: Pick<SavedObject<ObservablePersistedAttributes>, 'id' | 'attributes'>): Observable => ({
-  id,
-  typeKey: attributes.type_key,
-  value: attributes.value,
-  description: attributes.description ?? null,
-  createdAt: attributes.created_at,
-  updatedAt: attributes.updated_at ?? null,
-});
 
 /** Reads `cases-observables` objects. Searches run in the request's space. */
 export class ObservableGetter {
@@ -163,7 +75,7 @@ export class ObservableGetter {
       const response = await this.search({
         size: 0,
         track_total_hits: true,
-        query: { bool: { filter: [caseReferenceQuery([caseId])] } },
+        query: caseObservablesQuery([caseId]),
       });
 
       return getTotal(response.hits.total);
@@ -183,7 +95,7 @@ export class ObservableGetter {
       this.context.log,
       `find observables of case ${caseId} matching ${keys.length} type keys and values`,
       async () => {
-        const query = { bool: { filter: [caseReferenceQuery([caseId]), keysQuery(keys)] } };
+        const query = caseObservablesQuery([caseId], [keysQuery(keys)]);
         const existing: Observable[] = [];
         let searchAfter: estypes.SortResults | undefined;
 
@@ -219,14 +131,14 @@ export class ObservableGetter {
       this.context.log,
       `find a page of the observables of case ${caseId}`,
       async () => {
-        const filter: estypes.QueryDslQueryContainer[] = [caseReferenceQuery([caseId])];
+        const filters: estypes.QueryDslQueryContainer[] = [];
 
         if (typeKeys != null && typeKeys.length > 0) {
-          filter.push({ terms: { [observableField('type_key')]: typeKeys } });
+          filters.push({ terms: { [observableField('type_key')]: typeKeys } });
         }
 
         if (search != null && search.length > 0) {
-          filter.push({
+          filters.push({
             prefix: { [observableField('value')]: { value: search, case_insensitive: true } },
           });
         }
@@ -236,7 +148,7 @@ export class ObservableGetter {
           track_total_hits: true,
           sort: buildSort(sortField, sortOrder),
           ...(searchAfter != null && { search_after: searchAfter }),
-          query: { bool: { filter } },
+          query: caseObservablesQuery([caseId], filters),
         });
 
         return {
@@ -272,36 +184,8 @@ export class ObservableGetter {
       async () => {
         const response = await this.search<PreviewAggregations>({
           size: 0,
-          query: { bool: { filter: [caseReferenceQuery(uniqueCaseIds)] } },
-          aggs: {
-            refs: {
-              nested: { path: 'references' },
-              aggs: {
-                cases: {
-                  filter: { term: { 'references.type': CASE_SAVED_OBJECT } },
-                  aggs: {
-                    caseIds: {
-                      terms: {
-                        field: 'references.id',
-                        size: uniqueCaseIds.length,
-                        include: uniqueCaseIds,
-                      },
-                      aggs: {
-                        reverse: {
-                          reverse_nested: {},
-                          ...(previewSize > 0 && {
-                            aggs: {
-                              oldest: { top_hits: { size: previewSize, sort: OLDEST_FIRST } },
-                            },
-                          }),
-                        },
-                      },
-                    },
-                  },
-                },
-              },
-            },
-          },
+          query: caseObservablesQuery(uniqueCaseIds),
+          aggs: buildPreviewAggregations(uniqueCaseIds, previewSize),
         });
 
         for (const { key, reverse } of response.aggregations?.refs.cases.caseIds.buckets ?? []) {
