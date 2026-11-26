@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { ENTITY_LATEST, getEntitiesAlias } from '@kbn/entity-store/common';
 import { RISK_ENGINE_CLEANUP_URL } from '../../../../../common/constants';
 import {
@@ -26,6 +27,7 @@ describe('riskEngineCleanupRoute', () => {
   let clients: ReturnType<typeof requestContextMock.createMockClients>;
   let getStartServicesMock: jest.Mock;
   let removeIfExists: jest.Mock;
+  let getTask: jest.Mock;
 
   const buildRequest = () =>
     requestMock.create({
@@ -49,6 +51,7 @@ describe('riskEngineCleanupRoute', () => {
     context = requestContextMock.convertContext(tools.context);
     clients.riskScoreDataClient.tearDown.mockResolvedValue([]);
     (deleteSavedObjects as jest.Mock).mockResolvedValue(undefined);
+    clients.core.elasticsearch.client.asCurrentUser.indices.exists.mockResolvedValue(true);
     clients.core.elasticsearch.client.asCurrentUser.security.hasPrivileges.mockResolvedValue(
       privilegeCheck(true)
     );
@@ -77,11 +80,12 @@ describe('riskEngineCleanupRoute', () => {
       }
     );
     removeIfExists = jest.fn().mockResolvedValue(undefined);
+    getTask = jest.fn().mockResolvedValue({ status: 'idle' });
     getStartServicesMock = jest.fn().mockResolvedValue([
       {},
       {
         security: riskEnginePrivilegesMock.createMockSecurityStartWithFullRiskEngineAccess(),
-        taskManager: { removeIfExists },
+        taskManager: { removeIfExists, get: getTask },
       },
     ]);
     riskEngineCleanupRoute(server.router, getStartServicesMock);
@@ -124,6 +128,33 @@ describe('riskEngineCleanupRoute', () => {
       clients.core.elasticsearch.client.asInternalUser.ingest.deletePipeline
     ).not.toHaveBeenCalled();
     expect(removeIfExists).toHaveBeenCalledWith('risk-score:default');
+    expect(removeIfExists.mock.invocationCallOrder[0]).toBeLessThan(
+      clients.core.elasticsearch.client.asCurrentUser.indices.deleteDataStream.mock
+        .invocationCallOrder[0]
+    );
+    expect(removeIfExists.mock.invocationCallOrder[0]).toBeLessThan(
+      clients.core.elasticsearch.client.asCurrentUser.updateByQuery.mock.invocationCallOrder[0]
+    );
+    expect(
+      clients.core.elasticsearch.client.asCurrentUser.security.hasPrivileges
+    ).toHaveBeenCalledWith({
+      index: [
+        {
+          names: [getEntitiesAlias(ENTITY_LATEST, 'default')],
+          privileges: ['read', 'write'],
+        },
+      ],
+    });
+    expect(
+      clients.core.elasticsearch.client.asCurrentUser.security.hasPrivileges
+    ).toHaveBeenCalledWith({
+      index: [
+        {
+          names: ['risk-score.risk-score-default', '.entity_analytics.risk_score.lookup-default'],
+          privileges: ['delete_index'],
+        },
+      ],
+    });
     expect(clients.core.elasticsearch.client.asCurrentUser.updateByQuery).toHaveBeenCalledWith(
       expect.objectContaining({
         index: getEntitiesAlias(ENTITY_LATEST, 'default'),
@@ -148,17 +179,100 @@ describe('riskEngineCleanupRoute', () => {
     expect(deleteSavedObjects).not.toHaveBeenCalled();
   });
 
-  it('does not stop scoring when the caller cannot write entity documents', async () => {
-    clients.core.elasticsearch.client.asCurrentUser.security.hasPrivileges.mockResolvedValue(
-      privilegeCheck(false)
+  it('returns 403 and does not stop scoring when the caller cannot read and write entity documents', async () => {
+    clients.core.elasticsearch.client.asCurrentUser.security.hasPrivileges.mockImplementation(
+      async (request) => {
+        const privileges = request.index?.flatMap((check) => check.privileges) ?? [];
+        return privilegeCheck(!privileges.includes('read') && !privileges.includes('write'));
+      }
     );
 
     const response = await server.inject(buildRequest(), context);
 
-    expect(response.status).toEqual(500);
+    expect(response.status).toEqual(403);
     expect(removeIfExists).not.toHaveBeenCalled();
     expect(deleteSavedObjects).not.toHaveBeenCalled();
     expect(clients.core.elasticsearch.client.asCurrentUser.updateByQuery).not.toHaveBeenCalled();
+    expect(clients.core.elasticsearch.client.asCurrentUser.indices.delete).not.toHaveBeenCalled();
+  });
+
+  it('cleans up risk resources when the entity index does not exist', async () => {
+    clients.core.elasticsearch.client.asCurrentUser.indices.exists.mockResolvedValue(false);
+
+    const response = await server.inject(buildRequest(), context);
+
+    expect(response.status).toEqual(200);
+    expect(
+      clients.core.elasticsearch.client.asCurrentUser.security.hasPrivileges
+    ).toHaveBeenCalledTimes(1);
+    expect(
+      clients.core.elasticsearch.client.asCurrentUser.security.hasPrivileges
+    ).toHaveBeenCalledWith({
+      index: [
+        {
+          names: ['risk-score.risk-score-default', '.entity_analytics.risk_score.lookup-default'],
+          privileges: ['delete_index'],
+        },
+      ],
+    });
+    expect(clients.core.elasticsearch.client.asCurrentUser.updateByQuery).not.toHaveBeenCalled();
+    expect(removeIfExists).toHaveBeenCalledWith('risk-score:default');
+  });
+
+  it('returns 403 and leaves the task when the caller cannot delete risk resources', async () => {
+    clients.core.elasticsearch.client.asCurrentUser.security.hasPrivileges.mockImplementation(
+      async (request) => {
+        const privileges = request.index?.flatMap((check) => check.privileges) ?? [];
+        return privilegeCheck(!privileges.includes('delete_index'));
+      }
+    );
+
+    const response = await server.inject(buildRequest(), context);
+
+    expect(response.status).toEqual(403);
+    expect(removeIfExists).not.toHaveBeenCalled();
+    expect(clients.core.elasticsearch.client.asCurrentUser.indices.delete).not.toHaveBeenCalled();
+    expect(
+      clients.core.elasticsearch.client.asCurrentUser.indices.deleteDataStream
+    ).not.toHaveBeenCalled();
+    expect(deleteSavedObjects).not.toHaveBeenCalled();
+  });
+
+  it.each(['running', 'claiming'] as const)(
+    'returns 409 and deletes nothing when the maintainer task is %s',
+    async (status) => {
+      getTask.mockResolvedValue({ status });
+
+      const response = await server.inject(buildRequest(), context);
+
+      expect(response.status).toEqual(409);
+      expect(removeIfExists).not.toHaveBeenCalled();
+      expect(clients.core.elasticsearch.client.asCurrentUser.indices.delete).not.toHaveBeenCalled();
+      expect(deleteSavedObjects).not.toHaveBeenCalled();
+    }
+  );
+
+  it('still cleans up when the maintainer task does not exist', async () => {
+    getTask.mockRejectedValue(SavedObjectsErrorHelpers.createGenericNotFoundError());
+
+    const response = await server.inject(buildRequest(), context);
+
+    expect(response.status).toEqual(200);
+    expect(removeIfExists).toHaveBeenCalledWith('risk-score:default');
+  });
+
+  it('returns 500 and does not delete data when the maintainer task cannot be removed', async () => {
+    removeIfExists.mockRejectedValue(new Error('task remove failed'));
+
+    const response = await server.inject(buildRequest(), context);
+
+    expect(response.status).toEqual(500);
+    expect(
+      clients.core.elasticsearch.client.asCurrentUser.indices.deleteDataStream
+    ).not.toHaveBeenCalled();
+    expect(clients.core.elasticsearch.client.asCurrentUser.indices.delete).not.toHaveBeenCalled();
+    expect(clients.core.elasticsearch.client.asCurrentUser.updateByQuery).not.toHaveBeenCalled();
+    expect(deleteSavedObjects).not.toHaveBeenCalled();
   });
 
   it('does not report success when entity risk fields stay conflicted', async () => {
@@ -166,6 +280,20 @@ describe('riskEngineCleanupRoute', () => {
       version_conflicts: 2,
       failures: [],
       timed_out: false,
+    });
+
+    const response = await server.inject(buildRequest(), context);
+
+    expect(response.status).toEqual(500);
+    expect(clients.core.elasticsearch.client.asCurrentUser.updateByQuery).toHaveBeenCalledTimes(2);
+    expect(deleteSavedObjects).not.toHaveBeenCalled();
+  });
+
+  it('does not report success when clearing entity risk times out', async () => {
+    clients.core.elasticsearch.client.asCurrentUser.updateByQuery.mockResolvedValue({
+      version_conflicts: 0,
+      failures: [],
+      timed_out: true,
     });
 
     const response = await server.inject(buildRequest(), context);

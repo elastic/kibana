@@ -7,6 +7,7 @@
 
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import type { IKibanaResponse } from '@kbn/core-http-server';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { ENTITY_LATEST, getEntitiesAlias } from '@kbn/entity-store/common';
 import { withRiskEnginePrivilegeCheck } from '../../risk_score/routes/risk_engine_privileges';
 import { RISK_ENGINE_CLEANUP_URL, APP_ID, API_VERSIONS } from '../../../../../common/constants';
@@ -17,7 +18,12 @@ import type { CleanUpRiskEngineResponse } from '../../../../../common/api/entity
 import { deleteSavedObjects } from '../../risk_score/configuration/saved_object_configuration';
 import { getIndexPatternLookup } from '../../risk_score/configurations';
 import { RISK_SCORE_MAINTAINER_ID } from '../../../../../common/entity_analytics/risk_score/constants';
-import { TASK_MANAGER_UNAVAILABLE_ERROR } from '../../risk_score/routes/translations';
+import {
+  MISSING_RISK_SCORE_DELETE_PRIVILEGES_ERROR,
+  missingEntityIndexPrivilegesError,
+  RISK_SCORE_CLEANUP_IN_PROGRESS_ERROR,
+  TASK_MANAGER_UNAVAILABLE_ERROR,
+} from '../../risk_score/routes/translations';
 
 const CLEAR_ENTITY_RISK_SCRIPT = `
   if (ctx._source.entity != null) {
@@ -110,27 +116,75 @@ export const riskEngineCleanupRoute = (
           try {
             const alias = `risk-score.risk-score-${namespace}`;
             const entityIndex = getEntitiesAlias(ENTITY_LATEST, namespace);
-            const entityWrite = await currentUserEsClient.security.hasPrivileges({
-              index: [{ names: [entityIndex], privileges: ['write'] }],
-            });
-            if (!entityWrite.has_all_requested) {
-              addError(new Error(`Missing write privilege for entity index "${entityIndex}"`));
-              return failureResponse();
+            const taskId = `${RISK_SCORE_MAINTAINER_ID}:${namespace}`;
+            const entityIndexExists = await currentUserEsClient.indices
+              .exists({ index: entityIndex })
+              .catch((error: unknown) => {
+                const statusCode = (error as { meta?: { statusCode?: number } }).meta?.statusCode;
+                if (statusCode === 403) {
+                  return 'forbidden' as const;
+                }
+                throw error;
+              });
+            if (entityIndexExists === 'forbidden') {
+              return siemResponse.error({
+                statusCode: 403,
+                body: missingEntityIndexPrivilegesError(entityIndex),
+              });
+            }
+            // update_by_query needs read and write. Skip the check when the entity index is gone,
+            // so uninstalling Entity Store does not block cleanup of the remaining risk resources.
+            if (entityIndexExists) {
+              const entityPrivileges = await currentUserEsClient.security.hasPrivileges({
+                index: [{ names: [entityIndex], privileges: ['read', 'write'] }],
+              });
+              if (!entityPrivileges.has_all_requested) {
+                return siemResponse.error({
+                  statusCode: 403,
+                  body: missingEntityIndexPrivilegesError(entityIndex),
+                });
+              }
             }
 
-            // Stop scoring before deleting data. An in-flight run can otherwise write
-            // scores back, or recreate the risk-score name as a plain index after the
-            // data stream and template are gone.
-            await plugins.taskManager
-              .removeIfExists(`${RISK_SCORE_MAINTAINER_ID}:${namespace}`)
-              .catch(addError);
+            // The risk-engine privilege check grants read and write, not delete_index.
+            // Refuse before removing the task, or a denied delete leaves the space with
+            // its data and no schedule.
+            const deletePrivileges = await currentUserEsClient.security.hasPrivileges({
+              index: [{ names: [alias, lookupIndex.alias], privileges: ['delete_index'] }],
+            });
+            if (!deletePrivileges.has_all_requested) {
+              return siemResponse.error({
+                statusCode: 403,
+                body: MISSING_RISK_SCORE_DELETE_PRIVILEGES_ERROR,
+              });
+            }
+
+            // removeIfExists does not abort a run that has already been claimed, and Task
+            // Manager has no API to cancel one task. Refuse while a run is active.
+            try {
+              const task = await plugins.taskManager.get(taskId);
+              if (task.status === 'running' || task.status === 'claiming') {
+                return siemResponse.error({
+                  statusCode: 409,
+                  body: RISK_SCORE_CLEANUP_IN_PROGRESS_ERROR,
+                });
+              }
+            } catch (error) {
+              if (!SavedObjectsErrorHelpers.isNotFoundError(error as Error)) {
+                addError(error);
+                return failureResponse();
+              }
+            }
+
+            // The task is idle or already gone. Remove it before the deletes so a new
+            // run cannot start and recreate the risk-score name as a plain index.
+            await plugins.taskManager.removeIfExists(taskId).catch(addError);
             if (errors.length > 0) {
               return failureResponse();
             }
 
-            // The privilege check grants read/write, not delete_index. Delete the caller's
-            // risk-score data and lookup index as that user. The risk-score name is a data
-            // stream, and the index delete API rejects a data stream name.
+            // The risk-score name is a data stream, and the index delete API rejects a data
+            // stream name. Delete the data stream first, as the current user.
             await currentUserEsClient.indices
               .deleteDataStream({ name: alias }, { ignore: [404] })
               .catch(addError);
@@ -147,51 +201,53 @@ export const riskEngineCleanupRoute = (
               return failureResponse();
             }
 
-            const clearEntityRisk = () =>
-              currentUserEsClient.updateByQuery({
-                index: entityIndex,
-                ignore_unavailable: true,
-                conflicts: 'proceed',
-                refresh: true,
-                query: {
-                  bool: {
-                    should: [
-                      { exists: { field: 'entity.risk' } },
-                      { exists: { field: 'entity.relationships.resolution.risk' } },
-                    ],
-                    minimum_should_match: 1,
+            if (entityIndexExists) {
+              const clearEntityRisk = () =>
+                currentUserEsClient.updateByQuery({
+                  index: entityIndex,
+                  ignore_unavailable: true,
+                  conflicts: 'proceed',
+                  refresh: true,
+                  query: {
+                    bool: {
+                      should: [
+                        { exists: { field: 'entity.risk' } },
+                        { exists: { field: 'entity.relationships.resolution.risk' } },
+                      ],
+                      minimum_should_match: 1,
+                    },
                   },
-                },
-                script: { lang: 'painless', source: CLEAR_ENTITY_RISK_SCRIPT },
-              });
-            const incompleteClear = (
-              result: Awaited<ReturnType<typeof clearEntityRisk>> | undefined
-            ) =>
-              result != null &&
-              ((result.version_conflicts ?? 0) > 0 ||
-                (result.failures?.length ?? 0) > 0 ||
-                result.timed_out === true);
-            let clearResult = await clearEntityRisk().catch((error: unknown) => {
-              addError(error);
-              return undefined;
-            });
-            if (incompleteClear(clearResult)) {
-              clearResult = await clearEntityRisk().catch((error: unknown) => {
+                  script: { lang: 'painless', source: CLEAR_ENTITY_RISK_SCRIPT },
+                });
+              const incompleteClear = (
+                result: Awaited<ReturnType<typeof clearEntityRisk>> | undefined
+              ) =>
+                result != null &&
+                ((result.version_conflicts ?? 0) > 0 ||
+                  (result.failures?.length ?? 0) > 0 ||
+                  result.timed_out === true);
+              let clearResult = await clearEntityRisk().catch((error: unknown) => {
                 addError(error);
                 return undefined;
               });
-            }
-            if (incompleteClear(clearResult) && clearResult != null) {
-              const failureCount = clearResult.failures?.length ?? 0;
-              const message = clearResult.timed_out
-                ? 'Clearing entity risk fields timed out'
-                : failureCount > 0
-                ? `${failureCount} entity risk updates failed`
-                : `${clearResult.version_conflicts} entity documents still have risk fields after a retry`;
-              addError(new Error(message));
-            }
-            if (errors.length > 0) {
-              return failureResponse();
+              if (incompleteClear(clearResult)) {
+                clearResult = await clearEntityRisk().catch((error: unknown) => {
+                  addError(error);
+                  return undefined;
+                });
+              }
+              if (incompleteClear(clearResult) && clearResult != null) {
+                const failureCount = clearResult.failures?.length ?? 0;
+                const message = clearResult.timed_out
+                  ? 'Clearing entity risk fields timed out'
+                  : failureCount > 0
+                  ? `${failureCount} entity risk updates failed`
+                  : `${clearResult.version_conflicts} entity documents still have risk fields after a retry`;
+                addError(new Error(message));
+              }
+              if (errors.length > 0) {
+                return failureResponse();
+              }
             }
 
             const riskScoreErrors = await securitySolution.getRiskScoreDataClient().tearDown();

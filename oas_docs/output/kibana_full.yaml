@@ -78104,6 +78104,30 @@ paths:
               schema:
                 $ref: '#/components/schemas/Security_Entity_Analytics_API_TaskManagerUnavailableResponse'
           description: Task manager is unavailable
+        '403':
+          content:
+            application/json:
+              examples:
+                missingPrivileges:
+                  summary: Caller cannot delete the risk resources or update the entity index
+                  value:
+                    message: Missing delete_index privileges for the risk score data stream and lookup index.
+                    status_code: 403
+              schema:
+                $ref: '#/components/schemas/Security_Entity_Analytics_API_TaskManagerUnavailableResponse'
+          description: Missing privileges to delete the risk resources, or to read and write an existing entity index
+        '409':
+          content:
+            application/json:
+              examples:
+                scoringInProgress:
+                  summary: Scoring run is in progress
+                  value:
+                    message: Risk scoring is in progress. Wait for the current run to finish and try the cleanup again.
+                    status_code: 409
+              schema:
+                $ref: '#/components/schemas/Security_Entity_Analytics_API_TaskManagerUnavailableResponse'
+          description: A risk scoring run is already in progress
         default:
           content:
             application/json:

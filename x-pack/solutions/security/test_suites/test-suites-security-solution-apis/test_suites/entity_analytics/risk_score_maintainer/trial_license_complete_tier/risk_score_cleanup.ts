@@ -95,12 +95,17 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(await es.indices.exists({ index: riskScoreDataStream })).to.eql(false);
       expect(await es.indices.exists({ index: lookupIndex })).to.eql(false);
 
-      const tasks = await es.search({
-        index: '.kibana_task_manager*',
-        ignore_unavailable: true,
-        query: { ids: { values: ['task:risk-score:default'] } },
-      });
-      expect(tasks.hits.hits).to.have.length(0);
+      let taskStillExists = true;
+      try {
+        await es.get({
+          index: '.kibana_task_manager',
+          id: 'task:risk-score:default',
+        });
+      } catch (error) {
+        taskStillExists = false;
+        expect((error as { meta?: { statusCode?: number } }).meta?.statusCode).to.eql(404);
+      }
+      expect(taskStillExists).to.eql(false);
 
       const entity = await es.get({ index: latestAlias, id: hashEuid(entityId) });
       const source = entity._source as {
