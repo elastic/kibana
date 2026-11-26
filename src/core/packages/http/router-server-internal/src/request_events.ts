@@ -7,55 +7,44 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the "Elastic License
- * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
- * Public License v 1"; you may not use this file except in compliance with, at
- * your election, the "Elastic License 2.0", the "GNU Affero General Public
- * License v3.0 only", or the "Server Side Public License v 1".
- */
-
 import type { Request } from '@hapi/hapi';
-import { filter, first, fromEvent, NEVER, shareReplay } from 'rxjs';
+import { defer, filter, first, fromEvent, NEVER, shareReplay } from 'rxjs';
 import type { KibanaRequestEvents } from '@kbn/core-http-server';
 
-const fakeRequestEvents: KibanaRequestEvents = {
-  aborted$: NEVER,
-  completed$: NEVER,
-};
-
 class LazyKibanaRequestEvents implements KibanaRequestEvents {
-  private streams?: KibanaRequestEvents;
+  public readonly aborted$ = defer(() => this.getStreams().aborted$);
+  public readonly completed$ = defer(() => this.getStreams().completed$);
 
-  constructor(private readonly request: Request) {}
+  readonly #request: Request;
+  #streams?: KibanaRequestEvents;
 
-  public get aborted$(): KibanaRequestEvents['aborted$'] {
-    return this.getStreams().aborted$;
-  }
-
-  public get completed$(): KibanaRequestEvents['completed$'] {
-    return this.getStreams().completed$;
+  constructor(request: Request) {
+    this.#request = request;
   }
 
   private getStreams(): KibanaRequestEvents {
-    if (this.streams === undefined) {
-      const completed$ = fromEvent<void>(this.request.raw.res, 'close').pipe(
+    if (this.#streams === undefined) {
+      const completed$ = fromEvent<void>(this.#request.raw.res, 'close').pipe(
         shareReplay(1),
         first()
       );
-      this.streams = {
-        aborted$: completed$.pipe(filter(() => !isCompleted(this.request))),
+      this.#streams = {
+        aborted$: completed$.pipe(filter(() => !isCompleted(this.#request))),
         completed$,
       };
     }
 
-    return this.streams;
+    return this.#streams;
   }
 }
 
 export const createRequestEvents = (request?: Request): KibanaRequestEvents =>
-  request === undefined ? fakeRequestEvents : new LazyKibanaRequestEvents(request);
+  request === undefined
+    ? {
+        aborted$: NEVER,
+        completed$: NEVER,
+      }
+    : new LazyKibanaRequestEvents(request);
 
 const isCompleted = (request: Request): boolean => {
   const { res } = request.raw;

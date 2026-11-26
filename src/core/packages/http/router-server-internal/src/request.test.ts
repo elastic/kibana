@@ -14,10 +14,11 @@ jest.mock('uuid', () => ({
 import { v4 as uuidv4 } from 'uuid';
 import type { RouteOptions } from '@hapi/hapi';
 import { hapiMocks } from '@kbn/hapi-mocks';
-import type { FakeRawRequest, RouteSecurity } from '@kbn/core-http-server';
+import type { FakeRawRequest, RouteSecurity, RouteSecurityGetter } from '@kbn/core-http-server';
 import { CoreKibanaRequest } from './request';
 import { schema } from '@kbn/config-schema';
 import {
+  ELASTIC_HTTP_VERSION_HEADER,
   ELASTIC_INTERNAL_ORIGIN_QUERY_PARAM,
   X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
 } from '@kbn/core-http-common';
@@ -255,11 +256,38 @@ describe('CoreKibanaRequest', () => {
         expect(handler.params).toEqual({ id: 'request-id' });
         expect(handler.auth.isAuthenticated).toBe(true);
         expect(auth.route).toBe(preAuth.route);
-        expect(postAuth.route).toBe(auth.route);
+        expect(postAuth.route).not.toBe(auth.route);
         expect(handler.route).toBe(postAuth.route);
         expect(handler.socket).toBe(preAuth.socket);
         expect(handler.events).toBe(preAuth.events);
         expect(handler.serverTiming).toBe(preAuth.serverTiming);
+      });
+
+      it('refreshes request-derived route security after authentication', () => {
+        const beforeAuthSecurity: RouteSecurity = {
+          authz: { requiredPrivileges: ['before-auth'] },
+        };
+        const afterAuthSecurity: RouteSecurity = {
+          authz: { requiredPrivileges: ['after-auth'] },
+        };
+        const getSecurity: RouteSecurityGetter = (request) =>
+          request?.headers[ELASTIC_HTTP_VERSION_HEADER] === 'after-auth'
+            ? afterAuthSecurity
+            : beforeAuthSecurity;
+        const request = hapiMocks.createRequest({
+          headers: { [ELASTIC_HTTP_VERSION_HEADER]: 'before-auth' },
+          route: { settings: { app: { security: getSecurity } } },
+        });
+
+        CoreKibanaRequest.fromForLifecycle(request, 'preAuth');
+        const auth = CoreKibanaRequest.fromForAuth(request);
+        request.headers[ELASTIC_HTTP_VERSION_HEADER] = 'after-auth';
+        const postAuth = CoreKibanaRequest.fromForLifecycle(request, 'postAuth');
+
+        expect(auth.route.options.security).toBe(beforeAuthSecurity);
+        expect(postAuth.route.options.security).toBe(afterAuthSecurity);
+        expect(postAuth.route).not.toBe(auth.route);
+        expect(postAuth.url).toBe(auth.url);
       });
 
       it('validates fresh request parts for every handler facade', () => {

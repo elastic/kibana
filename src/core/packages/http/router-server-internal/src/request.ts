@@ -106,8 +106,9 @@ const getReusablePhaseSeed = (
     rewrittenUrl: snapshot.rewrittenUrl,
   };
 
-  // Hapi selects the route between pre-routing and pre-auth. It remains stable afterwards.
-  if (snapshot.phase !== 'preRouting' && stage !== 'preRouting') {
+  // Hapi selects the route between pre-routing and pre-auth. Authentication can then update
+  // headers used to resolve versioned route security, so refresh the route after auth.
+  if (snapshot.phase !== 'preRouting' && snapshot.phase !== 'auth' && stage !== 'preRouting') {
     return { ...urlSeed, route: snapshot.route };
   }
 
