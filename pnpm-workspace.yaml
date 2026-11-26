@@ -1003,6 +1003,7 @@ packages:
   - 'src/platform/packages/shared/kbn-zod'
   - 'src/platform/packages/shared/kbn-zod-helpers'
   - 'src/platform/packages/shared/navigation-customization-components'
+  - 'src/platform/packages/shared/presentation/presentation_panel_message'
   - 'src/platform/packages/shared/presentation/presentation_publishing'
   - 'src/platform/packages/shared/presentation/presentation_publishing_schemas'
   - 'src/platform/packages/shared/presentation/presentation_util'

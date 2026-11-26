@@ -67,6 +67,8 @@ export const storybookAliases = {
   nightshift: 'x-pack/solutions/observability/plugins/nightshift/.storybook',
   observability: 'x-pack/solutions/observability/plugins/observability/.storybook',
   presentation: 'src/platform/plugins/shared/presentation_util/storybook',
+  presentation_panel_message:
+    'src/platform/packages/shared/presentation/presentation_panel_message/.storybook',
   profiling: 'x-pack/solutions/observability/plugins/profiling/.storybook',
   random_sampling: 'x-pack/platform/packages/private/kbn-random-sampling/.storybook',
   ['response-ops']: 'x-pack/platform/packages/shared/response-ops/.storybook',

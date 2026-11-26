@@ -1042,6 +1042,7 @@
     "@kbn/plugin-initialize-example-plugin": "workspace:*",
     "@kbn/portable-dashboards-example": "workspace:*",
     "@kbn/preboot-example-plugin": "workspace:*",
+    "@kbn/presentation-panel-message": "workspace:*",
     "@kbn/presentation-publishing": "workspace:*",
     "@kbn/presentation-publishing-schemas": "workspace:*",
     "@kbn/presentation-util": "workspace:*",
