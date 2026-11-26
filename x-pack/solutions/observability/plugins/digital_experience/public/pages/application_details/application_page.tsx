@@ -12,41 +12,29 @@ import { EuiEmptyPrompt, EuiLoadingLogo, EuiPageSection } from '@elastic/eui';
 import { AppHeader } from '@kbn/app-header';
 import { i18n } from '@kbn/i18n';
 import { useAbortableAsync } from '@kbn/react-hooks';
-import { APPLICATION_SOURCE } from '../../../common/application_source';
+import { APPLICATION_SOURCE, APPLICATION_TYPE } from '../../../common/application_source';
 import {
   APPLICATION_TAB_IDS,
   type ApplicationSource,
+  type ApplicationType,
   type ApplicationTabId,
 } from '../../../common/types/applications';
 import { useRouteBreadcrumb } from '../../breadcrumbs/use_route_breadcrumb';
+import { DIGITAL_EXPERIENCE_EBT_ACTIONS } from '../../ebt_constants';
 import { useApplicationLinks } from '../../hooks/use_application_links';
 import { useApplicationsHref } from '../../hooks/use_applications_href';
 import { useKibanaServices } from '../../hooks/use_kibana_services';
+import { useQueryParam } from '../../hooks/use_query_param';
 import { useShareAction } from '../../hooks/use_share_action';
 import { useEnvironment } from '../../hooks/use_environment';
 import { useTimeRange } from '../../hooks/use_time_range';
-import { APPLICATIONS_LABEL, SESSIONS_LABEL } from '../../labels';
+import { APPLICATIONS_LABEL, APPLICATION_TAB_LABELS, COMPARE_LABEL } from '../../labels';
 import { ErrorsTab } from '../errors/errors_tab';
 import { NetworkTab } from '../network/network_tab';
 import { ReportsTab } from '../reports/reports_tab';
 import { SessionsTab } from '../sessions/sessions_tab';
+import { MobileApplicationPage } from './mobile_overview/mobile_application_page';
 import { OtelOverview } from './otel_overview/otel_overview';
-
-const APPLICATION_TAB_LABELS: Record<ApplicationTabId, string> = {
-  overview: i18n.translate('xpack.digitalExperience.application.tabs.overview', {
-    defaultMessage: 'Overview',
-  }),
-  errors: i18n.translate('xpack.digitalExperience.application.tabs.errors', {
-    defaultMessage: 'Errors',
-  }),
-  network: i18n.translate('xpack.digitalExperience.application.tabs.network', {
-    defaultMessage: 'Network',
-  }),
-  sessions: SESSIONS_LABEL,
-  reports: i18n.translate('xpack.digitalExperience.application.tabs.reports', {
-    defaultMessage: 'Reports',
-  }),
-};
 
 /**
  * Errors, network, sessions and reports are read from EDOT Browser data only; Classic RUM applications have
@@ -54,7 +42,6 @@ const APPLICATION_TAB_LABELS: Record<ApplicationTabId, string> = {
  */
 const tabsOf = (source: ApplicationSource): readonly ApplicationTabId[] =>
   source === APPLICATION_SOURCE.otel ? APPLICATION_TAB_IDS : ['overview'];
-
 const sessionsUnavailablePrompt = (
   <EuiEmptyPrompt
     data-test-subj="digitalExperienceSessionsUnavailable"
@@ -145,7 +132,36 @@ function ClassicRumOverview({ serviceName }: { serviceName: string }) {
   return withPagePadding(error || !ux ? overviewUnavailablePrompt : overviewLoadingPrompt);
 }
 
+/** An application's page: a mobile application's, or a web one's (EDOT Browser or Classic RUM). */
 export function ApplicationPage({
+  serviceName,
+  source,
+  applicationType,
+  selectedTab,
+}: {
+  serviceName: string;
+  source: ApplicationSource;
+  /** Whether the application is a web or a mobile one; web when unset. */
+  applicationType?: ApplicationType;
+  selectedTab: ApplicationTabId;
+}) {
+  // Mobile applications are EDOT data: their type, not their source, gives them their own page.
+  if (source === APPLICATION_SOURCE.otel && applicationType === APPLICATION_TYPE.mobile) {
+    // A new one per application, so its badges, filter options and KPIs never show the previous
+    // application's while the new one loads.
+    return (
+      <MobileApplicationPage
+        key={serviceName}
+        serviceName={serviceName}
+        selectedTab={selectedTab}
+      />
+    );
+  }
+  return <WebApplicationPage serviceName={serviceName} source={source} selectedTab={selectedTab} />;
+}
+
+/** A web application's page: the Overview of its source and, for EDOT Browser, its other tabs. */
+function WebApplicationPage({
   serviceName,
   source,
   selectedTab,
@@ -159,8 +175,11 @@ export function ApplicationPage({
   const { overviewHref, overviewPath, errorsHref, networkHref, reportsHref, sessionsHref } =
     useApplicationLinks(serviceName, source);
   const shareAction = useShareAction({ serviceName, source, tab: selectedTab });
+  // In the URL, so a reload or Share keeps it; the EDOT Browser Overview's KPIs read it.
+  const { value: compare, setValue: setCompare } = useQueryParam('compare');
+  const isComparing = compare === 'true';
   // Classic RUM only has the Overview (and Sessions' unavailable prompt); any other tab's URL is
-  // replaced by the Overview's, so a new EDOT-only tab needs no entry here.
+  // replaced by the Overview's.
   const isUnsupportedTab = selectedTab !== 'sessions' && !tabsOf(source).includes(selectedTab);
   useEffect(() => {
     if (isUnsupportedTab) {
@@ -220,6 +239,24 @@ export function ApplicationPage({
         title={serviceName}
         back={{ href: applicationsHref, label: APPLICATIONS_LABEL }}
         share={shareAction}
+        menu={
+          source === APPLICATION_SOURCE.otel && selectedTab === 'overview'
+            ? {
+                items: [
+                  {
+                    id: 'compare',
+                    order: 1,
+                    label: COMPARE_LABEL,
+                    iconType: 'compare',
+                    isSelected: isComparing,
+                    run: () => setCompare(isComparing ? undefined : 'true'),
+                    testId: 'digitalExperienceOverviewCompareToggle',
+                    ebt: { action: DIGITAL_EXPERIENCE_EBT_ACTIONS.TOGGLE_COMPARE },
+                  },
+                ],
+              }
+            : undefined
+        }
         tabs={tabsOf(source).map((id) => ({
           id,
           label: APPLICATION_TAB_LABELS[id],

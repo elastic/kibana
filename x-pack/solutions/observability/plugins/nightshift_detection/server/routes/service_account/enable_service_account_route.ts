@@ -15,7 +15,7 @@ import type { DetectionEngineEnableBody } from '../../../common/service_account'
 import { DetectionSetupService } from '../../lib/service_account/setup_service';
 import { BaseEngineRoute } from '../base_engine_route';
 import { EngineRouteContext } from '../engine_route_context';
-import { DETECTION_ENGINE_API_PATH } from '../constants';
+import { DETECTION_ENGINE_API_PATH } from '../../../common/constants';
 
 // Ids are opaque: `kibana/<name>` on stateful, a generated id on Serverless.
 const SERVICE_ACCOUNT_ID_MAX_LENGTH = 1024;

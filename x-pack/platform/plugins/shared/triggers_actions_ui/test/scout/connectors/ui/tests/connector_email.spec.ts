@@ -105,8 +105,10 @@ test.describe('Email connector', { tag: tags.stateful.classic }, () => {
       await page.testSubj.click('edit-connector-flyout-header');
 
       await expect(
-        page.testSubj.locator('test-connector-form').locator('.euiFormErrorText')
-      ).toContainText('At least one recipient is required.');
+        page.testSubj
+          .locator('test-connector-form')
+          .getByText('At least one recipient is required.')
+      ).toBeVisible();
       await expect(page.testSubj.locator('executeActionButton')).toBeDisabled();
     });
 
@@ -119,8 +121,10 @@ test.describe('Email connector', { tag: tags.stateful.classic }, () => {
       await page.testSubj.click('edit-connector-flyout-header');
 
       await expect(
-        page.testSubj.locator('test-connector-form').locator('.euiFormErrorText')
-      ).toContainText('At least one recipient is required.');
+        page.testSubj
+          .locator('test-connector-form')
+          .getByText('At least one recipient is required.')
+      ).toBeVisible();
       await expect(page.testSubj.locator('executeActionButton')).toBeDisabled();
     });
 
@@ -133,8 +137,8 @@ test.describe('Email connector', { tag: tags.stateful.classic }, () => {
       await page.testSubj.click('edit-connector-flyout-header');
 
       await expect(
-        page.testSubj.locator('test-connector-form').locator('.euiFormErrorText')
-      ).toContainText('is not valid');
+        page.testSubj.locator('test-connector-form').getByText('is not valid')
+      ).toBeVisible();
     });
 
     await test.step('shows invalid email error for address with leading hyphen in domain', async () => {
@@ -146,8 +150,8 @@ test.describe('Email connector', { tag: tags.stateful.classic }, () => {
       await page.testSubj.click('edit-connector-flyout-header');
 
       await expect(
-        page.testSubj.locator('test-connector-form').locator('.euiFormErrorText')
-      ).toContainText('is not valid');
+        page.testSubj.locator('test-connector-form').getByText('is not valid')
+      ).toBeVisible();
     });
 
     await test.step('clears recipients-required error when only Cc has a valid recipient', async () => {
@@ -158,8 +162,10 @@ test.describe('Email connector', { tag: tags.stateful.classic }, () => {
       await page.testSubj.click('edit-connector-flyout-header');
 
       await expect(
-        page.testSubj.locator('test-connector-form').locator('.euiFormErrorText')
-      ).toContainText('At least one recipient is required.');
+        page.testSubj
+          .locator('test-connector-form')
+          .getByText('At least one recipient is required.')
+      ).toBeVisible();
 
       // Adding a valid Cc address must clear the error from all fields
       await page.testSubj.click('emailAddCcButton');
@@ -170,7 +176,7 @@ test.describe('Email connector', { tag: tags.stateful.classic }, () => {
       await expect(
         page.testSubj
           .locator('test-connector-form')
-          .locator('.euiFormErrorText', { hasText: 'At least one recipient is required.' })
+          .getByText('At least one recipient is required.')
       ).toHaveCount(0);
     });
   });

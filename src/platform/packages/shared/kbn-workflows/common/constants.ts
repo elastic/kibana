@@ -45,10 +45,10 @@ export const WORKFLOWS_LIBRARY_ENABLED_SETTING_ID = 'workflowsManagement:library
 
 /**
  * How a workflow was created from a Workflow Template library template:
- * `install` (setup form), `import` (template file upload) or `remix`
- * (Remix with AI, saved from the editor).
+ * `catalog` (installed from a catalog template), `import` (installed from a
+ * template file) or `remix` (Remix with AI, saved from the editor).
  */
-export const WORKFLOW_TEMPLATE_ORIGINS = ['install', 'import', 'remix'] as const;
+export const WORKFLOW_TEMPLATE_ORIGINS = ['catalog', 'import', 'remix'] as const;
 
 /** Template slug stored when the source template is not in the library catalog. */
 export const CUSTOM_WORKFLOW_TEMPLATE_SLUG = 'custom';

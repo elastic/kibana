@@ -119,6 +119,7 @@ export async function getToolHandler({
     }),
     getLogExceptionGroups({
       core,
+      request,
       logger,
       esClient,
       index,
@@ -130,6 +131,7 @@ export async function getToolHandler({
     }),
     getNonExceptionLogGroups({
       core,
+      request,
       logger,
       esClient,
       index,

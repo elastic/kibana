@@ -80,7 +80,7 @@ x-codeSamples:
   - lang: curl
     source: |
       curl \
-        -X POST "https://${KIBANA_URL}/api/context_engine/ai_index" \
+        -X POST "${KIBANA_URL}/api/context_engine/ai_index" \
         -H "Authorization: ApiKey ${API_KEY}" \
         -H "kbn-xsrf: true" \
         -H "Content-Type: application/json" \

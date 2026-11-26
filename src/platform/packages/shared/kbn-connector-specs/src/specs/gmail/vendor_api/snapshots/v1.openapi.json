@@ -261,13 +261,25 @@
               "https://www.googleapis.com/auth/gmail.addons.current.message.metadata": "View your email message metadata when the add-on is running",
               "https://www.googleapis.com/auth/gmail.addons.current.message.readonly": "View your email messages when the add-on is running",
               "https://www.googleapis.com/auth/gmail.compose": "Manage drafts and send emails",
+              "https://www.googleapis.com/auth/gmail.drafts": "Read, compose, send, update, and permanently delete your draft emails",
+              "https://www.googleapis.com/auth/gmail.drafts.create": "Compose new draft emails",
+              "https://www.googleapis.com/auth/gmail.drafts.readonly": "Read your draft emails",
               "https://www.googleapis.com/auth/gmail.insert": "Add emails into your Gmail mailbox",
               "https://www.googleapis.com/auth/gmail.labels": "See and edit your email labels",
+              "https://www.googleapis.com/auth/gmail.labels.create": "Create new email labels",
+              "https://www.googleapis.com/auth/gmail.labels.readonly": "Read your email labels",
+              "https://www.googleapis.com/auth/gmail.messages": "Read, update, and permanently delete all your emails",
+              "https://www.googleapis.com/auth/gmail.messages.delete": "Permanently delete all your emails",
+              "https://www.googleapis.com/auth/gmail.messages.modify": "Update but not delete your emails",
+              "https://www.googleapis.com/auth/gmail.messages.readonly": "Read your emails",
               "https://www.googleapis.com/auth/gmail.metadata": "View your email message metadata such as labels and headers, but not the email body",
               "https://www.googleapis.com/auth/gmail.modify": "Read, compose, and send emails from your Gmail account",
               "https://www.googleapis.com/auth/gmail.readonly": "View your email messages and settings",
               "https://www.googleapis.com/auth/gmail.send": "Send email on your behalf",
+              "https://www.googleapis.com/auth/gmail.send.self": "Send email to yourself",
               "https://www.googleapis.com/auth/gmail.settings.basic": "See, edit, create, or change your email settings and filters in Gmail",
+              "https://www.googleapis.com/auth/gmail.settings.filters": "Read, create, and delete your filters",
+              "https://www.googleapis.com/auth/gmail.settings.filters.readonly": "Read your filters",
               "https://www.googleapis.com/auth/gmail.settings.sharing": "Manage your sensitive mail settings, including who can manage your mail"
             },
             "tokenUrl": "https://oauth2.googleapis.com/token"
@@ -297,6 +309,67 @@
           },
           {
             "in": "query",
+            "name": "upload_protocol",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "$.xgafv",
+            "schema": {
+              "enum": [
+                "1",
+                "2"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "quotaUser",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "oauth_token",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "key",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "callback",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "uploadType",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "prettyPrint",
+            "schema": {
+              "default": "true",
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
             "name": "fields",
             "schema": {
               "type": "string"
@@ -317,69 +390,8 @@
           },
           {
             "in": "query",
-            "name": "callback",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "oauth_token",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "upload_protocol",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "key",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "prettyPrint",
-            "schema": {
-              "default": "true",
-              "type": "boolean"
-            }
-          },
-          {
-            "in": "query",
             "name": "access_token",
             "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "quotaUser",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "uploadType",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "$.xgafv",
-            "schema": {
-              "enum": [
-                "1",
-                "2"
-              ],
               "type": "string"
             }
           }
@@ -398,10 +410,31 @@
         "security": [
           {
             "Oauth2": [
-              "https://mail.google.com/",
-              "https://www.googleapis.com/auth/gmail.labels",
-              "https://www.googleapis.com/auth/gmail.metadata",
-              "https://www.googleapis.com/auth/gmail.modify",
+              "https://mail.google.com/"
+            ]
+          },
+          {
+            "Oauth2": [
+              "https://www.googleapis.com/auth/gmail.labels"
+            ]
+          },
+          {
+            "Oauth2": [
+              "https://www.googleapis.com/auth/gmail.labels.readonly"
+            ]
+          },
+          {
+            "Oauth2": [
+              "https://www.googleapis.com/auth/gmail.metadata"
+            ]
+          },
+          {
+            "Oauth2": [
+              "https://www.googleapis.com/auth/gmail.modify"
+            ]
+          },
+          {
+            "Oauth2": [
               "https://www.googleapis.com/auth/gmail.readonly"
             ]
           }
@@ -423,6 +456,67 @@
           },
           {
             "in": "query",
+            "name": "upload_protocol",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "$.xgafv",
+            "schema": {
+              "enum": [
+                "1",
+                "2"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "quotaUser",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "oauth_token",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "key",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "callback",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "uploadType",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "prettyPrint",
+            "schema": {
+              "default": "true",
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
             "name": "fields",
             "schema": {
               "type": "string"
@@ -443,42 +537,6 @@
           },
           {
             "in": "query",
-            "name": "callback",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "oauth_token",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "upload_protocol",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "key",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "prettyPrint",
-            "schema": {
-              "default": "true",
-              "type": "boolean"
-            }
-          },
-          {
-            "in": "query",
             "name": "access_token",
             "schema": {
               "type": "string"
@@ -486,26 +544,8 @@
           },
           {
             "in": "query",
-            "name": "quotaUser",
+            "name": "pageToken",
             "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "uploadType",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "$.xgafv",
-            "schema": {
-              "enum": [
-                "1",
-                "2"
-              ],
               "type": "string"
             }
           },
@@ -521,6 +561,15 @@
           },
           {
             "in": "query",
+            "name": "maxResults",
+            "schema": {
+              "default": "100",
+              "format": "uint32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
             "name": "includeSpamTrash",
             "schema": {
               "default": "false",
@@ -532,22 +581,6 @@
             "name": "q",
             "schema": {
               "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "pageToken",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "maxResults",
-            "schema": {
-              "default": "100",
-              "format": "uint32",
-              "type": "integer"
             }
           }
         ],
@@ -565,9 +598,31 @@
         "security": [
           {
             "Oauth2": [
-              "https://mail.google.com/",
-              "https://www.googleapis.com/auth/gmail.metadata",
-              "https://www.googleapis.com/auth/gmail.modify",
+              "https://mail.google.com/"
+            ]
+          },
+          {
+            "Oauth2": [
+              "https://www.googleapis.com/auth/gmail.messages"
+            ]
+          },
+          {
+            "Oauth2": [
+              "https://www.googleapis.com/auth/gmail.messages.readonly"
+            ]
+          },
+          {
+            "Oauth2": [
+              "https://www.googleapis.com/auth/gmail.metadata"
+            ]
+          },
+          {
+            "Oauth2": [
+              "https://www.googleapis.com/auth/gmail.modify"
+            ]
+          },
+          {
+            "Oauth2": [
               "https://www.googleapis.com/auth/gmail.readonly"
             ]
           }
@@ -589,6 +644,67 @@
           },
           {
             "in": "query",
+            "name": "upload_protocol",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "$.xgafv",
+            "schema": {
+              "enum": [
+                "1",
+                "2"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "quotaUser",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "oauth_token",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "key",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "callback",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "uploadType",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "prettyPrint",
+            "schema": {
+              "default": "true",
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
             "name": "fields",
             "schema": {
               "type": "string"
@@ -609,69 +725,8 @@
           },
           {
             "in": "query",
-            "name": "callback",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "oauth_token",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "upload_protocol",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "key",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "prettyPrint",
-            "schema": {
-              "default": "true",
-              "type": "boolean"
-            }
-          },
-          {
-            "in": "query",
             "name": "access_token",
             "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "quotaUser",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "uploadType",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "$.xgafv",
-            "schema": {
-              "enum": [
-                "1",
-                "2"
-              ],
               "type": "string"
             }
           }
@@ -699,11 +754,32 @@
         "security": [
           {
             "Oauth2": [
-              "https://mail.google.com/",
-              "https://www.googleapis.com/auth/gmail.addons.current.action.compose",
-              "https://www.googleapis.com/auth/gmail.compose",
-              "https://www.googleapis.com/auth/gmail.modify",
+              "https://mail.google.com/"
+            ]
+          },
+          {
+            "Oauth2": [
+              "https://www.googleapis.com/auth/gmail.addons.current.action.compose"
+            ]
+          },
+          {
+            "Oauth2": [
+              "https://www.googleapis.com/auth/gmail.compose"
+            ]
+          },
+          {
+            "Oauth2": [
+              "https://www.googleapis.com/auth/gmail.modify"
+            ]
+          },
+          {
+            "Oauth2": [
               "https://www.googleapis.com/auth/gmail.send"
+            ]
+          },
+          {
+            "Oauth2": [
+              "https://www.googleapis.com/auth/gmail.send.self"
             ]
           }
         ]
@@ -732,6 +808,67 @@
           },
           {
             "in": "query",
+            "name": "upload_protocol",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "$.xgafv",
+            "schema": {
+              "enum": [
+                "1",
+                "2"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "quotaUser",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "oauth_token",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "key",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "callback",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "uploadType",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "prettyPrint",
+            "schema": {
+              "default": "true",
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
             "name": "fields",
             "schema": {
               "type": "string"
@@ -752,42 +889,6 @@
           },
           {
             "in": "query",
-            "name": "callback",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "oauth_token",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "upload_protocol",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "key",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "prettyPrint",
-            "schema": {
-              "default": "true",
-              "type": "boolean"
-            }
-          },
-          {
-            "in": "query",
             "name": "access_token",
             "schema": {
               "type": "string"
@@ -795,27 +896,12 @@
           },
           {
             "in": "query",
-            "name": "quotaUser",
+            "name": "metadataHeaders",
             "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "uploadType",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "$.xgafv",
-            "schema": {
-              "enum": [
-                "1",
-                "2"
-              ],
-              "type": "string"
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
             }
           },
           {
@@ -830,16 +916,6 @@
                 "metadata"
               ],
               "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "metadataHeaders",
-            "schema": {
-              "items": {
-                "type": "string"
-              },
-              "type": "array"
             }
           }
         ],
@@ -857,12 +933,46 @@
         "security": [
           {
             "Oauth2": [
-              "https://mail.google.com/",
-              "https://www.googleapis.com/auth/gmail.addons.current.message.action",
-              "https://www.googleapis.com/auth/gmail.addons.current.message.metadata",
-              "https://www.googleapis.com/auth/gmail.addons.current.message.readonly",
-              "https://www.googleapis.com/auth/gmail.metadata",
-              "https://www.googleapis.com/auth/gmail.modify",
+              "https://mail.google.com/"
+            ]
+          },
+          {
+            "Oauth2": [
+              "https://www.googleapis.com/auth/gmail.addons.current.message.action"
+            ]
+          },
+          {
+            "Oauth2": [
+              "https://www.googleapis.com/auth/gmail.addons.current.message.metadata"
+            ]
+          },
+          {
+            "Oauth2": [
+              "https://www.googleapis.com/auth/gmail.addons.current.message.readonly"
+            ]
+          },
+          {
+            "Oauth2": [
+              "https://www.googleapis.com/auth/gmail.messages"
+            ]
+          },
+          {
+            "Oauth2": [
+              "https://www.googleapis.com/auth/gmail.messages.readonly"
+            ]
+          },
+          {
+            "Oauth2": [
+              "https://www.googleapis.com/auth/gmail.metadata"
+            ]
+          },
+          {
+            "Oauth2": [
+              "https://www.googleapis.com/auth/gmail.modify"
+            ]
+          },
+          {
+            "Oauth2": [
               "https://www.googleapis.com/auth/gmail.readonly"
             ]
           }
@@ -892,6 +1002,67 @@
           },
           {
             "in": "query",
+            "name": "upload_protocol",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "$.xgafv",
+            "schema": {
+              "enum": [
+                "1",
+                "2"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "quotaUser",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "oauth_token",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "key",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "callback",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "uploadType",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "prettyPrint",
+            "schema": {
+              "default": "true",
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
             "name": "fields",
             "schema": {
               "type": "string"
@@ -912,69 +1083,8 @@
           },
           {
             "in": "query",
-            "name": "callback",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "oauth_token",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "upload_protocol",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "key",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "prettyPrint",
-            "schema": {
-              "default": "true",
-              "type": "boolean"
-            }
-          },
-          {
-            "in": "query",
             "name": "access_token",
             "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "quotaUser",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "uploadType",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "$.xgafv",
-            "schema": {
-              "enum": [
-                "1",
-                "2"
-              ],
               "type": "string"
             }
           }
@@ -1002,7 +1112,26 @@
         "security": [
           {
             "Oauth2": [
-              "https://mail.google.com/",
+              "https://mail.google.com/"
+            ]
+          },
+          {
+            "Oauth2": [
+              "https://www.googleapis.com/auth/gmail.messages"
+            ]
+          },
+          {
+            "Oauth2": [
+              "https://www.googleapis.com/auth/gmail.messages.delete"
+            ]
+          },
+          {
+            "Oauth2": [
+              "https://www.googleapis.com/auth/gmail.messages.modify"
+            ]
+          },
+          {
+            "Oauth2": [
               "https://www.googleapis.com/auth/gmail.modify"
             ]
           }
@@ -1032,6 +1161,67 @@
           },
           {
             "in": "query",
+            "name": "upload_protocol",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "$.xgafv",
+            "schema": {
+              "enum": [
+                "1",
+                "2"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "quotaUser",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "oauth_token",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "key",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "callback",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "uploadType",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "prettyPrint",
+            "schema": {
+              "default": "true",
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
             "name": "fields",
             "schema": {
               "type": "string"
@@ -1052,69 +1242,8 @@
           },
           {
             "in": "query",
-            "name": "callback",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "oauth_token",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "upload_protocol",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "key",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "prettyPrint",
-            "schema": {
-              "default": "true",
-              "type": "boolean"
-            }
-          },
-          {
-            "in": "query",
             "name": "access_token",
             "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "quotaUser",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "uploadType",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "$.xgafv",
-            "schema": {
-              "enum": [
-                "1",
-                "2"
-              ],
               "type": "string"
             }
           }
@@ -1133,7 +1262,21 @@
         "security": [
           {
             "Oauth2": [
-              "https://mail.google.com/",
+              "https://mail.google.com/"
+            ]
+          },
+          {
+            "Oauth2": [
+              "https://www.googleapis.com/auth/gmail.messages"
+            ]
+          },
+          {
+            "Oauth2": [
+              "https://www.googleapis.com/auth/gmail.messages.delete"
+            ]
+          },
+          {
+            "Oauth2": [
               "https://www.googleapis.com/auth/gmail.modify"
             ]
           }
@@ -1163,6 +1306,67 @@
           },
           {
             "in": "query",
+            "name": "upload_protocol",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "$.xgafv",
+            "schema": {
+              "enum": [
+                "1",
+                "2"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "quotaUser",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "oauth_token",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "key",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "callback",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "uploadType",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "prettyPrint",
+            "schema": {
+              "default": "true",
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
             "name": "fields",
             "schema": {
               "type": "string"
@@ -1183,69 +1387,8 @@
           },
           {
             "in": "query",
-            "name": "callback",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "oauth_token",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "upload_protocol",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "key",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "prettyPrint",
-            "schema": {
-              "default": "true",
-              "type": "boolean"
-            }
-          },
-          {
-            "in": "query",
             "name": "access_token",
             "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "quotaUser",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "uploadType",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "$.xgafv",
-            "schema": {
-              "enum": [
-                "1",
-                "2"
-              ],
               "type": "string"
             }
           }
@@ -1264,7 +1407,21 @@
         "security": [
           {
             "Oauth2": [
-              "https://mail.google.com/",
+              "https://mail.google.com/"
+            ]
+          },
+          {
+            "Oauth2": [
+              "https://www.googleapis.com/auth/gmail.messages"
+            ]
+          },
+          {
+            "Oauth2": [
+              "https://www.googleapis.com/auth/gmail.messages.delete"
+            ]
+          },
+          {
+            "Oauth2": [
               "https://www.googleapis.com/auth/gmail.modify"
             ]
           }
@@ -1302,6 +1459,67 @@
           },
           {
             "in": "query",
+            "name": "upload_protocol",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "$.xgafv",
+            "schema": {
+              "enum": [
+                "1",
+                "2"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "quotaUser",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "oauth_token",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "key",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "callback",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "uploadType",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "prettyPrint",
+            "schema": {
+              "default": "true",
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
             "name": "fields",
             "schema": {
               "type": "string"
@@ -1322,69 +1540,8 @@
           },
           {
             "in": "query",
-            "name": "callback",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "oauth_token",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "upload_protocol",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "key",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "prettyPrint",
-            "schema": {
-              "default": "true",
-              "type": "boolean"
-            }
-          },
-          {
-            "in": "query",
             "name": "access_token",
             "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "quotaUser",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "uploadType",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "$.xgafv",
-            "schema": {
-              "enum": [
-                "1",
-                "2"
-              ],
               "type": "string"
             }
           }
@@ -1403,10 +1560,36 @@
         "security": [
           {
             "Oauth2": [
-              "https://mail.google.com/",
-              "https://www.googleapis.com/auth/gmail.addons.current.message.action",
-              "https://www.googleapis.com/auth/gmail.addons.current.message.readonly",
-              "https://www.googleapis.com/auth/gmail.modify",
+              "https://mail.google.com/"
+            ]
+          },
+          {
+            "Oauth2": [
+              "https://www.googleapis.com/auth/gmail.addons.current.message.action"
+            ]
+          },
+          {
+            "Oauth2": [
+              "https://www.googleapis.com/auth/gmail.addons.current.message.readonly"
+            ]
+          },
+          {
+            "Oauth2": [
+              "https://www.googleapis.com/auth/gmail.messages"
+            ]
+          },
+          {
+            "Oauth2": [
+              "https://www.googleapis.com/auth/gmail.messages.readonly"
+            ]
+          },
+          {
+            "Oauth2": [
+              "https://www.googleapis.com/auth/gmail.modify"
+            ]
+          },
+          {
+            "Oauth2": [
               "https://www.googleapis.com/auth/gmail.readonly"
             ]
           }
