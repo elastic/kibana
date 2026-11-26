@@ -882,7 +882,8 @@ export const useEntityFlyoutApi = (): EntityFlyoutApi => {
         {
           surface: FLYOUT_SURFACE.TOOL,
           tool: FLYOUT_TOOL.RESOLUTION,
-          flyoutType: entityType,
+          // AI agents have no flyout of their own yet, so their telemetry counts as generic.
+          flyoutType: entityType === 'ai_agent' ? FLYOUT_TYPE.GENERIC : entityType,
           session: FLYOUT_SESSION_KIND.START,
           origin,
         },

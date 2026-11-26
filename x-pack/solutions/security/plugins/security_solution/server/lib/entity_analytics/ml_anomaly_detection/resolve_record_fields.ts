@@ -34,6 +34,7 @@ const IDENTITY_NAMESPACE: Record<EntityType, string> = {
   host: 'host',
   service: 'service',
   generic: 'entity',
+  ai_agent: 'process.ai_agent',
 };
 
 const collectIdentityFields = (path: string, value: unknown, into: EntityIdentityFields): void => {

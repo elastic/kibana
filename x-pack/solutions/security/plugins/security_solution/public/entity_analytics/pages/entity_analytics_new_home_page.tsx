@@ -505,7 +505,8 @@ const EntityAnalyticsNewHomePageContent: React.FC<{
               investigateInTimeline({ query: { query: kqlFilter, language: 'kuery' } });
               return;
             }
-            const field = EntityTypeToIdentifierField[entity.entityType] ?? 'entity.id';
+            const field =
+              EntityTypeToIdentifierField[toSecurityEntityType(entity.entityType)] ?? 'entity.id';
             const dataProviders = createDataProviders({
               contextId: scopeId,
               field,

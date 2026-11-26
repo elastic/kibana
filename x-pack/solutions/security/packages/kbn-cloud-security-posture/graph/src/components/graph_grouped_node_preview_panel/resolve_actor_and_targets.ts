@@ -6,10 +6,10 @@
  */
 
 import { get } from 'lodash';
-import { ALL_ENTITY_TYPES } from '@kbn/entity-store/common';
 import type { EntityType } from '@kbn/entity-store/common';
 import type { EntityStoreEuidApi } from '@kbn/entity-store/public';
 import {
+  GRAPH_ENTITY_TYPES,
   getGraphActorEuidSourceFields,
   getGraphTargetEuidSourceFields,
 } from '@kbn/cloud-security-posture-common/constants';
@@ -82,9 +82,8 @@ const resolveEuidsForType = (
   });
 
 /**
- * Resolves, from a document's own fields, the actor (first match in the entity store's
- * `ALL_ENTITY_TYPES` order: user, host, service, generic, the same order the graph's ES|QL
- * resolution uses) and all targets the graph would show for it. Values that integrations compute
+ * Resolves, from a document's own fields, the actor (first match in the order user, host,
+ * service, generic, the same order the graph's ES|QL resolution uses) and all targets the graph would show for it. Values that integrations compute
  * only in the graph's runtime ES|QL evaluations are not visible here.
  */
 export const resolveActorAndTargets = (
@@ -96,7 +95,7 @@ export const resolveActorAndTargets = (
   const namespace = readNamespace(source, actorFields.all);
 
   let actorId: string | undefined;
-  for (const type of ALL_ENTITY_TYPES) {
+  for (const type of GRAPH_ENTITY_TYPES) {
     [actorId] = resolveEuidsForType(
       euidApi,
       type,
@@ -107,7 +106,7 @@ export const resolveActorAndTargets = (
     if (actorId) break;
   }
 
-  const targetIds = ALL_ENTITY_TYPES.flatMap((type) =>
+  const targetIds = GRAPH_ENTITY_TYPES.flatMap((type) =>
     resolveEuidsForType(
       euidApi,
       type,

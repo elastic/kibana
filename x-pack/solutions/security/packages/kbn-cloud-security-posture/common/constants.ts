@@ -188,6 +188,9 @@ const ENTITY_NAMESPACE_SOURCE_FIELDS = [
  * These mirror the identity fields from Entity Store definitions.
  * Server-side code derives these dynamically via euid.getEuidSourceFields().
  */
+/** The entity types the graph resolves from event fields, in the entity store's ranking order. */
+export const GRAPH_ENTITY_TYPES = ['user', 'host', 'service', 'generic'] as const;
+
 export const getGraphActorEuidSourceFields = ({
   euid,
   getBuiltInEntityDefinition,
