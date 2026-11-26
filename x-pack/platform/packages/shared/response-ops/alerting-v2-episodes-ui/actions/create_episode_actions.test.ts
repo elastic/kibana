@@ -15,6 +15,10 @@ import { docLinksServiceMock } from '@kbn/core-doc-links-browser-mocks';
 import { expressionsPluginMock } from '@kbn/expressions-plugin/public/mocks';
 import { spacesPluginMock } from '@kbn/spaces-plugin/public/mocks';
 import { QueryClient } from '@kbn/react-query';
+import type { LocatorPublic } from '@kbn/share-plugin/public';
+import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
+import { ES_QUERY_ID } from '@kbn/rule-data-utils';
+import type { DataViewDiscoverLocatorParams } from '../utils/discover_href_for_alert';
 import type { AlertEpisode } from '../queries/episodes_query';
 import type { AddToCaseCasesService } from '../components/add_to_case_modal';
 import type { EpisodeDataSource } from '../types/episode_data_source';
@@ -22,6 +26,9 @@ import type { CanWriteEpisode } from '../utils/episode_write_privilege';
 import { createAddToCaseAction } from './add_to_case';
 import { ADD_TO_CASE_EPISODE_ACTION_ID } from './add_to_case_action_id';
 import { createEpisodeActions } from './create_episode_actions';
+import { createClassicEpisodeSource } from '../classic_alerts/create_classic_episode_source';
+import { CLASSIC_EPISODE_SOURCE_ID } from '../classic_alerts/constants';
+import type { ClassicAlertActionContext } from '../classic_alerts/utils/map_alert';
 
 const writeAll = { canWriteNativeEpisodes: true, canWriteSourceEpisode: () => true };
 
@@ -31,8 +38,10 @@ const buildActions = ({
   isAlertEventsHistoryAvailable = true,
   canWriteNativeEpisodes,
   canWriteSourceEpisode,
+  discoverLocator,
 }: {
   additionalDataSource?: EpisodeDataSource;
+  discoverLocator?: LocatorPublic<DataViewDiscoverLocatorParams>;
   includeHistory?: boolean;
   isAlertEventsHistoryAvailable?: boolean;
   canWriteNativeEpisodes: boolean;
@@ -60,6 +69,7 @@ const buildActions = ({
         }
       : {}),
     additionalDataSource,
+    discoverLocator,
   });
 
 describe('createEpisodeActions', () => {
@@ -132,6 +142,31 @@ describe('createEpisodeActions', () => {
       'ALERTING_V2_OPEN_EPISODE_IN_DISCOVER',
       'ALERTING_V2_OPEN_ALERT_EVENTS_HISTORY_IN_DISCOVER',
     ]);
+  });
+
+  it('opens classic rows with a Discover resolver through the platform Open in Discover action', () => {
+    const actions = buildActions({
+      ...writeAll,
+      additionalDataSource: createClassicEpisodeSource({ ruleTypeIds: ['test-type'] }),
+      discoverLocator: sharePluginMock.createLocator<DataViewDiscoverLocatorParams>(),
+    });
+    const makeClassicEpisode = (ruleTypeId: string) =>
+      ({
+        'episode.id': 'alert-1',
+        'rule.id': 'rule-1',
+        supports_actions: false,
+        source_id: CLASSIC_EPISODE_SOURCE_ID,
+        source_action_context: { alertUuid: 'alert-1', ruleTypeId } as ClassicAlertActionContext,
+      } as AlertEpisode);
+    const openInDiscover = actions.find(({ id }) => id === 'ALERTING_V2_OPEN_EPISODE_IN_DISCOVER');
+
+    expect(actions).toHaveLength(10);
+    expect(openInDiscover?.isCompatible({ episodes: [makeClassicEpisode(ES_QUERY_ID)] })).toBe(
+      true
+    );
+    expect(openInDiscover?.isCompatible({ episodes: [makeClassicEpisode('unknown.rule')] })).toBe(
+      false
+    );
   });
 });
 

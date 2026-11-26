@@ -7,7 +7,9 @@
 
 import type { Capabilities, IUiSettingsClient } from '@kbn/core/public';
 import { DISCOVER_APP_LOCATOR } from '@kbn/deeplinks-analytics';
-import type { TimeRange } from '@kbn/es-query';
+import type { Filter, Query, TimeRange } from '@kbn/es-query';
+import type { DataViewSpec } from '@kbn/data-views-plugin/common';
+import type { AsSerializableRecord } from '@kbn/utility-types';
 import { ALERT_EVENTS_DATA_STREAM } from '@kbn/alerting-v2-constants';
 import { ENABLE_ESQL, escapeStringValue } from '@kbn/esql-utils';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
@@ -15,6 +17,31 @@ import moment from 'moment';
 
 /** Same window as Observability alert details “View in Discover” (+-15 minutes). */
 export const DISCOVER_CONTEXT_HALF_WINDOW_MINUTES = 15;
+
+/** Subset of the Discover locator params used to open Discover in data view (classic) mode. */
+export type DataViewDiscoverLocatorParams = AsSerializableRecord<{
+  dataViewId?: string;
+  dataViewSpec?: DataViewSpec;
+  query?: Query;
+  filters?: Filter[];
+  timeRange?: TimeRange;
+}>;
+
+/**
+ * Where Discover opens for an alert: a link stored on the alert, or data view locator params.
+ * Locator params without a `timeRange` open around the alert start.
+ */
+export type AlertDiscoverTarget =
+  | { url: string }
+  | { locatorParams: DataViewDiscoverLocatorParams };
+
+/** Resolves the Discover target from an alert document, or `undefined` when it cannot. */
+export type AlertDiscoverLinkResolver = (
+  alert: Record<string, unknown>
+) => AlertDiscoverTarget | undefined;
+
+/** Discover resolvers keyed by rule type id. A rule type without a resolver has no Discover action. */
+export type AlertDiscoverLinkResolvers = Readonly<Record<string, AlertDiscoverLinkResolver>>;
 
 /**
  * Absolute ISO time range centered on an alert timestamp for opening Discover.

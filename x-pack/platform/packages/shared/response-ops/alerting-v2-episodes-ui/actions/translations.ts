@@ -74,6 +74,20 @@ export const OPEN_IN_DISCOVER = i18n.translate(
   }
 );
 
+export const OPEN_IN_DISCOVER_UNAVAILABLE = i18n.translate(
+  'xpack.alertingV2EpisodesUi.episodesUi.actions.openInDiscoverUnavailable',
+  {
+    defaultMessage: "This alert can't be opened in Discover",
+  }
+);
+
+export const OPEN_IN_DISCOVER_ERROR = i18n.translate(
+  'xpack.alertingV2EpisodesUi.episodesUi.actions.openInDiscoverError',
+  {
+    defaultMessage: 'Unable to open the alert in Discover',
+  }
+);
+
 export const OPEN_ALERT_EVENTS_HISTORY = i18n.translate(
   'xpack.alertingV2EpisodesUi.episodesUi.actions.openAlertEventsHistoryLabel',
   {

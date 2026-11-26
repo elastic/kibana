@@ -105,14 +105,10 @@ export interface SourceActionResult {
 /**
  * Extension that a data source registers to participate in a common episode action.
  */
-export interface EpisodeActionExtension<TContext = void> {
+export interface EpisodeActionExtension<TContext = void, TResult = SourceActionResult> {
   actionId: string;
   isCompatible: (ep: AlertEpisode) => boolean;
-  execute: (
-    episodes: AlertEpisode[],
-    http: HttpStart,
-    context?: TContext
-  ) => Promise<SourceActionResult>;
+  execute: (episodes: AlertEpisode[], http: HttpStart, context?: TContext) => Promise<TResult>;
 }
 
 export interface SeverityExtension {
@@ -134,7 +130,7 @@ export interface EpisodeDataSource {
   fetchTagOptions?: (params: FetchSourceTagOptionsParams) => Promise<string[]>;
   resolveRules?: (params: ResolveSourceRulesParams) => Promise<RuleResponse[]>;
   fetchSearchFields?: (params: EpisodeDataSourceBaseParams) => Promise<EpisodeSearchField[]>;
-  actionExtensions?: Array<EpisodeActionExtension<any>>;
+  actionExtensions?: Array<EpisodeActionExtension<any, any>>;
   createActions?: (deps: EpisodeActionsDeps) => EpisodeAction[];
   /**
    * Resolves which of this source's alerts the user may modify. Called as a React hook, so it can
