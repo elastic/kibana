@@ -176,3 +176,47 @@ it.each(['an HTTP error', 'an invalid response'])(
     }
   }
 );
+
+it('shows a refresh action when a poll fails after an empty response', async () => {
+  jest.useFakeTimers();
+  const queryClient = new QueryClient({ logger: { ...console, error: jest.fn() } });
+  const fetch = jest
+    .fn()
+    .mockResolvedValueOnce({ deliveries: [] })
+    .mockRejectedValueOnce(
+      Object.assign(new Error('Internal connector details'), {
+        request: {},
+        response: { status: 500 },
+      })
+    )
+    .mockResolvedValue({ deliveries: [] });
+
+  try {
+    render(
+      <I18nProvider>
+        <QueryClientProvider client={queryClient}>
+          <SlackDeliveryStatus
+            http={{ get: jest.fn() } as never}
+            investigationsClient={{ fetch } as never}
+            investigationId="investigation"
+          />
+        </QueryClientProvider>
+      </I18nProvider>
+    );
+    await waitFor(() => expect(queryClient.isFetching()).toBe(0));
+    expect(screen.queryByTestId('nightshiftSlackDeliveryStatus')).not.toBeInTheDocument();
+
+    await act(async () => jest.advanceTimersByTime(30_000));
+
+    expect(
+      await screen.findByText('Slack delivery status is unavailable (HTTP 500).')
+    ).toBeVisible();
+    fireEvent.click(screen.getByRole('button', { name: 'Refresh status' }));
+    await waitFor(() => {
+      expect(screen.queryByTestId('nightshiftSlackDeliveryStatus')).not.toBeInTheDocument();
+    });
+  } finally {
+    queryClient.clear();
+    jest.useRealTimers();
+  }
+});

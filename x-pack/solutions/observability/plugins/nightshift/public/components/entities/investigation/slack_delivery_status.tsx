@@ -215,9 +215,10 @@ export const SlackDeliveryStatus = ({
     },
   });
   const inaccessible = isInaccessible(error);
+  const hasDeliveries = Boolean(data?.deliveries.length);
   const { bindings, isLoading: isLoadingBindings } = useAllRelayAppBindingsWithHttp(
     http,
-    !inaccessible && !!data?.deliveries.length
+    !inaccessible && hasDeliveries
   );
   const canLookUpDisconnectedChannels =
     Boolean(settingsHref) &&
@@ -229,7 +230,7 @@ export const SlackDeliveryStatus = ({
         !bindings.some((binding) => binding.channel === channel)
     ) === true;
   const { channels } = useAvailableChannelsWithHttp(http, canLookUpDisconnectedChannels);
-  if (inaccessible || (!data?.deliveries.length && !isError)) return null;
+  if (inaccessible || (!hasDeliveries && !isError)) return null;
 
   const httpStatus = getHttpStatus(error);
   return (
@@ -321,7 +322,7 @@ export const SlackDeliveryStatus = ({
           </EuiFlexGroup>
         );
       })}
-      {isError && !data && (
+      {isError && !hasDeliveries && (
         <>
           <EuiSpacer size="s" />
           <EuiText size="s" color="subdued">
