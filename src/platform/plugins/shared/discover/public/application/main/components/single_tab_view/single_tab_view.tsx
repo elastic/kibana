@@ -18,6 +18,7 @@ import type { ProfileStateMap } from '../../../../../common/context_awareness';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import type { DiscoverAppState } from '../../state_management/redux';
 import { getDataStateContainer } from '../../state_management/discover_data_state_container';
+import { getCurrentUrlState } from '../../state_management/utils/cleanup_url_state';
 import {
   RuntimeStateProvider,
   internalStateActions,
@@ -47,6 +48,7 @@ import { ScopedServicesProvider } from '../../../../components/scoped_services_p
 import { HideTabsBar } from '../tabs_view/hide_tabs_bar';
 import { InitializationError } from './initialization_error';
 import { MissingDataViewPrompt } from './missing_data_view_prompt';
+import { ResetDiscoverTopNavMenu } from '../top_nav/discover_topnav_menu';
 import type { DiscoverSearchSessionManager } from '../../state_management/discover_search_session';
 
 export interface SingleTabViewProps {
@@ -152,15 +154,21 @@ export const SingleTabView = ({
     currentTabInitializationState.initializationStatus === TabInitializationStatus.MissingDataView
   ) {
     return (
-      <MissingDataViewPrompt
-        missingDataViewId={currentTabInitializationState.missingDataViewId}
-        adHocDataViews={adHocDataViews}
-        onSelectDataView={(dataViewId) => {
-          initializeTab.current({
-            defaultUrlState: { dataSource: createDataViewDataSource({ dataViewId }) },
-          });
-        }}
-      />
+      <>
+        <ResetDiscoverTopNavMenu />
+        <MissingDataViewPrompt
+          missingDataViewId={currentTabInitializationState.missingDataViewId}
+          adHocDataViews={adHocDataViews}
+          onSelectDataView={(dataViewId) => {
+            initializeTab.current({
+              defaultUrlState: {
+                ...getCurrentUrlState(urlStateStorage, services),
+                dataSource: createDataViewDataSource({ dataViewId }),
+              },
+            });
+          }}
+        />
+      </>
     );
   }
 

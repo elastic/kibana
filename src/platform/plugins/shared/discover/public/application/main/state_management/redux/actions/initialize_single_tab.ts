@@ -8,7 +8,7 @@
  */
 
 import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/common';
-import { isEmptyEsqlQuery, isOfAggregateQueryType } from '@kbn/es-query';
+import { isEmptyEsqlQuery, isOfAggregateQueryType, updateFilterReferences } from '@kbn/es-query';
 import type { AggregateQuery, Query } from '@kbn/es-query';
 import { cloneDeep, isEqual, pick } from 'lodash';
 import type { GlobalQueryStateFromUrl } from '@kbn/data-plugin/public';
@@ -219,6 +219,15 @@ export const initializeSingleTab = createInternalStateAsyncThunk(
       currentDataView,
     });
 
+    // A classic tab can't open with a deleted saved data view unless the URL or a replacement
+    // picked by the user points to another one, so let the user select a replacement instead.
+    // ES|QL tabs don't depend on the saved data view and open as usual. This is checked before
+    // the no data fallback below, which would hide the tabs bar and block the other tabs.
+    if (missingDataViewId && !isEsqlMode && (!dataViewId || dataViewId === missingDataViewId)) {
+      await dispatch(loadDataViewListOnce());
+      return { showNoDataPage: false, missingDataViewId };
+    }
+
     const canOpen =
       hasDataView ||
       canOpenWithoutPersistedDataViews({
@@ -233,14 +242,6 @@ export const initializeSingleTab = createInternalStateAsyncThunk(
 
     if (!canOpen) {
       return { showNoDataPage: true };
-    }
-
-    // A classic tab can't open with a deleted saved data view unless the URL or a replacement
-    // picked by the user points to another one, so let the user select a replacement instead.
-    // ES|QL tabs don't depend on the saved data view and open as usual.
-    if (missingDataViewId && !isEsqlMode && (!dataViewId || dataViewId === missingDataViewId)) {
-      await dispatch(loadDataViewListOnce());
-      return { showNoDataPage: false, missingDataViewId };
     }
 
     /**
@@ -317,6 +318,15 @@ export const initializeSingleTab = createInternalStateAsyncThunk(
       defaultProfileEsqlQuery,
       query: openingQuery,
     });
+
+    // Filters of the deleted data view are rebound to the replacement so they remain editable
+    if (missingDataViewId && !esqlSource && dataView.id && initialAppState.filters) {
+      initialAppState.filters = updateFilterReferences(
+        initialAppState.filters,
+        missingDataViewId,
+        dataView.id
+      );
+    }
 
     const initialGlobalState: TabStateGlobalState = {
       ...(persistedTab?.timeRestore && (esqlSource?.isTimeBased() ?? dataView.isTimeBased())

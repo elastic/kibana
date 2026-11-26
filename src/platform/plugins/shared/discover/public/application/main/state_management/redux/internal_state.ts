@@ -222,6 +222,11 @@ const internalStateSliceDef = createSlice({
         tab.initializationState = { initializationStatus: TabInitializationStatus.Disconnected };
       }),
 
+    resetTabInitialization: (state, action: TabAction) =>
+      withTab(state, action.payload, (tab) => {
+        tab.initializationState = { initializationStatus: TabInitializationStatus.NotStarted };
+      }),
+
     setForceFetchOnSelect: (state, action: TabAction<Pick<TabState, 'forceFetchOnSelect'>>) =>
       withTab(state, action.payload, (tab) => {
         tab.forceFetchOnSelect = action.payload.forceFetchOnSelect;

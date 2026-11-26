@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { buildPhraseFilter } from '@kbn/es-query';
 import { createDiscoverSessionMock } from '@kbn/saved-search-plugin/common/mocks';
 import { createResolvedMockEsqlSource } from '@kbn/data-source/src/__mocks__/esql_source.mock';
 import { createDiscoverServicesMock } from '../../../../../__mocks__/services';
@@ -79,6 +80,50 @@ describe('initializeSingleTab', () => {
         getTabDataView(selectTabRuntimeState(toolkit.runtimeStateManager, persistedTab.id))
       ).toBe(dataViewWithTimefieldMock);
       expect(services.toastNotifications.addWarning).not.toHaveBeenCalled();
+    });
+
+    it('rebinds the filters of the deleted data view to the replacement', async () => {
+      const deletedDataViewFilter = buildPhraseFilter(
+        { name: 'saved-field', type: 'string' },
+        'saved-value',
+        deletedDataView
+      );
+      const otherDataViewFilter = buildPhraseFilter(
+        { name: 'other-field', type: 'string' },
+        'other-value',
+        { id: 'other-data-view-id', title: 'other-data-view' }
+      );
+      const { toolkit, services, persistedTab } = await setup({
+        filters: [deletedDataViewFilter, otherDataViewFilter],
+      });
+      await toolkit.initializeSingleTab({ tabId: persistedTab.id, skipWaitForDataFetching: true });
+
+      await toolkit.initializeSingleTab({
+        tabId: persistedTab.id,
+        defaultUrlState: { dataSource: replacementDataSource },
+      });
+
+      expect(services.filterManager.setAppFilters).toHaveBeenCalledWith([
+        {
+          ...deletedDataViewFilter,
+          meta: { ...deletedDataViewFilter.meta, index: dataViewWithTimefieldMock.id },
+        },
+        otherDataViewFilter,
+      ]);
+    });
+
+    it('asks for a replacement instead of showing the no data page when no persisted data views are left', async () => {
+      const { toolkit, services, persistedTab } = await setup();
+      jest.mocked(services.dataViews.hasData.hasDataView).mockResolvedValueOnce(false);
+
+      await toolkit.initializeSingleTab({ tabId: persistedTab.id, skipWaitForDataFetching: true });
+
+      const { initializationState, tabs } = toolkit.internalState.getState();
+      expect(initializationState.hasDataView).toBe(false);
+      expect(tabs.byId[persistedTab.id].initializationState).toEqual({
+        initializationStatus: TabInitializationStatus.MissingDataView,
+        missingDataViewId: deletedDataView.id,
+      });
     });
 
     it('opens an ES|QL tab without asking for a replacement', async () => {

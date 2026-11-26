@@ -22,7 +22,7 @@ import {
   parseControlGroupJson,
 } from '../utils';
 import { setDataSource, setDataView } from './tab_state_data_view';
-import { updateTabs } from './tabs';
+import { clearTabRuntimeState, updateTabs } from './tabs';
 import { getInitialAppState } from '../../utils/get_initial_app_state';
 import { isNonEmptyEsqlQuery } from '../../utils/is_non_empty_esql_query';
 import type { DiscoverAppState } from '../types';
@@ -53,6 +53,7 @@ export const resetDiscoverSession = createInternalStateAsyncThunk(
     // Otherwise we're resetting the current session, and need to detect changes to mark tabs for refetch.
     const unsavedTabIds = updatedDiscoverSession ? [] : state.tabs.unsavedIds;
     const selectedTabId = nextSelectedTabId ?? state.tabs.unsafeCurrentId;
+    const reinitializedTabIds: string[] = [];
 
     const allTabs = await Promise.all(
       discoverSession.tabs.map(async (tab) => {
@@ -70,8 +71,10 @@ export const resetDiscoverSession = createInternalStateAsyncThunk(
 
         if (tabDataStateContainer) {
           const { query } = tab.serializedSearchSource;
-          // A deleted saved data view leaves `dataView` undefined, so the tab keeps its current one
-          let { dataView } = await fromSavedObjectTabToDataView({ tab, services });
+          const { dataView: savedDataView, missingDataViewId } = await fromSavedObjectTabToDataView(
+            { tab, services }
+          );
+          let dataView = savedDataView;
 
           if (isNonEmptyEsqlQuery(query)) {
             const previousSource = tabRuntimeState.currentDataSource$.getValue();
@@ -88,6 +91,17 @@ export const resetDiscoverSession = createInternalStateAsyncThunk(
             dispatch(setDataSource({ tabId: tab.id, dataSource: esqlSource }));
           } else if (dataView) {
             dispatch(setDataView({ tabId: tab.id, dataView }));
+          } else if (missingDataViewId) {
+            // The saved data view no longer exists, so instead of keeping the replacement with the
+            // saved state, the tab is initialized again and asks for a replacement like when opened
+            await dispatch(clearTabRuntimeState({ tabId: tab.id }));
+            reinitializedTabIds.push(tab.id);
+
+            return fromSavedObjectTabToTabState({
+              tab,
+              existingTab,
+              profileStateRegistry: services.profileStateRegistry,
+            });
           }
 
           initialAppState = getInitialAppState({
@@ -123,5 +137,10 @@ export const resetDiscoverSession = createInternalStateAsyncThunk(
     await dispatch(
       updateTabs({ items: allTabs, selectedItem: selectedTab, updatedDiscoverSession })
     );
+
+    // Marked only once the tabs hold the saved state, which the initialization starts from
+    for (const tabId of reinitializedTabIds) {
+      dispatch(internalStateSlice.actions.resetTabInitialization({ tabId }));
+    }
   }
 );

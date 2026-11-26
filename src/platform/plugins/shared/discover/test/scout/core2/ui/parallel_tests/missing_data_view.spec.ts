@@ -14,6 +14,8 @@ import { spaceTest, tags, testData } from '../fixtures';
 
 // A data view ID that doesn't exist, like the ID of a data view deleted after saving the session
 const DELETED_DATA_VIEW_ID = 'deleted-data-view-id';
+// Not the default data view, which Discover falls back to on its own
+const REPLACEMENT_DATA_VIEW = 'kibana_sample_data_flights';
 const MISSING_TAB_LABEL = 'Missing data view';
 const EXISTING_TAB_LABEL = 'Existing data view';
 
@@ -39,7 +41,7 @@ spaceTest.describe(
   { tag: tags.deploymentAgnostic },
   () => {
     spaceTest.beforeAll(async ({ discoverScoutSpace }) => {
-      await discoverScoutSpace.setupDiscoverDefaults();
+      await discoverScoutSpace.setupDiscoverDefaults({ loadFlightsDataView: true });
     });
 
     spaceTest.afterAll(async ({ discoverScoutSpace }) => {
@@ -64,6 +66,14 @@ spaceTest.describe(
           discoverScoutSpace.id
         );
         const missingDataViewPrompt = page.testSubj.locator('discoverMissingDataViewPrompt');
+        const pickReplacementDataView = async () => {
+          await page.testSubj.click('discoverMissingDataViewPicker');
+          await page.testSubj
+            .locator('indexPattern-switcher')
+            .locator(`[data-test-subj="dataView-${REPLACEMENT_DATA_VIEW}"]`)
+            .click();
+          await pageObjects.discover.waitUntilTabIsLoaded();
+        };
 
         await spaceTest.step('open the session on the tab with the missing data view', async () => {
           await browserAuth.loginAsPrivilegedUser();
@@ -89,18 +99,41 @@ spaceTest.describe(
         });
 
         await spaceTest.step('pick a replacement data view', async () => {
-          await page.testSubj.click('discoverMissingDataViewPicker');
-          await page.testSubj
-            .locator('indexPattern-switcher')
-            .locator(`[data-test-subj="dataView-${testData.DEFAULT_DATA_VIEW}"]`)
-            .click();
-          await pageObjects.discover.waitUntilTabIsLoaded();
+          await pickReplacementDataView();
 
           await expect(missingDataViewPrompt).toBeHidden();
           await expect(pageObjects.discover.getSelectedDataView()).toContainText(
-            testData.DEFAULT_DATA_VIEW
+            REPLACEMENT_DATA_VIEW
           );
           await expect(pageObjects.discover.unsavedChangesIndicator()).toBeVisible();
+        });
+
+        await spaceTest.step('reset the changes to ask for a replacement again', async () => {
+          // Like `pageObjects.discover.revertUnsavedChanges`, but the tab renders the prompt
+          // instead of the search bar it waits for
+          await page.testSubj.click('discoverSaveButton-secondary-button');
+          await page.testSubj.click('revertUnsavedChangesButton');
+
+          await expect(missingDataViewPrompt).toContainText(DELETED_DATA_VIEW_ID);
+          await expect(page.testSubj.locator('discoverSaveButton')).toBeHidden();
+        });
+
+        await spaceTest.step('save the session and reopen it from its saved state', async () => {
+          await pickReplacementDataView();
+          await pageObjects.discover.saveUnsavedChanges();
+          await expect(pageObjects.discover.unsavedChangesIndicator()).toBeHidden();
+
+          // Drop the local tab state so the session opens with what was saved
+          await page.evaluate(() => window.localStorage.setItem('discover.tabs', ''));
+          await pageObjects.discover.goto({ queryMode: 'classic', savedSearchId: sessionId });
+          await pageObjects.discover.waitUntilTabIsLoaded();
+
+          expect(await pageObjects.unifiedTabs.getSelectedTabLabel()).toBe(MISSING_TAB_LABEL);
+          await expect(missingDataViewPrompt).toBeHidden();
+          await expect(pageObjects.discover.getSelectedDataView()).toContainText(
+            REPLACEMENT_DATA_VIEW
+          );
+          await expect(pageObjects.discover.unsavedChangesIndicator()).toBeHidden();
         });
       }
     );
