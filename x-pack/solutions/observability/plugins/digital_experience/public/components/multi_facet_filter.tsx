@@ -46,22 +46,46 @@ export const facetRows = (buckets: FacetBucket[], selected: readonly FilterValue
   ];
 };
 
-/** The text of one selected value, e.g. "Browser: Chrome", or "Browser: not Chrome" when excluded. */
-export const filterPillText = (label: string, { value, exclude }: FilterValue): string =>
-  exclude
+/**
+ * The text of the values of one filter that are all included or all excluded, e.g. "Browser:
+ * Chrome, Edge", or "Browser: not Chrome, Edge" when excluded. Past `maxShown` values it ends in
+ * how many more there are, e.g. "Browser: Chrome, Edge, Safari +2".
+ */
+export const filterPillText = ({
+  label,
+  values,
+  exclude,
+  maxShown = values.length,
+}: {
+  label: string;
+  values: readonly string[];
+  exclude: boolean;
+  maxShown?: number;
+}): string => {
+  const shown = values.slice(0, maxShown).join(', ');
+  const hidden = values.length - maxShown;
+  const list =
+    hidden > 0
+      ? i18n.translate('xpack.digitalExperience.multiFacetFilter.moreValues', {
+          defaultMessage: '{shown} +{hidden}',
+          values: { shown, hidden },
+        })
+      : shown;
+  return exclude
     ? i18n.translate('xpack.digitalExperience.multiFacetFilter.excludedPill', {
-        defaultMessage: '{label}: not {value}',
-        values: { label, value },
+        defaultMessage: '{label}: not {values}',
+        values: { label, values: list },
       })
     : i18n.translate('xpack.digitalExperience.multiFacetFilter.includedPill', {
-        defaultMessage: '{label}: {value}',
-        values: { label, value },
+        defaultMessage: '{label}: {values}',
+        values: { label, values: list },
       });
+};
 
 /**
  * A filter button of an `EuiFilterGroup` that lists the values of one facet with their counts, to
  * include or exclude several of them. Each pick applies at once, and the button counts them; the
- * values themselves are shown as pills beside the filters.
+ * values themselves are shown as one pill per filter beside the filters.
  */
 export function MultiFacetFilter({
   label,

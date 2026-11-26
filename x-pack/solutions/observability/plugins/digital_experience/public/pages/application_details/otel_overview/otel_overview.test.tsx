@@ -493,7 +493,7 @@ describe('OtelOverview', () => {
     expect(setFilter).toHaveBeenLastCalledWith('browser', []);
   });
 
-  it('shows what the filters select as pills, with "not" before an exclusion', async () => {
+  it('shows what the filters select as a pill for each, with "not" before an exclusion', async () => {
     mockFilters({
       browser: [...include('Chrome', 'Firefox'), ...exclude('Safari')],
       os: exclude('Linux'),
@@ -502,8 +502,7 @@ describe('OtelOverview', () => {
     await findPageLoads('1,533');
 
     const pills = screen.getByTestId('digitalExperienceOverviewPills');
-    expect(within(pills).getByText('Browser: Chrome')).toBeInTheDocument();
-    expect(within(pills).getByText('Browser: Firefox')).toBeInTheDocument();
+    expect(within(pills).getByText('Browser: Chrome, Firefox')).toBeInTheDocument();
     expect(within(pills).getByText('Browser: not Safari')).toBeInTheDocument();
     expect(within(pills).getByText('OS: not Linux')).toBeInTheDocument();
   });
@@ -519,14 +518,26 @@ describe('OtelOverview', () => {
     );
   });
 
-  it('removes a value with its pill, and keeps the others of the filter', async () => {
-    mockFilters({ browser: [...include('Chrome'), ...exclude('Safari')] });
+  it('removes the values of a pill, and keeps the other values of the filter', async () => {
+    mockFilters({ browser: [...include('Chrome', 'Firefox'), ...exclude('Safari')] });
     renderOverview();
     await findPageLoads('1,533');
 
-    fireEvent.click(screen.getByRole('button', { name: 'Remove Browser: Chrome' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Remove Browser: Chrome, Firefox' }));
+    expect(setFilter).toHaveBeenLastCalledWith('browser', exclude('Safari'));
 
-    expect(setFilter).toHaveBeenCalledWith('browser', exclude('Safari'));
+    fireEvent.click(screen.getByRole('button', { name: 'Remove Browser: not Safari' }));
+    expect(setFilter).toHaveBeenLastCalledWith('browser', include('Chrome', 'Firefox'));
+  });
+
+  it('lists the first values on a pill and the others in its title', async () => {
+    mockFilters({ browser: include('Chrome', 'Edge', 'Safari', 'Firefox', 'Opera') });
+    renderOverview();
+    await findPageLoads('1,533');
+
+    const pill = screen.getByTestId('digitalExperienceOverviewPill-browser');
+    expect(pill).toHaveTextContent('Browser: Chrome, Edge, Safari +2');
+    expect(pill).toHaveAttribute('title', 'Browser: Chrome, Edge, Safari, Firefox, Opera');
   });
 
   it('shows no pills while no filter has a value', async () => {
@@ -564,7 +575,7 @@ describe('OtelOverview', () => {
     await findPageLoads('1,533');
 
     expect(screen.getByTestId('digitalExperienceOverviewFilter-country')).toBeInTheDocument();
-    expect(screen.getByTestId('digitalExperienceOverviewPill-country-DE')).toHaveTextContent(
+    expect(screen.getByTestId('digitalExperienceOverviewPill-country')).toHaveTextContent(
       'Country: DE'
     );
   });

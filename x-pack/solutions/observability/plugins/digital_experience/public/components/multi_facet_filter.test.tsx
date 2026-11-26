@@ -24,14 +24,33 @@ const BUCKETS = [
 ];
 
 describe('filterPillText', () => {
-  it('names the filter and the value', () => {
-    expect(filterPillText('Browser', { value: 'Chrome', exclude: false })).toBe('Browser: Chrome');
+  it('names the filter and its values', () => {
+    expect(filterPillText({ label: 'Browser', values: ['Chrome'], exclude: false })).toBe(
+      'Browser: Chrome'
+    );
+    expect(filterPillText({ label: 'Browser', values: ['Chrome', 'Edge'], exclude: false })).toBe(
+      'Browser: Chrome, Edge'
+    );
   });
 
-  it('puts "not" before the value of an exclusion', () => {
-    expect(filterPillText('Browser', { value: 'Chrome', exclude: true })).toBe(
-      'Browser: not Chrome'
+  it('puts "not" before the values of an exclusion', () => {
+    expect(filterPillText({ label: 'Browser', values: ['Chrome', 'Edge'], exclude: true })).toBe(
+      'Browser: not Chrome, Edge'
     );
+  });
+
+  it('ends in how many values it leaves out past the most it shows', () => {
+    const values = ['Chrome', 'Edge', 'Safari', 'Firefox', 'Opera'];
+
+    expect(filterPillText({ label: 'Browser', values, exclude: false, maxShown: 3 })).toBe(
+      'Browser: Chrome, Edge, Safari +2'
+    );
+    expect(filterPillText({ label: 'Browser', values, exclude: true, maxShown: 3 })).toBe(
+      'Browser: not Chrome, Edge, Safari +2'
+    );
+    expect(
+      filterPillText({ label: 'Browser', values: ['Chrome'], exclude: false, maxShown: 3 })
+    ).toBe('Browser: Chrome');
   });
 });
 

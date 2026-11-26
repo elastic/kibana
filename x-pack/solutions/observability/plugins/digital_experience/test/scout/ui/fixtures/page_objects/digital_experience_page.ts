@@ -367,9 +367,14 @@ export class DigitalExperiencePage {
     return this.page.getByTestId(`digitalExperienceOverviewFilter-${name}Option-${value}`);
   }
 
-  /** The pill of a selected value, e.g. `('browser', 'Firefox')`; its cross removes the value. */
-  overviewPill(name: OverviewFilterName, value: string): Locator {
-    return this.page.getByTestId(`digitalExperienceOverviewPill-${name}-${value}`);
+  /**
+   * The pill of the values a filter includes, or with `exclude` the values it excludes, e.g.
+   * `('browser')`; its cross removes those values.
+   */
+  overviewPill(name: OverviewFilterName, { exclude = false }: { exclude?: boolean } = {}): Locator {
+    return this.page.getByTestId(
+      `digitalExperienceOverviewPill-${name}${exclude ? '-excluded' : ''}`
+    );
   }
 
   /** The button that excludes a value in an Overview filter's popover. */
