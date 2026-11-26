@@ -42,6 +42,7 @@ describe('TruncatableSummary', () => {
   });
 
   it.each([
+    ['the opening bracket', 1],
     ['the tag name', 4],
     ['the datetime attribute', 20],
     ['the end of the opening tag', TAG.length - '</time>'.length],

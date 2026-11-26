@@ -31,7 +31,8 @@ const truncateSummary = (characters: readonly string[], maxLength: number): stri
   }
 
   // Never leave half a `<time ...>` tag: drop back to before the one the cut falls inside.
-  const lastTimeTagStart = [...truncated.matchAll(/<time(?=[\s/>]|$)|<tim?$|<t$/g)].pop()?.index;
+  const lastTimeTagStart = [...truncated.matchAll(/<time(?=[\s/>]|$)|<(?:t(?:im?)?)?$/g)].pop()
+    ?.index;
   if (lastTimeTagStart !== undefined && !isTimeTagComplete(truncated.slice(lastTimeTagStart))) {
     truncated = truncated.slice(0, lastTimeTagStart);
   }
