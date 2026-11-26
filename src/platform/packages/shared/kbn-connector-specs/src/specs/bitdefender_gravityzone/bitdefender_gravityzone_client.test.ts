@@ -421,3 +421,24 @@ describe('Bitdefender GravityZone batch partial failure', () => {
     expect((taskResult as any).subtasks).toHaveLength(2);
   });
 });
+
+// ---------------------------------------------------------------------------
+// JSON-RPC envelope validation
+// ---------------------------------------------------------------------------
+
+describe('Bitdefender GravityZone JSON-RPC envelope validation', () => {
+  it('throws when HTTP 200 body has neither result nor error (empty envelope)', async () => {
+    const client = makeClient();
+    const ctx = makeCtx(client);
+    client.request.mockResolvedValueOnce({
+      status: 200,
+      headers: { 'content-type': 'application/json' },
+      data: { jsonrpc: '2.0', id: '1' },
+    });
+
+    const handler = BitdefenderGravityzone.actions.searchEndpoints.handler;
+    await expect(handler(ctx as any, {})).rejects.toThrow(
+      'Invalid JSON-RPC response: neither result nor error present in response envelope'
+    );
+  });
+});

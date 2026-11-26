@@ -160,6 +160,34 @@ describe('Bitdefender GravityZone schema', () => {
     const accessUrlMeta = schema.shape.accessUrl.meta();
     expect(accessUrlMeta?.validate?.allowedHosts).toBe(true);
   });
+
+  it('rejects accessUrl with a query string', () => {
+    const schema = BitdefenderGravityzone.schema!;
+    expect(
+      schema.safeParse({ accessUrl: 'https://cloudap.gravityzone.bitdefender.com/api?foo=bar' })
+        .success
+    ).toBe(false);
+  });
+
+  it('rejects accessUrl with a fragment', () => {
+    const schema = BitdefenderGravityzone.schema!;
+    expect(
+      schema.safeParse({ accessUrl: 'https://cloudap.gravityzone.bitdefender.com/api#section' })
+        .success
+    ).toBe(false);
+  });
+
+  it('builds the full request URL by appending the service path to accessUrl pathname (trailing slash)', async () => {
+    const client = makeClient();
+    const ctx = makeCtx(client, { accessUrl: 'https://cloudap.gravityzone.bitdefender.com/api/' });
+    stubJsonRpc(client, { items: [], page: 1, pagesCount: 0, perPage: 1, total: 0 });
+
+    const handler = BitdefenderGravityzone.actions.searchEndpoints.handler;
+    await handler(ctx as any, {});
+
+    const call = client.request.mock.calls[0][0];
+    expect(call.url).toBe('https://cloudap.gravityzone.bitdefender.com/api/v1.0/jsonrpc/network');
+  });
 });
 
 // Input schema validation
