@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import {
   EuiButton,
   EuiModal,
@@ -44,14 +44,14 @@ const ShareModalComponent: React.FC<Props> = ({
   const { copyConversationUrl, updateConversationUsers } = useConversation();
 
   const { toasts } = useAssistantContext();
-  const [nextUsers, setNextUsers] = useState<UserProfile[]>([]);
 
   const conversationOwner = useMemo(
     () => getCurrentConversationOwner(selectedConversation),
     [selectedConversation]
   );
-  useEffect(() => {
-    const conversationUsers =
+  // seeded on mount only, so a refetch of selectedConversation does not discard the pending selection
+  const [nextUsers, setNextUsers] = useState<UserProfile[]>(
+    () =>
       selectedConversation?.users
         // do not show current user in UI
         .filter(
@@ -63,9 +63,8 @@ const ShareModalComponent: React.FC<Props> = ({
           enabled: true,
           user: { username: name ?? id ?? '' },
           data: {},
-        })) || [];
-    setNextUsers(conversationUsers);
-  }, [conversationOwner, selectedConversation]);
+        })) || []
+  );
   const handleCopyUrl = useCallback(
     () => copyConversationUrl(selectedConversation),
     [copyConversationUrl, selectedConversation]
