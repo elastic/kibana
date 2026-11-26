@@ -38,7 +38,10 @@ import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { createExpandableFlyoutApiMock } from '../../../../../common/mock/expandable_flyout';
 import { userEvent } from '@testing-library/user-event';
 import * as notesApi from '../../../../../notes/api/api';
-import { getMockTimelineSearchSubscription } from '../../../../../common/mock/mock_timeline_search_service';
+import {
+  getMockTimelineSearchSubscription,
+  MOCK_TIMELINE_HIT_INDEX,
+} from '../../../../../common/mock/mock_timeline_search_service';
 import * as useTimelineEventsModule from '../../../../containers';
 import { useDataView } from '../../../../../data_view_manager/hooks/use_data_view';
 import { useBrowserFields } from '../../../../../data_view_manager/hooks/use_browser_fields';
@@ -427,11 +430,18 @@ describe('query tab with unified timeline', () => {
         expect(screen.getByTestId('pagination-button-2')).toBeVisible();
         expect(screen.queryByTestId('pagination-button-3')).toBeNull();
 
+        fetchNotesSpy.mockClear();
         fireEvent.click(screen.getByTestId('pagination-button-2'));
 
         await waitFor(() => {
           expect(screen.getByTestId('pagination-button-2')).toHaveAttribute('aria-current', 'page');
         });
+
+        // the grid tells the tab which page it shows, and the tab loads the notes of that page only
+        await waitFor(() => {
+          expect(fetchNotesSpy).toHaveBeenCalledWith([mockTimelineData[2]._id]);
+        });
+        expect(fetchNotesSpy).toHaveBeenCalledTimes(1);
       },
       SPECIAL_TEST_TIMEOUT
     );
@@ -521,18 +531,29 @@ describe('query tab with unified timeline', () => {
       'should load notes for correct page size',
       async () => {
         useStubbedGrid();
-        const stateWithTwoPerPage = structuredClone(mockStateWithNoteInTimeline);
-        stateWithTwoPerPage.timeline.timelineById[TimelineId.test].itemsPerPage = 2;
+        const store = createMockStore(structuredClone(mockStateWithNoteInTimeline));
         render(
-          <TestProviders store={createMockStore(stateWithTwoPerPage)}>
+          <TestProviders store={store}>
             <TestComponent />
           </TestProviders>
         );
 
+        // 1 row per page: the notes of the first event only
+        await waitFor(() => {
+          expect(fetchNotesSpy).toHaveBeenCalledWith([mockTimelineData[0]._id]);
+        });
+
+        // 2 rows per page: the notes of both events are fetched again
+        fetchNotesSpy.mockClear();
+        act(() => {
+          store.dispatch(
+            timelineActions.updateItemsPerPage({ id: TimelineId.test, itemsPerPage: 2 })
+          );
+        });
+
         await waitFor(() => {
           expect(getUnifiedTimelineBodyProps().itemsPerPage).toBe(2);
         });
-
         await waitFor(() => {
           expect(fetchNotesSpy).toHaveBeenNthCalledWith(1, [
             mockTimelineData[0]._id,
@@ -912,8 +933,8 @@ describe('query tab with unified timeline', () => {
           expect(screen.getByTestId('fieldListGroupedSelectedFields-count')).toHaveTextContent(
             String(customColumnOrder.length - 1)
           );
+          expect(screen.queryAllByTestId(`dataGridHeaderCell-${field.name}`)).toHaveLength(0);
         });
-        expect(screen.queryAllByTestId(`dataGridHeaderCell-${field.name}`)).toHaveLength(0);
       },
       SPECIAL_TEST_TIMEOUT
     );
@@ -1041,7 +1062,13 @@ describe('query tab with unified timeline', () => {
 
         await waitFor(() => {
           expect(flyoutApi.openNotes).toHaveBeenCalledWith({
-            hit: expect.objectContaining({ _id: mockTimelineData[0]._id }),
+            hit: expect.objectContaining({
+              _id: mockTimelineData[0]._id,
+              raw: expect.objectContaining({
+                _id: mockTimelineData[0]._id,
+                _index: MOCK_TIMELINE_HIT_INDEX,
+              }),
+            }),
             origin: FLYOUT_ORIGIN.TIMELINE,
           });
         });
