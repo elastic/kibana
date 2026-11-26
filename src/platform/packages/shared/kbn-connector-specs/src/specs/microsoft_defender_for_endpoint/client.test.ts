@@ -313,6 +313,46 @@ describe('Microsoft Defender for Endpoint client', () => {
       expect(sleep.mock.calls).toEqual([[20000]]);
     });
 
+    it('keeps the final status and Retry-After where the Actions executor reads them', async () => {
+      const { ctx, request } = createContext();
+      request.mockRejectedValue(
+        Object.assign(httpError(429, {}, { 'retry-after': '3600' }), {
+          config: { headers: { Authorization: 'Bearer secret-token' } },
+        })
+      );
+
+      const error = await mdeRequest(ctx, {
+        method: 'GET',
+        path: '/alerts',
+        permission: 'Alert.ReadWrite.All',
+      }).catch((e: unknown) => e);
+
+      // The executor reports error.response.status as errorMeta.statusCode and turns
+      // error.response.headers['retry-after'] into the result's retry time.
+      expect(error).toBeInstanceOf(MdeApiError);
+      expect((error as MdeApiError).response).toEqual({
+        status: 429,
+        headers: { 'retry-after': '3600' },
+      });
+      expect(JSON.stringify(error)).not.toContain('secret-token');
+    });
+
+    it('keeps the status of a non-retried error, and sets none without an HTTP answer', async () => {
+      const { ctx, request } = createContext();
+      request
+        .mockRejectedValueOnce(httpError(403))
+        .mockRejectedValueOnce(new Error('socket hang up'));
+      const call = () =>
+        mdeRequest(ctx, {
+          method: 'GET',
+          path: '/alerts',
+          permission: 'Alert.ReadWrite.All',
+        }).catch((e: unknown) => e);
+
+      expect(((await call()) as MdeApiError).response).toEqual({ status: 403, headers: {} });
+      expect(((await call()) as MdeApiError).response).toBeUndefined();
+    });
+
     it('retries a 5xx for a GET', async () => {
       const { ctx, request } = createContext();
       request.mockRejectedValueOnce(httpError(503)).mockResolvedValueOnce({ data: { ok: 1 } });
@@ -358,15 +398,36 @@ describe('Microsoft Defender for Endpoint client', () => {
       expect(request).toHaveBeenCalledTimes(1);
     });
 
-    it('says to request fewer records when the response is over the size limit', async () => {
+    it('says to request fewer records when a paged response is over the size limit', async () => {
       const { ctx, request } = createContext();
       request.mockRejectedValue(new Error('maxContentLength size of 1048576 exceeded'));
 
       await expect(
-        mdeRequest(ctx, { method: 'GET', path: '/machines', permission: 'Machine.Read.All' })
+        mdeRequest(ctx, {
+          method: 'GET',
+          path: '/machines',
+          permission: 'Machine.Read.All',
+          params: { $top: 100 },
+        })
       ).rejects.toThrow(
         'Microsoft Defender for Endpoint request failed: maxContentLength size of 1048576 exceeded. The response is larger than the Kibana response size limit (xpack.actions.maxResponseContentLength): request fewer records with top.'
       );
+    });
+
+    it('does not suggest top when an unpaged response is over the size limit', async () => {
+      const { ctx, request } = createContext();
+      request.mockRejectedValue(new Error('maxContentLength size of 1048576 exceeded'));
+
+      const error = (await mdeRequest(ctx, {
+        method: 'GET',
+        path: '/files/abc/machines',
+        permission: 'Machine.ReadWrite.All',
+      }).catch((e: unknown) => e)) as Error;
+
+      expect(error.message).toMatch(
+        /response size limit \(xpack\.actions\.maxResponseContentLength\): this API returns every match in one response and cannot be paged, so ask a Kibana administrator to raise the limit\.$/
+      );
+      expect(error.message).not.toMatch(/with top/);
     });
   });
 

@@ -177,6 +177,29 @@ describe('MicrosoftDefenderForEndpoint', () => {
       expect(() => actions.getUserDevices.input.parse({ user: 'john\ndoe' })).toThrow();
       expect(() => actions.getUserDevices.input.parse({ user: '   ' })).toThrow();
     });
+
+    it('getUserDevices never lets a dot segment turn the request into another API', async () => {
+      // /users/../machines would be sent as /machines, the tenant-wide device list.
+      for (const user of ['..', '.', 'CONTOSO\\..', '..@contoso.com', 'CONTOSO\\']) {
+        const { ctx, request } = okContext();
+        const input = actions.getUserDevices.input.parse({ user });
+
+        await expect(actions.getUserDevices.handler(ctx, input)).rejects.toThrow(
+          /has an empty, "\." or "\.\." segment/
+        );
+        expect(request).not.toHaveBeenCalled();
+      }
+    });
+
+    it('listVulnerabilities rejects a dot-segment software ID', async () => {
+      const { ctx, request } = okContext();
+      const input = actions.listVulnerabilities.input.parse({ softwareId: '..' });
+
+      await expect(actions.listVulnerabilities.handler(ctx, input)).rejects.toThrow(
+        /has an empty, "\." or "\.\." segment/
+      );
+      expect(request).not.toHaveBeenCalled();
+    });
   });
 
   describe('listIndicators', () => {

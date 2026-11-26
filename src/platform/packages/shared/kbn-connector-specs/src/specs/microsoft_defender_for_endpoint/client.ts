@@ -24,15 +24,27 @@ export interface ConflictingMachineAction {
 
 /** An error from the Defender for Endpoint API, with its HTTP status and vendor error code. */
 export class MdeApiError extends Error {
+  /**
+   * The HTTP status and a plain copy of the response headers, where the Actions executor reads
+   * them: it reports the status as errorMeta.statusCode and turns Retry-After into the result's
+   * retry time, so Agent Builder can tell the agent to wait on a 429. Never the request config,
+   * which holds the access token.
+   */
+  public readonly response?: { status: number; headers: Record<string, unknown> };
+
   constructor(
     message: string,
     public readonly status?: number,
     public readonly code?: string,
     /** For a pending-action conflict: the machine action that blocked the request, if found. */
-    public readonly conflictingAction?: ConflictingMachineAction
+    public readonly conflictingAction?: ConflictingMachineAction,
+    headers?: Record<string, unknown>
   ) {
     super(message);
     this.name = 'MdeApiError';
+    if (status !== undefined) {
+      this.response = { status, headers: { ...headers } };
+    }
   }
 }
 
@@ -47,8 +59,9 @@ export const isResourceNotFound = (error: unknown): boolean =>
  * Defender clouds and the hosts each one uses. The API host is used unless the connector sets a
  * custom API URL. The token is requested by the auth type with the token URL and scope the user
  * entered, so those cannot be derived here: `getCloudConsistencyError` checks them against the
- * selected cloud instead, before every API request (and so before any token request), so a mismatch
- * fails with a clear message and no credential is sent to another cloud's login host.
+ * selected cloud instead, before every API request, so a mismatch fails with a clear message and the
+ * access token never goes to another cloud's API host. The framework requests the token before the
+ * handler runs, so this check cannot stop the token request itself.
  * Sources: Microsoft "Supported Defender for Endpoint APIs" (regional hosts) and "Microsoft
  * Defender for Endpoint for US Government customers" (GCC, GCC High, DoD hosts). Microsoft does
  * not document the US Government token audience; `<API host>/.default` is the expected value.
@@ -194,10 +207,11 @@ export const getCloud = (ctx: ActionContext): MdeCloud => cloudOf(ctx.config);
 /**
  * Returns why the token URL, the token scope or a custom API URL belongs to a different Defender
  * cloud than the one selected, or null when they match. Only known Microsoft hosts are compared, so
- * a proxy in the API URL or token URL is accepted. `mdeRequest` calls it before
- * every API request, so before the auth type requests a token and the client secret or assertion
- * never goes to a login host of another cloud. The message names the values the selected cloud
- * expects and never echoes a secrets field.
+ * a proxy in the API URL or token URL is accepted. `mdeRequest` calls it before every API request,
+ * so the access token never goes to another cloud's API host. It runs after the framework has
+ * requested the token (connector specs have no hook that sees config and secrets before that), so a
+ * token request with a mismatched token URL or scope still goes to the token URL the user entered.
+ * The message names the values the selected cloud expects and never echoes a secrets field.
  */
 export const getCloudConsistencyError = (
   config: ConnectorFields,
@@ -247,10 +261,10 @@ export const assertCloudConsistency = (ctx: ActionContext): void => {
 };
 
 /**
- * Throws before any request when the custom API URL would send the access token, or the token URL
- * the client secret or assertion, over plain http, or when the custom API URL has a query string or
- * fragment. This also covers connectors saved before the schemas enforced these rules. It runs
- * before the auth type requests a token.
+ * Throws before any API request when the custom API URL would send the access token, or the token
+ * URL the client secret or assertion, over plain http, or when the custom API URL has a query string
+ * or fragment. The config and secrets schemas enforce the same rules, and the framework validates
+ * them before it requests the token; this check is a second guard for the API request.
  */
 const assertSecureUrls = (ctx: ActionContext): void => {
   const configured = ctx.config?.apiUrl;
@@ -265,6 +279,20 @@ const assertSecureUrls = (ctx: ActionContext): void => {
   const tokenUrl = ctx.secrets?.tokenUrl;
   if (typeof tokenUrl === 'string' && tokenUrl.trim() && !isSecureUrl(tokenUrl.trim())) {
     throw new MdeApiError(INSECURE_TOKEN_URL_MESSAGE);
+  }
+};
+
+/**
+ * Throws when the request path has an empty, "." or ".." segment. encodeURIComponent leaves dots
+ * as they are and the URL parser collapses dot segments, so a value such as the user name ".."
+ * would turn /users/../machines into /machines: another API than the one the action calls.
+ */
+const assertPathSegments = (path: string): void => {
+  const segments = path.split('/').slice(1);
+  if (segments.some((segment) => segment === '' || segment === '.' || segment === '..')) {
+    throw new MdeApiError(
+      `Microsoft Defender for Endpoint request path ${path} has an empty, "." or ".." segment, which would change the API it calls. Check the value used in the path, for example the user name or software ID.`
+    );
   }
 };
 
@@ -380,8 +408,14 @@ const describeStatus = (status: number, body: MdeErrorBody | undefined, fallback
 export const formatMdeError = (error: unknown, options: MdeRequestOptions): MdeApiError => {
   if (!isAxiosError(error) || !error.response) {
     const reason = error instanceof Error ? error.message : String(error);
+    // Only list requests send $top. The related-device lookups return every match in one response,
+    // and the API documents no paging for them, so the only fix is a higher limit.
+    const sizeHint =
+      options.params?.$top !== undefined
+        ? 'request fewer records with top.'
+        : 'this API returns every match in one response and cannot be paged, so ask a Kibana administrator to raise the limit.';
     const tooLarge = /maxContentLength/.test(reason)
-      ? '. The response is larger than the Kibana response size limit (xpack.actions.maxResponseContentLength): request fewer records with top.'
+      ? `. The response is larger than the Kibana response size limit (xpack.actions.maxResponseContentLength): ${sizeHint}`
       : '';
     return new MdeApiError(`Microsoft Defender for Endpoint request failed: ${reason}${tooLarge}`);
   }
@@ -393,7 +427,8 @@ export const formatMdeError = (error: unknown, options: MdeRequestOptions): MdeA
   const prefix = `Microsoft Defender for Endpoint ${options.method.toUpperCase()} ${
     options.path
   } failed (${detail})`;
-  const fail = (message: string) => new MdeApiError(message, status, body?.error?.code);
+  const fail = (message: string) =>
+    new MdeApiError(message, status, body?.error?.code, undefined, error.response?.headers);
 
   if (status === 401) {
     return fail(
@@ -442,6 +477,7 @@ const retryDelay = (status: number, retryAfterHeader: unknown, attempt: number) 
  * 403 and 404 are never retried.
  */
 export const mdeRequest = async <T>(ctx: ActionContext, options: MdeRequestOptions): Promise<T> => {
+  assertPathSegments(options.path);
   assertCloudConsistency(ctx);
   assertSecureUrls(ctx);
   const url = `${getApiUrl(ctx)}${options.path}`;

@@ -66,6 +66,8 @@ describe('Microsoft Defender for Endpoint machine actions', () => {
 
       expect(error).toBeInstanceOf(MdeApiError);
       expect((error as MdeApiError).conflictingAction).toEqual(pendingAction);
+      // The re-thrown conflict keeps the HTTP status for the Actions executor.
+      expect((error as MdeApiError).response).toEqual({ status: 400, headers: {} });
       expect((error as Error).message).toContain(
         `Conflicting machine action: id=${pendingAction.id}, type=Isolate, status=Pending, requestor=analyst@contoso.com, creationDateTimeUtc=2026-11-12T10:00:00Z.`
       );

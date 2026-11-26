@@ -198,7 +198,13 @@ const toConflictError = async (
     lookupNote =
       'No Pending or InProgress machine action was found on the device; it may have just finished, so retry.';
   }
-  return new MdeApiError(`${error.message} ${lookupNote}`, error.status, error.code, conflicting);
+  return new MdeApiError(
+    `${error.message} ${lookupNote}`,
+    error.status,
+    error.code,
+    conflicting,
+    error.response?.headers
+  );
 };
 
 /**
