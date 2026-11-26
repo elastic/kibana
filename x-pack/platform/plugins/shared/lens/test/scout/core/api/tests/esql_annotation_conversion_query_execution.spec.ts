@@ -63,28 +63,38 @@ const toQueryAnnotation = ({
   ...(extraFields ? { extraFields: [...extraFields] } : {}),
 });
 
-const convertAnnotation = (annotation: QueryPointEventAnnotationConfig) => {
-  const conversion = convertQueryAnnotationsToEsql(
+const convertLayer = ({
+  annotation,
+  ignoreGlobalFilters,
+}: {
+  annotation: QueryPointEventAnnotationConfig;
+  ignoreGlobalFilters: boolean;
+}) =>
+  convertQueryAnnotationsToEsql(
     {
       layers: [
         {
           layerId: 'annotations',
           layerType: 'annotations',
           indexPatternId: 'logstash',
-          ignoreGlobalFilters: true,
+          ignoreGlobalFilters,
           annotations: [annotation],
         },
       ],
     },
     INDEX_PATTERNS
   );
+
+interface ConvertedState {
+  layers: Array<{ ignoreGlobalFilters: boolean; annotations: EsqlEventAnnotationConfig[] }>;
+}
+
+const convertAnnotation = (annotation: QueryPointEventAnnotationConfig) => {
+  const conversion = convertLayer({ annotation, ignoreGlobalFilters: true });
   if (!conversion.ok) {
     throw new Error(`Expected the annotation to be convertible, got: ${conversion.reason}`);
   }
-  const state = conversion.state as {
-    layers: Array<{ annotations: EsqlEventAnnotationConfig[] }>;
-  };
-  return state.layers[0].annotations[0];
+  return (conversion.state as ConvertedState).layers[0].annotations[0];
 };
 
 apiTest.describe(
@@ -123,5 +133,49 @@ apiTest.describe(
         }
       );
     }
+
+    apiTest(
+      'converts a layer that applies global filters, keeps the setting, and the converted query honors a global filter',
+      async ({ apiClient }) => {
+        const conversion = convertLayer({
+          annotation: toQueryAnnotation({
+            filter: { query: 'machine.os.raw : "osx"', language: 'kuery' },
+            textVisibility: true,
+            textField: 'geo.src',
+          }),
+          ignoreGlobalFilters: false,
+        });
+        if (!conversion.ok) {
+          throw new Error(`Expected the layer to be convertible, got: ${conversion.reason}`);
+        }
+        const [layer] = (conversion.state as ConvertedState).layers;
+        // ES|QL annotations apply global filters too, so the setting carries over unchanged
+        expect(layer.ignoreGlobalFilters).toBe(false);
+
+        const [converted] = layer.annotations;
+        const run = async (filter?: object) => {
+          const response = await apiClient.post(`${SEARCH_API_BASE_URL}/${ESQL_SEARCH_STRATEGY}`, {
+            headers: { ...INTERNAL_HEADERS, ...cookieHeader },
+            body: { params: { query: converted.query.esql, ...(filter ? { filter } : {}) } },
+          });
+          expect(response).toHaveStatusCode(200);
+          const columnNames: string[] = response.body.rawResponse.columns.map(
+            ({ name }: { name: string }) => name
+          );
+          const textIndex = columnNames.indexOf('geo.src');
+          expect(textIndex).toBeGreaterThanOrEqual(0);
+          return (response.body.rawResponse.values as unknown[][]).map((row) => row[textIndex]);
+        };
+
+        // The dashboard filter reaches Elasticsearch as the request `filter`
+        const unfiltered = await run();
+        const filtered = await run({ match_phrase: { 'geo.src': 'CN' } });
+
+        expect(filtered.length).toBeGreaterThan(0);
+        expect(filtered.length).toBeLessThan(unfiltered.length);
+        expect(filtered.every((source) => source === 'CN')).toBe(true);
+        expect(unfiltered.some((source) => source !== 'CN')).toBe(true);
+      }
+    );
   }
 );
