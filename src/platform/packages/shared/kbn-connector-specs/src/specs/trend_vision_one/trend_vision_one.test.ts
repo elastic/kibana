@@ -479,6 +479,18 @@ describe('TrendAI Vision One input bounds and the text that states them', () => 
       );
     const sorted = (values: unknown[]) => [...new Set(values.map(String))].sort();
 
+    it('lets fields name exactly the top-level fields of an Observed Attack Techniques detection', () => {
+      const response = deref(
+        specOperationOf('listObservedAttackTechniques').spec.responses?.['200']?.content?.[
+          'application/json'
+        ]?.schema ?? {}
+      );
+      const detection = deref(deref(response.properties?.items ?? {}).items ?? {});
+      const specFields = sorted(Object.keys(detection.properties ?? {}));
+      expect(specFields.length).toBeGreaterThan(0);
+      expect(sorted(accepted('listObservedAttackTechniques', 'fields'))).toEqual(specFields);
+    });
+
     it.each([
       ['listAlerts', 'query', 'dateTimeTarget'],
       ['listEndpoints', 'query', 'select'],

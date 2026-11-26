@@ -28,6 +28,19 @@ export const REGION_HOSTS: Readonly<Record<string, string>> = {
   Indonesia: 'api.id.xdr.trendmicro.com',
 };
 
+/** The top-level fields of an Observed Attack Techniques detection (vendor spec, GET /v3.0/oat/detections). */
+export const OAT_FIELDS = [
+  'detail',
+  'detectedDateTime',
+  'endpoint',
+  'entityName',
+  'entityType',
+  'filters',
+  'ingestedDateTime',
+  'source',
+  'uuid',
+] as const;
+
 export const API_PREFIX = '/v3.0';
 export const REQUEST_TIMEOUT_MS = 60_000;
 /**

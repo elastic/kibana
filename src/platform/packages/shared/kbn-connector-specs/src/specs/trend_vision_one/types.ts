@@ -15,6 +15,7 @@ import {
   DATE_TIME_TARGETS,
   ENDPOINT_SELECT_FIELDS,
   INVESTIGATION_RESULTS,
+  OAT_FIELDS,
   OAT_FILTER_MAX,
 } from './constants';
 
@@ -170,6 +171,14 @@ export const ListOatInputSchema = lazySchema(() =>
         .refine(isHeaderSafe, headerSafeMessage('filter'))
         .optional()
         .describe("TMV1-Filter expression, for example riskLevel eq 'high'."),
+      fields: z
+        .array(z.enum(OAT_FIELDS))
+        .min(1)
+        .max(OAT_FIELDS.length)
+        .optional()
+        .describe(
+          'Return only these parts of each detection, so that a page fits in an agent result. `detail` and `filters` are the largest parts of a detection: leave both out to list detections, then read them for the ones you need. Pass the same fields again with nextLink.'
+        ),
       nextLink: nextLinkField(),
     })
     .refine(

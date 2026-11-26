@@ -96,7 +96,7 @@ export type GetTaskInput = z.infer<typeof GetTaskInputSchema>;
 
 export const EmailTaskInputSchema = lazySchema(() =>
   z
-    .object({
+    .strictObject({
       messageId: z
         .string()
         .trim()

@@ -489,3 +489,21 @@ describe('TrendAI Vision One identifier inputs are trimmed', () => {
     expect(sent().data).toEqual([{ domain: 'test-elastic-soar.invalid' }]);
   });
 });
+
+describe('TrendAI Vision One email actions reject unknown fields', () => {
+  it.each(['quarantineEmailMessage', 'deleteEmailMessage'])(
+    '%s rejects a misspelled mailBox instead of widening the request to all mailboxes',
+    (name) => {
+      const typo = parseInput(name, {
+        messageId: '<a@example.test>',
+        mailbox: 'user@example.test',
+      });
+      expect(typo.success).toBe(false);
+      expect(JSON.stringify(typo.error)).toContain('mailbox');
+      expect(
+        parseInput(name, { messageId: '<a@example.test>', mailBox: 'user@example.test' }).success
+      ).toBe(true);
+      expect(parseInput(name, { uniqueId: 'abc' }).success).toBe(true);
+    }
+  );
+});

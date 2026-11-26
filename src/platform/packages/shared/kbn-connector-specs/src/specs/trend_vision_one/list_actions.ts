@@ -61,10 +61,17 @@ export const readOnePage = async (
   return {
     totalCount: data?.totalCount ?? null,
     count: data?.count ?? items.length,
-    items,
+    // Before the items: a long page is cut for an agent, so the cursor has to come first.
     nextLink: repeated ? null : returned,
+    items,
   };
 };
+
+/** Keeps only the named top-level fields of a detection; the projection happens here, the product has none. */
+const pickFields = (item: unknown, keep: ReadonlySet<string>): unknown =>
+  item !== null && typeof item === 'object'
+    ? Object.fromEntries(Object.entries(item).filter(([key]) => keep.has(key)))
+    : item;
 
 export const listActions: ConnectorSpec['actions'] = {
   listObservedAttackTechniques: {
@@ -72,8 +79,8 @@ export const listActions: ConnectorSpec['actions'] = {
     scope: 'read',
     description: ACTION_DESCRIPTIONS.listObservedAttackTechniques,
     input: ListOatInputSchema,
-    handler: async (ctx, input: ListOatInput) =>
-      readOnePage(
+    handler: async (ctx, input: ListOatInput) => {
+      const page = await readOnePage(
         ctx,
         'listObservedAttackTechniques',
         '/oat/detections',
@@ -87,7 +94,10 @@ export const listActions: ConnectorSpec['actions'] = {
         input.filter?.trim() || undefined,
         input.nextLink,
         OAT_TOP_MAX
-      ),
+      );
+      const keep = input.fields ? new Set<string>(input.fields) : undefined;
+      return keep ? { ...page, items: page.items.map((item) => pickFields(item, keep)) } : page;
+    },
   },
 
   listEndpoints: {

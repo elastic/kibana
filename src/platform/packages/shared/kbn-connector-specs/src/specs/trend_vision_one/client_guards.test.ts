@@ -12,6 +12,7 @@ import {
   apiUrlProblem,
   checkNextLink,
   decodeSegment,
+  effectiveTimeout,
   filterHeader,
   getApiOrigin,
   normaliseLink,
@@ -24,11 +25,13 @@ import {
   API,
   ctx,
   ctxWith,
+  ctxWithConfiguredTimeout,
   httpError,
   ok,
   request,
   resetMocksAroundEachTest,
   run,
+  sent,
   vendorError,
 } from './test_helpers';
 
@@ -414,5 +417,48 @@ describe('TrendAI Vision One sends one request and throws the failure once', () 
     await send(mutating);
     expect(request).toHaveBeenCalledTimes(1);
     expect(request.mock.calls[0][0]).toMatchObject({ timeout: 60000, maxRedirects: 0 });
+  });
+});
+
+describe('TrendAI Vision One request timeout and the configured response timeout', () => {
+  it.each([
+    [60_000, undefined, 60_000],
+    [60_000, 0, 60_000],
+    [60_000, 120_000, 60_000],
+    [60_000, 5_000, 5_000],
+    [40_000, 30_000, 30_000],
+  ])('wants %i ms with %j configured: uses %i ms', (wanted, configured, expected) => {
+    expect(effectiveTimeout(wanted, configured)).toBe(expected);
+  });
+
+  it('never waits longer than the configured response timeout, for a read and a write', async () => {
+    request
+      .mockResolvedValueOnce(ok({ id: 'WB-1' }, { etag: '"e1"' }))
+      .mockResolvedValueOnce(ok(undefined, {}, 204));
+    await run(
+      'updateAlertStatus',
+      { id: 'WB-1', status: 'Closed' },
+      ctxWithConfiguredTimeout(5_000)
+    );
+    expect(sent(0)).toMatchObject({ method: 'GET', timeout: 5_000 });
+    expect(sent(1)).toMatchObject({ method: 'PATCH', timeout: 5_000 });
+  });
+
+  it('keeps its own timeout when Kibana allows more', async () => {
+    request.mockResolvedValueOnce(ok({ id: 'WB-1' }));
+    await run('getAlertDetails', { id: 'WB-1' }, ctxWithConfiguredTimeout(300_000));
+    expect(sent(0)).toMatchObject({ timeout: 60_000 });
+  });
+
+  it('names the effective timeout when a request times out', async () => {
+    request.mockRejectedValueOnce(
+      Object.assign(new Error('timeout of 5000ms exceeded'), {
+        isAxiosError: true,
+        code: 'ECONNABORTED',
+      })
+    );
+    await expect(
+      run('getAlertDetails', { id: 'WB-1' }, ctxWithConfiguredTimeout(5_000))
+    ).rejects.toThrow('timed out after 5 s');
   });
 });

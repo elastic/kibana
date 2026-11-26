@@ -198,6 +198,15 @@ export const lastPathSegment = (value: string): string | null => {
 /** Added to a failed state-changing request whose outcome is unknown (no answer read, or a 5xx). */
 const MAYBE_APPLIED = 'The change may already have been applied; check before repeating it.';
 
+/**
+ * The timeout of a request: the wanted one, but never more than the {{kib}} setting the client was built with
+ * (`xpack.actions.responseTimeout`), so a deployment that cancels slow requests sooner keeps doing so.
+ */
+export const effectiveTimeout = (wantedMs: number, configuredMs: number | undefined): number =>
+  typeof configuredMs === 'number' && configuredMs > 0
+    ? Math.min(wantedMs, configuredMs)
+    : wantedMs;
+
 export interface VendorRequest {
   action: string;
   method: HttpMethod;
@@ -231,7 +240,10 @@ export const vendorRequest = async <T = unknown>(
   req: VendorRequest
 ): Promise<AxiosResponse<T>> => {
   const url = req.url ?? `${getApiOrigin(ctx)}${API_PREFIX}${req.path ?? ''}`;
-  const timeoutMs = req.timeoutMs ?? REQUEST_TIMEOUT_MS;
+  const timeoutMs = effectiveTimeout(
+    req.timeoutMs ?? REQUEST_TIMEOUT_MS,
+    ctx.client.defaults?.timeout
+  );
   try {
     return await ctx.client.request<T>({
       method: req.method,

@@ -222,3 +222,106 @@ describe('TrendAI Vision One filters padded with ideographic space', () => {
     expect(() => filterHeader(`${PAD}東京${PAD}`)).toThrow('characters above U+00FF');
   });
 });
+
+describe('TrendAI Vision One paged results put the cursor before the items', () => {
+  it.each([
+    ['listAlerts', `${API}/workbench/alerts`, { id: 'WB-1' }],
+    ['listObservedAttackTechniques', `${API}/oat/detections`, { uuid: 'd1' }],
+    ['listEndpoints', `${API}/endpointSecurity/endpoints`, { agentGuid: 'g1' }],
+  ])(
+    '%s returns nextLink before items, so a cut page still shows the cursor',
+    async (name, path, item) => {
+      request.mockResolvedValueOnce(
+        ok({ totalCount: 51, count: 1, items: [item], nextLink: `${path}?skipToken=abc` })
+      );
+      const result = await run(name, {});
+      expect(Object.keys(result as Record<string, unknown>)).toEqual([
+        'totalCount',
+        'count',
+        'nextLink',
+        'items',
+      ]);
+      expect(JSON.stringify(result).indexOf('"nextLink"')).toBeLessThan(
+        JSON.stringify(result).indexOf('"items"')
+      );
+    }
+  );
+});
+
+describe('TrendAI Vision One listObservedAttackTechniques fields', () => {
+  const detection = (n: number) => ({
+    uuid: `d${n}`,
+    source: 'detections',
+    detectedDateTime: '2026-11-25T01:00:00Z',
+    ingestedDateTime: '2026-11-25T01:00:05Z',
+    entityType: 'host',
+    entityName: `host-${n}`,
+    endpoint: { endpointName: `host-${n}`, agentGuid: 'g1' },
+    filters: [{ id: 'f1', name: 'Rule', riskLevel: 'high' }],
+    detail: { big: 'x'.repeat(2000) },
+  });
+  const page = (items: unknown[]) =>
+    ok({
+      totalCount: 51,
+      count: items.length,
+      nextLink: `${API}/oat/detections?nextBatchToken=abc`,
+      items,
+    });
+
+  it('returns only the named fields of each detection and keeps the cursor and the counts', async () => {
+    request.mockResolvedValueOnce(page([detection(1), detection(2)]));
+    const result = (await run('listObservedAttackTechniques', {
+      fields: ['uuid', 'detectedDateTime', 'entityName'],
+    })) as {
+      totalCount: number;
+      count: number;
+      nextLink: string;
+      items: Array<Record<string, unknown>>;
+    };
+    expect(result.items).toEqual([
+      { uuid: 'd1', detectedDateTime: '2026-11-25T01:00:00Z', entityName: 'host-1' },
+      { uuid: 'd2', detectedDateTime: '2026-11-25T01:00:00Z', entityName: 'host-2' },
+    ]);
+    expect(result).toMatchObject({
+      totalCount: 51,
+      count: 2,
+      nextLink: `${API}/oat/detections?nextBatchToken=abc`,
+    });
+    expect(Object.keys(result)).toEqual(['totalCount', 'count', 'nextLink', 'items']);
+    // the projection is ours: it is never sent to the product
+    expect(JSON.stringify(sent(0))).not.toContain('fields');
+  });
+
+  it('makes a page of 50 small enough for an agent when detail is left out', async () => {
+    request.mockResolvedValueOnce(page(Array.from({ length: 50 }, (_v, n) => detection(n))));
+    const small = await run('listObservedAttackTechniques', {
+      fields: ['uuid', 'detectedDateTime', 'entityName', 'entityType'],
+    });
+    request.mockResolvedValueOnce(page(Array.from({ length: 50 }, (_v, n) => detection(n))));
+    const full = await run('listObservedAttackTechniques', {});
+    expect(JSON.stringify(small).length).toBeLessThan(JSON.stringify(full).length / 10);
+  });
+
+  it('returns every field when fields is not given', async () => {
+    request.mockResolvedValueOnce(page([detection(1)]));
+    const result = (await run('listObservedAttackTechniques', {})) as { items: unknown[] };
+    expect(result.items).toEqual([detection(1)]);
+  });
+
+  it.each([
+    ['an unknown field name', ['detial']],
+    ['an empty list', []],
+    ['more names than there are fields', Array.from({ length: 10 }, () => 'uuid')],
+  ])('rejects %s', (_label, fields) => {
+    expect(parseInput('listObservedAttackTechniques', { fields }).success).toBe(false);
+  });
+
+  it('works with nextLink: the caller gives the same fields again', async () => {
+    request.mockResolvedValueOnce(page([detection(3)]));
+    const result = (await run('listObservedAttackTechniques', {
+      nextLink: `${API}/oat/detections?nextBatchToken=prev`,
+      fields: ['uuid'],
+    })) as { items: unknown[] };
+    expect(result.items).toEqual([{ uuid: 'd3' }]);
+  });
+});

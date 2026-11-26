@@ -22,6 +22,10 @@ export const ctx = {
   log: { debug: jest.fn(), error: jest.fn(), warn: jest.fn() },
 } as unknown as ActionContext;
 
+/** A context whose client carries the configured {{kib}} response timeout (`xpack.actions.responseTimeout`). */
+export const ctxWithConfiguredTimeout = (timeoutMs: number): ActionContext =>
+  ({ ...ctx, client: { request, defaults: { timeout: timeoutMs } } } as unknown as ActionContext);
+
 export const ctxWith = (apiUrl: unknown): ActionContext =>
   ({ ...ctx, config: { apiUrl } } as unknown as ActionContext);
 
@@ -87,6 +91,7 @@ interface SpecRequestBody {
 export interface SpecOperation {
   parameters?: SpecParameter[];
   requestBody?: SpecRequestBody;
+  responses?: Record<string, { content?: Record<string, { schema?: SpecSchema }> }>;
 }
 
 /** The recorded vendor spec (vendor_api/ manifest.json and the OpenAPI snapshot), read by the test file. */
