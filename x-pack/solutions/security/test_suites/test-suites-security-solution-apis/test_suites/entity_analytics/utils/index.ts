@@ -11,7 +11,6 @@ export * from './asset_criticality';
 export * from './entity_store';
 export * from './entity_maintainers';
 export * from './entity_analytics';
-export * from './privilege_monitoring';
 export * from './data_view';
 export * from './watchlist';
 export * from './risk_score_maintainer';

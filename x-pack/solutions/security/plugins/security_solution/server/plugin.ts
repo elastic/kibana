@@ -1146,8 +1146,8 @@ export class Plugin implements ISecuritySolutionPlugin {
         .catch(() => {}); // it shouldn't refuse, but just in case
 
       // The privilege monitoring task type is no longer registered. Remove any
-      // leftover Task Manager documents so they don't produce "unrecognized task
-      // type" warnings on every poll cycle after upgrade.
+      // leftover Task Manager documents (up to 100 per start) so they don't linger
+      // as orphans after upgrade.
       const taskRepo = core.savedObjects.createInternalRepository(['task']);
       taskRepo
         .find({
