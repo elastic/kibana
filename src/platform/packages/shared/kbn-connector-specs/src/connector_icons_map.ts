@@ -468,9 +468,7 @@ export const ConnectorIconsMap: Map<
     '.sophos_central',
     lazy(
       () =>
-        import(
-          /* webpackChunkName: "connectorIconsophoscentral" */ './specs/sophos_central/icon'
-        )
+        import(/* webpackChunkName: "connectorIconsophoscentral" */ './specs/sophos_central/icon')
     ),
   ],
   [

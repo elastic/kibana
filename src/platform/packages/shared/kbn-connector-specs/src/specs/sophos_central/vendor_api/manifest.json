@@ -26,50 +26,50 @@
     ],
     "addAllowedItem": [
       {
-        "method": "post",
-        "path": "/settings/allowed-items",
-        "source": "endpoint"
-      },
-      {
         "method": "get",
         "path": "/whoami/v1",
         "source": "common"
+      },
+      {
+        "method": "post",
+        "path": "/settings/allowed-items",
+        "source": "endpoint"
       }
     ],
     "addBlockedItem": [
       {
-        "method": "post",
-        "path": "/settings/blocked-items",
-        "source": "endpoint"
-      },
-      {
         "method": "get",
         "path": "/whoami/v1",
         "source": "common"
+      },
+      {
+        "method": "post",
+        "path": "/settings/blocked-items",
+        "source": "endpoint"
       }
     ],
     "deisolateEndpoint": [
       {
-        "method": "post",
-        "path": "/endpoints/isolation",
-        "source": "endpoint"
-      },
-      {
         "method": "get",
         "path": "/whoami/v1",
         "source": "common"
+      },
+      {
+        "method": "post",
+        "path": "/endpoints/isolation",
+        "source": "endpoint"
       }
     ],
     "deleteBlockedItem": [
       {
-        "method": "delete",
-        "path": "/settings/blocked-items/{blockedItemId}",
-        "source": "endpoint"
-      },
-      {
         "method": "get",
         "path": "/whoami/v1",
         "source": "common"
+      },
+      {
+        "method": "delete",
+        "path": "/settings/blocked-items/{blockedItemId}",
+        "source": "endpoint"
       }
     ],
     "getAlert": [
@@ -87,37 +87,37 @@
     "getEndpoint": [
       {
         "method": "get",
-        "path": "/endpoints/{endpointId}",
-        "source": "endpoint"
+        "path": "/whoami/v1",
+        "source": "common"
       },
       {
         "method": "get",
-        "path": "/whoami/v1",
-        "source": "common"
+        "path": "/endpoints/{endpointId}",
+        "source": "endpoint"
       }
     ],
     "getTamperProtection": [
       {
         "method": "get",
-        "path": "/endpoints/{endpointId}/tamper-protection",
-        "source": "endpoint"
+        "path": "/whoami/v1",
+        "source": "common"
       },
       {
         "method": "get",
-        "path": "/whoami/v1",
-        "source": "common"
+        "path": "/endpoints/{endpointId}/tamper-protection",
+        "source": "endpoint"
       }
     ],
     "isolateEndpoint": [
       {
-        "method": "post",
-        "path": "/endpoints/isolation",
-        "source": "endpoint"
-      },
-      {
         "method": "get",
         "path": "/whoami/v1",
         "source": "common"
+      },
+      {
+        "method": "post",
+        "path": "/endpoints/isolation",
+        "source": "endpoint"
       }
     ],
     "listAlerts": [
@@ -147,6 +147,11 @@
     "listBlockedItems": [
       {
         "method": "get",
+        "path": "/whoami/v1",
+        "source": "common"
+      },
+      {
+        "method": "get",
         "pagination": {
           "defaultSize": 50,
           "request": {
@@ -160,14 +165,14 @@
         },
         "path": "/settings/blocked-items",
         "source": "endpoint"
-      },
+      }
+    ],
+    "listDetections": [
       {
         "method": "get",
         "path": "/whoami/v1",
         "source": "common"
-      }
-    ],
-    "listDetections": [
+      },
       {
         "method": "post",
         "path": "/queries/detections",
@@ -194,14 +199,14 @@
         },
         "path": "/queries/detections/{runId}/results",
         "source": "detections"
-      },
+      }
+    ],
+    "listEndpoints": [
       {
         "method": "get",
         "path": "/whoami/v1",
         "source": "common"
-      }
-    ],
-    "listEndpoints": [
+      },
       {
         "method": "get",
         "pagination": {
@@ -218,35 +223,30 @@
         },
         "path": "/endpoints",
         "source": "endpoint"
-      },
-      {
-        "method": "get",
-        "path": "/whoami/v1",
-        "source": "common"
       }
     ],
     "scanEndpoint": [
       {
-        "method": "post",
-        "path": "/endpoints/scans",
-        "source": "endpoint"
-      },
-      {
         "method": "get",
         "path": "/whoami/v1",
         "source": "common"
+      },
+      {
+        "method": "post",
+        "path": "/endpoints/scans",
+        "source": "endpoint"
       }
     ],
     "updateTamperProtection": [
       {
-        "method": "post",
-        "path": "/endpoints/{endpointId}/tamper-protection",
-        "source": "endpoint"
-      },
-      {
         "method": "get",
         "path": "/whoami/v1",
         "source": "common"
+      },
+      {
+        "method": "post",
+        "path": "/endpoints/{endpointId}/tamper-protection",
+        "source": "endpoint"
       }
     ]
   },
