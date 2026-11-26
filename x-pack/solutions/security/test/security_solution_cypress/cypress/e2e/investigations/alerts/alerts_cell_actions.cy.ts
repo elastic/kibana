@@ -21,6 +21,7 @@ import {
   filterOutAlertProperty,
   scrollAlertTableColumnIntoViewAndTest,
   showTopNAlertProperty,
+  waitForAlerts,
 } from '../../../tasks/alerts';
 import { deleteAlertsAndRules } from '../../../tasks/api_calls/common';
 import { createRule } from '../../../tasks/api_calls/rules';
@@ -37,8 +38,7 @@ import { openActiveTimeline } from '../../../tasks/timeline';
 
 import { ALERTS_URL } from '../../../urls/navigation';
 
-// Failing: See https://github.com/elastic/kibana/issues/306455
-describe.skip('Alerts cell actions', { tags: ['@ess', '@serverless'] }, () => {
+describe('Alerts cell actions', { tags: ['@ess', '@serverless'] }, () => {
   beforeEach(() => {
     deleteAlertsAndRules();
     createRule(getNewRule());
@@ -141,6 +141,7 @@ describe.skip('Alerts cell actions', { tags: ['@ess', '@serverless'] }, () => {
     // add condition to make sure the field is empty
     openAddFilterPopover();
     fillAddFilterForm({ key: 'file.name', operator: 'does not exist' });
+    waitForAlerts();
     scrollAlertTableColumnIntoViewAndTest(ALERT_TABLE_FILE_NAME_HEADER, () => {
       addAlertPropertyToTimeline(ALERT_TABLE_FILE_NAME_VALUES, 0);
       openActiveTimeline();
