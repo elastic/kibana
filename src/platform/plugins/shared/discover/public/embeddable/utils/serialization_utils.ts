@@ -28,7 +28,7 @@ import type {
 } from '../types';
 import {
   applyTableSettings,
-  fromDiscoverSessionTab,
+  fromSessionApiTab,
   getTableSettingsOverrides,
   toByValuePanelTab,
   toSearchEmbeddableAttributes,
@@ -57,8 +57,9 @@ export const deserializeState = async ({
 
   if (isDiscoverSessionEmbeddableByReferenceState(apiState)) {
     const { ref_id: savedObjectId, selected_tab_id: selectedTabId, overrides = {} } = apiState;
-    const session = await discoverServices.savedSearch.getDiscoverSession(savedObjectId);
-    const tabs = session.tabs.map(fromDiscoverSessionTab);
+    // The panel does not read session controls, so their warnings do not apply to it
+    const { data: session } = await discoverServices.discoverSessionClient.get(savedObjectId);
+    const tabs = session.tabs.map(fromSessionApiTab);
     const selectedTab = selectedTabId ? tabs.find(({ id }) => id === selectedTabId) : tabs[0];
 
     return {

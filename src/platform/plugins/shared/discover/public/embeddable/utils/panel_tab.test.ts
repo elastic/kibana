@@ -7,13 +7,21 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DiscoverSessionApiEmbeddableOverrides } from '@kbn/as-code-discover-schema';
-import { AS_CODE_DATA_VIEW_SPEC_TYPE } from '@kbn/as-code-data-views-schema';
+import type {
+  DiscoverSessionApiEmbeddableOverrides,
+  DiscoverSessionApiEsqlTab,
+} from '@kbn/as-code-discover-schema';
+import {
+  AS_CODE_DATA_VIEW_SPEC_TYPE,
+  AS_CODE_ESQL_DATA_SOURCE_TYPE,
+} from '@kbn/as-code-data-views-schema';
 import { DataGridDensity, DiscoverTabType } from '@kbn/discover-session-constants';
 import { FilterStateStore, type Filter, type Query } from '@kbn/es-query';
-import type { DiscoverSessionTab } from '@kbn/saved-search-plugin/common';
+import { VIEW_MODE, type DiscoverSessionTab } from '@kbn/saved-search-plugin/common';
+import type { DiscoverSessionInternalData } from '../../../server/api/internal_schema';
 import {
   fromDiscoverSessionTab,
+  fromSessionApiTab,
   getTableSettingsOverrides,
   toSessionTabAttributes,
 } from './panel_tab';
@@ -119,6 +127,58 @@ describe('fromDiscoverSessionTab', () => {
     expect(() =>
       fromDiscoverSessionTab(createSessionTab({ controlGroupJson: '{not valid JSON' }))
     ).not.toThrow();
+  });
+});
+
+describe('fromSessionApiTab', () => {
+  it('keeps the inline Data View ID apart and leaves out session-only settings', () => {
+    const sessionTab: DiscoverSessionInternalData['tabs'][number] = {
+      id: 'tab-1',
+      label: 'Tab 1',
+      type: DiscoverTabType.Default,
+      data_source: {
+        type: AS_CODE_DATA_VIEW_SPEC_TYPE,
+        id: INLINE_DATA_VIEW_ID,
+        index_pattern: 'logs-*',
+      },
+      filters: [],
+      sort: [],
+      view_mode: VIEW_MODE.DOCUMENT_LEVEL,
+      hide_chart: false,
+      hide_table: false,
+    };
+
+    expect(fromSessionApiTab(sessionTab)).toEqual({
+      id: 'tab-1',
+      label: 'Tab 1',
+      inlineDataViewId: INLINE_DATA_VIEW_ID,
+      tab: {
+        type: DiscoverTabType.Default,
+        data_source: { type: AS_CODE_DATA_VIEW_SPEC_TYPE, index_pattern: 'logs-*' },
+        filters: [],
+        sort: [],
+        view_mode: VIEW_MODE.DOCUMENT_LEVEL,
+      },
+    });
+  });
+
+  it('leaves out session-only settings of an ES|QL tab', () => {
+    const esqlSessionTab: DiscoverSessionApiEsqlTab = {
+      id: 'esql-tab',
+      label: 'ES|QL tab',
+      type: DiscoverTabType.Default,
+      data_source: { type: AS_CODE_ESQL_DATA_SOURCE_TYPE, query: 'FROM logs-*' },
+      sort: [],
+      hide_chart: false,
+      hide_table: false,
+      esql_approximation: true,
+    };
+
+    expect(fromSessionApiTab(esqlSessionTab).tab).toEqual({
+      type: DiscoverTabType.Default,
+      data_source: { type: AS_CODE_ESQL_DATA_SOURCE_TYPE, query: 'FROM logs-*' },
+      sort: [],
+    });
   });
 });
 

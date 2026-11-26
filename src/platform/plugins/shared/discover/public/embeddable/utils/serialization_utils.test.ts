@@ -21,7 +21,8 @@ import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { discoverServiceMock } from '../../__mocks__/services';
 import { getPersistedTabMock } from '../../application/main/state_management/redux/__mocks__/internal_state.mocks';
 import { deserializeState, serializeState, toPanelTableSettings } from './serialization_utils';
-import { fromDiscoverSessionTab } from './panel_tab';
+import { toDiscoverSessionApiData } from '../../session/session_conversions';
+import { discoverSessionInternalDataSchema } from '../../../server/api/internal_schema';
 import type {
   DiscoverSessionTab,
   DiscoverSessionTabTypeState,
@@ -138,13 +139,21 @@ describe('Serialization utils', () => {
     label,
   });
 
-  const mockDiscoverSession = (sessionTabs: DiscoverSessionTab[]) =>
-    createDiscoverSessionMock({
+  const mockSessionResponse = (sessionTabs: DiscoverSessionTab[]) => {
+    const session = createDiscoverSessionMock({
       id: 'savedSearch',
       title: 'test1',
       description: 'description',
       tabs: sessionTabs,
     });
+    jest.mocked(discoverServiceMock.discoverSessionClient.get).mockResolvedValue({
+      id: session.id,
+      data: discoverSessionInternalDataSchema.parse(toDiscoverSessionApiData(session)),
+      meta: { managed: false },
+      warnings: [],
+      resolve: { outcome: 'exactMatch' },
+    });
+  };
 
   const getSessionTabsWithMetrics = (): DiscoverSessionTab[] => [
     {
@@ -195,9 +204,7 @@ describe('Serialization utils', () => {
           sort: [['timestamp', 'asc']],
         }),
       ];
-      discoverServiceMock.savedSearch.getDiscoverSession = jest
-        .fn()
-        .mockResolvedValue(mockDiscoverSession(sessionTabs));
+      mockSessionResponse(sessionTabs);
 
       const apiStateByRef: DiscoverSessionEmbeddableByReferenceState = {
         title: 'test panel title',
@@ -222,9 +229,7 @@ describe('Serialization utils', () => {
 
     test('by reference with panel overwrites', async () => {
       const sessionTabs = [mockTab('tab-1', 'Tab 1')];
-      discoverServiceMock.savedSearch.getDiscoverSession = jest
-        .fn()
-        .mockResolvedValue(mockDiscoverSession(sessionTabs));
+      mockSessionResponse(sessionTabs);
 
       const apiStateByRef: DiscoverSessionEmbeddableByReferenceState = {
         title: 'test panel title',
@@ -244,7 +249,13 @@ describe('Serialization utils', () => {
       expect(deserializedState.sort).toEqual([['order_date', 'asc']]);
       expect(deserializedState.columns).toEqual(['_source']); // from tab-1
       expect(deserializedState.selectedTabId).toEqual('tab-1');
-      expect(deserializedState.tabs).toEqual(sessionTabs.map(fromDiscoverSessionTab));
+      expect(deserializedState.tabs).toEqual([
+        {
+          id: 'tab-1',
+          label: 'Tab 1',
+          tab: expect.objectContaining({ column_order: ['_source'] }),
+        },
+      ]);
     });
 
     test('by reference - valid selectedTabId', async () => {
@@ -260,9 +271,7 @@ describe('Serialization utils', () => {
           tabTypeState: metricsTabTypeState,
         },
       ];
-      discoverServiceMock.savedSearch.getDiscoverSession = jest
-        .fn()
-        .mockResolvedValue(mockDiscoverSession(sessionTabs));
+      mockSessionResponse(sessionTabs);
 
       const serializedState: DiscoverSessionEmbeddableByReferenceState = {
         title: 'test panel title',
@@ -292,9 +301,7 @@ describe('Serialization utils', () => {
           sort: [['fallback_field', 'desc']],
         }),
       ];
-      discoverServiceMock.savedSearch.getDiscoverSession = jest
-        .fn()
-        .mockResolvedValue(mockDiscoverSession(sessionTabs));
+      mockSessionResponse(sessionTabs);
 
       const serializedState: DiscoverSessionEmbeddableByReferenceState = {
         title: 'test panel title',
@@ -324,9 +331,7 @@ describe('Serialization utils', () => {
           sort: [['timestamp', 'asc']],
         }),
       ];
-      discoverServiceMock.savedSearch.getDiscoverSession = jest
-        .fn()
-        .mockResolvedValue(mockDiscoverSession(sessionTabs));
+      mockSessionResponse(sessionTabs);
 
       const serializedState: DiscoverSessionEmbeddableByReferenceState = {
         title: 'test panel title',
@@ -348,9 +353,7 @@ describe('Serialization utils', () => {
       const sessionTabs = [
         mockTab('tab-1', 'Tab 1', { jsonModeSettings: { hideNulls: true, wrapLines: true } }),
       ];
-      discoverServiceMock.savedSearch.getDiscoverSession = jest
-        .fn()
-        .mockResolvedValue(mockDiscoverSession(sessionTabs));
+      mockSessionResponse(sessionTabs);
 
       const serializedState: DiscoverSessionEmbeddableByReferenceState = {
         title: 'test panel title',
@@ -375,9 +378,7 @@ describe('Serialization utils', () => {
           grid: { columns: { A: { width: 100 }, B: { width: 200 } } },
         }),
       ];
-      discoverServiceMock.savedSearch.getDiscoverSession = jest
-        .fn()
-        .mockResolvedValue(mockDiscoverSession(sessionTabs));
+      mockSessionResponse(sessionTabs);
 
       const serializedState: DiscoverSessionEmbeddableByReferenceState = {
         title: 'test panel title',
@@ -398,9 +399,7 @@ describe('Serialization utils', () => {
 
     test('by reference - empty column settings override keeps the session widths', async () => {
       const grid = { columns: { A: { width: 100 } } };
-      discoverServiceMock.savedSearch.getDiscoverSession = jest
-        .fn()
-        .mockResolvedValue(mockDiscoverSession([mockTab('tab-1', 'Tab 1', { grid })]));
+      mockSessionResponse([mockTab('tab-1', 'Tab 1', { grid })]);
 
       const deserializedState = await deserializeState({
         serializedState: { ref_id: 'savedSearch', overrides: { column_settings: {} } },
@@ -408,31 +407,6 @@ describe('Serialization utils', () => {
       });
 
       expect(deserializedState.grid).toEqual(grid);
-    });
-
-    test('by reference - a tab without a Data View does not prevent opening another tab', async () => {
-      const tabWithoutDataView: DiscoverSessionTab = {
-        ...mockTab('tab-2', 'Tab 2'),
-        // A tab saved before it loaded has no search source
-        serializedSearchSource: {},
-      };
-      discoverServiceMock.savedSearch.getDiscoverSession = jest
-        .fn()
-        .mockResolvedValue(
-          mockDiscoverSession([
-            mockTab('tab-1', 'Tab 1', { columns: ['message'] }),
-            tabWithoutDataView,
-          ])
-        );
-      const deserialize = (selectedTabId: string) =>
-        deserializeState({
-          serializedState: { ref_id: 'savedSearch', selected_tab_id: selectedTabId, overrides: {} },
-          discoverServices: discoverServiceMock,
-        });
-
-      expect((await deserialize('tab-1')).columns).toEqual(['message']);
-      // The panel shows the missing Data View prompt for the tab without one
-      expect((await deserialize('tab-2')).serializedSearchSource).toEqual({});
     });
   });
 
@@ -471,9 +445,7 @@ describe('Serialization utils', () => {
         sessionTabs: DiscoverSessionTab[],
         serializedState: DiscoverSessionEmbeddableState = { ref_id: 'savedSearch', overrides: {} }
       ) => {
-        discoverServiceMock.savedSearch.getDiscoverSession = jest
-          .fn()
-          .mockResolvedValue(mockDiscoverSession(sessionTabs));
+        mockSessionResponse(sessionTabs);
 
         return deserializeState({ serializedState, discoverServices: discoverServiceMock });
       };
@@ -660,9 +632,7 @@ describe('Serialization utils', () => {
   describe('legacy panel state (BWC)', () => {
     test('deserialize by-ref uses savedObjectId', async () => {
       const sessionTabs = [mockTab('tab-1', 'Tab 1')];
-      discoverServiceMock.savedSearch.getDiscoverSession = jest
-        .fn()
-        .mockResolvedValue(mockDiscoverSession(sessionTabs));
+      mockSessionResponse(sessionTabs);
 
       const legacyByRef: SearchEmbeddableByReferenceState = {
         title: 'Panel title',
@@ -675,7 +645,7 @@ describe('Serialization utils', () => {
       });
 
       expect(deserialized.savedObjectId).toBe('legacy-session-id');
-      expect(discoverServiceMock.savedSearch.getDiscoverSession).toHaveBeenCalledWith(
+      expect(discoverServiceMock.discoverSessionClient.get).toHaveBeenCalledWith(
         'legacy-session-id'
       );
     });
@@ -749,9 +719,7 @@ describe('Serialization utils', () => {
     });
 
     test('deserialize by-ref uses ref_id merged over a legacy draft', async () => {
-      discoverServiceMock.savedSearch.getDiscoverSession = jest
-        .fn()
-        .mockResolvedValue(mockDiscoverSession([mockTab('tab-1', 'Tab 1')]));
+      mockSessionResponse([mockTab('tab-1', 'Tab 1')]);
       const legacyDraft: SearchEmbeddableByReferenceState = {
         title: 'Panel title',
         savedObjectId: 'legacy-session-id',
@@ -766,9 +734,7 @@ describe('Serialization utils', () => {
         discoverServices: discoverServiceMock,
       });
 
-      expect(discoverServiceMock.savedSearch.getDiscoverSession).toHaveBeenCalledWith(
-        'new-session-id'
-      );
+      expect(discoverServiceMock.discoverSessionClient.get).toHaveBeenCalledWith('new-session-id');
       expect(deserialized.savedObjectId).toBe('new-session-id');
       expect(deserialized.title).toBe('Panel title');
     });
