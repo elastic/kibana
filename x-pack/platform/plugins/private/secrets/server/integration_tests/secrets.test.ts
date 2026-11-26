@@ -5,7 +5,9 @@
  * 2.0.
  */
 
+import type { CoreStart } from '@kbn/core/server';
 import { httpServerMock } from '@kbn/core/server/mocks';
+import { mockAuthenticatedUser } from '@kbn/core-security-common/mocks';
 import { MAIN_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import {
   createRootWithCorePlugins,
@@ -35,8 +37,6 @@ const OTHER_SPACE_ID = 'team-a';
 const VALUE = 'correct-horse-battery-staple';
 const NEW_VALUE = 'another-long-secret-value';
 const DESCRIPTION = 'Token of the release bot';
-const CREATOR_PROFILE_ID = 'u_creator_0';
-const UPDATER_PROFILE_ID = 'u_updater_0';
 
 type KibanaRoot = ReturnType<typeof createRootWithCorePlugins>;
 
@@ -45,6 +45,7 @@ describe('secrets on Elasticsearch', () => {
   let root: KibanaRoot;
   let coreStart: Awaited<ReturnType<KibanaRoot['start']>>;
   let secrets: SecretsPluginStart;
+  let pluginCore: CoreStart;
   let pluginDependencies: SecretsPluginStartDependencies;
 
   const getClient = (spaceId = DEFAULT_SPACE_ID): SecretsClient =>
@@ -89,7 +90,11 @@ describe('secrets on Elasticsearch', () => {
     await root.setup();
     coreStart = await root.start();
     secrets = start.mock.results[0].value;
-    [, pluginDependencies] = start.mock.calls[0];
+    [pluginCore, pluginDependencies] = start.mock.calls[0];
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
   });
 
   afterAll(async () => {
@@ -256,24 +261,25 @@ describe('secrets on Elasticsearch', () => {
       expect(await getStored(name)).toMatchObject({ value: NEW_VALUE, description: DESCRIPTION });
     });
 
-    it('keeps who created the secret and records who updated it', async () => {
+    it('records the profile id of who created the secret and of who updated it', async () => {
       const name = 'attributed_token';
-      const storage = createStorage();
-      await createSecretsClient({ storage, profileId: CREATOR_PROFILE_ID }).create({
-        name,
-        value: VALUE,
-      });
-      const created = await getStored(name);
+      const creator = mockAuthenticatedUser({ username: 'alice', profile_uid: 'u_alice_0' });
+      const updater = mockAuthenticatedUser({ username: 'bob', profile_uid: 'u_bob_0' });
+      const creatorRequest = httpServerMock.createKibanaRequest({ spaceId: DEFAULT_SPACE_ID });
+      const updaterRequest = httpServerMock.createKibanaRequest({ spaceId: DEFAULT_SPACE_ID });
+      // Stands for authentication, which these requests do not go through.
+      jest
+        .spyOn(pluginCore.security.authc, 'getCurrentUser')
+        .mockImplementation((request) => (request === creatorRequest ? creator : updater));
 
-      await createSecretsClient({ storage, profileId: UPDATER_PROFILE_ID }).update({
-        name,
-        value: NEW_VALUE,
-      });
+      await secrets.getClient({ request: creatorRequest }).create({ name, value: VALUE });
+      const created = await getStored(name);
+      await secrets.getClient({ request: updaterRequest }).update({ name, value: NEW_VALUE });
 
       expect(await getStored(name)).toMatchObject({
-        createdBy: CREATOR_PROFILE_ID,
+        createdBy: 'u_alice_0',
         createdAt: created?.createdAt,
-        updatedBy: UPDATER_PROFILE_ID,
+        updatedBy: 'u_bob_0',
       });
     });
 
