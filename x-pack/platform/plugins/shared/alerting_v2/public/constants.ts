@@ -47,6 +47,7 @@ export {
   ALERTING_V2_INTERNAL_RULE_TEMPLATE_API_PATH,
   CREATE_WITH_AGENT_INITIAL_PROMPT,
   CREATE_ACTION_POLICY_WITH_AGENT_INITIAL_PROMPT,
+  getCreateRuleWithAgentPrompt,
 } from '@kbn/alerting-v2-constants';
 
 export interface AlertEpisodesListLinkOptions {

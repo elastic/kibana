@@ -18,6 +18,9 @@ import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { useComposeDiscoverFlyout } from '../../hooks/use_compose_discover_flyout';
 import { useAlertingV2ExperimentalFeatures } from '../../hooks/use_alerting_v2_experimental_features';
 import { useNavigateToAgentBuilder } from '../../hooks/use_navigate_to_agent_builder';
+import { useOpenAgentBuilderChat } from '../../hooks/use_open_agent_builder_chat';
+import { useAreAgentBuilderSkillsAvailable } from '../../hooks/use_are_agent_builder_skills_available';
+import { getCreateRuleWithAgentPrompt } from '../../constants';
 import { RuleCreateOptionsPanel } from '../../components/rule_create_options/rule_create_options_panel';
 import { RuleCreateOptionsFlyout } from '../../components/rule_create_options/rule_create_options_flyout';
 import type { RuleCreateSearchProps } from '../../components/rule_create_search';
@@ -36,10 +39,8 @@ import { UniversalAlertingIntroBanner } from './universal_alerting_intro_banner'
 import { RULES_LIST_DEFAULT_SORT } from './rules_list_columns';
 
 // Sections are wired by their own issues; until then the search shows no results.
-const RULE_CREATE_SEARCH: RuleCreateSearchProps = {
-  sections: {},
-  onQueryChange: () => {},
-};
+const NO_SEARCH_SECTIONS: RuleCreateSearchProps['sections'] = {};
+const ignoreSearchQuery = () => {};
 
 export const RulesListPage = () => {
   useBreadcrumbs('rules_list');
@@ -85,6 +86,20 @@ export const RulesListPage = () => {
     closeCreateOptionsFlyout();
     navigateToAgentBuilder();
   };
+  const openAgentBuilderChat = useOpenAgentBuilderChat();
+  const areAgentBuilderSkillsAvailable = useAreAgentBuilderSkillsAvailable();
+  const onSendSearchToAgent = (text: string) => {
+    closeCreateOptionsFlyout();
+    openAgentBuilderChat(getCreateRuleWithAgentPrompt(text));
+  };
+  const ruleCreateSearch: RuleCreateSearchProps | undefined = isUnifiedRuleCreationEnabled
+    ? {
+        sections: NO_SEARCH_SECTIONS,
+        onQueryChange: ignoreSearchQuery,
+        // Without Agent Builder access the input is search only.
+        onSendToAgent: areAgentBuilderSkillsAvailable ? onSendSearchToAgent : undefined,
+      }
+    : undefined;
   const onBuildSequenceFromOptionsFlyout = () => {
     closeCreateOptionsFlyout();
     navigateToSequenceBuilder();
@@ -201,7 +216,7 @@ export const RulesListPage = () => {
           onCreateWithAgent={onCreateWithAgentFromOptionsFlyout}
           onCreateThresholdRule={onCreateThresholdRuleFromOptionsFlyout}
           onBuildSequence={showBuildSequence ? onBuildSequenceFromOptionsFlyout : undefined}
-          search={isUnifiedRuleCreationEnabled ? RULE_CREATE_SEARCH : undefined}
+          search={ruleCreateSearch}
         />
       ) : null}
       {flyout}

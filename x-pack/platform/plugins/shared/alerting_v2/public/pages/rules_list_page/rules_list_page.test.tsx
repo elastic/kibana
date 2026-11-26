@@ -33,6 +33,7 @@ let mockExperimentalFeaturesEnabled = true;
 let mockAlertingV2ExperimentalFeaturesEnabled = true;
 let mockCanWriteRules = true;
 let mockUnifiedRuleCreationEnabled = false;
+const mockOpenChat = jest.fn();
 
 jest.mock('@kbn/core-di-browser', () => {
   const { UserCapabilities: ActualUserCapabilities } = jest.requireActual(
@@ -49,6 +50,10 @@ jest.mock('@kbn/core-di-browser', () => {
           canRead: () => true,
           can: () => mockCanWriteRules,
         };
+      }
+
+      if (token === Symbol.for('plugin.start.agentBuilder')) {
+        return { openChat: mockOpenChat };
       }
 
       const services: Record<string, unknown> = {
@@ -682,6 +687,41 @@ describe('RulesListPage', () => {
 
     expect(screen.getByTestId('ruleCreateSearchInput')).toBeInTheDocument();
     expect(screen.getByText('ES|QL rule')).toBeInTheDocument();
+  });
+
+  it('sends the typed text to a new side chat conversation and closes the flyout', async () => {
+    mockUnifiedRuleCreationEnabled = true;
+    renderPage();
+    await waitFor(() => expect(screen.getByTestId('createRuleButton')).toBeInTheDocument());
+    fireEvent.click(screen.getByTestId('createRuleButton'));
+
+    fireEvent.change(screen.getByTestId('ruleCreateSearchInput'), {
+      target: { value: 'alert on cpu' },
+    });
+    fireEvent.click(await screen.findByTestId('ruleCreateSearchSendToAgent'));
+
+    expect(mockOpenChat).toHaveBeenCalledWith({
+      newConversation: true,
+      initialMessage: expect.stringContaining('alert on cpu'),
+      autoSendInitialMessage: true,
+    });
+    expect(screen.queryByTestId('ruleCreateOptionsFlyout')).not.toBeInTheDocument();
+    expect(mockNavigateToApp).not.toHaveBeenCalled();
+  });
+
+  it('makes the create rule search search-only without Agent Builder access', async () => {
+    mockUnifiedRuleCreationEnabled = true;
+    mockAgentBuilderShow = false;
+    renderPage();
+    await waitFor(() => expect(screen.getByTestId('createRuleButton')).toBeInTheDocument());
+    fireEvent.click(screen.getByTestId('createRuleButton'));
+
+    fireEvent.change(screen.getByTestId('ruleCreateSearchInput'), {
+      target: { value: 'alert on cpu' },
+    });
+
+    await screen.findAllByText('No matching builders, templates, or Classic rule types');
+    expect(screen.queryByTestId('ruleCreateSearchSendToAgent')).not.toBeInTheDocument();
   });
 
   it('closes create rule options flyout without navigating', async () => {
