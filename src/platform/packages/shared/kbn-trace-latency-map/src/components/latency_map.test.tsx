@@ -781,8 +781,8 @@ describe('LatencyMap', () => {
         focusedOperations
       );
       const badge = await screen.findByTestId('traceLatencyMapOperationBadge');
-      expect(badge).toHaveTextContent('Operation: cart GET /cart');
-      fireEvent.click(screen.getByLabelText('Show all operations'));
+      expect(badge).toHaveTextContent(/^cart GET \/cart$/);
+      fireEvent.click(screen.getByLabelText('Show all transactions'));
       expect(onClearOperation).toHaveBeenCalled();
     });
   });

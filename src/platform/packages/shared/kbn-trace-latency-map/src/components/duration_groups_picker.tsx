@@ -49,7 +49,7 @@ export function DurationGroupsPicker({
   return (
     <EuiPopover
       aria-label={i18n.translate('traceLatencyMap.durationGroups.ariaLabel', {
-        defaultMessage: 'Suggested operations',
+        defaultMessage: 'Suggested transactions',
       })}
       button={
         <EuiButtonEmpty
@@ -60,7 +60,7 @@ export function DurationGroupsPicker({
           data-test-subj="traceLatencyMapDurationGroups"
         >
           {i18n.translate('traceLatencyMap.durationGroups.button', {
-            defaultMessage: 'Suggestions ({count})',
+            defaultMessage: 'Transactions ({count})',
             values: { count: operations.length },
           })}
         </EuiButtonEmpty>
@@ -72,7 +72,7 @@ export function DurationGroupsPicker({
       <EuiContextMenuPanel
         data-test-subj="traceLatencyMapSuggestions"
         title={i18n.translate('traceLatencyMap.durationGroups.title', {
-          defaultMessage: 'Select a suggested operation',
+          defaultMessage: 'Select a suggested transaction and its duration group',
         })}
         items={operations.map((operationBands, index) => {
           const { operation } = operationBands;

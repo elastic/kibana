@@ -181,14 +181,11 @@ export function MapHeader({
             iconSide="right"
             iconOnClick={onClearOperation}
             iconOnClickAriaLabel={i18n.translate('traceLatencyMap.header.showAllOperations', {
-              defaultMessage: 'Show all operations',
+              defaultMessage: 'Show all transactions',
             })}
             data-test-subj="traceLatencyMapOperationBadge"
           >
-            {i18n.translate('traceLatencyMap.header.operationBadge', {
-              defaultMessage: 'Operation: {service} {operation}',
-              values: { service: focusedOperation.service, operation: focusedOperation.name },
-            })}
+            {focusedOperation.service} {focusedOperation.name}
           </EuiBadge>
         </EuiFlexItem>
       )}
