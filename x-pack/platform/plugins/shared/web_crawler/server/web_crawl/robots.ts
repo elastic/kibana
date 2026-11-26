@@ -13,6 +13,13 @@ const DECIMAL_NUMBER = /^\d{1,9}(\.\d{1,9})?$/;
 
 const NOT_PRINTABLE_ASCII = /[^\x21-\x7e]+/g;
 const PERCENT_ESCAPE = /%[0-9a-f]{2}/gi;
+const UNRESERVED = /[A-Za-z0-9\-._~]/;
+
+// An escaped unreserved character is the same as the character itself, in either spelling.
+const normalizeEscape = (escape: string): string => {
+  const char = String.fromCharCode(parseInt(escape.slice(1), 16));
+  return UNRESERVED.test(char) ? char : escape.toUpperCase();
+};
 
 // A URL carries its path percent-encoded, while a robots.txt may spell the same path out.
 const toComparablePath = (path: string): string => {
@@ -22,7 +29,7 @@ const toComparablePath = (path: string): string => {
   } catch {
     // A lone surrogate cannot be encoded, and cannot be in a URL either.
   }
-  return encoded.replace(PERCENT_ESCAPE, (escape) => escape.toUpperCase());
+  return encoded.replace(PERCENT_ESCAPE, normalizeEscape);
 };
 
 interface RobotsRule {
@@ -33,6 +40,7 @@ interface RobotsRule {
 interface RobotsGroup {
   rules: RobotsRule[];
   crawlDelayMs?: number;
+  isTruncated?: boolean;
 }
 
 export interface RobotsRules {
@@ -40,6 +48,8 @@ export interface RobotsRules {
   sitemaps: string[];
   /** The pause the site asks for between requests, when its `Crawl-delay` is a positive number. */
   crawlDelayMs?: number;
+  /** The file had more rules than are kept, so a path it disallows may be taken as allowed. */
+  isTruncated?: boolean;
 }
 
 export const ALLOW_ALL_ROBOTS: RobotsRules = { isAllowed: () => true, sitemaps: [] };
@@ -123,9 +133,11 @@ export const parseRobotsTxt = (content: string, userAgentToken: string): RobotsR
     } else if (field === 'allow' || field === 'disallow') {
       isReadingAgents = false;
       if (value.length > 0) {
-        for (const { rules } of groupTargets) {
-          if (rules.length < MAX_RULES_PER_GROUP) {
-            rules.push({ allow: field === 'allow', pattern: toComparablePath(value) });
+        for (const group of groupTargets) {
+          if (group.rules.length < MAX_RULES_PER_GROUP) {
+            group.rules.push({ allow: field === 'allow', pattern: toComparablePath(value) });
+          } else {
+            group.isTruncated = true;
           }
         }
       }
@@ -141,12 +153,11 @@ export const parseRobotsTxt = (content: string, userAgentToken: string): RobotsR
       if (value.length > 0 && sitemaps.length < MAX_SITEMAPS) {
         sitemaps.push(value);
       }
-    } else {
-      isReadingAgents = false;
     }
+    // Any other line is ignored, also between the `User-agent` lines of one group.
   }
 
-  const { rules, crawlDelayMs } = hasTokenGroup ? tokenGroup : wildcardGroup;
+  const { rules, crawlDelayMs, isTruncated } = hasTokenGroup ? tokenGroup : wildcardGroup;
 
   const isAllowed = (url: string): boolean => {
     const { pathname, search } = new URL(url);
@@ -164,5 +175,10 @@ export const parseRobotsTxt = (content: string, userAgentToken: string): RobotsR
     return allowed;
   };
 
-  return { isAllowed, sitemaps, crawlDelayMs };
+  return {
+    isAllowed,
+    sitemaps,
+    crawlDelayMs,
+    isTruncated: isTruncated || content.length > MAX_ROBOTS_LENGTH,
+  };
 };

@@ -35,12 +35,15 @@ path segments or more than 10 query parameters are not followed, as those are mo
 faceted listings.
 
 `robots.txt` is honoured using the `Elastic-Crawler` group when the file has one and the `*` group
-otherwise, including its `Crawl-delay` and the sitemaps it names. A site without a `robots.txt`
-allows everything; a site whose `robots.txt` request fails is left out of the crawl, and the crawl
-fails when that leaves no site. Sitemaps and sitemap indexes are read within a small request budget.
+otherwise, including its `Crawl-delay` and the sitemaps it names. Each origin of a site (its
+scheme, host and port) has its own `robots.txt`, read when the crawl first comes to that origin. An
+origin without one allows everything; one whose `robots.txt` request fails is left out of the
+crawl, and the crawl fails when that leaves no start URL. Sitemaps and sitemap indexes, gzipped
+ones included, are read within a small request budget.
 
-A crawl can be narrowed with path prefixes: with `includePaths` only pages under one of them are
-followed, and pages under an `excludePaths` prefix never are.
+A crawl can be narrowed with path prefixes. They apply to the links a crawl finds: with
+`includePaths` only links under one of them are followed, and links under an `excludePaths` prefix
+never are. The URLs a crawl starts from are always crawled, whatever the prefixes.
 
 Links to files are not followed unless the crawl is given their extensions in `fileExtensions`. The
 ones in `WEB_CRAWL_FILE_EXTENSIONS` can be asked for: PDF and Office documents, CSV and JSON files,
@@ -54,9 +57,11 @@ Kibana never fetches the site itself: each page, `robots.txt` and sitemap is fet
 only extracts the links from the markdown that comes back.
 
 Ten workers pull pages from a queue that always hands out the shallowest page found so far, which
-keeps the crawl close to breadth-first without one slow page holding up a whole depth level. A
-`Crawl-delay` in `robots.txt` spaces out the requests to that site, up to three seconds. A
-rate-limited extraction is retried twice with a backoff.
+keeps the crawl close to breadth-first without one slow page holding up a whole depth level. A page
+that is found again closer to a start URL is crawled again, so that its links are followed as far
+as that depth allows. A `Crawl-delay` in `robots.txt` spaces out the requests to that site, up to
+three seconds. A rate-limited extraction is retried twice with a backoff, each time waiting for its
+turn like any other request.
 
 A crawl starts from one or more URLs and stays on the sites those are on, each with its own
 `robots.txt`, crawl delay and sitemaps. It takes a maximum depth and a maximum number of pages.
@@ -67,7 +72,9 @@ markdown is in `content` and copied into the `semantic_text` field `content_sema
 twenty pages or one megabyte of content, and up to three run at once. Requests and documents that
 Elasticsearch turns away as too many are sent again twice, with a backoff.
 
-A crawl that read the whole site ends by deleting the documents earlier crawls indexed and it did
-not find again, on the hosts it covered and within its path rules. One that failed on a page,
-reached the page maximum or another of its limits, or was stopped deletes nothing, because it cannot
-tell a removed page from one it did not get to.
+A crawl that read the whole site ends by deleting the documents it did not find again, on the hosts
+it covered and within its path rules. It only deletes what an earlier crawl with the same start
+URLs and path rules indexed: every document carries that scope in `crawl_scope`, so two crawls of
+different sections of a site can share an index. A crawl that failed on a page or a sitemap,
+reached the page maximum or another of its limits, or was stopped deletes nothing, because it
+cannot tell a removed page from one it did not get to.

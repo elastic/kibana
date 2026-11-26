@@ -54,6 +54,7 @@ const toDocument = (position: number): CrawledDocument => ({
   content: `Content ${position}`,
   depth: 1,
   crawl_id: 'crawl-1',
+  crawl_scope: 'scope-1',
   crawled_at: '2026-01-01T00:00:00.000Z',
   url_host: 'example.com',
   url_path: `/page-${position}`,

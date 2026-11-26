@@ -49,7 +49,7 @@ const MIXED_SITES = toUrlSet([
 
 describe('parseSitemap', () => {
   const parse = (content: string, maxPages: number = 100, siteKeys: string[] = [SITE_KEY]) =>
-    parseSitemap(content, SITEMAP_URL, siteKeys, maxPages);
+    parseSitemap(content, SITEMAP_URL, { siteKeys, maxPages });
 
   it('reads the `<loc>` entries of an XML sitemap, resolved against the sitemap URL', () => {
     const content = [
@@ -66,6 +66,7 @@ describe('parseSitemap', () => {
         `${ORIGIN}/d`,
       ],
       sitemapUrls: [],
+      isTruncated: false,
     });
   });
 
@@ -73,11 +74,12 @@ describe('parseSitemap', () => {
     expect(parse(toMarkdown([`${ORIGIN}/a`, `${ORIGIN}/nested.xml`, `${ORIGIN}/b`]))).toEqual({
       pageUrls: [`${ORIGIN}/a`, `${ORIGIN}/b`],
       sitemapUrls: [`${ORIGIN}/nested.xml`],
+      isTruncated: false,
     });
   });
 
   it('reads no entry from plain text, an empty `<loc>` or an unterminated one', () => {
-    const empty = { pageUrls: [], sitemapUrls: [] };
+    const empty = { pageUrls: [], sitemapUrls: [], isTruncated: false };
 
     expect(parse('# 404\n\nPage not found')).toEqual(empty);
     expect(parse(`${ORIGIN}/a\n${ORIGIN}/b`)).toEqual(empty);
@@ -111,6 +113,7 @@ describe('parseSitemap', () => {
     expect(parse(content)).toEqual({
       pageUrls: [`${ORIGIN}/a?b=1&c=2`, `${ORIGIN}/literal?b=1&amp;c=2`],
       sitemapUrls: [`${ORIGIN}/nested.xml`],
+      isTruncated: false,
     });
   });
 
@@ -126,7 +129,8 @@ describe('parseSitemap', () => {
       `${OTHER_ORIGIN}/logo.png`,
     ]);
     const parseFrom = (siteKeys: string[]) =>
-      parseSitemap(content, 'https://cdn.example.net/sitemap.xml', siteKeys, 100).pageUrls;
+      parseSitemap(content, 'https://cdn.example.net/sitemap.xml', { siteKeys, maxPages: 100 })
+        .pageUrls;
 
     expect(parseFrom([SITE_KEY])).toEqual([`${ORIGIN}/same`, 'http://www.example.com/www']);
     expect(parseFrom(['docs.example.org', SITE_KEY])).toEqual([
@@ -144,8 +148,16 @@ describe('parseSitemap', () => {
     ];
     const content = [toSitemapIndex(nested), toUrlSet([`${ORIGIN}/a`])].join('\n');
 
-    expect(parse(content)).toEqual({ pageUrls: [`${ORIGIN}/a`], sitemapUrls: nested });
-    expect(parse(content, 100, [])).toEqual({ pageUrls: [], sitemapUrls: nested });
+    expect(parse(content)).toEqual({
+      pageUrls: [`${ORIGIN}/a`],
+      sitemapUrls: nested,
+      isTruncated: false,
+    });
+    expect(parse(content, 100, [])).toEqual({
+      pageUrls: [],
+      sitemapUrls: nested,
+      isTruncated: false,
+    });
   });
 
   it('dedupes pages and nested sitemaps, including an entity-encoded and a plain entry', () => {
@@ -158,6 +170,7 @@ describe('parseSitemap', () => {
     expect(parse(content)).toEqual({
       pageUrls: [`${ORIGIN}/a`, `${ORIGIN}/b?c=1&d=2`],
       sitemapUrls: [`${ORIGIN}/nested.xml`],
+      isTruncated: false,
     });
   });
 
@@ -165,10 +178,48 @@ describe('parseSitemap', () => {
     const content = toUrlSet([`${ORIGIN}/a`, `${ORIGIN}/file.pdf`, `${ORIGIN}/photo.png`]);
 
     expect(parse(content).pageUrls).toEqual([`${ORIGIN}/a`]);
-    expect(parseSitemap(content, SITEMAP_URL, [SITE_KEY], 100, ['pdf']).pageUrls).toEqual([
-      `${ORIGIN}/a`,
-      `${ORIGIN}/file.pdf`,
-    ]);
+    expect(
+      parseSitemap(content, SITEMAP_URL, {
+        siteKeys: [SITE_KEY],
+        maxPages: 100,
+        fileExtensions: ['pdf'],
+      }).pageUrls
+    ).toEqual([`${ORIGIN}/a`, `${ORIGIN}/file.pdf`]);
+  });
+
+  it('takes a gzipped sitemap for a nested sitemap, not for a page or an asset', () => {
+    const content = toUrlSet([`${ORIGIN}/sitemaps/pages.xml.gz`, `${ORIGIN}/SITEMAP.XML.GZ`]);
+
+    expect(parse(content)).toEqual({
+      pageUrls: [],
+      sitemapUrls: [`${ORIGIN}/sitemaps/pages.xml.gz`, `${ORIGIN}/SITEMAP.XML.GZ`],
+      isTruncated: false,
+    });
+  });
+
+  it('counts only the pages it is not told about against maxPages', () => {
+    const content = toUrlSet(toPages(6));
+    const knownPages = new Set(toPages(4));
+
+    expect(
+      parseSitemap(content, SITEMAP_URL, { siteKeys: [SITE_KEY], maxPages: 2, knownPages }).pageUrls
+    ).toEqual(toPages(6).slice(4));
+  });
+
+  it('keeps at most maxSitemaps nested sitemaps, and tells when it left some out', () => {
+    const content = toSitemapIndex([...toSitemapUrls(3), `${ORIGIN}/sitemap-0.xml`]);
+    const options = { siteKeys: [SITE_KEY], maxPages: 100 };
+
+    expect(parseSitemap(content, SITEMAP_URL, { ...options, maxSitemaps: 3 })).toEqual({
+      pageUrls: [],
+      sitemapUrls: toSitemapUrls(3),
+      isTruncated: false,
+    });
+    expect(parseSitemap(content, SITEMAP_URL, { ...options, maxSitemaps: 2 })).toEqual({
+      pageUrls: [],
+      sitemapUrls: toSitemapUrls(2),
+      isTruncated: true,
+    });
   });
 
   it('stops at maxPages pages, not counting duplicates or skipped entries', () => {
@@ -193,7 +244,7 @@ describe('parseSitemap', () => {
     const elapsedMs = performance.now() - startedAt;
 
     expect(pageUrls).toHaveLength(1000);
-    expect(pathological).toEqual({ pageUrls: [], sitemapUrls: [] });
+    expect(pathological).toEqual({ pageUrls: [], sitemapUrls: [], isTruncated: false });
     expect(elapsedMs).toBeLessThan(2000);
   });
 });

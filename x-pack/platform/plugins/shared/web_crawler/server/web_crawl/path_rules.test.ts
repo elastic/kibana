@@ -27,6 +27,24 @@ describe('normalizePathPrefixes', () => {
     ).toEqual(['/docs', '/blog/2026', '/Docs', '/docs/', '/']);
   });
 
+  it('spells a path the way a URL does, leaving one that is already encoded as it is', () => {
+    expect(normalizePathPrefixes(['/café', '/my files', '/caf%C3%A9', '/a"b'])).toEqual([
+      '/caf%C3%A9',
+      '/my%20files',
+      '/a%22b',
+    ]);
+    expect(
+      isPathAllowed('https://example.com/café/menu', {
+        includePaths: [],
+        excludePaths: normalizePathPrefixes(['/café']) ?? [],
+      })
+    ).toBe(false);
+  });
+
+  it('returns null for a path that cannot be encoded', () => {
+    expect(normalizePathPrefixes(['/docs', '/broken\ud800'])).toBeNull();
+  });
+
   it.each(['docs', 'https://example.com/docs', '*/docs', '?page=1'])(
     'returns null when a path is %s, which does not start with a slash',
     (path) => {

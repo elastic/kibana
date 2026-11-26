@@ -162,11 +162,15 @@ const hasSkippedExtension = (url: string, fileExtensions: readonly string[]): bo
 const isWhitespace = (char: string): boolean =>
   char === ' ' || char === '\n' || char === '\t' || char === '\r';
 
+const isLinkTargetEnd = (char: string, openParentheses: number): boolean =>
+  isWhitespace(char) || (char === ')' && openParentheses === 0);
+
 /**
  * Yields the raw target of every markdown link in a document.
  *
  * Scans with a forward-only cursor instead of a regular expression, so the cost stays linear in
- * the document length whatever the page contains. Balanced parentheses are part of the target.
+ * the document length whatever the page contains. Balanced parentheses are part of the target, and
+ * a target in angle brackets is everything between them.
  */
 export function* iterateLinkTargets(markdown: string): Generator<string> {
   let cursor = 0;
@@ -177,13 +181,14 @@ export function* iterateLinkTargets(markdown: string): Generator<string> {
       return;
     }
 
-    const targetStart = openIndex + LINK_TARGET_OPEN.length;
+    const isBracketed = markdown[openIndex + LINK_TARGET_OPEN.length] === '<';
+    const targetStart = openIndex + LINK_TARGET_OPEN.length + (isBracketed ? 1 : 0);
     const scanLimit = Math.min(markdown.length, targetStart + MAX_URL_LENGTH);
     let targetEnd = targetStart;
     let openParentheses = 0;
     for (; targetEnd < scanLimit; targetEnd++) {
       const char = markdown[targetEnd];
-      if (isWhitespace(char) || (char === ')' && openParentheses === 0)) {
+      if (isBracketed ? char === '>' || char === '\n' : isLinkTargetEnd(char, openParentheses)) {
         break;
       }
       if (char === '(') {
@@ -194,7 +199,8 @@ export function* iterateLinkTargets(markdown: string): Generator<string> {
     }
     cursor = targetEnd;
 
-    if (targetEnd !== scanLimit && targetEnd !== targetStart) {
+    const isClosed = !isBracketed || markdown[targetEnd] === '>';
+    if (isClosed && targetEnd !== scanLimit && targetEnd !== targetStart) {
       yield markdown.slice(targetStart, targetEnd);
     }
   }

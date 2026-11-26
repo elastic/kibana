@@ -13,6 +13,12 @@ import { purgeStaleDocuments } from './purge';
 
 const INDEX_NAME = 'web-crawl-example.com';
 const CRAWL_ID = 'crawl-2';
+const CRAWL_SCOPE = 'scope-1';
+const STARTED_AT = '2026-03-01T12:00:00.000Z';
+const SCOPE_FILTERS = [
+  { term: { crawl_scope: CRAWL_SCOPE } },
+  { range: { crawled_at: { lt: STARTED_AT } } },
+];
 
 describe('purgeStaleDocuments', () => {
   let esClient: ElasticsearchClientMock;
@@ -28,6 +34,8 @@ describe('purgeStaleDocuments', () => {
       signal: abortController.signal,
       indexName: INDEX_NAME,
       crawlId: CRAWL_ID,
+      crawlScope: CRAWL_SCOPE,
+      startedAt: STARTED_AT,
       maxDepth,
       hosts,
       pathRules,
@@ -43,7 +51,7 @@ describe('purgeStaleDocuments', () => {
     [2, ['example.com', 'www.example.com']],
     [0, ['docs.example.org']],
   ])(
-    'only deletes the pages of other crawls down to depth %i on the hosts %j',
+    'only deletes the pages earlier crawls of the same scope indexed, down to depth %i on the hosts %j',
     async (maxDepth, hosts) => {
       await purge(maxDepth, hosts);
 
@@ -55,7 +63,11 @@ describe('purgeStaleDocuments', () => {
           refresh: true,
           query: {
             bool: {
-              filter: [{ range: { depth: { lte: maxDepth } } }, { terms: { url_host: hosts } }],
+              filter: [
+                ...SCOPE_FILTERS,
+                { range: { depth: { lte: maxDepth } } },
+                { terms: { url_host: hosts } },
+              ],
               must_not: [{ term: { crawl_id: CRAWL_ID } }],
             },
           },
@@ -76,6 +88,7 @@ describe('purgeStaleDocuments', () => {
         query: {
           bool: {
             filter: [
+              ...SCOPE_FILTERS,
               { range: { depth: { lte: 2 } } },
               { terms: { url_host: ['example.com'] } },
               {

@@ -14,9 +14,30 @@ export interface PathRules {
 
 export const NO_PATH_RULES: PathRules = { includePaths: [], excludePaths: [] };
 
-/** Trims and de-duplicates path prefixes, or returns `null` when one of them is not usable. */
+// The characters a URL carries percent-encoded in its path.
+const ENCODED_IN_PATH = /[^\x21-\x7e]+|["<>`{}]/g;
+
+const toUrlPath = (path: string): string | null => {
+  try {
+    return path.replace(ENCODED_IN_PATH, encodeURIComponent);
+  } catch {
+    return null;
+  }
+};
+
+/**
+ * Trims and de-duplicates path prefixes and spells them the way a URL spells its path, or returns
+ * `null` when one of them is not usable.
+ */
 export const normalizePathPrefixes = (paths: string[] = []): string[] | null => {
-  const normalized = [...new Set(paths.map((path) => path.trim()).filter((path) => path !== ''))];
+  const urlPaths = paths
+    .map((path) => path.trim())
+    .filter((path) => path !== '')
+    .map(toUrlPath);
+  if (urlPaths.some((path) => path === null)) {
+    return null;
+  }
+  const normalized = [...new Set(urlPaths.filter((path): path is string => path !== null))];
   const isValid =
     normalized.length <= WEB_CRAWL_MAX_PATH_RULES &&
     normalized.every(

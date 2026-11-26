@@ -19,7 +19,8 @@ const INDEX_NAME = 'web-crawl-example.com';
 
 const INDEX_META: WebCrawlIndexMeta = { url: 'https://example.com/' };
 
-const URL_FIELD_PROPERTIES = {
+const LATER_PROPERTIES = {
+  crawl_scope: { type: 'keyword' },
   url_host: { type: 'keyword' },
   url_path: { type: 'keyword' },
   url_path_dir1: { type: 'keyword' },
@@ -55,6 +56,20 @@ describe('readCrawlIndexState', () => {
     esClient.indices.getMapping.mockResolvedValue({ [INDEX_NAME]: { mappings } });
 
     await expect(readCrawlIndexState(esClient, INDEX_NAME)).resolves.toEqual({
+      exists: true,
+      isCrawlIndex: false,
+    });
+  });
+
+  it('does not take an alias for a crawl index, even when it points at one', async () => {
+    await createCrawlIndex(esClient, INDEX_NAME, INDEX_META);
+    const [{ mappings }] = esClient.indices.create.mock.calls[0];
+    esClient.indices.getMapping.mockResolvedValue({
+      [INDEX_NAME]: { mappings: mappings ?? {} },
+      'other-index': { mappings: {} },
+    });
+
+    await expect(readCrawlIndexState(esClient, 'crawl-alias')).resolves.toEqual({
       exists: true,
       isCrawlIndex: false,
     });
@@ -97,19 +112,19 @@ describe('createCrawlIndex and updateCrawlIndexMappings', () => {
           depth: { type: 'integer' },
           crawl_id: { type: 'keyword' },
           crawled_at: { type: 'date' },
-          ...URL_FIELD_PROPERTIES,
+          ...LATER_PROPERTIES,
         },
       },
     });
   });
 
-  it('adds only the host, path and path directory fields to an existing index', async () => {
+  it('adds only the fields introduced after the first crawl indices to an existing index', async () => {
     await updateCrawlIndexMappings(esClient, INDEX_NAME);
 
     expect(esClient.indices.putMapping).toHaveBeenCalledTimes(1);
     expect(esClient.indices.putMapping).toHaveBeenCalledWith({
       index: INDEX_NAME,
-      properties: URL_FIELD_PROPERTIES,
+      properties: LATER_PROPERTIES,
     });
   });
 });

@@ -8,6 +8,9 @@
 import { getSiteKey, isSameSitePage, iterateLinkTargets, normalizeUrl } from './links';
 
 export const MAX_SITEMAP_REQUESTS = 3;
+// More nested sitemaps than any request budget gets to.
+const MAX_NESTED_SITEMAPS = 1000;
+const NO_PAGES: ReadonlySet<string> = new Set();
 const LOC_OPEN = '<loc>';
 const LOC_CLOSE = '</loc>';
 
@@ -50,23 +53,45 @@ function* iterateSitemapEntries(content: string): Generator<string> {
   yield* iterateLinkTargets(content);
 }
 
-const isSitemapUrl = (url: string): boolean => new URL(url).pathname.toLowerCase().endsWith('.xml');
+// The inference endpoint reads a gzipped sitemap as it reads a plain one.
+const isSitemapUrl = (url: string): boolean => {
+  const pathname = new URL(url).pathname.toLowerCase();
+  return pathname.endsWith('.xml') || pathname.endsWith('.xml.gz');
+};
 
 export interface SitemapEntries {
   pageUrls: string[];
   sitemapUrls: string[];
+  isTruncated: boolean;
 }
 
-/** Reads the same-site pages and the nested sitemaps a sitemap lists, stopping at `maxPages` pages. */
+interface ParseSitemapOptions {
+  siteKeys: string[];
+  /** How many pages to read that are not among `knownPages`. */
+  maxPages: number;
+  maxSitemaps?: number;
+  fileExtensions?: readonly string[];
+  knownPages?: ReadonlySet<string>;
+}
+
+/**
+ * Reads the same-site pages and the nested sitemaps a sitemap lists, stopping at `maxPages` new
+ * pages. `isTruncated` tells that it listed more nested sitemaps than `maxSitemaps`.
+ */
 export const parseSitemap = (
   content: string,
   sitemapUrl: string,
-  siteKeys: string[],
-  maxPages: number,
-  fileExtensions: readonly string[] = []
+  {
+    siteKeys,
+    maxPages,
+    maxSitemaps = MAX_NESTED_SITEMAPS,
+    fileExtensions = [],
+    knownPages = NO_PAGES,
+  }: ParseSitemapOptions
 ): SitemapEntries => {
   const pageUrls = new Set<string>();
   const sitemapUrls = new Set<string>();
+  let isTruncated = false;
 
   for (const entry of iterateSitemapEntries(content)) {
     if (pageUrls.size >= maxPages) {
@@ -77,13 +102,20 @@ export const parseSitemap = (
       continue;
     }
     if (isSitemapUrl(url)) {
-      sitemapUrls.add(url);
-    } else if (siteKeys.some((siteKey) => isSameSitePage(url, siteKey, fileExtensions))) {
+      if (sitemapUrls.size < maxSitemaps) {
+        sitemapUrls.add(url);
+      } else if (!sitemapUrls.has(url)) {
+        isTruncated = true;
+      }
+    } else if (
+      !knownPages.has(url) &&
+      siteKeys.some((siteKey) => isSameSitePage(url, siteKey, fileExtensions))
+    ) {
       pageUrls.add(url);
     }
   }
 
-  return { pageUrls: [...pageUrls], sitemapUrls: [...sitemapUrls] };
+  return { pageUrls: [...pageUrls], sitemapUrls: [...sitemapUrls], isTruncated };
 };
 
 interface DiscoverSitemapPagesOptions {
@@ -124,6 +156,7 @@ export const discoverSitemapPages = async ({
   const queue = declared.length > 0 ? declared : [new URL('/sitemap.xml', siteUrl).href];
   const requested = new Set<string>();
   const pages = new Set<string>();
+  let hasDroppedSitemaps = false;
 
   while (
     queue.length > 0 &&
@@ -145,20 +178,20 @@ export const discoverSitemapPages = async ({
       if (!content || pages.size >= maxPages) {
         return;
       }
-      const { pageUrls, sitemapUrls } = parseSitemap(
-        content,
-        batch[position],
+      const { pageUrls, sitemapUrls, isTruncated } = parseSitemap(content, batch[position], {
         siteKeys,
-        maxPages - pages.size,
-        fileExtensions
-      );
+        maxPages: maxPages - pages.size,
+        fileExtensions,
+        knownPages: pages,
+      });
       pageUrls.forEach((pageUrl) => pages.add(pageUrl));
-      queue.push(...sitemapUrls);
+      sitemapUrls.forEach((sitemapUrl) => queue.push(sitemapUrl));
+      hasDroppedSitemaps ||= isTruncated;
     });
   }
 
   const hasUnreadSitemaps = queue.some((sitemapUrl) => !requested.has(sitemapUrl));
-  if (!signal.aborted && (hasUnreadSitemaps || pages.size >= maxPages)) {
+  if (!signal.aborted && (hasUnreadSitemaps || hasDroppedSitemaps || pages.size >= maxPages)) {
     onIncomplete?.();
   }
 

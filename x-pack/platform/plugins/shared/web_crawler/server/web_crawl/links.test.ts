@@ -238,6 +238,21 @@ describe('iterateLinkTargets', () => {
     ]);
   });
 
+  it('reads a target in angle brackets up to the closing bracket, spaces and parentheses included', () => {
+    const markdown = [
+      '[guide](<https://example.com/guide>)',
+      '[spaced](</my page (draft)> "Title")',
+      '[unclosed](</broken\n[next](/next)',
+      '[empty](<>)',
+    ].join('\n');
+
+    expect([...iterateLinkTargets(markdown)]).toEqual([
+      'https://example.com/guide',
+      '/my page (draft)',
+      '/next',
+    ]);
+  });
+
   it('skips empty, unterminated and overlong targets, and keeps scanning after them', () => {
     const longest = `/${'a'.repeat(2046)}`;
     const markdown = [

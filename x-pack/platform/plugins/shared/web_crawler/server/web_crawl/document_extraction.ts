@@ -90,6 +90,8 @@ interface ExtractPageOptions {
   inferenceId: string;
   url: string;
   signal: AbortSignal;
+  /** Awaited before a request is sent again, on top of the backoff. */
+  beforeRetry?: () => Promise<void>;
 }
 
 /**
@@ -114,6 +116,7 @@ export const extractPage = async (
         throw error;
       }
       await waitFor(retryDelayMs, options.signal);
+      await options.beforeRetry?.();
       if (options.signal.aborted) {
         throw error;
       }

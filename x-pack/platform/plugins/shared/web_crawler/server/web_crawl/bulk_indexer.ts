@@ -27,6 +27,8 @@ export interface CrawledDocument {
   content: string;
   depth: number;
   crawl_id: string;
+  /** Identifies what the crawl set out to cover, so a later crawl of the same scope can purge it. */
+  crawl_scope: string;
   crawled_at: string;
   url_host: string;
   url_path: string;

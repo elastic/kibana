@@ -20,7 +20,9 @@ export interface CrawlIndexState {
   isCrawlIndex: boolean;
 }
 
-const URL_FIELD_PROPERTIES: Record<string, estypes.MappingProperty> = {
+// The fields added after the first crawl indices were created.
+const LATER_PROPERTIES: Record<string, estypes.MappingProperty> = {
+  crawl_scope: { type: 'keyword' },
   url_host: { type: 'keyword' },
   url_path: { type: 'keyword' },
   url_path_dir1: { type: 'keyword' },
@@ -39,7 +41,7 @@ const CRAWL_INDEX_PROPERTIES: Record<string, estypes.MappingProperty> = {
   depth: { type: 'integer' },
   crawl_id: { type: 'keyword' },
   crawled_at: { type: 'date' },
-  ...URL_FIELD_PROPERTIES,
+  ...LATER_PROPERTIES,
 };
 
 export const readCrawlIndexState = async (
@@ -48,7 +50,10 @@ export const readCrawlIndexState = async (
 ): Promise<CrawlIndexState> => {
   try {
     const mappings = await esClient.indices.getMapping({ index: indexName });
-    const indexMeta = Object.values(mappings)[0]?.mappings._meta;
+    // An alias or a data stream answers with the indices behind it, under their own names.
+    const indexMeta = Object.hasOwn(mappings, indexName)
+      ? mappings[indexName].mappings._meta
+      : undefined;
     return { exists: true, isCrawlIndex: indexMeta?.[WEB_CRAWL_META_KEY] !== undefined };
   } catch (error) {
     if (error?.statusCode === 404) {
@@ -74,7 +79,7 @@ export const updateCrawlIndexMappings = async (
   esClient: ElasticsearchClient,
   indexName: string
 ): Promise<void> => {
-  await esClient.indices.putMapping({ index: indexName, properties: URL_FIELD_PROPERTIES });
+  await esClient.indices.putMapping({ index: indexName, properties: LATER_PROPERTIES });
 };
 
 /** Reports, for each index, whether the user holds `privilege` on it. Works for missing indices too. */

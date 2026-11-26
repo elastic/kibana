@@ -56,6 +56,7 @@ interface IndexedDocument {
   url: string;
   title: string;
   depth: number;
+  crawl_scope: string;
 }
 
 const toDocumentId = (url: string): string =>
@@ -266,7 +267,7 @@ describe('crawlSite', () => {
   const getPurgedHosts = (): string[] => {
     expect(esClient.deleteByQuery).toHaveBeenCalledTimes(1);
     const [{ query }] = esClient.deleteByQuery.mock.calls[0];
-    const [, hostFilter] = [query?.bool?.filter].flat();
+    const hostFilter = [query?.bool?.filter].flat().find((filter) => filter?.terms !== undefined);
     return [hostFilter?.terms?.url_host].flat().map(String);
   };
 
@@ -335,6 +336,7 @@ describe('crawlSite', () => {
           content: `[link](${ORIGIN}/a)\n[link](/docs/guide/intro?tab=1)`,
           depth: 0,
           crawl_id: CRAWL_ID,
+          crawl_scope: expect.stringMatching(/^[0-9a-f]{64}$/),
           crawled_at: expect.any(String),
           url_host: 'example.com',
           url_path: '/',
@@ -345,6 +347,7 @@ describe('crawlSite', () => {
           content: 'No links here',
           depth: 1,
           crawl_id: CRAWL_ID,
+          crawl_scope: expect.stringMatching(/^[0-9a-f]{64}$/),
           crawled_at: expect.any(String),
           url_host: 'example.com',
           url_path: '/a',
@@ -356,6 +359,7 @@ describe('crawlSite', () => {
           content: 'No links here',
           depth: 1,
           crawl_id: CRAWL_ID,
+          crawl_scope: expect.stringMatching(/^[0-9a-f]{64}$/),
           crawled_at: expect.any(String),
           url_host: 'example.com',
           url_path: '/docs/guide/intro',
@@ -666,8 +670,8 @@ describe('crawlSite', () => {
       ]);
       mockSite({
         [SEED_URL]: pageLinkingTo(['/linked', '/robots.txt', '/sitemap.xml']),
-        [`${ORIGIN}/linked`]: pageLinkingTo(['/sitemap-only']),
-        [`${ORIGIN}/sitemap-only`]: pageLinkingTo([]),
+        [`${ORIGIN}/linked`]: pageLinkingTo(['/', '/linked']),
+        [`${ORIGIN}/sitemap-only`]: pageLinkingTo(['/linked']),
       });
 
       await expect(crawl()).resolves.toEqual(toResult({ documentsCount: 3 }));
@@ -694,6 +698,115 @@ describe('crawlSite', () => {
       );
 
       expect(getRequestedUrls()).toEqual([ROBOTS_URL, SEED_URL]);
+    });
+  });
+
+  describe('robots.txt of another origin of the site', () => {
+    const HTTP_ORIGIN = 'http://example.com';
+
+    it('is read once, when the crawl first comes across a link to that origin', async () => {
+      siteFiles[`${HTTP_ORIGIN}/robots.txt`] = disallow('/old');
+      mockSite({
+        [SEED_URL]: pageLinkingTo([`${HTTP_ORIGIN}/old/a`, `${HTTP_ORIGIN}/new`, '/old/b']),
+        [`${HTTP_ORIGIN}/new`]: pageLinkingTo([`${HTTP_ORIGIN}/old/c`]),
+        [`${ORIGIN}/old/b`]: pageLinkingTo([]),
+      });
+
+      await expect(crawl()).resolves.toEqual(
+        toResult({ documentsCount: 3, skippedByRobotsCount: 2 })
+      );
+
+      expect(
+        getRequestedUrls().filter((requestedUrl) => requestedUrl.endsWith('/robots.txt'))
+      ).toEqual([ROBOTS_URL, `${HTTP_ORIGIN}/robots.txt`]);
+    });
+
+    it('leaves the pages of an origin alone, and deletes nothing, when its robots.txt cannot be read', async () => {
+      siteFiles[`${HTTP_ORIGIN}/robots.txt`] = new Error('rate limited');
+      mockSite({
+        [SEED_URL]: pageLinkingTo([`${HTTP_ORIGIN}/a`, '/b']),
+        [`${ORIGIN}/b`]: pageLinkingTo([]),
+      });
+
+      await expect(crawl()).resolves.toEqual(toResult({ documentsCount: 2 }));
+
+      expect(getPageRequests()).toEqual([SEED_URL, `${ORIGIN}/b`]);
+      expect(logger.warn).toHaveBeenCalledWith(
+        `Web crawl could not read ${HTTP_ORIGIN}/robots.txt: rate limited`
+      );
+      expect(esClient.deleteByQuery).not.toHaveBeenCalled();
+    });
+
+    it('warns when a robots.txt has more rules than are kept', async () => {
+      siteFiles[ROBOTS_URL] = [
+        'User-agent: *',
+        ...range(2001, (rule) => `Disallow: /private-${rule}`),
+      ].join('\n');
+      mockSmallSite();
+
+      await crawl();
+
+      expect(logger.warn).toHaveBeenCalledWith(
+        `Web crawl read only the first rules of ${ROBOTS_URL}, which has more than it keeps`
+      );
+    });
+  });
+
+  describe('a page found more than once', () => {
+    it('is crawled again when it is found closer to a start URL, so that its links are followed', async () => {
+      const releaseSlow = hold(`${ORIGIN}/slow`);
+      mockSite({
+        [SEED_URL]: pageLinkingTo(['/fast', '/slow']),
+        [`${ORIGIN}/fast`]: pageLinkingTo(['/deep']),
+        [`${ORIGIN}/deep`]: pageLinkingTo(['/target']),
+        [`${ORIGIN}/target`]: pageLinkingTo(['/beyond']),
+        [`${ORIGIN}/slow`]: pageLinkingTo(['/target']),
+        [`${ORIGIN}/beyond`]: pageLinkingTo([]),
+      });
+
+      const crawling = crawl({ maxDepth: 3 });
+      await waitUntil(() => getPageRequests().includes(`${ORIGIN}/target`));
+      await letCrawlRun();
+      expect(getPageRequests()).not.toContain(`${ORIGIN}/beyond`);
+
+      releaseSlow();
+      await crawling;
+
+      expect(getPageRequests().filter((pageUrl) => pageUrl === `${ORIGIN}/target`)).toHaveLength(2);
+      expect(getIndexedDepths()).toEqual({
+        [SEED_URL]: 0,
+        [`${ORIGIN}/fast`]: 1,
+        [`${ORIGIN}/slow`]: 1,
+        [`${ORIGIN}/deep`]: 2,
+        [`${ORIGIN}/target`]: 2,
+        [`${ORIGIN}/beyond`]: 3,
+      });
+    });
+
+    it('is not crawled again when it is found at the same depth or deeper', async () => {
+      mockSite({
+        [SEED_URL]: pageLinkingTo(['/a', '/b']),
+        [`${ORIGIN}/a`]: pageLinkingTo(['/b', '/c']),
+        [`${ORIGIN}/b`]: pageLinkingTo(['/a', '/c', '/']),
+        [`${ORIGIN}/c`]: pageLinkingTo(['/a']),
+      });
+
+      await crawl({ maxDepth: 3 });
+
+      expect(getPageRequests()).toEqual([SEED_URL, `${ORIGIN}/a`, `${ORIGIN}/b`, `${ORIGIN}/c`]);
+    });
+
+    it('follows a URL of a page that the rules allow after another URL of it was turned away', async () => {
+      mockSite({
+        [SEED_URL]: pageLinkingTo(['/docs', '/docs', '/docs/']),
+        [`${ORIGIN}/docs/`]: pageLinkingTo(['/docs']),
+      });
+
+      await expect(
+        crawl({ pathRules: { includePaths: ['/docs/'], excludePaths: [] } })
+      ).resolves.toEqual(toResult({ documentsCount: 2, skippedByRulesCount: 1 }));
+
+      expect(getPageRequests()).toEqual([SEED_URL, `${ORIGIN}/docs/`]);
     });
   });
 
@@ -1159,8 +1272,42 @@ describe('crawlSite', () => {
       expect(getPageRequests()).toEqual([SEED_URL, `${ORIGIN}/a`, `${ORIGIN}/b`]);
     });
 
+    it('makes a request that is sent again wait for its turn too', async () => {
+      siteFiles[ROBOTS_URL] = 'User-agent: *\nCrawl-delay: 2';
+      mockSmallSite();
+
+      const crawling = crawl();
+      await letCrawlRun();
+      const [, { beforeRetry }] = mockExtractPage.mock.calls.find(
+        ([, { url: requestedUrl }]) => requestedUrl === SEED_URL
+      ) ?? [undefined, {}];
+
+      expect(getPageRequests()).toEqual([SEED_URL]);
+      let isRetryAllowed = false;
+      void beforeRetry?.().then(() => {
+        isRetryAllowed = true;
+      });
+      await advance(3_999);
+      expect(isRetryAllowed).toBe(false);
+
+      await advance(4_001);
+      await crawling;
+      expect(isRetryAllowed).toBe(true);
+    });
+
+    it('lets a request be sent again at once on a site that asks for no pause', async () => {
+      mockSmallSite();
+
+      await crawl();
+
+      for (const [, { beforeRetry }] of mockExtractPage.mock.calls) {
+        expect(beforeRetry).toBeUndefined();
+      }
+    });
+
     it('paces the start URLs on the www. host and the bare host of a site together', async () => {
       siteFiles[ROBOTS_URL] = 'User-agent: *\nCrawl-delay: 2';
+      siteFiles['https://www.example.com/robots.txt'] = 'User-agent: *\nCrawl-delay: 2';
       mockPages(() => pageLinkingTo([]));
 
       const crawling = crawl({ additionalSeedUrls: ['https://www.example.com/'] });
@@ -1283,6 +1430,8 @@ describe('crawlSite', () => {
           query: {
             bool: {
               filter: [
+                { term: { crawl_scope: expect.stringMatching(/^[0-9a-f]{64}$/) } },
+                { range: { crawled_at: { lt: expect.any(String) } } },
                 { range: { depth: { lte: 3 } } },
                 { terms: { url_host: ['example.com', 'www.example.com'] } },
               ],
@@ -1350,6 +1499,41 @@ describe('crawlSite', () => {
       );
     });
 
+    it('deletes only what a crawl of the same start URLs and path rules indexed', async () => {
+      const getScope = async (options: Partial<CrawlOptions>) => {
+        esClient.deleteByQuery.mockClear();
+        mockSmallSite();
+        await crawl(options);
+        const [{ query }] = esClient.deleteByQuery.mock.calls[0];
+        const [scopeFilter] = [query?.bool?.filter].flat();
+        return scopeFilter?.term?.crawl_scope;
+      };
+
+      const scope = await getScope({});
+
+      expect(getIndexedDocuments().every(({ crawl_scope: indexed }) => indexed === scope)).toBe(
+        true
+      );
+      expect(await getScope({ maxDepth: 1, fileExtensions: ['pdf'] })).toBe(scope);
+      const twoSeedsScope = await getScope({ additionalSeedUrls: [`${ORIGIN}/a`] });
+      expect(twoSeedsScope).not.toBe(scope);
+      expect(await getScope({ url: `${ORIGIN}/a`, additionalSeedUrls: [SEED_URL] })).toBe(
+        twoSeedsScope
+      );
+      expect(
+        await getScope({ pathRules: { includePaths: [], excludePaths: ['/private'] } })
+      ).not.toBe(scope);
+    });
+
+    it('deletes nothing when a sitemap could not be read', async () => {
+      siteFiles[SITEMAP_URL] = new Error('sitemap unavailable');
+      mockSmallSite();
+
+      await expect(crawl()).resolves.toEqual(toResult({ documentsCount: 3 }));
+
+      expect(esClient.deleteByQuery).not.toHaveBeenCalled();
+    });
+
     it('deletes only within the path rules of the crawl', async () => {
       mockSmallSite({ [SEED_URL]: pageLinkingTo(['/a', '/b', '/docs/internal']) });
       const pathRules = { includePaths: ['/a', '/b', '/docs'], excludePaths: ['/docs/internal'] };
@@ -1360,6 +1544,8 @@ describe('crawlSite', () => {
       const [{ query }] = esClient.deleteByQuery.mock.calls[0];
       expect(query?.bool).toEqual({
         filter: [
+          { term: { crawl_scope: expect.any(String) } },
+          { range: { crawled_at: { lt: expect.any(String) } } },
           { range: { depth: { lte: WEB_CRAWL_DEFAULT_MAX_DEPTH } } },
           { terms: { url_host: ['example.com', 'www.example.com'] } },
           {
@@ -1382,7 +1568,7 @@ describe('crawlSite', () => {
         CRAWL_LIMITS,
         'maxSeenUrlsLength',
         sections.reduce((total, section) => total + toKeyLength(section), 0) +
-          15 * toKeyLength(toSkippedLink(sections[0], 0))
+          15 * `${ORIGIN}${toSkippedLink(sections[0], 0)}`.length
       );
       mockPages((url) => {
         const { pathname } = new URL(url);
@@ -1643,11 +1829,13 @@ describe('crawlSite', () => {
         });
       });
 
-      it('treats the www. host and the bare host as one site, with one robots.txt', async () => {
-        siteFiles[ROBOTS_URL] = disallow('/private');
+      it('treats the www. host and the bare host as one site, each with its own robots.txt', async () => {
+        const wwwRobotsUrl = 'https://www.example.com/robots.txt';
+        siteFiles[wwwRobotsUrl] = disallow('/private');
         mockSite({
-          [SEED_URL]: pageLinkingTo(['https://www.example.com/private/a', '/a']),
+          [SEED_URL]: pageLinkingTo(['https://www.example.com/private/a', '/private/b', '/a']),
           [`${ORIGIN}/a`]: pageLinkingTo([]),
+          [`${ORIGIN}/private/b`]: pageLinkingTo([]),
           'https://www.example.com/docs': pageLinkingTo([]),
         });
 
@@ -1658,13 +1846,15 @@ describe('crawlSite', () => {
               'https://www.example.com/docs',
             ],
           })
-        ).resolves.toEqual(toResult({ documentsCount: 3, skippedByRobotsCount: 2 }));
+        ).resolves.toEqual(toResult({ documentsCount: 4, skippedByRobotsCount: 2 }));
 
         expect(getRequestedUrls()).toEqual([
           ROBOTS_URL,
+          wwwRobotsUrl,
           SITEMAP_URL,
           SEED_URL,
           'https://www.example.com/docs',
+          `${ORIGIN}/private/b`,
           `${ORIGIN}/a`,
         ]);
       });

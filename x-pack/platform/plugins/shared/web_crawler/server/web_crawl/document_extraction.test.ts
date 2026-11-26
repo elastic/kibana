@@ -164,6 +164,36 @@ describe('extractPage', () => {
       expect(removeEventListener).toHaveBeenCalledTimes(2);
     });
 
+    it('awaits beforeRetry after each delay, before the request is sent again', async () => {
+      let release: () => void = () => {};
+      const beforeRetry = jest.fn(
+        () =>
+          new Promise<void>((resolve) => {
+            release = resolve;
+          })
+      );
+      esClient.transport.request
+        .mockRejectedValueOnce(createEsError(429))
+        .mockResolvedValueOnce(PAGE_RESPONSE);
+
+      const extraction = extractPage(esClient, {
+        inferenceId: '.jina-reader',
+        url: 'https://example.com/page',
+        signal,
+        beforeRetry,
+      });
+      await jest.advanceTimersByTimeAsync(FIRST_DELAY_MS);
+
+      expect(beforeRetry).toHaveBeenCalledTimes(1);
+      expect(esClient.transport.request).toHaveBeenCalledTimes(1);
+
+      release();
+
+      await expect(extraction).resolves.toEqual({ content: '# Page' });
+      expect(esClient.transport.request).toHaveBeenCalledTimes(2);
+      expect(beforeRetry).toHaveBeenCalledTimes(1);
+    });
+
     it('gives up with the rate limiting error once every delay was used', async () => {
       const lastError = createEsError(429);
       esClient.transport.request

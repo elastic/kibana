@@ -210,6 +210,20 @@ describe('parseRobotsTxt', () => {
   });
 
   describe('syntax', () => {
+    it('keeps the `User-agent` lines of a group together across a line it does not know', () => {
+      const robotsTxt = lines(
+        'User-agent: other',
+        'Host: example.com',
+        'Unknown: value',
+        `User-agent: ${USER_AGENT}`,
+        'Disallow: /private'
+      );
+
+      expect(isAllowed(robotsTxt, '/private')).toBe(false);
+      expect(isAllowed(robotsTxt, '/private', 'other')).toBe(false);
+      expect(isAllowed(robotsTxt, '/public')).toBe(true);
+    });
+
     it('ignores comments, blank lines, unknown fields and lines without a separator', () => {
       const robotsTxt = lines(
         '# robots.txt for example.com',
@@ -426,11 +440,45 @@ describe('parseRobotsTxt', () => {
       expect(isAllowed(robotsTxt, '/a/b')).toBe(true);
     });
 
+    it('takes an escaped unreserved character for the character itself', () => {
+      const robotsTxt = lines('User-agent: *', 'Disallow: /%7Euser/', 'Disallow: /plain-name');
+
+      expect(isAllowed(robotsTxt, '/~user/home')).toBe(false);
+      expect(isAllowed(robotsTxt, '/%7euser/home')).toBe(false);
+      expect(isAllowed(robotsTxt, '/plain%2Dname')).toBe(false);
+      expect(isAllowed(robotsTxt, '/user/home')).toBe(true);
+    });
+
     it('keeps a pattern it cannot encode', () => {
       const robotsTxt = lines('User-agent: *', 'Disallow: /broken\ud800', 'Disallow: /private');
 
       expect(isAllowed(robotsTxt, '/private')).toBe(false);
       expect(isAllowed(robotsTxt, '/broken')).toBe(true);
+    });
+  });
+
+  describe('truncation', () => {
+    const toRules = (count: number) =>
+      Array.from({ length: count }, (_, index) => `Disallow: /path-${index}`);
+
+    it('is not truncated while every rule of the group that applies is kept', () => {
+      const robotsTxt = lines('User-agent: *', ...toRules(2000));
+
+      expect(parseRobotsTxt(robotsTxt, USER_AGENT).isTruncated).toBe(false);
+      expect(ALLOW_ALL_ROBOTS.isTruncated).toBeUndefined();
+    });
+
+    it('tells when the group that applies had more rules than are kept', () => {
+      const robotsTxt = lines('User-agent: *', ...toRules(2001), 'User-agent: other', 'Allow: /');
+
+      expect(parseRobotsTxt(robotsTxt, USER_AGENT).isTruncated).toBe(true);
+      expect(parseRobotsTxt(robotsTxt, 'other').isTruncated).toBe(false);
+    });
+
+    it('tells when the file was longer than what is read', () => {
+      const robotsTxt = lines('User-agent: *', `# ${'x'.repeat(500_000)}`, 'Disallow: /late');
+
+      expect(parseRobotsTxt(robotsTxt, USER_AGENT).isTruncated).toBe(true);
     });
   });
 
