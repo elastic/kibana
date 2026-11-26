@@ -16,6 +16,8 @@ export type OnboardingStepStatus = 'complete' | 'current' | 'disabled';
 
 export interface OnboardingStepState {
   status: OnboardingStepStatus;
+  /** Shows the check although the step is not behind the current one, e.g. its goal is already met. */
+  isComplete?: boolean;
   /** Makes the step title a link to that step. */
   onClick?: () => void;
   /** Short line under the step title. */
@@ -76,8 +78,8 @@ export function OnboardingStepsCard({
         `}
       >
         {ONBOARDING_STEP_IDS.map((stepId, index) => {
-          const { status, onClick, hint } = steps[stepId];
-          const isComplete = status === 'complete';
+          const { status, isComplete: isGoalMet, onClick, hint } = steps[stepId];
+          const isComplete = status === 'complete' || isGoalMet === true;
           const isCurrent = status === 'current';
           const isLast = index === ONBOARDING_STEP_IDS.length - 1;
           const title = STEP_TITLES[stepId];

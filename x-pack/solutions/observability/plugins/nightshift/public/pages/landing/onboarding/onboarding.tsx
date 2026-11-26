@@ -158,6 +158,12 @@ export function NightshiftOnboarding({
     setStepOverride(undefined);
   }
 
+  // A detour back to the suggestions hides the investigation card, so the user can start another.
+  const investigation = stepOverride === 'investigate' ? undefined : latestInvestigation;
+  // The investigation's goal is met once it has finished, not when it starts.
+  const isInvestigationDone = investigation != null && !investigation.in_progress;
+  const isInvestigationRunning = investigation != null && investigation.in_progress;
+
   // Before an exploration run exists, Proceed on Add data moves to Connect other sources locally.
   const step: OnboardingStepId = !isEnabled
     ? 'enable'
@@ -165,7 +171,7 @@ export function NightshiftOnboarding({
     ? stepOverride
     : !isConnected
     ? 'addData'
-    : latestInvestigation && stepOverride !== 'investigate'
+    : isInvestigationDone
     ? 'automate'
     : 'investigate';
 
@@ -250,7 +256,12 @@ export function NightshiftOnboarding({
 
   const steps: Record<OnboardingStepId, OnboardingStepState> = {
     enable: { status: statusOf('enable') },
-    addData: { status: statusOf('addData'), onClick: linkTo('addData') },
+    addData: {
+      status: statusOf('addData'),
+      onClick: linkTo('addData'),
+      // The goal is met once a telemetry source is connected, before Proceed moves on.
+      isComplete: step !== 'enable' && hasTelemetrySource,
+    },
     connectSources: {
       status: statusOf('connectSources'),
       onClick: linkTo('connectSources'),
@@ -259,12 +270,15 @@ export function NightshiftOnboarding({
     investigate: {
       status: statusOf('investigate'),
       onClick: linkTo('investigate'),
-      hint:
-        step === 'investigate' && execution?.status === 'running'
-          ? i18n.translate('xpack.nightshift.onboarding.steps.analyzingHint', {
-              defaultMessage: 'Analyzing your data…',
-            })
-          : undefined,
+      hint: isInvestigationRunning
+        ? i18n.translate('xpack.nightshift.onboarding.steps.investigatingHint', {
+            defaultMessage: 'Agent is investigating…',
+          })
+        : step === 'investigate' && execution?.status === 'running'
+        ? i18n.translate('xpack.nightshift.onboarding.steps.analyzingHint', {
+            defaultMessage: 'Analyzing your data…',
+          })
+        : undefined,
     },
     automate: {
       status: hasAutomation ? 'complete' : step === 'automate' ? 'current' : 'disabled',
@@ -303,7 +317,9 @@ export function NightshiftOnboarding({
         {hasAdditionalSource ? PROCEED_LABEL : SKIP_LABEL}
       </EuiButton>
     ) : step === 'investigate' ? (
-      latestInvestigation && (
+      // A finished investigation can be skipped past; a running one is waited for.
+      latestInvestigation != null &&
+      !latestInvestigation.in_progress && (
         <EuiButton
           fullWidth
           size="s"
@@ -396,15 +412,15 @@ export function NightshiftOnboarding({
             <OnboardingConnectSourcesStep />
           ) : step === 'addData' || !execution ? (
             <OnboardingAddDataStep />
-          ) : step === 'investigate' || !latestInvestigation ? (
+          ) : !investigation ? (
             <OnboardingFirstInvestigationStep
               execution={execution}
               onInvestigationStarted={() => setStepOverride(undefined)}
             />
           ) : (
             <OnboardingAutomationStep
-              investigation={latestInvestigation}
-              isInvestigationSelected={selectedInvestigationId === latestInvestigation.id}
+              investigation={investigation}
+              isInvestigationSelected={selectedInvestigationId === investigation.id}
               automations={automations.data?.automations ?? []}
               automationsAvailable={automationsHref != null}
               onInvestigationClick={openInvestigation}

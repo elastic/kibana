@@ -57,9 +57,11 @@ jest.mock('./connect_sources_step', () => ({
   OnboardingConnectSourcesStep: () => <div data-test-subj="connectSourcesStepStub" />,
 }));
 jest.mock('./first_investigation_step', () => ({
-  OnboardingFirstInvestigationStep: () => null,
+  OnboardingFirstInvestigationStep: () => <div data-test-subj="firstInvestigationStepStub" />,
 }));
-jest.mock('./automation_step', () => ({ OnboardingAutomationStep: () => null }));
+jest.mock('./automation_step', () => ({
+  OnboardingAutomationStep: () => <div data-test-subj="automationStepStub" />,
+}));
 
 const STEP_IDS = ['enable', 'addData', 'connectSources', 'investigate', 'automate'];
 
@@ -109,6 +111,11 @@ const currentStep = () =>
 const linkedSteps = () =>
   STEP_IDS.filter((id) => screen.queryByTestId(`nightshiftOnboardingStepLink-${id}`));
 const stepsCard = () => screen.getByTestId('nightshiftOnboardingSteps');
+/** A step shows a check icon instead of its number once its goal is met. */
+const isChecked = (id: string) =>
+  screen
+    .getByTestId(`nightshiftOnboardingStep-${id}`)
+    .querySelector('[data-euiicon-type="check"]') != null;
 
 describe('NightshiftOnboarding', () => {
   beforeEach(() => {
@@ -162,6 +169,23 @@ describe('NightshiftOnboarding', () => {
       expect(
         screen.queryByTestId('nightshiftOnboardingAddDataProceedButton')
       ).not.toBeInTheDocument();
+    });
+
+    it('checks Add data once a telemetry connector exists, before Proceed', () => {
+      mockConnectors({ '.elasticsearch': 0, '.new_relic': 1 });
+
+      renderOnboarding();
+
+      expect(currentStep()).toBe('addData');
+      expect(isChecked('addData')).toBe(true);
+    });
+
+    it('does not check Add data without a telemetry connector', () => {
+      mockConnectors({ '.elasticsearch': 0, '.new_relic': 0 });
+
+      renderOnboarding();
+
+      expect(isChecked('addData')).toBe(false);
     });
 
     it('proceeds to Connect other sources once a telemetry connector exists', () => {
@@ -269,8 +293,74 @@ describe('NightshiftOnboarding', () => {
     });
   });
 
+  describe('while the first investigation is running', () => {
+    const running = { id: 'inv-1', in_progress: true } as InvestigationSummary;
+
+    beforeEach(() => {
+      mockOnboarding({ explored: true });
+      mockConnectors({ '.new_relic': 1, '.github': 0 });
+    });
+
+    it('keeps Try first investigation current and unchecked, and Create first automation off', () => {
+      renderOnboarding(running);
+
+      expect(currentStep()).toBe('investigate');
+      expect(isChecked('investigate')).toBe(false);
+      expect(isChecked('automate')).toBe(false);
+      expect(screen.getByTestId('nightshiftOnboardingStepTitle')).toHaveTextContent(
+        'Try first investigation'
+      );
+      expect(stepsCard()).toHaveTextContent('Agent is investigating…');
+    });
+
+    it('shows the investigation card instead of the suggestions', () => {
+      renderOnboarding(running);
+
+      expect(screen.getByTestId('automationStepStub')).toBeInTheDocument();
+      expect(screen.queryByTestId('firstInvestigationStepStub')).not.toBeInTheDocument();
+    });
+
+    it('offers no Skip this step until it finishes', () => {
+      renderOnboarding(running);
+
+      expect(
+        screen.queryByTestId('nightshiftOnboardingProceedToAutomationButton')
+      ).not.toBeInTheDocument();
+    });
+
+    it('moves on to Create first automation once it finishes', () => {
+      const { rerender } = renderOnboarding(running);
+
+      rerender(
+        <I18nProvider>
+          <MemoryRouter>
+            <NightshiftOnboarding
+              onFinish={jest.fn()}
+              latestInvestigation={{ ...running, in_progress: false }}
+            />
+          </MemoryRouter>
+        </I18nProvider>
+      );
+
+      expect(currentStep()).toBe('automate');
+      expect(isChecked('investigate')).toBe(true);
+      expect(screen.getByTestId('automationStepStub')).toBeInTheDocument();
+    });
+
+    it('shows the suggestions again on a detour back to Try first investigation', () => {
+      renderOnboarding(running);
+
+      fireEvent.click(screen.getByTestId('nightshiftOnboardingStepLink-addData'));
+      fireEvent.click(screen.getByTestId('nightshiftOnboardingStepLink-investigate'));
+
+      expect(currentStep()).toBe('investigate');
+      expect(screen.getByTestId('firstInvestigationStepStub')).toBeInTheDocument();
+      expect(screen.queryByTestId('automationStepStub')).not.toBeInTheDocument();
+    });
+  });
+
   describe('after the first investigation', () => {
-    const investigation = { id: 'inv-1' } as InvestigationSummary;
+    const investigation = { id: 'inv-1', in_progress: false } as InvestigationSummary;
 
     beforeEach(() => {
       mockOnboarding({ explored: true });
@@ -281,9 +371,33 @@ describe('NightshiftOnboarding', () => {
       renderOnboarding(investigation);
 
       expect(currentStep()).toBe('automate');
+      expect(isChecked('investigate')).toBe(true);
+      expect(screen.getByTestId('automationStepStub')).toBeInTheDocument();
+      expect(screen.queryByTestId('firstInvestigationStepStub')).not.toBeInTheDocument();
       expect(linkedSteps()).toEqual(['addData', 'connectSources', 'investigate']);
       expect(screen.queryByRole('button', { name: 'Back' })).not.toBeInTheDocument();
       expect(screen.queryByText('Back to suggestions')).not.toBeInTheDocument();
+    });
+
+    it('keeps the check on Add data after a detour back to it', () => {
+      renderOnboarding(investigation);
+
+      fireEvent.click(screen.getByTestId('nightshiftOnboardingStepLink-addData'));
+
+      expect(currentStep()).toBe('addData');
+      expect(isChecked('addData')).toBe(true);
+    });
+
+    it('offers Skip this step on a detour back to the suggestions', () => {
+      renderOnboarding(investigation);
+
+      fireEvent.click(screen.getByTestId('nightshiftOnboardingStepLink-investigate'));
+      expect(screen.getByTestId('nightshiftOnboardingProceedToAutomationButton')).toHaveTextContent(
+        'Skip this step'
+      );
+      fireEvent.click(screen.getByTestId('nightshiftOnboardingProceedToAutomationButton'));
+
+      expect(currentStep()).toBe('automate');
     });
 
     it('returns to a completed step and forward again through the card, not by rerunning', () => {
