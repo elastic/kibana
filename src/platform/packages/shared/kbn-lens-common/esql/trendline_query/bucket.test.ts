@@ -30,30 +30,30 @@ const parseStats = (esqlQuery: string): ESQLCommand => {
 describe('buildTrendlineBucketExpression', () => {
   it('builds a BUCKET expression with time params', () => {
     expect(buildTrendlineBucketExpression('@timestamp')).toBe(
-      'BUCKET(@timestamp, 100, ?_tstart, ?_tend)'
+      'BUCKET(@timestamp, 50, ?_tstart, ?_tend)'
     );
   });
 
   it('escapes dotted field names with backticks', () => {
     expect(buildTrendlineBucketExpression('order.date')).toBe(
-      'BUCKET(`order.date`, 100, ?_tstart, ?_tend)'
+      'BUCKET(`order.date`, 50, ?_tstart, ?_tend)'
     );
   });
 
   it('uses the provided bucket target', () => {
-    expect(buildTrendlineBucketExpression('@timestamp', 50)).toBe(
-      'BUCKET(@timestamp, 50, ?_tstart, ?_tend)'
+    expect(buildTrendlineBucketExpression('@timestamp', 200)).toBe(
+      'BUCKET(@timestamp, 200, ?_tstart, ?_tend)'
     );
   });
 });
 
 describe('buildTrendlineTbucketExpression', () => {
   it('builds a TBUCKET expression with the auto bucket target', () => {
-    expect(buildTrendlineTbucketExpression()).toBe('TBUCKET(100)');
+    expect(buildTrendlineTbucketExpression()).toBe('TBUCKET(50)');
   });
 
   it('uses the provided bucket target', () => {
-    expect(buildTrendlineTbucketExpression(50)).toBe('TBUCKET(50)');
+    expect(buildTrendlineTbucketExpression(200)).toBe('TBUCKET(200)');
   });
 });
 
@@ -140,10 +140,10 @@ describe('getTbucketResultColumn', () => {
 describe('getBucketResultColumnForField', () => {
   it('returns the printed expression for an unaliased BUCKET on the field', () => {
     const statsCommand = parseStats(
-      'FROM index | STATS COUNT(*) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend)'
+      'FROM index | STATS COUNT(*) BY BUCKET(@timestamp, 50, ?_tstart, ?_tend)'
     );
     expect(getBucketResultColumnForField(statsCommand, '@timestamp')).toBe(
-      'BUCKET(@timestamp, 100, ?_tstart, ?_tend)'
+      'BUCKET(@timestamp, 50, ?_tstart, ?_tend)'
     );
   });
 

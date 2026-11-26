@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { UI_SETTINGS } from './constants';
+import { DEFAULT_HISTOGRAM_BAR_TARGET, UI_SETTINGS } from './constants';
 import { getAutoDateBucketTarget } from './get_auto_date_bucket_target';
 import type { GetConfigFn } from './types';
 
@@ -22,23 +22,19 @@ const config =
 
 describe('getAutoDateBucketTarget', () => {
   it('returns histogram:barTarget when it is a positive integer', () => {
-    expect(getAutoDateBucketTarget(config({ [UI_SETTINGS.HISTOGRAM_BAR_TARGET]: 50 }))).toBe(50);
+    expect(getAutoDateBucketTarget(config({ [UI_SETTINGS.HISTOGRAM_BAR_TARGET]: 75 }))).toBe(75);
   });
 
-  it('defaults to 100 when the setting is missing', () => {
-    expect(getAutoDateBucketTarget(config({}))).toBe(100);
+  it('defaults to DEFAULT_HISTOGRAM_BAR_TARGET when the setting is missing', () => {
+    expect(getAutoDateBucketTarget(config({}))).toBe(DEFAULT_HISTOGRAM_BAR_TARGET);
   });
 
-  it('defaults to 100 when the setting is not a positive integer', () => {
-    expect(getAutoDateBucketTarget(config({ [UI_SETTINGS.HISTOGRAM_BAR_TARGET]: 0 }))).toBe(100);
-    expect(getAutoDateBucketTarget(config({ [UI_SETTINGS.HISTOGRAM_BAR_TARGET]: -1 }))).toBe(100);
-    expect(getAutoDateBucketTarget(config({ [UI_SETTINGS.HISTOGRAM_BAR_TARGET]: 1.5 }))).toBe(100);
-    expect(getAutoDateBucketTarget(config({ [UI_SETTINGS.HISTOGRAM_BAR_TARGET]: '100' }))).toBe(
-      100
-    );
-    expect(getAutoDateBucketTarget(config({ [UI_SETTINGS.HISTOGRAM_BAR_TARGET]: '150' }))).toBe(
-      100
-    );
+  it('defaults to DEFAULT_HISTOGRAM_BAR_TARGET when the setting is not a positive integer', () => {
+    for (const value of [0, -1, 1.5, '100', '150']) {
+      expect(getAutoDateBucketTarget(config({ [UI_SETTINGS.HISTOGRAM_BAR_TARGET]: value }))).toBe(
+        DEFAULT_HISTOGRAM_BAR_TARGET
+      );
+    }
   });
 
   it('does not clamp to histogram:maxBars', () => {
