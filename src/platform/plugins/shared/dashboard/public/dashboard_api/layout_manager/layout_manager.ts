@@ -148,6 +148,17 @@ export function initializeLayoutManager(
     map(([children, visibleChildren]) => pick(children, visibleChildren))
   );
 
+  /**
+   * Emits when a section is collapsed or expanded, which only changes which panels are rendered. Sections
+   * that are added expanded do not emit.
+   */
+  const sectionToggled$ = layout$.pipe(
+    map(({ sections }) => Object.keys(sections).filter(isSectionCollapsed)),
+    distinctUntilChanged<string[]>(deepEqual),
+    skip(1),
+    map(() => undefined)
+  );
+
   let lastSavedLayout = initialLayout;
   let lastSavedChildState = initialChildState;
 
@@ -555,6 +566,7 @@ export function initializeLayoutManager(
       gridLayout$,
       visibleChildren$,
       renderedChildren$,
+      sectionToggled$,
       childApisPending$,
       reset: resetLayout,
       serializeLayout: () => serializeLayout(layout$.value, currentChildState),

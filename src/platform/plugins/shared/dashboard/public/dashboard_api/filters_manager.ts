@@ -18,6 +18,7 @@ import {
   filter,
   first,
   map,
+  merge,
   of,
   skip,
   skipWhile,
@@ -200,7 +201,6 @@ export const initializeFiltersManager = (
     .subscribe((pending) => {
       if (pending !== initialPublishPending$.getValue()) initialPublishPending$.next(pending);
     });
-
   /**
    * `true` while the unpublished child filters, or whether the children are awaiting required filters,
    * differ from what is published. The awaiting state can change without the filters changing (e.g. a
@@ -225,36 +225,45 @@ export const initializeFiltersManager = (
       }
     });
 
-  /** when auto-apply is `true`, push filters from `unpublishedFilters$` directly to published */
-  const autoPublishFiltersSubscription = unpublishedChildFilters$
-    .pipe(
-      combineLatestWith(settingsManager.api.settings.autoApplyFilters$),
-      filter(([_, autoApplyFilters]) => autoApplyFilters)
+  /**
+   * Collapsing or expanding a section only changes which controls are rendered, so it never needs an Apply.
+   * With auto-apply on there is nothing to publish, and the initial publish covers the grid opening.
+   */
+  const sectionToggled$ = layoutManager.internalApi.sectionToggled$.pipe(
+    filter(
+      () =>
+        !initialPublishPending$.getValue() &&
+        !awaitingRequiredFilters$.getValue() &&
+        !settingsManager.api.settings.autoApplyFilters$.getValue()
     )
-    .subscribe(([filters, autoApplyFilters]) => {
-      publishFilters();
-    });
+  );
 
   /**
-   * When auto-apply is `false` and the dashboard is reset, publish once the children have settled, i.e. are
-   * done computing their filters. `setState` only emits after every child has applied its new state, and a
-   * control flags `filtersLoading$` as soon as its state changes, so this waits for the controls' new filters
-   * when there are any, and resolves right away when the reset changes no filter-related state. This is the
-   * same settle condition as the initial publish. `switchMap` drops the wait if another reset happens first.
+   * Publishes the unpublished filters, either:
+   * - right away when auto-apply is `true`, or
+   * - when the dashboard is reset or a section is collapsed or expanded, once the children have settled, i.e.
+   *   are done computing their filters. `setState` only emits after every child has applied its new state, and
+   *   a control flags `filtersLoading$` as soon as its state changes, so this waits for the controls' new
+   *   filters when there are any, and resolves right away when nothing filter-related changed. This is the same
+   *   settle condition as the initial publish. `switchMap` drops the wait if another one starts first.
    */
-  const forcePublishSubscription = forcePublish$
-    .pipe(
+  const publishSubscription = merge(
+    unpublishedChildFilters$.pipe(
+      combineLatestWith(settingsManager.api.settings.autoApplyFilters$),
+      filter(([, autoApplyFilters]) => autoApplyFilters)
+    ),
+    merge(forcePublish$, sectionToggled$).pipe(
       switchMap(() =>
         combineLatest([childFilters$, childFiltersLoading$]).pipe(
           debounceTime(0),
           first(([, loading]) => !loading)
         )
-      )
+      ),
+      tap(([allChildFilters]) => unpublishedChildFilters$.next(allChildFilters))
     )
-    .subscribe(([allChildFilters]) => {
-      unpublishedChildFilters$.next(allChildFilters);
-      publishFilters();
-    });
+  ).subscribe(() => {
+    publishFilters();
+  });
 
   const filters$ = new BehaviorSubject<Filter[] | undefined>(undefined);
   const filtersSubscription = publishedChildFilters$
@@ -280,11 +289,10 @@ export const initializeFiltersManager = (
     },
     internalApi: { initialPublishPending$: initialPublishPending$.asObservable() },
     cleanup: () => {
-      autoPublishFiltersSubscription.unsubscribe();
+      publishSubscription.unsubscribe();
       unpublishedFiltersSubscription.unsubscribe();
       hasUnpublishedFiltersSubscription.unsubscribe();
       filtersSubscription.unsubscribe();
-      forcePublishSubscription.unsubscribe();
       requiredFiltersSubscription.unsubscribe();
       initialPublishSubscription.unsubscribe();
     },

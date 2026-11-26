@@ -9,7 +9,7 @@
 
 import deepEqual from 'fast-deep-equal';
 import { pick } from 'lodash';
-import { BehaviorSubject, Subject, combineLatest, distinctUntilChanged, map } from 'rxjs';
+import { BehaviorSubject, Subject, combineLatest, distinctUntilChanged, map, skip } from 'rxjs';
 
 import type { Filter } from '@kbn/es-query';
 
@@ -82,6 +82,15 @@ const buildSetup = (
       childApisPending$: derivedChildApisPending$,
       renderedChildren$: combineLatest([children$, renderedIds$]).pipe(
         map(([children, ids]) => pick(children, ids))
+      ),
+      // like the real layout manager, emits when a section is collapsed or expanded
+      sectionToggled$: layout$.pipe(
+        map(({ sections }) =>
+          Object.keys(sections).filter((id) => (sections as Record<string, any>)[id].collapsed)
+        ),
+        distinctUntilChanged<string[]>(deepEqual),
+        skip(1),
+        map(() => undefined)
       ),
     },
   } as unknown as ReturnType<typeof initializeLayoutManager>;
@@ -528,6 +537,104 @@ describe('filters manager: awaiting required filters', () => {
     setVisibleChildren(['gridControl']);
     await flush();
     expect(filtersManager.api.publishedChildFilters$.value).toEqual([pinnedFilter, gridFilter]);
+  });
+
+  describe('auto-apply off: collapsing and expanding sections', () => {
+    const gridFilter = { meta: { key: 'grid', group: 's1' } } as Filter;
+    const pendingFilter = { meta: { key: 'pending' } } as Filter;
+    const buildGridControl = () => ({
+      uuid: 'grid',
+      filtersLoading$: new BehaviorSubject<boolean>(false),
+      appliedFilters$: new BehaviorSubject<Filter[] | undefined>([gridFilter]),
+    });
+    // like the real layout manager, collapsing a section changes the layout and un-renders its panels
+    const setup = async (collapsedOnLoad = false) => {
+      const result = buildSetup(['pinned'], { autoApplyFilters: false });
+      const { layout$, setVisibleChildren } = result;
+      const setCollapsed = (collapsed: boolean) => {
+        layout$.next({
+          ...layout$.value,
+          sections: { s1: { collapsed } },
+          panels: { grid: { grid: { sectionId: 's1' } } },
+        } as unknown as typeof layout$.value);
+        setVisibleChildren(collapsed ? [] : ['grid']);
+      };
+      setCollapsed(collapsedOnLoad);
+      return { ...result, setCollapsed };
+    };
+
+    test('collapsing and expanding neither stages a change nor needs an Apply', async () => {
+      const { filtersManager, setChildren, setCollapsed } = await setup();
+      setChildren([buildControl('pinned'), buildGridControl()]);
+      await flush();
+      expect(filtersManager.api.publishedChildFilters$.value).toEqual([gridFilter]);
+
+      setCollapsed(true);
+      await flush();
+      expect(filtersManager.api.publishedChildFilters$.value).toBeUndefined();
+      expect(filtersManager.api.hasUnpublishedFilters$.value).toBe(false);
+
+      setCollapsed(false);
+      await flush();
+      expect(filtersManager.api.publishedChildFilters$.value).toEqual([gridFilter]);
+      expect(filtersManager.api.hasUnpublishedFilters$.value).toBe(false);
+    });
+
+    test('a control that first mounts when its section is expanded publishes its saved filters', async () => {
+      const { filtersManager, setChildren, setCollapsed } = await setup(true);
+      // the section is collapsed on load, so its control has not mounted
+      setChildren([buildControl('pinned')]);
+      await flush();
+      expect(filtersManager.api.publishedChildFilters$.value).toBeUndefined();
+
+      setCollapsed(false);
+      setChildren([buildControl('pinned'), buildGridControl()]);
+      await flush();
+      expect(filtersManager.api.publishedChildFilters$.value).toEqual([gridFilter]);
+      expect(filtersManager.api.hasUnpublishedFilters$.value).toBe(false);
+    });
+
+    test('publishes other pending changes too, like a reset does', async () => {
+      const { filtersManager, setChildren, setCollapsed } = await setup();
+      const pinned = buildControl('pinned');
+      setChildren([pinned, buildGridControl()]);
+      await flush();
+
+      // the viewer changes a pinned control but does not apply it
+      pinned.appliedFilters$.next([pendingFilter]);
+      await flush();
+      expect(filtersManager.api.publishedChildFilters$.value).toEqual([gridFilter]);
+      expect(filtersManager.api.hasUnpublishedFilters$.value).toBe(true);
+
+      setCollapsed(true);
+      await flush();
+      expect(filtersManager.api.publishedChildFilters$.value).toEqual([pendingFilter]);
+      expect(filtersManager.api.hasUnpublishedFilters$.value).toBe(false);
+    });
+
+    test('does not force publish the other managers sharing the reset subject', async () => {
+      const { forcePublish$, setChildren, setCollapsed } = await setup();
+      setChildren([buildControl('pinned'), buildGridControl()]);
+      await flush();
+      const onForcePublish = jest.fn();
+      forcePublish$.subscribe(onForcePublish);
+
+      setCollapsed(true);
+      await flush();
+      expect(onForcePublish).not.toHaveBeenCalled();
+    });
+
+    test('a deleted panel is staged like any other change rather than published', async () => {
+      const { filtersManager, layout$, setChildren, setVisibleChildren } = await setup();
+      setChildren([buildControl('pinned'), buildGridControl()]);
+      await flush();
+
+      layout$.next({ ...layout$.value, panels: {} } as unknown as typeof layout$.value);
+      setVisibleChildren([]);
+      await flush();
+      expect(filtersManager.api.publishedChildFilters$.value).toEqual([gridFilter]);
+      expect(filtersManager.api.hasUnpublishedFilters$.value).toBe(true);
+    });
   });
 
   test("auto-apply off: the apply that hides the grid also drops the grid controls' filters", async () => {
