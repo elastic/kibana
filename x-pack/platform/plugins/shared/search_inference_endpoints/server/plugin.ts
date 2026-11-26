@@ -17,17 +17,14 @@ import type {
 } from '@kbn/core/server';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import { ApiPrivileges } from '@kbn/core-security-server';
-import { createInferenceRequestError } from '@kbn/inference-common';
+import { createInferenceRequestError, type InferenceConnector } from '@kbn/inference-common';
+import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import { GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR } from '@kbn/management-settings-ids';
 
 import { defineRoutes } from './routes';
 import { InferenceFeatureRegistry } from './inference_feature_registry';
 import { getForFeature as getForFeatureFn } from './inference_endpoints';
 import { NO_DEFAULT_CONNECTOR, resolveModelsForFeature } from './lib/resolve_models_for_feature';
-import {
-  getConnectorByIdAndTaskType,
-  getConnectorListByTaskType,
-} from './lib/connectors_by_task_type';
 import { createInferenceSettingsSavedObjectType } from './saved_objects/inference_settings';
 import type {
   GetForFeatureOptions,
@@ -38,6 +35,7 @@ import type {
   SearchInferenceEndpointsPluginStartDependencies,
 } from './types';
 import {
+  CHAT_COMPLETION_TASK_TYPE,
   ELASTIC_INFERENCE_SERVICE_APP_ID,
   INFERENCE_ENDPOINTS_APP_ID,
   INFERENCE_SETTINGS_SO_TYPE,
@@ -59,6 +57,27 @@ const getInferenceSettingsClient = (
   });
   const namespace = savedObjects.getScopedClient(request).getCurrentNamespace();
   return namespace ? internalClient.asScopedToNamespace(namespace) : internalClient;
+};
+
+/** Finds a model by id among the models of the given task type; throws a 404 when it is missing. */
+export const getConnectorByIdAndTaskType = async (
+  inference: Pick<InferenceServerStart, 'getConnectorList' | 'getConnectorById'>,
+  id: string,
+  request: KibanaRequest,
+  taskType: InferenceTaskType = CHAT_COMPLETION_TASK_TYPE
+): Promise<InferenceConnector> => {
+  if (taskType === CHAT_COMPLETION_TASK_TYPE) {
+    return inference.getConnectorById(id, request);
+  }
+
+  const connectors = await inference.getConnectorList(request, { taskType });
+  const connector = connectors.find(({ connectorId }) => connectorId === id);
+
+  if (!connector) {
+    throw createInferenceRequestError(`No "${taskType}" inference endpoint with id "${id}"`, 404);
+  }
+
+  return connector;
 };
 
 export class SearchInferenceEndpointsPlugin
@@ -103,7 +122,7 @@ export class SearchInferenceEndpointsPlugin
 
     const getConnectorList = async (request: KibanaRequest, taskType?: InferenceTaskType) => {
       const [, pluginsStart] = await core.getStartServices();
-      return getConnectorListByTaskType(pluginsStart.inference, request, taskType);
+      return pluginsStart.inference.getConnectorList(request, { taskType });
     };
 
     const getConnectorById = async (
@@ -263,7 +282,7 @@ export class SearchInferenceEndpointsPlugin
           const resolveFeatureEndpoints = (fId: string) =>
             getForFeatureFn(featureRegistry, soClient, getConnectorById, fId, this.logger, opts);
           const getConnectorList = () =>
-            getConnectorListByTaskType(plugins.inference, request, feature?.taskType);
+            plugins.inference.getConnectorList(request, { taskType: feature?.taskType });
 
           const result = await resolveModelsForFeature({
             getForFeature: resolveFeatureEndpoints,

@@ -10,12 +10,12 @@ import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { coreMock, httpServerMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';
 import { inferenceMock } from '@kbn/inference-plugin/server/mocks';
-import { InferenceTaskErrorCode } from '@kbn/inference-common';
+import { InferenceTaskErrorCode, type InferenceConnector } from '@kbn/inference-common';
 import {
   GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR,
   GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY,
 } from '@kbn/management-settings-ids';
-import { SearchInferenceEndpointsPlugin } from './plugin';
+import { SearchInferenceEndpointsPlugin, getConnectorByIdAndTaskType } from './plugin';
 import {
   ELASTIC_INFERENCE_SERVICE_APP_ID,
   INFERENCE_ENDPOINTS_APP_ID,
@@ -474,5 +474,45 @@ describe('SearchInferenceEndpointsPlugin', () => {
         expect(result).toEqual({ endpoints: [], warnings: [], soEntryFound: false });
       });
     });
+  });
+});
+
+describe('getConnectorByIdAndTaskType', () => {
+  const connector = (connectorId: string) => ({ connectorId } as InferenceConnector);
+  const request = httpServerMock.createKibanaRequest();
+  const inference = {
+    getConnectorList: jest.fn(),
+    getConnectorById: jest.fn(),
+  };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('looks a chat model up by id', async () => {
+    inference.getConnectorById.mockResolvedValue(connector('chat-1'));
+
+    await expect(
+      getConnectorByIdAndTaskType(inference, 'chat-1', request, 'chat_completion')
+    ).resolves.toEqual(connector('chat-1'));
+    expect(inference.getConnectorById).toHaveBeenCalledWith('chat-1', request);
+    expect(inference.getConnectorList).not.toHaveBeenCalled();
+  });
+
+  it('finds a model of another task type among the endpoints of that task type', async () => {
+    inference.getConnectorList.mockResolvedValue([connector('decision-1')]);
+
+    await expect(
+      getConnectorByIdAndTaskType(inference, 'decision-1', request, 'decision')
+    ).resolves.toEqual(connector('decision-1'));
+    expect(inference.getConnectorById).not.toHaveBeenCalled();
+  });
+
+  it('throws a 404 when no endpoint of that task type has the id', async () => {
+    inference.getConnectorList.mockResolvedValue([connector('decision-1')]);
+
+    await expect(
+      getConnectorByIdAndTaskType(inference, 'chat-1', request, 'decision')
+    ).rejects.toMatchObject({ meta: { status: 404 } });
   });
 });
