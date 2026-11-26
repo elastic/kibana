@@ -117,6 +117,7 @@ const LINKS: ReturnType<typeof useApplicationLinks> = {
   networkHref: '/network-href',
   reportsHref: '/reports-href',
   frustrationHref: '/frustration-href',
+  crashesHref: '/crashes-href',
   sessionsHref: () => '/sessions-href',
   sessionHref: () => '/session-href',
 };

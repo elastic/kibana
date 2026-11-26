@@ -7,14 +7,14 @@
 
 import { renderHook } from '@testing-library/react';
 import {
-  mobileCrashesDiscoverLink,
+  mobileCrashesDiscoverEsql,
   mobilePanelDiscoverEsql,
 } from '../../../../common/mobile/discover';
 import { useDiscoverHref } from '../../../hooks/use_discover_href';
 import { useEnvironment } from '../../../hooks/use_environment';
 import { useQueryParam } from '../../../hooks/use_query_param';
 import { useTimeRange } from '../../../hooks/use_time_range';
-import { useMobileDiscoverHref } from './use_mobile_discover_href';
+import { laterBy, useMobileDiscoverHref } from './use_mobile_discover_href';
 
 jest.mock('../../../hooks/use_discover_href');
 jest.mock('../../../hooks/use_environment');
@@ -90,29 +90,20 @@ describe('useMobileDiscoverHref', () => {
     expect(esql).toContain('`resource.attributes.os.name` == "Android"');
   });
 
-  it("opens the Crashes tab's crashes, by when they happened and the release that crashed", () => {
+  it("opens the Crashes tab's crashes in a range a day longer, still relative", () => {
     mockUrl({ environment: 'production', release: '8.4.0' });
-    jest.mocked(useTimeRange).mockReturnValue({
-      timeRange: { rangeFrom: '2021-01-18T12:00:00.000Z', rangeTo: '2021-01-18T13:00:00.000Z' },
-      isTimeRangeInUrl: true,
-      setTimeRange: jest.fn(),
-    });
 
     renderHook(() => useMobileDiscoverHref('ride-ios', 'crashes'));
 
     const [esql, timeRange] = jest.mocked(useDiscoverHref).mock.calls.at(-1) ?? [];
-    const link = mobileCrashesDiscoverLink(
-      { serviceName: 'ride-ios', release: '8.4.0' },
-      {
-        environment: 'production',
-        start: Date.parse('2021-01-18T12:00:00.000Z'),
-        end: Date.parse('2021-01-18T13:00:00.000Z'),
-      }
+    expect(esql).toBe(
+      mobileCrashesDiscoverEsql(
+        { serviceName: 'ride-ios', release: '8.4.0' },
+        { environment: 'production' }
+      )
     );
-    expect(esql).toBe(link.esql);
-    // Discover filters on its own time range, which takes the crashes sent a day late.
-    expect(timeRange).toEqual({ from: '2021-01-18T12:00:00.000Z', to: '2021-01-19T13:00:00.000Z' });
-    expect(esql).toContain('crash_release == "8.4.0"');
+    // Discover resolves "now" when the link opens, so it never shows an older window.
+    expect(timeRange).toEqual({ from: 'now-2h', to: 'now+24h' });
   });
 
   it('has no link without access to Discover', () => {
@@ -122,5 +113,16 @@ describe('useMobileDiscoverHref', () => {
     expect(
       renderHook(() => useMobileDiscoverHref('shop-mobile', 'overview')).result.current
     ).toBeUndefined();
+  });
+});
+
+describe('laterBy', () => {
+  it('keeps a relative end relative', () => {
+    expect(laterBy('now', 24)).toBe('now+24h');
+    expect(laterBy('now/d', 24)).toBe('now/d+24h');
+  });
+
+  it('moves an absolute end', () => {
+    expect(laterBy('2021-01-18T13:00:00.000Z', 24)).toBe('2021-01-19T13:00:00.000Z');
   });
 });

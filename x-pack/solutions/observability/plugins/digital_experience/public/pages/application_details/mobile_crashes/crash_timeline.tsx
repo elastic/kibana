@@ -79,7 +79,7 @@ interface TimelineRow {
 }
 
 const isMobileKind = (kind: SessionTimelineEvent['kind']): kind is MobileSessionEventKind =>
-  kind in KIND_LABELS && kind !== 'crash';
+  kind in KIND_LABELS;
 
 const toRows = (events: SessionTimelineEvent[], crash: MobileCrash): TimelineRow[] => {
   const crashMs = Date.parse(crash.time);

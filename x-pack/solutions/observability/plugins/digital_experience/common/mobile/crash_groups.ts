@@ -6,6 +6,7 @@
  */
 
 import { Builder, esql, type ComposerQuery } from '@elastic/esql';
+import type { ESQLAstExpression, ESQLColumn } from '@elastic/esql/types';
 import { CRASH_EVENTS, OTEL_LOGS_INDEX } from '../otel_data';
 import { MOBILE_MAX_CRASH_DELAY_HOURS } from '../sessions';
 import { ERROR_GROUPS_ROWS } from '../top_rows';
@@ -33,34 +34,54 @@ export interface CrashEventsParams extends MobilePanelFilters {
 }
 
 /**
- * The crashes of an application that happened in `[start, end)`, each with its `crash_time`, the
- * earlier of its two times, and its `crash_release`, the release that crashed. The release filter
- * is on the latter: EDOT iOS sends a crash with the resource of the next launch, which may run an
- * updated release.
+ * The crashes of an application that `inRange` keeps by their `crash_time`, the earlier of their
+ * two times, each with its `crash_release`, the release that crashed. The release filter is on the
+ * latter: EDOT iOS sends a crash with the resource of the next launch, which may run an update.
  */
-export const crashEvents = ({
-  start,
-  end,
-  release,
-  ...filters
-}: CrashEventsParams): ComposerQuery => {
+const crashesInRange = (
+  { release, ...filters }: MobilePanelFilters,
+  inRange: (query: ComposerQuery, crashTime: ESQLColumn) => ComposerQuery
+): ComposerQuery => {
   const crashTime = resultColumn('crashTime');
   const crashRelease = resultColumn('crashRelease');
-  const query = mobilePanelQuery(filters, mobileDocuments({ indices: [OTEL_LOGS_INDEX] })).pipe`WHERE ${inValues(
-    'eventName',
-    CRASH_EVENTS
-  )}`.pipe`EVAL ${crashTime} = LEAST(@timestamp, COALESCE(TO_DATETIME(${mobileColumn(
+  const crashes = mobilePanelQuery(filters, mobileDocuments({ indices: [OTEL_LOGS_INDEX] }))
+    .pipe`WHERE ${inValues('eventName', CRASH_EVENTS)}`
+    .pipe`EVAL ${crashTime} = LEAST(@timestamp, COALESCE(TO_DATETIME(${mobileColumn(
     'observedTimestamp'
-  )}), @timestamp))`.pipe`WHERE ${crashTime} >= TO_DATETIME(${{
-    crash_start: new Date(start).toISOString(),
-  }}) AND ${crashTime} < TO_DATETIME(${{ crash_end: new Date(end).toISOString() }})`
-    .pipe`EVAL ${crashRelease} = ${reportRelease()}`.pipe`EVAL ${crashRelease} = CASE(
+  )}), @timestamp))`;
+  const query = inRange(crashes, crashTime).pipe`EVAL ${crashRelease} = ${reportRelease()}`
+    .pipe`EVAL ${crashRelease} = CASE(
       ${crashRelease} IS NULL OR ${crashRelease} == "",
       ${mobileColumn('serviceVersion')},
       ${crashRelease}
     )`;
   return release ? query.pipe`WHERE ${crashRelease} == ${{ release }}` : query;
 };
+
+/** The crashes of an application that happened in `[start, end)`, as `crashesInRange` reads them. */
+export const crashEvents = ({ start, end, ...filters }: CrashEventsParams): ComposerQuery =>
+  crashesInRange(
+    filters,
+    (query, crashTime) =>
+      query.pipe`WHERE ${crashTime} >= TO_DATETIME(${{
+        crash_start: new Date(start).toISOString(),
+      }}) AND ${crashTime} < TO_DATETIME(${{ crash_end: new Date(end).toISOString() }})`
+  );
+
+/**
+ * The crashes as Discover lists them. Discover filters its time field, the column first compared
+ * with `?_tstart`, on its time range itself, so `@timestamp` is that field and the range a link
+ * opens reaches `MOBILE_MAX_CRASH_DELAY_HOURS` past the crashes' end, for the crashes sent late.
+ * The crashes are the ones that happened from `?_tstart` to that long before `?_tend`, so they
+ * follow Discover's time picker.
+ */
+export const crashEventsInDiscoverRange = (filters: MobilePanelFilters): ComposerQuery =>
+  crashesInRange(
+    filters,
+    (query, crashTime) => query.pipe`WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend
+      AND ${crashTime} >= ?_tstart
+      AND ${crashTime} < TO_DATETIME(?_tend) - ${esql.exp(`${MOBILE_MAX_CRASH_DELAY_HOURS} hours`)}`
+  );
 
 /** How many releases the Crashes tab's picker lists, at most. */
 export const CRASH_RELEASE_ROWS = 1000;
@@ -172,14 +193,16 @@ export const withLatestCrash = (query: ComposerQuery): ComposerQuery =>
   ]}`;
 
 /** What a crash group is broken down by in its detail. */
-export const CRASH_BREAKDOWNS = {
+export const CRASH_BREAKDOWNS: Readonly<
+  Record<'releases' | 'osVersions' | 'deviceModels', () => ESQLAstExpression>
+> = {
   releases: () => resultColumn('crashRelease'),
   osVersions: () => mobileColumn('osVersion'),
   deviceModels: () =>
     esql.exp`COALESCE(${mobileColumn('deviceModelName')}, ${mobileColumn(
       'deviceModelIdentifier'
     )})`,
-} as const;
+};
 
 export type CrashBreakdownName = keyof typeof CRASH_BREAKDOWNS;
 

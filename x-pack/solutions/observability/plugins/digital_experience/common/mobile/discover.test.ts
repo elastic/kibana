@@ -6,7 +6,7 @@
  */
 
 import {
-  mobileCrashesDiscoverLink,
+  mobileCrashesDiscoverEsql,
   mobilePanelDiscoverEsql,
   mobileSessionDiscoverEsql,
 } from './discover';
@@ -50,27 +50,19 @@ describe('mobilePanelDiscoverEsql', () => {
   });
 });
 
-describe('mobileCrashesDiscoverLink', () => {
-  const START = Date.parse('2021-01-18T12:00:00.000Z');
-  const END = Date.parse('2021-01-18T13:00:00.000Z');
-  const { esql, timeRange } = mobileCrashesDiscoverLink(
+describe('mobileCrashesDiscoverEsql', () => {
+  const esql = mobileCrashesDiscoverEsql(
     { serviceName: 'ride-ios', osName: 'iOS', release: '8.4.0' },
-    { environment: 'production', start: START, end: END }
+    { environment: 'production' }
   );
 
-  it("filters Discover's time field over a day past the range, for crashes sent late", () => {
-    // Discover filters `@timestamp`, the field compared with `?_tstart`, on this range itself.
-    expect(timeRange).toEqual({
-      from: '2021-01-18T12:00:00.000Z',
-      to: '2021-01-19T13:00:00.000Z',
-    });
-    expect(esql).toContain('@timestamp >= ?_tstart AND @timestamp < ?_tend');
-  });
-
-  it('keeps the crashes that happened in the range, newest first', () => {
+  it("filters `@timestamp` as Discover's time field, and the crash times by its time picker", () => {
+    // Discover filters the column first compared with `?_tstart` on its own range, which the link
+    // makes a day longer than the tab's, for the crashes sent late.
     expect(esql).toContain(
-      'crash_time >= TO_DATETIME("2021-01-18T12:00:00.000Z") AND crash_time < TO_DATETIME("2021-01-18T13:00:00.000Z")'
+      'WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend AND crash_time >= ?_tstart AND crash_time < TO_DATETIME(?_tend) - 24 hours'
     );
+    expect(esql).not.toContain('crash_start');
     expect(esql).toContain('SORT crash_time DESC');
   });
 

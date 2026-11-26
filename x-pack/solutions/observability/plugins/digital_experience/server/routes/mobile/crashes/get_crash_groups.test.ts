@@ -271,8 +271,13 @@ describe('getCrashReleases', () => {
     expect(request.query).not.toContain('crash_release == ?release');
     expect(request.params).toEqual(expect.arrayContaining([{ os_name: 'iOS' }]));
     // Crashes sent on the next launch are in the timestamp filter, a day past the range.
-    expect(request.filter.bool.filter[0]).toEqual({
-      range: { '@timestamp': { gte: START, lt: END + DAY, format: 'epoch_millis' } },
+    expect(request.filter).toEqual({
+      bool: {
+        filter: [
+          { range: { '@timestamp': { gte: START, lt: END + DAY, format: 'epoch_millis' } } },
+          expect.anything(),
+        ],
+      },
     });
   });
 });

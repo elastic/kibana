@@ -10,8 +10,6 @@ import { CRASH_FINGERPRINT_CASES } from '../../../../common/mobile/crash_fingerp
 
 const LOGS_INDEX = 'logs-generic.otel-default';
 const TRACES_INDEX = 'traces-generic.otel-default';
-/** Another traces data stream, where a copy of a span keeps its document id. */
-const TRACES_COPY_INDEX = 'traces-generic.otel-scoutcopy';
 
 /** Applications of their own, so the other mobile fixtures' counts stay as they are. */
 export const CRASH_APPS = {
@@ -235,6 +233,8 @@ const SESSION_EVENTS: Array<{
   resource: Record<string, string>;
   /** Set where a copy must keep the document id. */
   id?: string;
+  /** Indexed after the traces data stream rolls over, so into another of its backing indices. */
+  afterRollover?: boolean;
   document: Record<string, unknown>;
 }> = [
   {
@@ -254,7 +254,13 @@ const SESSION_EVENTS: Array<{
   // The same request span sent again, as an SDK retrying an export does: listed once, whether the
   // copy is another document of the same index, or has the same document id in another index.
   { index: TRACES_INDEX, resource: npeSession, document: NPE_POST },
-  { index: TRACES_COPY_INDEX, resource: npeSession, id: NPE_POST_ID, document: NPE_POST },
+  {
+    index: TRACES_INDEX,
+    resource: npeSession,
+    id: NPE_POST_ID,
+    afterRollover: true,
+    document: NPE_POST,
+  },
   // Another request, in another trace, whose span id happens to be the same: listed too.
   {
     index: TRACES_INDEX,
@@ -350,6 +356,7 @@ const documents = [
   ...CRASHES.map((crash, index) => ({
     id: `dx-mobile-crash-${index}`,
     index: LOGS_INDEX,
+    afterRollover: false,
     document: {
       '@timestamp': crash.timestamp,
       ...(crash.observedTimestamp ? { observed_timestamp: crash.observedTimestamp } : {}),
@@ -376,9 +383,10 @@ const documents = [
       },
     },
   })),
-  ...SESSION_EVENTS.map(({ index, resource, id, document }, position) => ({
+  ...SESSION_EVENTS.map(({ index, resource, id, afterRollover = false, document }, position) => ({
     id: id ?? `dx-mobile-crash-session-${position}`,
     index,
+    afterRollover,
     document: {
       ...document,
       resource: { attributes: mobileResource(resource, resource['os.name']) },
@@ -387,26 +395,23 @@ const documents = [
 ];
 
 /**
- * Deletes the crash documents by their ids, leaving the rest of the shared data streams, and the
- * data stream only the copied span is in.
+ * Deletes every document of the fixture's applications, whose names no other fixture uses, so a
+ * run that was interrupted, even with older document ids, leaves nothing behind.
  */
 export const deleteMobileCrashData = async (esClient: EsClient): Promise<void> => {
   await esClient.deleteByQuery({
-    index: [LOGS_INDEX, TRACES_INDEX],
-    query: { ids: { values: documents.map(({ id }) => id) } },
+    index: ['logs-*.otel-*', 'traces-*.otel-*'],
+    query: { terms: { 'service.name': Object.values(CRASH_APPS) } },
     refresh: true,
     ignore_unavailable: true,
+    allow_no_indices: true,
   });
-  await esClient.indices.deleteDataStream({ name: TRACES_COPY_INDEX }, { ignore: [404] });
 };
 
-/** Indexes the crash documents, replacing what an interrupted run left behind. */
-export const ingestMobileCrashData = async (esClient: EsClient): Promise<void> => {
-  // Data streams only accept `create`, which would keep a leftover document's old body.
-  await deleteMobileCrashData(esClient);
+const indexDocuments = async (esClient: EsClient, batch: typeof documents): Promise<void> => {
   const { errors, items } = await esClient.bulk({
     refresh: 'wait_for',
-    operations: documents.flatMap(({ id, index, document }) => [
+    operations: batch.flatMap(({ id, index, document }) => [
       { create: { _index: index, _id: id } },
       document,
     ]),
@@ -415,4 +420,23 @@ export const ingestMobileCrashData = async (esClient: EsClient): Promise<void> =
   if (errors && failure) {
     throw new Error(`Could not ingest the mobile crash data: ${JSON.stringify(failure)}`);
   }
+};
+
+/**
+ * Indexes the crash documents, replacing what an interrupted run left behind. The traces data
+ * stream rolls over before the copy of a span is indexed, so the copy keeps its document id in
+ * another backing index, as a retried export can.
+ */
+export const ingestMobileCrashData = async (esClient: EsClient): Promise<void> => {
+  // Data streams only accept `create`, which would keep a leftover document's old body.
+  await deleteMobileCrashData(esClient);
+  await indexDocuments(
+    esClient,
+    documents.filter(({ afterRollover }) => !afterRollover)
+  );
+  await esClient.indices.rollover({ alias: TRACES_INDEX });
+  await indexDocuments(
+    esClient,
+    documents.filter(({ afterRollover }) => afterRollover)
+  );
 };
