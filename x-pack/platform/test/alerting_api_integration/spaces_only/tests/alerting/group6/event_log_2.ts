@@ -39,13 +39,11 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
       ruleId,
       runs,
       totalAlertsGeneratedPerRun = [],
-      throttleMs,
     }: {
       spaceId: string;
       ruleId: string;
       runs: number;
       totalAlertsGeneratedPerRun?: number[];
-      throttleMs?: number;
     }) => {
       if (totalAlertsGeneratedPerRun.length && totalAlertsGeneratedPerRun.length !== runs) {
         throw new Error('Alerts per run has to be the same length as the number of runs');
@@ -59,10 +57,6 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
           !!totalAlertsGeneratedPerRun[run] && currentRunAlerts !== prevRunAlerts;
         // Skip the first run since creating the rule runs it already
         if (run !== 0) {
-          // A forced run inside the previous run's throttle window skips the action, so its event never arrives
-          if (throttleMs) {
-            await setTimeoutAsync(throttleMs);
-          }
           await runSoon({
             id: ruleId,
             spaceId,
@@ -155,8 +149,9 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
               getTestRuleData({
                 rule_type_id: 'test.patternFiring',
                 schedule: { interval: '24h' },
-                notify_when: RuleNotifyWhen.THROTTLE,
-                throttle: '1s',
+                // Notify on every active run without a throttle window, so back-to-back forced runs cannot skip an action
+                notify_when: RuleNotifyWhen.ACTIVE,
+                throttle: null,
                 params: {
                   pattern,
                 },
@@ -186,7 +181,6 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
             ],
             ruleId: alertId,
             spaceId: space.id,
-            throttleMs: 1000,
           });
 
           // get the events we're expecting
