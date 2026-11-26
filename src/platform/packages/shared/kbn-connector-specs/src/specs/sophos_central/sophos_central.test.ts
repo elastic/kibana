@@ -743,6 +743,30 @@ describe('actOnAlertsBulk', () => {
     expect(result.results[0]).toMatchObject({ alertId: ALERT_ID, status: 'requested' });
     expect(result.results[1]).toMatchObject({ alertId: ALERT_ID_2, status: 'started' });
   });
+
+  it('preserves a non-success result from a completed action and still counts it toward acceptedCount', async () => {
+    // A completed action with result "notNeeded" means Sophos finished processing but no
+    // remediation occurred (e.g. the threat was already gone). The handler must not rewrite
+    // the result to "success" — doing so would make an unneeded action indistinguishable from
+    // actual remediation. The action is still HTTP 2xx so it counts toward acceptedCount.
+    const client = makeClient();
+    stubWhoami(client);
+    client.request.mockResolvedValueOnce({ data: { status: 'completed', result: 'notNeeded' } });
+    const ctx = makeCtx(client);
+
+    const result = await SophosCentral.actions.actOnAlertsBulk.handler(ctx as never, {
+      ids: [ALERT_ID],
+      action: 'cleanVirus',
+    });
+
+    expect(result.acceptedCount).toBe(1);
+    expect(result.failureCount).toBe(0);
+    expect(result.results[0]).toMatchObject({
+      alertId: ALERT_ID,
+      status: 'completed',
+      result: 'notNeeded',
+    });
+  });
 });
 
 // ---------------------------------------------------------------------------
