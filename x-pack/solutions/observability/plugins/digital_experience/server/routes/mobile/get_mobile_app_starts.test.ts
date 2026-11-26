@@ -43,10 +43,11 @@ const setup = ({
 const bucket = (timestamp: number) => new Date(timestamp).toISOString();
 
 describe('getMobileAppStarts', () => {
-  it('has no points without app starts', async () => {
-    const { run } = setup({ buckets: [START, START + HOUR] });
+  it('has no points without app starts, and searches no empty buckets', async () => {
+    const { client, run } = setup({ buckets: [START, START + HOUR] });
 
     expect((await run()).points).toEqual([]);
+    expect(client.search).not.toHaveBeenCalled();
   });
 
   it('gives every bucket its cold and warm average and count, a gap where there were none', async () => {
@@ -87,7 +88,9 @@ describe('getMobileAppStarts', () => {
   });
 
   it('reads the app starts of the filters, in the time zone, over the range', async () => {
-    const { client, run } = setup({});
+    const { client, run } = setup({
+      rows: [{ bucket: bucket(START), cold_start: 1800, cold_starts: 1, warm_starts: 0 }],
+    });
 
     await run();
 

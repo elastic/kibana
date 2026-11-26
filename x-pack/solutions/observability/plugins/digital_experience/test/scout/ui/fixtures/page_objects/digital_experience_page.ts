@@ -259,11 +259,12 @@ export class DigitalExperiencePage {
   }
 
   /**
-   * The legend item of `release` in a Release health chart (`chart`), which only shows once the
-   * chart is drawn. `@elastic/charts` names it by the series; there's no test subject to add.
+   * The legend item of the series `name` in a chart of the mobile Overview (`chart`), which only
+   * shows once the chart is drawn. `@elastic/charts` names it by the series; there's no test
+   * subject to add.
    */
-  mobileReleaseChartSeries(chart: Locator, release: string): Locator {
-    return chart.locator(`[data-ech-series-name="${release}"]`);
+  mobileChartSeries(chart: Locator, name: string): Locator {
+    return chart.locator(`[data-ech-series-name="${name}"]`);
   }
 
   /** The control in the Release health table that filters the page by `release`. */

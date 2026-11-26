@@ -18,9 +18,10 @@ describe('appStartTooltip', () => {
     );
   });
 
-  it('says the SDK sent no app starts, in one message, when there were none', () => {
+  it('says no start of the type counts, in one message, when none does', () => {
+    // There may be warm starts, or cold ones the guard leaves out: not "the SDK sent none"
     expect(appStartTooltip('cold', 0, 5)).toMatch(
-      /seconds are left out: .+ The SDK sent no app start events \(elastic\.app\.start\) in the time range and filters\.$/
+      /seconds are left out: .+ No cold starts of 60 seconds or less in the time range and filters\.$/
     );
   });
 });

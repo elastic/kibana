@@ -64,6 +64,8 @@ interface MobileDocument {
   installationId?: string;
   sessionId: string;
   exception?: boolean;
+  /** The resource `deployment.environment.name`; none unless set. */
+  environment?: string;
   /** An `elastic.app.start` event, with its type unless left out. */
   appStart?: { type?: string; durationMs: number };
   /** A span in the traces index; a log event otherwise. */
@@ -78,18 +80,21 @@ const EDOT_MOBILE = { distroName: 'elastic', version: '1.0.0' };
 export const BUSY_SESSIONS = 120;
 export const BUSY_RELEASE = '4.0.0';
 
+/** The environment of the busy app's warm starts; its other documents have none. */
+export const BUSY_WARM_START_ENVIRONMENT = 'production';
+
 /**
  * The app starts of `MOBILE_APPS.busyAndroid`, in sessions it already has: cold starts that
- * average 2 s, warm starts that average 400 ms, a cold start from a background launch above the
- * 60 s guard, and a `hot` one, which neither average counts. Not whole numbers, so the duration is
- * mapped as a float, as the SDKs send it.
+ * average 2 s, warm starts that average 400 ms (in `BUSY_WARM_START_ENVIRONMENT`), a cold start
+ * from a background launch above the 60 s guard, and a `hot` one, which neither average counts.
+ * Not whole numbers, so the duration is mapped as a float, as the SDKs send it.
  */
-const BUSY_APP_STARTS = [
+const BUSY_APP_STARTS: Array<{ type: string; durationMs: number; environment?: string }> = [
   { type: 'cold', durationMs: 1000.5 },
   { type: 'cold', durationMs: 2000 },
   { type: 'cold', durationMs: 2999.5 },
-  { type: 'warm', durationMs: 300.5 },
-  { type: 'warm', durationMs: 499.5 },
+  { type: 'warm', durationMs: 300.5, environment: BUSY_WARM_START_ENVIRONMENT },
+  { type: 'warm', durationMs: 499.5, environment: BUSY_WARM_START_ENVIRONMENT },
   { type: 'cold', durationMs: 120_000.5 },
   { type: 'hot', durationMs: 50.5 },
 ];
@@ -235,7 +240,7 @@ const MOBILE_DOCUMENTS: MobileDocument[] = [
     sessionId: `busy-${index}`,
     exception: index % 10 === 0,
   })),
-  ...BUSY_APP_STARTS.map((appStart, index) => ({
+  ...BUSY_APP_STARTS.map(({ environment, ...appStart }, index) => ({
     ...EDOT_MOBILE,
     serviceName: MOBILE_APPS.busyAndroid,
     sdkLanguage: 'java',
@@ -243,6 +248,7 @@ const MOBILE_DOCUMENTS: MobileDocument[] = [
     version: BUSY_RELEASE,
     installationId: `installation-busy-${index + 1}`,
     sessionId: `busy-${index + 1}`,
+    environment,
     appStart,
   })),
   // A second event of a session without an exception: the error rate still counts it once.
@@ -307,6 +313,7 @@ const documents = MOBILE_DOCUMENTS.map((doc, index) => ({
         'telemetry.sdk.language': doc.sdkLanguage,
         ...(doc.osName ? { 'os.name': doc.osName } : {}),
         ...(doc.installationId ? { 'app.installation.id': doc.installationId } : {}),
+        ...(doc.environment ? { 'deployment.environment.name': doc.environment } : {}),
       },
     },
     attributes: {

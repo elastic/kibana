@@ -33,7 +33,7 @@ import { ChartPanel } from '../chart_panel';
 import {
   APP_START_DESCRIPTIONS,
   APP_START_TITLES,
-  NO_APP_STARTS_DESCRIPTION,
+  NO_STARTS_OF_TYPE,
   appStartCountLabel,
 } from '../app_start_labels';
 
@@ -120,13 +120,15 @@ export function AppStartChart({
       title={CHART_TITLES[type]}
       tooltip={APP_START_DESCRIPTIONS[type]}
       hasData={data.some(({ count }) => count > 0)}
-      emptyMessage={NO_APP_STARTS_DESCRIPTION}
+      emptyMessage={NO_STARTS_OF_TYPE[type]}
     >
       <Chart size={CHART_SIZE}>
         <Settings
           baseTheme={baseTheme}
           locale={i18n.getLocale()}
           xDomain={xDomain}
+          showLegend
+          legendPosition={Position.Bottom}
           onBrushEnd={onBrushEnd}
         />
         <Tooltip<AppStartDatum> headerFormatter={headerFormatter} footer={TooltipFooter} />

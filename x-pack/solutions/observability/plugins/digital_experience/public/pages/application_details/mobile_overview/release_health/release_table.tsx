@@ -33,7 +33,7 @@ import { formatDurationMs } from '../../../../utils/format_duration';
 import {
   APP_START_DESCRIPTIONS,
   APP_START_TITLES,
-  NO_APP_STARTS_DESCRIPTION,
+  NO_STARTS_OF_TYPE,
   appStartCountLabel,
 } from '../app_start_labels';
 
@@ -233,7 +233,7 @@ const releaseColumns = ({
       }
       if (coldStart === null || coldStarts === 0) {
         return (
-          <EuiToolTip content={NO_APP_STARTS_DESCRIPTION}>
+          <EuiToolTip content={NO_STARTS_OF_TYPE.cold}>
             <span tabIndex={0}>
               <EmptyCellValue />
             </span>

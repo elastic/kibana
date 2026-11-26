@@ -42,26 +42,25 @@ export const getMobileAppStarts = async ({
   timeZone,
 }: GetMobileAppStartsParams): Promise<MobileAppStartsResponse> => {
   const histogram = { interval: getHistogramInterval(start, end), start, end };
-  const [rows, bucketTimestamps] = await Promise.all([
-    runEsql<AppStartSeriesRow>(
-      esClient,
-      'get_mobile_app_starts',
-      withAppStartSeries(mobilePanelQuery(filters), histogram.interval),
-      timeFilter(start, end, environment),
-      timeZone
-    ),
-    getBucketTimestamps({
-      esClient,
-      operationName: 'get_mobile_app_start_buckets',
-      start,
-      end,
-      interval: histogram.interval,
-      timeZone,
-    }),
-  ]);
+  const rows = await runEsql<AppStartSeriesRow>(
+    esClient,
+    'get_mobile_app_starts',
+    withAppStartSeries(mobilePanelQuery(filters), histogram.interval),
+    timeFilter(start, end, environment),
+    timeZone
+  );
+  // Most apps on SDKs without app starts stop here, without searching for the empty buckets
   if (rows.length === 0) {
     return { histogram, points: [] };
   }
+  const bucketTimestamps = await getBucketTimestamps({
+    esClient,
+    operationName: 'get_mobile_app_start_buckets',
+    start,
+    end,
+    interval: histogram.interval,
+    timeZone,
+  });
 
   const points = rows.map(
     (row): MobileAppStartPoint => ({

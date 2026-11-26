@@ -109,13 +109,11 @@ describe('AppStartChart', () => {
     );
   });
 
-  it('says the SDK sent no app starts when no bucket has any', () => {
-    renderChart('warm', [{ timestamp: 0, cold: NONE, warm: NONE }]);
+  it('says no start of the type counts when no bucket has any, whatever the other type has', () => {
+    renderChart('warm', [{ timestamp: 0, cold: { avg: 1800, count: 42 }, warm: NONE }]);
 
     expect(
-      screen.getByText(
-        'The SDK sent no app start events (elastic.app.start) in the time range and filters.'
-      )
+      screen.getByText('No warm starts of 60 seconds or less in the time range and filters.')
     ).toBeInTheDocument();
   });
 });

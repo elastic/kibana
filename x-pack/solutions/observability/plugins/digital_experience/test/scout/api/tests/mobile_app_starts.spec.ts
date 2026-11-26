@@ -12,6 +12,7 @@ import {
   BUSY_COLD_START,
   BUSY_RELEASE,
   BUSY_WARM_START,
+  BUSY_WARM_START_ENVIRONMENT,
   MOBILE_APPS,
   TIMESTAMP,
 } from '../../common/fixtures/mobile_data';
@@ -19,7 +20,13 @@ import { FLAG_ON_OVERRIDE, FLAG_RESET_OVERRIDE } from '../../feature_flag';
 import { testData } from '../fixtures';
 import { DIGITAL_EXPERIENCE_TAGS } from '../../tags';
 
-const { COMMON_HEADERS, TIME_RANGE, mobileAppStartsPath, mobileKpisPath } = testData;
+const {
+  COMMON_HEADERS,
+  DIGITAL_EXPERIENCE_ONLY_ROLE,
+  TIME_RANGE,
+  mobileAppStartsPath,
+  mobileKpisPath,
+} = testData;
 
 apiTest.describe(
   'Digital Experience mobile app starts API',
@@ -97,20 +104,21 @@ apiTest.describe(
           start: Date.parse(TIME_RANGE.rangeFrom),
           end: Date.parse(TIME_RANGE.rangeTo),
         });
-        // Every bucket of the range, all the starts in the bucket of their minute
-        expect(points.length).toBeGreaterThan(1);
-        expect(points.filter(({ cold }) => cold.count > 0)).toStrictEqual([
-          {
-            timestamp: Date.parse(TIMESTAMP),
-            cold: BUSY_COLD_START,
-            warm: BUSY_WARM_START,
-          },
-        ]);
-        expect(
-          points
-            .filter(({ timestamp }) => timestamp !== Date.parse(TIMESTAMP))
-            .every(({ cold, warm }) => cold.avg === null && warm.avg === null)
-        ).toBe(true);
+        // Every bucket of the range in order, the starts in the bucket of their minute, the
+        // others empty: no starts and no average, so the charts leave a gap
+        expect(histogram.interval.unit).toBe('s');
+        const intervalMs = histogram.interval.value * 1000;
+        const empty = { avg: null, count: 0 };
+        expect(points).toStrictEqual(
+          Array.from(
+            { length: (histogram.end - histogram.start) / intervalMs },
+            (_, index) => histogram.start + index * intervalMs
+          ).map((timestamp) =>
+            timestamp === Date.parse(TIMESTAMP)
+              ? { timestamp, cold: BUSY_COLD_START, warm: BUSY_WARM_START }
+              : { timestamp, cold: empty, warm: empty }
+          )
+        );
       }
     );
 
@@ -136,6 +144,28 @@ apiTest.describe(
       expect(await getAppStarts({ release: '9.9.9' })).toStrictEqual([]);
       expect(await getAppStarts({ osName: 'iOS' })).toStrictEqual([]);
       expect(await getAppStarts({ environment: 'no-such-environment' })).toStrictEqual([]);
+      // Only the starts of the environment: the warm ones
+      const inEnvironment = await getAppStarts({ environment: BUSY_WARM_START_ENVIRONMENT });
+      expect(totalColdStarts(inEnvironment)).toBe(0);
+      expect(inEnvironment.reduce((sum, { warm }) => sum + warm.count, 0)).toBe(
+        BUSY_WARM_START.count
+      );
+    });
+
+    apiTest('answers 403 naming the apm privilege, without it', async ({ apiClient, samlAuth }) => {
+      const { cookieHeader } = await samlAuth.asInteractiveUser(DIGITAL_EXPERIENCE_ONLY_ROLE);
+
+      const response = await apiClient.get(mobileAppStartsPath(MOBILE_APPS.busyAndroid), {
+        headers: { ...COMMON_HEADERS, ...cookieHeader },
+        responseType: 'json',
+      });
+
+      expect(response).toHaveStatusCode(403);
+      // Kibana's own check, before the route reads any data, rather than an Elasticsearch
+      // access denial, which would be a 403 too
+      expect((response.body as { message: string }).message).toContain(
+        'is unauthorized for user, this action is granted by the Kibana privileges [apm]'
+      );
     });
 
     apiTest(

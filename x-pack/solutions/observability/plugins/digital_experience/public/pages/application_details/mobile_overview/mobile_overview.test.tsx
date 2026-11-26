@@ -191,7 +191,7 @@ describe('MobileOverview', () => {
     ).toBeInTheDocument();
   });
 
-  it('reads "No data" on the app start tiles when the SDK sent no app starts', async () => {
+  it('reads "No data" on the app start tiles when no start of their type counts', async () => {
     const none = { value: null, previous: null, delta: null, count: 0, previousCount: 0 };
     fetch.mockResolvedValue({ ...KPIS, coldStart: none, warmStart: none });
     renderPage();
@@ -204,7 +204,9 @@ describe('MobileOverview', () => {
     );
     fireEvent.mouseOver(screen.getByTestId('digitalExperienceMobileKpiColdStartHint'));
     expect(
-      await screen.findByText(/The SDK sent no app start events \(elastic\.app\.start\)/)
+      await screen.findByText(
+        /No cold starts of 60 seconds or less in the time range and filters\./
+      )
     ).toBeInTheDocument();
   });
 

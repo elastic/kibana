@@ -61,6 +61,21 @@ export const NO_APP_STARTS_DESCRIPTION = i18n.translate(
 );
 
 /**
+ * No start of the type counts in the time range and filters: there may be other starts, or ones
+ * the guard leaves out, so it doesn't say the SDK sent none.
+ */
+export const NO_STARTS_OF_TYPE: Readonly<Record<StartType, string>> = {
+  cold: i18n.translate('xpack.digitalExperience.mobile.appStart.noColdStarts', {
+    defaultMessage: 'No cold starts of {maxSeconds} seconds or less in the time range and filters.',
+    values: { maxSeconds: MAX_START_SECONDS },
+  }),
+  warm: i18n.translate('xpack.digitalExperience.mobile.appStart.noWarmStarts', {
+    defaultMessage: 'No warm starts of {maxSeconds} seconds or less in the time range and filters.',
+    values: { maxSeconds: MAX_START_SECONDS },
+  }),
+};
+
+/**
  * How the average is calculated, and the starts it's based on, or that there were none. With
  * `previousCount`, while comparing, the starts of the previous period too, so a change based on a
  * few starts reads as such.
@@ -70,7 +85,7 @@ export const appStartTooltip = (type: StartType, count: number, previousCount?: 
   if (count === 0) {
     return i18n.translate('xpack.digitalExperience.mobile.appStart.tooltipNoStarts', {
       defaultMessage: '{description} {noStarts}',
-      values: { description, noStarts: NO_APP_STARTS_DESCRIPTION },
+      values: { description, noStarts: NO_STARTS_OF_TYPE[type] },
     });
   }
   const starts = appStartCountLabel(type, count);
