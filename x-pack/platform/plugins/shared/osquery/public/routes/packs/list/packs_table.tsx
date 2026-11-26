@@ -297,8 +297,8 @@ const PacksTableComponent = ({ hasAssetsToInstall }: { hasAssetsToInstall?: bool
               {
                 defaultMessage: '{selected} selected + {extra} via shared integration',
                 values: {
-                  selected: policyIds.length,
-                  extra: effectiveCount - policyIds.length,
+                  selected: policyIds?.length ?? 0,
+                  extra: effectiveCount - (policyIds?.length ?? 0),
                 },
               }
             );

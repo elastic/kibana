@@ -946,9 +946,7 @@ const PolicyAssignmentListComponent: React.FC<PolicyAssignmentListProps> = ({
                           'These agent policies receive this pack because they share an integration with a selected agent policy: {policyNames}. Saving does not add them to this pack’s agent policies.',
                         values: { policyNames: implicitPolicyNames },
                       }
-                    )}
-                  </p>
-                  <p>
+                    )}{' '}
                     <FormattedMessage
                       id="xpack.osquery.pack.form.sharedIntegration.splitIntegrationHint"
                       defaultMessage="To run this pack on only some of these agent policies, give each its own Osquery Manager integration in {fleetLink}."
