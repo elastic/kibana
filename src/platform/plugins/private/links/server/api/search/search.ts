@@ -20,6 +20,11 @@ export async function search(
 ): Promise<LinksSearchResponseBody> {
   const { core } = await requestCtx.resolve(['core']);
 
+  // Plain listings get a deterministic newest-first order; search requests keep relevance.
+  const sortOptions = searchParams.query
+    ? {}
+    : { sortField: 'updated_at', sortOrder: 'desc' as const };
+
   const soResponse = await findWithTagFilter<StoredLinksState>(
     core.savedObjects.client,
     {
@@ -30,6 +35,7 @@ export async function search(
       perPage: searchParams.per_page,
       page: searchParams.page ? +searchParams.page : undefined,
       defaultSearchOperator: 'AND',
+      ...sortOptions,
     },
     searchParams
   );
