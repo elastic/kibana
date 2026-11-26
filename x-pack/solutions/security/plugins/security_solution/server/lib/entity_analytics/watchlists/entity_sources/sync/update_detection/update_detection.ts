@@ -103,9 +103,18 @@ const WATCHLIST_ENTITY_TYPES = [
   'generic',
 ] as const satisfies readonly EntityType[];
 
+/**
+ * A store source's KQL rule already picks the entity rows, so it also syncs `ai_agent` rows.
+ * Integration sources stay on the types their integrations emit.
+ */
+const STORE_SOURCE_ENTITY_TYPES = [
+  ...WATCHLIST_ENTITY_TYPES,
+  'ai_agent',
+] as const satisfies readonly EntityType[];
+
 const getAllowedEntityIds = (
   entityStoreEntityIdsByType: EntityStoreEntityIdsByType,
-  entityType: (typeof WATCHLIST_ENTITY_TYPES)[number]
+  entityType: (typeof STORE_SOURCE_ENTITY_TYPES)[number]
 ): string[] => entityStoreEntityIdsByType[entityType] ?? [];
 
 export const createUpdateDetectionService = ({
@@ -232,7 +241,7 @@ export const createUpdateDetectionService = ({
     entityStoreEntityIdsByType: EntityStoreEntityIdsByType
   ) => {
     const allEntities: WatchlistBulkEntity[] = [];
-    for (const entityType of WATCHLIST_ENTITY_TYPES) {
+    for (const entityType of STORE_SOURCE_ENTITY_TYPES) {
       const euids = getAllowedEntityIds(entityStoreEntityIdsByType, entityType);
       for (const euid of euids) {
         allEntities.push({ euid, type: entityType, sourceId: source.id });

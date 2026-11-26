@@ -223,6 +223,58 @@ describe('Watchlist update detection service', () => {
     });
   });
 
+  describe('store source', () => {
+    const storeSource: WatchlistDataSources.MonitoringEntitySource = {
+      id: 'store-source-1',
+      type: 'store',
+      name: 'Agents acting for departing employees',
+      queryRule:
+        'entity.EngineMetadata.Type: "ai_agent" and entity.attributes.ai_agent_context.person_watchlists: "departing"',
+      enabled: true,
+    };
+
+    it('adds the matching ai_agent rows to the watchlist and to their store rows', async () => {
+      const internalEsClient = elasticsearchServiceMock.createElasticsearchClient();
+      internalEsClient.bulk.mockResolvedValue({ errors: false } as never);
+      const crudClient = createMockCrudClient();
+      const service = createUpdateDetectionService({
+        internalEsClient,
+        dataEsClient: internalEsClient,
+        logger,
+        crudClient,
+        watchlist: { id: 'agents-watchlist', name: 'agents', index: '.watchlist-entities-default' },
+      });
+
+      const result = await service.updateDetection(
+        storeSource,
+        createEntityStoreEntityIdsByType({
+          user: ['user:jdoe@okta'],
+          ai_agent: ['ai_agent:claude_code@host-1@ec2-user'],
+        }),
+        undefined,
+        new Map([['ai_agent:claude_code@host-1@ec2-user', ['privileged']]])
+      );
+
+      expect(result.entities.map(({ euid, type }) => ({ euid, type }))).toEqual([
+        { euid: 'user:jdoe@okta', type: 'user' },
+        { euid: 'ai_agent:claude_code@host-1@ec2-user', type: 'ai_agent' },
+      ]);
+      expect(crudClient.bulkUpdateEntity).toHaveBeenCalledWith({
+        objects: expect.arrayContaining([
+          {
+            type: 'ai_agent',
+            doc: {
+              entity: {
+                id: 'ai_agent:claude_code@host-1@ec2-user',
+                attributes: { watchlists: ['privileged', 'agents-watchlist'] },
+              },
+            },
+          },
+        ]),
+      });
+    });
+  });
+
   describe('integration source without syncMarkersService', () => {
     it('logs warning and returns empty array without calling search or bulk', async () => {
       const internalEsClient = elasticsearchServiceMock.createElasticsearchClient();
