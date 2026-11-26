@@ -9,10 +9,16 @@ import type { AggregatedPrebuiltRuleError } from '../model';
 import type { RuleObjectId, RuleSignatureId } from '../../model';
 
 export const RuleVersionSpecifier = t.exact(
-  t.type({
-    rule_id: t.string,
-    version: t.number,
-  })
+  t.intersection([
+    t.type({
+      rule_id: t.string,
+      version: t.number,
+    }),
+    t.partial({
+      // The library to install the rule from. Needed when the same rule_id exists in several libraries.
+      library_id: t.string,
+    }),
+  ])
 );
 export type RuleVersionSpecifier = t.TypeOf<typeof RuleVersionSpecifier>;
 
@@ -28,9 +34,15 @@ export const InstallSpecificRulesRequest = t.exact(
 export type InstallAllRulesRequest = t.TypeOf<typeof InstallAllRulesRequest>;
 
 export const InstallAllRulesRequest = t.exact(
-  t.type({
-    mode: t.literal(`ALL_RULES`),
-  })
+  t.intersection([
+    t.type({
+      mode: t.literal(`ALL_RULES`),
+    }),
+    t.partial({
+      // Installs the rules of this library only. Without it, the rules of every library are installed.
+      library_id: t.string,
+    }),
+  ])
 );
 
 export const PerformRuleInstallationRequestBody = t.union([

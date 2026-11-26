@@ -13,4 +13,5 @@ import type {
 export interface RuleVersionSpecifier {
   rule_id: RuleSignatureId;
   version: RuleVersion;
+  library_id?: string;
 }

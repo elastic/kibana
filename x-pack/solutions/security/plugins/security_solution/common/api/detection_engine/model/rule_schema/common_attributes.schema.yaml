@@ -125,6 +125,26 @@ components:
         - $ref: '#/components/schemas/ExternalRuleSource'
         - $ref: '#/components/schemas/InternalRuleSource'
 
+    RuleLibrary:
+      type: object
+      description: The rule library an installed prebuilt rule came from. Omitted on custom rules. Prebuilt rules saved before libraries existed are read as the Elastic library.
+      properties:
+        id:
+          type: string
+          maxLength: 128
+          description: Stable id of the rule library.
+        title:
+          type: string
+          maxLength: 256
+          description: Display name of the rule library.
+        icon:
+          type: string
+          maxLength: 512
+          description: EUI icon type or icon path for the rule library.
+      required:
+        - id
+        - title
+
     IsRuleEnabled:
       type: boolean
       description: Determines whether the rule is enabled. Defaults to true.

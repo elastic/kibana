@@ -162,7 +162,10 @@ export const importRulesRoute = (
           // Ensure the prebuilt rules package is installed once per request so
           // the import path can look up prebuilt assets during rule_source calc.
           await ensureLatestRulesPackageInstalled(
-            createPrebuiltRuleAssetsClient(savedObjectsClient),
+            createPrebuiltRuleAssetsClient(savedObjectsClient, {
+              ruleLibraryEnabled:
+                ctx.securitySolution.getConfig().experimentalFeatures.ruleLibrariesEnabled,
+            }),
             ctx.securitySolution,
             logger
           );

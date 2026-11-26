@@ -9,7 +9,7 @@ import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { validateDeprecatedRuleAssets } from '../../prebuilt_rule_assets_validation';
 import { MAX_DEPRECATED_RULES_TO_RETURN } from '../../../../../../../../common/api/detection_engine/prebuilt_rules';
 import { PREBUILT_RULE_ASSETS_SO_TYPE } from '../../prebuilt_rule_assets_type';
-import { getPrebuiltRuleAssetsSearchNamespace } from '../utils';
+import { buildLibraryIdsKueryFilter, getPrebuiltRuleAssetsSearchNamespace } from '../utils';
 import type { DeprecatedPrebuiltRuleAsset } from '../../../../model/rule_assets/deprecated_prebuilt_rule_asset';
 
 /**
@@ -19,7 +19,8 @@ import type { DeprecatedPrebuiltRuleAsset } from '../../../../model/rule_assets/
  */
 export const fetchDeprecatedRules = async (
   savedObjectsClient: SavedObjectsClientContract,
-  ruleIds?: string[]
+  ruleIds?: string[],
+  libraryIds?: string[]
 ): Promise<DeprecatedPrebuiltRuleAsset[]> => {
   const filterParts = [`${PREBUILT_RULE_ASSETS_SO_TYPE}.attributes.deprecated: true`];
 
@@ -32,6 +33,11 @@ export const fetchDeprecatedRules = async (
       .map((id) => `${PREBUILT_RULE_ASSETS_SO_TYPE}.attributes.rule_id: "${id}"`)
       .join(' OR ');
     filterParts.push(`(${ruleIdFilter})`);
+  }
+
+  const libraryFilter = buildLibraryIdsKueryFilter(libraryIds);
+  if (libraryFilter) {
+    filterParts.push(libraryFilter);
   }
 
   const searchResult = await savedObjectsClient.find<DeprecatedPrebuiltRuleAsset>({

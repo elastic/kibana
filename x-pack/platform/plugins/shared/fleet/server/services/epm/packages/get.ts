@@ -71,6 +71,7 @@ import { dataStreamService } from '../../data_streams';
 import * as Registry from '../registry';
 import type { PackageAsset } from '../archive/storage';
 import { getEsPackage, packageAssetToArchiveEntry } from '../archive/storage';
+import { generatePackageInfoFromArchiveBuffer, unpackBufferToAssetsMap } from '../archive';
 import { normalizeKuery } from '../../saved_object';
 import { getPackagePolicySavedObjectType } from '../../package_policy';
 import { auditLoggingService } from '../../audit_logging';
@@ -79,6 +80,7 @@ import { brandInstallationSpaceId } from './brand_installation_space_id';
 import { getFilteredSearchPackages } from '../filtered_packages';
 import { filterAssetPathForParseAndVerifyArchive } from '../archive/parse';
 import { airGappedUtils } from '../airgapped';
+import { getBundledPackageByName } from './bundled_packages';
 
 import type {
   PackageAssetReference,
@@ -722,6 +724,38 @@ export interface PackageResponse {
 }
 type GetPackageResponse = PackageResponse | undefined;
 
+async function getBundledPackageStream(
+  pkgName: string,
+  pkgVersion: string,
+  useStreaming: boolean
+): Promise<PackageResponse | undefined> {
+  const bundled = await getBundledPackageByName(pkgName);
+  if (!bundled || bundled.version !== pkgVersion) {
+    return undefined;
+  }
+  const archiveBuffer = await bundled.getBuffer();
+  const contentType = 'application/zip';
+  const [{ packageInfo }, { paths, assetsMap, archiveIterator }] = await Promise.all([
+    generatePackageInfoFromArchiveBuffer(archiveBuffer, contentType),
+    unpackBufferToAssetsMap({ archiveBuffer, contentType, useStreaming }),
+  ]);
+  return {
+    paths,
+    packageInfo,
+    assetsMap: useStreaming ? undefined : assetsMap,
+    archiveIterator,
+  };
+}
+
+const getBundledPackage = (
+  pkgName: string,
+  pkgVersion: string,
+  useStreaming: boolean
+): Promise<PackageResponse | undefined> =>
+  useStreaming
+    ? getBundledPackageStream(pkgName, pkgVersion, useStreaming)
+    : Registry.getBundledArchive(pkgName, pkgVersion);
+
 // gets package from install_source
 export async function getPackageFromSource(options: {
   pkgName: string;
@@ -729,6 +763,8 @@ export async function getPackageFromSource(options: {
   installedPkg?: Installation;
   savedObjectsClient: SavedObjectsClientContract;
   ignoreUnverified?: boolean;
+  /** When true, skip unpacking every file into assetsMap; use archiveIterator instead. */
+  useStreaming?: boolean;
 }): Promise<PackageResponse> {
   const logger = appContextService.getLogger();
   const {
@@ -737,6 +773,7 @@ export async function getPackageFromSource(options: {
     installedPkg,
     savedObjectsClient,
     ignoreUnverified = false,
+    useStreaming = false,
   } = options;
   let res: GetPackageResponse;
 
@@ -747,7 +784,9 @@ export async function getPackageFromSource(options: {
     installedPkg.version === pkgVersion
   ) {
     const { install_source: pkgInstallSource } = installedPkg;
-    if (!res && installedPkg.package_assets) {
+    // Streaming reads always go to the registry/bundled archive — installed package_assets
+    // for security_detection_engine may omit rule bodies when installed with streaming.
+    if (!useStreaming && !res && installedPkg.package_assets) {
       res = await getEsPackage(
         pkgName,
         pkgVersion,
@@ -763,7 +802,7 @@ export async function getPackageFromSource(options: {
     // See https://github.com/elastic/kibana/issues/115032
     if (!res && pkgInstallSource === 'registry') {
       try {
-        res = await Registry.getPackage(pkgName, pkgVersion);
+        res = await Registry.getPackage(pkgName, pkgVersion, { useStreaming });
         logger.debug(`retrieved installed package ${pkgName}-${pkgVersion}`);
       } catch (error) {
         if (error instanceof PackageFailedVerificationError) {
@@ -775,16 +814,16 @@ export async function getPackageFromSource(options: {
       }
     }
     if (!res && pkgInstallSource === 'bundled') {
-      res = await Registry.getBundledArchive(pkgName, pkgVersion);
+      res = await getBundledPackage(pkgName, pkgVersion, useStreaming);
       logger.debug(`retrieved bundled package ${pkgName}-${pkgVersion} from bundled archive`);
     }
   } else {
     try {
-      res = await Registry.getPackage(pkgName, pkgVersion, { ignoreUnverified });
+      res = await Registry.getPackage(pkgName, pkgVersion, { ignoreUnverified, useStreaming });
       logger.debug(`retrieved package ${pkgName}-${pkgVersion} from registry`);
     } catch (err) {
       if (err instanceof RegistryResponseError && err.status === 404) {
-        res = await Registry.getBundledArchive(pkgName, pkgVersion);
+        res = await getBundledPackage(pkgName, pkgVersion, useStreaming);
         logger.debug(`retrieved bundled package ${pkgName}-${pkgVersion}`);
       } else {
         throw err;
@@ -797,7 +836,7 @@ export async function getPackageFromSource(options: {
   return {
     paths: res.paths,
     packageInfo: res.packageInfo,
-    assetsMap: res.assetsMap,
+    assetsMap: useStreaming ? undefined : res.assetsMap,
     archiveIterator: res.archiveIterator,
   };
 }

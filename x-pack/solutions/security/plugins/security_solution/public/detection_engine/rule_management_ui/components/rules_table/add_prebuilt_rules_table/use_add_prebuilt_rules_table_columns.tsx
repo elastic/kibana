@@ -6,7 +6,7 @@
  */
 
 import type { EuiBasicTableColumn } from '@elastic/eui';
-import { EuiBadge, EuiLink, EuiText } from '@elastic/eui';
+import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiLink, EuiText } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import { RulesTableEmptyColumnName } from '../rules_table_empty_column_name';
 import { SHOW_RELATED_INTEGRATIONS_SETTING } from '../../../../../../common/constants';
@@ -25,28 +25,39 @@ import type {
 import { getNormalizedSeverity } from '../helpers';
 import { PrebuiltRulesInstallButton } from './add_prebuilt_rules_install_button';
 import { useUserPrivileges } from '../../../../../common/components/user_privileges';
+import { RuleLibraryBadge } from '../../../../common/components/rule_library_badge';
 
 export type TableColumn = EuiBasicTableColumn<RuleResponse>;
 
 interface RuleNameProps {
   name: string;
   ruleId: string;
+  library: RuleResponse['library'];
 }
 
-const RuleName = ({ name, ruleId }: RuleNameProps) => {
+const RuleName = ({ name, ruleId, library }: RuleNameProps) => {
   const {
     actions: { openRulePreview },
   } = useAddPrebuiltRulesTableContext();
 
   return (
-    <EuiLink
-      onClick={() => {
-        openRulePreview(ruleId);
-      }}
-      data-test-subj="ruleName"
-    >
-      {name}
-    </EuiLink>
+    <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+      <EuiFlexItem grow={false} className="eui-textTruncate">
+        <EuiLink
+          onClick={() => {
+            openRulePreview(ruleId);
+          }}
+          data-test-subj="ruleName"
+        >
+          {name}
+        </EuiLink>
+      </EuiFlexItem>
+      {library ? (
+        <EuiFlexItem grow={false}>
+          <RuleLibraryBadge library={library} />
+        </EuiFlexItem>
+      ) : null}
+    </EuiFlexGroup>
   );
 };
 
@@ -54,7 +65,7 @@ export const RULE_NAME_COLUMN: TableColumn = {
   field: 'name',
   name: i18n.COLUMN_RULE,
   render: (value: RuleResponse['name'], rule: RuleResponse) => (
-    <RuleName name={value} ruleId={rule.rule_id} />
+    <RuleName name={value} ruleId={rule.rule_id} library={rule.library} />
   ),
   sortable: true,
   truncateText: true,

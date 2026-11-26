@@ -51,7 +51,10 @@ export const getPrebuiltRulesAndTimelinesStatusRoute = (
         const ctx = await context.resolve(['core', 'alerting', 'securitySolution']);
         const savedObjectsClient = ctx.core.savedObjects.client;
         const rulesClient = await ctx.alerting.getRulesClient();
-        const ruleAssetsClient = createPrebuiltRuleAssetsClient(savedObjectsClient);
+        const ruleAssetsClient = createPrebuiltRuleAssetsClient(savedObjectsClient, {
+          ruleLibraryEnabled:
+            ctx.securitySolution.getConfig().experimentalFeatures.ruleLibrariesEnabled,
+        });
         const mlAuthz = ctx.securitySolution.getMlAuthz();
 
         try {

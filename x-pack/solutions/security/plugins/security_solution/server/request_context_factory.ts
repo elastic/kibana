@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { RULE_LIBRARY_SO_TYPE } from '@kbn/security-rule-libraries';
 import { memoize } from 'lodash';
 
 import type { KibanaRequest, Logger, RequestHandlerContext } from '@kbn/core/server';
@@ -169,6 +170,11 @@ export class RequestContextFactory implements IRequestContextFactory {
 
       getSpaceId,
 
+      getEncryptedSavedObjectsClient: () =>
+        startPlugins.encryptedSavedObjects?.getClient({
+          includedHiddenTypes: [RULE_LIBRARY_SO_TYPE],
+        }),
+
       getRuleDataService: () => ruleRegistry.ruleDataService,
 
       getRacClient: startPlugins.ruleRegistry.getRacClientWithRequest,
@@ -207,6 +213,7 @@ export class RequestContextFactory implements IRequestContextFactory {
           license: licensing.license,
           analytics: core.analytics,
           logger: options.logger,
+          ruleLibraryEnabled: config.experimentalFeatures.ruleLibrariesEnabled,
         });
       }),
 

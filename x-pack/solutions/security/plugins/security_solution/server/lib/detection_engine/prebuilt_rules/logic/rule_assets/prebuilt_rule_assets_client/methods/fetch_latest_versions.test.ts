@@ -37,6 +37,18 @@ const aggResponse = (ruleId: string, version: number) => ({
   },
 });
 
+const libraryAggResponse = (...buckets: Array<{ key: string[]; version: number | null }>) => ({
+  took: 1,
+  timed_out: false,
+  _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+  hits: { total: { value: 0, relation: 'eq' }, max_score: null, hits: [] },
+  aggregations: {
+    rules: {
+      buckets: buckets.map(({ key, version }) => ({ key, latest_version: { value: version } })),
+    },
+  },
+});
+
 const hitsResponse = (ruleId: string, version: number) => ({
   took: 1,
   timed_out: false,
@@ -127,5 +139,56 @@ describe('fetchLatestVersions', () => {
     const result = await fetchLatestVersions(savedObjectsClient);
 
     expect(result).toEqual([{ rule_id: 'rule-1', version: 5, type: 'query' }]);
+  });
+
+  describe('for libraries', () => {
+    it('asks for the highest version of each rule and reads only those documents', async () => {
+      searchMock
+        .mockResolvedValueOnce(libraryAggResponse({ key: ['rule-1', 'lib-1'], version: 7 }))
+        .mockResolvedValueOnce(hitsResponse('rule-1', 7));
+
+      const result = await fetchLatestVersions(savedObjectsClient, { libraryIds: ['lib-1'] });
+
+      const [aggregationQuery, documentsQuery] = searchMock.mock.calls.map(([query]) => query);
+      expect(aggregationQuery.aggs.rules.aggs).toEqual({
+        latest_version: { max: { field: `${PREBUILT_RULE_ASSETS_SO_TYPE}.version` } },
+      });
+      expect(documentsQuery.query.bool.filter).toContainEqual({
+        terms: { _id: [`${PREBUILT_RULE_ASSETS_SO_TYPE}:lib-1_rule-1_7`] },
+      });
+      expect(result).toEqual([{ rule_id: 'rule-1', version: 7, type: 'query' }]);
+    });
+
+    it('keeps the same rule apart in two libraries', async () => {
+      searchMock
+        .mockResolvedValueOnce(
+          libraryAggResponse(
+            { key: ['rule-1', 'lib-1'], version: 7 },
+            { key: ['rule-1', 'lib-2'], version: 3 }
+          )
+        )
+        .mockResolvedValueOnce(emptyHitsResponse);
+
+      await fetchLatestVersions(savedObjectsClient, { libraryIds: ['lib-1', 'lib-2'] });
+
+      expect(searchMock.mock.calls[1][0].query.bool.filter).toContainEqual({
+        terms: {
+          _id: [
+            `${PREBUILT_RULE_ASSETS_SO_TYPE}:lib-1_rule-1_7`,
+            `${PREBUILT_RULE_ASSETS_SO_TYPE}:lib-2_rule-1_3`,
+          ],
+        },
+      });
+    });
+
+    it('skips a rule that has no version', async () => {
+      searchMock
+        .mockResolvedValueOnce(libraryAggResponse({ key: ['rule-1', 'lib-1'], version: null }))
+        .mockResolvedValueOnce(emptyHitsResponse);
+
+      await fetchLatestVersions(savedObjectsClient, { libraryIds: ['lib-1'] });
+
+      expect(searchMock.mock.calls[1][0].query.bool.filter).toContainEqual({ terms: { _id: [] } });
+    });
   });
 });

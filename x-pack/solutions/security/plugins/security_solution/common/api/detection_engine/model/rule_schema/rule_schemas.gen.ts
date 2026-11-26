@@ -59,6 +59,7 @@ import {
   RuleSignatureId,
   IsRuleImmutable,
   RuleSource,
+  RuleLibrary,
   RuleRevision,
   RequiredFieldArray,
   RuleQuery,
@@ -189,6 +190,7 @@ export const ResponseFields = lazySchema(() =>
     rule_id: RuleSignatureId,
     immutable: IsRuleImmutable,
     rule_source: RuleSource,
+    library: RuleLibrary.optional(),
     updated_at: isoDateTime(),
     updated_by: z.string(),
     /**

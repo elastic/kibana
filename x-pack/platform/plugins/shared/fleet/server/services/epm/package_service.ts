@@ -129,6 +129,21 @@ export interface PackageClient {
     options?: { ignoreUnverified?: boolean }
   ): ReturnType<typeof getPackageFromSource>;
 
+  /**
+   * Read a package archive without unpacking every file into memory.
+   * Returns an ArchiveIterator so callers can traverse entries in batches
+   * (e.g. kibana/security_rule/* for the rule library fleet provider).
+   */
+  getPackageStream(
+    packageName: string,
+    packageVersion: string,
+    options?: { ignoreUnverified?: boolean }
+  ): Promise<{
+    paths: string[];
+    packageInfo: ArchivePackage | RegistryPackage;
+    archiveIterator: ArchiveIterator;
+  }>;
+
   getPackageFieldsMetadata(
     params: Parameters<typeof getPackageFieldsMetadata>['0'],
     options?: Parameters<typeof getPackageFieldsMetadata>['1']
@@ -374,6 +389,25 @@ class PackageClientImpl implements PackageClient {
       savedObjectsClient: this.internalSoClient,
       ignoreUnverified: options?.ignoreUnverified,
     });
+  }
+
+  public async getPackageStream(
+    packageName: string,
+    packageVersion: string,
+    options?: { ignoreUnverified?: boolean }
+  ) {
+    await this.#runPreflight(READ_PACKAGE_INFO_AUTHZ);
+    const { paths, packageInfo, archiveIterator } = await getPackageFromSource({
+      pkgName: packageName,
+      pkgVersion: packageVersion,
+      savedObjectsClient: this.internalSoClient,
+      ignoreUnverified: options?.ignoreUnverified,
+      useStreaming: true,
+    });
+    if (!archiveIterator) {
+      throw new Error(`getPackageStream: no archiveIterator for ${packageName}-${packageVersion}`);
+    }
+    return { paths, packageInfo, archiveIterator };
   }
 
   public async getPackageFieldsMetadata(

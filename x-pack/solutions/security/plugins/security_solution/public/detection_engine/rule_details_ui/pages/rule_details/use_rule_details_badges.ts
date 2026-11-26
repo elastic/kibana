@@ -29,6 +29,21 @@ import * as ruleInfoI18n from '../../../../detections/components/rules/rule_info
 import type { Rule } from '../../../rule_management/logic';
 import { useExecuteBulkAction } from '../../../rule_management/logic/bulk_actions/use_execute_bulk_action';
 import * as i18n from './translations';
+import {
+  ruleLibraryBadgeLabel,
+  RULE_LIBRARY_TOOLTIP,
+} from '../../../common/components/rule_library_badge';
+
+const libraryHeaderBadges = (rule: Rule | null): AppHeaderBadge[] =>
+  rule?.library
+    ? [
+        {
+          label: ruleLibraryBadgeLabel(rule.library),
+          tooltip: RULE_LIBRARY_TOOLTIP(rule.library.title),
+          'data-test-subj': 'ruleDetailsLibraryBadge',
+        },
+      ]
+    : [];
 
 interface UseRuleDetailsBadgesProps {
   rule: Rule | null;
@@ -160,6 +175,8 @@ export const useRuleDetailsBadges = ({
 
     // Right after the enabled badge so the header never folds it into the "+N" overflow badge.
     if (snoozeBadge) badges.push(snoozeBadge);
+
+    badges.push(...libraryHeaderBadges(rule));
 
     if (rule && isCustomizedPrebuiltRule(rule)) {
       badges.push(

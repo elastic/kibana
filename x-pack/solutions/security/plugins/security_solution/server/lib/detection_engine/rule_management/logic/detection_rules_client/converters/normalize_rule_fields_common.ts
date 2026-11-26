@@ -19,6 +19,7 @@ import {
   transformToActionFrequency,
 } from '../../../normalization/rule_actions';
 import { migrateLegacyInvestigationFields } from '../../../utils/utils';
+import { defaultElasticLibrary } from '../../../../prebuilt_rules/logic/rule_library_params_from_asset';
 import { normalizeRuleSource } from './normalize_rule_source';
 import { createRuleExecutionSummary } from '../../../../rule_monitoring';
 
@@ -53,6 +54,7 @@ export function normalizeCommonRuleFields(
     name: rule.name,
     immutable: params.immutable,
     rule_source: normalizedRuleSource,
+    library: params.immutable ? params.library ?? defaultElasticLibrary() : params.library,
     version: params.version,
     revision: rule.revision,
     updated_at: rule.updatedAt.toISOString(),

@@ -51,6 +51,7 @@ export const duplicateRule = async ({ rule }: DuplicateRuleParams): Promise<Inte
       immutable,
       ruleSource,
       exceptionsList: [],
+      library: undefined,
     },
     schedule: rule.schedule,
     enabled: false,

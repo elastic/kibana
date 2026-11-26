@@ -6,14 +6,41 @@
  */
 import { stringifyZodError } from '@kbn/zod-helpers/v4';
 import { BadRequestError } from '@kbn/securitysolution-es-utils';
-import { PrebuiltRuleAsset } from '../../model/rule_assets/prebuilt_rule_asset';
+import {
+  PrebuiltRuleAsset,
+  type PrebuiltRuleAssetRecord,
+} from '../../model/rule_assets/prebuilt_rule_asset';
 import { DeprecatedPrebuiltRuleAsset } from '../../model/rule_assets/deprecated_prebuilt_rule_asset';
 
-export const validatePrebuiltRuleAssets = (rules: PrebuiltRuleAsset[]): PrebuiltRuleAsset[] => {
+export const validatePrebuiltRuleAssets = (
+  rules: PrebuiltRuleAsset[]
+): PrebuiltRuleAssetRecord[] => {
   return rules.map((rule) => validatePrebuiltRuleAsset(rule));
 };
 
-export const validatePrebuiltRuleAsset = (rule: PrebuiltRuleAsset): PrebuiltRuleAsset => {
+// Parsing drops fields the asset schema does not know, so the ones that say where a rule came from are
+// read first and put back after.
+const readLibraryFields = (
+  rule: PrebuiltRuleAsset
+): Pick<PrebuiltRuleAssetRecord, 'library_id' | 'library_title' | 'library_path'> => {
+  const {
+    library_id: id,
+    library_title: title,
+    library_path: path,
+  } = rule as {
+    library_id?: string;
+    library_title?: string;
+    library_path?: string;
+  };
+  return {
+    ...(id ? { library_id: id } : {}),
+    ...(title ? { library_title: title } : {}),
+    ...(path ? { library_path: path } : {}),
+  };
+};
+
+export const validatePrebuiltRuleAsset = (rule: PrebuiltRuleAsset): PrebuiltRuleAssetRecord => {
+  const libraryFields = readLibraryFields(rule);
   const result = PrebuiltRuleAsset.safeParse(rule);
 
   if (!result.success) {
@@ -29,7 +56,7 @@ export const validatePrebuiltRuleAsset = (rule: PrebuiltRuleAsset): PrebuiltRule
     );
   }
 
-  return result.data;
+  return { ...result.data, ...libraryFields };
 };
 
 export const validateDeprecatedRuleAssets = (

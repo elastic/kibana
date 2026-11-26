@@ -34,10 +34,13 @@ export const getPrebuiltRuleBaseVersionHandler = async (
   const { id } = request.query;
 
   try {
-    const ctx = await context.resolve(['core', 'alerting']);
+    const ctx = await context.resolve(['core', 'alerting', 'securitySolution']);
     const soClient = ctx.core.savedObjects.client;
     const rulesClient = await ctx.alerting.getRulesClient();
-    const ruleAssetsClient = createPrebuiltRuleAssetsClient(soClient);
+    const ruleAssetsClient = createPrebuiltRuleAssetsClient(soClient, {
+      ruleLibraryEnabled:
+        ctx.securitySolution.getConfig().experimentalFeatures.ruleLibrariesEnabled,
+    });
 
     const currentRule = await getRuleById({ rulesClient, id });
 

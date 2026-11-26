@@ -45,6 +45,7 @@ import { IntegrationsPopover } from '../../../common/components/related_integrat
 import { RuleStatusBadge } from '../../../common/components/rule_execution_status';
 import { RuleSwitch } from '../../../common/components/rule_switch';
 import { SeverityBadge } from '../../../../common/components/severity_badge';
+import { RuleLibraryBadge } from '../../../common/components/rule_library_badge';
 import * as i18n from '../../../common/translations';
 import type { Rule } from '../../../rule_management/logic';
 import { useRulesTableContext } from './rules_table/rules_table_context';
@@ -162,7 +163,18 @@ export const RuleLink = ({ name, id }: Pick<Rule, 'id' | 'name'>) => {
 export const RULE_NAME_COLUMN: TableColumn = {
   field: 'name',
   name: i18n.COLUMN_RULE,
-  render: (value: Rule['name'], item: Rule) => <RuleLink id={item.id} name={value} />,
+  render: (value: Rule['name'], item: Rule) => (
+    <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+      <EuiFlexItem grow={false} className="eui-textTruncate">
+        <RuleLink id={item.id} name={value} />
+      </EuiFlexItem>
+      {item.library ? (
+        <EuiFlexItem grow={false}>
+          <RuleLibraryBadge library={item.library} />
+        </EuiFlexItem>
+      ) : null}
+    </EuiFlexGroup>
+  ),
   sortable: true,
   truncateText: true,
   minWidth: '12em',

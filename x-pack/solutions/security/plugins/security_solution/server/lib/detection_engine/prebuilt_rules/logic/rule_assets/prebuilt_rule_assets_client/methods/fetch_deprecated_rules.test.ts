@@ -59,6 +59,16 @@ describe('fetchDeprecatedRules', () => {
     expect(callArgs.filter).toContain('rule-b');
   });
 
+  it('scopes the query to the provided libraries when given', async () => {
+    const soClient = savedObjectsClientMock.create();
+    soClient.find.mockResolvedValue({ saved_objects: [], total: 0, per_page: 0, page: 1 });
+
+    await fetchDeprecatedRules(soClient, undefined, ['elastic']);
+
+    const callArgs = soClient.find.mock.calls[0][0];
+    expect(callArgs.filter).toContain('security-rule.attributes.library_id: "elastic"');
+  });
+
   it('returns empty array immediately when given an empty rule_ids list', async () => {
     const soClient = savedObjectsClientMock.create();
 
