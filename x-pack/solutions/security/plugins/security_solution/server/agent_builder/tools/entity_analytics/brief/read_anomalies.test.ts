@@ -117,13 +117,23 @@ describe('readAnomalies', () => {
       ...params,
     });
 
+  it('reads every ML results index, including custom ones, as the Entities with anomalies tile does', async () => {
+    const search = jest.fn().mockResolvedValue({ aggregations: {} });
+
+    await read({ esClient: esClientOf(search) });
+
+    expect(search).toHaveBeenCalledWith(
+      expect.objectContaining({ index: '.ml-anomalies-*', ignore_unavailable: true })
+    );
+  });
+
   it('reads the final records of the period of the Security jobs, that the candidate and its members own, not by entity id', async () => {
     const search = jest.fn().mockResolvedValue({ aggregations: {} });
 
     await read({ esClient: esClientOf(search) });
 
     const [{ index, query, aggs }] = search.mock.calls[0];
-    expect(index).toBe('.ml-anomalies-shared*');
+    expect(index).toBe('.ml-anomalies-*');
     expect(JSON.stringify(query)).toContain('{"term":{"result_type":"record"}}');
     expect(JSON.stringify(query)).toContain('{"term":{"is_interim":false}}');
     expect(JSON.stringify(query)).toContain('{"terms":{"job_id":["high_sent_bytes"]}}');

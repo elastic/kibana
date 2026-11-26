@@ -7,13 +7,12 @@
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { EntityAnalyticsScope } from '../../../../../common/entity_analytics/ai_brief/scope';
+import { ML_ANOMALY_INDICES } from '../../../../../common/entity_analytics/anomalies/constants';
 import { isSecurityJob } from '../../../../../common/machine_learning/is_security_job';
 import { getPeriodStart } from './describe_scope';
 import { buildRecordFilters } from './match_candidate_records';
 import type { BriefCandidate, BriefJobService, EntityAnomalies } from './types';
 
-/** The machine learning jobs' results, as the Entities with anomalies tile reads them. */
-const ANOMALY_INDICES = '.ml-anomalies-shared*';
 /** The two jobs with the highest record score are given to the model. */
 const MAX_JOBS_PER_ENTITY = 1;
 
@@ -60,7 +59,7 @@ export const readAnomalies = async ({
       return { anomaliesByEntityId: {}, isFailed: false };
     }
     const response = await esClient.search<unknown, AnomaliesByCandidate>({
-      index: ANOMALY_INDICES,
+      index: ML_ANOMALY_INDICES,
       size: 0,
       ignore_unavailable: true,
       query: {
