@@ -506,41 +506,52 @@ export const indexEndpointHostForPolicy = async ({
 
   await stopMetadataTransforms(esClient, integrationPolicy.package?.version ?? '');
 
-  // Create the Fleet agent
-  const indexedFleetAgent = await indexFleetAgentForHost(
-    esClient,
-    hostMetadataDoc,
-    agentPolicyId ?? integrationPolicy.policy_ids[0],
-    kibanaVersion,
-    undefined,
-    agentPolicy.space_ids
-  );
+  try {
+    // Create the Fleet agent
+    const indexedFleetAgent = await indexFleetAgentForHost(
+      esClient,
+      hostMetadataDoc,
+      agentPolicyId ?? integrationPolicy.policy_ids[0],
+      kibanaVersion,
+      undefined,
+      agentPolicy.space_ids
+    );
 
-  mergeAndAppendArrays(response, indexedFleetAgent);
+    mergeAndAppendArrays(response, indexedFleetAgent);
 
-  logger.info(`New fleet agent indexed [${indexedFleetAgent.agents[0]?.agent?.id}]`);
-  logger.verbose(JSON.stringify(indexedFleetAgent.agents, null, 2));
+    logger.info(`New fleet agent indexed [${indexedFleetAgent.agents[0]?.agent?.id}]`);
+    logger.verbose(JSON.stringify(indexedFleetAgent.agents, null, 2));
 
-  await esClient
-    .index({
-      index: METADATA_DATASTREAM,
-      id: uuidv4(),
-      body: hostMetadataDoc,
-      op_type: 'create',
-      refresh: 'wait_for',
-    })
-    .catch(catchHttpErrorFormatAndThrow);
+    await esClient
+      .index({
+        index: METADATA_DATASTREAM,
+        id: uuidv4(),
+        body: hostMetadataDoc,
+        op_type: 'create',
+        refresh: 'wait_for',
+      })
+      .catch(catchHttpErrorFormatAndThrow);
 
-  response.hosts.push(hostMetadataDoc);
-  response.metadataIndex = METADATA_DATASTREAM;
+    response.hosts.push(hostMetadataDoc);
+    response.metadataIndex = METADATA_DATASTREAM;
 
-  logger.info(`New endpoint host metadata doc indexed with agent id [${hostMetadataDoc.agent.id}]`);
+    logger.info(
+      `New endpoint host metadata doc indexed with agent id [${hostMetadataDoc.agent.id}]`
+    );
 
-  await startMetadataTransforms(
-    esClient,
-    [hostMetadataDoc.agent.id],
-    integrationPolicy.package?.version ?? ''
-  );
+    await startMetadataTransforms(
+      esClient,
+      [hostMetadataDoc.agent.id],
+      integrationPolicy.package?.version ?? ''
+    );
 
-  return response;
+    return response;
+  } catch (error) {
+    // The Fleet agent and host metadata are indexed before the transforms start. A throw after that
+    // point never returns `response`, so the caller has no cleanup handles: roll those documents back here.
+    if (response.hosts.length > 0 || response.agents.length > 0) {
+      await deleteIndexedEndpointHosts(esClient, kbnClient, response).catch(() => undefined);
+    }
+    throw error;
+  }
 };
