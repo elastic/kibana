@@ -17,13 +17,13 @@ test.describe('Browser proxy environment', { tag: ['@local-stateful-classic'] },
     'Chromium reads proxy environment variables only on Linux'
   );
 
-  test('uses the proxy when launched without the Scout launch options', async ({ loadSite }) => {
-    expect(await loadSite()).toBe('proxy');
+  test('uses the proxy when launched without the Scout launch options', async ({ visitSite }) => {
+    expect(await visitSite()).toStrictEqual({ http: 'proxy', https: 'proxy' });
   });
 
-  test('connects directly when launched with the Scout launch options', async ({ loadSite }) => {
+  test('connects directly when launched with the Scout launch options', async ({ visitSite }) => {
     const { launchOptions } = createPlaywrightConfig({ testDir: '.' }).use ?? {};
 
-    expect(await loadSite(launchOptions)).toBe('site');
+    expect(await visitSite(launchOptions)).toStrictEqual({ http: 'site', https: 'site' });
   });
 });

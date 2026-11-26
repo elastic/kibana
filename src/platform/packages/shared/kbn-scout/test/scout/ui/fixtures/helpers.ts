@@ -7,17 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import http from 'http';
+import type net from 'net';
 
 export interface LocalServer {
   port: number;
   close: () => void;
 }
 
-/** Starts a local HTTP server that answers every request with `body`. */
-export const serve = (body: string): Promise<LocalServer> =>
+/** Starts `server` on a free local port. */
+export const listen = (server: net.Server): Promise<LocalServer> =>
   new Promise((resolve, reject) => {
-    const server = http.createServer((_request, response) => response.end(body));
     server.once('error', reject);
     server.listen(0, '127.0.0.1', () => {
       const address = server.address();
