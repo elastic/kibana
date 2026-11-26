@@ -14,6 +14,7 @@ import type { UiCounterMetricType } from '@kbn/analytics';
 import { apiTest, testData } from '../fixtures';
 
 const USAGE_COUNTER_TYPE = 'usage-counter';
+const UI_METRIC_TYPE = 'ui-metric';
 const APP_NAME = 'myApp';
 // Usage counters are buffered for 5s by default and then written without a refresh.
 const COUNTER_STORED_TIMEOUT = 30_000;
@@ -62,11 +63,17 @@ apiTest.describe('UI counters API', { tag: ['@local-stateful-classic'] }, () => 
   });
 
   apiTest.afterAll(async ({ kbnClient }) => {
+    // The report endpoint also writes a legacy `ui-metric` object per event.
+    const objects = reportedEventNames.map((eventName) => ({
+      type: UI_METRIC_TYPE,
+      id: `${APP_NAME}:${eventName}`,
+    }));
     for (const eventName of reportedEventNames) {
       for (const { id } of await findCounters(kbnClient, eventName)) {
-        await kbnClient.savedObjects.delete({ type: USAGE_COUNTER_TYPE, id });
+        objects.push({ type: USAGE_COUNTER_TYPE, id });
       }
     }
+    await kbnClient.savedObjects.bulkDelete({ objects });
   });
 
   apiTest(
