@@ -103,7 +103,7 @@ test.describe('Maps - mapbox styles', { tag: '@local-stateful-classic' }, () => 
             '#61a2ff',
           ],
           'circle-opacity': 0.75,
-          'circle-stroke-color': '#009490',
+          'circle-stroke-color': '#008c72',
           'circle-stroke-opacity': 0.75,
           'circle-stroke-width': 1,
           'circle-radius': 10,
@@ -208,7 +208,7 @@ test.describe('Maps - mapbox styles', { tag: '@local-stateful-classic' }, () => 
           ['==', ['get', '__kbn_isvisibleduetojoin__'], true],
         ],
         layout: { visibility: 'visible' },
-        paint: { 'line-color': '#009490', 'line-opacity': 0.75, 'line-width': 1 },
+        paint: { 'line-color': '#008c72', 'line-opacity': 0.75, 'line-width': 1 },
       });
     });
   });

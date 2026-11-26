@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useCallback, useMemo } from 'react';
+import React, { memo, useCallback, useEffect, useMemo } from 'react';
 import { EuiFlyoutBody } from '@elastic/eui';
 import { KbnDangerCallout } from '@kbn/ui-callout';
 import { i18n } from '@kbn/i18n';
@@ -24,6 +24,7 @@ import { DataViewDegradedCallout } from '../../../data_view_manager/components/d
 import { PageScope } from '../../../data_view_manager/constants';
 import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
 import { EventKind } from './constants/event_kinds';
+import { getDocumentHistoryTitle } from './utils/get_header_title';
 import { DocumentFlyout } from '.';
 
 const DATA_VIEW_ERROR = i18n.translate(
@@ -68,6 +69,10 @@ export interface DocumentFlyoutWrapperProps {
    * Optional test subject forwarded to the document flyout header without adding a layout wrapper.
    */
   dataTestSubj?: string;
+  /**
+   * Reports the history title of the resolved document (so a host can retitle its flyout).
+   */
+  onHistoryTitleResolved?: (title: string) => void;
 }
 
 /**
@@ -92,6 +97,7 @@ const DocumentFlyoutWrapperContent = memo(
     renderCellActions,
     onAlertUpdated,
     dataTestSubj,
+    onHistoryTitleResolved,
   }: DocumentFlyoutWrapperProps) => {
     const { dataView, status: dataViewStatus } = useDataView(PageScope.default);
 
@@ -109,6 +115,10 @@ const DocumentFlyoutWrapperContent = memo(
       dataView,
       skip: shouldSkipSearch,
     });
+
+    useEffect(() => {
+      if (status === 'found' && hit) onHistoryTitleResolved?.(getDocumentHistoryTitle(hit));
+    }, [status, hit, onHistoryTitleResolved]);
 
     const handleAlertUpdated = useCallback(() => {
       onAlertUpdated();

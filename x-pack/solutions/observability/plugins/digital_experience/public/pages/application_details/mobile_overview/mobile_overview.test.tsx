@@ -20,8 +20,14 @@ import { useTimeRange } from '../../../hooks/use_time_range';
 import { useUpdateUrlQuery } from '../../../hooks/use_update_url_query';
 import { createUiSettingsMock } from '../../../test_utils/ui_settings_mock';
 import { MobileOverview } from './mobile_overview';
+import { ReleaseHealth } from './release_health/release_health';
+import { useMobileReleases, type MobileReleasesState } from './release_health/use_mobile_releases';
 import { useMobileKpis } from './use_mobile_kpis';
 
+jest.mock('./release_health/use_mobile_releases');
+jest.mock('./release_health/release_health', () => ({
+  ReleaseHealth: jest.fn(() => <div data-test-subj="digitalExperienceMobileReleaseHealth" />),
+}));
 jest.mock('../../../hooks/use_api_client');
 jest.mock('../../../hooks/use_digital_experience_params');
 jest.mock('../../../hooks/use_environment');
@@ -31,7 +37,11 @@ jest.mock('../../../hooks/use_formatters', () => ({
 }));
 jest.mock('../../../hooks/use_time_range');
 jest.mock('../../../hooks/use_update_url_query');
-jest.mock('../../../components/time_range_picker', () => ({ TimeRangePicker: () => null }));
+jest.mock('../../../components/time_range_picker', () => ({
+  TimeRangePicker: ({ onRefresh }: { onRefresh: () => void }) => (
+    <button data-test-subj="timeRangeRefresh" onClick={onRefresh} />
+  ),
+}));
 jest.mock('../../../components/environment_filter', () => ({
   EnvironmentFilter: jest.fn(() => null),
 }));
@@ -81,12 +91,22 @@ const Wrapper = ({ children }: { children: React.ReactNode }) => (
 );
 
 // The page fetches the KPIs and hands them to the Overview, as this does.
-const Overview = () => <MobileOverview kpisState={useMobileKpis('shop-mobile')} />;
+const RELEASES_STATE: MobileReleasesState = {
+  releases: undefined,
+  isLoading: true,
+  error: undefined,
+  refresh: jest.fn(),
+};
+
+const Overview = () => (
+  <MobileOverview serviceName="shop-mobile" kpisState={useMobileKpis('shop-mobile')} />
+);
 
 const renderPage = () => render(<Overview />, { wrapper: Wrapper });
 
 beforeEach(() => {
   jest.clearAllMocks();
+  jest.mocked(useMobileReleases).mockReturnValue(RELEASES_STATE);
   fetch.mockResolvedValue(KPIS);
   jest
     .mocked(useApiClient)
@@ -112,7 +132,10 @@ describe('MobileOverview', () => {
       '12'
     );
     expect(screen.getByTestId('digitalExperienceMobileKpiUsersValue')).toHaveTextContent('4');
-    expect(screen.getByTestId('digitalExperienceMobileKpiErrorRateValue')).toHaveTextContent('0.5');
+    // Two decimals, as the release table and the applications list show it.
+    expect(screen.getByTestId('digitalExperienceMobileKpiErrorRateValue')).toHaveTextContent(
+      '0.50'
+    );
     expect(
       Array.from(
         screen
@@ -309,6 +332,53 @@ describe('MobileOverview', () => {
     expect(environmentProps()).toMatchObject({ isLoading: false, environments: ['production'] });
   });
 
+  it('heads the KPI row with the health summary and its Compare toggle', async () => {
+    renderPage();
+    await screen.findByTestId('digitalExperienceMobileKpis');
+
+    expect(screen.getByRole('region', { name: 'Health summary' })).toContainElement(
+      screen.getByTestId('digitalExperienceMobileKpis')
+    );
+    const toggle = screen.getByTestId('digitalExperienceMobileCompareToggle');
+    expect(screen.getByText('Compare to the previous period')).toBeInTheDocument();
+    expect(toggle).toHaveAttribute('aria-checked', 'false');
+  });
+
+  it('turns Compare on in the URL, so a reload or Share keeps it', async () => {
+    renderPage();
+    await screen.findByTestId('digitalExperienceMobileKpis');
+
+    fireEvent.click(screen.getByTestId('digitalExperienceMobileCompareToggle'));
+
+    expect(updateUrlQuery).toHaveBeenCalledWith({ compare: 'true' });
+  });
+
+  it('turns Compare off when the URL has it on', async () => {
+    mockParams({ compare: 'true' });
+    renderPage();
+    await screen.findByTestId('digitalExperienceMobileKpis');
+
+    const toggle = screen.getByTestId('digitalExperienceMobileCompareToggle');
+    expect(toggle).toHaveAttribute('aria-checked', 'true');
+    fireEvent.click(toggle);
+
+    expect(updateUrlQuery).toHaveBeenCalledWith({ compare: undefined });
+  });
+
+  it('lets the release health filter the page by a release, kept in the URL', async () => {
+    mockParams({ release: '2.0.0' });
+    renderPage();
+    await screen.findByTestId('digitalExperienceMobileKpis');
+
+    const props = jest.mocked(ReleaseHealth).mock.calls.at(-1)?.[0];
+    expect(props?.selectedRelease).toBe('2.0.0');
+    // Every release of the OS, whatever the filter, so a release keeps its colour when picked
+    expect(props?.rankedReleases).toEqual(['2.0.0', '1.9.0']);
+    props?.onSelectRelease('1.9.0');
+
+    expect(updateUrlQuery).toHaveBeenCalledWith({ release: '1.9.0' });
+  });
+
   it('shows no change nor previous period with Compare off, its default', async () => {
     renderPage();
     await screen.findByTestId('digitalExperienceMobileKpis');
@@ -328,7 +398,7 @@ describe('MobileOverview', () => {
       '+20%'
     );
     expect(screen.getByTestId('digitalExperienceMobileKpiSessionsPrevious')).toHaveTextContent(
-      'Previous period: 10'
+      'vs 10'
     );
     ['Users', 'ErrorRate'].forEach((kpi) => {
       expect(screen.getByTestId(`digitalExperienceMobileKpi${kpi}Change`)).toBeInTheDocument();
@@ -371,6 +441,40 @@ describe('MobileOverview', () => {
 
     expect(await screen.findByTestId('digitalExperienceMobileKpis')).toBeInTheDocument();
     expect(screen.queryByTestId('digitalExperienceMobileKpisError')).toBeNull();
+  });
+
+  it('shows the release health below the KPIs, and only with them', async () => {
+    renderPage();
+
+    const kpis = await screen.findByTestId('digitalExperienceMobileKpis');
+    const releaseHealth = screen.getByTestId('digitalExperienceMobileReleaseHealth');
+    expect(kpis.compareDocumentPosition(releaseHealth)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
+  });
+
+  it.each([
+    ['fail', () => fetch.mockRejectedValue(new Error('Internal Server Error'))],
+    ['have no data', () => fetch.mockResolvedValue({ ...KPIS, hasData: false })],
+  ])('hides the release health when the KPIs %s', async (_, arrange) => {
+    arrange();
+    renderPage();
+
+    await waitFor(() => expect(screen.queryByTestId('digitalExperienceMobileKpis')).toBeNull());
+    expect(screen.queryByTestId('digitalExperienceMobileReleaseHealth')).toBeNull();
+  });
+
+  it("fetches the application's release health itself, so only the Overview runs it", async () => {
+    renderPage();
+
+    await waitFor(() => expect(useMobileReleases).toHaveBeenCalledWith('shop-mobile'));
+  });
+
+  it('refreshes the release health with the KPIs from the toolbar', async () => {
+    renderPage();
+    await screen.findByTestId('digitalExperienceMobileKpis');
+
+    fireEvent.click(screen.getByTestId('timeRangeRefresh'));
+
+    expect(RELEASES_STATE.refresh).toHaveBeenCalled();
   });
 
   it('links to the EDOT Android and iOS docs without mobile data', async () => {

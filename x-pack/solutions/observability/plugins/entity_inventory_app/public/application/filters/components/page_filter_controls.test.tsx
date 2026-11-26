@@ -6,15 +6,12 @@
  */
 
 import React from 'react';
-import { Router } from '@kbn/shared-ux-router';
 import { createMemoryHistory } from 'history';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { coreMock } from '@kbn/core/public/mocks';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { EntityInventoryEntityCategory } from '../../../types';
-import { createPublicConfigMock } from '../../../mocks';
-import { EntityInventorySearchProvider } from '../../context/search_context';
+import { createPublicConfigMock, MockEntityInventoryProvider } from '../../../mocks';
 import { useEntityInventoryDataView } from '../../hooks/use_entity_inventory_data_view';
 import { typesFixture as mockTypes } from '../../__fixtures__/types';
 import { EntityInventoryPageFilterControls } from './page_filter_controls';
@@ -36,20 +33,18 @@ const renderControls = (entityCategory: EntityInventoryEntityCategory, initialEn
   const history = createMemoryHistory({ initialEntries: [initialEntry] });
   const dataViewsCreate = jest.fn().mockResolvedValue({});
   const result = render(
-    <KibanaContextProvider
+    <MockEntityInventoryProvider
+      entityCategory={entityCategory}
       services={{
         ...coreMock.createStart(),
         config: createPublicConfigMock(),
         dataViews: { create: dataViewsCreate },
       }}
+      history={history}
     >
-      <Router history={history}>
-        <EntityInventorySearchProvider entityCategory={entityCategory}>
-          <EntityInventoryPageFilterControls />
-          <DataViewProbe />
-        </EntityInventorySearchProvider>
-      </Router>
-    </KibanaContextProvider>
+      <EntityInventoryPageFilterControls />
+      <DataViewProbe />
+    </MockEntityInventoryProvider>
   );
   return { history, dataViewsCreate, ...result };
 };

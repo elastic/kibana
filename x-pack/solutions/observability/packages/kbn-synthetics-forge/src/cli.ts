@@ -63,7 +63,6 @@ export async function cli(): Promise<void> {
     switch (action) {
       case 'create':
         const output = await run(config, log);
-        log.info(`Enrollment Token: ${output.enrollmentToken}`);
         log.info(`Kibana Version: ${output.kibanaVersion}`);
         log.info(`Total Monitors: ${output.monitorCount}`);
         writeOutputFile(output, log);

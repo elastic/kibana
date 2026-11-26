@@ -73,7 +73,7 @@ describe('mobileSessionSummaryQuery', () => {
 
   it('times a crash when it happened, the earlier of its two times', () => {
     expect(query).toContain(
-      'EVAL event_time = CASE(is_crash, LEAST(@timestamp, COALESCE(TO_DATETIME(observed_timestamp), @timestamp)), @timestamp)'
+      'EVAL event_time = CASE(is_crash AND observed_time + 24 hours >= @timestamp, LEAST(@timestamp, observed_time), @timestamp)'
     );
     expect(query).toContain('start_time = MIN(event_time)');
     expect(query).toContain('end_time = MAX(event_time)');

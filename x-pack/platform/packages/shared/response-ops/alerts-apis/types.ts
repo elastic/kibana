@@ -21,6 +21,9 @@ export type MutedAlerts = Record<string, string[]>;
 
 export type SnoozeConditionType = 'field_change' | 'severity_change' | 'severity_equals';
 
+/** How multiple snooze conditions combine: any of them, or all of them. */
+export type SnoozeConditionOperator = 'any' | 'all';
+
 export type SnoozeCondition =
   | { type: 'field_change'; field: string }
   | { type: 'severity_change' }
@@ -30,7 +33,7 @@ export interface SnoozedInstance {
   instanceId: string;
   expiresAt?: string;
   conditions?: SnoozeCondition[];
-  conditionOperator?: 'any' | 'all';
+  conditionOperator?: SnoozeConditionOperator;
   snoozedAt: string;
   snoozedBy: string;
 }

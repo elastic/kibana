@@ -54,7 +54,7 @@ pageLoadAssetSize:
   dataViews: 1697
   dataVisualizer: 7461
   devTools: 4281
-  digitalExperience: 8301
+  digitalExperience: 9252
   discover: 21958
   discoverEnhanced: 1359
   discoveries: 31528
@@ -62,7 +62,7 @@ pageLoadAssetSize:
   elasticAssistant: 136070
   elasticAssistantSharedState: 3369
   elasticConsole: 1119
-  elasticsearchHome: 2777
+  elasticsearchHome: 3770
   embeddable: 990
   embeddableAlertsTable: 1536
   enterpriseSearch: 28188
@@ -137,6 +137,7 @@ pageLoadAssetSize:
   navigation: 14840
   newsfeed: 10708
   nightshift: 5665
+  nightshiftDetection: 1500
   nightshiftInvestigations: 9405
   nightshiftSources: 3928
   noDataPage: 630
@@ -189,7 +190,7 @@ pageLoadAssetSize:
   serverless: 1571
   serverlessObservability: 14136
   serverlessSearch: 18103
-  serverlessVectordb: 8809
+  serverlessVectordb: 10433
   sessionView: 647
   share: 379
   shared-core: 343009

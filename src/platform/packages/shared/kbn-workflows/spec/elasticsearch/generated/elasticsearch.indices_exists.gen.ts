@@ -50,9 +50,9 @@ Check if one or more indices, index aliases, or data streams exist.
     bodyParams: [],
   },
   paramsSchema: z.object({
-    ...getShapeAt(indices_exists_request, 'body'),
-    ...getShapeAt(indices_exists_request, 'path'),
     ...getShapeAt(indices_exists_request, 'query'),
+    ...getShapeAt(indices_exists_request, 'path'),
+    ...getShapeAt(indices_exists_request, 'body'),
   }),
   outputSchema: z.optional(z.looseObject({})),
 };

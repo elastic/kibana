@@ -6,8 +6,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { BaseStepDefinition } from '@kbn/workflows';
 import { StepCategory } from '@kbn/workflows';
+import type { CommonStepDefinition } from '@kbn/workflows-extensions/common';
 import { z } from '@kbn/zod/v4';
 import { proposalDecisionSchema, proposalStatusSchema } from '../proposal';
 
@@ -37,7 +37,7 @@ export const getLatestRevisionStepOutputSchema = z.object({
  * proposal id that a revision inserted while the gate is parked invalidates,
  * so decisions resolve through this step rather than writing to a stale id.
  */
-export const getLatestRevisionStepCommonDefinition: BaseStepDefinition<
+export const getLatestRevisionStepCommonDefinition: CommonStepDefinition<
   typeof getLatestRevisionStepInputSchema,
   typeof getLatestRevisionStepOutputSchema
 > = {
@@ -50,6 +50,7 @@ export const getLatestRevisionStepCommonDefinition: BaseStepDefinition<
   }),
   category: StepCategory.Kibana,
   stability: 'beta',
+  exposure: 'internal',
   inputSchema: getLatestRevisionStepInputSchema,
   outputSchema: getLatestRevisionStepOutputSchema,
   documentation: {
