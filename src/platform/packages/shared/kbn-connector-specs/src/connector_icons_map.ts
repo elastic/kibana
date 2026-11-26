@@ -472,6 +472,8 @@ export const ConnectorIconsMap: Map<
     ),
   ],
 
+  ['.redis', lazy(() => import(/* webpackChunkName: "connectorIconredis" */ './specs/redis/icon'))],
+
   [
     '.trend_vision_one',
     lazy(

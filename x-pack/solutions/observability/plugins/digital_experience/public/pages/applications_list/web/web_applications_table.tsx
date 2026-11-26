@@ -17,7 +17,6 @@ import {
   EuiHighlight,
   EuiInMemoryTable,
   EuiLink,
-  EuiTextColor,
   EuiToolTip,
 } from '@elastic/eui';
 import type { EuiBasicTableColumn } from '@elastic/eui';
@@ -26,9 +25,10 @@ import { EmptyCellValue } from '@kbn/shared-ux-column-presets';
 import { EBT_CLICK_ACTIONS, getEbtProps } from '@kbn/ebt-click';
 import type { VitalRatings } from '../../../../common/types/applications';
 import type { CoreWebVital, VitalRating } from '../../../../common/core_web_vitals';
-import { CORE_WEB_VITAL, getVitalRating } from '../../../../common/core_web_vitals';
+import { CORE_WEB_VITAL } from '../../../../common/core_web_vitals';
 import { DIGITAL_EXPERIENCE_FEATURE_ID } from '../../../../common/feature';
-import { formatVital, RATING_COLORS, RATING_LABELS } from '../../../utils/web_vitals';
+import { RATING_COLORS, RATING_LABELS } from '../../../utils/web_vitals';
+import { WebVitalValue } from '../../../components/web_vital_badges';
 import {
   APPLICATIONS_LIST_EBT_ELEMENTS,
   DIGITAL_EXPERIENCE_EBT_ACTIONS,
@@ -97,19 +97,14 @@ const renderVital =
       return <EmptyCellValue />;
     }
     const { sampleCount, ratings } = webVitals[vital];
-    const rating = getVitalRating(vital, value);
     return (
-      <EuiToolTip content={vitalTooltip(sampleCount, ratings, formatters)}>
-        <EuiTextColor
-          tabIndex={0}
-          data-test-subj={`digitalExperienceVital-${vital}`}
-          data-rating={rating}
-          data-sample-count={sampleCount}
-          color={RATING_COLORS[rating]}
-        >
-          {formatVital(vital, value)}
-        </EuiTextColor>
-      </EuiToolTip>
+      <WebVitalValue
+        vital={vital}
+        value={value}
+        tooltip={vitalTooltip(sampleCount, ratings, formatters)}
+        data-test-subj={`digitalExperienceVital-${vital}`}
+        data-sample-count={sampleCount}
+      />
     );
   };
 

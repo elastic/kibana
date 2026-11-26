@@ -21,6 +21,7 @@ export {
   EXTERNAL_ALERT_SOURCE,
   MAX_AUTOMATION_INSTRUCTIONS_LENGTH,
 } from './automation_limits';
+export { isSlackChannelId, parseSlackChannelInput } from './slack_channel';
 export { isScheduleOnlyAutomation } from './automation_run';
 export { parsePresetSchedule, presetScheduleSchema } from './automation_schedule';
 export type { PresetSchedule } from './automation_schedule';

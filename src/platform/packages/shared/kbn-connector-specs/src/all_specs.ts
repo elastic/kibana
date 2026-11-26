@@ -98,6 +98,7 @@ export { ThreatQ } from './specs/threatq/threatq';
 export * from './specs/azure_sql/azure_sql';
 export * from './specs/solarwinds_platform/solarwinds_platform';
 export { SSF } from './specs/ssf/ssf';
+export * from './specs/redis/redis';
 export * from './specs/sentinelone/sentinelone';
 export * from './specs/microsoft_sql_server/microsoft_sql_server';
 export * from './specs/trend_vision_one/trend_vision_one';

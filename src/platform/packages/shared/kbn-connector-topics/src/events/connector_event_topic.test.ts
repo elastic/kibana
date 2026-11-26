@@ -7,11 +7,27 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ConnectorEventBusData, ConnectorEventTopicDefinition } from './connector_event_topic';
+import {
+  getConnectorEventTopicName,
+  type ConnectorEventBusData,
+  type ConnectorEventTopicDefinition,
+  type ConnectorEventTopicName,
+} from './connector_event_topic';
 import type { inboundWebhookReceived } from './inbound_webhook';
 import { slack2Message } from './slack';
 
 describe('connector event topic types', () => {
+  it('prefixes the event id for the bus topic name', () => {
+    const topicName: ConnectorEventTopicName<'github.push'> =
+      getConnectorEventTopicName('github.push');
+    // @ts-expect-error the bus name is the prefixed event id
+    const bareEventId: ConnectorEventTopicName<'github.push'> = 'github.push';
+
+    expect(topicName).toBe('connectors.github.push');
+    expect(getConnectorEventTopicName(slack2Message.name)).toBe('connectors.slack2.message');
+    expect(bareEventId).toBe('github.push');
+  });
+
   it('accepts a topics export and a spec entry as a topic definition', () => {
     const fromTopics: ConnectorEventTopicDefinition<
       (typeof slack2Message)['eventSchema'],
