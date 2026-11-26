@@ -159,6 +159,23 @@ describe('CoreKibanaRequest', () => {
         ).toBeUndefined();
       });
 
+      it('materializes each facade event container only when first accessed', () => {
+        const request = hapiMocks.createRequest();
+        const kibanaRequest = CoreKibanaRequest.fromForLifecycle(request, 'preAuth');
+        const lazyDescriptor = Object.getOwnPropertyDescriptor(kibanaRequest, 'events');
+
+        expect(Object.keys(kibanaRequest)).toContain('events');
+        expect(lazyDescriptor?.get).toEqual(expect.any(Function));
+        expect(lazyDescriptor?.value).toBeUndefined();
+
+        const events = kibanaRequest.events;
+        const materializedDescriptor = Object.getOwnPropertyDescriptor(kibanaRequest, 'events');
+
+        expect(materializedDescriptor?.get).toBeUndefined();
+        expect(materializedDescriptor?.value).toBe(events);
+        expect(kibanaRequest.events).toBe(events);
+      });
+
       it('observes header changes while carrying stable routed metadata forward', () => {
         const request = hapiMocks.createRequest({
           headers: { authorization: 'Bearer before-auth' },

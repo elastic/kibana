@@ -317,7 +317,7 @@ export class CoreKibanaRequest<
   /** {@inheritDoc KibanaRequest.socket} */
   public readonly socket: IKibanaSocket;
   /** {@inheritDoc KibanaRequest.events} */
-  public readonly events: KibanaRequestEvents;
+  public readonly events!: KibanaRequestEvents;
   /** {@inheritDoc KibanaRequest.auth} */
   public readonly auth: KibanaRequestAuth;
   /** {@inheritDoc KibanaRequest.isFakeRequest} */
@@ -400,7 +400,11 @@ export class CoreKibanaRequest<
         : KibanaSocket.getFakeSocket();
       this.#eventsFactory = createRequestEventsFactory(realRequest);
     }
-    this.events = this.#eventsFactory.create();
+    Object.defineProperty(this, 'events', {
+      configurable: true,
+      enumerable: true,
+      get: this.materializeEvents,
+    });
 
     if (phaseSnapshot) {
       this.url = phaseSnapshot.url ?? request.url ?? new URL('https://fake-request/url');
@@ -439,6 +443,16 @@ export class CoreKibanaRequest<
       // missing in fakeRequests, so we cast to false
       isAuthenticated: request.auth?.isAuthenticated ?? false,
     };
+  }
+
+  private materializeEvents(): KibanaRequestEvents {
+    const events = this.#eventsFactory.create();
+    Object.defineProperty(this, 'events', {
+      configurable: false,
+      enumerable: true,
+      value: events,
+    });
+    return events;
   }
 
   /**
