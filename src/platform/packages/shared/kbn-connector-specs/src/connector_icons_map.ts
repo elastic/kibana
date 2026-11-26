@@ -51,6 +51,15 @@ export const ConnectorIconsMap: Map<
     lazy(() => import(/* webpackChunkName: "connectorIconBigQuery" */ './specs/bigquery/icon')),
   ],
   [
+    '.bitdefender_gravityzone',
+    lazy(
+      () =>
+        import(
+          /* webpackChunkName: "connectorIconBitdefenderGravityzone" */ './specs/bitdefender_gravityzone/icon'
+        )
+    ),
+  ],
+  [
     '.censys',
     lazy(() => import(/* webpackChunkName: "connectorIconCensys" */ './specs/censys/icon')),
   ],

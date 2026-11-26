@@ -32,7 +32,7 @@ You can create connectors in **{{stack-manage-app}}** → **{{connectors-ui}}**.
 Bitdefender GravityZone connectors have the following configuration properties:
 
 GravityZone API access URL
-:   Full base URL of the GravityZone Cloud API, up to and including `/api`. Defaults to `https://cloudap.gravityzone.bitdefender.com/api`. The URL varies by account region (for example `https://eu.gravityzone.bitdefender.com/api`). The URL must use HTTPS. If you are using the [`xpack.actions.allowedHosts`](/reference/configuration-reference/alerting-settings.md#action-settings) setting, add your GravityZone Cloud host.
+:   Full base URL of the GravityZone Cloud API, up to and including `/api`. Required. Example: `https://cloudap.gravityzone.bitdefender.com/api`. The URL varies by account region (for example `https://eu.gravityzone.bitdefender.com/api`). The URL must use HTTPS. If you are using the [`xpack.actions.allowedHosts`](/reference/configuration-reference/alerting-settings.md#action-settings) setting, add your GravityZone Cloud host.
 
 Authentication
 :   Uses **HTTP Basic** with the GravityZone API key as the username and an empty password. Provide the API key from the GravityZone Control Center (My Account → API keys). The key must have the API areas enabled for the actions you use: Network, Incidents, Quarantine, and Policies.

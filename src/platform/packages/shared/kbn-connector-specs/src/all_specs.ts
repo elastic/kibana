@@ -14,6 +14,7 @@ export * from './specs/atlassian/confluence_cloud/confluence';
 export * from './specs/aws/aws';
 export * from './specs/aws_lambda/aws_lambda';
 export * from './specs/bigquery/bigquery';
+export * from './specs/bitdefender_gravityzone/bitdefender_gravityzone';
 export * from './specs/brave_search/brave_search';
 export * from './specs/censys/censys';
 export * from './specs/databricks/databricks';

@@ -124,7 +124,7 @@ describe('Bitdefender GravityZone auth', () => {
 
   it('overrides the API key label', () => {
     const apiKeyDef = BitdefenderGravityzone.auth!.types[0] as AuthTypeDef;
-    expect(apiKeyDef.overrides?.meta?.apiKey?.label).toBeDefined();
+    expect(apiKeyDef.overrides?.meta?.Authorization?.label).toBeDefined();
   });
 });
 
@@ -133,7 +133,9 @@ describe('Bitdefender GravityZone auth', () => {
 describe('Bitdefender GravityZone schema', () => {
   it('validates a correct accessUrl', () => {
     const schema = BitdefenderGravityzone.schema!;
-    expect(schema.safeParse({ accessUrl: 'https://eu.gravityzone.bitdefender.com/api' }).success).toBe(true);
+    expect(
+      schema.safeParse({ accessUrl: 'https://eu.gravityzone.bitdefender.com/api' }).success
+    ).toBe(true);
   });
 
   it('rejects a non-URL accessUrl', () => {
@@ -182,9 +184,7 @@ describe('Bitdefender GravityZone input schemas', () => {
   });
 
   it('isolateEndpoint: requires at least 1 and max 1000 endpointIds', () => {
-    expect(
-      IsolateEndpointInputSchema.safeParse({ endpointIds: [ENDPOINT_ID] }).success
-    ).toBe(true);
+    expect(IsolateEndpointInputSchema.safeParse({ endpointIds: [ENDPOINT_ID] }).success).toBe(true);
     expect(IsolateEndpointInputSchema.safeParse({ endpointIds: [] }).success).toBe(false);
   });
 
@@ -195,13 +195,13 @@ describe('Bitdefender GravityZone input schemas', () => {
   });
 
   it('scanEndpoint: requires targetIds and type', () => {
-    expect(
-      ScanEndpointInputSchema.safeParse({ targetIds: [ENDPOINT_ID], type: 1 }).success
-    ).toBe(true);
+    expect(ScanEndpointInputSchema.safeParse({ targetIds: [ENDPOINT_ID], type: 1 }).success).toBe(
+      true
+    );
     expect(ScanEndpointInputSchema.safeParse({ targetIds: [ENDPOINT_ID] }).success).toBe(false);
-    expect(
-      ScanEndpointInputSchema.safeParse({ targetIds: [ENDPOINT_ID], type: 5 }).success
-    ).toBe(false);
+    expect(ScanEndpointInputSchema.safeParse({ targetIds: [ENDPOINT_ID], type: 5 }).success).toBe(
+      false
+    );
   });
 
   it('getTask: requires taskId', () => {
@@ -236,9 +236,7 @@ describe('Bitdefender GravityZone input schemas', () => {
         filePath: '/tmp/malware.exe',
       }).success
     ).toBe(true);
-    expect(
-      QuarantineFileInputSchema.safeParse({ endpointIds: [ENDPOINT_ID] }).success
-    ).toBe(false);
+    expect(QuarantineFileInputSchema.safeParse({ endpointIds: [ENDPOINT_ID] }).success).toBe(false);
   });
 
   it('addToBlocklist: requires hashType, hashList and sourceInfo', () => {
@@ -311,7 +309,13 @@ describe('Bitdefender GravityZone actions', () => {
   it('searchEndpoints sends JSON-RPC to network path', async () => {
     const client = makeClient();
     const ctx = makeCtx(client);
-    const mockResult = { items: [{ id: ENDPOINT_ID, name: 'test-host' }], page: 1, pagesCount: 1, perPage: 30, total: 1 };
+    const mockResult = {
+      items: [{ id: ENDPOINT_ID, name: 'test-host' }],
+      page: 1,
+      pagesCount: 1,
+      perPage: 30,
+      total: 1,
+    };
     stubJsonRpc(client, mockResult);
 
     const handler = BitdefenderGravityzone.actions.searchEndpoints.handler;
@@ -400,7 +404,10 @@ describe('Bitdefender GravityZone actions', () => {
     const client = makeClient();
     const ctx = makeCtx(client);
     stubJsonRpc(client, { items: [], page: 1, pagesCount: 0, perPage: 30, total: 0 });
-    const result = await BitdefenderGravityzone.actions.listQuarantineItems.handler(ctx as any, { page: 1, endpointId: ENDPOINT_ID });
+    const result = await BitdefenderGravityzone.actions.listQuarantineItems.handler(ctx as any, {
+      page: 1,
+      endpointId: ENDPOINT_ID,
+    });
     expect(result).toHaveProperty('items');
     expect(client.request.mock.calls[0][0].data.method).toBe('getQuarantineItemsList');
     expect(client.request.mock.calls[0][0].url).toContain('/v1.0/jsonrpc/quarantine/computers');
@@ -429,7 +436,9 @@ describe('Bitdefender GravityZone actions', () => {
       const client = makeClient();
       const ctx = makeCtx(client);
       stubJsonRpc(client, false);
-      await expect(BitdefenderGravityzone.actions[action].handler(ctx as any, input)).rejects.toThrow('Task creation was unsuccessful');
+      await expect(
+        BitdefenderGravityzone.actions[action].handler(ctx as any, input)
+      ).rejects.toThrow('Task creation was unsuccessful');
     }
   );
 
@@ -437,7 +446,10 @@ describe('Bitdefender GravityZone actions', () => {
     const client = makeClient();
     const ctx = makeCtx(client);
     stubJsonRpc(client, [TASK_ID]);
-    const result = await BitdefenderGravityzone.actions.quarantineFile.handler(ctx as any, { endpointIds: [ENDPOINT_ID], filePath: '/tmp/suspicious.exe' });
+    const result = await BitdefenderGravityzone.actions.quarantineFile.handler(ctx as any, {
+      endpointIds: [ENDPOINT_ID],
+      filePath: '/tmp/suspicious.exe',
+    });
     expect(result).toEqual([TASK_ID]);
     expect(client.request.mock.calls[0][0].data.method).toBe('createAddFileToQuarantineTask');
     expect(client.request.mock.calls[0][0].url).toContain('/v1.1/jsonrpc/quarantine/computers');
@@ -447,7 +459,11 @@ describe('Bitdefender GravityZone actions', () => {
     const client = makeClient();
     const ctx = makeCtx(client);
     stubJsonRpc(client, true);
-    const result = await BitdefenderGravityzone.actions.addToBlocklist.handler(ctx as any, { hashType: 1, hashList: ['abc123def456789012345678901234567890123456789012345678901234'], sourceInfo: 'Elastic SOAR' });
+    const result = await BitdefenderGravityzone.actions.addToBlocklist.handler(ctx as any, {
+      hashType: 1,
+      hashList: ['abc123def456789012345678901234567890123456789012345678901234'],
+      sourceInfo: 'Elastic SOAR',
+    });
     expect(result).toBe(true);
     expect(client.request.mock.calls[0][0].data.method).toBe('addToBlocklist');
     expect(client.request.mock.calls[0][0].url).toContain('/v1.0/jsonrpc/incidents');
@@ -463,7 +479,10 @@ describe('Bitdefender GravityZone actions', () => {
     async (action, input, method, expectProp) => {
       const client = makeClient();
       const ctx = makeCtx(client);
-      const mockData = expectProp === 'items' ? { items: [], page: 1, pagesCount: 0, perPage: 30, total: 0 } : true;
+      const mockData =
+        expectProp === 'items'
+          ? { items: [], page: 1, pagesCount: 0, perPage: 30, total: 0 }
+          : true;
       stubJsonRpc(client, action === 'listGroups' ? [{ id: 'g1', name: 'P' }] : mockData);
       const result = await BitdefenderGravityzone.actions[action].handler(ctx as any, input);
       if (expectProp) expect(result).toHaveProperty(expectProp);
@@ -570,14 +589,10 @@ describe('Bitdefender GravityZone action definitions', () => {
     ['removeFromBlocklist', 'destroy', false],
     ['listGroups', 'read', true],
     ['listPolicies', 'read', true],
-  ] as Array<[string, string, boolean]>)(
-    '%s has scope %s and isTool %s',
-    (name, scope, isTool) => {
-      const action = actions[name];
-      expect(action).toBeDefined();
-      expect(action.scope).toBe(scope);
-      expect(action.isTool).toBe(isTool);
-    }
-  );
+  ] as Array<[string, string, boolean]>)('%s has scope %s and isTool %s', (name, scope, isTool) => {
+    const action = actions[name];
+    expect(action).toBeDefined();
+    expect(action.scope).toBe(scope);
+    expect(action.isTool).toBe(isTool);
+  });
 });
-

@@ -291,7 +291,11 @@ describe('Bitdefender GravityZone JSON-RPC error handling', () => {
     client.request.mockResolvedValueOnce({
       status: 200,
       headers: { 'content-type': 'application/json' },
-      data: { jsonrpc: '2.0', id: '1', error: { code: -32003, message: 'Temporary service error' } },
+      data: {
+        jsonrpc: '2.0',
+        id: '1',
+        error: { code: -32003, message: 'Temporary service error' },
+      },
     });
 
     const handler = BitdefenderGravityzone.actions.searchEndpoints.handler;
@@ -378,9 +382,9 @@ describe('Bitdefender GravityZone quarantine result=false handling', () => {
     });
 
     const handler = BitdefenderGravityzone.actions.restoreQuarantineItem.handler;
-    await expect(
-      handler(ctx as any, { quarantineItemsIds: [QUARANTINE_ID] })
-    ).rejects.toThrow('Task creation was unsuccessful');
+    await expect(handler(ctx as any, { quarantineItemsIds: [QUARANTINE_ID] })).rejects.toThrow(
+      'Task creation was unsuccessful'
+    );
   });
 });
 
@@ -394,17 +398,20 @@ describe('Bitdefender GravityZone batch partial failure', () => {
     const ctx = makeCtx(client);
 
     stubJsonRpcOk(client, ['task-id-batch-001']);
-    const isolateResult = await BitdefenderGravityzone.actions.isolateEndpoint.handler(
-      ctx as any,
-      { endpointIds: [ENDPOINT_ID, ENDPOINT_ID.replace(/.$/, '0')] }
-    );
+    const isolateResult = await BitdefenderGravityzone.actions.isolateEndpoint.handler(ctx as any, {
+      endpointIds: [ENDPOINT_ID, ENDPOINT_ID.replace(/.$/, '0')],
+    });
     expect(Array.isArray(isolateResult)).toBe(true);
 
     stubJsonRpcOk(client, {
       status: 2,
       subtasks: [
         { endpointId: ENDPOINT_ID, status: 3, statusMessage: 'Completed' },
-        { endpointId: ENDPOINT_ID.replace(/.$/, '0'), status: 4, statusMessage: 'Failed: not found' },
+        {
+          endpointId: ENDPOINT_ID.replace(/.$/, '0'),
+          status: 4,
+          statusMessage: 'Failed: not found',
+        },
       ],
     });
     const taskResult = await BitdefenderGravityzone.actions.getTask.handler(ctx as any, {

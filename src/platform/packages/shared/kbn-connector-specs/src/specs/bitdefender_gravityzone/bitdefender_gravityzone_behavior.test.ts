@@ -139,8 +139,6 @@ describe('Bitdefender GravityZone behavior matrix', () => {
     const ctx = makeCtx(client);
     stubJsonRpcError(client, -32002, 'Item not found');
     const handler = BitdefenderGravityzone.actions.removeFromBlocklist.handler;
-    await expect(
-      handler(ctx as any, { hashItemId: 'nonexistent' })
-    ).rejects.toThrow('Not found');
+    await expect(handler(ctx as any, { hashItemId: 'nonexistent' })).rejects.toThrow('Not found');
   });
 });

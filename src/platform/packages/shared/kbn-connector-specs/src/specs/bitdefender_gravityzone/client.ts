@@ -120,7 +120,9 @@ export async function jsonRpcCall<T = unknown>(
   params: Record<string, unknown>
 ): Promise<T> {
   const baseUrl = getAccessUrl(ctx);
-  const url = `${baseUrl}${servicePath}`;
+  const parsed = new URL(baseUrl);
+  parsed.pathname = parsed.pathname.replace(/\/+$/, '') + servicePath;
+  const url = parsed.toString();
   const body = buildJsonRpcBody(method, params);
   const authHeader = getAuthHeader(ctx);
   const ctxTimeout = (ctx.client.defaults as { timeout?: number }).timeout;
@@ -140,12 +142,25 @@ export async function jsonRpcCall<T = unknown>(
 
   // Detect HTML error pages (gateway/proxy errors returned as HTML)
   if (isHtmlResponse(headers?.['content-type'] as string | undefined)) {
-    const text =
-      typeof data === 'string' ? data.slice(0, 500) : 'HTML error response from gateway';
+    const text = typeof data === 'string' ? data.slice(0, 500) : 'HTML error response from gateway';
     throw new Error(`GravityZone returned an HTML error page (HTTP ${status}): ${text}`);
   }
 
   // HTTP-level errors (non-200)
+  if (status === 429) {
+    const retryAfter = headers?.['retry-after'] as string | undefined;
+    const err: Error & { statusCode?: number; retryAfterMs?: number } = new Error(
+      `GravityZone API rate limit exceeded (HTTP 429)${
+        retryAfter ? `: retry after ${retryAfter}s` : ''
+      }`
+    );
+    err.statusCode = 429;
+    if (retryAfter) {
+      const ms = parseInt(retryAfter, 10) * 1000;
+      if (!isNaN(ms)) err.retryAfterMs = ms;
+    }
+    throw err;
+  }
   if (status === 401) {
     throw new Error('Invalid or expired API key');
   }
@@ -173,6 +188,12 @@ export async function jsonRpcCall<T = unknown>(
       throw new Error(`Invalid parameters: ${msg}`);
     }
     throw new Error(`GravityZone API error (code ${code}): ${msg}`);
+  }
+
+  if (!Object.prototype.hasOwnProperty.call(rpcBody, 'result')) {
+    throw new Error(
+      'Invalid JSON-RPC response: neither result nor error present in response envelope'
+    );
   }
 
   return rpcBody.result as T;

@@ -96,12 +96,11 @@ export const BitdefenderGravityzone: ConnectorSpec = {
         type: 'api_key_header',
         defaults: { headerField: 'Authorization' },
         overrides: {
-          label: i18n.translate(
-            'core.kibanaConnectorSpecs.bitdefenderGravityzone.auth.label',
-            { defaultMessage: 'API key' }
-          ),
+          label: i18n.translate('core.kibanaConnectorSpecs.bitdefenderGravityzone.auth.label', {
+            defaultMessage: 'API key',
+          }),
           meta: {
-            apiKey: {
+            Authorization: {
               label: i18n.translate(
                 'core.kibanaConnectorSpecs.bitdefenderGravityzone.auth.apiKeyLabel',
                 { defaultMessage: 'API key' }
@@ -142,6 +141,17 @@ export const BitdefenderGravityzone: ConnectorSpec = {
             }
           },
           { message: 'The GravityZone API URL must use HTTPS' }
+        )
+        .refine(
+          (v) => {
+            try {
+              const { search, hash } = new URL(v);
+              return !search && !hash;
+            } catch {
+              return false;
+            }
+          },
+          { message: 'The GravityZone API URL must not contain query strings or fragments' }
         )
         .meta({
           label: i18n.translate(
@@ -189,14 +199,11 @@ export const BitdefenderGravityzone: ConnectorSpec = {
     'Use this connector to investigate and respond to endpoint threats detected by Bitdefender GravityZone.',
     '',
     '### Endpoint investigation',
-    '1. Call `searchEndpoints` to find endpoints by name, IP or hostname.',
+    '1. Call `searchEndpoints` to find endpoints by name, IP or hostname. Use `filters.search` for name/IP filtering, or `filters.details.ip` for exact IP matching. Check the `type` field of each result to distinguish endpoint IDs from group IDs before calling `scanEndpoint`.',
     '2. Call `getEndpoint` with an endpoint ID to get full details: OS, agent status, policy, isolation state.',
     '',
     '### Endpoint containment',
-    '1. Call `isolateEndpoint` with endpoint IDs to network-isolate them (async task).',
-    '2. Call `getTask` with the returned task ID to poll until status is 3 (Finished).',
-    '3. Call `getEndpoint` to confirm isIsolated is true.',
-    '4. Call `restoreEndpointFromIsolation` to reconnect endpoints after remediation.',
+    'Endpoint isolation must be initiated in the GravityZone Control Center. Call `getEndpoint` to verify the `isIsolated` state of an endpoint.',
     '',
     '### Scanning',
     '- Call `scanEndpoint` with target IDs and a scan type (1=Quick, 2=Full, 3=Memory, 4=Custom).',
@@ -204,13 +211,12 @@ export const BitdefenderGravityzone: ConnectorSpec = {
     '',
     '### Quarantine management',
     '- Call `listQuarantineItems` to see quarantined files. Filter by endpoint with `endpointId`.',
-    '- Call `restoreQuarantineItem` to restore files, or `deleteQuarantineItem` to permanently remove them.',
-    '- Call `quarantineFile` to quarantine a specific file by path on target endpoints.',
+    '- To restore, delete, or quarantine files, use the GravityZone Control Center.',
     '',
     '### Blocklist',
     '- Call `addToBlocklist` with SHA256 or MD5 hashes to block files across all endpoints.',
     '- Call `getBlocklistItems` to list current blocklist entries.',
-    '- Call `removeFromBlocklist` with a blocklist item ID to remove an entry.',
+    '- To remove blocklist entries, use the GravityZone Control Center.',
     '',
     '### Configuration discovery',
     '- Call `listGroups` to see endpoint groups. Call `listPolicies` to see security policies.',
@@ -233,7 +239,7 @@ export const BitdefenderGravityzone: ConnectorSpec = {
       isTool: true,
       scope: 'read',
       description:
-        'Find managed endpoints by name, IP or hostname. Returns IDs, names, IPs, group and isolation status. Use to find endpoint IDs before isolation or scanning.',
+        'Search the GravityZone network inventory. Use the filters.search field to filter by name or IP, or filters.details.ip to filter by IP address. Returns endpoint and group IDs, names, IPs, and isolation status. Verify the type field before scanning: scanEndpoint accepts both endpoint IDs and group IDs.',
       input: SearchEndpointsInputSchema,
       handler: async (ctx, input: SearchEndpointsInput) => {
         const params: Record<string, unknown> = {};
@@ -382,18 +388,12 @@ export const BitdefenderGravityzone: ConnectorSpec = {
     deleteQuarantineItem: {
       isTool: false,
       scope: 'destroy',
-      description:
-        'Permanently delete quarantined files (irreversible).',
+      description: 'Permanently delete quarantined files (irreversible).',
       input: DeleteQuarantineItemInputSchema,
       handler: async (ctx, input: DeleteQuarantineItemInput) => {
-        const result = await jsonRpcWrite(
-          ctx,
-          QUARANTINE_V10,
-          'createRemoveQuarantineItemTask',
-          {
-            quarantineItemsIds: input.quarantineItemsIds,
-          }
-        );
+        const result = await jsonRpcWrite(ctx, QUARANTINE_V10, 'createRemoveQuarantineItemTask', {
+          quarantineItemsIds: input.quarantineItemsIds,
+        });
         if (result === false) {
           throw new Error('Task creation was unsuccessful: the API returned false');
         }
@@ -437,8 +437,7 @@ export const BitdefenderGravityzone: ConnectorSpec = {
     removeFromBlocklist: {
       isTool: false,
       scope: 'destroy',
-      description:
-        'Remove an entry from the GravityZone blocklist by its item ID.',
+      description: 'Remove an entry from the GravityZone blocklist by its item ID.',
       input: RemoveFromBlocklistInputSchema,
       handler: async (ctx, input: RemoveFromBlocklistInput) => {
         return jsonRpcWrite(ctx, INCIDENTS_V10, 'removeFromBlocklist', {
@@ -467,8 +466,7 @@ export const BitdefenderGravityzone: ConnectorSpec = {
     listPolicies: {
       isTool: true,
       scope: 'read',
-      description:
-        'List security policies defined in the GravityZone account. Paginated.',
+      description: 'List security policies defined in the GravityZone account. Paginated.',
       input: ListPoliciesInputSchema,
       handler: async (ctx, input: ListPoliciesInput) => {
         const params: Record<string, unknown> = {};

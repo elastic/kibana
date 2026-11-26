@@ -16,21 +16,13 @@ import { z, lazySchema } from '@kbn/zod/v4';
 /** GravityZone endpoint and resource IDs are 24-hex-character strings. */
 const HEX_ID_RE = /^[0-9a-fA-F]{24}$/;
 const hexId = (label: string) =>
-  z
-    .string()
-    .regex(HEX_ID_RE, `${label} must be exactly 24 hexadecimal characters`)
-    .max(24);
+  z.string().regex(HEX_ID_RE, `${label} must be exactly 24 hexadecimal characters`).max(24);
 
 /** Reusable page/perPage pair for paginated actions. */
-const pageParam = () => z.number().int().min(1).optional().describe('Page number (1-based). Default 1.');
+const pageParam = () =>
+  z.number().int().min(1).optional().describe('Page number (1-based). Default 1.');
 const perPageParam = () =>
-  z
-    .number()
-    .int()
-    .min(1)
-    .max(100)
-    .optional()
-    .describe('Items per page, 1 to 100. Default 30.');
+  z.number().int().min(1).max(100).optional().describe('Items per page, 1 to 100. Default 30.');
 
 // ---------------------------------------------------------------------------
 // searchEndpoints
@@ -213,11 +205,7 @@ export const QuarantineFileInputSchema = lazySchema(() =>
       .min(1)
       .max(100)
       .describe('Endpoint IDs on which to quarantine the file. Max 100.'),
-    filePath: z
-      .string()
-      .min(1)
-      .max(4096)
-      .describe('Absolute file path on the target endpoint.'),
+    filePath: z.string().min(1).max(4096).describe('Absolute file path on the target endpoint.'),
   })
 );
 export type QuarantineFileInput = z.infer<typeof QuarantineFileInputSchema>;
@@ -228,9 +216,7 @@ export type QuarantineFileInput = z.infer<typeof QuarantineFileInputSchema>;
 
 export const AddToBlocklistInputSchema = lazySchema(() =>
   z.object({
-    hashType: z
-      .union([z.literal(1), z.literal(2)])
-      .describe('Hash algorithm: 1=SHA256, 2=MD5.'),
+    hashType: z.union([z.literal(1), z.literal(2)]).describe('Hash algorithm: 1=SHA256, 2=MD5.'),
     hashList: z
       .array(z.string().min(1).max(128))
       .min(1)
@@ -263,11 +249,7 @@ export type GetBlocklistItemsInput = z.infer<typeof GetBlocklistItemsInputSchema
 
 export const RemoveFromBlocklistInputSchema = lazySchema(() =>
   z.object({
-    hashItemId: z
-      .string()
-      .min(1)
-      .max(128)
-      .describe('Blocklist item ID to remove.'),
+    hashItemId: z.string().min(1).max(128).describe('Blocklist item ID to remove.'),
   })
 );
 export type RemoveFromBlocklistInput = z.infer<typeof RemoveFromBlocklistInputSchema>;
@@ -278,9 +260,7 @@ export type RemoveFromBlocklistInput = z.infer<typeof RemoveFromBlocklistInputSc
 
 export const ListGroupsInputSchema = lazySchema(() =>
   z.object({
-    parentId: hexId('parentId')
-      .optional()
-      .describe('Parent group ID. Omit for top-level groups.'),
+    parentId: hexId('parentId').optional().describe('Parent group ID. Omit for top-level groups.'),
   })
 );
 export type ListGroupsInput = z.infer<typeof ListGroupsInputSchema>;
