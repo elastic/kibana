@@ -12,17 +12,5 @@ export {
   type CloudConnectorTabsProps,
 } from './cloud_connector_tabs';
 export type { UpdatePolicy, CloudConnectorCredentials, CloudSetupForCloudConnector } from './types';
-export {
-  AwsConnectSetup,
-  type AwsConnectSetupProps,
-  type AwsAuthType,
-  type AwsStaticKeyCredentials,
-  type AwsTemporaryKeyCredentials,
-} from './aws_connect_setup';
-export { AwsAuthTypeSelector } from './aws_connect_setup/aws_auth_type_selector';
-export {
-  AWS_AUTH_TYPE_SELECTOR_TEST_SUBJ,
-  AWS_AUTH_TYPE_IF_CARD_TEST_SUBJ,
-  AWS_AUTH_TYPE_STATIC_KEYS_CARD_TEST_SUBJ,
-  AWS_AUTH_TYPE_TEMPORARY_KEYS_CARD_TEST_SUBJ,
-} from './aws_connect_setup/test_subjects';
+export type { AwsStaticKeyCredentials } from './aws_connect_setup/aws_static_keys_form';
+export type { AwsTemporaryKeyCredentials } from './aws_connect_setup/aws_temporary_keys_form';
