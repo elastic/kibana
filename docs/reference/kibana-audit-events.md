@@ -45,7 +45,7 @@ A `service_account_assume` event marks the start of a workload run that executes
 
 * **Who acted:** The service account is the actor. `user.id` and `user.name` are the account ID, and `user.roles` is omitted.
 * **What the run did:** Every event the run causes shares this event's `trace.id` (`http.request.id` in {{serverless-full}}). Search on that value to list them. When the plugin supplies a run ID, it appears in `kibana.workload.execution_id` and in the message as `[executionId=…]`.
-* {applies_to}`{stack: ga 9.6+, serverless: unavailable}` **How to reduce volume:** A workload that runs often writes one `success` event for each run. To drop them, add this filter to [`xpack.security.audit.ignore_filters`](/reference/configuration-reference/security-settings.md#audit-logging-ignore-filters):
+* {applies_to}`serverless: unavailable` **How to reduce volume:** A workload that runs often writes one `success` event for each run. To drop them, add this filter to [`xpack.security.audit.ignore_filters`](/reference/configuration-reference/security-settings.md#audit-logging-ignore-filters):
 
     ```yaml
     xpack.security.audit.ignore_filters:
