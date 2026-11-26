@@ -21,7 +21,11 @@ import {
 } from 'rxjs';
 import { errors } from '../../common';
 import type { Context, HeadlessChromiumDriver } from '../browsers';
-import { DEFAULT_VIEWPORT, getChromiumDisconnectedError } from '../browsers';
+import {
+  DEFAULT_VIEWPORT,
+  getChromiumClosedByKibanaError,
+  getChromiumDisconnectedError,
+} from '../browsers';
 import type { PdfScreenshotOptions } from '../formats';
 import type { Layout } from '../layouts';
 import type { EventLogger } from './event_logger';
@@ -309,8 +313,14 @@ export class ScreenshotObservableHandler {
   }
 
   public checkPageIsOpen() {
-    if (!this.driver.isPageOpen()) {
-      throw getChromiumDisconnectedError();
+    if (this.driver.isPageOpen()) {
+      return;
     }
+
+    // Kibana closes the browser itself when it is stopping. That says nothing about the report,
+    // so it must not fail as a browser that died, which is not tried again.
+    throw this.driver.isClosedIntentionally()
+      ? getChromiumClosedByKibanaError()
+      : getChromiumDisconnectedError();
   }
 }

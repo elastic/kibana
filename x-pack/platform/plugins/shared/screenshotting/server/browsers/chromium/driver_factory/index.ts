@@ -18,17 +18,7 @@ import path from 'path';
 import type { Browser, ConsoleMessage, Page, PageEvents, Viewport } from 'puppeteer';
 import { createInterface } from 'readline';
 import * as Rx from 'rxjs';
-import {
-  catchError,
-  concatMap,
-  filter,
-  ignoreElements,
-  map,
-  mergeMap,
-  reduce,
-  takeUntil,
-  tap,
-} from 'rxjs';
+import { catchError, concatMap, ignoreElements, map, mergeMap, reduce, takeUntil, tap } from 'rxjs';
 import { getChromiumDisconnectedError, getChromiumPageCrashedError } from '..';
 import { errors } from '../../../../common';
 import type { PerformanceMetrics } from '../../../../common/types';
@@ -208,19 +198,31 @@ export class HeadlessChromiumDriverFactory {
           page
         );
 
-        let isClosingBrowser = false;
+        const pageExit$ = this.getPageExit(browser, page);
+
         const childProcess = {
           async kill(): Promise<ClosePageResult> {
             if (page.isClosed()) {
               return {};
             }
 
+            const isPageOpen = driver.isPageOpen();
+            // Set before anything is awaited. When Kibana is stopping, Puppeteer closes the browser
+            // on the same signal, so it can disconnect while the metrics are still being requested.
+            driver.onIntentionalClose();
+
             let metrics: PerformanceMetrics | undefined;
 
             try {
-              // A crashed page never answers the metrics request, which would leave the browser open.
-              if (devTools && startMetrics && driver.isPageOpen()) {
-                const endMetrics = await devTools.send('Performance.getMetrics');
+              // A crashed page never answers the metrics request, which would leave the browser
+              // open, whether it crashed before the request or while the request is pending.
+              if (devTools && startMetrics && isPageOpen) {
+                const endMetrics = await Rx.firstValueFrom(
+                  Rx.merge(
+                    Rx.from(devTools.send('Performance.getMetrics')),
+                    pageExit$.pipe(mergeMap((error) => Rx.throwError(() => error)))
+                  )
+                );
                 metrics = getMetrics(startMetrics, endMetrics);
                 const { cpuInPercentage, memoryInMegabytes } = metrics;
 
@@ -234,7 +236,6 @@ export class HeadlessChromiumDriverFactory {
 
             try {
               logger.debug('Attempting to close browser...');
-              isClosingBrowser = true;
               await browser?.close();
               logger.debug('Browser closed.');
             } catch (err) {
@@ -272,12 +273,7 @@ export class HeadlessChromiumDriverFactory {
 
         // Watched for as long as the page is in use. `error$` is only watched while the page is
         // set up, so on its own it misses a browser that dies while the screenshots are captured.
-        observer.add(
-          this.getPageExit(browser, page)
-            // closing the browser ourselves also disconnects it
-            .pipe(filter(() => !isClosingBrowser))
-            .subscribe((error) => driver.onBrowserExit(error))
-        );
+        observer.add(pageExit$.subscribe((error) => driver.onBrowserExit(error)));
 
         const error$ = Rx.merge(driver.screenshottingError$, driver.browserExit$).pipe(
           mergeMap((err) => Rx.throwError(err))

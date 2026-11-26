@@ -209,6 +209,30 @@ describe('HeadlessChromiumDriverFactory', () => {
         expect(mockBrowser.close).toHaveBeenCalledTimes(1);
         expect(onError).not.toHaveBeenCalled();
         expect(driver.isPageOpen()).toBe(true);
+        expect(driver.isClosedIntentionally()).toBe(true);
+      });
+
+      it('does not fail when the browser disconnects while the close callback waits for the metrics', async () => {
+        const { driver, error$, close } = await createPage();
+        const onError = jest.fn();
+        error$.subscribe({ error: onError });
+        devToolsSend.mockReturnValue(new Promise(() => {}));
+
+        const closed = Rx.lastValueFrom(close());
+        // Puppeteer closes the browser itself when Kibana is stopping
+        browserEvents.emit('disconnected');
+        await closed;
+
+        expect(onError).not.toHaveBeenCalled();
+        expect(driver.isClosedIntentionally()).toBe(true);
+      });
+
+      it('does not mark a browser that died as closed intentionally', async () => {
+        const { driver } = await createPage();
+
+        browserEvents.emit('disconnected');
+
+        expect(driver.isClosedIntentionally()).toBe(false);
       });
 
       it('collects the metrics when closing a running browser', async () => {
@@ -227,6 +251,20 @@ describe('HeadlessChromiumDriverFactory', () => {
         const { metrics } = await Rx.lastValueFrom(close());
 
         expect(getMetricsRequests()).toHaveLength(1);
+        expect(metrics).toBeUndefined();
+        expect(mockBrowser.close).toHaveBeenCalledTimes(1);
+      });
+
+      it('closes the browser when the page crashes while the metrics request is pending', async () => {
+        const { close } = await createPage();
+        // a crashed page leaves the request pending
+        devToolsSend.mockReturnValue(new Promise(() => {}));
+
+        const closed = Rx.lastValueFrom(close());
+        pageEvents.emit('error', new Error('Page crashed!'));
+        const { metrics } = await closed;
+
+        expect(getMetricsRequests()).toHaveLength(2);
         expect(metrics).toBeUndefined();
         expect(mockBrowser.close).toHaveBeenCalledTimes(1);
       });

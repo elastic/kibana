@@ -79,6 +79,8 @@ export function createMockBrowserDriver(): jest.Mocked<HeadlessChromiumDriver> {
     screenshot,
     waitForSelector,
     isPageOpen: jest.fn(),
+    isClosedIntentionally: jest.fn(() => false),
+    onIntentionalClose: jest.fn(),
     browserExit$: NEVER,
     onBrowserExit: jest.fn(),
     open: jest.fn(),

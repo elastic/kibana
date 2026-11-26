@@ -109,6 +109,18 @@ describe('ScreenshotObservableHandler', () => {
       );
     });
 
+    it('does not throw a closed browser error when Kibana closed the browser itself', () => {
+      browser.isPageOpen.mockReturnValue(false);
+      browser.isClosedIntentionally.mockReturnValue(true);
+
+      const check = () => screenshots.checkPageIsOpen();
+
+      expect(check).toThrowErrorMatchingInlineSnapshot(
+        `"Browser was closed by Kibana before the screenshots were captured."`
+      );
+      expect(check).not.toThrow(errors.BrowserClosedUnexpectedly);
+    });
+
     it('is a pass-through when the page is open', async () => {
       const test$ = of(234455).pipe(
         map((input) => {
@@ -149,6 +161,21 @@ describe('ScreenshotObservableHandler', () => {
       const result = lastValueFrom(of(pageSetupResults).pipe(getHandler().getScreenshots()));
 
       await expect(result).rejects.toBeInstanceOf(errors.BrowserClosedUnexpectedly);
+    });
+
+    it('does not fail with a closed browser error when the capture fails because Kibana closed the browser', async () => {
+      browser.screenshot.mockImplementation(async () => {
+        browser.isPageOpen.mockReturnValue(false);
+        browser.isClosedIntentionally.mockReturnValue(true);
+        throw new Error('Protocol error (Page.captureScreenshot): Target closed');
+      });
+
+      const result = lastValueFrom(of(pageSetupResults).pipe(getHandler().getScreenshots()));
+
+      await expect(result).rejects.not.toBeInstanceOf(errors.BrowserClosedUnexpectedly);
+      await expect(result).rejects.toMatchInlineSnapshot(
+        `[Error: Browser was closed by Kibana before the screenshots were captured.]`
+      );
     });
 
     it('fails with a closed browser error when the browser exits and the capture never settles', async () => {

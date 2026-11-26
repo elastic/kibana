@@ -9,6 +9,7 @@ export { download } from './download';
 export { install } from './install';
 export type { Context } from './chromium';
 export {
+  getChromiumClosedByKibanaError,
   getChromiumDisconnectedError,
   DEFAULT_VIEWPORT,
   HeadlessChromiumDriver,

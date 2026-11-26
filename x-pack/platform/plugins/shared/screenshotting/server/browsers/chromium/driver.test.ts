@@ -166,5 +166,18 @@ describe('chromium driver', () => {
 
       expect(exitErrors).toEqual([firstError]);
     });
+
+    it('does not report an exit once Kibana closes the browser itself', () => {
+      const driver = createDriver();
+      const exitErrors: Error[] = [];
+      driver.browserExit$.subscribe((error) => exitErrors.push(error));
+
+      driver.onIntentionalClose();
+      driver.onBrowserExit(new Error('browser disconnected'));
+
+      expect(exitErrors).toEqual([]);
+      expect(driver.isClosedIntentionally()).toBe(true);
+      expect(driver.isPageOpen()).toBe(true);
+    });
   });
 });
