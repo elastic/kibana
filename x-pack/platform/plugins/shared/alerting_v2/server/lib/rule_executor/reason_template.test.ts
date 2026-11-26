@@ -289,20 +289,24 @@ describe('buildDataContext', () => {
 
 describe('applyReasons', () => {
   const createEvent = (data: Record<string, unknown>) => ({ data } as AlertEventDocument);
-  const renderer = (render: ReasonRenderer['render']): ReasonRenderer => ({ render });
+  const renderer = (renderRow: ReasonRenderer['render']): ReasonRenderer => ({
+    render: renderRow,
+  });
 
   beforeEach(() => {
     jest.mocked(yieldToEventLoop).mockClear();
   });
 
   it('sets the rendered reason on each event, rendering every row on its own', async () => {
-    const render = jest.fn((row: Record<string, unknown>) => `CPU on ${String(row['host.name'])}`);
+    const renderRow = jest.fn(
+      (row: Record<string, unknown>) => `CPU on ${String(row['host.name'])}`
+    );
     const events = [createEvent({ 'host.name': 'host-a' }), createEvent({ 'host.name': 'host-b' })];
 
-    await applyReasons(events, renderer(render));
+    await applyReasons(events, renderer(renderRow));
 
     expect(events.map((event) => event.reason)).toEqual(['CPU on host-a', 'CPU on host-b']);
-    expect(render).toHaveBeenNthCalledWith(1, { 'host.name': 'host-a' });
+    expect(renderRow).toHaveBeenNthCalledWith(1, { 'host.name': 'host-a' });
   });
 
   it('does not change the stored data of the event', async () => {
@@ -332,12 +336,12 @@ describe('applyReasons', () => {
     jest.mocked(yieldToEventLoop).mockImplementation(async () => {
       calls.push('yield');
     });
-    const render = jest.fn(() => {
+    const renderRow = jest.fn(() => {
       calls.push('render');
       return 'reason';
     });
 
-    await applyReasons([createEvent({}), createEvent({})], renderer(render));
+    await applyReasons([createEvent({}), createEvent({})], renderer(renderRow));
 
     expect(calls).toEqual(['yield', 'render', 'yield', 'render']);
   });
