@@ -34,6 +34,8 @@ jobs:
 
             Please check your task against the [task registration skill](https://github.com/elastic/kibana/blob/main/.agents/skills/task-manager-registration/SKILL.md) and its author checklist: an explicit \`timeout\`, the abort \`signal\` passed to every Elasticsearch and HTTP call, classified errors, \`cost\` and \`priority\` matched to the workload, and \`ensureScheduled\` for tasks scheduled on plugin start.
 
+            Libra also reviews the task code against this skill. Its findings are posted as review comments that end with \`Specialist: task-manager-registration\`.
+
             ${marker}
             `;
 
