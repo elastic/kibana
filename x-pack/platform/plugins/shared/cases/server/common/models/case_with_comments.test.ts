@@ -33,6 +33,7 @@ import {
   commentExternalReference,
   commentFileExternalReference,
   commentPersistableState,
+  isolateCommentActions,
 } from '../../client/cases/mock';
 
 describe('CaseCommentModel', () => {
@@ -410,6 +411,35 @@ describe('CaseCommentModel', () => {
             createdDate,
           })
         ).resolves.not.toThrow();
+      });
+
+      it('throws if limit is reached when creating an actions attachment with unified attachments enabled', async () => {
+        await expect(
+          model.createComment({
+            id: 'comment-1',
+            commentReq: isolateCommentActions,
+            createdDate,
+          })
+        ).rejects.toThrow(
+          `Case has reached the maximum allowed number (${MAX_PERSISTABLE_STATE_AND_EXTERNAL_REFERENCES}) of attached persistable state and external reference attachments.`
+        );
+
+        expect(clientArgs.services.attachmentService.create).not.toHaveBeenCalled();
+      });
+
+      it('creates an actions attachment when the limit is reached with unified attachments disabled', async () => {
+        const modelWithUnifiedAttachmentsDisabled = await CaseCommentModel.create(theCase.id, {
+          ...clientArgs,
+          config: { ...clientArgs.config, attachments: { enabled: false } },
+        });
+
+        await modelWithUnifiedAttachmentsDisabled.createComment({
+          id: 'comment-1',
+          commentReq: isolateCommentActions,
+          createdDate,
+        });
+
+        expect(clientArgs.services.attachmentService.create).toHaveBeenCalledTimes(1);
       });
 
       it('throws if trying to add an event or alert to a closed case', async () => {
