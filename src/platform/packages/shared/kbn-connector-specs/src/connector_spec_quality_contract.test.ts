@@ -48,8 +48,11 @@ const APPLIES_TO_SUFFIX_RE = /^(\{applies_to\}`[^`]*`\s*)*$/;
  * this parser so they derive the same heading key regardless of trailing markup after the marker.
  */
 const headingBeforeNonToolMarker = (line: string): string | undefined => {
-  // Whether the line is an ATX heading (optional leading spaces then one or more #).
-  const isAtxHeading = /^\s*#+/.test(line);
+  // Whether the line is a CommonMark ATX heading (1–6 # followed by a space or end-of-line).
+  // Leading block-quote markers (`> `, possibly nested) are stripped first so that quoted
+  // headings are recognized. A bare `####word` prefix (no space) is a paragraph, not a heading,
+  // and must not trigger the closing-hash strip.
+  const isAtxHeading = /^\s*#{1,6}(?:\s|$)/.test(line.replace(/^(\s*>\s*)+/, ''));
   for (const marker of [NOT_YET_AVAILABLE_MARKER, API_ONLY_MARKER]) {
     const idx = line.indexOf(marker);
     if (idx === -1) {
@@ -507,6 +510,20 @@ describe('connector spec quality contracts', () => {
           'This action is _(API only)_ {applies_to}`stack: preview 9.7` ###'
         )
       ).toBeUndefined();
+    });
+
+    it('returns undefined for a paragraph that starts with hashes but has no space after them', () => {
+      // Regression: /^\s*#+/ accepted `####word` as an ATX heading, stripping the closing ####
+      // and making an empty suffix pass APPLIES_TO_SUFFIX_RE.
+      expect(headingBeforeNonToolMarker('####List alerts _(API only)_ ####')).toBeUndefined();
+    });
+
+    it('returns the heading for a valid ATX heading inside a Markdown blockquote', () => {
+      // Regression: the guard returned false for `> ####` lines, so closing hashes were not
+      // stripped and the parser silently dropped the heading.
+      expect(
+        headingBeforeNonToolMarker('> #### List alerts _(API only)_ ####')
+      ).toBe('> #### List alerts');
     });
   });
 
