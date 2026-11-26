@@ -6,7 +6,7 @@
  */
 
 import http from 'http';
-import archiver from 'archiver';
+import { ZipArchive } from 'archiver';
 
 interface PluginsTestServerOptions {
   port: number;
@@ -88,7 +88,7 @@ export class PluginsTestServer {
    */
   private serveDirectZip(pluginName: string, res: http.ServerResponse): void {
     const pluginDir = `${this.assetsDir}/${pluginName}`;
-    const archive = archiver('zip', { zlib: { level: 0 } });
+    const archive = new ZipArchive({ zlib: { level: 0 } });
 
     res.writeHead(200, {
       'Content-Type': 'application/zip',
@@ -107,7 +107,7 @@ export class PluginsTestServer {
   private serveGithubArchive(repo: string, ref: string, res: http.ServerResponse): void {
     const pluginDir = `${this.assetsDir}/${repo}`;
     const rootPrefix = `${repo}-${ref}`;
-    const archive = archiver('zip', { zlib: { level: 0 } });
+    const archive = new ZipArchive({ zlib: { level: 0 } });
 
     res.writeHead(200, {
       'Content-Type': 'application/zip',

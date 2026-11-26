@@ -12,7 +12,7 @@ import { format } from 'url';
 import del from 'del';
 import { v4 as uuidv4 } from 'uuid';
 import { glob } from 'fast-glob';
-import createArchiver from 'archiver';
+import { TarArchive } from 'archiver';
 import Fs from 'fs';
 import { pipeline } from 'stream/promises';
 import { Cluster } from '@kbn/es';
@@ -423,8 +423,8 @@ export function createTestEsCluster<
       const uuid = uuidv4();
       const debugPath = Path.resolve(REPO_ROOT, `data/es_debug_${uuid}.tar.gz`);
       log.error(`[es] debug files found, archiving install to ${debugPath}`);
-      const archiver = createArchiver('tar', { gzip: true });
-      const promise = pipeline(archiver, Fs.createWriteStream(debugPath));
+      const archive = new TarArchive({ gzip: true });
+      const promise = pipeline(archive, Fs.createWriteStream(debugPath));
 
       const archiveDirname = `es_debug_${uuid}`;
       for (const name of Fs.readdirSync(config.installPath)) {
@@ -437,13 +437,13 @@ export function createTestEsCluster<
         const dest = Path.join(archiveDirname, name);
         const stat = Fs.statSync(src);
         if (stat.isDirectory()) {
-          archiver.directory(src, dest);
+          archive.directory(src, dest);
         } else {
-          archiver.file(src, { name: dest });
+          archive.file(src, { name: dest });
         }
       }
 
-      archiver.finalize();
+      archive.finalize();
       await promise;
 
       // cleanup the captured debug files

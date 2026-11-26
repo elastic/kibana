@@ -11,7 +11,7 @@ import { createHash } from 'crypto';
 import { createReadStream, createWriteStream } from 'fs';
 import { mkdir, readFile, stat, writeFile } from 'fs/promises';
 import { dirname, join, resolve } from 'path';
-import archiver from 'archiver';
+import { TarArchive } from 'archiver';
 import webpack from 'webpack';
 import type { Configuration, StatsError, Watching } from 'webpack';
 import { default as WebpackConfig } from '../webpack.config';
@@ -669,7 +669,7 @@ export const buildDocsArchive = async ({
 
   await new Promise<void>((resolvePromise, reject) => {
     const output = createWriteStream(outputPath);
-    const archive = archiver('tar', {
+    const archive = new TarArchive({
       gzip: true,
       gzipOptions: {
         level: 9,

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import archiver from 'archiver';
+import { ZipArchive } from 'archiver';
 import { stringify } from 'yaml';
 import semver from 'semver';
 import type { PackageSpecManifest } from '@kbn/fleet-plugin/common';
@@ -34,7 +34,7 @@ export function generatePrebuiltRulesPackage({
 }: GeneratePrebuiltRulesPackageParams): void {
   validateSemver(packageSemver);
 
-  const prebuiltRulesPackage = archiver('zip', {
+  const prebuiltRulesPackage = new ZipArchive({
     zlib: { level: 9 },
     forceZip64: true,
   });
