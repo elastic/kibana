@@ -6,7 +6,6 @@
  */
 
 import { Builder, esql, type ComposerQuery } from '@elastic/esql';
-import type { ESQLColumn } from '@elastic/esql/types';
 import { CRASH_EVENTS, OTEL_LOGS_INDEX } from '../otel_data';
 import { MOBILE_MAX_CRASH_DELAY_HOURS } from '../sessions';
 import { ERROR_GROUPS_ROWS } from '../top_rows';
@@ -34,52 +33,34 @@ export interface CrashEventsParams extends MobilePanelFilters {
 }
 
 /**
- * The crashes of an application that `inRange` keeps by their `crash_time`, the earlier of their
- * two times, each with its `crash_release`, the release that crashed. The release filter is on the
- * latter: EDOT iOS sends a crash with the resource of the next launch, which may run an update.
+ * The crashes of an application that happened in `[start, end)`, each with its `crash_time`, the
+ * earlier of its two times, and its `crash_release`, the release that crashed. The release filter
+ * is on the latter: EDOT iOS sends a crash with the resource of the next launch, which may run an
+ * updated release.
  */
-const crashesWhere = (
-  { release, ...filters }: MobilePanelFilters,
-  inRange: (query: ComposerQuery, crashTime: ESQLColumn) => ComposerQuery
-): ComposerQuery => {
+export const crashEvents = ({
+  start,
+  end,
+  release,
+  ...filters
+}: CrashEventsParams): ComposerQuery => {
   const crashTime = resultColumn('crashTime');
   const crashRelease = resultColumn('crashRelease');
-  const crashes = mobilePanelQuery(filters, mobileDocuments({ indices: [OTEL_LOGS_INDEX] }))
-    .pipe`WHERE ${inValues('eventName', CRASH_EVENTS)}`
-    .pipe`EVAL ${crashTime} = LEAST(@timestamp, COALESCE(TO_DATETIME(${mobileColumn(
+  const query = mobilePanelQuery(filters, mobileDocuments({ indices: [OTEL_LOGS_INDEX] })).pipe`WHERE ${inValues(
+    'eventName',
+    CRASH_EVENTS
+  )}`.pipe`EVAL ${crashTime} = LEAST(@timestamp, COALESCE(TO_DATETIME(${mobileColumn(
     'observedTimestamp'
-  )}), @timestamp))`;
-  const query = inRange(crashes, crashTime).pipe`EVAL ${crashRelease} = ${reportRelease()}`
-    .pipe`EVAL ${crashRelease} = CASE(
+  )}), @timestamp))`.pipe`WHERE ${crashTime} >= TO_DATETIME(${{
+    crash_start: new Date(start).toISOString(),
+  }}) AND ${crashTime} < TO_DATETIME(${{ crash_end: new Date(end).toISOString() }})`
+    .pipe`EVAL ${crashRelease} = ${reportRelease()}`.pipe`EVAL ${crashRelease} = CASE(
       ${crashRelease} IS NULL OR ${crashRelease} == "",
       ${mobileColumn('serviceVersion')},
       ${crashRelease}
     )`;
   return release ? query.pipe`WHERE ${crashRelease} == ${{ release }}` : query;
 };
-
-/** The crashes of an application that happened in `[start, end)`, as `crashesWhere` reads them. */
-export const crashEvents = ({ start, end, ...filters }: CrashEventsParams): ComposerQuery =>
-  crashesWhere(
-    filters,
-    (query, crashTime) =>
-      query.pipe`WHERE ${crashTime} >= TO_DATETIME(${{
-        crash_start: new Date(start).toISOString(),
-      }}) AND ${crashTime} < TO_DATETIME(${{ crash_end: new Date(end).toISOString() }})`
-  );
-
-/**
- * The crashes as Discover lists them, in its time range: `?_tstart` and `?_tend`, which Discover
- * fills, bound when they happened, and `@timestamp` reaches as far past the end as a crash can be
- * sent late, so the crashes are the Crashes tab's.
- */
-export const crashEventsInDiscoverRange = (filters: MobilePanelFilters): ComposerQuery =>
-  crashesWhere(
-    filters,
-    (query, crashTime) => query.pipe`WHERE @timestamp >= ?_tstart
-      AND @timestamp < TO_DATETIME(?_tend) + ${esql.exp(`${MOBILE_MAX_CRASH_DELAY_HOURS} hours`)}
-      AND ${crashTime} >= ?_tstart AND ${crashTime} < ?_tend`
-  );
 
 /** How many releases the Crashes tab's picker lists, at most. */
 export const CRASH_RELEASE_ROWS = 1000;

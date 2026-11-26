@@ -233,8 +233,8 @@ apiTest.describe('Digital Experience mobile crashes API', { tag: DIGITAL_EXPERIE
       });
       expect(detail.latestCrash?.stacktrace).toContain('MainActivity.onResume(MainActivity.kt:88)');
       expect(detail.releases).toStrictEqual({ top: [{ key: '4.2.0', count: 3 }], other: 0 });
-      // Its session's POST was sent twice, listed once; the GET in another trace reuses its span
-      // id, and is listed too.
+      // Its session's POST was sent three times, once with the same document id in another index,
+      // and is listed once; the GET in another trace reuses its span id, and is listed too.
       expect(detail.osVersions).toStrictEqual({
         top: [
           { key: '15', count: 2 },

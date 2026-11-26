@@ -10,6 +10,8 @@ import { CRASH_FINGERPRINT_CASES } from '../../../../common/mobile/crash_fingerp
 
 const LOGS_INDEX = 'logs-generic.otel-default';
 const TRACES_INDEX = 'traces-generic.otel-default';
+/** Another traces data stream, where a copy of a span keeps its document id. */
+const TRACES_COPY_INDEX = 'traces-generic.otel-scoutcopy';
 
 /** Applications of their own, so the other mobile fixtures' counts stay as they are. */
 export const CRASH_APPS = {
@@ -206,11 +208,35 @@ const npeSession = {
   'os.name': 'Android',
 };
 
+/** The request just before the NPE's latest crash, which the fixture sends three times. */
+const NPE_POST = {
+  '@timestamp': at('12:39:55'),
+  name: 'POST',
+  kind: 'Client',
+  trace_id: 'c'.repeat(32),
+  span_id: 'c'.repeat(15) + '2',
+  duration: 420_000_000,
+  attributes: {
+    'session.id': NPE_LATEST_SESSION,
+    'app.screen.name': 'Map',
+    'http.request.method': 'POST',
+    'url.full': 'https://api.example.com/tracks?id=7',
+    'http.response.status_code': 503,
+  },
+};
+const NPE_POST_ID = 'dx-mobile-crash-npe-post';
+
 /**
  * Events of the NPE's latest session and of another session of the app, and of the iOS session in
  * uppercase, as EDOT iOS writes its id, and in lowercase.
  */
-const SESSION_EVENTS = [
+const SESSION_EVENTS: Array<{
+  index: string;
+  resource: Record<string, string>;
+  /** Set where a copy must keep the document id. */
+  id?: string;
+  document: Record<string, unknown>;
+}> = [
   {
     index: TRACES_INDEX,
     resource: npeSession,
@@ -224,45 +250,11 @@ const SESSION_EVENTS = [
       attributes: { 'session.id': NPE_LATEST_SESSION, 'app.screen.name': 'Map' },
     },
   },
-  {
-    index: TRACES_INDEX,
-    resource: npeSession,
-    document: {
-      '@timestamp': at('12:39:55'),
-      name: 'POST',
-      kind: 'Client',
-      trace_id: 'c'.repeat(32),
-      span_id: 'c'.repeat(15) + '2',
-      duration: 420_000_000,
-      attributes: {
-        'session.id': NPE_LATEST_SESSION,
-        'app.screen.name': 'Map',
-        'http.request.method': 'POST',
-        'url.full': 'https://api.example.com/tracks?id=7',
-        'http.response.status_code': 503,
-      },
-    },
-  },
-  // The same request span sent again, as an SDK retrying an export does: listed once.
-  {
-    index: TRACES_INDEX,
-    resource: npeSession,
-    document: {
-      '@timestamp': at('12:39:55'),
-      name: 'POST',
-      kind: 'Client',
-      trace_id: 'c'.repeat(32),
-      span_id: 'c'.repeat(15) + '2',
-      duration: 420_000_000,
-      attributes: {
-        'session.id': NPE_LATEST_SESSION,
-        'app.screen.name': 'Map',
-        'http.request.method': 'POST',
-        'url.full': 'https://api.example.com/tracks?id=7',
-        'http.response.status_code': 503,
-      },
-    },
-  },
+  { index: TRACES_INDEX, resource: npeSession, id: NPE_POST_ID, document: NPE_POST },
+  // The same request span sent again, as an SDK retrying an export does: listed once, whether the
+  // copy is another document of the same index, or has the same document id in another index.
+  { index: TRACES_INDEX, resource: npeSession, document: NPE_POST },
+  { index: TRACES_COPY_INDEX, resource: npeSession, id: NPE_POST_ID, document: NPE_POST },
   // Another request, in another trace, whose span id happens to be the same: listed too.
   {
     index: TRACES_INDEX,
@@ -384,8 +376,8 @@ const documents = [
       },
     },
   })),
-  ...SESSION_EVENTS.map(({ index, resource, document }, position) => ({
-    id: `dx-mobile-crash-session-${position}`,
+  ...SESSION_EVENTS.map(({ index, resource, id, document }, position) => ({
+    id: id ?? `dx-mobile-crash-session-${position}`,
     index,
     document: {
       ...document,
@@ -394,7 +386,10 @@ const documents = [
   })),
 ];
 
-/** Deletes the crash documents by their ids, leaving the rest of the data streams. */
+/**
+ * Deletes the crash documents by their ids, leaving the rest of the shared data streams, and the
+ * data stream only the copied span is in.
+ */
 export const deleteMobileCrashData = async (esClient: EsClient): Promise<void> => {
   await esClient.deleteByQuery({
     index: [LOGS_INDEX, TRACES_INDEX],
@@ -402,6 +397,7 @@ export const deleteMobileCrashData = async (esClient: EsClient): Promise<void> =
     refresh: true,
     ignore_unavailable: true,
   });
+  await esClient.indices.deleteDataStream({ name: TRACES_COPY_INDEX }, { ignore: [404] });
 };
 
 /** Indexes the crash documents, replacing what an interrupted run left behind. */

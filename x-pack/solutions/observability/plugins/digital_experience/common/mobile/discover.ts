@@ -6,7 +6,7 @@
  */
 
 import { esql } from '@elastic/esql';
-import { crashEventsInDiscoverRange } from './crash_groups';
+import { CRASH_DELAY_MS, crashEvents } from './crash_groups';
 import { mobilePanelQuery, withEnvironment, type MobilePanelFilters } from './filters';
 import { resultColumn } from './fields';
 import { mobileSessionDocuments } from './session_events';
@@ -32,18 +32,24 @@ export const mobilePanelDiscoverEsql = (
     .print('pipe-multiline');
 
 /**
- * The ES|QL that Discover opens for the Crashes tab: the crashes it lists, by when they happened
- * and the release that crashed, newest first, with the values written into the text.
+ * The Discover link of the Crashes tab over `[start, end)`: the crashes it lists, by when they
+ * happened and the release that crashed, newest first. Discover filters its time field, the one
+ * compared with `?_tstart`, on its own time range, so that range reaches as far past the end as a
+ * crash can be sent late, and the query keeps the crash times of the tab's range.
  */
-export const mobileCrashesDiscoverEsql = (
+export const mobileCrashesDiscoverLink = (
   filters: MobilePanelFilters,
-  { environment }: { environment?: string }
-): string =>
-  withEnvironment(crashEventsInDiscoverRange(filters), environment).pipe`SORT ${resultColumn(
-    'crashTime'
-  )} DESC`
+  { environment, start, end }: { environment?: string; start: number; end: number }
+): { esql: string; timeRange: { from: string; to: string } } => ({
+  esql: withEnvironment(crashEvents({ ...filters, start, end }), environment)
+    .pipe`WHERE ${inDiscoverTimeRange()}`.pipe`SORT ${resultColumn('crashTime')} DESC`
     .inlineParams()
-    .print('pipe-multiline');
+    .print('pipe-multiline'),
+  timeRange: {
+    from: new Date(start).toISOString(),
+    to: new Date(end + CRASH_DELAY_MS).toISOString(),
+  },
+});
 
 /**
  * The ES|QL that Discover opens for a crash's session: its events, oldest first, matched as the

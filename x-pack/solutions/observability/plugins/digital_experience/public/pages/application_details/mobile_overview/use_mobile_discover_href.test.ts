@@ -7,7 +7,7 @@
 
 import { renderHook } from '@testing-library/react';
 import {
-  mobileCrashesDiscoverEsql,
+  mobileCrashesDiscoverLink,
   mobilePanelDiscoverEsql,
 } from '../../../../common/mobile/discover';
 import { useDiscoverHref } from '../../../hooks/use_discover_href';
@@ -92,18 +92,27 @@ describe('useMobileDiscoverHref', () => {
 
   it("opens the Crashes tab's crashes, by when they happened and the release that crashed", () => {
     mockUrl({ environment: 'production', release: '8.4.0' });
+    jest.mocked(useTimeRange).mockReturnValue({
+      timeRange: { rangeFrom: '2021-01-18T12:00:00.000Z', rangeTo: '2021-01-18T13:00:00.000Z' },
+      isTimeRangeInUrl: true,
+      setTimeRange: jest.fn(),
+    });
 
     renderHook(() => useMobileDiscoverHref('ride-ios', 'crashes'));
 
-    const [esql] = jest.mocked(useDiscoverHref).mock.calls.at(-1) ?? [];
-    expect(esql).toBe(
-      mobileCrashesDiscoverEsql(
-        { serviceName: 'ride-ios', release: '8.4.0' },
-        { environment: 'production' }
-      )
+    const [esql, timeRange] = jest.mocked(useDiscoverHref).mock.calls.at(-1) ?? [];
+    const link = mobileCrashesDiscoverLink(
+      { serviceName: 'ride-ios', release: '8.4.0' },
+      {
+        environment: 'production',
+        start: Date.parse('2021-01-18T12:00:00.000Z'),
+        end: Date.parse('2021-01-18T13:00:00.000Z'),
+      }
     );
+    expect(esql).toBe(link.esql);
+    // Discover filters on its own time range, which takes the crashes sent a day late.
+    expect(timeRange).toEqual({ from: '2021-01-18T12:00:00.000Z', to: '2021-01-19T13:00:00.000Z' });
     expect(esql).toContain('crash_release == "8.4.0"');
-    expect(esql).not.toContain('`service.version` == "8.4.0"');
   });
 
   it('has no link without access to Discover', () => {

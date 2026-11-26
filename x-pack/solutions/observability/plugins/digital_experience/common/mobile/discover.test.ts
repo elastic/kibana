@@ -6,7 +6,7 @@
  */
 
 import {
-  mobileCrashesDiscoverEsql,
+  mobileCrashesDiscoverLink,
   mobilePanelDiscoverEsql,
   mobileSessionDiscoverEsql,
 } from './discover';
@@ -50,25 +50,35 @@ describe('mobilePanelDiscoverEsql', () => {
   });
 });
 
-describe('mobileCrashesDiscoverEsql', () => {
-  const query = mobileCrashesDiscoverEsql(
+describe('mobileCrashesDiscoverLink', () => {
+  const START = Date.parse('2021-01-18T12:00:00.000Z');
+  const END = Date.parse('2021-01-18T13:00:00.000Z');
+  const { esql, timeRange } = mobileCrashesDiscoverLink(
     { serviceName: 'ride-ios', osName: 'iOS', release: '8.4.0' },
-    { environment: 'production' }
+    { environment: 'production', start: START, end: END }
   );
 
-  it('lists the crashes that happened in the time range, sent up to a day after it', () => {
-    expect(query).toContain('FROM logs-*.otel-*');
-    expect(query).toContain(
-      'WHERE @timestamp >= ?_tstart AND @timestamp < TO_DATETIME(?_tend) + 24 hours AND crash_time >= ?_tstart AND crash_time < ?_tend'
+  it("filters Discover's time field over a day past the range, for crashes sent late", () => {
+    // Discover filters `@timestamp`, the field compared with `?_tstart`, on this range itself.
+    expect(timeRange).toEqual({
+      from: '2021-01-18T12:00:00.000Z',
+      to: '2021-01-19T13:00:00.000Z',
+    });
+    expect(esql).toContain('@timestamp >= ?_tstart AND @timestamp < ?_tend');
+  });
+
+  it('keeps the crashes that happened in the range, newest first', () => {
+    expect(esql).toContain(
+      'crash_time >= TO_DATETIME("2021-01-18T12:00:00.000Z") AND crash_time < TO_DATETIME("2021-01-18T13:00:00.000Z")'
     );
-    expect(query).toContain('SORT crash_time DESC');
+    expect(esql).toContain('SORT crash_time DESC');
   });
 
   it('filters on the release that crashed, with the values written into the text', () => {
-    expect(query).toContain('WHERE crash_release == "8.4.0"');
-    expect(query).not.toContain('`service.version` == "8.4.0"');
-    expect(query).toContain('`resource.attributes.os.name` == "iOS"');
-    expect(query).toContain('`service.environment` == "production"');
+    expect(esql).toContain('WHERE crash_release == "8.4.0"');
+    expect(esql).not.toContain('`service.version` == "8.4.0"');
+    expect(esql).toContain('`resource.attributes.os.name` == "iOS"');
+    expect(esql).toContain('`service.environment` == "production"');
   });
 });
 

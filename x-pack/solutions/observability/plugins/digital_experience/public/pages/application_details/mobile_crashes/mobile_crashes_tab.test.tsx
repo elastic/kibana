@@ -123,7 +123,16 @@ describe('MobileCrashesTab', () => {
     renderTab();
 
     expect(jest.mocked(MobileToolbar).mock.calls.at(-1)?.[0]).toEqual(
-      expect.objectContaining({ releases: RELEASES })
+      expect.objectContaining({ releaseOptions: { buckets: RELEASES } })
+    );
+  });
+
+  it("has no release options of its own until the crashes load, rather than the KPIs'", () => {
+    mockCrashGroups({ response: undefined, lastResponse: undefined, isLoading: true });
+    renderTab();
+
+    expect(jest.mocked(MobileToolbar).mock.calls.at(-1)?.[0]).toEqual(
+      expect.objectContaining({ releaseOptions: { buckets: undefined } })
     );
   });
 

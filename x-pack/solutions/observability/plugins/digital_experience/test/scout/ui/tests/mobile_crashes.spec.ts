@@ -85,8 +85,9 @@ test.describe('Digital Experience mobile crashes', { tag: DIGITAL_EXPERIENCE_TAG
 
       await expect(page).toHaveURL(/\/app\/discover/);
       await expect.poll(() => discover.getEsqlQueryValue()).toContain(NPE_LATEST_SESSION);
-      // Its raw documents: the screen, the POST as sent twice, the GET, two taps, and the crash.
-      await expect(discover.getHitCountLocator()).toHaveText('7');
+      // Its raw documents: the screen, the POST as sent three times, the GET, two taps, and the
+      // crash.
+      await expect(discover.getHitCountLocator()).toHaveText('8');
     });
   });
 

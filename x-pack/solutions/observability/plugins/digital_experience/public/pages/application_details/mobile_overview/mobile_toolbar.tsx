@@ -65,21 +65,25 @@ export const useMobileFilters = (): { isFiltered: boolean; clearFiltersButton?: 
 /**
  * The toolbar every mobile tab shares: the environment, OS and release filters, kept in the URL so
  * a reload or a shared link keeps them, and the date picker. The options come from the KPIs,
- * unless a tab gives its own releases.
+ * unless a tab gives its own release options.
  */
 export function MobileToolbar({
   kpis,
-  releases,
+  releaseOptions,
   isLoading,
   onRefresh,
 }: {
   kpis: MobileKpisResponse | undefined;
-  /** The releases to pick from instead of the KPIs': the Crashes tab's, the releases that crashed. */
-  releases?: FacetBucket[];
+  /**
+   * The releases to pick from instead of the KPIs', `buckets` undefined until they load: the
+   * Crashes tab's, the releases that crashed, which its filter is on.
+   */
+  releaseOptions?: { buckets: FacetBucket[] | undefined };
   isLoading: boolean;
   onRefresh: () => void;
 }) {
-  const releaseBuckets = releases ?? kpis?.releases;
+  // Never the KPIs' releases when the tab has its own, even before they load or when they fail.
+  const releaseBuckets = releaseOptions ? releaseOptions.buckets : kpis?.releases;
   const formatters = useFormatters();
   const { value: release, setValue: setRelease } = useQueryParam('release');
   const { value: osName, setValue: setOsName } = useQueryParam('osName');

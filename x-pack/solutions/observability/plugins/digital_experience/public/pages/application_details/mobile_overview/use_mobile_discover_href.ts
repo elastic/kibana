@@ -6,8 +6,9 @@
  */
 
 import { useMemo } from 'react';
+import { getDateISORange } from '@kbn/timerange';
 import {
-  mobileCrashesDiscoverEsql,
+  mobileCrashesDiscoverLink,
   mobilePanelDiscoverEsql,
 } from '../../../../common/mobile/discover';
 import type { MobileApplicationTabId } from '../../../../common/types/applications';
@@ -18,8 +19,9 @@ import { useTimeRange } from '../../../hooks/use_time_range';
 
 /**
  * The Discover link of a mobile application's tab, `undefined` without access to Discover. Built
- * from the URL's filters and time range, so it always matches what the tab shows: the Crashes
- * tab's lists its crashes, by when they happened and the release that crashed.
+ * from the URL's filters and time range, so it always matches what the tab shows. The Crashes
+ * tab's lists its crashes, by when they happened and the release that crashed, in a time range
+ * that takes the crashes sent late.
  */
 export const useMobileDiscoverHref = (
   serviceName: string,
@@ -30,17 +32,24 @@ export const useMobileDiscoverHref = (
   const { value: osName } = useQueryParam('osName');
   const { value: release } = useQueryParam('release');
 
-  const esql = useMemo(
-    () =>
-      (tab === 'crashes' ? mobileCrashesDiscoverEsql : mobilePanelDiscoverEsql)(
-        { serviceName, osName, release },
-        { environment }
-      ),
-    [tab, serviceName, osName, release, environment]
-  );
-  const discoverTimeRange = useMemo(
-    () => ({ from: timeRange.rangeFrom, to: timeRange.rangeTo }),
-    [timeRange.rangeFrom, timeRange.rangeTo]
-  );
+  const { esql, discoverTimeRange } = useMemo(() => {
+    const filters = { serviceName, osName, release };
+    if (tab === 'crashes') {
+      const { startDate, endDate } = getDateISORange({
+        from: timeRange.rangeFrom,
+        to: timeRange.rangeTo,
+      });
+      const link = mobileCrashesDiscoverLink(filters, {
+        environment,
+        start: Date.parse(startDate),
+        end: Date.parse(endDate),
+      });
+      return { esql: link.esql, discoverTimeRange: link.timeRange };
+    }
+    return {
+      esql: mobilePanelDiscoverEsql(filters, { environment }),
+      discoverTimeRange: { from: timeRange.rangeFrom, to: timeRange.rangeTo },
+    };
+  }, [tab, serviceName, osName, release, environment, timeRange.rangeFrom, timeRange.rangeTo]);
   return useDiscoverHref(esql, discoverTimeRange);
 };
