@@ -61,6 +61,20 @@ describe('debounceAsync', () => {
     expect(await secondPromise).toEqual('second');
   });
 
+  it('rejects the calls of an invocation that rejects, and resolves later invocations', async () => {
+    const fn = jest.fn().mockRejectedValueOnce(new Error('failed')).mockResolvedValueOnce('second');
+
+    const debounced = debounceAsync(fn, 200);
+
+    const failedPromise = debounced();
+    jest.runOnlyPendingTimers();
+    await expect(failedPromise).rejects.toThrow('failed');
+
+    const secondPromise = debounced();
+    jest.runOnlyPendingTimers();
+    expect(await secondPromise).toEqual('second');
+  });
+
   it('debounces the function', async () => {
     const fn = jest.fn().mockResolvedValueOnce('first');
 
