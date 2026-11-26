@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { isSlackDeliveryFailureReason } from './specs/slack/delivery_reason';
-import type { SlackDeliveryFailureReason } from './specs/slack/delivery_reason';
+import { isSlackDeliveryFailureReason } from './specs/slack/delivery_failure_reason';
+import type { SlackDeliveryFailureReason } from './specs/slack/delivery_failure_reason';
 
 /**
  * Runtime utilities for connector error handling and response size estimation.

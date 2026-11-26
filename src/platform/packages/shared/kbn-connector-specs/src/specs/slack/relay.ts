@@ -11,7 +11,7 @@ import { RELAY_AUTH_ID } from '../../auth_types/relay';
 import type { ActionContext } from '../../connector_spec';
 import { setConnectorActionErrorMeta } from '../../connector_utils';
 import type { RelayActionClient } from '../../relay_action_client';
-import type { SlackDeliveryFailureReason } from './delivery_reason';
+import type { SlackDeliveryFailureReason } from './delivery_failure_reason';
 import type {
   SlackGetConversationHistoryInput,
   SlackGetConversationRepliesInput,
