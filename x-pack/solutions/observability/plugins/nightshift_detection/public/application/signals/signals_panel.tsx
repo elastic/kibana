@@ -44,6 +44,20 @@ interface SignalItem {
   row: StoredSignalRow;
 }
 
+/**
+ * Keys a row by its identity, and numbers only the rows that share one, so a newer signal arriving
+ * at the top of the list doesn't change the key of a row the user has open.
+ */
+function toItems(signals: StoredSignalRow[]): SignalItem[] {
+  const seen = new Map<string, number>();
+  return signals.map((row) => {
+    const identity = `${row.group_hash}:${readText(row.data.bucket_start)}:${row['@timestamp']}`;
+    const copy = seen.get(identity) ?? 0;
+    seen.set(identity, copy + 1);
+    return { key: `${identity}:${copy}`, row };
+  });
+}
+
 function readText(value: unknown): string | undefined {
   return typeof value === 'string' || typeof value === 'number' ? String(value) : undefined;
 }
@@ -123,10 +137,7 @@ export function SignalsPanel({ live, isLive, onLiveChange, discoverLinks }: Sign
   const [expandedKeys, setExpandedKeys] = useState<Set<string>>(new Set());
   const { signals, error, isLoading, updatedAt, refresh } = live;
 
-  const items: SignalItem[] = signals.map((row, index) => ({
-    key: `${row.group_hash}:${readText(row.data.bucket_start)}:${row['@timestamp']}:${index}`,
-    row,
-  }));
+  const items = toItems(signals);
 
   const toggleExpanded = (key: string) =>
     setExpandedKeys((previous) => {
@@ -139,7 +150,7 @@ export function SignalsPanel({ live, isLive, onLiveChange, discoverLinks }: Sign
 
   const columns: Array<EuiBasicTableColumn<SignalItem>> = [
     {
-      name: 'Written',
+      name: 'Tick minute',
       width: '13%',
       render: ({ row }: SignalItem) => formatMinute(Date.parse(row['@timestamp'])),
     },
