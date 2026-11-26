@@ -5,13 +5,15 @@
  * 2.0.
  */
 
-import type { KibanaRole } from '@kbn/scout-security';
+import type { KbnClient, KibanaRole } from '@kbn/scout-security';
 import { expect } from '@kbn/scout-security/ui';
 import type { IndexedFleetEndpointPolicyResponse } from '../../../../../common/endpoint/data_loaders/index_fleet_endpoint_policy';
+import { fetchEndpointMetadataList } from '../../../../../scripts/endpoint/common/endpoint_metadata_services';
 import {
   createScoutEndpointPolicy,
   deleteScoutEndpointPolicy,
 } from '../../../edr_artifacts/ui/fixtures/endpoint_policy';
+import { scopeKbnClientToSpace } from '../../../edr_response_actions/common/scope_kbn_client_to_space';
 import type { EndpointListEmptyStatePage } from '../fixtures/page_objects/endpoint_list_empty_state';
 import { FEATURE_PRIVILEGES, getEndpointListRole } from '../fixtures/roles';
 import { spaceTest, tags } from '../fixtures';
@@ -46,6 +48,19 @@ const POLICY_ONBOARDING: ExpectedEmptyState = {
   hidden: ['onboardingStartButton'],
 };
 
+const assertNoHost = async (kbnClient: KbnClient, spaceId: string): Promise<void> => {
+  const hosts = await fetchEndpointMetadataList(scopeKbnClientToSpace(kbnClient, spaceId), {
+    pageSize: 100,
+  });
+  if (hosts.total > 0) {
+    const agentIds = hosts.data.map(({ metadata }) => metadata.agent.id).join(', ');
+    throw new Error(
+      `Space "${spaceId}" must hold no host for the endpoint list to show an onboarding empty ` +
+        `state, but it has ${hosts.total} endpoint metadata hosts, agent ids: ${agentIds}`
+    );
+  }
+};
+
 interface RbacCase {
   readonly title: string;
   readonly role: KibanaRole;
@@ -74,6 +89,7 @@ spaceTest.describe(
     let indexedPolicy: IndexedFleetEndpointPolicyResponse | undefined;
 
     spaceTest.beforeAll(async ({ kbnClient, log, scoutSpace }) => {
+      await assertNoHost(kbnClient, scoutSpace.id);
       indexedPolicy = await createScoutEndpointPolicy(
         kbnClient,
         log,
