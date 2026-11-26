@@ -157,6 +157,15 @@ export class WorkflowsPlugin
       workflowsService,
       audit,
       analytics: core.analytics,
+      getSecretsClient: plugins.secrets
+        ? async (request) => {
+            const [, { secrets }] = await core.getStartServices();
+            if (!secrets) {
+              throw new Error('The secrets plugin is set up but did not start');
+            }
+            return secrets.getClient({ request });
+          }
+        : undefined,
     });
 
     core.http.registerRouteHandlerContext<WorkflowsRequestHandlerContext, 'workflowsManagement'>(
