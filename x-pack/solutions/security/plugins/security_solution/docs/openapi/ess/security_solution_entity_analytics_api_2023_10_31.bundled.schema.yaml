@@ -1497,11 +1497,13 @@ paths:
                 missingPrivileges:
                   summary: Caller cannot delete the risk resources or update the entity index
                   value:
-                    message: Missing delete_index privileges for the risk score data stream and lookup index.
+                    message: Missing delete_index privileges for the risk score data stream and
+                      lookup index.
                     status_code: 403
               schema:
                 $ref: '#/components/schemas/TaskManagerUnavailableResponse'
-          description: Missing privileges to delete the risk resources, or to read and write an existing entity index
+          description: Missing privileges to delete the risk resources, or to read and
+            write an existing entity index
         '409':
           content:
             application/json:
@@ -1509,7 +1511,8 @@ paths:
                 scoringInProgress:
                   summary: Scoring run is in progress
                   value:
-                    message: Risk scoring is in progress. Wait for the current run to finish and try the cleanup again.
+                    message: Risk scoring is in progress. Wait for the current run to finish and try
+                      the cleanup again.
                     status_code: 409
               schema:
                 $ref: '#/components/schemas/TaskManagerUnavailableResponse'
