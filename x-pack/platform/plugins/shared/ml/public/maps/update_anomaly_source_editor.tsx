@@ -9,11 +9,15 @@ import React, { Fragment, Component } from 'react';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
+import type { OnSourceChangeArgs } from '@kbn/maps-plugin/public';
 import { LayerSelector } from './layer_selector';
 import type { MlAnomalyLayersType } from './util';
+import type { AnomalySourceDescriptor } from './anomaly_source';
 
 interface Props {
-  onChange: (...args: Array<{ propName: string; value: unknown }>) => void;
+  onChange: (
+    ...args: Array<OnSourceChangeArgs<Pick<AnomalySourceDescriptor, 'typicalActual'>>>
+  ) => void;
   typicalActual: MlAnomalyLayersType;
 }
 

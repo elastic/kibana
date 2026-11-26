@@ -6,6 +6,7 @@
  */
 
 import { skippedResult } from '../../evaluator_utils';
+import { getQueries } from '../custom_content_output';
 import type { CustomContentEvaluator } from '../types';
 
 export const CUSTOM_CONTENT_QUERY_CONTENTS_EVALUATOR_NAME = 'Custom Content Query Contents';
@@ -13,7 +14,7 @@ export const CUSTOM_CONTENT_QUERY_CONTENTS_EVALUATOR_NAME = 'Custom Content Quer
 /** Ignores case, whitespace and the backticks that quote a name, so `AVG( \`bytes\` )` matches `avg(bytes)`. */
 export const normalizeQuery = (query: string): string => query.replace(/[`\s]/g, '').toLowerCase();
 
-/** The final query contains the expected text, for a user-supplied query or a kept grouping. */
+/** The final queries contain the expected text, for a user-supplied query or a kept grouping. */
 export const createQueryContentsEvaluator = (): CustomContentEvaluator => ({
   name: CUSTOM_CONTENT_QUERY_CONTENTS_EVALUATOR_NAME,
   kind: 'CODE',
@@ -24,13 +25,15 @@ export const createQueryContentsEvaluator = (): CustomContentEvaluator => ({
       return skippedResult('No expected query text declared for this example.');
     }
 
-    const query = output.after?.esql;
-    if (!query) {
+    const queries = getQueries(output.after);
+    if (queries.length === 0) {
       return { score: 0, label: 'no-query', explanation: 'The panel has no query.' };
     }
 
-    const normalized = normalizeQuery(query);
-    const missing = required.filter((text) => !normalized.includes(normalizeQuery(text)));
+    const normalizedQueries = queries.map(normalizeQuery);
+    const missing = required.filter(
+      (text) => !normalizedQueries.some((query) => query.includes(normalizeQuery(text)))
+    );
     const score = (required.length - missing.length) / required.length;
 
     return {
@@ -38,9 +41,9 @@ export const createQueryContentsEvaluator = (): CustomContentEvaluator => ({
       label: missing.length === 0 ? 'contains-all' : 'missing',
       explanation:
         missing.length === 0
-          ? 'The query contains every expected text.'
-          : `The query is missing: ${missing.join('; ')}.`,
-      metadata: { esql: query, missing },
+          ? 'The queries contain every expected text.'
+          : `The queries are missing: ${missing.join('; ')}.`,
+      metadata: { esql: queries.join('\n\n'), missing },
     };
   },
 });

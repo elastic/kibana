@@ -115,7 +115,7 @@ const paginationSchema = z.discriminatedUnion('style', [
       request: z.object({ ...cursorRequest, ...located }).strict(),
       response: z
         .object({
-          in: z.enum(['body', 'header']).optional(),
+          in: z.enum(['body', 'header', 'last_item']).optional(),
           itemsPath,
           nextPath: z.string().min(1),
           hasMorePath: z.string().optional(),
@@ -124,7 +124,11 @@ const paginationSchema = z.discriminatedUnion('style', [
       end: z.enum(['empty_string', 'null', 'missing']).optional(),
       ...defaultSize,
     })
-    .strict(),
+    .strict()
+    .refine(({ response, end }) => response.in !== 'last_item' || end === undefined, {
+      message: '"end" does not apply to a cursor held in the last item',
+      path: ['end'],
+    }),
   z
     .object({
       style: z.literal('offset'),

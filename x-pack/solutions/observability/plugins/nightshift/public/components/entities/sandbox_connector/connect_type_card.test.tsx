@@ -37,7 +37,7 @@ const setup = (options: Parameters<typeof mockKibanaServices>[0] = {}) => {
     connectors: options.connectors ?? connectors,
     assignedCount: (options.assigned ?? ['a']).length,
   };
-  renderWithProviders(<ConnectTypeCard group={group} />);
+  renderWithProviders(<ConnectTypeCard group={group} ebtElement="test" />);
   return services;
 };
 
@@ -84,7 +84,10 @@ describe('ConnectTypeCard', () => {
     const github = actionType('.github', { source: 'spec' });
     const { getAddConnectorFlyout } = mockKibanaServices({ types: [github], connectors: [] });
     renderWithProviders(
-      <ConnectTypeCard group={{ actionType: github, connectors: [], assignedCount: 0 }} />
+      <ConnectTypeCard
+        group={{ actionType: github, connectors: [], assignedCount: 0 }}
+        ebtElement="test"
+      />
     );
     await waitFor(() => expect(screen.getByTestId('.github-connect')).toBeEnabled());
 

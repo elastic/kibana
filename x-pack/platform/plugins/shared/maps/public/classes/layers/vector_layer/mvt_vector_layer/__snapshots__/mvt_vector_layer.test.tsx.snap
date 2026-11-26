@@ -4,8 +4,8 @@ exports[`getLayerIcon Layers with non-elasticsearch sources should display icon 
 <PolygonIcon
   style={
     Object {
-      "fill": "#16C5C0",
-      "stroke": "#009490",
+      "fill": "#00BDA0",
+      "stroke": "#008c72",
       "strokeWidth": "1px",
     }
   }
