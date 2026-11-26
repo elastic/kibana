@@ -7,6 +7,7 @@
 
 import type { AuditEvent } from '@kbn/core-security-server';
 import type { EcsEvent } from '@kbn/core/server';
+import type { RecallSessionStore } from '../../common/http_api/recall';
 
 export enum AiIndexAuditAction {
   CREATE = 'ai_index_create',
@@ -163,6 +164,7 @@ export enum MemoryAuditAction {
   FORGET = 'memory_forget',
   REMEMBER = 'memory_remember',
   SAVE_EVENT = 'memory_save_event',
+  RECALL = 'memory_recall',
 }
 
 export interface SessionMemoryForgetAuditEventParams {
@@ -277,6 +279,41 @@ export const sessionEventsSaveAuditEvent = ({
     kibana: {
       saved_object: { type: 'session_events', id: sessionId },
     },
+    error: error && {
+      code: error.name,
+      message: error.message,
+    },
+  };
+};
+
+export interface MemoryRecallAuditEventParams {
+  stores: readonly RecallSessionStore[];
+  targetUserId?: string;
+  results?: number;
+  error?: Error;
+}
+
+/** Audits recalling from short-term memory stores; core adds the caller, the space and the request id. */
+export const memoryRecallAuditEvent = ({
+  stores,
+  targetUserId,
+  results = 0,
+  error,
+}: MemoryRecallAuditEventParams): AuditEvent => {
+  const storeList = stores.join(', ');
+  const scope = targetUserId !== undefined ? ` of user [id=${targetUserId}]` : '';
+
+  return {
+    message: error
+      ? `Failed attempt to recall from [${storeList}]${scope}`
+      : `User has recalled ${results} result(s) from [${storeList}]${scope}`,
+    event: {
+      action: MemoryAuditAction.RECALL,
+      category: ['database'],
+      type: ['access'],
+      outcome: error ? 'failure' : 'success',
+    },
+    ...(targetUserId !== undefined && { user: { target: { id: targetUserId } } }),
     error: error && {
       code: error.name,
       message: error.message,
