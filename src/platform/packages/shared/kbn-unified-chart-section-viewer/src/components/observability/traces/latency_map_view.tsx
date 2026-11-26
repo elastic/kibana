@@ -331,20 +331,21 @@ export function TracesLatencyMapView({
       const row = Object.fromEntries(columns.map((column, i) => [column.name, firstRow[i]]));
       // Discover writes a link from raw._id/_index and restores it by re-running the editor
       // query. That only works when the query declares both metadata fields and the span is
-      // inside its selection. Otherwise the identity stays off raw. flattened keeps the row,
-      // index included, so the traces document profile still recognizes it.
+      // inside its selection. Otherwise _id is left off the record, so no link is written;
+      // _index stays, as the traces document profile recognizes the span from it.
       const queryCanRefetchIdentity =
         metadataFields.includes('_id') && metadataFields.includes('_index');
       const restorable = queryCanRefetchIdentity && (!selection || isCellWithin(cell, selection));
-      const { _id, _index, ...withoutIdentity } = row;
-      const raw = (restorable ? row : withoutIdentity) as DataTableRecord['raw'];
+      const { _id, ...withoutId } = row;
+      const flattened = restorable ? row : withoutId;
+      const raw = flattened as DataTableRecord['raw'];
       const id =
-        restorable && typeof _id === 'string' && typeof _index === 'string'
+        restorable && typeof _id === 'string' && typeof row._index === 'string'
           ? getDocId(raw)
           : `traceLatencyMapExampleSpan-${cell.from}-${cell.minDuration}`;
       openedDocIdRef.current = id;
       setExternalExpandedDoc(
-        { id, raw, flattened: row },
+        { id, raw, flattened },
         // The traces Overview front and center, not the field table. The id is the traces
         // document profile's (discover traces_document_profile doc_viewer accessor); as a
         // package this cannot import it, and an unknown id just falls back to the default.

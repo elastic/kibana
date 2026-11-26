@@ -357,7 +357,7 @@ describe('TracesLatencyMapView', () => {
 
   it('opens a span outside the selection without an identity to link to', async () => {
     // A link restores its document through the query, selection and all: this span could
-    // never come back that way. Its fields stay, the index among them, for the profile.
+    // never come back that way. The index stays, for the traces document profile.
     answerWith(spanWithIdentity);
     const { actions, mapProps } = renderView({
       filters: ['service.name == "cart"', selectionClause],
@@ -366,10 +366,8 @@ describe('TracesLatencyMapView', () => {
     await act(() => mapProps.onCellClick!(cell));
     const [record] = actions.setExternalExpandedDoc.mock.lastCall ?? [];
     expect(record?.id).toBe(`traceLatencyMapExampleSpan-${cell.from}-${cell.minDuration}`);
-    expect(record?.raw).toEqual({ 'service.name': 'cart' });
-    expect(record?.flattened).toEqual(
-      expect.objectContaining({ _id: 'span-1', _index: '.ds-traces-apm-000001' })
-    );
+    expect(record?.raw).toEqual({ 'service.name': 'cart', _index: '.ds-traces-apm-000001' });
+    expect(record?.flattened).toBe(record?.raw);
   });
 
   it('keeps the identity of a span inside the selection', async () => {
@@ -437,16 +435,14 @@ describe('TracesLatencyMapView', () => {
 
   it('opens a span without an identity to link to when the editor query lacks metadata', async () => {
     // Discover restores a link through the editor query. Without METADATA _id, _index that
-    // restore cannot run, so the id stays off raw. The fields, index included, stay for the profile.
+    // restore cannot run, so _id stays off the record. The index stays, for the profile.
     answerWith(spanWithIdentity);
     const { actions, mapProps } = renderView();
     await act(() => mapProps.onCellClick!(cell));
     const [record] = actions.setExternalExpandedDoc.mock.lastCall ?? [];
     expect(record?.id).toBe(`traceLatencyMapExampleSpan-${cell.from}-${cell.minDuration}`);
-    expect(record?.raw).toEqual({ 'service.name': 'cart' });
-    expect(record?.flattened).toEqual(
-      expect.objectContaining({ _id: 'span-1', _index: '.ds-traces-apm-000001' })
-    );
+    expect(record?.raw).toEqual({ 'service.name': 'cart', _index: '.ds-traces-apm-000001' });
+    expect(record?.flattened).toBe(record?.raw);
   });
 
   it('keeps the clicked cell active while its document is open, and releases it when the flyout closes', async () => {
