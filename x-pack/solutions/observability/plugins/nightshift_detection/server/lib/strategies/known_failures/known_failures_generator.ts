@@ -296,16 +296,20 @@ function memoizeDataStart({ esClient, cpsEnabled, abortSignal }: GeneratorContex
     if (cached) {
       return cached;
     }
-    const dataFrom = esClient.esql.query({ query }, { signal: abortSignal }).then(({ values }) => {
-      const [[first] = []] = values;
-      const firstMs = typeof first === 'string' ? Date.parse(first) : Number.NaN;
-      if (!Number.isFinite(firstMs)) {
-        // The rule counted matches in this range, so an empty answer contradicts it: the service
-        // account may not see the index the rule reads. The caller notes it and fails open.
-        throw new Error('found no data where the rule counted matches');
-      }
-      return Math.floor(firstMs / MINUTE_MS) * MINUTE_MS;
-    });
+    // Whole or not at all: a shard with the older documents failing would move the start later
+    // and hide a real breach, where a failed lookup fails open.
+    const dataFrom = esClient.esql
+      .query({ query, allow_partial_results: false }, { signal: abortSignal })
+      .then(({ values }) => {
+        const [[first] = []] = values;
+        const firstMs = typeof first === 'string' ? Date.parse(first) : Number.NaN;
+        if (!Number.isFinite(firstMs)) {
+          // The rule counted matches in this range, so an empty answer contradicts it: the service
+          // account may not see the index the rule reads. The caller notes it and fails open.
+          throw new Error('found no data where the rule counted matches');
+        }
+        return Math.floor(firstMs / MINUTE_MS) * MINUTE_MS;
+      });
     dataFromByQuery.set(query, dataFrom);
     return dataFrom;
   };

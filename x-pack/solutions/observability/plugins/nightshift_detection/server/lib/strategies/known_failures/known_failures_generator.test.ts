@@ -234,6 +234,7 @@ describe('KnownFailuresGenerator', () => {
     expect(readDataStart).toHaveBeenCalledWith(
       {
         query: `FROM logs\n| WHERE @timestamp >= "${lookupFrom}"\n| SORT @timestamp\n| LIMIT 1\n| KEEP @timestamp`,
+        allow_partial_results: false,
       },
       expect.anything()
     );
