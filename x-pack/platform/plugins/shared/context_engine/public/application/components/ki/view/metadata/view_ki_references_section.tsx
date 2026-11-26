@@ -115,7 +115,7 @@ const KiReferenceGroupItems = ({ group, onSelectKi, getUrlForApp }: KiReferenceG
   return (
     <>
       {visibleItems.map((item, index) => (
-        <React.Fragment key={`${relation}-${item.uri}`}>
+        <React.Fragment key={`${relation}-${index}-${item.uri}`}>
           {index > 0 ? <EuiSpacer size="s" /> : null}
           <KiReferenceItemContent
             item={item}

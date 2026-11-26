@@ -184,6 +184,18 @@ describe('groupKiReferences', () => {
     ]);
   });
 
+  it('skips references whose uri is not a string', () => {
+    const references = [
+      { uri: ['ki://a', 'ki://b'] },
+      { uri: ['ki://c'], relation: 'relates_to' },
+      { uri: 'ki://d', relation: 'relates_to' },
+    ] as unknown as KiDocument['references'];
+
+    expect(groupKiReferences(references)).toEqual([
+      { relation: 'relates_to', items: [{ kind: 'ki', id: 'd', uri: 'ki://d' }] },
+    ]);
+  });
+
   it('ignores null reference entries', () => {
     expect(groupKiReferences([null, { uri: 'ki://a', relation: 'relates_to' }])).toEqual([
       { relation: 'relates_to', items: [{ kind: 'ki', id: 'a', uri: 'ki://a' }] },

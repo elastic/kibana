@@ -78,7 +78,7 @@ describe('ViewKiReferencesSection', () => {
       ],
     });
 
-    const link = screen.getByRole('link', { name: 'conversation://conv-1' });
+    const link = screen.getByTestId('contextViewKiReferenceLink');
     expect(link).toHaveAttribute('href', '/app/agent_builder/conversations/conv-1');
     expect(
       within(link).getByText('The conversation where this memory was recorded.')
@@ -112,6 +112,17 @@ describe('ViewKiReferencesSection', () => {
     expect(
       within(screen.getByTestId('contextViewKiReferenceLink')).getByText('target-ki')
     ).toBeInTheDocument();
+  });
+
+  it('renders the same uri under different custom relations in Other', () => {
+    renderSection({
+      references: [
+        { uri: 'index://logs-*', relation: 'first' },
+        { uri: 'index://logs-*', relation: 'second' },
+      ],
+    });
+
+    expect(screen.getAllByText('index://logs-*')).toHaveLength(2);
   });
 
   it('shows references without a known relation under Other', () => {

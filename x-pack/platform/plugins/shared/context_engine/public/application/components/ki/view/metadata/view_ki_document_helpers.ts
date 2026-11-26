@@ -147,7 +147,8 @@ export const groupKiReferences = (
     return [];
   }
   const referencesWithUri = references.filter(
-    (reference): reference is KiDocumentReference => reference != null && Boolean(reference.uri)
+    (reference): reference is KiDocumentReference =>
+      reference != null && typeof reference.uri === 'string' && reference.uri.length > 0
   );
   const knownGroups = REFERENCE_GROUP_ORDER.flatMap((relation) => {
     const items = referencesWithUri
