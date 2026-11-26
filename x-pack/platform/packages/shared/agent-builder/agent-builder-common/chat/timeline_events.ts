@@ -120,6 +120,9 @@ export enum TimelineEventType {
   attachmentUpdated = 'attachment_updated',
   attachmentDeleted = 'attachment_deleted',
   attachmentRestored = 'attachment_restored',
+  // Threads
+  threadStarted = 'thread_started',
+  threadCreated = 'thread_created',
 }
 
 /** Fields the server fills in when an event is accepted; absent on producer input. */
@@ -216,6 +219,42 @@ export type AgentMessageEvent = BaseTimelineEvent<
 
 /** A message that starts a run or is read by the next one, whoever posted it. */
 export type MessageEvent = UserMessageEvent | AgentMessageEvent;
+
+export interface ThreadStartedEventData {
+  parent_conversation_id: string;
+  parent_title: string;
+  /** The parent event the copied history ends at, absent when the parent had no history. */
+  cut_event_id?: string;
+  highlight?: { text: string };
+}
+/** The first event of a thread's own history, after the events copied from its parent. */
+export type ThreadStartedEvent = BaseTimelineEvent<
+  TimelineEventType.threadStarted,
+  ThreadStartedEventData
+>;
+
+export interface ThreadCreatedEventData {
+  thread_id: string;
+  title: string;
+  cut_event_id?: string;
+}
+/** Written on the parent when a thread is started from it. */
+export type ThreadCreatedEvent = BaseTimelineEvent<
+  TimelineEventType.threadCreated,
+  ThreadCreatedEventData
+>;
+
+export const isThreadStartedEvent = (event: { type: string }): event is ThreadStartedEvent =>
+  event.type === TimelineEventType.threadStarted;
+
+export const isThreadCreatedEvent = (event: { type: string }): event is ThreadCreatedEvent =>
+  event.type === TimelineEventType.threadCreated;
+
+/** True for the standalone events a thread writes, on itself or on its parent. */
+export const isThreadEvent = (event: {
+  type: string;
+}): event is ThreadStartedEvent | ThreadCreatedEvent =>
+  isThreadStartedEvent(event) || isThreadCreatedEvent(event);
 
 export const isMessageEvent = <E extends { type: string }>(
   event: E
@@ -616,7 +655,9 @@ export type TimelineEvent =
   | AttachmentAddedEvent
   | AttachmentUpdatedEvent
   | AttachmentDeletedEvent
-  | AttachmentRestoredEvent;
+  | AttachmentRestoredEvent
+  | ThreadStartedEvent
+  | ThreadCreatedEvent;
 
 /** A timeline event as supplied by a caller, before the server assigns id/created_at/actor. */
 export type TimelineEventInput =
@@ -631,7 +672,9 @@ export type TimelineEventInput =
   | BaseTimelineEventInput<TimelineEventType.attachmentAdded, AttachmentAddedEventData>
   | BaseTimelineEventInput<TimelineEventType.attachmentUpdated, AttachmentUpdatedEventData>
   | BaseTimelineEventInput<TimelineEventType.attachmentDeleted, AttachmentDeletedEventData>
-  | BaseTimelineEventInput<TimelineEventType.attachmentRestored, AttachmentRestoredEventData>;
+  | BaseTimelineEventInput<TimelineEventType.attachmentRestored, AttachmentRestoredEventData>
+  | BaseTimelineEventInput<TimelineEventType.threadStarted, ThreadStartedEventData>
+  | BaseTimelineEventInput<TimelineEventType.threadCreated, ThreadCreatedEventData>;
 
 /**
  * The run lock held on a conversation while an execution is active.

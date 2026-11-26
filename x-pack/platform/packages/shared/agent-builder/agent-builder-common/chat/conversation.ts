@@ -721,6 +721,8 @@ export enum ConversationOriginType {
 export enum ConversationParentRelation {
   /** Child conversation is a persistent sub-agent spawned from the parent. */
   subagent = 'subagent',
+  /** Child conversation is a thread started from the parent's history. */
+  thread = 'thread',
 }
 
 /**

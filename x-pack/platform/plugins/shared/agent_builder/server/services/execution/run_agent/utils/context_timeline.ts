@@ -28,6 +28,7 @@ import {
   isExecutionTerminalEvent,
   isTimelineEvent,
   isMessageEvent,
+  isThreadEvent,
   lastExecutionTerminal,
   parseExecutionId,
   pendingPromptRequest,
@@ -143,6 +144,7 @@ export const eventsForContext = (conversation: Conversation): ContextTimelineEve
     ...folded,
     ...standaloneUserMessages(timelineEvents),
     ...attachmentEvents,
+    ...timelineEvents.filter(isThreadEvent),
     ...custom,
   ].sort(
     (left, right) =>
@@ -324,15 +326,16 @@ const isLinkedInput = (event: AttachmentTimelineEvent, messageIds: ReadonlySet<s
   messageIds.has(event.trigger_event_id);
 
 /**
- * The events owned by no execution: custom events, and attachment events with no execution that
- * no present message owns. Legacy `chat_input` events are left out: legacy refs render them.
+ * The events owned by no execution: custom events, thread events, and attachment events with no
+ * execution that no present message owns. Legacy `chat_input` events are left out: legacy refs
+ * render them.
  */
 export const standaloneEvents = <E extends AnyTimelineEvent>(
   timeline: E[]
 ): Array<StandaloneEventOf<E>> => {
   const messageIds = userMessageIds(timeline);
   return timeline.filter((event) => {
-    if (isCustomConversationEvent(event)) {
+    if (isCustomConversationEvent(event) || isThreadEvent(event)) {
       return true;
     }
     if (!isAttachmentEvent(event) || event.execution_id) {
