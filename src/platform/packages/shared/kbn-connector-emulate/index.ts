@@ -88,6 +88,12 @@ export type {
   Violation,
 } from './src/contract/types';
 export {
+  AGLIO_REFERENCE_FORMATS,
+  convertAglioReference,
+  isAglioReferenceFormat,
+} from './src/aglio';
+export type { AglioReferenceFormat, AglioReferenceOptions } from './src/aglio';
+export {
   convertMarkdownReference,
   isMarkdownReferenceFormat,
   MARKDOWN_REFERENCE_FORMATS,

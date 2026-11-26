@@ -17,6 +17,10 @@ import type { PackSavedObject } from './types';
 
 let mockWritePacks = true;
 const mockAddSuccess = jest.fn();
+const mockAddWarning = jest.fn();
+const mockGetUrlForApp = jest.fn(
+  (app: string, { path }: { path?: string } = {}) => `/app/${app}${path}`
+);
 const mockMutateAsync = jest.fn().mockResolvedValue({ data: { name: 'Test Pack', enabled: true } });
 
 jest.mock('../common/lib/kibana', () => ({
@@ -26,18 +30,40 @@ jest.mock('../common/lib/kibana', () => ({
         capabilities: {
           osquery: { writePacks: mockWritePacks },
         },
+        getUrlForApp: mockGetUrlForApp,
       },
-      notifications: { toasts: { addSuccess: mockAddSuccess } },
+      analytics: {},
+      i18n: {},
+      theme: {},
+      notifications: { toasts: { addSuccess: mockAddSuccess, addWarning: mockAddWarning } },
     },
   }),
 }));
 
+const mockAgentPoliciesQueryState = { isFetched: true, isError: false };
+
 jest.mock('../agent_policies/use_agent_policies', () => ({
   useAgentPolicies: () => ({
+    ...mockAgentPoliciesQueryState,
     data: {
       agentPoliciesById: {
         'policy-with-agents': { id: 'policy-with-agents', agents: 3 },
         'policy-no-agents': { id: 'policy-no-agents', agents: 0 },
+        'shared-a': { id: 'shared-a', agents: 2 },
+        'shared-b': { id: 'shared-b', agents: 5 },
+        'shared-empty': { id: 'shared-empty', agents: 0 },
+      },
+      groupsByPackagePolicyId: {
+        integration: {
+          id: 'integration',
+          name: 'Shared hosts',
+          policyIds: ['shared-a', 'shared-b', 'shared-empty'],
+        },
+      },
+      groupIdByPolicyId: {
+        'shared-a': 'integration',
+        'shared-b': 'integration',
+        'shared-empty': 'integration',
       },
     },
   }),
@@ -88,9 +114,13 @@ const renderSwitch = (item: PackSavedObject & { policy_ids: string[] }) =>
 
 describe('ActiveStateSwitch', () => {
   beforeEach(() => {
+    mockAgentPoliciesQueryState.isFetched = true;
+    mockAgentPoliciesQueryState.isError = false;
     mockWritePacks = true;
     mockMutateAsync.mockClear();
     mockAddSuccess.mockClear();
+    mockAddWarning.mockClear();
+    mockGetUrlForApp.mockClear();
   });
 
   it('disables the toggle and blocks mutation for a not-enabled pack with zero policies', async () => {
@@ -157,6 +187,82 @@ describe('ActiveStateSwitch', () => {
 
     expect(mockMutateAsync).not.toHaveBeenCalled();
     expect(screen.getByTestId('confirmModalTitleText')).toBeInTheDocument();
+  });
+
+  it('passes the pack id to the shared integration warning toast on activation', async () => {
+    mockMutateAsync.mockResolvedValueOnce({
+      data: { name: 'Test Pack', enabled: true },
+      warnings: [
+        {
+          code: 'shared_integration_overdelivery',
+          package_policy_id: 'pp-shared',
+          package_policy_name: 'Shared osquery',
+          additional_policy_ids: ['shared-b'],
+        },
+      ],
+    });
+    renderSwitch(basePack({ enabled: false, policy_ids: ['policy-no-agents'] }));
+
+    fireEvent.click(screen.getByRole('switch'));
+
+    await waitFor(() => expect(mockAddWarning).toHaveBeenCalledTimes(1));
+    expect(mockGetUrlForApp).toHaveBeenCalledWith('osquery', { path: '/packs/pack-1/edit' });
+  });
+
+  describe('shared integrations', () => {
+    it('counts every agent policy and agent of the shared integration for a disabled partial pack', () => {
+      renderSwitch(
+        basePack({ enabled: false, policy_ids: ['shared-a'], effective_policy_ids: [] })
+      );
+
+      fireEvent.click(screen.getByRole('switch'));
+
+      expect(
+        screen.getByText(/This action will update 3 agent policies affecting 7 agents/)
+      ).toBeInTheDocument();
+    });
+
+    it('shows the confirmation when only an unsaved member of the integration has agents', () => {
+      renderSwitch(basePack({ enabled: false, policy_ids: ['shared-empty'] }));
+
+      fireEvent.click(screen.getByRole('switch'));
+
+      expect(mockMutateAsync).not.toHaveBeenCalled();
+      expect(
+        screen.getByText(/This action will update 3 agent policies affecting 7 agents/)
+      ).toBeInTheDocument();
+    });
+
+    it('keeps the toggle disabled until the agent policies have loaded', () => {
+      mockAgentPoliciesQueryState.isFetched = false;
+      renderSwitch(basePack({ enabled: false, policy_ids: ['shared-empty'] }));
+
+      const toggle = screen.getByRole('switch');
+      expect(toggle).toBeDisabled();
+      fireEvent.click(toggle);
+      expect(mockMutateAsync).not.toHaveBeenCalled();
+    });
+
+    it('asks for confirmation when the agent policies failed to load', () => {
+      mockAgentPoliciesQueryState.isFetched = false;
+      mockAgentPoliciesQueryState.isError = true;
+      renderSwitch(basePack({ enabled: false, policy_ids: ['unknown-policy'] }));
+
+      fireEvent.click(screen.getByRole('switch'));
+
+      expect(mockMutateAsync).not.toHaveBeenCalled();
+      expect(screen.getAllByText('Save and deploy changes').length).toBeGreaterThan(0);
+    });
+
+    it('keeps counts unchanged for an unshared pack', () => {
+      renderSwitch(basePack({ enabled: false, policy_ids: ['policy-with-agents'] }));
+
+      fireEvent.click(screen.getByRole('switch'));
+
+      expect(
+        screen.getByText(/This action will update 1 agent policy affecting 3 agents/)
+      ).toBeInTheDocument();
+    });
   });
 
   it('disables the toggle regardless of policy count when the user lacks writePacks permission', () => {

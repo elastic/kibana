@@ -85,8 +85,8 @@
   },
   "sources": {
     "platform": {
-      "apiVersion": "1.0.145",
-      "fetchedAt": "2026-10-07T11:55:54.083Z",
+      "apiVersion": "1.0.165",
+      "fetchedAt": "2026-11-23T11:10:09.176Z",
       "format": "openapi",
       "url": "https://api.platform.censys.io/openapi.json"
     }

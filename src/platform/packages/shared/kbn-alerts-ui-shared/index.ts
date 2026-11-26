@@ -16,6 +16,8 @@ export { AddMessageVariables } from './src/add_message_variables';
 export * from './src/common/formatters';
 export { getAlertViewInAppUrl } from './src/common/utils/get_alert_view_in_app_url';
 export type { GetAlertViewInAppUrlParams } from './src/common/utils/get_alert_view_in_app_url';
+export { toLeafScalarFieldNames } from './src/common/utils/to_leaf_scalar_field_names';
+export type { LeafScalarFieldCandidate } from './src/common/utils/to_leaf_scalar_field_names';
 export * from './src/common/hooks';
 export { AlertsSearchBar } from './src/alerts_search_bar';
 export type { AlertsSearchBarProps } from './src/alerts_search_bar/types';
