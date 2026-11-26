@@ -65,3 +65,11 @@ export const spaceTest = baseSpaceTest.extend<{}, AgentBuilderWorkerFixtures>({
 });
 
 export { tags } from '@kbn/scout-security';
+
+/**
+ * The concrete index written by SECURITY_ARCHIVES.AUDITBEAT (auditbeat_single), which this
+ * config's global setup loads. Rules should target it rather than the default security indices:
+ * configs sharing a CI lane share Elasticsearch, and other configs write into `logs-*`,
+ * `traces-apm*` and `auditbeat-*`, which would add unexpected alerts.
+ */
+export const AUDITBEAT_ARCHIVE_INDEX = 'auditbeat-2022';
