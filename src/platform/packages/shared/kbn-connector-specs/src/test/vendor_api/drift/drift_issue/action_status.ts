@@ -64,11 +64,11 @@ export const MOVED_STATUS = 'Moved in the spec, same URL';
 
 const UNMATCHED_PROBLEM = / matches no operation of any source/;
 
-// Each scheme a set of security changes adds or removes, with the scopes it asks for.
-const schemesOf = (changes: readonly SpecChange[], suffix: string): Map<string, Set<string>> => {
+// Each scheme the security changes of one rule add or remove, with the scopes they name.
+const schemesOf = (changes: readonly SpecChange[], rule: string): Map<string, Set<string>> => {
   const schemes = new Map<string, Set<string>>();
   for (const { id, text } of changes) {
-    if (!id.endsWith(suffix)) continue;
+    if (id !== rule) continue;
     for (const { scheme, scope } of securityGrantsOf(id, text) ?? []) {
       const scopes = schemes.get(scheme) ?? new Set<string>();
       if (scope !== undefined) scopes.add(scope);
@@ -78,41 +78,100 @@ const schemesOf = (changes: readonly SpecChange[], suffix: string): Map<string, 
   return schemes;
 };
 
-const schemeText = (scheme: string, scopes: ReadonlySet<string>): string =>
-  scopes.size === 0
-    ? code(scheme)
-    : `${code(scheme)} (${scopes.size === 1 ? 'scope' : 'scopes'} ${listed(
-        [...scopes].map((scope) => code(scopeName(scope)))
-      )})`;
+// Names scopes by the end of their URL, unless two of them would then read the same.
+const scopeNamer = (scopes: Iterable<string>): ((scope: string) => string) => {
+  const byName = new Map<string, Set<string>>();
+  for (const scope of scopes) {
+    const name = scopeName(scope);
+    byName.set(name, (byName.get(name) ?? new Set<string>()).add(scope));
+  }
+  return (scope) => {
+    const name = scopeName(scope);
+    return (byName.get(name)?.size ?? 0) > 1 ? scope : name;
+  };
+};
 
 /**
- * What the latest spec asks of a request the connector doesn't authenticate as it wants: the
- * schemes it now requires, one of which will do, and those it no longer accepts.
+ * Why a request the connector doesn't authenticate as the latest spec wants fails: what the
+ * validator expected, then how the spec's security for it changed. An added scheme may be one of
+ * several the endpoint accepts, so the change is told apart from what is required.
  */
 const credentialsDetails = (
   authChanges: readonly SpecChange[],
   expected: string,
   endpoints: number
 ): string => {
-  const added = schemesOf(authChanges, '-added');
-  const removed = schemesOf(authChanges, '-removed');
-  const required = [...added].map(([scheme, scopes]) => schemeText(scheme, scopes));
-  const dropped = [...removed.keys()].filter((scheme) => !added.has(scheme)).map(code);
+  const requires = `The latest spec requires credentials the connector doesn't send: ${expected}.`;
+  const schemesAdded = schemesOf(authChanges, 'api-security-added');
+  const schemesRemoved = schemesOf(authChanges, 'api-security-removed');
+  const scopesAdded = schemesOf(authChanges, 'api-security-scope-added');
+  const scopesRemoved = schemesOf(authChanges, 'api-security-scope-removed');
+  const nameOf = scopeNamer(
+    [schemesAdded, scopesAdded, scopesRemoved].flatMap((schemes) =>
+      [...schemes.values()].flatMap((scopes) => [...scopes])
+    )
+  );
+  const scopesText = (scopes: ReadonlySet<string>): string =>
+    `${scopes.size === 1 ? 'scope' : 'scopes'} ${listed(
+      [...scopes].map((scope) => code(nameOf(scope)))
+    )}`;
+  const what = [
+    ...[...schemesAdded].flatMap(([scheme, scopes]) => {
+      if (!schemesRemoved.has(scheme)) {
+        return [`adds ${code(scheme)}${scopes.size > 0 ? ` (${scopesText(scopes)})` : ''}`];
+      }
+      // Removed and added again: only its scopes can have changed.
+      return scopes.size > 0 ? [`now asks for ${scopesText(scopes)} of ${code(scheme)}`] : [];
+    }),
+    ...[...scopesAdded].map(([scheme, scopes]) => `adds ${scopesText(scopes)} to ${code(scheme)}`),
+    ...[...scopesRemoved].map(
+      ([scheme, scopes]) => `removes ${scopesText(scopes)} from ${code(scheme)}`
+    ),
+    ...[...schemesRemoved.keys()]
+      .filter((scheme) => !schemesAdded.has(scheme))
+      .map((scheme) => `no longer accepts ${code(scheme)}`),
+  ];
+  if (what.length === 0) {
+    return requires;
+  }
   const where = endpoints > 1 ? 'the endpoints it calls' : 'this endpoint';
-  const sends = `The connector doesn't send that: ${expected}.`;
-  if (required.length > 0) {
-    const alternatives =
-      required.length === 1
-        ? required[0]
-        : `${required.slice(0, -1).join(', ')} or ${required[required.length - 1]}`;
-    return `The latest spec now requires ${alternatives} for ${where}${
-      dropped.length > 0 ? ` and no longer accepts ${listed(dropped)}` : ''
-    }. ${sends}`;
+  return `${requires} For ${where}, the latest spec ${listed(what)}.`;
+};
+
+// The request a problem is about: `GET https://api.example.com/v2/items/1 breaks the spec: …`.
+const PROBLEM_REQUEST = /(?:^|\s)([A-Z]+) (\S+) breaks the spec: /;
+
+const escapedForRegExp = (text: string): string => text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+/**
+ * Whether a request is a call of an operation: `GET https://api.example.com/v2/items/1` of
+ * `GET /items/{id}`, as the server URL may hold the start of the path.
+ */
+const isCallOf = (method: string, url: string, operation: string): boolean => {
+  const [operationMethod, template] = operation.split(' ');
+  if (operationMethod !== method || template === undefined) {
+    return false;
   }
-  if (dropped.length > 0) {
-    return `The latest spec no longer accepts ${listed(dropped)} for ${where}. ${sends}`;
-  }
-  return `The latest spec requires credentials the connector doesn't send: ${expected}.`;
+  const path = url.replace(/^[a-z][a-z0-9+.-]*:\/\/[^/]+/i, '').replace(/[?#].*$/, '');
+  const pattern = template
+    .split(/\{[^}]*\}/)
+    .map(escapedForRegExp)
+    .join('[^/]+');
+  return new RegExp(`${pattern}$`).test(path);
+};
+
+/** The operations of an action that the requests its problems name call. */
+const operationsOf = (
+  operations: ActionDrift['operations'],
+  problems: readonly string[]
+): ActionDrift['operations'] => {
+  const requests = problems.flatMap((problem) => {
+    const match = PROBLEM_REQUEST.exec(problem);
+    return match === null ? [] : [{ method: match[1], url: match[2] }];
+  });
+  return operations.filter(({ operation }) =>
+    requests.some(({ method, url }) => isCallOf(method, url, operation))
+  );
 };
 
 // The one violation a request with credentials the operation doesn't accept has.
@@ -173,7 +232,9 @@ export const statusOf = (
       return credentials === undefined ? [] : [credentials];
     });
     if (expected.length === latestProblems.length) {
-      const authChanges = action.operations.flatMap(({ source, operation }) =>
+      // Only the requests that failed: another operation's auth changes say nothing about them.
+      const failing = operationsOf(action.operations, latestProblems);
+      const authChanges = failing.flatMap(({ source, operation }) =>
         changesOf(source, operation).filter(({ id }) => id.startsWith('api-security-'))
       );
       return {
@@ -183,7 +244,7 @@ export const statusOf = (
         details: credentialsDetails(
           authChanges,
           problemText(`expected ${listed([...new Set(expected)])}`),
-          action.operations.length
+          failing.length
         ),
       };
     }
