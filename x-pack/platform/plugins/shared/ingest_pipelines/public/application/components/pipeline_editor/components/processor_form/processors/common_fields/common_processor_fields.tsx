@@ -7,6 +7,7 @@
 
 import type { FunctionComponent } from 'react';
 import React, { useMemo } from 'react';
+import { omit } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { PainlessLang } from '@kbn/monaco';
 
@@ -57,11 +58,12 @@ const getIfConfig = (initialIf: unknown): FieldConfig => ({
     if (!isScriptObject(initialIf)) {
       return from.emptyStringToUndefined(value);
     }
-    // Stored script references (e.g. `{ id }`) have no source to edit; keep them unless replaced.
-    if (typeof initialIf.source !== 'string') {
-      return value === '' ? initialIf : value;
+    if (value === '') {
+      // Stored script references (e.g. `{ id }`) have no source to edit, so an empty editor keeps them.
+      return typeof initialIf.source === 'string' ? undefined : initialIf;
     }
-    return value === '' ? undefined : { ...initialIf, source: value };
+    // An inline source replaces a stored script `id`; other script options such as `params` are kept.
+    return { ...omit(initialIf, 'id'), source: value };
   },
   label: i18n.translate('xpack.ingestPipelines.pipelineEditor.commonFields.ifFieldLabel', {
     defaultMessage: 'Condition (optional)',

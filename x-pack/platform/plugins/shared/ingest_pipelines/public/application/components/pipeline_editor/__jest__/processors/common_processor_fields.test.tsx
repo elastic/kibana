@@ -84,6 +84,7 @@ describe('Processor: Common Fields with a script object condition', () => {
     lang: 'painless',
     params: { dataId: 'data-abc-123' },
   };
+  const storedScript = { id: 'my_stored_condition', params: { dataId: 'data-abc-123' } };
   const UPDATED_TAG = 'updated_tag';
 
   let onUpdate: jest.Mock;
@@ -162,7 +163,6 @@ describe('Processor: Common Fields with a script object condition', () => {
   });
 
   test('preserves a stored script reference that has no source', async () => {
-    const storedScript = { id: 'my_stored_condition' };
     renderWithCondition(storedScript);
     const { form, conditionEditor } = await openEditForm();
     expect(conditionEditor).toHaveValue('');
@@ -172,5 +172,16 @@ describe('Processor: Common Fields with a script object condition', () => {
 
     expect(bytesProcessor.tag).toBe(UPDATED_TAG);
     expect(bytesProcessor.if).toEqual(storedScript);
+  });
+
+  test('keeps the script params when a stored script reference is replaced by a source', async () => {
+    renderWithCondition(storedScript);
+    const { form, conditionEditor } = await openEditForm();
+    const inlineSource = "ctx['_dataId'] == params.dataId";
+
+    fireEvent.change(conditionEditor, { target: { value: inlineSource } });
+    const bytesProcessor = await submitAndGetBytesProcessor(form);
+
+    expect(bytesProcessor.if).toEqual({ source: inlineSource, params: storedScript.params });
   });
 });
