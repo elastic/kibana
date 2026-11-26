@@ -223,6 +223,7 @@ export {
   MAX_ONBOARDING_SUGGESTION_TITLE_LENGTH,
   MAX_ONBOARDING_SUGGESTION_PROMPT_LENGTH,
   MAX_ONBOARDING_SUGGESTION_RATIONALE_LENGTH,
+  type OnboardingProgressStep,
   type OnboardingSuggestion,
   type OnboardingSuggestionSource,
   type OnboardingSuggestionsStatus,
