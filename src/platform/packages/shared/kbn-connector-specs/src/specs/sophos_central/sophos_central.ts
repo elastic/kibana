@@ -184,11 +184,7 @@ function checkBatchErrors(
   throw new Error(`${fallback}: ${messages}`);
 }
 
-function throwApiError(
-  err: unknown,
-  fallback: string,
-  meta?: Record<string, unknown>
-): never {
+function throwApiError(err: unknown, fallback: string, meta?: Record<string, unknown>): never {
   const axiosErr = err as AxiosError<{ error?: string; message?: string }>;
   const response = axiosErr?.response;
   if (response) {
@@ -337,7 +333,7 @@ export const SophosCentral: ConnectorSpec = {
                   'Sophos Central API client ID. Create in Sophos Central under ' +
                   'My Products > General Settings > API Credentials Management > Add Credential. ' +
                   'No scope or role selection is required; the credential inherits full API access ' +
-                  'from the creating admin\'s role. Only tenant-level credentials are supported.',
+                  "from the creating admin's role. Only tenant-level credentials are supported.",
               }),
             },
           },

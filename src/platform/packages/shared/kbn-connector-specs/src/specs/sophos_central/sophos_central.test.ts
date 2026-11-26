@@ -1468,10 +1468,7 @@ describe('listDetections', () => {
     const result = await resultPromise;
 
     // The budget after a 5 000 ms sleep is 85 000 ms — that must be the Axios timeout.
-    expect(client.request).toHaveBeenNthCalledWith(
-      2,
-      expect.objectContaining({ timeout: 85_000 })
-    );
+    expect(client.request).toHaveBeenNthCalledWith(2, expect.objectContaining({ timeout: 85_000 }));
     expect(result).toMatchObject({ runId: RUN_ID, state: 'pending' });
   });
 
@@ -1507,17 +1504,14 @@ describe('listDetections', () => {
       ); // poll: rejects with ECONNABORTED after exactly config.timeout ms
 
     const ctx = makeCtx(client);
-    const resultPromise = SophosCentral.actions.listDetections.handler(ctx as never, {}).catch(
-      (e) => e
-    );
+    const resultPromise = SophosCentral.actions.listDetections
+      .handler(ctx as never, {})
+      .catch((e) => e);
     await jest.runAllTimersAsync();
     const result = await resultPromise;
 
     // The clientCap (3 000 ms) is shorter than the remaining budget — that must be the Axios timeout.
-    expect(client.request).toHaveBeenNthCalledWith(
-      2,
-      expect.objectContaining({ timeout: 3_000 })
-    );
+    expect(client.request).toHaveBeenNthCalledWith(2, expect.objectContaining({ timeout: 3_000 }));
     // Must be an error, not a pending object
     expect(result).toBeInstanceOf(Error);
     expect(result).not.toMatchObject({ state: 'pending' });
