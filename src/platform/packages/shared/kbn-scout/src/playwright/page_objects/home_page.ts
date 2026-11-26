@@ -29,11 +29,13 @@ export class HomePage {
       window.localStorage.setItem('home:welcome:show', 'false');
     });
     if (spaceId) {
-      await this.page.gotoApp('home', { params: { space: spaceId } });
+      await this.page.gotoApp('home', {
+        params: { space: spaceId },
+        readyWhen: this.homeApp,
+      });
     } else {
-      await this.page.gotoApp('home');
+      await this.page.gotoApp('home', { readyWhen: this.homeApp });
     }
-    await this.homeApp.waitFor({ state: 'visible' });
   }
 
   // The home page renders one solution card per registered solution, with
