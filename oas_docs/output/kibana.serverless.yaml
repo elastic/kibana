@@ -74373,7 +74373,7 @@ paths:
                 $ref: '#/components/schemas/Security_Osquery_API_CreateLiveQueryResponse'
           description: Indicates a successful call.
         '404':
-          description: An alert referenced by `alert_ids` was not found, or you do not have access to it. The two cases are indistinguishable by design.
+          description: An alert referenced by `alert_ids` was not found, or you do not have access to it.
       summary: Create a live query
       tags:
         - Security Osquery API
