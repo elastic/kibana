@@ -7,7 +7,7 @@
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { EntityAnalyticsScope } from '../../../../../common/entity_analytics/ai_brief/scope';
-import { ML_ANOMALIES_INDEX } from '../../../../../common/entity_analytics/anomalies/constants';
+import { ML_ANOMALIES_SHARED_INDEX } from '../../../../../common/entity_analytics/anomalies/constants';
 import { isSecurityJob } from '../../../../../common/machine_learning/is_security_job';
 import { getPeriodStart } from './describe_scope';
 import { buildRecordFilters } from './match_candidate_records';
@@ -59,7 +59,7 @@ export const readAnomalies = async ({
       return { anomaliesByEntityId: {}, isFailed: false };
     }
     const response = await esClient.search<unknown, AnomaliesByCandidate>({
-      index: ML_ANOMALIES_INDEX,
+      index: ML_ANOMALIES_SHARED_INDEX,
       size: 0,
       ignore_unavailable: true,
       query: {

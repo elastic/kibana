@@ -11,7 +11,7 @@ import type { ESQLSearchResponse } from '@kbn/es-types';
 import { i18n } from '@kbn/i18n';
 import { useMemo } from 'react';
 import { getEntitiesAlias, ENTITY_LATEST } from '@kbn/entity-store/common';
-import { ML_ANOMALIES_INDEX } from '../../../../../common/constants';
+import { ML_ANOMALIES_SHARED_INDEX } from '../../../../../common/constants';
 import type { ESBoolQuery } from '../../../../../common/typed_json';
 import { useGlobalFilterQuery } from '../../../../common/hooks/use_global_filter_query';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
@@ -168,7 +168,7 @@ interface MlAnomaliesIndexExists {
 
 /**
  * Checks whether the ML anomalies index actually exists. When no ML job has
- * ever run, `ML_ANOMALIES_INDEX` resolves to zero concrete indices, which
+ * ever run, `ML_ANOMALIES_SHARED_INDEX` resolves to zero concrete indices, which
  * makes the downstream `LOOKUP JOIN` against the entity store report a
  * misleading "resolves to multiple indices" error instead of an empty
  * result. Short-circuiting here avoids issuing that query at all.
@@ -177,7 +177,7 @@ const useMlAnomaliesIndexExists = (): MlAnomaliesIndexExists => {
   const { dataViews } = useKibana().services.data;
 
   const { data, isLoading } = useQuery(['recent-anomalies-ml-index-exists'], async () => {
-    const existingIndices = await dataViews.getExistingIndices([ML_ANOMALIES_INDEX]);
+    const existingIndices = await dataViews.getExistingIndices([ML_ANOMALIES_SHARED_INDEX]);
     return existingIndices.length > 0;
   });
 
@@ -340,7 +340,7 @@ export const useRecentAnomaliesQuery = (params: {
       dsl: [
         JSON.stringify(
           {
-            index: [ML_ANOMALIES_INDEX],
+            index: [ML_ANOMALIES_SHARED_INDEX],
             body: prettifyQuery(esqlSource ?? ''),
           },
           null,
