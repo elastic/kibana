@@ -116,6 +116,7 @@ export function defineRoutes({
       const { scanUsage } = request.query;
       const result = await deleteInferenceEndpoint(
         asCurrentUser,
+        // the Elasticsearch client's type: its delete call does not accept `decision` yet
         type as EsInferenceTaskType,
         id,
         scanUsage ?? false

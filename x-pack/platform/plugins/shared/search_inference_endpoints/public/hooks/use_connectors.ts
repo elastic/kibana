@@ -19,9 +19,7 @@ export const useConnectors = (taskType: InferenceTaskType = CHAT_COMPLETION_TASK
   const isChatCompletion = taskType === CHAT_COMPLETION_TASK_TYPE;
 
   return useQuery({
-    queryKey: isChatCompletion
-      ? [INFERENCE_CONNECTORS_QUERY_KEY]
-      : [INFERENCE_CONNECTORS_QUERY_KEY, taskType],
+    queryKey: [INFERENCE_CONNECTORS_QUERY_KEY, taskType],
     queryFn: async () => {
       const response = await services.http.get<InferenceConnectorsResponse>(
         INFERENCE_CONNECTORS_API,

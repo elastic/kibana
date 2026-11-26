@@ -55,7 +55,9 @@ describe('useConnectors', () => {
       query: { taskType: 'decision' },
     });
     expect(queryClient.getQueryState([INFERENCE_CONNECTORS_QUERY_KEY, 'decision'])).toBeDefined();
-    expect(queryClient.getQueryState([INFERENCE_CONNECTORS_QUERY_KEY])).toBeUndefined();
+    expect(
+      queryClient.getQueryState([INFERENCE_CONNECTORS_QUERY_KEY, 'chat_completion'])
+    ).toBeUndefined();
   });
 
   it('returns the connectors from the response', async () => {
@@ -80,7 +82,9 @@ describe('useConnectors', () => {
     renderHook(() => useConnectors(), { wrapper: Wrapper });
 
     await waitFor(() =>
-      expect(queryClient.getQueryState([INFERENCE_CONNECTORS_QUERY_KEY])).toBeDefined()
+      expect(
+        queryClient.getQueryState([INFERENCE_CONNECTORS_QUERY_KEY, 'chat_completion'])
+      ).toBeDefined()
     );
   });
 
