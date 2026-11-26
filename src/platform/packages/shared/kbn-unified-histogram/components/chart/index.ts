@@ -7,10 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export {
-  UnifiedHistogramChart,
-  type UnifiedHistogramChartActionContext,
-  type UnifiedHistogramChartProps,
-} from './chart';
+export { UnifiedHistogramChart, type UnifiedHistogramChartProps } from './chart';
 export { checkChartAvailability } from './utils/check_chart_availability';
 export { ChartSectionTemplate, type ChartSectionTemplateProps } from './chart_section_template';

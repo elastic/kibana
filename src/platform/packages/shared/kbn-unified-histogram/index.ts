@@ -23,7 +23,6 @@ export {
 } from './components/chart/lazy';
 export {
   UnifiedHistogramChart,
-  type UnifiedHistogramChartActionContext,
   type UnifiedHistogramChartProps,
   ChartSectionTemplate,
   type ChartSectionTemplateProps,

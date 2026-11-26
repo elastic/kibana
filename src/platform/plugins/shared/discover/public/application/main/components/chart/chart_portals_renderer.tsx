@@ -42,7 +42,6 @@ import {
 import { ScopedServicesProvider } from '../../../../components/scoped_services_provider';
 import { useUnifiedHistogramRuntimeState } from './use_unified_histogram_runtime_state';
 import { useUnifiedHistogramCommon } from './use_unified_histogram_common';
-import { useAddChartToChatActions } from './use_add_chart_to_chat_actions';
 import type { ChartSectionConfiguration } from '../../../../context_awareness/types';
 import { useIsEsqlMode } from '../../hooks/use_is_esql_mode';
 
@@ -188,7 +187,6 @@ const UnifiedHistogramWrapper = ({ panelsToggle }: UnifiedHistogramChartProps) =
 
   const { setUnifiedHistogramApi } = unifiedHistogramProps;
   const unifiedHistogram = useUnifiedHistogram(unifiedHistogramProps);
-  const getAddToChatActions = useAddChartToChatActions();
 
   useEffect(() => {
     setUnifiedHistogramApi(unifiedHistogram.api);
@@ -208,7 +206,6 @@ const UnifiedHistogramWrapper = ({ panelsToggle }: UnifiedHistogramChartProps) =
     <UnifiedHistogramChart
       {...unifiedHistogram.chartProps}
       renderToggleActions={renderToggleActions}
-      getAdditionalActions={getAddToChatActions}
     />
   );
 };
