@@ -489,6 +489,22 @@ describe('TemplateDetail', () => {
       expect(analytics.reportEvent).toHaveBeenCalledTimes(3);
     });
 
+    it('reports the GitHub link clicks of a catalog template', () => {
+      renderDetail();
+
+      fireEvent.click(screen.getByRole('link', { name: 'Report an issue with this template' }));
+      fireEvent.click(screen.getByRole('link', { name: 'Edit this template' }));
+
+      expect(analytics.reportEvent).toHaveBeenCalledWith('workflows_template_link_clicked', {
+        link: 'report_issue',
+        ...VIEWED_TEMPLATE,
+      });
+      expect(analytics.reportEvent).toHaveBeenCalledWith('workflows_template_link_clicked', {
+        link: 'edit_template',
+        ...VIEWED_TEMPLATE,
+      });
+    });
+
     it('reports opening a step in the YAML preview from the graph as a preview change', () => {
       renderGraphDetail();
 

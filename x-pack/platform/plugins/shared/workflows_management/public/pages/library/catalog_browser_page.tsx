@@ -13,7 +13,12 @@ import type { AppHeaderBadge, AppHeaderMenu } from '@kbn/app-header';
 import { i18n } from '@kbn/i18n';
 import type { Template } from '@kbn/workflows-library';
 import type { WorkflowsImportRouteState } from '@kbn/workflows-ui';
-import { CatalogBrowser, UploadTemplateFlyout, useLibraryEnabled } from '@kbn/workflows-ui';
+import {
+  CatalogBrowser,
+  UploadTemplateFlyout,
+  useLibraryEnabled,
+  useLibraryTelemetry,
+} from '@kbn/workflows-ui';
 import { PLUGIN_ID } from '../../../common';
 import { WorkflowsPageName } from '../../deep_links';
 import { useKibana } from '../../hooks/use_kibana';
@@ -35,6 +40,11 @@ const createFromFileLabel = i18n.translate('workflows.libraryPage.createFromFile
   defaultMessage: 'Import template',
 });
 
+const REQUEST_TEMPLATE_URL =
+  'https://github.com/elastic/workflows/issues/new?template=template_request.yml';
+const CONTRIBUTE_TEMPLATE_URL =
+  'https://github.com/elastic/workflows/issues/new?template=template_contribution.yml';
+
 /**
  * Workflow Template library catalog page (`/app/workflows/library`). The
  * browse UI itself lives in `@kbn/workflows-ui` (`<CatalogBrowser>`) so it can
@@ -44,6 +54,7 @@ const createFromFileLabel = i18n.translate('workflows.libraryPage.createFromFile
  */
 export const LibraryCatalogBrowserPage = React.memo(() => {
   const { application } = useKibana().services;
+  const telemetry = useLibraryTelemetry();
 
   useWorkflowsBreadcrumbs(libraryPageTitle);
 
@@ -62,8 +73,16 @@ export const LibraryCatalogBrowserPage = React.memo(() => {
     []
   );
 
-  const headerMenu = useMemo<AppHeaderMenu>(
-    () => ({
+  const headerMenu = useMemo<AppHeaderMenu>(() => {
+    // With both `href` and `run`, a plain click runs `run` instead of following the link, so
+    // `run` reports the click and opens the link itself. Modified clicks follow `href` and
+    // aren't reported.
+    const openGitHubLink =
+      (link: 'request_template' | 'contribute_template', href: string) => () => {
+        telemetry.reportTemplateLinkClicked(link);
+        window.open(href, '_blank', 'noopener,noreferrer');
+      };
+    return {
       items: [
         {
           id: 'requestTemplate',
@@ -71,16 +90,18 @@ export const LibraryCatalogBrowserPage = React.memo(() => {
             defaultMessage: 'Request a template',
           }),
           iconType: 'logoGithub',
-          href: 'https://github.com/elastic/workflows/issues/new?template=template_request.yml',
+          href: REQUEST_TEMPLATE_URL,
           target: '_blank',
+          run: openGitHubLink('request_template', REQUEST_TEMPLATE_URL),
           testId: 'workflowLibraryRequestLink',
         },
         {
           id: 'contributeTemplate',
           label: contributeLinkLabel,
           iconType: 'logoGithub',
-          href: 'https://github.com/elastic/workflows/issues/new?template=template_contribution.yml',
+          href: CONTRIBUTE_TEMPLATE_URL,
           target: '_blank',
+          run: openGitHubLink('contribute_template', CONTRIBUTE_TEMPLATE_URL),
           testId: 'workflowLibraryContributeLink',
         },
         {
@@ -92,9 +113,8 @@ export const LibraryCatalogBrowserPage = React.memo(() => {
           testId: 'workflowLibraryCreateFromFileButton',
         },
       ],
-    }),
-    [openUploadFlyout]
-  );
+    };
+  }, [openUploadFlyout, telemetry]);
 
   const handleSelect = useCallback(
     (template: Template) => {

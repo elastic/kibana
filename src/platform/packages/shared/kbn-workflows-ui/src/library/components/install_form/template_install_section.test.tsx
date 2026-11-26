@@ -373,7 +373,20 @@ describe('TemplateInstallSection', () => {
       fireEvent.click(screen.getByTestId('workflowLibraryTemplateRemixButton'));
       unmount();
 
+      expect(reportedEvents('workflows_template_remix_clicked')).toEqual([
+        { ...TEMPLATE_FIELDS, step: 'setup' },
+      ]);
       expect(reportedEvents('workflows_template_setup_abandoned')).toEqual([]);
+    });
+
+    it('reports Remix with AI with the step it was clicked from', () => {
+      renderSection({ step: 'details' });
+
+      fireEvent.click(screen.getByTestId('workflowLibraryTemplateRemixButton'));
+
+      expect(reportedEvents('workflows_template_remix_clicked')).toEqual([
+        { ...TEMPLATE_FIELDS, step: 'details' },
+      ]);
     });
 
     it('reports an abandoned imported file without its field names', () => {

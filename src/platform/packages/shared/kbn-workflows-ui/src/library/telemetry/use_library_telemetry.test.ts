@@ -117,6 +117,54 @@ describe('createLibraryTelemetry', () => {
     );
   });
 
+  it('reports Remix with AI with the step it was clicked from', () => {
+    createLibraryTelemetry(analytics).reportTemplateRemixClicked(TEMPLATE, 'setup');
+
+    expect(analytics.reportEvent).toHaveBeenCalledWith('workflows_template_remix_clicked', {
+      ...TEMPLATE,
+      step: 'setup',
+    });
+  });
+
+  it('reports the import opening and its file checks', () => {
+    const telemetry = createLibraryTelemetry(analytics);
+
+    telemetry.reportTemplateImportOpened();
+    telemetry.reportTemplateImportFileValidated({ success: true });
+    telemetry.reportTemplateImportFileValidated({ success: false, errorType: 'template_parse' });
+
+    expect(analytics.reportEvent).toHaveBeenNthCalledWith(
+      1,
+      'workflows_template_import_opened',
+      {}
+    );
+    expect(analytics.reportEvent).toHaveBeenNthCalledWith(
+      2,
+      'workflows_template_import_file_validated',
+      { success: true }
+    );
+    expect(analytics.reportEvent).toHaveBeenNthCalledWith(
+      3,
+      'workflows_template_import_file_validated',
+      { success: false, errorType: 'template_parse' }
+    );
+  });
+
+  it('reports a link click with the template fields only when given', () => {
+    const telemetry = createLibraryTelemetry(analytics);
+
+    telemetry.reportTemplateLinkClicked('request_template');
+    telemetry.reportTemplateLinkClicked('report_issue', TEMPLATE);
+
+    expect(analytics.reportEvent).toHaveBeenNthCalledWith(1, 'workflows_template_link_clicked', {
+      link: 'request_template',
+    });
+    expect(analytics.reportEvent).toHaveBeenNthCalledWith(2, 'workflows_template_link_clicked', {
+      link: 'report_issue',
+      ...TEMPLATE,
+    });
+  });
+
   it('never throws, even when the event type is not registered', () => {
     analytics.reportEvent.mockImplementation(() => {
       throw new Error('Event type "workflows_template_viewed" is not registered');

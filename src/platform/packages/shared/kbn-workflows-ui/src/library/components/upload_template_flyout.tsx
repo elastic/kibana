@@ -24,9 +24,10 @@ import {
   EuiTitle,
   useGeneratedHtmlId,
 } from '@elastic/eui';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { parseTemplateYaml, TemplateParseError } from '@kbn/workflows-library';
+import { useLibraryTelemetry } from '../telemetry/use_library_telemetry';
 
 export interface UploadTemplateFlyoutProps {
   onClose: () => void;
@@ -55,44 +56,61 @@ export const UploadTemplateFlyout = React.memo<UploadTemplateFlyoutProps>(
     const [error, setError] = useState<string | undefined>();
     const [parsed, setParsed] = useState<ParsedFile | undefined>();
     const [isReading, setIsReading] = useState(false);
+    const telemetry = useLibraryTelemetry();
 
-    const handleFileChange = useCallback((files: FileList | null) => {
-      setError(undefined);
-      setParsed(undefined);
+    useEffect(() => {
+      telemetry.reportTemplateImportOpened();
+    }, [telemetry]);
 
-      const file = files?.[0];
-      if (!file) return;
+    const handleFileChange = useCallback(
+      (files: FileList | null) => {
+        setError(undefined);
+        setParsed(undefined);
 
-      if (file.size > MAX_FILE_BYTES) {
-        setError(
-          i18n.translate('workflowsUi.library.upload.tooLargeError', {
-            defaultMessage: 'The file is too large (limit {limit} KB).',
-            values: { limit: Math.floor(MAX_FILE_BYTES / 1024) },
-          })
-        );
-        return;
-      }
+        const file = files?.[0];
+        if (!file) return;
 
-      setIsReading(true);
-      file
-        .text()
-        .then((raw) => {
-          // Lenient matches the server's install route so a file accepted here
-          // isn't rejected at install (and vice versa).
-          const template = parseTemplateYaml(raw, { lenient: true });
-          setParsed({ raw, name: template.metadata.name });
-        })
-        .catch((err) => {
+        if (file.size > MAX_FILE_BYTES) {
+          telemetry.reportTemplateImportFileValidated({
+            success: false,
+            errorType: 'file_too_large',
+          });
           setError(
-            err instanceof TemplateParseError
-              ? err.message
-              : i18n.translate('workflowsUi.library.upload.readError', {
-                  defaultMessage: 'The file could not be read.',
-                })
+            i18n.translate('workflowsUi.library.upload.tooLargeError', {
+              defaultMessage: 'The file is too large (limit {limit} KB).',
+              values: { limit: Math.floor(MAX_FILE_BYTES / 1024) },
+            })
           );
-        })
-        .finally(() => setIsReading(false));
-    }, []);
+          return;
+        }
+
+        setIsReading(true);
+        file
+          .text()
+          .then((raw) => {
+            // Lenient matches the server's install route so a file accepted here
+            // isn't rejected at install (and vice versa).
+            const template = parseTemplateYaml(raw, { lenient: true });
+            telemetry.reportTemplateImportFileValidated({ success: true });
+            setParsed({ raw, name: template.metadata.name });
+          })
+          .catch((err) => {
+            telemetry.reportTemplateImportFileValidated({
+              success: false,
+              errorType: err instanceof TemplateParseError ? 'template_parse' : 'file_read_failed',
+            });
+            setError(
+              err instanceof TemplateParseError
+                ? err.message
+                : i18n.translate('workflowsUi.library.upload.readError', {
+                    defaultMessage: 'The file could not be read.',
+                  })
+            );
+          })
+          .finally(() => setIsReading(false));
+      },
+      [telemetry]
+    );
 
     const handleContinue = useCallback(() => {
       if (parsed) onUploaded(parsed.raw);

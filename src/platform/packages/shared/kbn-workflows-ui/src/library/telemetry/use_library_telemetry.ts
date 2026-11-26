@@ -11,14 +11,21 @@ import { useMemo } from 'react';
 import type { AnalyticsServiceStart } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type {
+  TemplateImportFileErrorType,
+  TemplateLink,
   TemplateLoadErrorType,
   TemplatePreviewView,
+  TemplateRemixClickedEvent,
   TemplateSetupOpenedEvent,
   TemplateTelemetryFields,
 } from './events';
 import {
+  TEMPLATE_IMPORT_FILE_VALIDATED_EVENT_TYPE,
+  TEMPLATE_IMPORT_OPENED_EVENT_TYPE,
+  TEMPLATE_LINK_CLICKED_EVENT_TYPE,
   TEMPLATE_LOAD_FAILED_EVENT_TYPE,
   TEMPLATE_PREVIEW_CHANGED_EVENT_TYPE,
+  TEMPLATE_REMIX_CLICKED_EVENT_TYPE,
   TEMPLATE_SETUP_ABANDONED_EVENT_TYPE,
   TEMPLATE_SETUP_OPENED_EVENT_TYPE,
   TEMPLATE_VIEWED_EVENT_TYPE,
@@ -43,6 +50,16 @@ export interface LibraryTelemetry {
   ): void;
   reportTemplateSetupOpened(template: TemplateTelemetryFields, setup: TemplateSetupDetails): void;
   reportTemplateSetupAbandoned(template: TemplateTelemetryFields, invalidFields?: string[]): void;
+  reportTemplateRemixClicked(
+    template: TemplateTelemetryFields,
+    step: TemplateRemixClickedEvent['step']
+  ): void;
+  reportTemplateImportOpened(): void;
+  reportTemplateImportFileValidated(
+    result: { success: true } | { success: false; errorType: TemplateImportFileErrorType }
+  ): void;
+  /** `template` is sent only for the links of a catalog template's page. */
+  reportTemplateLinkClicked(link: TemplateLink, template?: TemplateTelemetryFields): void;
 }
 
 // Events are built field by field: the analytics client checks payloads against the
@@ -95,6 +112,19 @@ export const createLibraryTelemetry = (
       report(TEMPLATE_SETUP_ABANDONED_EVENT_TYPE, {
         ...toTemplateFields(template),
         ...(invalidFields ? { invalidFields } : {}),
+      }),
+    reportTemplateRemixClicked: (template, step) =>
+      report(TEMPLATE_REMIX_CLICKED_EVENT_TYPE, { ...toTemplateFields(template), step }),
+    reportTemplateImportOpened: () => report(TEMPLATE_IMPORT_OPENED_EVENT_TYPE, {}),
+    reportTemplateImportFileValidated: (result) =>
+      report(
+        TEMPLATE_IMPORT_FILE_VALIDATED_EVENT_TYPE,
+        result.success ? { success: true } : { success: false, errorType: result.errorType }
+      ),
+    reportTemplateLinkClicked: (link, template) =>
+      report(TEMPLATE_LINK_CLICKED_EVENT_TYPE, {
+        link,
+        ...(template ? toTemplateFields(template) : {}),
       }),
   };
 };

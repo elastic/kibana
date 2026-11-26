@@ -8,4 +8,5 @@
  */
 
 export { libraryTelemetryEventTypes } from './events';
+export { type LibraryTelemetry, useLibraryTelemetry } from './use_library_telemetry';
 export { useTemplateLoadFailedTelemetry } from './use_template_load_failed_telemetry';

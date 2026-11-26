@@ -158,6 +158,16 @@ export const TemplateDetail = React.memo<TemplateDetailProps>(function TemplateD
     [previewView, telemetry, templateTelemetry]
   );
 
+  // The links open GitHub in a new tab; the click is only reported.
+  const reportIssueClicked = useCallback(
+    () => telemetry.reportTemplateLinkClicked('report_issue', templateTelemetry),
+    [telemetry, templateTelemetry]
+  );
+  const editTemplateClicked = useCallback(
+    () => telemetry.reportTemplateLinkClicked('edit_template', templateTelemetry),
+    [telemetry, templateTelemetry]
+  );
+
   // The setup step's back returns to the template summary; only the details
   // step leaves the view, through the host's `back`.
   const templateName = data?.metadata.name;
@@ -597,6 +607,7 @@ export const TemplateDetail = React.memo<TemplateDetailProps>(function TemplateD
                                   href={reportIssueUrl.toString()}
                                   target="_blank"
                                   rel="noopener noreferrer"
+                                  onClick={reportIssueClicked}
                                   data-test-subj="workflowLibraryTemplateReportIssueLink"
                                 >
                                   {i18n.translate(
@@ -615,6 +626,7 @@ export const TemplateDetail = React.memo<TemplateDetailProps>(function TemplateD
                                   href={`https://github.com/elastic/workflows/edit/main/${sourcePath}`}
                                   target="_blank"
                                   rel="noopener noreferrer"
+                                  onClick={editTemplateClicked}
                                   data-test-subj="workflowLibraryTemplateEditLink"
                                 >
                                   {i18n.translate(

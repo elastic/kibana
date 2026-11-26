@@ -271,6 +271,9 @@ export const TemplateInstallSection = React.memo<TemplateInstallSectionProps>(
     const handleRemix = useCallback(() => {
       // Remixing continues the setup in the editor, so it doesn't abandon it.
       hasCompleted.current = true;
+      if (templateTelemetry) {
+        telemetry.reportTemplateRemixClicked(templateTelemetry, step);
+      }
       void application.navigateToApp(WORKFLOWS_APP_ID, {
         path: '/create',
         state: {
@@ -278,7 +281,15 @@ export const TemplateInstallSection = React.memo<TemplateInstallSectionProps>(
           template: { slug: templateSlug, version: templateVersion },
         } satisfies WorkflowsCreateRouteState,
       });
-    }, [application, previewYaml, templateSlug, templateVersion]);
+    }, [
+      application,
+      previewYaml,
+      step,
+      telemetry,
+      templateSlug,
+      templateTelemetry,
+      templateVersion,
+    ]);
 
     const handleSetup = useCallback(() => {
       onStepChange('setup');
