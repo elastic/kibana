@@ -48,6 +48,7 @@ import { appContextService } from '../app_context';
 import { checkOtlpOutputAllowed } from '../outputs/helpers';
 import { checkKafkaAuthMethodAllowed } from '../outputs/kafka_auth_gate';
 import { KAFKA_AUTH_METHODS, usesKafkaAuth } from '../outputs/kafka_auth';
+import { validateOtlpTlsCertificatesHaveNoPrivateKey } from '../outputs/validators';
 import type { KafkaAuthMethod } from '../outputs/kafka_auth';
 import { getKafkaSecretLeaves } from '../secrets/outputs';
 import {
@@ -253,6 +254,15 @@ export async function createOrUpdatePreconfiguredOutputs(
     if (isOtlpOutput(output) && !otlpCheck.result) {
       logger.warn(`Skipping preconfigured OTLP output ${output.id}: ${otlpCheck.error}`);
       return;
+    }
+    if (isOtlpOutput(output)) {
+      // a private key in a certificate setting would be stored and returned in plain text
+      try {
+        validateOtlpTlsCertificatesHaveNoPrivateKey(output);
+      } catch (error) {
+        logger.warn(`Skipping preconfigured OTLP output ${output.id}: ${error.message}`);
+        return;
+      }
     }
 
     for (const method of KAFKA_AUTH_METHODS) {

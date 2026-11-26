@@ -879,6 +879,9 @@ class OutputService {
         ('is_preconfigured' in output && output.is_preconfigured)) ??
       false;
     this._runOutputValidators(output, isPreconfigured);
+    // not only a warning for preconfigured outputs: the key would be stored and returned in plain
+    // text (preconfiguration skips such an output before it gets here)
+    validateOtlpTlsCertificatesHaveNoPrivateKey(output);
 
     if (isOtlpOutput(output)) {
       validateOtlpAuth({
@@ -1472,6 +1475,7 @@ class OutputService {
           } as UpdateTypedOutput)
         : typedFullUpdateData;
     this._runOutputValidators(validatedData, isPreconfigured, keptAuthMethods);
+    validateOtlpTlsCertificatesHaveNoPrivateKey(validatedData);
 
     if (mergedType === outputType.Otlp) {
       this._validateOtlpAuthUpdate(data as Partial<NewOtlpOutput>, originalOutput, {
@@ -2153,7 +2157,6 @@ class OutputService {
       }
       ensureNoDuplicateSecrets(output);
       validateKafkaAuthMethods(output, keptAuthMethods);
-      validateOtlpTlsCertificatesHaveNoPrivateKey(output);
     } catch (e) {
       if (isPreconfigured && e instanceof OutputInvalidError) {
         appContextService.getLogger().warn(`Preconfigured output failed validation: ${e.message}`);

@@ -1275,9 +1275,10 @@ const getPemBlocks = (value: string): { blocks?: PemBlock[]; errors?: string[] }
 };
 
 /**
- * An optional PEM-encoded certificate authority or client certificate: CERTIFICATE blocks only. A
- * private key is rejected explicitly: these settings are saved in plain text, unlike the client
- * key, which is saved as a secret.
+ * An optional PEM-encoded certificate authority or client certificate: at least one CERTIFICATE
+ * block. Other blocks, such as a CRL in a CA bundle, are ignored, as the collector does. A private
+ * key is rejected: these settings are saved in plain text, unlike the client key, which is saved
+ * as a secret.
  */
 export function validateOtlpTlsCertificatePem(value: string) {
   const { blocks, errors } = getPemBlocks(value);
@@ -1292,12 +1293,11 @@ export function validateOtlpTlsCertificatePem(value: string) {
       }),
     ];
   }
-  const otherBlock = blocks.find(({ label }) => label !== 'CERTIFICATE');
-  if (otherBlock) {
+  if (!blocks.some(({ label }) => label === 'CERTIFICATE')) {
     return [
-      i18n.translate('xpack.fleet.settings.outputForm.otlpTlsCertificatePemOtherBlock', {
-        defaultMessage: 'Only CERTIFICATE blocks are supported, not {label}',
-        values: { label: otherBlock.label },
+      i18n.translate('xpack.fleet.settings.outputForm.otlpTlsCertificatePemNoCertificate', {
+        defaultMessage:
+          'Paste at least one certificate, from "-----BEGIN CERTIFICATE-----" to its END line',
       }),
     ];
   }

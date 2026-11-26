@@ -967,9 +967,12 @@ describe('OTLP validators', () => {
       );
     });
 
-    it('validateOtlpTlsCertificatePem should reject other blocks', () => {
+    it('validateOtlpTlsCertificatePem should ignore other blocks, but require a certificate', () => {
+      expect(
+        validateOtlpTlsCertificatePem(`${pem('CERTIFICATE')}\n${pem('X509 CRL')}`)
+      ).toBeUndefined();
       expect(validateOtlpTlsCertificatePem(pem('X509 CRL'))).toEqual([
-        'Only CERTIFICATE blocks are supported, not X509 CRL',
+        expect.stringContaining('Paste at least one certificate'),
       ]);
     });
 

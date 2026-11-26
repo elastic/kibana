@@ -375,6 +375,19 @@ function getMockedSoClient(
         });
       }
 
+      case outputIdToUuid('existing-preconfigured-otlp-output'): {
+        return mockOutputSO('existing-preconfigured-otlp-output', {
+          type: 'otlp',
+          is_default: false,
+          is_preconfigured: true,
+          allow_edit: ['otlp_exporter'],
+          otlp_exporter: {
+            endpoint: 'https://otel.example.com:4317',
+            protocol: 'grpc',
+          },
+        });
+      }
+
       default:
         return mockOutputSO(id, {
           type: 'remote_elasticsearch',
@@ -658,6 +671,19 @@ function getMockedEncryptedSoClient() {
           secrets: { otlp_exporter: { tls: { key_pem: { id: 'key-pem-secret-id' } } } },
         });
       }
+      case outputIdToUuid('existing-preconfigured-otlp-output'): {
+        return mockOutputSO('existing-preconfigured-otlp-output', {
+          type: 'otlp',
+          is_default: false,
+          is_preconfigured: true,
+          allow_edit: ['otlp_exporter'],
+          otlp_exporter: {
+            endpoint: 'https://otel.example.com:4317',
+            protocol: 'grpc',
+          },
+        });
+      }
+
       case outputIdToUuid('existing-otlp-output'): {
         return mockOutputSO('existing-otlp-output', {
           type: 'otlp',
@@ -5681,6 +5707,25 @@ describe('Output Service', () => {
               },
             })
           ).rejects.toThrow('otlp_exporter.tls.ca_pem cannot contain a private key');
+        });
+
+        it('rejects a private key in a certificate setting of a preconfigured output edited through the API', async () => {
+          await expect(
+            outputService.update(
+              getMockedSoClient({}),
+              esClientMock,
+              'existing-preconfigured-otlp-output',
+              {
+                otlp_exporter: {
+                  endpoint: 'https://otel.example.com:4317',
+                  protocol: 'grpc',
+                  tls: {
+                    cert_pem: '-----BEGIN EC PRIVATE KEY-----\nMIIE\n-----END EC PRIVATE KEY-----',
+                  },
+                },
+              }
+            )
+          ).rejects.toThrow('otlp_exporter.tls.cert_pem cannot contain a private key');
         });
 
         it('accepts a TLS secret when secret storage is enabled', async () => {

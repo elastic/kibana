@@ -4546,6 +4546,18 @@ describe('EditOutputFlyout', () => {
         expect(utils.getByTestId('saveApplySettingsBtn')).toBeDisabled();
       });
 
+      it('should not offer to add a client key to a preconfigured output whose TLS settings are read-only', () => {
+        const { utils } = renderFlyout({
+          ...otlpOutput,
+          is_preconfigured: true,
+          allow_edit: ['secrets'],
+          otlp_exporter: { ...otlpOutput.otlp_exporter, tls: storedTls },
+        } as Output);
+
+        // with no saved key, a new key could not be checked against the read-only certificate
+        expect(utils.getByTestId('settingsOutputsFlyout.otlpTlsKeyPemInput')).toBeDisabled();
+      });
+
       it('should not offer to change the client key of a preconfigured output that does not allow editing secrets', async () => {
         const { utils } = renderFlyout({
           ...otlpOutputWithTls,
