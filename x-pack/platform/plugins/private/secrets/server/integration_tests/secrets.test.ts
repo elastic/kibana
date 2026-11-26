@@ -267,10 +267,15 @@ describe('secrets on Elasticsearch', () => {
       const updater = mockAuthenticatedUser({ username: 'bob', profile_uid: 'u_bob_0' });
       const creatorRequest = httpServerMock.createKibanaRequest({ spaceId: DEFAULT_SPACE_ID });
       const updaterRequest = httpServerMock.createKibanaRequest({ spaceId: DEFAULT_SPACE_ID });
+      const users = new Map([
+        [creatorRequest, creator],
+        [updaterRequest, updater],
+      ]);
+      const getRealUser = pluginCore.security.authc.getCurrentUser.bind(pluginCore.security.authc);
       // Stands for authentication, which these requests do not go through.
       jest
         .spyOn(pluginCore.security.authc, 'getCurrentUser')
-        .mockImplementation((request) => (request === creatorRequest ? creator : updater));
+        .mockImplementation((request) => users.get(request) ?? getRealUser(request));
 
       await secrets.getClient({ request: creatorRequest }).create({ name, value: VALUE });
       const created = await getStored(name);
