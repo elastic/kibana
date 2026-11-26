@@ -9,7 +9,7 @@
 
 import type { createPlaywrightConfig } from '../../../../src/playwright';
 import { test as baseTest } from '../../../../src/playwright';
-import { getPort, serve, setEnv } from './helpers';
+import { serve, setEnv } from './helpers';
 
 // Chromium never proxies loopback names, so the site needs a name of its own.
 const SITE_HOST = 'scout-proxy-check.test';
@@ -26,7 +26,7 @@ interface ProxyFixtures {
 export const test = baseTest.extend<ProxyFixtures>({
   citadelJob: async ({}, use) => {
     const [site, proxy] = await Promise.all([serve('site'), serve('proxy')]);
-    const proxyUrl = `http://127.0.0.1:${getPort(proxy)}`;
+    const proxyUrl = `http://127.0.0.1:${proxy.port}`;
     const restoreEnv = setEnv({
       USE_CITADEL_PROXY: 'true',
       HTTP_PROXY: proxyUrl,
@@ -35,7 +35,7 @@ export const test = baseTest.extend<ProxyFixtures>({
       https_proxy: proxyUrl,
     });
 
-    await use({ siteUrl: `http://${SITE_HOST}:${getPort(site)}/` });
+    await use({ siteUrl: `http://${SITE_HOST}:${site.port}/` });
 
     restoreEnv();
     site.close();

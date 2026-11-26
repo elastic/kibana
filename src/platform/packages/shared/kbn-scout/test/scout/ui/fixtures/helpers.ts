@@ -9,22 +9,25 @@
 
 import http from 'http';
 
+export interface LocalServer {
+  port: number;
+  close: () => void;
+}
+
 /** Starts a local HTTP server that answers every request with `body`. */
-export const serve = (body: string): Promise<http.Server> =>
+export const serve = (body: string): Promise<LocalServer> =>
   new Promise((resolve, reject) => {
     const server = http.createServer((_request, response) => response.end(body));
     server.once('error', reject);
-    server.listen(0, '127.0.0.1', () => resolve(server));
+    server.listen(0, '127.0.0.1', () => {
+      const address = server.address();
+      if (address === null || typeof address === 'string') {
+        reject(new Error('Server is not listening on a TCP port'));
+        return;
+      }
+      resolve({ port: address.port, close: () => server.close() });
+    });
   });
-
-/** Returns the port a local server listens on. */
-export const getPort = (server: http.Server): number => {
-  const address = server.address();
-  if (address === null || typeof address === 'string') {
-    throw new Error('Server is not listening on a TCP port');
-  }
-  return address.port;
-};
 
 /** Sets environment variables and returns a function that restores the previous values. */
 export const setEnv = (vars: Record<string, string>): (() => void) => {
