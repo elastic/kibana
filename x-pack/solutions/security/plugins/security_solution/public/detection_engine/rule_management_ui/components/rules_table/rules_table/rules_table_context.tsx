@@ -45,7 +45,10 @@ import type {
   WarningSchema,
 } from '../../../../../../common/api/detection_engine';
 import { useFindRules } from '../../../../rule_management/logic/use_find_rules';
-import type { SearchFallbackReason } from '../../../../rule_management/api/hooks/use_find_rules_query';
+import type {
+  SearchFallbackReason,
+  SearchHighlight,
+} from '../../../../rule_management/api/hooks/use_find_rules_query';
 
 import {
   DEFAULT_FILTER_OPTIONS,
@@ -60,7 +63,7 @@ import { defaultRangeValue } from '../../../../rule_gaps/constants';
 import { getGapRange } from '../../../../rule_gaps/api/hooks/utils';
 
 /** One empty object, so that the table context does not change on every render. */
-const NO_HIGHLIGHTS: Record<string, string> = {};
+const NO_HIGHLIGHTS: Record<string, SearchHighlight> = {};
 
 interface RulesSnoozeSettings {
   /**
@@ -167,7 +170,7 @@ export interface RulesTableState {
   /** Why a search by meaning ran as the keyword search. */
   searchFallbackReason?: SearchFallbackReason;
   /** Why each rule of the page matched a search by meaning, by rule id. */
-  searchHighlights: Record<string, string>;
+  searchHighlights: Record<string, SearchHighlight>;
 }
 
 export type LoadingRuleAction =

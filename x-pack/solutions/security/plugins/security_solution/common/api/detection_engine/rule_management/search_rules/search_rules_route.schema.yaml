@@ -160,8 +160,22 @@ paths:
                   search_highlights:
                     type: object
                     additionalProperties:
-                      type: string
-                    description: For a search by meaning, why each rule of the page matched, by rule id - the passage of the rule closest in meaning to the text, as plain text.
+                      type: object
+                      required:
+                        - text
+                        - source
+                      properties:
+                        text:
+                          type: string
+                        source:
+                          type: string
+                          enum:
+                            - description
+                            - mitre
+                            - integrations
+                            - false_positives
+                            - index_patterns
+                    description: For a search by meaning, why each rule of the page matched, by rule id - the sentence of the rule card closest in meaning to the text, and where it comes from.
                   search_fallback_reason:
                     type: string
                     enum:

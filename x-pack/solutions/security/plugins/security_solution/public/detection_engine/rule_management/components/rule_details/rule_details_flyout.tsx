@@ -130,6 +130,12 @@ interface RuleDetailsFlyoutProps {
   id?: string;
   /** The width can be dragged. */
   resizable?: boolean;
+  /** Above the title, e.g. navigation and actions; with it, `hideFooter` drops the footer. */
+  headerActions?: ReactNode;
+  hideFooter?: boolean;
+  /** Passed to the Overview tab. */
+  overviewHighlight?: string;
+  hideOverviewSeverityAndRisk?: boolean;
   closeFlyout: () => void;
   title?: string;
 }
@@ -178,6 +184,10 @@ function RuleDetailsFlyoutContent({
   titleId,
   closeFlyout,
   title,
+  headerActions,
+  hideFooter,
+  overviewHighlight,
+  hideOverviewSeverityAndRisk,
 }: RuleDetailsFlyoutContentProps): JSX.Element {
   const { expandedOverviewSections, toggleOverviewSection } = useOverviewTabSections();
 
@@ -196,11 +206,20 @@ function RuleDetailsFlyoutContent({
             }
             expandedOverviewSections={expandedOverviewSections}
             toggleOverviewSection={toggleOverviewSection}
+            highlight={overviewHighlight}
+            hideSeverityAndRisk={hideOverviewSeverityAndRisk}
           />
         </TabContentPadding>
       ),
     }),
-    [rule, size, expandedOverviewSections, toggleOverviewSection]
+    [
+      rule,
+      size,
+      expandedOverviewSections,
+      toggleOverviewSection,
+      overviewHighlight,
+      hideOverviewSeverityAndRisk,
+    ]
   );
 
   const investigationGuideTab: EuiTabbedContentTab = useMemo(
@@ -241,7 +260,13 @@ function RuleDetailsFlyoutContent({
   return (
     <>
       <EuiFlyoutHeader>
-        <EuiTitle size="m">
+        {headerActions && (
+          <>
+            {headerActions}
+            <EuiSpacer size="m" />
+          </>
+        )}
+        <EuiTitle size={headerActions ? 's' : 'm'}>
           <h2 id={titleId}>{title ?? rule.name}</h2>
         </EuiTitle>
         <EuiSpacer size="s" />
@@ -259,16 +284,18 @@ function RuleDetailsFlyoutContent({
           onTabClick={onTabClick}
         />
       </StyledEuiFlyoutBody>
-      <EuiFlyoutFooter>
-        <EuiFlexGroup justifyContent="spaceBetween">
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty onClick={closeFlyout} flush="left">
-              {i18n.DISMISS_BUTTON_LABEL}
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>{ruleActions}</EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlyoutFooter>
+      {!hideFooter && (
+        <EuiFlyoutFooter>
+          <EuiFlexGroup justifyContent="spaceBetween">
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty onClick={closeFlyout} flush="left">
+                {i18n.DISMISS_BUTTON_LABEL}
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>{ruleActions}</EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlyoutFooter>
+      )}
     </>
   );
 }

@@ -56,10 +56,12 @@ export interface RulesQueryResponse {
   /** Why a search by meaning ran as the keyword search. */
   searchFallbackReason?: SearchFallbackReason;
   /** Why each rule matched a search by meaning, by rule id. */
-  searchHighlights?: Record<string, string>;
+  searchHighlights?: Record<string, SearchHighlight>;
 }
 
 export type SearchFallbackReason = NonNullable<SearchRulesResponse['search_fallback_reason']>;
+/** Why a rule matched a search by meaning: a sentence of the rule card and where it comes from. */
+export type SearchHighlight = NonNullable<SearchRulesResponse['search_highlights']>[string];
 
 /**
  * A wrapper around useQuery provides default values to the underlying query,

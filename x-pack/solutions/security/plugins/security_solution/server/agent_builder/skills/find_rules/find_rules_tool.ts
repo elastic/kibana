@@ -344,7 +344,9 @@ export const createFindRulesInlineTool = ({
       const snippets = semantic?.mode === 'semantic' ? semantic.snippets : {};
       const rules = findResult.data.map((rule) => ({
         ...summarizeRule(rule),
-        ...(snippets[rule.id] ? { matched: snippets[rule.id] } : {}),
+        ...(snippets[rule.id]
+          ? { matched: snippets[rule.id].text, matched_in: snippets[rule.id].source }
+          : {}),
       }));
       const hasTagFilter = Boolean(input.tags?.length || input.excludeTags?.length);
       const truncated = findResult.total > rules.length;

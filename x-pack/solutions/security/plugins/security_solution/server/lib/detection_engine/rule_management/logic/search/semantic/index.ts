@@ -13,6 +13,9 @@ import {
 } from '@kbn/management-settings-ids';
 import { RULE_SEARCH_INDEX, getRuleSearchModels } from './rule_search_index';
 import { searchRelevantRuleIds } from './rule_search_query';
+import type { RuleSearchSnippet } from './rule_search_query';
+
+export type { RuleSearchSnippet, RuleSearchSnippetSource } from './rule_search_query';
 
 export { syncRuleSearchIndex } from './rule_search_sync';
 
@@ -35,7 +38,7 @@ export type SemanticSearchResult =
       mode: 'semantic';
       ruleIds: string[];
       /** Why each rule matched: its passage closest in meaning to the text, by rule id. */
-      snippets: Record<string, string>;
+      snippets: Record<string, RuleSearchSnippet>;
     }
   | { mode: 'legacy'; reason: SemanticSearchFallbackReason };
 
@@ -62,7 +65,7 @@ const CACHE_TTL_MS = 30_000;
 const CACHE_SIZE = 100;
 const cache = new Map<
   string,
-  { at: number; ruleIds: string[]; snippets: Record<string, string> }
+  { at: number; ruleIds: string[]; snippets: Record<string, RuleSearchSnippet> }
 >();
 /** The same text from the table and its facet counts at once: one search, not two. */
 const inFlight = new Map<string, Promise<SemanticSearchResult>>();

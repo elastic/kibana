@@ -16,13 +16,13 @@ import {
   EuiContextMenuPanel,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiIcon,
   EuiLink,
-  EuiPanel,
   EuiPopover,
   EuiSpacer,
   EuiText,
-  EuiTitle,
   EuiToolTip,
+  useEuiTheme,
 } from '@elastic/eui';
 import { get } from 'lodash';
 import { useQuery } from '@kbn/react-query';
@@ -43,6 +43,7 @@ import {
 import { fetchQueryAlerts } from '../../../../detections/containers/detection_engine/alerts/api';
 import { RuleDetailTabs } from '../../../rule_details_ui/pages/rule_details/use_rule_details_tabs';
 import { RuleDetailsFlyout } from '../../../rule_management/components/rule_details/rule_details_flyout';
+import type { SearchHighlight } from '../../../rule_management/api/hooks/use_find_rules_query';
 import type { Rule } from '../../../rule_management/logic';
 import { useRule } from '../../../rule_management/logic/use_rule';
 import { RULE_TYPE_LABELS } from '../../../rule_sets/components/translations';
@@ -52,19 +53,15 @@ import { useRulesTableContext } from './rules_table/rules_table_context';
 
 /** The open rule, by id, so that a link opens the same flyout. */
 const URL_PARAM = 'ruleFlyout';
-/** Fields of the table columns that the flyout header shows, in this order. */
-const HEADER_FIELDS = [
-  'severity',
-  'risk_score',
-  'execution_summary.last_execution.status',
-  'execution_summary.last_execution.date',
-  'enabled',
-];
+/** Room for the close button of the flyout at the right end of the top bar. */
+const CLOSE_BUTTON_SPACE = 32;
+
+type Columns = Array<EuiBasicTableColumn<Rule>>;
 
 interface RuleFlyoutApi {
   openRule: (rule: Rule) => void;
   /** Why each rule matched a search by meaning, by rule id. */
-  snippets: Record<string, string>;
+  snippets: Record<string, SearchHighlight>;
 }
 
 const RuleFlyoutContext = createContext<RuleFlyoutApi | undefined>(undefined);
@@ -75,6 +72,14 @@ const isNewTabClick = (event: MouseEvent) =>
 const isTyping = (target: EventTarget | null) =>
   target instanceof HTMLElement &&
   (target.isContentEditable || ['INPUT', 'TEXTAREA', 'SELECT'].includes(target.tagName));
+
+/** The cell of a table column for the rule, e.g. the enabled switch with its permission checks. */
+const cellOf = (columns: Columns, rule: Rule, field: string): ReactNode => {
+  const column = columns.find((c) => 'field' in c && c.field === field);
+  if (!column || !('render' in column) || !column.render) return null;
+  const render = column.render as (value: unknown, item: Rule) => ReactNode;
+  return render(get(rule, field), rule);
+};
 
 const useAlertsLast7Days = (ruleId: string) =>
   useQuery(
@@ -100,142 +105,173 @@ const useAlertsLast7Days = (ruleId: string) =>
     { refetchOnWindowFocus: false }
   );
 
-const WhyItMatched = ({ snippet }: { snippet: string }) => (
-  <EuiPanel color="subdued" paddingSize="s" hasShadow={false} data-test-subj="ruleFlyoutWhyMatched">
-    <EuiTitle size="xxxs">
-      <h4>{i18n.WHY_IT_MATCHED}</h4>
-    </EuiTitle>
-    <EuiSpacer size="xs" />
-    <EuiText size="s">{snippet}</EuiText>
-  </EuiPanel>
+const Dot = () => (
+  <EuiText size="s" color="subdued" aria-hidden>
+    {'·'}
+  </EuiText>
 );
 
-const RuleFlyoutHeader = ({
-  rule,
-  columns,
-  position,
-  onPrevious,
-  onNext,
-  snippet,
-}: {
-  rule: Rule;
-  columns: Array<EuiBasicTableColumn<Rule>>;
-  position?: { index: number; total: number };
-  onPrevious?: () => void;
-  onNext?: () => void;
-  snippet?: string;
-}) => {
+/** One line of facts under the title, without labels, and the enabled switch at the end. */
+const RuleFacts = ({ rule, columns }: { rule: Rule; columns: Columns }) => {
   const { data: alerts } = useAlertsLast7Days(rule.id);
-  const cells = HEADER_FIELDS.flatMap((field) => {
-    const column = columns.find((c) => 'field' in c && c.field === field);
-    if (!column || !('render' in column) || !column.render) return [];
-    const render = column.render as (value: unknown, item: Rule) => ReactNode;
-    return [{ field, name: column.name, value: render(get(rule, field), rule) }];
-  });
+  const lastRun = rule.execution_summary?.last_execution;
   return (
-    <>
-      <EuiFlexGroup gutterSize="l" alignItems="center" wrap responsive={false}>
-        <EuiFlexItem grow={false}>
-          <EuiText size="xs" color="subdued">
-            {i18n.RULE_TYPE}
-          </EuiText>
-          <EuiBadge color="hollow">{RULE_TYPE_LABELS[rule.type] ?? rule.type}</EuiBadge>
-        </EuiFlexItem>
-        {cells.map(({ field, name, value }) => (
-          <EuiFlexItem grow={false} key={field} data-test-subj={`ruleFlyoutHeader-${field}`}>
-            <EuiText size="xs" color="subdued">
-              {name}
+    <EuiFlexGroup gutterSize="s" alignItems="center" wrap responsive={false}>
+      <EuiFlexItem grow={false}>
+        <EuiBadge color="hollow">{RULE_TYPE_LABELS[rule.type] ?? rule.type}</EuiBadge>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>{cellOf(columns, rule, 'severity')}</EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiText size="s">{i18n.RISK(rule.risk_score)}</EuiText>
+      </EuiFlexItem>
+      <Dot />
+      <EuiFlexItem grow={false}>
+        {lastRun ? (
+          <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+            {cellOf(columns, rule, 'execution_summary.last_execution.status')}
+            <EuiText size="s" color="subdued">
+              {cellOf(columns, rule, 'execution_summary.last_execution.date')}
             </EuiText>
-            {value}
-          </EuiFlexItem>
-        ))}
-        <EuiFlexItem />
-        {position && (
-          <EuiFlexItem grow={false}>
-            <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
-              <EuiText size="xs" color="subdued">
-                {i18n.POSITION(position.index + 1, position.total)}
-              </EuiText>
-              <EuiToolTip content={i18n.PREVIOUS_RULE} disableScreenReaderOutput>
-                <EuiButtonIcon
-                  iconType="chevronSingleUp"
-                  aria-label={i18n.PREVIOUS_RULE}
-                  isDisabled={!onPrevious}
-                  onClick={onPrevious}
-                  data-test-subj="ruleFlyoutPrevious"
-                />
-              </EuiToolTip>
-              <EuiToolTip content={i18n.NEXT_RULE} disableScreenReaderOutput>
-                <EuiButtonIcon
-                  iconType="chevronSingleDown"
-                  aria-label={i18n.NEXT_RULE}
-                  isDisabled={!onNext}
-                  onClick={onNext}
-                  data-test-subj="ruleFlyoutNext"
-                />
-              </EuiToolTip>
-            </EuiFlexGroup>
-          </EuiFlexItem>
+          </EuiFlexGroup>
+        ) : (
+          <EuiText size="s" color="subdued">
+            {i18n.NEVER_RUN}
+          </EuiText>
         )}
-      </EuiFlexGroup>
-      <EuiSpacer size="s" />
+      </EuiFlexItem>
       {alerts !== undefined && (
-        <EuiText size="s" data-test-subj="ruleFlyoutAlerts">
-          <SecuritySolutionLinkAnchor
-            deepLinkId={SecurityPageName.rules}
-            path={getRuleDetailsTabUrl(rule.id, RuleDetailTabs.alerts)}
-          >
-            {i18n.ALERTS_LAST_7_DAYS(alerts)}
-          </SecuritySolutionLinkAnchor>
-        </EuiText>
-      )}
-      {snippet && (
         <>
-          <EuiSpacer size="s" />
-          <WhyItMatched snippet={snippet} />
+          <Dot />
+          <EuiFlexItem grow={false}>
+            <EuiText size="s" data-test-subj="ruleFlyoutAlerts">
+              <SecuritySolutionLinkAnchor
+                deepLinkId={SecurityPageName.rules}
+                path={getRuleDetailsTabUrl(rule.id, RuleDetailTabs.alerts)}
+              >
+                {i18n.ALERTS_LAST_7_DAYS(alerts)}
+              </SecuritySolutionLinkAnchor>
+            </EuiText>
+          </EuiFlexItem>
         </>
       )}
-    </>
+      <EuiFlexItem />
+      <EuiFlexItem grow={false} data-test-subj="ruleFlyoutEnabled">
+        <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+          {cellOf(columns, rule, 'enabled')}
+          <EuiText size="s">{i18n.ENABLED}</EuiText>
+        </EuiFlexGroup>
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 };
 
-const RuleFlyoutActions = ({
+/** Why the rule matched the search, as a quiet quote that names its source. */
+const WhyItMatched = ({ snippet }: { snippet: SearchHighlight }) => {
+  const { euiTheme } = useEuiTheme();
+  return (
+    <div
+      style={{
+        borderLeft: `${euiTheme.border.width.thick} solid ${euiTheme.colors.borderBasePlain}`,
+        paddingLeft: euiTheme.size.m,
+      }}
+      data-test-subj="ruleFlyoutWhyMatched"
+    >
+      <EuiText size="s">
+        <em>{`“${snippet.text}”`}</em>
+      </EuiText>
+      <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+        <EuiIcon type="sparkles" size="s" color="subdued" aria-hidden />
+        <EuiText size="xs" color="subdued">
+          {i18n.WHY_IT_MATCHED_FROM(i18n.SNIPPET_SOURCE[snippet.source] ?? snippet.source)}
+        </EuiText>
+      </EuiFlexGroup>
+    </div>
+  );
+};
+
+/**
+ * The bar above the title: the position in the results with previous and next on the left; the
+ * actions on the right, with "Open rule details" the only filled button.
+ */
+const RuleFlyoutTopBar = ({
   rule,
   actions,
+  position,
+  onPrevious,
+  onNext,
   onDone,
 }: {
   rule: Rule;
   actions: Array<DefaultItemAction<Rule>>;
+  position?: { index: number; total: number };
+  onPrevious?: () => void;
+  onNext?: () => void;
   onDone: () => void;
 }) => {
-  const [isOpen, setIsOpen] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const searchStatus = useRuleSearchStatus();
   const {
     actions: { setFilterOptions },
   } = useRulesTableContext();
-  const items = actions.map((action, index) => {
-    const enabled = action.enabled ? action.enabled(rule) : true;
-    const label = typeof action.description === 'string' ? action.description : String(index);
-    return (
-      <EuiContextMenuItem
-        key={label}
-        icon={typeof action.icon === 'string' ? action.icon : undefined}
-        disabled={!enabled}
-        onClick={async () => {
-          setIsOpen(false);
-          await action.onClick?.(rule, {} as MouseEvent);
-          onDone();
-        }}
-      >
-        {typeof action.name === 'function' ? action.name(rule) : action.name}
-      </EuiContextMenuItem>
-    );
+  const { href: editHref } = useSecuritySolutionLinkProps({
+    deepLinkId: SecurityPageName.rules,
+    path: getEditRuleUrl(rule.id),
   });
+  const menuItems = actions.map((action, index) => (
+    <EuiContextMenuItem
+      key={typeof action.description === 'string' ? action.description : String(index)}
+      icon={typeof action.icon === 'string' ? action.icon : undefined}
+      disabled={action.enabled ? !action.enabled(rule) : false}
+      onClick={async () => {
+        setIsMenuOpen(false);
+        await action.onClick?.(rule, {} as MouseEvent);
+        onDone();
+      }}
+    >
+      {typeof action.name === 'function' ? action.name(rule) : action.name}
+    </EuiContextMenuItem>
+  ));
+
   return (
-    <EuiFlexGroup gutterSize="s" justifyContent="flexEnd" responsive={false}>
+    <EuiFlexGroup
+      gutterSize="s"
+      alignItems="center"
+      responsive={false}
+      style={{ paddingRight: CLOSE_BUTTON_SPACE }}
+    >
+      {position && (
+        <>
+          <EuiToolTip content={i18n.PREVIOUS_RULE} disableScreenReaderOutput>
+            <EuiButtonIcon
+              iconType="chevronSingleUp"
+              aria-label={i18n.PREVIOUS_RULE}
+              isDisabled={!onPrevious}
+              onClick={onPrevious}
+              data-test-subj="ruleFlyoutPrevious"
+            />
+          </EuiToolTip>
+          <EuiToolTip content={i18n.NEXT_RULE} disableScreenReaderOutput>
+            <EuiButtonIcon
+              iconType="chevronSingleDown"
+              aria-label={i18n.NEXT_RULE}
+              isDisabled={!onNext}
+              onClick={onNext}
+              data-test-subj="ruleFlyoutNext"
+            />
+          </EuiToolTip>
+          <EuiText size="xs" color="subdued">
+            {i18n.POSITION(position.index + 1, position.total)}
+          </EuiText>
+          <EuiText size="xs" color="subdued">
+            <kbd>{i18n.KEYS_HINT}</kbd>
+          </EuiText>
+        </>
+      )}
+      <EuiFlexItem />
       {searchStatus === 'ready' && (
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty
+            size="s"
             iconType="sparkles"
             onClick={() => {
               setFilterOptions({
@@ -252,38 +288,41 @@ const RuleFlyoutActions = ({
         </EuiFlexItem>
       )}
       <EuiFlexItem grow={false}>
+        <EuiToolTip content={i18n.EDIT_RULE} disableScreenReaderOutput>
+          <EuiButtonIcon
+            iconType="pencil"
+            href={editHref}
+            aria-label={i18n.EDIT_RULE}
+            data-test-subj="ruleFlyoutEdit"
+          />
+        </EuiToolTip>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
         <EuiPopover
           aria-label={i18n.MORE_ACTIONS}
-          isOpen={isOpen}
-          closePopover={() => setIsOpen(false)}
+          isOpen={isMenuOpen}
+          closePopover={() => setIsMenuOpen(false)}
           panelPaddingSize="none"
-          anchorPosition="upCenter"
+          anchorPosition="downRight"
           button={
-            <EuiButtonEmpty
-              iconType="ellipsis"
-              onClick={() => setIsOpen(!isOpen)}
-              data-test-subj="ruleFlyoutMoreActions"
-            >
-              {i18n.MORE_ACTIONS}
-            </EuiButtonEmpty>
+            <EuiToolTip content={i18n.MORE_ACTIONS} disableScreenReaderOutput>
+              <EuiButtonIcon
+                iconType="ellipsis"
+                aria-label={i18n.MORE_ACTIONS}
+                onClick={() => setIsMenuOpen(!isMenuOpen)}
+                data-test-subj="ruleFlyoutMoreActions"
+              />
+            </EuiToolTip>
           }
         >
-          <EuiContextMenuPanel items={items} />
+          <EuiContextMenuPanel items={menuItems} />
         </EuiPopover>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <SecuritySolutionLinkButton
-          deepLinkId={SecurityPageName.rules}
-          path={getEditRuleUrl(rule.id)}
-          iconType="pencil"
-          data-test-subj="ruleFlyoutEdit"
-        >
-          {i18n.EDIT_RULE}
-        </SecuritySolutionLinkButton>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <SecuritySolutionLinkButton
           fill
+          size="s"
+          iconType="external"
           deepLinkId={SecurityPageName.rules}
           path={getRuleDetailsTabUrl(rule.id, RuleDetailTabs.overview)}
           data-test-subj="rulesTableRuleFlyoutOpenDetails"
@@ -296,9 +335,9 @@ const RuleFlyoutActions = ({
 };
 
 /**
- * The rules table opens a rule in a flyout to read it without leaving the list: the state and
- * the actions of the rule, why it matched a search, and the next or previous rule of the page
- * (buttons, j/k). The full page is one click away; the open rule is in the URL.
+ * The rules table opens a rule in a flyout to read it without leaving the list (a "peek"): the
+ * state of the rule in one line, why it matched a search, the next or previous rule of the page
+ * (buttons, j/k) and its actions. The full page is one click away; the open rule is in the URL.
  */
 export const RuleFlyoutProvider = ({
   snippets,
@@ -307,11 +346,11 @@ export const RuleFlyoutProvider = ({
   actions,
   children,
 }: PropsWithChildren<{
-  snippets: Record<string, string>;
+  snippets: Record<string, SearchHighlight>;
   /** The rules of the page, for the next and the previous rule and fresh state. */
   rules: Rule[];
-  /** The table columns: the header shows the same cells (severity, last response, enabled…). */
-  columns: Array<EuiBasicTableColumn<Rule>>;
+  /** The table columns: the flyout shows the same cells (severity, last response, enabled…). */
+  columns: Columns;
   /** The actions of a table row (edit, duplicate, export, delete…). */
   actions: Array<DefaultItemAction<Rule>>;
 }>) => {
@@ -358,28 +397,42 @@ export const RuleFlyoutProvider = ({
   }, [index, rules, open]);
 
   const api = useMemo(() => ({ openRule: open, snippets }), [open, snippets]);
+  const snippet = rule ? snippets[rule.id] : undefined;
   return (
     <RuleFlyoutContext.Provider value={api}>
       {children}
       {rule && (
         <RuleDetailsFlyout
           rule={rule}
-          size="l"
+          size="m"
           resizable
           id="rulesTableRuleFlyout"
           dataTestSubj="rulesTableRuleFlyout"
           closeFlyout={close}
-          subHeader={
-            <RuleFlyoutHeader
+          hideFooter
+          hideOverviewSeverityAndRisk
+          overviewHighlight={snippet?.source === 'description' ? snippet.text : undefined}
+          headerActions={
+            <RuleFlyoutTopBar
               rule={rule}
-              columns={columns}
+              actions={actions}
               position={index >= 0 ? { index, total: rules.length } : undefined}
               onPrevious={previous}
               onNext={next}
-              snippet={snippets[rule.id]}
+              onDone={close}
             />
           }
-          ruleActions={<RuleFlyoutActions rule={rule} actions={actions} onDone={close} />}
+          subHeader={
+            <>
+              <RuleFacts rule={rule} columns={columns} />
+              {snippet && (
+                <>
+                  <EuiSpacer size="m" />
+                  <WhyItMatched snippet={snippet} />
+                </>
+              )}
+            </>
+          }
         />
       )}
     </RuleFlyoutContext.Provider>
@@ -387,8 +440,8 @@ export const RuleFlyoutProvider = ({
 };
 
 /**
- * The rule name in the rules table: opens the flyout, keeps the link to the rule page for a new
- * tab, and shows why the rule matched a search by meaning. Outside the rules table, a plain link.
+ * The rule name in the rules table: opens the flyout and keeps the link to the rule page for a
+ * new tab. Outside the rules table, a plain link.
  */
 export const RuleNameCell = ({ rule }: { rule: Rule }) => {
   const flyout = useContext(RuleFlyoutContext);
@@ -405,9 +458,13 @@ export const RuleNameCell = ({ rule }: { rule: Rule }) => {
     },
     [openRule, rule]
   );
-  if (!flyout) {
-    return (
-      <EuiToolTip content={rule.name} anchorClassName="eui-textTruncate">
+  return (
+    <EuiToolTip content={rule.name} anchorClassName="eui-textTruncate">
+      {flyout ? (
+        <EuiLink href={href} onClick={onClick} data-test-subj="ruleName">
+          {rule.name}
+        </EuiLink>
+      ) : (
         <SecuritySolutionLinkAnchor
           data-test-subj="ruleName"
           deepLinkId={SecurityPageName.rules}
@@ -415,28 +472,7 @@ export const RuleNameCell = ({ rule }: { rule: Rule }) => {
         >
           {rule.name}
         </SecuritySolutionLinkAnchor>
-      </EuiToolTip>
-    );
-  }
-  const snippet = flyout.snippets[rule.id];
-  return (
-    <div className="eui-textTruncate">
-      <EuiToolTip content={rule.name} anchorClassName="eui-textTruncate">
-        <EuiLink href={href} onClick={onClick} data-test-subj="ruleName">
-          {rule.name}
-        </EuiLink>
-      </EuiToolTip>
-      {snippet && (
-        <EuiText
-          size="xs"
-          color="subdued"
-          className="eui-textTruncate"
-          title={snippet}
-          data-test-subj="ruleSearchSnippet"
-        >
-          {snippet}
-        </EuiText>
       )}
-    </div>
+    </EuiToolTip>
   );
 };

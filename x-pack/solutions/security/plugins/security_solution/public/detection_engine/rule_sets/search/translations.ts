@@ -162,3 +162,45 @@ export const NO_SIMILAR = (name: string) =>
 export const RECENT_SEARCHES = i18n.translate('xpack.securitySolution.ruleSearch.recentSearches', {
   defaultMessage: 'Recent searches',
 });
+
+export const SNIPPET_SOURCE: Record<string, string> = {
+  description: i18n.translate('xpack.securitySolution.ruleSearch.source.description', {
+    defaultMessage: 'Description',
+  }),
+  mitre: i18n.translate('xpack.securitySolution.ruleSearch.source.mitre', {
+    defaultMessage: 'MITRE ATT&CK',
+  }),
+  integrations: i18n.translate('xpack.securitySolution.ruleSearch.source.integrations', {
+    defaultMessage: 'Integrations',
+  }),
+  false_positives: i18n.translate('xpack.securitySolution.ruleSearch.source.falsePositives', {
+    defaultMessage: 'False positives',
+  }),
+  index_patterns: i18n.translate('xpack.securitySolution.ruleSearch.source.indexPatterns', {
+    defaultMessage: 'Index patterns',
+  }),
+};
+
+export const WHY_IT_MATCHED_FROM = (source: string) =>
+  i18n.translate('xpack.securitySolution.ruleSearch.whyItMatchedFrom', {
+    values: { source },
+    defaultMessage: 'Why it matched · from {source}',
+  });
+
+export const KEYS_HINT = i18n.translate('xpack.securitySolution.ruleFlyout.keysHint', {
+  defaultMessage: 'j / k',
+});
+
+export const NEVER_RUN = i18n.translate('xpack.securitySolution.ruleFlyout.neverRun', {
+  defaultMessage: 'Never run',
+});
+
+export const RISK = (score: number) =>
+  i18n.translate('xpack.securitySolution.ruleFlyout.risk', {
+    values: { score },
+    defaultMessage: 'Risk {score}',
+  });
+
+export const ENABLED = i18n.translate('xpack.securitySolution.ruleFlyout.enabled', {
+  defaultMessage: 'Enabled',
+});

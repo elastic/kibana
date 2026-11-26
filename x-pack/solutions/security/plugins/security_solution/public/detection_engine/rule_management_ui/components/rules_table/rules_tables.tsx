@@ -22,6 +22,7 @@ import { RulesFilterBar } from '../../../rule_sets/components/rules_group_by_con
 import { SearchModeLine } from '../../../rule_sets/search/search_mode_line';
 import { RulesTableNoItems } from '../../../rule_sets/search/rules_table_no_items';
 import { RuleFlyoutProvider } from './rule_flyout';
+import { WhyMatchedRow } from '../../../rule_sets/search/why_matched_row';
 import { useRulesTableActions } from './use_rules_table_actions';
 import { GroupedRulesTable } from '../../../rule_sets/components/grouped_rules_table';
 import { Loader } from '../../../../common/components/loader';
@@ -343,6 +344,39 @@ export const RulesTables = React.memo<RulesTableProps>(({ selectedTab }) => {
     sectionRulesCount ??
     Math.max(isAllSelected ? pagination.total : selectedRuleIds?.length ?? 0, 1);
 
+  // In AI search, why each rule matched goes under its row, across the table, and the name
+  // column is wider: the rule names are what people read first.
+  const aiSearchColumns = useMemo(
+    () =>
+      tableProps.columns.map((column) =>
+        'field' in column && column.field === 'name'
+          ? { ...column, width: '38%', maxWidth: undefined }
+          : column
+      ),
+    [tableProps.columns]
+  );
+  const whyMatchedRows = useMemo(
+    () =>
+      searchMode === 'semantic'
+        ? Object.fromEntries(
+            rules.flatMap((rule) =>
+              searchHighlights[rule.id]
+                ? [
+                    [
+                      rule.id,
+                      <WhyMatchedRow
+                        highlight={searchHighlights[rule.id]}
+                        search={filterOptions.filter}
+                      />,
+                    ],
+                  ]
+                : []
+            )
+          )
+        : undefined,
+    [searchMode, rules, searchHighlights, filterOptions.filter]
+  );
+
   return (
     <>
       {shouldShowLinearProgress && (
@@ -467,6 +501,7 @@ export const RulesTables = React.memo<RulesTableProps>(({ selectedTab }) => {
               <EuiBasicTable
                 itemId="id"
                 items={rules}
+                itemIdToExpandedRowMap={whyMatchedRows}
                 tableCaption={i18n.RULES_TABLE_CAPTION}
                 noItemsMessage={NO_ITEMS_MESSAGE}
                 onChange={tableOnChangeCallback}
@@ -485,6 +520,7 @@ export const RulesTables = React.memo<RulesTableProps>(({ selectedTab }) => {
                       }
                 }
                 {...tableProps}
+                columns={searchMode === 'semantic' ? aiSearchColumns : tableProps.columns}
                 tableLayout="auto"
                 scrollableInline
                 responsiveBreakpoint={false}

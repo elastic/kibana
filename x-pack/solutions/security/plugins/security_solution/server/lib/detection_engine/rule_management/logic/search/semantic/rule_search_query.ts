@@ -27,32 +27,64 @@ const RELATIVE_SCORE = 0.6;
 /** A search by meaning that takes longer falls back to the keyword search. */
 const SEARCH_TIMEOUT_MS = 5_000;
 
+/** Where in the rule card a snippet comes from. */
+export type RuleSearchSnippetSource =
+  | 'description'
+  | 'mitre'
+  | 'integrations'
+  | 'false_positives'
+  | 'index_patterns';
+
+export interface RuleSearchSnippet {
+  text: string;
+  source: RuleSearchSnippetSource;
+}
+
 export interface RankedRule {
   soId: string;
   score: number;
-  /** The passage of the rule that is closest in meaning to the text, as plain text. */
-  snippet?: string;
+  /** The sentence of the rule card that is closest in meaning to the text. */
+  snippet?: RuleSearchSnippet;
 }
 
 const SNIPPET_LENGTH = 240;
 
+/** The labels of the rule card lines (`rule_search_document.ts`). */
+const CARD_LINES: Array<[string, RuleSearchSnippetSource]> = [
+  ['MITRE ATT&CK:', 'mitre'],
+  ['Integrations:', 'integrations'],
+  ['False positives:', 'false_positives'],
+  ['Index patterns:', 'index_patterns'],
+];
+
 /**
- * A chunk of the rule card as one readable line: no markdown marks, no rule name in front (the
- * table shows it), cut at a word.
+ * A chunk of the rule card as one readable line with its source: the first line of the chunk
+ * that is not the rule name (the table shows it), without its label, cut at a word.
  */
-const toSnippet = (chunk: string, name: string): string | undefined => {
-  let text = chunk
-    .replace(/`+/g, '')
-    .replace(/^\s*(#+|[-*]|\d+\.)\s+/gm, '')
-    .replace(/\s+/g, ' ')
-    .trim();
+const toSnippet = (chunk: string, name: string): RuleSearchSnippet | undefined => {
+  const line = chunk
+    .split('\n')
+    .map((l) => l.trim())
+    .find((l) => l && l.toLowerCase() !== name.toLowerCase());
+  if (!line) return undefined;
+  const [label, source] = CARD_LINES.find(([prefix]) => line.startsWith(prefix)) ?? [
+    '',
+    'description' as const,
+  ];
+  let text = line.slice(label.length).replace(/`+/g, '').replace(/\s+/g, ' ').trim();
   if (text.toLowerCase().startsWith(name.toLowerCase())) {
     text = text.slice(name.length).trim();
   }
+  // A long sentence is cut into chunks: a chunk can start in the middle of it.
+  if (source === 'description' && /^[^A-Z0-9"“(]/.test(text)) {
+    text = `…${text.replace(/^[\s,;:.)\]-]+/, '')}`;
+  }
   if (!text) return undefined;
-  if (text.length <= SNIPPET_LENGTH) return text;
-  const cut = text.lastIndexOf(' ', SNIPPET_LENGTH);
-  return `${text.slice(0, cut > 0 ? cut : SNIPPET_LENGTH)}…`;
+  if (text.length > SNIPPET_LENGTH) {
+    const cut = text.lastIndexOf(' ', SNIPPET_LENGTH);
+    text = `${text.slice(0, cut > 0 ? cut : SNIPPET_LENGTH)}…`;
+  }
+  return { text, source };
 };
 
 /**
