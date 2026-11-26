@@ -24,6 +24,7 @@ export const DashboardPanelExportJsonFlyout = <State extends object, PreparedSta
   closeFlyout,
   getExportJson,
   isByReference,
+  canExportByValue,
   sanitizeState,
   titleId,
 }: {
@@ -32,6 +33,7 @@ export const DashboardPanelExportJsonFlyout = <State extends object, PreparedSta
   closeFlyout: () => void;
   getExportJson: (forceExportByValue?: boolean) => State;
   isByReference: boolean;
+  canExportByValue: boolean;
   sanitizeState: (state: State) => Promise<{
     data: PreparedState | undefined;
     warnings: NonNullable<DashboardSanitizeResponseBody['warnings']>;
@@ -70,7 +72,7 @@ export const DashboardPanelExportJsonFlyout = <State extends object, PreparedSta
       }
       getExportJson={getSelectedExportJson}
       headerActions={
-        isByReference ? (
+        canExportByValue ? (
           <EuiSwitch
             compressed
             label={showFullConfigurationLabel}
@@ -87,13 +89,20 @@ export const DashboardPanelExportJsonFlyout = <State extends object, PreparedSta
               defaultMessage: 'Linked to library',
             })}
             text={
-              <FormattedMessage
-                id="dashboard.exportJson.showFullConfigCallout"
-                defaultMessage="This panel is linked to the library, so this dashboard stores only a reference to it. Select {buttonLabel} to see its complete definition."
-                values={{
-                  buttonLabel: <i>{showFullConfigurationLabel}</i>,
-                }}
-              />
+              canExportByValue ? (
+                <FormattedMessage
+                  id="dashboard.exportJson.showFullConfigCallout"
+                  defaultMessage="This panel is linked to the library, so this dashboard stores only a reference to it. Select {buttonLabel} to see its complete definition."
+                  values={{
+                    buttonLabel: <i>{showFullConfigurationLabel}</i>,
+                  }}
+                />
+              ) : (
+                <FormattedMessage
+                  id="dashboard.exportJson.linkedToLibraryCallout"
+                  defaultMessage="This panel is linked to the library, so this dashboard stores only a reference to it."
+                />
+              )
             }
           />
         ) : undefined

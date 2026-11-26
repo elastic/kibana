@@ -27,6 +27,7 @@ import {
   apiHasSerializableState,
   apiHasType,
   apiHasUniqueId,
+  apiPublishesSavedObjectId,
   apiPublishesTitle,
   apiSupportsJsonExport,
   type SupportsJsonExport,
@@ -86,10 +87,16 @@ export class ExportJSONAction implements Action<EmbeddableApiContext> {
       core: coreServices,
       parentApi: embeddable.parentApi,
       loadContent: async ({ closeFlyout, ariaLabelledBy }) => {
-        const [{ DashboardPanelExportJsonFlyout }, isByReference] = await Promise.all([
+        const [{ DashboardPanelExportJsonFlyout }, canExportByValue] = await Promise.all([
           import('../dashboard_app/top_nav/share/export_json/flyout/export_json_flyout'),
           supportsByReference ? embeddable.canUnlinkFromLibrary() : false,
         ]);
+        // A linked panel that cannot be unlinked still stores only a reference
+        const isByReference =
+          canExportByValue ||
+          (supportsByReference &&
+            apiPublishesSavedObjectId(embeddable) &&
+            Boolean(embeddable.savedObjectId$.value));
 
         return (
           <DashboardPanelExportJsonFlyout
@@ -97,6 +104,7 @@ export class ExportJSONAction implements Action<EmbeddableApiContext> {
             objectType={embeddable.getTypeDisplayName?.() ?? embeddable.type}
             closeFlyout={closeFlyout}
             isByReference={isByReference}
+            canExportByValue={canExportByValue}
             getExportJson={(forceExportByValue = false) => {
               if (supportsByReference && forceExportByValue) {
                 return embeddable.getSerializedStateByValue();
