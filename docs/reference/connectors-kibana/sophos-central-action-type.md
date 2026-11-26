@@ -12,19 +12,12 @@ applies_to:
 Use the Sophos Central connector to manage alerts, isolate and scan endpoints, maintain IOC block and allow lists, control tamper protection, and query XDR detections in Sophos Central.
 
 ::::{note}
-This connector is currently available in **Agent Builder** only. Workflow support is planned for a future release.
+This connector is currently available in **Agent Builder** only. Workflow support is planned for a future release. Actions marked _(API only)_ require a direct Kibana API call and cannot be invoked through Agent Builder.
 ::::
 
 ## Create connectors in {{kib}} [define-sophos-central-ui]
 
-You can create connectors in **{{stack-manage-app}} > {{connectors-ui}}**.
-
-### Connector configuration [sophos-central-connector-configuration]
-
-Sophos Central connectors have the following configuration properties:
-
-Authentication
-:   Uses **OAuth 2.0 Client Credentials**. Provide the Client ID and Client Secret from Sophos Central (**My Products → General Settings → API Credentials → Add Credential**). Only tenant-level credentials are supported — partner or organization credentials are rejected. The credential needs `alerts:read`, `alerts:action`, `endpoint-state:read`, `endpoint-state:update`, and `detections.queries.detections:create` scopes. If you are using the [`xpack.actions.allowedHosts`](/reference/configuration-reference/alerting-settings.md#action-settings) setting, make sure all three hosts are added to the allowed hosts: `id.sophos.com` (OAuth token endpoint), `api.central.sophos.com` (global API / whoami), and the regional data-center host returned by whoami (for example `api-us03.central.sophos.com`).
+You can create connectors in **{{stack-manage-app}} → {{connectors-ui}}**.
 
 ### Get API credentials [sophos-central-api-credentials]
 
@@ -33,9 +26,14 @@ Authentication
 3. Select **Add Credential** and assign a name.
 4. Copy the **Client ID** and **Client Secret**.
 
-## Test connectors [sophos-central-connector-test]
+### Connector configuration [sophos-central-connector-configuration]
 
-You can test connectors when you create or edit the connector in {{kib}}. The test verifies connectivity by calling the Sophos Central whoami endpoint and confirming the tenant ID and regional data center.
+Sophos Central connectors have the following configuration properties:
+
+Authentication
+:   Uses **OAuth 2.0 Client Credentials**. Provide the Client ID and Client Secret from Sophos Central (**My Products → General Settings → API Credentials → Add Credential**). Only tenant-level credentials are supported. Partner or organization credentials are rejected. The credential needs `alerts:read`, `alerts:action`, `endpoint-state:read`, `endpoint-state:update`, and `detections.queries.detections:create` scopes.
+
+    If you are using the [`xpack.actions.allowedHosts`](/reference/configuration-reference/alerting-settings.md#action-settings) setting, make sure all three hosts are added to the allowed hosts: `id.sophos.com` (OAuth token endpoint), `api.central.sophos.com` (global API / whoami), and the regional data-center host returned by whoami (for example `api-us03.central.sophos.com`).
 
 ## Connector actions [sophos-central-connector-actions]
 
@@ -68,7 +66,7 @@ The Sophos Central connector exposes the following actions:
     An analyst must invoke this action directly via the Kibana connector execution API after confirming the threat is remediated. Use `POST /api/actions/connector/<id>/_execute` for the default space, or `POST /s/<space_id>/api/actions/connector/<id>/_execute` for a non-default space. Kibana does not prompt for or verify that approval — the caller is responsible for obtaining it before invoking the action.
 
 `scanEndpoint`
-:   Trigger an on-demand malware scan on one or more endpoints. The scan runs asynchronously; the action returns a scan ID immediately. Accepts 1 to 500 endpoint UUIDs.
+:   Trigger an on-demand malware scan on one or more endpoints. The scan runs asynchronously. The response contains per-endpoint results — accepted endpoint IDs and any per-endpoint errors. There is no single scan identifier. Accepts 1 to 500 endpoint UUIDs.
 
 `getTamperProtection`
 :   Read the tamper protection status for an endpoint. Returns only the `enabled` flag — a disabled state is a risk signal. Passwords are never exposed.
@@ -90,3 +88,7 @@ The Sophos Central connector exposes the following actions:
 
 `listDetections`
 :   Query XDR detections (requires XDR license). On the first call the connector submits the query via `POST /detections/v1/queries/detections`, polls until it completes (up to 90 seconds), and returns the first page of results along with `runId`. To fetch subsequent pages, pass the same `runId` with the desired `page` number and the same `pageSize` used on the first call — the connector skips submission and returns results directly. Using a different `pageSize` on a continuation call changes the server's page boundaries and may cause rows to be skipped or duplicated.
+
+## Test connectors [sophos-central-connector-test]
+
+You can test connectors when you create or edit the connector in {{kib}}. The test verifies connectivity by calling the Sophos Central whoami endpoint and confirming the tenant ID and regional data center.

@@ -91,10 +91,11 @@ async function whoami(ctx: ActionContext): Promise<WhoamiResult> {
         'Confirm the credentials are correct.'
     );
   }
-  if (data?.idType && data.idType !== 'tenant') {
+  if (data?.idType !== 'tenant') {
     throw new Error(
-      `Sophos Central only supports tenant-level credentials, but whoami returned idType "${data.idType}". ` +
-        'Please use a tenant API credential, not a partner or organization credential.'
+      `Sophos Central requires tenant-level credentials but whoami returned idType "${
+        data?.idType ?? 'missing'
+      }". ` + 'Please use a tenant API credential, not a partner or organization credential.'
     );
   }
   if (!REGIONAL_URL_RE.test(dataRegion)) {
@@ -137,7 +138,7 @@ async function request<T = unknown>(
     method,
     url: `${dataRegion}${path}`,
     headers: { 'X-Tenant-ID': tenantId },
-    timeout: options?.timeout ?? 30_000,
+    timeout: options?.timeout ?? ctx.client.defaults?.timeout ?? 30_000,
   };
   if (options?.params) {
     // Sophos uses OpenAPI style:form, explode:false — arrays are comma-joined
@@ -552,8 +553,9 @@ export const SophosCentral: ConnectorSpec = {
       scope: 'write',
       description:
         'Trigger an on-demand malware scan on one or more Sophos Central endpoints. ' +
-        'The scan runs asynchronously; the action returns a scan ID immediately after ' +
-        'acceptance. Accepts 1 to 500 endpoint UUIDs.',
+        'The scan runs asynchronously. The response contains per-endpoint results — ' +
+        'accepted endpoint IDs and any per-endpoint errors. ' +
+        'There is no single scan identifier. Accepts 1 to 500 endpoint UUIDs.',
       input: ScanEndpointInputSchema,
       handler: async (ctx, input: ScanEndpointInput) => {
         let result;
@@ -750,21 +752,26 @@ export const SophosCentral: ConnectorSpec = {
 
         if (!runId) {
           // Step 1: submit the detection query
-          const submitRes = await request<{
-            id?: string;
-            runId?: string;
-            result?: string;
-          }>(ctx, 'POST', '/detections/v1/queries/detections', {
-            tenantId,
-            dataRegion,
-            data: {
-              ...(input.severity?.length && { severity: input.severity }),
-              ...(input.type?.length && { type: input.type }),
-              ...(input.category?.length && { category: input.category }),
-              ...(input.from && { from: input.from }),
-              ...(input.to && { to: input.to }),
-            },
-          });
+          let submitRes: { id?: string; runId?: string; result?: string } | undefined;
+          try {
+            submitRes = await request<{
+              id?: string;
+              runId?: string;
+              result?: string;
+            }>(ctx, 'POST', '/detections/v1/queries/detections', {
+              tenantId,
+              dataRegion,
+              data: {
+                ...(input.severity?.length && { severity: input.severity }),
+                ...(input.type?.length && { type: input.type }),
+                ...(input.category?.length && { category: input.category }),
+                ...(input.from && { from: input.from }),
+                ...(input.to && { to: input.to }),
+              },
+            });
+          } catch (err) {
+            throwApiError(err, 'Sophos Central listDetections: failed to submit detection query');
+          }
 
           runId = submitRes?.id ?? submitRes?.runId;
           if (!runId) {
@@ -794,24 +801,28 @@ export const SophosCentral: ConnectorSpec = {
           while (!TERMINAL.has(runState)) {
             const remaining = deadline - Date.now();
             if (remaining <= 0) {
-              throw new Error(
-                'Sophos Central listDetections: query run did not complete within 90 seconds'
-              );
+              return { runId, state: 'timedOut' };
             }
             await sleep(Math.min(pollIntervalMs, remaining));
             const afterSleep = deadline - Date.now();
             if (afterSleep < MIN_POLL_TIMEOUT_MS) {
-              throw new Error(
-                'Sophos Central listDetections: query run did not complete within 90 seconds'
-              );
+              return { runId, state: 'timedOut' };
             }
-            const pollRes = await request<{ result?: string; status?: string }>(
-              ctx,
-              'GET',
-              `/detections/v1/queries/detections/${encodeURIComponent(runId)}`,
-              { tenantId, dataRegion, timeout: Math.min(30_000, afterSleep) }
-            );
-            runState = pollRes?.result ?? pollRes?.status ?? '';
+            try {
+              const pollRes = await request<{ result?: string; status?: string }>(
+                ctx,
+                'GET',
+                `/detections/v1/queries/detections/${encodeURIComponent(runId)}`,
+                {
+                  tenantId,
+                  dataRegion,
+                  timeout: Math.min(ctx.client.defaults?.timeout ?? 30_000, afterSleep),
+                }
+              );
+              runState = pollRes?.result ?? pollRes?.status ?? '';
+            } catch (err) {
+              throwApiError(err, `Sophos Central listDetections: failed to poll run ${runId}`);
+            }
           }
 
           if (runState !== 'succeeded') {
@@ -822,19 +833,27 @@ export const SophosCentral: ConnectorSpec = {
         }
 
         // Step 3: retrieve results page
-        const resultsData = await request(
-          ctx,
-          'GET',
-          `/detections/v1/queries/detections/${encodeURIComponent(runId)}/results`,
-          {
-            tenantId,
-            dataRegion,
-            params: {
-              page: input.page ?? 1,
-              pageSize: input.pageSize ?? 50,
-            },
-          }
-        );
+        let resultsData: unknown;
+        try {
+          resultsData = await request(
+            ctx,
+            'GET',
+            `/detections/v1/queries/detections/${encodeURIComponent(runId)}/results`,
+            {
+              tenantId,
+              dataRegion,
+              params: {
+                page: input.page ?? 1,
+                pageSize: input.pageSize ?? 50,
+              },
+            }
+          );
+        } catch (err) {
+          throwApiError(
+            err,
+            `Sophos Central listDetections: failed to fetch results for run ${runId}`
+          );
+        }
 
         return { ...(resultsData as Record<string, unknown>), runId };
       },

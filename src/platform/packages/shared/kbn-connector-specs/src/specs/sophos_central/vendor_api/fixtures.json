@@ -8,7 +8,7 @@
     },
     "responses": [
       {
-        "source": "global",
+        "source": "common",
         "method": "GET",
         "path": "/whoami/v1",
         "status": 200,
@@ -29,7 +29,7 @@
     },
     "responses": [
       {
-        "source": "global",
+        "source": "common",
         "method": "GET",
         "path": "/whoami/v1",
         "status": 200,
@@ -51,7 +51,7 @@
     },
     "responses": [
       {
-        "source": "global",
+        "source": "common",
         "method": "GET",
         "path": "/whoami/v1",
         "status": 200,
@@ -76,7 +76,7 @@
     },
     "responses": [
       {
-        "source": "global",
+        "source": "common",
         "method": "GET",
         "path": "/whoami/v1",
         "status": 200,
@@ -97,7 +97,7 @@
     },
     "responses": [
       {
-        "source": "global",
+        "source": "common",
         "method": "GET",
         "path": "/whoami/v1",
         "status": 200,
@@ -118,7 +118,7 @@
     },
     "responses": [
       {
-        "source": "global",
+        "source": "common",
         "method": "GET",
         "path": "/whoami/v1",
         "status": 200,
@@ -140,7 +140,7 @@
     },
     "responses": [
       {
-        "source": "global",
+        "source": "common",
         "method": "GET",
         "path": "/whoami/v1",
         "status": 200,
@@ -162,7 +162,7 @@
     },
     "responses": [
       {
-        "source": "global",
+        "source": "common",
         "method": "GET",
         "path": "/whoami/v1",
         "status": 200,
@@ -183,7 +183,7 @@
     },
     "responses": [
       {
-        "source": "global",
+        "source": "common",
         "method": "GET",
         "path": "/whoami/v1",
         "status": 200,
@@ -204,7 +204,7 @@
     },
     "responses": [
       {
-        "source": "global",
+        "source": "common",
         "method": "GET",
         "path": "/whoami/v1",
         "status": 200,
@@ -226,7 +226,7 @@
     },
     "responses": [
       {
-        "source": "global",
+        "source": "common",
         "method": "GET",
         "path": "/whoami/v1",
         "status": 200,
@@ -248,7 +248,7 @@
     },
     "responses": [
       {
-        "source": "global",
+        "source": "common",
         "method": "GET",
         "path": "/whoami/v1",
         "status": 200,
@@ -270,7 +270,7 @@
     },
     "responses": [
       {
-        "source": "global",
+        "source": "common",
         "method": "GET",
         "path": "/whoami/v1",
         "status": 200,
@@ -295,7 +295,7 @@
     },
     "responses": [
       {
-        "source": "global",
+        "source": "common",
         "method": "GET",
         "path": "/whoami/v1",
         "status": 200,
@@ -316,7 +316,7 @@
     },
     "responses": [
       {
-        "source": "global",
+        "source": "common",
         "method": "GET",
         "path": "/whoami/v1",
         "status": 200,
@@ -346,7 +346,7 @@
     ],
     "responses": [
       {
-        "source": "global",
+        "source": "common",
         "method": "GET",
         "path": "/whoami/v1",
         "status": 200,

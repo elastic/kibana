@@ -527,6 +527,19 @@ describe('test handler', () => {
     );
   });
 
+  it('throws when whoami returns no idType', async () => {
+    // A response with no idType field must be rejected — only "tenant" is accepted.
+    const client = makeClient();
+    client.get.mockResolvedValue({
+      data: { id: TENANT_ID, apiHosts: { dataRegion: DATA_REGION } }, // idType absent
+    });
+    const ctx = makeCtx(client);
+
+    await expect(SophosCentral.test.handler(ctx as never)).rejects.toThrow(
+      'tenant-level credentials'
+    );
+  });
+
   it('throws when whoami returns an unexpected regional URL', async () => {
     const client = makeClient();
     client.get.mockResolvedValue({
@@ -858,6 +871,23 @@ describe('isolateEndpoint', () => {
     const config = client.request.mock.calls[0][0];
     expect(config.data).toEqual({ enabled: true, ids: [ENDPOINT_ID] });
     expect(config.data.comment).toBeUndefined();
+  });
+
+  it('throws when every endpoint fails (all-errors, no items)', async () => {
+    const client = makeClient();
+    stubWhoami(client);
+    client.request.mockResolvedValue({
+      data: {
+        errors: [
+          { id: ENDPOINT_ID, errorCode: 'DeviceOffline', errorMessage: 'Device is offline' },
+        ],
+      },
+    });
+    const ctx = makeCtx(client);
+
+    await expect(
+      SophosCentral.actions.isolateEndpoint.handler(ctx as never, { ids: [ENDPOINT_ID] })
+    ).rejects.toThrow('Device is offline');
   });
 });
 
@@ -1264,7 +1294,46 @@ describe('listDetections', () => {
     await expectation;
   });
 
-  it('throws when the polling deadline expires before a terminal state', async () => {
+  it('wraps a 403 submit error so the agent sees a readable message, not a raw Axios error', async () => {
+    // A 403 on submit means the tenant has no XDR licence.
+    const client = makeClient();
+    client.get.mockResolvedValue({
+      data: { id: TENANT_ID, idType: 'tenant', apiHosts: { dataRegion: DATA_REGION } },
+    });
+    client.request.mockRejectedValueOnce(
+      Object.assign(new Error('Forbidden'), {
+        response: {
+          status: 403,
+          data: { error: 'forbidden', message: 'XDR licence required' },
+        },
+      })
+    );
+    const ctx = makeCtx(client);
+
+    await expect(SophosCentral.actions.listDetections.handler(ctx as never, {})).rejects.toThrow(
+      'XDR licence required'
+    );
+  });
+
+  it('wraps a 404 results error so the agent sees a readable message for a stale runId', async () => {
+    const client = makeClient();
+    client.get.mockResolvedValue({
+      data: { id: TENANT_ID, idType: 'tenant', apiHosts: { dataRegion: DATA_REGION } },
+    });
+    // Caller passes a stale runId — results page returns 404
+    client.request.mockRejectedValueOnce(
+      Object.assign(new Error('Not Found'), {
+        response: { status: 404, data: { message: 'Run not found' } },
+      })
+    );
+    const ctx = makeCtx(client);
+
+    await expect(
+      SophosCentral.actions.listDetections.handler(ctx as never, { runId: RUN_ID })
+    ).rejects.toThrow('Run not found');
+  });
+
+  it('returns runId with state timedOut when the polling deadline expires before a terminal state', async () => {
     jest.useFakeTimers();
     const client = makeClient();
     client.get.mockResolvedValue({
@@ -1276,14 +1345,14 @@ describe('listDetections', () => {
       .mockResolvedValue({ data: { status: 'running' } });
 
     const ctx = makeCtx(client);
-    const expectation = expect(
-      SophosCentral.actions.listDetections.handler(ctx as never, {})
-    ).rejects.toThrow('did not complete within 90 seconds');
+    const resultPromise = SophosCentral.actions.listDetections.handler(ctx as never, {});
 
     // Advance past the 90 s deadline (18 × 5 s sleeps = 90 s, then afterSleep < MIN_POLL_TIMEOUT_MS).
     // No request with timeout: 0 (or below the minimum) should ever be attempted.
     await jest.advanceTimersByTimeAsync(90_001);
-    await expectation;
+    const result = await resultPromise;
+
+    expect(result).toMatchObject({ runId: RUN_ID, state: 'timedOut' });
   });
 });
 
