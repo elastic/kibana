@@ -122,6 +122,7 @@ export const RuleFlyout = ({
     : undefined;
 
   const { control, handleSubmit, setError } = useForm<RuleFormValues>({
+    mode: 'onTouched',
     defaultValues: {
       name: rule?.name ?? '',
       profileName: rule?.boost_profile ?? '',

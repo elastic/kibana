@@ -203,6 +203,49 @@ describe('RuleFlyout', () => {
       expect(onSave).not.toHaveBeenCalled();
     });
 
+    it('checks a field once the user leaves it, then as the user types', async () => {
+      renderFlyout();
+
+      await selectProfile('storefront-search');
+      const field = screen.getByTestId('searchBoostRuleFlyoutIndexPattern');
+
+      await userEvent.type(field, 'logs-*,');
+      expect(
+        screen.queryByText('Enter one pattern or name, without commas or spaces.')
+      ).not.toBeInTheDocument();
+
+      await userEvent.tab();
+      expect(
+        await screen.findByText('Enter one pattern or name, without commas or spaces.')
+      ).toBeInTheDocument();
+      expect(field).toBeInvalid();
+
+      await userEvent.type(field, '{backspace}');
+      await waitFor(() => expect(field).not.toBeInvalid());
+    });
+
+    it('asks for a name once the user leaves the field empty', async () => {
+      renderFlyout();
+
+      await userEvent.click(screen.getByTestId('searchBoostRuleFlyoutName'));
+      expect(screen.queryByText('Enter a name.')).not.toBeInTheDocument();
+
+      await userEvent.tab();
+
+      expect(await screen.findByText('Enter a name.')).toBeInTheDocument();
+    });
+
+    it('asks for a profile once the user leaves the picker without choosing one', async () => {
+      renderFlyout();
+
+      await userEvent.click(getProfileInput());
+      expect(screen.queryByText('Select a boost profile.')).not.toBeInTheDocument();
+
+      await userEvent.tab();
+
+      expect(await screen.findByText('Select a boost profile.')).toBeInTheDocument();
+    });
+
     it.each([
       [
         'Storefront',
