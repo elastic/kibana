@@ -10,8 +10,9 @@
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { DataViewType } from '@kbn/data-views-plugin/common';
 import type { DataViewFieldBase } from '@kbn/es-query';
+import type { FieldFormat } from '@kbn/field-formats-plugin/common';
 import type { SavedObjectReference } from '@kbn/core-saved-objects-common';
-import type { Column, DataSourceBase, SerializedDataSource } from '../types';
+import type { Column, DataSourceBase, FormatterField, SerializedDataSource } from '../types';
 import { columnFromDataViewField } from '../to_column';
 import type { FilterableSource } from '../filterable_source';
 
@@ -72,6 +73,10 @@ export class DataViewSource implements DataSourceBase {
   public getColumn(name: string): Column | undefined {
     const field = this.dataView.fields.getByName(name);
     return field ? columnFromDataViewField(field) : undefined;
+  }
+
+  public getFormatter(field: FormatterField): FieldFormat {
+    return this.dataView.getFormatterForField(field);
   }
 
   public async getFilterableFields(): Promise<readonly Column[]> {

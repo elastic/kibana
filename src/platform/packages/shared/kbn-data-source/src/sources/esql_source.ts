@@ -28,8 +28,10 @@ import {
   type ESQLSourceInfoColumn,
 } from '@kbn/esql-utils';
 import type { ESQLControlVariable } from '@kbn/esql-types';
+import type { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
 import { esFieldTypeToKibanaFieldType } from '@kbn/field-types';
-import type { Column, DataSourceBase, SerializedDataSource } from '../types';
+import type { FieldFormat, FieldFormatsStartCommon } from '@kbn/field-formats-plugin/common';
+import type { Column, DataSourceBase, FormatterField, SerializedDataSource } from '../types';
 import { columnFromDatatableColumn, columnToFieldBase } from '../to_column';
 import { sha256 } from '../sha256';
 import { buildFilterableFieldSpecs } from '../filterable_fields';
@@ -343,6 +345,13 @@ export class EsqlSource implements DataSourceBase {
 
   public getColumn(name: string): Column | undefined {
     return this.columnsByName.get(name);
+  }
+
+  public getFormatter(field: FormatterField, fieldFormats: FieldFormatsStartCommon): FieldFormat {
+    return fieldFormats.getDefaultInstance(
+      field.type as KBN_FIELD_TYPES,
+      field.esTypes as ES_FIELD_TYPES[]
+    );
   }
 
   /** Names of the result columns without values. They stay in {@link getColumns} but are missing from the rows. */

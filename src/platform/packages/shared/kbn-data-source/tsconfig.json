@@ -20,6 +20,7 @@
     "@kbn/expressions-plugin",
     "@kbn/esql-utils",
     "@kbn/field-types",
+    "@kbn/field-formats-plugin",
     "@kbn/core-saved-objects-common",
     "@kbn/crypto-browser",
     "@kbn/data-view-utils",

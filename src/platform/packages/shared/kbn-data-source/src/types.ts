@@ -10,6 +10,8 @@
 import type { DataViewBase } from '@kbn/es-query';
 import type { SavedObjectReference } from '@kbn/core-saved-objects-common';
 import type { KBN_FIELD_TYPES } from '@kbn/field-types';
+import type { DataView } from '@kbn/data-views-plugin/common';
+import type { FieldFormat, FieldFormatsStartCommon } from '@kbn/field-formats-plugin/common';
 import type { HttpStart } from '@kbn/core/public';
 import type { FilterableSource } from './filterable_source';
 
@@ -51,6 +53,9 @@ export interface Column {
  * 3. {@link EsqlSource} must never call `_field_caps`.
  * 4. {@link serialize} returns identity only — columns are runtime, never persisted.
  */
+/** The field a formatter is asked for: a `DataViewField` or its spec, as `DataView.getFormatterForField` takes it. */
+export type FormatterField = Parameters<DataView['getFormatterForField']>[0];
+
 export interface DataSourceBase extends DataViewBase {
   readonly kind: DataSourceKind;
 
@@ -76,6 +81,12 @@ export interface DataSourceBase extends DataViewBase {
 
   getColumns(): readonly Column[];
   getColumn(name: string): Column | undefined;
+
+  /**
+   * The formatter of the values of a field. A `DataViewSource` answers with the field formats of its
+   * `DataView`; an `EsqlSource` with the default formatter of the type of the field.
+   */
+  getFormatter(field: FormatterField, fieldFormats: FieldFormatsStartCommon): FieldFormat;
 
   /**
    * Fields that filters and KQL can target. Same as {@link getColumns} for `DataViewSource`;

@@ -36,6 +36,10 @@ export const createMockEsqlSource = (
     resultColumns,
     getColumns: () => columns as Column[],
     getColumn: (name: string) => columns.find((c) => c.name === name) as Column | undefined,
+    getFormatter: (
+      field: { type: string; esTypes?: string[] },
+      fieldFormats: { getDefaultInstance: (type: string, esTypes?: string[]) => unknown }
+    ) => fieldFormats.getDefaultInstance(field.type, field.esTypes),
     getEmptyColumnNames: () => resultColumns.filter(({ isNull }) => isNull).map(({ name }) => name),
     getFilterableFields: async () => columns as Column[],
     toFilterableSource: async () => ({
