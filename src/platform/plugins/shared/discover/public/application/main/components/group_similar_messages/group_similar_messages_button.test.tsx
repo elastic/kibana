@@ -96,6 +96,7 @@ describe('GroupSimilarMessagesButton', () => {
     expect(screen.getByTestId('dscGroupSimilarMessagesButton')).toHaveTextContent(
       'Find patterns in message'
     );
+    expect(screen.getByTestId('dscGroupSimilarMessagesButton')).toHaveAttribute('title', '');
     await userEvent.click(screen.getByTestId('dscGroupSimilarMessagesButton'));
 
     expect(getQuery()).toEqual({

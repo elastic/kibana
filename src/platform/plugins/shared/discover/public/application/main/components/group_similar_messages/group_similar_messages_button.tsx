@@ -67,6 +67,7 @@ export const GroupSimilarMessagesButton = () => {
         iconType="bulb"
         onClick={onClick}
         onClickAriaLabel={label}
+        title=""
         data-test-subj="dscGroupSimilarMessagesButton"
       >
         {label}
