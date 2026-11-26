@@ -6,11 +6,11 @@
  */
 
 import {
-  DEFAULT_REGRESSION_GATES,
+  DEFAULT_REGRESSION_REPORT_CONFIG,
   resolveJudgeModelIds,
-  type RegressionGateConfig,
-  type RegressionGateThresholds,
-  type RegressionGateReport,
+  type RegressionReportConfig,
+  type RegressionReportThresholds,
+  type RegressionReport,
 } from '@kbn/evals-common';
 import type { EvaluationScoreDocument } from '@kbn/evals-common';
 import type { SomeDevLog } from '@kbn/some-dev-log';
@@ -20,7 +20,7 @@ const GATE_ICONS = { pass: '✅', warn: '⚠️', fail: '❌' } as const;
 
 const THRESHOLD_KEYS = ['failRelativeChange', 'warnRelativeChange', 'alpha'] as const;
 
-const validateThresholds = (value: unknown, label: string): Partial<RegressionGateThresholds> => {
+const validateThresholds = (value: unknown, label: string): Partial<RegressionReportThresholds> => {
   if (value === null || typeof value !== 'object' || Array.isArray(value)) {
     throw new Error(`${label} must be an object of gate thresholds.`);
   }
@@ -41,10 +41,10 @@ const validateThresholds = (value: unknown, label: string): Partial<RegressionGa
       );
     }
   }
-  return value as Partial<RegressionGateThresholds>;
+  return value as Partial<RegressionReportThresholds>;
 };
 
-const assertCoherent = (thresholds: RegressionGateThresholds, label: string): void => {
+const assertCoherent = (thresholds: RegressionReportThresholds, label: string): void => {
   if (thresholds.warnRelativeChange > thresholds.failRelativeChange) {
     throw new Error(
       `${label}: warnRelativeChange (${thresholds.warnRelativeChange}) must not exceed ` +
@@ -54,11 +54,11 @@ const assertCoherent = (thresholds: RegressionGateThresholds, label: string): vo
 };
 
 /**
- * Parses and validates a `--gates` JSON override. Every value is checked rather than
+ * Parses and validates a `--report-gates` JSON override. Every value is checked rather than
  * merged blindly: a null alpha or a "15%" string would otherwise silently disable the gate
  * it was meant to tune, producing a confident but wrong verdict.
  */
-export const parseGateConfig = (json: string): RegressionGateConfig => {
+export const parseRegressionReportConfig = (json: string): RegressionReportConfig => {
   let parsed: unknown;
   try {
     parsed = JSON.parse(json);
@@ -75,13 +75,13 @@ export const parseGateConfig = (json: string): RegressionGateConfig => {
   }
   const raw = parsed as { defaults?: unknown; evaluators?: unknown };
 
-  const defaults: RegressionGateThresholds = {
-    ...DEFAULT_REGRESSION_GATES.defaults,
+  const defaults: RegressionReportThresholds = {
+    ...DEFAULT_REGRESSION_REPORT_CONFIG.defaults,
     ...(raw.defaults !== undefined ? validateThresholds(raw.defaults, '"defaults"') : {}),
   };
   assertCoherent(defaults, '"defaults"');
 
-  let evaluators: RegressionGateConfig['evaluators'];
+  let evaluators: RegressionReportConfig['evaluators'];
   if (raw.evaluators !== undefined) {
     if (
       raw.evaluators === null ||
@@ -144,8 +144,8 @@ const formatGateChange = (relativeChange: number | null): string =>
  * target run are called out and qualify a passing headline, since their slices were never
  * gated at all.
  */
-export const formatGateReportMarkdown = (
-  report: RegressionGateReport,
+export const formatRegressionReportMarkdown = (
+  report: RegressionReport,
   { missingBaselineDatasets = [] }: { missingBaselineDatasets?: string[] } = {}
 ): string => {
   const lines: string[] = [];
@@ -184,9 +184,9 @@ export const formatGateReportMarkdown = (
   return lines.join('\n');
 };
 
-export const logGateReport = (
+export const logRegressionReport = (
   log: SomeDevLog,
-  report: RegressionGateReport,
+  report: RegressionReport,
   { missingBaselineDatasets = [] }: { missingBaselineDatasets?: string[] } = {}
 ): void => {
   const summary = `Regression gates (report-only): ${report.verdict.toUpperCase()} — ${

@@ -6,7 +6,7 @@
  */
 
 import type { ComparisonResult } from '../schemas/experiments/compare_experiments_route.gen';
-import { evaluateRegressionGates, DEFAULT_REGRESSION_GATES } from './gates';
+import { buildRegressionReport, DEFAULT_REGRESSION_REPORT_CONFIG } from './gates';
 
 const slice = (overrides: Partial<ComparisonResult>): ComparisonResult =>
   ({
@@ -24,9 +24,9 @@ const slice = (overrides: Partial<ComparisonResult>): ComparisonResult =>
     ...overrides,
   } as ComparisonResult);
 
-describe('evaluateRegressionGates', () => {
+describe('buildRegressionReport', () => {
   it('fails only when the worse-direction change passes the threshold with significance', () => {
-    const report = evaluateRegressionGates([
+    const report = buildRegressionReport([
       // 25% significant drop on a maximize metric: regression.
       slice({ target: { mean: 0.6, used: 30, missing: 0, stability: null }, pValue: 0.01 }),
       // Same drop without significance: warn, not fail.
@@ -44,7 +44,7 @@ describe('evaluateRegressionGates', () => {
   });
 
   it('never gates improvements, whatever their size and significance', () => {
-    const report = evaluateRegressionGates([
+    const report = buildRegressionReport([
       slice({ target: { mean: 0.99, used: 30, missing: 0, stability: null }, pValue: 0.0001 }),
       // On a minimize metric (e.g. tokens), a drop is the improvement.
       slice({
@@ -61,7 +61,7 @@ describe('evaluateRegressionGates', () => {
   });
 
   it('gates minimize metrics on increases and warns on significant sub-threshold changes', () => {
-    const report = evaluateRegressionGates([
+    const report = buildRegressionReport([
       // 20% significant token increase: regression.
       slice({
         evaluatorName: 'Input Tokens',
@@ -85,7 +85,7 @@ describe('evaluateRegressionGates', () => {
   });
 
   it('skips neutral slices and refuses to fail on a zero baseline mean', () => {
-    const report = evaluateRegressionGates([
+    const report = buildRegressionReport([
       slice({ evaluatorName: 'Analysis', direction: 'neutral', pValue: null }),
       slice({
         evaluatorName: 'Errors',
@@ -104,7 +104,7 @@ describe('evaluateRegressionGates', () => {
   });
 
   it('gates changes landing exactly on a threshold despite floating-point error', () => {
-    const report = evaluateRegressionGates([
+    const report = buildRegressionReport([
       // 1 - 0.92 computes as 0.07999999999999996: exactly the 8% warn boundary.
       slice({
         baseline: { mean: 1, used: 30, missing: 0, stability: null },
@@ -125,7 +125,7 @@ describe('evaluateRegressionGates', () => {
   });
 
   it('does not let the float slack erase a deliberately tiny threshold', () => {
-    const report = evaluateRegressionGates(
+    const report = buildRegressionReport(
       [
         // A 1e-12 nonsignificant worsening sits three orders of magnitude under the 1e-9
         // warn threshold: a fixed absolute tolerance would gate it anyway.
@@ -136,7 +136,7 @@ describe('evaluateRegressionGates', () => {
         }),
       ],
       {
-        defaults: { ...DEFAULT_REGRESSION_GATES.defaults, warnRelativeChange: 1e-9 },
+        defaults: { ...DEFAULT_REGRESSION_REPORT_CONFIG.defaults, warnRelativeChange: 1e-9 },
       }
     );
 
@@ -144,13 +144,13 @@ describe('evaluateRegressionGates', () => {
   });
 
   it('applies per-evaluator overrides on top of the defaults', () => {
-    const report = evaluateRegressionGates(
+    const report = buildRegressionReport(
       [
         // 10% significant drop: passes the 15% default but fails a stricter override.
         slice({ target: { mean: 0.72, used: 30, missing: 0, stability: null }, pValue: 0.01 }),
       ],
       {
-        ...DEFAULT_REGRESSION_GATES,
+        ...DEFAULT_REGRESSION_REPORT_CONFIG,
         evaluators: { Factuality: { failRelativeChange: 0.05 } },
       }
     );

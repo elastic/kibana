@@ -56,6 +56,7 @@ export type {
   TiledSingleLayerVectorSourceDescriptor,
   JoinSourceDescriptor,
   SourceDescriptor,
+  DiscriminatedSourceDescriptor,
 
   //
   // Style types

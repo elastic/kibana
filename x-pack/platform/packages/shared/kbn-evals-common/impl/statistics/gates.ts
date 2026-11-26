@@ -9,7 +9,7 @@ import type { ComparisonResult } from '../schemas/experiments/compare_experiment
 
 export type GateVerdict = 'pass' | 'warn' | 'fail';
 
-export interface RegressionGateThresholds {
+export interface RegressionReportThresholds {
   /**
    * Worse-direction change in the slice mean, as a fraction of the baseline mean, at
    * which the slice fails — but only together with statistical significance, so a large
@@ -22,17 +22,17 @@ export interface RegressionGateThresholds {
   alpha: number;
 }
 
-export interface RegressionGateConfig {
-  defaults: RegressionGateThresholds;
+export interface RegressionReportConfig {
+  defaults: RegressionReportThresholds;
   /** Per-evaluator overrides, keyed by evaluator name as it appears in the scores. */
-  evaluators?: Record<string, Partial<RegressionGateThresholds>>;
+  evaluators?: Record<string, Partial<RegressionReportThresholds>>;
 }
 
 /**
  * Starting values from the regression-evals design: to be tuned once the noise floor of
  * the suite is measured, which is why a gates JSON file can override them per run.
  */
-export const DEFAULT_REGRESSION_GATES: RegressionGateConfig = {
+export const DEFAULT_REGRESSION_REPORT_CONFIG: RegressionReportConfig = {
   defaults: {
     failRelativeChange: 0.15,
     warnRelativeChange: 0.08,
@@ -55,7 +55,7 @@ export interface GateResult {
   reason: string;
 }
 
-export interface RegressionGateReport {
+export interface RegressionReport {
   /** The worst slice verdict: `fail` means a regression was detected. */
   verdict: GateVerdict;
   results: GateResult[];
@@ -77,7 +77,7 @@ const meetsThreshold = (relativeChange: number, threshold: number): boolean =>
 
 const gateSlice = (
   result: ComparisonResult,
-  thresholds: RegressionGateThresholds
+  thresholds: RegressionReportThresholds
 ): Pick<GateResult, 'verdict' | 'relativeChange' | 'reason'> => {
   if (result.direction === 'neutral') {
     return {
@@ -137,12 +137,12 @@ const gateSlice = (
  * threshold and significance, so neither noise nor a trivial-but-significant change
  * fails a run on its own.
  */
-export function evaluateRegressionGates(
+export function buildRegressionReport(
   results: ComparisonResult[],
-  config: RegressionGateConfig = DEFAULT_REGRESSION_GATES
-): RegressionGateReport {
+  config: RegressionReportConfig = DEFAULT_REGRESSION_REPORT_CONFIG
+): RegressionReport {
   const gateResults = results.map((result): GateResult => {
-    const thresholds: RegressionGateThresholds = {
+    const thresholds: RegressionReportThresholds = {
       ...config.defaults,
       ...config.evaluators?.[result.evaluatorName],
     };

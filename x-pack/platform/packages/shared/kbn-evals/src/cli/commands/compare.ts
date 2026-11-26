@@ -7,15 +7,15 @@
 
 import Fs from 'fs';
 import { createFailError, createFlagError } from '@kbn/dev-cli-errors';
-import type { Command } from '@kbn/dev-cli-runner';
+import type { Command, FlagsReader } from '@kbn/dev-cli-runner';
 import { KbnClient } from '@kbn/kbn-client';
 import {
   compareScores,
   pairScores,
-  evaluateRegressionGates,
-  DEFAULT_REGRESSION_GATES,
+  buildRegressionReport,
+  DEFAULT_REGRESSION_REPORT_CONFIG,
   RepetitionPolicy,
-  type RegressionGateConfig,
+  type RegressionReportConfig,
 } from '@kbn/evals-common';
 import type { BaselineExperiment } from '../../utils/evals_client';
 import { EvalsClient } from '../../utils/evals_client';
@@ -26,13 +26,61 @@ import { readSpaceIdsFlag } from '../run_helpers';
 import { formatCompareReport } from '../../utils/reporting/compare_report';
 import { formatMarkdownCompareReport } from '../../utils/reporting/compare_markdown_report';
 import {
-  parseGateConfig,
+  parseRegressionReportConfig,
   findJudgeMismatch,
-  formatGateReportMarkdown,
-  logGateReport,
+  formatRegressionReportMarkdown,
+  logRegressionReport,
 } from './regression_verdict';
+import type {
+  RegressionGateConfig,
+  RegressionGateVerdict,
+} from '../../utils/reporting/regression_gate';
+import {
+  evaluateRegressionGate,
+  inconclusiveVerdict,
+  validateRegressionGateConfig,
+} from '../../utils/reporting/regression_gate';
 
 const DEFAULT_EVAL_KBN_URL = 'http://elastic:changeme@localhost:5601';
+
+const readNumberFlag = (flagsReader: FlagsReader, name: string): number => {
+  const value = Number(flagsReader.string(name));
+  if (!Number.isFinite(value)) {
+    throw createFlagError(`--${name} must be a number.`);
+  }
+  return value;
+};
+
+/** The regression gate from the `--gate-*` flags, or `undefined` when none are set. */
+const readRegressionGateFlags = (flagsReader: FlagsReader): RegressionGateConfig | undefined => {
+  const names = [
+    'gate-dataset',
+    'gate-evaluator',
+    'gate-min-drop',
+    'gate-alpha',
+    'gate-max-baseline-age-days',
+  ];
+  const missing = names.filter((name) => !flagsReader.string(name));
+  if (missing.length === names.length) {
+    return undefined;
+  }
+  if (missing.length > 0) {
+    throw createFlagError(`The --gate-* flags go together; missing --${missing.join(', --')}.`);
+  }
+  const gate = {
+    dataset: flagsReader.requiredString('gate-dataset'),
+    evaluator: flagsReader.requiredString('gate-evaluator'),
+    minAbsoluteDrop: readNumberFlag(flagsReader, 'gate-min-drop'),
+    alpha: readNumberFlag(flagsReader, 'gate-alpha'),
+    maxBaselineAgeDays: readNumberFlag(flagsReader, 'gate-max-baseline-age-days'),
+  };
+  // Out-of-range thresholds would produce wrong verdicts, e.g. an alpha of 2 flags noise.
+  const problems = validateRegressionGateConfig(gate);
+  if (problems.length > 0) {
+    throw createFlagError(`Invalid --gate-* flags: ${problems.join('; ')}.`);
+  }
+  return gate;
+};
 
 export const compareCmd: Command<void> = {
   name: 'compare',
@@ -52,7 +100,7 @@ export const compareCmd: Command<void> = {
   Options:
     --baseline-branch  Branch to find the latest baseline experiment on (e.g. "main")
     --baseline-pinned  Compare against the suite's pinned baseline (see "evals ext pin-baseline")
-    --gates            Path to a JSON file overriding the default regression gate thresholds
+    --report-gates     Path to a JSON file overriding the default regression report thresholds
     --suite            Suite ID filter for baseline lookup and score filtering
     --format           Output format: "terminal" (default) or "markdown"
     --kibana-url       Kibana URL for generating compare page links in markdown
@@ -60,6 +108,12 @@ export const compareCmd: Command<void> = {
     --refresh-url      URL to include as a "Refresh Baseline" link in markdown output
     --space-ids        Spaces the experiments were run in (same value as "evals run")
     --repetition-policy  How repetitions of one example are compared: "mean" (default) or "median"
+
+  Regression gate (all gate flags together; see "regressionGate" in evals.suites.json):
+    --gate-dataset, --gate-evaluator      The gated (dataset, evaluator) slice
+    --gate-min-drop, --gate-alpha         A regression drops by at least this much with p below alpha
+    --gate-max-baseline-age-days          Older baselines make the verdict inconclusive
+    --verdict-output                      Write the verdict as JSON to this file
 
   Environment:
     EVAL_KBN_URL      Target Kibana URL (defaults to localhost)
@@ -69,7 +123,7 @@ export const compareCmd: Command<void> = {
   flags: {
     string: [
       'baseline-branch',
-      'gates',
+      'report-gates',
       'suite',
       'format',
       'kibana-url',
@@ -77,12 +131,18 @@ export const compareCmd: Command<void> = {
       'refresh-url',
       'space-ids',
       'repetition-policy',
+      'gate-dataset',
+      'gate-evaluator',
+      'gate-min-drop',
+      'gate-alpha',
+      'gate-max-baseline-age-days',
+      'verdict-output',
     ],
     boolean: ['baseline-pinned'],
     help: `
       --baseline-branch  Branch to find the latest baseline experiment on
       --baseline-pinned  Compare against the suite's pinned baseline instead of a branch run
-      --gates            Path to a JSON file overriding the default regression gate thresholds
+      --report-gates     Path to a JSON file overriding the default regression report thresholds
       --suite            Suite ID filter for baseline lookup and score filtering
       --format           Output format: "terminal" (default) or "markdown"
       --kibana-url       Kibana URL for generating compare page links in markdown
@@ -90,13 +150,19 @@ export const compareCmd: Command<void> = {
       --refresh-url      URL to include as a "Refresh Baseline" link in markdown output
       --space-ids        Spaces the experiments were run in
       --repetition-policy  "mean" (default) or "median" of each example's repetitions
+      --gate-dataset       Dataset name of the gated slice
+      --gate-evaluator     Evaluator name of the gated slice
+      --gate-min-drop      Smallest absolute drop that counts as a regression (e.g. 0.1)
+      --gate-alpha         Significance level for the gated slice (e.g. 0.05)
+      --gate-max-baseline-age-days  Baselines older than this make the verdict inconclusive
+      --verdict-output     Write the regression gate verdict as JSON to this file
     `,
   },
   run: async ({ log, flagsReader }) => {
     const positionals = flagsReader.getPositionals();
     const baselineBranch = flagsReader.string('baseline-branch');
     const baselinePinned = flagsReader.boolean('baseline-pinned');
-    const gatesPath = flagsReader.string('gates');
+    const reportGatesPath = flagsReader.string('report-gates');
     const suiteId = flagsReader.string('suite');
     const format = flagsReader.string('format') ?? 'terminal';
     const kibanaUrl = flagsReader.string('kibana-url');
@@ -121,17 +187,17 @@ export const compareCmd: Command<void> = {
     if (baselinePinned && baselineBranch) {
       throw createFlagError('--baseline-pinned and --baseline-branch are mutually exclusive.');
     }
-    if (gatesPath && !baselinePinned) {
-      throw createFlagError('--gates only applies with --baseline-pinned.');
+    if (reportGatesPath && !baselinePinned) {
+      throw createFlagError('--report-gates only applies with --baseline-pinned.');
     }
 
-    let gateConfig: RegressionGateConfig = DEFAULT_REGRESSION_GATES;
-    if (gatesPath) {
+    let reportConfig: RegressionReportConfig = DEFAULT_REGRESSION_REPORT_CONFIG;
+    if (reportGatesPath) {
       try {
-        gateConfig = parseGateConfig(Fs.readFileSync(gatesPath, 'utf-8'));
+        reportConfig = parseRegressionReportConfig(Fs.readFileSync(reportGatesPath, 'utf-8'));
       } catch (error) {
         throw createFlagError(
-          `Could not read gate thresholds from "${gatesPath}": ${
+          `Could not read report thresholds from "${reportGatesPath}": ${
             error instanceof Error ? error.message : String(error)
           }`
         );
@@ -164,6 +230,22 @@ export const compareCmd: Command<void> = {
         throw createFailError(message);
       }
       emitMarkdownNote(heading, message);
+    };
+
+    const regressionGate = readRegressionGateFlags(flagsReader);
+    const verdictOutputPath = flagsReader.string('verdict-output');
+    if (verdictOutputPath && !regressionGate) {
+      throw createFlagError('--verdict-output requires the --gate-* flags.');
+    }
+    if (regressionGate && !suiteId) {
+      // The baseline's age, which the gate checks, is looked up per suite.
+      throw createFlagError('The --gate-* flags require --suite.');
+    }
+    const writeVerdict = (verdict: RegressionGateVerdict) => {
+      log.info(`Regression gate: ${verdict.state} (${verdict.summary})`);
+      if (verdictOutputPath) {
+        Fs.writeFileSync(verdictOutputPath, JSON.stringify(verdict));
+      }
     };
 
     const evaluationsKbnUrl = process.env.EVAL_KBN_URL;
@@ -329,6 +411,9 @@ export const compareCmd: Command<void> = {
         log.warning(
           `No baseline experiment found for suite ${suiteId} on branch ${baselineBranch}. Nothing to compare.`
         );
+        if (regressionGate) {
+          writeVerdict(inconclusiveVerdict(`no baseline on ${baselineBranch}`));
+        }
         return;
       }
 
@@ -370,7 +455,8 @@ export const compareCmd: Command<void> = {
           resolveIfNeeded(baselineExperimentId),
         ]);
 
-        if (format === 'markdown') {
+        // The regression gate needs the baseline's age, whatever the output format.
+        if (format === 'markdown' || regressionGate) {
           const baselineBaseId = baselineExperimentId.includes('::')
             ? baselineExperimentId.split('::')[0]
             : baselineExperimentId;
@@ -409,8 +495,13 @@ export const compareCmd: Command<void> = {
 
     // An empty target is a missing-run problem, not a judge problem: handle it before
     // the judge match, or a run that exported nothing would be reported as a judge
-    // mismatch and point reviewers at the baseline instead of at the missing scores.
+    // mismatch and point reviewers at the baseline instead of at the missing scores. For
+    // the merge gate it is inconclusive rather than a regression: a run without scores
+    // can't be told apart from an infra failure.
     if (targetExperimentScores.length === 0) {
+      if (regressionGate) {
+        writeVerdict(inconclusiveVerdict('the PR run produced no scores'));
+      }
       if (pinnedBaselineId) {
         abortComparison(
           '⚠️ Pinned-baseline comparison unavailable',
@@ -437,6 +528,9 @@ export const compareCmd: Command<void> = {
     }
 
     if (baselineExperimentScores.length === 0) {
+      if (regressionGate) {
+        writeVerdict(inconclusiveVerdict('the baseline has no scores'));
+      }
       throw new Error(`No scores found for experiment ID: ${baselineExperimentId}`);
     }
 
@@ -504,15 +598,31 @@ export const compareCmd: Command<void> = {
     const results = compareScores(pairs, repetitions);
     if (results.length === 0) {
       log.warning('No comparison results returned.');
+      if (regressionGate) {
+        writeVerdict(inconclusiveVerdict('no comparison results'));
+      }
       return;
     }
 
-    // The regression decision, only against a pinned baseline: a branch-mode baseline is
+    // The regression report, only against a pinned baseline: a branch-mode baseline is
     // whatever happened to run last, not a reference anyone promoted. Report-only —
     // verdicts never change the exit code until the suite's noise floor is known.
-    const gateReport = pinnedBaselineId ? evaluateRegressionGates(results, gateConfig) : undefined;
-    if (gateReport) {
-      logGateReport(log, gateReport, { missingBaselineDatasets });
+    const regressionReport = pinnedBaselineId
+      ? buildRegressionReport(results, reportConfig)
+      : undefined;
+    if (regressionReport) {
+      logRegressionReport(log, regressionReport, { missingBaselineDatasets });
+    }
+
+    const regressionGateVerdict = regressionGate
+      ? evaluateRegressionGate({
+          results,
+          gate: regressionGate,
+          baselineTimestamp: baselineMetadata?.timestamp,
+        })
+      : undefined;
+    if (regressionGateVerdict) {
+      writeVerdict(regressionGateVerdict);
     }
 
     if (format === 'markdown') {
@@ -533,8 +643,8 @@ export const compareCmd: Command<void> = {
         log.warning('Invalid Kibana URL for compare page link.');
       }
 
-      const verdictMarkdown = gateReport
-        ? formatGateReportMarkdown(gateReport, { missingBaselineDatasets }) + '\n\n'
+      const verdictMarkdown = regressionReport
+        ? formatRegressionReportMarkdown(regressionReport, { missingBaselineDatasets }) + '\n\n'
         : '';
       const markdown = formatMarkdownCompareReport({
         targetExperimentId,
@@ -550,6 +660,7 @@ export const compareCmd: Command<void> = {
         repetitionPolicy,
         rejectedSlices: rejectedNames,
         pinnedBaseline: Boolean(pinnedBaselineId),
+        regressionGateVerdict,
       });
 
       if (outputPath) {

@@ -7,6 +7,7 @@
 
 import { isImproved, PARAMETRIC_UPGRADE_MIN_PAIRS } from '@kbn/evals-common';
 import type { Direction, ComparisonResult, RepetitionPolicy } from '@kbn/evals-common';
+import type { RegressionGateVerdict } from './regression_gate';
 import { formatDiscordantPairs, getTestLabel } from './test_label';
 
 const DEFAULT_SIGNIFICANCE_THRESHOLD = 0.05;
@@ -66,6 +67,17 @@ function relativeAge(days: number): string {
   return `${days} days ago`;
 }
 
+function formatRegressionGateVerdict({ state, summary }: RegressionGateVerdict): string {
+  switch (state) {
+    case 'regression':
+      return `**Merge gate: regression.** ${summary}. Fix it, or add the \`evals:accept-regression\` label to merge anyway.`;
+    case 'pass':
+      return `**Merge gate: passed.** ${summary.charAt(0).toUpperCase()}${summary.slice(1)}.`;
+    case 'inconclusive':
+      return `**Merge gate: not enforced.** The comparison is inconclusive: ${summary}.`;
+  }
+}
+
 export function formatMarkdownCompareReport({
   targetExperimentId,
   baselineExperimentId,
@@ -81,6 +93,7 @@ export function formatMarkdownCompareReport({
   repetitionPolicy = 'mean',
   rejectedSlices = [],
   pinnedBaseline = false,
+  regressionGateVerdict,
 }: {
   targetExperimentId: string;
   baselineExperimentId: string;
@@ -100,6 +113,8 @@ export function formatMarkdownCompareReport({
    * such and skip the staleness warning, which only makes sense for a branch that moves.
    */
   pinnedBaseline?: boolean;
+  /** Puts the suite's merge gate verdict above the report. */
+  regressionGateVerdict?: RegressionGateVerdict;
 }): string {
   const sortedResults = [...results].sort(
     (a, b) =>
@@ -121,6 +136,10 @@ export function formatMarkdownCompareReport({
   const baselineLabel = pinnedBaseline ? 'pinned' : baselineBranch;
 
   const lines: string[] = [];
+
+  if (regressionGateVerdict) {
+    lines.push(formatRegressionGateVerdict(regressionGateVerdict), '');
+  }
 
   lines.push(
     `**PR run**: ${targetExperimentId} | **Baseline (${baselineLabel})**: ${baselineExperimentId}`

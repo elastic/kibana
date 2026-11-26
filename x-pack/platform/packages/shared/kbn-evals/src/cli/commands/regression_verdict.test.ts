@@ -5,26 +5,32 @@
  * 2.0.
  */
 
-import type { EvaluationScoreDocument, RegressionGateReport } from '@kbn/evals-common';
-import { DEFAULT_REGRESSION_GATES } from '@kbn/evals-common';
-import { parseGateConfig, findJudgeMismatch, formatGateReportMarkdown } from './regression_verdict';
+import type { EvaluationScoreDocument, RegressionReport } from '@kbn/evals-common';
+import { DEFAULT_REGRESSION_REPORT_CONFIG } from '@kbn/evals-common';
+import {
+  parseRegressionReportConfig,
+  findJudgeMismatch,
+  formatRegressionReportMarkdown,
+} from './regression_verdict';
 
 const judgeScore = (modelId: string | undefined, kind: 'llm' | 'code' = 'llm') =>
   ({
     evaluator: { kind, model: modelId ? { id: modelId } : undefined },
   } as unknown as EvaluationScoreDocument);
 
-describe('parseGateConfig', () => {
+describe('parseRegressionReportConfig', () => {
   it('merges partial overrides over the defaults', () => {
-    const config = parseGateConfig(JSON.stringify({ defaults: { failRelativeChange: 0.2 } }));
+    const config = parseRegressionReportConfig(
+      JSON.stringify({ defaults: { failRelativeChange: 0.2 } })
+    );
     expect(config.defaults).toEqual({
-      ...DEFAULT_REGRESSION_GATES.defaults,
+      ...DEFAULT_REGRESSION_REPORT_CONFIG.defaults,
       failRelativeChange: 0.2,
     });
   });
 
   it('accepts per-evaluator overrides and keeps them partial', () => {
-    const config = parseGateConfig(
+    const config = parseRegressionReportConfig(
       JSON.stringify({ evaluators: { Factuality: { warnRelativeChange: 0.02 } } })
     );
     expect(config.evaluators).toEqual({ Factuality: { warnRelativeChange: 0.02 } });
@@ -49,11 +55,11 @@ describe('parseGateConfig', () => {
       { evaluators: { Factuality: { failRelativeChange: 0.05 } } },
     ],
   ])('rejects invalid gates JSON: %s', (_label, invalid) => {
-    expect(() => parseGateConfig(JSON.stringify(invalid))).toThrow();
+    expect(() => parseRegressionReportConfig(JSON.stringify(invalid))).toThrow();
   });
 
   it('rejects files that are not JSON at all', () => {
-    expect(() => parseGateConfig('{nope')).toThrow(/not valid JSON/);
+    expect(() => parseRegressionReportConfig('{nope')).toThrow(/not valid JSON/);
   });
 });
 
@@ -104,8 +110,8 @@ describe('findJudgeMismatch', () => {
   });
 });
 
-describe('formatGateReportMarkdown', () => {
-  const report = (overrides: Partial<RegressionGateReport>): RegressionGateReport => ({
+describe('formatRegressionReportMarkdown', () => {
+  const report = (overrides: Partial<RegressionReport>): RegressionReport => ({
     verdict: 'pass',
     results: [],
     regressions: [],
@@ -123,7 +129,9 @@ describe('formatGateReportMarkdown', () => {
       pValue: 0.01,
       reason: 'worsened',
     };
-    const markdown = formatGateReportMarkdown(report({ verdict: 'fail', regressions: [gate] }));
+    const markdown = formatRegressionReportMarkdown(
+      report({ verdict: 'fail', regressions: [gate] })
+    );
     expect(markdown).toContain('ES\\|QL suite');
     expect(markdown).toContain('ES\\|QL Completeness');
     // Every table row keeps the 5-column shape despite the pipes in the names.
@@ -132,7 +140,7 @@ describe('formatGateReportMarkdown', () => {
   });
 
   it('qualifies a passing verdict when baseline datasets are missing from the run', () => {
-    const markdown = formatGateReportMarkdown(report({}), {
+    const markdown = formatRegressionReportMarkdown(report({}), {
       missingBaselineDatasets: ['BrowseComp-Plus'],
     });
     expect(markdown).toContain('partial coverage');
@@ -141,7 +149,7 @@ describe('formatGateReportMarkdown', () => {
   });
 
   it('leaves a full-coverage pass headline unqualified', () => {
-    expect(formatGateReportMarkdown(report({}))).toContain(
+    expect(formatRegressionReportMarkdown(report({}))).toContain(
       'No regression against the pinned baseline'
     );
   });

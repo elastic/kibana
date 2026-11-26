@@ -47,16 +47,16 @@ export {
   resolveDirection,
   isImproved,
   PARAMETRIC_UPGRADE_MIN_PAIRS,
-  evaluateRegressionGates,
-  DEFAULT_REGRESSION_GATES,
+  buildRegressionReport,
+  DEFAULT_REGRESSION_REPORT_CONFIG,
 } from './impl/statistics';
 export type {
   PairedScore,
   GateVerdict,
   GateResult,
-  RegressionGateConfig,
-  RegressionGateThresholds,
-  RegressionGateReport,
+  RegressionReportConfig,
+  RegressionReportThresholds,
+  RegressionReport,
 } from './impl/statistics';
 export {
   DEFAULT_JUDGE_SCORE_DIRECTION,

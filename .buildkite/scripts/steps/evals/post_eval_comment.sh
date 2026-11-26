@@ -18,6 +18,31 @@ set -euo pipefail
 #    reconstructs the PR composite from that base ID + suite + model extracted from
 #    this build's composite, then calls `compare <pr-composite> <fresh-composite>`.
 
+suite_key() {
+  printf '%s' "$1" | tr '[:upper:]' '[:lower:]' | sed -E 's/[^a-z0-9_-]+/-/g; s/-+/-/g; s/^-|-$//g'
+}
+
+# `compare` writes each gated suite's regression verdict here; an absent file means no verdict.
+VERDICT_DIR="$(mktemp -d -t kbn-evals-verdicts.XXXXXX)"
+MARKDOWN_FILE=""
+
+# Posts an inconclusive verdict for every suite that didn't get one, e.g. when bootstrap fails, so
+# the `evals gate` doesn't wait forever. regression_gate.ts only needs the .buildkite deps (installed
+# by pre_command) and no-ops for ungated suites and non-PR builds.
+on_exit() {
+  if [[ -z "${FRESH_BASELINE_PR_EXPERIMENT_ID:-}" ]]; then
+    local suite
+    IFS=',' read -ra _exit_suites <<<"${EVAL_SUITE_IDS:-}"
+    for suite in ${_exit_suites[@]+"${_exit_suites[@]}"}; do
+      suite="$(printf '%s' "$suite" | xargs)"
+      [[ -z "$suite" || -e "${VERDICT_DIR}/$(suite_key "$suite").posted" ]] && continue
+      node .buildkite/scripts/steps/evals/regression_gate.ts post "$suite" "${VERDICT_DIR}/none.json" || true
+    done
+  fi
+  rm -rf "${MARKDOWN_FILE:-}" "$VERDICT_DIR"
+}
+trap on_exit EXIT
+
 # Bootstrap is required so that workspace packages (e.g. @kbn/setup-node-env)
 # are available when calling `node scripts/evals compare`.
 .buildkite/scripts/bootstrap.sh
@@ -49,7 +74,6 @@ if [[ -z "$EVAL_SUITE_IDS" ]]; then
 fi
 
 MARKDOWN_FILE="$(mktemp -t kbn-evals-compare.XXXXXX.md)"
-trap 'rm -f "$MARKDOWN_FILE"' EXIT
 
 HAS_RESULTS="false"
 
@@ -60,7 +84,8 @@ for suite_id in "${SUITE_ARRAY[@]}"; do
 
   echo "--- Comparing eval results for suite: ${suite_id}"
 
-  _suite_key_safe="$(printf '%s' "$suite_id" | tr '[:upper:]' '[:lower:]' | sed -E 's/[^a-z0-9_-]+/-/g; s/-+/-/g; s/^-|-$//g')"
+  _suite_key_safe="$(suite_key "$suite_id")"
+  VERDICT_FILE="${VERDICT_DIR}/${_suite_key_safe}.json"
 
   BASE_COMPARE_ARGS=(
     --suite "$suite_id"
@@ -73,10 +98,23 @@ for suite_id in "${SUITE_ARRAY[@]}"; do
 
   # Suites that opted in (pinnedBaseline in evals.suites.json) compare against their
   # pinned baseline instead of the latest run on main.
-  SUITE_PINNED_BASELINE="$(
-    node x-pack/platform/packages/shared/kbn-evals/scripts/ci/get_suite_info.js "$suite_id" 2>/dev/null \
-      | jq -r '.pinnedBaseline // false' 2>/dev/null || echo false
+  SUITE_INFO_JSON="$(
+    node x-pack/platform/packages/shared/kbn-evals/scripts/ci/get_suite_info.js "$suite_id" 2>/dev/null || echo '{}'
   )"
+  SUITE_PINNED_BASELINE="$(printf '%s' "$SUITE_INFO_JSON" | jq -r '.pinnedBaseline // false' 2>/dev/null || echo false)"
+
+  # The report thresholds come from the suite entry (regressionReportGates), not from
+  # framework defaults: the suite owns its gates. Absent config falls back to the CLI's
+  # built-in placeholders.
+  REPORT_GATES_ARGS=()
+  if [[ "$SUITE_PINNED_BASELINE" == "true" ]]; then
+    SUITE_REPORT_GATES="$(printf '%s' "$SUITE_INFO_JSON" | jq -c '.regressionReportGates // empty' 2>/dev/null || true)"
+    if [[ -n "$SUITE_REPORT_GATES" ]]; then
+      REPORT_GATES_FILE="$(mktemp -t report_gates_XXXXXX.json)"
+      printf '%s' "$SUITE_REPORT_GATES" >"$REPORT_GATES_FILE"
+      REPORT_GATES_ARGS=(--report-gates "$REPORT_GATES_FILE")
+    fi
+  fi
 
   # A fresh-baseline run for a pinned suite would post an ungated branch comparison over
   # the pinned verdict in the same PR comment slot; the pin is the reference, so skip it.
@@ -126,11 +164,22 @@ for suite_id in "${SUITE_ARRAY[@]}"; do
       else
         if [[ "$SUITE_PINNED_BASELINE" == "true" ]]; then
           COMPARE_ARGS+=(--baseline-pinned)
+          if [[ ${#REPORT_GATES_ARGS[@]} -gt 0 ]]; then
+            COMPARE_ARGS+=("${REPORT_GATES_ARGS[@]}")
+          fi
         else
           COMPARE_ARGS+=(--baseline-branch main)
           if [[ -n "${BUILDKITE_BUILD_URL:-}" ]]; then
             COMPARE_ARGS+=(--refresh-url "${BUILDKITE_BUILD_URL}#kbn-evals-${_suite_key_safe}-refresh-block")
           fi
+        fi
+        # Empty unless this suite has a regressionGate and this is its gate model's connector.
+        GATE_ARGS=()
+        mapfile -t GATE_ARGS < <(
+          node .buildkite/scripts/steps/evals/regression_gate.ts args "$suite_id" "$connector_id" || true
+        )
+        if [[ ${#GATE_ARGS[@]} -gt 0 ]]; then
+          COMPARE_ARGS+=("${GATE_ARGS[@]}" --verdict-output "$VERDICT_FILE")
         fi
         if node scripts/evals compare "$CONNECTOR_COMPOSITE" "${COMPARE_ARGS[@]}"; then
           HAS_RESULTS="true"
@@ -168,6 +217,9 @@ for suite_id in "${SUITE_ARRAY[@]}"; do
     else
       if [[ "$SUITE_PINNED_BASELINE" == "true" ]]; then
         COMPARE_ARGS+=(--baseline-pinned)
+        if [[ ${#REPORT_GATES_ARGS[@]} -gt 0 ]]; then
+          COMPARE_ARGS+=("${REPORT_GATES_ARGS[@]}")
+        fi
       else
         COMPARE_ARGS+=(--baseline-branch main)
         if [[ -n "${BUILDKITE_BUILD_URL:-}" ]]; then
@@ -185,6 +237,12 @@ for suite_id in "${SUITE_ARRAY[@]}"; do
         fi
       fi
     fi
+  fi
+
+  # Fresh-baseline builds run on main, so they have no PR commit to post the verdict to.
+  if [[ -z "$FRESH_BASELINE_PR_EXPERIMENT_ID" ]]; then
+    node .buildkite/scripts/steps/evals/regression_gate.ts post "$suite_id" "$VERDICT_FILE" || true
+    touch "${VERDICT_DIR}/${_suite_key_safe}.posted"
   fi
 done
 
