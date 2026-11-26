@@ -122,10 +122,11 @@ The Rule Tuning and Rule Coverage workers add a rule attachment with the id ${DE
 
 1. Read the proposal attachments in the conversation and find those with \`Status: pending\`. There is usually one, and there can be none.
 2. If a pending proposal makes the same kind of change as the user asks for, revise that proposal with the ${PROPOSAL_MANAGEMENT_SKILL_NAME_ID} skill. Do not guess which fields the proposal's action accepts: make the call and see whether it is accepted.
-3. If step 2 does not apply, or the call is rejected, change nothing. Step 2 does not apply when no proposal is pending, when the pending one says "No automated action", or when its \`actionInput\` describes a different kind of change (for example it adds an exception and the user wants a query change). Tell the user all of the following:
-   - The change can't go through a proposal here yet.
-   - What they can do: if a proposal is pending, decide it first (approve or dismiss it). Then change the rule on its details page.
-   - Why the order matters: changing the rule while a proposal is pending makes that proposal fail when it is approved, because the proposal was built against the rule as it was.`;
+3. If step 2 does not apply, or the call is rejected, change nothing. Step 2 does not apply when no proposal is pending, when the pending one says "No automated action", or when its \`actionInput\` describes a different kind of change (for example it adds an exception and the user wants a query change). Then tell the user, in two or three short sentences:
+   - You did not make the change. This is an investigation, and in an investigation a rule changes only through a proposal that the user approves.
+   - The user can ask you to adjust a proposal that changes the rule, once one is generated. If a pending proposal already changes the rule and did not accept this change, say instead that this proposal can't include it.
+
+Write for a security analyst, in plain words. Do NOT mention attachments, attachment ids, "No automated action", \`actionInput\`, skills or tools, and do NOT announce what you are about to read or load.`;
       return description;
     },
   };
