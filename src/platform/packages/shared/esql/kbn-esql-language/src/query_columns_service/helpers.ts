@@ -17,7 +17,11 @@ import {
 } from '../commands/registry/types';
 import type { IAdditionalFields } from '../commands/registry/registry';
 import { enrichFieldsWithECSInfo } from './enrich_fields_with_ecs';
-import { columnIsPresent, columnsWithFlattenedKeys } from '../commands/definitions/utils/columns';
+import {
+  columnIsPresent,
+  columnsWithFlattenedKeys,
+  escapeEsqlColumnName,
+} from '../commands/definitions/utils/columns';
 import { getUnmappedFieldType } from '../commands/definitions/utils/settings';
 import { getLookupJoinSource } from '../commands/definitions/utils/sources';
 import { getIndexFromPromQLParams } from '../commands/definitions/utils/promql';
@@ -57,15 +61,19 @@ function createGetEnrichFields(
       return [];
     }
 
-    const policyName = command.args[0].name;
+    // source.name keeps a mode prefix (_any, _coordinator, _remote). Policies are keyed by the bare name.
+    const policyName = command.args[0].index?.valueUnquoted;
+    if (!policyName) {
+      return [];
+    }
 
     const policies = await getPolicies();
     const policy = policies.get(policyName);
 
     if (policy) {
-      const fieldsQuery = `FROM ${policy.sourceIndices.join(
-        ', '
-      )} | KEEP ${policy.enrichFields.join(', ')}`;
+      const fieldsQuery = `FROM ${policy.sourceIndices.join(', ')} | KEEP ${policy.enrichFields
+        .map((field) => escapeEsqlColumnName(field))
+        .join(', ')}`;
       return fetchFields(fieldsQuery);
     }
 
