@@ -32,6 +32,7 @@ import type { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
 import { esFieldTypeToKibanaFieldType } from '@kbn/field-types';
 import type { FieldFormat, FieldFormatsStartCommon } from '@kbn/field-formats-plugin/common';
 import type { Column, DataSourceBase, FormatterField, SerializedDataSource } from '../types';
+import { getFormatterEsTypes } from '../formatter_field';
 import { columnFromDatatableColumn, columnToFieldBase } from '../to_column';
 import { sha256 } from '../sha256';
 import { buildFilterableFieldSpecs } from '../filterable_fields';
@@ -350,7 +351,7 @@ export class EsqlSource implements DataSourceBase {
   public getFormatter(field: FormatterField, fieldFormats: FieldFormatsStartCommon): FieldFormat {
     return fieldFormats.getDefaultInstance(
       field.type as KBN_FIELD_TYPES,
-      field.esTypes as ES_FIELD_TYPES[]
+      getFormatterEsTypes(field) as ES_FIELD_TYPES[]
     );
   }
 

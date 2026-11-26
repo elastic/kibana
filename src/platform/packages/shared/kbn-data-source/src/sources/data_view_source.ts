@@ -14,6 +14,7 @@ import type { FieldFormat } from '@kbn/field-formats-plugin/common';
 import type { SavedObjectReference } from '@kbn/core-saved-objects-common';
 import type { Column, DataSourceBase, FormatterField, SerializedDataSource } from '../types';
 import { columnFromDataViewField } from '../to_column';
+import { getFormatterEsTypes } from '../formatter_field';
 import type { FilterableSource } from '../filterable_source';
 
 /**
@@ -76,7 +77,12 @@ export class DataViewSource implements DataSourceBase {
   }
 
   public getFormatter(field: FormatterField): FieldFormat {
-    return this.dataView.getFormatterForField(field);
+    return this.dataView.getFormatterForField({
+      name: field.name,
+      type: field.type,
+      esTypes: getFormatterEsTypes(field),
+      defaultFormatter: field.defaultFormatter,
+    });
   }
 
   public async getFilterableFields(): Promise<readonly Column[]> {

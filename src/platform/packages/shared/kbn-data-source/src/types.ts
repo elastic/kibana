@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DataViewBase } from '@kbn/es-query';
+import type { DataViewBase, DataViewFieldBase } from '@kbn/es-query';
+import type { FieldSpec } from '@kbn/data-views-plugin/common';
 import type { SavedObjectReference } from '@kbn/core-saved-objects-common';
 import type { KBN_FIELD_TYPES } from '@kbn/field-types';
 import type { FieldFormat, FieldFormatsStartCommon } from '@kbn/field-formats-plugin/common';
@@ -54,14 +55,12 @@ export interface Column {
  */
 /**
  * What a formatter needs to know about a field. A `DataViewField`, a `FilterableField` of `source.fields` or
- * an ES|QL column fit as they are. `defaultFormatter` is the default of a mapped field, a data view honors it.
+ * a {@link Column} fit as they are. A `Column` has one Elasticsearch type, `esType`, used when `esTypes` is
+ * missing. `defaultFormatter` is the default of a mapped field, a data view honors it.
  */
-export interface FormatterField {
-  name: string;
-  type: string;
-  esTypes?: string[];
-  defaultFormatter?: string;
-}
+export type FormatterField = DataViewFieldBase &
+  Pick<FieldSpec, 'defaultFormatter'> &
+  Pick<Column, 'esType'>;
 
 export interface DataSourceBase extends DataViewBase {
   readonly kind: DataSourceKind;

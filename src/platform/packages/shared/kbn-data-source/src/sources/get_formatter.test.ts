@@ -14,11 +14,12 @@ import type { FieldFormatsGetConfigFn } from '@kbn/field-formats-plugin/common';
 import { DataViewSource } from './data_view_source';
 import { EsqlSource } from './esql_source';
 
-// The date formatters are registered by the plugin, not by `baseFormatters`, so dates map to another one
+// The date formatters are registered by the plugin, not by `baseFormatters`, so dates map to another one.
+// `date_nanos` is keyed by an Elasticsearch type (`es: true`), which wins over the Kibana type `date`.
 const defaultTypeMap = {
   ip: { id: 'ip', params: {} },
   date: { id: 'relative_date', params: {} },
-  date_nanos: { id: 'relative_date', params: {} },
+  date_nanos: { id: 'duration', params: {}, es: true },
   number: { id: 'number', params: {} },
   boolean: { id: 'boolean', params: {} },
   geo_point: { id: 'geo_point', params: {} },
@@ -68,6 +69,14 @@ const buildDataView = (
     },
   });
 
+const getTestField = (name: string) => {
+  const field = fieldsToTest.find((candidate) => candidate.name === name);
+  if (!field) {
+    throw new Error(`There is no test field ${name}`);
+  }
+  return field;
+};
+
 const getDataViewField = (dataView: DataView, name: string) => {
   const field = dataView.fields.getByName(name);
   if (!field) {
@@ -108,8 +117,43 @@ describe('getFormatter', () => {
 
       // the types do not all share one formatter, so the comparison above discriminates
       expect(new Set(ids)).toEqual(
-        new Set(['string', 'number', 'relative_date', 'boolean', 'ip', 'geo_point'])
+        new Set(['string', 'number', 'relative_date', 'duration', 'boolean', 'ip', 'geo_point'])
       );
+    });
+
+    it('formats a date_nanos field by its Elasticsearch type, not as an ordinary date', async () => {
+      const fieldFormats = buildFieldFormats();
+      const dataView = buildDataView(fieldFormats);
+      const source = await EsqlSource.create({ query: 'FROM logs-*', resultColumns: [] });
+      const preciseTime = getTestField('precise_time');
+
+      const ordinaryDate = source.getFormatter(getTestField('@timestamp'), fieldFormats);
+      const nanosDate = source.getFormatter(preciseTime, fieldFormats);
+
+      expect(ordinaryDate.type.id).toBe('relative_date');
+      expect(nanosDate.type.id).toBe('duration');
+      expect(nanosDate.toJSON()).toEqual(
+        dataView.getFormatterForField(getDataViewField(dataView, preciseTime.name)).toJSON()
+      );
+    });
+
+    it('formats a column of getColumns() by its Elasticsearch type', async () => {
+      const fieldFormats = buildFieldFormats();
+      const source = await EsqlSource.create({
+        query: 'FROM logs-*',
+        resultColumns: [
+          { id: '@timestamp', name: '@timestamp', meta: { type: 'date', esType: 'date' } },
+          {
+            id: 'precise_time',
+            name: 'precise_time',
+            meta: { type: 'date', esType: 'date_nanos' },
+          },
+        ],
+      });
+      const [date, nanosDate] = source.getColumns();
+
+      expect(source.getFormatter(date, fieldFormats).type.id).toBe('relative_date');
+      expect(source.getFormatter(nanosDate, fieldFormats).type.id).toBe('duration');
     });
 
     it('formats a field of source.fields and of the filterable source as they are', async () => {
@@ -169,6 +213,14 @@ describe('getFormatter', () => {
         );
       });
       expect(source.getFormatter(fieldsToTest[2]).type.id).toBe('percent');
+    });
+
+    it('formats a column of getColumns() by its Elasticsearch type', () => {
+      const source = new DataViewSource(buildDataView(buildFieldFormats()));
+      const column = source.getColumns().find(({ name }) => name === 'precise_time');
+
+      expect(column?.esType).toBe('date_nanos');
+      expect(column && source.getFormatter(column).type.id).toBe('duration');
     });
 
     it('is the formatter of the data view for its own fields, as classes', () => {
