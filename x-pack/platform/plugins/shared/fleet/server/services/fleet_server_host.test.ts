@@ -22,7 +22,11 @@ import {
 } from '../constants';
 
 import { appContextService } from './app_context';
-import { fleetServerHostService, migrateSettingsToFleetServerHost } from './fleet_server_host';
+import {
+  fleetServerHostService,
+  getFleetServerHostsForAgentPolicy,
+  migrateSettingsToFleetServerHost,
+} from './fleet_server_host';
 import { agentPolicyService } from './agent_policy';
 import { getAgentsByKuery } from './agents';
 import {
@@ -1014,5 +1018,251 @@ describe('update', () => {
         expect(sentUpdate(soClient).secrets).toEqual({ ssl: { key: { id: 'stored-key-id' } } });
       });
     });
+  });
+});
+
+describe('getFleetServerHostsForAgentPolicy', () => {
+  beforeEach(() => {
+    mockedLogger = loggerMock.create();
+    mockedAppContextService.getLogger.mockReturnValue(mockedLogger);
+  });
+
+  afterEach(() => {
+    jest.resetAllMocks();
+  });
+
+  const decryptedDefaultHost = {
+    id: 'test123',
+    type: FLEET_SERVER_HOST_SAVED_OBJECT_TYPE,
+    references: [],
+    attributes: {
+      name: 'fleetServerHost',
+      host_urls: ['https://fleet.example.com:8220'],
+      is_default: true,
+      ssl: JSON.stringify({ agent_certificate_authorities: ['/etc/ca.crt'] }),
+    },
+  };
+
+  it('returns the decrypted default host, with its ssl settings, when the policy has no host', async () => {
+    const soClient = getMockedSoClient({ findHosts: true });
+    const esoClient = getMockedEncryptedSoClient();
+    esoClient.getDecryptedAsInternalUser.mockResolvedValueOnce(decryptedDefaultHost as any);
+
+    const host = await getFleetServerHostsForAgentPolicy(soClient, {});
+
+    expect(esoClient.getDecryptedAsInternalUser).toHaveBeenCalledWith(
+      FLEET_SERVER_HOST_SAVED_OBJECT_TYPE,
+      'test123'
+    );
+    expect(host).toEqual(
+      expect.objectContaining({
+        id: 'test123',
+        is_default: true,
+        ssl: { agent_certificate_authorities: ['/etc/ca.crt'] },
+      })
+    );
+  });
+
+  it('returns the decrypted selected host when the policy has one', async () => {
+    const soClient = getMockedSoClient();
+    const esoClient = getMockedEncryptedSoClient();
+    esoClient.getDecryptedAsInternalUser.mockResolvedValueOnce({
+      ...decryptedDefaultHost,
+      id: 'selected-host',
+    } as any);
+
+    const host = await getFleetServerHostsForAgentPolicy(soClient, {
+      fleet_server_host_id: 'selected-host',
+    });
+
+    expect(soClient.find).not.toHaveBeenCalled();
+    expect(host).toEqual(expect.objectContaining({ id: 'selected-host' }));
+  });
+
+  it('keeps the default host, without its ssl settings, when they cannot be decrypted', async () => {
+    const soClient = getMockedSoClient({ findHosts: true });
+    const esoClient = getMockedEncryptedSoClient();
+    esoClient.getDecryptedAsInternalUser.mockRejectedValueOnce(new Error('Unable to decrypt'));
+
+    const host = await getFleetServerHostsForAgentPolicy(soClient, {});
+
+    expect(host).toEqual(expect.objectContaining({ id: 'test123', is_default: true }));
+    expect(host.ssl).toBeUndefined();
+    expect(mockedLogger.warn).toHaveBeenCalledWith(
+      'Could not read the SSL settings of the default Fleet Server host [test123], so it is used without them: Unable to decrypt'
+    );
+  });
+
+  it('resolves the default host again when it was deleted after it was looked up', async () => {
+    const soClient = getMockedSoClient({ findHosts: true });
+    soClient.find
+      .mockResolvedValueOnce({
+        saved_objects: [{ id: 'test123', attributes: { host_urls: [], is_default: true } }],
+      } as any)
+      .mockResolvedValueOnce({
+        saved_objects: [{ id: 'new-default', attributes: { host_urls: [], is_default: true } }],
+      } as any);
+    const esoClient = getMockedEncryptedSoClient();
+    esoClient.getDecryptedAsInternalUser
+      .mockRejectedValueOnce(
+        SavedObjectsErrorHelpers.createGenericNotFoundError(
+          FLEET_SERVER_HOST_SAVED_OBJECT_TYPE,
+          'test123'
+        )
+      )
+      .mockResolvedValueOnce({ ...decryptedDefaultHost, id: 'new-default' } as any);
+
+    const host = await getFleetServerHostsForAgentPolicy(soClient, {});
+
+    expect(esoClient.getDecryptedAsInternalUser).toHaveBeenLastCalledWith(
+      FLEET_SERVER_HOST_SAVED_OBJECT_TYPE,
+      'new-default'
+    );
+    expect(host).toEqual(
+      expect.objectContaining({
+        id: 'new-default',
+        ssl: { agent_certificate_authorities: ['/etc/ca.crt'] },
+      })
+    );
+    expect(mockedLogger.warn).not.toHaveBeenCalled();
+  });
+
+  it('reads the default host again when it was created again with the same id', async () => {
+    const soClient = getMockedSoClient({ findHosts: true });
+    const esoClient = getMockedEncryptedSoClient();
+    esoClient.getDecryptedAsInternalUser
+      .mockRejectedValueOnce(
+        SavedObjectsErrorHelpers.createGenericNotFoundError(
+          FLEET_SERVER_HOST_SAVED_OBJECT_TYPE,
+          'test123'
+        )
+      )
+      .mockResolvedValueOnce(decryptedDefaultHost as any);
+
+    const host = await getFleetServerHostsForAgentPolicy(soClient, {});
+
+    expect(esoClient.getDecryptedAsInternalUser).toHaveBeenCalledTimes(2);
+    expect(host).toEqual(
+      expect.objectContaining({
+        id: 'test123',
+        ssl: { agent_certificate_authorities: ['/etc/ca.crt'] },
+      })
+    );
+  });
+
+  it('resolves the default host again when the host it read is no longer the default', async () => {
+    const soClient = getMockedSoClient({ findHosts: true });
+    soClient.find
+      .mockResolvedValueOnce({
+        saved_objects: [{ id: 'test123', attributes: { host_urls: [], is_default: true } }],
+      } as any)
+      .mockResolvedValueOnce({
+        saved_objects: [{ id: 'new-default', attributes: { host_urls: [], is_default: true } }],
+      } as any);
+    const esoClient = getMockedEncryptedSoClient();
+    esoClient.getDecryptedAsInternalUser
+      .mockResolvedValueOnce({
+        ...decryptedDefaultHost,
+        attributes: { ...decryptedDefaultHost.attributes, is_default: false },
+      } as any)
+      .mockResolvedValueOnce({ ...decryptedDefaultHost, id: 'new-default' } as any);
+
+    const host = await getFleetServerHostsForAgentPolicy(soClient, {});
+
+    expect(esoClient.getDecryptedAsInternalUser).toHaveBeenLastCalledWith(
+      FLEET_SERVER_HOST_SAVED_OBJECT_TYPE,
+      'new-default'
+    );
+    expect(host).toEqual(expect.objectContaining({ id: 'new-default', is_default: true }));
+  });
+
+  it('throws when the host it reads again is not the default either', async () => {
+    const soClient = getMockedSoClient({ findHosts: true });
+    const esoClient = getMockedEncryptedSoClient();
+    const noLongerDefault = {
+      ...decryptedDefaultHost,
+      attributes: { ...decryptedDefaultHost.attributes, is_default: false },
+    };
+    esoClient.getDecryptedAsInternalUser
+      .mockResolvedValueOnce(noLongerDefault as any)
+      .mockResolvedValueOnce(noLongerDefault as any);
+
+    await expect(getFleetServerHostsForAgentPolicy(soClient, {})).rejects.toThrow(
+      'Default Fleet Server host is not setup'
+    );
+  });
+
+  it('keeps the new default host, without its ssl settings, when they cannot be decrypted', async () => {
+    const soClient = getMockedSoClient({ findHosts: true });
+    soClient.find
+      .mockResolvedValueOnce({
+        saved_objects: [{ id: 'test123', attributes: { host_urls: [], is_default: true } }],
+      } as any)
+      .mockResolvedValueOnce({
+        saved_objects: [{ id: 'new-default', attributes: { host_urls: [], is_default: true } }],
+      } as any);
+    const esoClient = getMockedEncryptedSoClient();
+    esoClient.getDecryptedAsInternalUser
+      .mockRejectedValueOnce(
+        SavedObjectsErrorHelpers.createGenericNotFoundError(
+          FLEET_SERVER_HOST_SAVED_OBJECT_TYPE,
+          'test123'
+        )
+      )
+      .mockRejectedValueOnce(new Error('Unable to decrypt'));
+
+    const host = await getFleetServerHostsForAgentPolicy(soClient, {});
+
+    expect(host).toEqual(expect.objectContaining({ id: 'new-default', is_default: true }));
+    expect(host.ssl).toBeUndefined();
+    expect(mockedLogger.warn).toHaveBeenCalledWith(
+      'Could not read the SSL settings of the default Fleet Server host [new-default], so it is used without them: Unable to decrypt'
+    );
+  });
+
+  it('throws when the default host is still not found the second time', async () => {
+    const soClient = getMockedSoClient({ findHosts: true });
+    const esoClient = getMockedEncryptedSoClient();
+    const notFound = SavedObjectsErrorHelpers.createGenericNotFoundError(
+      FLEET_SERVER_HOST_SAVED_OBJECT_TYPE,
+      'test123'
+    );
+    esoClient.getDecryptedAsInternalUser
+      .mockRejectedValueOnce(notFound)
+      .mockRejectedValueOnce(notFound);
+
+    await expect(getFleetServerHostsForAgentPolicy(soClient, {})).rejects.toThrow(
+      'Default Fleet Server host is not setup'
+    );
+    expect(esoClient.getDecryptedAsInternalUser).toHaveBeenCalledTimes(2);
+  });
+
+  it('throws, rather than using the deleted host, when there is no other default host', async () => {
+    const soClient = getMockedSoClient({ findHosts: true });
+    soClient.find
+      .mockResolvedValueOnce({
+        saved_objects: [{ id: 'test123', attributes: { host_urls: [], is_default: true } }],
+      } as any)
+      .mockResolvedValueOnce({ saved_objects: [] } as any);
+    const esoClient = getMockedEncryptedSoClient();
+    esoClient.getDecryptedAsInternalUser.mockRejectedValueOnce(
+      SavedObjectsErrorHelpers.createGenericNotFoundError(
+        FLEET_SERVER_HOST_SAVED_OBJECT_TYPE,
+        'test123'
+      )
+    );
+
+    await expect(getFleetServerHostsForAgentPolicy(soClient, {})).rejects.toThrow(
+      'Default Fleet Server host is not setup'
+    );
+  });
+
+  it('throws when there is no default host and the policy has none', async () => {
+    const soClient = getMockedSoClient();
+    getMockedEncryptedSoClient();
+
+    await expect(getFleetServerHostsForAgentPolicy(soClient, {})).rejects.toThrow(
+      'Default Fleet Server host is not setup'
+    );
   });
 });
