@@ -28,6 +28,17 @@ export const listen = (server: net.Server): Promise<LocalServer> =>
     });
   });
 
+/** Returns the current environment variables that have a value. */
+export const getEnv = (): Record<string, string> => {
+  const env: Record<string, string> = {};
+  for (const [name, value] of Object.entries(process.env)) {
+    if (value !== undefined) {
+      env[name] = value;
+    }
+  }
+  return env;
+};
+
 /** Sets environment variables and returns a function that restores the previous values. */
 export const setEnv = (vars: Record<string, string>): (() => void) => {
   const previous = Object.keys(vars).map((name) => [name, process.env[name]] as const);

@@ -11,7 +11,7 @@ import http from 'http';
 import net from 'net';
 import type { createPlaywrightConfig } from '../../../../src/playwright';
 import { test as baseTest } from '../../../../src/playwright';
-import { listen, setEnv } from './helpers';
+import { getEnv, listen, setEnv } from './helpers';
 
 // Chromium never proxies loopback names, so the site needs a name of its own.
 const SITE_HOST = 'scout-proxy-check.test';
@@ -22,7 +22,7 @@ type ScoutUseOptions = NonNullable<ReturnType<typeof createPlaywrightConfig>['us
 
 interface ProxyFixtures {
   /** A local site and a stand-in proxy, with the proxy variables a Citadel job exports. */
-  citadelJob: { siteUrls: Record<Scheme, string>; reached: Reached };
+  citadelJob: { siteUrls: Record<Scheme, string>; reached: Reached; env: Record<string, string> };
   /** Visits the site in a browser launched with the given options and returns what each visit reached. */
   visitSite: (launchOptions?: ScoutUseOptions['launchOptions']) => Promise<Record<Scheme, string>>;
 }
@@ -76,7 +76,7 @@ export const test = baseTest.extend<ProxyFixtures>({
       no_proxy: 'localhost,127.0.0.1',
     });
 
-    await use({ siteUrls, reached });
+    await use({ siteUrls, reached, env: getEnv() });
 
     restoreEnv();
     site.close();
@@ -85,11 +85,13 @@ export const test = baseTest.extend<ProxyFixtures>({
   },
 
   visitSite: async ({ playwright, citadelJob }, use) => {
-    const { siteUrls, reached } = citadelJob;
+    const { siteUrls, reached, env } = citadelJob;
 
     await use(async (launchOptions = {}) => {
       const browser = await playwright.chromium.launch({
         ...launchOptions,
+        // Set explicitly: Playwright would otherwise fill it in from this run's own config.
+        env: launchOptions.env ?? env,
         args: [...(launchOptions.args ?? []), `--host-resolver-rules=MAP ${SITE_HOST} 127.0.0.1`],
       });
       try {
