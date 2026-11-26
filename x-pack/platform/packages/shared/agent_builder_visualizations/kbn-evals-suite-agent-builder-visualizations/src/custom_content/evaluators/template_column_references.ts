@@ -41,7 +41,7 @@ interface QueryReference {
 }
 
 const readColumn = (isRow: boolean, name: Segment | undefined): string | undefined =>
-  isRow && name !== undefined && String(name) !== '' ? String(name) : undefined;
+  isRow && typeof name === 'string' && name !== '' ? name : undefined;
 
 /** The query and column a variable path reads, if its first part is a query or one of its rows. */
 const readReference = (

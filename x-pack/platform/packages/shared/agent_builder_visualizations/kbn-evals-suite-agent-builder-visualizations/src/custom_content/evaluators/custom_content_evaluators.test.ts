@@ -525,6 +525,14 @@ describe('Template columns of several queries', () => {
     ]).toEqual([[0, ['a']]]);
   });
 
+  it('does not take a key held in a variable for a column', () => {
+    expect([
+      ...readColumnReferencesByQuery(
+        '{% for row in rows %}{% for c in cols %}{{ row[c].value }}{{ max[c] }}{{ row[0] }}{% endfor %}{% endfor %}'
+      ),
+    ]).toEqual([[0, []]]);
+  });
+
   it('does not read a query chosen by a variable', () => {
     expect([...readColumnReferencesByQuery('{{ queries[i].rows[0].host }}')]).toEqual([]);
   });
@@ -595,12 +603,12 @@ describe('Template columns of several queries', () => {
     expect(result.score).toBe(0.5);
   });
 
-  it('fails a static panel whose template reads a query', async () => {
+  it('skips a static panel, whatever variables its template uses', async () => {
     const result = await run(
       withColumns({}),
-      outputWith({ template: '<p>{{ queries[1].rows.size }}</p>' })
+      outputWith({ template: '{% assign max = 5 %}{{ max }}{{ queries[1].rows.size }}' })
     );
-    expect(result).toMatchObject({ score: 0, label: 'unbound-columns' });
+    expect(result.score).toBeNull();
   });
 
   it('reports a second query that did not run', async () => {
