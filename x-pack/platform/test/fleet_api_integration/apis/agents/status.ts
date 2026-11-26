@@ -293,11 +293,13 @@ export default function ({ getService }: FtrProviderContext) {
         return body.items.map((agent: { id: string }) => agent.id);
       };
 
-      const inChunks = async (ids: string[], fn: (id: string) => Promise<unknown>) => {
-        const CHUNK_SIZE = 50;
+      const CHUNK_SIZE = 50;
+      const inChunks = (ids: string[]): string[][] => {
+        const chunks: string[][] = [];
         for (let i = 0; i < ids.length; i += CHUNK_SIZE) {
-          await Promise.all(ids.slice(i, i + CHUNK_SIZE).map(fn));
+          chunks.push(ids.slice(i, i + CHUNK_SIZE));
         }
+        return chunks;
       };
 
       const inactiveBefore = await getInactiveAgentIds();
@@ -305,34 +307,80 @@ export default function ({ getService }: FtrProviderContext) {
       expect(inactiveBefore).to.contain('agent5');
 
       const policyIds = new Array(1700).fill(0).map((_, i) => `policy-inactivity-timeout-${i}`);
-      const createdPolicyIds: string[] = [];
+      // every policy that a create request was sent for, including the ones whose request failed or
+      // did not finish before an error: the policy may still have been created
+      const attemptedPolicyIds: string[] = [];
+
+      const createPolicies = async () => {
+        for (const chunk of inChunks(policyIds)) {
+          attemptedPolicyIds.push(...chunk);
+          // wait for all the requests of the chunk to finish, so that none is still running when the
+          // cleanup starts, then fail if any of them failed
+          const results = await Promise.allSettled(
+            chunk.map((policyId) =>
+              supertest
+                .post(`/api/fleet/agent_policies`)
+                .set('kbn-xsrf', 'xxxx')
+                .send({
+                  id: policyId,
+                  name: policyId,
+                  namespace: 'default',
+                  inactivity_timeout: 60,
+                })
+                .expect(200)
+            )
+          );
+          const failed = results.find(
+            (result): result is PromiseRejectedResult => result.status === 'rejected'
+          );
+          if (failed) {
+            throw failed.reason;
+          }
+        }
+      };
+
+      // returns the ids of the policies that could not be deleted
+      const deletePolicies = async (): Promise<string[]> => {
+        const notDeleted: string[] = [];
+        for (const chunk of inChunks(attemptedPolicyIds)) {
+          const results = await Promise.allSettled(
+            chunk.map((policyId) =>
+              supertest
+                .post(`/api/fleet/agent_policies/delete`)
+                .set('kbn-xsrf', 'xxxx')
+                .send({ agentPolicyId: policyId })
+            )
+          );
+          results.forEach((result, index) => {
+            // a policy that does not exist (404) was not created or is already deleted
+            if (
+              result.status === 'rejected' ||
+              (result.value.status !== 200 && result.value.status !== 404)
+            ) {
+              notDeleted.push(chunk[index]);
+            }
+          });
+        }
+        return notDeleted;
+      };
+
+      let testError: unknown;
       try {
-        await inChunks(policyIds, async (policyId) => {
-          await supertest
-            .post(`/api/fleet/agent_policies`)
-            .set('kbn-xsrf', 'xxxx')
-            .send({
-              id: policyId,
-              name: policyId,
-              namespace: 'default',
-              inactivity_timeout: 60,
-            })
-            .expect(200);
-          createdPolicyIds.push(policyId);
-        });
+        await createPolicies();
 
         const inactiveAfter = await getInactiveAgentIds();
         expect(inactiveAfter).to.contain('agent4');
         expect(inactiveAfter).to.contain('agent5');
-      } finally {
-        // do not leave 1,700 policies behind for the tests that run after this one
-        await inChunks(createdPolicyIds, (policyId) =>
-          supertest
-            .post(`/api/fleet/agent_policies/delete`)
-            .set('kbn-xsrf', 'xxxx')
-            .send({ agentPolicyId: policyId })
-        );
+      } catch (error) {
+        testError = error;
       }
+
+      // do not leave 1,700 policies behind for the tests that run after this one
+      const notDeleted = await deletePolicies();
+      if (testError) {
+        throw testError;
+      }
+      expect(notDeleted).to.eql([]);
     });
 
     it('should get a list of agent policies by kuery', async () => {
