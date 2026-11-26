@@ -525,6 +525,61 @@ describe('Template columns of several queries', () => {
     ]).toEqual([[0, ['a']]]);
   });
 
+  it('reads a tablerow like a loop', () => {
+    expect([
+      ...readColumnReferencesByQuery(
+        '{% tablerow r in queries[1].rows cols:2 %}{{ r.host.value }}{% endtablerow %}'
+      ),
+    ]).toEqual([[1, ['host']]]);
+  });
+
+  it('reads loops inside conditions, and inside the else branch of another loop', () => {
+    const template =
+      '{% if rows.size > 0 %}{% for r in rows %}{{ r.a.value }}{% endfor %}{% endif %}' +
+      '{% case kind %}{% when "x" %}{% for r in queries[1].rows %}{{ r.b.value }}{% endfor %}{% endcase %}' +
+      '{% for r in queries[2].rows %}{{ r.c.value }}{% else %}{% for r in rows %}{{ r.d.value }}{% endfor %}{% endfor %}';
+    expect([...readColumnReferencesByQuery(template)]).toEqual([
+      [0, ['a', 'd']],
+      [1, ['b']],
+      [2, ['c']],
+    ]);
+  });
+
+  it('reads a realistic panel: cards, a badge condition and a table over another query', () => {
+    const template = `
+      {% comment %}{{ queries[5].rows[0].ignored }}{% endcomment %}
+      <div>{% for card in rows %}
+        <b>{{ card["Total Requests"].value | default: "-" | number_with_delimiter }}</b>
+        {% if card["Error Rate"].value > 5 %}<i>Warning</i>{% else %}<i>OK</i>{% endif %}
+        <span style="width:{{ card["Total Requests"].pct }}%"></span>
+      {% endfor %}</div>
+      <table>{% for h in queries[1].rows %}<tr><td>{{ h.host.value }}</td><td>{{ h.count.value }}</td></tr>{% endfor %}</table>
+      {% if queries[1].rows.size == 0 %}No hosts{% endif %}`;
+    expect([...readColumnReferencesByQuery(template)]).toEqual([
+      [0, ['Total Requests', 'Error Rate']],
+      [1, ['host', 'count']],
+    ]);
+  });
+
+  it('reads nothing, without throwing, from a template liquid cannot parse', () => {
+    expect([...readColumnReferencesByQuery('{% for r in rows %}{{ r.a.value }}')]).toEqual([]);
+    expect([...readColumnReferencesByQuery('{% unknown_tag %}')]).toEqual([]);
+  });
+
+  it('reads a loop written inside a liquid block', () => {
+    const template = '{% liquid\n  for h in queries[1].rows\n    echo h.host.value\n  endfor\n%}';
+    expect([...readColumnReferencesByQuery(template)]).toEqual([[1, ['host']]]);
+  });
+
+  it('is not confused by tag delimiters inside a string', () => {
+    const template =
+      '{% for r in rows %}{{ r.host.value | append: "%}" }}{% endfor %}{{ queries[1].max.bytes }}';
+    expect([...readColumnReferencesByQuery(template)]).toEqual([
+      [0, ['host']],
+      [1, ['bytes']],
+    ]);
+  });
+
   it('does not take a key held in a variable for a column', () => {
     expect([
       ...readColumnReferencesByQuery(

@@ -5,118 +5,121 @@
  * 2.0.
  */
 
-import { Liquid } from 'liquidjs';
+import { Liquid, type Template } from 'liquidjs';
 import { CUSTOM_CONTENT_LIQUID_OPTIONS } from '@kbn/custom-content-common';
 
 const liquid = new Liquid(CUSTOM_CONTENT_LIQUID_OPTIONS);
 
-type Segment = string | number;
+type Segments = ReadonlyArray<unknown>;
 
-const TAG = /\{%-?([\s\S]*?)-?%\}|\{\{-?([\s\S]*?)-?\}\}/g;
-const LOOP_HEADER = /^\s*(for|tablerow)\s+(\w+)\s+in\s+([\s\S]+)$/;
-const LOOP_END = /^\s*end(for|tablerow)\s*$/;
-const COLLECTION =
-  /^(?:rows|queries\s*\[\s*(\d+)\s*\]\s*(?:\.\s*rows|\[\s*(["'])rows\2\s*\]))(?!\w)/;
-const CHAIN =
-  /(?<!\w|(?<!\.)\.)([A-Za-z_]\w*)((?:\s*\.\s*\w+|\s*\[\s*(?:"[^"]*"|'[^']*'|\d+|[A-Za-z_][\w.]*)\s*\])*)/g;
-const SEGMENT = /\.\s*(\w+)|\[\s*(?:"([^"]*)"|'([^']*)'|(\d+)|([A-Za-z_][\w.]*))\s*\]/g;
-const BLOCKS_WITHOUT_READS = /\{%-?\s*(comment|raw)\s*-?%\}[\s\S]*?\{%-?\s*end\1\s*-?%\}/g;
-const STRING_LITERAL = /(\[\s*(["'])(?:(?!\2).)*\2)|(["'])(?:(?!\3).)*\3/g;
-const INLINE_COMMENT = /^\s*#/;
+interface Loop {
+  variable: string;
+  query?: number;
+}
 
-const isIndexedRow = (segment: Segment | undefined): boolean =>
-  typeof segment === 'number' || segment === 'first' || segment === 'last';
-
-const readSegments = (path: string): Segment[] =>
-  [...path.matchAll(SEGMENT)].map(([, dotted, double, single, index, variable]) => {
-    if (variable !== undefined) {
-      return Number.NaN;
-    }
-    return index !== undefined ? Number(index) : dotted ?? double ?? single;
-  });
+interface LoopTag {
+  variable: string;
+  collection: { input: string; begin: number; end: number };
+  templates: Template[];
+  elseTemplates?: Template[];
+}
 
 interface QueryReference {
   query: number;
   column?: string;
 }
 
-const readColumn = (isRow: boolean, name: Segment | undefined): string | undefined =>
-  isRow && typeof name === 'string' && name !== '' ? name : undefined;
+const isLoopTag = (template: Template): template is Template & LoopTag =>
+  'name' in template.token && (template.token.name === 'for' || template.token.name === 'tablerow');
 
-/** The query and column a variable path reads, if its first part is a query or one of its rows. */
+/** A row is picked by a position, `first`, `last`, or a variable. */
+const isRowPick = (segment: unknown): boolean =>
+  typeof segment === 'number' || segment === 'first' || segment === 'last' || isVariable(segment);
+
+const isVariable = (segment: unknown): boolean => typeof segment === 'object' && segment !== null;
+
+const asColumn = (segment: unknown): string | undefined =>
+  typeof segment === 'string' && segment !== '' ? segment : undefined;
+
+/** The query and column a variable path reads, if it starts from a query, its `max` or one of its rows. */
 const readReference = (
-  loops: Array<{ variable: string; query?: number }>,
-  root: string,
-  [first, second, third, fourth]: Segment[]
+  loops: Loop[],
+  [root, first, second, third, fourth]: Segments
 ): QueryReference | undefined => {
   if (root === 'rows') {
-    return { query: 0, column: readColumn(isIndexedRow(first), second) };
+    return { query: 0, column: isRowPick(first) ? asColumn(second) : undefined };
   }
   if (root === 'max') {
-    return { query: 0, column: readColumn(true, first) };
+    return { query: 0, column: asColumn(first) };
   }
   if (root === 'queries') {
-    if (typeof first !== 'number' || !Number.isInteger(first)) {
+    if (typeof first !== 'number') {
       return undefined;
     }
     if (second === 'rows') {
-      return { query: first, column: readColumn(isIndexedRow(third), fourth) };
+      return { query: first, column: isRowPick(third) ? asColumn(fourth) : undefined };
     }
-    return { query: first, column: readColumn(second === 'max', third) };
+    return { query: first, column: second === 'max' ? asColumn(third) : undefined };
   }
   const loop = [...loops].reverse().find(({ variable }) => variable === root);
-  return loop?.query === undefined
-    ? undefined
-    : { query: loop.query, column: readColumn(true, first) };
+  return loop?.query === undefined ? undefined : { query: loop.query, column: asColumn(first) };
 };
+
+const readSegments = (expression: string): Segments | undefined => {
+  const { variables } = liquid.parseAndAnalyzeSync(`{{ ${expression} }}`);
+  return Object.values(variables)[0]?.[0]?.segments;
+};
+
+/** The query whose rows a loop goes through: `rows` is the first, `queries[n].rows` the n-th. */
+const readLoopQuery = ({ collection: { input, begin, end } }: LoopTag): number | undefined => {
+  const [root, first, second] = readSegments(input.slice(begin, end)) ?? [];
+  if (root === 'rows') {
+    return 0;
+  }
+  return root === 'queries' && typeof first === 'number' && second === 'rows' ? first : undefined;
+};
+
+/** The loops of these templates that are not inside another loop, however deep in other tags. */
+const findOutermostLoops = (templates: Template[]): Array<Template & LoopTag> =>
+  templates.flatMap((template) => {
+    if (isLoopTag(template)) {
+      return [template, ...findOutermostLoops(template.elseTemplates ?? [])];
+    }
+    const children = template.children?.(false, true);
+    let step = children?.next();
+    while (step && !step.done) {
+      step = children?.next();
+    }
+    return step?.done ? findOutermostLoops(step.value) : [];
+  });
 
 /** The columns a template reads from each query it uses, keyed by query position (`rows` and `max` are query 0). */
 export const readColumnReferencesByQuery = (template: string): Map<number, string[]> => {
   const byQuery = new Map<number, string[]>();
-  try {
-    liquid.parse(template);
-  } catch {
-    return byQuery;
-  }
-
-  const loops: Array<{ variable: string; query?: number }> = [];
-  const note = ({ query, column }: QueryReference) => {
-    const columns = byQuery.get(query) ?? [];
-    if (column && !columns.includes(column)) {
-      columns.push(column);
-    }
-    byQuery.set(query, columns);
-  };
-  const noteChains = (body: string) => {
-    for (const [, root, path] of body
-      .replace(STRING_LITERAL, (_, bracketKey) => bracketKey ?? '')
-      .matchAll(CHAIN)) {
-      const reference = readReference(loops, root, readSegments(path));
-      if (reference) {
-        note(reference);
+  const read = (scope: Template[], loops: Loop[]) => {
+    for (const usages of Object.values(liquid.analyzeSync(scope).globals)) {
+      for (const { segments } of usages) {
+        const reference = readReference(loops, segments);
+        if (reference) {
+          const columns = byQuery.get(reference.query) ?? [];
+          if (reference.column && !columns.includes(reference.column)) {
+            columns.push(reference.column);
+          }
+          byQuery.set(reference.query, columns);
+        }
       }
     }
+    for (const loop of findOutermostLoops(scope)) {
+      read(loop.templates, [...loops, { variable: loop.variable, query: readLoopQuery(loop) }]);
+    }
   };
 
-  for (const [, tag, output] of template.replace(BLOCKS_WITHOUT_READS, '').matchAll(TAG)) {
-    if (tag !== undefined && INLINE_COMMENT.test(tag)) {
-      continue;
-    }
-    const loop = tag === undefined ? null : LOOP_HEADER.exec(tag);
-    if (loop) {
-      const [, , variable, collection] = loop;
-      noteChains(collection);
-      const matched = COLLECTION.exec(collection.trim());
-      loops.push({ variable, query: matched ? Number(matched[1] ?? 0) : undefined });
-      continue;
-    }
-    if (tag !== undefined && LOOP_END.test(tag)) {
-      loops.pop();
-      continue;
-    }
-    noteChains(tag ?? output ?? '');
+  try {
+    read(liquid.parse(template), []);
+    return byQuery;
+  } catch {
+    return new Map();
   }
-  return byQuery;
 };
 
 /** The columns a template reads from the first query, the one it reads as `rows`. */
