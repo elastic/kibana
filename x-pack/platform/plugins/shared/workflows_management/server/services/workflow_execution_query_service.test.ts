@@ -825,6 +825,99 @@ describe('WorkflowExecutionQueryService', () => {
     });
   });
 
+  describe('getStepExecutionsByStepId', () => {
+    const step = (id: string, stepId: string, startedAt: string, extra = {}) =>
+      ({
+        id,
+        stepId,
+        startedAt,
+        workflowRunId: 'exec-1',
+        spaceId: 'default',
+        ...extra,
+      } as EsWorkflowStepExecution);
+
+    it('picks the candidates from projected metadata and reads only those in full, never by search', async () => {
+      mockStepDataClient.getByIds
+        .mockResolvedValueOnce(
+          createMockGetExecutionsByIdsResponse([
+            { id: 'se-1', stepId: 'gate' },
+            { id: 'se-2', stepId: 'other' },
+            { id: 'se-3', stepId: 'gate' },
+          ] as EsWorkflowStepExecution[])
+        )
+        .mockResolvedValueOnce(
+          createMockGetExecutionsByIdsResponse([
+            step('se-1', 'gate', '2026-01-01T00:00:01.000Z', { output: { a: 1 } }),
+            step('se-3', 'gate', '2026-01-01T00:00:03.000Z', { output: null }),
+          ])
+        );
+
+      const result = await service.getStepExecutionsByStepId(
+        { executionId: 'exec-1', stepId: 'gate', stepExecutionIds: ['se-1', 'se-2', 'se-3'] },
+        'default'
+      );
+
+      expect(result.map(({ id }) => id)).toEqual(['se-3', 'se-1']);
+      expect(mockStepDataClient.getByIds).toHaveBeenNthCalledWith(1, ['se-1', 'se-2', 'se-3'], {
+        sourceIncludes: ['id', 'stepId'],
+      });
+      expect(mockStepDataClient.getByIds).toHaveBeenNthCalledWith(2, ['se-1', 'se-3']);
+      expect(mockEsClient.search).not.toHaveBeenCalled();
+    });
+
+    it('reads nothing in full when no document has the step id', async () => {
+      mockStepDataClient.getByIds.mockResolvedValueOnce(
+        createMockGetExecutionsByIdsResponse([
+          { id: 'se-2', stepId: 'other' },
+        ] as EsWorkflowStepExecution[])
+      );
+
+      await expect(
+        service.getStepExecutionsByStepId(
+          { executionId: 'exec-1', stepId: 'gate', stepExecutionIds: ['se-2'] },
+          'default'
+        )
+      ).resolves.toEqual([]);
+      expect(mockStepDataClient.getByIds).toHaveBeenCalledTimes(1);
+    });
+
+    it('drops documents of another execution or space', async () => {
+      mockStepDataClient.getByIds
+        .mockResolvedValueOnce(
+          createMockGetExecutionsByIdsResponse([
+            { id: 'se-1', stepId: 'gate' },
+            { id: 'se-2', stepId: 'gate' },
+          ] as EsWorkflowStepExecution[])
+        )
+        .mockResolvedValueOnce(
+          createMockGetExecutionsByIdsResponse([
+            step('se-1', 'gate', 's', { workflowRunId: 'other-exec' }),
+            step('se-2', 'gate', 's', { spaceId: 'other-space' }),
+          ])
+        );
+
+      await expect(
+        service.getStepExecutionsByStepId(
+          { executionId: 'exec-1', stepId: 'gate', stepExecutionIds: ['se-1', 'se-2'] },
+          'default'
+        )
+      ).resolves.toEqual([]);
+    });
+
+    it('searches the step of a run that predates stepExecutionIds', async () => {
+      const older = step('se-1', 'gate', 's');
+      mockEsClient.search.mockResolvedValue({
+        hits: { hits: [{ _source: older }], total: { value: 1 } },
+      } as any);
+
+      await expect(
+        service.getStepExecutionsByStepId({ executionId: 'exec-1', stepId: 'gate' }, 'default')
+      ).resolves.toEqual([older]);
+      expect(mockStepDataClient.getByIds).not.toHaveBeenCalled();
+      expect(JSON.stringify(mockEsClient.search.mock.calls[0][0])).toContain('"gate"');
+    });
+  });
+
   describe('getExecutionLogs', () => {
     it('delegates to workflowEventLoggerService', async () => {
       const params = { executionId: 'exec-1', spaceId: 'default' } as any;

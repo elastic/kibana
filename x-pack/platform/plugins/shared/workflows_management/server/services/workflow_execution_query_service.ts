@@ -51,6 +51,7 @@ import { searchWorkflowExecutions } from '../api/lib/search_workflow_executions'
 import type {
   GetExecutionStepExecutionsParams,
   GetStepExecutionParams,
+  GetStepExecutionsByStepIdParams,
   SearchStepExecutionsParams,
 } from '../api/workflows_management_api';
 import type {
@@ -1024,6 +1025,44 @@ export class WorkflowExecutionQueryService {
     }
 
     return stepExecution;
+  }
+
+  /**
+   * The documents of one step id in one execution, newest first. A projected mget of the run's
+   * step ids picks the candidates and a second mget reads only those in full, so both are
+   * real-time. Runs without `stepExecutionIds` predate that field and are searched instead.
+   */
+  async getStepExecutionsByStepId(
+    {
+      executionId,
+      stepId,
+      stepExecutionIds,
+    }: GetStepExecutionsByStepIdParams & { stepExecutionIds?: string[] },
+    spaceId: string
+  ): Promise<EsWorkflowStepExecution[]> {
+    if (!stepExecutionIds?.length) {
+      const { results } = await searchStepExecutions({
+        stepExecutionsDataClient: this.deps.stepExecutionsDataClient,
+        logger: this.deps.logger,
+        workflowExecutionId: executionId,
+        stepId,
+        spaceId,
+      });
+      return results;
+    }
+    const { items: candidates } = await this.deps.stepExecutionsDataClient.getByIds(
+      stepExecutionIds,
+      { sourceIncludes: ['id', 'stepId'] }
+    );
+    const ids = candidates
+      .filter(({ document }) => document.stepId === stepId)
+      .map(({ document }) => document.id);
+    if (ids.length === 0) return [];
+    const { items } = await this.deps.stepExecutionsDataClient.getByIds(ids);
+    return items
+      .map(({ document }) => document)
+      .filter((step) => step.workflowRunId === executionId && step.spaceId === spaceId)
+      .sort((a, b) => b.startedAt.localeCompare(a.startedAt));
   }
 
   /**

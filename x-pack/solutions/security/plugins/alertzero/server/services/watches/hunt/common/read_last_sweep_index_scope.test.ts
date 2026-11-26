@@ -132,13 +132,10 @@ describe('readLastSweepIndexScope', () => {
   });
 
   describe('through the Workflows management client', () => {
-    const setupWithClient = (stepsById: Record<string, unknown>) => {
+    /** `steps` are the real-time reads of the gate step id, newest first. */
+    const setupWithClient = (steps: unknown[]) => {
       const api = {
-        getWorkflowExecution: jest.fn().mockResolvedValue({
-          workflowId: 'wf-1',
-          stepExecutions: Object.values(stepsById),
-        }),
-        getStepExecution: jest.fn(async ({ id }: { id: string }) => stepsById[id]),
+        getStepExecutionsByStepId: jest.fn().mockResolvedValue(steps),
         // The step index has not refreshed since the execution finished.
         searchStepExecutions: jest.fn().mockResolvedValue({ results: [], total: 0 }),
       };
@@ -154,15 +151,16 @@ describe('readLastSweepIndexScope', () => {
     };
 
     it('reads the gate output of a finished execution before the step index refreshes', async () => {
-      const { params } = setupWithClient({
-        'se-gate': {
+      const { params } = setupWithClient([
+        {
           id: 'se-gate',
+          workflowId: 'wf-1',
           stepId: 'check_index_scope',
           startedAt: '2026-01-01T00:00:01.000Z',
           finishedAt: 'f',
           output: scope,
         },
-      });
+      ]);
       await expect(readLastSweepIndexScope(params)).resolves.toEqual({
         checkedAt: 'f',
         executionId: 'exec-1',
@@ -171,21 +169,23 @@ describe('readLastSweepIndexScope', () => {
     });
 
     it('skips a newer record of the shared gate step id whose output is null', async () => {
-      const { params } = setupWithClient({
-        'se-gate': {
+      const { params } = setupWithClient([
+        {
+          id: 'se-wrapper',
+          workflowId: 'wf-1',
+          stepId: 'check_index_scope',
+          startedAt: '2026-01-01T00:00:02.000Z',
+          output: null,
+        },
+        {
           id: 'se-gate',
+          workflowId: 'wf-1',
           stepId: 'check_index_scope',
           startedAt: '2026-01-01T00:00:01.000Z',
           finishedAt: 'f',
           output: scope,
         },
-        'se-wrapper': {
-          id: 'se-wrapper',
-          stepId: 'check_index_scope',
-          startedAt: '2026-01-01T00:00:02.000Z',
-          output: null,
-        },
-      });
+      ]);
       await expect(readLastSweepIndexScope(params)).resolves.toMatchObject({
         scope: expect.objectContaining({ resolution: 'blocked:empty_universe' }),
       });

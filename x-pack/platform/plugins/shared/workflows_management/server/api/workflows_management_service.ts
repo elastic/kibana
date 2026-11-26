@@ -76,6 +76,7 @@ import type {
   DeleteWorkflowsResponse,
   GetExecutionStepExecutionsParams,
   GetStepExecutionParams,
+  GetStepExecutionsByStepIdParams,
   GetWorkflowAggsOptions,
   GetWorkflowsParams,
   SearchStepExecutionsParams,
@@ -836,6 +837,14 @@ export class WorkflowsService {
   ): Promise<EsWorkflowStepExecution | null> {
     await this.ensureInitialized();
     return this.executionQueryService.getStepExecution(params, spaceId);
+  }
+
+  public async getStepExecutionsByStepId(
+    params: GetStepExecutionsByStepIdParams & { stepExecutionIds?: string[] },
+    spaceId: string
+  ): Promise<EsWorkflowStepExecution[]> {
+    await this.ensureInitialized();
+    return this.executionQueryService.getStepExecutionsByStepId(params, spaceId);
   }
 
   public async getAvailableConnectors(

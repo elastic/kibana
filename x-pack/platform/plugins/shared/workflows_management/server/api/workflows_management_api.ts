@@ -205,6 +205,12 @@ export interface GetStepExecutionParams {
   id: string;
 }
 
+export interface GetStepExecutionsByStepIdParams {
+  executionId: string;
+  /** The step id in the workflow definition. More than one document can share it. */
+  stepId: string;
+}
+
 export interface GetExecutionStepExecutionsParams {
   executionId: string;
   page: number;
@@ -1610,6 +1616,26 @@ export class WorkflowsManagementApi {
   ): Promise<EsWorkflowStepExecution | null> {
     await this.assertExecutionAccess(params.executionId, spaceId, 'read', request);
     return this.workflowsService.getStepExecution(params, spaceId);
+  }
+
+  /**
+   * The documents of one step id in one execution, newest first, read in real time so they
+   * agree with the execution document. Empty when the execution is missing or unreadable.
+   */
+  public async getStepExecutionsByStepId(
+    params: GetStepExecutionsByStepIdParams,
+    spaceId: string,
+    request: KibanaRequest
+  ): Promise<EsWorkflowStepExecution[]> {
+    const execution = await this.getWorkflowExecution(params.executionId, spaceId, {
+      omitStepExecutions: true,
+      request,
+    });
+    if (!execution) return [];
+    return this.workflowsService.getStepExecutionsByStepId(
+      { ...params, stepExecutionIds: execution.stepExecutionIds },
+      spaceId
+    );
   }
 
   public async searchStepExecutions(

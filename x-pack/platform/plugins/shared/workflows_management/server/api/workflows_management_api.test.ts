@@ -142,6 +142,7 @@ describe('WorkflowsManagementApi', () => {
       getWorkflowExecutionStatusCounts: jest.fn(),
       getExecutionStepExecutions: jest.fn(),
       searchStepExecutions: jest.fn(),
+      getStepExecutionsByStepId: jest.fn().mockResolvedValue([]),
       markStepAsResponded: jest.fn(),
       releaseHitlStepClaim: jest.fn(),
       getWaitingStepExecutionId: jest.fn(),
@@ -687,6 +688,50 @@ describe('WorkflowsManagementApi', () => {
     await expect(
       api.getWorkflowExecution('run-1', 'default', { request: mockRequest })
     ).resolves.toBe(execution);
+  });
+
+  describe('getStepExecutionsByStepId', () => {
+    const params = { executionId: 'run-1', stepId: 'gate' };
+
+    it('authorizes once, then reads the step by the ids the execution lists', async () => {
+      mockWorkflowsService.getWorkflowExecution.mockResolvedValue({
+        id: 'run-1',
+        workflowId: 'workflow-123',
+        stepExecutionIds: ['se-1', 'se-2'],
+      } as any);
+      const steps = [{ id: 'se-2', stepId: 'gate' }];
+      mockWorkflowsService.getStepExecutionsByStepId.mockResolvedValue(steps as any);
+
+      await expect(api.getStepExecutionsByStepId(params, 'default', mockRequest)).resolves.toBe(
+        steps
+      );
+      expect(mockWorkflowsService.getWorkflowExecution).toHaveBeenCalledTimes(1);
+      expect(mockWorkflowsService.getWorkflowExecution).toHaveBeenCalledWith('run-1', 'default', {
+        omitStepExecutions: true,
+        request: mockRequest,
+      });
+      expect(mockWorkflowsService.getWorkflow).toHaveBeenCalledTimes(1);
+      expect(mockWorkflowsService.getStepExecutionsByStepId).toHaveBeenCalledWith(
+        { ...params, stepExecutionIds: ['se-1', 'se-2'] },
+        'default'
+      );
+    });
+
+    it('reads no step when the execution is missing or its workflow is unreadable', async () => {
+      mockWorkflowsService.getWorkflowExecution.mockResolvedValueOnce(null);
+      await expect(api.getStepExecutionsByStepId(params, 'default', mockRequest)).resolves.toEqual(
+        []
+      );
+
+      const access = await mockWorkflowsService.getAccessControl();
+      jest
+        .mocked(access.permissions)
+        .mockResolvedValue({ read: false, execute: false, edit: false, manage: false });
+      await expect(api.getStepExecutionsByStepId(params, 'default', mockRequest)).resolves.toEqual(
+        []
+      );
+      expect(mockWorkflowsService.getStepExecutionsByStepId).not.toHaveBeenCalled();
+    });
   });
 
   describe('cloneWorkflow', () => {
