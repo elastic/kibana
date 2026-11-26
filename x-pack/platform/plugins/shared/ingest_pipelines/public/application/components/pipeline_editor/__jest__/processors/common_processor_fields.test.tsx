@@ -84,6 +84,7 @@ describe('Processor: Common Fields with a script object condition', () => {
     lang: 'painless',
     params: { dataId: 'data-abc-123' },
   };
+  const UPDATED_TAG = 'updated_tag';
 
   let onUpdate: jest.Mock;
 
@@ -104,10 +105,15 @@ describe('Processor: Common Fields with a script object condition', () => {
     return { form, conditionEditor: within(form).getByTestId('mockedCodeEditor') };
   };
 
+  const setTag = (form: HTMLElement) => {
+    fireEvent.change(within(within(form).getByTestId('tagField')).getByTestId('input'), {
+      target: { value: UPDATED_TAG },
+    });
+  };
+
   const submitAndGetBytesProcessor = async (form: HTMLElement) => {
-    onUpdate.mockClear();
     fireEvent.click(within(form).getByTestId('submitButton'));
-    await waitFor(() => expect(onUpdate).toHaveBeenCalled());
+    await waitFor(() => expect(screen.queryByTestId('editProcessorForm')).not.toBeInTheDocument());
     return getProcessorValue(onUpdate)[0].bytes;
   };
 
@@ -127,8 +133,10 @@ describe('Processor: Common Fields with a script object condition', () => {
     renderWithCondition(ifScript);
     const { form } = await openEditForm();
 
+    setTag(form);
     const bytesProcessor = await submitAndGetBytesProcessor(form);
 
+    expect(bytesProcessor.tag).toBe(UPDATED_TAG);
     expect(bytesProcessor.if).toEqual(ifScript);
   });
 
@@ -159,8 +167,10 @@ describe('Processor: Common Fields with a script object condition', () => {
     const { form, conditionEditor } = await openEditForm();
     expect(conditionEditor).toHaveValue('');
 
+    setTag(form);
     const bytesProcessor = await submitAndGetBytesProcessor(form);
 
+    expect(bytesProcessor.tag).toBe(UPDATED_TAG);
     expect(bytesProcessor.if).toEqual(storedScript);
   });
 });
