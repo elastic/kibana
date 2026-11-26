@@ -157,20 +157,31 @@ describe('findKeyTagsWithVerdicts', () => {
     body: { aggregations: { keys: { buckets: keys.map((key) => ({ key })) } } },
   });
 
-  it('asks for alerts that carry a key tag and a verdict tag, and returns only the key tags', async () => {
+  // A model false positive whose proposal failed, expired or was never reviewed is re-tagged
+  // `az:inconclusive` and keeps `az:model_fp`: nobody judged it otherwise, so it must not block.
+  it('asks for alerts of the keys with a true positive, or an inconclusive verdict that is not a model false positive', async () => {
     const callKibanaApi = jest.fn().mockResolvedValue(answer(['k1']));
 
-    const found = await findKeyTagsWithVerdicts(
-      { callKibanaApi },
-      ['k1', 'k2'],
-      ['az:true_positive']
-    );
+    const found = await findKeyTagsWithVerdicts({ callKibanaApi }, ['k1', 'k2']);
 
     expect([...found]).toEqual(['k1']);
     const { body } = callKibanaApi.mock.calls[0][0];
     expect(body.query.bool.filter).toEqual([
       { terms: { 'kibana.alert.workflow_tags': ['k1', 'k2'] } },
-      { terms: { 'kibana.alert.workflow_tags': ['az:true_positive'] } },
+      {
+        bool: {
+          should: [
+            { term: { 'kibana.alert.workflow_tags': 'az:true_positive' } },
+            {
+              bool: {
+                filter: [{ term: { 'kibana.alert.workflow_tags': 'az:inconclusive' } }],
+                must_not: [{ term: { 'kibana.alert.workflow_tags': 'az:model_fp' } }],
+              },
+            },
+          ],
+          minimum_should_match: 1,
+        },
+      },
     ]);
     expect(body.aggs.keys.terms).toEqual(
       expect.objectContaining({ include: ['k1', 'k2'], size: 2 })
@@ -185,7 +196,7 @@ describe('findKeyTagsWithVerdicts', () => {
       .mockResolvedValueOnce(answer(['k600']))
       .mockResolvedValueOnce(answer([]));
 
-    const found = await findKeyTagsWithVerdicts({ callKibanaApi }, keys, ['az:inconclusive']);
+    const found = await findKeyTagsWithVerdicts({ callKibanaApi }, keys);
 
     expect(callKibanaApi).toHaveBeenCalledTimes(3);
     expect([...found]).toEqual(['k1', 'k600']);
@@ -194,9 +205,9 @@ describe('findKeyTagsWithVerdicts', () => {
   it('fails instead of reporting no verdicts when the response has no aggregation', async () => {
     const callKibanaApi = jest.fn().mockResolvedValue({ status: 200, headers: {}, body: {} });
 
-    await expect(
-      findKeyTagsWithVerdicts({ callKibanaApi }, ['k1'], ['az:inconclusive'])
-    ).rejects.toThrow('Key verdicts missing');
+    await expect(findKeyTagsWithVerdicts({ callKibanaApi }, ['k1'])).rejects.toThrow(
+      'Key verdicts missing'
+    );
   });
 });
 
@@ -811,10 +822,7 @@ describe('countClosedByDecision', () => {
 describe('helpers that drive a write, on a partial search result', () => {
   const helpers: Array<[string, (api: { callKibanaApi: jest.Mock }) => Promise<unknown>]> = [
     ['countClosedByDecision', (api) => countClosedByDecision(api, 'fp-decision-1', 0)],
-    [
-      'findKeyTagsWithVerdicts',
-      (api) => findKeyTagsWithVerdicts(api, ['k1'], ['az:true_positive']),
-    ],
+    ['findKeyTagsWithVerdicts', (api) => findKeyTagsWithVerdicts(api, ['k1'])],
     [
       'findAlertsClosedWithoutFalsePositiveReason',
       (api) => findAlertsClosedWithoutFalsePositiveReason(api, ['a']),

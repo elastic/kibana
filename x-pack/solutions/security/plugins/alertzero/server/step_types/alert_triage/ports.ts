@@ -812,14 +812,18 @@ export const readKeyHistory = async (
 const BLOCKED_KEYS_CHUNK = 500;
 
 /**
- * The strict key tags among `keyTags` that some alert carries together with a verdict tag other
- * than false positive. Every alert counts, with no time limit: the consistency rule is about
- * every earlier verdict of the key. A failed read throws, so no decision is written on a guess.
+ * The strict key tags among `keyTags` that some alert carries with a verdict against a false
+ * positive: a true positive, or an inconclusive verdict from the model or from an analyst who
+ * dismissed a proposal. An alert with `az:inconclusive` and `az:model_fp` does not count: the model
+ * judged it a false positive, and its proposal failed, expired or was never reviewed, so nobody
+ * judged otherwise. Only the batch writes the strict key tag, so the `az:inconclusive` a
+ * dismissal's skip adds never counts. Every alert counts, with no time limit: the consistency rule
+ * is about every earlier verdict of the key. A failed read throws, so no decision is written on a
+ * guess.
  */
 export const findKeyTagsWithVerdicts = async (
   { callKibanaApi }: KibanaApi,
-  keyTags: readonly string[],
-  verdictTags: readonly string[]
+  keyTags: readonly string[]
 ): Promise<Set<string>> => {
   const found = new Set<string>();
   for (let from = 0; from < keyTags.length; from += BLOCKED_KEYS_CHUNK) {
@@ -837,7 +841,20 @@ export const findKeyTagsWithVerdicts = async (
           bool: {
             filter: [
               { terms: { [ALERT_FIELDS.tags]: chunk } },
-              { terms: { [ALERT_FIELDS.tags]: [...verdictTags] } },
+              {
+                bool: {
+                  should: [
+                    { term: { [ALERT_FIELDS.tags]: 'az:true_positive' } },
+                    {
+                      bool: {
+                        filter: [{ term: { [ALERT_FIELDS.tags]: 'az:inconclusive' } }],
+                        must_not: [{ term: { [ALERT_FIELDS.tags]: 'az:model_fp' } }],
+                      },
+                    },
+                  ],
+                  minimum_should_match: 1,
+                },
+              },
             ],
           },
         },

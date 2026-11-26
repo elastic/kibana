@@ -109,7 +109,7 @@ const setup = ({
   expiredAfterWrite?: string[];
   /** Decisions whose read after the sweep's writes fails. */
   unreadableAfterWrite?: string[];
-  /** Decisions whose key has a true positive or inconclusive verdict. */
+  /** Decisions whose key has a verdict against a false positive (the lookup answers with them). */
   conflictingVerdicts?: string[];
 }) => {
   const skipTagged = new Set<string>();

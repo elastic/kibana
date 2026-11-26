@@ -224,10 +224,11 @@ export const createDecisionSweep = ({
   // --- Approved decisions: close the alerts ---
 
   /**
-   * The decisions whose key has a true positive or inconclusive verdict. A verdict can be recorded
-   * at any time, so the decision's key is read right before its close, and only a positive answer
-   * is kept: a decision that had none is read again the next time it would close. A decision that
-   * has one stays blocked for the sweep. A read that fails throws, so the caller closes nothing.
+   * The decisions whose key has a verdict against a false positive (`findKeyTagsWithVerdicts`
+   * says which verdicts count). A verdict can be recorded at any time, so the decision's key is
+   * read right before its close, and only a positive answer is kept: a decision that had none is
+   * read again the next time it would close. A decision that has one stays blocked for the sweep.
+   * A read that fails throws, so the caller closes nothing.
    */
   const conflicting = new Set<string>();
   const hasConflictingVerdict = async (id: string): Promise<boolean> => {

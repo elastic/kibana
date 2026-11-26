@@ -28,7 +28,8 @@ describe('findDecisionsWithConflictingVerdicts', () => {
     await expect(findDecisionsWithConflictingVerdicts(api, [A, B])).resolves.toEqual(new Set([B]));
   });
 
-  it('searches once for all the decisions, with the strict key tag of each and the blocking verdicts', async () => {
+  // Which verdicts count is the rule of `findKeyTagsWithVerdicts`, tested in ports.test.ts.
+  it('searches once for all the decisions, with the strict key tag of each', async () => {
     const api = apiWith([]);
 
     await findDecisionsWithConflictingVerdicts(api, [A, B]);
@@ -38,10 +39,6 @@ describe('findDecisionsWithConflictingVerdicts', () => {
     expect(query.bool.filter[0].terms['kibana.alert.workflow_tags']).toEqual([
       strictKeyTag(HASH_A),
       strictKeyTag(HASH_B),
-    ]);
-    expect(query.bool.filter[1].terms['kibana.alert.workflow_tags']).toEqual([
-      'az:true_positive',
-      'az:inconclusive',
     ]);
   });
 

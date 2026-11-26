@@ -14,7 +14,6 @@ import {
 } from '../../../common/step_types/alert_triage';
 import type { DecisionAutoCloseMode } from '../../alert_triage/constants';
 import {
-  FP_DECISION_BLOCKING_VERDICT_TAGS,
   FP_DECISION_MIN_ALERTS,
   buildDecisionDocument,
   decisionId,
@@ -143,11 +142,7 @@ export const getTriageStoreFpDecisionsStepDefinition = ({
               .filter(({ alertIds }) => alertIds.length >= FP_DECISION_MIN_ALERTS)
               .map(({ hash }) => [strictKeyTag(hash), hash])
           );
-          const withVerdicts = await findKeyTagsWithVerdicts(
-            contextManager,
-            [...tagToHash.keys()],
-            FP_DECISION_BLOCKING_VERDICT_TAGS
-          );
+          const withVerdicts = await findKeyTagsWithVerdicts(contextManager, [...tagToHash.keys()]);
           for (const tag of withVerdicts) {
             const hash = tagToHash.get(tag);
             if (hash !== undefined) blocked.add(hash);
