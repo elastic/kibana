@@ -6,6 +6,7 @@
  */
 
 import { createAttachmentServiceMock } from '../../../services/mocks';
+import { actionComment } from '../../../mocks';
 import { PersistableStateAndExternalReferencesLimiter } from './persistable_state_and_external_references';
 import {
   createExternalReferenceRequests,
@@ -98,6 +99,10 @@ describe('PersistableStateAndExternalReferencesLimiter', () => {
           { type: INDICATOR_ATTACHMENT_TYPE, attachmentId: 'indicator-id', owner: 'test' },
         ])
       ).toBe(4);
+    });
+
+    it('counts legacy actions attachments, which are stored as security.endpoint', () => {
+      expect(limiter.countOfItemsInRequest([actionComment])).toBe(1);
     });
 
     it('excludes unified file attachments from the count', () => {

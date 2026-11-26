@@ -11,6 +11,7 @@ import type { AttachmentService } from '../../../services';
 import { MAX_PERSISTABLE_STATE_AND_EXTERNAL_REFERENCES } from '../../../../common/constants';
 import { isLegacyAttachmentRequest } from '../../../../common/utils/attachments';
 import {
+  isCommentRequestTypeActions,
   isFileAttachmentRequest,
   isPersistableStateOrExternalReference,
   isUnifiedPersistableStateOrExternalReference,
@@ -35,7 +36,8 @@ export class PersistableStateAndExternalReferencesLimiter extends BaseLimiter {
   public countOfItemsInRequest(requests: AttachmentRequestV2[]): number {
     return requests.filter((request) =>
       isLegacyAttachmentRequest(request)
-        ? isPersistableStateOrExternalReference(request) && !isFileAttachmentRequest(request)
+        ? (isPersistableStateOrExternalReference(request) && !isFileAttachmentRequest(request)) ||
+          isCommentRequestTypeActions(request)
         : isUnifiedPersistableStateOrExternalReference(request)
     ).length;
   }
