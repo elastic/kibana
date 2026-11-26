@@ -65,14 +65,17 @@ describe('validateIndexPattern', () => {
     expect(validateIndexPattern('a'.repeat(MAX_INDEX_PATTERN_LENGTH))).toBeUndefined();
     expect(validateIndexPattern('a'.repeat(MAX_INDEX_PATTERN_LENGTH + 1))).toEqual({
       code: 'tooLong',
-      message: 'Use 255 characters or fewer.',
+      message: 'Use 255 bytes or fewer.',
     });
   });
 
   it('counts the length in bytes, like Elasticsearch does for index names', () => {
     // "é" takes two bytes.
     expect(validateIndexPattern('é'.repeat(127))).toBeUndefined();
-    expect(validateIndexPattern('é'.repeat(128))?.code).toBe('tooLong');
+    expect(validateIndexPattern('é'.repeat(128))).toEqual({
+      code: 'tooLong',
+      message: 'Use 255 bytes or fewer.',
+    });
   });
 
   it.each(['logs-*,metrics-*', 'logs-* metrics-*', ' logs-*', 'logs-*\t'])(

@@ -45,7 +45,7 @@ const INDEX_PATTERN_MESSAGES: Readonly<Record<IndexPatternErrorCode, string>> = 
     defaultMessage: 'Enter a pattern or name.',
   }),
   tooLong: i18n.translate('xpack.searchBoost.validation.indexPatternTooLong', {
-    defaultMessage: 'Use {max} characters or fewer.',
+    defaultMessage: 'Use {max} bytes or fewer.',
     values: { max: MAX_INDEX_PATTERN_LENGTH },
   }),
   notSingleTarget: i18n.translate('xpack.searchBoost.validation.indexPatternNotSingleTarget', {
