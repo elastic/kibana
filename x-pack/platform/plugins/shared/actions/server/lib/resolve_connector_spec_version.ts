@@ -22,6 +22,14 @@ const isValidVersionSegment = (part?: string): boolean => {
   return Number.isSafeInteger(value) && value >= 0 && String(value) === part;
 };
 
+export const createUnknownSpecVersionError = (version: string, actionTypeId: string): Boom.Boom =>
+  Boom.badRequest(
+    i18n.translate('xpack.actions.serverSideErrors.unknownSpecVersionErrorMessage', {
+      defaultMessage: 'Unknown spec_version "{version}" for connector type "{actionTypeId}".',
+      values: { version, actionTypeId },
+    })
+  );
+
 export const parseSpecVersion = (value: string): { major: number; minor?: number } | undefined => {
   if (value.length > CONNECTOR_SPEC_VERSION_MAX_LENGTH) return undefined;
 
@@ -89,12 +97,7 @@ export const resolveConnectorSpecVersion = ({
 
   const selectedSpec = resolvedSpecVersion ? specs?.get(resolvedSpecVersion) : undefined;
   if (!selectedSpec) {
-    throw Boom.badRequest(
-      i18n.translate('xpack.actions.serverSideErrors.unknownSpecVersionErrorMessage', {
-        defaultMessage: 'Unknown spec_version "{version}" for connector type "{actionTypeId}".',
-        values: { version: requestedVersion, actionTypeId },
-      })
-    );
+    throw createUnknownSpecVersionError(requestedVersion, actionTypeId);
   }
 
   const actionTypeForValidation = {

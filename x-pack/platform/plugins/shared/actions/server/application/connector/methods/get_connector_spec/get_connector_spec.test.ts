@@ -286,6 +286,27 @@ describe('getConnectorSpecAsJsonSchema', () => {
           ).rejects.toMatchObject({ output: { statusCode: 400 } });
         }
       );
+
+      it.each(['2', '9.9', '1.3'])(
+        'rejects unavailable version %j instead of serving the unversioned spec',
+        async (specVersion) => {
+          await expect(
+            getConnectorSpecAsJsonSchema({
+              context: createContext(),
+              id: catalogOnly.metadata.id,
+              specVersion,
+              configurationUtilities: catalogConfigurationUtilities,
+            })
+          ).rejects.toMatchObject({
+            output: {
+              statusCode: 400,
+              payload: expect.objectContaining({
+                message: `Unknown spec_version "${specVersion}" for connector type "${catalogOnly.metadata.id}".`,
+              }),
+            },
+          });
+        }
+      );
     });
   });
 
