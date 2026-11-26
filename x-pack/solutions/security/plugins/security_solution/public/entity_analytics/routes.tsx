@@ -24,6 +24,7 @@ import { EntityAnalyticsManagementPage } from './pages/entity_analytics_manageme
 import { PluginTemplateWrapper } from '../common/components/plugin_template_wrapper';
 import { EntityAnalyticsHomePage } from './pages/entity_analytics_home_page';
 import { EntityAnalyticsNewHomePage } from './pages/entity_analytics_new_home_page';
+import { useIsExperimentalFeatureEnabled } from '../common/hooks/use_experimental_features';
 import { useKibana } from '../common/lib/kibana';
 
 // ---- Management routes ----
@@ -98,6 +99,12 @@ EntityAnalyticsEntityStoreRedirectContainer.displayName =
 
 // ---- Privileged user monitoring redirect route ----
 const EntityAnalyticsPrivilegedUserMonitoringContainer: React.FC = React.memo(() => {
+  const isWatchlistsEnabled = useIsExperimentalFeatureEnabled('entityAnalyticsWatchlistEnabled');
+  // The Watchlists tab only renders when the flag is on, so fall back to the management landing page.
+  const redirectPathname = isWatchlistsEnabled
+    ? `${ENTITY_ANALYTICS_MANAGEMENT_PATH}/watchlists`
+    : ENTITY_ANALYTICS_MANAGEMENT_PATH;
+
   return (
     <Routes>
       <Route
@@ -107,7 +114,7 @@ const EntityAnalyticsPrivilegedUserMonitoringContainer: React.FC = React.memo(()
           <Redirect
             to={{
               ...location,
-              pathname: `${ENTITY_ANALYTICS_MANAGEMENT_PATH}/watchlists`,
+              pathname: redirectPathname,
               search: location.search,
             }}
           />
