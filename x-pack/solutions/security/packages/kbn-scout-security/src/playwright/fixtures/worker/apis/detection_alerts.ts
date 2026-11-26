@@ -57,19 +57,18 @@ export const getDetectionAlertsApiService = ({
         const index = `${DEFAULT_ALERTS_INDEX_PATTERN}${space}`;
 
         while (Date.now() < deadline) {
-          try {
-            await esClient.indices.refresh({ index });
-            const result = await esClient.count({
-              index,
-              query: {
-                term: { 'kibana.alert.rule.name': ruleName },
-              },
-            });
-            if (result.count >= minCount) {
-              return result.count;
-            }
-          } catch {
-            // index not yet created — keep polling
+          // The alerts index is created lazily by the detection engine: `ignore_unavailable` makes a
+          // missing index count as zero alerts, so any error thrown here is unexpected and surfaces.
+          await esClient.indices.refresh({ index, ignore_unavailable: true });
+          const result = await esClient.count({
+            index,
+            ignore_unavailable: true,
+            query: {
+              term: { 'kibana.alert.rule.name': ruleName },
+            },
+          });
+          if (result.count >= minCount) {
+            return result.count;
           }
           await new Promise((resolve) => setTimeout(resolve, WAIT_FOR_ALERTS_POLL_INTERVAL_MS));
         }

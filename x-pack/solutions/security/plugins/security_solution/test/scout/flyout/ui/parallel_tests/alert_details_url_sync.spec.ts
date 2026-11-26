@@ -45,30 +45,30 @@ spaceTest.describe(
     spaceTest('should test flyout url sync', async ({ pageObjects, page }) => {
       await pageObjects.alertsTablePage.navigate();
 
-      const urlBeforeAlertDetails = page.url();
-      expect(urlBeforeAlertDetails).not.toContain(FLYOUT_URL_PARAM);
+      const urlBeforeAlertDetails = new URL(page.url());
+      expect(urlBeforeAlertDetails.searchParams.has(FLYOUT_URL_PARAM)).toBe(false);
 
       await pageObjects.alertsTablePage.waitForRuleAlert(ruleName);
       await pageObjects.alertsTablePage.alertsTable.scrollIntoViewIfNeeded();
       await pageObjects.alertsTablePage.expandAlertDetailsFlyout(ruleName);
 
-      const urlAfterAlertDetails = page.url();
-      expect(urlAfterAlertDetails).toContain(FLYOUT_URL_PARAM);
+      const urlAfterAlertDetails = new URL(page.url());
+      expect(urlAfterAlertDetails.searchParams.has(FLYOUT_URL_PARAM)).toBe(true);
 
       const headerTitle = pageObjects.alertDetailsRightPanelPage.detailsFlyoutHeaderTitle;
       await expect(headerTitle).toHaveText(ruleName);
 
       await page.reload();
-      await pageObjects.alertsTablePage.waitForRuleAlert(ruleName);
+      await pageObjects.documentFlyout.waitForAlertFlyout();
 
-      const urlAfterReload = page.url();
-      expect(urlAfterReload).toContain(FLYOUT_URL_PARAM);
+      const urlAfterReload = new URL(page.url());
+      expect(urlAfterReload.searchParams.has(FLYOUT_URL_PARAM)).toBe(true);
       await expect(headerTitle).toHaveText(ruleName);
 
       await pageObjects.alertDetailsRightPanelPage.closeFlyout();
 
-      const urlAfterClosingFlyout = page.url();
-      expect(urlAfterClosingFlyout).not.toContain(FLYOUT_URL_PARAM);
+      const urlAfterClosingFlyout = new URL(page.url());
+      expect(urlAfterClosingFlyout.searchParams.has(FLYOUT_URL_PARAM)).toBe(false);
     });
   }
 );
