@@ -115,7 +115,7 @@ interface ReleaseChartProps {
 }
 
 // A one-line header (an `h3` and an info tip), so both charts' plots line up side by side
-function ChartPanel({
+export function ChartPanel({
   title,
   tooltip,
   hasData,

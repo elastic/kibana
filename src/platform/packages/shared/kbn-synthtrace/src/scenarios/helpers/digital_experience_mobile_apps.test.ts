@@ -8,7 +8,10 @@
  */
 
 import {
+  ATTR_START_TYPE,
   EVENT_APP_START,
+  START_TYPE_COLD,
+  START_TYPE_WARM,
   EVENT_SESSION_START,
   SPAN_SCREEN_LOAD,
   edotReactNative,
@@ -440,7 +443,7 @@ describe('digital experience mobile apps', () => {
       });
     });
 
-    it('only writes the proposed signals for the native apps', () => {
+    it('only writes the proposed signals for the native apps, but the app starts for all', () => {
       const nativeDocs = collectNative();
       const eventNames = new Set(logsOf(nativeDocs).map(({ event_name: eventName }) => eventName));
       expect(eventNames).toContain(EVENT_SESSION_START);
@@ -449,6 +452,13 @@ describe('digital experience mobile apps', () => {
       const json = JSON.stringify(docs);
       expect(json).not.toContain(EVENT_SESSION_START);
       expect(json).not.toContain(SPAN_SCREEN_LOAD);
+      // EDOT React Native gets the app starts from the native SDKs it runs on
+      const startTypes = new Set(
+        logsOf(docs)
+          .filter(({ event_name: eventName }) => eventName === EVENT_APP_START)
+          .map(({ attributes }) => attributes?.[ATTR_START_TYPE])
+      );
+      expect([...startTypes].sort()).toEqual([START_TYPE_COLD, START_TYPE_WARM]);
     });
 
     it('writes every session that starts in the run, from its start, the long ones included', () => {

@@ -34,16 +34,34 @@ import {
 } from '../../../labels';
 import { ComparedKpiPanel } from '../../../components/compared_kpi_panel';
 import type { ComparedKpiPanelProps } from '../../../components/compared_kpi_panel';
+import type { StartType } from '../../../../common/mobile/app_starts';
+import { formatDurationMs } from '../../../utils/format_duration';
+import {
+  APP_START_DESCRIPTIONS,
+  APP_START_TITLES,
+  NO_APP_STARTS_LABEL,
+  appStartTooltip,
+} from './app_start_labels';
+import { Performance } from './performance/performance';
+import { useMobileAppStarts } from './performance/use_mobile_app_starts';
 import { ReleaseHealth } from './release_health/release_health';
 import { useMobileReleases } from './release_health/use_mobile_releases';
 import { MobileToolbar, useMobileFilters } from './mobile_toolbar';
 import type { MobileKpisState } from './use_mobile_kpis';
 
-type MobileKpi = 'sessions' | 'users' | 'errorRate';
+const APP_START_KPIS = { cold: 'coldStart', warm: 'warmStart' } as const;
+
+const APP_START_TEST_SUBJECTS: Readonly<Record<StartType, string>> = {
+  cold: 'digitalExperienceMobileKpiColdStart',
+  warm: 'digitalExperienceMobileKpiWarmStart',
+};
+
+type MobileKpi = 'sessions' | 'users' | 'errorRate' | (typeof APP_START_KPIS)[StartType];
 
 /**
- * The KPI row, in order. Crash-free sessions joins it once a crash is defined (#64), rather than
- * showing "Not enough data" while crash reporting may already work.
+ * The KPI row, in order, the average cold and warm start last. Crash-free sessions joins it once a
+ * crash is defined (#64), rather than showing "Not enough data" while crash reporting may already
+ * work.
  */
 const MOBILE_KPIS: ReadonlyArray<
   Pick<
@@ -53,6 +71,8 @@ const MOBILE_KPIS: ReadonlyArray<
     kpi: MobileKpi;
     /** The user's number format unless set. */
     formatValue?: (formatters: Formatters) => (value: number) => string;
+    /** An app start average: its tooltip names the starts, and it reads "No data" without any. */
+    startType?: StartType;
   }
 > = [
   {
@@ -86,6 +106,16 @@ const MOBILE_KPIS: ReadonlyArray<
     higherIsBetter: false,
     formatValue: ({ formatErrorRate }) => formatErrorRate,
   },
+  ...(['cold', 'warm'] as const).map((startType) => ({
+    kpi: APP_START_KPIS[startType],
+    startType,
+    'data-test-subj': APP_START_TEST_SUBJECTS[startType],
+    title: APP_START_TITLES[startType],
+    tooltip: APP_START_DESCRIPTIONS[startType],
+    changeUnit: 'relative' as const,
+    higherIsBetter: false,
+    formatValue: () => formatDurationMs,
+  })),
 ];
 
 const HEALTH_SUMMARY_TITLE = i18n.translate('xpack.digitalExperience.mobile.healthSummary.title', {
@@ -148,8 +178,8 @@ const NO_MATCHES_BODY = i18n.translate('xpack.digitalExperience.mobile.noMatches
 
 /**
  * The Overview of a mobile application's page, all its platforms: the toolbar its tabs share, the
- * health summary and the release health. The sibling issues add their sections below it as they
- * fill them.
+ * health summary, the release health and the performance. The sibling issues add their sections
+ * below it as they fill them.
  */
 export function MobileOverview({
   serviceName,
@@ -159,11 +189,13 @@ export function MobileOverview({
   /** Fetched by the page, whose header shows its platforms. */
   kpisState: MobileKpisState;
 }) {
-  // Fetched here, so only the Overview runs its queries; the toolbar's refresh reloads it with the KPIs.
+  // Fetched here, so only the Overview runs its queries; the toolbar's refresh reloads them with the KPIs.
   const releasesState = useMobileReleases(serviceName);
+  const appStartsState = useMobileAppStarts(serviceName);
   const refresh = () => {
     refreshKpis();
     releasesState.refresh();
+    appStartsState.refresh();
   };
   const formatters = useFormatters();
   const { formatNumber } = formatters;
@@ -250,10 +282,17 @@ export function MobileOverview({
               </EuiFlexGroup>
               <EuiSpacer size="m" />
               <EuiFlexGroup gutterSize="m" data-test-subj="digitalExperienceMobileKpis" wrap>
-                {MOBILE_KPIS.map(({ kpi, formatValue, ...panel }) => (
+                {MOBILE_KPIS.map(({ kpi, formatValue, startType, ...panel }) => (
                   <ComparedKpiPanel
                     key={kpi}
                     {...panel}
+                    {...(startType && {
+                      tooltip: appStartTooltip(
+                        startType,
+                        currentKpis?.[APP_START_KPIS[startType]].count ?? 0
+                      ),
+                      emptyLabel: NO_APP_STARTS_LABEL,
+                    })}
                     value={currentKpis?.[kpi]}
                     formatValue={formatValue?.(formatters) ?? formatNumber}
                     isComparing={isComparing}
@@ -269,6 +308,8 @@ export function MobileOverview({
               onSelectRelease={setRelease}
               rankedReleases={rankedReleases}
             />
+            <EuiSpacer size="l" />
+            <Performance appStartsState={appStartsState} />
           </>
         ))}
     </>

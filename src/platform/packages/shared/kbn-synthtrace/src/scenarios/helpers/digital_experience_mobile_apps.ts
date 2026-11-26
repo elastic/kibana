@@ -926,6 +926,8 @@ export const generateEdotReactNativeSessions = (
     ...opts,
     apps: opts.apps ?? DIGITAL_EXPERIENCE_MOBILE_APPS,
     proposedSignals: false,
+    // EDOT React Native gets the app starts from the native SDKs it runs on
+    appStartEvents: true,
   });
 
 /**
@@ -943,6 +945,7 @@ export const generateEdotNativeSessions = (
     apps: (opts.apps ?? DIGITAL_EXPERIENCE_NATIVE_APPS).map((app) => ({ ...app, native: true })),
     withManualSpans: false,
     proposedSignals: true,
+    appStartEvents: true,
   });
 
 const generateSessions = (
@@ -956,9 +959,11 @@ const generateSessions = (
     withManualSpans,
     apps,
     proposedSignals,
+    appStartEvents,
   }: GenerateSessionsOpts & {
     apps: readonly DigitalExperienceMobileApp[];
     proposedSignals: boolean;
+    appStartEvents: boolean;
   }
 ): Array<SynthtraceGenerator<EdotReactNativeDocument>> => {
   const platforms: readonly MobilePlatform[] =
@@ -1068,6 +1073,7 @@ const generateSessions = (
           visits,
           manualSpans: withManualSpans ? manualSpans : {},
           proposedSignals,
+          appStartEvents,
           previousSessionId,
           random,
           ...(proposedSignals ? { start: time, dwell: NATIVE_DWELL } : { end: time }),

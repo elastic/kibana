@@ -154,6 +154,7 @@ const simulate = ({
   model = APP_MODEL,
   native,
   proposedSignals,
+  appStartEvents,
   previousSessionId,
 }: {
   platform: 'android' | 'ios';
@@ -166,6 +167,7 @@ const simulate = ({
   model?: EdotReactNativeAppModel;
   native?: boolean;
   proposedSignals?: boolean;
+  appStartEvents?: boolean;
   previousSessionId?: string;
 }) =>
   serialize(
@@ -177,6 +179,7 @@ const simulate = ({
       visits,
       manualSpans,
       proposedSignals,
+      appStartEvents,
       previousSessionId,
       start: TIMESTAMP,
       random: seededRandom(seed),
@@ -1559,6 +1562,29 @@ describe('edotReactNative', () => {
           expect(scopes).toContain('com.example.trailmap');
           scopes.forEach((name) => expect(name).not.toContain('react-native'));
           expect(spansNamed(docs, 'UIViewController - view appearing')).toEqual([]);
+        }
+      });
+
+      it('writes the app starts alone when asked to, and leaves the rest of the session as it was', () => {
+        for (const platform of ['android', 'ios'] as const) {
+          const options = { platform, seed: 'app-starts', screenViews: 6, visits: 3 };
+          const withStarts = simulate({ ...options, appStartEvents: true });
+          const isStart = (doc: object) =>
+            'event_name' in doc && doc.event_name === EVENT_APP_START;
+
+          const starts = withStarts.filter(isStart);
+          // One per launch: the first is cold, the next ones warm
+          expect(
+            starts.map((doc) =>
+              'attributes' in doc ? doc.attributes?.[ATTR_START_TYPE] : undefined
+            )
+          ).toEqual([START_TYPE_COLD, START_TYPE_WARM, START_TYPE_WARM]);
+          // None of the other proposed signals
+          const json = JSON.stringify(withStarts);
+          [EVENT_SESSION_START, EVENT_SCREEN_CLICK, SPAN_SCREEN_LOAD].forEach((name) =>
+            expect(json).not.toContain(name)
+          );
+          expect(withStarts.filter((doc) => !isStart(doc))).toEqual(simulate(options));
         }
       });
 

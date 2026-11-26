@@ -17,6 +17,7 @@ import { useShareAction } from '../../../hooks/use_share_action';
 import { MobileApplicationPage } from './mobile_application_page';
 import { MobileCrashesTab } from '../mobile_crashes/mobile_crashes_tab';
 import { MobileOverview } from './mobile_overview';
+import { useMobileAppStarts } from './performance/use_mobile_app_starts';
 import { useMobileReleases } from './release_health/use_mobile_releases';
 import { useMobileDiscoverHref } from './use_mobile_discover_href';
 import { useMobileKpis } from './use_mobile_kpis';
@@ -36,6 +37,7 @@ jest.mock('../../../hooks/use_share_action');
 jest.mock('./use_mobile_discover_href');
 jest.mock('./use_mobile_kpis');
 jest.mock('./release_health/use_mobile_releases');
+jest.mock('./performance/use_mobile_app_starts');
 jest.mock('./mobile_overview', () => ({
   MobileOverview: jest.fn(() => <div data-test-subj="mobileOverview" />),
 }));
@@ -62,6 +64,8 @@ const KPIS_STATE: MobileKpisState = {
     sessions: { value: 4, previous: 2, delta: 2 },
     users: { value: 3, previous: 3, delta: 0 },
     errorRate: { value: 0.25, previous: null, delta: null },
+    coldStart: { value: 1800, previous: 1500, delta: 300, count: 42, previousCount: 30 },
+    warmStart: { value: 400, previous: null, delta: null, count: 2, previousCount: 0 },
     releases: [{ key: '1.0.0', count: 4 }],
     osNames: [{ key: 'Android', count: 2 }],
     platforms: ['android', 'ios'],
@@ -211,7 +215,7 @@ describe('MobileApplicationPage', () => {
     expect(useShareAction).toHaveBeenCalledWith(expect.objectContaining({ tab: 'crashes' }));
   });
 
-  it('gives the Overview the KPIs the page fetched, and leaves the release health to it', () => {
+  it('gives the Overview the KPIs the page fetched, and leaves the release health and the app starts to it', () => {
     render(<MobileApplicationPage serviceName="shop-mobile" selectedTab="overview" />);
 
     expect(jest.mocked(MobileOverview).mock.calls.at(-1)?.[0]).toEqual({
@@ -219,11 +223,13 @@ describe('MobileApplicationPage', () => {
       kpisState: KPIS_STATE,
     });
     expect(useMobileReleases).not.toHaveBeenCalled();
+    expect(useMobileAppStarts).not.toHaveBeenCalled();
   });
 
-  it('runs no release health query on the Crashes tab', () => {
+  it('runs no release health or app starts query on the Crashes tab', () => {
     render(<MobileApplicationPage serviceName="shop-mobile" selectedTab="crashes" />);
 
     expect(useMobileReleases).not.toHaveBeenCalled();
+    expect(useMobileAppStarts).not.toHaveBeenCalled();
   });
 });

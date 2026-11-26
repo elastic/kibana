@@ -15,6 +15,8 @@ const row = (release: string, isOther = false): MobileReleaseRow => ({
   sessions: 1,
   users: 1,
   errorRate: null,
+  coldStart: null,
+  coldStarts: 0,
 });
 
 describe('getReleaseColors', () => {

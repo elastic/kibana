@@ -29,6 +29,8 @@ export interface ComparedKpiPanelProps {
   changeUnit: ChangeUnit;
   /** Colours the change: green when it goes the better way, red otherwise; neutral when unset. */
   higherIsBetter?: boolean;
+  /** Shown without a value; "Not enough data" unless set. */
+  emptyLabel?: string;
   /** The page-level Compare toggle: shows the previous period's value next to the current one. */
   isComparing: boolean;
   isLoading: boolean;
@@ -76,6 +78,7 @@ export function ComparedKpiPanel({
   formatValue,
   changeUnit,
   higherIsBetter,
+  emptyLabel = NOT_ENOUGH_DATA_LABEL,
   isComparing,
   isLoading,
   'data-test-subj': dataTestSubj,
@@ -92,7 +95,7 @@ export function ComparedKpiPanel({
       isEmpty={!value || value.value === null}
       value={
         <span data-test-subj={`${dataTestSubj}Value`}>
-          {!value || value.value === null ? NOT_ENOUGH_DATA_LABEL : formatValue(value.value)}
+          {!value || value.value === null ? emptyLabel : formatValue(value.value)}
         </span>
       }
       change={

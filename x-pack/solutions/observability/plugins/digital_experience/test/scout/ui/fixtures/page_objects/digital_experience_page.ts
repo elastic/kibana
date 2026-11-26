@@ -29,7 +29,7 @@ type OverviewFilterName =
   | 'pageContains';
 
 /** The KPIs of the mobile page's row. */
-type MobileKpi = 'Sessions' | 'Users' | 'ErrorRate';
+type MobileKpi = 'Sessions' | 'Users' | 'ErrorRate' | 'ColdStart' | 'WarmStart';
 
 export class DigitalExperiencePage {
   public readonly mainContainer: Locator;
@@ -110,6 +110,9 @@ export class DigitalExperiencePage {
   public readonly mobileReleaseTable: Locator;
   public readonly mobileReleaseErrorRateChart: Locator;
   public readonly mobileReleaseAdoptionChart: Locator;
+  public readonly mobilePerformance: Locator;
+  public readonly mobileColdStartChart: Locator;
+  public readonly mobileWarmStartChart: Locator;
   public readonly mobilePagePlatforms: Locator;
   public readonly mobileOsFilter: Locator;
   public readonly mobileCompareToggle: Locator;
@@ -223,6 +226,9 @@ export class DigitalExperiencePage {
     this.mobileReleaseAdoptionChart = page.getByTestId(
       'digitalExperienceMobileReleaseAdoptionChart'
     );
+    this.mobilePerformance = page.getByTestId('digitalExperienceMobilePerformance');
+    this.mobileColdStartChart = page.getByTestId('digitalExperienceMobileColdStartChart');
+    this.mobileWarmStartChart = page.getByTestId('digitalExperienceMobileWarmStartChart');
     // The header's badges, one per platform the application reported on.
     this.mobilePagePlatforms = page.getByTestId(/^digitalExperienceMobilePlatformBadge-/);
     this.mobileOsFilter = page.getByTestId('digitalExperienceMobileOsFilter');

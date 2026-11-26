@@ -64,6 +64,8 @@ interface MobileDocument {
   installationId?: string;
   sessionId: string;
   exception?: boolean;
+  /** An `elastic.app.start` event, with its type unless left out. */
+  appStart?: { type?: string; durationMs: number };
   /** A span in the traces index; a log event otherwise. */
   isSpan?: boolean;
   /** `TIMESTAMP` unless set. */
@@ -75,6 +77,26 @@ const EDOT_MOBILE = { distroName: 'elastic', version: '1.0.0' };
 /** The sessions and release of `MOBILE_APPS.busyAndroid`. */
 export const BUSY_SESSIONS = 120;
 export const BUSY_RELEASE = '4.0.0';
+
+/**
+ * The app starts of `MOBILE_APPS.busyAndroid`, in sessions it already has: cold starts that
+ * average 2 s, warm starts that average 400 ms, a cold start from a background launch above the
+ * 60 s guard, and a `hot` one, which neither average counts. Not whole numbers, so the duration is
+ * mapped as a float, as the SDKs send it.
+ */
+const BUSY_APP_STARTS = [
+  { type: 'cold', durationMs: 1000.5 },
+  { type: 'cold', durationMs: 2000 },
+  { type: 'cold', durationMs: 2999.5 },
+  { type: 'warm', durationMs: 300.5 },
+  { type: 'warm', durationMs: 499.5 },
+  { type: 'cold', durationMs: 120_000.5 },
+  { type: 'hot', durationMs: 50.5 },
+];
+
+/** The averages and counts the routes answer for `BUSY_APP_STARTS`. */
+export const BUSY_COLD_START = { avg: 2000, count: 3 };
+export const BUSY_WARM_START = { avg: 400, count: 2 };
 
 const MOBILE_DOCUMENTS: MobileDocument[] = [
   // React Native, Android: `versionName` as the release, `versionCode` as the build.
@@ -213,6 +235,16 @@ const MOBILE_DOCUMENTS: MobileDocument[] = [
     sessionId: `busy-${index}`,
     exception: index % 10 === 0,
   })),
+  ...BUSY_APP_STARTS.map((appStart, index) => ({
+    ...EDOT_MOBILE,
+    serviceName: MOBILE_APPS.busyAndroid,
+    sdkLanguage: 'java',
+    osName: 'Android',
+    version: BUSY_RELEASE,
+    installationId: `installation-busy-${index + 1}`,
+    sessionId: `busy-${index + 1}`,
+    appStart,
+  })),
   // A second event of a session without an exception: the error rate still counts it once.
   {
     ...EDOT_MOBILE,
@@ -251,15 +283,20 @@ const toSpanFields = (index: number) => {
   };
 };
 
+/** Events the EDOT mobile SDKs send: an app start, an exception, or an app lifecycle change. */
+const eventNameOf = ({ appStart, exception }: MobileDocument): string => {
+  if (appStart) {
+    return 'elastic.app.start';
+  }
+  return exception ? 'exception' : 'device.app.lifecycle';
+};
+
 const documents = MOBILE_DOCUMENTS.map((doc, index) => ({
   id: `dx-mobile-${index}`,
   index: doc.isSpan ? TRACES_INDEX : LOGS_INDEX,
   document: {
     '@timestamp': doc.timestamp ?? TIMESTAMP,
-    // Events the EDOT mobile SDKs send: an app lifecycle change, or an exception.
-    ...(doc.isSpan
-      ? toSpanFields(index)
-      : { event_name: doc.exception ? 'exception' : 'device.app.lifecycle' }),
+    ...(doc.isSpan ? toSpanFields(index) : { event_name: eventNameOf(doc) }),
     resource: {
       attributes: {
         'service.name': doc.serviceName,
@@ -275,6 +312,12 @@ const documents = MOBILE_DOCUMENTS.map((doc, index) => ({
     attributes: {
       'session.id': doc.sessionId,
       ...(doc.exception ? { 'exception.type': 'java.lang.IllegalStateException' } : {}),
+      ...(doc.appStart
+        ? {
+            ...(doc.appStart.type ? { 'start.type': doc.appStart.type } : {}),
+            'elastic.app.start.duration': doc.appStart.durationMs,
+          }
+        : {}),
     },
   },
 }));

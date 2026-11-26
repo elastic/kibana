@@ -7,6 +7,7 @@
 
 import { groupBy, keyBy, orderBy, sortBy, sortedUniq } from 'lodash';
 import type { TracedElasticsearchClient } from '@kbn/traced-es-client';
+import { toAppStart } from '../../../common/mobile/app_starts';
 import { RESULT_COLUMNS } from '../../../common/mobile/fields';
 import { mobilePanelQuery, type MobilePanelFilters } from '../../../common/mobile/filters';
 import {
@@ -30,9 +31,9 @@ import type {
   MobileReleaseSeries,
   MobileReleasesResponse,
 } from '../../../common/types/mobile';
-import { OTEL_LOGS_INDEX, OTEL_TRACES_INDEX } from '../../../common/otel_data';
 import { runEsql, timeFilter } from '../../lib/esql';
-import { dateHistogram, getHistogramInterval } from '../../lib/helpers/time_series';
+import { getHistogramInterval } from '../../lib/helpers/time_series';
+import { getBucketTimestamps } from '../../lib/mobile/bucket_timestamps';
 
 export interface GetMobileReleasesParams {
   esClient: TracedElasticsearchClient;
@@ -90,26 +91,15 @@ export const getMobileReleases = async ({
       rangeFilter
     );
 
-  // TBUCKET leaves out empty buckets; a date histogram has them all, aligned the same way
-  const getBucketTimestamps = async (): Promise<number[]> => {
-    const { aggregations } = await esClient.search('get_mobile_release_buckets', {
-      index: [OTEL_TRACES_INDEX, OTEL_LOGS_INDEX],
-      ignore_unavailable: true,
-      allow_no_indices: true,
-      size: 0,
-      track_total_hits: false,
-      query: { match_none: {} },
-      aggs: {
-        buckets: dateHistogram({
-          start,
-          // `extended_bounds` includes its max, the range doesn't
-          end: end - 1,
-          histogram: { interval: histogram.interval, timeZone },
-        }),
-      },
+  const fetchBucketTimestamps = () =>
+    getBucketTimestamps({
+      esClient,
+      operationName: 'get_mobile_release_buckets',
+      start,
+      end,
+      interval: histogram.interval,
+      timeZone,
     });
-    return aggregations?.buckets.buckets.map(({ key }) => key) ?? [];
-  };
 
   const detailsOf = async (releases: string[], hasOther: boolean): Promise<ReleaseDetails> => {
     const [otherRows, seriesRows, seenRows, bucketTimestamps] = await Promise.all([
@@ -135,7 +125,7 @@ export const getMobileReleases = async ({
         withReleasesSeen(query(), releases),
         timeFilter(start - FIRST_SEEN_LOOKBACK_MS, start, environment)
       ),
-      getBucketTimestamps(),
+      fetchBucketTimestamps(),
     ]);
     return { otherRows, seriesRows, seenRows, bucketTimestamps };
   };
@@ -166,6 +156,7 @@ export const getMobileReleases = async ({
 
   const toRow = (release: string, kpis: OtherReleaseStatsRow): MobileReleaseRow => {
     const sessions = kpis[RESULT_COLUMNS.sessions] ?? 0;
+    const coldStart = toAppStart(kpis, 'cold');
     return {
       release,
       isOther: release === OTHER_RELEASE_KEY,
@@ -175,6 +166,9 @@ export const getMobileReleases = async ({
         sessions >= MIN_RELEASE_SESSIONS
           ? errorRateOf(sessions, kpis[RESULT_COLUMNS.exceptions] ?? 0)
           : null,
+      // The same floor as the error rate, so a release's row is all shown or all held back
+      coldStart: sessions >= MIN_RELEASE_SESSIONS ? coldStart.avg : null,
+      coldStarts: coldStart.count,
     };
   };
   const rows = [

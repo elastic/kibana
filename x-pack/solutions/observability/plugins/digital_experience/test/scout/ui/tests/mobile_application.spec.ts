@@ -112,7 +112,7 @@ test.describe('Digital Experience mobile applications', { tag: DIGITAL_EXPERIENC
     });
   });
 
-  test('shows the release health of an application with enough sessions, drawn', async ({
+  test('shows the release health and app starts of an application with enough sessions, drawn', async ({
     page,
     pageObjects: { digitalExperience },
   }) => {
@@ -142,6 +142,26 @@ test.describe('Digital Experience mobile applications', { tag: DIGITAL_EXPERIENC
           BUSY_RELEASE
         )
       ).toBeVisible();
+    });
+
+    await test.step('shows the average cold and warm start, in the tiles and the table', async () => {
+      await expect(digitalExperience.mobileKpiValue('ColdStart')).toHaveText('2.00 s');
+      await expect(digitalExperience.mobileKpiValue('WarmStart')).toHaveText('400 ms');
+      await expect(
+        digitalExperience.mobileReleaseTable.getByTestId('digitalExperienceMobileReleaseColdStart')
+      ).toContainText('2.00 s');
+    });
+
+    await test.step('draws the cold and warm starts over time in the Performance section', async () => {
+      await expect(digitalExperience.mobilePerformance).toBeVisible();
+      for (const chart of [
+        digitalExperience.mobileColdStartChart,
+        digitalExperience.mobileWarmStartChart,
+      ]) {
+        await expect(chart).toBeVisible();
+        // Drawn, not the message a chart shows without app starts
+        await expect(chart).not.toContainText('The SDK sent no app start events');
+      }
     });
 
     await test.step('has no accessibility violations with the charts drawn', async () => {
