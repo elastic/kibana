@@ -274,7 +274,9 @@ export const SophosCentral: ConnectorSpec = {
     '1. Call `getEndpoint` to confirm the endpoint\'s isolation state and health status.',
     '2. Call `isolateEndpoint` with the endpoint IDs to block network access.',
     '3. Call `scanEndpoint` to trigger an on-demand malware scan. The scan runs asynchronously.',
-    '4. Call `deisolateEndpoint` only after an analyst confirms the threat is remediated — this action is API-only and requires explicit analyst approval.',
+    '4. To restore connectivity, hand off to an analyst. ' +
+      '`deisolateEndpoint` is not available to agents — it must be called by an analyst ' +
+      'directly via the Kibana connector execution API after confirming the threat is remediated.',
     '',
     '### IOC management',
     '- Call `addBlockedItem` with a SHA-256 hash to add a file to the tenant-wide block list.',
