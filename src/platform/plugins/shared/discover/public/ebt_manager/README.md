@@ -129,7 +129,7 @@ Tracks entry points that group ES|QL results into patterns with `CATEGORIZE`.
 | Field       | Type      | Description                        |
 | ----------- | --------- | ---------------------------------- |
 | `eventName` | `keyword` | Categorize action.                 |
-| `fieldName` | `keyword` | Name of the field that is grouped. |
+| `fieldName` | `keyword` | ECS field name when known, or `<non-ecs>` otherwise. |
 
 ## Standard performance metrics
 

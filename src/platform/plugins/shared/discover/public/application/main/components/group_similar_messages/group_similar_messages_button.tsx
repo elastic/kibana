@@ -16,6 +16,7 @@ import {
   EsqlCategorizeEventDataKeys,
   EsqlCategorizeEventName,
 } from '../../../../ebt_manager/esql_categorize_event_definition';
+import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import {
   internalStateActions,
   useCurrentTabAction,
@@ -27,6 +28,7 @@ export const GroupSimilarMessagesButton = () => {
   const dispatch = useInternalStateDispatch();
   const updateESQLQuery = useCurrentTabAction(internalStateActions.updateESQLQuery);
   const { scopedEBTManager } = useScopedServices();
+  const { fieldsMetadata } = useDiscoverServices();
   const groupByField = useGroupSimilarMessagesField();
 
   const onClick = useCallback(() => {
@@ -34,17 +36,18 @@ export const GroupSimilarMessagesButton = () => {
       return;
     }
 
-    scopedEBTManager.trackEsqlCategorizeEvent({
+    void scopedEBTManager.trackEsqlCategorizeEvent({
       [EsqlCategorizeEventDataKeys.EVENT_NAME]:
         EsqlCategorizeEventName.GROUP_SIMILAR_MESSAGES_CLICKED,
       [EsqlCategorizeEventDataKeys.FIELD_NAME]: groupByField,
+      fieldsMetadata,
     });
     dispatch(
       updateESQLQuery({
         queryOrUpdater: (esql) => appendCategorizeToESQLQuery(esql, groupByField),
       })
     );
-  }, [dispatch, groupByField, scopedEBTManager, updateESQLQuery]);
+  }, [dispatch, fieldsMetadata, groupByField, scopedEBTManager, updateESQLQuery]);
 
   if (!groupByField) {
     return null;

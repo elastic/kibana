@@ -224,7 +224,8 @@ describe('DiscoverEBTManager', () => {
           fieldName: {
             type: 'keyword',
             _meta: {
-              description: 'The name of the field that was categorized',
+              description:
+                'The ECS field name or <non-ecs> if the field could not be verified as ECS',
               optional: false,
             },
           },
@@ -1436,26 +1437,42 @@ describe('DiscoverEBTManager', () => {
   });
 
   describe('trackEsqlCategorizeEvent', () => {
-    it('should track a group similar messages click', () => {
-      discoverEBTContextManager.initialize({
-        core: coreSetupMock,
-        discoverEbtContext$,
-      });
+    it.each([
+      { fieldName: 'test', metadata: fieldsMetadata, expectedFieldName: 'test' },
+      { fieldName: 'custom', metadata: fieldsMetadata, expectedFieldName: '<non-ecs>' },
+      { fieldName: 'test', metadata: undefined, expectedFieldName: '<non-ecs>' },
+      {
+        fieldName: 'test',
+        metadata: { ...fieldsMetadata, getClient: jest.fn().mockRejectedValue(new Error()) },
+        expectedFieldName: '<non-ecs>',
+      },
+    ])(
+      'reports $expectedFieldName for the field $fieldName',
+      async ({ fieldName, metadata, expectedFieldName }) => {
+        discoverEBTContextManager.initialize({
+          core: coreSetupMock,
+          discoverEbtContext$,
+        });
 
-      const scopedManager = discoverEBTContextManager.createScopedEBTManager();
-      scopedManager.setAsActiveManager();
+        const scopedManager = discoverEBTContextManager.createScopedEBTManager();
+        scopedManager.setAsActiveManager();
 
-      scopedManager.trackEsqlCategorizeEvent({
-        [EsqlCategorizeEventDataKeys.EVENT_NAME]:
-          EsqlCategorizeEventName.GROUP_SIMILAR_MESSAGES_CLICKED,
-        [EsqlCategorizeEventDataKeys.FIELD_NAME]: 'message',
-      });
+        await scopedManager.trackEsqlCategorizeEvent({
+          [EsqlCategorizeEventDataKeys.EVENT_NAME]:
+            EsqlCategorizeEventName.GROUP_SIMILAR_MESSAGES_CLICKED,
+          [EsqlCategorizeEventDataKeys.FIELD_NAME]: fieldName,
+          fieldsMetadata: metadata,
+        });
 
-      expect(coreSetupMock.analytics.reportEvent).toHaveBeenCalledTimes(1);
-      expect(coreSetupMock.analytics.reportEvent).toHaveBeenCalledWith('discover_esql_categorize', {
-        eventName: 'group_similar_messages_clicked',
-        fieldName: 'message',
-      });
-    });
+        expect(coreSetupMock.analytics.reportEvent).toHaveBeenCalledTimes(1);
+        expect(coreSetupMock.analytics.reportEvent).toHaveBeenCalledWith(
+          'discover_esql_categorize',
+          {
+            eventName: 'group_similar_messages_clicked',
+            fieldName: expectedFieldName,
+          }
+        );
+      }
+    );
   });
 });

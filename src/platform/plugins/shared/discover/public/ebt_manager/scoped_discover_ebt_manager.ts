@@ -519,13 +519,25 @@ export class ScopedDiscoverEBTManager {
     });
   }
 
-  public trackEsqlCategorizeEvent({ eventName, ...payload }: EsqlCategorizeEBTEvent) {
+  public async trackEsqlCategorizeEvent({
+    eventName,
+    fieldName,
+    fieldsMetadata,
+  }: EsqlCategorizeEBTEvent & { fieldsMetadata: FieldsMetadataPublicStart | undefined }) {
     if (!this.reportEvent) {
       return;
     }
+
+    const isEcsField = fieldsMetadata
+      ? await this.getFieldsFromMetadata({ fieldsMetadata, fieldNames: [fieldName] }).then(
+          (fields) => Boolean(fields[fieldName]?.short),
+          () => false
+        )
+      : false;
+
     this.reportEvent(ESQL_CATEGORIZE_EVENT_TYPE, {
       [EsqlCategorizeEventDataKeys.EVENT_NAME]: eventName,
-      ...payload,
+      [EsqlCategorizeEventDataKeys.FIELD_NAME]: isEcsField ? fieldName : NON_ECS_FIELD,
     });
   }
 }

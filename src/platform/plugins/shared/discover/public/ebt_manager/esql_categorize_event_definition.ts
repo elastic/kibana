@@ -38,7 +38,7 @@ export const esqlCategorizeEventType: EventTypeOpts<Record<string, unknown>> = {
     [EsqlCategorizeEventDataKeys.FIELD_NAME]: {
       type: 'keyword',
       _meta: {
-        description: 'The name of the field that was categorized',
+        description: 'The ECS field name or <non-ecs> if the field could not be verified as ECS',
         optional: false,
       },
     },
