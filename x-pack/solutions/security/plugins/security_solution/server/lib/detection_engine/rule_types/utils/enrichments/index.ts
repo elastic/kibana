@@ -19,6 +19,7 @@ import {
   createV2ServiceRiskEnrichments,
   createServiceRiskEnrichments,
 } from './enrichment_by_type/service_risk';
+import { createV2AiAgentRiskEnrichments } from './enrichment_by_type/ai_agent_risk';
 import {
   createV2HostAssetCriticalityEnrichments,
   createV2ServiceAssetCriticalityEnrichments,
@@ -63,6 +64,7 @@ const resolveV2Enrichments = async <T extends DetectionAlertLatest>(
     createV2HostRiskEnrichments(opts),
     createV2UserRiskEnrichments(opts),
     createV2ServiceRiskEnrichments(opts),
+    createV2AiAgentRiskEnrichments(opts),
     createV2HostAssetCriticalityEnrichments(opts),
     createV2UserAssetCriticalityEnrichments(opts),
     createV2ServiceAssetCriticalityEnrichments(opts),

@@ -17,6 +17,7 @@ import type {
   EventsMapByEnrichments,
 } from './types';
 import type { IRuleExecutionLogForExecutors } from '../../../rule_monitoring';
+import { getEventValue } from './utils/events';
 
 const CHUNK_SIZE = 1000;
 
@@ -67,6 +68,33 @@ const listEntitiesForEuidChunk = async ({
     return { entities: [], fields: [] };
   }
 };
+
+export type EntityStoreEnrichmentType = 'host' | 'user' | 'service' | 'ai_agent';
+
+/**
+ * Resolves the agent EUID from the agent fields alone, so a descendant
+ * (`process.ai_agent.is_descendant: true`) resolves to the agent that spawned it. The agent
+ * definition's documents filter rejects descendants, because they must not create agents.
+ */
+export const getAiAgentEuidFromAlert = <T extends DetectionAlertLatest>(
+  event: EventsForEnrichment<T>
+): string | undefined => {
+  const definition = getBuiltInEntityDefinition('ai_agent');
+  const { identitySourceFields } = euid.getEuidSourceFields(definition);
+  const identityDoc = Object.fromEntries(
+    identitySourceFields.map((field) => [field, getEventValue(event, field)])
+  );
+  return euid.getEuidFromObjectForSearch(definition, identityDoc);
+};
+
+const getEuidForEntityType = <T extends DetectionAlertLatest>(
+  entityType: EntityStoreEnrichmentType,
+  event: EventsForEnrichment<T>
+): string | undefined =>
+  entityType === 'ai_agent'
+    ? getAiAgentEuidFromAlert(event)
+    : euid.getEuidFromObjectForSearch(getBuiltInEntityDefinition(entityType), event._source);
+
 /**
  * Enriches alert events with data from the entity store V2, using the EUID translation
  * layer to identify entities. Queries via the entity store's `listEntities` API with a
@@ -78,6 +106,9 @@ const listEntitiesForEuidChunk = async ({
  * and `createEnrichmentFunction` is called with the matching document's fields
  * (in dot-notation `{ 'entity.risk.calculated_level': [value], … }` format) to
  * produce the per-event mutation.
+ *
+ * Host, user and service EUIDs are stamped whether or not the entity is in the store. Agent EUIDs
+ * are stamped only for agents in the store (see {@link ALERT_ENTITY_ID}).
  */
 export const createEntityStoreEnrichment = async <T extends DetectionAlertLatest>({
   name,
@@ -89,7 +120,7 @@ export const createEntityStoreEnrichment = async <T extends DetectionAlertLatest
   createEnrichmentFunction,
 }: {
   name: string;
-  entityType: 'host' | 'user' | 'service';
+  entityType: EntityStoreEnrichmentType;
   entityStoreCrudClient: EntityStoreCRUDClient;
   logger: IRuleExecutionLogForExecutors;
   events: Array<EventsForEnrichment<T>>;
@@ -99,18 +130,19 @@ export const createEntityStoreEnrichment = async <T extends DetectionAlertLatest
   try {
     logger.debug(`Enrichment ${name}: started`);
 
-    // Compute the EUID for each event and group events by EUID. Stamp all events with a derivable
-    // EUID immediately — store membership is not required for the stamp.
+    const stampRequiresStoredEntity = entityType === 'ai_agent';
+
+    // Compute the EUID for each event and group events by EUID. Types that don't require store
+    // membership for the stamp are stamped immediately.
     const eventsMapByEuid: Record<string, Array<EventsForEnrichment<T>>> = {};
     const eventsMapById: EventsMapByEnrichments = {};
     for (const event of events) {
-      const computedEuid = euid.getEuidFromObjectForSearch(
-        getBuiltInEntityDefinition(entityType),
-        event._source
-      );
+      const computedEuid = getEuidForEntityType(entityType, event);
       if (computedEuid) {
         (eventsMapByEuid[computedEuid] ??= []).push(event);
-        eventsMapById[event._id] = [buildEuidStampEnrichment(computedEuid)];
+        if (!stampRequiresStoredEntity) {
+          eventsMapById[event._id] = [buildEuidStampEnrichment(computedEuid)];
+        }
       }
     }
 
@@ -137,14 +169,18 @@ export const createEntityStoreEnrichment = async <T extends DetectionAlertLatest
       enrichableEntities
         .flatMap(({ entityId, fields }) => {
           const enrichmentFn = createEnrichmentFunction(fields);
-          if (!enrichmentFn) return [];
+          const enrichmentFns = [
+            ...(stampRequiresStoredEntity ? [buildEuidStampEnrichment(entityId)] : []),
+            ...(enrichmentFn ? [enrichmentFn] : []),
+          ];
+          if (enrichmentFns.length === 0) return [];
           return (eventsMapByEuid[entityId] ?? []).map((event) => ({
             event,
-            enrichmentFn,
+            enrichmentFns,
           }));
         })
-        .forEach(({ event, enrichmentFn }) => {
-          eventsMapById[event._id] = [...(eventsMapById[event._id] ?? []), enrichmentFn];
+        .forEach(({ event, enrichmentFns }) => {
+          eventsMapById[event._id] = [...(eventsMapById[event._id] ?? []), ...enrichmentFns];
         });
     }
 

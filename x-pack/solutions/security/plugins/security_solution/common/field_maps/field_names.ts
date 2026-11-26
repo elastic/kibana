@@ -30,10 +30,12 @@ export const LEGACY_ALERT_USER_CRITICALITY = `${ALERT_NAMESPACE}.user.criticalit
 /**
  * EUIDs of the entities this alert resolves to, computed at rule execution by the entity store
  * enrichments. Multi-valued: one alert can resolve to a host, a user and a service at once, and
- * each EUID is type-prefixed (`host:`, `user:`, `service:`).
+ * each EUID is type-prefixed (`host:`, `user:`, `service:`, `ai_agent:`).
  *
- * Present for every alert with derivable identity fields at rule execution — regardless of whether
- * the entity was in the store — so absence means "no EUID could be derived", not "not in the store".
+ * Host, user and service EUIDs are present for every alert with derivable identity fields at rule
+ * execution, regardless of whether the entity was in the store. An `ai_agent:` EUID is present only
+ * when that agent is in the store, because a descendant running as another OS user (`sudo`) would
+ * otherwise name an agent that doesn't exist.
  */
 export const ALERT_ENTITY_ID = `${ALERT_NAMESPACE}.entity.id` as const;
 
@@ -49,6 +51,10 @@ export const ALERT_USER_RISK_SCORE_CALCULATED_SCORE_NORM =
 export const ALERT_SERVICE_RISK_SCORE_CALCULATED_LEVEL = `service.risk.calculated_level` as const;
 export const ALERT_SERVICE_RISK_SCORE_CALCULATED_SCORE_NORM =
   `service.risk.calculated_score_norm` as const;
+export const ALERT_AI_AGENT_RISK_SCORE_CALCULATED_LEVEL =
+  `process.ai_agent.risk.calculated_level` as const;
+export const ALERT_AI_AGENT_RISK_SCORE_CALCULATED_SCORE_NORM =
+  `process.ai_agent.risk.calculated_score_norm` as const;
 
 export const ALERT_ORIGINAL_EVENT = `${ALERT_NAMESPACE}.original_event` as const;
 export const ALERT_ORIGINAL_EVENT_ACTION = `${ALERT_ORIGINAL_EVENT}.action` as const;
