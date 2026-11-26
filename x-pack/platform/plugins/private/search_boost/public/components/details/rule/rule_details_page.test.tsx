@@ -39,7 +39,7 @@ const getSetting = (id: string) => screen.getByTestId(`searchBoostSetting-${id}`
 
 const getMatchNames = () =>
   within(screen.getByTestId('searchBoostMatchesTable'))
-    .queryAllByTestId('searchBoostMatchLink')
+    .queryAllByTestId('searchBoostMatchName')
     .map(({ textContent }) => textContent);
 
 describe('RuleDetailsPage', () => {
@@ -72,6 +72,8 @@ describe('RuleDetailsPage', () => {
     expect(screen.getByText('Matching indices')).toBeInTheDocument();
     await waitFor(() =>
       expect(getMatchNames()).toEqual([
+        '.internal-alerts',
+        '.kibana-observability-ai-assistant',
         'catalog-products',
         'catalog-reviews',
         'customers',
@@ -105,6 +107,8 @@ describe('RuleDetailsPage', () => {
     expect(await screen.findByPlaceholderText('Search indices')).toHaveValue('');
     await waitFor(() =>
       expect(getMatchNames()).toEqual([
+        '.internal-alerts',
+        '.kibana-observability-ai-assistant',
         'catalog-products',
         'catalog-reviews',
         'customers',

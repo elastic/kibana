@@ -33,7 +33,11 @@ import { useSourceFilter } from '../../hooks/use_source_filter';
 import { usePlatformFilter } from '../../hooks/use_platform_filter';
 import { useApplicationType } from '../../hooks/use_application_type';
 import { createUiSettingsMock } from '../../test_utils/ui_settings_mock';
+import type { SessionsStatus } from '../../../common/sessions';
+import { useSessionsStatus } from '../../application/sessions_status_provider';
+import type { SessionsStatusState } from '../sessions/hooks/use_sessions_status';
 
+jest.mock('../../application/sessions_status_provider');
 jest.mock('../../hooks/use_kibana_services');
 jest.mock('../../hooks/use_time_range');
 jest.mock('../../hooks/use_environment');
@@ -71,6 +75,54 @@ const setSourceFilter = jest.fn();
 
 const mockSourceFilter = (sourceFilter?: ApplicationSummary['source']) =>
   jest.mocked(useSourceFilter).mockReturnValue({ sourceFilter, setSourceFilter });
+
+const HEALTHY_SESSIONS: SessionsStatus = {
+  installed: true,
+  disabled: false,
+  health: 'healthy',
+  installedVersion: 2,
+  currentVersion: 2,
+  rebuilding: false,
+  apiKeyInvalid: false,
+  lagSeconds: 30,
+  summarizedUntil: '2026-10-20T10:05:00.000Z',
+  lastRunAt: '2026-10-20T10:06:00.000Z',
+  lastSuccessAt: '2026-10-20T10:06:00.000Z',
+  lastError: null,
+  enabledBy: null,
+  retentionDays: 30,
+  canEnable: false,
+  autoEnable: false,
+  canManage: false,
+  setUpBlocker: null,
+};
+
+const NOT_SET_UP: SessionsStatus = {
+  ...HEALTHY_SESSIONS,
+  installed: false,
+  health: 'missing',
+  installedVersion: null,
+  lagSeconds: null,
+  summarizedUntil: null,
+};
+
+const enableSessions = jest.fn();
+const refreshSessionsStatus = jest.fn();
+
+const mockSessionsStatus = (overrides: Partial<SessionsStatusState> = {}) =>
+  jest.mocked(useSessionsStatus).mockReturnValue({
+    status: HEALTHY_SESSIONS,
+    loading: false,
+    error: undefined,
+    refresh: refreshSessionsStatus,
+    enable: enableSessions,
+    enabling: false,
+    enableError: undefined,
+    disable: jest.fn(),
+    disabling: false,
+    disableError: undefined,
+    ...overrides,
+  });
 
 const mockPlatformFilter = (platformFilter?: MobilePlatform) =>
   jest.mocked(usePlatformFilter).mockReturnValue({ platformFilter, setPlatformFilter: jest.fn() });
@@ -137,7 +189,8 @@ const respondWith = (
   unavailableSources: Array<ApplicationSummary['source']> = [],
   sessionsOverTime: Array<{ timestamp: number; count: number }> | null = null,
   partiallyAvailableSources: Array<ApplicationSummary['source']> = [],
-  mobileAvailability: MobileAvailability = 'complete'
+  mobileAvailability: MobileAvailability = 'complete',
+  rangeStart = Date.now() - 15 * 60 * 1000
 ) =>
   mockFetch.mockResolvedValue({
     applications,
@@ -146,7 +199,11 @@ const respondWith = (
     pageLoadsOverTime: {
       otel: [],
       classic: [],
-      histogram: { interval: { value: 30, unit: 's' }, start: 0, end: 15 * 60 * 1000 },
+      histogram: {
+        interval: { value: 30, unit: 's' },
+        start: rangeStart,
+        end: rangeStart + 15 * 60 * 1000,
+      },
     },
     sessionsOverTime,
     partiallyAvailableSources,
@@ -160,6 +217,7 @@ const renderPage = ({
 }: { isServerless?: boolean; timeZoneSetting?: string } = {}) => {
   jest.mocked(useKibanaServices).mockReturnValue({
     application: {
+      capabilities: { digital_experience: { show: true } },
       getUrlForApp: (appId: string, { path }: { path: string }) => `/app/${appId}${path}`,
     },
     http: {},
@@ -185,6 +243,7 @@ beforeEach(() => {
   mockTimeRange(timeRange);
   mockEnvironment();
   mockSourceFilter();
+  mockSessionsStatus();
   mockPlatformFilter();
   mockApplicationType();
   jest.mocked(useDigitalExperienceRouter).mockReturnValue(digitalExperienceRouter);
@@ -217,6 +276,120 @@ describe('ApplicationsListPage mobile applications', () => {
     expect(await screen.findByTestId('digitalExperienceMobileApplicationsTable')).toBeVisible();
     expect(screen.queryByTestId('digitalExperienceApplicationTypeTabs')).toBeNull();
     expect(screen.queryByTestId('digitalExperienceApplicationsTable')).toBeNull();
+  });
+
+  it.each([
+    ['not set up', NOT_SET_UP, 'digitalExperienceApplicationsSessionsNotEnabled'],
+    [
+      'still building',
+      { ...HEALTHY_SESSIONS, rebuilding: true },
+      'digitalExperienceApplicationsSessionsRebuilding',
+    ],
+  ])(
+    'keeps a Web tab, on the mobile one, while sessions are %s',
+    async (_name, status, callout) => {
+      mockSessionsStatus({ status });
+      respondWith([mobileApp()]);
+      renderPage();
+
+      expect(await screen.findByTestId('digitalExperienceMobileApplicationsTable')).toBeVisible();
+      expect(screen.queryByTestId(callout)).toBeNull();
+
+      fireEvent.click(screen.getByTestId('digitalExperienceApplicationTypeTab-web'));
+      expect(setApplicationType).toHaveBeenCalledWith('web');
+    }
+  );
+
+  it('requests no sessions status on the Mobile tab the URL picks, and keeps a Web tab for their setup', async () => {
+    mockApplicationType('mobile');
+    // Never fetched, as nothing asked for it on this visit
+    mockSessionsStatus({ status: undefined });
+    respondWith([mobileApp()]);
+    renderPage();
+
+    expect(await screen.findByTestId('digitalExperienceMobileApplicationsTable')).toBeVisible();
+    expect(useSessionsStatus).toHaveBeenLastCalledWith(expect.objectContaining({ enabled: false }));
+    // Sessions may still need setting up, which the Web tab offers
+    expect(screen.getByTestId('digitalExperienceApplicationTypeTab-web')).toBeVisible();
+  });
+
+  it('requests the sessions status on the Mobile tab it opens by itself, to show their Web applications once built', async () => {
+    respondWith([mobileApp()]);
+    renderPage();
+
+    expect(await screen.findByTestId('digitalExperienceMobileApplicationsTable')).toBeVisible();
+    expect(useSessionsStatus).toHaveBeenLastCalledWith({ enabled: true });
+  });
+
+  it('shows the Web applications by itself once the sessions it opened the Mobile tab without are built', async () => {
+    mockSessionsStatus({ status: { ...HEALTHY_SESSIONS, rebuilding: true } });
+    respondWith([mobileApp()]);
+    const { rerender } = renderPage();
+    expect(await screen.findByTestId('digitalExperienceMobileApplicationsTable')).toBeVisible();
+
+    // The rebuild finishes, and its sessions bring a Web application
+    respondWith([mobileApp(), webApp()]);
+    mockSessionsStatus();
+    rerender(<ApplicationsListPage />);
+
+    expect(
+      await within(await screen.findByTestId('digitalExperienceApplicationsTable')).findByText(
+        'web-app'
+      )
+    ).toBeVisible();
+    expect(mockFetch).toHaveBeenCalledTimes(2);
+  });
+
+  it('shows no empty Web tab on the Mobile tab the URL picks once sessions are known to be ready', async () => {
+    mockApplicationType('mobile');
+    respondWith([mobileApp()]);
+    renderPage();
+
+    expect(await screen.findByTestId('digitalExperienceMobileApplicationsTable')).toBeVisible();
+    expect(screen.queryByTestId('digitalExperienceApplicationTypeTabs')).toBeNull();
+  });
+
+  it.each([
+    ['Mobile', 'mobile' as const, false],
+    ['Web', 'web' as const, true],
+  ])(
+    'checks the sessions status again on refresh on the %s tab: %s',
+    async (_tab, applicationType, refreshesStatus) => {
+      mockApplicationType(applicationType);
+      respondWith([mobileApp(), webApp()]);
+      renderPage();
+      await waitFor(() => expect(mockFetch).toHaveBeenCalledTimes(1));
+
+      const { calls } = jest.mocked(TimeRangePicker).mock;
+      const { onRefresh } = calls[calls.length - 1][0];
+      act(() => onRefresh());
+
+      await waitFor(() => expect(mockFetch).toHaveBeenCalledTimes(2));
+      expect(refreshSessionsStatus).toHaveBeenCalledTimes(refreshesStatus ? 1 : 0);
+    }
+  );
+
+  it('keeps a Mobile tab on a Web tab without rows when the URL picks it', async () => {
+    mockApplicationType('web');
+    respondWith([mobileApp()]);
+    renderPage();
+
+    expect(await screen.findByTestId('digitalExperienceApplicationTypeTab-mobile')).toBeVisible();
+    expect(screen.queryByTestId('digitalExperienceMobileApplicationsTable')).toBeNull();
+  });
+
+  it('says on the Web tab that sessions are not set up, beside mobile applications', async () => {
+    mockApplicationType('web');
+    mockSessionsStatus({ status: NOT_SET_UP });
+    respondWith([mobileApp()]);
+    renderPage();
+
+    expect(
+      await screen.findByTestId('digitalExperienceApplicationsSessionsNotEnabled')
+    ).toBeVisible();
+    expect(
+      screen.getByText('EDOT Browser applications show up here once sessions are set up.')
+    ).toBeVisible();
   });
 
   it('lists one row per application with a badge per platform, linked to the mobile page', async () => {
@@ -778,7 +951,7 @@ describe('ApplicationsListPage', () => {
     expect(screen.getByTestId('digitalExperienceChartMetric-sessions')).toBeDisabled();
   });
 
-  it('shows no sessions total when the applications were read from the raw events', async () => {
+  it('shows no sessions total when no application has its sessions counted', async () => {
     respondWith([app({ serviceName: 'shop', source: 'otel', sessions: null })]);
     renderPage();
     await screen.findAllByTestId('digitalExperienceApplicationLink');
@@ -944,5 +1117,161 @@ describe('ApplicationsListPage', () => {
     expect(
       screen.getByText('No mobile applications match the search or the platform.')
     ).toBeInTheDocument();
+  });
+
+  describe('sessions, which EDOT Browser applications are read from', () => {
+    const SESSIONS_CALLOUTS = [
+      'digitalExperienceApplicationsSessionsNotEnabled',
+      'digitalExperienceApplicationsSessionsEnabling',
+      'digitalExperienceApplicationsSessionsRebuilding',
+      'digitalExperienceSessionsLagging',
+      'digitalExperienceSessionsDegraded',
+      'digitalExperienceSessionsDisabled',
+      'digitalExperienceSessionsRetention',
+    ];
+
+    it('says nothing when sessions can answer for the whole range', async () => {
+      respondWith([app({ source: 'otel' })]);
+      renderPage();
+      await screen.findByTestId('digitalExperienceApplicationLink');
+
+      for (const callout of SESSIONS_CALLOUTS) {
+        expect(screen.queryByTestId(callout)).not.toBeInTheDocument();
+      }
+    });
+
+    it('offers to set sessions up, and explains the empty list', async () => {
+      mockSessionsStatus({ status: { ...NOT_SET_UP, canEnable: true, autoEnable: true } });
+      respondWith([]);
+      renderPage();
+
+      expect(
+        await screen.findByText('EDOT Browser applications show up here once sessions are set up.')
+      ).toBeInTheDocument();
+      expect(screen.queryByTestId('digitalExperienceApplicationsEmpty')).not.toBeInTheDocument();
+
+      fireEvent.click(screen.getByTestId('digitalExperienceApplicationsSessionsEnable'));
+      expect(enableSessions).toHaveBeenCalledTimes(1);
+    });
+
+    it('says who sets sessions up when the user cannot, whatever their Kibana privileges', async () => {
+      mockSessionsStatus({ status: { ...NOT_SET_UP, canManage: true } });
+      respondWith([]);
+      renderPage();
+
+      expect(
+        await screen.findByTestId('digitalExperienceApplicationsSessionsNotEnabled')
+      ).toHaveTextContent('They are set up automatically when someone who can read');
+      expect(
+        screen.queryByTestId('digitalExperienceApplicationsSessionsEnable')
+      ).not.toBeInTheDocument();
+    });
+
+    it('says sessions are being set up while they are', async () => {
+      mockSessionsStatus({ status: { ...NOT_SET_UP, canManage: true }, enabling: true });
+      respondWith([]);
+      renderPage();
+
+      expect(
+        await screen.findByTestId('digitalExperienceApplicationsSessionsEnabling')
+      ).toBeInTheDocument();
+      expect(
+        screen.queryByTestId('digitalExperienceApplicationsSessionsNotEnabled')
+      ).not.toBeInTheDocument();
+    });
+
+    it('says applications may be missing while sessions rebuild', async () => {
+      mockSessionsStatus({ status: { ...HEALTHY_SESSIONS, rebuilding: true } });
+      respondWith([]);
+      renderPage();
+
+      expect(
+        await screen.findByText('EDOT Browser applications show up here as sessions are built.')
+      ).toBeInTheDocument();
+      expect(
+        screen.getByTestId('digitalExperienceApplicationsSessionsRebuilding')
+      ).toBeInTheDocument();
+    });
+
+    it.each([
+      ['behind', { health: 'lagging', lagSeconds: 600 }, 'digitalExperienceSessionsLagging'],
+      ['failing', { health: 'degraded' }, 'digitalExperienceSessionsDegraded'],
+      ['turned off', { health: 'disabled', disabled: true }, 'digitalExperienceSessionsDisabled'],
+    ] as const)('says when sessions are %s', async (_, overrides, callout) => {
+      mockSessionsStatus({ status: { ...HEALTHY_SESSIONS, ...overrides } });
+      respondWith([app({ source: 'otel' })]);
+      renderPage();
+
+      expect(await screen.findByTestId(callout)).toBeInTheDocument();
+    });
+
+    it.each([true, false])(
+      'offers to turn sessions back on only to managers (manager: %s)',
+      async (canManage) => {
+        mockSessionsStatus({
+          status: {
+            ...HEALTHY_SESSIONS,
+            disabled: true,
+            health: 'disabled',
+            canEnable: false,
+            autoEnable: false,
+            canManage,
+          },
+        });
+        respondWith([app({ source: 'otel' })]);
+        renderPage();
+
+        const callout = await screen.findByTestId('digitalExperienceSessionsDisabled');
+        const turnOn = screen.queryByTestId('digitalExperienceSessionsTurnOn');
+        if (canManage) {
+          fireEvent.click(turnOn as HTMLElement);
+          expect(enableSessions).toHaveBeenCalledTimes(1);
+        } else {
+          expect(turnOn).not.toBeInTheDocument();
+          expect(callout).toHaveTextContent('can turn them back on');
+        }
+      }
+    );
+
+    it('says sessions are not kept that far back, from when', async () => {
+      respondWith(
+        [app({ source: 'otel' })],
+        [],
+        [],
+        null,
+        [],
+        'complete',
+        Date.now() - 60 * 24 * 60 * 60 * 1000
+      );
+      renderPage();
+
+      expect(await screen.findByTestId('digitalExperienceSessionsRetention')).toHaveTextContent(
+        /^Sessions are built from the last 30 days of data, so this time range may be missing sessions before .+\.$/
+      );
+    });
+
+    it('says nothing about sessions when only Classic RUM is shown', async () => {
+      mockSourceFilter('classic');
+      mockSessionsStatus({ status: NOT_SET_UP });
+      respondWith([app({ source: 'classic' })]);
+      renderPage();
+      await screen.findByTestId('digitalExperienceApplicationLink');
+
+      for (const callout of SESSIONS_CALLOUTS) {
+        expect(screen.queryByTestId(callout)).not.toBeInTheDocument();
+      }
+    });
+
+    it('fetches the applications again once sessions are ready', async () => {
+      mockSessionsStatus({ status: { ...HEALTHY_SESSIONS, rebuilding: true } });
+      respondWith([]);
+      const { rerender } = renderPage();
+      await waitFor(() => expect(mockFetch).toHaveBeenCalledTimes(1));
+
+      mockSessionsStatus();
+      rerender(<ApplicationsListPage />);
+
+      await waitFor(() => expect(mockFetch).toHaveBeenCalledTimes(2));
+    });
   });
 });

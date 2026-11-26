@@ -10,10 +10,12 @@ import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { ESQLSearchResponse } from '@kbn/es-types';
 import { MAX_STREAMS_UNIT_STATS_COMPONENTS, type StreamsUnit } from '@kbn/streams-schema';
 import { isEsqlUnknownIndexError } from '@kbn/storage-adapter';
+import { chunk } from 'lodash';
 import { StatusError } from '../streams/errors/status_error';
 import { toEsqlRequest } from '../streams/helpers/esql';
 import {
   ESQL_MAX_ROWS,
+  STATS_COLUMN,
   UNIT_METRICS_STREAM,
   UNIT_STATS_DEFAULT_WINDOW_MS,
   UNIT_STATS_REQUEST_TIMEOUT_MS,
@@ -32,6 +34,7 @@ import {
 import { withDeliverySeries } from './mappers/map_delivery_series';
 import { mapProcessorStatsRows, noProcessorStats } from './mappers/map_processor_stats_result';
 import { mapSourceStatsRows, noSourceStats } from './mappers/map_source_stats_result';
+import { buildDestinationCollectionsQuery } from './query_builders/build_destination_collections_query';
 import {
   buildDestinationRateQuery,
   buildDestinationSumsQuery,
@@ -49,6 +52,12 @@ import {
   type SourceQueryRef,
 } from './query_refs';
 import { getSeriesBucketMs } from './utils/series_bucket';
+
+/** A data stream or index a destination wrote to, and the documents that stayed in it. */
+export interface DestinationCollection {
+  name: string;
+  documents: number;
+}
 
 /** The results of one kind, and the error when its queries failed. */
 interface KindOutcome<TResult> {
@@ -112,6 +121,65 @@ export class UnitStatsClient {
       components: { destinations, processors, sources },
       meta: { window, ...(configHash ? { config_hash: configHash } : {}) },
     };
+  }
+
+  /**
+   * The collections (data streams or indices) each destination wrote documents to in the window,
+   * with the documents that stayed in each, see `buildDestinationCollectionsQuery`. A destination
+   * that wrote nothing, or a unit that has not reported yet, has an empty list. A failure throws as
+   * a `UnitStatsError`.
+   */
+  async getDestinationCollections({
+    unitId,
+    destinationIds,
+    window,
+  }: {
+    unitId: string;
+    destinationIds: string[];
+    window: StatsQueryBaseParams['window'];
+  }): Promise<Record<string, DestinationCollection[]>> {
+    const what = 'destination collections';
+    const collections: Record<string, DestinationCollection[]> = Object.fromEntries(
+      destinationIds.map((id) => [id, []])
+    );
+    if (destinationIds.length === 0) return collections;
+
+    try {
+      if (!(await this.doesUnitMetricsStreamExist())) return collections;
+
+      const rowGroups = await Promise.all(
+        chunk(destinationIds, MAX_STREAMS_UNIT_STATS_COMPONENTS).map((ids) =>
+          this.runQuery(buildDestinationCollectionsQuery({ unitId, window, ids }))
+        )
+      );
+      for (const rows of rowGroups) {
+        if (rows.length >= ESQL_MAX_ROWS) {
+          this.dependencies.logger.warn(
+            `Unit stats ${what} for unit [${unitId}] reached the ${ESQL_MAX_ROWS} row limit, so some collections are missing`
+          );
+        }
+        for (const {
+          [STATS_COLUMN.id]: id,
+          [STATS_COLUMN.collection]: name,
+          [STATS_COLUMN.documents]: documents,
+        } of rows) {
+          if (
+            typeof id === 'string' &&
+            typeof name === 'string' &&
+            typeof documents === 'number' &&
+            Object.hasOwn(collections, id)
+          ) {
+            collections[id].push({ name, documents });
+          }
+        }
+      }
+
+      return collections;
+    } catch (error) {
+      const failure = toSearchError(error, what);
+      this.logFailure(failure, { unitId, what });
+      throw failure;
+    }
   }
 
   /** Every destination, processor and source in the unit, as long as one request can name them all. */

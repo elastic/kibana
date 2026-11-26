@@ -68,8 +68,22 @@ describe('ProfileDetailsPage', () => {
       profile: { ...dataStreamsProfile, recent: { ...dataStreamsProfile.recent, max_age: '0d' } },
     });
 
+    expect(getSetting('recent')).toHaveTextContent('1.5–5,000 boost');
     expect(getSetting('recent')).toHaveTextContent('Skipped');
     expect(getSetting('standard')).toHaveTextContent('Data up to 7 days old');
+  });
+
+  it('says why a period is skipped in its info tooltip', async () => {
+    renderPage({
+      profile: { ...dataStreamsProfile, recent: { ...dataStreamsProfile.recent, max_age: '0d' } },
+    });
+
+    const label = getSetting('recent').previousElementSibling as HTMLElement;
+    await userEvent.hover(within(label).getByText('Info'));
+
+    const tooltip = await screen.findByRole('tooltip');
+    expect(tooltip).toHaveTextContent('The newest data, up to the recent max age.');
+    expect(tooltip).toHaveTextContent('The recent max age is 0, so no data is ever recent.');
   });
 
   it('shows the usage of the rules using the profile', () => {

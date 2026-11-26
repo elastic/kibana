@@ -8,18 +8,31 @@
 import { apiTest } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/api';
 import type { ApplicationsResponse } from '../../../../common/types/applications';
+import {
+  deleteOwnedSessions,
+  setUpOwnedSessions,
+  type OwnedSessions,
+  type OwnedSessionsSetup,
+} from '../../common/fixtures/sessions_data';
 import { testData } from '../fixtures';
 import { DIGITAL_EXPERIENCE_SERVERLESS_TAGS } from '../../tags';
 import { FLAG_ON_OVERRIDE, FLAG_RESET_OVERRIDE } from '../../feature_flag';
 
 const { APPLICATIONS_IN_TIME_RANGE_PATH, COMMON_HEADERS, createRole } = testData;
 
-/** Reads the EDOT Browser traces but not its logs. */
-const NO_OTEL_LOGS_ROLE = {
+// The sessions index only needs to exist: a user is partially denied the indices it can't read.
+const NO_SESSIONS: OwnedSessions = {
+  idPrefix: 'dx-partial-access',
+  environment: 'partial-access-test',
+  count: 0,
+};
+
+/** Reads the EDOT Browser events but not the sessions index. */
+const NO_SESSIONS_READ_ROLE = {
   ...createRole({ digital_experience: ['read'], apm: ['read'] }),
   elasticsearch: {
     cluster: [],
-    indices: [{ names: ['traces-*.otel-*'], privileges: ['read'] }],
+    indices: [{ names: ['logs-*.otel-*', 'traces-*.otel-*'], privileges: ['read'] }],
   },
 };
 
@@ -27,18 +40,22 @@ apiTest.describe(
   'Digital Experience applications API with partial index access on serverless',
   { tag: DIGITAL_EXPERIENCE_SERVERLESS_TAGS },
   () => {
-    apiTest.beforeAll(async ({ apiServices }) => {
+    let setup: OwnedSessionsSetup | undefined;
+
+    apiTest.beforeAll(async ({ apiServices, esClient, kbnClient }) => {
       await apiServices.core.settings(FLAG_ON_OVERRIDE);
+      setup = await setUpOwnedSessions(esClient, kbnClient);
     });
 
-    apiTest.afterAll(async ({ apiServices }) => {
+    apiTest.afterAll(async ({ apiServices, esClient, kbnClient }) => {
+      await deleteOwnedSessions(esClient, kbnClient, NO_SESSIONS, setup);
       await apiServices.core.settings(FLAG_RESET_OVERRIDE);
     });
 
     apiTest(
-      'reports EDOT Browser as partially available when its logs are not readable',
+      'reports EDOT Browser as partially available when the sessions index is not readable',
       async ({ apiClient, requestAuth }) => {
-        const { apiKeyHeader } = await requestAuth.getApiKeyForCustomRole(NO_OTEL_LOGS_ROLE);
+        const { apiKeyHeader } = await requestAuth.getApiKeyForCustomRole(NO_SESSIONS_READ_ROLE);
 
         const response = await apiClient.get(APPLICATIONS_IN_TIME_RANGE_PATH, {
           headers: { ...COMMON_HEADERS, ...apiKeyHeader },
