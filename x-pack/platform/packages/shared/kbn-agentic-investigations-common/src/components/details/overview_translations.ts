@@ -12,6 +12,6 @@ import { i18n } from '@kbn/i18n';
 
 export const OVERVIEW_SECTION_LABELS = Object.freeze({
   loading: i18n.translate('xpack.agenticInvestigations.detailsFlyout.sections.loading', {
-    defaultMessage: 'Still investigating. This flyout will update with new findings.',
+    defaultMessage: 'Investigating…',
   }),
 });

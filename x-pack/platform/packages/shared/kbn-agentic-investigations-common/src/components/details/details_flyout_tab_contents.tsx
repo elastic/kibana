@@ -79,6 +79,7 @@ export const OverviewTab = memo<OverviewTabProps>(
             summary={investigation.summary}
             attachments={attachments}
             groupedAttachments={groupedAttachments}
+            isLoading={showLoadingSection}
           />
         </EuiFlexItem>
 
@@ -110,7 +111,7 @@ export const OverviewTab = memo<OverviewTabProps>(
           </EuiFlexItem>
         )}
 
-        {proposedActionsContent && (
+        {proposedActionsContent && !showLoadingSection && (
           <EuiFlexItem>
             <DetailsBlock
               title={DETAILS_FLYOUT_LABELS.sections.proposedActions}

@@ -76,6 +76,7 @@ const overviewElement = (overviewConversation: Conversation, queryClient: QueryC
         <InvestigationOverview
           conversation={overviewConversation}
           groupedAttachments={groupedAttachments}
+          proposedActionsContent={<div>Proposed rows</div>}
         />
       </QueryClientProvider>
     </I18nProvider>
@@ -162,6 +163,38 @@ describe('InvestigationOverview', () => {
     expect(screen.getByTestId('investigationOverviewLoadingSection')).toBeInTheDocument();
   });
 
+  it('keeps the loading skeleton once only the trigger is known, with what happened as a skeleton and no proposed actions', () => {
+    mockUseInvestigation.mockReturnValue({
+      data: { ...emptyInvestigation, subjects: investigation.subjects },
+    });
+
+    renderOverview({ ...conversation, metadata: { status: 'open' } });
+
+    expect(screen.getByTestId('investigationOverviewLoadingSection')).toBeInTheDocument();
+    expect(screen.getByText("What's happened")).toBeInTheDocument();
+    expect(screen.getByTestId('investigationOverviewSummarySkeleton')).toBeInTheDocument();
+    expect(screen.getByText('Why is checkout slow?')).toBeInTheDocument();
+    expect(screen.queryByText('Proposed actions')).not.toBeInTheDocument();
+    expect(screen.queryByText('Proposed rows')).not.toBeInTheDocument();
+  });
+
+  it.each([
+    ['a summary', { metadata: { status: 'open', summary: 'Checkout p99 tripled.' } }],
+    ['an impact', { impact: investigation.impact }],
+    ['a conclusion', { metadata: { status: 'open', verdict: 'A bad deploy.' } }],
+    ['hypotheses', { hypotheses: investigation.hypotheses }],
+  ])('drops the loading skeleton and shows proposed actions once there is %s', (_, findings) => {
+    mockUseInvestigation.mockReturnValue({
+      data: { ...emptyInvestigation, subjects: investigation.subjects, ...findings },
+    });
+
+    renderOverview({ ...conversation, metadata: { status: 'open' } });
+
+    expect(screen.queryByTestId('investigationOverviewLoadingSection')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('investigationOverviewSummarySkeleton')).not.toBeInTheDocument();
+    expect(screen.getByText('Proposed actions')).toBeInTheDocument();
+  });
+
   it('renders no loading skeleton while an agent works on an investigation that has findings', () => {
     mockUseInvestigation.mockReturnValue({ data: { ...investigation, in_progress: true } });
 
@@ -199,6 +232,30 @@ describe('InvestigationOverview', () => {
     renderOverview();
 
     expect(screen.queryByTestId('investigationOverviewLoadingSection')).not.toBeInTheDocument();
+    expect(screen.getByText('Proposed actions')).toBeInTheDocument();
+  });
+
+  it('keeps the proposed actions list when an agent resumes after a proposed action is decided', () => {
+    mockUseInvestigation.mockReturnValue({
+      data: {
+        ...emptyInvestigation,
+        proposals: [
+          {
+            id: 'proposal-1',
+            title: 'Roll back the deploy',
+            comment: 'The deploy matches the start of the spike.',
+            status: 'succeeded',
+            impact: 'medium',
+            confidence: 'high',
+            created_at: 'x',
+          },
+        ],
+      },
+    });
+
+    renderOverview({ ...conversation, metadata: { status: 'open' } });
+
+    expect(screen.getByText('Proposed rows')).toBeInTheDocument();
   });
 
   describe('proposed actions refresh', () => {

@@ -137,10 +137,14 @@ export const InvestigationOverview: React.FC<
   );
 
   // The skeleton only stands in for an empty overview. Once there is anything to read, such as
-  // when an agent resumes after a proposal is decided, the header's running state is enough.
+  // when an agent resumes after a proposal is decided, the header's running state is enough. The
+  // subjects are the trigger, known from the start, so they do not count as findings.
+  const { impact, conclusion, reasoning } = sections;
   const hasFindings =
     Boolean(investigation.summary?.trim()) ||
-    Object.values(sections).some(Boolean) ||
+    Boolean(impact) ||
+    Boolean(conclusion) ||
+    Boolean(reasoning) ||
     (data?.proposals.length ?? 0) > 0;
 
   return (
