@@ -18,11 +18,15 @@ jest.mock('./hooks/use_kibana', () => ({ useKibana: jest.fn() }));
 jest.mock('./components/search_homepage/search_homepage', () => ({
   SearchHomepagePage: () => <div data-test-subj="searchHomepagePage" />,
 }));
+jest.mock('./components/search_homepage/integrated_home_app', () => ({
+  IntegratedHomeApp: () => <div data-test-subj="integratedHomeApp" />,
+}));
 
 const mockUseKibana = useKibana as jest.Mock;
 
 describe('HomepageRouter', () => {
   const { application } = coreMock.createStart();
+  const useIntegratedOnboardingEnabled = jest.fn(() => false);
 
   const renderRouter = () =>
     render(
@@ -34,7 +38,10 @@ describe('HomepageRouter', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     localStorage.clear();
-    mockUseKibana.mockReturnValue({ services: { application } });
+    useIntegratedOnboardingEnabled.mockReturnValue(false);
+    mockUseKibana.mockReturnValue({
+      services: { application, elasticsearchHome: { useIntegratedOnboardingEnabled } },
+    });
   });
 
   it('sends a first-time visitor to getting started without rendering the home page', () => {
@@ -63,5 +70,34 @@ describe('HomepageRouter', () => {
     expect(application.navigateToApp).not.toHaveBeenCalled();
     expect(screen.getByTestId('searchHomepagePage')).toBeInTheDocument();
     getItem.mockRestore();
+  });
+
+  it('does not render the shared home app', () => {
+    localStorage.setItem(GETTING_STARTED_LOCALSTORAGE_KEY, 'true');
+
+    renderRouter();
+
+    expect(screen.queryByTestId('integratedHomeApp')).not.toBeInTheDocument();
+  });
+
+  describe('with integrated onboarding on', () => {
+    beforeEach(() => {
+      useIntegratedOnboardingEnabled.mockReturnValue(true);
+    });
+
+    it.each([
+      ['a first-time visitor', false],
+      ['a returning visitor', true],
+    ])('renders the shared home app for %s without redirecting', (_visitor, visited) => {
+      if (visited) {
+        localStorage.setItem(GETTING_STARTED_LOCALSTORAGE_KEY, 'true');
+      }
+
+      renderRouter();
+
+      expect(application.navigateToApp).not.toHaveBeenCalled();
+      expect(screen.getByTestId('integratedHomeApp')).toBeInTheDocument();
+      expect(screen.queryByTestId('searchHomepagePage')).not.toBeInTheDocument();
+    });
   });
 });
