@@ -11,12 +11,14 @@ import type {
 } from '@elastic/eui';
 import {
   EuiBasicTable,
+  useEuiTheme,
   EuiConfirmModal,
   EuiProgress,
   useGeneratedHtmlId,
   EuiSpacer,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { css } from '@emotion/react';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { RulesFilterBar } from '../../../rule_sets/components/rules_group_by_control';
 import { SearchModeLine } from '../../../rule_sets/search/search_mode_line';
@@ -355,6 +357,28 @@ export const RulesTables = React.memo<RulesTableProps>(({ selectedTab }) => {
       ),
     [tableProps.columns]
   );
+  const { euiTheme } = useEuiTheme();
+  // Why a rule matched belongs to the rule above it: no tint and no line between the two, and
+  // they are hovered together.
+  const whyMatchedRowsCss = useMemo(
+    () => css`
+      .euiTableRow-isExpandedRow {
+        background-color: transparent;
+      }
+      .euiTableRow-isExpandedRow > td {
+        border-top: none;
+      }
+      .euiTableRow-isExpandedRow .euiTableCellContent {
+        padding-block-start: 0;
+      }
+      .euiTableRow-isExpandable:hover + .euiTableRow-isExpandedRow,
+      .euiTableRow-isExpandable:has(+ .euiTableRow-isExpandedRow:hover),
+      .euiTableRow-isExpandedRow:hover {
+        background-color: ${euiTheme.colors.backgroundBaseInteractiveHover};
+      }
+    `,
+    [euiTheme]
+  );
   const whyMatchedRows = useMemo(
     () =>
       searchMode === 'semantic'
@@ -502,6 +526,7 @@ export const RulesTables = React.memo<RulesTableProps>(({ selectedTab }) => {
                 itemId="id"
                 items={rules}
                 itemIdToExpandedRowMap={whyMatchedRows}
+                css={whyMatchedRows ? whyMatchedRowsCss : undefined}
                 tableCaption={i18n.RULES_TABLE_CAPTION}
                 noItemsMessage={NO_ITEMS_MESSAGE}
                 onChange={tableOnChangeCallback}

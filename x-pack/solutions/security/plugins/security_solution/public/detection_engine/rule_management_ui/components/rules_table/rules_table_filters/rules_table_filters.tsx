@@ -58,14 +58,14 @@ const RulesTableFiltersComponent = ({ selectedTab }: RulesTableFiltersProps) => 
       const text = filterString.trim();
       startTransaction({ name: RULES_TABLE_ACTIONS.FILTER });
       if (text && boxMode === 'ai') remember(text);
-      setFilterOptions({ filter: text, members: undefined, similarTo: undefined });
+      setFilterOptions({ filter: text, members: undefined });
     },
     [boxMode, remember, setFilterOptions, startTransaction]
   );
   const handleSearchModeChange = useCallback(
     (searchMode: RuleSearchBoxMode) => {
       startTransaction({ name: RULES_TABLE_ACTIONS.FILTER });
-      setFilterOptions({ searchMode, similarTo: undefined });
+      setFilterOptions({ searchMode });
     },
     [setFilterOptions, startTransaction]
   );

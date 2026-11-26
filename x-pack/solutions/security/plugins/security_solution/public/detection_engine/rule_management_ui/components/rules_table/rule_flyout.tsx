@@ -6,11 +6,10 @@
  */
 
 import type { MouseEvent, PropsWithChildren, ReactNode } from 'react';
-import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import React, { createContext, useCallback, useContext, useMemo, useState } from 'react';
 import type { DefaultItemAction, EuiBasicTableColumn } from '@elastic/eui';
 import {
   EuiBadge,
-  EuiButtonEmpty,
   EuiButtonIcon,
   EuiContextMenuItem,
   EuiContextMenuPanel,
@@ -48,8 +47,6 @@ import type { Rule } from '../../../rule_management/logic';
 import { useRule } from '../../../rule_management/logic/use_rule';
 import { RULE_TYPE_LABELS } from '../../../rule_sets/components/translations';
 import * as i18n from '../../../rule_sets/search/translations';
-import { useRuleSearchStatus } from '../../../rule_sets/search/use_rule_search_status';
-import { useRulesTableContext } from './rules_table/rules_table_context';
 
 /** The open rule, by id, so that a link opens the same flyout. */
 const URL_PARAM = 'ruleFlyout';
@@ -68,10 +65,6 @@ const RuleFlyoutContext = createContext<RuleFlyoutApi | undefined>(undefined);
 
 const isNewTabClick = (event: MouseEvent) =>
   event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey;
-
-const isTyping = (target: EventTarget | null) =>
-  target instanceof HTMLElement &&
-  (target.isContentEditable || ['INPUT', 'TEXTAREA', 'SELECT'].includes(target.tagName));
 
 /** The cell of a table column for the rule, e.g. the enabled switch with its permission checks. */
 const cellOf = (columns: Columns, rule: Rule, field: string): ReactNode => {
@@ -209,10 +202,6 @@ const RuleFlyoutTopBar = ({
   onDone: () => void;
 }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const searchStatus = useRuleSearchStatus();
-  const {
-    actions: { setFilterOptions },
-  } = useRulesTableContext();
   const { href: editHref } = useSecuritySolutionLinkProps({
     deepLinkId: SecurityPageName.rules,
     path: getEditRuleUrl(rule.id),
@@ -262,31 +251,9 @@ const RuleFlyoutTopBar = ({
           <EuiText size="xs" color="subdued">
             {i18n.POSITION(position.index + 1, position.total)}
           </EuiText>
-          <EuiText size="xs" color="subdued">
-            <kbd>{i18n.KEYS_HINT}</kbd>
-          </EuiText>
         </>
       )}
       <EuiFlexItem />
-      {searchStatus === 'ready' && (
-        <EuiFlexItem grow={false}>
-          <EuiButtonEmpty
-            size="s"
-            iconType="sparkles"
-            onClick={() => {
-              setFilterOptions({
-                similarTo: { id: rule.id, name: rule.name },
-                filter: '',
-                members: undefined,
-              });
-              onDone();
-            }}
-            data-test-subj="ruleFlyoutFindSimilar"
-          >
-            {i18n.FIND_SIMILAR}
-          </EuiButtonEmpty>
-        </EuiFlexItem>
-      )}
       <EuiFlexItem grow={false}>
         <EuiToolTip content={i18n.EDIT_RULE} disableScreenReaderOutput>
           <EuiButtonIcon
@@ -337,7 +304,7 @@ const RuleFlyoutTopBar = ({
 /**
  * The rules table opens a rule in a flyout to read it without leaving the list (a "peek"): the
  * state of the rule in one line, why it matched a search, the next or previous rule of the page
- * (buttons, j/k) and its actions. The full page is one click away; the open rule is in the URL.
+ * and its actions. The full page is one click away; the open rule is in the URL.
  */
 export const RuleFlyoutProvider = ({
   snippets,
@@ -384,17 +351,6 @@ export const RuleFlyoutProvider = ({
   const index = rule ? rules.findIndex(({ id }) => id === rule.id) : -1;
   const previous = index > 0 ? () => open(rules[index - 1]) : undefined;
   const next = index >= 0 && index < rules.length - 1 ? () => open(rules[index + 1]) : undefined;
-
-  useEffect(() => {
-    if (index < 0) return;
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (event.metaKey || event.ctrlKey || event.altKey || isTyping(event.target)) return;
-      const to = event.key === 'j' ? index + 1 : event.key === 'k' ? index - 1 : -1;
-      if (to >= 0 && to < rules.length) open(rules[to]);
-    };
-    window.addEventListener('keydown', onKeyDown);
-    return () => window.removeEventListener('keydown', onKeyDown);
-  }, [index, rules, open]);
 
   const api = useMemo(() => ({ openRule: open, snippets }), [open, snippets]);
   const snippet = rule ? snippets[rule.id] : undefined;

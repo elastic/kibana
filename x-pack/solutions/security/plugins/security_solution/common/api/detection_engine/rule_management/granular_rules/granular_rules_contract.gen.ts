@@ -38,16 +38,6 @@ export const GranularRulesSearch = lazySchema(() =>
     .object({
       term: z.string().max(10000),
       mode: GranularRulesSearchMode.optional(),
-      /**
-      * With `mode: semantic`, rank the rules closest in meaning to this rule (its saved object id) instead of `term`; the rule itself is left out.
-
-      */
-      similar_to: z
-        .string()
-        .optional()
-        .describe(
-          'With `mode: semantic`, rank the rules closest in meaning to this rule (its saved object id) instead of `term`; the rule itself is left out.\n'
-        ),
     })
     .strict()
 );

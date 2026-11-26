@@ -117,11 +117,11 @@ export const POSITION = (position: number, total: number) =>
   });
 
 export const PREVIOUS_RULE = i18n.translate('xpack.securitySolution.ruleFlyout.previousRule', {
-  defaultMessage: 'Previous rule (k)',
+  defaultMessage: 'Previous rule',
 });
 
 export const NEXT_RULE = i18n.translate('xpack.securitySolution.ruleFlyout.nextRule', {
-  defaultMessage: 'Next rule (j)',
+  defaultMessage: 'Next rule',
 });
 
 export const ALERTS_LAST_7_DAYS = (count: number) =>
@@ -137,27 +137,6 @@ export const MORE_ACTIONS = i18n.translate('xpack.securitySolution.ruleFlyout.mo
 export const EDIT_RULE = i18n.translate('xpack.securitySolution.ruleFlyout.editRule', {
   defaultMessage: 'Edit rule',
 });
-
-export const FIND_SIMILAR = i18n.translate('xpack.securitySolution.ruleSearch.findSimilar', {
-  defaultMessage: 'Find similar rules',
-});
-
-export const SIMILAR_RESULTS = (count: number, name: string) =>
-  i18n.translate('xpack.securitySolution.ruleSearch.similarResults', {
-    values: { count, name },
-    defaultMessage:
-      'AI search: {count, plural, one {# rule} other {# rules}} similar to "{name}", best first.',
-  });
-
-export const CLEAR_SIMILAR = i18n.translate('xpack.securitySolution.ruleSearch.clearSimilar', {
-  defaultMessage: 'Clear',
-});
-
-export const NO_SIMILAR = (name: string) =>
-  i18n.translate('xpack.securitySolution.ruleSearch.noSimilar', {
-    values: { name },
-    defaultMessage: 'No rules are similar to "{name}"',
-  });
 
 export const RECENT_SEARCHES = i18n.translate('xpack.securitySolution.ruleSearch.recentSearches', {
   defaultMessage: 'Recent searches',
@@ -186,10 +165,6 @@ export const WHY_IT_MATCHED_FROM = (source: string) =>
     values: { source },
     defaultMessage: 'Why it matched · from {source}',
   });
-
-export const KEYS_HINT = i18n.translate('xpack.securitySolution.ruleFlyout.keysHint', {
-  defaultMessage: 'j / k',
-});
 
 export const NEVER_RUN = i18n.translate('xpack.securitySolution.ruleFlyout.neverRun', {
   defaultMessage: 'Never run',
