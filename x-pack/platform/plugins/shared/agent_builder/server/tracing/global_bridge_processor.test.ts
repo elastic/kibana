@@ -6,11 +6,11 @@
  */
 
 import { context } from '@opentelemetry/api';
-import type { tracing } from '@elastic/opentelemetry-node/sdk';
 import { GlobalBridgeProcessor } from './global_bridge_processor';
+import type { ReadableSpan, Span, SpanProcessor } from '@opentelemetry/sdk-trace';
 
 describe('GlobalBridgeProcessor', () => {
-  let mockGlobalProcessor: tracing.SpanProcessor;
+  let mockGlobalProcessor: SpanProcessor;
 
   beforeEach(() => {
     mockGlobalProcessor = {
@@ -23,7 +23,7 @@ describe('GlobalBridgeProcessor', () => {
 
   it('delegates onStart to the global processor', () => {
     const bridge = new GlobalBridgeProcessor(mockGlobalProcessor);
-    const mockSpan = {} as tracing.Span;
+    const mockSpan = {} as Span;
     const ctx = context.active();
 
     bridge.onStart(mockSpan, ctx);
@@ -33,7 +33,7 @@ describe('GlobalBridgeProcessor', () => {
 
   it('delegates onEnd to the global processor', () => {
     const bridge = new GlobalBridgeProcessor(mockGlobalProcessor);
-    const mockSpan = {} as tracing.ReadableSpan;
+    const mockSpan = {} as ReadableSpan;
 
     bridge.onEnd(mockSpan);
 

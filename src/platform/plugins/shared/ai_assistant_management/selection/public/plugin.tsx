@@ -47,7 +47,7 @@ export interface SetupDependencies {
 }
 
 export interface StartDependencies {
-  licensing: LicensingPluginStart;
+  licensing?: LicensingPluginStart;
   spaces?: SpacesPluginStart;
 }
 

@@ -514,18 +514,90 @@ export const setDefaultIndexInSpace = async ({
 const WORKFLOWS_API_HEADERS = { 'elastic-api-version': '2023-10-31' };
 const FINISHED_EXECUTION_STATUSES = ['completed', 'failed', 'cancelled', 'timed_out'];
 
-export interface FinishedSweepGate {
-  executionId: string;
-  stepStartedAt: string;
-  stepFinishedAt: string | undefined;
+/** One step execution of a finished sweep, as the executions route returns it. */
+export interface SweepStepExecution {
+  status: string;
+  error: unknown;
   output: unknown;
 }
 
+export interface FinishedSweepGate {
+  executionId: string;
+  /** The whole execution's status, so an aborted sweep is told from a finished one. */
+  executionStatus: string;
+  stepStartedAt: string;
+  stepFinishedAt: string | undefined;
+  output: unknown;
+  /** `resolve_index_scope_gate`, or `undefined` when no step execution carries that id. */
+  resolveGate?: SweepStepExecution;
+  /** `select_candidate_reports`, or `undefined` when no step execution carries that id. */
+  selectCandidates?: SweepStepExecution;
+}
+
+interface RawStepExecution {
+  stepId: string;
+  startedAt: string;
+  finishedAt?: string;
+  status?: string;
+  error?: unknown;
+  output?: unknown;
+}
+
+/**
+ * The last record for a step id that has an output, else the last record for it. Enter and scope
+ * records for the same step carry a null output.
+ */
+const lastStepExecution = (
+  steps: RawStepExecution[],
+  stepId: string
+): SweepStepExecution | undefined => {
+  const records = steps.filter((step) => step.stepId === stepId);
+  const record = [...records].reverse().find((step) => step.output != null) ?? records.at(-1);
+  return record
+    ? { status: String(record.status), error: record.error, output: record.output }
+    : undefined;
+};
+
+/**
+ * Whether search returns an execution's `check_index_scope` record with its output. The workers
+ * and coverage routes read the gate this way (`getStepExecution`), while the execution route
+ * reads it by id, which sees the record before a refresh makes it searchable.
+ */
+const isGateOutputSearchable = async ({
+  apiClient,
+  headers,
+  spaceId,
+  workflowId,
+  executionId,
+}: {
+  apiClient: ApiClientFixture;
+  headers: Record<string, string>;
+  spaceId: string;
+  workflowId: string;
+  executionId: string;
+}): Promise<boolean> => {
+  const response = await apiClient.get(
+    spaceUrl(
+      `api/workflows/workflow/${workflowId}/executions/steps?stepId=check_index_scope&includeOutput=true`,
+      spaceId
+    ),
+    { headers: { ...headers, ...WORKFLOWS_API_HEADERS }, responseType: 'json' }
+  );
+  const results =
+    (response.body as { results?: Array<{ workflowRunId?: string; output?: unknown }> }).results ??
+    [];
+  return results.some(
+    ({ workflowRunId, output }) => workflowRunId === executionId && output != null
+  );
+};
+
 /**
  * Waits for the newest finished execution of the Hunt workflow in a space (the same status set
- * as `getLatestFinishedWorkflowExecution`) and returns its `check_index_scope` step. Enabling
- * the worker starts a sweep at once and a run started while one is in flight is dropped, so this
- * waits instead of posting a run. Returns `undefined` when nothing finishes within the budget.
+ * as `getLatestFinishedWorkflowExecution`) and returns its `check_index_scope` step once search
+ * returns that step's output, as the workers and coverage routes need. Enabling the worker
+ * starts a sweep at once and a run started while one is in flight is dropped, so this waits
+ * instead of posting a run. Returns `undefined` when nothing finishes within the budget, and the
+ * gate as last read when its output is still not searchable at the deadline.
  */
 export const waitForFinishedSweepGate = async ({
   apiClient,
@@ -544,6 +616,7 @@ export const waitForFinishedSweepGate = async ({
 }): Promise<FinishedSweepGate | undefined> => {
   const statuses = FINISHED_EXECUTION_STATUSES.map((status) => `statuses=${status}`).join('&');
   const deadline = Date.now() + budgetMs;
+  let gate: FinishedSweepGate | undefined;
   while (Date.now() < deadline) {
     const list = await apiClient.get(
       spaceUrl(
@@ -558,26 +631,24 @@ export const waitForFinishedSweepGate = async ({
         spaceUrl(`api/workflows/executions/${executionId}?includeOutput=true`, spaceId),
         { headers: { ...headers, ...WORKFLOWS_API_HEADERS }, responseType: 'json' }
       );
-      const step = (
-        execution.body as {
-          stepExecutions?: Array<{
-            stepId: string;
-            startedAt: string;
-            finishedAt?: string;
-            output?: unknown;
-          }>;
-        }
-      ).stepExecutions?.find(({ stepId }) => stepId === 'check_index_scope');
-      return step
-        ? {
-            executionId,
-            stepStartedAt: step.startedAt,
-            stepFinishedAt: step.finishedAt,
-            output: step.output,
-          }
-        : undefined;
+      const steps =
+        (execution.body as { stepExecutions?: RawStepExecution[] }).stepExecutions ?? [];
+      const step = steps.find(({ stepId }) => stepId === 'check_index_scope');
+      if (!step) return undefined;
+      gate = {
+        executionId,
+        executionStatus: String((execution.body as { status?: string }).status),
+        stepStartedAt: step.startedAt,
+        stepFinishedAt: step.finishedAt,
+        output: step.output,
+        resolveGate: lastStepExecution(steps, 'resolve_index_scope_gate'),
+        selectCandidates: lastStepExecution(steps, 'select_candidate_reports'),
+      };
+      if (await isGateOutputSearchable({ apiClient, headers, spaceId, workflowId, executionId })) {
+        return gate;
+      }
     }
     await new Promise((resolve) => setTimeout(resolve, intervalMs));
   }
-  return undefined;
+  return gate;
 };

@@ -16,11 +16,14 @@ import type { MVTSingleLayerVectorSource } from './mvt_single_layer_vector_sourc
 import type { MVTSettings } from './mvt_single_layer_source_settings';
 import { MVTSingleLayerSourceSettings } from './mvt_single_layer_source_settings';
 import type { OnSourceChangeArgs } from '../source';
-import type { MVTFieldDescriptor } from '../../../../common/descriptor_types';
+import type {
+  MVTFieldDescriptor,
+  TiledSingleLayerVectorSourceDescriptor,
+} from '../../../../common/descriptor_types';
 
 interface Props {
   tooltipFields: MVTField[];
-  onChange: (...args: OnSourceChangeArgs[]) => void;
+  onChange: (...args: OnSourceChangeArgs<TiledSingleLayerVectorSourceDescriptor>[]) => void;
   source: MVTSingleLayerVectorSource;
 }
 
@@ -33,7 +36,7 @@ export class UpdateSourceEditor extends Component<Props, State> {
   };
 
   _handleChange = (settings: MVTSettings) => {
-    const changes: OnSourceChangeArgs[] = [];
+    const changes: OnSourceChangeArgs<TiledSingleLayerVectorSourceDescriptor>[] = [];
     if (settings.layerName !== this.props.source.getTileSourceLayer()) {
       changes.push({ propName: 'layerName', value: settings.layerName });
     }

@@ -179,7 +179,6 @@ export const AlertsListPage = () => {
       `}
     >
       <AppHeader
-        sticky={false}
         title={i18n.EPISODES_LIST_PAGE_TITLE}
         spacing="bleed"
         menu={alertsMenu}

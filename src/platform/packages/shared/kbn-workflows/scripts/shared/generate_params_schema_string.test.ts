@@ -29,6 +29,15 @@ describe('generateParamsSchemaString', () => {
     expect(result).toContain("'query'");
   });
 
+  it('should spread body last so body types win over query params with the same name', () => {
+    const result = generateParamsSchemaString(['search'], {});
+    const queryIndex = result.indexOf("'query'");
+    const pathIndex = result.indexOf("'path'");
+    const bodyIndex = result.indexOf("'body'");
+    expect(queryIndex).toBeLessThan(pathIndex);
+    expect(pathIndex).toBeLessThan(bodyIndex);
+  });
+
   it('should return z.union for multiple operation ids', () => {
     const result = generateParamsSchemaString(['search', 'indices.create'], {});
     expect(result).toContain('z.union([');
