@@ -211,6 +211,21 @@ describe('readServedTokenUrls', () => {
     ]);
   });
 
+  // An empty `variables:` key in a vendor's YAML is null, which mustn't stop the whole report.
+  it('reads a server whose variables, or one of them, are null', async () => {
+    await writeSnapshot(
+      withTokenUrl('/token', [
+        { url: 'https://a.example.com', variables: null },
+        { url: 'https://b.example.com', variables: { region: null } },
+      ])
+    );
+
+    await expect(readServedTokenUrls(directory)).resolves.toEqual([
+      'https://a.example.com/token',
+      'https://b.example.com/token',
+    ]);
+  });
+
   it('reports no token URLs when the connector has no snapshots', async () => {
     await expect(readServedTokenUrls(directory)).resolves.toEqual([]);
   });

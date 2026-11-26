@@ -15,6 +15,7 @@ import { vendorApiExemptionsSchema } from '../exemptions';
 import { listConnectors } from '../find_connector';
 import { parseManifest } from '../manifest';
 import { readOptional } from '../spec/load_vendor_specs';
+import { isRecord } from '../values';
 import type { ConnectorCoverageDocument } from './connector_coverage';
 import { buildCoverageDocument, getAuthTypeFacts } from './connector_coverage';
 
@@ -24,13 +25,9 @@ interface OpenApiSecurityScheme {
   flows?: Record<string, { tokenUrl?: string }>;
 }
 
-interface SnapshotServerVariable {
-  default?: unknown;
-  enum?: unknown;
-}
-
 interface SnapshotDocument {
-  servers?: Array<{ url?: string; variables?: Record<string, SnapshotServerVariable> }>;
+  // Vendor specs aren't validated: an empty `variables:` key in YAML, for one, is null.
+  servers?: unknown[];
   components?: { securitySchemes?: Record<string, OpenApiSecurityScheme> };
 }
 
@@ -38,20 +35,21 @@ const isString = (value: unknown): value is string => typeof value === 'string';
 
 // The snapshot's servers with their variables, so a token URL resolves as the emulator resolves it.
 const serversOf = ({ servers }: SnapshotDocument): TokenUrlServer[] =>
-  (servers ?? []).flatMap(({ url, variables = {} }) => {
+  (servers ?? []).filter(isRecord).flatMap(({ url, variables }) => {
     if (!isString(url)) return [];
-    const declared = Object.entries(variables).flatMap(([name, variable]) =>
-      isString(variable.default)
-        ? [
-            [
-              name,
-              {
-                default: variable.default,
-                ...(Array.isArray(variable.enum) ? { enum: variable.enum.filter(isString) } : {}),
-              },
-            ] as const,
-          ]
-        : []
+    const declared = Object.entries(isRecord(variables) ? variables : {}).flatMap(
+      ([name, variable]) =>
+        isRecord(variable) && isString(variable.default)
+          ? [
+              [
+                name,
+                {
+                  default: variable.default,
+                  ...(Array.isArray(variable.enum) ? { enum: variable.enum.filter(isString) } : {}),
+                },
+              ] as const,
+            ]
+          : []
     );
     return [{ url, variables: Object.fromEntries(declared) }];
   });
