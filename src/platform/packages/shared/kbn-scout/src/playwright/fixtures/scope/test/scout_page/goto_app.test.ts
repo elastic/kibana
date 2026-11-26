@@ -22,7 +22,10 @@ const setProjectTimeouts = (use: { navigationTimeout?: number; actionTimeout?: n
 };
 
 const mockBootDuration = (bootMs: number) =>
-  jest.spyOn(performance, 'now').mockReturnValueOnce(1_000).mockReturnValueOnce(1_000 + bootMs);
+  jest
+    .spyOn(performance, 'now')
+    .mockReturnValueOnce(1_000)
+    .mockReturnValueOnce(1_000 + bootMs);
 
 const createPage = () => {
   const loadingScreen = createLocator();
