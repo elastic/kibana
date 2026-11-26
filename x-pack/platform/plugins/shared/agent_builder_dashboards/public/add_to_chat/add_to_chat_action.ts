@@ -42,6 +42,7 @@ import {
   apiHasParentApi,
   apiHasType,
   apiHasUniqueId,
+  apiPublishesTimeRange,
   apiPublishesTimeslice,
   apiPublishesTitle,
   getTitle,
@@ -156,8 +157,9 @@ const appliesTimeslice = ({ type }: HasType): boolean => TIMESLICE_PANEL_TYPES.h
 
 /**
  * The bounds the panel showed, absolute so the agent reads the same data however late the message
- * is sent: the time slider's selection for panels that apply it, else the dashboard's time range
- * resolved against the same `now` as the panel's search.
+ * is sent: the panel's own time range, which overrides the time slider, else the slider's selection
+ * for panels that apply it, else the dashboard's time range. Relative ranges resolve against the
+ * same `now` as the panel's search.
  */
 const getShownTimeRange = ({
   dashboardApi,
@@ -168,6 +170,12 @@ const getShownTimeRange = ({
   embeddable: HasType;
   now: Date;
 }): { from: string; to: string } | undefined => {
+  const panelTimeRange = apiPublishesTimeRange(embeddable)
+    ? embeddable.timeRange$.getValue()
+    : undefined;
+  if (panelTimeRange) {
+    return getAbsoluteTimeRange(panelTimeRange, { forceNow: now });
+  }
   const timeslice =
     appliesTimeslice(embeddable) && apiPublishesTimeslice(dashboardApi)
       ? dashboardApi.timeslice$.getValue()
