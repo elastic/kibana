@@ -94,7 +94,7 @@ const CASES: readonly BucketKeysCase[] = [
     from: '2024-09-01T04:00:00Z',
     to: '2024-12-01T05:00:00Z',
     stepMs: HOUR_MS,
-    spans: [span(1, 'week')],
+    spans: [span(1, 'week'), span(7, 'day')],
   },
   {
     name: 'Rome months and month multiples',

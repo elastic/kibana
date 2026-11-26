@@ -26,7 +26,7 @@ if (rounding) {
 `toDateRounding` parses `<amount><unit>` with `ms`, `s`, `m`, `h`, `d`, `w`, `M` or `y`, using ES|QL `BUCKET` semantics:
 
 - `ms`, `s`, `m` and `h` are fixed widths, aligned to multiples of the width in local time.
-- `1d` and `1w` are calendar units: local midnight and ISO weeks starting on Monday. Larger day and week multiples are fixed widths.
+- `1d` and `1w` are calendar units: local midnight and ISO weeks starting on Monday. `7d` is rounded like `1w`. Other day and week multiples are fixed widths.
 - Months and years are calendar units. Multiples such as `3M` or `2y` are counted from January of year 1, not from the Unix epoch, so `2y` buckets start on odd years.
 
 The `date_histogram` aggregation rounds the same way, but an interval string alone doesn't say which rounding it gets. In ES|QL the unit decides; in DSL the parameter it goes into decides. `toDateRounding` always follows ES|QL:

@@ -44,6 +44,7 @@ describe('toDateRounding', () => {
     ['12h', { kind: 'fixed', widthMs: 43_200_000 }],
     ['1d', { kind: 'calendar', unit: 'day', amount: 1 }],
     ['2d', { kind: 'fixed', widthMs: 172_800_000 }],
+    ['7d', { kind: 'calendar', unit: 'isoWeek', amount: 1 }],
     ['1w', { kind: 'calendar', unit: 'isoWeek', amount: 1 }],
     ['2w', { kind: 'fixed', widthMs: 1_209_600_000 }],
     ['3M', { kind: 'calendar', unit: 'month', amount: 3 }],
@@ -150,6 +151,13 @@ describe('calendar intervals', () => {
 
   it('rounds weeks to ISO weeks starting on Monday', () => {
     expectBucket('1w', utc, '2026-01-07T10:00:00.000Z', {
+      key: '2026-01-05T00:00:00.000Z',
+      next: '2026-01-12T00:00:00.000Z',
+    });
+  });
+
+  it('rounds 7 days like a week, to ISO weeks starting on Monday', () => {
+    expectBucket('7d', utc, '2026-01-07T10:00:00.000Z', {
       key: '2026-01-05T00:00:00.000Z',
       next: '2026-01-12T00:00:00.000Z',
     });

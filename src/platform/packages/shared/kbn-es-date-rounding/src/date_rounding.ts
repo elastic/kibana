@@ -38,8 +38,9 @@ const FIXED_UNIT_MS = { ms: 1, s: SECOND_MS, m: MINUTE_MS, h: HOUR_MS } as const
 
 /**
  * Parse a bucket interval such as `30m`, `12h`, `1d`, `1w` or `3M` with ES|QL `BUCKET` semantics:
- * `1d` and `1w` are calendar units, larger day and week multiples are fixed widths,
- * and month and year multiples are calendar units aligned to January of year 1.
+ * `1d`, `7d` and `1w` are calendar units (`7d` is an ISO week, like `1w`), other day and week
+ * multiples are fixed widths, and month and year multiples are calendar units aligned to January
+ * of year 1.
  * Returns `undefined` for anything else.
  */
 export const toDateRounding = (expression: string): DateRounding | undefined => {
@@ -59,9 +60,14 @@ export const toDateRounding = (expression: string): DateRounding | undefined => 
     case 'h':
       return { kind: 'fixed', widthMs: amount * FIXED_UNIT_MS[unit] };
     case 'd':
-      return amount === 1
-        ? { kind: 'calendar', unit: 'day', amount }
-        : { kind: 'fixed', widthMs: amount * DAY_MS };
+      if (amount === 1) {
+        return { kind: 'calendar', unit: 'day', amount };
+      }
+      // ES|QL rounds exactly 7 days like a week: ISO weeks starting on Monday.
+      if (amount === 7) {
+        return { kind: 'calendar', unit: 'isoWeek', amount: 1 };
+      }
+      return { kind: 'fixed', widthMs: amount * DAY_MS };
     case 'w':
       return amount === 1
         ? { kind: 'calendar', unit: 'isoWeek', amount }
