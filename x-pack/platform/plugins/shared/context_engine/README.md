@@ -427,10 +427,11 @@ needs the Elasticsearch `write` privilege on each backing index, checked with `h
 or the route returns 403. If any AI index fails, the route rejects the request and saves
 nothing.
 
-Each request writes one `memory_save_event` audit event. It records the user the events belong
-to in `user.target.id`, the session in `kibana.saved_object`, and how many events were saved
-and failed. It records rejected requests, failed writes, and batches where every event fails as
-failures. Core adds the caller, the space and the request id.
+After route authorization, request validation, and feature-flag checks pass, each request writes
+one `memory_save_event` audit event. It records the user the events belong to in `user.target.id`,
+the session in `kibana.saved_object`, and how many events were saved and failed. Requests
+rejected by user-resolution or AI-index checks, failed writes, and batches where every event
+fails are recorded as failures. Core adds the caller, the space and the request id.
 
 ## Session memory
 
@@ -453,14 +454,18 @@ POST /api/context_engine/memory/_remember
 ```
 
 `session_id` and `content` are required. Pass `id` to revise an existing memory. The revision
-replaces the memory in full, and the route does not check whether the id exists. Without `id`,
-the route generates one. `ai_index_ids` lists the AI indices that dreaming promotes the memory
-into. `attributes` is a map of string hints for dreaming.
+replaces the memory in full, and the route returns 404 if the memory does not exist, was
+forgotten, or belongs to another user or space. Without `id`, the route generates a new UUID.
+`ai_index_ids` lists the AI indices that dreaming promotes the memory into. `attributes` is a
+map of string hints for dreaming.
 
 The route returns `202` with `{ "id": "..." }` and writes the memory in the background, because
 `semantic_text` inference runs inside the index request. The memory becomes searchable after
-the background write completes. The route does not report a failed write in the response.
-Instead, it logs the error to the Kibana logs and writes a failure audit event.
+the background write completes and Elasticsearch refreshes, so revising a memory immediately
+after creating it can return 404 until the write is visible. The route does not report a failed
+write in the response. Instead, it logs the error to the Kibana logs and writes a failure audit
+event. When this Kibana instance is at its in-flight background write limit, the route returns
+`429` with a `Retry-After` header.
 
 The space comes from the request URL. The route returns 404 while `contextEngine:enabled` or
 the memory setting is off. Each AI index in `ai_index_ids` must exist in the request space, or
@@ -504,12 +509,10 @@ After authorization (`contextEngine:write`), schema validation, and feature-flag
 finishes or when the handler rejects the request, and `_forget` writes one `memory_forget`
 audit event per unique id. Requests rejected before the handler (for example, missing
 `contextEngine:write`, invalid request body, or Context Engine disabled) do not emit these
-events. Because `_remember` does not check whether a supplied `id` exists, a request with an
-unknown `id` creates a memory while auditing with `event.type` set to `change`. Both events
-record the authenticated actor in `user.*`, the memory's owner in `user.target.id`, and the
-memory in `kibana.saved_object`. Because memories are scoped by space and user and the caller
-can choose `id`, two users can share the same id; combine the space, `user.target.id`, and
-`kibana.saved_object.id` to identify a single memory. The routes record in-handler rejections,
+events. Both events record the authenticated actor in `user.*`, the memory's owner in
+`user.target.id`, and the memory in `kibana.saved_object` when known (`user.target.id` is absent
+when neither `user_id` nor a caller profile is available, and `kibana.saved_object.id` is absent
+when `_remember` rejects a request before assigning an id). The routes record in-handler rejections,
 background write errors, `not_found`, `failed`, and Elasticsearch errors as failures.
 
 ## Dreaming input

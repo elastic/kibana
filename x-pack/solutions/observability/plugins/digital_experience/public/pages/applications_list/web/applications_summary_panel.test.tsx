@@ -11,6 +11,7 @@ import { EuiProvider } from '@elastic/eui';
 import { useKibanaServices } from '../../../hooks/use_kibana_services';
 import { createUiSettingsMock } from '../../../test_utils/ui_settings_mock';
 import type { ApplicationsSummary } from '../utils/summarize_applications';
+import type { IngestSummary } from './applications_summary_panel';
 import { ApplicationsSummaryPanel } from './applications_summary_panel';
 
 const SUMMARY: ApplicationsSummary = {
@@ -22,8 +23,10 @@ const SUMMARY: ApplicationsSummary = {
   poorCoreWebVitals: 2,
 };
 
-const renderPanel = (summary = SUMMARY) =>
-  render(<ApplicationsSummaryPanel summary={summary} isLoading={false} />, {
+const INGEST: IngestSummary = { bytes: 3 * 1024 * 1024, isLoading: false, notes: [] };
+
+const renderPanel = (summary = SUMMARY, ingest = INGEST) =>
+  render(<ApplicationsSummaryPanel summary={summary} isLoading={false} ingest={ingest} />, {
     wrapper: EuiProvider,
   });
 
@@ -42,6 +45,7 @@ describe('ApplicationsSummaryPanel', () => {
     renderPanel();
 
     expect(stat('applications')).toHaveTextContent('5');
+    expect(stat('ingest')).toHaveTextContent('3 MB');
     expect(stat('sessions')).toHaveTextContent('6,702');
     expect(stat('pageLoads')).toHaveTextContent('1,533');
     expect(stat('errorsPerPageLoad')).toHaveTextContent('0.50');
@@ -55,6 +59,26 @@ describe('ApplicationsSummaryPanel', () => {
     expect(stat('sessions')).toHaveTextContent('—');
     fireEvent.mouseOver(screen.getByText('Sessions'));
     expect(await screen.findByText(/from their session summaries/)).toBeInTheDocument();
+  });
+
+  it('says the ingest is an estimate, and shows a dash without one', async () => {
+    renderPanel(SUMMARY, {
+      bytes: null,
+      isLoading: false,
+      notes: ['Some data could not be read.'],
+    });
+
+    expect(stat('ingest')).toHaveTextContent('—');
+    fireEvent.mouseOver(screen.getByTestId('digitalExperienceSummaryIngestLabel'));
+    expect(await screen.findByText(/^Estimated RUM telemetry stored/)).toBeInTheDocument();
+    expect(screen.getByText('Some data could not be read.')).toBeInTheDocument();
+  });
+
+  it('loads the ingest apart from the other totals', () => {
+    renderPanel(SUMMARY, { ...INGEST, isLoading: true });
+
+    expect(stat('applications')).toHaveTextContent('5');
+    expect(stat('ingest')).not.toHaveTextContent('3 MB');
   });
 
   it('shows a dash for the rates without page loads or requests', () => {
