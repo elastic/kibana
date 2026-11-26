@@ -48,11 +48,13 @@ const APPLIES_TO_SUFFIX_RE = /^(\{applies_to\}`[^`]*`\s*)*$/;
  * this parser so they derive the same heading key regardless of trailing markup after the marker.
  */
 const headingBeforeNonToolMarker = (line: string): string | undefined => {
-  // Whether the line is a CommonMark ATX heading (1–6 # followed by a space or end-of-line).
-  // Leading block-quote markers (`> `, possibly nested) are stripped first so that quoted
-  // headings are recognized. A bare `####word` prefix (no space) is a paragraph, not a heading,
-  // and must not trigger the closing-hash strip.
-  const isAtxHeading = /^\s*#{1,6}(?:\s|$)/.test(line.replace(/^(\s*>\s*)+/, ''));
+  // Whether the line is a CommonMark ATX heading (0–3 spaces indent, 1–6 #, space or EOL).
+  // Leading block-quote markers are stripped first so that quoted headings are recognized.
+  // Each marker consumes only its optional single separator space — preserving any further
+  // indentation — so that indented code inside a quote (4+ spaces after `> `) is not mistaken
+  // for a heading. The 0–3 limit on the ATX opener enforces the same CommonMark rule: 4+ spaces
+  // of indentation make the line a code block, not a heading.
+  const isAtxHeading = /^\s{0,3}#{1,6}(?:\s|$)/.test(line.replace(/^(\s{0,3}>\s?)+/, ''));
   for (const marker of [NOT_YET_AVAILABLE_MARKER, API_ONLY_MARKER]) {
     const idx = line.indexOf(marker);
     if (idx === -1) {
@@ -524,6 +526,19 @@ describe('connector spec quality contracts', () => {
       expect(
         headingBeforeNonToolMarker('> #### List alerts _(API only)_ ####')
       ).toBe('> #### List alerts');
+    });
+
+    it('returns undefined for indented code inside a blockquote that has a closing ATX sequence', () => {
+      // 4+ spaces after the `> ` separator make the content a code block, not a heading.
+      // The closing `####` is the observable signal: for a real heading the guard strips it
+      // (leaving an empty suffix that passes), for quoted code it must not.
+      // Regression: /^(\s*>\s*)+/ stripped all spaces after `>`, turning `>     ####` into
+      // `####` → isAtxHeading=true → hashes stripped → empty suffix → wrongly accepted.
+      // With the fix only one separator space is consumed, leaving 4 spaces → \s{0,3} in the
+      // ATX opener cannot cover them → isAtxHeading=false → hashes stay → suffix "####" fails.
+      expect(
+        headingBeforeNonToolMarker('>     #### List alerts _(API only)_ ####')
+      ).toBeUndefined();
     });
   });
 
