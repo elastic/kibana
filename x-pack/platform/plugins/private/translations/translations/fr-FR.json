@@ -19297,8 +19297,6 @@
     "xpack.alertingV2EpisodesUi.severityFilter.label": "Gravité",
     "xpack.alertingV2EpisodesUi.severityFilter.noMatch": "Aucune sévérité correspondante",
     "xpack.alertingV2EpisodesUi.severityFilter.noneLabel": "Aucune sévérité",
-    "xpack.alertingV2EpisodesUi.snoozedTooltipUnknownExpiry": "Les notifications sont répétées.",
-    "xpack.alertingV2EpisodesUi.snoozedUntilTooltip": "Notifications répétées jusqu'au {expiry}.",
     "xpack.alertingV2EpisodesUi.source.classicAlertingLabel": "Alerting classique",
     "xpack.alertingV2EpisodesUi.source.classicLabel": "Classic",
     "xpack.alertingV2EpisodesUi.source.universalAlertingLabel": "Universal Alerting",

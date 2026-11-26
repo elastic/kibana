@@ -19359,8 +19359,6 @@
     "xpack.alertingV2EpisodesUi.severityFilter.label": "深刻度",
     "xpack.alertingV2EpisodesUi.severityFilter.noMatch": "一致する重大度がありません",
     "xpack.alertingV2EpisodesUi.severityFilter.noneLabel": "重大度なし",
-    "xpack.alertingV2EpisodesUi.snoozedTooltipUnknownExpiry": "通知はスヌーズされています。",
-    "xpack.alertingV2EpisodesUi.snoozedUntilTooltip": "通知は{expiry}までスヌーズされています。",
     "xpack.alertingV2EpisodesUi.source.classicAlertingLabel": "Classic Alerting",
     "xpack.alertingV2EpisodesUi.source.classicLabel": "クラシック",
     "xpack.alertingV2EpisodesUi.source.universalAlertingLabel": "Universal Alerting",
