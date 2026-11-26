@@ -248,6 +248,34 @@ describe('composeSourceStatus', () => {
     expect(message).toContain('source "a\\tb"');
   });
 
+  it('distinguishes a real tab in the source id from the two literal characters backslash-t', async () => {
+    // Escaping a real tab to `\t` would collide with a source id that already contains the two
+    // literal characters `\` `t`, letting an operator attribute a failed probe to the wrong
+    // source. The backslash is escaped too, so the two forms render differently.
+    const timeout = () =>
+      jest.fn().mockRejectedValue(new errors.TimeoutError('Request timed out'));
+
+    const logFor = async (sourceId: string) => {
+      jest.clearAllMocks();
+      await composeSourceStatus({
+        logger,
+        sourceStatus: { hasMetricIndices: timeout() },
+        requestContext,
+        request,
+        sourceId,
+        metricAlias,
+      });
+      return logger.warn.mock.calls[0][0] as string;
+    };
+
+    const realTab = await logFor('a\tb');
+    const literalBackslashT = await logFor('a\\tb');
+
+    expect(realTab).toContain('source "a\\tb"');
+    expect(literalBackslashT).toContain('source "a\\\\tb"');
+    expect(realTab).not.toBe(literalBackslashT);
+  });
+
   it('escapes other control characters (for example backspace) in the request-controlled source id', async () => {
     // Kibana's plain-text logger passes control characters other than CR/LF straight through, so a
     // backspace in a request-controlled value could overwrite earlier text in a terminal and make

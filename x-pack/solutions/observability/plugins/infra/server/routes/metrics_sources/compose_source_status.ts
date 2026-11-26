@@ -20,7 +20,12 @@ export const defaultSourceStatus: MetricsSourceStatus = {
   metricIndicesStatus: 'unknown',
 };
 
-const NAMED_ESCAPES: Record<string, string> = { '\n': '\\n', '\r': '\\r', '\t': '\\t' };
+const NAMED_ESCAPES: Record<string, string> = {
+  '\\': '\\\\',
+  '\n': '\\n',
+  '\r': '\\r',
+  '\t': '\\t',
+};
 
 /**
  * Escapes control characters (for example `\n` becomes the two characters `\` `n`) so a
@@ -29,11 +34,15 @@ const NAMED_ESCAPES: Record<string, string> = { '\n': '\\n', '\r': '\\r', '\t': 
  * Kibana's plain-text logger passes straight through (for example backspace), which could
  * otherwise rewrite the rendered source or log prefix in a terminal. Escaping rather than
  * replacing keeps distinct values distinguishable (a tab no longer logs like a space).
+ *
+ * The backslash itself is escaped too, in the same pass so an introduced escape is never
+ * re-escaped. Without it a real tab (`\t`) and the two literal characters `\` `t` would render
+ * identically, so an operator could attribute a failed probe to the wrong source.
  */
 const toSingleLine = (value: string): string =>
   // eslint-disable-next-line no-control-regex
   value.replace(
-    /[\u0000-\u001f\u007f]/g,
+    /[\\\u0000-\u001f\u007f]/g,
     (char) => NAMED_ESCAPES[char] ?? `\\u${char.charCodeAt(0).toString(16).padStart(4, '0')}`
   );
 
