@@ -6,7 +6,6 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { ApplicationStart } from '@kbn/core/public';
 import { createAction, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import type { LensSerializedState } from '@kbn/lens-common';
 import { isLensApi } from '../../react_embeddable/type_guards';
@@ -14,7 +13,6 @@ import { ACTION_OPEN_IN_LENS } from './constants';
 import { getChartInput, getContextEmbeddable } from './helpers';
 
 export interface OpenInLensActionServices {
-  application: Pick<ApplicationStart, 'capabilities'>;
   navigateToPrefilledEditor: (
     input: LensSerializedState,
     options?: { openInNewTab?: boolean }
@@ -31,7 +29,7 @@ export interface OpenInLensActionOptions {
 }
 
 export const createOpenInLensAction = (
-  { application, navigateToPrefilledEditor }: OpenInLensActionServices,
+  { navigateToPrefilledEditor }: OpenInLensActionServices,
   { onExecute, openInNewTab, title }: OpenInLensActionOptions = {}
 ) =>
   createAction({
@@ -41,9 +39,7 @@ export const createOpenInLensAction = (
     getIconType: () => 'lensApp',
     getDisplayName: () =>
       i18n.translate('xpack.lens.action.openInLens', { defaultMessage: 'Open in Lens' }),
-    isCompatible: async (context) =>
-      isLensApi(getContextEmbeddable(context)) &&
-      Boolean(application.capabilities.visualize_v2?.show),
+    isCompatible: async (context) => isLensApi(getContextEmbeddable(context)),
     execute: async (context) => {
       const embeddable = getContextEmbeddable(context);
       if (!isLensApi(embeddable)) throw new IncompatibleActionError();

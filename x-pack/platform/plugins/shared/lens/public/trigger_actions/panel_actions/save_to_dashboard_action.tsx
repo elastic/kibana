@@ -53,9 +53,7 @@ export const createSaveToDashboardAction = (
       i18n.translate('xpack.lens.action.saveToDashboard', {
         defaultMessage: 'Save to dashboard',
       }),
-    isCompatible: async (context) =>
-      isLensApi(getContextEmbeddable(context)) &&
-      core.application.capabilities.dashboard_v2?.showWriteControls === true,
+    isCompatible: async (context) => isLensApi(getContextEmbeddable(context)),
     execute: async (context) => {
       const embeddable = getContextEmbeddable(context);
       if (!isLensApi(embeddable)) throw new IncompatibleActionError();

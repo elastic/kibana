@@ -11,6 +11,9 @@ import { test } from '../../../common/ui/fixtures';
 
 test.describe('OverviewSaveLensVisualization', { tag: tags.stateful.classic }, () => {
   test.beforeAll(async ({ syntheticsServices }) => {
+    // Without it the overview redirects to Management when this spec runs alone, as the
+    // other specs of the config are the ones that enable the Synthetics service otherwise.
+    await syntheticsServices.enable();
     await syntheticsServices.cleanUp();
   });
 

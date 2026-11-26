@@ -45,12 +45,8 @@ const toContext = (embeddable: EmbeddableApiContext['embeddable']) =>
   ({ embeddable } as ActionExecutionContext<EmbeddableApiContext>);
 
 describe('save to dashboard action', () => {
-  const createAction = (showWriteControls = true, options?: SaveToDashboardActionOptions) =>
-    createSaveToDashboardAction(
-      { application: { capabilities: { dashboard_v2: { showWriteControls } } } } as never,
-      {} as never,
-      options
-    );
+  const createAction = (options?: SaveToDashboardActionOptions) =>
+    createSaveToDashboardAction({} as never, {} as never, options);
 
   beforeEach(() => jest.clearAllMocks());
   afterEach(() => {
@@ -61,12 +57,8 @@ describe('save to dashboard action', () => {
     expect(createAction().id).toBe(ACTION_SAVE_TO_DASHBOARD);
   });
 
-  it('is compatible when the user can write dashboards', async () => {
+  it('is compatible with lens embeddables', async () => {
     expect(await createAction().isCompatible(toContext(getEmbeddable()))).toBe(true);
-  });
-
-  it('is incompatible when the user cannot write dashboards', async () => {
-    expect(await createAction(false).isCompatible(toContext(getEmbeddable()))).toBe(false);
   });
 
   it('is incompatible with non-lens embeddables', async () => {
@@ -75,9 +67,7 @@ describe('save to dashboard action', () => {
 
   it('opens the save modal with the chart state and closes it', async () => {
     const onExecute = jest.fn();
-    await createAction(true, { telemetrySource: 'chat', onExecute }).execute(
-      toContext(getEmbeddable())
-    );
+    await createAction({ telemetrySource: 'chat', onExecute }).execute(toContext(getEmbeddable()));
 
     expect(await screen.findByTestId('saveModal')).toBeInTheDocument();
     expect(mockSaveModal).toHaveBeenCalledWith(
@@ -94,7 +84,7 @@ describe('save to dashboard action', () => {
   });
 
   it('supports saving to the library, a label and a title', async () => {
-    const action = createAction(true, {
+    const action = createAction({
       isSaveable: true,
       displayName: 'Save visualization',
       title: 'Prefilled title',

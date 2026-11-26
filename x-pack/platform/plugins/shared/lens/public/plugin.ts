@@ -275,8 +275,8 @@ export interface LensPublicStart {
   ) => void;
   /**
    * Panel actions to pass to the `extraActions` prop of the `EmbeddableComponent`.
-   * The actions are not checked for permissions by the panel, so only pass them when the user
-   * can use them: see `canUseEditor` and the `dashboard_v2.showWriteControls` capability.
+   * The actions do not check the permissions of the user, so only pass them when the user can
+   * use them: see `canUseEditor` and the `dashboard_v2.showWriteControls` capability.
    * Create each action once (e.g. with `useMemo`), as the panel is updated when the actions change.
    *
    * This API might undergo breaking changes even in minor versions.
@@ -815,10 +815,7 @@ export class LensPlugin {
       navigateToPrefilledEditor,
       actions: {
         createOpenInLensAction: (options) =>
-          createOpenInLensAction(
-            { application: core.application, navigateToPrefilledEditor },
-            options
-          ),
+          createOpenInLensAction({ navigateToPrefilledEditor }, options),
         createSaveToDashboardAction: (options) =>
           createSaveToDashboardAction(core, startDependencies, options),
       },

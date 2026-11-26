@@ -30,14 +30,8 @@ const toContext = (embeddable: EmbeddableApiContext['embeddable']) =>
 
 describe('open in Lens action', () => {
   const navigateToPrefilledEditor = jest.fn();
-  const createAction = (canUseEditor = true, onExecute?: () => void) =>
-    createOpenInLensAction(
-      {
-        application: { capabilities: { visualize_v2: { show: canUseEditor } } } as never,
-        navigateToPrefilledEditor,
-      },
-      { onExecute }
-    );
+  const createAction = (onExecute?: () => void) =>
+    createOpenInLensAction({ navigateToPrefilledEditor }, { onExecute });
 
   beforeEach(() => jest.clearAllMocks());
 
@@ -45,12 +39,8 @@ describe('open in Lens action', () => {
     expect(createAction().id).toBe(ACTION_OPEN_IN_LENS);
   });
 
-  it('is compatible when the user can use Lens', async () => {
+  it('is compatible with lens embeddables', async () => {
     expect(await createAction().isCompatible(toContext(getEmbeddable()))).toBe(true);
-  });
-
-  it('is incompatible when the user cannot use Lens', async () => {
-    expect(await createAction(false).isCompatible(toContext(getEmbeddable()))).toBe(false);
   });
 
   it('is incompatible with non-lens embeddables', async () => {
@@ -67,13 +57,7 @@ describe('open in Lens action', () => {
   });
 
   it('opens the editor in a new tab when asked to', async () => {
-    const action = createOpenInLensAction(
-      {
-        application: { capabilities: { visualize_v2: { show: true } } } as never,
-        navigateToPrefilledEditor,
-      },
-      { openInNewTab: true }
-    );
+    const action = createOpenInLensAction({ navigateToPrefilledEditor }, { openInNewTab: true });
 
     await action.execute(toContext(getEmbeddable()));
 
@@ -96,17 +80,14 @@ describe('open in Lens action', () => {
   it('calls onExecute when the action runs', async () => {
     const onExecute = jest.fn();
 
-    await createAction(true, onExecute).execute(toContext(getEmbeddable()));
+    await createAction(onExecute).execute(toContext(getEmbeddable()));
 
     expect(onExecute).toHaveBeenCalledTimes(1);
   });
 
   it('uses the title option over the one of the chart', async () => {
     const action = createOpenInLensAction(
-      {
-        application: { capabilities: { visualize_v2: { show: true } } } as never,
-        navigateToPrefilledEditor,
-      },
+      { navigateToPrefilledEditor },
       { title: 'Prefilled title' }
     );
 
