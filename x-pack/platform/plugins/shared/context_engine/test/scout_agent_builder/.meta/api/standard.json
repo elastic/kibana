@@ -1,5 +1,5 @@
 {
-  "sha1": "9fa0a80ddf6562c5120a2af7696852b7ad417952",
+  "sha1": "8b9e2193af806eb9e48b8aa137e87da5cb2677ca",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -364,7 +364,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ai_indices.spec.ts",
-        "line": 236,
+        "line": 279,
         "column": 30
       }
     },
@@ -378,7 +378,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ai_indices.spec.ts",
-        "line": 333,
+        "line": 376,
         "column": 9
       }
     },
@@ -392,7 +392,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ai_indices.spec.ts",
-        "line": 345,
+        "line": 388,
         "column": 58
       }
     },
@@ -406,7 +406,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ai_indices.spec.ts",
-        "line": 364,
+        "line": 407,
         "column": 13
       }
     },
@@ -420,7 +420,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ai_indices.spec.ts",
-        "line": 373,
+        "line": 416,
         "column": 22
       }
     },
@@ -434,7 +434,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ai_indices.spec.ts",
-        "line": 382,
+        "line": 425,
         "column": 69
       }
     },
@@ -448,7 +448,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ai_indices.spec.ts",
-        "line": 395,
+        "line": 438,
         "column": 84
       }
     },
@@ -462,7 +462,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ai_indices.spec.ts",
-        "line": 406,
+        "line": 449,
         "column": 80
       }
     },
@@ -476,7 +476,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ai_indices.spec.ts",
-        "line": 416,
+        "line": 459,
         "column": 11
       }
     },
@@ -490,7 +490,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ai_indices.spec.ts",
-        "line": 423,
+        "line": 466,
         "column": 12
       }
     },
@@ -504,7 +504,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ai_indices.spec.ts",
-        "line": 429,
+        "line": 472,
         "column": 21
       }
     },
@@ -518,7 +518,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ai_indices.spec.ts",
-        "line": 456,
+        "line": 499,
         "column": 72
       }
     },
@@ -532,7 +532,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ai_indices.spec.ts",
-        "line": 484,
+        "line": 527,
         "column": 69
       }
     },
@@ -546,7 +546,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ai_indices.spec.ts",
-        "line": 530,
+        "line": 573,
         "column": 82
       }
     },
@@ -560,7 +560,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ai_indices.spec.ts",
-        "line": 575,
+        "line": 618,
         "column": 60
       }
     },
@@ -574,7 +574,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ai_indices.spec.ts",
-        "line": 583,
+        "line": 626,
         "column": 27
       }
     },
@@ -588,7 +588,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ai_indices.spec.ts",
-        "line": 595,
+        "line": 638,
         "column": 58
       }
     },
@@ -602,7 +602,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ai_indices.spec.ts",
-        "line": 610,
+        "line": 653,
         "column": 29
       }
     },
@@ -616,7 +616,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ai_indices.spec.ts",
-        "line": 658,
+        "line": 701,
         "column": 91
       }
     },
@@ -630,7 +630,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ai_indices.spec.ts",
-        "line": 686,
+        "line": 729,
         "column": 9
       }
     },
@@ -644,7 +644,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ai_indices.spec.ts",
-        "line": 716,
+        "line": 759,
         "column": 5
       }
     },
@@ -658,7 +658,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ai_indices.spec.ts",
-        "line": 742,
+        "line": 785,
         "column": 30
       }
     },
@@ -672,7 +672,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ai_indices.spec.ts",
-        "line": 774,
+        "line": 817,
         "column": 24
       }
     },
@@ -686,7 +686,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ai_indices.spec.ts",
-        "line": 794,
+        "line": 837,
         "column": 29
       }
     },
@@ -700,7 +700,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ai_indices.spec.ts",
-        "line": 814,
+        "line": 857,
         "column": 22
       }
     },
@@ -714,7 +714,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ai_indices.spec.ts",
-        "line": 830,
+        "line": 873,
         "column": 27
       }
     },
@@ -728,7 +728,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ai_indices.spec.ts",
-        "line": 848,
+        "line": 891,
         "column": 27
       }
     },
@@ -742,8 +742,36 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ai_indices.spec.ts",
-        "line": 898,
-        "column": 60
+        "line": 941,
+        "column": 47
+      }
+    },
+    {
+      "id": "d00330aaa254910-e0e6d7dd88c159c",
+      "title": "context engine dreaming templates API serves the built-in dreaming templates to a reader session only while memory is on",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/dreaming_templates.spec.ts",
+        "line": 57,
+        "column": 9
+      }
+    },
+    {
+      "id": "d00330aaa254910-682ad5b28f57304",
+      "title": "context engine dreaming templates API returns 403 to a session without Context Engine read access while memory is on",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/dreaming_templates.spec.ts",
+        "line": 139,
+        "column": 5
       }
     },
     {
@@ -789,6 +817,20 @@
       }
     },
     {
+      "id": "fcd35323787d13e-a72d6a0122b733f",
+      "title": "context engine KI groups groups \"Other\" by type with exclude_types",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ki_groups.spec.ts",
+        "line": 220,
+        "column": 49
+      }
+    },
+    {
       "id": "fcd35323787d13e-fe33001726834b1",
       "title": "context engine KI groups total_other matches the \"Other\" list total with search",
       "expectedStatus": "passed",
@@ -798,7 +840,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ki_groups.spec.ts",
-        "line": 233,
+        "line": 255,
         "column": 74
       }
     },
@@ -812,7 +854,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ki_groups.spec.ts",
-        "line": 233,
+        "line": 255,
         "column": 74
       }
     },
@@ -826,7 +868,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ki_groups.spec.ts",
-        "line": 233,
+        "line": 255,
         "column": 74
       }
     },
@@ -840,7 +882,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ki_groups.spec.ts",
-        "line": 252,
+        "line": 274,
         "column": 17
       }
     },
@@ -854,7 +896,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ki_groups.spec.ts",
-        "line": 262,
+        "line": 284,
         "column": 77
       }
     },
@@ -868,7 +910,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ki_groups.spec.ts",
-        "line": 270,
+        "line": 292,
         "column": 6
       }
     },
@@ -1150,6 +1192,104 @@
         "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ki_write_api.spec.ts",
         "line": 212,
         "column": 11
+      }
+    },
+    {
+      "id": "b523081a6644631-fdb7ff391f5f0b4",
+      "title": "context engine session events API enforces contextEngine:write per space",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/session_events.spec.ts",
+        "line": 235,
+        "column": 29
+      }
+    },
+    {
+      "id": "b523081a6644631-0095706d70908f7",
+      "title": "context engine session events API saves events for the caller in the non-default space without manage_memory",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/session_events.spec.ts",
+        "line": 268,
+        "column": 18
+      }
+    },
+    {
+      "id": "b523081a6644631-1ebdb6d454f9de6",
+      "title": "context engine session events API resolves contextEngine:manage_memory in the request space when targeting another user",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/session_events.spec.ts",
+        "line": 298,
+        "column": 24
+      }
+    },
+    {
+      "id": "b523081a6644631-a4780551c20607e",
+      "title": "context engine session events API checks AI index existence and Elasticsearch write privileges in the request space",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/session_events.spec.ts",
+        "line": 371,
+        "column": 27
+      }
+    },
+    {
+      "id": "efc31e2a69fe03a-2ba319d8267222f",
+      "title": "context engine session memory _forget API enforces contextEngine:write per space",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/session_memory.spec.ts",
+        "line": 225,
+        "column": 74
+      }
+    },
+    {
+      "id": "efc31e2a69fe03a-67b0037d6b6d199",
+      "title": "context engine session memory _forget API forgets only the caller memories in the request space without manage_memory",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/session_memory.spec.ts",
+        "line": 258,
+        "column": 23
+      }
+    },
+    {
+      "id": "efc31e2a69fe03a-9ba9860b46cffb7",
+      "title": "context engine session memory _forget API resolves contextEngine:manage_memory in the request space when targeting another user",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/session_memory.spec.ts",
+        "line": 314,
+        "column": 23
       }
     }
   ]

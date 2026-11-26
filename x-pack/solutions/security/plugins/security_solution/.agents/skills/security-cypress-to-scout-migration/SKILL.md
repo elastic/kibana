@@ -92,7 +92,7 @@ All paths relative to this skill's directory.
 ## Namespace selection — where does the test belong?
 
 Before scaffolding, decide which namespace the migrated test belongs in.
-**Primary rule: namespaces track feature areas**, not teams — one team commonly owns several namespaces (e.g. `@elastic/security-threat-hunting` owns `agent_builder`, `flyout`, `timelines`, and `workflows`).
+**Primary rule: namespaces track feature areas**, not teams — one team commonly owns several namespaces (e.g. `@elastic/security-investigations` owns `agent_builder`, `flyout`, `timelines`, and `workflows`).
 
 ### Add to an existing namespace when:
 

@@ -433,7 +433,7 @@ describe('SignificantEventsScheduledWorkflowsService', () => {
     );
   });
 
-  it('disables and uninstalls without waiting for in-flight executions', async () => {
+  it('disables scheduling without draining or uninstalling when asked to skip the drain', async () => {
     const managementApi = createMockManagementApi({
       getWorkflow: jest.fn().mockResolvedValue({ enabled: true }),
     });
@@ -470,15 +470,14 @@ describe('SignificantEventsScheduledWorkflowsService', () => {
       'default',
       request
     );
+    expect(managementApi.updateWorkflow).toHaveBeenCalledWith(
+      `${SIGNIFICANT_EVENTS_SCHEDULED_REVIEW_WORKFLOW_ID}-default`,
+      { enabled: false },
+      'default',
+      request
+    );
     expect(managementApi.getWorkflowExecutions).not.toHaveBeenCalled();
     expect(managementApi.cancelWorkflowExecution).not.toHaveBeenCalled();
-    expect(managedWorkflowsClient.uninstall).toHaveBeenCalledWith(
-      SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW_ID,
-      { spaceId: 'default', workflowIdSuffix: 'default' }
-    );
-    expect(managedWorkflowsClient.uninstall).toHaveBeenCalledWith(
-      SIGNIFICANT_EVENTS_SCHEDULED_REVIEW_WORKFLOW_ID,
-      { spaceId: 'default', workflowIdSuffix: 'default' }
-    );
+    expect(managedWorkflowsClient.uninstall).not.toHaveBeenCalled();
   });
 });

@@ -10,23 +10,19 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { EuiProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
-import { KibanaStyledComponentsThemeProvider } from '@kbn/react-kibana-context-styled';
-
 import { UpdatedBy } from './updated_info';
 import { createKibanaContextProviderMock } from '../../../../../../common/lib/kibana/kibana_react.mock';
 
 const MockKibanaContextProvider = createKibanaContextProviderMock();
 
 /**
- * `UpdatedBy` consumes only these four contexts, and unlike `TestProviders` this builds no redux
+ * `UpdatedBy` consumes only these three contexts, and unlike `TestProviders` this builds no redux
  * store or query client per render, which the per-test budget cannot afford on a contended CI worker.
  */
 const UpdatedInfoTestProviders = ({ children }: PropsWithChildren<{}>) => (
   <MockKibanaContextProvider>
     <I18nProvider>
-      <KibanaStyledComponentsThemeProvider>
-        <EuiProvider highContrastMode={false}>{children}</EuiProvider>
-      </KibanaStyledComponentsThemeProvider>
+      <EuiProvider highContrastMode={false}>{children}</EuiProvider>
     </I18nProvider>
   </MockKibanaContextProvider>
 );

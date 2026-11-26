@@ -1,0 +1,164 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { renderHook } from '@testing-library/react';
+import { useLocation } from 'react-router-dom';
+import { encodeOverviewFilters } from '../../common/overview_filters_param';
+import { digitalExperienceRouter } from '../routes';
+import { useApplicationLinks } from './use_application_links';
+import { useDigitalExperienceParams } from './use_digital_experience_params';
+import { useDigitalExperienceRouter } from './use_digital_experience_router';
+import { useKibanaServices } from './use_kibana_services';
+import { useListQuery } from './use_list_query';
+import { useSharedFilters } from './use_shared_filters';
+
+jest.mock('react-router-dom', () => ({
+  ...jest.requireActual('react-router-dom'),
+  useLocation: jest.fn(),
+}));
+jest.mock('./use_digital_experience_params');
+jest.mock('./use_digital_experience_router');
+jest.mock('./use_kibana_services');
+jest.mock('./use_list_query');
+jest.mock('./use_shared_filters', () => ({
+  ...jest.requireActual('./use_shared_filters'),
+  useSharedFilters: jest.fn(),
+}));
+
+const mockSearch = (search: string) =>
+  jest.mocked(useLocation).mockReturnValue({
+    search,
+    pathname: '/shop-mobile',
+    hash: '',
+    state: undefined,
+    key: '',
+  });
+
+beforeEach(() => {
+  jest.mocked(useKibanaServices).mockReturnValue({
+    application: {
+      getUrlForApp: (appId: string, { path }: { path: string }) => `/app/${appId}${path}`,
+    },
+  } as unknown as ReturnType<typeof useKibanaServices>);
+  jest.mocked(useDigitalExperienceRouter).mockReturnValue(digitalExperienceRouter);
+  jest.mocked(useListQuery).mockReturnValue({ rangeFrom: 'now-15m', rangeTo: 'now' });
+  jest.mocked(useSharedFilters).mockReturnValue({});
+  jest.mocked(useDigitalExperienceParams).mockReturnValue({
+    query: {},
+  } as unknown as ReturnType<typeof useDigitalExperienceParams>);
+});
+
+const mockRouteQuery = (query: Record<string, string>) =>
+  jest.mocked(useDigitalExperienceParams).mockReturnValue({
+    query,
+  } as unknown as ReturnType<typeof useDigitalExperienceParams>);
+
+describe('useApplicationLinks', () => {
+  it("keeps a mobile application's type, OS and release, as the route validated them", () => {
+    jest
+      .mocked(useListQuery)
+      .mockReturnValue({ rangeFrom: 'now-15m', rangeTo: 'now', applicationType: 'mobile' });
+    mockSearch('?source=otel&applicationType=mobile&osName=iOS&release=2.0.0');
+    mockRouteQuery({ source: 'otel', applicationType: 'mobile', osName: 'iOS', release: '2.0.0' });
+
+    const { result } = renderHook(() => useApplicationLinks('shop-mobile', 'otel'));
+
+    expect(result.current.overviewHref).toBe(
+      '/app/digital_experience/shop-mobile?applicationType=mobile&osName=iOS&rangeFrom=now-15m&rangeTo=now&release=2.0.0&source=otel'
+    );
+    expect(result.current.crashesHref).toBe(
+      '/app/digital_experience/shop-mobile/crashes?applicationType=mobile&osName=iOS&rangeFrom=now-15m&rangeTo=now&release=2.0.0&source=otel'
+    );
+  });
+
+  it("keeps a mobile application's Compare, so its breadcrumb and tab lead back to it", () => {
+    jest
+      .mocked(useListQuery)
+      .mockReturnValue({ rangeFrom: 'now-15m', rangeTo: 'now', applicationType: 'mobile' });
+    mockSearch('?source=otel&applicationType=mobile&compare=true');
+    mockRouteQuery({ source: 'otel', applicationType: 'mobile', compare: 'true' });
+
+    const { result } = renderHook(() => useApplicationLinks('shop-mobile', 'otel'));
+
+    expect(
+      new URL(result.current.overviewHref, 'http://localhost').searchParams.get('compare')
+    ).toBe('true');
+  });
+
+  it('leaves the OS and release out of the links of a web application', () => {
+    mockSearch('?source=otel&osName=iOS&release=2.0.0&compare=true');
+    mockRouteQuery({ source: 'otel', osName: 'iOS', release: '2.0.0', compare: 'true' });
+
+    const { result } = renderHook(() => useApplicationLinks('shop', 'otel'));
+
+    expect(result.current.overviewHref).not.toContain('osName=');
+    expect(result.current.overviewHref).not.toContain('release=');
+  });
+
+  it("keeps a web application's Compare in every tab, so the Overview still has it on the way back", () => {
+    mockSearch('?source=otel&compare=true');
+    mockRouteQuery({ source: 'otel', compare: 'true' });
+
+    const { result } = renderHook(() => useApplicationLinks('shop', 'otel'));
+    const { overviewHref, errorsHref, networkHref, reportsHref, sessionsHref } = result.current;
+
+    [overviewHref, errorsHref, networkHref, reportsHref, sessionsHref()].forEach((href) => {
+      expect(new URL(href, 'http://localhost').searchParams.get('compare')).toBe('true');
+    });
+  });
+
+  it('leaves Compare out of the links while it is off', () => {
+    mockSearch('?source=otel');
+    mockRouteQuery({ source: 'otel' });
+
+    const { result } = renderHook(() => useApplicationLinks('shop', 'otel'));
+
+    expect(result.current.errorsHref).not.toContain('compare=');
+    expect(result.current.overviewHref).not.toContain('compare=');
+  });
+
+  describe('frustrationHref', () => {
+    const frustrationHrefFor = (listQuery: ReturnType<typeof useListQuery>) => {
+      jest.mocked(useListQuery).mockReturnValue(listQuery);
+      mockSearch('?source=otel');
+      return renderHook(() => useApplicationLinks('my app', 'otel')).result.current.frustrationHref;
+    };
+
+    it('links the frustration page of the application with the time range and environment', () => {
+      expect(
+        frustrationHrefFor({ rangeFrom: 'now-7d', rangeTo: 'now', environment: 'production' })
+      ).toBe(
+        '/app/digital_experience/my%20app/frustration?environment=production&rangeFrom=now-7d&rangeTo=now&source=otel'
+      );
+    });
+
+    it('has no environment when all are selected', () => {
+      expect(frustrationHrefFor({ rangeFrom: 'now-15m', rangeTo: 'now' })).toBe(
+        '/app/digital_experience/my%20app/frustration?rangeFrom=now-15m&rangeTo=now&source=otel'
+      );
+    });
+
+    it('keeps the applications list filter, so the breadcrumb leads back to the same list', () => {
+      expect(
+        frustrationHrefFor({ rangeFrom: 'now-15m', rangeTo: 'now', sourceFilter: 'otel' })
+      ).toContain('sourceFilter=otel');
+    });
+
+    it("keeps the Overview's filters and KQL query, so its back link restores them", () => {
+      const filters = encodeOverviewFilters({ browser: [{ value: 'Chrome', exclude: false }] });
+      mockRouteQuery({ ...(filters ? { filters } : {}), kuery: 'url.full : *checkout*' });
+
+      const href = new URL(
+        frustrationHrefFor({ rangeFrom: 'now-15m', rangeTo: 'now' }),
+        'http://localhost'
+      );
+
+      expect(href.searchParams.get('filters')).toBe(filters);
+      expect(href.searchParams.get('kuery')).toBe('url.full : *checkout*');
+    });
+  });
+});

@@ -17,11 +17,7 @@ import {
   toErrorBudget,
 } from '../../domain/services';
 import { toHighPrecision } from '../../utils/number';
-import {
-  toRichRollingTimeWindow,
-  type CompositeSLODefinition,
-  type Summary,
-} from '../../domain/models';
+import type { CompositeSLODefinition, Summary } from '../../domain/models';
 import type { BurnRateWindow, SummaryClient } from '../summary_client';
 import type { SLODefinitionRepository } from '../slo_definition_repository';
 
@@ -175,12 +171,10 @@ async function computeMemberSummaries(
 
   const activeMembers = compositeSlo.members.filter((m) => memberDefinitionMap.has(m.sloId));
 
-  const richTimeWindow = toRichRollingTimeWindow(compositeSlo.timeWindow);
-
   const summaryParams = activeMembers.map((member) => ({
     slo: memberDefinitionMap.get(member.sloId)!,
     instanceId: member.instanceId ?? ALL_VALUE,
-    timeWindowOverride: richTimeWindow,
+    timeWindowOverride: compositeSlo.timeWindow,
   }));
 
   const summaryResults = await summaryClient.computeSummaries(summaryParams);

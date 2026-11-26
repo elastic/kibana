@@ -104,11 +104,13 @@ class TutorialUi extends React.Component<TutorialProps, TutorialState> {
         text: tutorial ? tutorial.name : this.props.tutorialId,
       },
     ];
-    getServices().chrome.setBreadcrumbs(breadcrumbs, {
+    const { chrome } = getServices();
+    chrome.setBreadcrumbs(breadcrumbs, {
       project: {
         value: breadcrumbs,
       },
     });
+    chrome.docTitle.change(tutorial ? tutorial.name : this.props.tutorialId);
   }
 
   getInstructions = () => {

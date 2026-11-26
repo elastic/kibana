@@ -573,7 +573,8 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
     },
     query: {
       eql: `${ELASTIC_DOCS}explore-analyze/query-filter/languages/eql`,
-      kueryQuerySyntax: `${ELASTIC_DOCS}explore-analyze/query-filter/languages/kql`,
+      kueryQuerySyntax: `${ELASTIC_DOCS}reference/query-languages/kql`,
+      kueryQueryNestedFields: `${ELASTIC_DOCS}reference/query-languages/kql#_querying_nested_fields`,
       luceneQuery: `${ELASTIC_DOCS}reference/query-languages/query-dsl/query-dsl-query-string-query`,
       luceneQuerySyntax: `${ELASTIC_DOCS}reference/query-languages/query-dsl/query-dsl-query-string-query#query-string-syntax`,
       percolate: `${ELASTIC_DOCS}reference/query-languages/query-dsl/query-dsl-percolate-query`,
@@ -1169,6 +1170,8 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
     contextEngine: {
       overview: `${ELASTIC_DOCS}explore-analyze/ai-features/context-engine`,
       aiIndices: `${ELASTIC_DOCS}explore-analyze/ai-features/context-engine/concepts#ai-indices`,
+      sources: `${ELASTIC_DOCS}explore-analyze/ai-features/context-engine/concepts#sources`,
+      memory: `${ELASTIC_DOCS}explore-analyze/ai-features/context-engine/concepts#memory`,
     },
     agentBuilder: {
       agentBuilder: `${ELASTIC_DOCS}explore-analyze/ai-features/elastic-agent-builder`,

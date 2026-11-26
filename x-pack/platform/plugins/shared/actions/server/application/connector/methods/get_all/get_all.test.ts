@@ -1567,6 +1567,78 @@ describe('getAll()', () => {
       expect(connectorWithoutAuthMode!.authMode).toBe('shared');
     });
 
+    test('returns the pinned specVersion of saved object connectors', async () => {
+      unsecuredSavedObjectsClient.find.mockResolvedValueOnce({
+        total: 2,
+        per_page: 10,
+        page: 1,
+        saved_objects: [
+          {
+            id: 'pinned',
+            type: 'action',
+            attributes: {
+              name: 'pinned',
+              actionTypeId: '.abuseipdb',
+              isMissingSecrets: false,
+              config: {},
+              specVersion: '1.3',
+            },
+            score: 1,
+            references: [],
+          },
+          {
+            id: 'unpinned',
+            type: 'action',
+            attributes: {
+              name: 'unpinned',
+              actionTypeId: '.abuseipdb',
+              isMissingSecrets: false,
+              config: {},
+            },
+            score: 1,
+            references: [],
+          },
+        ],
+      });
+      scopedClusterClient.asInternalUser.search.mockResponse({
+        took: 1,
+        timed_out: false,
+        _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+        hits: { hits: [] },
+        aggregations: {
+          pinned: { doc_count: 0 },
+          unpinned: { doc_count: 0 },
+        },
+      });
+
+      actionsClient = new ActionsClient({
+        logger,
+        actionTypeRegistry,
+        authTypeRegistry,
+        unsecuredSavedObjectsClient,
+        scopedClusterClient,
+        kibanaIndices,
+        actionExecutor,
+        bulkExecutionEnqueuer,
+        request,
+        authorization: authorization as unknown as ActionsAuthorization,
+        inMemoryConnectors: [],
+        connectorTokenClient: connectorTokenClientMock.create(),
+        getEventLogClient,
+        encryptedSavedObjectsClient,
+        isESOCanEncrypt,
+        getAxiosInstanceWithAuth,
+      });
+
+      const result = await actionsClient.getAll();
+
+      const pinnedConnector = result.find(({ id }) => id === 'pinned');
+      const unpinnedConnector = result.find(({ id }) => id === 'unpinned');
+      expect(pinnedConnector?.specVersion).toBe('1.3');
+      expect(unpinnedConnector).toBeDefined();
+      expect(unpinnedConnector).not.toHaveProperty('specVersion');
+    });
+
     test('always includes authMode in results', async () => {
       unsecuredSavedObjectsClient.find.mockResolvedValueOnce({
         total: 1,

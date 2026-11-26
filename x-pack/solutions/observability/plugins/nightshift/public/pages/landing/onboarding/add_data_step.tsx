@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
+import { NIGHTSHIFT_EBT_ELEMENTS } from '../../../common/ebt_constants';
 import {
   ConnectSourcesGrid,
   isTelemetryType,
@@ -21,7 +22,11 @@ export const ADD_DATA_TITLE = i18n.translate('xpack.nightshift.onboarding.addDat
 export function OnboardingAddDataStep(): React.ReactElement {
   return (
     <div data-test-subj="nightshiftOnboardingAddDataStep">
-      <ConnectSourcesGrid filter={isTelemetryType} trailing={<AddDataCard />} />
+      <ConnectSourcesGrid
+        ebtElement={NIGHTSHIFT_EBT_ELEMENTS.ONBOARDING_CONNECTORS}
+        filter={isTelemetryType}
+        trailing={<AddDataCard />}
+      />
     </div>
   );
 }

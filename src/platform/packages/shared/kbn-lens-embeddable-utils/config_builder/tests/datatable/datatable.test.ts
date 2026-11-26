@@ -261,6 +261,12 @@ describe('Datatable', () => {
       expect(esqlOutput.metrics?.[1].color).toEqual(progressBarESQLDatatable.metrics?.[1].color);
     });
 
+    it('(API -> SO -> API) should not add `steps` to a default `status` palette fill', () => {
+      const dslOutput = toDatatableApiConfig(builder, builder.fromAPIFormat(progressBarDatatable));
+
+      expect(dslOutput.metrics?.[1].color).toEqual(statusPalette);
+    });
+
     it.each([
       ['DSL', progressBarDatatable],
       ['ESQL', progressBarESQLDatatable],

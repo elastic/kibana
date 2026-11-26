@@ -274,7 +274,12 @@ describe('nightshift.sendNotifications step', () => {
   describe('Slack thread claim for a root post', () => {
     const rootResponse = {
       status: 'ok',
-      data: { ts: '1.2', channel: 'C123', externalConversationId: 'slack:T1:C123:1.2' },
+      data: {
+        ts: '1.2',
+        channel: 'C123',
+        externalConversationId: 'slack:T1:C123:1.2',
+        workspace: 'T1',
+      },
     } as never;
 
     it('claims the thread the root post started', async () => {
@@ -289,6 +294,44 @@ describe('nightshift.sendNotifications step', () => {
         externalConversationId: 'slack:T1:C123:1.2',
         channel: 'C123',
         threadTs: '1.2',
+        workspace: 'T1',
+        summary: 'Latency',
+      });
+    });
+
+    it('claims a receipt recorded before the workspace was stored at its own timestamp', async () => {
+      const { definition, context, execute, claimSlackThread, routing } = setup(
+        'default',
+        'elastic-apps-slack'
+      );
+      execute.mockResolvedValueOnce({
+        status: 'ok',
+        data: { ts: '1.2', channel: 'C123', externalConversationId: 'slack:T1:C123:1.2' },
+      } as never);
+      claimSlackThread.mockRejectedValueOnce(new Error('boom'));
+      await definition.handler(context('started'));
+      const { id } = routing.client;
+      const stored = routing.storage.entries.get(id)?.source;
+      expect(stored?.destinations[0].thread?.thread_ts).toBe('1.2');
+      routing.storage.put(id, {
+        ...stored!,
+        attempts: stored!.attempts.map((attempt) => ({
+          ...attempt,
+          message_ts: '1.0',
+          external_conversation_id: 'slack:T1:C123:1.0',
+        })),
+      });
+
+      await definition.handler(context('started'));
+
+      expect(execute).toHaveBeenCalledTimes(1);
+      expect(claimSlackThread).toHaveBeenLastCalledWith({
+        investigationId: 'inv-1',
+        externalConversationId: 'slack:T1:C123:1.0',
+        channel: 'C123',
+        threadTs: '1.0',
+        workspace: undefined,
+        summary: 'Latency',
       });
     });
 

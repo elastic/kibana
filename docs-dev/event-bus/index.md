@@ -41,7 +41,7 @@ The producer does not need to depend on its consumers to publish events. A consu
 
 Share the topic type from a small types-only package. Each plugin imports the type and calls `defineTopic` independently; consumers should not import the producer's runtime token.
 
-Creating a token does not register the topic. Exactly one plugin can register each topic name on a node. For a single-producer topic, register it in the producer's setup so publication does not depend on a consumer being enabled. Registration does not restrict who can publish.
+Creating a token does not register the topic. Exactly one plugin can register each topic name on a node. For a single-producer topic, register it in the producer's setup so publication does not depend on a consumer being enabled. Until a subscriber exists, those events are discarded. Registration does not restrict who can publish.
 
 ## Delivery today and the durable direction
 
@@ -67,9 +67,9 @@ flowchart LR
   Bus --> C3["otherPlugin.audit"]
 ```
 
-A resolved publish does not guarantee delivery. A consumer's copy is dropped when its queue has 1000 pending events. Overflow is logged on the first drop and with a count when the queue drains. A failed handler is logged; processing continues with the next event. Subscriptions process serially and can run concurrently with each other.
+A resolved publish does not guarantee delivery. Queues belong to subscriptions. A topic with no subscribers accepts the event and discards it. There is no topic queue, and that drop is silent. A subscriber's copy is dropped when its queue has 1000 pending events. Overflow is logged on the first drop and with a count when the queue drains. A failed handler is logged; processing continues with the next event. Subscriptions process serially and can run concurrently with each other.
 
-Other nodes never receive the publication. Queued events are lost at shutdown; absent consumers have no history to recover. A producer running on every node, such as a timer, publishes separately on each node. If the resulting work must run once across the cluster, coordinate it separately; pub/sub does not elect one consumer.
+Other nodes never receive the publication. Queued events are lost at shutdown. A consumer that subscribes later has no history to recover. A producer running on every node, such as a timer, publishes separately on each node. If the resulting work must run once across the cluster, coordinate it separately; pub/sub does not elect one consumer.
 
 At start, subscriptions to unregistered topics generate a warning and receive no events. Publishing to an unregistered topic rejects.
 
@@ -135,7 +135,7 @@ const { id, acceptedAt } = await core.pubsub.publish(caseUpdated, {
 });
 ```
 
-The producer supplies `{ id, data }`. Publish resolves with `{ id, acceptedAt }`; handlers receive `{ id, data, topic, acceptedAt }`. IDs must be source-derived and unique within the topic for distinct events. Reuse the ID when retrying the same logical delivery.
+The producer supplies `{ id, data }`. Publish resolves with `{ id, acceptedAt }`; handlers receive `{ id, data, topic, acceptedAt }`. IDs must be source-derived, at most 256 UTF-16 code units (`PUBSUB_MAX_ID_LENGTH`), and unique within the topic for distinct events. Reuse the ID when retrying the same logical delivery.
 
 Consumer names are plugin-local suffixes. Core scopes them as `${pluginId}.${consumer}`, so two plugins can both use `engine`. A second subscription with the same scoped name **on the same topic** throws; the suffix can be reused on another topic.
 
@@ -146,9 +146,10 @@ Consumer names are plugin-local suffixes. Core scopes them as `${pluginId}.${con
 | Topic name | 1–256 characters; dot-separated segments, each beginning with a letter followed by `[A-Za-z0-9_-]*` |
 | Topic registration | One registration per topic name on a node |
 | Consumer suffix | 1–128 characters; a letter followed by `[A-Za-z0-9_-]*`; no dots or plugin prefix |
-| Event `id` | Non-empty string, at most 256 characters |
+| Event `id` | Non-empty string, at most 256 UTF-16 code units (`PUBSUB_MAX_ID_LENGTH`) |
 | Event `data` | At most 256 KiB of UTF-8 JSON |
 | Pending events per subscription | 1000, excluding the event in flight; further copies are dropped |
+| No subscribers | Accepted and discarded. No topic queue, and no log |
 | Delivery | Best effort, at-most-once per publication and subscription, this node only |
 | Deduplication | None |
 
