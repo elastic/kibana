@@ -169,6 +169,17 @@ describe('calendar intervals', () => {
     expect(keyAt('2009-11-01T03:30:00.000Z')).toBe('2009-11-01T02:30:00.000Z');
   });
 
+  it('returns a next key before the timestamp when a rollback repeats the previous date', () => {
+    const stJohns = ianaTimeZone('America/St_Johns');
+    const day: DateRounding = { kind: 'calendar', unit: 'day', amount: 1 };
+    const timestamp = Date.parse('2009-11-01T03:00:00.000Z');
+
+    // The timestamp is in the repeated hour of October 31, whose next key is the first November 1 midnight.
+    expect(new Date(nextBucketKey(timestamp, day, stJohns)).toISOString()).toBe(
+      '2009-11-01T02:30:00.000Z'
+    );
+  });
+
   it('rounds 7 days like a week, to ISO weeks starting on Monday', () => {
     expectBucket('7d', utc, '2026-01-07T10:00:00.000Z', {
       key: '2026-01-05T00:00:00.000Z',

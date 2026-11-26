@@ -103,8 +103,10 @@ export const roundToBucketKey = (
 };
 
 /**
- * Start of the bucket right after the one containing `timestamp` (the end of that bucket), in UTC
- * epoch milliseconds. Like `roundToBucketKey`, it matches the bucket boundaries Elasticsearch uses.
+ * Key of the bucket that follows the one containing `timestamp`, in UTC epoch milliseconds. Like
+ * `roundToBucketKey`, it matches the bucket keys Elasticsearch uses. It is the next key, not an
+ * exclusive upper bound of the bucket: when a clock rollback repeats a local date, calendar keys can
+ * go backward, so the result may be before `timestamp`. Don't use it for containment checks.
  */
 export const nextBucketKey = (
   timestamp: number,
