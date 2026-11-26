@@ -53,13 +53,17 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await discover.waitUntilSearchingHasFinished();
     });
 
-    it('should render categorize fields correctly', async () => {
-      // set query to be categorize command
-      // ensure the columns are correct
-      await monacoEditor.setCodeEditorValue(
-        'from logstash-*\n  | STATS Count=COUNT(*) BY Pattern=CATEGORIZE(@message)\n | SORT Count DESC'
-      );
+    it('finds patterns in document results and opens matching logs', async () => {
+      await monacoEditor.setCodeEditorValue('FROM logstash-* | KEEP @timestamp, @message');
       await testSubjects.click('querySubmitButton');
+      await discover.waitUntilTabIsLoaded();
+
+      const findPatternsButton = 'dscGroupSimilarMessagesButton';
+      expect(await testSubjects.getVisibleText(findPatternsButton)).to.contain(
+        'Find patterns in @message'
+      );
+      await testSubjects.click(findPatternsButton);
+
       const columns = ['Count', 'Pattern'];
       await discover.waitUntilTabIsLoaded();
       await unifiedFieldList.waitUntilFieldlistHasCountOfFields(columns.length);
