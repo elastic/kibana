@@ -82,7 +82,7 @@ describe('initializeSingleTab', () => {
       expect(services.toastNotifications.addWarning).not.toHaveBeenCalled();
     });
 
-    it('rebinds the filters of the deleted data view to the replacement except scripted ones', async () => {
+    it('rebinds the filters of the deleted data view to the replacement and disables scripted ones', async () => {
       const deletedDataViewFilter = buildPhraseFilter(
         { name: 'saved-field', type: 'string' },
         'saved-value',
@@ -119,8 +119,10 @@ describe('initializeSingleTab', () => {
           ...deletedDataViewFilter,
           meta: { ...deletedDataViewFilter.meta, index: dataViewWithTimefieldMock.id },
         },
-        // Stays on the deleted data view, so getValidFilters disables it as for any other data view
-        scriptedFilter,
+        {
+          ...scriptedFilter,
+          meta: { ...scriptedFilter.meta, index: dataViewWithTimefieldMock.id, disabled: true },
+        },
         otherDataViewFilter,
       ]);
     });

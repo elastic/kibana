@@ -319,16 +319,24 @@ export const initializeSingleTab = createInternalStateAsyncThunk(
       query: openingQuery,
     });
 
-    // Filters of the deleted data view are rebound to the replacement so they remain editable,
-    // except scripted ones, which getValidFilters disables below since their scripts may fail
-    // with the replacement data view
+    // Filters of the deleted data view are rebound to the replacement so they remain editable and
+    // saving the session no longer references the deleted data view. Scripted filters are also
+    // disabled since their scripts may fail with the replacement data view.
     if (missingDataViewId && !esqlSource && dataView.id && initialAppState.filters) {
       const replacementDataViewId = dataView.id;
-      initialAppState.filters = initialAppState.filters.map((filter) =>
-        filter.meta.index === missingDataViewId && !filter.query?.script
-          ? { ...filter, meta: { ...filter.meta, index: replacementDataViewId } }
-          : filter
-      );
+      initialAppState.filters = initialAppState.filters.map((filter) => {
+        if (filter.meta.index !== missingDataViewId) {
+          return filter;
+        }
+
+        const meta = { ...filter.meta, index: replacementDataViewId };
+
+        if (filter.query?.script) {
+          meta.disabled = true;
+        }
+
+        return { ...filter, meta };
+      });
     }
 
     const initialGlobalState: TabStateGlobalState = {

@@ -153,12 +153,10 @@ export const SingleTabView = ({
   if (
     currentTabInitializationState.initializationStatus === TabInitializationStatus.MissingDataView
   ) {
-    const selectReplacementDataView = (dataViewId: string) => {
+    // Applied on top of the URL state so overrides from a link are kept
+    const initializeWithReplacement = (dataViewId: string, urlState: DiscoverAppState) => {
       initializeTab.current({
-        defaultUrlState: {
-          ...getCurrentUrlState(urlStateStorage, services),
-          dataSource: createDataViewDataSource({ dataViewId }),
-        },
+        defaultUrlState: { ...urlState, dataSource: createDataViewDataSource({ dataViewId }) },
       });
     };
 
@@ -168,8 +166,13 @@ export const SingleTabView = ({
         <MissingDataViewPrompt
           missingDataViewId={currentTabInitializationState.missingDataViewId}
           adHocDataViews={adHocDataViews}
-          onSelectDataView={selectReplacementDataView}
+          onSelectDataView={(dataViewId) =>
+            initializeWithReplacement(dataViewId, getCurrentUrlState(urlStateStorage, services))
+          }
           onDataViewCreated={async (dataView) => {
+            // Read before refreshing the list, after which the URL can belong to another tab
+            const urlState = getCurrentUrlState(urlStateStorage, services);
+
             if (dataView.isPersisted()) {
               await dispatch(internalStateActions.loadDataViewList());
               // The availability check runs once, so a data view created afterwards is marked here
@@ -184,7 +187,7 @@ export const SingleTabView = ({
             }
 
             if (dataView.id) {
-              selectReplacementDataView(dataView.id);
+              initializeWithReplacement(dataView.id, urlState);
             }
           }}
         />
