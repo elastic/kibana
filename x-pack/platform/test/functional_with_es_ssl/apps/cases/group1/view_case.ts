@@ -578,13 +578,15 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       it('adds lens visualization in new comment', async () => {
         // The activity sort order is persisted in local storage, so the new
         // comment is identified by its id rather than by its position.
-        const getUserCommentCopyLinkSubjects = async () => {
+        const getUserCommentCopyLinkSubjects = async (timeout?: number) => {
           const copyLinks = await find.allByCssSelector(
-            '[data-test-subj="comment-comment-comment"] [data-test-subj^="copy-link-"]'
+            '[data-test-subj="comment-comment-comment"] [data-test-subj^="copy-link-"]',
+            timeout
           );
           return Promise.all(copyLinks.map((copyLink) => copyLink.getAttribute('data-test-subj')));
         };
-        const copyLinkSubjectsBefore = await getUserCommentCopyLinkSubjects();
+        // The case may hold no comments yet, so the baseline must not wait for one.
+        const copyLinkSubjectsBefore = await getUserCommentCopyLinkSubjects(0);
 
         await cases.singleCase.addVisualizationToNewComment(LENS_BASIC_XY_VIS_TITLE);
 
