@@ -16,8 +16,10 @@ import type {
   GetUninstallTokenResponse,
   GetUninstallTokensMetadataResponse,
 } from '@kbn/fleet-plugin/common/types/rest_spec/uninstall_token';
-import type { ApiClientFixture } from '@kbn/scout-security';
+import type { ApiClientFixture, ScoutLogger } from '@kbn/scout-security';
 import { expect } from '@kbn/scout-security/api';
+import { waitForAppliedEndpointPolicy } from '../../../fixtures/applied_endpoint_policy';
+import type { EndpointAgentPolicy } from './protected_policy';
 
 type RequestHeaders = Record<string, string>;
 
@@ -51,13 +53,22 @@ const readAgent = async (
     responseType: 'json',
   });
 
-/** Polls until the agent reports `agentPolicyId` at `revision` or later and is not updating. */
+/**
+ * Polls until the agent reports `agentPolicyId` at `revision` or later and is not updating, then until
+ * Endpoint reports the agent policy's Elastic Defend package policy applied. The headers need the
+ * `securitySolution` API privilege for the host metadata route.
+ */
 export const waitForAgentOnPolicy = async (
   apiClient: ApiClientFixture,
   headers: RequestHeaders,
   agentId: string,
-  { agentPolicyId, revision }: { agentPolicyId: string; revision: number }
+  policy: Pick<
+    EndpointAgentPolicy,
+    'agentPolicyId' | 'revision' | 'packagePolicyId' | 'packagePolicyRevision'
+  >,
+  log?: ScoutLogger
 ): Promise<void> => {
+  const { agentPolicyId, revision, packagePolicyId, packagePolicyRevision } = policy;
   await expect
     .poll(
       async () => {
@@ -80,6 +91,13 @@ export const waitForAgentOnPolicy = async (
       }
     )
     .toStrictEqual({ policyId: agentPolicyId, revisionApplied: true, updating: false });
+
+  await waitForAppliedEndpointPolicy(apiClient, headers, agentId, {
+    packagePolicyId,
+    minimumRevision: packagePolicyRevision,
+    failOnUnacceptedStatus: true,
+    log,
+  });
 };
 
 /** Sends a graceful unenroll (no `revoke`): Fleet waits for the agent to acknowledge it. */

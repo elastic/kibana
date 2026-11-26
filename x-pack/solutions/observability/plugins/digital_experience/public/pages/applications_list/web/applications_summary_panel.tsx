@@ -11,8 +11,19 @@ import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiStat, EuiToolTip } from '@elast
 import { i18n } from '@kbn/i18n';
 import { EmptyCellValue } from '@kbn/shared-ux-column-presets';
 import { useFormatters } from '../../../hooks/use_formatters';
-import { SESSIONS_LABEL, SESSIONS_UNAVAILABLE_LABEL } from '../../../labels';
+import { INGEST_LABEL, SESSIONS_LABEL, SESSIONS_UNAVAILABLE_LABEL } from '../../../labels';
+import { formatBytes } from '../../../utils/format_bytes';
+import { IngestTooltip } from '../components/ingest_tooltip';
 import type { ApplicationsSummary } from '../utils/summarize_applications';
+
+/** The ingest tile, which loads apart from the list. */
+export interface IngestSummary {
+  /** Estimated bytes of the summarized applications; `null` without an estimate. */
+  bytes: number | null;
+  isLoading: boolean;
+  /** Why some applications have no estimate. */
+  notes: string[];
+}
 
 const LABELS = {
   applications: i18n.translate('xpack.digitalExperience.summary.applications', {
@@ -36,9 +47,11 @@ const LABELS = {
 export function ApplicationsSummaryPanel({
   summary,
   isLoading,
+  ingest,
 }: {
   summary: ApplicationsSummary;
   isLoading: boolean;
+  ingest: IngestSummary;
 }) {
   const { formatNumber, formatPercent } = useFormatters();
   const stats: Array<{
@@ -46,8 +59,23 @@ export function ApplicationsSummaryPanel({
     label: ReactNode;
     value: ReactNode;
     color?: 'danger';
+    /** A tile that loads apart from the list. */
+    isLoading?: boolean;
   }> = [
     { id: 'applications', label: LABELS.applications, value: formatNumber(summary.applications) },
+    {
+      id: 'ingest',
+      // Always a tooltip: the value is an estimate, and how it is made matters.
+      label: (
+        <EuiToolTip content={<IngestTooltip notes={ingest.notes} />}>
+          <span tabIndex={0} data-test-subj="digitalExperienceSummaryIngestLabel">
+            {INGEST_LABEL}
+          </span>
+        </EuiToolTip>
+      ),
+      value: ingest.bytes === null ? <EmptyCellValue /> : formatBytes(ingest.bytes),
+      isLoading: isLoading || ingest.isLoading,
+    },
     {
       id: 'sessions',
       // Without a total, the label says where the sessions come from.
@@ -93,7 +121,7 @@ export function ApplicationsSummaryPanel({
   return (
     <EuiPanel hasBorder data-test-subj="digitalExperienceApplicationsSummary">
       <EuiFlexGroup gutterSize="l" responsive={false} wrap>
-        {stats.map(({ id, label, value, color }) => (
+        {stats.map(({ id, label, value, color, isLoading: isStatLoading = isLoading }) => (
           <EuiFlexItem key={id}>
             <EuiStat
               data-test-subj={`digitalExperienceSummary-${id}`}
@@ -101,7 +129,7 @@ export function ApplicationsSummaryPanel({
               titleColor={color}
               titleSize="s"
               description={label}
-              isLoading={isLoading}
+              isLoading={isStatLoading}
             />
           </EuiFlexItem>
         ))}
