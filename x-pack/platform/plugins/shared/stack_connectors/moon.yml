@@ -53,8 +53,6 @@ dependsOn:
   - '@kbn/spaces-plugin'
   - '@kbn/encrypted-saved-objects-plugin'
   - '@kbn/cloud-plugin'
-  - '@kbn/licensing-plugin'
-  - '@kbn/licensing-types'
   - '@kbn/core-http-server-mocks'
   - '@kbn/usage-collection-plugin'
   - '@kbn/react-query'
