@@ -285,7 +285,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         );
         await addVisualizationButton.click();
 
-        await cases.singleCase.findAndSaveVisualization('lnsXYvis');
+        await cases.singleCase.findAndSaveVisualization('lnsXYvis', editableDescription);
 
         await header.waitUntilLoadingHasFinished();
 

@@ -6,9 +6,12 @@
  */
 
 import expect from '@kbn/expect';
+import type { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 
 const replaceNewLinesWithSpace = (str: string) => str.replace(/\n/g, ' ');
+
+const MARKDOWN_EDITOR_TEXTAREA = 'textarea.euiMarkdownEditorTextArea';
 
 const REPORTED_BY_PREFIX = 'Reported by:';
 
@@ -78,14 +81,14 @@ export function CasesSingleViewServiceProvider({ getService, getPageObject }: Ft
       );
       await addVisualizationButton.click();
 
-      await this.findAndSaveVisualization(visName);
+      await this.findAndSaveVisualization(visName, addCommentElement);
 
       await testSubjects.existOrFail('cases-app', { timeout: 10 * 1000 });
 
       await this.submitComment();
     },
 
-    async findAndSaveVisualization(visName: string) {
+    async findAndSaveVisualization(visName: string, editorContainer?: WebElementWrapper) {
       await testSubjects.existOrFail('savedObjectsFinderTable', { timeout: 10 * 1000 });
 
       // select visualization
@@ -93,19 +96,27 @@ export function CasesSingleViewServiceProvider({ getService, getPageObject }: Ft
         clearWithKeyboard: true,
       });
       const sourceSubj = `savedObjectTitle${visName.replaceAll(' ', '-')}`;
+      const lensBlocksBefore = await this.countLensBlocks(editorContainer);
       await testSubjects.click(sourceSubj);
 
       // choosing a saved object inserts the lens block into the editor and closes the modal
       await testSubjects.missingOrFail('savedObjectsFinderTable');
-      await retry.waitFor('lens block to be inserted into the markdown editor', async () => {
-        const editors = await find.allByCssSelector('textarea.euiMarkdownEditorTextArea');
-        for (const editor of editors) {
-          if ((await editor.getAttribute('value'))?.includes('!{lens')) {
-            return true;
-          }
-        }
-        return false;
-      });
+      await retry.waitFor(
+        'a new lens block to be inserted into the markdown editor',
+        async () => (await this.countLensBlocks(editorContainer)) > lensBlocksBefore
+      );
+    },
+
+    async countLensBlocks(editorContainer?: WebElementWrapper): Promise<number> {
+      const editors = editorContainer
+        ? await editorContainer.findAllByCssSelector(MARKDOWN_EDITOR_TEXTAREA)
+        : await find.allByCssSelector(MARKDOWN_EDITOR_TEXTAREA);
+      let count = 0;
+      for (const editor of editors) {
+        const value = (await editor.getAttribute('value')) ?? '';
+        count += value.split('!{lens').length - 1;
+      }
+      return count;
     },
 
     async openVisualizationButtonTooltip() {
