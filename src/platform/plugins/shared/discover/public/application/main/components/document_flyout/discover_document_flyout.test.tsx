@@ -96,26 +96,6 @@ type InitialFlyout =
   | { type: 'openDocument'; document: DataTableRecord }
   | { type: 'closed' };
 
-/**
- * Builds rows resolved as the fetch layers resolve them (`fetch_documents.ts`,
- * `fetch_esql.ts`): rows carry their document context, so dispatching one as the
- * expanded document stores that very instance, rather than a resolved copy.
- */
-const buildResolvedRecords = (
-  toolkit: ReturnType<typeof getDiscoverInternalStateMock>,
-  hits: EsHitRecord[]
-) => {
-  const scopedProfilesManager =
-    toolkit.runtimeStateManager.tabs.byId[
-      toolkit.getCurrentTab().id
-    ].scopedProfilesManager$.getValue();
-  return hits.map((hit) =>
-    scopedProfilesManager.resolveDocumentProfile({
-      record: buildDataTableRecord(hit, dataViewMock),
-    })
-  );
-};
-
 const setup = async ({
   searchResult,
   hits = [inResultsHit],
@@ -163,7 +143,7 @@ const setup = async ({
 
   dataStateContainer.data$.documents$.next({
     fetchStatus,
-    result: buildResolvedRecords(toolkit, hits),
+    result: hits.map((hit) => buildDataTableRecord(hit, dataViewMock)),
   });
   // Freeze before rendering: the unawaited initial fetch emits LOADING without `result`, wiping the seed.
   dataStateContainer.data$.documents$.next = jest.fn();
@@ -482,7 +462,7 @@ describe('DiscoverDocumentFlyout', () => {
       expect(services.data.search.search).toHaveBeenCalled();
     });
 
-    const completeRecords = buildResolvedRecords(toolkit, esHitsMock);
+    const completeRecords = esHitsMock.map((hit) => buildDataTableRecord(hit, dataViewMock));
 
     act(() => {
       emitDocuments({
@@ -681,11 +661,8 @@ describe('DiscoverDocumentFlyout', () => {
     });
 
     const tabId = toolkit.getCurrentTab().id;
-    // Cascade grids hand rows their fetcher resolved (`cascaded_documents_fetcher.ts`).
-    const [expandedDoc, nextExpandedDoc] = buildResolvedRecords(toolkit, [
-      esHitsMock[0],
-      esHitsMock[1],
-    ]);
+    const expandedDoc = buildDataTableRecord(esHitsMock[0], dataViewMock);
+    const nextExpandedDoc = buildDataTableRecord(esHitsMock[1], dataViewMock);
 
     toolkit.internalState.dispatch(
       internalStateActions.setExpandedDoc({
@@ -789,8 +766,7 @@ describe('DiscoverDocumentFlyout', () => {
     });
 
     const tabId = toolkit.getCurrentTab().id;
-    // Cascade grids hand rows their fetcher resolved (`cascaded_documents_fetcher.ts`).
-    const [expandedDoc] = buildResolvedRecords(toolkit, [esHitsMock[0]]);
+    const expandedDoc = buildDataTableRecord(esHitsMock[0], dataViewMock);
 
     toolkit.internalState.dispatch(
       internalStateActions.setExpandedDoc({

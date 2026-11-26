@@ -145,41 +145,8 @@ describe('tab_state actions', () => {
 
       const tab = selectTab(internalState.getState(), tabId);
 
-      expect(tab.expandedDoc?.raw).toBe(expandedDoc.raw);
+      expect(tab.expandedDoc).toBe(expandedDoc);
       expect(tab.appState.expandedDoc).toEqual({ id: '1', index: 'i' });
-    });
-
-    it('should resolve the document profile for records passed in unresolved', async () => {
-      const { internalState, runtimeStateManager, tabId } = await setup();
-      const scopedProfilesManager = selectTabRuntimeState(
-        runtimeStateManager,
-        tabId
-      ).scopedProfilesManager$.getValue();
-      const resolveSpy = jest.spyOn(scopedProfilesManager, 'resolveDocumentProfile');
-
-      // A raw record (a chart section's, for example) gains the lazy document context,
-      // so the flyout can pick its document profile.
-      internalState.dispatch(internalStateActions.setExpandedDoc({ tabId, expandedDoc }));
-      const stored = selectTab(internalState.getState(), tabId).expandedDoc;
-      expect(resolveSpy).toHaveBeenCalledWith({ record: expandedDoc });
-      expect(stored && 'context' in stored).toBe(true);
-
-      // An already-resolved record passes through untouched.
-      resolveSpy.mockClear();
-      internalState.dispatch(internalStateActions.setExpandedDoc({ tabId, expandedDoc: stored }));
-      expect(resolveSpy).not.toHaveBeenCalled();
-      expect(selectTab(internalState.getState(), tabId).expandedDoc).toBe(stored);
-    });
-
-    it('should resolve a raw record once, so a redispatch converges on the same instance', async () => {
-      const { internalState, tabId } = await setup();
-
-      // The expanded-doc sync redispatches its record until the store holds it: a fresh
-      // proxy per dispatch would never match and loop forever.
-      internalState.dispatch(internalStateActions.setExpandedDoc({ tabId, expandedDoc }));
-      const first = selectTab(internalState.getState(), tabId).expandedDoc;
-      internalState.dispatch(internalStateActions.setExpandedDoc({ tabId, expandedDoc }));
-      expect(selectTab(internalState.getState(), tabId).expandedDoc).toBe(first);
     });
 
     it('should clear the expanded doc reference when the flyout is closed', async () => {
@@ -268,7 +235,7 @@ describe('tab_state actions', () => {
 
       const tab = selectTab(internalState.getState(), tabId);
 
-      expect(tab.expandedDoc?.raw).toBe(expandedDoc.raw);
+      expect(tab.expandedDoc).toBe(expandedDoc);
       expect(tab.expandedDocOwner).toBe('cascade_node_1');
       expect(tab.appState.expandedDoc).toBeUndefined();
     });
@@ -289,7 +256,7 @@ describe('tab_state actions', () => {
 
       const tab = selectTab(internalState.getState(), tabId);
 
-      expect(tab.expandedDoc?.raw).toBe(cascadeExpandedDoc.raw);
+      expect(tab.expandedDoc).toBe(cascadeExpandedDoc);
       expect(tab.expandedDocOwner).toBe('cascade_node_1');
       expect(tab.appState.expandedDoc).toBeUndefined();
     });
@@ -308,7 +275,7 @@ describe('tab_state actions', () => {
 
       const tab = selectTab(internalState.getState(), tabId);
 
-      expect(tab.expandedDoc?.raw).toBe(esqlRecord.raw);
+      expect(tab.expandedDoc).toBe(esqlRecord);
       expect(tab.appState.expandedDoc).toBeUndefined();
     });
 
@@ -360,6 +327,71 @@ describe('tab_state actions', () => {
       );
 
       expect(selectTab(internalState.getState(), tabId).appState).toBe(initialAppState);
+    });
+  });
+
+  describe('setExpandedDocExtPointAction', () => {
+    const expandedDoc = buildDataTableRecord(esHitsMock[0], dataViewMockWithTimeField);
+
+    const setupWithResolveSpy = async () => {
+      const { internalState, runtimeStateManager, tabId } = await setup();
+      const scopedProfilesManager = selectTabRuntimeState(
+        runtimeStateManager,
+        tabId
+      ).scopedProfilesManager$.getValue();
+      const resolveSpy = jest.spyOn(scopedProfilesManager, 'resolveDocumentProfile');
+
+      return { internalState, scopedProfilesManager, resolveSpy, tabId };
+    };
+
+    it('should resolve the document profile of a record Discover did not fetch', async () => {
+      const { internalState, resolveSpy, tabId } = await setupWithResolveSpy();
+
+      // A raw record (a chart section's, for example) gains the lazy document context,
+      // so the flyout can pick its document profile.
+      internalState.dispatch(
+        internalStateActions.setExpandedDocExtPointAction({
+          tabId,
+          expandedDoc,
+          initialDocViewerTabId: 'overview',
+        })
+      );
+
+      const tab = selectTab(internalState.getState(), tabId);
+
+      expect(resolveSpy).toHaveBeenCalledWith({ record: expandedDoc });
+      expect(tab.expandedDoc && 'context' in tab.expandedDoc).toBe(true);
+      expect(tab.expandedDoc?.raw).toBe(expandedDoc.raw);
+      expect(tab.initialDocViewerTabId).toBe('overview');
+    });
+
+    it('should store a record that carries its context as it is', async () => {
+      const { internalState, scopedProfilesManager, resolveSpy, tabId } =
+        await setupWithResolveSpy();
+      const resolvedDoc = scopedProfilesManager.resolveDocumentProfile({ record: expandedDoc });
+      resolveSpy.mockClear();
+
+      internalState.dispatch(
+        internalStateActions.setExpandedDocExtPointAction({ tabId, expandedDoc: resolvedDoc })
+      );
+
+      expect(resolveSpy).not.toHaveBeenCalled();
+      expect(selectTab(internalState.getState(), tabId).expandedDoc).toBe(resolvedDoc);
+    });
+
+    it('should close the flyout without resolving anything', async () => {
+      const { internalState, resolveSpy, tabId } = await setupWithResolveSpy();
+
+      internalState.dispatch(
+        internalStateActions.setExpandedDocExtPointAction({ tabId, expandedDoc })
+      );
+      resolveSpy.mockClear();
+      internalState.dispatch(
+        internalStateActions.setExpandedDocExtPointAction({ tabId, expandedDoc: undefined })
+      );
+
+      expect(resolveSpy).not.toHaveBeenCalled();
+      expect(selectTab(internalState.getState(), tabId).expandedDoc).toBeUndefined();
     });
   });
 

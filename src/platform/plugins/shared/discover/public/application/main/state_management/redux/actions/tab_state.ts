@@ -135,38 +135,10 @@ type ExpandedDocPayload = TabActionPayload<{
   shouldUpdateUrl?: boolean;
 }>;
 
-/**
- * Resolution must be idempotent: the expanded-doc sync redispatches its record until the
- * store holds it, and a fresh proxy per dispatch would never let the identities converge.
- */
-const resolvedExpandedDocs = new WeakMap<
-  DataTableRecord,
-  { scope: unknown; resolved: DataTableRecord }
->();
-
 /** Sets the expanded document and synchronizes its URL reference. */
 export const setExpandedDoc: InternalStateThunkActionCreator<[ExpandedDocPayload]> = (payload) =>
-  function setExpandedDocThunkFn(dispatch, getState, { runtimeStateManager }) {
+  function setExpandedDocThunkFn(dispatch, getState) {
     const { shouldUpdateUrl = true, ...expandedDocPayload } = payload;
-
-    // A record handed in from outside the fetch paths (a chart section, for example) is
-    // not the proxy `resolveDocumentProfile` creates: without its lazy `context`, the
-    // flyout would fall back to the default document profile and show the generic viewer
-    // for a document a profile knows better. Fetched rows pass through untouched.
-    const record = expandedDocPayload.expandedDoc;
-    if (record && !recordHasContext(record)) {
-      const scopedProfilesManager = selectTabRuntimeState(
-        runtimeStateManager,
-        payload.tabId
-      ).scopedProfilesManager$.getValue();
-      const cached = resolvedExpandedDocs.get(record);
-      const resolved =
-        cached?.scope === scopedProfilesManager
-          ? cached.resolved
-          : scopedProfilesManager.resolveDocumentProfile({ record });
-      resolvedExpandedDocs.set(record, { scope: scopedProfilesManager, resolved });
-      expandedDocPayload.expandedDoc = resolved;
-    }
 
     dispatch(internalStateSlice.actions.setExpandedDoc(expandedDocPayload));
 
@@ -206,6 +178,30 @@ export const setExpandedDoc: InternalStateThunkActionCreator<[ExpandedDocPayload
         },
       })
     );
+  };
+
+type ExpandedDocExtPointPayload = TabActionPayload<{
+  expandedDoc: DataTableRecord | undefined;
+  initialDocViewerTabId?: string;
+}>;
+
+/** Sets the expanded document for a profile, which may hand in a record Discover did not fetch. */
+export const setExpandedDocExtPointAction: InternalStateThunkActionCreator<
+  [ExpandedDocExtPointPayload]
+> = ({ tabId, expandedDoc, initialDocViewerTabId }) =>
+  function setExpandedDocExtPointActionThunkFn(dispatch, _getState, { runtimeStateManager }) {
+    // A record from outside the fetch paths (a chart section's, for example) is not the
+    // proxy `resolveDocumentProfile` creates: without its lazy `context`, the flyout would
+    // fall back to the default document profile and show the generic viewer for a document
+    // a profile knows better. A record that carries its context passes through untouched.
+    const resolvedDoc =
+      expandedDoc && !recordHasContext(expandedDoc)
+        ? selectTabRuntimeState(runtimeStateManager, tabId)
+            .scopedProfilesManager$.getValue()
+            .resolveDocumentProfile({ record: expandedDoc })
+        : expandedDoc;
+
+    dispatch(setExpandedDoc({ tabId, expandedDoc: resolvedDoc, initialDocViewerTabId }));
   };
 
 type DocViewerShareableStatePayload = TabActionPayload<{
