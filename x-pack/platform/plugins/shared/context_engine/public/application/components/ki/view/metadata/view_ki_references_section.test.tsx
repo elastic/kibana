@@ -104,6 +104,30 @@ describe('ViewKiReferencesSection', () => {
     ).toBeInTheDocument();
   });
 
+  it('falls back to the id when the description is empty', () => {
+    renderSection({
+      references: [{ uri: 'ki://target-ki', relation: 'relates_to', description: '' }],
+    });
+
+    expect(
+      within(screen.getByTestId('contextViewKiReferenceLink')).getByText('target-ki')
+    ).toBeInTheDocument();
+  });
+
+  it('shows references without a known relation under Other', () => {
+    renderSection({
+      references: [
+        { uri: 'index://logs-*' },
+        { uri: 'ki://b', relation: 'custom', description: 'custom related' },
+      ],
+    });
+
+    const list = screen.getByTestId('contextViewKiReferencesList');
+    expect(within(list).getByText('Other')).toBeInTheDocument();
+    expect(within(list).getByText('index://logs-*')).toBeInTheDocument();
+    expect(within(list).getByText('custom related')).toBeInTheDocument();
+  });
+
   it('renders non-ki uris as plain text in relates_to', () => {
     renderSection({
       references: [{ uri: 'index://logs-*', relation: 'relates_to' }],

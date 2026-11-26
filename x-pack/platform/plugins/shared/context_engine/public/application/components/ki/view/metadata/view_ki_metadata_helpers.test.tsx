@@ -131,6 +131,15 @@ describe('buildKiMetadataListItems', () => {
       expect(within(visibleIn).queryByText('All spaces')).not.toBeInTheDocument();
     });
 
+    it('shows a badge when privileges is a single object', () => {
+      renderItems('ki-1', {
+        permissions: { kibana: { privileges: { space: 'marketing', name: ['read'] } } },
+      });
+      const visibleIn = screen.getByTestId('contextViewKiVisibleIn');
+      expect(within(visibleIn).getByText('marketing')).toBeInTheDocument();
+      expect(within(visibleIn).queryByText('All spaces')).not.toBeInTheDocument();
+    });
+
     it('shows a badge per distinct space', () => {
       renderItems('ki-1', {
         permissions: {

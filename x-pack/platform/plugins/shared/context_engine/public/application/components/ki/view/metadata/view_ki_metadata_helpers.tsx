@@ -26,6 +26,15 @@ export const when = <T,>(condition: boolean, value: () => T): T[] => (condition 
 export const whenDefined = <T,>(value: T | undefined, build: (defined: T) => KiMetadataListItem) =>
   value !== undefined ? [build(value)] : [];
 
+const toPrivilegeList = (
+  privileges: KiPrivilegeGroup | KiPrivilegeGroup[] | undefined
+): KiPrivilegeGroup[] => {
+  if (!privileges) {
+    return [];
+  }
+  return Array.isArray(privileges) ? privileges : [privileges];
+};
+
 const distinctVisibleSpaces = (privileges: KiPrivilegeGroup[]): string[] => [
   ...new Set(privileges.map((privilege) => privilege.space).filter((space) => space !== '*')),
 ];
@@ -38,7 +47,7 @@ export const buildKiMetadataListItems = (
   const tags = Array.isArray(document.tags) ? document.tags : [];
   const { description, updated_at: updatedAt, expires_at: expiresAt } = document;
   const createdAt = document['@timestamp'];
-  const privileges = document.permissions?.kibana?.privileges ?? [];
+  const privileges = toPrivilegeList(document.permissions?.kibana?.privileges);
   const visibleInAllSpaces =
     privileges.length === 0 || privileges.some((privilege) => privilege.space === '*');
   const visibleInSpaces = distinctVisibleSpaces(privileges);

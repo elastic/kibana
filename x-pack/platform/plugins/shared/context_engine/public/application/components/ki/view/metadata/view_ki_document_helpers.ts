@@ -14,6 +14,7 @@ import { conversationIdFromUri, kiIdFromUri } from '../../../../../../common/ki_
 import type {
   KiJsonValue,
   KiDocument,
+  KiDocumentReference,
 } from '../../../../../../common/http_api/knowledge_indicators';
 import {
   type KiLifecycleStatus,
@@ -103,8 +104,11 @@ export type KiReferenceItem =
   | { kind: 'conversation'; id: string; uri: string; description?: string }
   | { kind: 'other'; uri: string; description?: string };
 
+/** Groups references whose relation is missing or not one of the known relations. */
+export const OTHER_REFERENCE_RELATION = 'other';
+
 export interface KiReferenceGroup {
-  relation: KiReferenceRelation;
+  relation: KiReferenceRelation | typeof OTHER_REFERENCE_RELATION;
   items: KiReferenceItem[];
 }
 
@@ -129,21 +133,36 @@ const REFERENCE_GROUP_ORDER: readonly KiReferenceRelation[] = [
   'supersedes',
 ];
 
+const isKnownRelation = (relation: string | undefined): boolean =>
+  REFERENCE_GROUP_ORDER.some((knownRelation) => knownRelation === relation);
+
 /**
- * Groups references by relation in a fixed order, skipping unknown relations and empty groups.
- * `derived_from` keeps only sources the UI can open: KIs and conversations.
+ * Groups references by relation in a fixed order, followed by an `other` group for references
+ * without a known relation. `derived_from` keeps only sources the UI can open: KIs and conversations.
  */
-export const groupKiReferences = (references: KiDocument['references']): KiReferenceGroup[] => {
+export const groupKiReferences = (
+  references: Array<KiDocumentReference | null> | undefined
+): KiReferenceGroup[] => {
   if (!Array.isArray(references)) {
     return [];
   }
-  return REFERENCE_GROUP_ORDER.flatMap((relation) => {
-    const items = references
-      .filter(({ relation: itemRelation, uri }) => itemRelation === relation && Boolean(uri))
+  const referencesWithUri = references.filter(
+    (reference): reference is KiDocumentReference => reference != null && Boolean(reference.uri)
+  );
+  const knownGroups = REFERENCE_GROUP_ORDER.flatMap((relation) => {
+    const items = referencesWithUri
+      .filter(({ relation: itemRelation }) => itemRelation === relation)
       .map(({ uri = '', description }) => toKiReferenceItem(uri, description))
       .filter((item) => relation !== 'derived_from' || isOpenableDerivedFromItem(item));
     return items.length > 0 ? [{ relation, items }] : [];
   });
+  const otherItems = referencesWithUri
+    .filter(({ relation }) => !isKnownRelation(relation))
+    .map(({ uri = '', description }) => toKiReferenceItem(uri, description));
+
+  return otherItems.length > 0
+    ? [...knownGroups, { relation: OTHER_REFERENCE_RELATION, items: otherItems }]
+    : knownGroups;
 };
 
 export const documentAttributesToRows = (

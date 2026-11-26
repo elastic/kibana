@@ -91,7 +91,8 @@ export interface KiPrivilegeGroup {
 
 export interface KiDocumentPermissions {
   kibana?: {
-    privileges?: KiPrivilegeGroup[];
+    /** Elasticsearch returns a single object as stored when a document was indexed with one. */
+    privileges?: KiPrivilegeGroup | KiPrivilegeGroup[];
   };
 }
 

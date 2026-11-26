@@ -37,6 +37,10 @@ const groupTitle = ({ relation }: KiReferenceGroup): string => {
       return i18n.translate('xpack.contextEngine.viewKi.references.supersedes', {
         defaultMessage: 'Replaces',
       });
+    case 'other':
+      return i18n.translate('xpack.contextEngine.viewKi.references.other', {
+        defaultMessage: 'Other',
+      });
     default:
       return relation;
   }
@@ -58,7 +62,7 @@ const KiReferenceItemContent = ({
   if (item.kind === 'ki') {
     const text = (
       <ViewKiSidebarBreakableText title={description ? uri : undefined}>
-        {description ?? item.id}
+        {description || item.id}
       </ViewKiSidebarBreakableText>
     );
     if (onSelectKi) {
@@ -74,7 +78,7 @@ const KiReferenceItemContent = ({
   if (item.kind === 'conversation') {
     const text = (
       <ViewKiSidebarBreakableText title={description ? uri : undefined}>
-        {description ?? item.id}
+        {description || item.id}
       </ViewKiSidebarBreakableText>
     );
     if (conversationHref) {
@@ -89,7 +93,7 @@ const KiReferenceItemContent = ({
 
   return (
     <ViewKiSidebarBreakableText title={description ? uri : undefined}>
-      {description ?? uri}
+      {description || uri}
     </ViewKiSidebarBreakableText>
   );
 };

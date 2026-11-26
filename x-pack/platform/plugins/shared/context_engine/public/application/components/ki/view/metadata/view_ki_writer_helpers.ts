@@ -87,6 +87,7 @@ export const getKiWriterUriHref = (
   return undefined;
 };
 
+// The link uses the current space. It cannot open the conversation if it was recorded in another space.
 export const getKiConversationHref = (
   getUrlForApp: KiGetUrlForApp,
   conversationId: string

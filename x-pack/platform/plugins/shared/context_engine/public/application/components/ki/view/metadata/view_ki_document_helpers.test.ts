@@ -96,6 +96,13 @@ describe('documentAttributesToRows', () => {
     ]);
   });
 
+  it('does not use inherited object properties as labels', () => {
+    expect(documentAttributesToRows({ attributes: { toString: 'x', constructor: 'y' } })).toEqual([
+      { key: 'toString', label: 'toString', value: 'x', isDate: false },
+      { key: 'constructor', label: 'constructor', value: 'y', isDate: false },
+    ]);
+  });
+
   it('omits hidden attributes', () => {
     expect(
       documentAttributesToRows({
@@ -152,13 +159,34 @@ describe('groupKiReferences', () => {
     ]);
   });
 
-  it('skips references without a uri or with an unknown relation', () => {
+  it('skips references without a uri', () => {
+    expect(groupKiReferences([{ relation: 'derived_from' }, { relation: 'relates_to' }])).toEqual(
+      []
+    );
+  });
+
+  it('puts references without a known relation in a trailing other group', () => {
     expect(
       groupKiReferences([
-        { relation: 'derived_from' },
         { uri: 'ki://a', relation: 'unknown' },
-        { uri: 'ki://b' },
+        { uri: 'index://logs-*' },
+        { uri: 'ki://b', relation: 'relates_to' },
       ])
-    ).toEqual([]);
+    ).toEqual([
+      { relation: 'relates_to', items: [{ kind: 'ki', id: 'b', uri: 'ki://b' }] },
+      {
+        relation: 'other',
+        items: [
+          { kind: 'ki', id: 'a', uri: 'ki://a' },
+          { kind: 'other', uri: 'index://logs-*' },
+        ],
+      },
+    ]);
+  });
+
+  it('ignores null reference entries', () => {
+    expect(groupKiReferences([null, { uri: 'ki://a', relation: 'relates_to' }])).toEqual([
+      { relation: 'relates_to', items: [{ kind: 'ki', id: 'a', uri: 'ki://a' }] },
+    ]);
   });
 });

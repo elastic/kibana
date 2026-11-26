@@ -33,7 +33,8 @@ const DATE_ATTRIBUTE_KEYS: readonly string[] = [LAST_SEEN_AT_ATTRIBUTE];
 /** Attributes that are internal bookkeeping and are not shown. */
 const HIDDEN_ATTRIBUTE_KEYS: readonly string[] = [RELATIONSHIP_KEY_ATTRIBUTE];
 
-export const getKiAttributeLabel = (key: string): string => ATTRIBUTE_LABELS[key] ?? key;
+export const getKiAttributeLabel = (key: string): string =>
+  Object.hasOwn(ATTRIBUTE_LABELS, key) ? ATTRIBUTE_LABELS[key] : key;
 
 export const isKiDateAttribute = (key: string): boolean => DATE_ATTRIBUTE_KEYS.includes(key);
 
