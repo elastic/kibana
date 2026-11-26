@@ -31,6 +31,8 @@ const buildModel = (initial: string) => {
 };
 
 const buildEditor = (model: ReturnType<typeof buildModel>) => {
+  const contentListeners: Array<() => void> = [];
+  let isBlockCollapsed = false;
   const executeEdits = jest.fn((source: string, edits: Array<{ text: string | null }>) => {
     if (source === 'nl-to-esql-visor') {
       model.setValue(`${model.getValue()}${edits[0]?.text ?? ''}`);
@@ -52,20 +54,35 @@ const buildEditor = (model: ReturnType<typeof buildModel>) => {
     }),
     addContentWidget: jest.fn(),
     removeContentWidget: jest.fn(),
-    createDecorationsCollection: jest.fn(() => ({ clear: jest.fn() })),
+    createDecorationsCollection: jest.fn((decorations: Array<{ range: monaco.Range }>) => ({
+      clear: jest.fn(),
+      getRange: (index: number) =>
+        isBlockCollapsed ? { isEmpty: (): boolean => true } : decorations[index].range,
+    })),
     createContextKey: jest.fn(() => ({ set: jest.fn() })),
     addAction: jest.fn(() => ({ dispose: jest.fn() })),
+    onDidChangeModelContent: jest.fn((listener: () => void) => {
+      contentListeners.push(listener);
+      return { dispose: jest.fn() };
+    }),
     focus: jest.fn(),
     revealLineInCenter: jest.fn(),
     getDomNode: () => document.createElement('div'),
   } as unknown as monaco.editor.IStandaloneCodeEditor;
 
-  return { editor, executeEdits };
+  return {
+    editor,
+    executeEdits,
+    emitContentChange: () => contentListeners.forEach((listener) => listener()),
+    collapseGeneratedBlock: () => {
+      isBlockCollapsed = true;
+    },
+  };
 };
 
 describe('useVisorNlToEsql', () => {
   const renderVisor = (model: ReturnType<typeof buildModel>) => {
-    const { editor, executeEdits } = buildEditor(model);
+    const { editor, executeEdits, emitContentChange, collapseGeneratedBlock } = buildEditor(model);
     const editorRef = {
       current: editor,
     } as MutableRefObject<monaco.editor.IStandaloneCodeEditor | undefined>;
@@ -84,7 +101,15 @@ describe('useVisorNlToEsql', () => {
       })
     );
 
-    return { ...rendered, onSubmit, previewPendingRef, executeEdits, model };
+    return {
+      ...rendered,
+      onSubmit,
+      previewPendingRef,
+      executeEdits,
+      emitContentChange,
+      collapseGeneratedBlock,
+      model,
+    };
   };
 
   it('inserts the suggestion without submitting it', () => {
@@ -118,12 +143,13 @@ describe('useVisorNlToEsql', () => {
   it('drops an edited suggestion and leaves the user query for Run to submit', () => {
     const model = buildModel(ORIGINAL);
     const onReject = jest.fn();
-    const { result, onSubmit } = renderVisor(model);
+    const { result, onSubmit, emitContentChange } = renderVisor(model);
 
     act(() => {
       result.current.showVisorReview(GENERATED, { onAccept: jest.fn(), onReject });
     });
     model.setValue(`FROM traces-*\n${GENERATED}`);
+    emitContentChange();
 
     let accepted = true;
     act(() => {
@@ -138,12 +164,15 @@ describe('useVisorNlToEsql', () => {
 
   it('keeps a fully replaced buffer instead of restoring the suggestion', () => {
     const model = buildModel(ORIGINAL);
-    const { result, onSubmit, executeEdits } = renderVisor(model);
+    const { result, onSubmit, executeEdits, emitContentChange, collapseGeneratedBlock } =
+      renderVisor(model);
 
     act(() => {
       result.current.showVisorReview(GENERATED, { onAccept: jest.fn() });
     });
     model.setValue('FROM traces-*');
+    collapseGeneratedBlock();
+    emitContentChange();
     executeEdits.mockClear();
 
     let accepted = true;

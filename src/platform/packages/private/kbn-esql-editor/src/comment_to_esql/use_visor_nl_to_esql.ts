@@ -29,19 +29,6 @@ interface UseVisorNlToEsqlParams {
   previewPendingRef: PreviewPendingRef;
 }
 
-const generatedBlockStillPresent = (
-  model: monaco.editor.ITextModel,
-  state: ReviewState,
-  untouchedPreview: string
-): boolean => {
-  if (state.generatedLineEnd < state.generatedLineStart) return false;
-  if (model.getLineCount() < state.generatedLineEnd) return false;
-
-  const getBlock = (lines: string[]) =>
-    lines.slice(state.generatedLineStart - 1, state.generatedLineEnd).join('\n');
-  return getBlock(model.getValue().split('\n')) === getBlock(untouchedPreview.split('\n'));
-};
-
 export const useVisorNlToEsql = ({
   editorRef,
   editorModel,
@@ -52,16 +39,9 @@ export const useVisorNlToEsql = ({
 }: UseVisorNlToEsqlParams) => {
   const { euiTheme } = useEuiTheme();
   const reviewRef = useRef<Parameters<VisorNlResultHandler>[1] | undefined>(undefined);
-  const isSilentRejectRef = useRef(false);
-  const untouchedPreviewRef = useRef<string | null>(null);
-
-  const clearPreviewSnapshot = useCallback(() => {
-    untouchedPreviewRef.current = null;
-  }, []);
 
   const onAfterAccept = useCallback(
     ({ generatedLineStart, generatedLineEnd }: ReviewState, acceptedQuery: string) => {
-      clearPreviewSnapshot();
       telemetryService?.trackVisorNlReviewed({
         action: AiReviewAction.ACCEPT,
         linesChanged: generatedLineEnd - generatedLineStart + 1,
@@ -71,20 +51,18 @@ export const useVisorNlToEsql = ({
       onSubmit(acceptedQuery);
       reviewRef.current?.onAccept();
     },
-    [clearPreviewSnapshot, onSubmit, telemetryService]
+    [onSubmit, telemetryService]
   );
 
   const onAfterReject = useCallback(
     ({ generatedLineStart, generatedLineEnd }: ReviewState) => {
-      clearPreviewSnapshot();
-      if (isSilentRejectRef.current) return;
       telemetryService?.trackVisorNlReviewed({
         action: AiReviewAction.REJECT,
         linesChanged: generatedLineEnd - generatedLineStart + 1,
       });
       reviewRef.current?.onReject?.();
     },
-    [clearPreviewSnapshot, telemetryService]
+    [telemetryService]
   );
 
   const rejectAction = useMemo(
@@ -99,10 +77,9 @@ export const useVisorNlToEsql = ({
 
   const {
     showReview,
-    reject,
-    accept: acceptReplacement,
-    cleanup: discardReviewUi,
-    getReviewState,
+    dismiss,
+    accept: acceptReview,
+    cleanup: discardReview,
   } = useReplaceReview({
     editorRef,
     editorModel,
@@ -115,11 +92,6 @@ export const useVisorNlToEsql = ({
     onAfterReject,
   });
 
-  const discardReview = useCallback(() => {
-    clearPreviewSnapshot();
-    discardReviewUi();
-  }, [clearPreviewSnapshot, discardReviewUi]);
-
   const showVisorReview = useCallback<VisorNlResultHandler>(
     (generatedContent, review) => {
       const editor = editorRef.current;
@@ -128,9 +100,7 @@ export const useVisorNlToEsql = ({
 
       // Revert any outstanding review so the next plan is against the original query,
       // not leftover generated lines from the previous result.
-      isSilentRejectRef.current = true;
-      reject();
-      isSilentRejectRef.current = false;
+      dismiss();
 
       reviewRef.current = review;
 
@@ -154,8 +124,6 @@ export const useVisorNlToEsql = ({
           ]);
         }
 
-        untouchedPreviewRef.current = model.getValue();
-
         onAfterInsert?.();
         showReview(plan.review);
       };
@@ -166,27 +134,8 @@ export const useVisorNlToEsql = ({
         insertAndReview();
       }
     },
-    [editorRef, editorModel, reject, showReview, onAfterInsert, previewPendingRef]
+    [editorRef, editorModel, dismiss, showReview, onAfterInsert, previewPendingRef]
   );
-
-  // Run accepts an untouched preview. Once the user has edited the buffer, drop the
-  // suggestion instead of restoring the text that was generated.
-  const acceptReview = useCallback(() => {
-    const model = editorModel.current;
-    const snapshot = untouchedPreviewRef.current;
-    if (model && snapshot != null && model.getValue() !== snapshot) {
-      const state = getReviewState();
-      if (state && generatedBlockStillPresent(model, state, snapshot)) {
-        isSilentRejectRef.current = true;
-        reject();
-        isSilentRejectRef.current = false;
-      } else {
-        discardReview();
-      }
-      return false;
-    }
-    return acceptReplacement();
-  }, [editorModel, getReviewState, reject, discardReview, acceptReplacement]);
 
   return { showVisorReview, acceptReview, discardReview };
 };

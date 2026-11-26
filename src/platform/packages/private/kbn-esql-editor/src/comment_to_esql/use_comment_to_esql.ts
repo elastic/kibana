@@ -15,8 +15,8 @@ import { i18n } from '@kbn/i18n';
 import { NL_TO_ESQL_ROUTE } from '@kbn/esql-types';
 import type { HttpStart, NotificationsStart } from '@kbn/core/public';
 import { AiReviewAction, type ESQLEditorTelemetryService } from '../telemetry/telemetry_service';
-import { ReviewActionsWidget } from './review_actions_widget';
-import { CODE_ADDED_CLASS, GENERATING_HINT_CLASS, LINE_REPLACED_CLASS } from '../editor_ai.styles';
+import { GENERATING_HINT_CLASS } from '../editor_ai.styles';
+import { useReplaceReview } from './use_replace_review';
 
 import { insertPendingPreview } from './preview_pending';
 import type { PreviewPendingRef } from './preview_pending';
@@ -30,13 +30,6 @@ import {
 interface GenerateResult {
   content: string;
   replacesNext: boolean;
-}
-
-interface CommentReviewState {
-  commentLineNumber: number;
-  generatedLineStart: number;
-  generatedLineEnd: number;
-  replacedLineNumber: number | null;
 }
 
 interface UseCommentToEsqlParams {
@@ -71,11 +64,6 @@ export const useCommentToEsql = ({
   previewPendingRef,
 }: UseCommentToEsqlParams) => {
   const { euiTheme } = useEuiTheme();
-  const reviewStateRef = useRef<CommentReviewState | null>(null);
-  const decorationsRef = useRef<monaco.editor.IEditorDecorationsCollection | undefined>(undefined);
-  const widgetRef = useRef<ReviewActionsWidget | undefined>(undefined);
-  const contextKeyRef = useRef<monaco.editor.IContextKey<boolean> | undefined>(undefined);
-  const actionDisposablesRef = useRef<monaco.IDisposable[]>([]);
   // Aborts the in-flight nl_to_esql HTTP request when the user retriggers or accepts/rejects.
   const abortControllerRef = useRef<AbortController | undefined>(undefined);
   // Sticky decoration that tracks the comment line as the user types during the LLM wait.
@@ -126,149 +114,44 @@ export const useCommentToEsql = ({
     [editorRef, editorModel]
   );
 
+  const {
+    showReview,
+    accept: acceptReview,
+    cleanup: discardReview,
+    reviewStateRef,
+  } = useReplaceReview({
+    editorRef,
+    editorModel,
+    euiTheme,
+    contextKeyId: 'esqlCommentReviewActive',
+    rejectAction: {
+      id: 'esql.commentReview.reject',
+      label: 'Reject generated code',
+    },
+    editSourceId: 'nl-to-esql',
+    isReplaceMode: ({ firstChangedOriginalLine, lastChangedOriginalLine }) =>
+      lastChangedOriginalLine >= firstChangedOriginalLine,
+    previewPendingRef,
+    onAfterAccept: ({ generatedLineStart, generatedLineEnd }, acceptedQuery) => {
+      telemetryService?.trackCommentToEsqlReviewed({
+        action: AiReviewAction.ACCEPT,
+        linesGenerated: generatedLineEnd - generatedLineStart + 1,
+      });
+      onSubmit(acceptedQuery);
+    },
+    onAfterReject: ({ generatedLineStart, generatedLineEnd }) =>
+      telemetryService?.trackCommentToEsqlReviewed({
+        action: AiReviewAction.REJECT,
+        linesGenerated: generatedLineEnd - generatedLineStart + 1,
+      }),
+  });
+
   const cleanup = useCallback(() => {
-    if (previewPendingRef) previewPendingRef.current = false;
-
-    decorationsRef.current?.clear();
-    decorationsRef.current = undefined;
-
-    if (widgetRef.current) {
-      widgetRef.current.dispose();
-      widgetRef.current = undefined;
-    }
-
-    actionDisposablesRef.current.forEach((d) => d.dispose());
-    actionDisposablesRef.current = [];
-    contextKeyRef.current?.set(false);
-    reviewStateRef.current = null;
-
+    discardReview();
     clearCommentAnchor();
     clearGeneratingDecoration();
     abortInFlight();
-  }, [clearCommentAnchor, clearGeneratingDecoration, abortInFlight, previewPendingRef]);
-
-  // Keeps the generated code and runs the query; false if no review is pending
-  // (an in-flight generation is left alone in that case).
-  const acceptChange = useCallback(() => {
-    const state = reviewStateRef.current;
-    if (!state) {
-      return false;
-    }
-
-    const editor = editorRef.current;
-    const model = editorModel.current;
-    cleanup();
-    if (!editor || !model) {
-      return false;
-    }
-
-    const { replacedLineNumber, generatedLineStart, generatedLineEnd } = state;
-
-    telemetryService?.trackCommentToEsqlReviewed({
-      action: AiReviewAction.ACCEPT,
-      linesGenerated: generatedLineEnd - generatedLineStart + 1,
-    });
-
-    if (replacedLineNumber) {
-      const lineContent = model.getLineContent(replacedLineNumber);
-      const isLastLine = replacedLineNumber === model.getLineCount();
-      editor.executeEdits('nl-to-esql-accept', [
-        {
-          range: new monaco.Range(
-            replacedLineNumber,
-            1,
-            isLastLine ? replacedLineNumber : replacedLineNumber + 1,
-            isLastLine ? lineContent.length + 1 : 1
-          ),
-          text: null,
-        },
-      ]);
-    }
-
-    onSubmit(model.getValue());
-    return true;
-  }, [editorRef, editorModel, cleanup, telemetryService, onSubmit]);
-
-  const rejectChange = useCallback(() => {
-    const editor = editorRef.current;
-    const model = editorModel.current;
-    const state = reviewStateRef.current;
-    if (!editor || !model || !state) return;
-
-    const { generatedLineStart, generatedLineEnd } = state;
-    cleanup();
-
-    telemetryService?.trackCommentToEsqlReviewed({
-      action: AiReviewAction.REJECT,
-      linesGenerated: generatedLineEnd - generatedLineStart + 1,
-    });
-
-    editor.executeEdits('nl-to-esql-reject', [
-      {
-        range: new monaco.Range(generatedLineStart, 1, generatedLineEnd + 1, 1),
-        text: null,
-      },
-    ]);
-  }, [editorRef, editorModel, cleanup, telemetryService]);
-
-  const showReview = useCallback(
-    (state: CommentReviewState) => {
-      const editor = editorRef.current;
-      if (!editor) return;
-
-      reviewStateRef.current = state;
-
-      const decorations: monaco.editor.IModelDeltaDecoration[] = [];
-
-      for (let line = state.generatedLineStart; line <= state.generatedLineEnd; line++) {
-        decorations.push({
-          range: new monaco.Range(line, 1, line, 1),
-          options: {
-            isWholeLine: true,
-            className: CODE_ADDED_CLASS,
-          },
-        });
-      }
-
-      if (state.replacedLineNumber) {
-        decorations.push({
-          range: new monaco.Range(state.replacedLineNumber, 1, state.replacedLineNumber, 1),
-          options: {
-            isWholeLine: true,
-            className: LINE_REPLACED_CLASS,
-          },
-        });
-      }
-
-      decorationsRef.current = editor.createDecorationsCollection(decorations);
-
-      const widgetAfterLine = state.replacedLineNumber ?? state.generatedLineEnd;
-      widgetRef.current = new ReviewActionsWidget(
-        euiTheme,
-        editor,
-        widgetAfterLine,
-        { onAccept: acceptChange, onReject: rejectChange },
-        Boolean(state.replacedLineNumber)
-      );
-
-      if (!contextKeyRef.current) {
-        contextKeyRef.current = editor.createContextKey('esqlCommentReviewActive', false);
-      }
-      contextKeyRef.current.set(true);
-
-      actionDisposablesRef.current = [
-        editor.addAction({
-          id: 'esql.commentReview.reject',
-          label: 'Reject generated code',
-          // eslint-disable-next-line no-bitwise
-          keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyMod.Shift | monaco.KeyCode.Backspace],
-          precondition: 'esqlCommentReviewActive',
-          run: () => rejectChange(),
-        }),
-      ];
-    },
-    [editorRef, euiTheme, acceptChange, rejectChange]
-  );
+  }, [discardReview, clearCommentAnchor, clearGeneratingDecoration, abortInFlight]);
 
   const generateESQL = useCallback(
     async (
@@ -456,10 +339,10 @@ export const useCommentToEsql = ({
         }
 
         showReview({
-          commentLineNumber: currentCommentLine,
+          firstChangedOriginalLine: replacedLineNumber ?? generatedLineEnd + 1,
+          lastChangedOriginalLine: replacedLineNumber ?? generatedLineEnd,
           generatedLineStart,
           generatedLineEnd,
-          replacedLineNumber,
         });
       });
     } finally {
@@ -472,6 +355,7 @@ export const useCommentToEsql = ({
     clearGhostHintRef,
     autoAcceptCallbackRef,
     showGeneratingDecoration,
+    reviewStateRef,
     cleanup,
     generateESQL,
     trackCommentResult,
@@ -486,7 +370,7 @@ export const useCommentToEsql = ({
     generateFromComment,
     isReviewActiveRef: reviewStateRef,
     isGeneratingRef,
-    acceptReview: acceptChange,
+    acceptReview,
     discardReview: cleanup,
   };
 };

@@ -29,11 +29,15 @@ interface UseReplaceReviewParams {
   contextKeyId: string;
   rejectAction: { id: string; label: string };
   editSourceId: string;
+  /** Whether accepting replaces original lines ("Replace") or only keeps the new ones ("Keep"). */
+  isReplaceMode?: (state: ReviewState) => boolean;
   /** Cleared when the review ends so the following accept/reject edit can publish. */
   previewPendingRef?: PreviewPendingRef;
   onAfterAccept?: (state: ReviewState, acceptedQuery: string) => void;
   onAfterReject?: (state: ReviewState) => void;
 }
+
+const alwaysReplace = () => true;
 
 /**
  * Shared review UI for inline diff-and-replace flows: decorates original changed
@@ -41,11 +45,16 @@ interface UseReplaceReviewParams {
  * Accepting is left to the editor's run action (Cmd/Ctrl+Enter), which is why only
  * the undo keybinding is registered here.
  *
+ * The generated lines are followed through edits with a tracked decoration, so removing
+ * them stays correct even if the user typed above them.
+ *
  * Returns:
  *  - showReview  — call after inserting the generated lines into the model
  *  - cleanup     — clears decorations/widget/keybindings without reverting editor content
- *  - reject      — reverts the editor to before the suggestion and cleans up
- *  - accept      — keeps the suggestion and drops the original lines; false if nothing was pending
+ *  - dismiss     — removes the generated lines and cleans up, without calling any callback
+ *  - reject      — dismiss, then calls onAfterReject
+ *  - accept      — keeps the suggestion and drops the original lines; false if nothing was
+ *                  pending, or if the user edited the query since (the suggestion is dismissed)
  */
 export const useReplaceReview = ({
   editorRef,
@@ -54,6 +63,7 @@ export const useReplaceReview = ({
   contextKeyId,
   rejectAction,
   editSourceId,
+  isReplaceMode = alwaysReplace,
   previewPendingRef,
   onAfterAccept,
   onAfterReject,
@@ -63,6 +73,8 @@ export const useReplaceReview = ({
   const actionDisposablesRef = useRef<monaco.IDisposable[]>([]);
   const contextKeyRef = useRef<monaco.editor.IContextKey<boolean> | undefined>(undefined);
   const reviewStateRef = useRef<ReviewState | null>(null);
+  const generatedBlockIndexRef = useRef<number | undefined>(undefined);
+  const isEditedRef = useRef(false);
 
   const cleanup = useCallback(() => {
     // Clear before any follow-up edit so accept/reject still publish.
@@ -79,58 +91,79 @@ export const useReplaceReview = ({
 
     contextKeyRef.current?.set(false);
     reviewStateRef.current = null;
+    generatedBlockIndexRef.current = undefined;
+    isEditedRef.current = false;
   }, [previewPendingRef]);
 
   useEffect(() => cleanup, [cleanup]);
+
+  const dismiss = useCallback(() => {
+    const editor = editorRef.current;
+    const model = editorModel.current;
+    const blockIndex = generatedBlockIndexRef.current;
+    const block =
+      blockIndex === undefined ? null : decorationsRef.current?.getRange(blockIndex) ?? null;
+
+    cleanup();
+
+    if (!editor || !model || !block || block.isEmpty()) return;
+
+    const lineBefore = block.startLineNumber - 1;
+    editor.executeEdits(`${editSourceId}-reject`, [
+      {
+        range: new monaco.Range(
+          lineBefore,
+          model.getLineMaxColumn(lineBefore),
+          block.endLineNumber,
+          model.getLineMaxColumn(block.endLineNumber)
+        ),
+        text: null,
+      },
+    ]);
+  }, [editorRef, editorModel, cleanup, editSourceId]);
+
+  const reject = useCallback(() => {
+    const state = reviewStateRef.current;
+    dismiss();
+    if (state) onAfterReject?.(state);
+  }, [dismiss, onAfterReject]);
 
   const accept = useCallback(() => {
     const editor = editorRef.current;
     const model = editorModel.current;
     const state = reviewStateRef.current;
 
+    if (state && isEditedRef.current) {
+      dismiss();
+      return false;
+    }
+
     cleanup();
 
     if (!editor || !model || !state) return false;
 
-    editor.executeEdits(`${editSourceId}-accept`, [
-      {
-        range: new monaco.Range(
-          state.firstChangedOriginalLine,
-          1,
-          state.lastChangedOriginalLine + 1,
-          1
-        ),
-        text: null,
-      },
-    ]);
+    const { firstChangedOriginalLine: first, lastChangedOriginalLine: last } = state;
+    if (last >= first) {
+      // A replaced last line has no following newline, so remove the preceding one instead.
+      const isLastLine = last >= model.getLineCount() && first > 1;
+      editor.executeEdits(`${editSourceId}-accept`, [
+        {
+          range: isLastLine
+            ? new monaco.Range(
+                first - 1,
+                model.getLineMaxColumn(first - 1),
+                last,
+                model.getLineMaxColumn(last)
+              )
+            : new monaco.Range(first, 1, last + 1, 1),
+          text: null,
+        },
+      ]);
+    }
 
     onAfterAccept?.(state, model.getValue());
     return true;
-  }, [editorRef, editorModel, cleanup, editSourceId, onAfterAccept]);
-
-  const reject = useCallback(() => {
-    const editor = editorRef.current;
-    const model = editorModel.current;
-    const state = reviewStateRef.current;
-
-    cleanup();
-
-    if (!editor || !model || !state) return;
-
-    editor.executeEdits(`${editSourceId}-reject`, [
-      {
-        range: new monaco.Range(
-          state.lastChangedOriginalLine,
-          model.getLineMaxColumn(state.lastChangedOriginalLine),
-          state.generatedLineEnd,
-          model.getLineMaxColumn(state.generatedLineEnd)
-        ),
-        text: null,
-      },
-    ]);
-
-    onAfterReject?.(state);
-  }, [editorRef, editorModel, cleanup, editSourceId, onAfterReject]);
+  }, [editorRef, editorModel, cleanup, dismiss, editSourceId, onAfterAccept]);
 
   const showReview = useCallback(
     (state: ReviewState) => {
@@ -139,22 +172,32 @@ export const useReplaceReview = ({
 
       reviewStateRef.current = state;
 
+      const model = editorModel.current;
+      if (!model) return;
+
       const decorations: monaco.editor.IModelDeltaDecoration[] = [];
 
-      for (
-        let line = state.firstChangedOriginalLine;
-        line <= state.lastChangedOriginalLine;
-        line++
-      ) {
+      if (state.lastChangedOriginalLine >= state.firstChangedOriginalLine) {
         decorations.push({
-          range: new monaco.Range(line, 1, line, 1),
+          range: new monaco.Range(
+            state.firstChangedOriginalLine,
+            1,
+            state.lastChangedOriginalLine,
+            model.getLineMaxColumn(state.lastChangedOriginalLine)
+          ),
           options: { isWholeLine: true, className: LINE_REPLACED_CLASS },
         });
       }
 
-      for (let line = state.generatedLineStart; line <= state.generatedLineEnd; line++) {
+      if (state.generatedLineEnd >= state.generatedLineStart) {
+        generatedBlockIndexRef.current = decorations.length;
         decorations.push({
-          range: new monaco.Range(line, 1, line, 1),
+          range: new monaco.Range(
+            state.generatedLineStart,
+            1,
+            state.generatedLineEnd,
+            model.getLineMaxColumn(state.generatedLineEnd)
+          ),
           options: { isWholeLine: true, className: CODE_ADDED_CLASS },
         });
       }
@@ -169,9 +212,10 @@ export const useReplaceReview = ({
       widgetRef.current = new ReviewActionsWidget(
         euiTheme,
         editor,
-        state.generatedLineEnd,
+        // Below both blocks, whichever comes first.
+        Math.max(state.generatedLineEnd, state.lastChangedOriginalLine),
         { onAccept: accept, onReject: reject },
-        true
+        isReplaceMode(state)
       );
 
       const activeElement = document.activeElement;
@@ -193,12 +237,13 @@ export const useReplaceReview = ({
           precondition: contextKeyId,
           run: () => reject(),
         }),
+        editor.onDidChangeModelContent(() => {
+          isEditedRef.current = true;
+        }),
       ];
     },
-    [editorRef, euiTheme, contextKeyId, rejectAction, accept, reject]
+    [editorRef, editorModel, euiTheme, contextKeyId, rejectAction, isReplaceMode, accept, reject]
   );
 
-  const getReviewState = useCallback(() => reviewStateRef.current, []);
-
-  return { showReview, cleanup, reject, accept, getReviewState };
+  return { showReview, cleanup, dismiss, reject, accept, reviewStateRef };
 };
