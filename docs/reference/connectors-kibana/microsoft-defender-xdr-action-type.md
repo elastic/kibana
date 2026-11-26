@@ -172,7 +172,7 @@ The following actions are available for the Microsoft Defender XDR connector. Ac
 :   Retrieves Microsoft Defender Threat Intelligence (MDTI) data for a hostname or IP address — including associated threat actors, malware families, infrastructure relationships, and first/last seen dates. The `host` parameter accepts FQDNs, IPv4 addresses, or IPv6 addresses.
 
 `getThreatIntelHostReputation`
-:   Returns the MDTI reputation score and classification for a hostname or IP address. The score ranges from 0–100 (higher = more malicious). Classification is one of `malicious`, `suspicious`, `neutral`, or `benign`, with the rules that influenced the score.
+:   Returns the MDTI reputation score and classification for a hostname or IP address. The score ranges from 0–100 (higher = more malicious). Classification is one of `malicious`, `suspicious`, or `neutral`, with the rules that influenced the score.
 
 `getPassiveDnsRecords`
 :   Retrieves forward passive DNS records for a hostname from MDTI — showing what IPs a domain resolved to. Use to pivot across attacker infrastructure during threat hunting or attribution investigations.
