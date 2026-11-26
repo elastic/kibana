@@ -742,6 +742,14 @@ pin_baseline() {
   if [[ "${EVAL_PIN_BASELINE:-}" != "1" ]]; then
     return 0
   fi
+  # A baseline must represent main: `on_demand.sh` passes EVAL_PIN_BASELINE through, so
+  # without this check an on-demand run of a feature branch could become the reference
+  # every PR is compared against. The override is two deliberate variables, not one
+  # accident, for the rare legitimate pin from another ref.
+  if [[ "${BUILDKITE_BRANCH:-}" != "main" && "${EVAL_PIN_BASELINE_ALLOW_BRANCH:-}" != "1" ]]; then
+    echo "EVAL_PIN_BASELINE=1 on branch '${BUILDKITE_BRANCH:-unknown}': baselines are pinned from main only. Set EVAL_PIN_BASELINE_ALLOW_BRANCH=1 to pin from another ref deliberately."
+    return 1
+  fi
   # An explicitly requested pin that cannot be published must fail the step: a scheduled
   # baseline run finishing green with the active baseline unchanged would go unnoticed.
   if [[ -n "${EVAL_GREP:-}" || -n "${EVAL_GREP_INVERT:-}" ]]; then
