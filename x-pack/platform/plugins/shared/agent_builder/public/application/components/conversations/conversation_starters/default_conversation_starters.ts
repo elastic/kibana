@@ -10,23 +10,41 @@ import type { ConversationStarter } from '@kbn/agent-builder-common';
 
 /**
  * The starters shown on the default Elastic AI agent when nothing more specific exists. Each one
- * must be something the agent can do out of the box. The copy is a placeholder until product
- * confirms it.
+ * must be something the agent can do out of the box.
  */
 export const DEFAULT_CONVERSATION_STARTERS: readonly ConversationStarter[] = [
   {
-    label: i18n.translate('xpack.agentBuilder.conversationStarters.default.whatCanYouHelpWith', {
-      defaultMessage: 'What can you help me with?',
+    label: i18n.translate('xpack.agentBuilder.conversationStarters.default.whatsInDeployment', {
+      defaultMessage: 'What’s in this deployment?',
     }),
+    prompt: i18n.translate(
+      'xpack.agentBuilder.conversationStarters.default.whatsInDeployment.prompt',
+      {
+        defaultMessage:
+          'Summarize the data in this deployment: what indices and data streams exist, and what are they used for?',
+      }
+    ),
   },
   {
-    label: i18n.translate('xpack.agentBuilder.conversationStarters.default.whatDataDoIHave', {
-      defaultMessage: 'What data do I have?',
+    label: i18n.translate('xpack.agentBuilder.conversationStarters.default.investigateErrors', {
+      defaultMessage: 'Investigate errors',
     }),
+    prompt: i18n.translate(
+      'xpack.agentBuilder.conversationStarters.default.investigateErrors.prompt',
+      {
+        defaultMessage: 'Find errors or unusual activity in my logs from the last 24 hours.',
+      }
+    ),
   },
   {
-    label: i18n.translate('xpack.agentBuilder.conversationStarters.default.investigateAnIssue', {
-      defaultMessage: 'Help me investigate an issue',
+    label: i18n.translate('xpack.agentBuilder.conversationStarters.default.buildDashboard', {
+      defaultMessage: 'Build a dashboard',
     }),
+    prompt: i18n.translate(
+      'xpack.agentBuilder.conversationStarters.default.buildDashboard.prompt',
+      {
+        defaultMessage: 'Build a dashboard to monitor the most important trends in my data.',
+      }
+    ),
   },
 ];

@@ -11,7 +11,6 @@ import { agentBuilderDefaultAgentId } from '@kbn/agent-builder-common';
 import type { SolutionView } from '@kbn/spaces-plugin/common';
 import { useAgentId } from '../../../hooks/use_conversation';
 import { useAgentModel } from '../../../hooks/agents/use_agent_model';
-import { useExperimentalFeatures } from '../../../hooks/use_experimental_features';
 import { useSubmitMessage } from '../../../hooks/use_submit_message';
 import { useConversationContext } from '../../../context/conversation/conversation_context';
 import { DEFAULT_CONVERSATION_STARTERS } from './default_conversation_starters';
@@ -24,9 +23,9 @@ const NO_STARTERS: ResolvedConversationStarters = { starters: [], source: 'defau
 /**
  * The starters to show, and how to send one: those the app passed in its chat config, or else those
  * of the solution of the space, or else the default list. They are shown for the default Elastic AI
- * agent only. The lists of the solution and the default one also wait for the solution to be known,
- * and show only while the experimental features setting is on, until their copy is final. A click
- * sends the prompt of the starter, or its label when it has none, as the message, which creates the conversation and moves the user to it.
+ * agent only. The lists of the solution and the default one also wait for the solution to be known.
+ * A click sends the prompt of the starter, or its label when it has none, as the message, which
+ * creates the conversation and moves the user to it.
  */
 export const useConversationStarters = ({
   solution,
@@ -37,11 +36,10 @@ export const useConversationStarters = ({
   const agentId = useAgentId();
   const { submitMessage, isCreatingConversation } = useSubmitMessage();
   const { isLoading: isAgentModelLoading } = useAgentModel(agentId);
-  const isExperimentalFeaturesEnabled = useExperimentalFeatures();
   const { conversationStarters: appStarters } = useConversationContext();
 
   const isDefaultAgent = agentId === agentBuilderDefaultAgentId;
-  const canShowBuiltInStarters = isExperimentalFeaturesEnabled && solution !== undefined;
+  const canShowBuiltInStarters = solution !== undefined;
 
   const { starters, source } = useMemo(
     () =>
