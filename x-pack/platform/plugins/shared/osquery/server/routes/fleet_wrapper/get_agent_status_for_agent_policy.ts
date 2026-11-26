@@ -7,6 +7,7 @@
 
 import type { GetAgentStatusResponse } from '@kbn/fleet-plugin/common';
 import type { IRouter } from '@kbn/core/server';
+import { AgentRequestInvalidError } from '@kbn/fleet-plugin/server';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type {
   GetAgentStatusForAgentPolicyRequestParamsSchema,
@@ -53,10 +54,19 @@ export const getAgentStatusForAgentPolicyRoute = (
       },
       async (context, request, response) => {
         const space = await osqueryContext.service.getActiveSpace(request);
-        const results = await osqueryContext.service
-          .getAgentService()
-          ?.asInternalScopedUser(space?.id ?? DEFAULT_SPACE_ID)
-          .getAgentStatusForAgentPolicy(request.query.policyId, request.query.kuery);
+        let results: GetAgentStatusResponse['results'] | undefined;
+        try {
+          results = await osqueryContext.service
+            .getAgentService()
+            ?.asInternalScopedUser(space?.id ?? DEFAULT_SPACE_ID)
+            .getAgentStatusForAgentPolicy(request.query.policyId, request.query.kuery);
+        } catch (error) {
+          if (error instanceof AgentRequestInvalidError) {
+            return response.badRequest({ body: { message: error.message } });
+          }
+
+          throw error;
+        }
 
         if (!results) {
           return response.ok({ body: {} });
