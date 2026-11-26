@@ -534,16 +534,15 @@ export const indexEndpointHostForPolicy = async ({
   await stopMetadataTransforms(esClient, integrationPolicy.package?.version ?? '');
 
   const hostDocId = uuidv4();
-  // Rollback may only remove what this call created: an agent id that already has metadata keeps its history.
-  const hadMetadata =
-    (
-      await esClient
-        .count({
-          index: METADATA_DATASTREAM,
-          query: { term: { 'agent.id': hostMetadataDoc.agent.id } },
-        })
-        .catch(() => ({ count: 0 }))
-    ).count > 0;
+  // Rollback may only remove what this call created: an agent id that already has metadata keeps its
+  // history. A failed read is inconclusive, so it is treated like existing metadata (the safe side).
+  const existingMetadata = await esClient
+    .count({
+      index: METADATA_DATASTREAM,
+      query: { term: { 'agent.id': hostMetadataDoc.agent.id } },
+    })
+    .catch(() => undefined);
+  const hadMetadata = existingMetadata === undefined || existingMetadata.count > 0;
 
   try {
     // Create the Fleet agent
@@ -593,7 +592,7 @@ export const indexEndpointHostForPolicy = async ({
   }
 };
 
-/** Best effort: each step runs even if an earlier one failed, and the caller rethrows the original error. */
+/** Best effort: the Fleet agent is cleaned up even if the metadata cleanup fails; the caller rethrows the original error. */
 const rollbackIndexedHost = async (
   esClient: Client,
   indexed: IndexedHostsResponse,
@@ -601,35 +600,41 @@ const rollbackIndexedHost = async (
   hadMetadata: boolean
 ): Promise<void> => {
   const agentIds = indexed.hosts.map((host) => host.agent.id);
-  const steps: Array<() => Promise<unknown>> = [];
 
-  if (indexed.hosts.length > 0) {
-    steps.push(() =>
-      esClient.deleteByQuery({
-        index: METADATA_DATASTREAM,
-        wait_for_completion: true,
-        query: { ids: { values: [hostDocId] } },
-      })
-    );
+  const removeHostMetadata = async () => {
+    // The source goes first and is refreshed: the transforms read it, so a destination cleanup that
+    // ran alongside could be undone by a transform republishing the host afterwards.
+    await esClient.deleteByQuery({
+      index: METADATA_DATASTREAM,
+      wait_for_completion: true,
+      refresh: true,
+      query: { ids: { values: [hostDocId] } },
+    });
 
-    if (!hadMetadata) {
-      // The transforms may have copied the new host into their destinations before the failure.
-      const query = { bool: { filter: [{ terms: { 'agent.id': agentIds } }] } };
-
-      steps.push(() =>
-        esClient.deleteByQuery({
-          index: [metadataCurrentIndexPattern, METADATA_UNITED_INDEX],
-          ignore_unavailable: true,
-          wait_for_completion: true,
-          query,
-        })
-      );
+    if (hadMetadata) {
+      return;
     }
-  }
 
-  if (indexed.agents.length > 0) {
-    steps.push(() => deleteIndexedFleetAgents(esClient, indexed));
-  }
+    // The transforms may have copied the new host into their destinations before the failure. The
+    // two destinations keep the agent id under different fields.
+    await Promise.allSettled([
+      esClient.deleteByQuery({
+        index: metadataCurrentIndexPattern,
+        ignore_unavailable: true,
+        wait_for_completion: true,
+        query: { terms: { 'agent.id': agentIds } },
+      }),
+      esClient.deleteByQuery({
+        index: METADATA_UNITED_INDEX,
+        ignore_unavailable: true,
+        wait_for_completion: true,
+        query: { terms: { 'united.endpoint.agent.id': agentIds } },
+      }),
+    ]);
+  };
 
-  await Promise.allSettled(steps.map(async (step) => step()));
+  await Promise.allSettled([
+    indexed.hosts.length > 0 ? removeHostMetadata() : undefined,
+    indexed.agents.length > 0 ? deleteIndexedFleetAgents(esClient, indexed) : undefined,
+  ]);
 };

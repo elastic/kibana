@@ -114,10 +114,13 @@ describe('indexEndpointHostForPolicy', () => {
     expect(deleteQueryFor(METADATA_DATASTREAM)).toEqual(
       expect.objectContaining({ query: { ids: { values: [indexed.id] } } })
     );
-    // The new host is also removed from the transform destinations, for this agent only.
-    expect(deleteQueryFor([metadataCurrentIndexPattern, METADATA_UNITED_INDEX])).toEqual(
+    // The new host is also removed from each transform destination, by that index's agent id field.
+    expect(deleteQueryFor(metadataCurrentIndexPattern)).toEqual(
+      expect.objectContaining({ query: { terms: { 'agent.id': [indexed.body.agent.id] } } })
+    );
+    expect(deleteQueryFor(METADATA_UNITED_INDEX)).toEqual(
       expect.objectContaining({
-        query: { bool: { filter: [{ terms: { 'agent.id': [indexed.body.agent.id] } }] } },
+        query: { terms: { 'united.endpoint.agent.id': [indexed.body.agent.id] } },
       })
     );
     expect(deleteIndexedFleetAgentsMock).toHaveBeenCalledWith(
@@ -143,6 +146,33 @@ describe('indexEndpointHostForPolicy', () => {
     expect(esClient.deleteByQuery).toHaveBeenCalledTimes(1);
     expect(deleteQueryFor(METADATA_DATASTREAM)).toEqual(
       expect.objectContaining({ query: { ids: { values: [indexed.id] } } })
+    );
+  });
+
+  it('treats a failed existing-metadata read as existing metadata and keeps the destinations', async () => {
+    esClient.count.mockRejectedValue(new Error('count timed out'));
+    startMetadataTransformsMock.mockRejectedValue(transformsMissingError);
+
+    await expect(callIndexEndpointHostForPolicy()).rejects.toBe(transformsMissingError);
+
+    expect(esClient.deleteByQuery).toHaveBeenCalledTimes(1);
+    expect(deleteQueryFor(METADATA_DATASTREAM)).toBeDefined();
+  });
+
+  it('finishes deleting the source document before it cleans the destinations', async () => {
+    startMetadataTransformsMock.mockRejectedValue(transformsMissingError);
+    const order: string[] = [];
+    esClient.deleteByQuery.mockImplementation(async ({ index }: { index: unknown }) => {
+      order.push(`start:${String(index)}`);
+      await new Promise((resolve) => setTimeout(resolve, index === METADATA_DATASTREAM ? 5 : 0));
+      order.push(`end:${String(index)}`);
+      return {};
+    });
+
+    await expect(callIndexEndpointHostForPolicy()).rejects.toBe(transformsMissingError);
+
+    expect(order.indexOf(`end:${METADATA_DATASTREAM}`)).toBeLessThan(
+      order.indexOf(`start:${metadataCurrentIndexPattern}`)
     );
   });
 
