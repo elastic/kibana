@@ -14,7 +14,7 @@ const listConnectorsRoute = createGenAiSettingsServerRoute({
     authz: {
       enabled: false,
       reason:
-        'This route relies on the actions plugin to authorize stack connectors and intentionally lists inference endpoints for LLM features using the Kibana internal ES user, so that LLM model preferences resolve consistently for all users',
+        'This route intentionally resolves connectors and inference endpoints with the internal Kibana user to consistently resolve feature settings for all users.',
     },
   },
   handler: async (resources): Promise<InferenceConnector[]> => {
@@ -32,7 +32,7 @@ const getConnectorByIdRoute = createGenAiSettingsServerRoute({
     authz: {
       enabled: false,
       reason:
-        'This route relies on the actions plugin to authorize stack connectors and intentionally resolves inference endpoints for LLM features using the Kibana internal ES user, so that LLM model preferences resolve consistently for all users',
+        'This route intentionally resolves connectors and inference endpoints with the internal Kibana user to consistently resolve feature settings for all users.',
     },
   },
   params: z.object({
