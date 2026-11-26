@@ -152,7 +152,7 @@ describe('toRiseReading', () => {
   it('reports a lasting rise on the newest minute, with the matches per minute around it', () => {
     expect(toRiseReading(RISE)).toEqual(
       expect.objectContaining({
-        fingerprint: 'known_failures:ki-timeouts:rise',
+        fingerprint: 'known_failures_rise:ki-timeouts',
         bucket_start: Date.UTC(2026, 10, 20, 10, 30),
         bucket_end: Date.UTC(2026, 10, 20, 10, 31),
         value: 11,
@@ -184,6 +184,19 @@ describe('toRiseReading', () => {
       '@timestamp >= "2026-11-20T04:31:00.000Z" AND @timestamp < "2026-11-20T10:31:00.000Z"\n| STATS matches = COUNT(*) BY period = BUCKET(@timestamp, 10 minutes, '
     );
     expect(reading.details).not.toHaveProperty('change_type');
+  });
+
+  // Sharing a series, the two would hide each other's minutes.
+  it('keeps a rise out of the unusual minutes of an indicator whose id ends in its suffix', () => {
+    const lookalike = { ...KNOWLEDGE_INDICATOR.query, id: 'ki-timeouts:rise' };
+
+    expect(toRiseReading(RISE).fingerprint).not.toBe(
+      toUnusualMinuteReading({
+        ...CONTEXT,
+        knowledgeIndicator: { ...KNOWLEDGE_INDICATOR, query: lookalike },
+        unusual: UNUSUAL,
+      }).fingerprint
+    );
   });
 });
 

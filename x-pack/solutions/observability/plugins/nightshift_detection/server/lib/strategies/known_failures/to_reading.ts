@@ -41,10 +41,11 @@ export function getKnownFailureFingerprint(knowledgeIndicator: QueryLink): strin
 /**
  * The series of a knowledge indicator's rises. Apart from its unusual minutes, because the store
  * keeps one reading per series and minute: in one series, a rise and an unusual minute on the same
- * minute would replace each other.
+ * minute would replace each other. Its own prefix, not a suffix: the rises of indicator `x` as
+ * `known_failures:x:rise` would share a series with the unusual minutes of indicator `x:rise`.
  */
 export function getKnownFailureRiseFingerprint(knowledgeIndicator: QueryLink): string {
-  return `${getKnownFailureFingerprint(knowledgeIndicator)}:rise`;
+  return `${KNOWN_FAILURES_STRATEGY_ID}_rise:${knowledgeIndicator.query.id}`;
 }
 
 /** The breached reading of an unusual minute, with the newest lines of that minute as evidence. */

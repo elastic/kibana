@@ -215,7 +215,7 @@ describe('KnownFailuresGenerator', () => {
         details: expect.objectContaining({ check: 'unusual_minute' }),
       }),
       expect.objectContaining({
-        fingerprint: 'known_failures:watched:rise',
+        fingerprint: 'known_failures_rise:watched',
         value: 10,
         details: expect.objectContaining({
           check: 'lasting_rise',
@@ -252,7 +252,7 @@ describe('KnownFailuresGenerator', () => {
         bucket_start: WINDOW.from + 6 * MINUTE_MS,
       }),
       expect.objectContaining({
-        fingerprint: 'known_failures:watched:rise',
+        fingerprint: 'known_failures_rise:watched',
         bucket_start: WINDOW.from + 6 * MINUTE_MS,
       }),
     ]);
@@ -396,7 +396,7 @@ describe('KnownFailuresGenerator', () => {
     });
     const earlierRise = {
       status: 'breached',
-      fingerprint: 'known_failures:watched:rise',
+      fingerprint: 'known_failures_rise:watched',
       rule_id: RULE_ID,
       bucket_start: WINDOW.from + 2 * MINUTE_MS,
       details: { check: 'lasting_rise' },
