@@ -81,6 +81,7 @@ import {
 
 import type { ValueOf } from '../../common/types';
 import { normalizeHostsForAgents, validateFleetSavedObjectId } from '../../common/services';
+import { omitRemovedOtlpQueueSettings } from '../../common/services/otlp_sending_queue';
 import {
   FleetEncryptedSavedObjectEncryptionKeyRequired,
   OutputInvalidError,
@@ -141,7 +142,11 @@ import {
   canEnableSyncIntegrations,
   createOrUpdateFleetSyncedIntegrationsIndex,
 } from './setup/fleet_synced_integrations';
-import { applyManagedOtlpDefaults } from './utils/managed_otlp';
+import {
+  applyManagedOtlpDefaults,
+  getOtlpExporterUpdate,
+  validateOtlpSendingQueueSizes,
+} from './utils/managed_otlp';
 import { assertPrivilegesInSpaces } from './security/assert_privileges_in_spaces';
 
 type Nullable<T> = { [P in keyof T]: T[P] | null };
@@ -228,6 +233,20 @@ function omitRemovedOtlpHeaders(
   return { ...exporter, headers: storedHeaders };
 }
 
+// the settings that an update removed are kept as `null` by the saved object update
+function omitRemovedOtlpQueueSettingsOfExporter<T extends { sending_queue?: unknown }>(
+  exporter: T
+): T {
+  return exporter.sending_queue
+    ? {
+        ...exporter,
+        sending_queue: omitRemovedOtlpQueueSettings(
+          exporter.sending_queue as Parameters<typeof omitRemovedOtlpQueueSettings>[0]
+        ),
+      }
+    : exporter;
+}
+
 export function outputSavedObjectToOutput(so: SavedObject<OutputSOAttributes>): Output {
   const logger = appContextService.getLogger();
   // the references of the secrets an update removed are kept as `null` by the saved object update
@@ -262,7 +281,9 @@ export function outputSavedObjectToOutput(so: SavedObject<OutputSOAttributes>): 
     return {
       ...attributes,
       ...(attributes.otlp_exporter && {
-        otlp_exporter: omitRemovedOtlpHeaders(attributes.otlp_exporter),
+        otlp_exporter: omitRemovedOtlpQueueSettingsOfExporter(
+          omitRemovedOtlpHeaders(attributes.otlp_exporter)
+        ),
       }),
       ...(storedAuth && { auth: storedAuth }),
       id: outputId ?? so.id,
@@ -1014,6 +1035,10 @@ class OutputService {
 
     if (output.type === outputType.Otlp && data.type === outputType.Otlp) {
       data.otlp_exporter = applyManagedOtlpDefaults(data.otlp_exporter);
+      validateOtlpSendingQueueSizes({
+        queue: data.otlp_exporter.sending_queue,
+        fromPreconfiguration: !!options?.fromPreconfiguration,
+      });
     }
 
     await remoteSyncIntegrationsCheck(esClient, output);
@@ -1725,7 +1750,11 @@ class OutputService {
     }
 
     if (isOtlpOutput(updateData) && updateData.otlp_exporter) {
-      updateData.otlp_exporter = applyManagedOtlpDefaults(updateData.otlp_exporter);
+      updateData.otlp_exporter = getOtlpExporterUpdate({
+        update: updateData.otlp_exporter,
+        stored: isOtlpOutput(originalOutput) ? originalOutput.otlp_exporter : undefined,
+        fromPreconfiguration,
+      });
     }
 
     if (isOtlpOutput(updateData) && isOtlpOutput(originalOutput) && updateData.auth) {

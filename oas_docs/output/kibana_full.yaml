@@ -26888,6 +26888,8 @@ paths:
 
         After authorization, validation, and feature-flag checks pass, each request writes one `memory_save_event` audit event.
 
+        Returns 429 when Elasticsearch rejects the request because it is overloaded. The whole request is rejected (unlike individual `failed` items in a 200 response); retry with backoff.
+
         Returns a 404 response when Context Engine is turned off in this space (`contextEngine:enabled`), when memory is turned off (`contextEngine:memoryEnabled`), or when an AI index in `ai_index_ids` does not exist.
 
         **For more information, refer to the [Context Engine documentation](https://www.elastic.co/docs/explore-analyze/ai-features/context-engine).**<br/><br/>[Required authorization] Route required privileges: contextEngine:write. Extended privileges (optional, expand functionality when granted): contextEngine:manage_memory.
@@ -27136,6 +27138,34 @@ paths:
                 required:
                   - message
           description: Context Engine or memory is turned off, or an AI index does not exist.
+        '429':
+          content:
+            application/json:
+              examples:
+                tooManyRequestsExample:
+                  description: Elasticsearch rejected the whole request with 429; retry with backoff
+                  summary: Too many requests
+                  value:
+                    error: Too Many Requests
+                    message: 'es_rejected_execution_exception: too many requests'
+                    statusCode: 429
+              schema:
+                additionalProperties: false
+                description: Generic error response.
+                type: object
+                properties:
+                  error:
+                    description: The HTTP status text.
+                    type: string
+                  message:
+                    description: A human-readable error message.
+                    type: string
+                  statusCode:
+                    description: The HTTP status code.
+                    type: number
+                required:
+                  - message
+          description: Elasticsearch rejected the request because it is overloaded. The whole request was rejected (unlike individual `failed` items in a 200 response); retry with backoff.
       summary: Save session events
       tags:
         - context engine
@@ -94148,13 +94178,6 @@ paths:
                         name: logs-myapp-default
                         type: classic
                         updated_at: '2024-12-01T09:00:00.000Z'
-                      - description: All error-level logs across every stream
-                        name: logs.errors
-                        query:
-                          esql: FROM logs* | WHERE log.level == "error"
-                          view: logs.errors-view
-                        type: query
-                        updated_at: '2025-01-20T14:00:00.000Z'
           description: A list of all streams.
       summary: Get stream list
       tags:
@@ -94459,16 +94482,6 @@ paths:
         content:
           application/json:
             examples:
-              createQueryStream:
-                value:
-                  dashboards: []
-                  rules: []
-                  stream:
-                    description: All error-level logs across every stream
-                    query:
-                      esql: FROM logs* | WHERE log.level == "error"
-                      view: logs.errors-view
-                    type: query
               createWiredStream:
                 value:
                   dashboards: []
@@ -94574,8 +94587,6 @@ paths:
               additionalProperties: false
               type: object
               properties:
-                draft:
-                  type: boolean
                 status:
                   enum:
                     - enabled
@@ -144298,8 +144309,6 @@ paths:
                           additionalProperties: false
                           type: object
                           properties:
-                            draft:
-                              type: boolean
                             fields:
                               $ref: '#/components/schemas/Kibana_HTTP_APIs_FieldDefinition'
                             routing:
@@ -144310,8 +144319,6 @@ paths:
                                     description: A non-empty string.
                                     minLength: 1
                                     type: string
-                                  draft:
-                                    type: boolean
                                   status:
                                     enum:
                                       - enabled
@@ -144413,109 +144420,6 @@ paths:
       tags:
         - streams
       x-state: Experimental; added in 9.1.0
-      x-metaTags:
-        - content: Kibana
-          name: product_name
-  /api/streams/{name}/_query:
-    get:
-      description: |-
-        **Spaces method and path for this operation:**
-
-        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/streams/{name}/_query</span></div>
-
-        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
-
-        Fetches the query settings of a query stream definition<br/><br/>[Required authorization] Route required privileges: read_stream.
-      operationId: get-streams-name-query
-      parameters:
-        - description: The name of the query stream.
-          in: path
-          name: name
-          required: true
-          schema:
-            maxLength: 200
-            type: string
-      requestBody:
-        content:
-          application/json:
-            examples: {}
-            schema:
-              anyOf:
-                - additionalProperties: false
-                  type: object
-                  properties: {}
-                - {}
-              nullable: true
-      responses:
-        '200':
-          description: Query settings for the stream.
-      summary: Get query stream settings
-      tags:
-        - streams
-      x-state: Experimental; added in 9.4.0
-      x-metaTags:
-        - content: Kibana
-          name: product_name
-    put:
-      description: |-
-        **Spaces method and path for this operation:**
-
-        <div><span class="operation-verb put">put</span>&nbsp;<span class="operation-path">/s/{space_id}/api/streams/{name}/_query</span></div>
-
-        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
-
-        Upserts the query settings of a query stream definition<br/><br/>[Required authorization] Route required privileges: manage_stream.
-      operationId: put-streams-name-query
-      parameters:
-        - description: A required header to protect against CSRF attacks
-          in: header
-          name: kbn-xsrf
-          required: true
-          schema:
-            example: 'true'
-            type: string
-        - description: The name of the query stream.
-          in: path
-          name: name
-          required: true
-          schema:
-            maxLength: 200
-            type: string
-      requestBody:
-        content:
-          application/json:
-            examples:
-              upsertQueryStream:
-                value:
-                  query:
-                    esql: FROM logs* | WHERE log.level == "error" | KEEP @timestamp, message, host.name, log.level
-            schema:
-              additionalProperties: false
-              type: object
-              properties:
-                field_descriptions:
-                  additionalProperties:
-                    maxLength: 1000
-                    type: string
-                  type: object
-                query:
-                  additionalProperties: false
-                  type: object
-                  properties:
-                    esql:
-                      maxLength: 65535
-                      type: string
-                  required:
-                    - esql
-              required:
-                - query
-      responses:
-        '200':
-          description: The query stream settings were updated successfully.
-      summary: Upsert query stream settings
-      tags:
-        - streams
-      x-state: Experimental; added in 9.4.0
       x-metaTags:
         - content: Kibana
           name: product_name
@@ -168765,6 +168669,8 @@ components:
                 - failure_store
                 - classic
             query_streams:
+              deprecated: true
+              description: Deprecated. Query streams have been removed; this field is accepted for backwards compatibility and ignored.
               items:
                 type: object
                 properties:
@@ -185128,11 +185034,14 @@ components:
               description: Kerberos service name of the Kafka brokers.
               type: string
             username:
-              description: Kerberos username. Required when `auth_type` is `password`; the password is set in `secrets.kerberos.password`.
+              description: Kerberos username (the principal). Required. When `auth_type` is `keytab`, it is the principal to look up in the keytab file; when it is `password`, the password is set in `secrets.kerberos.password`.
+              maxLength: 256
+              minLength: 1
               type: string
           required:
             - auth_type
             - config_path
+            - username
             - realm
         key:
           type: string
@@ -186586,30 +186495,37 @@ components:
               type: number
         sending_queue:
           additionalProperties: false
+          description: The sending queue of the exporter. Set to `null` to use the collector defaults for the whole queue. In an update, a setting that is left out keeps its stored value, and a setting that accepts `null` is reset to its default when set to `null`. To change `enabled`, `sizer`, `wait_for_result`, `block_on_overflow` or `batch.sizer`, send the value you want. On the managed OTLP endpoint, a setting that is reset, or that has no value, gets the Elastic default. Set `batch` to `null` to turn batching off.
           nullable: true
           type: object
           properties:
             batch:
               additionalProperties: false
+              description: Batching of the queue. An empty object batches with the defaults. Set to `null` to turn batching off.
               nullable: true
               type: object
               properties:
                 flush_timeout:
+                  description: 'Time after which a batch is sent, whatever its size. Default: `200ms`, or `1s` on the managed OTLP endpoint.'
                   maxLength: 64
                   nullable: true
                   type: string
                 max_size:
+                  description: 'Maximum size of a batch, `0` for no maximum. Default: `0`, or `4000000` on the managed OTLP endpoint.'
                   nullable: true
                   type: number
                 min_size:
+                  description: 'Minimum size of a batch, in the unit of the batch `sizer`. Default: `8192`, or `1000000` on the managed OTLP endpoint.'
                   nullable: true
                   type: number
                 partition:
                   additionalProperties: false
+                  description: Batches data separately by client metadata.
                   nullable: true
                   type: object
                   properties:
                     metadata_keys:
+                      description: Client metadata keys used to batch data separately.
                       items:
                         maxLength: 256
                         type: string
@@ -186617,27 +186533,34 @@ components:
                       nullable: true
                       type: array
                 sizer:
+                  description: 'Unit of the batch sizes. Default: the unit of the queue, `items` for a queue that counts requests, or `bytes` on the managed OTLP endpoint.'
                   enum:
                     - items
                     - bytes
                   type: string
             block_on_overflow:
+              description: 'Whether incoming requests are blocked when the queue is full, instead of rejected. Default: `false`, or `true` on the managed OTLP endpoint.'
               type: boolean
             enabled:
+              description: 'Whether the exporter uses a sending queue. Default: `true`.'
               type: boolean
             num_consumers:
+              description: 'Number of consumers that send the data of the queue. Default: `10`.'
               nullable: true
               type: number
             queue_size:
+              description: 'Maximum size of the queue, in the unit of `sizer`. Default: `1000`, or `50000000` on the managed OTLP endpoint when `sizer` is `bytes`.'
               nullable: true
               type: number
             sizer:
+              description: 'Unit of `queue_size`. Default: `requests`, or `bytes` on the managed OTLP endpoint.'
               enum:
                 - requests
                 - items
                 - bytes
               type: string
             wait_for_result:
+              description: 'Whether incoming requests are blocked until they are processed. Default: `false`.'
               type: boolean
         timeout:
           maxLength: 64
@@ -186846,30 +186769,37 @@ components:
               type: number
         sending_queue:
           additionalProperties: false
+          description: The sending queue of the exporter. Set to `null` to use the collector defaults for the whole queue. In an update, a setting that is left out keeps its stored value, and a setting that accepts `null` is reset to its default when set to `null`. To change `enabled`, `sizer`, `wait_for_result`, `block_on_overflow` or `batch.sizer`, send the value you want. On the managed OTLP endpoint, a setting that is reset, or that has no value, gets the Elastic default. Set `batch` to `null` to turn batching off.
           nullable: true
           type: object
           properties:
             batch:
               additionalProperties: false
+              description: Batching of the queue. An empty object batches with the defaults. Set to `null` to turn batching off.
               nullable: true
               type: object
               properties:
                 flush_timeout:
+                  description: 'Time after which a batch is sent, whatever its size. Default: `200ms`, or `1s` on the managed OTLP endpoint.'
                   maxLength: 64
                   nullable: true
                   type: string
                 max_size:
+                  description: 'Maximum size of a batch, `0` for no maximum. Default: `0`, or `4000000` on the managed OTLP endpoint.'
                   nullable: true
                   type: number
                 min_size:
+                  description: 'Minimum size of a batch, in the unit of the batch `sizer`. Default: `8192`, or `1000000` on the managed OTLP endpoint.'
                   nullable: true
                   type: number
                 partition:
                   additionalProperties: false
+                  description: Batches data separately by client metadata.
                   nullable: true
                   type: object
                   properties:
                     metadata_keys:
+                      description: Client metadata keys used to batch data separately.
                       items:
                         maxLength: 256
                         type: string
@@ -186877,27 +186807,34 @@ components:
                       nullable: true
                       type: array
                 sizer:
+                  description: 'Unit of the batch sizes. Default: the unit of the queue, `items` for a queue that counts requests, or `bytes` on the managed OTLP endpoint.'
                   enum:
                     - items
                     - bytes
                   type: string
             block_on_overflow:
+              description: 'Whether incoming requests are blocked when the queue is full, instead of rejected. Default: `false`, or `true` on the managed OTLP endpoint.'
               type: boolean
             enabled:
+              description: 'Whether the exporter uses a sending queue. Default: `true`.'
               type: boolean
             num_consumers:
+              description: 'Number of consumers that send the data of the queue. Default: `10`.'
               nullable: true
               type: number
             queue_size:
+              description: 'Maximum size of the queue, in the unit of `sizer`. Default: `1000`, or `50000000` on the managed OTLP endpoint when `sizer` is `bytes`.'
               nullable: true
               type: number
             sizer:
+              description: 'Unit of `queue_size`. Default: `requests`, or `bytes` on the managed OTLP endpoint.'
               enum:
                 - requests
                 - items
                 - bytes
               type: string
             wait_for_result:
+              description: 'Whether incoming requests are blocked until they are processed. Default: `false`.'
               type: boolean
         timeout:
           maxLength: 64
@@ -187104,30 +187041,37 @@ components:
               type: number
         sending_queue:
           additionalProperties: true
+          description: The sending queue of the exporter. Set to `null` to use the collector defaults for the whole queue. In an update, a setting that is left out keeps its stored value, and a setting that accepts `null` is reset to its default when set to `null`. To change `enabled`, `sizer`, `wait_for_result`, `block_on_overflow` or `batch.sizer`, send the value you want. On the managed OTLP endpoint, a setting that is reset, or that has no value, gets the Elastic default. Set `batch` to `null` to turn batching off.
           nullable: true
           type: object
           properties:
             batch:
               additionalProperties: true
+              description: Batching of the queue. An empty object batches with the defaults. Set to `null` to turn batching off.
               nullable: true
               type: object
               properties:
                 flush_timeout:
+                  description: 'Time after which a batch is sent, whatever its size. Default: `200ms`, or `1s` on the managed OTLP endpoint.'
                   maxLength: 64
                   nullable: true
                   type: string
                 max_size:
+                  description: 'Maximum size of a batch, `0` for no maximum. Default: `0`, or `4000000` on the managed OTLP endpoint.'
                   nullable: true
                   type: number
                 min_size:
+                  description: 'Minimum size of a batch, in the unit of the batch `sizer`. Default: `8192`, or `1000000` on the managed OTLP endpoint.'
                   nullable: true
                   type: number
                 partition:
                   additionalProperties: true
+                  description: Batches data separately by client metadata.
                   nullable: true
                   type: object
                   properties:
                     metadata_keys:
+                      description: Client metadata keys used to batch data separately.
                       items:
                         maxLength: 256
                         type: string
@@ -187135,27 +187079,34 @@ components:
                       nullable: true
                       type: array
                 sizer:
+                  description: 'Unit of the batch sizes. Default: the unit of the queue, `items` for a queue that counts requests, or `bytes` on the managed OTLP endpoint.'
                   enum:
                     - items
                     - bytes
                   type: string
             block_on_overflow:
+              description: 'Whether incoming requests are blocked when the queue is full, instead of rejected. Default: `false`, or `true` on the managed OTLP endpoint.'
               type: boolean
             enabled:
+              description: 'Whether the exporter uses a sending queue. Default: `true`.'
               type: boolean
             num_consumers:
+              description: 'Number of consumers that send the data of the queue. Default: `10`.'
               nullable: true
               type: number
             queue_size:
+              description: 'Maximum size of the queue, in the unit of `sizer`. Default: `1000`, or `50000000` on the managed OTLP endpoint when `sizer` is `bytes`.'
               nullable: true
               type: number
             sizer:
+              description: 'Unit of `queue_size`. Default: `requests`, or `bytes` on the managed OTLP endpoint.'
               enum:
                 - requests
                 - items
                 - bytes
               type: string
             wait_for_result:
+              description: 'Whether incoming requests are blocked until they are processed. Default: `false`.'
               type: boolean
         timeout:
           maxLength: 64
@@ -187364,30 +187315,37 @@ components:
               type: number
         sending_queue:
           additionalProperties: true
+          description: The sending queue of the exporter. Set to `null` to use the collector defaults for the whole queue. In an update, a setting that is left out keeps its stored value, and a setting that accepts `null` is reset to its default when set to `null`. To change `enabled`, `sizer`, `wait_for_result`, `block_on_overflow` or `batch.sizer`, send the value you want. On the managed OTLP endpoint, a setting that is reset, or that has no value, gets the Elastic default. Set `batch` to `null` to turn batching off.
           nullable: true
           type: object
           properties:
             batch:
               additionalProperties: true
+              description: Batching of the queue. An empty object batches with the defaults. Set to `null` to turn batching off.
               nullable: true
               type: object
               properties:
                 flush_timeout:
+                  description: 'Time after which a batch is sent, whatever its size. Default: `200ms`, or `1s` on the managed OTLP endpoint.'
                   maxLength: 64
                   nullable: true
                   type: string
                 max_size:
+                  description: 'Maximum size of a batch, `0` for no maximum. Default: `0`, or `4000000` on the managed OTLP endpoint.'
                   nullable: true
                   type: number
                 min_size:
+                  description: 'Minimum size of a batch, in the unit of the batch `sizer`. Default: `8192`, or `1000000` on the managed OTLP endpoint.'
                   nullable: true
                   type: number
                 partition:
                   additionalProperties: true
+                  description: Batches data separately by client metadata.
                   nullable: true
                   type: object
                   properties:
                     metadata_keys:
+                      description: Client metadata keys used to batch data separately.
                       items:
                         maxLength: 256
                         type: string
@@ -187395,27 +187353,34 @@ components:
                       nullable: true
                       type: array
                 sizer:
+                  description: 'Unit of the batch sizes. Default: the unit of the queue, `items` for a queue that counts requests, or `bytes` on the managed OTLP endpoint.'
                   enum:
                     - items
                     - bytes
                   type: string
             block_on_overflow:
+              description: 'Whether incoming requests are blocked when the queue is full, instead of rejected. Default: `false`, or `true` on the managed OTLP endpoint.'
               type: boolean
             enabled:
+              description: 'Whether the exporter uses a sending queue. Default: `true`.'
               type: boolean
             num_consumers:
+              description: 'Number of consumers that send the data of the queue. Default: `10`.'
               nullable: true
               type: number
             queue_size:
+              description: 'Maximum size of the queue, in the unit of `sizer`. Default: `1000`, or `50000000` on the managed OTLP endpoint when `sizer` is `bytes`.'
               nullable: true
               type: number
             sizer:
+              description: 'Unit of `queue_size`. Default: `requests`, or `bytes` on the managed OTLP endpoint.'
               enum:
                 - requests
                 - items
                 - bytes
               type: string
             wait_for_result:
+              description: 'Whether incoming requests are blocked until they are processed. Default: `false`.'
               type: boolean
         timeout:
           maxLength: 64
@@ -187720,11 +187685,14 @@ components:
               description: Kerberos service name of the Kafka brokers.
               type: string
             username:
-              description: Kerberos username. Required when `auth_type` is `password`; the password is set in `secrets.kerberos.password`.
+              description: Kerberos username (the principal). Required. When `auth_type` is `keytab`, it is the principal to look up in the keytab file; when it is `password`, the password is set in `secrets.kerberos.password`.
+              maxLength: 256
+              minLength: 1
               type: string
           required:
             - auth_type
             - config_path
+            - username
             - realm
         key:
           type: string
@@ -189716,60 +189684,6 @@ components:
         - has_required_role
       title: profiling_setup_status_response
       type: object
-    Kibana_HTTP_APIs_QueryStreamUpsertRequest:
-      additionalProperties: false
-      type: object
-      properties:
-        dashboards:
-          items:
-            type: string
-          type: array
-        rules:
-          items:
-            type: string
-          type: array
-        stream:
-          additionalProperties: false
-          type: object
-          properties:
-            description:
-              type: string
-            field_descriptions:
-              additionalProperties:
-                type: string
-              type: object
-            query:
-              additionalProperties: false
-              type: object
-              properties:
-                esql:
-                  type: string
-                view:
-                  type: string
-              required:
-                - view
-                - esql
-            query_streams:
-              items:
-                type: object
-                properties:
-                  name:
-                    type: string
-                required:
-                  - name
-              type: array
-            type:
-              enum:
-                - query
-              type: string
-          required:
-            - description
-            - type
-            - query
-      required:
-        - dashboards
-        - rules
-        - stream
     Kibana_HTTP_APIs_reauthorize_transform_request:
       additionalProperties: false
       properties:
@@ -194490,7 +194404,6 @@ components:
       anyOf:
         - $ref: '#/components/schemas/Kibana_HTTP_APIs_WiredStreamUpsertRequest'
         - $ref: '#/components/schemas/Kibana_HTTP_APIs_ClassicStreamUpsertRequest'
-        - $ref: '#/components/schemas/Kibana_HTTP_APIs_QueryStreamUpsertRequest'
     Kibana_HTTP_APIs_syntheticsJsonValue:
       description: Any JSON value.
     Kibana_HTTP_APIs_tagcloudLibItemNoESQL:
@@ -195641,11 +195554,14 @@ components:
               description: Kerberos service name of the Kafka brokers.
               type: string
             username:
-              description: Kerberos username. Required when `auth_type` is `password`; the password is set in `secrets.kerberos.password`.
+              description: Kerberos username (the principal). Required. When `auth_type` is `keytab`, it is the principal to look up in the keytab file; when it is `password`, the password is set in `secrets.kerberos.password`.
+              maxLength: 256
+              minLength: 1
               type: string
           required:
             - auth_type
             - config_path
+            - username
             - realm
         key:
           type: string
@@ -204915,8 +204831,6 @@ components:
                   additionalProperties: false
                   type: object
                   properties:
-                    draft:
-                      type: boolean
                     fields:
                       $ref: '#/components/schemas/Kibana_HTTP_APIs_FieldDefinition'
                     routing:
@@ -204927,8 +204841,6 @@ components:
                             description: A non-empty string.
                             minLength: 1
                             type: string
-                          draft:
-                            type: boolean
                           status:
                             enum:
                               - enabled
@@ -204950,6 +204862,8 @@ components:
                 - failure_store
                 - wired
             query_streams:
+              deprecated: true
+              description: Deprecated. Query streams have been removed; this field is accepted for backwards compatibility and ignored.
               items:
                 type: object
                 properties:

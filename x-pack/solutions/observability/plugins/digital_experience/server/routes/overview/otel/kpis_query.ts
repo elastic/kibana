@@ -22,6 +22,7 @@ import {
 import { cleanedValue } from '../../../lib/esql';
 import {
   esqlDocumentConditions,
+  esqlLogConditions,
   esqlFilterEvals,
   esqlPageLoadConditions,
 } from '../../../lib/otel/overview_filters_esql';
@@ -52,8 +53,9 @@ const IS_JS_ERROR = `event == ${escapeStringValue(EVENT_EXCEPTION)}`;
 /**
  * The KPIs of one application's browser documents in one period: the `filter` of the request
  * keeps the application, period, environment and KQL. The selected filters narrow every document,
- * and the page filters the page loads only, as on the rest of the Overview. Sessions count every
- * event's session, so a session with only clicks counts too.
+ * the page every log (the HTTP request spans carry the URL they request, not the page's route) and
+ * the URL text the page loads only, as on the rest of the Overview. Sessions count every event's
+ * session, so a session with only clicks counts too.
  */
 export const overviewKpisQuery = (
   filters: OverviewFilters,
@@ -61,6 +63,7 @@ export const overviewKpisQuery = (
 ): ComposerQuery => {
   const filterEvals = esqlFilterEvals(filters);
   const documentConditions = esqlDocumentConditions(filters);
+  const logConditions = esqlLogConditions(filters);
   const isPageLoad = [
     `event == ${escapeStringValue(EVENT_NAVIGATION_TIMING)}`,
     ...esqlPageLoadConditions(filters),
@@ -70,6 +73,10 @@ export const overviewKpisQuery = (
     `FROM ${OTEL_LOGS_INDEX}, ${OTEL_TRACES_INDEX}`,
     ...(filterEvals.length > 0 ? [`| EVAL ${filterEvals.join(', ')}`] : []),
     ...(documentConditions.length > 0 ? [`| WHERE ${documentConditions.join(' AND ')}`] : []),
+    // Spans have no event name.
+    ...(logConditions.length > 0
+      ? [`| WHERE ${OTEL_EVENT_NAME} IS NULL OR (${logConditions.join(' AND ')})`]
+      : []),
     `| EVAL event = ${OTEL_EVENT_NAME},
        session_id = ${cleanedValue(SOURCE_SESSION_ID_FIELD)},
        ${HTTP_REQUEST_EVALS}`,

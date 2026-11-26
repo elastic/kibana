@@ -21,6 +21,7 @@ import { OtlpAuthentication } from './output_form_otlp_auth';
 import { isOtlpAuthAvailable, isOtlpAuthSelected } from './use_otlp_auth_inputs';
 import { OtlpGrpcSettings } from './output_form_otlp_grpc';
 import { OtlpHttpSettings } from './output_form_otlp_http';
+import { OtlpRetrySettings, OtlpSendingQueueSettings } from './output_form_otlp_queue_retry';
 import { OtlpTlsSettings } from './output_form_otlp_tls';
 
 const GRPC_COMPRESSION_OPTIONS = [
@@ -155,6 +156,10 @@ export const OutputFormOtlpSection: React.FunctionComponent<{ inputs: OutputForm
       {isGrpc ? <OtlpGrpcSettings inputs={inputs} /> : <OtlpHttpSettings inputs={inputs} />}
       {/* TLS is shared by both protocols: changing the protocol keeps it */}
       <OtlpTlsSettings inputs={inputs} />
+      <EuiSpacer size="m" />
+      <OtlpSendingQueueSettings inputs={inputs} />
+      <EuiSpacer size="m" />
+      <OtlpRetrySettings inputs={inputs} />
       <EuiSpacer size="m" />
     </>
   );

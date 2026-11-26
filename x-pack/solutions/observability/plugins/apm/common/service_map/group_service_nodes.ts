@@ -19,6 +19,7 @@ import type {
 } from './types';
 import { isServiceNodeData } from './types';
 import { formatServiceGroupName } from './format_service_group_name';
+import { getServiceGroupAriaLabel, getServiceGroupBoxAriaLabel } from './service_group_labels';
 import { createEdgeMarker, getEdgeId } from './utils';
 import { DEFAULT_EDGE_STYLE } from './constants';
 
@@ -31,12 +32,18 @@ export interface GroupServiceNodesResult {
  * Collapses services in groups of 2+ into closed service-group nodes for the selected
  * strategy (default: `serviceGrouping.automatic`). Groups of 1 stay as service nodes.
  * Dependencies and resource groups are unchanged. Missing grouping is a no-op.
+ *
+ * A group whose id is in `openGroupIds` is opened in place instead: a box node, followed by its
+ * member services with `parentId` set to the box. Their edges are kept, so calls to and from
+ * other nodes still end on the members, and calls between members are flagged `isIntraGroup`.
+ * Ids that match no group of 2+ are ignored.
  */
 export function groupServiceNodes(
   nodes: ServiceMapNode[],
   edges: ServiceMapEdge[],
   serviceGrouping: ServiceMapGrouping | undefined,
-  source?: ServiceGroupingSource
+  source?: ServiceGroupingSource,
+  openGroupIds?: ReadonlySet<string>
 ): GroupServiceNodesResult {
   if (!serviceGrouping) {
     return { nodes, edges };
@@ -64,10 +71,13 @@ export function groupServiceNodes(
     }
   }
 
-  // Edge endpoints may use node.id or data.label; map both to the closed group id.
-  const endpointToGroupId = new Map<string, string>();
-  const closedGroupNodes: ServiceMapNode[] = [];
+  // Edge endpoints may use node.id or data.label; map both to the closed group id, or for the
+  // members of an open group, to their own id.
+  const endpointToNodeId = new Map<string, string>();
+  const groupNodes: ServiceMapNode[] = [];
   const collapsedServiceIds = new Set<string>();
+  const openedServiceIds = new Set<string>();
+  const openGroupIdByMemberId = new Map<string, string>();
 
   strategy.groups.forEach((group, groupIndex) => {
     const memberNodes = (membersByGroup[groupIndex] ?? [])
@@ -79,31 +89,77 @@ export function groupServiceNodes(
       return;
     }
 
+    if (openGroupIds?.has(group.id)) {
+      // A parent must come before its children in the node list
+      groupNodes.push(
+        createServiceGroupBoxNode(group, memberNodes),
+        // `extent` keeps a dragged member inside its box
+        ...memberNodes.map((member) => ({
+          ...member,
+          parentId: group.id,
+          extent: 'parent' as const,
+        }))
+      );
+      for (const member of memberNodes) {
+        openedServiceIds.add(member.id);
+        openGroupIdByMemberId.set(member.id, group.id);
+        endpointToNodeId.set(member.data.label, member.id);
+      }
+      return;
+    }
+
     const groupNode = createServiceGroupNode(group, memberNodes);
-    closedGroupNodes.push(groupNode);
+    groupNodes.push(groupNode);
 
     for (const member of memberNodes) {
       collapsedServiceIds.add(member.id);
-      endpointToGroupId.set(member.id, groupNode.id);
-      endpointToGroupId.set(member.data.label, groupNode.id);
+      endpointToNodeId.set(member.id, groupNode.id);
+      endpointToNodeId.set(member.data.label, groupNode.id);
     }
   });
 
-  if (closedGroupNodes.length === 0) {
+  if (groupNodes.length === 0) {
     return { nodes, edges };
   }
 
   const nextNodes = [
-    ...nodes.filter((node) => !collapsedServiceIds.has(node.id)),
-    ...closedGroupNodes,
+    ...nodes.filter((node) => !collapsedServiceIds.has(node.id) && !openedServiceIds.has(node.id)),
+    ...groupNodes,
   ];
   const nextEdges = rewriteEdges(
     edges,
-    (endpointId) => endpointToGroupId.get(endpointId) ?? endpointId,
-    collapsedServiceIds
+    (endpointId) => endpointToNodeId.get(endpointId) ?? endpointId,
+    collapsedServiceIds,
+    openGroupIdByMemberId
   );
 
   return { nodes: nextNodes, edges: nextEdges };
+}
+
+function createServiceGroupBoxNode(
+  group: ServiceMapGroup,
+  memberNodes: ServiceMapNode[]
+): ServiceMapNode {
+  const label = formatServiceGroupName(group);
+  return {
+    id: group.id,
+    type: 'serviceGroupBox',
+    position: { x: 0, y: 0 },
+    // The box covers a large area: dragging on it should pan the map, not move the group. Its
+    // members can still be dragged, inside it.
+    draggable: false,
+    // The name of the element that takes the focus, as React Flow only sets it from here.
+    ariaLabel: getServiceGroupBoxAriaLabel({ groupName: label, memberCount: memberNodes.length }),
+    data: {
+      id: group.id,
+      label,
+      isService: false,
+      isServiceGroupBox: true,
+      groupKind: group.kind,
+      memberServiceIds: memberNodes.map((node) => node.data.id),
+      memberCount: memberNodes.length,
+    },
+  };
 }
 
 function createServiceGroupNode(
@@ -111,14 +167,17 @@ function createServiceGroupNode(
   memberNodes: ServiceMapNode[]
 ): ServiceMapNode {
   const members = memberNodes.map((node) => node.data as ServiceNodeData);
+  const label = formatServiceGroupName(group);
 
   return {
     id: group.id,
     type: 'serviceGroup',
     position: { x: 0, y: 0 },
+    // The name of the element that takes the focus, as React Flow only sets it from here.
+    ariaLabel: getServiceGroupAriaLabel({ groupName: label, memberCount: members.length }),
     data: {
       id: group.id,
-      label: formatServiceGroupName(group),
+      label,
       isService: false,
       isServiceGroup: true,
       groupKind: group.kind,
@@ -314,7 +373,8 @@ function markEdgeBidirectional(existing: ServiceMapEdge, from?: ServiceMapEdge):
 function rewriteEdges(
   edges: ServiceMapEdge[],
   remapEndpoint: (id: string) => string,
-  collapsedServiceIds: Set<string>
+  collapsedServiceIds: Set<string>,
+  openGroupIdByMemberId: ReadonlyMap<string, string>
 ): ServiceMapEdge[] {
   const merged = new Map<string, ServiceMapEdge>();
 
@@ -356,6 +416,10 @@ function rewriteEdges(
       continue;
     }
 
+    const sourceGroupId = openGroupIdByMemberId.get(source);
+    const isIntraGroup =
+      sourceGroupId !== undefined && sourceGroupId === openGroupIdByMemberId.get(target);
+
     merged.set(id, {
       ...edge,
       id,
@@ -363,6 +427,15 @@ function rewriteEdges(
       target,
       style: edge.style ?? DEFAULT_EDGE_STYLE,
       markerEnd: edge.markerEnd ?? createEdgeMarker(DEFAULT_EDGE_STYLE.stroke),
+      ...(isIntraGroup
+        ? {
+            data: {
+              ...edge.data,
+              isBidirectional: edge.data?.isBidirectional ?? false,
+              isIntraGroup,
+            },
+          }
+        : {}),
     });
   }
 
