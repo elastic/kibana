@@ -59,7 +59,7 @@ const services = {
 } as unknown as TracesLatencyMapViewProps['services'];
 
 const renderView = (overrides: Partial<TracesLatencyMapViewProps> = {}) => {
-  const actions = { updateESQLQuery: jest.fn(), setExpandedDoc: jest.fn() };
+  const actions = { updateESQLQuery: jest.fn(), setExternalExpandedDoc: jest.fn() };
   const view = render(
     <TracesLatencyMapView
       indexPattern="traces-apm*"
@@ -321,7 +321,7 @@ describe('TracesLatencyMapView', () => {
     expect(params?.query).toContain('service.name == "cart"');
     expect(params?.query).not.toContain(selectionClause);
     expect(params?.dropNullColumns).toBe(true);
-    expect(actions.setExpandedDoc).toHaveBeenCalledWith(
+    expect(actions.setExternalExpandedDoc).toHaveBeenCalledWith(
       expect.objectContaining({ flattened: { 'service.name': 'cart' } }),
       // The flyout opens on the traces Overview, not the field table.
       { initialTabId: 'doc_view_obs_traces_overview' }
@@ -329,9 +329,9 @@ describe('TracesLatencyMapView', () => {
   });
 
   /** The editor query can refetch a document only when it declares both identity fields. */
-const identityMetadata = ['_id', '_index'];
+  const identityMetadata = ['_id', '_index'];
 
-const spanWithIdentity: ESQLSearchResponse = {
+  const spanWithIdentity: ESQLSearchResponse = {
     columns: [
       { name: 'service.name', type: 'keyword' },
       { name: '_id', type: 'keyword' },
@@ -346,7 +346,7 @@ const spanWithIdentity: ESQLSearchResponse = {
     await act(() => mapProps.onCellClick!(cell));
     // The identity lets the traces document profile recognize the record, and the flyout
     // write a URL reference from raw._id/_index.
-    expect(actions.setExpandedDoc).toHaveBeenCalledWith(
+    expect(actions.setExternalExpandedDoc).toHaveBeenCalledWith(
       expect.objectContaining({
         id: '.ds-traces-apm-000001::span-1::',
         raw: expect.objectContaining({ _id: 'span-1', _index: '.ds-traces-apm-000001' }),
@@ -364,7 +364,7 @@ const spanWithIdentity: ESQLSearchResponse = {
       metadataFields: identityMetadata,
     });
     await act(() => mapProps.onCellClick!(cell));
-    const [record] = actions.setExpandedDoc.mock.lastCall ?? [];
+    const [record] = actions.setExternalExpandedDoc.mock.lastCall ?? [];
     expect(record?.id).toBe(`traceLatencyMapExampleSpan-${cell.from}-${cell.minDuration}`);
     expect(record?.raw).toEqual({ 'service.name': 'cart' });
     expect(record?.flattened).toEqual(
@@ -382,7 +382,9 @@ const spanWithIdentity: ESQLSearchResponse = {
     await act(() =>
       mapProps.onCellClick!({ ...inside, minDuration: 1_000_000, maxDuration: 2_000_000 })
     );
-    expect(actions.setExpandedDoc.mock.lastCall?.[0]?.id).toBe('.ds-traces-apm-000001::span-1::');
+    expect(actions.setExternalExpandedDoc.mock.lastCall?.[0]?.id).toBe(
+      '.ds-traces-apm-000001::span-1::'
+    );
   });
 
   it('keeps the identity of a span on the selection edge: the bounds round as the query does', async () => {
@@ -401,7 +403,9 @@ const spanWithIdentity: ESQLSearchResponse = {
         maxDuration: 2_000_000,
       })
     );
-    expect(actions.setExpandedDoc.mock.lastCall?.[0]?.id).toBe('.ds-traces-apm-000001::span-1::');
+    expect(actions.setExternalExpandedDoc.mock.lastCall?.[0]?.id).toBe(
+      '.ds-traces-apm-000001::span-1::'
+    );
   });
 
   it('abandons a pending span lookup when the map source changes', async () => {
@@ -420,14 +424,14 @@ const spanWithIdentity: ESQLSearchResponse = {
     expect(esql.mock.lastCall?.[1]?.abortSignal?.aborted).toBe(true);
     resolveLookup({ rawResponse: spanWithIdentity });
     await act(() => clicked);
-    expect(view.actions.setExpandedDoc).not.toHaveBeenCalled();
+    expect(view.actions.setExternalExpandedDoc).not.toHaveBeenCalled();
   });
 
   it('leaves the view as it is when the cell has no span to open', async () => {
     esql.mockRejectedValue(new Error('shards failed'));
     const { actions, mapProps } = renderView();
     await act(() => mapProps.onCellClick!(cell));
-    expect(actions.setExpandedDoc).not.toHaveBeenCalled();
+    expect(actions.setExternalExpandedDoc).not.toHaveBeenCalled();
     expect(jest.mocked(LatencyMap).mock.lastCall?.[0].activeCell).toBeUndefined();
   });
 
@@ -437,7 +441,7 @@ const spanWithIdentity: ESQLSearchResponse = {
     answerWith(spanWithIdentity);
     const { actions, mapProps } = renderView();
     await act(() => mapProps.onCellClick!(cell));
-    const [record] = actions.setExpandedDoc.mock.lastCall ?? [];
+    const [record] = actions.setExternalExpandedDoc.mock.lastCall ?? [];
     expect(record?.id).toBe(`traceLatencyMapExampleSpan-${cell.from}-${cell.minDuration}`);
     expect(record?.raw).toEqual({ 'service.name': 'cart' });
     expect(record?.flattened).toEqual(

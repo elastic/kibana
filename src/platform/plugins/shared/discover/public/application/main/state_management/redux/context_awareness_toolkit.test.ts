@@ -87,7 +87,7 @@ describe('createContextAwarenessToolkit', () => {
 
   it('maps setExpandedDoc options.initialTabId to initialDocViewerTabId', async () => {
     const { internalState, profileStateRegistry, tabId } = await setup();
-    const setExpandedDocSpy = jest.spyOn(internalStateActions, 'setExpandedDocExtPointAction');
+    const setExpandedDocSpy = jest.spyOn(internalStateActions, 'setExpandedDoc');
 
     createContextAwarenessToolkit({
       internalState,
@@ -104,7 +104,7 @@ describe('createContextAwarenessToolkit', () => {
     });
   });
 
-  it('resolves the document profile of a record handed to setExpandedDoc', async () => {
+  it('resolves the document profile of a record handed to setExternalExpandedDoc', async () => {
     const { internalState, profileStateRegistry, tabId } = await setup();
     const record = buildDataTableRecord(esHitsMock[0], dataViewMockWithTimeField);
 
@@ -112,7 +112,7 @@ describe('createContextAwarenessToolkit', () => {
       internalState,
       profileStateRegistry,
       tabId,
-    }).actions.setExpandedDoc?.(record);
+    }).actions.setExternalExpandedDoc?.(record);
 
     // A profile's record is not one Discover fetched: it gets the document context here,
     // so the flyout can pick its document profile.

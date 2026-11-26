@@ -25,9 +25,9 @@ interface ChartSectionActions {
   }) => void;
   updateESQLQuery?: (queryOrUpdater: string | ((prevQuery: string) => string)) => void;
   /**
-   * Opens or updates the document flyout, as Discover's context awareness toolkit does.
+   * Opens a record produced outside Discover's results.
    */
-  setExpandedDoc?: (record?: DataTableRecord, options?: { initialTabId?: string }) => void;
+  setExternalExpandedDoc?: (record?: DataTableRecord, options?: { initialTabId?: string }) => void;
 }
 
 export interface UnifiedMetricsGridProps extends ChartSectionProps {

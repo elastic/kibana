@@ -126,7 +126,7 @@ export function TracesLatencyMapView({
   expandedDocId,
   metadataFields = [],
 }: TracesLatencyMapViewProps) {
-  const { updateESQLQuery, setExpandedDoc } = actions;
+  const { updateESQLQuery, setExternalExpandedDoc } = actions;
   const selectionClause = filters.find(isSelectionCondition);
   // One object per clause: parsed anew every render, the map would redraw for nothing.
   const selection = useMemo(
@@ -304,7 +304,7 @@ export function TracesLatencyMapView({
   // given, rather than looking it up in the current query, which may not read that metadata.
   const openExampleSpan = useCallback(
     async (cell: LatencyMapCell) => {
-      if (!setExpandedDoc) return;
+      if (!setExternalExpandedDoc) return;
       clickAbortRef.current?.abort();
       const controller = new AbortController();
       clickAbortRef.current = controller;
@@ -335,8 +335,7 @@ export function TracesLatencyMapView({
       // index included, so the traces document profile still recognizes it.
       const queryCanRefetchIdentity =
         metadataFields.includes('_id') && metadataFields.includes('_index');
-      const restorable =
-        queryCanRefetchIdentity && (!selection || isCellWithin(cell, selection));
+      const restorable = queryCanRefetchIdentity && (!selection || isCellWithin(cell, selection));
       const { _id, _index, ...withoutIdentity } = row;
       const raw = (restorable ? row : withoutIdentity) as DataTableRecord['raw'];
       const id =
@@ -344,7 +343,7 @@ export function TracesLatencyMapView({
           ? getDocId(raw)
           : `traceLatencyMapExampleSpan-${cell.from}-${cell.minDuration}`;
       openedDocIdRef.current = id;
-      setExpandedDoc(
+      setExternalExpandedDoc(
         { id, raw, flattened: row },
         // The traces Overview front and center, not the field table. The id is the traces
         // document profile's (discover traces_document_profile doc_viewer accessor); as a
@@ -352,7 +351,7 @@ export function TracesLatencyMapView({
         { initialTabId: 'doc_view_obs_traces_overview' }
       );
     },
-    [setExpandedDoc, indexPattern, baseFilters, searchEsql, selection, metadataFields]
+    [setExternalExpandedDoc, indexPattern, baseFilters, searchEsql, selection, metadataFields]
   );
 
   if (!source) return null;
@@ -376,7 +375,7 @@ export function TracesLatencyMapView({
         failedOnly={failedOnly}
         onFailedOnlyChange={changeFailedOnly}
         onSelectionCommit={commitSelection}
-        onCellClick={setExpandedDoc ? openExampleSpan : undefined}
+        onCellClick={setExternalExpandedDoc ? openExampleSpan : undefined}
         activeCell={activeCell}
         onFocusOperation={updateESQLQuery ? focusOperation : undefined}
         focusedOperation={focusedOperation}

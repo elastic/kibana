@@ -43,9 +43,14 @@ export interface ContextAwarenessToolkitActions {
    */
   updateAdHocDataViews?: (adHocDataViews: DataView[]) => Promise<void>;
   /**
-   * Opens or updates the expanded document flyout.
+   * Opens or updates the expanded document flyout for a record from Discover's own results.
    */
   setExpandedDoc?: (record?: DataTableRecord, options?: { initialTabId?: string }) => void;
+  /**
+   * Opens a record produced outside Discover's results (a chart section's own lookup, for
+   * example), resolving its document profile first.
+   */
+  setExternalExpandedDoc?: (record?: DataTableRecord, options?: { initialTabId?: string }) => void;
 }
 
 /**

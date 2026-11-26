@@ -51,7 +51,16 @@ export const createContextAwarenessToolkit = ({
       },
       setExpandedDoc: (record, options) => {
         internalState.dispatch(
-          internalStateActions.setExpandedDocExtPointAction({
+          internalStateActions.setExpandedDoc({
+            tabId,
+            expandedDoc: record,
+            initialDocViewerTabId: options?.initialTabId,
+          })
+        );
+      },
+      setExternalExpandedDoc: (record, options) => {
+        internalState.dispatch(
+          internalStateActions.setExternalExpandedDoc({
             tabId,
             expandedDoc: record,
             initialDocViewerTabId: options?.initialTabId,
