@@ -3628,7 +3628,7 @@ describe('Task Runner', () => {
       status: 'error',
       softErrorFromLastRun: true,
       errorMessage: 'an error occurred,second error occurred',
-      errorReason: 'unknown',
+      errorReason: 'execute',
     });
 
     expect(getErrorSource(runnerResult.taskRunError as Error)).toBe(TaskErrorSource.FRAMEWORK);

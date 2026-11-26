@@ -7,13 +7,10 @@
 
 import type { Logger } from '@kbn/core/server';
 import { ActionsCompletion } from '@kbn/alerting-state-types';
+import { reasonForReportedErrors } from './reason_for_reported_error';
 import type { RuleResultService } from '../monitoring/rule_result_service';
 import type { RuleExecutionStatus, RawRuleExecutionStatus, RawRule, Rule } from '../types';
-import {
-  RuleExecutionStatusValues,
-  RuleExecutionStatusWarningReasons,
-  RuleExecutionStatusErrorReasons,
-} from '../types';
+import { RuleExecutionStatusValues, RuleExecutionStatusWarningReasons } from '../types';
 import { getReasonFromError } from './error_with_reason';
 import { getEsErrorMessage } from './errors';
 import { addCloudApiKeyAuthErrorGuidance } from './cloud_api_key_auth_error_guidance';
@@ -73,9 +70,10 @@ export function executionStatusFromState({
     ruleResultService.getLastRunResults();
   if (errorsFromLastRun.length > 0) {
     status = RuleExecutionStatusValues[2];
-    // These errors are reported by ruleResultService.addLastRunError, therefore they are landed in successful execution map
+    // The executor finished and reported these via addLastRunError. One status reason is
+    // stored; it is a configuration failure only when every reported error is a user error.
     error = {
-      reason: RuleExecutionStatusErrorReasons.Unknown,
+      reason: reasonForReportedErrors(errorsFromLastRun),
       message: addCloudApiKeyAuthErrorGuidance(
         errorsFromLastRun.map((lastRunError) => lastRunError.message).join(',')
       ),
