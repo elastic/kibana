@@ -12,6 +12,7 @@ import type { SignificantEventsServer } from '../../types';
 import { RelayRequestError } from '@kbn/actions-plugin/server';
 import { createAgentNotFoundError, createAgentUnavailableError } from '@kbn/agent-builder-common';
 import { NIGHTSHIFT_ENABLED_FLAG } from '@kbn/nightshift-shared';
+import { mockAuthenticatedUser } from '@kbn/core-security-common/mocks';
 import { RELAY_APP_CONNECTION_STATUS } from '../../../common/slack_app/types';
 import { ELASTIC_APPS_SLACK_CONNECTOR_ID, SlackAppService } from './service';
 import { SlackAppUnavailableError } from './errors';
@@ -40,6 +41,7 @@ interface HarnessOptions {
   serviceAccountsEnabled?: boolean;
   /** Whether the Nightshift assistant agent is registered. */
   assistantEnabled?: boolean;
+  relayRoleExists?: boolean;
 }
 
 function createHarness({
@@ -49,6 +51,7 @@ function createHarness({
   isServerless = false,
   serviceAccountsEnabled = false,
   assistantEnabled = false,
+  relayRoleExists = true,
 }: HarnessOptions = {}) {
   const soClient = {
     get: jest
@@ -75,6 +78,9 @@ function createHarness({
   const createServiceAccount = jest.fn();
   const deleteServiceAccount = jest.fn().mockResolvedValue({ deleted: true, warnings: [] });
   const serviceAccountsIsEnabled = jest.fn().mockReturnValue(serviceAccountsEnabled);
+  const queryRole = jest
+    .fn()
+    .mockResolvedValue({ roles: relayRoleExists ? [{ name: '_nightshift_agent' }] : [] });
 
   // Mutated in place like the actions plugin's own array, so `getRegisteredTenantKey` sees what the
   // service just did. The `isDynamic` handling mirrors the plugin: registration is refused for any
@@ -116,6 +122,9 @@ function createHarness({
     core: {
       savedObjects: { getScopedClient: jest.fn().mockReturnValue(soClient) },
       featureFlags: { getBooleanValue$ },
+      elasticsearch: {
+        client: { asScoped: jest.fn(() => ({ asCurrentUser: { security: { queryRole } } })) },
+      },
       http: { basePath: { publicBaseUrl: 'https://kibana.test' }, getServerInfo: jest.fn() },
       security: {
         serviceAccounts: {
@@ -142,6 +151,7 @@ function createHarness({
     invalidateAsInternalUser,
     createServiceAccount,
     deleteServiceAccount,
+    queryRole,
     getBooleanValue$,
     inMemoryConnectors,
     registerDynamicConnector,
@@ -385,6 +395,30 @@ describe('SlackAppService', () => {
       );
     });
 
+    it('records the full name of the connecting user instead of an opaque username', async () => {
+      const { server, soClient, grantAsInternalUser } = createHarness();
+      jest.mocked(server.security.authc.getCurrentUser).mockReturnValue(
+        mockAuthenticatedUser({
+          username: '12345',
+          full_name: 'Test User',
+          email: 't@example.com',
+        })
+      );
+      grantAsInternalUser.mockResolvedValue({ id: 'new-key', name: 'k', api_key: 'secret' });
+      startInstall.mockResolvedValue({ authorize_url: 'https://slack/oauth', claim_id: 'claim-2' });
+
+      await new SlackAppService(server).connect(request);
+
+      expect(startInstall).toHaveBeenCalledWith(
+        expect.objectContaining({ created_by_user_key: '12345' })
+      );
+      expect(soClient.create).toHaveBeenCalledWith(
+        RELAY_APP_CONNECTION_SO_TYPE,
+        expect.objectContaining({ createdBy: 'Test User' }),
+        { id: RELAY_APP_CONNECTION_SO_ID, overwrite: true }
+      );
+    });
+
     // Regression: invalidating the old key up front (before startInstall) would
     // brick an already-working connection if the reconnect failed, since the SO is
     // never rewritten on failure. The old key must only be invalidated after the
@@ -582,6 +616,28 @@ describe('SlackAppService', () => {
       expect(grantAsInternalUser).not.toHaveBeenCalled();
       expect(createServiceAccount).not.toHaveBeenCalled();
       expect(startInstall).not.toHaveBeenCalled();
+    });
+
+    it('fails closed without creating anything when the _nightshift_agent role is missing', async () => {
+      const { server, soClient, createServiceAccount, queryRole } = createHarness({
+        uiamEnabled: true,
+        isServerless: true,
+        serviceAccountsEnabled: true,
+        relayRoleExists: false,
+      });
+
+      await expect(new SlackAppService(server).connect(request)).rejects.toThrow(
+        new SlackAppUnavailableError(
+          'The role [_nightshift_agent] required by the Elastic Slack app does not exist on this deployment.'
+        )
+      );
+      expect(queryRole).toHaveBeenCalledWith({
+        query: { term: { name: '_nightshift_agent' } },
+        size: 1,
+      });
+      expect(createServiceAccount).not.toHaveBeenCalled();
+      expect(startInstall).not.toHaveBeenCalled();
+      expect(soClient.create).not.toHaveBeenCalled();
     });
 
     it('fails closed when UIAM service-account creation is unavailable', async () => {
@@ -1536,9 +1592,93 @@ describe('SlackAppService', () => {
     });
   });
 
+  describe('isChannelBound', () => {
+    const isChannelBound = jest.fn();
+
+    const createConnectedHarness = () => {
+      const harness = createHarness();
+      (harness.server as unknown as { relayClient: unknown }).relayClient = {
+        startInstall,
+        fetchClaim,
+        unbind,
+        isChannelBound,
+      };
+      harness.soClient.get.mockResolvedValue({
+        attributes: { status: RELAY_APP_CONNECTION_STATUS.connected, tenantKey: 'tenant-A' },
+      });
+      return harness;
+    };
+
+    beforeEach(() => {
+      isChannelBound.mockReset();
+    });
+
+    it('returns true when the Relay says the channel is bound', async () => {
+      const { server } = createConnectedHarness();
+      isChannelBound.mockResolvedValue(true);
+
+      await expect(new SlackAppService(server).isChannelBound(request, 'C1')).resolves.toBe(true);
+      expect(isChannelBound).toHaveBeenCalledWith('tenant-A', 'C1');
+    });
+
+    it('returns false when the Relay says the channel is not bound', async () => {
+      const { server } = createConnectedHarness();
+      isChannelBound.mockResolvedValue(false);
+
+      await expect(new SlackAppService(server).isChannelBound(request, 'C1')).resolves.toBe(false);
+    });
+
+    it('returns false when the Slack App is not connected', async () => {
+      const { server } = createHarness();
+
+      await expect(new SlackAppService(server).isChannelBound(request, 'C1')).resolves.toBe(false);
+      expect(isChannelBound).not.toHaveBeenCalled();
+    });
+
+    it('logs the status, reason and error message of a Relay failure before rethrowing', async () => {
+      const { server, logger } = createConnectedHarness();
+      isChannelBound.mockRejectedValue(
+        new RelayRequestError('/bindings', 503, 'down', 'relay_busy')
+      );
+
+      await expect(
+        new SlackAppService(server).isChannelBound(request, 'C1')
+      ).rejects.toBeInstanceOf(RelayRequestError);
+      expect(logger.warn).toHaveBeenCalledWith(
+        expect.stringContaining('status 503, reason relay_busy, down')
+      );
+    });
+
+    it('logs the status and error message when the failure has no reason', async () => {
+      const { server, logger } = createConnectedHarness();
+      isChannelBound.mockRejectedValue(new RelayRequestError('/bindings', 502, 'upstream down'));
+
+      await expect(
+        new SlackAppService(server).isChannelBound(request, 'C1')
+      ).rejects.toBeInstanceOf(RelayRequestError);
+      expect(logger.warn).toHaveBeenCalledTimes(1);
+      expect(logger.warn).toHaveBeenCalledWith(
+        expect.stringContaining('status 502, upstream down')
+      );
+    });
+
+    it('rethrows a Relay failure and logs it once', async () => {
+      const { server, logger } = createConnectedHarness();
+      const relayError = new Error('relay down');
+      isChannelBound.mockRejectedValue(relayError);
+
+      await expect(new SlackAppService(server).isChannelBound(request, 'C1')).rejects.toBe(
+        relayError
+      );
+      expect(logger.warn).toHaveBeenCalledTimes(1);
+      expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('relay down'));
+    });
+  });
+
   describe('bindChannel / unbindChannel', () => {
     const bind = jest.fn();
     const unbindChannel = jest.fn();
+    const listAvailableChannels = jest.fn();
 
     function createHarnessWithChannelOps(opts?: HarnessOptions) {
       const harness = createHarness(opts);
@@ -1549,6 +1689,7 @@ describe('SlackAppService', () => {
         listBindings: jest.fn(),
         bind,
         unbindChannel,
+        listAvailableChannels,
       };
       return harness;
     }
@@ -1556,6 +1697,7 @@ describe('SlackAppService', () => {
     beforeEach(() => {
       bind.mockReset();
       unbindChannel.mockReset();
+      listAvailableChannels.mockReset();
     });
 
     it('bindChannel calls relay bind with tenantKey and channelId', async () => {
@@ -1604,6 +1746,38 @@ describe('SlackAppService', () => {
       await new SlackAppService(server).unbindChannel(request, 'C123');
 
       expect(unbindChannel).toHaveBeenCalledWith('tenant-A', 'C123');
+    });
+
+    it('listAvailableChannels maps the relay channels and keeps truncated', async () => {
+      const { server, soClient } = createHarnessWithChannelOps();
+      soClient.get.mockResolvedValue({
+        attributes: {
+          status: RELAY_APP_CONNECTION_STATUS.connected,
+          tenantKey: 'tenant-A',
+        },
+      });
+      listAvailableChannels.mockResolvedValue({
+        channels: [{ scope_id: 'C1', display_name: 'alerts' }],
+        truncated: true,
+      });
+
+      await expect(new SlackAppService(server).listAvailableChannels(request)).resolves.toEqual({
+        channels: [{ channel: 'C1', displayName: 'alerts' }],
+        truncated: true,
+      });
+      expect(listAvailableChannels).toHaveBeenCalledWith('tenant-A');
+    });
+
+    it('listAvailableChannels throws when the connection is not connected', async () => {
+      const { server, soClient } = createHarnessWithChannelOps();
+      soClient.get.mockResolvedValue({
+        attributes: { status: RELAY_APP_CONNECTION_STATUS.notConnected },
+      });
+
+      await expect(new SlackAppService(server).listAvailableChannels(request)).rejects.toThrow(
+        'Connection is not in a connected state'
+      );
+      expect(listAvailableChannels).not.toHaveBeenCalled();
     });
   });
 

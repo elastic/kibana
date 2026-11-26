@@ -12,6 +12,7 @@ import {
   chanceOfFailingInARow,
   describeBreakage,
   findBreakages,
+  type BuildOutcome,
   type SetupBuilds,
 } from './breakages';
 
@@ -21,14 +22,23 @@ const SETUP = 'kibana-on-merge a.config.ts stateful-classic local';
 const FIRST_BUILD_AT = Date.UTC(2026, 9, 1);
 const HOUR_MS = 60 * 60 * 1000;
 
-/** Builds numbered from `first` on, oldest first: `x` failed, `.` passed. */
+const OUTCOMES: Readonly<Record<string, BuildOutcome>> = {
+  x: 'failed',
+  r: 'recovered',
+  '.': 'passed',
+};
+
+/**
+ * Builds numbered from `first` on, oldest first: `x` failed every attempt, `r` failed then passed
+ * on a retry, `.` passed.
+ */
 const setupBuilds = (pattern: string, first = 1, branch = 'main'): SetupBuilds => ({
   branch,
   setup: SETUP,
-  builds: [...pattern].map((outcome, index) => ({
+  builds: [...pattern].map((mark, index) => ({
     buildId: `build-${first + index}`,
     buildNumber: first + index,
-    failed: outcome === 'x',
+    outcome: OUTCOMES[mark],
     ranAt: new Date(FIRST_BUILD_AT + (first + index) * HOUR_MS),
   })),
 });
@@ -85,6 +95,34 @@ describe('findBreakages', () => {
   it('finds none without builds', () => {
     expect(findBreakages(setupBuilds(''))).toEqual([]);
   });
+
+  it('finds none in builds where a retry passed, however many in a row', () => {
+    // The test still works in those builds: it fails its first attempt in nearly all of them
+    expect(findBreakages(setupBuilds(`.${'r'.repeat(84)}`))).toEqual([]);
+    expect(findBreakages(setupBuilds('r'.repeat(40)))).toEqual([]);
+  });
+
+  it('ends a breakage at a build where a retry passed', () => {
+    const setup = setupBuilds(`${'.'.repeat(60)}${'x'.repeat(10)}r`);
+
+    const [breakage, ...others] = findBreakages(setup);
+
+    expect(others).toEqual([]);
+    expect(breakage.ongoing).toBe(false);
+    expect(numbers(breakage)).toEqual(numbers(setup).slice(60, 70));
+  });
+
+  it('judges the chance of a run by the builds failing every attempt only', () => {
+    // 3 of 62 builds failed every attempt, all in a row: under a 1% chance at that rate, while
+    // counting the 15 builds where a retry passed too would make the run likely
+    const pattern = `${'r.'.repeat(15)}xxx${'.'.repeat(29)}`;
+
+    const breakages = findBreakages(setupBuilds(pattern));
+
+    expect(breakages).toHaveLength(1);
+    expect(breakages[0].ongoing).toBe(false);
+    expect(numbers(breakages[0])).toEqual([31, 32, 33]);
+  });
 });
 
 describe('branchCountsWithout', () => {
@@ -120,6 +158,25 @@ describe('branchCountsWithout', () => {
       failedBuilds: 2,
     });
   });
+
+  it('takes a breakage in a pipeline judged on its own off that pipeline’s counts only', () => {
+    const fipsCounts = [
+      ...counts,
+      { branch: 'main', pipeline: 'kibana-fips', builds: 40, failedBuilds: 8 },
+    ];
+    const breakages = findBreakages({
+      ...setupBuilds(`${'.'.repeat(30)}xxxxxx`),
+      pipeline: 'kibana-fips',
+      setup: 'kibana-fips a.config.ts stateful-classic local',
+    });
+
+    expect(breakages).toEqual([expect.objectContaining({ pipeline: 'kibana-fips' })]);
+    expect(branchCountsWithout(fipsCounts, breakages)).toEqual([
+      { branch: 'main', builds: 53, failedBuilds: 12 },
+      { branch: '9.5', builds: 20, failedBuilds: 2 },
+      { branch: 'main', pipeline: 'kibana-fips', builds: 34, failedBuilds: 2 },
+    ]);
+  });
 });
 
 describe('describeBreakage', () => {
@@ -127,7 +184,7 @@ describe('describeBreakage', () => {
     const [breakage] = findBreakages(setupBuilds(`${'.'.repeat(50)}xxxxx`, 113400));
 
     expect(describeBreakage(breakage)).toBe(
-      `5 failed builds in a row on main (#113450 to #113454) in ${SETUP}`
+      `5 builds in a row failing every attempt on main (#113450 to #113454) in ${SETUP}`
     );
   });
 });

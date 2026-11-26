@@ -17,11 +17,15 @@ import type {
 } from 'graphql';
 import {
   GraphQLError,
+  TypeInfo,
   buildSchema,
   experimentalExecuteIncrementally,
   getOperationAST,
   parse,
+  specifiedScalarTypes,
   validate,
+  visit,
+  visitWithTypeInfo,
 } from 'graphql';
 import type {
   ContractProtocol,
@@ -127,20 +131,66 @@ const rootFieldNames = (
     return rootFieldNames(fragment.selectionSet, fragments, visited);
   });
 
+const SPECIFIED_SCALARS = new Set(specifiedScalarTypes.map(({ name }) => name));
+
+// The types in fragments' conditions and variables' declarations.
+const namedTypesOf = (document: DocumentNode): string[] => {
+  const names = new Set<string>();
+  visit(document, {
+    NamedType: ({ name: { value } }) => {
+      if (!SPECIFIED_SCALARS.has(value)) {
+        names.add(value);
+      }
+    },
+  });
+  return [...names].sort();
+};
+
+// Every root field the document selects: in any operation or fragment, skipped or not.
+const mentionedRootFieldsOf = (document: DocumentNode, schema: GraphQLSchema): string[] => {
+  const roots = new Map<unknown, string>([
+    [schema.getQueryType(), 'query'],
+    [schema.getMutationType(), 'mutation'],
+    [schema.getSubscriptionType(), 'subscription'],
+  ]);
+  const typeInfo = new TypeInfo(schema);
+  const names = new Set<string>();
+  visit(
+    document,
+    visitWithTypeInfo(typeInfo, {
+      Field: ({ name: { value } }) => {
+        const root = roots.get(typeInfo.getParentType());
+        if (root && !value.startsWith('__')) {
+          names.add(`${root} ${value}`);
+        }
+      },
+    })
+  );
+  return [...names].sort();
+};
+
 const toOperations = (
   document: DocumentNode,
   operation: OperationDefinitionNode,
-  source: string | undefined
+  source: string | undefined,
+  schema: GraphQLSchema
 ): NamedOperation[] => {
   const fragments = new Map(
     document.definitions.flatMap((definition) =>
       definition.kind === 'FragmentDefinition' ? [[definition.name.value, definition]] : []
     )
   );
-  return [...new Set(rootFieldNames(operation.selectionSet, fragments))].map((field) => ({
-    name: `${operation.operation} ${field}`,
+  const namedTypes = namedTypesOf(document);
+  const called = [...new Set(rootFieldNames(operation.selectionSet, fragments))].map(
+    (field) => `${operation.operation} ${field}`
+  );
+  const namedRootFields = mentionedRootFieldsOf(document, schema);
+  return called.map((name) => ({
+    name,
     ...(source === undefined ? {} : { source }),
     readOnly: operation.operation === 'query',
+    ...(namedTypes.length > 0 ? { namedTypes } : {}),
+    ...(namedRootFields.length > 0 ? { namedRootFields } : {}),
   }));
 };
 
@@ -256,7 +306,7 @@ export const createGraphQLProtocol = (
         return rejected([], [violation(['body', 'query'], 'syntax', message)]);
       }
       const operation = getOperationAST(document, params.operationName);
-      const operations = operation ? toOperations(document, operation, source) : [];
+      const operations = operation ? toOperations(document, operation, source, schema) : [];
       const validationErrors = validate(schema, document);
       if (validationErrors.length > 0) {
         return rejected(
@@ -342,6 +392,7 @@ export const createGraphQLProtocol = (
               : { data: result.data },
         },
         operations: operations.filter(({ name }) => executed.has(name)),
+        ...(executed.size === 0 && operations.length > 0 ? { skipped: operations[0] } : {}),
         requestViolations: [],
         responseViolations,
       };

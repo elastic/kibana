@@ -47,6 +47,7 @@ import { z } from '@kbn/zod/v4';
 import type { AnalyticsServiceSetup } from '@kbn/core/server';
 import type { AgentBuilderPluginStart, RunAgentParams } from '@kbn/agent-builder-server';
 import type { AgentAvailabilityConfig } from '@kbn/agent-builder-server/agents';
+import type { EvaluateFn } from '@kbn/evals-plugin/server';
 import type { AuditedSandboxSession, NightshiftSandboxStart } from '../server/sandbox_audit';
 import type { NightshiftTelemetryClient } from '../server/telemetry';
 
@@ -67,6 +68,7 @@ import { memoryMaterializeToSandboxStepDefinition } from '../server/step_definit
 import { memoryOptimizeStepDefinition } from '../server/step_definitions/memory_optimize';
 import { obtainSandboxStepDefinition } from '../server/step_definitions/obtain_sandbox';
 import { resolveModelStepDefinition } from '../server/step_definitions/resolve_model';
+import { scoreMemoryOnlineEvalsStepDefinition } from '../server/step_definitions/score_memory_online_evals';
 
 jest.mock('../server/wiki/register_wiki', () => ({
   hydrateWikiWorkspace: jest.fn(),
@@ -130,6 +132,7 @@ export interface NightshiftWorkflowFixtureOptions {
   wikiEnabled?: boolean;
   memoryEnabled?: boolean;
   decisionTreesEnabled?: boolean;
+  evaluate?: EvaluateFn;
 }
 
 /** One `runAgent` invocation as the fake recorded it. */
@@ -139,6 +142,13 @@ export interface NightshiftWorkflowFixture {
   engine: WorkflowRunFixtureType;
   sandboxStart: jest.Mocked<NightshiftSandboxStart>;
   agentBuilder: { ensure: jest.Mock };
+  reportOnlineEvalScore: jest.Mock;
+  telemetry: {
+    reportSemanticMemoryMaterialized: jest.Mock;
+    reportSemanticMemoryOptimized: jest.Mock;
+    reportDecisionTreeCausalCheck: jest.Mock;
+    reportOnlineEvalScore: jest.Mock;
+  };
   /** The saved rounds `prepare_turn` reads; none by default, so a round is a first round. */
   setSavedRounds: (rounds: Array<{ id: string; steps: unknown[] }>) => void;
   agentRuns: AgentRun[];
@@ -211,6 +221,7 @@ export const createNightshiftWorkflowFixture = ({
   wikiEnabled = true,
   memoryEnabled = true,
   decisionTreesEnabled = true,
+  evaluate,
 }: NightshiftWorkflowFixtureOptions = {}): NightshiftWorkflowFixture => {
   setHealthyBoundary();
 
@@ -272,10 +283,14 @@ export const createNightshiftWorkflowFixture = ({
       })),
     },
   };
-  const telemetry = {
+  const reportOnlineEvalScore = jest.fn();
+  const telemetryMock = {
     reportSemanticMemoryMaterialized: jest.fn(),
     reportSemanticMemoryOptimized: jest.fn(),
-  } as unknown as NightshiftTelemetryClient;
+    reportDecisionTreeCausalCheck: jest.fn(),
+    reportOnlineEvalScore,
+  };
+  const telemetry = telemetryMock as unknown as NightshiftTelemetryClient;
 
   // Mirrors the registration list in `plugin.ts`: every writer and both reinforcement steps are
   // registered whatever the feature flags say, which is what lets a trees-off install still run
@@ -323,6 +338,7 @@ export const createNightshiftWorkflowFixture = ({
       getAgentBuilder: () => conversationsAgentBuilder as unknown as AgentBuilderPluginStart,
       logger,
       isEnabled: () => decisionTreesEnabled,
+      telemetry,
     }),
     resolveModelStepDefinition({
       getInference: () => ({} as never),
@@ -337,6 +353,17 @@ export const createNightshiftWorkflowFixture = ({
     decisionTreeReinforceStepDefinition({
       getAgentBuilder: () => agentBuilder as unknown as AgentBuilderPluginStart,
       isEnabled: () => decisionTreesEnabled,
+    }),
+    scoreMemoryOnlineEvalsStepDefinition({
+      getAgentBuilder: () => agentBuilder as unknown as AgentBuilderPluginStart,
+      getEvaluate: () => evaluate,
+      isPaused: () => false,
+      shouldIncludeExplanations: () => false,
+      telemetry: { reportOnlineEvalScore },
+      logger,
+      isEnabled: () => wikiEnabled || memoryEnabled || decisionTreesEnabled,
+      isWikiEnabled: () => wikiEnabled,
+      isDecisionTreesEnabled: () => decisionTreesEnabled,
     }),
   ];
   const byId = new Map(definitions.map((definition) => [definition.id, definition]));
@@ -400,6 +427,8 @@ export const createNightshiftWorkflowFixture = ({
     engine,
     sandboxStart,
     agentBuilder: { ensure: ensureAgent },
+    reportOnlineEvalScore,
+    telemetry: telemetryMock,
     setSavedRounds: (rounds) => {
       savedRounds = rounds;
     },

@@ -61,6 +61,7 @@ describe('createVisPanelResolver', () => {
     });
 
     const result = await resolveVisPanel({
+      type: 'vis',
       nlQuery: 'show total requests',
       index: 'logs-*',
       chartType: SupportedChartType.Metric,
@@ -98,6 +99,7 @@ describe('createVisPanelResolver', () => {
 
     await expect(
       resolveVisPanel({
+        type: 'vis',
         nlQuery: 'show total requests',
         index: 'logs-*',
       })
@@ -121,6 +123,7 @@ describe('createVisPanelResolver', () => {
     });
 
     await resolveVisPanel({
+      type: 'vis',
       nlQuery: 'change the title',
       preserveESQL: true,
       applyChartRules: true,
@@ -142,7 +145,7 @@ describe('createVisPanelResolver', () => {
     );
   });
 
-  it('creates a Vega panel in the attachment API shape (config.spec) when renderer is "vega"', async () => {
+  it('creates a native Vega panel when type is "vega"', async () => {
     const spec = '{"$schema":"https://vega.github.io/schema/vega-lite/v6.json"}';
     mockedBuildVegaConfig.mockResolvedValue({
       spec,
@@ -156,14 +159,14 @@ describe('createVisPanelResolver', () => {
     const result = await resolveVisPanel({
       nlQuery: 'a small multiples chart',
       index: 'logs-*',
-      renderer: 'vega',
+      type: 'vega',
     });
 
     expect(result).toEqual({
       type: 'success',
       panelContent: {
         type: VEGA_VIS_TYPE,
-        config: { spec, title: 'Requests by host' },
+        config: { spec: { format: 'hjson', value: spec }, title: 'Requests by host' },
       },
       authoringNote: 'Created a bar chart of requests by host with a concise title.',
     });
@@ -173,12 +176,13 @@ describe('createVisPanelResolver', () => {
     expect(mockedBuildLensConfig).not.toHaveBeenCalled();
   });
 
-  it('defaults to Lens when renderer is omitted on a create request', async () => {
+  it('creates a Lens panel when type is "vis"', async () => {
     mockedBuildLensConfig.mockResolvedValue(createBuildLensConfigResult({ type: 'metric' }));
 
     const resolveVisPanel = createVisPanelResolver({ logger, modelProvider, events, esClient });
 
     const result = await resolveVisPanel({
+      type: 'vis',
       nlQuery: 'total requests',
       chartType: SupportedChartType.Metric,
     });
@@ -188,7 +192,7 @@ describe('createVisPanelResolver', () => {
     expect(mockedBuildLensConfig).toHaveBeenCalled();
   });
 
-  it('reuses the embedded spec when editing a Vega panel', async () => {
+  it('reuses the embedded spec and keeps the panel settings when editing a Vega panel', async () => {
     const existingSpec = '{"$schema":"vega-lite","mark":"bar"}';
     const nextSpec = '{"$schema":"vega-lite","mark":"line"}';
     mockedBuildVegaConfig.mockResolvedValue({
@@ -202,11 +206,15 @@ describe('createVisPanelResolver', () => {
     const result = await resolveVisPanel({
       nlQuery: 'make it a line chart',
       preserveESQL: true,
-      renderer: 'vega',
+      type: 'vega',
       existingPanel: {
         id: 'panel-1',
         type: VEGA_VIS_TYPE,
-        config: { spec: existingSpec },
+        config: {
+          spec: { format: 'json', value: JSON.parse(existingSpec) },
+          title: 'Requests',
+          query: { language: 'kql', expression: 'host.name: "a"' },
+        },
         grid: { w: 24, h: 12, x: 0, y: 0 },
       },
     });
@@ -215,7 +223,11 @@ describe('createVisPanelResolver', () => {
       type: 'success',
       panelContent: {
         type: VEGA_VIS_TYPE,
-        config: { spec: nextSpec },
+        config: {
+          spec: { format: 'hjson', value: nextSpec },
+          title: 'Requests',
+          query: { language: 'kql', expression: 'host.name: "a"' },
+        },
       },
       authoringNote: 'Changed the panel to a line chart.',
     });
@@ -230,13 +242,13 @@ describe('createVisPanelResolver', () => {
 
     const result = await resolveVisPanel({
       nlQuery: 'Enhance this panel',
-      renderer: 'vega',
+      type: 'vega',
       applyChartRules: true,
       preserveESQL: true,
       existingPanel: {
         id: 'panel-1',
         type: VEGA_VIS_TYPE,
-        config: { spec: '{"mark":"bar"}' },
+        config: { spec: { format: 'hjson', value: '{"mark":"bar"}' } },
         grid: { w: 24, h: 10, x: 0, y: 0 },
       },
     });

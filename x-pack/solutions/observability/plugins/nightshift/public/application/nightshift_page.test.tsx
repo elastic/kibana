@@ -570,6 +570,31 @@ describe('NightshiftPage', () => {
       );
     });
 
+    it('replaces early header actions through First automation when onboarding ends', async () => {
+      withInvestigationsClient();
+      mockUseOnboardingVisibility.mockReturnValue({
+        isLoading: false,
+        showOnboarding: true,
+        latestInvestigation: { id: 'inv-1' },
+        dismiss: jest.fn(),
+      });
+      const { history, rerender } = renderPage();
+      expect(await screen.findByTestId('nightshiftOnboardingStub')).toBeInTheDocument();
+      expect(screen.queryByTestId('nightshiftAutomationsPrimaryAction')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('nightshiftDetectionsPrimaryAction')).not.toBeInTheDocument();
+      expect(
+        screen.queryByTestId('o11yNightshiftAppStartInvestigationButton')
+      ).not.toBeInTheDocument();
+
+      mockUseOnboardingVisibility.mockReturnValue({
+        isLoading: false,
+        showOnboarding: false,
+        dismiss: jest.fn(),
+      });
+      rerender(renderPageContent(history));
+      expect(await screen.findByTestId('nightshiftAutomationsPrimaryAction')).toBeInTheDocument();
+    });
+
     it('hides the detection setup banner across app remounts in the same space', async () => {
       withInvestigationsClient();
       mockUseOnboardingVisibility.mockReturnValue({

@@ -271,6 +271,7 @@ export const EsqlParamRow: React.FC<EsqlParamRowProps> = ({
           render={({ field: { ref, onChange, value, ...field } }) => (
             <EuiCheckbox
               id={`params.${index}.optional`}
+              aria-label={i18nMessages.optionalParamLabel}
               inputRef={ref}
               onChange={(e) => {
                 onChange(e.target.checked);

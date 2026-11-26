@@ -6,14 +6,15 @@
  */
 
 import type { AnalyticsServiceSetup } from '@kbn/core-analytics-server';
+import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type {
   AgentBuilderKnowledgeIndicatorCreatedProps,
   AgentToolEventCreateProps,
-  AgentToolEventInvestigationAttachProps,
   AgentToolEventSearchProps,
-  AgentToolEventStatusUpdateProps,
+  AgentToolFailedProps,
   AgentToolKnowledgeIndicatorIdentificationStartedProps,
   KnowledgeIndicatorFeaturesIdentifiedProps,
+  KnowledgeIndicatorQueriesGenerationFailedProps,
   KnowledgeIndicatorQueriesGeneratedProps,
   KnowledgeIndicatorOnboardingScheduledProps,
   DetectionScanProps,
@@ -22,104 +23,170 @@ import type {
   DiscoveryTriggeredProps,
   EventStatusChangedProps,
   AgentToolEventWriteProps,
+  EbtTelemetryContext,
 } from './types';
+import type { CpsTelemetryContextProvider, TargetClusterScope } from './cps_telemetry_context';
 import {
-  SIGNIFICANT_EVENTS_KNOWLEDGE_INDICATORS_QUERIES_GENERATED_EVENT_TYPE,
-  SIGNIFICANT_EVENTS_FEATURES_IDENTIFIED_EVENT_TYPE,
-  SIGNIFICANT_EVENTS_AGENT_BUILDER_KNOWLEDGE_INDICATOR_CREATED_EVENT_TYPE,
-  SIGNIFICANT_EVENTS_AGENT_TOOL_KI_IDENTIFICATION_STARTED_EVENT_TYPE,
-  SIGNIFICANT_EVENTS_AGENT_TOOL_EVENT_CREATE_EVENT_TYPE,
-  SIGNIFICANT_EVENTS_AGENT_TOOL_EVENT_SEARCH_EVENT_TYPE,
-  SIGNIFICANT_EVENTS_AGENT_TOOL_EVENT_STATUS_UPDATE_EVENT_TYPE,
-  SIGNIFICANT_EVENTS_AGENT_TOOL_EVENT_INVESTIGATION_ATTACH_EVENT_TYPE,
-  SIGNIFICANT_EVENTS_DISCOVERY_COMPLETED_EVENT_TYPE,
-  SIGNIFICANT_EVENTS_DISCOVERY_STARTED_EVENT_TYPE,
-  SIGNIFICANT_EVENTS_DISCOVERY_TRIGGERED_EVENT_TYPE,
-  SIGNIFICANT_EVENTS_DETECTION_SCAN_EVENT_TYPE,
-  SIGNIFICANT_EVENTS_ONBOARDING_SCHEDULED_EVENT_TYPE,
-  SIGNIFICANT_EVENTS_AGENT_TOOL_EVENT_WRITE_EVENT_TYPE,
-  SIGNIFICANT_EVENTS_EVENT_STATUS_CHANGED_EVENT_TYPE,
+  NIGHTSHIFT_KNOWLEDGE_INDICATORS_QUERIES_GENERATED_EVENT_TYPE,
+  NIGHTSHIFT_FEATURES_IDENTIFIED_EVENT_TYPE,
+  NIGHTSHIFT_AGENT_BUILDER_KNOWLEDGE_INDICATOR_CREATED_EVENT_TYPE,
+  NIGHTSHIFT_AGENT_TOOL_KI_IDENTIFICATION_STARTED_EVENT_TYPE,
+  NIGHTSHIFT_AGENT_TOOL_EVENT_CREATE_EVENT_TYPE,
+  NIGHTSHIFT_AGENT_TOOL_EVENT_SEARCH_EVENT_TYPE,
+  NIGHTSHIFT_AGENT_TOOL_FAILED_EVENT_TYPE,
+  NIGHTSHIFT_KNOWLEDGE_INDICATORS_QUERIES_GENERATION_FAILED_EVENT_TYPE,
+  NIGHTSHIFT_DISCOVERY_COMPLETED_EVENT_TYPE,
+  NIGHTSHIFT_DISCOVERY_STARTED_EVENT_TYPE,
+  NIGHTSHIFT_DISCOVERY_TRIGGERED_EVENT_TYPE,
+  NIGHTSHIFT_DETECTION_SCAN_EVENT_TYPE,
+  NIGHTSHIFT_ONBOARDING_SCHEDULED_EVENT_TYPE,
+  NIGHTSHIFT_AGENT_TOOL_EVENT_WRITE_EVENT_TYPE,
+  NIGHTSHIFT_EVENT_STATUS_CHANGED_EVENT_TYPE,
 } from './constants';
 
-export class EbtTelemetryClient {
-  constructor(private readonly analytics: AnalyticsServiceSetup) {}
+type TrackParams<T> = Omit<T, keyof EbtTelemetryContext> & Partial<EbtTelemetryContext>;
 
-  public trackSignificantEventsQueriesGenerated(params: KnowledgeIndicatorQueriesGeneratedProps) {
-    this.analytics.reportEvent(
-      SIGNIFICANT_EVENTS_KNOWLEDGE_INDICATORS_QUERIES_GENERATED_EVENT_TYPE,
-      params
+export class EbtTelemetryClient {
+  constructor(
+    private readonly analytics: AnalyticsServiceSetup,
+    private readonly contextProvider: CpsTelemetryContextProvider,
+    private readonly logger: Logger
+  ) {}
+
+  public trackSignificantEventsQueriesGenerated(
+    params: TrackParams<KnowledgeIndicatorQueriesGeneratedProps>,
+    request: KibanaRequest
+  ) {
+    this.report(
+      NIGHTSHIFT_KNOWLEDGE_INDICATORS_QUERIES_GENERATED_EVENT_TYPE,
+      params,
+      request,
+      'all'
     );
   }
 
-  public trackFeaturesIdentified(params: KnowledgeIndicatorFeaturesIdentifiedProps) {
-    this.analytics.reportEvent(SIGNIFICANT_EVENTS_FEATURES_IDENTIFIED_EVENT_TYPE, params);
+  public trackFeaturesIdentified(
+    params: TrackParams<KnowledgeIndicatorFeaturesIdentifiedProps>,
+    request: KibanaRequest
+  ) {
+    this.report(NIGHTSHIFT_FEATURES_IDENTIFIED_EVENT_TYPE, params, request, 'all');
   }
 
   public trackAgentBuilderKnowledgeIndicatorCreated(
-    params: AgentBuilderKnowledgeIndicatorCreatedProps
+    params: TrackParams<AgentBuilderKnowledgeIndicatorCreatedProps>,
+    request: KibanaRequest
   ) {
-    this.analytics.reportEvent(
-      SIGNIFICANT_EVENTS_AGENT_BUILDER_KNOWLEDGE_INDICATOR_CREATED_EVENT_TYPE,
-      params
+    this.report(
+      NIGHTSHIFT_AGENT_BUILDER_KNOWLEDGE_INDICATOR_CREATED_EVENT_TYPE,
+      params,
+      request,
+      'origin'
     );
   }
 
   public trackAgentToolKiIdentificationStarted(
-    params: AgentToolKnowledgeIndicatorIdentificationStartedProps
+    params: TrackParams<AgentToolKnowledgeIndicatorIdentificationStartedProps>,
+    request: KibanaRequest
   ) {
-    this.analytics.reportEvent(
-      SIGNIFICANT_EVENTS_AGENT_TOOL_KI_IDENTIFICATION_STARTED_EVENT_TYPE,
-      params
+    this.report(NIGHTSHIFT_AGENT_TOOL_KI_IDENTIFICATION_STARTED_EVENT_TYPE, params, request, 'all');
+  }
+
+  public trackAgentToolEventCreate(
+    params: TrackParams<AgentToolEventCreateProps>,
+    request: KibanaRequest
+  ) {
+    this.report(NIGHTSHIFT_AGENT_TOOL_EVENT_CREATE_EVENT_TYPE, params, request, 'origin');
+  }
+
+  public trackSignificantEventsDiscoveryStarted(
+    params: TrackParams<DiscoveryStartedProps>,
+    request: KibanaRequest
+  ) {
+    this.report(NIGHTSHIFT_DISCOVERY_STARTED_EVENT_TYPE, params, request, 'all');
+  }
+
+  public trackSignificantEventsDiscoveryCompleted(
+    params: TrackParams<DiscoveryCompletedProps>,
+    request: KibanaRequest
+  ) {
+    this.report(NIGHTSHIFT_DISCOVERY_COMPLETED_EVENT_TYPE, params, request, 'all');
+  }
+
+  public trackEventStatusChanged(
+    params: TrackParams<EventStatusChangedProps>,
+    request: KibanaRequest
+  ) {
+    this.report(NIGHTSHIFT_EVENT_STATUS_CHANGED_EVENT_TYPE, params, request, 'origin');
+  }
+
+  public trackSignificantEventsDiscoveryTriggered(
+    params: TrackParams<DiscoveryTriggeredProps>,
+    request: KibanaRequest
+  ) {
+    this.report(NIGHTSHIFT_DISCOVERY_TRIGGERED_EVENT_TYPE, params, request, 'all');
+  }
+
+  public trackOnboardingScheduled(
+    params: TrackParams<KnowledgeIndicatorOnboardingScheduledProps>,
+    request: KibanaRequest
+  ) {
+    this.report(NIGHTSHIFT_ONBOARDING_SCHEDULED_EVENT_TYPE, params, request, 'all');
+  }
+
+  public trackSignificantEventsDetectionScan(
+    params: TrackParams<DetectionScanProps>,
+    request: KibanaRequest
+  ) {
+    this.report(NIGHTSHIFT_DETECTION_SCAN_EVENT_TYPE, params, request, 'origin');
+  }
+
+  public trackAgentToolEventsWrite(
+    params: TrackParams<AgentToolEventWriteProps>,
+    request: KibanaRequest
+  ) {
+    this.report(NIGHTSHIFT_AGENT_TOOL_EVENT_WRITE_EVENT_TYPE, params, request, 'origin');
+  }
+
+  public trackAgentToolEventSearch(
+    params: TrackParams<AgentToolEventSearchProps>,
+    request: KibanaRequest
+  ) {
+    this.report(NIGHTSHIFT_AGENT_TOOL_EVENT_SEARCH_EVENT_TYPE, params, request, 'origin');
+  }
+
+  private report<T>(
+    eventType: string,
+    params: T,
+    request: KibanaRequest,
+    targetClusterScope: TargetClusterScope
+  ): void {
+    const context = this.contextProvider.get(request, targetClusterScope);
+    const report = (resolvedContext: EbtTelemetryContext) =>
+      this.analytics.reportEvent(eventType, { ...params, ...resolvedContext });
+
+    if (context instanceof Promise) {
+      void context
+        .then(report)
+        .catch((error) => this.logger.error('Failed to report CPS telemetry', { error }));
+      return;
+    }
+
+    report(context);
+  }
+
+  public trackAgentToolFailed(params: TrackParams<AgentToolFailedProps>, request: KibanaRequest) {
+    this.report(NIGHTSHIFT_AGENT_TOOL_FAILED_EVENT_TYPE, params, request, 'origin');
+  }
+
+  public trackSignificantEventsQueriesGenerationFailed(
+    params: TrackParams<KnowledgeIndicatorQueriesGenerationFailedProps>,
+    request: KibanaRequest
+  ) {
+    this.report(
+      NIGHTSHIFT_KNOWLEDGE_INDICATORS_QUERIES_GENERATION_FAILED_EVENT_TYPE,
+      params,
+      request,
+      'all'
     );
-  }
-
-  public trackAgentToolEventCreate(params: AgentToolEventCreateProps) {
-    this.analytics.reportEvent(SIGNIFICANT_EVENTS_AGENT_TOOL_EVENT_CREATE_EVENT_TYPE, params);
-  }
-
-  public trackAgentToolEventStatusUpdate(params: AgentToolEventStatusUpdateProps) {
-    this.analytics.reportEvent(
-      SIGNIFICANT_EVENTS_AGENT_TOOL_EVENT_STATUS_UPDATE_EVENT_TYPE,
-      params
-    );
-  }
-
-  public trackAgentToolEventInvestigationAttach(params: AgentToolEventInvestigationAttachProps) {
-    this.analytics.reportEvent(
-      SIGNIFICANT_EVENTS_AGENT_TOOL_EVENT_INVESTIGATION_ATTACH_EVENT_TYPE,
-      params
-    );
-  }
-
-  public trackSignificantEventsDiscoveryStarted(params: DiscoveryStartedProps) {
-    this.analytics.reportEvent(SIGNIFICANT_EVENTS_DISCOVERY_STARTED_EVENT_TYPE, params);
-  }
-
-  public trackSignificantEventsDiscoveryCompleted(params: DiscoveryCompletedProps) {
-    this.analytics.reportEvent(SIGNIFICANT_EVENTS_DISCOVERY_COMPLETED_EVENT_TYPE, params);
-  }
-
-  public trackEventStatusChanged(params: EventStatusChangedProps) {
-    this.analytics.reportEvent(SIGNIFICANT_EVENTS_EVENT_STATUS_CHANGED_EVENT_TYPE, params);
-  }
-
-  public trackSignificantEventsDiscoveryTriggered(params: DiscoveryTriggeredProps) {
-    this.analytics.reportEvent(SIGNIFICANT_EVENTS_DISCOVERY_TRIGGERED_EVENT_TYPE, params);
-  }
-
-  public trackOnboardingScheduled(params: KnowledgeIndicatorOnboardingScheduledProps) {
-    this.analytics.reportEvent(SIGNIFICANT_EVENTS_ONBOARDING_SCHEDULED_EVENT_TYPE, params);
-  }
-
-  public trackSignificantEventsDetectionScan(params: DetectionScanProps) {
-    this.analytics.reportEvent(SIGNIFICANT_EVENTS_DETECTION_SCAN_EVENT_TYPE, params);
-  }
-
-  public trackAgentToolEventsWrite(params: AgentToolEventWriteProps) {
-    this.analytics.reportEvent(SIGNIFICANT_EVENTS_AGENT_TOOL_EVENT_WRITE_EVENT_TYPE, params);
-  }
-
-  public trackAgentToolEventSearch(params: AgentToolEventSearchProps) {
-    this.analytics.reportEvent(SIGNIFICANT_EVENTS_AGENT_TOOL_EVENT_SEARCH_EVENT_TYPE, params);
   }
 }

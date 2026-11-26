@@ -35,7 +35,11 @@ export interface FetchInvestigationsParams {
   /** True: only investigations an agent is working on; false: the rest. */
   inProgress: boolean;
   severities?: InvestigationSeverityFilterValue[];
+  status?: 'open' | 'closed';
   query?: string;
+  /** Only investigations last modified within this window (ISO 8601). */
+  updatedAfter?: string;
+  updatedBefore?: string;
   /**
    * Poll interval in ms, or `false` to never poll. A refetch re-requests every page this
    * section has loaded, so only sections that stay shallow should poll.
@@ -91,7 +95,10 @@ export const getInvestigationsNextPageParam = ({
 export const useFetchInvestigations = ({
   inProgress,
   severities,
+  status = 'open',
   query,
+  updatedAfter,
+  updatedBefore,
   refetchInterval = false,
 }: FetchInvestigationsParams): FetchInvestigationsResult => {
   const { http, agenticInvestigations } = useKibana().services;
@@ -107,18 +114,26 @@ export const useFetchInvestigations = ({
     isPreviousData,
     refetch,
   } = useInfiniteQuery<ListInvestigationsResponse, Error>({
-    queryKey: [...NIGHTSHIFT_INVESTIGATIONS_QUERY_KEY, 'section', inProgress, severities, query],
+    queryKey: [
+      ...NIGHTSHIFT_INVESTIGATIONS_QUERY_KEY,
+      'section',
+      inProgress,
+      severities,
+      status,
+      query,
+      updatedAfter,
+      updatedBefore,
+    ],
     // The list API belongs to agenticInvestigations, an optional dependency.
     enabled: agenticInvestigations != null,
     queryFn: async ({ pageParam, signal }) =>
       http.get<ListInvestigationsResponse>(SHARED_INVESTIGATIONS_URL, {
         version: SHARED_INVESTIGATIONS_API_VERSION,
         query: {
-          sort_field: 'created_at',
+          sort_field: 'updated_at',
           sort_order: 'desc',
           in_progress: inProgress,
-          // Home sections and tiles are open-only; closed finished work is out of scope here.
-          status: 'open',
+          status,
           ...(inProgress
             ? { page: 1, per_page: IN_PROGRESS_CANDIDATES }
             : {
@@ -127,6 +142,8 @@ export const useFetchInvestigations = ({
               }),
           ...(severities?.length ? { severity: severities } : {}),
           ...(query ? { query } : {}),
+          ...(updatedAfter ? { updated_after: updatedAfter } : {}),
+          ...(updatedBefore ? { updated_before: updatedBefore } : {}),
         },
         signal,
       }),

@@ -9,7 +9,6 @@
     "@kbn/zod",
     "@kbn/zod-helpers",
     "@kbn/streamlang",
-    "@kbn/std"
   ],
   "exclude": ["target/**/*"]
 }

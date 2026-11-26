@@ -29,7 +29,8 @@ import HeatmapComponent, {
   computeMinIntervalFromData,
   getDateFormatPattern,
 } from './heatmap_component';
-import { ChartTooltipFooterMessage, LegendSize } from '@kbn/chart-expressions-common';
+import { LegendSize } from '@kbn/chart-expressions-common';
+import { ChartTooltipFooterMessage } from '@kbn/visualizations-components';
 import type { FieldFormat } from '@kbn/field-formats-plugin/common';
 
 const actWithTimeout = (action: Function, timer: number = 1) =>
@@ -523,6 +524,79 @@ describe('HeatmapComponent', function () {
       };
       const component = shallowWithIntl(<HeatmapComponent {...wrapperProps} data={esqlData} />);
       expect(component.find(Tooltip).prop('footer')).toBe('default');
+    });
+  });
+
+  describe('missing numeric Y buckets', () => {
+    const row = (y: number | string, value: number) => ({
+      'col-0-1': value,
+      'col-1-2': 'a',
+      'col-2-3': y,
+    });
+    const table = (
+      rows: Datatable['rows'],
+      yMeta: Datatable['columns'][number]['meta'],
+      esql = false
+    ): Datatable => ({
+      type: 'datatable',
+      ...(esql ? { meta: { type: ESQL_TABLE_TYPE } } : {}),
+      rows,
+      columns: [
+        { id: 'col-0-1', name: 'Count', meta: { type: 'number' } },
+        { id: 'col-1-2', name: 'Dest', meta: { type: 'string' } },
+        { id: 'col-2-3', name: 'Bytes', meta: yMeta },
+      ],
+    });
+    const heatmap = (datatable: Datatable, ySortPredicate?: 'asc' | 'desc') =>
+      shallowWithIntl(
+        <HeatmapComponent
+          {...wrapperProps}
+          data={datatable}
+          args={{
+            ...wrapperProps.args,
+            gridConfig: { ...wrapperProps.args.gridConfig, ySortPredicate },
+          }}
+        />
+      ).find(Heatmap);
+
+    it('fills a missing ES|QL histogram step from the column interval', () => {
+      const chart = heatmap(
+        table([row(0, 1), row(2, 2)], { type: 'number', esMeta: { bucket: { interval: 1 } } }, true)
+      );
+      const chartData = chart.prop('data') as Datatable['rows'];
+
+      expect(chartData.map((entry) => entry['col-2-3'])).toEqual([0, 1, 2]);
+      expect(chartData[1]['col-0-1']).toBeNull();
+    });
+
+    it('leaves a DSL histogram gap for the agg empty-row toggle', () => {
+      const rows = [row(0, 1), row(2, 2)];
+      const chart = heatmap(
+        table(rows, {
+          type: 'number',
+          source: 'esaggs',
+          sourceParams: { type: 'histogram', params: { used_interval: 1 } },
+        })
+      );
+
+      expect(chart.prop('data')).toEqual(rows);
+    });
+
+    it('fills a 9-to-11 range gap and tells the chart to keep that row order', () => {
+      // Alphabetical descending would put "9..10" first and "10..11" last.
+      const chart = heatmap(
+        table(
+          [row('9..10', 1), row('11..12', 2)],
+          { type: 'number_range', esMeta: { bucket: { interval: 1 } } },
+          true
+        ),
+        'desc'
+      );
+      const chartData = chart.prop('data') as Datatable['rows'];
+
+      expect(chartData.map((entry) => entry['col-2-3'])).toEqual(['11..12', '10..11', '9..10']);
+      expect(chartData[1]['col-0-1']).toBeNull();
+      expect(chart.prop('ySortPredicate')).toBe('dataIndex');
     });
   });
 

@@ -35,6 +35,7 @@ import {
   ConnectSourcesGrid,
   isAdditionalType,
 } from '../../../components/entities/sandbox_connector/connect_sources_grid';
+import { NIGHTSHIFT_EBT_ELEMENTS } from '../../../common/ebt_constants';
 import { IconMark } from '../../../components/ui/icon_mark';
 import { CONNECT_SOURCES_TITLE } from './connect_sources_step';
 import { useStartOnboardingSuggestions } from './use_onboarding';
@@ -108,6 +109,23 @@ export function OnboardingFirstInvestigationStep({
     [isStarting, startInvestigation]
   );
 
+  const compose = (
+    <ComposeCard
+      key="compose"
+      title={i18n.translate('xpack.nightshift.onboarding.investigate.customTitle', {
+        defaultMessage: 'Ask your own question',
+      })}
+      value={message}
+      onChange={setMessage}
+      isStarting={isStarting}
+      isLoading={isStarting && startingPrompt === message.trim()}
+      onSubmit={() => {
+        const prompt = message.trim();
+        if (prompt) start(prompt);
+      }}
+    />
+  );
+
   if (isRunning) {
     return (
       <div
@@ -124,8 +142,12 @@ export function OnboardingFirstInvestigationStep({
             <h4>{CONNECT_SOURCES_TITLE}</h4>
           </EuiTitle>
           <EuiSpacer size="m" />
-          <ConnectSourcesGrid filter={isAdditionalType} />
+          <ConnectSourcesGrid
+            ebtElement={NIGHTSHIFT_EBT_ELEMENTS.ONBOARDING_CONNECTORS}
+            filter={isAdditionalType}
+          />
         </section>
+        {compose}
       </div>
     );
   }
@@ -204,19 +226,7 @@ export function OnboardingFirstInvestigationStep({
           />
         </EuiPanel>
       )}
-      <ComposeCard
-        title={i18n.translate('xpack.nightshift.onboarding.investigate.customTitle', {
-          defaultMessage: 'Ask your own question',
-        })}
-        value={message}
-        onChange={setMessage}
-        isStarting={isStarting}
-        isLoading={isStarting && startingPrompt === message.trim()}
-        onSubmit={() => {
-          const prompt = message.trim();
-          if (prompt) start(prompt);
-        }}
-      />
+      {compose}
     </div>
   );
 }

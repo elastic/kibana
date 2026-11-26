@@ -6,6 +6,7 @@
  */
 
 import { errors } from '@elastic/elasticsearch';
+import type { DestinationCollection } from '../../../lib/unit_stats/client';
 import { resolveUnitIndicesRoute } from './resolve_indices';
 
 const getUnitOrEmpty = jest.fn();
@@ -18,20 +19,35 @@ const route = resolveUnitIndicesRoute['GET /internal/streams/unit/{id}/_resolve_
 
 type HandlerParams = Parameters<typeof route.handler>[0];
 
+/** 900 seconds, so a collection with the default 900 documents has a rate of 1 per second. */
+const timeRange = { start: '2026-11-23T15:00:00.000Z', end: '2026-11-23T15:15:00.000Z' };
+const DEFAULT_DOCUMENTS = 900;
+
+const toCollection = (collection: string | DestinationCollection): DestinationCollection =>
+  typeof collection === 'string' ? { name: collection, documents: DEFAULT_DOCUMENTS } : collection;
+
 const callHandler = ({
   resolveIndex,
   getDataStream,
+  collectionsByDestination = {},
+  getDestinationCollections = jest.fn(async ({ destinationIds }: { destinationIds: string[] }) =>
+    Object.fromEntries(
+      destinationIds.map((id) => [id, (collectionsByDestination[id] ?? []).map(toCollection)])
+    )
+  ),
   readFailureStore = {},
   logger = { error: jest.fn(), warn: jest.fn() },
 }: {
   resolveIndex: jest.Mock;
   getDataStream: jest.Mock;
+  collectionsByDestination?: Record<string, Array<string | DestinationCollection>>;
+  getDestinationCollections?: jest.Mock;
   readFailureStore?: Record<string, boolean>;
   logger?: { error: jest.Mock; warn: jest.Mock };
 }) =>
   route.handler({
     request: {},
-    params: { path: { id: 'default' } },
+    params: { path: { id: 'default' }, query: timeRange },
     logger,
     telemetry: {
       startTrackingEndpointLatency: jest.fn().mockReturnValue(jest.fn()),
@@ -41,6 +57,7 @@ const callHandler = ({
       uiSettingsClient: { get: jest.fn().mockResolvedValue(true) },
       soClient: {},
       scopedClusterClient: { asCurrentUser: { indices: { resolveIndex, getDataStream } } },
+      unitStatsClient: { getDestinationCollections },
       streamsClient: {
         getPrivilegesPerStream: jest.fn(async (names: string[]) =>
           Object.fromEntries(
@@ -67,42 +84,152 @@ const mixedDestinationUnit = {
 };
 
 describe('GET /internal/streams/unit/{id}/_resolve_indices', () => {
-  it('resolves telemetry-scoped indices of one destination', async () => {
+  it('asks the metrics where each local Elasticsearch destination wrote in the time range', async () => {
     getUnitOrEmpty.mockResolvedValue({
       unit: {
         destinations: [
           {
-            id: 'es-app',
-            name: 'App',
+            id: 'es-auto',
+            name: 'Auto',
             type: 'elasticsearch',
-            supported_telemetry: ['logs', 'traces'],
-            config: [
-              { name: 'index', telemetry: ['logs'], value: 'logs-app-default' },
-              { name: 'index', telemetry: ['traces'], value: 'traces-app-default' },
-            ],
+            supported_telemetry: ['logs', 'metrics', 'traces'],
+          },
+          { id: 's3-archive', name: 'Archive', type: 's3', supported_telemetry: ['logs'] },
+        ],
+      },
+      ui_metadata: {},
+    });
+    const getDestinationCollections = jest.fn().mockResolvedValue({ 'es-auto': [] });
+    const resolveIndex = jest.fn();
+    const getDataStream = jest.fn();
+
+    const result = await callHandler({ resolveIndex, getDataStream, getDestinationCollections });
+
+    expect(getDestinationCollections).toHaveBeenCalledWith({
+      unitId: 'default',
+      destinationIds: ['es-auto'],
+      window: timeRange,
+    });
+    expect(resolveIndex).not.toHaveBeenCalled();
+    expect(result).toEqual({
+      destinations: { 'es-auto': { indices: [] }, 's3-archive': { indices: [] } },
+    });
+  });
+
+  it('lists only the indices a destination wrote to, not every index its write patterns match', async () => {
+    getUnitOrEmpty.mockResolvedValue({
+      unit: {
+        destinations: [
+          {
+            id: 'es-auto',
+            name: 'Auto',
+            type: 'elasticsearch',
+            supported_telemetry: ['logs'],
           },
         ],
       },
       ui_metadata: {},
     });
     const resolveIndex = jest.fn().mockResolvedValue({
-      data_streams: [{ name: 'logs-app-default' }, { name: 'traces-app-default' }],
+      data_streams: [{ name: 'logs-app.otel-default' }],
       indices: [],
     });
     const getDataStream = jest.fn().mockResolvedValue({ data_streams: [] });
 
-    const result = await callHandler({ resolveIndex, getDataStream });
+    const result = await callHandler({
+      resolveIndex,
+      getDataStream,
+      collectionsByDestination: { 'es-auto': ['logs-app.otel-default'] },
+    });
 
     expect(resolveIndex).toHaveBeenCalledWith(
-      expect.objectContaining({ name: 'logs-app-default,traces-app-default' })
+      expect.objectContaining({ name: 'logs-app.otel-default' })
     );
-    expect(result.destinations['es-app'].indices.map((index) => index.name)).toEqual([
-      'logs-app-default',
-      'traces-app-default',
+    expect(result.destinations['es-auto'].indices.map((index) => index.name)).toEqual([
+      'logs-app.otel-default',
     ]);
   });
 
-  it('keys resolved indices by destination write patterns', async () => {
+  it('resolves long names in batches that fit the request line', async () => {
+    getUnitOrEmpty.mockResolvedValue(mixedDestinationUnit);
+    const names = Array.from(
+      { length: 20 },
+      (_, index) => `logs-${'a'.repeat(240)}-${String(index).padStart(2, '0')}`
+    );
+    const resolveIndex = jest.fn().mockResolvedValue({ data_streams: [], indices: [] });
+
+    await callHandler({
+      resolveIndex,
+      getDataStream: jest.fn(),
+      collectionsByDestination: { 'es-mixed': names },
+    });
+
+    const batches = resolveIndex.mock.calls.map(([{ name }]: [{ name: string }]) => name);
+    expect(batches.length).toBeGreaterThan(1);
+    expect(batches.every((batch) => batch.length <= 4096 * 0.75 + names.length)).toBe(true);
+    expect(batches.flatMap((batch) => batch.split(','))).toEqual(names);
+  });
+
+  it('gives each index the documents the destination wrote to it, and their rate over the time range', async () => {
+    getUnitOrEmpty.mockResolvedValue(mixedDestinationUnit);
+    const resolveIndex = jest.fn().mockResolvedValue({
+      data_streams: [{ name: 'logs-app-default' }],
+      indices: [{ name: 'logs-regular' }],
+    });
+    const getDataStream = jest.fn().mockResolvedValue({ data_streams: [] });
+
+    const result = await callHandler({
+      resolveIndex,
+      getDataStream,
+      collectionsByDestination: {
+        'es-mixed': [
+          { name: 'logs-app-default', documents: 1800 },
+          { name: 'logs-regular', documents: 45 },
+        ],
+      },
+    });
+
+    expect(result.destinations['es-mixed'].indices).toEqual([
+      expect.objectContaining({ name: 'logs-app-default', documents: 1800, ingestion_rate: 2 }),
+      expect.objectContaining({ name: 'logs-regular', documents: 45, ingestion_rate: 0.05 }),
+    ]);
+  });
+
+  it('leaves out a written-to index that no longer resolves', async () => {
+    getUnitOrEmpty.mockResolvedValue(mixedDestinationUnit);
+    const resolveIndex = jest.fn().mockResolvedValue({
+      data_streams: [{ name: 'logs-kept-default' }],
+      indices: [],
+    });
+    const getDataStream = jest.fn().mockResolvedValue({ data_streams: [] });
+
+    const result = await callHandler({
+      resolveIndex,
+      getDataStream,
+      collectionsByDestination: { 'es-mixed': ['logs-kept-default', 'logs-deleted-default'] },
+    });
+
+    expect(result.destinations['es-mixed'].indices.map((index) => index.name)).toEqual([
+      'logs-kept-default',
+    ]);
+  });
+
+  it('fails with the error of the metrics query', async () => {
+    getUnitOrEmpty.mockResolvedValue(mixedDestinationUnit);
+    const forbidden = Object.assign(new Error('The current user cannot read the stats stream.'), {
+      statusCode: 403,
+    });
+
+    await expect(
+      callHandler({
+        resolveIndex: jest.fn(),
+        getDataStream: jest.fn(),
+        getDestinationCollections: jest.fn().mockRejectedValue(forbidden),
+      })
+    ).rejects.toBe(forbidden);
+  });
+
+  it('keys resolved indices by the destination that wrote them', async () => {
     getUnitOrEmpty.mockResolvedValue({
       unit: {
         destinations: [
@@ -153,11 +280,15 @@ describe('GET /internal/streams/unit/{id}/_resolve_indices', () => {
     const result = await callHandler({
       resolveIndex,
       getDataStream,
+      collectionsByDestination: {
+        'es-logs': ['logs-nginx-default'],
+        'es-metrics': ['metrics-host-default'],
+      },
       readFailureStore: { 'logs-nginx-default': true },
     });
 
     expect(resolveIndex).toHaveBeenCalledWith({
-      name: 'logs-*-*,metrics-host-default',
+      name: 'logs-nginx-default,metrics-host-default',
       expand_wildcards: 'open',
       ignore_unavailable: true,
       allow_no_indices: true,
@@ -171,6 +302,8 @@ describe('GET /internal/streams/unit/{id}/_resolve_indices', () => {
     expect(result.destinations['debug-out'].indices).toEqual([]);
     expect(result.destinations['es-logs'].indices[0]).toEqual({
       name: 'logs-nginx-default',
+      documents: DEFAULT_DOCUMENTS,
+      ingestion_rate: 1,
       is_data_stream: true,
       lifecycle: { dsl: { data_retention: '7d', downsample: undefined, frozen_after: undefined } },
       failure_store_enabled: true,
@@ -200,12 +333,18 @@ describe('GET /internal/streams/unit/{id}/_resolve_indices', () => {
       ],
     });
 
-    const result = await callHandler({ resolveIndex, getDataStream });
+    const result = await callHandler({
+      resolveIndex,
+      getDataStream,
+      collectionsByDestination: { 'es-mixed': ['logs-nginx-default', 'logs-regular'] },
+    });
 
     expect(getDataStream).toHaveBeenCalledWith({ name: ['logs-nginx-default'] });
     expect(result.destinations['es-mixed'].indices).toEqual([
       {
         name: 'logs-nginx-default',
+        documents: DEFAULT_DOCUMENTS,
+        ingestion_rate: 1,
         is_data_stream: true,
         lifecycle: {
           dsl: { data_retention: '7d', downsample: undefined, frozen_after: undefined },
@@ -213,7 +352,12 @@ describe('GET /internal/streams/unit/{id}/_resolve_indices', () => {
         failure_store_enabled: false,
         privileges: { read_failure_store: false },
       },
-      { name: 'logs-regular', is_data_stream: false },
+      {
+        name: 'logs-regular',
+        documents: DEFAULT_DOCUMENTS,
+        ingestion_rate: 1,
+        is_data_stream: false,
+      },
     ]);
   });
 
@@ -226,7 +370,12 @@ describe('GET /internal/streams/unit/{id}/_resolve_indices', () => {
     const getDataStream = jest.fn().mockRejectedValue(new Error('security_exception'));
     const logger = { error: jest.fn(), warn: jest.fn() };
 
-    const result = await callHandler({ resolveIndex, getDataStream, logger });
+    const result = await callHandler({
+      resolveIndex,
+      getDataStream,
+      collectionsByDestination: { 'es-mixed': ['logs-nginx-default'] },
+      logger,
+    });
 
     expect(result.destinations['es-mixed'].indices[0]).toMatchObject({
       is_data_stream: true,
@@ -252,7 +401,11 @@ describe('GET /internal/streams/unit/{id}/_resolve_indices', () => {
       })
     );
 
-    const result = await callHandler({ resolveIndex, getDataStream });
+    const result = await callHandler({
+      resolveIndex,
+      getDataStream,
+      collectionsByDestination: { 'es-mixed': ['logs-nginx-default'] },
+    });
 
     expect(result.destinations['es-mixed'].indices[0]).toMatchObject({
       lifecycle: { error: { message: 'Data stream not found' } },

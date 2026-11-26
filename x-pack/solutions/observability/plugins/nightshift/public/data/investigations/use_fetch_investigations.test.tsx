@@ -86,7 +86,7 @@ describe('useFetchInvestigations', () => {
       '/internal/investigations/investigations',
       expect.objectContaining({
         query: {
-          sort_field: 'created_at',
+          sort_field: 'updated_at',
           sort_order: 'desc',
           in_progress: true,
           page: 1,
@@ -95,6 +95,31 @@ describe('useFetchInvestigations', () => {
         },
       })
     );
+  });
+
+  it('keeps open and closed results separate when the status filter changes', async () => {
+    const open = investigation('open', false);
+    const closed: InvestigationSummary = {
+      ...investigation('closed', false),
+      metadata: { status: 'closed' },
+    };
+    httpGet.mockImplementation((_url, { query: { status } }) =>
+      Promise.resolve({
+        results: [status === 'closed' ? closed : open],
+        pagination: { page: 1, per_page: INVESTIGATIONS_PAGE_SIZE, total: 1 },
+      })
+    );
+    const { result, rerender } = renderHook(
+      ({ status }: { status: 'open' | 'closed' }) =>
+        useFetchInvestigations({ inProgress: false, status }),
+      { initialProps: { status: 'open' }, wrapper: createWrapper() }
+    );
+
+    await waitFor(() => expect(result.current.investigations).toEqual([open]));
+    rerender({ status: 'closed' });
+    await waitFor(() => expect(result.current.investigations).toEqual([closed]));
+    rerender({ status: 'open' });
+    await waitFor(() => expect(result.current.investigations).toEqual([open]));
   });
 
   it('leaves running investigations out of the severity sections', async () => {
@@ -111,7 +136,7 @@ describe('useFetchInvestigations', () => {
       '/internal/investigations/investigations',
       expect.objectContaining({
         query: {
-          sort_field: 'created_at',
+          sort_field: 'updated_at',
           sort_order: 'desc',
           in_progress: false,
           status: 'open',

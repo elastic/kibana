@@ -25,13 +25,18 @@ describe('normalizeAclSource', () => {
       normalizeAclSource({
         type: 'my-type',
         'my-type': { name: 'not part of the acl' },
-        acl: { version: 1, owner: { type: 'user' }, 'owner.id': 'u_a', general_access: ['none'] },
+        acl: {
+          version: 1,
+          owner: { type: 'user' },
+          'owner.id': 'u_a',
+          general: { access: ['none'] },
+        },
         'acl.owner.id': ['u_b', null],
       })
     ).toEqual({
       version: [1],
       owner: { type: ['user'], id: ['u_a', 'u_b'] },
-      general_access: ['none'],
+      general: { access: ['none'] },
       entries: [],
     });
   });
@@ -78,22 +83,22 @@ describe('normalizeAclSource', () => {
   it('converts numbers and booleans to text, except in version', () => {
     expect(
       normalizeAclSource({
-        acl: { version: 1, owner: { type: 'user', id: 7 }, general_access: true },
+        acl: { version: 1, owner: { type: 'user', id: 7 }, general: { access: true } },
       })
     ).toEqual({
       version: [1],
       owner: { type: ['user'], id: ['7'] },
-      general_access: ['true'],
+      general: { access: ['true'] },
       entries: [],
     });
     expect(normalizeAclSource({ acl: { version: ['1', 2] } })?.version).toEqual(['1', 2]);
   });
 
   it('reads an empty string as a value', () => {
-    expect(normalizeAclSource({ acl: { general_access: '' } })).toEqual({
+    expect(normalizeAclSource({ acl: { general: { access: '' } } })).toEqual({
       version: [],
       owner: { type: [], id: [] },
-      general_access: [''],
+      general: { access: [''] },
       entries: [],
     });
   });
@@ -146,12 +151,12 @@ describe('toAclSource', () => {
       toAclSource({
         version: [1],
         owner: { type: [], id: ['u_a'] },
-        general_access: ['none', 'use'],
+        general: { access: ['none', 'use'] },
         entries: [{ type: ['user'], id: ['u_b'], access: ['use'], added_at: [] }],
       })
     ).toEqual({
       version: 1,
-      general_access: ['none', 'use'],
+      general: { access: ['none', 'use'] },
       owner: { id: 'u_a' },
       entries: [{ type: 'user', id: 'u_b', access: 'use' }],
     });

@@ -17,7 +17,6 @@ import { convertToWorkflowGraph } from '../../../graph';
 
 interface WorkflowJsonSchema {
   type?: string;
-  enum?: string[];
   description?: string;
   properties?: Record<string, WorkflowJsonSchema>;
   items?: WorkflowJsonSchema;
@@ -41,6 +40,7 @@ interface WorkflowStep {
     written_rule_uuids?: string;
     inputs?: Record<string, string>;
     schema?: WorkflowJsonSchema;
+    message?: string;
   };
   foreach?: string;
 }
@@ -79,7 +79,7 @@ const featuresIdentification = parse(
 
 describe('significant events persistence workflow contracts', () => {
   it('bumps managed workflow versions for the bulk persistence contract', () => {
-    expect(SIGNIFICANT_EVENTS_DISCOVERY_WORKFLOW.version).toBe(30);
+    expect(SIGNIFICANT_EVENTS_DISCOVERY_WORKFLOW.version).toBe(31);
     expect(SIGNIFICANT_EVENTS_ORCHESTRATOR_WORKFLOW.version).toBe(4);
   });
 
@@ -247,7 +247,23 @@ describe('significant events persistence workflow contracts', () => {
     ).toBe('${{ parent.executionId }}');
   });
 
-  it('stamps discovery detections only from reported completed outcomes', () => {
+  it('ends the features identification loop on its time budget without failing the run', () => {
+    const { settings } = parse(SIGNIFICANT_EVENTS_KI_FEATURES_IDENTIFICATION_WORKFLOW.yaml) as {
+      settings: { timeout: string };
+    };
+    const loop = requireStep(featuresIdentification, 'identify_loop');
+
+    expect(parseInt(loop.timeout ?? '', 10)).toBeLessThan(parseInt(settings.timeout, 10));
+    expect(loop['on-failure']).toEqual({ continue: true });
+    expect(requireStep(featuresIdentification, 'check_all_failed').condition).toBe(
+      '${{ variables.hasSuccess == false and steps.prepare.output.hasDocuments != false }}'
+    );
+    expect(requireStep(featuresIdentification, 'all_failed').with?.message).toContain(
+      '{{ steps.identify_loop.error.message }}'
+    );
+  });
+
+  it('dedupes reported rule uuids and stamps only when a rule count is above zero', () => {
     expect(requireStep(discovery, 'compute_written_rule_uuids').with?.written_rule_uuids).toContain(
       '| default: [] | uniq'
     );

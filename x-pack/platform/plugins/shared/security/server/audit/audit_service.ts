@@ -39,6 +39,7 @@ import {
 import type { AuditLogWriteAccess } from './audit_write_access';
 import { getAuditLogPath, getAuditStatus$, probeAuditLogWriteAccess } from './audit_write_access';
 import type { SecurityLicense, SecurityLicenseFeatures } from '../../common';
+import { isMinimallyAuthenticatedUser } from '../authentication/providers/base';
 import type { ConfigType } from '../config';
 import type { SecurityPluginSetup } from '../plugin';
 
@@ -81,9 +82,11 @@ interface AuditServiceSetupParams {
 
 export class AuditService {
   private logger: Logger;
+  private readonly serviceLogger: Logger;
   private usageIntervalId?: NodeJS.Timeout;
 
   constructor(_logger: Logger) {
+    this.serviceLogger = _logger;
     this.logger = _logger.get('ecs');
   }
 
@@ -198,61 +201,74 @@ export class AuditService {
         if (!event || !isLoggingEnabled()) {
           return;
         }
-        const spaceId = getSpaceId(request);
-        const user = getCurrentUser(request);
-        // Resolved before the first await. Callers do not await `log`, so a workload can release
-        // its fake request before this resumes, and the registry no longer knows it after that.
-        const principal = user
-          ? getAuthenticatedPrincipal(user)
-          : request.isFakeRequest
-          ? getFakeRequestPrincipal(request)
-          : null;
-        const serviceAccountId =
-          principal?.type === 'service_account' ? principal.serviceAccountId : undefined;
-        const sessionId = await getSID(request);
-        const forwardedFor = getForwardedFor(request);
-        // The request user is the actor. An event may also name who the action was taken on, as
-        // ECS `user.target`, and that is the event's to keep.
-        const target = event.user?.target;
 
-        log({
-          ...event,
-          user: user
-            ? {
-                // A service account has no user profile, so its id stands in for one.
-                id: user.profile_uid ?? serviceAccountId,
-                name: user.username,
-                ...(user.email ? { email: user.email } : {}),
-                ...(user.full_name ? { full_name: user.full_name } : {}),
-                ...(includeUserDomain && user.authentication_realm?.name
-                  ? { domain: user.authentication_realm.name }
-                  : {}),
-                roles: user.roles as string[],
-                ...(target ? { target } : {}),
-              }
-            : serviceAccountId
-            ? // The registry knows only which account a fake request runs as, not its roles.
-              { id: serviceAccountId, name: serviceAccountId, ...(target ? { target } : {}) }
-            : event.user,
-          kibana: {
-            space_id: spaceId,
-            session_id: sessionId,
-            ...event.kibana,
-          },
-          trace: { id: request.id },
-          client: { ip: request.socket.remoteAddress },
-          http: forwardedFor
-            ? {
-                ...event.http,
-                request: {
-                  ...event.http?.request,
-                  headers: {
-                    'x-forwarded-for': forwardedFor,
+        // Callers do not await `log`, so an error that escapes here becomes an unhandled rejection.
+        try {
+          const spaceId = getSpaceId(request);
+          const user = getCurrentUser(request);
+          // Resolved before the first await. Callers do not await `log`, so a workload can release
+          // its fake request before this resumes, and the registry no longer knows it after that.
+          const principal = user
+            ? getAuthenticatedPrincipal(user)
+            : request.isFakeRequest
+            ? getFakeRequestPrincipal(request)
+            : null;
+          const serviceAccountId =
+            principal?.type === 'service_account' ? principal.serviceAccountId : undefined;
+          const sessionId = await getSID(request);
+          const forwardedFor = getForwardedFor(request);
+          // The request user is the actor. An event may also name who the action was taken on, as
+          // ECS `user.target`, and that is the event's to keep.
+          const target = event.user?.target;
+          // A minimally authenticated user has no authentication realm, and reading it throws.
+          const domain =
+            includeUserDomain && user && !isMinimallyAuthenticatedUser(user)
+              ? user.authentication_realm?.name
+              : undefined;
+
+          log({
+            ...event,
+            user: user
+              ? {
+                  // A service account has no user profile, so its id stands in for one.
+                  id: user.profile_uid ?? serviceAccountId,
+                  name: user.username,
+                  ...(user.email ? { email: user.email } : {}),
+                  ...(user.full_name ? { full_name: user.full_name } : {}),
+                  ...(domain ? { domain } : {}),
+                  roles: user.roles as string[],
+                  ...(target ? { target } : {}),
+                }
+              : serviceAccountId
+              ? // The registry knows only which account a fake request runs as, not its roles.
+                { id: serviceAccountId, name: serviceAccountId, ...(target ? { target } : {}) }
+              : event.user,
+            kibana: {
+              space_id: spaceId,
+              session_id: sessionId,
+              ...event.kibana,
+            },
+            trace: { id: request.id },
+            client: { ip: request.socket.remoteAddress },
+            http: forwardedFor
+              ? {
+                  ...event.http,
+                  request: {
+                    ...event.http?.request,
+                    headers: {
+                      'x-forwarded-for': forwardedFor,
+                    },
                   },
-                },
-              }
-            : event.http,
-        });
+                }
+              : event.http,
+          });
+        } catch (error) {
+          this.serviceLogger.error(
+            `Failed to write audit event [action=${event.event?.action}]: ${
+              error instanceof Error ? error.message : String(error)
+            }`
+          );
+        }
       },
       enabled,
       includeSavedObjectNames,

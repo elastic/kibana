@@ -20,11 +20,20 @@ import { clearSearchTermRegExpCache } from './in_table_search_highlights_wrapper
 import { getHighlightColors } from './get_highlight_colors';
 import { getActiveMatchCss } from './get_active_match_css';
 
+export type InTableSearchScrollToCell = UseInTableSearchControlProps['scrollToCell'];
+
 export interface UseDataGridInTableSearchProps
   extends Pick<UseInTableSearchControlProps, 'rows' | 'visibleColumns'> {
   enableInTableSearch?: boolean;
   dataGridWrapper: HTMLElement | null;
   dataGridRef: React.RefObject<EuiDataGridRefProps | null>;
+  /**
+   * Overrides how the grid scrolls to the active in-table search match. Provide this together with
+   * `renderCustomGridBody`, since EUI's built-in `scrollToItem` only works with its own virtualized body.
+   */
+  scrollToCell?: InTableSearchScrollToCell;
+  /** Additional hosts containing table controls rendered outside the grid wrapper. */
+  additionalSearchScopeElements?: readonly HTMLElement[];
   cellContext: EuiDataGridProps['cellContext'] | undefined;
   pagination: EuiDataGridProps['pagination'] | undefined;
   renderCellValue: EuiDataGridProps['renderCellValue'];
@@ -52,7 +61,9 @@ export const useDataGridInTableSearch = (
   const {
     enableInTableSearch = true,
     dataGridWrapper,
+    additionalSearchScopeElements,
     dataGridRef,
+    scrollToCell: customScrollToCell,
     visibleColumns,
     rows,
     renderCellValue,
@@ -109,16 +120,24 @@ export const useDataGridInTableSearch = (
     [visibleColumns, controlsCount]
   );
 
-  const scrollToCell = useCallback(
-    (params: { rowIndex: number; columnIndex: number; align: 'center' }) => {
+  const scrollToCell = useCallback<InTableSearchScrollToCell>(
+    (params) => {
+      if (customScrollToCell) {
+        customScrollToCell(params);
+        return;
+      }
       dataGridRef.current?.scrollToItem?.(params);
     },
-    [dataGridRef]
+    [dataGridRef, customScrollToCell]
   );
 
   const shouldOverrideCmdF = useCallback(
-    (element: HTMLElement) => dataGridWrapper?.contains(element) ?? false,
-    [dataGridWrapper]
+    (element: HTMLElement) =>
+      Boolean(
+        dataGridWrapper?.contains(element) ||
+          additionalSearchScopeElements?.some((scope) => scope.contains(element))
+      ),
+    [dataGridWrapper, additionalSearchScopeElements]
   );
 
   const onChange = useCallback(

@@ -15,9 +15,11 @@ import type {
   AttackDiscoveryTaskOutput,
 } from '@kbn/evals-suite-attack-discovery/src/types';
 import { createAdFailureClassEvaluator } from './evaluators/ad_failure_class_evaluator';
+import { createAdAxesRubricEvaluator } from './evaluators/ad_axes_rubric_evaluator';
 import { createChainCoverageEvaluator } from './evaluators/chain_coverage_evaluator';
+import { isPersonaRubricJudgeEnabled } from './evaluators/persona_rubric_evaluator';
 
-// Derived from the rubric evaluator so this package needs no direct inference dependency.
+// Derived from the AD suite's rubric evaluator so this stays whatever client type it accepts.
 type EvaluationInferenceClient = Parameters<
   typeof createAttackDiscoveryRubricEvaluator
 >[0]['inferenceClient'];
@@ -29,10 +31,14 @@ type EvaluationInferenceClient = Parameters<
  */
 export const CHRYSALIS_AD_DATASET_NAME = 'Attack Discovery Chrysalis kill-chains (generate API)';
 
+/** `criteria()` is the only handle on the shared judge model; this criterion is never scored. */
+const AD_AXES_MODEL_PROBE_CRITERION = 'Accuracy: The output is technically correct.';
+
 /**
  * Mirrors the attack-discovery suite's own experiment configuration
  * (`configureExperiment` in its `evaluate_dataset.ts`) so the original evaluator
- * names are unchanged; the two deterministic evaluators are appended.
+ * names are unchanged; the two deterministic evaluators are appended, plus the
+ * opt-in four-axis LLM judge when `PERSONA_MATRIX_RUBRIC_JUDGE=1`.
  */
 export const createChrysalisAdExperimentEvaluators = ({
   evaluators,
@@ -57,5 +63,15 @@ export const createChrysalisAdExperimentEvaluators = ({
     cachedTokens as Evaluator<AttackDiscoveryDatasetExample, TaskOutput>,
     createChainCoverageEvaluator(),
     createAdFailureClassEvaluator(),
+    ...(isPersonaRubricJudgeEnabled()
+      ? [
+          createAdAxesRubricEvaluator({
+            inferenceClient: evaluationInferenceClient,
+            log,
+            // Report the judge's model the same way the criteria judge does.
+            getModel: evaluators.criteria([AD_AXES_MODEL_PROBE_CRITERION]).getModel,
+          }),
+        ]
+      : []),
   ];
 };

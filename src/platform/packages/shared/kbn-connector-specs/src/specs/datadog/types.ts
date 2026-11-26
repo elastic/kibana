@@ -35,31 +35,6 @@ export const DATADOG_SITES = [
 
 export type DatadogSite = (typeof DATADOG_SITES)[number];
 
-export const DatadogReceivedEventSchema = lazySchema(() =>
-  z.object({
-    body: z
-      .object({
-        message: z.unknown().optional(),
-        last_updated: z.unknown().optional(),
-        event_type: z.unknown().optional(),
-        title: z.unknown().optional(),
-        severity: z.unknown().optional(),
-        alert_type: z.unknown().optional(),
-        alert_query: z.unknown().optional(),
-        alert_transition: z.unknown().optional(),
-        date: z.unknown().optional(),
-        scopes: z.unknown().optional(),
-        org: z.unknown().optional(),
-        url: z.unknown().optional(),
-        tags: z.unknown().optional(),
-        id: z.unknown().optional(),
-        monitor_id: z.unknown().optional(),
-      })
-      .loose()
-      .describe('Datadog webhook JSON body.'),
-  })
-);
-
 /** Maps Datadog site parameter to the regional API base URL. */
 export const DATADOG_SITE_API_URLS: Record<DatadogSite, string> = {
   'datadoghq.com': 'https://api.datadoghq.com',
@@ -419,9 +394,11 @@ export const SearchLogsInputSchema = lazySchema(() =>
       .number()
       .int()
       .min(1)
-      .max(1000)
+      .max(5000)
       .optional()
-      .describe('Maximum number of log events to return (1–1000). Defaults to 50.'),
+      .describe(
+        'Maximum number of log events to return (1–5000). Defaults to 50. Large results can exceed the Kibana connector response size limit, so keep it low unless you need more.'
+      ),
     sort: z
       .enum(['timestamp', '-timestamp'])
       .optional()

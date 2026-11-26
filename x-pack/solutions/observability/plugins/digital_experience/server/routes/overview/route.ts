@@ -9,19 +9,43 @@ import { lazySchema, z } from '@kbn/zod/v4';
 import { getRequestAbortedSignal } from '@kbn/data-plugin/server';
 import { OVERVIEW_PERCENTILES } from '../../../common/overview_filters';
 import { readOverviewFilters } from '../../../common/overview_filters_param';
-import type { ApplicationOverviewResponse } from '../../../common/types/overview';
+import type {
+  ApplicationOverviewKpisResponse,
+  ApplicationOverviewResponse,
+} from '../../../common/types/overview';
 import { APM_API_PRIVILEGE, DIGITAL_EXPERIENCE_API_PRIVILEGES } from '../../../common/feature';
-import { MAX_SERVICE_NAME_LENGTH } from '../../lib/constants';
 import { kueryToQuery } from '../../lib/helpers/kuery';
+import { getHistogramInterval } from '../../lib/helpers/time_series';
+import {
+  APPLICATION_TAB_ROUTE_OPTIONS,
+  APPLICATION_TAB_ROUTE_SECURITY,
+  toApplicationSearch,
+} from '../application_tab_route';
 import { createDigitalExperienceServerRoute } from '../create_digital_experience_server_route';
-import { START_AFTER_END_ISSUE, filteredTimeRangeShape, isStartBeforeEnd } from '../params';
+import {
+  START_AFTER_END_ISSUE,
+  filteredTimeRangeShape,
+  isStartBeforeEnd,
+  serviceNameParam,
+  timeZoneShape,
+} from '../params';
 import { getOtelOverview } from './otel/get_otel_overview';
+import { getOtelOverviewKpis } from './otel/get_otel_overview_kpis';
 
 export const APPLICATION_OVERVIEW_ENDPOINT =
   'GET /internal/digital_experience/applications/{serviceName}/overview';
 
-/** The Overview route, keyed by its endpoint; `plugin.ts` registers it. */
-export const overviewRouteRepository = createDigitalExperienceServerRoute({
+export const APPLICATION_OVERVIEW_KPIS_ENDPOINT =
+  'GET /internal/digital_experience/applications/{serviceName}/overview/kpis';
+
+/** The percentile of the load time, as a string like the rest of the query; 75 when left out. */
+const percentileParam = () =>
+  z
+    .enum(OVERVIEW_PERCENTILES.map(String))
+    .transform((raw) => OVERVIEW_PERCENTILES.find((candidate) => String(candidate) === raw))
+    .optional();
+
+const overviewRoute = createDigitalExperienceServerRoute({
   endpoint: APPLICATION_OVERVIEW_ENDPOINT,
   options: { access: 'internal' },
   security: {
@@ -30,23 +54,20 @@ export const overviewRouteRepository = createDigitalExperienceServerRoute({
   params: lazySchema(() =>
     z.object({
       path: z.object({
-        serviceName: z.string().min(1).max(MAX_SERVICE_NAME_LENGTH),
+        serviceName: serviceNameParam(),
       }),
       query: z
         .object({
           ...filteredTimeRangeShape(),
-          // The percentile of the load time, as a string like the rest of the query; 75 when left out.
-          percentile: z
-            .enum(OVERVIEW_PERCENTILES.map(String))
-            .transform((raw) => OVERVIEW_PERCENTILES.find((candidate) => String(candidate) === raw))
-            .optional(),
+          ...timeZoneShape(),
+          percentile: percentileParam(),
         })
         .refine(isStartBeforeEnd, START_AFTER_END_ISSUE),
     })
   ),
   handler: async ({ params, context, request }): Promise<ApplicationOverviewResponse> => {
     const { serviceName } = params.path;
-    const { environment, filters, percentile, kuery } = params.query;
+    const { environment, filters, percentile, kuery, timeZone } = params.query;
     const start = Date.parse(params.query.start);
     const end = Date.parse(params.query.end);
 
@@ -63,7 +84,31 @@ export const overviewRouteRepository = createDigitalExperienceServerRoute({
       filters: readOverviewFilters(filters),
       percentile,
       kuery: kueryToQuery(kuery),
+      histogram: { interval: getHistogramInterval(start, end), timeZone },
       signal,
     });
   },
 });
+
+/** The Overview's KPI row, against the period of equal length before the time range. */
+const overviewKpisRoute = createDigitalExperienceServerRoute({
+  endpoint: APPLICATION_OVERVIEW_KPIS_ENDPOINT,
+  options: APPLICATION_TAB_ROUTE_OPTIONS,
+  security: APPLICATION_TAB_ROUTE_SECURITY,
+  params: lazySchema(() =>
+    z.object({
+      path: z.object({ serviceName: serviceNameParam() }),
+      query: z
+        .object({ ...filteredTimeRangeShape(), percentile: percentileParam() })
+        .refine(isStartBeforeEnd, START_AFTER_END_ISSUE),
+    })
+  ),
+  handler: async ({ params, context, request, logger }): Promise<ApplicationOverviewKpisResponse> =>
+    getOtelOverviewKpis({
+      ...(await toApplicationSearch({ params, context, request, logger })),
+      percentile: params.query.percentile,
+    }),
+});
+
+/** The Overview's routes, keyed by their endpoints; `plugin.ts` registers them. */
+export const overviewRouteRepository = { ...overviewRoute, ...overviewKpisRoute };

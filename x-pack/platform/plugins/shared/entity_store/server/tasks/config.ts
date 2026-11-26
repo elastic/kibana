@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { TaskCost } from '@kbn/task-manager-plugin/server';
 import type { IntervalSchedule, TaskRegisterDefinition } from '@kbn/task-manager-plugin/server';
 import { EntityStoreTaskType } from './constants';
 
@@ -50,7 +51,8 @@ export const TasksConfig = {
   [EntityStoreTaskType.enum.statusReport]: {
     title: 'Entity Store - Status Report Task',
     type: 'entity_store:v2:status_report_task',
-    timeout: '5m',
+    // Runs every 12h. Isolated metadata queries get their own timeouts inside this budget.
+    timeout: '10m',
     interval: '12h',
   },
   [EntityStoreTaskType.enum.legacySecurityAssetsMigration]: {
@@ -58,6 +60,15 @@ export const TasksConfig = {
     type: 'entity_store:v2:legacy_security_assets_migration',
     // Latest/metadata reindex can take a long time on large entity indices.
     timeout: '60m',
+  },
+  [EntityStoreTaskType.enum.latestIndexMappingsMigration]: {
+    title: 'Entity Store - Latest Index Mappings Migration',
+    description:
+      'Adds mapping fields introduced after the latest index was created to the existing latest index of every space; runs once at Kibana start.',
+    type: 'entity_store:v2:latest_index_mappings_migration',
+    timeout: '10m',
+    // One cheap putMapping per space; the default, stated to document the choice.
+    cost: TaskCost.Normal,
   },
 } as const satisfies Record<EntityStoreTaskType, EntityStoreTaskConfig>;
 

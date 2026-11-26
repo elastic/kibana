@@ -30,23 +30,16 @@ import type {
   AnomalySummaryResponse,
   AssetCriticalityRecord,
   ConfigureRiskEngineSavedObjectRequestBodyInput,
-  CreateEntitySourceResponse,
-  CreatePrivilegesImportIndexResponse,
   CreateWatchlistRequestBodyInput,
   CreateWatchlistResponse,
   DisableRiskEngineResponse,
   EnableRiskEngineResponse,
   EntityAnalyticsPrivileges,
   FindAssetCriticalityRecordsResponse,
-  InitMonitoringEngineResponse,
   InitRiskEngineResponse,
   InternalUploadAssetCriticalityV2CsvResponse,
   EntityType,
   ListEntitiesResponse,
-  ListEntitySourcesResponse,
-  PrivMonHealthResponse,
-  PrivMonPrivilegesResponse,
-  PrivmonBulkUploadUsersCSVResponse,
   ReadRiskEngineSettingsResponse,
   RiskEngineStatusResponse,
   RiskScoreHistoryEntry,
@@ -55,8 +48,6 @@ import type {
   RiskScoresEntityCalculationResponse,
   RiskScoresPreviewRequest,
   RiskScoresPreviewResponse,
-  SearchPrivilegesIndicesResponse,
-  UpdateEntitySourceResponse,
   UploadAssetCriticalityRecordsResponse,
 } from '../../../common/api/entity_analytics';
 import type { ListWatchlistsResponse } from '../../../common/api/entity_analytics/watchlists/management/list.gen';
@@ -82,24 +73,11 @@ import {
   ASSET_CRITICALITY_PUBLIC_LIST_URL,
   ASSET_CRITICALITY_PUBLIC_URL,
   ENTITY_STORE_INTERNAL_PRIVILEGES_URL,
-  getPrivmonMonitoringSourceByIdUrl,
   LIST_ENTITIES_URL,
-  MONITORING_ENGINE_INIT_URL,
-  MONITORING_ENTITY_LIST_SOURCES_URL,
-  MONITORING_ENTITY_SOURCE_URL,
-  MONITORING_USERS_CSV_UPLOAD_URL,
-  PRIVMON_HEALTH_URL,
-  PRIVMON_INDICES_URL,
-  PRIVMON_PRIVILEGE_CHECK_API,
   RISK_ENGINE_CLEANUP_URL,
   RISK_ENGINE_CONFIGURE_SO_URL,
-  RISK_ENGINE_DISABLE_URL,
-  RISK_ENGINE_ENABLE_URL,
-  RISK_ENGINE_INIT_URL,
   RISK_ENGINE_PRIVILEGES_URL,
   RISK_ENGINE_SETTINGS_URL,
-  RISK_ENGINE_STATUS_URL,
-  RISK_SCORE_ENTITY_CALCULATION_URL,
   RISK_SCORE_ENTITY_CALCULATION_V2_URL,
   RISK_SCORE_PREVIEW_URL,
   ENTITY_ANOMALY_OVERVIEW_INTERNAL_URL,
@@ -141,11 +119,6 @@ export interface DeleteAssetCriticalityResponse {
   deleted: true;
 }
 
-/**
- * This hardcoded name was temporarily introduced for 9.1.0.
- * It is used to identify the only entity source that can be edited by the UI.
- */
-const ENTITY_SOURCE_NAME = 'User Monitored Indices';
 const ENTITY_STORE_V2_QUERY = { apiVersion: ENTITY_STORE_API_VERSIONS.internal.v2 } as const;
 
 const getMaintainerRouteWithId = (route: string, id: string): string =>
@@ -156,7 +129,6 @@ export const useEntityAnalyticsRoutes = () => {
   const isEntityAnalyticsEntityStoreV2Enabled = useIsExperimentalFeatureEnabled(
     'entityAnalyticsEntityStoreV2'
   );
-  const isMaintainerRiskScoreV2Enabled = isEntityAnalyticsEntityStoreV2Enabled;
 
   return useMemo(() => {
     const fetchEntityMaintainers = (ids?: string[], context?: KibanaExecutionContext) =>
@@ -281,136 +253,97 @@ export const useEntityAnalyticsRoutes = () => {
      * Fetches risks engine status
      */
     const fetchRiskEngineStatus = async ({
-      signal,
       context,
     }: {
       signal?: AbortSignal;
       context?: KibanaExecutionContext;
     }) => {
-      if (isMaintainerRiskScoreV2Enabled) {
-        const riskScoreMaintainer = await fetchRiskScoreMaintainer(context);
-        const riskEngineStatus = !riskScoreMaintainer
-          ? 'NOT_INSTALLED'
-          : riskScoreMaintainer.taskStatus === 'started'
-          ? 'ENABLED'
-          : riskScoreMaintainer.taskStatus === 'stopped'
-          ? 'DISABLED'
-          : 'NOT_INSTALLED';
-        const runAt = riskScoreMaintainer?.nextRunAt;
+      const riskScoreMaintainer = await fetchRiskScoreMaintainer(context);
+      const riskEngineStatus = !riskScoreMaintainer
+        ? 'NOT_INSTALLED'
+        : riskScoreMaintainer.taskStatus === 'started'
+        ? 'ENABLED'
+        : riskScoreMaintainer.taskStatus === 'stopped'
+        ? 'DISABLED'
+        : 'NOT_INSTALLED';
+      const runAt = riskScoreMaintainer?.nextRunAt;
 
-        // The maintainer API doesn't expose the underlying TaskManager status directly,
-        // so we infer 'running' vs 'idle' based on whether nextRunAt is in the past.
-        // This is a heuristic, but it avoids leaking TaskManager internals into the maintainer API.
-        const isRunning = runAt ? new Date(runAt).getTime() <= Date.now() : false;
-        const status = isRunning ? 'running' : 'idle';
+      // The maintainer API doesn't expose the underlying TaskManager status directly,
+      // so we infer 'running' vs 'idle' based on whether nextRunAt is in the past.
+      // This is a heuristic, but it avoids leaking TaskManager internals into the maintainer API.
+      const isRunning = runAt ? new Date(runAt).getTime() <= Date.now() : false;
+      const status = isRunning ? 'running' : 'idle';
 
-        return {
-          risk_engine_status: riskEngineStatus,
-          risk_engine_task_status: runAt
-            ? {
-                status,
-                runAt,
-              }
-            : undefined,
-        } as RiskEngineStatusResponse;
-      }
-
-      return http.fetch<RiskEngineStatusResponse>(RISK_ENGINE_STATUS_URL, {
-        version: '1',
-        method: 'GET',
-        signal,
-        context,
-      });
+      return {
+        risk_engine_status: riskEngineStatus,
+        risk_engine_task_status: runAt
+          ? {
+              status,
+              runAt,
+            }
+          : undefined,
+      } as RiskEngineStatusResponse;
     };
 
     /**
      * Init risk score engine
      */
     const initRiskEngine = async () => {
-      if (isMaintainerRiskScoreV2Enabled) {
-        await http.fetch<{ ok: true }>(ENTITY_STORE_ROUTES.internal.ENTITY_MAINTAINERS_INIT, {
-          method: 'POST',
-          query: ENTITY_STORE_V2_QUERY,
-          body: JSON.stringify({}),
-        });
-
-        return {
-          result: {
-            risk_engine_enabled: true,
-            risk_engine_resources_installed: true,
-            risk_engine_configuration_created: true,
-            errors: [],
-          },
-        } as InitRiskEngineResponse;
-      }
-
-      return http.fetch<InitRiskEngineResponse>(RISK_ENGINE_INIT_URL, {
-        version: '1',
+      await http.fetch<{ ok: true }>(ENTITY_STORE_ROUTES.internal.ENTITY_MAINTAINERS_INIT, {
         method: 'POST',
+        query: ENTITY_STORE_V2_QUERY,
+        body: JSON.stringify({}),
       });
+
+      return {
+        result: {
+          risk_engine_enabled: true,
+          risk_engine_resources_installed: true,
+          risk_engine_configuration_created: true,
+          errors: [],
+        },
+      } as InitRiskEngineResponse;
     };
 
     /**
      * Enable risk score engine
      */
     const enableRiskEngine = async () => {
-      if (isMaintainerRiskScoreV2Enabled) {
-        await http.fetch<{ ok: true }>(
-          getMaintainerRouteWithId(
-            ENTITY_STORE_ROUTES.internal.ENTITY_MAINTAINERS_START,
-            RISK_SCORE_MAINTAINER_ID
-          ),
-          {
-            method: 'PUT',
-            query: ENTITY_STORE_V2_QUERY,
-            body: JSON.stringify({}),
-          }
-        );
-        return { success: true } as EnableRiskEngineResponse;
-      }
-
-      return http.fetch<EnableRiskEngineResponse>(RISK_ENGINE_ENABLE_URL, {
-        version: '1',
-        method: 'POST',
-      });
+      await http.fetch<{ ok: true }>(
+        getMaintainerRouteWithId(
+          ENTITY_STORE_ROUTES.internal.ENTITY_MAINTAINERS_START,
+          RISK_SCORE_MAINTAINER_ID
+        ),
+        {
+          method: 'PUT',
+          query: ENTITY_STORE_V2_QUERY,
+          body: JSON.stringify({}),
+        }
+      );
+      return { success: true } as EnableRiskEngineResponse;
     };
 
     /**
      * Disable risk score engine
      */
     const disableRiskEngine = async () => {
-      if (isMaintainerRiskScoreV2Enabled) {
-        await http.fetch<{ ok: true }>(
-          getMaintainerRouteWithId(
-            ENTITY_STORE_ROUTES.internal.ENTITY_MAINTAINERS_STOP,
-            RISK_SCORE_MAINTAINER_ID
-          ),
-          {
-            method: 'PUT',
-            query: ENTITY_STORE_V2_QUERY,
-            body: JSON.stringify({}),
-          }
-        );
-        return { success: true } as DisableRiskEngineResponse;
-      }
-
-      return http.fetch<DisableRiskEngineResponse>(RISK_ENGINE_DISABLE_URL, {
-        version: '1',
-        method: 'POST',
-      });
+      await http.fetch<{ ok: true }>(
+        getMaintainerRouteWithId(
+          ENTITY_STORE_ROUTES.internal.ENTITY_MAINTAINERS_STOP,
+          RISK_SCORE_MAINTAINER_ID
+        ),
+        {
+          method: 'PUT',
+          query: ENTITY_STORE_V2_QUERY,
+          body: JSON.stringify({}),
+        }
+      );
+      return { success: true } as DisableRiskEngineResponse;
     };
 
     /**
      * Calculate and stores risk score for an entity
      */
-    const calculateEntityRiskScore = (params: RiskScoresEntityCalculationRequest) => {
-      return http.fetch<RiskScoresEntityCalculationResponse>(RISK_SCORE_ENTITY_CALCULATION_URL, {
-        version: '1',
-        method: 'POST',
-        body: JSON.stringify(params),
-      });
-    };
-
     const calculateEntityRiskScoreV2 = (params: RiskScoresEntityCalculationRequest) => {
       return http.fetch<RiskScoresEntityCalculationResponse>(RISK_SCORE_ENTITY_CALCULATION_V2_URL, {
         version: '1',
@@ -453,68 +386,6 @@ export const useEntityAnalyticsRoutes = () => {
       http.fetch<EntityAnalyticsPrivileges>(ENTITY_STORE_ROUTES.internal.CHECK_PRIVILEGES, {
         version: ENTITY_STORE_API_VERSIONS.internal.v2,
         method: 'GET',
-      });
-
-    /**
-     * Search indices for privilege monitoring import
-     */
-    const searchPrivMonIndices = async (params: {
-      query: string | undefined;
-      signal?: AbortSignal;
-      context?: KibanaExecutionContext;
-    }) =>
-      http.fetch<SearchPrivilegesIndicesResponse>(PRIVMON_INDICES_URL, {
-        version: API_VERSIONS.public.v1,
-        method: 'GET',
-        query: {
-          searchQuery: params.query,
-        },
-        signal: params.signal,
-        context: params.context,
-      });
-
-    /**
-     * Create an index for privilege monitoring import
-     */
-    const createPrivMonImportIndex = async (params: {
-      name: string;
-      mode: 'standard' | 'lookup';
-      signal?: AbortSignal;
-    }) =>
-      http.fetch<CreatePrivilegesImportIndexResponse>(PRIVMON_INDICES_URL, {
-        version: API_VERSIONS.public.v1,
-        method: 'PUT',
-        body: JSON.stringify({
-          name: params.name,
-          mode: params.mode,
-        }),
-        signal: params.signal,
-      });
-    /**
-     * Register a data source for privilege monitoring engine
-     */
-    const registerPrivMonMonitoredIndices = async (indexPattern: string | undefined) =>
-      http.fetch<CreateEntitySourceResponse>(MONITORING_ENTITY_SOURCE_URL, {
-        version: API_VERSIONS.public.v1,
-        method: 'POST',
-        body: JSON.stringify({
-          type: 'index',
-          name: ENTITY_SOURCE_NAME,
-          indexPattern,
-        }),
-      });
-
-    /**
-     * Update a data source for privilege monitoring engine
-     */
-    const updatePrivMonMonitoredIndices = async (id: string, indexPattern: string | undefined) =>
-      http.fetch<UpdateEntitySourceResponse>(getPrivmonMonitoringSourceByIdUrl(id), {
-        version: API_VERSIONS.public.v1,
-        method: 'PUT',
-        body: JSON.stringify({
-          name: ENTITY_SOURCE_NAME,
-          indexPattern,
-        }),
       });
 
     /**
@@ -658,71 +529,6 @@ export const useEntityAnalyticsRoutes = () => {
         }
       );
     };
-
-    /**
-     * List all data source for privilege monitoring engine
-     */
-    const listPrivMonMonitoredIndices = async ({
-      signal,
-      context,
-    }: {
-      signal?: AbortSignal;
-      context?: KibanaExecutionContext;
-    }) =>
-      http.fetch<ListEntitySourcesResponse>(MONITORING_ENTITY_LIST_SOURCES_URL, {
-        version: API_VERSIONS.public.v1,
-        method: 'GET',
-        signal,
-        context,
-        query: {
-          type: 'index',
-          managed: false,
-          name: ENTITY_SOURCE_NAME,
-        },
-      });
-
-    const uploadPrivilegedUserMonitoringFile = async (
-      fileContent: string,
-      fileName: string,
-      context?: KibanaExecutionContext
-    ): Promise<PrivmonBulkUploadUsersCSVResponse> => {
-      const file = new File([new Blob([fileContent])], fileName, {
-        type: 'text/csv',
-      });
-      const body = new FormData();
-      body.append('file', file);
-
-      return http.fetch<PrivmonBulkUploadUsersCSVResponse>(MONITORING_USERS_CSV_UPLOAD_URL, {
-        version: API_VERSIONS.public.v1,
-        method: 'POST',
-        headers: {
-          'Content-Type': undefined, // Lets the browser set the appropriate content type
-        },
-        body,
-        context,
-      });
-    };
-
-    const initPrivilegedMonitoringEngine = (): Promise<InitMonitoringEngineResponse> =>
-      http.fetch<InitMonitoringEngineResponse>(MONITORING_ENGINE_INIT_URL, {
-        version: API_VERSIONS.public.v1,
-        method: 'POST',
-      });
-
-    const fetchPrivilegeMonitoringEngineStatus = (
-      context?: KibanaExecutionContext
-    ): Promise<PrivMonHealthResponse> =>
-      http.fetch<PrivMonHealthResponse>(PRIVMON_HEALTH_URL, {
-        version: API_VERSIONS.public.v1,
-        method: 'GET',
-        context,
-      });
-
-    const fetchPrivilegeMonitoringPrivileges = (): Promise<PrivMonPrivilegesResponse> =>
-      http.fetch<PrivMonPrivilegesResponse>(PRIVMON_PRIVILEGE_CHECK_API, {
-        version: API_VERSIONS.public.v1,
-        method: 'GET',
-      });
 
     const fetchWatchlistsPrivileges = (): Promise<EntityAnalyticsPrivileges> =>
       http.fetch<EntityAnalyticsPrivileges>(WATCHLISTS_PRIVILEGES_URL, {
@@ -1126,19 +932,11 @@ export const useEntityAnalyticsRoutes = () => {
       fetchAssetCriticalityPrivileges,
       fetchEntityStorePrivileges,
       fetchEntityStoreV2Privileges,
-      searchPrivMonIndices,
-      createPrivMonImportIndex,
       createAssetCriticality,
       deleteAssetCriticality,
       fetchAssetCriticality,
       fetchAssetCriticalityList,
       uploadAssetCriticalityFile,
-      uploadPrivilegedUserMonitoringFile,
-      initPrivilegedMonitoringEngine,
-      registerPrivMonMonitoredIndices,
-      updatePrivMonMonitoredIndices,
-      fetchPrivilegeMonitoringEngineStatus,
-      fetchPrivilegeMonitoringPrivileges,
       fetchWatchlistsPrivileges,
       createWatchlist,
       getWatchlist,
@@ -1151,13 +949,11 @@ export const useEntityAnalyticsRoutes = () => {
       searchWatchlistIndices,
       uploadWatchlistCsv,
       fetchRiskEngineSettings,
-      calculateEntityRiskScore,
       calculateEntityRiskScoreV2,
       cleanUpRiskEngine,
       fetchEntitiesList,
       fetchEntitiesListV2,
       updateSavedObjectConfiguration,
-      listPrivMonMonitoredIndices,
       fetchEntityDetailsHighlights,
       saveEntityAiSummary,
       fetchPersistedAiSummary,
@@ -1174,7 +970,7 @@ export const useEntityAnalyticsRoutes = () => {
       fetchAnomalyOverview,
       fetchAnomalySummary,
     };
-  }, [http, isEntityAnalyticsEntityStoreV2Enabled, isMaintainerRiskScoreV2Enabled]);
+  }, [http, isEntityAnalyticsEntityStoreV2Enabled]);
 };
 
 export type AssetCriticality = SnakeToCamelCase<AssetCriticalityRecord>;
