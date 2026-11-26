@@ -6,6 +6,8 @@
  */
 
 import Boom from '@hapi/boom';
+import { nodeBuilder } from '@kbn/es-query';
+import { isEqual, sortBy } from 'lodash';
 import { DEFAULT_EXCLUDED_GAP_REASONS } from '../../../../../../common/constants';
 import type { RulesClientContext } from '../../../../../rules_client/types';
 import type { GapAutoFillSchedulerSO } from '../../../../../data/gap_auto_fill_scheduler/types/gap_auto_fill_scheduler';
@@ -20,7 +22,11 @@ import { transformSavedObjectToGapAutoFillSchedulerResult } from '../../transfor
 import type { GapAutoFillSchedulerResponse } from '../../result/types';
 import { updateGapAutoFillSchedulerSchema } from './schemas';
 import type { UpdateGapAutoFillSchedulerParams } from './types';
-import { getGapAutoFillSchedulerSO } from '../utils';
+import {
+  gapAutoFillSchedulerTaskConflictError,
+  getGapAutoFillSchedulerSO,
+  getGapAutoFillSchedulerTask,
+} from '../utils';
 
 const toRuleTypeKey = (ruleType: { type: string; consumer: string }) =>
   `${ruleType.type}:${ruleType.consumer}`;
@@ -62,12 +68,15 @@ export async function updateGapAutoFillScheduler(
 
   const updatedRuleTypePairs = Array.from(new Set(updatedRuleTypes.map(toRuleTypeKey)));
   if (updatedRuleTypePairs.length > 0) {
-    const filter = `(${updatedRuleTypePairs
-      .map(
-        (pair) =>
-          `${GAP_AUTO_FILL_SCHEDULER_SAVED_OBJECT_TYPE}.attributes.ruleTypeConsumerPairs: "${pair}"`
+    // Build the filter as nodes so caller-provided consumers are matched literally
+    const filter = nodeBuilder.or(
+      updatedRuleTypePairs.map((pair) =>
+        nodeBuilder.is(
+          `${GAP_AUTO_FILL_SCHEDULER_SAVED_OBJECT_TYPE}.attributes.ruleTypeConsumerPairs`,
+          pair
+        )
       )
-      .join(' or ')})`;
+    );
 
     const { saved_objects: candidates } = await soClient.find<GapAutoFillSchedulerSO>({
       type: GAP_AUTO_FILL_SCHEDULER_SAVED_OBJECT_TYPE,
@@ -114,6 +123,21 @@ export async function updateGapAutoFillScheduler(
   const updatedEnabled = params.enabled;
   const updatedSchedule = params.schedule;
   const updatedScope = params.scope !== undefined ? params.scope : schedulerSo.attributes.scope;
+
+  // Task ids are global, so never touch a task that belongs to a scheduler in another space
+  const { task: existingTask, isOwnedByCurrentSpace } = await getGapAutoFillSchedulerTask({
+    context,
+    id: params.id,
+  });
+  if (existingTask && !isOwnedByCurrentSpace && updatedEnabled) {
+    throw gapAutoFillSchedulerTaskConflictError(params.id);
+  }
+  const ownedTask = existingTask && isOwnedByCurrentSpace ? existingTask : undefined;
+  // An unchanged schedule keeps the existing task so a repeated update does not reset its next run
+  const taskMatchesUpdate =
+    ownedTask !== undefined &&
+    ownedTask.schedule?.interval === updatedSchedule.interval &&
+    isEqual(sortBy(ownedTask.scope ?? []), sortBy(updatedScope ?? []));
   const updatedAttributes: Partial<GapAutoFillSchedulerSO> = {
     name: params.name,
     enabled: updatedEnabled,
@@ -144,9 +168,10 @@ export async function updateGapAutoFillScheduler(
     );
     const nextSchedulerName = updatedSo.attributes.name ?? schedulerName;
 
-    await taskManager.removeIfExists(updatedSo.id);
-
     if (updatedEnabled) {
+      if (ownedTask && !taskMatchesUpdate) {
+        await taskManager.removeIfExists(updatedSo.id);
+      }
       await taskManager.ensureScheduled(
         {
           id: updatedSo.id,
@@ -161,9 +186,15 @@ export async function updateGapAutoFillScheduler(
         },
         {
           request: params.request,
+          // A kept task keeps its next run but must take this caller's credentials, because the
+          // runner reads the updated configuration and would otherwise act with the previous caller's key
+          regenerateApiKey: true,
         }
       );
     } else {
+      if (ownedTask) {
+        await taskManager.removeIfExists(updatedSo.id);
+      }
       await context.backfillClient.deleteBackfillsByInitiatorId({
         initiatorId: updatedSo.id,
         unsecuredSavedObjectsClient: soClient,

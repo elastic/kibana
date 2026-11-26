@@ -4,26 +4,54 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { IRouter } from '@kbn/core/server';
+import type { IRouter, RouteConfigOptions, RouteMethod } from '@kbn/core/server';
 import type { ILicenseState } from '../../../../../lib';
 import { verifyAccessAndContext } from '../../../../lib';
 import type { AlertingRequestHandlerContext } from '../../../../../types';
-import { INTERNAL_ALERTING_GAPS_AUTO_FILL_SCHEDULER_API_PATH } from '../../../../../types';
+import {
+  ALERTING_GAPS_AUTO_FILL_SCHEDULER_API_PATH,
+  INTERNAL_ALERTING_GAPS_AUTO_FILL_SCHEDULER_API_PATH,
+} from '../../../../../types';
 import { getGapAutoFillSchedulerParamsSchemaV1 } from '../../../../../../common/routes/gaps/apis/gap_auto_fill_scheduler';
 import type { GetGapAutoFillSchedulerParamsV1 } from '../../../../../../common/routes/gaps/apis/gap_auto_fill_scheduler';
 import { DEFAULT_ALERTING_ROUTE_SECURITY } from '../../../../constants';
 
-export const deleteAutoFillSchedulerRoute = (
-  router: IRouter<AlertingRequestHandlerContext>,
-  licenseState: ILicenseState
-) => {
+interface BuildDeleteAutoFillSchedulerRouteParams {
+  licenseState: ILicenseState;
+  path: string;
+  router: IRouter<AlertingRequestHandlerContext>;
+  options: RouteConfigOptions<RouteMethod>;
+}
+
+const buildDeleteAutoFillSchedulerRoute = ({
+  licenseState,
+  path,
+  router,
+  options,
+}: BuildDeleteAutoFillSchedulerRouteParams) => {
   router.delete(
     {
-      path: `${INTERNAL_ALERTING_GAPS_AUTO_FILL_SCHEDULER_API_PATH}/{id}`,
+      path,
       security: DEFAULT_ALERTING_ROUTE_SECURITY,
-      options: { access: 'internal' },
+      options,
       validate: {
-        params: getGapAutoFillSchedulerParamsSchemaV1,
+        request: {
+          params: getGapAutoFillSchedulerParamsSchemaV1,
+        },
+        response: {
+          204: {
+            description: 'Indicates a successful call.',
+          },
+          400: {
+            description: 'Indicates an invalid schema or parameters.',
+          },
+          403: {
+            description: 'Indicates that this call is forbidden.',
+          },
+          404: {
+            description: 'Indicates a gap auto fill scheduler with the given ID does not exist.',
+          },
+        },
       },
     },
     router.handleLegacyErrors(
@@ -39,3 +67,31 @@ export const deleteAutoFillSchedulerRoute = (
     )
   );
 };
+
+export const deleteAutoFillSchedulerRoute = (
+  router: IRouter<AlertingRequestHandlerContext>,
+  licenseState: ILicenseState
+) =>
+  buildDeleteAutoFillSchedulerRoute({
+    licenseState,
+    path: `${INTERNAL_ALERTING_GAPS_AUTO_FILL_SCHEDULER_API_PATH}/{id}`,
+    router,
+    options: { access: 'internal' },
+  });
+
+export const deleteAutoFillSchedulerPublicRoute = (
+  router: IRouter<AlertingRequestHandlerContext>,
+  licenseState: ILicenseState
+) =>
+  buildDeleteAutoFillSchedulerRoute({
+    licenseState,
+    path: `${ALERTING_GAPS_AUTO_FILL_SCHEDULER_API_PATH}/{id}`,
+    router,
+    options: {
+      access: 'public',
+      summary: 'Delete a gap auto fill scheduler by ID',
+      description:
+        'Delete a gap auto fill scheduler and stop its scheduled task. Automatic gap filling stops for the rule types the scheduler covered. This API requires an Enterprise license.',
+      tags: ['oas-tag:alerting'],
+    },
+  });

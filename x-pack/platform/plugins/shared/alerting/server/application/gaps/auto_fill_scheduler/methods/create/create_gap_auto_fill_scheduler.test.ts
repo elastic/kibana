@@ -6,6 +6,8 @@
  */
 
 import type { SavedObject, KibanaRequest } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import { TaskStatus, type ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
 import type { TaskInstanceWithId } from '@kbn/task-manager-plugin/server/task';
 import type { GapAutoFillSchedulerSO } from '../../../../../data/gap_auto_fill_scheduler/types/gap_auto_fill_scheduler';
 import { RulesClient } from '../../../../../rules_client';
@@ -79,6 +81,9 @@ describe('createGapFillAutoScheduler()', () => {
   beforeEach(() => {
     jest.resetAllMocks();
     rulesClient = new RulesClient(rulesClientParams);
+    taskManager.get.mockRejectedValue(
+      SavedObjectsErrorHelpers.createGenericNotFoundError('task', 'custom-gap-id')
+    );
 
     unsecuredSavedObjectsClient.find.mockResolvedValue({
       saved_objects: [],
@@ -236,6 +241,22 @@ describe('createGapFillAutoScheduler()', () => {
         savedObject: soWithCustomId,
       })
     );
+  });
+
+  test('throws a conflict when the custom id has a task in another space', async () => {
+    taskManager.get.mockResolvedValue({
+      id: 'custom-gap-id',
+      taskType: 'gap-auto-fill-scheduler-task',
+      params: { configId: 'custom-gap-id', spaceId: 'other-space' },
+      status: TaskStatus.Idle,
+    } as unknown as ConcreteTaskInstance);
+
+    await expect(
+      rulesClient.createGapAutoFillScheduler(getParams({ id: 'custom-gap-id' }))
+    ).rejects.toThrow('already exists for a gap auto fill scheduler in another space');
+
+    expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
+    expect(taskManager.ensureScheduled).not.toHaveBeenCalled();
   });
 
   test('throws an error if a rule type is not registered', async () => {

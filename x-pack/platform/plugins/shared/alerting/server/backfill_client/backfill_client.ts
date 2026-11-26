@@ -25,6 +25,7 @@ import type {
 import { TaskPriority } from '@kbn/task-manager-plugin/server';
 import type { IEventLogger, IEventLogClient } from '@kbn/event-log-plugin/server';
 import { isNumber, chunk } from 'lodash';
+import { nodeBuilder } from '@kbn/es-query';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
 import { withSpan } from '@kbn/apm-utils';
 import { TaskTypeGroup } from '@kbn/task-manager-plugin/server/task';
@@ -43,6 +44,7 @@ import type { RuleDomain } from '../application/rule/types';
 import type { AdHocRunSO } from '../data/ad_hoc_run/types';
 import { AdHocRunAuditAction, adHocRunAuditEvent } from '../rules_client/common/audit_events';
 import { AD_HOC_RUN_SAVED_OBJECT_TYPE, RULE_SAVED_OBJECT_TYPE } from '../saved_objects';
+import { backfillInitiator } from '../../common/constants';
 import type { TaskRunnerFactory } from '../task_runner';
 import type { RuleTypeRegistry } from '../types';
 import { createBackfillError, getBackfillActions, getBackfillRuleError } from './lib';
@@ -570,7 +572,14 @@ export class BackfillClient {
       const adHocRunFinder = await unsecuredSavedObjectsClient.createPointInTimeFinder<AdHocRunSO>({
         type: AD_HOC_RUN_SAVED_OBJECT_TYPE,
         perPage: 100,
-        filter: `${AD_HOC_RUN_SAVED_OBJECT_TYPE}.attributes.initiatorId: "${initiatorId}"`,
+        // Match the id literally and only the backfills the system scheduled on this initiator's behalf
+        filter: nodeBuilder.and([
+          nodeBuilder.is(
+            `${AD_HOC_RUN_SAVED_OBJECT_TYPE}.attributes.initiator`,
+            backfillInitiator.SYSTEM
+          ),
+          nodeBuilder.is(`${AD_HOC_RUN_SAVED_OBJECT_TYPE}.attributes.initiatorId`, initiatorId),
+        ]),
       });
       const adHocRuns: Array<SavedObjectsFindResult<AdHocRunSO>> = [];
       for await (const response of adHocRunFinder.find()) {

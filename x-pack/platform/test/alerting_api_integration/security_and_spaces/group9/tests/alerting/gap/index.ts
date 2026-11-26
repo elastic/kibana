@@ -12,5 +12,6 @@ export default function gapsTests({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./update_gaps'));
     loadTestFile(require.resolve('./create_gap_auto_fill_scheduler'));
     loadTestFile(require.resolve('./get_gap_auto_fill_scheduler'));
+    loadTestFile(require.resolve('./public_gap_auto_fill_scheduler'));
   });
 }

@@ -11,7 +11,11 @@ import { verifyApiAccess } from '../../../../../lib/license_api_access';
 import { mockHandlerArguments } from '../../../../_mock_handler_arguments';
 import { rulesClientMock } from '../../../../../rules_client.mock';
 import { gapReasonType } from '../../../../../../common/constants/gap_reason';
-import { createAutoFillSchedulerRoute } from './create_auto_fill_scheduler_route';
+import {
+  createAutoFillSchedulerRoute,
+  createAutoFillSchedulerPublicRoute,
+} from './create_auto_fill_scheduler_route';
+import { DEFAULT_ALERTING_ROUTE_SECURITY } from '../../../../constants';
 
 const rulesClient = rulesClientMock.create();
 
@@ -140,13 +144,142 @@ describe('createAutoFillSchedulerRoute', () => {
     createAutoFillSchedulerRoute(router, licenseState);
 
     const [config] = router.post.mock.calls[0];
-    expect(config.validate).toBeDefined();
-    if (
-      config.validate &&
-      typeof config.validate !== 'boolean' &&
-      typeof config.validate !== 'function'
-    ) {
-      expect(config.validate.body).toBeDefined();
-    }
+    expect(config.validate).toEqual(
+      expect.objectContaining({
+        request: expect.objectContaining({
+          body: expect.anything(),
+        }),
+      })
+    );
+  });
+});
+
+describe('createAutoFillSchedulerPublicRoute', () => {
+  beforeEach(() => {
+    jest.resetAllMocks();
+  });
+
+  const mockCreateRequest = {
+    id: 'security-solution-gap-auto-fill-scheduler-default',
+    name: '',
+    enabled: true,
+    schedule: { interval: '2m' },
+    gap_fill_range: 'now-90d',
+    max_backfills: 100,
+    num_retries: 3,
+    scope: ['security_solution'],
+    rule_types: [{ type: 'siem.queryRule', consumer: 'siem' }],
+    excluded_reasons: [gapReasonType.RULE_DISABLED],
+  };
+
+  const mockCreateResponse = {
+    id: 'security-solution-gap-auto-fill-scheduler-default',
+    name: '',
+    enabled: true,
+    schedule: { interval: '2m' },
+    gapFillRange: 'now-90d',
+    maxBackfills: 100,
+    numRetries: 3,
+    createdBy: 'elastic',
+    updatedBy: 'elastic',
+    createdAt: '2024-01-01T00:00:00.000Z',
+    updatedAt: '2024-01-01T00:00:00.000Z',
+    scheduledTaskId: 'task-id',
+    scope: ['security_solution'],
+    ruleTypes: [{ type: 'siem.queryRule', consumer: 'siem' }],
+    excludedReasons: [gapReasonType.RULE_DISABLED],
+  };
+
+  test('registers a public route with the public path and OAS options', () => {
+    const licenseState = licenseStateMock.create();
+    const router = httpServiceMock.createRouter();
+
+    createAutoFillSchedulerPublicRoute(router, licenseState);
+
+    const [config] = router.post.mock.calls[0];
+    expect(config.path).toEqual('/api/alerting/rules/gaps/auto_fill_scheduler');
+    expect(config.options).toEqual(
+      expect.objectContaining({
+        access: 'public',
+        summary: 'Create a gap auto fill scheduler',
+        tags: ['oas-tag:alerting'],
+      })
+    );
+    expect(config.options?.description).toEqual(expect.any(String));
+    expect(config.options?.oasOperationObject).toEqual(expect.any(Function));
+    expect(config.security).toEqual(DEFAULT_ALERTING_ROUTE_SECURITY);
+    expect(config.validate).toEqual(
+      expect.objectContaining({
+        request: expect.objectContaining({
+          body: expect.anything(),
+        }),
+        response: expect.objectContaining({
+          200: expect.anything(),
+        }),
+      })
+    );
+  });
+
+  test('calls create gap auto fill scheduler and returns the public response', async () => {
+    const licenseState = licenseStateMock.create();
+    const router = httpServiceMock.createRouter();
+
+    createAutoFillSchedulerPublicRoute(router, licenseState);
+
+    rulesClient.createGapAutoFillScheduler.mockResolvedValueOnce(mockCreateResponse);
+    const [, handler] = router.post.mock.calls[0];
+    const [context, req, res] = mockHandlerArguments({ rulesClient }, { body: mockCreateRequest }, [
+      'ok',
+    ]);
+
+    await handler(context, req, res);
+
+    expect(verifyApiAccess).toHaveBeenCalledWith(licenseState);
+    expect(licenseState.ensureLicenseForGapAutoFillScheduler).toHaveBeenCalled();
+    expect(rulesClient.createGapAutoFillScheduler).toHaveBeenCalledWith(
+      expect.objectContaining({
+        id: 'security-solution-gap-auto-fill-scheduler-default',
+        enabled: true,
+        gapFillRange: 'now-90d',
+        ruleTypes: [{ type: 'siem.queryRule', consumer: 'siem' }],
+        excludedReasons: [gapReasonType.RULE_DISABLED],
+        request: expect.any(Object),
+      })
+    );
+    expect(res.ok).toHaveBeenCalledWith({
+      body: {
+        id: 'security-solution-gap-auto-fill-scheduler-default',
+        name: '',
+        enabled: true,
+        schedule: { interval: '2m' },
+        gap_fill_range: 'now-90d',
+        max_backfills: 100,
+        num_retries: 3,
+        scope: ['security_solution'],
+        rule_types: [{ type: 'siem.queryRule', consumer: 'siem' }],
+        excluded_reasons: [gapReasonType.RULE_DISABLED],
+        created_by: 'elastic',
+        updated_by: 'elastic',
+        created_at: '2024-01-01T00:00:00.000Z',
+        updated_at: '2024-01-01T00:00:00.000Z',
+      },
+    });
+  });
+
+  test('respects license failures', async () => {
+    const licenseState = licenseStateMock.create();
+    const router = httpServiceMock.createRouter();
+
+    createAutoFillSchedulerPublicRoute(router, licenseState);
+
+    (verifyApiAccess as jest.Mock).mockImplementation(() => {
+      throw new Error('License check failed');
+    });
+    const [, handler] = router.post.mock.calls[0];
+    const [context, req, res] = mockHandlerArguments({ rulesClient }, { body: mockCreateRequest });
+    await expect(handler(context, req, res)).rejects.toMatchInlineSnapshot(
+      `[Error: License check failed]`
+    );
+    expect(rulesClient.createGapAutoFillScheduler).not.toHaveBeenCalled();
   });
 });

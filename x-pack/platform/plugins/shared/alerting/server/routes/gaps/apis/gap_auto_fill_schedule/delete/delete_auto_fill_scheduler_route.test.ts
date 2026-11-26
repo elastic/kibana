@@ -10,7 +10,11 @@ import { licenseStateMock } from '../../../../../lib/license_state.mock';
 import { verifyApiAccess } from '../../../../../lib/license_api_access';
 import { mockHandlerArguments } from '../../../../_mock_handler_arguments';
 import { rulesClientMock } from '../../../../../rules_client.mock';
-import { deleteAutoFillSchedulerRoute } from './delete_auto_fill_scheduler_route';
+import {
+  deleteAutoFillSchedulerRoute,
+  deleteAutoFillSchedulerPublicRoute,
+} from './delete_auto_fill_scheduler_route';
+import { DEFAULT_ALERTING_ROUTE_SECURITY } from '../../../../constants';
 
 const rulesClient = rulesClientMock.create();
 
@@ -93,13 +97,90 @@ describe('deleteAutoFillSchedulerRoute', () => {
     deleteAutoFillSchedulerRoute(router, licenseState);
 
     const [config] = router.delete.mock.calls[0];
-    expect(config.validate).toBeDefined();
-    if (
-      config.validate &&
-      typeof config.validate !== 'boolean' &&
-      typeof config.validate !== 'function'
-    ) {
-      expect(config.validate.params).toBeDefined();
-    }
+    expect(config.validate).toEqual(
+      expect.objectContaining({
+        request: expect.objectContaining({
+          params: expect.anything(),
+        }),
+      })
+    );
+  });
+});
+
+describe('deleteAutoFillSchedulerPublicRoute', () => {
+  beforeEach(() => {
+    jest.resetAllMocks();
+  });
+
+  test('registers a public route with the public path and OAS options', () => {
+    const licenseState = licenseStateMock.create();
+    const router = httpServiceMock.createRouter();
+
+    deleteAutoFillSchedulerPublicRoute(router, licenseState);
+
+    const [config] = router.delete.mock.calls[0];
+    expect(config.path).toEqual('/api/alerting/rules/gaps/auto_fill_scheduler/{id}');
+    expect(config.options).toEqual(
+      expect.objectContaining({
+        access: 'public',
+        summary: 'Delete a gap auto fill scheduler by ID',
+        tags: ['oas-tag:alerting'],
+      })
+    );
+    expect(config.security).toEqual(DEFAULT_ALERTING_ROUTE_SECURITY);
+    expect(config.validate).toEqual(
+      expect.objectContaining({
+        request: expect.objectContaining({
+          params: expect.anything(),
+        }),
+        response: expect.objectContaining({
+          204: expect.anything(),
+        }),
+      })
+    );
+  });
+
+  test('calls delete gap auto fill scheduler and returns no content', async () => {
+    const licenseState = licenseStateMock.create();
+    const router = httpServiceMock.createRouter();
+
+    deleteAutoFillSchedulerPublicRoute(router, licenseState);
+
+    rulesClient.deleteGapAutoFillScheduler.mockResolvedValueOnce();
+    const [, handler] = router.delete.mock.calls[0];
+    const [context, req, res] = mockHandlerArguments(
+      { rulesClient },
+      { params: { id: 'security-solution-gap-auto-fill-scheduler-default' } },
+      ['noContent']
+    );
+
+    await handler(context, req, res);
+
+    expect(verifyApiAccess).toHaveBeenCalledWith(licenseState);
+    expect(licenseState.ensureLicenseForGapAutoFillScheduler).toHaveBeenCalled();
+    expect(rulesClient.deleteGapAutoFillScheduler).toHaveBeenCalledWith({
+      id: 'security-solution-gap-auto-fill-scheduler-default',
+    });
+    expect(res.noContent).toHaveBeenCalled();
+  });
+
+  test('respects license failures', async () => {
+    const licenseState = licenseStateMock.create();
+    const router = httpServiceMock.createRouter();
+
+    deleteAutoFillSchedulerPublicRoute(router, licenseState);
+
+    (verifyApiAccess as jest.Mock).mockImplementation(() => {
+      throw new Error('License check failed');
+    });
+    const [, handler] = router.delete.mock.calls[0];
+    const [context, req, res] = mockHandlerArguments(
+      { rulesClient },
+      { params: { id: 'security-solution-gap-auto-fill-scheduler-default' } }
+    );
+    await expect(handler(context, req, res)).rejects.toMatchInlineSnapshot(
+      `[Error: License check failed]`
+    );
+    expect(rulesClient.deleteGapAutoFillScheduler).not.toHaveBeenCalled();
   });
 });

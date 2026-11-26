@@ -19,6 +19,8 @@ import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { actionsClientMock } from '@kbn/actions-plugin/server/mocks';
 import type { SavedObject, Logger } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import { TaskStatus, type ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
 import { eventLoggerMock } from '@kbn/event-log-plugin/server/event_logger.mock';
 import { eventLogClientMock } from '@kbn/event-log-plugin/server/event_log_client.mock';
 import type { AlertingAuthorization } from '../../../../../authorization';
@@ -108,8 +110,20 @@ describe('deleteGapAutoFillScheduler()', () => {
     return so;
   }
 
+  function mockSchedulerTask(spaceId = 'default') {
+    taskManager.get.mockResolvedValue({
+      id: 'scheduler-1',
+      taskType: 'gap-auto-fill-scheduler-task',
+      params: { configId: 'scheduler-1', spaceId },
+      status: TaskStatus.Idle,
+    } as unknown as ConcreteTaskInstance);
+  }
+
   beforeEach(() => {
     jest.resetAllMocks();
+    taskManager.get.mockRejectedValue(
+      SavedObjectsErrorHelpers.createGenericNotFoundError('task', 'scheduler-1')
+    );
   });
 
   test('removes task, deletes SO, deletes backfills and audits success', async () => {
@@ -118,6 +132,7 @@ describe('deleteGapAutoFillScheduler()', () => {
     const rulesClient = new RulesClient(rulesClientParamsBase);
 
     const so = setupSchedulerSo();
+    mockSchedulerTask();
 
     const params = { id: so.id };
     await expect(rulesClient.deleteGapAutoFillScheduler(params)).resolves.toBeUndefined();
@@ -163,6 +178,39 @@ describe('deleteGapAutoFillScheduler()', () => {
           }),
         }),
       })
+    );
+  });
+
+  test('deletes the SO without removing a task that belongs to a scheduler in another space', async () => {
+    rulesClientParamsBase.getEventLogClient.mockResolvedValue(eventLogClient);
+    rulesClientParamsBase.getActionsClient.mockResolvedValue(actionsClient);
+    const rulesClient = new RulesClient(rulesClientParamsBase);
+
+    const so = setupSchedulerSo();
+    mockSchedulerTask('other-space');
+
+    await expect(rulesClient.deleteGapAutoFillScheduler({ id: so.id })).resolves.toBeUndefined();
+
+    expect(taskManager.removeIfExists).not.toHaveBeenCalled();
+    expect(unsecuredSavedObjectsClient.delete).toHaveBeenCalledWith(
+      GAP_AUTO_FILL_SCHEDULER_SAVED_OBJECT_TYPE,
+      so.id
+    );
+  });
+
+  test('deletes the SO when the scheduler has no task', async () => {
+    rulesClientParamsBase.getEventLogClient.mockResolvedValue(eventLogClient);
+    rulesClientParamsBase.getActionsClient.mockResolvedValue(actionsClient);
+    const rulesClient = new RulesClient(rulesClientParamsBase);
+
+    const so = setupSchedulerSo({ enabled: false });
+
+    await expect(rulesClient.deleteGapAutoFillScheduler({ id: so.id })).resolves.toBeUndefined();
+
+    expect(taskManager.removeIfExists).not.toHaveBeenCalled();
+    expect(unsecuredSavedObjectsClient.delete).toHaveBeenCalledWith(
+      GAP_AUTO_FILL_SCHEDULER_SAVED_OBJECT_TYPE,
+      so.id
     );
   });
 

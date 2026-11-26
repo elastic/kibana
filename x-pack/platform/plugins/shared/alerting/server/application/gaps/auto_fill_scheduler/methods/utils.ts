@@ -5,7 +5,11 @@
  * 2.0.
  */
 
+import Boom from '@hapi/boom';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
+import type { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
 import type { RulesClientContext } from '../../../../rules_client/types';
 import type { GapAutoFillSchedulerSO } from '../../../../data/gap_auto_fill_scheduler/types/gap_auto_fill_scheduler';
 import type { ReadOperations, WriteOperations } from '../../../../authorization';
@@ -14,6 +18,7 @@ import type { GapAutoFillSchedulerAuditAction } from '../../../../rules_client/c
 import { gapAutoFillSchedulerAuditEvent } from '../../../../rules_client/common/audit_events';
 import { GAP_AUTO_FILL_SCHEDULER_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 import type { SchedulerContext } from '../../methods/utils';
+import { GAP_AUTO_FILL_SCHEDULER_TASK_TYPE } from '../../types/scheduler';
 
 /**
  * Fetches the gap auto fill scheduler saved object and performs rule type based authorization.
@@ -62,6 +67,41 @@ export const getGapAutoFillSchedulerSO = async ({
 
   return schedulerSO;
 };
+
+/**
+ * Scheduler saved objects are scoped to a space but their task ids are global, so a scheduler in
+ * another space can have the same id. Returns the scheduler task when it exists and whether it
+ * belongs to the scheduler in the current space, so callers never remove another space's task.
+ */
+export const getGapAutoFillSchedulerTask = async ({
+  context,
+  id,
+}: {
+  context: RulesClientContext;
+  id: string;
+}): Promise<{ task?: ConcreteTaskInstance; isOwnedByCurrentSpace: boolean }> => {
+  let task: ConcreteTaskInstance;
+  try {
+    task = await context.taskManager.get(id);
+  } catch (error) {
+    if (SavedObjectsErrorHelpers.isNotFoundError(error)) {
+      return { task: undefined, isOwnedByCurrentSpace: false };
+    }
+    throw error;
+  }
+
+  const taskSpaceId =
+    (task.params as { spaceId?: string } | undefined)?.spaceId ?? DEFAULT_SPACE_ID;
+  const isOwnedByCurrentSpace =
+    task.taskType === GAP_AUTO_FILL_SCHEDULER_TASK_TYPE && taskSpaceId === context.spaceId;
+
+  return { task, isOwnedByCurrentSpace };
+};
+
+export const gapAutoFillSchedulerTaskConflictError = (id: string) =>
+  Boom.conflict(
+    `A task with id "${id}" already exists for a gap auto fill scheduler in another space. Use a different scheduler id.`
+  );
 
 /**
  * Fetches the scheduler config (enabled + numRetries) for gap fill status calculation.

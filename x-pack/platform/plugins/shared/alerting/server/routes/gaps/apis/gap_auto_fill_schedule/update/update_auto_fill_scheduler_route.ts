@@ -4,33 +4,67 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import type { IRouter } from '@kbn/core/server';
+import type { IRouter, RouteConfigOptions, RouteMethod } from '@kbn/core/server';
 import type { GapAutoFillSchedulerResponseV1 } from '../../../../../../common/routes/gaps/apis/gap_auto_fill_scheduler';
 import {
+  gapAutoFillSchedulerResponseSchemaV1,
   gapAutoFillSchedulerUpdateBodySchemaV1,
   getGapAutoFillSchedulerParamsSchemaV1,
+  updateGapAutoFillSchedulerExamplesV1,
 } from '../../../../../../common/routes/gaps/apis/gap_auto_fill_scheduler';
 import type { ILicenseState } from '../../../../../lib';
 import { verifyAccessAndContext } from '../../../../lib';
 import type { AlertingRequestHandlerContext } from '../../../../../types';
-import { INTERNAL_ALERTING_GAPS_AUTO_FILL_SCHEDULER_API_PATH } from '../../../../../types';
+import {
+  ALERTING_GAPS_AUTO_FILL_SCHEDULER_API_PATH,
+  INTERNAL_ALERTING_GAPS_AUTO_FILL_SCHEDULER_API_PATH,
+} from '../../../../../types';
 import { transformToGapAutoFillSchedulerResponseBodyV1 } from '../transforms/transform_response';
 import { transformRequestV1 } from './transforms';
 import { DEFAULT_ALERTING_ROUTE_SECURITY } from '../../../../constants';
 
-export const updateAutoFillSchedulerRoute = (
-  router: IRouter<AlertingRequestHandlerContext>,
-  licenseState: ILicenseState
-) => {
+interface BuildUpdateAutoFillSchedulerRouteParams {
+  licenseState: ILicenseState;
+  path: string;
+  router: IRouter<AlertingRequestHandlerContext>;
+  options: RouteConfigOptions<RouteMethod>;
+}
+
+const buildUpdateAutoFillSchedulerRoute = ({
+  licenseState,
+  path,
+  router,
+  options,
+}: BuildUpdateAutoFillSchedulerRouteParams) => {
   router.put(
     {
-      path: `${INTERNAL_ALERTING_GAPS_AUTO_FILL_SCHEDULER_API_PATH}/{id}`,
+      path,
       security: DEFAULT_ALERTING_ROUTE_SECURITY,
-      options: { access: 'internal' },
+      options,
       validate: {
-        params: getGapAutoFillSchedulerParamsSchemaV1,
-        body: gapAutoFillSchedulerUpdateBodySchemaV1,
+        request: {
+          params: getGapAutoFillSchedulerParamsSchemaV1,
+          body: gapAutoFillSchedulerUpdateBodySchemaV1,
+        },
+        response: {
+          200: {
+            body: () => gapAutoFillSchedulerResponseSchemaV1,
+            description: 'Indicates a successful call.',
+          },
+          400: {
+            description: 'Indicates an invalid schema or parameters.',
+          },
+          403: {
+            description: 'Indicates that this call is forbidden.',
+          },
+          404: {
+            description: 'Indicates a gap auto fill scheduler with the given ID does not exist.',
+          },
+          409: {
+            description:
+              'Indicates another gap auto fill scheduler already exists for one of the given rule type and consumer pairs.',
+          },
+        },
       },
     },
     router.handleLegacyErrors(
@@ -48,3 +82,32 @@ export const updateAutoFillSchedulerRoute = (
     )
   );
 };
+
+export const updateAutoFillSchedulerRoute = (
+  router: IRouter<AlertingRequestHandlerContext>,
+  licenseState: ILicenseState
+) =>
+  buildUpdateAutoFillSchedulerRoute({
+    licenseState,
+    path: `${INTERNAL_ALERTING_GAPS_AUTO_FILL_SCHEDULER_API_PATH}/{id}`,
+    router,
+    options: { access: 'internal' },
+  });
+
+export const updateAutoFillSchedulerPublicRoute = (
+  router: IRouter<AlertingRequestHandlerContext>,
+  licenseState: ILicenseState
+) =>
+  buildUpdateAutoFillSchedulerRoute({
+    licenseState,
+    path: `${ALERTING_GAPS_AUTO_FILL_SCHEDULER_API_PATH}/{id}`,
+    router,
+    options: {
+      access: 'public',
+      summary: 'Update a gap auto fill scheduler by ID',
+      description:
+        'Replace the configuration of a gap auto fill scheduler. The request body must contain the full configuration; if `excluded_reasons` is omitted, the current value is kept. Set `enabled` to `true` to turn automatic gap filling on and to `false` to turn it off. The call is idempotent: repeating it with the same body leaves the scheduler in the same state and does not reset the next scheduled run. This API requires an Enterprise license.',
+      tags: ['oas-tag:alerting'],
+      oasOperationObject: updateGapAutoFillSchedulerExamplesV1,
+    },
+  });

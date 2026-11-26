@@ -1,0 +1,78 @@
+requestBody:
+  content:
+    application/json:
+      examples:
+        createGapAutoFillSchedulerRequest:
+          summary: Turn on automatic gap filling for Elastic Security detection rules in the default space
+          description: Use the identifier `security-solution-gap-auto-fill-scheduler-<space-id>` so the scheduler appears in the Elastic Security detection rules settings for that space.
+          value:
+            id: security-solution-gap-auto-fill-scheduler-default
+            name: ''
+            enabled: true
+            schedule:
+              interval: 2m
+            rule_types:
+              - type: siem.esqlRule
+                consumer: siem
+              - type: siem.eqlRule
+                consumer: siem
+              - type: siem.indicatorRule
+                consumer: siem
+              - type: siem.mlRule
+                consumer: siem
+              - type: siem.queryRule
+                consumer: siem
+              - type: siem.savedQueryRule
+                consumer: siem
+              - type: siem.thresholdRule
+                consumer: siem
+              - type: siem.newTermsRule
+                consumer: siem
+            gap_fill_range: now-90d
+            max_backfills: 100
+            num_retries: 3
+            scope:
+              - security_solution
+            excluded_reasons:
+              - rule_disabled
+responses:
+  200:
+    content:
+      application/json:
+        examples:
+          createGapAutoFillSchedulerResponse:
+            summary: Create gap auto fill scheduler response
+            value:
+              id: security-solution-gap-auto-fill-scheduler-default
+              name: ''
+              enabled: true
+              schedule:
+                interval: 2m
+              rule_types:
+                - type: siem.esqlRule
+                  consumer: siem
+                - type: siem.eqlRule
+                  consumer: siem
+                - type: siem.indicatorRule
+                  consumer: siem
+                - type: siem.mlRule
+                  consumer: siem
+                - type: siem.queryRule
+                  consumer: siem
+                - type: siem.savedQueryRule
+                  consumer: siem
+                - type: siem.thresholdRule
+                  consumer: siem
+                - type: siem.newTermsRule
+                  consumer: siem
+              gap_fill_range: now-90d
+              max_backfills: 100
+              num_retries: 3
+              scope:
+                - security_solution
+              excluded_reasons:
+                - rule_disabled
+              created_by: elastic
+              updated_by: elastic
+              created_at: '2025-01-01T00:00:00.000Z'
+              updated_at: '2025-01-01T00:00:00.000Z'

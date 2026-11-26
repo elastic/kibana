@@ -9013,6 +9013,513 @@ paths:
         <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/alerting/rules/backfill/{id}</span></div>
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+  /api/alerting/rules/gaps/auto_fill_scheduler:
+    post:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/alerting/rules/gaps/auto_fill_scheduler</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Create a gap auto fill scheduler that periodically fills detected gaps for the given rule types in the Kibana space of the request. Only one scheduler can exist per rule type and consumer pair. To manage the automatic gap filling setting shown in the Elastic Security detection rules settings, use the ID `security-solution-gap-auto-fill-scheduler-<space-id>`. This API requires an Enterprise license.
+      operationId: post-alerting-rules-gaps-auto-fill-scheduler
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+      requestBody:
+        content:
+          application/json:
+            examples:
+              createGapAutoFillSchedulerRequest:
+                description: Use the identifier `security-solution-gap-auto-fill-scheduler-<space-id>` so the scheduler appears in the Elastic Security detection rules settings for that space.
+                summary: Turn on automatic gap filling for Elastic Security detection rules in the default space
+                value:
+                  enabled: true
+                  excluded_reasons:
+                    - rule_disabled
+                  gap_fill_range: now-90d
+                  id: security-solution-gap-auto-fill-scheduler-default
+                  max_backfills: 100
+                  name: ''
+                  num_retries: 3
+                  rule_types:
+                    - consumer: siem
+                      type: siem.esqlRule
+                    - consumer: siem
+                      type: siem.eqlRule
+                    - consumer: siem
+                      type: siem.indicatorRule
+                    - consumer: siem
+                      type: siem.mlRule
+                    - consumer: siem
+                      type: siem.queryRule
+                    - consumer: siem
+                      type: siem.savedQueryRule
+                    - consumer: siem
+                      type: siem.thresholdRule
+                    - consumer: siem
+                      type: siem.newTermsRule
+                  schedule:
+                    interval: 2m
+                  scope:
+                    - security_solution
+            schema:
+              additionalProperties: false
+              type: object
+              properties:
+                enabled:
+                  default: true
+                  description: Indicates whether the scheduler is enabled. When `true`, the scheduler periodically fills detected gaps for the matching rules; when `false`, no automatic gap filling occurs.
+                  type: boolean
+                excluded_reasons:
+                  description: The gap reasons that the scheduler skips. Gaps caused by a rule being disabled are excluded by default.
+                  items:
+                    enum:
+                      - rule_disabled
+                      - rule_did_not_run
+                    type: string
+                  maxItems: 2
+                  type: array
+                gap_fill_range:
+                  default: now-90d
+                  description: How far back in time the scheduler looks for gaps, as a date math expression relative to now, for example `now-90d`.
+                  maxLength: 100
+                  type: string
+                id:
+                  description: The identifier for the gap auto fill scheduler. If omitted, a random identifier is generated.
+                  maxLength: 512
+                  type: string
+                max_backfills:
+                  default: 1000
+                  description: The maximum number of backfills that can exist for the scheduler at the same time. Backfills that are still running count toward this limit, so a run schedules fewer backfills, or none, until existing backfills finish. Reaching the limit is not a scheduler failure.
+                  maximum: 5000
+                  minimum: 1
+                  type: number
+                name:
+                  default: ''
+                  description: A name for the gap auto fill scheduler.
+                  maxLength: 512
+                  type: string
+                num_retries:
+                  default: 3
+                  description: The number of times the scheduler retries filling a gap that failed.
+                  maximum: 10
+                  minimum: 1
+                  type: number
+                rule_types:
+                  description: The rule type and consumer pairs that the scheduler fills gaps for.
+                  items:
+                    additionalProperties: false
+                    type: object
+                    properties:
+                      consumer:
+                        description: The consumer of the rule type, for example `siem`.
+                        maxLength: 512
+                        type: string
+                      type:
+                        description: The rule type identifier, for example `siem.queryRule`.
+                        maxLength: 512
+                        type: string
+                    required:
+                      - type
+                      - consumer
+                  maxItems: 100
+                  type: array
+                schedule:
+                  additionalProperties: false
+                  type: object
+                  properties:
+                    interval:
+                      description: How often the scheduler runs, as a duration string such as `2m` or `1h`. The minimum interval is one minute.
+                      maxLength: 100
+                      type: string
+                  required:
+                    - interval
+                scope:
+                  description: The scopes of the scheduler task, for example `security_solution`.
+                  items:
+                    maxLength: 512
+                    type: string
+                  maxItems: 100
+                  type: array
+              required:
+                - schedule
+                - scope
+                - rule_types
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                createGapAutoFillSchedulerResponse:
+                  summary: Create gap auto fill scheduler response
+                  value:
+                    created_at: '2025-01-01T00:00:00.000Z'
+                    created_by: elastic
+                    enabled: true
+                    excluded_reasons:
+                      - rule_disabled
+                    gap_fill_range: now-90d
+                    id: security-solution-gap-auto-fill-scheduler-default
+                    max_backfills: 100
+                    name: ''
+                    num_retries: 3
+                    rule_types:
+                      - consumer: siem
+                        type: siem.esqlRule
+                      - consumer: siem
+                        type: siem.eqlRule
+                      - consumer: siem
+                        type: siem.indicatorRule
+                      - consumer: siem
+                        type: siem.mlRule
+                      - consumer: siem
+                        type: siem.queryRule
+                      - consumer: siem
+                        type: siem.savedQueryRule
+                      - consumer: siem
+                        type: siem.thresholdRule
+                      - consumer: siem
+                        type: siem.newTermsRule
+                    schedule:
+                      interval: 2m
+                    scope:
+                      - security_solution
+                    updated_at: '2025-01-01T00:00:00.000Z'
+                    updated_by: elastic
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_gap_auto_fill_scheduler_response'
+          description: Indicates a successful call.
+        '400':
+          description: Indicates an invalid schema or parameters.
+        '403':
+          description: Indicates that this call is forbidden.
+        '409':
+          description: Indicates a gap auto fill scheduler with the given ID, or for one of the given rule type and consumer pairs, already exists.
+      summary: Create a gap auto fill scheduler
+      tags:
+        - alerting
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
+  /api/alerting/rules/gaps/auto_fill_scheduler/{id}:
+    delete:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb delete">delete</span>&nbsp;<span class="operation-path">/s/{space_id}/api/alerting/rules/gaps/auto_fill_scheduler/{id}</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Delete a gap auto fill scheduler and stop its scheduled task. Automatic gap filling stops for the rule types the scheduler covered. This API requires an Enterprise license.
+      operationId: delete-alerting-rules-gaps-auto-fill-scheduler-id
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - description: The identifier for the gap auto fill scheduler.
+          in: path
+          name: id
+          required: true
+          schema:
+            maxLength: 512
+            type: string
+      responses:
+        '204':
+          description: Indicates a successful call.
+        '400':
+          description: Indicates an invalid schema or parameters.
+        '403':
+          description: Indicates that this call is forbidden.
+        '404':
+          description: Indicates a gap auto fill scheduler with the given ID does not exist.
+      summary: Delete a gap auto fill scheduler by ID
+      tags:
+        - alerting
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
+    get:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/alerting/rules/gaps/auto_fill_scheduler/{id}</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Get the configuration of a gap auto fill scheduler, including whether automatic gap filling is enabled. Schedulers are scoped to the Kibana space of the request. The Elastic Security detection rules settings use the scheduler with the ID `security-solution-gap-auto-fill-scheduler-<space-id>`. This API requires an Enterprise license.
+      operationId: get-alerting-rules-gaps-auto-fill-scheduler-id
+      parameters:
+        - description: The identifier for the gap auto fill scheduler.
+          in: path
+          name: id
+          required: true
+          schema:
+            maxLength: 512
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                getGapAutoFillSchedulerResponse:
+                  summary: Get the gap auto fill scheduler for Elastic Security detection rules in the default space
+                  value:
+                    created_at: '2025-01-01T00:00:00.000Z'
+                    created_by: elastic
+                    enabled: true
+                    excluded_reasons:
+                      - rule_disabled
+                    gap_fill_range: now-90d
+                    id: security-solution-gap-auto-fill-scheduler-default
+                    max_backfills: 100
+                    name: ''
+                    num_retries: 3
+                    rule_types:
+                      - consumer: siem
+                        type: siem.esqlRule
+                      - consumer: siem
+                        type: siem.eqlRule
+                      - consumer: siem
+                        type: siem.indicatorRule
+                      - consumer: siem
+                        type: siem.mlRule
+                      - consumer: siem
+                        type: siem.queryRule
+                      - consumer: siem
+                        type: siem.savedQueryRule
+                      - consumer: siem
+                        type: siem.thresholdRule
+                      - consumer: siem
+                        type: siem.newTermsRule
+                    schedule:
+                      interval: 2m
+                    scope:
+                      - security_solution
+                    updated_at: '2025-01-01T00:00:00.000Z'
+                    updated_by: elastic
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_gap_auto_fill_scheduler_response'
+          description: Indicates a successful call.
+        '400':
+          description: Indicates an invalid schema or parameters.
+        '403':
+          description: Indicates that this call is forbidden.
+        '404':
+          description: Indicates a gap auto fill scheduler with the given ID does not exist.
+      summary: Get a gap auto fill scheduler by ID
+      tags:
+        - alerting
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
+    put:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb put">put</span>&nbsp;<span class="operation-path">/s/{space_id}/api/alerting/rules/gaps/auto_fill_scheduler/{id}</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Replace the configuration of a gap auto fill scheduler. The request body must contain the full configuration; if `excluded_reasons` is omitted, the current value is kept. Set `enabled` to `true` to turn automatic gap filling on and to `false` to turn it off. The call is idempotent: repeating it with the same body leaves the scheduler in the same state and does not reset the next scheduled run. This API requires an Enterprise license.
+      operationId: put-alerting-rules-gaps-auto-fill-scheduler-id
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - description: The identifier for the gap auto fill scheduler.
+          in: path
+          name: id
+          required: true
+          schema:
+            maxLength: 512
+            type: string
+      requestBody:
+        content:
+          application/json:
+            examples:
+              updateGapAutoFillSchedulerRequest:
+                summary: Turn off automatic gap filling for Elastic Security detection rules in the default space
+                value:
+                  enabled: false
+                  excluded_reasons:
+                    - rule_disabled
+                  gap_fill_range: now-90d
+                  max_backfills: 100
+                  name: ''
+                  num_retries: 3
+                  rule_types:
+                    - consumer: siem
+                      type: siem.esqlRule
+                    - consumer: siem
+                      type: siem.eqlRule
+                    - consumer: siem
+                      type: siem.indicatorRule
+                    - consumer: siem
+                      type: siem.mlRule
+                    - consumer: siem
+                      type: siem.queryRule
+                    - consumer: siem
+                      type: siem.savedQueryRule
+                    - consumer: siem
+                      type: siem.thresholdRule
+                    - consumer: siem
+                      type: siem.newTermsRule
+                  schedule:
+                    interval: 2m
+                  scope:
+                    - security_solution
+            schema:
+              additionalProperties: false
+              type: object
+              properties:
+                enabled:
+                  description: Indicates whether the scheduler is enabled. When `true`, the scheduler periodically fills detected gaps for the matching rules; when `false`, no automatic gap filling occurs.
+                  type: boolean
+                excluded_reasons:
+                  description: The gap reasons that the scheduler skips. Gaps caused by a rule being disabled are excluded by default.
+                  items:
+                    enum:
+                      - rule_disabled
+                      - rule_did_not_run
+                    type: string
+                  maxItems: 2
+                  type: array
+                gap_fill_range:
+                  description: How far back in time the scheduler looks for gaps, as a date math expression relative to now, for example `now-90d`.
+                  maxLength: 100
+                  type: string
+                max_backfills:
+                  default: 1000
+                  description: The maximum number of backfills that can exist for the scheduler at the same time. Backfills that are still running count toward this limit, so a run schedules fewer backfills, or none, until existing backfills finish. Reaching the limit is not a scheduler failure.
+                  maximum: 5000
+                  minimum: 1
+                  type: number
+                name:
+                  description: A name for the gap auto fill scheduler.
+                  maxLength: 512
+                  type: string
+                num_retries:
+                  default: 3
+                  description: The number of times the scheduler retries filling a gap that failed.
+                  maximum: 10
+                  minimum: 1
+                  type: number
+                rule_types:
+                  description: The rule type and consumer pairs that the scheduler fills gaps for.
+                  items:
+                    additionalProperties: false
+                    type: object
+                    properties:
+                      consumer:
+                        description: The consumer of the rule type, for example `siem`.
+                        maxLength: 512
+                        type: string
+                      type:
+                        description: The rule type identifier, for example `siem.queryRule`.
+                        maxLength: 512
+                        type: string
+                    required:
+                      - type
+                      - consumer
+                  maxItems: 100
+                  type: array
+                schedule:
+                  additionalProperties: false
+                  type: object
+                  properties:
+                    interval:
+                      description: How often the scheduler runs, as a duration string such as `2m` or `1h`. The minimum interval is one minute.
+                      maxLength: 100
+                      type: string
+                  required:
+                    - interval
+                scope:
+                  description: The scopes of the scheduler task, for example `security_solution`.
+                  items:
+                    maxLength: 512
+                    type: string
+                  maxItems: 100
+                  type: array
+              required:
+                - name
+                - enabled
+                - gap_fill_range
+                - schedule
+                - scope
+                - rule_types
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                updateGapAutoFillSchedulerResponse:
+                  summary: Update gap auto fill scheduler response
+                  value:
+                    created_at: '2025-01-01T00:00:00.000Z'
+                    created_by: elastic
+                    enabled: false
+                    excluded_reasons:
+                      - rule_disabled
+                    gap_fill_range: now-90d
+                    id: security-solution-gap-auto-fill-scheduler-default
+                    max_backfills: 100
+                    name: ''
+                    num_retries: 3
+                    rule_types:
+                      - consumer: siem
+                        type: siem.esqlRule
+                      - consumer: siem
+                        type: siem.eqlRule
+                      - consumer: siem
+                        type: siem.indicatorRule
+                      - consumer: siem
+                        type: siem.mlRule
+                      - consumer: siem
+                        type: siem.queryRule
+                      - consumer: siem
+                        type: siem.savedQueryRule
+                      - consumer: siem
+                        type: siem.thresholdRule
+                      - consumer: siem
+                        type: siem.newTermsRule
+                    schedule:
+                      interval: 2m
+                    scope:
+                      - security_solution
+                    updated_at: '2025-01-02T00:00:00.000Z'
+                    updated_by: elastic
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_gap_auto_fill_scheduler_response'
+          description: Indicates a successful call.
+        '400':
+          description: Indicates an invalid schema or parameters.
+        '403':
+          description: Indicates that this call is forbidden.
+        '404':
+          description: Indicates a gap auto fill scheduler with the given ID does not exist.
+        '409':
+          description: Indicates another gap auto fill scheduler already exists for one of the given rule type and consumer pairs.
+      summary: Update a gap auto fill scheduler by ID
+      tags:
+        - alerting
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
   /api/alerting/v2/action_policies:
     get:
       description: |-
@@ -166595,6 +167102,95 @@ components:
         - outputs
         - inputs
       title: full_agent_policy
+      type: object
+    Kibana_HTTP_APIs_gap_auto_fill_scheduler_response:
+      additionalProperties: false
+      properties:
+        created_at:
+          description: The date and time that the scheduler was created.
+          type: string
+        created_by:
+          default: null
+          description: The identifier for the user that created the scheduler.
+          nullable: true
+          type: string
+        enabled:
+          description: Indicates whether the scheduler is enabled. When `true`, the scheduler periodically fills detected gaps for the matching rules; when `false`, no automatic gap filling occurs.
+          type: boolean
+        excluded_reasons:
+          description: The gap reasons that the scheduler skips. Gaps caused by a rule being disabled are excluded by default.
+          items:
+            type: string
+          maxItems: 2
+          type: array
+        gap_fill_range:
+          description: How far back in time the scheduler looks for gaps, as a date math expression relative to now, for example `now-90d`.
+          type: string
+        id:
+          description: The identifier for the gap auto fill scheduler.
+          type: string
+        max_backfills:
+          description: The maximum number of backfills that can exist for the scheduler at the same time. Backfills that are still running count toward this limit, so a run schedules fewer backfills, or none, until existing backfills finish. Reaching the limit is not a scheduler failure.
+          type: number
+        name:
+          description: A name for the gap auto fill scheduler.
+          type: string
+        num_retries:
+          description: The number of times the scheduler retries filling a gap that failed.
+          type: number
+        rule_types:
+          description: The rule type and consumer pairs that the scheduler fills gaps for.
+          items:
+            additionalProperties: false
+            type: object
+            properties:
+              consumer:
+                description: The consumer of the rule type, for example `siem`.
+                type: string
+              type:
+                description: The rule type identifier, for example `siem.queryRule`.
+                type: string
+            required:
+              - type
+              - consumer
+          maxItems: 100
+          type: array
+        schedule:
+          additionalProperties: false
+          type: object
+          properties:
+            interval:
+              description: How often the scheduler runs, as a duration string such as `2m` or `1h`. The minimum interval is one minute.
+              type: string
+          required:
+            - interval
+        scope:
+          description: The scopes of the scheduler task, for example `security_solution`.
+          items:
+            type: string
+          maxItems: 100
+          type: array
+        updated_at:
+          description: The date and time that the scheduler was last updated.
+          type: string
+        updated_by:
+          default: null
+          description: The identifier for the user that last updated the scheduler.
+          nullable: true
+          type: string
+      required:
+        - id
+        - name
+        - enabled
+        - schedule
+        - rule_types
+        - gap_fill_range
+        - max_backfills
+        - num_retries
+        - scope
+        - created_at
+        - updated_at
+      title: gap_auto_fill_scheduler_response
       type: object
     Kibana_HTTP_APIs_gaugeLibItemNoESQL:
       additionalProperties: false
