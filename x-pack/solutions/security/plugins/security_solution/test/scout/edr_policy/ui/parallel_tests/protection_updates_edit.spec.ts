@@ -8,7 +8,12 @@
 import moment from 'moment';
 import { expect } from '@kbn/scout-security/ui';
 import { spaceTest, tags } from '../fixtures';
-import { setManifestVersion, setProtectionUpdatesNote } from '../fixtures/protection_updates_data';
+import {
+  getNoteWriterAuthHeaders,
+  NOTE_WRITER_ROLE,
+  setManifestVersion,
+  setProtectionUpdatesNote,
+} from '../fixtures/protection_updates_data';
 
 const DISPLAY_DATE_FORMAT = 'MMMM DD, YYYY';
 const MANIFEST_DATE_FORMAT = 'YYYY-MM-DD';
@@ -22,7 +27,8 @@ spaceTest.describe(
   { tag: [...tags.stateful.classic, ...tags.serverless.security.complete] },
   () => {
     spaceTest.beforeEach(async ({ browserAuth }) => {
-      await browserAuth.loginAsSecurityRole('endpoint_operations_analyst');
+      // The note writer, so that seeding the note on stateful keeps the worker's custom role as is.
+      await browserAuth.loginAsSecurityRole(NOTE_WRITER_ROLE);
     });
 
     spaceTest('renders tab content', async ({ page, pageObjects, endpointPolicy }) => {
@@ -156,6 +162,7 @@ spaceTest.describe(
       async ({
         kbnClient,
         samlAuth,
+        config,
         endpointManagementApi,
         scoutSpace,
         pageObjects,
@@ -168,10 +175,9 @@ spaceTest.describe(
           endpointPolicy.id,
           daysAgo(7).format(MANIFEST_DATE_FORMAT)
         );
-        const { cookieHeader } = await samlAuth.asInteractiveUser('admin');
         await setProtectionUpdatesNote({
           endpointManagementApi,
-          authHeaders: cookieHeader,
+          authHeaders: await getNoteWriterAuthHeaders(samlAuth, config),
           spaceId: scoutSpace.id,
           policyId: endpointPolicy.id,
           note: NOTE,

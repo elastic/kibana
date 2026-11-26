@@ -8,9 +8,15 @@
 import moment from 'moment';
 import { expect } from '@kbn/scout-security/ui';
 import { spaceTest, tags } from '../fixtures';
-import { setManifestVersion, setProtectionUpdatesNote } from '../fixtures/protection_updates_data';
+import {
+  getNoteWriterAuthHeaders,
+  setManifestVersion,
+  setProtectionUpdatesNote,
+} from '../fixtures/protection_updates_data';
 
 const NOTE = 'test note';
+// Has policy management read but not write.
+const READ_ONLY_ROLE = 't3_analyst';
 // 0 means the wait has no own timer; it is bounded by the test timeout.
 const NO_OWN_TIMEOUT_MS = 0;
 
@@ -18,16 +24,13 @@ spaceTest.describe(
   'Policy details - protection updates (read only)',
   { tag: [...tags.stateful.classic, ...tags.serverless.security.complete] },
   () => {
-    spaceTest.beforeEach(async ({ browserAuth }) => {
-      // Has policy management read but not write.
-      await browserAuth.loginAsSecurityRole('t3_analyst');
-    });
-
     spaceTest(
       'with note',
       async ({
+        browserAuth,
         kbnClient,
         samlAuth,
+        config,
         endpointManagementApi,
         scoutSpace,
         pageObjects,
@@ -41,14 +44,16 @@ spaceTest.describe(
           endpointPolicy.id,
           oneWeekAgo.format('YYYY-MM-DD')
         );
-        const { cookieHeader } = await samlAuth.asInteractiveUser('admin');
         await setProtectionUpdatesNote({
           endpointManagementApi,
-          authHeaders: cookieHeader,
+          authHeaders: await getNoteWriterAuthHeaders(samlAuth, config),
           spaceId: scoutSpace.id,
           policyId: endpointPolicy.id,
           note: NOTE,
         });
+        // After the seeding: on stateful the note writer is the worker's custom role, which this
+        // login turns back into the read-only one.
+        await browserAuth.loginAsSecurityRole(READ_ONLY_ROLE);
 
         await protectionUpdates.goto(endpointPolicy.id);
         await expect(protectionUpdates.automaticUpdatesViewMode).toBeVisible();
@@ -69,8 +74,9 @@ spaceTest.describe(
 
     spaceTest(
       'without note',
-      async ({ page, kbnClient, scoutSpace, pageObjects, endpointPolicy }) => {
+      async ({ page, browserAuth, kbnClient, scoutSpace, pageObjects, endpointPolicy }) => {
         const { protectionUpdates } = pageObjects;
+        await browserAuth.loginAsSecurityRole(READ_ONLY_ROLE);
         const oneWeekAgo = moment.utc().subtract(7, 'days');
         await setManifestVersion(
           kbnClient,
