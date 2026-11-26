@@ -10,13 +10,16 @@
 import type {
   DiscoverSessionApiEmbeddableByReferenceConfig,
   DiscoverSessionApiEmbeddableByValueConfig,
+  DiscoverSessionApiEmbeddableTab,
 } from '@kbn/as-code-discover-schema';
 import type { StateComparators } from '@kbn/presentation-publishing';
-import { isEqual, isUndefined, omit, omitBy } from 'lodash';
+import { isEqual, isUndefined, omitBy } from 'lodash';
+import { areTableSettingOverridesEqual } from './panel_tab';
 
 export function getDiscoverSessionEmbeddableComparators(
   isByValue: boolean,
-  shouldSkipTabComparators: boolean
+  shouldSkipTabComparators: boolean,
+  selectedSessionTab?: DiscoverSessionApiEmbeddableTab
 ): StateComparators<
   DiscoverSessionApiEmbeddableByValueConfig | DiscoverSessionApiEmbeddableByReferenceConfig
 > {
@@ -36,16 +39,8 @@ export function getDiscoverSessionEmbeddableComparators(
         // until the user explicitly applies a tab change.
         selected_tab_id: shouldSkipTabComparators ? 'skip' : 'referenceEquality',
         ref_id: 'skip',
-        overrides: (prev = {}, next = {}) => {
-          return (
-            isEqual(prev.column_order ?? [], next.column_order ?? []) &&
-            isEqual(prev.column_settings ?? {}, next.column_settings ?? {}) &&
-            isEqual(prev.sort ?? [], next.sort ?? []) &&
-            isEqual(
-              omit(prev, ['column_order', 'column_settings', 'sort']),
-              omit(next, ['column_order', 'column_settings', 'sort'])
-            )
-          );
-        },
+        // Overrides that show the same table on top of the selected session tab are equal
+        overrides: (prev, next) =>
+          areTableSettingOverridesEqual(selectedSessionTab ?? {}, prev, next),
       };
 }

@@ -114,7 +114,7 @@ describe('significant events fair batch selection', () => {
     const backlog = gate?.steps?.find(({ name }) => name === 'get_written_rules_backlog');
     expect(backlog?.type).toBe('elasticsearch.esql.query');
     expect(backlog?.if).toBeUndefined();
-    expect(JSON.stringify(backlog?.with?.filter)).toContain('written_rule_uuids');
+    expect(JSON.stringify(backlog?.with?.filter)).toContain('stamp_rule_uuids');
     expect(discovery.steps.some(({ name }) => name === 'get_rule_backlog')).toBe(false);
     expect(hasStepLevelIfOnEsql(discovery.steps)).toBe(false);
   });
@@ -169,7 +169,6 @@ describe('significant events fair batch selection', () => {
       'heldBackCount',
       'needsAgentCount',
       'classifierReasonCounts',
-      'classifierProbeStatusCounts',
       'classifierFailed',
     ]);
     expect(discovery.steps.find(({ name }) => name === 'output_result')?.with).toMatchObject({
@@ -271,10 +270,11 @@ describe('significant events fair batch selection', () => {
 
   it('passes the four positional params in the expected order', () => {
     const selection = getStep(DISCOVERY_YAML, 'get_detections');
-    // params is a YAML array of strings: detectionBatchMax, threshold, probe, exempt
-    const params = selection.with?.params as string[] | undefined;
+    // params is a YAML array: the classifier's row pool, threshold, probe, exempt
+    const params = selection.with?.params as Array<string | number> | undefined;
     expect(params).toHaveLength(4);
-    expect(params?.[0]).toContain('detectionBatchMax');
+    // The pool is the classifier's MAX_CLASSIFIED_ROWS; the agent's batch (detectionBatchMax) is capped by the step.
+    expect(params?.[0]).toBe(100);
     expect(params?.[1]).toContain('flakyRuleDetectionThreshold');
     expect(params?.[2]).toContain('flakyRuleProbeAfterMinutes');
     expect(params?.[3]).toContain('flakyRuleExemptSeverityScore');

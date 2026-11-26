@@ -1,5 +1,5 @@
 {
-  "sha1": "d110b701a82bd89031134272f8f96b8b02a9b859",
+  "sha1": "8a0d5df0b7dfd2ae50607f575853f6150c9fe63f",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -611,7 +611,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/transform/test/scout/ui/tests/edit_clone/editing.spec.ts",
-        "line": 102,
+        "line": 113,
         "column": 65
       }
     },
@@ -631,7 +631,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/transform/test/scout/ui/tests/edit_clone/editing.spec.ts",
-        "line": 111,
+        "line": 122,
         "column": 7
       }
     },

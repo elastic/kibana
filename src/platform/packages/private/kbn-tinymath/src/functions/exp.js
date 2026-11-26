@@ -13,8 +13,8 @@
  * @return {(number|number[])} `e^a`. Returns an array with the values of `e^x` evaluated where `x` is each element of `a` if `a` is an array.
  *
  * @example
- * exp(2) // returns e^2 = 7.3890560989306495
- * exp([1, 2, 3]) // returns [e^1, e^2, e^3] = [2.718281828459045, 7.3890560989306495, 20.085536923187668]
+ * exp(2) // returns e^2 = 7.38905609893065
+ * exp([1, 2, 3]) // returns [e^1, e^2, e^3] = [2.718281828459045, 7.38905609893065, 20.085536923187668]
  */
 
 function exp(a) {

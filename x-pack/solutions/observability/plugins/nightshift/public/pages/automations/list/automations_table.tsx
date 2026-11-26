@@ -18,6 +18,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_ELEMENTS } from '../../../common/ebt_constants';
 import { useToggleAutomation, type Automation } from '../../../data/automations/use_automations';
+import type { UseAllRelayAppBindings } from '../../../data/relay_apps/use_relay_app_bindings';
 import type { RunCounts, RunCountStatus } from '../hooks/use_automation_usage';
 import type { AutomationFacets } from '../utils/filter_automations';
 import { AutomationAuthorCell } from './cells/author_cell';
@@ -25,6 +26,7 @@ import { AutomationNameCell } from './cells/name_cell';
 import { AutomationActions } from './cells/row_actions';
 import { RunCountCell } from './cells/run_count_cell';
 import { AutomationUsageCell } from './cells/usage_cell';
+import { getUnconnectedSlackChannels } from '../utils/unconnected_slack_channels';
 import { listLabels, runCountColumns } from './translations';
 
 const INTERACTIVE_ELEMENTS =
@@ -39,6 +41,7 @@ export const AutomationsTable = ({
   getFacets,
   isRateLimited,
   isGlobalLimitReached = false,
+  connectedChannels,
   pageIndex,
   pageSize,
   onPageChange,
@@ -60,6 +63,8 @@ export const AutomationsTable = ({
   getFacets: (automation: Automation) => AutomationFacets;
   isRateLimited: (automation: Automation) => boolean;
   isGlobalLimitReached?: boolean;
+  /** Connected Slack channels, to flag automations that listen to a channel that is not. */
+  connectedChannels: UseAllRelayAppBindings;
   pageIndex: number;
   pageSize: number;
   onPageChange: (index: number, size: number) => void;
@@ -92,7 +97,14 @@ export const AutomationsTable = ({
       name: listLabels.automationColumn,
       sortable: true,
       render: (_name: string, automation: Automation) => (
-        <AutomationNameCell automation={automation} onOpen={() => onOpenAutomation(automation)} />
+        <AutomationNameCell
+          automation={automation}
+          unconnectedSlackChannels={getUnconnectedSlackChannels(
+            automation.trigger.rows,
+            connectedChannels
+          )}
+          onOpen={() => onOpenAutomation(automation)}
+        />
       ),
     },
     {
@@ -147,10 +159,17 @@ export const AutomationsTable = ({
       render: (isEnabled: boolean, automation: Automation) => (
         <EuiToolTip content={editDisabledReason}>
           <EuiSwitch
-            label={i18n.translate('xpack.nightshift.automations.toggleLabel', {
-              defaultMessage: '{action} {name}',
-              values: { action: isEnabled ? 'Pause' : 'Enable', name: automation.name },
-            })}
+            label={
+              isEnabled
+                ? i18n.translate('xpack.nightshift.automations.pauseToggleLabel', {
+                    defaultMessage: 'Pause {name}',
+                    values: { name: automation.name },
+                  })
+                : i18n.translate('xpack.nightshift.automations.enableToggleLabel', {
+                    defaultMessage: 'Enable {name}',
+                    values: { name: automation.name },
+                  })
+            }
             showLabel={false}
             compressed
             checked={isEnabled}

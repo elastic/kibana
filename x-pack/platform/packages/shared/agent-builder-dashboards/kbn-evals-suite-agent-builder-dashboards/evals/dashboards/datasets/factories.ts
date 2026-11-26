@@ -17,6 +17,7 @@ import type {
   LayoutEditGold,
   PanelEditGold,
   ReplaceConfirmationGold,
+  SettingsGold,
   UnavailableRequestGold,
   VisualizationAttachment,
 } from '../../../src/types';
@@ -38,7 +39,9 @@ export interface ExampleMetadata {
     | 'enhance'
     | 'discover_results'
     | 'layout_edit'
-    | 'edit_scenario';
+    | 'edit_scenario'
+    | 'settings_edit'
+    | 'ml_panels';
   /** `logs_dissect` is the sample logs index read through a `DISSECT` query attached from Discover. */
   dataSource: 'logs' | 'logs_dissect';
   enhanceMode?: EnhanceMode;
@@ -148,6 +151,8 @@ export const enhanceExample = ({
       mode === 'content'
         ? ['load_skill', platformCoreTools.getIndexMapping, GENERATE_DASHBOARD_TOOL_ID]
         : ['load_skill', GENERATE_DASHBOARD_TOOL_ID],
+    // Neither mode may change a dashboard setting the user did not ask for.
+    settings: {},
   },
 });
 
@@ -206,7 +211,7 @@ export const discoverResultsExample = ({
  * and where the prompt puts things; the other gold covers what else the
  * prompt asks of the edit. `visualizations` are charts the agent created
  * earlier in the conversation. `edit_scenario` tags the edits beyond moving
- * ES|QL panels.
+ * ES|QL panels, and `settings_edit` the changes to dashboard settings.
  */
 export const layoutEditExample = ({
   question,
@@ -219,13 +224,14 @@ export const layoutEditExample = ({
   question: string;
   layoutEdit?: LayoutEditGold;
   panelEdits?: readonly PanelEditGold[];
+  settings?: SettingsGold;
   structure?: DashboardStructureGold;
   controls?: Omit<ControlsGold, 'mappedFields'>;
   replaceConfirmation?: ReplaceConfirmationGold;
   unavailableRequests?: readonly UnavailableRequestGold[];
   visualizations?: readonly VisualizationAttachment[];
   dashboard?: DashboardAttachmentData;
-  behaviour?: 'layout_edit' | 'edit_scenario';
+  behaviour?: 'layout_edit' | 'edit_scenario' | 'settings_edit';
 }): DashboardDatasetExample => ({
   input: { question, dashboard, ...(visualizations ? { visualizations } : {}) },
   metadata: { behaviour, dataSource: 'logs' } satisfies ExampleMetadata,
@@ -237,5 +243,25 @@ export const layoutEditExample = ({
     ...(gold.replaceConfirmation
       ? {}
       : { goldenToolPath: ['load_skill', GENERATE_DASHBOARD_TOOL_ID] }),
+  },
+});
+
+/**
+ * Dashboard request for ML anomaly panels, whose config schemas are only in skill references.
+ * `panelConfigTypes` are the panel types the prompt asks for.
+ */
+export const mlPanelExample = ({
+  question,
+  panelConfigTypes,
+}: {
+  question: string;
+  panelConfigTypes: readonly string[];
+}): DashboardDatasetExample => ({
+  input: { question },
+  metadata: { behaviour: 'ml_panels', dataSource: 'logs' } satisfies ExampleMetadata,
+  output: {
+    route: 'dashboard',
+    panelConfigTypes,
+    goldenToolPath: ['load_skill', GENERATE_DASHBOARD_TOOL_ID],
   },
 });

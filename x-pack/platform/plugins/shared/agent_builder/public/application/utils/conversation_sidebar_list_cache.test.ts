@@ -187,6 +187,98 @@ describe('conversation_sidebar_list_cache', () => {
       expect(unpinned?.pages[0].pagination.total).toBe(2);
     });
 
+    it('inserts the row by updated_at instead of at the top of the target list', () => {
+      const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+      queryClient.setQueryData<ConversationListCache>(
+        unpinnedKey,
+        buildCache(
+          buildPage([buildItem('old', agentId, 't', { updated_at: '2020-01-02T00:00:00.000Z' })])
+        )
+      );
+      queryClient.setQueryData<ConversationListCache>(
+        pinnedKey,
+        buildCache(
+          buildPage(
+            [
+              buildItem('newest', agentId, 't', {
+                pinned: true,
+                updated_at: '2025-03-01T00:00:00.000Z',
+              }),
+              buildItem('oldest', agentId, 't', {
+                pinned: true,
+                updated_at: '2019-01-01T00:00:00.000Z',
+              }),
+            ],
+            1,
+            2
+          )
+        )
+      );
+
+      movePinnedConversationBetweenLists({
+        queryClient,
+        agentId,
+        conversationId: 'old',
+        pinned: true,
+      });
+
+      const pinned = queryClient.getQueryData<ConversationListCache>(pinnedKey);
+      expect(pinned?.pages[0].results.map((c) => c.id)).toEqual(['newest', 'old', 'oldest']);
+      expect(pinned?.pages[0].pagination.total).toBe(3);
+    });
+
+    it('appends a row older than every loaded row when the whole list is loaded', () => {
+      const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+      queryClient.setQueryData<ConversationListCache>(
+        unpinnedKey,
+        buildCache(
+          buildPage([buildItem('old', agentId, 't', { updated_at: '2018-01-01T00:00:00.000Z' })])
+        )
+      );
+      queryClient.setQueryData<ConversationListCache>(
+        pinnedKey,
+        buildCache(
+          buildPage([buildItem('a', agentId, 't', { pinned: true })], 1, 2),
+          buildPage([buildItem('b', agentId, 't', { pinned: true })], 2, 2)
+        )
+      );
+
+      movePinnedConversationBetweenLists({
+        queryClient,
+        agentId,
+        conversationId: 'old',
+        pinned: true,
+      });
+
+      const pinned = queryClient.getQueryData<ConversationListCache>(pinnedKey);
+      expect(pinned?.pages.map((p) => p.results.map((c) => c.id))).toEqual([['a'], ['b', 'old']]);
+    });
+
+    it('skips inserting a row older than every loaded row when more pages remain', () => {
+      const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+      queryClient.setQueryData<ConversationListCache>(
+        unpinnedKey,
+        buildCache(
+          buildPage([buildItem('old', agentId, 't', { updated_at: '2018-01-01T00:00:00.000Z' })])
+        )
+      );
+      queryClient.setQueryData<ConversationListCache>(
+        pinnedKey,
+        buildCache(buildPage([buildItem('a', agentId, 't', { pinned: true })], 1, 60))
+      );
+
+      movePinnedConversationBetweenLists({
+        queryClient,
+        agentId,
+        conversationId: 'old',
+        pinned: true,
+      });
+
+      const pinned = queryClient.getQueryData<ConversationListCache>(pinnedKey);
+      expect(pinned?.pages[0].results.map((c) => c.id)).toEqual(['a']);
+      expect(pinned?.pages[0].pagination.total).toBe(61);
+    });
+
     it('is a no-op on the target when the source conversation is not found', () => {
       const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
       queryClient.setQueryData<ConversationListCache>(

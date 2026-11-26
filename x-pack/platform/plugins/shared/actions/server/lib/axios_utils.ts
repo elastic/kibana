@@ -24,6 +24,7 @@ import type { ConnectorUsageCollector } from '../types';
 import { combineHeadersWithBasicAuthHeader } from './get_basic_auth_header';
 import { createAndThrowUserError } from './create_and_throw_user_error';
 import { getBeforeRedirectFn } from './before_redirect';
+import { applyNetworkErrorMessage } from './network_error_message';
 
 export const request = async <T = unknown>({
   axios,
@@ -118,6 +119,7 @@ export const request = async <T = unknown>({
       connectorUsageCollector.addRequestBodyBytes(error, data);
     }
     if (isAxiosError(error)) {
+      applyNetworkErrorMessage(error);
       createAndThrowUserError(error);
     }
     throw error;

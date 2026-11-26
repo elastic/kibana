@@ -152,13 +152,13 @@ describe('getApplyDreamRelationshipsStepDefinition', () => {
       [customer.id]: {
         ...customer,
         permissions: team,
-        references: [{ uri: 'trace://round-1', relation: 'derived_from' }],
+        references: [{ uri: 'session://round-1', relation: 'derived_from' }],
       },
       [montreal.id]: {
         ...montreal,
         permissions: team,
         references: [
-          { uri: 'trace://round-1', relation: 'derived_from' },
+          { uri: 'session://round-1', relation: 'derived_from' },
           { uri: 'session-memory://m-9', relation: 'derived_from' },
         ],
       },
@@ -216,7 +216,54 @@ describe('getApplyDreamRelationshipsStepDefinition', () => {
         references: [
           { uri: `ki://${customer.id}`, relation: 'relates_to', description: 'from' },
           { uri: `ki://${montreal.id}`, relation: 'relates_to', description: 'to' },
-          { uri: 'trace://round-1', relation: 'derived_from' },
+          { uri: 'session://round-1', relation: 'derived_from' },
+        ],
+      })
+    );
+  });
+
+  it('links a stored fact about one of the items being linked', async () => {
+    const team = {
+      kibana: { privileges: [{ space: 'default', name: ['ai_index:a/read'], count: 1 }] },
+    };
+    const olderFact = {
+      id: 'fact-older',
+      type: 'fact.preference',
+      title: 'Prefers email',
+      content: 'Customer 825464 prefers email.',
+      permissions: team,
+      references: [{ uri: 'ki://mem-2', relation: 'derived_from' }],
+    };
+    const stored: Record<string, Record<string, unknown>> = {
+      [customer.id]: { ...customer, permissions: team },
+      [olderFact.id]: olderFact,
+    };
+    const esClient = createEsClient(stored);
+    const context = createMockStepContext({
+      input: {
+        ai_index_id: 'support',
+        items: [customer.id],
+        changes: {
+          relationships: [
+            { from: olderFact.id, relation: 'about', to: customer.id, description: 'D' },
+          ],
+        },
+      },
+      esClient,
+    });
+
+    const { output } = await definition(aiIndexService()).handler(context);
+
+    expect(output).toEqual({ created: 1, updated: 0, deleted: 0, rejected: [] });
+    expect(stored[relationshipId(relationshipKey(olderFact.id, 'about', customer.id))]).toEqual(
+      expect.objectContaining({
+        type: 'memory.relationship',
+        permissions: team,
+        references: [
+          { uri: `ki://${olderFact.id}`, relation: 'relates_to', description: 'from' },
+          { uri: `ki://${customer.id}`, relation: 'relates_to', description: 'to' },
+          { uri: 'ki://mem-2', relation: 'derived_from' },
+          { uri: 'ki://mem-1', relation: 'derived_from' },
         ],
       })
     );

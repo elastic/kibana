@@ -50,6 +50,15 @@ const logger: Logger = {
 
 const BLOCK_GAP_MS = 500;
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+const HOUR_MS = 60 * 60 * 1000;
+/** Waits past the next clock hour if it's within `ms`, so the next `ms` stay in one hour. */
+const keepWithinClockHour = async (ms: number) => {
+  const untilNextHour = HOUR_MS - (Date.now() % HOUR_MS);
+  if (untilNextHour < ms) {
+    await sleep(untilNextHour + 1_000);
+  }
+};
 const blockFor = (ms: number) => {
   const end = Date.now() + ms;
   while (Date.now() < end) {
@@ -87,11 +96,15 @@ const NO_PROFILING: WatchdogProfilingData = {
   maxDurationMs: perPhase(10_000),
   cooldownMs: perPhase(60_000),
 };
-/** Profiles blocks from 1 s, so the scenarios stay short. */
+/**
+ * Starts captures after 1 s with a 1 s cooldown, rather than the 30 s and 1 min defaults, to keep
+ * scenarios short. Files are written only when the test passes a profile directory.
+ */
 const PROFILING: WatchdogProfilingData = {
   startAfterMs: perPhase(1_000),
   maxDurationMs: perPhase(10_000),
   cooldownMs: perPhase(1_000),
+  diagnosticDir: process.env.WATCHDOG_PROFILE_DIR,
 };
 
 const create = (workerEntry?: string, profiling = NO_PROFILING) =>
@@ -233,14 +246,53 @@ const scenarios: Record<string, () => Promise<void>> = {
     await sleep(STATS_INTERVAL_MS * 2);
     await watchdog.stop();
   },
-  // A 10 s capture of code with many distinct stacks, at the worker's 32 MB limit. Containers run
-  // Kibana with --max-old-space-size, which replaces that limit, so this covers other installs.
+  // Generate many distinct call stacks in a 10 s capture to stress the worker's 64 MB heap limit.
+  // The test runs the harness without `NODE_OPTIONS`, so CI's `--max-old-space-size` doesn't
+  // replace it.
   profile_large: async () => {
-    const run = await loadDeepCode(2_000, 30);
+    const run = await loadDeepCode(2_000, 40);
     const watchdog = await startRunning({ ...PROFILING, maxDurationMs: perPhase(10_000) });
     watchdog.setProfiling(true);
     run(12_000);
     await sleep(STATS_INTERVAL_MS * 3);
+    await watchdog.stop();
+  },
+  // Three large captures in one worker, so anything a capture leaves behind breaks a later one.
+  profile_repeated: async () => {
+    const run = await loadDeepCode(2_000, 40);
+    const watchdog = await startRunning({ ...PROFILING, maxDurationMs: perPhase(10_000) });
+    watchdog.setProfiling(true);
+    await sleep(STATS_INTERVAL_MS * 2);
+    // Admission allows one file per top frame per clock hour, so all three captures must share it.
+    await keepWithinClockHour(90_000);
+    for (let i = 0; i < 3; i++) {
+      run(12_000);
+      await sleep(STATS_INTERVAL_MS * 3);
+    }
+    await watchdog.stop();
+  },
+  // Three large captures in one worker, each under its own nearest Kibana function, so each
+  // capture has its own top frame and all three are written.
+  profile_repeated_frames: async () => {
+    const run = await loadDeepCode(2_000, 40);
+    const callers = [
+      function firstFrame(ms: number) {
+        run(ms);
+      },
+      function secondFrame(ms: number) {
+        run(ms);
+      },
+      function thirdFrame(ms: number) {
+        run(ms);
+      },
+    ];
+    const watchdog = await startRunning({ ...PROFILING, maxDurationMs: perPhase(10_000) });
+    watchdog.setProfiling(true);
+    await sleep(STATS_INTERVAL_MS * 2);
+    for (const caller of callers) {
+      caller(12_000);
+      await sleep(STATS_INTERVAL_MS * 3);
+    }
     await watchdog.stop();
   },
   // The worker crashes while it profiles the main thread; the profiler's thread afterwards shows

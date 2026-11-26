@@ -12,10 +12,12 @@ import { mockHandlerArguments } from '../../_mock_handler_arguments';
 import { verifyAccessAndContext } from '../../verify_access_and_context';
 import { actionsClientMock } from '../../../actions_client/actions_client.mock';
 import { actionsConfigMock } from '../../../actions_config.mock';
+import { createMockConnectorFindResult } from '../../../application/connector/mocks';
 
-const actionsConfigUtils = (inboundEventsFeatureEnabled = false) => {
+const actionsConfigUtils = (inboundEventsFeatureEnabled = false, catalogEnabled = false) => {
   const utils = actionsConfigMock.create();
   utils.isInboundEventsEnabled.mockReturnValue(inboundEventsFeatureEnabled);
+  utils.isCatalogEnabled.mockReturnValue(catalogEnabled);
   return utils;
 };
 
@@ -294,5 +296,63 @@ describe('getAllConnectorsRoute', () => {
 
     const responseBody = (res.ok as jest.Mock).mock.calls[0][0].body;
     expect(responseBody[0]).not.toHaveProperty('is_inbound_events_enabled');
+  });
+
+  it.each([
+    { catalogEnabled: true, expected: { spec_version: '1.3' } },
+    { catalogEnabled: false, expected: {} },
+  ])(
+    'returns spec_version only when catalog connectors are enabled (catalogEnabled: $catalogEnabled)',
+    async ({ catalogEnabled, expected }) => {
+      const licenseState = licenseStateMock.create();
+      const router = httpServiceMock.createRouter();
+      getAllConnectorsRoute(router, licenseState, actionsConfigUtils(false, catalogEnabled));
+      const [, handler] = router.get.mock.calls[0];
+
+      const actionsClient = actionsClientMock.create();
+      actionsClient.getAll.mockResolvedValueOnce([
+        createMockConnectorFindResult({
+          id: '1',
+          actionTypeId: '.abuseipdb',
+          config: {},
+          specVersion: '1.3',
+        }),
+      ]);
+
+      const [context, req, res] = mockHandlerArguments({ actionsClient }, {}, ['ok']);
+      await handler(context, req, res);
+
+      const [responseConnector] = (res.ok as jest.Mock).mock.calls[0][0].body;
+      expect(responseConnector).toEqual({
+        id: '1',
+        name: 'Test Connector',
+        config: {},
+        connector_type_id: '.abuseipdb',
+        is_preconfigured: false,
+        is_deprecated: false,
+        is_system_action: false,
+        is_connector_type_deprecated: false,
+        referenced_by_count: 0,
+        ...expected,
+      });
+    }
+  );
+
+  it('omits spec_version for connectors without a pinned version', async () => {
+    const licenseState = licenseStateMock.create();
+    const router = httpServiceMock.createRouter();
+    getAllConnectorsRoute(router, licenseState, actionsConfigUtils(false, true));
+    const [, handler] = router.get.mock.calls[0];
+
+    const actionsClient = actionsClientMock.create();
+    actionsClient.getAll.mockResolvedValueOnce([
+      createMockConnectorFindResult({ id: '1', config: {} }),
+    ]);
+
+    const [context, req, res] = mockHandlerArguments({ actionsClient }, {}, ['ok']);
+    await handler(context, req, res);
+
+    const [responseConnector] = (res.ok as jest.Mock).mock.calls[0][0].body;
+    expect(responseConnector).not.toHaveProperty('spec_version');
   });
 });

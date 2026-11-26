@@ -79,7 +79,33 @@
           "k": "",
           "maximum_relevance": ""
         }
-      }
+      },
+      "templates": [
+        {
+          "id": "",
+          "template": {
+            "__one_of": [
+              {
+                "source": "",
+                "id": "",
+                "params": {},
+                "lang": {
+                  "__one_of": [
+                    "painless",
+                    "expression",
+                    "mustache",
+                    "java"
+                  ]
+                },
+                "options": {
+                  "*": ""
+                }
+              },
+              ""
+            ]
+          }
+        }
+      ]
     },
     "methods": [
       "GET",

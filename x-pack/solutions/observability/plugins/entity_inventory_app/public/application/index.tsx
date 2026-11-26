@@ -18,11 +18,16 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { ObservabilitySharedPluginStart } from '@kbn/observability-shared-plugin/public';
 import type { StartServices } from '../hooks/use_kibana';
 import { ENTITY_INVENTORY_PAGES, ENTITY_INVENTORY_TITLE } from '../pages';
-import type { EntityInventoryAppStartDependencies } from '../types';
+import type { EntityInventoryAppPublicConfig, EntityInventoryAppStartDependencies } from '../types';
 import { entityInventoryRouter } from '../routes/config';
 import { EntityTablePreferencesProvider } from './context/entity_table_preferences_context';
+import { EntityInventoryDateRangeProvider } from './context/date_range_context';
 import { EntityTypesProvider } from './context/entity_types_context';
 import { createHttpEntityInventoryApiClient } from '../inventory_api/http_client';
+import { withPerformanceRecording } from '../inventory_api/with_performance_recording';
+import { ENTITY_INVENTORY_PERFORMANCE_OVERLAY_ENABLED } from '../../common/feature_flags';
+import { createPerformanceRecorder } from './performance_overlay/performance_recorder';
+import { PerformanceOverlay } from './performance_overlay/performance_overlay';
 
 interface EntityInventoryShellProps {
   PageTemplate: ObservabilitySharedPluginStart['navigation']['PageTemplate'];
@@ -61,7 +66,9 @@ export function EntityInventoryShell({ PageTemplate }: EntityInventoryShellProps
       <EuiPageSection paddingSize="m" grow restrictWidth={false}>
         <EntityTypesProvider>
           <EntityTablePreferencesProvider>
-            <RouteRenderer />
+            <EntityInventoryDateRangeProvider>
+              <RouteRenderer />
+            </EntityInventoryDateRangeProvider>
           </EntityTablePreferencesProvider>
         </EntityTypesProvider>
       </EuiPageSection>
@@ -72,14 +79,29 @@ export function EntityInventoryShell({ PageTemplate }: EntityInventoryShellProps
 export function renderApp(
   core: CoreStart,
   plugins: EntityInventoryAppStartDependencies,
-  { element, history }: AppMountParameters
+  { element, history }: AppMountParameters,
+  config: EntityInventoryAppPublicConfig
 ) {
   const { PageTemplate } = plugins.observabilityShared.navigation;
+
+  // The client keeps its identity when the flag flips, so the page neither re-renders nor refetches.
+  const recorder = createPerformanceRecorder();
+  let isRecording = false;
+  const flagSubscription = core.featureFlags
+    .getBooleanValue$(ENTITY_INVENTORY_PERFORMANCE_OVERLAY_ENABLED, false)
+    .subscribe((enabled) => {
+      isRecording = enabled;
+    });
 
   const services: StartServices = {
     ...core,
     ...plugins,
-    inventoryApi: createHttpEntityInventoryApiClient(core.http),
+    inventoryApi: withPerformanceRecording(
+      createHttpEntityInventoryApiClient(core.http),
+      recorder,
+      () => isRecording
+    ),
+    config,
   };
 
   ReactDOM.render(
@@ -88,9 +110,13 @@ export function renderApp(
         <RouterProvider history={history} router={entityInventoryRouter}>
           <EntityInventoryShell PageTemplate={PageTemplate} />
         </RouterProvider>
+        <PerformanceOverlay recorder={recorder} />
       </KibanaContextProvider>
     ),
     element
   );
-  return () => ReactDOM.unmountComponentAtNode(element);
+  return () => {
+    flagSubscription.unsubscribe();
+    ReactDOM.unmountComponentAtNode(element);
+  };
 }

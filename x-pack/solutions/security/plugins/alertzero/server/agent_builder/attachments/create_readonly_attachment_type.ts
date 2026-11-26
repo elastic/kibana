@@ -10,31 +10,6 @@ import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachm
 import type { Attachment } from '@kbn/agent-builder-common/attachments';
 
 /**
- * Builds the shared "## INLINE RENDERING (REQUIRED)" block used by every read-only
- * Hunt Watch attachment type. Only the attachment id and the noun naming what gets
- * rendered ("threat pill", "event card", "correlation table") vary between types.
- */
-const buildInlineRenderingBlock = ({
-  id,
-  renderNoun,
-}: {
-  id: string;
-  renderNoun: string;
-}): string => `## INLINE RENDERING (REQUIRED)
-When a ${id} attachment is present in the conversation, you MUST render it inline using the exact custom XML element shown below. The element name is literally \`render_attachment\` and the attribute names are literally \`id\` and \`version\` — do not rename, translate, or abbreviate them.
-
-Assemble the tag by substituting \`ATTACHMENT_ID\` with the value of the attachment's \`attachment_id\` field from the conversation's attachment manifest, and \`VERSION\` with the value of the \`current_version\` field:
-
-    <render_attachment id="ATTACHMENT_ID" version="VERSION" />
-
-Rules:
-- Copy \`attachment_id\` and \`current_version\` VERBATIM from the manifest. Never invent, guess, or rewrite them.
-- Put the \`<render_attachment>\` tag on its OWN LINE, with a blank line before and after it. Do not wrap it in backticks, quotes, code fences, or surrounding prose.
-- Emit the \`<render_attachment>\` tag BEFORE your prose summary so the user sees the ${renderNoun} first.
-- Render each ${id} attachment at most once per turn.
-`;
-
-/**
  * Builds a read-only {@link AttachmentTypeDefinition} shared by every Hunt Watch
  * attachment type that is produced by the system and only ever formatted for the
  * agent, never created or updated through the attachment_add/update tools.
@@ -45,7 +20,6 @@ export const createReadonlyAttachmentType = <T>({
   readSchema = schema,
   formatForAgent,
   describePayload,
-  renderNoun,
   maxContentLength,
 }: {
   id: string;
@@ -58,8 +32,11 @@ export const createReadonlyAttachmentType = <T>({
    */
   readSchema?: z.ZodType<T>;
   formatForAgent: (data: T) => string;
+  /**
+   * The whole agent description: what the payload holds and what the card shows when it is
+   * rendered, never when to render it.
+   */
   describePayload: string;
-  renderNoun: string;
   /**
    * Overrides the platform's `DEFAULT_MAX_CONTENT_LENGTH` (10 000 characters) for this
    * attachment type. Each type's payload is bounded by its schema's per-field max lengths
@@ -108,8 +85,5 @@ export const createReadonlyAttachmentType = <T>({
       },
     };
   },
-  getAgentDescription: () => `
-${describePayload}
-
-${buildInlineRenderingBlock({ id, renderNoun })}`,
+  getAgentDescription: () => describePayload,
 });

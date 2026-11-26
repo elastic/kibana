@@ -19,7 +19,7 @@ import {
   htmlIdGenerator,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 import type { CellActionRenderer } from '../../../flyout_v2/shared/components/cell_actions';
 import { EventKind } from '../../../flyout_v2/document/main/constants/event_kinds';
 import { StyledTitle } from './styles';

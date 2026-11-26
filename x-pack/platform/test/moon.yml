@@ -151,13 +151,13 @@ dependsOn:
   - '@kbn/alerting-v2-schemas'
   - '@kbn/core-chrome-browser-components'
   - '@kbn/content-list-common'
+  - '@kbn/osquery-plugin'
 tags:
   - test-helper
   - package
   - dev
   - group-platform
   - shared
-  - jest-unit-tests
 fileGroups:
   src:
     - index.d.ts

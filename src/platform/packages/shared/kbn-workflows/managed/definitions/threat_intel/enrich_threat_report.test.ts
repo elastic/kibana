@@ -60,9 +60,9 @@ describe('THREAT_INTEL_ENRICH_REPORT_WORKFLOW yaml', () => {
       expect(gate.if).toContain(`steps.${step}.error == null`);
     });
 
-    it('marks the report workflow_v4 when the gate passes', () => {
+    it('marks the report enrich_workflow when the gate passes', () => {
       const gate = gateCondition('mark_llm_enrich_complete');
-      expect(gate.with?.extraction_method).toBe('workflow_v4');
+      expect(gate.with?.extraction_method).toBe('enrich_workflow');
     });
 
     it.each(GATED_STEPS)('leaves the report pending when %s failed', (step) => {
@@ -151,11 +151,27 @@ describe('THREAT_INTEL_ENRICH_REPORT_WORKFLOW yaml', () => {
       with?: { query?: { bool?: { must_not?: unknown[] } } };
     };
     const mustNot = step.with?.query?.bool?.must_not ?? [];
+    // enrich_workflow_rejected is the current value, workflow_v4_rejected the legacy one.
+    // Object form is what the editor's ES connector schema requires for a boolean term.
     expect(mustNot).toEqual(
       expect.arrayContaining([
-        { term: { 'lineage.extraction_method': 'workflow_v4_rejected' } },
-        { term: { 'extracted.gate.is_intelligence': false } },
+        {
+          terms: {
+            'lineage.extraction_method': ['enrich_workflow_rejected', 'workflow_v4_rejected'],
+          },
+        },
+        { term: { 'extracted.gate.is_intelligence': { value: false } } },
       ])
+    );
+  });
+
+  it('writes the version-independent rejected extraction method', () => {
+    const step = findStepByName(workflow.steps, 'persist_gate_rejection') as {
+      with?: { body?: { doc?: { lineage?: { extraction_method?: string } } } };
+    };
+    expect(step.with?.body?.doc?.lineage?.extraction_method).toBe('enrich_workflow_rejected');
+    expect(THREAT_INTEL_ENRICH_REPORT_WORKFLOW.yaml).not.toContain(
+      'extraction_method: workflow_v4_rejected'
     );
   });
 
@@ -171,10 +187,16 @@ describe('THREAT_INTEL_ENRICH_REPORT_WORKFLOW yaml', () => {
       with?: { query?: { bool?: { must_not?: unknown[] } } };
     };
     const mustNot = step.with?.query?.bool?.must_not ?? [];
+    // enrich_workflow_rejected is the current value, workflow_v4_rejected the legacy one.
+    // Object form is what the editor's ES connector schema requires for a boolean term.
     expect(mustNot).toEqual(
       expect.arrayContaining([
-        { term: { 'lineage.extraction_method': 'workflow_v4_rejected' } },
-        { term: { 'extracted.gate.is_intelligence': false } },
+        {
+          terms: {
+            'lineage.extraction_method': ['enrich_workflow_rejected', 'workflow_v4_rejected'],
+          },
+        },
+        { term: { 'extracted.gate.is_intelligence': { value: false } } },
       ])
     );
   });

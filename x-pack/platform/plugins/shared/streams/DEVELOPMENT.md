@@ -2,7 +2,7 @@
 
 This document explains how to develop Streams V2 — unit-scoped map, YAML unit model, and the Kibana unit APIs.
 
-Legacy wired / classic / query streams are documented in [`LEGACY_DEVELOPMENT.md`](./LEGACY_DEVELOPMENT.md).
+Legacy wired / classic streams are documented in [`LEGACY_DEVELOPMENT.md`](./LEGACY_DEVELOPMENT.md).
 
 Also consult the [streams-spec](https://github.com/elastic/streams-spec/tree/main/docs) repo for up to date ADRs, the official schema etc.
 
@@ -88,7 +88,7 @@ With the feature flags enabled you can then access V2 via `/app/streams/v2/unit/
 | `PUT /internal/streams/unit/{id}` | `manage_streams_v2` | The unit saved object, the distributor (Kibana's mTLS client certificate), `DELETE /_security/api_key` as Kibana for removed components, and an empty `POST <endpoint>/_prometheus/api/v1/write` with the user's key for new or changed remote Elasticsearch destinations | None |
 | `GET /internal/streams/components` | `read_streams_v2` | The distributor | None |
 | `POST /internal/streams/components/_validate` | `manage_streams_v2` | The distributor | None |
-| `GET /internal/streams/unit/{id}/_resolve_indices` | `read_streams_v2` | `GET /_resolve/index/<destination targets>`, `GET /_data_stream/<names>`, `POST /_security/user/_has_privileges` | `view_index_metadata` on the destination targets (see "Destination targets"). Indices the user can't see are left out. |
+| `GET /internal/streams/unit/{id}/_resolve_indices?start=&end=` | `read_streams_v2` | `POST /_query` (ES\|QL) on `metrics-streams.otel-default` for the indices each local Elasticsearch destination wrote to in the range, then `GET /_resolve/index/<those names>`, `GET /_data_stream/<names>`, `POST /_security/user/_has_privileges` | `read` on `metrics-streams.otel-default`, which fails the request as `forbidden` without it, and `view_index_metadata` on the destination targets (see "Destination targets"). Indices the user can't see are left out. |
 | `GET /internal/streams/indices/{name}` | `read_streams_v2` | `GET /_data_stream/<name>`, `GET /<name>`, `POST /_security/user/_has_privileges` | `view_index_metadata`. The response reports `monitor` and `read_failure_store`, which the UI uses to show or hide panels. |
 | `POST /internal/streams/unit/{id}/_stats` | `read_streams_v2` | `POST /_query` (ES\|QL) on `metrics-streams.otel-default` | `read` on `metrics-streams.otel-default`. Without it, the stats fail as `forbidden`. |
 | `/internal/streams/doc_counts/{total,degraded,failed,ingestion}`, `/internal/streams/storage_stats` | `read_stream` or `read_streams_v2` | `GET /_data_stream`, `_search`, ES\|QL on `<name>::failures`, and `_metering/stats` on Serverless | `view_index_metadata` and `read`, plus `read_failure_store` for failed-document counts |
@@ -168,9 +168,9 @@ POST /_security/api_key
 
 ### Destination targets
 
-Index privileges are on the targets of a local Elasticsearch destination, which depend on its configuration. The key, `_resolve_indices` and the indices table all use the same targets (`getSignalTargetsWritePatterns` in `@kbn/streams-schema`). For each signal the destination sends, the first of these that is set wins:
+Index privileges are on the targets of a local Elasticsearch destination, which depend on its configuration. The key and the privilege checks use the same targets (`getSignalTargetsWritePatterns` in `@kbn/streams-schema`). For each signal the destination sends, the first of these that is set wins:
 
-1. `index`: that index.
+1. `index`: that index. A metrics `index` also covers the data stream Prometheus remote write lands in (`getPrometheusDataStream`): `metrics-<dataset>.prometheus-<namespace>`, or `metrics-generic.prometheus-default` when the name doesn't split.
 2. `write_patterns`: those patterns.
 3. Neither: the Auto pattern `<signal>-*-*` (`logs-*`, `metrics-*` and `traces-*` for docs).
 
@@ -178,13 +178,16 @@ Index privileges are on the targets of a local Elasticsearch destination, which 
 | --- | --- | --- |
 | Auto, all signals | No `index` and no `write_patterns` | `logs-*-*`, `metrics-*-*`, `traces-*-*` |
 | Auto with custom write patterns | `write_patterns`, shaped `<signal>-<dataset>-<namespace>`, where either part may contain `*` | `logs-billing-*` for logs only |
-| Static index | `index`, shaped `<signal>-<dataset>-<namespace>` with no wildcards. "All" applies one `<dataset>-<namespace>` to every signal. | `logs-app-default`, `metrics-app-default` |
+| Static index | `index`, shaped `<signal>-<dataset>.otel-<namespace>` with no wildcards | `logs-app.otel-default`, `metrics-app.otel-default`, `metrics-app.prometheus-default` |
 
-The create form enforces those shapes. A unit written with the API can contain anything.
+The create form enforces those shapes. The unit `PUT` rejects (400) a new or changed logs, metrics or traces `index` on an `elasticsearch` or `remote_elasticsearch` destination with any other shape, because the exporter writes in OTel mapping mode and only `*.otel-*` data streams have its templates. The docs `index` is free-form. Anything else a unit written with the API contains is left to the config distributor.
 
 - A wildcard target needs a role covering every name it could match. `logs-*` covers `logs-*-*`; `logs-billing-*` doesn't, so that user can't create an Auto destination.
 - Grant write (`create_doc`, `auto_configure`) and read (`view_index_metadata`, `read`, `monitor`, `read_failure_store`) on the same names, covering the union of the targets the user manages. Otherwise they can create destinations whose indices they can't see.
 - The key covers the targets at the time the destination is created.
+- `_resolve_indices`, and the indices table and index count built on it, list only the indices the destination wrote to in the page time range, not every index its targets match. They come from `streams.destination.items` grouped by `db.collection.name`, and an index is listed when its `success` items less its `failure_store: used` items are above zero. `metrics-streams.otel-default` is never listed.
+- Each listed index carries that difference as `documents`, and `ingestion_rate` as `documents` per second over the range. The table's Docs written and Ingestion columns show them, so other writers to a shared data stream, such as another destination, aren't counted. Storage, quality, health and retention are of the whole index.
+- The flyout of a local Elasticsearch destination shows its delivery from the same metrics, as for S3 and remote Elasticsearch, with totals above it. Docs written is the sum of the listed indices' `documents`, so it adds up with the table. It can be lower than the delivery chart, because an index that was deleted since, or that the user can't see, isn't listed. Peak delivery rate is the busiest bucket of the delivery series. Storage size is of the listed indices.
 
 ### Non-admin V2 managers
 

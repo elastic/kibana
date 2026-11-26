@@ -1,0 +1,78 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { ExitWhileNode } from '@kbn/workflows/graph';
+import type { WhileStepState } from './types';
+import type { StepExecutionRuntime } from '../../workflow_context_manager/step_execution_runtime';
+import type { WorkflowExecutionRuntimeManager } from '../../workflow_context_manager/workflow_execution_runtime_manager';
+import type { IWorkflowEventLogger } from '../../workflow_event_logger';
+import { evaluateCondition } from '../evaluate_condition';
+import type { NodeImplementation } from '../node_implementation';
+
+export class ExitWhileNodeImpl implements NodeImplementation {
+  constructor(
+    private node: ExitWhileNode,
+    private stepExecutionRuntime: StepExecutionRuntime,
+    private wfExecutionRuntimeManager: WorkflowExecutionRuntimeManager,
+    private workflowLogger: IWorkflowEventLogger
+  ) {}
+
+  public run(): void {
+    const whileState = this.stepExecutionRuntime.getCurrentStepState() as
+      | WhileStepState
+      | undefined;
+
+    if (!whileState) {
+      throw new Error(`While state for step ${this.node.stepId} not found`);
+    }
+
+    const nextIteration = whileState.iteration + 1;
+    const maxReached =
+      this.node.maxIterations !== undefined && nextIteration >= this.node.maxIterations;
+
+    if (!maxReached) {
+      // getContext() does not include the enclosing while iteration at the exit node;
+      // inject it explicitly from the step state.
+      const whileAdditionalContext: Record<string, unknown> = {
+        while: { iteration: nextIteration },
+      };
+      const context = {
+        ...this.stepExecutionRuntime.contextManager.getContext(),
+        ...whileAdditionalContext,
+      };
+
+      const renderedCondition = this.stepExecutionRuntime.contextManager.renderConditionWithContext(
+        this.node.condition,
+        context
+      );
+      const conditionResult = evaluateCondition(renderedCondition, context, this.node.stepId);
+      if (conditionResult) {
+        this.wfExecutionRuntimeManager.navigateToNode(this.node.startNodeId);
+        return;
+      }
+    }
+
+    if (maxReached && this.node.onLimit === 'fail') {
+      throw new Error(
+        `While step "${this.node.stepId}" exceeded max-iterations limit of ${this.node.maxIterations}. ` +
+          `Completed ${nextIteration} iterations.`
+      );
+    }
+
+    this.stepExecutionRuntime.finishStep({
+      exitReason: maxReached ? 'max-iterations' : 'condition',
+    });
+
+    this.workflowLogger.logDebug(
+      `Exiting while step "${this.node.stepId}" after ${
+        maxReached ? 'max-iterations' : 'condition'
+      }. Completed ${nextIteration} iterations.`,
+      { workflow: { step_id: this.node.stepId } }
+    );
+    this.wfExecutionRuntimeManager.navigateToNextNode();
+  }
+}
