@@ -34,6 +34,8 @@
     "@kbn/shared-ux-ai-components",
     "@kbn/shared-ux-utility",
     "@kbn/shared-ux-page-kibana-template",
+    "@kbn/shared-ux-router",
+    "@kbn/app-header",
     "@kbn/announcement-banner",
     "@kbn/custom-icons",
     "@kbn/deeplinks-analytics",
