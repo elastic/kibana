@@ -20,11 +20,11 @@ const MINUTE_MS = 60_000;
  */
 export function getSignalsEsqlCommands(spaceId: string): string[] {
   return [
-    `FROM ${ALERT_EVENTS_DATA_STREAM}`,
+    `FROM ${ALERT_EVENTS_DATA_STREAM} METADATA _id`,
     `WHERE type == "signal" AND source == ${JSON.stringify(
       DETECTION_SIGNAL_SOURCE
     )} AND space_id == ${JSON.stringify(spaceId)}`,
-    'KEEP @timestamp, status, severity, group_hash, data',
+    'KEEP _id, @timestamp, status, severity, group_hash, data',
     'SORT @timestamp DESC',
   ];
 }

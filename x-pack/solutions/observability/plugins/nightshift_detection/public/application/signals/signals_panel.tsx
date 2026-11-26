@@ -38,24 +38,10 @@ const STATUS_COLOR: Record<string, string> = {
   recovered: 'success',
 };
 
-/** A signal row with a key that stays unique when a replayed window stored the same signal twice. */
+/** A signal row keyed by its document id, which stays the same as newer signals arrive. */
 interface SignalItem {
   key: string;
   row: StoredSignalRow;
-}
-
-/**
- * Keys a row by its identity, and numbers only the rows that share one, so a newer signal arriving
- * at the top of the list doesn't change the key of a row the user has open.
- */
-function toItems(signals: StoredSignalRow[]): SignalItem[] {
-  const seen = new Map<string, number>();
-  return signals.map((row) => {
-    const identity = `${row.group_hash}:${readText(row.data.bucket_start)}:${row['@timestamp']}`;
-    const copy = seen.get(identity) ?? 0;
-    seen.set(identity, copy + 1);
-    return { key: `${identity}:${copy}`, row };
-  });
 }
 
 function readText(value: unknown): string | undefined {
@@ -137,7 +123,7 @@ export function SignalsPanel({ live, isLive, onLiveChange, discoverLinks }: Sign
   const [expandedKeys, setExpandedKeys] = useState<Set<string>>(new Set());
   const { signals, error, isLoading, updatedAt, refresh } = live;
 
-  const items = toItems(signals);
+  const items: SignalItem[] = signals.map((row) => ({ key: row._id, row }));
 
   const toggleExpanded = (key: string) =>
     setExpandedKeys((previous) => {

@@ -23,6 +23,8 @@ const MAX_SIGNALS = 200;
  * nested keys come back dotted, such as `entity.type`.
  */
 export interface StoredSignalRow {
+  /** The stored document's id, which tells apart signals a replay stored twice. */
+  _id: string;
   '@timestamp': string;
   status: string;
   severity: string | null;
