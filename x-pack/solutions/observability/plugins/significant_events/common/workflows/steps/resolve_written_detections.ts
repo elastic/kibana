@@ -15,7 +15,8 @@ export const resolveWrittenDetectionsInputSchema = lazySchema(() =>
   z.object({
     workflow_execution_id: z.string().max(MAX_ID_LENGTH),
     batch: z.array(batchEntrySchema).max(MAX_BATCH_ENTRIES),
-    reported_rule_uuids: z.array(z.string().max(MAX_ID_LENGTH)).max(MAX_BATCH_ENTRIES),
+    // Optional: a caller's template may render an empty list as undefined; the handler uses `[]`.
+    reported_rule_uuids: z.array(z.string().max(MAX_ID_LENGTH)).max(MAX_BATCH_ENTRIES).optional(),
   })
 );
 

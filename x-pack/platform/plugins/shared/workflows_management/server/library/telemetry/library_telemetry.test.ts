@@ -44,11 +44,11 @@ const installForm: InstallFormField[] = [
 ];
 
 const catalogInstall: TemplateInstallDetails = {
-  origin: 'install',
+  origin: 'catalog',
   storedOrigin: {
     templateSlug: 'triage-alerts',
     templateVersion: '1.2.0',
-    templateOrigin: 'install',
+    templateOrigin: 'catalog',
   },
   installForm,
 };
@@ -93,7 +93,7 @@ describe('LibraryTelemetry', () => {
 
       expect(analytics.reportEvent).toHaveBeenCalledWith(TEMPLATE_INSTALLED_EVENT_TYPE, {
         success: true,
-        templateOrigin: 'install',
+        templateOrigin: 'catalog',
         sourceMode: 'http',
         templateSlug: 'triage-alerts',
         templateVersion: '1.2.0',
@@ -247,13 +247,13 @@ describe('LibraryTelemetry', () => {
       const { analytics, telemetry } = setup();
 
       telemetry.reportTemplateInstallFailed(
-        { origin: 'install' },
+        { origin: 'catalog' },
         new LibraryNotFoundError('acme-internal')
       );
 
       expect(analytics.reportEvent).toHaveBeenCalledWith(TEMPLATE_INSTALLED_EVENT_TYPE, {
         success: false,
-        templateOrigin: 'install',
+        templateOrigin: 'catalog',
         sourceMode: 'http',
         errorType: 'template_not_found',
       });
