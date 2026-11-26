@@ -7,6 +7,7 @@
 
 import { globalSetupHook } from '@kbn/scout-oblt';
 import { ES_ARCHIVES } from '../../common/fixtures/constants';
+import { ingestMobileCrashData } from '../../common/fixtures/mobile_crash_data';
 import { ingestMobileData } from '../../common/fixtures/mobile_data';
 import { ingestOtelRumData } from '../../common/fixtures/otel_rum_data';
 import { ingestTimeZoneData } from '../../common/fixtures/time_zone_data';
@@ -19,6 +20,7 @@ globalSetupHook(
     await ingestOtelRumData(esClient);
     await ingestTimeZoneData(esClient);
     await ingestMobileData(esClient);
+    await ingestMobileCrashData(esClient);
 
     // CI runs the setup in every lane of this config; only stateful specs read Classic RUM data,
     // and the archive's ILM settings do not exist on serverless.

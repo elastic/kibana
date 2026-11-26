@@ -28,6 +28,7 @@ export const usePacks = ({
   search,
   createdBy,
   enabled,
+  withEffectivePolicyIds = false,
 }: {
   isLive?: boolean;
   pageIndex?: number;
@@ -37,13 +38,27 @@ export const usePacks = ({
   search?: string;
   createdBy?: string;
   enabled?: string;
+  /** Also load `effective_policy_ids`; costs a scan of every Osquery integration. */
+  withEffectivePolicyIds?: boolean;
 }) => {
   const { http } = useKibana().services;
   const setErrorToast = useErrorToast();
   const sanitizedSearch = sanitizeSearch(search);
 
   return useQuery<UsePacksResponse, { body: { error: string; message: string } }>(
-    [PACKS_ID, { pageIndex, pageSize, sortField, sortOrder, search, createdBy, enabled }],
+    [
+      PACKS_ID,
+      {
+        pageIndex,
+        pageSize,
+        sortField,
+        sortOrder,
+        search,
+        createdBy,
+        enabled,
+        withEffectivePolicyIds,
+      },
+    ],
     () =>
       http.get('/api/osquery/packs', {
         version: API_VERSIONS.public.v1,
@@ -55,6 +70,7 @@ export const usePacks = ({
           ...(sanitizedSearch && { search: sanitizedSearch }),
           ...(createdBy && { createdBy }),
           ...(enabled && { enabled }),
+          ...(withEffectivePolicyIds && { withEffectivePolicyIds: 'true' }),
         },
       }),
     {

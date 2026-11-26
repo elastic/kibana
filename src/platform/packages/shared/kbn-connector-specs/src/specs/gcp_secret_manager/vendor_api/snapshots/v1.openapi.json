@@ -541,7 +541,7 @@
           },
           {
             "in": "query",
-            "name": "access_token",
+            "name": "key",
             "schema": {
               "type": "string"
             }
@@ -549,6 +549,35 @@
           {
             "in": "query",
             "name": "fields",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "quotaUser",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "prettyPrint",
+            "schema": {
+              "default": "true",
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "uploadType",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "access_token",
             "schema": {
               "type": "string"
             }
@@ -573,13 +602,6 @@
           },
           {
             "in": "query",
-            "name": "uploadType",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
             "name": "alt",
             "schema": {
               "default": "json",
@@ -593,35 +615,6 @@
           },
           {
             "in": "query",
-            "name": "key",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "quotaUser",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "prettyPrint",
-            "schema": {
-              "default": "true",
-              "type": "boolean"
-            }
-          },
-          {
-            "in": "query",
-            "name": "upload_protocol",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
             "name": "oauth_token",
             "schema": {
               "type": "string"
@@ -629,7 +622,7 @@
           },
           {
             "in": "query",
-            "name": "pageToken",
+            "name": "upload_protocol",
             "schema": {
               "type": "string"
             }
@@ -645,6 +638,13 @@
           {
             "in": "query",
             "name": "filter",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "pageToken",
             "schema": {
               "type": "string"
             }
@@ -682,7 +682,7 @@
           },
           {
             "in": "query",
-            "name": "access_token",
+            "name": "key",
             "schema": {
               "type": "string"
             }
@@ -690,6 +690,35 @@
           {
             "in": "query",
             "name": "fields",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "quotaUser",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "prettyPrint",
+            "schema": {
+              "default": "true",
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "uploadType",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "access_token",
             "schema": {
               "type": "string"
             }
@@ -714,13 +743,6 @@
           },
           {
             "in": "query",
-            "name": "uploadType",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
             "name": "alt",
             "schema": {
               "default": "json",
@@ -734,36 +756,14 @@
           },
           {
             "in": "query",
-            "name": "key",
+            "name": "oauth_token",
             "schema": {
               "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "quotaUser",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "prettyPrint",
-            "schema": {
-              "default": "true",
-              "type": "boolean"
             }
           },
           {
             "in": "query",
             "name": "upload_protocol",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "oauth_token",
             "schema": {
               "type": "string"
             }
@@ -827,7 +827,7 @@
           },
           {
             "in": "query",
-            "name": "access_token",
+            "name": "key",
             "schema": {
               "type": "string"
             }
@@ -835,6 +835,35 @@
           {
             "in": "query",
             "name": "fields",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "quotaUser",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "prettyPrint",
+            "schema": {
+              "default": "true",
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "uploadType",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "access_token",
             "schema": {
               "type": "string"
             }
@@ -859,13 +888,6 @@
           },
           {
             "in": "query",
-            "name": "uploadType",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
             "name": "alt",
             "schema": {
               "default": "json",
@@ -879,36 +901,14 @@
           },
           {
             "in": "query",
-            "name": "key",
+            "name": "oauth_token",
             "schema": {
               "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "quotaUser",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "prettyPrint",
-            "schema": {
-              "default": "true",
-              "type": "boolean"
             }
           },
           {
             "in": "query",
             "name": "upload_protocol",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "oauth_token",
             "schema": {
               "type": "string"
             }
@@ -961,7 +961,7 @@
           },
           {
             "in": "query",
-            "name": "access_token",
+            "name": "key",
             "schema": {
               "type": "string"
             }
@@ -969,6 +969,35 @@
           {
             "in": "query",
             "name": "fields",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "quotaUser",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "prettyPrint",
+            "schema": {
+              "default": "true",
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "uploadType",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "access_token",
             "schema": {
               "type": "string"
             }
@@ -993,13 +1022,6 @@
           },
           {
             "in": "query",
-            "name": "uploadType",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
             "name": "alt",
             "schema": {
               "default": "json",
@@ -1013,36 +1035,14 @@
           },
           {
             "in": "query",
-            "name": "key",
+            "name": "oauth_token",
             "schema": {
               "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "quotaUser",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "prettyPrint",
-            "schema": {
-              "default": "true",
-              "type": "boolean"
             }
           },
           {
             "in": "query",
             "name": "upload_protocol",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "oauth_token",
             "schema": {
               "type": "string"
             }
@@ -1088,7 +1088,7 @@
           },
           {
             "in": "query",
-            "name": "access_token",
+            "name": "key",
             "schema": {
               "type": "string"
             }
@@ -1096,6 +1096,35 @@
           {
             "in": "query",
             "name": "fields",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "quotaUser",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "prettyPrint",
+            "schema": {
+              "default": "true",
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "uploadType",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "access_token",
             "schema": {
               "type": "string"
             }
@@ -1120,13 +1149,6 @@
           },
           {
             "in": "query",
-            "name": "uploadType",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
             "name": "alt",
             "schema": {
               "default": "json",
@@ -1140,36 +1162,14 @@
           },
           {
             "in": "query",
-            "name": "key",
+            "name": "oauth_token",
             "schema": {
               "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "quotaUser",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "prettyPrint",
-            "schema": {
-              "default": "true",
-              "type": "boolean"
             }
           },
           {
             "in": "query",
             "name": "upload_protocol",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "oauth_token",
             "schema": {
               "type": "string"
             }
@@ -1234,7 +1234,7 @@
           },
           {
             "in": "query",
-            "name": "access_token",
+            "name": "key",
             "schema": {
               "type": "string"
             }
@@ -1242,6 +1242,35 @@
           {
             "in": "query",
             "name": "fields",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "quotaUser",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "prettyPrint",
+            "schema": {
+              "default": "true",
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "uploadType",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "access_token",
             "schema": {
               "type": "string"
             }
@@ -1266,13 +1295,6 @@
           },
           {
             "in": "query",
-            "name": "uploadType",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
             "name": "alt",
             "schema": {
               "default": "json",
@@ -1286,35 +1308,6 @@
           },
           {
             "in": "query",
-            "name": "key",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "quotaUser",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "prettyPrint",
-            "schema": {
-              "default": "true",
-              "type": "boolean"
-            }
-          },
-          {
-            "in": "query",
-            "name": "upload_protocol",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
             "name": "oauth_token",
             "schema": {
               "type": "string"
@@ -1322,7 +1315,7 @@
           },
           {
             "in": "query",
-            "name": "pageToken",
+            "name": "upload_protocol",
             "schema": {
               "type": "string"
             }
@@ -1340,6 +1333,13 @@
             "schema": {
               "format": "int32",
               "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "pageToken",
+            "schema": {
+              "type": "string"
             }
           }
         ],
@@ -1393,7 +1393,7 @@
           },
           {
             "in": "query",
-            "name": "access_token",
+            "name": "key",
             "schema": {
               "type": "string"
             }
@@ -1401,6 +1401,35 @@
           {
             "in": "query",
             "name": "fields",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "quotaUser",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "prettyPrint",
+            "schema": {
+              "default": "true",
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "uploadType",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "access_token",
             "schema": {
               "type": "string"
             }
@@ -1425,13 +1454,6 @@
           },
           {
             "in": "query",
-            "name": "uploadType",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
             "name": "alt",
             "schema": {
               "default": "json",
@@ -1445,36 +1467,14 @@
           },
           {
             "in": "query",
-            "name": "key",
+            "name": "oauth_token",
             "schema": {
               "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "quotaUser",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "prettyPrint",
-            "schema": {
-              "default": "true",
-              "type": "boolean"
             }
           },
           {
             "in": "query",
             "name": "upload_protocol",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "oauth_token",
             "schema": {
               "type": "string"
             }
@@ -1530,7 +1530,7 @@
           },
           {
             "in": "query",
-            "name": "access_token",
+            "name": "key",
             "schema": {
               "type": "string"
             }
@@ -1538,6 +1538,35 @@
           {
             "in": "query",
             "name": "fields",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "quotaUser",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "prettyPrint",
+            "schema": {
+              "default": "true",
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "uploadType",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "access_token",
             "schema": {
               "type": "string"
             }
@@ -1562,13 +1591,6 @@
           },
           {
             "in": "query",
-            "name": "uploadType",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
             "name": "alt",
             "schema": {
               "default": "json",
@@ -1582,36 +1604,14 @@
           },
           {
             "in": "query",
-            "name": "key",
+            "name": "oauth_token",
             "schema": {
               "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "quotaUser",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "prettyPrint",
-            "schema": {
-              "default": "true",
-              "type": "boolean"
             }
           },
           {
             "in": "query",
             "name": "upload_protocol",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "oauth_token",
             "schema": {
               "type": "string"
             }
@@ -1667,7 +1667,7 @@
           },
           {
             "in": "query",
-            "name": "access_token",
+            "name": "key",
             "schema": {
               "type": "string"
             }
@@ -1675,6 +1675,35 @@
           {
             "in": "query",
             "name": "fields",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "quotaUser",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "prettyPrint",
+            "schema": {
+              "default": "true",
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "uploadType",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "access_token",
             "schema": {
               "type": "string"
             }
@@ -1699,13 +1728,6 @@
           },
           {
             "in": "query",
-            "name": "uploadType",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
             "name": "alt",
             "schema": {
               "default": "json",
@@ -1719,36 +1741,14 @@
           },
           {
             "in": "query",
-            "name": "key",
+            "name": "oauth_token",
             "schema": {
               "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "quotaUser",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "prettyPrint",
-            "schema": {
-              "default": "true",
-              "type": "boolean"
             }
           },
           {
             "in": "query",
             "name": "upload_protocol",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "oauth_token",
             "schema": {
               "type": "string"
             }
@@ -1813,7 +1813,7 @@
           },
           {
             "in": "query",
-            "name": "access_token",
+            "name": "key",
             "schema": {
               "type": "string"
             }
@@ -1821,6 +1821,35 @@
           {
             "in": "query",
             "name": "fields",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "quotaUser",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "prettyPrint",
+            "schema": {
+              "default": "true",
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "uploadType",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "access_token",
             "schema": {
               "type": "string"
             }
@@ -1845,13 +1874,6 @@
           },
           {
             "in": "query",
-            "name": "uploadType",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
             "name": "alt",
             "schema": {
               "default": "json",
@@ -1865,36 +1887,14 @@
           },
           {
             "in": "query",
-            "name": "key",
+            "name": "oauth_token",
             "schema": {
               "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "quotaUser",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "prettyPrint",
-            "schema": {
-              "default": "true",
-              "type": "boolean"
             }
           },
           {
             "in": "query",
             "name": "upload_protocol",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "oauth_token",
             "schema": {
               "type": "string"
             }
@@ -1959,7 +1959,7 @@
           },
           {
             "in": "query",
-            "name": "access_token",
+            "name": "key",
             "schema": {
               "type": "string"
             }
@@ -1967,6 +1967,35 @@
           {
             "in": "query",
             "name": "fields",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "quotaUser",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "prettyPrint",
+            "schema": {
+              "default": "true",
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "uploadType",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "access_token",
             "schema": {
               "type": "string"
             }
@@ -1991,13 +2020,6 @@
           },
           {
             "in": "query",
-            "name": "uploadType",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
             "name": "alt",
             "schema": {
               "default": "json",
@@ -2011,36 +2033,14 @@
           },
           {
             "in": "query",
-            "name": "key",
+            "name": "oauth_token",
             "schema": {
               "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "quotaUser",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "prettyPrint",
-            "schema": {
-              "default": "true",
-              "type": "boolean"
             }
           },
           {
             "in": "query",
             "name": "upload_protocol",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "oauth_token",
             "schema": {
               "type": "string"
             }
@@ -2097,7 +2097,7 @@
           },
           {
             "in": "query",
-            "name": "access_token",
+            "name": "key",
             "schema": {
               "type": "string"
             }
@@ -2105,6 +2105,35 @@
           {
             "in": "query",
             "name": "fields",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "quotaUser",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "prettyPrint",
+            "schema": {
+              "default": "true",
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "uploadType",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "access_token",
             "schema": {
               "type": "string"
             }
@@ -2129,13 +2158,6 @@
           },
           {
             "in": "query",
-            "name": "uploadType",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
             "name": "alt",
             "schema": {
               "default": "json",
@@ -2149,36 +2171,14 @@
           },
           {
             "in": "query",
-            "name": "key",
+            "name": "oauth_token",
             "schema": {
               "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "quotaUser",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "prettyPrint",
-            "schema": {
-              "default": "true",
-              "type": "boolean"
             }
           },
           {
             "in": "query",
             "name": "upload_protocol",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "oauth_token",
             "schema": {
               "type": "string"
             }
@@ -2235,7 +2235,7 @@
           },
           {
             "in": "query",
-            "name": "access_token",
+            "name": "key",
             "schema": {
               "type": "string"
             }
@@ -2243,6 +2243,35 @@
           {
             "in": "query",
             "name": "fields",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "quotaUser",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "prettyPrint",
+            "schema": {
+              "default": "true",
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "uploadType",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "access_token",
             "schema": {
               "type": "string"
             }
@@ -2267,13 +2296,6 @@
           },
           {
             "in": "query",
-            "name": "uploadType",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
             "name": "alt",
             "schema": {
               "default": "json",
@@ -2287,36 +2309,14 @@
           },
           {
             "in": "query",
-            "name": "key",
+            "name": "oauth_token",
             "schema": {
               "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "quotaUser",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "prettyPrint",
-            "schema": {
-              "default": "true",
-              "type": "boolean"
             }
           },
           {
             "in": "query",
             "name": "upload_protocol",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "oauth_token",
             "schema": {
               "type": "string"
             }
@@ -2372,7 +2372,7 @@
           },
           {
             "in": "query",
-            "name": "access_token",
+            "name": "key",
             "schema": {
               "type": "string"
             }
@@ -2380,6 +2380,35 @@
           {
             "in": "query",
             "name": "fields",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "quotaUser",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "prettyPrint",
+            "schema": {
+              "default": "true",
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "uploadType",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "access_token",
             "schema": {
               "type": "string"
             }
@@ -2404,13 +2433,6 @@
           },
           {
             "in": "query",
-            "name": "uploadType",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
             "name": "alt",
             "schema": {
               "default": "json",
@@ -2424,36 +2446,14 @@
           },
           {
             "in": "query",
-            "name": "key",
+            "name": "oauth_token",
             "schema": {
               "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "quotaUser",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "prettyPrint",
-            "schema": {
-              "default": "true",
-              "type": "boolean"
             }
           },
           {
             "in": "query",
             "name": "upload_protocol",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "oauth_token",
             "schema": {
               "type": "string"
             }

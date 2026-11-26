@@ -133,35 +133,31 @@ describe('enrichErrorMessage', () => {
       const schema = buildWorkflowSchema(200);
 
       // Prime both the description cache and the JIT before measuring so the
-      // baseline reflects steady-state cost rather than first-call overhead.
+      // loop reflects steady-state cost rather than first-call overhead.
       for (let i = 0; i < 3; i++) {
         enrichErrorMessage(['steps', 1000 + i], `# warm ${i}`, 'unknown', { schema });
       }
 
-      // Calibrate per-call cost on the current machine. The loop below should
-      // stay close to `iterations * baselineMs` once caches are warm.
-      const baselineStart = performance.now();
-      enrichErrorMessage(['steps', 2000], 'baseline.', 'unknown', { schema });
-      const baselineMs = Math.max(0.1, performance.now() - baselineStart);
-
       const iterations = 50;
-      const start = performance.now();
+      const durations: number[] = [];
       // Vary the path so `enrichmentCache` always misses and we re-exercise
       // `tryWorkflowSchemaEnrichment`.
       for (let i = 0; i < iterations; i++) {
+        const iterationStart = performance.now();
         enrichErrorMessage(['steps', i], `Incorrect type. Expected "array". (#${i})`, 'unknown', {
           schema,
         });
+        durations.push(performance.now() - iterationStart);
       }
-      const elapsed = performance.now() - start;
-      const perIterMs = elapsed / iterations;
 
-      // Per-iteration cost should not exceed the calibrated baseline by more
-      // than a generous noise multiplier. Using a relative bound (with a small
-      // absolute floor) keeps the assertion stable on noisy CI agents while
-      // still catching a regression that would inflate per-iter cost.
-      const perIterCeiling = Math.max(baselineMs * 5, 50);
-      expect(perIterMs).toBeLessThan(perIterCeiling);
+      const meanMs = (samples: number[]) =>
+        samples.reduce((total, sample) => total + sample, 0) / samples.length;
+      const earlyMarkersMs = meanMs(durations.slice(0, iterations / 2));
+      const lateMarkersMs = meanMs(durations.slice(iterations / 2));
+
+      // Both halves miss `enrichmentCache` and pay the same JIT and GC costs, so
+      // growth in per-marker cost shows up as a multiple of the earlier markers.
+      expect(lateMarkersMs).toBeLessThan(Math.max(earlyMarkersMs * 3, 1));
     });
   });
 

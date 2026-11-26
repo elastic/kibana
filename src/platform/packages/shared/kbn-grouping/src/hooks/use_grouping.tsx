@@ -42,6 +42,7 @@ type StaticGroupingProps<T> = Pick<
   | 'multiValueFields'
   | 'emptyGroupingComponent'
   | 'getAdditionalActionButtons'
+  | 'getGroupToggleAriaLabel'
 >;
 
 /** Type for dynamic grouping component props where T is the consumer `GroupingAggregation`

@@ -6,11 +6,8 @@
  */
 
 import { createHash } from 'crypto';
-import {
-  DETECTION_SIGNAL_SOURCE,
-  detectionSignalSchema,
-  type DetectionSignal,
-} from '../../../common/detection_signal';
+import { DETECTION_SIGNAL_SOURCE } from '../../../common/constants';
+import { detectionSignalSchema, type DetectionSignal } from '../../../common/detection_signal';
 import type { DetectionSignalReading } from '../strategies/types';
 
 /** The group hash of `alerting_v2`, so a series keeps its identity when signals move to `.rule-events`. */

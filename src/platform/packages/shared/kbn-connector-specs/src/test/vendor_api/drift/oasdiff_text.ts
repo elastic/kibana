@@ -81,6 +81,65 @@ export const isRequestChange = (id: string): boolean => REQUEST_CHANGE.test(id);
 /** Whether the change is to what a response holds. */
 export const isResponseChange = (id: string): boolean => RESPONSE_CHANGE.test(id);
 
+/** Every name between backticks in a message, in order. */
+export const quoted = (text: string): string[] =>
+  [...text.matchAll(/`([^`]+)`/g)].map(([, name]) => name);
+
+// `https://www.googleapis.com/auth/gmail.labels` as `gmail.labels`, `https://mail.google.com/` as
+// `mail.google.com`.
+export const scopeName = (scope: string): string => {
+  const trimmed = scope.replace(/\/+$/, '');
+  return trimmed.slice(trimmed.lastIndexOf('/') + 1);
+};
+
+/** A scheme an endpoint's security asks for, with one of its scopes when it has any. */
+export interface SecurityGrant {
+  readonly scheme: string;
+  readonly scope?: string;
+}
+
+/** What a security change adds or removes, or undefined for a rule that isn't about that. */
+export const securityGrantsOf = (id: string, text: string): SecurityGrant[] | undefined => {
+  const names = quoted(text);
+  if (id === 'api-security-added' || id === 'api-security-removed') {
+    // `Oauth2: [https://…/auth/a, https://…/auth/b]`, or `apiKey` for a scheme without scopes.
+    const match = /^([^:[]+?)(?::\s*\[([^\]]*)\])?$/.exec(names[0] ?? '');
+    if (match === null) return undefined;
+    const scheme = match[1].trim();
+    const scopes = (match[2] ?? '')
+      .split(',')
+      .map((scope) => scope.trim())
+      .filter((scope) => scope !== '');
+    return scopes.length === 0 ? [{ scheme }] : scopes.map((scope) => ({ scheme, scope }));
+  }
+  if (id === 'api-security-scope-added' || id === 'api-security-scope-removed') {
+    // The security scope `pipeline:write` was added to the endpoint's security scheme `oauth2`.
+    const [scope, scheme] = names;
+    return scope === undefined || scheme === undefined ? undefined : [{ scheme, scope }];
+  }
+  if (/^api-security-component-oauth-scope-(added|removed)$/.test(id)) {
+    // The component security scheme `oauth2` oauth `clientCredentials` flow scope `write` was added.
+    const scheme = names[0];
+    const scope = names[names.length - 1];
+    return names.length < 2 ? undefined : [{ scheme, scope }];
+  }
+  if (id === 'api-security-component-added' || id === 'api-security-component-removed') {
+    return names[0] === undefined ? undefined : [{ scheme: names[0] }];
+  }
+  return undefined;
+};
+
+// "the `query` request parameter `status`": the location comes first, then the parameter's name.
+const REQUEST_PARAMETER = /`(query|header|path|cookie)` request parameter `([^`]+)`/;
+
+/** The location and name of the request parameter a change is about. */
+export const requestParameterOf = (
+  text: string
+): { readonly location: string; readonly name: string } | undefined => {
+  const match = REQUEST_PARAMETER.exec(text);
+  return match === null ? undefined : { location: match[1], name: match[2] };
+};
+
 // `allOf[#/components/schemas/Options]/waitFor`: oasdiff names the subschema a property is in.
 const COMPOSITION = /(?:allOf|anyOf|oneOf)\[[^\]]*\]\/?/g;
 
@@ -132,8 +191,10 @@ export const additionOf = (id: string, text: string): ParsedAddition | undefined
       return named && { kind: 'request-option', field: toFieldPath(named[1]) };
     }
     case 'new-optional-request-parameter': {
-      const named = match(/`query` request parameter `([^`]+)`/);
-      return named && { kind: 'query-parameter', field: named[1] };
+      const parameter = requestParameterOf(text);
+      return parameter?.location === 'query'
+        ? { kind: 'query-parameter', field: parameter.name }
+        : undefined;
     }
     case 'request-property-enum-value-added': {
       const named = match(/new `([^`]+)` enum value to the request property `([^`]+)`/);
