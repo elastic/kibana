@@ -35,14 +35,14 @@ interface ExpectedEmptyState {
   readonly hidden: readonly EmptyStateElement[];
 }
 
-// `noFleetAccess` renders under the same loaded-privileges condition as the button, so each case
-// waits for a visible outcome before asserting the other one is absent.
 const HOSTS_ONBOARDING: ExpectedEmptyState = {
   readyWhen: 'onboardingSteps',
   visible: ['emptyHostsTable', 'onboardingSteps'],
-  hidden: ['noFleetAccess'],
+  hidden: ['emptyPolicyTable'],
 };
 
+// `noFleetAccess` renders under the same loaded-privileges condition as the button, so it must be
+// visible before the button's absence means anything.
 const POLICY_ONBOARDING: ExpectedEmptyState = {
   readyWhen: 'policyOnboardingInstructions',
   visible: ['emptyPolicyTable', 'noFleetAccess'],
@@ -97,9 +97,10 @@ const withPolicyManagement = (role: KibanaRole, privilege: 'read' | 'all'): Kiba
   })),
 });
 
-// Policy management lets the page list the Defend policy without Integrations once it is read
-// from the current feature version (elastic/kibana#307734); that must not show the hosts
-// onboarding either.
+// These behave exactly like Fleet all + Integrations none: `canAccessFleet` decides the outcome,
+// since Fleet's `fleet.all` needs Integrations read or all and `stateToDisplay` returns
+// `policyEmptyStateWithoutFleetAccess` before reading any policy data. They are not coverage of
+// the policy management fix in elastic/kibana#307734.
 const POLICY_MANAGEMENT_CASES: readonly RbacCase[] = (['read', 'all'] as const).map(
   (privilege) => ({
     title: `hides the hosts onboarding with policy management ${privilege}, fleet all and integrations none`,
