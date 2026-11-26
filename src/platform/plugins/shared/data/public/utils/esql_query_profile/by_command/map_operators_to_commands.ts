@@ -31,6 +31,8 @@ export interface QueryHeat {
   commands: CommandHeat[];
   /** Share of the operator time that no command explains, such as the final output. From 0 to 1. */
   unattributedShare: number;
+  /** Short names of the operators that took time and belong to no command, slowest first. */
+  unattributedOperators: string[];
   /** True when the query has subqueries, so the commands belong to different queries. */
   hasSubqueries: boolean;
 }
@@ -94,6 +96,10 @@ const listEntries = (commands: QueryCommand[]): Entry[] => {
   return list(commands);
 };
 
+/** The names of a map of operator time, the slowest first. */
+const slowestFirst = (nanosByOperator: Map<string, number>): string[] =>
+  [...nanosByOperator.entries()].sort((left, right) => right[1] - left[1]).map(([title]) => title);
+
 /** The operator time found for one command, while the operators are being attributed. */
 interface CommandAccumulator {
   entry: Entry;
@@ -151,6 +157,7 @@ export function mapOperatorsToCommands({
     return commandOfNode.get(key);
   };
   let unattributedNanos = 0;
+  const unattributedByOperator = new Map<string, number>();
   let totalNanos = 0;
 
   operators.forEach(({ title, drivers }) => {
@@ -161,6 +168,12 @@ export function mapOperatorsToCommands({
         planNodeId === undefined ? undefined : commandOf(planNodeKey(nodeName, planNodeId));
       if (!target) {
         unattributedNanos += processNanos;
+        if (processNanos > 0) {
+          unattributedByOperator.set(
+            title,
+            (unattributedByOperator.get(title) ?? 0) + processNanos
+          );
+        }
         return;
       }
       target.nanos += processNanos;
@@ -172,9 +185,7 @@ export function mapOperatorsToCommands({
     command: entry.command,
     subquery: entry.subquery,
     share: shareOf(nanos, totalNanos),
-    operators: [...operatorNanos.entries()]
-      .sort((left, right) => right[1] - left[1])
-      .map(([title]) => title),
+    operators: slowestFirst(operatorNanos),
   }));
 
   return {
@@ -182,6 +193,7 @@ export function mapOperatorsToCommands({
     // stays, such as FROM a, (...) with a source, or WHERE k IN (...) with an expression.
     commands: heats.filter(({ command, share }) => !command.holdsOnlySubqueries || share > 0),
     unattributedShare: shareOf(unattributedNanos, totalNanos),
+    unattributedOperators: slowestFirst(unattributedByOperator),
     hasSubqueries: commands.some((command) => Boolean(command.branches?.length)),
   };
 }

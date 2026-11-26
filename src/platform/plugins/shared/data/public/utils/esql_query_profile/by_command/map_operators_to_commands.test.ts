@@ -124,6 +124,8 @@ describe('mapOperatorsToCommands', () => {
     ]);
     expect(heat.commands[2].operators).toEqual(['ValuesSourceReader', 'HashAggregation']);
     expect(heat.unattributedShare).toBeCloseTo(0.1);
+    // The operators that belong to no command are named, the slowest first.
+    expect(heat.unattributedOperators).toEqual(['Output']);
   });
 
   it('tells apart two commands of the same kind by where they are in the query', () => {
@@ -171,6 +173,7 @@ describe('mapOperatorsToCommands', () => {
     expect(planned.commands[1].share).toBe(1);
     expect(edited.commands[1].share).toBe(0);
     expect(edited.unattributedShare).toBe(1);
+    expect(edited.unattributedOperators).toEqual(['Limit']);
   });
 
   it('counts a plan node id on its own node only', () => {
@@ -188,6 +191,17 @@ describe('mapOperatorsToCommands', () => {
 
     expect(heat.commands.every(({ share }) => share === 0)).toBe(true);
     expect(heat.unattributedShare).toBe(1);
+  });
+
+  it('names no operator that reports no time among those that belong to no command', () => {
+    const heat = heatOf('FROM logs', [
+      { operator: 'LuceneSourceOperator', node: { id: '1', text: 'FROM logs' }, nanos: 10 },
+      { operator: 'OutputOperator', node: { id: '2' } },
+      { operator: 'ExchangeSinkOperator', node: { id: '3' }, nanos: 5 },
+      { operator: 'ProjectOperator', node: { id: '4' }, nanos: 20 },
+    ]);
+
+    expect(heat.unattributedOperators).toEqual(['Project', 'ExchangeSink']);
   });
 
   it('keeps an operator that reports no time in the list of its command', () => {
