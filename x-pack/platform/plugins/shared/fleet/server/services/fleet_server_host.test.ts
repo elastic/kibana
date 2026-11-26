@@ -1150,6 +1150,48 @@ describe('getFleetServerHostsForAgentPolicy', () => {
     );
   });
 
+  it('resolves the default host again when the host it read is no longer the default', async () => {
+    const soClient = getMockedSoClient({ findHosts: true });
+    soClient.find
+      .mockResolvedValueOnce({
+        saved_objects: [{ id: 'test123', attributes: { host_urls: [], is_default: true } }],
+      } as any)
+      .mockResolvedValueOnce({
+        saved_objects: [{ id: 'new-default', attributes: { host_urls: [], is_default: true } }],
+      } as any);
+    const esoClient = getMockedEncryptedSoClient();
+    esoClient.getDecryptedAsInternalUser
+      .mockResolvedValueOnce({
+        ...decryptedDefaultHost,
+        attributes: { ...decryptedDefaultHost.attributes, is_default: false },
+      } as any)
+      .mockResolvedValueOnce({ ...decryptedDefaultHost, id: 'new-default' } as any);
+
+    const host = await getFleetServerHostsForAgentPolicy(soClient, {});
+
+    expect(esoClient.getDecryptedAsInternalUser).toHaveBeenLastCalledWith(
+      FLEET_SERVER_HOST_SAVED_OBJECT_TYPE,
+      'new-default'
+    );
+    expect(host).toEqual(expect.objectContaining({ id: 'new-default', is_default: true }));
+  });
+
+  it('throws when the host it reads again is not the default either', async () => {
+    const soClient = getMockedSoClient({ findHosts: true });
+    const esoClient = getMockedEncryptedSoClient();
+    const noLongerDefault = {
+      ...decryptedDefaultHost,
+      attributes: { ...decryptedDefaultHost.attributes, is_default: false },
+    };
+    esoClient.getDecryptedAsInternalUser
+      .mockResolvedValueOnce(noLongerDefault as any)
+      .mockResolvedValueOnce(noLongerDefault as any);
+
+    await expect(getFleetServerHostsForAgentPolicy(soClient, {})).rejects.toThrow(
+      'Default Fleet Server host is not setup'
+    );
+  });
+
   it('keeps the new default host, without its ssl settings, when they cannot be decrypted', async () => {
     const soClient = getMockedSoClient({ findHosts: true });
     soClient.find

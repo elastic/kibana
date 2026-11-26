@@ -601,8 +601,9 @@ export async function getFleetServerHostsForAgentPolicy(
     return decryptedDefault;
   }
 
-  // The host was deleted after it was looked up, so resolve the default host again, once. It can
-  // have the same id, since a host can be created again with the id of a deleted one.
+  // The host was deleted, or another host became the default, after it was looked up, so resolve
+  // the default host again, once. It can have the same id, since a host can be created again with
+  // the id of a deleted one.
   const currentDefault = await fleetServerHostService.getDefaultFleetServerHost();
   const decryptedCurrentDefault = currentDefault
     ? await getDecryptedDefaultFleetServerHost(currentDefault)
@@ -614,14 +615,18 @@ export async function getFleetServerHostsForAgentPolicy(
 }
 
 /**
- * Reads the default Fleet Server host decrypted. Returns undefined when it no longer exists, and
- * the host as given, without its SSL settings, when they cannot be decrypted.
+ * Reads the default Fleet Server host decrypted. Returns undefined when it no longer exists or is
+ * no longer the default, and the host as given, without its SSL settings, when they cannot be
+ * decrypted.
  */
 async function getDecryptedDefaultFleetServerHost(
   defaultFleetServerHost: FleetServerHost
 ): Promise<FleetServerHost | undefined> {
   try {
-    return await fleetServerHostService.get(defaultFleetServerHost.id);
+    const decrypted = await fleetServerHostService.get(defaultFleetServerHost.id);
+    // Another host may have become the default since the lookup, and the policy must get that
+    // host's URLs and SSL settings.
+    return decrypted.is_default ? decrypted : undefined;
   } catch (error) {
     if (SavedObjectsErrorHelpers.isNotFoundError(error)) {
       return undefined;
