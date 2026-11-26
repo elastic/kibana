@@ -248,8 +248,8 @@ const elasticsearchConnectorsByType = new Map(
   getElasticsearchConnectors().map((connector) => [connector.type, connector])
 );
 
-const OBJECT_FORM_HINT =
-  'Hint: the editor schema rejects some shorthand that Elasticsearch accepts. If this is one, use the object form, for example `term: { field: { value: false } }`, `prefix: { field: { value: "a" } }` or `_source: { includes: [...] }`.';
+const SCHEMA_GAP_HINT =
+  'Hint: if Elasticsearch accepts this body, the generated schema is missing a case from the spec. Fix it in the OAS preprocessors (`kbn-workflows/scripts/shared/oas_*.ts`) and run `node scripts/generate_workflow_es_contracts.js`.';
 
 function renderWorkflowYaml(definition: ManagedWorkflowDefinition): string {
   const { id } = definition;
@@ -530,7 +530,7 @@ describe('managedWorkflowDefinitions', () => {
           failures.push({
             path,
             issuePaths: survivingIssues.map((issue) => issue.path.map(String).join('.')),
-            error: `${z.prettifyError(new z.ZodError(survivingIssues))}\n${OBJECT_FORM_HINT}`,
+            error: `${z.prettifyError(new z.ZodError(survivingIssues))}\n${SCHEMA_GAP_HINT}`,
           });
         }
       };

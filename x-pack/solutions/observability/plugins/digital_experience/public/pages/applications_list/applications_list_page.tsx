@@ -50,9 +50,15 @@ import { useKibanaServices } from '../../hooks/use_kibana_services';
 import { usePlatformFilter } from '../../hooks/use_platform_filter';
 import { useSourceFilter } from '../../hooks/use_source_filter';
 import { useTimeRange } from '../../hooks/use_time_range';
-import { APPLICATIONS_LABEL } from '../../labels';
+import {
+  APPLICATIONS_LABEL,
+  INGEST_FAILED_LABEL,
+  INGEST_MISSING_PRIVILEGES_LABEL,
+  INGEST_REMOTE_LABEL,
+} from '../../labels';
 import { EDOT_BROWSER_DOCS_URL } from '../../utils/doc_links';
 import { toTimeRangeQuery } from '../../utils/time_range_query';
+import type { IngestColumnState } from './components/ingest_column';
 import { MobileApplicationsTable } from './mobile/mobile_applications_table';
 import { MobileAvailabilityCallOut } from './mobile/mobile_availability_callout';
 import { PlatformFilter } from './mobile/platform_filter';
@@ -63,12 +69,15 @@ import {
   isWebApplication,
   mobileApplicationsMatching,
 } from './utils/filter_applications';
+import { ingestChartPoints, toIngestLookup, totalIngest } from './utils/ingest';
 import {
   pageLoadsOfSources,
   sessionsOfSource,
   summarizeApplications,
 } from './utils/summarize_applications';
+import type { IngestSummary } from './web/applications_summary_panel';
 import { ApplicationsSummaryPanel } from './web/applications_summary_panel';
+import { IngestChart } from './web/ingest_chart';
 import { PageLoadsChart } from './web/page_loads_chart';
 import { SessionsSourceStatus } from './web/sessions_source_status';
 import { SourceFilter } from './web/source_filter';
@@ -285,6 +294,46 @@ export function ApplicationsListPage() {
   const selectedType = applicationType ?? typeWithData;
   const isMobileTab = selectedType === APPLICATION_TYPE.mobile;
 
+  // Apart from the list, which shows its rows without waiting, and for the shown tab only: ingest
+  // counts every document of the time range. Each value keeps what it was fetched for, so the rows
+  // never show the estimates of another range, environment or tab while the next ones load.
+  const ingestKey = JSON.stringify([timeRange, environment, timeZone, selectedType]);
+  const {
+    value: ingestValue,
+    loading: ingestLoading,
+    error: ingestError,
+    refresh: refreshIngest,
+  } = useAbortableAsync(
+    async ({ signal }) => ({
+      key: ingestKey,
+      response: await apiClient.fetch('GET /internal/digital_experience/applications/ingest', {
+        signal,
+        params: {
+          query: {
+            ...toTimeRangeQuery(timeRange, environment, timeZone),
+            applicationType: selectedType,
+          },
+        },
+      }),
+    }),
+    [apiClient, ingestKey, timeRange, environment, timeZone, selectedType],
+    { unsetValueOnError: true }
+  );
+  const ingestResponse = ingestValue?.key === ingestKey ? ingestValue.response : undefined;
+  const isIngestLoading = ingestLoading || (!ingestResponse && !ingestError);
+  const ingestState = useMemo<IngestColumnState>(
+    () => ({
+      lookup: ingestResponse ? toIngestLookup(ingestResponse) : undefined,
+      isLoading: isIngestLoading,
+      notes: [
+        ...(ingestResponse?.missingPrivileges ? [INGEST_MISSING_PRIVILEGES_LABEL] : []),
+        ...(ingestResponse?.skippedRemoteIndices ? [INGEST_REMOTE_LABEL] : []),
+        ...(ingestError || ingestResponse?.hasFailures ? [INGEST_FAILED_LABEL] : []),
+      ],
+    }),
+    [ingestResponse, isIngestLoading, ingestError]
+  );
+
   // Sessions are web only, so the Mobile tab the URL picks requests no status; the one the list
   // opens by itself does, to fetch again once sessions are built
   const {
@@ -331,10 +380,11 @@ export function ApplicationsListPage() {
   // A refresh checks the sessions status again, on the Web tab only: sessions are web only
   const refreshAll = useCallback(() => {
     refresh();
+    refreshIngest();
     if (!isMobileTab) {
       refreshSessionsStatus();
     }
-  }, [refresh, refreshSessionsStatus, isMobileTab]);
+  }, [refresh, refreshIngest, refreshSessionsStatus, isMobileTab]);
   // A filter in the URL is ignored where its control isn't shown, so it can't hide rows, narrow the
   // other tab's count or follow its links: the source only on the Web tab (and not on serverless),
   // the platform only on the Mobile tab, whatever a shared link or a link back carries.
@@ -367,16 +417,31 @@ export function ApplicationsListPage() {
 
   // The summary and the chart cover the same rows: every source's, without the search, which only
   // narrows the table.
-  const summary = useMemo(
+  const summarizedApplications = useMemo(
     () =>
-      summarizeApplications(
-        applicationsMatching({
-          applications: response?.applications ?? [],
-          source: selectedSource,
-          search: '',
-        })
-      ),
+      applicationsMatching({
+        applications: response?.applications ?? [],
+        source: selectedSource,
+        search: '',
+      }),
     [response, selectedSource]
+  );
+  const summary = useMemo(
+    () => summarizeApplications(summarizedApplications),
+    [summarizedApplications]
+  );
+  const ingestSummary = useMemo<IngestSummary>(
+    () => ({
+      // The Web tab's: mobile applications are EDOT data too, but have their own tab.
+      bytes: totalIngest(ingestState.lookup, summarizedApplications.filter(isWebApplication)),
+      isLoading: ingestState.isLoading,
+      notes: ingestState.notes,
+    }),
+    [ingestState, summarizedApplications]
+  );
+  const ingestChartData = useMemo(
+    () => (ingestResponse ? ingestChartPoints(ingestResponse.overTime, selectedSource) : []),
+    [ingestResponse, selectedSource]
   );
   const pageLoadsOfResponse = response?.pageLoadsOverTime ?? NO_PAGE_LOADS;
   const pageLoadsOverTime = useMemo(
@@ -566,15 +631,32 @@ export function ApplicationsListPage() {
         )}
         {!isMobileTab && (
           <>
-            <ApplicationsSummaryPanel summary={summary} isLoading={isLoading} />
-            <EuiSpacer size="m" />
-            <PageLoadsChart
-              pageLoads={pageLoadsOverTime}
-              sessions={sessionsOverTime}
-              histogram={response?.pageLoadsOverTime.histogram}
+            <ApplicationsSummaryPanel
+              summary={summary}
               isLoading={isLoading}
-              onTimeRangeSelect={setTimeRange}
+              ingest={ingestSummary}
             />
+            <EuiSpacer size="m" />
+            <EuiFlexGroup gutterSize="m">
+              <EuiFlexItem>
+                <PageLoadsChart
+                  pageLoads={pageLoadsOverTime}
+                  sessions={sessionsOverTime}
+                  histogram={response?.pageLoadsOverTime.histogram}
+                  isLoading={isLoading}
+                  onTimeRangeSelect={setTimeRange}
+                />
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <IngestChart
+                  points={ingestChartData}
+                  histogram={ingestResponse?.overTime.histogram}
+                  isLoading={isIngestLoading}
+                  notes={ingestState.notes}
+                  onTimeRangeSelect={setTimeRange}
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
             <EuiSpacer size="m" />
           </>
         )}
@@ -623,6 +705,7 @@ export function ApplicationsListPage() {
             searchTerm={searchTerm}
             isLoading={isLoading}
             noItemsMessage={getMobileNoItemsMessage()}
+            ingest={ingestState}
           />
         ) : (
           <WebApplicationsTable
@@ -632,6 +715,7 @@ export function ApplicationsListPage() {
             noItemsMessage={getWebNoItemsMessage()}
             visibleColumns={visibleColumns}
             onShowClassicData={showClassicData}
+            ingest={ingestState}
           />
         )}
       </EuiPageSection>

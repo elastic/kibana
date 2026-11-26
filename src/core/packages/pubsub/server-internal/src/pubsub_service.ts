@@ -11,6 +11,7 @@ import type { Logger } from '@kbn/logging';
 import type { CoreContext, CoreService } from '@kbn/core-base-server-internal';
 import {
   assertTopicName,
+  PUBSUB_MAX_ID_LENGTH,
   type PubSubEvent,
   type PubSubEventInit,
   type PubSubPublishResult,
@@ -50,9 +51,6 @@ export const PUBSUB_MAX_PENDING_EVENTS = 1000;
 
 /** UTF-8 byte size of `JSON.stringify(data)`. */
 export const PUBSUB_MAX_DATA_BYTES = 256 * 1024;
-
-/** Characters in a producer-supplied event id. */
-export const PUBSUB_MAX_ID_LENGTH = 256;
 
 /** @internal */
 export class PubSubService implements CoreService<InternalPubSubSetup, InternalPubSubStart> {
@@ -295,7 +293,7 @@ export class PubSubService implements CoreService<InternalPubSubSetup, InternalP
 
     if (id.length > PUBSUB_MAX_ID_LENGTH) {
       throw new Error(
-        `Pubsub event id is ${id.length} characters, which exceeds the ${PUBSUB_MAX_ID_LENGTH} character limit.`
+        `Pubsub event id is ${id.length} UTF-16 code units, which exceeds the ${PUBSUB_MAX_ID_LENGTH} UTF-16 code unit limit.`
       );
     }
   }

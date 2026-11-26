@@ -85,6 +85,7 @@ beforeEach(() => {
     errorsHref: '/errors-href',
     networkHref: '/network-href',
     reportsHref: '/reports-href',
+    frustrationHref: '/frustration-href',
     sessionsHref: () => '/sessions-href',
     sessionHref: () => '/session-href',
   });
