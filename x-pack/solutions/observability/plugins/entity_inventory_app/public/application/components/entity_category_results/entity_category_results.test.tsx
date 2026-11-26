@@ -502,7 +502,7 @@ describe('EntityCategoryResults', () => {
       const fixtureClient = createFixtureEntityInventoryApiClient();
       const getTypes = jest.fn(fixtureClient.getTypes);
       const getEntities = jest.fn(fixtureClient.getEntities);
-      renderResults({ getTypes, getEntities }, null);
+      renderResults({ ...fixtureClient, getTypes, getEntities }, null);
       await waitFor(() => expect(screen.getAllByTestId('entityInventoryTable')).toHaveLength(2));
 
       fireEvent.click(screen.getByRole('button', { name: NEW_RANGE_LABEL }));
@@ -544,7 +544,7 @@ describe('EntityCategoryResults', () => {
         .fn(fixtureClient.getTypes)
         .mockRejectedValueOnce(new Error('Types failed'));
       const getEntities = jest.fn(fixtureClient.getEntities);
-      renderResults({ getTypes, getEntities });
+      renderResults({ ...fixtureClient, getTypes, getEntities });
 
       expect(await screen.findByTestId('entityInventoryTableError')).toHaveTextContent(
         'Types failed'
