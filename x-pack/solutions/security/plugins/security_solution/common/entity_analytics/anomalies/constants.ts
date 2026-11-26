@@ -21,5 +21,4 @@ export const ENTITY_ANOMALY_PRIVILEGES_INTERNAL_URL =
 /** Every ML results index: jobs may write to `.ml-anomalies-custom-<job>` instead of the shared one. */
 export const ML_ANOMALY_INDICES = '.ml-anomalies-*';
 
-/** The shared ML results index. */
 export const ML_ANOMALIES_INDEX = '.ml-anomalies-shared*';
