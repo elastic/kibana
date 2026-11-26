@@ -140,9 +140,11 @@ export class InspectorService extends FtrService {
    */
   public async getTableData(): Promise<string[][]> {
     // TODO: we should use datat-test-subj=inspectorTable as soon as EUI supports it
-    const inspectorPanel = await this.testSubjects.find('inspectorPanel');
-    const tableBody = await this.retry.try(async () => inspectorPanel.findByTagName('tbody'));
-    const $ = await tableBody.parseDomContent();
+    const $ = await this.retry.try(async () => {
+      const inspectorPanel = await this.testSubjects.find('inspectorPanel');
+      const tableBody = await inspectorPanel.findByTagName('tbody');
+      return await tableBody.parseDomContent();
+    });
     return $('tr')
       .toArray()
       .map((tr) => {
