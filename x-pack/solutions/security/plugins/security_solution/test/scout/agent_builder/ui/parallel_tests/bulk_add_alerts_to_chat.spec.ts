@@ -8,12 +8,11 @@
 import { createToolCallMessage } from '@kbn/ftr-llm-proxy';
 import { expect } from '@kbn/scout-security/ui';
 import { CUSTOM_QUERY_RULE, FULL_KIBANA_SECURITY_ROLE } from '@kbn/scout-security';
-import { spaceTest, tags } from '../fixtures';
+import { AUDITBEAT_ARCHIVE_INDEX, spaceTest, tags } from '../fixtures';
 
 const ALERT_COUNT = 3;
 
-// Failing: See https://github.com/elastic/kibana/issues/274822
-spaceTest.describe.skip(
+spaceTest.describe(
   'Bulk add alerts to chat',
   // Serverless excluded: agent builder feature not yet available on serverless
   { tag: [...tags.stateful.classic] },
@@ -39,6 +38,7 @@ spaceTest.describe.skip(
           ...CUSTOM_QUERY_RULE,
           name,
           rule_id: `scout-bulk-chat-${scoutSpace.id}-${i}`,
+          index: [AUDITBEAT_ARCHIVE_INDEX],
         });
       }
 
