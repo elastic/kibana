@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type Nock from 'nock';
 import { Request, Response, Headers } from 'undici';
 import { loggerMock } from '@kbn/logging-mocks';
 import { AuthTypeRegistry, registerAuthTypes } from '../auth_types';
@@ -12,9 +13,14 @@ import { actionsConfigMock } from '../actions_config.mock';
 import { connectorTokenClientMock } from './connector_token_client.mock';
 import { getAxiosInstanceWithAuth } from './get_axios_instance';
 
-jest.mock('axios', () => jest.requireActual('axios/dist/node/axios.cjs'));
+// Use the server HTTP client and adapter under this plugin's jsdom test environment.
+jest.mock('axios', () => {
+  const axios = jest.requireActual('axios/dist/node/axios.cjs');
+  axios.defaults.adapter = 'http';
+  return axios;
+});
 
-let nock: typeof import('nock');
+let nock: typeof Nock;
 const origin = 'https://threatq.example.com';
 const tokenUrl = `${origin}/api/token`;
 const secrets = {
@@ -62,7 +68,7 @@ describe('OAuth password authentication', () => {
 
   beforeAll(() => {
     Object.assign(globalThis, { Request, Response, Headers });
-    nock = jest.requireActual('nock');
+    nock = jest.requireActual<typeof Nock>('nock');
     nock.disableNetConnect();
   });
   beforeEach(() => {

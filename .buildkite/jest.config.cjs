@@ -16,10 +16,12 @@ const tsJestTransformCfg = createJsWithTsEsmPreset().transform;
 module.exports = {
   testEnvironment: require.resolve('jest-environment-node', { paths: [dirname(process.argv[1])] }),
   transform: {
+    'node_modules/(nock|@mswjs/interceptors|rettime|@open-draft/until)/.+\\.m?js$':
+      '<rootDir>/jest_esm_transformer.cjs',
     ...tsJestTransformCfg,
   },
   transformIgnorePatterns: [
-    'node_modules/(?!(@octokit/.*|universal-user-agent|before-after-hook|globby|unicorn-magic|is-path-inside|slash|@sindresorhus/merge-streams)/)',
+    'node_modules/(?!(@octokit/.*|universal-user-agent|before-after-hook|globby|unicorn-magic|is-path-inside|slash|@sindresorhus/merge-streams|nock|@mswjs/interceptors|rettime|@open-draft/until)/)',
   ],
   moduleNameMapper: {
     '^unicorn-magic/node$': '<rootDir>/node_modules/unicorn-magic/node.js',
