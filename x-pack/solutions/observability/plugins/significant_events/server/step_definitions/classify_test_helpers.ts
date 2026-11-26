@@ -30,17 +30,20 @@ export const detectionRow = (
   ruleUuid: string,
   {
     sourceId,
+    flaky = false,
     heldBack = false,
     reviewedAt = null,
     detectedAt = new Date(NOW - 10_000).toISOString(),
-    oldestUnprocessed = null,
+    oldestUnprocessed = detectedAt,
   }: {
     sourceId?: string;
+    /** The flaky-rule probe flagged the rule. */
+    flaky?: boolean;
     heldBack?: boolean;
     reviewedAt?: string | null;
     /** When the detection fired: a moment ago, after any review. */
     detectedAt?: string;
-    /** When the rule's oldest unprocessed detection fired; absent, the detection's own time counts. */
+    /** When the rule's oldest unprocessed detection fired; the detection's own time by default, null for an unreadable cell. */
     oldestUnprocessed?: string | null;
   } = {}
 ) => [
@@ -53,7 +56,7 @@ export const detectionRow = (
   },
   70,
   1,
-  false,
+  flaky,
   heldBack,
   reviewedAt,
   oldestUnprocessed,

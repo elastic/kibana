@@ -144,11 +144,11 @@ const isForAgent = (outcome: RowOutcome): boolean =>
 
 /**
  * Whether a waiting row has waited out the hold. The wait runs from the rule's oldest unprocessed
- * detection: the row is its newest, which a rule that keeps firing renews every run. An unreadable
- * time is not young: the row goes to the agent.
+ * detection. A missing or unreadable time is not young: the row goes to the agent, rather than
+ * restarting the wait from the rule's newest detection, which a rule that keeps firing renews every run.
  */
 const hasWaitedHold = ({
-  outcome: { entry, waitingSince },
+  outcome: { waitingSince },
   now,
   holdMs,
 }: {
@@ -156,7 +156,7 @@ const hasWaitedHold = ({
   now: number;
   holdMs: number;
 }): boolean => {
-  const since = waitingSince ?? Date.parse(entry['@timestamp'] ?? '');
+  const since = waitingSince ?? Number.NaN;
   return !Number.isFinite(since) || since > now || now - since >= holdMs;
 };
 

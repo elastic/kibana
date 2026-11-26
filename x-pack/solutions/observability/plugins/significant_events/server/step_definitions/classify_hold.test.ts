@@ -56,16 +56,11 @@ describe('classifyBatch', () => {
           detectionRow('rule-A', { sourceId: 'logs.checkout' }),
           // Flaky, so the joining rule is a waiting reason too: nothing in the run is a change, and
           // both rows wait. Without `member_joining` the member is the change and neither waits.
-          [...detectionRow('rule-B', { sourceId: 'logs.checkout' }).slice(0, 4), true],
+          detectionRow('rule-B', { sourceId: 'logs.checkout', flaky: true }),
         ],
         2,
       ],
-      [
-        'its rule is flaky and in no live event',
-        {},
-        [[...detectionRow('rule-A').slice(0, 4), true]],
-        1,
-      ],
+      ['its rule is flaky and in no live event', {}, [detectionRow('rule-A', { flaky: true })], 1],
     ])(
       'holds a detection that goes to the agent only because %s',
       async (_name, entries, rows, held) => {
@@ -134,6 +129,17 @@ describe('classifyBatch', () => {
         expect(agentBatchOf(output)).toEqual(expected);
       }
     );
+
+    it('releases a waiting detection with no readable oldest unprocessed time, however new it is', async () => {
+      const output = await classifyBatch(
+        batchParams({
+          rows: [detectionRow('rule-A', { oldestUnprocessed: null })],
+          findLiveMembers: live({ 'rule-A': stale() }),
+        })
+      );
+
+      expect(agentBatchOf(output)).toEqual(['rule-A']);
+    });
 
     it('releases every waiting detection when one of them has waited the window', async () => {
       const output = await classifyBatch(
@@ -313,7 +319,7 @@ describe('classifyBatch', () => {
   });
 
   describe('a flaky probe', () => {
-    const flakyRow = (ruleUuid: string) => [...detectionRow(ruleUuid).slice(0, 4), true];
+    const flakyRow = (ruleUuid: string) => detectionRow(ruleUuid, { flaky: true });
 
     it('sends a flaky rule in no live event to the agent as a flaky probe', async () => {
       const output = await classifyBatch(
