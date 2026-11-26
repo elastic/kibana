@@ -83,6 +83,8 @@ import { getActionsConfigurationUtilities } from './actions_config';
 
 import { defineRoutes } from './routes';
 import { setupInboundEvents, type ConnectorEventEmitter } from './inbound';
+import { registerConnectorEventTopics } from './inbound/register_connector_event_topics';
+import { setConnectorEventPublisher } from './inbound/publish_connector_event';
 import { initializeActionsTelemetry, scheduleActionsTelemetry } from './usage/task';
 import {
   initializeOAuthStateCleanupTask,
@@ -139,6 +141,13 @@ import { OAuthRateLimiter } from './lib/oauth_rate_limiter';
 import type { GetAxiosInstanceWithAuthFnOpts, GetCredentialFnOpts } from './lib/get_axios_instance';
 import { getAxiosInstanceWithAuth, getCredentialWithAuth } from './lib/get_axios_instance';
 import { RelayClient, type RelayClientContract } from './lib/relay';
+import {
+  buildTypeFromStoredSpec,
+  CATALOG_REQUEST_WAIT_MS,
+  createConnectorCatalogStorage,
+  startConnectorCatalog,
+  type ConnectorCatalogHandle,
+} from './lib/connector_catalog';
 
 export interface PluginSetupContract {
   registerType<
@@ -267,6 +276,9 @@ export interface PluginStartContract {
     request: KibanaRequest,
     connectorIds: string[]
   ) => Promise<Set<string>>;
+
+  /** Resolves when the first connector catalog load is done, failed, or timed out. Never rejects. */
+  whenCatalogReady(): Promise<void>;
 }
 
 export interface ActionsPluginsSetup {
@@ -327,13 +339,22 @@ export class ActionsPlugin
   private connectorUsageReportingTask: ConnectorUsageReportingTask | undefined;
   private connectorLifecycleListeners: ConnectorLifecycleListener[] = [];
   private connectorEventEmitter?: ConnectorEventEmitter;
+  /** Topics registered in setup when inbound events are enabled. `start` installs the publisher only when this is set. */
+  private connectorEventTopicsByEventId?: ReturnType<typeof registerConnectorEventTopics>;
   private skippedPreconfiguredConnectorIds: Set<string> = new Set();
   // Process-wide: a warm client must outlive a single action, and the per-action context is
   // discarded when the action returns, so the plugin instance owns the pool.
   private readonly clientLeasePool: LeasePool<unknown>;
   private relayClient?: RelayClientContract;
+  private setupContract?: PluginSetupContract;
   private isCatalogFeatureFlagEnabled = false;
   private connectorCatalogFeatureFlagSubscription?: Subscription;
+  private connectorCatalog?: ConnectorCatalogHandle;
+  private catalogReady: Promise<void> = Promise.resolve();
+  // Request paths wait on this instead of catalogReady. It resolves at ready or after CATALOG_REQUEST_WAIT_MS.
+  private catalogRequestWait: Promise<void> = Promise.resolve();
+  private catalogRequestWaitTimer?: ReturnType<typeof setTimeout>;
+  private isStopping = false;
 
   constructor(initContext: PluginInitializerContext) {
     this.logger = initContext.logger.get();
@@ -530,6 +551,11 @@ export class ActionsPlugin
       inMemoryConnectors: this.inMemoryConnectors,
       getConnectorEventEmitter: () => this.connectorEventEmitter,
     });
+    if (actionsConfigUtils.isInboundEventsEnabled()) {
+      this.connectorEventTopicsByEventId = registerConnectorEventTopics((topic) => {
+        core.pubsub.registerTopic(topic);
+      });
+    }
     defineRoutes({
       getSpaceId: (request) => this.spaces?.spacesService.getSpaceId(request) ?? 'default',
       router,
@@ -542,7 +568,7 @@ export class ActionsPlugin
       inboundEvents,
     });
 
-    return {
+    const setupContract: PluginSetupContract = {
       registerType: <
         Config extends ActionTypeConfig = ActionTypeConfig,
         Secrets extends ActionTypeSecrets = ActionTypeSecrets,
@@ -627,9 +653,20 @@ export class ActionsPlugin
         this.connectorEventEmitter = emitter;
       },
     };
+    // Kept for start(): catalog types are built with the same setup helpers that stack_connectors uses.
+    this.setupContract = setupContract;
+    return setupContract;
   }
 
   public start(core: CoreStart, plugins: ActionsPluginsStart): PluginStartContract {
+    const connectorEventTopicsByEventId = this.connectorEventTopicsByEventId;
+    if (connectorEventTopicsByEventId) {
+      setConnectorEventPublisher({
+        pubsub: core.pubsub,
+        logger: this.logger,
+        topics: connectorEventTopicsByEventId,
+      });
+    }
     this.securityStart = plugins.security;
     if (this.actionsConfig.relay?.uiam?.enabled && !plugins.security?.authc.systemIdentity) {
       this.logger.warn(
@@ -637,6 +674,7 @@ export class ActionsPlugin
       );
     }
 
+    const connectorCatalog = this.startConnectorCatalog(core);
     this.connectorCatalogFeatureFlagSubscription = core.featureFlags
       .getBooleanValue$(ACTIONS_CONNECTOR_CATALOG_ENABLED_FLAG, false)
       .subscribe((isCatalogEnabled: boolean) => {
@@ -686,6 +724,7 @@ export class ActionsPlugin
       unsecuredSavedObjectsClient: SavedObjectsClientContract;
       spaceId?: SpaceId;
     }) => {
+      await this.catalogRequestWait;
       return new ActionsClient({
         publicBaseUrl: core.http.basePath.publicBaseUrl,
         connectorSigningKeysEnabled: this.actionsConfig.connectorSigningKeys.enabled,
@@ -781,6 +820,7 @@ export class ActionsPlugin
         kibanaIndices: core.savedObjects.getAllIndices(),
         logger: this.logger,
         connectorTypeRegistry: actionTypeRegistry!,
+        waitForCatalog: () => this.catalogRequestWait,
       });
     };
 
@@ -906,7 +946,7 @@ export class ActionsPlugin
       }).catch(() => {});
     }
 
-    this.validateEnabledConnectorTypes(plugins);
+    this.validateEnabledConnectorTypes(plugins, connectorCatalog.ready);
 
     this.connectorUsageReportingTask?.start(plugins.taskManager).catch(() => {});
 
@@ -945,6 +985,7 @@ export class ActionsPlugin
       unregisterDynamicConnector: (connectorId: string) =>
         this.unregisterDynamicConnector(connectorId),
       getRelayClient: () => this.relayClient,
+      whenCatalogReady: () => this.catalogReady,
       getUsableUserOAuthConnectorIds: async (request: KibanaRequest, connectorIds: string[]) => {
         throwIfCannotEncrypt();
         const profileUid = await getCurrentUserProfileId(request);
@@ -1128,9 +1169,12 @@ export class ActionsPlugin
     const evictClientPool = async (connectorId: string): Promise<void> => {
       await this.clientLeasePool.evict(connectorId);
     };
+    const waitForCatalog = () => this.catalogRequestWait;
 
     return async function actionsRouteHandlerContext(context, request) {
       const [coreStart, pluginsStart] = await core.getStartServices();
+      // Requests that arrive before the first catalog load ends wait for it, up to a cap.
+      await waitForCatalog();
       const { taskManager, encryptedSavedObjects, eventLog } = pluginsStart;
       const { savedObjects } = coreStart;
 
@@ -1204,16 +1248,98 @@ export class ActionsPlugin
     };
   };
 
-  private validateEnabledConnectorTypes = (plugins: ActionsPluginsStart) => {
+  private startConnectorCatalog(core: CoreStart): ConnectorCatalogHandle {
+    const { setupContract, actionTypeRegistry, logger } = this;
+    const isEnabled = this.actionsConfig.catalog.enabled;
+    const handle = startConnectorCatalog({
+      isEnabled,
+      storage: createConnectorCatalogStorage({
+        esClient: core.elasticsearch.client.asInternalUser,
+        logger,
+      }),
+      actionTypeRegistry: actionTypeRegistry!,
+      buildType: (definition) => {
+        if (!setupContract) {
+          throw new Error('The actions plugin setup contract is not available.');
+        }
+        return buildTypeFromStoredSpec(definition, setupContract);
+      },
+      logger,
+    });
+    this.connectorCatalog = handle;
+    this.catalogReady = handle.ready;
+    this.catalogRequestWait = this.createCatalogRequestWait(isEnabled, handle.ready);
+    return handle;
+  }
+
+  private createCatalogRequestWait(isEnabled: boolean, ready: Promise<void>): Promise<void> {
+    if (!isEnabled) {
+      return Promise.resolve();
+    }
+    return new Promise<void>((resolve) => {
+      this.catalogRequestWaitTimer = setTimeout(resolve, CATALOG_REQUEST_WAIT_MS);
+      void ready.then(() => {
+        this.clearCatalogRequestWaitTimer();
+        resolve();
+      });
+    });
+  }
+
+  private clearCatalogRequestWaitTimer(): void {
+    clearTimeout(this.catalogRequestWaitTimer);
+    this.catalogRequestWaitTimer = undefined;
+  }
+
+  /** Checks the serverless connector type allowlist; catalog types are checked again after the catalog load. */
+  private validateEnabledConnectorTypes = (
+    plugins: ActionsPluginsStart,
+    catalogReady: Promise<void>
+  ): void => {
+    const { enabledActionTypes } = this.actionsConfig;
     if (
-      !!plugins.serverless &&
-      this.actionsConfig.enabledActionTypes.length > 0 &&
-      this.actionsConfig.enabledActionTypes[0] !== AllowedHosts.Any
+      !plugins.serverless ||
+      enabledActionTypes.length === 0 ||
+      enabledActionTypes[0] === AllowedHosts.Any
     ) {
-      this.actionsConfig.enabledActionTypes.forEach((connectorType) => {
+      return;
+    }
+
+    if (!this.actionsConfig.catalog.enabled) {
+      enabledActionTypes.forEach((connectorType) => {
         // Throws error if action type doesn't exist
         this.actionTypeRegistry?.get(connectorType);
       });
+      return;
+    }
+
+    const pendingTypes = enabledActionTypes.filter(
+      (connectorType) => !this.actionTypeRegistry?.has(connectorType)
+    );
+    if (pendingTypes.length === 0) {
+      return;
+    }
+
+    void this.warnAboutUnregisteredConnectorTypes(pendingTypes, catalogReady);
+  };
+
+  private warnAboutUnregisteredConnectorTypes = async (
+    pendingTypes: string[],
+    catalogReady: Promise<void>
+  ): Promise<void> => {
+    // Catalog types register after start(), so check again once the load has ended.
+    await catalogReady;
+    if (this.isStopping) {
+      return;
+    }
+    const unavailableTypes = pendingTypes.filter(
+      (connectorType) => !this.actionTypeRegistry?.has(connectorType)
+    );
+    if (unavailableTypes.length > 0) {
+      this.logger.warn(
+        `Connector types [${unavailableTypes.join(
+          ', '
+        )}] in xpack.actions.enabledActionTypes are not registered.`
+      );
     }
   };
 
@@ -1274,9 +1400,13 @@ export class ActionsPlugin
   };
 
   public stop() {
+    setConnectorEventPublisher(undefined);
     this.connectorCatalogFeatureFlagSubscription?.unsubscribe();
     this.connectorCatalogFeatureFlagSubscription = undefined;
     this.isCatalogFeatureFlagEnabled = false;
+    this.isStopping = true;
+    this.connectorCatalog?.stop();
+    this.clearCatalogRequestWaitTimer();
     if (this.licenseState) {
       this.licenseState.clean();
     }

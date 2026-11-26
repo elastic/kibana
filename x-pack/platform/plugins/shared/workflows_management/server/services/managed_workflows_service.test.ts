@@ -694,6 +694,7 @@ describe('ManagedWorkflowsService', () => {
       expect(crudService.prepareWorkflowDocumentForStorage).toHaveBeenCalledWith(
         expect.objectContaining({
           lightweightValidation: true,
+          isManaged: true,
         })
       );
       expect(crudService.createWorkflowDocument).toHaveBeenCalledWith(
@@ -792,6 +793,9 @@ describe('ManagedWorkflowsService', () => {
 
       await service.installManagedWorkflow(WORKFLOW_ID, { spaceId: SPACE_ID }, definition.pluginId);
 
+      expect(crudService.prepareWorkflowDocumentForStorage).toHaveBeenCalledWith(
+        expect.objectContaining({ isManaged: true })
+      );
       expect(crudService.writeWorkflowDocumentWithOcc).toHaveBeenCalledWith(
         WORKFLOW_ID,
         SPACE_ID,
@@ -2960,6 +2964,27 @@ describe('ManagedWorkflowsService', () => {
 
       expect(crudService.getManagedWorkflowDocumentsAllSpaces).toHaveBeenCalledTimes(1);
       expect(logger.warn).toHaveBeenCalledWith(
+        `Managed workflows: plugin '${PLUGIN_ID}' called ready() more than once. Ignoring.`
+      );
+    });
+
+    it('stays not ready when reconciliation fails, so ready() can run it again', async () => {
+      const definition = createDefinition();
+      mockManagedWorkflowDefinitions = [definition];
+      const { crudService, logger, service } = createService();
+      const readFailure = new Error('There are no living connections');
+      crudService.getManagedWorkflowDocumentsAllSpaces
+        .mockRejectedValueOnce(readFailure)
+        .mockResolvedValueOnce([]);
+
+      await expect(service.pluginReady(PLUGIN_ID)).rejects.toBe(readFailure);
+      expect(service.isPluginReady(PLUGIN_ID)).toBe(false);
+
+      await service.pluginReady(PLUGIN_ID);
+
+      expect(service.isPluginReady(PLUGIN_ID)).toBe(true);
+      expect(crudService.getManagedWorkflowDocumentsAllSpaces).toHaveBeenCalledTimes(2);
+      expect(logger.warn).not.toHaveBeenCalledWith(
         `Managed workflows: plugin '${PLUGIN_ID}' called ready() more than once. Ignoring.`
       );
     });

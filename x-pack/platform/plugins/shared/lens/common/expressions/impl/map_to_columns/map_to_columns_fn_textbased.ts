@@ -105,7 +105,10 @@ export const mapToOriginalColumnsTextBased: MapToColumnsExpressionFunction['fn']
           meta: {
             ...column.meta,
             ...('sourceField' in originalColumn ? { field: originalColumn.sourceField } : {}),
-            ...('format' in originalColumn ? { params: originalColumn.format } : {}),
+            // A scalar format reads "0.3..0.4" as 0.3, so ranges keep their number_range format.
+            ...('format' in originalColumn && column.meta?.type !== 'number_range'
+              ? { params: originalColumn.format }
+              : {}),
             sourceParams: {
               ...(column.meta?.sourceParams ?? {}),
               ...('sourceField' in originalColumn

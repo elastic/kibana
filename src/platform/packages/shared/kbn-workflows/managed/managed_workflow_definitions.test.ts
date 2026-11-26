@@ -26,9 +26,10 @@ import {
   ALERTZERO_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_WORKFLOW_ID,
   CONTEXT_ENGINE_DREAMING_WORKFLOW_ID,
   CONTEXT_ENGINE_FEEDBACK_ANALYSIS_WORKFLOW_ID,
+  CONTEXT_ENGINE_MAINTENANCE_WORKFLOW_ID,
   CONTEXT_ENGINE_RELATIONSHIPS_WORKFLOW_ID,
-  CONTEXT_ENGINE_TRACE_DREAMING_BATCH_WORKFLOW_ID,
-  CONTEXT_ENGINE_TRACE_DREAMING_WORKFLOW_ID,
+  CONTEXT_ENGINE_TRANSCRIPT_DREAMING_BATCH_WORKFLOW_ID,
+  CONTEXT_ENGINE_TRANSCRIPT_DREAMING_WORKFLOW_ID,
   EXAMPLE_MANAGED_WORKFLOW_ID,
   EXAMPLE_SERVICE_ACCOUNT_WORKFLOW_ID,
   NIGHTSHIFT_BOUND_AGENT_OPTIMIZE_WORKFLOW_ID,
@@ -37,13 +38,15 @@ import {
   NIGHTSHIFT_BOUND_SANDBOX_MATERIALIZE_WORKSPACE_WORKFLOW_ID,
   NIGHTSHIFT_BOUND_SLACK_THREAD_WORKFLOW_ID,
   NIGHTSHIFT_CONTINUOUS_DETECTION_WORKFLOW_ID,
+  NIGHTSHIFT_DETECTION_RECONCILE_WORKFLOW_ID,
   SECURITY_ALERT_ANALYSIS_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_SCHEDULED_REVIEW_WORKFLOW_ID,
 } from './definitions';
 import CONTEXT_ENGINE_DREAMING_YAML from './definitions/context_engine/dreaming.yaml';
-import CONTEXT_ENGINE_TRACE_DREAMING_YAML from './definitions/context_engine/dreaming_traces.yaml';
-import CONTEXT_ENGINE_TRACE_DREAMING_BATCH_YAML from './definitions/context_engine/dreaming_traces_batch.yaml';
+import CONTEXT_ENGINE_TRANSCRIPT_DREAMING_YAML from './definitions/context_engine/dreaming_transcripts.yaml';
+import CONTEXT_ENGINE_TRANSCRIPT_DREAMING_BATCH_YAML from './definitions/context_engine/dreaming_transcripts_batch.yaml';
+import CONTEXT_ENGINE_MAINTENANCE_YAML from './definitions/context_engine/maintenance.yaml';
 import CONTEXT_ENGINE_RELATIONSHIPS_YAML from './definitions/context_engine/relationships.yaml';
 import type { ManagedWorkflowDefinition, ManagedWorkflowTemplateValues } from './types';
 import { isDynamicValue, isLiquidTagValue, isVariableValue } from '../common/utils';
@@ -82,6 +85,9 @@ const templateRepresentativeValuesById: ManagedWorkflowTemplateValuesById = {
   [NIGHTSHIFT_CONTINUOUS_DETECTION_WORKFLOW_ID]: {
     serviceAccountId: 'kibana/nightshift_detection',
   },
+  [NIGHTSHIFT_DETECTION_RECONCILE_WORKFLOW_ID]: {
+    serviceAccountId: 'kibana/nightshift_detection',
+  },
   [EXAMPLE_MANAGED_WORKFLOW_ID]: {
     recipient: 'World',
   },
@@ -100,7 +106,7 @@ const templateRepresentativeValuesById: ManagedWorkflowTemplateValuesById = {
     entityTypes: [{ type: 'customer', attributes: ['tier'] }, { type: 'city' }],
     relationshipTypes: [{ type: 'lives_in', description: 'A customer lives in a city.' }],
   },
-  [CONTEXT_ENGINE_TRACE_DREAMING_WORKFLOW_ID]: {
+  [CONTEXT_ENGINE_TRANSCRIPT_DREAMING_WORKFLOW_ID]: {
     aiIndexId: 'my-ai-index',
     instanceKey: 'my-ai-index-0123456789abcdef',
     memoriesIndex: 'ai-index-idx-my-ai-index',
@@ -122,7 +128,15 @@ const templateRepresentativeValuesById: ManagedWorkflowTemplateValuesById = {
     entityTypes: [{ type: 'customer', attributes: ['tier'] }, { type: 'city' }],
     relationshipTypes: [{ type: 'lives_in', description: 'A customer lives in a city.' }],
   },
-  [CONTEXT_ENGINE_TRACE_DREAMING_BATCH_WORKFLOW_ID]: {
+  [CONTEXT_ENGINE_MAINTENANCE_WORKFLOW_ID]: {
+    aiIndexId: 'my-ai-index',
+    instanceKey: 'my-ai-index-0123456789abcdef',
+    connectorId: 'my-connector',
+    instructions: 'Remember what customers "prefer".\nIgnore {{ small talk }}.',
+    maintenanceIntervalMinutes: 1440,
+    maintenanceMode: 'report',
+  },
+  [CONTEXT_ENGINE_TRANSCRIPT_DREAMING_BATCH_WORKFLOW_ID]: {
     aiIndexId: 'my-ai-index',
     instanceKey: 'my-ai-index-0123456789abcdef',
     memoriesIndex: 'ai-index-idx-my-ai-index',
@@ -234,8 +248,8 @@ const elasticsearchConnectorsByType = new Map(
   getElasticsearchConnectors().map((connector) => [connector.type, connector])
 );
 
-const OBJECT_FORM_HINT =
-  'Hint: the editor schema rejects some shorthand that Elasticsearch accepts. If this is one, use the object form, for example `term: { field: { value: false } }`, `prefix: { field: { value: "a" } }` or `_source: { includes: [...] }`.';
+const SCHEMA_GAP_HINT =
+  'Hint: if Elasticsearch accepts this body, the generated schema is missing a case from the spec. Fix it in the OAS preprocessors (`kbn-workflows/scripts/shared/oas_*.ts`) and run `node scripts/generate_workflow_es_contracts.js`.';
 
 function renderWorkflowYaml(definition: ManagedWorkflowDefinition): string {
   const { id } = definition;
@@ -270,13 +284,18 @@ function createContentFingerprint(content: string): string {
 }
 
 it.each([
-  [CONTEXT_ENGINE_DREAMING_WORKFLOW_ID, CONTEXT_ENGINE_DREAMING_YAML, '6:4dcfae3f'],
-  [CONTEXT_ENGINE_RELATIONSHIPS_WORKFLOW_ID, CONTEXT_ENGINE_RELATIONSHIPS_YAML, '3:2622f7b3'],
-  [CONTEXT_ENGINE_TRACE_DREAMING_WORKFLOW_ID, CONTEXT_ENGINE_TRACE_DREAMING_YAML, '5:53938616'],
+  [CONTEXT_ENGINE_DREAMING_WORKFLOW_ID, CONTEXT_ENGINE_DREAMING_YAML, '8:0f093d1e'],
+  [CONTEXT_ENGINE_RELATIONSHIPS_WORKFLOW_ID, CONTEXT_ENGINE_RELATIONSHIPS_YAML, '4:8a38fbe6'],
+  [CONTEXT_ENGINE_MAINTENANCE_WORKFLOW_ID, CONTEXT_ENGINE_MAINTENANCE_YAML, '1:0ba262e3'],
   [
-    CONTEXT_ENGINE_TRACE_DREAMING_BATCH_WORKFLOW_ID,
-    CONTEXT_ENGINE_TRACE_DREAMING_BATCH_YAML,
-    '5:85da232f',
+    CONTEXT_ENGINE_TRANSCRIPT_DREAMING_WORKFLOW_ID,
+    CONTEXT_ENGINE_TRANSCRIPT_DREAMING_YAML,
+    '7:342b0877',
+  ],
+  [
+    CONTEXT_ENGINE_TRANSCRIPT_DREAMING_BATCH_WORKFLOW_ID,
+    CONTEXT_ENGINE_TRANSCRIPT_DREAMING_BATCH_YAML,
+    '6:7dd0638a',
   ],
 ] as const)(
   'requires bumping %s definition.version together with the fingerprint of its render inputs',
@@ -511,7 +530,7 @@ describe('managedWorkflowDefinitions', () => {
           failures.push({
             path,
             issuePaths: survivingIssues.map((issue) => issue.path.map(String).join('.')),
-            error: `${z.prettifyError(new z.ZodError(survivingIssues))}\n${OBJECT_FORM_HINT}`,
+            error: `${z.prettifyError(new z.ZodError(survivingIssues))}\n${SCHEMA_GAP_HINT}`,
           });
         }
       };

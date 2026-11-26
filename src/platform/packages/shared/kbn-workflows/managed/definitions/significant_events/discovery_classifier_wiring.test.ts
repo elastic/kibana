@@ -15,6 +15,7 @@ interface WorkflowStep {
   name: string;
   type?: string;
   condition?: string;
+  if?: string;
   'on-failure'?: { continue?: boolean };
   'iteration-on-failure'?: { continue?: boolean };
   foreach?: string;
@@ -107,6 +108,115 @@ describe('discovery workflow detection classifier wiring', () => {
       expect(step['on-failure']).toBeUndefined();
     });
 
+    it('resolves written detections only when the agent succeeded, and a failure does not fail the run', () => {
+      const resolve = requireStep('resolve_written_detections');
+
+      expect(evaluate(resolve.if, { steps: { run_discovery_agent: { error: null } } })).toBe(true);
+      expect(
+        evaluate(resolve.if, { steps: { run_discovery_agent: { error: { message: 'failed' } } } })
+      ).toBe(false);
+      expect(resolve['on-failure']).toEqual({ continue: true });
+    });
+
+    it('uses the workflow execution space rather than caller-provided step input', () => {
+      const resolve = requireStep('resolve_written_detections');
+
+      expect(resolve.with).not.toHaveProperty('space_id');
+    });
+
+    it('stamps only the valid batch UUID when the agent reports an unknown UUID', () => {
+      const resolve = requireStep('resolve_written_detections');
+      const stampRuleUuids = requireStep('compute_stamp_rule_uuids').with?.stamp_rule_uuids;
+      const context = {
+        steps: {
+          classify_detections: {
+            output: {
+              batch: [{ detection_id: 'detection-A', rule_uuid: 'rule-A' }],
+            },
+          },
+          compute_written_rule_uuids: {
+            output: { written_rule_uuids: ['rule-A', 'unknown-rule'] },
+          },
+        },
+      };
+
+      expect(evaluate(resolve.with?.batch, context)).toEqual([
+        { detection_id: 'detection-A', rule_uuid: 'rule-A' },
+      ]);
+      expect(evaluate(resolve.with?.reported_rule_uuids, context)).toEqual([
+        'rule-A',
+        'unknown-rule',
+      ]);
+      expect(
+        evaluate(stampRuleUuids, {
+          steps: {
+            compute_resolved_stamp_rule_uuids: {
+              output: { stamp_rule_uuids: ['rule-A'] },
+            },
+            compute_fallback_stamp_rule_uuids: { output: { stamp_rule_uuids: [] } },
+          },
+        })
+      ).toEqual(['rule-A']);
+    });
+
+    it('passes an empty agent report to the resolver as an empty list, not undefined', () => {
+      const resolve = requireStep('resolve_written_detections');
+
+      expect(
+        evaluate(resolve.with?.reported_rule_uuids, {
+          steps: { compute_written_rule_uuids: { output: { written_rule_uuids: [] } } },
+        })
+      ).toEqual([]);
+    });
+
+    describe('stamp rule uuids', () => {
+      const resolved = requireStep('compute_resolved_stamp_rule_uuids');
+      const fallback = requireStep('compute_fallback_stamp_rule_uuids');
+      const stampRuleUuids = requireStep('compute_stamp_rule_uuids').with?.stamp_rule_uuids;
+
+      // Runs each stamp step only when its `if` passes, as the engine does, then merges the outputs.
+      const stampRules = (resolver: { error: { message: string } | null; stamp: string[] }) => {
+        const context = {
+          steps: {
+            resolve_written_detections: {
+              error: resolver.error,
+              output: resolver.error ? undefined : { stamp_rule_uuids: resolver.stamp },
+            },
+            compute_written_rule_uuids: { output: { written_rule_uuids: ['rule-X'] } },
+          },
+        };
+        const run = (step: typeof resolved) =>
+          evaluate(step.if, context)
+            ? { output: { stamp_rule_uuids: evaluate(step.with?.stamp_rule_uuids, context) } }
+            : undefined;
+
+        return evaluate(stampRuleUuids, {
+          steps: {
+            compute_resolved_stamp_rule_uuids: run(resolved),
+            compute_fallback_stamp_rule_uuids: run(fallback),
+          },
+        });
+      };
+
+      it('keeps an empty resolver result instead of falling back to the reported rules', () => {
+        expect(stampRules({ error: null, stamp: [] })).toEqual([]);
+      });
+
+      it('falls back to the reported rules when the resolver step failed', () => {
+        expect(stampRules({ error: { message: 'down' }, stamp: [] })).toEqual(['rule-X']);
+      });
+    });
+
+    it('reports the unknown reported rule count in the completed body', () => {
+      const body = requireStep('report_discovery_completed').with?.body as Record<string, unknown>;
+
+      expect(
+        evaluate(body.unknown_reported_rule_count, {
+          steps: { resolve_written_detections: { output: { unknown_reported_count: 3 } } },
+        })
+      ).toBe(3);
+    });
+
     it('passes the detection rows, the space and every classifier input to the step', () => {
       const withBlock = requireStep('classify_detections').with ?? {};
 
@@ -114,15 +224,10 @@ describe('discovery workflow detection classifier wiring', () => {
         rows: '${{ steps.get_detections.output.values }}',
         columns: "${{ steps.get_detections.output.columns | map: 'name' }}",
         space_id: '{{ variables.spaceId }}',
-        probe_window_minutes: '${{ inputs.classifierProbeWindowMinutes }}',
-        probe_timeout_ms: '${{ inputs.classifierProbeTimeoutMs }}',
-        probe_concurrency: '${{ inputs.classifierProbeConcurrency }}',
-        budget_ms: '${{ inputs.classifierBudgetMs }}',
         max_skip_age_hours: '${{ inputs.classifierMaxSkipAgeHours }}',
         live_lookback_days: '${{ inputs.classifierLiveLookbackDays }}',
         review_fresh_minutes: '${{ inputs.classifierReviewFreshMinutes }}',
-        baseline_bucket_minutes: '${{ inputs.classifierBaselineBucketMinutes }}',
-        baseline_window_minutes: '${{ inputs.classifierBaselineWindowMinutes }}',
+        batch_max: '${{ inputs.detectionBatchMax }}',
       });
     });
   });
@@ -163,16 +268,11 @@ describe('discovery workflow detection classifier wiring', () => {
     const inputs = discovery.triggers[0].inputs;
 
     it.each([
-      // At most the rows the classifier step accepts, so a batch never fails its input schema.
-      ['detectionBatchMax', 'number', 10, 1, 1000],
-      ['classifierProbeWindowMinutes', 'number', 20, 15, 360],
-      ['classifierProbeTimeoutMs', 'number', 8000, 1000, 30000],
-      ['classifierProbeConcurrency', 'number', 5, 1, 10],
-      ['classifierBudgetMs', 'number', 20000, 2000, 60000],
+      // At most the pool the query returns (the classifier's MAX_CLASSIFIED_ROWS), so a batch is never
+      // larger than the rows the classifier reads.
+      ['detectionBatchMax', 'number', 10, 1, 100],
       ['classifierReviewFreshMinutes', 'number', 240, 15, 1440],
       ['classifierLiveLookbackDays', 'number', 90, 1, 90],
-      ['classifierBaselineBucketMinutes', 'number', 5, 1, 60],
-      ['classifierBaselineWindowMinutes', 'number', 300, 60, 1440],
     ])('declares %s with its default and bounds', (name, type, def, minimum, maximum) => {
       const property = inputs?.properties?.[name];
 
@@ -363,8 +463,8 @@ describe('discovery workflow detection classifier wiring', () => {
           rule_uuid: 'rule-B',
           skip: {
             reason: 'still_breaching',
-            probe_status: 'ok',
-            baseline: { decision: 'background', value: 150, samples: 60 },
+            rule_breached: true,
+            breach_window_minutes: 10,
           },
         },
       ];
@@ -406,7 +506,6 @@ describe('discovery workflow detection classifier wiring', () => {
       ['skippedCount', 'number'],
       ['needsAgentCount', 'number'],
       ['classifierReasonCounts', 'string'],
-      ['classifierProbeStatusCounts', 'string'],
       ['classifierFailed', 'boolean'],
     ] as const;
 
@@ -448,7 +547,6 @@ describe('discovery workflow detection classifier wiring', () => {
       expect(evaluate(outputs.skippedCount, context)).toBe(0);
       expect(evaluate(outputs.needsAgentCount, context)).toBe(0);
       expect(evaluate(outputs.classifierReasonCounts, context)).toBe('{}');
-      expect(evaluate(outputs.classifierProbeStatusCounts, context)).toBe('{}');
     });
 
     it('reports the classifier counts', () => {
@@ -459,7 +557,6 @@ describe('discovery workflow detection classifier wiring', () => {
             skipped_count: 2,
             needs_agent_count: 1,
             reason_counts: { still_breaching: 2, possible_recovery: 1 },
-            probe_status_counts: { ok: 3 },
           },
         }),
       };
@@ -469,9 +566,6 @@ describe('discovery workflow detection classifier wiring', () => {
       expect(JSON.parse(String(evaluate(outputs.classifierReasonCounts, context)))).toEqual({
         still_breaching: 2,
         possible_recovery: 1,
-      });
-      expect(JSON.parse(String(evaluate(outputs.classifierProbeStatusCounts, context)))).toEqual({
-        ok: 3,
       });
     });
   });

@@ -11,6 +11,7 @@ import { CommandRegistry } from './registry';
 import { limitCommand } from './limit';
 import { dedupCommand } from './dedup';
 import { dropCommand } from './drop';
+import { describeCommand } from './describe';
 import { keepCommand } from './keep';
 import { forkCommand } from './fork';
 import { renameCommand } from './rename';
@@ -46,6 +47,7 @@ import { metricsInfoCommand } from './metrics_info';
 import { tsInfoCommand } from './ts_info';
 import { highlightCommand } from './highlight';
 import { denseVectorCommand } from './dense_vector';
+import { fillNullCommand } from './fillnull';
 
 const esqlCommandRegistry = new CommandRegistry();
 
@@ -53,6 +55,7 @@ const baseCommands = [
   limitCommand,
   dedupCommand,
   dropCommand,
+  describeCommand,
   forkCommand,
   renameCommand,
   changePointCommand,
@@ -87,6 +90,7 @@ const baseCommands = [
   tsInfoCommand,
   highlightCommand,
   denseVectorCommand,
+  fillNullCommand,
 ];
 
 baseCommands.forEach((command) => {
