@@ -36,7 +36,7 @@ export interface ToolEvidenceSummary {
   usedReadFile: boolean;
   usedEsql: boolean;
   readsPocIndex: boolean;
-  /** User indices other than the POC index that a data tool read. */
+  /** Indices other than the POC index that a data tool read, including the evaluation indices. */
   otherIndices: string[];
   /** Opaque session IDs returned by any tool, for the retrieval diagnostic. */
   retrievedSessionIds: string[];
@@ -83,7 +83,11 @@ export const esqlSources = (query: string): string[] => {
   );
 };
 
-const isSystemIndex = (name: string): boolean => name.startsWith('.');
+// The evaluation indices (datasets, examples, scores) hold the expected answers, so a read of
+// them must be flagged like any other index. Other dot-prefixed indices are Kibana internals.
+const EVALUATION_INDEX = /^\.(?:ds-)?\.?evaluation/;
+const isIgnoredSystemIndex = (name: string): boolean =>
+  name.startsWith('.') && !EVALUATION_INDEX.test(name);
 
 /** Whether an index name or wildcard pattern (e.g. `longmemeval*`) covers the POC index. */
 export const targetsPocIndex = (target: string): boolean => {
@@ -139,7 +143,7 @@ export const summarizeToolEvidence = (steps: readonly ConverseStepLike[]): ToolE
     ...new Set(
       dataCalls
         .flatMap(({ targets }) => targets)
-        .filter((target) => !targetsPocIndex(target) && !isSystemIndex(target))
+        .filter((target) => !targetsPocIndex(target) && !isIgnoredSystemIndex(target))
     ),
   ];
 

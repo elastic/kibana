@@ -10,7 +10,9 @@ import { POC_INDEX } from './constants';
 import type { LongMemEvalHistory } from './dataset';
 import {
   assertPocIndex,
+  assertPocIndexSearchable,
   deletePocIndex,
+  isPocIndexPresent,
   loadHistoryIntoPocIndex,
   toHistoryDocuments,
   toTurnDocuments,
@@ -32,7 +34,15 @@ const history: LongMemEvalHistory = {
   ],
 };
 
-const mockEsClient = ({ bulkErrors = false, count = 1 } = {}) => {
+const mockEsClient = ({
+  bulkErrors = false,
+  count = 1,
+  esqlResponse = { columns: [{ name: 'text' }], values: [['user: I painted my bike red']] },
+}: {
+  bulkErrors?: boolean;
+  count?: number;
+  esqlResponse?: { columns: Array<{ name: string }>; values: unknown[][] };
+} = {}) => {
   const client = {
     indices: {
       delete: jest.fn().mockResolvedValue({}),
@@ -44,6 +54,7 @@ const mockEsClient = ({ bulkErrors = false, count = 1 } = {}) => {
       items: bulkErrors ? [{ index: { error: { type: 'mapper_parsing_exception' } } }] : [],
     }),
     count: jest.fn().mockResolvedValue({ count }),
+    esql: { query: jest.fn().mockResolvedValue(esqlResponse) },
   };
   return { client, esClient: client as unknown as Client };
 };
@@ -160,5 +171,47 @@ describe('loadHistoryIntoPocIndex', () => {
     await expect(
       loadHistoryIntoPocIndex(mockEsClient({ count: 0 }).esClient, history)
     ).rejects.toThrow(/Expected 1 documents/);
+  });
+});
+
+describe('assertPocIndexSearchable', () => {
+  it('runs a full-text ES|QL query over the loaded index and then deletes it', async () => {
+    const { client, esClient } = mockEsClient();
+    await expect(assertPocIndexSearchable(esClient, history)).resolves.toBeUndefined();
+
+    const { query } = client.esql.query.mock.calls[0][0];
+    expect(query).toContain(`FROM ${POC_INDEX}`);
+    expect(query).toContain('MATCH(text, "painted")');
+    // Once to clear the index before loading, once in the finally.
+    expect(client.indices.delete).toHaveBeenCalledTimes(2);
+  });
+
+  it('fails when the query returns no turn text, still deleting the index', async () => {
+    const { client, esClient } = mockEsClient({
+      esqlResponse: { columns: [{ name: 'text' }], values: [[null]] },
+    });
+    await expect(assertPocIndexSearchable(esClient, history)).rejects.toThrow(/no turn text/);
+    expect(client.indices.delete).toHaveBeenCalledTimes(2);
+  });
+
+  it('fails before touching Elasticsearch when no search term can be chosen', async () => {
+    const { client, esClient } = mockEsClient();
+    const shortWords: LongMemEvalHistory = {
+      sessions: [{ ...history.sessions[0], messages: [{ role: 'user', content: 'hi me' }] }],
+    };
+    await expect(assertPocIndexSearchable(esClient, shortWords)).rejects.toThrow(
+      /Cannot pick a search term/
+    );
+    expect(client.indices.create).not.toHaveBeenCalled();
+  });
+});
+
+describe('isPocIndexPresent', () => {
+  it('checks the POC index and refuses any other name', async () => {
+    const { client, esClient } = mockEsClient();
+    client.indices.exists.mockResolvedValue(true);
+    await expect(isPocIndexPresent(esClient)).resolves.toBe(true);
+    expect(client.indices.exists).toHaveBeenCalledWith({ index: POC_INDEX });
+    await expect(isPocIndexPresent(esClient, 'other-index')).rejects.toThrow(/Refusing/);
   });
 });

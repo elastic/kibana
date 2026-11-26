@@ -10,6 +10,7 @@
     "@kbn/evals",
     "@kbn/agent-builder-common",
     "@kbn/inference-common",
-    "@kbn/tooling-log"
+    "@kbn/tooling-log",
+    "@kbn/std"
   ]
 }

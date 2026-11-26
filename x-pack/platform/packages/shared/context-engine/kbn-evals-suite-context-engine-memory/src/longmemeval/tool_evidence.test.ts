@@ -91,4 +91,25 @@ describe('summarizeToolEvidence', () => {
     expect(summary.readsPocIndex).toBe(false);
     expect(summary.otherIndices).toEqual(['customer-data']);
   });
+
+  it('flags reads of the evaluation indices that hold the expected answers', () => {
+    const summary = summarizeToolEvidence([
+      {
+        type: 'tool_call',
+        tool_id: 'platform.core.search',
+        params: { query: 'q', index: '.evaluation-dataset-examples-000001' },
+        results: [],
+      },
+      {
+        type: 'tool_call',
+        tool_id: 'platform.core.execute_esql',
+        params: { query: 'FROM .ds-.evaluation-scores-2026.11.25-000001, .kibana | LIMIT 1' },
+        results: [],
+      },
+    ]);
+    expect(summary.otherIndices).toEqual([
+      '.evaluation-dataset-examples-000001',
+      '.ds-.evaluation-scores-2026.11.25-000001',
+    ]);
+  });
 });

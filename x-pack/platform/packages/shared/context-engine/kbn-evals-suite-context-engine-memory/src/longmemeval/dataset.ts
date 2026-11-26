@@ -413,6 +413,9 @@ export class DatasetDownloadFailedError extends Error {
 }
 
 const DOWNLOAD_ATTEMPTS = 3;
+/** Client errors other than timeouts and rate limits will not succeed on retry. */
+const isRetryableStatus = (status: number): boolean =>
+  status < 400 || status >= 500 || status === 408 || status === 429;
 // A stalled connection must fail and retry rather than hang until the test timeout.
 const DOWNLOAD_TIMEOUT_MS = 5 * 60_000;
 const CACHE_PATH = Path.join(
@@ -433,7 +436,9 @@ const readVerified = async (path: string): Promise<Buffer | undefined> => {
 
 const download = async (log: ToolingLog): Promise<Buffer> => {
   let lastError: unknown;
+  let retryable = true;
   for (let attempt = 1; attempt <= DOWNLOAD_ATTEMPTS; attempt++) {
+    retryable = true;
     try {
       log.info(`Downloading LongMemEval-S (attempt ${attempt}/${DOWNLOAD_ATTEMPTS})`);
       const deadline = timeoutSignal(DOWNLOAD_TIMEOUT_MS);
@@ -442,6 +447,7 @@ const download = async (log: ToolingLog): Promise<Buffer> => {
           signal: deadline,
         });
         if (!response.ok) {
+          retryable = isRetryableStatus(response.status);
           throw new Error(`HTTP ${response.status} ${response.statusText}`);
         }
         const buffer = Buffer.from(await response.arrayBuffer());
@@ -453,6 +459,9 @@ const download = async (log: ToolingLog): Promise<Buffer> => {
     } catch (error) {
       lastError = error;
       log.warning(`LongMemEval-S download attempt ${attempt} failed: ${String(error)}`);
+      if (!retryable) {
+        break;
+      }
       if (attempt < DOWNLOAD_ATTEMPTS) {
         await new Promise((resolve) => setTimeout(resolve, attempt * 5_000));
       }

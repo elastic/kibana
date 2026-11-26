@@ -11,6 +11,7 @@ import {
   buildJudgePrompt,
   createEvidenceSessionRecallEvaluator,
   createLongMemEvalAnswerAccuracyEvaluator,
+  createUsedEsqlEvaluator,
   selectJudgeBranch,
 } from './evaluators';
 import type { LongMemEvalExample, LongMemEvalMetadata } from './dataset';
@@ -219,5 +220,23 @@ describe('createEvidenceSessionRecallEvaluator', () => {
         params({ ...okOutput, toolEvidence: toolEvidence(['session-0002']) }, meta)
       )
     ).resolves.toEqual({ score: 0.5, label: '1/2' });
+  });
+});
+
+describe('createUsedEsqlEvaluator', () => {
+  it('reports whether an ES|QL tool was used, neutrally, and null without evidence', async () => {
+    const evaluator = createUsedEsqlEvaluator();
+    expect(evaluator.direction).toBe('neutral');
+    await expect(evaluator.evaluate(params(okOutput))).resolves.toEqual({
+      score: 1,
+      label: 'true',
+    });
+    const noEsql = { ...toolEvidence([]), usedEsql: false };
+    await expect(
+      evaluator.evaluate(params({ ...okOutput, toolEvidence: noEsql }))
+    ).resolves.toEqual({ score: 0, label: 'false' });
+    await expect(
+      evaluator.evaluate(params({ ...okOutput, toolEvidence: undefined }))
+    ).resolves.toEqual({ score: null, label: 'unavailable' });
   });
 });

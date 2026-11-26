@@ -12,7 +12,24 @@ A plumbing POC ([search-team#17382](https://github.com/elastic/search-team/issue
 4. Judge the answer with the LongMemEval task-specific prompts (copied verbatim from upstream `evaluate_qa.py`, MIT), through the evaluation connector at temperature 0.
 5. Delete the index, then read the scores back from the score store and fail unless every question produced a valid, judged, persisted answer.
 
-It bypasses Memory ingestion, Dreaming and recall, so it does **not** measure Memory quality, regression sensitivity or comparability with published LongMemEval results.
+### What this is, and is not
+
+This is the **direct-index arm**: a generic Agent Builder agent over a flat Elasticsearch index with one document per conversation turn. It bypasses Memory ingestion, Dreaming and recall, so a score from this suite is **not** a measure of Context Engine Memory quality. Later arms (for example the Memory APIs) would be separate suites or arms with their own dataset version.
+
+It is also **not comparable to published LongMemEval numbers**:
+- The grading templates are the upstream ones, but the judge is the configured evaluation connector (currently `eis-zai-glm-5-2`), not GPT-4o, and it answers through a forced tool call (`{ correct: boolean }`) instead of free-text yes/no.
+- Only five frozen questions are used. With one run of five binary scores, a single flipped question moves the mean by 20 points, so this cannot detect regressions; it checks that the pipeline runs and persists scores.
+
+### Why one document per turn
+
+A search over whole-session documents returned about 22k tokens and was truncated by Agent Builder's 20k tool-result limit. A turn document is about 500 tokens at the median (3.5k at most), and each keeps its `session_id`, so session-level evidence recall and neighbouring-turn lookups still work.
+
+### Guard rails
+
+- Every index helper accepts only the exact index name `longmemeval-memory-direct-index-poc`; there is no wildcard delete.
+- The agent keeps its normal tools and the Kibana user's index access. After each answer the suite records which indices the tools read. A question is **invalid** (and the run fails) if any index other than the POC index was read, **including the `.evaluation-*` indices**, which hold the expected answers. Other dot-prefixed Kibana internals are ignored. Tool calls that do not name an index cannot be attributed, so this check is a safeguard, not a sandbox.
+- Not reading the POC index at all is not invalid: the answer is simply scored.
+- Any invalid, unjudged or unpersisted question fails the whole run, so a red weekly step means at least one of the five did not produce a usable score.
 
 ### Evaluators
 
