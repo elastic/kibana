@@ -46,10 +46,11 @@ components:
           description: >-
             A list of alert IDs associated with the live query. At most 100 distinct IDs are
             accepted. Every ID must refer to an alert you can read; otherwise the request fails
-            with a 404.
+            with a 404. IDs must not be empty.
           type: array
           items:
             type: string
+            minLength: 1
         case_ids:
           description: 'A list of case IDs associated with the live query.'
           type: array

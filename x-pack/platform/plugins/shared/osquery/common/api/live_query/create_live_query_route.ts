@@ -27,11 +27,20 @@ const alertIdsSchema = new t.Type<string[], string[], unknown>(
   (u, c) =>
     pipe(
       t.array(t.string).validate(u, c),
-      chain((ids) =>
-        new Set(ids).size <= MAX_DISTINCT_ALERT_IDS
+      chain((ids) => {
+        // An empty id is falsy in the route, which would skip every alert lookup.
+        if (ids.some((id) => id === '')) {
+          return t.failure(u, c, 'alert_ids must not contain empty ids');
+        }
+
+        return new Set(ids).size <= MAX_DISTINCT_ALERT_IDS
           ? t.success(ids)
-          : t.failure(u, c, `alert_ids must contain at most ${MAX_DISTINCT_ALERT_IDS} distinct ids`)
-      )
+          : t.failure(
+              u,
+              c,
+              `alert_ids must contain at most ${MAX_DISTINCT_ALERT_IDS} distinct ids`
+            );
+      })
     ),
   t.identity
 );

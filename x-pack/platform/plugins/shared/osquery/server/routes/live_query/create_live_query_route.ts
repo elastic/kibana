@@ -44,18 +44,32 @@ const alertNotAccessible = (id: string) => `Alert "${id}" was not found or is no
 
 // Returns the ids that do not resolve to an alert the caller can read. `ids` matches `_id`
 // literally, and the client ANDs the caller's authorization and space filters into the query.
+// `size` bounds documents, not distinct ids, and the same `_id` can exist in several alert
+// indices. A full page may therefore hide other ids, so the ids still missing are searched again
+// until a page comes back short. Every round resolves at least one id, so the loop ends.
 const findUnreadableAlertIds = async (
   client: PublicMethodsOf<AlertsClient>,
   ids: string[]
 ): Promise<string[]> => {
-  const { hits } = await client.find({
-    query: { ids: { values: ids } },
-    size: ids.length,
-    _source: false,
-  });
-  const readable = new Set(hits.hits.map((hit) => hit._id));
+  let missing = ids;
 
-  return ids.filter((id) => !readable.has(id));
+  while (missing.length) {
+    const { hits } = await client.find({
+      query: { ids: { values: missing } },
+      size: missing.length,
+      _source: false,
+    });
+    const readable = new Set(hits.hits.map((hit) => hit._id));
+    const stillMissing = missing.filter((id) => !readable.has(id));
+
+    if (hits.hits.length < missing.length || stillMissing.length === missing.length) {
+      return stillMissing;
+    }
+
+    missing = stillMissing;
+  }
+
+  return missing;
 };
 
 export const createLiveQueryRoute = (router: IRouter, osqueryContext: OsqueryAppContext) => {

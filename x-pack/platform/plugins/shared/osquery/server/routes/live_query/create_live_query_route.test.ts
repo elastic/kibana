@@ -437,6 +437,57 @@ describe('createLiveQueryRoute', () => {
       );
     });
 
+    it('looks again for the ids a full page of duplicate hits left out', async () => {
+      const racGet = jest.fn().mockResolvedValue(readableAlert);
+      // The same _id exists in two alert indices, so a page of two documents holds one id.
+      const racFind = jest
+        .fn()
+        .mockResolvedValueOnce(findResponse(['alert-2', 'alert-2']))
+        .mockResolvedValueOnce(findResponse(['alert-3']));
+      const coreStart = createMockCoreStart({}, { writeLiveQueries: true });
+
+      const response = await invokeRoute(
+        {
+          query: 'select 1;',
+          alert_ids: ['alert-1', 'alert-2', 'alert-3'],
+          agent_ids: ['agent-1'],
+        },
+        { coreStart, racGet, racFind }
+      );
+
+      expect(racFind).toHaveBeenCalledTimes(2);
+      expect(racFind).toHaveBeenLastCalledWith({
+        query: { ids: { values: ['alert-3'] } },
+        size: 1,
+        _source: false,
+      });
+      expect(response.ok).toHaveBeenCalled();
+    });
+
+    it('still returns 404 for an id hidden behind duplicate hits that does not exist', async () => {
+      const racGet = jest.fn().mockResolvedValue(readableAlert);
+      const racFind = jest
+        .fn()
+        .mockResolvedValueOnce(findResponse(['alert-2', 'alert-2']))
+        .mockResolvedValueOnce(findResponse([]));
+      const coreStart = createMockCoreStart({}, { writeLiveQueries: true });
+
+      const response = await invokeRoute(
+        {
+          query: 'select 1;',
+          alert_ids: ['alert-1', 'alert-2', 'alert-3'],
+          agent_ids: ['agent-1'],
+        },
+        { coreStart, racGet, racFind }
+      );
+
+      expect(response.customError).toHaveBeenCalledWith({
+        statusCode: 404,
+        body: { message: alertNotAccessible('alert-3') },
+      });
+      expect(mockedCreateActionHandler).not.toHaveBeenCalled();
+    });
+
     it('does not run the secondary lookup for a single alert id', async () => {
       const racGet = jest.fn().mockResolvedValue(readableAlert);
       const racFind = jest.fn();

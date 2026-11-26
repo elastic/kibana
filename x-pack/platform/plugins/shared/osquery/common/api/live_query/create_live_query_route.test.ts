@@ -38,6 +38,10 @@ describe('createLiveQueryRequestBodySchema alert_ids', () => {
     ).toBe(true);
   });
 
+  it.each([[['']], [['', 'alert-1']], [['alert-1', '']]])('rejects empty ids in %j', (alertIds) => {
+    expect(isLeft(createLiveQueryRequestBodySchema.decode({ alert_ids: alertIds }))).toBe(true);
+  });
+
   it('rejects non-string entries', () => {
     expect(isLeft(createLiveQueryRequestBodySchema.decode({ alert_ids: [1] }))).toBe(true);
   });
