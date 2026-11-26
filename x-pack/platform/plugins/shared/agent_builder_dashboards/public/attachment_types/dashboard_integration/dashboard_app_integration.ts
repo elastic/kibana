@@ -205,6 +205,8 @@ export const registerDashboardAppIntegration = ({
       attachment,
       dashboardId: api.savedObjectId$.getValue(),
       isStagedFromDashboard: (attachmentId) => stagedDashboards.isStagedFrom(attachmentId, api),
+      isStagedFromOtherDashboard: (attachmentId) =>
+        stagedDashboards.isStagedFromOtherDashboard(attachmentId, api),
     });
     // without write access, opening another dashboard would show unsaved changes that look saved
     if (!canWriteDashboards) {

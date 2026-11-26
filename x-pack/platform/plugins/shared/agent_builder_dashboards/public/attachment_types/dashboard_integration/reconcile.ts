@@ -105,16 +105,24 @@ export const reconcileStaging = ({
   (isNewConversation || isDraftStagedFromDashboard ? draftAttachmentId : undefined);
 
 /**
- * Whether an agent update belongs to the open dashboard: an unsaved dashboard takes every update,
- * a saved one those of its attachment, or of one it staged without an origin because it can't be
- * edited.
+ * Whether an agent update belongs to the open dashboard: a saved one takes those of its attachment,
+ * or of one it staged without an origin because it can't be edited. An unsaved one takes every
+ * update without an origin, except those of another dashboard staged for a panel pointer, so
+ * editing a pointed panel never replaces the unsaved dashboard.
  */
 export const isOpenDashboardUpdate = ({
   attachment: { id, origin },
   dashboardId,
   isStagedFromDashboard,
+  isStagedFromOtherDashboard,
 }: {
   attachment: DashboardAttachment;
   dashboardId: string | undefined;
   isStagedFromDashboard: (attachmentId: string) => boolean;
-}): boolean => !dashboardId || origin === dashboardId || (!origin && isStagedFromDashboard(id));
+  isStagedFromOtherDashboard: (attachmentId: string) => boolean;
+}): boolean => {
+  if (!dashboardId) {
+    return !origin && !isStagedFromOtherDashboard(id);
+  }
+  return origin === dashboardId || (!origin && isStagedFromDashboard(id));
+};

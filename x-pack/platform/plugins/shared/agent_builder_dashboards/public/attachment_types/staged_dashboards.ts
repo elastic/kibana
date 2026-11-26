@@ -15,6 +15,8 @@ import type { IdGenerator } from '.';
 export interface StagedDashboards {
   add: (attachmentId: string, api: DashboardApi) => void;
   isStagedFrom: (attachmentId: string, api: DashboardApi) => boolean;
+  /** Whether the attachment was staged from a dashboard other than this one, e.g. for a panel pointer. */
+  isStagedFromOtherDashboard: (attachmentId: string, api: DashboardApi) => boolean;
   /** Whether the attachment was staged from a saved dashboard, e.g. a copy of a managed one. */
   isStagedFromSavedDashboard: (attachmentId: string) => boolean;
   /** Records that a panel pointer staged in the chat input points at the attachment. */
@@ -58,6 +60,8 @@ export const createStagedDashboards = (): StagedDashboards => {
     },
     isStagedFrom: (attachmentId, api) =>
       dashboardKeyByAttachmentId.has(attachmentId) && isStagedFrom(attachmentId, api),
+    isStagedFromOtherDashboard: (attachmentId, api) =>
+      dashboardKeyByAttachmentId.has(attachmentId) && !isStagedFrom(attachmentId, api),
     isStagedFromSavedDashboard: (attachmentId) => stagedFromSavedDashboard.has(attachmentId),
     addPointerTarget: (attachmentId) => {
       pointerTargets.add(attachmentId);
