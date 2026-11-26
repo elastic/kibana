@@ -249,6 +249,39 @@ describe('patternsDataSourceProfileProvider', () => {
       expect(windowOpen).not.toHaveBeenCalled();
     });
 
+    it('says the search goes beyond the sample when the drilldown drops a trailing SAMPLE', async () => {
+      const updateESQLQuery = jest.fn();
+      const { action } = getViewMatchingResultsAction(updateESQLQuery);
+      const context = createContext({
+        query: {
+          esql: 'FROM logs-* | WHERE service.name == "checkout" | SAMPLE 0.1 | STATS Count = COUNT(*) BY Pattern = CATEGORIZE(message)',
+        },
+      });
+
+      expect(action.getDisplayName(context)).toBe(
+        'View matching results (searches beyond the sample)'
+      );
+      await action.execute(context);
+
+      const [newQuery] = updateESQLQuery.mock.calls[0];
+      expect(newQuery).toContain('WHERE service.name == "checkout"');
+      expect(newQuery).not.toContain('SAMPLE');
+    });
+
+    it('uses the regular label when the query has no sample or retains an earlier sample', () => {
+      const { action } = getViewMatchingResultsAction();
+      expect(action.getDisplayName(createContext())).toBe('View matching results');
+      expect(
+        action.getDisplayName(
+          createContext({
+            query: {
+              esql: 'FROM logs-* | SAMPLE 0.1 | WHERE service.name == "checkout" | STATS Count = COUNT(*) BY Pattern = CATEGORIZE(message)',
+            },
+          })
+        )
+      ).toBe('View matching results');
+    });
+
     it('opens the query in a new window when the host cannot update the query', async () => {
       const { action, services } = getViewMatchingResultsAction();
       jest.mocked(services.locator.getRedirectUrl).mockReturnValue('/app/discover#/matching');

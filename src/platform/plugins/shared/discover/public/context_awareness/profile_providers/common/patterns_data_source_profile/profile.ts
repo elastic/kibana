@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { Parser } from '@elastic/esql';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import { getCategorizeColumns, getSparklineColumns } from '@kbn/esql-utils';
 import { i18n } from '@kbn/i18n';
@@ -105,10 +106,22 @@ export const createPatternsDataSourceProfileProvider = (
           ...prev(),
           {
             id: 'patterns-action-view-docs-in-discover',
-            getDisplayName: () =>
-              i18n.translate('discover.docViews.patterns.cellAction.viewResults', {
+            getDisplayName: ({ query }) => {
+              if (isOfAggregateQueryType(query)) {
+                const { root } = Parser.parse(query.esql);
+                const statsIndex = root.commands.findLastIndex(({ name }) => name === 'stats');
+                if (root.commands[statsIndex - 1]?.name === 'sample') {
+                  return i18n.translate(
+                    'discover.docViews.patterns.cellAction.viewResultsBeyondSampleLabel',
+                    { defaultMessage: 'View matching results (searches beyond the sample)' }
+                  );
+                }
+              }
+
+              return i18n.translate('discover.docViews.patterns.cellAction.viewResults', {
                 defaultMessage: 'View matching results',
-              }),
+              });
+            },
             getIconType: () => 'productDiscover',
             isCompatible: (compatibleContext) => {
               const { query, field } = compatibleContext;
