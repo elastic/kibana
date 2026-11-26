@@ -48,7 +48,7 @@ import { isSafeMethod } from './route';
 import { KibanaSocket, resolveRawSocket } from './socket';
 import { patchRequest } from './patch_requests';
 import { RequestTimingImpl } from './timing';
-import { createRequestEvents } from './request_events';
+import { createRequestEventsFactory, type KibanaRequestEventsFactory } from './request_events';
 
 // patching at module load
 patchRequest();
@@ -69,7 +69,7 @@ interface KibanaRequestSharedSnapshot {
   readonly httpVersion: string;
   readonly protocol: HttpProtocol;
   readonly socket: IKibanaSocket;
-  readonly events: KibanaRequestEvents;
+  readonly eventsFactory: KibanaRequestEventsFactory;
 }
 
 interface KibanaRequestPhaseSnapshot {
@@ -134,6 +134,8 @@ export class CoreKibanaRequest<
   Method extends RouteMethod = any
 > implements KibanaRequest<Params, Query, Body, Method>
 {
+  readonly #eventsFactory: KibanaRequestEventsFactory;
+
   /** Creates a fresh lifecycle facade backed by request- and phase-scoped snapshots. */
   public static fromForLifecycle(
     request: Request,
@@ -206,7 +208,7 @@ export class CoreKibanaRequest<
       httpVersion: kibanaRequest.httpVersion,
       protocol: kibanaRequest.protocol,
       socket: kibanaRequest.socket,
-      events: kibanaRequest.events,
+      eventsFactory: kibanaRequest.#eventsFactory,
     };
     const updatedPhaseSnapshot = exactPhaseSnapshot ?? {
       phase: stage,
@@ -375,7 +377,7 @@ export class CoreKibanaRequest<
       this.httpVersion = sharedSnapshot.httpVersion;
       this.protocol = sharedSnapshot.protocol;
       this.socket = sharedSnapshot.socket;
-      this.events = sharedSnapshot.events;
+      this.#eventsFactory = sharedSnapshot.eventsFactory;
     } else {
       // Initialize timing state if not present
       if (appState && !appState.timingState) {
@@ -396,8 +398,9 @@ export class CoreKibanaRequest<
       this.socket = realRequest
         ? new KibanaSocket(resolveRawSocket(realRequest.raw.req))
         : KibanaSocket.getFakeSocket();
-      this.events = createRequestEvents(realRequest);
+      this.#eventsFactory = createRequestEventsFactory(realRequest);
     }
+    this.events = this.#eventsFactory.create();
 
     if (phaseSnapshot) {
       this.url = phaseSnapshot.url ?? request.url ?? new URL('https://fake-request/url');

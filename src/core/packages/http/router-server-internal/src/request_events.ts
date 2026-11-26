@@ -11,25 +11,41 @@ import type { Request } from '@hapi/hapi';
 import { defer, filter, first, fromEvent, NEVER, shareReplay } from 'rxjs';
 import type { KibanaRequestEvents } from '@kbn/core-http-server';
 
-class LazyKibanaRequestEvents implements KibanaRequestEvents {
-  public readonly aborted$ = defer(() => this.getStreams().aborted$);
-  public readonly completed$ = defer(() => this.getStreams().completed$);
+export interface KibanaRequestEventsFactory {
+  create(): KibanaRequestEvents;
+}
 
-  readonly #request: Request;
+class LazyKibanaRequestEventsFactory implements KibanaRequestEventsFactory {
+  readonly #request?: Request;
   #streams?: KibanaRequestEvents;
 
-  constructor(request: Request) {
+  constructor(request?: Request) {
     this.#request = request;
+  }
+
+  public create(): KibanaRequestEvents {
+    if (this.#request === undefined) {
+      return {
+        aborted$: NEVER,
+        completed$: NEVER,
+      };
+    }
+
+    return {
+      aborted$: defer(() => this.getStreams().aborted$),
+      completed$: defer(() => this.getStreams().completed$),
+    };
   }
 
   private getStreams(): KibanaRequestEvents {
     if (this.#streams === undefined) {
-      const completed$ = fromEvent<void>(this.#request.raw.res, 'close').pipe(
-        shareReplay(1),
-        first()
-      );
+      const request = this.#request;
+      if (request === undefined) {
+        throw new Error('Cannot create request event streams without a request.');
+      }
+      const completed$ = fromEvent<void>(request.raw.res, 'close').pipe(shareReplay(1), first());
       this.#streams = {
-        aborted$: completed$.pipe(filter(() => !isCompleted(this.#request))),
+        aborted$: completed$.pipe(filter(() => !isCompleted(request))),
         completed$,
       };
     }
@@ -38,13 +54,8 @@ class LazyKibanaRequestEvents implements KibanaRequestEvents {
   }
 }
 
-export const createRequestEvents = (request?: Request): KibanaRequestEvents =>
-  request === undefined
-    ? {
-        aborted$: NEVER,
-        completed$: NEVER,
-      }
-    : new LazyKibanaRequestEvents(request);
+export const createRequestEventsFactory = (request?: Request): KibanaRequestEventsFactory =>
+  new LazyKibanaRequestEventsFactory(request);
 
 const isCompleted = (request: Request): boolean => {
   const { res } = request.raw;

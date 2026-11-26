@@ -135,6 +135,7 @@ describe('CoreKibanaRequest', () => {
         });
 
         const first = CoreKibanaRequest.fromForLifecycle(request, 'preAuth');
+        first.events.completed$ = first.events.aborted$;
         const second = CoreKibanaRequest.fromForLifecycle(request, 'preAuth');
 
         expect(uuidMock).toHaveBeenCalledTimes(2);
@@ -142,7 +143,8 @@ describe('CoreKibanaRequest', () => {
         expect(second.headers).toBe(first.headers);
         expect(second.route).toBe(first.route);
         expect(second.socket).toBe(first.socket);
-        expect(second.events).toBe(first.events);
+        expect(second.events).not.toBe(first.events);
+        expect(second.events.completed$).not.toBe(first.events.completed$);
         expect(second.serverTiming).toBe(first.serverTiming);
         expect(second.params).not.toBe(first.params);
         expect(second.query).not.toBe(first.query);
@@ -171,7 +173,7 @@ describe('CoreKibanaRequest', () => {
         expect(postAuth.route).toBe(preAuth.route);
         expect(postAuth.url).toBe(preAuth.url);
         expect(postAuth.socket).toBe(preAuth.socket);
-        expect(postAuth.events).toBe(preAuth.events);
+        expect(postAuth.events).not.toBe(preAuth.events);
         expect(postAuth.serverTiming).toBe(preAuth.serverTiming);
       });
 
@@ -207,7 +209,7 @@ describe('CoreKibanaRequest', () => {
         expect(refreshed.headers).not.toBe(initial.headers);
         expect(refreshed.route).not.toBe(initial.route);
         expect(refreshed.socket).toBe(initial.socket);
-        expect(refreshed.events).toBe(initial.events);
+        expect(refreshed.events).not.toBe(initial.events);
         expect(refreshed.serverTiming).toBe(initial.serverTiming);
       });
 
@@ -259,7 +261,7 @@ describe('CoreKibanaRequest', () => {
         expect(postAuth.route).not.toBe(auth.route);
         expect(handler.route).toBe(postAuth.route);
         expect(handler.socket).toBe(preAuth.socket);
-        expect(handler.events).toBe(preAuth.events);
+        expect(handler.events).not.toBe(preAuth.events);
         expect(handler.serverTiming).toBe(preAuth.serverTiming);
       });
 

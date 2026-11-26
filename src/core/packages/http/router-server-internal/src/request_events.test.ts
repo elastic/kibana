@@ -10,14 +10,14 @@
 import { EventEmitter } from 'node:events';
 import { NEVER, of } from 'rxjs';
 import { hapiMocks } from '@kbn/hapi-mocks';
-import { createRequestEvents } from './request_events';
+import { createRequestEventsFactory } from './request_events';
 
-describe('createRequestEvents', () => {
+describe('createRequestEventsFactory', () => {
   it('exposes lazy streams as enumerable own properties without exposing backing state', () => {
     const request = hapiMocks.createRequest();
     const response = new EventEmitter();
     Object.assign(request.raw, { res: response });
-    const events = createRequestEvents(request);
+    const events = createRequestEventsFactory(request).create();
     const copiedEvents = { ...events };
     const completed = jest.fn();
 
@@ -32,9 +32,35 @@ describe('createRequestEvents', () => {
     expect(completed).toHaveBeenCalledTimes(1);
   });
 
+  it('shares the underlying streams without sharing mutable event containers', () => {
+    const request = hapiMocks.createRequest();
+    const response = new EventEmitter();
+    Object.assign(request.raw, { res: response });
+    const factory = createRequestEventsFactory(request);
+    const first = factory.create();
+    const second = factory.create();
+    const firstCompleted = jest.fn();
+    const secondCompleted = jest.fn();
+
+    first.completed$.subscribe(firstCompleted);
+    second.completed$.subscribe(secondCompleted);
+
+    expect(first).not.toBe(second);
+    expect(response.listenerCount('close')).toBe(1);
+
+    first.completed$ = NEVER;
+    expect(second.completed$).not.toBe(NEVER);
+
+    response.emit('close');
+
+    expect(firstCompleted).toHaveBeenCalledTimes(1);
+    expect(secondCompleted).toHaveBeenCalledTimes(1);
+  });
+
   it('returns an isolated event container for each fake request', () => {
-    const first = createRequestEvents();
-    const second = createRequestEvents();
+    const factory = createRequestEventsFactory();
+    const first = factory.create();
+    const second = factory.create();
 
     expect(first).not.toBe(second);
     expect(first.aborted$).toBe(NEVER);
