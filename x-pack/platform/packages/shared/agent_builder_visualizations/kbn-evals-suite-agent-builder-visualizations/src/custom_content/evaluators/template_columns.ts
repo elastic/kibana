@@ -39,8 +39,8 @@ export const createTemplateColumnsEvaluator = ({
   evaluate: async ({ output }) => {
     const { template } = output.after ?? {};
     const queries = getQueries(output.after);
-    if (!template || queries.length === 0) {
-      return skippedResult('The panel has no template and query to compare.');
+    if (!template) {
+      return skippedResult('The panel has no template to compare.');
     }
 
     const references = readColumnReferencesByQuery(template);

@@ -38,8 +38,12 @@ const isRowPick = (segment: unknown): boolean =>
 
 const isVariable = (segment: unknown): boolean => typeof segment === 'object' && segment !== null;
 
-const asColumn = (segment: unknown): string | undefined =>
-  typeof segment === 'string' && segment !== '' ? segment : undefined;
+const asColumn = (segment: unknown): string | undefined => {
+  if (typeof segment === 'number') {
+    return String(segment);
+  }
+  return typeof segment === 'string' && segment !== '' ? segment : undefined;
+};
 
 /** The query and column a variable path reads, if it starts from a query, its `max` or one of its rows. */
 const readReference = (

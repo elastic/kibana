@@ -433,6 +433,13 @@ describe('Custom Content Template Columns', () => {
     expect(result.metadata).toMatchObject({ missing: ['Error Rate'] });
   });
 
+  it('fails a template that reads a row by position', async () => {
+    const template = '{% for r in rows %}{{ r[0].value }}{% endfor %}';
+    const result = await run(withColumns(['host']), outputWith({ esql: 'FROM logs', template }));
+    expect(result).toMatchObject({ score: 0, label: 'unbound-columns' });
+    expect(result.metadata).toMatchObject({ missing: ['0'] });
+  });
+
   it('checks columns read with dot access too', async () => {
     const template = '{% for r in rows %}<p>{{ r.host.value }}</p>{% endfor %}';
     expect(
@@ -583,9 +590,16 @@ describe('Template columns of several queries', () => {
   it('does not take a key held in a variable for a column', () => {
     expect([
       ...readColumnReferencesByQuery(
-        '{% for row in rows %}{% for c in cols %}{{ row[c].value }}{{ max[c] }}{{ row[0] }}{% endfor %}{% endfor %}'
+        '{% for row in rows %}{% for c in cols %}{{ row[c].value }}{{ max[c] }}{% endfor %}{% endfor %}'
       ),
     ]).toEqual([[0, []]]);
+  });
+
+  it('reads a numeric key as a column, since a row is keyed by column name and not by position', () => {
+    const references = readColumnReferencesByQuery(
+      '{% for r in rows %}{{ r[0].value }}{% endfor %}{{ rows[0].host.value }}{{ max[1] }}'
+    );
+    expect([...(references.get(0) ?? [])].sort()).toEqual(['0', '1', 'host']);
   });
 
   it('does not read a query chosen by a variable', () => {
@@ -658,12 +672,31 @@ describe('Template columns of several queries', () => {
     expect(result.score).toBe(0.5);
   });
 
-  it('skips a static panel, whatever variables its template uses', async () => {
+  it('skips a static panel whose template only uses its own variables', async () => {
     const result = await run(
       withColumns({}),
-      outputWith({ template: '{% assign max = 5 %}{{ max }}{{ queries[1].rows.size }}' })
+      outputWith({ template: '{% assign max = 5 %}{% assign rows = "x" %}{{ max }}{{ rows }}' })
     );
     expect(result.score).toBeNull();
+    const reviewed = await run(
+      withColumns({}),
+      outputWith({ template: '{% assign max = 5 %}{{ max }}' })
+    );
+    expect(reviewed.score).toBeNull();
+  });
+
+  it('fails a static panel whose template reads an unassigned max or rows', async () => {
+    const result = await run(withColumns({}), outputWith({ template: '<p>{{ max }}</p>' }));
+    expect(result).toMatchObject({ score: 0, label: 'unbound-columns' });
+  });
+
+  it('fails a static panel whose template reads a query', async () => {
+    const result = await run(
+      withColumns({}),
+      outputWith({ template: '<p>{{ queries[1].rows.size }}</p>' })
+    );
+    expect(result).toMatchObject({ score: 0, label: 'unbound-columns' });
+    expect(result.explanation).toContain('queries[1]');
   });
 
   it('reports a second query that did not run', async () => {
