@@ -77,9 +77,8 @@ export const ModelSettings: React.FC = () => {
   const { canManage } = useInferenceCapabilities();
   const usageTracker = useUsageTracker();
   const deprecatedEndpointsMap: Map<string, EndpointDeprecationInfo> = useMemo(() => {
-    if (connectorsLoading || !connectors) return new Map();
     return new Map(
-      [...connectors, ...(decisionConnectors ?? [])]
+      [...(connectors ?? []), ...(decisionConnectors ?? [])]
         .filter((connector) => isModelDeprecated(connector.metadata))
         .map((connector) => [
           connector.connectorId,
@@ -90,7 +89,7 @@ export const ModelSettings: React.FC = () => {
           },
         ])
     );
-  }, [connectors, connectorsLoading, decisionConnectors]);
+  }, [connectors, decisionConnectors]);
   const [deprecatedAssignedModels, eolAssignedModels] = useMemo(() => {
     const eolModels = new Set<string>();
     const deprecatedModels = new Set<string>();

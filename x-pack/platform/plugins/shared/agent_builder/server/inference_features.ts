@@ -15,7 +15,6 @@ import {
   AGENT_BUILDER_PARENT_INFERENCE_FEATURE_ID,
   AGENT_BUILDER_RECOMMENDED_ENDPOINTS,
   AGENT_BUILDER_FAST_RECOMMENDED_ENDPOINTS,
-  AGENT_BUILDER_DECISION_RECOMMENDED_ENDPOINTS,
 } from '@kbn/agent-builder-common/constants';
 
 export const registerInferenceFeatures = ({
@@ -59,7 +58,7 @@ export const registerInferenceFeatures = ({
     featureName: 'Decision models',
     featureDescription: 'Models used for quick decisions',
     taskType: DECISION_TASK_TYPE,
-    recommendedEndpoints: AGENT_BUILDER_DECISION_RECOMMENDED_ENDPOINTS,
+    recommendedEndpoints: [],
     isTechPreview: true,
     ignoreGlobalDefault: true,
     visibilityCondition: { key: AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID, value: true },

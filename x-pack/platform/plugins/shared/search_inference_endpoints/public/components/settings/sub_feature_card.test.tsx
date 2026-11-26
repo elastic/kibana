@@ -659,6 +659,35 @@ describe('SubFeatureCard', () => {
       expect(screen.queryByTestId('endpoint-row-ep-2')).not.toBeInTheDocument();
     });
 
+    it('checks region policy against the models of the feature task type', () => {
+      mockUseConnectors.mockImplementation((taskType?: string) => ({
+        data: taskType === 'decision' ? regionDeniedConnectors : mockConnectors,
+      }));
+
+      render(
+        <Wrapper>
+          <SubFeatureCard
+            featureId={feature.featureId}
+            feature={{ ...feature, taskType: 'decision' }}
+            endpointIds={recommendedEndpointIds}
+            effectiveRecommendedEndpoints={recommendedEndpointIds}
+            onEndpointsChange={onEndpointsChange}
+            efforts={{}}
+            effectiveRecommendedEfforts={{}}
+            onEffortsChange={jest.fn()}
+            invalidEndpointIds={new Set()}
+            deprecatedEndpointsMap={new Map()}
+            hasSavedObject={false}
+            isFeatureDirty={false}
+            globalDefaultId={NO_DEFAULT_MODEL}
+          />
+        </Wrapper>
+      );
+
+      expect(screen.getByTestId('endpoint-row-ep-1')).toBeInTheDocument();
+      expect(screen.queryByTestId('endpoint-row-ep-2')).not.toBeInTheDocument();
+    });
+
     it('hides the global default row when the global model is denied by region policy', () => {
       renderRecommendedCard('ep-3');
 

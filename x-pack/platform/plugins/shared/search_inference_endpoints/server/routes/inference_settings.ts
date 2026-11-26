@@ -19,12 +19,11 @@ import {
 } from '../../common/constants';
 import type { InferenceSettingsAttributes, InferenceSettingsResponse } from '../../common/types';
 import { APIRoutes } from '../../common/types';
-import type { InferenceTaskType, RegisteredInferenceFeature } from '../types';
+import type { InferenceTaskType } from '../types';
 import { inferenceSettingsSchemaV2 } from '../saved_objects/schema/v2';
 import type { InferenceFeatureRegistry } from '../inference_feature_registry';
 import { resolveFeatureEndpoints } from '../inference_endpoints';
 import { errorHandler } from '../utils/error_handler';
-import { getVisibleFeatures } from '../lib/get_visible_features';
 import {
   parseInferenceSettingsSO,
   validateEndpointParameters,
@@ -45,12 +44,12 @@ interface ResolvedEndpointId {
 const resolveAllEndpointIds = (
   settings: InferenceSettingsAttributes,
   featureRegistry: InferenceFeatureRegistry,
-  features: RegisteredInferenceFeature[],
   logger: Logger
 ): ResolvedEndpointId[] => {
   const soFeaturesMap = new Map(settings.features.map((f) => [f.feature_id, f]));
 
-  const resolvedEndpointIds = features
+  const resolvedEndpointIds = featureRegistry
+    .getAll()
     .filter((f) => f.parentFeatureId !== undefined)
     .flatMap(({ featureId, taskType }) =>
       resolveFeatureEndpoints(featureRegistry, soFeaturesMap, featureId, logger).endpoints.map(
@@ -139,18 +138,7 @@ export const defineInferenceSettingsRoutes = ({
 
         if (settingsBody.data.features.length > 0) {
           try {
-            // only the features on the page: a hidden one's models would be warned about unseen
-            const visibleFeatures = await getVisibleFeatures(
-              featureRegistry,
-              coreContext.uiSettings.client,
-              logger
-            );
-            const ids = resolveAllEndpointIds(
-              settingsBody.data,
-              featureRegistry,
-              visibleFeatures,
-              logger
-            );
+            const ids = resolveAllEndpointIds(settingsBody.data, featureRegistry, logger);
             invalidEndpoints = await findInvalidEndpoints(ids, (id, taskType) =>
               getConnectorById(id, request, taskType)
             );
