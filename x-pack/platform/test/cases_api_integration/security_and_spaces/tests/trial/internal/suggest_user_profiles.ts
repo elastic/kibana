@@ -12,6 +12,7 @@ import {
   superUser,
   obsOnly,
   noCasesPrivilegesSpace1,
+  secOnlyReadCreateComment,
 } from '../../../../common/lib/authentication/users';
 import type { Role, User } from '../../../../common/lib/authentication/types';
 import { createUsersAndRoles, deleteUsersAndRoles } from '../../../../common/lib/authentication';
@@ -20,6 +21,13 @@ export default function ({ getService }: FtrProviderContext) {
   const supertestWithoutAuth = getService('supertestWithoutAuth');
 
   describe('suggest_user_profiles', () => {
+    before(async () => {
+      await loginUsers({
+        supertest: supertestWithoutAuth,
+        users: [secOnlyReadCreateComment],
+      });
+    });
+
     it('returns no suggestions when the owner is an empty array', async () => {
       const profiles = await suggestUserProfiles({
         supertest: supertestWithoutAuth,
