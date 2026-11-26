@@ -192,7 +192,9 @@ function throwApiError(err: unknown, fallback: string): never {
     const detail = body?.error && body?.message ? `${body.error}: ${body.message}` : body?.message;
     const msg = detail ? `${detail} (HTTP ${status})` : `${fallback} (HTTP ${status})`;
     const wrapped = new Error(msg);
-    // Preserve structured fields for callers that inspect the error
+    // Preserve response so the Actions executor can read HTTP status and retry headers.
+    // The executor reads error.response (AxiosError shape), not top-level status / retryAfter.
+    (wrapped as Error & { response: typeof response }).response = response;
     (wrapped as Error & { status: number }).status = status;
     if (headers?.['retry-after']) {
       (wrapped as Error & { retryAfter: string }).retryAfter = headers['retry-after'] as string;
@@ -201,6 +203,83 @@ function throwApiError(err: unknown, fallback: string): never {
   }
   const original = err instanceof Error ? err.message : String(err);
   throw new Error(`${fallback}: ${original}`);
+}
+
+// ---------------------------------------------------------------------------
+// Detection run polling helper
+// ---------------------------------------------------------------------------
+
+/**
+ * Polls a Sophos detection run until it reaches a terminal state.
+ *
+ * Returns the terminal state string ('succeeded', 'failed', etc.) on completion.
+ * Returns `{ runId, state: 'pending' }` if the 90-second client-side budget expires
+ * before the run reaches a terminal state — the caller may pass the same runId back
+ * to resume polling. 'pending' is a client-side budget marker; it differs from the
+ * Sophos server-side 'timedOut' state, which the run can also reach on its own and
+ * which causes a thrown error.
+ *
+ * skipInitialSleep: when true, the first poll fires immediately (used for the
+ * continuation path where the run is likely already complete).
+ */
+interface DetectionPollPending {
+  runId: string;
+  state: 'pending';
+}
+
+async function pollDetectionRunToCompletion(
+  ctx: ActionContext,
+  runId: string,
+  tenantId: string,
+  dataRegion: string,
+  skipInitialSleep = false
+): Promise<string | DetectionPollPending> {
+  const TERMINAL = new Set(['succeeded', 'canceled', 'failed', 'notAvailable', 'timedOut']);
+  const pollTimeoutMs = 90_000;
+  const pollIntervalMs = 5_000;
+  // Minimum remaining budget required to attempt a poll request.
+  // Prevents passing timeout: 0 to Axios (which means "no timeout") and avoids
+  // raw "timeout of Nms exceeded" Axios errors from a 1-few ms budget.
+  const MIN_POLL_TIMEOUT_MS = 500;
+  const deadline = Date.now() + pollTimeoutMs;
+  // Treat client timeout 0 (Axios "disabled" / xpack.actions.responseTimeout: 0ms) as no cap.
+  // A zero client timeout makes Math.min(0, afterSleep) = 0, disabling the Axios timer and
+  // letting a stalled request outlive the 90-second poll budget.
+  const clientCap = ctx.client.defaults?.timeout || undefined;
+
+  let runState = '';
+  let isFirstIter = true;
+
+  while (!TERMINAL.has(runState)) {
+    const remaining = deadline - Date.now();
+    if (remaining <= 0) return { runId, state: 'pending' };
+
+    if (!isFirstIter || !skipInitialSleep) {
+      await sleep(Math.min(pollIntervalMs, remaining));
+    }
+    isFirstIter = false;
+
+    const afterSleep = deadline - Date.now();
+    if (afterSleep < MIN_POLL_TIMEOUT_MS) return { runId, state: 'pending' };
+
+    try {
+      const pollRes = await request<{ result?: string; status?: string }>(
+        ctx,
+        'GET',
+        `/detections/v1/queries/detections/${encodeURIComponent(runId)}`,
+        {
+          tenantId,
+          dataRegion,
+          timeout: clientCap !== undefined ? Math.min(clientCap, afterSleep) : afterSleep,
+        }
+      );
+      runState = pollRes?.result ?? pollRes?.status ?? '';
+    } catch (err) {
+      throwApiError(err, `Sophos Central listDetections: failed to poll run ${runId}`);
+    }
+  }
+
+  return runState;
 }
 
 // ---------------------------------------------------------------------------
@@ -236,10 +315,9 @@ export const SophosCentral: ConnectorSpec = {
               helpText: i18n.translate('connectorSpecs.sophosCentral.auth.clientIdHelpText', {
                 defaultMessage:
                   'Sophos Central API client ID. Create in Sophos Central under ' +
-                  'My Products > General Settings > API Credentials > Add Credential. ' +
-                  'The credential needs alerts:read, alerts:action, endpoint-state:read, ' +
-                  'endpoint-state:update, and detections.queries.detections:create scopes. ' +
-                  'Only tenant-level credentials are supported.',
+                  'My Products > General Settings > API Credentials Management > Add Credential. ' +
+                  'No scope or role selection is required; the credential inherits full API access ' +
+                  'from the creating admin\'s role. Only tenant-level credentials are supported.',
               }),
             },
           },
@@ -287,9 +365,11 @@ export const SophosCentral: ConnectorSpec = {
     '',
     '### XDR detections (requires XDR licence)',
     '- Call `listDetections` to query XDR detections. The connector submits the query asynchronously, ' +
-      'polls until complete (up to 90 s), and returns paginated results with a `runId`.',
+      'polls until complete (up to 90 s), and returns paginated results with a `runId`. ' +
+      'If the 90-second poll budget expires, the connector returns `{ runId, state: "pending" }` — ' +
+      'pass that `runId` back to resume polling once the run completes.',
     '- To fetch the next page, call `listDetections` again with the same `runId` and increment `page`. ' +
-      'This reuses the original query run without resubmitting.',
+      'The connector checks the run is complete before fetching results.',
     '',
     '### Pagination',
     '- `listAlerts` and `listEndpoints` use cursor pagination: pass the returned `pages.nextKey` as `pageFromKey` to get the next page.',
@@ -741,9 +821,12 @@ export const SophosCentral: ConnectorSpec = {
         'Query XDR detections for the Sophos Central tenant (requires XDR licence). ' +
         'On the first call the connector submits the query, polls until it completes ' +
         '(up to 90 s), and returns the first page of results along with `runId`. ' +
+        'If the 90-second poll budget expires before the run completes, the connector ' +
+        'returns `{ runId, state: "pending" }` instead of results — pass that `runId` ' +
+        'back to resume polling and retrieve results once the run finishes. ' +
         'To fetch subsequent pages, pass the same `runId` with the desired `page` and ' +
-        'the same `pageSize` used on the first call — the connector skips submission ' +
-        'and returns results directly.',
+        'the same `pageSize` used on the first call — the connector checks the run is ' +
+        'complete before fetching results.',
       input: ListDetectionsInputSchema,
       handler: async (ctx, input: ListDetectionsInput) => {
         const { tenantId, dataRegion } = await whoami(ctx);
@@ -787,47 +870,34 @@ export const SophosCentral: ConnectorSpec = {
             );
           }
 
-          // Step 2: poll until terminal state
-          const TERMINAL = new Set(['succeeded', 'canceled', 'failed', 'notAvailable', 'timedOut']);
-          const pollTimeoutMs = 90_000;
-          const pollIntervalMs = 5_000;
-          // Minimum remaining budget required to attempt a poll request.
-          // Prevents passing timeout: 0 to Axios (which means "no timeout") and avoids
-          // raw "timeout of Nms exceeded" Axios errors from a 1-few ms budget.
-          const MIN_POLL_TIMEOUT_MS = 500;
-          const deadline = Date.now() + pollTimeoutMs;
-
-          let runState = '';
-          while (!TERMINAL.has(runState)) {
-            const remaining = deadline - Date.now();
-            if (remaining <= 0) {
-              return { runId, state: 'timedOut' };
-            }
-            await sleep(Math.min(pollIntervalMs, remaining));
-            const afterSleep = deadline - Date.now();
-            if (afterSleep < MIN_POLL_TIMEOUT_MS) {
-              return { runId, state: 'timedOut' };
-            }
-            try {
-              const pollRes = await request<{ result?: string; status?: string }>(
-                ctx,
-                'GET',
-                `/detections/v1/queries/detections/${encodeURIComponent(runId)}`,
-                {
-                  tenantId,
-                  dataRegion,
-                  timeout: Math.min(ctx.client.defaults?.timeout ?? 30_000, afterSleep),
-                }
-              );
-              runState = pollRes?.result ?? pollRes?.status ?? '';
-            } catch (err) {
-              throwApiError(err, `Sophos Central listDetections: failed to poll run ${runId}`);
-            }
+          // Step 2: poll until terminal state (sleeps before the first probe)
+          const pollResult = await pollDetectionRunToCompletion(ctx, runId, tenantId, dataRegion);
+          if (typeof pollResult !== 'string') {
+            // Client-side budget expired; return pending so the caller can resume with the same runId
+            return pollResult;
           }
-
-          if (runState !== 'succeeded') {
+          if (pollResult !== 'succeeded') {
             throw new Error(
-              `Sophos Central listDetections: query run ended with state "${runState}"`
+              `Sophos Central listDetections: query run ended with state "${pollResult}"`
+            );
+          }
+        } else {
+          // Continuation path: the caller is either paginating a completed run or resuming after a
+          // pending timeout. Poll to confirm the run is in a succeeded state before fetching results
+          // (skips the initial sleep — the run is likely already complete for the pagination case).
+          const pollResult = await pollDetectionRunToCompletion(
+            ctx,
+            runId,
+            tenantId,
+            dataRegion,
+            true // skipInitialSleep
+          );
+          if (typeof pollResult !== 'string') {
+            return pollResult;
+          }
+          if (pollResult !== 'succeeded') {
+            throw new Error(
+              `Sophos Central listDetections: query run ended with state "${pollResult}"`
             );
           }
         }

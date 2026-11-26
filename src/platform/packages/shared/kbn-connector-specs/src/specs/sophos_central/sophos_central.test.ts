@@ -1227,13 +1227,18 @@ describe('listDetections', () => {
     );
   });
 
-  it('skips submit and poll when runId is provided (pagination shortcut)', async () => {
+  it('polls to confirm run is complete when runId is provided, then fetches results', async () => {
+    // The continuation path (pagination or resume after pending) always polls once first to
+    // confirm the run succeeded before fetching results. This prevents fetching from a run
+    // that is still in progress (e.g. when resuming after a pending timeout).
     const client = makeClient();
     client.get.mockResolvedValue({
       data: { id: TENANT_ID, idType: 'tenant', apiHosts: { dataRegion: DATA_REGION } },
     });
-    // Only the results call — no submit, no poll
-    client.request.mockResolvedValueOnce({ data: { items: [{ id: 'det-2' }] } });
+    // poll (immediate, no sleep) → succeeded; then results
+    client.request
+      .mockResolvedValueOnce({ data: { result: 'succeeded' } }) // poll GET
+      .mockResolvedValueOnce({ data: { items: [{ id: 'det-2' }] } }); // results GET
 
     const ctx = makeCtx(client);
     const result = await SophosCentral.actions.listDetections.handler(ctx as never, {
@@ -1242,16 +1247,23 @@ describe('listDetections', () => {
       pageSize: 10,
     });
 
-    // Only one request call (the results GET), no submit POST or poll GET
-    expect(client.request).toHaveBeenCalledTimes(1);
-    expect(client.request).toHaveBeenCalledWith(
+    // Two request calls: poll GET then results GET
+    expect(client.request).toHaveBeenCalledTimes(2);
+    expect(client.request).toHaveBeenNthCalledWith(
+      1,
+      expect.objectContaining({
+        method: 'GET',
+        url: `${DATA_REGION}/detections/v1/queries/detections/${RUN_ID}`,
+      })
+    );
+    expect(client.request).toHaveBeenNthCalledWith(
+      2,
       expect.objectContaining({
         method: 'GET',
         url: `${DATA_REGION}/detections/v1/queries/detections/${RUN_ID}/results`,
         params: expect.objectContaining({ page: 2, pageSize: 10 }),
       })
     );
-    // runId is returned in the result
     expect(result).toEqual({ items: [{ id: 'det-2' }], runId: RUN_ID });
   });
 
@@ -1320,12 +1332,14 @@ describe('listDetections', () => {
     client.get.mockResolvedValue({
       data: { id: TENANT_ID, idType: 'tenant', apiHosts: { dataRegion: DATA_REGION } },
     });
-    // Caller passes a stale runId — results page returns 404
-    client.request.mockRejectedValueOnce(
-      Object.assign(new Error('Not Found'), {
-        response: { status: 404, data: { message: 'Run not found' } },
-      })
-    );
+    // Caller passes a runId whose run succeeded, but the results page has expired (404)
+    client.request
+      .mockResolvedValueOnce({ data: { result: 'succeeded' } }) // poll GET succeeds
+      .mockRejectedValueOnce(
+        Object.assign(new Error('Not Found'), {
+          response: { status: 404, data: { message: 'Run not found' } },
+        })
+      ); // results GET returns 404
     const ctx = makeCtx(client);
 
     await expect(
@@ -1333,7 +1347,11 @@ describe('listDetections', () => {
     ).rejects.toThrow('Run not found');
   });
 
-  it('returns runId with state timedOut when the polling deadline expires before a terminal state', async () => {
+  it('returns runId with state "pending" when the polling deadline expires before a terminal state', async () => {
+    // The client-side 90-second poll budget expired. The connector returns
+    // { runId, state: 'pending' } so the caller can pass that runId back to resume.
+    // 'pending' distinguishes this from the Sophos server-side 'timedOut' terminal state
+    // (which throws), so callers can tell the two apart.
     jest.useFakeTimers();
     const client = makeClient();
     client.get.mockResolvedValue({
@@ -1352,7 +1370,33 @@ describe('listDetections', () => {
     await jest.advanceTimersByTimeAsync(90_001);
     const result = await resultPromise;
 
-    expect(result).toMatchObject({ runId: RUN_ID, state: 'timedOut' });
+    expect(result).toMatchObject({ runId: RUN_ID, state: 'pending' });
+  });
+
+  it('uses the remaining poll budget as the per-request timeout when Kibana HTTP timeout is 0 (disabled)', async () => {
+    // xpack.actions.responseTimeout: 0ms sets client.defaults.timeout to 0, which Axios
+    // interprets as "no timeout". Passing Math.min(0, afterSleep) = 0 to Axios would let a
+    // stalled poll request outlive the 90-second budget. The helper must treat 0 as "no cap".
+    jest.useFakeTimers();
+    const client = makeClient();
+    // Simulate responseTimeout: 0ms
+    (client as unknown as { defaults: { timeout: number } }).defaults = { timeout: 0 };
+    client.get.mockResolvedValue({
+      data: { id: TENANT_ID, idType: 'tenant', apiHosts: { dataRegion: DATA_REGION } },
+    });
+    client.request
+      .mockResolvedValueOnce({ data: { runId: RUN_ID } }) // submit
+      .mockResolvedValueOnce({ data: { result: 'succeeded' } }) // poll
+      .mockResolvedValueOnce({ data: { items: [] } }); // results
+
+    const ctx = makeCtx(client);
+    const resultPromise = SophosCentral.actions.listDetections.handler(ctx as never, {});
+    await jest.runAllTimersAsync();
+    await resultPromise;
+
+    // The poll request must NOT use timeout: 0 — it should use the remaining budget (> 0)
+    const pollCall = client.request.mock.calls[1][0];
+    expect(pollCall.timeout).toBeGreaterThan(0);
   });
 });
 
@@ -1407,5 +1451,34 @@ describe('error handling', () => {
     await expect(
       SophosCentral.actions.getEndpoint.handler(ctx as never, { endpointId: ENDPOINT_ID })
     ).rejects.toThrow(`Failed to get endpoint ${ENDPOINT_ID} (HTTP 500)`);
+  });
+
+  it('attaches the original response to the thrown error so the Actions executor can read HTTP status and retry headers', async () => {
+    // The Actions executor reads error.response (AxiosError shape), not the top-level status /
+    // retryAfter fields written by throwApiError. A Sophos 429 with Retry-After must keep
+    // its wait guidance so the executor can back off correctly.
+    const client = makeClient();
+    stubWhoami(client);
+    const retryResponse = {
+      status: 429,
+      headers: { 'retry-after': '30' },
+      data: { message: 'Too Many Requests' },
+    };
+    client.request.mockRejectedValue(
+      Object.assign(new Error('Too Many Requests'), { response: retryResponse })
+    );
+    const ctx = makeCtx(client);
+
+    let caughtError: Error & { response?: unknown } = new Error();
+    try {
+      await SophosCentral.actions.listAlerts.handler(ctx as never, {});
+    } catch (err) {
+      caughtError = err as Error & { response?: unknown };
+    }
+
+    // The thrown error must carry .response so the executor can inspect status and headers
+    expect(caughtError.response).toBeDefined();
+    expect((caughtError.response as typeof retryResponse).status).toBe(429);
+    expect((caughtError.response as typeof retryResponse).headers['retry-after']).toBe('30');
   });
 });

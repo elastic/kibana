@@ -24,7 +24,7 @@ You can create connectors in **{{stack-manage-app}} → {{connectors-ui}}**.
 The credential is created by a Sophos Central **Super Admin**. No scope or role selection is required during creation — the resulting credential inherits full API access from the creating admin's role.
 
 1. Sign in to [Sophos Central Admin](https://central.sophos.com).
-2. Go to **Global Settings → API Credentials** (the navigation label may vary by console version; look for **API Credentials** under your account or settings menu).
+2. Go to **My Products → General Settings → API Credentials Management**, or **Global Settings → API Credentials** in some console versions.
 3. Select **Add Credential**, enter a name, and click **Add**.
 4. Copy the **Client ID** and **Client Secret**.
 
@@ -33,7 +33,7 @@ The credential is created by a Sophos Central **Super Admin**. No scope or role 
 Sophos Central connectors have the following configuration properties:
 
 Authentication
-:   Uses **OAuth 2.0 Client Credentials**. Provide the Client ID and Client Secret obtained from **Global Settings → API Credentials** in Sophos Central. The credential must be created by a Super Admin and must be a tenant-level credential. Partner or organization credentials are rejected.
+:   Uses **OAuth 2.0 Client Credentials**. Provide the Client ID and Client Secret obtained from **My Products → General Settings → API Credentials Management** in Sophos Central. The credential must be created by a Super Admin and must be a tenant-level credential. Partner or organization credentials are rejected.
 
     If you are using the [`xpack.actions.allowedHosts`](/reference/configuration-reference/alerting-settings.md#action-settings) setting, make sure all three hosts are added to the allowed hosts: `id.sophos.com` (OAuth token endpoint), `api.central.sophos.com` (global API / whoami), and the regional data-center host returned by whoami (for example `api-us03.central.sophos.com`).
 
@@ -89,7 +89,7 @@ The Sophos Central connector exposes the following actions:
 :   Remove a blocked item from the tenant's global blocked list by its item ID. Deletion is permanent.
 
 `listDetections`
-:   Query XDR detections (requires XDR license). On the first call the connector submits the query via `POST /detections/v1/queries/detections`, polls until it completes (up to 90 seconds), and returns the first page of results along with `runId`. To fetch subsequent pages, pass the same `runId` with the desired `page` number and the same `pageSize` used on the first call — the connector skips submission and returns results directly. Using a different `pageSize` on a continuation call changes the server's page boundaries and may cause rows to be skipped or duplicated.
+:   Query XDR detections (requires XDR license). On the first call the connector submits the query via `POST /detections/v1/queries/detections`, polls until it completes (up to 90 seconds), and returns the first page of results along with `runId`. If the 90-second poll budget expires before the run completes, the connector returns `{ runId, state: "pending" }` instead of results — pass that `runId` back to resume polling and retrieve results once the run finishes. To fetch subsequent pages, pass the same `runId` with the desired `page` number and the same `pageSize` used on the first call — the connector checks the run is complete before fetching results. Using a different `pageSize` on a continuation call changes the server's page boundaries and may cause rows to be skipped or duplicated.
 
 ## Test connectors [sophos-central-connector-test]
 
