@@ -33,6 +33,14 @@ describe('riskEngineCleanupRoute', () => {
       path: RISK_ENGINE_CLEANUP_URL,
     });
 
+  const privilegeCheck = (granted: boolean) => ({
+    username: 'test-user',
+    has_all_requested: granted,
+    cluster: {},
+    index: {},
+    application: {},
+  });
+
   beforeEach(() => {
     jest.clearAllMocks();
     server = serverMock.create();
@@ -41,8 +49,13 @@ describe('riskEngineCleanupRoute', () => {
     context = requestContextMock.convertContext(tools.context);
     clients.riskScoreDataClient.tearDown.mockResolvedValue([]);
     (deleteSavedObjects as jest.Mock).mockResolvedValue(undefined);
-    clients.core.elasticsearch.client.asInternalUser.updateByQuery.mockResolvedValue({
+    clients.core.elasticsearch.client.asCurrentUser.security.hasPrivileges.mockResolvedValue(
+      privilegeCheck(true)
+    );
+    clients.core.elasticsearch.client.asCurrentUser.updateByQuery.mockResolvedValue({
       version_conflicts: 0,
+      failures: [],
+      timed_out: false,
     });
     clients.core.elasticsearch.client.asCurrentUser.indices.delete.mockImplementation(
       async (params) => {
@@ -111,11 +124,12 @@ describe('riskEngineCleanupRoute', () => {
       clients.core.elasticsearch.client.asInternalUser.ingest.deletePipeline
     ).not.toHaveBeenCalled();
     expect(removeIfExists).toHaveBeenCalledWith('risk-score:default');
-    expect(clients.core.elasticsearch.client.asInternalUser.updateByQuery).toHaveBeenCalledWith(
+    expect(clients.core.elasticsearch.client.asCurrentUser.updateByQuery).toHaveBeenCalledWith(
       expect.objectContaining({
         index: getEntitiesAlias(ENTITY_LATEST, 'default'),
       })
     );
+    expect(clients.core.elasticsearch.client.asInternalUser.updateByQuery).not.toHaveBeenCalled();
   });
 
   it('returns 400 and does not delete anything when Task Manager is unavailable', async () => {
@@ -134,9 +148,9 @@ describe('riskEngineCleanupRoute', () => {
     expect(deleteSavedObjects).not.toHaveBeenCalled();
   });
 
-  it('does not remove the maintainer task when the caller cannot delete the risk score index', async () => {
-    clients.core.elasticsearch.client.asCurrentUser.indices.delete.mockRejectedValueOnce(
-      Object.assign(new Error('delete_index denied'), { meta: { statusCode: 403 } })
+  it('does not stop scoring when the caller cannot write entity documents', async () => {
+    clients.core.elasticsearch.client.asCurrentUser.security.hasPrivileges.mockResolvedValue(
+      privilegeCheck(false)
     );
 
     const response = await server.inject(buildRequest(), context);
@@ -144,18 +158,41 @@ describe('riskEngineCleanupRoute', () => {
     expect(response.status).toEqual(500);
     expect(removeIfExists).not.toHaveBeenCalled();
     expect(deleteSavedObjects).not.toHaveBeenCalled();
+    expect(clients.core.elasticsearch.client.asCurrentUser.updateByQuery).not.toHaveBeenCalled();
   });
 
-  it('does not stop scoring when entity risk fields stay conflicted', async () => {
-    clients.core.elasticsearch.client.asInternalUser.updateByQuery.mockResolvedValue({
+  it('does not report success when entity risk fields stay conflicted', async () => {
+    clients.core.elasticsearch.client.asCurrentUser.updateByQuery.mockResolvedValue({
       version_conflicts: 2,
+      failures: [],
+      timed_out: false,
     });
 
     const response = await server.inject(buildRequest(), context);
 
     expect(response.status).toEqual(500);
-    expect(clients.core.elasticsearch.client.asInternalUser.updateByQuery).toHaveBeenCalledTimes(2);
-    expect(removeIfExists).not.toHaveBeenCalled();
+    expect(clients.core.elasticsearch.client.asCurrentUser.updateByQuery).toHaveBeenCalledTimes(2);
+    expect(deleteSavedObjects).not.toHaveBeenCalled();
+  });
+
+  it('does not report success when the entity risk update returns failures', async () => {
+    clients.core.elasticsearch.client.asCurrentUser.updateByQuery.mockResolvedValue({
+      version_conflicts: 0,
+      failures: [
+        {
+          cause: { type: 'version_conflict_engine_exception', reason: 'conflict' },
+          id: 'entity-1',
+          index: 'entities-latest-default',
+          status: 409,
+        },
+      ],
+      timed_out: false,
+    });
+
+    const response = await server.inject(buildRequest(), context);
+
+    expect(response.status).toEqual(500);
+    expect(clients.core.elasticsearch.client.asCurrentUser.updateByQuery).toHaveBeenCalledTimes(2);
     expect(deleteSavedObjects).not.toHaveBeenCalled();
   });
 
