@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { css } from '@emotion/react';
 import {
   EuiCodeBlock,
   EuiLink,
@@ -21,6 +22,13 @@ import {
 export const MARKDOWN_BLOCK_SPACER_CLASS_NAME = 'agentBuilderMarkdownBlockSpacer';
 
 const BlockSpacer = () => <EuiSpacer size="m" className={MARKDOWN_BLOCK_SPACER_CLASS_NAME} />;
+
+/** About 80 characters of body text a line. */
+const PROSE_MAX_INLINE_SIZE = '40em';
+
+const proseStyles = css`
+  max-inline-size: ${PROSE_MAX_INLINE_SIZE};
+`;
 
 type ConversationMarkdownComponents = ReturnType<
   typeof getDefaultEuiMarkdownProcessingPlugins
@@ -99,3 +107,13 @@ export const createConversationMarkdownComponents = ({
       </EuiTableRowCell>
     ),
   } satisfies ConversationMarkdownComponents);
+
+/**
+ * Renderers that keep an agent response's prose to a readable line length. Tables, code blocks
+ * and attachments are not listed, so they keep the full width.
+ */
+export const responseProseComponents = {
+  p: (props: React.HTMLAttributes<HTMLParagraphElement>) => <p {...props} css={proseStyles} />,
+  ul: (props: React.HTMLAttributes<HTMLUListElement>) => <ul {...props} css={proseStyles} />,
+  ol: (props: React.OlHTMLAttributes<HTMLOListElement>) => <ol {...props} css={proseStyles} />,
+} satisfies ConversationMarkdownComponents;

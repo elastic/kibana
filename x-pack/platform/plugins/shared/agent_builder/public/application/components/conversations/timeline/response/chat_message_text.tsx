@@ -38,6 +38,7 @@ import {
   renderTagParser,
   createRenderRenderer,
   createConversationMarkdownComponents,
+  responseProseComponents,
 } from './markdown_plugins';
 import { useMarkdownContainerStyles } from './use_markdown_container_styles';
 import { useStepsFromSavedTurns } from '../../../../hooks/use_steps_from_saved_turns';
@@ -150,6 +151,7 @@ export function ChatMessageText({
     rehypeToReactOptions.components = {
       ...rehypeToReactOptions.components,
       ...createConversationMarkdownComponents({ onLinkClick: handleLinkClick }),
+      ...responseProseComponents,
       cursor: Cursor,
       [visualizationElement.tagName]: visualizationRenderer,
       [renderElement.tagName]: renderRenderer,

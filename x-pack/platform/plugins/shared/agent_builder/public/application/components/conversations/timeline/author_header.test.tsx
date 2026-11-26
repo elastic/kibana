@@ -75,6 +75,22 @@ describe('AuthorHeader', () => {
     expect(container.textContent).toMatch(/^Jane Doe·Text Note·/);
   });
 
+  it('shows the time by default', () => {
+    render(<AuthorHeader startedAt={startedAt} name="Custom Agent" />);
+
+    expect(screen.getByTestId('agentBuilderAuthorHeaderTime')).toHaveStyle({ opacity: '1' });
+  });
+
+  it('keeps the time and its separator out of sight when the time is not wanted yet', () => {
+    render(<AuthorHeader startedAt={startedAt} name="Custom Agent" isTimeVisible={false} />);
+
+    const time = screen.getByTestId('agentBuilderAuthorHeaderTime');
+
+    expect(time).toHaveStyle({ opacity: '0' });
+    expect(time).toHaveTextContent('·');
+    expect(screen.getByText('Custom Agent')).not.toHaveTextContent('·');
+  });
+
   it('does not render the agent badge for user authors', () => {
     render(<AuthorHeader startedAt={startedAt} name="Jane Doe" />);
 

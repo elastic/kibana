@@ -64,7 +64,7 @@ const AgentBadge: React.FC = () => {
   );
 };
 
-const AuthorOrigin: React.FC<{ origin: ConversationRoundOrigin }> = ({ origin }) => {
+export const AuthorOrigin: React.FC<{ origin: ConversationRoundOrigin }> = ({ origin }) => {
   const euiThemeContext = useEuiTheme();
 
   return (
@@ -85,7 +85,7 @@ const AuthorLabel: React.FC<{ label: string }> = ({ label }) => {
   return <span css={authorDetailItemStyles(euiThemeContext)}>{label}</span>;
 };
 
-const AuthorTime: React.FC<{ startedAt: string }> = ({ startedAt }) => {
+export const AuthorTime: React.FC<{ startedAt: string }> = ({ startedAt }) => {
   const euiThemeContext = useEuiTheme();
   const m = moment(startedAt).locale(i18n.getLocale());
   const displayTime = m.format('LT');
@@ -106,6 +106,8 @@ interface AuthorHeaderProps {
   label?: string;
   origin?: ConversationRoundOrigin;
   startedAt: string;
+  /** Set to false to keep the time out of sight until it is wanted, for example on hover. */
+  isTimeVisible?: boolean;
 }
 
 export const AuthorHeader: React.FC<AuthorHeaderProps> = ({
@@ -114,8 +116,27 @@ export const AuthorHeader: React.FC<AuthorHeaderProps> = ({
   label,
   origin,
   startedAt,
+  isTimeVisible = true,
 }) => {
   const { euiTheme } = useEuiTheme();
+  const hasAttribution = Boolean(name || label || origin);
+
+  const itemsStyles = css`
+    display: inline-flex;
+    align-items: center;
+    gap: ${euiTheme.size.xs};
+    flex-wrap: wrap;
+  `;
+
+  // Hidden, not removed, so the header keeps its height and the time stays reachable by keyboard.
+  const timeStyles = css`
+    opacity: ${isTimeVisible ? 1 : 0};
+    transition: opacity ${euiTheme.animation.fast} ease;
+
+    &:focus-within {
+      opacity: 1;
+    }
+  `;
 
   return (
     <EuiText
@@ -127,34 +148,29 @@ export const AuthorHeader: React.FC<AuthorHeaderProps> = ({
         line-height: ${euiTheme.size.base};
       `}
     >
-      <span
-        css={css`
-          display: inline-flex;
-          align-items: center;
-          gap: ${euiTheme.size.xs};
-          flex-wrap: wrap;
-        `}
-      >
+      <span css={itemsStyles}>
         {name && (
           <>
             <AuthorName name={name} />
             {showAgentBadge && <AgentBadge />}
-            <AuthorSeparator />
           </>
         )}
         {label && (
           <>
+            {name && <AuthorSeparator />}
             <AuthorLabel label={label} />
-            <AuthorSeparator />
           </>
         )}
         {origin && (
           <>
+            {(name || label) && <AuthorSeparator />}
             <AuthorOrigin origin={origin} />
-            <AuthorSeparator />
           </>
         )}
-        <AuthorTime startedAt={startedAt} />
+        <span css={[itemsStyles, timeStyles]} data-test-subj="agentBuilderAuthorHeaderTime">
+          {hasAttribution && <AuthorSeparator />}
+          <AuthorTime startedAt={startedAt} />
+        </span>
       </span>
     </EuiText>
   );
