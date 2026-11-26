@@ -525,6 +525,34 @@ export const buildTopNCases = (): EsqlConversionCase[] => {
         reason: 'terms_other_bucket_same_field_not_supported',
       },
     },
+    // A multi-field inner dimension does not share the outer result column, so the blocker
+    // reported is its own rather than the same-field Other one.
+    {
+      group: 'top_n',
+      dataset: logs,
+      description:
+        'nested terms with other bucket on the outer dimension and a multi-field inner dimension on the same field reports multiple fields',
+      columns: {
+        col1: terms('host.keyword', {
+          size: 2,
+          orderBy: { type: 'column', columnId: 'col3' },
+          orderDirection: 'desc',
+          otherBucket: true,
+        }),
+        col2: terms('host.keyword', {
+          size: 3,
+          orderBy: { type: 'column', columnId: 'col3' },
+          orderDirection: 'desc',
+          secondaryFields: ['geo.dest'],
+        }),
+        col3: metric('average', 'bytes'),
+      },
+      columnOrder: ['col1', 'col2', 'col3'],
+      expected: {
+        success: false,
+        reason: 'terms_multiple_fields_not_supported',
+      },
+    },
     // The nested Other path limits by the outer key only, so a bucket between the two Top
     // values would pick the inner top N across every date bucket instead of per date bucket.
     {

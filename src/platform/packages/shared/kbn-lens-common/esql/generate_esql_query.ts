@@ -472,6 +472,12 @@ export function generateEsqlQuery(
   // one Other per parent bucket.
   const hasBucketBetweenTermsDimensions = leadingBucketEntries.length > 1;
 
+  // Only single-field Top values on one field produce the same bucket expression, which
+  // collapses into one result column (see `bucketsResult`) that the Other remap would replace
+  // with its key, dropping the inner group. Multi-field dimensions are gated on their own.
+  const isSingleFieldTerms = ({ params }: TermsIndexPatternColumn): boolean =>
+    (params.secondaryFields?.length ?? 0) === 0;
+
   // Fail fast on terms blockers before building bucket expressions; metric
   // failures above still take precedence. One reason per terms column; take the first.
   const termsFailureReason = termsBuckets
@@ -480,11 +486,14 @@ export function generateEsqlQuery(
         hasUnsupportedDateHistogramNesting,
         termsBucketCount: termsBuckets.length,
         supportsOtherBucket: index === 0 && !hasBucketBetweenTermsDimensions,
-        // Duplicate bucket expressions collapse into one result column (see `bucketsResult`),
-        // which the Other remap would replace with its key, dropping the inner group.
-        hasDuplicateTermsField: termsBuckets.some(
-          (other) => other.index !== index && other.col.sourceField === col.sourceField
-        ),
+        hasDuplicateTermsField:
+          isSingleFieldTerms(col) &&
+          termsBuckets.some(
+            (other) =>
+              other.index !== index &&
+              other.col.sourceField === col.sourceField &&
+              isSingleFieldTerms(other.col)
+          ),
       })
     )
     .find((reason): reason is EsqlConversionFailureReason => reason !== undefined);
