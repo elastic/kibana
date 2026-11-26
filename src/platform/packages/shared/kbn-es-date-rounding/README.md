@@ -40,7 +40,7 @@ So for a DSL interval, build the `DateRounding` from the parameter instead of ca
 
 Daylight saving changes follow Elasticsearch:
 
-- When clocks go back, the repeated hour gets its own fixed-width buckets, and the bucket that spans the change is longer (a `12h` bucket can last 13 hours).
+- When clocks go back, fixed-width buckets are keyed by local time, so the repeated hour gets its own buckets only when a bucket boundary falls inside it, as with `1h` or `30m`. A wider bucket that spans the change is longer: a `12h` bucket can last 13 hours, and in Europe/Rome both 02:30s fall in the single `3h` bucket that starts at local midnight and lasts 4 hours.
 - When clocks go forward, a bucket whose local start is skipped starts at the transition instant, and the bucket that spans the change is shorter.
 - When local midnight is skipped, the day starts at the transition instant.
 
