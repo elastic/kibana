@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
   EuiButtonEmpty,
   EuiCodeBlock,
@@ -26,6 +26,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { ISearchStart } from '../../../search';
 import type { QueryProfileView } from '../profile/types';
+import { splitQueryCommands } from '../by_command/query_commands';
 import { compareResults } from './compare_results';
 import { loadEsqlQueryProfile } from '../profile/load_esql_query_profile';
 import { ResultsCheck, TimeComparison } from './suggestion_comparison';
@@ -93,6 +94,8 @@ type SuggestedStage = Extract<Stage, { kind: 'suggested' | 'profiling' | 'compar
 interface SuggestionBodyProps {
   stage: Stage;
   originalView: QueryProfileView;
+  /** Whether the original query sorts its output. */
+  isSorted: boolean;
   connectorsUrl?: string;
   onProfile: (query: string, reason: string) => void;
   onDismiss: () => void;
@@ -102,6 +105,7 @@ interface SuggestionBodyProps {
 function SuggestedQuery({
   stage,
   originalView,
+  isSorted,
   onProfile,
   onDismiss,
 }: Omit<SuggestionBodyProps, 'stage'> & { stage: SuggestedStage }) {
@@ -166,6 +170,7 @@ function SuggestedQuery({
         <>
           <ResultsCheck
             verdict={compareResults(originalView.readResults?.(), stage.view.readResults?.())}
+            isSorted={isSorted}
           />
           <EuiSpacer size="m" />
           <TimeComparison original={originalView} suggested={stage.view} />
@@ -181,6 +186,7 @@ function SuggestedQuery({
 function SuggestionBody({
   stage,
   originalView,
+  isSorted,
   connectorsUrl,
   onProfile,
   onDismiss,
@@ -263,6 +269,7 @@ function SuggestionBody({
         <SuggestedQuery
           stage={stage}
           originalView={originalView}
+          isSorted={isSorted}
           onProfile={onProfile}
           onDismiss={onDismiss}
         />
@@ -291,6 +298,11 @@ export function FasterQuerySuggestion({
   connectorsUrl?: string;
 }) {
   const [stage, setStage] = useState<Stage>({ kind: 'idle' });
+  // Only a command of the query itself can sort its output, not one inside a subquery.
+  const isSorted = useMemo(
+    () => splitQueryCommands(originalQuery).some(({ name }) => name === 'SORT'),
+    [originalQuery]
+  );
 
   const controller = useRef<AbortController | undefined>();
 
@@ -405,6 +417,7 @@ export function FasterQuerySuggestion({
         <SuggestionBody
           stage={stage}
           originalView={originalView}
+          isSorted={isSorted}
           connectorsUrl={connectorsUrl}
           onProfile={profileSuggestion}
           onDismiss={dismiss}

@@ -54,11 +54,14 @@ const describeVerdict = (verdict: ResultsVerdict): string => {
   }
 };
 
-const describeColor = (verdict: ResultsVerdict): 'success' | 'warning' | 'subdued' | 'danger' => {
+const describeColor = (
+  verdict: ResultsVerdict,
+  isSorted: boolean
+): 'success' | 'warning' | 'subdued' | 'danger' => {
   switch (verdict.kind) {
     case 'same':
-      // The same rows in another order are a change when the query sorts its output.
-      return verdict.sameOrder ? 'success' : 'warning';
+      // The same rows in another order are only a change when the query sorts its output.
+      return verdict.sameOrder || !isSorted ? 'success' : 'warning';
     case 'sameShape':
       // The shape matches, but nothing says the values do.
       return 'subdued';
@@ -67,7 +70,14 @@ const describeColor = (verdict: ResultsVerdict): 'success' | 'warning' | 'subdue
   }
 };
 
-export function ResultsCheck({ verdict }: { verdict: ResultsVerdict | undefined }) {
+export function ResultsCheck({
+  verdict,
+  isSorted,
+}: {
+  verdict: ResultsVerdict | undefined;
+  /** Whether the original query sorts its output, so that the order of its rows is part of its results. */
+  isSorted: boolean;
+}) {
   if (!verdict) {
     return (
       <EuiText size="xs" color="subdued" data-test-subj="esqlQueryProfileResultsCheck">
@@ -80,7 +90,11 @@ export function ResultsCheck({ verdict }: { verdict: ResultsVerdict | undefined 
   }
 
   return (
-    <EuiText size="xs" color={describeColor(verdict)} data-test-subj="esqlQueryProfileResultsCheck">
+    <EuiText
+      size="xs"
+      color={describeColor(verdict, isSorted)}
+      data-test-subj="esqlQueryProfileResultsCheck"
+    >
       <strong>{describeVerdict(verdict)}</strong>
     </EuiText>
   );

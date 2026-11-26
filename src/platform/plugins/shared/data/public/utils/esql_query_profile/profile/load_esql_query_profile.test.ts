@@ -40,7 +40,7 @@ describe('loadEsqlQueryProfile results', () => {
     expect(readResults?.()).toBe(first);
   });
 
-  it('summarizes a result with many rows by its shape at once', async () => {
+  it('takes the shape of a result with many rows at once, so the rows are not needed later', async () => {
     const wide = {
       profile: rawResponse.profile,
       columns: [{ name: 'k', type: 'keyword' }],
@@ -56,6 +56,9 @@ describe('loadEsqlQueryProfile results', () => {
       abortSignal: new AbortController().signal,
       keepResults: () => true,
     });
+
+    // The shape was taken while loading: emptying the rows now changes nothing, so they are not needed.
+    wide.values.length = 0;
 
     expect(readResults?.()).toEqual({
       columns: [{ name: 'k', type: 'keyword' }],

@@ -181,15 +181,21 @@ describe('registerOptimizeQueryRoute', () => {
 
   it('notices an abort that comes while the connector is still being looked up', async () => {
     const { handler, requestHandlerContext, request, response } = buildMocks();
+    let startedLookup: () => void = () => {};
+    const lookupStarted = new Promise<void>((resolve) => {
+      startedLookup = resolve;
+    });
     let resolveConnector: (id: string) => void = () => {};
-    resolveConnectorId.mockReturnValue(
-      new Promise<string>((resolve) => {
+    resolveConnectorId.mockImplementation(() => {
+      startedLookup();
+      return new Promise<string>((resolve) => {
         resolveConnector = resolve;
-      })
-    );
+      });
+    });
     const invoke = modelReturning({ canImprove: false, query: '', reason: 'Already efficient.' });
 
     const handled = handler(requestHandlerContext, request, response);
+    await lookupStarted;
     request.events.aborted$.next();
     resolveConnector('connector-1');
     await handled;
