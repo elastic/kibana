@@ -202,6 +202,25 @@ describe('Output model', () => {
         ).toThrow();
       });
 
+      it.each(['keytab', 'password'])(
+        'should not accept a blank username for the %s authentication',
+        (authType) => {
+          expect(() =>
+            schema.object(KafkaSchema).validate(
+              kerberosOutput({
+                kerberos: {
+                  auth_type: authType,
+                  config_path: '/etc/krb5.conf',
+                  keytab: '/etc/kafka.keytab',
+                  username: '   ',
+                  realm: 'EXAMPLE.COM',
+                },
+              })
+            )
+          ).toThrow(/must not be blank/);
+        }
+      );
+
       it('should limit the length of the username', () => {
         const withUsername = (username: string) =>
           kerberosOutput({
