@@ -24,6 +24,7 @@ export function LoadErrorPrompt({
   retryEbtElement,
   'data-test-subj': dataTestSubj,
   retryDataTestSubj,
+  headingLevel = 'h2',
 }: {
   title: string;
   error: Error;
@@ -31,13 +32,17 @@ export function LoadErrorPrompt({
   retryEbtElement: string;
   'data-test-subj': string;
   retryDataTestSubj: string;
+  /** `h3` for a section's error, under the section's `h2`. */
+  headingLevel?: 'h2' | 'h3';
 }) {
+  const Heading = headingLevel;
   return (
     <EuiEmptyPrompt
       data-test-subj={dataTestSubj}
       iconType="warning"
       color="danger"
-      title={<h2>{title}</h2>}
+      title={<Heading>{title}</Heading>}
+      titleSize={headingLevel === 'h3' ? 'xs' : undefined}
       body={<p>{httpErrorMessage(error)}</p>}
       actions={
         <EuiButton

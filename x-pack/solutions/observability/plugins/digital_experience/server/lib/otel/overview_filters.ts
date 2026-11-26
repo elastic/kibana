@@ -8,49 +8,21 @@
 import type { estypes } from '@elastic/elasticsearch';
 import { partitionFilterValues } from '../../../common/filter_values';
 import type { FacetBucket } from '../../../common/sessions';
-import { SESSION_ATTRIBUTE_FIELDS } from '../../../common/session_attribute_fields';
 import {
   isFreeTextFilter,
   OVERVIEW_FILTER_MAX_LENGTHS,
   OVERVIEW_FILTER_NAMES,
   OVERVIEW_FILTER_SIZE,
-  PAGE_FILTER_NAMES,
+  URL_FILTER_NAMES,
   type ListedFilterName,
   type OverviewFilterName,
   type OverviewFilterOptions,
   type OverviewFilters,
 } from '../../../common/overview_filters';
 import { ENVIRONMENT_FIELDS, EVENT_NAVIGATION_TIMING } from '../../../common/otel_data';
-import { SOURCE_URL_FIELD } from './source_fields';
+import { FIELD_VALUE_LABELS, FILTER_SOURCE_FIELDS } from '../../../common/overview_filter_fields';
 import { environmentFilter } from '../helpers/environment';
 import { eventCount } from './queries';
-
-/**
- * Whether the browser runs on a mobile device. EDOT Browser records it even where no device model
- * or type is, so the device falls back to "Mobile" or "Desktop" rather than to nothing.
- */
-const MOBILE_FIELDS = ['resource.attributes.browser.mobile', 'attributes.browser.mobile'] as const;
-
-/** What a field that is not a name says, per value: the device name of `browser.mobile`. */
-const FIELD_VALUE_LABELS: Record<string, Record<string, string>> = Object.fromEntries(
-  MOBILE_FIELDS.map((field) => [field, { true: 'Mobile', false: 'Desktop' }])
-);
-
-/**
- * The fields each filter reads, in priority order. The session summaries' lists come first, so a
- * browser, OS, device or country means the same in the Overview and the Sessions where they have
- * one; the device then falls back to `browser.mobile`.
- */
-const FILTER_SOURCE_FIELDS: Record<OverviewFilterName, readonly string[]> = {
-  browser: SESSION_ATTRIBUTE_FIELDS.browser,
-  os: SESSION_ATTRIBUTE_FIELDS.os,
-  device: [...SESSION_ATTRIBUTE_FIELDS.device, ...MOBILE_FIELDS],
-  country: SESSION_ATTRIBUTE_FIELDS.countryIso,
-  // The version the application reports, a resource attribute of OpenTelemetry.
-  appVersion: ['resource.attributes.service.version', 'attributes.service.version'],
-  pageUrl: [SOURCE_URL_FIELD],
-  pageContains: [SOURCE_URL_FIELD],
-};
 
 /** The runtime field that coalesces the alternatives of a filter. */
 const runtimeFieldOf = (name: OverviewFilterName) => `digital_experience_filter_${name}`;
@@ -139,24 +111,24 @@ const filterClause = (
 };
 
 /**
- * The selected filters that narrow every document of the Overview, except `exclude`'s own. The
- * page filters are left out: the web vitals, errors and clicks carry no page URL yet, so they
- * narrow the page loads only (`pageLoadFilters`).
+ * The selected filters that narrow every log of the Overview, except `exclude`'s own. The filters
+ * on the URL text are left out: the web vitals and JS errors carry no URL, so they narrow the page
+ * loads only (`pageLoadFilters`).
  */
 export const documentFilters = (
   filters: OverviewFilters,
   exclude?: OverviewFilterName
 ): estypes.QueryDslQueryContainer[] =>
   OVERVIEW_FILTER_NAMES.filter(
-    (name) => !PAGE_FILTER_NAMES.some((page) => page === name) && name !== exclude
+    (name) => !URL_FILTER_NAMES.some((url) => url === name) && name !== exclude
   ).flatMap((name) => filterClause(name, filters));
 
-/** The selected page filters, which narrow the page loads (except `exclude`'s own). */
+/** The selected filters on the URL text, which narrow the page loads (except `exclude`'s own). */
 export const pageLoadFilters = (
   filters: OverviewFilters,
   exclude?: OverviewFilterName
 ): estypes.QueryDslQueryContainer[] =>
-  PAGE_FILTER_NAMES.filter((name) => name !== exclude).flatMap((name) =>
+  URL_FILTER_NAMES.filter((name) => name !== exclude).flatMap((name) =>
     filterClause(name, filters)
   );
 

@@ -80,7 +80,7 @@ The `cleanup` command identifies resources to delete by:
 
 ## Output
 
-Returns an enrollment token for deploying an Elastic Agent:
+When `OUTPUT_FILE` is set, `create` writes the result JSON (including the Elastic Agent `enrollmentToken`) to that file:
 
 ```json
 {
@@ -93,8 +93,8 @@ Returns an enrollment token for deploying an Elastic Agent:
 }
 ```
 
-> [!TIP]
-> Use `OUTPUT_FILE` to save this to a file:
+> [!NOTE]
+> The enrollment token is not printed to `stdout`. If you need the token, set `OUTPUT_FILE` before running `create`:
 > ```bash
 > OUTPUT_FILE=/tmp/forge_output.json node x-pack/scripts/synthetics_forge.js create
 > ```

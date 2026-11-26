@@ -135,6 +135,22 @@ export class EndpointActionsClient extends ResponseActionsClientImpl {
   protected async validateRequest(
     actionRequest: ResponseActionsClientWriteActionRequestToEndpointIndexOptions<any, any, any>
   ): Promise<ResponseActionsClientValidateRequestResponse> {
+    // Get-file/Memory Dump: `export` is gated by a feature flag. (The Endpoint capability that it
+    // requires is checked up front in `validateCommandCapabilities()`.)
+    if (
+      (actionRequest.command === 'get-file' || actionRequest.command === 'memory-dump') &&
+      actionRequest.parameters?.export !== undefined &&
+      !this.options.endpointService.experimentalFeatures.responseActionsEndpointFileExport
+    ) {
+      return {
+        isValid: false,
+        error: new ResponseActionsClientError(
+          `${actionRequest.command} \`export\` parameter is not enabled`,
+          400
+        ),
+      };
+    }
+
     // Memory Dump: ensure that agents/Endpoint support this command
     if (actionRequest.command === 'memory-dump') {
       const memDumpType = actionRequest.parameters.type;
@@ -279,8 +295,9 @@ export class EndpointActionsClient extends ResponseActionsClientImpl {
   }
 
   /**
-   * Returns an error if the request uses a command parameter that requires an Endpoint capability
-   * which one or more of the target hosts do not report.
+   * Returns an error if the request uses command parameters that require Endpoint capabilities
+   * which one or more of the target hosts do not report. Every required capability is checked (ex.
+   * get-file with both `force` and `export`) and the error lists each one that is not supported.
    *
    * This intentionally uses the host metadata that was already retrieved when the agent IDs were
    * checked (instead of querying for it again) and is only called once per request. Re-running it
@@ -324,7 +341,14 @@ export class EndpointActionsClient extends ResponseActionsClientImpl {
       }
     }
 
-    for (const { capability, unsupportedMessage } of requirements) {
+    if ((command === 'get-file' || command === 'memory-dump') && parameters.export !== undefined) {
+      requirements.push({
+        capability: 'file_export',
+        unsupportedMessage: 'exporting files to external storage',
+      });
+    }
+
+    const errorMessages = requirements.flatMap(({ capability, unsupportedMessage }) => {
       const unsupportedAgents = hosts
         .filter((endpointMeta) => !endpointMeta.Endpoint.capabilities?.includes(capability))
         .map(
@@ -332,14 +356,17 @@ export class EndpointActionsClient extends ResponseActionsClientImpl {
             `${endpointMeta.agent.id} / ${endpointMeta.host.hostname} (Agent v.${endpointMeta.agent.version})`
         );
 
-      if (unsupportedAgents.length > 0) {
-        return new ResponseActionsClientError(
-          `The following agent IDs do not support ${unsupportedMessage}: ${unsupportedAgents.join(
-            ', '
-          )}`,
-          400
-        );
-      }
+      return unsupportedAgents.length > 0
+        ? [
+            `The following agent IDs do not support ${unsupportedMessage}: ${unsupportedAgents.join(
+              ', '
+            )}`,
+          ]
+        : [];
+    });
+
+    if (errorMessages.length > 0) {
+      return new ResponseActionsClientError(errorMessages.join('. '), 400);
     }
   }
 
