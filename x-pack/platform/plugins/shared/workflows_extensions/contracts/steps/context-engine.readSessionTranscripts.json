@@ -1,14 +1,14 @@
 {
   "exposure": "open",
-  "id": "context-engine.readTraceTranscripts",
+  "id": "context-engine.readSessionTranscripts",
   "input": {
     "definitions": {
       "__schema0": {
-        "maxLength": 512,
+        "maxLength": 2048,
         "type": "string"
       },
       "__schema1": {
-        "maximum": 2000,
+        "maximum": 10000,
         "minimum": 1,
         "type": "integer"
       },
@@ -35,7 +35,7 @@
             "$ref": "#/definitions/__schema0"
           }
         ],
-        "description": "The resume_after of the read that stopped at since: the trace id to continue after. Empty or omitted: read from since."
+        "description": "The resume_after of the read that stopped at since: the event to continue after. Empty or omitted: read from since."
       },
       "ai_index_id": {
         "description": "The id of the AI index the knowledge indicator belongs to",
@@ -65,10 +65,10 @@
             "$ref": "#/definitions/__schema4"
           }
         ],
-        "description": "Leave rounds that ended this recently for the next run. Defaults to 5."
+        "description": "Leave events saved this recently for the next run: their turn may still be running. Defaults to 5."
       },
       "since": {
-        "description": "Read the rounds that ended since this ISO 8601 time",
+        "description": "Read the events saved since this ISO 8601 time",
         "maxLength": 64,
         "type": "string"
       },
@@ -78,7 +78,7 @@
             "$ref": "#/definitions/__schema1"
           }
         ],
-        "description": "How many rounds to read, oldest first. Defaults to 50."
+        "description": "How many events to look at, oldest first. Defaults to 500."
       }
     },
     "required": [
@@ -176,41 +176,18 @@
       },
       "__schema2": {
         "type": "string"
-      },
-      "__schema3": {
-        "additionalProperties": false,
-        "properties": {
-          "error": {
-            "type": "string"
-          },
-          "rounds": {
-            "type": "number"
-          },
-          "type": {
-            "type": "string"
-          },
-          "value": {
-            "type": "string"
-          }
-        },
-        "required": [
-          "rounds",
-          "type",
-          "value"
-        ],
-        "type": "object"
       }
     },
     "properties": {
       "batches": {
-        "description": "The memories in batches for the model, a call each: rounds that share permissions, each conversation together and in order, whole conversations up to batch_tokens",
+        "description": "The memories in batches for the model, a call each: each session together and in order, whole sessions up to batch_tokens",
         "items": {
           "$ref": "#/definitions/__schema1"
         },
         "type": "array"
       },
       "memories": {
-        "description": "One transcript per round, oldest first, shaped as the memories applyDreamChanges takes",
+        "description": "One transcript per turn, oldest first, shaped as the memories applyDreamChanges takes",
         "items": {
           "$ref": "#/definitions/__schema0"
         },
@@ -222,30 +199,22 @@
             "$ref": "#/definitions/__schema2"
           }
         ],
-        "description": "Set when size or max_tokens cut the read: the trace id to pass as after"
+        "description": "Set when size or max_tokens cut the read: the event to pass as after"
       },
       "resume_from": {
-        "description": "Where the next read starts: the end of the last round read when size or max_tokens cut the read, else the end of the window read",
+        "description": "Where the next read starts: the last event read when size or max_tokens cut the read, else the end of the window read",
         "type": "string"
       },
       "skipped": {
-        "description": "Rounds left out because their traces hold no conversation text to read",
+        "description": "Turns left out because nobody said anything in them",
         "type": "number"
-      },
-      "sources": {
-        "description": "Each trace source of the AI index: how many rounds it found, or why it failed",
-        "items": {
-          "$ref": "#/definitions/__schema3"
-        },
-        "type": "array"
       }
     },
     "required": [
       "batches",
       "memories",
       "resume_from",
-      "skipped",
-      "sources"
+      "skipped"
     ],
     "type": "object"
   },

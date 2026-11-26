@@ -6,7 +6,7 @@
       "__schema0": {
         "enum": [
           "memories",
-          "traces",
+          "transcripts",
           "relationships",
           "maintenance"
         ],
@@ -26,7 +26,7 @@
             "$ref": "#/definitions/__schema0"
           }
         ],
-        "description": "What the run dreams on: memories (the default); the traces configured on the AI index, which also need a trace source; its facts and entities, to link with relationships, which also need relationship types; or its facts and entities, to maintain, which also needs maintenance turned on"
+        "description": "What the run dreams on: session memories (the default); session transcripts; its facts and entities, to link with relationships, which also need relationship types; or its facts and entities, to maintain, which also needs maintenance turned on"
       }
     },
     "required": [

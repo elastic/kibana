@@ -51,31 +51,62 @@
         "type": "object"
       },
       "__schema1": {
-        "maxLength": 512,
+        "maxLength": 1024,
         "minLength": 1,
         "type": "string"
       },
       "__schema10": {
+        "properties": {
+          "esql_example": {
+            "maxLength": 4096,
+            "minLength": 1,
+            "type": "string"
+          },
+          "esql_template": {
+            "maxLength": 4096,
+            "minLength": 1,
+            "type": "string"
+          },
+          "question_type": {
+            "maxLength": 256,
+            "minLength": 1,
+            "type": "string"
+          },
+          "returns": {
+            "maxLength": 1024,
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "esql_example",
+          "esql_template",
+          "question_type",
+          "returns"
+        ],
+        "type": "object"
+      },
+      "__schema11": {
         "items": {
           "$ref": "#/definitions/__schema1"
         },
         "maxItems": 100,
         "type": "array"
       },
-      "__schema11": {
+      "__schema12": {
         "default": [],
         "items": {
-          "$ref": "#/definitions/__schema12"
+          "$ref": "#/definitions/__schema13"
         },
         "maxItems": 200,
         "type": "array"
       },
-      "__schema12": {
+      "__schema13": {
         "properties": {
           "access_patterns": {
             "allOf": [
               {
-                "$ref": "#/definitions/__schema8"
+                "$ref": "#/definitions/__schema9"
               }
             ]
           },
@@ -87,12 +118,12 @@
             "type": "boolean"
           },
           "ref": {
-            "$ref": "#/definitions/__schema1"
+            "$ref": "#/definitions/__schema6"
           },
           "source_memory_ids": {
             "allOf": [
               {
-                "$ref": "#/definitions/__schema10"
+                "$ref": "#/definitions/__schema11"
               }
             ]
           },
@@ -103,7 +134,7 @@
           "type": {
             "allOf": [
               {
-                "$ref": "#/definitions/__schema6"
+                "$ref": "#/definitions/__schema7"
               }
             ]
           }
@@ -113,7 +144,7 @@
         ],
         "type": "object"
       },
-      "__schema13": {
+      "__schema14": {
         "type": "boolean"
       },
       "__schema2": {
@@ -155,13 +186,13 @@
           "access_patterns": {
             "allOf": [
               {
-                "$ref": "#/definitions/__schema8"
+                "$ref": "#/definitions/__schema9"
               }
             ]
           },
           "attributes": {
             "items": {
-              "$ref": "#/definitions/__schema7"
+              "$ref": "#/definitions/__schema8"
             },
             "maxItems": 200,
             "type": "array"
@@ -178,12 +209,12 @@
             "type": "string"
           },
           "ref": {
-            "$ref": "#/definitions/__schema1"
+            "$ref": "#/definitions/__schema6"
           },
           "source_memory_ids": {
             "allOf": [
               {
-                "$ref": "#/definitions/__schema10"
+                "$ref": "#/definitions/__schema11"
               }
             ]
           },
@@ -194,7 +225,7 @@
           "type": {
             "allOf": [
               {
-                "$ref": "#/definitions/__schema6"
+                "$ref": "#/definitions/__schema7"
               }
             ]
           }
@@ -205,10 +236,15 @@
         "type": "object"
       },
       "__schema6": {
-        "maxLength": 128,
+        "maxLength": 512,
+        "minLength": 1,
         "type": "string"
       },
       "__schema7": {
+        "maxLength": 128,
+        "type": "string"
+      },
+      "__schema8": {
         "properties": {
           "key": {
             "maxLength": 256,
@@ -226,43 +262,12 @@
         ],
         "type": "object"
       },
-      "__schema8": {
+      "__schema9": {
         "items": {
-          "$ref": "#/definitions/__schema9"
+          "$ref": "#/definitions/__schema10"
         },
         "maxItems": 5,
         "type": "array"
-      },
-      "__schema9": {
-        "properties": {
-          "esql_example": {
-            "maxLength": 4096,
-            "minLength": 1,
-            "type": "string"
-          },
-          "esql_template": {
-            "maxLength": 4096,
-            "minLength": 1,
-            "type": "string"
-          },
-          "question_type": {
-            "maxLength": 256,
-            "minLength": 1,
-            "type": "string"
-          },
-          "returns": {
-            "maxLength": 1024,
-            "minLength": 1,
-            "type": "string"
-          }
-        },
-        "required": [
-          "esql_example",
-          "esql_template",
-          "question_type",
-          "returns"
-        ],
-        "type": "object"
       }
     },
     "properties": {
@@ -279,7 +284,7 @@
             "$ref": "#/definitions/__schema4"
           },
           "facts": {
-            "$ref": "#/definitions/__schema11"
+            "$ref": "#/definitions/__schema12"
           }
         },
         "type": "object"
@@ -287,7 +292,7 @@
       "dry_run": {
         "allOf": [
           {
-            "$ref": "#/definitions/__schema13"
+            "$ref": "#/definitions/__schema14"
           }
         ],
         "description": "Check and resolve the change set and report what it would write, without writing. Each call is previewed on its own, without what earlier calls of the same run would write."

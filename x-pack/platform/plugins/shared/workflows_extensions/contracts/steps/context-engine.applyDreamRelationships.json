@@ -28,7 +28,9 @@
             "type": "object"
           },
           "id": {
-            "$ref": "#/definitions/__schema2"
+            "maxLength": 1024,
+            "minLength": 1,
+            "type": "string"
           },
           "permissions": {
             "properties": {
@@ -36,7 +38,7 @@
                 "properties": {
                   "privileges": {
                     "items": {
-                      "$ref": "#/definitions/__schema3"
+                      "$ref": "#/definitions/__schema2"
                     },
                     "maxItems": 100,
                     "type": "array"
@@ -61,18 +63,13 @@
         "type": "boolean"
       },
       "__schema2": {
-        "maxLength": 512,
-        "minLength": 1,
-        "type": "string"
-      },
-      "__schema3": {
         "properties": {
           "count": {
             "type": "number"
           },
           "name": {
             "items": {
-              "$ref": "#/definitions/__schema4"
+              "$ref": "#/definitions/__schema3"
             },
             "maxItems": 50,
             "type": "array"
@@ -87,16 +84,21 @@
         ],
         "type": "object"
       },
-      "__schema4": {
+      "__schema3": {
         "maxLength": 256,
         "type": "string"
       },
-      "__schema5": {
+      "__schema4": {
         "items": {
-          "$ref": "#/definitions/__schema2"
+          "$ref": "#/definitions/__schema5"
         },
         "maxItems": 200,
         "type": "array"
+      },
+      "__schema5": {
+        "maxLength": 512,
+        "minLength": 1,
+        "type": "string"
       },
       "__schema6": {
         "default": [],
@@ -116,14 +118,14 @@
             "type": "string"
           },
           "from": {
-            "$ref": "#/definitions/__schema2"
+            "$ref": "#/definitions/__schema5"
           },
           "relation": {
             "maxLength": 128,
             "type": "string"
           },
           "to": {
-            "$ref": "#/definitions/__schema2"
+            "$ref": "#/definitions/__schema5"
           }
         },
         "required": [
@@ -144,7 +146,7 @@
         "additionalProperties": {},
         "properties": {
           "id": {
-            "$ref": "#/definitions/__schema2"
+            "$ref": "#/definitions/__schema5"
           },
           "title": {
             "type": "string"
@@ -196,7 +198,7 @@
       "items": {
         "allOf": [
           {
-            "$ref": "#/definitions/__schema5"
+            "$ref": "#/definitions/__schema4"
           }
         ],
         "description": "Without memories: the ids of the stored facts and entities being linked, which share permissions. Every relationship has an end among them, is based on the memories its ends cite, and takes the permissions of its ends."

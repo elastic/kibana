@@ -1,0 +1,158 @@
+{
+  "exposure": "open",
+  "id": "context-engine.readSessionMemories",
+  "input": {
+    "definitions": {
+      "__schema0": {
+        "maxLength": 512,
+        "type": "string"
+      },
+      "__schema1": {
+        "maximum": 1000,
+        "minimum": 1,
+        "type": "integer"
+      }
+    },
+    "properties": {
+      "after": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema0"
+          }
+        ],
+        "description": "The resume_after_id of the read that stopped at since: the memory id to continue after. Empty or omitted: read from since."
+      },
+      "ai_index_id": {
+        "description": "The id of the AI index the knowledge indicator belongs to",
+        "maxLength": 256,
+        "minLength": 1,
+        "type": "string"
+      },
+      "since": {
+        "description": "Read the memories remembered or revised since this ISO 8601 time",
+        "maxLength": 64,
+        "type": "string"
+      },
+      "size": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema1"
+          }
+        ],
+        "description": "How many revisions to look at, oldest first. Defaults to 500."
+      }
+    },
+    "required": [
+      "ai_index_id",
+      "since"
+    ],
+    "type": "object"
+  },
+  "output": {
+    "additionalProperties": false,
+    "definitions": {
+      "__schema0": {
+        "additionalProperties": false,
+        "properties": {
+          "attributes": {
+            "additionalProperties": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "boolean"
+                }
+              ]
+            },
+            "type": "object"
+          },
+          "content": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "permissions": {
+            "additionalProperties": false,
+            "properties": {
+              "kibana": {
+                "additionalProperties": false,
+                "properties": {
+                  "privileges": {
+                    "items": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "space": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "space"
+                      ],
+                      "type": "object"
+                    },
+                    "type": "array"
+                  }
+                },
+                "required": [
+                  "privileges"
+                ],
+                "type": "object"
+              }
+            },
+            "required": [
+              "kibana"
+            ],
+            "type": "object"
+          },
+          "title": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          },
+          "updated_at": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "content",
+          "id",
+          "permissions",
+          "title",
+          "type",
+          "updated_at"
+        ],
+        "type": "object"
+      }
+    },
+    "properties": {
+      "memories": {
+        "description": "The latest revision of each memory, oldest first, shaped as the memories applyDreamChanges takes",
+        "items": {
+          "$ref": "#/definitions/__schema0"
+        },
+        "type": "array"
+      },
+      "resume_after_id": {
+        "description": "Set when size cut the read: the memory id to pass as after. Empty otherwise",
+        "type": "string"
+      },
+      "resume_from": {
+        "description": "Set when size cut the read: where the next read starts. Empty otherwise",
+        "type": "string"
+      }
+    },
+    "required": [
+      "memories",
+      "resume_after_id",
+      "resume_from"
+    ],
+    "type": "object"
+  },
+  "stability": "tech_preview"
+}
