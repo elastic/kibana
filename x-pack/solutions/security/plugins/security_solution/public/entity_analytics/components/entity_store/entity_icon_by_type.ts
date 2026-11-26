@@ -21,4 +21,5 @@ export const EntityIconByType: Record<EntityType, IconType> = {
   [EntityType.host]: 'storage',
   [EntityType.service]: 'vectorTriangle',
   [EntityType.generic]: 'globe',
+  [EntityType.ai_agent]: 'sparkles',
 };

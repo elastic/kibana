@@ -15,7 +15,7 @@ import type { EntityViewMode } from '../../../../common/entity_analytics/entity_
  * the server-side Zod schema.
  */
 export interface EntityAttachmentIdentifier {
-  identifierType: EntityType | 'host' | 'user' | 'service' | 'generic';
+  identifierType: EntityType | 'host' | 'user' | 'service' | 'generic' | 'ai_agent';
   identifier: string;
   /**
    * Canonical `entity.id` from the entity store (e.g. `user:name@host@namespace`).
