@@ -14,6 +14,7 @@ import type { Attachment } from '@kbn/agent-builder-common/attachments';
 import { platformCoreTools } from '@kbn/agent-builder-common';
 import { z, lazySchema } from '@kbn/zod/v4';
 import { SecurityAgentBuilderAttachments } from '../../../common/constants';
+import { ALERTZERO_RULE_ATTACHMENT_IDS } from '../../../common/agent_builder/alertzero_rule_attachments';
 import type { SecuritySolutionPluginCoreSetupDependencies } from '../../plugin_contract';
 import { readRules } from '../../lib/detection_engine/rule_management/logic/detection_rules_client/read_rules';
 import { transform } from '../../lib/detection_engine/rule_management/utils/utils';
@@ -34,6 +35,9 @@ export const ruleAttachmentDataSchema = lazySchema(() =>
 const DETECTION_RULE_SKILL_NAME_ID = 'detection-rule-edit';
 const INVESTIGATE_RULE_SKILL_NAME_ID = 'investigate-rule';
 const PROPOSAL_MANAGEMENT_SKILL_NAME_ID = 'proposal-management';
+const ALERTZERO_RULE_ATTACHMENT_IDS_TEXT = ALERTZERO_RULE_ATTACHMENT_IDS.map(
+  (attachmentId) => `\`${attachmentId}\``
+).join(' or ');
 
 export type RuleAttachmentData = z.infer<typeof ruleAttachmentDataSchema>;
 
@@ -107,14 +111,14 @@ SECURITY RULE DATA:
 ---
 Complete in order:
 
-1. When asked to modify, update, or create a detection rule, ALWAYS read the ${DETECTION_RULE_SKILL_NAME_ID} skill from the skills/security/rules directory. If this attachment is read-only, follow "Read-only rule attachments" below instead.
+1. When asked to modify, update, or create a detection rule, ALWAYS read the ${DETECTION_RULE_SKILL_NAME_ID} skill from the skills/security/rules directory. If this attachment's id is ${ALERTZERO_RULE_ATTACHMENT_IDS_TEXT}, follow "AlertZero investigation rule attachments" below instead.
 2. When asked why the rule is noisy or generating false positives, ALWAYS read the ${INVESTIGATE_RULE_SKILL_NAME_ID} skill from the skills/security/rules directory.
 3. Use the available tools to research, create, or edit the rule and provide a response.
 
 ---
-Read-only rule attachments:
+AlertZero investigation rule attachments:
 
-A workflow can add this attachment as read-only. \`attachment_list\` then shows \`readonly: true\` for it, and edits of it fail with "is read-only". Its rule changes only through proposals that the user approves or dismisses. Do NOT edit a read-only rule attachment, and do NOT offer to. When asked to change its rule:
+AlertZero adds a rule attachment with the id ${ALERTZERO_RULE_ATTACHMENT_IDS_TEXT} to its investigations. The rule of such an attachment changes only through proposals that the user approves or dismisses. Do NOT edit such an attachment, and do NOT offer to. When asked to change its rule:
 
 1. Read the proposal attachments in the conversation and find one with \`Status: pending\`.
 2. If the pending proposal can take the change, revise it with the ${PROPOSAL_MANAGEMENT_SKILL_NAME_ID} skill. Do not guess which fields its action accepts: try the revision.

@@ -84,8 +84,8 @@ interface ResolvedAttachmentTarget {
 
 /**
  * Resolve which attachment the rule is written to:
- *  1. attachment_id given → update that card. Throws when it can't: the id doesn't match any
- *     card, or the card is not a rule card, is read-only, or has no version.
+ *  1. attachment_id given → update that card. Fails closed: a stale/hallucinated id, a
+ *     non-rule target, or a versionless record throws instead of no-op'ing update().
  *  2. no id + empty placeholder card exists → consume it (first create from a menu/form entry).
  *  3. no id + no placeholder → mint a new id.
  */
@@ -102,9 +102,6 @@ export const resolveAttachmentTarget = (
       throw new Error(
         `Attachment "${attachmentId}" is not a ${SecurityAgentBuilderAttachments.rule} attachment`
       );
-    }
-    if (record.readonly === true) {
-      throw new Error(`Rule attachment "${attachmentId}" is read-only`);
     }
     const latestVersion = getLatestVersion(record);
     if (!latestVersion) {

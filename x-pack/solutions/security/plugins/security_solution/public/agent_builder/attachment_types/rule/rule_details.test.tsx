@@ -1212,7 +1212,7 @@ describe('RuleInlineContent integration', () => {
       savedRule,
       origin = 'saved-rule-id',
       versionData,
-      readonly,
+      id = 'test',
       application = makeApplication(),
       uiSettings = makeUiSettings(),
       registerActionButtons = jest.fn(),
@@ -1222,7 +1222,7 @@ describe('RuleInlineContent integration', () => {
       savedRule?: Record<string, unknown>;
       origin?: string;
       versionData?: { version: number; versionCount: number; createdAt: string };
-      readonly?: boolean;
+      id?: string;
       application?: ApplicationStart;
       uiSettings?: IUiSettingsClient;
       registerActionButtons?: jest.Mock;
@@ -1238,11 +1238,10 @@ describe('RuleInlineContent integration', () => {
         definition.renderInlineContent!(
           {
             attachment: {
-              id: 'test',
+              id,
               type: 'security.rule',
               origin,
               ...(versionData ? { versionData } : {}),
-              ...(readonly === undefined ? {} : { readonly }),
               data: { text: JSON.stringify(rule) },
             },
             isSidebar: false,
@@ -1284,26 +1283,14 @@ describe('RuleInlineContent integration', () => {
       expect(lastRegisteredLabels(registerActionButtons)).toEqual([]);
     });
 
-    it('registers no buttons for a read-only card, even when it differs from the saved rule', () => {
-      const { registerActionButtons } = renderCard({
-        savedRule: changedSavedRule,
-        readonly: true,
-      });
+    it.each(['tuned-rule', 'coverage-rule'])(
+      'registers no buttons for the AlertZero investigation card "%s", even when it differs from the saved rule',
+      (id) => {
+        const { registerActionButtons } = renderCard({ savedRule: changedSavedRule, id });
 
-      expect(lastRegisteredLabels(registerActionButtons)).toEqual([]);
-    });
-
-    it('registers the buttons for a card that is explicitly not read-only', () => {
-      const { registerActionButtons } = renderCard({
-        savedRule: changedSavedRule,
-        readonly: false,
-      });
-
-      expect(lastRegisteredLabels(registerActionButtons)).toEqual([
-        'Apply to rule form',
-        'Update rule',
-      ]);
-    });
+        expect(lastRegisteredLabels(registerActionButtons)).toEqual([]);
+      }
+    );
 
     it('registers no buttons when the card matches the saved rule', () => {
       const { registerActionButtons } = renderCard({ savedRule: cardRule });
