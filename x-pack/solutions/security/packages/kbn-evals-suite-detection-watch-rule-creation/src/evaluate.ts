@@ -30,8 +30,8 @@ export const evaluate = base.extend<
     { scope: 'worker', auto: true },
   ],
   ruleCreationClient: [
-    async ({ fetch, log }, use) => {
-      const client = new RuleCreationClient(fetch, log);
+    async ({ fetch, log, esClient }, use) => {
+      const client = new RuleCreationClient(fetch, log, esClient);
       await use(client);
       await client.cancelPending();
     },
