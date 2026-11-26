@@ -6,6 +6,7 @@
  */
 
 import { z, lazySchema } from '@kbn/zod/v4';
+import { canonicalizeEsqlFilter } from '../../../esql/canonical_filter';
 
 // Bounds are denial-of-service limits for later HTTP input, not design limits.
 
@@ -260,15 +261,28 @@ const addDuplicateIssues = (
 };
 
 /**
+ * The text a metric filter is grouped by: its canonical re-print, which is what the inventory
+ * generator groups on. A filter that does not parse is counted as written; the generator rejects
+ * it with the reason when it plans the source.
+ */
+const getPlanGroupKey = (filter: string | undefined): string | null => {
+  if (filter === undefined) {
+    return null;
+  }
+  const canonical = canonicalizeEsqlFilter(filter);
+  return canonical.ok ? canonical.filter : filter;
+};
+
+/**
  * How many query plans the sources can expand to, before the probes say which engines run. A
- * source gives one plan group per distinct metric filter, and one more for its unfiltered metrics,
- * so a metric-less source is one group. Each group runs under `TS` and `FROM` at most. Filters are
- * counted as written: two spellings of one expression count twice, which can only over-count,
- * never let a definition past the generator's budget.
+ * source gives one plan group per distinct canonical metric filter, and one more for its
+ * unfiltered metrics, so a metric-less source is one group. Each group runs under `TS` and `FROM`
+ * at most. Two spellings of one expression, such as `state=="idle"` and `state == "idle"`, are one
+ * group, as the generator merges them.
  */
 const countPossibleQueryPlans = (sources: readonly DynamicSource[]): number =>
   sources.reduce((total, { metrics = [] }) => {
-    const planGroups = new Set(metrics.map(({ filter }) => filter ?? null));
+    const planGroups = new Set(metrics.map(({ filter }) => getPlanGroupKey(filter)));
     return total + Math.max(planGroups.size, 1) * ENGINES_PER_PLAN_GROUP;
   }, 0);
 
@@ -290,7 +304,7 @@ export const dynamicBlockSchema = lazySchema(() =>
         ctx.addIssue({
           code: 'custom',
           path: ['sources'],
-          message: `the sources can expand to ${possibleQueryPlans} query plans (one per distinct metric filter per source, under TS and FROM); at most ${MAX_QUERY_PLANS} are allowed`,
+          message: `the sources can expand to ${possibleQueryPlans} query plans (one per distinct canonical metric filter per source, under TS and FROM); at most ${MAX_QUERY_PLANS} are allowed`,
         });
       }
       addDuplicateIssues(

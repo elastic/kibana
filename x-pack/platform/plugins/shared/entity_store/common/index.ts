@@ -142,6 +142,8 @@ export {
   ENTITY_DEFINITION_TYPE_MAX_LENGTH,
 } from './domain/definitions/entity_schema';
 export type { EntityDefinitionManagedBy } from './domain/definitions/entity_schema';
+export { canonicalizeEsqlFilter } from './esql/canonical_filter';
+export type { CanonicalEsqlFilterResult } from './esql/canonical_filter';
 export type {
   DynamicAttribute,
   DynamicDisplayLabel,

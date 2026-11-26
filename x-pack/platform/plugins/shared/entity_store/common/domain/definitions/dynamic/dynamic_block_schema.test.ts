@@ -404,13 +404,52 @@ describe('dynamicBlockSchema', () => {
       expect(dynamicBlockSchema.safeParse({ sources }).success).toBe(true);
     });
 
-    it('counts two spellings of one filter as two plan groups', () => {
+    it('counts two spellings of one filter as one plan group', () => {
       const sources = Array.from({ length: MAX_SOURCES }, (_, index) =>
         source({
           indexPattern: `metrics-${index}-*`,
           metrics: [
             metric({ name: 'a', field: 'a', filter: 'state=="idle"' }),
             metric({ name: 'b', field: 'b', filter: 'state == "idle"' }),
+          ],
+        })
+      );
+      expect(dynamicBlockSchema.safeParse({ sources }).success).toBe(true);
+    });
+
+    it('accepts one differently spelled filter among sources that fill the budget', () => {
+      const sources = Array.from({ length: MAX_SOURCES }, (_, index) =>
+        source({
+          indexPattern: `metrics-${index}-*`,
+          metrics: [
+            metric({ name: 'a', field: 'a', filter: 'state == "idle"' }),
+            ...(index === 0 ? [metric({ name: 'b', field: 'b', filter: 'state=="idle"' })] : []),
+          ],
+        })
+      );
+      expect(dynamicBlockSchema.safeParse({ sources }).success).toBe(true);
+    });
+
+    it('still counts two different filters as two plan groups', () => {
+      const sources = Array.from({ length: MAX_SOURCES }, (_, index) =>
+        source({
+          indexPattern: `metrics-${index}-*`,
+          metrics: [
+            metric({ name: 'a', field: 'a', filter: 'state=="idle"' }),
+            metric({ name: 'b', field: 'b', filter: 'state == "user"' }),
+          ],
+        })
+      );
+      expect(dynamicBlockSchema.safeParse({ sources }).success).toBe(false);
+    });
+
+    it('counts a filter that does not parse as written', () => {
+      const sources = Array.from({ length: MAX_SOURCES }, (_, index) =>
+        source({
+          indexPattern: `metrics-${index}-*`,
+          metrics: [
+            metric({ name: 'a', field: 'a', filter: 'state == "idle"' }),
+            metric({ name: 'b', field: 'b', filter: 'state ==' }),
           ],
         })
       );
