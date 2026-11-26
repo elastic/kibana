@@ -59,8 +59,6 @@ export const mobileDocuments = ({
   indices = [OTEL_TRACES_INDEX, OTEL_LOGS_INDEX],
   metadataFields = [],
 }: MobileDocumentsOptions = {}): ComposerQuery =>
-  esql
-    .from([...indices], [...metadataFields])
-    .addSetCommand('unmapped_fields', 'nullify')
+  esql.from([...indices], [...metadataFields]).addSetCommand('unmapped_fields', 'nullify')
     .pipe`WHERE ${hasMobileSdkName()} OR ${isElasticOnMobileOs()}`.pipe`WHERE ${isNotBrowser()}`
     .pipe`EVAL ${resultColumn('platform')} = ${platformOfDocument()}`;
