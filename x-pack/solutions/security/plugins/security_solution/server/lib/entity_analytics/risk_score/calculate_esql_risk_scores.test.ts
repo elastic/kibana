@@ -390,7 +390,40 @@ describe('Calculate risk scores with ESQL', () => {
         expect(query).toContain('EVAL entity_id = COALESCE(stamped_entity_id, entity_id)');
       });
 
-      it('keeps alerts stamped for the type even when the documents filter rejects them', () => {
+      it.each([EntityType.host, EntityType.user, EntityType.service])(
+        'requires the documents filter for %s alerts, stamped or not',
+        (entityType) => {
+          const query = getBaseScoreESQL(
+            entityType,
+            { lower: `${entityType}:a`, upper: `${entityType}:z` },
+            10000,
+            3500,
+            '.alerts-security.alerts-default'
+          );
+
+          expect(query).not.toContain('stamped_entity_id IS NOT NULL');
+          expect(query).toMatch(/WHERE kibana\.alert\.risk_score IS NOT NULL AND \(/);
+          expect(query.indexOf('kibana.alert.risk_score IS NOT NULL AND')).toBeLessThan(
+            query.indexOf('EVAL stamped_entity_id')
+          );
+        }
+      );
+
+      it('requires the documents filter for resolution scoring of non-agent types', () => {
+        const query = getResolutionScoreESQLByIds(
+          EntityType.user,
+          ['user:target'],
+          5000,
+          1000,
+          '.alerts-security.alerts-default',
+          '.entity_analytics.risk_score.lookup-default'
+        );
+
+        expect(query).not.toContain('stamped_entity_id IS NOT NULL');
+        expect(query).toMatch(/WHERE kibana\.alert\.risk_score IS NOT NULL AND \(/);
+      });
+
+      it('keeps agent alerts stamped for the type even when the documents filter rejects them', () => {
         // Agent descendants are stamped with their agent, but the agent documents filter rejects
         // descendants and the alerts index doesn't map the agent fields.
         const query = getBaseScoreESQL(

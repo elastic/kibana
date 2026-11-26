@@ -12,7 +12,7 @@ import type {
 
 import { euid, getBuiltInEntityDefinition } from '@kbn/entity-store/common/euid_helpers';
 import { ALERT_ENTITY_ID } from '../../../../common/field_maps/field_names';
-import type { EntityType } from '../../../../common/search_strategy';
+import { EntityType } from '../../../../common/search_strategy';
 import { DEFAULT_ALERT_SAMPLE_SIZE, MAX_INPUTS_COUNT, RIEMANN_ZETA_S_VALUE } from './constants';
 import { assertValidEsqlSourceIndex } from './validate_esql_source_index';
 
@@ -109,12 +109,13 @@ const STAMPED_EUID_POSITIONS = 4;
  * Selects the alerts that resolve to an entity of this type and prefers the pre-stamped EUID over
  * the EVAL-derived one.
  *
- * An alert with a stamped EUID for the type is kept even when the definition's documents filter
+ * For agents only, an alert with a stamped agent EUID is kept even when the documents filter
  * rejects it. Agent descendants (`process.ai_agent.is_descendant: true`) are stamped with their
  * agent but rejected by the agent filter, and the agent fields aren't mapped in the alerts index,
- * so for agents the stamp is the only way in. Stamped values are scanned at every position with
- * MV_SLICE, because keyword doc values come back sorted, not in write order, mirroring the Painless
- * loop in buildEuidRuntimeMappingWithStoredFieldFastPath.
+ * so for agents the stamp is the only way in. Other types still require the documents filter.
+ * Stamped values are scanned at every position with MV_SLICE, because keyword doc values come back
+ * sorted, not in write order, mirroring the Painless loop in
+ * buildEuidRuntimeMappingWithStoredFieldFastPath.
  */
 const buildStampedEuidClauses = (
   entityType: EntityType,
@@ -127,13 +128,17 @@ const buildStampedEuidClauses = (
     (_, i) =>
       `STARTS_WITH(MV_FIRST(MV_SLICE(${f}, ${i}, ${i})), ${p}), MV_FIRST(MV_SLICE(${f}, ${i}, ${i}))`
   );
+  const stampedEuidEval = `| EVAL stamped_entity_id = CASE(${branches.join(', ')})`;
 
   return {
-    alertsWithEuidClause: [
-      '| WHERE kibana.alert.risk_score IS NOT NULL',
-      `| EVAL stamped_entity_id = CASE(${branches.join(', ')})`,
-      `| WHERE stamped_entity_id IS NOT NULL OR (${containsIdFilter})`,
-    ].join('\n    '),
+    alertsWithEuidClause: (entityType === EntityType.ai_agent
+      ? [
+          '| WHERE kibana.alert.risk_score IS NOT NULL',
+          stampedEuidEval,
+          `| WHERE stamped_entity_id IS NOT NULL OR (${containsIdFilter})`,
+        ]
+      : [`| WHERE kibana.alert.risk_score IS NOT NULL AND (${containsIdFilter})`, stampedEuidEval]
+    ).join('\n    '),
     storedEuidCoalesceClause: '| EVAL entity_id = COALESCE(stamped_entity_id, entity_id)',
   };
 };
