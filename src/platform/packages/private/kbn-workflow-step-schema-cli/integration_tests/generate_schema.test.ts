@@ -140,50 +140,52 @@ async function waitForStepRegistry(
   );
 }
 
-describe('workflow step schema generation', () => {
-  const log = new ToolingLog({ level: 'info', writeTo: process.stdout });
+const log = new ToolingLog({ level: 'info', writeTo: process.stdout });
 
-  let esServer: TestElasticsearchUtils;
-  let kibanaServer: TestKibanaUtils;
-  let connection: KibanaConnection;
+let esServer: TestElasticsearchUtils;
+let kibanaServer: TestKibanaUtils;
+let connection: KibanaConnection;
 
-  beforeAll(async () => {
-    const { startES, startKibana } = createTestServers({
-      adjustTimeout: (timeout) => jest.setTimeout(timeout),
-      settings: {
-        es: { license: 'trial' },
-        kbn: {
-          // `oss: false` discovers every repo plugin (getPackages(REPO_ROOT)), so
-          // the full union of solution steps/connectors/triggers is registered.
-          cliArgs: { oss: false },
-          // An explicit port avoids a port-0 trap: createRootWithCorePlugins
-          // defaults to server.port = 0 (OS-assigned ephemeral), but
-          // coreSetup.http.getServerInfo() returns config.port (0), not the
-          // actual bound port. fetch('http://localhost:0/...') fails immediately
-          // with ECONNREFUSED for every attempt, silently timing the test out.
-          server: { port: 55620 },
-        },
+// Both suites share one Kibana boot, the slow part of this job. The hooks are file-level, so
+// skipping one suite doesn't skip the other.
+beforeAll(async () => {
+  const { startES, startKibana } = createTestServers({
+    adjustTimeout: (timeout) => jest.setTimeout(timeout),
+    settings: {
+      es: { license: 'trial' },
+      kbn: {
+        // `oss: false` discovers every repo plugin (getPackages(REPO_ROOT)), so
+        // the full union of solution steps/connectors/triggers is registered.
+        cliArgs: { oss: false },
+        // An explicit port avoids a port-0 trap: createRootWithCorePlugins
+        // defaults to server.port = 0 (OS-assigned ephemeral), but
+        // coreSetup.http.getServerInfo() returns config.port (0), not the
+        // actual bound port. fetch('http://localhost:0/...') fails immediately
+        // with ECONNREFUSED for every attempt, silently timing the test out.
+        server: { port: 55620 },
       },
-    });
-
-    esServer = await startES();
-    kibanaServer = await startKibana();
-
-    const { protocol, hostname, port } = kibanaServer.coreSetup.http.getServerInfo();
-    // Use 127.0.0.1 (IPv4) explicitly to avoid IPv6/IPv4 ambiguity where `localhost`
-    // may resolve to `::1` on macOS while Kibana binds to `0.0.0.0` (IPv4 only).
-    const host = hostname === '0.0.0.0' ? '127.0.0.1' : hostname;
-    const baseUrl = `${protocol}://${host}:${port}`;
-    connection = { kibanaUrl: baseUrl, username: USERNAME, password: PASSWORD };
-
-    await waitForStepRegistry(log, baseUrl);
+    },
   });
 
-  afterAll(async () => {
-    await kibanaServer?.stop();
-    await esServer?.stop();
-  });
+  esServer = await startES();
+  kibanaServer = await startKibana();
 
+  const { protocol, hostname, port } = kibanaServer.coreSetup.http.getServerInfo();
+  // Use 127.0.0.1 (IPv4) explicitly to avoid IPv6/IPv4 ambiguity where `localhost`
+  // may resolve to `::1` on macOS while Kibana binds to `0.0.0.0` (IPv4 only).
+  const host = hostname === '0.0.0.0' ? '127.0.0.1' : hostname;
+  const baseUrl = `${protocol}://${host}:${port}`;
+  connection = { kibanaUrl: baseUrl, username: USERNAME, password: PASSWORD };
+
+  await waitForStepRegistry(log, baseUrl);
+});
+
+afterAll(async () => {
+  await kibanaServer?.stop();
+  await esServer?.stop();
+});
+
+describe('workflow step schema generation', () => {
   it('writes the workflow step schema artifact from a live Kibana', async () => {
     const composedSchema = await fetchComposedSchema(connection, log);
     const connectorTypes = await fetchConnectorTypes(connection, log);
@@ -251,7 +253,9 @@ describe('workflow step schema generation', () => {
 
     log.success(`Wrote workflow step schema artifact to ${bundleDir}`);
   });
+});
 
+describe('workflow step contracts', () => {
   it('writes the contract of every registered custom step', async () => {
     const { contracts, errors } = await fetchStepContracts(connection, log);
     if (errors.length > 0) {
