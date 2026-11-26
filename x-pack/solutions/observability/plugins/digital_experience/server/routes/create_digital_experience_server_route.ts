@@ -14,6 +14,7 @@ import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import { DIGITAL_EXPERIENCE_ENABLED_FLAG } from '../../common/feature_flags';
 import type { SessionsSettings } from '../../common/sessions';
 import type { SessionsSetUpBackoff } from '../services/sessions/sessions_set_up_backoff';
+import type { ScheduledReportsWorkflowsServices } from '../lib/report/scheduled_reports_service';
 import { describeError, toClientError } from '../lib/helpers/errors';
 
 /** What sessions need from other plugins, available once they have started. */
@@ -35,6 +36,7 @@ export interface DigitalExperienceRouteHandlerResources extends DefaultRouteHand
   /** `xpack.digital_experience.sessions` config: how often the summaries task runs. */
   sessionsSettings: SessionsSettings;
   getSessionsServices: () => Promise<SessionsServices>;
+  getScheduledReportsServices: () => Promise<ScheduledReportsWorkflowsServices>;
   sessionsSetUpBackoff: SessionsSetUpBackoff;
 }
 

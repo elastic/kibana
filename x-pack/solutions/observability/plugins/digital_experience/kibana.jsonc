@@ -18,7 +18,8 @@
       "security",
       "dashboard",
       "lens",
-      "workflowsExtensions"
+      "workflowsExtensions",
+      "workflowsManagement"
     ],
     "requiredBundles": ["kibanaReact", "fieldFormats", "observability", "charts"]
   }

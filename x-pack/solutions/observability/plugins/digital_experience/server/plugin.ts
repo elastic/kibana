@@ -7,6 +7,7 @@
 
 import type {
   CoreSetup,
+  CoreStart,
   Logger,
   PluginInitializerContext,
   Plugin as PluginType,
@@ -21,9 +22,15 @@ import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
-import type { WorkflowsExtensionsServerPluginSetup } from '@kbn/workflows-extensions/server';
+import type { PluginScopedManagedWorkflowsApi } from '@kbn/workflows/server/types';
+import type {
+  WorkflowsExtensionsServerPluginSetup,
+  WorkflowsExtensionsServerPluginStart,
+} from '@kbn/workflows-extensions/server';
+import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import { DigitalExperienceLocatorDefinition } from '../common/locator';
 import type { DigitalExperienceConfig } from './config';
+import { describeError } from './lib/helpers/errors';
 import { registerDigitalExperienceFeature } from './register_feature';
 import { getGlobalDigitalExperienceServerRouteRepository } from './routes/get_global_digital_experience_route_repository';
 import { savedViewSavedObjectType } from './saved_objects/saved_view';
@@ -31,6 +38,8 @@ import { SESSIONS_PLATFORMS } from './services/sessions/sessions_platforms';
 import { createSessionsSetUpBackoff } from './services/sessions/sessions_set_up_backoff';
 import { registerSessionsTask } from './services/sessions/sessions_task';
 import { getScorecardReportStepDefinition } from './step_types/get_scorecard_report_step';
+
+const MANAGED_WORKFLOW_OWNER = 'digitalExperience';
 
 interface DigitalExperienceSetupDeps {
   features: FeaturesPluginSetup;
@@ -43,14 +52,17 @@ interface DigitalExperienceSetupDeps {
   taskManager?: TaskManagerSetupContract;
   /** Optional: without it, or without an encryption key, the task's API key can't be stored. */
   encryptedSavedObjects?: EncryptedSavedObjectsPluginSetup;
-  /** Optional: the scorecard step is only registered where Workflows is. */
+  /** Optional: the scorecard step and managed reports are only registered where Workflows is. */
   workflowsExtensions?: WorkflowsExtensionsServerPluginSetup;
+  /** Optional: manages schedule enablement, execution history, and email connectors. */
+  workflowsManagement?: WorkflowsServerPluginSetup;
 }
 
 interface DigitalExperienceStartDeps {
   taskManager?: TaskManagerStartContract;
   /** Optional: checks the manage sessions privilege in all spaces. */
   security?: SecurityPluginStart;
+  workflowsExtensions?: WorkflowsExtensionsServerPluginStart;
 }
 
 export class Plugin
@@ -58,10 +70,25 @@ export class Plugin
 {
   private readonly logger: Logger;
   private readonly config: DigitalExperienceConfig;
+  private managedWorkflowsClientPromise?: Promise<PluginScopedManagedWorkflowsApi>;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
     this.config = initializerContext.config.get<DigitalExperienceConfig>();
+  }
+
+  private getManagedWorkflowsClient(
+    workflowsExtensions: WorkflowsExtensionsServerPluginStart
+  ): Promise<PluginScopedManagedWorkflowsApi> {
+    if (!this.managedWorkflowsClientPromise) {
+      this.managedWorkflowsClientPromise = workflowsExtensions
+        .initManagedWorkflowsClient(MANAGED_WORKFLOW_OWNER)
+        .catch((error) => {
+          this.managedWorkflowsClientPromise = undefined;
+          throw error;
+        });
+    }
+    return this.managedWorkflowsClientPromise;
   }
 
   public setup(core: CoreSetup<DigitalExperienceStartDeps>, plugins: DigitalExperienceSetupDeps) {
@@ -71,6 +98,7 @@ export class Plugin
     // A short URL names its locator, and the server looks it up to create one.
     plugins.share.url.locators.create(new DigitalExperienceLocatorDefinition());
 
+    plugins.workflowsExtensions?.registerManagedWorkflowOwner(MANAGED_WORKFLOW_OWNER);
     plugins.workflowsExtensions?.registerStepDefinition(
       getScorecardReportStepDefinition(this.logger, async () => {
         const [, pluginsStart] = await core.getStartServices();
@@ -104,6 +132,16 @@ export class Plugin
             authz: pluginsStart.security?.authz,
           };
         },
+        getScheduledReportsServices: async () => {
+          const [, pluginsStart] = await core.getStartServices();
+          const { workflowsExtensions } = pluginsStart;
+          return {
+            workflowsExtensions,
+            workflowsManagement: plugins.workflowsManagement?.management,
+            getManagedWorkflowsClient: async () =>
+              workflowsExtensions ? this.getManagedWorkflowsClient(workflowsExtensions) : undefined,
+          };
+        },
       },
       runDevModeChecks: this.initializerContext.env.mode.dev,
     });
@@ -121,7 +159,18 @@ export class Plugin
     }
   }
 
-  public start() {}
+  public start(_core: CoreStart, plugins: DigitalExperienceStartDeps) {
+    if (plugins.workflowsExtensions) {
+      // Signals startup completion so Workflows runs auto-upgrades for dynamic report instances.
+      void this.getManagedWorkflowsClient(plugins.workflowsExtensions)
+        .then((client) => client.ready())
+        .catch((error) => {
+          this.logger.warn(
+            `Could not initialize Digital Experience managed workflows: ${describeError(error)}`
+          );
+        });
+    }
+  }
 
   public stop() {}
 }

@@ -13,6 +13,7 @@ import { mobileRouteRepository } from './mobile/route';
 import { networkRouteRepository } from './network/route';
 import { overviewRouteRepository } from './overview/route';
 import { reportRouteRepository } from './report/route';
+import { scheduledReportsRouteRepository } from './report/scheduled_routes';
 import { sessionsRouteRepository } from './sessions/route';
 import { usageRouteRepository } from './usage/route';
 import { savedViewsRouteRepository } from './views/route';
@@ -26,6 +27,7 @@ export const getGlobalDigitalExperienceServerRouteRepository = () => ({
   ...usageRouteRepository,
   ...errorsRouteRepository,
   ...reportRouteRepository,
+  ...scheduledReportsRouteRepository,
   ...networkRouteRepository,
   ...sessionsRouteRepository,
   ...savedViewsRouteRepository,
