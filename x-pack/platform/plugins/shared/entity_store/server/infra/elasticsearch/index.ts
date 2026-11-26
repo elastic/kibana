@@ -15,14 +15,14 @@ import type {
 } from '@elastic/elasticsearch/lib/api/types';
 import { signalRequestOptions } from './signal_request_options';
 
-export { assertReindexSucceeded, reindex } from './reindex';
+export { assertReindexSucceeded, reindex, startReindex, toReindexResult } from './reindex';
 export { chunkByUrlLength } from './chunk_by_url_length';
 export type { ReindexOptions, ReindexResult } from './reindex';
 export { updateByQueryWithScript } from './ingest';
 export type { UpdateByQueryWithScriptOptions } from './ingest';
 export { clearRelationshipIdsByEntitySource } from './entity_relationships';
-export { waitForTaskToComplete } from './wait_for_task';
-export type { WaitForTaskOptions } from './wait_for_task';
+export { cancelTask, pollTaskUntil, waitForTaskToComplete } from './wait_for_task';
+export type { PollTaskUntilResult, WaitForTaskOptions } from './wait_for_task';
 export { retryOnConflict } from './retry_on_conflict';
 export type { RetryOnConflictOptions } from './retry_on_conflict';
 

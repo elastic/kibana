@@ -54,7 +54,8 @@ on serverless and stateful.
   review of the names; nothing reads it yet.
 - **Row metrics** (ES|QL, `server/routes/applications/mobile/`): sessions (distinct `session.id`),
   users (distinct `app.installation.id`), error rate (exceptions per session), last seen, and the
-  latest release. Rows are sorted by sessions and capped at 1,000. Crash-free sessions is `null`
+  latest release. The server returns rows by sessions, capped at 1,000; the table sorts them by
+  ingest (see [Ingest](#ingest)) once it loads. Crash-free sessions is `null`
   ("Not enough data") until a crash is defined and session start reaches the SDKs. The latest
   release query filters on the listed `service.name`s through the request's Query DSL `terms`
   filter, so its ES|QL text is the same on every request.
@@ -101,8 +102,7 @@ on serverless and stateful.
   `ApplicationPage` stays the route's page and hands a mobile application to
   `MobileApplicationPage` (web ones keep the EDOT Browser and Classic RUM page). That page owns its
   header, as the Session page does: the title, a badge per platform the application reported on,
-  Share, the Overview tab, and two actions, **Compare to the previous period** (`compare=true` in
-  the URL, so a reload or Share keeps it) and **Open in Discover**, which opens the application's
+  Share, the Overview tab, and **Open in Discover**, which opens the application's
   mobile events with the URL's filters, newest first, built in the browser from the URL
   (`use_mobile_discover_href.ts`, `common/mobile/discover.ts`). It fetches the KPIs
   (`use_mobile_kpis.ts`) for the header's badges and the Overview, and remounts per application, so
@@ -114,11 +114,14 @@ on serverless and stateful.
   date picker pinned to the right. A picked value fits its capped button (`12em`), so picking one
   never moves the page. The filters are in the URL, so a reload or a shared link keeps them; the
   router drops a value longer than the KPI route accepts (`common/filter_lengths.ts`). Below, the
-  KPI row (sessions, users, error rate). The crash-free card and the sections of the sibling issues
+  **Health summary**: its title, a **Compare to the previous period** toggle (`compare=true` in the
+  URL, so a reload or Share keeps it) and the KPI row (sessions, users, error rate). The crash-free card and the sections of the sibling issues
   (health summary, release health, stability, users, performance, views) join the page as those
-  issues fill them, rather than showing placeholders. Every KPI uses `MobilePanel`: the current
+  issues fill them, rather than showing placeholders. Every KPI uses `ComparedKpiPanel`: the current
   value and a tooltip with the calculation and, with Compare on, its change against the previous
-  period of equal length and the previous value. A change's sign and color follow the rounded value
+  period of equal length and the previous value. The error rate shows with two decimals in the user's
+  number locale (`formatErrorRate`), as in the release table and its chart. A relative change shows one decimal at most
+  (`+3.9%`), whatever the percent pattern. A change's sign and color follow the rounded value
   shown, so one that rounds to 0 reads `0%` with a neutral badge. A warning shows when the user
   can't read every OTel index, as the counts may then miss data. Without mobile data it links to
   the EDOT Android and iOS setup docs, unless the user can't read every OTel index: then it says
@@ -131,6 +134,45 @@ on serverless and stateful.
   optional `osName` and `release`. It also lists, for the pickers, the OS names (whatever the OS
   and release filters) and releases (on the selected OS), each with its sessions, and the
   platforms and environments.
+- **Release health** (`mobile_overview/release_health/`), below the KPI row and only when it
+  shows: a table of sessions, users and error rate (exceptions per session, as the KPI row) per
+  release, the error rate over time by release, and the release adoption (sessions per release,
+  stacked), the charts with a marker where each release first appears. Releases are grouped as the
+  **top 5 by sessions** in the range, and **Other** for the rest (last in the table, left out when
+  nothing falls outside the top 5; with a release filter there is one group). A release needs
+  **100 sessions** (`MIN_RELEASE_SESSIONS`) in the range for an error rate: below it the table
+  shows "Not enough data" and the error rate chart leaves the release out. The chart also leaves a
+  gap for a time bucket with fewer than 10 sessions (`MIN_BUCKET_SESSIONS`), where one exception
+  would swing the rate from 0 to a spike; with no point left to draw, it says why. The charts'
+  buckets line up with the user's time zone, as the other time charts': the route takes
+  `timeZone` and sends it as the ES|QL request's `time_zone`, which `TBUCKET` follows (local
+  midnight for days, weeks and months, local alignment for fixed intervals); the series counts
+  sessions and exceptions only. Every release gets every bucket of the range: `TBUCKET` leaves out
+  the empty ones, so a `size: 0` date histogram (`min_doc_count: 0`, `extended_bounds`, same time
+  zone) lists them all, both of an hour repeated when clocks fall back included, and the route fills
+  them with no sessions and no error rate, so the charts never draw across them. A release **first appears** at its first document with
+  that `service.version` in the selected environment: its first one in the range, which comes
+  with its stats, unless it has one in the 30 days before the range, which a separate query checks
+  over those days only; one seen before the range start gets no marker, and releases first seen in the same bucket
+  share one (e.g. `2.3.0, 2.2.1`, or `2.3.0 +2` for more). The section loads apart from the KPIs
+  (`GET .../mobile_applications/{serviceName}/releases`, the KPI route's params and `timeZone`)
+  and has its own error state with a retry; the toolbar's refresh reloads both. The route ranks
+  the releases with their stats in one query (one more than the top 5, which tells whether any are
+  left for "Other", whose stats a second query counts only then), then reads the series, capped at
+  10,000 rows, and the releases seen before the range; with the release filter, all at once.
+  Releases with equal sessions keep their order (the highest first) and their colours, which follow
+  every release's rank, so a release keeps its colour when the page is filtered to it; the table's
+  sort survives a reload.
+  The table, in a bordered panel like the KPIs and charts, shows each release's share of the
+  sessions (none while filtered by a release, where it would read 100%), sorts by sessions, users
+  or error rate ("Other" stays last) and shows the error rate with two decimals; a release filters
+  the page by it (the `release` filter; not one longer than `MAX_RELEASE_LENGTH`, which the URL and
+  the routes reject, as the release picker leaves it out), and the selected one shows as a pill whose cross takes
+  the filter off. Each chart has a one-line header (an `h3` and an info tip with the
+  calculation), so both plots line up, and a legend below it (hover a release to spotlight it,
+  click to hide it); dragging over one narrows the time range. Session shares show one decimal at
+  most (`formatKpiPercent`). The crash rate (#64) and the cold start (#68) join the table's columns and
+  the charts later.
 
 ## Pages
 
@@ -140,8 +182,8 @@ The monitored applications in the selected time range, served by
 `GET /internal/digital_experience/applications`, which requires the Digital Experience and APM
 privileges like the app.
 
-- **Summary:** applications, sessions, page loads, JS errors per page load, failed HTTP requests and
-  the applications with a poor Core Web Vital. Like the chart, it covers the selected environment and
+- **Summary:** applications, ingest, sessions, page loads, JS errors per page load, failed HTTP
+  requests and the applications with a poor Core Web Vital. Like the chart, it covers the selected environment and
   source; the search narrows only the table. The sessions are the total of the sessions that started
   in the range, over the EDOT Browser applications, so it shows a dash for Classic RUM, which has no
   sessions, and when the EDOT Browser source failed. It adds up to the same total as the sessions in
@@ -184,11 +226,14 @@ privileges like the app.
   the toggle disables **Sessions**, and says why, when only Classic RUM is selected or the EDOT
   Browser source failed. The choice is kept until they are back, the chart showing page loads
   meanwhile.
+- **Ingest over time:** beside the chart, the estimated ingest in the same buckets, stacked by the 10
+  applications with the most and "Other" (see [Ingest](#ingest)).
 - **Filters:** environment and source (kept in the URL), and a search on the name.
-- **Table:** per application, its source, page loads, JS errors per page load, LCP / INP / CLS / FCP /
-  TTFB p75 colored by rating (with the good / needs improvement / poor shares in the tooltip), JS
-  errors, failed HTTP requests and when it was last seen. Page loads, which the table is sorted by, is
-  always shown; a column selector, kept in local storage, hides FCP, TTFB and JS errors by default.
+- **Table:** per application, its source, ingest, page loads, JS errors per page load, LCP / INP /
+  CLS / FCP / TTFB p75 colored by rating (with the good / needs improvement / poor shares in the
+  tooltip), JS errors, failed HTTP requests and when it was last seen. Ingest, which the table is
+  sorted by, and page loads are always shown; a column selector, kept in local storage, hides FCP,
+  TTFB and JS errors by default.
 - **Empty states:** with no applications at all, a link to the EDOT Browser docs; with none in the
   selected environment, a button to show all environments.
 - With all sources, a name with data in both shows its EDOT Browser row with a "+ Classic RUM" hint
@@ -196,7 +241,8 @@ privileges like the app.
 
 **Where the EDOT Browser rows come from:** the sessions index only (see [Sessions](#sessions)), as
 the current user, over session summaries instead of aggregating every raw event; the list never
-reads `logs-*.otel-*` or `traces-*.otel-*`. Classic RUM reads its own indices. Two searches run at
+reads `logs-*.otel-*` or `traces-*.otel-*` (only the separate ingest request does, see
+[Ingest](#ingest)). Classic RUM reads its own indices. Two searches run at
 once, one for the metrics and one for the p75 of the vitals (see
 [Applications list performance](#applications-list-performance)).
 Without sessions set up there is no index and so no EDOT Browser application, and a failing
@@ -243,10 +289,10 @@ The page loads chart and the Overview trends bucket by the time zone of Advanced
 weeks or months, so they start at local midnight. Below that they are fixed intervals (up to 12
 hours) that keep their local alignment across daylight saving changes; the bucket holding a change
 is an hour shorter or longer. The first and last buckets, which cover only part of the selected
-range, are shaded as partial data, as in Lens (`Endzones` from `@kbn/charts-plugin`), with its
-limits: area charts aren't shaded, and as every bucket is measured by the shortest one, a last
-bucket longer than that (a 31-day month after February, a day after a daylight saving change) may
-not be.
+range, are shaded as partial data, as in Lens (`Endzones` from `@kbn/charts-plugin`, without
+`isFullBin`): from the range's edges over the part of the edge buckets outside it, for bars and
+for lines and areas, whose domain reaches the end of the last bucket. As every bucket is measured by the shortest one, a last bucket longer than that (a
+31-day month after February, a day after a daylight saving change) may not be shaded.
 
 Both routes take an optional `timeZone` (at most 64 characters; `UTC` when left out): a name
 moment-timezone knows, or a `+HH:MM`/`-HH:MM` offset, which the browser sends when it can't name
@@ -254,6 +300,31 @@ its time zone. Anything else is a 400. The page sends the four `dateFormat:tz` n
 rejects (`EST`, `HST`, `MST`, `ROC`) as the zones they link to. They return the bucket interval and
 the queried range next to the buckets: `pageLoadsOverTime.histogram` on the Applications route and
 `overview.trendHistogram` on the Overview route.
+
+#### Ingest
+
+The RUM telemetry stored for each application in the range, not its own network traffic, served
+by `GET /internal/digital_experience/applications/ingest` apart from the list, so the rows, summary
+and page loads chart never wait for it. The page asks only for the shown tab's applications
+(`applicationType`), as each source counts every document of the range. Nothing records stored
+bytes per `service.name`, and data streams hold many applications, so it is an estimate:
+
+- each application's documents per backing index in the range (EDOT Browser `webjs` documents,
+  every Classic RUM agent document, the EDOT mobile documents), grouped by `_index` as
+  `data_stream.dataset` and `namespace` read as `null` on EDOT data in ES|QL;
+- times the average stored size of a document of the index's data stream, primaries only (the data
+  set size, so searchable snapshots count): from `indices.stats` on stateful, which needs the
+  **`monitor`** index privilege on the raw indices on top of `read`, and from `_metering/stats` as
+  the secondary auth user on serverless;
+- the chart names each source's 10 applications with the most and the 10 of both sources, so any
+  source filter finds its 10 among them; the rest of each source is "Other".
+
+Each index is asked for as a wildcard, which Elasticsearch resolves to the indices the user may
+monitor, so an index they can't leaves out only itself. Applications without a size get a dash,
+sort last, and the tooltips say why (no `monitor`, remote indices, which neither API reads, or a
+failed search). Checked against exact per-application sizes on synthtrace data, shares were within
+about one percentage point; applications with unusually large documents, or data streams shared with
+backend services, drift more.
 
 ### Application details (`/{serviceName}?source=otel|classic`)
 
@@ -357,7 +428,73 @@ it is kept in the URL (`browser`, `os`, `device`, `country`, `pageUrl`, `percent
   its per-type counts, its sessions (**Pages** shows a lower bound: the largest session count of the
   URLs that fold into the path) and **Open sessions**, which opens the Sessions list filtered to
   that element or page (`withFrustration`, `frustrationTarget` / `frustrationPage`). The page filter
-  narrows it, as the signals carry a page URL. See [Frustration signals](#frustration-signals).
+  narrows it, as the signals carry a page URL. A **View dashboard** link in its header opens the
+  Frustration page below. See [Frustration signals](#frustration-signals).
+
+### Frustration (`/{serviceName}/frustration?source=otel`)
+
+A page of EDOT Browser applications only (Classic RUM shows an empty prompt), opened from the
+Overview's Frustration panel with **View dashboard**; it has no tab. Its breadcrumb is Applications >
+{application} > Frustration. The time range and environment are the app's and are kept in the URL.
+
+- **Dashboard:** the portable dashboard (`DashboardRenderer`, view mode) with Lens panels built as
+  code from ES|QL (`LensConfigBuilder`, `public/pages/frustration/utils/frustration_panels.ts`), so
+  each has the panel menu's inspect, maximize and **Explore in Discover / Lens**. Collapsible
+  sections, laid out after Datadog's RUM frustration signals dashboard, each open with a by-value
+  markdown panel defining the signal (the Overview panel's definitions). Each metric's panel
+  `description` says what it measures, which the dashboard shows as an info icon tooltip by the
+  title:
+  - **Overview:** signals per session and rage, dead and error clicks per session (2 decimals, with
+    the count), frustrated sessions (share of all sessions, with their count); signals over time,
+    stacked by type, and the frustrated sessions by their number of signals (`10+` caps it); the
+    top actions, by type, element (CSS selector) and page, with signals, sessions and signals per
+    page view (2 decimals; above 1 when a view has several).
+  - **Rage clicks**, **Dead clicks**, **Error clicks:** the average per page view, with the count,
+    the share of sessions with the type (with their count), and the type's top actions by page and
+    element; error clicks add the clicks by exception.
+  - **Breakdowns** (collapsed): signals per session by app version, browser and device, stacked by
+    type, so a release or browser with less traffic but more signals per session stands out; the
+    busiest values without signals stay as a baseline.
+
+  Once sessions are set up and built (`/sessions/status`: installed, not rebuilding, healthy, so
+  not lagging, degraded or turned off),
+  the per-session panels (signals and frustrated share per session, per page view, the
+  distribution and the breakdowns) read the session summaries, one document per session instead
+  of every event, with the sessions that overlap the time range (`start_time <= ?_tend AND
+  end_time >= ?_tstart`), as the Sessions list does. Signals over time, top actions and exceptions
+  read the events, which the summaries don't keep. Before that, every panel reads the events:
+  sessions are the distinct non-empty `session.id` of the page views and signals of the
+  application, as every session has a page view, so a session whose page views fall before the
+  time range can be in the list and not on the dashboard. Sessions are counted exactly up to
+  40,000 (`COUNT_DISTINCT` precision), as the summaries count them. The source is picked once per
+  time range, environment and **Refresh**, so a status change doesn't remount the dashboard.
+  Shares have one decimal. Page views are
+  `PAGE_VIEW_EVENTS` (`common/otel_data.ts`) in the logs. A page is labeled in ES|QL as
+  `toPagePath` labels it for the Overview's frustrated pages (hash route, else path, without
+  query), and its views are counted with `INLINE STATS ... BY page` before the signals are grouped.
+- **Save as dashboard:** a header action, with the privilege to save dashboards
+  (`dashboard_v2.showWriteControls`), opens Kibana's save modal (`DashboardApi.runInteractiveSave`)
+  titled after the application (and environment), then opens the saved dashboard. It keeps the
+  panels and sections with the application and environment in their ES|QL; the native panel
+  isn't part of it. Saved while the per-session panels read the summaries, it keeps reading them
+  for any time range, which its description says: ranges older than the summaries keep have no
+  sessions there, and once sessions are turned off they stop updating.
+- **Queries:** every panel filters on the application and, unless all environments are picked, the
+  environment, in the ES|QL `WHERE` (escaped). The time range goes through `?_tstart`/`?_tend`:
+  Lens takes the column compared with the first of them as the panel's time field and filters it
+  on the range too (the Lens API can't set it for ES|QL), so the events compare `@timestamp` first,
+  and the summaries wrap `start_time` in `TO_DATETIME` so that there's no time field to filter
+  out sessions that started before the range. The field
+  names are shared with the summary query (`common/otel_source_fields.ts`) and the event names come
+  from `common/otel_data.ts`.
+- **Native panel:** above the dashboard, the Overview's **Elements** / **Pages** panel from
+  `/usage`, with **Open sessions**, as Lens tables can't link into the Sessions list with those
+  filters.
+- **Plugins:** `dashboard` and `lens` are optional. Without them the Overview hides the
+  link and the page shows an empty prompt in place of the dashboard.
+- **Limits:** the Overview's filters (browser, OS, device, country, version, page) and KQL query
+  aren't carried over yet: the dashboard and the panel above it cover the application and
+  environment only.
 
 ### Sessions (`/{serviceName}/sessions?source=otel`)
 
@@ -501,7 +638,7 @@ country, city and pages, which the list's search matches anywhere in.
 ### Frustration signals
 
 EDOT Browser reports a rage, dead or error click as a log event of its own
-(`browser.frustration.rage_click`, `.dead_click` and `.error_click`, in `common/otel_data.ts`),
+(`elastic.frustration.rage_click`, `.dead_click` and `.error_click`, in `common/otel_data.ts`),
 timestamped at the first click, with the element's `browser.css_selector` and the page's `url.full`.
 Kibana adds no detection of its own; it counts what the SDK reports:
 
@@ -850,7 +987,13 @@ readers also need `read` on `digital-experience-sessions-*` (and on the source i
 session detail timeline). Without it they answer 403 naming those privileges; other failures are
 logged and answer 500 without Elasticsearch details:
 
-- `GET /internal/digital_experience/sessions/status`: whether sessions are set up or turned off, the
+- `GET /internal/digital_experience/sessions/status` (fetched by `SessionsStatusProvider` only once
+  a web page asks for it, and checked back only while one is open, at once when one opens again
+  during a rebuild, so mobile pages and the list's
+  Mobile tab the URL picks request none; on that tab, with the status unknown, the list keeps its
+  Web tab, where sessions may still need setting up. The Mobile tab the list opens by itself, with
+  only mobile rows, requests it and checks back while sessions rebuild, so the list fetches again,
+  with their Web applications, once they're built; its refresh doesn't check the status): whether sessions are set up or turned off, the
   task's health, lag and last error, whether it is still building, how many days sessions are kept,
   whether the current user can set them up (`canEnable`) and whether the app should do it for them
   (`autoEnable`), what keeps anyone from
@@ -874,7 +1017,7 @@ logged and answer 500 without Elasticsearch details:
 - `server/services/sessions/`: the session summaries: the task, its ES|QL queries, the index, status,
   and enabling, with their routes and readers in `server/routes/sessions/`.
 - `public/pages/`: one folder per page (`applications_list/`, `application_details/`, `sessions/`,
-  `session_detail/`) with its own components, hooks and utils; what several pages share is in
-  `public/components/`, `public/hooks/` and `public/utils/`. `public/application/` is the app shell.
-  The applications list keeps each tab's components in `web/` and `mobile/`, and what both use in
-  `components/`.
+  `session_detail/`, `frustration/`) with its own components, hooks and utils; what several pages
+  share is in `public/components/`, `public/hooks/` and `public/utils/`. `public/application/` is the
+  app shell. The applications list keeps each tab's components in `web/` and `mobile/`, and what both
+  use in `components/`.

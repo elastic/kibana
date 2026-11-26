@@ -8,29 +8,24 @@
 import { useMemo } from 'react';
 import moment from 'moment-timezone';
 import type { IUiSettingsClient } from '@kbn/core/public';
-import { getUserTimeZone } from '@kbn/data-plugin/common';
 import { UI_SETTINGS } from '@kbn/data-plugin/public';
 import type { FieldFormatsGetConfigFn } from '@kbn/field-formats-plugin/common';
 import { NumberFormat, PercentFormat } from '@kbn/field-formats-plugin/common';
+import { getTimeZone } from '@kbn/visualization-utils';
+import { toElasticsearchTimeZone } from '../../common/time_zone';
 import { useKibanaServices } from './use_kibana_services';
-
-// Every `moment.tz.names()` entry (and so `dateFormat:tz` option) that an Elasticsearch 9.7
-// `date_histogram` rejects, as the zone it links to.
-const ES_TIME_ZONE_OF: Readonly<Record<string, string>> = {
-  EST: 'America/Panama',
-  HST: 'Pacific/Honolulu',
-  MST: 'America/Phoenix',
-  ROC: 'Asia/Taipei',
-};
 
 const COMPACT_NUMBER_PATTERN = '0,0.[0]';
 const COMPACT_PERCENT_PATTERN = '0,0.[0]%';
+const ERROR_RATE_PATTERN = '0,0.00';
 
 export interface Formatters {
   /** A count or other number, with the `format:number:defaultPattern` advanced setting. */
   formatNumber: (value: number) => string;
   /** A share between 0 and 1, with the `format:percent:defaultPattern` advanced setting. */
   formatPercent: (share: number) => string;
+  /** An error rate, always with two decimals in the user's number locale, e.g. "0.10". */
+  formatErrorRate: (rate: number) => string;
   /** A share on a KPI tile, to one decimal at most, e.g. "42.4%": more reads as noise there. */
   formatKpiPercent: (share: number) => string;
   /** A change, to one decimal at most, with a sign unless it rounds to 0, e.g. "+1.5" or "0". */
@@ -55,6 +50,7 @@ export const createFormatters = (uiSettings: IUiSettingsClient): Formatters => {
   // Changes and KPI shares to one decimal at most, whatever the default patterns: "-4.949%" reads
   // as noise on a tile.
   const kpiPercent = new PercentFormat({ pattern: COMPACT_PERCENT_PATTERN }, getConfig);
+  const errorRate = new NumberFormat({ pattern: ERROR_RATE_PATTERN }, getConfig);
   const signedNumber = new NumberFormat(
     { alwaysShowSign: true, pattern: COMPACT_NUMBER_PATTERN },
     getConfig
@@ -64,13 +60,14 @@ export const createFormatters = (uiSettings: IUiSettingsClient): Formatters => {
     getConfig
   );
   const dateFormat = uiSettings.get<string>(UI_SETTINGS.DATE_FORMAT);
-  // As Kibana's own date histograms do: `Browser` becomes the browser's IANA time zone.
-  const userTimeZone = getUserTimeZone((key) => uiSettings.get(key));
-  const timeZone = ES_TIME_ZONE_OF[userTimeZone] ?? userTimeZone;
+  // As Lens charts do: always a zone name, `Browser` the browser's, never a UTC offset moment.tz
+  // can't use
+  const timeZone = toElasticsearchTimeZone(getTimeZone(uiSettings));
 
   return {
     formatNumber: (value) => number.convertToText(value),
     formatPercent: (share) => percent.convertToText(share),
+    formatErrorRate: (rate) => errorRate.convertToText(rate),
     formatKpiPercent: (share) => kpiPercent.convertToText(share),
     formatSignedNumber: (value) => signedNumber.convertToText(value),
     formatSignedPercent: (share) => signedPercent.convertToText(share),
