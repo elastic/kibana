@@ -13,6 +13,7 @@ import {
   withFleetServerForEndpoint,
   type EnrolledHost,
 } from '../../../fixtures/enrolled_endpoint';
+import { buildRequestHeaders } from '../../../fixtures/request_headers';
 import {
   createProtectedEndpointPolicy,
   createUnprotectedEndpointPolicy,
@@ -27,15 +28,16 @@ export type { EnrolledHost, EndpointAgentPolicy };
 export interface EndpointAgentPolicies {
   /** The policy the host enrolls on. */
   first: EndpointAgentPolicy;
-  /** The policy the host is reassigned to. */
-  second: EndpointAgentPolicy;
+  /** The policy the host is reassigned to; created only when `secondProtected` is set. */
+  second?: EndpointAgentPolicy;
 }
 
 interface AgentPolicyOptions {
   /** Policies are named `<namePrefix>-a-<timestamp>` and `<namePrefix>-b-<timestamp>`. */
   namePrefix: string;
   firstProtected: boolean;
-  secondProtected: boolean;
+  /** Omit it when the spec does not reassign the agent, so no second policy is created. */
+  secondProtected?: boolean;
 }
 
 interface TamperProtectionTestFixtures {
@@ -46,6 +48,11 @@ interface TamperProtectionTestFixtures {
 
 interface TamperProtectionWorkerFixtures {
   fleetServer: void;
+  /**
+   * Headers with an API key that can use Fleet and read Endpoint host metadata,
+   * shared by every request the specs make with `apiClient`.
+   */
+  requestHeaders: Record<string, string>;
 }
 
 const createAgentPolicy = (
@@ -58,6 +65,14 @@ const createAgentPolicy = (
     ? createProtectedEndpointPolicy(kbnClient, log, name)
     : createUnprotectedEndpointPolicy(kbnClient, log, name);
 
+/** The policy the host is reassigned to. Throws when the spec did not ask for a second policy. */
+export const getReassignPolicy = ({ second }: EndpointAgentPolicies): EndpointAgentPolicy => {
+  if (!second) {
+    throw new Error('Set `secondProtected` in `agentPolicyOptions` to create the reassign policy');
+  }
+  return second;
+};
+
 export const apiTest = baseApiTest.extend<
   TamperProtectionTestFixtures,
   TamperProtectionWorkerFixtures
@@ -67,6 +82,24 @@ export const apiTest = baseApiTest.extend<
       await withFleetServerForEndpoint({ kbnClient, log }, use);
     },
     { scope: 'worker', timeout: FLEET_AND_HOST_TIMEOUT_MS },
+  ],
+
+  requestHeaders: [
+    async ({ requestAuth }, use) => {
+      const { apiKeyHeader } = await requestAuth.getApiKeyForCustomRole({
+        elasticsearch: { cluster: [], indices: [] },
+        kibana: [
+          {
+            base: [],
+            // `siemV5: read` grants the `securitySolution` API privilege the host metadata route requires.
+            feature: { fleetv2: ['all'], siemV5: ['read'] },
+            spaces: ['default'],
+          },
+        ],
+      });
+      await use(buildRequestHeaders(apiKeyHeader));
+    },
+    { scope: 'worker' },
   ],
 
   agentPolicyOptions: [
@@ -88,12 +121,14 @@ export const apiTest = baseApiTest.extend<
           `${namePrefix}-a-${suffix}`,
           firstProtected
         );
-        created.second = await createAgentPolicy(
-          kbnClient,
-          log,
-          `${namePrefix}-b-${suffix}`,
-          secondProtected
-        );
+        if (secondProtected !== undefined) {
+          created.second = await createAgentPolicy(
+            kbnClient,
+            log,
+            `${namePrefix}-b-${suffix}`,
+            secondProtected
+          );
+        }
 
         await use({ first: created.first, second: created.second });
       } finally {
