@@ -111,7 +111,7 @@ spaceTest.describe('TSVB Time Series - chart data', { tag: testData.TSVB_DEPLOYM
       const debugState = await visualBuilder.getChartDebugState();
       expect(getLegendNames(debugState)).toStrictEqual(['apache', 'nginx']);
       // The first two colors of the elastic palette.
-      expect(getAreaChartColors(debugState)).toStrictEqual(['#16c5c0', '#a6edea']);
+      expect(getAreaChartColors(debugState)).toStrictEqual(['#00bda0', '#93f0d9']);
       expect(getAreaChartData(debugState)).toStrictEqual([
         [1442620800000, 0],
         [1442664000000, 0],

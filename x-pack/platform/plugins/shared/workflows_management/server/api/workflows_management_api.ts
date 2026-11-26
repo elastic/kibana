@@ -358,6 +358,15 @@ const withEnabledState = ({
 const hasServiceAccount = (definition: unknown): boolean =>
   isRecord(definition) && isRecord(definition.settings) && Boolean(definition.settings.run_as);
 
+/**
+ * Whether the YAML is a managed workflow's stored YAML. Users can't save other YAML to a
+ * managed workflow, so YAML that differs from it isn't managed.
+ */
+const isStoredManagedYaml = (
+  workflow: Pick<WorkflowDetailDto, 'managed' | 'yaml'> | null,
+  yaml: string
+): boolean => workflow?.managed === true && workflow.yaml === yaml;
+
 export class WorkflowsManagementApi {
   private smlClient: Pick<
     AgentBuilderSmlPluginStart,
@@ -680,7 +689,9 @@ export class WorkflowsManagementApi {
     ) {
       throw new ManagedWorkflowUpdateForbiddenError();
     }
-    const result = await this.workflowsService.updateWorkflow(id, workflow, spaceId, request);
+    const result = await this.workflowsService.updateWorkflow(id, workflow, spaceId, request, {
+      isManaged: originalWorkflow.managed === true,
+    });
     this.notifySml(id, spaceId, 'update', request);
     return result;
   }
@@ -717,14 +728,14 @@ export class WorkflowsManagementApi {
   // YAML stands in to describe the calls; YAML that doesn't parse runs nothing.
   private async getDraftDefinition(
     yaml: string,
-    workflow: { id: string; enabled: boolean },
+    { id, enabled, managed }: { id: string; enabled: boolean; managed?: boolean },
     spaceId: string,
     request: KibanaRequest
   ): Promise<{ definition: unknown; isValid: boolean }> {
     const parsedDraft = parseDraftDefinition(yaml);
     const storedDraft = await this.workflowsService.getDefinitionToStore(
       yaml,
-      workflow,
+      { id, enabled, managed: managed === true },
       spaceId,
       request
     );
@@ -1076,7 +1087,8 @@ export class WorkflowsManagementApi {
       params.spaceId,
       params.request,
       // This throws on an invalid result, so it must not apply the variable rules.
-      { includeVariableRules: false, includeEsqlRules: false }
+      // Inline YAML is never saved, so it isn't a managed workflow.
+      { includeVariableRules: false, includeEsqlRules: false, isManaged: false }
     );
     if (!validation.valid || !validation.parsedWorkflow) {
       throw buildWorkflowValidationError(validation, params.yaml);
@@ -1282,6 +1294,7 @@ export class WorkflowsManagementApi {
       {
         includeVariableRules: false,
         includeEsqlRules: false,
+        isManaged: isStoredManagedYaml(existingWorkflow, resolvedYaml),
       }
     );
     if (!validation.valid || !validation.parsedWorkflow) {
@@ -1340,12 +1353,14 @@ export class WorkflowsManagementApi {
     request: KibanaRequest
   ): Promise<string> {
     let workflowUid: string | undefined;
+    let isManaged = false;
     if (workflowId) {
       await this.assertWorkflowAccess(workflowId, spaceId, 'edit', request, {
         allowAdminOverride: false,
       });
       const existingWorkflow = await this.workflowsService.getWorkflow(workflowId, spaceId);
       workflowUid = existingWorkflow?.workflowUid;
+      isManaged = isStoredManagedYaml(existingWorkflow, workflowYaml);
     }
     const validation = await this.workflowsService.validateWorkflow(
       workflowYaml,
@@ -1354,6 +1369,7 @@ export class WorkflowsManagementApi {
       {
         includeVariableRules: false,
         includeEsqlRules: false,
+        isManaged,
       }
     );
     if (!validation.valid || !validation.parsedWorkflow) {
@@ -1922,15 +1938,20 @@ export class WorkflowsManagementApi {
     return getWorkflowJsonSchema(zodSchema);
   }
 
-  /** Backs `POST /api/workflows/validate`, which reports and does not gate. */
+  /**
+   * Backs `POST /api/workflows/validate`, which reports and does not gate. Set `isManaged` only
+   * for the stored YAML of a managed workflow; the route never sets it.
+   */
   public async validateWorkflow(
     yaml: string,
     spaceId: string,
-    request: KibanaRequest
+    request: KibanaRequest,
+    { isManaged = false }: { isManaged?: boolean } = {}
   ): Promise<ValidateWorkflowResponseDto> {
     return this.workflowsService.validateWorkflow(yaml, spaceId, request, {
       includeVariableRules: true,
       includeEsqlRules: true,
+      isManaged,
     });
   }
 

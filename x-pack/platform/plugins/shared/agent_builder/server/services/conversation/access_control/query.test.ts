@@ -6,7 +6,7 @@
  */
 
 import { ConversationAccessControlMode, type UserIdAndName } from '@kbn/agent-builder-common';
-import { buildPinnedFilter, buildReadAccessFilter } from './query';
+import { buildOwnedConversationFilter, buildPinnedFilter, buildReadAccessFilter } from './query';
 
 const user: UserIdAndName = {
   id: 'user-profile-id',
@@ -14,6 +14,41 @@ const user: UserIdAndName = {
 };
 
 describe('conversation access control query', () => {
+  describe('buildOwnedConversationFilter', () => {
+    it('matches on the profile id, and on username only for documents without one', () => {
+      expect(buildOwnedConversationFilter({ user })).toEqual({
+        bool: {
+          should: [
+            { term: { user_id: user.id } },
+            {
+              bool: {
+                must_not: { exists: { field: 'user_id' } },
+                filter: { term: { user_name: user.username } },
+              },
+            },
+          ],
+          minimum_should_match: 1,
+        },
+      });
+    });
+
+    it('matches on username only when the user has no profile id', () => {
+      expect(buildOwnedConversationFilter({ user: { username: 'service-account' } })).toEqual({
+        bool: {
+          should: [
+            {
+              bool: {
+                must_not: { exists: { field: 'user_id' } },
+                filter: { term: { user_name: 'service-account' } },
+              },
+            },
+          ],
+          minimum_should_match: 1,
+        },
+      });
+    });
+  });
+
   describe('buildReadAccessFilter', () => {
     it('matches public, owned and shared conversations for accessible agents', () => {
       expect(buildReadAccessFilter({ user, agentIds: ['agent-1', 'agent-2'] })).toEqual({
