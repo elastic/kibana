@@ -2751,6 +2751,7 @@ src/platform/packages/shared/kbn-connector-specs/src/specs/inbound_webhook/** @e
 src/platform/packages/shared/kbn-connector-specs/src/specs/jenkins/** @elastic/workflows-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/jina/** @elastic/jinastic
 src/platform/packages/shared/kbn-connector-specs/src/specs/kubernetes/** @elastic/nightshift
+src/platform/packages/shared/kbn-connector-specs/src/specs/microsoft_defender_for_endpoint/** @elastic/workflows-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/microsoft_sql_server/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/microsoft_teams/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/misp/** @elastic/workflows-eng
@@ -2781,6 +2782,7 @@ src/platform/packages/shared/kbn-connector-specs/src/specs/sublime_security/** @
 src/platform/packages/shared/kbn-connector-specs/src/specs/tavily/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/threatq/** @elastic/workflows-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/trello/** @elastic/workchat-eng
+src/platform/packages/shared/kbn-connector-specs/src/specs/trend_vision_one/** @elastic/workflows-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/unifi/** @elastic/workflows-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/urlscan_io/** @elastic/workflows-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/urlvoid/** @elastic/workflows-eng
@@ -3252,7 +3254,7 @@ src/platform/packages/shared/kbn-workflows/managed/definitions/nightshift_detect
 # Context Engine managed workflows
 src/platform/packages/shared/kbn-workflows/managed/definitions/context_engine @elastic/context-eng
 
-# AlertZero managed workflows (shared files: index, constants, template values, rule workflows)
+# AlertZero managed workflows (shared files: index, constants, template values)
 src/platform/packages/shared/kbn-workflows/managed/definitions/alertzero @elastic/alertzero-common-layer
 # Per-watch definitions without an override below fall back to @elastic/alertzero-common-layer.
 
@@ -3307,6 +3309,20 @@ x-pack/solutions/security/plugins/security_solution/common/workflows/alert_analy
 /x-pack/solutions/security/plugins/alertzero/server/telemetry/workers/hunt.md @elastic/security-investigations
 x-pack/solutions/security/plugins/security_solution/public/detection_engine/rule_management_ui/pages/alert_analysis_workflow @elastic/security-investigations
 x-pack/solutions/security/plugins/security_solution/server/workflows/alert_analysis_workflow @elastic/security-investigations
+
+# AlertZero Detection Watch services
+/src/platform/packages/shared/kbn-workflows/managed/definitions/alertzero/detection @elastic/security-detection-engineering
+/x-pack/solutions/security/packages/kbn-alertzero-common/impl/schemas/components/detection_watch_settings.schema.yaml @elastic/security-detection-engineering
+/x-pack/solutions/security/packages/kbn-alertzero-common/impl/schemas/components/detection_watch_settings.gen.ts @elastic/security-detection-engineering
+/x-pack/solutions/security/packages/kbn-alertzero-common/impl/worker_settings/detection_watch.ts @elastic/security-detection-engineering
+/x-pack/solutions/security/plugins/alertzero/common/telemetry/to_detection_rule_type.ts @elastic/security-detection-engineering
+/x-pack/solutions/security/plugins/alertzero/common/telemetry/to_detection_rule_type.test.ts @elastic/security-detection-engineering
+/x-pack/solutions/security/plugins/alertzero/public/pages/watches/custom_settings/rule_coverage @elastic/security-detection-engineering
+/x-pack/solutions/security/plugins/alertzero/public/pages/watches/custom_settings/rule_tuning @elastic/security-detection-engineering
+/x-pack/solutions/security/plugins/alertzero/server/managed_workflows/detection_rule_workflows.test.ts @elastic/security-detection-engineering
+/x-pack/solutions/security/plugins/alertzero/server/step_types/report_worker_outcome/shipped_yaml_contract.detection.fixture.ts @elastic/security-detection-engineering
+/x-pack/solutions/security/plugins/alertzero/server/step_types/report_worker_outcome/shipped_yaml_contract.detection.test.ts @elastic/security-detection-engineering
+/x-pack/solutions/security/plugins/alertzero/server/telemetry/workers/detection.md @elastic/security-detection-engineering
 
 # AlertZero Triage Watch
 /x-pack/solutions/security/plugins/alertzero/server/alert_triage @elastic/security-investigations
