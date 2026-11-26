@@ -22,7 +22,6 @@ import {
 } from '@elastic/eui';
 import { KbnWarningCallout } from '@kbn/ui-callout';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { DataStreamOptions } from '../../../../../common/types/data_streams';
 import { indexModeLabels } from '../../../lib/index_mode_labels';
 import { allowAutoCreateRadioIds, LOOKUP_INDEX_MODE } from '../../../../../common/constants';
 import { serializers } from '../../../../shared_imports';
@@ -65,7 +64,6 @@ const getDescriptionText = (data: Aliases | boolean | undefined) => {
 interface Props {
   template: TemplateDeserialized;
   navigateToStep: (stepId: WizardSection) => void;
-  dataStreamOptions?: DataStreamOptions;
   onSaveBlockedChange?: (isBlocked: boolean) => void;
 }
 
@@ -96,7 +94,7 @@ const PreviewTab = ({ template }: { template: { [key: string]: any } }) => {
 };
 
 export const StepReview: React.FunctionComponent<Props> = React.memo(
-  ({ template, navigateToStep, dataStreamOptions, onSaveBlockedChange }) => {
+  ({ template, navigateToStep, onSaveBlockedChange }) => {
     const {
       config: { isServerless },
     } = useAppContext();
@@ -127,11 +125,10 @@ export const StepReview: React.FunctionComponent<Props> = React.memo(
             : serializeTemplate(
                 stripEmptyFields(template!, {
                   types: ['string'],
-                }) as TemplateDeserialized,
-                dataStreamOptions
+                }) as TemplateDeserialized
               )
         ),
-      [dataStreamOptions, isLegacy, template]
+      [isLegacy, template]
     );
     const serializedTemplate = useMemo(
       () =>

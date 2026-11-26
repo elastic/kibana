@@ -355,7 +355,6 @@ export const TemplateForm = ({
           <FormWizardStep id={wizardSections.review.id} label={wizardSections.review.label}>
             <StepReviewContainer
               getTemplateData={buildTemplateObject(indexTemplate)}
-              dataStreamOptions={dataStreamOptions}
               onSaveBlockedChange={setIsReviewSaveBlocked}
             />
           </FormWizardStep>

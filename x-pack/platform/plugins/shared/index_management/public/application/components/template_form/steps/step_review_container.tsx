@@ -7,7 +7,6 @@
 
 import React from 'react';
 
-import type { DataStreamOptions } from '../../../../../common/types/data_streams';
 import type { TemplateDeserialized } from '../../../../../common';
 import { Forms } from '../../../../shared_imports';
 import type { WizardContent, WizardSection } from '../template_form';
@@ -15,29 +14,25 @@ import { StepReview } from './step_review';
 
 interface Props {
   getTemplateData: (wizardContent: WizardContent) => TemplateDeserialized;
-  dataStreamOptions?: DataStreamOptions;
   onSaveBlockedChange: (isBlocked: boolean) => void;
 }
 
-export const StepReviewContainer = React.memo(
-  ({ getTemplateData, dataStreamOptions, onSaveBlockedChange }: Props) => {
-    const { navigateToStep } = Forms.useFormWizardContext<WizardSection>();
-    const { getData } = Forms.useMultiContentContext<WizardContent>();
+export const StepReviewContainer = React.memo(({ getTemplateData, onSaveBlockedChange }: Props) => {
+  const { navigateToStep } = Forms.useFormWizardContext<WizardSection>();
+  const { getData } = Forms.useMultiContentContext<WizardContent>();
 
-    const wizardContent = getData();
-    const template = getTemplateData(wizardContent);
+  const wizardContent = getData();
+  const template = getTemplateData(wizardContent);
 
-    React.useEffect(() => {
-      return () => onSaveBlockedChange(false);
-    }, [onSaveBlockedChange]);
+  React.useEffect(() => {
+    return () => onSaveBlockedChange(false);
+  }, [onSaveBlockedChange]);
 
-    return (
-      <StepReview
-        template={template}
-        navigateToStep={navigateToStep}
-        dataStreamOptions={dataStreamOptions}
-        onSaveBlockedChange={onSaveBlockedChange}
-      />
-    );
-  }
-);
+  return (
+    <StepReview
+      template={template}
+      navigateToStep={navigateToStep}
+      onSaveBlockedChange={onSaveBlockedChange}
+    />
+  );
+});

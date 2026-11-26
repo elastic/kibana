@@ -123,6 +123,40 @@ describe('StepReview', () => {
     });
   });
 
+  describe('WHEN the template has data stream options', () => {
+    const dataStreamOptions = { failure_store: { enabled: true } };
+
+    const renderRequestTab = (template: TemplateDeserialized) => {
+      render(
+        <I18nProvider>
+          <StepReview template={template} navigateToStep={jest.fn()} />
+        </I18nProvider>
+      );
+      fireEvent.click(screen.getByText('Request'));
+      return screen.getByTestId('requestTab');
+    };
+
+    it('SHOULD show them in the Request tab for a data stream template', () => {
+      const requestTab = renderRequestTab(
+        makeTemplate({
+          dataStream: {},
+          template: { data_stream_options: dataStreamOptions },
+          _kbnMeta: { type: 'default', hasDatastream: true, isLegacy: false },
+        })
+      );
+
+      expect(requestTab).toHaveTextContent('data_stream_options');
+      expect(requestTab).toHaveTextContent('failure_store');
+    });
+
+    it('SHOULD NOT show them when the template is not a data stream template', () => {
+      // The wizard builder omits the options in this case, so the review must not add them back.
+      const requestTab = renderRequestTab(makeTemplate());
+
+      expect(requestTab).not.toHaveTextContent('data_stream_options');
+    });
+  });
+
   describe('WHEN reviewing a legacy template', () => {
     it('SHOULD not render the Preview tab', () => {
       render(
