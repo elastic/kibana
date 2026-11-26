@@ -83,6 +83,13 @@ jest.mock('./mobile_overview/mobile_application_page', () => {
     },
   };
 });
+jest.mock('../reports/scorecard/scorecard_report', () => {
+  return {
+    ScorecardReport: ({ serviceName }: { serviceName: string }) => {
+      return <div data-test-subj="scorecardReport">{serviceName}</div>;
+    },
+  };
+});
 jest.mock('../sessions/sessions_tab', () => {
   return {
     SessionsTab: ({ serviceName }: { serviceName: string }) => {
@@ -118,6 +125,7 @@ const LINKS: ReturnType<typeof useApplicationLinks> = {
   reportsHref: '/reports-href',
   frustrationHref: '/frustration-href',
   crashesHref: '/crashes-href',
+  scorecardReportHref: '/scorecard-href',
   sessionsHref: () => '/sessions-href',
   sessionHref: () => '/session-href',
 };
@@ -374,6 +382,27 @@ describe('ApplicationPage', () => {
     expect(useRouteBreadcrumb).toHaveBeenCalledWith([
       { text: 'my-app', href: '/overview-href' },
       { text: 'Reports' },
+    ]);
+  });
+
+  it('renders the scorecard under the Reports breadcrumb', () => {
+    useKibanaServicesMock.mockReturnValue({} as ReturnType<typeof useKibanaServices>);
+
+    render(
+      <ApplicationPage
+        serviceName="my-app"
+        source="otel"
+        selectedTab="reports"
+        report="scorecard"
+      />
+    );
+
+    expect(screen.getByTestId('scorecardReport')).toHaveTextContent('my-app');
+    expect(screen.queryByTestId('reportsTab')).not.toBeInTheDocument();
+    expect(useRouteBreadcrumb).toHaveBeenCalledWith([
+      { text: 'my-app', href: '/overview-href' },
+      { text: 'Reports', href: '/reports-href' },
+      { text: 'Weekly scorecard' },
     ]);
   });
 

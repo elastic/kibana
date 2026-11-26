@@ -32,7 +32,10 @@ import { useTimeRange } from '../../hooks/use_time_range';
 import { APPLICATIONS_LABEL, APPLICATION_TAB_LABELS, COMPARE_LABEL } from '../../labels';
 import { ErrorsTab } from '../errors/errors_tab';
 import { NetworkTab } from '../network/network_tab';
+import { REPORT_TEMPLATES } from '../reports/report_templates';
+import type { ReportTemplateId } from '../reports/report_templates';
 import { ReportsTab } from '../reports/reports_tab';
+import { ScorecardReport } from '../reports/scorecard/scorecard_report';
 import { SessionsTab } from '../sessions/sessions_tab';
 import { MobileApplicationPage } from './mobile_overview/mobile_application_page';
 import { OtelOverview } from './otel_overview/otel_overview';
@@ -142,12 +145,15 @@ export function ApplicationPage({
   source,
   applicationType,
   selectedTab,
+  report,
 }: {
   serviceName: string;
   source: ApplicationSource;
   /** Whether the application is a web or a mobile one; web when unset. */
   applicationType?: ApplicationType;
   selectedTab: ApplicationTabId;
+  /** The report open on a web application's Reports tab; the template gallery when unset. */
+  report?: ReportTemplateId;
 }) {
   // Mobile applications are EDOT data: their type, not their source, gives them their own page.
   if (source === APPLICATION_SOURCE.otel && applicationType === APPLICATION_TYPE.mobile) {
@@ -161,7 +167,14 @@ export function ApplicationPage({
       />
     );
   }
-  return <WebApplicationPage serviceName={serviceName} source={source} selectedTab={selectedTab} />;
+  return (
+    <WebApplicationPage
+      serviceName={serviceName}
+      source={source}
+      selectedTab={selectedTab}
+      report={report}
+    />
+  );
 }
 
 /** A web application's page: the Overview of its source and, for EDOT Browser, its other tabs. */
@@ -169,15 +182,25 @@ function WebApplicationPage({
   serviceName,
   source,
   selectedTab,
+  report,
 }: {
   serviceName: string;
   source: ApplicationSource;
   selectedTab: ApplicationTabId;
+  /** The report open on the Reports tab; the template gallery when unset. */
+  report?: ReportTemplateId;
 }) {
   const applicationsHref = useApplicationsHref();
   const history = useHistory();
-  const { overviewHref, overviewPath, errorsHref, networkHref, reportsHref, sessionsHref } =
-    useApplicationLinks(serviceName, source);
+  const {
+    overviewHref,
+    overviewPath,
+    errorsHref,
+    networkHref,
+    reportsHref,
+    scorecardReportHref,
+    sessionsHref,
+  } = useApplicationLinks(serviceName, source);
   const shareAction = useShareAction({ serviceName, source, tab: selectedTab });
   // In the URL, so a reload or Share keeps it; the EDOT Browser Overview's KPIs read it.
   const { value: compare, setValue: setCompare } = useQueryParam('compare');
@@ -198,10 +221,16 @@ function WebApplicationPage({
     sessions: sessionsHref(),
   };
 
-  useRouteBreadcrumb([
-    { text: serviceName, href: overviewHref },
-    { text: APPLICATION_TAB_LABELS[selectedTab] },
-  ]);
+  const reportTitle = REPORT_TEMPLATES.find(({ id }) => id === report)?.title;
+  useRouteBreadcrumb(
+    reportTitle
+      ? [
+          { text: serviceName, href: overviewHref },
+          { text: APPLICATION_TAB_LABELS[selectedTab], href: reportsHref },
+          { text: reportTitle },
+        ]
+      : [{ text: serviceName, href: overviewHref }, { text: APPLICATION_TAB_LABELS[selectedTab] }]
+  );
 
   const renderOverview = () =>
     source === APPLICATION_SOURCE.otel ? (
@@ -231,7 +260,13 @@ function WebApplicationPage({
       case 'sessions':
         return renderSessions();
       case 'reports':
-        return withPagePadding(<ReportsTab />);
+        return withPagePadding(
+          report === 'scorecard' ? (
+            <ScorecardReport serviceName={serviceName} />
+          ) : (
+            <ReportsTab hrefs={{ scorecard: scorecardReportHref }} />
+          )
+        );
       default:
         return renderOverview();
     }

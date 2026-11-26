@@ -19,6 +19,7 @@ import { DigitalExperienceLayout } from './application/digital_experience_layout
 import { useDigitalExperienceParams } from './hooks/use_digital_experience_params';
 import type { ApplicationTabId } from '../common/types/applications';
 import { MAX_CRASH_FINGERPRINT_LENGTH } from '../common/mobile/crash_fingerprint';
+import type { ReportTemplateId } from './pages/reports/report_templates';
 import { ApplicationPage } from './pages/application_details/application_page';
 import { FrustrationPage } from './pages/frustration/frustration_page';
 import { ApplicationsListPage } from './pages/applications_list/applications_list_page';
@@ -31,7 +32,7 @@ import {
   MAX_RELEASE_LENGTH,
 } from '../common/filter_lengths';
 
-function ApplicationRoute({ tab }: { tab: ApplicationTabId }) {
+function ApplicationRoute({ tab, report }: { tab: ApplicationTabId; report?: ReportTemplateId }) {
   const {
     path: { serviceName },
     query: { source, applicationType },
@@ -42,6 +43,7 @@ function ApplicationRoute({ tab }: { tab: ApplicationTabId }) {
       source={source}
       applicationType={applicationType}
       selectedTab={tab}
+      report={report}
     />
   );
 }
@@ -118,6 +120,9 @@ const digitalExperienceRoutes = {
           },
           '/{serviceName}/network': {
             element: <ApplicationRoute tab="network" />,
+          },
+          '/{serviceName}/reports/scorecard': {
+            element: <ApplicationRoute tab="reports" report="scorecard" />,
           },
           '/{serviceName}/reports': {
             element: <ApplicationRoute tab="reports" />,

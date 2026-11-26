@@ -83,6 +83,7 @@ beforeEach(() => {
     reportsHref: '/reports-href',
     frustrationHref: '/frustration-href',
     crashesHref: '/crashes-href',
+    scorecardReportHref: '/scorecard-href',
     sessionsHref: () => '/sessions-href',
     sessionHref: () => '/session-href',
   });

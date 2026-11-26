@@ -161,4 +161,15 @@ describe('useApplicationLinks', () => {
       expect(href.searchParams.get('kuery')).toBe('url.full : *checkout*');
     });
   });
+
+  it("leaves the Overview's filters and query out of the report links, which cover the whole application", () => {
+    mockSearch('?source=otel&kuery=host.name%3Aa');
+    mockRouteQuery({ source: 'otel', kuery: 'host.name:a' });
+
+    const { result } = renderHook(() => useApplicationLinks('shop', 'otel'));
+
+    expect(result.current.errorsHref).toContain('kuery=');
+    expect(result.current.reportsHref).not.toContain('kuery=');
+    expect(result.current.scorecardReportHref).not.toContain('kuery=');
+  });
 });
