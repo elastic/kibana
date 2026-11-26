@@ -14,7 +14,6 @@ const NONE = {
   runInvestigations: false,
   runConnectorProbes: false,
   runWikiOptimize: false,
-  runWriteup: false,
   runReinforcement: false,
   storedDatasetIds: [],
 };
@@ -63,11 +62,10 @@ describe('resolveEvalSelection', () => {
     });
   });
 
-  it('runs only the writeup eval for writeup, without credentials', () => {
-    expect(resolveEvalSelection({ NIGHTSHIFT_DATASETS: 'writeup' })).toEqual({
-      ...NONE,
-      runWriteup: true,
-    });
+  it('leaves the writeup eval to its own suite', () => {
+    expect(() => resolveEvalSelection({ NIGHTSHIFT_DATASETS: 'writeup' })).toThrow(
+      'Unknown dataset(s) in NIGHTSHIFT_DATASETS: writeup'
+    );
   });
 
   it('combines evals in one list', () => {
@@ -84,7 +82,6 @@ describe('resolveEvalSelection', () => {
       expect(resolveEvalSelection({ ...WITH_SANDBOX, NIGHTSHIFT_DATASETS: value })).toMatchObject({
         runConnectorProbes: false,
         runWikiOptimize: false,
-        runWriteup: false,
         storedDatasetIds: [],
       });
     }

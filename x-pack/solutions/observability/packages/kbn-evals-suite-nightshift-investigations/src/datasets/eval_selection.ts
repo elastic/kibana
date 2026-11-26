@@ -25,12 +25,6 @@ export const WIKI_OPTIMIZE_DATASET_ID = 'wiki-optimize';
  * on the Scout server, so it needs its own server. Unset and `all` never select it.
  */
 export const REINFORCEMENT_DATASET_ID = 'reinforcement';
-/**
- * `NIGHTSHIFT_DATASETS` id for the writeup eval, which rewrites the agent's final reply from a
- * recorded investigation under a given prompt and scores how it's written up. Opt-in only, so
- * unset and `all` never select it. It runs no investigation, so it needs no sandbox.
- */
-export const WRITEUP_DATASET_ID = 'writeup';
 
 /** The CI ORCA shard, whole (`orcabench`) or one slice of it (`orcabench-<index>-of-<count>`). */
 const ORCA_SHARD_ID = /^orcabench(?:-\d+-of-\d+)?$/;
@@ -41,7 +35,6 @@ const EVAL_IDS: readonly string[] = [
   CONNECTOR_PROBE_DATASET_ID,
   WIKI_OPTIMIZE_DATASET_ID,
   REINFORCEMENT_DATASET_ID,
-  WRITEUP_DATASET_ID,
 ];
 /** Stored dataset ids are opt-in too: they run live investigations, so unset and `all` skip them. */
 const STORED_DATASET_IDS: readonly string[] = STORED_DATASETS.map(({ id }) => id);
@@ -51,7 +44,6 @@ export interface EvalSelection {
   runOrca: boolean;
   runConnectorProbes: boolean;
   runWikiOptimize: boolean;
-  runWriteup: boolean;
   /**
    * True only when `NIGHTSHIFT_DATASETS` lists `reinforcement` or `EVAL_SHARD_ID` is
    * `reinforcement`. Not part of an unset or `all` run.
@@ -126,7 +118,6 @@ export const resolveEvalSelection = (
       runOrca: false,
       runConnectorProbes: false,
       runWikiOptimize: false,
-      runWriteup: false,
       runReinforcement: true,
       storedDatasetIds: [],
     };
@@ -145,7 +136,6 @@ export const resolveEvalSelection = (
       runOrca: true,
       runConnectorProbes: false,
       runWikiOptimize: false,
-      runWriteup: false,
       runReinforcement: false,
       storedDatasetIds: [],
     };
@@ -161,7 +151,6 @@ export const resolveEvalSelection = (
       runOrca: false,
       runConnectorProbes: false,
       runWikiOptimize: false,
-      runWriteup: false,
       runReinforcement: false,
       storedDatasetIds: shardDatasetIds,
     };
@@ -192,7 +181,7 @@ export const resolveEvalSelection = (
         `NIGHTSHIFT_DATASETS=${
           requested ?? ALL_DATASETS
         } selects ${selected}, which runs the Nightshift agents in the sandbox, ` +
-          `but SANDBOX_API_KEY is required; use --profile dev-vault, export SANDBOX_*, or select only ${WIKI_OPTIMIZE_DATASET_ID} or ${WRITEUP_DATASET_ID}.`
+          `but SANDBOX_API_KEY is required; use --profile dev-vault, export SANDBOX_*, or select only ${WIKI_OPTIMIZE_DATASET_ID}.`
       );
     }
   };
@@ -204,7 +193,6 @@ export const resolveEvalSelection = (
       runInvestigations: true,
       runConnectorProbes: false,
       runWikiOptimize: false,
-      runWriteup: false,
       runReinforcement: false,
       storedDatasetIds: [],
     };
@@ -227,7 +215,6 @@ export const resolveEvalSelection = (
     runInvestigations,
     runConnectorProbes,
     runWikiOptimize: ids.includes(WIKI_OPTIMIZE_DATASET_ID),
-    runWriteup: ids.includes(WRITEUP_DATASET_ID),
     runReinforcement,
     storedDatasetIds,
   };

@@ -6,8 +6,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { BaseStepDefinition } from '@kbn/workflows';
 import { StepCategory } from '@kbn/workflows';
+import type { CommonStepDefinition } from '@kbn/workflows-extensions/common';
 import { z } from '@kbn/zod/v4';
 import { optionalStepInput } from './optional_step_input';
 
@@ -25,7 +25,7 @@ export const cloneProposalStepOutputSchema = z.object({
   proposalId: z.string(),
 });
 
-export const cloneProposalStepCommonDefinition: BaseStepDefinition<
+export const cloneProposalStepCommonDefinition: CommonStepDefinition<
   typeof cloneProposalStepInputSchema,
   typeof cloneProposalStepOutputSchema
 > = {
@@ -38,6 +38,7 @@ export const cloneProposalStepCommonDefinition: BaseStepDefinition<
   }),
   category: StepCategory.Kibana,
   stability: 'beta',
+  exposure: 'internal',
   inputSchema: cloneProposalStepInputSchema,
   outputSchema: cloneProposalStepOutputSchema,
   documentation: {

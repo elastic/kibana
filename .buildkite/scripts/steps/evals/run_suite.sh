@@ -528,6 +528,12 @@ EOF
       )"
       buildkite-agent meta-data set "kbn-evals:connectors:${EVAL_SUITE_ID}" "$_connectors_csv" 2>/dev/null || true
 
+      # The `evals gate` waits on this status until the post-comparison step replaces it with the
+      # verdict. No-op for suites without a regressionGate.
+      if [[ -n "${BUILDKITE_PULL_REQUEST:-}" && "${BUILDKITE_PULL_REQUEST}" != "false" ]]; then
+        node .buildkite/scripts/steps/evals/regression_gate.ts pending "$EVAL_SUITE_ID" || true
+      fi
+
       echo "Fanout uploaded. Exiting parent step."
       exit 0
     fi

@@ -16,6 +16,7 @@ exports[`AddItemPopover renders the popover 1`] = `
       >
         Add item
         <span
+          aria-hidden="true"
           color="inherit"
           data-euiicon-type="chevronSingleDown"
         />

@@ -14,10 +14,11 @@ import { i18n } from '@kbn/i18n';
 import { useAbortableAsync } from '@kbn/react-hooks';
 import { APPLICATION_SOURCE, APPLICATION_TYPE } from '../../../common/application_source';
 import {
-  APPLICATION_TAB_IDS,
+  WEB_APPLICATION_TAB_IDS,
   type ApplicationSource,
   type ApplicationType,
   type ApplicationTabId,
+  type WebApplicationTabId,
 } from '../../../common/types/applications';
 import { useRouteBreadcrumb } from '../../breadcrumbs/use_route_breadcrumb';
 import { DIGITAL_EXPERIENCE_EBT_ACTIONS } from '../../ebt_constants';
@@ -40,8 +41,11 @@ import { OtelOverview } from './otel_overview/otel_overview';
  * Errors, network, sessions and reports are read from EDOT Browser data only; Classic RUM applications have
  * the ux plugin's dashboard as their Overview.
  */
-const tabsOf = (source: ApplicationSource): readonly ApplicationTabId[] =>
-  source === APPLICATION_SOURCE.otel ? APPLICATION_TAB_IDS : ['overview'];
+const tabsOf = (source: ApplicationSource): readonly WebApplicationTabId[] =>
+  source === APPLICATION_SOURCE.otel ? WEB_APPLICATION_TAB_IDS : ['overview'];
+
+const isTabOf = (source: ApplicationSource, tab: ApplicationTabId): boolean =>
+  tabsOf(source).some((id) => id === tab);
 const sessionsUnavailablePrompt = (
   <EuiEmptyPrompt
     data-test-subj="digitalExperienceSessionsUnavailable"
@@ -180,13 +184,13 @@ function WebApplicationPage({
   const isComparing = compare === 'true';
   // Classic RUM only has the Overview (and Sessions' unavailable prompt); any other tab's URL is
   // replaced by the Overview's.
-  const isUnsupportedTab = selectedTab !== 'sessions' && !tabsOf(source).includes(selectedTab);
+  const isUnsupportedTab = selectedTab !== 'sessions' && !isTabOf(source, selectedTab);
   useEffect(() => {
     if (isUnsupportedTab) {
       history.replace(overviewPath);
     }
   }, [history, isUnsupportedTab, overviewPath]);
-  const tabHrefs: Record<ApplicationTabId, string> = {
+  const tabHrefs: Record<WebApplicationTabId, string> = {
     overview: overviewHref,
     errors: errorsHref,
     network: networkHref,

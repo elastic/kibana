@@ -63,6 +63,12 @@ export class ArtifactListPage {
     );
   }
 
+  cardCriteriaByName(pagePrefix: string, name: string): Locator {
+    return this.cardByName(pagePrefix, name).getByTestId(
+      `${pagePrefix}-card-criteriaConditions-condition`
+    );
+  }
+
   cardDescription(pagePrefix: string): Locator {
     return this.page.testSubj.locator(`${pagePrefix}-card-description`);
   }

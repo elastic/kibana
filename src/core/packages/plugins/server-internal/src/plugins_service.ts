@@ -325,6 +325,7 @@ export class PluginsService
             ? this.prebootUiPluginInternalInfo
             : this.standardUiPluginInternalInfo;
         uiPluginInternalInfo.set(plugin.name, {
+          requiredPlugins: plugin.requiredPlugins,
           requiredBundles: plugin.requiredBundles,
           version: plugin.manifest.version,
           publicTargetDir: Path.resolve(plugin.path, 'target/public'),
