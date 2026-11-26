@@ -405,6 +405,11 @@ export const allowedExperimentalValues = Object.freeze({
    * Enables the SIEM Rule Migrations Agent Builder tools.
    */
   siemRuleMigrationsAgentBuilderEnabled: true,
+
+  /**
+   * Proof of concept: the AI agents page under Entity Analytics and the AI agent entity flyout.
+   */
+  entityAnalyticsAiAgentsPoc: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;
