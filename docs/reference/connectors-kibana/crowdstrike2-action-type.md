@@ -137,10 +137,10 @@ The CrowdStrike Falcon connector exposes the following actions. List and search 
 :   Remove up to 100 hosts (device IDs) from a static host group. The hosts lose the policies of that group. Returns `outcomes` like `addHostGroupMembers`, including hosts that are not members.
 
 `searchAlerts`
-:   Search Falcon alerts by status, minimum severity, host, time range, free text or an FQL filter. Returns composite alert IDs. Offset paging stops at 10,000 results.
+:   Search Falcon alerts by status, minimum severity, host, time range, free text or an FQL filter. Returns composite alert IDs. Offset paging stops at 10,000 results. Alerts hidden in the Falcon console are left out unless `include_hidden` is `true`.
 
 `getAlertDetails`
-:   Get full alert details by composite ID: severity, status, tactic and technique, process and file details, the affected host and the Falcon console link.
+:   Get full alert details by composite ID: severity, status, tactic and technique, process and file details, the affected host and the Falcon console link. Alerts hidden in the Falcon console are left out unless `include_hidden` is `true`.
 
 `updateAlert`
 :   Update alerts in one request: set the status, append a comment, assign or unassign, add or remove tags, and show or hide them in the Falcon console.
