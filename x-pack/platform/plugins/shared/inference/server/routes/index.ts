@@ -13,7 +13,6 @@ import { registerConnectorByIdRoute } from './connector_by_id';
 import { registerConnectorsRoute } from './connectors';
 import { registerPromptRoute } from './prompt';
 import { registerReplacementsRoutes } from '../chat_complete/anonymization/replacements/replacements_routes';
-import { registerEndpointsRoute } from './endpoints';
 
 export const registerRoutes = ({
   router,
@@ -31,5 +30,4 @@ export const registerRoutes = ({
   registerReplacementsRoutes(router, logger.get('replacements'), {
     coreSetup,
   });
-  registerEndpointsRoute({ router, coreSetup });
 };
