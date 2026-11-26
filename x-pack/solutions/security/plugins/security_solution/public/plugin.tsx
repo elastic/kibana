@@ -231,8 +231,9 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     });
 
     // Register legacy SIEM app for backward compatibility
+    const legacySiemAppId = 'siem';
     core.application.register({
-      id: 'siem',
+      id: legacySiemAppId,
       appRoute: 'app/siem',
       title: 'SIEM',
       visibleIn: [],
@@ -243,7 +244,12 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         // The legacy routes are resolved through the Security Solution app deepLinks, so the
         // redirect can only happen once those deepLinks have been registered.
         await firstValueFrom(this.deepLinksRegistered$);
-        manageOldSiemRoutes(coreStart);
+        // Core does not cancel a pending mount: when the user navigated to another app during the
+        // wait, redirecting would replace the URL of that app.
+        const currentAppId = await firstValueFrom(coreStart.application.currentAppId$);
+        if (currentAppId === legacySiemAppId) {
+          manageOldSiemRoutes(coreStart);
+        }
 
         return () => true;
       },

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Subject } from 'rxjs';
+import { BehaviorSubject, Subject } from 'rxjs';
 import type { App, AppDeepLink, AppUpdater } from '@kbn/core/public';
 import { coreMock } from '@kbn/core/public/mocks';
 import type { ILicense } from '@kbn/licensing-types';
@@ -55,6 +55,8 @@ const startPlugin = ({ accessible = true }: { accessible?: boolean } = {}) => {
         }
       : {}),
   };
+  const currentAppId$ = new BehaviorSubject<string | undefined>(LEGACY_SIEM_APP_ID);
+  coreStart.application.currentAppId$ = currentAppId$;
   coreSetup.getStartServices.mockResolvedValue([coreStart, {} as never, {} as never]);
 
   const license$ = new Subject<ILicense>();
@@ -89,7 +91,7 @@ const startPlugin = ({ accessible = true }: { accessible?: boolean } = {}) => {
 
   plugin.start(coreStart, { licensing: { license$ } } as unknown as StartPlugins);
 
-  return { legacySiemApp, license$, registeredDeepLinks };
+  return { legacySiemApp, license$, currentAppId$, registeredDeepLinks };
 };
 
 const mountLegacySiemApp = (legacySiemApp: App) =>
@@ -109,6 +111,10 @@ describe('Security Solution plugin', () => {
   describe('legacy `siem` app', () => {
     it('redirects only once the deepLinks it resolves the legacy route with are registered', async () => {
       const { legacySiemApp, license$, registeredDeepLinks } = startPlugin();
+      let deepLinkIdsOnRedirect: string[] | undefined;
+      (manageOldSiemRoutes as jest.Mock).mockImplementationOnce(async () => {
+        deepLinkIdsOnRedirect = registeredDeepLinks.at(-1)?.map(({ id }) => id);
+      });
       void mountLegacySiemApp(legacySiemApp);
 
       // The links are only processed once the license resolves, which can outlast the debounce
@@ -122,8 +128,21 @@ describe('Security Solution plugin', () => {
       await jest.advanceTimersByTimeAsync(1000);
 
       expect(manageOldSiemRoutes).toHaveBeenCalledTimes(1);
-      const deepLinkIds = registeredDeepLinks[registeredDeepLinks.length - 1].map(({ id }) => id);
-      expect(deepLinkIds).toContain(SecurityPageName.alerts);
+      expect(deepLinkIdsOnRedirect).toContain(SecurityPageName.alerts);
+    });
+
+    it('does not redirect when the user navigated to another app before the deepLinks were registered', async () => {
+      const { legacySiemApp, license$, currentAppId$, registeredDeepLinks } = startPlugin();
+      void mountLegacySiemApp(legacySiemApp);
+
+      await jest.advanceTimersByTimeAsync(1000);
+      currentAppId$.next('discover');
+
+      license$.next(licensingMock.createLicense({ license: { type: 'platinum' } }));
+      await jest.advanceTimersByTimeAsync(1000);
+
+      expect(registeredDeepLinks).not.toHaveLength(0);
+      expect(manageOldSiemRoutes).not.toHaveBeenCalled();
     });
 
     it('redirects when the Security Solution app is not accessible and no deepLink is registered', async () => {
