@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { v4 as uuidv4 } from 'uuid';
 import expect from '@kbn/expect';
 import {
   CaseSeverity,
@@ -114,7 +115,8 @@ export default ({ getService }: FtrProviderContext): void => {
         200
       );
 
-      await retry.try(() => runCasesBackfillTask(supertest));
+      const backfillRunId = uuidv4();
+      await retry.try(() => runCasesBackfillTask(supertest, backfillRunId));
 
       await retry.tryForTime(300000, async () => {
         const caseAnalytics = await esClient.get({
@@ -203,7 +205,8 @@ export default ({ getService }: FtrProviderContext): void => {
         auth: authSpace1,
       });
 
-      await retry.try(() => runAttachmentsBackfillTask(supertest, 'space1'));
+      const backfillRunId = uuidv4();
+      await retry.try(() => runAttachmentsBackfillTask(supertest, backfillRunId, 'space1'));
 
       await retry.tryForTime(300000, async () => {
         const firstAttachmentAnalytics = await esClient.get({
@@ -237,7 +240,8 @@ export default ({ getService }: FtrProviderContext): void => {
         caseId: postedCase.id,
         params: { ...postCommentUserReq, owner: SECURITY_SOLUTION_OWNER },
       });
-      await retry.try(() => runCommentsBackfillTask(supertest));
+      const backfillRunId = uuidv4();
+      await retry.try(() => runCommentsBackfillTask(supertest, backfillRunId));
 
       await retry.try(async () => {
         const commentAnalytics = await esClient.get({
@@ -306,7 +310,8 @@ export default ({ getService }: FtrProviderContext): void => {
 
       // Updating a case writes its user actions without a refresh, and the backfill only copies what is searchable.
       await esClient.indices.refresh({ index: CAI_ACTIVITY_SOURCE_INDEX });
-      await retry.try(() => runActivityBackfillTask(supertest));
+      const backfillRunId = uuidv4();
+      await retry.try(() => runActivityBackfillTask(supertest, backfillRunId));
 
       let activityArray: any[] = [];
       await retry.try(async () => {
