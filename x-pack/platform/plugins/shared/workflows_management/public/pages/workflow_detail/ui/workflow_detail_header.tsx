@@ -18,8 +18,10 @@ import { ChangeHistoryModalContext } from '@kbn/change-history-ui';
 import type { AppMenuConfig, AppMenuItemType } from '@kbn/core-chrome-app-menu-components';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { i18n } from '@kbn/i18n';
+import { getPageTriggerId, isPageTrigger } from '@kbn/workflows';
 import { useWorkflowsCapabilities } from '@kbn/workflows-ui';
 import { WorkflowAccessControlModal } from './workflow_access_control_modal';
+import { WorkflowPageShareModal } from './workflow_page_share_modal';
 import { PLUGIN_ID, WORKFLOWS_DOCUMENTATION_URL } from '../../../../common';
 import { useUpdateWorkflow } from '../../../entities/workflows/model/use_update_workflow';
 import {
@@ -46,6 +48,7 @@ import {
   navigateToWorkflowsList,
   type WorkflowDetailRouteState,
 } from '../../../shared/utils/workflow_navigation';
+import { triggerSchemas } from '../../../trigger_schemas';
 
 const executionsTabReadExecutionDisabledTooltip = i18n.translate(
   'workflows.workflowDetailHeader.executionsTabReadExecutionDisabledTooltip',
@@ -123,12 +126,14 @@ export const WorkflowDetailHeader = React.memo(
     const back = useWorkflowDetailHeaderBack();
     const styles = useMemoCss(componentStyles);
     const [isAccessOpen, setIsAccessOpen] = useState(false);
+    const [isPageShareOpen, setIsPageShareOpen] = useState(false);
     const {
       canCreateWorkflow,
       canUpdateWorkflow: hasUpdatePrivilege,
       canReadWorkflow,
       canReadWorkflowExecution,
       canReadManagedWorkflowExecution,
+      canExecuteWorkflow,
     } = useWorkflowsCapabilities();
 
     const { activeTab, isViewingExecution, setActiveTab } = useWorkflowUrlState();
@@ -303,6 +308,32 @@ export const WorkflowDetailHeader = React.memo(
       };
     }, [showHistoryButton, openHistoryModal]);
 
+    // The page serves the saved definition, so the button follows the saved page trigger.
+    const savedPageTrigger = useMemo(
+      () =>
+        triggerSchemas.getTriggerSchemaOptions().includePageTrigger
+          ? workflow?.definition?.triggers?.find(isPageTrigger)
+          : undefined,
+      [workflow?.definition?.triggers]
+    );
+
+    const sharePageItem = useMemo<AppMenuItemType | undefined>(() => {
+      if (!workflowId || !savedPageTrigger || !canExecuteWorkflow || isViewingExecution) {
+        return undefined;
+      }
+      return {
+        id: 'sharePage',
+        // Before History: for a workflow with a page, sharing it is the main thing to do here.
+        order: 1,
+        label: i18n.translate('workflows.workflowDetailHeader.sharePageButton', {
+          defaultMessage: 'Share page',
+        }),
+        iconType: 'link',
+        run: () => setIsPageShareOpen(true),
+        testId: 'workflowDetailSharePageButton',
+      };
+    }, [workflowId, savedPageTrigger, canExecuteWorkflow, isViewingExecution]);
+
     const enabledSwitchConfig = useMemo<NonNullable<AppMenuConfig['switch']> | undefined>(() => {
       if (!workflowId) {
         return undefined;
@@ -422,6 +453,9 @@ export const WorkflowDetailHeader = React.memo(
       if (historyItem) {
         items.push(historyItem);
       }
+      if (sharePageItem) {
+        items.push(sharePageItem);
+      }
       if (addConnectorsMenuItem) {
         items.push(addConnectorsMenuItem);
       }
@@ -454,6 +488,7 @@ export const WorkflowDetailHeader = React.memo(
       workflowId,
       executionsToggleItem,
       historyItem,
+      sharePageItem,
       addConnectorsMenuItem,
       enabledSwitchConfig,
       handleSaveWorkflow,
@@ -503,6 +538,14 @@ export const WorkflowDetailHeader = React.memo(
         </EuiPageTemplate>
         {isAccessOpen && workflow && (
           <WorkflowAccessControlModal workflow={workflow} onClose={() => setIsAccessOpen(false)} />
+        )}
+        {isPageShareOpen && workflowId && savedPageTrigger && (
+          <WorkflowPageShareModal
+            workflowId={workflowId}
+            pageId={getPageTriggerId(savedPageTrigger)}
+            serviceAccountId={workflow?.definition?.settings?.run_as}
+            onClose={() => setIsPageShareOpen(false)}
+          />
         )}
         {disableConfirmModal}
       </>

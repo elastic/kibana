@@ -87,10 +87,10 @@ import type {
   WorkflowChangesHistoryResponse,
 } from '../../common/lib/workflow_change_history/types';
 import type { WorkflowLookupItem } from '../../common/lib/workflow_dependents/types';
+import type { WorkflowPageStatus } from '../../common/pages';
 import { getAuthenticatedUser } from '../lib/get_user';
 import { getHistoryForWorkflow } from '../lib/get_workflow_change_history';
 import { getWorkflowPageStatus } from '../lib/get_workflow_page_status';
-import type { WorkflowPageStatus } from '../lib/get_workflow_page_status';
 import {
   MANAGED_INSTALL_MAX_RETRIES,
   MANAGED_INSTALL_RETRY_DELAY,

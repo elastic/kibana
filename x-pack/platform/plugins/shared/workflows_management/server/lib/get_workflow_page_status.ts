@@ -6,27 +6,9 @@
  */
 
 import type { WorkflowsExecutionEnginePluginStart } from '@kbn/workflows-execution-engine/server';
+import type { WorkflowPageOfflineReason, WorkflowPageStatus } from '../../common/pages';
 import type { WorkflowPageDto } from '../pages/types';
 import type { WorkflowProperties } from '../storage/workflow_storage';
-
-/** Why a page does not serve. The Share modal shows every reason that applies. */
-export type WorkflowPageOfflineReason =
-  | 'pages_disabled'
-  | 'encryption_unavailable'
-  | 'no_access_level'
-  | 'page_disabled'
-  | 'workflow_disabled'
-  | 'workflow_invalid'
-  | 'no_service_account'
-  | 'service_accounts_disabled'
-  | 'not_bound'
-  | 'service_account_missing'
-  | 'service_account_disabled';
-
-export interface WorkflowPageStatus {
-  online: boolean;
-  reasons: WorkflowPageOfflineReason[];
-}
 
 export interface GetWorkflowPageStatusDeps {
   arePagesEnabled: () => Promise<boolean>;
