@@ -100,7 +100,11 @@
     "kbnConfig": "src/platform/packages/shared/kbn-config/src",
     "kbnDocViews": "src/legacy/core_plugins/kbn_doc_views",
     "kbnUI": "src/platform/kbn-ui",
-    "kibana_utils": "src/platform/plugins/shared/kibana_utils",
+    "kibana_utils": [
+      "src/platform/plugins/shared/kibana_utils",
+      "src/platform/packages/shared/kbn-kibana-utils-browser",
+      "src/platform/packages/shared/kbn-kibana-utils-common"
+    ],
     "kibana-react": "src/platform/plugins/shared/kibana_react",
     "kibanaOverview": "src/platform/plugins/private/kibana_overview",
     "lensFormulaDocs": "src/platform/packages/private/kbn-lens-formula-docs",
