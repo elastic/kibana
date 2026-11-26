@@ -234,7 +234,25 @@ If something reads your registry before plugins start, for example saved objects
 Plugins are not ordered relative to each other without a manifest edge, and a contribution can depend on start-only services such as `CoreStart('http')` of the plugin that contributes it.
 So `ExtensionService` throws when it is used before every plugin has started.
 Inject it anywhere, but call `get` and `getAll` in an `OnExtensionsReady` hook, in request handlers, or later.
-Contributions are built in the scope of the plugin that contributes them, so they resolve the same way inside a request handler and cannot depend on request-scoped services such as `Request`.
+Contributions are built in the scope of the plugin that contributes them.
+Inside a request, that is the contributing plugin's request scope, so a contribution can inject `Request`, `Response`, `ApplicationParameters`, or anything else bound with `Scope.expose`, like any other service.
+The consumer does not pass the request to `get` or `getAll`:
+```ts
+import { KibanaContainerModule } from '@kbn/core-di';
+import { Request } from '@kbn/core-di-server';
+import { RequestGreeter } from '@kbn/greeter-extension-points';
+
+const pluginModule = new KibanaContainerModule(({ extensions }) => {
+  extensions
+    .contribute(RequestGreeter)
+    .toResolvedValue((request) => ({ greet: () => `hello from ${request.url.pathname}` }), [Request])
+    .inRequestScope();
+});
+```
+
+Bind a contribution that injects a request-scoped value with `.inRequestScope()`. A singleton contribution is built once and keeps the values of the first request.
+The consumer that reads it must be request-scoped too, such as a route or a service bound with `.inRequestScope()`. A singleton consumer first built inside a request keeps that request's values in later requests, and throws once that request ends.
+Outside a request, for example in an `OnExtensionsReady` hook or through `core.injection.getContainer()`, such a contribution throws, naming the extension point and the plugin that contributed it, and `collect` skips and logs it.
 
 ### Existing Plugins
 The `PluginSetup` and `PluginStart` injection tokens can be used to inject existing plugins without migrating or adapting them. This is similar to accessing plugin dependencies from the lifecycle methods.

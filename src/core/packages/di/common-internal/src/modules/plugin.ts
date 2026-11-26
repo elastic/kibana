@@ -37,12 +37,21 @@ import {
 type ScopeFactory = (id?: PluginOpaqueId) => Container;
 
 /**
- * One contribution to an extension point: the contributing plugin, its scope, and the slot bound to the value there.
+ * One contribution to an extension point: the contributing plugin's id and name, its long-lived scope, and the slot bound to the value there.
  */
 interface ExtensionEntry {
+  id: PluginOpaqueId;
   plugin: string;
   scope: Container;
   slot: ServiceIdentifier;
+}
+
+/**
+ * Where `ExtensionService` was resolved inside a fork: the requesting container and the fork that holds the per-request plugin scopes.
+ */
+interface ResolutionOrigin {
+  caller: Container;
+  context: Container;
 }
 
 /**
@@ -114,7 +123,15 @@ export class PluginModule extends ContainerModule {
 
       bind(Container).toConstantValue(root);
       bind(Contributions).toConstantValue(getContributions);
-      bind(ExtensionService).toConstantValue(createExtensionService(getContributions));
+      bind(ExtensionService)
+        .toResolvedValue(
+          (caller: Container, context: Container = caller) =>
+            createExtensionService((point) =>
+              this.getContributions(point, context === root ? undefined : { caller, context })
+            ),
+          [Container, { serviceIdentifier: Context, optional: true }]
+        )
+        .inRequestScope();
       bind(Fork).toDynamicValue(this.getForkFactory.bind(this)).inRequestScope();
       bind(OnSetup).toConstantValue(this.registerGlobals.bind(this));
       bind(Plugin).toDynamicValue(this.getPluginFactory.bind(this)).inRequestScope();
@@ -144,16 +161,22 @@ export class PluginModule extends ContainerModule {
     return undefined;
   }
 
-  protected getContributions<T>(point: ExtensionPoint<T>): Array<Contribution<T>> {
+  /**
+   * Lists the contributions to the extension point, built in the contributing plugin's scope of the origin fork, or in its long-lived scope without one.
+   */
+  protected getContributions<T>(
+    point: ExtensionPoint<T>,
+    origin?: ResolutionOrigin
+  ): Array<Contribution<T>> {
     if (this.phase.name !== 'ready') {
       throw new Error(
         `Cannot resolve extension point "${point.description}" before all plugins started. Call it in an OnExtensionsReady hook, a request handler, or later.`
       );
     }
 
-    return (this.phase.extensions.get(point) ?? []).map(({ plugin, scope, slot }) => ({
+    return (this.phase.extensions.get(point) ?? []).map(({ id, plugin, scope, slot }) => ({
       plugin,
-      resolve: () => scope.get(slot) as T,
+      resolve: () => (origin ? this.resolveIn(origin, id, slot) : scope.get(slot)) as T,
     }));
   }
 
@@ -296,6 +319,18 @@ export class PluginModule extends ContainerModule {
     }
   }
 
+  private resolveIn(
+    { caller, context }: ResolutionOrigin,
+    id: PluginOpaqueId,
+    slot: ServiceIdentifier
+  ) {
+    const target = context.get(Plugin)(id);
+    this.registerGlobals(caller);
+    this.inheritGlobals(target);
+
+    return target.get(slot);
+  }
+
   private indexExtensions(): Map<ExtensionPoint<unknown>, ExtensionEntry[]> {
     const extensions = new Map<ExtensionPoint<unknown>, ExtensionEntry[]>();
     for (const scope of this.scopes) {
@@ -306,7 +341,7 @@ export class PluginModule extends ContainerModule {
       const id = scope.get(Id);
       const plugin = id.description ?? String(id);
       for (const { point, slot } of scope.getAll(ExtensionContribution)) {
-        extensions.set(point, [...(extensions.get(point) ?? []), { plugin, scope, slot }]);
+        extensions.set(point, [...(extensions.get(point) ?? []), { id, plugin, scope, slot }]);
       }
     }
 

@@ -12,6 +12,9 @@ import { createToken } from '../token';
 
 /**
  * Resolves the values plugins contributed to extension points, without a plugin dependency on them.
+ * Inside a request, contributions are built in the contributing plugin's request scope, so they can inject `Request` or anything else bound with `Scope.expose`.
+ * Such contributions should be bound with `.inRequestScope()`, and read from a request-scoped consumer, because a singleton consumer keeps the values of the first request.
+ * Outside a request, a contribution that needs a request-scoped value throws.
  * @public
  */
 export interface ExtensionService {
