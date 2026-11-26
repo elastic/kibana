@@ -39,6 +39,7 @@ export type AgentActionType =
   | 'UNENROLL'
   | 'UPGRADE'
   | 'ROLLBACK'
+  | 'RESTART'
   | 'SETTINGS'
   | 'POLICY_REASSIGN'
   | 'CANCEL'
@@ -110,6 +111,7 @@ interface AgentBase {
   enrolled_at: string;
   unenrolled_at?: string;
   unenrollment_started_at?: string;
+  unenrolled_reason?: string;
   audit_unenrolled_reason?: string;
   upgraded_at?: string | null;
   upgrade_started_at?: string | null;
@@ -185,6 +187,13 @@ export interface Agent extends AgentBase {
   sort?: any[];
   metrics?: AgentMetrics;
   last_known_status?: AgentStatus;
+  pending_restart?: AgentPendingRestart;
+}
+
+export interface AgentPendingRestart {
+  action_id: string;
+  created_at: string;
+  expiration?: string;
 }
 
 export interface CurrentUpgrade {
@@ -297,6 +306,10 @@ export interface FleetServerAgent {
    * Date/time the Elastic Agent unenrolled started
    */
   unenrollment_started_at?: string;
+  /**
+   * Reason set by Kibana when it unenrolls the agent, for example `agentless`
+   */
+  unenrolled_reason?: string;
   /**
    * Date/time the Elastic Agent was last upgraded
    */
@@ -554,6 +567,8 @@ export interface ActionStatusOptions {
   perPage?: number;
   date?: string;
   latest?: number;
+  /** Only return actions whose start_time is in the future (i.e. scheduled but not yet started) */
+  scheduledOnly?: boolean;
 }
 
 export interface AgentUpgradeDetails {

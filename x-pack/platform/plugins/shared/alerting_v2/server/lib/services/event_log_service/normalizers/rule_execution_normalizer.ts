@@ -13,7 +13,7 @@ import type { RuleExecution, RuleExecutionError, RuleExecutionOutcome } from '..
 /**
  * Task id layout: `<TASK_ID_TYPE_NAMESPACE>:<TASK_ID_TYPE_NAME>:<spaceId>:<ruleId>`.
  *
- * Rule ids are user-supplied (`CreateRuleParams.id` accepts an arbitrary
+ * Rule ids are user-supplied (`CreateRuleData.id` accepts an arbitrary
  * string) and may legally contain `:`. Space ids cannot (Kibana restricts
  * them to `^[a-z0-9_-]+$`). So we anchor the parse on the *prefix* — the
  * first three segments are fixed-shape (namespace, name, spaceId) — and
@@ -61,7 +61,7 @@ const isRuleExecutionOutcome = (value: unknown): value is RuleExecutionOutcome =
  *    structurally-valid set, so this branch is defence-in-depth —
  *    it should not fire in steady state. If it does, the
  *    `EventLogService` drop counter emits
- *    `EXECUTION_HISTORY_NORMALIZER_REJECTED_EVENTS`, signalling that
+ *    `EXECUTION_HISTORY_NORMALIZER_DEGRADED`, signalling that
  *    the ES filter, this check, the public schema, and Task Manager's
  *    source enum have fallen out of lock-step.
  */

@@ -9,21 +9,51 @@
 
 import './src/register_globals';
 
-export { monaco } from './src/monaco_imports';
+export {
+  monaco,
+  jsonDefaults,
+  isCancellationError,
+  CODE_EDITOR_DEFAULT_THEME_ID,
+  initializeRegisteredLanguagesTheme,
+} from './src/monaco_imports';
+export type {
+  KbnMonacoLanguageThemeResolver,
+  KbnCodeEditorThemeColorId,
+} from './src/languages/theming';
 
 /* eslint-disable-next-line @kbn/eslint/module_migration */
-import * as BarePluginApi from 'monaco-editor/esm/vs/editor/editor.api';
+import * as BarePluginApi from 'monaco-editor/editor/editor.api.js';
 
-export * from './src/languages';
+import { HoverParticipantRegistry as hoverParticipantRegistry } from './src/monaco_imports';
+
+export * from './src/languages/definitions';
+export { getWorker } from './src/languages/worker_factory';
 
 export { BarePluginApi };
 export type * from './src/types';
 
+export { getUndoRedoService } from './src/common/undo_redo_service';
+export type { UndoRedoService, UndoRedoElement } from './src/common/undo_redo_service';
 export {
-  defaultThemesResolvers,
-  CODE_EDITOR_DEFAULT_THEME_ID,
-  CODE_EDITOR_TRANSPARENT_THEME_ID,
-} from './src/code_editor';
+  setClipboardContextMenuLabels,
+  type ClipboardContextMenuLabels,
+} from './src/common/clipboard_context_menu_actions';
 
-export { getUndoRedoService } from './src/undo_redo_service';
-export type { UndoRedoService, UndoRedoElement } from './src/undo_redo_service';
+/**
+ * A hover participant instance. Only the members we actually reach for are described —
+ * Monaco declares `hideCopyButton` as optional on its own `IEditorHoverParticipant`.
+ */
+export interface IEditorHoverParticipant {
+  hideCopyButton?: boolean;
+}
+
+/**
+ * Typed explicitly rather than re-exported directly: the deep `hoverTypes.js` import resolves
+ * to an untyped module, so without this annotation consumers of this package land on `any`.
+ * Participants are registered as classes, so `getAll()` hands back constructors, not instances.
+ */
+export const HoverParticipantRegistry: {
+  getAll(): Array<{
+    prototype: IEditorHoverParticipant;
+  }>;
+} = hoverParticipantRegistry;

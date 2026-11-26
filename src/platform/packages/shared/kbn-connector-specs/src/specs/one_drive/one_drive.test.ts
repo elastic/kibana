@@ -469,27 +469,22 @@ describe('OneDrive', () => {
   });
 
   describe('test handler', () => {
-    it('returns ok with user display name on success', async () => {
+    const testSpec = OneDrive.test;
+
+    it('returns {} on success', async () => {
       mockGet.mockResolvedValue({
         data: { displayName: 'Test User', mail: 'test@example.com' },
       });
 
-      if (!OneDrive.test) throw new Error('test handler not defined');
-      const result = await OneDrive.test.handler(mockContext);
+      const result = await testSpec.handler(mockContext);
 
-      expect(result).toEqual({
-        ok: true,
-        message: 'Connected to OneDrive as Test User (test@example.com)',
-      });
+      expect(result).toEqual({});
     });
 
-    it('returns ok:false with error message on failure', async () => {
+    it('should throw on error', async () => {
       mockGet.mockRejectedValue(new Error('401 Unauthorized'));
 
-      if (!OneDrive.test) throw new Error('test handler not defined');
-      const result = await OneDrive.test.handler(mockContext);
-
-      expect(result).toEqual({ ok: false, message: '401 Unauthorized' });
+      await expect(testSpec.handler(mockContext)).rejects.toThrow();
     });
   });
 

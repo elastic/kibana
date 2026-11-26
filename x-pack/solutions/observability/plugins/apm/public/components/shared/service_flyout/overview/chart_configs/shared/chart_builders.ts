@@ -66,11 +66,13 @@ export function getLatencyChart({
   buildQuery,
   latencyAggregationType,
   titleAction,
+  projectRouting,
 }: {
   indices: string | undefined;
   buildQuery: (indices: string, aggregation: string) => ComposerQuery;
   latencyAggregationType: LatencyAggregationType;
   titleAction?: ReactNode;
+  projectRouting?: string;
 }): FlyoutLensChartConfigDefinition {
   const { label, aggregation } = getLatencyAggregationConfig(latencyAggregationType);
 
@@ -82,13 +84,21 @@ export function getLatencyChart({
     titleAction,
     indices,
     buildQuery: (idx) => buildQuery(idx, aggregation),
+    projectRouting,
     yAxis: [
       {
         label,
         value: aggregation,
-        format: 'number',
-        decimals: 0,
-        suffix: ' ms',
+        // The queries EVAL a `duration_ms` column; let Lens auto-scale the unit
+        // (µs/ms/s) like the APM duration formatter instead of a fixed ms suffix.
+        // These are the duration field formatter's own unit names: the legacy
+        // LensConfigBuilder forwards fromUnit/toUnit verbatim into the formatter
+        // params (short names like 'ms'/'auto' belong to the new Lens API schema
+        // and break the formatter). compactValues gives short suffixes ("µs").
+        format: 'duration',
+        fromUnit: 'milliseconds',
+        toUnit: 'humanizePrecise',
+        compactValues: true,
         seriesColor: seriesColor(getLatencyChartType(latencyAggregationType)),
       },
     ],
@@ -98,9 +108,11 @@ export function getLatencyChart({
 export function getThroughputChart({
   indices,
   buildQuery,
+  projectRouting,
 }: {
   indices: string | undefined;
   buildQuery: (indices: string) => ComposerQuery;
+  projectRouting?: string;
 }): FlyoutLensChartConfigDefinition {
   return buildChartDefinition({
     id: 'throughput',
@@ -109,6 +121,7 @@ export function getThroughputChart({
     }),
     indices,
     buildQuery,
+    projectRouting,
     yAxis: [
       {
         label: i18n.translate('xpack.apm.serviceFlyout.throughputSeriesLabel', {
@@ -127,16 +140,19 @@ export function getErrorRateChart({
   indices,
   buildQuery,
   title,
+  projectRouting,
 }: {
   indices: string | undefined;
   buildQuery: (indices: string) => ComposerQuery;
   title: string;
+  projectRouting?: string;
 }): FlyoutLensChartConfigDefinition {
   return buildChartDefinition({
     id: 'failedTransactionRate',
     title,
     indices,
     buildQuery,
+    projectRouting,
     yBounds: { mode: 'custom', lowerBound: 0, upperBound: 1 },
     yAxis: [
       {

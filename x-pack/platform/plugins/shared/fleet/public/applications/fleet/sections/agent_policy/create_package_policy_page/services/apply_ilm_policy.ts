@@ -18,10 +18,18 @@ export async function applyIlmPolicyChange(
   ilmPolicy: string | undefined,
   packageInfo: PackageInfo,
   notifications: NotificationsStart,
-  packageTitle: string
+  packageTitle: string,
+  namespaceCustomizationEnabled: boolean
 ): Promise<void> {
   const trimmed = namespace?.trim();
   if (!trimmed) {
+    return;
+  }
+
+  // When namespace customization is being disabled, the server automatically clears the ILM
+  // policy for opted-out namespaces as part of the opt-out call. Sending a separate ILM
+  // settings request would fail because the namespace is no longer in the opt-in list.
+  if (!namespaceCustomizationEnabled) {
     return;
   }
 

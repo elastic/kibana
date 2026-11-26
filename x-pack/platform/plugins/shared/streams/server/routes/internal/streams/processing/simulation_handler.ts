@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-/* eslint-disable @typescript-eslint/naming-convention */
+/* eslint-disable @kbn/compat/typescript-naming-convention */
 
 import { errors as esErrors } from '@elastic/elasticsearch';
 import type {
@@ -38,7 +38,6 @@ import type {
 import {
   getInheritedFieldsFromAncestors,
   getRoot,
-  isDraftStream,
   LOGS_ECS_STREAM_NAME,
   Streams,
 } from '@kbn/streams-schema';
@@ -54,7 +53,6 @@ import {
   normalizeGeoPointsInObject,
   detectGeoPointPatternsFromDocuments,
 } from '../../../../lib/streams/helpers/normalize_geo_points';
-import { resolveFirstNonDraftAncestor } from '../../../../lib/streams/helpers/draft_helpers';
 import { getProcessingPipelineName } from '../../../../lib/streams/ingest_pipelines/name';
 import type { StreamsClient } from '../../../../lib/streams/client';
 import { createStreamlangResolverOptions } from '../../../../lib/streams/resolvers';
@@ -65,10 +63,16 @@ export interface ProcessingSimulationParams {
     name: string;
   };
   body: {
-    processing: StreamlangDSL;
     documents: FlattenRecord[];
     detected_fields?: NamedFieldDefinitionConfig[];
-  };
+  } & (
+    | {
+        processing: StreamlangDSL;
+      }
+    | {
+        processors: IngestProcessorContainer[];
+      }
+  );
 }
 
 export interface SimulateProcessingDeps {
@@ -77,6 +81,11 @@ export interface SimulateProcessingDeps {
   streamsClient: StreamsClient;
   fieldsMetadataClient: IFieldsMetadataClient;
 }
+
+const hasStreamlangProcessing = (
+  body: ProcessingSimulationParams['body']
+): body is Extract<ProcessingSimulationParams['body'], { processing: StreamlangDSL }> =>
+  'processing' in body;
 
 // Narrow down the type to only successful processor results
 export type SuccessfulPipelineSimulateDocumentResult = WithRequired<
@@ -117,20 +126,13 @@ export const simulateProcessing = async ({
   fieldsMetadataClient,
 }: SimulateProcessingDeps): Promise<ProcessingSimulationResponse> => {
   /* 0. Retrieve required data to prepare the simulation */
-  const stream = await streamsClient.getStream(params.path.name);
+  const [stream, { indexState: streamIndexState, fieldCaps: streamIndexFieldCaps }, ancestors] =
+    await Promise.all([
+      streamsClient.getStream(params.path.name),
+      getStreamIndex(esClient, streamsClient, params.path.name),
+      streamsClient.getAncestors(params.path.name),
+    ]);
 
-  const isDraft = Streams.WiredStream.Definition.is(stream) && isDraftStream(stream);
-  const indexStreamName = isDraft
-    ? await resolveFirstNonDraftAncestor(streamsClient, params.path.name)
-    : params.path.name;
-
-  const { indexState: streamIndexState, fieldCaps: streamIndexFieldCaps } = await getStreamIndex(
-    esClient,
-    streamsClient,
-    indexStreamName
-  );
-
-  const ancestors = await streamsClient.getAncestors(params.path.name);
   const streamFields = getStreamFieldsFromDefinition(stream, ancestors);
 
   // Get reserved fields for validation
@@ -138,32 +140,34 @@ export const simulateProcessing = async ({
     .filter(([, { type }]) => type === 'system')
     .map(([name]) => name);
 
-  // Validate the Streamlang DSL before attempting simulation
   const rootStream = getRoot(params.path.name);
   const isWiredStream = Streams.WiredStream.Definition.is(stream);
-  const validationResult = validateStreamlang(params.body.processing, {
-    reservedFields,
-    streamType: isWiredStream ? 'wired' : 'classic',
-    skipNamespaceValidation: isWiredStream && rootStream === LOGS_ECS_STREAM_NAME,
-  });
 
-  if (!validationResult.isValid) {
-    return {
-      documents: [],
-      processors_metrics: {},
-      documents_metrics: {
-        failed_rate: 1,
-        partially_parsed_rate: 0,
-        skipped_rate: 0,
-        parsed_rate: 0,
-        dropped_rate: 0,
-      },
-      detected_fields: [],
-      definition_error: {
-        type: 'validation_error',
-        message: validationResult.errors.map((e) => e.message).join(', '),
-      },
-    };
+  if (hasStreamlangProcessing(params.body)) {
+    const validationResult = validateStreamlang(params.body.processing, {
+      reservedFields,
+      streamType: isWiredStream ? 'wired' : 'classic',
+      skipNamespaceValidation: isWiredStream && rootStream === LOGS_ECS_STREAM_NAME,
+    });
+
+    if (!validationResult.isValid) {
+      return {
+        documents: [],
+        processors_metrics: {},
+        documents_metrics: {
+          failed_rate: 1,
+          partially_parsed_rate: 0,
+          skipped_rate: 0,
+          parsed_rate: 0,
+          dropped_rate: 0,
+        },
+        detected_fields: [],
+        definition_error: {
+          type: 'validation_error',
+          message: validationResult.errors.map((e) => e.message).join(', '),
+        },
+      };
+    }
   }
 
   const streamlangResolverOptions: StreamlangResolverOptions =
@@ -181,9 +185,7 @@ export const simulateProcessing = async ({
     simulationData,
     stream,
     streamIndexState,
-    params,
-    ancestors,
-    indexStreamName
+    params
   );
   /**
    * 2. Run both pipeline and ingest simulations in parallel.
@@ -207,10 +209,10 @@ export const simulateProcessing = async ({
     pipelineSimulationResult.simulation,
     ingestSimulationResult.simulation,
     simulationData.docs,
-    params.body.processing,
+    simulationData.metricProcessors,
+    simulationData.conditionProcessorTags,
     Streams.WiredStream.Definition.is(stream),
-    streamFields,
-    streamlangResolverOptions
+    streamFields
   );
 
   /* 5. Extract valid detected fields with intelligent type suggestions from fieldsMetadataService */
@@ -239,43 +241,44 @@ const prepareSimulationDocs = (
 };
 
 const prepareSimulationProcessors = async (
-  processing: StreamlangDSL,
+  processing: StreamlangDSL | IngestProcessorContainer[],
   resolverOptions?: StreamlangResolverOptions
-): Promise<IngestProcessorContainer[]> => {
+): Promise<Array<NonNullable<IngestProcessorContainer>>> => {
   //
   /**
    * We want to simulate processors logic and collect data independently from the user config for simulation purposes.
    * 1. Force each processor to not ignore failures to collect all errors
    * 2. Append the error message to the `_errors` field on failure
    */
-  const transpiledIngestPipelineProcessors = await buildSimulationProcessorsWithConditionNoops(
-    processing,
-    resolverOptions
-  );
+  const transpiledIngestPipelineProcessors = Array.isArray(processing)
+    ? processing
+    : await buildSimulationProcessorsWithConditionNoops(processing, resolverOptions);
 
-  return transpiledIngestPipelineProcessors.map((processor) => {
-    const type = Object.keys(processor)[0];
-    const processorConfig = (processor as Record<string, Record<string, unknown>>)[type];
+  return transpiledIngestPipelineProcessors
+    .filter((processor): processor is NonNullable<IngestProcessorContainer> => Boolean(processor))
+    .map((processor) => {
+      const type = Object.keys(processor)[0];
+      const processorConfig = (processor as Record<string, Record<string, unknown>>)[type];
 
-    return {
-      [type]: {
-        ...processorConfig,
-        ignore_failure: false,
-        on_failure: [
-          {
-            append: {
-              field: '_errors',
-              value: {
-                message: '{{{ _ingest.on_failure_message }}}',
-                processor_id: processorConfig?.tag,
-                type: 'generic_processor_failure',
+      return {
+        [type]: {
+          ...processorConfig,
+          ignore_failure: false,
+          on_failure: [
+            {
+              append: {
+                field: '_errors',
+                value: {
+                  message: '{{{ _ingest.on_failure_message }}}',
+                  processor_id: processorConfig?.tag,
+                  type: 'generic_processor_failure',
+                },
               },
             },
-          },
-        ],
-      },
-    };
-  });
+          ],
+        },
+      };
+    });
 };
 
 const prepareSimulationData = async (
@@ -285,7 +288,8 @@ const prepareSimulationData = async (
   resolverOptions?: StreamlangResolverOptions
 ) => {
   const { body } = params;
-  const { processing, documents } = body;
+  const { documents } = body;
+  const processing = hasStreamlangProcessing(body) ? body.processing : body.processors;
 
   const targetStreamName = Streams.WiredStream.Definition.is(stream)
     ? getRoot(stream.name)
@@ -308,6 +312,13 @@ const prepareSimulationData = async (
   return {
     docs: prepareSimulationDocs(documents, targetStreamName, geoPointFields),
     processors: await prepareSimulationProcessors(processing, resolverOptions),
+    metricProcessors: (hasStreamlangProcessing(body)
+      ? await buildSimulationProcessorsWithConditionNoops(body.processing, resolverOptions)
+      : body.processors
+    ).filter((processor): processor is NonNullable<IngestProcessorContainer> => Boolean(processor)),
+    conditionProcessorTags: hasStreamlangProcessing(body)
+      ? collectConditionBlockIds(body.processing)
+      : new Set<string>(),
   };
 };
 
@@ -329,16 +340,12 @@ const prepareIngestSimulationBody = (
   simulationData: PreparedSimulationData,
   stream: Streams.all.Definition,
   streamIndex: IndicesIndexState,
-  params: ProcessingSimulationParams,
-  ancestors: Streams.WiredStream.Definition[],
-  indexStreamName: string
+  params: ProcessingSimulationParams
 ): SimulateIngestRequest => {
   const { body } = params;
   const { detected_fields } = body;
 
   const { docs, processors } = simulationData;
-
-  const isWiredDraft = Streams.WiredStream.Definition.is(stream) && isDraftStream(stream);
 
   const pipelineSubstitutions: SimulateIngestRequest['pipeline_substitutions'] = {};
 
@@ -347,31 +354,20 @@ const prepareIngestSimulationBody = (
       processors: [
         {
           reroute: {
-            destination: indexStreamName,
+            destination: stream.name,
           },
         },
       ],
     };
   }
 
-  {
-    const defaultPipelineName = streamIndex.settings?.index?.default_pipeline;
-    if (defaultPipelineName) {
-      pipelineSubstitutions[defaultPipelineName] = {
-        processors,
-        field_access_pattern: 'flexible',
-      };
-    }
+  const defaultPipelineName = streamIndex.settings?.index?.default_pipeline;
+  if (defaultPipelineName) {
+    pipelineSubstitutions[defaultPipelineName] = {
+      processors,
+      field_access_pattern: 'flexible',
+    };
   }
-
-  // Build mapping_addition from explicit detected_fields in the request body.
-  // For drafts, also include field definitions from the stream and all its
-  // ancestors (including other drafts in the chain) since there is no backing
-  // index template to provide them to the simulate API.
-  const mappingProperties: StreamsMappingProperties = {
-    ...(isWiredDraft ? computeDraftFieldMappings(stream, ancestors) : {}),
-    ...(detected_fields ? computeMappingProperties(detected_fields) : {}),
-  };
 
   const simulationBody: SimulateIngestRequest = {
     docs,
@@ -380,9 +376,9 @@ const prepareIngestSimulationBody = (
     // But the ingest simulation API does not validate correctly the mappings unless they are specified in the simulation body.
     // So we need to merge the mappings from the stream index with the detected fields.
     // This is a workaround until the ingest simulation API works as expected.
-    ...(!isEmpty(mappingProperties) && {
+    ...(detected_fields && {
       mapping_addition: {
-        properties: mappingProperties,
+        properties: computeMappingProperties(detected_fields),
       },
     }),
   };
@@ -407,25 +403,6 @@ const TYPES_SUPPORTING_IGNORE_MALFORMED = new Set([
   'geo_shape',
   'ip',
 ]);
-
-const computeDraftFieldMappings = (
-  stream: Streams.WiredStream.Definition,
-  ancestors: Streams.WiredStream.Definition[]
-): StreamsMappingProperties => {
-  const allFieldSources = [...ancestors, stream];
-  return Object.fromEntries(
-    allFieldSources.flatMap((def) =>
-      Object.entries(def.ingest.wired.fields).flatMap(([name, config]) => {
-        if (
-          !FIELD_DEFINITION_TYPES.includes(config.type as (typeof FIELD_DEFINITION_TYPES)[number])
-        ) {
-          return [];
-        }
-        return [[name, { type: config.type }]];
-      })
-    )
-  ) as StreamsMappingProperties;
-};
 
 /**
  * When running a pipeline simulation, we want to fail fast on syntax failures, such as grok patterns.
@@ -590,21 +567,15 @@ const computePipelineSimulationResult = async (
   pipelineSimulationResult: SuccessfulPipelineSimulateResponse,
   ingestSimulationResult: SimulateIngestResponse,
   sampleDocs: Array<{ _source: FlattenRecord }>,
-  processing: StreamlangDSL,
+  metricProcessors: Array<NonNullable<IngestProcessorContainer>>,
+  conditionProcessorTags: Set<string>,
   isWiredStream: boolean,
-  streamFields: FieldDefinition,
-  resolverOptions?: StreamlangResolverOptions
+  streamFields: FieldDefinition
 ): Promise<{
   docReports: SimulationDocReport[];
   processorsMetrics: Record<string, ProcessorMetrics>;
 }> => {
-  const transpiledProcessors = await buildSimulationProcessorsWithConditionNoops(
-    processing,
-    resolverOptions
-  );
-
-  const processorsMap = initProcessorMetricsMap(transpiledProcessors);
-  const conditionProcessorTags = collectConditionBlockIds(processing);
+  const processorsMap = initProcessorMetricsMap(metricProcessors);
 
   const forbiddenFields = Object.entries(streamFields)
     .filter(([, { type }]) => type === 'system')

@@ -8,20 +8,20 @@
  */
 
 import type { z } from '@kbn/zod';
-import { durationFormatSchema, legacyDurationFormatSchema } from './duration_units';
+import { durationFormatSchema } from './duration_units';
 
 type DurationFormat = z.infer<typeof durationFormatSchema>;
-type LegacyDurationFormat = z.infer<typeof legacyDurationFormatSchema>;
 
 describe('Duration unit schemas', () => {
-  describe('durationFormatSchema (GA)', () => {
-    it('validates fine-grained input units', () => {
+  describe('durationFormatSchema', () => {
+    it('validates fine-grained input units without inventing decimals/compact', () => {
       const input = {
         type: 'duration',
         from: 'us',
         to: 'auto-approximate',
       } satisfies DurationFormat;
 
+      // Approximate: decimals/compact are optional and must stay absent (transform omits them).
       expect(durationFormatSchema.parse(input)).toEqual(input);
     });
 
@@ -32,6 +32,7 @@ describe('Duration unit schemas', () => {
         to: 'auto',
       } satisfies DurationFormat;
 
+      // Precise: schema does not default; complete-out is the transform's job.
       expect(durationFormatSchema.parse(input)).toEqual(input);
     });
 
@@ -40,6 +41,30 @@ describe('Duration unit schemas', () => {
         type: 'duration',
         from: 'mo',
         to: 'auto',
+      } satisfies DurationFormat;
+
+      expect(durationFormatSchema.parse(input)).toEqual(input);
+    });
+
+    it('preserves explicit decimals and compact', () => {
+      const input = {
+        type: 'duration',
+        from: 'ms',
+        to: 'auto',
+        decimals: 0,
+        compact: true,
+      } satisfies DurationFormat;
+
+      expect(durationFormatSchema.parse(input)).toEqual(input);
+    });
+
+    it('accepts decimals/compact on approximate without requiring them', () => {
+      const input = {
+        type: 'duration',
+        from: 's',
+        to: 'auto-approximate',
+        decimals: 7,
+        compact: true,
       } satisfies DurationFormat;
 
       expect(durationFormatSchema.parse(input)).toEqual(input);
@@ -73,50 +98,6 @@ describe('Duration unit schemas', () => {
       expect(() =>
         durationFormatSchema.parse({ type: 'duration', from: 'auto', to: 's' })
       ).toThrow();
-    });
-  });
-
-  // Legacy duration units are intentionally free-form strings (no enum validation) to preserve
-  // the pre-GA behavior, so nothing is rejected based on the unit name.
-  describe('legacyDurationFormatSchema', () => {
-    it('validates legacy `m` for minutes', () => {
-      const input = {
-        type: 'duration',
-        from: 'm',
-        to: 'humanize',
-      } satisfies LegacyDurationFormat;
-
-      expect(legacyDurationFormatSchema.parse(input)).toEqual(input);
-    });
-
-    it('validates legacy `humanizePrecise` output', () => {
-      const input = {
-        type: 'duration',
-        from: 'us',
-        to: 'humanizePrecise',
-      } satisfies LegacyDurationFormat;
-
-      expect(legacyDurationFormatSchema.parse(input)).toEqual(input);
-    });
-
-    it('accepts GA unit names without enum validation', () => {
-      const input = {
-        type: 'duration',
-        from: 'min',
-        to: 'auto-approximate',
-      } satisfies LegacyDurationFormat;
-
-      expect(legacyDurationFormatSchema.parse(input)).toEqual(input);
-    });
-
-    it('accepts arbitrary unit strings for backwards compatibility', () => {
-      const input = {
-        type: 'duration',
-        from: 'minutes',
-        to: 'anything',
-      } satisfies LegacyDurationFormat;
-
-      expect(legacyDurationFormatSchema.parse(input)).toEqual(input);
     });
   });
 });

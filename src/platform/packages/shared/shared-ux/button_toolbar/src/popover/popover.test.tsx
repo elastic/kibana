@@ -37,7 +37,7 @@ describe('<ToolbarPopover />', () => {
     const button = component.find('EuiButton');
     expect(button).toHaveStyleRule('background-color', '#FFFFFF');
     expect(button).toHaveStyleRule('border', '1px solid #CAD3E2');
-    expect(button).toHaveStyleRule('color', '#1D2A3E');
+    expect(button).toHaveStyleRule('color', '#384861');
   });
 
   test('accepts a button type', () => {
@@ -49,7 +49,7 @@ describe('<ToolbarPopover />', () => {
     expect(button.prop('color')).toBe('primary');
   });
 
-  test('if not given an iconType, render arrowDown on the right', () => {
+  test('if not given an iconType, render chevronSingleDown on the right', () => {
     const isOpen = false;
 
     const component = mountWithIntl(<ToolbarPopover label="test" children={() => !isOpen} />);

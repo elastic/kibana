@@ -14,10 +14,7 @@ import type { CasesContextProps } from '../../../cases_context';
 
 export type CasesActionContextProps = Pick<
   CasesContextProps,
-  | 'externalReferenceAttachmentTypeRegistry'
-  | 'persistableStateAttachmentTypeRegistry'
-  | 'unifiedAttachmentTypeRegistry'
-  | 'getFilesClient'
+  'unifiedAttachmentTypeRegistry' | 'getFilesClient'
 >;
 
 export interface Services {

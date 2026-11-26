@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from '@kbn/zod/v4';
+import { lazySchema, z } from '@kbn/zod/v4';
 import { MAX_HITL_GRAPH_NODE_ID_LENGTH } from '../../../common/hitl';
 import {
   DataSetStepSchema,
@@ -16,16 +16,25 @@ import {
   WaitForApprovalStepSchema,
   WaitForInputStepSchema,
   WaitStepSchema,
+  WorkflowAwaitExecutionsStepSchema,
   WorkflowExecuteAsyncStepSchema,
   WorkflowExecuteStepSchema,
   WorkflowOutputStepSchema,
 } from '../../../spec/schema';
 
-export const GraphNodeSchema = z.object({
+export const BaseGraphNodeSchema = z.object({
   id: z.string(),
   type: z.string(),
   stepId: z.string(),
   stepType: z.string(),
+});
+
+export const SyntheticGraphNodeSchema = BaseGraphNodeSchema.extend({
+  isSynthetic: z.boolean(),
+});
+export type SyntheticGraphNode = z.infer<typeof SyntheticGraphNodeSchema>;
+
+export const GraphNodeSchema = BaseGraphNodeSchema.extend({
   templateDependencies: z.array(z.unknown()).optional(),
 });
 
@@ -95,6 +104,17 @@ export const WorkflowExecuteAsyncGraphNodeSchema = GraphNodeSchema.extend({
   configuration: WorkflowExecuteAsyncStepSchema,
 });
 export type WorkflowExecuteAsyncGraphNode = z.infer<typeof WorkflowExecuteAsyncGraphNodeSchema>;
+
+export const WorkflowAwaitExecutionsGraphNodeSchema = lazySchema(() =>
+  GraphNodeSchema.extend({
+    id: z.string(),
+    type: z.literal('workflow.awaitExecutions'),
+    configuration: WorkflowAwaitExecutionsStepSchema,
+  })
+);
+export type WorkflowAwaitExecutionsGraphNode = z.infer<
+  typeof WorkflowAwaitExecutionsGraphNodeSchema
+>;
 
 export const WorkflowOutputGraphNodeSchema = GraphNodeSchema.extend({
   id: z.string(),

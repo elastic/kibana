@@ -12,7 +12,6 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { ApplicationStart } from '@kbn/core/public';
 
 import {
-  EuiLink,
   EuiSelect,
   EuiForm,
   EuiFormRow,
@@ -20,11 +19,11 @@ import {
   EuiModal,
   EuiModalBody,
   EuiModalHeader,
-  EuiCallOut,
   EuiSpacer,
   EuiModalHeaderTitle,
   htmlIdGenerator,
 } from '@elastic/eui';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 
 import type { Index } from '../../../common/types';
 import { loadPolicies, addLifecyclePolicyToIndex } from '../../application/services/api';
@@ -116,7 +115,7 @@ export class AddLifecyclePolicyConfirmModal extends Component<Props, State> {
       return (
         <Fragment>
           <EuiSpacer size="m" />
-          <EuiCallOut
+          <KbnWarningCallout
             announceOnMount={false}
             style={{ maxWidth: 400 }}
             title={
@@ -125,18 +124,18 @@ export class AddLifecyclePolicyConfirmModal extends Component<Props, State> {
                 defaultMessage="Index has no aliases"
               />
             }
-            color="warning"
-          >
-            <FormattedMessage
-              id="xpack.indexLifecycleMgmt.indexManagementTable.addLifecyclePolicyConfirmModal.indexHasNoAliasesWarningMessage"
-              defaultMessage="Policy {policyName} is configured for rollover,
+            text={
+              <FormattedMessage
+                id="xpack.indexLifecycleMgmt.indexManagementTable.addLifecyclePolicyConfirmModal.indexHasNoAliasesWarningMessage"
+                defaultMessage="Policy {policyName} is configured for rollover,
                 but index {indexName} does not have an alias, which is required for rollover."
-              values={{
-                policyName: selectedPolicy?.name,
-                indexName: index.name,
-              }}
-            />
-          </EuiCallOut>
+                values={{
+                  policyName: selectedPolicy?.name,
+                  indexName: index.name,
+                }}
+              />
+            }
+          />
         </Fragment>
       );
     }
@@ -261,7 +260,7 @@ export class AddLifecyclePolicyConfirmModal extends Component<Props, State> {
           </EuiModalHeader>
 
           <EuiModalBody>
-            <EuiCallOut
+            <KbnWarningCallout
               announceOnMount={false}
               style={{ maxWidth: 400 }}
               title={
@@ -270,21 +269,20 @@ export class AddLifecyclePolicyConfirmModal extends Component<Props, State> {
                   defaultMessage="No index lifecycle policies defined"
                 />
               }
-              color="warning"
-            >
-              <p>
-                <EuiLink
-                  href={getUrlForApp('management', {
+              actionProps={{
+                primary: {
+                  href: getUrlForApp('management', {
                     path: `data/index_lifecycle_management/policies/edit`,
-                  })}
-                >
-                  <FormattedMessage
-                    id="xpack.indexLifecycleMgmt.indexManagementTable.addLifecyclePolicyConfirmModal.defineLifecyclePolicyLinkText"
-                    defaultMessage="Define lifecycle policy"
-                  />
-                </EuiLink>
-              </p>
-            </EuiCallOut>
+                  }),
+                  children: (
+                    <FormattedMessage
+                      id="xpack.indexLifecycleMgmt.indexManagementTable.addLifecyclePolicyConfirmModal.defineLifecyclePolicyLinkText"
+                      defaultMessage="Define lifecycle policy"
+                    />
+                  ),
+                },
+              }}
+            />
           </EuiModalBody>
         </EuiModal>
       );

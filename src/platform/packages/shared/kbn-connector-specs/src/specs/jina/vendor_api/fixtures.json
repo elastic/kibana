@@ -1,0 +1,38 @@
+{
+  "browse": {
+    "queries": [
+      {
+        "method": "POST",
+        "path": "/",
+        "source": "reader"
+      }
+    ]
+  },
+  "fileToMarkdown": {
+    "queries": [
+      {
+        "method": "POST",
+        "path": "/",
+        "source": "reader"
+      }
+    ]
+  },
+  "fileToRenderedImage": {
+    "queries": [
+      {
+        "method": "POST",
+        "path": "/",
+        "source": "reader"
+      }
+    ]
+  },
+  "search": {
+    "queries": [
+      {
+        "method": "POST",
+        "path": "/",
+        "source": "search"
+      }
+    ]
+  }
+}

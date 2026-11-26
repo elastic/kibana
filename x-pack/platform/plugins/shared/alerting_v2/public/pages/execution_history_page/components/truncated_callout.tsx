@@ -10,23 +10,29 @@ import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 import type { SearchMatchCounts } from '@kbn/alerting-v2-schemas';
 import { i18n } from '@kbn/i18n';
 
-type TruncatedType = 'policies' | 'rules';
+type MatchedType = 'policy_count' | 'rule_count';
+
+// The Rules tab only reports rule matches, so `policy_count` is optional.
+type SearchMatches = Omit<SearchMatchCounts, 'policy_count'> &
+  Partial<Pick<SearchMatchCounts, 'policy_count'>>;
 
 interface Props {
   searchParam?: string;
   data?: {
-    searchMatches: SearchMatchCounts | null;
+    search_matches?: SearchMatches;
   };
 }
 
 export const TruncatedCallout = ({ data, searchParam }: Props) => {
-  const searchMatches = data?.searchMatches ?? null;
-  const truncatedTypes: TruncatedType[] =
-    searchMatches !== null
-      ? (['policies', 'rules'] as const).filter((t) => searchMatches[t] > searchMatches.cap)
-      : [];
+  const searchMatches = data?.search_matches;
+  const matchedTypes: MatchedType[] = searchMatches
+    ? (['policy_count', 'rule_count'] as const).filter((t) => (searchMatches[t] ?? 0) > 0)
+    : [];
   const showSearchTruncatedCallout =
-    searchParam !== undefined && truncatedTypes.length > 0 && searchMatches !== null;
+    searchParam !== undefined &&
+    searchMatches !== undefined &&
+    searchMatches.is_truncated &&
+    matchedTypes.length > 0;
 
   return showSearchTruncatedCallout ? (
     <>
@@ -35,29 +41,29 @@ export const TruncatedCallout = ({ data, searchParam }: Props) => {
         size="s"
         color="warning"
         iconType="warning"
-        title={buildSearchTruncatedCalloutTitle(searchMatches, truncatedTypes)}
+        title={buildSearchTruncatedCalloutTitle(searchMatches, matchedTypes)}
       />
       <EuiSpacer size="m" />
     </>
   ) : null;
 };
 
-const renderTruncatedPart = (matches: SearchMatchCounts, type: TruncatedType): string =>
-  type === 'policies'
+const renderMatchedPart = (matches: SearchMatches, type: MatchedType): string =>
+  type === 'policy_count'
     ? i18n.translate('xpack.alertingV2.executionHistory.searchTruncatedCallout.policiesPart', {
-        defaultMessage: '{cap} of {total} matching policies',
-        values: { cap: matches.cap, total: matches.policies },
+        defaultMessage: '{total} matching action policies',
+        values: { total: matches.policy_count ?? 0 },
       })
     : i18n.translate('xpack.alertingV2.executionHistory.searchTruncatedCallout.rulesPart', {
-        defaultMessage: '{cap} of {total} matching rules',
-        values: { cap: matches.cap, total: matches.rules },
+        defaultMessage: '{total} matching rules',
+        values: { total: matches.rule_count },
       });
 
 const buildSearchTruncatedCalloutTitle = (
-  matches: SearchMatchCounts,
-  truncatedTypes: TruncatedType[]
+  matches: SearchMatches,
+  matchedTypes: MatchedType[]
 ): string => {
-  const summary = truncatedTypes.map((t) => renderTruncatedPart(matches, t));
+  const summary = matchedTypes.map((t) => renderMatchedPart(matches, t));
   const summaryText =
     summary.length === 2
       ? i18n.translate('xpack.alertingV2.executionHistory.searchTruncatedCallout.joinedSummary', {
@@ -67,7 +73,8 @@ const buildSearchTruncatedCalloutTitle = (
       : summary[0];
 
   return i18n.translate('xpack.alertingV2.executionHistory.searchTruncatedCallout', {
-    defaultMessage: 'Showing events for the first {summary}. Refine your search to narrow results.',
+    defaultMessage:
+      'Your search matched {summary}, but only a subset of these events is shown. Refine your search to narrow results.',
     values: { summary: summaryText },
   });
 };

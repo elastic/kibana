@@ -22,5 +22,4 @@ export const INCLUDED_OPERATIONS = [
   'SetAlertTags',
   'get-streams',
   'get-streams-name',
-  'get-streams-name-significant-events',
 ];

@@ -73,6 +73,13 @@ export function createGetMetricChangePointsTool({
   const toolDefinition: BuiltinToolDefinition<typeof getMetricChangePointsSchema> = {
     id: OBSERVABILITY_GET_METRIC_CHANGE_POINTS_TOOL_ID,
     type: ToolType.builtin,
+    annotations: {
+      title: 'Get Metric Change Points',
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: true,
+      openWorldHint: false,
+    },
     description: `Detects statistically significant changes in metrics across groups (e.g., by service, host, or custom fields).
 
 When to use:
@@ -86,9 +93,12 @@ When to use:
         return getAgentBuilderResourceAvailability({ core, request, logger });
       },
     },
-    handler: async ({ start, end, index, kqlFilter, aggregation, groupBy }, { esClient }) => {
+    handler: async (
+      { start, end, index, kqlFilter, aggregation, groupBy },
+      { esClient, request }
+    ) => {
       try {
-        const metricIndexPatterns = await getMetricsIndices({ core, plugins, logger });
+        const metricIndexPatterns = await getMetricsIndices({ core, plugins, request, logger });
 
         const topMetricChangePoints = await getToolHandler({
           esClient,

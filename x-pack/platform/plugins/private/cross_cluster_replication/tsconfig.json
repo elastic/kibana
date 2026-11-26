@@ -10,6 +10,7 @@
   ],
   "kbn_references": [
     "@kbn/core",
+    "@kbn/app-header",
     // required plugins
     "@kbn/licensing-plugin",
     "@kbn/management-plugin",
@@ -34,6 +35,7 @@
     "@kbn/data-views-plugin",
     "@kbn/index-management-shared-types",
     "@kbn/core-http-browser",
+    "@kbn/ui-callout"
   ],
   "exclude": [
     "target/**/*",

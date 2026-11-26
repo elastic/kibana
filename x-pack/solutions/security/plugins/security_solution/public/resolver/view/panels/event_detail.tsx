@@ -12,7 +12,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { EuiBasicTableColumn, EuiBreadcrumb, EuiSearchBarProps } from '@elastic/eui';
 import { EuiInMemoryTable, EuiSpacer, EuiText } from '@elastic/eui';
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 import { useSelector } from 'react-redux-v7';
 import type { CellActionRenderer } from '../../../flyout_v2/shared/components/cell_actions';
 import { BoldCode, StyledTime } from './styles';
@@ -54,8 +54,14 @@ export const EventDetail = memo(function EventDetail({
     selectors.isCurrentRelatedEventLoading(state.analyzer[id])
   );
   const isTreeLoading = useSelector((state: State) => selectors.isTreeLoading(state.analyzer[id]));
+  const originTimestampMs = useSelector((state: State) =>
+    selectors.originTimestamp(state.analyzer[id])
+  );
   const processEvent = useSelector((state: State) =>
-    nodeDataModel.firstEvent(selectors.nodeDataForID(state.analyzer[id])(nodeID))
+    nodeDataModel.eventAtOrBefore(
+      selectors.nodeDataForID(state.analyzer[id])(nodeID),
+      originTimestampMs
+    )
   );
   const nodeStatus = useSelector((state: State) =>
     selectors.nodeDataStatus(state.analyzer[id])(nodeID)
@@ -348,3 +354,4 @@ const StyledDescriptiveName = memo(styled(EuiText)`
   padding-right: 1em;
   overflow-wrap: break-word;
 `);
+StyledDescriptiveName.displayName = 'StyledDescriptiveName';

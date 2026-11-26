@@ -104,11 +104,13 @@ class TutorialUi extends React.Component<TutorialProps, TutorialState> {
         text: tutorial ? tutorial.name : this.props.tutorialId,
       },
     ];
-    getServices().chrome.setBreadcrumbs(breadcrumbs, {
+    const { chrome } = getServices();
+    chrome.setBreadcrumbs(breadcrumbs, {
       project: {
         value: breadcrumbs,
       },
     });
+    chrome.docTitle.change(tutorial ? tutorial.name : this.props.tutorialId);
   }
 
   getInstructions = () => {
@@ -418,6 +420,11 @@ class TutorialUi extends React.Component<TutorialProps, TutorialState> {
             isBeta={this.state.tutorial.isBeta}
             notices={this.renderModuleNotices()}
             basePath={getServices().http.basePath}
+            hash={
+              getServices().history.location.hash ||
+              (typeof window !== 'undefined' ? window.location.hash : '')
+            }
+            getUrlForApp={getServices().application.getUrlForApp}
           />
 
           {this.renderInstructionSetsToggle()}

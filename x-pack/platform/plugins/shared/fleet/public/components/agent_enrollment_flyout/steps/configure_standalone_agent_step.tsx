@@ -16,10 +16,10 @@ import {
   EuiCopy,
   EuiCodeBlock,
   EuiLink,
-  EuiCallOut,
   EuiFieldText,
   EuiFormAppend,
 } from '@elastic/eui';
+import { KbnSuccessCallout, KbnWarningCallout } from '@kbn/ui-callout';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
@@ -122,20 +122,19 @@ export const ConfigureStandaloneAgentStep = ({
             <>{policyMsg}</>
             <EuiSpacer size="m" />
             {apiKey && (
-              <EuiCallOut
+              <KbnSuccessCallout
                 announceOnMount={false}
                 title={i18n.translate('xpack.fleet.agentEnrollment.apiKeyBanner.created', {
                   defaultMessage: 'API key created.',
                 })}
-                color="success"
-                iconType="check"
                 data-test-subj="obltOnboardingLogsApiKeyCreated"
-              >
-                <p>
-                  {i18n.translate('xpack.fleet.agentEnrollment.apiKeyBanner.created.description', {
+                text={i18n.translate(
+                  'xpack.fleet.agentEnrollment.apiKeyBanner.created.description',
+                  {
                     defaultMessage: `Remember to store this information in a safe place. It won't be displayed anymore after you continue.`,
-                  })}
-                </p>
+                  }
+                )}
+              >
                 <EuiFieldText
                   data-test-subj="apmAgentKeyCallOutFieldText"
                   readOnly
@@ -161,7 +160,7 @@ export const ConfigureStandaloneAgentStep = ({
                     </EuiCopy>
                   }
                 />
-              </EuiCallOut>
+              </KbnSuccessCallout>
             )}
             <EuiSpacer size="s" />
             <EuiFlexGroup gutterSize="m">
@@ -207,23 +206,20 @@ export const ConfigureStandaloneAgentStep = ({
             <EuiSpacer size="m" />
             {!canReadSettings && (
               <>
-                <EuiCallOut
+                <KbnWarningCallout
                   announceOnMount
                   title={i18n.translate(
                     'xpack.fleet.agentEnrollment.secretsRedactedCallout.title',
                     { defaultMessage: 'Some proxy credentials may not be shown' }
                   )}
-                  color="warning"
-                  iconType="warning"
-                >
-                  {i18n.translate(
+                  text={i18n.translate(
                     'xpack.fleet.agentEnrollment.secretsRedactedCallout.description',
                     {
                       defaultMessage:
                         'Proxy headers and TLS private keys are only visible to users with the Fleet Settings: Read Kibana privilege.',
                     }
                   )}
-                </EuiCallOut>
+                />
                 <EuiSpacer size="m" />
               </>
             )}

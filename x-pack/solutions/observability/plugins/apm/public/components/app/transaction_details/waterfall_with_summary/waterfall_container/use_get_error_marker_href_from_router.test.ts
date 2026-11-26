@@ -116,6 +116,65 @@ describe('useGetErrorMarkerHrefFromRouter', () => {
     );
   });
 
+  // OTel-native error documents only carry `span.id`.
+  it('builds kuery with spanId when transactionId is missing', () => {
+    const { result } = renderHook(() => useGetErrorMarkerHrefFromRouter());
+
+    result.current({
+      serviceName: 'my-service',
+      errorGroupId: 'abc123',
+      traceId: 'trace-456',
+      spanId: 'span-1',
+    });
+
+    expect(mockLink).toHaveBeenCalledWith(
+      expect.any(String),
+      expect.objectContaining({
+        query: expect.objectContaining({
+          kuery: 'trace.id : "trace-456" and span.id : "span-1"',
+        }),
+      })
+    );
+  });
+
+  it('builds kuery with spanId alone when no traceId is provided', () => {
+    const { result } = renderHook(() => useGetErrorMarkerHrefFromRouter());
+
+    result.current({
+      serviceName: 'my-service',
+      errorGroupId: 'abc123',
+      spanId: 'span-1',
+    });
+
+    expect(mockLink).toHaveBeenCalledWith(
+      expect.any(String),
+      expect.objectContaining({
+        query: expect.objectContaining({ kuery: 'span.id : "span-1"' }),
+      })
+    );
+  });
+
+  it('ORs transactionId and spanId inside parentheses when both are provided', () => {
+    const { result } = renderHook(() => useGetErrorMarkerHrefFromRouter());
+
+    result.current({
+      serviceName: 'my-service',
+      errorGroupId: 'abc123',
+      traceId: 'trace-456',
+      transactionId: 'tx-789',
+      spanId: 'span-1',
+    });
+
+    expect(mockLink).toHaveBeenCalledWith(
+      expect.any(String),
+      expect.objectContaining({
+        query: expect.objectContaining({
+          kuery: 'trace.id : "trace-456" and (transaction.id : "tx-789" or span.id : "span-1")',
+        }),
+      })
+    );
+  });
+
   it('sets empty kuery when neither traceId nor transactionId are provided', () => {
     const { result } = renderHook(() => useGetErrorMarkerHrefFromRouter());
 

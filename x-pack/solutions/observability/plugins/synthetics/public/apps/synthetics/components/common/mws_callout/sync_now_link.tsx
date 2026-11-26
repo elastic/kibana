@@ -7,12 +7,18 @@
 
 import React, { useCallback, useState } from 'react';
 import { EuiLink } from '@elastic/eui';
+import { useQueryClient } from '@kbn/react-query';
 import { i18n } from '@kbn/i18n';
 import { kibanaService } from '../../../../../utils/kibana_service';
 import { triggerMwSync } from '../../../state/settings/api';
+import { MAINTENANCE_WINDOWS_QUERY_KEY } from '../../../hooks';
+
+// Gives the sync a moment to finish and record its completion before refetching.
+const REFETCH_DELAY_MS = 10 * 1000;
 
 export const SyncNowLink = () => {
   const [isLoading, setIsLoading] = useState(false);
+  const queryClient = useQueryClient();
 
   const handleClick = useCallback(async () => {
     setIsLoading(true);
@@ -23,6 +29,9 @@ export const SyncNowLink = () => {
           defaultMessage: 'Maintenance window sync started. Changes will apply shortly.',
         })
       );
+      setTimeout(() => {
+        queryClient.invalidateQueries({ queryKey: MAINTENANCE_WINDOWS_QUERY_KEY });
+      }, REFETCH_DELAY_MS);
     } catch (err) {
       kibanaService.toasts.addError(err, {
         title: i18n.translate('xpack.synthetics.maintenanceWindowCallout.syncTriggered.error', {
@@ -32,7 +41,7 @@ export const SyncNowLink = () => {
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [queryClient]);
 
   return (
     <EuiLink onClick={handleClick} disabled={isLoading} data-test-subj="triggerMwSyncButton">

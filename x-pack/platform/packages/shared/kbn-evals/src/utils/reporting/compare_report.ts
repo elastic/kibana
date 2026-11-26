@@ -7,7 +7,9 @@
 
 import chalk from 'chalk';
 import { table } from 'table';
-import type { PairedTTestResult } from '@kbn/evals-common';
+import { isImproved } from '@kbn/evals-common';
+import type { Direction, ComparisonResult, RepetitionPolicy } from '@kbn/evals-common';
+import { formatDiscordantPairs, getTestLabel } from './test_label';
 
 const DEFAULT_SIGNIFICANCE_THRESHOLD = 0.05;
 
@@ -22,17 +24,18 @@ function formatNumber(value: number): string {
   return Number.isFinite(value) ? value.toFixed(2) : '-';
 }
 
-function formatDifference(value: number): string {
+function formatDifference(value: number, direction: Direction): string {
   if (!Number.isFinite(value)) {
     return chalk.gray('-');
   }
-  if (value > 0) {
-    return chalk.green(`+${value.toFixed(2)}`);
+
+  const formatted = value > 0 ? `+${value.toFixed(2)}` : value.toFixed(2);
+
+  if (value === 0 || direction === 'neutral') {
+    return formatted;
   }
-  if (value < 0) {
-    return chalk.red(value.toFixed(2));
-  }
-  return value.toFixed(2);
+
+  return isImproved(value, direction) ? chalk.green(formatted) : chalk.red(formatted);
 }
 
 function buildTableConfig(columnCount: number): {
@@ -50,16 +53,18 @@ function buildTableConfig(columnCount: number): {
   return { columns };
 }
 
-export function formatPairedTTestReport({
-  experimentIdA,
-  experimentIdB,
+export function formatCompareReport({
+  targetExperimentId,
+  baselineExperimentId,
   results,
   significanceThreshold = DEFAULT_SIGNIFICANCE_THRESHOLD,
+  repetitionPolicy = 'mean',
 }: {
-  experimentIdA: string;
-  experimentIdB: string;
-  results: PairedTTestResult[];
+  targetExperimentId: string;
+  baselineExperimentId: string;
+  results: ComparisonResult[];
   significanceThreshold?: number;
+  repetitionPolicy?: RepetitionPolicy;
 }): {
   header: string[];
   summary: string;
@@ -75,11 +80,20 @@ export function formatPairedTTestReport({
     (result) => result.pValue !== null && result.pValue < significanceThreshold
   ).length;
 
-  const tableHeaders = ['Evaluator', 'N', 'Mean A', 'Mean B', 'Diff', 'p-value', 'Significant'];
+  const tableHeaders = [
+    'Evaluator',
+    'N',
+    'Mean (target)',
+    'Mean (baseline)',
+    'Diff',
+    'Test',
+    'p-value',
+    'Significant',
+  ];
   const rowsByDataset = new Map<string, string[][]>();
 
   sortedResults.forEach((result) => {
-    const delta = result.meanA - result.meanB;
+    const delta = result.target.mean - result.baseline.mean;
     const isSignificant = result.pValue !== null && result.pValue < significanceThreshold;
     const significanceLabel =
       result.pValue === null
@@ -91,10 +105,11 @@ export function formatPairedTTestReport({
     const rows = rowsByDataset.get(result.datasetName) ?? [];
     rows.push([
       result.evaluatorName,
-      result.sampleSize.toString(),
-      formatNumber(result.meanA),
-      formatNumber(result.meanB),
-      formatDifference(delta),
+      `${result.sampleSize}${result.repetitionWarning ? '*' : ''}`,
+      formatNumber(result.target.mean),
+      formatNumber(result.baseline.mean),
+      formatDifference(delta, result.direction) + formatDiscordantPairs(result.hypothesisTest),
+      getTestLabel(result.hypothesisTest.id),
       formatPValue(result.pValue),
       significanceLabel,
     ]);
@@ -102,10 +117,18 @@ export function formatPairedTTestReport({
   });
 
   const header = [
-    `Experiment A: ${experimentIdA}`,
-    `Experiment B: ${experimentIdB}`,
+    `Target: ${targetExperimentId}`,
+    `Baseline: ${baselineExperimentId}`,
     `Significance threshold: p < ${significanceThreshold}`,
+    `Repetition policy: ${repetitionPolicy}`,
   ];
+  if (sortedResults.some((result) => result.repetitionWarning)) {
+    header.push(
+      chalk.yellow(
+        'Warning: in rows marked N*, some examples have a different number of valid repetitions in the two runs, or null scores.'
+      )
+    );
+  }
   const summary = `Significant differences: ${significantCount}/${sortedResults.length}`;
   const tableOutput = [...rowsByDataset.entries()]
     .map(([datasetName, rows]) => {

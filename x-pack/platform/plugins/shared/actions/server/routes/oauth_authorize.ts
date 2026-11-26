@@ -17,6 +17,7 @@ import type {
   Logger,
 } from '@kbn/core/server';
 import { getEarsEndpointsForProvider, resolveEarsUrl } from '../lib/ears';
+import { logEarsEvent } from '../lib/ears/log_ears_event';
 import type { ILicenseState } from '../lib';
 import {
   BASE_ACTION_API_PATH,
@@ -31,6 +32,7 @@ import type { ActionsPluginsStart } from '../plugin';
 import type { OAuthRateLimiter } from '../lib/oauth_rate_limiter';
 import type { ActionsConfigurationUtilities } from '../actions_config';
 import { OAUTH_API_TAG } from '../feature';
+import { getConnectorAuthInitiateErrorType, recordConnectorAuth } from '../lib/connector_metrics';
 
 class OAuthRouteError extends Error {
   constructor(message: string, public readonly statusCode: number) {
@@ -237,7 +239,7 @@ async function startOAuthAuthorizationFlow(params: {
   const routeLogger = logger.get('oauth_authorize');
 
   const actionsClient = (await context.actions).getActionsClient();
-  await actionsClient.get({ id: connectorId });
+  const { actionTypeId: connectorTypeId } = await actionsClient.get({ id: connectorId });
 
   const core = await context.core;
   const currentUser = core.security.authc.getCurrentUser();
@@ -339,6 +341,15 @@ async function startOAuthAuthorizationFlow(params: {
       state: state.state,
       pkceChallenge: codeChallenge,
     });
+    logEarsEvent(routeLogger, {
+      step: 'authorize',
+      outcome: 'success',
+      connectorId,
+      provider: oauthConfig.provider,
+      profileUid: profile_uid,
+      spaceId,
+      state: state.state,
+    });
   } else {
     authorizationUrl = oauthService.buildAuthorizationUrl({
       baseAuthorizationUrl: oauthConfig.authorizationUrl,
@@ -350,6 +361,12 @@ async function startOAuthAuthorizationFlow(params: {
       codeChallenge,
     });
   }
+
+  recordConnectorAuth({
+    phase: 'initiate',
+    authType: oauthConfig.authTypeId,
+    connectorType: connectorTypeId,
+  });
 
   return {
     authorizationUrl,
@@ -371,6 +388,13 @@ function handleOAuthStartError(
       : err instanceof Error && typeof (err as { statusCode?: unknown }).statusCode === 'number'
       ? (err as Error & { statusCode: number }).statusCode
       : 500;
+
+  // The connector may not have been resolved when the flow failed, so its type is unknown here.
+  recordConnectorAuth({
+    phase: 'initiate',
+    authType: 'unknown',
+    errorType: getConnectorAuthInitiateErrorType(statusCode),
+  });
 
   if (statusCode >= 500) {
     logger.error('Failed to initiate OAuth authorization', {

@@ -7,23 +7,20 @@
 
 import React from 'react';
 
-import { EuiCallOut } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+
+import { KbnWarningCallout } from '@kbn/ui-callout';
 
 export const DeprecationCallout = () => {
   return (
-    <EuiCallOut
+    <KbnWarningCallout
       title={i18n.translate('xpack.enterpriseSearch.deprecationCallout.title', {
         defaultMessage: 'Deprecation Notice',
       })}
-      color="warning"
-    >
-      <p>
-        {i18n.translate('xpack.enterpriseSearch.deprecationCallout.description', {
-          defaultMessage:
-            'Behavioral Analytics has been deprecated and will be removed in a future release.',
-        })}
-      </p>
-    </EuiCallOut>
+      text={i18n.translate('xpack.enterpriseSearch.deprecationCallout.description', {
+        defaultMessage:
+          'Behavioral Analytics has been deprecated and will be removed in a future release.',
+      })}
+    />
   );
 };

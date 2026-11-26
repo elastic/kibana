@@ -18,7 +18,19 @@ A concise, non-technical map of the Discover Profile extension points (what they
 
 **Use when:** Preconfigure defaults per team/use case.
 
-**Returns:** `{ columns?, rowHeight?, breakdownField?, hideChart?, hideTable? }`
+**Returns:** `{ columns?, rowHeight?, breakdownField?, hideChart?, hideTable?, hideSidebar? }`
+
+To show the Summary column alongside selected fields by default, include `{ name: '_source' }` in `columns` (omit `width` for auto-width), typically last:
+
+```ts
+columns: [
+  { name: dataView.timeFieldName, width: 212 },
+  { name: 'log.level', width: 150 },
+  { name: '_source' }, // Summary
+],
+```
+
+`_source` is always treated as a valid profile column. Users can still pin Summary from the Columns popover.
 
 **Screenshot:**
 ![Default app state example](./docs/extension_points/get_default_app_state.png)
@@ -255,6 +267,10 @@ A concise, non-technical map of the Discover Profile extension points (what they
 **Use when:** Rename headers, add icons, improve tooltips.
 
 **Returns:** `CustomGridColumnsConfiguration`
+
+The accessor receives the displayed column names, data source, and saved grid settings. Profiles can use response column types to supply default widths while preserving user settings and leaving a column flexible to fill the table.
+
+The Patterns profile uses compact numeric widths while a flexible pattern is displayed. A numeric column using the compact profile default has no **Reset width** action. After the user resizes the column, **Reset width** restores automatic sizing rather than the compact default. The reset leaves an empty settings entry for that column, which opts it out of the profile's default width.
 
 **Screenshot:**
 ![Columns configuration example](./docs/extension_points/get_columns_configuration.png)

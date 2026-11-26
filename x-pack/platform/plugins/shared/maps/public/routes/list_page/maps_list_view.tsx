@@ -6,12 +6,11 @@
  */
 
 import React, { memo, useEffect, useMemo } from 'react';
-import { EuiButton } from '@elastic/eui';
 import type { ScopedHistory } from '@kbn/core/public';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
-import type { UserContentCommonSchema } from '@kbn/content-management-table-list-view-common';
+import { AppHeader } from '@kbn/app-header';
+import type { AppHeaderMenu } from '@kbn/app-header';
 import type { ContentListItem, ContentListItemConfig } from '@kbn/content-list';
 import { KibanaContentListPage } from '@kbn/content-list-page';
 import {
@@ -20,10 +19,8 @@ import {
   type ContentEditorConfig,
   type ContentListClientFeatures,
   type ContentListClientServices,
-  type TableListViewFindItemsFn,
 } from '@kbn/content-list-provider-client';
 
-import type { MapItem } from '../../../common/content_management';
 import { APP_ID, APP_NAME, getEditPath, MAP_PATH } from '../../../common/constants';
 import {
   getCore,
@@ -36,27 +33,10 @@ import {
   getUsageCollection,
 } from '../../kibana_services';
 import { MapList } from '../../components/map_list';
+import { findItems } from './find_items';
 import { getMapClient } from '../../content_management';
 
 const PAGE_DATA_TEST_SUBJ = 'mapLandingPage';
-
-interface MapUserContent extends UserContentCommonSchema {
-  type: string;
-  attributes: {
-    title: string;
-  };
-}
-
-const toContentListItem = (mapItem: MapItem): MapUserContent => {
-  return {
-    ...mapItem,
-    updatedAt: mapItem.updatedAt!,
-    attributes: {
-      ...mapItem.attributes,
-      title: mapItem.attributes.title ?? '',
-    },
-  };
-};
 
 const navigateToNewMap = () => {
   getUsageCollection()?.reportUiCounter(APP_ID, METRIC_TYPE.CLICK, 'create_maps_vis_editor');
@@ -84,25 +64,6 @@ const onSave: ContentEditorConfig['onSave'] = async ({ id, title, description, t
   });
 };
 
-const findItems: TableListViewFindItemsFn = async (searchTerm, { listingLimit: limit } = {}) => {
-  try {
-    const {
-      hits,
-      pagination: { total },
-    } = await getMapClient().search({
-      text: searchTerm ? `${searchTerm}*` : undefined,
-      limit,
-    });
-
-    return {
-      hits: hits.map(toContentListItem),
-      total,
-    };
-  } catch {
-    return { total: 0, hits: [] };
-  }
-};
-
 const labels = {
   entity: i18n.translate('xpack.maps.mapListing.entityName', {
     defaultMessage: 'map',
@@ -112,20 +73,9 @@ const labels = {
   }),
 };
 
-const CreateMapButton = ({ isReadOnly }: { isReadOnly: boolean }) =>
-  isReadOnly ? null : (
-    <EuiButton
-      fill
-      iconType="plusInCircle"
-      onClick={navigateToNewMap}
-      data-test-subj="newItemButton"
-    >
-      <FormattedMessage
-        id="xpack.maps.mapListing.createMapButtonLabel"
-        defaultMessage="Create map"
-      />
-    </EuiButton>
-  );
+const createMapLabel = i18n.translate('xpack.maps.mapListing.createMapButtonLabel', {
+  defaultMessage: 'Create map',
+});
 
 interface Props {
   history: ScopedHistory;
@@ -177,6 +127,22 @@ const MapsListViewComp = ({ history }: Props) => {
     [isReadOnly]
   );
 
+  const menu = useMemo<AppHeaderMenu | undefined>(() => {
+    if (isReadOnly) {
+      return undefined;
+    }
+
+    return {
+      primaryActionItem: {
+        id: 'createMap',
+        label: createMapLabel,
+        iconType: 'plusCircle',
+        testId: 'newItemButton',
+        run: navigateToNewMap,
+      },
+    };
+  }, [isReadOnly]);
+
   return (
     <ContentListClientProvider
       id="map"
@@ -184,11 +150,8 @@ const MapsListViewComp = ({ history }: Props) => {
       {...{ labels, isReadOnly, findItems, services, features, item }}
     >
       <KibanaContentListPage data-test-subj={PAGE_DATA_TEST_SUBJ}>
-        <KibanaContentListPage.Header
-          title={APP_NAME}
-          actions={<CreateMapButton isReadOnly={isReadOnly} />}
-        />
-        <KibanaContentListPage.Section>
+        <AppHeader title={APP_NAME} menu={menu} />
+        <KibanaContentListPage.Section aria-label={APP_NAME}>
           <MapList />
         </KibanaContentListPage.Section>
       </KibanaContentListPage>

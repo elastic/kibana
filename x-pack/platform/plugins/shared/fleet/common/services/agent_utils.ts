@@ -7,9 +7,23 @@
 import semverValid from 'semver/functions/valid';
 
 import type { AgentTargetVersion } from '../types';
+import type { IncomingDataList } from '../types/rest_spec/agent';
 
 export function removeSOAttributes(kuery: string): string {
   return kuery.replace(/attributes\./g, '').replace(/fleet-agents\./g, '');
+}
+
+// Some agent fields exposed for sorting in the UI are mapped as analyzed `text` fields in the
+// `.fleet-agents` index (with an unanalyzed `.keyword` multi-field alongside them). Sorting
+// directly on the analyzed field sorts by its tokens rather than the literal displayed value,
+// which produces effectively random order (see https://github.com/elastic/kibana/issues/243607).
+// Map those fields to their `.keyword` sub-field before building the Elasticsearch sort clause.
+const TEXT_FIELD_KEYWORD_OVERRIDES: Record<string, string> = {
+  'local_metadata.host.hostname': 'local_metadata.host.hostname.keyword',
+};
+
+function getEsSortableField(sortField: string): string {
+  return TEXT_FIELD_KEYWORD_OVERRIDES[sortField] ?? sortField;
 }
 
 export function getSortConfig(
@@ -21,7 +35,7 @@ export function getSortConfig(
   const secondarySort: Array<Record<string, { order: 'asc' | 'desc' }>> = isDefaultSort
     ? [{ 'local_metadata.host.hostname.keyword': { order: 'asc' } }]
     : [];
-  return [{ [sortField]: { order: sortOrder } }, ...secondarySort];
+  return [{ [getEsSortableField(sortField)]: { order: sortOrder } }, ...secondarySort];
 }
 
 export function checkTargetVersionsValidity(
@@ -48,3 +62,11 @@ export function checkTargetVersionsValidity(
     return `sum of percentages cannot exceed 100`;
   }
 }
+
+/** The incoming data items of the agents that have data, in their original shape. */
+export const filterIncomingDataWithData = (items: IncomingDataList[]): IncomingDataList[] =>
+  items.filter((item) => Object.values(item).some(({ data }) => data === true));
+
+/** The ids of the agents that have incoming data. */
+export const extractAgentIdsWithData = (items: IncomingDataList[]): string[] =>
+  filterIncomingDataWithData(items).flatMap((item) => Object.keys(item));

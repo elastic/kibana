@@ -104,6 +104,7 @@ const BulkActionsComponent: React.FC<Props> = ({
   return (
     <EuiPopover
       anchorPosition="downLeft"
+      aria-label={appliesTo === 'multipleRows' ? i18n.BULK_ACTIONS : i18n.ALL_ACTIONS}
       button={button}
       closePopover={closePopover}
       data-test-subj="bulkActions"

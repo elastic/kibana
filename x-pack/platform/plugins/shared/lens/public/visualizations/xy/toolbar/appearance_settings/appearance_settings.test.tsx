@@ -14,7 +14,7 @@ import type {
   SeriesType,
 } from '@kbn/lens-common';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 
 import { createMockDatasource, createMockFramePublicAPI } from '../../../../mocks';
 import { XyAppearanceSettings } from './appearance_settings';
@@ -64,24 +64,35 @@ describe('Appearance settings', () => {
     seriesType: string;
     showsMissingValues?: boolean;
     showsFillOpacity?: boolean;
+    showsAreaFillOption?: boolean;
     showsPointVisibility?: boolean;
   }>([
+    {
+      seriesType: 'area',
+      showsMissingValues: true,
+      showsFillOpacity: true,
+      showsAreaFillOption: true,
+      showsPointVisibility: true,
+    },
     {
       seriesType: 'area_percentage_stacked',
       showsMissingValues: false,
       showsFillOpacity: true,
+      showsAreaFillOption: true,
       showsPointVisibility: true,
     },
     {
       seriesType: 'bar_horizontal',
       showsMissingValues: false,
       showsFillOpacity: false,
+      showsAreaFillOption: false,
       showsPointVisibility: false,
     },
     {
       seriesType: 'line',
       showsMissingValues: true,
       showsFillOpacity: false,
+      showsAreaFillOption: false,
       showsPointVisibility: true,
     },
   ])(
@@ -90,6 +101,7 @@ describe('Appearance settings', () => {
       seriesType,
       showsMissingValues = false,
       showsFillOpacity = false,
+      showsAreaFillOption = false,
       showsPointVisibility = false,
     }) => {
       const state = testState();
@@ -106,6 +118,11 @@ describe('Appearance settings', () => {
       } else {
         expect(screen.queryAllByTestId('lnsFillOpacity')).toHaveLength(0);
       }
+      if (showsAreaFillOption) {
+        expect(screen.getByTestId('lnsAreaFillOption')).toBeInTheDocument();
+      } else {
+        expect(screen.queryByTestId('lnsAreaFillOption')).not.toBeInTheDocument();
+      }
       if (showsPointVisibility) {
         expect(screen.getAllByTestId('lnsPointVisibilityOption')).toHaveLength(1);
       } else {
@@ -113,6 +130,36 @@ describe('Appearance settings', () => {
       }
     }
   );
+
+  describe('area fill', () => {
+    const areaState = (areaFill?: XYVisualizationState['areaFill']): XYVisualizationState => {
+      const state = testState();
+      (state.layers[0] as XYDataLayerConfig).seriesType = 'area';
+      return { ...state, areaFill };
+    };
+
+    it('shows gradient as selected when no fill is set', () => {
+      renderComponent({ state: areaState() });
+      expect(screen.getByRole('button', { name: 'Gradient' })).toHaveAttribute(
+        'aria-pressed',
+        'true'
+      );
+    });
+
+    it('saves solid explicitly', () => {
+      const setState = jest.fn();
+      renderComponent({ state: areaState(), setState });
+      fireEvent.click(screen.getByRole('button', { name: 'Solid' }));
+      expect(setState).toHaveBeenCalledWith(expect.objectContaining({ areaFill: 'solid' }));
+    });
+
+    it('saves gradient explicitly', () => {
+      const setState = jest.fn();
+      renderComponent({ state: areaState('solid'), setState });
+      fireEvent.click(screen.getByRole('button', { name: 'Gradient' }));
+      expect(setState).toHaveBeenCalledWith(expect.objectContaining({ areaFill: 'gradient' }));
+    });
+  });
 
   it('hides missing values fitting controls for text-based (ES|QL) datasource', () => {
     frame.datasourceLayers = {

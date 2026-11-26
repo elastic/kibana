@@ -11,7 +11,7 @@ import {
   type SavedObjectsClientContract,
 } from '@kbn/core/server';
 import type { EntityAnalyticsMigrationsParams } from '../migrations';
-import { getAllSpaceConfigurations } from '../risk_engine/utils/saved_object_configuration';
+import { getAllSpaceConfigurations } from '../risk_score/configuration/saved_object_configuration';
 import { AssetCriticalityMigrationClient } from '../asset_criticality/asset_criticality_migration_client';
 
 export const getIngestPipelineName = (namespace: string): string => {
@@ -86,9 +86,11 @@ export const createEventIngestedPipelineInAllNamespaces = async ({
   getStartServices,
   logger,
   auditLogger,
+  spaceId,
 }: EntityAnalyticsMigrationsParams) => {
   const [coreStart] = await getStartServices();
   const esClient = coreStart.elasticsearch.client.asInternalUser;
+
   const savedObjectsRepo = coreStart.savedObjects.createInternalRepository();
   const internalSoClient = new SavedObjectsClient(savedObjectsRepo);
   const assetCriticalityMigrationClient = new AssetCriticalityMigrationClient({
@@ -99,7 +101,10 @@ export const createEventIngestedPipelineInAllNamespaces = async ({
   const assetCriticalitySpaces =
     await assetCriticalityMigrationClient.getAllSpacesWithAssetCriticalityInstalled();
   const riskEngineSpaces = await getAllRiskEngineSpaces(internalSoClient);
-  const uniqueNamespaces = new Set([...assetCriticalitySpaces, ...riskEngineSpaces]);
+  const allNamespaces = new Set([...assetCriticalitySpaces, ...riskEngineSpaces]);
+  const uniqueNamespaces = spaceId
+    ? new Set([spaceId].filter((id) => allNamespaces.has(id)))
+    : allNamespaces;
 
   for (const namespace of uniqueNamespaces) {
     const pipelineExists = await hasEventIngestedPipeline(esClient, namespace);

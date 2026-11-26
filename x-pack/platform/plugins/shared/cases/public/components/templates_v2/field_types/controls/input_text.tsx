@@ -25,7 +25,10 @@ import {
 import { getFieldRequirementLabel } from '../../../optional_field_label';
 import { InlineFieldActions } from './inline_field_actions';
 
-type InputTextProps = z.infer<typeof InputTextFieldSchema> & ConditionRenderProps;
+type InputTextProps = z.infer<typeof InputTextFieldSchema> &
+  ConditionRenderProps & {
+    onEditCancel?: () => void;
+  };
 
 export const InputText = ({
   label,
@@ -39,6 +42,7 @@ export const InputText = ({
   onConfirm,
   isSaving,
   isSaveDisabled,
+  onEditCancel,
 }: InputTextProps) => {
   const { control, resetField } = useFormContext();
   const path = `${CASE_EXTENDED_FIELDS}.${getFieldSnakeKey(name, type)}`;
@@ -78,7 +82,8 @@ export const InputText = ({
 
   const handleCancel = useCallback(() => {
     resetField(path);
-  }, [path, resetField]);
+    onEditCancel?.();
+  }, [onEditCancel, path, resetField]);
 
   return (
     <Controller

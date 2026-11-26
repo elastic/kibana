@@ -6,7 +6,7 @@ $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/files-plugin'
 layer: unknown
 owners:
-  defaultOwner: '@elastic/appex-sharedux'
+  defaultOwner: '@elastic/kibana-core'
 toolchains:
   default: node
 language: typescript
@@ -14,7 +14,7 @@ project:
   title: '@kbn/files-plugin'
   description: Moon project for @kbn/files-plugin
   channel: ''
-  owner: '@elastic/appex-sharedux'
+  owner: '@elastic/kibana-core'
   sourceRoot: src/platform/plugins/shared/files
 dependsOn:
   - '@kbn/core'
@@ -33,7 +33,6 @@ dependsOn:
   - '@kbn/es-query'
   - '@kbn/core-test-helpers-kbn-server'
   - '@kbn/ebt-tools'
-  - '@kbn/core-http-router-server-internal'
   - '@kbn/core-elasticsearch-server'
   - '@kbn/std'
   - '@kbn/core-saved-objects-api-server'
@@ -48,12 +47,15 @@ dependsOn:
   - '@kbn/cbor'
   - '@kbn/lazy-object'
   - '@kbn/core-http-server'
+  - '@kbn/core-http-browser'
+  - '@kbn/core-http-browser-mocks'
 tags:
   - plugin
   - prod
   - group-platform
   - shared
   - jest-unit-tests
+  - jest-integration-tests
 fileGroups:
   src:
     - common/**/*
@@ -61,6 +63,4 @@ fileGroups:
     - server/**/*
     - .storybook/**/*
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

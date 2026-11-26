@@ -77,8 +77,47 @@ describe('<AutoFollowPatternList />', () => {
       expect(screen.getByTestId('emptyPrompt')).toBeInTheDocument();
     });
 
-    test('should have a button to create a follower index', () => {
-      expect(screen.getByTestId('createAutoFollowPatternButton')).toBeInTheDocument();
+    test('should have a button to create an auto-follow pattern in the empty prompt', () => {
+      expect(
+        within(screen.getByTestId('emptyPrompt')).getByTestId('createAutoFollowPatternButton')
+      ).toBeInTheDocument();
+    });
+  });
+
+  describe('when an auto-follow pattern has no follow index pattern', () => {
+    let actions: AutoFollowPatternListSetupResult['actions'];
+
+    beforeEach(async () => {
+      // Patterns created through the ES API may omit `follow_index_pattern`
+      httpRequestsMockHelpers.setLoadAutoFollowPatternsResponse({
+        patterns: [
+          {
+            name: 'no-follow-pattern',
+            active: true,
+            remoteCluster: getRandomString(),
+            leaderIndexPatterns: ['leader-*'],
+          },
+        ],
+      });
+
+      ({ user, actions } = setup());
+      await act(async () => {
+        await jest.runOnlyPendingTimersAsync();
+      });
+    });
+
+    test('should list the pattern instead of showing an error', () => {
+      expect(screen.queryByText('Error loading auto-follow patterns')).not.toBeInTheDocument();
+
+      const table = new EuiTableTestHarness('autoFollowPatternListTable');
+      expect(table.getCellValues()[0][1]).toBe('no-follow-pattern');
+    });
+
+    test('should show the default prefix and suffix values in the detail panel', async () => {
+      await actions.clickAutoFollowPatternAt(0);
+
+      expect(screen.getByTestId('patternPrefix').textContent).toEqual('No prefix');
+      expect(screen.getByTestId('patternSuffix').textContent).toEqual('No suffix');
     });
   });
 
@@ -153,8 +192,8 @@ describe('<AutoFollowPatternList />', () => {
       expect(screen.queryByTestId('emptyPrompt')).not.toBeInTheDocument();
     });
 
-    test('should have a button to create an auto-follow pattern', () => {
-      expect(screen.getByTestId('createAutoFollowPatternButton')).toBeInTheDocument();
+    test('should not render a table create button; that action lives on the home header', () => {
+      expect(screen.queryByTestId('createAutoFollowPatternButton')).not.toBeInTheDocument();
     });
 
     test('should list the auto-follow patterns in the table', () => {

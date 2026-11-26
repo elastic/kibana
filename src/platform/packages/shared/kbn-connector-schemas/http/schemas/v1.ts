@@ -12,6 +12,7 @@ import {
   SecretConfigurationSchemaValidation,
 } from '../../common/auth/schemas/v1';
 import { AuthConfiguration } from '../../common/auth';
+import { AUTH_SCHEME_REGEX } from '../constants';
 
 export const HTTP_METHODS = ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'] as const;
 
@@ -31,6 +32,7 @@ export const ConfigSchema = lazySchema(() =>
       clientId: AuthConfiguration.clientId,
       scope: AuthConfiguration.scope,
       additionalFields: AuthConfiguration.additionalFields,
+      tokenType: z.string().min(1).max(128).regex(AUTH_SCHEME_REGEX).optional(),
       proxyUrl: z.string().url().nullable().default(null),
       proxyVerificationMode: z.enum(['none', 'certificate', 'full']).optional(),
       hasProxyAuth: z.boolean().default(false),
@@ -76,6 +78,16 @@ export const HttpFormDataFieldSchema = lazySchema(() =>
   )
 );
 
+export const QueryParamScalarSchema = z.union([z.string(), z.number(), z.boolean()]);
+
+type QueryParamScalar = z.infer<typeof QueryParamScalarSchema>;
+export type QueryParamValue = QueryParamScalar | QueryParamScalar[];
+
+export const QueryParamValueSchema = z.union([
+  QueryParamScalarSchema,
+  z.array(QueryParamScalarSchema),
+]);
+
 export const ParamsSchema = lazySchema(() =>
   z
     .object({
@@ -84,7 +96,7 @@ export const ParamsSchema = lazySchema(() =>
       method: HttpMethodSchema,
       body: HttpRequestBodySchema.optional(),
       form_data: HttpFormDataFieldSchema.optional(),
-      query: z.record(z.string(), z.string()).optional(),
+      query: z.record(z.string(), QueryParamValueSchema).optional(),
       headers: z.record(z.string(), z.string()).optional(),
       fetcher: z
         .object({

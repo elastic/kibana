@@ -28,6 +28,7 @@ import {
   getAllConnectors,
   getCachedAllConnectorsMap,
   getDeprecatedStepMetadata,
+  getStepExposure,
 } from '@kbn/workflows-management-plugin/common/schema';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
@@ -169,6 +170,13 @@ export function registerGetStepDefinitionsTool(
   agentBuilder.tools.register({
     id: workflowTools.getStepDefinitions,
     type: ToolType.builtin,
+    annotations: {
+      title: 'Get Step Definitions',
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: true,
+      openWorldHint: false,
+    },
     description: `Get available workflow step types, their parameters, and usage examples.
 
 **When to use:** Before generating step YAML, to discover available step types, their input params (\`with\` block), config params (step-level fields like \`connector-id\`), and usage examples.
@@ -176,6 +184,7 @@ export function registerGetStepDefinitionsTool(
 
 Supports filtering by exact step type, keyword search, or category.
 Deprecated steps are excluded from broad discovery by default, but exact step type lookups still return them.
+Step types reserved for managed workflows are never returned, even for exact lookups.
 When a small number of results is returned, input/config parameter summaries and usage examples are included.
 Common step properties (name, type, if, timeout, on-failure) are NOT listed per step -- they apply to all steps (see skill prompt).
 Set includeOutputSummary=true to get a compact one-line summary of each step's output fields (useful for knowing what data is available via \`{{ steps.name.field }}\`).
@@ -222,8 +231,13 @@ Set includeFullSchema=true to get the full JSON Schema for step input params (us
       const builtInTypes = new Set(builtInStepDefinitions.map((s) => s.id));
       const { all: allConnectors } = await resolveConnectors(api, spaceId, request);
 
+      // Managed-only steps can't be used in the workflows the agent authors, so they are
+      // never returned, not even for exact lookups. Internal steps stay discoverable.
       const connectorDefinitions = allConnectors
-        .filter((connector) => !builtInTypes.has(connector.type))
+        .filter(
+          (connector) =>
+            !builtInTypes.has(connector.type) && getStepExposure(connector.type) !== 'managed_only'
+        )
         .map(formatConnectorStep);
       const builtInFormatted = builtInStepDefinitions.map(formatBuiltInStep);
 

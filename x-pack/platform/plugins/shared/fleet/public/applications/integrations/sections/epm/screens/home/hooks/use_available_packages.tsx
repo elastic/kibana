@@ -10,16 +10,14 @@ import { uniq } from 'lodash';
 
 import type { CustomIntegration } from '@kbn/custom-integrations-plugin/common';
 
-import type { IntegrationPreferenceType } from '../../../components/integration_preference';
 import { useAgentless } from '../../../../../../fleet/sections/agent_policy/create_package_policy_page/single_page_layout/hooks/setup_technology';
 import {
+  useAuthz,
   useGetPackagesQuery,
   useGetCategoriesQuery,
   useGetAppendCustomIntegrationsQuery,
-  useGetReplacementCustomIntegrationsQuery,
   useGetPackageVerificationKeyId,
 } from '../../../../../hooks';
-import { useMergeEprPackagesWithReplacements } from '../../../../../hooks/use_merge_epr_with_replacements';
 
 import { mapToCard } from '..';
 import type { PackageList, PackageListItem } from '../../../../../types';
@@ -30,7 +28,11 @@ import {
   isInputOnlyPolicyTemplate,
   isIntegrationPolicyTemplate,
   filterPolicyTemplatesTiles,
+  shouldAddIntegrationFromCatalog,
 } from '../../../../../../../../common/services';
+import { FLEET_APM_PACKAGE } from '../../../../../../../../common/constants';
+
+import { ExperimentalFeaturesService } from '../../../../../services';
 
 import {
   isOnlyAgentlessPolicyTemplate,
@@ -47,12 +49,12 @@ import { mergeCategoriesAndCount } from '../util';
 
 import { useBuildIntegrationsUrl } from './use_build_integrations_url';
 import { useOnboardingOverride } from './use_onboarding_override';
+import { applyGrouping } from './apply_grouping';
 
 export interface IntegrationsURLParameters {
   searchString?: string;
   categoryId?: string;
   subCategoryId?: string;
-  onlyAgentless?: boolean;
   showDeprecated?: boolean;
 }
 
@@ -111,6 +113,9 @@ const packageListToIntegrationsList = (packages: PackageList): PackageList => {
         })
       : [];
 
+    // Classify before `policy_templates` is stripped from the tiles above
+    const addIntegrationFromCatalog = shouldAddIntegrationFromCatalog(pkg);
+
     const tiles = filterPolicyTemplatesTiles<PackageListItem>(
       pkg.policy_templates_behavior,
       topPackage,
@@ -119,6 +124,7 @@ const packageListToIntegrationsList = (packages: PackageList): PackageList => {
       return {
         ...tile,
         supportsAgentless: isAgentlessIntegration(pkg, tile.integration || tile.name),
+        addIntegrationFromCatalog,
       };
     });
 
@@ -147,11 +153,20 @@ export type AvailablePackagesHookType = typeof useAvailablePackages;
 
 export const useAvailablePackages = ({
   prereleaseIntegrationsEnabled,
+  enableCollectionGrouping = false,
 }: {
   prereleaseIntegrationsEnabled: boolean;
+  /**
+   * When true, packages sharing a `group` id are collapsed into a single collection
+   * tile (subject to the `enableIntegrationCollectionTiles` feature flag).
+   * Omit or pass false in contexts where collection tiles are not appropriate
+   * (e.g. the agent policy add-integration flyout).
+   * Hosts outside the Integrations app that enable this must also pass
+   * `collectionReturnLocation` to `PackageListGrid` (or render their own chooser), otherwise a
+   * click on a collection tile has nowhere to go.
+   */
+  enableCollectionGrouping?: boolean;
 }) => {
-  const [preference, setPreference] = useState<IntegrationPreferenceType>('agent');
-
   const { isAgentlessEnabled } = useAgentless();
   const { applyOnboardingOverride } = useOnboardingOverride();
 
@@ -160,7 +175,6 @@ export const useAvailablePackages = ({
   const {
     initialSelectedCategory,
     initialSubcategory,
-    initialOnlyAgentless,
     setUrlandPushHistory,
     setUrlandReplaceHistory,
     getHref,
@@ -174,7 +188,6 @@ export const useAvailablePackages = ({
     initialSubcategory
   );
   const [searchTerm, setSearchTerm] = useState(searchParam || '');
-  const [onlyAgentlessFilter, setOnlyAgentlessFilter] = useState(initialOnlyAgentless);
 
   const {
     data: eprPackages,
@@ -198,70 +211,107 @@ export const useAvailablePackages = ({
     return integrations;
   }, [eprPackages?.items, isAgentlessEnabled]);
 
-  const {
-    data: replacementCustomIntegrations,
-    isInitialLoading: isLoadingReplacmentCustomIntegrations,
-  } = useGetReplacementCustomIntegrationsQuery();
-
   const { isInitialLoading: isLoadingAppendCustomIntegrations, data: appendCustomIntegrations } =
     useGetAppendCustomIntegrationsQuery();
 
-  const mergedEprPackages: Array<PackageListItem | CustomIntegration> =
-    useMergeEprPackagesWithReplacements(
-      preference === 'beats' ? [] : eprIntegrationList,
-      preference === 'agent' ? [] : replacementCustomIntegrations || []
-    );
+  // The APM EPR package is never shown in the catalog, APM has special handling.
+  const eprPackagesWithoutApm = useMemo(
+    () => eprIntegrationList.filter((pkg) => pkg.name !== FLEET_APM_PACKAGE),
+    [eprIntegrationList]
+  );
 
-  // All cards before any filter (no agentless filter, no category filter).
-  // Used by useBrowseIntegrationHook which applies both filters from the live URL.
+  const { enableIntegrationCollectionTiles } = ExperimentalFeaturesService.get();
+  // `authz` is not provided when the hook is used outside of Fleet (e.g. Observability onboarding),
+  // where the privileges are enforced by the destination page.
+  const canAddIntegration = useAuthz()?.integrations?.all ?? true;
+
+  // All cards before the category filter.
+  // Used by useBrowseIntegrationHook which applies its own filters from the live URL.
   const allCards: IntegrationCardItem[] = useMemo(() => {
-    const eprAndCustomPackages = [...mergedEprPackages, ...(appendCustomIntegrations || [])];
-    const mapped = eprAndCustomPackages
-      .map((item) =>
+    const eprAndCustomPackages = [...eprPackagesWithoutApm, ...(appendCustomIntegrations || [])];
+
+    let itemsToMap: Array<PackageListItem | CustomIntegration>;
+    let extraCards: IntegrationCardItem[] = [];
+
+    if (enableIntegrationCollectionTiles && enableCollectionGrouping) {
+      const { collectionCards, ungroupedItems } = applyGrouping({
+        items: eprAndCustomPackages,
+        getHref,
+        getAbsolutePath,
+        addBasePath,
+        packageVerificationKeyId,
+        canAddIntegration,
+      });
+      itemsToMap = ungroupedItems;
+      extraCards = collectionCards;
+    } else {
+      itemsToMap = eprAndCustomPackages;
+    }
+
+    const mapped = [
+      ...extraCards,
+      ...itemsToMap.map((item) =>
         mapToCard({
           getAbsolutePath,
           getHref,
           item,
           addBasePath,
           packageVerificationKeyId,
+          canAddIntegration,
         })
-      )
-      .sort((a, b) => a.title.localeCompare(b.title));
+      ),
+    ].sort((a, b) => a.title.localeCompare(b.title));
+
     return applyOnboardingOverride(mapped);
   }, [
     addBasePath,
     appendCustomIntegrations,
+    canAddIntegration,
     applyOnboardingOverride,
+    enableCollectionGrouping,
+    enableIntegrationCollectionTiles,
     getAbsolutePath,
     getHref,
-    mergedEprPackages,
+    eprPackagesWithoutApm,
     packageVerificationKeyId,
   ]);
 
-  // Cards with the agentless filter applied (used by the old home page and
-  // its category sidebar counts). Derived from allCards so the sort/map work
-  // is not duplicated.
-  const cards: IntegrationCardItem[] = useMemo(() => {
-    if (isAgentlessEnabled && onlyAgentlessFilter) {
-      return allCards.filter((item) => item.supportsAgentless === true);
-    }
-    return allCards;
-  }, [allCards, isAgentlessEnabled, onlyAgentlessFilter]);
-
   // Packages to show
-  // Filters out based on selected category and subcategory (if any)
-  const filteredCards = useMemo(
-    () =>
-      cards.filter((c) => {
-        if (selectedCategory === '') {
-          return true;
-        }
-        if (!selectedSubCategory) return c.categories.includes(selectedCategory);
-
-        return c.categories.includes(selectedSubCategory);
-      }),
-    [cards, selectedCategory, selectedSubCategory]
-  );
+  // Filters out based on selected category and subcategory (if any).
+  // For collection cards, filters groupMembers too so badge counts and flyout
+  // variants reflect the active filter state. Re-sorted after filtering because
+  // singleton degradation can change a card's title, shifting its position.
+  const filteredCards = useMemo(() => {
+    if (selectedCategory === '') return allCards;
+    const categoryMatch = (c: IntegrationCardItem) =>
+      selectedSubCategory
+        ? c.categories.includes(selectedSubCategory)
+        : c.categories.includes(selectedCategory);
+    const result: IntegrationCardItem[] = [];
+    for (const card of allCards) {
+      if (!card.isCollectionCard) {
+        if (categoryMatch(card)) result.push(card);
+        continue;
+      }
+      const filteredMembers = (card.groupMembers ?? []).filter(categoryMatch);
+      if (filteredMembers.length === 0) continue;
+      if (filteredMembers.length === 1) {
+        result.push(filteredMembers[0]);
+        continue;
+      }
+      const filteredCategories = [...new Set(filteredMembers.flatMap((m) => m.categories))];
+      const filteredSearchableContent = filteredMembers
+        .flatMap((m) => [m.name, m.title, m.description ?? ''])
+        .join(' ');
+      result.push({
+        ...card,
+        groupMembers: filteredMembers,
+        categories: filteredCategories,
+        searchableContent: filteredSearchableContent,
+      });
+    }
+    return result.sort((a, b) => a.title.localeCompare(b.title));
+  }, [allCards, selectedCategory, selectedSubCategory]);
 
   const {
     data: eprCategoriesRes,
@@ -274,15 +324,15 @@ export const useAvailablePackages = ({
   const allCategories: CategoryFacet[] = useMemo(() => {
     const eprAndCustomCategories: CategoryFacet[] = isLoadingCategories
       ? []
-      : mergeCategoriesAndCount(eprCategories ? eprCategories : [], cards);
+      : mergeCategoriesAndCount(eprCategories ? eprCategories : [], allCards);
     return [
       {
         ...ALL_CATEGORY,
-        count: cards.length,
+        count: allCards.length,
       },
       ...(eprAndCustomCategories ? eprAndCustomCategories : []),
     ];
-  }, [cards, eprCategories, isLoadingCategories]);
+  }, [allCards, eprCategories, isLoadingCategories]);
 
   // Filter out subcategories
   const mainCategories = useMemo(() => {
@@ -306,16 +356,8 @@ export const useAvailablePackages = ({
     setSearchTerm,
     setUrlandPushHistory,
     setUrlandReplaceHistory,
-    preference,
-    setPreference,
-    onlyAgentlessFilter,
-    setOnlyAgentlessFilter,
     isAgentlessEnabled,
-    isLoading:
-      isLoadingReplacmentCustomIntegrations ||
-      isLoadingAppendCustomIntegrations ||
-      isLoadingCategories ||
-      isLoadingAllPackages,
+    isLoading: isLoadingAppendCustomIntegrations || isLoadingCategories || isLoadingAllPackages,
     isLoadingCategories,
     isLoadingAllPackages,
     isLoadingAppendCustomIntegrations,

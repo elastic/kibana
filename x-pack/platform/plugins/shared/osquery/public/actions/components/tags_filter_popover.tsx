@@ -92,7 +92,7 @@ const TagsFilterPopoverComponent: React.FC<TagsFilterPopoverProps> = ({
 
   const triggerButton = (
     <EuiFilterButton
-      iconType="arrowDown"
+      iconType="chevronSingleDown"
       onClick={togglePopover}
       isLoading={isLoading}
       isSelected={isOpen}

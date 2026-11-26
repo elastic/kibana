@@ -152,12 +152,40 @@ describe('Inference Schema', () => {
               },
             ],
             tool_choice: 'auto',
+            reasoning: { effort: 'none' },
             top_p: 0.9,
             user: 'user-123',
           },
           telemetryMetadata: { pluginId: 'test' },
         })
       ).not.toThrow();
+    });
+
+    it('validates reasoning configuration', () => {
+      expect(() =>
+        UnifiedChatCompleteParamsSchema.parse({
+          body: {
+            messages: [],
+            reasoning: {
+              effort: 'high',
+              summary: 'detailed',
+              exclude: false,
+              enabled: true,
+            },
+          },
+        })
+      ).not.toThrow();
+    });
+
+    it('rejects invalid reasoning effort values', () => {
+      expect(() =>
+        UnifiedChatCompleteParamsSchema.parse({
+          body: {
+            messages: [],
+            reasoning: { effort: 'extreme' },
+          },
+        })
+      ).toThrow();
     });
 
     it('validates tool_choice as object', () => {

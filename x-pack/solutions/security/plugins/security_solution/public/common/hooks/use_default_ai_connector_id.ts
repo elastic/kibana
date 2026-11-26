@@ -6,21 +6,30 @@
  */
 
 import { getDefaultConnector } from '@kbn/elastic-assistant/impl/assistant/helpers';
+import { useLoadConnectors } from '@kbn/inference-connectors';
 import { useMemo } from 'react';
-import { useAIConnectors } from './use_ai_connectors';
 import { useKibana } from '../lib/kibana';
 
+/**
+ * Resolves the default AI connector id from the same server-side list the AI Assistant uses.
+ * That list includes inference endpoints (for example an External Inference global model),
+ * which are not stack connectors and would otherwise never match the configured default.
+ */
 export const useDefaultAIConnectorId = () => {
-  const { settings } = useKibana().services;
+  const { http, notifications, settings } = useKibana().services;
 
-  const { aiConnectors: connectors, isLoading: isLoadingConnectors } = useAIConnectors();
+  const { data: connectors, isLoading } = useLoadConnectors({
+    http,
+    toasts: notifications.toasts,
+    featureId: 'elastic_assistant',
+  });
   const defaultConnectorId = getDefaultConnector(connectors, settings)?.id;
 
   return useMemo(
     () => ({
       defaultConnectorId,
-      isLoading: isLoadingConnectors,
+      isLoading,
     }),
-    [defaultConnectorId, isLoadingConnectors]
+    [defaultConnectorId, isLoading]
   );
 };

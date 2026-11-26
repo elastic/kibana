@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { recurse } from 'cypress-recurse';
 import {
   AVAILABLE_FIELD_COUNT,
   DISCOVER_CONTAINER,
@@ -19,6 +18,7 @@ import {
   GET_DISCOVER_FIELD_BROWSER_POPOVER_FIELD_ADD_BUTTON,
 } from '../screens/discover';
 import { GET_LOCAL_SEARCH_BAR_SUBMIT_BUTTON } from '../screens/search_bar';
+import { setCodeEditorValue, getCodeEditorValue } from './common/monaco';
 
 export const waitForDiscoverFieldsToLoad = () => {
   cy.get(AVAILABLE_FIELD_COUNT).should('be.visible');
@@ -29,8 +29,11 @@ export const assertFieldsAreLoaded = () => {
 };
 
 export const fillEsqlQueryBar = (query: string) => {
-  // eslint-disable-next-line cypress/no-force
-  cy.get(DISCOVER_ESQL_EDITABLE_INPUT).type(query, { force: true });
+  return setCodeEditorValue(DISCOVER_CONTAINER, query);
+};
+
+export const getEsqlQueryBarValue = () => {
+  return getCodeEditorValue(DISCOVER_CONTAINER);
 };
 
 export const selectCurrentDiscoverEsqlQuery = (
@@ -38,30 +41,14 @@ export const selectCurrentDiscoverEsqlQuery = (
 ) => {
   // eslint-disable-next-line cypress/no-force
   cy.get(discoverEsqlInput).click({ force: true });
-  fillEsqlQueryBar(Cypress.platform === 'darwin' ? '{cmd+a}' : '{ctrl+a}');
+  // eslint-disable-next-line cypress/no-force
+  cy.get(discoverEsqlInput).type(Cypress.platform === 'darwin' ? '{cmd+a}' : '{ctrl+a}', {
+    force: true,
+  });
 };
 
 export const addDiscoverEsqlQuery = (esqlQuery: string) => {
-  recurse(
-    () => {
-      // ESQL input uses the monaco editor which doesn't allow for traditional input updates
-      selectCurrentDiscoverEsqlQuery();
-      fillEsqlQueryBar(esqlQuery);
-      return cy
-        .get(DISCOVER_ESQL_INPUT_TEXT_CONTAINER)
-        .then(($el) => $el.text().replaceAll(String.fromCharCode(160), ' '));
-    },
-    (val) =>
-      val === esqlQuery || val.replaceAll(/\s/, '\u00b7') === esqlQuery.replaceAll(/\s/, '\u00b7'),
-    {
-      delay: 1000,
-      limit: 5,
-      log: (k) => {
-        cy.log(`query found-${k}.`);
-      },
-    }
-  );
-  cy.get(DISCOVER_ESQL_EDITABLE_INPUT).blur();
+  fillEsqlQueryBar(esqlQuery);
   cy.get(GET_LOCAL_SEARCH_BAR_SUBMIT_BUTTON(DISCOVER_CONTAINER)).click();
 };
 
@@ -78,14 +65,13 @@ export const verifyDiscoverEsqlQuery = (esqlQueryToVerify: string) => {
   // We select the query first as multi-line queries do not render fully unless all the text is selected
   selectCurrentDiscoverEsqlQuery();
   /**
-   * When selected all visual spaces actually render the middot character, so we replace the spaces with the middot
-   * If testing without selecting first you can replace with a Non-breaking space character
+   * Monaco renders spaces as middots inside a selection and as non-breaking spaces outside it,
+   * so both are normalised back to plain spaces before comparing.
    * https://github.com/cypress-io/cypress/issues/15863#issuecomment-816746693
    */
-  const unicodeReplacedQuery = esqlQueryToVerify.replaceAll(' ', '\u00b7');
-  cy.get(DISCOVER_ESQL_INPUT_TEXT_CONTAINER).should(
-    ($input) => $input.text() === unicodeReplacedQuery
-  );
+  cy.get(DISCOVER_ESQL_INPUT_TEXT_CONTAINER).should(($input) => {
+    expect($input.text().replace(/[\u00a0\u00b7]/g, ' ')).to.eq(esqlQueryToVerify);
+  });
 };
 
 export const submitDiscoverSearchBar = () => {

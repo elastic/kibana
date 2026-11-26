@@ -71,6 +71,16 @@ describe('createCustomContentContextAttachmentType', () => {
       expect(result).toEqual({ valid: false, error: expect.any(String) });
     });
 
+    it('returns invalid when panel_height is out of range', () => {
+      const result = createCustomContentContextAttachmentType().validate({
+        panel_template: '<div>hi</div>',
+        embeddable_id: 'panel-1',
+        panel_height: 99999,
+      });
+
+      expect(result).toEqual({ valid: false, error: expect.any(String) });
+    });
+
     it('returns invalid when panel_template has the wrong type', () => {
       const definition = createCustomContentContextAttachmentType();
       const result = definition.validate({ panel_template: 123 });
@@ -102,12 +112,32 @@ describe('createCustomContentContextAttachmentType', () => {
       expect(value).toContain('```esql\nFROM logs | LIMIT 10\n```');
     });
 
+    it('lists the additional queries after the main one, with the name the template reads them by', async () => {
+      const value = await getRepresentationValue({
+        panel_template: '<div/>',
+        esql_query: 'FROM logs',
+        additional_esql_queries: ['FROM metrics', 'FROM traces'],
+        embeddable_id: 'panel-1',
+      });
+      expect(value).toContain('read by the template as queries[1]:\n```esql\nFROM metrics\n```');
+      expect(value).toContain('read by the template as queries[2]:\n```esql\nFROM traces\n```');
+      expect(value.indexOf('FROM logs')).toBeLessThan(value.indexOf('FROM metrics'));
+    });
+
     it('omits ES|QL query section when esql_query is not provided', async () => {
       const value = await getRepresentationValue({
         panel_template: '<div/>',
         embeddable_id: 'panel-1',
       });
       expect(value).not.toContain('ES|QL Query:');
+    });
+
+    it('includes embeddable_id in the panel header', async () => {
+      const value = await getRepresentationValue({
+        panel_template: '<div/>',
+        embeddable_id: 'panel-xyz',
+      });
+      expect(value).toContain('embeddable_id: panel-xyz');
     });
   });
 });

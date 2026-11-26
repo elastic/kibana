@@ -20,6 +20,7 @@ import { ALERTING_V2_RULE_API_PATH } from '../constants';
 import { BaseAlertingRoute } from '../base_alerting_route';
 import { AlertingRouteContext } from '../alerting_route_context';
 import { INVALID_SCHEMA_OR_PARAMETERS_DESCRIPTION } from '../route_descriptions';
+import { RULE_ALREADY_EXISTS_DESCRIPTION } from './rule_response_descriptions';
 import { createRuleOasExamples } from './create_rule_oas_example';
 
 @injectable()
@@ -32,9 +33,11 @@ export class CreateRuleRoute extends BaseAlertingRoute {
     },
   };
   static routeOptions = {
+    access: 'public' as const,
+    availability: { stability: 'stable', since: '9.6.0' },
     summary: 'Create a rule',
     description:
-      'Creates a rule with a server-generated identifier. To create or replace a rule with a client-supplied identifier, use PUT /api/alerting/v2/rules/.',
+      'Creates a rule. You can supply your own `id`; if you omit it, Kibana generates one. If a rule with that `id` already exists, the request fails with HTTP 409 and the existing rule is not changed. To create or replace a rule at a specific ID, use PUT /api/alerting/v2/rules/{id}.',
     oasOperationObject: createRuleOasExamples,
   } as const;
   static schemas = {
@@ -49,6 +52,10 @@ export class CreateRuleRoute extends BaseAlertingRoute {
       400: {
         body: () => errorResponseSchema,
         description: INVALID_SCHEMA_OR_PARAMETERS_DESCRIPTION,
+      },
+      409: {
+        body: () => errorResponseSchema,
+        description: RULE_ALREADY_EXISTS_DESCRIPTION,
       },
     },
   };

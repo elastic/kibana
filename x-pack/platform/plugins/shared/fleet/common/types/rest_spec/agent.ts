@@ -25,6 +25,7 @@ export interface GetAgentsRequest {
     showInactive?: boolean;
     showUpgradeable?: boolean;
     withMetrics?: boolean;
+    withPendingRestart?: boolean;
     searchAfter?: string;
     openPit?: boolean;
     pitId?: string;
@@ -48,6 +49,7 @@ export interface GetOneAgentRequest {
   };
   query: {
     withMetrics?: boolean;
+    withPendingRestart?: boolean;
   };
 }
 
@@ -178,6 +180,28 @@ export interface PostBulkAgentRollbackRequest {
 }
 
 export type PostBulkAgentRollbackResponse = { actionIds: string[] } | BulkAgentActionDryRun;
+
+export interface PostAgentRestartRequest {
+  params: {
+    agentId: string;
+  };
+}
+
+export interface PostAgentRestartResponse {
+  actionId: string;
+}
+
+export interface PostBulkAgentRestartRequest {
+  body: {
+    agents: string[] | string;
+    batchSize?: number;
+    includeInactive?: boolean;
+  };
+}
+
+export interface PostBulkAgentRestartResponse {
+  actionId: string;
+}
 
 export interface PostAgentReassignRequest {
   params: {
@@ -347,6 +371,7 @@ export interface GetActionStatusRequest {
     page?: number;
     date?: string;
     latest?: number;
+    scheduledOnly?: boolean;
   };
 }
 export interface GetActionStatusResponse {

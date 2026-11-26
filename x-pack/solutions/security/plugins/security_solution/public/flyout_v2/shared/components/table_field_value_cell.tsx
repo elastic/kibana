@@ -14,9 +14,7 @@ import type { EventFieldsData } from '../../../common/components/event_details/t
 import { OverflowField } from '../../../common/components/tables/helpers';
 import { FormattedFieldValue } from '../../../timelines/components/timeline/body/renderers/formatted_field';
 import { MESSAGE_FIELD_NAME } from '../../../timelines/components/timeline/body/renderers/constants';
-import { FLYOUT_TABLE_PREVIEW_LINK_FIELD_TEST_ID } from '../../../flyout/document_details/right/components/test_ids';
 import { isFlyoutLink } from '../../../flyout/shared/utils/link_utils';
-import { PreviewLink } from '../../../flyout/shared/components/preview_link';
 import type { OpenFlyoutLinkRenderer } from './open_flyout_link';
 
 export interface FieldValueCellProps {
@@ -41,10 +39,6 @@ export interface FieldValueCellProps {
    */
   ruleId: string;
   /**
-   * Whether the preview link is in rule preview
-   */
-  isRulePreview: boolean;
-  /**
    * Value of the link field if it exists. Allows to navigate to other pages like host, user, network...
    */
   getLinkValue?: (field: string) => string | null;
@@ -53,17 +47,12 @@ export interface FieldValueCellProps {
    */
   values: string[] | null | undefined;
   /**
-   * Entity Store canonical id for host/user preview navigation when known
-   */
-  entityId?: string;
-  /**
    * The source document record, forwarded to the flyout link for entity resolution (new flyout).
    */
   hit?: DataTableRecord;
   /**
    * Optional wrapper that renders a preview link for supported field types (host, ip, rule).
-   * Injected by the caller so each flyout context controls its own navigation. When provided
-   * (new flyout), it is used instead of the legacy expandable-flyout `PreviewLink`.
+   * When omitted, falls back to the `PreviewLink` preview panel.
    */
   renderFlyoutLink?: OpenFlyoutLinkRenderer;
 }
@@ -80,8 +69,6 @@ export const TableFieldValueCell = memo(
     ruleId,
     getLinkValue,
     values,
-    isRulePreview,
-    entityId,
     hit,
     renderFlyoutLink: RenderFlyoutLink,
   }: FieldValueCellProps) => {
@@ -107,19 +94,7 @@ export const TableFieldValueCell = memo(
           let content: React.ReactNode;
           if (data.field === MESSAGE_FIELD_NAME) {
             content = <OverflowField value={value} />;
-          } else if (isLink && !RenderFlyoutLink) {
-            // Legacy expandable flyout: open the preview panel.
-            content = (
-              <PreviewLink
-                field={data.field}
-                value={value}
-                entityId={entityId}
-                scopeId={scopeId}
-                ruleId={ruleId}
-                data-test-subj={`${FLYOUT_TABLE_PREVIEW_LINK_FIELD_TEST_ID}-${i}`}
-              />
-            );
-          } else if (isLink && RenderFlyoutLink) {
+          } else if (isLink) {
             // New flyout: render the plain value; the `RenderFlyoutLink` wrapper below turns it
             // into a link that opens the relevant system flyout (host, ip, rule).
             content = <EuiText size="xs">{value}</EuiText>;

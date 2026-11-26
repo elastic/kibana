@@ -114,7 +114,7 @@ function lowerUnifiedAttributesToLegacy(
 
 /**
  * Resolves a legacy externalReferenceAttachmentTypeId to its unified type name.
- * Returns undefined if the subtype is not mapped (not yet migrated).
+ * Returns undefined if the subtype is not mapped.
  */
 function resolveUnifiedType(externalReferenceAttachmentTypeId: string): string | undefined {
   return EXTERNAL_REFERENCE_TYPE_MAP[externalReferenceAttachmentTypeId];
@@ -156,7 +156,7 @@ function isUnifiedExternalReferenceAttachment(attributes: unknown): boolean {
  *
  * The mapping from externalReferenceAttachmentTypeId to unified type name is driven by
  * EXTERNAL_REFERENCE_TYPE_MAP in common/constants/attachments.ts. Add new entries there
- * as more external reference subtypes are migrated.
+ * as more external reference subtypes gain a unified type.
  */
 export const externalReferenceAttachmentTransformer: AttachmentTypeTransformer<
   AttachmentPersistedAttributes,
@@ -236,7 +236,7 @@ export const externalReferenceAttachmentTransformer: AttachmentTypeTransformer<
     return isLegacyExternalReferenceAttachment(attachment);
   },
 
-  isUnifiedPayload(attachment: AttachmentRequestV2): boolean {
+  isUnifiedPayload(attachment: AttachmentRequestV2): attachment is UnifiedAttachmentPayload {
     return isUnifiedExternalReferenceAttachment(attachment);
   },
 

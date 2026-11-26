@@ -12,7 +12,6 @@ import { i18n } from '@kbn/i18n';
 
 import {
   EuiButtonIcon,
-  EuiCallOut,
   EuiFlexGrid,
   EuiFlexGroup,
   EuiFlexItem,
@@ -23,6 +22,7 @@ import {
   EuiTitle,
   EuiToolTip,
 } from '@elastic/eui';
+import { KbnInfoCallout } from '@kbn/ui-callout';
 
 import type { Detector } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
 import { JobCreatorContext } from '../../../job_creator_context';
@@ -180,18 +180,18 @@ const NoDetectorsWarning: FC<{ show: boolean }> = ({ show }) => {
   return (
     <>
       <EuiSpacer size="s" />
-      <EuiCallOut
+      <KbnInfoCallout
         title={i18n.translate('xpack.ml.newJob.wizard.pickFieldsStep.noDetectorsCallout.title', {
           defaultMessage: 'No detectors',
         })}
-        iconType="warning"
         data-test-subj="mlAdvancedNoDetectorsMessage"
-      >
-        <FormattedMessage
-          id="xpack.ml.newJob.wizard.pickFieldsStep.noDetectorsCallout.message"
-          defaultMessage="At least one detector is needed to create a job."
-        />
-      </EuiCallOut>
+        text={
+          <FormattedMessage
+            id="xpack.ml.newJob.wizard.pickFieldsStep.noDetectorsCallout.message"
+            defaultMessage="At least one detector is needed to create a job."
+          />
+        }
+      />
     </>
   );
 };

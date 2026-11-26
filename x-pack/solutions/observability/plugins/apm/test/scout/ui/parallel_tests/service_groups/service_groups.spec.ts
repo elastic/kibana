@@ -7,7 +7,7 @@
 import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
 import { test, testData } from '../../fixtures';
-import { waitForApmSettingsHeaderLink } from '../../fixtures/page_helpers';
+import { waitForApmAppMenuReady } from '../../fixtures/page_helpers';
 import { PRODUCTION_ENVIRONMENT } from '../../fixtures/constants';
 
 const GO_SERVICE_GROUP_NAME = 'go services';
@@ -85,7 +85,7 @@ test.describe(
         await page.getByTestId('apmDeleteGroupButton').click();
 
         // after deletion there should be no service groups
-        await waitForApmSettingsHeaderLink(page);
+        await waitForApmAppMenuReady(page);
         await expect(
           page.getByRole('heading', { name: 'No service groups', level: 2 })
         ).toBeVisible();

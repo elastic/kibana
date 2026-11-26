@@ -9,8 +9,9 @@
 
 import React, { useCallback, useEffect } from 'react';
 import { keys } from '@elastic/eui';
-import { usePerformanceContext } from '@kbn/ebt-tools';
+import { usePerformanceContext } from '@kbn/ebt-tools/react';
 import { i18n } from '@kbn/i18n';
+import { DiscoverFlyouts, dismissAllFlyoutsExceptFor } from '@kbn/discover-utils';
 import useToggle from 'react-use/lib/useToggle';
 import { useFetchMetricsData } from './hooks/use_fetch_metrics_data';
 import { METRICS_BREAKDOWN_SELECTOR_DATA_TEST_SUBJ } from '../../../common/constants';
@@ -18,7 +19,6 @@ import { useMetricsExperienceState } from './context/metrics_experience_state_pr
 import { ChartsGrid } from '../../charts_grid';
 import { EmptyState } from '../../empty_state/empty_state';
 import { useToolbarActions } from '../../toolbar/hooks/use_toolbar_actions';
-import { SearchButton } from '../../toolbar/right_side_actions/search_button';
 import { MetricsExperienceGridContent } from './metrics_experience_grid_content';
 import { ChartSectionSearchError } from '../../chart_section_search_error/chart_section_search_error';
 import { GridSettingsFlyout } from '../../flyout';
@@ -26,6 +26,7 @@ import type { Dimension, UnifiedMetricsGridProps } from '../../../types';
 import {
   useDimensionsWipe,
   useDiscoverFieldForBreakdown,
+  useExitFullscreenOnEmptyResults,
   useMetricFieldsFilter,
   useMetricsSort,
   useResetPageOnDimensionsChange,
@@ -46,12 +47,13 @@ export const MetricsExperienceGrid = ({
   isTabSelected,
   breakdownField,
   onBreakdownFieldChange,
+  setBreakdownFieldNames,
 }: UnifiedMetricsGridProps) => {
   const {
     searchTerm,
     isFullscreen,
-    onSearchTermChange,
     onToggleFullscreen,
+    onExitFullscreen,
     selectedDimensions,
     onDimensionsChange,
     onPageChange,
@@ -59,15 +61,27 @@ export const MetricsExperienceGrid = ({
     profileId,
     gridSettings,
     onGridSettingsChange,
+    onFlyoutStateChange,
     recentlyExploredMetrics,
   } = useMetricsExperienceState();
   const [isGridSettingsFlyoutOpen, toggleGridSettingsFlyout] = useToggle(false);
+
+  const onOpenGridSettings = useCallback(() => {
+    onFlyoutStateChange(undefined);
+    dismissAllFlyoutsExceptFor(DiscoverFlyouts.metricGridSettings);
+    toggleGridSettingsFlyout(true);
+  }, [onFlyoutStateChange, toggleGridSettingsFlyout]);
+
+  const onCloseGridSettings = useCallback(() => {
+    toggleGridSettingsFlyout(false);
+  }, [toggleGridSettingsFlyout]);
   const {
     metricItems,
     allDimensions,
     activeDimensions,
     loading: isDiscoverLoading,
     error: metricsInfoError,
+    loadedFetchParams,
   } = useFetchMetricsData({
     fetchParams,
     services,
@@ -81,7 +95,7 @@ export const MetricsExperienceGrid = ({
     searchTerm,
   });
 
-  const [sortBy, direction] = metricsSort;
+  const { sortField: sortBy, sortDirection: direction } = metricsSort;
   const { sortedMetricItems } = useMetricsSort({
     metricItems: filteredMetricItems,
     sortBy,
@@ -96,24 +110,39 @@ export const MetricsExperienceGrid = ({
     onDimensionsChange
   );
 
-  useResetPageOnDimensionsChange(selectedDimensions, onPageChange);
+  useEffect(() => {
+    setBreakdownFieldNames?.(allDimensions.map(({ name }) => name));
+  }, [allDimensions, setBreakdownFieldNames]);
 
+  useEffect(() => () => setBreakdownFieldNames?.(undefined), [setBreakdownFieldNames]);
+
+  // Deselecting the breakdown field also clears it in Discover, otherwise it would be re-applied on the next mount
   const onToolbarDimensionsChange = useCallback(
-    (nextSelectedDimensions: Dimension[]) => {
-      onDimensionsChange(nextSelectedDimensions);
-      onBreakdownFieldChange?.(nextSelectedDimensions[0]?.name);
+    (nextDimensions: Dimension[]) => {
+      if (breakdownField && !nextDimensions.some(({ name }) => name === breakdownField)) {
+        onBreakdownFieldChange?.(undefined);
+      }
+      onDimensionsChange(nextDimensions);
     },
-    [onDimensionsChange, onBreakdownFieldChange]
+    [breakdownField, onBreakdownFieldChange, onDimensionsChange]
   );
+
+  useResetPageOnDimensionsChange(selectedDimensions, onPageChange);
 
   useDimensionsWipe({
     selectedDimensions,
     allDimensions,
     isLoading: isDiscoverLoading,
     hasError: metricsInfoError != null,
-    breakdownField,
     onSelectedDimensionsChange: onDimensionsChange,
-    onBreakdownFieldChange,
+  });
+
+  useExitFullscreenOnEmptyResults({
+    isFullscreen,
+    isLoading: isDiscoverLoading,
+    isComponentVisible,
+    hasMetrics: metricItems.length > 0,
+    onExitFullscreen,
   });
 
   const { onPageReady } = usePerformanceContext();
@@ -138,13 +167,13 @@ export const MetricsExperienceGrid = ({
     isDiscoverLoading,
   ]);
 
-  const { toggleActions, leftSideActions, rightSideActions } = useToolbarActions({
+  const { toggleActions, leftSideActions, rightSideActions, searchInput } = useToolbarActions({
     allDimensions,
     metricItems,
     renderToggleActions,
     onDimensionsChange: onToolbarDimensionsChange,
     isLoading: isDiscoverLoading,
-    onOpenGridSettings: toggleGridSettingsFlyout,
+    onOpenGridSettings,
   });
 
   const onKeyDown = useCallback(
@@ -184,17 +213,7 @@ export const MetricsExperienceGrid = ({
           toggleActions,
           leftSide: leftSideActions,
           rightSide: rightSideActions,
-          additionalControls: {
-            prependRight: (
-              <SearchButton
-                isFullscreen={isFullscreen}
-                value={searchTerm}
-                onSearchTermChange={onSearchTermChange}
-                onKeyDown={onKeyDown}
-                data-test-subj="metricsExperienceGridToolbarSearch"
-              />
-            ),
-          },
+          additionalControls: { prependRight: searchInput },
         }}
         toolbarWrapAt={isFullscreen ? 'l' : 'xl'}
         isComponentVisible={isComponentVisible}
@@ -204,6 +223,7 @@ export const MetricsExperienceGrid = ({
         <MetricsExperienceGridContent
           metricItems={sortedMetricItems}
           activeDimensions={activeDimensions}
+          loadedFetchParams={loadedFetchParams}
           services={services}
           discoverFetch$={discoverFetch$}
           fetchParams={fetchParams}
@@ -213,13 +233,14 @@ export const MetricsExperienceGrid = ({
           histogramCss={histogramCss}
           isDiscoverLoading={isDiscoverLoading}
           isTabSelected={isTabSelected}
+          isComponentVisible={isComponentVisible}
         />
       </ChartsGrid>
       {isGridSettingsFlyoutOpen && (
         <GridSettingsFlyout
           gridSettings={gridSettings}
           onGridSettingsChange={onGridSettingsChange}
-          onClose={toggleGridSettingsFlyout}
+          onClose={onCloseGridSettings}
         />
       )}
     </>

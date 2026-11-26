@@ -8,7 +8,6 @@
 import type { RegistryRelease, ExperimentalDataStreamFeature, DeprecationInfo } from './epm';
 import type { SecretReference } from './secret';
 import type { GlobalDataTag } from './agent_policy';
-
 /** Boolean expression syntax evaluated by Elastic Agent. */
 export type AgentConditionExpression = string;
 
@@ -141,6 +140,8 @@ export interface PackagePolicy extends Omit<NewPackagePolicy, 'inputs'> {
   created_at: string;
   created_by: string;
   package_agent_version_condition?: string;
+  /** Cloud onboarding deployment that manages this policy. Set by Fleet only; null once cleared. */
+  onboarding_deployment_id?: string | null;
 }
 
 export type DryRunPackagePolicy = NewPackagePolicy & {

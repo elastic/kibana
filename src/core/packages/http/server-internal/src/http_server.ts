@@ -64,8 +64,9 @@ import { createCookieSessionStorageFactory } from './cookie_session_storage';
 import { AuthStateStorage } from './auth_state_storage';
 import { AuthHeadersStorage } from './auth_headers_storage';
 import { BasePath } from './base_path_service';
-import { getEcsResponseLog } from './logging';
+import { getEcsResponseLog, getSlimInfoResponseLog } from './logging';
 import { type InternalStaticAssets, StaticAssets } from './static_assets';
+import { createSelfCallPreHandler, createSelfCallPreResponseHandler } from './self_client_observer';
 
 /**
  * Adds ELU timings for the executed function to the current's context transaction
@@ -174,7 +175,10 @@ export interface HttpServerSetup {
    * Register a static directory to be served by the Kibana server
    * @note Static assets may be served over CDN
    */
-  registerStaticDir: (path: string, dirPath: string) => void;
+  registerStaticDir: (
+    path: string,
+    dirPath: string | ((request: Request) => string | Error)
+  ) => void;
   staticAssets: InternalStaticAssets;
   basePath: HttpServiceSetup['basePath'];
   csp: HttpServiceSetup['csp'];
@@ -324,6 +328,8 @@ export class HttpServer {
     // It's important to have setupRequestStateAssignment call the very first, otherwise context passing will be broken.
     // That's the only reason why context initialization exists in this method.
     this.setupRequestStateAssignment(config, basePathService, executionContext, userActivity);
+    this.server.ext('onPreHandler', createSelfCallPreHandler());
+    this.server.ext('onPreResponse', createSelfCallPreResponseHandler(this.log.get('self-client')));
     this.setupConditionalCompression(config);
     this.setupResponseLogging();
     this.setupGracefulShutdownHandlers();
@@ -545,9 +551,19 @@ export class HttpServer {
     const log = this.logger.get('http', 'server', 'response');
 
     this.handleServerResponseEvent = (request) => {
+      const logAtInfo =
+        (request.route?.settings as { app?: KibanaRouteOptions } | undefined)?.app
+          ?.httpResponseLogLevel === 'info';
+
       if (log.isLevelEnabled('debug')) {
         const { message, meta } = getEcsResponseLog(request, this.log);
         log.debug(message!, meta);
+        return;
+      }
+
+      if (logAtInfo && log.isLevelEnabled('info')) {
+        const { message, meta } = getSlimInfoResponseLog(request);
+        log.info(message, meta);
       }
     };
 
@@ -587,7 +603,9 @@ export class HttpServer {
   ) {
     this.server!.ext('onPreResponse', (request, responseToolkit) => {
       const app = request.app as KibanaRequestState;
-      app.httpSpan?.updateName(`${request.route.method.toUpperCase()} ${request.route.path}`);
+      if (app.httpSpan?.isRecording()) {
+        app.httpSpan.updateName(`${request.route.method.toUpperCase()} ${request.route.path}`);
+      }
 
       const stop = app.measureElu;
 
@@ -740,8 +758,10 @@ export class HttpServer {
               roles: user.roles ? [...user.roles] : undefined,
             }
           : undefined,
-        session: {
-          id: redactedSessionId,
+        kibana: {
+          session: {
+            id: redactedSessionId,
+          },
         },
         http: {
           request: {
@@ -955,7 +975,8 @@ export class HttpServer {
           }
 
           if (requestHeaders) {
-            this.authRequestHeaders.set(req, requestHeaders);
+            // Each raw request owns its header generation, even when a provider reuses its result.
+            this.authRequestHeaders.set(req, { ...requestHeaders });
             // we mutate headers only for the backward compatibility with the legacy platform.
             // where some plugin read directly from headers to identify whether a user is authenticated.
             Object.assign(req.headers, requestHeaders);
@@ -975,6 +996,8 @@ export class HttpServer {
       const authResponseHeaders = this.authResponseHeaders.get(request);
       return t.next({ headers: authResponseHeaders });
     });
+
+    return { get: this.authRequestHeaders.get, set: this.authRequestHeaders.set };
   }
 
   public getRouters({ pluginId }: GetRoutersOptions = {}): {
@@ -1009,7 +1032,10 @@ export class HttpServer {
     return routers;
   }
 
-  private registerStaticDir(path: string, dirPath: string) {
+  private registerStaticDir(
+    path: string,
+    dirPath: string | ((request: Request) => string | Error)
+  ) {
     if (this.server === undefined) {
       throw new Error('Http server is not setup up yet');
     }
@@ -1069,7 +1095,13 @@ export class HttpServer {
       access: route.options.access ?? 'internal',
       deprecated,
       security: route.security,
-      ...omitBy({ excludeFromRateLimiter: route.options.excludeFromRateLimiter }, isNil),
+      ...omitBy(
+        {
+          excludeFromRateLimiter: route.options.excludeFromRateLimiter,
+          httpResponseLogLevel: route.options.httpResponseLogLevel,
+        },
+        isNil
+      ),
     };
     // Log HTTP API target consumer.
     optionsLogger.debug(

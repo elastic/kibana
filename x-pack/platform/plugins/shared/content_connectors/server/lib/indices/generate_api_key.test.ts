@@ -80,8 +80,8 @@ describe('generateApiKey lib function for connector clients', () => {
         },
       },
     });
-    expect(createConnectorSecret).toBeCalledTimes(0);
-    expect(updateConnectorSecret).toBeCalledTimes(0);
+    expect(createConnectorSecret).toHaveBeenCalledTimes(0);
+    expect(updateConnectorSecret).toHaveBeenCalledTimes(0);
   });
   it('should create an API key plus connector for connectors', async () => {
     mockClient.asCurrentUser.search.mockImplementation(() =>
@@ -125,8 +125,8 @@ describe('generateApiKey lib function for connector clients', () => {
       index: CONNECTORS_INDEX,
     });
     expect(mockClient.asCurrentUser.security.invalidateApiKey).not.toHaveBeenCalled();
-    expect(createConnectorSecret).toBeCalledTimes(0);
-    expect(updateConnectorSecret).toBeCalledTimes(0);
+    expect(createConnectorSecret).toHaveBeenCalledTimes(0);
+    expect(updateConnectorSecret).toHaveBeenCalledTimes(0);
   });
   it('should invalidate API key if already defined', async () => {
     mockClient.asCurrentUser.search.mockImplementation(() =>
@@ -178,8 +178,8 @@ describe('generateApiKey lib function for connector clients', () => {
     expect(mockClient.asCurrentUser.security.invalidateApiKey).toHaveBeenCalledWith({
       ids: ['1'],
     });
-    expect(createConnectorSecret).toBeCalledTimes(0);
-    expect(updateConnectorSecret).toBeCalledTimes(0);
+    expect(createConnectorSecret).toHaveBeenCalledTimes(0);
+    expect(updateConnectorSecret).toHaveBeenCalledTimes(0);
   });
 });
 
@@ -240,8 +240,8 @@ describe('generateApiKey lib function for native connectors', () => {
         },
       },
     });
-    expect(createConnectorSecret).toBeCalledTimes(0);
-    expect(updateConnectorSecret).toBeCalledTimes(0);
+    expect(createConnectorSecret).toHaveBeenCalledTimes(0);
+    expect(updateConnectorSecret).toHaveBeenCalledTimes(0);
   });
   it('should create an API key plus connector for connectors', async () => {
     mockClient.asCurrentUser.search.mockImplementation(() =>
@@ -288,7 +288,7 @@ describe('generateApiKey lib function for native connectors', () => {
     });
     expect(mockClient.asCurrentUser.security.invalidateApiKey).not.toHaveBeenCalled();
     expect(createConnectorSecret).toHaveBeenCalledWith(mockClient.asCurrentUser, 'encoded');
-    expect(updateConnectorSecret).toBeCalledTimes(0);
+    expect(updateConnectorSecret).toHaveBeenCalledTimes(0);
   });
   it('should invalidate API key if already defined', async () => {
     mockClient.asCurrentUser.search.mockImplementation(() =>
@@ -342,7 +342,7 @@ describe('generateApiKey lib function for native connectors', () => {
     expect(mockClient.asCurrentUser.security.invalidateApiKey).toHaveBeenCalledWith({
       ids: ['1'],
     });
-    expect(createConnectorSecret).toBeCalledTimes(0);
+    expect(createConnectorSecret).toHaveBeenCalledTimes(0);
     expect(updateConnectorSecret).toHaveBeenCalledWith(mockClient.asCurrentUser, 'encoded', '2');
   });
 });

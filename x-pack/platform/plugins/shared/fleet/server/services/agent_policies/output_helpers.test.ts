@@ -9,6 +9,11 @@ import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 
 import { securityMock } from '@kbn/security-plugin/server/mocks';
 
+import {
+  BEATS_OUTPUT_TYPES,
+  ECH_AGENTLESS_MANAGED_BULK_OUTPUT_ID,
+  SERVERLESS_AGENTLESS_MANAGED_BULK_OUTPUT_ID,
+} from '../../../common/constants';
 import { appContextService } from '..';
 import { outputService } from '../output';
 
@@ -32,29 +37,39 @@ function mockHasLicence(res: boolean) {
 }
 
 describe('validateOutputForPolicy', () => {
+  beforeEach(() => {
+    mockedOutputService.get.mockResolvedValue({ type: 'elasticsearch' } as any);
+  });
+
   describe('Without oldData (create)', () => {
     it('should allow default outputs without platinum licence', async () => {
       mockHasLicence(false);
-      await validateOutputForPolicy(savedObjectsClientMock.create(), {
-        data_output_id: null,
-        monitoring_output_id: null,
-      });
+      await validateOutputForPolicy(
+        savedObjectsClientMock.create(),
+        { data_output_id: null, monitoring_output_id: null },
+        {},
+        BEATS_OUTPUT_TYPES
+      );
     });
 
     it('should allow default outputs with platinum licence', async () => {
       mockHasLicence(false);
-      await validateOutputForPolicy(savedObjectsClientMock.create(), {
-        data_output_id: null,
-        monitoring_output_id: null,
-      });
+      await validateOutputForPolicy(
+        savedObjectsClientMock.create(),
+        { data_output_id: null, monitoring_output_id: null },
+        {},
+        BEATS_OUTPUT_TYPES
+      );
     });
 
     it('should not allow custom data outputs without platinum licence', async () => {
       mockHasLicence(false);
-      const res = validateOutputForPolicy(savedObjectsClientMock.create(), {
-        data_output_id: 'test1',
-        monitoring_output_id: null,
-      });
+      const res = validateOutputForPolicy(
+        savedObjectsClientMock.create(),
+        { data_output_id: 'test1', monitoring_output_id: null },
+        {},
+        BEATS_OUTPUT_TYPES
+      );
       await expect(res).rejects.toThrow(
         'Invalid licence to set per policy output, you need platinum licence'
       );
@@ -62,10 +77,12 @@ describe('validateOutputForPolicy', () => {
 
     it('should not allow custom monitoring outputs without platinum licence', async () => {
       mockHasLicence(false);
-      const res = validateOutputForPolicy(savedObjectsClientMock.create(), {
-        data_output_id: null,
-        monitoring_output_id: 'test1',
-      });
+      const res = validateOutputForPolicy(
+        savedObjectsClientMock.create(),
+        { data_output_id: null, monitoring_output_id: 'test1' },
+        {},
+        BEATS_OUTPUT_TYPES
+      );
       await expect(res).rejects.toThrow(
         'Invalid licence to set per policy output, you need platinum licence'
       );
@@ -73,28 +90,37 @@ describe('validateOutputForPolicy', () => {
 
     it('should allow custom data output with platinum licence', async () => {
       mockHasLicence(true);
-      await validateOutputForPolicy(savedObjectsClientMock.create(), {
-        data_output_id: 'test1',
-        monitoring_output_id: null,
-      });
+      await validateOutputForPolicy(
+        savedObjectsClientMock.create(),
+        { data_output_id: 'test1', monitoring_output_id: null },
+        {},
+        BEATS_OUTPUT_TYPES
+      );
     });
 
     it('should allow custom monitoring output with platinum licence', async () => {
       mockHasLicence(true);
-      await validateOutputForPolicy(savedObjectsClientMock.create(), {
-        data_output_id: null,
-        monitoring_output_id: 'test1',
-      });
+      await validateOutputForPolicy(
+        savedObjectsClientMock.create(),
+        { data_output_id: null, monitoring_output_id: 'test1' },
+        {},
+        BEATS_OUTPUT_TYPES
+      );
     });
 
     it('should allow custom outputs for managed preconfigured policy without licence', async () => {
       mockHasLicence(false);
-      await validateOutputForPolicy(savedObjectsClientMock.create(), {
-        is_managed: true,
-        is_preconfigured: true,
-        data_output_id: 'test1',
-        monitoring_output_id: 'test1',
-      });
+      await validateOutputForPolicy(
+        savedObjectsClientMock.create(),
+        {
+          is_managed: true,
+          is_preconfigured: true,
+          data_output_id: 'test1',
+          monitoring_output_id: 'test1',
+        },
+        {},
+        BEATS_OUTPUT_TYPES
+      );
     });
   });
 
@@ -103,14 +129,9 @@ describe('validateOutputForPolicy', () => {
       mockHasLicence(false);
       await validateOutputForPolicy(
         savedObjectsClientMock.create(),
-        {
-          data_output_id: null,
-          monitoring_output_id: null,
-        },
-        {
-          data_output_id: 'test1',
-          monitoring_output_id: 'test1',
-        }
+        { data_output_id: null, monitoring_output_id: null },
+        { data_output_id: 'test1', monitoring_output_id: 'test1' },
+        BEATS_OUTPUT_TYPES
       );
     });
 
@@ -118,14 +139,9 @@ describe('validateOutputForPolicy', () => {
       mockHasLicence(false);
       const res = validateOutputForPolicy(
         savedObjectsClientMock.create(),
-        {
-          data_output_id: 'test1',
-          monitoring_output_id: null,
-        },
-        {
-          data_output_id: null,
-          monitoring_output_id: null,
-        }
+        { data_output_id: 'test1', monitoring_output_id: null },
+        { data_output_id: null, monitoring_output_id: null },
+        BEATS_OUTPUT_TYPES
       );
       await expect(res).rejects.toThrow(
         'Invalid licence to set per policy output, you need platinum licence'
@@ -136,14 +152,9 @@ describe('validateOutputForPolicy', () => {
       mockHasLicence(false);
       const res = validateOutputForPolicy(
         savedObjectsClientMock.create(),
-        {
-          data_output_id: null,
-          monitoring_output_id: 'test1',
-        },
-        {
-          data_output_id: null,
-          monitoring_output_id: null,
-        }
+        { data_output_id: null, monitoring_output_id: 'test1' },
+        { data_output_id: null, monitoring_output_id: null },
+        BEATS_OUTPUT_TYPES
       );
       await expect(res).rejects.toThrow(
         'Invalid licence to set per policy output, you need platinum licence'
@@ -154,34 +165,29 @@ describe('validateOutputForPolicy', () => {
       mockHasLicence(true);
       await validateOutputForPolicy(
         savedObjectsClientMock.create(),
-        {
-          data_output_id: 'test1',
-          monitoring_output_id: null,
-        },
-        {
-          data_output_id: 'test1',
-          monitoring_output_id: null,
-        }
+        { data_output_id: 'test1', monitoring_output_id: null },
+        { data_output_id: 'test1', monitoring_output_id: null },
+        BEATS_OUTPUT_TYPES
       );
     });
 
     it('should allow custom monitoring output with platinum licence', async () => {
       mockHasLicence(true);
-      await validateOutputForPolicy(savedObjectsClientMock.create(), {
-        data_output_id: null,
-        monitoring_output_id: 'test1',
-      });
+      await validateOutputForPolicy(
+        savedObjectsClientMock.create(),
+        { data_output_id: null, monitoring_output_id: 'test1' },
+        {},
+        BEATS_OUTPUT_TYPES
+      );
     });
 
     it('should allow custom outputs for managed preconfigured policy without licence', async () => {
       mockHasLicence(false);
       await validateOutputForPolicy(
         savedObjectsClientMock.create(),
-        {
-          data_output_id: 'test1',
-          monitoring_output_id: 'test1',
-        },
-        { is_managed: true, is_preconfigured: true }
+        { data_output_id: 'test1', monitoring_output_id: 'test1' },
+        { is_managed: true, is_preconfigured: true },
+        BEATS_OUTPUT_TYPES
       );
     });
 
@@ -189,11 +195,9 @@ describe('validateOutputForPolicy', () => {
       mockHasLicence(false);
       await validateOutputForPolicy(
         savedObjectsClientMock.create(),
-        {
-          data_output_id: 'test1',
-          monitoring_output_id: 'test1',
-        },
-        { data_output_id: 'test1', monitoring_output_id: 'test1' }
+        { data_output_id: 'test1', monitoring_output_id: 'test1' },
+        { data_output_id: 'test1', monitoring_output_id: 'test1' },
+        BEATS_OUTPUT_TYPES
       );
     });
 
@@ -251,6 +255,50 @@ describe('validateOutputForPolicy', () => {
         ['logstash', 'elasticsearch']
       );
     });
+  });
+});
+
+describe('validateOutputForPolicy managed bulk guard', () => {
+  it('should reject a non-agentless policy setting data_output_id to the ECH managed bulk output', async () => {
+    mockHasLicence(true);
+    await expect(
+      validateOutputForPolicy(
+        savedObjectsClientMock.create(),
+        { data_output_id: ECH_AGENTLESS_MANAGED_BULK_OUTPUT_ID, monitoring_output_id: null },
+        {},
+        BEATS_OUTPUT_TYPES
+      )
+    ).rejects.toThrow(
+      `Output "${ECH_AGENTLESS_MANAGED_BULK_OUTPUT_ID}" can only be used with an agentless agent policy.`
+    );
+  });
+
+  it('should reject a non-agentless policy setting monitoring_output_id to the serverless managed bulk output', async () => {
+    mockHasLicence(true);
+    await expect(
+      validateOutputForPolicy(
+        savedObjectsClientMock.create(),
+        { data_output_id: null, monitoring_output_id: SERVERLESS_AGENTLESS_MANAGED_BULK_OUTPUT_ID },
+        {},
+        BEATS_OUTPUT_TYPES
+      )
+    ).rejects.toThrow(
+      `Output "${SERVERLESS_AGENTLESS_MANAGED_BULK_OUTPUT_ID}" can only be used with an agentless agent policy.`
+    );
+  });
+
+  it('should allow an agentless policy to use the managed bulk output via newData', async () => {
+    mockHasLicence(true);
+    await validateOutputForPolicy(
+      savedObjectsClientMock.create(),
+      {
+        supports_agentless: true,
+        data_output_id: ECH_AGENTLESS_MANAGED_BULK_OUTPUT_ID,
+        monitoring_output_id: ECH_AGENTLESS_MANAGED_BULK_OUTPUT_ID,
+      },
+      {},
+      BEATS_OUTPUT_TYPES
+    );
   });
 });
 
@@ -376,6 +424,74 @@ describe('validateAgentPolicyOutputForIntegration', () => {
       } as any,
       {} as any,
       'fleet_server'
+    );
+  });
+
+  it('should allow an OTel-only integration to be added to a policy using an otlp output', async () => {
+    mockHasLicence(true);
+    mockedOutputService.get.mockResolvedValue({
+      type: 'otlp',
+    } as any);
+
+    await validateAgentPolicyOutputForIntegration(
+      savedObjectsClientMock.create(),
+      {
+        name: 'Agent policy',
+        data_output_id: 'otlp-output',
+      } as any,
+      {
+        inputs: [{ type: 'otelcol', enabled: true }],
+      } as any,
+      'test_otel_dynamic'
+    );
+  });
+
+  it('should not allow a beats integration to be added to a policy using an otlp output', async () => {
+    mockHasLicence(true);
+    mockedOutputService.get.mockResolvedValue({
+      type: 'otlp',
+    } as any);
+
+    await expect(
+      validateAgentPolicyOutputForIntegration(
+        savedObjectsClientMock.create(),
+        {
+          name: 'OTel policy',
+          data_output_id: 'otlp-output',
+        } as any,
+        {
+          inputs: [{ type: 'logfile', enabled: true }],
+        } as any,
+        'filetest'
+      )
+    ).rejects.toThrow(
+      'Integration "filetest" cannot be added to agent policy "OTel policy" because it uses output type "otlp".'
+    );
+  });
+
+  it('should not allow a mixed OTel+beats integration to be added to a policy using an otlp output', async () => {
+    mockHasLicence(true);
+    mockedOutputService.get.mockResolvedValue({
+      type: 'otlp',
+    } as any);
+
+    await expect(
+      validateAgentPolicyOutputForIntegration(
+        savedObjectsClientMock.create(),
+        {
+          name: 'OTel policy',
+          data_output_id: 'otlp-output',
+        } as any,
+        {
+          inputs: [
+            { type: 'otelcol', enabled: true },
+            { type: 'logfile', enabled: true },
+          ],
+        } as any,
+        'mixed_package'
+      )
+    ).rejects.toThrow(
+      'Integration "mixed_package" cannot be added to agent policy "OTel policy" because it uses output type "otlp".'
     );
   });
 

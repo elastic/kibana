@@ -8,69 +8,15 @@
  */
 
 import { runComparator } from '@kbn/presentation-publishing';
-import {
-  getDiscoverSessionEmbeddableComparators,
-  getSearchEmbeddableComparators,
-} from './get_search_embeddable_comparators';
+import { getDiscoverSessionEmbeddableComparators } from './get_search_embeddable_comparators';
 import { AS_CODE_DATA_VIEW_REFERENCE_TYPE } from '@kbn/as-code-data-views-schema';
+import { DiscoverTabType } from '@kbn/discover-session-constants';
 import { VIEW_MODE } from '@kbn/saved-search-plugin/common';
-
-const sharedSavedSearchComparators = {
-  sort: 'deepEquality',
-  columns: 'deepEquality',
-  rowHeight: 'referenceEquality',
-  sampleSize: 'referenceEquality',
-  rowsPerPage: 'referenceEquality',
-  headerRowHeight: 'referenceEquality',
-  density: 'referenceEquality',
-  grid: 'deepEquality',
-} as const;
-
-describe('getSearchEmbeddableComparators', () => {
-  it('returns shared attribute comparators for by-value panels', () => {
-    const c = getSearchEmbeddableComparators(true, false);
-    expect(c).toMatchObject(sharedSavedSearchComparators);
-    expect('attributes' in c && c.attributes).toBe('skip');
-    expect(c).not.toHaveProperty('selectedTabId');
-    expect(c).not.toHaveProperty('savedObjectId');
-  });
-
-  it('uses referenceEquality for selectedTabId when by-reference and tab comparators are active', () => {
-    const c = getSearchEmbeddableComparators(false, false);
-    expect(c).toMatchObject(sharedSavedSearchComparators);
-    expect('selectedTabId' in c && c.selectedTabId).toBe('referenceEquality');
-    expect('savedObjectId' in c && c.savedObjectId).toBe('skip');
-    expect(c).not.toHaveProperty('attributes');
-  });
-
-  it('skips selectedTabId when by-reference and tab comparators should be skipped', () => {
-    const c = getSearchEmbeddableComparators(false, true);
-    expect(c).toMatchObject(sharedSavedSearchComparators);
-    expect('selectedTabId' in c && c.selectedTabId).toBe('skip');
-    expect('savedObjectId' in c && c.savedObjectId).toBe('skip');
-  });
-
-  it('treats selectedTabId as always equal when skipped (deleted tab / inline edit)', () => {
-    const c = getSearchEmbeddableComparators(false, true);
-    expect(
-      'selectedTabId' in c && runComparator(c.selectedTabId, undefined, undefined, 'tab-a', 'tab-b')
-    ).toBe(true);
-  });
-
-  it('compares selectedTabId by reference when not skipped', () => {
-    const c = getSearchEmbeddableComparators(false, false);
-    expect(
-      'selectedTabId' in c && runComparator(c.selectedTabId, undefined, undefined, 'a', 'a')
-    ).toBe(true);
-    expect(
-      'selectedTabId' in c && runComparator(c.selectedTabId, undefined, undefined, 'a', 'b')
-    ).toBe(false);
-  });
-});
 
 describe('getDiscoverSessionEmbeddableComparators', () => {
   const language = 'kql' as const;
   const baseTab = {
+    type: DiscoverTabType.Default as const,
     query: { language, expression: '*' },
     filters: [],
     sort: [],
@@ -246,6 +192,38 @@ describe('getDiscoverSessionEmbeddableComparators', () => {
       const cmp = getOverridesComparator();
       expect(runComparator(cmp, undefined, undefined, undefined, { sort: [] })).toBe(true);
       expect(runComparator(cmp, undefined, undefined, { sort: [] }, undefined)).toBe(true);
+    });
+
+    it('compares overrides by the table they show on top of the session tab', () => {
+      const c = getDiscoverSessionEmbeddableComparators(false, false, {
+        ...baseTab,
+        column_order: ['message'],
+      });
+      if (!('overrides' in c) || typeof c.overrides !== 'function') {
+        throw new Error('expected overrides function comparator');
+      }
+
+      // An override saved with the session tab's own value shows the same table as none
+      expect(
+        runComparator(c.overrides, undefined, undefined, { column_order: ['message'] }, {})
+      ).toBe(true);
+      expect(
+        runComparator(c.overrides, undefined, undefined, { column_order: ['host.name'] }, {})
+      ).toBe(false);
+    });
+
+    it('treats empty column settings overrides as keeping the session tab widths', () => {
+      const c = getDiscoverSessionEmbeddableComparators(false, false, {
+        ...baseTab,
+        column_settings: { message: { width: 100 } },
+      });
+      if (!('overrides' in c) || typeof c.overrides !== 'function') {
+        throw new Error('expected overrides function comparator');
+      }
+
+      expect(runComparator(c.overrides, undefined, undefined, { column_settings: {} }, {})).toBe(
+        true
+      );
     });
   });
 });

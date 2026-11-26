@@ -5,30 +5,47 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import {
-  EuiButtonEmpty,
-  EuiFieldPassword,
-  EuiFieldText,
-  EuiFormRow,
-  EuiSpacer,
-  useGeneratedHtmlId,
-} from '@elastic/eui';
+import { EuiFieldPassword, EuiFieldText, EuiFormRow, EuiSpacer, EuiTextColor } from '@elastic/eui';
 
-import type { UseFormUnregister } from 'react-hook-form';
 import { type Control, useController } from 'react-hook-form';
 import type { CreateDataSourceFlyoutFormValues } from './types';
 import type { FederatedIdentityClusterInfo } from './federated_identity_cluster_info';
-import { FederatedIdentityClusterInfoFields } from './federated_identity_cluster_info_fields';
+import { FederatedIdentityDeployPanel } from './federated_identity_deploy_panel';
+import { FederatedIdentityManualSetup } from './federated_identity_manual_setup';
+import type {
+  FederatedIdentitySetupMethod,
+  FederatedIdentitySetupMethodOption,
+} from './federated_identity_setup_method_cards';
+import { FederatedIdentitySetupMethodCards } from './federated_identity_setup_method_cards';
+import {
+  getS3FederatedIdentityDeployConfig,
+  getS3FederatedIdentityManualSteps,
+  s3FederatedIdentitySetupStrings,
+} from './federated_identity_s3_setup_content';
+
+const ROLE_ARN_PLACEHOLDER = 'arn:aws:iam::112233445566:role/elastic-data-federation';
+
+// Matches IAM role ARNs only, so the provider, policy or stack ARNs the setup also creates are rejected.
+const IAM_ROLE_ARN_REGEX = /^arn:aws[a-z-]*:iam::[0-9]+:role\/.+$/;
+// Name of the role the CloudFormation stack outputs. Only warned about, so other valid roles still save.
+const CLOUDFORMATION_ROLE_NAME_REGEX = /:role\/(?:.+\/)?ElasticEsqlDataFederation-[^/]+$/;
+
+const SETUP_METHOD_OPTIONS: FederatedIdentitySetupMethodOption[] = [
+  {
+    id: 'cloudformation',
+    label: s3FederatedIdentitySetupStrings.cloudFormationMethod,
+    icon: 'logoAWS',
+  },
+  { id: 'manual', label: s3FederatedIdentitySetupStrings.manualMethod, icon: 'commandLine' },
+];
 
 export function CreateDataSourceFlyoutTypeSettingsS3Region({
   control,
-  unregister,
   isRequired,
 }: {
   control: Control<CreateDataSourceFlyoutFormValues, any>;
-  unregister: UseFormUnregister<CreateDataSourceFlyoutFormValues>;
   isRequired: boolean;
 }) {
   const { field: regionField, fieldState: regionState } = useController({
@@ -46,12 +63,6 @@ export function CreateDataSourceFlyoutTypeSettingsS3Region({
       : undefined,
   });
 
-  useEffect(() => {
-    return () => {
-      unregister('settings.region');
-    };
-  }, [unregister]);
-
   return (
     <EuiFormRow
       label={i18n.translate('xpack.dataFederation.createFlyout.s3.fields.region', {
@@ -66,7 +77,7 @@ export function CreateDataSourceFlyoutTypeSettingsS3Region({
         fullWidth
         autoComplete="off"
         isInvalid={Boolean(regionState.error)}
-        value={regionField.value}
+        value={regionField.value ?? ''}
         onChange={(e) => regionField.onChange(e.target.value)}
         name={regionField.name}
         inputRef={regionField.ref}
@@ -77,21 +88,13 @@ export function CreateDataSourceFlyoutTypeSettingsS3Region({
 
 export function CreateDataSourceFlyoutTypeSettingsS3({
   control,
-  unregister,
 }: {
   control: Control<CreateDataSourceFlyoutFormValues, any>;
-  unregister: UseFormUnregister<CreateDataSourceFlyoutFormValues>;
 }) {
   const { field: endpointField } = useController({
     name: 'settings.endpoint',
     control,
   });
-
-  useEffect(() => {
-    return () => {
-      unregister('settings.endpoint');
-    };
-  }, [unregister]);
 
   return (
     <EuiFormRow
@@ -104,7 +107,7 @@ export function CreateDataSourceFlyoutTypeSettingsS3({
         data-test-subj="createDataSourceFlyoutS3Endpoint"
         fullWidth
         autoComplete="off"
-        value={endpointField.value}
+        value={endpointField.value ?? ''}
         onChange={(e) => endpointField.onChange(e.target.value)}
         name={endpointField.name}
         inputRef={endpointField.ref}
@@ -115,11 +118,9 @@ export function CreateDataSourceFlyoutTypeSettingsS3({
 
 export function CreateDataSourceFlyoutTypeSettingsS3Credentials({
   control,
-  unregister,
   areCredentialsRequired,
 }: {
   control: Control<CreateDataSourceFlyoutFormValues, any>;
-  unregister: UseFormUnregister<CreateDataSourceFlyoutFormValues>;
   areCredentialsRequired: boolean;
 }) {
   const { field: accessKeyField, fieldState: accessKeyState } = useController({
@@ -151,13 +152,6 @@ export function CreateDataSourceFlyoutTypeSettingsS3Credentials({
       : undefined,
   });
 
-  useEffect(() => {
-    return () => {
-      unregister('settings.access_key');
-      unregister('settings.secret_key');
-    };
-  }, [unregister]);
-
   return (
     <>
       <EuiFormRow
@@ -173,7 +167,7 @@ export function CreateDataSourceFlyoutTypeSettingsS3Credentials({
           fullWidth
           autoComplete="off"
           isInvalid={Boolean(accessKeyState.error)}
-          value={accessKeyField.value}
+          value={accessKeyField.value ?? ''}
           onChange={(e) => accessKeyField.onChange(e.target.value)}
           name={accessKeyField.name}
           inputRef={accessKeyField.ref}
@@ -193,7 +187,7 @@ export function CreateDataSourceFlyoutTypeSettingsS3Credentials({
           fullWidth
           autoComplete="off"
           isInvalid={Boolean(secretKeyState.error)}
-          value={secretKeyField.value}
+          value={secretKeyField.value ?? ''}
           onChange={(e) => secretKeyField.onChange(e.target.value)}
           name={secretKeyField.name}
           inputRef={secretKeyField.ref}
@@ -206,169 +200,123 @@ export function CreateDataSourceFlyoutTypeSettingsS3Credentials({
 export function CreateDataSourceFlyoutTypeSettingsS3FederatedIdentity({
   control,
   cloudInfo,
-  unregister,
   areFieldsRequired,
 }: {
   control: Control<CreateDataSourceFlyoutFormValues, any>;
   cloudInfo?: FederatedIdentityClusterInfo;
-  unregister: UseFormUnregister<CreateDataSourceFlyoutFormValues>;
   areFieldsRequired: boolean;
 }) {
-  const [isAdvancedOpen, setIsAdvancedOpen] = useState(false);
-  const advancedId = useGeneratedHtmlId({ prefix: 'createDataSourceFlyoutS3FederatedAdvanced' });
+  const [setupMethod, setSetupMethod] = useState<FederatedIdentitySetupMethod>('cloudformation');
+
+  const setupValues =
+    cloudInfo?.jwtIssuer && cloudInfo.deploymentId
+      ? {
+          jwtIssuer: cloudInfo.jwtIssuer,
+          subject: cloudInfo.deploymentId,
+          templateUrl: cloudInfo.awsCloudFormationTemplateUrl,
+        }
+      : undefined;
+  // Edit mode keeps roles created before, so only new data sources set up with the stack are checked.
+  const expectsCloudFormationRole =
+    areFieldsRequired && Boolean(setupValues) && setupMethod === 'cloudformation';
 
   const { field: roleArnField, fieldState: roleArnState } = useController({
     name: 'settings.role_arn',
     control,
-    rules: areFieldsRequired
-      ? {
-          validate: (value?: string) =>
-            value?.trim()
-              ? true
-              : i18n.translate('xpack.dataFederation.createFlyout.s3.fields.roleArnRequired', {
-                  defaultMessage: 'Role ARN is required.',
-                }),
+    rules: {
+      validate: (value?: string) => {
+        const roleArn = value?.trim();
+
+        if (!roleArn) {
+          return areFieldsRequired
+            ? i18n.translate('xpack.dataFederation.createFlyout.s3.fields.roleArnRequired', {
+                defaultMessage: 'Role ARN is required.',
+              })
+            : true;
         }
-      : undefined,
+
+        return IAM_ROLE_ARN_REGEX.test(roleArn)
+          ? true
+          : i18n.translate('xpack.dataFederation.createFlyout.s3.fields.roleArnInvalid', {
+              defaultMessage:
+                'Enter the ARN of an IAM role, for example arn:aws:iam::123456789012:role/role-name.',
+            });
+      },
+    },
   });
 
-  const { field: jwtAudienceField, fieldState: jwtAudienceState } = useController({
-    name: 'settings.jwt_audience',
-    control,
-  });
-
-  const { field: roleSessionNameField } = useController({
-    name: 'settings.role_session_name',
-    control,
-  });
-  const { field: stsEndpointField } = useController({
-    name: 'settings.sts_endpoint',
-    control,
-  });
-  const { field: stsRegionField } = useController({
-    name: 'settings.sts_region',
-    control,
-  });
-
-  useEffect(() => {
-    return () => {
-      unregister('settings.role_arn');
-      unregister('settings.jwt_audience');
-      unregister('settings.role_session_name');
-      unregister('settings.sts_endpoint');
-      unregister('settings.sts_region');
-    };
-  }, [unregister]);
+  const currentRoleArn = roleArnField.value?.trim() ?? '';
+  const showCloudFormationRoleWarning =
+    expectsCloudFormationRole &&
+    IAM_ROLE_ARN_REGEX.test(currentRoleArn) &&
+    !CLOUDFORMATION_ROLE_NAME_REGEX.test(currentRoleArn);
+  const roleArnHelpText =
+    setupMethod === 'cloudformation'
+      ? s3FederatedIdentitySetupStrings.deployRoleArnHelp
+      : s3FederatedIdentitySetupStrings.roleArnHelp;
 
   return (
     <>
+      {setupValues ? (
+        <>
+          <FederatedIdentitySetupMethodCards
+            options={SETUP_METHOD_OPTIONS}
+            selectedMethod={setupMethod}
+            onMethodChange={setSetupMethod}
+            testSubjPrefix="createDataSourceFlyoutS3Federated"
+          />
+          <EuiSpacer size="l" />
+          {setupMethod === 'cloudformation' ? (
+            <FederatedIdentityDeployPanel
+              config={getS3FederatedIdentityDeployConfig(setupValues)}
+              testSubjPrefix="createDataSourceFlyoutS3Federated"
+            />
+          ) : (
+            <FederatedIdentityManualSetup
+              intro={s3FederatedIdentitySetupStrings.manualIntro}
+              steps={getS3FederatedIdentityManualSteps(setupValues)}
+              testSubjPrefix="createDataSourceFlyoutS3Federated"
+            />
+          )}
+          <EuiSpacer size="l" />
+        </>
+      ) : null}
       <EuiFormRow
-        label={i18n.translate('xpack.dataFederation.createFlyout.s3.fields.roleArn', {
-          defaultMessage: 'Role ARN',
-        })}
+        label={s3FederatedIdentitySetupStrings.roleArnLabel}
         fullWidth
         isInvalid={Boolean(roleArnState.error)}
         error={roleArnState.error?.message}
+        helpText={
+          setupValues
+            ? [
+                roleArnHelpText,
+                ...(showCloudFormationRoleWarning
+                  ? [
+                      <EuiTextColor
+                        color="warning"
+                        key="cloudFormationRoleWarning"
+                        data-test-subj="createDataSourceFlyoutS3FederatedRoleArnWarning"
+                      >
+                        {s3FederatedIdentitySetupStrings.cloudFormationRoleWarning}
+                      </EuiTextColor>,
+                    ]
+                  : []),
+              ]
+            : undefined
+        }
       >
         <EuiFieldText
           data-test-subj="createDataSourceFlyoutS3FederatedRoleArn"
           fullWidth
           autoComplete="off"
           isInvalid={Boolean(roleArnState.error)}
-          value={roleArnField.value}
+          placeholder={ROLE_ARN_PLACEHOLDER}
+          value={roleArnField.value ?? ''}
           onChange={(e) => roleArnField.onChange(e.target.value)}
           name={roleArnField.name}
           inputRef={roleArnField.ref}
         />
       </EuiFormRow>
-      <FederatedIdentityClusterInfoFields cloudInfo={cloudInfo} />
-      <EuiButtonEmpty
-        size="s"
-        flush="left"
-        iconType={isAdvancedOpen ? 'arrowDown' : 'arrowRight'}
-        aria-expanded={isAdvancedOpen}
-        aria-controls={advancedId}
-        onClick={() => setIsAdvancedOpen((value) => !value)}
-        data-test-subj="createDataSourceFlyoutS3FederatedAdvancedToggle"
-      >
-        {isAdvancedOpen
-          ? i18n.translate('xpack.dataFederation.createFlyout.s3.federated.advanced.hide', {
-              defaultMessage: 'Hide optional authentication settings',
-            })
-          : i18n.translate('xpack.dataFederation.createFlyout.s3.federated.advanced.show', {
-              defaultMessage: 'Show optional authentication settings',
-            })}
-      </EuiButtonEmpty>
-      <div id={advancedId} hidden={!isAdvancedOpen}>
-        <EuiSpacer size="s" />
-        <EuiFormRow
-          label={i18n.translate('xpack.dataFederation.createFlyout.s3.fields.jwtAudience', {
-            defaultMessage: 'JWT audience',
-          })}
-          fullWidth
-          isInvalid={Boolean(jwtAudienceState.error)}
-          error={jwtAudienceState.error?.message}
-        >
-          <EuiFieldText
-            data-test-subj="createDataSourceFlyoutS3FederatedJwtAudience"
-            fullWidth
-            autoComplete="off"
-            isInvalid={Boolean(jwtAudienceState.error)}
-            value={jwtAudienceField.value}
-            onChange={(e) => jwtAudienceField.onChange(e.target.value)}
-            name={jwtAudienceField.name}
-            inputRef={jwtAudienceField.ref}
-          />
-        </EuiFormRow>
-        <EuiFormRow
-          label={i18n.translate('xpack.dataFederation.createFlyout.s3.fields.roleSessionName', {
-            defaultMessage: 'Role session name',
-          })}
-          fullWidth
-        >
-          <EuiFieldText
-            data-test-subj="createDataSourceFlyoutS3FederatedRoleSessionName"
-            fullWidth
-            autoComplete="off"
-            value={roleSessionNameField.value}
-            onChange={(e) => roleSessionNameField.onChange(e.target.value)}
-            name={roleSessionNameField.name}
-            inputRef={roleSessionNameField.ref}
-          />
-        </EuiFormRow>
-        <EuiFormRow
-          label={i18n.translate('xpack.dataFederation.createFlyout.s3.fields.stsEndpoint', {
-            defaultMessage: 'STS endpoint',
-          })}
-          fullWidth
-        >
-          <EuiFieldText
-            data-test-subj="createDataSourceFlyoutS3FederatedStsEndpoint"
-            fullWidth
-            autoComplete="off"
-            value={stsEndpointField.value}
-            onChange={(e) => stsEndpointField.onChange(e.target.value)}
-            name={stsEndpointField.name}
-            inputRef={stsEndpointField.ref}
-          />
-        </EuiFormRow>
-        <EuiFormRow
-          label={i18n.translate('xpack.dataFederation.createFlyout.s3.fields.stsRegion', {
-            defaultMessage: 'STS region',
-          })}
-          fullWidth
-        >
-          <EuiFieldText
-            data-test-subj="createDataSourceFlyoutS3FederatedStsRegion"
-            fullWidth
-            autoComplete="off"
-            value={stsRegionField.value}
-            onChange={(e) => stsRegionField.onChange(e.target.value)}
-            name={stsRegionField.name}
-            inputRef={stsRegionField.ref}
-          />
-        </EuiFormRow>
-      </div>
     </>
   );
 }

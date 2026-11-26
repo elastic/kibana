@@ -7,6 +7,7 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import type { IClusterClient, ISavedObjectsRepository, Logger } from '@kbn/core/server';
+import type { SpaceId } from '@kbn/core-spaces-common';
 import type {
   BulkUnsecuredExecutionEnqueuer,
   ExecuteOptions,
@@ -41,15 +42,16 @@ export interface UnsecuredActionsClientOpts {
   kibanaIndices: string[];
   logger: Logger;
   connectorTypeRegistry: ActionTypeRegistry;
+  waitForCatalog: () => Promise<void>;
 }
 
 type UnsecuredExecuteOptions = Omit<ExecuteOptions, 'source'> & {
-  spaceId: string;
+  spaceId: SpaceId;
   requesterId: string;
 };
 
 export interface IUnsecuredActionsClient {
-  getAll: (spaceId: string) => Promise<ConnectorWithExtraFindData[]>;
+  getAll: (spaceId: SpaceId) => Promise<ConnectorWithExtraFindData[]>;
   execute: (opts: UnsecuredExecuteOptions) => Promise<ActionTypeExecutorResult<unknown>>;
   bulkEnqueueExecution: (
     requesterId: string,
@@ -73,6 +75,8 @@ export class UnsecuredActionsClient {
         `"${requesterId}" feature is not allow-listed for UnsecuredActionsClient access.`
       );
     }
+
+    await this.opts.waitForCatalog();
 
     if (!relatedSavedObjects) {
       this.opts.logger.warn(
@@ -103,6 +107,8 @@ export class UnsecuredActionsClient {
       );
     }
 
+    await this.opts.waitForCatalog();
+
     // Inject source based on requesterId
     const actionsToEnqueue = actionsToExecute.map((action) => {
       const source = this.getSourceFromRequester(
@@ -118,7 +124,7 @@ export class UnsecuredActionsClient {
     return this.opts.executionEnqueuer(this.opts.internalSavedObjectsRepository, actionsToEnqueue);
   }
 
-  public async getAll(spaceId: string): Promise<ConnectorWithExtraFindData[]> {
+  public async getAll(spaceId: SpaceId): Promise<ConnectorWithExtraFindData[]> {
     return getAllUnsecured({
       esClient: this.opts.clusterClient.asInternalUser,
       inMemoryConnectors: this.opts.inMemoryConnectors,

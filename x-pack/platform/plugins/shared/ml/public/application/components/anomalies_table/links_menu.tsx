@@ -49,6 +49,7 @@ import { parseInterval } from '@kbn/ml-parse-interval';
 import { ML_APP_LOCATOR } from '@kbn/ml-common-types/locator_app_locator';
 import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
 import { CATEGORIZE_FIELD_TRIGGER } from '@kbn/ui-actions-plugin/common/trigger_ids';
+import { getProjectRoutingFromDatafeed } from '@kbn/ml-cps-common';
 import { PLUGIN_ID } from '../../../../common/constants/app';
 import { findMessageField } from '../../util/index_utils';
 import { getInitialAnomaliesLayers, getInitialSourceIndexFieldLayers } from '../../../maps/util';
@@ -782,7 +783,7 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
   ]);
   const canConfigureRules = isRuleSupported(anomaly.source) && canUpdateJob;
 
-  const contextMenuItems = useMemo(() => {
+  const getContextMenuItems = () => {
     const items = [];
     if (anomaly.customUrls !== undefined) {
       anomaly.customUrls.forEach((customUrl, index) => {
@@ -1002,6 +1003,9 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
                     }
                   : {}),
               },
+              projectRouting: job.datafeed_config
+                ? getProjectRoutingFromDatafeed(job.datafeed_config)
+                : undefined,
               focusTrapProps,
             });
           }}
@@ -1016,22 +1020,13 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
     }
 
     return items;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [
-    dataViewId,
-    dataViewIdWithTemporary,
-    openInDiscoverUrl,
-    openInDiscoverUrlError,
-    viewExamplesUrlError,
-    viewExamples,
-    viewSeries,
-    canConfigureRules,
-    canCreateMlAlerts,
-    isCategorizationAnomalyRecord,
-  ]);
+  };
 
   return (
-    <EuiContextMenuPanel items={contextMenuItems} data-test-subj="mlAnomaliesListRowActionsMenu" />
+    <EuiContextMenuPanel
+      items={getContextMenuItems()}
+      data-test-subj="mlAnomaliesListRowActionsMenu"
+    />
   );
 };
 

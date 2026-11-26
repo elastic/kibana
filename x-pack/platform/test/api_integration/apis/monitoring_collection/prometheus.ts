@@ -28,7 +28,7 @@ export default function ({ getService }: FtrProviderContext) {
       expect(cleanResponseText).to.match(/service_version="[^"]+"/);
       expect(cleanResponseText).to.match(/service_instance_id="[^"]+"/);
 
-      // 2. Match the specific known counter reported in src/platform/test/common/plugins/otel_metrics/server/monitoring/metrics.ts
+      // 2. Match the specific known counter reported in src/platform/test_plugins/otel_metrics/server/monitoring/metrics.ts
       expect(cleanResponseText).to.match(
         /# HELP request_count_total Counts total number of requests # TYPE request_count_total counter request_count_total\{otel_scope_name="dummyMetric"\} [0-9]/
       );

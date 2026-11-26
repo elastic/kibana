@@ -51,13 +51,15 @@ exports[`CalendarsListTable renders the table with all calendars 1`] = `
       >
         <div
           class="euiFilterGroup emotion-euiFilterGroup-uncompressed"
+          data-display="regular"
+          data-dividers="true"
         />
       </div>
       <div
         class="euiFlexItem emotion-euiFlexItem-growZero"
       >
         <button
-          class="euiButton emotion-euiButtonDisplay-s-defaultMinWidth-base-primary"
+          class="euiButton emotion-euiButtonDisplay-s-base-primary"
           data-test-subj="mlCalendarButtonCreate"
           type="button"
         >
@@ -72,7 +74,7 @@ exports[`CalendarsListTable renders the table with all calendars 1`] = `
         class="euiFlexItem emotion-euiFlexItem-growZero"
       >
         <button
-          class="euiButton emotion-euiButtonDisplay-s-defaultMinWidth-isDisabled-base-disabled"
+          class="euiButton emotion-euiButtonDisplay-s-isDisabled-base-disabled"
           data-test-subj="mlCalendarButtonDelete"
           disabled=""
           type="button"
@@ -81,6 +83,7 @@ exports[`CalendarsListTable renders the table with all calendars 1`] = `
             class="emotion-euiButtonDisplayContent"
           >
             <span
+              aria-hidden="true"
               color="inherit"
               data-euiicon-type="trash"
             />
@@ -97,7 +100,7 @@ exports[`CalendarsListTable renders the table with all calendars 1`] = `
       data-test-subj="mlCalendarTable loaded"
     >
       <div
-        class="emotion-euiContainerCSS"
+        class="euiTable__wrapper emotion-euiContainerCSS"
       >
         <table
           class="euiTable emotion-euiTable-fixed-uncompressed-hasBackground-desktop"
@@ -130,6 +133,7 @@ exports[`CalendarsListTable renders the table with all calendars 1`] = `
                           class="euiCheckboxControl emotion-euiCheckboxControl-unselected"
                         >
                           <span
+                            aria-hidden="true"
                             class="emotion-euiCheckbox__icon-check"
                             data-euiicon-type="empty"
                             role="presentation"
@@ -173,6 +177,7 @@ exports[`CalendarsListTable renders the table with all calendars 1`] = `
                         ID
                       </span>
                       <span
+                        aria-hidden="true"
                         class="euiTableSortIcon"
                         data-euiicon-type="sortUp"
                       />
@@ -206,6 +211,7 @@ exports[`CalendarsListTable renders the table with all calendars 1`] = `
                         Jobs
                       </span>
                       <span
+                        aria-hidden="true"
                         class="euiTableSortIcon euiTableSortIcon--sortable"
                         color="subdued"
                         data-euiicon-type="sortable"
@@ -240,6 +246,7 @@ exports[`CalendarsListTable renders the table with all calendars 1`] = `
                         Events
                       </span>
                       <span
+                        aria-hidden="true"
                         class="euiTableSortIcon euiTableSortIcon--sortable"
                         color="subdued"
                         data-euiicon-type="sortable"
@@ -277,6 +284,7 @@ exports[`CalendarsListTable renders the table with all calendars 1`] = `
                           class="euiCheckboxControl emotion-euiCheckboxControl-unselected"
                         >
                           <span
+                            aria-hidden="true"
                             class="emotion-euiCheckbox__icon-check"
                             data-euiicon-type="empty"
                             role="presentation"
@@ -361,6 +369,7 @@ exports[`CalendarsListTable renders the table with all calendars 1`] = `
                           class="euiCheckboxControl emotion-euiCheckboxControl-unselected"
                         >
                           <span
+                            aria-hidden="true"
                             class="emotion-euiCheckbox__icon-check"
                             data-euiicon-type="empty"
                             role="presentation"
@@ -452,6 +461,7 @@ exports[`CalendarsListTable renders the table with all calendars 1`] = `
                     20
                   </span>
                   <span
+                    aria-hidden="true"
                     color="inherit"
                     data-euiicon-type="chevronSingleDown"
                   />

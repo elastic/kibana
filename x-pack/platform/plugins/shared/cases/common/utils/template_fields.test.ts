@@ -10,12 +10,18 @@ import {
   applyRefFieldOverride,
   buildExtendedFieldsBackfill,
   buildExtendedFieldsDefaults,
+  collectNormalizedRefNames,
+  diffExtendedFields,
+  excludeRefFieldsToDefinitions,
+  getAuthorableFieldNameViolation,
   getFieldCamelKey,
   getFieldSnakeKey,
+  getFoldedFieldName,
   getV2FieldType,
   getYamlDefaultAsString,
-  mergeCustomFieldsIntoExtendedFields,
+  normalizeFieldDefinitionName,
   parseFieldDefinitionsToInlineFields,
+  pickExtendedFieldsDifferingFromDefaults,
   resolveTemplateFields,
 } from './template_fields';
 import type { FieldDefinition } from '../types/domain/field_definition/latest';
@@ -56,6 +62,115 @@ describe('template field key utils', () => {
       expect(getFieldCamelKey(name, type)).toBe(
         snakeKey.replace(/_([a-z])/g, (_, c) => c.toUpperCase())
       );
+    });
+  });
+
+  describe('getFoldedFieldName', () => {
+    it('folds hyphen, underscore, and camelCase spellings onto the same form', () => {
+      expect(getFoldedFieldName('my-field')).toBe('myField');
+      expect(getFoldedFieldName('my_field')).toBe('myField');
+      expect(getFoldedFieldName('myField')).toBe('myField');
+    });
+
+    it('names with equal folds produce equal camel read keys for the same type', () => {
+      // The load-bearing claim behind the twin check: if two names fold together, the UI
+      // reads their values through the same camel key.
+      expect(getFieldCamelKey('my-field', 'keyword')).toBe(getFieldCamelKey('my_field', 'keyword'));
+    });
+  });
+
+  describe('getAuthorableFieldNameViolation', () => {
+    it('returns null for a clean snake_case name', () => {
+      expect(getAuthorableFieldNameViolation('risk_score', 'keyword')).toBeNull();
+    });
+
+    it('returns "charset" for a name with characters outside the authoring charset', () => {
+      expect(getAuthorableFieldNameViolation('risk-score', 'keyword')).toBe('charset');
+      expect(getAuthorableFieldNameViolation('bad name', 'keyword')).toBe('charset');
+    });
+
+    it('returns "length" when the derived key exceeds the maximum', () => {
+      expect(getAuthorableFieldNameViolation('a'.repeat(300), 'keyword')).toBe('length');
+    });
+
+    it('reports charset before length when both are violated', () => {
+      expect(getAuthorableFieldNameViolation(`${'a'.repeat(300)}-x`, 'keyword')).toBe('charset');
+    });
+  });
+
+  describe('normalizeFieldDefinitionName', () => {
+    it('lowercases and trims', () => {
+      expect(normalizeFieldDefinitionName('  My_Field ')).toBe('my_field');
+    });
+
+    it('leaves an already-normalized name unchanged', () => {
+      expect(normalizeFieldDefinitionName('my_field')).toBe('my_field');
+    });
+  });
+
+  describe('collectNormalizedRefNames', () => {
+    it('returns an empty set for undefined fields', () => {
+      expect(collectNormalizedRefNames(undefined)).toEqual(new Set());
+    });
+
+    it('returns an empty set when there are no ref fields', () => {
+      const fields: Field[] = [{ name: 'hostname', control: 'INPUT_TEXT', type: 'keyword' }];
+      expect(collectNormalizedRefNames(fields)).toEqual(new Set());
+    });
+
+    it('collects normalized (trimmed, lowercased) $ref names', () => {
+      const fields: Field[] = [{ $ref: '  SLA_Tier ' }, { $ref: 'cf_text' }];
+      expect(collectNormalizedRefNames(fields)).toEqual(new Set(['sla_tier', 'cf_text']));
+    });
+
+    it('ignores inline fields and only collects ref fields', () => {
+      const fields: Field[] = [
+        { $ref: 'sla_tier' },
+        { name: 'hostname', control: 'INPUT_TEXT', type: 'keyword' },
+      ];
+      expect(collectNormalizedRefNames(fields)).toEqual(new Set(['sla_tier']));
+    });
+
+    it('deduplicates refs that only differ in case', () => {
+      const fields: Field[] = [{ $ref: 'SLA_Tier' }, { $ref: 'sla_tier' }];
+      expect(collectNormalizedRefNames(fields)).toEqual(new Set(['sla_tier']));
+    });
+  });
+
+  describe('excludeRefFieldsToDefinitions', () => {
+    it('returns an empty array for undefined fields', () => {
+      expect(excludeRefFieldsToDefinitions(undefined, new Set(['sla_tier']))).toEqual([]);
+    });
+
+    it('drops only $ref entries targeting an excluded definition', () => {
+      const fields: Field[] = [
+        { $ref: 'sla_tier' },
+        { $ref: 'other_field' },
+        { name: 'hostname', control: 'INPUT_TEXT', type: 'keyword' },
+      ];
+      expect(excludeRefFieldsToDefinitions(fields, new Set(['sla_tier']))).toEqual([
+        { $ref: 'other_field' },
+        { name: 'hostname', control: 'INPUT_TEXT', type: 'keyword' },
+      ]);
+    });
+
+    it('matches $refs case-insensitively (normalized names)', () => {
+      const fields: Field[] = [{ $ref: '  SLA_Tier ' }];
+      expect(excludeRefFieldsToDefinitions(fields, new Set(['sla_tier']))).toEqual([]);
+    });
+
+    it('keeps an inline field whose name matches an excluded definition', () => {
+      // Inline fields are template-local, not references to the excluded library definition.
+      const fields: Field[] = [{ name: 'sla_tier', control: 'INPUT_TEXT', type: 'keyword' }];
+      expect(excludeRefFieldsToDefinitions(fields, new Set(['sla_tier']))).toEqual(fields);
+    });
+
+    it('returns all fields when the exclusion set is empty', () => {
+      const fields: Field[] = [
+        { $ref: 'sla_tier' },
+        { name: 'hostname', control: 'INPUT_TEXT', type: 'keyword' },
+      ];
+      expect(excludeRefFieldsToDefinitions(fields, new Set())).toEqual(fields);
     });
   });
 
@@ -154,6 +269,96 @@ describe('template field key utils', () => {
       });
       expect(result.metadata?.default).toBeUndefined();
     });
+
+    const showWhen = {
+      combine: 'all' as const,
+      rules: [{ field: 'toggle_field', operator: 'eq' as const, value: true }],
+    };
+
+    it('applies a local display.show_when override onto a $ref field', () => {
+      const result = applyRefFieldOverride(libField, {
+        $ref: 'lib_field',
+        display: { show_when: showWhen },
+      });
+      expect(result.display?.show_when).toEqual(showWhen);
+    });
+
+    it('applies a local validation.required_when override onto a $ref field', () => {
+      const result = applyRefFieldOverride(libField, {
+        $ref: 'lib_field',
+        validation: { required_when: showWhen },
+      });
+      expect(result.validation?.required_when).toEqual(showWhen);
+    });
+
+    it('leaves display/validation untouched when the $ref has no override', () => {
+      const result = applyRefFieldOverride(libField, { $ref: 'lib_field' });
+      expect(result.display).toBeUndefined();
+      expect(result.validation).toBeUndefined();
+    });
+
+    describe('validation merge', () => {
+      const libFieldWithValidation: InlineField = {
+        ...libField,
+        validation: {
+          required: true,
+          pattern: { regex: '^[a-z]+$' },
+          min_length: 2,
+          max_length: 10,
+        },
+      };
+
+      it('preserves the library format constraints when the override only sets an unrelated key', () => {
+        const result = applyRefFieldOverride(libFieldWithValidation, {
+          $ref: 'lib_field',
+          validation: { max_length: 20 },
+        });
+        expect(result.validation).toEqual({
+          required: true,
+          pattern: { regex: '^[a-z]+$' },
+          min_length: 2,
+          max_length: 20,
+        });
+      });
+
+      it('drops the library required-family keys when the override defines a different required* key', () => {
+        const result = applyRefFieldOverride(libFieldWithValidation, {
+          $ref: 'lib_field',
+          validation: { required_when: showWhen },
+        });
+        expect(result.validation).toEqual({
+          required_when: showWhen,
+          pattern: { regex: '^[a-z]+$' },
+          min_length: 2,
+          max_length: 10,
+        });
+        expect(result.validation?.required).toBeUndefined();
+      });
+
+      it('drops the library required-family keys even when the override sets required_on_close only', () => {
+        const result = applyRefFieldOverride(libFieldWithValidation, {
+          $ref: 'lib_field',
+          validation: { required_on_close: true },
+        });
+        expect(result.validation?.required).toBeUndefined();
+        expect(result.validation?.required_when).toBeUndefined();
+        expect(result.validation?.required_on_close).toBe(true);
+        expect(result.validation?.pattern).toEqual({ regex: '^[a-z]+$' });
+      });
+
+      it('lets the override redeclare required alongside other required* keys unchanged by it', () => {
+        const result = applyRefFieldOverride(libFieldWithValidation, {
+          $ref: 'lib_field',
+          validation: { required: false },
+        });
+        expect(result.validation).toEqual({
+          required: false,
+          pattern: { regex: '^[a-z]+$' },
+          min_length: 2,
+          max_length: 10,
+        });
+      });
+    });
   });
 
   describe('resolveTemplateFields', () => {
@@ -203,6 +408,39 @@ describe('template field key utils', () => {
       expect(resolveTemplateFields([ref], libDefs)).toEqual([]);
     });
 
+    it('resolves a $ref that differs from the library name only in case', () => {
+      const ref: RefField = { $ref: 'LIB_Text' };
+      const [resolved] = resolveTemplateFields([ref], libDefs);
+      expect(resolved).toBeDefined();
+      expect(resolved.metadata?.default).toBe('from_lib');
+    });
+
+    it('keys extended-fields under the legacy key when a case-insensitive $ref carries a name alias', () => {
+      const caseInsensitiveLibDefs = [
+        makeLibDef('CF_Text', {
+          name: 'CF_Text',
+          type: 'keyword',
+          control: 'INPUT_TEXT',
+          metadata: { default: 'from_lib' },
+        }),
+      ];
+      // A `name` alias composes with case-insensitive $ref resolution: the ref resolves
+      // to the library definition, the alias controls the resolved field's storage key.
+      const ref: RefField = { $ref: 'CF_Text', name: 'cf_text' };
+      const resolved = resolveTemplateFields([ref], caseInsensitiveLibDefs);
+      expect(buildExtendedFieldsDefaults(resolved)).toEqual({ cf_text_as_keyword: 'from_lib' });
+    });
+
+    it('preserves a local display.show_when authored on a $ref entry (regression: previously silently dropped)', () => {
+      const showWhen = {
+        combine: 'all' as const,
+        rules: [{ field: 'open_tuning_request', operator: 'eq' as const, value: true }],
+      };
+      const ref: RefField = { $ref: 'lib_text', display: { show_when: showWhen } };
+      const [resolved] = resolveTemplateFields([ref], libDefs);
+      expect(resolved.display?.show_when).toEqual(showWhen);
+    });
+
     it('produces an empty extended-fields default for a null-cleared $ref', () => {
       const ref: RefField = { $ref: 'lib_text', metadata: { default: null } };
       const resolved = resolveTemplateFields([ref], libDefs);
@@ -228,6 +466,158 @@ describe('template field key utils', () => {
       expect(defaults).not.toHaveProperty('instructions_as_keyword');
     });
   });
+
+  describe('pickExtendedFieldsDifferingFromDefaults', () => {
+    it('returns an empty object when every persisted value matches its default', () => {
+      expect(
+        pickExtendedFieldsDifferingFromDefaults(
+          { priority_as_keyword: 'medium', effort_as_integer: '' },
+          { priority_as_keyword: 'medium', effort_as_integer: '' }
+        )
+      ).toEqual({});
+    });
+
+    it('keeps a non-empty override that differs from the default', () => {
+      expect(
+        pickExtendedFieldsDifferingFromDefaults(
+          { priority_as_keyword: 'high', effort_as_integer: '' },
+          { priority_as_keyword: 'medium', effort_as_integer: '' }
+        )
+      ).toEqual({ priority_as_keyword: 'high' });
+    });
+
+    it('keeps clearing a non-empty default as an empty-string entry', () => {
+      expect(
+        pickExtendedFieldsDifferingFromDefaults(
+          { priority_as_keyword: '' },
+          { priority_as_keyword: 'medium' }
+        )
+      ).toEqual({ priority_as_keyword: '' });
+    });
+
+    it('drops empty persisted values when the default is also empty', () => {
+      expect(
+        pickExtendedFieldsDifferingFromDefaults(
+          { effort_as_integer: '' },
+          { effort_as_integer: '' }
+        )
+      ).toEqual({});
+    });
+
+    it('keeps a persisted key with no default when its value is non-empty', () => {
+      expect(pickExtendedFieldsDifferingFromDefaults({ notes_as_keyword: 'hello' }, {})).toEqual({
+        notes_as_keyword: 'hello',
+      });
+    });
+
+    it('drops a persisted key with no default when its value is empty', () => {
+      expect(pickExtendedFieldsDifferingFromDefaults({ notes_as_keyword: '' }, {})).toEqual({});
+    });
+  });
+
+  describe('diffExtendedFields', () => {
+    it('returns empty diff when both sides are null/undefined', () => {
+      expect(diffExtendedFields(null, undefined)).toEqual({ changedFields: [] });
+    });
+
+    it('returns empty diff when both sides are empty objects', () => {
+      expect(diffExtendedFields({}, {})).toEqual({ changedFields: [] });
+    });
+
+    it('returns empty diff for identical maps', () => {
+      expect(diffExtendedFields({ a: 'x', b: 'y' }, { a: 'x', b: 'y' })).toEqual({
+        changedFields: [],
+      });
+    });
+
+    it('detects a modified key', () => {
+      const result = diffExtendedFields({ priority: 'low' }, { priority: 'high' });
+      expect(result.changedFields).toEqual(['priority']);
+    });
+
+    it('detects an added key (absent → value)', () => {
+      const result = diffExtendedFields({}, { priority: 'high' });
+      expect(result.changedFields).toEqual(['priority']);
+    });
+
+    it('detects a removed key (value → absent)', () => {
+      const result = diffExtendedFields({ priority: 'high' }, {});
+      expect(result.changedFields).toEqual(['priority']);
+    });
+
+    it('treats absent → empty-string as a change', () => {
+      const result = diffExtendedFields({}, { priority: '' });
+      expect(result.changedFields).toEqual(['priority']);
+    });
+
+    it('treats empty-string → absent as a change', () => {
+      const result = diffExtendedFields({ priority: '' }, {});
+      expect(result.changedFields).toEqual(['priority']);
+    });
+
+    it('treats empty-string → non-empty as a change', () => {
+      const result = diffExtendedFields({ priority: '' }, { priority: 'high' });
+      expect(result.changedFields).toEqual(['priority']);
+    });
+
+    it('treats non-empty → empty-string as a change', () => {
+      const result = diffExtendedFields({ priority: 'high' }, { priority: '' });
+      expect(result.changedFields).toEqual(['priority']);
+    });
+
+    it('does not report unchanged sibling keys', () => {
+      const result = diffExtendedFields(
+        { priority: 'low', severity: 'medium' },
+        { priority: 'high', severity: 'medium' }
+      );
+      expect(result.changedFields).toEqual(['priority']);
+    });
+
+    it('returns changedFields sorted alphabetically', () => {
+      const result = diffExtendedFields({ c: '1', a: '2', b: '3' }, { c: 'x', a: 'y', b: 'z' });
+      expect(result.changedFields).toEqual(['a', 'b', 'c']);
+    });
+
+    it('treats own key with undefined value as absent', () => {
+      const prev: Record<string, unknown> = {};
+      Object.defineProperty(prev, 'priority', { value: undefined, enumerable: true });
+      const result = diffExtendedFields(prev, { priority: 'high' });
+      expect(result.changedFields).toEqual(['priority']);
+    });
+
+    it('ignores inherited properties', () => {
+      const proto = { inherited_key: 'should-be-ignored' };
+      const prev = Object.create(proto) as Record<string, unknown>;
+      prev.priority = 'low';
+      const result = diffExtendedFields(prev, { priority: 'low' });
+      expect(result.changedFields).toEqual([]);
+    });
+
+    it('coerces numeric values via String() — equal after coercion is not a change', () => {
+      const result = diffExtendedFields({ count: 5 }, { count: '5' });
+      expect(result.changedFields).toEqual([]);
+    });
+
+    it('coerces numeric values via String() — different after coercion is a change', () => {
+      const result = diffExtendedFields({ count: 5 }, { count: '6' });
+      expect(result.changedFields).toEqual(['count']);
+    });
+
+    it('coerces boolean values', () => {
+      const result = diffExtendedFields({ flag: true }, { flag: 'true' });
+      expect(result.changedFields).toEqual([]);
+    });
+
+    it('handles null previous as empty map', () => {
+      const result = diffExtendedFields(null, { priority: 'high' });
+      expect(result.changedFields).toEqual(['priority']);
+    });
+
+    it('handles undefined next as empty map', () => {
+      const result = diffExtendedFields({ priority: 'high' }, undefined);
+      expect(result.changedFields).toEqual(['priority']);
+    });
+  });
 });
 
 describe('customFields → extended_fields adapter utilities', () => {
@@ -251,13 +641,44 @@ describe('customFields → extended_fields adapter utilities', () => {
   });
 
   describe('buildExtendedFieldsBackfill', () => {
+    // Most of these tests exercise value/precedence semantics independent of key derivation, so
+    // they resolve every field to its raw-key-based storage key (matching pre-friendly-name
+    // behavior) via this stub resolver. Dedicated tests below cover link-resolution itself.
+    const rawKeyBackfill = (
+      customFields: Array<{ key: string; type: string; value: unknown }> | undefined,
+      existingExtendedFields: Record<string, unknown> | null | undefined
+    ) =>
+      buildExtendedFieldsBackfill(customFields, existingExtendedFields, (cf) =>
+        getFieldSnakeKey(cf.key, getV2FieldType(cf.type))
+      );
+
     it('returns an empty object when customFields is undefined or empty', () => {
-      expect(buildExtendedFieldsBackfill(undefined, {})).toEqual({});
-      expect(buildExtendedFieldsBackfill([], {})).toEqual({});
+      expect(rawKeyBackfill(undefined, {})).toEqual({});
+      expect(rawKeyBackfill([], {})).toEqual({});
+    });
+
+    it('skips a field with no resolvable storage key rather than guessing', () => {
+      const result = buildExtendedFieldsBackfill(
+        [{ key: 'unresolved', type: 'text', value: 'x' }],
+        {},
+        () => undefined
+      );
+
+      expect(result).toEqual({});
+    });
+
+    it('uses the resolver-provided storage key, not the raw legacy key', () => {
+      const result = buildExtendedFieldsBackfill(
+        [{ key: 'raw_v1_key', type: 'text', value: 'hello' }],
+        {},
+        () => 'friendly_name_as_keyword'
+      );
+
+      expect(result).toEqual({ friendly_name_as_keyword: 'hello' });
     });
 
     it('derives storage keys using <key>_as_<v2type>', () => {
-      const result = buildExtendedFieldsBackfill(
+      const result = rawKeyBackfill(
         [
           { key: 'priority', type: 'text', value: 'high' },
           { key: 'count', type: 'number', value: 42 },
@@ -274,7 +695,7 @@ describe('customFields → extended_fields adapter utilities', () => {
     });
 
     it('skips null and undefined values', () => {
-      const result = buildExtendedFieldsBackfill(
+      const result = rawKeyBackfill(
         [
           { key: 'filled', type: 'text', value: 'yes' },
           { key: 'empty_null', type: 'text', value: null },
@@ -289,16 +710,15 @@ describe('customFields → extended_fields adapter utilities', () => {
     it('never overwrites a key already present in existingExtendedFields', () => {
       // FAILURE SCENARIO: adapter called twice on same case — second call must not
       // overwrite the value set by the first (existing-wins semantics).
-      const result = buildExtendedFieldsBackfill(
-        [{ key: 'priority', type: 'text', value: 'low' }],
-        { priority_as_keyword: 'high' }
-      );
+      const result = rawKeyBackfill([{ key: 'priority', type: 'text', value: 'low' }], {
+        priority_as_keyword: 'high',
+      });
 
       expect(result).toEqual({});
     });
 
     it('only returns the additions, not the full merged map', () => {
-      const result = buildExtendedFieldsBackfill(
+      const result = rawKeyBackfill(
         [
           { key: 'priority', type: 'text', value: 'low' }, // already in existing — skipped
           { key: 'severity', type: 'text', value: 'medium' }, // new — added
@@ -311,108 +731,44 @@ describe('customFields → extended_fields adapter utilities', () => {
     });
 
     it('treats null existingExtendedFields as empty', () => {
-      const result = buildExtendedFieldsBackfill([{ key: 'x', type: 'text', value: 'v' }], null);
+      const result = rawKeyBackfill([{ key: 'x', type: 'text', value: 'v' }], null);
 
       expect(result).toEqual({ x_as_keyword: 'v' });
     });
-  });
 
-  describe('mergeCustomFieldsIntoExtendedFields', () => {
-    it('adds a new key when no existing map is present', () => {
-      const result = mergeCustomFieldsIntoExtendedFields(
-        [{ key: 'priority', type: 'text', value: 'high' }],
-        { existing_key_as_keyword: 'value' }
-      );
-
-      expect(result).toEqual({
-        existing_key_as_keyword: 'value',
-        priority_as_keyword: 'high',
+    it('does NOT fill a key whose existing value is the empty string (deliberate clear preserved)', () => {
+      // The v2 UI persists '' both for untouched fields and for fields the user explicitly
+      // cleared, and the migration runs asynchronously — field definitions become visible
+      // before a space's backfill completes, so a '' observed at backfill time may be a
+      // deliberate clear. It is ambiguous, so it must never be overwritten with the stale
+      // legacy value.
+      const result = rawKeyBackfill([{ key: 'priority', type: 'text', value: 'low' }], {
+        priority_as_keyword: '',
       });
+
+      expect(result).toEqual({});
     });
 
-    it('overrides an existing key when the customField value changes', () => {
-      const result = mergeCustomFieldsIntoExtendedFields(
-        [{ key: 'priority', type: 'text', value: 'low' }],
-        { priority_as_keyword: 'high' }
-      );
+    it('fills a key whose existing value is null', () => {
+      const result = rawKeyBackfill([{ key: 'priority', type: 'text', value: 'low' }], {
+        priority_as_keyword: null,
+      });
 
       expect(result).toEqual({ priority_as_keyword: 'low' });
     });
 
-    it('overrides existing keys and adds new ones simultaneously', () => {
-      const result = mergeCustomFieldsIntoExtendedFields(
+    it('does not fill a key whose existing value is a non-empty string', () => {
+      const result = rawKeyBackfill(
         [
-          { key: 'kept', type: 'text', value: 'updated' }, // customFields-win — overrides
-          { key: 'new', type: 'number', value: 7 }, // added
+          { key: 'kept', type: 'text', value: 'legacy' },
+          { key: 'zero', type: 'number', value: 1 },
+          { key: 'flag', type: 'toggle', value: true },
         ],
-        { kept_as_keyword: 'original' }
+        { kept_as_keyword: 'v2-value', zero_as_integer: '0', flag_as_boolean: 'false' }
       );
 
-      expect(result).toEqual({
-        kept_as_keyword: 'updated', // overridden
-        new_as_integer: '7', // added
-      });
-    });
-
-    it('returns existingExtendedFields unchanged (same reference) when every value is identical', () => {
-      // FAILURE SCENARIO: adapter returns a new object reference on every call even when
-      // nothing changed — would trigger spurious SO writes and user-action entries.
-      const existing = { priority_as_keyword: 'high' };
-      const result = mergeCustomFieldsIntoExtendedFields(
-        [{ key: 'priority', type: 'text', value: 'high' }], // same value — no-op
-        existing
-      );
-
-      expect(result).toBe(existing); // same reference
-    });
-
-    it('returns undefined unchanged when customFields is empty and existing is undefined', () => {
-      const result = mergeCustomFieldsIntoExtendedFields(undefined, undefined);
-      expect(result).toBeUndefined();
-    });
-
-    it('returns null unchanged when customFields is empty and existing is null', () => {
-      const result = mergeCustomFieldsIntoExtendedFields([], null);
-      expect(result).toBeNull();
-    });
-
-    it('clears a mirror key when the customField value is null', () => {
-      const result = mergeCustomFieldsIntoExtendedFields(
-        [{ key: 'priority', type: 'text', value: null }],
-        { priority_as_keyword: 'high', other_as_keyword: 'keep' }
-      );
-
-      expect(result).toEqual({ other_as_keyword: 'keep' });
-      expect(result).not.toHaveProperty('priority_as_keyword');
-    });
-
-    it('clears a mirror key when the customField value is undefined', () => {
-      const result = mergeCustomFieldsIntoExtendedFields(
-        [{ key: 'priority', type: 'text', value: undefined }],
-        { priority_as_keyword: 'high' }
-      );
-
+      // '0' and 'false' are real (falsy-looking) v2 values and must win over the legacy mirror.
       expect(result).toEqual({});
-      expect(result).not.toHaveProperty('priority_as_keyword');
-    });
-
-    it('is a no-op (same reference) when a null customField key is not present in existing', () => {
-      const existing = { other_as_keyword: 'keep' };
-      const result = mergeCustomFieldsIntoExtendedFields(
-        [{ key: 'priority', type: 'text', value: null }], // key absent — nothing to delete
-        existing
-      );
-
-      expect(result).toBe(existing); // same reference — no spurious write
-    });
-
-    it('produces a new map from undefined existing when customFields have values', () => {
-      const result = mergeCustomFieldsIntoExtendedFields(
-        [{ key: 'x', type: 'toggle', value: false }],
-        undefined
-      );
-
-      expect(result).toEqual({ x_as_boolean: 'false' });
     });
   });
 });

@@ -10,9 +10,9 @@ import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { NotesButton } from './notes_button';
 import { TimelineTypeEnum } from '../../../../../common/api/timeline';
-import { ThemeProvider } from 'styled-components';
+import { EuiThemeProvider } from '@elastic/eui';
 import type { DataTableRecord } from '@kbn/discover-utils';
-import type { TimelineItem } from '@kbn/timelines-plugin/common';
+import type { TimelineItem } from '@kbn/securitysolution-timeline-common';
 
 const toggleShowNotesMock = jest.fn();
 
@@ -37,7 +37,7 @@ const defaultProps: ComponentProps<typeof NotesButton> = {
 };
 
 const TestWrapper: React.FC<React.PropsWithChildren<{}>> = ({ children }) => {
-  return <ThemeProvider theme={{ eui: { euiColorDanger: 'red' } }}>{children}</ThemeProvider>;
+  return <EuiThemeProvider>{children}</EuiThemeProvider>;
 };
 
 const renderTestComponent = (props?: Partial<ComponentProps<typeof NotesButton>>) => {

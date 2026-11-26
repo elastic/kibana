@@ -9,7 +9,8 @@
     "public/**/*",
     "server/**/*",
     "test/**/*",
-    "../../../../../typings/**/*"
+    "../../../../../typings/**/*",
+    "@kbn/core-user-settings-types"
   ],
   "kbn_references": [
     "@kbn/core",
@@ -28,6 +29,8 @@
     "@kbn/core-plugins-browser",
     "@kbn/config",
     "@kbn/scout",
+    "@kbn/ui-callout",
+    "@kbn/core-user-profile-common",
   ],
   "exclude": [
     "target/**/*",

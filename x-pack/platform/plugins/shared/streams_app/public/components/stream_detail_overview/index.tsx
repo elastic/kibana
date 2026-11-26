@@ -7,9 +7,8 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, useIsWithinBreakpoints } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { isDraftGetResponse, Streams } from '@kbn/streams-schema';
+import { Streams } from '@kbn/streams-schema';
 import React, { type CSSProperties, type ReactNode, useMemo } from 'react';
-import { useSignificantEventsApp } from '../../hooks/use_significant_events_app';
 import { useStreamDetail } from '../../hooks/use_stream_detail';
 import { useStreamsPrivileges } from '../../hooks/use_streams_privileges';
 import { AboutPanel } from './about_panel';
@@ -28,20 +27,8 @@ export function StreamOverview() {
   const {
     features: { contentPacks },
   } = useStreamsPrivileges();
-  const {
-    significantEventsApp,
-    isAvailable,
-    isLoading: isAvailabilityLoading,
-  } = useSignificantEventsApp();
-  const KnowledgeIndicatorsPanel = useMemo(
-    () => significantEventsApp?.getKnowledgeIndicatorsPanel(),
-    [significantEventsApp]
-  );
-  const showKnowledgeIndicatorsPanel =
-    KnowledgeIndicatorsPanel != null && isAvailable && !isAvailabilityLoading;
 
   const isIngest = Streams.ingest.all.GetResponse.is(definition);
-  const isDraft = isDraftGetResponse(definition);
   /** Match EuiFlexGroup responsive `m` max-breakpoint so sidebar stacks above main when narrow. */
   const isStackedOverviewLayout = useIsWithinBreakpoints(['xs', 's', 'm']);
   const isMobileOverviewLayout = useIsWithinBreakpoints(['xs', 's']);
@@ -58,18 +45,11 @@ export function StreamOverview() {
 
   const mainSections: OverviewSection[] = [
     { id: 'ingest-rate-chart', node: <IngestRateChart />, show: true },
-    { id: 'dataset-quality', node: <DataQualityCard />, show: isIngest && !isDraft },
+    { id: 'dataset-quality', node: <DataQualityCard />, show: isIngest },
   ];
 
   const sidebarSections: OverviewSection[] = [
     { id: 'about', node: <AboutPanel />, show: true },
-    {
-      id: 'knowledge-indicators',
-      node: KnowledgeIndicatorsPanel ? (
-        <KnowledgeIndicatorsPanel streamName={definition.stream.name} />
-      ) : null,
-      show: showKnowledgeIndicatorsPanel,
-    },
     {
       id: 'import-export',
       node: <ImportExportPanel definition={definition} refreshDefinition={refresh} />,

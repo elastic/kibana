@@ -51,6 +51,10 @@ export const ConnectorIconsMap: Map<
     lazy(() => import(/* webpackChunkName: "connectorIconBigQuery" */ './specs/bigquery/icon')),
   ],
   [
+    '.censys',
+    lazy(() => import(/* webpackChunkName: "connectorIconCensys" */ './specs/censys/icon')),
+  ],
+  [
     '.github',
     lazy(() => import(/* webpackChunkName: "connectorIconGithub" */ './specs/github/icon')),
   ],
@@ -109,6 +113,12 @@ export const ConnectorIconsMap: Map<
     ),
   ],
   [
+    '.google_docs',
+    lazy(
+      () => import(/* webpackChunkName: "connectorIconGoogleDocs" */ './specs/google_docs/icon')
+    ),
+  ],
+  [
     '.google_drive',
     lazy(
       () => import(/* webpackChunkName: "connectorIconGoogleDrive" */ './specs/google_drive/icon')
@@ -122,6 +132,8 @@ export const ConnectorIconsMap: Map<
     '.slack2',
     lazy(() => import(/* webpackChunkName: "connectorIconSlack2" */ './specs/slack/icon')),
   ],
+
+  ['.mysql', lazy(() => import(/* webpackChunkName: "connectorIconMysql" */ './specs/mysql/icon'))],
   ['.gmail', lazy(() => import(/* webpackChunkName: "connectorIconGmail" */ './specs/gmail/icon'))],
   [
     '.azure-blob',
@@ -162,6 +174,7 @@ export const ConnectorIconsMap: Map<
         import(/* webpackChunkName: "connectorIconGoogleCalendar" */ './specs/google_calendar/icon')
     ),
   ],
+  ['.aws', lazy(() => import(/* webpackChunkName: "connectorIconAws" */ './specs/aws/icon'))],
   [
     '.aws_lambda',
     lazy(() => import(/* webpackChunkName: "connectorIconAwsLambda" */ './specs/aws_lambda/icon')),
@@ -228,6 +241,10 @@ export const ConnectorIconsMap: Map<
     lazy(() => import(/* webpackChunkName: "connectorIconOneDrive" */ './specs/one_drive/icon')),
   ],
   [
+    '.mongodb',
+    lazy(() => import(/* webpackChunkName: "connectorIconMongodb" */ './specs/mongodb/icon')),
+  ],
+  [
     '.ansible_controller',
     lazy(
       () =>
@@ -252,6 +269,11 @@ export const ConnectorIconsMap: Map<
           /* webpackChunkName: "connectorIconSublimeSecurity" */ './specs/sublime_security/icon'
         )
     ),
+  ],
+
+  [
+    '.trello',
+    lazy(() => import(/* webpackChunkName: "connectorIcontrello" */ './specs/trello/icon')),
   ],
   [
     '.workday',
@@ -315,6 +337,10 @@ export const ConnectorIconsMap: Map<
     lazy(() => import(/* webpackChunkName: "connectorIconawsxray" */ './specs/aws_x_ray/icon')),
   ],
   [
+    '.aws_ssm',
+    lazy(() => import(/* webpackChunkName: "connectorIconAwsSsm" */ './specs/aws_ssm/icon')),
+  ],
+  [
     '.prometheus',
     lazy(() => import(/* webpackChunkName: "connectorIconPrometheus" */ './specs/prometheus/icon')),
   ],
@@ -335,6 +361,134 @@ export const ConnectorIconsMap: Map<
       () =>
         import(
           /* webpackChunkName: "connectorIconopensearchawsopensearchservice" */ './specs/opensearch_aws_opensearch_service/icon'
+        )
+    ),
+  ],
+  [
+    '.zabbix',
+    lazy(() => import(/* webpackChunkName: "connectorIconZabbix" */ './specs/zabbix/icon')),
+  ],
+  ['.okta', lazy(() => import(/* webpackChunkName: "connectorIconOkta" */ './specs/okta/icon'))],
+  [
+    '.gcp_iam',
+    lazy(() => import(/* webpackChunkName: "connectorIconGcpIam" */ './specs/gcp_iam/icon')),
+  ],
+  [
+    '.gcp_secret_manager',
+    lazy(
+      () =>
+        import(
+          /* webpackChunkName: "connectorIconGcpSecretManager" */ './specs/gcp_secret_manager/icon'
+        )
+    ),
+  ],
+  ['.unifi', lazy(() => import(/* webpackChunkName: "connectorIconUnifi" */ './specs/unifi/icon'))],
+  [
+    '.urlscan_io',
+    lazy(() => import(/* webpackChunkName: "connectorIconUrlscanIo" */ './specs/urlscan_io/icon')),
+  ],
+
+  [
+    '.aws_eks',
+    lazy(() => import(/* webpackChunkName: "connectorIconAwsEks" */ './specs/aws_eks/icon')),
+  ],
+  [
+    '.google_gke',
+    lazy(() => import(/* webpackChunkName: "connectorIconGoogleGke" */ './specs/google_gke/icon')),
+  ],
+  [
+    '.bitbucket',
+    lazy(() => import(/* webpackChunkName: "connectorIconBitbucket" */ './specs/bitbucket/icon')),
+  ],
+  [
+    '.azure_aks',
+    lazy(() => import(/* webpackChunkName: "connectorIconAzureAks" */ './specs/azure_aks/icon')),
+  ],
+  ['.misp', lazy(() => import(/* webpackChunkName: "connectorIconMisp" */ './specs/misp/icon'))],
+  [
+    '.google_threat_intelligence',
+    lazy(
+      () =>
+        import(
+          /* webpackChunkName: "connectorIconGoogleThreatIntelligence" */ './specs/google_threat_intelligence/icon'
+        )
+    ),
+  ],
+  [
+    '.gitlab',
+    lazy(() => import(/* webpackChunkName: "connectorIconGitlab" */ './specs/gitlab/icon')),
+  ],
+  [
+    '.threatq',
+    lazy(() => import(/* webpackChunkName: "connectorIconThreatQ" */ './specs/threatq/icon')),
+  ],
+  [
+    '.elasticsearch',
+    lazy(
+      () =>
+        import(/* webpackChunkName: "connectorIconelasticsearch" */ './specs/elasticsearch/icon')
+    ),
+  ],
+  [
+    '.azure_functions',
+    lazy(
+      () =>
+        import(/* webpackChunkName: "connectorIconazurefunctions" */ './specs/azure_functions/icon')
+    ),
+  ],
+
+  [
+    '.aws_rds',
+    lazy(() => import(/* webpackChunkName: "connectorIconAwsRds" */ './specs/aws_rds/icon')),
+  ],
+  [
+    '.azure_sql',
+    lazy(() => import(/* webpackChunkName: "connectorIconazuresql" */ './specs/azure_sql/icon')),
+  ],
+  [
+    '.solarwinds_platform',
+    lazy(
+      () =>
+        import(
+          /* webpackChunkName: "connectorIconSolarWindsPlatform" */ './specs/solarwinds_platform/icon'
+        )
+    ),
+  ],
+  [
+    '.microsoft_defender_endpoint2',
+    lazy(
+      () =>
+        import(
+          /* webpackChunkName: "connectorIconMicrosoftDefenderForEndpoint" */ './specs/microsoft_defender_for_endpoint/icon'
+        )
+    ),
+  ],
+
+  [
+    '.microsoft_sql_server',
+    lazy(
+      () =>
+        import(
+          /* webpackChunkName: "connectorIconmicrosoftsqlserver" */ './specs/microsoft_sql_server/icon'
+        )
+    ),
+  ],
+
+  [
+    '.sentinelone2',
+    lazy(
+      () => import(/* webpackChunkName: "connectorIconSentinelone2" */ './specs/sentinelone/icon')
+    ),
+  ],
+
+  ['.redis', lazy(() => import(/* webpackChunkName: "connectorIconredis" */ './specs/redis/icon'))],
+
+  [
+    '.trend_vision_one',
+    lazy(
+      () =>
+        import(
+          /* webpackChunkName: "connectorIconTrendVisionOne" */ './specs/trend_vision_one/icon'
         )
     ),
   ],

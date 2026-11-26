@@ -306,6 +306,19 @@ describe('PostHog', () => {
       });
       expect(result).toEqual({ results: [{ id: 'rec1' }] });
     });
+
+    it('should filter by person UUID', async () => {
+      mockClient.get.mockResolvedValue({ data: { results: [] } });
+
+      await PostHog.actions.listSessionRecordings.handler(mockContext, {
+        personId: '0190a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b',
+        limit: 20,
+      });
+
+      expect(mockClient.get).toHaveBeenCalledWith(`${BASE}/session_recordings/`, {
+        params: expect.objectContaining({ person_uuid: '0190a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b' }),
+      });
+    });
   });
 
   describe('createExternalReference action', () => {
@@ -334,7 +347,7 @@ describe('PostHog', () => {
       if (!PostHog.test) throw new Error('Test handler not defined');
       const result = await PostHog.test.handler(mockContext);
 
-      expect(result).toEqual({ ok: true, message: 'Successfully connected to the PostHog API.' });
+      expect(result).toEqual({ message: 'Successfully connected to the PostHog API.' });
     });
 
     it('should throw a formatted error on failure', async () => {

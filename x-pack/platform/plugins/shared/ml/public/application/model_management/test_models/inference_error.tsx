@@ -8,7 +8,7 @@
 import type { FC } from 'react';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiCallOut } from '@elastic/eui';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 
 interface Props {
   errorText: string | null;
@@ -17,16 +17,13 @@ interface Props {
 export const ErrorMessage: FC<Props> = ({ errorText }) => {
   return errorText === null ? null : (
     <>
-      <EuiCallOut
+      <KbnDangerCallout
         announceOnMount
         title={i18n.translate('xpack.ml.trainedModels.testModelsFlyout.inferenceError', {
           defaultMessage: 'An error occurred',
         })}
-        color="danger"
-        iconType="cross"
-      >
-        <p>{errorText}</p>
-      </EuiCallOut>
+        text={errorText}
+      />
     </>
   );
 };

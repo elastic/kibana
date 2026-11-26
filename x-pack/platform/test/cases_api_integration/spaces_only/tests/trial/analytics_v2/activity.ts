@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 import { CaseSeverity, CaseStatuses } from '@kbn/cases-plugin/common/types/domain';
 import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
-import { getPostCaseRequest } from '../../../../common/lib/mock';
+import { getPostCaseRequest, userActionSourceUser } from '../../../../common/lib/mock';
 import {
   createCase,
   updateCase,
@@ -32,7 +32,8 @@ import {
  *       → CasesActivityV2Writer → .cases-activity
  *
  * Tests assert:
- *   1. `create_case` user-action lands in `.cases-activity` on case create.
+ *   1. `create_case` user-action lands in `.cases-activity` on case create,
+ *      carrying the user-action `source`.
  *   2. `status` / `severity` patches produce per-type rows with the
  *      curated extracts populated.
  *   3. Deleting the case cascades the activity rows out (verifies
@@ -68,6 +69,7 @@ export default ({ getService }: FtrProviderContext): void => {
       // implicit-privileges DLS field, populated correctly for a
       // non-default space at write time (not just after reconciliation).
       expect(createDoc!.space_id).to.eql('space1');
+      expect(createDoc!.source).to.eql(userActionSourceUser);
       // payload_json contains the full create_case payload —
       // assert a known field (title) round-trips so analysts can
       // pivot via ES|QL `MV_FROM_JSON` on the column.

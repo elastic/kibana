@@ -22,6 +22,7 @@ export const createAttackDiscoveryRubricEvaluator = ({
   return {
     name: 'AttackDiscoveryRubric',
     kind: 'LLM',
+    direction: 'maximize',
     evaluate: async ({ output, expected }) => {
       const errors = (output as AttackDiscoveryTaskOutput | undefined)?.errors;
       if (errors && errors.length > 0) {
@@ -49,9 +50,24 @@ export const createAttackDiscoveryRubricEvaluator = ({
         2
       );
 
+      const expectedDiscoveries = expected?.attackDiscoveries ?? [];
+      if (expectedDiscoveries.length === 0) {
+        // No reference answer exists for this example (generateApi-mode suites
+        // have no golden kill-chain output yet). Scoring against an empty
+        // reference would mark every non-empty submission as "does not capture
+        // the essence of the expected response" — a structural zero that says
+        // nothing about the model. Return N/A instead of a misleading 0.
+        return {
+          score: null,
+          label: 'no_reference',
+          explanation:
+            'No expected attack discoveries for this example; rubric scoring is not applicable.',
+        };
+      }
+
       const reference = JSON.stringify(
         {
-          attackDiscoveries: expected?.attackDiscoveries ?? [],
+          attackDiscoveries: expectedDiscoveries,
         },
         null,
         2

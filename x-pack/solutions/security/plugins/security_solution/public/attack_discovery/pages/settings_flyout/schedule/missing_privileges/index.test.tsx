@@ -40,7 +40,7 @@ const mockKibana = ({
         },
       },
       featureFlags: {
-        getBooleanValue: jest.fn().mockResolvedValue(isWorkflowsEnabled),
+        useBooleanValue: jest.fn().mockReturnValue(isWorkflowsEnabled),
       },
       uiSettings: {
         get: jest.fn().mockReturnValue(isWorkflowsEnabled),

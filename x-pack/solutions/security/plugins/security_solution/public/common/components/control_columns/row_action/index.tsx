@@ -8,7 +8,6 @@
 import type { EuiDataGridCellValueElementProps } from '@elastic/eui';
 import type { RefObject } from 'react';
 import React, { useCallback, useMemo } from 'react';
-import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import type { DataTableRecord, EsHitRecord } from '@kbn/discover-utils';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import { TableId } from '@kbn/securitysolution-data-table';
@@ -17,15 +16,14 @@ import {
   SECURITY_CELL_ACTIONS_DETAILS_FLYOUT,
 } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import type { AlertsTableImperativeApi } from '@kbn/response-ops-alerts-table/types';
-import { createCellActionRenderer } from '../../../../flyout_v2/shared/components/cell_actions';
-import { useFlyoutApi } from '../../../../flyout_v2/use_flyout_api';
-import { LeftPanelNotesTab } from '../../../../flyout/document_details/left';
-import { useKibana } from '../../../lib/kibana';
-import { useIsNewFlyoutEnabled } from '../../../hooks/use_is_new_flyout_enabled';
 import {
-  DocumentDetailsLeftPanelKey,
-  DocumentDetailsRightPanelKey,
-} from '../../../../flyout/document_details/shared/constants/panel_keys';
+  createCellActionRenderer,
+  rulePreviewCellActionRenderer,
+} from '../../../../flyout_v2/shared/components/cell_actions';
+import { useFlyoutApi } from '../../../../flyout_v2/use_flyout_api';
+import { getAlertIndexAlias } from '../../../../flyout/document_details/shared/hooks/use_event_details';
+import { useSpaceId } from '../../../hooks/use_space_id';
+import { useKibana } from '../../../lib/kibana';
 import type {
   ControlColumnProps,
   SetEventsDeleted,
@@ -47,6 +45,7 @@ export type RowActionProps = EuiDataGridCellValueElementProps & {
   index: number;
   isEventViewer: boolean;
   loadingEventIds: Readonly<string[]>;
+  onRemoveFromCase?: (eventId: string) => void;
   onRowSelected: OnRowSelected;
   onRuleChange?: () => void;
   pageRowIndex: number;
@@ -63,6 +62,16 @@ export type RowActionProps = EuiDataGridCellValueElementProps & {
    */
   alertsTableRef?: RefObject<AlertsTableImperativeApi>;
   width: number;
+  /**
+   * Optional override for the "expand flyout" row action. When provided,
+   * clicking the expand button calls this callback instead of opening the
+   * document details flyout directly. The alerts page uses this so the alerts table
+   * can drive the in-flyout pagination (see `usePaginatedFlyout` in `flyout_v2/document/pagination`).
+   *
+   * If omitted (e.g. for the cases events table), the default behaviour of
+   * opening the document details flyout directly is preserved.
+   */
+  onExpandFlyout?: () => void;
 };
 
 const RowActionComponent = ({
@@ -74,6 +83,8 @@ const RowActionComponent = ({
   index,
   isEventViewer,
   loadingEventIds,
+  onExpandFlyout,
+  onRemoveFromCase,
   onRowSelected,
   onRuleChange,
   pageRowIndex,
@@ -95,10 +106,9 @@ const RowActionComponent = ({
   );
 
   const { telemetry } = useKibana().services;
+  const spaceId = useSpaceId();
 
-  const { openFlyout } = useExpandableFlyoutApi();
-  const enableNewFlyout = useIsNewFlyoutEnabled();
-  const { openDocumentFlyoutFromIndex, openNotes } = useFlyoutApi();
+  const { openDocumentFlyoutFromIndex, openDocumentFlyoutFromPattern, openNotes } = useFlyoutApi();
 
   const columnValues = useMemo(
     () =>
@@ -149,7 +159,31 @@ const RowActionComponent = ({
   );
 
   const handleOnEventDetailPanelOpened = useCallback(() => {
-    if (enableNewFlyout && hit) {
+    if (onExpandFlyout) {
+      onExpandFlyout();
+      return;
+    }
+
+    if (!hit) {
+      return;
+    }
+
+    if (tableId === TableId.rulePreview) {
+      // Rule preview alert rows reference their backing .internal.preview. index, which is
+      // not included in any data view pattern. Convert to the alias and resolve via the
+      // pattern-based wrapper.
+      const resolvedIndex = indexName
+        ? getAlertIndexAlias(indexName, spaceId) ?? indexName
+        : undefined;
+      openDocumentFlyoutFromPattern({
+        documentId: eventId,
+        indexName: resolvedIndex,
+        renderCellActions: rulePreviewCellActionRenderer,
+        onAlertUpdated: handleAlertUpdated,
+        origin: FLYOUT_ORIGIN.ALERTS_TABLE,
+        title: getDocumentHistoryTitle(hit),
+      });
+    } else {
       openDocumentFlyoutFromIndex({
         documentId: eventId,
         indexName: indexName ?? undefined,
@@ -158,60 +192,23 @@ const RowActionComponent = ({
         origin: FLYOUT_ORIGIN.ALERTS_TABLE,
         title: getDocumentHistoryTitle(hit),
       });
-    } else {
-      openFlyout({
-        right: {
-          id: DocumentDetailsRightPanelKey,
-          params: {
-            id: eventId,
-            indexName,
-            scopeId: tableId,
-          },
-        },
-      });
-      telemetry.reportEvent(DocumentEventTypes.DetailsFlyoutOpened, {
-        location: tableId,
-        panel: 'right',
-      });
     }
   }, [
-    enableNewFlyout,
     hit,
+    tableId,
+    spaceId,
+    indexName,
+    openDocumentFlyoutFromPattern,
     openDocumentFlyoutFromIndex,
     documentFlyoutCellActionRenderer,
     eventId,
-    indexName,
     handleAlertUpdated,
-    openFlyout,
-    tableId,
-    telemetry,
+    onExpandFlyout,
   ]);
 
   const toggleShowNotes = useCallback(() => {
-    if (enableNewFlyout && hit) {
+    if (hit) {
       openNotes({ hit, origin: FLYOUT_ORIGIN.ALERTS_TABLE });
-    } else {
-      openFlyout({
-        right: {
-          id: DocumentDetailsRightPanelKey,
-          params: {
-            id: eventId,
-            indexName,
-            scopeId: tableId,
-          },
-        },
-        left: {
-          id: DocumentDetailsLeftPanelKey,
-          path: {
-            tab: LeftPanelNotesTab,
-          },
-          params: {
-            id: eventId,
-            indexName,
-            scopeId: tableId,
-          },
-        },
-      });
     }
     telemetry.reportEvent(NotesEventTypes.OpenNoteInExpandableFlyoutClicked, {
       location: tableId,
@@ -220,7 +217,7 @@ const RowActionComponent = ({
       location: tableId,
       panel: 'left',
     });
-  }, [enableNewFlyout, hit, openNotes, openFlyout, eventId, indexName, tableId, telemetry]);
+  }, [hit, openNotes, tableId, telemetry]);
 
   const Action = controlColumn.rowCellRender;
 
@@ -246,6 +243,7 @@ const RowActionComponent = ({
           isEventViewer={isEventViewer}
           loadingEventIds={loadingEventIds}
           onEventDetailsPanelOpened={handleOnEventDetailPanelOpened}
+          onRemoveFromCase={onRemoveFromCase}
           onRowSelected={onRowSelected}
           onRuleChange={onRuleChange}
           refetch={refetch}

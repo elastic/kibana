@@ -56,9 +56,6 @@ test.describe(
 
       await test.step('renders a prefilled lens visualization', async () => {
         await expect(page.testSubj.locator('xyVisChart')).toBeVisible();
-        await expect(
-          page.locator('div[data-title="Prefilled from exploratory view app"]')
-        ).toBeVisible();
       });
 
       await test.step('breaks the series down by user_agent.name', async () => {

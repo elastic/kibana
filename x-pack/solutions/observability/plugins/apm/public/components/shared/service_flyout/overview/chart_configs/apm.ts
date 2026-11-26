@@ -17,6 +17,7 @@ import {
   METRIC_SYSTEM_TOTAL_MEMORY,
   PROCESSOR_EVENT,
   TRANSACTION_DURATION,
+  TRANSACTION_NAME,
   TRANSACTION_TYPE,
 } from '../../../../../../common/es_fields/apm';
 import { ChartType } from '../../../charts/helper/get_timeseries_color';
@@ -44,10 +45,13 @@ function createApmBaseQuery({
   processorEvent: FlyoutLensChartProcessorEvent;
   scope: ServiceScope & { transactionType?: string };
 }): ComposerQuery {
-  const { transactionType } = scope;
+  const { transactionType, transactionName } = scope;
   const query = esql.from(indices).where`${esql.col(PROCESSOR_EVENT)} == ${processorEvent}`;
   if (transactionType) {
     query.where`${esql.col(TRANSACTION_TYPE)} == ${transactionType}`;
+  }
+  if (transactionName) {
+    query.where`${esql.col(TRANSACTION_NAME)} == ${transactionName}`;
   }
   applyServiceFilters(query, scope);
   return query;
@@ -88,7 +92,8 @@ export const APM_ERROR_RATE_TITLE = i18n.translate(
 
 export function getCpuUsageChart(
   indices: string | undefined,
-  scope: ServiceScope
+  scope: ServiceScope,
+  projectRouting?: string
 ): FlyoutLensChartConfigDefinition {
   const cpuUsage = `AVG(TO_DOUBLE(${METRIC_SYSTEM_CPU_PERCENT}))`;
   const title = i18n.translate('xpack.apm.serviceFlyout.cpuUsageChartTitle', {
@@ -99,6 +104,7 @@ export function getCpuUsageChart(
     id: 'cpuUsage',
     title,
     indices,
+    projectRouting,
     buildQuery: (idx) => {
       const query = createApmBaseQuery({ indices: idx, processorEvent: 'metric', scope });
       query.pipe(`WHERE TO_DOUBLE(${METRIC_SYSTEM_CPU_PERCENT}) IS NOT NULL`);
@@ -120,7 +126,8 @@ export function getCpuUsageChart(
 
 export function getMemoryUsageChart(
   indices: string | undefined,
-  scope: ServiceScope
+  scope: ServiceScope,
+  projectRouting?: string
 ): FlyoutLensChartConfigDefinition {
   const title = i18n.translate('xpack.apm.serviceFlyout.memoryUsageChartTitle', {
     defaultMessage: 'Memory usage',
@@ -130,6 +137,7 @@ export function getMemoryUsageChart(
     id: 'memoryUsage',
     title,
     indices,
+    projectRouting,
     buildQuery: (idx) => {
       const query = createApmBaseQuery({ indices: idx, processorEvent: 'metric', scope });
       query.pipe(`EVAL cgroup_usage = TO_DOUBLE(${METRIC_CGROUP_MEMORY_USAGE_BYTES})`);

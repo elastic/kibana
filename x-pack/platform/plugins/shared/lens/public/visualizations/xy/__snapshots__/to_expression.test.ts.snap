@@ -9,6 +9,9 @@ Object {
           false,
         ],
         "annotations": Array [],
+        "areaFill": Array [
+          "solid",
+        ],
         "emphasizeFitting": Array [
           true,
         ],
@@ -39,7 +42,7 @@ Object {
                     "c",
                   ],
                   "colorMapping": Array [
-                    "{\\"assignments\\":[],\\"specialAssignments\\":[{\\"rules\\":[{\\"type\\":\\"other\\"}],\\"color\\":{\\"type\\":\\"loop\\"},\\"touched\\":false}],\\"paletteId\\":\\"default\\",\\"colorMode\\":{\\"type\\":\\"categorical\\"}}",
+                    "{\\"assignments\\":[],\\"specialAssignments\\":[{\\"rules\\":[{\\"type\\":\\"other\\"}],\\"color\\":{\\"type\\":\\"loop\\"}}],\\"paletteId\\":\\"default\\",\\"colorMode\\":{\\"type\\":\\"categorical\\"}}",
                   ],
                   "columnToLabel": Array [
                     "{\\"b\\":\\"col_b\\",\\"c\\":\\"col_c\\",\\"d\\":\\"col_d\\"}",
@@ -112,6 +115,9 @@ Object {
                   "floatingColumns": Array [],
                   "isVisible": Array [
                     true,
+                  ],
+                  "legendSize": Array [
+                    "auto",
                   ],
                   "position": Array [
                     "left",

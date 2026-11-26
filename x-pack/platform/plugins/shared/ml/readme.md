@@ -16,7 +16,7 @@ info, refer to
 
 1. Fork and clone the [Kibana repo](https://github.com/elastic/kibana).
 
-1. Install `nvm`, `node`, `yarn` (for example, by using Homebrew). See
+1. Install `nvm`, `node`, `pnpm` (for example, by using Homebrew). See
    [Install dependencies](https://www.elastic.co/guide/en/kibana/master/development-getting-started.html#_install_dependencies).
 
 1. Make sure that Elasticsearch is deployed and running on localhost:9200.
@@ -32,16 +32,16 @@ info, refer to
    If you need to update your Node version, the response message contains the
    command you need to run to do it.
 
-1. Run `yarn kbn bootstrap`. It takes all the dependencies in the code and
+1. Run `pnpm kbn bootstrap`. It takes all the dependencies in the code and
    installs/checks them. It is recommended to use it every time when you switch
    between branches.
 
 1. Make a copy of `kibana.yml` and save as `kibana.dev.yml`. (Git will not track
-   the changes in `kibana.dev.yml` but yarn will use it.)
+   the changes in `kibana.dev.yml` but pnpm will use it.)
 
 1. Provide the appropriate password and user name in `kibana.dev.yml`.
 
-1. Run `yarn start` to start Kibana.
+1. Run `pnpm start` to start Kibana.
 
 1. Go to http://localhost:560x/xxx (check the terminal message for the exact
    path).
@@ -74,25 +74,25 @@ Run the test following jest tests from `kibana/x-pack/platform/plugins/shared/ml
 New snapshots, all plugins:
 
 ```
-yarn test:jest
+pnpm test:jest
 ```
 
 Update snapshots for the ML plugin:
 
 ```
-yarn test:jest -u
+pnpm test:jest -u
 ```
 
 Update snapshots for a specific directory only:
 
 ```
-yarn test:jest public/application/settings/filter_lists
+pnpm test:jest public/application/settings/filter_lists
 ```
 
 Run tests with verbose output:
 
 ```
-yarn test:jest --verbose
+pnpm test:jest --verbose
 ```
 
 ### Functional tests
@@ -124,7 +124,6 @@ With PATH_TO_CONFIG and other options as follows.
    | anomaly detection result views | `src/platform/test/functional/apps/ml/anomaly_detection_result_views/config.ts` |
    | anomaly detection integrations | `src/platform/test/functional/apps/ml/anomaly_detection_integrations/config.ts` |
    | data frame analytics           | `src/platform/test/functional/apps/ml/data_frame_analytics/config.ts`           |
-   | data visualizer                | `src/platform/test/functional/apps/ml/data_visualizer/config.ts`                |
    | permissions                    | `src/platform/test/functional/apps/ml/permissions/config.ts`                    |
    | stack management jobs          | `src/platform/test/functional/apps/ml/stack_management_jobs/config.ts`          |
    | short tests                    | `src/platform/test/functional/apps/ml/short_tests/config.ts`                    |
@@ -133,14 +132,18 @@ With PATH_TO_CONFIG and other options as follows.
    feature controls, settings and notifications. Test files for each group are located
    in the directory of their configuration file.
 
+1. Scout UI tests (data visualizer):
+
+   | Area              | PATH                                                                 |
+   | ----------------- | -------------------------------------------------------------------- |
+   | data visualizer   | `x-pack/platform/plugins/private/data_visualizer/test/scout/ui/`     |
+   | ML actions panel  | `x-pack/platform/plugins/shared/ml/test/scout/ui/`                   |
+
 1. Functional UI tests with `Basic` license:
 
    | Group                                                 | PATH_TO_CONFIG                                                            |
    | ----------------------------------------------------- | ------------------------------------------------------------------------- |
    | permissions                                           | `platform/test/functional_basic/apps/ml/permissions/config.ts`            |
-   | data visualizer group1 (file data viz)                | `platform/test/functional_basic/apps/ml/data_visualizer/group3/config.ts` |
-   | data visualizer group2 (index data viz)               | `platform/test/functional_basic/apps/ml/data_visualizer/group2/config.ts` |
-   | data visualizer group3 (actions panel, discover grid) | `platform/test/functional_basic/apps/ml/data_visualizer/group3/config.ts` |
 
 1. API integration tests with `Trial` license:
 

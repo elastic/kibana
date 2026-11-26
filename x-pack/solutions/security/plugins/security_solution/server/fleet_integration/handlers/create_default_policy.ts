@@ -12,6 +12,7 @@ import type { ExperimentalFeatures } from '../../../common';
 import type { TelemetryConfigProvider } from '../../../common/telemetry_config/telemetry_config_provider';
 import {
   policyFactory as policyConfigFactory,
+  policyFactoryWithoutPaidEnterpriseFeatures as policyConfigFactoryWithoutPaidEnterpriseFeatures,
   policyFactoryWithoutPaidFeatures as policyConfigFactoryWithoutPaidFeatures,
 } from '../../../common/endpoint/models/policy_config';
 import type { LicenseService } from '../../../common/license/license';
@@ -27,8 +28,12 @@ import {
   disableProtections,
   ensureOnlyEventCollectionIsAllowed,
   isBillablePolicy,
+  removeAiDataCollection,
+  removeCustomYaraSignatures,
   removeDeviceControl,
   removeLinuxDnsEvents,
+  removeLinuxRansomware,
+  removeRegistryCredentialHardening,
 } from '../../../common/endpoint/models/policy_config_helpers';
 import type { ProductFeaturesService } from '../../lib/product_features_service/product_features_service';
 
@@ -45,7 +50,7 @@ export const createDefaultPolicy = (
   experimentalFeatures: ExperimentalFeatures
 ): PolicyConfig => {
   // Pass license and cloud information to use in Policy creation
-  const factoryPolicy = policyConfigFactory({
+  let factoryPolicy = policyConfigFactory({
     license: licenseService.getLicenseType(),
     cloud: cloud?.isCloudEnabled,
     licenseUuid: licenseService.getLicenseUID(),
@@ -55,6 +60,22 @@ export const createDefaultPolicy = (
     isGlobalTelemetryEnabled: telemetryConfigProvider.getIsOptedIn(),
   });
 
+  // Sanitize factory defaults before presets turn `true` into `false`, which the shared
+  // sanitizer preserves as an explicit opt-out.
+  if (
+    !productFeatures.isEnabled(ProductFeatureSecurityKey.endpointCustomYaraSignatures) ||
+    !experimentalFeatures.customYaraSignaturesEnabled
+  ) {
+    factoryPolicy = removeCustomYaraSignatures(factoryPolicy);
+  }
+
+  if (
+    !productFeatures.isEnabled(ProductFeatureSecurityKey.endpointRegistryCredentialHardening) ||
+    !experimentalFeatures.registryCredentialHardening
+  ) {
+    factoryPolicy = removeRegistryCredentialHardening(factoryPolicy);
+  }
+
   let defaultPolicyPerType: PolicyConfig =
     config?.type === 'cloud'
       ? getCloudPolicyConfig(factoryPolicy)
@@ -62,6 +83,8 @@ export const createDefaultPolicy = (
 
   if (!licenseService.isPlatinumPlus()) {
     defaultPolicyPerType = policyConfigFactoryWithoutPaidFeatures(defaultPolicyPerType);
+  } else if (!licenseService.isEnterprise()) {
+    defaultPolicyPerType = policyConfigFactoryWithoutPaidEnterpriseFeatures(defaultPolicyPerType);
   }
 
   // If no Policy Protection allowed (ex. serverless)
@@ -78,6 +101,14 @@ export const createDefaultPolicy = (
 
   if (!experimentalFeatures.linuxDnsEvents) {
     defaultPolicyPerType = removeLinuxDnsEvents(defaultPolicyPerType);
+  }
+
+  if (!experimentalFeatures.linuxRansomwareProtection) {
+    defaultPolicyPerType = removeLinuxRansomware(defaultPolicyPerType);
+  }
+
+  if (!experimentalFeatures.endpointAiDataCollection) {
+    defaultPolicyPerType = removeAiDataCollection(defaultPolicyPerType);
   }
 
   defaultPolicyPerType.meta.billable = isBillablePolicy(defaultPolicyPerType);

@@ -118,6 +118,18 @@ describe('EQL search strategy', () => {
         });
       });
 
+      it('long-polls with `pollLength` from options', async () => {
+        const eqlSearch = await eqlSearchStrategyProvider(mockSearchConfig, mockLogger);
+        await eqlSearch.search({ id: 'my-search-id' }, { pollLength: '30s' }, mockDeps).toPromise();
+        const [[requestParams]] = mockEqlGet.mock.calls;
+
+        expect(requestParams).toEqual({
+          id: 'my-search-id',
+          keep_alive: '60000ms',
+          wait_for_completion_timeout: '30s',
+        });
+      });
+
       it('emits an error if the client throws', async () => {
         expect.assertions(1);
         mockEqlSearch.mockReset().mockRejectedValueOnce(new Error('client error'));
@@ -154,9 +166,9 @@ describe('EQL search strategy', () => {
         err = e;
       }
 
-      expect(mockEqlSearch).toBeCalled();
+      expect(mockEqlSearch).toHaveBeenCalled();
       expect(err).not.toBeUndefined();
-      expect(mockEqlDelete).toBeCalled();
+      expect(mockEqlDelete).toHaveBeenCalled();
     });
 
     describe('arguments', () => {
@@ -252,7 +264,11 @@ describe('EQL search strategy', () => {
         );
         const [[_params, requestOptions]] = mockEqlGet.mock.calls;
 
-        expect(requestOptions).toEqual({ meta: true, signal: expect.any(AbortSignal) });
+        expect(requestOptions).toEqual({
+          meta: true,
+          requestTimeout: 600_000,
+          signal: expect.any(AbortSignal),
+        });
       });
 
       it('passes transport options for search with id', async () => {
@@ -266,6 +282,7 @@ describe('EQL search strategy', () => {
         expect(requestOptions).toEqual({
           maxResponseSize: 13131313,
           meta: true,
+          requestTimeout: 600_000,
           signal: undefined,
         });
       });

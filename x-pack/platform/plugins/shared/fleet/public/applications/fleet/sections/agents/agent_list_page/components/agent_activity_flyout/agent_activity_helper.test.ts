@@ -7,7 +7,7 @@
 
 import type { ActionStatus } from '../../../../../types';
 
-import { getOtherDaysActions, getTodayActions } from './agent_activity_helper';
+import { getOtherDaysActions, getTodayActions, isScheduledAction } from './agent_activity_helper';
 
 describe('agent activity helper', () => {
   const actions = [
@@ -36,5 +36,27 @@ describe('agent activity helper', () => {
     expect(Object.keys(result)).toEqual(['2022-09-12', '2022-09-11']);
     expect(result['2022-09-12'].length).toEqual(1);
     expect(result['2022-09-11'].length).toEqual(2);
+  });
+});
+
+describe('isScheduledAction', () => {
+  const FUTURE = new Date(Date.now() + 60 * 60 * 1000).toISOString(); // 1h from now
+  const PAST = new Date(Date.now() - 60 * 60 * 1000).toISOString(); // 1h ago
+
+  it('returns true when status is IN_PROGRESS and startTime is in the future', () => {
+    expect(isScheduledAction({ status: 'IN_PROGRESS', startTime: FUTURE })).toBe(true);
+  });
+
+  it('returns false when startTime is in the past', () => {
+    expect(isScheduledAction({ status: 'IN_PROGRESS', startTime: PAST })).toBe(false);
+  });
+
+  it('returns false when startTime is absent', () => {
+    expect(isScheduledAction({ status: 'IN_PROGRESS', startTime: undefined })).toBe(false);
+  });
+
+  it('returns false when status is not IN_PROGRESS even with a future startTime', () => {
+    expect(isScheduledAction({ status: 'CANCELLED', startTime: FUTURE })).toBe(false);
+    expect(isScheduledAction({ status: 'COMPLETE', startTime: FUTURE })).toBe(false);
   });
 });

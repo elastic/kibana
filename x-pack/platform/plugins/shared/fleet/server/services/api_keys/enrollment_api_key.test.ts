@@ -392,9 +392,7 @@ describe('enrollment api keys', () => {
 
       await expect(
         getEnrollmentAPIKey(esClient, 'test-enrollment-api-key-id', 'test')
-      ).rejects.toThrowError(
-        'Enrollment api key test-enrollment-api-key-id not found in namespace'
-      );
+      ).rejects.toThrow('Enrollment api key test-enrollment-api-key-id not found in namespace');
     });
   });
 });

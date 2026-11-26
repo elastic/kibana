@@ -25,11 +25,12 @@ import type {
   OpenTimelineResult,
   EnableExportTimelineDownloader,
   OnOpenDeleteTimelineModal,
+  OnRemoveTimelineFromCase,
 } from '../types';
 import { getActionsColumns } from './actions_columns';
 import { getCommonColumns } from './common_columns';
 import { getExtendedColumns } from './extended_columns';
-import { getIconHeaderColumns } from './icon_header_columns';
+import { getIconHeaderColumns, getSuperTimelineQueryTypeColumn } from './icon_header_columns';
 import {
   TimelineStatusEnum,
   type TimelineType,
@@ -54,6 +55,7 @@ export const getTimelinesTableColumns = ({
   onCreateRuleFromEql,
   onOpenDeleteTimelineModal,
   onOpenTimeline,
+  onRemoveFromCase,
   onToggleShowNotes,
   showExtendedColumns,
   timelineType,
@@ -67,6 +69,7 @@ export const getTimelinesTableColumns = ({
   onCreateRuleFromEql?: OnCreateRuleFromTimeline;
   onOpenDeleteTimelineModal?: OnOpenDeleteTimelineModal;
   onOpenTimeline: OnOpenTimeline;
+  onRemoveFromCase?: OnRemoveTimelineFromCase;
   onSelectionChange: OnSelectionChange;
   onToggleShowNotes: OnToggleShowNotes;
   showExtendedColumns: boolean;
@@ -82,7 +85,8 @@ export const getTimelinesTableColumns = ({
     }),
     ...getExtendedColumns(showExtendedColumns),
     ...getIconHeaderColumns({ timelineType }),
-    ...(actionTimelineToShow.length
+    ...(timelineType !== TimelineTypeEnum.template ? [getSuperTimelineQueryTypeColumn()] : []),
+    ...(actionTimelineToShow.some((a) => a !== 'selectable')
       ? getActionsColumns({
           onCreateRule,
           onCreateRuleFromEql,
@@ -91,6 +95,7 @@ export const getTimelinesTableColumns = ({
           enableExportTimelineDownloader,
           onOpenDeleteTimelineModal,
           onOpenTimeline,
+          onRemoveFromCase,
           hasCrudAccess,
         })
       : []),
@@ -108,6 +113,7 @@ export interface TimelinesTableProps {
   onCreateRuleFromEql?: OnCreateRuleFromTimeline;
   onOpenDeleteTimelineModal?: OnOpenDeleteTimelineModal;
   onOpenTimeline: OnOpenTimeline;
+  onRemoveFromCase?: OnRemoveTimelineFromCase;
   onSelectionChange: OnSelectionChange;
   onTableChange: OnTableChange;
   onToggleShowNotes: OnToggleShowNotes;
@@ -138,6 +144,7 @@ export const TimelinesTable = React.memo<TimelinesTableProps>(
     onCreateRuleFromEql,
     onOpenDeleteTimelineModal,
     onOpenTimeline,
+    onRemoveFromCase,
     onSelectionChange,
     onTableChange,
     onToggleShowNotes,
@@ -198,6 +205,7 @@ export const TimelinesTable = React.memo<TimelinesTableProps>(
           onCreateRuleFromEql,
           onOpenDeleteTimelineModal,
           onOpenTimeline,
+          onRemoveFromCase,
           onSelectionChange,
           onToggleShowNotes,
           showExtendedColumns,
@@ -213,6 +221,7 @@ export const TimelinesTable = React.memo<TimelinesTableProps>(
         onCreateRuleFromEql,
         onOpenDeleteTimelineModal,
         onOpenTimeline,
+        onRemoveFromCase,
         onSelectionChange,
         onToggleShowNotes,
         showExtendedColumns,

@@ -7,7 +7,10 @@ source .buildkite/scripts/steps/functional/common.sh
 CONFIG_PATHS=(
   "x-pack/solutions/security/plugins/security_solution/test/scout_cps_local/ui/playwright.config.ts"
   "x-pack/solutions/security/plugins/security_solution/test/scout_cps_local/api/playwright.config.ts"
-  "x-pack/solutions/security/plugins/entity_store/test/scout_cps_local/api/playwright.config.ts"
+  "x-pack/platform/plugins/shared/entity_store/test/scout_cps_local/api/playwright.config.ts"
+  "x-pack/platform/plugins/private/transform/test/scout_cps_local/api/playwright.config.ts"
+  "x-pack/platform/plugins/private/transform/test/scout_cps_local/ui/playwright.config.ts"
+  "x-pack/platform/plugins/shared/alerting/test/scout_cps_local/api/playwright.config.ts"
 )
 
 SPACES_CPS_CONFIG="x-pack/platform/plugins/shared/spaces/test/scout_cps_local/ui/playwright.config.ts"
@@ -26,7 +29,6 @@ run_cps_tests() {
 
   if ! node scripts/scout run-tests \
     --location local \
-    --serverConfigSet cps_local \
     --arch serverless \
     --domain "$domain" \
     --config "$config_path" \

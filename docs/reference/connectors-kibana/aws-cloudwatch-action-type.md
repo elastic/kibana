@@ -9,7 +9,11 @@ applies_to:
 
 # AWS CloudWatch connector [aws-cloudwatch-action-type]
 
-The AWS CloudWatch connector calls the [Amazon CloudWatch](https://docs.aws.amazon.com/AmazonCloudWatch/latest/APIReference/Welcome.html) and [Amazon CloudWatch Logs](https://docs.aws.amazon.com/AmazonCloudWatchLogs/latest/APIReference/Welcome.html) APIs so a workflow or agent can triage alerts: list and suppress noisy alarms, pull the metric data and dashboards behind an alert, and search or query the logs around an incident.
+The AWS CloudWatch connector calls the [Amazon CloudWatch](https://docs.aws.amazon.com/AmazonCloudWatch/latest/APIReference/Welcome.html) and [Amazon CloudWatch Logs](https://docs.aws.amazon.com/AmazonCloudWatchLogs/latest/APIReference/Welcome.html) APIs so an agent can triage alerts: list and suppress noisy alarms, pull the metric data and dashboards behind an alert, and search or query the logs around an incident.
+
+::::{note}
+This connector is currently available in **Agent Builder** only. Workflow support is planned for a future release. Actions marked _(not yet available)_ are not exposed to agents. Until workflow support is added, you can only run them through the [Run a connector](https://www.elastic.co/docs/api/doc/kibana/operation/operation-post-actions-connector-id-execute) API.
+::::
 
 ## Create connectors in {{kib}} [define-aws-cloudwatch-ui]
 
@@ -49,13 +53,13 @@ The AWS CloudWatch connector has the following actions:
 `disableAlarmActions`
 :   Suppress the notification and auto-scaling actions for one or more alarms (`alarmNames`) without deleting them — useful for silencing a known-noisy alarm during a deploy.
 
-`setAlarmState`
+`setAlarmState` _(not yet available)_
 :   Force an alarm (`alarmName`) into a specific state (`stateValue`, `stateReason`) for testing. The alarm typically returns to its real evaluated state within seconds, so this is not a way to permanently silence an alarm — use `disableAlarmActions` for that.
 
 `getAlarmHistory`
 :   Retrieve the state-transition, configuration, and action history for an alarm, or for all alarms if `alarmName` is omitted. Timestamps in the response are Unix epoch seconds.
 
-`putMetricAlarm`
+`putMetricAlarm` _(not yet available)_
 :   Create a new metric alarm, or completely overwrite an existing one with the same `alarmName`. Supports both a basic metric/threshold alarm and a metric-math-expression alarm (`metrics`).
 
 `listMetrics`

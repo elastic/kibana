@@ -598,7 +598,7 @@ export const EditDlmPhasesFlyout = ({
                         <EuiButton
                           {...buttonProps}
                           size="s"
-                          iconType="arrowDown"
+                          iconType="chevronSingleDown"
                           iconSide="right"
                           data-test-subj={`${dataTestSubj}DlmEmptyStateAddButton`}
                         >

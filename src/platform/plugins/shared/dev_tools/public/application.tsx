@@ -83,7 +83,7 @@ const useStyles = () => {
   return {
     ...staticStyles,
     tabs: css`
-      padding-left: ${euiTheme.size.s};
+      padding-left: ${euiTheme.size.base};
     `,
   };
 };
@@ -100,6 +100,7 @@ function DevToolsWrapper({
 }: DevToolsWrapperProps) {
   const styles = useStyles();
   const { docTitleService, breadcrumbService } = appServices;
+  const { docLinks } = startServices;
   const mountedTool = useRef<MountedDevToolDescriptor | null>(null);
   const chromeStyle = useObservable(chrome.getChromeStyle$(), chrome.getChromeStyle());
 
@@ -145,6 +146,7 @@ function DevToolsWrapper({
     () =>
       devTools.map((currentDevTool) => ({
         id: currentDevTool.id,
+        'data-test-subj': `${currentDevTool.id}Tab`,
         label: currentDevTool.title,
         isSelected: currentDevTool === activeDevTool,
         disabled: currentDevTool.isDisabled(),
@@ -168,6 +170,7 @@ function DevToolsWrapper({
           {devTools.map((currentDevTool) => (
             <EuiTab
               key={currentDevTool.id}
+              data-test-subj={`${currentDevTool.id}Tab`}
               disabled={currentDevTool.isDisabled()}
               isSelected={currentDevTool === activeDevTool}
               onClick={() => {
@@ -198,6 +201,7 @@ function DevToolsWrapper({
           })}
           tabs={headerTabs}
           badges={badges}
+          docLink={docLinks.links.console.guide}
         />
       )}
       <div

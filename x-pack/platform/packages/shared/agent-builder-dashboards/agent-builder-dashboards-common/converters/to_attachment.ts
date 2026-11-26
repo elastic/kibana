@@ -9,7 +9,8 @@ import type {
   DashboardPanel,
   DashboardSection,
   DashboardState,
-} from '@kbn/dashboard-plugin/server';
+} from '@kbn/as-code-dashboard-schema';
+import { v5 as uuidv5 } from 'uuid';
 import { LensConfigBuilder, type LensAttributes } from '@kbn/lens-embeddable-utils';
 import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
 import { VISUALIZE_EMBEDDABLE_TYPE } from '@kbn/visualizations-common';
@@ -40,32 +41,34 @@ export const isLensAttributesPanel = (
   );
 };
 
+const LEGACY_VEGA_PANEL_ID_NAMESPACE = '013a085a-2f4c-4afa-8ef8-4b43384e6ddf';
+
 /**
  * Converts a DashboardPanel to an AttachmentPanel.
  * For Lens panels with internal attributes format, converts to API format.
  */
 export const toAttachmentPanel = (panel: DashboardPanel): AttachmentPanel | undefined => {
-  // Normalize a by-value legacy-vis (`visualization`) Vega panel to the future
-  // native `vega` API shape (`config.spec`). Temporary bridge that pairs with the
-  // expansion in `from_attachment`; remove once the native vega API ships.
-  // Panel-level settings (title, description, hide_*, drilldowns, …) live beside
-  // `savedVis` and must be preserved — same pattern as Lens below.
+  // Read a by-value legacy-vis (`visualization`) Vega panel as a native `vega` panel,
+  // until the dashboard migrates these panels on read. The panel gets a new id because the
+  // dashboard keeps the mounted embeddable of a panel id when only its type changes. The id is
+  // derived from the legacy one, so reading the same dashboard again gives the same id.
   if (panel.type === VISUALIZE_EMBEDDABLE_TYPE) {
     const vega = extractVegaSpecFromSavedVis(panel.config);
     if (vega) {
-      const { savedVis: _savedVis, ...restConfig } = (panel.config ?? {}) as {
-        savedVis?: unknown;
-      } & Record<string, unknown>;
+      const {
+        savedVis: _savedVis,
+        title,
+        description,
+        ...restConfig
+      } = panel.config as Record<string, unknown>;
       return {
         type: VEGA_VIS_TYPE,
-        id: panel.id ?? '',
+        id: panel.id ? uuidv5(panel.id, LEGACY_VEGA_PANEL_ID_NAMESPACE) : '',
         config: {
           ...restConfig,
-          spec: vega.spec,
-          // Prefer panel-level title/description (manual edits); fall back to savedVis.
-          title: typeof restConfig.title === 'string' ? restConfig.title : vega.title,
-          description:
-            typeof restConfig.description === 'string' ? restConfig.description : vega.description,
+          title: typeof title === 'string' ? title : vega.title,
+          description: typeof description === 'string' ? description : vega.description,
+          spec: { format: 'hjson', value: vega.spec },
         },
         grid: panel.grid,
       };

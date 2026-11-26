@@ -56,7 +56,11 @@ export async function suggestPipelineLogic(input: SuggestPipelineInput): Promise
       })
       .pipe(
         map((event) => {
-          if (event.pipeline === null || event.pipeline.steps.length === 0) {
+          if (
+            event.pipeline === null ||
+            Array.isArray(event.pipeline) ||
+            event.pipeline.steps.length === 0
+          ) {
             throw new NoSuggestionsError(
               i18n.translate(
                 'xpack.streams.streamDetailView.managementTab.enrichment.noSuggestionsError',

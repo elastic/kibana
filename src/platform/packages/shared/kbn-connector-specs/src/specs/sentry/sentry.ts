@@ -65,6 +65,9 @@ const getOrgSlug = (ctx: ActionContext): string => {
   return encodeURIComponent(orgSlug);
 };
 
+const buildIssueUrl = (ctx: ActionContext, issueId: string): string =>
+  `${buildBaseUrl(ctx)}/organizations/${getOrgSlug(ctx)}/issues/${encodeURIComponent(issueId)}/`;
+
 function formatSentryError(action: string, error: unknown): Error {
   const err = error as AxiosError<{ detail?: string; error?: string }>;
   const detail = err.response?.data?.detail ?? err.response?.data?.error ?? err.message;
@@ -97,7 +100,7 @@ export const Sentry: ConnectorSpec = {
   metadata: {
     id: '.sentry',
     displayName: 'Sentry',
-    description: i18n.translate('core.kibanaConnectorSpecs.sentry.metadata.description', {
+    description: i18n.translate('connectorSpecs.sentry.metadata.description', {
       defaultMessage:
         'Triage Sentry issues: list, read, resolve, ignore, reopen, assign, and bulk-update error groups, provision issue alert rules, and correlate incidents to releases.',
     }),
@@ -115,16 +118,13 @@ export const Sentry: ConnectorSpec = {
         overrides: {
           meta: {
             token: {
-              label: i18n.translate('core.kibanaConnectorSpecs.sentry.auth.bearer.token.label', {
+              label: i18n.translate('connectorSpecs.sentry.auth.bearer.token.label', {
                 defaultMessage: 'Auth Token',
               }),
-              helpText: i18n.translate(
-                'core.kibanaConnectorSpecs.sentry.auth.bearer.token.helpText',
-                {
-                  defaultMessage:
-                    'A Sentry auth token with org:read, project:read, event:read, and event:write scopes (add alerts:write if you plan to provision issue alert rules, and event:admin if you plan to use deleteIssue). Create one as an internal integration (Settings > Developer Settings) or a personal auth token.',
-                }
-              ),
+              helpText: i18n.translate('connectorSpecs.sentry.auth.bearer.token.helpText', {
+                defaultMessage:
+                  'A Sentry auth token with org:read, project:read, event:read, and event:write scopes (add alerts:write if you plan to provision issue alert rules, and event:admin if you plan to use deleteIssue). Create one as an internal integration (Settings > Developer Settings) or a personal auth token.',
+              }),
             },
           },
         },
@@ -141,26 +141,23 @@ export const Sentry: ConnectorSpec = {
         .describe('Your Sentry organization slug')
         .meta({
           widget: 'text',
-          label: i18n.translate('core.kibanaConnectorSpecs.sentry.config.organizationSlug.label', {
+          label: i18n.translate('connectorSpecs.sentry.config.organizationSlug.label', {
             defaultMessage: 'Organization slug',
           }),
           placeholder: 'my-org',
-          helpText: i18n.translate(
-            'core.kibanaConnectorSpecs.sentry.config.organizationSlug.helpText',
-            {
-              defaultMessage:
-                'The slug of your Sentry organization, found in the URL: sentry.io/organizations/your-slug/',
-            }
-          ),
+          helpText: i18n.translate('connectorSpecs.sentry.config.organizationSlug.helpText', {
+            defaultMessage:
+              'The slug of your Sentry organization, found in the URL: sentry.io/organizations/your-slug/',
+          }),
         }),
       baseUrl: UISchemas.url('https://sentry.io/api/0')
         .optional()
         .describe('Sentry API base URL')
         .meta({
-          label: i18n.translate('core.kibanaConnectorSpecs.sentry.config.baseUrl.label', {
+          label: i18n.translate('connectorSpecs.sentry.config.baseUrl.label', {
             defaultMessage: 'API base URL',
           }),
-          helpText: i18n.translate('core.kibanaConnectorSpecs.sentry.config.baseUrl.helpText', {
+          helpText: i18n.translate('connectorSpecs.sentry.config.baseUrl.helpText', {
             defaultMessage:
               'Leave empty to use Sentry SaaS (https://sentry.io/api/0). If your organization uses a region-specific data storage location, use its regional domain instead, e.g. https://us.sentry.io/api/0 or https://de.sentry.io/api/0. Set this for a self-hosted Sentry instance, e.g. https://sentry.example.com/api/0.',
           }),
@@ -175,6 +172,7 @@ export const Sentry: ConnectorSpec = {
   actions: {
     listIssues: {
       isTool: true,
+      scope: 'read',
       description:
         'List Sentry issues for the organization (optionally scoped to a project), filtered by search query, environment, or time window. The primary read path for building a triage feed. Defaults to "is:unresolved" when no query is given.',
       input: SentryListIssuesInputSchema,
@@ -205,14 +203,13 @@ export const Sentry: ConnectorSpec = {
 
     getIssue: {
       isTool: true,
+      scope: 'read',
       description:
         'Get the full record for a single Sentry issue by ID: status, culprit, event/user counts, first/last seen, and assignee. Use to enrich an alert with error detail before deciding on an action.',
       input: SentryGetIssueInputSchema,
       handler: async (ctx, input: SentryGetIssueInput) => {
         try {
-          const response = await ctx.client.get<SentryIssue>(
-            `${buildBaseUrl(ctx)}/issues/${encodeURIComponent(input.issueId)}/`
-          );
+          const response = await ctx.client.get<SentryIssue>(buildIssueUrl(ctx, input.issueId));
           return projectIssue(response.data);
         } catch (error) {
           throw formatSentryError('getIssue', error);
@@ -222,6 +219,7 @@ export const Sentry: ConnectorSpec = {
 
     resolveIssue: {
       isTool: true,
+      scope: 'destroy',
       description:
         'Resolve a Sentry issue, the closing step of an incident workflow. Set inNextRelease to resolve conditionally on the next deploy instead of immediately.',
       input: SentryResolveIssueInputSchema,
@@ -231,7 +229,7 @@ export const Sentry: ConnectorSpec = {
           : { status: 'resolved' };
         try {
           const response = await ctx.client.put<SentryIssue>(
-            `${buildBaseUrl(ctx)}/issues/${encodeURIComponent(input.issueId)}/`,
+            buildIssueUrl(ctx, input.issueId),
             body
           );
           return projectIssue(response.data);
@@ -243,6 +241,7 @@ export const Sentry: ConnectorSpec = {
 
     ignoreIssue: {
       isTool: true,
+      scope: 'destroy',
       description:
         'Ignore (archive) a noisy Sentry issue so it drops out of the default review list. Pass ignoreDuration (minutes) to auto-unignore later, or omit to ignore indefinitely.',
       input: SentryIgnoreIssueInputSchema,
@@ -253,7 +252,7 @@ export const Sentry: ConnectorSpec = {
         }
         try {
           const response = await ctx.client.put<SentryIssue>(
-            `${buildBaseUrl(ctx)}/issues/${encodeURIComponent(input.issueId)}/`,
+            buildIssueUrl(ctx, input.issueId),
             body
           );
           return projectIssue(response.data);
@@ -265,15 +264,15 @@ export const Sentry: ConnectorSpec = {
 
     unresolveIssue: {
       isTool: true,
+      scope: 'destroy',
       description:
         'Move a Sentry issue back to unresolved. Use to re-escalate an issue on regression or a new event.',
       input: SentryUnresolveIssueInputSchema,
       handler: async (ctx, input: SentryUnresolveIssueInput) => {
         try {
-          const response = await ctx.client.put<SentryIssue>(
-            `${buildBaseUrl(ctx)}/issues/${encodeURIComponent(input.issueId)}/`,
-            { status: 'unresolved' }
-          );
+          const response = await ctx.client.put<SentryIssue>(buildIssueUrl(ctx, input.issueId), {
+            status: 'unresolved',
+          });
           return projectIssue(response.data);
         } catch (error) {
           throw formatSentryError('unresolveIssue', error);
@@ -283,15 +282,15 @@ export const Sentry: ConnectorSpec = {
 
     assignIssue: {
       isTool: true,
+      scope: 'destroy',
       description:
         'Assign a Sentry issue to a user (by primary email or "user:<user-id>") or a team (using "team:<team-slug>"), so automated routing puts the error group in front of the right owner.',
       input: SentryAssignIssueInputSchema,
       handler: async (ctx, input: SentryAssignIssueInput) => {
         try {
-          const response = await ctx.client.put<SentryIssue>(
-            `${buildBaseUrl(ctx)}/issues/${encodeURIComponent(input.issueId)}/`,
-            { assignedTo: input.assignedTo }
-          );
+          const response = await ctx.client.put<SentryIssue>(buildIssueUrl(ctx, input.issueId), {
+            assignedTo: input.assignedTo,
+          });
           return projectIssue(response.data);
         } catch (error) {
           throw formatSentryError('assignIssue', error);
@@ -301,6 +300,7 @@ export const Sentry: ConnectorSpec = {
 
     listIssueEvents: {
       isTool: true,
+      scope: 'read',
       description:
         'List the events recorded under a Sentry issue, newest first. Use to inspect recurrence before deciding whether to resolve, ignore, or escalate. Pass cursor from a previous response to page further back.',
       input: SentryListIssueEventsInputSchema,
@@ -309,10 +309,9 @@ export const Sentry: ConnectorSpec = {
         if (input.cursor) params.cursor = input.cursor;
         if (input.full !== undefined) params.full = input.full;
         try {
-          const response = await ctx.client.get(
-            `${buildBaseUrl(ctx)}/issues/${encodeURIComponent(input.issueId)}/events/`,
-            { params }
-          );
+          const response = await ctx.client.get(`${buildIssueUrl(ctx, input.issueId)}events/`, {
+            params,
+          });
           return { events: response.data };
         } catch (error) {
           throw formatSentryError('listIssueEvents', error);
@@ -322,6 +321,7 @@ export const Sentry: ConnectorSpec = {
 
     getEvent: {
       isTool: true,
+      scope: 'read',
       description:
         'Get one Sentry event by project and event ID, including its stack trace, tags, and context. Use after listIssueEvents to inspect a specific occurrence in detail.',
       input: SentryGetEventInputSchema,
@@ -342,6 +342,7 @@ export const Sentry: ConnectorSpec = {
 
     bulkUpdateIssues: {
       isTool: true,
+      scope: 'destroy',
       description:
         'Update the status and/or assignee of multiple Sentry issues in one call, so a cleanup workflow does not fan out one request per issue.',
       input: SentryBulkUpdateIssuesInputSchema,
@@ -371,14 +372,13 @@ export const Sentry: ConnectorSpec = {
 
     deleteIssue: {
       isTool: false,
+      scope: 'destroy',
       description:
         'Permanently delete a Sentry issue confirmed as noise or a duplicate. This is irreversible.',
       input: SentryDeleteIssueInputSchema,
       handler: async (ctx, input: SentryDeleteIssueInput) => {
         try {
-          await ctx.client.delete(
-            `${buildBaseUrl(ctx)}/issues/${encodeURIComponent(input.issueId)}/`
-          );
+          await ctx.client.delete(buildIssueUrl(ctx, input.issueId));
           return { deleted: true, issueId: input.issueId };
         } catch (error) {
           throw formatSentryError('deleteIssue', error);
@@ -388,6 +388,7 @@ export const Sentry: ConnectorSpec = {
 
     listProjects: {
       isTool: true,
+      scope: 'read',
       description:
         "List the organization's Sentry projects, so a workflow can resolve a project slug before scoping another action.",
       input: SentryListProjectsInputSchema,
@@ -417,6 +418,7 @@ export const Sentry: ConnectorSpec = {
 
     listIssueAlertRules: {
       isTool: true,
+      scope: 'read',
       description:
         'List the issue alert rules configured on a Sentry project, so an onboarding workflow can audit existing monitor coverage.',
       input: SentryListIssueAlertRulesInputSchema,
@@ -438,6 +440,7 @@ export const Sentry: ConnectorSpec = {
 
     createIssueAlertRule: {
       isTool: true,
+      scope: 'write',
       description:
         "Create a new issue alert rule on a Sentry project, so an onboarding workflow can provision monitor coverage for a new service. Conditions/actions use Sentry's rule id catalog (see the Sentry issue alert rule docs).",
       input: SentryCreateIssueAlertRuleInputSchema,
@@ -463,6 +466,7 @@ export const Sentry: ConnectorSpec = {
 
     updateIssueAlertRule: {
       isTool: true,
+      scope: 'destroy',
       description:
         'Update an existing Sentry issue alert rule (name, conditions, actions, or frequency) so an audit workflow can adjust thresholds on provisioned monitor coverage.',
       input: SentryUpdateIssueAlertRuleInputSchema,
@@ -513,7 +517,7 @@ export const Sentry: ConnectorSpec = {
 
   test: {
     enabled: true,
-    description: i18n.translate('core.kibanaConnectorSpecs.sentry.test.description', {
+    description: i18n.translate('connectorSpecs.sentry.test.description', {
       defaultMessage: 'Verifies the Sentry connection by listing organization projects',
     }),
     handler: async (ctx) => {
@@ -523,7 +527,6 @@ export const Sentry: ConnectorSpec = {
           `${buildBaseUrl(ctx)}/organizations/${orgSlug}/projects/`
         );
         return {
-          ok: true,
           message: `Successfully connected to Sentry organization "${orgSlug}" (${response.data.length} project(s) visible).`,
         };
       } catch (error) {

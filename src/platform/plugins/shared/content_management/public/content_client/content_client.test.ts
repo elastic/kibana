@@ -32,14 +32,14 @@ describe('#get', () => {
     const output = { test: 'test' };
     crudClient.get.mockResolvedValueOnce(output);
     expect(await contentClient.get(input)).toEqual(output);
-    expect(crudClient.get).toBeCalledWith({ ...input, version: 3 }); // latest version added
+    expect(crudClient.get).toHaveBeenCalledWith({ ...input, version: 3 }); // latest version added
   });
 
   it('does not add the latest version if one is passed', async () => {
     const { crudClient, contentClient } = setup();
     const input: GetIn = { id: 'test', contentTypeId: 'testType', version: 1 };
     await contentClient.get(input);
-    expect(crudClient.get).toBeCalledWith(input);
+    expect(crudClient.get).toHaveBeenCalledWith(input);
   });
 
   it('throws if version is not valid', async () => {
@@ -47,13 +47,13 @@ describe('#get', () => {
     let input = { id: 'test', contentTypeId: 'testType', version: 'foo' }; // Invalid format
     await expect(async () => {
       contentClient.get(input as any);
-    }).rejects.toThrowError('Invalid version [foo]. Must be an integer.');
+    }).rejects.toThrow('Invalid version [foo]. Must be an integer.');
 
     // @ts-expect-error
     input = { id: 'test', contentTypeId: 'testType', version: 4 }; // Latest version is 3
     await expect(async () => {
       contentClient.get(input as any);
-    }).rejects.toThrowError('Invalid version [4]. Latest version is [3]');
+    }).rejects.toThrow('Invalid version [4]. Latest version is [3]');
   });
 
   it('calls rpcClient.get$ with input and returns output', async () => {
@@ -86,14 +86,14 @@ describe('#create', () => {
     crudClient.create.mockResolvedValueOnce(output);
 
     expect(await contentClient.create(input)).toEqual(output);
-    expect(crudClient.create).toBeCalledWith({ ...input, version: 3 }); // latest version added
+    expect(crudClient.create).toHaveBeenCalledWith({ ...input, version: 3 }); // latest version added
   });
 
   it('does not add the latest version if one is passed', async () => {
     const { crudClient, contentClient } = setup();
     const input: CreateIn = { contentTypeId: 'testType', data: { foo: 'bar' }, version: 1 };
     await contentClient.create(input);
-    expect(crudClient.create).toBeCalledWith(input);
+    expect(crudClient.create).toHaveBeenCalledWith(input);
   });
 });
 
@@ -109,7 +109,7 @@ describe('#update', () => {
     crudClient.update.mockResolvedValueOnce(output);
 
     expect(await contentClient.update(input)).toEqual(output);
-    expect(crudClient.update).toBeCalledWith({ ...input, version: 3 }); // latest version added
+    expect(crudClient.update).toHaveBeenCalledWith({ ...input, version: 3 }); // latest version added
   });
 
   it('does not add the latest version if one is passed', async () => {
@@ -122,7 +122,7 @@ describe('#update', () => {
       version: 1,
     };
     await contentClient.update(input);
-    expect(crudClient.update).toBeCalledWith(input);
+    expect(crudClient.update).toHaveBeenCalledWith(input);
   });
 });
 
@@ -134,14 +134,14 @@ describe('#delete', () => {
     crudClient.delete.mockResolvedValueOnce(output);
 
     expect(await contentClient.delete(input)).toEqual(output);
-    expect(crudClient.delete).toBeCalledWith({ ...input, version: 3 }); // latest version added
+    expect(crudClient.delete).toHaveBeenCalledWith({ ...input, version: 3 }); // latest version added
   });
 
   it('does not add the latest version if one is passed', async () => {
     const { crudClient, contentClient } = setup();
     const input: DeleteIn = { contentTypeId: 'testType', id: 'test', version: 1 };
     await contentClient.delete(input);
-    expect(crudClient.delete).toBeCalledWith(input);
+    expect(crudClient.delete).toHaveBeenCalledWith(input);
   });
 });
 
@@ -152,14 +152,14 @@ describe('#search', () => {
     const output = { hits: [{ id: 'test' }] };
     crudClient.search.mockResolvedValueOnce(output);
     expect(await contentClient.search(input)).toEqual(output);
-    expect(crudClient.search).toBeCalledWith({ ...input, version: 3 }); // latest version added
+    expect(crudClient.search).toHaveBeenCalledWith({ ...input, version: 3 }); // latest version added
   });
 
   it('does not add the latest version if one is passed', async () => {
     const { crudClient, contentClient } = setup();
     const input: SearchIn = { contentTypeId: 'testType', query: {}, version: 1 };
     await contentClient.search(input);
-    expect(crudClient.search).toBeCalledWith(input);
+    expect(crudClient.search).toHaveBeenCalledWith(input);
   });
 
   it('calls rpcClient.search$ with input and returns output', async () => {
@@ -192,7 +192,7 @@ describe('#mSearch', () => {
     // @ts-ignore
     crudClient.mSearch.mockResolvedValueOnce(output);
     expect(await contentClient.mSearch(input)).toEqual(output);
-    expect(crudClient.mSearch).toBeCalledWith({
+    expect(crudClient.mSearch).toHaveBeenCalledWith({
       contentTypes: [{ contentTypeId: 'testType', version: 3 }], // latest version added
       query: {},
     });

@@ -17,14 +17,15 @@ export {
   type TabStateGlobalState,
   type RecentlyClosedTabState,
   type DiscoverAppState,
+  type ExpandedDocCascadePath,
   type InternalStateDataRequestParams,
   type CascadedDocumentsState,
-  type DefaultProfileStateField,
-  type DefaultProfileStateFields,
-  type DefaultProfileState,
-  type ProfileStateSnapshot,
+  type ProfileAppStateDefaultField,
+  type ProfileAppStateDefaultFields,
+  type ProfileAppStateDefaults,
+  type ProfileAppStateSnapshot,
   type UpdateESQLQueryActionPayload,
-  DEFAULT_PROFILE_STATE_FIELDS,
+  PROFILE_APP_STATE_DEFAULT_FIELDS,
   TabInitializationStatus,
   TabsBarVisibility,
 } from './types';
@@ -42,11 +43,13 @@ export const internalStateActions = {
   ...omit(
     internalStateSlice.actions,
     'setTabs',
+    'setPersistedDiscoverSession',
     'disconnectTab',
     'setDefaultProfileAdHocDataViewIds',
     'setAppState',
     'setProfileState',
-    'syncProfileStateSnapshot'
+    'syncProfileAppStateSnapshot',
+    'setExpandedDoc'
   ),
   ...actions,
   syncLocallyPersistedTabState,
@@ -78,7 +81,7 @@ export {
   selectHasUnsavedChanges,
   searchSourceComparator,
   selectTabSavedSearch,
-  selectTabSavedSearchByValueAttributes,
+  selectTabEmbeddableTab,
 } from './selectors';
 
 export {
@@ -90,10 +93,13 @@ export {
   createRuntimeStateManager,
   useRuntimeState,
   selectTabRuntimeState,
+  setTabChartBreakdownFieldNames,
   selectDataSourceProfileId,
   selectCurrentProfileStateDefinition,
   selectCurrentProfileUrlState,
   selectCurrentProfileLocatorState,
+  selectCurrentTabType,
+  selectTabTypeForPersistence,
   selectIsDataViewUsedInMultipleRuntimeTabStates,
   selectInitialUnifiedHistogramLayoutPropsMap,
   useCurrentTabRuntimeState,
@@ -101,7 +107,12 @@ export {
   RuntimeStateProvider,
   RuntimeStateManagerProvider,
   useRuntimeStateManager,
+  getDataViewIdOfSource,
+  pinDataViewOfSource,
+  getDataViewOfSource,
+  getTabDataView,
   useCurrentDataView,
+  useCurrentDataSource,
   useAdHocDataViews,
 } from './runtime_state';
 

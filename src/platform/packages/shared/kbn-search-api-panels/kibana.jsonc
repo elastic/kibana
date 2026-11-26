@@ -2,7 +2,7 @@
   "type": "shared-browser",
   "id": "@kbn/search-api-panels",
   "owner": [
-    "@elastic/search-kibana"
+    "@elastic/search-ml-ux"
   ],
   // FIXME? @kbn/index-management-plugin depends on it
   "group": "platform",

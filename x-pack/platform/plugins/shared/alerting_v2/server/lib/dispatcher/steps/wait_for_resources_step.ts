@@ -6,31 +6,35 @@
  */
 
 import { inject, injectable } from 'inversify';
-import {
-  LoggerServiceToken,
-  type LoggerServiceContract,
-} from '../../services/logger_service/logger_service';
+import type { LoggerServiceContract } from '../../services/logger_service/logger_service';
 import {
   ResourceManager,
   type ResourceManagerContract,
 } from '../../services/resource_service/resource_manager';
+import { ALERT_ACTIONS_RESOURCE_KEY } from '../../../resources/datastreams/alert_actions';
+import { ALERT_EVENTS_RESOURCE_KEY } from '../../../resources/datastreams/alert_events';
 import type { DispatcherPipelineState, DispatcherStep, DispatcherStepOutput } from '../types';
+
+export const DISPATCHER_RESOURCE_KEYS = [
+  ALERT_EVENTS_RESOURCE_KEY,
+  ALERT_ACTIONS_RESOURCE_KEY,
+] as const;
 
 @injectable()
 export class WaitForResourcesStep implements DispatcherStep {
   public readonly name = 'wait_for_resources';
 
-  constructor(
-    @inject(LoggerServiceToken) private readonly logger: LoggerServiceContract,
-    @inject(ResourceManager) private readonly resourceManager: ResourceManagerContract
-  ) {}
+  constructor(@inject(ResourceManager) private readonly resourceManager: ResourceManagerContract) {}
 
-  public async execute(_state: Readonly<DispatcherPipelineState>): Promise<DispatcherStepOutput> {
-    this.logger.debug({ message: `[${this.name}] Waiting for resources to be ready` });
+  public async execute(
+    _: Readonly<DispatcherPipelineState>,
+    logger: LoggerServiceContract
+  ): Promise<DispatcherStepOutput> {
+    logger.debug({ message: 'Waiting for resources to be ready' });
 
-    await this.resourceManager.waitUntilReady();
+    await this.resourceManager.waitForResources(DISPATCHER_RESOURCE_KEYS);
 
-    this.logger.debug({ message: `[${this.name}] Resources ready` });
+    logger.debug({ message: 'Resources ready' });
 
     return { type: 'continue' };
   }

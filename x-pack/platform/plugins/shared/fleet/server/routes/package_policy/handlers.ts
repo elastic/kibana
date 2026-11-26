@@ -13,6 +13,10 @@ import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { groupBy, isEmpty, isEqual, keyBy, uniq } from 'lodash';
 
 import { populatePackagePolicyAssignedAgentsCount } from '../../services/package_policies/populate_package_policy_assigned_agents_count';
+import {
+  assertOnboardingAccess,
+  assertOnboardingAccessByIds,
+} from '../../services/package_policies/onboarding_access';
 
 import {
   agentPolicyService,
@@ -39,6 +43,7 @@ import type {
   PostDeletePackagePoliciesResponse,
   UpgradePackagePolicyDryRunResponse,
   UpgradePackagePolicyResponse,
+  UpgradePackagePolicyResponseItem,
 } from '../../../common/types';
 import { isOnlyAgentlessIntegration } from '../../../common/services/agentless_policy_helper';
 import { logLegacyAgentlessWriteDeprecation } from '../../services/utils/agentless';
@@ -50,6 +55,7 @@ import {
   PackagePolicyRequestError,
 } from '../../errors';
 import {
+  assertPackagePoliciesUpgradeAcknowledged,
   getInstallation,
   getInstallations,
   getPackageInfo,
@@ -62,6 +68,11 @@ import {
   simplifiedPackagePolicytoNewPackagePolicy,
 } from '../../../common/services/simplified_package_policy_helper';
 import { runWithCache } from '../../services/epm/packages/cache';
+import {
+  getAgentVersionBlockMessage,
+  redactAgentVersionBlock,
+  redactAgentVersionIncompatibleError,
+} from '../../services/package_policies/agent_version_guard';
 
 import {
   alignInputsAndStreams,
@@ -232,7 +243,14 @@ export const createPackagePolicyHandler: FleetRequestHandler<
   const soClient = fleetContext.internalSoClient;
   const esClient = coreContext.elasticsearch.client.asInternalUser;
 
-  const { force, id, package: pkg, create_dataset_templates, ...newPolicy } = request.body;
+  const {
+    force,
+    id,
+    package: pkg,
+    create_dataset_templates,
+    acknowledge_agent_version_incompatibility: acknowledgeAgentVersionIncompatibility,
+    ...newPolicy
+  } = request.body;
   if ('spaceIds' in newPolicy) {
     delete newPolicy.spaceIds;
   }
@@ -328,6 +346,7 @@ export const createPackagePolicyHandler: FleetRequestHandler<
         force,
         spaceId,
         createDatasetTemplates: create_dataset_templates,
+        acknowledgeAgentVersionIncompatibility,
       },
       context,
       request
@@ -392,7 +411,7 @@ export const createPackagePolicyHandler: FleetRequestHandler<
         body: { message: error.message },
       });
     }
-    throw error;
+    throw fleetContext.authz.fleet.readAgents ? error : redactAgentVersionIncompatibleError(error);
   }
 };
 
@@ -412,6 +431,8 @@ export const updatePackagePolicyHandler: FleetRequestHandler<
   if (!packagePolicy) {
     throw new PackagePolicyNotFoundError('Package policy not found');
   }
+
+  assertOnboardingAccess([packagePolicy], request.query.onboarding_deployment_id);
 
   if (limitedToPackages && limitedToPackages.length) {
     // Enforce the package scope against both the existing package policy and the
@@ -470,7 +491,12 @@ export const updatePackagePolicyHandler: FleetRequestHandler<
 
   try {
     // simplified request
-    const { force, package: pkg, ...body } = request.body;
+    const {
+      force,
+      package: pkg,
+      acknowledge_agent_version_incompatibility: acknowledgeAgentVersionIncompatibility,
+      ...body
+    } = request.body;
     let newData: NewPackagePolicy;
 
     if (
@@ -564,8 +590,8 @@ export const updatePackagePolicyHandler: FleetRequestHandler<
       esClient,
       request.params.packagePolicyId,
       newData,
-      { user, force },
-      packagePolicy.package?.version
+      { user, force, acknowledgeAgentVersionIncompatibility },
+      context
     );
     return response.ok({
       body: {
@@ -582,13 +608,13 @@ export const updatePackagePolicyHandler: FleetRequestHandler<
         body: { message: error.message },
       });
     }
-    throw error;
+    throw fleetContext.authz.fleet.readAgents ? error : redactAgentVersionIncompatibleError(error);
   }
 };
 
 export const deletePackagePolicyHandler: RequestHandler<
   unknown,
-  unknown,
+  TypeOf<typeof DeletePackagePoliciesRequestSchema.query>,
   TypeOf<typeof DeletePackagePoliciesRequestSchema.body>
 > = async (context, request, response) => {
   const coreContext = await context.core;
@@ -596,6 +622,12 @@ export const deletePackagePolicyHandler: RequestHandler<
   const esClient = coreContext.elasticsearch.client.asInternalUser;
   const user = appContextService.getSecurityCore().authc.getCurrentUser(request) || undefined;
   const packagePolicyIds = deduplicateIds(request.body.packagePolicyIds);
+
+  await assertOnboardingAccessByIds(
+    soClient,
+    packagePolicyIds,
+    request.query.onboarding_deployment_id
+  );
 
   const body: PostDeletePackagePoliciesResponse = await packagePolicyService.delete(
     soClient,
@@ -620,6 +652,12 @@ export const deleteOnePackagePolicyHandler: RequestHandler<
   const soClient = coreContext.savedObjects.client;
   const esClient = coreContext.elasticsearch.client.asInternalUser;
   const user = appContextService.getSecurityCore().authc.getCurrentUser(request) || undefined;
+
+  await assertOnboardingAccessByIds(
+    soClient,
+    [request.params.packagePolicyId],
+    request.query.onboarding_deployment_id
+  );
 
   const res = await packagePolicyService.delete(
     soClient,
@@ -682,7 +720,25 @@ const throwIfTargetsAgentlessPolicies = async (
   }
 };
 
-export const upgradePackagePolicyHandler: RequestHandler<
+const redactAgentVersionBlockOfResult = (
+  result: UpgradePackagePolicyResponseItem
+): UpgradePackagePolicyResponseItem => {
+  const agentVersionBlock = result.body?.attributes?.agent_version_block;
+  if (!result.body || !agentVersionBlock) {
+    return result;
+  }
+  const redactedBlock = redactAgentVersionBlock(agentVersionBlock);
+  return {
+    ...result,
+    body: {
+      ...result.body,
+      message: getAgentVersionBlockMessage(redactedBlock, 'upgrade'),
+      attributes: { ...result.body.attributes, agent_version_block: redactedBlock },
+    },
+  };
+};
+
+export const upgradePackagePolicyHandler: FleetRequestHandler<
   unknown,
   unknown,
   TypeOf<typeof UpgradePackagePoliciesRequestSchema.body>
@@ -695,14 +751,37 @@ export const upgradePackagePolicyHandler: RequestHandler<
 
   await throwIfTargetsAgentlessPolicies(soClient, packagePolicyIds);
 
-  const body: UpgradePackagePolicyResponse = await packagePolicyService.bulkUpgrade(
+  if (!request.body.acknowledge_breaking_changes) {
+    // Reject the whole request before upgrading anything, so a rejected request leaves all the
+    // package policies unchanged.
+    const packagePolicies =
+      (await packagePolicyService.getByIDs(soClient, packagePolicyIds, { ignoreMissing: true })) ??
+      [];
+    await assertPackagePoliciesUpgradeAcknowledged(packagePolicies);
+  }
+
+  const results: UpgradePackagePolicyResponse = await packagePolicyService.bulkUpgrade(
     soClient,
     esClient,
     packagePolicyIds,
-    { user }
+    {
+      user,
+      acknowledgeAgentVersionIncompatibility:
+        request.body.acknowledge_agent_version_incompatibility,
+    }
   );
+  // The agent inventory is fetched as the internal user: only return it to users who can read agents.
+  const { authz } = await context.fleet;
+  const body = authz.fleet.readAgents ? results : results.map(redactAgentVersionBlockOfResult);
 
-  const firstFatalError = body.find((item) => item.statusCode && item.statusCode !== 200);
+  // When some package policies were upgraded and the others were only blocked by the agent version
+  // guard, the per-item results are returned as a 200, so that the blocked package policies don't
+  // hide the upgraded ones. Otherwise, the first failure that acknowledging the incompatibility
+  // wouldn't resolve is returned, falling back to the first agent version block.
+  const failures = body.filter((item) => item.statusCode && item.statusCode !== 200);
+  const otherFailure = failures.find((item) => !item.body?.attributes?.agent_version_block);
+  const isPartialAgentVersionBlock = body.some((item) => item.success) && !otherFailure;
+  const firstFatalError = isPartialAgentVersionBlock ? undefined : otherFailure ?? failures[0];
 
   if (firstFatalError) {
     return response.customError({
@@ -715,24 +794,33 @@ export const upgradePackagePolicyHandler: RequestHandler<
   });
 };
 
-export const dryRunUpgradePackagePolicyHandler: RequestHandler<
+export const dryRunUpgradePackagePolicyHandler: FleetRequestHandler<
   unknown,
   unknown,
   TypeOf<typeof DryRunPackagePoliciesRequestSchema.body>
 > = async (context, request, response) => {
   const soClient = (await context.core).savedObjects.client;
+  const { authz } = await context.fleet;
 
-  const body: UpgradePackagePolicyDryRunResponse = [];
   const packagePolicyIds = deduplicateIds(request.body.packagePolicyIds);
 
   await throwIfTargetsAgentlessPolicies(soClient, packagePolicyIds);
 
-  await runWithCache(async () => {
-    for (const id of packagePolicyIds) {
-      const result = await packagePolicyService.getUpgradeDryRunDiff(soClient, id);
-      body.push(result);
-    }
-  });
+  const results = await runWithCache(() =>
+    packagePolicyService.getUpgradeDryRunDiffs(
+      soClient,
+      packagePolicyIds,
+      request.body.packageVersion
+    )
+  );
+  // The agent inventory is fetched as the internal user: only return it to users who can read agents.
+  const body: UpgradePackagePolicyDryRunResponse = authz.fleet.readAgents
+    ? results
+    : results.map((result) =>
+        result.agent_version_block
+          ? { ...result, agent_version_block: redactAgentVersionBlock(result.agent_version_block) }
+          : result
+      );
 
   const firstFatalError = body.find((item) => item.statusCode && item.statusCode !== 200);
 

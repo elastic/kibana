@@ -42,7 +42,7 @@ import type {
   TableListViewTableProps,
 } from '../table_list_view_table';
 import type { TableItemsRowActions } from '../types';
-import { TableSortSelect } from './table_sort_select';
+import { SortSelectContextProvider, SortSelectFilter } from './table_sort_select';
 import { TagFilterPanel, TagFilterContextProvider } from './tag_filter_panel';
 import { useTagFilterPanel } from './use_tag_filter_panel';
 import type { Params as UseTagFilterPanelParams } from './use_tag_filter_panel';
@@ -130,6 +130,7 @@ export function Table<T extends UserContentCommonSchema>({
       <EuiButton
         color="danger"
         iconType="trash"
+        size="s"
         onClick={() => dispatch({ type: 'showConfirmDeleteItemsModal' })}
         data-test-subj="deleteSelectedItems"
       >
@@ -198,28 +199,13 @@ export function Table<T extends UserContentCommonSchema>({
     addOrRemoveIncludeTagFilter,
   });
 
-  const tableSortSelectFilter = useMemo<SearchFilterConfig>(() => {
-    return {
+  const sortSelectFilter = useMemo<SearchFilterConfig>(
+    () => ({
       type: 'custom_component',
-      component: () => {
-        return (
-          <TableSortSelect
-            tableSort={tableSort}
-            hasUpdatedAtMetadata={hasUpdatedAtMetadata}
-            hasRecentlyAccessedMetadata={hasRecentlyAccessedMetadata}
-            customSortingOptions={customSortingOptions}
-            onChange={onSortChange}
-          />
-        );
-      },
-    };
-  }, [
-    hasUpdatedAtMetadata,
-    onSortChange,
-    tableSort,
-    hasRecentlyAccessedMetadata,
-    customSortingOptions,
-  ]);
+      component: SortSelectFilter,
+    }),
+    []
+  );
 
   const tagFilterPanel = useMemo<SearchFilterConfig | null>(() => {
     if (!isTaggingEnabled()) return null;
@@ -258,15 +244,16 @@ export function Table<T extends UserContentCommonSchema>({
   }, [favoritesEnabled, tableFilter.favorites, onFilterChange]);
 
   const searchFilters = useMemo(() => {
-    return [tableSortSelectFilter, tagFilterPanel, userFilterPanel, favoritesFilterButton].filter(
+    return [sortSelectFilter, tagFilterPanel, userFilterPanel, favoritesFilterButton].filter(
       (f: SearchFilterConfig | null): f is SearchFilterConfig => Boolean(f)
     );
-  }, [tableSortSelectFilter, tagFilterPanel, userFilterPanel, favoritesFilterButton]);
+  }, [sortSelectFilter, tagFilterPanel, userFilterPanel, favoritesFilterButton]);
 
   const search = useMemo((): Search => {
     const showHint = !!searchQuery.error && searchQuery.error.containsForbiddenChars;
     return {
       onChange: onTableSearchChange,
+      compressed: true,
       toolsLeft: renderToolsLeft(),
       toolsRight: renderCreateButton(),
       query: searchQuery.query ?? undefined,
@@ -383,27 +370,35 @@ export function Table<T extends UserContentCommonSchema>({
         totalActiveFilters={totalActiveFilters}
         clearTagSelection={clearTagSelection}
       >
-        <EuiLiveAnnouncer>{selectionAnnouncement}</EuiLiveAnnouncer>
-        <EuiInMemoryTable<T>
-          itemId="id"
-          items={visibleItems}
-          columns={tableColumns}
-          pagination={pagination}
-          loading={isFetchingItems}
-          noItemsMessage={isFetchingItems ? '' : noItemsMessage}
-          selection={selection}
-          search={search}
-          executeQueryOptions={{ enabled: false }}
-          sorting={sorting}
-          onChange={onTableChange}
-          data-test-subj={isFetchingItems ? 'listingTable-isLoading' : 'listingTable-isLoaded'}
-          rowHeader="attributes.title"
-          tableCaption={tableCaption}
-          scrollableInline
-          tableLayout="auto"
-          responsiveBreakpoint={false}
-          css={cssFavoriteHoverWithinEuiTableRow(euiTheme.euiTheme)}
-        />
+        <SortSelectContextProvider
+          tableSort={tableSort}
+          hasUpdatedAtMetadata={hasUpdatedAtMetadata}
+          hasRecentlyAccessedMetadata={hasRecentlyAccessedMetadata}
+          customSortingOptions={customSortingOptions}
+          onChange={onSortChange}
+        >
+          <EuiLiveAnnouncer>{selectionAnnouncement}</EuiLiveAnnouncer>
+          <EuiInMemoryTable<T>
+            itemId="id"
+            items={visibleItems}
+            columns={tableColumns}
+            pagination={pagination}
+            loading={isFetchingItems}
+            noItemsMessage={isFetchingItems ? '' : noItemsMessage}
+            selection={selection}
+            search={search}
+            executeQueryOptions={{ enabled: false }}
+            sorting={sorting}
+            onChange={onTableChange}
+            data-test-subj={isFetchingItems ? 'listingTable-isLoading' : 'listingTable-isLoaded'}
+            rowHeader="attributes.title"
+            tableCaption={tableCaption}
+            scrollableInline
+            tableLayout="auto"
+            responsiveBreakpoint={false}
+            css={cssFavoriteHoverWithinEuiTableRow(euiTheme.euiTheme)}
+          />
+        </SortSelectContextProvider>
       </TagFilterContextProvider>
     </UserFilterContextProvider>
   );

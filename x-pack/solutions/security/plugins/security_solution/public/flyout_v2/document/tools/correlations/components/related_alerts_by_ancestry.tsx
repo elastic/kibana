@@ -20,6 +20,7 @@ import { getColumns } from '../utils/get_columns';
 import { useSecurityDefaultPatterns } from '../../../../../data_view_manager/hooks/use_security_default_patterns';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { FLYOUT_STORAGE_KEYS } from '../../../main/constants/local_storage';
+import { withDocumentIndex } from '../../../../shared/utils/non_local_index';
 
 const DEFAULT_FROM = 'now-1d';
 const DEFAULT_TO = 'now';
@@ -30,6 +31,12 @@ export interface RelatedAlertsByAncestryProps {
    */
   documentId: string;
   /**
+   * Project-qualified index of the ancestry document, prepended to the search indices so entity
+   * lookup can disambiguate the same `_id` across linked projects (CPS). `undefined` when the
+   * document has no index; required so every render site consciously threads it.
+   */
+  documentIndex: string | undefined;
+  /**
    * Maintain backwards compatibility // TODO remove when possible
    */
   scopeId: string;
@@ -37,10 +44,6 @@ export interface RelatedAlertsByAncestryProps {
    * Callback to open the alert preview
    */
   onShowAlert: (id: string, indexName: string, title?: string) => void;
-  /**
-   * Whether to render rule links as PreviewLink (legacy expandable flyout) instead of OpenFlyoutLink (new flyout system)
-   */
-  useLegacyExpandableFlyout: boolean;
 }
 
 /**
@@ -50,9 +53,9 @@ export interface RelatedAlertsByAncestryProps {
  */
 export const RelatedAlertsByAncestry: React.FC<RelatedAlertsByAncestryProps> = ({
   documentId,
+  documentIndex,
   scopeId,
   onShowAlert,
-  useLegacyExpandableFlyout,
 }) => {
   const { storage } = useKibana().services;
   const { indexPatterns } = useSecurityDefaultPatterns();
@@ -74,9 +77,14 @@ export const RelatedAlertsByAncestry: React.FC<RelatedAlertsByAncestryProps> = (
     [storage]
   );
 
+  const indices = useMemo(
+    () => withDocumentIndex(indexPatterns, documentIndex),
+    [indexPatterns, documentIndex]
+  );
+
   const { loading, error, data, dataCount, refetch } = useFetchRelatedAlertsByAncestry({
     documentId,
-    indices: indexPatterns,
+    indices,
     interval: { from: start, to: end },
   });
 
@@ -87,12 +95,10 @@ export const RelatedAlertsByAncestry: React.FC<RelatedAlertsByAncestryProps> = (
   const columns = useMemo(
     () =>
       getColumns({
-        scopeId,
         dataTestSubj: CORRELATIONS_DETAILS_BY_ANCESTRY_SECTION_TEST_ID,
         onShowAlert,
-        useLegacyExpandableFlyout,
       }),
-    [scopeId, onShowAlert, useLegacyExpandableFlyout]
+    [onShowAlert]
   );
 
   return (

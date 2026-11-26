@@ -7,7 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 import type { TemplateV2Response } from '../../../../common/bundled-types.gen';
-import { CASE_TEMPLATE_DETAILS_URL } from '../../../../common/constants';
+import { CASE_TEMPLATE_DETAILS_URL, MAX_TEMPLATE_KEY_LENGTH } from '../../../../common/constants';
 import { createCaseError } from '../../../common/error';
 import { createCasesRoute } from '../create_cases_route';
 import { DEFAULT_CASES_ROUTE_SECURITY } from '../constants';
@@ -28,7 +28,7 @@ export const getPublicTemplateRoute = createCasesRoute({
   },
   params: {
     params: schema.object({
-      template_id: schema.string({ maxLength: 36 }),
+      template_id: schema.string({ maxLength: MAX_TEMPLATE_KEY_LENGTH }),
     }),
     query: schema.object({
       version: schema.maybe(schema.number({ min: 1 })),
@@ -53,7 +53,14 @@ export const getPublicTemplateRoute = createCasesRoute({
         });
       }
 
-      const body: TemplateV2Response = parseTemplate(template.attributes);
+      let latestVersion = template.attributes.templateVersion;
+      if (template.attributes.isLatest === false) {
+        const latestTemplate = await casesClient.templates.getTemplate(templateId);
+        latestVersion =
+          latestTemplate?.attributes.templateVersion ?? template.attributes.templateVersion;
+      }
+
+      const body: TemplateV2Response = parseTemplate(template.attributes, { latestVersion });
 
       return response.ok({ body });
     } catch (error) {

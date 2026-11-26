@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import type { api } from '@elastic/opentelemetry-node/sdk';
-import { resources, tracing } from '@elastic/opentelemetry-node/sdk';
 import {
   ElasticGenAIAttributes,
   GenAISemanticConventions,
+  UserAttributes,
   parseJsonAttr,
   type GenAIInputMessage,
   type GenAIOutputMessage,
@@ -21,8 +20,18 @@ import {
   AGENT_BUILDER_BUILTIN_AGENTS,
   AGENT_BUILDER_BUILTIN_TOOLS,
 } from '@kbn/agent-builder-server/allow_lists';
-import { DATA_STREAM_NAMESPACE_ATTR, isAgentBuilderSpan } from './agent_builder_context';
-import { normalizeAgentIdForTelemetry, toHashedId } from '../telemetry/utils';
+import { toHashedId } from '@kbn/agent-builder-server/telemetry';
+import type { Context } from '@opentelemetry/api';
+import { resourceFromAttributes } from '@opentelemetry/resources';
+import { BatchSpanProcessor } from '@opentelemetry/sdk-trace';
+import type { ReadableSpan, Span, SpanExporter, SpanProcessor } from '@opentelemetry/sdk-trace';
+import { normalizeAgentIdForTelemetry } from '../telemetry/utils';
+import type { TracingPrivacySettings } from './privacy_settings';
+import {
+  DATA_STREAM_NAMESPACE_ATTR,
+  getPrivacySettingsFromContext,
+  isAgentBuilderSpan,
+} from './agent_builder_context';
 
 const BUILTIN_TOOL_IDS: Set<string> = new Set(AGENT_BUILDER_BUILTIN_TOOLS);
 const BUILTIN_AGENT_IDS: Set<string> = new Set([
@@ -32,20 +41,9 @@ const BUILTIN_AGENT_IDS: Set<string> = new Set([
 
 const SHOULD_TRACK_ATTR = '_agent_builder_should_track';
 
-export interface TracingPrivacySettings {
-  enabled: boolean;
-  includeUserPrompts: boolean;
-  includeLlmResponses: boolean;
-  includeToolDetails: boolean;
-  includeSystemPrompt: boolean;
-  includeRealNames: boolean;
-  includeRealIds: boolean;
-}
-
 interface AgentBuilderSpanProcessorOpts {
-  exporter: tracing.SpanExporter;
+  exporter: SpanExporter;
   scheduledDelayMillis: number;
-  getSettings: () => TracingPrivacySettings;
 }
 
 /**
@@ -74,6 +72,22 @@ function hashSensitiveAttributes(attributes: Record<string, unknown>): Record<st
   const workflowExecId = result['elastic.workflow.execution_id'];
   if (workflowExecId != null) {
     result['elastic.workflow.execution_id'] = toHashedId(String(workflowExecId));
+  }
+
+  return result;
+}
+
+/**
+ * Replaces real `user.id` with SemConv `user.hash` and strips `user.name`
+ * when user-identity attributes are disabled.
+ */
+function anonymizeUserData(attributes: Record<string, unknown>): Record<string, unknown> {
+  const { [UserAttributes.UserName]: _userName, ...result } = attributes;
+
+  const userId = result[UserAttributes.UserId];
+  if (userId != null) {
+    result[UserAttributes.UserHash] = toHashedId(String(userId));
+    delete result[UserAttributes.UserId];
   }
 
   return result;
@@ -256,35 +270,34 @@ function applyMessageAttributePrivacy(
 /**
  * Span processor that exports Agent Builder inference spans.
  */
-export class AgentBuilderSpanProcessor implements tracing.SpanProcessor {
-  private readonly batchProcessor: tracing.SpanProcessor;
-  private readonly getSettings: () => TracingPrivacySettings;
+export class AgentBuilderSpanProcessor implements SpanProcessor {
+  private readonly batchProcessor: SpanProcessor;
+  private readonly spanSettings = new WeakMap<object, TracingPrivacySettings>();
 
   constructor(opts: AgentBuilderSpanProcessorOpts) {
-    this.batchProcessor = new tracing.BatchSpanProcessor(opts.exporter, {
+    this.batchProcessor = new BatchSpanProcessor({
+      exporter: opts.exporter,
       scheduledDelayMillis: opts.scheduledDelayMillis,
     });
-    this.getSettings = opts.getSettings;
   }
 
-  async onStart(span: tracing.Span, parentContext: api.Context): Promise<void> {
-    const settings = this.getSettings();
-    if (!settings.enabled) {
+  onStart(span: Span, parentContext: Context): void {
+    if (!isAgentBuilderSpan(span, parentContext)) {
       return;
     }
-    if (isAgentBuilderSpan(span, parentContext)) {
-      span.setAttribute(SHOULD_TRACK_ATTR, true);
-      this.batchProcessor.onStart(span, parentContext);
+    const settings = getPrivacySettingsFromContext(parentContext);
+    if (!settings) {
+      return;
     }
+    this.spanSettings.set(span, settings);
+    span.setAttribute(SHOULD_TRACK_ATTR, true);
+    this.batchProcessor.onStart(span, parentContext);
   }
 
-  onEnd(span: tracing.ReadableSpan): void {
-    if (!span.attributes[SHOULD_TRACK_ATTR]) {
-      return;
-    }
-
-    const settings = this.getSettings();
-    if (!settings.enabled) {
+  onEnd(span: ReadableSpan): void {
+    const settings = this.spanSettings.get(span);
+    this.spanSettings.delete(span);
+    if (!settings?.enabled) {
       return;
     }
 
@@ -299,6 +312,10 @@ export class AgentBuilderSpanProcessor implements tracing.SpanProcessor {
       ? cleanAttributes
       : hashSensitiveAttributes(cleanAttributes);
 
+    processedAttributes = settings.includeUserData
+      ? processedAttributes
+      : anonymizeUserData(processedAttributes);
+
     processedAttributes = settings.includeToolDetails
       ? processedAttributes
       : stripToolCallIO(processedAttributes);
@@ -309,12 +326,12 @@ export class AgentBuilderSpanProcessor implements tracing.SpanProcessor {
       ? { attributes: processedAttributes, spanName: span.name }
       : anonymizeNames(processedAttributes, span.name);
 
-    const datasetResource = resources.resourceFromAttributes({
+    const datasetResource = resourceFromAttributes({
       'data_stream.dataset': 'agent_builder',
       ...(typeof namespace === 'string' ? { [DATA_STREAM_NAMESPACE_ATTR]: namespace } : {}),
     });
 
-    const exportSpan: tracing.ReadableSpan = Object.create(span, {
+    const exportSpan: ReadableSpan = Object.create(span, {
       resource: {
         value: span.resource.merge(datasetResource),
         enumerable: true,

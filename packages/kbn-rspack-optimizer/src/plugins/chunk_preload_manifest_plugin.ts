@@ -7,18 +7,22 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { rspack, type Compiler, type Chunk } from '@rspack/core';
+import type { Compiler, Chunk } from '@rspack/core';
+import { rspack } from '../rspack_runtime';
 import { CHUNK_MANIFEST_FILENAME } from '../paths';
 
 /**
- * Emits `chunk-manifest.json` with a single field:
+ * Emits `chunk-manifest.json` with two fields:
  *
- * - `allChunks`: ALL async chunks (named shared + plugin entries + unnamed).
- *   Used by `bootstrap_renderer.ts` to populate the bootstrap `load()` array,
- *   enabling eager parallel download of every chunk via `<script async=false>`
- *   before `kibana.bundle.js`. Rspack's JSONP mechanism queues module factories
- *   so that dynamic imports resolve without network requests once the runtime
- *   drains the queue.
+ * - `allChunks`: async chunks to preload (named shared chunks + plugin entry
+ *   children). Cache groups with `name: false` are omitted so those chunks stay
+ *   on demand. Retained as a compatibility fallback.
+ * - `entrypointChunks`: the exact entry chunk and shared prerequisites for each
+ *   plugin ID (including `core`). Used by `bootstrap_renderer.ts` to preload only
+ *   the bundles selected for the current page.
+ *
+ * Rspack's JSONP mechanism queues module factories so that dynamic imports
+ * resolve without network requests once the runtime drains the queue.
  *
  * If CI or FTR shows ChunkLoadError / 404 on /bundles/chunks/, compare emitted assets to
  * chunk-manifest.json and validate script order vs Rspack chunk graph (alphabetical sort here
@@ -40,45 +44,66 @@ export class ChunkPreloadManifestPlugin {
               : undefined;
 
           const staticNameGroupKeys = new Set<string>();
+          const onDemandGroupKeys = new Set<string>();
           if (cacheGroups && typeof cacheGroups === 'object') {
             for (const [key, group] of Object.entries(cacheGroups)) {
-              if (group && typeof group === 'object' && typeof group.name === 'string') {
+              if (!group || typeof group !== 'object') continue;
+              if (typeof group.name === 'string') {
                 staticNameGroupKeys.add(key);
+              } else if (group.name === false) {
+                onDemandGroupKeys.add(key);
               }
             }
           }
 
-          const isNamedSharedChunk = (chunk: Chunk): boolean => {
+          const chunkHasHint = (chunk: Chunk, keys: Set<string>): boolean => {
             for (const hint of chunk.idNameHints) {
-              if (staticNameGroupKeys.has(hint)) return true;
+              if (keys.has(hint)) return true;
             }
             return false;
           };
 
-          const collectJsFiles = (chunk: Chunk, into: string[]) => {
+          const collectJsFiles = (chunk: Chunk, into: Set<string>) => {
             for (const file of chunk.files) {
               if (file.endsWith('.js')) {
-                into.push(file);
+                into.add(file);
               }
             }
           };
 
-          // Collect ALL async chunks for the load() array: named shared chunks
-          // first, then remaining entrypoint children (deduplicated).
-          const allChunkFiles: string[] = [];
+          // Named shared chunks first, then remaining entrypoint children.
+          // `name: false` groups (jqueryFlot) stay out of bootstrap even when
+          // splitChunks places them in an entrypoint child group.
+          const allChunkFiles = new Set<string>();
           const seen = new Set<Chunk>();
 
           for (const chunk of compilation.chunks) {
-            if (isNamedSharedChunk(chunk)) {
+            if (chunkHasHint(chunk, staticNameGroupKeys)) {
               collectJsFiles(chunk, allChunkFiles);
               seen.add(chunk);
             }
           }
 
           const entrypoint = compilation.entrypoints.get('kibana');
+          const entrypointChunkFiles = new Map<string, Set<string>>();
           if (entrypoint) {
             for (const childGroup of entrypoint.childrenIterable) {
+              const pluginChunkName =
+                childGroup.name ??
+                childGroup.chunks.find((chunk) => chunk.name?.startsWith('plugin-'))?.name;
+              const pluginId = pluginChunkName?.startsWith('plugin-')
+                ? pluginChunkName.slice('plugin-'.length)
+                : undefined;
+
               for (const chunk of childGroup.chunks) {
+                if (chunkHasHint(chunk, onDemandGroupKeys)) continue;
+
+                if (pluginId) {
+                  const files = entrypointChunkFiles.get(pluginId) ?? new Set<string>();
+                  collectJsFiles(chunk, files);
+                  entrypointChunkFiles.set(pluginId, files);
+                }
+
                 if (!seen.has(chunk)) {
                   collectJsFiles(chunk, allChunkFiles);
                   seen.add(chunk);
@@ -87,11 +112,17 @@ export class ChunkPreloadManifestPlugin {
             }
           }
 
-          allChunkFiles.sort();
+          const entrypointChunks = Object.fromEntries(
+            [...entrypointChunkFiles.entries()]
+              .sort(([left], [right]) => left.localeCompare(right))
+              .map(([pluginId, files]) => [pluginId, [...files].sort()])
+          );
 
           compilation.emitAsset(
             CHUNK_MANIFEST_FILENAME,
-            new rspack.sources.RawSource(JSON.stringify({ allChunks: allChunkFiles }))
+            new rspack.sources.RawSource(
+              JSON.stringify({ allChunks: [...allChunkFiles].sort(), entrypointChunks })
+            )
           );
         }
       );

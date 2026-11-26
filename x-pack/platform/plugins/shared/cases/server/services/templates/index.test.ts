@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type Boom from '@hapi/boom';
 import { stringify as yamlStringify } from 'yaml';
 import { elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { serializerMock } from '@kbn/core-saved-objects-base-server-mocks';
@@ -1528,6 +1529,113 @@ describe('TemplatesService', () => {
         expect.any(Object)
       );
     });
+
+    describe('authoring-charset grandfathering', () => {
+      const buildDefinitionWithFields = (
+        name: string,
+        fields: Array<{ name: string; type?: string }>
+      ) =>
+        yamlStringify({
+          name,
+          fields: fields.map((field) => ({
+            control: 'INPUT_TEXT',
+            name: field.name,
+            type: field.type ?? 'keyword',
+          })),
+        });
+
+      const mockCurrentTemplate = (definition: string) => {
+        const service = createService();
+        jest
+          .spyOn(
+            service as unknown as Record<'_getTemplate', typeof service.getTemplate>,
+            '_getTemplate'
+          )
+          .mockResolvedValue({
+            id: 'template-so-id',
+            attributes: {
+              templateId: 'template-id',
+              name: 'Existing Template',
+              owner: 'securitySolution',
+              definition,
+              templateVersion: 1,
+              deletedAt: null,
+            },
+          } as SavedObject<Template>);
+        unsecuredSavedObjectsClient.create.mockResolvedValue({
+          id: 'template-new-so-id',
+          attributes: {} as Template,
+        } as SavedObject<Template>);
+        return service;
+      };
+
+      it('accepts an unrelated edit to a template with a pre-existing invalid field name', async () => {
+        const service = mockCurrentTemplate(
+          buildDefinitionWithFields('Existing Template', [{ name: 'legacy-field' }])
+        );
+
+        // Same field, untouched; only the template name changes.
+        await expect(
+          service.updateTemplate('template-id', {
+            name: 'Renamed Template',
+            owner: 'securitySolution',
+            definition: buildDefinitionWithFields('Renamed Template', [{ name: 'legacy-field' }]),
+          })
+        ).resolves.toBeDefined();
+      });
+
+      it('rejects a brand-new invalid field name added alongside a grandfathered one', async () => {
+        const service = mockCurrentTemplate(
+          buildDefinitionWithFields('Existing Template', [{ name: 'legacy-field' }])
+        );
+
+        await expect(
+          service.updateTemplate('template-id', {
+            name: 'Existing Template',
+            owner: 'securitySolution',
+            definition: buildDefinitionWithFields('Existing Template', [
+              { name: 'legacy-field' },
+              { name: 'brand new field' },
+            ]),
+          })
+        ).rejects.toThrow(/brand new field/);
+      });
+
+      it('rejects renaming a grandfathered invalid field to a different invalid name', async () => {
+        const service = mockCurrentTemplate(
+          buildDefinitionWithFields('Existing Template', [{ name: 'legacy-field' }])
+        );
+
+        await expect(
+          service.updateTemplate('template-id', {
+            name: 'Existing Template',
+            owner: 'securitySolution',
+            definition: buildDefinitionWithFields('Existing Template', [
+              { name: 'legacy-field-2' },
+            ]),
+          })
+        ).rejects.toThrow(/legacy-field-2/);
+      });
+
+      it('rejects a new underscore twin of an existing hyphenated field name', async () => {
+        // `legacy_field` and the stored `legacy-field` camelCase-fold to the same display key,
+        // so the case list and case view would show each other's values.
+        const service = mockCurrentTemplate(
+          buildDefinitionWithFields('Existing Template', [{ name: 'legacy-field' }])
+        );
+
+        await expect(
+          service.updateTemplate('template-id', {
+            name: 'Existing Template',
+            owner: 'securitySolution',
+            definition: buildDefinitionWithFields('Existing Template', [
+              { name: 'legacy-field' },
+              { name: 'legacy_field' },
+            ]),
+          })
+        ).rejects.toThrow(/conflicts with the existing field "legacy-field"/);
+      });
+    });
   });
 
   describe('resource limits', () => {
@@ -1825,6 +1933,600 @@ describe('TemplatesService', () => {
 
       expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
     });
+
+    it('does not cap version history: allows update well past the former version limit', async () => {
+      const service = createService();
+      jest
+        .spyOn(
+          service as unknown as Record<'_getTemplate', typeof service.getTemplate>,
+          '_getTemplate'
+        )
+        .mockResolvedValue(
+          createTemplateSO('template-so-id', {
+            templateId: 'template-id',
+            name: 'Busy Template',
+            owner: 'securitySolution',
+            definition: buildDefinition('Busy Template'),
+            templateVersion: 1000,
+          })
+        );
+
+      await service.updateTemplate('template-id', {
+        name: 'Busy Template',
+        owner: 'securitySolution',
+        definition: buildDefinition('Busy Template'),
+      });
+
+      expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith(
+        CASE_TEMPLATE_SAVED_OBJECT,
+        expect.objectContaining({ templateVersion: 1001 }),
+        expect.any(Object)
+      );
+    });
+
+    describe('validateWriteInput (dry_run preflight)', () => {
+      it('surfaces the per-owner count cap on the create dry_run preflight', async () => {
+        const service = createService();
+        unsecuredSavedObjectsClient.find.mockResolvedValue(
+          createMockFindResponse([], MAX_TEMPLATES_PER_OWNER)
+        );
+
+        await expect(
+          service.validateWriteInput({
+            name: 'One Too Many',
+            owner: 'securitySolution',
+            definition: buildDefinition('One Too Many'),
+          })
+        ).rejects.toThrow(
+          `Cannot create more than ${MAX_TEMPLATES_PER_OWNER} templates per owner.`
+        );
+
+        expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
+      });
+
+      it('does NOT apply the create-only count cap on the update dry_run preflight', async () => {
+        const service = createService();
+        // Owner is at the limit, but an update (identified by `excludeTemplateId`) edits an existing
+        // template in place — it must not be rejected by the create-only count cap.
+        unsecuredSavedObjectsClient.find.mockResolvedValue(
+          createMockFindResponse([], MAX_TEMPLATES_PER_OWNER)
+        );
+
+        await expect(
+          service.validateWriteInput(
+            {
+              name: 'Edited In Place',
+              owner: 'securitySolution',
+              definition: buildDefinition('Edited In Place'),
+            },
+            { excludeTemplateId: 'template-id' }
+          )
+        ).resolves.toBeUndefined();
+      });
+
+      it('applies the count cap on the update dry_run preflight when the update changes owner', async () => {
+        const service = createService();
+        // The target owner (observability) is at the limit; the update moves the template from
+        // securitySolution into observability, so the cap must be enforced — mirroring the real
+        // `updateTemplate` write, which asserts the target-owner count whenever `input.owner`
+        // differs from the template's current owner.
+        unsecuredSavedObjectsClient.find.mockResolvedValue(
+          createMockFindResponse([], MAX_TEMPLATES_PER_OWNER)
+        );
+
+        await expect(
+          service.validateWriteInput(
+            {
+              name: 'Moved Owner',
+              owner: 'observability',
+              definition: buildDefinition('Moved Owner'),
+            },
+            { excludeTemplateId: 'template-id', currentOwner: 'securitySolution' }
+          )
+        ).rejects.toThrow(
+          `Cannot create more than ${MAX_TEMPLATES_PER_OWNER} templates per owner.`
+        );
+      });
+
+      it('does NOT apply the count cap on the update dry_run preflight when the owner is unchanged', async () => {
+        const service = createService();
+        unsecuredSavedObjectsClient.find.mockResolvedValue(
+          createMockFindResponse([], MAX_TEMPLATES_PER_OWNER)
+        );
+
+        await expect(
+          service.validateWriteInput(
+            {
+              name: 'Same Owner',
+              owner: 'securitySolution',
+              definition: buildDefinition('Same Owner'),
+            },
+            { excludeTemplateId: 'template-id', currentOwner: 'securitySolution' }
+          )
+        ).resolves.toBeUndefined();
+      });
+
+      it('rejects the dry_run preflight when a definition declares too many fields', async () => {
+        const service = createService();
+
+        await expect(
+          service.validateWriteInput({
+            name: 'Too Many Fields',
+            owner: 'securitySolution',
+            definition: buildDefinitionWithFields('Too Many Fields', MAX_FIELDS_PER_TEMPLATE + 1),
+          })
+        ).rejects.toThrow(`A template cannot define more than ${MAX_FIELDS_PER_TEMPLATE} fields.`);
+      });
+
+      describe('authoring-charset grandfathering', () => {
+        const buildDefinitionWithNamedFields = (name: string, fieldNames: string[]): string =>
+          yamlStringify({
+            name,
+            fields: fieldNames.map((fieldName) => ({
+              control: 'INPUT_TEXT',
+              name: fieldName,
+              type: 'keyword',
+            })),
+          });
+
+        it('rejects a create dry_run preflight with no existingDefinition to grandfather against', async () => {
+          const service = createService();
+
+          await expect(
+            service.validateWriteInput({
+              name: 'New Template',
+              owner: 'securitySolution',
+              definition: buildDefinitionWithNamedFields('New Template', ['legacy-field']),
+            })
+          ).rejects.toThrow(/legacy-field/);
+        });
+
+        it('accepts an update dry_run preflight for an untouched pre-existing invalid field name', async () => {
+          const service = createService();
+
+          await expect(
+            service.validateWriteInput(
+              {
+                name: 'Renamed Template',
+                owner: 'securitySolution',
+                definition: buildDefinitionWithNamedFields('Renamed Template', ['legacy-field']),
+              },
+              {
+                excludeTemplateId: 'template-id',
+                existingDefinition: buildDefinitionWithNamedFields('Existing Template', [
+                  'legacy-field',
+                ]),
+              }
+            )
+          ).resolves.toBeUndefined();
+        });
+
+        it('rejects an update dry_run preflight for a brand-new invalid field name', async () => {
+          const service = createService();
+
+          await expect(
+            service.validateWriteInput(
+              {
+                name: 'Existing Template',
+                owner: 'securitySolution',
+                definition: buildDefinitionWithNamedFields('Existing Template', [
+                  'legacy-field',
+                  'brand new field',
+                ]),
+              },
+              {
+                excludeTemplateId: 'template-id',
+                existingDefinition: buildDefinitionWithNamedFields('Existing Template', [
+                  'legacy-field',
+                ]),
+              }
+            )
+          ).rejects.toThrow(/brand new field/);
+        });
+      });
+
+      it('rejects the dry_run preflight when a template default exceeds the maximum byte size', async () => {
+        const service = createService();
+
+        await expect(
+          service.validateWriteInput({
+            name: 'Large Default',
+            owner: 'securitySolution',
+            definition: buildDefinitionWithDefault(
+              'Large Default',
+              'a'.repeat(MAX_EXTENDED_FIELD_VALUE_BYTES + 1)
+            ),
+          })
+        ).rejects.toThrow(
+          `Template field "field_one" default exceeds the maximum size of ${MAX_EXTENDED_FIELD_VALUE_BYTES} bytes`
+        );
+      });
+
+      it('rejects the dry_run preflight when the definition exceeds the SO maxLength', async () => {
+        const service = createService();
+        const definition = `name: Too Long\nseverity: low\nfields: []\n#${'y'.repeat(
+          MAX_TEMPLATE_DEFINITION_LENGTH
+        )}`;
+
+        expect(definition.length).toBeGreaterThan(MAX_TEMPLATE_DEFINITION_LENGTH);
+
+        await expect(
+          service.validateWriteInput({
+            name: 'Too Long',
+            owner: 'securitySolution',
+            definition,
+          })
+        ).rejects.toThrow(
+          `Template definition exceeds the maximum length of ${MAX_TEMPLATE_DEFINITION_LENGTH} characters.`
+        );
+
+        expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
+      });
+    });
+  });
+
+  describe('extractObservables owner rule', () => {
+    const blockedOwners = ['cases', 'observability'];
+
+    const buildDefinitionWithSettings = (extractObservables?: boolean) =>
+      yamlStringify({
+        name: 'Settings Template',
+        ...(extractObservables !== undefined ? { settings: { extractObservables } } : {}),
+        fields: [{ control: 'INPUT_TEXT', name: 'field_one', type: 'keyword' }],
+      });
+
+    const getRejection = async (promise: Promise<unknown>): Promise<Boom.Boom> => {
+      try {
+        await promise;
+      } catch (error) {
+        return error;
+      }
+      throw new Error('Expected the write to be rejected');
+    };
+
+    const mockStoredTemplate = (
+      service: TemplatesService,
+      { owner, definition }: { owner: string; definition: string }
+    ) =>
+      jest
+        .spyOn(
+          service as unknown as Record<'_getTemplate', typeof service.getTemplate>,
+          '_getTemplate'
+        )
+        .mockResolvedValue({
+          id: 'template-so-id',
+          attributes: {
+            templateId: 'template-id',
+            name: 'Settings Template',
+            owner,
+            definition,
+            templateVersion: 1,
+            deletedAt: null,
+            author: 'alice',
+          },
+        } as SavedObject<Template>);
+
+    beforeEach(() => {
+      unsecuredSavedObjectsClient.create.mockResolvedValue({
+        id: 'template-new-so-id',
+        attributes: {} as Template,
+      } as SavedObject<Template>);
+    });
+
+    describe('createTemplate', () => {
+      it.each(blockedOwners)('rejects true with a 400 for the %s owner', async (owner) => {
+        const service = createService();
+
+        const error = await getRejection(
+          service.createTemplate(
+            { name: 'Settings Template', owner, definition: buildDefinitionWithSettings(true) },
+            'alice',
+            'generated-id'
+          )
+        );
+
+        expect(error.message).toContain(
+          `Setting extractObservables to true is not allowed for the "${owner}" owner`
+        );
+        expect(error.output.statusCode).toBe(400);
+        expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
+      });
+
+      it.each(blockedOwners)(
+        'accepts false and an omitted value for the %s owner',
+        async (owner) => {
+          const service = createService();
+
+          await service.createTemplate(
+            { name: 'Settings Template', owner, definition: buildDefinitionWithSettings(false) },
+            'alice'
+          );
+          await service.createTemplate(
+            { name: 'Settings Template', owner, definition: buildDefinitionWithSettings() },
+            'alice'
+          );
+
+          expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledTimes(2);
+        }
+      );
+
+      it.each(['securitySolution', 'securitySolutionFixture'])(
+        'accepts true for the %s owner',
+        async (owner) => {
+          const service = createService();
+
+          await service.createTemplate(
+            { name: 'Settings Template', owner, definition: buildDefinitionWithSettings(true) },
+            'alice'
+          );
+
+          expect(unsecuredSavedObjectsClient.create).toHaveBeenCalled();
+        }
+      );
+    });
+
+    describe('updateTemplate', () => {
+      it.each(blockedOwners)(
+        'rejects a change from an omitted value to true with a 400 for the %s owner',
+        async (owner) => {
+          const service = createService();
+          mockStoredTemplate(service, { owner, definition: buildDefinitionWithSettings() });
+
+          const error = await getRejection(
+            service.updateTemplate('template-id', {
+              name: 'Settings Template',
+              owner,
+              definition: buildDefinitionWithSettings(true),
+            })
+          );
+
+          expect(error.output.statusCode).toBe(400);
+          expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
+        }
+      );
+
+      it('rejects a change from false to true', async () => {
+        const service = createService();
+        mockStoredTemplate(service, {
+          owner: 'cases',
+          definition: buildDefinitionWithSettings(false),
+        });
+
+        const error = await getRejection(
+          service.updateTemplate('template-id', {
+            name: 'Settings Template',
+            owner: 'cases',
+            definition: buildDefinitionWithSettings(true),
+          })
+        );
+
+        expect(error.output.statusCode).toBe(400);
+        expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
+      });
+
+      it.each(blockedOwners)(
+        'accepts a stored true that the update keeps for the %s owner',
+        async (owner) => {
+          const service = createService();
+          mockStoredTemplate(service, { owner, definition: buildDefinitionWithSettings(true) });
+
+          await service.updateTemplate('template-id', {
+            name: 'Settings Template',
+            owner,
+            definition: buildDefinitionWithSettings(true),
+          });
+
+          expect(unsecuredSavedObjectsClient.create).toHaveBeenCalled();
+        }
+      );
+
+      it('rejects a stored true that moves to a blocked owner', async () => {
+        const service = createService();
+        mockStoredTemplate(service, {
+          owner: 'securitySolution',
+          definition: buildDefinitionWithSettings(true),
+        });
+
+        const error = await getRejection(
+          service.updateTemplate('template-id', {
+            name: 'Settings Template',
+            owner: 'cases',
+            definition: buildDefinitionWithSettings(true),
+          })
+        );
+
+        expect(error.output.statusCode).toBe(400);
+        expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
+      });
+
+      it('rejects a stored true that moves between two blocked owners', async () => {
+        const service = createService();
+        mockStoredTemplate(service, {
+          owner: 'cases',
+          definition: buildDefinitionWithSettings(true),
+        });
+
+        const error = await getRejection(
+          service.updateTemplate('template-id', {
+            name: 'Settings Template',
+            owner: 'observability',
+            definition: buildDefinitionWithSettings(true),
+          })
+        );
+
+        expect(error.output.statusCode).toBe(400);
+        expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
+      });
+
+      it('rejects true when the stored definition is valid YAML but fails the schema', async () => {
+        const service = createService();
+        mockStoredTemplate(service, {
+          owner: 'cases',
+          definition: yamlStringify({ settings: { extractObservables: true }, fields: 'invalid' }),
+        });
+
+        const error = await getRejection(
+          service.updateTemplate('template-id', {
+            name: 'Settings Template',
+            owner: 'cases',
+            definition: buildDefinitionWithSettings(true),
+          })
+        );
+
+        expect(error.output.statusCode).toBe(400);
+      });
+
+      it('rejects true when the stored definition cannot be parsed', async () => {
+        const service = createService();
+        mockStoredTemplate(service, { owner: 'cases', definition: 'not: [valid' });
+
+        const error = await getRejection(
+          service.updateTemplate('template-id', {
+            name: 'Settings Template',
+            owner: 'cases',
+            definition: buildDefinitionWithSettings(true),
+          })
+        );
+
+        expect(error.output.statusCode).toBe(400);
+      });
+
+      it.each(blockedOwners)(
+        'accepts a change from true to false for the %s owner',
+        async (owner) => {
+          const service = createService();
+          mockStoredTemplate(service, { owner, definition: buildDefinitionWithSettings(true) });
+
+          await service.updateTemplate('template-id', {
+            name: 'Settings Template',
+            owner,
+            definition: buildDefinitionWithSettings(false),
+          });
+
+          expect(unsecuredSavedObjectsClient.create).toHaveBeenCalled();
+        }
+      );
+
+      it('accepts a change from false to true for the securitySolution owner', async () => {
+        const service = createService();
+        mockStoredTemplate(service, {
+          owner: 'securitySolution',
+          definition: buildDefinitionWithSettings(false),
+        });
+
+        await service.updateTemplate('template-id', {
+          name: 'Settings Template',
+          owner: 'securitySolution',
+          definition: buildDefinitionWithSettings(true),
+        });
+
+        expect(unsecuredSavedObjectsClient.create).toHaveBeenCalled();
+      });
+    });
+
+    describe('validateWriteInput (dry_run preflight)', () => {
+      it.each(blockedOwners)(
+        'rejects true on the create preflight for the %s owner',
+        async (owner) => {
+          const service = createService();
+
+          const error = await getRejection(
+            service.validateWriteInput({
+              name: 'Settings Template',
+              owner,
+              definition: buildDefinitionWithSettings(true),
+            })
+          );
+
+          expect(error.output.statusCode).toBe(400);
+        }
+      );
+
+      it('accepts false on the create preflight', async () => {
+        const service = createService();
+
+        await expect(
+          service.validateWriteInput({
+            name: 'Settings Template',
+            owner: 'cases',
+            definition: buildDefinitionWithSettings(false),
+          })
+        ).resolves.toBeUndefined();
+      });
+
+      it('rejects a change to true on the update preflight', async () => {
+        const service = createService();
+
+        const error = await getRejection(
+          service.validateWriteInput(
+            {
+              name: 'Settings Template',
+              owner: 'cases',
+              definition: buildDefinitionWithSettings(true),
+            },
+            {
+              excludeTemplateId: 'template-id',
+              currentOwner: 'cases',
+              existingDefinition: buildDefinitionWithSettings(false),
+            }
+          )
+        );
+
+        expect(error.output.statusCode).toBe(400);
+      });
+
+      it('rejects a stored true that moves to a blocked owner on the update preflight', async () => {
+        const service = createService();
+
+        const error = await getRejection(
+          service.validateWriteInput(
+            {
+              name: 'Settings Template',
+              owner: 'cases',
+              definition: buildDefinitionWithSettings(true),
+            },
+            {
+              excludeTemplateId: 'template-id',
+              currentOwner: 'securitySolution',
+              existingDefinition: buildDefinitionWithSettings(true),
+            }
+          )
+        );
+
+        expect(error.output.statusCode).toBe(400);
+      });
+
+      it('accepts a stored true that the update preflight keeps', async () => {
+        const service = createService();
+
+        await expect(
+          service.validateWriteInput(
+            {
+              name: 'Settings Template',
+              owner: 'cases',
+              definition: buildDefinitionWithSettings(true),
+            },
+            {
+              excludeTemplateId: 'template-id',
+              currentOwner: 'cases',
+              existingDefinition: buildDefinitionWithSettings(true),
+            }
+          )
+        ).resolves.toBeUndefined();
+      });
+
+      it('accepts true for the securitySolution owner', async () => {
+        const service = createService();
+
+        await expect(
+          service.validateWriteInput({
+            name: 'Settings Template',
+            owner: 'securitySolution',
+            definition: buildDefinitionWithSettings(true),
+          })
+        ).resolves.toBeUndefined();
+      });
+    });
   });
 
   describe('incrementUsageStats', () => {
@@ -1855,6 +2557,40 @@ describe('TemplatesService', () => {
             type: CASE_TEMPLATE_SAVED_OBJECT,
             attributes: {
               usageCount: 6,
+              lastUsedAt: expect.any(String),
+            },
+          },
+        ],
+        { refresh: false }
+      );
+    });
+
+    it('adds the given number of cases to usageCount', async () => {
+      const service = createService();
+
+      jest
+        .spyOn(
+          service as unknown as Record<'_getTemplate', typeof service.getTemplate>,
+          '_getTemplate'
+        )
+        .mockResolvedValue({
+          id: 'so-1',
+          attributes: {
+            templateId: 'template-1',
+            name: 'Template',
+            usageCount: 5,
+          },
+        } as SavedObject<Template>);
+
+      await service.incrementUsageStats('template-1', 3);
+
+      expect(unsecuredSavedObjectsClient.bulkUpdate).toHaveBeenCalledWith(
+        [
+          {
+            id: 'so-1',
+            type: CASE_TEMPLATE_SAVED_OBJECT,
+            attributes: {
+              usageCount: 8,
               lastUsedAt: expect.any(String),
             },
           },
@@ -2095,6 +2831,39 @@ describe('TemplatesService', () => {
       );
 
       expect(result).toEqual([]);
+    });
+
+    it('matches a $ref that differs from the field name only in case', async () => {
+      // resolveTemplateFields resolves $refs case-insensitively, so a template
+      // referencing "PRIORITY" still depends on the definition named "priority"
+      // and must block its deletion.
+      const service = createService();
+
+      const definition = yamlStringify({
+        name: 'Cased Template',
+        fields: [{ $ref: 'PRIORITY' }],
+      });
+      const so = makeSO('so-cased', definition, 'Cased Template');
+
+      unsecuredSavedObjectsClient.search.mockResolvedValue({
+        took: 1,
+        timed_out: false,
+        _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+        hits: {
+          total: { value: 1, relation: 'eq' },
+          max_score: null,
+          hits: [makeHit('so-cased')],
+        },
+      } as unknown as ReturnType<typeof createMockSearchResponse>);
+
+      savedObjectsSerializer.rawToSavedObject.mockReturnValueOnce(so);
+
+      const result = await service.getActiveTemplatesReferencingField(
+        'securitySolution',
+        'priority'
+      );
+
+      expect(result).toEqual([{ name: 'Cased Template' }]);
     });
 
     it('skips a template with unparseable YAML rather than blocking the delete', async () => {

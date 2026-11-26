@@ -9,10 +9,13 @@ import React, { useMemo } from 'react';
 import { EuiSkeletonText, EuiSpacer, EuiTitle } from '@elastic/eui';
 import type { CaseUI } from '../../../../common';
 import type { InlineField } from '../../../../common/types/domain/template/fields';
-import { isRefField } from '../../../../common/types/domain/template/fields';
 import { useGetTemplate } from '../../templates_v2/hooks/use_get_template';
 import { useGetFieldDefinitions } from '../../field_library/hooks/use_get_field_definitions';
-import { parseFieldDefinitionsToInlineFields } from '../../../../common/utils';
+import {
+  collectNormalizedRefNames,
+  normalizeFieldDefinitionName,
+  parseFieldDefinitionsToInlineFields,
+} from '../../../../common/utils';
 import * as i18n from '../translations';
 import type { OnUpdateFields } from '../types';
 import { EMPTY_EXTENDED_FIELDS, TemplateFieldsFormReady } from './template_fields_form_ready';
@@ -58,14 +61,14 @@ export const GlobalCaseFields = React.memo<GlobalCaseFieldsProps>(
     );
 
     const templateRefNames = useMemo<ReadonlySet<string>>(
-      () => new Set((templateData?.definition.fields ?? []).filter(isRefField).map((f) => f.$ref)),
+      () => collectNormalizedRefNames(templateData?.definition.fields),
       [templateData]
     );
 
     const visibleGlobalFields = useMemo<InlineField[]>(
       () =>
         parseFieldDefinitionsToInlineFields(globalFieldDefsData?.fieldDefinitions ?? []).filter(
-          (f) => !templateRefNames.has(f.name)
+          (f) => !templateRefNames.has(normalizeFieldDefinitionName(f.name))
         ),
       [globalFieldDefsData, templateRefNames]
     );

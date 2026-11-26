@@ -33,8 +33,10 @@ import {
   deleteAlertsAndRules,
   deletePrebuiltRulesAssets,
 } from '../../../../../tasks/api_calls/common';
-import { visitAddRulesPage } from '../../../../../tasks/rules_management';
-import { RULE_MANAGEMENT_PAGE_BREADCRUMB } from '../../../../../screens/breadcrumbs';
+import {
+  navigateBackToRulesManagement,
+  visitAddRulesPage,
+} from '../../../../../tasks/rules_management';
 
 describe(
   'Detection rules, Prebuilt Rules Installation Workflow',
@@ -76,7 +78,7 @@ describe(
       // Assert installation succeeded
       assertRuleInstallationSuccessToastShown([RULE_1]);
       // Go back to rules table and assert that the rules are installed
-      cy.get(RULE_MANAGEMENT_PAGE_BREADCRUMB).click();
+      navigateBackToRulesManagement();
       assertRulesPresentInInstalledRulesTable([RULE_1]);
     });
 
@@ -86,7 +88,7 @@ describe(
       assertInstallationRequestIsComplete([RULE_1, RULE_2]);
       assertRuleInstallationSuccessToastShown([RULE_1, RULE_2]);
       // Go back to rules table and assert that the rules are installed
-      cy.get(RULE_MANAGEMENT_PAGE_BREADCRUMB).click();
+      navigateBackToRulesManagement();
       assertRulesPresentInInstalledRulesTable([RULE_1, RULE_2]);
     });
 
@@ -96,7 +98,7 @@ describe(
       assertInstallationRequestIsComplete([RULE_1, RULE_2]);
       assertRuleInstallationSuccessToastShown([RULE_1, RULE_2]);
       // Go back to rules table and assert that the rules are installed
-      cy.get(RULE_MANAGEMENT_PAGE_BREADCRUMB).click();
+      navigateBackToRulesManagement();
       assertRulesPresentInInstalledRulesTable([RULE_1, RULE_2]);
     });
 
@@ -105,7 +107,7 @@ describe(
       assertInstallationRequestIsComplete([RULE_1, RULE_2]);
       assertRuleInstallationSuccessToastShown([RULE_1, RULE_2]);
       // Go back to rules table and assert that the rules are installed
-      cy.get(RULE_MANAGEMENT_PAGE_BREADCRUMB).click();
+      navigateBackToRulesManagement();
       assertRulesPresentInInstalledRulesTable([RULE_1, RULE_2]);
     });
 

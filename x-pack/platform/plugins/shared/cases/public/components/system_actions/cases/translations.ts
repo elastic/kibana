@@ -21,6 +21,13 @@ export const GROUP_BY_ALERT = i18n.translate(
   }
 );
 
+export const GROUP_BY_ALERT_INVALID_FIELD_ERROR = i18n.translate(
+  'xpack.cases.systemActions.casesConnector.groupByAlertInvalidFieldError',
+  {
+    defaultMessage: 'Invalid field. Select a field from the list.',
+  }
+);
+
 export const TIME_WINDOW = i18n.translate(
   'xpack.cases.systemActions.casesConnector.timeWindowLabel',
   {
@@ -140,3 +147,39 @@ export const MAX_CASES_TO_OPEN_HELP_TEXT = (maxCases: number) =>
     defaultMessage: 'Set the maximum amount of cases to be opened. (Max {maxCases})',
     values: { maxCases },
   });
+
+export const EXTRACT_OBSERVABLES_LABEL = i18n.translate(
+  'xpack.cases.systemActions.casesConnector.extractObservablesLabel',
+  {
+    defaultMessage: 'Auto-extract observables',
+  }
+);
+
+export const EXTRACT_OBSERVABLES_ON = i18n.translate(
+  'xpack.cases.systemActions.casesConnector.extractObservablesOn',
+  {
+    defaultMessage: 'On',
+  }
+);
+
+export const EXTRACT_OBSERVABLES_OFF = i18n.translate(
+  'xpack.cases.systemActions.casesConnector.extractObservablesOff',
+  {
+    defaultMessage: 'Off',
+  }
+);
+
+export const EXTRACT_OBSERVABLES_INHERIT = (spaceDefault: boolean) =>
+  i18n.translate('xpack.cases.systemActions.casesConnector.extractObservablesInherit', {
+    defaultMessage: 'Use space default ({value})',
+    values: {
+      value: spaceDefault ? EXTRACT_OBSERVABLES_ON : EXTRACT_OBSERVABLES_OFF,
+    },
+  });
+
+export const EXTRACT_OBSERVABLES_INHERIT_TEMPLATE = i18n.translate(
+  'xpack.cases.systemActions.casesConnector.extractObservablesInheritTemplate',
+  {
+    defaultMessage: 'Use template/space default',
+  }
+);

@@ -147,6 +147,10 @@ export const REQUIRED_ON_CLOSE = i18n.translate('xpack.cases.caseView.requiredOn
   defaultMessage: 'Required on close',
 });
 
+export const REQUIRED = i18n.translate('xpack.cases.caseView.required', {
+  defaultMessage: 'Required',
+});
+
 export const PAGE_TITLE = i18n.translate('xpack.cases.pageTitle', {
   defaultMessage: 'Cases',
 });
@@ -324,11 +328,12 @@ export const SYNC_ALERTS_SWITCH_LABEL_OFF = i18n.translate(
 );
 
 export const SYNC_ALERTS = i18n.translate('xpack.cases.settings.syncAlerts', {
-  defaultMessage: 'Sync alerts',
+  defaultMessage: 'Sync detections',
 });
 
 export const SYNC_ALERTS_HELP = i18n.translate('xpack.cases.components.create.syncAlertHelpText', {
-  defaultMessage: 'Enabling this option will sync the alert statuses with the case status.',
+  defaultMessage:
+    'Enabling this option will sync the statuses of attached alerts and attacks with the case status.',
 });
 
 export const EXTRACT_OBSERVABLES_SWITCH_LABEL_ON = i18n.translate(

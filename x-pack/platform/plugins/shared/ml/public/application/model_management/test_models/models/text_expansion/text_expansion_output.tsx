@@ -16,8 +16,8 @@ import {
   EuiSpacer,
   EuiStat,
   EuiTextColor,
-  EuiCallOut,
 } from '@elastic/eui';
+import { KbnInfoCallout } from '@kbn/ui-callout';
 
 import { roundToDecimalPlace } from '@kbn/ml-number-utils';
 import { i18n } from '@kbn/i18n';
@@ -40,12 +40,14 @@ export const TextExpansionOutput: FC<{
 
   return (
     <>
-      <EuiCallOut color="primary">
-        <FormattedMessage
-          id="xpack.ml.trainedModels.testModelsFlyout.textExpansion.output.info"
-          defaultMessage="The numbers below represent relevance scores for documents randomly selected from the index concerning the supplied query. Evaluating model recall is simpler when using a query related to the documents."
-        />
-      </EuiCallOut>
+      <KbnInfoCallout
+        title={
+          <FormattedMessage
+            id="xpack.ml.trainedModels.testModelsFlyout.textExpansion.output.info"
+            defaultMessage="The numbers below represent relevance scores for documents randomly selected from the index concerning the supplied query. Evaluating model recall is simpler when using a query related to the documents."
+          />
+        }
+      />
 
       <EuiSpacer size="m" />
 
@@ -148,15 +150,17 @@ export const DocumentResultWithTokens: FC<{
         >
           <>
             <EuiSpacer size="s" />
-            <EuiCallOut announceOnMount={false} color="primary">
-              <FormattedMessage
-                id="xpack.ml.trainedModels.testModelsFlyout.textExpansion.output.tokenHelpInfo"
-                defaultMessage="Top {count} extracted tokens, which are not synonyms of the query, represent linguistic elements
+            <KbnInfoCallout
+              title={
+                <FormattedMessage
+                  id="xpack.ml.trainedModels.testModelsFlyout.textExpansion.output.tokenHelpInfo"
+                  defaultMessage="Top {count} extracted tokens, which are not synonyms of the query, represent linguistic elements
               relevant to the search result. The weight value represents the relevancy of a given
               token."
-                values={{ count: MAX_TOKENS }}
-              />
-            </EuiCallOut>
+                  values={{ count: MAX_TOKENS }}
+                />
+              }
+            />
             <EuiSpacer size="s" />
             <EuiInMemoryTable
               tableCaption={i18n.translate(

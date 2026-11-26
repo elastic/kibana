@@ -7,8 +7,7 @@
 
 import { act, waitFor, renderHook } from '@testing-library/react';
 
-import { AttachmentType } from '../../common/types/domain';
-import { SECURITY_SOLUTION_OWNER } from '../../common/constants';
+import { COMMENT_ATTACHMENT_TYPE, SECURITY_SOLUTION_OWNER } from '../../common/constants';
 import { useCreateAttachments } from './use_create_attachments';
 import { basicCaseId } from './mock';
 import * as api from './api';
@@ -29,22 +28,15 @@ describe('useCreateAttachments', () => {
     addSuccess,
   });
 
-  const attachmentsWithoutOwner = [
-    {
-      comment: 'a comment',
-      type: AttachmentType.user as const,
-    },
-  ];
-
-  const attachmentsWithOwner = attachmentsWithoutOwner.map((attachment) => ({
-    ...attachment,
-    owner: SECURITY_SOLUTION_OWNER,
-  }));
+  const commentAttachment = {
+    type: COMMENT_ATTACHMENT_TYPE,
+    data: { content: 'a comment' },
+  };
 
   const request = {
     caseId: basicCaseId,
     caseOwner: SECURITY_SOLUTION_OWNER,
-    attachments: attachmentsWithoutOwner,
+    attachments: [commentAttachment],
   };
 
   beforeEach(() => {
@@ -64,7 +56,7 @@ describe('useCreateAttachments', () => {
 
     await waitFor(() =>
       expect(spy).toHaveBeenCalledWith({
-        attachments: attachmentsWithOwner,
+        attachments: [{ ...commentAttachment, owner: SECURITY_SOLUTION_OWNER }],
         caseId: request.caseId,
       })
     );

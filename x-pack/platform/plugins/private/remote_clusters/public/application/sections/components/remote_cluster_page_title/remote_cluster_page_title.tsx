@@ -5,38 +5,35 @@
  * 2.0.
  */
 
-import type { ReactNode } from 'react';
 import React from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiPageHeader, EuiButtonEmpty, EuiSpacer } from '@elastic/eui';
+import { EuiSpacer } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { AppHeader } from '@kbn/app-header';
 import { remoteClustersUrl } from '../../../services/documentation';
 
 interface Props {
-  title: ReactNode;
-  description?: ReactNode;
+  title: string;
+  description?: string;
+  backHref?: string;
 }
 
-export const RemoteClusterPageTitle: React.FC<Props> = ({ title, description }) => (
+export const RemoteClusterPageTitle: React.FC<Props> = ({ title, description, backHref }) => (
   <>
-    <EuiPageHeader
-      bottomBorder
-      pageTitle={<span data-test-subj="remoteClusterPageTitle">{title}</span>}
-      rightSideItems={[
-        <EuiButtonEmpty
-          size="s"
-          flush="right"
-          href={remoteClustersUrl}
-          target="_blank"
-          iconType="question"
-          data-test-subj="remoteClusterDocsButton"
-        >
-          <FormattedMessage
-            id="xpack.remoteClusters.readDocsButtonLabel"
-            defaultMessage="Remote cluster docs"
-          />
-        </EuiButtonEmpty>,
-      ]}
+    <AppHeader
+      title={title}
       description={description}
+      back={
+        backHref
+          ? {
+              href: backHref,
+              label: i18n.translate('xpack.remoteClusters.backToListLabel', {
+                defaultMessage: 'Remote Clusters',
+              }),
+            }
+          : undefined
+      }
+      docLink={remoteClustersUrl}
+      spacing="bleed"
     />
 
     <EuiSpacer size="l" />

@@ -30,6 +30,12 @@ const SOURCE_OPTIONS: SourceOption[] = [
     label: i18n.translate('xpack.osquery.historyFilters.source.rule', { defaultMessage: 'Rule' }),
   },
   {
+    key: 'workflow',
+    label: i18n.translate('xpack.osquery.historyFilters.source.workflow', {
+      defaultMessage: 'Workflow',
+    }),
+  },
+  {
     key: 'scheduled',
     label: i18n.translate('xpack.osquery.historyFilters.source.scheduled', {
       defaultMessage: 'Scheduled',
@@ -83,7 +89,7 @@ const SourceFilterPopoverComponent: React.FC<SourceFilterPopoverProps> = ({
 
   const triggerButton = (
     <EuiFilterButton
-      iconType="arrowDown"
+      iconType="chevronSingleDown"
       onClick={togglePopover}
       isSelected={isOpen}
       hasActiveFilters={isFiltered}

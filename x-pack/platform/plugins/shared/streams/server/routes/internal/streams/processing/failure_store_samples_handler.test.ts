@@ -311,6 +311,10 @@ describe('getFailureStoreSamples', () => {
       });
 
       const call = mockSimulateProcessing.mock.calls[0][0];
+      expect('processing' in call.params.body).toBe(true);
+      if (!('processing' in call.params.body)) {
+        throw new Error('Expected legacy processing simulation body');
+      }
       const steps = call.params.body.processing.steps as StreamlangDSL['steps'];
 
       // Only the ancestor step must be present — no step from 'logs.nginx.access' itself
@@ -341,6 +345,10 @@ describe('getFailureStoreSamples', () => {
       });
 
       const call = mockSimulateProcessing.mock.calls[0][0];
+      expect('processing' in call.params.body).toBe(true);
+      if (!('processing' in call.params.body)) {
+        throw new Error('Expected legacy processing simulation body');
+      }
       const steps = call.params.body.processing.steps as StreamlangDSL['steps'];
 
       expect(steps).toEqual([rootStep, midStep]);

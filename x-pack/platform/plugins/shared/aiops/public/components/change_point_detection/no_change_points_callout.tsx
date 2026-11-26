@@ -7,7 +7,7 @@
 
 import React from 'react';
 import type { FC } from 'react';
-import { EuiCallOut } from '@elastic/eui';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 interface NoChangePointsCalloutProps {
@@ -16,7 +16,7 @@ interface NoChangePointsCalloutProps {
 
 export const NoChangePointsCallout: FC<NoChangePointsCalloutProps> = ({ reason }) => {
   return (
-    <EuiCallOut
+    <KbnWarningCallout
       data-test-subj="aiopsNoChangePointsWarningCallout"
       title={
         <FormattedMessage
@@ -24,8 +24,6 @@ export const NoChangePointsCallout: FC<NoChangePointsCalloutProps> = ({ reason }
           defaultMessage="No change points found"
         />
       }
-      color="warning"
-      iconType="warning"
     >
       <p data-test-subj="aiopsNoChangePointsWarningCalloutText">
         {reason ? (
@@ -41,6 +39,6 @@ export const NoChangePointsCallout: FC<NoChangePointsCalloutProps> = ({ reason }
           />
         )}
       </p>
-    </EuiCallOut>
+    </KbnWarningCallout>
   );
 };

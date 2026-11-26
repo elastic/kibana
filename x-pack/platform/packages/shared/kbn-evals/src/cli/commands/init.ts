@@ -117,7 +117,7 @@ export const ensureLocalConfig = async (repoRoot: string, log: ToolingLog): Prom
     'Note: the local profile expects Elasticsearch on localhost:9200 and Kibana on localhost:5601.'
   );
   log.info(
-    'Make sure both are running before starting evals (e.g. yarn es snapshot && yarn start).'
+    'Make sure both are running before starting evals (e.g. pnpm es snapshot && pnpm start).'
   );
 };
 
@@ -232,29 +232,16 @@ export const runConfigInit = async (
     set(example, field.jsonPath, value.trim() || '');
   }
 
-  const litellmVirtualKey = getNestedValue(example, 'litellm.virtualKey');
-  if (typeof litellmVirtualKey === 'string' && litellmVirtualKey.includes('REPLACE_ME')) {
+  const openrouterApiKey = getNestedValue(example, 'openrouter.apiKey');
+  if (typeof openrouterApiKey === 'string' && openrouterApiKey.includes('REPLACE_ME')) {
     const { value } = await inquirer.prompt<{ value: string }>({
       type: 'password',
       name: 'value',
-      message: 'LiteLLM virtual key (sk-...):',
+      message: 'OpenRouter API key:',
       mask: '*',
     });
     if (value.trim()) {
-      set(example, 'litellm.virtualKey', value.trim());
-    }
-  }
-
-  const litellmTeamId = getNestedValue(example, 'litellm.teamId');
-  if (typeof litellmTeamId === 'string' && litellmTeamId.includes('REPLACE_ME')) {
-    const { value } = await inquirer.prompt<{ value: string }>({
-      type: 'input',
-      name: 'value',
-      message: 'LiteLLM team ID (find yours at https://elastic.litellm-prod.ai/ui/?page=teams):',
-      default: '',
-    });
-    if (value.trim()) {
-      set(example, 'litellm.teamId', value.trim());
+      set(example, 'openrouter.apiKey', value.trim());
     }
   }
 
@@ -387,7 +374,7 @@ const listConnectorIds = (base64Payload: string): Array<{ id: string; name: stri
 export const runConnectorSetup = async (repoRoot: string, log: ToolingLog): Promise<void> => {
   if (!isTTY()) {
     throw new Error(
-      'No connectors available. Set KIBANA_TESTING_AI_CONNECTORS or run with a TTY to use the setup wizard.'
+      'No connectors available. Set KIBANA_TESTING_INFERENCE_ENDPOINTS, or run with a TTY to use the setup wizard.'
     );
   }
 
@@ -405,7 +392,7 @@ export const runConnectorSetup = async (repoRoot: string, log: ToolingLog): Prom
   }
   if (hasExistingConnectors) {
     choices.push({
-      name: `Already set (KIBANA_TESTING_AI_CONNECTORS has ${existingConnectors.length} connector(s))`,
+      name: `Already set (${existingConnectors.length} connector(s) found in env)`,
       value: 'existing',
     });
   }
@@ -436,7 +423,7 @@ export const runConnectorSetup = async (repoRoot: string, log: ToolingLog): Prom
     kibanaDevYmlConnectors.forEach((c) => log.info(`  - ${c.id} (${c.name})`));
     log.info('');
     log.info(
-      'These connectors will be used automatically when KIBANA_TESTING_AI_CONNECTORS is not set.'
+      'These connectors will be used automatically when KIBANA_TESTING_INFERENCE_ENDPOINTS is not set.'
     );
     log.info('Set KBN_EVALS_SKIP_CONNECTOR_SETUP=true to skip connector setup/teardown.');
     log.info('');
@@ -453,7 +440,7 @@ export const runConnectorSetup = async (repoRoot: string, log: ToolingLog): Prom
   if (cachedConnectors) {
     const connectorEntries = Object.entries(cachedConnectors);
     const base64Payload = Buffer.from(JSON.stringify(cachedConnectors)).toString('base64');
-    process.env.KIBANA_TESTING_AI_CONNECTORS = base64Payload;
+    process.env.KIBANA_TESTING_INFERENCE_ENDPOINTS = base64Payload;
 
     log.info(`Using cached EIS connectors (${connectorEntries.length} connector(s)):`);
     connectorEntries.forEach(([id]) => log.info(`  - ${id}`));
@@ -492,8 +479,8 @@ export const runConnectorSetup = async (repoRoot: string, log: ToolingLog): Prom
   log.info('');
   log.info('Done! Run the following to export connectors to your shell:');
   log.info('');
-  log.info(`  export KIBANA_TESTING_AI_CONNECTORS="${base64Payload}"`);
-  process.env.KIBANA_TESTING_AI_CONNECTORS = base64Payload;
+  log.info(`  export KIBANA_TESTING_INFERENCE_ENDPOINTS="${base64Payload}"`);
+  process.env.KIBANA_TESTING_INFERENCE_ENDPOINTS = base64Payload;
   log.info('');
   log.info('Available connector IDs:');
   connectors.forEach((c) => log.info(`  - ${c.id}`));

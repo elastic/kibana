@@ -8,8 +8,8 @@
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
-import { spacesMock } from '@kbn/spaces-plugin/server/mocks';
 import { ACTION_POLICY_SAVED_OBJECT_TYPE } from '../../../saved_objects';
+import { createSpacesServiceMock } from '../spaces_service/spaces_service.mock';
 import { ActionPolicySavedObjectService } from './action_policy_saved_object_service';
 
 /**
@@ -26,7 +26,9 @@ export function createMockEncryptedSavedObjects(
       id,
       type: ACTION_POLICY_SAVED_OBJECT_TYPE,
       attributes: {
-        auth: { apiKey: attrs.apiKey, createdByUser: attrs.createdByUser, owner: 'test-user' },
+        apiKey: attrs.apiKey,
+        apiKeyCreatedByUser: attrs.createdByUser,
+        apiKeyOwner: 'test-user',
       },
       references: [],
     });
@@ -52,15 +54,18 @@ export function createActionPolicySavedObjectService(): {
   actionPolicySavedObjectService: ActionPolicySavedObjectService;
   mockSavedObjectsClient: jest.Mocked<SavedObjectsClientContract>;
   mockEncryptedSavedObjectsClient: jest.Mocked<EncryptedSavedObjectsClient>;
-  mockFindAllDecrypted: jest.SpyInstance;
+  mockFindAllDecrypted: jest.SpyInstance<
+    ReturnType<ActionPolicySavedObjectService['findAllDecrypted']>,
+    Parameters<ActionPolicySavedObjectService['findAllDecrypted']>
+  >;
 } {
   const mockSavedObjectsClient = savedObjectsClientMock.create();
-  const mockSpaces = spacesMock.createStart();
+  const { spacesService } = createSpacesServiceMock();
   const mockEncryptedSavedObjectsClient = createMockEncryptedSavedObjectsClient();
 
   const actionPolicySavedObjectService = new ActionPolicySavedObjectService(
     mockSavedObjectsClient,
-    mockSpaces,
+    spacesService,
     mockEncryptedSavedObjectsClient
   );
 

@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { screen } from '@testing-library/react';
+import { fireEvent, screen } from '@testing-library/react';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { InspectHighlight } from './inspect_highlight';
 
@@ -68,6 +68,25 @@ describe('InspectHighlight', () => {
     const badge = screen.getByText('CapybaraWrapper');
 
     expect(badge).toBeInTheDocument();
+  });
+
+  it('should make the box a drag source when onDragStart is provided', () => {
+    const onDragStart = jest.fn();
+
+    renderWithI18n(
+      <InspectHighlight
+        currentPosition={{ width: 50, height: 20, transform: 'translate(0px,0px)' }}
+        path="CapybaraWrapper"
+        onDragStart={onDragStart}
+      />
+    );
+
+    const highlight = screen.getByTestId('inspectHighlightBox');
+    expect(highlight).toHaveAttribute('draggable', 'true');
+
+    fireEvent.dragStart(highlight);
+
+    expect(onDragStart).toHaveBeenCalledTimes(1);
   });
 
   it('should adjust badge position if it would overflow the right of the viewport', () => {

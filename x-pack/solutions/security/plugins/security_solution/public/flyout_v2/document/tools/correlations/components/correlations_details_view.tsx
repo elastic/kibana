@@ -22,6 +22,7 @@ import { RelatedAlertsBySameSourceEvent } from './related_alerts_by_same_source_
 import { RelatedAlertsBySession } from './related_alerts_by_session';
 import { RelatedAlertsByAncestry } from './related_alerts_by_ancestry';
 import { RelatedAttacks } from './related_attacks';
+import { isRulePreviewDocument } from '../../../../shared/utils/is_rule_preview_document';
 
 export interface CorrelationsDetailsViewProps {
   /**
@@ -33,10 +34,6 @@ export interface CorrelationsDetailsViewProps {
    */
   scopeId: string;
   /**
-   * Whether the document is being displayed in a rule preview
-   */
-  isRulePreview: boolean;
-  /**
    * Callback to open an alert preview when clicking the preview button in the correlations table
    */
   onShowAlert: (id: string, indexName: string, title?: string) => void;
@@ -45,10 +42,6 @@ export interface CorrelationsDetailsViewProps {
    * When not provided, the expand button column is hidden.
    */
   onShowAttack?: (id: string, indexName: string, title?: string) => void;
-  /**
-   * Whether to render rule links as PreviewLink (legacy expandable flyout) instead of OpenFlyoutLink (new flyout system)
-   */
-  useLegacyExpandableFlyout: boolean;
 }
 
 /**
@@ -56,14 +49,8 @@ export interface CorrelationsDetailsViewProps {
  * so it can be used both inside a flyout body and inline in a tab panel.
  */
 export const CorrelationsDetailsView = memo(
-  ({
-    hit,
-    scopeId,
-    isRulePreview,
-    onShowAlert,
-    onShowAttack,
-    useLegacyExpandableFlyout,
-  }: CorrelationsDetailsViewProps) => {
+  ({ hit, scopeId, onShowAlert, onShowAttack }: CorrelationsDetailsViewProps) => {
+    const isRulePreview = useMemo(() => isRulePreviewDocument(hit), [hit]);
     const eventId = hit.raw._id ?? '';
     const ecsData = useMemo<Ecs>(
       () => ({
@@ -74,9 +61,12 @@ export const CorrelationsDetailsView = memo(
       [hit]
     );
 
-    const { show: showAlertsByAncestry, ancestryDocumentId } = useShowRelatedAlertsByAncestry({
+    const {
+      show: showAlertsByAncestry,
+      ancestryDocumentId,
+      ancestryDocumentIndex,
+    } = useShowRelatedAlertsByAncestry({
       hit,
-      isRulePreview,
     });
     const { show: showSameSourceAlerts, originalEventId } = useShowRelatedAlertsBySameSourceEvent({
       hit,
@@ -121,7 +111,6 @@ export const CorrelationsDetailsView = memo(
                   scopeId={scopeId}
                   eventId={eventId}
                   onShowAlert={onShowAlert}
-                  useLegacyExpandableFlyout={useLegacyExpandableFlyout}
                 />
               </EuiFlexItem>
             )}
@@ -132,7 +121,6 @@ export const CorrelationsDetailsView = memo(
                   scopeId={scopeId}
                   eventId={eventId}
                   onShowAlert={onShowAlert}
-                  useLegacyExpandableFlyout={useLegacyExpandableFlyout}
                 />
               </EuiFlexItem>
             )}
@@ -141,8 +129,8 @@ export const CorrelationsDetailsView = memo(
                 <RelatedAlertsByAncestry
                   scopeId={scopeId}
                   documentId={ancestryDocumentId}
+                  documentIndex={ancestryDocumentIndex}
                   onShowAlert={onShowAlert}
-                  useLegacyExpandableFlyout={useLegacyExpandableFlyout}
                 />
               </EuiFlexItem>
             )}

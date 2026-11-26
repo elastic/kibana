@@ -10,12 +10,16 @@ import {
   ensureMetadata,
   extractBucketColumnName,
   extractBucketIntervalMs,
+  extractReferencedColumns,
   extractStatsGroupColumns,
   extractWhereExpression,
+  findNonColumnFullTextArguments,
+  findOverBroadMatchPredicates,
   getStatsQueryHints,
   hasSameEsql,
   hasStatsCommand,
   normalizeEsqlSafe,
+  renderNonColumnFullTextArgumentError,
 } from './esql_helpers';
 
 describe('extractWhereExpression', () => {
@@ -421,5 +425,141 @@ describe('hasSameEsql', () => {
 
   it('distinguishes valid but different queries', () => {
     expect(hasSameEsql('FROM logs | WHERE a > 1', 'FROM logs | WHERE b > 2')).toBe(false);
+  });
+});
+
+describe('findOverBroadMatchPredicates', () => {
+  it('flags a multi-word `:` value', () => {
+    expect(findOverBroadMatchPredicates('FROM logs | WHERE message : "request failed"')).toEqual([
+      { field: 'message', value: 'request failed', operator: ':' },
+    ]);
+  });
+
+  it('flags a multi-word MATCH value with no options', () => {
+    expect(
+      findOverBroadMatchPredicates('FROM logs | WHERE MATCH(message, "request failed")')
+    ).toEqual([{ field: 'message', value: 'request failed', operator: 'MATCH' }]);
+  });
+
+  it('does not flag a single-word `:` value', () => {
+    expect(
+      findOverBroadMatchPredicates('FROM logs | WHERE error.type : "OutOfMemoryError"')
+    ).toEqual([]);
+  });
+
+  it('does not flag MATCH_PHRASE', () => {
+    expect(
+      findOverBroadMatchPredicates('FROM logs | WHERE MATCH_PHRASE(message, "request failed")')
+    ).toEqual([]);
+  });
+
+  it('does not flag MATCH with an explicit AND operator', () => {
+    expect(
+      findOverBroadMatchPredicates(
+        'FROM logs | WHERE MATCH(message, "request failed", {"operator": "AND"})'
+      )
+    ).toEqual([]);
+  });
+
+  it('returns an empty array for an unparseable query', () => {
+    expect(findOverBroadMatchPredicates('THIS IS NOT ESQL {{{')).toEqual([]);
+  });
+});
+
+describe('extractReferencedColumns', () => {
+  it('collects field references across clauses, including a field under a cast', () => {
+    const columns = extractReferencedColumns(
+      'FROM logs | WHERE svc::keyword == "x" AND msg == "y"'
+    );
+    expect(new Set(columns)).toEqual(new Set(['svc', 'msg']));
+  });
+
+  it('returns an empty array for an unparseable query', () => {
+    expect(extractReferencedColumns('THIS IS NOT ESQL {{{')).toEqual([]);
+  });
+});
+
+describe('findNonColumnFullTextArguments', () => {
+  it('flags MATCH_PHRASE on a casted field', () => {
+    expect(
+      findNonColumnFullTextArguments(
+        'FROM logs | WHERE MATCH_PHRASE(exception.message::KEYWORD, "i/o timeout")'
+      )
+    ).toEqual([{ operator: 'MATCH_PHRASE', field: 'exception.message::KEYWORD' }]);
+  });
+
+  it('flags MATCH on a casted field, normalising the cast to upper case', () => {
+    expect(
+      findNonColumnFullTextArguments('FROM logs | WHERE MATCH(message::keyword, "timeout")')
+    ).toEqual([{ operator: 'MATCH', field: 'message::KEYWORD' }]);
+  });
+
+  it('flags the `:` operator on a casted field', () => {
+    expect(
+      findNonColumnFullTextArguments('FROM logs | WHERE message::keyword : "timeout"')
+    ).toEqual([{ operator: ':', field: 'message::KEYWORD' }]);
+  });
+
+  it('flags a function wrapping the field', () => {
+    expect(
+      findNonColumnFullTextArguments('FROM logs | WHERE MATCH_PHRASE(TO_LOWER(message), "timeout")')
+    ).toEqual([{ operator: 'MATCH_PHRASE', field: 'TO_LOWER(message)' }]);
+  });
+
+  it('flags the generated query that failed in production', () => {
+    const esql = `FROM $.nightshift.sources.default.logging-eis | WHERE \`kubernetes.labels.app_kubernetes_io/name\` == "eis-entitlements-consumer" AND MATCH_PHRASE(exception.message::KEYWORD, "execute Kafka entitlements store upsert: i/o timeout")
+| STATS metric_value = COUNT(*) BY bucket = BUCKET(@timestamp, 1 minute)
+| LIMIT 6`;
+
+    expect(findNonColumnFullTextArguments(esql)).toEqual([
+      { operator: 'MATCH_PHRASE', field: 'exception.message::KEYWORD' },
+    ]);
+  });
+
+  it('does not flag a backticked column containing a slash', () => {
+    expect(
+      findNonColumnFullTextArguments(
+        'FROM logs | WHERE `kubernetes.labels.app_kubernetes_io/name` : "api" AND MATCH_PHRASE(`a/b`, "x y")'
+      )
+    ).toEqual([]);
+  });
+
+  it('does not flag full-text functions on plain columns', () => {
+    expect(
+      findNonColumnFullTextArguments(
+        'FROM logs | WHERE MATCH_PHRASE(exception.message, "i/o timeout") AND message : "timeout"'
+      )
+    ).toEqual([]);
+  });
+
+  it('does not flag a cast used with an exact comparison', () => {
+    expect(
+      findNonColumnFullTextArguments('FROM logs | WHERE exception.message::keyword == "timeout"')
+    ).toEqual([]);
+  });
+
+  it('returns nothing when the query does not parse', () => {
+    expect(findNonColumnFullTextArguments('FROM | WHERE (')).toEqual([]);
+  });
+});
+
+describe('renderNonColumnFullTextArgumentError', () => {
+  it('renders function calls as calls and the `:` operator as an infix predicate', () => {
+    const message = renderNonColumnFullTextArgumentError([
+      { operator: 'MATCH_PHRASE', field: 'a::KEYWORD' },
+      { operator: ':', field: 'b::KEYWORD' },
+    ]);
+
+    expect(message).toContain('MATCH_PHRASE(a::KEYWORD, ...), b::KEYWORD : ...');
+    expect(message).not.toContain(':(');
+  });
+
+  it('tells the model to use the recommended cast and to mind LIKE case sensitivity', () => {
+    const message = renderNonColumnFullTextArgumentError([
+      { operator: 'MATCH', field: 'a::KEYWORD' },
+    ]);
+
+    expect(message).toContain('field::<recommended cast> LIKE');
+    expect(message).toContain('case-sensitive');
   });
 });

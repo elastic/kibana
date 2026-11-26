@@ -3,7 +3,7 @@
 exports[`ActionsSection renders with no actions selected 1`] = `
 <div>
   <div
-    class="euiText emotion-euiText-m"
+    class="euiText emotion-euiText-s"
   >
     <p>
       Choose the actions to take when the job rule matches an anomaly.
@@ -28,6 +28,7 @@ exports[`ActionsSection renders with no actions selected 1`] = `
             class="euiCheckboxControl emotion-euiCheckboxControl-unselected"
           >
             <span
+              aria-hidden="true"
               class="emotion-euiCheckbox__icon-check"
               data-euiicon-type="empty"
               role="presentation"
@@ -82,6 +83,7 @@ exports[`ActionsSection renders with no actions selected 1`] = `
             class="euiCheckboxControl emotion-euiCheckboxControl-unselected"
           >
             <span
+              aria-hidden="true"
               class="emotion-euiCheckbox__icon-check"
               data-euiicon-type="empty"
               role="presentation"
@@ -123,7 +125,7 @@ exports[`ActionsSection renders with no actions selected 1`] = `
 exports[`ActionsSection renders with skip_result and skip_model_update selected 1`] = `
 <div>
   <div
-    class="euiText emotion-euiText-m"
+    class="euiText emotion-euiText-s"
   >
     <p>
       Choose the actions to take when the job rule matches an anomaly.
@@ -148,6 +150,7 @@ exports[`ActionsSection renders with skip_result and skip_model_update selected 
             class="euiCheckboxControl emotion-euiCheckboxControl-selected"
           >
             <span
+              aria-hidden="true"
               class="emotion-euiCheckbox__icon-check"
               data-euiicon-type="check"
               role="presentation"
@@ -203,6 +206,7 @@ exports[`ActionsSection renders with skip_result and skip_model_update selected 
             class="euiCheckboxControl emotion-euiCheckboxControl-selected"
           >
             <span
+              aria-hidden="true"
               class="emotion-euiCheckbox__icon-check"
               data-euiicon-type="check"
               role="presentation"
@@ -245,7 +249,7 @@ exports[`ActionsSection renders with skip_result and skip_model_update selected 
 exports[`ActionsSection renders with skip_result selected 1`] = `
 <div>
   <div
-    class="euiText emotion-euiText-m"
+    class="euiText emotion-euiText-s"
   >
     <p>
       Choose the actions to take when the job rule matches an anomaly.
@@ -270,6 +274,7 @@ exports[`ActionsSection renders with skip_result selected 1`] = `
             class="euiCheckboxControl emotion-euiCheckboxControl-selected"
           >
             <span
+              aria-hidden="true"
               class="emotion-euiCheckbox__icon-check"
               data-euiicon-type="check"
               role="presentation"
@@ -325,6 +330,7 @@ exports[`ActionsSection renders with skip_result selected 1`] = `
             class="euiCheckboxControl emotion-euiCheckboxControl-unselected"
           >
             <span
+              aria-hidden="true"
               class="emotion-euiCheckbox__icon-check"
               data-euiicon-type="empty"
               role="presentation"

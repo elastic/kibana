@@ -84,7 +84,7 @@ To test the Elasticsearch deprecations page ([#107053](https://github.com/elasti
   Next, point to the 6.x data directory when running from a 7.x cluster.
 
   ```
-  yarn es snapshot -E path.data=./path_to_6.x_indices
+  pnpm es snapshot -E path.data=./path_to_6.x_indices
   ```
 
   **Token-based authentication**
@@ -92,7 +92,7 @@ To test the Elasticsearch deprecations page ([#107053](https://github.com/elasti
   Reindexing should also work using token-based authentication (implemented via [#111451](https://github.com/elastic/kibana/pull/111451)). To simulate, set the following parameters when running ES from a snapshot:
 
   ```
-  yarn es snapshot -E path.data=./path_to_6.x_indices -E xpack.security.authc.token.enabled=true -E xpack.security.authc.api_key.enabled=true
+  pnpm es snapshot -E path.data=./path_to_6.x_indices -E xpack.security.authc.token.enabled=true -E xpack.security.authc.api_key.enabled=true
   ```
 
   Then, update your `kibana.dev.yml` file to include:
@@ -123,7 +123,7 @@ To test the Elasticsearch deprecations page ([#107053](https://github.com/elasti
   Next, point to the 6.x data directory when running from a 7.x cluster.
 
   ```
-  yarn es snapshot --license trial -E path.data=./path_to_6.x_ml_snapshots
+  pnpm es snapshot --license trial -E path.data=./path_to_6.x_ml_snapshots
   ```
 
 **3. Removing deprecated settings**
@@ -287,7 +287,7 @@ PUT .reporting-*/_settings
 #### Kibana API deprecations:
 Run kibana locally with the test example plugin that has deprecated routes
 ```
-yarn start --plugin-path=examples/routing_example --plugin-path=examples/developer_examples
+pnpm start --plugin-path=examples/routing_example --plugin-path=examples/developer_examples
 ```
 
 The following comprehensive deprecated routes examples are registered inside the folder: `examples/routing_example/server/routes/deprecated_routes`

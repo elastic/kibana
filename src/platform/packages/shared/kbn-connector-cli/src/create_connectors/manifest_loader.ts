@@ -9,7 +9,7 @@
 
 import fs from 'fs';
 import path from 'path';
-import yaml from 'js-yaml';
+import { parse } from 'yaml';
 import { vaultRead } from './vault';
 import type { Manifest, ManifestSecretField, ResolvedManifest } from './types';
 
@@ -22,7 +22,7 @@ export function loadManifests(manifestsDir: string = MANIFESTS_DIR): Manifest[] 
   const files = fs.readdirSync(manifestsDir).filter((f) => f.endsWith('.yaml'));
   return files.map((file) => {
     const content = fs.readFileSync(path.join(manifestsDir, file), 'utf-8');
-    const manifest = yaml.load(content) as Manifest;
+    const manifest = parse(content) as Manifest;
     validate(manifest, file);
     return manifest;
   });

@@ -10,7 +10,7 @@
 import { spawn } from 'child_process';
 import { EventEmitter } from 'events';
 
-import { runPreBuild } from './pre_build';
+import { runPreBuild } from './pre_build.ts';
 
 jest.mock('child_process', () => ({
   spawn: jest.fn(),

@@ -221,7 +221,7 @@ describe('registerAttachmentUiDefinitions', () => {
     expect(monitorCall).toBeDefined();
 
     const config = monitorCall![1];
-    expect(config.getIcon()).toBe('online');
+    expect(config.getIcon()).toBe('wifi');
     expect(config.getLabel({ id: 'test', type: 'test', data: {} })).toBe('Monitor');
   });
 });

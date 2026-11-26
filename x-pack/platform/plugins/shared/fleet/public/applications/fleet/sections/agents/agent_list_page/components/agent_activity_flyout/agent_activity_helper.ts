@@ -7,6 +7,8 @@
 
 import type { ActionStatus } from '../../../../../types';
 
+export { isScheduledAction } from '../../utils/is_scheduled_action';
+
 const today = () => new Date().toISOString().substring(0, 10);
 
 export function getOtherDaysActions(actions: ActionStatus[]) {

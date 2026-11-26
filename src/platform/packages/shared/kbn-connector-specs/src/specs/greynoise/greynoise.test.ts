@@ -210,6 +210,8 @@ describe('GreyNoiseConnector', () => {
   });
 
   describe('test handler', () => {
+    const testSpec = GreyNoiseConnector.test;
+
     it('should return success when API is accessible', async () => {
       const mockResponse = {
         data: {
@@ -220,30 +222,18 @@ describe('GreyNoiseConnector', () => {
       };
       mockClient.get.mockResolvedValue(mockResponse);
 
-      if (!GreyNoiseConnector.test) {
-        throw new Error('Test handler not defined');
-      }
-      const result = await GreyNoiseConnector.test.handler(mockContext);
+      const result = await testSpec.handler(mockContext);
 
       expect(mockClient.get).toHaveBeenCalledWith(
         'https://api.greynoise.io/v2/noise/quick/8.8.8.8'
       );
-      expect(result).toEqual({
-        ok: true,
-        message: 'Successfully connected to GreyNoise API',
-      });
+      expect(result).toEqual({});
     });
 
-    it('should return failure when API is not accessible', async () => {
+    it('should throw on error', async () => {
       mockClient.get.mockRejectedValue(new Error('API key invalid'));
 
-      if (!GreyNoiseConnector.test) {
-        throw new Error('Test handler not defined');
-      }
-      const result = await GreyNoiseConnector.test.handler(mockContext);
-
-      expect(result.ok).toBe(false);
-      expect(result.message).toContain('Failed to connect');
+      await expect(testSpec.handler(mockContext)).rejects.toThrow();
     });
   });
 });

@@ -11,7 +11,6 @@ import { ScoutTestRunConfigCategory } from '@kbn/scout-info';
 import type { ServerlessProjectType } from '@kbn/es';
 import type { DeploymentAgnosticCommonServices } from '../services';
 import { services } from '../services';
-import { LOCAL_PRODUCT_DOC_PATH } from './common_paths';
 import { updateKbnServerArguments } from './helpers';
 
 interface CreateTestConfigOptions<T extends DeploymentAgnosticCommonServices> {
@@ -30,7 +29,6 @@ const esServerArgsFromController = {
   es: [],
   oblt: ['xpack.apm_data.enabled=true'],
   security: ['xpack.security.authc.api_key.cache.max_keys=70000'],
-  workplaceai: [],
   vectordb: [],
 };
 
@@ -51,7 +49,6 @@ const kbnServerArgsFromController = {
     // disable fleet task that writes to metrics.fleet_server.* data streams, impacting functional tests
     `--xpack.task_manager.unsafe.exclude_task_types=${JSON.stringify(['Fleet-Metrics-Task'])}`,
   ],
-  workplaceai: [],
   vectordb: [],
 };
 
@@ -102,7 +99,6 @@ export function createServerlessFeatureFlagTestConfig<T extends DeploymentAgnost
                 '--xpack.uptime.service.username=localKibanaIntegrationTestsUser',
                 '--xpack.uptime.service.devUrl=mockDevUrl',
                 '--xpack.uptime.service.manifestUrl=mockDevUrl',
-                `--xpack.productDocBase.artifactRepositoryUrl=file:///${LOCAL_PRODUCT_DOC_PATH}`,
               ]
             : []),
           ...(dockerRegistryPort

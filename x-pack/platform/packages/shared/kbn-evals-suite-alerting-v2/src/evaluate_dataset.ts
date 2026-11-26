@@ -30,6 +30,8 @@ import {
   createExpectedToolCalledEvaluator,
 } from './evaluators/expected_tool_called';
 import {
+  collectAttachmentDataCheckNames,
+  createAttachmentDataCheckEvaluator,
   createExpectedAttachmentDataEvaluator,
   createExpectedRenderAttachmentEvaluator,
 } from './evaluators/expected_attachment';
@@ -62,6 +64,7 @@ export const collectScoredCriteria = (
 const createCriteriaEvaluator = (evaluators: DefaultEvaluators): Evaluator => ({
   name: 'Criteria',
   kind: 'LLM',
+  direction: 'maximize',
   evaluate: async ({ expected, ...rest }) => {
     const scoredCriteria = collectScoredCriteria(
       expected as RuleManagementExample['output'] | null | undefined
@@ -197,6 +200,7 @@ export const createEvaluateDataset = ({
         createExpectedAnyOfToolIdsEvaluator(),
         createExpectedRenderAttachmentEvaluator(),
         createExpectedAttachmentDataEvaluator(),
+        ...collectAttachmentDataCheckNames(examples).map(createAttachmentDataCheckEvaluator),
         createCriteriaEvaluator(evaluators),
       ].map((evaluator) => withLowScoreLogging(evaluator, log, { testTitle }))
     );

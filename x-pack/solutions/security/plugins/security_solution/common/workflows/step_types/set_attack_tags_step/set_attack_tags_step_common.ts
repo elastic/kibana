@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { StepCategory } from '@kbn/workflows';
 import type { BaseStepDefinition } from '@kbn/workflows';
 import { i18n } from '@kbn/i18n';
@@ -14,36 +14,42 @@ import { MAX_ATTACK_ID_LENGTH, MAX_WORKFLOW_MESSAGE_LENGTH } from '../common/con
 
 export const SetAttackTagsStepId = 'security.setAttackTags' as const;
 
-const tagsArray = z.array(AlertTag);
+const tagsArray = lazySchema(() => z.array(AlertTag));
 
-const attackIdsBase = z.object({
-  ids: z
-    .union([
-      z.string().min(1).max(MAX_ATTACK_ID_LENGTH),
-      z.array(z.string().min(1).max(MAX_ATTACK_ID_LENGTH)).min(1),
-    ])
-    .describe('A single attack ID or a list of IDs to support bulk updates'),
-  update_related_alerts: z.boolean().optional().default(false),
-});
+const attackIdsBase = lazySchema(() =>
+  z.object({
+    ids: z
+      .union([
+        z.string().min(1).max(MAX_ATTACK_ID_LENGTH),
+        z.array(z.string().min(1).max(MAX_ATTACK_ID_LENGTH)).min(1),
+      ])
+      .describe('A single attack ID or a list of IDs to support bulk updates'),
+    update_related_alerts: z.boolean().optional().default(false),
+  })
+);
 
 // `z.union` (not `.refine`) so the "at least one tags array" constraint lowers to JSON Schema
 // `anyOf` and surfaces in the editor — a top-level `.refine` is unwrapped before JSON Schema
 // generation. Follow-up: elastic/security-team#17984.
-export const setAttackTagsInputSchema = z.union([
-  attackIdsBase.extend({
-    tags_to_add: tagsArray.min(1).describe('Tags to add to the specified attacks'),
-    tags_to_remove: tagsArray.default([]).describe('Tags to remove from the specified attacks'),
-  }),
-  attackIdsBase.extend({
-    tags_to_add: tagsArray.default([]).describe('Tags to add to the specified attacks'),
-    tags_to_remove: tagsArray.min(1).describe('Tags to remove from the specified attacks'),
-  }),
-]);
+export const setAttackTagsInputSchema = lazySchema(() =>
+  z.union([
+    attackIdsBase.extend({
+      tags_to_add: tagsArray.min(1).describe('Tags to add to the specified attacks'),
+      tags_to_remove: tagsArray.default([]).describe('Tags to remove from the specified attacks'),
+    }),
+    attackIdsBase.extend({
+      tags_to_add: tagsArray.default([]).describe('Tags to add to the specified attacks'),
+      tags_to_remove: tagsArray.min(1).describe('Tags to remove from the specified attacks'),
+    }),
+  ])
+);
 
-export const setAttackTagsOutputSchema = z.object({
-  success: z.boolean(),
-  message: z.string().max(MAX_WORKFLOW_MESSAGE_LENGTH).optional(),
-});
+export const setAttackTagsOutputSchema = lazySchema(() =>
+  z.object({
+    success: z.boolean(),
+    message: z.string().max(MAX_WORKFLOW_MESSAGE_LENGTH).optional(),
+  })
+);
 
 export const setAttackTagsStepCommonDefinition: BaseStepDefinition<
   typeof setAttackTagsInputSchema,

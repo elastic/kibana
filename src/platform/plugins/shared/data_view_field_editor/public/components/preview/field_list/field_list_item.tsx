@@ -71,6 +71,8 @@ export interface PreviewListItemProps {
   hasScriptError?: boolean;
   /** Indicates whether the field list item comes from the Painless script */
   isFromScript?: boolean;
+  /** Display label of the field, falls back to the field key when not set */
+  label?: string;
 }
 
 const isLoadingPreviewSelector = (state: PreviewState) => state.isLoadingPreview;
@@ -80,6 +82,7 @@ export const PreviewListItem: React.FC<PreviewListItemProps> = ({
   toggleIsPinned,
   hasScriptError,
   isFromScript = false,
+  label,
 }) => {
   const styles = useMemoCss(componentStyles);
 
@@ -94,6 +97,14 @@ export const PreviewListItem: React.FC<PreviewListItemProps> = ({
   const [isPinFocused, setIsPinFocused] = useState(false);
 
   const showPinIcon = isPinHovered || isPinFocused || isPinned;
+
+  const pinButtonLabel = isPinned
+    ? i18n.translate('indexPatternFieldEditor.fieldPreview.unpinFieldButtonLabel', {
+        defaultMessage: 'Unpin field',
+      })
+    : i18n.translate('indexPatternFieldEditor.fieldPreview.pinFieldButtonLabel', {
+        defaultMessage: 'Pin field',
+      });
 
   const doesContainImage = useMemo(() => containsImgElement(formattedValue), [formattedValue]);
 
@@ -110,7 +121,7 @@ export const PreviewListItem: React.FC<PreviewListItemProps> = ({
       );
     }
 
-    return key;
+    return label ?? key;
   };
 
   const withTooltip = (content: JSX.Element) => (
@@ -193,12 +204,7 @@ export const PreviewListItem: React.FC<PreviewListItemProps> = ({
 
         <EuiFlexItem css={styles.actions} grow={false}>
           {toggleIsPinned && (
-            <EuiToolTip
-              content={i18n.translate('indexPatternFieldEditor.fieldPreview.pinFieldButtonLabel', {
-                defaultMessage: 'Pin field',
-              })}
-              disableScreenReaderOutput
-            >
+            <EuiToolTip content={pinButtonLabel} disableScreenReaderOutput>
               <EuiButtonIcon
                 onClick={(e: { detail: number }) => {
                   const isKeyboardEvent = e.detail === 0; // Mouse = non-zero, Keyboard = 0
@@ -210,12 +216,7 @@ export const PreviewListItem: React.FC<PreviewListItemProps> = ({
                 color="text"
                 iconType={showPinIcon ? 'pinFill' : 'empty'}
                 data-test-subj="pinFieldButton"
-                aria-label={i18n.translate(
-                  'indexPatternFieldEditor.fieldPreview.pinFieldButtonLabel',
-                  {
-                    defaultMessage: 'Pin field',
-                  }
-                )}
+                aria-label={pinButtonLabel}
               />
             </EuiToolTip>
           )}

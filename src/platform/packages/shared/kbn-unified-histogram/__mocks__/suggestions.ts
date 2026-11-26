@@ -13,7 +13,7 @@ export const currentSuggestionMock = {
   title: 'Heat map',
   hide: false,
   score: 0.6,
-  previewIcon: 'heatmap',
+  previewIcon: 'chartHeatmap',
   visualizationId: 'lnsHeatmap',
   visualizationState: {
     shape: 'heatmap',

@@ -16,7 +16,7 @@ node scripts/workflow_graph_screenshot.js --input <path> [options]
 ```sh
 # Directory — renders all *.yaml / *.yml files inside
 node scripts/workflow_graph_screenshot.js \
-  --input src/platform/plugins/shared/workflows_management/common/examples
+  --input x-pack/platform/plugins/shared/workflows_management/common/examples
 
 # Single file
 node scripts/workflow_graph_screenshot.js \
@@ -81,14 +81,14 @@ view — Playwright waits for this signal before capturing.
 ## Chromium
 
 Chromium is launched via Playwright, which manages its own browser install
-(downloaded during `yarn kbn bootstrap`) — no system Chrome detection is needed.
+(downloaded during `pnpm kbn bootstrap`) — no system Chrome detection is needed.
 To use a different executable, pass `--chrome-executable "/path/to/chrome"`.
 
 If the managed Chromium hasn't been installed (e.g. it was pruned, or bootstrap
 was skipped), Playwright's own launch error explains how to fetch it:
 
 ```
-npx playwright install chromium
+node scripts/playwright install chromium
 ```
 
 ## Caveats

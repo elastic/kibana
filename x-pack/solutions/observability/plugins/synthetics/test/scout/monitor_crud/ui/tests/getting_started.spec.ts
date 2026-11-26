@@ -9,10 +9,15 @@ import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
 import { test } from '../../../common/ui/fixtures';
 
-test.describe('GettingStarted', { tag: tags.stateful.classic }, () => {
+// Failing: See https://github.com/elastic/kibana/issues/302135
+test.describe.skip('GettingStarted', { tag: tags.stateful.classic }, () => {
+  let locationLabel: string;
+
   test.beforeAll(async ({ syntheticsServices }) => {
+    await syntheticsServices.enable();
     await syntheticsServices.deleteMonitors();
-    await syntheticsServices.ensurePrivateLocationExists();
+    const location = await syntheticsServices.ensurePrivateLocationExists();
+    locationLabel = location.label;
   });
 
   test.afterAll(async ({ syntheticsServices }) => {
@@ -30,20 +35,15 @@ test.describe('GettingStarted', { tag: tags.stateful.classic }, () => {
       await pageObjects.syntheticsApp.navigateToGettingStarted();
     });
 
-    await test.step('enable monitor management', async () => {
-      await pageObjects.syntheticsApp.enableMonitorManagement(true);
-    });
-
     await test.step('shows validation error on submit', async () => {
-      await page.locator('.euiSideNavItem').locator('text=Synthetics').click();
-      await page.click('text=Create monitor');
+      await page.testSubj.click('syntheticsMonitorConfigSubmitButton');
       await expect(page.getByText('URL is required')).toBeVisible();
     });
 
     await test.step('create basic monitor', async () => {
       await pageObjects.syntheticsApp.fillFirstMonitorDetails({
         url: 'https://www.elastic.co',
-        location: 'Test private location',
+        location: locationLabel,
       });
       await pageObjects.syntheticsApp.confirmAndSave();
     });

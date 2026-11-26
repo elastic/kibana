@@ -33,8 +33,7 @@ export default function ({ getService }: FtrProviderContext) {
       jobGroups: [...new Set(expectedJobGroups)].sort(),
       recordCount: '2,399',
       memoryStatus: 'ok',
-      jobState: 'closed',
-      datafeedState: 'stopped',
+      jobAndDatafeedState: 'closed stopped',
       latestTimestamp: '2016-02-11 23:56:59',
     };
   }
@@ -422,10 +421,8 @@ export default function ({ getService }: FtrProviderContext) {
       await ml.jobWizardCommon.assertJobIdInputExists();
       await ml.jobWizardCommon.setJobId(`${jobIdClone}-again`);
       await ml.jobWizardCommon.advanceToValidationSection();
-      await ml.jobWizardCommon.assertValidationCallouts([
-        'mlValidationCallout warning',
-        'mlValidationCallout error',
-      ]);
+      await ml.jobWizardCommon.assertValidationCallouts(['mlValidationCallout warning']);
+
       await ml.jobWizardCommon.assertCalloutText(
         'mlValidationCallout warning',
         /Time range\s*The selected or available time range might be too short/

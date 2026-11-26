@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import dateMath from '@elastic/datemath';
+import moment from 'moment';
+
 import {
   DATE_PICKER_ABSOLUTE_TAB,
   DATE_PICKER_ABSOLUTE_INPUT,
@@ -24,6 +27,21 @@ import {
 
 const NEW_PICKER_CONTROL = '[data-test-subj="dateRangePickerControlButton"]';
 
+// Converts a date-math expression (now-X style) to the humanized label that the
+// legacy EuiSuperDatePicker button renders.  Absolute formatted strings like
+// 'Aug 1, 2019 @ 20:03:29.186' are returned unchanged — the legacy picker
+// button already shows them in that exact format.
+const toLegacyPickerLabel = (raw: string): string => {
+  if (raw === 'now') return 'now';
+  if (/^now(\b|[-+])/.test(raw)) {
+    const parsed = dateMath.parse(raw);
+    if (parsed && parsed.isValid()) return `~ ${parsed.fromNow()}`;
+  }
+  const isoMoment = moment(raw, moment.ISO_8601, true);
+  if (isoMoment.isValid()) return isoMoment.format('MMM D, YYYY @ HH:mm:ss.SSS');
+  return raw;
+};
+
 // Convert legacy popover format ("MMM D, YYYY @ HH:mm:ss.SSS") to ISO 8601, which
 // the new picker's input accepts. Falls through "now" / "now-15m" / ISO unchanged.
 const toIsoIfDate = (value: string) => {
@@ -38,15 +56,17 @@ const retypeRangeOnNewPicker = (
   container: string,
   pickFromCurrent: (current: { start: string; end: string }) => { start: string; end: string }
 ) => {
-  cy.get(`${container} ${NEW_PICKER_CONTROL}`).then(($btn) => {
-    const [currentStart = '', currentEnd = ''] = ($btn.attr('data-date-range') ?? '')
-      .split(' to ')
-      .map((s) => s.trim());
-    const next = pickFromCurrent({ start: currentStart, end: currentEnd });
-    cy.wrap($btn).click();
-    cy.get(DATE_RANGE_PICKER_INPUT).clear();
-    cy.get(DATE_RANGE_PICKER_INPUT).type(`${next.start} to ${next.end}{enter}`);
-  });
+  cy.get(`${container} ${NEW_PICKER_CONTROL}`)
+    .invoke('attr', 'data-date-range')
+    .then((dateRange) => {
+      const [currentStart = '', currentEnd = ''] = (dateRange ?? '')
+        .split(' to ')
+        .map((s) => s.trim());
+      const next = pickFromCurrent({ start: currentStart, end: currentEnd });
+      cy.get(`${container} ${NEW_PICKER_CONTROL}`).click();
+      cy.get(DATE_RANGE_PICKER_INPUT).clear();
+      cy.get(DATE_RANGE_PICKER_INPUT).type(`${next.start} to ${next.end}{enter}`);
+    });
 };
 
 const usingNewPicker = (
@@ -115,6 +135,28 @@ export const setStartDate = (date: string, container: string = GLOBAL_FILTERS_CO
   );
 };
 
+export const setDateRange = (
+  start: string,
+  end: string,
+  container: string = GLOBAL_FILTERS_CONTAINER
+) => {
+  usingNewPicker(
+    container,
+    () => {
+      cy.get(`${container} ${NEW_PICKER_CONTROL}`).click();
+      cy.get(DATE_RANGE_PICKER_INPUT).clear();
+      cy.get(DATE_RANGE_PICKER_INPUT).type(`${toIsoIfDate(start)} to ${toIsoIfDate(end)}{enter}`);
+    },
+    () => {
+      setStartDate(start, container);
+      setEndDate(end, container);
+      // eslint-disable-next-line cypress/no-force
+      cy.get(GET_DATE_PICKER_APPLY_BUTTON(container)).click({ force: true });
+      cy.get(GET_DATE_PICKER_APPLY_BUTTON(container)).should('not.have.text', 'Updating');
+    }
+  );
+};
+
 export const updateDates = (container: string = GLOBAL_FILTERS_CONTAINER) => {
   // The new picker applies on Enter inside set{Start,End}Date{Now}, so this
   // step is a no-op there. The legacy picker still needs an explicit click.
@@ -122,6 +164,7 @@ export const updateDates = (container: string = GLOBAL_FILTERS_CONTAINER) => {
     container,
     () => undefined,
     () => {
+      // eslint-disable-next-line cypress/no-force
       cy.get(GET_DATE_PICKER_APPLY_BUTTON(container)).click({ force: true });
       cy.get(GET_DATE_PICKER_APPLY_BUTTON(container)).should('not.have.text', 'Updating');
     }
@@ -149,10 +192,10 @@ export const expectDateRangeToBe = (
     () => {
       cy.get(`${container} [data-test-subj="superDatePickerstartDatePopoverButton"]`)
         .first()
-        .should('have.text', expected.start);
+        .should('have.text', toLegacyPickerLabel(expected.start));
       cy.get(`${container} [data-test-subj="superDatePickerendDatePopoverButton"]`)
         .first()
-        .should('have.text', expected.end);
+        .should('have.text', toLegacyPickerLabel(expected.end));
     }
   );
 };

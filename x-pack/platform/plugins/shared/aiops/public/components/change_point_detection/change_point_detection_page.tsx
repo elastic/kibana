@@ -8,7 +8,6 @@ import type { FC } from 'react';
 import React, { useCallback, useState } from 'react';
 import {
   EuiButtonEmpty,
-  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyout,
@@ -19,6 +18,7 @@ import {
   EuiTitle,
   EuiToolTip,
 } from '@elastic/eui';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { Query } from '@kbn/es-query';
@@ -61,22 +61,17 @@ export const ChangePointDetectionPage: FC = () => {
 
   if (metricFieldOptions.length === 0) {
     return (
-      <EuiCallOut
+      <KbnDangerCallout
         announceOnMount={false}
         title={i18n.translate('xpack.aiops.index.dataViewWithoutMetricNotificationTitle', {
           defaultMessage: 'The data view "{dataViewTitle}" does not contain any metric fields.',
           values: { dataViewTitle: dataView.getName() },
         })}
-        color="danger"
-        iconType="warning"
-      >
-        <p>
-          {i18n.translate('xpack.aiops.index.dataViewWithoutMetricNotificationDescription', {
-            defaultMessage:
-              'Change point detection can only be run on data views with a metric field.',
-          })}
-        </p>
-      </EuiCallOut>
+        text={i18n.translate('xpack.aiops.index.dataViewWithoutMetricNotificationDescription', {
+          defaultMessage:
+            'Change point detection can only be run on data views with a metric field.',
+        })}
+      />
     );
   }
 

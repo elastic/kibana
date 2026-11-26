@@ -8,12 +8,11 @@
  */
 
 import { join, parse } from 'path';
-import sharp from 'sharp';
-import type { Sharp, Metadata } from 'sharp';
 import pixelmatch from 'pixelmatch';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { promises as fs } from 'fs';
 import { PNG } from 'pngjs';
+import { resizePng } from '@kbn/ftr-common-functional-ui-services';
 export interface PngDescriptor {
   path: string;
 
@@ -32,15 +31,9 @@ const toDescriptor = (imageInfo: string | PngDescriptor): PngDescriptor => {
   };
 };
 
-/**
- * Use sharp to open the image and get the metadata
- */
-const getSharpInstance = async (
-  imageInfo: string | Buffer
-): Promise<{ instance: Sharp; metadata: Metadata }> => {
-  const instance = sharp(imageInfo).png({ quality: 100, progressive: true }).clone();
-  const metadata = await instance.metadata();
-  return { instance, metadata };
+const readPng = async (imageInfo: string | Buffer): Promise<PNG> => {
+  const buffer = Buffer.isBuffer(imageInfo) ? imageInfo : await fs.readFile(imageInfo);
+  return PNG.sync.read(buffer);
 };
 
 /**
@@ -63,22 +56,12 @@ export async function comparePngs(
   const sessionDescriptor = toDescriptor(sessionInfo);
   const baselineDescriptor = toDescriptor(baselineInfo);
 
-  let sessionTestPath: string = sessionDescriptor.path;
-  let baselineTestPath: string = baselineDescriptor.path;
+  log.debug(`comparePngs: ${sessionDescriptor.path} vs ${baselineDescriptor.path}`);
 
-  log.debug(`comparePngs: ${sessionTestPath} vs ${baselineTestPath}`);
-
-  const { instance: session, metadata: sessionMetadata } = await getSharpInstance(
-    sessionDescriptor.buffer ?? sessionTestPath
-  );
-  const sessionWidth = sessionMetadata.width ?? 0;
-  const sessionHeight = sessionMetadata.height ?? 0;
-
-  const { instance: baseline, metadata: baselineMetadata } = await getSharpInstance(
-    baselineDescriptor.buffer ?? baselineTestPath
-  );
-  const baselineWidth = baselineMetadata.width ?? 0;
-  const baselineHeight = baselineMetadata.height ?? 0;
+  let sessionTestImg = await readPng(sessionDescriptor.buffer ?? sessionDescriptor.path);
+  let baselineTestImg = await readPng(baselineDescriptor.buffer ?? baselineDescriptor.path);
+  const { width: sessionWidth, height: sessionHeight } = sessionTestImg;
+  const { width: baselineWidth, height: baselineHeight } = baselineTestImg;
 
   // Adjust screenshot size
   const testWidth = Math.min(sessionWidth, baselineWidth);
@@ -87,16 +70,16 @@ export async function comparePngs(
   log.debug('session height ' + sessionHeight + ' and width ' + sessionWidth);
   log.debug('test height ' + testHeight + ' and width ' + testWidth);
   if (sessionWidth !== baselineWidth || sessionHeight !== baselineHeight) {
-    sessionTestPath = join(
-      sessionDirectory,
-      `${parse(sessionDescriptor.path).name}-session-resized.png`
+    sessionTestImg = resizePng(sessionTestImg, testWidth, testHeight);
+    baselineTestImg = resizePng(baselineTestImg, testWidth, testHeight);
+    await fs.writeFile(
+      join(sessionDirectory, `${parse(sessionDescriptor.path).name}-session-resized.png`),
+      PNG.sync.write(sessionTestImg)
     );
-    baselineTestPath = join(
-      sessionDirectory,
-      `${parse(baselineDescriptor.path).name}-baseline-resized.png`
+    await fs.writeFile(
+      join(sessionDirectory, `${parse(baselineDescriptor.path).name}-baseline-resized.png`),
+      PNG.sync.write(baselineTestImg)
     );
-    await session.resize(testWidth, testHeight, { fit: 'fill' }).png().toFile(sessionTestPath);
-    await baseline.resize(testWidth, testHeight, { fit: 'fill' }).png().toFile(baselineTestPath);
   }
 
   log.debug(`calculating diff pixels...`);
@@ -105,8 +88,6 @@ export async function comparePngs(
   // will still show up as diffs, but upping this will not help that.  Instead we keep the threshold low, and expect
   // some the diffCount to be lower than our own threshold value.
   const THRESHOLD = 0.1;
-  const sessionTestImg = PNG.sync.read(await fs.readFile(sessionTestPath));
-  const baselineTestImg = PNG.sync.read(await fs.readFile(baselineTestPath));
   const diff = new PNG({ width: testWidth, height: testHeight });
   const mismatchedPixels = pixelmatch(
     sessionTestImg.data,

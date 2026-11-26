@@ -62,9 +62,11 @@ module.exports = [
         }
         callback();
       },
-      // Handle monaco-editor internal imports
+      // Handle monaco-editor subpath imports. 0.56 remapped ESM entry points
+      // (monaco-editor/esm/vs/... → monaco-editor/editor|languages|platform/...);
+      // keep matching the legacy esm/vs prefixes for packages that still use them.
       function (context, request, callback) {
-        if (/^monaco-editor\/(esm\/vs|esm|lib|min)/.test(request)) {
+        if (/^monaco-editor\//.test(request)) {
           return callback(null, 'commonjs ' + request);
         }
         callback();
@@ -104,7 +106,6 @@ module.exports = [
         },
         {
           test: /\.css$/,
-          exclude: /components/,
           use: [{ loader: 'style-loader' }, { loader: 'css-loader' }],
           sideEffects: true,
         },
@@ -122,14 +123,7 @@ module.exports = [
                 sourceMap: !isProd,
               },
             },
-            {
-              loader: 'postcss-loader',
-              options: {
-                postcssOptions: {
-                  config: require.resolve('@kbn/optimizer/postcss.config'),
-                },
-              },
-            },
+            { loader: require.resolve('@kbn/optimizer-webpack-helpers/lightningcss_loader') },
             {
               loader: 'sass-loader',
               options: {
@@ -155,15 +149,7 @@ module.exports = [
                 sourceMap: !isProd,
               },
             },
-            {
-              loader: 'postcss-loader',
-              options: {
-                sourceMap: !isProd,
-                postcssOptions: {
-                  config: require.resolve('@kbn/optimizer/postcss.config'),
-                },
-              },
-            },
+            { loader: require.resolve('@kbn/optimizer-webpack-helpers/lightningcss_loader') },
             {
               loader: 'sass-loader',
               options: {
@@ -173,7 +159,7 @@ module.exports = [
                       loaderContext.context || loaderContext.rootContext,
                       path.resolve(
                         kibanaRoot,
-                        'src/core/public/styles/core_app/_globals_borealislight.scss'
+                        'src/core/packages/core/public/styles/core_app/_globals_borealislight.scss'
                       )
                     )
                   );

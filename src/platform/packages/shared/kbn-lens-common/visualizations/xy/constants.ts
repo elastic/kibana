@@ -7,6 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { VisIconType } from '@kbn/chart-icons';
+
+/**
+ * Whether the partial data markers (endzones) are hidden when a saved XY chart doesn't set
+ * `hideEndzones`: by default they are shown.
+ */
+export const LENS_XY_HIDE_ENDZONES_DEFAULT = false;
+
 export const YAxisModes = {
   AUTO: 'auto',
   LEFT: 'left',
@@ -47,4 +55,4 @@ export const AvailableReferenceLineIcons = {
   STAR_FILLED: 'starFilled',
   TAG: 'tag',
   TRIANGLE: 'triangle',
-} as const;
+} as const satisfies Record<string, VisIconType>;

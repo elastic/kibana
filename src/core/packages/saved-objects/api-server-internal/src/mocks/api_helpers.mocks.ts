@@ -75,6 +75,7 @@ const createValidationHelperMock = (): ValidationHelperMock => {
     validateInitialNamespaces: jest.fn(),
     validateObjectNamespaces: jest.fn(),
     validateObjectForCreate: jest.fn(),
+    validateObjectForUpdate: jest.fn(),
     validateOriginId: jest.fn(),
   };
 

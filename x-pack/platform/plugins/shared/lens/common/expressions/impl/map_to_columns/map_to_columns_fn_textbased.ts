@@ -6,10 +6,8 @@
  */
 
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
-import type {
-  OriginalColumn,
-  MapToColumnsExpressionFunction,
-} from '../../defs/map_to_columns/types';
+import type { OriginalColumn } from '@kbn/lens-common';
+import type { MapToColumnsExpressionFunction } from '../../defs/map_to_columns/types';
 
 export const mapToOriginalColumnsTextBased: MapToColumnsExpressionFunction['fn'] = (
   data,
@@ -107,7 +105,10 @@ export const mapToOriginalColumnsTextBased: MapToColumnsExpressionFunction['fn']
           meta: {
             ...column.meta,
             ...('sourceField' in originalColumn ? { field: originalColumn.sourceField } : {}),
-            ...('format' in originalColumn ? { params: originalColumn.format } : {}),
+            // A scalar format reads "0.3..0.4" as 0.3, so ranges keep their number_range format.
+            ...('format' in originalColumn && column.meta?.type !== 'number_range'
+              ? { params: originalColumn.format }
+              : {}),
             sourceParams: {
               ...(column.meta?.sourceParams ?? {}),
               ...('sourceField' in originalColumn

@@ -7,13 +7,14 @@
 
 import {
   EuiButtonIcon,
-  EuiCallOut,
   EuiFlyout,
   EuiFlyoutBody,
   EuiFlyoutHeader,
   EuiTitle,
   EuiToolTip,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 import { UnifiedDocViewer, useEsDocSearch } from '@kbn/unified-doc-viewer-plugin/public';
 import type { MouseEvent } from 'react';
 import React, { useState } from 'react';
@@ -30,6 +31,7 @@ import type { ClientPluginsStart } from '../../../../../plugin';
 
 export const ViewDocument = ({ ping }: { ping: Ping }) => {
   const [isFlyoutVisible, setIsFlyoutVisible] = useState<boolean>(false);
+  const flyoutTitleId = useGeneratedHtmlId();
 
   const remoteName = ping.remote?.remoteName;
   const indexPattern = getSyntheticsCcsIndex(remoteName);
@@ -65,6 +67,7 @@ export const ViewDocument = ({ ping }: { ping: Ping }) => {
       </EuiToolTip>
       {isFlyoutVisible && (
         <EuiFlyout
+          aria-labelledby={flyoutTitleId}
           onClose={() => setIsFlyoutVisible(false)}
           ownFocus={true}
           onClick={(evt: MouseEvent) => {
@@ -74,26 +77,23 @@ export const ViewDocument = ({ ping }: { ping: Ping }) => {
         >
           <EuiFlyoutHeader>
             <EuiTitle size="m">
-              <h4>
+              <h4 id={flyoutTitleId}>
                 {INDEXED_AT} {formattedTimestamp}
               </h4>
             </EuiTitle>
           </EuiFlyoutHeader>
           <EuiFlyoutBody>
             {remoteDataViewError ? (
-              <EuiCallOut
+              <KbnDangerCallout
                 announceOnMount
-                color="danger"
-                iconType="warning"
                 title={i18n.translate(
                   'xpack.synthetics.monitorDetails.summary.viewDocument.error',
                   {
                     defaultMessage: 'Unable to load document from remote cluster',
                   }
                 )}
-              >
-                {String(remoteDataViewError.message ?? remoteDataViewError)}
-              </EuiCallOut>
+                text={String(remoteDataViewError.message ?? remoteDataViewError)}
+              />
             ) : dataView?.id && hit ? (
               <UnifiedDocViewer hit={hit} dataView={dataView} />
             ) : (

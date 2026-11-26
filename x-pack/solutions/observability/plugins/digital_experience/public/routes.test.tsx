@@ -1,0 +1,266 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import React from 'react';
+import type { ComponentProps } from 'react';
+import { render, screen } from '@testing-library/react';
+import { createMemoryHistory } from 'history';
+import {
+  InvalidRouteParamsException,
+  RouteRenderer,
+  RouterProvider,
+} from '@kbn/typed-react-router-config';
+import { digitalExperienceRouter } from './routes';
+
+jest.mock('./application/digital_experience_layout', () => ({
+  DigitalExperienceLayout: () => {
+    const { Outlet: LayoutOutlet } = jest.requireActual('@kbn/typed-react-router-config');
+    return <LayoutOutlet />;
+  },
+}));
+jest.mock('./pages/frustration/frustration_page', () => ({
+  FrustrationPage: ({ serviceName, source }: { serviceName: string; source: string }) => (
+    <div data-test-subj="frustrationPage">{`${serviceName} ${source}`}</div>
+  ),
+}));
+jest.mock('./pages/application_details/application_page', () => ({
+  ApplicationPage: ({ selectedTab }: { selectedTab: string }) => (
+    <div data-test-subj="applicationPage">{selectedTab}</div>
+  ),
+}));
+
+const locationOf = (pathname: string) => ({ pathname, search: '', hash: '', state: undefined });
+
+describe('digitalExperienceRouter', () => {
+  it('matches / to the Applications list', () => {
+    const matches = digitalExperienceRouter.matchRoutes(locationOf('/'));
+
+    expect(matches.map(({ route }) => route.path)).toEqual(['/', '/']);
+  });
+
+  it('matches /{serviceName} to the Overview of the Application view with the path param', () => {
+    const location = locationOf('/my-app');
+
+    const matches = digitalExperienceRouter.matchRoutes(location);
+
+    // The application route, then its Overview tab.
+    expect(matches.map(({ route }) => route.path)).toEqual([
+      '/',
+      '/{serviceName}',
+      '/{serviceName}',
+    ]);
+    expect(digitalExperienceRouter.getParams('/{serviceName}', location)).toEqual({
+      path: { serviceName: 'my-app' },
+      // Links without a source open the Classic Overview.
+      query: { source: 'classic' },
+    });
+  });
+
+  it('heals an unknown source to the Classic one', () => {
+    const location = { ...locationOf('/my-app'), search: '?source=unknown' };
+
+    expect(() => digitalExperienceRouter.matchRoutes(location)).toThrow(
+      expect.objectContaining({
+        constructor: InvalidRouteParamsException,
+        patched: expect.objectContaining({ query: { source: 'classic' } }),
+      })
+    );
+  });
+
+  it('removes an unknown source filter from the list', () => {
+    const location = { ...locationOf('/'), search: '?rangeFrom=now-15m&sourceFilter=unknown' };
+
+    expect(() => digitalExperienceRouter.matchRoutes(location)).toThrow(
+      expect.objectContaining({
+        patched: expect.objectContaining({ query: { rangeFrom: 'now-15m' } }),
+      })
+    );
+  });
+
+  it('removes an OS or release longer than the KPI route accepts, so the page never fails with a 400', () => {
+    const location = {
+      ...locationOf('/my-app'),
+      search: `?source=otel&osName=${'o'.repeat(65)}&release=${'r'.repeat(1025)}`,
+    };
+
+    expect(() => digitalExperienceRouter.matchRoutes(location)).toThrow(
+      expect.objectContaining({
+        constructor: InvalidRouteParamsException,
+        patched: expect.objectContaining({ query: { source: 'otel' } }),
+      })
+    );
+  });
+
+  it('removes an environment longer than the routes accept', () => {
+    const location = {
+      ...locationOf('/'),
+      search: `?rangeFrom=now-15m&environment=${'e'.repeat(1025)}`,
+    };
+
+    expect(() => digitalExperienceRouter.matchRoutes(location)).toThrow(
+      expect.objectContaining({
+        patched: expect.objectContaining({ query: { rangeFrom: 'now-15m' } }),
+      })
+    );
+  });
+
+  it('keeps an OS, release and environment up to the longest the routes accept', () => {
+    const query = {
+      environment: 'e'.repeat(1024),
+      source: 'otel',
+      osName: 'o'.repeat(64),
+      release: 'r'.repeat(1024),
+    };
+    const location = { ...locationOf('/my-app'), search: `?${new URLSearchParams(query)}` };
+
+    expect(digitalExperienceRouter.getParams('/{serviceName}', location)).toEqual({
+      path: { serviceName: 'my-app' },
+      query,
+    });
+  });
+
+  it('links an application with its source', () => {
+    expect(
+      digitalExperienceRouter.link('/{serviceName}', {
+        path: { serviceName: 'my-app' },
+        query: { source: 'otel' },
+      })
+    ).toBe('/my-app?source=otel');
+  });
+
+  it('reads the source from the query', () => {
+    const location = { ...locationOf('/my-app'), search: '?source=otel' };
+
+    expect(digitalExperienceRouter.getParams('/{serviceName}', location)).toEqual({
+      path: { serviceName: 'my-app' },
+      query: { source: 'otel' },
+    });
+  });
+
+  it('matches the Sessions tab and a session, below the application', () => {
+    expect(
+      digitalExperienceRouter
+        .matchRoutes(locationOf('/my-app/sessions'))
+        .map(({ route }) => route.path)
+    ).toEqual(['/', '/{serviceName}', '/{serviceName}/sessions']);
+
+    const location = { ...locationOf('/my-app/sessions/abc'), search: '?source=otel&os=Linux' };
+    expect(digitalExperienceRouter.matchRoutes(location).map(({ route }) => route.path)).toEqual([
+      '/',
+      '/{serviceName}',
+      '/{serviceName}/sessions/{sessionId}',
+    ]);
+    expect(
+      digitalExperienceRouter.getParams('/{serviceName}/sessions/{sessionId}', location)
+    ).toEqual({
+      path: { serviceName: 'my-app', sessionId: 'abc' },
+      query: { source: 'otel', os: 'Linux' },
+    });
+  });
+
+  it('removes invalid sessions list params', () => {
+    const location = {
+      ...locationOf('/my-app/sessions'),
+      search: `?source=otel&withJsErrors=true&withFailedRequests=true&frustrationTarget=${'X'.repeat(
+        1025
+      )}&frustrationPage=&duration=forever&sortField=error_count&page=1001&perPage=30&os=&country=${'X'.repeat(
+        17
+      )}&browser=Chrome`,
+    };
+
+    expect(() => digitalExperienceRouter.matchRoutes(location)).toThrow(
+      expect.objectContaining({
+        patched: expect.objectContaining({
+          query: {
+            source: 'otel',
+            withJsErrors: 'true',
+            withFailedRequests: 'true',
+            browser: 'Chrome',
+          },
+        }),
+      })
+    );
+  });
+
+  it('reads the sessions list params as their types', () => {
+    const location = {
+      ...locationOf('/my-app/sessions'),
+      search:
+        '?source=otel&withJsErrors=true&withFailedRequests=false&withFrustration=true&frustrationTarget=%23pay&frustrationPage=%2Fcheckout&sortField=frustration_count&page=2&perPage=50&browser=Chrome',
+    };
+
+    expect(digitalExperienceRouter.getParams('/{serviceName}/sessions', location)).toEqual({
+      path: { serviceName: 'my-app' },
+      query: {
+        source: 'otel',
+        withJsErrors: true,
+        withFailedRequests: false,
+        withFrustration: true,
+        frustrationTarget: '#pay',
+        frustrationPage: '/checkout',
+        sortField: 'frustration_count',
+        page: 2,
+        perPage: 50,
+        browser: 'Chrome',
+      },
+    });
+  });
+
+  it('links a session with the sessions list state', () => {
+    expect(
+      digitalExperienceRouter.link('/{serviceName}/sessions/{sessionId}', {
+        path: { serviceName: 'my-app', sessionId: 'abc' },
+        query: { source: 'otel', withFailedRequests: true, perPage: 50 },
+      })
+    ).toBe('/my-app/sessions/abc?perPage=50&source=otel&withFailedRequests=true');
+  });
+
+  it('matches the frustration page below the application, and not as a tab', () => {
+    expect(
+      digitalExperienceRouter
+        .matchRoutes({ ...locationOf('/my-app/frustration'), search: '?source=otel' })
+        .map(({ route }) => route.path)
+    ).toEqual(['/', '/{serviceName}', '/{serviceName}/frustration']);
+  });
+
+  it('links the frustration page with the source', () => {
+    expect(
+      digitalExperienceRouter.link('/{serviceName}/frustration', {
+        path: { serviceName: 'my-app' },
+        query: { source: 'otel', rangeFrom: 'now-7d', rangeTo: 'now', environment: 'production' },
+      })
+    ).toBe('/my-app/frustration?environment=production&rangeFrom=now-7d&rangeTo=now&source=otel');
+  });
+
+  describe('rendering', () => {
+    const renderAt = (url: string) =>
+      render(
+        <RouterProvider
+          history={createMemoryHistory({ initialEntries: [url] })}
+          router={
+            digitalExperienceRouter as unknown as ComponentProps<typeof RouterProvider>['router']
+          }
+        >
+          <RouteRenderer />
+        </RouterProvider>
+      );
+
+    it('renders the frustration page for the application and source of the URL', () => {
+      renderAt('/my-app/frustration?source=otel');
+
+      expect(screen.getByTestId('frustrationPage')).toHaveTextContent('my-app otel');
+      expect(screen.queryByTestId('applicationPage')).not.toBeInTheDocument();
+    });
+
+    it('still renders the Overview at the application path', () => {
+      renderAt('/my-app?source=otel');
+
+      expect(screen.getByTestId('applicationPage')).toHaveTextContent('overview');
+      expect(screen.queryByTestId('frustrationPage')).not.toBeInTheDocument();
+    });
+  });
+});

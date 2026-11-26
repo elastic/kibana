@@ -7,10 +7,7 @@
 
 import { kebabCase } from 'lodash';
 import { EuiLink, EuiFormRow, EuiFilePicker, EuiSpacer } from '@elastic/eui';
-import type {
-  EuiFilePickerClass,
-  EuiFilePickerProps,
-} from '@elastic/eui/src/components/form/file_picker/file_picker';
+import type { EuiFilePickerRef } from '@elastic/eui';
 import React, { useCallback, useState, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -34,53 +31,52 @@ interface OsqueryPackUploaderProps {
 
 const OsqueryPackUploaderComponent: React.FC<OsqueryPackUploaderProps> = ({ onChange }) => {
   const packName = useRef('');
-  const filePickerRef = useRef<EuiFilePickerClass>(null);
+  const filePickerRef = useRef<EuiFilePickerRef>(null);
   const [isInvalid, setIsInvalid] = useState<string | null>(null);
-  // @ts-expect-error update types
-  let fileReader;
 
-  const handleFileRead = () => {
-    // @ts-expect-error update types
-    const content = fileReader.result;
+  const handleFileRead = useCallback(
+    (content: string) => {
+      let parsedContent;
 
-    let parsedContent;
+      try {
+        parsedContent = JSON.parse(content.replaceAll('\\\n', ''), (key, value) => {
+          if (key === 'query') {
+            // remove any multiple spaces from the query
+            return value.replaceAll(/\s(?=\s)/gm, '');
+          }
 
-    try {
-      parsedContent = JSON.parse(content.replaceAll('\\\n', ''), (key, value) => {
-        if (key === 'query') {
-          // remove any multiple spaces from the query
-          return value.replaceAll(/\s(?=\s)/gm, '');
-        }
+          if (key === 'interval') {
+            // convert interval int to string
+            return `${value}`;
+          }
 
-        if (key === 'interval') {
-          // convert interval int to string
-          return `${value}`;
-        }
+          return value;
+        });
 
-        return value;
-      });
+        setIsInvalid(null);
+      } catch (error) {
+        setIsInvalid(error);
+        filePickerRef.current?.removeFiles();
+      }
 
-      setIsInvalid(null);
-    } catch (error) {
-      setIsInvalid(error);
+      if (!parsedContent?.queries) {
+        return;
+      }
+
+      onChange(parsedContent, packName.current);
       filePickerRef.current?.removeFiles();
-    }
+    },
+    [onChange]
+  );
 
-    if (!parsedContent?.queries) {
-      return;
-    }
-
-    onChange(parsedContent, packName.current);
-    filePickerRef.current?.removeFiles();
-  };
-
-  // @ts-expect-error update types
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const handleFileChosen = (file) => {
-    fileReader = new FileReader();
-    fileReader.onloadend = handleFileRead;
-    fileReader.readAsText(file);
-  };
+  const handleFileChosen = useCallback(
+    (file: File) => {
+      const fileReader = new FileReader();
+      fileReader.onloadend = () => handleFileRead(fileReader.result as string);
+      fileReader.readAsText(file);
+    },
+    [handleFileRead]
+  );
 
   const handleInputChange = useCallback(
     (inputFiles: any) => {
@@ -131,7 +127,7 @@ const OsqueryPackUploaderComponent: React.FC<OsqueryPackUploaderProps> = ({ onCh
         error={<>{`${isInvalid}`}</>}
       >
         <EuiFilePicker
-          ref={filePickerRef as React.Ref<Omit<EuiFilePickerProps, 'stylesMemoizer'>>}
+          ref={filePickerRef}
           id="osquery_pack_picker"
           initialPromptText={filePickerLabel}
           aria-label={filePickerLabel}

@@ -35,7 +35,7 @@ interface QueryRuleDetailPanelProps {
   tourInfo?: {
     title: string;
     content: string;
-    tourTargetRef?: React.RefObject<HTMLDivElement>;
+    tourTargetRef?: React.Ref<HTMLDivElement>;
   };
   createMode?: boolean;
 }

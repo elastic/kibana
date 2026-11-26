@@ -18,7 +18,11 @@ import {
   CPS_USAGE_OVERRIDES_BADGE,
 } from './customize_panel_action/constants';
 import { ACTION_SHOW_CONFIG_PANEL } from './show_config_panel_action/constants';
-import { OPEN_FLYOUT_ADD_DRILLDOWN, OPEN_FLYOUT_EDIT_DRILLDOWN } from './constants';
+import {
+  OPEN_FLYOUT_ADD_DRILLDOWN,
+  OPEN_FLYOUT_EDIT_DRILLDOWN,
+  APPROXIMATION_APPLIED_BADGE,
+} from './constants';
 
 export const registerActions = (uiActions: UiActionsSetup) => {
   uiActions.registerActionAsync(ACTION_REMOVE_PANEL, async () => {
@@ -62,6 +66,11 @@ export const registerActions = (uiActions: UiActionsSetup) => {
     return new ShowConfigPanelAction();
   });
   uiActions.attachAction(ON_OPEN_PANEL_MENU, ACTION_SHOW_CONFIG_PANEL);
+
+  uiActions.addTriggerActionAsync(PANEL_BADGE_TRIGGER, APPROXIMATION_APPLIED_BADGE, async () => {
+    const { approximationAppliedBadge } = await import('../async_module');
+    return approximationAppliedBadge;
+  });
 
   uiActions.addTriggerActionAsync(ON_OPEN_PANEL_MENU, OPEN_FLYOUT_ADD_DRILLDOWN, async () => {
     const { openCreateDrilldownFlyout } = await import('../async_module');

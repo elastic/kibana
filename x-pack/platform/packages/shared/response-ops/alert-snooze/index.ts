@@ -8,6 +8,7 @@
 export { QuickSnoozePanel } from './components/quick_snooze_panel';
 export type {
   QuickSnoozePanelProps,
+  QuickSnoozePanelMessages,
   SnoozeUnit,
   QuickDurationId,
   CustomSnoozeMode,

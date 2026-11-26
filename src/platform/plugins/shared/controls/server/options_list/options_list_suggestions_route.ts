@@ -14,6 +14,7 @@ import { schema } from '@kbn/config-schema';
 import type { CoreSetup, ElasticsearchClient } from '@kbn/core/server';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
 import { getKbnServerError, reportServerError } from '@kbn/kibana-utils-plugin/server';
+import type { ISearchMethods } from '@kbn/search-types';
 import type { PluginSetup as KqlPluginSetup } from '@kbn/kql/server';
 
 import { SELECTIONS_MAX } from '@kbn/controls-constants';
@@ -161,12 +162,14 @@ const getOptionsListDslSuggestions = async ({
     ? {}
     : validationBuilder.buildAggregation(suggestionRequest);
 
+  const searchFilter = suggestionBuilder.buildSearchFilter?.(suggestionRequest);
+
   const body: SearchRequest = {
     size: 0,
     ...timeoutSettings,
     query: {
       bool: {
-        filter: filters,
+        filter: [...(filters ?? []), ...(searchFilter ? [searchFilter] : [])],
       },
     },
     aggs: {
@@ -176,6 +179,9 @@ const getOptionsListDslSuggestions = async ({
     runtime_mappings: {
       ...runtimeFieldMap,
     },
+    // Same default as the data plugin search strategy. A data view title can name
+    // several concrete indices while only some exist.
+    ignore_unavailable: true,
   };
 
   /**
@@ -203,6 +209,7 @@ const getOptionsListDslSuggestions = async ({
     suggestions: results.suggestions,
     totalCardinality,
     invalidSelections,
+    isPartial: Boolean(rawEsResult.terminated_early || rawEsResult.timed_out),
   };
 };
 
@@ -214,17 +221,16 @@ const getOptionsListEsqlSuggestions = async ({
 }: {
   request: OptionsListESQLFetchBody;
   abortedEvent$: Observable<void>;
-  searchAsScoped: { search: import('@kbn/search-types').ISearchGeneric };
+  searchAsScoped: Pick<ISearchMethods, 'esql'>;
   uiSettingsClient: { get: <T = unknown>(key: string) => Promise<T> };
 }): Promise<OptionsListResponse> => {
   const abortController = new AbortController();
   abortedEvent$.subscribe(() => abortController.abort());
-
   const timezone = (await uiSettingsClient.get(UI_SETTINGS.DATEFORMAT_TZ)) as string | undefined;
 
   const result = await getESQLSingleColumnValues({
     query: request.esql,
-    search: searchAsScoped.search,
+    search: searchAsScoped,
     signal: abortController.signal,
     timeRange: request.timeRange,
     filter: request.filter,

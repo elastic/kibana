@@ -1,0 +1,1829 @@
+{
+  "id": "vendor_j_switch",
+  "title": "Vendor J switch",
+  "description": "Aruba CX switch syslog",
+  "cohort": "recent",
+  "format": "text",
+  "samples": [
+    {
+      "line": "<14>Jun 27 13:03:00 198.51.100.10 03363 auth:  User 'svc_example-ldap' logged out of SSH session from 203.0.113.20",
+      "expected": {
+        "@timestamp": "2026-06-27T13:03:00.000Z",
+        "ecs": {
+          "version": "8.11.0"
+        },
+        "log": {
+          "syslog": {
+            "appname": "auth",
+            "priority": 14,
+            "procid": "03363"
+          }
+        },
+        "message": "User 'svc_example-ldap' logged out of SSH session from 203.0.113.20",
+        "tags": [
+          "preserve_original_event"
+        ],
+        "event": {
+          "category": [
+            "network",
+            "configuration"
+          ],
+          "timezone": "UTC"
+        }
+      },
+      "unscoredFields": [
+        "@timestamp"
+      ]
+    },
+    {
+      "line": "2024-07-12T08:01:16.228730-04:00 6000RCSE4802 lldpd[2407]: Event|104|LOG_INFO|AMM|1/1|LLDP neighbor ab:cd:ef:12:34:56 added on 1/1/38",
+      "expected": {
+        "@timestamp": "2024-07-12T08:01:16.228730-04:00",
+        "ecs": {
+          "version": "8.11.0"
+        },
+        "log": {
+          "level": "LOG_INFO",
+          "syslog": {
+            "appname": "lldpd",
+            "procid": "2407"
+          }
+        },
+        "message": "LLDP neighbor ab:cd:ef:12:34:56 added on 1/1/38",
+        "tags": [
+          "preserve_original_event"
+        ],
+        "event": {
+          "category": [
+            "network",
+            "configuration"
+          ],
+          "code": "104",
+          "kind": [
+            "event"
+          ],
+          "outcome": "success",
+          "sequence": 1,
+          "type": [
+            "protocol",
+            "info",
+            "change"
+          ]
+        }
+      }
+    },
+    {
+      "line": "2024-07-12T16:32:37.065248-04:00 6000RCSE4802 lldpd[2407]: Event|105|LOG_INFO|AMM|1/1|LLDP neighbor ab:cd:ef:12:34:56 updated on 1/1/38",
+      "expected": {
+        "@timestamp": "2024-07-12T16:32:37.065248-04:00",
+        "ecs": {
+          "version": "8.11.0"
+        },
+        "log": {
+          "level": "LOG_INFO",
+          "syslog": {
+            "appname": "lldpd",
+            "procid": "2407"
+          }
+        },
+        "message": "LLDP neighbor ab:cd:ef:12:34:56 updated on 1/1/38",
+        "tags": [
+          "preserve_original_event"
+        ],
+        "event": {
+          "category": [
+            "network",
+            "configuration"
+          ],
+          "code": "105",
+          "kind": [
+            "event"
+          ],
+          "outcome": "success",
+          "sequence": 1,
+          "type": [
+            "protocol",
+            "info",
+            "change"
+          ]
+        }
+      }
+    },
+    {
+      "line": "2024-07-12T16:32:37.066329-04:00 6000RCSE4802 lldpd[2407]: Event|106|LOG_INFO|AMM|1/1|LLDP neighbor ab:cd:ef:12:34:56 deleted on 1/1/38",
+      "expected": {
+        "@timestamp": "2024-07-12T16:32:37.066329-04:00",
+        "ecs": {
+          "version": "8.11.0"
+        },
+        "log": {
+          "level": "LOG_INFO",
+          "syslog": {
+            "appname": "lldpd",
+            "procid": "2407"
+          }
+        },
+        "message": "LLDP neighbor ab:cd:ef:12:34:56 deleted on 1/1/38",
+        "tags": [
+          "preserve_original_event"
+        ],
+        "event": {
+          "category": [
+            "network",
+            "configuration"
+          ],
+          "code": "106",
+          "kind": [
+            "event"
+          ],
+          "outcome": "success",
+          "sequence": 1,
+          "type": [
+            "protocol",
+            "info",
+            "deletion"
+          ]
+        }
+      }
+    },
+    {
+      "line": "2024-07-12T16:32:20.648442-04:00 6000RCSE4802 lldpd[2407]: Event|113|LOG_INFO|AMM|1/1|PVID mismatch on 1/1/38 pvid = 394, Neighbor ab:cd:ef:12:34:56 port_id = ab:cd:ef:12:34:56 pvid = 0",
+      "expected": {
+        "@timestamp": "2024-07-12T16:32:20.648442-04:00",
+        "ecs": {
+          "version": "8.11.0"
+        },
+        "log": {
+          "level": "LOG_INFO",
+          "syslog": {
+            "appname": "lldpd",
+            "procid": "2407"
+          }
+        },
+        "message": "PVID mismatch on 1/1/38 pvid = 394, Neighbor ab:cd:ef:12:34:56 port_id = ab:cd:ef:12:34:56 pvid = 0",
+        "tags": [
+          "preserve_original_event"
+        ],
+        "event": {
+          "category": [
+            "network",
+            "configuration"
+          ],
+          "code": "113",
+          "kind": [
+            "event"
+          ],
+          "outcome": "unknown",
+          "sequence": 1,
+          "type": [
+            "protocol",
+            "info"
+          ]
+        }
+      }
+    },
+    {
+      "line": "2024-07-12T08:00:57.166221-04:00 6000RCSE4802 intfd[582]: Event|403|LOG_INFO|AMM|1/1|Link status for interface 1/1/38 is up",
+      "expected": {
+        "@timestamp": "2024-07-12T08:00:57.166221-04:00",
+        "ecs": {
+          "version": "8.11.0"
+        },
+        "log": {
+          "level": "LOG_INFO",
+          "syslog": {
+            "appname": "intfd",
+            "procid": "582"
+          }
+        },
+        "message": "Link status for interface 1/1/38 is up",
+        "tags": [
+          "preserve_original_event"
+        ],
+        "event": {
+          "category": [
+            "network",
+            "configuration"
+          ],
+          "code": "403",
+          "kind": [
+            "state"
+          ],
+          "outcome": "unknown",
+          "sequence": 1,
+          "type": [
+            "info",
+            "start"
+          ]
+        }
+      }
+    },
+    {
+      "line": "2024-07-12T16:32:43.623871-04:00 6000RCSE4802 intfd[582]: Event|404|LOG_INFO|AMM|1/1|Link status for interface 1/1/38 is down",
+      "expected": {
+        "@timestamp": "2024-07-12T16:32:43.623871-04:00",
+        "ecs": {
+          "version": "8.11.0"
+        },
+        "log": {
+          "level": "LOG_INFO",
+          "syslog": {
+            "appname": "intfd",
+            "procid": "582"
+          }
+        },
+        "message": "Link status for interface 1/1/38 is down",
+        "tags": [
+          "preserve_original_event"
+        ],
+        "event": {
+          "category": [
+            "network",
+            "configuration"
+          ],
+          "code": "404",
+          "kind": [
+            "state"
+          ],
+          "outcome": "unknown",
+          "sequence": 1,
+          "type": [
+            "info",
+            "end"
+          ]
+        }
+      }
+    },
+    {
+      "line": "2024-07-12T08:00:57.547412-04:00 6000RCSE4802 hpe-mstpd[2403]: Event|2012|LOG_INFO|AMM|1/1|CIST - Topology Change generated on port 1/1/38 going in to forwarding",
+      "expected": {
+        "@timestamp": "2024-07-12T08:00:57.547412-04:00",
+        "ecs": {
+          "version": "8.11.0"
+        },
+        "log": {
+          "level": "LOG_INFO",
+          "syslog": {
+            "appname": "hpe-mstpd",
+            "procid": "2403"
+          }
+        },
+        "message": "CIST - Topology Change generated on port 1/1/38 going in to forwarding",
+        "tags": [
+          "preserve_original_event"
+        ],
+        "event": {
+          "category": [
+            "network",
+            "configuration"
+          ],
+          "code": "2012",
+          "kind": [
+            "state"
+          ],
+          "outcome": "success",
+          "sequence": 1,
+          "type": [
+            "info",
+            "change"
+          ]
+        }
+      }
+    },
+    {
+      "line": "2024-08-01T16:36:24.166032-04:00 6000RCSE4802 ops-switchd[556]: Event|2108|LOG_INFO|AMM|1/1|Created Mac based VLAN entry. VLAN 394 is mapped to client ab:cd:ef:12:34:56 on port 1/1/18",
+      "expected": {
+        "@timestamp": "2024-08-01T16:36:24.166032-04:00",
+        "ecs": {
+          "version": "8.11.0"
+        },
+        "log": {
+          "level": "LOG_INFO",
+          "syslog": {
+            "appname": "ops-switchd",
+            "procid": "556"
+          }
+        },
+        "message": "Created Mac based VLAN entry. VLAN 394 is mapped to client ab:cd:ef:12:34:56 on port 1/1/18",
+        "network": {
+          "vlan": {
+            "id": "394"
+          }
+        },
+        "server": {
+          "mac": "AB-CD-EF-12-34-56"
+        },
+        "tags": [
+          "preserve_original_event"
+        ],
+        "event": {
+          "category": [
+            "network",
+            "configuration"
+          ],
+          "code": "2108",
+          "kind": [
+            "event"
+          ],
+          "outcome": "success",
+          "sequence": 1,
+          "type": [
+            "info",
+            "creation"
+          ]
+        }
+      }
+    },
+    {
+      "line": "2024-08-01T16:36:07.144362-04:00 6000RCSE4802 ops-switchd[556]: Event|2110|LOG_INFO|AMM|1/1|Deleted Mac based VLAN entry for ab:cd:ef:12:34:56 with VLAN 394 on port 1/1/18",
+      "expected": {
+        "@timestamp": "2024-08-01T16:36:07.144362-04:00",
+        "ecs": {
+          "version": "8.11.0"
+        },
+        "log": {
+          "level": "LOG_INFO",
+          "syslog": {
+            "appname": "ops-switchd",
+            "procid": "556"
+          }
+        },
+        "message": "Deleted Mac based VLAN entry for ab:cd:ef:12:34:56 with VLAN 394 on port 1/1/18",
+        "network": {
+          "vlan": {
+            "id": "394"
+          }
+        },
+        "server": {
+          "mac": "AB-CD-EF-12-34-56"
+        },
+        "tags": [
+          "preserve_original_event"
+        ],
+        "event": {
+          "category": [
+            "network",
+            "configuration"
+          ],
+          "code": "2110",
+          "kind": [
+            "event"
+          ],
+          "outcome": "success",
+          "sequence": 1,
+          "type": [
+            "info",
+            "deletion"
+          ]
+        }
+      }
+    },
+    {
+      "line": "2024-07-12T17:26:29.166604-04:00 6000RCSE4802 ops-switchd[556]: Event|2112|LOG_INFO|AMM|1/1|Updated MAC based VLAN entry. VLAN 394 is mapped to client ab:cd:ef:12:34:56 on port 1/1/48",
+      "expected": {
+        "@timestamp": "2024-07-12T17:26:29.166604-04:00",
+        "ecs": {
+          "version": "8.11.0"
+        },
+        "log": {
+          "level": "LOG_INFO",
+          "syslog": {
+            "appname": "ops-switchd",
+            "procid": "556"
+          }
+        },
+        "message": "Updated MAC based VLAN entry. VLAN 394 is mapped to client ab:cd:ef:12:34:56 on port 1/1/48",
+        "network": {
+          "vlan": {
+            "id": "394"
+          }
+        },
+        "server": {
+          "mac": "AB-CD-EF-12-34-56"
+        },
+        "tags": [
+          "preserve_original_event"
+        ],
+        "event": {
+          "category": [
+            "network",
+            "configuration"
+          ],
+          "code": "2112",
+          "kind": [
+            "event"
+          ],
+          "outcome": "success",
+          "sequence": 1,
+          "type": [
+            "info",
+            "change"
+          ]
+        }
+      }
+    },
+    {
+      "line": "2024-08-01T15:35:04.512076-04:00 6000RCSE4802 hpe-restd[3799]: Event|4650|LOG_INFO|AMM|-|Unable to fetch Aruba Central location from activate via VRF.",
+      "expected": {
+        "@timestamp": "2024-08-01T15:35:04.512076-04:00",
+        "ecs": {
+          "version": "8.11.0"
+        },
+        "log": {
+          "level": "LOG_INFO",
+          "syslog": {
+            "appname": "hpe-restd",
+            "procid": "3799"
+          }
+        },
+        "message": "Unable to fetch Aruba Central location from activate via VRF.",
+        "tags": [
+          "preserve_original_event"
+        ],
+        "event": {
+          "category": [
+            "network",
+            "configuration"
+          ],
+          "code": "4650",
+          "kind": [
+            "event"
+          ],
+          "outcome": "failure",
+          "type": [
+            "info"
+          ]
+        }
+      }
+    },
+    {
+      "line": "2024-08-01T11:20:47.843849-04:00 6000RCSE4802 hpe-sysmond[583]: Event|6303|LOG_INFO|AMM|1/1|Current system memory usage for module 1/1 is 33%",
+      "expected": {
+        "@timestamp": "2024-08-01T11:20:47.843849-04:00",
+        "ecs": {
+          "version": "8.11.0"
+        },
+        "log": {
+          "level": "LOG_INFO",
+          "syslog": {
+            "appname": "hpe-sysmond",
+            "procid": "583"
+          }
+        },
+        "message": "Current system memory usage for module 1/1 is 33%",
+        "tags": [
+          "preserve_original_event"
+        ],
+        "event": {
+          "category": [
+            "network",
+            "configuration"
+          ],
+          "code": "6303",
+          "kind": [
+            "event"
+          ],
+          "outcome": "unknown",
+          "sequence": 1,
+          "type": [
+            "info"
+          ]
+        }
+      }
+    },
+    {
+      "line": "2024-08-01T00:00:29.090345-04:00 6000RCSE4802 hpe-config[19382]: Event|6801|LOG_INFO|AMM|-|Copying configs from: running-config to: startup-config",
+      "expected": {
+        "@timestamp": "2024-08-01T00:00:29.090345-04:00",
+        "ecs": {
+          "version": "8.11.0"
+        },
+        "log": {
+          "level": "LOG_INFO",
+          "syslog": {
+            "appname": "hpe-config",
+            "procid": "19382"
+          }
+        },
+        "message": "Copying configs from: running-config to: startup-config",
+        "tags": [
+          "preserve_original_event"
+        ],
+        "event": {
+          "category": [
+            "network",
+            "configuration"
+          ],
+          "code": "6801",
+          "kind": [
+            "event"
+          ],
+          "outcome": "success",
+          "type": [
+            "info"
+          ]
+        }
+      }
+    },
+    {
+      "line": "2024-07-12T17:26:54.653018-04:00 6000RCSE4802 cdpd[2388]: Event|8904|LOG_INFO|AMM|1/1|CDP neighbor ab:cd:ef:12:34:56 is updated on 1/1/48",
+      "expected": {
+        "@timestamp": "2024-07-12T17:26:54.653018-04:00",
+        "ecs": {
+          "version": "8.11.0"
+        },
+        "log": {
+          "level": "LOG_INFO",
+          "syslog": {
+            "appname": "cdpd",
+            "procid": "2388"
+          }
+        },
+        "message": "CDP neighbor ab:cd:ef:12:34:56 is updated on 1/1/48",
+        "source": {
+          "mac": "AB-CD-EF-12-34-56"
+        },
+        "tags": [
+          "preserve_original_event"
+        ],
+        "event": {
+          "category": [
+            "network",
+            "configuration"
+          ],
+          "code": "8904",
+          "kind": [
+            "event"
+          ],
+          "outcome": "success",
+          "sequence": 1,
+          "type": [
+            "info",
+            "change"
+          ]
+        }
+      }
+    },
+    {
+      "line": "2024-08-01T16:36:07.075168-04:00 6000RCSE4802 port-accessd[2418]: Event|10502|LOG_INFO|AMM|1/1|Port 1/1/18 is blocked by port-access",
+      "expected": {
+        "@timestamp": "2024-08-01T16:36:07.075168-04:00",
+        "ecs": {
+          "version": "8.11.0"
+        },
+        "log": {
+          "level": "LOG_INFO",
+          "syslog": {
+            "appname": "port-accessd",
+            "procid": "2418"
+          }
+        },
+        "message": "Port 1/1/18 is blocked by port-access",
+        "tags": [
+          "preserve_original_event"
+        ],
+        "event": {
+          "category": [
+            "network",
+            "configuration"
+          ],
+          "code": "10502",
+          "kind": [
+            "event"
+          ],
+          "outcome": "success",
+          "sequence": 1,
+          "type": [
+            "info",
+            "denied"
+          ]
+        }
+      }
+    },
+    {
+      "line": "2024-07-31T04:16:20.043375-04:00 6000RCSE4802 port-accessd[2418]: Event|10503|LOG_INFO|AMM|1/1|Port 1/1/18 is unblocked by port-access",
+      "expected": {
+        "@timestamp": "2024-07-31T04:16:20.043375-04:00",
+        "ecs": {
+          "version": "8.11.0"
+        },
+        "log": {
+          "level": "LOG_INFO",
+          "syslog": {
+            "appname": "port-accessd",
+            "procid": "2418"
+          }
+        },
+        "message": "Port 1/1/18 is unblocked by port-access",
+        "tags": [
+          "preserve_original_event"
+        ],
+        "event": {
+          "category": [
+            "network",
+            "configuration"
+          ],
+          "code": "10503",
+          "kind": [
+            "event"
+          ],
+          "outcome": "success",
+          "sequence": 1,
+          "type": [
+            "info",
+            "access"
+          ]
+        }
+      }
+    },
+    {
+      "line": "2024-07-30T06:26:58.582294-04:00 6300-DIST-RDL lldpd[3530]: Event|104|LOG_INFO|CDTR|1|LLDP neighbor ab:cd:ef:12:34:56 added on 1/1/3",
+      "expected": {
+        "@timestamp": "2024-07-30T06:26:58.582294-04:00",
+        "ecs": {
+          "version": "8.11.0"
+        },
+        "log": {
+          "level": "LOG_INFO",
+          "syslog": {
+            "appname": "lldpd",
+            "procid": "3530"
+          }
+        },
+        "message": "LLDP neighbor ab:cd:ef:12:34:56 added on 1/1/3",
+        "tags": [
+          "preserve_original_event"
+        ],
+        "event": {
+          "category": [
+            "network",
+            "configuration"
+          ],
+          "code": "104",
+          "kind": [
+            "event"
+          ],
+          "outcome": "success",
+          "type": [
+            "protocol",
+            "info",
+            "change"
+          ]
+        }
+      }
+    },
+    {
+      "line": "2024-07-30T06:20:37.113466-04:00 6300-DIST-RDL lldpd[3530]: Event|106|LOG_INFO|CDTR|1|LLDP neighbor ab:cd:ef:12:34:56 deleted on 1/1/3",
+      "expected": {
+        "@timestamp": "2024-07-30T06:20:37.113466-04:00",
+        "ecs": {
+          "version": "8.11.0"
+        },
+        "log": {
+          "level": "LOG_INFO",
+          "syslog": {
+            "appname": "lldpd",
+            "procid": "3530"
+          }
+        },
+        "message": "LLDP neighbor ab:cd:ef:12:34:56 deleted on 1/1/3",
+        "tags": [
+          "preserve_original_event"
+        ],
+        "event": {
+          "category": [
+            "network",
+            "configuration"
+          ],
+          "code": "106",
+          "kind": [
+            "event"
+          ],
+          "outcome": "success",
+          "type": [
+            "protocol",
+            "info",
+            "deletion"
+          ]
+        }
+      }
+    },
+    {
+      "line": "2024-07-31T05:26:38.150256-04:00 6300-DIST-RDL intfd[718]: Event|403|LOG_INFO|UKWN|1|Link status for interface 1/1/11 is up",
+      "expected": {
+        "@timestamp": "2024-07-31T05:26:38.150256-04:00",
+        "ecs": {
+          "version": "8.11.0"
+        },
+        "log": {
+          "level": "LOG_INFO",
+          "syslog": {
+            "appname": "intfd",
+            "procid": "718"
+          }
+        },
+        "message": "Link status for interface 1/1/11 is up",
+        "tags": [
+          "preserve_original_event"
+        ],
+        "event": {
+          "category": [
+            "network",
+            "configuration"
+          ],
+          "code": "403",
+          "kind": [
+            "state"
+          ],
+          "outcome": "unknown",
+          "type": [
+            "info",
+            "start"
+          ]
+        }
+      }
+    },
+    {
+      "line": "2024-07-31T05:26:33.066044-04:00 6300-DIST-RDL intfd[718]: Event|404|LOG_INFO|UKWN|1|Link status for interface 1/1/11 is down",
+      "expected": {
+        "@timestamp": "2024-07-31T05:26:33.066044-04:00",
+        "ecs": {
+          "version": "8.11.0"
+        },
+        "log": {
+          "level": "LOG_INFO",
+          "syslog": {
+            "appname": "intfd",
+            "procid": "718"
+          }
+        },
+        "message": "Link status for interface 1/1/11 is down",
+        "tags": [
+          "preserve_original_event"
+        ],
+        "event": {
+          "category": [
+            "network",
+            "configuration"
+          ],
+          "code": "404",
+          "kind": [
+            "state"
+          ],
+          "outcome": "unknown",
+          "type": [
+            "info",
+            "end"
+          ]
+        }
+      }
+    },
+    {
+      "line": "2024-08-01T16:08:56.048072-04:00 6300-DIST-RDL log-mgmtd[3360]: Event|1231|LOG_INFO|CDTR|1|Syslog client restarted due to configuration change.",
+      "expected": {
+        "@timestamp": "2024-08-01T16:08:56.048072-04:00",
+        "ecs": {
+          "version": "8.11.0"
+        },
+        "log": {
+          "level": "LOG_INFO",
+          "syslog": {
+            "appname": "log-mgmtd",
+            "procid": "3360"
+          }
+        },
+        "message": "Syslog client restarted due to configuration change.",
+        "tags": [
+          "preserve_original_event"
+        ],
+        "event": {
+          "category": [
+            "network",
+            "configuration"
+          ],
+          "code": "1231",
+          "kind": [
+            "event"
+          ],
+          "outcome": "unknown",
+          "type": [
+            "info",
+            "change"
+          ]
+        }
+      }
+    },
+    {
+      "line": "2024-08-01T16:08:56.211641-04:00 6300-DIST-RDL log-proxyd[762]: Event|1233|LOG_INFO|CDTR|1|Starting System Logging Service.",
+      "expected": {
+        "@timestamp": "2024-08-01T16:08:56.211641-04:00",
+        "ecs": {
+          "version": "8.11.0"
+        },
+        "log": {
+          "level": "LOG_INFO",
+          "syslog": {
+            "appname": "log-proxyd",
+            "procid": "762"
+          }
+        },
+        "message": "Starting System Logging Service.",
+        "tags": [
+          "preserve_original_event"
+        ],
+        "event": {
+          "category": [
+            "network",
+            "configuration"
+          ],
+          "code": "1233",
+          "kind": [
+            "event"
+          ],
+          "outcome": "success",
+          "type": [
+            "info",
+            "start"
+          ]
+        }
+      }
+    },
+    {
+      "line": "2024-08-01T16:08:56.211725-04:00 6300-DIST-RDL log-proxyd[762]: Event|1234|LOG_INFO|CDTR|1|Started System Logging Service.",
+      "expected": {
+        "@timestamp": "2024-08-01T16:08:56.211725-04:00",
+        "ecs": {
+          "version": "8.11.0"
+        },
+        "log": {
+          "level": "LOG_INFO",
+          "syslog": {
+            "appname": "log-proxyd",
+            "procid": "762"
+          }
+        },
+        "message": "Started System Logging Service.",
+        "tags": [
+          "preserve_original_event"
+        ],
+        "event": {
+          "category": [
+            "network",
+            "configuration"
+          ],
+          "code": "1234",
+          "kind": [
+            "event"
+          ],
+          "outcome": "success",
+          "type": [
+            "info",
+            "start"
+          ]
+        }
+      }
+    },
+    {
+      "line": "2024-08-01T16:33:08.642006-04:00 6300-DIST-RDL hpe-mstpd[3588]: Event|2011|LOG_INFO|CDTR|1|Topology Change received on port 1/1/6 for MSTI 17 from source: ab:cd:ef:12:34:56",
+      "expected": {
+        "@timestamp": "2024-08-01T16:33:08.642006-04:00",
+        "ecs": {
+          "version": "8.11.0"
+        },
+        "log": {
+          "level": "LOG_INFO",
+          "syslog": {
+            "appname": "hpe-mstpd",
+            "procid": "3588"
+          }
+        },
+        "message": "Topology Change received on port 1/1/6 for MSTI 17 from source: ab:cd:ef:12:34:56",
+        "source": {
+          "mac": "AB-CD-EF-12-34-56"
+        },
+        "tags": [
+          "preserve_original_event"
+        ],
+        "event": {
+          "category": [
+            "network",
+            "configuration"
+          ],
+          "code": "2011",
+          "kind": [
+            "event"
+          ],
+          "outcome": "success",
+          "type": [
+            "info",
+            "change"
+          ]
+        }
+      }
+    },
+    {
+      "line": "2024-07-31T05:26:38.400947-04:00 6300-DIST-RDL hpe-mstpd[4536]: Event|2012|LOG_INFO|STBY|2|CIST - Topology Change generated on port 1/1/11 going in to forwarding",
+      "expected": {
+        "@timestamp": "2024-07-31T05:26:38.400947-04:00",
+        "ecs": {
+          "version": "8.11.0"
+        },
+        "log": {
+          "level": "LOG_INFO",
+          "syslog": {
+            "appname": "hpe-mstpd",
+            "procid": "4536"
+          }
+        },
+        "message": "CIST - Topology Change generated on port 1/1/11 going in to forwarding",
+        "tags": [
+          "preserve_original_event"
+        ],
+        "event": {
+          "category": [
+            "network",
+            "configuration"
+          ],
+          "code": "2012",
+          "kind": [
+            "state"
+          ],
+          "outcome": "success",
+          "type": [
+            "info",
+            "change"
+          ]
+        }
+      }
+    },
+    {
+      "line": "2024-06-18T12:45:38.182641-05:00 8360-Primaire lldpd[1234]: Event|101|LOG_INFO|AMM|-|LLDP Enabled",
+      "expected": {
+        "@timestamp": "2024-06-18T12:45:38.182641-05:00",
+        "ecs": {
+          "version": "8.11.0"
+        },
+        "log": {
+          "level": "LOG_INFO",
+          "syslog": {
+            "appname": "lldpd",
+            "procid": "1234"
+          }
+        },
+        "message": "LLDP Enabled",
+        "tags": [
+          "preserve_original_event"
+        ],
+        "event": {
+          "category": [
+            "network",
+            "configuration"
+          ],
+          "code": "101",
+          "kind": [
+            "event"
+          ],
+          "outcome": "success",
+          "type": [
+            "protocol",
+            "info",
+            "change"
+          ]
+        }
+      }
+    },
+    {
+      "line": "2024-06-18T12:46:38.182641-05:00 8360-Primaire lldpd[1234]: Event|102|LOG_INFO|AMM|-|LLDP Disabled",
+      "expected": {
+        "@timestamp": "2024-06-18T12:46:38.182641-05:00",
+        "ecs": {
+          "version": "8.11.0"
+        },
+        "log": {
+          "level": "LOG_INFO",
+          "syslog": {
+            "appname": "lldpd",
+            "procid": "1234"
+          }
+        },
+        "message": "LLDP Disabled",
+        "tags": [
+          "preserve_original_event"
+        ],
+        "event": {
+          "category": [
+            "network",
+            "configuration"
+          ],
+          "code": "102",
+          "kind": [
+            "event"
+          ],
+          "outcome": "success",
+          "type": [
+            "protocol",
+            "info",
+            "change"
+          ]
+        }
+      }
+    },
+    {
+      "line": "2024-06-18T12:47:38.182641-05:00 8360-Primaire lldpd[1234]: Event|103|LOG_INFO|AMM|-|Configured LLDP tx-timer to 30",
+      "expected": {
+        "@timestamp": "2024-06-18T12:47:38.182641-05:00",
+        "ecs": {
+          "version": "8.11.0"
+        },
+        "log": {
+          "level": "LOG_INFO",
+          "syslog": {
+            "appname": "lldpd",
+            "procid": "1234"
+          }
+        },
+        "message": "Configured LLDP tx-timer to 30",
+        "tags": [
+          "preserve_original_event"
+        ],
+        "event": {
+          "category": [
+            "network",
+            "configuration"
+          ],
+          "code": "103",
+          "kind": [
+            "state"
+          ],
+          "outcome": "success",
+          "type": [
+            "protocol",
+            "info",
+            "change"
+          ]
+        }
+      }
+    },
+    {
+      "line": "2024-06-18T12:51:38.182641-05:00 8360-Primaire lldpd[1234]: Event|107|LOG_INFO|AMM|-|Configured LLDP Management IP 192.168.1.1",
+      "expected": {
+        "@timestamp": "2024-06-18T12:51:38.182641-05:00",
+        "ecs": {
+          "version": "8.11.0"
+        },
+        "log": {
+          "level": "LOG_INFO",
+          "syslog": {
+            "appname": "lldpd",
+            "procid": "1234"
+          }
+        },
+        "message": "Configured LLDP Management IP 192.168.1.1",
+        "server": {
+          "ip": "192.168.1.1"
+        },
+        "tags": [
+          "preserve_original_event"
+        ],
+        "event": {
+          "category": [
+            "network",
+            "configuration"
+          ],
+          "code": "107",
+          "kind": [
+            "event"
+          ],
+          "outcome": "success",
+          "type": [
+            "protocol",
+            "info",
+            "change"
+          ]
+        }
+      }
+    },
+    {
+      "line": "2024-06-18T12:52:38.182641-05:00 8360-Primaire lldpd[1234]: Event|108|LOG_INFO|AMM|-|Configured LLDP tx-hold to 4",
+      "expected": {
+        "@timestamp": "2024-06-18T12:52:38.182641-05:00",
+        "ecs": {
+          "version": "8.11.0"
+        },
+        "log": {
+          "level": "LOG_INFO",
+          "syslog": {
+            "appname": "lldpd",
+            "procid": "1234"
+          }
+        },
+        "message": "Configured LLDP tx-hold to 4",
+        "tags": [
+          "preserve_original_event"
+        ],
+        "event": {
+          "category": [
+            "network",
+            "configuration"
+          ],
+          "code": "108",
+          "kind": [
+            "event"
+          ],
+          "outcome": "success",
+          "type": [
+            "protocol",
+            "info",
+            "change"
+          ]
+        }
+      }
+    },
+    {
+      "line": "2024-06-18T12:54:38.182641-05:00 8360-Primaire lldpd[1234]: Event|110|LOG_INFO|AMM|-|Configured LLDP reinit-delay to 1",
+      "expected": {
+        "@timestamp": "2024-06-18T12:54:38.182641-05:00",
+        "ecs": {
+          "version": "8.11.0"
+        },
+        "log": {
+          "level": "LOG_INFO",
+          "syslog": {
+            "appname": "lldpd",
+            "procid": "1234"
+          }
+        },
+        "message": "Configured LLDP reinit-delay to 1",
+        "tags": [
+          "preserve_original_event"
+        ],
+        "event": {
+          "category": [
+            "network",
+            "configuration"
+          ],
+          "code": "110",
+          "kind": [
+            "event"
+          ],
+          "outcome": "success",
+          "type": [
+            "protocol",
+            "info",
+            "change"
+          ]
+        }
+      }
+    },
+    {
+      "line": "2024-06-18T12:55:38.182641-05:00 8360-Primaire lldpd[1234]: Event|111|LOG_INFO|AMM|-|LLDP statistics cleared",
+      "expected": {
+        "@timestamp": "2024-06-18T12:55:38.182641-05:00",
+        "ecs": {
+          "version": "8.11.0"
+        },
+        "log": {
+          "level": "LOG_INFO",
+          "syslog": {
+            "appname": "lldpd",
+            "procid": "1234"
+          }
+        },
+        "message": "LLDP statistics cleared",
+        "tags": [
+          "preserve_original_event"
+        ],
+        "event": {
+          "category": [
+            "network",
+            "configuration"
+          ],
+          "code": "111",
+          "kind": [
+            "event"
+          ],
+          "outcome": "success",
+          "type": [
+            "protocol",
+            "info",
+            "deletion"
+          ]
+        }
+      }
+    },
+    {
+      "line": "2024-06-18T12:56:38.182641-05:00 8360-Primaire lldpd[1234]: Event|112|LOG_INFO|AMM|-|LLDP neighbor info cleared",
+      "expected": {
+        "@timestamp": "2024-06-18T12:56:38.182641-05:00",
+        "ecs": {
+          "version": "8.11.0"
+        },
+        "log": {
+          "level": "LOG_INFO",
+          "syslog": {
+            "appname": "lldpd",
+            "procid": "1234"
+          }
+        },
+        "message": "LLDP neighbor info cleared",
+        "tags": [
+          "preserve_original_event"
+        ],
+        "event": {
+          "category": [
+            "network",
+            "configuration"
+          ],
+          "code": "112",
+          "kind": [
+            "event"
+          ],
+          "outcome": "success",
+          "type": [
+            "protocol",
+            "info",
+            "deletion"
+          ]
+        }
+      }
+    },
+    {
+      "line": "2024-06-18T12:44:38.182641-05:00 8360-Primaire fand[1094]: Event|201|LOG_INFO|AMM|1/1|There are 4 total fans in subsystem A.",
+      "expected": {
+        "@timestamp": "2024-06-18T12:44:38.182641-05:00",
+        "ecs": {
+          "version": "8.11.0"
+        },
+        "log": {
+          "level": "LOG_INFO",
+          "syslog": {
+            "appname": "fand",
+            "procid": "1094"
+          }
+        },
+        "message": "There are 4 total fans in subsystem A.",
+        "tags": [
+          "preserve_original_event"
+        ],
+        "event": {
+          "category": [
+            "network",
+            "configuration"
+          ],
+          "code": "201",
+          "kind": [
+            "event"
+          ],
+          "outcome": "unknown",
+          "sequence": 1,
+          "type": [
+            "info"
+          ]
+        }
+      }
+    },
+    {
+      "line": "2024-06-18T12:45:38.182641-05:00 8360-Primaire fand[1094]: Event|202|LOG_INFO|AMM|1/1|Subsystem A setting fan speed control register to 3: 1500.",
+      "expected": {
+        "@timestamp": "2024-06-18T12:45:38.182641-05:00",
+        "ecs": {
+          "version": "8.11.0"
+        },
+        "log": {
+          "level": "LOG_INFO",
+          "syslog": {
+            "appname": "fand",
+            "procid": "1094"
+          }
+        },
+        "message": "Subsystem A setting fan speed control register to 3: 1500.",
+        "tags": [
+          "preserve_original_event"
+        ],
+        "event": {
+          "category": [
+            "network",
+            "configuration"
+          ],
+          "code": "202",
+          "kind": [
+            "event"
+          ],
+          "outcome": "success",
+          "sequence": 1,
+          "type": [
+            "info",
+            "change"
+          ]
+        }
+      }
+    },
+    {
+      "line": "2024-06-18T12:46:38.182641-05:00 8360-Primaire fand[1094]: Event|203|LOG_INFO|AMM|1/1|Air flow direction: Front-to-Back.",
+      "expected": {
+        "@timestamp": "2024-06-18T12:46:38.182641-05:00",
+        "ecs": {
+          "version": "8.11.0"
+        },
+        "log": {
+          "level": "LOG_INFO",
+          "syslog": {
+            "appname": "fand",
+            "procid": "1094"
+          }
+        },
+        "message": "Air flow direction: Front-to-Back.",
+        "tags": [
+          "preserve_original_event"
+        ],
+        "event": {
+          "category": [
+            "network",
+            "configuration"
+          ],
+          "code": "203",
+          "kind": [
+            "event"
+          ],
+          "outcome": "unknown",
+          "sequence": 1,
+          "type": [
+            "info"
+          ]
+        }
+      }
+    },
+    {
+      "line": "2024-06-18T12:47:38.182641-05:00 8360-Primaire fand[1094]: Event|204|LOG_WARN|AMM|1/1|Fan tray 1 was removed.",
+      "expected": {
+        "@timestamp": "2024-06-18T12:47:38.182641-05:00",
+        "ecs": {
+          "version": "8.11.0"
+        },
+        "log": {
+          "level": "LOG_WARN",
+          "syslog": {
+            "appname": "fand",
+            "procid": "1094"
+          }
+        },
+        "message": "Fan tray 1 was removed.",
+        "tags": [
+          "preserve_original_event"
+        ],
+        "event": {
+          "category": [
+            "network",
+            "configuration"
+          ],
+          "code": "204",
+          "kind": [
+            "event"
+          ],
+          "outcome": "unknown",
+          "sequence": 1,
+          "type": [
+            "info",
+            "deletion"
+          ]
+        }
+      }
+    },
+    {
+      "line": "2024-06-18T12:48:38.182641-05:00 8360-Primaire fand[1094]: Event|205|LOG_INFO|AMM|1/1|Fan tray 1 was inserted.",
+      "expected": {
+        "@timestamp": "2024-06-18T12:48:38.182641-05:00",
+        "ecs": {
+          "version": "8.11.0"
+        },
+        "log": {
+          "level": "LOG_INFO",
+          "syslog": {
+            "appname": "fand",
+            "procid": "1094"
+          }
+        },
+        "message": "Fan tray 1 was inserted.",
+        "tags": [
+          "preserve_original_event"
+        ],
+        "event": {
+          "category": [
+            "network",
+            "configuration"
+          ],
+          "code": "205",
+          "kind": [
+            "event"
+          ],
+          "outcome": "unknown",
+          "sequence": 1,
+          "type": [
+            "info",
+            "creation"
+          ]
+        }
+      }
+    },
+    {
+      "line": "2024-06-18T12:49:38.182641-05:00 8360-Primaire fand[1094]: Event|206|LOG_INFO|AMM|1/1|Fan module PSU-1/1/2 in fan tray 1 was removed.",
+      "expected": {
+        "@timestamp": "2024-06-18T12:49:38.182641-05:00",
+        "ecs": {
+          "version": "8.11.0"
+        },
+        "log": {
+          "level": "LOG_INFO",
+          "syslog": {
+            "appname": "fand",
+            "procid": "1094"
+          }
+        },
+        "message": "Fan module PSU-1/1/2 in fan tray 1 was removed.",
+        "tags": [
+          "preserve_original_event"
+        ],
+        "event": {
+          "category": [
+            "network",
+            "configuration"
+          ],
+          "code": "206",
+          "kind": [
+            "event"
+          ],
+          "outcome": "unknown",
+          "sequence": 1,
+          "type": [
+            "info",
+            "deletion"
+          ]
+        }
+      }
+    },
+    {
+      "line": "2024-06-18T12:51:38.182641-05:00 8360-Primaire fand[1094]: Event|208|LOG_ERR|AMM|1/1|Unsupported fan tray 2 detected. Please insert a standard fan tray.",
+      "expected": {
+        "@timestamp": "2024-06-18T12:51:38.182641-05:00",
+        "ecs": {
+          "version": "8.11.0"
+        },
+        "log": {
+          "level": "LOG_ERR",
+          "syslog": {
+            "appname": "fand",
+            "procid": "1094"
+          }
+        },
+        "message": "Unsupported fan tray 2 detected. Please insert a standard fan tray.",
+        "tags": [
+          "preserve_original_event"
+        ],
+        "event": {
+          "category": [
+            "network",
+            "configuration"
+          ],
+          "code": "208",
+          "kind": [
+            "alert"
+          ],
+          "outcome": "failure",
+          "sequence": 1,
+          "type": [
+            "denied"
+          ]
+        }
+      }
+    },
+    {
+      "line": "2024-06-18T12:52:38.182641-05:00 8360-Primaire fand[1094]: Event|209|LOG_ERR|AMM|1/1|Shutting down system now because 3 fan_failures exceeded limit of 2.",
+      "expected": {
+        "@timestamp": "2024-06-18T12:52:38.182641-05:00",
+        "ecs": {
+          "version": "8.11.0"
+        },
+        "error": {
+          "type": "fan_failures"
+        },
+        "log": {
+          "level": "LOG_ERR",
+          "syslog": {
+            "appname": "fand",
+            "procid": "1094"
+          }
+        },
+        "message": "Shutting down system now because 3 fan_failures exceeded limit of 2.",
+        "tags": [
+          "preserve_original_event"
+        ],
+        "event": {
+          "category": [
+            "network",
+            "configuration"
+          ],
+          "code": "209",
+          "kind": [
+            "alert"
+          ],
+          "outcome": "failure",
+          "sequence": 1,
+          "type": [
+            "end"
+          ]
+        }
+      }
+    },
+    {
+      "line": "2024-06-18T12:53:38.182641-05:00 8360-Primaire fand[1094]: Event|211|LOG_ALERT|AMM|1/1|Shutting down system in 60 seconds because 3 fan_failures exceeded limit of 2",
+      "expected": {
+        "@timestamp": "2024-06-18T12:53:38.182641-05:00",
+        "ecs": {
+          "version": "8.11.0"
+        },
+        "error": {
+          "type": "fan_failures"
+        },
+        "log": {
+          "level": "LOG_ALERT",
+          "syslog": {
+            "appname": "fand",
+            "procid": "1094"
+          }
+        },
+        "message": "Shutting down system in 60 seconds because 3 fan_failures exceeded limit of 2",
+        "tags": [
+          "preserve_original_event"
+        ],
+        "event": {
+          "category": [
+            "network",
+            "configuration"
+          ],
+          "code": "211",
+          "kind": [
+            "alert"
+          ],
+          "outcome": "failure",
+          "sequence": 1,
+          "type": [
+            "end"
+          ]
+        }
+      }
+    },
+    {
+      "line": "2024-06-18T12:54:38.182641-05:00 8360-Primaire fand[1094]: Event|212|LOG_WARN|AMM|1/1|System shutdown timer is cancelled.",
+      "expected": {
+        "@timestamp": "2024-06-18T12:54:38.182641-05:00",
+        "ecs": {
+          "version": "8.11.0"
+        },
+        "log": {
+          "level": "LOG_WARN",
+          "syslog": {
+            "appname": "fand",
+            "procid": "1094"
+          }
+        },
+        "message": "System shutdown timer is cancelled.",
+        "tags": [
+          "preserve_original_event"
+        ],
+        "event": {
+          "category": [
+            "network",
+            "configuration"
+          ],
+          "code": "212",
+          "kind": [
+            "event"
+          ],
+          "outcome": "success",
+          "sequence": 1,
+          "type": [
+            "info",
+            "deletion"
+          ]
+        }
+      }
+    },
+    {
+      "line": "2024-06-18T12:55:38.182641-05:00 8360-Primaire fand[1094]: Event|213|LOG_ERR|AMM|1/1|3 fan_failures in the system.",
+      "expected": {
+        "@timestamp": "2024-06-18T12:55:38.182641-05:00",
+        "ecs": {
+          "version": "8.11.0"
+        },
+        "error": {
+          "type": "fan_failures"
+        },
+        "log": {
+          "level": "LOG_ERR",
+          "syslog": {
+            "appname": "fand",
+            "procid": "1094"
+          }
+        },
+        "message": "3 fan_failures in the system.",
+        "tags": [
+          "preserve_original_event"
+        ],
+        "event": {
+          "category": [
+            "network",
+            "configuration"
+          ],
+          "code": "213",
+          "kind": [
+            "alert"
+          ],
+          "outcome": "failure",
+          "sequence": 1,
+          "type": [
+            "info"
+          ]
+        }
+      }
+    },
+    {
+      "line": "2024-06-18T12:56:38.182641-05:00 8360-Primaire fand[1094]: Event|214|LOG_ERR|AMM|1/1|fan_overheat: Fan fault in tray 1, module 2, reason: Overheating.",
+      "expected": {
+        "@timestamp": "2024-06-18T12:56:38.182641-05:00",
+        "ecs": {
+          "version": "8.11.0"
+        },
+        "log": {
+          "level": "LOG_ERR",
+          "syslog": {
+            "appname": "fand",
+            "procid": "1094"
+          }
+        },
+        "message": "fan_overheat: Fan fault in tray 1, module 2, reason: Overheating.",
+        "tags": [
+          "preserve_original_event"
+        ],
+        "event": {
+          "category": [
+            "network",
+            "configuration"
+          ],
+          "code": "214",
+          "kind": [
+            "alert"
+          ],
+          "outcome": "failure",
+          "reason": "Overheating",
+          "sequence": 1,
+          "type": [
+            "info"
+          ]
+        }
+      }
+    },
+    {
+      "line": "2024-06-18T12:56:38.182641-05:00 8360-Primaire fand[1094]: Event|214|LOG_ERR|AMM|1/1|fan_overheat: Fan fan_name_mock faulted, reason: Overheating.",
+      "expected": {
+        "@timestamp": "2024-06-18T12:56:38.182641-05:00",
+        "ecs": {
+          "version": "8.11.0"
+        },
+        "log": {
+          "level": "LOG_ERR",
+          "syslog": {
+            "appname": "fand",
+            "procid": "1094"
+          }
+        },
+        "message": "fan_overheat: Fan fan_name_mock faulted, reason: Overheating.",
+        "tags": [
+          "preserve_original_event"
+        ],
+        "event": {
+          "category": [
+            "network",
+            "configuration"
+          ],
+          "code": "214",
+          "kind": [
+            "alert"
+          ],
+          "outcome": "failure",
+          "reason": "Overheating",
+          "sequence": 1,
+          "type": [
+            "info"
+          ]
+        }
+      }
+    },
+    {
+      "line": "2024-06-18T12:57:38.182641-05:00 8360-Primaire fand[1094]: Event|215|LOG_INFO|AMM|1/1|Fan1 fan is operational.",
+      "expected": {
+        "@timestamp": "2024-06-18T12:57:38.182641-05:00",
+        "ecs": {
+          "version": "8.11.0"
+        },
+        "log": {
+          "level": "LOG_INFO",
+          "syslog": {
+            "appname": "fand",
+            "procid": "1094"
+          }
+        },
+        "message": "Fan1 fan is operational.",
+        "tags": [
+          "preserve_original_event"
+        ],
+        "event": {
+          "category": [
+            "network",
+            "configuration"
+          ],
+          "code": "215",
+          "kind": [
+            "state"
+          ],
+          "outcome": "unknown",
+          "sequence": 1,
+          "type": [
+            "info"
+          ]
+        }
+      }
+    },
+    {
+      "line": "2024-06-18T12:58:38.182641-05:00 8360-Primaire fand[1094]: Event|216|LOG_INFO|AMM|1/1|Status of fan 2 in tray 1 has changed from Stopped to Running.",
+      "expected": {
+        "@timestamp": "2024-06-18T12:58:38.182641-05:00",
+        "ecs": {
+          "version": "8.11.0"
+        },
+        "log": {
+          "level": "LOG_INFO",
+          "syslog": {
+            "appname": "fand",
+            "procid": "1094"
+          }
+        },
+        "message": "Status of fan 2 in tray 1 has changed from Stopped to Running.",
+        "tags": [
+          "preserve_original_event"
+        ],
+        "event": {
+          "category": [
+            "network",
+            "configuration"
+          ],
+          "code": "216",
+          "kind": [
+            "state"
+          ],
+          "outcome": "success",
+          "sequence": 1,
+          "type": [
+            "info",
+            "change"
+          ]
+        }
+      }
+    },
+    {
+      "line": "2024-06-18T12:58:38.182641-05:00 8360-Primaire fand[1094]: Event|216|LOG_INFO|AMM|1/1|Status of fan fan_name_mock has changed from Stopped to Running.",
+      "expected": {
+        "@timestamp": "2024-06-18T12:58:38.182641-05:00",
+        "ecs": {
+          "version": "8.11.0"
+        },
+        "log": {
+          "level": "LOG_INFO",
+          "syslog": {
+            "appname": "fand",
+            "procid": "1094"
+          }
+        },
+        "message": "Status of fan fan_name_mock has changed from Stopped to Running.",
+        "tags": [
+          "preserve_original_event"
+        ],
+        "event": {
+          "category": [
+            "network",
+            "configuration"
+          ],
+          "code": "216",
+          "kind": [
+            "state"
+          ],
+          "outcome": "success",
+          "sequence": 1,
+          "type": [
+            "info",
+            "change"
+          ]
+        }
+      }
+    }
+  ]
+}

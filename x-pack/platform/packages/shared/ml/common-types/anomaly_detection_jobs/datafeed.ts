@@ -9,10 +9,18 @@ import type { estypes } from '@elastic/elasticsearch';
 
 export type DatafeedId = string;
 
-export type Datafeed = estypes.MlDatafeed;
+export type Datafeed = estypes.MlDatafeed & {
+  // remove this when the datafeed types are correct
+  project_routing?: string;
+  authorization?: Authorization;
+};
 
 export type ChunkingConfig = estypes.MlChunkingConfig;
 
 export type Aggregation = Record<string, estypes.AggregationsAggregationContainer>;
 
 export type IndicesOptions = estypes.IndicesOptions;
+
+export type Authorization = estypes.MlDatafeedAuthorization & {
+  cloud_api_key?: { id?: string };
+};

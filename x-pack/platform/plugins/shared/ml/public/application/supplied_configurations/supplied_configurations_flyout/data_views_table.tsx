@@ -18,6 +18,7 @@ import type {
   RecognizeModuleResultDataView,
 } from '@kbn/ml-common-types/modules';
 import { useMlKibana, useMlManagementLocator } from '../../contexts/kibana';
+import { getIsMlCpsEnabled } from '../../services/ml_server_info';
 
 interface Props {
   matchingDataViews: RecognizeModuleResult;
@@ -29,18 +30,32 @@ export const DataViewsTable: FC<Props> = ({ matchingDataViews, moduleId, jobsLen
   const {
     services: {
       application: { navigateToUrl },
+      cps,
     },
   } = useMlKibana();
   const mlManagementLocator = useMlManagementLocator()!;
+  const isMlCpsEnabled = getIsMlCpsEnabled();
 
   const getUrl = useCallback(
     (id: string) => {
+      const projectRouting =
+        isMlCpsEnabled && cps?.cpsManager ? cps?.cpsManager?.getProjectRouting() : undefined;
+      const params = new URLSearchParams();
+      params.set('id', moduleId);
+      params.set('index', id);
+
+      if (projectRouting !== undefined && projectRouting !== '') {
+        params.set('project_routing', projectRouting);
+      }
+
       return mlManagementLocator.getRedirectUrl({
         sectionId: 'ml',
-        appId: `anomaly_detection/${ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_RECOGNIZER}?id=${moduleId}&index=${id}`,
+        appId: `anomaly_detection/${
+          ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_RECOGNIZER
+        }?${params.toString()}`,
       });
     },
-    [mlManagementLocator, moduleId]
+    [mlManagementLocator, moduleId, cps?.cpsManager, isMlCpsEnabled]
   );
 
   const columns: Array<

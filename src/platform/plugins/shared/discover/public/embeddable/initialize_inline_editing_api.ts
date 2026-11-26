@@ -10,13 +10,18 @@
 import { BehaviorSubject, skip, filter, map } from 'rxjs';
 import type { Observable } from 'rxjs';
 import type { AnalyticsServiceStart } from '@kbn/core/public';
-import type { DiscoverSessionTab, SavedSearch } from '@kbn/saved-search-plugin/common/types';
+import type { SavedSearch } from '@kbn/saved-search-plugin/common/types';
 import {
   apiCanFocusPanel,
   apiPublishesSavedObjectId,
   type PublishingSubject,
 } from '@kbn/presentation-publishing';
-import type { SearchEmbeddableSerializedAttributes, SearchEmbeddableStateManager } from './types';
+import type {
+  SearchEmbeddableSerializedAttributes,
+  SearchEmbeddableSessionTab,
+  SearchEmbeddableStateManager,
+} from './types';
+import { toSessionTabAttributes } from './utils/panel_tab';
 import {
   DISCOVER_IN_DASHBOARD_EVENT_TYPE,
   DiscoverInDashboardEventDataKeys,
@@ -56,17 +61,17 @@ export const initializeInlineEditingApi = ({
   selectedTabId$,
   savedObjectId$,
   searchEmbeddable,
-  blockingError$,
+  setSearchError,
   dataLoading$,
 }: {
   uuid: string;
   parentApi: unknown;
-  tabs: DiscoverSessionTab[];
+  tabs: SearchEmbeddableSessionTab[];
   analytics: AnalyticsServiceStart;
   selectedTabId$: BehaviorSubject<string | undefined>;
   savedObjectId$: BehaviorSubject<string | undefined>;
   searchEmbeddable: SearchEmbeddableDeps;
-  blockingError$: BehaviorSubject<Error | undefined>;
+  setSearchError: (error: Error | undefined) => void;
   dataLoading$: BehaviorSubject<boolean | undefined>;
 }): InlineEditingApi => {
   const draftSelectedTabId$ = new BehaviorSubject<string | undefined>(selectedTabId$.getValue());
@@ -74,7 +79,23 @@ export const initializeInlineEditingApi = ({
   const inlineEditDirty$ = new BehaviorSubject<boolean>(false);
   const overrideHoverActions$ = isInlineEditing$;
 
+  // Pre-edit state, captured on the first tab switch; if set, discard restores it
   let inlineEditStateSnapshot: InlineEditSnapshot | undefined;
+
+  const applyEmbeddableState = async (
+    state: SearchEmbeddableSerializedAttributes
+  ): Promise<boolean> => {
+    setSearchError(undefined);
+
+    try {
+      await searchEmbeddable.reinitializeState(state);
+      return true;
+    } catch (error) {
+      setSearchError(error as Error);
+      dataLoading$.next(false);
+      return false;
+    }
+  };
 
   const setFocusedPanelId = (panelId?: string) => {
     if (apiCanFocusPanel(parentApi)) {
@@ -85,17 +106,16 @@ export const initializeInlineEditingApi = ({
   const switchTab = async (tabId: string): Promise<boolean> => {
     const tab = tabs.find((t) => t.id === tabId);
 
-    if (!tab) return false;
+    if (!tab || !isInlineEditing$.getValue()) return false;
 
-    try {
-      await searchEmbeddable.reinitializeState(tab);
+    inlineEditStateSnapshot ??= createSnapshot(searchEmbeddable);
 
-      return true;
-    } catch (error) {
-      blockingError$.next(error as Error);
-      dataLoading$.next(false);
+    return applyEmbeddableState(toSessionTabAttributes(tab));
+  };
 
-      return false;
+  const restoreInlineEditSnapshot = async () => {
+    if (inlineEditStateSnapshot) {
+      await applyEmbeddableState(inlineEditStateSnapshot);
     }
   };
 
@@ -111,24 +131,6 @@ export const initializeInlineEditingApi = ({
 
   const startInlineEditing = async () => {
     if (isInlineEditing$.getValue()) return;
-
-    const {
-      stateManager,
-      api: { savedSearch$ },
-    } = searchEmbeddable;
-
-    inlineEditStateSnapshot = {
-      serializedSearchSource: savedSearch$.getValue().searchSource.getSerializedFields(),
-      sort: stateManager.sort.getValue(),
-      columns: stateManager.columns.getValue(),
-      grid: stateManager.grid.getValue(),
-      sampleSize: stateManager.sampleSize.getValue(),
-      rowsPerPage: stateManager.rowsPerPage.getValue(),
-      rowHeight: stateManager.rowHeight.getValue(),
-      headerRowHeight: stateManager.headerRowHeight.getValue(),
-      viewMode: stateManager.viewMode.getValue(),
-      density: stateManager.density.getValue(),
-    };
 
     draftSelectedTabId$.next(selectedTabId$.getValue());
     isInlineEditing$.next(true);
@@ -160,6 +162,8 @@ export const initializeInlineEditingApi = ({
     const committedTabId = selectedTabId$.getValue();
 
     if (!draftTabId || draftTabId === committedTabId) {
+      // Nothing to commit, so this is a discard
+      await restoreInlineEditSnapshot();
       stopInlineEditing();
       return;
     }
@@ -182,17 +186,9 @@ export const initializeInlineEditingApi = ({
   };
 
   const cancelInlineTabSelection = async () => {
-    if (!isInlineEditing$.getValue() || !inlineEditStateSnapshot) return;
+    if (!isInlineEditing$.getValue()) return;
 
-    if (inlineEditDirty$.getValue()) {
-      try {
-        await searchEmbeddable.reinitializeState(inlineEditStateSnapshot);
-      } catch (error) {
-        blockingError$.next(error as Error);
-        dataLoading$.next(false);
-      }
-    }
-
+    await restoreInlineEditSnapshot();
     stopInlineEditing();
   };
 
@@ -214,3 +210,22 @@ export const initializeInlineEditingApi = ({
     stopInlineEditing,
   };
 };
+
+const createSnapshot = ({
+  stateManager,
+  api: { savedSearch$ },
+}: SearchEmbeddableDeps): InlineEditSnapshot => ({
+  serializedSearchSource: savedSearch$.getValue().searchSource.getSerializedFields(),
+  tabTypeState: savedSearch$.getValue().tabTypeState,
+  sort: stateManager.sort.getValue(),
+  columns: stateManager.columns.getValue(),
+  grid: stateManager.grid.getValue(),
+  sampleSize: stateManager.sampleSize.getValue(),
+  rowsPerPage: stateManager.rowsPerPage.getValue(),
+  rowHeight: stateManager.rowHeight.getValue(),
+  headerRowHeight: stateManager.headerRowHeight.getValue(),
+  viewMode: stateManager.viewMode.getValue(),
+  density: stateManager.density.getValue(),
+  documentsDisplayMode: stateManager.documentsDisplayMode.getValue(),
+  jsonModeSettings: stateManager.jsonModeSettings.getValue(),
+});

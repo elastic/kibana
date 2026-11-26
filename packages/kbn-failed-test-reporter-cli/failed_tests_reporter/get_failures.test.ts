@@ -120,7 +120,7 @@ it('discovers failures in ftr report', async () => {
         "likelyIrrelevant": true,
         "location": "x-pack/platform/test/functional/apps/machine_learning/anomaly_detection/saved_search_job.ts",
         "name": "machine learning anomaly detection saved search  with lucene query job creation opens the advanced section",
-        "owners": "elastic/ml-ui",
+        "owners": "elastic/search-ml-ux",
         "system-out": "[00:21:57]         └-: machine learning...",
         "testType": "ftr",
         "time": "6.040",
@@ -227,6 +227,129 @@ it('associates each Jest failure with its enclosing suite', async () => {
     { name: 'first test', location: 'path/to/first.test.ts' },
     { name: 'second test', location: 'other/path/second.test.ts' },
   ]);
+});
+
+describe('cascading failures', () => {
+  const report = (cascadingAttr: string) => `
+    <testsuites name="ftr">
+      <testsuite name="FTR" timestamp="2026-07-15T12:00:00" time="1" tests="2" failures="2" skipped="0">
+        <testcase classname="FTR.x-pack/a·ts" name="root cause" time="120">
+          <failure>Error: Timeout of 120000ms exceeded.</failure>
+        </testcase>
+        <testcase classname="FTR.x-pack/a·ts" name="after all hook" time="0.001" ${cascadingAttr}>
+          <failure>Error: Timeout of 1ms exceeded.</failure>
+        </testcase>
+      </testsuite>
+    </testsuites>
+  `;
+
+  it('flags the failures the reporter marked as cascading', async () => {
+    const [rootCause, cascading] = getFailures(
+      await parseTestReport(report('cascading-failure="true"'))
+    );
+
+    expect(rootCause.cascading).toBeUndefined();
+    expect(cascading.cascading).toBe(true);
+    expect(cascading).not.toHaveProperty('cascading-failure');
+  });
+
+  it('leaves failures unflagged when the attribute is absent', async () => {
+    const failures = getFailures(await parseTestReport(report('')));
+
+    expect(failures.map(({ cascading }) => cascading)).toEqual([undefined, undefined]);
+  });
+});
+
+describe('infrastructure failures', () => {
+  const report = (rootAttrs: string, failure: string) => `
+    <testsuites name="ftr" ${rootAttrs}>
+      <testsuite name="FTR" timestamp="2026-07-15T12:00:00" time="1" tests="1" failures="1" skipped="0">
+        <testcase classname="FTR.x-pack/a·ts" name="a test" time="1">
+          <failure>${failure}</failure>
+        </testcase>
+      </testsuite>
+    </testsuites>
+  `;
+
+  it.each([
+    ['Error: Failed to parse SAML response value.', 'auth'],
+    ["Error: User with 'viewer' role is not defined", 'role'],
+    ['Error: connect ECONNREFUSED 10.0.0.1:443', 'connection'],
+    ['TimeoutError: Request timed out\n    at runRequest (Transport.ts:708:38)', 'es_timeout'],
+  ])('attributes "%s" on Cloud to infrastructure (%s)', async (message, category) => {
+    const [failure] = getFailures(
+      await parseTestReport(report('target="cloud-serverless-search"', message))
+    );
+
+    expect(failure.likelyIrrelevant).toBe(true);
+    expect(failure.infraReason?.category).toBe(category);
+  });
+
+  it('keeps the same errors relevant on local runs', async () => {
+    const failures = await Promise.all(
+      ['Error: connect ECONNREFUSED 127.0.0.1:5620', 'TimeoutError: Request timed out'].map(
+        async (message) =>
+          getFailures(await parseTestReport(report('target="local-serverless-search"', message)))
+      )
+    );
+
+    for (const [failure] of failures) {
+      expect(failure.likelyIrrelevant).toBe(false);
+      expect(failure.infraReason).toBeUndefined();
+    }
+  });
+
+  // What an FTR run against an existing Cloud deployment reports: the domain cannot be resolved,
+  // so only the location is known, and the Cloud rules still have to apply.
+  it('attributes failures on a cloud target with an unresolved domain', async () => {
+    const [failure] = getFailures(
+      await parseTestReport(
+        report('target="cloud-unknown"', 'Error: Failed to parse SAML response value.')
+      )
+    );
+
+    expect(failure.likelyIrrelevant).toBe(true);
+    expect(failure.infraReason?.category).toBe('auth');
+  });
+
+  it('keeps them relevant when the report has no target', async () => {
+    const [failure] = getFailures(
+      await parseTestReport(report('', 'Error: Failed to parse SAML response value.'))
+    );
+
+    expect(failure.infraReason).toBeUndefined();
+  });
+
+  it('does not apply to non-FTR reports', async () => {
+    const [failure] = getFailures(
+      await parseTestReport(
+        report('target="cloud-serverless-search"', 'Error: connect ECONNREFUSED').replace(
+          'name="ftr"',
+          'name="jest"'
+        )
+      )
+    );
+
+    expect(failure.infraReason).toBeUndefined();
+  });
+});
+
+it('rewrites absolute checkout paths as repository relative ones', async () => {
+  const report = await parseTestReport(`
+    <testsuites name="ftr">
+      <testsuite name="FTR" timestamp="2026-07-15T12:00:00" time="1" tests="1" failures="1" skipped="0">
+        <testcase classname="FTR.x-pack/a·ts" name="a test" time="1">
+          <failure>Error: boom (/opt/buildkite-agent/builds/bk-agent-1/elastic/kibana-pull-request/kibana/x-pack/a.ts)</failure>
+          <system-out>ran /opt/buildkite-agent/builds/bk-agent-1/elastic/kibana-pull-request/kibana/x-pack/a.ts</system-out>
+        </testcase>
+      </testsuite>
+    </testsuites>
+  `);
+
+  const [failure] = getFailures(report);
+
+  expect(failure.failure).toBe('Error: boom (x-pack/a.ts)');
+  expect(failure['system-out']).toBe('ran x-pack/a.ts');
 });
 
 it('discovers failures in mocha report', async () => {

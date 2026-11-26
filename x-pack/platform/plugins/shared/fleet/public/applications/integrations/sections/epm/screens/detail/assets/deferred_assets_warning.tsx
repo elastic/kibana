@@ -72,7 +72,7 @@ export const DeferredAssetsWarning = ({
       display="inlineBlock"
       content={tooltipContent}
       title={DEFERRED_ASSETS_WARNING_LABEL}
-      type={'alert'}
+      type={'warning'}
       color={'warning'}
     />
   );

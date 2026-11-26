@@ -1,0 +1,81 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { Client } from '@elastic/elasticsearch';
+import { epmRouteService } from '@kbn/fleet-plugin/common';
+import type { RetryService } from '@kbn/ftr-common-functional-services';
+import {
+  ENDPOINT_PACKAGE_NAME,
+  PREBUILT_RULES_PACKAGE_NAME,
+} from '@kbn/security-solution-plugin/common/detection_engine/constants';
+import type { ToolingLog } from '@kbn/tooling-log';
+import type SuperTest from 'supertest';
+import { refreshSavedObjectIndices } from '../../refresh_index';
+import { retryFleetRequest } from './retry_fleet_request';
+
+interface DeleteFleetPackageDeps {
+  supertest: SuperTest.Agent;
+  retryService: RetryService;
+  log: ToolingLog;
+  es: Client;
+}
+
+interface DeleteFleetPackageArgs {
+  packageName: string;
+  dependencies: DeleteFleetPackageDeps;
+}
+
+/**
+ * Delete the security_detection_engine package using fleet API.
+ */
+export async function deletePrebuiltRulesFleetPackage(params: DeleteFleetPackageDeps) {
+  await deleteFleetPackage({
+    packageName: PREBUILT_RULES_PACKAGE_NAME,
+    dependencies: params,
+  });
+}
+
+/**
+ * Delete the endpoint package using fleet API.
+ */
+export async function deleteEndpointFleetPackage(params: DeleteFleetPackageDeps) {
+  await deleteFleetPackage({
+    packageName: ENDPOINT_PACKAGE_NAME,
+    dependencies: params,
+  });
+}
+
+async function deleteFleetPackage(params: DeleteFleetPackageArgs): Promise<void> {
+  const { packageName, dependencies } = params;
+  const { supertest, retryService, log, es } = dependencies;
+
+  log.debug(`Deleting ${packageName} package`);
+
+  const response = await retryFleetRequest(
+    retryService,
+    () =>
+      supertest
+        .delete(epmRouteService.getRemovePath(packageName))
+        .set('kbn-xsrf', 'true')
+        .set('elastic-api-version', '2023-10-31')
+        .send({ force: true }),
+    {
+      description: `deleteFleetPackage ${packageName}`,
+      timeout: 3 * 60_000,
+      isSuccess: ({ status, body }) =>
+        status === 200 || (status === 400 && body.message === `${packageName} is not installed`),
+    }
+  );
+
+  log.debug(
+    response.status === 200
+      ? `Deleted ${packageName} package (was installed)`
+      : `Deleted ${packageName} package (was not installed)`
+  );
+
+  await refreshSavedObjectIndices(es);
+}

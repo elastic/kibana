@@ -9,19 +9,12 @@ import type { FunctionComponent } from 'react';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 
-import {
-  EuiAccordion,
-  EuiCallOut,
-  EuiCodeBlock,
-  EuiText,
-  EuiSpacer,
-  EuiSelect,
-} from '@elastic/eui';
+import { EuiAccordion, EuiCodeBlock, EuiText, EuiSpacer, EuiSelect } from '@elastic/eui';
+import { KbnDangerCallout, KbnInfoCallout, KbnWarningCallout } from '@kbn/ui-callout';
 import { css } from '@emotion/react';
 
 import { SectionLoading } from '../../../../../../shared_imports';
 import type { ProcessorResult, Document } from '../../../types';
-import { ErrorIcon, ErrorIgnoredIcon, SkippedIcon } from '../../shared';
 
 export interface Props {
   processorOutput?: ProcessorResult;
@@ -107,14 +100,7 @@ export const ProcessorOutput: FunctionComponent<Props> = ({
   }
 
   if (!processorOutput) {
-    return (
-      <EuiCallOut
-        announceOnMount
-        title={i18nTexts.noOutputCalloutTitle}
-        color="danger"
-        iconType="warning"
-      />
-    );
+    return <KbnDangerCallout announceOnMount title={i18nTexts.noOutputCalloutTitle} />;
   }
 
   const {
@@ -126,21 +112,15 @@ export const ProcessorOutput: FunctionComponent<Props> = ({
   } = processorOutput!;
 
   const NoOutputCallOut: FunctionComponent = () => (
-    <EuiCallOut title={i18nTexts.noOutputCalloutTitle} iconType="pin" />
+    <KbnInfoCallout title={i18nTexts.noOutputCalloutTitle} />
   );
 
   const getOutputContent = () => {
     switch (status) {
       case 'skipped':
-        return (
-          <EuiCallOut
-            title={i18nTexts.skippedCalloutTitle}
-            iconType={SkippedIcon}
-            css={styles.callOut}
-          />
-        );
+        return <KbnInfoCallout title={i18nTexts.skippedCalloutTitle} css={styles.callOut} />;
       case 'dropped':
-        return <EuiCallOut title={i18nTexts.droppedCalloutTitle} iconType="indexClose" />;
+        return <KbnInfoCallout title={i18nTexts.droppedCalloutTitle} />;
       case 'success':
         if (currentResult) {
           return (
@@ -153,12 +133,7 @@ export const ProcessorOutput: FunctionComponent<Props> = ({
         return <NoOutputCallOut />;
       case 'error':
         return (
-          <EuiCallOut
-            iconType={ErrorIcon}
-            title={i18nTexts.processorErrorTitle}
-            color="danger"
-            css={styles.callOut}
-          >
+          <KbnDangerCallout title={i18nTexts.processorErrorTitle} css={styles.callOut}>
             <EuiCodeBlock
               language="json"
               paddingSize="none"
@@ -167,16 +142,11 @@ export const ProcessorOutput: FunctionComponent<Props> = ({
             >
               {JSON.stringify(error, null, 2)}
             </EuiCodeBlock>
-          </EuiCallOut>
+          </KbnDangerCallout>
         );
       case 'error_ignored':
         return (
-          <EuiCallOut
-            iconType={ErrorIgnoredIcon}
-            title={i18nTexts.processorIgnoredErrorTitle}
-            color="warning"
-            css={styles.callOut}
-          >
+          <KbnWarningCallout title={i18nTexts.processorIgnoredErrorTitle} css={styles.callOut}>
             <EuiCodeBlock
               css={styles.codeBlock}
               language="json"
@@ -185,7 +155,7 @@ export const ProcessorOutput: FunctionComponent<Props> = ({
             >
               {JSON.stringify(ignoredError, null, 2)}
             </EuiCodeBlock>
-          </EuiCallOut>
+          </KbnWarningCallout>
         );
       default:
         return <NoOutputCallOut />;

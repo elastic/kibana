@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
 import type { OverlayStart } from '@kbn/core-overlays-browser';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
@@ -17,6 +17,7 @@ import { AlertEpisodeTagsFlyout } from './actions/edit_episode_tags_flyout';
 
 interface TagsFlyoutInnerProps {
   currentTags: string[];
+  fetchAdditionalSuggestions?: () => Promise<string[]>;
   services: { expressions: ExpressionsStart; spaces: SpacesPluginStart };
   onConfirm: (tags: string[]) => void;
   onCancel: () => void;
@@ -26,15 +27,25 @@ interface TagsFlyoutInnerProps {
 // mount the content-only variant here to avoid nesting two flyouts.
 export const TagsFlyoutInner = ({
   currentTags,
+  fetchAdditionalSuggestions,
   services,
   onConfirm,
   onCancel,
 }: TagsFlyoutInnerProps) => {
+  const [additionalSuggestions, setAdditionalSuggestions] = useState<string[]>([]);
+
+  useEffect(() => {
+    fetchAdditionalSuggestions?.()
+      .then(setAdditionalSuggestions)
+      .catch(() => setAdditionalSuggestions([]));
+  }, [fetchAdditionalSuggestions]);
+
   return (
     <AlertEpisodeTagsFlyout
       embedded
       onClose={onCancel}
       currentTags={currentTags}
+      additionalSuggestions={additionalSuggestions}
       services={services}
       onSave={onConfirm}
     />
@@ -49,6 +60,7 @@ export const openTagsFlyout = (
     expressions: ExpressionsStart;
     spaces: SpacesPluginStart;
     queryClient: QueryClient;
+    fetchAdditionalSuggestions?: () => Promise<string[]>;
   }
 ): Promise<string[] | undefined> => {
   return new Promise<string[] | undefined>((resolve) => {
@@ -61,6 +73,7 @@ export const openTagsFlyout = (
         <QueryClientProvider client={deps.queryClient}>
           <TagsFlyoutInner
             currentTags={currentTags}
+            fetchAdditionalSuggestions={deps.fetchAdditionalSuggestions}
             services={{ expressions: deps.expressions, spaces: deps.spaces }}
             onConfirm={(tags) => {
               ref.close();

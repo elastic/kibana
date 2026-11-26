@@ -66,7 +66,7 @@ const flappingOffContentSettings = i18n.translate(
 const alertFlappingTitleInfo = i18n.translate(
   'alertsUIShared.ruleSettingsFlappingTitleTooltip.alertFlappingTitleInfo',
   {
-    defaultMessage: 'Rule settings flapping title info',
+    defaultMessage: 'More information about alert flapping detection',
   }
 );
 
@@ -85,13 +85,13 @@ export const RuleSettingsFlappingTitleTooltip = (props: RuleSettingsFlappingTitl
         repositionOnScroll
         isOpen={isOpen}
         anchorPosition={anchorPosition}
-        aria-label={alertFlappingTitleInfo}
+        aria-label={tooltipTitle}
         panelStyle={{
           width: 500,
         }}
         closePopover={() => setIsPopoverOpen(false)}
         button={
-          <EuiToolTip content={alertFlappingTitleInfo} disableScreenReaderOutput>
+          <EuiToolTip content={tooltipTitle} disableScreenReaderOutput>
             <EuiButtonIcon
               data-test-subj="ruleSettingsFlappingTitleTooltipButton"
               display="empty"

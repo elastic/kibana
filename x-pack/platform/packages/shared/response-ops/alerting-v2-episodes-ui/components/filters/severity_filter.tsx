@@ -6,46 +6,13 @@
  */
 
 import React, { useCallback, useMemo, useState } from 'react';
-import { EuiFilterButton, EuiPopover, EuiHealth, useEuiTheme } from '@elastic/eui';
-import type { EuiThemeComputed } from '@elastic/eui';
-import {
-  EPISODE_SEVERITIES,
-  EPISODE_SEVERITY_FILTER_NONE,
-  EpisodeSeverity,
-  getEpisodeSeverityLabel,
-} from '../severity/severity_utils';
+import { EuiBadge, EuiFilterButton, EuiPopover } from '@elastic/eui';
+import type { EuiSelectableOption } from '@elastic/eui';
+import { EPISODE_SEVERITY_FILTER_NONE } from '../severity/severity_utils';
+import { AlertEpisodeSeverityBadge } from '../severity/episode_severity_badge';
+import { useSeverityRegistry } from '../../hooks/use_severity_registry';
 import { InlineFilterPopover } from './inline_filter_popover';
 import * as i18n from './translations';
-
-type SeverityDotColorKey = Extract<keyof EuiThemeComputed['colors'], `text${string}`>;
-
-// Resolved theme color per severity (rather than named tokens like `danger`) so the dot keeps its
-// color when its row is highlighted/selected: `EuiIcon` applies custom color values inline, which
-// beats `EuiSelectable`'s highlighted-row recolor. Colors mirror the severity badge colors.
-const SEVERITY_DOT_COLOR_KEYS: Record<EpisodeSeverity, SeverityDotColorKey> = {
-  [EpisodeSeverity.Critical]: 'textDanger',
-  [EpisodeSeverity.High]: 'textRisk',
-  [EpisodeSeverity.Medium]: 'textSuccess',
-  [EpisodeSeverity.Low]: 'textPrimary',
-  [EpisodeSeverity.Info]: 'textParagraph',
-};
-
-const SEVERITY_FILTER_OPTIONS: Array<{
-  label: string;
-  value: string;
-  colorKey: SeverityDotColorKey;
-}> = [
-  ...EPISODE_SEVERITIES.map((severity) => ({
-    label: getEpisodeSeverityLabel(severity),
-    value: severity,
-    colorKey: SEVERITY_DOT_COLOR_KEYS[severity],
-  })),
-  {
-    label: i18n.SEVERITY_FILTER_NONE_LABEL,
-    value: EPISODE_SEVERITY_FILTER_NONE,
-    colorKey: 'textSubdued',
-  },
-];
 
 interface AlertEpisodesSeverityFilterProps {
   selectedSeverities?: string[] | null;
@@ -59,17 +26,29 @@ export function AlertEpisodesSeverityFilter({
   'data-test-subj': dataTestSubj = 'severityFilter',
 }: AlertEpisodesSeverityFilterProps) {
   const [isOpen, setIsOpen] = useState(false);
-  const { euiTheme } = useEuiTheme();
+  const { entries } = useSeverityRegistry();
 
+  // Soft severity badges as the option content (Cases Status filter pattern).
   const options = useMemo(
-    () =>
-      SEVERITY_FILTER_OPTIONS.map(({ label, value, colorKey }) => ({
+    () => [
+      ...[...entries].reverse().map(({ label, value }) => ({
         label,
         value,
-        prepend: <EuiHealth color={euiTheme.colors[colorKey]} />,
       })),
-    [euiTheme]
+      {
+        label: i18n.SEVERITY_FILTER_NONE_LABEL,
+        value: EPISODE_SEVERITY_FILTER_NONE,
+      },
+    ],
+    [entries]
   );
+
+  const renderOption = useCallback((option: EuiSelectableOption) => {
+    if (option.key === EPISODE_SEVERITY_FILTER_NONE) {
+      return <EuiBadge color="hollow">{option.label}</EuiBadge>;
+    }
+    return <AlertEpisodeSeverityBadge severity={String(option.key)} />;
+  }, []);
 
   const handleSelectionChange = useCallback(
     (values: string[]) => {
@@ -86,7 +65,7 @@ export function AlertEpisodesSeverityFilter({
       aria-label={i18n.SEVERITY_FILTER_ARIA_LABEL}
       button={
         <EuiFilterButton
-          iconType="arrowDown"
+          iconType="chevronSingleDown"
           iconSide="right"
           onClick={() => setIsOpen(!isOpen)}
           isSelected={isOpen}
@@ -108,6 +87,7 @@ export function AlertEpisodesSeverityFilter({
         selectedValues={selectedValues}
         singleSelect={false}
         onSelectionChange={handleSelectionChange}
+        renderOption={renderOption}
         emptyMessage={i18n.SEVERITY_FILTER_NO_MATCH}
         data-test-subj={`${dataTestSubj}-popover`}
       />

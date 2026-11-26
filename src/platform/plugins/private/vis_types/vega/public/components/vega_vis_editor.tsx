@@ -17,9 +17,10 @@ import { i18n } from '@kbn/i18n';
 
 import type { VisEditorOptionsProps } from '@kbn/visualizations-plugin/public';
 import { CodeEditor, HJSON_LANG_ID } from '@kbn/code-editor';
-import { type UseEuiTheme } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, type UseEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
+import type { VegaByValueState } from '../../server';
 import { getNotifications } from '../services';
 import type { VisParams } from '../vega_fn';
 import { VegaHelpMenu } from './vega_help_menu';
@@ -69,6 +70,9 @@ const vegaVisStyles = {
       right: euiTheme.size.xxl,
       lineHeight: 1,
     }),
+  toolbarEditor: css({
+    minHeight: 0,
+  }),
 };
 
 const monacoOverride = {
@@ -83,82 +87,140 @@ const monacoOverride = {
     }),
 };
 
-function VegaVisEditor({ stateParams, setValue }: VisEditorOptionsProps<VisParams>) {
+export function VegaSpecEditor({
+  editorValue,
+  initialFormat,
+  onChange,
+  onFormatChange,
+  actionsPlacement = 'overlay',
+}: {
+  editorValue: string;
+  initialFormat?: VegaByValueState['spec']['format'];
+  onChange: (value: string) => void;
+  onFormatChange?: (format: VegaByValueState['spec']['format']) => void;
+  /** `overlay` floats the actions over the top-right corner; `toolbar` renders them in a row above the editor. */
+  actionsPlacement?: 'overlay' | 'toolbar';
+}) {
   const styles = useMemoCss(vegaVisStyles);
   const monacoStyles = useMemoCss(monacoOverride);
   const [languageId, setLanguageId] = useState<string>();
 
   useMount(() => {
-    let specLang = XJsonLang.ID;
+    let fmt: VegaByValueState['spec']['format'];
     try {
-      JSON.parse(stateParams.spec);
+      if (!initialFormat) JSON.parse(editorValue);
+      fmt = initialFormat ?? 'json';
     } catch {
-      specLang = HJSON_LANG_ID;
+      fmt = 'hjson';
     }
-    setLanguageId(specLang);
+    setLanguageId(fmt === 'json' ? XJsonLang.ID : HJSON_LANG_ID);
+    onFormatChange?.(fmt);
   });
 
   const setSpec = useCallback(
     (value: string, specLang?: string) => {
-      setValue('spec', value);
+      onChange(value);
       if (specLang) {
         setLanguageId(specLang);
+        onFormatChange?.(specLang === HJSON_LANG_ID ? 'hjson' : 'json');
       }
     },
-    [setValue]
+    [onChange, onFormatChange]
   );
 
-  const onChange = useCallback((value: string) => setSpec(value), [setSpec]);
+  const handleChange = useCallback((value: string) => setSpec(value), [setSpec]);
 
   const formatJson = useCallback(() => {
-    const { value, isValid } = format(stateParams.spec, prettyCompactStringify);
+    const { value: formattedValue, isValid } = format(editorValue, prettyCompactStringify);
 
     if (isValid) {
-      setSpec(value, XJsonLang.ID);
+      setSpec(formattedValue, XJsonLang.ID);
     }
-  }, [setSpec, stateParams.spec]);
+  }, [editorValue, setSpec]);
 
   const formatHJson = useCallback(() => {
-    const { value, isValid } = format(stateParams.spec, hjson.stringify, {
+    const { value: formattedValue, isValid } = format(editorValue, hjson.stringify, {
       bracesSameLine: true,
       keepWsc: true,
     });
 
     if (isValid) {
-      setSpec(value, HJSON_LANG_ID);
+      setSpec(formattedValue, HJSON_LANG_ID);
     }
-  }, [setSpec, stateParams.spec]);
+  }, [editorValue, setSpec]);
 
   if (!languageId) {
     return null;
   }
 
+  const actions = (
+    <>
+      <VegaHelpMenu />
+      <VegaActionsMenu formatHJson={formatHJson} formatJson={formatJson} />
+    </>
+  );
+
+  const editor = (
+    <CodeEditor
+      classNameCss={monacoStyles.override}
+      width="100%"
+      height="100%"
+      languageId={languageId}
+      value={editorValue}
+      onChange={handleChange}
+      options={{
+        lineNumbers: 'on',
+        fontSize: 12,
+        minimap: {
+          enabled: false,
+        },
+        folding: true,
+        wordWrap: 'on',
+        wrappingIndent: 'indent',
+        automaticLayout: true,
+      }}
+    />
+  );
+
+  if (actionsPlacement === 'toolbar') {
+    return (
+      <EuiFlexGroup
+        className="vgaEditor"
+        data-test-subj="vega-editor"
+        css={styles.base}
+        direction="column"
+        gutterSize="xs"
+        responsive={false}
+      >
+        <EuiFlexItem grow={false}>
+          <EuiFlexGroup
+            className="vgaEditor__editorActions"
+            justifyContent="flexEnd"
+            alignItems="center"
+            gutterSize="xs"
+            responsive={false}
+          >
+            {actions}
+          </EuiFlexGroup>
+        </EuiFlexItem>
+        <EuiFlexItem css={styles.toolbarEditor}>{editor}</EuiFlexItem>
+      </EuiFlexGroup>
+    );
+  }
+
   return (
     <div className="vgaEditor" data-test-subj="vega-editor" css={styles.base}>
       <div className="vgaEditor__editorActions" css={styles.editorActions}>
-        <VegaHelpMenu />
-        <VegaActionsMenu formatHJson={formatHJson} formatJson={formatJson} />
+        {actions}
       </div>
-      <CodeEditor
-        classNameCss={monacoStyles.override}
-        width="100%"
-        height="100%"
-        languageId={languageId}
-        value={stateParams.spec}
-        onChange={onChange}
-        options={{
-          lineNumbers: 'on',
-          fontSize: 12,
-          minimap: {
-            enabled: false,
-          },
-          folding: true,
-          wordWrap: 'on',
-          wrappingIndent: 'indent',
-          automaticLayout: true,
-        }}
-      />
+      {editor}
     </div>
+  );
+}
+
+function VegaVisEditor({ stateParams, setValue }: VisEditorOptionsProps<VisParams>) {
+  return (
+    <VegaSpecEditor editorValue={stateParams.spec} onChange={(value) => setValue('spec', value)} />
   );
 }
 

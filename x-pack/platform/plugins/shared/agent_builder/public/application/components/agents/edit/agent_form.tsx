@@ -163,6 +163,8 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
   });
 
   const canEditAgent = isCreateMode ? manageAgents : permissions?.update_agent ?? false;
+  // A bound agent is read-only without manage_security; binding itself is API-only for now.
+  const isBoundReadOnly = !isCreateMode && Boolean(agentState?.service_account_id) && !canEditAgent;
 
   const formMethods = useForm<AgentFormData>({
     defaultValues: { ...agentState },
@@ -273,6 +275,10 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
             canChangeAccessControl={
               isCreateMode ? manageAgents : permissions?.update_access_control ?? false
             }
+            canChangeApprovals={
+              isCreateMode ? manageAgents : permissions?.update_approvals ?? false
+            }
+            isBoundReadOnly={isBoundReadOnly}
             owner={agentState?.created_by}
             agentId={editingAgentId}
           />
@@ -382,6 +388,8 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
       activePluginsCount,
       manageAgents,
       permissions?.update_access_control,
+      permissions?.update_approvals,
+      isBoundReadOnly,
       isExperimentalFeaturesEnabled,
       enableElasticCapabilities,
     ]
@@ -626,6 +634,12 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
                 <EuiFlexGroup gutterSize="xs">
                   {renderSaveButton({ size: 'm' })}
                   <EuiPopover
+                    aria-label={i18n.translate(
+                      'xpack.agentBuilder.agents.form.saveActionsMenuAriaLabel',
+                      {
+                        defaultMessage: 'Save actions',
+                      }
+                    )}
                     panelPaddingSize="xs"
                     isOpen={isAdditionalActionsMenuOpen}
                     closePopover={() => setAdditionalActionsMenuOpen(false)}
@@ -686,6 +700,12 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
             : !isCreateMode
             ? [
                 <EuiPopover
+                  aria-label={i18n.translate(
+                    'xpack.agentBuilder.agents.form.agentActionsMenuAriaLabel',
+                    {
+                      defaultMessage: 'Agent actions',
+                    }
+                  )}
                   button={
                     <EuiToolTip
                       content={i18n.translate('xpack.agentBuilder.agents.form.openMenuLabel', {

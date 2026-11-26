@@ -42,6 +42,8 @@ export const useTimelineConfig = (
     [timeline.status]
   );
 
+  const isSuperTimeline = timeline.isSuperTimeline ?? false;
+
   const onNoteAddInTimeline = useCallback(() => {
     const isEventPinned = documentId ? timeline?.pinnedEventIds[documentId] === true : false;
     if (!isEventPinned && documentId && timelineSavedObjectId) {
@@ -56,7 +58,7 @@ export const useTimelineConfig = (
 
   return useMemo(
     () =>
-      isTimelineFlyout
+      isTimelineFlyout && !isSuperTimeline
         ? {
             timelineSavedObjectId,
             isTimelineSaved,
@@ -74,6 +76,7 @@ export const useTimelineConfig = (
 
     [
       isTimelineFlyout,
+      isSuperTimeline,
       timelineSavedObjectId,
       isTimelineSaved,
       onNoteAddInTimeline,

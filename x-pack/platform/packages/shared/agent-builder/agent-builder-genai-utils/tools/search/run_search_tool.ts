@@ -23,10 +23,12 @@ export const runSearchTool = async ({
   timeRange,
   modelProvider,
   esClient,
+  internalEsClient,
   logger,
   events,
   topSnippetsConfig,
   includeDatasets = false,
+  includeFrozen = false,
 }: {
   nlQuery: string;
   index?: string;
@@ -37,18 +39,22 @@ export const runSearchTool = async ({
   timeRange?: TimeRange;
   modelProvider: ModelProvider;
   esClient: ElasticsearchClient;
+  internalEsClient?: ElasticsearchClient;
   logger: Logger;
   events: ToolEventEmitter;
   topSnippetsConfig?: TopSnippetsConfig;
   includeDatasets?: boolean;
+  includeFrozen?: boolean;
 }): Promise<ToolHandlerResult[]> => {
   const toolGraph = await createSearchToolGraph({
     modelProvider,
     esClient,
+    internalEsClient,
     logger,
     events,
     topSnippetsConfig,
     includeDatasets,
+    includeFrozen,
   });
 
   return withActiveInferenceSpan(

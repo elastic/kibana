@@ -45,7 +45,7 @@ Most Kibana plugins are code-first. Spec-first is used primarily by Security sol
 - Edit the YAML spec files only. Never hand-edit `*.gen.ts` files — they are overwritten on regeneration.
 - Descriptions in YAML `description` fields flow through to generated TypeScript via JSDoc.
 - Examples in YAML `example`/`examples` fields do **not** flow to generated code — they are documentation-only artifacts in the YAML and bundled output.
-- After editing YAML, run the plugin's generation script (e.g. `yarn openapi` in the plugin directory) to regenerate.
+- After editing YAML, run the plugin's generation script (e.g. `pnpm openapi` in the plugin directory) to regenerate.
 
 ### Schema library (code-first only)
 
@@ -158,7 +158,7 @@ export const addressSchema = z
   .meta({ id: 'Address', description: 'Mailing address for a foo resource.' });
 ```
 
-If an API uses tagged unions, prefer `schema.discriminatedUnion('type', [...])` or `z.discriminatedUnion('type', [...])` over a plain union. With Zod, when each variant has its own `.meta({ id })`, the OAS generator produces a discriminator mapping automatically.
+If an API uses tagged unions, prefer `schema.discriminatedUnion('type', [...])` or `z.discriminatedUnion('type', [...])` over a plain union. With Zod, the OAS generator produces a discriminator mapping automatically when each variant has its own `.meta({ id })` and a required string discriminator (no `.optional()`, `.default()`, or `.nullable()`). Otherwise it omits the discriminator and emits a plain `oneOf`.
 
 ### Zod field descriptions
 

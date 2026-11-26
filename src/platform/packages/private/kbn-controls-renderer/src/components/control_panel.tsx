@@ -28,6 +28,7 @@ import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { EmbeddableRenderer, type DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
 import {
+  apiCanCancelRequests,
   apiPublishesRelatedPanels,
   useBatchedPublishingSubjects,
   type PublishingSubject,
@@ -74,6 +75,14 @@ export const ControlPanel = ({
   const [selectedPanelRelatedPanels, setSelectedPanelRelatedPanels] = useState<string[]>([]);
 
   const prependWrapperRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    return () => {
+      if (api && apiCanCancelRequests(api)) {
+        api.cancelRequests();
+      }
+    };
+  }, [api]);
 
   const selectedPanel = useMemo(
     () =>
@@ -211,15 +220,7 @@ export const ControlPanel = ({
         disabledActions={disabledActionIds}
         prependWrapperRef={prependWrapperRef}
       >
-        <EuiFormRow
-          data-test-subj="control-frame-title"
-          fullWidth
-          id={`control-title-${id}`}
-          aria-label={i18n.translate('controls.controlGroup.controlFrameAriaLabel', {
-            defaultMessage: 'Control for ${controlTitle}',
-            values: { controlTitle: panelLabel },
-          })}
-        >
+        <EuiFormRow data-test-subj="control-frame-title" fullWidth id={`control-title-${id}`}>
           <EuiFormControlLayout
             fullWidth
             className={classNames('controlFrame__formControlLayout', {

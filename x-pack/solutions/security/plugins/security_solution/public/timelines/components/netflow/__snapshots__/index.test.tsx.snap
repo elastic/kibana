@@ -2,25 +2,7 @@
 
 exports[`Netflow renders correctly against snapshot 1`] = `
 <DocumentFragment>
-  .c3 {
-  margin-right: 5px;
-}
-
-.c2 {
-  margin-right: 5px;
-}
-
-.c1 {
-  margin-right: 3px;
-  position: relative;
-  top: -1px;
-}
-
-.c0 {
-  margin-right: 10px;
-}
-
-<div
+  <div
     class="euiFlexGroup emotion-euiFlexGroup-wrap-none-center-center-column"
     data-test-subj="netflow-rows"
   >
@@ -32,7 +14,7 @@ exports[`Netflow renders correctly against snapshot 1`] = `
         data-test-subj="netflow-columns"
       >
         <div
-          class="euiFlexItem c0 emotion-euiFlexItem-growZero"
+          class="euiFlexItem exrv9020 emotion-euiFlexItem-growZero-EuiFlexItemMarginRight"
         >
           <div
             class="euiFlexGroup emotion-euiFlexGroup-none-center-flexStart-column"
@@ -48,7 +30,7 @@ exports[`Netflow renders correctly against snapshot 1`] = `
                   tabindex="-1"
                 >
                   <span
-                    class="css-jlsvsc-ProviderContentWrapper e1p0plmv0"
+                    class="css-1s7tdhk-ProviderContentWrapper e14kwmf30"
                     data-test-subj="render-content-user.name"
                   >
                     <span
@@ -56,13 +38,14 @@ exports[`Netflow renders correctly against snapshot 1`] = `
                       id="generated-id-wrapper"
                     >
                       <span
-                        class="euiBadge eb5dvw90 emotion-euiBadge-hollow-Badge"
+                        class="euiBadge e1tqya0j0 emotion-euiBadge-hollow-Badge"
                         title=""
                       >
                         <span
                           class="euiBadge__content emotion-euiBadge__content"
                         >
                           <span
+                            aria-hidden="true"
                             class="euiBadge__icon emotion-euiBadge__icon-left"
                             color="inherit"
                             data-euiicon-type="user"
@@ -89,7 +72,7 @@ exports[`Netflow renders correctly against snapshot 1`] = `
                   tabindex="-1"
                 >
                   <span
-                    class="css-jlsvsc-ProviderContentWrapper e1p0plmv0"
+                    class="css-1s7tdhk-ProviderContentWrapper e14kwmf30"
                     data-test-subj="render-content-process.name"
                   >
                     <span
@@ -97,13 +80,14 @@ exports[`Netflow renders correctly against snapshot 1`] = `
                       id="generated-id-wrapper"
                     >
                       <span
-                        class="euiBadge eb5dvw90 emotion-euiBadge-hollow-Badge"
+                        class="euiBadge e1tqya0j0 emotion-euiBadge-hollow-Badge"
                         title=""
                       >
                         <span
                           class="euiBadge__content emotion-euiBadge__content"
                         >
                           <span
+                            aria-hidden="true"
                             class="euiBadge__icon emotion-euiBadge__icon-left"
                             color="inherit"
                             data-euiicon-type="commandLine"
@@ -123,7 +107,7 @@ exports[`Netflow renders correctly against snapshot 1`] = `
           </div>
         </div>
         <div
-          class="euiFlexItem c0 emotion-euiFlexItem-growZero"
+          class="euiFlexItem exrv9020 emotion-euiFlexItem-growZero-EuiFlexItemMarginRight"
         >
           <div
             class="euiFlexGroup emotion-euiFlexGroup-none-center-flexStart-column"
@@ -139,14 +123,14 @@ exports[`Netflow renders correctly against snapshot 1`] = `
                   tabindex="-1"
                 >
                   <span
-                    class="css-jlsvsc-ProviderContentWrapper e1p0plmv0"
+                    class="css-1s7tdhk-ProviderContentWrapper e14kwmf30"
                     data-test-subj="render-content-event.duration"
                   >
                     <div
                       class="euiText emotion-euiText-xs"
                     >
                       <span
-                        class="c1"
+                        class="css-8e460u-TimeIcon e1w3gexs0"
                         data-euiicon-type="clock"
                       />
                       <span
@@ -174,14 +158,14 @@ exports[`Netflow renders correctly against snapshot 1`] = `
                   tabindex="-1"
                 >
                   <span
-                    class="css-jlsvsc-ProviderContentWrapper e1p0plmv0"
+                    class="css-1s7tdhk-ProviderContentWrapper e14kwmf30"
                     data-test-subj="render-content-event.start"
                   >
                     <div
                       class="euiText emotion-euiText-xs"
                     >
                       <span
-                        class="c1"
+                        class="css-8e460u-TimeIcon e1w3gexs0"
                         data-euiicon-type="clock"
                       />
                       <span
@@ -205,14 +189,14 @@ exports[`Netflow renders correctly against snapshot 1`] = `
                   tabindex="-1"
                 >
                   <span
-                    class="css-jlsvsc-ProviderContentWrapper e1p0plmv0"
+                    class="css-1s7tdhk-ProviderContentWrapper e14kwmf30"
                     data-test-subj="render-content-event.end"
                   >
                     <div
                       class="euiText emotion-euiText-xs"
                     >
                       <span
-                        class="c1"
+                        class="css-8e460u-TimeIcon e1w3gexs0"
                         data-euiicon-type="clock"
                       />
                       <span
@@ -241,7 +225,7 @@ exports[`Netflow renders correctly against snapshot 1`] = `
                 class="euiFlexGroup emotion-euiFlexGroup-responsive-none-center-center-row"
               >
                 <div
-                  class="euiFlexItem e1kgdg111 emotion-euiFlexItem-growZero-EuiFlexItemMarginRight"
+                  class="euiFlexItem e1u78ynk0 emotion-euiFlexItem-growZero-EuiFlexItemMarginRight"
                 >
                   <div
                     data-test-subj="mock-security-cell-actions"
@@ -250,7 +234,7 @@ exports[`Netflow renders correctly against snapshot 1`] = `
                       tabindex="-1"
                     >
                       <span
-                        class="css-jlsvsc-ProviderContentWrapper e1p0plmv0"
+                        class="css-1s7tdhk-ProviderContentWrapper e14kwmf30"
                         data-test-subj="render-content-network.direction"
                       >
                         <span
@@ -258,13 +242,14 @@ exports[`Netflow renders correctly against snapshot 1`] = `
                           id="generated-id-wrapper"
                         >
                           <span
-                            class="euiBadge eb5dvw90 emotion-euiBadge-hollow-Badge"
+                            class="euiBadge e1tqya0j0 emotion-euiBadge-hollow-Badge"
                             title=""
                           >
                             <span
                               class="euiBadge__content emotion-euiBadge__content"
                             >
                               <span
+                                aria-hidden="true"
                                 class="euiBadge__icon emotion-euiBadge__icon-left"
                                 color="inherit"
                                 data-euiicon-type="chevronSingleUp"
@@ -282,7 +267,7 @@ exports[`Netflow renders correctly against snapshot 1`] = `
                   </div>
                 </div>
                 <div
-                  class="euiFlexItem e1kgdg111 emotion-euiFlexItem-growZero-EuiFlexItemMarginRight"
+                  class="euiFlexItem e1u78ynk0 emotion-euiFlexItem-growZero-EuiFlexItemMarginRight"
                 >
                   <div
                     data-test-subj="mock-security-cell-actions"
@@ -291,7 +276,7 @@ exports[`Netflow renders correctly against snapshot 1`] = `
                       tabindex="-1"
                     >
                       <span
-                        class="css-jlsvsc-ProviderContentWrapper e1p0plmv0"
+                        class="css-1s7tdhk-ProviderContentWrapper e14kwmf30"
                         data-test-subj="render-content-network.protocol"
                       >
                         <span
@@ -299,7 +284,7 @@ exports[`Netflow renders correctly against snapshot 1`] = `
                           id="generated-id-wrapper"
                         >
                           <span
-                            class="euiBadge eb5dvw90 emotion-euiBadge-hollow-Badge"
+                            class="euiBadge e1tqya0j0 emotion-euiBadge-hollow-Badge"
                             title=""
                           >
                             <span
@@ -318,7 +303,7 @@ exports[`Netflow renders correctly against snapshot 1`] = `
                   </div>
                 </div>
                 <div
-                  class="euiFlexItem e1kgdg111 emotion-euiFlexItem-growZero-EuiFlexItemMarginRight"
+                  class="euiFlexItem e1u78ynk0 emotion-euiFlexItem-growZero-EuiFlexItemMarginRight"
                 >
                   <div
                     data-test-subj="mock-security-cell-actions"
@@ -327,7 +312,7 @@ exports[`Netflow renders correctly against snapshot 1`] = `
                       tabindex="-1"
                     >
                       <span
-                        class="css-jlsvsc-ProviderContentWrapper e1p0plmv0"
+                        class="css-1s7tdhk-ProviderContentWrapper e14kwmf30"
                         data-test-subj="render-content-network.bytes"
                       >
                         <span
@@ -335,7 +320,7 @@ exports[`Netflow renders correctly against snapshot 1`] = `
                           id="generated-id-wrapper"
                         >
                           <div
-                            class="euiText e1kgdg110 emotion-euiText-xs-Stats"
+                            class="euiText e1u78ynk1 emotion-euiText-xs-Stats"
                           >
                             <span>
                               100B
@@ -347,7 +332,7 @@ exports[`Netflow renders correctly against snapshot 1`] = `
                   </div>
                 </div>
                 <div
-                  class="euiFlexItem e1kgdg111 emotion-euiFlexItem-growZero-EuiFlexItemMarginRight"
+                  class="euiFlexItem e1u78ynk0 emotion-euiFlexItem-growZero-EuiFlexItemMarginRight"
                 >
                   <div
                     data-test-subj="mock-security-cell-actions"
@@ -356,7 +341,7 @@ exports[`Netflow renders correctly against snapshot 1`] = `
                       tabindex="-1"
                     >
                       <span
-                        class="css-jlsvsc-ProviderContentWrapper e1p0plmv0"
+                        class="css-1s7tdhk-ProviderContentWrapper e14kwmf30"
                         data-test-subj="render-content-network.packets"
                       >
                         <span
@@ -364,7 +349,7 @@ exports[`Netflow renders correctly against snapshot 1`] = `
                           id="generated-id-wrapper"
                         >
                           <div
-                            class="euiText e1kgdg110 emotion-euiText-xs-Stats"
+                            class="euiText e1u78ynk1 emotion-euiText-xs-Stats"
                           >
                             <span>
                               3 pkts
@@ -376,7 +361,7 @@ exports[`Netflow renders correctly against snapshot 1`] = `
                   </div>
                 </div>
                 <div
-                  class="euiFlexItem e1kgdg111 emotion-euiFlexItem-growZero-EuiFlexItemMarginRight"
+                  class="euiFlexItem e1u78ynk0 emotion-euiFlexItem-growZero-EuiFlexItemMarginRight"
                 >
                   <div
                     data-test-subj="mock-security-cell-actions"
@@ -385,7 +370,7 @@ exports[`Netflow renders correctly against snapshot 1`] = `
                       tabindex="-1"
                     >
                       <span
-                        class="css-jlsvsc-ProviderContentWrapper e1p0plmv0"
+                        class="css-1s7tdhk-ProviderContentWrapper e14kwmf30"
                         data-test-subj="render-content-network.transport"
                       >
                         <span
@@ -393,7 +378,7 @@ exports[`Netflow renders correctly against snapshot 1`] = `
                           id="generated-id-wrapper"
                         >
                           <span
-                            class="euiBadge eb5dvw90 emotion-euiBadge-hollow-Badge"
+                            class="euiBadge e1tqya0j0 emotion-euiBadge-hollow-Badge"
                             title=""
                           >
                             <span
@@ -421,7 +406,7 @@ exports[`Netflow renders correctly against snapshot 1`] = `
                       tabindex="-1"
                     >
                       <span
-                        class="css-jlsvsc-ProviderContentWrapper e1p0plmv0"
+                        class="css-1s7tdhk-ProviderContentWrapper e14kwmf30"
                         data-test-subj="render-content-network.community_id"
                       >
                         <span
@@ -429,7 +414,7 @@ exports[`Netflow renders correctly against snapshot 1`] = `
                           id="generated-id-wrapper"
                         >
                           <span
-                            class="euiBadge eb5dvw90 emotion-euiBadge-hollow-Badge"
+                            class="euiBadge e1tqya0j0 emotion-euiBadge-hollow-Badge"
                             title=""
                           >
                             <span
@@ -450,7 +435,7 @@ exports[`Netflow renders correctly against snapshot 1`] = `
               </div>
             </div>
             <div
-              class="euiFlexItem e1ikjo0y0 emotion-euiFlexItem-growZero-EuiFlexItemMarginTop"
+              class="euiFlexItem e5f8nf60 emotion-euiFlexItem-growZero-EuiFlexItemMarginTop"
             >
               <div
                 class="euiFlexGroup emotion-euiFlexGroup-responsive-none-center-stretch-row"
@@ -477,7 +462,7 @@ exports[`Netflow renders correctly against snapshot 1`] = `
                             class="euiFlexItem emotion-euiFlexItem-growZero"
                           >
                             <div
-                              class="css-u90o0n-Label egdhtzu0"
+                              class="css-u90o0n-Label ecpgoij0"
                             >
                               Source
                             </div>
@@ -498,7 +483,7 @@ exports[`Netflow renders correctly against snapshot 1`] = `
                                     class="euiFlexItem emotion-euiFlexItem-growZero"
                                   >
                                     <button
-                                      class="euiLink emotion-euiLink-primary"
+                                      class="euiLink emotion-euiLink-text"
                                       data-test-subj="network-details"
                                       type="button"
                                     >
@@ -515,7 +500,7 @@ exports[`Netflow renders correctly against snapshot 1`] = `
                                         class="euiFlexItem emotion-euiFlexItem-growZero"
                                       >
                                         <span
-                                          class="css-1jvb4f-IpPortSeparator e1h8j3wk0"
+                                          class="css-1jvb4f-IpPortSeparator eooupwg0"
                                           data-test-subj="ip-port-separator"
                                         >
                                           :
@@ -525,10 +510,10 @@ exports[`Netflow renders correctly against snapshot 1`] = `
                                         class="euiFlexItem emotion-euiFlexItem-growZero"
                                       >
                                         <div
-                                          class="css-q5yr96-PortContainer etea1110"
+                                          class="css-p0iey-PortContainer equgoob1"
                                         >
                                           <a
-                                            class="euiLink emotion-euiLink-primary"
+                                            class="euiLink emotion-euiLink-text"
                                             data-test-subj="port-or-service-name-link"
                                             href="https://www.iana.org/assignments/service-names-port-numbers/service-names-port-numbers.xhtml?search=9987"
                                             rel="noopener noreferrer"
@@ -561,7 +546,7 @@ exports[`Netflow renders correctly against snapshot 1`] = `
                               class="euiFlexGroup emotion-euiFlexGroup-responsive-none-flexStart-center-row"
                             >
                               <div
-                                class="euiFlexItem esjk1ht0 emotion-euiFlexItem-growZero-GeoFlexItem"
+                                class="euiFlexItem e751pt60 emotion-euiFlexItem-growZero-GeoFlexItem"
                               >
                                 <div
                                   class="euiFlexGroup emotion-euiFlexGroup-responsive-none-flexStart-center-row"
@@ -576,7 +561,7 @@ exports[`Netflow renders correctly against snapshot 1`] = `
                                         tabindex="-1"
                                       >
                                         <span
-                                          class="css-jlsvsc-ProviderContentWrapper e1p0plmv0"
+                                          class="css-1s7tdhk-ProviderContentWrapper e14kwmf30"
                                           data-test-subj="render-content-source.geo.continent_name"
                                         >
                                           <span
@@ -592,7 +577,7 @@ exports[`Netflow renders correctly against snapshot 1`] = `
                                 </div>
                               </div>
                               <div
-                                class="euiFlexItem esjk1ht0 emotion-euiFlexItem-growZero-GeoFlexItem"
+                                class="euiFlexItem e751pt60 emotion-euiFlexItem-growZero-GeoFlexItem"
                               >
                                 <div
                                   class="euiFlexGroup emotion-euiFlexGroup-responsive-none-flexStart-center-row"
@@ -607,7 +592,7 @@ exports[`Netflow renders correctly against snapshot 1`] = `
                                         tabindex="-1"
                                       >
                                         <span
-                                          class="css-jlsvsc-ProviderContentWrapper e1p0plmv0"
+                                          class="css-1s7tdhk-ProviderContentWrapper e14kwmf30"
                                           data-test-subj="render-content-source.geo.country_name"
                                         >
                                           <span
@@ -623,7 +608,7 @@ exports[`Netflow renders correctly against snapshot 1`] = `
                                 </div>
                               </div>
                               <div
-                                class="euiFlexItem esjk1ht0 emotion-euiFlexItem-growZero-GeoFlexItem"
+                                class="euiFlexItem e751pt60 emotion-euiFlexItem-growZero-GeoFlexItem"
                               >
                                 <div
                                   class="euiFlexGroup emotion-euiFlexGroup-responsive-none-flexStart-center-row"
@@ -632,7 +617,7 @@ exports[`Netflow renders correctly against snapshot 1`] = `
                                     class="euiFlexItem emotion-euiFlexItem-growZero"
                                   >
                                     <span
-                                      class="css-purdnl-FlagWrapper e1v8vkkw0"
+                                      class="css-purdnl-FlagWrapper e1nywon80"
                                       data-test-subj="country-flag"
                                     >
                                       🇺🇸
@@ -648,7 +633,7 @@ exports[`Netflow renders correctly against snapshot 1`] = `
                                         tabindex="-1"
                                       >
                                         <span
-                                          class="css-jlsvsc-ProviderContentWrapper e1p0plmv0"
+                                          class="css-1s7tdhk-ProviderContentWrapper e14kwmf30"
                                           data-test-subj="render-content-source.geo.country_iso_code"
                                         >
                                           <span
@@ -664,7 +649,7 @@ exports[`Netflow renders correctly against snapshot 1`] = `
                                 </div>
                               </div>
                               <div
-                                class="euiFlexItem esjk1ht0 emotion-euiFlexItem-growZero-GeoFlexItem"
+                                class="euiFlexItem e751pt60 emotion-euiFlexItem-growZero-GeoFlexItem"
                               >
                                 <div
                                   class="euiFlexGroup emotion-euiFlexGroup-responsive-none-flexStart-center-row"
@@ -679,7 +664,7 @@ exports[`Netflow renders correctly against snapshot 1`] = `
                                         tabindex="-1"
                                       >
                                         <span
-                                          class="css-jlsvsc-ProviderContentWrapper e1p0plmv0"
+                                          class="css-1s7tdhk-ProviderContentWrapper e14kwmf30"
                                           data-test-subj="render-content-source.geo.region_name"
                                         >
                                           <span
@@ -695,7 +680,7 @@ exports[`Netflow renders correctly against snapshot 1`] = `
                                 </div>
                               </div>
                               <div
-                                class="euiFlexItem esjk1ht0 emotion-euiFlexItem-growZero-GeoFlexItem"
+                                class="euiFlexItem e751pt60 emotion-euiFlexItem-growZero-GeoFlexItem"
                               >
                                 <div
                                   class="euiFlexGroup emotion-euiFlexGroup-responsive-none-flexStart-center-row"
@@ -710,7 +695,7 @@ exports[`Netflow renders correctly against snapshot 1`] = `
                                         tabindex="-1"
                                       >
                                         <span
-                                          class="css-jlsvsc-ProviderContentWrapper e1p0plmv0"
+                                          class="css-1s7tdhk-ProviderContentWrapper e14kwmf30"
                                           data-test-subj="render-content-source.geo.city_name"
                                         >
                                           <span
@@ -733,7 +718,7 @@ exports[`Netflow renders correctly against snapshot 1`] = `
                   </span>
                 </div>
                 <div
-                  class="euiFlexGroup e1jag3831 emotion-euiFlexGroup-none-center-center-column-SourceDestinationArrowsContainer"
+                  class="euiFlexGroup e1ooes7d1 emotion-euiFlexGroup-none-center-center-column-SourceDestinationArrowsContainer"
                 >
                   <div
                     class="euiFlexItem emotion-euiFlexItem-growZero"
@@ -745,7 +730,7 @@ exports[`Netflow renders correctly against snapshot 1`] = `
                         class="euiFlexItem emotion-euiFlexItem-growZero"
                       >
                         <span
-                          class="css-438b4r-ArrowBody e1do9oav0"
+                          class="css-438b4r-ArrowBody ett86g80"
                           height="2.8"
                         />
                       </div>
@@ -759,7 +744,7 @@ exports[`Netflow renders correctly against snapshot 1`] = `
                             tabindex="-1"
                           >
                             <span
-                              class="css-jlsvsc-ProviderContentWrapper e1p0plmv0"
+                              class="css-1s7tdhk-ProviderContentWrapper e14kwmf30"
                               data-test-subj="render-content-source.bytes"
                             >
                               <span
@@ -767,10 +752,10 @@ exports[`Netflow renders correctly against snapshot 1`] = `
                                 id="generated-id-wrapper"
                               >
                                 <div
-                                  class="euiText e1jag3830 emotion-euiText-xs-Data"
+                                  class="euiText e1ooes7d2 emotion-euiText-xs-Data"
                                 >
                                   <span
-                                    class="css-1ioglsa-Percent e1jag3832"
+                                    class="css-1ioglsa-Percent e1ooes7d0"
                                   >
                                     (60.00%)
                                   </span>
@@ -787,7 +772,7 @@ exports[`Netflow renders correctly against snapshot 1`] = `
                         class="euiFlexItem emotion-euiFlexItem-growZero"
                       >
                         <span
-                          class="css-438b4r-ArrowBody e1do9oav0"
+                          class="css-438b4r-ArrowBody ett86g80"
                           height="2.8"
                         />
                       </div>
@@ -801,7 +786,7 @@ exports[`Netflow renders correctly against snapshot 1`] = `
                             tabindex="-1"
                           >
                             <span
-                              class="css-jlsvsc-ProviderContentWrapper e1p0plmv0"
+                              class="css-1s7tdhk-ProviderContentWrapper e14kwmf30"
                               data-test-subj="render-content-source.packets"
                             >
                               <span
@@ -809,7 +794,7 @@ exports[`Netflow renders correctly against snapshot 1`] = `
                                 id="generated-id-wrapper"
                               >
                                 <div
-                                  class="euiText e1jag3830 emotion-euiText-xs-Data"
+                                  class="euiText e1ooes7d2 emotion-euiText-xs-Data"
                                 >
                                   <span>
                                     2 pkts
@@ -824,7 +809,7 @@ exports[`Netflow renders correctly against snapshot 1`] = `
                         class="euiFlexItem emotion-euiFlexItem-growZero"
                       >
                         <span
-                          class="css-438b4r-ArrowBody e1do9oav0"
+                          class="css-438b4r-ArrowBody ett86g80"
                           height="2.8"
                         />
                       </div>
@@ -860,7 +845,7 @@ exports[`Netflow renders correctly against snapshot 1`] = `
                         class="euiFlexItem emotion-euiFlexItem-growZero"
                       >
                         <span
-                          class="css-sm8vet-ArrowBody e1do9oav0"
+                          class="css-sm8vet-ArrowBody ett86g80"
                           height="2.2"
                         />
                       </div>
@@ -874,7 +859,7 @@ exports[`Netflow renders correctly against snapshot 1`] = `
                             tabindex="-1"
                           >
                             <span
-                              class="css-jlsvsc-ProviderContentWrapper e1p0plmv0"
+                              class="css-1s7tdhk-ProviderContentWrapper e14kwmf30"
                               data-test-subj="render-content-destination.bytes"
                             >
                               <span
@@ -882,10 +867,10 @@ exports[`Netflow renders correctly against snapshot 1`] = `
                                 id="generated-id-wrapper"
                               >
                                 <div
-                                  class="euiText e1jag3830 emotion-euiText-xs-Data"
+                                  class="euiText e1ooes7d2 emotion-euiText-xs-Data"
                                 >
                                   <span
-                                    class="css-1ioglsa-Percent e1jag3832"
+                                    class="css-1ioglsa-Percent e1ooes7d0"
                                   >
                                     (40.00%)
                                   </span>
@@ -902,7 +887,7 @@ exports[`Netflow renders correctly against snapshot 1`] = `
                         class="euiFlexItem emotion-euiFlexItem-growZero"
                       >
                         <span
-                          class="css-sm8vet-ArrowBody e1do9oav0"
+                          class="css-sm8vet-ArrowBody ett86g80"
                           height="2.2"
                         />
                       </div>
@@ -916,7 +901,7 @@ exports[`Netflow renders correctly against snapshot 1`] = `
                             tabindex="-1"
                           >
                             <span
-                              class="css-jlsvsc-ProviderContentWrapper e1p0plmv0"
+                              class="css-1s7tdhk-ProviderContentWrapper e14kwmf30"
                               data-test-subj="render-content-destination.packets"
                             >
                               <span
@@ -924,7 +909,7 @@ exports[`Netflow renders correctly against snapshot 1`] = `
                                 id="generated-id-wrapper"
                               >
                                 <div
-                                  class="euiText e1jag3830 emotion-euiText-xs-Data"
+                                  class="euiText e1ooes7d2 emotion-euiText-xs-Data"
                                 >
                                   <span>
                                     1 pkts
@@ -939,7 +924,7 @@ exports[`Netflow renders correctly against snapshot 1`] = `
                         class="euiFlexItem emotion-euiFlexItem-growZero"
                       >
                         <span
-                          class="css-sm8vet-ArrowBody e1do9oav0"
+                          class="css-sm8vet-ArrowBody ett86g80"
                           height="2.2"
                         />
                       </div>
@@ -968,7 +953,7 @@ exports[`Netflow renders correctly against snapshot 1`] = `
                             class="euiFlexItem emotion-euiFlexItem-growZero"
                           >
                             <div
-                              class="css-u90o0n-Label egdhtzu0"
+                              class="css-u90o0n-Label ecpgoij0"
                             >
                               Destination
                             </div>
@@ -989,7 +974,7 @@ exports[`Netflow renders correctly against snapshot 1`] = `
                                     class="euiFlexItem emotion-euiFlexItem-growZero"
                                   >
                                     <button
-                                      class="euiLink emotion-euiLink-primary"
+                                      class="euiLink emotion-euiLink-text"
                                       data-test-subj="network-details"
                                       type="button"
                                     >
@@ -1006,7 +991,7 @@ exports[`Netflow renders correctly against snapshot 1`] = `
                                         class="euiFlexItem emotion-euiFlexItem-growZero"
                                       >
                                         <span
-                                          class="css-1jvb4f-IpPortSeparator e1h8j3wk0"
+                                          class="css-1jvb4f-IpPortSeparator eooupwg0"
                                           data-test-subj="ip-port-separator"
                                         >
                                           :
@@ -1016,10 +1001,10 @@ exports[`Netflow renders correctly against snapshot 1`] = `
                                         class="euiFlexItem emotion-euiFlexItem-growZero"
                                       >
                                         <div
-                                          class="css-q5yr96-PortContainer etea1110"
+                                          class="css-p0iey-PortContainer equgoob1"
                                         >
                                           <a
-                                            class="euiLink emotion-euiLink-primary"
+                                            class="euiLink emotion-euiLink-text"
                                             data-test-subj="port-or-service-name-link"
                                             href="https://www.iana.org/assignments/service-names-port-numbers/service-names-port-numbers.xhtml?search=80"
                                             rel="noopener noreferrer"
@@ -1052,7 +1037,7 @@ exports[`Netflow renders correctly against snapshot 1`] = `
                               class="euiFlexGroup emotion-euiFlexGroup-responsive-none-flexStart-center-row"
                             >
                               <div
-                                class="euiFlexItem esjk1ht0 emotion-euiFlexItem-growZero-GeoFlexItem"
+                                class="euiFlexItem e751pt60 emotion-euiFlexItem-growZero-GeoFlexItem"
                               >
                                 <div
                                   class="euiFlexGroup emotion-euiFlexGroup-responsive-none-flexStart-center-row"
@@ -1067,7 +1052,7 @@ exports[`Netflow renders correctly against snapshot 1`] = `
                                         tabindex="-1"
                                       >
                                         <span
-                                          class="css-jlsvsc-ProviderContentWrapper e1p0plmv0"
+                                          class="css-1s7tdhk-ProviderContentWrapper e14kwmf30"
                                           data-test-subj="render-content-destination.geo.continent_name"
                                         >
                                           <span
@@ -1083,7 +1068,7 @@ exports[`Netflow renders correctly against snapshot 1`] = `
                                 </div>
                               </div>
                               <div
-                                class="euiFlexItem esjk1ht0 emotion-euiFlexItem-growZero-GeoFlexItem"
+                                class="euiFlexItem e751pt60 emotion-euiFlexItem-growZero-GeoFlexItem"
                               >
                                 <div
                                   class="euiFlexGroup emotion-euiFlexGroup-responsive-none-flexStart-center-row"
@@ -1098,7 +1083,7 @@ exports[`Netflow renders correctly against snapshot 1`] = `
                                         tabindex="-1"
                                       >
                                         <span
-                                          class="css-jlsvsc-ProviderContentWrapper e1p0plmv0"
+                                          class="css-1s7tdhk-ProviderContentWrapper e14kwmf30"
                                           data-test-subj="render-content-destination.geo.country_name"
                                         >
                                           <span
@@ -1114,7 +1099,7 @@ exports[`Netflow renders correctly against snapshot 1`] = `
                                 </div>
                               </div>
                               <div
-                                class="euiFlexItem esjk1ht0 emotion-euiFlexItem-growZero-GeoFlexItem"
+                                class="euiFlexItem e751pt60 emotion-euiFlexItem-growZero-GeoFlexItem"
                               >
                                 <div
                                   class="euiFlexGroup emotion-euiFlexGroup-responsive-none-flexStart-center-row"
@@ -1123,7 +1108,7 @@ exports[`Netflow renders correctly against snapshot 1`] = `
                                     class="euiFlexItem emotion-euiFlexItem-growZero"
                                   >
                                     <span
-                                      class="css-purdnl-FlagWrapper e1v8vkkw0"
+                                      class="css-purdnl-FlagWrapper e1nywon80"
                                       data-test-subj="country-flag"
                                     >
                                       🇺🇸
@@ -1139,7 +1124,7 @@ exports[`Netflow renders correctly against snapshot 1`] = `
                                         tabindex="-1"
                                       >
                                         <span
-                                          class="css-jlsvsc-ProviderContentWrapper e1p0plmv0"
+                                          class="css-1s7tdhk-ProviderContentWrapper e14kwmf30"
                                           data-test-subj="render-content-destination.geo.country_iso_code"
                                         >
                                           <span
@@ -1155,7 +1140,7 @@ exports[`Netflow renders correctly against snapshot 1`] = `
                                 </div>
                               </div>
                               <div
-                                class="euiFlexItem esjk1ht0 emotion-euiFlexItem-growZero-GeoFlexItem"
+                                class="euiFlexItem e751pt60 emotion-euiFlexItem-growZero-GeoFlexItem"
                               >
                                 <div
                                   class="euiFlexGroup emotion-euiFlexGroup-responsive-none-flexStart-center-row"
@@ -1170,7 +1155,7 @@ exports[`Netflow renders correctly against snapshot 1`] = `
                                         tabindex="-1"
                                       >
                                         <span
-                                          class="css-jlsvsc-ProviderContentWrapper e1p0plmv0"
+                                          class="css-1s7tdhk-ProviderContentWrapper e14kwmf30"
                                           data-test-subj="render-content-destination.geo.region_name"
                                         >
                                           <span
@@ -1186,7 +1171,7 @@ exports[`Netflow renders correctly against snapshot 1`] = `
                                 </div>
                               </div>
                               <div
-                                class="euiFlexItem esjk1ht0 emotion-euiFlexItem-growZero-GeoFlexItem"
+                                class="euiFlexItem e751pt60 emotion-euiFlexItem-growZero-GeoFlexItem"
                               >
                                 <div
                                   class="euiFlexGroup emotion-euiFlexGroup-responsive-none-flexStart-center-row"
@@ -1201,7 +1186,7 @@ exports[`Netflow renders correctly against snapshot 1`] = `
                                         tabindex="-1"
                                       >
                                         <span
-                                          class="css-jlsvsc-ProviderContentWrapper e1p0plmv0"
+                                          class="css-1s7tdhk-ProviderContentWrapper e14kwmf30"
                                           data-test-subj="render-content-destination.geo.city_name"
                                         >
                                           <span
@@ -1246,7 +1231,7 @@ exports[`Netflow renders correctly against snapshot 1`] = `
               tabindex="-1"
             >
               <span
-                class="css-jlsvsc-ProviderContentWrapper e1p0plmv0"
+                class="css-1s7tdhk-ProviderContentWrapper e14kwmf30"
                 data-test-subj="render-content-tls.fingerprints.ja3.hash"
               >
                 <span
@@ -1254,13 +1239,14 @@ exports[`Netflow renders correctly against snapshot 1`] = `
                   id="generated-id-wrapper"
                 >
                   <span
-                    class="euiBadge eb5dvw90 emotion-euiBadge-hollow-Badge"
+                    class="euiBadge e1tqya0j0 emotion-euiBadge-hollow-Badge"
                     title=""
                   >
                     <span
                       class="euiBadge__content emotion-euiBadge__content"
                     >
                       <span
+                        aria-hidden="true"
                         class="euiBadge__icon emotion-euiBadge__icon-left"
                         color="inherit"
                         data-euiicon-type="snowflake"
@@ -1269,12 +1255,12 @@ exports[`Netflow renders correctly against snapshot 1`] = `
                         class="euiBadge__text emotion-euiBadge__text"
                       >
                         <span
-                          class="c2"
+                          class="css-3esyjx-Ja3FingerprintLabel e15wdmre0"
                         >
                           ja3
                         </span>
                         <a
-                          class="euiLink emotion-euiLink-primary"
+                          class="euiLink emotion-euiLink-text"
                           data-test-subj="ja3-fingerprint-link"
                           href="https://sslbl.abuse.ch/ja3-fingerprints/tls.fingerprints.ja3.hash-value"
                           rel="noopener noreferrer"
@@ -1310,7 +1296,7 @@ exports[`Netflow renders correctly against snapshot 1`] = `
               tabindex="-1"
             >
               <span
-                class="css-jlsvsc-ProviderContentWrapper e1p0plmv0"
+                class="css-1s7tdhk-ProviderContentWrapper e14kwmf30"
                 data-test-subj="render-content-tls.client_certificate.fingerprint.sha1"
               >
                 <span
@@ -1318,13 +1304,14 @@ exports[`Netflow renders correctly against snapshot 1`] = `
                   id="generated-id-wrapper"
                 >
                   <span
-                    class="euiBadge eb5dvw90 emotion-euiBadge-hollow-Badge"
+                    class="euiBadge e1tqya0j0 emotion-euiBadge-hollow-Badge"
                     title=""
                   >
                     <span
                       class="euiBadge__content emotion-euiBadge__content"
                     >
                       <span
+                        aria-hidden="true"
                         class="euiBadge__icon emotion-euiBadge__icon-left"
                         color="inherit"
                         data-euiicon-type="snowflake"
@@ -1333,12 +1320,12 @@ exports[`Netflow renders correctly against snapshot 1`] = `
                         class="euiBadge__text emotion-euiBadge__text"
                       >
                         <span
-                          class="c3"
+                          class="css-zjolvq-FingerprintLabel e18pxs070"
                         >
                           client cert
                         </span>
                         <a
-                          class="euiLink emotion-euiLink-primary"
+                          class="euiLink emotion-euiLink-text"
                           data-test-subj="certificate-fingerprint-link"
                           href="https://sslbl.abuse.ch/ssl-certificates/sha1/tls.client_certificate.fingerprint.sha1-value"
                           rel="noopener noreferrer"
@@ -1374,7 +1361,7 @@ exports[`Netflow renders correctly against snapshot 1`] = `
               tabindex="-1"
             >
               <span
-                class="css-jlsvsc-ProviderContentWrapper e1p0plmv0"
+                class="css-1s7tdhk-ProviderContentWrapper e14kwmf30"
                 data-test-subj="render-content-tls.server_certificate.fingerprint.sha1"
               >
                 <span
@@ -1382,13 +1369,14 @@ exports[`Netflow renders correctly against snapshot 1`] = `
                   id="generated-id-wrapper"
                 >
                   <span
-                    class="euiBadge eb5dvw90 emotion-euiBadge-hollow-Badge"
+                    class="euiBadge e1tqya0j0 emotion-euiBadge-hollow-Badge"
                     title=""
                   >
                     <span
                       class="euiBadge__content emotion-euiBadge__content"
                     >
                       <span
+                        aria-hidden="true"
                         class="euiBadge__icon emotion-euiBadge__icon-left"
                         color="inherit"
                         data-euiicon-type="snowflake"
@@ -1397,12 +1385,12 @@ exports[`Netflow renders correctly against snapshot 1`] = `
                         class="euiBadge__text emotion-euiBadge__text"
                       >
                         <span
-                          class="c3"
+                          class="css-zjolvq-FingerprintLabel e18pxs070"
                         >
                           server cert
                         </span>
                         <a
-                          class="euiLink emotion-euiLink-primary"
+                          class="euiLink emotion-euiLink-text"
                           data-test-subj="certificate-fingerprint-link"
                           href="https://sslbl.abuse.ch/ssl-certificates/sha1/tls.server_certificate.fingerprint.sha1-value"
                           rel="noopener noreferrer"

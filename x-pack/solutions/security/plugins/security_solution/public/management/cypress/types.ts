@@ -54,10 +54,9 @@ export type IndexEndpointHostsCyTaskOptions = Partial<
 >;
 
 export interface HostActionResponse {
-  data: {
-    action: ActionDetails;
-    state: { state?: 'success' | 'failure' };
-  };
+  action: ActionDetails;
+  state: { state?: 'success' | 'failure' };
+  responseCode?: string;
 }
 
 export interface LoadUserAndRoleCyTaskOptions {
@@ -68,15 +67,6 @@ export interface CreateUserAndRoleCyTaskOptions {
   role: Role;
 }
 
-export interface UninstallAgentFromHostTaskOptions {
-  hostname: string;
-  uninstallToken: string;
-}
-
-export interface IsAgentAndEndpointUninstalledFromHostTaskOptions {
-  hostname: string;
-}
-
 export interface LogItTaskOptions {
   level: keyof Pick<ToolingLog, 'info' | 'debug' | 'verbose'>;
   data: any;
@@ -85,9 +75,4 @@ export interface LogItTaskOptions {
 export interface CaptureHostVmAgentDiagnosticsOptions {
   hostname: string;
   fileNamePrefix?: string;
-}
-
-export interface ExecuteCommandOnHostOptions {
-  hostname: string;
-  command: string;
 }

@@ -9,13 +9,15 @@ import { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux-v7';
 import { getLocationMonitorsAction } from '../../../../state/settings/actions';
 import { selectLocationMonitors } from '../../../../state/settings';
+import { useSyntheticsRefreshContext } from '../../../../contexts';
 
 export const useLocationMonitors = () => {
   const dispatch = useDispatch();
+  const { lastRefresh } = useSyntheticsRefreshContext();
 
   useEffect(() => {
     dispatch(getLocationMonitorsAction.get());
-  }, [dispatch]);
+  }, [dispatch, lastRefresh]);
 
   return useSelector(selectLocationMonitors);
 };

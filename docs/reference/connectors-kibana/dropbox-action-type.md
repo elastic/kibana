@@ -11,6 +11,8 @@ applies_to:
 
 The Dropbox connector connects to Dropbox through the official remote Model Context Protocol (MCP) server at `https://mcp.dropbox.com/mcp`. Agents and workflows use the connector to locate files by keyword or path, inspect metadata, read content, and create or list shared links. Authentication uses Dropbox OAuth 2.0, so each connector instance is scoped to a specific Dropbox account.
 
+You can use this connector in **Agent Builder** and **Workflows**.
+
 ## Create connectors in {{kib}} [define-dropbox-ui]
 
 You can create connectors in **{{stack-manage-app}} > {{connectors-ui}}**.

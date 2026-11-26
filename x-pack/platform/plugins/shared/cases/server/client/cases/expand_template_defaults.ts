@@ -21,6 +21,7 @@ import {
 import { parseTemplate } from '../../routes/api/templates/parse_template';
 import type { TemplatesService } from '../../services/templates';
 import type { FieldDefinitionsService } from '../../services/field_definitions';
+import { resolveTemplateConnector } from './resolve_template_connector';
 
 /**
  * A template resolved and prepared for expansion into a create-case request.
@@ -105,35 +106,6 @@ export const resolveTemplateForCreate = async ({
 };
 
 /**
- * Resolves the template's default connector `name` from its `id` (the YAML stores connectors
- * without a name). Returns undefined when the template has no connector or the id no longer
- * resolves — the case then keeps the caller's connector, mirroring the create form's fallback.
- */
-const resolveTemplateConnector = async (
-  parsed: ParsedTemplate,
-  actionsClient: PublicMethodsOf<ActionsClient>,
-  logger: Logger
-): Promise<CasePostRequest['connector'] | undefined> => {
-  const templateConnector = parsed.definition.connector;
-  if (!templateConnector || templateConnector.type === ConnectorTypes.none) {
-    return undefined;
-  }
-
-  try {
-    const action = await actionsClient.get({ id: templateConnector.id });
-    return { ...templateConnector, name: action.name } as CasePostRequest['connector'];
-  } catch (error) {
-    // The connector default is dropped and the case keeps the caller's connector (the UI does the
-    // same). A genuinely-missing / unauthorized connector is expected here, but so is a transient
-    // ES/auth error — log so a real infra failure silently changing the created case is diagnosable.
-    logger.debug(
-      `Dropping template connector default "${templateConnector.id}"; could not resolve it: ${error}`
-    );
-    return undefined;
-  }
-};
-
-/**
  * Applies a resolved template's case defaults and `extended_fields` defaults onto a create-case
  * request. **Caller-wins**: any value explicitly present in the request survives; template
  * defaults only fill what the caller left unset.
@@ -210,7 +182,7 @@ export const applyTemplateDefaultsToCreateRequest = async <T extends CasePostReq
   // spares callers with their own connector an actions-client round-trip and a spurious debug log.
   if (query.connector.type === ConnectorTypes.none) {
     const templateConnector = await resolveTemplateConnector(
-      resolved.parsed,
+      resolved.parsed.definition.connector,
       actionsClient,
       logger
     );

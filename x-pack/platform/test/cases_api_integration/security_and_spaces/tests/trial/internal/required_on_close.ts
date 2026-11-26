@@ -58,14 +58,12 @@ export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const es = getService('es');
 
-  // Failing: See https://github.com/elastic/kibana/issues/278278
-  describe.skip('required_on_close — server-side close validation', () => {
+  describe('required_on_close — server-side close validation', () => {
     afterEach(async () => {
       await deleteAllCaseItems(es);
     });
 
-    // Failing: See https://github.com/elastic/kibana/issues/278277
-    describe.skip('template fields with required_on_close', () => {
+    describe('template fields with required_on_close', () => {
       it('blocks closing when a template required_on_close field is missing', async () => {
         const template = await createTemplate(supertest, [
           {
@@ -300,6 +298,63 @@ export default ({ getService }: FtrProviderContext): void => {
         const postedCase = await createCase(supertest, {
           ...getPostCaseRequest({ owner: 'securitySolutionFixture' }),
           [CASE_EXTENDED_FIELDS]: { impact_summary_as_keyword: 'Low impact' },
+        });
+
+        const patchedCases = await updateCase({
+          supertest,
+          params: {
+            cases: [
+              {
+                id: postedCase.id,
+                version: postedCase.version,
+                status: CaseStatuses.closed,
+              },
+            ],
+          },
+        });
+
+        expect(patchedCases[0].status).to.eql(CaseStatuses.closed);
+      });
+
+      it('blocks closing when a template $ref-es a global required_on_close field and it is not filled', async () => {
+        // Regression test for https://github.com/elastic/security-team/issues/19101
+        // A template referencing a global field via $ref should not bypass close enforcement:
+        // the global field's required_on_close is authoritative and must still be enforced.
+        await createGlobalFieldDefinition(supertest, 'root_cause');
+
+        const template = await createTemplate(supertest, [{ $ref: 'root_cause' }]);
+
+        const postedCase = await createCase(supertest, {
+          ...getPostCaseRequest({ owner: 'securitySolutionFixture' }),
+          template: { id: template.templateId, version: template.templateVersion },
+        });
+
+        // FAILURE SCENARIO: the $ref resolves to a global field with required_on_close: true
+        // but the field is not filled — closure must be blocked.
+        await updateCase({
+          supertest,
+          params: {
+            cases: [
+              {
+                id: postedCase.id,
+                version: postedCase.version,
+                status: CaseStatuses.closed,
+              },
+            ],
+          },
+          expectedHttpCode: 400,
+        });
+      });
+
+      it('allows closing when a template $ref-es a global required_on_close field and it is filled', async () => {
+        await createGlobalFieldDefinition(supertest, 'root_cause');
+
+        const template = await createTemplate(supertest, [{ $ref: 'root_cause' }]);
+
+        const postedCase = await createCase(supertest, {
+          ...getPostCaseRequest({ owner: 'securitySolutionFixture' }),
+          template: { id: template.templateId, version: template.templateVersion },
+          [CASE_EXTENDED_FIELDS]: { root_cause_as_keyword: 'Misconfigured firewall rule' },
         });
 
         const patchedCases = await updateCase({

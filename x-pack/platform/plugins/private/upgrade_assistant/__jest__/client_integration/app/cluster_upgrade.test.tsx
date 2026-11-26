@@ -25,7 +25,7 @@ describe('Cluster upgrade', () => {
     test('renders overview', async () => {
       await setupAppPage(httpSetup);
 
-      expect(screen.getByTestId('overviewPageHeader')).toBeInTheDocument();
+      expect(screen.getByTestId('overview')).toBeInTheDocument();
       expect(screen.queryByTestId('isUpgradingMessage')).toBeNull();
       expect(screen.queryByTestId('isUpgradeCompleteMessage')).toBeNull();
     });
@@ -52,7 +52,7 @@ describe('Cluster upgrade', () => {
     test('renders rolling upgrade message', async () => {
       await screen.findByTestId('isUpgradingMessage');
       await waitFor(() => {
-        expect(screen.queryByTestId('overviewPageHeader')).toBeNull();
+        expect(screen.queryByTestId('overview')).toBeNull();
       });
       expect(screen.queryByTestId('isUpgradeCompleteMessage')).toBeNull();
     });
@@ -74,7 +74,7 @@ describe('Cluster upgrade', () => {
     test('renders upgrade complete message', async () => {
       await screen.findByTestId('isUpgradeCompleteMessage');
       await waitFor(() => {
-        expect(screen.queryByTestId('overviewPageHeader')).toBeNull();
+        expect(screen.queryByTestId('overview')).toBeNull();
       });
       expect(screen.queryByTestId('isUpgradingMessage')).toBeNull();
     });

@@ -5,11 +5,13 @@
  * 2.0.
  */
 
-import { load } from 'js-yaml';
+import { mergeWith } from 'lodash';
+import { parse } from 'yaml';
 
 import type { Logger } from '@kbn/logging';
 
 import type { FleetProxy, Output, TemplateAgentPolicyInput } from '../../types';
+import type { BeatsOutput } from '../../../common/types';
 import type {
   FullAgentPolicyInput,
   FullAgentPolicyInputStream,
@@ -23,13 +25,17 @@ import {
   dataTypes,
   FLEET_UNMANAGED_DATA_STREAM_TYPES,
   OTEL_COLLECTOR_INPUT_TYPE,
+  otlpProtocol,
   outputType,
   USE_APM_VAR_NAME,
 } from '../../../common/constants';
 import { FleetError } from '../../errors';
 import { getOutputIdForAgentPolicy } from '../../../common/services/output_helpers';
 import { pkgToPkgKey } from '../epm/registry';
+import { getOtlpAuthHeaders } from '../outputs/otlp_auth';
 import { hasDynamicSignalTypes } from '../../../common/services';
+
+import { buildOtelEsExporterConfig, parseYamlRecord } from './otel_output_settings';
 
 /**
  * Builds OpenTelemetry Collector fragments merged into the full agent policy.
@@ -49,6 +55,25 @@ import { hasDynamicSignalTypes } from '../../../common/services';
  * @see `dev_docs/data_streams.md` (OpenTelemetry integrations and the `.otel` suffix)
  * @see `x-pack/platform/test/fleet_api_integration/apis/agent_policy/agent_policy_otel_routing.ts`
  */
+// Recursively removes null and undefined values from a plain object so that
+// SO-layer cleanup sentinels (written when switching OTLP protocols) never
+// reach compiled collector config where the strict decoder would reject them.
+// A `null` OTLP `sending_queue` or `batch` is left out too, so the exporter uses its
+// defaults. Batching turned off therefore relies on the exporterhelper not batching by
+// default, which only holds while the `pkg.exporterhelper.queueBatchEnabled` feature
+// gate is off: once it is on by default, a left-out batch enables batching.
+const deepStripNulls = (obj: Record<string, unknown>): Record<string, unknown> =>
+  Object.fromEntries(
+    Object.entries(obj)
+      .filter(([, v]) => v !== null && v !== undefined)
+      .map(([k, v]) => [
+        k,
+        !Array.isArray(v) && typeof v === 'object'
+          ? deepStripNulls(v as Record<string, unknown>)
+          : v,
+      ])
+  );
+
 export function generateOtelcolConfig({
   inputs,
   dataOutput,
@@ -614,7 +639,7 @@ function mergeOtelcolConfigs(otelConfigs: OTelCollectorConfig[]): OTelCollectorC
 }
 
 function buildBeatsauthConfig(
-  output: Output,
+  output: BeatsOutput,
   proxy?: FleetProxy,
   logger?: Logger
 ): Record<string, unknown> {
@@ -671,7 +696,7 @@ function buildBeatsauthConfig(
 function parseOutputConfigYaml(yaml: string | null | undefined): Record<string, unknown> {
   if (!yaml) return {};
   try {
-    const parsed = load(yaml);
+    const parsed = parse(yaml);
     if (parsed !== null && typeof parsed === 'object' && !Array.isArray(parsed)) {
       return parsed as Record<string, unknown>;
     }
@@ -739,29 +764,19 @@ function attachOtelcolExporter(
   return config;
 }
 
-function parseOtelExporterConfigYaml(
+const parseOtelExporterConfigYaml = (
   yaml: string | null | undefined,
   logger?: Logger
-): Record<string, unknown> {
-  if (!yaml) return {};
-  try {
-    const parsed = load(yaml);
-    if (parsed !== null && typeof parsed === 'object' && !Array.isArray(parsed)) {
-      return parsed as Record<string, unknown>;
-    }
-    logger?.warn(
-      'otel_exporter_config_yaml did not parse to an object, skipping extra exporter config'
-    );
-    return {};
-  } catch (e) {
+): Record<string, unknown> =>
+  parseYamlRecord(yaml, (e) =>
     // Malformed YAML — skip extra config rather than crashing policy generation.
     // The UI validates YAML before saving; this path is only reachable via direct API writes.
     logger?.warn(
-      `Failed to parse otel_exporter_config_yaml, skipping extra exporter config: ${e.message}`
-    );
-    return {};
-  }
-}
+      `Failed to parse otel_exporter_config_yaml, skipping extra exporter config: ${
+        e instanceof Error ? e.message : String(e)
+      }`
+    )
+  );
 
 function generateOtelcolExporter(
   dataOutput: Output,
@@ -779,15 +794,31 @@ function generateOtelcolExporter(
         dataOutput.otel_exporter_config_yaml,
         logger
       );
+      // Batching, queueing, retry and compression settings translated from the Fleet output,
+      // so this exporter behaves like the one the agent generates for Beats-based inputs.
+      // User-supplied exporter YAML wins over the translated values at the individual field
+      // level (deep merge). Arrays in the user YAML are replaced wholesale rather than merged
+      // position-by-position (e.g. retry_on_status is replaced, not extended).
+      const outputExporterConfig = buildOtelEsExporterConfig(dataOutput);
+      // Deep-merge: translated settings are the base; user YAML overrides individual fields;
+      // arrays from user YAML replace rather than position-merge. endpoints/auth are forced
+      // last so they always take precedence regardless of what the user YAML contains.
+      const mergedExporterConfig = mergeWith(
+        {},
+        outputExporterConfig,
+        extraExporterConfig,
+        (_dst: unknown, src: unknown) => (Array.isArray(src) ? src : undefined)
+      ) as Record<string, unknown>;
 
-      // When otel_disable_beatsauth is set, skip the beatsauth extension entirely and
-      // pass only the endpoint + any user-supplied exporter YAML to the ES exporter.
+      // When otel_disable_beatsauth is set, skip the beatsauth extension entirely. The
+      // output's own exporter settings still apply — beatsauth only carries transport
+      // (ssl/proxy/timeout) configuration.
       if (dataOutput.otel_disable_beatsauth) {
         return {
           extensions: {},
           exporters: {
             [`elasticsearch/${outputID}`]: {
-              ...extraExporterConfig,
+              ...mergedExporterConfig,
               endpoints: dataOutput.hosts,
             },
           },
@@ -801,10 +832,45 @@ function generateOtelcolExporter(
         extensions: hasBeatsauthConfig ? { [beatsauthID]: beatsauthConfig } : {},
         exporters: {
           [`elasticsearch/${outputID}`]: {
-            ...extraExporterConfig,
+            ...mergedExporterConfig,
             // endpoints and auth always take precedence over user-supplied YAML
             endpoints: dataOutput.hosts,
             ...(hasBeatsauthConfig ? { auth: { authenticator: beatsauthID } } : {}),
+          },
+        },
+      };
+    }
+    case outputType.Otlp: {
+      const outputID = getOutputIdForAgentPolicy(dataOutput);
+      const { protocol, ...rest } = dataOutput.otlp_exporter;
+      // Null values are SO-layer cleanup sentinels written when switching protocols
+      // (e.g. removeOtlpHttpFields / removeOtlpGrpcFields). Strip them recursively
+      // so they never appear in the compiled exporter config — the OTel Collector
+      // strict decoder rejects unknown keys.
+      const exporterConfig = deepStripNulls(rest);
+      const exporterID =
+        protocol === otlpProtocol.Grpc ? `otlp/${outputID}` : `otlphttp/${outputID}`;
+      const tlsSecrets = dataOutput.secrets?.otlp_exporter?.tls;
+      // the credential is a secret reference in the header value, Fleet Server replaces it
+      const authHeaders = getOtlpAuthHeaders(
+        dataOutput.auth,
+        dataOutput.secrets?.auth?.credential,
+        dataOutput.otlp_exporter
+      );
+      return {
+        extensions: {},
+        exporters: {
+          [exporterID]: {
+            ...exporterConfig,
+            ...(authHeaders
+              ? {
+                  headers: {
+                    ...(exporterConfig.headers as Record<string, string> | undefined),
+                    ...authHeaders,
+                  },
+                }
+              : {}),
+            ...(tlsSecrets ? { secrets: { tls: tlsSecrets } } : {}),
           },
         },
       };

@@ -18,6 +18,7 @@ import type { InjectActionParamsOpts } from '../inject_action_params';
 import { injectActionParams } from '../inject_action_params';
 import type { RuleTypeParams, SanitizedRule, GetViewInAppRelativeUrlFnOpts } from '../../types';
 import { RuleRunMetricsStore } from '../../lib/rule_run_metrics_store';
+import { RuleResultService } from '../../monitoring/rule_result_service';
 import { alertingEventLoggerMock } from '../../lib/alerting_event_logger/alerting_event_logger.mock';
 import type { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
 import { TaskErrorSource, TaskPriority } from '@kbn/task-manager-plugin/server';
@@ -344,6 +345,70 @@ describe('Action Scheduler', () => {
     }
   });
 
+  test('skips the actions of a connector that is not found and reports a warning', async () => {
+    actionsClient.bulkEnqueueExecution.mockResolvedValueOnce({
+      errors: true,
+      items: [
+        {
+          actionTypeId: 'test',
+          id: '1',
+          uuid: '111-111',
+          response: ExecutionResponseType.SUCCESS,
+        },
+        {
+          actionTypeId: 'test',
+          id: '2',
+          uuid: '222-222',
+          response: ExecutionResponseType.CONNECTOR_NOT_FOUND_ERROR,
+        },
+      ],
+    });
+    const actions = [
+      {
+        id: '1',
+        group: 'default',
+        actionTypeId: 'test',
+        params: { foo: true },
+        uuid: '111-111',
+      },
+      {
+        id: '2',
+        group: 'default',
+        actionTypeId: 'test',
+        params: { foo: true },
+        uuid: '222-222',
+      },
+    ];
+    const ruleResultService = new RuleResultService();
+    const actionScheduler = new ActionScheduler(
+      getSchedulerContext({
+        ruleResultService,
+        rule: {
+          ...defaultSchedulerContext.rule,
+          actions,
+        },
+      })
+    );
+
+    await actionScheduler.run({
+      activeAlerts: generateAlert({ id: 2 }),
+      recoveredAlerts: {},
+    });
+
+    expect(actionsClient.bulkEnqueueExecution).toHaveBeenCalledTimes(1);
+    expect(ruleRunMetricsStore.getNumberOfGeneratedActions()).toBe(2);
+    expect(ruleRunMetricsStore.getNumberOfTriggeredActions()).toBe(1);
+    expect(ruleRunMetricsStore.getStatusByConnectorType('test').numberOfTriggeredActions).toBe(1);
+    expect(ruleRunMetricsStore.getTriggeredActionsStatus()).toBe(ActionsCompletion.COMPLETE);
+    expect(ruleResultService.getLastRunWarnings()).toEqual([
+      'Actions were not triggered because their connectors no longer exist: 2',
+    ]);
+    expect(alertingEventLogger.logAction).toHaveBeenCalledTimes(1);
+    expect(alertingEventLogger.logAction).toHaveBeenCalledWith(
+      expect.objectContaining({ id: '1', uuid: '111-111' })
+    );
+  });
+
   test('limits actionsPlugin.execute per action group', async () => {
     const actionScheduler = new ActionScheduler(getSchedulerContext());
     await actionScheduler.run({
@@ -462,7 +527,15 @@ describe('Action Scheduler', () => {
     });
 
     expect(defaultSchedulerContext.logger.error).toHaveBeenCalledWith(
-      'Invalid action group "invalid-group" for rule "test".'
+      'Invalid action group "invalid-group" for rule "test".',
+      {
+        labels: {
+          ruleId: '1',
+          ruleType: 'test',
+          spaceId: 'test1',
+          executionId: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
+        },
+      }
     );
 
     expect(ruleRunMetricsStore.getNumberOfTriggeredActions()).toBe(0);
@@ -841,9 +914,17 @@ describe('Action Scheduler', () => {
     });
 
     expect(actionsClient.bulkEnqueueExecution).toHaveBeenCalledTimes(0);
-    expect(defaultSchedulerContext.logger.debug).nthCalledWith(
+    expect(defaultSchedulerContext.logger.debug).toHaveBeenNthCalledWith(
       1,
-      `skipping scheduling of actions for '1' in rule ${defaultSchedulerContext.ruleLabel}: rule is muted`
+      `skipping scheduling of actions for '1' in rule ${defaultSchedulerContext.ruleLabel}: rule is muted`,
+      {
+        labels: {
+          alertId: '1',
+          executionId: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
+          ruleId: '1',
+          spaceId: 'test1',
+        },
+      }
     );
   });
 
@@ -866,9 +947,19 @@ describe('Action Scheduler', () => {
     clock.tick(30000);
 
     expect(actionsClient.bulkEnqueueExecution).toHaveBeenCalledTimes(0);
-    expect(defaultSchedulerContext.logger.debug).nthCalledWith(
+    expect(defaultSchedulerContext.logger.debug).toHaveBeenNthCalledWith(
       1,
-      `skipping scheduling of actions for '1' in rule ${defaultSchedulerContext.ruleLabel}: rule is throttled`
+      `skipping scheduling of actions for '1' in rule ${defaultSchedulerContext.ruleLabel}: rule is throttled`,
+      {
+        labels: {
+          actionId: '1',
+          alertId: '1',
+          actionTypeId: 'test',
+          ruleId: '1',
+          spaceId: 'test1',
+          executionId: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
+        },
+      }
     );
   });
 
@@ -902,9 +993,19 @@ describe('Action Scheduler', () => {
     clock.tick(30000);
 
     expect(actionsClient.bulkEnqueueExecution).toHaveBeenCalledTimes(0);
-    expect(defaultSchedulerContext.logger.debug).nthCalledWith(
+    expect(defaultSchedulerContext.logger.debug).toHaveBeenNthCalledWith(
       1,
-      `skipping scheduling of actions for '1' in rule ${defaultSchedulerContext.ruleLabel}: rule is throttled`
+      `skipping scheduling of actions for '1' in rule ${defaultSchedulerContext.ruleLabel}: rule is throttled`,
+      {
+        labels: {
+          executionId: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
+          ruleId: '1',
+          actionId: '1',
+          actionTypeId: 'test',
+          alertId: '1',
+          spaceId: 'test1',
+        },
+      }
     );
   });
 
@@ -954,9 +1055,17 @@ describe('Action Scheduler', () => {
     });
 
     expect(actionsClient.bulkEnqueueExecution).toHaveBeenCalledTimes(0);
-    expect(defaultSchedulerContext.logger.debug).nthCalledWith(
+    expect(defaultSchedulerContext.logger.debug).toHaveBeenNthCalledWith(
       1,
-      `skipping scheduling of actions for '1' in rule ${defaultSchedulerContext.ruleLabel}: rule is muted`
+      `skipping scheduling of actions for '1' in rule ${defaultSchedulerContext.ruleLabel}: rule is muted`,
+      {
+        labels: {
+          alertId: '1',
+          executionId: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
+          ruleId: '1',
+          spaceId: 'test1',
+        },
+      }
     );
   });
 
@@ -1053,7 +1162,7 @@ describe('Action Scheduler', () => {
         ],
       ]
     `);
-    expect(alertingEventLogger.logAction).toBeCalledWith({
+    expect(alertingEventLogger.logAction).toHaveBeenCalledWith({
       alertSummary: { new: 1, ongoing: 0, recovered: 0 },
       id: '1',
       uuid: '111-111',
@@ -1202,7 +1311,7 @@ describe('Action Scheduler', () => {
         ],
       ]
     `);
-    expect(alertingEventLogger.logAction).toBeCalledWith({
+    expect(alertingEventLogger.logAction).toHaveBeenCalledWith({
       alertSummary: { new: 1, ongoing: 0, recovered: 0 },
       id: '1',
       uuid: '111-111',
@@ -1357,7 +1466,15 @@ describe('Action Scheduler', () => {
     });
 
     expect(defaultSchedulerContext.logger.error).toHaveBeenCalledWith(
-      'Skipping action "1" for rule "1" because the rule type "Test" does not support alert-as-data.'
+      'Skipping action "1" for rule "1" because the rule type "Test" does not support alert-as-data.',
+      {
+        labels: {
+          actionId: '1',
+          ruleId: '1',
+          ruleType: 'test',
+          spaceId: 'test1',
+        },
+      }
     );
 
     expect(ruleRunMetricsStore.getNumberOfTriggeredActions()).toBe(0);
@@ -1565,7 +1682,8 @@ describe('Action Scheduler', () => {
     expect(alertingEventLogger.logAction).not.toHaveBeenCalled();
     expect(defaultSchedulerContext.logger.debug).toHaveBeenCalledTimes(1);
     expect(defaultSchedulerContext.logger.debug).toHaveBeenCalledWith(
-      '(2) alerts have been filtered out for: testActionTypeId:111'
+      '(2) alerts have been filtered out for: testActionTypeId:111',
+      { labels: { actionId: '1', actionTypeId: 'testActionTypeId' } }
     );
   });
 
@@ -1735,7 +1853,16 @@ describe('Action Scheduler', () => {
     });
     expect(defaultSchedulerContext.logger.debug).toHaveBeenCalledTimes(1);
     expect(defaultSchedulerContext.logger.debug).toHaveBeenCalledWith(
-      '(2) alerts have been filtered out for: testActionTypeId:111-111'
+      '(2) alerts have been filtered out for: testActionTypeId:111-111',
+      {
+        labels: {
+          actionId: '1',
+          actionTypeId: 'testActionTypeId',
+          executionId: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
+          ruleId: '1',
+          spaceId: 'test1',
+        },
+      }
     );
   });
 
@@ -1818,7 +1945,8 @@ describe('Action Scheduler', () => {
 
     expect(defaultSchedulerContext.logger.debug).toHaveBeenNthCalledWith(
       1,
-      '(3) alerts have been filtered out for: testActionTypeId:1'
+      '(3) alerts have been filtered out for: testActionTypeId:1',
+      { labels: { actionId: '1', actionTypeId: 'testActionTypeId' } }
     );
   });
 
@@ -1870,7 +1998,8 @@ describe('Action Scheduler', () => {
 
     expect(defaultSchedulerContext.logger.debug).toHaveBeenNthCalledWith(
       1,
-      '(3) alerts have been filtered out for: testActionTypeId:1'
+      '(3) alerts have been filtered out for: testActionTypeId:1',
+      { labels: { actionId: '1', actionTypeId: 'testActionTypeId' } }
     );
   });
 
@@ -1890,13 +2019,43 @@ describe('Action Scheduler', () => {
     expect(defaultSchedulerContext.logger.debug).toHaveBeenCalledTimes(3);
 
     expect(defaultSchedulerContext.logger.debug).toHaveBeenCalledWith(
-      'no scheduling of actions "1" for alert "1" from rule "1": has active maintenance windows test-id-1.'
+      'no scheduling of actions "1" for alert "1" from rule "1": has active maintenance windows test-id-1.',
+      {
+        labels: {
+          actionId: '1',
+          actionTypeId: 'test',
+          alertId: '1',
+          executionId: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
+          ruleId: '1',
+          spaceId: 'test1',
+        },
+      }
     );
     expect(defaultSchedulerContext.logger.debug).toHaveBeenCalledWith(
-      'no scheduling of actions "1" for alert "2" from rule "1": has active maintenance windows test-id-2.'
+      'no scheduling of actions "1" for alert "2" from rule "1": has active maintenance windows test-id-2.',
+      {
+        labels: {
+          actionId: '1',
+          alertId: '2',
+          actionTypeId: 'test',
+          executionId: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
+          ruleId: '1',
+          spaceId: 'test1',
+        },
+      }
     );
     expect(defaultSchedulerContext.logger.debug).toHaveBeenCalledWith(
-      'no scheduling of actions "1" for alert "3" from rule "1": has active maintenance windows test-id-3.'
+      'no scheduling of actions "1" for alert "3" from rule "1": has active maintenance windows test-id-3.',
+      {
+        labels: {
+          actionId: '1',
+          alertId: '3',
+          actionTypeId: 'test',
+          executionId: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
+          ruleId: '1',
+          spaceId: 'test1',
+        },
+      }
     );
   });
 
@@ -2094,7 +2253,7 @@ describe('Action Scheduler', () => {
     const actionScheduler = new ActionScheduler(
       getSchedulerContext({
         ...defaultSchedulerContext,
-        priority: TaskPriority.Low,
+        priority: TaskPriority.Maintenance,
         rule: {
           ...defaultSchedulerContext.rule,
           actions: [
@@ -2725,7 +2884,7 @@ describe('Action Scheduler', () => {
         ]
       `);
 
-      expect(alertingEventLogger.logAction).toBeCalledWith({
+      expect(alertingEventLogger.logAction).toHaveBeenCalledWith({
         alertSummary: { new: 1, ongoing: 0, recovered: 0 },
         id: '1',
         uuid: 'test',
@@ -2793,7 +2952,17 @@ describe('Action Scheduler', () => {
       expect(actionsClient.bulkEnqueueExecution).not.toHaveBeenCalled();
       expect(alertingEventLogger.logAction).not.toHaveBeenCalled();
       expect(executorParams.logger.warn).toHaveBeenCalledWith(
-        'Rule "1" skipped scheduling system action "action-id" because no connector adapter is configured'
+        'Rule "1" skipped scheduling system action "action-id" because no connector adapter is configured',
+        {
+          labels: {
+            actionId: 'action-id',
+            actionTypeId: '.connector-adapter-not-exists',
+            executionId: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
+            ruleId: '1',
+            ruleType: 'test',
+            spaceId: 'test1',
+          },
+        }
       );
     });
 

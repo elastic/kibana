@@ -1,21 +1,9 @@
 {
-  "sha1": "5cec90482a1957e8884791011cd39c8a622e2ee0",
+  "sha1": "234db8f1bb87153ee42fae6172f726352c1cdb67",
   "testChannels": [
-    "ci-on-commit",
-    "ci-batch-3h"
+    "ci-on-commit"
   ],
   "tests": [
-    {
-      "id": "d4d97e00130eace-e748235f7fc12b4",
-      "title": "Teardown traces experience tests data",
-      "expectedStatus": "passed",
-      "tags": [],
-      "location": {
-        "file": "src/platform/plugins/shared/discover/test/scout/traces_experience/ui/parallel_tests/global.teardown.ts",
-        "line": 7,
-        "column": 1
-      }
-    },
     {
       "id": "ee40a7482a9e189-258b185aba8058b",
       "title": "Setup traces experience tests data",
@@ -87,8 +75,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/traces_experience/ui/parallel_tests/explore_from_apm.spec.ts",
-        "line": 65,
-        "column": 7
+        "line": 67,
+        "column": 25
       }
     },
     {
@@ -103,8 +91,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/traces_experience/ui/parallel_tests/explore_from_apm.spec.ts",
-        "line": 85,
-        "column": 17
+        "line": 84,
+        "column": 29
       }
     },
     {
@@ -119,8 +107,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/traces_experience/ui/parallel_tests/explore_from_apm.spec.ts",
-        "line": 128,
-        "column": 17
+        "line": 130,
+        "column": 15
       }
     },
     {
@@ -135,8 +123,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/traces_experience/ui/parallel_tests/explore_from_apm.spec.ts",
-        "line": 175,
-        "column": 13
+        "line": 190,
+        "column": 17
       }
     },
     {
@@ -151,8 +139,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/traces_experience/ui/parallel_tests/explore_from_apm.spec.ts",
-        "line": 212,
-        "column": 24
+        "line": 221,
+        "column": 17
       }
     },
     {
@@ -167,8 +155,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/traces_experience/ui/parallel_tests/explore_from_apm.spec.ts",
-        "line": 236,
-        "column": 40
+        "line": 245,
+        "column": 7
       }
     },
     {
@@ -183,8 +171,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/traces_experience/ui/parallel_tests/explore_from_apm.spec.ts",
-        "line": 257,
-        "column": 11
+        "line": 262,
+        "column": 17
       }
     },
     {
@@ -199,8 +187,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/traces_experience/ui/parallel_tests/explore_from_apm.spec.ts",
-        "line": 282,
-        "column": 19
+        "line": 287,
+        "column": 33
       }
     },
     {
@@ -215,8 +203,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/traces_experience/ui/parallel_tests/explore_from_apm.spec.ts",
-        "line": 326,
-        "column": 35
+        "line": 329,
+        "column": 30
       }
     },
     {
@@ -300,8 +288,8 @@
       }
     },
     {
-      "id": "88503647b7e10fd-1f25e9798fd3adc",
-      "title": "Traces in Discover - Overview tab content and actions About section - service name link navigates to APM service overview",
+      "id": "88503647b7e10fd-4fe01e6dab75dad",
+      "title": "Traces in Discover - Overview tab content and actions About section - service name link opens service flyout in-place",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -311,7 +299,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/traces_experience/ui/parallel_tests/overview_tab_usage.spec.ts",
-        "line": 49,
+        "line": 59,
         "column": 61
       }
     },
@@ -327,8 +315,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/traces_experience/ui/parallel_tests/overview_tab_usage.spec.ts",
-        "line": 61,
-        "column": 27
+        "line": 71,
+        "column": 34
       }
     },
     {
@@ -343,7 +331,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/traces_experience/ui/parallel_tests/overview_tab_usage.spec.ts",
-        "line": 71,
+        "line": 84,
         "column": 24
       }
     },
@@ -359,8 +347,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/traces_experience/ui/parallel_tests/overview_tab_usage.spec.ts",
-        "line": 92,
-        "column": 15
+        "line": 99,
+        "column": 30
       }
     },
     {
@@ -375,8 +363,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/traces_experience/ui/parallel_tests/overview_tab_usage.spec.ts",
-        "line": 111,
-        "column": 11
+        "line": 119,
+        "column": 15
       }
     },
     {
@@ -391,8 +379,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/traces_experience/ui/parallel_tests/overview_tab_usage.spec.ts",
-        "line": 137,
-        "column": 24
+        "line": 146,
+        "column": 11
       }
     },
     {
@@ -407,8 +395,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/traces_experience/ui/parallel_tests/overview_tab_usage.spec.ts",
-        "line": 158,
-        "column": 17
+        "line": 164,
+        "column": 40
       }
     },
     {
@@ -423,8 +411,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/traces_experience/ui/parallel_tests/overview_tab_usage.spec.ts",
-        "line": 196,
-        "column": 7
+        "line": 203,
+        "column": 27
       }
     },
     {
@@ -439,8 +427,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/traces_experience/ui/parallel_tests/overview_tab_usage.spec.ts",
-        "line": 219,
-        "column": 6
+        "line": 176,
+        "column": 29
       }
     },
     {
@@ -524,8 +512,8 @@
       }
     },
     {
-      "id": "53930ab6f1fc97d-9769bb34d445fad",
-      "title": "Traces in Discover - Profile disabled in non-observability configs should not display trace-specific columns in data view mode (Classic)",
+      "id": "53930ab6f1fc97d-975df6e69d1c960",
+      "title": "Traces in Discover - Profile gated by solution view should not display trace-specific columns in data view mode (Search)",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -533,13 +521,13 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/traces_experience/ui/parallel_tests/profile_disabled.spec.ts",
-        "line": 31,
-        "column": 50
+        "line": 30,
+        "column": 33
       }
     },
     {
-      "id": "53930ab6f1fc97d-ba6702658f026b8",
-      "title": "Traces in Discover - Profile disabled in non-observability configs should not render RED metrics charts in ESQL mode (Classic)",
+      "id": "53930ab6f1fc97d-e74660ebaa31fad",
+      "title": "Traces in Discover - Profile gated by solution view should not render RED metrics charts in ESQL mode (Search)",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -547,13 +535,13 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/traces_experience/ui/parallel_tests/profile_disabled.spec.ts",
-        "line": 41,
-        "column": 56
+        "line": 40,
+        "column": 37
       }
     },
     {
-      "id": "53930ab6f1fc97d-de0d56f85499f05",
-      "title": "Traces in Discover - Profile disabled in non-observability configs should not show Overview tab in document flyout (Classic)",
+      "id": "53930ab6f1fc97d-65398bb4b948e3b",
+      "title": "Traces in Discover - Profile gated by solution view should not show Overview tab in document flyout (Search)",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -561,13 +549,13 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/traces_experience/ui/parallel_tests/profile_disabled.spec.ts",
-        "line": 57,
-        "column": 41
+        "line": 56,
+        "column": 28
       }
     },
     {
-      "id": "53930ab6f1fc97d-a7770e39a4e073a",
-      "title": "Traces in Discover - Profile disabled in non-observability configs should not display trace-specific columns in data view mode (Search)",
+      "id": "53930ab6f1fc97d-3d4a4d699a9dba2",
+      "title": "Traces in Discover - Profile gated by solution view should not display trace-specific columns in data view mode (Security)",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -575,13 +563,13 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/traces_experience/ui/parallel_tests/profile_disabled.spec.ts",
-        "line": 31,
-        "column": 50
+        "line": 30,
+        "column": 33
       }
     },
     {
-      "id": "53930ab6f1fc97d-0caf01adc247915",
-      "title": "Traces in Discover - Profile disabled in non-observability configs should not render RED metrics charts in ESQL mode (Search)",
+      "id": "53930ab6f1fc97d-55b78ddfb3e56a2",
+      "title": "Traces in Discover - Profile gated by solution view should not render RED metrics charts in ESQL mode (Security)",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -589,13 +577,13 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/traces_experience/ui/parallel_tests/profile_disabled.spec.ts",
-        "line": 41,
-        "column": 56
+        "line": 40,
+        "column": 37
       }
     },
     {
-      "id": "53930ab6f1fc97d-b3574ba39cb8851",
-      "title": "Traces in Discover - Profile disabled in non-observability configs should not show Overview tab in document flyout (Search)",
+      "id": "53930ab6f1fc97d-0e69a6bed2177ff",
+      "title": "Traces in Discover - Profile gated by solution view should not show Overview tab in document flyout (Security)",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -603,50 +591,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/traces_experience/ui/parallel_tests/profile_disabled.spec.ts",
-        "line": 57,
-        "column": 41
-      }
-    },
-    {
-      "id": "53930ab6f1fc97d-7fa76165ecffbff",
-      "title": "Traces in Discover - Profile disabled in non-observability configs should not display trace-specific columns in data view mode (Security)",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
-      ],
-      "location": {
-        "file": "src/platform/plugins/shared/discover/test/scout/traces_experience/ui/parallel_tests/profile_disabled.spec.ts",
-        "line": 31,
-        "column": 50
-      }
-    },
-    {
-      "id": "53930ab6f1fc97d-ce21131b4b582fa",
-      "title": "Traces in Discover - Profile disabled in non-observability configs should not render RED metrics charts in ESQL mode (Security)",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
-      ],
-      "location": {
-        "file": "src/platform/plugins/shared/discover/test/scout/traces_experience/ui/parallel_tests/profile_disabled.spec.ts",
-        "line": 41,
-        "column": 56
-      }
-    },
-    {
-      "id": "53930ab6f1fc97d-be0a84e32b7b264",
-      "title": "Traces in Discover - Profile disabled in non-observability configs should not show Overview tab in document flyout (Security)",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
-      ],
-      "location": {
-        "file": "src/platform/plugins/shared/discover/test/scout/traces_experience/ui/parallel_tests/profile_disabled.spec.ts",
-        "line": 57,
-        "column": 41
+        "line": 56,
+        "column": 28
       }
     },
     {
@@ -746,6 +692,38 @@
       }
     },
     {
+      "id": "e4d7b0c35e4ec6a-fba1430212e5161",
+      "title": "Traces in Discover - Service flyout opens service flyout for an ECS service and renders its content",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/traces_experience/ui/parallel_tests/service_flyout.spec.ts",
+        "line": 71,
+        "column": 25
+      }
+    },
+    {
+      "id": "e4d7b0c35e4ec6a-79429901d0e9508",
+      "title": "Traces in Discover - Service flyout opens service flyout for an unprocessed OTel service and renders its content",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/traces_experience/ui/parallel_tests/service_flyout.spec.ts",
+        "line": 81,
+        "column": 35
+      }
+    },
+    {
       "id": "4b9dcbd7577f683-126381863b66a98",
       "title": "Traces in Discover - Waterfall flyout usage child flyout loads the correct document data for each waterfall item",
       "expectedStatus": "passed",
@@ -839,6 +817,17 @@
         "file": "src/platform/plugins/shared/discover/test/scout/traces_experience/ui/parallel_tests/waterfall_flyout_usage.spec.ts",
         "line": 235,
         "column": 43
+      }
+    },
+    {
+      "id": "d4d97e00130eace-e748235f7fc12b4",
+      "title": "Teardown traces experience tests data",
+      "expectedStatus": "passed",
+      "tags": [],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/traces_experience/ui/parallel_tests/global.teardown.ts",
+        "line": 7,
+        "column": 1
       }
     }
   ]

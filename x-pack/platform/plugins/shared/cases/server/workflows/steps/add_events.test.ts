@@ -16,10 +16,10 @@ const createContext = (input: unknown) =>
 describe('addEventsStepDefinition', () => {
   it('adds events to a case', async () => {
     const get = jest.fn().mockResolvedValue(createCaseResponseFixture);
-    const bulkCreate = jest.fn().mockResolvedValue(createCaseResponseFixture);
+    const bulkCreateAndGetCase = jest.fn().mockResolvedValue(createCaseResponseFixture);
     const getCasesClient = jest.fn().mockResolvedValue({
       cases: { get },
-      attachments: { bulkCreate },
+      attachments: { bulkCreateAndGetCase },
     } as unknown as CasesClient);
     const definition = addEventsStepDefinition(getCasesClient);
 
@@ -31,13 +31,13 @@ describe('addEventsStepDefinition', () => {
     );
 
     expect(definition.id).toBe('cases.addEvents');
-    expect(bulkCreate).toHaveBeenCalledWith({
+    expect(bulkCreateAndGetCase).toHaveBeenCalledWith({
       caseId: 'case-1',
       attachments: [
         {
-          type: 'event',
-          eventId: ['event-1'],
-          index: ['.ds-logs-*'],
+          type: 'security.event',
+          attachmentId: ['event-1'],
+          metadata: { index: ['.ds-logs-*'] },
           owner: createCaseResponseFixture.owner,
         },
       ],
@@ -46,10 +46,10 @@ describe('addEventsStepDefinition', () => {
 
   it('creates a single event attachment for multiple events with the same index', async () => {
     const get = jest.fn().mockResolvedValue(createCaseResponseFixture);
-    const bulkCreate = jest.fn().mockResolvedValue(createCaseResponseFixture);
+    const bulkCreateAndGetCase = jest.fn().mockResolvedValue(createCaseResponseFixture);
     const getCasesClient = jest.fn().mockResolvedValue({
       cases: { get },
-      attachments: { bulkCreate },
+      attachments: { bulkCreateAndGetCase },
     } as unknown as CasesClient);
     const definition = addEventsStepDefinition(getCasesClient);
 
@@ -63,13 +63,13 @@ describe('addEventsStepDefinition', () => {
       })
     );
 
-    expect(bulkCreate).toHaveBeenCalledWith({
+    expect(bulkCreateAndGetCase).toHaveBeenCalledWith({
       caseId: 'case-1',
       attachments: [
         {
-          type: 'event',
-          eventId: ['event-1', 'event-2'],
-          index: ['.ds-logs-*', '.ds-logs-*'],
+          type: 'security.event',
+          attachmentId: ['event-1', 'event-2'],
+          metadata: { index: ['.ds-logs-*', '.ds-logs-*'] },
           owner: createCaseResponseFixture.owner,
         },
       ],
@@ -78,10 +78,10 @@ describe('addEventsStepDefinition', () => {
 
   it('creates one event attachment per distinct index', async () => {
     const get = jest.fn().mockResolvedValue(createCaseResponseFixture);
-    const bulkCreate = jest.fn().mockResolvedValue(createCaseResponseFixture);
+    const bulkCreateAndGetCase = jest.fn().mockResolvedValue(createCaseResponseFixture);
     const getCasesClient = jest.fn().mockResolvedValue({
       cases: { get },
-      attachments: { bulkCreate },
+      attachments: { bulkCreateAndGetCase },
     } as unknown as CasesClient);
     const definition = addEventsStepDefinition(getCasesClient);
 
@@ -95,19 +95,19 @@ describe('addEventsStepDefinition', () => {
       })
     );
 
-    expect(bulkCreate).toHaveBeenCalledWith({
+    expect(bulkCreateAndGetCase).toHaveBeenCalledWith({
       caseId: 'case-1',
       attachments: [
         {
-          type: 'event',
-          eventId: ['event-1'],
-          index: ['idx-a'],
+          type: 'security.event',
+          attachmentId: ['event-1'],
+          metadata: { index: ['idx-a'] },
           owner: createCaseResponseFixture.owner,
         },
         {
-          type: 'event',
-          eventId: ['event-2'],
-          index: ['idx-b'],
+          type: 'security.event',
+          attachmentId: ['event-2'],
+          metadata: { index: ['idx-b'] },
           owner: createCaseResponseFixture.owner,
         },
       ],

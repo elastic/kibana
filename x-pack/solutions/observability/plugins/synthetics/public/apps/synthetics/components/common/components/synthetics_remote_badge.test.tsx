@@ -7,9 +7,14 @@
 
 import React from 'react';
 import { render, screen } from '@testing-library/react';
+import { kibanaService } from '../../../../../utils/kibana_service';
 import { SyntheticsRemoteBadge } from './synthetics_remote_badge';
 
 describe('SyntheticsRemoteBadge', () => {
+  afterEach(() => {
+    kibanaService.isServerless = false;
+  });
+
   it('renders nothing when remote is undefined', () => {
     const { container } = render(<SyntheticsRemoteBadge remote={undefined} />);
     expect(container).toBeEmptyDOMElement();
@@ -19,6 +24,12 @@ describe('SyntheticsRemoteBadge', () => {
     render(<SyntheticsRemoteBadge remote={{ remoteName: 'cluster-west' }} />);
     expect(screen.getByTestId('syntheticsRemoteBadge')).toBeInTheDocument();
     expect(screen.getByText('Remote')).toBeInTheDocument();
+  });
+
+  it('renders a "Linked" badge on serverless', () => {
+    kibanaService.isServerless = true;
+    render(<SyntheticsRemoteBadge remote={{ remoteName: 'keep-serverless-qa-oblt-dc9711' }} />);
+    expect(screen.getByText('Linked')).toBeInTheDocument();
   });
 
   it('renders the badge with kibanaUrl provided', () => {

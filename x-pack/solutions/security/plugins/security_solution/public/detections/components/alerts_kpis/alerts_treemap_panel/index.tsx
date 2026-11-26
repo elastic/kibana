@@ -24,6 +24,7 @@ import { ALERTS_QUERY_NAMES } from '../../../containers/detection_engine/alerts/
 import { FieldSelection } from '../common/field_selection';
 import { HeaderSection } from '../../../../common/components/header_section';
 import { InspectButtonContainer } from '../../../../common/components/inspect';
+import { ALERT_DETAILS_TOGGLE_ARIA_LABEL } from '../common/translations';
 import { DEFAULT_STACK_BY_FIELD0_SIZE, getAlertsRiskQuery } from './alerts_treemap/query';
 import type { AlertsTreeMapAggregation } from './alerts_treemap/types';
 import { useKibana } from '../../../../common/lib/kibana';
@@ -185,6 +186,7 @@ const AlertsTreemapPanelComponent: React.FC<Props> = ({
           titleSize="s"
           toggleQuery={setIsPanelExpanded}
           toggleStatus={isPanelExpanded}
+          toggleAriaLabel={ALERT_DETAILS_TOGGLE_ARIA_LABEL}
         >
           {isPanelExpanded && (
             <FieldSelection

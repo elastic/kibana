@@ -15,6 +15,7 @@ import Path from 'path';
 import { runOnCompareCallbacks } from './compare/run_on_compare_callbacks';
 import { collectAndRun } from './collect_and_run';
 import { collectAndRunForRightHandSide } from './collect_and_run_for_right_hand_side';
+import { collectAndRunPaired, hasPairedComparisonConfig } from './collect_and_run_paired';
 import { getGlobalConfig } from './config/get_global_config';
 import type { GlobalBenchConfig } from './config/types';
 import { getDefaultDataDir } from './filesystem/get_default_data_dir';
@@ -107,6 +108,51 @@ export async function bench({
   };
 
   leftLog.info(`Running benchmarks`);
+
+  if (
+    rightWorkspace &&
+    (await hasPairedComparisonConfig({
+      context: leftContext,
+      configGlob,
+      configFromCwd,
+    }))
+  ) {
+    const rightLog = log.withContext(rightWorkspace.getDisplayName());
+    const rightContext: GlobalRunContext = {
+      ...globalRunContext,
+      buildDir: buildDirOverrides?.right,
+      workspace: rightWorkspace,
+      log: rightLog,
+    };
+    const { leftResults, rightResults } = await collectAndRunPaired({
+      leftContext,
+      rightContext,
+      configGlob,
+      configFromCwd,
+    });
+
+    await Promise.all([
+      writeResults(leftContext, leftResults),
+      writeResults(rightContext, rightResults),
+    ]);
+    log.info(
+      '\n' +
+        reportDiffTerminal(
+          {
+            name: leftWorkspace.getDisplayName(),
+            title: await leftWorkspace.getCommitLine(),
+            results: leftResults,
+          },
+          {
+            name: rightWorkspace.getDisplayName(),
+            title: await rightWorkspace.getCommitLine(),
+            results: rightResults,
+          }
+        )
+    );
+    await runOnCompareCallbacks({ log, leftResults, rightResults });
+    return;
+  }
 
   const leftResults = await collectAndRun({
     configGlob,

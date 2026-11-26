@@ -14,7 +14,6 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiButton,
   EuiButtonEmpty,
-  EuiCallOut,
   EuiDescribedFormGroup,
   EuiFlexGroup,
   EuiFlexItem,
@@ -29,6 +28,7 @@ import {
   EuiTitle,
   type EuiSwitchEvent,
 } from '@elastic/eui';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 
 import { extractQueryParams, indices } from '../../../shared_imports';
 import { indexNameValidator, leaderIndexValidator } from '../../services/input_validation';
@@ -162,7 +162,7 @@ export class FollowerIndexForm extends PureComponent<Props, State> {
       typeof rawCluster === 'string'
         ? rawCluster
         : Array.isArray(rawCluster)
-        ? rawCluster[0]
+        ? rawCluster[0] ?? undefined
         : undefined;
 
     const followerIndexProp = this.props.followerIndex;
@@ -724,7 +724,7 @@ export class FollowerIndexForm extends PureComponent<Props, State> {
 
       return (
         <Fragment>
-          <EuiCallOut
+          <KbnDangerCallout
             role="alert"
             title={
               <FormattedMessage
@@ -732,8 +732,6 @@ export class FollowerIndexForm extends PureComponent<Props, State> {
                 defaultMessage="Fix errors before continuing."
               />
             }
-            color="danger"
-            iconType="cross"
             data-test-subj="formError"
           />
 

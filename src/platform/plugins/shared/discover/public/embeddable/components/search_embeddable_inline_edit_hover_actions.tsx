@@ -8,7 +8,6 @@
  */
 
 import type { BehaviorSubject } from 'rxjs';
-import type { DiscoverSessionTab } from '@kbn/saved-search-plugin/common';
 import React, { useMemo, useState } from 'react';
 import {
   EuiButton,
@@ -29,7 +28,7 @@ interface SearchEmbeddableInlineEditHoverActionsProps {
   draftSelectedTabId$: BehaviorSubject<string | undefined>;
   onEditInDiscover: () => Promise<void>;
   onSelectTab: (tabId: string) => Promise<void>;
-  tabs: DiscoverSessionTab[];
+  tabs: ReadonlyArray<{ id: string; label: string }>;
 }
 
 export const SearchEmbeddableInlineEditHoverActions = ({
@@ -125,7 +124,7 @@ export const SearchEmbeddableInlineEditHoverActions = ({
             data-test-subj="discoverEmbeddableInlineEditSelectTabAction"
             disabled={tabs.length === 0}
             iconSide="right"
-            iconType="arrowDown"
+            iconType="chevronSingleDown"
             onClick={() => setIsPopoverOpen((open) => !open)}
             size="s"
             css={[buttonStyles, { marginInlineEnd: euiTheme.size.xs }]}

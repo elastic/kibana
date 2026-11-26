@@ -11,4 +11,20 @@ export const APM_EBT_ACTIONS = {
   SET_TRANSACTION_TYPE: 'setTransactionType',
   SET_LATENCY_AGGREGATION_TYPE: 'setLatencyAggregationType',
   EXPLORE_SERVICE_MAP: 'exploreServiceMap',
+  /** User intends to view service metadata from a logo/icon badge popover. */
+  VIEW_SERVICE_METADATA: 'viewServiceMetadata',
+} as const;
+
+export const SERVICE_HEADER_EBT_ELEMENTS = {
+  ALERTS_BADGE: 'serviceHeaderAlertsBadge',
+  SLO_BADGE: 'serviceHeaderSloBadge',
+  ANOMALIES_BADGE: 'serviceHeaderAnomaliesBadge',
+  ICON_BADGE: 'serviceHeaderIconBadge',
+} as const;
+
+export const SERVICE_INVENTORY_EBT_ELEMENTS = {
+  ROW_ACTIONS: 'servicesTableRowActions',
+  ALERTS_BADGE: 'serviceInventoryAlertsBadge',
+  SLO_BADGE: 'serviceInventorySloBadge',
+  ANOMALIES_BADGE: 'serviceInventoryAnomaliesBadge',
 } as const;

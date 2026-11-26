@@ -7,5 +7,13 @@
 
 export { createIndex } from './create_index';
 export { populateIndex } from './populate_index';
-export { validateArtifactArchive } from './validate_artifact_archive';
-export { fetchArtifactVersions, fetchSecurityLabsVersions } from './fetch_artifact_versions';
+export {
+  validateArtifactArchive,
+  validateOpenApiArtifactArchive,
+} from './validate_artifact_archive';
+export {
+  fetchArtifactVersions,
+  fetchSecurityLabsVersions,
+  fetchLocalRepositoryVersion,
+  type ArtifactRepositoryVersions,
+} from './fetch_artifact_versions';

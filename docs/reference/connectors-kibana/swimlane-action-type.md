@@ -13,6 +13,11 @@ applies_to:
 
 The Swimlane connector uses the [Swimlane REST API](https://swimlane.com/knowledge-center/docs/developer-guide/rest-api/) to create Swimlane records.
 
+::::{note}
+The Swimlane connector works with the Swimlane API v2.  Swimlane Turbine is not supported.
+::::
+
+
 ## Create connectors in {{kib}} [define-swimlane-ui]
 
 You can create connectors in **{{stack-manage-app}} > {{connectors-ui}}** or as needed when you're creating a rule. For example:

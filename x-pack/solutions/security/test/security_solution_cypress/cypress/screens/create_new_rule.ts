@@ -89,16 +89,7 @@ export const THREAT_MATCH_AND_BUTTON = '[data-test-subj="andButton"]';
 
 export const THREAT_ITEM_ENTRY_DELETE_BUTTON = '[data-test-subj="itemEntryDeleteButton"]';
 
-export const THREAT_MATCH_OR_BUTTON = '[data-test-subj="orButton"]';
-
-export const THREAT_COMBO_BOX_INPUT =
-  '[data-test-subj="stepDefineRule"] [data-test-subj="fieldAutocompleteComboBox"]';
-
 export const THREAT_MATCH_OPERATOR_SELECT = '[data-test-subj="entryItemMatchInputFormRow"]';
-
-export const INVALID_MATCH_CONTENT = 'All matches require both a field and threat index field.';
-
-export const AT_LEAST_ONE_VALID_MATCH = 'At least one indicator match is required.';
 
 export const AT_LEAST_ONE_INDEX_PATTERN = 'A minimum of one index pattern is required.';
 
@@ -210,9 +201,6 @@ export const RULE_NAME_INPUT =
 
 export const RULE_NAME_OVERRIDE = '[data-test-subj="detectionEngineStepAboutRuleRuleNameOverride"]';
 
-export const RULE_NAME_OVERRIDE_FOR_ESQL =
-  '[data-test-subj="detectionEngineStepAboutRuleRuleNameOverrideForEsqlRuleType"]';
-
 export const RULE_STATUS = '[data-test-subj="ruleStatus"]';
 
 export const RULE_TIMESTAMP_OVERRIDE =
@@ -233,12 +221,6 @@ export const SCHEDULE_INTERVAL_AMOUNT_INPUT =
 
 export const SCHEDULE_INTERVAL_UNITS_INPUT =
   '[data-test-subj="detectionEngineStepScheduleRuleInterval"] [data-test-subj="timeType"]';
-
-export const SCHEDULE_LOOKBACK_AMOUNT_INPUT =
-  '[data-test-subj="detectionEngineStepScheduleRuleFrom"] [data-test-subj="interval"]';
-
-export const SCHEDULE_LOOKBACK_UNITS_INPUT =
-  '[data-test-subj="detectionEngineStepScheduleRuleFrom"] [data-test-subj="timeType"]';
 
 export const SEVERITY_DROPDOWN =
   '[data-test-subj="detectionEngineStepAboutRuleSeverity"] [data-test-subj="select"]';
@@ -266,10 +248,6 @@ export const THRESHOLD_TYPE = '[data-test-subj="thresholdRuleType"]';
 export const NEW_TERMS_TYPE = '[data-test-subj="newTermsRuleType"]';
 
 export const ESQL_TYPE = '[data-test-subj="esqlRuleType"]';
-
-export const ESQL_QUERY_BAR_INPUT_AREA = '[data-test-subj="ruleEsqlQueryBar"] textarea.inputarea';
-
-export const ESQL_QUERY_BAR = '[data-test-subj="ruleEsqlQueryBar"]';
 
 export const NEW_TERMS_INPUT_AREA = '[data-test-subj="newTermsInput"]';
 

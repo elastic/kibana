@@ -10,7 +10,7 @@ exports[`EventsTable Renders events table with no search bar 1`] = `
     data-test-subj="mlCalendarEventsTable"
   >
     <div
-      class="emotion-euiContainerCSS"
+      class="euiTable__wrapper emotion-euiContainerCSS"
     >
       <table
         class="euiTable emotion-euiTable-fixed-uncompressed-hasBackground-desktop"
@@ -48,6 +48,7 @@ exports[`EventsTable Renders events table with no search bar 1`] = `
                       Description
                     </span>
                     <span
+                      aria-hidden="true"
                       class="euiTableSortIcon euiTableSortIcon--sortable"
                       color="subdued"
                       data-euiicon-type="sortable"
@@ -84,6 +85,7 @@ exports[`EventsTable Renders events table with no search bar 1`] = `
                       </span>
                     </span>
                     <span
+                      aria-hidden="true"
                       class="euiTableSortIcon"
                       data-euiicon-type="sortUp"
                     />
@@ -119,6 +121,7 @@ exports[`EventsTable Renders events table with no search bar 1`] = `
                       </span>
                     </span>
                     <span
+                      aria-hidden="true"
                       class="euiTableSortIcon euiTableSortIcon--sortable"
                       color="subdued"
                       data-euiicon-type="sortable"
@@ -236,6 +239,7 @@ exports[`EventsTable Renders events table with no search bar 1`] = `
                   5
                 </span>
                 <span
+                  aria-hidden="true"
                   color="inherit"
                   data-euiicon-type="chevronSingleDown"
                 />
@@ -373,13 +377,15 @@ exports[`EventsTable Renders events table with search bar 1`] = `
       >
         <div
           class="euiFilterGroup emotion-euiFilterGroup-uncompressed"
+          data-display="regular"
+          data-dividers="true"
         />
       </div>
       <div
         class="euiFlexItem emotion-euiFlexItem-growZero"
       >
         <button
-          class="euiButton emotion-euiButtonDisplay-s-defaultMinWidth-base-primary"
+          class="euiButton emotion-euiButtonDisplay-s-base-primary"
           data-test-subj="mlCalendarNewEventButton"
           type="button"
         >
@@ -387,6 +393,7 @@ exports[`EventsTable Renders events table with search bar 1`] = `
             class="emotion-euiButtonDisplayContent"
           >
             <span
+              aria-hidden="true"
               color="inherit"
               data-euiicon-type="plusCircle"
             />
@@ -398,7 +405,7 @@ exports[`EventsTable Renders events table with search bar 1`] = `
         class="euiFlexItem emotion-euiFlexItem-growZero"
       >
         <button
-          class="euiButton emotion-euiButtonDisplay-s-defaultMinWidth-base-primary"
+          class="euiButton emotion-euiButtonDisplay-s-base-primary"
           data-test-subj="mlCalendarImportEventsButton"
           type="button"
         >
@@ -406,6 +413,7 @@ exports[`EventsTable Renders events table with search bar 1`] = `
             class="emotion-euiButtonDisplayContent"
           >
             <span
+              aria-hidden="true"
               color="inherit"
               data-euiicon-type="download"
             />
@@ -422,7 +430,7 @@ exports[`EventsTable Renders events table with search bar 1`] = `
       data-test-subj="mlCalendarEventsTable"
     >
       <div
-        class="emotion-euiContainerCSS"
+        class="euiTable__wrapper emotion-euiContainerCSS"
       >
         <table
           class="euiTable emotion-euiTable-fixed-uncompressed-hasBackground-desktop"
@@ -460,6 +468,7 @@ exports[`EventsTable Renders events table with search bar 1`] = `
                         Description
                       </span>
                       <span
+                        aria-hidden="true"
                         class="euiTableSortIcon euiTableSortIcon--sortable"
                         color="subdued"
                         data-euiicon-type="sortable"
@@ -496,6 +505,7 @@ exports[`EventsTable Renders events table with search bar 1`] = `
                         </span>
                       </span>
                       <span
+                        aria-hidden="true"
                         class="euiTableSortIcon"
                         data-euiicon-type="sortUp"
                       />
@@ -531,6 +541,7 @@ exports[`EventsTable Renders events table with search bar 1`] = `
                         </span>
                       </span>
                       <span
+                        aria-hidden="true"
                         class="euiTableSortIcon euiTableSortIcon--sortable"
                         color="subdued"
                         data-euiicon-type="sortable"
@@ -648,6 +659,7 @@ exports[`EventsTable Renders events table with search bar 1`] = `
                     5
                   </span>
                   <span
+                    aria-hidden="true"
                     color="inherit"
                     data-euiicon-type="chevronSingleDown"
                   />

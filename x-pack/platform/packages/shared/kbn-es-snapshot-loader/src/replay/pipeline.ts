@@ -8,12 +8,13 @@
 import type { Client } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
 
+// `now_ms` is fixed per replay: a per-document clock would shift documents unevenly and collide TSDB ids.
 const timestampTransformBody = (doc: string) => `
   if (${doc}.containsKey('@timestamp') && ${doc}['@timestamp'] != null) {
     Instant maxTime = Instant.parse(params.max_timestamp);
     Instant originalTime = Instant.parse(${doc}['@timestamp'].toString());
     long deltaMillis = maxTime.toEpochMilli() - originalTime.toEpochMilli();
-    Instant now = Instant.ofEpochMilli(System.currentTimeMillis());
+    Instant now = Instant.ofEpochMilli(params.now_ms);
     ${doc}['@timestamp'] = now.minusMillis(deltaMillis).toString();
   }
 `;
@@ -34,13 +35,15 @@ export async function createTimestampPipeline({
   log,
   pipelineName,
   maxTimestamp,
+  nowMs,
 }: {
   esClient: Client;
   log: ToolingLog;
   pipelineName: string;
   maxTimestamp: string;
+  nowMs: number;
 }): Promise<string> {
-  log.debug(`Creating timestamp transformation pipeline (max: ${maxTimestamp})`);
+  log.debug(`Creating timestamp transformation pipeline (max: ${maxTimestamp}, now: ${nowMs})`);
 
   try {
     await esClient.ingest.putPipeline({
@@ -51,7 +54,7 @@ export async function createTimestampPipeline({
         {
           script: {
             lang: 'painless',
-            params: { max_timestamp: maxTimestamp },
+            params: { max_timestamp: maxTimestamp, now_ms: nowMs },
             source: TIMESTAMP_TRANSFORM_SCRIPT,
           },
         },

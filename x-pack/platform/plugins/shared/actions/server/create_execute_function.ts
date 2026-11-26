@@ -10,6 +10,7 @@ import type {
   SavedObjectsClientContract,
   Logger,
 } from '@kbn/core/server';
+import type { SpaceId } from '@kbn/core-spaces-common';
 import { isSavedObjectErrorResult } from '@kbn/core/server';
 import type { TaskPriority, TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import type { RawAction, ActionTypeRegistryContract, InMemoryConnector } from './types';
@@ -32,9 +33,25 @@ export interface ExecuteOptions
   extends Pick<ActionExecutorOptions, 'params' | 'source' | 'relatedSavedObjects' | 'consumer'> {
   id: string;
   uuid?: string;
-  spaceId: string;
+  spaceId: SpaceId;
   apiKeyId?: string;
   apiKey: string | null;
+  /**
+   * Id of the UIAM API key in `apiKey`. Persisted so the alerting API key invalidation task can
+   * see this pending execution still needs the key; `apiKeyId` only ever holds an Elasticsearch
+   * key id, so a UIAM key stored there would be invisible to the in-use check.
+   *
+   * Callers must set this only when `apiKey` is that UIAM key. Setting it for an execution that
+   * authenticates with something else records a claim on a key the execution never presents,
+   * which keeps an otherwise unused key alive.
+   */
+  uiamApiKeyId?: string;
+  /**
+   * True when `apiKey` is an external (user-created Cloud) UIAM API key. Marks the execution
+   * fake request so the Elasticsearch cluster client does not attach the UIAM shared secret,
+   * which UIAM rejects for external keys.
+   */
+  uiamApiKeyExternal?: boolean;
   executionId: string;
   actionTypeId: string;
   priority?: TaskPriority;
@@ -65,6 +82,7 @@ export type BulkExecutionEnqueuer<T> = (
 export enum ExecutionResponseType {
   SUCCESS = 'success',
   QUEUED_ACTIONS_LIMIT_ERROR = 'queuedActionsLimitError',
+  CONNECTOR_NOT_FOUND_ERROR = 'connectorNotFoundError',
 }
 
 export interface ExecutionResponse {
@@ -111,15 +129,23 @@ export function createBulkExecutionEnqueuerFunction({
     }
 
     const actionTypeIds: Record<string, string> = {};
-    const spaceIds: Record<string, string> = {};
+    const spaceIds: Record<string, SpaceId> = {};
     const connectorIsInMemory: Record<string, boolean> = {};
     const connectorIds = [...new Set(actionsToExecute.map((action) => action.id))];
-    const connectors = await getConnectors(
+    const { connectors, notFoundConnectorIds } = await getConnectors(
       unsecuredSavedObjectsClient,
       inMemoryConnectors,
       connectorIds
     );
     const runnableActions: ExecuteOptions[] = [];
+
+    // A connector that no longer exists must not block the actions of the other connectors.
+    for (const id of notFoundConnectorIds) {
+      logger.warn(`Skipped the actions for the connector: ${id}. Error: connector not found.`);
+    }
+    const actionsWithConnectorNotFound = actionsToExecute.filter((action) =>
+      notFoundConnectorIds.has(action.id)
+    );
 
     for (const c of connectors) {
       const { id, connector, isInMemory } = c;
@@ -174,6 +200,10 @@ export function createBulkExecutionEnqueuerFunction({
           consumer: actionToExecute.consumer,
           relatedSavedObjects: relatedSavedObjectWithRefs,
           apiKeyId: actionToExecute.apiKeyId,
+          ...(actionToExecute.uiamApiKeyId ? { uiamApiKeyId: actionToExecute.uiamApiKeyId } : {}),
+          ...(actionToExecute.uiamApiKeyExternal !== undefined
+            ? { uiamApiKeyExternal: actionToExecute.uiamApiKeyExternal }
+            : {}),
           ...(actionToExecute.source ? { source: actionToExecute.source.type } : {}),
         },
         references: taskReferences,
@@ -203,7 +233,7 @@ export function createBulkExecutionEnqueuerFunction({
     await taskManager.bulkSchedule(taskInstances);
 
     return {
-      errors: actionsOverLimit.length > 0,
+      errors: actionsOverLimit.length > 0 || actionsWithConnectorNotFound.length > 0,
       items: runnableActions
         .map((a) => ({
           id: a.id,
@@ -217,6 +247,14 @@ export function createBulkExecutionEnqueuerFunction({
             uuid: a.uuid,
             actionTypeId: a.actionTypeId,
             response: ExecutionResponseType.QUEUED_ACTIONS_LIMIT_ERROR,
+          }))
+        )
+        .concat(
+          actionsWithConnectorNotFound.map((a) => ({
+            id: a.id,
+            uuid: a.uuid,
+            actionTypeId: a.actionTypeId,
+            response: ExecutionResponseType.CONNECTOR_NOT_FOUND_ERROR,
           }))
         ),
     };
@@ -262,8 +300,9 @@ async function getConnectors(
   unsecuredSavedObjectsClient: SavedObjectsClientContract,
   inMemoryConnectors: InMemoryConnector[],
   connectorIds: string[]
-): Promise<GetConnectorsResult[]> {
+): Promise<{ connectors: GetConnectorsResult[]; notFoundConnectorIds: Set<string> }> {
   const result: GetConnectorsResult[] = [];
+  const notFoundConnectorIds = new Set<string>();
 
   const connectorIdsToFetch = [];
   for (const connectorId of connectorIds) {
@@ -285,7 +324,11 @@ async function getConnectors(
     );
 
     for (const item of bulkGetResult.saved_objects) {
-      if (isSavedObjectErrorResult(item)) throw item.error;
+      if (isSavedObjectErrorResult(item)) {
+        if (item.error.statusCode !== 404) throw item.error;
+        notFoundConnectorIds.add(item.id);
+        continue;
+      }
       result.push({
         isInMemory: false,
         connector: item.attributes,
@@ -294,5 +337,5 @@ async function getConnectors(
     }
   }
 
-  return result;
+  return { connectors: result, notFoundConnectorIds };
 }

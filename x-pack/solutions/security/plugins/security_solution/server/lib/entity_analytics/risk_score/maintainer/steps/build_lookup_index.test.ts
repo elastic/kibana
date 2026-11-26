@@ -38,9 +38,16 @@ describe('build_lookup_index', () => {
     } as unknown as EntityUpdateClient;
   });
 
-  it('writes a self-row for a non-alias entity', async () => {
+  it('filters listEntities to only entities with resolved_to and writes alias rows', async () => {
     (crudClient.listEntities as jest.Mock).mockResolvedValueOnce({
-      entities: [{ entity: { id: 'host:1' } }],
+      entities: [
+        {
+          entity: {
+            id: 'host:1',
+            relationships: { resolution: { resolved_to: 'host:target' } },
+          },
+        },
+      ],
       nextSearchAfter: undefined,
     });
 
@@ -55,7 +62,7 @@ describe('build_lookup_index', () => {
     });
 
     expect(result).toEqual({
-      lookupRowsWritten: 1,
+      lookupRowsWritten: 2,
       entitiesIterated: 1,
       pagesProcessed: 1,
       bulkBatches: 1,
@@ -63,17 +70,29 @@ describe('build_lookup_index', () => {
     });
     expect(crudClient.listEntities).toHaveBeenCalledWith(
       expect.objectContaining({
-        filter: { terms: { 'entity.EngineMetadata.Type': [EntityType.host] } },
+        filter: [
+          { terms: { 'entity.EngineMetadata.Type': [EntityType.host] } },
+          { exists: { field: 'entity.relationships.resolution.resolved_to' } },
+        ],
       })
     );
     expect(esClient.bulk).toHaveBeenCalledWith({
       operations: [
+        { index: { _index: '.lookup-default', _id: 'host:target' } },
+        {
+          entity_id: 'host:target',
+          resolution_target_id: 'host:target',
+          propagation_target_id: null,
+          relationship_type: 'self',
+          calculation_run_id: RUN_ID,
+          '@timestamp': NOW,
+        },
         { index: { _index: '.lookup-default', _id: 'host:1' } },
         {
           entity_id: 'host:1',
-          resolution_target_id: 'host:1',
+          resolution_target_id: 'host:target',
           propagation_target_id: null,
-          relationship_type: 'self',
+          relationship_type: 'entity.relationships.resolution.resolved_to',
           calculation_run_id: RUN_ID,
           '@timestamp': NOW,
         },
@@ -81,15 +100,19 @@ describe('build_lookup_index', () => {
     });
   });
 
-  it('writes only the alias row for alias entities', async () => {
-    // Targets that aren't themselves iterated have no lookup row; Phase 2
-    // ES|QL recovers their target_id via COALESCE(resolution_target_id,
-    // entity_id) after the LOOKUP JOIN.
+  it('writes one row per resolution target ahead of its alias rows', async () => {
+    // Phase 2 keeps joined alerts that have a lookup row, so targets need one too.
     (crudClient.listEntities as jest.Mock).mockResolvedValueOnce({
       entities: [
         {
           entity: {
-            id: 'user:alias',
+            id: 'user:alias-1',
+            relationships: { resolution: { resolved_to: 'user:target' } },
+          },
+        },
+        {
+          entity: {
+            id: 'user:alias-2',
             relationships: { resolution: { resolved_to: 'user:target' } },
           },
         },
@@ -107,17 +130,29 @@ describe('build_lookup_index', () => {
       now: NOW,
     });
 
+    const aliasRow = (entityId: string) => ({
+      entity_id: entityId,
+      resolution_target_id: 'user:target',
+      propagation_target_id: null,
+      relationship_type: 'entity.relationships.resolution.resolved_to',
+      calculation_run_id: RUN_ID,
+      '@timestamp': NOW,
+    });
     expect(esClient.bulk).toHaveBeenCalledWith({
       operations: [
-        { index: { _index: '.lookup-default', _id: 'user:alias' } },
+        { index: { _index: '.lookup-default', _id: 'user:target' } },
         {
-          entity_id: 'user:alias',
+          entity_id: 'user:target',
           resolution_target_id: 'user:target',
           propagation_target_id: null,
-          relationship_type: 'entity.relationships.resolution.resolved_to',
+          relationship_type: 'self',
           calculation_run_id: RUN_ID,
           '@timestamp': NOW,
         },
+        { index: { _index: '.lookup-default', _id: 'user:alias-1' } },
+        aliasRow('user:alias-1'),
+        { index: { _index: '.lookup-default', _id: 'user:alias-2' } },
+        aliasRow('user:alias-2'),
       ],
     });
   });

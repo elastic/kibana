@@ -14,7 +14,7 @@ export const createDateRangePickerPresetsServiceMock =
   (): jest.Mocked<DateRangePickerPresetsService> => ({
     getDefaultPresets: jest.fn(() => []),
     getPresets$: jest.fn(() => of([])),
-    getCanWrite$: jest.fn(() => of(false)),
+    canPersist: jest.fn(() => false),
     savePreset: jest.fn().mockResolvedValue('saved'),
     deletePreset: jest.fn().mockResolvedValue(undefined),
   });

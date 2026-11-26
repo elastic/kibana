@@ -6,15 +6,33 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { validate as isUuid } from 'uuid';
+import type { FeedbackChipId } from '@kbn/agent-builder-common';
+import {
+  CONVERSATION_ID_MAX_LENGTH,
+  CONVERSATION_TITLE_MAX_LENGTH,
+  STEER_MESSAGE_MAX_LENGTH,
+  agentIdMaxLength,
+} from '@kbn/agent-builder-common';
 import type { RouteDependencies } from '../types';
 import { getHandlerWrapper } from '../wrap_handler';
 import type {
   MarkPinnedConversationResponse,
   MarkReadConversationResponse,
   RenameConversationResponse,
+  SearchConversationsResponse,
+  SteerConversationResponse,
 } from '../../../common/http_api/conversations';
+import { currentUserActor } from '../../services/conversation/client/rounds_to_events';
+import type { ApplyTemplateResponse } from '../../../common/http_api/apply_template';
+import type { PatchConversationMetadataResponse } from '../../../common/http_api/patch_metadata';
 import { apiPrivileges } from '../../../common/features';
-import { internalApiPath } from '../../../common/constants';
+import {
+  internalApiPath,
+  MAX_CONVERSATION_SEARCH_PER_PAGE,
+  MAX_RESULT_WINDOW,
+  CONVERSATION_SEARCH_QUERY_MAX_LENGTH,
+} from '../../../common/constants';
 
 export function registerInternalConversationRoutes({
   router,
@@ -29,10 +47,10 @@ export function registerInternalConversationRoutes({
       path: `${internalApiPath}/conversations/{conversation_id}/_rename`,
       validate: {
         params: schema.object({
-          conversation_id: schema.string(),
+          conversation_id: schema.string({ maxLength: CONVERSATION_ID_MAX_LENGTH }),
         }),
         body: schema.object({
-          title: schema.string(),
+          title: schema.string({ maxLength: CONVERSATION_TITLE_MAX_LENGTH }),
         }),
       },
       options: { access: 'internal' },
@@ -46,10 +64,10 @@ export function registerInternalConversationRoutes({
       const { title } = request.body;
 
       const client = await conversationsService.getScopedClient({ request });
-      const updatedConversation = await client.update({
-        id: conversationId,
-        title,
-      });
+      const updatedConversation = await client.update(
+        { id: conversationId, title },
+        { access: 'rename', retryOnConflict: true, source: 'http_api' }
+      );
 
       return response.ok<RenameConversationResponse>({
         body: {
@@ -62,10 +80,94 @@ export function registerInternalConversationRoutes({
 
   router.post(
     {
+      path: `${internalApiPath}/conversations/{conversation_id}/_apply_template`,
+      validate: {
+        params: schema.object({
+          conversation_id: schema.string({ maxLength: CONVERSATION_ID_MAX_LENGTH }),
+        }),
+        body: schema.object({
+          template_id: schema.string({ maxLength: 256 }),
+        }),
+      },
+      options: { access: 'internal' },
+      security: {
+        authz: { requiredPrivileges: [apiPrivileges.readAgentBuilder] },
+      },
+    },
+    wrapHandler(async (ctx, request, response) => {
+      const { conversations: conversationsService } = getInternalServices();
+      const { conversation_id: conversationId } = request.params;
+      const { template_id: templateId } = request.body;
+
+      const client = await conversationsService.getScopedClient({ request });
+      const updatedConversation = await client.applyTemplate(conversationId, templateId, {
+        source: 'http_api',
+      });
+
+      return response.ok<ApplyTemplateResponse>({
+        body: { id: updatedConversation.id },
+      });
+    })
+  );
+
+  router.patch(
+    {
+      path: `${internalApiPath}/conversations/{conversation_id}/metadata`,
+      validate: {
+        params: schema.object({
+          conversation_id: schema.string({ maxLength: CONVERSATION_ID_MAX_LENGTH }),
+        }),
+        body: schema.object({
+          metadata: schema.recordOf(
+            schema.string({ maxLength: 256 }),
+            schema.oneOf([
+              schema.string({ maxLength: 10_000 }),
+              schema.number(),
+              schema.boolean(),
+              schema.arrayOf(schema.string({ maxLength: 2_000 }), { maxSize: 100 }),
+            ]),
+            {
+              validate: (record) => {
+                if (Object.keys(record).length > 100) {
+                  return 'metadata may not have more than 100 keys';
+                }
+              },
+            }
+          ),
+        }),
+      },
+      options: { access: 'internal' },
+      security: {
+        authz: { requiredPrivileges: [apiPrivileges.readAgentBuilder] },
+      },
+    },
+    wrapHandler(async (ctx, request, response) => {
+      const { conversations: conversationsService } = getInternalServices();
+      const { conversation_id: conversationId } = request.params;
+      const { metadata } = request.body;
+
+      const client = await conversationsService.getScopedClient({ request });
+      const { conversation: updatedConversation } = await client.patchMetadata(
+        conversationId,
+        metadata,
+        { source: 'http_api' }
+      );
+
+      return response.ok<PatchConversationMetadataResponse>({
+        body: {
+          id: updatedConversation.id,
+          metadata: updatedConversation.metadata ?? {},
+        },
+      });
+    })
+  );
+
+  router.post(
+    {
       path: `${internalApiPath}/conversations/{conversation_id}/_mark_read`,
       validate: {
         params: schema.object({
-          conversation_id: schema.string({ maxLength: 256 }),
+          conversation_id: schema.string({ maxLength: CONVERSATION_ID_MAX_LENGTH }),
         }),
         body: schema.object({
           read: schema.boolean(),
@@ -82,13 +184,7 @@ export function registerInternalConversationRoutes({
       const { read } = request.body;
 
       const client = await conversationsService.getScopedClient({ request });
-      const updatedConversation = await client.update(
-        {
-          id: conversationId,
-          read,
-        },
-        { access: 'converse' }
-      );
+      const updatedConversation = await client.markRead(conversationId, read);
 
       return response.ok<MarkReadConversationResponse>({
         body: {
@@ -99,12 +195,60 @@ export function registerInternalConversationRoutes({
     })
   );
 
+  // submit round feedback
+  router.post(
+    {
+      path: `${internalApiPath}/conversations/{conversation_id}/executions/{execution_id}/_feedback`,
+      validate: {
+        params: schema.object({
+          conversation_id: schema.string({ maxLength: 256 }),
+          execution_id: schema.string({ maxLength: 256 }),
+        }),
+        body: schema.object({
+          vote: schema.nullable(schema.oneOf([schema.literal('up'), schema.literal('down')])),
+          chips: schema.maybe(
+            schema.arrayOf(
+              schema.oneOf([
+                schema.literal('inaccurate'),
+                schema.literal('incomplete'),
+                schema.literal('didnt_follow_instructions'),
+                schema.literal('accurate'),
+                schema.literal('useful'),
+                schema.literal('well_explained'),
+              ]),
+              { maxSize: 3 }
+            )
+          ),
+          comment: schema.maybe(schema.string({ maxLength: 500 })),
+        }),
+      },
+      options: { access: 'internal' },
+      security: {
+        authz: { requiredPrivileges: [apiPrivileges.readAgentBuilder] },
+      },
+    },
+    wrapHandler(async (ctx, request, response) => {
+      const { conversations: conversationsService } = getInternalServices();
+      const { conversation_id: conversationId, execution_id: executionId } = request.params;
+      const { vote, chips, comment } = request.body;
+
+      const client = await conversationsService.getScopedClient({ request });
+      await client.updateRoundFeedback(conversationId, executionId, {
+        vote,
+        chips: chips as FeedbackChipId[] | undefined,
+        comment,
+      });
+
+      return response.noContent();
+    })
+  );
+
   router.post(
     {
       path: `${internalApiPath}/conversations/{conversation_id}/_set_pinned`,
       validate: {
         params: schema.object({
-          conversation_id: schema.string({ maxLength: 256 }),
+          conversation_id: schema.string({ maxLength: CONVERSATION_ID_MAX_LENGTH }),
         }),
         body: schema.object({
           pinned: schema.boolean(),
@@ -121,16 +265,110 @@ export function registerInternalConversationRoutes({
       const { pinned } = request.body;
 
       const client = await conversationsService.getScopedClient({ request });
-      const updatedConversation = await client.update(
-        { id: conversationId, pinned },
-        { access: 'converse' }
-      );
+      const updatedConversation = await client.setPinned(conversationId, pinned);
 
       return response.ok<MarkPinnedConversationResponse>({
         body: {
           id: updatedConversation.id,
           pinned: updatedConversation.pinned ?? false,
         },
+      });
+    })
+  );
+
+  router.get(
+    {
+      path: `${internalApiPath}/conversations/_search`,
+      validate: {
+        query: schema.object(
+          {
+            query: schema.string({
+              minLength: 1,
+              maxLength: CONVERSATION_SEARCH_QUERY_MAX_LENGTH,
+              validate: (value) =>
+                value.trim().length === 0 ? 'query must not be blank' : undefined,
+            }),
+            agent_id: schema.maybe(
+              schema.string({
+                maxLength: agentIdMaxLength,
+              })
+            ),
+            page: schema.number({ defaultValue: 1, min: 1 }),
+            per_page: schema.number({
+              defaultValue: MAX_CONVERSATION_SEARCH_PER_PAGE,
+              min: 1,
+              max: MAX_CONVERSATION_SEARCH_PER_PAGE,
+            }),
+          },
+          {
+            validate: ({ page, per_page: perPage }) => {
+              if (page * perPage > MAX_RESULT_WINDOW) {
+                return `page * per_page must not exceed ${MAX_RESULT_WINDOW}; conversations beyond that are not reachable through this API`;
+              }
+            },
+          }
+        ),
+      },
+      options: { access: 'internal' },
+      security: {
+        authz: { requiredPrivileges: [apiPrivileges.readAgentBuilder] },
+      },
+    },
+    wrapHandler(async (ctx, request, response) => {
+      const { conversations: conversationsService } = getInternalServices();
+      const { query, agent_id: agentId, page, per_page: perPage } = request.query;
+
+      const client = await conversationsService.getScopedClient({ request });
+      const { results, total } = await client.search({ query, agentId, page, perPage });
+
+      return response.ok<SearchConversationsResponse>({
+        body: {
+          pagination: { total, page, per_page: perPage },
+          results,
+        },
+      });
+    })
+  );
+
+  router.post(
+    {
+      path: `${internalApiPath}/conversations/{conversation_id}/_steer`,
+      validate: {
+        params: schema.object({
+          conversation_id: schema.string({ maxLength: CONVERSATION_ID_MAX_LENGTH }),
+        }),
+        body: schema.object({
+          message: schema.string({ minLength: 1, maxLength: STEER_MESSAGE_MAX_LENGTH }),
+          // Client-generated idempotency key.
+          event_id: schema.string({
+            minLength: 36,
+            maxLength: 36,
+            validate: (value) => (isUuid(value) ? undefined : 'must be a UUID'),
+          }),
+        }),
+      },
+      options: { access: 'internal' },
+      security: {
+        authz: { requiredPrivileges: [apiPrivileges.readAgentBuilder] },
+      },
+    },
+    wrapHandler(async (ctx, request, response) => {
+      const { conversations: conversationsService, execution: executionService } =
+        getInternalServices();
+      const { conversation_id: conversationId } = request.params;
+      const { message, event_id: eventId } = request.body;
+
+      const client = await conversationsService.getScopedClient({ request });
+      // A steer is admitted for whoever could start the run: a member the agent refuses, or one
+      // without the invoke privilege on a bound agent, is turned away as converse turns them away.
+      const { agent_id: agentId } = await client.get(conversationId);
+      await executionService.assertCanRunAgent({ request, agentId });
+      const { event, alreadyStored } = await client.appendSteer(
+        { id: conversationId, message, eventId, actor: currentUserActor(client.getUser()) },
+        { source: 'http_api' }
+      );
+      return response.ok<SteerConversationResponse>({
+        body: { event, ...(alreadyStored ? { already_stored: true } : {}) },
       });
     })
   );

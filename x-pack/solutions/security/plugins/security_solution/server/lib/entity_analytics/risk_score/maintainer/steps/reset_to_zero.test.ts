@@ -31,7 +31,15 @@ describe('resetToZero (maintainer)', () => {
     logger = loggingSystemMock.createLogger();
     writerBulkMock = jest.fn().mockResolvedValue({ errors: [], docs_written: 1 });
     writer = { bulk: writerBulkMock } as unknown as RiskEngineDataWriter;
-    (persistRiskScoresToEntityStore as jest.Mock).mockResolvedValue([]);
+    (persistRiskScoresToEntityStore as jest.Mock).mockImplementation(
+      async ({ scores }: { scores: Partial<Record<string, unknown[]>> }) => {
+        const count = Object.values(scores).reduce(
+          (sum, arr) => sum + ((arr as unknown[] | undefined)?.length ?? 0),
+          0
+        );
+        return { docsWritten: count, unexpectedErrors: [] };
+      }
+    );
     (esClient.indices.exists as jest.Mock).mockResolvedValue(true);
     crudClient = {
       createEntity: jest.fn(),
@@ -61,14 +69,19 @@ describe('resetToZero (maintainer)', () => {
       spaceId: 'default',
       entityType: EntityType.host,
       logger,
-      idBasedRiskScoringEnabled: true,
       crudClient,
       calculationRunId: 'run-id-1',
       now,
       watchlistConfigs: emptyWatchlistConfigs,
     });
 
-    expect(result).toEqual({ scoresWritten: 1, pagesProcessed: 0, resetBatchLimitHit: false });
+    expect(result).toEqual({
+      scoresWrittenRiskIndex: 1,
+      scoresWrittenEntityStore: 1,
+      scoresFailed: 0,
+      pagesProcessed: 0,
+      resetBatchLimitHit: false,
+    });
     expect(writerBulkMock).toHaveBeenCalledWith({
       host: [
         expect.objectContaining({
@@ -103,7 +116,6 @@ describe('resetToZero (maintainer)', () => {
       spaceId: 'default',
       entityType: EntityType.host,
       logger,
-      idBasedRiskScoringEnabled: true,
       crudClient,
       calculationRunId: 'run-id-1',
       now,
@@ -115,7 +127,13 @@ describe('resetToZero (maintainer)', () => {
         filter: { terms: { 'entity.id': ['host:host-1'] } },
       })
     );
-    expect(result).toEqual({ scoresWritten: 1, pagesProcessed: 0, resetBatchLimitHit: false });
+    expect(result).toEqual({
+      scoresWrittenRiskIndex: 1,
+      scoresWrittenEntityStore: 1,
+      scoresFailed: 0,
+      pagesProcessed: 0,
+      resetBatchLimitHit: false,
+    });
 
     expect(writerBulkMock).toHaveBeenCalledWith({
       host: [
@@ -169,14 +187,19 @@ describe('resetToZero (maintainer)', () => {
       spaceId: 'default',
       entityType: EntityType.user,
       logger,
-      idBasedRiskScoringEnabled: true,
       crudClient,
       calculationRunId: 'run-id-1',
       now,
       watchlistConfigs,
     });
 
-    expect(result).toEqual({ scoresWritten: 1, pagesProcessed: 0, resetBatchLimitHit: false });
+    expect(result).toEqual({
+      scoresWrittenRiskIndex: 1,
+      scoresWrittenEntityStore: 1,
+      scoresFailed: 0,
+      pagesProcessed: 0,
+      resetBatchLimitHit: false,
+    });
     expect(writerBulkMock).toHaveBeenCalledWith({
       user: [
         expect.objectContaining({
@@ -203,14 +226,19 @@ describe('resetToZero (maintainer)', () => {
       spaceId: 'default',
       entityType: EntityType.service,
       logger,
-      idBasedRiskScoringEnabled: true,
       crudClient,
       calculationRunId: 'run-id-1',
       now,
       watchlistConfigs: emptyWatchlistConfigs,
     });
 
-    expect(result).toEqual({ scoresWritten: 1, pagesProcessed: 0, resetBatchLimitHit: false });
+    expect(result).toEqual({
+      scoresWrittenRiskIndex: 1,
+      scoresWrittenEntityStore: 1,
+      scoresFailed: 0,
+      pagesProcessed: 0,
+      resetBatchLimitHit: false,
+    });
     expect(writerBulkMock).toHaveBeenCalledWith({
       service: [
         expect.objectContaining({
@@ -238,14 +266,19 @@ describe('resetToZero (maintainer)', () => {
       spaceId: 'default',
       entityType: EntityType.host,
       logger,
-      idBasedRiskScoringEnabled: true,
       crudClient,
       calculationRunId: 'run-id-1',
       now,
       watchlistConfigs: emptyWatchlistConfigs,
     });
 
-    expect(result).toEqual({ scoresWritten: 1, pagesProcessed: 0, resetBatchLimitHit: false });
+    expect(result).toEqual({
+      scoresWrittenRiskIndex: 1,
+      scoresWrittenEntityStore: 1,
+      scoresFailed: 0,
+      pagesProcessed: 0,
+      resetBatchLimitHit: false,
+    });
     expect(logger.warn).toHaveBeenCalledWith(
       expect.stringContaining('Error fetching entities for reset-to-zero')
     );
@@ -271,14 +304,19 @@ describe('resetToZero (maintainer)', () => {
       spaceId: 'default',
       entityType: EntityType.host,
       logger,
-      idBasedRiskScoringEnabled: true,
       crudClient,
       calculationRunId: 'run-id-1',
       now,
       watchlistConfigs: emptyWatchlistConfigs,
     });
 
-    expect(result).toEqual({ scoresWritten: 0, pagesProcessed: 0, resetBatchLimitHit: false });
+    expect(result).toEqual({
+      scoresWrittenRiskIndex: 0,
+      scoresWrittenEntityStore: 0,
+      scoresFailed: 0,
+      pagesProcessed: 0,
+      resetBatchLimitHit: false,
+    });
     expect(writerBulkMock).not.toHaveBeenCalled();
   });
 
@@ -291,14 +329,19 @@ describe('resetToZero (maintainer)', () => {
       spaceId: 'default',
       entityType: EntityType.host,
       logger,
-      idBasedRiskScoringEnabled: true,
       crudClient,
       calculationRunId: 'run-id-1',
       now,
       watchlistConfigs: emptyWatchlistConfigs,
     });
 
-    expect(result).toEqual({ scoresWritten: 0, pagesProcessed: 0, resetBatchLimitHit: false });
+    expect(result).toEqual({
+      scoresWrittenRiskIndex: 0,
+      scoresWrittenEntityStore: 0,
+      scoresFailed: 0,
+      pagesProcessed: 0,
+      resetBatchLimitHit: false,
+    });
     expect(esClient.esql.query).not.toHaveBeenCalled();
     expect(writerBulkMock).not.toHaveBeenCalled();
   });
@@ -318,7 +361,6 @@ describe('resetToZero (maintainer)', () => {
       spaceId: 'default',
       entityType: EntityType.host,
       logger,
-      idBasedRiskScoringEnabled: true,
       crudClient,
       calculationRunId: 'run-id-1',
       now,
@@ -331,7 +373,7 @@ describe('resetToZero (maintainer)', () => {
     expect(query).toContain('WHERE calculation_run_id IS NULL OR calculation_run_id != "run-id-1"');
   });
 
-  it('writes to entity store when idBasedRiskScoringEnabled is true', async () => {
+  it('writes zero scores to the entity store', async () => {
     (esClient.esql.query as jest.Mock)
       .mockResolvedValueOnce({
         values: [['host:host-1', null]],
@@ -346,7 +388,6 @@ describe('resetToZero (maintainer)', () => {
       spaceId: 'default',
       entityType: EntityType.host,
       logger,
-      idBasedRiskScoringEnabled: true,
       crudClient,
       calculationRunId: 'run-id-1',
       now,

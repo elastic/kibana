@@ -25,7 +25,10 @@ export const DEFAULT_ALLOWED_TRACES_BASE_PATTERNS = ['trace', 'traces'];
 
 export const DEFAULT_ALLOWED_TRACES_BASE_PATTERNS_REGEXP = createRegExpPatternFrom(
   DEFAULT_ALLOWED_TRACES_BASE_PATTERNS,
-  'data'
+  'data',
+  // Observability traces live in `traces-*` indices, so only match names that start with the base
+  // pattern (e.g. `traces-*`), not names where it appears later (e.g. `shipping-traces`).
+  { allowPrefix: false }
 );
 
 export const createTracesContextService = ({

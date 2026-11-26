@@ -7,18 +7,34 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ContainerModuleLoadOptions } from 'inversify';
-import { CoreSetup, CapabilitiesProvider } from '@kbn/core-di-server';
-import { OnSetup } from '@kbn/core-di';
+import { type KibanaContainerModuleLoadOptions } from '@kbn/core-di';
+import { cacheInScope } from '@kbn/core-di-internal';
+import {
+  CapabilitiesProvider,
+  CapabilitiesResolver,
+  CapabilitiesSwitcher,
+  CoreSetup,
+  CoreStart,
+  type ICapabilitiesResolver,
+  Request,
+} from '@kbn/core-di-server';
 
-export function loadCapabilites({ bind, onActivation }: ContainerModuleLoadOptions): void {
-  onActivation(CapabilitiesProvider, ({ get }, provider) => {
-    get(CoreSetup('capabilities')).registerProvider(provider);
-
-    return provider;
+export function loadCapabilities({ bind, onSetup }: KibanaContainerModuleLoadOptions): void {
+  onSetup(CapabilitiesProvider, CoreSetup('capabilities'), (_, provider, capabilities) => {
+    capabilities.registerProvider(provider);
   });
 
-  bind(OnSetup).toConstantValue((container) => {
-    container.getAll(CapabilitiesProvider);
+  onSetup(CapabilitiesSwitcher, CoreSetup('capabilities'), (_, switcher, capabilities) => {
+    capabilities.registerSwitcher(switcher.switch, switcher);
   });
+
+  bind(CapabilitiesResolver)
+    .toResolvedValue(
+      (capabilities, request): ICapabilitiesResolver =>
+        (options) =>
+          capabilities.resolveCapabilities(request, options),
+      [CoreStart('capabilities'), Request]
+    )
+    .inRequestScope()
+    .onActivation(cacheInScope(CapabilitiesResolver));
 }

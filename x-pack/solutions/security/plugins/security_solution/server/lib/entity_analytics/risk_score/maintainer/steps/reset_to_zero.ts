@@ -32,7 +32,6 @@ export interface ResetToZeroDependencies {
   logger: ScopedLogger;
   crudClient: EntityUpdateClient;
   watchlistConfigs: Map<string, WatchlistObject>;
-  idBasedRiskScoringEnabled: boolean;
   calculationRunId: string;
   now: string;
 }
@@ -59,7 +58,6 @@ export const resetToZero = async ({
   logger,
   crudClient,
   watchlistConfigs,
-  idBasedRiskScoringEnabled,
   calculationRunId,
   now,
 }: ResetToZeroDependencies): Promise<ResetToZeroSummary> => {
@@ -67,7 +65,13 @@ export const resetToZero = async ({
   const indexExists = await esClient.indices.exists({ index: alias });
   if (!indexExists) {
     logger.debug(`reset_to_zero skipped because index "${alias}" does not exist yet`);
-    return { scoresWritten: 0, pagesProcessed: 0, resetBatchLimitHit: false };
+    return {
+      scoresWrittenRiskIndex: 0,
+      scoresWrittenEntityStore: 0,
+      scoresFailed: 0,
+      pagesProcessed: 0,
+      resetBatchLimitHit: false,
+    };
   }
 
   const entityField = `${entityType}.${RISK_SCORE_ID_VALUE_FIELD}`;
@@ -125,7 +129,13 @@ export const resetToZero = async ({
 
   if (allEntityIds.length === 0) {
     logger.debug('reset_to_zero found no stale entities');
-    return { scoresWritten: 0, pagesProcessed: 0, resetBatchLimitHit: false };
+    return {
+      scoresWrittenRiskIndex: 0,
+      scoresWrittenEntityStore: 0,
+      scoresFailed: 0,
+      pagesProcessed: 0,
+      resetBatchLimitHit: false,
+    };
   }
 
   const resetBatchLimitHit =
@@ -175,20 +185,26 @@ export const resetToZero = async ({
   });
 
   const scores = [...baseScores, ...resolutionScores];
-  const scoresWritten = await persistScoresToRiskIndex({
+  const scoresWrittenRiskIndex = await persistScoresToRiskIndex({
     writer,
     entityType,
     scores,
     logger,
   });
 
-  await persistScoresToEntityStore({
-    crudClient,
-    logger,
-    entityType,
-    scores,
-    enabled: idBasedRiskScoringEnabled,
-  });
+  const { docsWritten: scoresWrittenEntityStore, errorsCount: scoresFailed } =
+    await persistScoresToEntityStore({
+      crudClient,
+      logger,
+      entityType,
+      scores,
+    });
 
-  return { scoresWritten, pagesProcessed: 0, resetBatchLimitHit };
+  return {
+    scoresWrittenRiskIndex,
+    scoresWrittenEntityStore,
+    scoresFailed,
+    pagesProcessed: 0,
+    resetBatchLimitHit,
+  };
 };

@@ -14,7 +14,7 @@
  *   version: 2023-10-31
  */
 
-import { z, lazySchema } from '@kbn/zod/v4';
+import { z, lazySchema, isoDateTime } from '@kbn/zod/v4';
 
 import { ECSMappingOrUndefined } from '../model/schema/common_attributes.gen';
 
@@ -23,28 +23,37 @@ export const FindLiveQueryRequestQuery = lazySchema(() =>
     /**
      * A KQL search string to filter live queries.
      */
-    kuery: z.string().optional(),
+    kuery: z.string().optional().describe('A KQL search string to filter live queries.'),
     /**
      * The page number to return. The default is 1.
      */
-    page: z.number().int().optional(),
+    page: z.number().int().optional().describe('The page number to return. The default is 1.'),
     /**
      * The number of results to return per page. The default is 20.
      */
-    pageSize: z.number().int().optional(),
+    pageSize: z
+      .number()
+      .int()
+      .optional()
+      .describe('The number of results to return per page. The default is 20.'),
     /**
      * The field to sort results by.
      */
-    sort: z.string().optional(),
+    sort: z.string().optional().describe('The field to sort results by.'),
     /**
      * The sort order.
      */
-    sortOrder: z.enum(['asc', 'desc']).optional(),
+    sortOrder: z.enum(['asc', 'desc']).optional().describe('The sort order.'),
     /**
       * When true, the response includes result_counts on each item with aggregated result statistics from the action responses index.
 
       */
-    withResultCounts: z.boolean().optional(),
+    withResultCounts: z
+      .boolean()
+      .optional()
+      .describe(
+        'When true, the response includes result_counts on each item with aggregated result statistics from the action responses index.\n'
+      ),
   })
 );
 export type FindLiveQueryRequestQuery = z.infer<typeof FindLiveQueryRequestQuery>;
@@ -56,7 +65,7 @@ export const FindLiveQueryResponse = lazySchema(() =>
         /**
          * The total number of live queries.
          */
-        total: z.number().int().optional(),
+        total: z.number().int().optional().describe('The total number of live queries.'),
         /**
          * An array of live query action items.
          */
@@ -66,8 +75,8 @@ export const FindLiveQueryResponse = lazySchema(() =>
               _source: z
                 .object({
                   action_id: z.string().optional(),
-                  expiration: z.string().datetime().optional(),
-                  '@timestamp': z.string().datetime().optional(),
+                  expiration: isoDateTime().optional(),
+                  '@timestamp': isoDateTime().optional(),
                   agents: z.array(z.string()).optional(),
                   user_id: z.string().optional(),
                   pack_id: z.string().optional(),
@@ -93,12 +102,14 @@ export const FindLiveQueryResponse = lazySchema(() =>
                       successful_agents: z.number().int().optional(),
                       error_agents: z.number().int().optional(),
                     })
-                    .optional(),
+                    .optional()
+                    .describe('Result count statistics (present when withResultCounts is true).'),
                 })
                 .optional(),
             })
           )
-          .optional(),
+          .optional()
+          .describe('An array of live query action items.'),
       })
       .optional(),
   })
@@ -110,8 +121,8 @@ export const FindLiveQueryDetailsResponse = lazySchema(() =>
     data: z
       .object({
         action_id: z.string().optional(),
-        expiration: z.string().datetime().optional(),
-        '@timestamp': z.string().datetime().optional(),
+        expiration: isoDateTime().optional(),
+        '@timestamp': isoDateTime().optional(),
         agents: z.array(z.string()).optional(),
         user_id: z.string().optional(),
         user_profile_uid: z.string().optional(),
@@ -120,9 +131,40 @@ export const FindLiveQueryDetailsResponse = lazySchema(() =>
         prebuilt_pack: z.boolean().optional(),
         tags: z.array(z.string()).optional(),
         /**
+         * What started the live query. Absent for live queries started from the UI, the API or a rule.
+         */
+        origin: z
+          .object({
+            /**
+             * The kind of origin. `workflow` means a workflow run made the request.
+             */
+            type: z
+              .literal('workflow')
+              .describe('The kind of origin. `workflow` means a workflow run made the request.'),
+            /**
+             * The workflow execution (run) ID that made the request.
+             */
+            run_id: z.string().describe('The workflow execution (run) ID that made the request.'),
+            /**
+             * Whether Kibana verified that the run exists and made the request. Always `false` for now.
+             */
+            verified: z
+              .boolean()
+              .describe(
+                'Whether Kibana verified that the run exists and made the request. Always `false` for now.'
+              ),
+          })
+          .optional()
+          .describe(
+            'What started the live query. Absent for live queries started from the UI, the API or a rule.'
+          ),
+        /**
          * Global status of the live query (completed, running).
          */
-        status: z.enum(['completed', 'running']).optional(),
+        status: z
+          .enum(['completed', 'running'])
+          .optional()
+          .describe('Global status of the live query (completed, running).'),
         /**
          * The queries with their execution status.
          */
@@ -138,30 +180,34 @@ export const FindLiveQueryDetailsResponse = lazySchema(() =>
               /**
                * Number of result documents.
                */
-              docs: z.number().int().optional(),
+              docs: z.number().int().optional().describe('Number of result documents.'),
               /**
                * Number of failed queries.
                */
-              failed: z.number().int().optional(),
+              failed: z.number().int().optional().describe('Number of failed queries.'),
               /**
                * Number of pending agents.
                */
-              pending: z.number().int().optional(),
+              pending: z.number().int().optional().describe('Number of pending agents.'),
               /**
                * Total responded agents.
                */
-              responded: z.number().int().optional(),
+              responded: z.number().int().optional().describe('Total responded agents.'),
               /**
                * Number of successful agents.
                */
-              successful: z.number().int().optional(),
+              successful: z.number().int().optional().describe('Number of successful agents.'),
               /**
                * Status of this individual query.
                */
-              status: z.enum(['completed', 'running']).optional(),
+              status: z
+                .enum(['completed', 'running'])
+                .optional()
+                .describe('Status of this individual query.'),
             })
           )
-          .optional(),
+          .optional()
+          .describe('The queries with their execution status.'),
       })
       .optional(),
   })

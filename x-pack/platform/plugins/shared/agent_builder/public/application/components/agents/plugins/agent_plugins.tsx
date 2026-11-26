@@ -251,7 +251,7 @@ export const AgentPlugins: React.FC = () => {
                         button={
                           <EuiButton
                             fill
-                            iconType="plusInCircle"
+                            iconType="plusCircle"
                             iconSide="left"
                             onClick={() => setIsHeaderInstallMenuOpen((prev) => !prev)}
                           >

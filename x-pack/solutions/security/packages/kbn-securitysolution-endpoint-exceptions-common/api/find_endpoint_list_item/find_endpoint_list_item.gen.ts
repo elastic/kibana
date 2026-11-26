@@ -29,23 +29,35 @@ export const FindEndpointListItemsRequestQuery = lazySchema(() =>
 using the `<field name>:<field value>` syntax.
 
       */
-    filter: FindEndpointListItemsFilter.optional(),
+    filter: FindEndpointListItemsFilter.optional().describe(
+      'Filters the returned results according to the value of the specified field,\nusing the `<field name>:<field value>` syntax.\n'
+    ),
     /**
      * The page number to return
      */
-    page: z.coerce.number().int().min(0).optional(),
+    page: z.coerce.number().int().min(0).optional().describe('The page number to return'),
     /**
      * The number of exception list items to return per page
      */
-    per_page: z.coerce.number().int().min(0).optional(),
+    per_page: z.coerce
+      .number()
+      .int()
+      .min(0)
+      .optional()
+      .describe('The number of exception list items to return per page'),
     /**
      * Determines which field is used to sort the results
      */
-    sort_field: NonEmptyString.optional(),
+    sort_field: NonEmptyString.optional().describe(
+      'Determines which field is used to sort the results'
+    ),
     /**
      * Determines the sort order, which can be `desc` or `asc`
      */
-    sort_order: z.enum(['desc', 'asc']).optional(),
+    sort_order: z
+      .enum(['desc', 'asc'])
+      .optional()
+      .describe('Determines the sort order, which can be `desc` or `asc`'),
   })
 );
 export type FindEndpointListItemsRequestQuery = z.infer<typeof FindEndpointListItemsRequestQuery>;
@@ -58,23 +70,23 @@ export const FindEndpointListItemsResponse = lazySchema(() =>
     /**
      * The list of endpoint exception list items.
      */
-    data: z.array(EndpointListItem),
+    data: z.array(EndpointListItem).describe('The list of endpoint exception list items.'),
     /**
      * The current page number.
      */
-    page: z.number().int().min(0),
+    page: z.number().int().min(0).describe('The current page number.'),
     /**
      * The number of items per page.
      */
-    per_page: z.number().int().min(0),
+    per_page: z.number().int().min(0).describe('The number of items per page.'),
     /**
      * The total number of endpoint exception list items.
      */
-    total: z.number().int().min(0),
+    total: z.number().int().min(0).describe('The total number of endpoint exception list items.'),
     /**
      * The point-in-time ID for pagination.
      */
-    pit: z.string().optional(),
+    pit: z.string().optional().describe('The point-in-time ID for pagination.'),
   })
 );
 export type FindEndpointListItemsResponse = z.infer<typeof FindEndpointListItemsResponse>;

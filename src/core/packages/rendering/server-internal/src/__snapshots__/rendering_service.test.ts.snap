@@ -15,6 +15,7 @@ Object {
     "warnLegacyBrowsers": true,
   },
   "customBranding": Object {},
+  "edotBrowserConfig": null,
   "env": Object {
     "airgapped": Any<Boolean>,
     "exposeNavDependencies": false,
@@ -53,6 +54,9 @@ Object {
         "label": "English",
       },
     ],
+    "configDefaultLocale": "en",
+    "locale": "en",
+    "localeSource": "default",
     "translationsUrl": null,
   },
   "legacyMetadata": Object {
@@ -94,6 +98,7 @@ Object {
   },
   "uiPlugins": Array [],
   "userStorage": Object {
+    "available": false,
     "values": Object {},
   },
   "version": Any<String>,
@@ -115,6 +120,7 @@ Object {
     "warnLegacyBrowsers": true,
   },
   "customBranding": Object {},
+  "edotBrowserConfig": null,
   "env": Object {
     "airgapped": Any<Boolean>,
     "exposeNavDependencies": false,
@@ -153,6 +159,9 @@ Object {
         "label": "English",
       },
     ],
+    "configDefaultLocale": "en",
+    "locale": "en",
+    "localeSource": "default",
     "translationsUrl": null,
   },
   "legacyMetadata": Object {
@@ -190,6 +199,7 @@ Object {
   },
   "uiPlugins": Array [],
   "userStorage": Object {
+    "available": false,
     "values": Object {},
   },
   "version": Any<String>,
@@ -211,6 +221,7 @@ Object {
     "warnLegacyBrowsers": true,
   },
   "customBranding": Object {},
+  "edotBrowserConfig": null,
   "env": Object {
     "airgapped": Any<Boolean>,
     "exposeNavDependencies": false,
@@ -249,6 +260,9 @@ Object {
         "label": "English",
       },
     ],
+    "configDefaultLocale": "en",
+    "locale": "en",
+    "localeSource": "default",
     "translationsUrl": null,
   },
   "legacyMetadata": Object {
@@ -290,6 +304,7 @@ Object {
   },
   "uiPlugins": Array [],
   "userStorage": Object {
+    "available": false,
     "values": Object {},
   },
   "version": Any<String>,
@@ -311,6 +326,7 @@ Object {
     "warnLegacyBrowsers": true,
   },
   "customBranding": Object {},
+  "edotBrowserConfig": null,
   "env": Object {
     "airgapped": Any<Boolean>,
     "exposeNavDependencies": false,
@@ -349,6 +365,9 @@ Object {
         "label": "English",
       },
     ],
+    "configDefaultLocale": "en",
+    "locale": "en",
+    "localeSource": "default",
     "translationsUrl": null,
   },
   "legacyMetadata": Object {
@@ -386,6 +405,7 @@ Object {
   },
   "uiPlugins": Array [],
   "userStorage": Object {
+    "available": false,
     "values": Object {},
   },
   "version": Any<String>,
@@ -409,6 +429,7 @@ Object {
     "warnLegacyBrowsers": true,
   },
   "customBranding": Object {},
+  "edotBrowserConfig": null,
   "env": Object {
     "airgapped": Any<Boolean>,
     "exposeNavDependencies": false,
@@ -447,6 +468,9 @@ Object {
         "label": "English",
       },
     ],
+    "configDefaultLocale": "en",
+    "locale": "en",
+    "localeSource": "default",
     "translationsUrl": null,
   },
   "legacyMetadata": Object {
@@ -484,6 +508,7 @@ Object {
   },
   "uiPlugins": Array [],
   "userStorage": Object {
+    "available": false,
     "values": Object {},
   },
   "version": Any<String>,
@@ -505,6 +530,7 @@ Object {
     "warnLegacyBrowsers": true,
   },
   "customBranding": Object {},
+  "edotBrowserConfig": null,
   "env": Object {
     "airgapped": Any<Boolean>,
     "exposeNavDependencies": false,
@@ -543,6 +569,9 @@ Object {
         "label": "English",
       },
     ],
+    "configDefaultLocale": "en",
+    "locale": "en",
+    "localeSource": "default",
     "translationsUrl": null,
   },
   "legacyMetadata": Object {
@@ -584,6 +613,7 @@ Object {
   },
   "uiPlugins": Array [],
   "userStorage": Object {
+    "available": false,
     "values": Object {},
   },
   "version": Any<String>,
@@ -607,6 +637,7 @@ Object {
     "warnLegacyBrowsers": true,
   },
   "customBranding": Object {},
+  "edotBrowserConfig": null,
   "env": Object {
     "airgapped": Any<Boolean>,
     "exposeNavDependencies": false,
@@ -645,6 +676,9 @@ Object {
         "label": "English",
       },
     ],
+    "configDefaultLocale": "en",
+    "locale": "en",
+    "localeSource": "default",
     "translationsUrl": null,
   },
   "legacyMetadata": Object {
@@ -682,6 +716,7 @@ Object {
   },
   "uiPlugins": Array [],
   "userStorage": Object {
+    "available": false,
     "values": Object {},
   },
   "version": Any<String>,
@@ -703,6 +738,7 @@ Object {
     "warnLegacyBrowsers": true,
   },
   "customBranding": Object {},
+  "edotBrowserConfig": null,
   "env": Object {
     "airgapped": Any<Boolean>,
     "exposeNavDependencies": false,
@@ -741,6 +777,9 @@ Object {
         "label": "English",
       },
     ],
+    "configDefaultLocale": "en",
+    "locale": "en",
+    "localeSource": "default",
     "translationsUrl": null,
   },
   "legacyMetadata": Object {
@@ -778,6 +817,7 @@ Object {
   },
   "uiPlugins": Array [],
   "userStorage": Object {
+    "available": false,
     "values": Object {},
   },
   "version": Any<String>,
@@ -799,6 +839,7 @@ Object {
     "warnLegacyBrowsers": true,
   },
   "customBranding": Object {},
+  "edotBrowserConfig": null,
   "env": Object {
     "airgapped": Any<Boolean>,
     "exposeNavDependencies": false,
@@ -837,6 +878,9 @@ Object {
         "label": "English",
       },
     ],
+    "configDefaultLocale": "en",
+    "locale": "en",
+    "localeSource": "default",
     "translationsUrl": null,
   },
   "legacyMetadata": Object {
@@ -874,6 +918,7 @@ Object {
   },
   "uiPlugins": Array [],
   "userStorage": Object {
+    "available": false,
     "values": Object {},
   },
   "version": Any<String>,
@@ -895,6 +940,7 @@ Object {
     "warnLegacyBrowsers": true,
   },
   "customBranding": Object {},
+  "edotBrowserConfig": null,
   "env": Object {
     "airgapped": Any<Boolean>,
     "exposeNavDependencies": false,
@@ -933,6 +979,9 @@ Object {
         "label": "English",
       },
     ],
+    "configDefaultLocale": "en",
+    "locale": "en",
+    "localeSource": "default",
     "translationsUrl": null,
   },
   "legacyMetadata": Object {
@@ -970,6 +1019,7 @@ Object {
   },
   "uiPlugins": Array [],
   "userStorage": Object {
+    "available": false,
     "values": Object {},
   },
   "version": Any<String>,
@@ -996,6 +1046,7 @@ Object {
     "warnLegacyBrowsers": true,
   },
   "customBranding": Object {},
+  "edotBrowserConfig": null,
   "env": Object {
     "airgapped": Any<Boolean>,
     "exposeNavDependencies": false,
@@ -1034,6 +1085,9 @@ Object {
         "label": "English",
       },
     ],
+    "configDefaultLocale": "en",
+    "locale": "en",
+    "localeSource": "default",
     "translationsUrl": null,
   },
   "legacyMetadata": Object {
@@ -1075,6 +1129,7 @@ Object {
   },
   "uiPlugins": Array [],
   "userStorage": Object {
+    "available": false,
     "values": Object {},
   },
   "version": Any<String>,
@@ -1096,6 +1151,7 @@ Object {
     "warnLegacyBrowsers": true,
   },
   "customBranding": Object {},
+  "edotBrowserConfig": null,
   "env": Object {
     "airgapped": Any<Boolean>,
     "exposeNavDependencies": false,
@@ -1136,6 +1192,9 @@ Object {
         "label": "English",
       },
     ],
+    "configDefaultLocale": "en",
+    "locale": "en",
+    "localeSource": "default",
     "translationsUrl": null,
   },
   "legacyMetadata": Object {
@@ -1173,6 +1232,7 @@ Object {
   },
   "uiPlugins": Array [],
   "userStorage": Object {
+    "available": false,
     "values": Object {},
   },
   "version": Any<String>,
@@ -1199,6 +1259,7 @@ Object {
     "warnLegacyBrowsers": true,
   },
   "customBranding": Object {},
+  "edotBrowserConfig": null,
   "env": Object {
     "airgapped": Any<Boolean>,
     "exposeNavDependencies": false,
@@ -1237,6 +1298,9 @@ Object {
         "label": "English",
       },
     ],
+    "configDefaultLocale": "en",
+    "locale": "en",
+    "localeSource": "default",
     "translationsUrl": null,
   },
   "legacyMetadata": Object {
@@ -1278,6 +1342,7 @@ Object {
   },
   "uiPlugins": Array [],
   "userStorage": Object {
+    "available": false,
     "values": Object {},
   },
   "version": Any<String>,
@@ -1304,6 +1369,7 @@ Object {
     "warnLegacyBrowsers": true,
   },
   "customBranding": Object {},
+  "edotBrowserConfig": null,
   "env": Object {
     "airgapped": Any<Boolean>,
     "exposeNavDependencies": false,
@@ -1342,6 +1408,9 @@ Object {
         "label": "English",
       },
     ],
+    "configDefaultLocale": "en",
+    "locale": "en",
+    "localeSource": "default",
     "translationsUrl": null,
   },
   "legacyMetadata": Object {
@@ -1379,6 +1448,7 @@ Object {
   },
   "uiPlugins": Array [],
   "userStorage": Object {
+    "available": false,
     "values": Object {},
   },
   "version": Any<String>,
@@ -1400,6 +1470,7 @@ Object {
     "warnLegacyBrowsers": true,
   },
   "customBranding": Object {},
+  "edotBrowserConfig": null,
   "env": Object {
     "airgapped": Any<Boolean>,
     "exposeNavDependencies": false,
@@ -1438,6 +1509,9 @@ Object {
         "label": "English",
       },
     ],
+    "configDefaultLocale": "en",
+    "locale": "en",
+    "localeSource": "default",
     "translationsUrl": null,
   },
   "legacyMetadata": Object {
@@ -1475,6 +1549,7 @@ Object {
   },
   "uiPlugins": Array [],
   "userStorage": Object {
+    "available": false,
     "values": Object {},
   },
   "version": Any<String>,
@@ -1501,6 +1576,7 @@ Object {
     "warnLegacyBrowsers": true,
   },
   "customBranding": Object {},
+  "edotBrowserConfig": null,
   "env": Object {
     "airgapped": Any<Boolean>,
     "exposeNavDependencies": false,
@@ -1539,6 +1615,9 @@ Object {
         "label": "English",
       },
     ],
+    "configDefaultLocale": "en",
+    "locale": "en",
+    "localeSource": "default",
     "translationsUrl": null,
   },
   "legacyMetadata": Object {
@@ -1580,6 +1659,7 @@ Object {
   },
   "uiPlugins": Array [],
   "userStorage": Object {
+    "available": false,
     "values": Object {},
   },
   "version": Any<String>,
@@ -1606,6 +1686,7 @@ Object {
     "warnLegacyBrowsers": true,
   },
   "customBranding": Object {},
+  "edotBrowserConfig": null,
   "env": Object {
     "airgapped": Any<Boolean>,
     "exposeNavDependencies": false,
@@ -1644,6 +1725,9 @@ Object {
         "label": "English",
       },
     ],
+    "configDefaultLocale": "en",
+    "locale": "en",
+    "localeSource": "default",
     "translationsUrl": null,
   },
   "legacyMetadata": Object {
@@ -1681,6 +1765,7 @@ Object {
   },
   "uiPlugins": Array [],
   "userStorage": Object {
+    "available": false,
     "values": Object {},
   },
   "version": Any<String>,
@@ -1707,6 +1792,7 @@ Object {
     "warnLegacyBrowsers": true,
   },
   "customBranding": Object {},
+  "edotBrowserConfig": null,
   "env": Object {
     "airgapped": Any<Boolean>,
     "exposeNavDependencies": false,
@@ -1745,6 +1831,9 @@ Object {
         "label": "English",
       },
     ],
+    "configDefaultLocale": "en",
+    "locale": "en",
+    "localeSource": "default",
     "translationsUrl": null,
   },
   "legacyMetadata": Object {
@@ -1782,6 +1871,7 @@ Object {
   },
   "uiPlugins": Array [],
   "userStorage": Object {
+    "available": false,
     "values": Object {},
   },
   "version": Any<String>,
@@ -1808,6 +1898,7 @@ Object {
     "warnLegacyBrowsers": true,
   },
   "customBranding": Object {},
+  "edotBrowserConfig": null,
   "env": Object {
     "airgapped": Any<Boolean>,
     "exposeNavDependencies": false,
@@ -1848,6 +1939,9 @@ Object {
         "label": "English",
       },
     ],
+    "configDefaultLocale": "en",
+    "locale": "en",
+    "localeSource": "default",
     "translationsUrl": null,
   },
   "legacyMetadata": Object {
@@ -1885,6 +1979,7 @@ Object {
   },
   "uiPlugins": Array [],
   "userStorage": Object {
+    "available": false,
     "values": Object {},
   },
   "version": Any<String>,
@@ -1911,6 +2006,7 @@ Object {
     "warnLegacyBrowsers": true,
   },
   "customBranding": Object {},
+  "edotBrowserConfig": null,
   "env": Object {
     "airgapped": Any<Boolean>,
     "exposeNavDependencies": false,
@@ -1951,6 +2047,9 @@ Object {
         "label": "English",
       },
     ],
+    "configDefaultLocale": "en",
+    "locale": "en",
+    "localeSource": "default",
     "translationsUrl": null,
   },
   "legacyMetadata": Object {
@@ -1988,6 +2087,7 @@ Object {
   },
   "uiPlugins": Array [],
   "userStorage": Object {
+    "available": false,
     "values": Object {},
   },
   "version": Any<String>,

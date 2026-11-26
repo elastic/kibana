@@ -5,11 +5,37 @@
  * 2.0.
  */
 
-import type { ConversationWithoutRounds } from '@kbn/agent-builder-common';
+import type {
+  UserMessageEvent,
+  ConversationAccessControl,
+  ConversationAccessControlEntryInput,
+  ConversationAccessControlMode,
+  ConversationAddEventInput,
+  ConversationEvent,
+  ConversationWithPermissions,
+  ConversationWithoutRoundsWithPermissions,
+} from '@kbn/agent-builder-common';
+
+export type {
+  ConversationPermissions,
+  ConversationWithPermissions,
+  ConversationWithoutRoundsWithPermissions,
+} from '@kbn/agent-builder-common';
+
+export type GetConversationResponse = ConversationWithPermissions;
+
+export type ListConversationsResponseItem = ConversationWithoutRoundsWithPermissions;
 
 export interface ListConversationsResponse {
-  results: ConversationWithoutRounds[];
+  pagination: {
+    total: number;
+    page: number;
+    per_page: number;
+  };
+  results: ListConversationsResponseItem[];
 }
+
+export type SearchConversationsResponse = ListConversationsResponse;
 
 export interface DeleteConversationResponse {
   success: boolean;
@@ -28,4 +54,34 @@ export interface MarkReadConversationResponse {
 export interface MarkPinnedConversationResponse {
   id: string;
   pinned: boolean;
+}
+
+export type CreateConversationResponse = ConversationWithPermissions;
+
+export interface SteerConversationRequestBody {
+  message: string;
+  /** Client-generated idempotency key. */
+  event_id: string;
+}
+
+/** Returns the canonical stored event. */
+export interface SteerConversationResponse {
+  event: UserMessageEvent;
+  /** Present and true when an earlier request already stored this `event_id`. */
+  already_stored?: boolean;
+}
+
+export interface UpdateConversationAccessControlRequestBody {
+  access_mode: ConversationAccessControlMode;
+  entries: ConversationAccessControlEntryInput[];
+}
+
+export type UpdateConversationAccessControlResponse = ConversationAccessControl;
+
+export interface AddConversationEventsRequestBody {
+  events: ConversationAddEventInput[];
+}
+
+export interface AddConversationEventsResponse {
+  events: ConversationEvent[];
 }

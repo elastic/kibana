@@ -8,9 +8,11 @@
  */
 
 import { AS_CODE_DATA_VIEW_SPEC_TYPE } from '@kbn/as-code-data-views-schema';
+import type { LensTagCloudState } from '@kbn/lens-common';
 
 import { validator } from '../utils/validator';
 import type { TagcloudConfig } from '../../schema';
+import { tagcloudConfigSchema } from '../../schema/charts/tagcloud';
 import { DEFAULT_CATEGORICAL_COLOR_MAPPING } from '../../schema/color';
 import { LensConfigBuilder } from '../../config_builder';
 import {
@@ -26,6 +28,12 @@ import {
   tagcloudAttributesWithFullConfig,
   tagcloudESQLAttributes,
 } from './lens_state_config.mock';
+
+const OPEN_ENDED_RANGE_COLOR = {
+  type: 'categorical',
+  paletteId: 'default',
+  colorIndex: 0,
+} as const;
 
 describe('Tagcloud', () => {
   describe('state transform validation', () => {
@@ -66,6 +74,73 @@ describe('Tagcloud', () => {
     });
   });
 
+  describe('open-ended range color assignments', () => {
+    // The saved object stores an open-ended range bound as `null`; the API omits it.
+    it('should round-trip a state with `null` range bounds', () => {
+      validator.tag_cloud.fromState({
+        ...tagcloudAttributesWithFullConfig,
+        state: {
+          ...tagcloudAttributesWithFullConfig.state,
+          visualization: {
+            ...tagcloudAttributesWithFullConfig.state.visualization,
+            colorMapping: {
+              ...tagcloudAttributesWithFullConfig.state.visualization.colorMapping,
+              colorMode: { type: 'categorical' },
+              assignments: [
+                {
+                  rules: [
+                    {
+                      type: 'raw',
+                      value: {
+                        type: 'rangeKey',
+                        from: 1000,
+                        to: null,
+                        ranges: [
+                          { from: 1000, to: null, label: 'Large' },
+                          { from: null, to: 1000, label: 'Small' },
+                        ],
+                      },
+                    },
+                  ],
+                  color: OPEN_ENDED_RANGE_COLOR,
+                  touched: false,
+                },
+              ],
+            },
+          },
+        },
+      });
+    });
+
+    it('should round-trip an API config that omits open-ended range bounds', () => {
+      validator.tag_cloud.fromApi({
+        ...comprehensiveTagcloudWithDataView,
+        tag_by: {
+          ...comprehensiveTagcloudWithDataView.tag_by,
+          color: {
+            mode: 'categorical',
+            palette: 'default',
+            mapping: [
+              {
+                values: [
+                  {
+                    type: 'range_key',
+                    from: 1000,
+                    ranges: [
+                      { from: 1000, label: 'Large' },
+                      { to: 1000, label: 'Small' },
+                    ],
+                  },
+                ],
+                color: { type: 'from_palette', palette: 'default', index: 0 },
+              },
+            ],
+          },
+        },
+      });
+    });
+  });
+
   describe('color default application', () => {
     it('should emit DEFAULT_CATEGORICAL_COLOR_MAPPING on tag_by when no color is specified', () => {
       const config = {
@@ -94,6 +169,40 @@ describe('Tagcloud', () => {
       const apiOutput = builder.toAPIFormat(lensState) as TagcloudConfig;
 
       expect(apiOutput.tag_by.color).toEqual(DEFAULT_CATEGORICAL_COLOR_MAPPING);
+    });
+
+    it('should store the default categorical color mapping when tag_by has no color', () => {
+      const config = {
+        type: 'tag_cloud',
+        title: 'Tagcloud color default in state',
+        data_source: {
+          type: AS_CODE_DATA_VIEW_SPEC_TYPE,
+          index_pattern: 'test-index',
+          time_field: '@timestamp',
+        },
+        metric: {
+          operation: 'count',
+          empty_as_null: false,
+        },
+        tag_by: {
+          operation: 'terms',
+          fields: ['tags.keyword'],
+          limit: 5,
+        },
+        sampling: 1,
+        ignore_global_filters: false,
+      } satisfies TagcloudConfig;
+
+      const builder = new LensConfigBuilder();
+      const lensState = builder.fromAPIFormat(tagcloudConfigSchema.parse(config));
+      const vizState = lensState.state.visualization as LensTagCloudState;
+
+      expect(vizState.colorMapping).toEqual({
+        colorMode: { type: 'categorical' },
+        paletteId: 'default',
+        assignments: [],
+        specialAssignments: [{ rules: [{ type: 'other' }], color: { type: 'loop' } }],
+      });
     });
   });
 });

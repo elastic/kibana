@@ -6,6 +6,7 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
+import { asSpaceId, DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import {
   elasticsearchServiceMock,
   loggingSystemMock,
@@ -56,9 +57,11 @@ const inMemoryConnectors = [
   }),
 ];
 let unsecuredActionsClient: UnsecuredActionsClient;
+let waitForCatalog: jest.Mock<Promise<void>, []>;
 
 beforeEach(() => {
   jest.resetAllMocks();
+  waitForCatalog = jest.fn().mockResolvedValue(undefined);
   connectorTypeRegistry.isDeprecated = jest.fn().mockReturnValue(false);
   unsecuredActionsClient = new UnsecuredActionsClient({
     actionExecutor,
@@ -69,6 +72,7 @@ beforeEach(() => {
     kibanaIndices: ['.kibana'],
     logger,
     connectorTypeRegistry,
+    waitForCatalog,
   });
 });
 
@@ -91,7 +95,7 @@ describe('getAll()', () => {
       }),
     ];
     mockGetAllUnsecured.mockResolvedValueOnce(expectedResult);
-    const result = await unsecuredActionsClient.getAll('default');
+    const result = await unsecuredActionsClient.getAll(DEFAULT_SPACE_ID);
     expect(result).toEqual(expectedResult);
     expect(mockGetAllUnsecured).toHaveBeenCalledWith({
       esClient: clusterClient.asInternalUser,
@@ -99,7 +103,7 @@ describe('getAll()', () => {
       kibanaIndices: ['.kibana'],
       logger,
       internalSavedObjectsRepository,
-      spaceId: 'default',
+      spaceId: DEFAULT_SPACE_ID,
       connectorTypeRegistry,
     });
   });
@@ -109,7 +113,7 @@ describe('getAll()', () => {
       throw new Error('failfail');
     });
     await expect(
-      unsecuredActionsClient.getAll('customSpace')
+      unsecuredActionsClient.getAll(asSpaceId('custom-space'))
     ).rejects.toThrowErrorMatchingInlineSnapshot(`"failfail"`);
     expect(mockGetAllUnsecured).toHaveBeenCalledWith({
       esClient: clusterClient.asInternalUser,
@@ -117,7 +121,7 @@ describe('getAll()', () => {
       kibanaIndices: ['.kibana'],
       logger,
       internalSavedObjectsRepository,
-      spaceId: 'customSpace',
+      spaceId: asSpaceId('custom-space'),
       connectorTypeRegistry,
     });
   });
@@ -129,7 +133,7 @@ describe('execute()', () => {
       unsecuredActionsClient.execute({
         requesterId: 'badId',
         id: '1',
-        spaceId: 'default',
+        spaceId: DEFAULT_SPACE_ID,
         params: {
           name: 'my name',
         },
@@ -146,7 +150,7 @@ describe('execute()', () => {
       unsecuredActionsClient.execute({
         requesterId: 'background_task',
         id: actionId,
-        spaceId: 'default',
+        spaceId: DEFAULT_SPACE_ID,
         params: {
           name: 'my name',
         },
@@ -158,7 +162,7 @@ describe('execute()', () => {
       params: {
         name: 'my name',
       },
-      spaceId: 'default',
+      spaceId: DEFAULT_SPACE_ID,
       actionExecutionId: expect.any(String),
     });
     expect(logger.warn).toHaveBeenCalledWith(
@@ -177,7 +181,7 @@ describe('execute()', () => {
         params: {
           name: 'my name',
         },
-        spaceId: 'custom',
+        spaceId: asSpaceId('custom'),
         relatedSavedObjects: [
           {
             id: 'some-id',
@@ -193,7 +197,7 @@ describe('execute()', () => {
       params: {
         name: 'my name',
       },
-      spaceId: 'custom',
+      spaceId: asSpaceId('custom'),
       source: {
         source: {
           taskId: 'some-id',
@@ -224,7 +228,7 @@ describe('execute()', () => {
         params: {
           name: 'my name',
         },
-        spaceId: 'custom',
+        spaceId: asSpaceId('custom'),
         relatedSavedObjects: [
           {
             id: 'some-id',
@@ -239,7 +243,7 @@ describe('execute()', () => {
       params: {
         name: 'my name',
       },
-      spaceId: 'custom',
+      spaceId: asSpaceId('custom'),
       source: {
         source: {
           taskId: 'some-id',
@@ -325,5 +329,80 @@ describe('bulkEnqueueExecution()', () => {
       }),
     }));
     expect(executionEnqueuer).toHaveBeenCalledWith(internalSavedObjectsRepository, optsWithSource);
+  });
+});
+
+describe('catalog readiness', () => {
+  const createPendingReady = () => {
+    let resolveReady: () => void = () => {};
+    waitForCatalog.mockReturnValue(
+      new Promise<void>((resolve) => {
+        resolveReady = resolve;
+      })
+    );
+    return resolveReady;
+  };
+  const flush = () => new Promise((resolve) => setImmediate(resolve));
+
+  test('execute() does not reach the executor before ready resolves', async () => {
+    const resolveReady = createPendingReady();
+
+    const promise = unsecuredActionsClient.execute({
+      requesterId: 'functional_tester',
+      id: 'testPreconfigured',
+      params: {},
+      spaceId: DEFAULT_SPACE_ID,
+      relatedSavedObjects: [{ id: 'some-id', type: 'task' }],
+    });
+    await flush();
+    expect(actionExecutor.executeUnsecured).not.toHaveBeenCalled();
+
+    resolveReady();
+    await promise;
+    expect(actionExecutor.executeUnsecured).toHaveBeenCalledTimes(1);
+  });
+
+  test('bulkEnqueueExecution() does not reach the enqueuer before ready resolves', async () => {
+    const resolveReady = createPendingReady();
+
+    const promise = unsecuredActionsClient.bulkEnqueueExecution('functional_tester', [
+      { id: 'testPreconfigured', params: {} },
+    ]);
+    await flush();
+    expect(executionEnqueuer).not.toHaveBeenCalled();
+
+    resolveReady();
+    await promise;
+    expect(executionEnqueuer).toHaveBeenCalledTimes(1);
+  });
+
+  test('execute() rejects a not allowed requester without waiting for ready', async () => {
+    createPendingReady();
+
+    await expect(
+      unsecuredActionsClient.execute({
+        requesterId: 'not-allowed',
+        id: 'testPreconfigured',
+        params: {},
+        spaceId: DEFAULT_SPACE_ID,
+        relatedSavedObjects: [{ id: 'some-id', type: 'task' }],
+      })
+    ).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"\\"not-allowed\\" feature is not allow-listed for UnsecuredActionsClient access."`
+    );
+    expect(waitForCatalog).not.toHaveBeenCalled();
+  });
+
+  test('bulkEnqueueExecution() rejects a not allowed requester without waiting for ready', async () => {
+    createPendingReady();
+
+    await expect(
+      unsecuredActionsClient.bulkEnqueueExecution('not-allowed', [
+        { id: 'testPreconfigured', params: {} },
+      ])
+    ).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"\\"not-allowed\\" feature is not allow-listed for UnsecuredActionsClient access."`
+    );
+    expect(waitForCatalog).not.toHaveBeenCalled();
   });
 });

@@ -18,11 +18,13 @@ paths:
           required: true
           schema:
             type: string
+            maxLength: 1024
         - name: exampleId
           in: path
           required: true
           schema:
             type: string
+            maxLength: 1024
       requestBody:
         required: true
         content:

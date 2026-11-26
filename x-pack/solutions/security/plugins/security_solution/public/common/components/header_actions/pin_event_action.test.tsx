@@ -128,6 +128,53 @@ describe('PinEventAction', () => {
     });
   });
 
+  it('should disable button and prevent pin/unpin when timeline is a Super Timeline', async () => {
+    // WHY: Super Timeline is read-only / transient. Allowing pinning would silently persist the
+    // aggregated timeline as a new saved object, defeating the "never persisted" contract.
+    const pinSpy = jest.spyOn(timelineActions, 'pinEvent');
+    const unPinSpy = jest.spyOn(timelineActions, 'unPinEvent');
+
+    (useUserPrivileges as jest.Mock).mockReturnValue({
+      timelinePrivileges: { crud: true, read: true },
+    });
+
+    const mockStore = createMockStore({
+      ...mockGlobalState,
+      timeline: {
+        ...mockGlobalState.timeline,
+        timelineById: {
+          [TimelineId.test]: {
+            ...mockGlobalState.timeline.timelineById[TimelineId.test],
+            isSuperTimeline: true,
+          },
+        },
+      },
+    });
+
+    const { getByTestId } = render(
+      <TestProviders store={mockStore}>
+        <PinEventAction
+          ariaRowindex={1}
+          columnValues={''}
+          eventId={'eventId'}
+          eventIdToNoteIds={{}}
+          isAlert={false}
+          noteIds={[]}
+          timelineId={TimelineId.test}
+          timelineType={TimelineTypeEnum.default}
+        />
+      </TestProviders>
+    );
+
+    expect(getByTestId(BUTTON_TEST_ID)).toHaveProperty('disabled', true);
+    getByTestId(BUTTON_TEST_ID).click();
+
+    await waitFor(() => {
+      expect(pinSpy).not.toHaveBeenCalled();
+      expect(unPinSpy).not.toHaveBeenCalled();
+    });
+  });
+
   it('should unpin event', async () => {
     const spy = jest.spyOn(timelineActions, 'unPinEvent');
 
@@ -242,6 +289,20 @@ describe('getPinTooltipContent', () => {
   it('should indicate the alert is disabled if timelineType is template', () => {
     expect(getPinTooltipContent(true, false, [], TimelineTypeEnum.template)).toEqual(
       'This alert may not be pinned while editing a template Timeline'
+    );
+  });
+
+  it('should indicate the event may not be pinned in a Super Timeline', () => {
+    // WHY: Super Timeline tooltip must take precedence so the user understands the read-only
+    // constraint regardless of pin state, notes, or timeline type.
+    expect(getPinTooltipContent(false, false, [], TimelineTypeEnum.default, true)).toEqual(
+      'This event may not be pinned in a read-only Super Timeline'
+    );
+  });
+
+  it('should indicate the alert may not be pinned in a Super Timeline', () => {
+    expect(getPinTooltipContent(true, false, [], TimelineTypeEnum.default, true)).toEqual(
+      'This alert may not be pinned in a read-only Super Timeline'
     );
   });
 });

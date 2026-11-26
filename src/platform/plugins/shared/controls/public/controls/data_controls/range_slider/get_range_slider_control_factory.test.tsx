@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { BehaviorSubject, firstValueFrom, of } from 'rxjs';
+import { BehaviorSubject, firstValueFrom, of, Subject } from 'rxjs';
 
 import type { estypes } from '@elastic/elasticsearch';
 import type { PublishesUnifiedSearch, PresentationContainer } from '@kbn/presentation-publishing';
@@ -24,12 +24,6 @@ import { ControlValuesSource } from '@kbn/controls-constants';
 import type { Filter, AggregateQuery, TimeRange } from '@kbn/es-query';
 import type { RangeSliderControlApi } from './types';
 import type { DataView } from '@kbn/data-views-plugin/common';
-
-const mockGetESQLResults = jest.fn();
-jest.mock('@kbn/esql-utils', () => ({
-  ...jest.requireActual('@kbn/esql-utils'),
-  getESQLResults: (...args: unknown[]) => mockGetESQLResults(...args),
-}));
 
 const DEFAULT_TOTAL_RESULTS = 20;
 const DEFAULT_MIN = 0;
@@ -227,8 +221,8 @@ describe('RangeSliderControlApi', () => {
     });
 
     test('fetches min/max from ES|QL when values_source is esql', async () => {
-      mockGetESQLResults.mockResolvedValue({
-        response: {
+      (dataService.search.esql as jest.Mock).mockResolvedValue({
+        rawResponse: {
           columns: [{ name: 'myFieldName', type: 'long' }],
           values: [[42], [256], [1024]],
         },
@@ -338,6 +332,74 @@ describe('RangeSliderControlApi', () => {
       });
       const hasUnsavedChanges = await firstValueFrom(embeddable.api.hasUnsavedChanges$);
       expect(hasUnsavedChanges).toBe(false);
+    });
+  });
+
+  describe('cancelRequests', () => {
+    const originalCreate = dataService.search.searchSource.create;
+
+    afterEach(() => {
+      dataService.search.searchSource.create = originalCreate;
+    });
+
+    test('api should have cancelRequests method', async () => {
+      const { api } = await factory.buildEmbeddable({
+        initializeDrilldownsManager: jest.fn(),
+        initialState: {
+          ...DEFAULT_RANGE_SLIDER_STATE,
+          data_view_id: 'myDataViewId',
+          field_name: 'myFieldName',
+        } as RangeSliderControlState,
+        finalizeApi,
+        uuid,
+        parentApi,
+      });
+      expect(api.cancelRequests).toBeDefined();
+      expect(typeof api.cancelRequests).toBe('function');
+    });
+
+    test('should abort pending minMax request when cancelRequests is called', async () => {
+      let capturedAbortSignal: AbortSignal | undefined;
+
+      dataService.search.searchSource.create = jest.fn().mockImplementation(() => {
+        let isAggsRequest = false;
+        return {
+          setField: (key: string) => {
+            if (key === 'aggs') {
+              isAggsRequest = true;
+            }
+          },
+          fetch$: ({ abortSignal }: { abortSignal?: AbortSignal }) => {
+            if (isAggsRequest) {
+              capturedAbortSignal = abortSignal;
+              return new Subject();
+            }
+            return of({
+              rawResponse: { hits: { total: { value: totalResults } } },
+            });
+          },
+        };
+      });
+
+      const { api } = await factory.buildEmbeddable({
+        initializeDrilldownsManager: jest.fn(),
+        initialState: {
+          ...DEFAULT_RANGE_SLIDER_STATE,
+          data_view_id: 'myDataViewId',
+          field_name: 'myFieldName',
+        } as RangeSliderControlState,
+        finalizeApi,
+        uuid,
+        parentApi,
+      });
+
+      await waitFor(() => expect(capturedAbortSignal).toBeDefined());
+
+      expect(capturedAbortSignal!.aborted).toBe(false);
+
+      api.cancelRequests();
+
+      expect(capturedAbortSignal!.aborted).toBe(true);
     });
   });
 

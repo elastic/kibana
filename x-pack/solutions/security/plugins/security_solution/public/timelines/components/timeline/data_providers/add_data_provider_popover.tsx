@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 import { pick } from 'lodash/fp';
 import React, { useCallback, useMemo, useState } from 'react';
 import type { EuiContextMenuPanelItemDescriptor } from '@elastic/eui';
@@ -203,6 +203,7 @@ const AddDataProviderPopoverComponent: React.FC<AddDataProviderPopoverProps> = (
   return (
     <EuiPopover
       id="addFieldsPopover"
+      aria-label={ADD_FIELD_LABEL}
       button={button}
       isOpen={isAddFilterPopoverOpen}
       closePopover={handleClosePopover}

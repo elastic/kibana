@@ -97,7 +97,7 @@ exports[`NetworkTopNFlow Table Component rendering it renders the default Networ
     data-test-subj="table-topNFlowSource-loading-false"
   >
     <header
-      class="toggle-expand siemHeaderSection css-125xqyz-header"
+      class="toggle-expand siemHeaderSection css-qibzrl-header"
       data-test-subj="header-section"
     >
       <div
@@ -131,6 +131,7 @@ exports[`NetworkTopNFlow Table Component rendering it renders the default Networ
                         id="generated-id_euiToolTipAnchor"
                       >
                         <button
+                          aria-expanded="true"
                           aria-label="Open"
                           class="euiButtonIcon emotion-euiButtonIcon-s-empty-text"
                           data-test-subj="query-toggle-header"
@@ -210,7 +211,7 @@ exports[`NetworkTopNFlow Table Component rendering it renders the default Networ
       data-test-subj="paginated-basic-table"
     >
       <div
-        class="emotion-euiContainerCSS"
+        class="euiTable__wrapper emotion-euiContainerCSS"
       >
         <table
           class="euiTable emotion-euiTable-fixed-uncompressed-hasBackground-desktop"
@@ -302,6 +303,7 @@ exports[`NetworkTopNFlow Table Component rendering it renders the default Networ
                         Bytes in
                       </span>
                       <span
+                        aria-hidden="true"
                         class="euiTableSortIcon euiTableSortIcon--sortable"
                         color="subdued"
                         data-euiicon-type="sortable"
@@ -336,6 +338,7 @@ exports[`NetworkTopNFlow Table Component rendering it renders the default Networ
                         Bytes out
                       </span>
                       <span
+                        aria-hidden="true"
                         class="euiTableSortIcon"
                         data-euiicon-type="sortDown"
                       />
@@ -369,6 +372,7 @@ exports[`NetworkTopNFlow Table Component rendering it renders the default Networ
                         Flows
                       </span>
                       <span
+                        aria-hidden="true"
                         class="euiTableSortIcon euiTableSortIcon--sortable"
                         color="subdued"
                         data-euiicon-type="sortable"
@@ -401,7 +405,7 @@ exports[`NetworkTopNFlow Table Component rendering it renders the default Networ
                       >
                         <div>
                           <button
-                            class="euiLink emotion-euiLink-primary"
+                            class="euiLink emotion-euiLink-text"
                             data-test-subj="network-details"
                             type="button"
                           >
@@ -413,7 +417,7 @@ exports[`NetworkTopNFlow Table Component rendering it renders the default Networ
                   </div>
                    
                   <span
-                    class="css-purdnl-FlagWrapper e1v8vkkw0"
+                    class="css-purdnl-FlagWrapper e1nywon80"
                     data-test-subj="country-flag"
                   >
                     🇺🇸
@@ -518,7 +522,7 @@ exports[`NetworkTopNFlow Table Component rendering it renders the default Networ
                       >
                         <div>
                           <button
-                            class="euiLink emotion-euiLink-primary"
+                            class="euiLink emotion-euiLink-text"
                             data-test-subj="network-details"
                             type="button"
                           >
@@ -530,7 +534,7 @@ exports[`NetworkTopNFlow Table Component rendering it renders the default Networ
                   </div>
                    
                   <span
-                    class="css-purdnl-FlagWrapper e1v8vkkw0"
+                    class="css-purdnl-FlagWrapper e1nywon80"
                     data-test-subj="country-flag"
                   >
                     🇲🇾
@@ -549,14 +553,14 @@ exports[`NetworkTopNFlow Table Component rendering it renders the default Networ
                   test.domain.net
                    
                   <div
-                    class="css-19lowmu-subtext"
+                    class="css-du0w0-subtext"
                   >
                     <div
                       class="euiPopover emotion-euiPopover-inline-block"
                       id="networkTopSourceFlow-top-talkers-table-9_9_9_9-popover"
                     >
                       <button
-                        class="euiLink emotion-euiLink-primary"
+                        class="euiLink emotion-euiLink-text"
                         data-test-subj="overflow-button"
                         type="button"
                       >
@@ -660,6 +664,7 @@ exports[`NetworkTopNFlow Table Component rendering it renders the default Networ
                 Rows per page: 10
               </span>
               <span
+                aria-hidden="true"
                 color="inherit"
                 data-euiicon-type="chevronSingleDown"
               />
@@ -925,7 +930,7 @@ exports[`NetworkTopNFlow Table Component rendering it renders the default Networ
     data-test-subj="table-topNFlowSource-loading-false"
   >
     <header
-      class="toggle-expand siemHeaderSection css-125xqyz-header"
+      class="toggle-expand siemHeaderSection css-qibzrl-header"
       data-test-subj="header-section"
     >
       <div
@@ -959,6 +964,7 @@ exports[`NetworkTopNFlow Table Component rendering it renders the default Networ
                         id="generated-id_euiToolTipAnchor"
                       >
                         <button
+                          aria-expanded="true"
                           aria-label="Open"
                           class="euiButtonIcon emotion-euiButtonIcon-s-empty-text"
                           data-test-subj="query-toggle-header"
@@ -1038,7 +1044,7 @@ exports[`NetworkTopNFlow Table Component rendering it renders the default Networ
       data-test-subj="paginated-basic-table"
     >
       <div
-        class="emotion-euiContainerCSS"
+        class="euiTable__wrapper emotion-euiContainerCSS"
       >
         <table
           class="euiTable emotion-euiTable-fixed-uncompressed-hasBackground-desktop"
@@ -1130,6 +1136,7 @@ exports[`NetworkTopNFlow Table Component rendering it renders the default Networ
                         Bytes in
                       </span>
                       <span
+                        aria-hidden="true"
                         class="euiTableSortIcon euiTableSortIcon--sortable"
                         color="subdued"
                         data-euiicon-type="sortable"
@@ -1164,6 +1171,7 @@ exports[`NetworkTopNFlow Table Component rendering it renders the default Networ
                         Bytes out
                       </span>
                       <span
+                        aria-hidden="true"
                         class="euiTableSortIcon"
                         data-euiicon-type="sortDown"
                       />
@@ -1197,6 +1205,7 @@ exports[`NetworkTopNFlow Table Component rendering it renders the default Networ
                         Flows
                       </span>
                       <span
+                        aria-hidden="true"
                         class="euiTableSortIcon euiTableSortIcon--sortable"
                         color="subdued"
                         data-euiicon-type="sortable"
@@ -1231,6 +1240,7 @@ exports[`NetworkTopNFlow Table Component rendering it renders the default Networ
                         Destination IPs
                       </span>
                       <span
+                        aria-hidden="true"
                         class="euiTableSortIcon euiTableSortIcon--sortable"
                         color="subdued"
                         data-euiicon-type="sortable"
@@ -1263,7 +1273,7 @@ exports[`NetworkTopNFlow Table Component rendering it renders the default Networ
                       >
                         <div>
                           <button
-                            class="euiLink emotion-euiLink-primary"
+                            class="euiLink emotion-euiLink-text"
                             data-test-subj="network-details"
                             type="button"
                           >
@@ -1275,7 +1285,7 @@ exports[`NetworkTopNFlow Table Component rendering it renders the default Networ
                   </div>
                    
                   <span
-                    class="css-purdnl-FlagWrapper e1v8vkkw0"
+                    class="css-purdnl-FlagWrapper e1nywon80"
                     data-test-subj="country-flag"
                   >
                     🇺🇸
@@ -1389,7 +1399,7 @@ exports[`NetworkTopNFlow Table Component rendering it renders the default Networ
                       >
                         <div>
                           <button
-                            class="euiLink emotion-euiLink-primary"
+                            class="euiLink emotion-euiLink-text"
                             data-test-subj="network-details"
                             type="button"
                           >
@@ -1401,7 +1411,7 @@ exports[`NetworkTopNFlow Table Component rendering it renders the default Networ
                   </div>
                    
                   <span
-                    class="css-purdnl-FlagWrapper e1v8vkkw0"
+                    class="css-purdnl-FlagWrapper e1nywon80"
                     data-test-subj="country-flag"
                   >
                     🇲🇾
@@ -1420,14 +1430,14 @@ exports[`NetworkTopNFlow Table Component rendering it renders the default Networ
                   test.domain.net
                    
                   <div
-                    class="css-19lowmu-subtext"
+                    class="css-du0w0-subtext"
                   >
                     <div
                       class="euiPopover emotion-euiPopover-inline-block"
                       id="networkTopSourceFlow-top-talkers-table-9_9_9_9-popover"
                     >
                       <button
-                        class="euiLink emotion-euiLink-primary"
+                        class="euiLink emotion-euiLink-text"
                         data-test-subj="overflow-button"
                         type="button"
                       >
@@ -1540,6 +1550,7 @@ exports[`NetworkTopNFlow Table Component rendering it renders the default Networ
                 Rows per page: 10
               </span>
               <span
+                aria-hidden="true"
                 color="inherit"
                 data-euiicon-type="chevronSingleDown"
               />

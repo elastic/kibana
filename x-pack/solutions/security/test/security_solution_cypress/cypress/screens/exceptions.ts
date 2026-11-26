@@ -9,6 +9,8 @@ export const CLOSE_ALERTS_CHECKBOX = '[data-test-subj="bulkCloseAlertOnAddExcept
 
 export const CLOSE_SINGLE_ALERT_CHECKBOX = '[data-test-subj="closeAlertOnAddExceptionCheckbox"]';
 
+export const CLOSE_ALERTS_REASON_SELECT = '[data-test-subj="exceptionFlyoutCloseReasonSelect"]';
+
 export const CONFIRM_BTN = '[data-test-subj="addExceptionConfirmButton"]';
 
 export const ENDPOINT_EXCEPTION_ITEM_CONFIRM_BTN =
@@ -41,8 +43,6 @@ export const ADD_OR_BTN = '[data-test-subj="exceptionsOrButton"]';
 export const ADD_NESTED_BTN = '[data-test-subj="exceptionsNestedButton"]';
 
 export const ENTRY_DELETE_BTN = '[data-test-subj="builderItemEntryDeleteButton"]';
-
-export const CANCEL_BTN = '[data-test-subj="cancelExceptionAddButton"]';
 
 export const EXCEPTIONS_OVERFLOW_ACTIONS_BTN =
   '[data-test-subj="sharedListOverflowCardButtonIcon"]';
@@ -82,29 +82,9 @@ export const EXCEPTIONS_TABLE_MODAL_CONFIRM_BTN = '[data-test-subj="confirmModal
 
 export const EXCEPTION_ITEM_CONTAINER = '[data-test-subj="exceptionEntriesContainer"]';
 
-export const EXCEPTION_FIELD_LIST =
-  '[data-test-subj="comboBoxOptionsList fieldAutocompleteComboBox-optionsList"]';
-
-export const EXCEPTION_FIELD_MAPPING_CONFLICTS_TOOLTIP =
-  '[data-test-subj="mappingConflictsTooltip"]';
-
-export const EXCEPTION_FIELD_MAPPING_CONFLICTS_ICON =
-  '[data-test-subj="mappingConflictsWarningIcon"]';
-
-export const EXCEPTION_FIELD_MAPPING_CONFLICTS_ACCORDION_ICON =
-  '[data-test-subj="mappingConflictsAccordionIcon"]';
-
-export const EXCEPTION_FIELD_MAPPING_CONFLICTS_DESCRIPTION =
-  '[data-test-subj="mappingConflictsDescription"]';
-
 export const EXCEPTION_FLYOUT_TITLE = '[data-test-subj="exceptionFlyoutTitle"]';
 
 export const EXCEPTION_EDIT_FLYOUT_SAVE_BTN = '[data-test-subj="editExceptionConfirmButton"]';
-
-export const EXCEPTION_FLYOUT_VERSION_CONFLICT =
-  '[data-test-subj="exceptionsFlyoutVersionConflict"]';
-
-export const EXCEPTION_FLYOUT_LIST_DELETED_ERROR = '[data-test-subj="errorCalloutContainer"]';
 
 // Exceptions all items view in Rule pages
 export const NO_EXCEPTIONS_EXIST_PROMPT =
@@ -162,14 +142,13 @@ export const EXCEPTION_COMMENTS_ACCORDION_BTN = '[data-test-subj="exceptionItemC
 export const EXCEPTION_COMMENT_TEXT_AREA = '[data-test-subj="newExceptionItemCommentTextArea"]';
 
 // Shared Exception List Management Page
-export const MANAGE_EXCEPTION_CREATE_BUTTON_MENU =
-  '[data-test-subj="manageExceptionListCreateButton"]';
+export const MANAGE_EXCEPTION_MENU_DROPDOWN =
+  '[data-test-subj="manageExceptionListCreateButton-secondary-button"]';
 
-export const MANAGE_EXCEPTION_CREATE_BUTTON_EXCEPTION =
+export const MANAGE_EXCEPTION_CREATE_ITEM =
   '[data-test-subj="manageExceptionListCreateExceptionButton"]';
 
-export const MANAGE_EXCEPTION_CREATE_LIST_BUTTON =
-  '[data-test-subj="manageExceptionListCreateExceptionListButton"]';
+export const MANAGE_EXCEPTION_CREATE_LIST = '[data-test-subj="manageExceptionListCreateButton"]';
 
 export const RULE_ACTION_LINK_RULE_SWITCH = '[data-test-subj="ruleActionLinkRuleSwitch"]';
 
@@ -186,24 +165,22 @@ export const CREATE_SHARED_EXCEPTION_LIST_BTN =
 
 // Exception List detail page
 
-export const EXCEPTIONS_LIST_MANAGEMENT_NAME =
-  '[data-test-subj="exceptionListManagementTitleText"]';
+export const EXCEPTIONS_LIST_MANAGEMENT_NAME = '[data-test-subj="appHeaderTitle"]';
 
 export const EXCEPTIONS_LIST_MANAGEMENT_EDIT_NAME_BTN =
-  '[data-test-subj="exceptionListManagementTitleEditIcon"]';
+  '[data-test-subj="exceptionListManagementEditDetailsAction"]';
 
 export const EXCEPTIONS_LIST_MANAGEMENT_EDIT_MODAL_NAME_INPUT =
   '[data-test-subj="editModalNameTextField"]';
 export const EXCEPTIONS_LIST_MANAGEMENT_DESCRIPTION =
-  '[data-test-subj="exceptionListManagementDescriptionText"]';
+  '[data-test-subj="exceptionListManagementDescription"]';
 
 export const EXCEPTIONS_LIST_MANAGEMENT_EDIT_MODAL_DESCRIPTION_INPUT =
   '[data-test-subj="editModalDescriptionTextField"]';
 
 export const EXCEPTIONS_LIST_EDIT_DETAILS_SAVE_BTN = '[data-test-subj="editModalSaveBtn"]';
 
-export const EXCEPTIONS_LIST_DETAILS_HEADER =
-  '[data-test-subj="exceptionListManagementPageHeader"]';
+export const EXCEPTIONS_LIST_DETAILS_HEADER = '[data-test-subj="appHeaderTitle"]';
 
 export const EXCEPTION_LIST_DETAILS_CARD_ITEM_NAME = '[data-test-subj="exceptionItemCardHeader"]';
 
@@ -233,10 +210,10 @@ export const LINKED_RULES_BADGE = '[data-test-subj="exceptionListCardLinkedRules
 export const MANAGE_RULES_SAVE = '[data-test-subj="manageListRulesSaveButton"]';
 
 export const EXCEPTION_LIST_DETAIL_LINKED_TO_RULES_HEADER_MENU =
-  '[data-test-subj="exceptionListManagementRightSideMenuItemsLinkedRulesMenuEmptyButton"]';
+  '[data-test-subj="exceptionListManagementLinkedRulesMenu"]';
 
 export const EXCEPTION_LIST_DETAIL_LINKED_TO_RULES_HEADER_MENU_ITEM =
-  '[data-test-subj="exceptionListManagementRightSideMenuItemsLinkedRulesMenuMenuPanel"] .euiContextMenuItem';
+  '[data-test-subj^="exceptionListManagementLinkedRule"]:not([data-test-subj="exceptionListManagementLinkedRulesMenu"])';
 
 // Exception card in Shared List Detail Page
 export const EXCEPTION_ITEM_HEADER_ACTION_MENU =
@@ -249,5 +226,11 @@ export const EXCEPTION_ITEM_OVERFLOW_ACTION_DELETE =
   '[data-test-subj="exceptionItemCardHeaderActionItemdelete"]';
 
 export const EXECPTION_ITEM_CARD_HEADER_TITLE = '[data-test-subj="exceptionItemCardHeaderTitle"]';
+
+export const EXCEPTION_ITEM_DELETE_CONFIRM_MODAL =
+  '[data-test-subj="exceptionItemDeleteConfirmModal"]';
+
+export const EXCEPTION_ITEM_DELETE_CONFIRM_MODAL_CONFIRM_BTN =
+  '[data-test-subj="exceptionItemDeleteConfirmModal"] [data-test-subj="confirmModalConfirmButton"]';
 
 export const EMPTY_EXCEPTIONS_VIEWER = '[data-test-subj="emptyViewerState"]';

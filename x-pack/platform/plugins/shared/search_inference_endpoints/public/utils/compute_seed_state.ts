@@ -41,10 +41,10 @@ export const computeSeedState = (
     activeTab: noPolicy ? 'geo' : 'regions',
     isNewPolicy: noPolicy,
     regionKeys: noPolicy
-      ? new Set(availableRegions.map(regionKey))
+      ? new Set<string>()
       : new Set(
           existing.map(regionKey).filter((k) => availableRegions.some((r) => regionKey(r) === k))
         ),
-    geos: noPolicy ? new Set(availableGeos) : new Set<string>(),
+    geos: new Set<string>(),
   };
 };

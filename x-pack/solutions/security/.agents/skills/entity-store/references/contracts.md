@@ -34,20 +34,26 @@ interface EntityStoreApiRequestHandlerContext {
   assetManagerClient: AssetManagerClient;         // Engine lifecycle
   entityMaintainersClient: EntityMaintainersClient; // Maintainer management
   crudClient: CRUDClient;                         // Entity CRUD operations
+  entityMetadataClient: EntityMetadataClient;
+  relationshipsClient: RelationshipsClient;
   resolutionClient: ResolutionClient;             // Link/unlink/group
-  ccsLogsExtractionClient: CcsLogsExtractionClient; // Cross-cluster extraction
-  logsExtractionClient: LogsExtractionClient;     // Standard logs extraction
-  historySnapshotClient: HistorySnapshotClient;   // History snapshots
+  entityResolutionRuleClient: ResolutionRulesClient;
   featureFlags: FeatureFlags;
+  isDualProcessEnabled: () => Promise<boolean>;   // entityStore.dualProcess.enabled
+  logsExtractionClient: LogsExtractionClient;     // Logs extraction, local and CCS; .withExtractionMode(mode) for one process
+  historySnapshotClient: HistorySnapshotClient;   // History snapshots
   security: SecurityPluginStart;
   namespace: string;
+  analytics: TelemetryReporter;
 }
 ```
 
 ## Index Naming
 
-- **Latest**: `.entities.v2.latest.security_{namespace}` (single-shard, `mode: 'lookup'`)
-- **Updates**: `.entities.v2.updates.security_{namespace}` (data stream)
+- **Latest**: `.entities.v2.latest.{namespace}` (single-shard, `mode: 'lookup'`)
+- **Updates**: `.entities.v2.updates.{namespace}` (data stream)
+- **Metadata**: `.entities.v2.metadata.{namespace}` (data stream)
+- **Legacy compatibility aliases** (post-migration / install): `.entities.v2.latest.security_{namespace}` and `.entities.v2.metadata.security_{namespace}` point at the neutral assets so roles granting `security_*` keep matching until elasticsearch-controller / ES reserved roles are updated in a compatible release order.
 
 ## Key Fields
 

@@ -11,7 +11,7 @@
  * Multiplies two numbers. If at least one array of numbers is passed into the function, the function will be applied index-wise to each element.
  * @param {(number|number[])} a a number or an array of numbers
  * @param {(number|number[])} b a number or an array of numbers
- * @return {(number|number[])} The product of `a` and `b` if both are numbers. Returns an array with the the products applied index-wise to each element if `a` or `b` is an array.
+ * @return {(number|number[])} The product of `a` and `b` if both are numbers. Returns an array with the products applied index-wise to each element if `a` or `b` is an array.
  * @throws `'Array length mismatch'` if `a` and `b` are arrays with different lengths
  * @example
  * multiply(6, 3) // returns 18
@@ -21,6 +21,11 @@
  */
 
 function multiply(...args) {
+  if (args.length === 1) {
+    if (Array.isArray(args[0])) return args[0].reduce((result, current) => result * current);
+    return args[0];
+  }
+
   return args.reduce((result, current) => {
     if (Array.isArray(result) && Array.isArray(current)) {
       if (current.length !== result.length) throw new Error('Array length mismatch');

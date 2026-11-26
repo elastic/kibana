@@ -11,7 +11,6 @@ export class FeatureSettingsPage {
   // Header
   readonly pageHeader: Locator;
   readonly saveButton: Locator;
-  readonly apiDocumentationLink: Locator;
 
   // Content
   readonly content: Locator;
@@ -54,11 +53,12 @@ export class FeatureSettingsPage {
   readonly deprecatedModelsCallout: Locator;
   readonly eolModelsCallout: Locator;
 
+  readonly toastList: Locator;
+
   constructor(private readonly page: ScoutPage) {
     // Header
-    this.pageHeader = this.page.testSubj.locator('modelSettingsPageHeader');
+    this.pageHeader = this.page.testSubj.locator('appHeaderTitle');
     this.saveButton = this.page.testSubj.locator('save-settings-button');
-    this.apiDocumentationLink = this.page.testSubj.locator('settings-api-documentation');
 
     // Content
     this.content = this.page.testSubj.locator('modelSettingsContent');
@@ -81,7 +81,7 @@ export class FeatureSettingsPage {
 
     // Add Model Popover
     this.addModelSearch = this.page.testSubj.locator('add-model-search');
-    this.addModelOptions = this.page.testSubj.locator('add-model-selectable').getByRole('option');
+    this.addModelOptions = this.page.components.selectable('add-model-selectable').options;
 
     // Copy To Modal
     this.copyToModalApply = this.page.testSubj.locator('copy-to-modal-apply');
@@ -106,13 +106,15 @@ export class FeatureSettingsPage {
     // Deprecation / EOL callouts
     this.deprecatedModelsCallout = this.page.testSubj.locator('deprecatedModelsCallout');
     this.eolModelsCallout = this.page.testSubj.locator('eolModelsCallout');
+
+    this.toastList = this.page.testSubj.locator('globalToastList');
   }
 
   // --- Navigation ---
 
   public async goto() {
     await this.page.gotoApp('management/modelManagement/model_settings');
-    await this.page.testSubj.waitForSelector('modelSettingsPageHeader', { state: 'visible' });
+    await this.page.testSubj.waitForSelector('appHeaderTitle', { state: 'visible' });
   }
 
   public async gotoEmptyState() {
@@ -147,7 +149,9 @@ export class FeatureSettingsPage {
   }
 
   public addModelOption(name: string): Locator {
-    return this.page.testSubj.locator('add-model-selectable').getByRole('option', { name });
+    return this.page.components
+      .selectable('add-model-selectable')
+      .options.filter({ hasText: name });
   }
 
   public copyToModalCheckbox(featureId: string): Locator {
@@ -172,6 +176,21 @@ export class FeatureSettingsPage {
 
   public globalDefaultLockedRow(featureId: string): Locator {
     return this.page.testSubj.locator(`global-default-row-${featureId}`);
+  }
+
+  public addEffortButton(endpointId: string): Locator {
+    return this.page.testSubj.locator(`add-effort-${endpointId}`);
+  }
+
+  public effortBadge(endpointId: string): Locator {
+    return this.page.testSubj.locator(`effort-badge-${endpointId}`);
+  }
+
+  /** Hovers the model row to reveal "+ Effort", then picks the level in the popover. */
+  public async setEffort(endpointId: string, level: string): Promise<void> {
+    await this.endpointRow(endpointId).hover();
+    await this.addEffortButton(endpointId).click();
+    await this.page.testSubj.locator(`reasoningEffort-${level}`).click();
   }
 
   // --- Composite actions ---

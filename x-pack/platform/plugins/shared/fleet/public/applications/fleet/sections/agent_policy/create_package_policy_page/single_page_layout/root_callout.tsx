@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { EuiCallOut, EuiLink } from '@elastic/eui';
+import { EuiLink } from '@elastic/eui';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 
@@ -19,9 +20,8 @@ export const RootPrivilegesCallout: React.FC<Props> = ({ dataStreams }) => {
   const { docLinks } = useStartServices();
 
   return (
-    <EuiCallOut
+    <KbnWarningCallout
       size="m"
-      color="warning"
       title={
         <FormattedMessage
           id="xpack.fleet.createPackagePolicy.requireRootCalloutTitle"
@@ -29,14 +29,13 @@ export const RootPrivilegesCallout: React.FC<Props> = ({ dataStreams }) => {
         />
       }
       data-test-subj="rootPrivilegesCallout"
-    >
-      {dataStreams.length === 0 ? (
-        <FormattedMessage
-          id="xpack.fleet.createPackagePolicy.requireRootCalloutDescription"
-          defaultMessage="Elastic Agent needs to be run with root/administrator privileges for this integration."
-        />
-      ) : (
-        <>
+      text={
+        dataStreams.length === 0 ? (
+          <FormattedMessage
+            id="xpack.fleet.createPackagePolicy.requireRootCalloutDescription"
+            defaultMessage="Elastic Agent needs to be run with root/administrator privileges for this integration."
+          />
+        ) : (
           <FormattedMessage
             id="xpack.fleet.addIntegration.confirmModal.unprivilegedAgentsDataStreamsMessage"
             defaultMessage="This integration has the following data streams that require Elastic Agents to have root privileges. To ensure that all data required by the integration can be collected, enroll agents using an account with root privileges.  For more information, see the {guideLink}"
@@ -51,13 +50,16 @@ export const RootPrivilegesCallout: React.FC<Props> = ({ dataStreams }) => {
               ),
             }}
           />
-          <ul>
-            {dataStreams.map((item) => (
-              <li key={item.name}>{item.title}</li>
-            ))}
-          </ul>
-        </>
+        )
+      }
+    >
+      {dataStreams.length > 0 && (
+        <ul>
+          {dataStreams.map((item) => (
+            <li key={item.name}>{item.title}</li>
+          ))}
+        </ul>
       )}
-    </EuiCallOut>
+    </KbnWarningCallout>
   );
 };

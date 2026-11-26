@@ -20,16 +20,13 @@ import { login } from '../../../tasks/login';
 import { visitWithTimeRange } from '../../../tasks/navigation';
 import { waitForWelcomePanelToBeLoaded } from '../../../tasks/common';
 import { postDataView } from '../../../tasks/api_calls/common';
-import { mockRiskEngineEnabled } from '../../../tasks/entity_analytics';
+import {
+  mockEntityStoreRiskScores,
+  mockRiskEngineEnabled,
+  mockRiskEnginePrivileges,
+} from '../../../tasks/entity_analytics';
 
 const DATA_VIEW = 'auditbeat-*';
-
-// The Hosts and Users pages in this suite are still individually flaky/skipped for reasons
-// tracked by their own issues below. Their root cause has not been verified as fixed, so they
-// stay skipped here. Do not remove these without separately verifying and closing those issues.
-// FLAKY (Hosts page): https://github.com/elastic/kibana/issues/178367
-// FLAKY (Users page): https://github.com/elastic/kibana/issues/199583
-const SKIPPED_PAGES = ['Hosts', 'Users'];
 
 describe('Inspect Explore pages', { tags: ['@ess', '@serverless'] }, () => {
   beforeEach(() => {
@@ -37,6 +34,8 @@ describe('Inspect Explore pages', { tags: ['@ess', '@serverless'] }, () => {
     cy.task('esArchiverLoad', { archiveName: 'risk_scores_new' });
     login();
     mockRiskEngineEnabled();
+    mockRiskEnginePrivileges();
+    mockEntityStoreRiskScores();
     // Create and select data view
     postDataView(DATA_VIEW);
   });
@@ -86,14 +85,6 @@ describe('Inspect Explore pages', { tags: ['@ess', '@serverless'] }, () => {
       });
     };
 
-    // NOTE: the CI spec load-balancer statically parses this file for literal `it`/`it.skip`
-    // calls, so this must stay an if/else rather than a `const itFn = cond ? it.skip : it`
-    // (a dynamic reference isn't recognized and would cause the whole file to be treated as
-    // fully skipped and excluded from CI runs).
-    if (SKIPPED_PAGES.includes(pageName)) {
-      it.skip(`inspect ${pageName} page`, testBody);
-    } else {
-      it(`inspect ${pageName} page`, testBody);
-    }
+    it(`inspect ${pageName} page`, testBody);
   });
 });

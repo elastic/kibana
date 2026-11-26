@@ -31,5 +31,11 @@
     "@kbn/alerts-ui-shared",
     "@kbn/deeplinks-workflows",
     "@kbn/shared-ux-ai-components",
+    "@kbn/ui-callout",
+    "@kbn/react-kibana-mount",
+    "@kbn/agent-builder-common",
+    "@kbn/app-header",
+    "@kbn/core-chrome-browser-hooks",
+    "@kbn/core-chrome-browser-mocks",
   ]
 }

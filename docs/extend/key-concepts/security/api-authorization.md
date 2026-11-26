@@ -347,6 +347,3 @@ To check the OAS documentation for a specific API route and see its security det
 ```sh
 GET /api/oas?pathStartsWith=/your/api/path
 ```
-
-## Questions?
-If you have any questions or need help with API authorization, please reach out to the `@elastic/kibana-security` team.

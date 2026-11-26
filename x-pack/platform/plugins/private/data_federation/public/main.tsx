@@ -6,34 +6,40 @@
  */
 
 import type { FunctionComponent } from 'react';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import type { EuiTabbedContentTab } from '@elastic/eui';
-import {
-  EuiBetaBadge,
-  EuiLink,
-  EuiPageHeader,
-  EuiPageSection,
-  EuiTabbedContent,
-} from '@elastic/eui';
+import React, { useCallback, useMemo } from 'react';
+import { Redirect, useHistory, useLocation } from 'react-router-dom';
+import { EuiSpacer } from '@elastic/eui';
 
+import { Routes, Route } from '@kbn/shared-ux-router';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { AppHeader, type AppHeaderTab } from '@kbn/app-header';
 import type { DataSetWithName, DataSource } from '../common';
 import { mainTranslations } from './main_i18n';
 import { DataSourcesTabContent } from './data_sources_tab_content';
 import { DatasetsTabContent } from './datasets_tab_content';
+import { CreateDatasetWizardPage } from './create_dataset_wizard';
 import type { DataFederationKibanaServices } from './types';
 import { useLoadList } from './use_load_list';
 
+import {
+  CREATE_DATASET_PATH,
+  DATASETS_PATH,
+  DATA_SOURCES_PATH,
+  EDIT_DATASET_PATH,
+  isDatasetWizardPath,
+} from './app_paths';
+
 export const Main: FunctionComponent = () => {
   const {
-    services: { dataSourcesClient, datasetsClient },
+    services: { dataSourcesClient, datasetsClient, docLinks },
   } = useKibana<DataFederationKibanaServices>();
 
-  const {
-    items: dataSources,
-    hasLoaded: hasLoadedDataSources,
-    reload: reloadDataSources,
-  } = useLoadList<DataSource>(
+  const dataFederationLinks = docLinks.links.dataFederation;
+
+  const history = useHistory();
+  const { pathname } = useLocation();
+
+  const { items: dataSources, reload: reloadDataSources } = useLoadList<DataSource>(
     useCallback(async () => await dataSourcesClient.get(), [dataSourcesClient])
   );
 
@@ -45,93 +51,128 @@ export const Main: FunctionComponent = () => {
     useCallback(async () => await datasetsClient.get(), [datasetsClient])
   );
 
-  const [selectedTabId, setSelectedTabId] = useState<'sets' | 'sources'>('sets');
-  const [hasUserSelectedTab, setHasUserSelectedTab] = useState(false);
+  const isWizardPath = isDatasetWizardPath(pathname);
+  const selectedTabId = useMemo<'datasets' | 'data_sources'>(() => {
+    return pathname.startsWith(DATA_SOURCES_PATH) ? 'data_sources' : 'datasets';
+  }, [pathname]);
+  const onTabClick = useCallback(
+    (id: 'datasets' | 'sources') => {
+      history.push(id === 'sources' ? DATA_SOURCES_PATH : DATASETS_PATH);
+    },
+    [history]
+  );
 
-  useEffect(() => {
-    if (hasUserSelectedTab || !hasLoadedDataSources || !hasLoadedDataSets) {
-      return;
-    }
-
-    if (dataSources.length === 0 && dataSets.length === 0) {
-      setSelectedTabId('sources');
-    }
-  }, [
-    dataSets.length,
-    hasLoadedDataSets,
-    hasLoadedDataSources,
-    hasUserSelectedTab,
-    dataSources.length,
-  ]);
-
-  const tabs = useMemo<EuiTabbedContentTab[]>(
+  const tabs = useMemo<AppHeaderTab[]>(
     () => [
       {
-        id: 'sets',
-        name: mainTranslations.tabs.sets,
-        content: (
-          <DatasetsTabContent
-            dataSources={dataSources}
-            dataSets={dataSets}
-            loadDataSets={reloadDataSets}
-          />
-        ),
+        id: 'datasets',
+        label: mainTranslations.tabs.sets,
+        isSelected: selectedTabId === 'datasets',
+        onClick: () => onTabClick('datasets'),
+        'data-test-subj': 'dataFederationDatasetsTab',
       },
       {
         id: 'sources',
-        name: mainTranslations.tabs.sources,
-        content: (
-          <DataSourcesTabContent
-            dataSources={dataSources}
-            dataSets={dataSets}
-            loadDataSources={reloadDataSources}
-          />
-        ),
+        label: mainTranslations.tabs.sources,
+        isSelected: selectedTabId === 'data_sources',
+        onClick: () => onTabClick('sources'),
+        'data-test-subj': 'dataFederationDataSourcesTab',
       },
     ],
-    [dataSources, dataSets, reloadDataSets, reloadDataSources]
-  );
-
-  const selectedTab = useMemo(
-    () => tabs.find((tab) => tab.id === selectedTabId) ?? tabs[0],
-    [selectedTabId, tabs]
+    [onTabClick, selectedTabId]
   );
 
   return (
     <>
-      <EuiPageHeader
-        bottomBorder
-        pageTitle={
-          <>
-            <span data-test-subj="dataSetsPageTitle">{mainTranslations.pageTitle}</span>
-            &nbsp;
-            <EuiBetaBadge label={mainTranslations.experimental} size="m" />
-          </>
-        }
-        description={
-          <>
-            {mainTranslations.pageDescription}{' '}
-            <EuiLink
-              href="https://www.elastic.co/docs/reference/query-languages/esql/esql-data-federation"
-              target="_blank"
-            >
-              {mainTranslations.docsLink}
-            </EuiLink>
-          </>
-        }
-      />
-      <EuiPageSection paddingSize="m">
-        <EuiTabbedContent
-          tabs={tabs}
-          selectedTab={selectedTab}
-          onTabClick={(tab) => {
-            setHasUserSelectedTab(true);
-            setSelectedTabId(tab.id === 'sources' ? 'sources' : 'sets');
-          }}
-          autoFocus="initial"
-          data-test-subj="dataSetsTabs"
+      {!isWizardPath && (
+        <>
+          <AppHeader
+            title={mainTranslations.pageTitle}
+            badges={[{ label: mainTranslations.experimental }]}
+            tabs={tabs}
+            description={mainTranslations.pageDescription}
+            spacing="bleed"
+            docLink={dataFederationLinks.overview}
+            menu={{
+              items: [
+                {
+                  id: 'quickstart',
+                  label: mainTranslations.quickstartLink,
+                  iconType: 'rocket',
+                  href: dataFederationLinks.quickstart,
+                  target: '_blank',
+                  overflow: true,
+                  order: 3,
+                },
+              ],
+            }}
+          />
+          <EuiSpacer size="l" />
+        </>
+      )}
+
+      <Routes>
+        <Route
+          exact
+          path={CREATE_DATASET_PATH}
+          render={() => (
+            <CreateDatasetWizardPage
+              dataSources={dataSources}
+              existingDataSetNames={dataSets.map((ds) => ds.name)}
+              loadDataSets={reloadDataSets}
+              loadDataSources={reloadDataSources}
+            />
+          )}
         />
-      </EuiPageSection>
+        <Route
+          exact
+          path={EDIT_DATASET_PATH}
+          render={({ match }) => {
+            const datasetName = decodeURIComponent(match.params.datasetName);
+            const initialDataSet = dataSets.find((dataSet) => dataSet.name === datasetName);
+            if (!hasLoadedDataSets) {
+              return null;
+            }
+            if (!initialDataSet) {
+              return <Redirect to={DATASETS_PATH} />;
+            }
+            return (
+              <CreateDatasetWizardPage
+                key={initialDataSet.name}
+                initialDataSet={initialDataSet}
+                dataSources={dataSources}
+                existingDataSetNames={dataSets.map((ds) => ds.name)}
+                loadDataSets={reloadDataSets}
+                loadDataSources={reloadDataSources}
+              />
+            );
+          }}
+        />
+        <Route
+          exact
+          path={DATASETS_PATH}
+          render={() => (
+            <DatasetsTabContent
+              dataSources={dataSources}
+              dataSets={dataSets}
+              loadDataSets={reloadDataSets}
+            />
+          )}
+        />
+        <Route
+          exact
+          path={DATA_SOURCES_PATH}
+          render={() => (
+            <DataSourcesTabContent
+              dataSources={dataSources}
+              dataSets={dataSets}
+              loadDataSources={reloadDataSources}
+            />
+          )}
+        />
+        <Redirect exact from="/" to={DATASETS_PATH} />
+        <Redirect to={DATASETS_PATH} />
+      </Routes>
     </>
   );
 };

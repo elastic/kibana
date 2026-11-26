@@ -4,13 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import {
-  getRoot,
-  isDraftStream,
-  isEnabledFailureStore,
-  LOGS_ECS_STREAM_NAME,
-  Streams,
-} from '@kbn/streams-schema';
+import { getRoot, isEnabledFailureStore, LOGS_ECS_STREAM_NAME, Streams } from '@kbn/streams-schema';
 import { getPlaceholderFor } from '@kbn/xstate-utils';
 import type { ActorRefFrom, MachineImplementationsFrom, SnapshotFrom } from 'xstate';
 import { assign, cancel, forwardTo, raise, sendTo, setup, stopChild } from 'xstate';
@@ -24,6 +18,7 @@ import {
   isConditionBlock,
   validateStreamlang,
   validateStreamlangModeCompatibility,
+  type StreamlangDSLWithUpdatedAt,
 } from '@kbn/streamlang';
 import { sanitiseForEditing } from '@kbn/streamlang-yaml-editor/src/utils/sanitise_for_editing';
 import {
@@ -154,7 +149,7 @@ export const streamEnrichmentMachine = setup({
     // When the definition is refreshed (outside of the machine), this resets state back to match it.
     resetStateFromDefinition: assign(({ context }) => {
       const dslWithIdentifiers = addDeterministicCustomIdentifiersFromIngestProcessing(
-        context.definition.stream.ingest.processing
+        getStreamlangProcessing(context.definition.stream.ingest.processing)
       );
       return {
         previousStreamlangDSL: dslWithIdentifiers,
@@ -231,30 +226,20 @@ export const streamEnrichmentMachine = setup({
     /* Data sources actions */
     setupDataSources: assign((assignArgs) => {
       const { definition, urlState } = assignArgs.context;
+      const dataSources = [...urlState.dataSources];
 
-      const isWiredDraft = isDraftStream(definition.stream);
+      // Add failure store data source by default if available and not already present
+      const isFailureStoreAvailable =
+        isEnabledFailureStore(definition.effective_failure_store) &&
+        definition.privileges?.read_failure_store;
+      const hasFailureStoreDataSource = dataSources.some((ds) => ds.type === 'failure-store');
 
-      const dataSources = isWiredDraft
-        ? urlState.dataSources.filter(
-            (ds) => ds.type !== 'kql-samples' && ds.type !== 'failure-store'
-          )
-        : [...urlState.dataSources];
-
-      // Add failure store data source by default if available and not already present.
-      // Draft streams have no backing data stream so failure store is not applicable.
-      if (!isWiredDraft) {
-        const isFailureStoreAvailable =
-          isEnabledFailureStore(definition.effective_failure_store) &&
-          definition.privileges?.read_failure_store;
-        const hasFailureStoreDataSource = dataSources.some((ds) => ds.type === 'failure-store');
-
-        if (isFailureStoreAvailable && !hasFailureStoreDataSource) {
-          // Add with enabled: false since there's already an active data source
-          dataSources.push({
-            ...createFailureStoreDataSource(definition.stream.name),
-            enabled: false,
-          });
-        }
+      if (isFailureStoreAvailable && !hasFailureStoreDataSource) {
+        // Add with enabled: false since there's already an active data source
+        dataSources.push({
+          ...createFailureStoreDataSource(definition.stream.name),
+          enabled: false,
+        });
       }
 
       return {
@@ -357,10 +342,10 @@ export const streamEnrichmentMachine = setup({
     return {
       definition: input.definition,
       previousStreamlangDSL: addDeterministicCustomIdentifiersFromIngestProcessing(
-        input.definition.stream.ingest.processing
+        getStreamlangProcessing(input.definition.stream.ingest.processing)
       ),
       nextStreamlangDSL: addDeterministicCustomIdentifiersFromIngestProcessing(
-        input.definition.stream.ingest.processing
+        getStreamlangProcessing(input.definition.stream.ingest.processing)
       ),
       hasChanges: false,
       schemaErrors: [], // Schema errors from Zod parsing
@@ -378,7 +363,7 @@ export const streamEnrichmentMachine = setup({
         input: {
           steps: [],
           streamName: input.definition.stream.name,
-          streamType: streamType === 'query' ? 'unknown' : streamType,
+          streamType,
         },
       }),
     };
@@ -757,6 +742,12 @@ function createFetchMoreSamplesAction() {
     });
   };
 }
+
+const getStreamlangProcessing = (
+  processing: StreamEnrichmentContextType['definition']['stream']['ingest']['processing']
+): StreamlangDSLWithUpdatedAt => {
+  return 'steps' in processing ? processing : { steps: [], updated_at: processing.updated_at };
+};
 
 const hasChanges = (nextStreamlangDSL: StreamlangDSL, previousStreamlangDSL: StreamlangDSL) => {
   const isValidSchema = isStreamlangDSLSchema(nextStreamlangDSL);

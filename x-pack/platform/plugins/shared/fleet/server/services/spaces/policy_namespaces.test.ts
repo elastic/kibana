@@ -54,7 +54,7 @@ describe('validatePolicyNamespaceForSpace', () => {
       namespace: 'test',
     });
 
-    expect(soClient.get).toBeCalledWith('fleet-space-settings', 'test1-default-settings');
+    expect(soClient.get).toHaveBeenCalledWith('fleet-space-settings', 'test1-default-settings');
   });
 
   it('should retrieve default space settings based if no spaceId is provided', async () => {
@@ -63,7 +63,7 @@ describe('validatePolicyNamespaceForSpace', () => {
       namespace: 'test',
     });
 
-    expect(soClient.get).toBeCalledWith('fleet-space-settings', 'default-default-settings');
+    expect(soClient.get).toHaveBeenCalledWith('fleet-space-settings', 'default-default-settings');
   });
 
   it('should accept valid namespace if there is some allowed_namespace_prefixes configured', async () => {
@@ -109,7 +109,7 @@ describe('validatePolicyNamespaceForSpace', () => {
         spaceId: 'test1',
         namespace: 'notvalid',
       })
-    ).rejects.toThrowError(/Invalid namespace, supported namespace prefixes: tata, test, toto/);
+    ).rejects.toThrow(/Invalid namespace, supported namespace prefixes: tata, test, toto/);
   });
 
   it('should not validate if feature flag is off', async () => {
@@ -171,6 +171,7 @@ jest.mock(
         upgrade: jest.fn(),
         bulkUpgrade: jest.fn(),
         getUpgradeDryRunDiff: jest.fn(),
+        getUpgradeDryRunDiffs: jest.fn(),
         enrichPolicyWithDefaultsFromPackage: jest.fn(),
       } as any,
     };
@@ -201,7 +202,7 @@ describe('validatePackagePoliciesUniqueNameAcrossSpaces', () => {
     });
     await expect(
       validatePackagePoliciesUniqueNameAcrossSpaces([packagePolicy1], ['default'])
-    ).rejects.toThrowError(
+    ).rejects.toThrow(
       new PackagePolicyNameExistsError(
         'An integration policy with the name Package Policy 1 already exists in space "default". Please rename it or choose a different name.'
       )
@@ -227,7 +228,7 @@ describe('validatePackagePoliciesUniqueNameAcrossSpaces', () => {
     });
     await expect(
       validatePackagePoliciesUniqueNameAcrossSpaces([packagePolicy1], ['default', 'space1'])
-    ).rejects.toThrowError(
+    ).rejects.toThrow(
       new PackagePolicyNameExistsError(
         'An integration policy with the name Package Policy 1 already exists in space "space1". Please rename it or choose a different name.'
       )

@@ -5,147 +5,420 @@
  * 2.0.
  */
 
-import {
-  EuiButton,
-  EuiButtonEmpty,
-  EuiEmptyPrompt,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIcon,
-  EuiSkeletonTitle,
-  EuiSpacer,
-  EuiText,
-} from '@elastic/eui';
+import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import type { AppHeaderBadge, AppHeaderMenu, AppHeaderTab } from '@kbn/app-header';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
-import React, { useState } from 'react';
-import { useParams } from 'react-router-dom';
-import { AutomationsPanel, DescriptionPanel, SourcesPanel } from '../components/ai_index_detail';
-import { EditSourcesFlyout } from '../components/edit_sources_flyout';
+import { Route, Routes } from '@kbn/shared-ux-router';
+import { css } from '@emotion/react';
+import React, { useEffect, useMemo, useState } from 'react';
+import { useHistory, useLocation, useParams, useRouteMatch } from 'react-router-dom';
+import { CONTEXT_ENGINE_UI_EBT } from '../../../common/telemetry';
+import {
+  AiIndexCreatedCallout,
+  AutomationsSection,
+  ConnectAgentPanel,
+  FailedAutomationRunsCallout,
+  KnowledgeDocumentsChartPanel,
+  LearnMorePanel,
+  ManageAutomationsLink,
+  OverviewStatCards,
+  RECENT_KNOWLEDGE_DOCUMENTS_QUERY,
+  RecentKnowledgeDocumentsPanel,
+  SourcesPanel,
+  SpendPanel,
+} from '../components/ai_index_detail';
+import { buildAiIndexOnboardingPrompt } from '../components/ai_index_detail/onboarding_prompt';
+import { SettingsTab } from '../components/ai_index_detail/settings';
+import { ListKiPanel } from '../components/ki';
 import { useAiIndex } from '../hooks/use_ai_index';
+import { useAiIndexDestLinks } from '../hooks/use_ai_index_dest_links';
+import { useAiIndexOverviewSections } from '../hooks/use_ai_index_overview_sections';
+import { useContextEngineBreadcrumbs } from '../hooks/use_context_engine_breadcrumbs';
+import { useKibanaUrl } from '../hooks/use_kibana_url';
+import { useListKi } from '../hooks/use_list_ki';
+import { useMemoryEnabled } from '../hooks/use_memory_enabled';
 import { useNavigation } from '../hooks/use_navigation';
-import { CONTEXT_ENGINE_PATHS } from '../paths';
+import { getVisibleAutomations, getVisibleWorkflowIds } from '../utils/visible_automations';
+import {
+  ContextEngineSubPageHeader,
+  contextEngineBackDestinationLabel,
+} from '../layout/context_engine_page_header';
+import {
+  ContextEnginePageSection,
+  ContextEnginePageTemplate,
+} from '../layout/context_engine_page_template';
+import {
+  CONTEXT_ENGINE_PATHS,
+  getAiIndexDetailPath,
+  getAiIndexSourcesPath,
+  getAiIndexKnowledgeDocumentsPath,
+  getAiIndexSettingsPath,
+} from '../paths';
+import type { AiIndexCreatedLocationState } from '../ai_index_created_location_state';
 
-const backToListLabel = i18n.translate('xpack.contextEngine.aiIndexDetail.backToListButton', {
-  defaultMessage: 'Back to AI indexes',
+// Flex items don't shrink below their content, so a long title or type name would push the
+// chart off screen.
+const shrinkableFlexItemStyle = css({ minWidth: 0 });
+
+const managedBadgeLabel = i18n.translate('xpack.contextEngine.aiIndexDetail.managedBadge', {
+  defaultMessage: 'Managed',
+});
+
+const overviewTabLabel = i18n.translate('xpack.contextEngine.aiIndexDetail.tabs.overview', {
+  defaultMessage: 'Overview',
+});
+
+const sourcesTabLabel = i18n.translate('xpack.contextEngine.aiIndexDetail.tabs.sources', {
+  defaultMessage: 'Sources',
+});
+
+const knowledgeIndicatorsTabLabel = i18n.translate(
+  'xpack.contextEngine.aiIndexDetail.tabs.knowledgeIndicators',
+  {
+    defaultMessage: 'Knowledge documents',
+  }
+);
+
+const settingsTabLabel = i18n.translate('xpack.contextEngine.aiIndexDetail.tabs.settings', {
+  defaultMessage: 'Settings',
+});
+
+const discoverLinkLabel = i18n.translate('xpack.contextEngine.aiIndexDetail.listKi.discoverLink', {
+  defaultMessage: 'Open in Discover',
 });
 
 export const AiIndexDetailPage = () => {
   const { id } = useParams<{ id: string }>();
+  const location = useLocation<AiIndexCreatedLocationState | undefined>();
+  const history = useHistory<AiIndexCreatedLocationState | undefined>();
   const { aiIndex, isLoading, error, refetch } = useAiIndex(id);
-  const { createContextEngineUrl } = useNavigation();
-  const [isEditingSources, setIsEditingSources] = useState(false);
+  const { discoverHref, indexManagementHref } = useAiIndexDestLinks(aiIndex?.dest);
+  const { createContextEngineUrl, navigateToContextEngine } = useNavigation();
+  const isMemoryEnabled = useMemoryEnabled();
+  const isSourcesTab =
+    useRouteMatch({ path: CONTEXT_ENGINE_PATHS.detailSources, exact: true }) !== null;
+  const isKnowledgeIndicatorsTab =
+    useRouteMatch({
+      path: [
+        CONTEXT_ENGINE_PATHS.detailKnowledgeDocuments,
+        CONTEXT_ENGINE_PATHS.detailKnowledgeDocument,
+      ],
+      exact: true,
+    }) !== null;
+  const isSettingsTab =
+    useRouteMatch({ path: CONTEXT_ENGINE_PATHS.detailSettings, exact: true }) !== null;
+  const resolvedAiIndexId = aiIndex?.id ?? id ?? '';
 
-  const landingUrl = createContextEngineUrl(CONTEXT_ENGINE_PATHS.landing);
-  const isManaged = aiIndex !== undefined && aiIndex.managed;
-  const hideEditControls = isLoading || isManaged;
+  const [showCreatedCallout, setShowCreatedCallout] = useState(
+    () => location.state?.aiIndexCreated === true
+  );
+  // Hide the callout as soon as the user adds a source.
+  useEffect(() => {
+    if (showCreatedCallout && aiIndex && aiIndex.sources.length > 0) {
+      setShowCreatedCallout(false);
+    }
+  }, [aiIndex, showCreatedCallout]);
 
-  if (error) {
-    return (
-      <KibanaPageTemplate data-test-subj="contextAiIndexDetailPage">
-        <KibanaPageTemplate.Section>
-          <EuiEmptyPrompt
-            iconType="error"
-            color="danger"
-            data-test-subj="contextAiIndexDetailError"
-            title={
-              <h2>
-                <FormattedMessage
-                  id="xpack.contextEngine.aiIndexDetail.error.title"
-                  defaultMessage="Unable to load AI index"
-                />
-              </h2>
-            }
-            body={<p>{error.message}</p>}
-            actions={[
-              <EuiButton
-                key="back-to-list"
-                iconType="arrowLeft"
-                href={landingUrl}
-                data-test-subj="contextAiIndexBackToListButton"
-              >
-                {backToListLabel}
-              </EuiButton>,
-            ]}
-          />
-        </KibanaPageTemplate.Section>
-      </KibanaPageTemplate>
-    );
-  }
+  // Remove aiIndexCreated from location state after it has been shown
+  useEffect(() => {
+    if (!location.state?.aiIndexCreated) {
+      return;
+    }
 
-  const pageTitle = isLoading ? (
-    <EuiSkeletonTitle size="l" data-test-subj="contextAiIndexTitleLoading" />
-  ) : (
-    <EuiFlexGroup alignItems="baseline" gutterSize="s" responsive={false}>
-      <EuiFlexItem grow={false}>{aiIndex?.id}</EuiFlexItem>
-      {isManaged && (
-        <EuiFlexItem grow={false}>
-          <EuiText
-            component="span"
-            size="s"
-            color="subdued"
-            data-test-subj="contextAiIndexDetailManagedBadge"
-          >
-            <EuiIcon type="lock" size="s" aria-hidden={true} />{' '}
-            <FormattedMessage
-              id="xpack.contextEngine.aiIndexDetail.managedBadge"
-              defaultMessage="Managed"
-            />
-          </EuiText>
-        </EuiFlexItem>
+    history.replace({ ...location, state: undefined });
+  }, [location, history]);
+
+  const {
+    summary,
+    isLoading: isKiSummaryLoading,
+    isPreviousData: isKiSummaryPreviousData,
+    error: kiSummaryError,
+  } = useListKi({
+    // The URL id, so the summary loads in parallel with the AI index instead of after it.
+    aiIndexId: id,
+    ...RECENT_KNOWLEDGE_DOCUMENTS_QUERY,
+    // No toast for an AI index that does not exist: the page shows that error.
+    notifyOnError: aiIndex !== undefined,
+  });
+
+  // `useListKi` keeps the previous AI index's response while this one loads.
+  const isKiSummaryPending = isKiSummaryLoading || (isKiSummaryPreviousData && !kiSummaryError);
+  const hasLoadedKiSummary = aiIndex !== undefined && !isKiSummaryPending;
+  const hasKnowledgeIndicators = hasLoadedKiSummary && !kiSummaryError && summary.total > 0;
+  const showKnowledgeIndicatorsTabInHeader = isKnowledgeIndicatorsTab || hasKnowledgeIndicators;
+
+  const { hideEditControls, showOnboardingPanel, showAutomationsPanel } =
+    useAiIndexOverviewSections({
+      aiIndex,
+      isLoading,
+      hasKnowledgeIndicators,
+      // A failed count does not mean the AI index is empty.
+      isKnowledgeIndicatorsLoading: isKiSummaryPending || kiSummaryError !== undefined,
+    });
+  const pageTitle = aiIndex?.id ?? id ?? '';
+  const backHref = createContextEngineUrl(CONTEXT_ENGINE_PATHS.landing);
+  const sources = useMemo(() => aiIndex?.sources ?? [], [aiIndex?.sources]);
+  const automations = useMemo(() => aiIndex?.automations ?? [], [aiIndex?.automations]);
+  const visibleAutomationsCount = useMemo(
+    () => getVisibleAutomations(automations, isMemoryEnabled).length,
+    [automations, isMemoryEnabled]
+  );
+  const visibleWorkflowIds = useMemo(
+    () => getVisibleWorkflowIds(automations, isMemoryEnabled),
+    [automations, isMemoryEnabled]
+  );
+  const isManaged = aiIndex?.managed === true;
+
+  const { kibanaUrl } = useKibanaUrl();
+  const onboardingPrompt = useMemo(() => {
+    if (!showOnboardingPanel) {
+      return '';
+    }
+    return buildAiIndexOnboardingPrompt({
+      aiIndexId: resolvedAiIndexId,
+      aiIndexDest: aiIndex?.dest.value ?? '',
+      kibanaUrl,
+    });
+  }, [aiIndex?.dest.value, kibanaUrl, resolvedAiIndexId, showOnboardingPanel]);
+
+  useContextEngineBreadcrumbs(pageTitle ? [{ text: pageTitle }] : []);
+
+  const headerBadges = useMemo<AppHeaderBadge[] | undefined>(
+    () =>
+      aiIndex?.managed
+        ? [
+            {
+              label: managedBadgeLabel,
+              color: 'hollow',
+              'data-test-subj': 'contextAiIndexDetailManagedBadge',
+            },
+          ]
+        : undefined,
+    [aiIndex?.managed]
+  );
+
+  const headerMenu = useMemo<AppHeaderMenu | undefined>(() => {
+    if (!isKnowledgeIndicatorsTab || !aiIndex) {
+      return undefined;
+    }
+
+    const primaryActionItem =
+      discoverHref === undefined
+        ? undefined
+        : {
+            id: 'contextListKiDiscover',
+            label: discoverLinkLabel,
+            iconType: 'discoverApp',
+            href: discoverHref,
+            testId: 'contextListKiDiscoverLink',
+            ebt: { action: CONTEXT_ENGINE_UI_EBT.action.listKi.DISCOVER_LINK },
+          };
+
+    if (primaryActionItem === undefined) {
+      return undefined;
+    }
+
+    return { primaryActionItem };
+  }, [aiIndex, discoverHref, isKnowledgeIndicatorsTab]);
+
+  // No count before the AI index loads: 0 would claim the AI index has no sources.
+  const sourcesTabBadge = aiIndex ? sources.length : undefined;
+  const headerTabs = useMemo<AppHeaderTab[] | undefined>(() => {
+    if (error) {
+      return undefined;
+    }
+
+    const overviewTab: AppHeaderTab = {
+      id: 'overview',
+      label: overviewTabLabel,
+      isSelected: !isSourcesTab && !isKnowledgeIndicatorsTab && !isSettingsTab,
+      onClick: () => navigateToContextEngine(getAiIndexDetailPath(resolvedAiIndexId)),
+      'data-test-subj': 'contextAiIndexDetailTab-overview',
+    };
+
+    const tabs: AppHeaderTab[] = [
+      overviewTab,
+      {
+        id: 'sources',
+        label: sourcesTabLabel,
+        isSelected: isSourcesTab,
+        onClick: () => navigateToContextEngine(getAiIndexSourcesPath(resolvedAiIndexId)),
+        badge: sourcesTabBadge,
+        'data-test-subj': 'contextAiIndexDetailTab-sources',
+      },
+    ];
+
+    if (showKnowledgeIndicatorsTabInHeader) {
+      tabs.push({
+        id: 'knowledge_indicators',
+        label: knowledgeIndicatorsTabLabel,
+        isSelected: isKnowledgeIndicatorsTab,
+        onClick: () => navigateToContextEngine(getAiIndexKnowledgeDocumentsPath(resolvedAiIndexId)),
+        badge: hasKnowledgeIndicators ? summary.total : undefined,
+        'data-test-subj': 'contextAiIndexDetailTab-knowledge_indicators',
+      });
+    }
+
+    tabs.push({
+      id: 'settings',
+      label: settingsTabLabel,
+      isSelected: isSettingsTab,
+      onClick: () => navigateToContextEngine(getAiIndexSettingsPath(resolvedAiIndexId)),
+      'data-test-subj': 'contextAiIndexDetailTab-settings',
+    });
+
+    return tabs;
+  }, [
+    error,
+    hasKnowledgeIndicators,
+    isKnowledgeIndicatorsTab,
+    isSettingsTab,
+    isSourcesTab,
+    navigateToContextEngine,
+    resolvedAiIndexId,
+    showKnowledgeIndicatorsTabInHeader,
+    sourcesTabBadge,
+    summary.total,
+  ]);
+
+  const sourcesPanel = (
+    <SourcesPanel
+      isLoading={isLoading}
+      aiIndex={aiIndex}
+      onSaved={refetch}
+      isManaged={hideEditControls}
+    />
+  );
+
+  const overviewTabContent = (
+    <>
+      {showCreatedCallout && (
+        <AiIndexCreatedCallout
+          onDismiss={() => setShowCreatedCallout(false)}
+          showMemory={isMemoryEnabled}
+        />
       )}
-    </EuiFlexGroup>
+      {/* Sections render with skeletons right away, so nothing is pushed down while they load. */}
+      <OverviewStatCards
+        aiIndexId={resolvedAiIndexId}
+        knowledgeDocumentsCount={kiSummaryError ? undefined : summary.total}
+        sourcesCount={sources.length}
+        automationsCount={visibleAutomationsCount}
+        isManaged={isManaged}
+        isMemoryEnabled={isMemoryEnabled}
+        isLoading={isKiSummaryPending}
+        isAiIndexLoading={aiIndex === undefined}
+      />
+      <EuiSpacer size="l" />
+      {/* `key` remounts the panels for another AI index, so they never show its previous data. */}
+      <EuiFlexGroup gutterSize="m" key={resolvedAiIndexId}>
+        <EuiFlexItem css={shrinkableFlexItemStyle}>
+          <RecentKnowledgeDocumentsPanel
+            aiIndexId={resolvedAiIndexId}
+            isManaged={isManaged}
+            isMemoryEnabled={isMemoryEnabled}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem css={shrinkableFlexItemStyle}>
+          <KnowledgeDocumentsChartPanel aiIndexId={resolvedAiIndexId} />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiSpacer size="l" />
+      {/* Below the sections that are always there, so it does not push them down when it shows. */}
+      {showOnboardingPanel && (
+        <>
+          <ConnectAgentPanel prompt={onboardingPrompt} />
+          <EuiSpacer size="l" />
+        </>
+      )}
+      {aiIndex && !isManaged && <FailedAutomationRunsCallout workflowIds={visibleWorkflowIds} />}
+      <AutomationsSection
+        isLoading={isLoading}
+        aiIndex={aiIndex}
+        aiIndexId={resolvedAiIndexId}
+        onSaved={refetch}
+        isUnlocked={showAutomationsPanel}
+        headerAction={
+          hideEditControls ? undefined : <ManageAutomationsLink aiIndexId={resolvedAiIndexId} />
+        }
+      />
+      {showAutomationsPanel && (
+        <>
+          <EuiSpacer size="l" />
+          <SpendPanel aiIndexId={aiIndex?.id} />
+        </>
+      )}
+      {aiIndex && !isManaged && (
+        <>
+          <EuiSpacer size="l" />
+          <LearnMorePanel />
+        </>
+      )}
+    </>
+  );
+
+  const pageContent = error ? (
+    <EuiEmptyPrompt
+      iconType="error"
+      color="danger"
+      data-test-subj="contextAiIndexDetailError"
+      title={
+        <h2>
+          <FormattedMessage
+            id="xpack.contextEngine.aiIndexDetail.error.title"
+            defaultMessage="Unable to load AI index"
+          />
+        </h2>
+      }
+      body={<p>{error.message}</p>}
+    />
+  ) : (
+    <Routes>
+      <Route path={CONTEXT_ENGINE_PATHS.detailSources} exact>
+        {sourcesPanel}
+      </Route>
+      <Route
+        path={[
+          CONTEXT_ENGINE_PATHS.detailKnowledgeDocuments,
+          CONTEXT_ENGINE_PATHS.detailKnowledgeDocument,
+        ]}
+        exact
+      >
+        {aiIndex ? <ListKiPanel aiIndex={aiIndex} discoverHref={discoverHref} /> : null}
+      </Route>
+      <Route path={CONTEXT_ENGINE_PATHS.detailSettings} exact>
+        <SettingsTab
+          isLoading={isLoading}
+          aiIndex={aiIndex}
+          aiIndexId={resolvedAiIndexId}
+          onSaved={refetch}
+          isAutomationsUnlocked={showAutomationsPanel}
+          indexManagementHref={indexManagementHref}
+        />
+      </Route>
+      <Route path={CONTEXT_ENGINE_PATHS.detail} exact>
+        {overviewTabContent}
+      </Route>
+    </Routes>
   );
 
   return (
-    <KibanaPageTemplate data-test-subj="contextAiIndexDetailPage">
-      <KibanaPageTemplate.Header
+    <ContextEnginePageTemplate data-test-subj="contextAiIndexDetailPage">
+      <ContextEngineSubPageHeader
+        backDestinationLabel={contextEngineBackDestinationLabel}
+        backHref={backHref}
+        onBackClick={(event) => {
+          event.preventDefault();
+          navigateToContextEngine(CONTEXT_ENGINE_PATHS.landing);
+        }}
         pageTitle={pageTitle}
-        rightSideItems={[
-          <EuiButtonEmpty
-            key="back-to-list"
-            iconType="arrowLeft"
-            href={landingUrl}
-            data-test-subj="contextAiIndexBackToListButton"
-          >
-            {backToListLabel}
-          </EuiButtonEmpty>,
-        ]}
+        description={aiIndex?.description || undefined}
+        menu={headerMenu}
+        badges={headerBadges}
+        tabs={headerTabs}
       />
-      <KibanaPageTemplate.Section>
-        <DescriptionPanel
-          isLoading={isLoading}
-          aiIndex={aiIndex}
-          onSaved={refetch}
-          isManaged={isManaged}
-        />
-        <EuiSpacer size="m" />
-        <SourcesPanel
-          isLoading={isLoading}
-          sources={aiIndex?.sources ?? []}
-          canEdit={aiIndex !== undefined}
-          onEditSources={() => setIsEditingSources(true)}
-          isManaged={hideEditControls}
-        />
-        <EuiSpacer size="m" />
-        <AutomationsPanel
-          isLoading={isLoading}
-          aiIndex={aiIndex}
-          onSaved={refetch}
-          isManaged={isManaged}
-        />
-      </KibanaPageTemplate.Section>
-      {isEditingSources && aiIndex && (
-        <EditSourcesFlyout
-          aiIndex={aiIndex}
-          onClose={() => setIsEditingSources(false)}
-          onSaved={() => {
-            setIsEditingSources(false);
-            refetch();
-          }}
-        />
-      )}
-    </KibanaPageTemplate>
+      <ContextEnginePageSection>{pageContent}</ContextEnginePageSection>
+    </ContextEnginePageTemplate>
   );
 };

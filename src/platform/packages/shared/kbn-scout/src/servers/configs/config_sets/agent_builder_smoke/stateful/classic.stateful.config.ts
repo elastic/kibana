@@ -11,11 +11,12 @@ import { existsSync, readFileSync } from 'fs';
 import { resolve } from 'path';
 
 import { mapValues } from 'lodash';
-import { load as loadYaml } from 'js-yaml';
+import { parse } from 'yaml';
 import { REPO_ROOT } from '@kbn/repo-info';
 
 import type { ScoutServerConfig } from '../../../../../types';
 import { defaultConfig } from '../../default/stateful/base.config';
+import { getAgentBuilderSmokeEisModels } from '../eis_models';
 
 // Elastic Inference Service QA base URL (Elasticsearch Cloud Connected Mode).
 const EIS_QA_URL = 'https://inference.eu-west-1.aws.svc.qa.elastic.cloud';
@@ -37,7 +38,7 @@ const getConnectorsFromKibanaDevYml = (): Record<string, AvailableConnector> => 
     if (!existsSync(kibanaDevConfigPath)) {
       return {};
     }
-    const parsedConfig = (loadYaml(readFileSync(kibanaDevConfigPath, 'utf8')) || {}) as Record<
+    const parsedConfig = (parse(readFileSync(kibanaDevConfigPath, 'utf8')) || {}) as Record<
       string,
       unknown
     >;
@@ -81,35 +82,8 @@ const loadStaticPreconfiguredConnectors = (): Record<string, AvailableConnector>
   return getConnectorsFromKibanaDevYml();
 };
 
-interface DiscoveredModel {
-  inferenceId: string;
-  modelId: string;
-  metadata?: {
-    heuristics?: {
-      properties?: string[];
-    };
-  };
-}
-
-const EIS_MODELS_PATH = resolve(REPO_ROOT, 'target/eis_models.json');
-
-const getPreDiscoveredEisModels = (): DiscoveredModel[] => {
-  if (!existsSync(EIS_MODELS_PATH)) {
-    return [];
-  }
-  try {
-    const data = JSON.parse(readFileSync(EIS_MODELS_PATH, 'utf8')) as {
-      models?: DiscoveredModel[];
-    };
-    const models = data.models ?? [];
-    return models.filter((model) => !model.metadata?.heuristics?.properties?.includes('efficient'));
-  } catch {
-    return [];
-  }
-};
-
 const buildEisPreconfiguredConnectors = (): Record<string, unknown> => {
-  const models = getPreDiscoveredEisModels();
+  const models = getAgentBuilderSmokeEisModels();
   const connectors: Record<string, unknown> = {};
 
   for (const model of models) {

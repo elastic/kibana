@@ -250,6 +250,25 @@ describe('UrlFormat', () => {
       expect(url.convertToReact('url')).toBe('url');
     });
 
+    test('risonValue escapes rison delimiters so values survive Kibana app URL templates', () => {
+      const url = new UrlFormat({
+        urlTemplate: "http://elastic.co/app/kibana#/dashboard?_a=(query:'{{risonValue}}')",
+      });
+
+      // identical to how Kibana itself encodes this value in its own URLs
+      expect(url.convertToText("Roady's Jump (Start) *Travel!* Center")).toBe(
+        "http://elastic.co/app/kibana#/dashboard?_a=(query:'Roady!'s%20Jump%20(Start)%20*Travel!!*%20Center')"
+      );
+    });
+
+    test('value stays plain encodeURIComponent-encoded', () => {
+      const url = new UrlFormat({
+        urlTemplate: 'http://elastic.co/?q={{value}}',
+      });
+
+      expect(url.convertToText("Roady's Travel!")).toBe("http://elastic.co/?q=Roady's%20Travel!");
+    });
+
     test('rawValue in url template is not URL-encoded (unlike value)', () => {
       const url = new UrlFormat({
         urlTemplate: 'http://elastic.co/?raw={{rawValue}}&encoded={{value}}',
@@ -494,6 +513,20 @@ describe('UrlFormat', () => {
       `);
     });
 
+    test('resolves leading-slash relative urls against the base path, including the space prefix', () => {
+      const renderLink = (basePath: string) => {
+        const url = new UrlFormat({ parsedUrl: { origin: 'http://kibana.host.com', basePath } });
+        return renderReactNode(url.convertToReact('/test/hello')).querySelector('a');
+      };
+
+      expect(renderLink('')).toHaveAttribute('href', 'http://kibana.host.com/test/hello');
+      expect(renderLink('/xyz')).toHaveAttribute('href', 'http://kibana.host.com/xyz/test/hello');
+      expect(renderLink('/xyz/s/custom')).toHaveAttribute(
+        'href',
+        'http://kibana.host.com/xyz/s/custom/test/hello'
+      );
+    });
+
     test('should fail gracefully if there are no parsedUrl provided', () => {
       const url = new UrlFormat({});
 
@@ -652,6 +685,16 @@ describe('UrlFormat', () => {
     );
     expect(container.querySelector('a')).toHaveAttribute('href', 'http://elastic.co');
     expect(container.querySelector('mark')).toHaveTextContent('http://elastic.co');
+  });
+
+  test('omits the anchor when isInteractive is false, even with openLinkInCurrentTab', () => {
+    const url = new UrlFormat({ openLinkInCurrentTab: true });
+    const container = renderReactNode(
+      url.convertToReact('http://elastic.co', { isInteractive: false })
+    );
+
+    expect(container.querySelector('a')).toBeNull();
+    expect(container).toHaveTextContent('http://elastic.co');
   });
 
   test('renders a numeric value as text when no URL template is set', () => {

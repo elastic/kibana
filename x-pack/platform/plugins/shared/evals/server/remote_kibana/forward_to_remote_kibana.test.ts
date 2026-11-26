@@ -136,4 +136,47 @@ describe('forward_to_remote_kibana', () => {
       })
     );
   });
+
+  it('drops the local space from the forwarded path', async () => {
+    const esoStart = encryptedSavedObjectsMock.createStart();
+    const esoClient = encryptedSavedObjectsMock.createClient();
+    (esoStart.getClient as jest.Mock).mockReturnValue(esoClient);
+    (esoClient.getDecryptedAsInternalUser as jest.Mock).mockResolvedValueOnce({
+      attributes: {
+        displayName: 'Remote',
+        url: 'https://kbn-evals-serverless-ed035a.kb.us-central1.gcp.elastic.cloud/',
+        apiKey: 'abc123',
+        createdAt: '2026-01-01T00:00:00.000Z',
+        updatedAt: '2026-01-01T00:00:00.000Z',
+      },
+    });
+
+    mockedFetch.mockResolvedValueOnce({
+      status: 200,
+      headers: { get: () => 'application/json' },
+      json: async () => ({ dataset_id: 'x' }),
+      text: async () => '',
+    } as any);
+
+    const request = httpServerMock.createKibanaRequest({
+      method: 'post',
+      path: '/s/marketing/internal/evals/datasets',
+      query: { [DESTINATION_QUERY_PARAM]: 'remote-1' },
+    });
+
+    await forwardToRemoteKibana({
+      encryptedSavedObjects: esoStart,
+      remoteId: 'remote-1',
+      request,
+      method: 'POST',
+      body: { name: 'my-dataset' },
+    });
+
+    // The remote's spaces are its own, so replaying the prefix would address an
+    // unrelated space there — the same leak the body's assignment is stripped for.
+    expect(mockedFetch).toHaveBeenCalledWith(
+      'https://kbn-evals-serverless-ed035a.kb.us-central1.gcp.elastic.cloud/internal/evals/datasets',
+      expect.anything()
+    );
+  });
 });

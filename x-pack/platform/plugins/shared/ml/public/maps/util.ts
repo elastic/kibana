@@ -19,14 +19,18 @@ import { fromKueryExpression, luceneStringToDsl, toElasticsearchQuery } from '@k
 import type { ESSearchResponse } from '@kbn/es-types';
 import type { VectorSourceRequestMeta } from '@kbn/maps-plugin/common';
 import { LAYER_TYPE, SOURCE_TYPES, SCALING_TYPES } from '@kbn/maps-plugin/common';
-import { type MLAnomalyDoc, getMlSeverityColorRampValue } from '@kbn/ml-anomaly-utils';
+import type { MLAnomalyDoc } from '@kbn/ml-anomaly-utils';
+import { getMlSeverityColorRampValue } from '@kbn/ml-anomaly-utils/severity_ramp';
 import { formatHumanReadableDateTimeSeconds } from '@kbn/ml-date-utils';
 import { SEARCH_QUERY_LANGUAGE } from '@kbn/ml-query-utils';
 import type { MlApi } from '../application/services/ml_api_service';
 import { tabColor } from '../../common/util/group_color_utils';
 import { AnomalySource } from './anomaly_source';
 import type { ExplorerJob } from '../application/explorer/explorer_utils';
-import { getIndexPattern, type SourceIndexGeoFields } from '../application/explorer/explorer_utils';
+import {
+  getAnomalyResultsIndexPattern,
+  type SourceIndexGeoFields,
+} from '../application/explorer/explorer_utils';
 
 export const ML_ANOMALY_LAYERS = {
   TYPICAL: 'typical',
@@ -37,46 +41,46 @@ export const ML_ANOMALY_LAYERS = {
 export const getCustomColorRampStyleProperty = (euiTheme: EuiThemeComputed) => ({
   type: STYLE_TYPE.DYNAMIC,
   options: {
-    customColorRamp: getMlSeverityColorRampValue(euiTheme),
+    custom_color_ramp: getMlSeverityColorRampValue(euiTheme),
     field: {
       name: 'record_score',
       origin: FIELD_ORIGIN.SOURCE,
     },
-    useCustomColorRamp: true,
+    use_custom_color_ramp: true,
   },
 });
 
 export const getActualStyle = (euiTheme: EuiThemeComputed) => ({
   type: 'VECTOR',
   properties: {
-    fillColor: getCustomColorRampStyleProperty(euiTheme),
-    lineColor: getCustomColorRampStyleProperty(euiTheme),
+    fill_color: getCustomColorRampStyleProperty(euiTheme),
+    line_color: getCustomColorRampStyleProperty(euiTheme),
   },
-  isTimeAware: false,
+  is_time_aware: false,
 });
 
 export const TYPICAL_STYLE = {
   type: 'VECTOR',
   properties: {
-    fillColor: {
+    fill_color: {
       type: 'STATIC',
       options: {
         color: '#98A2B2',
       },
     },
-    lineColor: {
+    line_color: {
       type: 'STATIC',
       options: {
         color: '#fff',
       },
     },
-    lineWidth: {
+    line_width: {
       type: 'STATIC',
       options: {
         size: 2,
       },
     },
-    iconSize: {
+    icon_size: {
       type: 'STATIC',
       options: {
         size: 6,
@@ -134,13 +138,13 @@ export function getInitialSourceIndexFieldLayers(
           style: {
             type: 'VECTOR',
             properties: {
-              fillColor: {
+              fill_color: {
                 type: 'STATIC',
                 options: {
                   color,
                 },
               },
-              lineColor: {
+              line_color: {
                 type: 'STATIC',
                 options: {
                   color,
@@ -174,7 +178,7 @@ export async function getResultsForJobId(
   const hasQuery = query && query.query !== '';
   let queryFilter;
 
-  const indexPattern = getIndexPattern([{ id: jobId }] as ExplorerJob[]);
+  const indexPattern = getAnomalyResultsIndexPattern([{ id: jobId }] as ExplorerJob[]);
 
   if (hasQuery && query.language === SEARCH_QUERY_LANGUAGE.KUERY) {
     queryFilter = toElasticsearchQuery(fromKueryExpression(query.query), indexPattern);

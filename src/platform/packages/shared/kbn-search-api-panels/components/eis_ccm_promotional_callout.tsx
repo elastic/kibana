@@ -8,25 +8,17 @@
  */
 
 import React from 'react';
-import {
-  EuiButton,
-  EuiCallOut,
-  EuiFlexGroup,
-  EuiImage,
-  EuiSpacer,
-  EuiText,
-  EuiTitle,
-} from '@elastic/eui';
+import { EuiIllustration, EuiSpacer } from '@elastic/eui';
+import { cloudRocketDeploy } from '@elastic/eui-illustrations';
+import { AnnouncementBanner } from '@kbn/announcement-banner';
 import * as i18n from '../translations';
 import { useKibana } from '../hooks/use_kibana';
 import { useShowEisPromotionalContent } from '../hooks/use_show_eis_promotional_content';
-import searchRocketIcon from '../assets/search-rocket.svg';
 
 export interface EisCloudConnectPromoCalloutProps {
   promoId: string;
   isSelfManaged: boolean;
   navigateToApp: () => void;
-  direction: 'row' | 'column';
   addSpacer?: 'top' | 'bottom';
 }
 
@@ -34,7 +26,6 @@ export const EisCloudConnectPromoCallout = ({
   promoId,
   isSelfManaged,
   navigateToApp,
-  direction,
   addSpacer,
 }: EisCloudConnectPromoCalloutProps) => {
   const {
@@ -57,41 +48,25 @@ export const EisCloudConnectPromoCallout = ({
   return (
     <>
       {addSpacer === 'top' && <EuiSpacer size="l" />}
-      <EuiCallOut
-        data-telemetry-id={dataId}
+      <AnnouncementBanner
         data-test-subj={dataId}
-        css={({ euiTheme }) => ({
-          backgroundColor: `${euiTheme.colors.backgroundBaseSubdued}`,
-          border: `${euiTheme.border.thin}`,
-          borderRadius: `${euiTheme.border.radius.medium}`,
-        })}
+        data-telemetry-id={dataId}
+        title={i18n.EIS_CALLOUT_TITLE}
+        text={i18n.EIS_CLOUD_CONNECT_PROMO_DESCRIPTION}
+        media={<EuiIllustration type={cloudRocketDeploy} alt="" />}
+        color="highlighted"
         onDismiss={onDismissPromo}
-      >
-        <EuiFlexGroup direction={direction} alignItems="flexStart">
-          <EuiImage src={searchRocketIcon} alt="" size="original" />
-          <div>
-            <EuiTitle>
-              <h4>{i18n.EIS_CALLOUT_TITLE}</h4>
-            </EuiTitle>
-            <EuiText color="subdued" size="s">
-              <p>{i18n.EIS_CLOUD_CONNECT_PROMO_DESCRIPTION}</p>
-            </EuiText>
-            <EuiSpacer size="m" />
-            <EuiButton
-              fullWidth={false}
-              color="text"
-              size="s"
-              onClick={navigateToApp}
-              data-test-subj="eisUpdateCalloutCtaBtn"
-              data-telemetry-id={`${dataId}-connectYourCluster-btn`}
-              iconSide="right"
-              iconType="external"
-            >
-              {i18n.EIS_CLOUD_CONNECT_PROMO_TOUR_CTA}
-            </EuiButton>
-          </div>
-        </EuiFlexGroup>
-      </EuiCallOut>
+        actionProps={{
+          primary: {
+            children: i18n.EIS_CLOUD_CONNECT_PROMO_TOUR_CTA,
+            iconType: 'external',
+            iconSide: 'right',
+            onClick: navigateToApp,
+            'data-test-subj': 'eisUpdateCalloutCtaBtn',
+            'data-telemetry-id': `${dataId}-connectYourCluster-btn`,
+          },
+        }}
+      />
       {addSpacer === 'bottom' && <EuiSpacer size="l" />}
     </>
   );

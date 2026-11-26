@@ -16,6 +16,7 @@
     "@kbn/security-plugin-types-server",
     "@kbn/zod",
     "@kbn/core-http-server-mocks",
-    "@kbn/core-logging-server-mocks"
+    "@kbn/core-logging-server-mocks",
+    "@kbn/evals-common"
   ]
 }

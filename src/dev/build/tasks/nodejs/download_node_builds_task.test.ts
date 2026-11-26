@@ -39,6 +39,7 @@ async function setup({ failOnUrl }: { failOnUrl?: string } = {}) {
     isRelease: true,
     targetAllPlatforms: true,
     targetServerlessPlatforms: false,
+    targetCloudPlatforms: false,
     skipServerless: false,
     dockerContextUseLocalArtifact: false,
     dockerCrossCompile: false,

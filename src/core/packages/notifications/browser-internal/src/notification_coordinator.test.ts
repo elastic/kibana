@@ -188,7 +188,7 @@ describe('notification coordination', () => {
       expect(() =>
         // @ts-expect-error - we expect an error because the function has not been bound to the Coordinator class
         notificationCoordinator('test')
-      ).toThrowError();
+      ).toThrow();
     });
 
     it('returns a object with the expected properties', () => {

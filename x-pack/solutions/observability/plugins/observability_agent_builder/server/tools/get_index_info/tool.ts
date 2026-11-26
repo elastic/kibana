@@ -80,6 +80,13 @@ export function createGetIndexInfoTool({
   const toolDefinition: BuiltinToolDefinition<typeof getIndexInfoSchema> = {
     id: OBSERVABILITY_GET_INDEX_INFO_TOOL_ID,
     type: ToolType.builtin,
+    annotations: {
+      title: 'Get Index Info',
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: true,
+      openWorldHint: false,
+    },
     description: dedent(`
       Discovers observability index patterns, fields, and field values in the user's Elasticsearch cluster.
 
@@ -105,13 +112,13 @@ export function createGetIndexInfoTool({
         return getAgentBuilderResourceAvailability({ core, request, logger });
       },
     },
-    handler: async (params, { esClient, modelProvider }) => {
+    handler: async (params, { esClient, modelProvider, request }) => {
       try {
         let result;
 
         switch (params.operation) {
           case 'get-index-patterns':
-            result = await getIndexPatternsHandler({ core, plugins, esClient, logger });
+            result = await getIndexPatternsHandler({ core, plugins, request, esClient, logger });
             break;
 
           case 'list-fields':

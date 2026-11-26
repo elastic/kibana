@@ -14,6 +14,7 @@ import { Tutorial } from './tutorial';
 import type { TutorialType } from '../../../services/tutorials/types';
 
 const mockSetBreadcrumbs = jest.fn();
+const mockDocTitleChange = jest.fn();
 
 jest.mock('../../kibana_services', () => ({
   getServices: () => ({
@@ -22,8 +23,15 @@ jest.mock('../../kibana_services', () => ({
       basePath: { prepend: (path: string) => `/foo/${path}` },
     },
     getBasePath: jest.fn(() => 'path'),
+    application: {
+      getUrlForApp: (appId: string, { path }: { path: string }) => `/app/${appId}${path}`,
+    },
+    history: {
+      location: { hash: '#/tutorial/apm' },
+    },
     chrome: {
       setBreadcrumbs: mockSetBreadcrumbs,
+      docTitle: { change: mockDocTitleChange },
     },
     tutorialService: {
       getModuleNotices: () => [],
@@ -242,6 +250,7 @@ describe('Tutorial component', () => {
   describe('breadcrumbs', () => {
     test('should set breadcrumbs with Integrations and tutorial name on mount', async () => {
       mockSetBreadcrumbs.mockClear();
+      mockDocTitleChange.mockClear();
       render(
         <I18nProvider>
           <Tutorial
@@ -264,6 +273,7 @@ describe('Tutorial component', () => {
         ],
         expect.anything()
       );
+      expect(mockDocTitleChange).toHaveBeenCalledWith('jest test tutorial');
     });
   });
 });

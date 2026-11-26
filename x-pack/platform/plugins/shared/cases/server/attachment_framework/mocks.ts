@@ -17,22 +17,7 @@ import {
   ExternalReferenceStorageType,
   SECURITY_SOLUTION_OWNER,
 } from '../../common';
-import { ExternalReferenceAttachmentTypeRegistry } from './external_reference_registry';
-import { PersistableStateAttachmentTypeRegistry } from './persistable_state_registry';
-import type {
-  PersistableStateAttachmentTypeSetup,
-  PersistableStateAttachmentState,
-  ExternalReferenceAttachmentType,
-} from './types';
 import { UnifiedAttachmentTypeRegistry } from './unified_attachment_registry';
-
-export const getPersistableAttachment = (): PersistableStateAttachmentTypeSetup => ({
-  id: '.test',
-});
-
-export const getExternalReferenceAttachment = (): ExternalReferenceAttachmentType => ({
-  id: '.test',
-});
 
 export const externalReferenceAttachmentSO = {
   type: AttachmentType.externalReference as const,
@@ -85,7 +70,10 @@ export const externalReferenceAttachmentESAttributes: ExternalReferenceNoSOAttac
   pushed_by: null,
 };
 
-export const persistableStateAttachmentStateOnly: PersistableStateAttachmentState = {
+export const persistableStateAttachmentStateOnly: Pick<
+  PersistableStateAttachmentPayload,
+  'persistableStateAttachmentTypeId' | 'persistableStateAttachmentState'
+> = {
   persistableStateAttachmentTypeId: '.test',
   persistableStateAttachmentState: { foo: 'foo' },
 };
@@ -116,22 +104,6 @@ export const externalReferenceAttachmentSOAttributesWithoutRefs = omit(
   externalReferenceAttachmentSOAttributes,
   'externalReferenceId'
 );
-
-export const createPersistableStateAttachmentTypeRegistryMock =
-  (): PersistableStateAttachmentTypeRegistry => {
-    const persistableStateAttachmentTypeRegistry = new PersistableStateAttachmentTypeRegistry();
-    persistableStateAttachmentTypeRegistry.register(getPersistableAttachment());
-
-    return persistableStateAttachmentTypeRegistry;
-  };
-
-export const createExternalReferenceAttachmentTypeRegistryMock =
-  (): ExternalReferenceAttachmentTypeRegistry => {
-    const externalReferenceAttachmentTypeRegistry = new ExternalReferenceAttachmentTypeRegistry();
-    externalReferenceAttachmentTypeRegistry.register(getExternalReferenceAttachment());
-
-    return externalReferenceAttachmentTypeRegistry;
-  };
 
 export const createUnifiedAttachmentTypeRegistryMock = (): UnifiedAttachmentTypeRegistry => {
   const unifiedAttachmentTypeRegistry = new UnifiedAttachmentTypeRegistry();

@@ -28,16 +28,24 @@ export const DeleteExceptionListItemRequestQuery = lazySchema(() =>
     /**
      * Exception item's identifier. Either `id` or `item_id` must be specified
      */
-    id: ExceptionListItemId.optional(),
+    id: ExceptionListItemId.optional().describe(
+      "Exception item's identifier. Either `id` or `item_id` must be specified"
+    ),
     /**
      * Human readable exception item string identifier, e.g. `trusted-linux-processes`. Either `id` or `item_id` must be specified
      */
-    item_id: ExceptionListItemHumanId.optional(),
+    item_id: ExceptionListItemHumanId.optional().describe(
+      'Human readable exception item string identifier, e.g. `trusted-linux-processes`. Either `id` or `item_id` must be specified'
+    ),
     /**
       * `single` deletes the item in the current Kibana space; `agnostic` deletes an item in a space-agnostic list. Must match the list that owns the item.
 
       */
-    namespace_type: ExceptionNamespaceType.optional().default('single'),
+    namespace_type: ExceptionNamespaceType.optional()
+      .default('single')
+      .describe(
+        '`single` deletes the item in the current Kibana space; `agnostic` deletes an item in a space-agnostic list. Must match the list that owns the item.\n'
+      ),
   })
 );
 export type DeleteExceptionListItemRequestQuery = z.infer<

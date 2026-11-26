@@ -15,8 +15,8 @@ import {
   EuiFlexItem,
   EuiButton,
   EuiFieldText,
-  EuiCallOut,
 } from '@elastic/eui';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 import { useCloudConnectedAppContext } from '../../../app_context';
 import {
   STEP_1_TITLE,
@@ -30,7 +30,10 @@ import {
   LOGIN_BUTTON,
   CONNECT_BUTTON,
   API_KEY_PLACEHOLDER,
+  AUTHENTICATION_FAILED_TITLE,
+  CLOUD_API_UNREACHABLE_TITLE,
 } from './translations';
+import { CLOUD_API_UNREACHABLE } from '../../../../../common/constants';
 import { buildClusterQueryParams } from './utils';
 
 interface ConnectionWizardProps {
@@ -42,7 +45,7 @@ export const ConnectionWizard: React.FC<ConnectionWizardProps> = ({ onConnect })
     useCloudConnectedAppContext();
   const [apiKey, setApiKey] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<{ message: string; code?: string } | null>(null);
 
   const clusterParams = buildClusterQueryParams(clusterConfig);
   const signupParams = clusterParams ? `&${clusterParams}` : '';
@@ -64,7 +67,10 @@ export const ConnectionWizard: React.FC<ConnectionWizardProps> = ({ onConnect })
     const { data, error: apiError } = await apiService.authenticate(apiKey.trim());
 
     if (apiError) {
-      setError(apiError.message || 'Failed to authenticate with Cloud Connect');
+      setError({
+        message: apiError.message || 'Failed to authenticate with Cloud Connect',
+        code: apiError.attributes?.code,
+      });
       setIsLoading(false);
       return;
     }
@@ -179,15 +185,16 @@ export const ConnectionWizard: React.FC<ConnectionWizardProps> = ({ onConnect })
         {error && (
           <>
             <EuiSpacer size="m" />
-            <EuiCallOut
+            <KbnDangerCallout
               announceOnMount
-              title="Authentication failed"
-              color="danger"
-              iconType="error"
+              title={
+                error.code === CLOUD_API_UNREACHABLE
+                  ? CLOUD_API_UNREACHABLE_TITLE
+                  : AUTHENTICATION_FAILED_TITLE
+              }
               data-test-subj="connectionWizardError"
-            >
-              <p>{error}</p>
-            </EuiCallOut>
+              text={error.message}
+            />
           </>
         )}
       </>

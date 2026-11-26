@@ -25,6 +25,7 @@ import { InfraFormatterType } from '../../../../common/inventory/types';
 import { createInventoryMetricFormatter } from '../lib/create_inventory_metric_formatter';
 import { createLegend } from '../lib/create_legend';
 import { BottomDrawer } from './bottom_drawer';
+import { InventoryHeaderContent } from './header_content';
 import { LegendControls } from './waffle/legend_controls';
 import { KubernetesDashboardCard } from '../../../../components/kubernetes_dashboard_promotion/kubernetes_dashboard_promotion';
 import { useKubernetesDashboardPromotion } from '../../../../hooks/use_kubernetes_dashboard_promotion';
@@ -78,6 +79,10 @@ export const Layout = React.memo(({ interval, nodes, loading }: Props) => {
 
   const showEcsK8sDashboardCard = hasEcsSchema && !dismissedCards?.ecs;
   const showSemconvK8sDashboardCard = hasSemconvSchema && !dismissedCards?.semconv;
+  // Match NodesOverview `showLoading`: keep promotion cards mounted while
+  // auto-reload refetches so they do not unmount and shift the waffle.
+  const showK8sDashboardPromotion =
+    (showEcsK8sDashboardCard || showSemconvK8sDashboardCard) && (!loading || isAutoReloading);
 
   const options = {
     formatter: InfraFormatterType.percent,
@@ -134,29 +139,49 @@ export const Layout = React.memo(({ interval, nodes, loading }: Props) => {
     [changeBoundsOverride, changeAutoBounds, changeLegend]
   );
 
+  const legendControls =
+    view === 'map' ? (
+      <LegendControls
+        options={legend != null ? legend : DEFAULT_LEGEND}
+        dataBounds={dataBounds}
+        bounds={bounds}
+        autoBounds={autoBounds}
+        boundsOverride={boundsOverride}
+        onChange={handleLegendControlChange}
+      />
+    ) : undefined;
+
   return (
-    <>
-      <PageContent>
-        <EuiFlexGroup direction="column" gutterSize="s">
-          {view === 'map' && (
-            <EuiFlexItem grow={false}>
-              <EuiFlexGroup justifyContent="flexEnd" gutterSize="m">
-                <EuiFlexItem grow={false}>
-                  <LegendControls
-                    options={legend != null ? legend : DEFAULT_LEGEND}
-                    dataBounds={dataBounds}
-                    bounds={bounds}
-                    autoBounds={autoBounds}
-                    boundsOverride={boundsOverride}
-                    onChange={handleLegendControlChange}
-                  />
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiFlexItem>
-          )}
-          {nodeType === 'pod' &&
-            (showEcsK8sDashboardCard || showSemconvK8sDashboardCard) &&
-            !loading && (
+    <EuiFlexGroup
+      direction="column"
+      gutterSize="s"
+      css={css`
+        flex: 1;
+        min-height: 0;
+      `}
+    >
+      <EuiFlexItem grow={false}>
+        <InventoryHeaderContent legendControls={legendControls} />
+      </EuiFlexItem>
+      <EuiFlexItem
+        grow
+        css={css`
+          min-height: 0;
+          overflow-y: auto;
+          display: flex;
+          flex-direction: column;
+        `}
+      >
+        <PageContent>
+          <EuiFlexGroup
+            direction="column"
+            gutterSize="s"
+            css={css`
+              flex: 1;
+              min-height: 0;
+            `}
+          >
+            {nodeType === 'pod' && showK8sDashboardPromotion && (
               <EuiFlexGroup css={{ flexGrow: 0 }} direction="row">
                 {showEcsK8sDashboardCard && (
                   <EuiFlexItem>
@@ -188,36 +213,37 @@ export const Layout = React.memo(({ interval, nodes, loading }: Props) => {
                 )}
               </EuiFlexGroup>
             )}
-          <EuiFlexItem
-            grow={false}
-            css={css`
-              position: relative;
-              flex: 1 1 auto;
-            `}
-          >
-            <AutoSizer bounds>
-              {({ bounds: { height = 0 } }) => (
-                <NodesOverview
-                  nodes={nodes}
-                  options={options}
-                  nodeType={nodeType}
-                  loading={loading}
-                  showLoading={showLoading}
-                  onDrilldown={onDrilldown}
-                  currentTime={currentTime}
-                  view={view}
-                  autoBounds={autoBounds}
-                  boundsOverride={boundsOverride}
-                  formatter={formatter}
-                  bottomMargin={height}
-                  isAutoReloading={isAutoReloading}
-                  refreshInterval={AUTO_REFRESH_INTERVAL}
-                />
-              )}
-            </AutoSizer>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </PageContent>
+            <EuiFlexItem
+              grow={false}
+              css={css`
+                position: relative;
+                flex: 1 1 auto;
+              `}
+            >
+              <AutoSizer bounds>
+                {({ bounds: { height = 0 } }) => (
+                  <NodesOverview
+                    nodes={nodes}
+                    options={options}
+                    nodeType={nodeType}
+                    loading={loading}
+                    showLoading={showLoading}
+                    onDrilldown={onDrilldown}
+                    currentTime={currentTime}
+                    view={view}
+                    autoBounds={autoBounds}
+                    boundsOverride={boundsOverride}
+                    formatter={formatter}
+                    bottomMargin={height}
+                    isAutoReloading={isAutoReloading}
+                    refreshInterval={AUTO_REFRESH_INTERVAL}
+                  />
+                )}
+              </AutoSizer>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </PageContent>
+      </EuiFlexItem>
       <BottomDrawer
         interval={interval}
         formatter={formatter}
@@ -225,6 +251,6 @@ export const Layout = React.memo(({ interval, nodes, loading }: Props) => {
         nodeType={nodeType}
         loading={loading}
       />
-    </>
+    </EuiFlexGroup>
   );
 });

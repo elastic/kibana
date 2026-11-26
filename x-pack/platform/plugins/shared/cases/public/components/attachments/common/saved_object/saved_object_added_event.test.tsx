@@ -8,7 +8,7 @@
 import React from 'react';
 import { screen } from '@testing-library/react';
 import { renderWithTestingProviders } from '../../../../common/mock';
-import { SavedObjectAddedEvent } from './saved_object_added_event';
+import { SavedObjectAddedEvent, getSavedObjectDeletedEvent } from './saved_object_added_event';
 import { useSavedObjectInAppUrl } from './use_saved_object_in_app_url';
 
 jest.mock('./use_saved_object_in_app_url');
@@ -58,5 +58,37 @@ describe('SavedObjectAddedEvent', () => {
       <SavedObjectAddedEvent soType="dashboard" attachmentId="fallback-id" label="added" />
     );
     expect(screen.getByText(/added\s+Untitled/i)).toBeInTheDocument();
+  });
+});
+
+describe('getSavedObjectDeletedEvent', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('links the cached title', () => {
+    useSavedObjectInAppUrlMock.mockReturnValue('/base/app/dashboards#/view/1');
+    renderWithTestingProviders(
+      <>
+        {getSavedObjectDeletedEvent({
+          soType: 'dashboard',
+          attachmentId: '1',
+          title: 'My dashboard',
+          label: 'removed dashboard',
+          'data-test-subj': 'ev',
+        })}
+      </>
+    );
+    expect(screen.getByTestId('ev')).toHaveTextContent('My dashboard');
+    expect(screen.getByText(/removed dashboard/i)).toBeInTheDocument();
+  });
+
+  it.each([
+    ['no title', { attachmentId: '1' }],
+    ['no attachment id', { title: 'My dashboard' }],
+  ])('returns the bare label when there is %s', (_, props) => {
+    expect(
+      getSavedObjectDeletedEvent({ soType: 'dashboard', label: 'removed dashboard', ...props })
+    ).toBe('removed dashboard');
   });
 });

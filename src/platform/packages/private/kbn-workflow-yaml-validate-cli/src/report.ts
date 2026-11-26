@@ -29,6 +29,7 @@ export interface JsonReport {
 /** Display labels for issue sources whose token differs from what we print. */
 const SOURCE_LABELS: Partial<Record<IssueSource, string>> = {
   'liquidjs-expression': 'liquidjs exp',
+  'managed-placeholder': 'managed',
 };
 
 const sourceLabel = (source: IssueSource): string => SOURCE_LABELS[source] ?? source;

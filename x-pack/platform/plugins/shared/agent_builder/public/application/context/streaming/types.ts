@@ -5,16 +5,26 @@
  * 2.0.
  */
 
-import type { ConversationRoundStep } from '@kbn/agent-builder-common';
+import type { OptimisticAttachments } from '../../utils/build_optimistic_attachments';
 
-export type StreamType = 'send' | 'regenerate' | 'resume';
+export type StreamType = 'send' | 'resume' | 'attach';
 
 export interface ActiveStream {
   type: StreamType;
+  /** The stream that registered this entry. Only that stream clears it again. */
+  streamId: string;
+  /** The server reported `execution_started`, so the run exists and can be stopped. */
+  started?: boolean;
+  /** Stop was pressed; the server is winding the run down. */
+  cancelling?: boolean;
+}
+
+/** Stamped on the mutation vars by the provider, carrying the entry's `streamId` to its owner. */
+export interface StreamOwner {
+  streamId: string;
 }
 
 export interface StreamRecord {
   pendingMessage?: string;
-  error?: unknown;
-  errorSteps: ConversationRoundStep[];
+  pendingAttachments?: OptimisticAttachments;
 }

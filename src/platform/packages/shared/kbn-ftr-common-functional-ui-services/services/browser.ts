@@ -16,10 +16,11 @@ import Url from 'url';
 import type { Protocol } from 'devtools-protocol';
 
 import { NoSuchSessionError } from 'selenium-webdriver/lib/error';
-import sharp from 'sharp';
+import { PNG } from 'pngjs';
 import { APP_MAIN_SCROLL_CONTAINER_ID } from '@kbn/core-chrome-layout-constants';
 import { WebElementWrapper } from './web_element_wrapper';
 import { Browsers } from './remote/browsers';
+import { dismissOpenDialog, isBlockedByOpenDialogError } from './remote/dismiss_open_dialog';
 import {
   NETWORK_PROFILES,
   type NetworkOptions,
@@ -34,7 +35,7 @@ export interface InterceptResponseFactory {
     responseOptions: Omit<Protocol.Fetch.FulfillRequestRequest, 'requestId'>
   ) => ['Fetch.fulfillRequest', Protocol.Fetch.FulfillRequestRequest];
 }
-class BrowserService extends FtrService {
+export class BrowserService extends FtrService {
   /**
    * Keyboard events
    */
@@ -54,6 +55,22 @@ class BrowserService extends FtrService {
 
   public isChromium(): this is { driver: ChromiumWebDriver } {
     return this.driver instanceof ChromiumWebDriver;
+  }
+
+  /**
+   * Retries a navigation once after dismissing a `beforeunload` dialog leaked by a prior
+   * spec, which ChromeDriver 148+ no longer handles via `unhandledPromptBehavior` (#289092).
+   */
+  private async withOpenDialogRetry<T>(command: () => Promise<T>): Promise<T> {
+    try {
+      return await command();
+    } catch (error) {
+      if (!isBlockedByOpenDialogError(error)) {
+        throw error;
+      }
+      await dismissOpenDialog(this.driver, this.log);
+      return await command();
+    }
   }
 
   /**
@@ -107,14 +124,11 @@ class BrowserService extends FtrService {
   }
 
   /**
-   * Gets a screenshot of the focused window and returns it as a Bitmap object
+   * Gets a screenshot of the focused window and returns it as a decoded PNG
    */
-  public async getScreenshotAsBitmap() {
+  public async getScreenshotAsBitmap(): Promise<PNG> {
     const screenshot = await this.takeScreenshot();
-    const buffer = Buffer.from(screenshot, 'base64');
-
-    const session = sharp(buffer).png({ quality: 100, progressive: true }).clone();
-    return session;
+    return PNG.sync.read(Buffer.from(screenshot, 'base64'));
   }
 
   /**
@@ -135,24 +149,20 @@ class BrowserService extends FtrService {
     const smallHeight = 400;
 
     await this.setWindowSize(largeWidth, largeHeight);
-    const bitmap1 = await this.getScreenshotAsBitmap();
-    const bm1Data = await bitmap1.metadata();
+    const bm1Data = await this.getScreenshotAsBitmap();
     this.log.debug(
       `======browser======== actual initial screenshot size width=${bm1Data.width}, height=${bm1Data.height}`
     );
 
     // drasticly change the window size so we can calculate the scaling
     await this.setWindowSize(smallWidth, smallHeight);
-    const bitmap2 = await this.getScreenshotAsBitmap();
-    const bm2Data = await bitmap2.metadata();
+    const bm2Data = await this.getScreenshotAsBitmap();
     this.log.debug(
       `======browser======== actual second screenshot size width= ${bm2Data.width}, height=${bm2Data.height}`
     );
 
-    const bm1Width = bm1Data.width ?? smallWidth;
-    const bm1Height = bm1Data.height ?? smallHeight;
-    const bm2Width = bm2Data.width ?? smallWidth;
-    const bm2Height = bm2Data.height ?? smallHeight;
+    const { width: bm1Width, height: bm1Height } = bm1Data;
+    const { width: bm2Width, height: bm2Height } = bm2Data;
 
     const xScaling = (bm1Width - bm2Width) / smallWidth;
     const yScaling = (bm1Height - bm2Height) / smallHeight;
@@ -167,10 +177,7 @@ class BrowserService extends FtrService {
     );
     await this.setWindowSize(width + xBorder, height + yBorder);
 
-    const bitmap3 = await this.getScreenshotAsBitmap();
-    const bm3Data = await bitmap3.metadata();
-    const bm3Width = bm3Data.width ?? width;
-    const bm3Height = bm3Data.height ?? height;
+    const { width: bm3Width, height: bm3Height } = await this.getScreenshotAsBitmap();
     // when there is display scaling this won't show the expected size.  It will show expected size * scaling factor
     this.log.debug(
       `======browser======== final screenshot size width=${bm3Width}, height=${bm3Height}`
@@ -252,9 +259,9 @@ class BrowserService extends FtrService {
         return void 0;
       });
 
-      return await this.driver.get(urlWithTime);
+      return await this.withOpenDialogRetry(() => this.driver.get(urlWithTime));
     }
-    return await this.driver.get(url);
+    return await this.withOpenDialogRetry(() => this.driver.get(url));
   }
 
   /**
@@ -425,7 +432,7 @@ class BrowserService extends FtrService {
    * @return {Promise<void>}
    */
   public async refresh() {
-    await this.driver.navigate().refresh();
+    await this.withOpenDialogRetry(() => this.driver.navigate().refresh());
   }
 
   /**
@@ -455,7 +462,7 @@ class BrowserService extends FtrService {
    * @return {Promise<void>}
    */
   public async navigateTo(url: string) {
-    await this.driver.navigate().to(url);
+    await this.withOpenDialogRetry(() => this.driver.navigate().to(url));
   }
 
   /**

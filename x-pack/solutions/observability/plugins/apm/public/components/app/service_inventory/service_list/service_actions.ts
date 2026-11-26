@@ -15,7 +15,7 @@ import { getManageSlosUrl } from '../../../../hooks/use_manage_slos_url';
 import { useAlertSloActions } from '../../../../hooks/use_alert_slo_actions';
 import type { TableActions } from '../../../shared/managed_table';
 import type { IndexType } from '../../../shared/links/discover_links/get_esql_query';
-import { SERVICE_INVENTORY_EBT_ELEMENTS } from '../ebt_constants';
+import { SERVICE_INVENTORY_EBT_ELEMENTS } from '../../ebt_constants';
 
 interface UseServiceActionsParams {
   openAlertFlyout: (ruleType: ApmRuleType, serviceName: string) => void;

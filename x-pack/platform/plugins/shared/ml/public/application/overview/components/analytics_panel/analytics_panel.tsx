@@ -7,7 +7,8 @@
 
 import type { FC } from 'react';
 import React, { useCallback, useEffect, useState } from 'react';
-import { EuiCallOut, EuiLink, EuiLoadingSpinner } from '@elastic/eui';
+import { EuiLink, EuiLoadingSpinner } from '@elastic/eui';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 import { i18n } from '@kbn/i18n';
 
 import { useStorage } from '@kbn/ml-local-storage';
@@ -76,19 +77,17 @@ export const AnalyticsPanel: FC<Props> = ({ setLazyJobCount }) => {
   }, [refresh]);
 
   const errorDisplay = (
-    <EuiCallOut
+    <KbnDangerCallout
       title={i18n.translate('xpack.ml.overview.analyticsList.errorPromptTitle', {
         defaultMessage: 'An error occurred getting the data frame analytics list.',
       })}
-      color="danger"
-      iconType="warning"
     >
       <pre>
         {errorMessage && errorMessage.message !== undefined
           ? errorMessage.message
           : JSON.stringify(errorMessage)}
       </pre>
-    </EuiCallOut>
+    </KbnDangerCallout>
   );
 
   const noDFAJobs = errorMessage === undefined && isInitialized === true && analytics.length === 0;

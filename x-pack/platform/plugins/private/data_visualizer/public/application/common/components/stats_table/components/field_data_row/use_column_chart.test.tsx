@@ -8,7 +8,7 @@
 import React from 'react';
 import { render, renderHook } from '@testing-library/react';
 
-import { KBN_FIELD_TYPES } from '@kbn/data-plugin/public';
+import { KBN_FIELD_TYPES } from '@kbn/field-types';
 
 import type { NumericChartData, OrdinalChartData, UnsupportedChartData } from '@kbn/ml-data-grid';
 import { isNumericChartData, isOrdinalChartData, isUnsupportedChartData } from '@kbn/ml-data-grid';

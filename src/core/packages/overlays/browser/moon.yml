@@ -6,7 +6,7 @@ $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/core-overlays-browser'
 layer: unknown
 owners:
-  defaultOwner: '@elastic/kibana-core'
+  defaultOwner: '@elastic/appex-sharedux'
 toolchains:
   default: node
 language: typescript
@@ -14,10 +14,11 @@ project:
   title: '@kbn/core-overlays-browser'
   description: Moon project for @kbn/core-overlays-browser
   channel: ''
-  owner: '@elastic/kibana-core'
+  owner: '@elastic/appex-sharedux'
   sourceRoot: src/core/packages/overlays/browser
 dependsOn:
   - '@kbn/core-mount-utils-browser'
+  - '@kbn/flyout-template'
 tags:
   - shared-browser
   - package
@@ -29,6 +30,4 @@ fileGroups:
   src:
     - '**/*.ts'
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

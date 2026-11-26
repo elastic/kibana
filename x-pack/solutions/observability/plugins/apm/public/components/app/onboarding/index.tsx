@@ -7,7 +7,7 @@
 
 import React, { useCallback, useEffect, useState } from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { EuiSpacer } from '@elastic/eui';
+import { EuiPageSection, EuiSpacer } from '@elastic/eui';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { getApmInternalServices, type ApmPluginStartDeps } from '../../../plugin';
 import { Introduction } from './introduction';
@@ -115,12 +115,16 @@ export function Onboarding() {
 
   const ObservabilityPageTemplate = observabilityShared.navigation.PageTemplate;
   return (
-    <ObservabilityPageTemplate>
-      <Introduction isBeta={false} guideLink={guideLink} />
-      <EuiSpacer />
-      {instructionsExists && <InstructionsSet instructions={instructions} />}
-      <EuiSpacer />
-      <Footer />
+    // Header outside the padded section (ApmMainTemplate structure): the menu
+    // bar spans the full width with `standard` spacing, body gets its own 16px
+    // section — matching the service inventory page.
+    <ObservabilityPageTemplate pageSectionProps={{ paddingSize: 'none' }}>
+      <Introduction guideLink={guideLink} />
+      <EuiPageSection paddingSize="m" restrictWidth={false}>
+        {instructionsExists && <InstructionsSet instructions={instructions} />}
+        <EuiSpacer />
+        <Footer />
+      </EuiPageSection>
     </ObservabilityPageTemplate>
   );
 }

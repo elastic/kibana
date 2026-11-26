@@ -7,7 +7,6 @@
 
 import React, { useMemo } from 'react';
 import {
-  EuiCallOut,
   EuiHorizontalRule,
   EuiFlexGroup,
   EuiFlexItem,
@@ -15,6 +14,7 @@ import {
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
@@ -35,7 +35,7 @@ import type {
   RegistryInput,
 } from '../../../../../types';
 import { Loading } from '../../../../../components';
-import { doesPackageHaveIntegrations, ExperimentalFeaturesService } from '../../../../../services';
+import { doesPackageHaveIntegrations } from '../../../../../services';
 
 import type { PackagePolicyValidationResults, VarGroupSelection } from '../../services';
 import { isInputCompatibleWithVarGroupSelections } from '../../services';
@@ -148,17 +148,15 @@ export const StepConfigurePackagePolicy: React.FunctionComponent<{
               );
 
             const isSingleInput = isSinglePolicyTemplate && inputsToRender.length === 1;
-            //  Enable simplified agentless UX for single input/datastreams integrations
+            //  Simplified agentless UX for single input/datastreams integrations
             const isSingleInputAndStreams =
-              ExperimentalFeaturesService.get().enableSimplifiedAgentlessUX &&
-              isSingleInput &&
-              inputsToRender[0].packagePolicyInput.streams.length <= 1;
+              isSingleInput && inputsToRender[0].packagePolicyInput.streams.length <= 1;
 
             return (
               <React.Fragment key={policyTemplate.name}>
                 {isPolicyTemplateDeprecated && (
                   <>
-                    <EuiCallOut
+                    <KbnWarningCallout
                       announceOnMount
                       data-test-subj="deprecatedPolicyTemplateCallout"
                       title={i18n.translate(
@@ -168,12 +166,9 @@ export const StepConfigurePackagePolicy: React.FunctionComponent<{
                           values: { title: policyTemplate.title },
                         }
                       )}
-                      color="warning"
-                      iconType="warning"
                       size="s"
-                    >
-                      <p>{policyTemplate.deprecated?.description}</p>
-                    </EuiCallOut>
+                      text={policyTemplate.deprecated?.description}
+                    />
                     <EuiSpacer size="m" />
                   </>
                 )}

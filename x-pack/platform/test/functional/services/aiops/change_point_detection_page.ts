@@ -125,6 +125,28 @@ export function ChangePointDetectionPageProvider(
       await testSubjects.missingOrFail('aiopsChangePointDetectionSelectedCharts');
     },
 
+    async ensureFlyoutClosed() {
+      if (await testSubjects.exists('aiopsChangePointDetectionSelectedCharts')) {
+        await this.closeFlyout();
+      }
+    },
+
+    async ensureNoChangePointsSelected() {
+      if (
+        !(await testSubjects.exists('aiopsChangePointDetectionViewSelected')) ||
+        !(await testSubjects.isEnabled('aiopsChangePointDetectionViewSelected'))
+      ) {
+        return;
+      }
+      // With rows selected, the select all checkbox is checked or indeterminate, so a click clears it.
+      await this.getTable(0).selectAllRows();
+      await retry.waitForWithTimeout(
+        'the change point selection to be cleared',
+        30 * 1000,
+        async () => !(await testSubjects.isEnabled('aiopsChangePointDetectionViewSelected'))
+      );
+    },
+
     async addChangePointConfig() {
       await testSubjects.click('aiopsChangePointAddConfig');
     },

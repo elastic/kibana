@@ -12,12 +12,15 @@ import {
   listRuleExecutionsRequestSchema,
   listRuleExecutionsResponseSchema,
   type ListRuleExecutionsRequest,
+  type ListRuleExecutionsResponse,
+  type RuleExecutionView,
 } from '@kbn/alerting-v2-schemas';
 import { inject, injectable } from 'inversify';
 import { ExecutionHistoryClientToken } from '../../lib/execution_history_client';
 import type {
   ExecutionHistoryClientContract,
   ListRuleExecutionsArgs,
+  ListRuleExecutionsResult,
 } from '../../lib/execution_history_client';
 import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
 import { BaseAlertingRoute } from '../base_alerting_route';
@@ -29,10 +32,11 @@ import { listRuleExecutionsOasExamples } from './list_rule_executions_oas_exampl
 
 export const toListRuleExecutionsArgs = ({
   rule_ids: ruleIds,
-  outcome: outcomes,
-  from,
-  to,
-  sort,
+  search,
+  outcomes,
+  from: from,
+  to: to,
+  sort_field: sortField,
   sort_order: sortOrder,
   page,
   per_page: perPage,
@@ -41,13 +45,62 @@ export const toListRuleExecutionsArgs = ({
   assertAllFieldsMapped(rest);
   return {
     ruleIds,
+    search,
     outcomes,
     from,
     to,
-    sort: sort === 'started_at' ? 'startedAt' : sort,
+    sortField: sortField === 'started_at' ? 'startedAt' : 'duration',
     sortOrder,
     page,
     perPage,
+  };
+};
+
+const toRuleExecutionView = ({
+  id,
+  rule,
+  spaceId,
+  startedAt,
+  endedAt,
+  timings: { duration, scheduledDelay, ...restTimings },
+  outcome,
+  reason,
+  error,
+  ...rest
+}: ListRuleExecutionsResult['items'][number]): Complete<RuleExecutionView> => {
+  assertAllFieldsMapped(rest);
+  assertAllFieldsMapped(restTimings);
+  return {
+    id,
+    rule: { id: rule.id, version: rule.version ?? undefined },
+    started_at: startedAt,
+    ended_at: endedAt,
+    timings: { duration_ms: duration, scheduled_delay_ms: scheduledDelay },
+    outcome,
+    reason: reason ?? undefined,
+    error: error
+      ? { message: error.message, stack_trace: error.stackTrace ?? undefined }
+      : undefined,
+  };
+};
+
+export const toListRuleExecutionsResponse = ({
+  items,
+  total,
+  page,
+  perPage,
+  searchMatches,
+  ...rest
+}: ListRuleExecutionsResult): Complete<ListRuleExecutionsResponse> => {
+  assertAllFieldsMapped(rest);
+  return {
+    items: items.map(toRuleExecutionView),
+    total,
+    page,
+    per_page: perPage,
+    search_matches: searchMatches
+      ? { rule_count: searchMatches.ruleCount, is_truncated: searchMatches.isTruncated }
+      : undefined,
   };
 };
 
@@ -61,6 +114,8 @@ export class ListRuleExecutionsRoute extends BaseAlertingRoute {
     },
   };
   static routeOptions = {
+    access: 'public' as const,
+    availability: { stability: 'stable', since: '9.6.0' },
     summary: 'List rule executions',
     description: 'Get a paginated list of rule execution events.',
     oasOperationObject: listRuleExecutionsOasExamples,
@@ -97,6 +152,6 @@ export class ListRuleExecutionsRoute extends BaseAlertingRoute {
     const result = await this.executionHistoryClient.listRuleExecutions(
       toListRuleExecutionsArgs(this.request.query)
     );
-    return this.ctx.response.ok({ body: result });
+    return this.ctx.response.ok({ body: toListRuleExecutionsResponse(result) });
   }
 }

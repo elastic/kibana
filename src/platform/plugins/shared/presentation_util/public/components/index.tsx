@@ -31,10 +31,6 @@ export const withSuspense = <P extends {}, R = {}>(
     );
   });
 
-export const LazyLabsBeakerButton = React.lazy(() => import('./labs/labs_beaker_button'));
-
-export const LazyLabsFlyout = React.lazy(() => import('./labs/labs_flyout'));
-
 export const LazyDashboardPicker = React.lazy(() => import('./dashboard_picker/dashboard_picker'));
 
 const LazySavedObjectSaveModalDashboard = React.lazy(async () => {
@@ -55,5 +51,9 @@ export const SavedObjectSaveModalDashboard = <SaveResponse = void,>(
 export const LazyDataViewPicker = React.lazy(() => import('./data_view_picker/data_view_picker'));
 
 export const LazyFieldPicker = React.lazy(() => import('./field_picker/field_picker'));
+
+export { EmbeddableEditorPreview } from './embeddable_editor_preview';
+
+export { ManagedEditorFooter } from './managed_editor_footer';
 
 export type * from './types';

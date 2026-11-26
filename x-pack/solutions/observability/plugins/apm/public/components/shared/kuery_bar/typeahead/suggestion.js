@@ -8,24 +8,16 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import styled from '@emotion/styled';
-import { EuiIcon, useEuiFontSize } from '@elastic/eui';
+import { EuiIcon, euiFontSize } from '@elastic/eui';
 import { unit } from '@kbn/apm-common';
-import { tint } from 'polished';
 
-function getIconColor(type, theme) {
-  switch (type) {
-    case 'field':
-      return theme.euiTheme.colors.vis.euiColorVis7;
-    case 'value':
-      return theme.euiTheme.colors.vis.euiColorVis0;
-    case 'operator':
-      return theme.euiTheme.colors.vis.euiColorVis1;
-    case 'conjunction':
-      return theme.euiTheme.colors.vis.euiColorVis3;
-    case 'recentSearch':
-      return theme.euiTheme.colors.mediumShade;
-  }
-}
+const typeColors = {
+  field: { base: 'backgroundBaseWarning', text: 'textWarning' },
+  value: { base: 'backgroundBaseSuccess', text: 'textSuccess' },
+  operator: { base: 'backgroundBasePrimary', text: 'textPrimary' },
+  conjunction: { base: 'backgroundBaseSubdued', text: 'textSubdued' },
+  recentSearch: { base: 'backgroundBaseSubdued', text: 'textSubdued' },
+};
 
 const Description = styled.div`
   color: ${({ theme }) => theme.euiTheme.colors.darkShade};
@@ -38,12 +30,14 @@ const Description = styled.div`
       color: ${({ theme }) => theme.euiTheme.colors.fullShade};
       padding: 0 ${({ theme }) => theme.euiTheme.size.xs};
       display: inline-block;
+      background: ${({ selected, theme }) =>
+        selected ? theme.euiTheme.colors.emptyShade : theme.euiTheme.colors.lightestShade};
     }
   }
 `;
 
 const ListItem = styled.li`
-  font-size: ${() => useEuiFontSize('xs').fontSize};
+  font-size: ${({ theme }) => euiFontSize(theme, 'xs').fontSize};
   height: ${({ theme }) => theme.euiTheme.size.xl};
   align-items: center;
   display: flex;
@@ -51,19 +45,14 @@ const ListItem = styled.li`
     selected ? theme.euiTheme.colors.lightestShade : 'initial'};
   cursor: pointer;
   border-radius: ${({ theme }) => theme.euiTheme.border.radius.small};
-
-  ${Description} {
-    p span {
-      background: ${({ selected, theme }) =>
-        selected ? theme.euiTheme.colors.emptyShade : theme.euiTheme.colors.lightestShade};
-    }
-  }
 `;
 
 const Icon = styled.div`
   flex: 0 0 ${({ theme }) => theme.euiTheme.size.xl};
-  background: ${({ type, theme }) => tint(0.9, getIconColor(type, theme))};
-  color: ${({ type, theme }) => getIconColor(type, theme)};
+  background: ${({ type, theme }) =>
+    theme.euiTheme.colors[(typeColors[type] ?? typeColors.recentSearch).base]};
+  color: ${({ type, theme }) =>
+    theme.euiTheme.colors[(typeColors[type] ?? typeColors.recentSearch).text]};
   width: 100%;
   height: 100%;
   text-align: center;
@@ -83,7 +72,7 @@ function getEuiIconType(type) {
     case 'value':
       return 'queryValue';
     case 'recentSearch':
-      return 'search';
+      return 'magnify';
     case 'conjunction':
       return 'querySelector';
     case 'operator':
@@ -105,7 +94,7 @@ function Suggestion(props) {
         <EuiIcon type={getEuiIconType(props.suggestion.type)} aria-hidden={true} />
       </Icon>
       <TextValue>{props.suggestion.text}</TextValue>
-      <Description>{props.suggestion.description}</Description>
+      <Description selected={props.selected}>{props.suggestion.description}</Description>
     </ListItem>
   );
 }

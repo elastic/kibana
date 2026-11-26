@@ -12,6 +12,10 @@ import type { PhaseName } from '@kbn/streams-schema';
 
 import { EditDlmPhasesFlyout } from './edit_dlm_phases_flyout';
 
+jest.mock('../../../../../../hooks/use_streams_privileges', () => ({
+  useStreamsPrivileges: jest.fn(() => ({ features: { canvas: { enabled: false } } })),
+}));
+
 jest.mock('../../hooks/use_ilm_phases_color_and_description', () => ({
   useIlmPhasesColorAndDescription: () => ({
     ilmPhases: {

@@ -23,7 +23,7 @@ import type { IUiSettingsClient } from '@kbn/core-ui-settings-server';
 import type { UiPlugins } from '@kbn/core-plugins-base-server-internal';
 import type { InternalUserSettingsServiceSetup } from '@kbn/core-user-settings-server-internal';
 import { getPluginsBundlePaths } from './get_plugin_bundle_paths';
-import { getJsDependencyPaths, getRspackDependencyPaths } from './get_js_dependency_paths';
+import { getRspackDependencyPaths } from './get_js_dependency_paths';
 import { renderTemplate } from './render_template';
 import { getBundlesHref } from '../render_utils';
 
@@ -51,13 +51,45 @@ interface RendererResult {
   etag: string;
 }
 
-/**
- * Check if RSPack mode is enabled via environment variable
- */
-export function isRspackModeEnabled(): boolean {
-  const v = process.env.KBN_USE_RSPACK;
-  return v === 'true' || v === '1';
+interface ChunkPreloadManifest {
+  allChunks?: string[];
+  entrypointChunks?: Record<string, string[]>;
 }
+
+/** Converts parsed JSON into a chunk manifest that is safe to consume. */
+export const normalizeChunkPreloadManifest = (value: unknown): ChunkPreloadManifest => {
+  if (value === null || typeof value !== 'object' || Array.isArray(value)) {
+    return { allChunks: [] };
+  }
+
+  const { allChunks, entrypointChunks } = value as Record<string, unknown>;
+  return {
+    allChunks: Array.isArray(allChunks)
+      ? allChunks.filter((chunk): chunk is string => typeof chunk === 'string')
+      : [],
+    ...(entrypointChunks !== null &&
+    typeof entrypointChunks === 'object' &&
+    !Array.isArray(entrypointChunks)
+      ? { entrypointChunks: entrypointChunks as Record<string, string[]> }
+      : {}),
+  };
+};
+
+/** Returns the preload chunks required by the selected internal plugin entries. */
+export const getChunkFilenamesForPlugins = (
+  manifest: ChunkPreloadManifest,
+  pluginIds: string[]
+): string[] => {
+  const { allChunks = [], entrypointChunks } = manifest;
+  if (
+    !entrypointChunks ||
+    pluginIds.some((pluginId) => !Array.isArray(entrypointChunks[pluginId]))
+  ) {
+    return allChunks;
+  }
+
+  return [...new Set(pluginIds.flatMap((pluginId) => entrypointChunks[pluginId]))].sort();
+};
 
 export const bootstrapRendererFactory: BootstrapRendererFactory = ({
   packageInfo,
@@ -73,29 +105,27 @@ export const bootstrapRendererFactory: BootstrapRendererFactory = ({
     return authStatus !== 'unauthenticated';
   };
 
-  const useRspack = isRspackModeEnabled();
   const useHMR = !packageInfo.dist && process.env.KBN_HMR !== 'false';
   const isDist = packageInfo.dist;
 
-  // Read chunk-manifest.json to get all async chunk filenames for the load() array.
+  // Read chunk-manifest.json to get async chunk filenames for the load() array.
   // Cached in dist mode (chunks don't change at runtime). In dev mode, re-read each
   // request so HMR-triggered recompilations are picked up.
-  let cachedAllChunkFilenames: string[] | null = null;
-  const getAllChunkFilenames = (): string[] => {
-    if (isDist && cachedAllChunkFilenames) {
-      return cachedAllChunkFilenames;
+  let cachedChunkManifest: ChunkPreloadManifest | null = null;
+  const getChunkManifest = (): ChunkPreloadManifest => {
+    if (isDist && cachedChunkManifest) {
+      return cachedChunkManifest;
     }
     try {
       const manifestPath = fromRoot('target/public/bundles/chunk-manifest.json');
       const raw = Fs.readFileSync(manifestPath, 'utf-8');
-      const manifest = JSON.parse(raw) as { allChunks?: string[] };
-      const result = manifest.allChunks ?? [];
+      const manifest = normalizeChunkPreloadManifest(JSON.parse(raw));
       if (isDist) {
-        cachedAllChunkFilenames = result;
+        cachedChunkManifest = manifest;
       }
-      return result;
+      return manifest;
     } catch {
-      return [];
+      return {};
     }
   };
 
@@ -103,18 +133,16 @@ export const bootstrapRendererFactory: BootstrapRendererFactory = ({
   // External plugins live in the plugins/ directory and have standalone bundles
   // built by kbn-plugin-helpers. Only check that directory — internal plugins are
   // compiled into kibana.bundle.js and their directories may contain leftover
-  // webpack bundles that must not be loaded separately.
+  // bundles that must not be loaded separately.
   const externalPluginIds = new Set<string>();
-  if (useRspack) {
-    const externalPluginsDir = fromRoot('plugins') + Path.sep;
-    for (const [pluginId, { publicTargetDir }] of uiPlugins.internal.entries()) {
-      if (!publicTargetDir.startsWith(externalPluginsDir)) {
-        continue;
-      }
-      const standaloneBundle = Path.join(publicTargetDir, `${pluginId}.plugin.js`);
-      if (Fs.existsSync(standaloneBundle)) {
-        externalPluginIds.add(pluginId);
-      }
+  const externalPluginsDir = fromRoot('plugins') + Path.sep;
+  for (const [pluginId, { publicTargetDir }] of uiPlugins.internal.entries()) {
+    if (!publicTargetDir.startsWith(externalPluginsDir)) {
+      continue;
+    }
+    const standaloneBundle = Path.join(publicTargetDir, `${pluginId}.plugin.js`);
+    if (Fs.existsSync(standaloneBundle)) {
+      externalPluginIds.add(pluginId);
     }
   }
 
@@ -148,76 +176,54 @@ export const bootstrapRendererFactory: BootstrapRendererFactory = ({
       isAnonymousPage,
     });
 
-    let body: string;
+    // Only load external plugins this page needs (enabled, anonymous-page filtered, or
+    // required bundles), keeping the startup detection order for their script tags.
+    const externalPluginInfos = [...externalPluginIds].flatMap((pluginId) => {
+      const info = bundlePaths.get(pluginId);
+      return info ? [{ pluginId, ...info }] : [];
+    });
+    const externalPluginScriptPaths = externalPluginInfos.map(({ bundlePath }) => bundlePath);
 
-    if (useRspack) {
-      // Build script paths for external plugins using the same route scheme as bundle routes
-      const externalPluginScriptPaths = [...externalPluginIds].map((pluginId) => {
-        const { version } = uiPlugins.internal.get(pluginId)!;
-        return `${bundlesHref}/plugin/${pluginId}/${version}/${pluginId}.plugin.js`;
-      });
+    const internalPluginIds = [
+      'core',
+      ...[...bundlePaths.keys()].filter((pluginId) => !externalPluginIds.has(pluginId)),
+    ];
+    const chunkPaths = getChunkFilenamesForPlugins(getChunkManifest(), internalPluginIds).map(
+      (filename) => `${bundlesHref}/${filename}`
+    );
 
-      const chunkPaths = getAllChunkFilenames().map((f) => `${bundlesHref}/${f}`);
+    const jsDependencyPaths = getRspackDependencyPaths(
+      bundlesHref,
+      externalPluginScriptPaths,
+      chunkPaths
+    );
 
-      const rspackPaths = getRspackDependencyPaths(
-        bundlesHref,
-        bundlePaths,
-        externalPluginScriptPaths,
-        chunkPaths
-      );
+    const bundlesDir = `${bundlesHref}/`;
+    const publicPathMap = JSON.stringify({
+      core: bundlesDir,
+      'kbn-ui-shared-deps-src': `${bundlesHref}/kbn-ui-shared-deps-src/`,
+      'kbn-ui-shared-deps-npm': `${bundlesHref}/kbn-ui-shared-deps-npm/`,
+      'kbn-monaco': `${bundlesHref}/kbn-monaco/`,
+      // Internal plugins use the unified bundles directory
+      ...Object.fromEntries(
+        [...bundlePaths.keys()]
+          .filter((pluginId) => !externalPluginIds.has(pluginId))
+          .map((pluginId) => [pluginId, bundlesDir])
+      ),
+      // External plugins use their own versioned bundle route
+      ...Object.fromEntries(
+        externalPluginInfos.map(({ pluginId, publicPath }) => [pluginId, publicPath])
+      ),
+    });
 
-      const bundlesDir = `${bundlesHref}/`;
-      const publicPathMap = JSON.stringify({
-        core: bundlesDir,
-        'kbn-ui-shared-deps-src': `${bundlesHref}/kbn-ui-shared-deps-src/`,
-        'kbn-ui-shared-deps-npm': `${bundlesHref}/kbn-ui-shared-deps-npm/`,
-        'kbn-monaco': `${bundlesHref}/kbn-monaco/`,
-        // Internal plugins use the unified bundles directory
-        ...Object.fromEntries(
-          [...bundlePaths.entries()]
-            .filter(([pluginId]) => !externalPluginIds.has(pluginId))
-            .map(([pluginId]) => [pluginId, bundlesDir])
-        ),
-        // External plugins use their own versioned bundle route
-        ...Object.fromEntries(
-          [...externalPluginIds].map((pluginId) => {
-            const { version } = uiPlugins.internal.get(pluginId)!;
-            return [pluginId, `${bundlesHref}/plugin/${pluginId}/${version}/`];
-          })
-        ),
-      });
-
-      body = renderTemplate({
-        colorMode,
-        themeTagName,
-        jsDependencyPaths: rspackPaths,
-        publicPathMap,
-        useHMR,
-        useRspack: true,
-      });
-    } else {
-      // Legacy mode - use __kbnBundles__ with DLLs
-      const jsDependencyPaths = getJsDependencyPaths(bundlesHref, bundlePaths);
-
-      // These paths should align with the bundle routes configured in
-      // src/optimize/bundles_route/bundles_route.ts
-      const publicPathMap = JSON.stringify({
-        core: `${bundlesHref}/core/`,
-        'kbn-ui-shared-deps-src': `${bundlesHref}/kbn-ui-shared-deps-src/`,
-        'kbn-ui-shared-deps-npm': `${bundlesHref}/kbn-ui-shared-deps-npm/`,
-        'kbn-monaco': `${bundlesHref}/kbn-monaco/`,
-        ...Object.fromEntries(
-          [...bundlePaths.entries()].map(([pluginId, plugin]) => [pluginId, plugin.publicPath])
-        ),
-      });
-
-      body = renderTemplate({
-        colorMode,
-        themeTagName,
-        jsDependencyPaths,
-        publicPathMap,
-      });
-    }
+    const body = renderTemplate({
+      colorMode,
+      themeTagName,
+      jsDependencyPaths,
+      publicPathMap,
+      pluginIdsToLoad: ['core', ...bundlePaths.keys()],
+      useHMR,
+    });
 
     const hash = createHash('sha256');
     hash.update(body);

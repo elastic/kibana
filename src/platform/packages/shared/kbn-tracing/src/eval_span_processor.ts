@@ -9,7 +9,7 @@
 
 import type { Context } from '@opentelemetry/api';
 import { propagation } from '@opentelemetry/api';
-import type { tracing } from '@elastic/opentelemetry-node/sdk';
+import type { ReadableSpan, Span, SpanProcessor } from '@opentelemetry/sdk-trace';
 
 const noop = async () => {};
 
@@ -24,10 +24,10 @@ export interface EvalBaggageField {
  * This enables correlating traces (`traces-*`) with eval score docs
  * by filtering on `attributes.<attributeKey>`.
  */
-export class EvalSpanProcessor implements tracing.SpanProcessor {
+export class EvalSpanProcessor implements SpanProcessor {
   constructor(private readonly fields: EvalBaggageField[]) {}
 
-  onStart(span: tracing.Span, parentContext: Context): void {
+  onStart(span: Span, parentContext: Context): void {
     if (!span.isRecording?.()) {
       return;
     }
@@ -47,7 +47,7 @@ export class EvalSpanProcessor implements tracing.SpanProcessor {
     });
   }
 
-  onEnd(_span: tracing.ReadableSpan): void {}
+  onEnd(_span: ReadableSpan): void {}
 
   async forceFlush(): Promise<void> {
     await noop();

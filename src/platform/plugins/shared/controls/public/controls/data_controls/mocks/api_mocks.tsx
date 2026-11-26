@@ -9,13 +9,14 @@
 
 import { BehaviorSubject, Subject } from 'rxjs';
 
-import type { DataViewField } from '@kbn/data-views-plugin/common';
 import { DEFAULT_DSL_OPTIONS_LIST_STATE, OPTIONS_LIST_CONTROL } from '@kbn/controls-constants';
 import type {
   OptionsListDisplaySettings,
-  OptionsListSortingType,
   OptionsListSelection,
+  OptionsListSortingType,
 } from '@kbn/controls-schemas';
+import type { FilterableField } from '@kbn/data-source';
+import type { ViewMode } from '@kbn/presentation-publishing';
 
 import { initializeLabelManager } from '../../control_labels';
 import { initializeEditorStateManager } from '../options_list_control/editor_state_manager';
@@ -34,9 +35,9 @@ export const getOptionsListContextMock = () => {
     { fieldName$ },
     'fieldName'
   );
-  const field$ = new BehaviorSubject<DataViewField | undefined>({
+  const field$ = new BehaviorSubject<FilterableField | undefined>({
     type: 'string',
-  } as DataViewField);
+  } as FilterableField);
   const sort$ = new BehaviorSubject<OptionsListSortingType>(DEFAULT_DSL_OPTIONS_LIST_STATE.sort);
   return {
     componentApi: {
@@ -56,10 +57,14 @@ export const getOptionsListContextMock = () => {
       fieldFormatter: new BehaviorSubject((value: string | number) => String(value)),
       makeSelection: jest.fn(),
       loadMoreSubject: new Subject<void>(),
+      viewMode$: new BehaviorSubject<ViewMode>('edit'),
+      isPartial$: new BehaviorSubject<boolean>(false),
     } as unknown as Required<DSLOptionsListComponentApi>,
-    displaySettings: {} as OptionsListDisplaySettings,
+    displaySettings: {} as OptionsListDisplaySettings & {
+      isInteractive?: boolean;
+    },
     testOnlyMethods: {
-      setField: (next: DataViewField | undefined) => {
+      setField: (next: FilterableField | undefined) => {
         field$.next(next);
       },
     },

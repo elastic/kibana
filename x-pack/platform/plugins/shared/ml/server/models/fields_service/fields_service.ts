@@ -55,6 +55,9 @@ export function fieldsServiceProvider({ asCurrentUser }: IScopedClusterClient) {
       {
         index,
         fields: fieldNames,
+        ...(datafeedConfig?.project_routing
+          ? { project_routing: datafeedConfig.project_routing }
+          : {}),
       },
       { maxRetries: 0 }
     );
@@ -194,6 +197,9 @@ export function fieldsServiceProvider({ asCurrentUser }: IScopedClusterClient) {
         index,
         body,
         ...getIndicesOptions(datafeedConfig),
+        ...(datafeedConfig?.project_routing
+          ? { project_routing: datafeedConfig.project_routing }
+          : {}),
       },
       { maxRetries: 0 }
     );
@@ -422,6 +428,9 @@ export function fieldsServiceProvider({ asCurrentUser }: IScopedClusterClient) {
         index,
         ...body,
         ...getIndicesOptions(datafeedConfig),
+        ...(datafeedConfig?.project_routing
+          ? { project_routing: datafeedConfig.project_routing }
+          : {}),
       },
       { maxRetries: 0 }
     );

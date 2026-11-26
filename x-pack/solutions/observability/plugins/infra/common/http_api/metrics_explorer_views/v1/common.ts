@@ -12,7 +12,9 @@ export const METRICS_EXPLORER_VIEW_URL = '/api/infra/metrics_explorer_views';
 export const METRICS_EXPLORER_VIEW_URL_ENTITY =
   `${METRICS_EXPLORER_VIEW_URL}/{metricsExplorerViewId}` as const;
 export const getMetricsExplorerViewUrl = (metricsExplorerViewId?: string) =>
-  [METRICS_EXPLORER_VIEW_URL, metricsExplorerViewId].filter(Boolean).join('/');
+  [METRICS_EXPLORER_VIEW_URL, metricsExplorerViewId && encodeURIComponent(metricsExplorerViewId)]
+    .filter(Boolean)
+    .join('/');
 
 const metricsExplorerViewIdRT = new rt.Type<string, string, unknown>(
   'MetricsExplorerViewId',

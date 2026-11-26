@@ -20,6 +20,7 @@ export function EmbeddableStackTraces({
   kuery,
   rangeFrom,
   rangeTo,
+  schema,
   onClick,
   onChartBrushEnd,
   ...deps
@@ -32,6 +33,7 @@ export function EmbeddableStackTraces({
           kuery={kuery}
           rangeFrom={rangeFrom}
           rangeTo={rangeTo}
+          schema={schema}
           onClick={onClick}
           onChartBrushEnd={onChartBrushEnd}
         />

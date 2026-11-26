@@ -14,7 +14,6 @@ import { useEuiTheme, type UseEuiTheme } from '@elastic/eui';
 
 import { COLLAPSED_WIDTH, EXPANDED_WIDTH } from '../../hooks/use_layout_width';
 import { Footer } from '../footer';
-import { Logo } from './logo';
 import { NestedSecondaryMenu } from '../nested_secondary_menu';
 import { Popover } from './popover';
 import { PrimaryMenu } from '../primary_menu';
@@ -39,7 +38,6 @@ export interface SideNavProps {
 }
 
 interface SideNavComponent extends FC<SideNavProps> {
-  Logo: typeof Logo;
   PrimaryMenu: typeof PrimaryMenu;
   Popover: typeof Popover;
   SecondaryMenu: typeof SecondaryMenu;
@@ -50,7 +48,6 @@ interface SideNavComponent extends FC<SideNavProps> {
 
 /**
  * A wrapper component for the side navigation that encapsulates:
- * - the logo,
  * - the primary menu,
  * - the secondary menu used in the popover and in the side panel,
  * - the nested secondary menu used in the "More" menu,
@@ -72,7 +69,6 @@ export const SideNav: SideNavComponent = ({ children, isCollapsed }) => {
   );
 };
 
-SideNav.Logo = Logo;
 SideNav.PrimaryMenu = PrimaryMenu;
 SideNav.Popover = Popover;
 SideNav.SecondaryMenu = SecondaryMenu;

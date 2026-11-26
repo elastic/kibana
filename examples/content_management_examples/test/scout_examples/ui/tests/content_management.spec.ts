@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { test } from '@kbn/scout';
+import { euiSelectors, test } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 
 test.describe('Content Management Examples', { tag: ['@local-stateful-classic'] }, () => {
@@ -97,7 +97,7 @@ test.describe('Content Management Examples', { tag: ['@local-stateful-classic'] 
 
     await expect
       .poll(() => pageObjects.listingTable.getAllItemsNames())
-      .toEqual(expect.arrayContaining(expectedItems));
+      .toStrictEqual(expect.arrayContaining(expectedItems));
   });
 
   test('Finder demo displays saved objects from sample data', async ({
@@ -111,11 +111,6 @@ test.describe('Content Management Examples', { tag: ['@local-stateful-classic'] 
     await expect(page.testSubj.locator('finderExample')).toBeVisible();
     await expect(page.testSubj.locator('savedObjectsFinderTable')).toBeVisible();
 
-    const titleElements = page.testSubj.locator('savedObjectFinderTitle');
-    await expect(titleElements.first()).toBeVisible();
-
-    const titles = await titleElements.locator('.euiLink').allTextContents();
-
     const expectedItems = [
       'Kibana Sample Data Flights',
       '[Flights] Airport Connections (Hover Over Airport)',
@@ -124,8 +119,11 @@ test.describe('Content Management Examples', { tag: ['@local-stateful-classic'] 
       '[Flights] Flight Log',
     ];
 
-    for (const item of expectedItems) {
-      expect(titles).toContain(item);
-    }
+    const titles = page.testSubj
+      .locator('savedObjectFinderTitle')
+      .locator(euiSelectors.link.ROOT_SELECTOR);
+    await expect
+      .poll(() => titles.allTextContents())
+      .toStrictEqual(expect.arrayContaining(expectedItems));
   });
 });

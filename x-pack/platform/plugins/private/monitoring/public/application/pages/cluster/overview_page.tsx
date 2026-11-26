@@ -97,6 +97,7 @@ export const ClusterOverview: React.FC<{}> = () => {
       tabs={tabs}
       getPageData={getPageData}
       showAutoOpsPromotion={true}
+      showAutoOpsEnabledBanner={true}
     >
       <SetupModeRenderer
         render={({ setupMode, flyoutComponent, bottomBarComponent }: SetupModeProps) => (

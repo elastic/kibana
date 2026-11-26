@@ -5,11 +5,27 @@
  * 2.0.
  */
 
-import { darken } from '@elastic/eui';
+import { darken, makeHighContrastColor } from '@elastic/eui';
 import type { useEuiTheme } from '@elastic/eui';
+
+export const getContrastTextColor = (
+  backgroundColor: string,
+  euiTheme: ReturnType<typeof useEuiTheme>['euiTheme'],
+  isDarkMode: boolean
+) => {
+  const foregroundColor = isDarkMode ? euiTheme.colors.plainLight : euiTheme.colors.plainDark;
+
+  return makeHighContrastColor(foregroundColor)(backgroundColor);
+};
+
+export const getHighlightBorderColor = (
+  euiTheme: ReturnType<typeof useEuiTheme>['euiTheme'],
+  isDarkMode: boolean
+) => (isDarkMode ? euiTheme.colors.plainLight : euiTheme.colors.plainDark);
 
 export interface InteractivePanelStylesOptions {
   euiTheme: ReturnType<typeof useEuiTheme>['euiTheme'];
+  isDarkMode: boolean;
   backgroundColor?: string;
   isPopoverOpen: boolean;
   minHeight?: string;
@@ -22,6 +38,7 @@ export interface InteractivePanelStylesOptions {
 
 export const getInteractivePanelStyles = ({
   euiTheme,
+  isDarkMode,
   backgroundColor,
   isPopoverOpen,
   minHeight,
@@ -31,25 +48,30 @@ export const getInteractivePanelStyles = ({
   alignCenter,
   extraStyles,
 }: InteractivePanelStylesOptions) => {
+  const highlightBorderColor = getHighlightBorderColor(euiTheme, isDarkMode);
+  const highlightBoxShadow = isPopoverOpen
+    ? `inset 0 0 0 2px ${highlightBorderColor}`
+    : 'none !important';
+
   return {
     backgroundColor,
     margin: '0',
     borderRadius: euiTheme.border.radius.small,
-    boxShadow: isPopoverOpen ? `inset 0 0 0 2px ${euiTheme.colors.shadow}` : 'none !important',
+    boxShadow: highlightBoxShadow,
     transform: 'none !important',
     transition: 'background-color 150ms ease-in-out !important',
     '&:hover': {
       backgroundColor: backgroundColor ? darken(backgroundColor, 0.07) : undefined,
       transform: 'none !important',
-      boxShadow: isPopoverOpen ? `inset 0 0 0 2px ${euiTheme.colors.shadow}` : 'none !important',
+      boxShadow: highlightBoxShadow,
     },
     '&:focus': {
       transform: 'none !important',
-      boxShadow: isPopoverOpen ? `inset 0 0 0 2px ${euiTheme.colors.shadow}` : 'none !important',
+      boxShadow: highlightBoxShadow,
     },
     '&:active': {
       transform: 'none !important',
-      boxShadow: isPopoverOpen ? `inset 0 0 0 2px ${euiTheme.colors.shadow}` : 'none !important',
+      boxShadow: highlightBoxShadow,
     },
     ...(minHeight ? { minHeight } : {}),
     ...(minWidth ? { minWidth } : {}),

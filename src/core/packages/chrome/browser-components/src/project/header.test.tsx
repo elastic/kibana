@@ -7,35 +7,168 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { render, screen, act } from '@testing-library/react';
 import React from 'react';
+import { act, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { renderWithI18n } from '@kbn/test-jest-helpers';
+import { BehaviorSubject, Subject } from 'rxjs';
+import { chromeServiceMock } from '@kbn/core-chrome-browser-mocks';
 import { createMockChromeComponentsDeps, TestChromeProviders } from '../test_helpers';
-import { ProjectHeader } from './header';
+import { ChromeHeader } from './header';
+import { CHROME_HEADER_TEST_SUBJECTS } from '../test_subjects';
 
-describe('Header', () => {
-  it('renders', async () => {
-    const deps = createMockChromeComponentsDeps();
-    render(
-      <TestChromeProviders deps={deps}>
-        <ProjectHeader />
+describe('ChromeHeader', () => {
+  it('renders the project picker beside the context switcher', () => {
+    const chrome = chromeServiceMock.createStartContract();
+    chrome.controls.contextSwitcher.set(<span>Context switcher</span>);
+    chrome.controls.projectPicker.set(<span>Project picker</span>);
+
+    renderWithI18n(
+      <TestChromeProviders chrome={chrome}>
+        <ChromeHeader />
       </TestChromeProviders>
     );
 
-    expect(screen.queryByTestId(/nav-header-logo/)).toBeVisible();
+    expect(screen.getByTestId(CHROME_HEADER_TEST_SUBJECTS.switcher)).toHaveTextContent(
+      'Context switcher'
+    );
+    expect(screen.getByTestId(CHROME_HEADER_TEST_SUBJECTS.projectPicker)).toHaveTextContent(
+      'Project picker'
+    );
   });
 
-  it('renders custom branding logo', async () => {
-    const deps = createMockChromeComponentsDeps();
-    const { queryByTestId } = render(
-      <TestChromeProviders deps={deps}>
-        <ProjectHeader />
+  it('renders the subscription badge only once it is set', () => {
+    const chrome = chromeServiceMock.createStartContract();
+
+    renderWithI18n(
+      <TestChromeProviders chrome={chrome}>
+        <ChromeHeader />
       </TestChromeProviders>
     );
 
+    expect(
+      screen.queryByTestId(CHROME_HEADER_TEST_SUBJECTS.subscriptionBadge)
+    ).not.toBeInTheDocument();
+
     act(() => {
-      deps.customBranding.customBranding$.next({ logo: 'foo.jpg' });
+      chrome.controls.subscriptionBadge.set(<span>Trial</span>);
     });
 
-    expect(queryByTestId(/customLogo/)).not.toBeNull();
+    expect(screen.getByTestId(CHROME_HEADER_TEST_SUBJECTS.subscriptionBadge)).toHaveTextContent(
+      'Trial'
+    );
+  });
+
+  it('renders the help menu button', async () => {
+    renderWithI18n(
+      <TestChromeProviders>
+        <ChromeHeader />
+      </TestChromeProviders>
+    );
+
+    await userEvent.click(screen.getByTestId(CHROME_HEADER_TEST_SUBJECTS.helpButton));
+
+    expect(screen.getByText('Help')).toBeInTheDocument();
+    expect(screen.getByText('Kibana documentation')).toBeInTheDocument();
+  });
+
+  it('renders a registered newsfeed handler in the help menu', async () => {
+    const chrome = chromeServiceMock.createStartContract();
+    chrome.getChromeStyle.mockReturnValue('project');
+    chrome.getChromeStyle$.mockReturnValue(new BehaviorSubject('project'));
+    chrome.help.getNewsfeedHandler$.mockReturnValue(
+      new BehaviorSubject({
+        open: jest.fn(),
+        hasNew$: new BehaviorSubject(false),
+      })
+    );
+
+    renderWithI18n(
+      <TestChromeProviders chrome={chrome}>
+        <ChromeHeader />
+      </TestChromeProviders>
+    );
+
+    await userEvent.click(screen.getByTestId(CHROME_HEADER_TEST_SUBJECTS.helpButton));
+
+    expect(screen.getByTestId('helpMenuWhatsNewButton')).toBeInTheDocument();
+  });
+
+  it('renders a registered newsfeed handler before unread state emits', async () => {
+    const chrome = chromeServiceMock.createStartContract();
+    chrome.getChromeStyle.mockReturnValue('project');
+    chrome.getChromeStyle$.mockReturnValue(new BehaviorSubject('project'));
+    chrome.help.getNewsfeedHandler$.mockReturnValue(
+      new BehaviorSubject({
+        open: jest.fn(),
+        hasNew$: new Subject<boolean>(),
+      })
+    );
+
+    renderWithI18n(
+      <TestChromeProviders chrome={chrome}>
+        <ChromeHeader />
+      </TestChromeProviders>
+    );
+
+    await userEvent.click(screen.getByTestId(CHROME_HEADER_TEST_SUBJECTS.helpButton));
+
+    expect(screen.getByTestId('helpMenuWhatsNewButton')).toBeInTheDocument();
+  });
+
+  it('shows unread indicators when the newsfeed has new items', async () => {
+    const chrome = chromeServiceMock.createStartContract();
+    const hasNew$ = new BehaviorSubject(true);
+    chrome.getChromeStyle.mockReturnValue('project');
+    chrome.getChromeStyle$.mockReturnValue(new BehaviorSubject('project'));
+    chrome.help.getNewsfeedHandler$.mockReturnValue(
+      new BehaviorSubject({
+        open: jest.fn(),
+        hasNew$,
+      })
+    );
+
+    renderWithI18n(
+      <TestChromeProviders chrome={chrome}>
+        <ChromeHeader />
+      </TestChromeProviders>
+    );
+
+    expect(screen.getByTestId('headerActionButtonNotification')).toBeInTheDocument();
+
+    await userEvent.click(screen.getByTestId(CHROME_HEADER_TEST_SUBJECTS.helpButton));
+
+    expect(screen.getByTestId('helpMenuWhatsNewUnreadIndicator')).toBeInTheDocument();
+
+    act(() => {
+      hasNew$.next(false);
+    });
+
+    expect(screen.queryByTestId('headerActionButtonNotification')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('helpMenuWhatsNewUnreadIndicator')).not.toBeInTheDocument();
+    expect(screen.getByTestId('helpMenuWhatsNewButton')).toBeInTheDocument();
+  });
+
+  it('does not announce project breadcrumbs', async () => {
+    const chrome = chromeServiceMock.createStartContract();
+    const breadcrumbs$ = new BehaviorSubject([{ text: 'Should not be announced' }]);
+    chrome.project.getBreadcrumbs$.mockReturnValue(breadcrumbs$);
+    chrome.inlineAppHeader.register('Dashboards');
+    const deps = createMockChromeComponentsDeps();
+    const { notify } = deps.notifications.screenReader;
+
+    renderWithI18n(
+      <TestChromeProviders chrome={chrome} deps={deps}>
+        <ChromeHeader />
+      </TestChromeProviders>
+    );
+
+    await waitFor(() =>
+      expect(notify).toHaveBeenCalledWith('Dashboards - Elastic', { key: 'pageTitle' })
+    );
+    expect(notify).not.toHaveBeenCalledWith(
+      expect.stringContaining('Should not be announced'),
+      expect.anything()
+    );
   });
 });

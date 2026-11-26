@@ -8,7 +8,7 @@
  */
 
 import type { ActionContext } from '../../connector_spec';
-import { getConnectorSpec } from '../../..';
+import { getConnectorSpec, getSandboxHosts } from '../../..';
 import { NewRelic } from './new_relic';
 import {
   NewRelicCreateDeploymentMarkerInputSchema,
@@ -56,6 +56,21 @@ describe('NewRelic', () => {
       typeof t === 'string' ? t : t.type
     );
     expect(types).toContain('api_key_header');
+  });
+
+  it('does not mark the api_key_header auth type as sandbox capable', () => {
+    const types = NewRelic.auth?.types ?? [];
+    expect(types).toEqual([
+      expect.objectContaining({ type: 'api_key_header', supportsSandbox: false }),
+    ]);
+  });
+
+  it('declares every regional API host as a sandbox host', () => {
+    expect(getSandboxHosts(NewRelic.sandbox, { region: 'eu' })).toEqual([
+      'api.newrelic.com',
+      'api.eu.newrelic.com',
+      'api.jp.newrelic.com',
+    ]);
   });
 
   describe('config schema', () => {
@@ -655,11 +670,9 @@ describe('NewRelic', () => {
         data: { data: { actor: { user: { name: 'Jane Doe', email: 'jane@example.com' } } } },
       });
 
-      if (!NewRelic.test) throw new Error('Test handler not defined');
       const result = await NewRelic.test.handler(mockContext);
 
       expect(result).toEqual({
-        ok: true,
         message: 'Connected to New Relic NerdGraph as Jane Doe (jane@example.com).',
       });
     });

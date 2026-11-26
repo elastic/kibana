@@ -87,7 +87,7 @@ describe('getRunAttackDiscoveriesWithReplacements', () => {
       },
     };
 
-    expect(() => getRunAttackDiscoveriesWithReplacements(missingAttackDiscoveries)).toThrowError();
+    expect(() => getRunAttackDiscoveriesWithReplacements(missingAttackDiscoveries)).toThrow();
   });
 
   it('throws when attackDiscoveries is null', () => {
@@ -99,7 +99,7 @@ describe('getRunAttackDiscoveriesWithReplacements', () => {
       },
     };
 
-    expect(() => getRunAttackDiscoveriesWithReplacements(nullAttackDiscoveries)).toThrowError();
+    expect(() => getRunAttackDiscoveriesWithReplacements(nullAttackDiscoveries)).toThrow();
   });
 
   it('returns the original attack discoveries when replacements are missing', () => {

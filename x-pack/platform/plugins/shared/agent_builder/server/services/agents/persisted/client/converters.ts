@@ -6,20 +6,29 @@
  */
 
 import type { GetResponse } from '@elastic/elasticsearch/lib/api/types';
+import type { AgentAccessControl, CurrentUser, UserIdAndName } from '@kbn/agent-builder-common';
 import {
   agentBuilderDefaultAgentId,
   chatAgentTypeId,
   getDefaultAgentAccessControl,
+  normalizeAgentApprovals,
 } from '@kbn/agent-builder-common';
-import type { AgentAccessControl, UserIdAndName } from '@kbn/agent-builder-common';
 import type { AgentCreateRequest, AgentUpdateRequest } from '../../../../../common/agents';
 import type { AgentConfigurationProperties, AgentProperties } from './storage';
-import type { PersistedAgentDefinition } from '../types';
-import { isAgentOwner, normalizeAccessControl } from '../../access_control';
+import type { PersistedAgentDefinition, PersistedAgentDefinitionWithPermissions } from '../types';
+import {
+  getAgentPermissions,
+  isAgentOwner,
+  normalizeAccessControl,
+  redactAccessControlForCaller,
+} from '../../access_control';
 
 export type Document = Pick<GetResponse<AgentProperties>, '_id' | '_source'>;
 
 const defaultAgentType = chatAgentTypeId;
+
+const readOwner = (id?: string, name?: string): UserIdAndName | undefined =>
+  id || name ? { id, username: name ?? 'unknown' } : undefined;
 
 export const fromEs = (document: Document): PersistedAgentDefinition => {
   if (!document._source) {
@@ -41,13 +50,11 @@ export const fromEs = (document: Document): PersistedAgentDefinition => {
     avatar_color: document._source.avatar_color,
     avatar_symbol: document._source.avatar_symbol,
     access_control: normalizeAccessControl(document._source),
-    created_by:
-      document._source.created_by_id || document._source.created_by_name
-        ? {
-            id: document._source.created_by_id,
-            username: document._source.created_by_name ?? 'unknown',
-          }
-        : undefined,
+    created_by: readOwner(document._source.created_by_id, document._source.created_by_name),
+    created_at: document._source.created_at,
+    updated_by: readOwner(document._source.updated_by_id, document._source.updated_by_name),
+    updated_at: document._source.updated_at,
+    service_account_id: document._source.service_account_id,
     configuration: {
       instructions: configuration.instructions,
       tools: configuration.tools,
@@ -56,9 +63,36 @@ export const fromEs = (document: Document): PersistedAgentDefinition => {
         configuration.enable_elastic_capabilities ??
         (resolvedId === agentBuilderDefaultAgentId ? true : undefined),
       workflow_ids: configuration.workflow_ids,
+      post_execution_workflow_ids: configuration.post_execution_workflow_ids,
       plugin_ids: configuration.plugin_ids,
       connector_ids: configuration.connector_ids,
+      ai_indices: configuration.ai_indices,
+      subagent_ids: configuration.subagent_ids ?? [],
+      approvals: normalizeAgentApprovals(configuration.approvals),
     },
+  };
+};
+
+export const withPermissions = ({
+  document,
+  user,
+}: {
+  document: Required<Document>;
+  user: CurrentUser;
+}): PersistedAgentDefinitionWithPermissions => {
+  const source = document._source;
+  const redactedDefinition = redactAccessControlForCaller({
+    definition: fromEs(document),
+    source,
+    user,
+  });
+
+  return {
+    ...redactedDefinition,
+    permissions: getAgentPermissions({
+      source,
+      user,
+    }),
   };
 };
 
@@ -93,10 +127,16 @@ export const createRequestToEs = ({
       skill_ids: profile.configuration.skill_ids,
       enable_elastic_capabilities: profile.configuration.enable_elastic_capabilities,
       workflow_ids: profile.configuration.workflow_ids,
+      post_execution_workflow_ids: profile.configuration.post_execution_workflow_ids,
       plugin_ids: profile.configuration.plugin_ids,
       connector_ids: profile.configuration.connector_ids,
+      ai_indices: profile.configuration.ai_indices,
+      subagent_ids: profile.configuration.subagent_ids,
+      approvals: normalizeAgentApprovals(profile.configuration.approvals),
     },
     created_at: creationDate.toISOString(),
+    updated_by_id: user.id,
+    updated_by_name: user.username,
     updated_at: creationDate.toISOString(),
   };
 };
@@ -116,6 +156,7 @@ export const updateRequestToEs = ({
 }): AgentProperties => {
   const currentConfig = currentProps.configuration ?? currentProps.config;
   const { configuration, access_control, ...restUpdate } = update;
+  const { approvals: nextApprovals, ...restConfiguration } = configuration ?? {};
   const currentAccessControl = normalizeAccessControl(currentProps);
 
   // Strip legacy fields from the persisted doc: `access_control` and `config` are now the source of
@@ -136,8 +177,10 @@ export const updateRequestToEs = ({
       : currentAccessControl,
     config: {
       ...currentConfig,
-      ...configuration,
+      ...restConfiguration,
+      ...(nextApprovals !== undefined && { approvals: normalizeAgentApprovals(nextApprovals) }),
     },
+    ...(user && { updated_by_id: user.id, updated_by_name: user.username }),
     updated_at: updateDate.toISOString(),
   };
 
@@ -160,14 +203,18 @@ export const accessControlUpdateToEs = ({
   currentProps,
   access_control,
   updateDate,
+  user,
 }: {
   currentProps: AgentProperties;
   access_control: AgentAccessControl;
   updateDate: Date;
+  user: UserIdAndName;
 }): AgentProperties => {
   return {
     ...currentProps,
     access_control,
+    updated_by_id: user.id,
+    updated_by_name: user.username,
     updated_at: updateDate.toISOString(),
   };
 };

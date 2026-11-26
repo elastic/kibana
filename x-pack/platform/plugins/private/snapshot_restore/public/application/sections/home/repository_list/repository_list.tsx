@@ -8,7 +8,8 @@
 import React, { Fragment, useEffect } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { RouteComponentProps } from 'react-router-dom';
-import { EuiButton, EuiPageTemplate, EuiCallOut, EuiSpacer } from '@elastic/eui';
+import { EuiButton, EuiPageTemplate, EuiSpacer } from '@elastic/eui';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 
@@ -117,7 +118,7 @@ export const RepositoryList: React.FunctionComponent<RouteComponentProps<MatchPa
   } else if (repositories && repositories.length === 0) {
     content = (
       <EuiPageTemplate.EmptyPrompt
-        iconType="managementApp"
+        iconType="gear"
         title={
           <h1>
             <FormattedMessage
@@ -157,22 +158,21 @@ export const RepositoryList: React.FunctionComponent<RouteComponentProps<MatchPa
       <section data-test-subj="repositoryList">
         {defaultRepositoryLoadError && (
           <>
-            <EuiCallOut
+            <KbnWarningCallout
               announceOnMount={false}
-              color="warning"
-              iconType="warning"
               title={
                 <FormattedMessage
                   id="xpack.snapshotRestore.repositoryList.defaultRepositoryLoadErrorCalloutTitle"
                   defaultMessage="The default repository feature is currently unavailable"
                 />
               }
-            >
-              <FormattedMessage
-                id="xpack.snapshotRestore.repositoryList.defaultRepositoryLoadErrorCalloutDescription"
-                defaultMessage="Please try refreshing the page or returning at a later time."
-              />
-            </EuiCallOut>
+              text={
+                <FormattedMessage
+                  id="xpack.snapshotRestore.repositoryList.defaultRepositoryLoadErrorCalloutDescription"
+                  defaultMessage="Please try refreshing the page or returning at a later time."
+                />
+              }
+            />
             <EuiSpacer size="m" />
           </>
         )}

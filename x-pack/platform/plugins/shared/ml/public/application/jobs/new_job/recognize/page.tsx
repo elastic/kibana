@@ -9,15 +9,8 @@ import type { FC } from 'react';
 import React, { useState, Fragment, useEffect, useCallback } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import {
-  EuiTitle,
-  EuiFlexItem,
-  EuiFlexGroup,
-  EuiText,
-  EuiSpacer,
-  EuiCallOut,
-  EuiPanel,
-} from '@elastic/eui';
+import { EuiTitle, EuiFlexItem, EuiFlexGroup, EuiSpacer, EuiPanel, EuiText } from '@elastic/eui';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 import { isEqual, merge } from 'lodash';
 import moment from 'moment';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
@@ -36,8 +29,8 @@ import type {
 } from '@kbn/ml-common-types/modules';
 import type { JobId } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
 import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
-import { useDataSource } from '../../../contexts/ml';
 import { useMlKibana, useMlLocator } from '../../../contexts/kibana';
+import { useDataSource } from '../../../contexts/ml';
 import { CreateResultCallout } from './components/create_result_callout';
 import { KibanaObjectList } from './components/kibana_objects';
 import { ModuleJobs } from './components/module_jobs';
@@ -81,7 +74,6 @@ export const Page: FC<PageProps> = ({ moduleId, existingGroupIds }) => {
   const anomalyDetectionJobsBack = useAnomalyDetectionJobsBack();
   const locator = useMlLocator();
 
-  // #region State
   const [jobPrefix, setJobPrefix] = useState<string>('');
   const [jobs, setJobs] = useState<ModuleJobUI[]>([]);
   const [jobOverrides, setJobOverrides] = useState<JobOverrides>({});
@@ -90,9 +82,13 @@ export const Page: FC<PageProps> = ({ moduleId, existingGroupIds }) => {
   const [resultsUrl, setResultsUrl] = useState<string>('');
   const [existingGroups, setExistingGroups] = useState(existingGroupIds);
   const [jobsAwaitingNodeCount, setJobsAwaitingNodeCount] = useState(0);
-  // #endregion
 
-  const { selectedSavedSearch, selectedDataView: dataView, combinedQuery } = useDataSource();
+  const {
+    selectedSavedSearch,
+    selectedDataView: dataView,
+    combinedQuery,
+    projectRouting,
+  } = useDataSource();
   const pageTitle = selectedSavedSearch
     ? i18n.translate('xpack.ml.newJob.recognize.savedSearchPageTitle', {
         defaultMessage: 'Discover session {savedSearchTitle}',
@@ -138,6 +134,7 @@ export const Page: FC<PageProps> = ({ moduleId, existingGroupIds }) => {
           // By default we want to use full non-frozen time range
           query: addExcludeFrozenToQuery(combinedQuery),
           ...(isPopulatedObject(runtimeMappings) ? { runtimeMappings } : {}),
+          projectRouting,
         });
         return {
           start,
@@ -147,7 +144,7 @@ export const Page: FC<PageProps> = ({ moduleId, existingGroupIds }) => {
         return Promise.resolve(timeRange);
       }
     },
-    [combinedQuery, dataView, getTimeFieldRange]
+    [dataView, getTimeFieldRange, combinedQuery, projectRouting]
   );
 
   useEffect(() => {
@@ -167,7 +164,6 @@ export const Page: FC<PageProps> = ({ moduleId, existingGroupIds }) => {
         useFullIndexData,
         timeRange,
       } = formValues;
-
       const resultTimeRange = await getTimeRange(useFullIndexData, timeRange);
 
       try {
@@ -183,6 +179,7 @@ export const Page: FC<PageProps> = ({ moduleId, existingGroupIds }) => {
           startDatafeed: startDatafeedAfterSave,
           ...(jobOverridesPayload !== null ? { jobOverrides: jobOverridesPayload } : {}),
           ...resultTimeRange,
+          ...(projectRouting ? { projectRouting } : {}),
         });
         const {
           datafeeds: datafeedsResponse,
@@ -258,6 +255,7 @@ export const Page: FC<PageProps> = ({ moduleId, existingGroupIds }) => {
       }
     },
     [
+      projectRouting,
       dataView,
       getTimeRange,
       jobOverrides,
@@ -296,27 +294,34 @@ export const Page: FC<PageProps> = ({ moduleId, existingGroupIds }) => {
         back={anomalyDetectionJobsBack}
       />
 
+      {projectRouting ? (
+        <EuiText size="s">
+          <FormattedMessage
+            id="xpack.ml.newJob.recognize.projectRouting"
+            defaultMessage="Project scope: {projectRouting}"
+            values={{ projectRouting }}
+          />
+          <EuiSpacer size="m" />
+        </EuiText>
+      ) : null}
+
       {displayQueryWarning && (
         <>
-          <EuiCallOut
-            announceOnMount={false}
+          <KbnWarningCallout
             title={
               <FormattedMessage
                 id="xpack.ml.newJob.recognize.searchWillBeOverwrittenLabel"
                 defaultMessage="Search will be overwritten"
               />
             }
-            color="warning"
-            iconType="warning"
-          >
-            <EuiText size="s">
+            text={
               <FormattedMessage
                 id="xpack.ml.newJob.recognize.usingSavedSearchDescription"
                 defaultMessage="Using a saved Discover session will mean the query used in the datafeeds will be different from the default ones we supply in the {moduleId} module."
                 values={{ moduleId }}
               />
-            </EuiText>
-          </EuiCallOut>
+            }
+          />
           <EuiSpacer size="l" />
         </>
       )}

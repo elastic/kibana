@@ -10,7 +10,6 @@
 import type { SerializableRecord } from '@kbn/utility-types';
 import { map, pick, zipObject } from 'lodash';
 import type { SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
-
 import type { ExpressionTypeDefinition, ExpressionValueBoxed } from '../types';
 import type { PointSeries, PointSeriesColumn } from './pointseries';
 import type { ExpressionValueRender } from './render';
@@ -24,6 +23,9 @@ export enum DimensionType {
   SPLIT_COLUMN = 'splitCol',
   SPLIT_ROW = 'splitRow',
 }
+
+export const MAX_DATATABLE_ROWS = 10_000; // matches default ES index.max_result_window
+const MAX_DATATABLE_CELLS = MAX_DATATABLE_ROWS * 50; // max rows * 50 columns per row
 
 const name = 'datatable';
 
@@ -55,6 +57,7 @@ export type DatatableColumnType =
   | 'nested'
   | 'histogram'
   | 'flattened'
+  | 'number_range'
   | 'null';
 
 /**
@@ -164,6 +167,7 @@ export interface DatatableColumn {
   id: string;
   name: string;
   meta: DatatableColumnMeta;
+  /** An ES|QL column without values. Rows have no key for it, and the row values follow the other columns' order. */
   isNull?: boolean;
   // Whether the column is computed by the query (not from the index)
   isComputedColumn?: boolean;
@@ -198,6 +202,11 @@ export interface DatatableMeta {
    * The `Datatable` data source.
    */
   source?: string;
+
+  /**
+   * Whether approximate results were applied for the query that generated the `Datatable`.
+   */
+  approximationApplied?: boolean;
 
   [key: string]: unknown;
 }
@@ -247,6 +256,12 @@ export const datatable: ExpressionTypeDefinition<typeof name, Datatable, Seriali
   },
   deserialize: (table) => {
     const { columns, rows } = table;
+    if (rows.length > MAX_DATATABLE_ROWS) {
+      throw new Error(`Datatable exceeds maximum of ${MAX_DATATABLE_ROWS} rows.`);
+    }
+    if (columns.length * rows.length > MAX_DATATABLE_CELLS) {
+      throw new Error(`Datatable exceeds maximum allowed size of ${MAX_DATATABLE_CELLS} cells.`);
+    }
     return {
       ...table,
       rows: rows.map((row) => {

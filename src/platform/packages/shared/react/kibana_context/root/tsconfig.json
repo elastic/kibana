@@ -22,7 +22,6 @@
     "@kbn/core-execution-context-browser",
     "@kbn/core-execution-context-browser-mocks",
     "@kbn/shared-ux-router",
-    "@kbn/core-chrome-layout-constants",
     "@kbn/shared-ux-error-boundary",
     "@kbn/core-base-browser-internal",
     "@kbn/react-kibana-context-env",

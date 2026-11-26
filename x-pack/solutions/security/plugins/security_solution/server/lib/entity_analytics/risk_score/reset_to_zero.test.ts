@@ -34,7 +34,15 @@ describe('resetToZero', () => {
     dataClient = riskScoreDataClientMock.create();
     writerBulkMock = jest.fn().mockResolvedValue({ errors: [], docs_written: 1 });
     (dataClient.getWriter as jest.Mock).mockResolvedValue({ bulk: writerBulkMock });
-    (persistRiskScoresToEntityStore as jest.Mock).mockResolvedValue([]);
+    (persistRiskScoresToEntityStore as jest.Mock).mockImplementation(
+      async ({ scores }: { scores: Partial<Record<string, unknown[]>> }) => {
+        const count = Object.values(scores).reduce(
+          (sum, arr) => sum + ((arr as unknown[] | undefined)?.length ?? 0),
+          0
+        );
+        return { docsWritten: count, unexpectedErrors: [] };
+      }
+    );
     privmonUserCrudService = {
       create: jest.fn(),
       get: jest.fn(),
@@ -55,41 +63,7 @@ describe('resetToZero', () => {
     jest.clearAllMocks();
   });
 
-  it('uses legacy id field and does not write to entity store when V2 is disabled', async () => {
-    (esClient.esql.query as jest.Mock).mockResolvedValue({
-      values: [['host-a', 'host.name']],
-    });
-
-    const result = await resetToZero({
-      esClient,
-      dataClient,
-      spaceId: 'default',
-      entityType: EntityType.host,
-      assetCriticalityService: assetCriticalityServiceMock.create(),
-      privmonUserCrudService,
-      experimentalFeatures,
-      logger,
-      excludedEntities: [],
-      idBasedRiskScoringEnabled: false,
-      refresh: 'wait_for',
-    });
-
-    expect(result).toEqual({ scoresWritten: 1 });
-    expect(writerBulkMock).toHaveBeenCalledWith({
-      host: [
-        expect.objectContaining({
-          id_field: 'host.name',
-          id_value: 'host-a',
-          calculated_score: 0,
-          calculated_score_norm: 0,
-        }),
-      ],
-      refresh: 'wait_for',
-    });
-    expect(persistRiskScoresToEntityStore).not.toHaveBeenCalled();
-  });
-
-  it('uses entity.id and writes zero scores to entity store when V2 is enabled', async () => {
+  it('uses entity.id and writes zero scores to entity store', async () => {
     (esClient.esql.query as jest.Mock).mockResolvedValue({
       values: [['host:abc123', null]],
     });
@@ -104,7 +78,6 @@ describe('resetToZero', () => {
       experimentalFeatures,
       logger,
       excludedEntities: ['host:do-not-reset'],
-      idBasedRiskScoringEnabled: true,
       crudClient,
       refresh: 'wait_for',
     });
@@ -162,7 +135,6 @@ describe('resetToZero', () => {
       experimentalFeatures,
       logger,
       excludedEntities: [],
-      idBasedRiskScoringEnabled: false,
     });
 
     expect(result).toEqual({ scoresWritten: 0 });

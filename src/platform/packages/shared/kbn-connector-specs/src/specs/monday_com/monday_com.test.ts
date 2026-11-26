@@ -270,8 +270,8 @@ describe('MondayCom', () => {
   });
 
   describe('createItem action', () => {
-    it('is not exposed as a tool', () => {
-      expect(MondayCom.actions.createItem.isTool).toBe(false);
+    it('is exposed as a tool', () => {
+      expect(MondayCom.actions.createItem.isTool).toBe(true);
     });
 
     it('calls create_item with required fields and empty columnValues default', async () => {
@@ -307,8 +307,8 @@ describe('MondayCom', () => {
   });
 
   describe('changeItemColumnValues action', () => {
-    it('is not exposed as a tool', () => {
-      expect(MondayCom.actions.changeItemColumnValues.isTool).toBe(false);
+    it('is exposed as a tool', () => {
+      expect(MondayCom.actions.changeItemColumnValues.isTool).toBe(true);
     });
 
     it('calls change_item_column_values with camelCase keys and JSON-stringified columnValues', async () => {
@@ -331,8 +331,8 @@ describe('MondayCom', () => {
   });
 
   describe('createSubitem action', () => {
-    it('is not exposed as a tool', () => {
-      expect(MondayCom.actions.createSubitem.isTool).toBe(false);
+    it('is exposed as a tool', () => {
+      expect(MondayCom.actions.createSubitem.isTool).toBe(true);
     });
 
     it('posts a CreateSubitem GraphQL mutation with parentItemId and subitemName', async () => {
@@ -357,8 +357,8 @@ describe('MondayCom', () => {
   });
 
   describe('moveItemToGroup action', () => {
-    it('is not exposed as a tool', () => {
-      expect(MondayCom.actions.moveItemToGroup.isTool).toBe(false);
+    it('is exposed as a tool', () => {
+      expect(MondayCom.actions.moveItemToGroup.isTool).toBe(true);
     });
 
     it('posts a MoveItem GraphQL mutation', async () => {
@@ -569,20 +569,15 @@ describe('MondayCom', () => {
   });
 
   describe('test handler', () => {
-    it('returns ok with tool count on successful connection', async () => {
-      if (!MondayCom.test) throw new Error('test handler not defined');
+    it('returns {} on successful connection', async () => {
       const result = await MondayCom.test.handler(mockContext);
       expect(mockListTools).toHaveBeenCalled();
-      expect(result).toEqual({
-        ok: true,
-        message: 'Connected to Monday.com MCP server. 62 tools available.',
-      });
+      expect(result).toEqual({});
     });
 
     it('propagates errors thrown by withMcpClient', async () => {
       const { withMcpClient } = jest.requireMock('../../lib/mcp/with_mcp_client');
       withMcpClient.mockRejectedValueOnce(new Error('connection refused'));
-      if (!MondayCom.test) throw new Error('test handler not defined');
       await expect(MondayCom.test.handler(mockContext)).rejects.toThrow('connection refused');
     });
   });

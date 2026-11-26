@@ -9,8 +9,8 @@
 
 import type { MaybePromise } from '@kbn/utility-types';
 import type { UnauthorizedError } from '@kbn/es-errors';
-import type { SetAuthHeaders } from '@kbn/core-http-server';
-import { isRealRequest } from '@kbn/core-http-router-server-internal';
+import type { Headers, SetAuthHeaders } from '@kbn/core-http-server';
+import { isKibanaRequest, isRealRequest } from '@kbn/core-http-router-server-internal';
 import type {
   ScopeableRequest,
   UnauthorizedErrorHandler,
@@ -22,7 +22,8 @@ import type {
 
 /** @internal */
 export type InternalUnauthorizedErrorHandler = (
-  error: UnauthorizedError
+  error: UnauthorizedError,
+  authHeaders?: Headers
 ) => MaybePromise<UnauthorizedErrorHandlerResult>;
 
 /** @internal */
@@ -50,18 +51,26 @@ export const createInternalErrorHandler = ({
   request: ScopeableRequest;
   setAuthHeaders: SetAuthHeaders;
 }): InternalUnauthorizedErrorHandler => {
-  // we don't want to support 401 retry for fake requests
-  if (!isRealRequest(request)) {
+  // 401 retry is supported for real requests and for fake `CoreKibanaRequest`s (whose credentials
+  // a handler may be able to refresh, e.g. Kibana-minted service account requests), but not for
+  // bare `{ headers }` fake requests: they can't be distinguished by handlers, which are typed
+  // against `KibanaRequest`.
+  if (!isKibanaRequest(request)) {
     return notHandledInternalErrorHandler;
   }
-  return async (error) => {
+  return async (error, authHeaders) => {
     try {
       const handler = getHandler();
       if (!handler) {
         return toolkit.notHandled();
       }
-      const result = await handler({ request, error }, toolkit);
-      if (isRetryResult(result)) {
+      const result = await handler(
+        { request, error, ...(authHeaders && { authHeaders }) },
+        toolkit
+      );
+      if (isRetryResult(result) && isRealRequest(request)) {
+        // Fake requests are deliberately excluded: the auth headers storage is only ever read for
+        // real requests, and a fake request's effective credential is its own mutable `headers`.
         setAuthHeaders(request, result.authHeaders);
       }
       return result;

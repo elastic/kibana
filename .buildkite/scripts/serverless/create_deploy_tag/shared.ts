@@ -9,9 +9,9 @@
 
 import axios from 'axios';
 
-import { getExec } from './mock_exec';
-import type { GitCommitExtract } from './info_sections/commit_info';
-import type { BuildkiteBuildExtract } from './info_sections/build_info';
+import { getExec } from './mock_exec.ts';
+import type { GitCommitExtract } from './info_sections/commit_info.ts';
+import type { BuildkiteBuildExtract } from './info_sections/build_info.ts';
 import { BuildkiteClient, getGithubClient } from '#pipeline-utils';
 
 const SELECTED_COMMIT_META_KEY = 'selected-commit-hash';

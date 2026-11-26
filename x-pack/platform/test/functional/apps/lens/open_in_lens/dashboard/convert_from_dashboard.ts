@@ -16,7 +16,6 @@ import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../../../../ftr_provider_context';
 
 const AREA_PANEL_INDEX = 0;
-const TIMELION_PANEL_INDEX = 1;
 const HISTOGRAM_PANEL_INDEX = 2;
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
@@ -31,11 +30,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await dashboard.initTests();
       await header.waitUntilLoadingHasFinished();
       await dashboard.loadDashboardInEditMode('legacy visualizations');
-    });
-
-    it('should show notification in context menu if visualization can be converted', async () => {
-      await dashboard.waitForRenderComplete();
-      expect(await dashboard.isNotificationExists(AREA_PANEL_INDEX)).to.be(true);
     });
 
     it('should convert legacy visualization to lens by clicking "convert to lens" action', async () => {
@@ -53,16 +47,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       const titles = await dashboard.getPanelTitles();
 
       expect(titles[0]).to.be('area (converted)');
-
-      expect(await dashboard.isNotificationExists(AREA_PANEL_INDEX)).to.be(false);
-    });
-
-    it('should not show notification in context menu if visualization can not be converted', async () => {
-      expect(await dashboard.isNotificationExists(TIMELION_PANEL_INDEX)).to.be(false);
     });
 
     it('should carry the visualizations filters to Lens', async () => {
-      expect(await dashboard.isNotificationExists(HISTOGRAM_PANEL_INDEX)).to.be(true);
       const panel = (await dashboard.getDashboardPanels())[HISTOGRAM_PANEL_INDEX];
       await panelActions.convertToLens(panel);
       await lens.waitForVisualization('xyVisChart');
@@ -71,8 +58,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       expect(filterCount).to.equal(1);
       await lens.replaceInDashboard();
       await dashboard.waitForRenderComplete();
-
-      expect(await dashboard.isNotificationExists(HISTOGRAM_PANEL_INDEX)).to.be(false);
     });
   });
 }

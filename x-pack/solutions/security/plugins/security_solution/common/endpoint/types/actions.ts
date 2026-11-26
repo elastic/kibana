@@ -44,6 +44,12 @@ export interface ActionResponseOutput<
      * this value may not be available and thus will be empty string in those cases
      */
     canceled_id?: string;
+
+    /**
+     * The UUID of the duplicate action that was already queued or running on the endpoint when this most
+     * recent one arrived on the host
+     */
+    duplicate_of_id?: string;
   } & TOutputContent;
 }
 
@@ -71,12 +77,41 @@ export interface SuspendProcessActionOutputContent {
   entity_id?: string;
 }
 
+/** A single killed process descendant. Only for Endpoint starting with v9.6 */
+export interface KilledProcessDescendant {
+  code?: string;
+  pid?: number;
+  parent_pid?: number;
+  entity_id?: string;
+  parent_entity_id?: string;
+  process_name?: string;
+  command?: string;
+  error?: string;
+}
+
 export interface KillProcessActionOutputContent {
   code: string;
   command?: string;
   pid?: number;
   entity_id?: string;
+  /** Process Name is currently a SentinelOne only property */
   process_name?: string;
+  /** Killed process descendants. Only for Endpoint starting with v9.6 */
+  descendants?: KilledProcessDescendant[];
+}
+
+/** Where Endpoint uploaded the file of an action sent with `parameters.export`. Endpoint sends it only on success. */
+export interface ResponseActionExportedOutput {
+  /** The provider id from the request's `parameters.export` */
+  export: string;
+  /** The provider `type`, e.g. `azure_blob`. A plain string: newer Endpoints may report types this Kibana doesn't know */
+  service: string;
+  /** Storage account name */
+  account: string;
+  /** Container name */
+  container: string;
+  /** Blob name inside the container, e.g. `<action id>/upload.zip` */
+  path: string;
 }
 
 export interface ResponseActionGetFileOutputContent {
@@ -91,9 +126,25 @@ export interface ResponseActionGetFileOutputContent {
     type: string;
   }>;
   /**
+   * `true` when `contents` does not list every file in the zip (the list is capped when the
+   * response action retrieves many files). Only for Endpoint that support `get_file_multi_path`
+   */
+  contents_truncated?: boolean;
+  /**
+   * A summary of all the files processed. Only for Endpoint that support `get_file_multi_path`
+   */
+  totals?: {
+    files: number;
+    bytes: number;
+    /** The number of files by status */
+    counts: Record<string, number>;
+  };
+  /**
    * The relative API path to download the output file for this response action
    */
   downloadUri?: string;
+  /** Set when the file was uploaded to an export provider instead of to Fleet */
+  exported?: ResponseActionExportedOutput;
 }
 
 export interface ResponseActionExecuteOutputContent {
@@ -283,7 +334,20 @@ export type ResponseActionParametersWithProcessData =
   | ResponseActionParametersWithProcessName;
 
 export interface ResponseActionGetFileParameters {
-  path: string;
+  /** The path of the file to retrieve. Mutually exclusive with `paths` */
+  path?: string;
+  /**
+   * The list of paths to retrieve. Mutually exclusive with `path`.
+   * Only for Endpoint that support the `get_file_multi_path` capability
+   */
+  paths?: string[];
+  /**
+   * Read a file that the OS has locked from a snapshot of its volume. Valid for `endpoint` agent
+   * type only, and supported on Windows only (requires the `get_file_force` capability).
+   */
+  force?: boolean;
+  /** Id of an export provider in the host's Elastic Defend policy. Endpoint uploads the file there instead of to Fleet */
+  export?: string;
 }
 
 export interface ResponseActionsExecuteParameters {
@@ -311,6 +375,31 @@ export interface ResponseActionMemoryDumpOutputContent {
   path: string;
   /** The remaining free disk space in bytes (after creating memory dump) */
   disk_free_space: number;
+  /** Returned for `raw` memory dump. The size of the dump's memory */
+  total_memory_size?: number;
+  /** Returned for `raw` memory dump. The amount of bytes captured by the dump */
+  total_bytes_captured?: number;
+  /**
+   * Returned for `raw` memory dump.
+   * Calculated as `total_bytes_captured `/ (double) `total_memory_size` - tells the percentage
+   * of RAM successfully captured into a dump
+   */
+  success_ratio?: number;
+  /**
+   * Returned for `kernel` memory dump.
+   * If true, the dump was executed from the driver, which means it doesn't have the same restrictions
+   * as a dump executed from user mode (e.g. it will work on older systems and will contain user mode memory)
+   */
+  dump_executed_from_driver?: boolean;
+  /**
+   * Returned for `kernel` memory dump.
+   * Indicates if the user space memory was included in the dump
+   */
+  user_space_included?: boolean;
+  /** Set when the dump was uploaded to an export provider instead of to Fleet */
+  exported?: ResponseActionExportedOutput;
+  /** The dump file name. Only for Endpoint starting with v9.7 */
+  file_name?: string;
 }
 
 export type EndpointActionDataParameterTypes =
@@ -335,7 +424,8 @@ export type EndpointActionResponseDataOutput =
   | KillProcessActionOutputContent
   | ResponseActionScanOutputContent
   | ResponseActionRunScriptOutputContent
-  | ResponseActionCancelOutputContent;
+  | ResponseActionCancelOutputContent
+  | ResponseActionMemoryDumpOutputContent;
 
 /**
  * The data stored with each Response Action under `EndpointActions.data` property

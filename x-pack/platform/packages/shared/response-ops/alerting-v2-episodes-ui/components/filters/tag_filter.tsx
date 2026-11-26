@@ -7,6 +7,7 @@
 
 import React, { useCallback, useMemo, useState } from 'react';
 import { EuiFilterButton, EuiPopover } from '@elastic/eui';
+import type { HttpStart } from '@kbn/core-http-browser';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { TimeRange } from '@kbn/es-query';
@@ -17,7 +18,7 @@ import * as i18n from './translations';
 interface AlertEpisodesTagFilterProps {
   selectedTags?: string[] | null;
   onTagsChange: (tags: string[] | undefined) => void;
-  services: { expressions: ExpressionsStart; spaces: SpacesPluginStart };
+  services: { expressions: ExpressionsStart; http: HttpStart; spaces: SpacesPluginStart };
   timeRange: TimeRange;
   'data-test-subj'?: string;
 }
@@ -66,7 +67,7 @@ export function AlertEpisodesTagFilter({
       aria-label={i18n.TAG_FILTER_ARIA_LABEL}
       button={
         <EuiFilterButton
-          iconType="arrowDown"
+          iconType="chevronSingleDown"
           iconSide="right"
           onClick={() => setIsOpen(!isOpen)}
           isSelected={isOpen}

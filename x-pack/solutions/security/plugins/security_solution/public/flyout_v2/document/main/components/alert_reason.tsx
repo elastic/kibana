@@ -64,7 +64,7 @@ export const AlertReason: FC<AlertReasonProps> = ({ hit }) => {
     const button = (
       <EuiButtonEmpty
         size="s"
-        iconType="arrowDown"
+        iconType="chevronSingleDown"
         onClick={togglePopover}
         iconSide="right"
         data-test-subj={REASON_DETAILS_PREVIEW_BUTTON_TEST_ID}

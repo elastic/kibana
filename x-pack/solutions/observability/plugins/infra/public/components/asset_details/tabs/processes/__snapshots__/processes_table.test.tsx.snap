@@ -6,7 +6,7 @@ Object {
   "baseElement": <body>
     <div>
       <div
-        class="emotion-euiContainerCSS"
+        class="euiTable__wrapper emotion-euiContainerCSS"
       >
         <table
           class="euiTable emotion-euiTable-fixed-uncompressed-hasBackground-desktop"
@@ -90,6 +90,7 @@ Object {
                         Time
                       </span>
                       <span
+                        aria-hidden="true"
                         class="euiTableSortIcon euiTableSortIcon--sortable"
                         color="subdued"
                         data-euiicon-type="sortable"
@@ -124,6 +125,7 @@ Object {
                         CPU
                       </span>
                       <span
+                        aria-hidden="true"
                         class="euiTableSortIcon"
                         data-euiicon-type="sortDown"
                       />
@@ -157,6 +159,7 @@ Object {
                         Mem.
                       </span>
                       <span
+                        aria-hidden="true"
                         class="euiTableSortIcon euiTableSortIcon--sortable"
                         color="subdued"
                         data-euiicon-type="sortable"
@@ -168,7 +171,7 @@ Object {
             </tr>
           </thead>
           <tbody
-            class="css-x41dah-ProcessesTable"
+            class="css-13v7qks-visibleColumns"
           >
             <tr
               class="euiTableRow emotion-euiTableRow-desktop"
@@ -190,6 +193,7 @@ Object {
                       class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
                     >
                       <span
+                        aria-hidden="true"
                         color="inherit"
                         data-euiicon-type="chevronSingleRight"
                       />
@@ -232,7 +236,7 @@ Object {
                     class="euiTableCellContent__text"
                   >
                     <div
-                      class="css-10w4zy3-CodeLine"
+                      class="css-10uu5zv-CodeLine"
                     >
                       <code>
                         /some/test/command here 3
@@ -291,7 +295,7 @@ Object {
   </body>,
   "container": <div>
     <div
-      class="emotion-euiContainerCSS"
+      class="euiTable__wrapper emotion-euiContainerCSS"
     >
       <table
         class="euiTable emotion-euiTable-fixed-uncompressed-hasBackground-desktop"
@@ -375,6 +379,7 @@ Object {
                       Time
                     </span>
                     <span
+                      aria-hidden="true"
                       class="euiTableSortIcon euiTableSortIcon--sortable"
                       color="subdued"
                       data-euiicon-type="sortable"
@@ -409,6 +414,7 @@ Object {
                       CPU
                     </span>
                     <span
+                      aria-hidden="true"
                       class="euiTableSortIcon"
                       data-euiicon-type="sortDown"
                     />
@@ -442,6 +448,7 @@ Object {
                       Mem.
                     </span>
                     <span
+                      aria-hidden="true"
                       class="euiTableSortIcon euiTableSortIcon--sortable"
                       color="subdued"
                       data-euiicon-type="sortable"
@@ -453,7 +460,7 @@ Object {
           </tr>
         </thead>
         <tbody
-          class="css-x41dah-ProcessesTable"
+          class="css-13v7qks-visibleColumns"
         >
           <tr
             class="euiTableRow emotion-euiTableRow-desktop"
@@ -475,6 +482,7 @@ Object {
                     class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
                   >
                     <span
+                      aria-hidden="true"
                       color="inherit"
                       data-euiicon-type="chevronSingleRight"
                     />
@@ -517,7 +525,7 @@ Object {
                   class="euiTableCellContent__text"
                 >
                   <div
-                    class="css-10w4zy3-CodeLine"
+                    class="css-10uu5zv-CodeLine"
                   >
                     <code>
                       /some/test/command here 3

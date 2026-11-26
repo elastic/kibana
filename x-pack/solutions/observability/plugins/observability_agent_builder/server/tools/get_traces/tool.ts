@@ -83,6 +83,13 @@ export function createGetTracesTool({
   const toolDefinition: BuiltinToolDefinition<typeof getTracesSchema> = {
     id: OBSERVABILITY_GET_TRACES_TOOL_ID,
     type: ToolType.builtin,
+    annotations: {
+      title: 'Get Traces',
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: true,
+      openWorldHint: false,
+    },
     description: `Retrieves Observability documents (logs, transactions, spans, and errors) for one or more traces.
 
   This tool is KQL-driven: it searches for matching Observability documents within the time range, extracts one or more trace.id values, then returns Observability documents grouped by trace.id.
@@ -109,12 +116,13 @@ export function createGetTracesTool({
     },
     handler: async (
       { start, end, index, kqlFilter, maxDocsPerTrace, maxTraces, fields },
-      { esClient }
+      { esClient, request }
     ) => {
       try {
         const result = await getToolHandler({
           core,
           plugins,
+          request,
           logger,
           esClient,
           start,

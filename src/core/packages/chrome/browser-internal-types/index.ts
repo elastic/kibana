@@ -15,13 +15,16 @@ import type { MountPoint } from '@kbn/core-mount-utils-browser';
 import type {
   ChromeSetup,
   ChromeStart,
-  AppHeaderConfig,
+  AppHeaderTitle,
+  ChromeAppHeaderConfig,
   ChromeBadge,
   ChromeBreadcrumb,
   ChromeBreadcrumbsAppendExtension,
   ChromeBreadcrumbsBadge,
-  ChromeNext,
-  GlobalHeaderAiButton,
+  ChromeAiButton,
+  ChromeControls,
+  ChromeHelp,
+  ChromeNewsfeedHandler,
   ChromeUserBanner,
   GlobalSearchConfig,
   NavigationCustomization,
@@ -31,10 +34,33 @@ import type {
   SolutionId,
   ChromeProjectNavigationNode,
   ChromeSetProjectBreadcrumbsParams,
+  ProjectNavigationLinks,
 } from '@kbn/core-chrome-browser';
+
+/**
+ * Cross-plugin navigation references collected from a solution nav tree.
+ * @internal
+ */
+export interface NavTreeDependencies {
+  /** Id of the plugin that registered the solution nav tree. */
+  ownerPluginId: string;
+  /** `link` targets referenced by the tree (app ids or deep-link ids). */
+  linkTargets: string[];
+}
 
 /** @internal */
 export type InternalChromeSetup = ChromeSetup;
+
+/** @internal */
+export interface InlineAppHeaderState {
+  title?: AppHeaderTitle;
+}
+
+/** @internal */
+export interface InlineAppHeaderRegistration {
+  update(title?: AppHeaderTitle): void;
+  unregister(): void;
+}
 
 /** @internal */
 export interface InternalChromeStart extends ChromeStart {
@@ -46,6 +72,7 @@ export interface InternalChromeStart extends ChromeStart {
     readonly basePath: IBasePath;
     readonly legacyActionMenu$: Observable<MountPoint | undefined>;
     readonly capabilities: Capabilities;
+    readonly docTitleParts$: Observable<readonly string[]>;
   };
 
   sideNav: ChromeStart['sideNav'] & {
@@ -123,6 +150,9 @@ export interface InternalChromeStart extends ChromeStart {
 
     /**
      * Set project breadcrumbs.
+     * @deprecated Project breadcrumb overrides remain only for compatibility fallback back
+     * navigation. Declare hierarchy in the project navigation tree and pass explicit `back`
+     * configuration to `AppHeader`.
      * @param breadcrumbs - Breadcrumb(s) to set.
      * @param params.absolute If true, replaces defaults; otherwise appends. Defaults to false.
      */
@@ -142,34 +172,78 @@ export interface InternalChromeStart extends ChromeStart {
 
     /** Register the handler that opens the navigation customization modal. Called once by the navigation plugin. */
     registerCustomizeNavigationHandler(handler: () => void): void;
+
+    /**
+     * Attach supplementary lists to an existing project-nav deep link.
+     * Does not require project chrome style; unused until project nav renders. The lists render in
+     * primary and footer hover popovers and, for panel openers, the existing side panel. They do
+     * not create a side panel or render in More.
+     */
+    registerNavigationLinks(links: ProjectNavigationLinks): void;
+
+    /** Registered supplementary navigation lists. Live updates. */
+    getRegisteredNavigationLinks$(): Observable<readonly ProjectNavigationLinks[]>;
+
+    /**
+     * Register a solution nav tree so Core can track the cross-plugin `link` references it
+     * declares when nav-dependency collection is enabled. No-op otherwise. Called by the
+     * navigation plugin for every tree that provides an `ownerPluginId`.
+     */
+    registerNavTreeDependencies(
+      ownerPluginId: string,
+      navigationTree$: Observable<NavigationTreeDefinition>
+    ): void;
+
+    /**
+     * Return the latest cross-plugin navigation references collected from all registered solution
+     * nav trees. Empty when collection is disabled. Consumed by the navigation-dependency snapshot.
+     */
+    getNavTreeDependencies(): NavTreeDependencies[];
   };
 
-  /** @internal Extends public `next` with `get$` for Chrome layout components. */
-  next: InternalChromeNext;
+  /** Persistent chrome controls, including getters for Chrome-owned renderers. */
+  controls: InternalChromeControls;
+
+  /** Help action registration, including getters for Chrome-owned renderers. */
+  help: InternalChromeHelp;
+
+  /** Chrome-owned app-header registry. Public apps should use `@kbn/app-header`. */
+  appHeader: {
+    set(config: ChromeAppHeaderConfig): () => void;
+    get$(): Observable<ChromeAppHeaderConfig | undefined>;
+  };
+
+  /** Whether the active app currently mounts an inline `AppHeader`. */
+  inlineAppHeader: {
+    get$(): Observable<InlineAppHeaderState | undefined>;
+    register(title?: AppHeaderTitle): InlineAppHeaderRegistration;
+  };
 }
 
 /** @internal */
-export interface InternalChromeNext extends ChromeNext {
-  aiButton: ChromeNext['aiButton'] & {
-    get$(): Observable<GlobalHeaderAiButton[]>;
+export interface InternalChromeControls extends ChromeControls {
+  aiButton: ChromeControls['aiButton'] & {
+    get$(): Observable<ChromeAiButton[]>;
   };
-  contextSwitcher: ChromeNext['contextSwitcher'] & {
-    get$(): Observable<ReactNode>;
-  };
-  projectPicker: ChromeNext['projectPicker'] & {
-    get$(): Observable<ReactNode>;
-  };
-  globalSearch: ChromeNext['globalSearch'] & {
+  globalSearch: ChromeControls['globalSearch'] & {
     get$(): Observable<GlobalSearchConfig | undefined>;
   };
-  inlineAppHeader: {
-    get$(): Observable<boolean>;
-    set(mounted: boolean): void;
-  };
-  appHeader: ChromeNext['appHeader'] & {
-    get$(): Observable<AppHeaderConfig | undefined>;
-  };
-  userMenu: ChromeNext['userMenu'] & {
+  contextSwitcher: ChromeControls['contextSwitcher'] & {
     get$(): Observable<ReactNode>;
   };
+  projectPicker: ChromeControls['projectPicker'] & {
+    get$(): Observable<ReactNode>;
+  };
+  subscriptionBadge: ChromeControls['subscriptionBadge'] & {
+    get$(): Observable<ReactNode>;
+  };
+  userMenu: ChromeControls['userMenu'] & {
+    get$(): Observable<ReactNode>;
+  };
+}
+
+/** @internal */
+export interface InternalChromeHelp extends ChromeHelp {
+  getFeedbackHandler$(): Observable<(() => void) | undefined>;
+  getNewsfeedHandler$(): Observable<ChromeNewsfeedHandler | undefined>;
 }

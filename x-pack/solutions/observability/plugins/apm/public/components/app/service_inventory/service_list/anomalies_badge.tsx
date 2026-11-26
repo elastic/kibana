@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React from 'react';
+import type { ReactNode } from 'react';
+import React, { useMemo } from 'react';
 import { css } from '@emotion/react';
 import { EuiBadge, EuiHealth, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -15,6 +16,7 @@ import type { EbtClickAttrs } from '@kbn/ebt-click';
 import { getEbtProps } from '@kbn/ebt-click';
 import { ML_ANOMALY_SEVERITY } from '@kbn/ml-anomaly-utils/anomaly_severity';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
+import { useLocatorUrl } from '@kbn/share-plugin/public';
 import { isMobileAgentName } from '../../../../../common/agent_name';
 import {
   getApmMlDetectorLabel,
@@ -22,6 +24,7 @@ import {
   getSeverityColor,
   isNoAnomalyScore,
 } from '../../../../../common/anomaly_detection';
+import type { APMLocatorPayload } from '../../../../locator/helpers';
 import { APM_APP_LOCATOR_ID } from '../../../../locator/service_detail_locator';
 
 const COMPARISON_ENABLED_DEFAULT = true;
@@ -162,7 +165,28 @@ interface AnomaliesBadgeProps {
   ebt?: Omit<EbtClickAttrs, 'detail'>;
 }
 
-export function AnomaliesBadge({ score, detectorType, navigationProps, ebt }: AnomaliesBadgeProps) {
+/** Presentation descriptor shared by {@link AnomaliesBadge} and the service flyout header badge. */
+export interface AnomaliesBadgeDescriptor {
+  color: 'hollow';
+  /** Badge content (the severity health indicator + label). */
+  label: ReactNode;
+  toolTipContent: string;
+  ariaLabel: string;
+  /** Set when the badge navigates to the service overview with the anomaly highlighted. */
+  href?: string;
+  ebtProps: ReturnType<typeof getEbtProps> | {};
+}
+
+/**
+ * Resolves the anomaly badge presentation. A hook because the in-app href is derived via
+ * `useLocatorUrl`; shared by the standalone badge and the service flyout header so they agree.
+ */
+export function useAnomaliesBadgeDescriptor({
+  score,
+  detectorType,
+  navigationProps,
+  ebt,
+}: AnomaliesBadgeProps): AnomaliesBadgeDescriptor {
   const isNone = isNoAnomalyScore(score);
   const severity = getSeverity(score);
   const text = isNone
@@ -171,59 +195,81 @@ export function AnomaliesBadge({ score, detectorType, navigationProps, ebt }: An
       })
     : formatLabelWithScore(getI18nLabel(severity), score);
 
-  const href =
-    navigationProps && score !== undefined && !isNone
-      ? navigationProps.locators.get(APM_APP_LOCATOR_ID)?.getRedirectUrl({
-          serviceName: navigationProps.serviceName,
-          isMobileAgentName: isMobileAgentName(navigationProps.agentName),
-          query: {
-            environment: navigationProps.anomalyEnvironment,
-            rangeFrom: navigationProps.rangeFrom,
-            rangeTo: navigationProps.rangeTo,
-            kuery: '',
-            transactionType: navigationProps.transactionType,
-            anomalyThreshold: severity === ML_ANOMALY_SEVERITY.UNKNOWN ? undefined : severity,
-            comparisonEnabled: navigationProps.comparisonEnabled ?? COMPARISON_ENABLED_DEFAULT,
-            offset: 'expected_bounds',
-          },
-        })
-      : undefined;
+  const isInteractive = Boolean(navigationProps && score !== undefined && !isNone);
+  const locator = isInteractive ? navigationProps?.locators.get(APM_APP_LOCATOR_ID) ?? null : null;
 
-  const tooltipContent = getTooltipContent({
-    isNone,
-    score,
-    detectorType,
+  // `getRedirectUrl` points at `/app/r` (share redirect) and causes a full Kibana reload
+  // that can drop comparison query params. `getUrl` (via useLocatorUrl) is the in-app path.
+  const locatorParams = useMemo<APMLocatorPayload>(() => {
+    if (!navigationProps) {
+      return {};
+    }
+    return {
+      serviceName: navigationProps.serviceName,
+      isMobileAgentName: isMobileAgentName(navigationProps.agentName),
+      query: {
+        environment: navigationProps.anomalyEnvironment,
+        rangeFrom: navigationProps.rangeFrom,
+        rangeTo: navigationProps.rangeTo,
+        kuery: '',
+        transactionType: navigationProps.transactionType,
+        anomalyThreshold: severity === ML_ANOMALY_SEVERITY.UNKNOWN ? undefined : severity,
+        comparisonEnabled: navigationProps.comparisonEnabled ?? COMPARISON_ENABLED_DEFAULT,
+        offset: 'expected_bounds',
+      },
+    };
+  }, [navigationProps, severity]);
+
+  const locatorUrl = useLocatorUrl(locator, locatorParams, undefined, [locator, locatorParams]);
+  const href = isInteractive && locatorUrl ? locatorUrl : undefined;
+
+  return {
+    color: 'hollow',
+    ariaLabel: text,
+    toolTipContent: getTooltipContent({
+      isNone,
+      score,
+      detectorType,
+      href,
+      comparisonEnabled: navigationProps?.comparisonEnabled,
+      isInServiceOverview: navigationProps?.isInServiceOverview,
+    }),
     href,
-    comparisonEnabled: navigationProps?.comparisonEnabled,
-    isInServiceOverview: navigationProps?.isInServiceOverview,
-  });
+    ebtProps:
+      ebt && href
+        ? getEbtProps({
+            ...ebt,
+            detail: severity,
+          })
+        : {},
+    label: (
+      <EuiHealth
+        textSize="inherit"
+        color={score === undefined || isNone ? 'subdued' : getSeverityColor(score)}
+        css={anomaliesBadgeHealthCss}
+      >
+        {text}
+      </EuiHealth>
+    ),
+  };
+}
 
-  const roleProps = href ? { href } : { role: 'img' as const, 'aria-label': text };
-  const ebtProps =
-    ebt && href
-      ? getEbtProps({
-          ...ebt,
-          detail: severity,
-        })
-      : {};
+export function AnomaliesBadge(props: AnomaliesBadgeProps) {
+  const { color, label, toolTipContent, ariaLabel, href, ebtProps } =
+    useAnomaliesBadgeDescriptor(props);
+  const roleProps = href ? { href } : { role: 'img' as const, 'aria-label': ariaLabel };
 
   return (
-    <EuiToolTip position="bottom" content={tooltipContent}>
+    <EuiToolTip position="bottom" content={toolTipContent}>
       <EuiBadge
         tabIndex={0}
-        color="hollow"
+        color={color}
         css={anomaliesBadgeCss}
         data-test-subj="apmAnomaliesBadge"
         {...roleProps}
         {...ebtProps}
       >
-        <EuiHealth
-          textSize="inherit"
-          color={score === undefined || isNone ? 'subdued' : getSeverityColor(score)}
-          css={anomaliesBadgeHealthCss}
-        >
-          {text}
-        </EuiHealth>
+        {label}
       </EuiBadge>
     </EuiToolTip>
   );

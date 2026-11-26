@@ -36,6 +36,7 @@ import { RULE_SAVED_OBJECT_TYPE } from '../..';
 import { AD_HOC_RUN_SAVED_OBJECT_TYPE } from '../../saved_objects';
 import type { GapBase } from '../../application/gaps/types';
 import { gapReasonType } from '../../../common/constants';
+import { CLOUD_API_KEY_AUTH_ERROR_GUIDANCE } from '../cloud_api_key_auth_error_guidance';
 
 const mockNow = '2020-01-01T02:00:00.000Z';
 const eventLogger = eventLoggerMock.create();
@@ -388,6 +389,17 @@ describe('AlertingEventLogger', () => {
         },
       });
     });
+
+    test('should update standard event with rule tags correctly', () => {
+      const event = initializeExecuteRecord(ruleContextWithScheduleDelay, ruleData, [alertSO]);
+      alertingEventLogger.initialize({ context: ruleContext, runDate, ruleData });
+      alertingEventLogger.addOrUpdateRuleData({ tags: ['tag-1', 'tag-3'] });
+
+      expect(alertingEventLogger.getEvent()).toEqual({
+        ...event,
+        tags: ['tag-1', 'tag-3'],
+      });
+    });
   });
 
   describe('setExecutionSucceeded()', () => {
@@ -516,6 +528,20 @@ describe('AlertingEventLogger', () => {
         },
         message: 'rule failed!',
       });
+    });
+
+    test('should prepend remediation guidance when the error reports a cloud API key auth failure', () => {
+      mockEventLoggerStartTiming();
+
+      alertingEventLogger.initialize({ context: ruleContext, runDate, ruleData });
+      alertingEventLogger.setExecutionFailed(
+        'rule failed!',
+        'security_exception: failed to authenticate cloud API key: [0xD38358]'
+      );
+
+      expect(alertingEventLogger.getEvent()?.error?.message).toBe(
+        `${CLOUD_API_KEY_AUTH_ERROR_GUIDANCE} security_exception: failed to authenticate cloud API key: [0xD38358]`
+      );
     });
 
     test('should update execute event correctly for backfill executions if error occurs after rule data is set', () => {
@@ -1601,6 +1627,7 @@ describe('helper functions', () => {
       type: ruleType,
       consumer: 'test-consumer',
       revision: 0,
+      tags: ['tag-1', 'tag-2'],
     };
     ruleDataWithName = { ...ruleData, name: 'my-super-cool-rule' };
     alertSO = { id: '123', relation: 'primary', type: 'alert', typeId: 'test' };
@@ -1622,6 +1649,7 @@ describe('helper functions', () => {
       expect(record.rule).toBeDefined();
 
       // these fields should be explicitly set
+      expect(record.tags).toEqual(['tag-1', 'tag-2']);
       expect(record.event?.action).toEqual('execute');
       expect(record.event?.kind).toEqual('alert');
       expect(record.event?.category).toEqual([ruleData.type?.producer]);
@@ -2106,6 +2134,14 @@ describe('helper functions', () => {
             },
           },
         },
+      });
+    });
+
+    test('updates event tags if provided', () => {
+      updateEventWithRuleData(event, { ruleTags: ['tag-1', 'tag-2'] });
+      expect(event).toEqual({
+        ...expectedEvent,
+        tags: ['tag-1', 'tag-2'],
       });
     });
 

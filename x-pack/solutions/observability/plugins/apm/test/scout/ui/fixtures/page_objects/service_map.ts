@@ -12,7 +12,7 @@ import {
   type ScoutPage,
 } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
-import { waitForApmSettingsHeaderLink } from '../page_helpers';
+import { waitForApmAppMenuReady } from '../page_helpers';
 import { EXTENDED_TIMEOUT, PRODUCTION_ENVIRONMENT } from '../constants';
 
 export class ServiceMapPage {
@@ -31,7 +31,8 @@ export class ServiceMapPage {
   public serviceMapPopoverContent: Locator;
   public serviceMapPopoverTitle: Locator;
   public serviceMapDependencyDetailsButton: Locator;
-  public serviceMapEdgeExploreTracesButton: Locator;
+  public requestFlyout: Locator;
+  public requestFlyoutTitle: Locator;
   public serviceMapOptionsPanel: Locator;
   public serviceMapHideControlsButton: Locator;
   public serviceMapShowControlsButton: Locator;
@@ -64,16 +65,15 @@ export class ServiceMapPage {
     this.zoomInBtnControl = this.zoomInBtn;
     this.zoomOutBtnControl = this.zoomOutBtn;
     this.fitViewBtn = this.centerServiceMapBtn;
-    this.noServicesPlaceholder = page.locator('.euiEmptyPrompt__content .euiTitle');
+    this.noServicesPlaceholder = page.getByRole('heading', { name: 'No services available' });
     this.serviceMapPopover = page.testSubj.locator('serviceMapPopover');
     this.serviceMapPopoverContent = page.testSubj.locator('serviceMapPopoverContent');
     this.serviceMapPopoverTitle = page.testSubj.locator('serviceMapPopoverTitle');
     this.serviceMapDependencyDetailsButton = page.testSubj.locator(
       'apmDependencyContentsDependencyDetailsButton'
     );
-    this.serviceMapEdgeExploreTracesButton = page.testSubj.locator(
-      'apmEdgeContentsOpenInDiscoverButton'
-    );
+    this.requestFlyout = page.testSubj.locator('requestFlyout');
+    this.requestFlyoutTitle = page.testSubj.locator('requestFlyoutHeader');
     this.serviceMapOptionsPanel = page.testSubj.locator('serviceMapOptionsPanel');
     this.serviceMapHideControlsButton = page.testSubj.locator('serviceMapHideControlsButton');
     this.serviceMapShowControlsButton = page.testSubj.locator('serviceMapShowControlsButton');
@@ -107,7 +107,7 @@ export class ServiceMapPage {
       params.set('kuery', options.kuery);
     }
     await this.page.goto(`${this.kbnUrl.app('apm')}/service-map?${params.toString()}`);
-    return await waitForApmSettingsHeaderLink(this.page);
+    return await waitForApmAppMenuReady(this.page);
   }
 
   async getSearchBar() {
@@ -246,10 +246,10 @@ export class ServiceMapPage {
     await this.serviceMapPopoverContent.waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
   }
 
-  async openEdgePopover(edgeId: string) {
+  async openEdgeFlyout(edgeId: string) {
     await this.settleServiceMapLayout();
     await this.clickEdge(edgeId);
-    await this.serviceMapPopoverContent.waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
+    await this.requestFlyout.waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
   }
 
   getNodeById(nodeId: string) {
@@ -281,6 +281,11 @@ export class ServiceMapPage {
 
   getServiceNodeAlertsBadge(serviceName: string) {
     return this.getServiceNodeRoot(serviceName).getByTestId('serviceMapNodeAlertsBadge');
+  }
+
+  /** Compact requests / failure / latency line under the service circle when node stats are on. */
+  getServiceNodeStats(serviceName: string) {
+    return this.getServiceNodeRoot(serviceName).getByTestId('serviceMapNodeStats');
   }
 
   async waitForNodeToLoad(nodeId: string) {

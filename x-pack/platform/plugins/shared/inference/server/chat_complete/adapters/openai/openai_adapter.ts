@@ -22,6 +22,8 @@ import {
   isNativeFunctionCallingSupported,
   handleConnectorStreamResponse,
   handleConnectorDataResponse,
+  ensureToolsWhenHistoryHasToolUse,
+  pickConnectorTelemetryForConnector,
 } from '../../utils';
 import type { OpenAIRequest } from './types';
 import { messagesToOpenAI, toolsToOpenAI, toolChoiceToOpenAI } from './to_openai';
@@ -29,6 +31,7 @@ import { processOpenAIStream } from './process_openai_stream';
 import { processOpenAIResponse } from './process_openai_response';
 import { emitTokenCountEstimateIfMissing } from './emit_token_count_if_missing';
 import { getTemperatureIfValid } from '../../utils/get_temperature';
+import { resolveOpenAIReasoningEffort } from '../../utils/resolve_chat_completion_reasoning';
 
 export const openAIAdapter: InferenceConnectorAdapter = {
   chatComplete: ({
@@ -40,6 +43,7 @@ export const openAIAdapter: InferenceConnectorAdapter = {
     temperature = 0,
     functionCalling = 'auto',
     modelName: modelName,
+    reasoning,
     logger,
     abortSignal,
     metadata,
@@ -70,22 +74,38 @@ export const openAIAdapter: InferenceConnectorAdapter = {
         messages: messagesToOpenAI({ system: wrapped.system, messages: wrapped.messages }),
       };
     } else {
-      const openAiTools = toolsToOpenAI(tools);
+      const toolsForRequest = ensureToolsWhenHistoryHasToolUse({ tools, messages });
+      const openAiTools = toolsToOpenAI(toolsForRequest);
       const hasTools = Array.isArray(openAiTools) && openAiTools.length > 0;
+      const modelId = modelName ?? connector.config?.defaultModel;
+      const reasoningEffort = resolveOpenAIReasoningEffort({
+        hasNativeTools: hasTools,
+        model: modelId,
+      });
+
+      if (reasoningEffort && ((reasoning?.effort ?? 'none') !== 'none' || reasoning?.enabled)) {
+        logger.debug(
+          `Overriding the requested reasoning with reasoning_effort "${reasoningEffort}": model "${modelId}" rejects native tools at any other effort`
+        );
+      }
 
       request = {
         stream,
         ...getTemperatureIfValid(temperature, { connector, modelName }),
         model: modelName,
         messages: messagesToOpenAI({ system, messages }),
-        // Some OpenAI-compatible gateways (notably for Anthropic models) reject tool calling
-        // params when the tools list is empty. Only forward tools/tool_choice when tools exist.
         ...(hasTools
           ? {
-              tool_choice: toolChoiceToOpenAI(toolChoice, { connector, tools }),
+              tool_choice: toolChoiceToOpenAI(toolChoice, {
+                connector,
+                tools: toolsForRequest,
+                modelId,
+                logger,
+              }),
               tools: openAiTools,
             }
           : {}),
+        ...(reasoningEffort ? { reasoning_effort: reasoningEffort } : {}),
       };
     }
 
@@ -97,7 +117,9 @@ export const openAIAdapter: InferenceConnectorAdapter = {
           signal: abortSignal,
           stream,
           ...(metadata?.connectorTelemetry
-            ? { telemetryMetadata: metadata.connectorTelemetry }
+            ? {
+                telemetryMetadata: pickConnectorTelemetryForConnector(metadata.connectorTelemetry),
+              }
             : {}),
           ...(typeof timeout === 'number' && isFinite(timeout) ? { timeout } : {}),
           ...(typeof maxContentLength === 'number' && isFinite(maxContentLength)

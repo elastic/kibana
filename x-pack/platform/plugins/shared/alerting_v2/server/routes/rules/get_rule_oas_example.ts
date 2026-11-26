@@ -7,12 +7,17 @@
 
 import type { AlertingOasOperationObject } from '../oas_types';
 import { buildOasOperation } from '../oas_utils';
-import { RULE_NOT_FOUND_RESPONSE, ruleResponseExample } from './rule_oas_shared_examples';
+import {
+  INVALID_QUERY_PARAMETERS_RESPONSE,
+  RULE_NOT_FOUND_RESPONSE,
+  ruleResponseExample,
+} from './rule_oas_shared_examples';
 
 export const getRuleOasExamples = (): AlertingOasOperationObject =>
   buildOasOperation({
     responses: {
       200: ruleResponseExample('getRuleResponse', 'Retrieved host CPU threshold rule'),
+      400: INVALID_QUERY_PARAMETERS_RESPONSE,
       404: RULE_NOT_FOUND_RESPONSE,
     },
   });

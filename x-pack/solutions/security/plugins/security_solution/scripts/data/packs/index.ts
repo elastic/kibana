@@ -8,6 +8,7 @@
 import type { TechnologyWatchPack } from './types';
 import { pack as awsIamPack } from './aws-iam/pack';
 import { pack as githubActionsPack } from './github-actions/pack';
+import { pack as ipFieldsPack } from './ip-fields/pack';
 import { pack as kubernetesPack } from './kubernetes/pack';
 import { pack as oktaPack } from './okta/pack';
 
@@ -18,6 +19,7 @@ const PACKS: Record<string, TechnologyWatchPack> = {
   [awsIamPack.id]: awsIamPack,
   [kubernetesPack.id]: kubernetesPack,
   [githubActionsPack.id]: githubActionsPack,
+  [ipFieldsPack.id]: ipFieldsPack,
 };
 
 export const packs = Object.values(PACKS);
@@ -26,4 +28,4 @@ export const getPack = (id: string): TechnologyWatchPack | undefined => PACKS[id
 
 export const listPacks = (): TechnologyWatchPack[] => packs;
 
-export { awsIamPack, githubActionsPack, kubernetesPack, oktaPack };
+export { awsIamPack, githubActionsPack, ipFieldsPack, kubernetesPack, oktaPack };

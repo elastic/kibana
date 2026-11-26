@@ -1,7 +1,0 @@
-{
-  "type": "shared-browser",
-  "id": "@kbn/agent-builder-visualizations",
-  "owner": "@elastic/kibana-presentation",
-  "group": "platform",
-  "visibility": "shared"
-}

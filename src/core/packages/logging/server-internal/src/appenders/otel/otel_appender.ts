@@ -14,25 +14,47 @@ import type { Ecs } from '@elastic/ecs';
 import type { OTLPLogExporter as OTLPLogExporterHTTP } from '@opentelemetry/exporter-logs-otlp-http';
 import type { OTLPLogExporter as OTLPLogExporterGRPC } from '@opentelemetry/exporter-logs-otlp-grpc';
 import type { OTLPLogExporter as OTLPLogExporterPROTO } from '@opentelemetry/exporter-logs-otlp-proto';
-import { schema } from '@kbn/config-schema';
+import { offeringBasedSchema, schema } from '@kbn/config-schema';
+import { withTimeout } from '@kbn/std';
 import type { DisposableAppender, Layout, LogLevel, LogRecord } from '@kbn/logging';
 import {
   ROOT_CONTEXT,
+  SeverityNumber,
   TraceFlags,
   metrics,
   trace,
   type Context,
   type Attributes,
   type AttributeValue,
+  type Logger,
   type MeterProvider,
 } from '@opentelemetry/api';
-import type { AnyValueMap } from '@opentelemetry/api-logs';
-import { SeverityNumber, type Logger } from '@opentelemetry/api-logs';
-import { resources } from '@elastic/opentelemetry-node/sdk';
-import { BatchLogRecordProcessor, LoggerProvider } from '@opentelemetry/sdk-logs';
-import type { OtelAppenderConfig, LayoutConfigType } from '@kbn/core-logging-server';
+import {
+  BatchLogRecordProcessor,
+  LoggerProvider,
+  type ReadableLogRecord,
+} from '@opentelemetry/sdk-logs';
+import type { ExporterMetrics } from '@opentelemetry/otlp-exporter-base';
+import { createOtlpHttpExporterMetrics } from '@opentelemetry/otlp-exporter-base/node-http';
+import {
+  convertLegacyOtlpGrpcOptions,
+  createOtlpGrpcExporterMetrics,
+} from '@opentelemetry/otlp-grpc-exporter-base';
+import { LogsExporterMetricsHelper } from '@opentelemetry/otlp-transformer';
+import {
+  OTEL_COMPONENT_TYPE_VALUE_OTLP_GRPC_LOG_EXPORTER,
+  OTEL_COMPONENT_TYPE_VALUE_OTLP_HTTP_LOG_EXPORTER,
+} from '@opentelemetry/semantic-conventions/incubating';
+import type {
+  OtelAppenderConfig,
+  OtelAppenderPluginConfig,
+  OtelAttributesTransform,
+  LayoutConfigType,
+} from '@kbn/core-logging-server';
 import { buildOtelResources } from '@kbn/telemetry';
 import { getFlattenedObject } from '@kbn/std';
+import { resourceFromAttributes } from '@opentelemetry/resources';
+import type { Resource } from '@opentelemetry/resources';
 import { Layouts } from '../../layouts/layouts';
 import { JsonLayout } from '../../layouts/json_layout';
 import {
@@ -41,8 +63,12 @@ import {
   resolveTlsMaterial,
   toGrpcRootCerts,
 } from './otel_tls';
+import { RetryingLogRecordExporter } from './retrying_log_exporter';
 
 const DISPOSE_TIMEOUT_MS = 5_000;
+
+/** Headroom over the retry budget so the processor outlasts it plus one in-flight attempt. */
+const EXPORT_TIMEOUT_MARGIN_MS = 30_000;
 
 const isPromiseLike = (value: unknown): value is PromiseLike<unknown> =>
   typeof value === 'object' &&
@@ -50,7 +76,7 @@ const isPromiseLike = (value: unknown): value is PromiseLike<unknown> =>
   typeof (value as { then?: unknown }).then === 'function';
 
 /** The value half of a raw resource-attribute entry: an AttributeValue, or a promise of one. */
-type ResolvedResourceValue = ReturnType<resources.Resource['getRawAttributes']>[number][1];
+type ResolvedResourceValue = ReturnType<Resource['getRawAttributes']>[number][1];
 
 /**
  * Captures the requested resource-attribute values from the resolved attribute map so they can be
@@ -70,37 +96,6 @@ const capturePromotedResourceAttributes = (
     }
   }
   return promoted;
-};
-
-/**
- * A `fieldAdditions` template parsed once at construction so `append()` doesn't re-parse the regex on
- * every record (audit logging is a hot path). `segments` are the literal/placeholder parts in order;
- * `refs` are the referenced attribute keys, for the presence/scalar check.
- */
-interface CompiledFieldAddition {
-  key: string;
-  refs: string[];
-  segments: Array<{ literal: string } | { ref: string }>;
-}
-
-/**
- * Parses each `fieldAdditions` template into literal segments + placeholder refs. Splitting on the
- * `{ref}` capturing group yields alternating literals (even indices) and refs (odd indices).
- */
-const compileFieldAdditions = (
-  fieldAdditions?: Record<string, string>
-): CompiledFieldAddition[] | undefined => {
-  if (!fieldAdditions) {
-    return undefined;
-  }
-  return Object.entries(fieldAdditions).map(([key, template]) => {
-    const tokens = template.split(/\{([^}]+)\}/);
-    const segments = tokens.map((token, index) =>
-      index % 2 === 0 ? { literal: token } : { ref: token }
-    );
-    const refs = tokens.filter((_, index) => index % 2 === 1);
-    return { key, refs, segments };
-  });
 };
 
 /**
@@ -183,11 +178,6 @@ const resolveLayoutConfig = (config?: LayoutConfigType): LayoutConfigType => {
 const toAttributes = (
   record: LogRecord,
   includeLogMeta: boolean,
-  fieldRenames?: Record<string, string | string[]>,
-  fieldDrops?: string[],
-  fieldDefaults?: Record<string, string | string[]>,
-  fieldUppercase?: string[],
-  compiledAdditions?: CompiledFieldAddition[],
   promotedAttributes?: Attributes
 ): Attributes => {
   const attrs: Attributes = {
@@ -241,63 +231,6 @@ const toAttributes = (
     });
   }
 
-  if (fieldRenames) {
-    for (const [oldKey, newKeys] of Object.entries(fieldRenames)) {
-      if (oldKey in attrs) {
-        const value = attrs[oldKey];
-        delete attrs[oldKey];
-        const targets = Array.isArray(newKeys) ? newKeys : [newKeys];
-        for (const newKey of targets) {
-          attrs[newKey] = value;
-        }
-      }
-    }
-  }
-
-  // Derived attributes: build a value from a template referencing other flattened attributes.
-  // Runs after renames (so templates can reference renamed keys) and before drops (so a template
-  // may reference source fields that are then dropped, e.g. url.original from url.scheme/domain/path).
-  if (compiledAdditions) {
-    for (const { key, refs, segments } of compiledAdditions) {
-      // Templates may only reference scalar fields. Skip when any referenced field is missing,
-      // nullish, empty, or an array/object — so events that don't carry the source fields (e.g.
-      // non-http events for url.original) don't get a degenerate value, and array-valued attributes
-      // (e.g. source.ip, event.type) aren't silently comma-joined into the template.
-      const allUsable = refs.every((ref) => {
-        const value = attrs[ref];
-        return value != null && value !== '' && typeof value !== 'object';
-      });
-      if (!allUsable) {
-        continue;
-      }
-      attrs[key] = segments
-        .map((segment) => ('literal' in segment ? segment.literal : String(attrs[segment.ref])))
-        .join('');
-    }
-  }
-
-  if (fieldDrops) {
-    for (const key of fieldDrops) {
-      delete attrs[key];
-    }
-  }
-
-  if (fieldDefaults) {
-    for (const [key, value] of Object.entries(fieldDefaults)) {
-      if (!(key in attrs)) {
-        attrs[key] = value;
-      }
-    }
-  }
-
-  if (fieldUppercase) {
-    for (const key of fieldUppercase) {
-      if (typeof attrs[key] === 'string') {
-        attrs[key] = (attrs[key] as string).toUpperCase();
-      }
-    }
-  }
-
   return attrs;
 };
 
@@ -317,6 +250,20 @@ export class OtelAppender implements DisposableAppender {
     url: schema.string(),
     headers: schema.recordOf(schema.string(), schema.string(), { defaultValue: {} }),
     /**
+     * Serverless / internal only. Max log records buffered by the batch processor; once full,
+     * new records are dropped. Floored at 512, the SDK's default export batch size.
+     */
+    maxQueueSize: offeringBasedSchema({
+      serverless: schema.number({ defaultValue: 15_000, min: 512, max: 1_000_000 }),
+    }),
+    /**
+     * Serverless / internal only. How long transient export failures are retried before the
+     * batch is dropped; enables {@link RetryingLogRecordExporter}.
+     */
+    maxElapsedTime: offeringBasedSchema({
+      serverless: schema.duration({ defaultValue: '2m' }),
+    }),
+    /**
      * Optional layout config. Defaults to pattern layout (body.text, aliased to `message`).
      * Use `{ type: 'json' }` for a structured body (body.structured); note that the ECS
      * `message` field will be empty in that case because it aliases body.text.
@@ -328,28 +275,6 @@ export class OtelAppender implements DisposableAppender {
     includeResources: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 20 })),
     // Resource-attribute keys to also emit as per-record log attributes.
     promoteResourceAttributes: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 20 })),
-    // Template-based derived attributes: target key -> template with {field} placeholders.
-    fieldAdditions: schema.maybe(schema.recordOf(schema.string(), schema.string())),
-    fieldRenames: schema.maybe(
-      schema.recordOf(
-        schema.string(),
-        schema.oneOf([
-          schema.string(),
-          schema.arrayOf(schema.string(), { minSize: 1, maxSize: 20 }),
-        ])
-      )
-    ),
-    fieldDrops: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 20 })),
-    fieldUppercase: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 20 })),
-    fieldDefaults: schema.maybe(
-      schema.recordOf(
-        schema.string(),
-        schema.oneOf([
-          schema.string(),
-          schema.arrayOf(schema.string(), { minSize: 1, maxSize: 20 }),
-        ])
-      )
-    ),
     ssl: schema.maybe(
       schema.object(
         {
@@ -385,21 +310,45 @@ export class OtelAppender implements DisposableAppender {
     ),
   });
 
+  /**
+   * {@link OtelAppender.configSchema} plus the plugin-only options of
+   * {@link OtelAppenderPluginConfig}; used only by the {@link LoggingServiceSetup.configure}
+   * validation path, never wired into YAML config validation.
+   */
+  public static runtimeConfigSchema = OtelAppender.configSchema.extends({
+    transformAttributes: schema.maybe(
+      schema.any({
+        validate: (value) => {
+          if (typeof value !== 'function') {
+            return 'expected an attribute-transform function (attrs: Attributes) => Attributes';
+          }
+        },
+      })
+    ),
+    dropResourceAttributes: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 20 })),
+    // The YAML schema gates these on the serverless offering; this runtime path is internal
+    // (plugins calling `LoggingServiceSetup.configure`), so no gating and no defaults.
+    maxQueueSize: schema.maybe(schema.number({ min: 512, max: 1_000_000 })),
+    maxElapsedTime: schema.maybe(schema.duration()),
+  });
+
   private readonly loggerProvider: LoggerProvider;
   private readonly logger: Logger;
   private readonly layout: Layout;
   /** True when using JSON layout: the full LogRecord is sent as `body.structured`. */
   private readonly useStructuredBody: boolean;
-  private readonly fieldRenames?: Record<string, string | string[]>;
-  private readonly fieldDrops?: string[];
-  private readonly fieldDefaults?: Record<string, string | string[]>;
-  private readonly fieldUppercase?: string[];
-  private readonly compiledAdditions?: CompiledFieldAddition[];
+  private readonly transformAttributes?: OtelAttributesTransform;
   private readonly promotedAttributes: Attributes;
+  private disposed = false;
 
-  constructor(config: OtelAppenderConfig) {
+  constructor(config: OtelAppenderPluginConfig) {
     const meterProvider = metrics.getMeterProvider();
-    const exporter = createExporter(config, meterProvider);
+    const maxElapsedTimeMs = config.maxElapsedTime?.asMilliseconds();
+    // The SDK's built-in retry gives up after ~13s; the retry layer extends it to the budget.
+    const exporter =
+      maxElapsedTimeMs !== undefined
+        ? createRetryingExporter(config, meterProvider, maxElapsedTimeMs)
+        : createExporter(config, meterProvider);
     // Layer the resource from three sources (each overriding the previous):
     //   1. Auto-detected: host, OS, process, env-var OTel attributes
     //   2. Derived: service.name / service.version / deployment.environment from the
@@ -408,23 +357,22 @@ export class OtelAppender implements DisposableAppender {
     //
     // The fully-resolved resource above is then shaped by two config knobs:
     //   - includeResources: allowlist of keys to keep (default ['*'] = keep all).
-    //   - fieldDrops: denylist, applied to the resource only when includeResources includes '*'
-    //     (its default).
-    // An explicit allowlist fully governs the resource — a key it names is kept even if fieldDrops
-    // also lists it, because fieldDrops is primarily a per-record denylist (a field can be dropped
-    // from per-record attributes yet kept in the resource, e.g. audit logs' service.type).
+    //   - dropResourceAttributes: denylist, applied to the resource only when includeResources
+    //     includes '*' (its default).
+    // An explicit allowlist fully governs the resource — a key it names is kept even if
+    // dropResourceAttributes also lists it.
     const includeResources = config.includeResources ?? ['*'];
     const includeAll = includeResources.includes('*');
     const baseResource = buildOtelResources().merge(
-      resources.resourceFromAttributes(config.attributes ?? {})
+      resourceFromAttributes(config.attributes ?? {})
     );
 
     // The default appender (keep everything, no drops) uses the merged resource directly. Only when
     // we have to reshape it — filter the resource or promote attributes onto records — do we resolve
     // the attributes ourselves.
-    const needsFilter = !includeAll || Boolean(config.fieldDrops?.length);
+    const needsFilter = !includeAll || Boolean(config.dropResourceAttributes?.length);
     const needsPromotion = Boolean(config.promoteResourceAttributes?.length);
-    let resource: resources.Resource = baseResource;
+    let resource: Resource = baseResource;
     let promoted: Attributes = {};
 
     if (needsFilter || needsPromotion) {
@@ -450,17 +398,29 @@ export class OtelAppender implements DisposableAppender {
       }
 
       if (needsFilter) {
-        // Explicit allowlist governs alone; otherwise (['*']) fall back to the fieldDrops denylist.
+        // Explicit allowlist governs alone; otherwise (['*']) fall back to the denylist.
         const keepAttribute = (key: string) =>
-          includeAll ? !config.fieldDrops?.includes(key) : includeResources.includes(key);
+          includeAll
+            ? !config.dropResourceAttributes?.includes(key)
+            : includeResources.includes(key);
         const kept = [...resolved].filter(([key]) => keepAttribute(key));
-        resource = resources.resourceFromAttributes(Object.fromEntries(kept));
+        resource = resourceFromAttributes(Object.fromEntries(kept));
       }
     }
     this.promotedAttributes = promoted;
 
     this.loggerProvider = new LoggerProvider({
-      processors: [new BatchLogRecordProcessor({ exporter, selfObsMeterProvider: meterProvider })],
+      processors: [
+        new BatchLogRecordProcessor({
+          exporter,
+          selfObsMeterProvider: meterProvider,
+          ...(config.maxQueueSize !== undefined && { maxQueueSize: config.maxQueueSize }),
+          // The processor abandons exports after this timeout, so it must outlast the retry budget.
+          ...(maxElapsedTimeMs !== undefined && {
+            exportTimeoutMillis: maxElapsedTimeMs + EXPORT_TIMEOUT_MARGIN_MS,
+          }),
+        }),
+      ],
       resource,
       meterProvider,
     });
@@ -470,18 +430,18 @@ export class OtelAppender implements DisposableAppender {
 
     const layoutConfig = resolveLayoutConfig(config.layout);
     this.layout = Layouts.create(layoutConfig);
-    // JSON layout → sanitised LogRecord as AnyValueMap → indexed as body.structured.
+    // JSON layout → sanitised LogRecord as an OTel Attributes map → indexed as body.structured.
     // Pattern layout → formatted string → indexed as body.text (aliased to `message`).
     this.useStructuredBody = layoutConfig.type !== 'pattern';
-    this.fieldRenames = config.fieldRenames;
-    this.fieldDrops = config.fieldDrops;
-    this.fieldDefaults = config.fieldDefaults;
-    this.fieldUppercase = config.fieldUppercase;
-    this.compiledAdditions = compileFieldAdditions(config.fieldAdditions);
+    this.transformAttributes = config.transformAttributes;
   }
 
   public append(record: LogRecord): void {
     const severityNumber = toSeverityNumber(record.level);
+
+    // log.meta is omitted from attributes when using JSON layout because it
+    // is already part of the structured body.
+    const attributes = toAttributes(record, !this.useStructuredBody, this.promotedAttributes);
 
     this.logger.emit({
       timestamp: record.timestamp,
@@ -497,52 +457,84 @@ export class OtelAppender implements DisposableAppender {
           ? omitDeepNilValues(JsonLayout.ecsRecord(record))
           : this.layout.format(record),
       context: toTraceContext(record),
-      // log.meta is omitted from attributes when using JSON layout because it
-      // is already part of the structured body.
-      attributes: toAttributes(
-        record,
-        !this.useStructuredBody,
-        this.fieldRenames,
-        this.fieldDrops,
-        this.fieldDefaults,
-        this.fieldUppercase,
-        this.compiledAdditions,
-        this.promotedAttributes
-      ),
+      // The plugin transform hook runs last, on the fully flattened attributes.
+      attributes: this.transformAttributes ? this.transformAttributes(attributes) : attributes,
     });
   }
 
   public async dispose(): Promise<void> {
+    if (this.disposed) return;
+    this.disposed = true;
     // Wrap shutdown in a timeout to prevent indefinite hangs when the remote
     // endpoint is unreachable or slow (the spike confirmed this is a real risk).
     // Attach .catch() so that a late rejection from shutdown() after the timeout
     // fires does not produce an unhandled promise rejection.
     const shutdownPromise = this.loggerProvider.shutdown().catch(() => {});
-    await Promise.race([
-      shutdownPromise,
-      new Promise<void>((resolve) => setTimeout(resolve, DISPOSE_TIMEOUT_MS)),
-    ]);
+    await withTimeout({ promise: shutdownPromise, timeoutMs: DISPOSE_TIMEOUT_MS });
   }
 }
 
 const omitDeepNilValues = (obj: Ecs) => {
-  const result: AnyValueMap = {};
+  const result: Attributes = {};
   Object.entries(getFlattenedObject(obj))
     .filter(([_, value]) => !isNil(value))
     .forEach(([key, value]) => set(result, key, value));
   return result;
 };
 
+/**
+ * Wraps the SDK exporter in the retry layer, which records the `otel.sdk.exporter.*` metrics in
+ * its place so each batch is counted once, after its final attempt.
+ */
+const createRetryingExporter = (
+  config: OtelAppenderConfig,
+  meterProvider: MeterProvider,
+  maxElapsedTimeMs: number
+): RetryingLogRecordExporter => {
+  // Created before the SDK exporter so it takes the `otel.component.name` that exporter would get.
+  const exporterMetrics = createExporterMetrics(config, meterProvider);
+  return new RetryingLogRecordExporter(
+    createExporter(config, undefined),
+    maxElapsedTimeMs,
+    exporterMetrics
+  );
+};
+
+/** The `otel.sdk.exporter.*` metrics recorder the SDK exporter for `config.protocol` would use. */
+const createExporterMetrics = (
+  config: OtelAppenderConfig,
+  meterProvider: MeterProvider
+): ExporterMetrics<ReadableLogRecord[]> => {
+  switch (config.protocol) {
+    case 'http':
+    case 'proto':
+      return createOtlpHttpExporterMetrics(
+        OTEL_COMPONENT_TYPE_VALUE_OTLP_HTTP_LOG_EXPORTER,
+        LogsExporterMetricsHelper,
+        config.url,
+        meterProvider
+      );
+    case 'grpc':
+      return createOtlpGrpcExporterMetrics(
+        OTEL_COMPONENT_TYPE_VALUE_OTLP_GRPC_LOG_EXPORTER,
+        LogsExporterMetricsHelper,
+        // The SDK exporter records the normalized `host[:port]`, not the configured URL.
+        convertLegacyOtlpGrpcOptions({ url: config.url }, 'LOGS').url,
+        meterProvider
+      );
+  }
+};
+
 const createExporter = (
   config: OtelAppenderConfig,
-  selfObsMeterProvider: MeterProvider
+  selfObsMeterProvider: MeterProvider | undefined
 ): OTLPLogExporterHTTP | OTLPLogExporterGRPC | OTLPLogExporterPROTO => {
   const tls = resolveTlsMaterial(config.ssl);
 
   switch (config.protocol) {
     case 'http': {
       // No need to import the module at the top if not used in the switch statement.
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      // eslint-disable-next-line @kbn/compat/typescript-no-var-requires
       const { OTLPLogExporter } = require('@opentelemetry/exporter-logs-otlp-http');
       return new OTLPLogExporter({
         url: config.url,
@@ -553,7 +545,7 @@ const createExporter = (
     }
     case 'proto': {
       // No need to import the module at the top if not used in the switch statement.
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      // eslint-disable-next-line @kbn/compat/typescript-no-var-requires
       const { OTLPLogExporter } = require('@opentelemetry/exporter-logs-otlp-proto');
       return new OTLPLogExporter({
         url: config.url,
@@ -564,14 +556,14 @@ const createExporter = (
     }
     case 'grpc': {
       // No need to import the module at the top if not used in the switch statement.
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      // eslint-disable-next-line @kbn/compat/typescript-no-var-requires
       const { Metadata, credentials } = require('@grpc/grpc-js');
       const metadata = new Metadata();
       Object.entries(config.headers ?? {}).forEach(([key, value]) => {
         metadata.add(key, value);
       });
       // No need to import the module at the top if not used in the switch statement.
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      // eslint-disable-next-line @kbn/compat/typescript-no-var-requires
       const { OTLPLogExporter } = require('@opentelemetry/exporter-logs-otlp-grpc');
       return new OTLPLogExporter({
         url: config.url,

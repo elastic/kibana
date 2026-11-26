@@ -23,13 +23,23 @@ interface AttachmentAccordionProps {
   title: string;
   count: number;
   children: React.ReactNode;
+  isOpen?: boolean;
+  onToggle?: (isOpen: boolean) => void;
 }
 
-export const AttachmentAccordion = ({ id, title, count, children }: AttachmentAccordionProps) => {
+export const AttachmentAccordion = ({
+  id,
+  title,
+  count,
+  children,
+  isOpen: controlledIsOpen,
+  onToggle: onToggleProp,
+}: AttachmentAccordionProps) => {
   const { euiTheme } = useEuiTheme();
   const accordionId = useGeneratedHtmlId({ prefix: `case-view-attachment-${id}` });
-  // Controlled isOpen so we can fully unmount children when collapsed
-  const [isOpen, setIsOpen] = useState(true);
+  // Keep the accordion independently usable while allowing the attachments tab to coordinate it.
+  const [uncontrolledIsOpen, setUncontrolledIsOpen] = useState(true);
+  const isOpen = controlledIsOpen ?? uncontrolledIsOpen;
   const trackAttachmentAccordionOpened = useAttachmentAccordionOpenedEBT();
 
   // Reports every time the accordion becomes visible, including the initial mount (accordions
@@ -40,9 +50,15 @@ export const AttachmentAccordion = ({ id, title, count, children }: AttachmentAc
     }
   }, [isOpen, id, trackAttachmentAccordionOpened]);
 
-  const onToggle = useCallback((nextIsOpen: boolean) => {
-    setIsOpen(nextIsOpen);
-  }, []);
+  const onToggle = useCallback(
+    (nextIsOpen: boolean) => {
+      if (controlledIsOpen === undefined) {
+        setUncontrolledIsOpen(nextIsOpen);
+      }
+      onToggleProp?.(nextIsOpen);
+    },
+    [controlledIsOpen, onToggleProp]
+  );
   return (
     <EuiFlexItem grow={false}>
       <EuiPanel hasBorder>

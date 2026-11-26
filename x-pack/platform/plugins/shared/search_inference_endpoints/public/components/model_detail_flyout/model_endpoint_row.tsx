@@ -86,7 +86,7 @@ export const ModelEndpointRow: React.FC<ModelEndpointRowProps> = ({
               >
                 <EuiButtonIcon
                   data-test-subj="searchInferenceEndpointsModelEndpointRowCopyButton"
-                  iconType="copyClipboard"
+                  iconType="copy"
                   size="xs"
                   color="text"
                   aria-label={i18n.translate(

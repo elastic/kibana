@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
+import { ACTION_POLICY_ATTACHMENT_TYPE } from '@kbn/alerting-v2-schemas';
 import { createActionPolicyAttachmentDefinition } from './action_policy_attachment_definition';
 
 jest.mock('./action_policy_inline_content', () => ({
@@ -23,7 +24,7 @@ const createMockServices = () => ({
 
 const createAttachment = (overrides: { origin?: string } = {}) => ({
   id: 'att-1',
-  type: 'action_policy' as const,
+  type: ACTION_POLICY_ATTACHMENT_TYPE,
   versions: [],
   current_version: 1,
   origin: overrides.origin,
@@ -50,9 +51,35 @@ describe('createActionPolicyAttachmentDefinition', () => {
   });
 
   describe('getIcon', () => {
-    it('returns pagesSelect', () => {
+    it('returns tablePlay', () => {
       const definition = createActionPolicyAttachmentDefinition(createMockServices());
-      expect(definition.getIcon!()).toBe('pagesSelect');
+      expect(definition.getIcon!()).toBe('tablePlay');
+    });
+  });
+
+  describe('getHeader', () => {
+    it('returns the tablePlay icon without badges for a draft', () => {
+      const definition = createActionPolicyAttachmentDefinition(createMockServices());
+      expect(definition.getHeader!({ attachment: createAttachment() })).toEqual({
+        icon: 'tablePlay',
+      });
+    });
+
+    it('adds an unsaved changes badge when the latest version is newer than the last sync', () => {
+      const definition = createActionPolicyAttachmentDefinition(createMockServices());
+      const attachment = {
+        ...createAttachment({ origin: 'policy-123' }),
+        versionData: {
+          version: 2,
+          versionCount: 2,
+          createdAt: '2026-04-02T00:00:00.000Z',
+          originSyncedAt: '2026-04-01T00:00:00.000Z',
+        },
+      };
+
+      expect(definition.getHeader!({ attachment }).badges).toEqual([
+        { label: 'Unsaved', color: 'primary', iconType: 'save' },
+      ]);
     });
   });
 

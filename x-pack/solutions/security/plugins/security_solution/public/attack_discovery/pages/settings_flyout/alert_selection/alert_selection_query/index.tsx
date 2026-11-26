@@ -205,7 +205,7 @@ const AlertSelectionQueryComponent: React.FC<Props> = ({
           &&
             .kbnQueryBar__filterButtonGroup
             [data-test-subj='addFilter']
-            svg[data-icon-type='plusInCircleFilled']
+            svg[data-icon-type='plusCircle']
             path:nth-of-type(2) {
             display: none;
           }

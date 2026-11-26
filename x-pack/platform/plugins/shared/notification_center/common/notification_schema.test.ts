@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { notificationWriteSchema, notificationReadSchema } from './notification_schema';
+import {
+  notificationWriteSchema,
+  notificationReadSchema,
+  notificationQueryParamsSchema,
+} from './notification_schema';
 import type { Notification, NotificationInput, NotificationDocument } from './types';
 
 /** A producer submission — no `@timestamp` (NC stamps it on ingest). */
@@ -159,6 +163,49 @@ describe('notificationWriteSchema', () => {
       ).toThrow();
     });
   });
+
+  describe('targeting', () => {
+    it('omits profile_uid and space_ids when the notification is a broadcast', () => {
+      const parsed = notificationWriteSchema.parse(validInput);
+      expect(parsed).not.toHaveProperty('profile_uid');
+      expect(parsed).not.toHaveProperty('space_ids');
+    });
+
+    it('accepts a target user and spaces', () => {
+      const targeted = { ...validInput, profile_uid: 'u_abc123', space_ids: ['default', 'ops'] };
+      expect(notificationWriteSchema.parse(targeted)).toEqual(targeted);
+    });
+
+    it('rejects an empty profile_uid', () => {
+      expect(() => notificationWriteSchema.parse({ ...validInput, profile_uid: '' })).toThrow();
+    });
+
+    it('rejects a profile_uid longer than 256 characters', () => {
+      expect(() =>
+        notificationWriteSchema.parse({ ...validInput, profile_uid: 'x'.repeat(257) })
+      ).toThrow();
+    });
+
+    // An empty array would read as "targeted at no space", which no producer can mean.
+    it('rejects an empty space_ids array', () => {
+      expect(() => notificationWriteSchema.parse({ ...validInput, space_ids: [] })).toThrow();
+    });
+
+    it('rejects a space id longer than 1024 characters', () => {
+      expect(() =>
+        notificationWriteSchema.parse({ ...validInput, space_ids: ['x'.repeat(1025)] })
+      ).toThrow();
+    });
+
+    it('rejects more than 100 space ids', () => {
+      expect(() =>
+        notificationWriteSchema.parse({
+          ...validInput,
+          space_ids: Array.from({ length: 101 }, (_unused, i) => `space-${i}`),
+        })
+      ).toThrow();
+    });
+  });
 });
 
 describe('notificationReadSchema', () => {
@@ -217,5 +264,27 @@ describe('NotificationDocument typing', () => {
     // @ts-expect-error — write payload lacks @timestamp, so it is not a NotificationDocument
     const unstamped: NotificationDocument = notificationWriteSchema.parse(validInput);
     expect(unstamped).toBeDefined();
+  });
+});
+
+describe('notificationQueryParamsSchema', () => {
+  it('accepts the document-level filters', () => {
+    expect(
+      notificationQueryParamsSchema.parse({
+        namespace: 'inference',
+        type: 'modelStatus',
+        from: '2026-07-01T00:00:00.000Z',
+        to: '2026-07-20T00:00:00.000Z',
+      })
+    ).toEqual({
+      namespace: 'inference',
+      type: 'modelStatus',
+      from: '2026-07-01T00:00:00.000Z',
+      to: '2026-07-20T00:00:00.000Z',
+    });
+  });
+
+  it('rejects unknown params (strict)', () => {
+    expect(() => notificationQueryParamsSchema.parse({ nope: 'value' })).toThrow();
   });
 });

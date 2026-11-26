@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-// Runs stateful classic only: CCR is not available on Cloud deployments.
+// Runs local stateful classic only: the CCR resource setup requires a local
+// Elasticsearch transport endpoint for the self-referential remote cluster.
 //
 // Restores the "with data" accessibility scenarios from the deleted CCR a11y FTR
 // (follower index table + detail flyout, auto-follow pattern table + detail
@@ -14,7 +15,6 @@
 // address) is used, mirroring the original FTR's `localhost:9300` seed.
 
 import type { EsClient } from '@kbn/scout';
-import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { test, CUSTOM_ROLES } from '../fixtures';
 
@@ -85,7 +85,7 @@ const cleanupCcrResources = async (esClient: EsClient): Promise<void> => {
   }
 };
 
-test.describe('Cross-Cluster Replication - with data', { tag: tags.stateful.classic }, () => {
+test.describe('Cross-Cluster Replication - with data', { tag: '@local-stateful-classic' }, () => {
   test.beforeAll(async ({ esClient }) => {
     await cleanupCcrResources(esClient);
 

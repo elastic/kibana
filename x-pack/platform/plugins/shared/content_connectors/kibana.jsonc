@@ -1,7 +1,7 @@
 {
   "type": "plugin",
   "id": "@kbn/content-connectors-plugin",
-  "owner": "@elastic/search-kibana",
+  "owner": "@elastic/search-ml-ux",
   "group": "platform",
   "visibility": "shared",
   "description": "Plugin hosting shared features for connectors",
@@ -26,6 +26,7 @@
     "optionalPlugins": [
       "cloud",
       "discover",
+      "usageCollection",
     ],
     "requiredBundles": ["kibanaReact"]
   }

@@ -6,12 +6,14 @@
  */
 
 import React from 'react';
-import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor, act, within } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { Router } from '@kbn/shared-ux-router';
 import { createMemoryHistory } from 'history';
 import { EuiThemeProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
+import { MockChromeContextProvider } from '@kbn/core-chrome-browser-context-mocks';
+import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
 import { ModelSettings } from './model_settings';
 import { useModelSettingsForm } from './use_model_settings_form';
 import { useDefaultModelSettings } from '../../hooks/use_default_model_settings';
@@ -30,8 +32,14 @@ jest.mock('./no_models_empty_prompt', () => ({
   NoModelsEmptyPrompt: () => <div data-test-subj="settings-no-models">NoModelsEmptyPrompt</div>,
 }));
 jest.mock('./feature_section', () => ({
-  FeatureSection: ({ parentName }: { parentName: string }) => (
-    <div data-test-subj={`featureSection-${parentName}`} />
+  FeatureSection: ({
+    parentName,
+    discardVersion,
+  }: {
+    parentName: string;
+    discardVersion?: number;
+  }) => (
+    <div data-test-subj={`featureSection-${parentName}`} data-discard-version={discardVersion} />
   ),
 }));
 jest.mock('./default_model_section', () => ({
@@ -75,7 +83,9 @@ const defaultFormState = {
   isSaving: false,
   isDirty: false,
   assignments: { child_1: ['ep-1'] },
+  efforts: {},
   effectiveRecommendedEndpoints: { child_1: ['ep-1'] },
+  effectiveRecommendedEfforts: {},
   sections: [
     {
       featureId: 'search',
@@ -90,12 +100,15 @@ const defaultFormState = {
   hasSavedObject: {} as Record<string, boolean>,
   dirtyFeatureIds: new Set<string>() as ReadonlySet<string>,
   updateEndpoints: jest.fn(),
+  updateEfforts: jest.fn(),
   save: jest.fn().mockResolvedValue(undefined),
+  reset: jest.fn(),
 };
 
 const defaultModelSettingsState = {
   state: { enableAi: true, defaultModelId: 'pre-1', featureSpecificModels: true },
   isDirty: false,
+  dirtyFields: new Set() as ReadonlySet<'enableAi' | 'defaultModelId' | 'featureSpecificModels'>,
   setEnableAi: jest.fn(),
   setDefaultModelId: jest.fn(),
   setFeatureSpecificModels: jest.fn(),
@@ -109,11 +122,13 @@ const validValidation = {
 };
 
 const Wrapper = ({ children }: { children: React.ReactNode }) => (
-  <MemoryRouter>
-    <EuiThemeProvider>
-      <I18nProvider>{children}</I18nProvider>
-    </EuiThemeProvider>
-  </MemoryRouter>
+  <MockChromeContextProvider>
+    <MemoryRouter>
+      <EuiThemeProvider>
+        <I18nProvider>{children}</I18nProvider>
+      </EuiThemeProvider>
+    </MemoryRouter>
+  </MockChromeContextProvider>
 );
 
 describe('ModelSettings', () => {
@@ -159,7 +174,7 @@ describe('ModelSettings', () => {
       </Wrapper>
     );
 
-    expect(screen.getByTestId('modelSettingsPageHeader')).toBeInTheDocument();
+    expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.root)).toBeInTheDocument();
     expect(screen.getByTestId('defaultModelSection')).toBeInTheDocument();
   });
 
@@ -205,17 +220,17 @@ describe('ModelSettings', () => {
     expect(screen.queryByTestId('settings-no-features')).not.toBeInTheDocument();
   });
 
-  it('save button is disabled when not dirty', () => {
+  it('save button is disabled when not dirty', async () => {
     render(
       <Wrapper>
         <ModelSettings />
       </Wrapper>
     );
 
-    expect(screen.getByTestId('save-settings-button')).toBeDisabled();
+    expect(await screen.findByTestId('save-settings-button')).toBeDisabled();
   });
 
-  it('save button is enabled when feature settings are dirty', () => {
+  it('save button is enabled when feature settings are dirty', async () => {
     mockUseModelSettingsForm.mockReturnValue({ ...defaultFormState, isDirty: true });
 
     render(
@@ -224,10 +239,10 @@ describe('ModelSettings', () => {
       </Wrapper>
     );
 
-    expect(screen.getByTestId('save-settings-button')).toBeEnabled();
+    expect(await screen.findByTestId('save-settings-button')).toBeEnabled();
   });
 
-  it('save button is enabled when only default model settings are dirty', () => {
+  it('save button is enabled when only default model settings are dirty', async () => {
     mockUseDefaultModelSettings.mockReturnValue({ ...defaultModelSettingsState, isDirty: true });
 
     render(
@@ -236,10 +251,10 @@ describe('ModelSettings', () => {
       </Wrapper>
     );
 
-    expect(screen.getByTestId('save-settings-button')).toBeEnabled();
+    expect(await screen.findByTestId('save-settings-button')).toBeEnabled();
   });
 
-  it('save button stays disabled when validation fails, even if dirty', () => {
+  it('save button stays disabled when validation fails, even if dirty', async () => {
     mockUseDefaultModelSettings.mockReturnValue({
       ...defaultModelSettingsState,
       isDirty: true,
@@ -255,10 +270,10 @@ describe('ModelSettings', () => {
       </Wrapper>
     );
 
-    expect(screen.getByTestId('save-settings-button')).toBeDisabled();
+    expect(await screen.findByTestId('save-settings-button')).toBeDisabled();
   });
 
-  it('clicking save is a no-op when validation fails', () => {
+  it('clicking save is a no-op when validation fails', async () => {
     const saveFeatures = jest.fn().mockResolvedValue(undefined);
     const saveDefaultModel = jest.fn().mockResolvedValue(undefined);
 
@@ -283,7 +298,7 @@ describe('ModelSettings', () => {
       </Wrapper>
     );
 
-    fireEvent.click(screen.getByTestId('save-settings-button'));
+    fireEvent.click(await screen.findByTestId('save-settings-button'));
 
     expect(saveFeatures).not.toHaveBeenCalled();
     expect(saveDefaultModel).not.toHaveBeenCalled();
@@ -310,7 +325,7 @@ describe('ModelSettings', () => {
       </Wrapper>
     );
 
-    fireEvent.click(screen.getByTestId('save-settings-button'));
+    fireEvent.click(await screen.findByTestId('save-settings-button'));
 
     await waitFor(() => {
       expect(saveFeatures).toHaveBeenCalledTimes(1);
@@ -346,9 +361,14 @@ describe('ModelSettings', () => {
 
   it('shows unsaved changes modal and navigates away when discard is confirmed', async () => {
     const resetDefaultModel = jest.fn();
+    const resetFeatures = jest.fn();
     const history = createMemoryHistory();
 
-    mockUseModelSettingsForm.mockReturnValue({ ...defaultFormState, isDirty: true });
+    mockUseModelSettingsForm.mockReturnValue({
+      ...defaultFormState,
+      isDirty: true,
+      reset: resetFeatures,
+    });
     mockUseDefaultModelSettings.mockReturnValue({
       ...defaultModelSettingsState,
       isDirty: true,
@@ -356,13 +376,15 @@ describe('ModelSettings', () => {
     });
 
     render(
-      <Router history={history}>
-        <EuiThemeProvider>
-          <I18nProvider>
-            <ModelSettings />
-          </I18nProvider>
-        </EuiThemeProvider>
-      </Router>
+      <MockChromeContextProvider>
+        <Router history={history}>
+          <EuiThemeProvider>
+            <I18nProvider>
+              <ModelSettings />
+            </I18nProvider>
+          </EuiThemeProvider>
+        </Router>
+      </MockChromeContextProvider>
     );
 
     act(() => {
@@ -373,13 +395,114 @@ describe('ModelSettings', () => {
       expect(screen.getByTestId('unsavedChangesModal')).toBeInTheDocument();
     });
 
-    fireEvent.click(screen.getByText('Discard changes'));
+    fireEvent.click(within(screen.getByTestId('unsavedChangesModal')).getByText('Discard changes'));
 
     expect(resetDefaultModel).toHaveBeenCalledTimes(1);
+    expect(resetFeatures).toHaveBeenCalledTimes(1);
     expect(mockNavigateToUrl).toHaveBeenCalledWith('/some-other-page', expect.any(Object));
 
     await waitFor(() => {
       expect(screen.queryByTestId('unsavedChangesModal')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('unsaved changes bottom bar', () => {
+    const dirtyFormState = {
+      ...defaultFormState,
+      isDirty: true,
+      dirtyFeatureIds: new Set(['child_1']) as ReadonlySet<string>,
+    };
+
+    it('is hidden when nothing is dirty', () => {
+      render(
+        <Wrapper>
+          <ModelSettings />
+        </Wrapper>
+      );
+
+      expect(screen.queryByTestId('settings-save-button')).not.toBeInTheDocument();
+    });
+
+    it('appears with the unsaved changes count once a setting is dirty', () => {
+      mockUseModelSettingsForm.mockReturnValue(dirtyFormState);
+      mockUseDefaultModelSettings.mockReturnValue({
+        ...defaultModelSettingsState,
+        isDirty: true,
+        dirtyFields: new Set(['featureSpecificModels']),
+      });
+
+      render(
+        <Wrapper>
+          <ModelSettings />
+        </Wrapper>
+      );
+
+      expect(screen.getAllByText('2 unsaved settings').length).toBeGreaterThan(0);
+      expect(screen.getByTestId('settings-save-button')).toBeEnabled();
+    });
+
+    it('saves from the bottom bar save button', async () => {
+      const saveFeatures = jest.fn().mockResolvedValue(undefined);
+      mockUseModelSettingsForm.mockReturnValue({ ...dirtyFormState, save: saveFeatures });
+
+      render(
+        <Wrapper>
+          <ModelSettings />
+        </Wrapper>
+      );
+
+      fireEvent.click(screen.getByTestId('settings-save-button'));
+
+      await waitFor(() => {
+        expect(saveFeatures).toHaveBeenCalledTimes(1);
+      });
+    });
+
+    it('disables the bottom bar save button when validation fails', () => {
+      mockUseModelSettingsForm.mockReturnValue(dirtyFormState);
+      mockUseDefaultModelValidation.mockReturnValue({ errors: ['Invalid'], isValid: false });
+
+      render(
+        <Wrapper>
+          <ModelSettings />
+        </Wrapper>
+      );
+
+      expect(screen.getByTestId('settings-save-button')).toBeDisabled();
+    });
+
+    it('resets both forms when cancel changes is clicked', () => {
+      const resetFeatures = jest.fn();
+      const resetDefaultModel = jest.fn();
+      mockUseModelSettingsForm.mockReturnValue({ ...dirtyFormState, reset: resetFeatures });
+      mockUseDefaultModelSettings.mockReturnValue({
+        ...defaultModelSettingsState,
+        isDirty: true,
+        dirtyFields: new Set(['enableAi']),
+        reset: resetDefaultModel,
+      });
+
+      render(
+        <Wrapper>
+          <ModelSettings />
+        </Wrapper>
+      );
+
+      expect(screen.getByTestId('featureSection-Search')).toHaveAttribute(
+        'data-discard-version',
+        '0'
+      );
+
+      fireEvent.click(screen.getByTestId('settings-cancel-button'));
+
+      expect(resetFeatures).toHaveBeenCalledTimes(1);
+      expect(resetDefaultModel).toHaveBeenCalledTimes(1);
+      expect(mockNavigateToUrl).not.toHaveBeenCalled();
+      // Sub-feature cards drop their sticky custom-mode flag on discard.
+      expect(screen.getByTestId('featureSection-Search')).toHaveAttribute(
+        'data-discard-version',
+        '1'
+      );
     });
   });
 
@@ -534,13 +657,15 @@ describe('ModelSettings', () => {
     mockUseModelSettingsForm.mockReturnValue({ ...defaultFormState, isDirty: true });
 
     render(
-      <Router history={history}>
-        <EuiThemeProvider>
-          <I18nProvider>
-            <ModelSettings />
-          </I18nProvider>
-        </EuiThemeProvider>
-      </Router>
+      <MockChromeContextProvider>
+        <Router history={history}>
+          <EuiThemeProvider>
+            <I18nProvider>
+              <ModelSettings />
+            </I18nProvider>
+          </EuiThemeProvider>
+        </Router>
+      </MockChromeContextProvider>
     );
 
     act(() => {
@@ -585,14 +710,16 @@ describe('ModelSettings', () => {
       expect(screen.queryByTestId('save-settings-button')).not.toBeInTheDocument();
     });
 
-    it('still renders the documentation link', () => {
+    it('does not render the unsaved changes bottom bar even when dirty', () => {
+      mockUseModelSettingsForm.mockReturnValue({ ...defaultFormState, isDirty: true });
+
       render(
         <Wrapper>
           <ModelSettings />
         </Wrapper>
       );
 
-      expect(screen.getByTestId('settings-api-documentation')).toBeInTheDocument();
+      expect(screen.queryByTestId('settings-save-button')).not.toBeInTheDocument();
     });
 
     it('passes disabled to DefaultModelSection', () => {

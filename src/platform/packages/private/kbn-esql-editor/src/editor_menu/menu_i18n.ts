@@ -12,17 +12,13 @@ export const helpLabel = i18n.translate('esqlEditor.menu.helpLabel', {
   defaultMessage: 'ES|QL help',
 });
 
-export const searchTooltipLabel = (commandKey: string) =>
-  i18n.translate('esqlEditor.menu.searchTooltipLabel', {
-    defaultMessage: 'Search your data using KQL ({commandKey}+K)',
-    values: { commandKey },
-  });
+export const searchTooltipLabel = i18n.translate('esqlEditor.menu.searchTooltipLabel', {
+  defaultMessage: 'Search your data using KQL',
+});
 
-export const searchWithNlTooltipLabel = (commandKey: string) =>
-  i18n.translate('esqlEditor.menu.searchWithNlTooltipLabel', {
-    defaultMessage: 'Search your data using KQL or natural language ({commandKey}+K)',
-    values: { commandKey },
-  });
+export const searchWithNlTooltipLabel = i18n.translate('esqlEditor.menu.searchWithNlTooltipLabel', {
+  defaultMessage: 'Search your data using KQL or natural language',
+});
 
 export const showHistoryLabel = i18n.translate('esqlEditor.query.showQueriesLabel', {
   defaultMessage: 'Show recent queries',

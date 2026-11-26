@@ -203,7 +203,7 @@ const instanceofZodTypeLikeString = (_type: z.ZodTypeAny, allowMixedUnion: boole
     return true;
   }
 
-  // "string" covers both z.string() and z.iso.datetime(), z.email(), etc.
+  // "string" covers both z.string() and isoDateTime(), z.email(), etc.
   return defType === 'string';
 };
 
@@ -457,7 +457,9 @@ interface ZodSchemaMeta {
 }
 
 const getZodMeta = (schema: z.ZodType): ZodSchemaMeta =>
-  (z.globalRegistry.get(schema) ?? {}) as ZodSchemaMeta;
+  ((typeof schema.meta === 'function' ? schema.meta() : undefined) ??
+    z.globalRegistry.get(schema) ??
+    {}) as ZodSchemaMeta;
 
 const getStableComponentName = (schema: z.ZodType): string | undefined =>
   zodV4OasComponentRegistry.get(schema as object) ?? getZodMeta(schema).id;
@@ -501,34 +503,29 @@ function normalizeOasMetaExtensions(
 }
 
 /**
- * For `z.discriminatedUnion` schemas, auto-generate an OAS discriminator
- * with property name and (when every variant has a stable component name) a
- * mapping.  Returns `null` for non-discriminated schemas.
+ * For `z.discriminatedUnion` schemas, auto-generate an OAS discriminator whose
+ * mapping covers every variant. OAS 3.0 resolves discriminator values only to
+ * named schemas through string mapping keys, so returns `null` unless every
+ * variant has a stable component name and a required string discriminator.
  */
 function buildAutoDiscriminator(schema: z.ZodType): OasMetaExtensions | null {
   const { discriminator: key, options } = (schema as any)._zod?.def ?? {};
   if (typeof key !== 'string' || !Array.isArray(options)) return null;
 
   const mapping: Record<string, string> = {};
-  let allNamed = true;
 
   for (const opt of options) {
     const name = getStableComponentName(opt);
-    if (!name) {
-      allNamed = false;
-      continue;
-    }
-    const litValues = opt._zod?.def?.shape?.[key]?._zod?.def?.values;
-    if (Array.isArray(litValues) && litValues.length === 1) {
-      mapping[String(litValues[0])] = `#/components/schemas/${name}`;
+    const values: z.core.util.PropValues[string] | undefined = opt._zod?.propValues?.[key];
+    if (!name || !values?.size) return null;
+
+    for (const value of values) {
+      if (typeof value !== 'string') return null;
+      mapping[value] = `#/components/schemas/${name}`;
     }
   }
 
-  const disc: OpenAPIV3.DiscriminatorObject = { propertyName: key };
-  if (allNamed && Object.keys(mapping).length > 0) {
-    disc.mapping = mapping;
-  }
-  return { discriminator: disc };
+  return { discriminator: { propertyName: key, mapping } };
 }
 
 /**
@@ -642,6 +639,11 @@ function hoistMarkedSchemas(
   const name = obj[COMPONENT_ID_MARKER];
 
   if (typeof name === 'string') {
+    // Keep an existing definition (e.g. extracted from `$defs`) rather than
+    // overwriting it with a partial inline copy of the same component.
+    if (Object.hasOwn(shared, name)) {
+      return { $ref: `#/components/schemas/${name}` };
+    }
     const {
       [COMPONENT_ID_MARKER]: _idMarker,
       [OAS_EXTENSIONS_MARKER]: oasExt,
@@ -701,6 +703,58 @@ function mergeInlineOasExtensions(node: unknown): unknown {
   return result;
 }
 
+/** A `{ type: 'null' }` branch, as emitted by z.toJSONSchema() for `.nullable()`. */
+const isNullBranch = (branch: unknown): boolean =>
+  typeof branch === 'object' &&
+  branch !== null &&
+  !Array.isArray(branch) &&
+  (branch as Record<string, unknown>).type === 'null' &&
+  Object.keys(branch as Record<string, unknown>).length === 1;
+
+// OAS 3.0 ignores keywords sibling to $ref; COMPONENT_ID_MARKER branches become $ref later.
+const keepWrapped = (branch: Record<string, unknown>): boolean =>
+  '$ref' in branch || COMPONENT_ID_MARKER in branch;
+
+// Must run before the recursive descent, which rewrites { type: 'null' } to { nullable: true }.
+function collapseNullBranches(node: Record<string, unknown>): {
+  node: Record<string, unknown>;
+  nullable: boolean;
+} {
+  let result = node;
+  let nullable = false;
+
+  for (const combiner of ['anyOf', 'oneOf'] as const) {
+    const branches = result[combiner];
+    if (!Array.isArray(branches)) continue;
+
+    const nullIdx = branches.findIndex(isNullBranch);
+    if (nullIdx === -1) continue;
+
+    const remaining = branches.filter((_: unknown, i: number) => i !== nullIdx);
+    nullable = true;
+
+    const [sole] = remaining;
+    const soleIsMergeable =
+      remaining.length === 1 &&
+      typeof sole === 'object' &&
+      sole !== null &&
+      !Array.isArray(sole) &&
+      !keepWrapped(sole as Record<string, unknown>);
+
+    if (soleIsMergeable) {
+      const { [combiner]: _combiner, ...rest } = result;
+      result = { ...rest, ...(sole as Record<string, unknown>) };
+    } else if (remaining.length === 1) {
+      const { [combiner]: _combiner, ...rest } = result;
+      result = { ...rest, allOf: remaining };
+    } else {
+      result = { ...result, [combiner]: remaining };
+    }
+  }
+
+  return { node: result, nullable };
+}
+
 /**
  * Recursively transform a JSON Schema object (OAS 3.1 / JSON Schema draft 2020-12)
  * into an OpenAPI 3.0-compatible Schema Object.
@@ -716,11 +770,13 @@ function mergeInlineOasExtensions(node: unknown): unknown {
 function jsonSchemaToOpenApi30(node: Record<string, unknown>): Record<string, unknown> {
   if (typeof node !== 'object' || node === null) return node;
 
-  let result: Record<string, unknown> = {};
+  const { node: collapsed, nullable } = collapseNullBranches(node);
 
-  const hasPropertyNames = 'propertyNames' in node;
+  const result: Record<string, unknown> = {};
 
-  for (const [key, value] of Object.entries(node)) {
+  const hasPropertyNames = 'propertyNames' in collapsed;
+
+  for (const [key, value] of Object.entries(collapsed)) {
     // Strip `propertyNames` (not supported in OAS 3.0)
     if (key === 'propertyNames') continue;
     // Strip companion `required` emitted by z.toJSONSchema() for z.record(z.enum([...]), ...)
@@ -746,43 +802,31 @@ function jsonSchemaToOpenApi30(node: Record<string, unknown>): Record<string, un
     }
   }
 
-  // Handle `anyOf`/`oneOf` containing `{ type: 'null' }` branches:
-  // Pull out the null branch and set `nullable: true` on the remaining schema.
-  for (const combiner of ['anyOf', 'oneOf'] as const) {
-    const branches = result[combiner];
-    if (!Array.isArray(branches)) continue;
+  // Handle top-level `type: 'null'` (standalone null schema)
+  if (result.type === 'null') {
+    delete result.type;
+    result.nullable = true;
+  }
 
-    const nullIdx = branches.findIndex(
-      (b: unknown) =>
-        typeof b === 'object' &&
-        b !== null &&
-        (b as Record<string, unknown>).type === 'null' &&
-        Object.keys(b as Record<string, unknown>).length === 1
-    );
-
-    if (nullIdx === -1) continue;
-
-    // Remove the null branch
-    const remaining = branches.filter((_: unknown, i: number) => i !== nullIdx);
-
-    if (remaining.length === 1) {
-      // Single remaining branch: merge it into the current level with nullable
-      const [sole] = remaining;
-      if (typeof sole === 'object' && sole !== null) {
-        // Remove the combiner key, spread the sole schema, add nullable
-        delete result[combiner];
-        result = { ...result, ...(sole as Record<string, unknown>), nullable: true };
-      }
+  // Zod 4.5+ compacts simple nullable unions into a type array,
+  // e.g. `type: ['string', 'null']` — OAS 3.0 does not support type arrays.
+  if (Array.isArray(result.type)) {
+    const types = (result.type as unknown[]).filter((t) => t !== 'null');
+    const isNullable = types.length !== (result.type as unknown[]).length;
+    if (types.length === 1) {
+      result.type = types[0];
     } else {
-      // Multiple remaining branches: keep the combiner, add nullable
-      result[combiner] = remaining;
+      delete result.type;
+      if (types.length > 1) {
+        result.anyOf = types.map((t) => ({ type: t }));
+      }
+    }
+    if (isNullable) {
       result.nullable = true;
     }
   }
 
-  // Handle top-level `type: 'null'` (standalone null schema)
-  if (result.type === 'null') {
-    delete result.type;
+  if (nullable) {
     result.nullable = true;
   }
 
@@ -820,6 +864,11 @@ export const convert = (schema: z.ZodTypeAny, opts: ConvertOptions = {}) => {
       const oasExtensions = normalizeOasMetaExtensions(zSchema, opts.env);
       if (oasExtensions) {
         (js as any)[OAS_EXTENSIONS_MARKER] = oasExtensions;
+      }
+
+      // `format: date-time` already documents the contract; the regex only bloats the OAS docs.
+      if ((js as any).format === 'date-time') {
+        delete (js as any).pattern;
       }
     },
   }) as Record<string, any>;

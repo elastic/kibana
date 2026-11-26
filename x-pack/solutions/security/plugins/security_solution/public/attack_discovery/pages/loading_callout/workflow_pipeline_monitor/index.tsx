@@ -548,7 +548,7 @@ const WorkflowPipelineMonitorComponent: React.FC<WorkflowPipelineMonitorProps> =
         <EuiButton
           data-test-subj="openInEditorButton"
           href={editorUrl ?? undefined}
-          iconType="popout"
+          iconType="external"
           rel="noopener noreferrer"
           size="s"
           target="_blank"

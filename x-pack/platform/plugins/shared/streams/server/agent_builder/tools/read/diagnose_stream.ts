@@ -109,28 +109,19 @@ export const createDiagnoseStreamTool = ({
     **Efficiency:** If you already called this tool for the same stream earlier in the conversation and no write tools have modified it since, the prior result is still valid — do not re-call. When you need both diagnostic data and configuration context, call this tool and ${INSPECT_STREAMS} in parallel.
   `),
   tags: ['streams'],
+  annotations: {
+    title: 'Diagnose Stream',
+    readOnlyHint: true,
+    destructiveHint: false,
+    idempotentHint: true,
+    openWorldHint: false,
+  },
   schema: diagnoseStreamSchema,
   handler: async ({ name, time_range }, { request }) => {
     try {
       const { streamsClient, scopedClusterClient } = await getScopedClients({ request });
       const esClient = scopedClusterClient.asCurrentUser;
       const definition = await streamsClient.getStream(name);
-
-      if (!Streams.ingest.all.Definition.is(definition)) {
-        return {
-          results: [
-            {
-              type: ToolResultType.other,
-              data: {
-                stream: name,
-                stream_type: 'query',
-                health: 'not_applicable' as const,
-                note: 'Query streams are read-only ES|QL views. They do not have processing pipelines or failure stores. Check the source streams referenced by this query instead.',
-              },
-            },
-          ],
-        };
-      }
 
       const streamType = Streams.WiredStream.Definition.is(definition) ? 'wired' : 'classic';
 

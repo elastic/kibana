@@ -22,6 +22,7 @@ export default function (providerContext: FtrProviderContext) {
   const supertest = getService('supertest');
   const kibanaServer = getService('kibanaServer');
   const fleetAndAgents = getService('fleetAndAgents');
+  const esArchiver = getService('esArchiver');
   const apiClient = new SpaceTestApiClient(supertest);
 
   const getPackagePolicyById = async (id: string) => {
@@ -261,6 +262,159 @@ export default function (providerContext: FtrProviderContext) {
           },
         })
         .expect(400);
+    });
+
+    it('should return a 400 with a path-traversal input id', async function () {
+      const { body } = await supertest
+        .post(`/api/fleet/package_policies`)
+        .set('kbn-xsrf', 'xxxx')
+        .send({
+          name: `filetest-traversal-input-${uuidv4()}`,
+          description: '',
+          namespace: 'default',
+          policy_id: agentPolicyId,
+          enabled: true,
+          inputs: [
+            {
+              id: '../../../../../../tmp/evil',
+              type: 'logfile',
+              policy_template: 'template_a',
+              enabled: true,
+              streams: [],
+            },
+          ],
+          package: {
+            name: 'filetest',
+            title: 'For File Tests',
+            version: '0.1.0',
+          },
+        })
+        .expect(400);
+      expect(body.message).to.contain('path traversal');
+    });
+
+    it('should return a 400 with a path-traversal stream id', async function () {
+      const { body } = await supertest
+        .post(`/api/fleet/package_policies`)
+        .set('kbn-xsrf', 'xxxx')
+        .send({
+          name: `filetest-traversal-stream-${uuidv4()}`,
+          description: '',
+          namespace: 'default',
+          policy_id: agentPolicyId,
+          enabled: true,
+          inputs: [
+            {
+              id: 'safe-input-id',
+              type: 'logfile',
+              policy_template: 'template_a',
+              enabled: true,
+              streams: [
+                {
+                  id: 'a/../../../../tmp/evil',
+                  enabled: true,
+                  data_stream: { type: 'logs', dataset: 'filetest.test_logs' },
+                },
+              ],
+            },
+          ],
+          package: {
+            name: 'filetest',
+            title: 'For File Tests',
+            version: '0.1.0',
+          },
+        })
+        .expect(400);
+      expect(body.message).to.contain('path traversal');
+    });
+
+    it('should allow an input id containing a slash but no traversal sequence', async function () {
+      const response = await supertest
+        .post(`/api/fleet/package_policies`)
+        .set('kbn-xsrf', 'xxxx')
+        .send({
+          name: `filetest-slash-input-${uuidv4()}`,
+          description: '',
+          namespace: 'default',
+          policy_id: agentPolicyId,
+          enabled: true,
+          inputs: [
+            {
+              id: 'logfile/template_a-slashed-input',
+              type: 'logfile',
+              policy_template: 'template_a',
+              enabled: true,
+              streams: [],
+            },
+          ],
+          package: {
+            name: 'filetest',
+            title: 'For File Tests',
+            version: '0.1.0',
+          },
+        })
+        .expect(200);
+      expect(response.body.item.inputs[0].id).to.eql('logfile/template_a-slashed-input');
+    });
+
+    it('should return a 400 with a path-traversal input config id override', async function () {
+      const { body } = await supertest
+        .post(`/api/fleet/package_policies`)
+        .set('kbn-xsrf', 'xxxx')
+        .send({
+          name: `filetest-traversal-config-${uuidv4()}`,
+          description: '',
+          namespace: 'default',
+          policy_id: agentPolicyId,
+          enabled: true,
+          inputs: [
+            {
+              id: 'safe-input-id',
+              type: 'logfile',
+              policy_template: 'template_a',
+              enabled: true,
+              config: { id: { value: '../../../../../../tmp/evil' } },
+              streams: [],
+            },
+          ],
+          package: {
+            name: 'filetest',
+            title: 'For File Tests',
+            version: '0.1.0',
+          },
+        })
+        .expect(400);
+      expect(body.message).to.contain('path traversal');
+    });
+
+    it('should return a 400 with a path-traversal id in an input config streams override', async function () {
+      const { body } = await supertest
+        .post(`/api/fleet/package_policies`)
+        .set('kbn-xsrf', 'xxxx')
+        .send({
+          name: `filetest-traversal-config-streams-${uuidv4()}`,
+          description: '',
+          namespace: 'default',
+          policy_id: agentPolicyId,
+          enabled: true,
+          inputs: [
+            {
+              id: 'safe-input-id',
+              type: 'logfile',
+              policy_template: 'template_a',
+              enabled: true,
+              config: { streams: { value: [{ id: 'a/../../../../../../tmp/evil' }] } },
+              streams: [],
+            },
+          ],
+          package: {
+            name: 'filetest',
+            title: 'For File Tests',
+            version: '0.1.0',
+          },
+        })
+        .expect(400);
+      expect(body.message).to.contain('path traversal');
     });
 
     it('should not allow multiple limited packages on the same agent policy', async function () {
@@ -1364,12 +1518,55 @@ export default function (providerContext: FtrProviderContext) {
       // Associated agent policy that was created for agentless deployment should be deleted
       await supertest.get(`/api/fleet/agent_policies/${deletableTestPolicyId}`).expect(404);
     });
-    // TODO: Fix this test
-    describe.skip('Cloud Connector Integration', () => {
+    describe('Cloud Connector Integration', () => {
       let agentPolicyWithCloudConnectorsId: string;
       let agentPolicyWithoutCloudConnectorsId: string;
+      let fleetServerAgentPolicyId: string;
 
       before(async () => {
+        await esArchiver.load('x-pack/platform/test/fixtures/es_archives/fleet/empty_fleet_server');
+        await apiClient.installPackage({ pkgName: 'cspm', pkgVersion: '1.0.0' });
+
+        // Create a fleet server package policy so isSecretStorageEnabled returns true.
+        // The check returns true when fleet_server package policies exist but no agents are enrolled.
+        // Without this, createCloudConnectorForPackagePolicy is never reached (it lives inside the
+        // isSecretStorageEnabled block in package_policy.ts).
+        const fleetServerPkgRes = await supertest
+          .get('/api/fleet/epm/packages/fleet_server')
+          .set('kbn-xsrf', 'xxxx')
+          .expect(200);
+        const fleetServerVersion: string = fleetServerPkgRes.body.item.version;
+
+        const fleetServerAgentPolicyRes = await supertest
+          .post('/api/fleet/agent_policies')
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: `Fleet Server Policy ${uuidv4()}`,
+            namespace: 'default',
+          })
+          .expect(200);
+        fleetServerAgentPolicyId = fleetServerAgentPolicyRes.body.item.id;
+
+        await supertest
+          .post('/api/fleet/package_policies')
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            force: true,
+            package: { name: 'fleet_server', version: fleetServerVersion },
+            name: `Fleet Server ${uuidv4()}`,
+            namespace: 'default',
+            policy_id: fleetServerAgentPolicyId,
+            vars: {},
+            inputs: {
+              'fleet_server-fleet-server': {
+                enabled: true,
+                vars: { custom: '' },
+                streams: {},
+              },
+            },
+          })
+          .expect(200);
+
         // Create agent policies for cloud connector testing
         const policy1Response = await supertest
           .post(`/api/fleet/agent_policies`)
@@ -1379,7 +1576,6 @@ export default function (providerContext: FtrProviderContext) {
             description: 'Test agent policy with cloud connectors enabled',
             namespace: 'default',
             monitoring_enabled: ['logs', 'metrics'],
-            supports_agentless: true,
             agentless: {
               cloud_connectors: {
                 enabled: true,
@@ -1397,7 +1593,6 @@ export default function (providerContext: FtrProviderContext) {
             description: 'Test agent policy without cloud connectors',
             namespace: 'default',
             monitoring_enabled: ['logs', 'metrics'],
-            supports_agentless: true,
             agentless: {
               cloud_connectors: {
                 enabled: false,
@@ -1411,7 +1606,6 @@ export default function (providerContext: FtrProviderContext) {
       });
 
       after(async () => {
-        // Clean up test agent policies
         await supertest
           .post(`/api/fleet/agent_policies/delete`)
           .set('kbn-xsrf', 'xxxx')
@@ -1420,10 +1614,19 @@ export default function (providerContext: FtrProviderContext) {
           .post(`/api/fleet/agent_policies/delete`)
           .set('kbn-xsrf', 'xxxx')
           .send({ agentPolicyId: agentPolicyWithoutCloudConnectorsId });
+        await supertest
+          .post(`/api/fleet/agent_policies/delete`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({ agentPolicyId: fleetServerAgentPolicyId });
+        await esArchiver.unload(
+          'x-pack/platform/test/fixtures/es_archives/fleet/empty_fleet_server'
+        );
       });
 
       it('should create package policy with cloud connector when conditions are met', async () => {
-        const { body: packagePolicy } = await supertest
+        const {
+          body: { item: packagePolicy },
+        } = await supertest
           .post(`/api/fleet/package_policies`)
           .set('kbn-xsrf', 'xxxx')
           .send({
@@ -1443,7 +1646,7 @@ export default function (providerContext: FtrProviderContext) {
                     enabled: true,
                     data_stream: {
                       type: 'logs',
-                      dataset: 'log.findings',
+                      dataset: 'cspm.findings',
                     },
                     vars: {
                       paths: {
@@ -1453,13 +1656,6 @@ export default function (providerContext: FtrProviderContext) {
                       'data_stream.dataset': {
                         value: 'hello',
                         type: 'text',
-                      },
-                      external_id: {
-                        value: {
-                          id: 'aws-external-id-secret',
-                          isSecretRef: true,
-                        },
-                        type: 'password',
                       },
                       role_arn: {
                         value: 'arn:aws:iam::123456789012:role/CloudSecurityPostureRole',
@@ -1485,7 +1681,9 @@ export default function (providerContext: FtrProviderContext) {
       });
 
       it('should not create cloud connector when agent policy has cloud connectors disabled', async () => {
-        const { body: packagePolicy } = await supertest
+        const {
+          body: { item: packagePolicy },
+        } = await supertest
           .post(`/api/fleet/package_policies`)
           .set('kbn-xsrf', 'xxxx')
           .send({
@@ -1503,7 +1701,7 @@ export default function (providerContext: FtrProviderContext) {
                     enabled: true,
                     data_stream: {
                       type: 'logs',
-                      dataset: 'log.findings',
+                      dataset: 'cspm.findings',
                     },
                     vars: {
                       paths: {
@@ -1540,7 +1738,6 @@ export default function (providerContext: FtrProviderContext) {
 
         expect(packagePolicy).to.have.property('id');
         expect(packagePolicy.name).to.equal('test-cspm-package-policy-no-connector');
-        expect(packagePolicy.supports_cloud_connector).to.equal(false);
         expect(packagePolicy).to.not.have.property('cloud_connector_id');
       });
     });

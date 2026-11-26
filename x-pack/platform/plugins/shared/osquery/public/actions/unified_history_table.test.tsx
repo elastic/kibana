@@ -18,17 +18,20 @@ import {
   createMockLiveRow,
   createMockPackLiveRow,
   createMockRuleRow,
+  createMockWorkflowRow,
   createMockScheduledRow,
   defaultPermissions,
   noRunPermissions,
   resetMockCounter,
 } from './__test_helpers__/mock_data';
+import { allowedExperimentalValues } from '../../common/experimental_features';
 
 const renderWithProviders = (element: React.ReactElement) =>
   render(element, { wrapper: TestProviders });
 
 const mockPush = jest.fn();
 const mockReplace = jest.fn();
+let mockSearch = '';
 const mockUseKibana = jest.fn();
 
 jest.mock('../common/lib/kibana', () => ({
@@ -44,7 +47,12 @@ jest.mock('react-router-dom', () => ({
     replace: mockReplace,
     location: { search: '', pathname: '/history' },
   }),
-  useLocation: () => ({ search: '', pathname: '/history' }),
+  useLocation: () => ({ search: mockSearch, pathname: '/history' }),
+}));
+
+jest.mock('@elastic/eui', () => ({
+  ...jest.requireActual('@elastic/eui'),
+  formatDate: (value: unknown) => String(value),
 }));
 
 jest.mock('./use_unified_history');
@@ -106,6 +114,7 @@ const mockHistory = ({
 describe('UnifiedHistoryTable', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockSearch = '';
     resetMockCounter();
     mockKibana();
     mockPacks();
@@ -153,6 +162,41 @@ describe('UnifiedHistoryTable', () => {
     renderWithProviders(<UnifiedHistoryTable />);
 
     expect(screen.getByTestId('history-toolbar-search')).toBeInTheDocument();
+  });
+
+  describe('workflow source filter', () => {
+    const renderWithWorkflowSteps = (workflowsExtensionsEnabled: boolean) =>
+      render(<UnifiedHistoryTable />, {
+        wrapper: ({ children }) => (
+          <TestProviders
+            experimentalFeatures={{ ...allowedExperimentalValues, workflowsExtensionsEnabled }}
+          >
+            {children}
+          </TestProviders>
+        ),
+      });
+
+    it.each([true, false])(
+      'requests workflow rows from the URL whether workflow steps are enabled (%p)',
+      (workflowsExtensionsEnabled) => {
+        mockSearch = '?sources=workflow,live';
+        mockHistory({ data: [] });
+
+        renderWithWorkflowSteps(workflowsExtensionsEnabled);
+
+        expect(useUnifiedHistoryMock).toHaveBeenLastCalledWith(
+          expect.objectContaining({ sourceFilters: ['workflow', 'live'] })
+        );
+      }
+    );
+
+    it('still labels existing workflow rows as Workflow when workflow steps are disabled', () => {
+      mockHistory({ data: [createMockWorkflowRow()] });
+
+      renderWithWorkflowSteps(false);
+
+      expect(screen.getByText('Workflow')).toBeInTheDocument();
+    });
   });
 
   it('calls useUnifiedHistory with expected parameters', () => {
@@ -249,6 +293,15 @@ describe('UnifiedHistoryTable', () => {
     expect(screen.getByText('Rule')).toBeInTheDocument();
   });
 
+  it('source column shows Workflow for workflow row', () => {
+    const row = createMockWorkflowRow();
+    mockHistory({ data: [row] });
+
+    renderWithProviders(<UnifiedHistoryTable />);
+
+    expect(screen.getByText('Workflow')).toBeInTheDocument();
+  });
+
   it('run by column shows Elastic for rule row', () => {
     const row = createMockRuleRow();
     mockHistory({ data: [row] });
@@ -323,6 +376,28 @@ describe('UnifiedHistoryTable', () => {
     expect(screen.getByText('SELECT * FROM uptime')).toBeInTheDocument();
   });
 
+  it('query column truncates SQL longer than 90 characters', () => {
+    const longQuery =
+      'SELECT very_long_column_name, another_column, yet_another FROM some_table WHERE condition = 1 AND more_stuff';
+    expect(longQuery.length).toBeGreaterThan(90);
+    mockHistory({ data: [createMockLiveRow({ queryText: longQuery })] });
+
+    renderWithProviders(<UnifiedHistoryTable />);
+
+    expect(screen.getByText(`${longQuery.substring(0, 90)}...`)).toBeInTheDocument();
+    expect(screen.queryByText(longQuery)).not.toBeInTheDocument();
+  });
+
+  it('query column shows SQL of exactly 90 characters untruncated', () => {
+    const exactQuery = `SELECT * FROM processes WHERE name = '${'a'.repeat(51)}'`;
+    expect(exactQuery).toHaveLength(90);
+    mockHistory({ data: [createMockLiveRow({ queryText: exactQuery })] });
+
+    renderWithProviders(<UnifiedHistoryTable />);
+
+    expect(screen.getByText(exactQuery)).toBeInTheDocument();
+  });
+
   it('query column shows pack name for pack query', () => {
     const row = createMockPackLiveRow();
     mockHistory({ data: [row] });
@@ -374,6 +449,36 @@ describe('UnifiedHistoryTable', () => {
       expect(screen.getByText('Monitoring Pack')).toBeInTheDocument();
     });
 
+    it('query column falls back to scheduleId and packId when names are absent (cross-project row)', () => {
+      const row = createMockScheduledRow({
+        queryName: undefined,
+        packName: undefined,
+        scheduleId: 'sched-xp-1',
+        packId: 'pack-xp-1',
+      });
+      mockHistory({ data: [row] });
+
+      renderWithProviders(<UnifiedHistoryTable />);
+
+      expect(screen.getByText('sched-xp-1')).toBeInTheDocument();
+      expect(screen.getByText('pack-xp-1')).toBeInTheDocument();
+    });
+
+    it('query column falls back to ids when names are empty strings (cross-project row)', () => {
+      const row = createMockScheduledRow({
+        queryName: '',
+        packName: '',
+        scheduleId: 'sched-xp-2',
+        packId: 'pack-xp-2',
+      });
+      mockHistory({ data: [row] });
+
+      renderWithProviders(<UnifiedHistoryTable />);
+
+      expect(screen.getByText('sched-xp-2')).toBeInTheDocument();
+      expect(screen.getByText('pack-xp-2')).toBeInTheDocument();
+    });
+
     it('results column shows totalRows for scheduled row', () => {
       const row = createMockScheduledRow({ totalRows: 20 });
       mockHistory({ data: [row] });
@@ -415,6 +520,15 @@ describe('UnifiedHistoryTable', () => {
         'href',
         '/history/scheduled/sched-1/3'
       );
+    });
+
+    it('live row query column is unaffected by the scheduled-row fallback logic', () => {
+      const row = createMockLiveRow({ queryText: 'SELECT * FROM uptime' });
+      mockHistory({ data: [row] });
+
+      renderWithProviders(<UnifiedHistoryTable />);
+
+      expect(screen.getByText('SELECT * FROM uptime')).toBeInTheDocument();
     });
 
     it('renders mixed live and scheduled rows together', () => {
@@ -471,6 +585,64 @@ describe('UnifiedHistoryTable', () => {
       expect(headers).toContain('Created at');
       expect(headers).not.toContain('Tags');
       expect(headers).not.toContain('Source');
+    });
+  });
+
+  describe('Created at column', () => {
+    it('shows plannedTime for a scheduled row (not the streaming timestamp)', () => {
+      const row = createMockScheduledRow({
+        plannedTime: '2025-06-15T08:00:00.000Z',
+        timestamp: '2025-06-15T08:05:37.123Z',
+      });
+      mockHistory({ data: [row] });
+
+      renderWithProviders(<UnifiedHistoryTable />);
+
+      expect(screen.getByText('2025-06-15T08:00:00.000Z')).toBeInTheDocument();
+      expect(screen.queryByText('2025-06-15T08:05:37.123Z')).not.toBeInTheDocument();
+    });
+
+    it('shows timestamp for a live row (no plannedTime)', () => {
+      const row = createMockLiveRow({ timestamp: '2025-06-15T09:30:00.000Z' });
+      mockHistory({ data: [row] });
+
+      renderWithProviders(<UnifiedHistoryTable />);
+
+      expect(screen.getByText('2025-06-15T09:30:00.000Z')).toBeInTheDocument();
+    });
+
+    it('displayed Created at values follow ascending row order for a mixed page', () => {
+      const rows = [
+        createMockScheduledRow({
+          plannedTime: '2025-06-15T07:00:00.000Z',
+          timestamp: '2025-06-15T07:05:00.000Z',
+        }),
+        createMockScheduledRow({
+          plannedTime: '2025-06-15T08:00:00.000Z',
+          timestamp: '2025-06-15T08:07:00.000Z',
+        }),
+        createMockLiveRow({ timestamp: '2025-06-15T09:00:00.000Z' }),
+      ];
+      mockHistory({ data: rows });
+
+      renderWithProviders(<UnifiedHistoryTable />);
+
+      const createdAtHeader = screen
+        .getAllByRole('columnheader')
+        .find((h) => h.textContent === 'Created at');
+      expect(createdAtHeader).toBeTruthy();
+      const colIndex =
+        Array.from(createdAtHeader!.closest('tr')!.children).indexOf(createdAtHeader!) + 1;
+      const dataRows = screen.getAllByRole('row').slice(1);
+      const cellValues = dataRows.map(
+        (r) => (r.querySelectorAll('td')[colIndex - 1] as HTMLElement)?.textContent ?? ''
+      );
+
+      expect(cellValues).toEqual([
+        '2025-06-15T07:00:00.000Z',
+        '2025-06-15T08:00:00.000Z',
+        '2025-06-15T09:00:00.000Z',
+      ]);
     });
   });
 

@@ -5,73 +5,50 @@
  * 2.0.
  */
 
-import { EuiFlyoutHeader, EuiLink, EuiSpacer, EuiTab, EuiTabs, EuiTitle } from '@elastic/eui';
+import { EuiLink, EuiToolTip } from '@elastic/eui';
 import { EBT_CLICK_ACTIONS, getEbtProps } from '@kbn/ebt-click';
+import { i18n } from '@kbn/i18n';
+import type { ReactNode } from 'react';
 import React from 'react';
-import { SERVICE_FLYOUT_EBT_ACTIONS, SERVICE_FLYOUT_EBT_ELEMENTS } from '../ebt_constants';
-import { ServiceBadges } from './service_badges';
-import { SERVICE_FLYOUT_TABS, type ServiceFlyoutTabId } from '..';
+import { SERVICE_FLYOUT_EBT_ELEMENTS } from '../ebt_constants';
 import { useServiceFlyoutLinks } from '../hooks/use_service_flyout_links';
 import { useServiceFlyoutContext } from '../service_flyout_context';
 
-interface ServiceFlyoutHeaderProps {
-  title: string;
-  titleId: string;
-  selectedTabId: ServiceFlyoutTabId;
-  onSelectedTabIdChange: (tabId: ServiceFlyoutTabId) => void;
-}
+const TITLE_LINK_TOOLTIP = i18n.translate('xpack.apm.serviceFlyout.titleLinkTooltip', {
+  defaultMessage: 'Open service overview',
+});
 
-export function ServiceFlyoutHeader({
-  title,
-  titleId,
-  selectedTabId,
-  onSelectedTabIdChange,
-}: ServiceFlyoutHeaderProps) {
+/**
+ * Builds the service flyout title node for `FlyoutTemplate.Header`: a link to the service overview
+ * when the capability and href are available, otherwise plain text. The template owns the heading
+ * element; this returns only its content.
+ */
+export function useServiceFlyoutTitle(title: string): ReactNode {
   const { capabilities } = useServiceFlyoutContext();
   const { apm } = useServiceFlyoutLinks();
   const serviceOverviewHref = apm.overviewTab;
-  const showServiceNameLink = capabilities.header?.serviceNameLink ?? false;
+  const showServiceNameLink = Boolean(
+    serviceOverviewHref && (capabilities.header?.serviceNameLink ?? false)
+  );
+
+  if (!showServiceNameLink) {
+    return <span data-test-subj="serviceFlyoutTitle">{title}</span>;
+  }
 
   return (
-    <EuiFlyoutHeader>
-      <EuiTitle size="s">
-        <h2 id={titleId} data-test-subj="serviceFlyoutTitle">
-          {showServiceNameLink ? (
-            <EuiLink
-              href={serviceOverviewHref}
-              data-test-subj="serviceFlyoutTitleLink"
-              {...getEbtProps({
-                action: EBT_CLICK_ACTIONS.VIEW_SERVICE,
-                element: SERVICE_FLYOUT_EBT_ELEMENTS.TITLE,
-              })}
-            >
-              {title}
-            </EuiLink>
-          ) : (
-            title
-          )}
-        </h2>
-      </EuiTitle>
-      <EuiSpacer size="m" />
-      <ServiceBadges />
-      <EuiSpacer size="s" />
-      <EuiTabs data-test-subj="serviceFlyoutTabs">
-        {SERVICE_FLYOUT_TABS.map(({ id, label }) => (
-          <EuiTab
-            key={id}
-            isSelected={id === selectedTabId}
-            onClick={() => onSelectedTabIdChange(id)}
-            data-test-subj={`serviceFlyoutTab-${id}`}
-            {...getEbtProps({
-              action: SERVICE_FLYOUT_EBT_ACTIONS.VIEW_TAB,
-              element: SERVICE_FLYOUT_EBT_ELEMENTS.TABS,
-              detail: id,
-            })}
-          >
-            {label}
-          </EuiTab>
-        ))}
-      </EuiTabs>
-    </EuiFlyoutHeader>
+    <span data-test-subj="serviceFlyoutTitle">
+      <EuiToolTip content={TITLE_LINK_TOOLTIP} position="bottom">
+        <EuiLink
+          href={serviceOverviewHref}
+          data-test-subj="serviceFlyoutTitleLink"
+          {...getEbtProps({
+            action: EBT_CLICK_ACTIONS.VIEW_SERVICE,
+            element: SERVICE_FLYOUT_EBT_ELEMENTS.TITLE,
+          })}
+        >
+          {title}
+        </EuiLink>
+      </EuiToolTip>
+    </span>
   );
 }

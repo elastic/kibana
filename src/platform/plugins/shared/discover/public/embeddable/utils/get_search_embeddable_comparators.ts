@@ -7,55 +7,21 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type {
+  DiscoverSessionApiEmbeddableByReferenceConfig,
+  DiscoverSessionApiEmbeddableByValueConfig,
+  DiscoverSessionApiEmbeddableTab,
+} from '@kbn/as-code-discover-schema';
 import type { StateComparators } from '@kbn/presentation-publishing';
-import { isEqual, isUndefined, omit, omitBy } from 'lodash';
-import type {
-  EditableSavedSearchAttributes,
-  SearchEmbeddableBaseState,
-  SearchEmbeddableByReferenceState,
-  SearchEmbeddableByValueState,
-} from '../../../common/embeddable/types';
-import type {
-  DiscoverSessionEmbeddableByReferenceProps,
-  DiscoverSessionEmbeddableByValueProps,
-} from '../../../server';
-
-type SearchEmbeddableStateAttrs = EditableSavedSearchAttributes &
-  (
-    | Omit<SearchEmbeddableByValueState, keyof SearchEmbeddableBaseState>
-    | Omit<SearchEmbeddableByReferenceState, keyof SearchEmbeddableBaseState>
-  );
-
-export function getSearchEmbeddableComparators(
-  isByValue: boolean,
-  shouldSkipTabComparators: boolean
-): StateComparators<SearchEmbeddableStateAttrs> {
-  return {
-    sort: 'deepEquality',
-    columns: 'deepEquality',
-    rowHeight: 'referenceEquality',
-    sampleSize: 'referenceEquality',
-    rowsPerPage: 'referenceEquality',
-    headerRowHeight: 'referenceEquality',
-    density: 'referenceEquality',
-    grid: 'deepEquality',
-    ...(isByValue
-      ? { attributes: 'skip' }
-      : {
-          // While the selected tab is missing or inline editing is in progress,
-          // skip tab-dependent comparators so unsaved-changes badges don't appear
-          // until the user explicitly applies a tab change.
-          selectedTabId: shouldSkipTabComparators ? 'skip' : 'referenceEquality',
-          savedObjectId: 'skip',
-        }),
-  };
-}
+import { isEqual, isUndefined, omitBy } from 'lodash';
+import { areTableSettingOverridesEqual } from './panel_tab';
 
 export function getDiscoverSessionEmbeddableComparators(
   isByValue: boolean,
-  shouldSkipTabComparators: boolean
+  shouldSkipTabComparators: boolean,
+  selectedSessionTab?: DiscoverSessionApiEmbeddableTab
 ): StateComparators<
-  DiscoverSessionEmbeddableByValueProps | DiscoverSessionEmbeddableByReferenceProps
+  DiscoverSessionApiEmbeddableByValueConfig | DiscoverSessionApiEmbeddableByReferenceConfig
 > {
   return isByValue
     ? {
@@ -73,16 +39,8 @@ export function getDiscoverSessionEmbeddableComparators(
         // until the user explicitly applies a tab change.
         selected_tab_id: shouldSkipTabComparators ? 'skip' : 'referenceEquality',
         ref_id: 'skip',
-        overrides: (prev = {}, next = {}) => {
-          return (
-            isEqual(prev.column_order ?? [], next.column_order ?? []) &&
-            isEqual(prev.column_settings ?? {}, next.column_settings ?? {}) &&
-            isEqual(prev.sort ?? [], next.sort ?? []) &&
-            isEqual(
-              omit(prev, ['column_order', 'column_settings', 'sort']),
-              omit(next, ['column_order', 'column_settings', 'sort'])
-            )
-          );
-        },
+        // Overrides that show the same table on top of the selected session tab are equal
+        overrides: (prev, next) =>
+          areTableSettingOverridesEqual(selectedSessionTab ?? {}, prev, next),
       };
 }

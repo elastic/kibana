@@ -47,10 +47,10 @@ export const ENTITY_ANALYTICS = i18n.translate(
   }
 );
 
-export const ENTITY_ANALYTICS_PRIVILEGED_USER_MONITORING = i18n.translate(
-  'xpack.securitySolution.navigation.privilegedUserMonitoring',
+export const ENTITY_ANALYTICS_SETTINGS = i18n.translate(
+  'xpack.securitySolution.navigation.entityAnalyticsSettings',
   {
-    defaultMessage: 'Privileged user monitoring',
+    defaultMessage: 'Entity analytics settings',
   }
 );
 
@@ -73,7 +73,7 @@ export const DASHBOARDS = i18n.translate('xpack.securitySolution.navigation.dash
 export const COVERAGE_OVERVIEW = i18n.translate(
   'xpack.securitySolution.navigation.coverageOverviewDashboard',
   {
-    defaultMessage: 'MITRE ATT&CK\u00AE Coverage',
+    defaultMessage: 'MITRE coverage',
   }
 );
 

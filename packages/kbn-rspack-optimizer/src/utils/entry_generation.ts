@@ -9,24 +9,19 @@
 
 import Path from 'path';
 import Fs from 'fs';
-import { rspack } from '@rspack/core';
+import { rspack } from '../rspack_runtime';
 import type { PluginEntry } from '../types';
 import { createCoreEntry } from './plugin_discovery';
 
 // Entry file version - increment when changing the entry generation logic
 // This ensures the entry file is regenerated when config structure changes
-const ENTRY_VERSION = 'v11';
+const ENTRY_VERSION = 'v12';
 
 /**
  * Find the index entry file for a given target directory within a plugin.
  *
- * Generalizes the previous `findEntry` (which only looked in `public/`) to
- * support any target directory declared in `extraPublicDirs`. This mirrors
- * the legacy webpack optimizer's val-loader entry generation where each
- * target in `bundle.remoteInfo.targets` was resolved via
- * `Path.resolve(bundle.contextDir, target)`.
- *
- * @see packages/kbn-optimizer/src/worker/webpack.config.ts (val-loader entries)
+ * Supports any target directory declared in `extraPublicDirs`, resolved
+ * relative to the plugin's `contextDir`.
  */
 export function findTargetEntry(contextDir: string, target: string = 'public'): string | null {
   const targetDir = Path.join(contextDir, target);
@@ -46,10 +41,9 @@ export function findTargetEntry(contextDir: string, target: string = 'public'): 
  * Collect plugin entries from discovered plugins, including extra targets
  * declared in `extraPublicDirs`.
  *
- * The legacy webpack optimizer registered a `__kbnBundles__.define()` call
- * for every target in `['public', ...extraPublicDirs]` via the val-loader
- * entry creator. This function produces the equivalent set of entries so
- * that `createUnifiedEntry` can generate matching registrations.
+ * Every target in `['public', ...extraPublicDirs]` gets a
+ * `__kbnBundles__.define()` registration; this function produces the set of
+ * entries `createUnifiedEntry` uses to generate those registrations.
  *
  * Each entry includes a `pluginId` field used by `createUnifiedEntry` to
  * group targets under the same `webpackChunkName`, ensuring rspack merges
@@ -90,11 +84,13 @@ export function collectPluginEntries(
 }
 
 /**
- * Create a unified entry module with ALL-ASYNC loading:
+ * Create a unified entry module with SELECTIVE ASYNC loading:
  *
- * All bundles (core + plugins) are loaded in parallel via dynamic import().
+ * Core and the server-selected plugin bundles are loaded in parallel via
+ * dynamic import(). If the bootstrap selection is absent, all bundles are
+ * loaded for backwards compatibility.
  * kibana.bundle.js becomes a tiny orchestration shell containing only the
- * rspack runtime and the Promise.all that loads everything.
+ * rspack runtime and the generated loader records.
  *
  * Core gets webpackChunkName "plugin-core" and is treated identically
  * to other plugins. Promise.all guarantees all .then() callbacks complete
@@ -162,15 +158,15 @@ export function createUnifiedEntry(
     Fs.mkdirSync(pluginWrapperDir, { recursive: true });
   }
 
-  // Generate wrapper files and async imports for ALL entries (core + plugins).
+  // Generate wrapper files and async loaders for ALL entries (core + plugins).
   // Core is treated the same as plugins -- loaded via dynamic import() with
   // webpackChunkName "plugin-core". This makes kibana.bundle.js a tiny
-  // orchestration shell and enables core to download in parallel with all plugins.
+  // orchestration shell and enables core to download in parallel with selected plugins.
   // All targets for the same plugin share a webpackChunkName so rspack merges
   // them into a single chunk.
   const BATCH_SIZE = 150;
 
-  const importLines = pluginEntries.map((entry) => {
+  const loaderLines = pluginEntries.map((entry) => {
     const chunkName = `plugin-${entry.pluginId}`;
     const wrapperFilename = `${entry.id.replace(/\//g, '__')}.js`;
     const wrapperPath = Path.join(pluginWrapperDir, wrapperFilename);
@@ -179,42 +175,28 @@ export function createUnifiedEntry(
     Fs.writeFileSync(wrapperPath, `export * from ${JSON.stringify(relativeSourcePath)};\n`);
 
     const relativeWrapperPath = toRelativePath(wrapperPath);
-    return `    import(/* webpackChunkName: ${JSON.stringify(chunkName)} */ ${JSON.stringify(
+    return `  { pluginId: ${JSON.stringify(
+      entry.pluginId
+    )}, load: () => import(/* webpackChunkName: ${JSON.stringify(chunkName)} */ ${JSON.stringify(
       relativeWrapperPath
-    )}).then(m => registerPlugin('${entry.bundleId}', m))`;
+    )}).then(m => registerPlugin(${JSON.stringify(entry.bundleId)}, m)) }`;
   });
-
-  const batches: string[][] = [];
-  for (let i = 0; i < importLines.length; i += BATCH_SIZE) {
-    batches.push(importLines.slice(i, i + BATCH_SIZE));
-  }
-
-  const batchBlocks = batches
-    .map((batch, idx) => {
-      const promiseAll = `  await Promise.all([\n${batch.join(',\n')}\n  ]);`;
-      if (idx < batches.length - 1) {
-        return `${promiseAll}\n  await new Promise(r => setTimeout(r, 0));`;
-      }
-      return promiseAll;
-    })
-    .join('\n');
 
   const content = `// Auto-generated unified entry for Kibana RSPack build
 // Plugin list hash: ${pluginListHash}
 // Generated at: ${new Date().toISOString()}
 //
-// ALL-ASYNC STRATEGY:
-// 1. Core + all plugins loaded in parallel via dynamic import()
+// SELECTIVE ASYNC STRATEGY:
+// 1. Core + server-selected plugins load via dynamic import()
 // 2. Each target gets a webpackChunkName; same-plugin targets merge into one chunk
 // 3. RSPack naturally splits shared code via splitChunks cache groups
 // 4. kibana.bundle.js is just the runtime + orchestration shell
 //
 // TBT MITIGATION:
-// With eager chunk loading, all chunks are pre-loaded via the bootstrap load()
-// array. When this entry runs, every import() resolves instantly (modules already
-// in JSONP queue), concentrating all ~220 plugin factory executions into one
-// macrotask. To prevent a single long blocking task, imports are batched with
-// setTimeout(0) yielding between groups of ${BATCH_SIZE}.
+// Selected chunks are pre-loaded via the bootstrap load() array. When this entry
+// runs, their import() calls resolve instantly (modules already in the JSONP
+// queue). Full application pages can still select ~220 plugins, so imports are
+// batched with setTimeout(0) yielding between groups of ${BATCH_SIZE}.
 
 // Verify __kbnBundles__ is available
 if (typeof __kbnBundles__ === 'undefined' || typeof __kbnBundles__.define !== 'function') {
@@ -232,11 +214,25 @@ function registerPlugin(bundleId, moduleExports) {
   __kbnBundles__.define(bundleId, () => moduleExports, bundleId);
 }
 
+const pluginLoaders = [
+${loaderLines.join(',\n')}
+];
+
+// The server computes this set from enabled page plugins plus their transitive
+// requiredBundles. Missing bootstrap data falls back to the previous load-all
+// behavior so independently consumed builds remain backwards compatible.
+const selectedPluginIds = Array.isArray(window.__kbnPluginIdsToLoad__)
+  ? new Set(window.__kbnPluginIdsToLoad__)
+  : undefined;
+const loadersToRun = selectedPluginIds
+  ? pluginLoaders.filter(({ pluginId }) => pluginId === 'core' || selectedPluginIds.has(pluginId))
+  : pluginLoaders;
+
 // ============================================
-// All bundles (core + plugins) loaded in parallel via batched async imports
+// Core + selected plugins loaded in parallel via batched async imports
 // ============================================
-// Core is loaded as "plugin-core" alongside all other plugins.
-// Batches of ${BATCH_SIZE} imports run in parallel within each batch, with a
+// Core is always loaded as "plugin-core".
+// Batches of ${BATCH_SIZE} loaders run in parallel within each batch, with a
 // setTimeout(0) yield between batches to break up the long task.
 window.__kbnPluginsLoaded = (async () => {
   try {
@@ -250,8 +246,14 @@ window.__kbnPluginsLoaded = (async () => {
   } catch (e) {
     // Non-fatal: plugins will load with English defaults
   }
-${batchBlocks}
-  console.log('[@kbn/rspack-optimizer] All plugins loaded');
+
+  for (let i = 0; i < loadersToRun.length; i += ${BATCH_SIZE}) {
+    await Promise.all(loadersToRun.slice(i, i + ${BATCH_SIZE}).map(({ load }) => load()));
+    if (i + ${BATCH_SIZE} < loadersToRun.length) {
+      await new Promise(r => setTimeout(r, 0));
+    }
+  }
+  console.log('[@kbn/rspack-optimizer] Selected plugins loaded');
 })().catch(err => {
   console.error('[@kbn/rspack-optimizer] Failed to load plugins:', err);
   throw err;

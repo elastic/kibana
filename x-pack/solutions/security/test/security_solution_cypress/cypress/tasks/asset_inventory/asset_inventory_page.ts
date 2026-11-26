@@ -382,7 +382,7 @@ export const enableAssetInventory = () => {
 // status, the privileges check, and a search for any document on `entities-latest-*`. Tests should
 // seed entity docs into `entities-latest-{namespace}` and the All Assets title becomes visible once
 // the page renders.
-export const ALL_ASSETS_TITLE_TEST_ID = '[data-test-subj="asset-inventory-test-subj-page-title"]';
+export const ALL_ASSETS_TITLE_TEST_ID = '[data-test-subj="appHeaderTitle"]';
 export const waitForAssetInventoryReady = (timeoutMs = 30000) => {
   cy.get(ALL_ASSETS_TITLE_TEST_ID, { timeout: timeoutMs }).should('be.visible');
 };

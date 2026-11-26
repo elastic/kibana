@@ -25,6 +25,7 @@ import {
 } from '../create_alert_event_log_record_object';
 import type { RuleRunMetrics } from '../rule_run_metrics_store';
 import { Gap } from '../rule_gaps/gap';
+import { addCloudApiKeyAuthErrorGuidance } from '../cloud_api_key_auth_error_guidance';
 import type { GapBase } from '../../application/gaps/types';
 import type { GapReason } from '../../../common/constants';
 
@@ -38,6 +39,7 @@ export interface RuleContext {
   consumer?: string;
   name?: string;
   revision?: number;
+  tags?: string[];
 }
 export interface ContextOpts {
   savedObjectId: string;
@@ -229,6 +231,7 @@ export class AlertingEventLogger {
     consumer,
     type,
     revision,
+    tags,
   }: {
     name?: string;
     id?: string;
@@ -236,6 +239,7 @@ export class AlertingEventLogger {
     consumer?: string;
     revision?: number;
     type?: UntypedNormalizedRuleType;
+    tags?: string[];
   }) {
     if (!this.isInitialized) {
       throw new Error(`AlertingEventLogger not initialized`);
@@ -265,6 +269,10 @@ export class AlertingEventLogger {
       this.ruleData.revision = revision;
     }
 
+    if (tags) {
+      this.ruleData.tags = tags;
+    }
+
     let updatedRelatedSavedObjects = false;
     if (id && type) {
       // add this to saved objects array if it doesn't already exists
@@ -285,6 +293,7 @@ export class AlertingEventLogger {
       ruleId: id,
       ruleUuid,
       ruleType: type,
+      ruleTags: tags,
       consumer,
       revision,
       savedObjects: updatedRelatedSavedObjects ? this.relatedSavedObjects : undefined,
@@ -316,7 +325,7 @@ export class AlertingEventLogger {
       message,
       outcome: 'failure',
       alertingOutcome: 'failure',
-      error: errorMessage,
+      error: addCloudApiKeyAuthErrorGuidance(errorMessage),
     });
   }
 
@@ -494,6 +503,7 @@ export function createAlertRecord(
     flapping: alert.flapping,
     maintenanceWindowIds: alert.maintenanceWindowIds,
     ruleRevision: ruleData.revision,
+    ruleTags: ruleData.tags,
   });
 }
 
@@ -525,6 +535,7 @@ export function createActionExecuteRecord(
     ruleName: ruleData.name,
     alertSummary: action.alertSummary,
     ruleRevision: ruleData.revision,
+    ruleTags: ruleData.tags,
   });
 }
 
@@ -558,6 +569,7 @@ export function createExecuteTimeoutRecord(
     savedObjects,
     ruleName: ruleData?.name,
     ruleRevision: ruleData?.revision,
+    ruleTags: ruleData?.tags,
   });
 }
 
@@ -585,6 +597,7 @@ export function createGapRecord(
     savedObjects,
     ruleName: ruleData?.name,
     ruleRevision: ruleData?.revision,
+    ruleTags: ruleData?.tags,
     gap,
   });
 }
@@ -599,6 +612,7 @@ export function initializeExecuteRecord(
     ruleType: ruleData.type,
     consumer: ruleData.consumer,
     ruleRevision: ruleData.revision,
+    ruleTags: ruleData.tags,
     namespace: context.namespace,
     spaceId: context.spaceId,
     executionId: context.executionId,
@@ -643,6 +657,7 @@ interface UpdateRuleOpts {
   ruleName?: string;
   ruleId?: string;
   ruleUuid?: string;
+  ruleTags?: string[];
   consumer?: string;
   ruleType?: UntypedNormalizedRuleType;
   revision?: number;
@@ -650,7 +665,7 @@ interface UpdateRuleOpts {
 }
 
 export function updateEventWithRuleData(event: IEvent, opts: UpdateRuleOpts) {
-  const { ruleName, ruleId, ruleUuid, consumer, ruleType, revision, savedObjects } = opts;
+  const { ruleName, ruleId, ruleUuid, consumer, ruleType, revision, ruleTags, savedObjects } = opts;
   if (!event) {
     throw new Error('Cannot update event because it is not initialized.');
   }
@@ -674,6 +689,10 @@ export function updateEventWithRuleData(event: IEvent, opts: UpdateRuleOpts) {
       ...event.rule,
       uuid: ruleUuid,
     };
+  }
+
+  if (ruleTags && ruleTags.length > 0) {
+    event.tags = ruleTags;
   }
 
   if (consumer) {

@@ -8,6 +8,8 @@
 export const LOOKBACK_WINDOW = 'now-30d';
 export const COMPOSITE_PAGE_SIZE = 3500;
 export const MAX_ITERATIONS = 1000;
+/** Default per-request timeout (ms) for ES client calls made by the engine. */
+export const DEFAULT_ESQL_TIMEOUT_MS = 60_000;
 
 /**
  * Required ES|QL preamble for every Step 2 query the engine runs.

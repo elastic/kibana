@@ -12,10 +12,10 @@ import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { injectedMetadataServiceMock } from '@kbn/core-injected-metadata-browser-mocks';
 import { UserStorageService } from './user_storage_service';
 
-const buildDeps = (initialValues: Record<string, unknown> = {}) => {
+const buildDeps = (initialValues: Record<string, unknown> = {}, available = true) => {
   const http = httpServiceMock.createSetupContract();
   const injectedMetadata = injectedMetadataServiceMock.createSetupContract();
-  injectedMetadata.getUserStorage.mockReturnValue({ values: initialValues });
+  injectedMetadata.getUserStorage.mockReturnValue({ available, values: initialValues });
   return { http, injectedMetadata };
 };
 
@@ -24,7 +24,14 @@ describe('UserStorageService', () => {
     const service = new UserStorageService();
     const client = service.setup(buildDeps({ key: 42 }));
 
-    expect(client.get('key')).toBe(42);
+    expect(client.peek('key')).toBe(42);
+  });
+
+  it('threads the injected `available` flag into the client', () => {
+    const service = new UserStorageService();
+
+    expect(service.setup(buildDeps({}, true)).isAvailable()).toBe(true);
+    expect(new UserStorageService().setup(buildDeps({}, false)).isAvailable()).toBe(false);
   });
 
   it('returns the same client from start as setup', () => {
@@ -49,20 +56,21 @@ describe('UserStorageService', () => {
         body: JSON.stringify({ value: { hidden: ['discover'] } }),
       })
     );
-    expect(client.get('navigation:layout')).toEqual({ hidden: ['discover'] });
+    expect(client.peek('navigation:layout')).toEqual({ hidden: ['discover'] });
   });
 
   it('completes the client observables on stop', async () => {
     const service = new UserStorageService();
     const client = service.setup(buildDeps());
 
-    const update$ = client.getUpdate$();
     const errors$ = client.getHttpError$();
+    const completed = jest.fn();
+    client.get$('key').subscribe({ complete: completed });
 
     service.stop();
 
-    await expect(lastValueFrom(update$, { defaultValue: 'done' })).resolves.toBe('done');
     await expect(lastValueFrom(errors$, { defaultValue: 'done' })).resolves.toBe('done');
+    expect(completed).toHaveBeenCalled();
   });
 
   it('emits the seeded value as the first observable emission', async () => {

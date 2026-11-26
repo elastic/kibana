@@ -88,8 +88,6 @@ export const useSettingsView = ({
     useState<string>(DEFAULT_STACK_BY_FIELD);
   const [localConnectorId, setLocalConnectorId] = useState<string | undefined>(connectorId);
 
-  // Feature flag and workflow configuration
-  const [isWorkflowsEnabledFlag, setIsWorkflowsEnabledFlag] = useState<boolean>(false);
   const fetchDefaultEsqlQueryResult = useFetchDefaultEsqlQuery();
   const { resetCache: resetDefaultEsqlQueryCache } = fetchDefaultEsqlQueryResult;
   const {
@@ -110,19 +108,9 @@ export const useSettingsView = ({
 
   const workflowConfiguration = draftWorkflowConfiguration;
 
-  // Load feature flag value and combine with per-space uiSetting opt-in
-  useEffect(() => {
-    const loadFeatureFlag = async () => {
-      const ffEnabled = await featureFlags.getBooleanValue(
-        'securitySolution.attackDiscoveryWorkflowsEnabled',
-        true
-      );
-      setIsWorkflowsEnabledFlag(
-        ffEnabled && uiSettings.get(ENABLE_ATTACK_DISCOVERY_WORKFLOWS_SETTING, false)
-      );
-    };
-    loadFeatureFlag();
-  }, [featureFlags, uiSettings]);
+  const isWorkflowsEnabledFlag =
+    featureFlags.useBooleanValue('securitySolution.attackDiscoveryWorkflowsEnabled', true) &&
+    uiSettings.get(ENABLE_ATTACK_DISCOVERY_WORKFLOWS_SETTING, false);
 
   const isWorkflowsEnabled = isWorkflowsEnabledOverride ?? isWorkflowsEnabledFlag;
 
