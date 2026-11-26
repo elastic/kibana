@@ -22,6 +22,7 @@ import { RulesFilterBar } from '../../../rule_sets/components/rules_group_by_con
 import { SearchModeLine } from '../../../rule_sets/search/search_mode_line';
 import { RulesTableNoItems } from '../../../rule_sets/search/rules_table_no_items';
 import { RuleFlyoutProvider } from './rule_flyout';
+import { useRulesTableActions } from './use_rules_table_actions';
 import { GroupedRulesTable } from '../../../rule_sets/components/grouped_rules_table';
 import { Loader } from '../../../../common/components/loader';
 import { useBoolState } from '../../../../common/hooks/use_bool_state';
@@ -263,6 +264,11 @@ export const RulesTables = React.memo<RulesTableProps>(({ selectedTab }) => {
     confirmDeletion,
   });
 
+  const ruleActions = useRulesTableActions({
+    showExceptionsDuplicateConfirmation: showBulkDuplicateConfirmation,
+    showManualRuleRunConfirmation,
+    confirmDeletion,
+  });
   const monitoringColumns = useMonitoringColumns({
     isLoadingJobs,
     mlJobs,
@@ -445,7 +451,12 @@ export const RulesTables = React.memo<RulesTableProps>(({ selectedTab }) => {
             onToggleSelectAll={toggleSelectAll}
             isBulkActionInProgress={isBulkActionsDryRunLoading || loadingRulesAction != null}
           />
-          <RuleFlyoutProvider snippets={searchHighlights}>
+          <RuleFlyoutProvider
+            snippets={searchHighlights}
+            rules={rules}
+            columns={rulesColumns}
+            actions={ruleActions}
+          >
             {filterOptions.groupBy ? (
               <GroupedRulesTable
                 key={filterOptions.groupBy}

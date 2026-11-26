@@ -105,3 +105,35 @@ export const EXAMPLE_QUERIES = [
     defaultMessage: 'suspicious Okta sign-ins',
   }),
 ];
+
+export const RULE_TYPE = i18n.translate('xpack.securitySolution.ruleFlyout.ruleType', {
+  defaultMessage: 'Rule type',
+});
+
+export const POSITION = (position: number, total: number) =>
+  i18n.translate('xpack.securitySolution.ruleFlyout.position', {
+    values: { position, total },
+    defaultMessage: '{position} of {total}',
+  });
+
+export const PREVIOUS_RULE = i18n.translate('xpack.securitySolution.ruleFlyout.previousRule', {
+  defaultMessage: 'Previous rule (k)',
+});
+
+export const NEXT_RULE = i18n.translate('xpack.securitySolution.ruleFlyout.nextRule', {
+  defaultMessage: 'Next rule (j)',
+});
+
+export const ALERTS_LAST_7_DAYS = (count: number) =>
+  i18n.translate('xpack.securitySolution.ruleFlyout.alertsLast7Days', {
+    values: { count },
+    defaultMessage: '{count, plural, one {# alert} other {# alerts}} in the last 7 days',
+  });
+
+export const MORE_ACTIONS = i18n.translate('xpack.securitySolution.ruleFlyout.moreActions', {
+  defaultMessage: 'More actions',
+});
+
+export const EDIT_RULE = i18n.translate('xpack.securitySolution.ruleFlyout.editRule', {
+  defaultMessage: 'Edit rule',
+});

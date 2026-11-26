@@ -16,6 +16,7 @@ import {
   EuiFlyoutHeader,
   EuiFlyoutBody,
   EuiFlyoutFooter,
+  EuiFlyoutResizable,
   EuiTabbedContent,
   EuiSpacer,
   EuiFlexGroup,
@@ -127,6 +128,8 @@ interface RuleDetailsFlyoutProps {
   extraTabs?: EuiTabbedContentTab[];
   dataTestSubj?: string;
   id?: string;
+  /** The width can be dragged. */
+  resizable?: boolean;
   closeFlyout: () => void;
   title?: string;
 }
@@ -134,14 +137,16 @@ interface RuleDetailsFlyoutProps {
 export function RuleDetailsFlyout({
   id,
   dataTestSubj,
+  resizable = false,
   ...props
 }: RuleDetailsFlyoutProps): JSX.Element {
   const prebuiltRulesFlyoutTitleId = useGeneratedHtmlId({
     prefix: 'prebuiltRulesFlyoutTitle',
   });
 
+  const Flyout = resizable ? EuiFlyoutResizable : EuiFlyout;
   return (
-    <EuiFlyout
+    <Flyout
       id={id}
       size={props.size}
       onClose={props.closeFlyout}
@@ -154,7 +159,7 @@ export function RuleDetailsFlyout({
       <KibanaSectionErrorBoundary sectionName={i18n.RULE_DETAILS_FLYOUT_LABEL}>
         <RuleDetailsFlyoutContent {...props} titleId={prebuiltRulesFlyoutTitleId} />
       </KibanaSectionErrorBoundary>
-    </EuiFlyout>
+    </Flyout>
   );
 }
 
