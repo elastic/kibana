@@ -65,7 +65,7 @@ The Sophos Central connector exposes the following actions:
 `deisolateEndpoint` _(API only)_
 :   Remove one or more endpoints from network isolation, restoring normal network connectivity. Accepts 1 to 500 endpoint UUIDs.
 
-    An analyst must invoke this action directly via the Kibana connector execution API (`POST /api/actions/connector/<id>/_execute`) after confirming the threat is remediated. Kibana does not prompt for or verify that approval — the caller is responsible for obtaining it before invoking the action.
+    An analyst must invoke this action directly via the Kibana connector execution API after confirming the threat is remediated. Use `POST /api/actions/connector/<id>/_execute` for the default space, or `POST /s/<space_id>/api/actions/connector/<id>/_execute` for a non-default space. Kibana does not prompt for or verify that approval — the caller is responsible for obtaining it before invoking the action.
 
 `scanEndpoint`
 :   Trigger an on-demand malware scan on one or more endpoints. The scan runs asynchronously; the action returns a scan ID immediately. Accepts 1 to 500 endpoint UUIDs.
