@@ -50,6 +50,8 @@ interface ConnectorSection {
   readonly endpointCount: number;
   /** The endpoints that changed, without the changes to the spec as a whole. */
   readonly locatedCount: number;
+  /** The endpoints whose auth scopes were only regrouped, which the table leaves out. */
+  readonly regroupedCount: number;
   /** Of `changeCount`, the changes to the spec as a whole rather than to an endpoint. */
   readonly specChangeCount: number;
   readonly rows: readonly EndpointRow[];
@@ -90,26 +92,38 @@ const sectionOf = (drift: ConnectorDrift): ConnectorSection => {
       )
       .map(({ action }) => action)
       .sort(byText);
-  const all = endpoints.map(({ endpoint, source, changes: group }) => ({
+  const countOf = (areas: readonly ChangeArea[]): number =>
+    areas.reduce((sum, area) => sum + countChanges(area), 0);
+  const withAreas = endpoints.map(({ endpoint, source, changes: group }) => ({
+    endpoint,
+    source,
+    changes: group,
+    areas: changeAreas(group),
+  }));
+  // A row whose only change is regrouped auth scopes changes nothing, so the table leaves it out.
+  const isRegrouped = ({ changes: group, areas }: (typeof withAreas)[number]): boolean =>
+    group.length > 0 && countOf(areas) === 0;
+  const shown = withAreas.filter((row) => !isRegrouped(row));
+  const all: EndpointRow[] = shown.map(({ endpoint, source, areas }) => ({
     endpoint,
     ...(endpoint !== NO_ENDPOINT && (sourcesOf.get(endpoint)?.size ?? 0) > 1 ? { source } : {}),
     actions: endpoint === NO_ENDPOINT ? [] : actionsOf(source, endpoint),
-    areas: changeAreas(group),
+    areas,
   }));
-  const countOf = (rows: typeof all): number =>
-    rows.reduce(
-      (total, { areas }) => total + areas.reduce((sum, area) => sum + countChanges(area), 0),
-      0
-    );
-  const changeCount = countOf(all);
-  const specChangeCount = countOf(all.filter(({ endpoint }) => endpoint === NO_ENDPOINT));
+  const countRows = (rows: readonly EndpointRow[]): number =>
+    rows.reduce((total, { areas }) => total + countOf(areas), 0);
+  const changeCount = countRows(all);
+  const specChangeCount = countRows(all.filter(({ endpoint }) => endpoint === NO_ENDPOINT));
+  const isLocated = ({ endpoint }: { readonly endpoint: string }): boolean =>
+    endpoint !== NO_ENDPOINT;
   return {
     connector: drift.connector,
     changeCount,
     onlyRegrouped: changes.length > 0 && changeCount === 0,
     operationsChanged: drift.operationsChanged,
-    endpointCount: endpoints.length,
-    locatedCount: endpoints.filter(({ endpoint }) => endpoint !== NO_ENDPOINT).length,
+    endpointCount: all.length,
+    locatedCount: all.filter(isLocated).length,
+    regroupedCount: withAreas.filter((row) => isRegrouped(row) && isLocated(row)).length,
     specChangeCount,
     rows: all.slice(0, MAX_ENDPOINTS_PER_CONNECTOR),
   };
@@ -118,16 +132,20 @@ const sectionOf = (drift: ConnectorDrift): ConnectorSection => {
 const summaryOf = ({
   changeCount,
   locatedCount,
+  regroupedCount,
   specChangeCount,
   onlyRegrouped,
 }: ConnectorSection): string => {
   const uses = `${plural(locatedCount, 'endpoint')} that the connector uses`;
+  const regrouped = `${plural(regroupedCount, 'endpoint')} that the connector uses`;
   // Changes to no endpoint, such as a removed schema or a new security scheme, are counted apart.
   const whole = `${plural(specChangeCount, 'change')} to the spec as a whole`;
   const onEndpoints = changeCount - specChangeCount;
   let what = 'has changes that `oasdiff` does not report';
   if (onlyRegrouped) {
-    what = `only regroups the auth scopes of ${locatedCount > 0 ? uses : 'the spec as a whole'}`;
+    what = `only regroups the auth scopes of ${
+      regroupedCount > 0 ? regrouped : 'the spec as a whole'
+    }`;
   } else if (onEndpoints > 0) {
     what = `has ${plural(onEndpoints, 'change')} on ${uses}${
       specChangeCount > 0 ? `, and ${whole}` : ''

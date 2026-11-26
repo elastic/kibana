@@ -232,6 +232,19 @@ describe('renderRefreshPr', () => {
     expect(body).toContain(
       'New spec only regroups the auth scopes of 1 endpoint that the connector uses.\n'
     );
+    expect(body).not.toContain('<details>');
+
+    // Next to real changes, an endpoint that only regrouped its scopes has no row and isn't counted
+    const mixed = renderRefreshPr([
+      changed('.other', [
+        scheme('api-security-removed', 'a'),
+        scheme('api-security-added', 'a'),
+        field('GET /b', 'name'),
+      ]),
+    ]);
+    expect(mixed).toContain('New spec has 1 change on 1 endpoint that the connector uses.');
+    expect(mixed).toContain('`GET /b`');
+    expect(mixed).not.toContain('GET /a');
   });
 
   it('has no table for a spec that changed outside what oasdiff reports', () => {
