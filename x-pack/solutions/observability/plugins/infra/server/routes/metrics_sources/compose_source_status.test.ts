@@ -77,7 +77,7 @@ describe('composeSourceStatus', () => {
     expect(logger.error).not.toHaveBeenCalled();
   });
 
-  it('collapses line breaks in the timeout error message so it cannot forge log lines', async () => {
+  it('escapes line breaks in the timeout error message so it cannot forge log lines', async () => {
     const hasMetricIndices = jest
       .fn()
       .mockRejectedValue(new errors.TimeoutError('Request timed out\nerror forged line'));
@@ -93,7 +93,7 @@ describe('composeSourceStatus', () => {
 
     const [message] = logger.warn.mock.calls[0];
     expect(message).not.toContain('\n');
-    expect(message).toContain('Request timed out error forged line');
+    expect(message).toContain('Request timed out\\nerror forged line');
   });
 
   it('keeps an unexpected probe failure visible as a structured error with the source context and reports unknown', async () => {
@@ -211,7 +211,7 @@ describe('composeSourceStatus', () => {
     expect(renderMessage(loggedError)).toBe(expectedMessage);
   });
 
-  it('collapses line breaks in the request-controlled source id so it cannot forge log lines', async () => {
+  it('escapes line breaks in the request-controlled source id so it cannot forge log lines', async () => {
     const hasMetricIndices = jest
       .fn()
       .mockRejectedValue(new errors.TimeoutError('Request timed out'));
@@ -227,13 +227,31 @@ describe('composeSourceStatus', () => {
 
     const [message] = logger.warn.mock.calls[0];
     expect(message).not.toContain('\n');
-    expect(message).toContain('default error forged line');
+    expect(message).toContain('default\\nerror forged line');
   });
 
-  it('strips other control characters (for example backspace) from the request-controlled source id', async () => {
+  it('keeps a tab in the source id distinguishable from a space', async () => {
+    const hasMetricIndices = jest
+      .fn()
+      .mockRejectedValue(new errors.TimeoutError('Request timed out'));
+
+    await composeSourceStatus({
+      logger,
+      sourceStatus: { hasMetricIndices },
+      requestContext,
+      request,
+      sourceId: 'a\tb',
+      metricAlias,
+    });
+
+    const [message] = logger.warn.mock.calls[0];
+    expect(message).toContain('source "a\\tb"');
+  });
+
+  it('escapes other control characters (for example backspace) in the request-controlled source id', async () => {
     // Kibana's plain-text logger passes control characters other than CR/LF straight through, so a
     // backspace in a request-controlled value could overwrite earlier text in a terminal and make
-    // the source or the log prefix misleading. They must be stripped alongside line breaks.
+    // the source or the log prefix misleading. They must be escaped alongside line breaks.
     const hasMetricIndices = jest
       .fn()
       .mockRejectedValue(new errors.TimeoutError('Request timed out'));
@@ -250,10 +268,10 @@ describe('composeSourceStatus', () => {
     const [message] = logger.warn.mock.calls[0];
     // eslint-disable-next-line no-control-regex
     expect(message).not.toMatch(/[\u0000-\u001f\u007f]/);
-    expect(message).toContain('default error');
+    expect(message).toContain('default\\u0008\\u0008\\u0008\\u0008error');
   });
 
-  it('collapses line breaks in the request-controlled metric alias so it cannot forge log lines', async () => {
+  it('escapes line breaks in the request-controlled metric alias so it cannot forge log lines', async () => {
     const hasMetricIndices = jest
       .fn()
       .mockRejectedValue(new errors.RequestAbortedError('Request aborted'));
@@ -269,7 +287,7 @@ describe('composeSourceStatus', () => {
 
     const [message] = logger.debug.mock.calls[0];
     expect(message).not.toContain('\n');
-    expect(message).toContain('metrics-* error forged line');
+    expect(message).toContain('metrics-*\\nerror forged line');
   });
 
   it('keeps the error log and reports missing remote clusters, naming the source in the message', async () => {

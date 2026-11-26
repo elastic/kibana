@@ -20,14 +20,22 @@ export const defaultSourceStatus: MetricsSourceStatus = {
   metricIndicesStatus: 'unknown',
 };
 
+const NAMED_ESCAPES: Record<string, string> = { '\n': '\\n', '\r': '\\r', '\t': '\\t' };
+
 /**
- * Strips control characters so a request-controlled value cannot forge additional log lines or
- * overwrite earlier text when interpolated into a single-line log message. This covers not only
- * CR/LF but also characters Kibana's plain-text logger passes straight through (for example
- * backspace), which could otherwise rewrite the rendered source or log prefix in a terminal.
+ * Escapes control characters (for example `\n` becomes the two characters `\` `n`) so a
+ * request-controlled value cannot forge additional log lines or overwrite earlier text when
+ * interpolated into a single-line log message. This covers not only CR/LF but also characters
+ * Kibana's plain-text logger passes straight through (for example backspace), which could
+ * otherwise rewrite the rendered source or log prefix in a terminal. Escaping rather than
+ * replacing keeps distinct values distinguishable (a tab no longer logs like a space).
  */
-// eslint-disable-next-line no-control-regex
-const toSingleLine = (value: string): string => value.replace(/[\u0000-\u001f\u007f]+/g, ' ');
+const toSingleLine = (value: string): string =>
+  // eslint-disable-next-line no-control-regex
+  value.replace(
+    /[\u0000-\u001f\u007f]/g,
+    (char) => NAMED_ESCAPES[char] ?? `\\u${char.charCodeAt(0).toString(16).padStart(4, '0')}`
+  );
 
 /**
  * Wraps a probe failure in an `Error` whose message is prefixed with the source and pattern
