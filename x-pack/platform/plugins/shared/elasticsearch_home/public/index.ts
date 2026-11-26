@@ -10,6 +10,7 @@ import { ElasticsearchHomePlugin } from './plugin';
 export const plugin = () => new ElasticsearchHomePlugin();
 
 export type {
+  ElasticsearchHomeAppProps,
   ElasticsearchHomePageProps,
   ElasticsearchHomePublicStart,
   HomeAddDataLink,

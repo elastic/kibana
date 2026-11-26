@@ -30,6 +30,6 @@ export const getAclState = (acl: StoredAcl | undefined): AclState => {
 
   const hasVersion = acl.version.length > 0 && acl.version.every((value) => value === 1);
   const hasOwner = getPrincipalKind(acl.owner.type) !== undefined && acl.owner.id.length > 0;
-  const hasGeneralAccess = acl.general_access.some(isGeneralAccessLevel);
+  const hasGeneralAccess = acl.general.access.some(isGeneralAccessLevel);
   return hasVersion && hasOwner && hasGeneralAccess ? 'valid' : 'invalid';
 };

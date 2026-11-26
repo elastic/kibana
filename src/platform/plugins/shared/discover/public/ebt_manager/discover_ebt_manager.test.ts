@@ -88,7 +88,8 @@ describe('DiscoverEBTManager', () => {
             items: {
               type: 'keyword',
               _meta: {
-                description: 'List of active Discover context awareness profiles',
+                description:
+                  'List of active Discover context awareness profile ids, including inherited telemetry labels',
               },
             },
           },

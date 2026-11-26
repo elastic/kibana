@@ -7,9 +7,10 @@
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { buildProbeQuery } from '../generator';
+import type { GeneratedQuery } from '../generator';
 import { isVerificationError, toSourceError } from './errors/source_error';
 import { executeEsql } from './esql_client';
-import type { EsqlQueryResult } from './esql_client';
+import type { EsqlQueryResult, EsqlStats } from './esql_client';
 
 // The only question the executor asks Elasticsearch before the list queries. On purpose it makes
 // no metadata calls (no resolve-index, `_has_privileges` or field capabilities) and never learns a
@@ -35,14 +36,27 @@ import type { EsqlQueryResult } from './esql_client';
 // comes from the response body's `error.type`, never from the message, which is undocumented and
 // may change.
 
-/** What the probe found behind one pattern, or why it could not tell. */
-export type ProbeResult =
+type ProbeOutcome =
   | { failed: false; hasTimeSeries: boolean }
   | { failed: true; status: number | null; reason: string };
 
+/** How the probe query ran: its stats. */
+export interface ProbeExecution {
+  /** Null when the probe threw. */
+  stats: EsqlStats | null;
+  /** Null when the probe threw. */
+  isPartial: boolean | null;
+}
+
+/**
+ * What the probe found behind one pattern, or why it could not tell, the probe query sent and how
+ * it ran.
+ */
+export type ProbeResult = ProbeOutcome & { query: GeneratedQuery; execution: ProbeExecution };
+
 const TIMESTAMP_COLUMN = '@timestamp';
 
-const fromResponse = ({ columns }: EsqlQueryResult): ProbeResult => {
+const fromResponse = ({ columns }: EsqlQueryResult): ProbeOutcome => {
   const timestamp = columns.find(({ name }) => name === TIMESTAMP_COLUMN);
   return {
     failed: false,
@@ -53,7 +67,7 @@ const fromResponse = ({ columns }: EsqlQueryResult): ProbeResult => {
 // A concrete index that is not time series and a name that does not exist both fail verification,
 // and both mean there is no time-series index. Any other failure is not that answer: the `FROM`
 // plan excludes time-series indices, so reading it as "none" would silently leave them out.
-const fromError = (pattern: string, error: unknown): ProbeResult => {
+const fromError = (pattern: string, error: unknown): ProbeOutcome => {
   if (isVerificationError(error)) {
     return { failed: false, hasTimeSeries: false };
   }
@@ -61,9 +75,17 @@ const fromError = (pattern: string, error: unknown): ProbeResult => {
   return { failed: true, status, reason };
 };
 
+const toExecution = (outcome: PromiseSettledResult<EsqlQueryResult>): ProbeExecution => {
+  if (outcome.status === 'rejected') {
+    return { stats: null, isPartial: null };
+  }
+  const { stats, isPartial } = outcome.value;
+  return { stats, isPartial };
+};
+
 /**
  * Runs the probe once per distinct pattern, concurrently, and tells for each whether a readable
- * time-series index exists behind it.
+ * time-series index exists behind it, keeping the probe query it sent.
  */
 export const probeSources = async (
   client: ElasticsearchClient,
@@ -82,9 +104,13 @@ export const probeSources = async (
       const outcome = settled[position];
       return [
         pattern,
-        outcome.status === 'fulfilled'
-          ? fromResponse(outcome.value)
-          : fromError(pattern, outcome.reason),
+        {
+          ...(outcome.status === 'fulfilled'
+            ? fromResponse(outcome.value)
+            : fromError(pattern, outcome.reason)),
+          query: probes[position],
+          execution: toExecution(outcome),
+        },
       ];
     })
   );

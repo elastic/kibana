@@ -944,6 +944,82 @@ groups:
           self: ga
         note: "To reload the logging settings, send a SIGHUP signal to {{kib}}. For more logging configuration options, see the [Configure Logging in {{kib}}](docs-content://deploy-manage/monitor/logging-configuration/kibana-logging.md) guide."
 
+  - group: Async search settings
+    id: async-search-settings
+    description: |
+      Configure how {{kib}} submits and polls asynchronous searches, including those in Discover and Dashboards. Set these options in `kibana.yml`.
+    settings:
+
+      - setting: data.search.asyncSearch.waitForCompletion
+        description: |
+          How long {{es}} waits for a search to complete when {{kib}} first submits it. If the search is still running when this time elapses, {{kib}} can poll for results.
+        datatype: string
+        default: 200ms
+        applies_to:
+          stack: ga
+          ech: unavailable
+          ece: unavailable
+          eck: ga
+          self: ga
+          serverless: unavailable
+
+      - setting: data.search.asyncSearch.keepAlive
+        description: |
+          How long {{es}} retains an asynchronous search after submission or its most recent poll. {{es}} deletes the search and any stored results when this period expires. Saving a search to the background extends its retention according to [`data.search.sessions.defaultExpiration`](./search-sessions-settings.md#data-search-sessions-defaultexpiration).
+        datatype: string
+        default: 1m
+        applies_to:
+          stack: ga
+          ech: unavailable
+          ece: unavailable
+          eck: ga
+          self: ga
+          serverless: unavailable
+
+      - setting: data.search.asyncSearch.batchedReduceSize
+        description: |
+          The number of shard results {{es}} combines at a time when processing an asynchronous Query DSL search. This affects how often partial results become available.
+        datatype: int
+        default: 64
+        applies_to:
+          stack: ga
+          ech: unavailable
+          ece: unavailable
+          eck: ga
+          self: ga
+          serverless: unavailable
+
+      - setting: data.search.asyncSearch.pollInterval
+        description: |
+          Time in milliseconds between receiving a poll response and sending the next poll request. The minimum configurable interval is 200 milliseconds.
+          If you omit this setting, the default depends on whether the browser has detected HTTP/2 or HTTP/3 when the search starts. If it has, {{kib}} sends the next poll as soon as it receives the previous response. Otherwise, {{kib}} increases the delay between polls as the search runs.
+        datatype: int
+        applies_to:
+          stack: ga
+          ech: unavailable
+          ece: unavailable
+          eck: ga
+          self: ga
+          serverless: unavailable
+        note: |
+          :applies_to: stack: ga 9.0-9.3
+          When this setting is omitted, {{kib}} increases the delay between polls as the search runs, regardless of the HTTP version.
+
+      - setting: data.search.asyncSearch.pollLength
+        description: |
+          Maximum time that each poll request waits for results. Accepts a duration string.
+          If you omit this setting, {{kib}} uses `30s` for searches that use long polling over HTTP/2 or HTTP/3. Over HTTP/1, polls return the available results immediately by default.
+        datatype: string
+        applies_to:
+          stack: ga 9.4+
+          ech: unavailable
+          ece: unavailable
+          eck: ga
+          self: ga
+          serverless: unavailable
+        tip: |
+          If your reverse proxy times out before a poll returns, increase the proxy timeout or set `data.search.asyncSearch.pollLength` to a duration shorter than the proxy timeout.
+
   - group: Server settings
     id: server-settings
     settings:
@@ -1785,10 +1861,13 @@ groups:
 
       - setting: xpack.upgrade_assistant.ui.enabled
         description: |
-          Set this value to false to disable the Upgrade Assistant UI.
+          Shows or hides the Upgrade Assistant UI without disabling the plugin. Set this value to `true` to show the UI, or to `false` to hide it.
         datatype: bool
-        default: true
+        default: false
         applies_to:
           stack: ga
           ech: unavailable
           self: ga
+        note: |
+          :applies_to: stack: ga =9.0
+          In this version, this setting defaults to `true`.

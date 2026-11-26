@@ -107,11 +107,9 @@ back either slot. The limit is at least 1, and an omitted limit allows unlimited
 To stop automatic investigation starts, disable the automation. Changing the limit takes effect on
 the next attempt.
 
-The API-only `scopeQuery` field is forwarded as `scope_query` guidance in the investigation context.
-It guides the agent's telemetry filters; it is not an enforced data-access boundary. The optional
-`runtime.timeoutSeconds` bounds the investigation workflow started by that run. When set, the generated
-automation workflow gets an additional 60 seconds for setup and returning the investigation result.
-The stored managed investigation definition and its default timeout are unchanged.
+The optional `runtime.timeoutSeconds` bounds the investigation workflow started by that run. When set,
+the generated automation workflow gets an additional 60 seconds for setup and returning the
+investigation result. The stored managed investigation definition and its default timeout are unchanged.
 
 Only one schedule row is supported per automation. It can coexist with alert rows; each source has a
 separate guarded investigation step. Alert publication opt-in and alert snapshot resolution are
@@ -153,10 +151,13 @@ are absent when no alert triggered the run:
 - `source_kind`: `significant_events`, `elastic_configured` when the alert has a rule, otherwise
   `external`. An external sender may also use `internal` as its source, so use this field to split
   rule alerts from external ones.
-- `fingerprint`: for Significant Events, the `event_id`, which joins to the `significant-events-*`
-  events. Otherwise `sha256(space_id:source:rule_id:group_hash)` from `toAlertFingerprint`, with an
-  empty `rule_id` for external alerts, because a rule's `group_hash` is only unique within the rule.
-  Any other event about the same alert series must derive it with the same function.
+- `fingerprint`: for Significant Events, the `event_id`, which joins to `fingerprint` on
+  `nightshift-agent-tool-event-create`, `nightshift-agent-tool-event-write`, and
+  `nightshift-event-status-changed`. A create or write that failed before it had a persisted
+  caller-visible ID may omit it. Otherwise `sha256(space_id:source:rule_id:group_hash)` from
+  `toAlertFingerprint`, with an empty `rule_id` for external alerts, because a rule's `group_hash`
+  is only unique within the rule. Any other event about the same alert series must derive it with
+  the same function.
 
 `trigger_type` on the started event separates automatic from manual runs. No alert title, message,
 tag, or other customer alert content is sent. The skipped event also carries `event_id`, the
@@ -191,6 +192,21 @@ These API privileges are not scoped to Nightshift: they cover every agentic inve
 Starting an investigation also needs Agent Builder `all` (the start route's own requirement), execute access to workflows (the start runs the investigation workflow as the caller), and read access to connectors (availability checks that an inference connector exists for the investigation agent). The Scout write-path tests run with exactly that role.
 
 `read_investigations` lets a user with Nightshift `read` get, list, and count investigations through the shared query API; every write still needs `manage_investigations`. UI capabilities are scoped to the feature that owns them, so capabilities like `agenticInvestigations.showInvestigations` and `proposals.showProposals` still need the `agenticInvestigations` and `proposals` features. Opening the investigation conversation in Agent Builder still needs the Agent Builder feature privileges.
+
+### Proposals that run a workflow
+
+The findings recorder's final pass proposes up to three actions. By default each is a to-do: the analyst carries it out and marks it applied. A proposal can instead run a workflow the space's users wrote, once someone approves it. The recorder is shown every workflow in the space that:
+
+1. carries the `action` tag;
+2. declares `consts.actionMetadata` with at least `name` and `approvalPolicy: always-gate`. Workflows with any other policy are left out, so every run the recorder proposes waits for a person to approve it;
+3. takes one `actionInput` object on its manual trigger, whose properties are the workflow's parameters (describe each, the recorder fills them from the findings);
+4. ends in a `workflow.output` step.
+
+When one fits a proposal, the recorder sets its id and input. Approving the proposal runs the workflow as the person who approved it. Managed action workflows (another solution's) are not shown. A proposal naming a workflow the catalog did not list, or with an input the workflow refuses, is not written; the failure is logged. See the proposals plugin README for the action workflow contract.
+
+The approve dialog shows what will run: a link to the workflow, and under **Input parameters** (collapsed) the exact `actionInput` the recorder filled in. Once the workflow has run, the dialog also links to that execution, so the analyst can see what it did and what it returned.
+
+**Use this for low-harm actions only for now**, such as opening a case or an issue, or paging someone. The input is written by the model from findings that come from logs, so it is only checked against the workflow's input schema. The workflow and input are not re-checked at approval time, and nothing stops two investigations from proposing (and two people from approving) the same action. Do not wire up rollbacks, restarts or other changes to production systems until those checks exist. Where an input names a target (a cluster, namespace or service), constrain it with `enum` or `pattern` instead of a free string.
 
 ## Service accounts
 
@@ -347,6 +363,8 @@ Investigations are public conversations, and Agent Builder lets anyone who can c
 
 With `create`, the route creates the investigation as the identity that runs the Slack workflow. The new investigation has the thread as its subject, claimed so that concurrent creates for one thread agree on one investigation. The thread's status message is recorded on that subject as `slack.status_message_ts`.
 
+The subject's summary is the message that started the thread, as plain text, not the automation's name. Its `slack.permalink` opens the thread in Slack's web client (`https://app.slack.com/client/<T>/<C>/thread/<C>-<ts>`), since Slack's documented message link needs the workspace domain, which events don't carry. A thread recorded without a link gets one on its next `_slack_thread` call.
+
 The Slack connector delivers each event at least once. The workflow passes Slack's event id as `event_id` and its own execution id as `execution_id`, and the route records both on the thread's subject in `slack.seen_events` (the latest 50). An event another execution already recorded is answered with `duplicate: true`, and the workflow skips it; the same execution asking again, for example on a retried step, is not a duplicate. A run whose investigation failed calls the route again with `release_event: true`, which removes the event as recorded for that execution, so a redelivery of the event is handled. The workflow runs one call per thread at a time, so two deliveries of one event cannot race each other.
 
 ## Sandbox connectors
@@ -379,20 +397,28 @@ The investigation workflow sends a started message, stores its confirmed Slack t
 
 The managed failure sweep runs every five minutes and stores its checkpoint in ordinary workflow output. It pages through a fixed time window, then retains a completed time watermark so subsequent sweeps query new failures with a ten-minute overlap rather than all retained history. The overlap tolerates delayed search visibility; terminal recovery writes with a new finish timestamp enter a later window. Writes backdated beyond the overlap are not guaranteed to be discovered. Reporting failures keep the page cursor before the first failed candidate for up to three sweeps, tracked in the checkpoint, while an additional recent-failure query prioritizes fresh outcomes during a backlog. After that candidate blocks three sweeps, the sweep logs the unresolved execution and advances; its reporting may remain incomplete. The overlap can revisit it while it is still recent. Explicit investigation-not-found results are skipped without holding the cursor; failed creation is retained as a recovery error. Timeline read/write failures remain retryable after subject recovery and execution association. Slack delivery still proceeds if conversation recovery fails, and confirmed delivery claims prevent duplicate messages during retries.
 
-Each execution, destination, and phase is claimed as `unconfirmed` before connector execution. The shared attachment factory handles versioned writes, and the connector executes once using workflow authentication, the investigation's space, and the abort signal. A confirmed message timestamp produces `sent`; connector error responses produce `failed`; exceptions, cancellation after claiming, and missing timestamps remain `unconfirmed`. Replay skips all existing attempts. An uncertain root blocks automatic root recreation across later executions; a definitely failed root may be attempted again by a later execution.
+Each execution, destination, and phase is claimed as `unconfirmed` before connector execution. The shared attachment factory handles versioned writes, and the connector executes once using workflow authentication, the investigation's space, and the abort signal. A confirmed message timestamp produces `sent`; connector error responses and cancellation or deactivation before posting produce `failed`; exceptions, cancellation during posting, and missing timestamps remain `unconfirmed`. Replay skips all existing attempts. An uncertain root blocks automatic root recreation across later executions; a definitely failed root may be attempted again by a later execution.
 
 Routing readers preserve additional fields, including nested fields, when updating documents written by newer versions. Stored phases and attempt statuses accept bounded unfamiliar values; operation inputs still validate supported phases. An unfamiliar terminal phase stops delivery for that execution. An unfamiliar attempt status retains its claim and counts as `unconfirmed` for the requested phase. An unfamiliar root-delivery status also blocks automatic root recreation unless a thread is already confirmed. Invalid required fields still fail validation instead of resetting the routing record and losing delivery history. This supports additive format changes; changes to required field types still need a coordinated rollout.
 
 The `nightshift.sendNotifications` step validates the persisted workflow execution and its investigation binding, and reads the investigation (title, severity, summary, impact, first pending proposed action) through the shared query API. Until Agent Builder titles the investigation, messages use the run's `title` input. Investigation and execution IDs may differ for explicit continuation. It returns persisted `sent`, `failed`, and `unconfirmed` counts for the requested execution and phase; full diagnostics are available through authorized attachment reads. Notification-step failures continue the investigation workflow, while persistence failures stop further posts within that step. There is no automatic claim expiry, resend, or routing-document cleanup on investigation or space deletion. A confirmed root post from the Elastic Slack app claims its thread as a `slack_thread` subject using the thread key the Relay returns, so a mention or reply in it continues the investigation. Posts through a custom Slack connector and replies under a caller-named message register nothing here; a thread another investigation holds stays with it.
 
-### Investigation quota notice
+### Investigation limit notice
 
-When the global investigation quota denies an automatic start from a Slack trigger,
-`nightshift.triggerInvestigation` skips the start with `investigation_limit` and replies in the
-triggering Slack thread, once per Slack channel and UTC day. The reply names today's deployment-wide
-limit, says new investigations resume at 00:00 UTC, and links settings in the workflow's space for an
-admin to raise it, or says "settings" without a link when no Kibana URL is known. The once-a-day marker
-is claimed before posting, so a failed post is not retried. Alert, schedule, and manual runs post nothing.
+When a limit skips a start, `nightshift.triggerInvestigation` tells Slack once per channel, limit, and
+UTC day. Two limits post a notice:
+
+- The global investigation quota skips the start with `investigation_limit`. The notice names today's
+  deployment-wide limit, says new investigations resume at 00:00 UTC, and links settings in the
+  workflow's space for an admin to raise it, or says "settings" without a link when no Kibana URL is
+  known.
+- An automation's daily limit skips the start with `daily_limit`. The notice names the automation and
+  its limit, and sends an admin to the automation to raise it. Each automation has its own marker.
+
+A run started by a Slack message hears back in its thread. Any other run posts a top-level message
+to each channel its automation posts to, through that destination's connector. A run with
+no channel destination, including one whose only destination replies in a thread, posts nothing. The
+once-a-day marker is claimed before posting, so a failed post is not retried.
 
 ### Workflow failures
 
@@ -461,3 +487,39 @@ This is best effort: a process exit after a claim can leave delivery unconfirmed
 emission missing. Denied writes remain denied, cancellation is outside this sweep's scope, and a
 per-space schedule that cannot run requires its normal Workflows identity/scheduling issue to be
 repaired. There is no new watcher service, storage index, or engine hook.
+
+## Detection snapshot telemetry
+
+A Task Manager task (`nightshift-investigations:detection-snapshot-telemetry`) is scheduled when an
+administrator enables Nightshift, runs once a day, and is removed when the last space that has
+Nightshift is disabled. It shares its lifecycle, and the enabling administrator's credentials, with
+the source volume task of `nightshift_sources`. Each run sends one `nightshift-detection-snapshot`
+EBT event per space that has Nightshift set up. The event holds counts only: no rule name, tag,
+source name or connector name.
+
+| Field | Meaning |
+| --- | --- |
+| `rules_eligible` | Enabled Alerting v2 rules of kind `alert` in the space, read with the task's credentials. Classic rules are not counted. Significant Event rules are of kind `signal`, so they are not counted either. |
+| `rules_wired_in` | Eligible rules matched by the alert trigger of at least one enabled automation that has a workflow: its rule names, name pattern and tags, when its source filter admits `internal` alerts. A trigger without a rule filter wires in every rule. Severity filters are ignored, because they apply to an alert when it fires, not to a rule. |
+| `rules_truncated` | `true` when the space has more than 10,000 eligible rules; `rules_wired_in` then covers the first 10,000 by name. |
+| `automations_total`, `automations_enabled` | Automations in the space, of any trigger kind. |
+| `automations_alert_total`, `automations_alert_enabled`, `automations_schedule_total`, `automations_schedule_enabled`, `automations_slack_total`, `automations_slack_enabled` | Automations that have a trigger of that kind. An automation counts once under each kind it has, so the kinds can sum above `automations_total`. |
+| `connectors_configured`, `connectors_by_type` | Connectors of any type in the space, and a `{ connector_type, count }` entry per connector type id, Slack included. |
+| `slack_connected`, `slack_channels_bound` | Whether the Slack app is connected, and how many channels are bound (counted over at most 20 pages). Both are per deployment, so every space reports the same values. Contributed by the Significant Events plugin; absent when its read fails. |
+| `significant_event_rules`, `significant_event_rules_active` | Distinct rules backing a Query Knowledge Indicator, and how many of those rules exist and are enabled. |
+| `significant_events_total`, `significant_events_open` | Significant Events in the space by current status: all of them, and those that are `active` or `recovering`. |
+| `external_connectors_configured`, `external_connectors_active_24h` | Connectors of a type whose inbound events are translated into alerts, and how many of them belong to an alert source that wrote an alert in the past 24 hours. Today that is Datadog only. An alert does not name the connector that delivered it, so every connector of an active source counts as active. |
+| `external_sources_active_24h`, `external_alerts_24h` | Distinct `source` values and distinct alerts in `.rule-events` over the past 24 hours whose source is neither `internal` nor `elastic.*`. An alert that closes and fires again counts as a new alert. Any workflow can write such alerts, so an active source does not need a configured connector. An alert written with the `internal` source by a workflow is not counted as external. |
+| `significant_events_24h` | Distinct alerts in `.rule-events` over the past 24 hours with the `elastic.significant_events` source: activity, where `significant_events_open` is current state. |
+| `knowledge_indicators_features`, `knowledge_indicators_queries` | Knowledge Indicators that are not deleted; excluded and expired ones are counted. |
+| `memory_enabled`, `memory_pages` | Whether Semantic Memory is enabled in the deployment, and its active pages. `memory_pages` is absent when it is disabled. |
+| `custom_context_snippets`, `sandbox_allowlist_hosts` | Entries configured in Settings. |
+
+The Significant Events plugin contributes the Knowledge Indicator and Significant Event rule
+fields through `registerDetectionSnapshotContributor`; they are absent when that plugin is not
+installed or its read fails, in which case the rest of the event is still sent. A run costs a fixed
+number of queries per space, plus one query per 500 eligible rules when an automation filters by
+rule (none when no automation has an alert trigger, or one has no rule filter) and one per 500
+Significant Event rules. A space where any other read fails sends no event for that run, so a
+missing day is never a row of zeros. A run that times out reports the spaces it reached; the space a
+run starts from rotates daily, so a timeout does not skip the same spaces every day.

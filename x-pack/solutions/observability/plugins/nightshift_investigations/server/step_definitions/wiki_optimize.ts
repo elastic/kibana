@@ -81,6 +81,11 @@ export const wikiOptimizeStepDefinition = ({
         .max(128)
         .optional()
         .describe('Deterministic T_background trace id from materialize.'),
+      round_trace_id: z
+        .string()
+        .max(128)
+        .optional()
+        .describe("Trace id of the agent run for this round, so the step's spans join it."),
     }),
     outputSchema: z.object({
       status: z.literal('ok').describe('The optimizer finished without throwing.'),
@@ -107,6 +112,7 @@ export const wikiOptimizeStepDefinition = ({
         {
           name: 'nightshift.wikiOptimize',
           traceId: context.input.background_trace_id || execution.id,
+          foregroundTraceId: context.input.round_trace_id,
           roundId: context.input.round_id,
           conversationId: context.input.conversation_id,
           spaceId: workflow.spaceId,

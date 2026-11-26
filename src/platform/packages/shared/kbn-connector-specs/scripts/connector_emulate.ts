@@ -26,13 +26,13 @@ import { REPO_ROOT } from '@kbn/repo-info';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { FoundConnector } from '../src/test/vendor_api/find_connector';
 import { listConnectors } from '../src/test/vendor_api/find_connector';
-import { fixedHttpsOrigins } from '../src/test/vendor_api/fixed_https_origins';
+import { fixedHttpsOrigins } from '../src/test/vendor_api/spec/fixed_https_origins';
 import {
   readRecordings,
   readResponseFixtures,
   RECORDINGS,
-} from '../src/test/vendor_api/load_responses';
-import { loadVendorSpecs, readOptional } from '../src/test/vendor_api/load_vendor_specs';
+} from '../src/test/vendor_api/record/load_responses';
+import { loadVendorSpecs, readOptional } from '../src/test/vendor_api/spec/load_vendor_specs';
 
 const DEFAULT_PORT = 5690;
 const DEFAULT_CA_DIRECTORY = path.join(REPO_ROOT, 'data', 'connector_emulate');

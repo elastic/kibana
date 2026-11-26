@@ -8,6 +8,8 @@
 import type { WorkflowsExtensionsServerPluginSetup } from '@kbn/workflows-extensions/server';
 import type { AiIndexService } from '../ai_indices/service';
 import type { ImprovementsServiceApi } from '../improvements/service';
+import type { SessionEventsService } from '../session_events/types';
+import type { SessionMemoryService } from '../session_memory/types';
 import { registerStepDefinitions } from '.';
 import { mockKiStepTelemetry } from './test_utils';
 
@@ -41,6 +43,8 @@ describe('registerStepDefinitions', () => {
         isContextEngineEnabled: async () => true,
         isMemoryEnabled: async () => true,
         checkReadPrivilege: async () => true,
+        getSessionMemoryService: async () => ({} as SessionMemoryService),
+        getSessionEventsService: async () => ({} as SessionEventsService),
       },
     });
 
@@ -51,9 +55,13 @@ describe('registerStepDefinitions', () => {
       'context-engine.getFeedbackContext',
       'context-engine.recordImprovements',
       'context-engine.getDreamingStatus',
-      'context-engine.readTraceTranscripts',
+      'context-engine.readSessionMemories',
+      'context-engine.readSessionTranscripts',
       'context-engine.applyDreamChanges',
       'context-engine.applyDreamRelationships',
+      'context-engine.gatherMaintenance',
+      'context-engine.applyMaintenanceChanges',
+      'context-engine.recordMaintenanceRun',
     ]);
   });
 });

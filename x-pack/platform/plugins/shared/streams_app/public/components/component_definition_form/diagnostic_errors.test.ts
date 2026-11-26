@@ -57,6 +57,21 @@ describe('toFieldErrors', () => {
     });
   });
 
+  it('says the details of a diagnostic on the field too', () => {
+    expect(
+      toFieldErrors(
+        [
+          {
+            ...error('bad action', '/config/0/value/0/action'),
+            details: { allowed: ['upsert', 'insert'], got: 'nope' },
+          },
+        ],
+        config,
+        fieldNames
+      ).errors
+    ).toEqual({ '/fields/0/action': 'bad action (allowed: ["upsert","insert"]; got: nope)' });
+  });
+
   it('keeps the first error per field and lists the rest', () => {
     const [first, second] = [error('first', '/config/0'), error('second', '/config/0')];
     expect(toFieldErrors([first, second], config, fieldNames)).toEqual({
