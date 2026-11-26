@@ -5,9 +5,12 @@
  * 2.0.
  */
 
+import type { Client } from '@elastic/elasticsearch';
 import type SuperTest from 'supertest';
 import { v4 as uuidv4 } from 'uuid';
 
+import { ANALYTICS_BACKFILL_TASK_TYPE } from '@kbn/cases-plugin/common/constants';
+import { TASK_MANAGER_INDEX } from '@kbn/task-manager-plugin/server/constants';
 import {
   getCAIActivityBackfillTaskId,
   CAI_ACTIVITY_SOURCE_INDEX,
@@ -111,4 +114,14 @@ export const runActivityBackfillTask = async (supertest: SuperTest.Agent) => {
       sourceQuery: JSON.stringify(getActivitySourceQuery('default', 'securitySolution')),
     })
     .expect(200);
+};
+
+/** Counts the backfill tasks that are scheduled or running; task manager deletes each one once it has run. */
+export const getBackfillTaskCount = async (es: Client): Promise<number> => {
+  const { count } = await es.count({
+    index: TASK_MANAGER_INDEX,
+    query: { term: { 'task.taskType': ANALYTICS_BACKFILL_TASK_TYPE } },
+  });
+
+  return count;
 };
