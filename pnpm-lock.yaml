@@ -339,11 +339,11 @@ importers:
         specifier: 1.1.0
         version: 1.1.0
       '@atlaskit/pragmatic-drag-and-drop':
-        specifier: 1.7.7
-        version: 1.7.7
+        specifier: 4.0.0
+        version: 4.0.0
       '@atlaskit/pragmatic-drag-and-drop-hitbox':
-        specifier: 1.1.0
-        version: 1.1.0
+        specifier: 3.0.0
+        version: 3.0.0
       '@aws-sdk/client-bedrock-runtime':
         specifier: 3.1166.0
         version: 3.1166.0
@@ -10149,11 +10149,11 @@ packages:
   '@asyncapi/specs@6.11.1':
     resolution: {integrity: sha512-A3WBLqAKGoJ2+6FWFtpjBlCQ1oFCcs4GxF7zsIGvNqp/klGUHjlA3aAcZ9XMMpLGE8zPeYDz2x9FmO6DSuKraQ==}
 
-  '@atlaskit/pragmatic-drag-and-drop-hitbox@1.1.0':
-    resolution: {integrity: sha512-JWt6eVp6Br2FPHRM8s0dUIHQk/jFInGP1f3ti5CdtM1Ji5/pt8Akm44wDC063Gv2i5RGseixtbW0z/t6RYtbdg==}
+  '@atlaskit/pragmatic-drag-and-drop-hitbox@3.0.0':
+    resolution: {integrity: sha512-AGLp1ewjm07eRN2NL62awllSM19FrWVZMQYfZA/jugQlpaeoTr5ah2DE7zfiEt7yrg34htoKQVM+y6SGIQYs2A==}
 
-  '@atlaskit/pragmatic-drag-and-drop@1.7.7':
-    resolution: {integrity: sha512-jX+68AoSTqO/fhCyJDTZ38Ey6/wyL2Iq+J/moanma0YyktpnoHxevjY1UNJHYp0NCburdQDZSL1ZFac1mO1osQ==}
+  '@atlaskit/pragmatic-drag-and-drop@4.0.0':
+    resolution: {integrity: sha512-pyDo2B5NiaExoKGmgeXKGNUL4aR4UzzSZm8QWWjYTEyBLVqSqKyKUwtVxMw2YEkakagOGFONUdHM32LAH2nPug==}
 
   '@aws-sdk/client-bedrock-agent-runtime@3.1166.0':
     resolution: {integrity: sha512-U3AfbT4BTaNG8Cw7jeagr/rXufot4KIN0nkC4WED+bOPawBSpc3+V5DFYu4aeXgk2iGkRuzcKc5vid+DxVLxSw==}
@@ -25440,12 +25440,12 @@ snapshots:
     dependencies:
       '@types/json-schema': 7.0.15
 
-  '@atlaskit/pragmatic-drag-and-drop-hitbox@1.1.0':
+  '@atlaskit/pragmatic-drag-and-drop-hitbox@3.0.0':
     dependencies:
-      '@atlaskit/pragmatic-drag-and-drop': 1.7.7
+      '@atlaskit/pragmatic-drag-and-drop': 4.0.0
       '@babel/runtime': 7.29.7
 
-  '@atlaskit/pragmatic-drag-and-drop@1.7.7':
+  '@atlaskit/pragmatic-drag-and-drop@4.0.0':
     dependencies:
       '@babel/runtime': 7.29.7
       bind-event-listener: 3.0.0
