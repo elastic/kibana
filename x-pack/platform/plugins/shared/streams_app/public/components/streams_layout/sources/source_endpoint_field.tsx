@@ -8,11 +8,13 @@
 import React from 'react';
 import { css } from '@emotion/react';
 import {
-  EuiButtonIcon,
   EuiCopy,
+  EuiFormAppend,
+  EuiFormControlLayout,
   EuiFormRow,
   EuiSpacer,
-  EuiTextArea,
+  EuiText,
+  EuiTextTruncate,
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -57,12 +59,11 @@ export const SourceEndpointField = ({
   showHelpText?: boolean;
 }) => {
   const { euiTheme } = useEuiTheme();
-  // `rows` stops setting the height under `field-sizing: content`, so keep two rows as the minimum.
   const endpointValueStyles = css`
-    @supports (field-sizing: content) {
-      field-sizing: content;
-      min-block-size: calc(2lh + 2 * ${euiTheme.size.m});
-    }
+    display: grid;
+    align-items: center;
+    block-size: 100%;
+    padding-inline: ${euiTheme.size.m};
   `;
   const endpointUnavailableLabel = i18n.translate(
     'xpack.streams.sources.endpointUnavailableLabel',
@@ -89,29 +90,7 @@ export const SourceEndpointField = ({
             <EuiFormRow
               fullWidth
               label={label}
-              labelAppend={
-                endpoint ? (
-                  <EuiCopy
-                    textToCopy={url}
-                    beforeMessage={copyLabel}
-                    tooltipProps={{ disableScreenReaderOutput: true }}
-                  >
-                    {(copy) => (
-                      <EuiButtonIcon
-                        size="xs"
-                        iconType="copy"
-                        onClick={copy}
-                        data-test-subj={
-                          id === 'default'
-                            ? 'streamsSourceEndpointCopyButton'
-                            : `streamsSourceEndpointCopyButton-${id}`
-                        }
-                        aria-label={copyLabel}
-                      />
-                    )}
-                  </EuiCopy>
-                ) : undefined
-              }
+              labelType="legend"
               helpText={
                 showHelpText && index === displayedEndpoints.length - 1
                   ? i18n.translate('xpack.streams.sources.endpointHelpText', {
@@ -120,21 +99,42 @@ export const SourceEndpointField = ({
                   : undefined
               }
             >
-              <EuiTextArea
+              <EuiFormControlLayout
                 fullWidth
                 readOnly
-                rows={2}
-                resize="none"
-                css={endpointValueStyles}
-                value={url}
-                aria-label={label}
-                data-test-subj={
-                  id === 'default'
-                    ? 'streamsSourceEndpointValue'
-                    : `streamsSourceEndpointValue-${id}`
+                isDisabled={!endpoint}
+                append={
+                  endpoint ? (
+                    <EuiCopy textToCopy={url}>
+                      {(copy) => (
+                        <EuiFormAppend
+                          element="button"
+                          iconLeft="copy"
+                          onClick={copy}
+                          data-test-subj={
+                            id === 'default'
+                              ? 'streamsSourceEndpointCopyButton'
+                              : `streamsSourceEndpointCopyButton-${id}`
+                          }
+                          aria-label={copyLabel}
+                        />
+                      )}
+                    </EuiCopy>
+                  ) : undefined
                 }
-                disabled={!endpoint}
-              />
+              >
+                <EuiText size="s" css={endpointValueStyles}>
+                  <EuiTextTruncate
+                    truncation="middle"
+                    text={url}
+                    data-test-subj={
+                      id === 'default'
+                        ? 'streamsSourceEndpointValue'
+                        : `streamsSourceEndpointValue-${id}`
+                    }
+                  />
+                </EuiText>
+              </EuiFormControlLayout>
             </EuiFormRow>
           </React.Fragment>
         );
