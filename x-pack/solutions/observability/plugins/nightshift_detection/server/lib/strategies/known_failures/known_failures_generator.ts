@@ -6,7 +6,7 @@
  */
 
 import type { QueryLink } from '@kbn/significant-events-schema';
-import { groupBy, sortBy, uniq } from 'lodash';
+import { groupBy, sortBy, uniq, uniqBy } from 'lodash';
 import { getErrorMessage } from '../../errors/get_error_message';
 import { MAX_ROWS } from '../../rules/managed_rule_reader';
 import { getSeriesKey } from '../series_key';
@@ -56,10 +56,17 @@ interface MeasuredKnownFailure {
   measurements: KnownFailureMeasurement[];
 }
 
+/** A rise that still holds in one run, on that run's newest minute. */
+interface RiseAtMinute {
+  rise: KnownFailureRise;
+  /** Start of the run's newest minute, in epoch milliseconds. */
+  lastMinute: number;
+}
+
 /** What the judgement found for one knowledge indicator. */
 interface JudgedKnownFailure extends MeasuredKnownFailure {
   unusual: UnusualMinute[];
-  rise?: KnownFailureRise;
+  rises: RiseAtMinute[];
 }
 
 /**
@@ -76,7 +83,7 @@ export class KnownFailuresGenerator implements DetectionSignalGenerator {
     }
 
     const judged = await judgeMeasuredFailures({ context, measured, notes });
-    const breached = judged.filter(({ unusual, rise }) => unusual.length > 0 || rise !== undefined);
+    const breached = judged.filter(({ unusual, rises }) => unusual.length > 0 || rises.length > 0);
     if (breached.length === 0) {
       return { readings: [], notes, truncated };
     }
@@ -242,28 +249,20 @@ async function judgeMeasuredFailures({
   const readDataFrom = memoizeDataStart(context);
   return Promise.all(
     measured.map(async (failure, index) => {
-      const [newest] = failure.measurements;
+      const { measurements } = failure;
       const { reported, reportedCounts, open } = readPastMinutes({
         readings: history.get(getSeriesKey(series[index])) ?? [],
-        ruleId: newest.rule_id,
+        ruleId: measurements[0].rule_id,
       });
-      const { start, lastMinute } = getRunWindow(newest);
-      // The rise sits on the newest minute: an earlier tick that already wrote a reading there,
-      // a rise or an unusual minute, keeps the event open, and a second one would replace it.
-      const isRiseMinuteReported = reported.has(lastMinute);
+      // The oldest run reaches furthest back, so the data start lookup covers every run's window.
+      const { start } = getRunWindow(measurements[measurements.length - 1]);
       const judge = (dataFrom?: number) => ({
-        unusual: findUnusualMinutes({
-          measurements: failure.measurements,
-          open,
-          reported,
-          reportedCounts,
-          dataFrom,
-        }),
-        rise: isRiseMinuteReported ? undefined : findRise({ measurement: newest, dataFrom }),
+        unusual: findUnusualMinutes({ measurements, open, reported, reportedCounts, dataFrom }),
+        rises: findRises({ measurements, reported, dataFrom }),
       });
 
       const unguarded = judge();
-      if (unguarded.unusual.length === 0 && unguarded.rise === undefined) {
+      if (unguarded.unusual.length === 0 && unguarded.rises.length === 0) {
         return { ...failure, ...unguarded };
       }
       const { knowledgeIndicator } = failure;
@@ -286,6 +285,35 @@ async function judgeMeasuredFailures({
       }
     })
   );
+}
+
+/**
+ * The rise of each run that still holds, on the run's newest minute. Every run counts, not only the
+ * newest: a tick that reads two runs reports what two ticks reading one each would, so a rise that
+ * held in the older run and faded by the newer one is not lost. A minute an earlier tick already
+ * wrote a reading on, a rise or an unusual minute, is skipped: that reading keeps the event open,
+ * and a second one would replace it. Two runs ending on the same minute count once, the newer.
+ */
+function findRises({
+  measurements,
+  reported,
+  dataFrom,
+}: {
+  /** Newest run first. */
+  measurements: KnownFailureMeasurement[];
+  reported: Set<number>;
+  dataFrom?: number;
+}): RiseAtMinute[] {
+  return uniqBy(
+    measurements.map((measurement) => ({ measurement, ...getRunWindow(measurement) })),
+    ({ lastMinute }) => lastMinute
+  ).flatMap(({ measurement, lastMinute }) => {
+    if (reported.has(lastMinute)) {
+      return [];
+    }
+    const rise = findRise({ measurement, dataFrom });
+    return rise ? [{ rise, lastMinute }] : [];
+  });
 }
 
 /**
@@ -356,7 +384,7 @@ function readPastMinutes({
   };
 }
 
-/** The readings of one judged knowledge indicator: its unusual minutes, then its rise. */
+/** The readings of one judged knowledge indicator: its unusual minutes, then its rises. */
 function toReadings({
   failure,
   entity,
@@ -368,19 +396,23 @@ function toReadings({
   sourceTitle?: string;
   cpsEnabled: boolean;
 }): DetectionSignalReading[] {
-  const { knowledgeIndicator, measurements, unusual, rise } = failure;
-  const [newest] = measurements;
-  const context = { knowledgeIndicator, ruleId: newest.rule_id, entity, sourceTitle, cpsEnabled };
-  const { lastMinute } = getRunWindow(newest);
+  const { knowledgeIndicator, measurements, unusual, rises } = failure;
+  const context = {
+    knowledgeIndicator,
+    ruleId: measurements[0].rule_id,
+    entity,
+    sourceTitle,
+    cpsEnabled,
+  };
 
-  // The rise sits on the newest minute; when that minute is unusual too, its reading already
+  // A rise sits on its run's newest minute; when that minute is unusual too, its reading already
   // keeps the event open, and a second reading for the minute would replace it in the store.
-  const isRiseMinuteTaken = unusual.some(({ minute }) => minute === lastMinute);
+  const unusualMinutes = new Set(unusual.map(({ minute }) => minute));
 
   return [
     ...unusual.map((minute) => toUnusualMinuteReading({ ...context, unusual: minute })),
-    ...(rise !== undefined && !isRiseMinuteTaken
-      ? [toRiseReading({ ...context, rise, lastMinute })]
-      : []),
+    ...rises
+      .filter(({ lastMinute }) => !unusualMinutes.has(lastMinute))
+      .map(({ rise, lastMinute }) => toRiseReading({ ...context, rise, lastMinute })),
   ];
 }

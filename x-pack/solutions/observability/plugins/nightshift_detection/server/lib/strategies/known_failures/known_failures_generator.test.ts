@@ -217,6 +217,35 @@ describe('KnownFailuresGenerator', () => {
     expect(result.notes).toEqual([]);
   });
 
+  // A tick that reads two runs must report what two ticks reading one each would.
+  it('reports a rise that held in the older run of the tick and faded by the newer one', async () => {
+    const change = {
+      change_point_at: WINDOW.from - 60 * MINUTE_MS,
+      change_point_type: 'step_change',
+      change_point_pvalue: 1e-20,
+      change_point_median_before: 5,
+      change_point_minutes_before: 300,
+      change_point_median_after: 10,
+    };
+
+    const result = await new KnownFailuresGenerator().generate(
+      createContext({
+        rows: [
+          createRow(3, [2, 2, 2, 2, 2, 2, 2], { ...change, recent_median: 5 }),
+          createRow(-2, [2, 2, 2, 2, 2, 2, 2], { ...change, recent_median: 10 }),
+        ],
+      })
+    );
+
+    expect(result.readings).toEqual([
+      expect.objectContaining({
+        bucket_start: WINDOW.from + 4 * MINUTE_MS,
+        value: 10,
+        details: expect.objectContaining({ check: 'lasting_rise' }),
+      }),
+    ]);
+  });
+
   // Minutes before the source's data count as zero matches: its first data would read as a failure.
   it('reports nothing measured against minutes from before the source’s data', async () => {
     const readDataStart = jest

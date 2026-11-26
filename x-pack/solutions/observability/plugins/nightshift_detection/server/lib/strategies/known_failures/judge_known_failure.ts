@@ -235,7 +235,7 @@ function getMinRise(levelBefore: number): number {
 }
 
 /**
- * The rise of the knowledge indicator's level that still holds in the newest run, or `undefined`.
+ * The rise of the knowledge indicator's level that still holds in a run, or `undefined`.
  * - A lasting rise: the latest step or trend change, confident (p-value below `max_pvalue`),
  *   measured from at least `min_before_minutes` of data, rising at least `getMinRise` over the level
  *   before, with the last minutes still half that above it, so a rise that faded back reports
