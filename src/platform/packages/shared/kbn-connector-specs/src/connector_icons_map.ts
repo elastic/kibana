@@ -454,6 +454,15 @@ export const ConnectorIconsMap: Map<
         )
     ),
   ],
+  [
+    '.microsoft_defender_endpoint2',
+    lazy(
+      () =>
+        import(
+          /* webpackChunkName: "connectorIconMicrosoftDefenderForEndpoint" */ './specs/microsoft_defender_for_endpoint/icon'
+        )
+    ),
+  ],
 
   [
     '.microsoft_sql_server',
