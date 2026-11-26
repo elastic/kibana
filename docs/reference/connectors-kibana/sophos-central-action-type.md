@@ -9,7 +9,7 @@ applies_to:
 
 # Sophos Central connector [sophos-central-action-type]
 
-Use the Sophos Central connector to manage alerts, isolate and scan endpoints, maintain IOC block and allow lists, control tamper protection, and query XDR detections in Sophos Central.
+The Sophos Central connector connects {{kib}} to Sophos Central. Use it to manage alerts, isolate and scan endpoints, maintain IOC block and allow lists, control tamper protection, and query XDR detections.
 
 ::::{note}
 This connector is currently available in **Agent Builder** only. Workflow support is planned for a future release. Actions marked _(API only)_ require a direct Kibana API call and cannot be invoked through Agent Builder.
@@ -25,7 +25,7 @@ The credential is created by a Sophos Central **Super Admin**. No scope or role 
 
 1. Sign in to [Sophos Central Admin](https://central.sophos.com).
 2. Go to **My Products → General Settings → API Credentials Management**, or **Global Settings → API Credentials** in some console versions.
-3. Select **Add Credential**, enter a name, and click **Add**.
+3. Select **Add Credential** and enter a name.
 4. Copy the **Client ID** and **Client Secret**.
 
 ### Connector configuration [sophos-central-connector-configuration]
@@ -35,7 +35,9 @@ Sophos Central connectors have the following configuration properties:
 Authentication
 :   Uses **OAuth 2.0 Client Credentials**. Provide the Client ID and Client Secret obtained from **My Products → General Settings → API Credentials Management** in Sophos Central. The credential must be created by a Super Admin and must be a tenant-level credential. Partner or organization credentials are rejected.
 
-    If you are using the [`xpack.actions.allowedHosts`](/reference/configuration-reference/alerting-settings.md#action-settings) setting, make sure all three hosts are added to the allowed hosts: `id.sophos.com` (OAuth token endpoint), `api.central.sophos.com` (global API / whoami), and the regional data-center host returned by whoami (for example `api-us03.central.sophos.com`).
+**Connector networking configuration**
+
+If you are using the [`xpack.actions.allowedHosts`](/reference/configuration-reference/alerting-settings.md#action-settings) setting, add all three Sophos hosts: `id.sophos.com` (OAuth token endpoint), `api.central.sophos.com` (global API / whoami), and the regional data-center host returned by whoami (for example `api-us03.central.sophos.com`).
 
 ## Connector actions [sophos-central-connector-actions]
 
@@ -71,7 +73,7 @@ The Sophos Central connector exposes the following actions:
 :   Trigger an on-demand malware scan on one or more endpoints. The scan runs asynchronously. The response contains per-endpoint results — accepted endpoint IDs and any per-endpoint errors. There is no single scan identifier. Accepts 1 to 500 endpoint UUIDs.
 
 `getTamperProtection`
-:   Read the tamper protection status for an endpoint. Returns only the `enabled` flag — a disabled state is a risk signal. Passwords are never exposed.
+:   Read the tamper protection status for an endpoint. Returns only the `enabled` flag, and never the tamper protection passwords. A disabled state is a risk signal.
 
 `updateTamperProtection` _(API only)_
 :   Enable or disable tamper protection for an endpoint. Optionally regenerate the recovery password. Only use after analyst approval.
