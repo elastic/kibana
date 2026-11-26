@@ -83,6 +83,10 @@
 - [Google Cloud IAM](/reference/connectors-kibana/gcp-iam-action-type.md): Disable service accounts, revoke leaked keys, and grant or revoke IAM role bindings.
 - [Google Cloud Secret Manager](/reference/connectors-kibana/gcp-secret-manager-action-type.md): Inspect secrets, add and disable secret versions, and read access policy.
 
+**Endpoint security**
+
+- [Microsoft Defender for Endpoint (v2)](/reference/connectors-kibana/microsoft-defender-for-endpoint-action-type.md): Contain and investigate devices in Microsoft Defender for Endpoint. List, isolate, and release devices, run live response scripts and antivirus scans, and manage block and allow indicators.
+
 **Email security**
 
 - [Sublime Security](/reference/connectors-kibana/sublime-security-action-type.md): Search flagged email, get verdicts, and quarantine, trash, or restore message groups in Sublime Security.
@@ -91,6 +95,7 @@
 
 - [Microsoft Defender XDR](/reference/connectors-kibana/microsoft-defender-xdr-action-type.md): Manage incidents and alerts, run advanced hunting KQL queries, and triage threats in Microsoft Defender XDR.
 - [SentinelOne (v2)](/reference/connectors-kibana/sentinelone-v2-action-type.md): Find and isolate endpoints, triage and mitigate threats, run remote scripts, retrieve files, and manage blocklists, exclusions, indicators, firewall and detection rules.
+- [TrendAI Vision One](/reference/connectors-kibana/trend-vision-one-action-type.md): Read Workbench alerts, Observed Attack Techniques detections, endpoints, response tasks, and sandbox analysis results.
 
 **Threat intelligence**
 
