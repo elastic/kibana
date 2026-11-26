@@ -52,10 +52,33 @@ const setup = ({
 describe('useOnboardingVisibility', () => {
   beforeEach(() => window.localStorage.clear());
 
-  it('onboards a space without automations, even with investigations', () => {
+  it('onboards a space without automations and investigations', () => {
+    const { result } = setup();
+    expect(result.current.showOnboarding).toBe(true);
+    expect(result.current.latestInvestigation).toBeUndefined();
+  });
+
+  it('is done once the space has an investigation, even without automations', () => {
     const { result } = setup({ investigations: [investigation] });
+    expect(result.current.showOnboarding).toBe(false);
+    expect(result.current.latestInvestigation).toBe(investigation);
+  });
+
+  it('keeps an active session open after the trial investigation appears', () => {
+    const { result, rerender } = setup();
+    expect(result.current.showOnboarding).toBe(true);
+
+    mockUseFetchLatestInvestigation.mockReturnValue({
+      latestInvestigation: investigation,
+      isInitialLoading: false,
+      error: null,
+    });
+    rerender();
+
     expect(result.current.showOnboarding).toBe(true);
     expect(result.current.latestInvestigation).toBe(investigation);
+    act(() => result.current.dismiss());
+    expect(result.current.showOnboarding).toBe(false);
   });
 
   it('is done once the space has an automation', () => {
@@ -100,7 +123,7 @@ describe('useOnboardingVisibility', () => {
     expect(result.current.showOnboarding).toBe(false);
   });
 
-  it('waits for the investigation lookup before latching an empty-automation session', () => {
+  it('waits for the investigation lookup before deciding, and skips onboarding if one exists', () => {
     mockUseFetchAutomations.mockReturnValue({
       data: { automations: [] },
       isInitialLoading: false,
@@ -129,8 +152,13 @@ describe('useOnboardingVisibility', () => {
     rerender();
 
     expect(result.current.isLoading).toBe(false);
-    expect(result.current.showOnboarding).toBe(true);
+    expect(result.current.showOnboarding).toBe(false);
     expect(result.current.latestInvestigation).toBe(investigation);
+  });
+
+  it('forces onboarding with an investigation', () => {
+    const { result } = setup({ investigations: [investigation], forceOnboarding: true });
+    expect(result.current.showOnboarding).toBe(true);
   });
 
   it('forces onboarding with an automation', () => {
@@ -138,7 +166,7 @@ describe('useOnboardingVisibility', () => {
     expect(result.current.showOnboarding).toBe(true);
   });
 
-  it('falls back to "has an investigation" without automations', () => {
+  it('only counts investigations without automations', () => {
     expect(setup({ canUseAutomations: false }).result.current.showOnboarding).toBe(true);
     expect(
       setup({ canUseAutomations: false, investigations: [investigation] }).result.current
