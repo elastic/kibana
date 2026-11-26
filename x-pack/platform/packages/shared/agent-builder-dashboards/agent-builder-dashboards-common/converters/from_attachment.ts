@@ -12,8 +12,6 @@ import type {
 } from '@kbn/as-code-dashboard-schema';
 import { isLensAPIFormat, LensConfigBuilder } from '@kbn/lens-embeddable-utils';
 import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
-import { VISUALIZE_EMBEDDABLE_TYPE } from '@kbn/visualizations-common';
-import { buildVegaSavedVis } from '@kbn/agent-builder-visualizations-common';
 import { VEGA_EMBEDDABLE_TYPE } from '@kbn/vega-constants';
 import type {
   AttachmentPanel,
@@ -26,36 +24,12 @@ import { EMPTY_DASHBOARD_STATE } from '../dashboard_state_helpers';
 /**
  * Converts an AttachmentPanel to a DashboardPanel.
  * - Lens panels with API-format attributes are converted to internal format.
- * - `vega` panels (the future native API shape, `config.spec`) are expanded to a
- *   by-value legacy-vis (`visualization`) embeddable for rendering. This is a
- *   temporary bridge: once the native `vega` embeddable API ships, the panel can
- *   be passed through unchanged and this branch removed.
+ * - Vega panels from attachments saved before Vega panels were native carry a string spec,
+ *   which is HJSON (JSON included).
  */
 const buildPanelFromConfig = ({ config, type, id, grid }: AttachmentPanel): DashboardPanel => {
-  if (type === VEGA_EMBEDDABLE_TYPE) {
-    const { spec, title, description, ...restConfig } = config as {
-      spec?: unknown;
-      title?: unknown;
-      description?: unknown;
-    } & Record<string, unknown>;
-    const panelTitle = typeof title === 'string' ? title : '';
-    const panelDescription = typeof description === 'string' ? description : '';
-    return {
-      type: VISUALIZE_EMBEDDABLE_TYPE,
-      id,
-      grid,
-      config: {
-        // Preserve panel-level settings (hide_title, hide_border, drilldowns, …).
-        ...restConfig,
-        ...(typeof title === 'string' ? { title: panelTitle } : {}),
-        ...(typeof description === 'string' ? { description: panelDescription } : {}),
-        savedVis: buildVegaSavedVis({
-          spec: typeof spec === 'string' ? spec : '',
-          title: panelTitle,
-          description: panelDescription,
-        }),
-      },
-    };
+  if (type === VEGA_EMBEDDABLE_TYPE && typeof config.spec === 'string') {
+    return { type, id, grid, config: { ...config, spec: { format: 'hjson', value: config.spec } } };
   }
 
   let configObject = config;

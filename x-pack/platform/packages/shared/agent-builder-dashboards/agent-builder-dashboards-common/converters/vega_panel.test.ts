@@ -18,40 +18,60 @@ const SPEC = JSON.stringify(
   null,
   2
 );
-const MINIFIED_SPEC = '{"$schema":"https://vega.github.io/schema/vega-lite/v6.json","mark":"bar"}';
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-5[0-9a-f]{3}-[0-9a-f]{4}-[0-9a-f]{12}$/;
 const grid = { x: 0, y: 0, w: 24, h: 15 };
 
-describe('Vega dashboard panel conversion (temporary legacy-vis bridge)', () => {
-  it('from_attachment expands a `vega` attachment panel into a by-value legacy-vis panel', () => {
+const panelSettings = {
+  title: 'Panel title edited',
+  description: 'Panel description edited',
+  hide_title: true,
+  hide_border: true,
+  drilldowns: [{ id: 'd1' }],
+};
+
+describe('Vega dashboard panel conversion', () => {
+  it.each([
+    ['json', { format: 'json', value: JSON.parse(SPEC) }],
+    ['hjson', { format: 'hjson', value: '{\n  // bars\n  mark: bar\n}' }],
+  ])('round-trips a native `vega` panel with a %s spec unchanged', (_format, spec) => {
+    const panel = {
+      type: VEGA_EMBEDDABLE_TYPE,
+      id: 'p1',
+      grid,
+      config: {
+        ...panelSettings,
+        query: { language: 'kql', expression: 'host.name: "a"' },
+        filters: [{ condition: { field: 'host.name', operator: 'is', value: 'a' } }],
+        spec,
+      },
+    };
+    const attachmentData = { title: 'Dash', panels: [panel] } as unknown as DashboardAttachmentData;
+
+    const dashboardState = attachmentDataToDashboardState(attachmentData);
+
+    expect(dashboardState.panels).toEqual([panel]);
+    expect(dashboardStateToAttachmentData(dashboardState).panels).toEqual([panel]);
+  });
+
+  it('from_attachment reads the string spec of a `vega` panel saved before native panels as HJSON', () => {
     const attachmentData = {
       title: 'Dash',
       panels: [
-        {
-          type: VEGA_EMBEDDABLE_TYPE,
-          id: 'p1',
-          grid,
-          config: { spec: SPEC, title: 'Chart', description: 'Desc' },
-        },
+        { type: VEGA_EMBEDDABLE_TYPE, id: 'p1', grid, config: { spec: SPEC, title: 'Chart' } },
       ],
     } as unknown as DashboardAttachmentData;
 
-    const state = attachmentDataToDashboardState(attachmentData);
-
-    expect(state.panels).toEqual([
+    expect(attachmentDataToDashboardState(attachmentData).panels).toEqual([
       {
-        type: VISUALIZE_EMBEDDABLE_TYPE,
+        type: VEGA_EMBEDDABLE_TYPE,
         id: 'p1',
         grid,
-        config: {
-          title: 'Chart',
-          description: 'Desc',
-          savedVis: buildVegaSavedVis({ spec: SPEC, title: 'Chart', description: 'Desc' }),
-        },
+        config: { spec: { format: 'hjson', value: SPEC }, title: 'Chart' },
       },
     ]);
   });
 
-  it('to_attachment normalizes a by-value legacy-vis Vega panel to the `vega` API shape, re-indenting a compact spec', () => {
+  it('to_attachment reads a by-value legacy-vis Vega panel as a native `vega` panel with a new, stable id', () => {
     const state = {
       panels: [
         {
@@ -59,8 +79,9 @@ describe('Vega dashboard panel conversion (temporary legacy-vis bridge)', () => 
           id: 'p1',
           grid,
           config: {
+            title: undefined,
             savedVis: buildVegaSavedVis({
-              spec: MINIFIED_SPEC,
+              spec: SPEC,
               title: 'Chart',
               description: 'Desc',
             }),
@@ -74,30 +95,12 @@ describe('Vega dashboard panel conversion (temporary legacy-vis bridge)', () => 
     expect(attachmentData.panels).toEqual([
       {
         type: VEGA_EMBEDDABLE_TYPE,
-        id: 'p1',
+        id: expect.stringMatching(UUID),
         grid,
-        config: { spec: SPEC, title: 'Chart', description: 'Desc' },
+        config: { spec: { format: 'hjson', value: SPEC }, title: 'Chart', description: 'Desc' },
       },
     ]);
-  });
-
-  it('round-trips a `vega` attachment panel through dashboard state unchanged', () => {
-    const attachmentPanel = {
-      type: VEGA_EMBEDDABLE_TYPE,
-      id: 'p1',
-      grid,
-      config: { spec: SPEC, title: 'Chart', description: 'Desc' },
-    };
-    const attachmentData = {
-      title: 'Dash',
-      panels: [attachmentPanel],
-    } as unknown as DashboardAttachmentData;
-
-    const roundTripped = dashboardStateToAttachmentData(
-      attachmentDataToDashboardState(attachmentData)
-    );
-
-    expect(roundTripped.panels).toEqual([attachmentPanel]);
+    expect(dashboardStateToAttachmentData(state).panels[0].id).toBe(attachmentData.panels[0].id);
   });
 
   it('to_attachment preserves panel-level settings (title, description, hide_*, drilldowns) over savedVis values', () => {
@@ -108,13 +111,9 @@ describe('Vega dashboard panel conversion (temporary legacy-vis bridge)', () => 
           id: 'p1',
           grid,
           config: {
-            title: 'Panel title edited',
-            description: 'Panel description edited',
-            hide_title: true,
-            hide_border: true,
-            drilldowns: [{ id: 'd1' }],
+            ...panelSettings,
             savedVis: buildVegaSavedVis({
-              spec: MINIFIED_SPEC,
+              spec: SPEC,
               title: 'Original savedVis title',
               description: 'Original savedVis description',
             }),
@@ -128,61 +127,10 @@ describe('Vega dashboard panel conversion (temporary legacy-vis bridge)', () => 
     expect(attachmentData.panels).toEqual([
       {
         type: VEGA_EMBEDDABLE_TYPE,
-        id: 'p1',
+        id: expect.stringMatching(UUID),
         grid,
-        config: {
-          title: 'Panel title edited',
-          description: 'Panel description edited',
-          hide_title: true,
-          hide_border: true,
-          drilldowns: [{ id: 'd1' }],
-          spec: SPEC,
-        },
+        config: { ...panelSettings, spec: { format: 'hjson', value: SPEC } },
       },
     ]);
-  });
-
-  it('round-trips panel-level settings through dashboard state', () => {
-    const attachmentPanel = {
-      type: VEGA_EMBEDDABLE_TYPE,
-      id: 'p1',
-      grid,
-      config: {
-        spec: SPEC,
-        title: 'Panel title edited',
-        description: 'Panel description edited',
-        hide_title: true,
-        hide_border: true,
-        drilldowns: [{ id: 'd1' }],
-      },
-    };
-    const attachmentData = {
-      title: 'Dash',
-      panels: [attachmentPanel],
-    } as unknown as DashboardAttachmentData;
-
-    const dashboardState = attachmentDataToDashboardState(attachmentData);
-
-    expect(dashboardState.panels).toEqual([
-      {
-        type: VISUALIZE_EMBEDDABLE_TYPE,
-        id: 'p1',
-        grid,
-        config: {
-          title: 'Panel title edited',
-          description: 'Panel description edited',
-          hide_title: true,
-          hide_border: true,
-          drilldowns: [{ id: 'd1' }],
-          savedVis: buildVegaSavedVis({
-            spec: SPEC,
-            title: 'Panel title edited',
-            description: 'Panel description edited',
-          }),
-        },
-      },
-    ]);
-
-    expect(dashboardStateToAttachmentData(dashboardState).panels).toEqual([attachmentPanel]);
   });
 });

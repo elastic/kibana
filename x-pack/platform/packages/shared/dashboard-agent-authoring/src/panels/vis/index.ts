@@ -127,12 +127,27 @@ export const isEsqlLensPanel = ({ type, config }: AttachmentPanel): boolean => {
   return (Array.isArray(layers) ? layers : [config]).some(isEsqlDataSourceCarrier);
 };
 
-/** Parses a Vega panel's HJSON (or JSON) spec string; `undefined` when it does not parse. */
-export const parseVegaSpec = (spec: unknown): unknown =>
-  typeof spec === 'string' ? parseSpec({ format: 'hjson', value: spec }) : spec;
-
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   !!value && typeof value === 'object' && !Array.isArray(value);
+
+/** Unwraps a native Vega panel spec (`{ format, value }`) to its HJSON string or JSON object. */
+const unwrapVegaSpec = (spec: unknown): unknown =>
+  isRecord(spec) && (spec.format === 'hjson' || spec.format === 'json') ? spec.value : spec;
+
+/** Parses a Vega panel spec into its object form; `undefined` when HJSON does not parse to an object. */
+export const parseVegaSpec = (spec: unknown): unknown => {
+  const value = unwrapVegaSpec(spec);
+  return typeof value === 'string' ? parseSpec({ format: 'hjson', value }) : value;
+};
+
+/** Serializes a Vega panel spec to the text an author edits, keeping HJSON as written. */
+export const getVegaSpecText = (spec: unknown): string | undefined => {
+  const value = unwrapVegaSpec(spec);
+  if (typeof value === 'string') {
+    return value;
+  }
+  return isRecord(value) ? JSON.stringify(value) : undefined;
+};
 
 /** Vega-Lite keys that hold nested views, whose own `data` the Vega author drops. */
 const CHILD_VIEW_KEYS = ['spec', 'layer', 'concat', 'hconcat', 'vconcat'] as const;

@@ -22,3 +22,8 @@ export { groupResourceNodes } from './group_resource_nodes';
 export { markIdleServices, shouldKeepVisibleDespiteLowTraffic } from './mark_idle_services';
 export { groupServiceNodes } from './group_service_nodes';
 export { formatServiceGroupName } from './format_service_group_name';
+export {
+  getServiceGroupAriaLabel,
+  getServiceGroupBoxAriaLabel,
+  getServiceGroupMemberCountLabel,
+} from './service_group_labels';

@@ -37,6 +37,7 @@ export type {
   GroupInfo,
   GroupedNodeData,
   ServiceGroupNodeData,
+  ServiceGroupBoxNodeData,
   ServiceMapNodeData,
   ServiceMapNode,
   EdgeMarker,
@@ -55,6 +56,7 @@ import type {
   DependencyNodeData,
   GroupedNodeData,
   ServiceGroupNodeData,
+  ServiceGroupBoxNodeData,
   ServiceMapNodeData,
 } from '@kbn/apm-types';
 import type { Node } from '@xyflow/react';
@@ -88,6 +90,22 @@ export function isServiceGroupNode(node: ServiceMapNode): node is Node<ServiceGr
 }
 
 /**
+ * Type guard for the box of an open service group.
+ */
+export function isServiceGroupBoxNodeData(
+  data: ServiceMapNodeData
+): data is ServiceGroupBoxNodeData {
+  return 'isServiceGroupBox' in data && data.isServiceGroupBox === true;
+}
+
+/**
+ * Helper to check if a node is the box of an open service group.
+ */
+export function isServiceGroupBoxNode(node: ServiceMapNode): node is Node<ServiceGroupBoxNodeData> {
+  return isServiceGroupBoxNodeData(node.data);
+}
+
+/**
  * Helper to check if a node is an external/dependency node.
  */
 export function isExternalNode(node: ServiceMapNode): node is Node<DependencyNodeData> {
@@ -112,5 +130,10 @@ export function isGroupedNodeData(data: ServiceMapNodeData): data is GroupedNode
  * Type guard to check if node data is dependency/external node data.
  */
 export function isDependencyNodeData(data: ServiceMapNodeData): data is DependencyNodeData {
-  return data.isService === false && !isGroupedNodeData(data) && !isServiceGroupNodeData(data);
+  return (
+    data.isService === false &&
+    !isGroupedNodeData(data) &&
+    !isServiceGroupNodeData(data) &&
+    !isServiceGroupBoxNodeData(data)
+  );
 }
