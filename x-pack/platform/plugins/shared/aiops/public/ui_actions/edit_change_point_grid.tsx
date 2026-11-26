@@ -13,7 +13,6 @@ import {
 } from '@kbn/discover-utils';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { ENABLE_ESQL } from '@kbn/esql-utils';
-import { ES_FIELD_TYPES } from '@kbn/field-types';
 import { i18n } from '@kbn/i18n';
 import {
   apiCanAccessViewMode,
@@ -43,6 +42,11 @@ import {
 } from '@kbn/ui-actions-plugin/public';
 import { map, merge } from 'rxjs';
 import { canUseAiops } from '../capabilities';
+import {
+  isChangePointMetricField,
+  isChangePointSplitField,
+  isEsqlCompatibleField,
+} from '../components/change_point_detection/change_point_field_utils';
 import type { AiopsCoreSetup } from '../types';
 
 export const EDIT_CHANGE_POINT_GRID_ACTION_ID = 'edit-change-point-grid';
@@ -113,10 +117,9 @@ const resolveEditModeState = async ({
     };
   }
 
-  const [{ buildChangePointEsql }, { isEsqlCompatibleField }] = await Promise.all([
-    import('../embeddables/change_point_chart/build_change_point_esql'),
-    import('../embeddables/change_point_chart/change_point_esql_initializer'),
-  ]);
+  const { buildChangePointEsql } = await import(
+    '../embeddables/change_point_chart/build_change_point_esql'
+  );
 
   try {
     const dataView = await dataViews.get(configuration.data_view_id);
@@ -127,8 +130,7 @@ const resolveEditModeState = async ({
     const hasCompatibleMetricField = dataView.fields.some(
       (field) =>
         field.name === configuration.metric_field &&
-        field.aggregatable &&
-        field.type === 'number' &&
+        isChangePointMetricField(field) &&
         isEsqlCompatibleField(field)
     );
     if (!hasCompatibleMetricField) {
@@ -139,13 +141,7 @@ const resolveEditModeState = async ({
       const hasCompatibleSplitField = dataView.fields.some(
         (field) =>
           field.name === configuration.split_field &&
-          field.aggregatable &&
-          Boolean(
-            field.esTypes?.some((esType) =>
-              [ES_FIELD_TYPES.KEYWORD, ES_FIELD_TYPES.IP].includes(esType as ES_FIELD_TYPES)
-            )
-          ) &&
-          !['_id', '_index'].includes(field.displayName) &&
+          isChangePointSplitField(field) &&
           isEsqlCompatibleField(field)
       );
       if (!hasCompatibleSplitField) {
@@ -179,6 +175,26 @@ const resolveEditModeState = async ({
   };
 };
 
+const getEditChangePointGridContext = async (
+  embeddable: unknown,
+  getStartServices: AiopsCoreSetup['getStartServices']
+) => {
+  if (
+    !isEditableChangePointGridApi(embeddable) ||
+    !embeddable.configuration$.getValue() ||
+    getInheritedViewMode(embeddable) !== 'edit'
+  ) {
+    return undefined;
+  }
+
+  const [coreStart, pluginStart] = await getStartServices();
+  if (!coreStart.uiSettings.get<boolean>(ENABLE_ESQL) || !canUseAiops(coreStart)) {
+    return undefined;
+  }
+
+  return { embeddable, coreStart, pluginStart };
+};
+
 /** Creates the Dashboard panel-menu action for editing AIOps-configured change_point_grid panels. */
 export const createEditChangePointGridAction = (
   getStartServices: AiopsCoreSetup['getStartServices']
@@ -204,33 +220,14 @@ export const createEditChangePointGridAction = (
     ).pipe(map(() => undefined));
   },
   async isCompatible({ embeddable }: EmbeddableApiContext) {
-    if (
-      !isEditableChangePointGridApi(embeddable) ||
-      !embeddable.configuration$.getValue() ||
-      getInheritedViewMode(embeddable) !== 'edit'
-    ) {
-      return false;
-    }
-
-    const [coreStart] = await getStartServices();
-    return coreStart.uiSettings.get<boolean>(ENABLE_ESQL) && canUseAiops(coreStart);
+    return Boolean(await getEditChangePointGridContext(embeddable, getStartServices));
   },
-  async execute(context: EmbeddableApiContext) {
-    const { embeddable, returnFocus } = context;
-    if (!isEditableChangePointGridApi(embeddable)) {
+  async execute({ embeddable: contextEmbeddable, returnFocus }: EmbeddableApiContext) {
+    const editContext = await getEditChangePointGridContext(contextEmbeddable, getStartServices);
+    if (!editContext) {
       throw new IncompatibleActionError();
     }
-
-    const [coreStart, pluginStart] = await getStartServices();
-    const configuration = embeddable.configuration$.getValue();
-    if (
-      !configuration ||
-      getInheritedViewMode(embeddable) !== 'edit' ||
-      !coreStart.uiSettings.get<boolean>(ENABLE_ESQL) ||
-      !canUseAiops(coreStart)
-    ) {
-      throw new IncompatibleActionError();
-    }
+    const { embeddable, coreStart, pluginStart } = editContext;
 
     const dashboardParentApi = apiHasParentApi(embeddable) ? embeddable.parentApi : undefined;
     const focusedPanelId = apiHasUniqueId(embeddable) ? embeddable.uuid : undefined;
@@ -295,7 +292,7 @@ export const createEditChangePointGridAction = (
                 Boolean(currentTitle) &&
                 currentTitle !== getChangePointConfigurationTitle(currentConfiguration);
               const nextTitle = getChangePointSubmissionTitle(submission);
-              if (nextTitle !== undefined && !hasCustomTitle) {
+              if (!hasCustomTitle && nextTitle !== currentTitle) {
                 embeddable.setTitle(nextTitle);
               }
               closeFlyout();

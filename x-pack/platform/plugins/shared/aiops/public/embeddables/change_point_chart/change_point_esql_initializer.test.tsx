@@ -17,7 +17,6 @@ import { ViewTypeSelector } from '../../components/change_point_detection/view_t
 import { buildChangePointEsql, type BuildChangePointEsqlParams } from './build_change_point_esql';
 import {
   ChangePointEsqlInitializer,
-  isEsqlCompatibleField,
   type ChangePointEsqlInitializerProps,
 } from './change_point_esql_initializer';
 import type { ChangePointPreviewStateUpdate } from './change_point_preview';
@@ -233,14 +232,6 @@ const renderInitializer = (
 };
 
 describe('ChangePointEsqlInitializer', () => {
-  it('filters out scripted and runtime fields while keeping mapped fields', () => {
-    const dv = createMockDataView();
-    expect(dv.fields.filter(isEsqlCompatibleField).map((f) => f.name)).toEqual([
-      'bytes',
-      'host.name',
-    ]);
-  });
-
   it('starts in form mode without rendering the editor, hides max series, filters incompatible fields, and gates Confirm on preview readiness', async () => {
     const { onConfirm } = renderInitializer();
 

@@ -26,7 +26,6 @@ import {
   CHANGE_POINT_DETECTION_VIEW_TYPE,
   type ChangePointDetectionViewType,
 } from '@kbn/aiops-change-point-detection/constants';
-import type { DataViewField } from '@kbn/data-views-plugin/public';
 import type { ChangePointGridFormConfiguration } from '@kbn/discover-utils';
 import type { AggregateQuery, TimeRange } from '@kbn/es-query';
 import { ESQLLangEditor } from '@kbn/esql/public';
@@ -42,6 +41,7 @@ import {
   ChangePointDetectionControlsContextProvider,
   useChangePointDetectionControlsContext,
 } from '../../components/change_point_detection/change_point_detection_context';
+import { isEsqlCompatibleField } from '../../components/change_point_detection/change_point_field_utils';
 import { ViewTypeSelector } from '../../components/change_point_detection/view_type_selector';
 import { TimeFieldWarning } from '../../components/time_field_warning';
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
@@ -58,10 +58,6 @@ import {
 } from './change_point_preview';
 
 const MAX_ESQL_QUERY_LENGTH = 10_000;
-
-/** Excludes scripted and Kibana data-view runtime fields, which ES|QL cannot query. */
-export const isEsqlCompatibleField = (field: DataViewField): boolean =>
-  !field.scripted && !field.runtimeField && field.isMapped !== false;
 
 const getInitialFormControls = (
   initialFormConfiguration?: ChangePointGridFormConfiguration
@@ -463,7 +459,6 @@ export const ChangePointEsqlInitializer: FC<ChangePointEsqlInitializerProps> = (
                   setDirectEsql(nextQuery.esql);
                 }}
                 onTextLangQuerySubmit={handleSubmitDirectQuery}
-                isDisabled={false}
                 editorIsInline
                 hasOutline
                 hideQueryHistory
@@ -471,7 +466,6 @@ export const ChangePointEsqlInitializer: FC<ChangePointEsqlInitializerProps> = (
                 disableAutoFocus
                 expandToFitQueryOnMount
                 initialState={{ editorHeight: 140 }}
-                errors={[]}
                 esqlVariables={esqlVariables}
                 dataTestSubj="aiopsChangePointEsqlEditor"
               />

@@ -303,6 +303,54 @@ describe('edit_change_point_grid', () => {
     expect(embeddable.title$.getValue()).toBe('My custom title');
   });
 
+  it('clears a generated form title when confirming in direct-edit mode', async () => {
+    const embeddable = createMockGridApi({
+      title: 'Change point: avg(bytes) split by "host.name"',
+    });
+    const action = createEditChangePointGridAction(createGetStartServices());
+
+    await action.execute({ embeddable: embeddable as never });
+    const element = (await mockOpenLazyFlyout.mock.calls.at(-1)![0].loadContent({
+      ariaLabelledBy: 'changePointConfig',
+      closeFlyout: jest.fn(),
+    })) as React.ReactElement<React.ComponentProps<typeof EmbeddableChangePointEsqlUserInput>>;
+
+    const customEsql = 'FROM custom-* | CHANGE_POINT m ON b';
+    element.props.onConfirm({
+      mode: 'esql',
+      viewType: CHANGE_POINT_DETECTION_VIEW_TYPE.CHARTS,
+      esql: customEsql,
+    });
+
+    expect(embeddable.updateChangePointQuery).toHaveBeenCalledWith({
+      esql: customEsql,
+      configuration: { mode: 'esql' },
+    });
+    expect(embeddable.setTitle).toHaveBeenCalledWith(undefined);
+    expect(embeddable.title$.getValue()).toBeUndefined();
+  });
+
+  it('preserves a custom title on a form-configured panel when confirming in direct-edit mode', async () => {
+    const embeddable = createMockGridApi({ title: 'My custom title' });
+    const action = createEditChangePointGridAction(createGetStartServices());
+
+    await action.execute({ embeddable: embeddable as never });
+    const element = (await mockOpenLazyFlyout.mock.calls.at(-1)![0].loadContent({
+      ariaLabelledBy: 'changePointConfig',
+      closeFlyout: jest.fn(),
+    })) as React.ReactElement<React.ComponentProps<typeof EmbeddableChangePointEsqlUserInput>>;
+
+    element.props.onConfirm({
+      mode: 'esql',
+      viewType: CHANGE_POINT_DETECTION_VIEW_TYPE.CHARTS,
+      esql: 'FROM custom-* | CHANGE_POINT m ON b',
+    });
+
+    expect(embeddable.updateChangePointQuery).toHaveBeenCalled();
+    expect(embeddable.setTitle).not.toHaveBeenCalled();
+    expect(embeddable.title$.getValue()).toBe('My custom title');
+  });
+
   it('reopens in direct-edit mode when mode is esql, query diverged, or data view / fields cannot regenerate the query, and preserves current title on Confirm', async () => {
     const customEsql = 'FROM custom-* | CHANGE_POINT m ON b';
 
