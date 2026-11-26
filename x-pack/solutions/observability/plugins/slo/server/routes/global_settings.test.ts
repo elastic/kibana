@@ -45,15 +45,24 @@ describe('global SLO settings routes', () => {
     });
   });
 
-  it('PUT returns 400 without saving when the kibana.yml override is set', async () => {
+  it('PUT saves and resolves the effective settings from the kibana.yml override', async () => {
     const { globalSettingsRepository, resources } = createResources();
+    const sliRetention = { enabled: false, periodDays: 400 };
+    globalSettingsRepository.save.mockResolvedValue({
+      sliRetention: { ...sliRetention, updatedAt: new Date() },
+    });
 
-    await expect(
-      updateSLOGlobalSettingsRoute[PUT_ENDPOINT].handler({
-        ...resources,
-        params: { body: { sliRetention: { enabled: false, periodDays: 400 } } },
-      } as never)
-    ).rejects.toMatchObject({ output: { statusCode: 400 } });
-    expect(globalSettingsRepository.save).not.toHaveBeenCalled();
+    const response = await updateSLOGlobalSettingsRoute[PUT_ENDPOINT].handler({
+      ...resources,
+      params: { body: { sliRetention } },
+    } as never);
+
+    expect(globalSettingsRepository.save).toHaveBeenCalledWith({ sliRetention });
+    expect(response).toEqual({
+      sliRetention: expect.objectContaining({
+        ...sliRetention,
+        effective: { ...SLI_RETENTION_OVERRIDE, source: 'config' },
+      }),
+    });
   });
 });

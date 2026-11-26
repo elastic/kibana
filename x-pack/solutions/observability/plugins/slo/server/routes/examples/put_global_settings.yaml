@@ -31,12 +31,6 @@ responses:
         schema:
           $ref: ../oas_error_schemas.yaml#/400_response
         examples:
-          configOverrideExample:
-            summary: SLI retention is set in kibana.yml
-            value:
-              statusCode: 400
-              error: Bad Request
-              message: SLI retention is set by xpack.slo.sliRetention in kibana.yml and cannot be changed through the API
           invalidPeriodExample:
             summary: Retention period below the minimum
             value:

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { IllegalArgumentError } from '../../errors';
 import type { SLOGlobalSettingsRepository } from './slo_global_settings_repository';
 import { updateGlobalSettings } from './update_global_settings';
 
@@ -42,16 +41,27 @@ describe('updateGlobalSettings', () => {
     });
   });
 
-  it('rejects the update without saving when SLI retention is set in kibana.yml', async () => {
-    const update = updateGlobalSettings({
+  it('saves the SLI retention and keeps the kibana.yml override effective', async () => {
+    repository.save.mockResolvedValue({
+      sliRetention: { enabled: false, periodDays: 400, updatedAt: SAVED_AT },
+    });
+
+    const response = await updateGlobalSettings({
       repository,
       override: { enabled: true, periodDays: 200 },
       settings: { sliRetention: { enabled: false, periodDays: 400 } },
     });
 
-    await expect(update).rejects.toBeInstanceOf(IllegalArgumentError);
-    await expect(update).rejects.toThrow('xpack.slo.sliRetention');
-
-    expect(repository.save).not.toHaveBeenCalled();
+    expect(repository.save).toHaveBeenCalledWith({
+      sliRetention: { enabled: false, periodDays: 400 },
+    });
+    expect(response).toEqual({
+      sliRetention: {
+        enabled: false,
+        periodDays: 400,
+        updatedAt: SAVED_AT.toISOString(),
+        effective: { enabled: true, periodDays: 200, source: 'config' },
+      },
+    });
   });
 });

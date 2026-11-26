@@ -7,7 +7,6 @@
 
 import type { PutSLOGlobalSettingsParams, PutSLOGlobalSettingsResponse } from '@kbn/slo-schema';
 import type { SliRetention } from '../../domain/models';
-import { IllegalArgumentError } from '../../errors';
 import type { SLOGlobalSettingsRepository } from './slo_global_settings_repository';
 import { toGlobalSettingsResponse } from './to_global_settings_response';
 
@@ -17,19 +16,13 @@ interface Params {
   settings: PutSLOGlobalSettingsParams;
 }
 
-/** Saves the global SLO settings, unless SLI retention is overridden in kibana.yml. */
+/** Saves the global SLO settings; a kibana.yml override keeps precedence over the saved value. */
 export const updateGlobalSettings = async ({
   repository,
   override,
   settings,
 }: Params): Promise<PutSLOGlobalSettingsResponse> => {
-  if (override) {
-    throw new IllegalArgumentError(
-      'SLI retention is set by xpack.slo.sliRetention in kibana.yml and cannot be changed through the API'
-    );
-  }
-
   const stored = await repository.save(settings);
 
-  return toGlobalSettingsResponse({ stored });
+  return toGlobalSettingsResponse({ stored, override });
 };

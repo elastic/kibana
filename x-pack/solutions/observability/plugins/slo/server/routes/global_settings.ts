@@ -56,7 +56,7 @@ export const updateSLOGlobalSettingsRoute = createSloServerRoute({
   options: {
     access: 'public',
     summary: 'Update the global SLO settings',
-    description: `${GLOBAL_ADMIN_DESCRIPTION} Each settings block is replaced as a whole. The request fails when the setting is set in kibana.yml.`,
+    description: `${GLOBAL_ADMIN_DESCRIPTION} Each settings block is replaced as a whole. When the setting is set in kibana.yml, the request still saves it, and the kibana.yml value stays effective until it is removed.`,
     operationId: 'updateSloGlobalSettingsOp',
     availability: AVAILABILITY,
     oasOperationObject: () => path.join(__dirname, 'examples/put_global_settings.yaml'),

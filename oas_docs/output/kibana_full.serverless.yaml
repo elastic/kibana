@@ -69831,7 +69831,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Global SLO settings apply to all spaces. You must have `all` privileges for the **SLOs** feature in the **Observability** section of the Kibana feature privileges in all spaces. Each settings block is replaced as a whole. The request fails when the setting is set in kibana.yml.<br/><br/>[Required authorization] Route required privileges: slo_write.
+        Global SLO settings apply to all spaces. You must have `all` privileges for the **SLOs** feature in the **Observability** section of the Kibana feature privileges in all spaces. Each settings block is replaced as a whole. When the setting is set in kibana.yml, the request still saves it, and the kibana.yml value stays effective until it is removed.<br/><br/>[Required authorization] Route required privileges: slo_write.
       operationId: updateSloGlobalSettingsOp
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -69896,12 +69896,6 @@ paths:
           content:
             application/json:
               examples:
-                configOverrideExample:
-                  summary: SLI retention is set in kibana.yml
-                  value:
-                    error: Bad Request
-                    message: SLI retention is set by xpack.slo.sliRetention in kibana.yml and cannot be changed through the API
-                    statusCode: 400
                 invalidPeriodExample:
                   summary: Retention period below the minimum
                   value:

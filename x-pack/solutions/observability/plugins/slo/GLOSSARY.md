@@ -19,7 +19,7 @@ A user granted the SLO feature's `All` privilege on all spaces.
 _Avoid_: Admin, superuser, operator
 
 **Config override**:
-A global SLO setting fixed by the operator in `kibana.yml`; while it is set, it takes precedence over the stored value, which an SLO global admin can no longer change.
+A global SLO setting fixed by the operator in `kibana.yml`; while it is set, it takes precedence over the stored value, which an SLO global admin can still change for when the override is removed.
 _Avoid_: YML setting, locked setting, overwrite
 
 **Effective setting**:
