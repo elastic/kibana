@@ -18,7 +18,6 @@
   "include": ["**/*.ts", "**/*.tsx"],
   "exclude": [
     "target/**/*",
-    "vitest.config.ts"
   ],
   "kbn_references": [
     "@kbn/field-types",

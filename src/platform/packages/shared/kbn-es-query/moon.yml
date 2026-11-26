@@ -34,5 +34,5 @@ fileGroups:
     - '**/*.ts'
     - '**/*.js'
     - '!target/**/*'
-    - '!vitest.config.ts'
+    - '!vitest.config.js'
 tasks: {}

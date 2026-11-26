@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { defineConfig, mergeConfig } from 'vitest/config';
-import preset from './node_preset';
+const { defineConfig, mergeConfig } = require('vitest/config');
+const preset = require('@kbn/vitest/jsdom_preset');
 
-export default mergeConfig(preset, defineConfig({ test: { root: import.meta.dirname } }));
+module.exports = mergeConfig(preset, defineConfig({ test: { root: __dirname } }));

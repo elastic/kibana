@@ -11,7 +11,7 @@ import { relative } from 'path';
 import { defineConfig } from 'vitest/config';
 import preset from '@kbn/vitest/node_preset';
 
-// Every package-level `vitest.config.ts` is a project; `node scripts/vitest` runs them all.
+// Every package-level `vitest.config.js` is a project; `node scripts/vitest` runs them all.
 // Packages migrate from Jest one at a time, so this runs alongside `node scripts/jest`.
 export default defineConfig({
   test: {
@@ -33,7 +33,7 @@ export default defineConfig({
         ]
       : ['default'],
     projects: [
-      '{src,x-pack,packages,examples}/**/vitest.config.ts',
+      '{src,x-pack,packages,examples}/**/vitest.config.js',
       '!**/{node_modules,target,__fixtures__}/**',
     ],
   },

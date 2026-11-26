@@ -23,7 +23,6 @@
   ],
   "exclude": [
     "target/**/*",
-    "vitest.config.ts"
   ],
   "kbn_references": [
     "@kbn/i18n",

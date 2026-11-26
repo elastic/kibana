@@ -9,7 +9,7 @@
 
 /**
  * Moves a package's unit tests from Jest to Vitest: replaces `jest.config.js` with a
- * `vitest.config.ts`, rewrites the tests and package-local mocks, re-keys snapshots and updates
+ * `vitest.config.js`, rewrites the tests and package-local mocks, re-keys snapshots and updates
  * tsconfig.json and moon.yml. Integration tests (`jest.integration.config.js`) stay on Jest.
  */
 
@@ -72,8 +72,8 @@ const readJestConfig = (dir) => {
   if (!Fs.existsSync(configPath)) {
     throw new MigrationError(`${configPath} not found`);
   }
-  if (Fs.existsSync(Path.join(dir, 'vitest.config.ts'))) {
-    throw new MigrationError(`${dir} already has a vitest.config.ts`);
+  if (Fs.existsSync(Path.join(dir, 'vitest.config.js'))) {
+    throw new MigrationError(`${dir} already has a vitest.config.js`);
   }
   const config = createRequire(configPath)(configPath);
 
@@ -192,6 +192,9 @@ const vitestTypes = (types) => {
   ];
 };
 
+/** `include` patterns that pick up a JavaScript file in the package root. */
+const ROOT_JS_INCLUDE = /^(\*\*\/)?\*(\.js)?$/;
+
 /** Updates tsconfig.json; returns whether it changed. */
 const updateTsconfig = (dir, { dryRun }) => {
   const path = Path.join(dir, 'tsconfig.json');
@@ -206,16 +209,19 @@ const updateTsconfig = (dir, { dryRun }) => {
           `"types": [\n${types.map((type) => `      ${JSON.stringify(type)}`).join(',\n')}\n    ]`
         )
       : setCompilerOption(source, 'types', types);
-  // kbn_references to @kbn/vitest would create project cycles (@kbn/vitest -> @kbn/jest -> ...);
-  // keep vitest.config.ts out of the TS project instead, like jest.config.js was.
+  // kbn_references to @kbn/vitest would create project cycles (@kbn/vitest -> @kbn/jest -> ...),
+  // so vitest.config.js stays out of the TS project, like jest.config.js.
   const stringValues = (name) =>
     (getProp(next, name)?.value.elements ?? []).map((element) => element.value);
   if (stringValues('kbn_references').includes('@kbn/vitest')) {
     next = removeReferences(next, ['@kbn/vitest']);
   }
   const exclude = stringValues('exclude');
-  if (!exclude.includes('vitest.config.ts')) {
-    next = setProp(next, 'exclude', [...exclude, 'vitest.config.ts']);
+  if (
+    stringValues('include').some((pattern) => ROOT_JS_INCLUDE.test(pattern)) &&
+    !exclude.includes('vitest.config.js')
+  ) {
+    next = setProp(next, 'exclude', [...exclude, 'vitest.config.js']);
   }
   if (next !== source && !dryRun) {
     Fs.writeFileSync(path, next);
@@ -331,13 +337,13 @@ const migratePackage = (packageDir, { dryRun = false } = {}) => {
 
   if (!dryRun) {
     Fs.writeFileSync(
-      Path.join(dir, 'vitest.config.ts'),
+      Path.join(dir, 'vitest.config.js'),
       `${LICENSE_HEADER}
 
-import { defineConfig, mergeConfig } from 'vitest/config';
-import preset from '${preset}';
+const { defineConfig, mergeConfig } = require('vitest/config');
+const preset = require('${preset}');
 
-export default mergeConfig(preset, defineConfig({ test: { root: import.meta.dirname } }));
+module.exports = mergeConfig(preset, defineConfig({ test: { root: __dirname } }));
 `
     );
     Fs.unlinkSync(configPath);

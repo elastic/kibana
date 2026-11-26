@@ -82,5 +82,4 @@ fileGroups:
     - test/**/*
     - server/lib/spec_definitions/kibana_api_doc_links/*.json
     - '!target/**/*'
-    - '!vitest.config.ts'
 tasks: {}

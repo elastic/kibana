@@ -65,7 +65,7 @@ export async function getJestConfigs(configPaths?: string[]): Promise<{
       // canaries) are never treated as real tests or orphaned. This mirrors CI's
       // discoverJestUnitConfigs, which already ignores **/__fixtures__/**.
       const combinedResult = await execAsync(
-        `git ls-files -- '*.test.ts' '*.test.tsx' '**/jest.config.js' '**/*/jest.config.js' '**/jest.config.cjs' '**/*/jest.config.cjs' '**/jest.integration.config.js' '**/*/jest.integration.config.js' '**/jest.integration.config.cjs' '**/*/jest.integration.config.cjs' '**/*/vitest.config.ts' ':(glob,exclude)**/__fixtures__/**'`,
+        `git ls-files -- '*.test.ts' '*.test.tsx' '**/jest.config.js' '**/*/jest.config.js' '**/jest.config.cjs' '**/*/jest.config.cjs' '**/jest.integration.config.js' '**/*/jest.integration.config.js' '**/jest.integration.config.cjs' '**/*/jest.integration.config.cjs' '**/*/vitest.config.js' ':(glob,exclude)**/__fixtures__/**'`,
         { cwd: REPO_ROOT, maxBuffer: 1024 * 1024 * 10 }
       );
 
@@ -81,7 +81,7 @@ export async function getJestConfigs(configPaths?: string[]): Promise<{
 
       configFiles = allFiles.filter((file) => configPattern.test(file));
       allTestFiles = allFiles.filter((file) => testPattern.test(file));
-      vitestConfigs = allFiles.filter((file) => file.endsWith(`${osSep}vitest.config.ts`));
+      vitestConfigs = allFiles.filter((file) => file.endsWith(`${osSep}vitest.config.js`));
     }
 
     // Step 2: Parse all config files in parallel and apply Jest matching rules using fast heuristic
@@ -204,7 +204,7 @@ export async function getJestConfigs(configPaths?: string[]): Promise<{
 }
 
 /**
- * Every package `vitest.config.ts` whose project runs a test file. Integration tests stay on Jest.
+ * Every package `vitest.config.js` whose project runs a test file. Integration tests stay on Jest.
  */
 function findVitestConfigs(testFile: string, vitestConfigs: string[]): string[] {
   if (testFile.includes(`${osSep}integration_tests${osSep}`)) {

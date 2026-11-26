@@ -69,5 +69,4 @@ fileGroups:
     - '**/*.ts'
     - '**/*.tsx'
     - '!target/**/*'
-    - '!vitest.config.ts'
 tasks: {}

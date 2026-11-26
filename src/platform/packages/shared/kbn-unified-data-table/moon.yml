@@ -69,5 +69,4 @@ fileGroups:
     - src/**/*
     - __mocks__/**/*.ts
     - '!target/**/*'
-    - '!vitest.config.ts'
 tasks: {}

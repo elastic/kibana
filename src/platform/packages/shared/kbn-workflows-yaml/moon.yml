@@ -31,5 +31,4 @@ fileGroups:
   src:
     - '**/*.ts'
     - '!target/**/*'
-    - '!vitest.config.ts'
 tasks: {}

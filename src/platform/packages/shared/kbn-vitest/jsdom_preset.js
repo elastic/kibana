@@ -15,7 +15,7 @@ const SETUP_DIR = Path.resolve(__dirname, 'src/setup');
 
 /**
  * Vitest counterpart of the `@kbn/jest` (jsdom) preset. Merge it into a package's
- * `vitest.config.ts` with `mergeConfig` and set `test.root` to the package directory.
+ * `vitest.config.js` with `mergeConfig` and set `test.root` to the package directory.
  *
  * @type {import('vitest/config').ViteUserConfig & {
  *   test: NonNullable<import('vitest/config').ViteUserConfig['test']>

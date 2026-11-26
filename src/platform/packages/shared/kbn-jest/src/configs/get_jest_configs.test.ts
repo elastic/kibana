@@ -219,12 +219,12 @@ describe('getJestConfigs', () => {
     expect(result.orphanedTestFiles).toHaveLength(0);
   });
 
-  it('treats unit tests under a vitest.config.ts as covered, but not integration tests', async () => {
+  it('treats unit tests under a vitest.config.js as covered, but not integration tests', async () => {
     mockExecResponder = () => ({
       stdout: [
         'pkg/a/jest.config.js',
         'pkg/a/a.test.ts',
-        'pkg/v/vitest.config.ts',
+        'pkg/v/vitest.config.js',
         'pkg/v/src/v.test.ts',
         'pkg/v/integration_tests/v.test.ts',
       ].join('\n'),
@@ -242,9 +242,9 @@ describe('getJestConfigs', () => {
     ]);
   });
 
-  it('reports tests claimed by both a Jest config and a vitest.config.ts', async () => {
+  it('reports tests claimed by both a Jest config and a vitest.config.js', async () => {
     mockExecResponder = () => ({
-      stdout: ['pkg/jest.config.js', 'pkg/v/vitest.config.ts', 'pkg/v/v.test.ts'].join('\n'),
+      stdout: ['pkg/jest.config.js', 'pkg/v/vitest.config.js', 'pkg/v/v.test.ts'].join('\n'),
     });
 
     const { getJestConfigs } = await import('./get_jest_configs');
@@ -255,15 +255,15 @@ describe('getJestConfigs', () => {
         testFile: resolve('/repo', 'pkg/v/v.test.ts'),
         configs: [
           resolve('/repo', 'pkg/jest.config.js'),
-          resolve('/repo', 'pkg/v/vitest.config.ts'),
+          resolve('/repo', 'pkg/v/vitest.config.js'),
         ],
       },
     ]);
   });
 
-  it('reports tests claimed by nested vitest.config.ts projects', async () => {
+  it('reports tests claimed by nested vitest.config.js projects', async () => {
     mockExecResponder = () => ({
-      stdout: ['pkg/vitest.config.ts', 'pkg/sub/vitest.config.ts', 'pkg/sub/s.test.ts'].join('\n'),
+      stdout: ['pkg/vitest.config.js', 'pkg/sub/vitest.config.js', 'pkg/sub/s.test.ts'].join('\n'),
     });
 
     const { getJestConfigs } = await import('./get_jest_configs');
@@ -273,8 +273,8 @@ describe('getJestConfigs', () => {
       {
         testFile: resolve('/repo', 'pkg/sub/s.test.ts'),
         configs: [
-          resolve('/repo', 'pkg/vitest.config.ts'),
-          resolve('/repo', 'pkg/sub/vitest.config.ts'),
+          resolve('/repo', 'pkg/vitest.config.js'),
+          resolve('/repo', 'pkg/sub/vitest.config.js'),
         ],
       },
     ]);

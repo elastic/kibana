@@ -65,5 +65,4 @@ fileGroups:
     - public/**/*.json
     - server/**/*.json
     - '!target/**/*'
-    - '!vitest.config.ts'
 tasks: {}

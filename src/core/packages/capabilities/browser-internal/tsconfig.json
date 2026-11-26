@@ -21,6 +21,5 @@
   ],
   "exclude": [
     "target/**/*",
-    "vitest.config.ts"
   ]
 }
