@@ -211,7 +211,12 @@ async function readWatchedKnowledgeIndicators({
  * Runs both checks for every measured knowledge indicator. The history read gives each one the
  * minutes an earlier tick already reported and the event it has open. When a check finds something,
  * it runs again knowing when the source's data begins: the minutes before count as zero matches, so
- * a new source, or one back from an outage, would look like a rise.
+ * a new source would look like a rise.
+ *
+ * Only the start is guarded, not a gap. A source back from an outage that emptied the whole baseline
+ * hour still has documents from before it, so its return can be reported. Telling that gap from a
+ * sparse index that was only quiet would take another read per breach, and a false report costs
+ * less than a missed failure.
  */
 async function judgeMeasuredFailures({
   context,
