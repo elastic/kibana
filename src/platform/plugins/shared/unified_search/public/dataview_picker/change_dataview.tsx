@@ -19,6 +19,7 @@ import {
   EuiFlexItem,
   EuiFormControlButton,
   EuiFormControlLayout,
+  EuiFormPrepend,
   EuiHorizontalRule,
   EuiIcon,
   EuiPopover,
@@ -126,6 +127,10 @@ export function ChangeDataView({
 
   // Create a reusable id to ensure search input is the first focused item in the popover even though it's not the first item
   const searchListInputId = useGeneratedHtmlId({ prefix: 'dataviewPickerListSearchInput' });
+  // The visible "Data view" prepend and the trigger are siblings, so link them explicitly
+  // to include the visible label in the trigger's accessible name (WCAG 2.5.3).
+  const labelId = useGeneratedHtmlId({ prefix: 'dataviewPickerLabel' });
+  const triggerId = useGeneratedHtmlId({ prefix: 'dataviewPickerTrigger' });
 
   const closePopover = useCallback(() => {
     setPopoverIsOpen(false);
@@ -169,6 +174,8 @@ export function ChangeDataView({
         css={styles.trigger}
         isInvalid={isMissingCurrent}
         disabled={isDisabled}
+        id={triggerId}
+        aria-labelledby={showDataViewLabel ? `${labelId} ${triggerId}` : undefined}
         data-test-subj={dataTestSubj}
         aria-expanded={isPopoverOpen}
         aria-controls={popoverId}
@@ -369,11 +376,17 @@ export function ChangeDataView({
             compressed={compressed}
             isDropdown={showDropdownIcon}
             prepend={
-              showDataViewLabel
-                ? i18n.translate('unifiedSearch.query.queryBar.esqlMenu.switcherLabelTitle', {
-                    defaultMessage: 'Data view',
-                  })
-                : undefined
+              showDataViewLabel ? (
+                <EuiFormPrepend
+                  id={labelId}
+                  label={i18n.translate(
+                    'unifiedSearch.query.queryBar.esqlMenu.switcherLabelTitle',
+                    {
+                      defaultMessage: 'Data view',
+                    }
+                  )}
+                />
+              ) : undefined
             }
             {...(trigger.fullWidth && { fullWidth: true })}
           >

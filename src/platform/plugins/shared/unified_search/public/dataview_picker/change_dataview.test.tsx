@@ -122,8 +122,14 @@ describe('DataView component', () => {
     render(wrapDataViewComponentInContext());
 
     const trigger = screen.getByTestId('dataview-trigger');
-    expect(trigger).toHaveAccessibleName('Dataview 1');
+    expect(trigger).toHaveAccessibleName('Data view Dataview 1');
     expect(trigger).not.toHaveAttribute('title');
+  });
+
+  it('includes the visible "Data view" label in the accessible name', () => {
+    render(wrapDataViewComponentInContext());
+
+    expect(screen.getByTestId('dataview-trigger')).toHaveAccessibleName('Data view Dataview 1');
   });
 
   it('resets the inherited text fill color so the truncated label stays readable when disabled', () => {
@@ -131,7 +137,7 @@ describe('DataView component', () => {
 
     const trigger = screen.getByTestId('dataview-trigger');
     expect(trigger).toBeDisabled();
-    expect(trigger).toHaveAccessibleName('Dataview 1');
+    expect(trigger).toHaveAccessibleName('Data view Dataview 1');
 
     const ghostLabel = screen.getByText('Dataview 1', { selector: '[aria-hidden="true"]' });
     expect(ghostLabel.nextElementSibling).toHaveStyleRule(
