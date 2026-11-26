@@ -471,4 +471,6 @@ export const ConnectorIconsMap: Map<
       () => import(/* webpackChunkName: "connectorIconSentinelone2" */ './specs/sentinelone/icon')
     ),
   ],
+
+  ['.redis', lazy(() => import(/* webpackChunkName: "connectorIconredis" */ './specs/redis/icon'))],
 ]);

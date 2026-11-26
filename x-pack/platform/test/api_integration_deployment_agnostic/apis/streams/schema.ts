@@ -144,7 +144,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                 name: 'logs.otel',
               },
               body: {
-                field_definitions: [{ name: 'body.text', type: 'boolean' }],
+                // logs.otel sets index.mapping.ignore_malformed, which ES now honors in simulations
+                field_definitions: [
+                  { name: 'body.text', type: 'boolean', ignore_malformed: false },
+                ],
               },
             },
           }

@@ -58,6 +58,7 @@ import {
 import { enhanceScopeEvaluator } from './evaluators/enhance_scope_evaluator';
 import { dashboardLayoutEditEvaluator } from './evaluators/layout_edit';
 import { dashboardPanelEditsEvaluator } from './evaluators/panel_edits';
+import { dashboardSettingsEvaluator } from './evaluators/dashboard_settings';
 import { panelPointerScopeEvaluator } from './evaluators/panel_pointer_scope';
 import { dashboardReplaceConfirmationEvaluator } from './evaluators/replace_confirmation';
 import { createReplyEvaluator } from './evaluators/reply_judge';
@@ -402,6 +403,7 @@ export function createEvaluateDataset({
     enhanceScopeEvaluator,
     dashboardLayoutEditEvaluator,
     dashboardPanelEditsEvaluator,
+    dashboardSettingsEvaluator,
     dashboardReplaceConfirmationEvaluator,
     panelPointerScopeEvaluator,
     createUnavailableRequestsEvaluator(esClient),

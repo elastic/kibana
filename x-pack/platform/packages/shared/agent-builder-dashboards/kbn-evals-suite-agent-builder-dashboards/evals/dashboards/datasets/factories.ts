@@ -17,6 +17,7 @@ import type {
   LayoutEditGold,
   PanelEditGold,
   ReplaceConfirmationGold,
+  SettingsGold,
   UnavailableRequestGold,
   VisualizationAttachment,
 } from '../../../src/types';
@@ -39,6 +40,7 @@ export interface ExampleMetadata {
     | 'discover_results'
     | 'layout_edit'
     | 'edit_scenario'
+    | 'settings_edit'
     | 'ml_panels';
   /** `logs_dissect` is the sample logs index read through a `DISSECT` query attached from Discover. */
   dataSource: 'logs' | 'logs_dissect';
@@ -149,6 +151,8 @@ export const enhanceExample = ({
       mode === 'content'
         ? ['load_skill', platformCoreTools.getIndexMapping, GENERATE_DASHBOARD_TOOL_ID]
         : ['load_skill', GENERATE_DASHBOARD_TOOL_ID],
+    // Neither mode may change a dashboard setting the user did not ask for.
+    settings: {},
   },
 });
 
@@ -208,7 +212,7 @@ export const discoverResultsExample = ({
  * prompt asks of the edit. `visualizations` are charts the agent created
  * earlier in the conversation. `panelPointerAttachments` are seed panels the user points
  * at with the question, and `laterMessage` a later message. `edit_scenario` tags
- * the edits beyond moving ES|QL panels.
+ * the edits beyond moving ES|QL panels, and `settings_edit` the changes to dashboard settings.
  */
 export const layoutEditExample = ({
   question,
@@ -223,6 +227,7 @@ export const layoutEditExample = ({
   question: string;
   layoutEdit?: LayoutEditGold;
   panelEdits?: readonly PanelEditGold[];
+  settings?: SettingsGold;
   structure?: DashboardStructureGold;
   controls?: Omit<ControlsGold, 'mappedFields'>;
   replaceConfirmation?: ReplaceConfirmationGold;
@@ -232,7 +237,7 @@ export const layoutEditExample = ({
   panelPointerAttachments?: readonly string[];
   laterMessage?: string;
   dashboard?: DashboardAttachmentData;
-  behaviour?: 'layout_edit' | 'edit_scenario';
+  behaviour?: 'layout_edit' | 'edit_scenario' | 'settings_edit';
 }): DashboardDatasetExample => ({
   input: {
     question,

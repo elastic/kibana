@@ -39,7 +39,7 @@ const relaySecrets = { authType: 'relay', tenantKey: 'team-A' };
 /** What a `RelayRequestError` looks like to this package, which cannot import it. */
 const relayError = (
   statusCode: number,
-  details: { reason?: string; retryAfterSeconds?: number } = {}
+  details: { reason?: string; relayMessage?: string; retryAfterSeconds?: number } = {}
 ) =>
   Object.assign(new Error(`Relay request failed with status ${statusCode}`), {
     statusCode,
@@ -606,6 +606,18 @@ describe('relayGetConversationHistory', () => {
   });
 
   it.each([
+    {
+      error: relayError(403, {
+        reason: 'not_readable',
+        relayMessage: 'private channels cannot be read',
+      }),
+      expected: {
+        ok: false,
+        reason: 'not_readable',
+        channel: 'C123',
+        message: 'private channels cannot be read',
+      },
+    },
     {
       error: relayError(403, { reason: 'not_readable' }),
       expected: { ok: false, reason: 'not_readable', channel: 'C123' },
