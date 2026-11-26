@@ -28,11 +28,22 @@ interface ReadingContext {
   cpsEnabled: boolean;
 }
 
-/** The series a knowledge indicator's readings belong to, the same whichever rule measured them. */
+/**
+ * The series of a knowledge indicator's unusual minutes, the same whichever rule measured them: a
+ * rule id changes with the query, the routing and every tuned setting, and the event must keep its
+ * identity through those.
+ */
 export function getKnownFailureFingerprint(knowledgeIndicator: QueryLink): string {
-  // The knowledge indicator, not the rule: a rule id changes with the query, the routing and every
-  // tuned setting, and the event must keep its identity through those.
   return `${KNOWN_FAILURES_STRATEGY_ID}:${knowledgeIndicator.query.id}`;
+}
+
+/**
+ * The series of a knowledge indicator's rises. Apart from its unusual minutes, because the store
+ * keeps one reading per series and minute: in one series, a rise and an unusual minute on the same
+ * minute would replace each other.
+ */
+export function getKnownFailureRiseFingerprint(knowledgeIndicator: QueryLink): string {
+  return `${getKnownFailureFingerprint(knowledgeIndicator)}:rise`;
 }
 
 /** The breached reading of an unusual minute, with the newest lines of that minute as evidence. */
@@ -43,6 +54,7 @@ export function toUnusualMinuteReading({
   const { minute, count, threshold, baseline } = unusual;
   return toReading({
     ...context,
+    fingerprint: getKnownFailureFingerprint(context.knowledgeIndicator),
     minute,
     value: count,
     evidence: compileEvidenceQuery({
@@ -65,10 +77,9 @@ export function toUnusualMinuteReading({
 }
 
 /**
- * The breached reading of a rise that still holds, on the newest minute the rule counted, with the
- * level of the last minutes as its value and the matches per minute around the rise as evidence.
- * The newest minute because the store keeps one reading per series and minute: an earlier minute may
- * already hold an unusual minute's reading.
+ * The breached reading of a rise that still holds, in the indicator's rise series, on the newest
+ * minute the run counted: the rise is judged as of that minute. Its value is the level of the last
+ * minutes, and its evidence the matches per minute around the rise.
  */
 export function toRiseReading({
   rise,
@@ -86,6 +97,7 @@ export function toRiseReading({
       : lastMinute + MINUTE_MS - KNOWN_FAILURES_SETTINGS.window_minutes * MINUTE_MS;
   return toReading({
     ...context,
+    fingerprint: getKnownFailureRiseFingerprint(context.knowledgeIndicator),
     minute: lastMinute,
     value: levelNow,
     evidence: compileCountEvidenceQuery({
@@ -121,11 +133,13 @@ function toReading({
   ruleId,
   entity,
   sourceTitle,
+  fingerprint,
   minute,
   value,
   evidence,
   details,
 }: ReadingContext & {
+  fingerprint: string;
   minute: number;
   value: number;
   evidence: string;
@@ -134,7 +148,7 @@ function toReading({
   const { query } = knowledgeIndicator;
   return {
     status: 'breached',
-    fingerprint: getKnownFailureFingerprint(knowledgeIndicator),
+    fingerprint,
     rule_id: ruleId,
     source_id: knowledgeIndicator.source_id,
     entity,

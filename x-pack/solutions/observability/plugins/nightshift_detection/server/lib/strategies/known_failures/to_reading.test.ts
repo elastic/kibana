@@ -149,10 +149,10 @@ describe('toUnusualMinuteReading', () => {
 });
 
 describe('toRiseReading', () => {
-  // The newest minute, so the reading cannot land on a minute an unusual-minute reading holds.
   it('reports a lasting rise on the newest minute, with the matches per minute around it', () => {
     expect(toRiseReading(RISE)).toEqual(
       expect.objectContaining({
+        fingerprint: 'known_failures:ki-timeouts:rise',
         bucket_start: Date.UTC(2026, 10, 20, 10, 30),
         bucket_end: Date.UTC(2026, 10, 20, 10, 31),
         value: 11,

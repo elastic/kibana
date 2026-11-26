@@ -14,7 +14,6 @@ import { KnownFailuresGenerator } from './known_failures_generator';
 
 const MINUTE_MS = 60_000;
 const WINDOW = { from: Date.UTC(2026, 10, 20, 10, 0), to: Date.UTC(2026, 10, 20, 10, 5) };
-const SERIES_KEY = getSeriesKey({ fingerprint: 'known_failures:watched', source_id: 'source-1' });
 
 const createQuery = (
   id: string,
@@ -98,17 +97,27 @@ const createContext = ({
       listManaged: async () => [{ id: RULE_ID, enabled: true, created_at: CREATED_AT }],
       readRows: async () => rows,
     },
-    // Filtered by time like the store, so a test sees what a too-narrow lookback would miss.
+    // Filtered by series and time like the store, so a test sees what a too-narrow lookback would
+    // miss. A reading without a fingerprint belongs to the unusual minutes' series.
     history: {
-      readHistory: async ({ from, to }: { from: number; to: number }) =>
-        new Map([
-          [
-            SERIES_KEY,
+      readHistory: async ({
+        series,
+        from,
+        to,
+      }: {
+        series: Array<{ fingerprint: string; source_id: string }>;
+        from: number;
+        to: number;
+      }) =>
+        new Map(
+          series.map((one) => [
+            getSeriesKey(one),
             history.filter(
-              ({ bucket_start: bucketStart }) => bucketStart >= from && bucketStart < to
+              ({ fingerprint = 'known_failures:watched', bucket_start: bucketStart }) =>
+                fingerprint === one.fingerprint && bucketStart >= from && bucketStart < to
             ),
-          ],
-        ]),
+          ])
+        ),
     },
   } as unknown as GeneratorContext);
 
@@ -206,6 +215,7 @@ describe('KnownFailuresGenerator', () => {
         details: expect.objectContaining({ check: 'unusual_minute' }),
       }),
       expect.objectContaining({
+        fingerprint: 'known_failures:watched:rise',
         value: 10,
         details: expect.objectContaining({
           check: 'lasting_rise',
@@ -215,6 +225,37 @@ describe('KnownFailuresGenerator', () => {
       }),
     ]);
     expect(result.notes).toEqual([]);
+  });
+
+  // One series per check: the store keeps one reading per series and minute, so in one series the
+  // second reading on a minute would replace the first.
+  it('reports a spike and a rise on the same minute, each in its own series', async () => {
+    const result = await new KnownFailuresGenerator().generate(
+      createContext({
+        rows: [
+          createRow(0, [2, 2, 2, 2, 2, 2, 40], {
+            change_point_at: WINDOW.from - 60 * MINUTE_MS,
+            change_point_type: 'step_change',
+            change_point_pvalue: 1e-20,
+            change_point_median_before: 5,
+            change_point_minutes_before: 300,
+            change_point_median_after: 10,
+            recent_median: 10,
+          }),
+        ],
+      })
+    );
+
+    expect(result.readings).toEqual([
+      expect.objectContaining({
+        fingerprint: 'known_failures:watched',
+        bucket_start: WINDOW.from + 6 * MINUTE_MS,
+      }),
+      expect.objectContaining({
+        fingerprint: 'known_failures:watched:rise',
+        bucket_start: WINDOW.from + 6 * MINUTE_MS,
+      }),
+    ]);
   });
 
   // A tick that reads two runs must report what two ticks reading one each would.
@@ -361,18 +402,43 @@ describe('KnownFailuresGenerator', () => {
   });
 
   // The newest minutes of a run start before the window; a minute an earlier tick reported there
-  // must be found, whichever check reported it, or it is reported twice.
+  // must be found, or it is reported twice.
   it('does not report again a minute an earlier tick reported just before the window', async () => {
     const reportedMinute = WINDOW.from - 4 * MINUTE_MS;
     const earlierReading = {
       status: 'breached',
       rule_id: RULE_ID,
       bucket_start: reportedMinute,
-      details: { check: 'lasting_rise', threshold: 3 },
+      details: { check: 'unusual_minute', threshold: 3 },
     } as unknown as DetectionSignalReading;
 
     const result = await new KnownFailuresGenerator().generate(
       createContext({ rows: [createRow(-4, [40, 2, 2, 2, 2, 2, 2])], history: [earlierReading] })
+    );
+
+    expect(result.readings).toEqual([]);
+  });
+
+  it('does not report again a rise an earlier tick reported on the same minute', async () => {
+    const row = createRow(-4, [2, 2, 2, 2, 2, 2, 2], {
+      change_point_at: WINDOW.from - 60 * MINUTE_MS,
+      change_point_type: 'step_change',
+      change_point_pvalue: 1e-20,
+      change_point_median_before: 5,
+      change_point_minutes_before: 300,
+      change_point_median_after: 10,
+      recent_median: 10,
+    });
+    const earlierRise = {
+      status: 'breached',
+      fingerprint: 'known_failures:watched:rise',
+      rule_id: RULE_ID,
+      bucket_start: WINDOW.from + 2 * MINUTE_MS,
+      details: { check: 'lasting_rise' },
+    } as unknown as DetectionSignalReading;
+
+    const result = await new KnownFailuresGenerator().generate(
+      createContext({ rows: [row], history: [earlierRise] })
     );
 
     expect(result.readings).toEqual([]);

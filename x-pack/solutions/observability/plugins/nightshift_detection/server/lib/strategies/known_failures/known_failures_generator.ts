@@ -29,7 +29,12 @@ import {
 import { getKnownFailureRuleId, getUnwatchableReason } from './known_failure_rule';
 import { decodeKnownFailureRow, type KnownFailureMeasurement } from './known_failure_row';
 import { resolveEntity } from './resolve_entity';
-import { getKnownFailureFingerprint, toRiseReading, toUnusualMinuteReading } from './to_reading';
+import {
+  getKnownFailureFingerprint,
+  getKnownFailureRiseFingerprint,
+  toRiseReading,
+  toUnusualMinuteReading,
+} from './to_reading';
 
 const MINUTE_MS = 60_000;
 /**
@@ -235,12 +240,18 @@ async function judgeMeasuredFailures({
   /** Filled with what the judgement could not do. */
   notes: string[];
 }): Promise<JudgedKnownFailure[]> {
-  const series = measured.map(({ knowledgeIndicator }) => ({
-    fingerprint: getKnownFailureFingerprint(knowledgeIndicator),
-    source_id: knowledgeIndicator.source_id,
+  const seriesOf = measured.map(({ knowledgeIndicator }) => ({
+    unusual: {
+      fingerprint: getKnownFailureFingerprint(knowledgeIndicator),
+      source_id: knowledgeIndicator.source_id,
+    },
+    rise: {
+      fingerprint: getKnownFailureRiseFingerprint(knowledgeIndicator),
+      source_id: knowledgeIndicator.source_id,
+    },
   }));
   const history = await context.history.readHistory({
-    series,
+    series: seriesOf.flatMap(({ unusual, rise }) => [unusual, rise]),
     from: context.window.from - HISTORY_LOOKBACK_MS,
     to: context.window.to,
     abortSignal: context.abortSignal,
@@ -251,14 +262,19 @@ async function judgeMeasuredFailures({
     measured.map(async (failure, index) => {
       const { measurements } = failure;
       const { reported, reportedCounts, open } = readPastMinutes({
-        readings: history.get(getSeriesKey(series[index])) ?? [],
+        readings: history.get(getSeriesKey(seriesOf[index].unusual)) ?? [],
         ruleId: measurements[0].rule_id,
       });
+      const reportedRises = new Set(
+        (history.get(getSeriesKey(seriesOf[index].rise)) ?? []).map(
+          ({ bucket_start: bucketStart }) => bucketStart
+        )
+      );
       // The oldest run reaches furthest back, so the data start lookup covers every run's window.
       const { start } = getRunWindow(measurements[measurements.length - 1]);
       const judge = (dataFrom?: number) => ({
         unusual: findUnusualMinutes({ measurements, open, reported, reportedCounts, dataFrom }),
-        rises: findRises({ measurements, reported, dataFrom }),
+        rises: findRises({ measurements, reported: reportedRises, dataFrom }),
       });
 
       const unguarded = judge();
@@ -291,8 +307,7 @@ async function judgeMeasuredFailures({
  * The rise of each run that still holds, on the run's newest minute. Every run counts, not only the
  * newest: a tick that reads two runs reports what two ticks reading one each would, so a rise that
  * held in the older run and faded by the newer one is not lost. A minute an earlier tick already
- * wrote a reading on, a rise or an unusual minute, is skipped: that reading keeps the event open,
- * and a second one would replace it. Two runs ending on the same minute count once, the newer.
+ * reported a rise on is skipped, and two runs ending on the same minute count once, the newer.
  */
 function findRises({
   measurements,
@@ -301,6 +316,7 @@ function findRises({
 }: {
   /** Newest run first. */
   measurements: KnownFailureMeasurement[];
+  /** Minutes an earlier tick already reported a rise on. */
   reported: Set<number>;
   dataFrom?: number;
 }): RiseAtMinute[] {
@@ -349,11 +365,11 @@ function memoizeDataStart({ esClient, cpsEnabled, abortSignal }: GeneratorContex
 }
 
 /**
- * The minutes already reported for a knowledge indicator, the counts of its unusual ones, and the
- * event they left open. Every breached minute counts as reported, whichever check or rule reported
- * it: the store keeps one reading per series and minute, so a second one would hide the first. The
- * open event counts only when the same rule reported it: an edited query gets a new rule, and the
- * threshold saved for the old query says nothing about the new one.
+ * The unusual minutes already reported for a knowledge indicator, their counts, and the event they
+ * left open. Every reported minute counts, whichever rule reported it: the store keeps one reading
+ * per series and minute, so a second one would hide the first. The counts and the open event count
+ * only when the same rule reported them: an edited query gets a new rule, and what the old query
+ * counted says nothing about the new one.
  */
 function readPastMinutes({
   readings,
@@ -405,14 +421,8 @@ function toReadings({
     cpsEnabled,
   };
 
-  // A rise sits on its run's newest minute; when that minute is unusual too, its reading already
-  // keeps the event open, and a second reading for the minute would replace it in the store.
-  const unusualMinutes = new Set(unusual.map(({ minute }) => minute));
-
   return [
     ...unusual.map((minute) => toUnusualMinuteReading({ ...context, unusual: minute })),
-    ...rises
-      .filter(({ lastMinute }) => !unusualMinutes.has(lastMinute))
-      .map(({ rise, lastMinute }) => toRiseReading({ ...context, rise, lastMinute })),
+    ...rises.map(({ rise, lastMinute }) => toRiseReading({ ...context, rise, lastMinute })),
   ];
 }
