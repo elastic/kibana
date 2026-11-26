@@ -45,7 +45,7 @@ export const ChildrenProcessesButton = ({
       css={button}
       onClick={onToggle}
       data-test-subj="sessionView:processTreeNodeChildProcessesButton"
-      aria-label={CHILD_PROCESSES}
+      aria-expanded={isExpanded}
     >
       {CHILD_PROCESSES}
       <EuiIcon css={buttonArrow} size="s" type="chevronSingleDown" aria-hidden={true} />
@@ -81,7 +81,7 @@ export const AlertButton = ({
       css={alertButton}
       onClick={onToggle}
       data-test-subj="processTreeNodeAlertButton"
-      aria-label={ALERTS}
+      aria-expanded={isExpanded}
     >
       {alertsCount > 1 ? ALERTS : ALERT}
       {alertsCount > 1 &&
@@ -109,7 +109,6 @@ export const OutputButton = ({ onClick }: { onClick: () => void }) => {
       css={outputButton}
       onClick={onClick}
       data-test-subj="processTreeNodeOutpuButton"
-      aria-label={OUTPUT}
     >
       {OUTPUT}
       <EuiIcon css={buttonArrow} size="s" type="chevronSingleRight" aria-hidden={true} />

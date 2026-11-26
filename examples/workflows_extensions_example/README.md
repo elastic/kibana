@@ -66,7 +66,7 @@ steps:
 
 The plugin registers an event-driven trigger `example.customTrigger` and exposes a route to emit events for it. Workflows that subscribe to this trigger in the same space will run when an event is emitted.
 
-You can emit events in two ways: **via the request-scoped client** (from a route, recommended) or **directly** via the start contract when you have a request and space id. This example uses the request-scoped client. For the full guide (both options, naming, approval), see the [Workflows Extensions README — Contributing Event-Driven Triggers](../../src/platform/plugins/shared/workflows_extensions/README.md#contributing-event-driven-triggers).
+You can emit events in two ways: **via the request-scoped client** (from a route, recommended) or **directly** via the start contract when you have a request and space id. This example uses the request-scoped client. For the full guide (both options, naming, approval), see the [Workflows Extensions README — Contributing Event-Driven Triggers](../../x-pack/platform/plugins/shared/workflows_extensions/README.md#contributing-event-driven-triggers).
 
 ### Emit an event (request context)
 
@@ -91,7 +91,7 @@ curl -X POST -u elastic:changeme -H 'Content-Type: application/json' \
 
 The trigger id is `example.customTrigger` (kebab-case namespace, camelCase event). The event payload must match the trigger’s `eventSchema` (`message` required; `source`, `category`, and `labels` optional).
 
-For information about some guardrails in event-driven triggers see [Event-driven guardrails](../../src/platform/plugins/shared/workflows_extensions/dev_docs/TRIGGERS.md#event-driven-guardrails).
+For information about some guardrails in event-driven triggers see [Event-driven guardrails](../../x-pack/platform/plugins/shared/workflows_extensions/dev_docs/TRIGGERS.md#event-driven-guardrails).
 
 ## Managed Workflows
 
@@ -194,5 +194,5 @@ not validate `kibana.request` authentication or automatic startup provisioning.
 
 2. **Handler Function**: The handler receives validated input and the step execution runtime context, and returns output conforming to the output schema.
 
-3. **Metadata Registration**: The public plugin registers UI metadata that helps users understand and use the step in the workflow editor. This registration is required: without it the editor rejects the step as an unknown type, even though the server can run it. See [Server and Client Registration Check](../../src/platform/plugins/shared/workflows_extensions/dev_docs/STEPS.md#server-and-client-registration-check).
+3. **Metadata Registration**: The public plugin registers UI metadata that helps users understand and use the step in the workflow editor. This registration is required: without it the editor rejects the step as an unknown type, even though the server can run it. See [Server and Client Registration Check](../../x-pack/platform/plugins/shared/workflows_extensions/dev_docs/STEPS.md#server-and-client-registration-check).
 

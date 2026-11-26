@@ -45,6 +45,7 @@ dependsOn:
   - '@kbn/workflows-management-plugin'
   - '@kbn/datemath'
   - '@kbn/core-security-common'
+  - '@kbn/inference-tracing'
 tags:
   - shared-server
   - package

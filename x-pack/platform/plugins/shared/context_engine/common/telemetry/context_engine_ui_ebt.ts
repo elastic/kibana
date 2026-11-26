@@ -23,10 +23,12 @@ const ebtElement = {
   aiIndexCreatePageTraceSelector: 'contextEngine.aiIndexCreatePage.traceSelector',
   aiIndexDetailPage: 'contextEngine.aiIndexDetailPage',
   aiIndexDetailPageOnboardingPanel: 'contextEngine.aiIndexDetailPage.onboardingPanel',
+  aiIndexDetailPageOverview: 'contextEngine.aiIndexDetailPage.overview',
   aiIndexDetailPageDescriptionPanel: 'contextEngine.aiIndexDetailPage.descriptionPanel',
   aiIndexDetailPageTracesPanel: 'contextEngine.aiIndexDetailPage.tracesPanel',
   aiIndexDetailPageSourcesPanel: 'contextEngine.aiIndexDetailPage.sourcesPanel',
   aiIndexDetailPageAutomationsPanel: 'contextEngine.aiIndexDetailPage.automationsPanel',
+  aiIndexDetailPageDreamingPanel: 'contextEngine.aiIndexDetailPage.dreamingPanel',
   aiIndexDetailPageSignalsPanel: 'contextEngine.aiIndexDetailPage.signalsPanel',
   aiIndexDetailPageListKiPanel: 'contextEngine.aiIndexDetailPage.listKiPanel',
   viewKiPage: 'contextEngine.viewKiPage',
@@ -63,8 +65,14 @@ const ebtAction = {
   onboarding: {
     COPY_PROMPT: 'copy_prompt',
   },
+  overview: {
+    OPEN_STAT_CARD: 'open_stat_card',
+    OPEN_RECENT_DOCUMENT: 'open_recent_document',
+    VIEW_ALL_DOCUMENTS: 'view_all_documents',
+    OPEN_FAILED_RUN: 'open_failed_run',
+    VIEW_FAILED_AUTOMATIONS: 'view_failed_automations',
+  },
   description: {
-    EDIT: 'edit_description',
     SAVE: 'save_description',
     CANCEL: 'cancel_description',
   },
@@ -84,10 +92,14 @@ const ebtAction = {
     TOGGLE_CONNECTOR: 'toggle_connector',
     REMOVE_SOURCE: 'remove_source',
   },
+  dreaming: {
+    RUN_NOW: 'run_dreaming',
+  },
   automations: {
     SUGGEST: 'suggest_automation',
     CREATE: 'create_automation',
     ADD_MENU: 'open_add_automation_menu',
+    MANAGE_IN_SETTINGS: 'manage_automations_in_settings',
     ROW_ACTIONS_MENU: 'open_automation_actions_menu',
     RUN_WORKFLOW: 'run_actions_workflows',
     PREVIEW_WORKFLOW: 'preview_actions_workflows',
@@ -105,7 +117,6 @@ const ebtAction = {
     INTERACT_FEEDBACK_AGENT: 'interact_feedback_agent',
   },
   listKi: {
-    DEST_LINK: 'open_destination',
     DISCOVER_LINK: 'open_ki_discover',
     FILTER_TYPE: 'filter_type',
     FILTER_STATUS: 'filter_status',

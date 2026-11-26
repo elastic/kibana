@@ -34,6 +34,7 @@ import {
 import { withMetadataTransformLock } from '../../common/with_metadata_transform_lock';
 import { createSystemIndicesEsClient } from './system_indices_es_client';
 import { scopeKbnClientToSpace } from './scope_kbn_client_to_space';
+import { withMetadataTransformLock } from '../../common/with_metadata_transform_lock';
 
 export interface SeededResponseConsoleCase {
   readonly caseId: string;

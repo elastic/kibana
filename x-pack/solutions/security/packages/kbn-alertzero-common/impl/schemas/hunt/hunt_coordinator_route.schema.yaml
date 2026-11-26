@@ -158,8 +158,9 @@ components:
           type: array
           description: >-
             What IOC Hunt searched: the space's Security Solution default
-            data view patterns, exclusions included, never an alerts
-            index. Empty when the scope was blocked or resolution failed.
+            data view patterns, exclusions included, with policy-skipped entries
+            (hidden and alerts names) and unresolved local concrete names
+            removed (under cross-project search no concrete name is removed). Empty when the scope was blocked or resolution failed.
           items:
             type: string
         tier2_targets:
@@ -504,8 +505,9 @@ components:
           type: array
           description: >-
             The coordinator's own coverage gaps — input this run had to
-            truncate, and a Behavior Hunt that was requested but could not run,
-            or had nothing to run against. Not a copy of
+            truncate, a default data view name the scope dropped from the search
+            (`index_not_searched`), and a Behavior Hunt that was requested but
+            could not run, or had nothing to run against. Not a copy of
             `tier1.incomplete` / `tier2.incomplete`, which the caller
             already has; this is the part of `completeness` that would
             otherwise reach the caller only as an enum, or on the

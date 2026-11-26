@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
-import useDebounce from 'react-use/lib/useDebounce';
+import React from 'react';
 import {
+  EuiBadge,
   EuiButtonEmpty,
   EuiFieldSearch,
   EuiFilterButton,
@@ -25,7 +25,7 @@ import { DIGITAL_EXPERIENCE_EBT_ACTIONS, SESSIONS_EBT_ELEMENTS } from '../../../
 import type { Formatters } from '../../../hooks/use_formatters';
 import { FacetFilter } from '../../../components/facet_filter';
 import { SingleSelectFilter } from '../../../components/single_select_filter';
-import { SEARCH_DEBOUNCE_MS } from '../../../hooks/use_debounced_text';
+import { useDebouncedText } from '../../../hooks/use_debounced_text';
 import type { SessionsListState } from '../hooks/use_sessions_list_query';
 import { DURATION_BUCKETS, type SessionsListUrlQuery } from '../../../utils/sessions_list_query';
 
@@ -78,11 +78,41 @@ const FACETS: ReadonlyArray<{
   },
 ];
 
+/** The element and page a link to the list filters the frustrated sessions by. */
+const FRUSTRATION_BADGES: ReadonlyArray<{
+  param: 'frustrationTarget' | 'frustrationPage';
+  dataTestSubj: string;
+  ebtElement: string;
+  label: (value: string) => string;
+}> = [
+  {
+    param: 'frustrationTarget',
+    dataTestSubj: 'digitalExperienceSessionsFrustrationTarget',
+    ebtElement: SESSIONS_EBT_ELEMENTS.FRUSTRATION_TARGET_FILTER,
+    label: (element) =>
+      i18n.translate('xpack.digitalExperience.sessions.filters.frustrationElementBadge', {
+        defaultMessage: 'Element: {element}',
+        values: { element },
+      }),
+  },
+  {
+    param: 'frustrationPage',
+    dataTestSubj: 'digitalExperienceSessionsFrustrationPage',
+    ebtElement: SESSIONS_EBT_ELEMENTS.FRUSTRATION_PAGE_FILTER,
+    label: (page) =>
+      i18n.translate('xpack.digitalExperience.sessions.filters.frustrationPageBadge', {
+        defaultMessage: 'Page: {page}',
+        values: { page },
+      }),
+  },
+];
+
 export function SessionsFilters({
   state,
   facets,
   sessionsWithJsErrors,
   sessionsWithFailedRequests,
+  sessionsWithFrustration,
   hasActiveFilters,
   isLoading,
   formatters,
@@ -95,6 +125,7 @@ export function SessionsFilters({
   /** Shown on the error filters, so users see how many sessions each keeps. */
   sessionsWithJsErrors: number | undefined;
   sessionsWithFailedRequests: number | undefined;
+  sessionsWithFrustration: number | undefined;
   hasActiveFilters: boolean;
   isLoading: boolean;
   formatters: Formatters;
@@ -102,27 +133,7 @@ export function SessionsFilters({
   onSearch: (search: string) => void;
   onClear: () => void;
 }) {
-  const [search, setSearch] = useState(state.search ?? '');
-
-  // Follows the URL, e.g. when the filters are cleared or the user goes back; a search the URL
-  // already has, but with spaces still being typed around it, stays as typed.
-  useEffect(
-    () =>
-      setSearch((current) =>
-        current.trim() === (state.search ?? '') ? current : state.search ?? ''
-      ),
-    [state.search]
-  );
-
-  useDebounce(
-    () => {
-      if (search.trim() !== (state.search ?? '')) {
-        onSearch(search);
-      }
-    },
-    SEARCH_DEBOUNCE_MS,
-    [search]
-  );
+  const [search, setSearch] = useDebouncedText(state.search, onSearch);
 
   return (
     <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} wrap>
@@ -180,6 +191,31 @@ export function SessionsFilters({
               defaultMessage: 'Failed requests',
             })}
           </EuiFilterButton>
+          <EuiFilterButton
+            data-test-subj="digitalExperienceSessionsFrustrationFilter"
+            {...getEbtProps({
+              action: DIGITAL_EXPERIENCE_EBT_ACTIONS.SET_FILTER,
+              element: SESSIONS_EBT_ELEMENTS.FRUSTRATION_FILTER,
+            })}
+            withNext
+            hasActiveFilters={state.withFrustration}
+            numFilters={sessionsWithFrustration}
+            onClick={() =>
+              onChange(
+                state.withFrustration
+                  ? {
+                      withFrustration: undefined,
+                      frustrationTarget: undefined,
+                      frustrationPage: undefined,
+                    }
+                  : { withFrustration: 'true' }
+              )
+            }
+          >
+            {i18n.translate('xpack.digitalExperience.sessions.filters.withFrustrationLabel', {
+              defaultMessage: 'Frustrated',
+            })}
+          </EuiFilterButton>
           <SingleSelectFilter
             data-test-subj="digitalExperienceSessionsDurationFilter"
             ebtElement={SESSIONS_EBT_ELEMENTS.DURATION_FILTER}
@@ -209,6 +245,36 @@ export function SessionsFilters({
           ))}
         </EuiFilterGroup>
       </EuiFlexItem>
+      {FRUSTRATION_BADGES.map(({ param, dataTestSubj, ebtElement, label }) => {
+        const value = state[param];
+        if (!value) {
+          return null;
+        }
+        const text = label(value);
+        return (
+          <EuiFlexItem grow={false} key={param}>
+            <EuiBadge
+              data-test-subj={dataTestSubj}
+              color="hollow"
+              iconType="cross"
+              iconSide="right"
+              iconOnClick={() => onChange({ [param]: undefined })}
+              iconOnClickAriaLabel={i18n.translate(
+                'xpack.digitalExperience.sessions.filters.removeFrustrationBadgeLabel',
+                { defaultMessage: 'Remove {filter}', values: { filter: text } }
+              )}
+              title={text}
+              css={{ maxInlineSize: '28em' }}
+              {...getEbtProps({
+                action: DIGITAL_EXPERIENCE_EBT_ACTIONS.SET_FILTER,
+                element: ebtElement,
+              })}
+            >
+              {text}
+            </EuiBadge>
+          </EuiFlexItem>
+        );
+      })}
       {hasActiveFilters && (
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty

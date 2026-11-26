@@ -20,6 +20,7 @@ export type WorkflowValidationErrorType =
   | 'schema'
   | 'step-name-validation'
   | 'connector-id-validation'
+  | 'service-account-validation'
   | 'variable-validation'
   | 'liquid-template-validation'
   | 'invalid_yaml'

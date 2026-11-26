@@ -29,8 +29,8 @@ spaceTest.describe(
     let seeded: SeededResponseConsoleCase | undefined;
 
     spaceTest.beforeAll(async ({ esClient, kbnClient, scoutSpace, config, apiServices }) => {
-      // Endpoint host indexing installs Fleet and waits on metadata transforms. The seed also waits
-      // for another worker's seed to release the metadata-transform lock.
+      // Endpoint host indexing installs Fleet and waits on metadata transforms, after the other
+      // worker's metadata-transform lock.
       spaceTest.setTimeout(PARALLEL_HOST_SEED_TIMEOUT_MS);
       // Serverless forces xpack.spaces.allowSolutionVisibility off, so the
       // solution property cannot be set. A security project is already that view.

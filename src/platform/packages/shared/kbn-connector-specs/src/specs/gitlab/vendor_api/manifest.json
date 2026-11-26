@@ -481,8 +481,8 @@
   },
   "sources": {
     "v4": {
-      "apiVersion": "19.5",
-      "fetchedAt": "2026-10-07T20:20:38.328Z",
+      "apiVersion": "19.7",
+      "fetchedAt": "2026-11-23T11:13:39.222Z",
       "format": "openapi",
       "url": "https://gitlab.com/gitlab-org/gitlab/-/raw/master/doc/api/openapi/openapi_v3.yaml"
     }
