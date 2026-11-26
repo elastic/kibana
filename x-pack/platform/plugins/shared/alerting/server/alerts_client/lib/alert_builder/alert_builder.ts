@@ -342,6 +342,11 @@ export class AlertBuilder<
     // rebuilt, so they must stop matching the tracked query. An active one is
     // untracked, otherwise it would stay active forever with nothing left to
     // recover it. Any other status only has tracked flipped to false.
+    // Backfill runs reach this loop too, with an empty task state. It finds
+    // nothing there only because backfills are limited to rule types without
+    // autoRecoverAlerts (see getBackfillRuleError), and tracked alerts are not
+    // loaded for those. Revisit this loop before allowing backfills for
+    // lifecycle rule types, or it would untrack alerts the rule still tracks.
     const untrackedInstanceIds: string[] = [];
     for (const [uuid, alert] of Object.entries(this.trackedAlerts.all)) {
       if (keepUuids.has(uuid) || get(alert, ALERT_TRACKED) === false) {

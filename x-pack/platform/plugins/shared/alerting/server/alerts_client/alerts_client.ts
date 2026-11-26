@@ -213,6 +213,7 @@ export class AlertsClient<
   // before `kibana.alert.tracked` existed and the ones an earlier version left active with
   // tracked set to false. They are written here and kept out of the tracked alerts, so the rule
   // executor never sees them and a failure cannot fail the run.
+  // Removal is tracked in https://github.com/elastic/response-ops-team/issues/896
   private async untrackOrphanedAlerts({
     activeAlertsFromState,
     recoveredAlertsFromState,
