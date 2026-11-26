@@ -263,3 +263,23 @@ describe('PackQueriesStatusTable — query details flyout failures', () => {
     expect(setErrorToast).toHaveBeenCalledTimes(1);
   });
 });
+
+describe('PackQueriesStatusTable — query details flyout session props', () => {
+  it('opens the details flyout standalone at size m outside a managed flyout', () => {
+    const queryDetailsFlyoutMock = jest.mocked(QueryDetailsFlyout);
+    renderWithContext(
+      <PackQueriesStatusTable
+        actionId="parent-action-id"
+        agentIds={['agent-1']}
+        data={twoItemData}
+      />
+    );
+
+    fireEvent.click(screen.getAllByRole('button', { name: 'View query' })[0]);
+
+    expect(queryDetailsFlyoutMock).toHaveBeenCalledWith(
+      expect.objectContaining({ flyoutProps: { session: 'never', size: 'm' } }),
+      expect.anything()
+    );
+  });
+});

@@ -15,12 +15,18 @@ import {
   EuiSpacer,
   EuiTitle,
   useGeneratedHtmlId,
-  useHasActiveSession,
-  useIsInManagedFlyout,
 } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+
+// Session behaviour is decided by the caller, which knows whether it is rendered inside a
+// managed (session) flyout: nested joins that session at size s, standalone stays at size m.
+export type QueryDetailsFlyoutSessionProps =
+  | { session: 'inherit'; size: 's' }
+  | { session: 'never'; size: 'm' };
+
+const STANDALONE_FLYOUT_PROPS: QueryDetailsFlyoutSessionProps = { session: 'never', size: 'm' };
 
 interface QueryDetailsFlyoutProps {
   action: {
@@ -28,31 +34,26 @@ interface QueryDetailsFlyoutProps {
     query: string;
   };
   onClose: () => void;
+  flyoutProps?: QueryDetailsFlyoutSessionProps;
 }
 
 const QUERY_DETAILS_TITLE = i18n.translate('xpack.osquery.liveQueryActions.details.title', {
   defaultMessage: 'Query Details',
 });
 
-const QueryDetailsFlyoutComponent: React.FC<QueryDetailsFlyoutProps> = ({ action, onClose }) => {
+const QueryDetailsFlyoutComponent: React.FC<QueryDetailsFlyoutProps> = ({
+  action,
+  onClose,
+  flyoutProps = STANDALONE_FLYOUT_PROPS,
+}) => {
   const titleId = useGeneratedHtmlId({ prefix: 'osqueryQueryDetailsFlyoutTitle' });
-  // Only join a session when rendered inside a managed (session) flyout; an unmanaged
-  // parent (session="never") keeps this flyout standalone at size m.
-  const isInManagedFlyout = useIsInManagedFlyout();
-  const hasActiveSession = useHasActiveSession();
-  const isNested = isInManagedFlyout && hasActiveSession;
 
   return (
     <EuiPortal>
       <EuiFlyout
         data-test-subj="osquery-query-details-flyout"
-        {...(isNested
-          ? { session: 'inherit' as const, size: 's' as const, 'aria-label': QUERY_DETAILS_TITLE }
-          : {
-              session: 'never' as const,
-              size: 'm' as const,
-              'aria-labelledby': titleId,
-            })}
+        {...flyoutProps}
+        aria-labelledby={titleId}
         ownFocus
         onClose={onClose}
       >

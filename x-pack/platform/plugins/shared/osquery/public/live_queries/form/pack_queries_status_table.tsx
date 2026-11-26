@@ -19,11 +19,14 @@ import {
   EuiErrorBoundary,
   EuiText,
   formatDate,
+  useHasActiveSession,
+  useIsInManagedFlyout,
 } from '@elastic/eui';
 import type { UseEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { ECSMapping } from '@kbn/osquery-io-ts-types';
 import { QueryDetailsFlyout } from './query_details_flyout';
+import type { QueryDetailsFlyoutSessionProps } from './query_details_flyout';
 import { useErrorToast } from '../../common/hooks/use_error_toast';
 import { PackResultsHeader } from './pack_results_header';
 import { Direction } from '../../../common/search_strategy';
@@ -209,6 +212,17 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
 }) => {
   const exportFiltersStore = useExportFiltersContext();
   const setErrorToast = useErrorToast();
+  // Join the surrounding session only when rendered inside a managed (session) flyout; an
+  // unmanaged parent (session="never") keeps the details flyout standalone at size m.
+  const isInManagedFlyout = useIsInManagedFlyout();
+  const hasActiveSession = useHasActiveSession();
+  const queryDetailsFlyoutProps = useMemo<QueryDetailsFlyoutSessionProps>(
+    () =>
+      isInManagedFlyout && hasActiveSession
+        ? { session: 'inherit', size: 's' }
+        : { session: 'never', size: 'm' },
+    [isInManagedFlyout, hasActiveSession]
+  );
   const [queryDetailsFlyoutOpen, setQueryDetailsFlyoutOpen] = useState<{
     id: string;
     query: string;
@@ -663,7 +677,11 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
       />
       {queryDetailsFlyoutOpen ? (
         <EuiErrorBoundary onError={handleQueryFlyoutError}>
-          <QueryDetailsFlyout onClose={handleQueryFlyoutClose} action={queryDetailsFlyoutOpen} />
+          <QueryDetailsFlyout
+            onClose={handleQueryFlyoutClose}
+            action={queryDetailsFlyoutOpen}
+            flyoutProps={queryDetailsFlyoutProps}
+          />
         </EuiErrorBoundary>
       ) : null}
     </>

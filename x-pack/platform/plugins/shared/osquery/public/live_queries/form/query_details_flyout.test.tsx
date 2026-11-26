@@ -56,7 +56,11 @@ describe('QueryDetailsFlyout', () => {
   it('renders inside a managed size m parent flyout without throwing', () => {
     renderWithProviders(
       <EuiFlyout session="start" size="m" aria-label="parent" onClose={noop}>
-        <QueryDetailsFlyout action={action} onClose={jest.fn()} />
+        <QueryDetailsFlyout
+          action={action}
+          onClose={jest.fn()}
+          flyoutProps={{ session: 'inherit', size: 's' }}
+        />
       </EuiFlyout>
     );
 
@@ -67,15 +71,11 @@ describe('QueryDetailsFlyout', () => {
     );
   });
 
-  it('renders standalone size m outside a managed session', () => {
+  it('defaults to a standalone flyout that registers no session', () => {
     renderWithProviders(<QueryDetailsFlyout action={action} onClose={jest.fn()} />);
 
     expectDetailsShown();
     expect(getFlyoutManagerStore().getState().flyouts).toHaveLength(0);
-    // size m, not the narrower nested size s: EUI encodes the size in the emotion class name
-    const { className } = screen.getByTestId('osquery-query-details-flyout');
-    expect(className).toMatch(/-m-/);
-    expect(className).not.toMatch(/-s-/);
   });
 
   it('close button calls onClose once', () => {
@@ -84,7 +84,11 @@ describe('QueryDetailsFlyout', () => {
     renderWithProviders(
       <EuiFlyout session="start" size="m" aria-label="parent" onClose={onParentClose}>
         <div data-test-subj="parent-content">parent</div>
-        <QueryDetailsFlyout action={action} onClose={onClose} />
+        <QueryDetailsFlyout
+          action={action}
+          onClose={onClose}
+          flyoutProps={{ session: 'inherit', size: 's' }}
+        />
       </EuiFlyout>
     );
 
@@ -102,7 +106,11 @@ describe('QueryDetailsFlyout', () => {
     renderWithProviders(
       <EuiFlyout session="start" size="m" aria-label="parent" onClose={onParentClose}>
         <div data-test-subj="parent-content">parent</div>
-        <QueryDetailsFlyout action={action} onClose={onClose} />
+        <QueryDetailsFlyout
+          action={action}
+          onClose={onClose}
+          flyoutProps={{ session: 'inherit', size: 's' }}
+        />
       </EuiFlyout>
     );
 
@@ -111,42 +119,5 @@ describe('QueryDetailsFlyout', () => {
     expect(onClose).toHaveBeenCalledTimes(1);
     expect(screen.getByTestId('parent-content')).toBeInTheDocument();
     expect(onParentClose).not.toHaveBeenCalled();
-  });
-
-  it('stays standalone when an unrelated managed session is active', () => {
-    renderWithProviders(
-      <>
-        <EuiFlyout session="start" size="m" aria-label="other" onClose={noop}>
-          other
-        </EuiFlyout>
-        <QueryDetailsFlyout action={action} onClose={jest.fn()} />
-      </>
-    );
-
-    expect(getFlyoutManagerStore().getState().flyouts).toHaveLength(1);
-    expectDetailsShown();
-    expect(validationErrors(consoleErrorSpy)).toHaveLength(0);
-  });
-
-  it('does not throw inside an unmanaged parent while a session is active', () => {
-    renderWithProviders(
-      <>
-        <EuiFlyout session="start" size="m" aria-label="other" onClose={noop}>
-          other
-        </EuiFlyout>
-        <EuiFlyout session="never" size="m" aria-label="unmanaged" onClose={noop}>
-          <QueryDetailsFlyout action={action} onClose={jest.fn()} />
-        </EuiFlyout>
-      </>
-    );
-
-    expectDetailsShown();
-    expect(validationErrors(consoleErrorSpy)).toHaveLength(0);
-    // an unmanaged parent keeps the details flyout standalone: only the sibling session is registered
-    const { flyouts } = getFlyoutManagerStore().getState();
-    expect(flyouts).toHaveLength(1);
-    expect(flyouts).not.toEqual(
-      expect.arrayContaining([expect.objectContaining({ level: 'child' })])
-    );
   });
 });

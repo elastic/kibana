@@ -40,26 +40,24 @@ jest.mock('./row_kebab_menu', () => ({
   RowKebabMenu: () => null,
 }));
 
+const items = [
+  {
+    id: 'q1',
+    action_id: 'a1',
+    query: 'select 1;',
+    agents: ['agent-1'],
+    docs: 1,
+    status: 'completed' as const,
+    pending: 0,
+  },
+];
+
 const renderInResponse = (size: 'm' | 'l' = 'm') =>
   render(
     <EuiProvider>
       <IntlProvider locale="en">
         <EuiFlyout session="start" size={size} aria-label="Response" onClose={noop}>
-          <PackQueriesStatusTable
-            actionId="a1"
-            agentIds={['agent-1']}
-            data={[
-              {
-                id: 'q1',
-                action_id: 'a1',
-                query: 'select 1;',
-                agents: ['agent-1'],
-                docs: 1,
-                status: 'completed',
-                pending: 0,
-              },
-            ]}
-          />
+          <PackQueriesStatusTable actionId="a1" agentIds={['agent-1']} data={items} />
         </EuiFlyout>
       </IntlProvider>
     </EuiProvider>
@@ -131,5 +129,33 @@ describe('PackQueriesStatusTable inside a managed flyout', () => {
     const { sessions, flyouts } = getFlyoutManagerStore().getState();
     expect(sessions).toEqual([expect.objectContaining({ childFlyoutId: null })]);
     expect(flyouts).toEqual([expect.objectContaining({ level: 'main' })]);
+  });
+
+  it('stays standalone inside an unmanaged parent while an unrelated session is active', () => {
+    const consoleErrorSpy = jest.spyOn(console, 'error');
+    render(
+      <EuiProvider>
+        <IntlProvider locale="en">
+          <EuiFlyout session="start" size="m" aria-label="other" onClose={noop}>
+            other
+          </EuiFlyout>
+          <EuiFlyout session="never" size="m" aria-label="unmanaged" onClose={noop}>
+            <PackQueriesStatusTable actionId="a1" agentIds={['agent-1']} data={items} />
+          </EuiFlyout>
+        </IntlProvider>
+      </EuiProvider>
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: 'View query' }));
+
+    expect(screen.getByTestId('osquery-query-details-flyout')).toBeVisible();
+    expect(setErrorToast).not.toHaveBeenCalled();
+    expect(consoleErrorSpy).not.toHaveBeenCalled();
+    // only the sibling session is registered; the details flyout did not join it as a child
+    const { flyouts } = getFlyoutManagerStore().getState();
+    expect(flyouts).toHaveLength(1);
+    expect(flyouts).not.toEqual(
+      expect.arrayContaining([expect.objectContaining({ level: 'child' })])
+    );
   });
 });
