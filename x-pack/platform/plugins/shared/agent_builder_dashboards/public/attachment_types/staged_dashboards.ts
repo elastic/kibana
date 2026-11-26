@@ -14,6 +14,8 @@ import type { IdGenerator } from '.';
  */
 export interface StagedDashboards {
   add: (attachmentId: string, api: DashboardApi) => void;
+  /** Forgets the dashboard the attachment was staged from, e.g. once it opened in a new dashboard. */
+  remove: (attachmentId: string) => void;
   isStagedFrom: (attachmentId: string, api: DashboardApi) => boolean;
   /** Whether the attachment was staged from a dashboard other than this one, e.g. for a panel pointer. */
   isStagedFromOtherDashboard: (attachmentId: string, api: DashboardApi) => boolean;
@@ -57,6 +59,9 @@ export const createStagedDashboards = (): StagedDashboards => {
       } else {
         stagedFromSavedDashboard.delete(attachmentId);
       }
+    },
+    remove: (attachmentId) => {
+      dashboardKeyByAttachmentId.delete(attachmentId);
     },
     isStagedFrom: (attachmentId, api) =>
       dashboardKeyByAttachmentId.has(attachmentId) && isStagedFrom(attachmentId, api),
