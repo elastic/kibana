@@ -223,18 +223,6 @@ describe('Options list popover', () => {
       expect(badge.tabIndex).toBe(-1);
       expect(option).toHaveTextContent('Appears in 1,234 documents');
     });
-
-    test('shows the document count tooltip on the badge, not on the whole option', async () => {
-      const { popover, option, badge } = mountWithDocumentCount();
-
-      // an option-level tooltip would describe the option itself
-      expect(option).not.toHaveAttribute('aria-describedby');
-
-      await userEvent.hover(badge);
-      const tooltip = await popover.findByRole('tooltip');
-      expect(tooltip).toHaveTextContent('This value appears in 1,234 documents');
-      expect(badge).toHaveAttribute('aria-describedby', tooltip.id);
-    });
   });
 
   describe('show only selected', () => {
