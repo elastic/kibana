@@ -38,6 +38,8 @@ export interface OpenFieldDeleteModalOptions {
    * @param fieldNames - the names of the deleted fields
    */
   onDelete?: (fieldNames: string[]) => void;
+  /** Called after cancellation, but never after confirming deletion. */
+  onCancel?: () => void;
   /**
    * Names of the fields to be deleted
    */
@@ -84,15 +86,28 @@ export const getFieldDeleteModalOpener =
      */
     const openDeleteModal = ({
       onDelete,
+      onCancel,
       fieldName,
       ctx: { dataView },
     }: OpenFieldDeleteModalOptions): CloseEditor => {
       const fieldsToDelete = Array.isArray(fieldName) ? fieldName : [fieldName];
       const closeModal = () => {
-        if (overlayRef) {
-          overlayRef.close();
-          overlayRef = null;
+        if (!overlayRef) {
+          return;
         }
+
+        const overlay = overlayRef;
+        overlayRef = null;
+        overlay.close();
+      };
+
+      const cancelModal = () => {
+        if (!overlayRef) {
+          return;
+        }
+
+        closeModal();
+        onCancel?.();
       };
 
       const onConfirmDelete = async () => {
@@ -113,14 +128,23 @@ export const getFieldDeleteModalOpener =
         toMountPoint(
           <DeleteFieldModal
             fieldsToDelete={fieldsToDelete}
-            closeModal={closeModal}
+            closeModal={cancelModal}
             confirmDelete={onConfirmDelete}
           />,
           core
         )
       );
 
-      return closeModal;
+      if (onCancel) {
+        void overlayRef.onClose.then(() => {
+          if (overlayRef) {
+            overlayRef = null;
+            onCancel();
+          }
+        });
+      }
+
+      return cancelModal;
     };
 
     return openDeleteModal(options);

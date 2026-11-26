@@ -10,6 +10,12 @@
 import { expect } from '@kbn/scout/ui';
 import { spaceTest, tags, testData } from '../fixtures';
 
+const SEARCH_REQUEST = {
+  endpoint: '/internal/search/ese',
+  method: 'POST',
+  exactPathname: true,
+};
+
 spaceTest.describe('Discover inline data view editing', { tag: tags.deploymentAgnostic }, () => {
   spaceTest.beforeEach(async ({ apiServices, browserAuth, discoverScoutSpace, pageObjects }) => {
     await discoverScoutSpace.setupDiscoverDefaults();
@@ -42,6 +48,40 @@ spaceTest.describe('Discover inline data view editing', { tag: tags.deploymentAg
   spaceTest.afterEach(async ({ discoverScoutSpace }) => {
     await discoverScoutSpace.teardownDiscoverDefaults();
   });
+
+  spaceTest(
+    'keeps unchanged edits clean after confirmation and reload',
+    async ({ page, network, pageObjects }) => {
+      const { discover, unifiedFieldList } = pageObjects;
+      // Wait for the refetch each edit triggers, since the editors close before the edit is applied.
+      const waitForRefetch = () =>
+        page.waitForResponse((response) =>
+          network.matchesEndpoint(response.request(), SEARCH_REQUEST)
+        );
+      const originalId = await discover.getCurrentDataViewId();
+      await expect(discover.unsavedChangesIndicator()).toBeHidden();
+
+      const nameEditRefetch = waitForRefetch();
+      await discover.editCurrentDataViewName('Inline editing');
+      await nameEditRefetch;
+      await expect.poll(() => discover.getCurrentDataViewId()).toBe(originalId);
+      await expect(discover.unsavedChangesIndicator()).toBeHidden();
+
+      await unifiedFieldList.openFieldEditor('inline_runtime');
+      const fieldEditRefetch = waitForRefetch();
+      await discover.saveOpenFieldEditor();
+      await fieldEditRefetch;
+      await expect.poll(() => discover.getCurrentDataViewId()).toBe(originalId);
+      await expect(discover.unsavedChangesIndicator()).toBeHidden();
+
+      await page.reload();
+      await discover.waitUntilTabIsLoaded();
+      await expect.poll(() => discover.getCurrentDataViewId()).toBe(originalId);
+      await expect(discover.unsavedChangesIndicator()).toBeHidden();
+      await unifiedFieldList.searchField('inline_runtime');
+      await expect(unifiedFieldList.getAvailableField('inline_runtime')).toBeVisible();
+    }
+  );
 
   spaceTest(
     'discards field edits without changing the shared inline view',

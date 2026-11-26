@@ -83,6 +83,7 @@ import {
 } from './constants';
 import { EmbeddableEditorService } from './plugin_imports/embeddable_editor_service';
 import { InitialTabStateService } from './plugin_imports/initial_tab_state_service';
+import type { InlineDataViewService } from './services/inline_data_view_service';
 import {
   createDiscoverSessionClient,
   createDiscoverSessionService,
@@ -134,6 +135,7 @@ export interface DiscoverServices {
   filterManager: FilterManager;
   fieldFormats: FieldFormatsStart;
   dataViews: DataViewsContract;
+  inlineDataViews: InlineDataViewService;
   dataSourceService: DataSourceService;
   inspector: InspectorPublicPluginStart;
   metadata: { branch: string; version: string };
@@ -207,6 +209,8 @@ export const buildServices = ({
   profilesManager,
   profileStateRegistry,
   ebtManager,
+  inlineDataViews,
+  dataViewEditor,
   setHeaderActionMenu = noop,
 }: {
   core: CoreStart;
@@ -221,6 +225,8 @@ export const buildServices = ({
   profilesManager: ProfilesManager;
   profileStateRegistry: ProfileStateRegistry;
   ebtManager: DiscoverEBTManager;
+  inlineDataViews: InlineDataViewService;
+  dataViewEditor: DataViewEditorStart;
   setHeaderActionMenu?: AppMountParameters['setHeaderActionMenu'];
 }): DiscoverServices => {
   const { usageCollection } = plugins;
@@ -263,6 +269,7 @@ export const buildServices = ({
     initialTabStateService: new InitialTabStateService(),
     setHeaderActionMenu,
     dataViews: plugins.data.dataViews,
+    inlineDataViews,
     dataSourceService: new DataSourceService(plugins.data.dataViews),
     inspector: plugins.inspector,
     metadata: {
@@ -283,7 +290,7 @@ export const buildServices = ({
     dataViewFieldEditor: plugins.dataViewFieldEditor,
     http: core.http,
     spaces: plugins.spaces,
-    dataViewEditor: plugins.dataViewEditor,
+    dataViewEditor,
     triggersActionsUi: plugins.triggersActionsUi,
     locator,
     contextLocator,

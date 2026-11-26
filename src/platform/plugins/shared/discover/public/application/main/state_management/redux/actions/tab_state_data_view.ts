@@ -33,7 +33,10 @@ import {
 } from '../runtime_state';
 import { internalStateActions } from '..';
 import { selectTab } from '../selectors';
-import { updateFiltersReferences } from '../../utils/update_filter_references';
+import {
+  updateAppFiltersReferences,
+  updateFiltersReferences,
+} from '../../utils/update_filter_references';
 import {
   createDataViewDataSource,
   DataSourceType,
@@ -43,6 +46,7 @@ import { addLog } from '../../../../../utils/add_log';
 import { getDataViewAppState } from '../../utils/get_switch_data_view_app_state';
 import { isNonEmptyEsqlQuery } from '../../utils/is_non_empty_esql_query';
 import { resolveEsqlSource } from '../../../data_fetching/resolve_esql_source';
+import { isInlineDataView } from '../../../../../../common/session/inline_data_view';
 import { fetchData } from './tab_state';
 
 /**
@@ -305,22 +309,23 @@ export const onDataViewEdited: InternalStateThunkActionCreator<
       const newDataView = await services.dataViews.create(editedDataView.toSpec(), true);
       dispatch(assignNextDataView({ tabId, dataView: newDataView }));
     } else {
-      await dispatch(updateAdHocDataViewId({ tabId, editedDataView }));
+      await dispatch(applyAdHocDataViewEdit({ tabId, confirmedDataView: editedDataView }));
     }
     void dispatch(internalStateActions.loadDataViewList());
     addLog('onDataViewEdited triggers data fetching');
     dispatch(fetchData({ tabId }));
   };
 
-/**
- * When editing an ad hoc data view, a new id needs to be generated for the data view
- * This is to prevent duplicate ids messing with our system
- */
-export const updateAdHocDataViewId: InternalStateThunkActionCreator<
-  [TabActionPayload<{ editedDataView: DataView }>],
+/** Applies a confirmed inline edit and updates references only when its identity changes. */
+export const applyAdHocDataViewEdit: InternalStateThunkActionCreator<
+  [
+    TabActionPayload<{
+      confirmedDataView: DataView;
+    }>
+  ],
   Promise<DataView | undefined>
-> = ({ tabId, editedDataView }) =>
-  async function updateAdHocDataViewIdThunkFn(
+> = ({ tabId, confirmedDataView }) =>
+  async function applyAdHocDataViewEditThunkFn(
     dispatch,
     getState,
     { runtimeStateManager, services }
@@ -333,24 +338,30 @@ export const updateAdHocDataViewId: InternalStateThunkActionCreator<
       prevDataView.id!
     );
 
-    const nextDataView = await services.dataViews.create({
-      ...editedDataView.toSpec(),
-      id: uuidv4(),
-    });
+    let nextDataView = confirmedDataView;
 
-    if (!isUsedInMultipleTabs) {
-      services.dataViews.clearInstanceCache(prevDataView.id);
+    // Only excluded views retain UUID replacement and eviction of an unshared previous instance.
+    if (!isInlineDataView(confirmedDataView)) {
+      nextDataView = await services.dataViews.create({
+        ...confirmedDataView.toSpec(),
+        id: uuidv4(),
+      });
+
+      if (!isUsedInMultipleTabs) {
+        services.dataViews.clearInstanceCache(prevDataView.id);
+      }
     }
 
-    await updateFiltersReferences({
-      prevDataView,
-      nextDataView,
-      services,
-    });
+    if (nextDataView.id === prevDataView.id) {
+      return nextDataView;
+    }
 
     if (isUsedInMultipleTabs) {
+      // Only move app filters, so pinned filters keep pointing at the view other tabs still use.
+      updateAppFiltersReferences({ prevDataView, nextDataView, services });
       dispatch(internalStateActions.appendAdHocDataViews(nextDataView));
     } else {
+      await updateFiltersReferences({ prevDataView, nextDataView, services });
       dispatch(internalStateActions.replaceAdHocDataViewWithId(prevDataView.id!, nextDataView));
     }
 
@@ -377,19 +388,16 @@ export const updateAdHocDataViewId: InternalStateThunkActionCreator<
     return nextDataView;
   };
 
-/**
- * Create and select a temporary/adhoc data view by a given spec
- * Used by the Data View Picker
- */
+/** Creates and selects an Explore view, preferring a date field named @timestamp. */
 export const createAndAppendAdHocDataView: InternalStateThunkActionCreator<
   [TabActionPayload<{ dataViewSpec: DataViewSpec }>],
   Promise<DataView>
 > = ({ tabId, dataViewSpec }) =>
   async function createAndAppendAdHocDataViewThunkFn(dispatch, _, { services }) {
-    const newDataView = await services.dataViews.create(dataViewSpec);
-    if (newDataView.fields.getByName('@timestamp')?.type === 'date') {
-      newDataView.timeFieldName = '@timestamp';
-    }
+    const newDataView = await services.inlineDataViews.create(dataViewSpec, {
+      preferredTimeField: '@timestamp',
+    });
+
     dispatch(internalStateActions.appendAdHocDataViews(newDataView));
     await dispatch(
       changeDataView({

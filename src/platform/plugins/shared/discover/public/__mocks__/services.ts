@@ -11,6 +11,7 @@ import type { Observable } from 'rxjs';
 import { BehaviorSubject, of } from 'rxjs';
 import type { DiscoverServices, HistoryLocationState } from '../build_services';
 import { InitialTabStateService } from '../plugin_imports/initial_tab_state_service';
+import { createInlineDataViewService } from '../services/inline_data_view_service';
 import { DataSourceService } from '@kbn/data-source';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
@@ -66,6 +67,7 @@ export function createDiscoverServicesMock(): DiscoverServices {
   dataPlugin.query.queryString.getDefaultQuery = jest.fn(() => ({ query: '', language: 'kuery' }));
 
   dataPlugin.query.filterManager.getFilters = jest.fn(() => []);
+  dataPlugin.query.filterManager.getAppFilters = jest.fn(() => []);
   dataPlugin.query.filterManager.getUpdates$ = jest.fn(() => of({}) as unknown as Observable<void>);
 
   dataPlugin.query.timefilter.timefilter.createFilter = jest.fn();
@@ -268,6 +270,7 @@ export function createDiscoverServicesMock(): DiscoverServices {
     },
     dataViewFieldEditor: {
       openEditor: jest.fn(),
+      openDeleteModal: jest.fn(),
       userPermissions: {
         editIndexPattern: jest.fn(() => true),
       },
@@ -302,6 +305,10 @@ export function createDiscoverServicesMock(): DiscoverServices {
     discoverSessionService,
     searchSessionsManagement: searchSessionsManagementMock.createStartContract(),
     dataViews: dataPlugin.dataViews,
+    inlineDataViews: createInlineDataViewService({
+      dataViews: dataPlugin.dataViews,
+      searchSource: dataPlugin.search.searchSource,
+    }),
     dataSourceService: new DataSourceService(dataPlugin.dataViews),
     timefilter: dataPlugin.query.timefilter.timefilter,
     lens: {

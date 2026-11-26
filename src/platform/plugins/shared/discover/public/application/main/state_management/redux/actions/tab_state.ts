@@ -497,11 +497,7 @@ export const transitionFromESQLToDataView: InternalStateThunkActionCreator<
   [TabActionPayload<{ dataView: DataView }>],
   Promise<void>
 > = ({ tabId, dataView: fallbackDataView }) =>
-  async function transitionFromESQLToDataViewThunkFn(
-    dispatch,
-    getState,
-    { services, runtimeStateManager }
-  ) {
+  async function transitionFromESQLToDataViewThunkFn(dispatch, getState, { services }) {
     dispatch(internalStateSlice.actions.setIsDataViewLoading({ tabId, isDataViewLoading: true }));
 
     try {
@@ -571,7 +567,7 @@ const resolveClassicDataView: InternalStateThunkActionCreator<
         return await services.dataViews.get(match.id);
       }
 
-      const dataView = await services.dataViews.create({
+      const dataView = await services.inlineDataViews.resolve({
         title: source.title,
         timeFieldName: source.timeFieldName,
       });

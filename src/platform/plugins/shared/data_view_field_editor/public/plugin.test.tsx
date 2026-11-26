@@ -29,10 +29,21 @@ jest.mock('@kbn/react-kibana-mount', () => {
 
 jest.mock('./components/field_editor_loader', () => {
   return {
-    FieldEditorLoader: ({ onSave }: { onSave: (fields: unknown[]) => void }) => (
-      <button type="button" onClick={() => onSave([])}>
-        Save field
-      </button>
+    FieldEditorLoader: ({
+      onSave,
+      onMounted,
+    }: {
+      onSave: (fields: unknown[]) => void;
+      onMounted: (options: { canCloseValidator: () => boolean }) => void;
+    }) => (
+      <>
+        <button type="button" onClick={() => onSave([])}>
+          Save field
+        </button>
+        <button type="button" onClick={() => onMounted({ canCloseValidator: () => false })}>
+          Block closing
+        </button>
+      </>
     ),
   };
 });
@@ -64,8 +75,12 @@ describe('DataViewFieldEditorPlugin', () => {
   });
 
   const createOverlayRef = () => {
-    const close = jest.fn().mockResolvedValue(undefined);
-    const overlayRef: OverlayRef = { close, onClose: Promise.resolve() };
+    let resolveClose: () => void = () => {};
+    const onClose = new Promise<void>((resolve) => {
+      resolveClose = resolve;
+    });
+    const close = jest.fn(async () => resolveClose());
+    const overlayRef: OverlayRef = { close, onClose };
 
     return { close, overlayRef };
   };
@@ -100,10 +115,11 @@ describe('DataViewFieldEditorPlugin', () => {
     const user = userEvent.setup();
     const { closeFlyout, openFlyout } = createFlyoutMock();
     const onSaveSpy = jest.fn();
+    const onCancel = jest.fn();
 
     const { openEditor } = plugin.start(createCoreStart({ openFlyout }), pluginStart);
 
-    await openEditor({ onSave: onSaveSpy, ctx: { dataView: {} as DataView } });
+    await openEditor({ onSave: onSaveSpy, onCancel, ctx: { dataView: {} as DataView } });
 
     expect(openFlyout).toHaveBeenCalled();
 
@@ -114,6 +130,7 @@ describe('DataViewFieldEditorPlugin', () => {
 
     expect(closeFlyout).toHaveBeenCalled();
     expect(onSaveSpy).toHaveBeenCalledWith([]);
+    expect(onCancel).not.toHaveBeenCalled();
   });
 
   it('should return a handler to close the flyout', async () => {
@@ -126,6 +143,77 @@ describe('DataViewFieldEditorPlugin', () => {
     expect(typeof closeEditorHandler).toBe('function');
   });
 
+  it('notifies field edit cancellation only once', async () => {
+    const { openFlyout } = createFlyoutMock();
+    const { openEditor } = plugin.start(createCoreStart({ openFlyout }), pluginStart);
+    const onCancel = jest.fn();
+    const close = await openEditor({ ctx: { dataView: {} as DataView }, onCancel });
+
+    const [, options] = openFlyout.mock.calls[0];
+    options?.onClose?.(openFlyout.mock.results[0].value);
+    close();
+
+    expect(onCancel).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not report cancellation when the flyout rejects closing', async () => {
+    const user = userEvent.setup();
+    const { openFlyout, closeFlyout } = createFlyoutMock();
+    const { openEditor } = plugin.start(createCoreStart({ openFlyout }), pluginStart);
+    const onCancel = jest.fn();
+    await openEditor({ ctx: { dataView: {} as DataView }, onCancel });
+    const [mountPoint, options] = openFlyout.mock.calls[0];
+    renderMountPoint(mountPoint);
+
+    await user.click(screen.getByText('Block closing'));
+    options?.onClose?.(openFlyout.mock.results[0].value);
+
+    expect(closeFlyout).not.toHaveBeenCalled();
+    expect(onCancel).not.toHaveBeenCalled();
+  });
+
+  it('cancels deletion only once without deleting fields', async () => {
+    const user = userEvent.setup();
+    const { openModal, closeModal } = createModalMock();
+    const { openDeleteModal } = plugin.start(createCoreStart({ openModal }), pluginStart);
+    const onCancel = jest.fn();
+    const onDelete = jest.fn();
+    const close = await openDeleteModal({
+      ctx: { dataView: {} as DataView },
+      fieldName: ['field'],
+      onCancel,
+      onDelete,
+    });
+    const [[mountPoint]] = openModal.mock.calls;
+    renderMountPoint(mountPoint);
+
+    await user.click(screen.getByRole('button', { name: 'Cancel' }));
+    close();
+
+    expect(closeModal).toHaveBeenCalledTimes(1);
+    expect(onCancel).toHaveBeenCalledTimes(1);
+    expect(onDelete).not.toHaveBeenCalled();
+  });
+
+  it('reports external deletion-modal closure as cancellation', async () => {
+    const { openModal, closeModal } = createModalMock();
+    const { openDeleteModal } = plugin.start(createCoreStart({ openModal }), pluginStart);
+    const onCancel = jest.fn();
+    const onDelete = jest.fn();
+    const close = await openDeleteModal({
+      ctx: { dataView: {} as DataView },
+      fieldName: ['field'],
+      onCancel,
+      onDelete,
+    });
+
+    await closeModal();
+    await waitFor(() => expect(onCancel).toHaveBeenCalledTimes(1));
+    close();
+    expect(onCancel).toHaveBeenCalledTimes(1);
+    expect(onDelete).not.toHaveBeenCalled();
+  });
+
   it('should expose a handler to open field deletion modal', () => {
     const startApi = plugin.start(coreStart, pluginStart);
 
@@ -136,6 +224,7 @@ describe('DataViewFieldEditorPlugin', () => {
     const user = userEvent.setup();
     const { closeModal, openModal } = createModalMock();
     const onDeleteSpy = jest.fn();
+    const onCancel = jest.fn();
     const removeFieldSpy = jest.fn();
     const updateSavedObject = jest.fn();
     const fieldNames = ['a', 'b', 'c'];
@@ -158,6 +247,7 @@ describe('DataViewFieldEditorPlugin', () => {
       ctx: { dataView: indexPatternMock },
       fieldName: fieldNames,
       onDelete: onDeleteSpy,
+      onCancel,
     });
 
     expect(openModal).toHaveBeenCalled();
@@ -184,6 +274,7 @@ describe('DataViewFieldEditorPlugin', () => {
       expect(onDeleteSpy).toHaveBeenCalledWith(fieldNames);
     });
     expect(closeModal).toHaveBeenCalled();
+    expect(onCancel).not.toHaveBeenCalled();
 
     fieldNames.forEach((fieldName) => {
       expect(removeFieldSpy).toHaveBeenCalledWith(fieldName);

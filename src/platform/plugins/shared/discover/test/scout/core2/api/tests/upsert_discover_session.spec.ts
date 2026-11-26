@@ -280,7 +280,7 @@ apiTest.describe('PUT /api/discover_sessions/{id}', { tag: tags.deploymentAgnost
   });
 
   apiTest(
-    'preserves the stored inline ID and filter references through GET and PUT',
+    'replaces a legacy inline ID with implicit own filter references through GET and PUT',
     async ({ apiClient, kbnClient }) => {
       const id = createId('inline-id-round-trip');
       const url = `${DISCOVER_SESSION_API_BASE_PATH}/${id}`;
@@ -345,7 +345,7 @@ apiTest.describe('PUT /api/discover_sessions/{id}', { tag: tags.deploymentAgnost
       expect(putResponse).toHaveStatusCode(200);
       expect(putResponse.body.data).toStrictEqual(getResponse.body.data);
 
-      // The response hides the ID; check that the actual write kept it and its filters.
+      // Public writes store the spec without an ID; only foreign filter references stay explicit.
       const storedSession = await kbnClient.savedObjects.get<DiscoverSessionAttributes>({
         type: 'search',
         id,
@@ -357,8 +357,14 @@ apiTest.describe('PUT /api/discover_sessions/{id}', { tag: tags.deploymentAgnost
         storedSession.references
       );
 
-      expect(storedSearchSource.index).toStrictEqual(inlineDataView);
-      expect(storedSearchSource.filter).toMatchObject(filters);
+      expect(storedSearchSource.index).toStrictEqual({ title: inlineDataView.title });
+      expect(storedSearchSource.filter?.map(({ query }) => query)).toStrictEqual(
+        filters.map(({ query }) => query)
+      );
+      expect(storedSearchSource.filter?.map(({ meta }) => meta.index)).toStrictEqual([
+        undefined,
+        'foreign-data-view',
+      ]);
       expect(storedSession.references.map(({ id: referenceId }) => referenceId)).toStrictEqual([
         'foreign-data-view',
       ]);
@@ -678,4 +684,36 @@ apiTest.describe('PUT /api/discover_sessions/{id}', { tag: tags.deploymentAgnost
 
     expect(response).toHaveStatusCode(403);
   });
+
+  apiTest(
+    'returns 403 without creating a session when a viewer PUTs a new ID',
+    async ({ apiClient }) => {
+      const id = createId('put-forbidden-create');
+      const path = `${DISCOVER_SESSION_API_BASE_PATH}/${id}`;
+
+      const response = await apiClient.put(path, {
+        headers: {
+          ...COMMON_HEADERS,
+          ...viewerCredentials.apiKeyHeader,
+        },
+        body: {
+          title: 'Forbidden Discover session',
+          tabs: [createEsqlTab('main', 'FROM logs-* | LIMIT 10')],
+        },
+        responseType: 'json',
+      });
+
+      expect(response).toHaveStatusCode(403);
+
+      const readResponse = await apiClient.get(path, {
+        headers: {
+          ...COMMON_HEADERS,
+          ...editorCredentials.apiKeyHeader,
+        },
+        responseType: 'json',
+      });
+
+      expect(readResponse).toHaveStatusCode(404);
+    }
+  );
 });
