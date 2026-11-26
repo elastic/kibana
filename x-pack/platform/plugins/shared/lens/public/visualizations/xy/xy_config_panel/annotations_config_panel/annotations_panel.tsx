@@ -105,6 +105,7 @@ export const AnnotationsPanel = (
 
   const queryInputServices = useKibana<LensAppServices>().services;
   const { data, http, uiSettings } = queryInputServices;
+  const { esqlVariables, isApproximate = false } = props;
   // Read through a ref: columns do not depend on the time range, so changing it must not
   // refetch. The range is only needed to bind ?_tstart/?_tend if the query uses them.
   const timeRangeRef = useRef({ from: frame.absDateRange.fromDate, to: frame.absDateRange.toDate });
@@ -123,14 +124,14 @@ export const AnnotationsPanel = (
           timeFieldName: timeField,
           uiSettings,
         }),
+        variables: esqlVariables,
         includeColumnMetadata: true,
       });
       return { columns, timeField };
     },
-    [data.search.search, http, uiSettings]
+    [data.search.search, http, uiSettings, esqlVariables]
   );
 
-  const { esqlVariables, isApproximate = false } = props;
   const ignoreGlobalFilters = Boolean(localLayer.ignoreGlobalFilters);
   const fetchResults = useCallback(
     (query: AggregateQuery, abortController: AbortController) =>
