@@ -8,13 +8,16 @@
 import {
   EuiBadge,
   EuiButton,
+  EuiButtonEmpty,
   EuiCode,
   EuiCopy,
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
+  EuiHorizontalRule,
   EuiLink,
+  EuiPanel,
   EuiModal,
   EuiModalBody,
   EuiModalFooter,
@@ -27,88 +30,114 @@ import {
   EuiToolTip,
   useGeneratedHtmlId,
 } from '@elastic/eui';
-import React, { useCallback, useMemo, useState } from 'react';
-import { buildPath, isHttpFetchError } from '@kbn/core-http-browser';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { isHttpFetchError } from '@kbn/core-http-browser';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useQuery, useQueryClient } from '@kbn/react-query';
 import { KbnDangerCallout, KbnWarningCallout } from '@kbn/ui-callout';
 import { WORKFLOWS_MANAGEMENT_FEATURE_ID } from '@kbn/workflows';
 import { WorkflowsManagementUiActions } from '@kbn/workflows/common/privileges';
-import type { WorkflowPageOfflineReason, WorkflowPageResponse } from '../../../../common/pages';
+import {
+  getPageShareStatusView,
+  isBlockingPageReason,
+  PAGE_OFFLINE_REASON_TEXT,
+  WORKFLOW_PAGE_API_VERSION,
+  workflowPageApiPath,
+  workflowPageQueryKey,
+} from './page_share_model';
+import type { WorkflowPageResponse } from '../../../../common/pages';
 import { useKibana } from '../../../hooks/use_kibana';
-
-const API_VERSION = { version: '1' } as const;
-const PAGE_API_PATH = '/internal/workflows/workflow/{id}/pages/{pageId}';
-
-/** Reasons the author must fix elsewhere before the page can have a link. */
-const BLOCKER_TEXT: Partial<Record<WorkflowPageOfflineReason, string>> = {
-  no_service_account: i18n.translate('workflows.pageShare.blocker.noServiceAccount', {
-    defaultMessage: 'Set settings.run_as to a service account, then save the workflow.',
-  }),
-  service_accounts_disabled: i18n.translate('workflows.pageShare.blocker.serviceAccountsOff', {
-    defaultMessage: 'Service accounts are turned off in this deployment.',
-  }),
-  not_bound: i18n.translate('workflows.pageShare.blocker.notBound', {
-    defaultMessage: 'Save the workflow to bind its service account.',
-  }),
-  service_account_missing: i18n.translate('workflows.pageShare.blocker.accountMissing', {
-    defaultMessage: 'The service account does not exist. Create it, or change settings.run_as.',
-  }),
-  service_account_disabled: i18n.translate('workflows.pageShare.blocker.accountDisabled', {
-    defaultMessage: 'The service account is disabled.',
-  }),
-  workflow_invalid: i18n.translate('workflows.pageShare.blocker.invalid', {
-    defaultMessage: 'Fix the errors in the workflow, then save it.',
-  }),
-  encryption_unavailable: i18n.translate('workflows.pageShare.blocker.encryption', {
-    defaultMessage: 'An administrator must set an encryption key for saved objects.',
-  }),
-};
-
-/** Reasons that keep a published page offline until someone changes a setting elsewhere. */
-const WARNING_TEXT: Partial<Record<WorkflowPageOfflineReason, string>> = {
-  workflow_disabled: i18n.translate('workflows.pageShare.warning.workflowDisabled', {
-    defaultMessage: 'The workflow is disabled. Enable it to accept submissions.',
-  }),
-  pages_disabled: i18n.translate('workflows.pageShare.warning.pagesDisabled', {
-    defaultMessage: 'An administrator turned off all workflow pages in Advanced settings.',
-  }),
-};
+import { focusRunAsSetting } from '../../../shared/focus_run_as';
 
 const NO_MANAGE_PRIVILEGE = i18n.translate('workflows.pageShare.noManagePrivilege', {
   defaultMessage: 'You need the Manage pages privilege.',
 });
 const COPY_LINK = i18n.translate('workflows.pageShare.copyLink', { defaultMessage: 'Copy link' });
 const OPEN_PAGE = i18n.translate('workflows.pageShare.openPage', { defaultMessage: 'Open page' });
-const ROTATE_LINK = i18n.translate('workflows.pageShare.rotate', { defaultMessage: 'Rotate link' });
+const ROTATE_TITLE = i18n.translate('workflows.pageShare.rotate', {
+  defaultMessage: 'Rotate link',
+});
+const ROTATE_DESCRIPTION = i18n.translate('workflows.pageShare.rotateDescription', {
+  defaultMessage: 'Replace the current link. The old one stops working immediately.',
+});
+const ROTATE_BUTTON = i18n.translate('workflows.pageShare.rotateButton', {
+  defaultMessage: 'Rotate',
+});
+const UNPUBLISH_TITLE = i18n.translate('workflows.pageShare.unpublishPage', {
+  defaultMessage: 'Unpublish page',
+});
+const UNPUBLISH_DESCRIPTION = i18n.translate('workflows.pageShare.unpublishDescription', {
+  defaultMessage: 'Take the page offline. Publishing again brings back the same link.',
+});
 const UNPUBLISH = i18n.translate('workflows.pageShare.unpublish', { defaultMessage: 'Unpublish' });
+const PUBLISH = i18n.translate('workflows.pageShare.publish', { defaultMessage: 'Publish page' });
+const CANCEL = i18n.translate('workflows.pageShare.cancel', { defaultMessage: 'Cancel' });
 
 const CONFIRM = {
   rotate: {
-    Callout: KbnWarningCallout,
     title: i18n.translate('workflows.pageShare.rotateConfirmTitle', {
       defaultMessage: 'Rotate the link?',
     }),
     text: i18n.translate('workflows.pageShare.rotateConfirmText', {
-      defaultMessage: 'The current link stops working at once. Share the new link again.',
+      defaultMessage:
+        'The current link stops working at once. Copy the new link and share it again.',
     }),
-    confirm: ROTATE_LINK,
+    confirm: ROTATE_BUTTON,
+    iconType: 'refresh',
+    color: 'text',
   },
   unpublish: {
-    Callout: KbnDangerCallout,
     title: i18n.translate('workflows.pageShare.unpublishConfirmTitle', {
       defaultMessage: 'Unpublish the page?',
     }),
     text: i18n.translate('workflows.pageShare.unpublishConfirmText', {
-      defaultMessage: 'The link stops working. Publish again to bring back the same link.',
+      defaultMessage: 'The link stops working until you publish again. It will be the same link.',
     }),
     confirm: UNPUBLISH,
+    iconType: 'linkSlash',
+    color: 'danger',
   },
 } as const;
 
-/** Asks before a change that breaks the current link. */
-const ConfirmCallout = ({
+/** Title, explanation, and the action for one share-page row. */
+const ShareActionRow = ({
+  title,
+  description,
+  actions,
+  'data-test-subj': dataTestSubj,
+}: {
+  title: string;
+  description: string;
+  actions: React.ReactNode;
+  'data-test-subj'?: string;
+}) => (
+  <EuiPanel
+    hasShadow={false}
+    hasBorder={false}
+    color="transparent"
+    borderRadius="none"
+    paddingSize="m"
+    data-test-subj={dataTestSubj}
+  >
+    <EuiFlexGroup alignItems="center" gutterSize="l" responsive={false}>
+      <EuiFlexItem>
+        <EuiText size="s">
+          <p>
+            <strong>{title}</strong>
+          </p>
+        </EuiText>
+        <EuiText size="xs" color="subdued">
+          <p>{description}</p>
+        </EuiText>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>{actions}</EuiFlexItem>
+    </EuiFlexGroup>
+  </EuiPanel>
+);
+
+/** Confirm and cancel, shown in place of the row's action button. */
+const ConfirmActions = ({
   kind,
   isLoading,
   onConfirm,
@@ -119,26 +148,27 @@ const ConfirmCallout = ({
   onConfirm: () => void;
   onCancel: () => void;
 }) => {
-  const { Callout, title, text, confirm } = CONFIRM[kind];
+  const { confirm, iconType, color } = CONFIRM[kind];
   return (
-    <Callout
-      title={title}
-      text={text}
-      size="s"
-      data-test-subj={`workflowPageShareConfirm-${kind}`}
-      actionProps={{
-        primary: {
-          children: confirm,
-          onClick: onConfirm,
-          isLoading,
-          'data-test-subj': 'workflowPageShareConfirm',
-        },
-        secondary: {
-          children: i18n.translate('workflows.pageShare.cancel', { defaultMessage: 'Cancel' }),
-          onClick: onCancel,
-        },
-      }}
-    />
+    <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+      <EuiFlexItem grow={false}>
+        <EuiButtonEmpty size="s" color="text" onClick={onCancel} isDisabled={isLoading}>
+          {CANCEL}
+        </EuiButtonEmpty>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiButton
+          size="s"
+          color={color}
+          iconType={iconType}
+          onClick={onConfirm}
+          isLoading={isLoading}
+          data-test-subj="workflowPageShareConfirm"
+        >
+          {confirm}
+        </EuiButton>
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 };
 
@@ -152,10 +182,30 @@ const getErrorMessage = (error: unknown): string =>
     ? error.message
     : String(error);
 
+/** The risk, with a link to `settings.run_as` instead of the raw account id. */
+const ExposureWarning = ({ onShowServiceAccount }: { onShowServiceAccount: () => void }) => (
+  <FormattedMessage
+    id="workflows.pageShare.exposureWarning"
+    defaultMessage="Anyone with this link can run this workflow as its <account>service account</account>. Treat the link as a password and rotate it if it leaks."
+    values={{
+      account: (chunks: React.ReactNode) => (
+        <EuiButtonEmpty
+          onClick={onShowServiceAccount}
+          flush="both"
+          size="xs"
+          data-test-subj="workflowPageShareServiceAccount"
+        >
+          {chunks}
+        </EuiButtonEmpty>
+      ),
+    }}
+  />
+);
+
 export interface WorkflowPageShareModalProps {
   workflowId: string;
   pageId: string;
-  /** The `settings.run_as` of the saved workflow, shown so the author knows who submissions run as. */
+  /** The `settings.run_as` of the saved workflow. Blockers name it; the lead links to the setting. */
   serviceAccountId?: string;
   onClose: () => void;
 }
@@ -166,7 +216,7 @@ export const WorkflowPageShareModal = ({
   serviceAccountId,
   onClose,
 }: WorkflowPageShareModalProps) => {
-  const { http, application } = useKibana().services;
+  const { http, application, notifications } = useKibana().services;
   // Pages are behind a feature flag, so their privilege is not in the shared capabilities hook.
   const canManageWorkflowPages = Boolean(
     application.capabilities[WORKFLOWS_MANAGEMENT_FEATURE_ID]?.[
@@ -175,13 +225,13 @@ export const WorkflowPageShareModal = ({
   );
   const queryClient = useQueryClient();
   const titleId = useGeneratedHtmlId();
-  const pagePath = (suffix = '') =>
-    buildPath(`${PAGE_API_PATH}${suffix}`, { id: workflowId, pageId });
-  const queryKey = useMemo(() => ['workflowPage', workflowId, pageId], [workflowId, pageId]);
+  const pagePath = (suffix = '') => workflowPageApiPath(workflowId, pageId, suffix);
+  const queryKey = useMemo(() => workflowPageQueryKey(workflowId, pageId), [workflowId, pageId]);
 
   const [pending, setPending] = useState<Action>();
   const [actionError, setActionError] = useState<string>();
   const [confirming, setConfirming] = useState<'rotate' | 'unpublish'>();
+  const [focusCopyToken, setFocusCopyToken] = useState(0);
 
   const {
     data: page,
@@ -189,7 +239,7 @@ export const WorkflowPageShareModal = ({
     refetch,
   } = useQuery({
     queryKey,
-    queryFn: () => http.get<WorkflowPageResponse>(pagePath(), API_VERSION),
+    queryFn: () => http.get<WorkflowPageResponse>(pagePath(), WORKFLOW_PAGE_API_VERSION),
     refetchOnWindowFocus: false,
   });
 
@@ -200,6 +250,17 @@ export const WorkflowPageShareModal = ({
       try {
         await request();
         setConfirming(undefined);
+        if (action === 'rotate') {
+          notifications.toasts.addSuccess({
+            title: i18n.translate('workflows.pageShare.rotatedToastTitle', {
+              defaultMessage: 'Link rotated',
+            }),
+            text: i18n.translate('workflows.pageShare.rotatedToastText', {
+              defaultMessage: 'Copy the new link. The previous one stopped working.',
+            }),
+          });
+          setFocusCopyToken((token) => token + 1);
+        }
         await queryClient.invalidateQueries({ queryKey });
       } catch (error) {
         setActionError(getErrorMessage(error));
@@ -207,35 +268,46 @@ export const WorkflowPageShareModal = ({
         setPending(undefined);
       }
     },
-    [queryClient, queryKey]
+    [notifications.toasts, queryClient, queryKey]
   );
+
+  useEffect(() => {
+    if (focusCopyToken === 0) return;
+    document.querySelector<HTMLElement>('[data-test-subj="workflowPageShareCopy"]')?.focus();
+  }, [focusCopyToken]);
 
   const setAccess = (published: boolean) =>
     run(published ? 'publish' : 'unpublish', () =>
       http.put(pagePath('/access'), {
-        ...API_VERSION,
+        ...WORKFLOW_PAGE_API_VERSION,
         body: JSON.stringify({ access: published ? { level: 'secret_link' } : null }),
       })
     );
   const setEnabled = (enabled: boolean) =>
     run(enabled ? 'enable' : 'disable', () =>
-      http.put(pagePath('/enabled'), { ...API_VERSION, body: JSON.stringify({ enabled }) })
+      http.put(pagePath('/enabled'), {
+        ...WORKFLOW_PAGE_API_VERSION,
+        body: JSON.stringify({ enabled }),
+      })
     );
-  const rotate = () => run('rotate', () => http.post(pagePath('/_rotate'), API_VERSION));
+  const rotate = () =>
+    run('rotate', () => http.post(pagePath('/_rotate'), WORKFLOW_PAGE_API_VERSION));
+
+  const showServiceAccount = () => {
+    onClose();
+    // The modal returns focus to the header button as it closes. Focus the
+    // setting after that, or the editor never keeps the cursor.
+    window.setTimeout(() => focusRunAsSetting(), 0);
+  };
 
   const reasons = page?.status.reasons ?? [];
-  const blockers = reasons.filter((reason) => BLOCKER_TEXT[reason]);
-  const warnings = reasons.filter((reason) => WARNING_TEXT[reason]);
-  const isPublished = page?.access != null;
+  const blockers = reasons.filter(isBlockingPageReason);
+  const submissionsPaused = reasons.includes('page_disabled');
+  const offlineExplanations = reasons
+    .filter((reason) => reason !== 'no_access_level' && reason !== 'page_disabled')
+    .map((reason) => PAGE_OFFLINE_REASON_TEXT[reason]);
   const absoluteUrl = page ? new URL(page.url, window.location.origin).href : '';
-
-  const runsAs = serviceAccountId ? (
-    <FormattedMessage
-      id="workflows.pageShare.runsAs"
-      defaultMessage="Anyone with the link can submit this form. Submissions run as {account}."
-      values={{ account: <strong>{serviceAccountId}</strong> }}
-    />
-  ) : null;
+  const status = page ? getPageShareStatusView(page, 'modal') : undefined;
 
   const withManageTooltip = (button: React.ReactElement) =>
     canManageWorkflowPages ? (
@@ -271,25 +343,42 @@ export const WorkflowPageShareModal = ({
             defaultMessage: "This page can't run yet",
           })}
           data-test-subj="workflowPageShareBlockers"
+          text={
+            <>
+              {serviceAccountId && (
+                <p>
+                  <FormattedMessage
+                    id="workflows.pageShare.configuredAccount"
+                    defaultMessage="settings.run_as is {account}."
+                    values={{ account: <EuiCode>{serviceAccountId}</EuiCode> }}
+                  />
+                </p>
+              )}
+              <p>
+                <EuiButtonEmpty
+                  onClick={showServiceAccount}
+                  flush="both"
+                  size="xs"
+                  data-test-subj="workflowPageShareServiceAccount"
+                >
+                  {i18n.translate('workflows.pageShare.showRunAs', {
+                    defaultMessage: 'Show settings.run_as',
+                  })}
+                </EuiButtonEmpty>
+              </p>
+            </>
+          }
         >
           <ul>
             {blockers.map((reason) => (
-              <li key={reason}>{BLOCKER_TEXT[reason]}</li>
+              <li key={reason}>{PAGE_OFFLINE_REASON_TEXT[reason]}</li>
             ))}
           </ul>
-          {serviceAccountId && (
-            <p>
-              <FormattedMessage
-                id="workflows.pageShare.configuredAccount"
-                defaultMessage="settings.run_as: {account}"
-                values={{ account: <EuiCode>{serviceAccountId}</EuiCode> }}
-              />
-            </p>
-          )}
         </KbnDangerCallout>
       );
     }
-    if (!isPublished) {
+    const online = page.status.online;
+    if (page.access == null) {
       return (
         <>
           <EuiText size="s">
@@ -298,31 +387,20 @@ export const WorkflowPageShareModal = ({
                 id="workflows.pageShare.notPublished"
                 defaultMessage="Publish the page to get a link."
               />{' '}
-              {runsAs}
+              <ExposureWarning onShowServiceAccount={showServiceAccount} />
             </p>
           </EuiText>
-          <EuiSpacer />
-          {withManageTooltip(
-            <EuiButton
-              fill
-              iconType="link"
-              onClick={() => setAccess(true)}
-              isLoading={pending === 'publish'}
-              isDisabled={!canManageWorkflowPages || pending !== undefined}
-              data-test-subj="workflowPageSharePublish"
-            >
-              {i18n.translate('workflows.pageShare.publish', { defaultMessage: 'Publish page' })}
-            </EuiButton>
-          )}
         </>
       );
     }
     return (
       <>
         <EuiText size="s">
-          <p>{runsAs}</p>
+          <p>
+            <ExposureWarning onShowServiceAccount={showServiceAccount} />
+          </p>
         </EuiText>
-        <EuiSpacer />
+        <EuiSpacer size="m" />
         <EuiFormRow
           label={i18n.translate('workflows.pageShare.linkLabel', { defaultMessage: 'Page link' })}
           labelAppend={
@@ -337,9 +415,6 @@ export const WorkflowPageShareModal = ({
               </EuiLink>
             </EuiText>
           }
-          helpText={i18n.translate('workflows.pageShare.linkHelp', {
-            defaultMessage: 'Treat the link like a password. Rotate it if it leaks.',
-          })}
           fullWidth
         >
           <EuiCopy
@@ -351,6 +426,7 @@ export const WorkflowPageShareModal = ({
               <EuiFieldText
                 value={absoluteUrl}
                 readOnly
+                disabled={!online}
                 fullWidth
                 onFocus={(event) => event.target.select()}
                 data-test-subj="workflowPageShareUrl"
@@ -365,88 +441,130 @@ export const WorkflowPageShareModal = ({
             )}
           </EuiCopy>
         </EuiFormRow>
-        <EuiSpacer />
+        <EuiSpacer size="m" />
         {withManageTooltip(
           <EuiSwitch
-            label={i18n.translate('workflows.pageShare.acceptSubmissions', {
-              defaultMessage: 'Accept submissions',
+            label={i18n.translate('workflows.pageShare.pauseSubmissions', {
+              defaultMessage: 'Pause submissions',
             })}
-            checked={page.enabled}
-            onChange={(event) => setEnabled(event.target.checked)}
+            checked={!page.enabled}
+            onChange={(event) => setEnabled(!event.target.checked)}
             disabled={!canManageWorkflowPages || pending !== undefined}
+            aria-describedby={submissionsPaused ? 'workflowPageSharePauseHelp' : undefined}
             data-test-subj="workflowPageShareEnabled"
           />
         )}
-        {!page.enabled && (
+        {submissionsPaused && (
           <>
-            <EuiSpacer size="xs" />
-            <EuiText size="xs" color="subdued">
-              <p>
-                {i18n.translate('workflows.pageShare.offlineHelp', {
-                  defaultMessage: 'The page is offline. Turning it back on keeps the same link.',
-                })}
-              </p>
+            <EuiSpacer size="s" />
+            <EuiText
+              id="workflowPageSharePauseHelp"
+              size="s"
+              color="subdued"
+              data-test-subj="workflowPageSharePauseHelp"
+            >
+              <p>{PAGE_OFFLINE_REASON_TEXT.page_disabled}</p>
             </EuiText>
           </>
         )}
-        {warnings.map((reason) => (
-          <React.Fragment key={reason}>
+        {offlineExplanations.length > 0 && (
+          <>
             <EuiSpacer size="m" />
-            <KbnWarningCallout title={WARNING_TEXT[reason]} size="s" />
-          </React.Fragment>
-        ))}
-        <EuiSpacer size="m" />
-        {confirming ? (
-          <ConfirmCallout
-            kind={confirming}
-            isLoading={pending !== undefined}
-            onConfirm={confirming === 'rotate' ? rotate : () => setAccess(false)}
-            onCancel={() => setConfirming(undefined)}
-          />
-        ) : (
-          <EuiFlexGroup gutterSize="s" responsive={false}>
-            <EuiFlexItem grow={false}>
-              {withManageTooltip(
-                <EuiButton
-                  size="s"
-                  color="warning"
-                  onClick={() => setConfirming('rotate')}
-                  isDisabled={!canManageWorkflowPages || pending !== undefined}
-                  data-test-subj="workflowPageShareRotate"
-                >
-                  {ROTATE_LINK}
-                </EuiButton>
-              )}
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              {withManageTooltip(
-                <EuiButton
-                  size="s"
-                  color="danger"
-                  onClick={() => setConfirming('unpublish')}
-                  isDisabled={!canManageWorkflowPages || pending !== undefined}
-                  data-test-subj="workflowPageShareUnpublish"
-                >
-                  {UNPUBLISH}
-                </EuiButton>
-              )}
-            </EuiFlexItem>
-          </EuiFlexGroup>
+            <KbnWarningCallout
+              title={i18n.translate('workflows.pageShare.offlineTitle', {
+                defaultMessage: 'This page is offline',
+              })}
+              text={offlineExplanations.length === 1 ? offlineExplanations[0] : undefined}
+              size="s"
+              data-test-subj="workflowPageShareOfflineReasons"
+            >
+              {offlineExplanations.length > 1 ? (
+                <ul>
+                  {offlineExplanations.map((line) => (
+                    <li key={line}>{line}</li>
+                  ))}
+                </ul>
+              ) : null}
+            </KbnWarningCallout>
+          </>
         )}
+        <EuiSpacer size="m" />
+        <EuiPanel hasBorder hasShadow={false} paddingSize="none">
+          <ShareActionRow
+            title={confirming === 'rotate' ? CONFIRM.rotate.title : ROTATE_TITLE}
+            description={confirming === 'rotate' ? CONFIRM.rotate.text : ROTATE_DESCRIPTION}
+            data-test-subj={
+              confirming === 'rotate' ? 'workflowPageShareConfirm-rotate' : undefined
+            }
+            actions={
+              confirming === 'rotate' ? (
+                <ConfirmActions
+                  kind="rotate"
+                  isLoading={pending === 'rotate'}
+                  onConfirm={rotate}
+                  onCancel={() => setConfirming(undefined)}
+                />
+              ) : (
+                withManageTooltip(
+                  <EuiButton
+                    size="s"
+                    color="text"
+                    iconType="refresh"
+                    onClick={() => setConfirming('rotate')}
+                    isDisabled={
+                      !canManageWorkflowPages || pending !== undefined || confirming !== undefined
+                    }
+                    data-test-subj="workflowPageShareRotate"
+                  >
+                    {ROTATE_BUTTON}
+                  </EuiButton>
+                )
+              )
+            }
+          />
+          <EuiHorizontalRule margin="none" />
+          <ShareActionRow
+            title={confirming === 'unpublish' ? CONFIRM.unpublish.title : UNPUBLISH_TITLE}
+            description={
+              confirming === 'unpublish' ? CONFIRM.unpublish.text : UNPUBLISH_DESCRIPTION
+            }
+            data-test-subj={
+              confirming === 'unpublish' ? 'workflowPageShareConfirm-unpublish' : undefined
+            }
+            actions={
+              confirming === 'unpublish' ? (
+                <ConfirmActions
+                  kind="unpublish"
+                  isLoading={pending === 'unpublish'}
+                  onConfirm={() => setAccess(false)}
+                  onCancel={() => setConfirming(undefined)}
+                />
+              ) : (
+                withManageTooltip(
+                  <EuiButton
+                    size="s"
+                    color="danger"
+                    iconType="linkSlash"
+                    onClick={() => setConfirming('unpublish')}
+                    isDisabled={
+                      !canManageWorkflowPages || pending !== undefined || confirming !== undefined
+                    }
+                    data-test-subj="workflowPageShareUnpublish"
+                  >
+                    {UNPUBLISH}
+                  </EuiButton>
+                )
+              )
+            }
+          />
+        </EuiPanel>
       </>
     );
   };
 
-  const statusBadge = page && (
-    <EuiBadge
-      color={page.status.online ? 'success' : 'hollow'}
-      data-test-subj="workflowPageShareStatus"
-    >
-      {page.status.online
-        ? i18n.translate('workflows.pageShare.live', { defaultMessage: 'Live' })
-        : isPublished
-        ? i18n.translate('workflows.pageShare.offline', { defaultMessage: 'Offline' })
-        : i18n.translate('workflows.pageShare.draft', { defaultMessage: 'Not published' })}
+  const statusBadge = status && (
+    <EuiBadge color={status.color} data-test-subj="workflowPageShareStatus">
+      {status.label}
     </EuiBadge>
   );
 
@@ -477,9 +595,28 @@ export const WorkflowPageShareModal = ({
         {renderBody()}
       </EuiModalBody>
       <EuiModalFooter>
-        <EuiButton onClick={onClose} data-test-subj="workflowPageShareDone">
-          {i18n.translate('workflows.pageShare.done', { defaultMessage: 'Done' })}
-        </EuiButton>
+        {page && page.access == null && blockers.length === 0 ? (
+          <>
+            <EuiButtonEmpty onClick={onClose} data-test-subj="workflowPageShareCancel">
+              {CANCEL}
+            </EuiButtonEmpty>
+            {withManageTooltip(
+              <EuiButton
+                fill
+                onClick={() => setAccess(true)}
+                isLoading={pending === 'publish'}
+                isDisabled={!canManageWorkflowPages || pending !== undefined}
+                data-test-subj="workflowPageSharePublish"
+              >
+                {PUBLISH}
+              </EuiButton>
+            )}
+          </>
+        ) : (
+          <EuiButton onClick={onClose} data-test-subj="workflowPageShareDone">
+            {i18n.translate('workflows.pageShare.done', { defaultMessage: 'Done' })}
+          </EuiButton>
+        )}
       </EuiModalFooter>
     </EuiModal>
   );
