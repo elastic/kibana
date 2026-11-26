@@ -39,7 +39,15 @@ const additionText = ({ kind, field, value }: Addition): string => {
 };
 
 // The Reaches consumers of Connector column: whether consumers can use it, through which actions.
-const reachText = ({ kind, field, value, actions, reachedBy, unknownFor }: Addition): string => {
+const reachText = ({
+  kind,
+  field,
+  value,
+  actions,
+  reachedBy,
+  unknownFor,
+  graphql,
+}: Addition): string => {
   const named = (names: readonly string[]) => listed(names.map(code));
   if (reachedBy.length === 0) {
     if (unknownFor.length > 0) {
@@ -48,7 +56,8 @@ const reachText = ({ kind, field, value, actions, reachedBy, unknownFor }: Addit
       } with it wasn't recorded`;
     }
     if (kind === 'response-field') {
-      return 'No, no action passes it along';
+      // A GraphQL response only has what the query selects.
+      return graphql ? "No, no action's query selects it" : 'No, no action passes it along';
     }
     return kind === 'request-value'
       ? `No, no action sends ${code(field)}`
@@ -108,9 +117,9 @@ export const additionsSectionOf = (drift: ConnectorDrift): string[] => {
           '|---|---|---|---|',
           ...shownAdditions.map(
             (addition) =>
-              `| ${code(addition.operation)} | ${additionText(addition)} | ${addition.actions
-                .map(code)
-                .join(', ')} | ${reachText(addition)} |`
+              `| ${addition.operations.map(code).join('<br>')} | ${additionText(
+                addition
+              )} | ${addition.actions.map(code).join(', ')} | ${reachText(addition)} |`
           ),
           ...(additions.length > shownAdditions.length
             ? [

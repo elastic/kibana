@@ -1,0 +1,50 @@
+{
+  "getBoardInfo": {
+    "queries": [
+      {
+        "method": "POST",
+        "path": "/mcp"
+      }
+    ]
+  },
+  "getBoardItemsPage": {
+    "queries": [
+      {
+        "method": "POST",
+        "path": "/mcp"
+      }
+    ]
+  },
+  "getUpdates": {
+    "queries": [
+      {
+        "method": "POST",
+        "path": "/mcp"
+      }
+    ]
+  },
+  "listTools": {
+    "queries": [
+      {
+        "method": "POST",
+        "path": "/mcp"
+      }
+    ]
+  },
+  "search": {
+    "queries": [
+      {
+        "method": "POST",
+        "path": "/mcp"
+      }
+    ]
+  },
+  "whoAmI": {
+    "queries": [
+      {
+        "method": "POST",
+        "path": "/mcp"
+      }
+    ]
+  }
+}

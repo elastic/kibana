@@ -69,8 +69,13 @@ const RESPONSE_CHANGE = /^(response-|api-schema-removed$)/;
 const VERIFIED_BY_FIELD_USE =
   /^(response-(body|mediatype|((required|optional)-)?(write-only-)?property)-|api-schema-removed$)/;
 
+// A new default changes what a request that leaves the parameter out gets, which its mock run
+// doesn't see: the mock accepts either.
+const DEFAULT_CHANGE = /-default-value-changed$/;
+
 /** Whether running an action against the latest spec verifies this change. */
-export const isVerifiedByRunning = (id: string): boolean => REQUEST_CHANGE.test(id);
+export const isVerifiedByRunning = (id: string): boolean =>
+  REQUEST_CHANGE.test(id) && !DEFAULT_CHANGE.test(id);
 
 /** Whether comparing the response fields an action reads verifies this change. */
 export const isVerifiedByFieldUse = (id: string): boolean => VERIFIED_BY_FIELD_USE.test(id);

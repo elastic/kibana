@@ -512,3 +512,144 @@ describe('recordActions', () => {
     });
   });
 });
+
+describe('recordActions with a GraphQL spec', () => {
+  const GRAPHQL = 'https://api.example.com/graphql';
+  const sdl = `
+    type Query { boards(ids: [ID!], limit: Int): [Board!]! }
+    type Mutation { archiveItem(itemId: ID!, options: ArchiveOptions): Item }
+    input ArchiveOptions { reason: String, notify: Boolean }
+    type Board { id: ID!, name: String!, items: [Item!]! }
+    type Item { id: ID!, name: String! }
+  `;
+  const graphqlConnector: ConnectorSpec = {
+    ...connector,
+    auth: { types: ['none'] },
+    actions: {
+      listBoards: action(z.object({}), async ({ client }) => {
+        const { data } = await client.post(GRAPHQL, {
+          query: 'query Boards($ids: [ID!]) { all: boards(ids: $ids) { name items { id } } }',
+          variables: { ids: ['1'] },
+        });
+        return data.data.all.map(({ name }: { name: string }) => name);
+      }),
+      archiveItem: action(
+        z.object({}),
+        async ({ client }) =>
+          (
+            await client.post(GRAPHQL, {
+              query:
+                'mutation { archiveItem(itemId: "1", options: { reason: "done" }) { id name } }',
+            })
+          ).data.data.archiveItem,
+        'write'
+      ),
+    },
+  };
+
+  it('records the root fields the actions select, with their field use', async () => {
+    const recording = await recordActions({
+      connector: graphqlConnector,
+      specs: { api: { format: 'graphql', sdl, endpoints: [GRAPHQL] } },
+      trackFields: true,
+    });
+
+    expect(recording.operations).toEqual({
+      archiveItem: [{ source: 'api', name: 'mutation archiveItem' }],
+      listBoards: [{ source: 'api', name: 'query boards' }],
+    });
+    // A query is read-only, though it is sent with POST
+    expect(recording.findings).toEqual([]);
+    expect(recording.fieldUse?.listBoards['api QUERY boards']).toEqual({
+      read: ['items', 'items/name'],
+      copied: [],
+      returned: [],
+      sent: ['ids', 'ids/items'],
+      selected: ['items', 'items/id', 'name'],
+      values: ['ids/items=1'],
+      occurrences: ['(ids)', 'items()', 'items/id()', 'name()'],
+    });
+    expect(recording.fieldUse?.archiveItem['api MUTATION archiveItem']).toEqual({
+      read: [],
+      copied: [],
+      returned: [''],
+      sent: ['itemId', 'options', 'options/reason'],
+      selected: ['id', 'name'],
+      occurrences: ['(itemId,options)', 'id()', 'name()'],
+    });
+  });
+});
+
+describe('recordActions with GraphQL aliases, fragments, nested arguments and GET requests', () => {
+  const GRAPHQL = 'https://api.example.com/graphql';
+  const sdl = `
+    type Query { items(limit: Int): [Item!]! }
+    type Item { id: ID!, name: String!, updates(limit: Int = 5, source: Source): [String!] }
+    enum Source { X, Y }
+  `;
+  const post = (query: string, variables?: Record<string, unknown>) =>
+    action(z.object({}), async ({ client }) => {
+      const { data } = await client.post(GRAPHQL, { query, variables });
+      return data.data;
+    });
+  const graphqlConnector: ConnectorSpec = {
+    ...connector,
+    auth: { types: ['none'] },
+    actions: {
+      // Reads the response by the alias the query gave, and sends an argument below the root
+      aliased: action(z.object({}), async ({ client }) => {
+        const { data } = await client.post(GRAPHQL, {
+          query: 'query { items { label: name updates(limit: 2, source: X) } }',
+        });
+        return data.data.items.map(({ label }: { label: string }) => label);
+      }),
+      // The root field is selected under fragments, inline and named
+      rootFragment: post(
+        'query { ... on Query { ...Root } } fragment Root on Query { items { id } }'
+      ),
+      // The variables of a nested argument
+      variables: post('query Q($limit: Int) { items { updates(limit: $limit) } }', { limit: 3 }),
+      // A query in the URL of a GET
+      viaGet: action(z.object({}), async ({ client }) => {
+        const { data } = await client.get(GRAPHQL, {
+          params: {
+            query: 'query($limit: Int) { items(limit: $limit) { name } }',
+            variables: JSON.stringify({ limit: 1 }),
+          },
+        });
+        return data.data.items.map(({ name }: { name: string }) => name);
+      }),
+    },
+  };
+
+  it('records aliases, selections under root fragments, nested arguments and GET queries', async () => {
+    const recording = await recordActions({
+      connector: graphqlConnector,
+      specs: { api: { format: 'graphql', sdl, endpoints: [GRAPHQL] } },
+      trackFields: true,
+    });
+
+    expect(recording.findings).toEqual([]);
+    const use = (name: string) => recording.fieldUse?.[name]['api QUERY items'];
+    expect(use('aliased')).toMatchObject({
+      read: ['items', 'items/label'],
+      selected: ['name', 'updates'],
+      // The key a handler reads, and the field it stands for
+      aliased: ['label=name'],
+      sent: ['updates(limit:)', 'updates(source:)'],
+    });
+    // The enum value sent, and what each selection of a field sent, so a default that applies
+    // when an argument is left out can be told from one that doesn't
+    expect(use('aliased')).toMatchObject({
+      values: ['updates(source:)=X'],
+      occurrences: ['()', 'name()', 'updates(limit,source)'],
+    });
+    expect(use('rootFragment')).toMatchObject({ selected: ['id'] });
+    expect(use('variables')).toMatchObject({ sent: ['updates(limit:)'] });
+    expect(use('viaGet')).toMatchObject({
+      read: ['items', 'items/name'],
+      selected: ['name'],
+      sent: ['limit'],
+    });
+  });
+});

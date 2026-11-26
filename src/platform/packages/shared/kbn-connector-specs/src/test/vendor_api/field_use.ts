@@ -21,6 +21,28 @@ export interface FieldUse {
   readonly returned: Set<string>;
   /** Fields of the JSON request bodies the handler sent, and query parameters as `?name`. */
   readonly sent: Set<string>;
+  /**
+   * GraphQL only: the fields the query selects, by name from the root field, without list
+   * elements; a GraphQL response has nothing else.
+   */
+  readonly selected: Set<string>;
+  /**
+   * GraphQL only: the fields the query selects under another name, as `alias path=field name`,
+   * the path being the response keys from the root field, so what a handler reads under an alias
+   * can be traced to the field.
+   */
+  readonly aliased: Set<string>;
+  /**
+   * GraphQL only: the enum values and other strings sent as arguments, as `argument path=value`,
+   * the path as in `sent`. The schema says which of them are enum values.
+   */
+  readonly values: Set<string>;
+  /**
+   * GraphQL only: each time the query selects a field, the arguments it sent to it, as
+   * `field path(argument,argument)`, with the root field at the path `''`. A field selected
+   * twice, or in several queries, is there once for each different set.
+   */
+  readonly occurrences: Set<string>;
 }
 
 export const createFieldUse = (): FieldUse => ({
@@ -28,6 +50,10 @@ export const createFieldUse = (): FieldUse => ({
   copied: new Set(),
   returned: new Set(),
   sent: new Set(),
+  selected: new Set(),
+  aliased: new Set(),
+  values: new Set(),
+  occurrences: new Set(),
 });
 
 // Properties that every object answers, or that runtimes and test tools ask for; not fields.

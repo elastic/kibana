@@ -31,7 +31,10 @@ export const REVIEW_LABELS: Record<ReviewKind, string> = {
 
 /** How the summary says that passing actions are affected by a kind of change, one or several. */
 export const AFFECTED: Record<ReviewKind, readonly [string, string]> = {
-  deprecated: ['passes but calls a deprecated endpoint', 'pass but call deprecated endpoints'],
+  deprecated: [
+    'passes but uses a deprecated endpoint or field',
+    'pass but use deprecated endpoints or fields',
+  ],
   sunset: [
     'passes but calls an endpoint with a sunset date',
     'pass but call endpoints with a sunset date',
