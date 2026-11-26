@@ -213,12 +213,20 @@
       "apiVersion": "2021-08-08",
       "fetchedAt": "2026-10-07T20:19:42.490Z",
       "format": "swagger",
+      "latest": {
+        "pattern": "stable/(\\d{4}-\\d{2}-\\d{2})",
+        "url": "https://api.github.com/repos/Azure/azure-rest-api-specs/contents/specification/alertsmanagement/resource-manager/Microsoft.AlertsManagement/AlertProcessingRules/stable"
+      },
       "url": "https://raw.githubusercontent.com/Azure/azure-rest-api-specs/main/specification/alertsmanagement/resource-manager/Microsoft.AlertsManagement/AlertProcessingRules/stable/2021-08-08/AlertProcessingRules.json"
     },
     "alerts_management": {
       "apiVersion": "2019-03-01",
       "fetchedAt": "2026-10-07T20:58:09.584Z",
       "format": "swagger",
+      "latest": {
+        "pattern": "stable/(\\d{4}-\\d{2}-\\d{2})",
+        "url": "https://api.github.com/repos/Azure/azure-rest-api-specs/contents/specification/alertsmanagement/resource-manager/Microsoft.AlertsManagement/AlertsManagement/stable"
+      },
       "url": "https://raw.githubusercontent.com/Azure/azure-rest-api-specs/main/specification/alertsmanagement/resource-manager/Microsoft.AlertsManagement/AlertsManagement/stable/2019-03-01/AlertsManagement.json"
     },
     "log_analytics_query": {

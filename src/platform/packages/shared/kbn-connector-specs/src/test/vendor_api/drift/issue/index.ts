@@ -52,7 +52,8 @@ const problemsOutsideActions = (drift: ConnectorDrift, found: DriftConclusions):
   found.attention.unattached +
   found.stale.length +
   Object.values(drift.sources).filter(
-    ({ status, changes }) => status === 'unreachable' || (status === 'changed' && !changes)
+    ({ status, changes, newerVersion }) =>
+      status === 'unreachable' || newerVersion !== undefined || (status === 'changed' && !changes)
   ).length;
 
 /**

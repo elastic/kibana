@@ -611,6 +611,13 @@ export const updateVendorApi = async ({
       ...(name in protocols && endpoints ? { endpoints: [...endpoints] } : {}),
       ...(tools === undefined ? {} : { tools: [...tools] }),
       ...(isCaptured(name) ? { captured: true as const } : {}),
+      // Moving a pinned source to the vendor's next version is how it is refreshed, so both marks
+      // stay; remove them by hand once a source follows the vendor. A capture replaces the source
+      // with one that is never fetched, which can't also be pinned or follow a release page.
+      ...(!isCaptured(name) && previous?.sources[name]?.pinned ? { pinned: true as const } : {}),
+      ...(!isCaptured(name) && previous?.sources[name]?.latest
+        ? { latest: previous.sources[name].latest }
+        : {}),
       ...(pages === undefined ? {} : { pages: [...pages] }),
       ...(apiVersion === undefined ? {} : { apiVersion }),
       fetchedAt: fetchedAt ?? now().toISOString(),

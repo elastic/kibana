@@ -19,10 +19,16 @@ import { cell, code, link, listed } from './issue_markdown';
 export const LAST_CHECKED_ROW = '| **Last checked** |';
 
 // What the check found, for the Result row; vendor drift needn't come from a failing action.
-const resultOf = (verdict: ConnectorDrift['verdict'], actionsFail: boolean): string => {
+const resultOf = (
+  verdict: ConnectorDrift['verdict'],
+  actionsFail: boolean,
+  newerUnchecked: boolean
+): string => {
   switch (verdict) {
     case 'healthy':
-      return 'Every checked action passes against the committed snapshot and the latest spec';
+      return newerUnchecked
+        ? 'Every checked action passes against the committed snapshot and the spec at the source URL; the newer vendor version is not checked yet'
+        : 'Every checked action passes against the committed snapshot and the latest spec';
     case 'vendor-drift':
       return actionsFail
         ? 'Vendor drift: passes against the committed snapshot, fails against the latest spec'
@@ -44,12 +50,22 @@ export const factsOf = (
   const { failing } = found;
   const facts: string[] = [
     `| **Connector** | ${link(code(drift.connector), folder)} |`,
-    `| **Result** | ${resultOf(drift.verdict, failing.length > 0)} |`,
+    `| **Result** | ${resultOf(
+      drift.verdict,
+      failing.length > 0,
+      Object.values(drift.sources).some(({ newerVersion }) => newerVersion !== undefined)
+    )} |`,
   ];
-  for (const [source, { status, error, url, servers }] of Object.entries(drift.sources)) {
-    const latest = url ? `[Latest](${url})` : 'Latest';
-    const state =
-      status === 'unreachable' ? `unreachable: ${code(error ?? 'unknown error')}` : status;
+  for (const [source, { status, error, url, servers, newerVersion }] of Object.entries(
+    drift.sources
+  )) {
+    // With a newer version announced, the spec at the URL is the one checked, not the latest.
+    const specLabel = newerVersion ? 'Checked' : 'Latest';
+    const latest = url ? `[${specLabel}](${url})` : specLabel;
+    const state = [
+      status === 'unreachable' ? `unreachable: ${code(error ?? 'unknown error')}` : status,
+      ...(newerVersion ? [`newer version ${code(newerVersion.latest)}`] : []),
+    ].join(', ');
     facts.push(
       `| **Vendor spec ${code(source)}** | ${latest} (${cell(state)}) · ${link(
         'Committed snapshot',

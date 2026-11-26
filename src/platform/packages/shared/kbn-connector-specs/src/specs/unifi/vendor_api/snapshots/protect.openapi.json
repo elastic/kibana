@@ -342,6 +342,13 @@
             },
             "type": "object"
           },
+          "deviceTamperStatus": {
+            "enum": [
+              "tampered",
+              "restored"
+            ],
+            "type": "string"
+          },
           "emergencyTerminalStatus": {
             "properties": {
               "idleSubState": {
@@ -835,7 +842,7 @@
           ],
           "type": "string"
         },
-        "title": "objectTypes",
+        "title": "audioTypes",
         "type": "array"
       },
       "batteryStatus": {
@@ -857,6 +864,9 @@
         "properties": {
           "clients": {
             "$ref": "#/components/schemas/bridgeClients"
+          },
+          "guid": {
+            "$ref": "#/components/schemas/deviceGuid"
           },
           "id": {
             "$ref": "#/components/schemas/bridgeId"
@@ -885,6 +895,9 @@
           },
           "state": {
             "$ref": "#/components/schemas/deviceState"
+          },
+          "type": {
+            "$ref": "#/components/schemas/deviceType"
           }
         },
         "required": [
@@ -892,6 +905,8 @@
           "modelKey",
           "state",
           "name",
+          "type",
+          "guid",
           "mac",
           "platform",
           "clients",
@@ -942,6 +957,9 @@
           "featureFlags": {
             "$ref": "#/components/schemas/cameraFeatureFlags"
           },
+          "guid": {
+            "$ref": "#/components/schemas/deviceGuid"
+          },
           "hasPackageCamera": {
             "$ref": "#/components/schemas/hasPackageCamera"
           },
@@ -988,6 +1006,9 @@
           "state": {
             "$ref": "#/components/schemas/deviceState"
           },
+          "type": {
+            "$ref": "#/components/schemas/deviceType"
+          },
           "videoMode": {
             "$ref": "#/components/schemas/videoMode"
           }
@@ -997,6 +1018,8 @@
           "modelKey",
           "state",
           "name",
+          "type",
+          "guid",
           "mac",
           "isMicEnabled",
           "osdSettings",
@@ -1070,7 +1093,8 @@
                 "sport",
                 "slowShutter",
                 "lprReflex",
-                "lprNoneReflex"
+                "lprNoneReflex",
+                "antiFlicker"
               ],
               "type": "string"
             },
@@ -1107,6 +1131,9 @@
             },
             "type": "array"
           },
+          "guid": {
+            "$ref": "#/components/schemas/deviceGuid"
+          },
           "id": {
             "$ref": "#/components/schemas/chimeId"
           },
@@ -1134,6 +1161,9 @@
           },
           "state": {
             "$ref": "#/components/schemas/deviceState"
+          },
+          "type": {
+            "$ref": "#/components/schemas/deviceType"
           }
         },
         "required": [
@@ -1141,6 +1171,8 @@
           "modelKey",
           "state",
           "name",
+          "type",
+          "guid",
           "mac",
           "cameraIds",
           "ringSettings"
@@ -1157,6 +1189,13 @@
         "title": "chimeModelKey",
         "type": "string"
       },
+      "deviceGuid": {
+        "title": "deviceGuid",
+        "type": [
+          "string",
+          "null"
+        ]
+      },
       "deviceState": {
         "enum": [
           "CONNECTED",
@@ -1165,6 +1204,13 @@
         ],
         "title": "deviceState",
         "type": "string"
+      },
+      "deviceType": {
+        "title": "deviceType",
+        "type": [
+          "string",
+          "null"
+        ]
       },
       "doorbellSettings": {
         "properties": {
@@ -1217,6 +1263,9 @@
       },
       "fob": {
         "properties": {
+          "armControlSettings": {
+            "$ref": "#/components/schemas/fobArmControlSettings"
+          },
           "awayState": {
             "$ref": "#/components/schemas/fobAwayState"
           },
@@ -1226,8 +1275,14 @@
           "featureFlags": {
             "$ref": "#/components/schemas/fobFeatureFlags"
           },
+          "guid": {
+            "$ref": "#/components/schemas/deviceGuid"
+          },
           "id": {
             "$ref": "#/components/schemas/fobId"
+          },
+          "keypadSettings": {
+            "$ref": "#/components/schemas/fobKeypadSettings"
           },
           "mac": {
             "$ref": "#/components/schemas/mac"
@@ -1248,6 +1303,9 @@
           "state": {
             "$ref": "#/components/schemas/deviceState"
           },
+          "type": {
+            "$ref": "#/components/schemas/deviceType"
+          },
           "wirelessConnectionState": {
             "$ref": "#/components/schemas/wirelessConnectionState"
           }
@@ -1257,13 +1315,43 @@
           "modelKey",
           "state",
           "name",
+          "type",
+          "guid",
           "mac",
           "awayState",
           "buttonLabels",
           "featureFlags",
+          "armControlSettings",
+          "keypadSettings",
           "wirelessConnectionState"
         ],
         "title": "fob",
+        "type": "object"
+      },
+      "fobArmControlSettings": {
+        "properties": {
+          "armProfileId": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "nightProfileId": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "enabled",
+          "armProfileId",
+          "nightProfileId"
+        ],
+        "title": "fobArmControlSettings",
         "type": "object"
       },
       "fobAwayState": {
@@ -1296,7 +1384,8 @@
             "left",
             "right",
             "input1",
-            "input2"
+            "input2",
+            "main"
           ],
           "type": "string"
         },
@@ -1307,10 +1396,14 @@
         "properties": {
           "buttons": {
             "$ref": "#/components/schemas/fobButtons"
+          },
+          "hasKeypad": {
+            "type": "boolean"
           }
         },
         "required": [
-          "buttons"
+          "buttons",
+          "hasKeypad"
         ],
         "title": "fobFeatureFlags",
         "type": "object"
@@ -1318,6 +1411,24 @@
       "fobId": {
         "title": "fobId",
         "type": "string"
+      },
+      "fobKeypadSettings": {
+        "properties": {
+          "beepEnabled": {
+            "type": "boolean"
+          },
+          "beepVolume": {
+            "maximum": 100,
+            "minimum": 0,
+            "type": "integer"
+          }
+        },
+        "required": [
+          "beepEnabled",
+          "beepVolume"
+        ],
+        "title": "fobKeypadSettings",
+        "type": "object"
       },
       "fobModelKey": {
         "const": "fob",
@@ -1517,6 +1628,9 @@
               }
             ]
           },
+          "guid": {
+            "$ref": "#/components/schemas/deviceGuid"
+          },
           "id": {
             "$ref": "#/components/schemas/lightId"
           },
@@ -1559,6 +1673,9 @@
           },
           "state": {
             "$ref": "#/components/schemas/deviceState"
+          },
+          "type": {
+            "$ref": "#/components/schemas/deviceType"
           }
         },
         "required": [
@@ -1566,6 +1683,8 @@
           "modelKey",
           "state",
           "name",
+          "type",
+          "guid",
           "mac",
           "lightModeSettings",
           "lightDeviceSettings",
@@ -1671,6 +1790,9 @@
           "alarmHub": {
             "$ref": "#/components/schemas/alarmHubStatus"
           },
+          "guid": {
+            "$ref": "#/components/schemas/deviceGuid"
+          },
           "id": {
             "$ref": "#/components/schemas/linkStationId"
           },
@@ -1701,6 +1823,12 @@
           },
           "state": {
             "$ref": "#/components/schemas/deviceState"
+          },
+          "threadState": {
+            "$ref": "#/components/schemas/linkStationThreadState"
+          },
+          "type": {
+            "$ref": "#/components/schemas/deviceType"
           }
         },
         "required": [
@@ -1708,10 +1836,13 @@
           "modelKey",
           "state",
           "name",
+          "type",
+          "guid",
           "mac",
           "isAlarmHub",
           "ledSettings",
-          "lastEvent"
+          "lastEvent",
+          "threadState"
         ],
         "title": "linkStation",
         "type": "object"
@@ -1745,6 +1876,107 @@
           "isEnabled"
         ],
         "title": "linkStationLedSettings",
+        "type": "object"
+      },
+      "linkStationThreadNetwork": {
+        "properties": {
+          "channel": {
+            "maximum": 26,
+            "minimum": 11,
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "errorReason": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "extendedPanId": {
+            "maxLength": 16,
+            "minLength": 16,
+            "pattern": "^[0-9a-fA-F]+$",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "joinedDeviceCount": {
+            "minimum": 0,
+            "type": "integer"
+          },
+          "lastUpdatedAt": {
+            "type": "number"
+          },
+          "networkName": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "panId": {
+            "maxLength": 4,
+            "minLength": 4,
+            "pattern": "^[0-9a-fA-F]+$",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "role": {
+            "enum": [
+              "disabled",
+              "detached",
+              "child",
+              "router",
+              "leader"
+            ],
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "status": {
+            "enum": [
+              "ready",
+              "error"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "status",
+          "role",
+          "networkName",
+          "channel",
+          "panId",
+          "extendedPanId",
+          "joinedDeviceCount",
+          "errorReason",
+          "lastUpdatedAt"
+        ],
+        "title": "linkStationThreadNetwork",
+        "type": "object"
+      },
+      "linkStationThreadState": {
+        "properties": {
+          "network": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/linkStationThreadNetwork"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "network"
+        ],
+        "title": "linkStationThreadState",
         "type": "object"
       },
       "linkstationModelKey": {
@@ -1797,8 +2029,17 @@
           "doorbellSettings": {
             "$ref": "#/components/schemas/doorbellSettings"
           },
+          "featureFlags": {
+            "$ref": "#/components/schemas/nvrFeatureFlags"
+          },
+          "guid": {
+            "$ref": "#/components/schemas/nvrGuid"
+          },
           "id": {
             "$ref": "#/components/schemas/nvrId"
+          },
+          "mac": {
+            "$ref": "#/components/schemas/mac"
           },
           "modelKey": {
             "$ref": "#/components/schemas/nvrModelKey"
@@ -1812,12 +2053,19 @@
                 "type": "null"
               }
             ]
+          },
+          "type": {
+            "$ref": "#/components/schemas/nvrType"
           }
         },
         "required": [
           "id",
           "modelKey",
           "name",
+          "type",
+          "guid",
+          "mac",
+          "featureFlags",
           "doorbellSettings",
           "armMode"
         ],
@@ -1888,6 +2136,25 @@
         "title": "nvrArmMode",
         "type": "object"
       },
+      "nvrFeatureFlags": {
+        "properties": {
+          "useExternalAlarmManager": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "useExternalAlarmManager"
+        ],
+        "title": "nvrFeatureFlags",
+        "type": "object"
+      },
+      "nvrGuid": {
+        "title": "nvrGuid",
+        "type": [
+          "string",
+          "null"
+        ]
+      },
       "nvrId": {
         "title": "nvrId",
         "type": "string"
@@ -1895,6 +2162,10 @@
       "nvrModelKey": {
         "const": "nvr",
         "title": "nvrModelKey",
+        "type": "string"
+      },
+      "nvrType": {
+        "title": "nvrType",
         "type": "string"
       },
       "objectTypes": {
@@ -1974,6 +2245,9 @@
       },
       "relay": {
         "properties": {
+          "guid": {
+            "$ref": "#/components/schemas/deviceGuid"
+          },
           "id": {
             "$ref": "#/components/schemas/relayId"
           },
@@ -2005,6 +2279,9 @@
           "state": {
             "$ref": "#/components/schemas/deviceState"
           },
+          "type": {
+            "$ref": "#/components/schemas/deviceType"
+          },
           "wirelessConnectionState": {
             "$ref": "#/components/schemas/wirelessConnectionState"
           }
@@ -2014,6 +2291,8 @@
           "modelKey",
           "state",
           "name",
+          "type",
+          "guid",
           "mac",
           "ledSettings",
           "outputs",
@@ -2292,8 +2571,14 @@
           "externalLeakDetectedAt": {
             "$ref": "#/components/schemas/sensorExternalLeakDetectedAt"
           },
+          "featureFlags": {
+            "$ref": "#/components/schemas/sensorFeatureFlags"
+          },
           "glassBreakSettings": {
             "$ref": "#/components/schemas/glassBreakSettings"
+          },
+          "guid": {
+            "$ref": "#/components/schemas/deviceGuid"
           },
           "hasCustomSensitivityWhenArmed": {
             "$ref": "#/components/schemas/sensorHasCustomSensitivityWhenArmed"
@@ -2306,6 +2591,9 @@
           },
           "isMotionDetected": {
             "$ref": "#/components/schemas/sensorIsMotionDetected"
+          },
+          "isMountedIncorrectly": {
+            "$ref": "#/components/schemas/sensorIsMountedIncorrectly"
           },
           "isOpened": {
             "$ref": "#/components/schemas/sensorIsOpened"
@@ -2362,6 +2650,9 @@
           "temperatureSettings": {
             "$ref": "#/components/schemas/temperatureSettings"
           },
+          "type": {
+            "$ref": "#/components/schemas/deviceType"
+          },
           "wirelessConnectionState": {
             "$ref": "#/components/schemas/wirelessConnectionState"
           }
@@ -2371,6 +2662,8 @@
           "modelKey",
           "state",
           "name",
+          "type",
+          "guid",
           "mac",
           "mountType",
           "batteryStatus",
@@ -2393,6 +2686,7 @@
           "externalLeakDetectedAt",
           "leakSettings",
           "tamperingDetectedAt",
+          "isMountedIncorrectly",
           "wirelessConnectionState"
         ],
         "title": "sensor",
@@ -2424,6 +2718,36 @@
           "null"
         ]
       },
+      "sensorFeatureFlags": {
+        "properties": {
+          "humidity": {
+            "$ref": "#/components/schemas/sensorIntegrationFeatureCapability"
+          },
+          "light": {
+            "$ref": "#/components/schemas/sensorIntegrationFeatureCapability"
+          },
+          "motion": {
+            "$ref": "#/components/schemas/sensorIntegrationFeatureCapability"
+          },
+          "open": {
+            "$ref": "#/components/schemas/sensorIntegrationFeatureCapability"
+          },
+          "smoke": {
+            "$ref": "#/components/schemas/sensorIntegrationFeatureCapability"
+          },
+          "tamper": {
+            "$ref": "#/components/schemas/sensorIntegrationFeatureCapability"
+          },
+          "temperature": {
+            "$ref": "#/components/schemas/sensorIntegrationFeatureCapability"
+          },
+          "waterLeak": {
+            "$ref": "#/components/schemas/sensorIntegrationFeatureCapability"
+          }
+        },
+        "title": "sensorFeatureFlags",
+        "type": "object"
+      },
       "sensorHasCustomSensitivityWhenArmed": {
         "title": "sensorHasCustomSensitivityWhenArmed",
         "type": "boolean"
@@ -2432,9 +2756,30 @@
         "title": "sensorId",
         "type": "string"
       },
+      "sensorIntegrationFeatureCapability": {
+        "additionalProperties": false,
+        "properties": {
+          "channelCount": {
+            "exclusiveMinimum": 0,
+            "type": "integer"
+          }
+        },
+        "required": [
+          "channelCount"
+        ],
+        "title": "sensorIntegrationFeatureCapability",
+        "type": "object"
+      },
       "sensorIsMotionDetected": {
         "title": "sensorIsMotionDetected",
         "type": "boolean"
+      },
+      "sensorIsMountedIncorrectly": {
+        "title": "sensorIsMountedIncorrectly",
+        "type": [
+          "boolean",
+          "null"
+        ]
       },
       "sensorIsOpened": {
         "title": "sensorIsOpened",
@@ -2598,6 +2943,9 @@
           "connectionType": {
             "$ref": "#/components/schemas/sirenConnectionType"
           },
+          "guid": {
+            "$ref": "#/components/schemas/deviceGuid"
+          },
           "id": {
             "$ref": "#/components/schemas/sirenId"
           },
@@ -2626,6 +2974,9 @@
           "state": {
             "$ref": "#/components/schemas/deviceState"
           },
+          "type": {
+            "$ref": "#/components/schemas/deviceType"
+          },
           "volume": {
             "$ref": "#/components/schemas/sirenVolume"
           },
@@ -2638,6 +2989,8 @@
           "modelKey",
           "state",
           "name",
+          "type",
+          "guid",
           "mac",
           "volume",
           "ledSettings",
@@ -2779,6 +3132,9 @@
           "featureFlags": {
             "$ref": "#/components/schemas/speakerFeatureFlags"
           },
+          "guid": {
+            "$ref": "#/components/schemas/deviceGuid"
+          },
           "id": {
             "$ref": "#/components/schemas/speakerId"
           },
@@ -2810,6 +3166,9 @@
           "state": {
             "$ref": "#/components/schemas/deviceState"
           },
+          "type": {
+            "$ref": "#/components/schemas/deviceType"
+          },
           "volume": {
             "$ref": "#/components/schemas/speakerVolume"
           }
@@ -2819,6 +3178,8 @@
           "modelKey",
           "state",
           "name",
+          "type",
+          "guid",
           "mac",
           "volume",
           "micVolume",
@@ -2949,13 +3310,17 @@
           "sport",
           "slowShutter",
           "lprReflex",
-          "lprNoneReflex"
+          "lprNoneReflex",
+          "antiFlicker"
         ],
         "title": "videoMode",
         "type": "string"
       },
       "viewer": {
         "properties": {
+          "guid": {
+            "$ref": "#/components/schemas/deviceGuid"
+          },
           "id": {
             "$ref": "#/components/schemas/viewerId"
           },
@@ -2990,6 +3355,9 @@
           },
           "streamLimit": {
             "$ref": "#/components/schemas/streamLimit"
+          },
+          "type": {
+            "$ref": "#/components/schemas/deviceType"
           }
         },
         "required": [
@@ -2997,6 +3365,8 @@
           "modelKey",
           "state",
           "name",
+          "type",
+          "guid",
           "mac",
           "liveview",
           "streamLimit"

@@ -202,15 +202,15 @@
   "sources": {
     "logs": {
       "apiVersion": "2014-03-28",
-      "fetchedAt": "2026-11-01T19:45:14.934Z",
+      "fetchedAt": "2026-11-20T21:22:51.446Z",
       "format": "smithy",
-      "url": "https://raw.githubusercontent.com/aws/api-models-aws/1b9ff13fe6c28ea9774a527e53cda6a3b91369dc/models/cloudwatch-logs/service/2014-03-28/cloudwatch-logs-2014-03-28.json"
+      "url": "https://raw.githubusercontent.com/aws/api-models-aws/main/models/cloudwatch-logs/service/2014-03-28/cloudwatch-logs-2014-03-28.json"
     },
     "metrics": {
       "apiVersion": "2010-08-01",
       "fetchedAt": "2026-11-01T19:45:15.166Z",
       "format": "smithy",
-      "url": "https://raw.githubusercontent.com/aws/api-models-aws/1b9ff13fe6c28ea9774a527e53cda6a3b91369dc/models/cloudwatch/service/2010-08-01/cloudwatch-2010-08-01.json"
+      "url": "https://raw.githubusercontent.com/aws/api-models-aws/main/models/cloudwatch/service/2010-08-01/cloudwatch-2010-08-01.json"
     }
   }
 }

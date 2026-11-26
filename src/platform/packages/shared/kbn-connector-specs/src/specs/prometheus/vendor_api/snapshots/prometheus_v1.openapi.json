@@ -1,6 +1,28 @@
 {
   "components": {
     "schemas": {
+      "ActualCost": {
+        "additionalProperties": false,
+        "properties": {
+          "peakSamples": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "samplesRead": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "seriesTouched": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "seriesTouched",
+          "samplesRead"
+        ],
+        "type": "object"
+      },
       "Alert": {
         "additionalProperties": false,
         "properties": {
@@ -77,6 +99,24 @@
         "required": [
           "status",
           "data"
+        ],
+        "type": "object"
+      },
+      "CostEstimate": {
+        "additionalProperties": false,
+        "properties": {
+          "samplesRead": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "seriesTouched": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "seriesTouched",
+          "samplesRead"
         ],
         "type": "object"
       },
@@ -309,11 +349,30 @@
         "additionalProperties": true,
         "type": "object"
       },
+      "QueryCostComparison": {
+        "additionalProperties": false,
+        "properties": {
+          "actual": {
+            "$ref": "#/components/schemas/ActualCost"
+          },
+          "estimated": {
+            "$ref": "#/components/schemas/CostEstimate"
+          }
+        },
+        "required": [
+          "estimated",
+          "actual"
+        ],
+        "type": "object"
+      },
       "QueryData": {
         "anyOf": [
           {
             "additionalProperties": false,
             "properties": {
+              "cost": {
+                "$ref": "#/components/schemas/QueryCostComparison"
+              },
               "result": {
                 "items": {
                   "anyOf": [
@@ -346,6 +405,9 @@
           {
             "additionalProperties": false,
             "properties": {
+              "cost": {
+                "$ref": "#/components/schemas/QueryCostComparison"
+              },
               "result": {
                 "items": {
                   "anyOf": [
@@ -378,6 +440,9 @@
           {
             "additionalProperties": false,
             "properties": {
+              "cost": {
+                "$ref": "#/components/schemas/QueryCostComparison"
+              },
               "result": {
                 "items": {
                   "oneOf": [
@@ -412,6 +477,9 @@
           {
             "additionalProperties": false,
             "properties": {
+              "cost": {
+                "$ref": "#/components/schemas/QueryCostComparison"
+              },
               "result": {
                 "items": {
                   "type": "string"
@@ -522,6 +590,10 @@
                   "type": "array"
                 },
                 "type": "array"
+              },
+              "seriesTouched": {
+                "format": "int64",
+                "type": "integer"
               },
               "totalQueryableSamples": {
                 "type": "integer"
@@ -1020,6 +1092,53 @@
             "schema": {
               "type": "string"
             }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "cost",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "max_series",
+            "required": false,
+            "schema": {
+              "format": "int64",
+              "type": "integer"
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "max_samples_read",
+            "required": false,
+            "schema": {
+              "format": "int64",
+              "type": "integer"
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "max_query_duration",
+            "required": false,
+            "schema": {
+              "oneOf": [
+                {
+                  "format": "duration",
+                  "type": "string"
+                },
+                {
+                  "format": "float",
+                  "type": "number"
+                }
+              ]
+            }
           }
         ],
         "responses": {
@@ -1164,6 +1283,53 @@
             "required": false,
             "schema": {
               "type": "string"
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "cost",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "max_series",
+            "required": false,
+            "schema": {
+              "format": "int64",
+              "type": "integer"
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "max_samples_read",
+            "required": false,
+            "schema": {
+              "format": "int64",
+              "type": "integer"
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "max_query_duration",
+            "required": false,
+            "schema": {
+              "oneOf": [
+                {
+                  "format": "duration",
+                  "type": "string"
+                },
+                {
+                  "format": "float",
+                  "type": "number"
+                }
+              ]
             }
           }
         ],

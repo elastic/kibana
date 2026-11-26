@@ -33,6 +33,8 @@ import { parseSpecText } from '../spec/parse_spec_text';
 import { diffProtocolSnapshots, loadProtocolSpec } from '../spec/protocol_sources';
 import type { DiffSpecs, OasdiffEntry } from './run_oasdiff';
 import { createOasdiff } from './run_oasdiff';
+import type { NewerVersion } from './newer_version';
+import { findNewerVersion } from './newer_version';
 import { toStableJson } from '../stable_json';
 import type { UpdateVendorApiResult, VendorApiLog } from '../record/update_vendor_api';
 import { updateVendorApi } from '../record/update_vendor_api';
@@ -58,7 +60,8 @@ export interface SpecChange {
 export interface SourceDrift {
   /**
    * `unreachable` when the latest spec couldn't be fetched or loaded, and `pinned` for a captured
-   * source, which has no latest to compare with until someone captures it again with credentials.
+   * source, which has no latest to compare with until someone captures it again with credentials,
+   * and for a source at a fixed URL that answered with the snapshot: it can't notice a change.
    */
   readonly status: 'unchanged' | 'changed' | 'unreachable' | 'pinned';
   readonly error?: string;
@@ -68,6 +71,13 @@ export interface SourceDrift {
   readonly servers?: { readonly snapshot: readonly string[]; readonly latest: readonly string[] };
   /** Where the source is fetched from, as the manifest records it. */
   readonly url?: string;
+  /** Set when the vendor names a version above the one the source's URL does; see `latest`. */
+  readonly newerVersion?: NewerVersion;
+  /**
+   * Set when the vendor's release page couldn't be read, so whether a newer version exists is
+   * unknown; an open issue stays open until a check can tell.
+   */
+  readonly newerVersionError?: string;
 }
 
 /** An operation an action calls, as the committed manifest records it. */
@@ -342,8 +352,9 @@ const outcomeOf = (drift: Omit<ConnectorDrift, 'outcome'>): DriftOutcome => {
     drift.overlayFindings.length > 0 ||
     (drift.actions ?? []).some(({ fieldChanges = [] }) => fieldChanges.length > 0) ||
     Object.entries(drift.sources).some(
-      ([source, { status, changes }]) =>
+      ([source, { status, changes, newerVersion }]) =>
         status === 'unreachable' ||
+        newerVersion !== undefined ||
         (status === 'changed' &&
           (changes === undefined || changes.some((change) => review(source, change).needsReview)))
     );
@@ -481,9 +492,9 @@ const compareWithLatest = async ({
             },
           }
         : {};
-      const { url } = manifest.sources[name];
+      const { url, pinned } = manifest.sources[name];
       if (committed === current) {
-        sources[name] = { status: 'unchanged', ...servers, url };
+        sources[name] = { status: pinned ? 'pinned' : 'unchanged', ...servers, url };
       } else {
         const changes = await classifyChanges({
           format,
@@ -600,6 +611,49 @@ export const detectDrift = async ({
     ? undefined
     : await compareWithLatest({ connector, directory, manifest, fetchText: fetchOnce, now, diff });
 
+  // A page that fails to name a version is a problem with the page, which a warning reports; it
+  // is not news about the vendor's API, so it doesn't open an issue.
+  const newerVersions: Record<string, NewerVersion> = {};
+  const newerVersionErrors: Record<string, string> = {};
+  for (const [name, source] of Object.entries(manifest.sources)) {
+    const { latest: where } = source;
+    if (!where || source.captured) {
+      continue;
+    }
+    try {
+      const newer = await findNewerVersion({ url: source.url, latest: where }, fetchOnce);
+      if (newer) {
+        newerVersions[name] = newer;
+      }
+    } catch (error) {
+      log.warning(
+        `${connector.metadata.id}: couldn't check ${name} for a newer version: ${errorMessage(
+          error
+        )}`
+      );
+      newerVersionErrors[name] = errorMessage(error);
+    }
+  }
+  // When another source didn't load there is no comparison, so the sources that did load have no
+  // entry yet; one with a newer version still gets one.
+  const compared: Record<string, SourceDrift> = latest?.sources ?? sources;
+  const checked = Object.fromEntries(
+    [...new Set([...Object.keys(compared), ...Object.keys(newerVersions)])].map((name) => {
+      const source: SourceDrift = compared[name] ?? {
+        status: 'unchanged',
+        url: manifest.sources[name]?.url,
+      };
+      return [
+        name,
+        {
+          ...source,
+          ...(name in newerVersions ? { newerVersion: newerVersions[name] } : {}),
+          ...(name in newerVersionErrors ? { newerVersionError: newerVersionErrors[name] } : {}),
+        },
+      ];
+    })
+  );
+
   const latestSpecs = latest?.result?.specs;
   const overlayText = await readOptional(path.join(directory, OVERLAY));
   const overlay = overlayText ? (parseSpecText(overlayText) as OverlayDocument) : undefined;
@@ -609,7 +663,7 @@ export const detectDrift = async ({
 
   const drift = {
     connector: connector.metadata.id,
-    sources: latest?.sources ?? sources,
+    sources: checked,
     operationsChanged: latest?.operationsChanged ?? false,
     snapshotProblems: snapshot,
     ...(latest ? { latestProblems: latest.problems } : {}),
