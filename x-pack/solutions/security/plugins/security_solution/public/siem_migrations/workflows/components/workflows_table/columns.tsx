@@ -17,8 +17,8 @@ import {
 import { FormattedRelativePreferenceDate } from '../../../../common/components/formatted_date';
 import { PanelText } from '../../../../common/components/panel_text';
 import { TableHeader } from '../../../common/components';
+import { StatusBadge } from '../../../common/components/status_badge';
 import { isMigrationItemNavigableWithFlyout } from '../../../common/utils';
-import { StatusBadge } from './status_badge';
 import * as i18n from './translations';
 
 export type TableColumn = EuiBasicTableColumn<WorkflowMigrationWorkflow>;
@@ -101,7 +101,11 @@ export const createStatusColumn = (): TableColumn => ({
   render: (_, workflow: WorkflowMigrationWorkflow) => (
     <StatusBadge
       data-test-subj={`translationStatus-${workflow.translation_result ?? workflow.status}`}
-      workflow={workflow}
+      isInstalled={!!workflow.elastic_workflow?.id}
+      isFailed={workflow.status === SiemMigrationStatus.FAILED}
+      translationResult={workflow.translation_result}
+      failedMessage={workflow.comments?.[0]?.message}
+      failedLabel={i18n.WORKFLOW_STATUS_ERROR}
     />
   ),
   sortable: true,

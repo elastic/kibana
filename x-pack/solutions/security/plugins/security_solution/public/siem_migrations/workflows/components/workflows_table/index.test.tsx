@@ -117,6 +117,38 @@ describe('MigrationWorkflowsTable', () => {
     expect(await screen.findByTestId(testId)).toHaveTextContent(text);
   });
 
+  it('should show a workflow that is installed as installed', async () => {
+    mockWorkflows([
+      getWorkflow({ elastic_workflow: { id: 'elastic-workflow-1', title: 'Phishing triage' } }),
+    ]);
+    renderTable();
+
+    expect(await screen.findByTestId('translationStatus-full')).toHaveTextContent('Installed');
+  });
+
+  it('should show why a workflow failed when hovering its status', async () => {
+    mockWorkflows([
+      getWorkflow({
+        status: 'failed',
+        translation_result: undefined,
+        comments: [
+          {
+            message: 'The connector returned status 429',
+            created_at: '2024-06-01T12:00:00Z',
+            created_by: 'assistant',
+          },
+        ],
+      }),
+    ]);
+    renderTable();
+
+    fireEvent.mouseOver(await screen.findByTestId('translationStatus-failed'));
+
+    expect(await screen.findByTestId('failedStatusTooltip')).toHaveTextContent(
+      'The connector returned status 429'
+    );
+  });
+
   it('should show untranslatable workflows as not translated', async () => {
     mockWorkflows([getWorkflow({ translation_result: 'untranslatable' })]);
     renderTable();
