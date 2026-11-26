@@ -10,12 +10,12 @@ import {
   ChangeHistoryTelemetryEventTypes,
 } from '@kbn/change-history-ui';
 import { analyticsServiceMock } from '@kbn/core/public/mocks';
-import { RUN_WORKFLOW_EXECUTED_EVENT_TYPE } from '@kbn/workflows-ui';
+import { libraryTelemetryEventTypes, RUN_WORKFLOW_EXECUTED_EVENT_TYPE } from '@kbn/workflows-ui';
 import { workflowsTelemetryEvents } from './events/workflows';
 import { TelemetryService } from './telemetry_service';
 
 describe('TelemetryService', () => {
-  it('registers workflow, run workflow panel, and change history event types', async () => {
+  it('registers workflow, run workflow panel, template library, and change history event types', async () => {
     const analytics = analyticsServiceMock.createAnalyticsServiceSetup();
     const service = new TelemetryService();
 
@@ -24,11 +24,17 @@ describe('TelemetryService', () => {
     await new Promise((resolve) => setImmediate(resolve));
 
     const expectedEventCount =
-      workflowsTelemetryEvents.length + 1 + changeHistoryTelemetryEvents.length;
+      workflowsTelemetryEvents.length +
+      1 +
+      libraryTelemetryEventTypes.length +
+      changeHistoryTelemetryEvents.length;
 
     expect(analytics.registerEventType).toHaveBeenCalledTimes(expectedEventCount);
     expect(analytics.registerEventType).toHaveBeenCalledWith(
       expect.objectContaining({ eventType: RUN_WORKFLOW_EXECUTED_EVENT_TYPE })
+    );
+    expect(analytics.registerEventType).toHaveBeenCalledWith(
+      expect.objectContaining({ eventType: 'workflows_template_viewed' })
     );
     expect(analytics.registerEventType).toHaveBeenCalledWith(
       expect.objectContaining({

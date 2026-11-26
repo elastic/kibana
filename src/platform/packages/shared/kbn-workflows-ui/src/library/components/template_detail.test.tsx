@@ -11,11 +11,16 @@ import { act, fireEvent, render, screen, within } from '@testing-library/react';
 import React from 'react';
 import { of } from 'rxjs';
 import { MockAppHeaderProvider } from '@kbn/app-header/mocks';
+import { analyticsServiceMock } from '@kbn/core/public/mocks';
 import { chromeServiceMock } from '@kbn/core-chrome-browser-mocks';
-import type { TemplateBody } from '@kbn/workflows-library';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
+import type { Template, TemplateBody } from '@kbn/workflows-library';
 import { TemplateDetail } from './template_detail';
 import { WorkflowsUiServicesProvider } from '../../context';
 import { createMockWorkflowsUiServices } from '../../context/__mocks__/mocks';
+import { testQueryClientConfig } from '../../test_utils';
+import { CATALOG_QUERY_KEY } from '../hooks/use_catalog';
 
 const mockUseTemplate = jest.fn();
 jest.mock('../hooks/use_template', () => ({
@@ -29,7 +34,24 @@ jest.mock('../../components', () => {
     ...actual,
     ReactFlowProvider: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
     TypeIcon: () => <span data-test-subj="mockTypeIcon" />,
-    WorkflowDetailBottomBar: () => <div data-test-subj="mockWorkflowDetailBottomBar" />,
+    WorkflowDetailBottomBar: ({
+      onEditorViewChange,
+    }: {
+      onEditorViewChange: (view: 'graph' | 'yaml') => void;
+    }) => (
+      <div data-test-subj="mockWorkflowDetailBottomBar">
+        <button
+          type="button"
+          data-test-subj="mockBottomBarYaml"
+          onClick={() => onEditorViewChange('yaml')}
+        />
+        <button
+          type="button"
+          data-test-subj="mockBottomBarGraph"
+          onClick={() => onEditorViewChange('graph')}
+        />
+      </div>
+    ),
     WorkflowVisualEditorFlyout: ({
       target,
       onOpenInYaml,
@@ -166,17 +188,35 @@ const TEMPLATE_BODY: TemplateBody = {
 
 const LIBRARY_BACK = { href: '/app/workflows/library', label: 'Template Library' };
 
+let analytics: ReturnType<typeof analyticsServiceMock.createAnalyticsServiceStart>;
+let queryClient: QueryClient;
+
+const withProviders = (
+  ui: React.ReactElement,
+  chrome = chromeServiceMock.createStartContract()
+) => (
+  <KibanaContextProvider services={{ analytics }}>
+    <QueryClientProvider client={queryClient}>
+      <MockAppHeaderProvider chrome={chrome}>
+        <WorkflowsUiServicesProvider services={createMockWorkflowsUiServices()}>
+          {ui}
+        </WorkflowsUiServicesProvider>
+      </MockAppHeaderProvider>
+    </QueryClientProvider>
+  </KibanaContextProvider>
+);
+
 const renderWithProviders = (
   ui: React.ReactElement,
   chrome = chromeServiceMock.createStartContract()
-) =>
-  render(
-    <MockAppHeaderProvider chrome={chrome}>
-      <WorkflowsUiServicesProvider services={createMockWorkflowsUiServices()}>
-        {ui}
-      </WorkflowsUiServicesProvider>
-    </MockAppHeaderProvider>
-  );
+) => render(withProviders(ui, chrome));
+
+const VIEWED_TEMPLATE = {
+  templateSlug: 'my-template',
+  templateVersion: '1.2.0',
+  templateOrigin: 'catalog',
+  solutions: ['security'],
+};
 
 const renderDetail = () => renderWithProviders(<TemplateDetail slug="my-template" />);
 
@@ -186,6 +226,8 @@ const renderGraphDetail = () =>
 describe('TemplateDetail', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    analytics = analyticsServiceMock.createAnalyticsServiceStart();
+    queryClient = new QueryClient(testQueryClientConfig);
     mockUseTemplate.mockReturnValue({ data: TEMPLATE_BODY, isLoading: false, isError: false });
   });
 
@@ -384,5 +426,79 @@ describe('TemplateDetail', () => {
     expect(screen.getByTestId('workflowLibraryTemplateDetail-preview')).toBeInTheDocument();
     expect(screen.queryByTestId('workflowLibraryTemplateDetail-loading')).toBeNull();
     expect(screen.queryByTestId('workflowLibraryTemplateDetail-error')).toBeNull();
+  });
+
+  describe('telemetry', () => {
+    it('reports one view of a catalog template, even when it renders again', () => {
+      const { rerender } = renderDetail();
+      rerender(withProviders(<TemplateDetail slug="my-template" />));
+
+      expect(analytics.reportEvent).toHaveBeenCalledTimes(1);
+      expect(analytics.reportEvent).toHaveBeenCalledWith(
+        'workflows_template_viewed',
+        VIEWED_TEMPLATE
+      );
+    });
+
+    it('reports no view until the template has loaded', () => {
+      mockUseTemplate.mockReturnValue({ data: undefined, isLoading: true, isError: false });
+      renderDetail();
+
+      expect(analytics.reportEvent).not.toHaveBeenCalled();
+    });
+
+    it('reports an imported file with the slug the cached catalog lists', () => {
+      queryClient.setQueryData<Template[]>(CATALOG_QUERY_KEY, [
+        { slug: 'my-template', version: '1.2.0', solutions: ['security'] } as Template,
+      ]);
+
+      renderWithProviders(<TemplateDetail template={TEMPLATE_BODY} installMode="custom" />);
+
+      expect(analytics.reportEvent).toHaveBeenCalledWith('workflows_template_viewed', {
+        ...VIEWED_TEMPLATE,
+        templateOrigin: 'import',
+      });
+    });
+
+    it('reports an imported file the cached catalog does not list as `custom`', () => {
+      queryClient.setQueryData<Template[]>(CATALOG_QUERY_KEY, []);
+
+      renderWithProviders(<TemplateDetail template={TEMPLATE_BODY} installMode="custom" />);
+
+      expect(analytics.reportEvent).toHaveBeenCalledWith('workflows_template_viewed', {
+        templateSlug: 'custom',
+        templateOrigin: 'import',
+      });
+    });
+
+    it('reports switching the preview, but not choosing the view already shown', () => {
+      renderGraphDetail();
+
+      fireEvent.click(screen.getByTestId('mockBottomBarGraph'));
+      fireEvent.click(screen.getByTestId('mockBottomBarYaml'));
+      fireEvent.click(screen.getByTestId('mockBottomBarGraph'));
+
+      expect(analytics.reportEvent).toHaveBeenCalledWith('workflows_template_preview_changed', {
+        ...VIEWED_TEMPLATE,
+        previewView: 'yaml',
+      });
+      expect(analytics.reportEvent).toHaveBeenCalledWith('workflows_template_preview_changed', {
+        ...VIEWED_TEMPLATE,
+        previewView: 'graph',
+      });
+      expect(analytics.reportEvent).toHaveBeenCalledTimes(3);
+    });
+
+    it('reports opening a step in the YAML preview from the graph as a preview change', () => {
+      renderGraphDetail();
+
+      fireEvent.click(screen.getByTestId('mockWorkflowGraphCanvas'));
+      fireEvent.click(screen.getByTestId('workflowVisualEditorFlyoutOpenInYaml'));
+
+      expect(analytics.reportEvent).toHaveBeenCalledWith('workflows_template_preview_changed', {
+        ...VIEWED_TEMPLATE,
+        previewView: 'yaml',
+      });
+    });
   });
 });

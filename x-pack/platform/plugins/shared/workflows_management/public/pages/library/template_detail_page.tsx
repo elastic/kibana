@@ -20,6 +20,7 @@ import {
   TemplateDetail,
   useLibraryEnabled,
   useTemplate,
+  useTemplateLoadFailedTelemetry,
 } from '@kbn/workflows-ui';
 import { TemplateNotFoundPage } from './template_not_found_page';
 import { PLUGIN_ID } from '../../../common';
@@ -91,6 +92,8 @@ export const LibraryTemplateDetailPage = React.memo<LibraryTemplateDetailPagePro
   // Shares the query (and its cache entry) with `TemplateDetail`; read here so
   // a missing slug replaces the whole page rather than rendering inside it.
   const { error: templateError } = useTemplate(isLibraryEnabled ? slug : undefined);
+  // Reported here, not in `TemplateDetail`: a missing slug renders the not-found page instead.
+  useTemplateLoadFailedTelemetry(slug, templateError);
 
   if (!isLibraryEnabled) {
     return <Redirect to="/" />;

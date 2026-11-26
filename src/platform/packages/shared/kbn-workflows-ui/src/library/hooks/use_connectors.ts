@@ -34,6 +34,23 @@ export function useConnectors(connectorType: string) {
   });
 }
 
+/**
+ * Returns a function that loads the full connector list through the cache
+ * `useConnectors` shares, so a load while the pickers fetch it makes no extra request.
+ */
+export function useLoadConnectors() {
+  const queryClient = useQueryClient();
+  const { http } = useKibana<{ http: HttpStart }>().services;
+  return useCallback(
+    () =>
+      queryClient.fetchQuery({
+        queryKey: CONNECTORS_QUERY_KEY,
+        queryFn: () => fetchConnectors({ http }),
+      }),
+    [queryClient, http]
+  );
+}
+
 /** Invalidates the shared connector-list cache (e.g. after creating a connector). */
 export function useInvalidateConnectors() {
   const queryClient = useQueryClient();

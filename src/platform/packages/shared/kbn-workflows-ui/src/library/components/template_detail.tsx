@@ -55,6 +55,8 @@ import { useWorkflowsUiServices } from '../../context';
 import { useTemplate } from '../hooks/use_template';
 import { getCategoryLabel } from '../lib/category_labels';
 import { getWorkflowTypes } from '../lib/get_workflow_types';
+import { useTemplateTelemetryFields } from '../telemetry/template_telemetry_fields';
+import { useLibraryTelemetry } from '../telemetry/use_library_telemetry';
 
 export interface TemplateDetailProps {
   /** Catalog slug to fetch. Ignored when `template` is provided. */
@@ -133,6 +135,28 @@ export const TemplateDetail = React.memo<TemplateDetailProps>(function TemplateD
     setPreviewValues({});
     setActiveStep('details');
   }, [resetKey]);
+
+  const telemetry = useLibraryTelemetry();
+  const templateTelemetry = useTemplateTelemetryFields(data, installMode);
+  // Once per template: a refetch of the same template is not a new view.
+  const viewedKey = useRef<string | undefined>();
+  useEffect(() => {
+    if (!templateTelemetry || viewedKey.current === resetKey) {
+      return;
+    }
+    viewedKey.current = resetKey;
+    telemetry.reportTemplateViewed(templateTelemetry);
+  }, [resetKey, telemetry, templateTelemetry]);
+
+  const changePreviewView = useCallback(
+    (view: WorkflowDetailBottomBarView) => {
+      setPreviewView(view);
+      if (view !== previewView && templateTelemetry) {
+        telemetry.reportTemplatePreviewChanged(templateTelemetry, view);
+      }
+    },
+    [previewView, telemetry, templateTelemetry]
+  );
 
   // The setup step's back returns to the template summary; only the details
   // step leaves the view, through the host's `back`.
@@ -221,9 +245,9 @@ export const TemplateDetail = React.memo<TemplateDetailProps>(function TemplateD
 
   const closeGraphPreviewTarget = useCallback(() => setSelectedGraphStepId(undefined), []);
   const openGraphTargetInYaml = useCallback(() => {
-    setPreviewView('yaml');
+    changePreviewView('yaml');
     closeGraphPreviewTarget();
-  }, [closeGraphPreviewTarget]);
+  }, [changePreviewView, closeGraphPreviewTarget]);
   const handleFlyoutKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
       if (e.key === 'Escape') {
@@ -669,7 +693,7 @@ export const TemplateDetail = React.memo<TemplateDetailProps>(function TemplateD
         {showGraphPreview ? (
           <WorkflowDetailBottomBar
             editorView={previewView}
-            onEditorViewChange={setPreviewView}
+            onEditorViewChange={changePreviewView}
             disableAutoCollapse={true}
           />
         ) : null}

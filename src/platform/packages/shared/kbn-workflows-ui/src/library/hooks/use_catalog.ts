@@ -13,6 +13,9 @@ import type { Template } from '@kbn/workflows-library';
 import { type CatalogFilters, filterCatalog } from './filter_catalog';
 import { useWorkflowsApi } from '../../api/use_workflows_api';
 
+/** React Query key of the catalog `useCatalog` fetches. */
+export const CATALOG_QUERY_KEY = ['workflows-library', 'catalog'];
+
 /**
  * Fetches the full Workflow Template Library catalog (cached across callers via
  * react-query) and applies {@link filterCatalog} client-side. At v1 scale
@@ -28,7 +31,7 @@ export function useCatalog(filters?: CatalogFilters) {
   const api = useWorkflowsApi();
 
   const query = useQuery<Template[]>({
-    queryKey: ['workflows-library', 'catalog'],
+    queryKey: CATALOG_QUERY_KEY,
     queryFn: async () => {
       const { templates } = await api.getCatalog();
       return templates;

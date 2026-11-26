@@ -21,6 +21,11 @@ jest.mock('@kbn/kibana-react-plugin/public', () => ({
   useKibana: jest.fn(),
 }));
 
+const mockFetchConnectors = jest.fn();
+jest.mock('@kbn/alerts-ui-shared/src/common/apis', () => ({
+  fetchConnectors: () => mockFetchConnectors(),
+}));
+
 const mockWorkflowApi = createMockWorkflowApi();
 jest.mock('../../../api/use_workflows_api', () => ({
   useWorkflowsApi: () => mockWorkflowApi,
@@ -83,14 +88,17 @@ describe('TemplateInstallSection', () => {
   let addSuccessToast: jest.Mock;
   let onPreviewValuesChange: jest.Mock;
   let onStepChange: jest.Mock;
+  let reportEvent: jest.Mock;
 
   const setCapabilities = (canCreate: boolean) => {
     mockUseKibana.mockReturnValue({
       services: {
+        analytics: { reportEvent },
         application: {
           capabilities: { workflowsManagement: { createWorkflow: canCreate } },
           navigateToApp,
         },
+        http: {},
         notifications: { toasts: { addSuccess: addSuccessToast } },
       },
     });
@@ -102,7 +110,12 @@ describe('TemplateInstallSection', () => {
   const renderSection = ({
     template = TEMPLATE,
     step = 'setup',
-  }: { template?: TemplateBody; step?: TemplateInstallStep } = {}) =>
+    installMode,
+  }: {
+    template?: TemplateBody;
+    step?: TemplateInstallStep;
+    installMode?: 'catalog' | 'custom';
+  } = {}) =>
     render(
       <QueryClientProvider client={queryClient}>
         <TemplateInstallSection
@@ -111,6 +124,7 @@ describe('TemplateInstallSection', () => {
           onStepChange={onStepChange}
           onPreviewValuesChange={onPreviewValuesChange}
           previewYaml={PREVIEW_YAML}
+          installMode={installMode}
         />
       </QueryClientProvider>
     );
@@ -122,6 +136,7 @@ describe('TemplateInstallSection', () => {
     addSuccessToast = jest.fn();
     onPreviewValuesChange = jest.fn();
     onStepChange = jest.fn();
+    reportEvent = jest.fn();
     setCapabilities(true);
   });
 
@@ -245,5 +260,130 @@ describe('TemplateInstallSection', () => {
 
     expect(screen.queryByTestId('workflowLibraryTemplateInstallActions')).toBeNull();
     expect(screen.queryByTestId('workflowLibraryTemplateRemixButton')).toBeNull();
+  });
+
+  describe('telemetry', () => {
+    const TEMPLATE_FIELDS = {
+      templateSlug: 'demo',
+      templateVersion: '1.0.0',
+      templateOrigin: 'catalog',
+      solutions: [],
+    };
+
+    const reportedEvents = (eventType: string) =>
+      reportEvent.mock.calls.filter(([type]) => type === eventType).map(([, event]) => event);
+
+    it('reports setup opened once, with the connector types the user already has', async () => {
+      mockFetchConnectors.mockResolvedValue([
+        { id: 'connector-1', actionTypeId: '.demo' },
+        { id: 'connector-2', actionTypeId: '.other' },
+      ]);
+      renderSection({ step: 'details' });
+
+      fireEvent.click(screen.getByTestId('workflowLibraryTemplateSetupButton'));
+      fireEvent.click(screen.getByTestId('workflowLibraryTemplateSetupButton'));
+
+      await waitFor(() =>
+        expect(reportedEvents('workflows_template_setup_opened')).toEqual([
+          {
+            ...TEMPLATE_FIELDS,
+            formFieldCount: 2,
+            connectorTypes: ['.demo'],
+            connectorTypesExisting: ['.demo'],
+          },
+        ])
+      );
+    });
+
+    it('reports no existing connector types when the user has none of them', async () => {
+      mockFetchConnectors.mockResolvedValue([{ id: 'connector-2', actionTypeId: '.other' }]);
+      renderSection({ step: 'details' });
+
+      fireEvent.click(screen.getByTestId('workflowLibraryTemplateSetupButton'));
+
+      await waitFor(() =>
+        expect(reportedEvents('workflows_template_setup_opened')).toEqual([
+          {
+            ...TEMPLATE_FIELDS,
+            formFieldCount: 2,
+            connectorTypes: ['.demo'],
+            connectorTypesExisting: [],
+          },
+        ])
+      );
+    });
+
+    it('leaves out the existing connector types when the connector list fails to load', async () => {
+      mockFetchConnectors.mockRejectedValue(new Error('Forbidden'));
+      renderSection({ step: 'details' });
+
+      fireEvent.click(screen.getByTestId('workflowLibraryTemplateSetupButton'));
+
+      await waitFor(() =>
+        expect(reportedEvents('workflows_template_setup_opened')).toEqual([
+          { ...TEMPLATE_FIELDS, formFieldCount: 2, connectorTypes: ['.demo'] },
+        ])
+      );
+    });
+
+    it('reports an imported file without its connector types', () => {
+      renderSection({ step: 'details', installMode: 'custom' });
+
+      fireEvent.click(screen.getByTestId('workflowLibraryTemplateSetupButton'));
+
+      expect(reportedEvents('workflows_template_setup_opened')).toEqual([
+        { templateSlug: 'unresolved', templateOrigin: 'import', formFieldCount: 2 },
+      ]);
+      expect(mockFetchConnectors).not.toHaveBeenCalled();
+    });
+
+    it('reports setup abandoned with the invalid fields when the user leaves the setup step', () => {
+      const { unmount } = renderSection({ step: 'setup' });
+
+      unmount();
+
+      expect(reportedEvents('workflows_template_setup_abandoned')).toEqual([
+        { ...TEMPLATE_FIELDS, invalidFields: ['demo-connector'] },
+      ]);
+    });
+
+    it('reports no abandoned setup when the user never opened it', () => {
+      const { unmount } = renderSection({ step: 'details' });
+
+      unmount();
+
+      expect(reportedEvents('workflows_template_setup_abandoned')).toEqual([]);
+    });
+
+    it('reports no abandoned setup after a successful install', async () => {
+      mockWorkflowApi.installTemplate.mockResolvedValue({ workflowId: 'wf-1' });
+      const { unmount } = renderSection({ step: 'setup' });
+
+      fireEvent.click(screen.getByTestId('workflowLibraryInstallForm-field-demo-connector'));
+      fireEvent.click(screen.getByTestId('workflowLibraryTemplateInstallButton'));
+      await waitFor(() => expect(navigateToApp).toHaveBeenCalled());
+      unmount();
+
+      expect(reportedEvents('workflows_template_setup_abandoned')).toEqual([]);
+    });
+
+    it('reports no abandoned setup after Remix with AI', () => {
+      const { unmount } = renderSection({ step: 'setup' });
+
+      fireEvent.click(screen.getByTestId('workflowLibraryTemplateRemixButton'));
+      unmount();
+
+      expect(reportedEvents('workflows_template_setup_abandoned')).toEqual([]);
+    });
+
+    it('reports an abandoned imported file without its field names', () => {
+      const { unmount } = renderSection({ step: 'setup', installMode: 'custom' });
+
+      unmount();
+
+      expect(reportedEvents('workflows_template_setup_abandoned')).toEqual([
+        { templateSlug: 'unresolved', templateOrigin: 'import' },
+      ]);
+    });
   });
 });

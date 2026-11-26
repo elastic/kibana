@@ -127,6 +127,9 @@ describe('LibraryTemplateDetailPage', () => {
 
     fireEvent.click(screen.getByTestId('workflowLibraryTemplateNotFoundBackButton'));
     expect(services.application.navigateToUrl).toHaveBeenCalledWith('/app/workflows/library');
+    expect(services.analytics.reportEvent).toHaveBeenCalledWith('workflows_template_load_failed', {
+      errorType: 'template_not_found',
+    });
   });
 
   it('keeps the template detail for errors other than not found', () => {
@@ -139,5 +142,21 @@ describe('LibraryTemplateDetailPage', () => {
 
     expect(screen.queryByTestId('workflowLibraryTemplateNotFoundPage')).not.toBeInTheDocument();
     expect(screen.getByTestId('mockTemplateDetail')).toBeInTheDocument();
+    expect(services.analytics.reportEvent).toHaveBeenCalledWith('workflows_template_load_failed', {
+      errorType: 'fetch_failed',
+    });
+  });
+
+  it('reports no load failure while the template loads', () => {
+    const services = buildEnabledServices();
+
+    render(<LibraryTemplateDetailPage {...routeProps('first-template')} />, {
+      wrapper: getTestProvider({ services }),
+    });
+
+    expect(services.analytics.reportEvent).not.toHaveBeenCalledWith(
+      'workflows_template_load_failed',
+      expect.anything()
+    );
   });
 });
