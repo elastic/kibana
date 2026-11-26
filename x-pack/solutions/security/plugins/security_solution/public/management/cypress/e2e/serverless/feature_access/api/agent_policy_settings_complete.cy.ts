@@ -17,7 +17,7 @@ import { login } from '../../../../tasks/login';
 describe(
   'Agent policy settings API operations on Complete',
   {
-    tags: ['@serverlessQA'],
+    tags: ['@serverless', '@serverlessQA'],
     env: {
       ftrConfig: {
         productTypes: [
