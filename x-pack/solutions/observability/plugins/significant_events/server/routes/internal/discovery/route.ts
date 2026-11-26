@@ -215,6 +215,7 @@ const discoveryCompletedRoute = createServerRoute({
         held_back_count: optionalCount,
         needs_agent_count: optionalCount,
         written_rule_count: optionalCount,
+        unknown_reported_rule_count: optionalCount,
         classifier_failed: z.boolean().optional(),
         error_type: z.string().max(MAX_ID_LENGTH).optional(),
         error_message: z.string().max(1024).optional(),
@@ -259,6 +260,11 @@ const discoveryCompletedRoute = createServerRoute({
       error_message: errorMessage,
       ...counts
     } = params.body;
+    if ((counts.unknown_reported_rule_count ?? 0) > 0) {
+      logger.warn(
+        `discovery-completed: ${counts.unknown_reported_rule_count} reported rule uuids were not in the discovery batch of ${discoveryExecutionId}`
+      );
+    }
 
     // The report must land even when the execution record cannot be read.
     const execution = await significantEventsDiscoveryClient

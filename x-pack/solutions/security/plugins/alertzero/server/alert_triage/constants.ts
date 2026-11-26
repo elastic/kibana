@@ -109,16 +109,6 @@ export const GROUPED_PROPOSAL_LOOKUP_IDS_PER_KEY =
  */
 export const GROUPED_PROPOSAL_LIST_HEADS_TERMS = 10_000;
 
-/** Feature flag that turns Alert Triage grouping off: every batch then mints its own proposal. */
-export const TRIAGE_GROUPING_FLAG = 'alertzero.triageGrouping';
-
-/**
- * Decisions in the sweep. In `shadow` a matching alert is only tagged, and still goes through
- * analysis. In `on` an approved match is closed and a dismissed match is kept out of analysis.
- * In `off` decisions are neither stored nor matched. The default is `off` until the follow-ups that
- * `on` needs have landed, so `shadow` and `on` are set per deployment.
- */
-export const TRIAGE_DECISION_AUTO_CLOSE_FLAG = 'alertzero.triageDecisionAutoClose';
 export type DecisionAutoCloseMode = 'off' | 'shadow' | 'on';
 /**
  * The mode from the `alertzero.triageDecisionAutoClose` flag. Only `shadow` and `on` turn decisions

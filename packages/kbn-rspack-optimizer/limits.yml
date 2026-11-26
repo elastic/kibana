@@ -34,7 +34,7 @@ pageLoadAssetSize:
   contentConnectors: 3166
   contentManagement: 6737
   contextEngine: 4053
-  contextEngineAgentBuilder: 2553
+  contextEngineAgentBuilder: 2911
   controls: 4166
   core: 320
   cps: 6032
@@ -137,6 +137,7 @@ pageLoadAssetSize:
   navigation: 14840
   newsfeed: 10708
   nightshift: 5665
+  nightshiftDetection: 1500
   nightshiftInvestigations: 9405
   nightshiftSources: 3928
   noDataPage: 630

@@ -24,27 +24,39 @@ import {
 import {
   BROWSER_SDK_LANGUAGE,
   CLICK_EVENTS,
+  EVENT_DEAD_CLICK,
+  EVENT_ERROR_CLICK,
   EVENT_EXCEPTION,
   EVENT_NAVIGATION_TIMING,
+  EVENT_RAGE_CLICK,
   EVENT_WEB_VITAL,
+  FRUSTRATION_EVENTS,
   OTEL_SPAN_NAME,
   PAGE_VIEW_EVENTS,
   SPAN_KIND_CLIENT,
   SPAN_STATUS_ERROR,
 } from '../../../common/otel_data';
-import { SESSIONS_JOURNEY_URL_CANDIDATES, SESSIONS_SOURCE_INDICES } from '../../../common/sessions';
+import {
+  SESSIONS_FRUSTRATION_URL_CANDIDATES,
+  SESSIONS_FRUSTRATION_VALUES,
+  SESSIONS_JOURNEY_URL_CANDIDATES,
+  SESSIONS_SOURCE_INDICES,
+} from '../../../common/sessions';
 import {
   SESSION_ATTRIBUTE_FIELDS,
   type SessionAttribute,
 } from '../../../common/session_attribute_fields';
 import {
+  NULLIFY_UNMAPPED_FIELDS,
+  SOURCE_CSS_SELECTOR_FIELD,
   SOURCE_LOAD_EVENT_END_FIELD,
   SOURCE_SERVICE_NAME_FIELD,
   SOURCE_SESSION_ID_FIELD,
   SOURCE_URL_FIELD,
   SOURCE_WEB_VITAL_NAME_FIELD,
   SOURCE_WEB_VITAL_VALUE_FIELD,
-} from '../../lib/otel/source_fields';
+} from '../../../common/otel_source_fields';
+import { cleanedValue } from '../../lib/esql';
 import { ESQL_DEFAULT_MAX_ROWS } from './esql_max_rows';
 import { HASH_SPACE, hashPrefix, type HashRange } from './hash_ranges';
 
@@ -66,8 +78,6 @@ export interface SummaryQuery {
   params: estypes.EsqlNamedValue[];
 }
 
-// OTel attributes that some index doesn't map read as null instead of failing the query.
-export const NULLIFY_UNMAPPED_FIELDS = 'SET unmapped_fields = "NULLIFY";';
 const SOURCES = SESSIONS_SOURCE_INDICES.join(', ');
 
 export const texts = (values: readonly string[]): string =>
@@ -81,7 +91,10 @@ export const SESSION_ATTRIBUTE_GROUPS = {
   environment: ['environment'],
   user: ['user'],
   user_agent: ['browser', 'browserVersion', 'os', 'device'],
+  // Own group: an event with only this flag would otherwise blank the browser and OS.
+  mobile: ['mobile'],
   geo: ['countryIso', 'region', 'city'],
+  app: ['appVersion'],
 } as const satisfies Record<string, readonly SessionAttribute[]>;
 
 /** The `FROM` and `WHERE` of a platform's events, from `?from` up to `?to`. */
@@ -174,10 +187,6 @@ ${events('changed_from', 'changed_to')}
   };
 };
 
-/** Strings as the summaries keep them: trimmed, and empty or `null` as missing. */
-const cleaned = (field: string): string =>
-  `CASE(TRIM(TO_STRING(${field})) IN ("", "null"), null, TRIM(TO_STRING(${field})))`;
-
 /** The column of an attribute in the summary query's rows, e.g. `attribute_browser_version`. */
 export const attributeColumn = (attribute: string): string => `attribute_${snakeCase(attribute)}`;
 const seenColumn = (group: string): string => `seen_${group}`;
@@ -223,7 +232,7 @@ export const attributeQueryParts = <TFields extends AttributeFields>(
     evals: Object.entries(fields).map(
       ([attribute, candidates]) =>
         `${attributeColumn(attribute)} = COALESCE(${candidates
-          .map((field) => cleaned(rawColumn(field)))
+          .map((field) => cleanedValue(rawColumn(field)))
           .join(', ')})`
     ),
   };
@@ -284,9 +293,15 @@ const SESSION_STATS: Stat[] = [
   ['page_load_count', `COUNT(*) WHERE event == ${escapeStringValue(EVENT_NAVIGATION_TIMING)}`],
   ['click_count', 'COUNT(*) WHERE is_click'],
   ['js_error_count', `COUNT(*) WHERE event == ${escapeStringValue(EVENT_EXCEPTION)}`],
+  ['rage_click_count', `COUNT(*) WHERE event == ${escapeStringValue(EVENT_RAGE_CLICK)}`],
+  ['dead_click_count', `COUNT(*) WHERE event == ${escapeStringValue(EVENT_DEAD_CLICK)}`],
+  ['error_click_count', `COUNT(*) WHERE event == ${escapeStringValue(EVENT_ERROR_CLICK)}`],
+  ['frustration_count', 'COUNT(*) WHERE is_frustration'],
   ...HTTP_REQUEST_STATS,
   ...ATTRIBUTE_STATS,
 ];
+
+const FRUSTRATION_FILTER = `${OTEL_EVENT_NAME} IN (${texts(FRUSTRATION_EVENTS)})`;
 
 const VITAL_STATS: Stat[] = CORE_WEB_VITALS.flatMap(vitalStatsOf);
 
@@ -354,10 +369,17 @@ ${browserSessionEvents('rebuild_from', 'changed_to')}
 | EVAL event = COALESCE(${OTEL_EVENT_NAME}, ""), span = COALESCE(${OTEL_SPAN_NAME}, "")
 | EVAL is_page_view = event IN (${texts(PAGE_VIEW_EVENTS)}) OR span IN (${texts(PAGE_VIEW_EVENTS)}),
        is_click = event IN (${texts(CLICK_EVENTS)}) OR span IN (${texts(CLICK_EVENTS)}),
+       is_frustration = event IN (${texts(FRUSTRATION_EVENTS)}),
        ${HTTP_REQUEST_EVALS},
        ${SEEN_EVALS.join(',\n       ')}
 | FORK (STATS ${renderStats(SESSION_STATS, '              ')}
           BY service = ${SOURCE_SERVICE_NAME_FIELD}, session = ${SOURCE_SESSION_ID_FIELD})
+       (WHERE ${FRUSTRATION_FILTER} AND ${SOURCE_CSS_SELECTOR_FIELD} IS NOT NULL
+        | STATS target_signals = COUNT(*)
+            BY service = ${SOURCE_SERVICE_NAME_FIELD}, session = ${SOURCE_SESSION_ID_FIELD}, target = ${SOURCE_CSS_SELECTOR_FIELD})
+       (WHERE ${FRUSTRATION_FILTER} AND ${SOURCE_URL_FIELD} IS NOT NULL
+        | STATS url_signals = COUNT(*)
+            BY service = ${SOURCE_SERVICE_NAME_FIELD}, session = ${SOURCE_SESSION_ID_FIELD}, frustration_url = ${SOURCE_URL_FIELD})
        (WHERE ${PAGE_VIEW_FILTER}
         | STATS first_view = MIN(@timestamp), last_view = MAX(@timestamp)
             BY service = ${SOURCE_SERVICE_NAME_FIELD}, session = ${SOURCE_SESSION_ID_FIELD}, page_url = ${SOURCE_URL_FIELD})
@@ -371,6 +393,8 @@ ${browserSessionEvents('rebuild_from', 'changed_to')}
         | STATS ${renderStats(LOAD_TIME_STATS, '                ')}
             BY service = ${SOURCE_SERVICE_NAME_FIELD}, session = ${SOURCE_SESSION_ID_FIELD})
 | STATS ${renderStats(MERGED_STATS, '        ')},
+        frustration_targets = TOP(target_signals, ${SESSIONS_FRUSTRATION_VALUES}, "desc", target) WHERE target IS NOT NULL,
+        frustration_urls = TOP(url_signals, ${SESSIONS_FRUSTRATION_URL_CANDIDATES}, "desc", frustration_url) WHERE frustration_url IS NOT NULL,
         pages = TOP(first_view, ${SESSIONS_JOURNEY_URL_CANDIDATES}, "asc", page_url) WHERE page_url IS NOT NULL,
         exit = LAST(page_url, last_view) WHERE page_url IS NOT NULL
   BY service, session

@@ -1723,6 +1723,7 @@ describe('Slack', () => {
         channel: 'C0123456789',
         ts: '1234567890.123456',
         timestamp: '1234567890.123456',
+        workspace: 'team-A',
       });
     });
 
@@ -1750,6 +1751,7 @@ describe('Slack', () => {
         channel: 'C0123456789',
         ts: '1234567890.123456',
         timestamp: '1234567890.123456',
+        workspace: 'team-A',
       });
     });
 
