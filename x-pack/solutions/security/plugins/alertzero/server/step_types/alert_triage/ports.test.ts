@@ -919,17 +919,19 @@ describe('findAlertsClosedWithoutFalsePositiveReason', () => {
       },
     });
 
-    const found = await findAlertsClosedWithoutFalsePositiveReason({ callKibanaApi }, [
-      'tp',
-      'none',
-      'fp',
-    ]);
+    const ids = ['tp', 'custom', 'none', 'auto', 'dup', 'benign', 'fp'];
+
+    const found = await findAlertsClosedWithoutFalsePositiveReason({ callKibanaApi }, ids);
 
     expect(found).toEqual({
       closedAsOther: ['tp', 'custom'],
       closedWithoutVerdict: ['none', 'auto', 'dup', 'benign'],
     });
     const { query } = callKibanaApi.mock.calls[0][0].body;
+    expect(query.bool.filter).toEqual([
+      { ids: { values: ids } },
+      { term: { 'kibana.alert.workflow_status': 'closed' } },
+    ]);
     expect(query.bool.must_not).toEqual([
       { term: { 'kibana.alert.workflow_reason': 'false_positive' } },
     ]);
