@@ -10,6 +10,7 @@ import type { Template, AttachmentAttributes, Observable } from '../../../common
 import type { CaseSavedObjectTransformed } from '../../common/types/case';
 import { mockCases, mockCaseComments } from '../../mocks';
 import { createCasesClientMockArgs } from '../mocks';
+import { mockObservablesPreviewSearchFailure } from '../../services/mocks';
 import { CaseStatuses } from '../../../common/types/domain';
 import { MAX_ATTACHMENT_IDS_PER_CASES_LOOKUP } from '../../../common/constants';
 import { Operations } from '../../authorization';
@@ -501,10 +502,9 @@ describe('get', () => {
 
         expect(result.observables).toEqual([fieldObservable, typeObservable]);
         expect(result.total_observables).toBe(4);
-        expect(args.services.observableService.getter.getPreviews).toHaveBeenCalledWith(
-          [caseSO.id],
-          49
-        );
+        expect(args.services.observableService.getter.getPreviews).toHaveBeenCalledWith([
+          { id: caseSO.id, observables: [fieldObservable] },
+        ]);
       });
 
       /**
@@ -516,9 +516,7 @@ describe('get', () => {
        */
       it('fails the read when the preview fails, rather than returning a wrong total', async () => {
         const args = createArgs();
-        args.services.observableService.getter.getPreviews.mockRejectedValue(
-          new Error('search failed')
-        );
+        mockObservablesPreviewSearchFailure(args.services.observableService);
 
         await expect(get({ id: caseSO.id, includeComments }, args)).rejects.toThrow(
           'Failed to get case id: mock-id-1: Error: search failed'
@@ -564,10 +562,9 @@ describe('get', () => {
 
         expect(theCase.observables).toEqual([fieldObservable, typeObservable]);
         expect(theCase.total_observables).toBe(4);
-        expect(args.services.observableService.getter.getPreviews).toHaveBeenCalledWith(
-          [caseSO.id],
-          49
-        );
+        expect(args.services.observableService.getter.getPreviews).toHaveBeenCalledWith([
+          expect.objectContaining({ id: caseSO.id, observables: [fieldObservable] }),
+        ]);
       });
     });
 

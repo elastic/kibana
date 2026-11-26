@@ -12,8 +12,7 @@ import type { CasesBulkGetRequest, CasesBulkGetResponse } from '../../../common/
 import { CasesBulkGetResponseSchema, CasesBulkGetRequestSchema } from '../../../common/types/api';
 import { decodeWithExcessOrThrowZod, decodeOrThrowZod } from '../../common/runtime_types';
 import { createCaseError, generateCaseErrorResponse, isSOError } from '../../common/error';
-import { flattenCaseSavedObject } from '../../common/utils';
-import { getObservablesPreviews, mergeObservablesPreview } from '../../common/observables_preview';
+import { flattenCaseSavedObject, mergeObservablesPreview } from '../../common/utils';
 import type { CasesClientArgs } from '../types';
 import { Operations } from '../../authorization';
 import type { CaseSavedObjectTransformed } from '../../common/types/case';
@@ -54,8 +53,7 @@ export const bulkGet = async (
       attachmentService.getter.getCaseAttatchmentStats({
         caseIds: authorizedCases.map((theCase) => theCase.id),
       }),
-      getObservablesPreviews(
-        observableService,
+      observableService.getter.getPreviews(
         authorizedCases.map(({ id, attributes }) => ({ id, observables: attributes.observables }))
       ),
     ]);

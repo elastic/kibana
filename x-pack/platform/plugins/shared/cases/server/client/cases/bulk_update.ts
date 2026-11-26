@@ -48,11 +48,8 @@ import {
   createAlertUpdateStatusRequest,
   createAttackUpdateStatusRequest,
   flattenCaseSavedObject,
-} from '../../common/utils';
-import {
-  getObservablesPreviewsAfterWrite,
   mergeObservablesPreview,
-} from '../../common/observables_preview';
+} from '../../common/utils';
 import {
   isAlertAttachmentType,
   isAttackAttachmentType,
@@ -1036,12 +1033,12 @@ export const bulkUpdate = async (
       attachmentService.getter.getCaseAttatchmentStats({
         caseIds,
       }),
-      getObservablesPreviewsAfterWrite(
-        observableService,
+      observableService.getter.getPreviews(
         casesToUpdate.map(({ originalCase }) => ({
           id: originalCase.id,
           observables: originalCase.attributes.observables,
-        }))
+        })),
+        { ignoreErrors: true }
       ),
     ]);
 

@@ -34,6 +34,20 @@ export interface ObservableToCreate extends ObservableKey {
   createdAt: string;
 }
 
+export interface CaseWithFieldObservables {
+  id: string;
+  /** The observables stored in the case's `observables` field. */
+  observables: Observable[];
+}
+
+export interface GetObservablesPreviewsOptions {
+  /**
+   * Log a failed search and return no previews instead of rejecting, for the response of a write
+   * that is already saved: failing it would report the write as failed and skip what runs after.
+   */
+  ignoreErrors?: boolean;
+}
+
 export interface ObservablesPreview {
   /** How many `cases-observables` objects the case holds. */
   count: number;

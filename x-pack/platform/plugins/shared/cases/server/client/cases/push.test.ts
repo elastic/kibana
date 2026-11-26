@@ -13,6 +13,7 @@ import { mockCases } from '../../mocks';
 import { flattenCaseSavedObject } from '../../common/utils';
 import type { CaseSavedObjectTransformed } from '../../common/types/case';
 import { createCasesClientMock, createCasesClientMockArgs } from '../mocks';
+import { mockObservablesPreviewSearchFailure } from '../../services/mocks';
 import { push } from './push';
 
 jest.mock('./utils', () => ({
@@ -130,8 +131,8 @@ describe('push', () => {
     expect(pushedCase.observables).toEqual([fieldObservable, typeObservable]);
     expect(pushedCase.total_observables).toBe(4);
     expect(clientArgs.services.observableService.getter.getPreviews).toHaveBeenCalledWith(
-      [theCase.id],
-      49
+      [{ id: theCase.id, observables: [fieldObservable] }],
+      { ignoreErrors: true }
     );
   });
 
@@ -144,9 +145,7 @@ describe('push', () => {
    *   are closed, and the next read lists both stores.
    */
   it('records the user actions and closes the alerts when the preview fails', async () => {
-    clientArgs.services.observableService.getter.getPreviews.mockRejectedValue(
-      new Error('search failed')
-    );
+    mockObservablesPreviewSearchFailure(clientArgs.services.observableService);
 
     const pushedCase = await push(pushParams, clientArgs, casesClient);
 

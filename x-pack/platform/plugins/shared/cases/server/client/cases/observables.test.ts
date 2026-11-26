@@ -16,6 +16,7 @@ import Boom from '@hapi/boom';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { LICENSING_CASE_OBSERVABLES_FEATURE } from '../../common/constants';
 import { createCasesClientMock, createCasesClientMockArgs } from '../mocks';
+import { mockObservablesPreviewSearchFailure } from '../../services/mocks';
 import { mockCases } from '../../mocks';
 import {
   OBSERVABLE_TYPE_HOSTNAME,
@@ -1639,7 +1640,10 @@ describe('observable write responses', () => {
       typeObservable.value,
     ]);
     expect(result.total_observables).toBe(5);
-    expect(mockObservableService.getter.getPreviews).toHaveBeenCalledWith([caseSO.id], 48);
+    expect(mockObservableService.getter.getPreviews).toHaveBeenCalledWith(
+      [expect.objectContaining({ id: caseSO.id, observables: patchedObservables() })],
+      { ignoreErrors: true }
+    );
     expect(patchedObservables().map(({ value }) => value)).toEqual([
       mockObservable.value,
       '10.0.0.9',
@@ -1715,7 +1719,7 @@ describe('observable write responses', () => {
    */
   describe('when the preview fails', () => {
     beforeEach(() => {
-      mockObservableService.getter.getPreviews.mockRejectedValue(new Error('search failed'));
+      mockObservablesPreviewSearchFailure(mockObservableService);
     });
 
     it('addObservable succeeds, lists the field alone and emits observablesAdded', async () => {

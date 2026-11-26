@@ -48,12 +48,8 @@ import {
   flattenCaseSavedObject,
   countUserAttachments,
   countEventsForID,
-} from '../../common/utils';
-import {
-  getObservablesPreview,
   mergeObservablesPreview,
-  withObservablesPreview,
-} from '../../common/observables_preview';
+} from '../../common/utils';
 import { parseFieldDefinitionsToInlineFields } from '../../../common/utils';
 import { enrichCasesWithFieldLabels } from './utils';
 import type { CasesClientArgs } from '..';
@@ -442,11 +438,11 @@ export const get = async (
     const fieldObservables = { id: theCase.id, observables: theCase.attributes.observables };
 
     if (!includeComments) {
-      const [commentStats, observablesPreview] = await Promise.all([
+      const [commentStats, observablesPreviews] = await Promise.all([
         attachmentService.getter.getCaseAttatchmentStats({
           caseIds: [theCase.id],
         }),
-        getObservablesPreview(observableService, fieldObservables),
+        observableService.getter.getPreviews([fieldObservables]),
       ]);
       const flattenedCase = mergeObservablesPreview(
         flattenCaseSavedObject({
@@ -459,14 +455,14 @@ export const get = async (
               }
             : {}),
         }),
-        observablesPreview
+        observablesPreviews.get(theCase.id)
       );
       return decodeOrThrowZod(CaseSchema)(
         await enrichCaseWithFieldLabels(flattenedCase, clientArgs)
       );
     }
 
-    const [comments, observablesPreview] = await Promise.all([
+    const [comments, observablesPreviews] = await Promise.all([
       caseService.getAllCaseComments({
         id,
         options: {
@@ -474,7 +470,7 @@ export const get = async (
           sortOrder: 'asc',
         },
       }),
-      getObservablesPreview(observableService, fieldObservables),
+      observableService.getter.getPreviews([fieldObservables]),
     ]);
     const theComments = comments as SavedObjectsFindResponse<AttachmentAttributes>;
 
@@ -486,7 +482,7 @@ export const get = async (
         totalAlerts: countAlertsForID({ comments: theComments, id }),
         totalEvents: countEventsForID({ comments: theComments }),
       }),
-      observablesPreview
+      observablesPreviews.get(theCase.id)
     );
 
     return decodeOrThrowZod(CaseSchema)(await enrichCaseWithFieldLabels(res, clientArgs));
@@ -533,9 +529,11 @@ export const resolve = async (
     });
 
     if (!includeComments) {
-      const flattenedCase = await withObservablesPreview(
-        observableService,
-        flattenCaseSavedObject({ savedObject: resolvedSavedObject })
+      const resolvedCase = flattenCaseSavedObject({ savedObject: resolvedSavedObject });
+      const observablesPreviews = await observableService.getter.getPreviews([resolvedCase]);
+      const flattenedCase = mergeObservablesPreview(
+        resolvedCase,
+        observablesPreviews.get(resolvedCase.id)
       );
       return decodeOrThrowZod(CaseResolveResponseSchema)({
         ...resolveData,
@@ -543,7 +541,7 @@ export const resolve = async (
       });
     }
 
-    const [comments, observablesPreview] = await Promise.all([
+    const [comments, observablesPreviews] = await Promise.all([
       caseService.getAllCaseComments({
         id: resolvedSavedObject.id,
         options: {
@@ -551,10 +549,9 @@ export const resolve = async (
           sortOrder: 'asc',
         },
       }),
-      getObservablesPreview(observableService, {
-        id: resolvedSavedObject.id,
-        observables: resolvedSavedObject.attributes.observables,
-      }),
+      observableService.getter.getPreviews([
+        { id: resolvedSavedObject.id, observables: resolvedSavedObject.attributes.observables },
+      ]),
     ]);
     const theComments = comments as SavedObjectsFindResponse<AttachmentAttributes>;
 
@@ -566,7 +563,7 @@ export const resolve = async (
         totalEvents: countEventsForID({ comments: theComments }),
         totalAlerts: countAlertsForID({ comments: theComments, id: resolvedSavedObject.id }),
       }),
-      observablesPreview
+      observablesPreviews.get(resolvedSavedObject.id)
     );
 
     const res = {

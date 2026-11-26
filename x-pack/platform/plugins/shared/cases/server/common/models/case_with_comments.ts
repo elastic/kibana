@@ -46,9 +46,9 @@ import {
   getEventInfoFromComments,
   getIDsAndIndicesAsArrays,
   countEventsForID,
+  mergeObservablesPreview,
 } from '../utils';
 import { decodeOrThrowZod } from '../runtime_types';
-import { getObservablesPreviewAfterWrite, mergeObservablesPreview } from '../observables_preview';
 import { extractCommentContent, isUnifiedPayloadCommentAttachment } from '../attachments/comment';
 import type {
   AttachmentAttributesV2,
@@ -737,7 +737,7 @@ export class CaseCommentModel {
 
   public async encodeWithComments(): Promise<Case> {
     try {
-      const [comments, observablesPreview] = await Promise.all([
+      const [comments, observablesPreviews] = await Promise.all([
         this.params.services.caseService.getAllCaseComments({
           id: this.caseInfo.id,
           options: {
@@ -746,10 +746,10 @@ export class CaseCommentModel {
             perPage: MAX_DOCS_PER_PAGE,
           },
         }),
-        getObservablesPreviewAfterWrite(this.params.services.observableService, {
-          id: this.caseInfo.id,
-          observables: this.caseInfo.attributes.observables,
-        }),
+        this.params.services.observableService.getter.getPreviews(
+          [{ id: this.caseInfo.id, observables: this.caseInfo.attributes.observables }],
+          { ignoreErrors: true }
+        ),
       ]);
       const totalAlerts =
         countAlertsForID({
@@ -768,7 +768,7 @@ export class CaseCommentModel {
           totalEvents,
           ...this.formatForEncoding(comments.total),
         },
-        observablesPreview
+        observablesPreviews.get(this.caseInfo.id)
       );
 
       return decodeOrThrowZod(CaseSchema)(caseResponse);

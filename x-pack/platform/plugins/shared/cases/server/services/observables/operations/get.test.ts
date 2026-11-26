@@ -10,8 +10,13 @@ import type { SavedObject, SavedObjectsRawDoc, SavedObjectsRawDocSource } from '
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { serializerMock } from '@kbn/core-saved-objects-base-server-mocks';
 import { loggerMock } from '@kbn/logging-mocks';
-import { CASE_OBSERVABLE_SAVED_OBJECT, CASE_SAVED_OBJECT } from '../../../../common/constants';
+import {
+  CASE_OBSERVABLE_SAVED_OBJECT,
+  CASE_SAVED_OBJECT,
+  MAX_OBSERVABLES_PER_CASE,
+} from '../../../../common/constants';
 import type { ObservablePersistedAttributes } from '../../../common/types/observable';
+import type { CaseWithFieldObservables } from '../types';
 import {
   attributes,
   bulkResponse,
@@ -72,6 +77,18 @@ const searchResponse = <A = unknown>({
   ...(aggregations != null && { aggregations }),
 });
 
+const withFieldObservables = (id: string, count: number): CaseWithFieldObservables => ({
+  id,
+  observables: Array.from({ length: count }, (_, index) => ({
+    id: `${id}-field-${index}`,
+    typeKey: 'observable-type-ipv4',
+    value: `10.0.0.${index}`,
+    description: null,
+    createdAt: '2026-11-06T09:30:00.000Z',
+    updatedAt: null,
+  })),
+});
+
 const keyClause = (typeKey: string, values: string[]) => ({
   bool: {
     filter: [
@@ -111,7 +128,7 @@ describe('ObservableGetter', () => {
   it.each<[string, () => Promise<object>, object]>([
     ['getForCase', () => getter.getForCase(CASE_ID, []), { found: [], missingIds: [] }],
     ['findExisting', () => getter.findExisting(CASE_ID, []), []],
-    ['getPreviews', () => getter.getPreviews([], 50), new Map()],
+    ['getPreviews', () => getter.getPreviews([]), new Map()],
   ])('%s does not call Elasticsearch with nothing to look up', async (_method, run, expected) => {
     await expect(run()).resolves.toEqual(expected);
     expect(unsecuredSavedObjectsClient.bulkGet).not.toHaveBeenCalled();
@@ -386,7 +403,11 @@ describe('ObservableGetter', () => {
         })
       );
 
-      const previews = await getter.getPreviews(['case-1', 'case-2', 'case-1'], 2);
+      const previews = await getter.getPreviews([
+        withFieldObservables('case-1', MAX_OBSERVABLES_PER_CASE - 2),
+        withFieldObservables('case-2', MAX_OBSERVABLES_PER_CASE - 1),
+        withFieldObservables('case-1', MAX_OBSERVABLES_PER_CASE - 2),
+      ]);
 
       expect(unsecuredSavedObjectsClient.search).toHaveBeenCalledTimes(1);
       expect(unsecuredSavedObjectsClient.search).toHaveBeenCalledWith({
@@ -434,7 +455,23 @@ describe('ObservableGetter', () => {
       ]);
     });
 
-    it('returns counts only for a preview size of 0', async () => {
+    it.each([
+      ['the case with the most room left in its field', [45, 10], 40],
+      ['50 for a case whose field is empty', [0, 30], MAX_OBSERVABLES_PER_CASE],
+    ])('reads as many objects as %s needs', async (_case, fieldCounts, size) => {
+      unsecuredSavedObjectsClient.search.mockResolvedValueOnce(searchResponse({}));
+
+      await getter.getPreviews(
+        fieldCounts.map((count, index) => withFieldObservables(`case-${index}`, count))
+      );
+
+      expect(unsecuredSavedObjectsClient.search.mock.calls[0][0]).toHaveProperty(
+        'aggs.refs.aggs.cases.aggs.caseIds.aggs.reverse.aggs.oldest.top_hits.size',
+        size
+      );
+    });
+
+    it('returns counts only when every field holds 50 or more', async () => {
       unsecuredSavedObjectsClient.search.mockResolvedValueOnce(
         searchResponse({
           aggregations: {
@@ -445,12 +482,46 @@ describe('ObservableGetter', () => {
         })
       );
 
-      const previews = await getter.getPreviews(['case-1'], 0);
+      const previews = await getter.getPreviews([
+        withFieldObservables('case-1', MAX_OBSERVABLES_PER_CASE),
+        withFieldObservables('case-2', MAX_OBSERVABLES_PER_CASE + 1),
+      ]);
 
       expect(unsecuredSavedObjectsClient.search.mock.calls[0][0]).not.toHaveProperty(
         'aggs.refs.aggs.cases.aggs.caseIds.aggs.reverse.aggs'
       );
       expect(previews.get('case-1')).toEqual({ count: 3, oldest: [] });
+    });
+
+    it('rejects and logs when the search fails', async () => {
+      const error = new Error('search failed');
+      unsecuredSavedObjectsClient.search.mockRejectedValueOnce(error);
+
+      await expect(getter.getPreviews([withFieldObservables('case-1', 0)])).rejects.toBe(error);
+      expect(log.error).toHaveBeenCalledWith(
+        'Failed to get the observables previews of 1 cases: Error: search failed',
+        { error }
+      );
+    });
+
+    /**
+     * FAILURE SCENARIO: the preview search fails after a write is saved
+     * Symptom: the write response lists and counts the case field's observables only, until the next read
+     * Log signature: `Failed to get the observables previews of 1 cases: Error: search failed`
+     * Trigger: Elasticsearch rejects or times out the search on `.kibana_alerting_cases`
+     * Recovery: none needed; the write and everything after it ran, and the next read lists both stores
+     */
+    it('logs a failed search and returns no previews with ignoreErrors', async () => {
+      const error = new Error('search failed');
+      unsecuredSavedObjectsClient.search.mockRejectedValueOnce(error);
+
+      await expect(
+        getter.getPreviews([withFieldObservables('case-1', 0)], { ignoreErrors: true })
+      ).resolves.toEqual(new Map());
+      expect(log.error).toHaveBeenCalledWith(
+        'Failed to get the observables previews of 1 cases: Error: search failed',
+        { error }
+      );
     });
   });
 });

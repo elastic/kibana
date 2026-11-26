@@ -292,6 +292,18 @@ const createObservableGetterServiceMock = (): ObservableGetterServiceMock => {
   return service as unknown as ObservableGetterServiceMock;
 };
 
+/** Makes `getPreviews` behave as the getter does when its search fails. */
+export const mockObservablesPreviewSearchFailure = ({
+  getter,
+}: Pick<ObservableServiceMock, 'getter'>): void => {
+  getter.getPreviews.mockImplementation(async (_cases, { ignoreErrors = false } = {}) => {
+    if (ignoreErrors) {
+      return new Map();
+    }
+    throw new Error('search failed');
+  });
+};
+
 type FakeObservableService = PublicMethodsOf<ObservableService> & ObservableServiceOperations;
 
 export const createObservableServiceMock = (): ObservableServiceMock => {

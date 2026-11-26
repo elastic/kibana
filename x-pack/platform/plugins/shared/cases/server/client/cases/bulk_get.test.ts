@@ -90,7 +90,7 @@ describe('bulkGet', () => {
       expect(res.cases[1]).toMatchObject({ observables: [], total_observables: 0 });
     });
 
-    it('requests one preview for the authorized cases, sized for the most room', async () => {
+    it("requests the authorized cases' previews in one call, passing their field observables", async () => {
       const clientArgs = createArgs();
       clientArgs.services.attachmentService.getter.getCaseAttatchmentStats.mockResolvedValue(
         new Map()
@@ -99,10 +99,10 @@ describe('bulkGet', () => {
       await bulkGet({ ids: [caseWithObservables.id, otherCase.id] }, clientArgs);
 
       expect(clientArgs.services.observableService.getter.getPreviews).toHaveBeenCalledTimes(1);
-      expect(clientArgs.services.observableService.getter.getPreviews).toHaveBeenCalledWith(
-        [caseWithObservables.id, otherCase.id],
-        50
-      );
+      expect(clientArgs.services.observableService.getter.getPreviews).toHaveBeenCalledWith([
+        { id: caseWithObservables.id, observables: [fieldObservable] },
+        { id: otherCase.id, observables: otherCase.attributes.observables },
+      ]);
     });
 
     it('requests the previews alongside the attachment totals', async () => {

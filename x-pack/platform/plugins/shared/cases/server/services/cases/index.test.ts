@@ -4073,13 +4073,16 @@ describe('CasesService', () => {
           expect(casesMap.get('2')).toMatchObject({ observables: [], total_observables: 0 });
         });
 
-        it('requests one preview for every case, sized for the most room', async () => {
+        it("requests every case's preview in one call, passing its field observables", async () => {
           trackPreviewsRequestedBeforeTotals();
 
           await service.findCasesGroupedByID({ caseOptions: {} });
 
           expect(observableService.getter.getPreviews).toHaveBeenCalledTimes(1);
-          expect(observableService.getter.getPreviews).toHaveBeenCalledWith(['1', '2'], 50);
+          expect(observableService.getter.getPreviews).toHaveBeenCalledWith([
+            { id: '1', observables: [fieldObservable] },
+            { id: '2', observables: [] },
+          ]);
         });
 
         it('requests the previews alongside the attachment totals', async () => {
@@ -4130,13 +4133,16 @@ describe('CasesService', () => {
           expect(casesMap.get('2')).toMatchObject({ observables: [], total_observables: 0 });
         });
 
-        it('requests one preview for every case, sized for the most room', async () => {
+        it("requests every case's preview in one call, passing its field observables", async () => {
           trackPreviewsRequestedBeforeTotals();
 
           await service.searchCasesGroupedByID({ caseOptions: {}, namespaces: ['default'] });
 
           expect(observableService.getter.getPreviews).toHaveBeenCalledTimes(1);
-          expect(observableService.getter.getPreviews).toHaveBeenCalledWith(['1', '2'], 50);
+          expect(observableService.getter.getPreviews).toHaveBeenCalledWith([
+            expect.objectContaining({ id: '1', observables: [fieldObservable] }),
+            expect.objectContaining({ id: '2', observables: [] }),
+          ]);
         });
 
         it('requests the previews alongside the attachment totals', async () => {

@@ -8,6 +8,7 @@
 import type { Observable } from '../../../common/types/domain';
 import { CaseStatuses } from '../../../common/types/domain';
 import { createCasesClientMockArgs } from '../../client/mocks';
+import { mockObservablesPreviewSearchFailure } from '../../services/mocks';
 import { mockCaseComments, mockCases } from '../../mocks';
 import { CaseCommentModel } from './case_with_comments';
 import {
@@ -1774,8 +1775,8 @@ describe('CaseCommentModel', () => {
       expect(encoded.observables).toEqual([fieldObservable, typeObservable]);
       expect(encoded.total_observables).toBe(4);
       expect(clientArgs.services.observableService.getter.getPreviews).toHaveBeenCalledWith(
-        [caseWithObservables.id],
-        49
+        [{ id: caseWithObservables.id, observables: [fieldObservable] }],
+        { ignoreErrors: true }
       );
     });
 
@@ -1807,9 +1808,7 @@ describe('CaseCommentModel', () => {
      */
     it('lists and counts the field alone when the preview fails', async () => {
       const modelWithObservables = await createModel();
-      clientArgs.services.observableService.getter.getPreviews.mockRejectedValue(
-        new Error('search failed')
-      );
+      mockObservablesPreviewSearchFailure(clientArgs.services.observableService);
 
       const encoded = await modelWithObservables.encodeWithComments();
 

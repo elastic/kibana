@@ -47,11 +47,8 @@ import {
   createAttackUpdateStatusRequest,
   flattenCaseSavedObject,
   getAlertInfoFromComments,
-} from '../../common/utils';
-import {
-  getObservablesPreviewAfterWrite,
   mergeObservablesPreview,
-} from '../../common/observables_preview';
+} from '../../common/utils';
 import type { CasesClient, CasesClientArgs } from '..';
 import { Operations } from '../../authorization';
 import { casesConnectors } from '../../connectors';
@@ -260,7 +257,7 @@ export const push = async (
 
     const shouldMarkAsClosed = shouldCloseByPush(myCaseConfigure);
 
-    const [updatedCase, updatedComments, observablesPreview] = await Promise.all([
+    const [updatedCase, updatedComments, observablesPreviews] = await Promise.all([
       caseService.patchCase({
         originalCase: myCase,
         caseId,
@@ -309,10 +306,10 @@ export const push = async (
         requestWithoutType: true,
       }),
 
-      getObservablesPreviewAfterWrite(observableService, {
-        id: myCase.id,
-        observables: myCase.attributes.observables,
-      }),
+      observableService.getter.getPreviews(
+        [{ id: myCase.id, observables: myCase.attributes.observables }],
+        { ignoreErrors: true }
+      ),
     ]);
 
     if (shouldMarkAsClosed) {
@@ -367,7 +364,7 @@ export const push = async (
           };
         }),
       }),
-      observablesPreview
+      observablesPreviews.get(myCase.id)
     );
 
     return decodeOrThrowZod(CaseSchema)(res);

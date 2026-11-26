@@ -8,11 +8,17 @@
 import type { estypes } from '@elastic/elasticsearch';
 import type { SavedObject, SavedObjectsRawDoc, SavedObjectsRawDocSource } from '@kbn/core/server';
 import { isSavedObjectErrorResult } from '@kbn/core/server';
-import { CASE_OBSERVABLE_SAVED_OBJECT, CASE_SAVED_OBJECT } from '../../../../common/constants';
+import {
+  CASE_OBSERVABLE_SAVED_OBJECT,
+  CASE_SAVED_OBJECT,
+  MAX_OBSERVABLES_PER_CASE,
+} from '../../../../common/constants';
 import type { Observable } from '../../../../common/types/domain';
 import type { ObservablePersistedAttributes } from '../../../common/types/observable';
 import type {
+  CaseWithFieldObservables,
   FindObservablesPageArgs,
+  GetObservablesPreviewsOptions,
   ObservableKey,
   ObservableServiceContext,
   ObservablesPageItem,
@@ -163,22 +169,29 @@ export class ObservableGetter {
   }
 
   /**
-   * For each case, how many objects it holds and its oldest `previewSize` of them, in one search
-   * for every case. Cases without objects are left out. `previewSize` 0 returns counts only; it
-   * must not exceed the index's `max_inner_result_window` (100 by default).
+   * For each case, how many objects it holds and enough of its oldest to fill its response to 50
+   * observables after the ones in its field, in one search for every case. The search reads as many
+   * as the case with the most room needs, and none when every field is full. Cases without objects
+   * are left out.
    */
   public async getPreviews(
-    caseIds: string[],
-    previewSize: number
+    cases: CaseWithFieldObservables[],
+    { ignoreErrors = false }: GetObservablesPreviewsOptions = {}
   ): Promise<Map<string, ObservablesPreview>> {
     const previews = new Map<string, ObservablesPreview>();
-    const uniqueCaseIds = [...new Set(caseIds)];
+    const uniqueCaseIds = [...new Set(cases.map(({ id }) => id))];
 
     if (uniqueCaseIds.length === 0) {
       return previews;
     }
 
-    return logged(
+    // At most 50, which stays under the index's `max_inner_result_window` (100 by default).
+    const previewSize = cases.reduce(
+      (size, { observables }) => Math.max(size, MAX_OBSERVABLES_PER_CASE - observables.length),
+      0
+    );
+
+    const search = logged(
       this.context.log,
       `get the observables previews of ${uniqueCaseIds.length} cases`,
       async () => {
@@ -198,6 +211,8 @@ export class ObservableGetter {
         return previews;
       }
     );
+
+    return ignoreErrors ? search.catch(() => new Map<string, ObservablesPreview>()) : search;
   }
 
   private async search<Aggregations = unknown>(

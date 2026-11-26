@@ -52,7 +52,11 @@ import type {
   SavedObjectsBulkResponseWithErrors,
   SOWithErrors,
 } from '../../common/types';
-import { defaultSortField, flattenCaseSavedObject } from '../../common/utils';
+import {
+  defaultSortField,
+  flattenCaseSavedObject,
+  mergeObservablesPreview,
+} from '../../common/utils';
 import { STATUS_ESMODEL_TO_EXTERNAL } from '../../common/constants';
 import { DEFAULT_PAGE, DEFAULT_PER_PAGE } from '../../routes/api';
 import { buildFilter, combineFilters } from '../../client/utils';
@@ -66,7 +70,6 @@ import {
 } from './transform';
 import type { AttachmentService } from '../attachments';
 import type { ObservableService } from '../observables';
-import { getObservablesPreviews, mergeObservablesPreview } from '../../common/observables_preview';
 import type {
   CasesActivityV2WriterContract,
   CasesAnalyticsV2WriterContract,
@@ -449,8 +452,7 @@ export class CasesService {
       this.attachmentService.getter.getCaseAttatchmentStats({
         caseIds: Array.from(casesMap.keys()),
       }),
-      getObservablesPreviews(
-        this.observableService,
+      this.observableService.getter.getPreviews(
         Array.from(casesMap.values(), ({ id, attributes }) => ({
           id,
           observables: attributes.observables,
@@ -587,7 +589,7 @@ export class CasesService {
       this.attachmentService.getter.getCaseAttatchmentStats({
         caseIds: Array.from(casesMap.keys()),
       }),
-      getObservablesPreviews(this.observableService, Array.from(casesMap.values())),
+      this.observableService.getter.getPreviews(Array.from(casesMap.values())),
     ]);
 
     const casesWithComments = new Map<string, Case>();

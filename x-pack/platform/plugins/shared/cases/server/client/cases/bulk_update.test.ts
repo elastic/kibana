@@ -36,6 +36,7 @@ import {
 } from '../../../common/constants/attachments';
 import { mockCaseComments, mockCases } from '../../mocks';
 import { createCasesClientMock, createCasesClientMockArgs } from '../mocks';
+import { mockObservablesPreviewSearchFailure } from '../../services/mocks';
 import { Operations } from '../../authorization';
 import type { UserActionEvent } from '../../services/user_actions/types';
 import { bulkUpdate, getOperationsToAuthorize } from './bulk_update';
@@ -117,8 +118,8 @@ describe('update', () => {
         total_observables: 4,
       });
       expect(clientArgs.services.observableService.getter.getPreviews).toHaveBeenCalledWith(
-        [caseWithObservables.id],
-        49
+        [{ id: caseWithObservables.id, observables: [fieldObservable] }],
+        { ignoreErrors: true }
       );
     });
 
@@ -159,9 +160,7 @@ describe('update', () => {
      *   lists both stores.
      */
     it('records the user actions and emits the update when the preview fails', async () => {
-      clientArgs.services.observableService.getter.getPreviews.mockRejectedValue(
-        new Error('search failed')
-      );
+      mockObservablesPreviewSearchFailure(clientArgs.services.observableService);
 
       const [updatedCase] = await bulkUpdate(titleUpdate, clientArgs, casesClientMock);
 
