@@ -40,6 +40,7 @@ describe('registerConnectorSkills', () => {
     for (const skill of registerSkillsWith()) {
       expect(skill.basePath).toBe(CONNECTORS_SKILLS_BASE_PATH);
       expect(skill.hidden).toBe(true);
+      expect(skill.requiresAllRegistryTools).toBe(true);
       expect(skill.excludeFromElasticCapabilities).toBe(true);
       expect(await skill.getRegistryTools?.()).toEqual([platformCoreTools.executeWorkflow]);
       const inlineTools = (await skill.getInlineTools?.()) ?? [];

@@ -374,10 +374,10 @@ describe('layout manager', () => {
         },
       ]);
 
-      expect(layoutManager.internalApi.childrenStateLoading$.value).toBe(true);
+      expect(layoutManager.internalApi.applyingChildState$.value).toBe(true);
       await waitFor(() => {
         expect(applySerializedState).toHaveBeenCalledWith(updatedState);
-        expect(layoutManager.internalApi.childrenStateLoading$.value).toBe(false);
+        expect(layoutManager.internalApi.applyingChildState$.value).toBe(false);
       });
 
       const layout = layoutManager.api.layout$.value;
@@ -415,10 +415,10 @@ describe('layout manager', () => {
         },
       ]);
 
-      expect(layoutManager.internalApi.childrenStateLoading$.value).toBe(true);
+      expect(layoutManager.internalApi.applyingChildState$.value).toBe(true);
       await waitFor(() => {
         expect(applySerializedState).toHaveBeenCalledWith({ title: 'Updated Panel One' });
-        expect(layoutManager.internalApi.childrenStateLoading$.value).toBe(false);
+        expect(layoutManager.internalApi.applyingChildState$.value).toBe(false);
       });
 
       expect(trackPanelMock.setScrollToPanelId).toHaveBeenCalledWith(PANEL_ONE_ID);
@@ -806,7 +806,7 @@ describe('layout manager', () => {
     });
   });
 
-  describe('childrenLoading$', () => {
+  describe('childApisPending$', () => {
     test('all children load when no sections', async () => {
       const loadingStates: boolean[] = [];
       const layoutManager = initializeLayoutManager(
@@ -815,7 +815,7 @@ describe('layout manager', () => {
         pinnedControls,
         trackPanelMock
       );
-      layoutManager.internalApi.childrenLoading$.subscribe((loading) => {
+      layoutManager.internalApi.childApisPending$.subscribe((loading) => {
         loadingStates.push(loading);
       });
 
@@ -842,7 +842,7 @@ describe('layout manager', () => {
         pinnedControls,
         trackPanelMock
       );
-      layoutManager.internalApi.childrenLoading$.subscribe((loading) => {
+      layoutManager.internalApi.childApisPending$.subscribe((loading) => {
         loadingStates.push(loading);
       });
 
@@ -871,7 +871,7 @@ describe('layout manager', () => {
         pinnedControls,
         trackPanelMock
       );
-      layoutManager.internalApi.childrenLoading$.subscribe((loading) => {
+      layoutManager.internalApi.childApisPending$.subscribe((loading) => {
         loadingStates.push(loading);
       });
 
@@ -914,7 +914,7 @@ describe('layout manager', () => {
         trackPanelMock
       );
 
-      layoutManager.internalApi.childrenLoading$.subscribe((loading) => {
+      layoutManager.internalApi.childApisPending$.subscribe((loading) => {
         loadingStates.push(loading);
       });
       layoutManager.api.registerChildApi(panel1Api);

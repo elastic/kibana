@@ -21,9 +21,11 @@ export {
   CUSTOM_QUERY_RULE,
   DEFAULT_SECURITY_SOLUTION_INDEXES,
   EQL_RULE,
+  ESQL_RULE,
 } from './src/playwright/constants/detection_rules';
 export type {
   CustomQueryRuleResponseAction,
+  EsqlRule,
   ThreatMatchRule,
 } from './src/playwright/constants/detection_rules';
 export { APP_LOAD_TIMEOUT_MS, DATA_LOAD_TIMEOUT_MS } from './src/playwright/constants/timeouts';

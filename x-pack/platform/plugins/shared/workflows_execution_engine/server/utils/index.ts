@@ -6,8 +6,6 @@
  */
 
 export { parseDuration } from '@kbn/workflows';
-export { computeRetryDelayMs } from './retry_delay/retry_delay';
-export type { RetryDelayConfig } from './retry_delay/retry_delay';
 export { buildStepExecutionId } from './build_step_execution_id/build_step_execution_id';
 export { stringifyStackFrames } from './stringify_stack_frames';
 export {
@@ -21,4 +19,3 @@ export { isTemplateExpression } from './templates';
 export { renderDuration } from './render_duration/render_duration';
 export { extractTokenUsage, extractConnectorId, sumTokenUsage } from './token_usage/token_usage';
 export { hasExecutionChain, toExecutionChainHop } from './workflow_lineage_guards';
-export type { ExecutionChainHop } from './workflow_lineage_guards';

@@ -271,3 +271,143 @@ test('shows axis labels when configured', async () => {
     })
   );
 });
+
+test('writes the breakdown format onto the ES|QL Y column', async () => {
+  const result = await buildHeatmap(
+    {
+      chartType: 'heatmap',
+      title: 'latency',
+      dataset: {
+        esql: 'TS metrics | STATS count = COUNT(latency) BY bucket, TBUCKET(100)',
+      },
+      breakdown: 'bucket',
+      breakdownFormat: {
+        format: 'duration',
+        fromUnit: 'milliseconds',
+        toUnit: 'humanizePrecise',
+        decimals: 0,
+        compactValues: true,
+      },
+      xAxis: 'TBUCKET(100)',
+      value: 'count',
+    },
+    {
+      dataViewsAPI: mockDataViewsService() as any,
+    }
+  );
+
+  const columns = result.state.datasourceStates.textBased?.layers.layer_0.columns ?? [];
+  const yColumn = columns.find((column) => column.columnId === 'y_metric_formula_accessor');
+  const valueColumn = columns.find((column) => column.columnId === 'metric_formula_accessor');
+
+  expect(yColumn?.meta).toBeUndefined();
+  expect(yColumn?.params?.format).toEqual({
+    id: 'duration',
+    params: {
+      compact: true,
+      decimals: 0,
+      fromUnit: 'milliseconds',
+      toUnit: 'humanizePrecise',
+    },
+  });
+  expect(valueColumn?.params).toBeUndefined();
+});
+
+test('writes a format id when optional breakdown format params are omitted', async () => {
+  const result = await buildHeatmap(
+    {
+      chartType: 'heatmap',
+      title: 'share',
+      dataset: {
+        esql: 'from test | count=count() by @timestamp, category',
+      },
+      breakdown: 'category',
+      breakdownFormat: { format: 'percent' },
+      xAxis: '@timestamp',
+      value: 'count',
+    },
+    {
+      dataViewsAPI: mockDataViewsService() as any,
+    }
+  );
+
+  const columns = result.state.datasourceStates.textBased?.layers.layer_0.columns ?? [];
+  const yColumn = columns.find((column) => column.columnId === 'y_metric_formula_accessor');
+
+  expect(yColumn?.params?.format).toEqual({ id: 'percent' });
+});
+
+test('writes decimals 0 on the breakdown format', async () => {
+  const result = await buildHeatmap(
+    {
+      chartType: 'heatmap',
+      title: 'bytes',
+      dataset: {
+        esql: 'from test | count=count() by @timestamp, category',
+      },
+      breakdown: 'category',
+      breakdownFormat: { format: 'bytes', decimals: 0 },
+      xAxis: '@timestamp',
+      value: 'count',
+    },
+    {
+      dataViewsAPI: mockDataViewsService() as any,
+    }
+  );
+
+  const columns = result.state.datasourceStates.textBased?.layers.layer_0.columns ?? [];
+  const yColumn = columns.find((column) => column.columnId === 'y_metric_formula_accessor');
+
+  expect(yColumn?.params?.format).toEqual({
+    id: 'bytes',
+    params: { decimals: 0 },
+  });
+});
+
+test('writes the breakdown format onto the data view Y column', async () => {
+  const result = await buildHeatmap(
+    {
+      chartType: 'heatmap',
+      title: 'latency',
+      dataset: {
+        index: 'test',
+      },
+      breakdown: 'price',
+      breakdownFormat: {
+        format: 'duration',
+        fromUnit: 'milliseconds',
+        toUnit: 'humanizePrecise',
+        decimals: 0,
+        compactValues: true,
+      },
+      xAxis: '@timestamp',
+      value: 'count()',
+    },
+    {
+      dataViewsAPI: mockDataViewsService() as any,
+    }
+  );
+
+  const columns = result.state.datasourceStates.formBased?.layers.layer_0.columns;
+  const yColumn = columns?.y_metric_formula_accessor;
+  const valueColumn = columns?.metric_formula_accessor;
+  const yParams = yColumn && 'params' in yColumn ? yColumn.params : undefined;
+  const valueFormat =
+    valueColumn && 'params' in valueColumn ? valueColumn.params?.format : undefined;
+
+  expect(yColumn?.operationType).toBe('range');
+  expect(yParams?.format).toEqual({
+    id: 'duration',
+    params: {
+      compact: true,
+      decimals: 0,
+      fromUnit: 'milliseconds',
+      toUnit: 'humanizePrecise',
+    },
+  });
+  expect(yParams && 'parentFormat' in yParams ? yParams.parentFormat : undefined).toEqual({
+    id: 'range',
+    params: { template: 'arrow_right', replaceInfinity: true },
+  });
+  expect(valueFormat).toBeUndefined();
+});
