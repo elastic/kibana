@@ -456,6 +456,25 @@ export const ConnectorIconsMap: Map<
   ],
 
   [
+    '.microsoft_sql_server',
+    lazy(
+      () =>
+        import(
+          /* webpackChunkName: "connectorIconmicrosoftsqlserver" */ './specs/microsoft_sql_server/icon'
+        )
+    ),
+  ],
+
+  [
+    '.sentinelone2',
+    lazy(
+      () => import(/* webpackChunkName: "connectorIconSentinelone2" */ './specs/sentinelone/icon')
+    ),
+  ],
+
+  ['.redis', lazy(() => import(/* webpackChunkName: "connectorIconredis" */ './specs/redis/icon'))],
+
+  [
     '.crowdstrike2',
     lazy(
       () => import(/* webpackChunkName: "connectorIconcrowdstrike2" */ './specs/crowdstrike2/icon')
