@@ -235,7 +235,7 @@ export const useProcessorForm = ({
     signalsError: signalsTouched ? signalsProblem : undefined,
     values,
     errors,
-    isDirty,
+    isDirty: isDirty || hasUnparsedInput,
     canSubmit: definition !== undefined && !doesNotFit && signals.length > 0 && !hasUnparsedInput,
     changeType,
     setSignals,

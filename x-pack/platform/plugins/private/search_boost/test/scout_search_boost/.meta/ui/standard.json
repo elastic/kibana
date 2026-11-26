@@ -1,9 +1,100 @@
 {
-  "sha1": "fb559abf985d18fbdb0b5117fdcd30f95972896f",
+  "sha1": "e5a837f58cfa596d10db1855c27f0920c54c55a6",
   "testChannels": [
     "ci-on-commit"
   ],
   "tests": [
+    {
+      "id": "984a8589f1e743a-63dd150bca4631c",
+      "title": "Search boost details pages opens a rule from its table and shows what it applies to",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-vectordb"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/search_boost/test/scout_search_boost/ui/tests/boost_details.spec.ts",
+        "line": 26,
+        "column": 23
+      }
+    },
+    {
+      "id": "984a8589f1e743a-3987c401b7ad60b",
+      "title": "Search boost details pages opens an index in Index Management for users who can open it",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-vectordb"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/search_boost/test/scout_search_boost/ui/tests/boost_details.spec.ts",
+        "line": 64,
+        "column": 13
+      }
+    },
+    {
+      "id": "984a8589f1e743a-db6ccfa7307b9b8",
+      "title": "Search boost details pages opens a data stream in a flyout over the rule",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-vectordb"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/search_boost/test/scout_search_boost/ui/tests/boost_details.spec.ts",
+        "line": 71,
+        "column": 5
+      }
+    },
+    {
+      "id": "984a8589f1e743a-538b504488aa169",
+      "title": "Search boost details pages loads again once the data stream is deleted from the flyout",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-vectordb"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/search_boost/test/scout_search_boost/ui/tests/boost_details.spec.ts",
+        "line": 82,
+        "column": 23
+      }
+    },
+    {
+      "id": "984a8589f1e743a-10e01535003ab8a",
+      "title": "Search boost details pages opens a rule's profile and lists the rules using it",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-vectordb"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/search_boost/test/scout_search_boost/ui/tests/boost_details.spec.ts",
+        "line": 107,
+        "column": 5
+      }
+    },
+    {
+      "id": "79eba99270dbe05-38707c2a01cae22",
+      "title": "Search boost rules and profiles shows the boost rules and what each applies to",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-vectordb"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/search_boost/test/scout_search_boost/ui/tests/boost_lists.spec.ts",
+        "line": 22,
+        "column": 23
+      }
+    },
+    {
+      "id": "79eba99270dbe05-65ff81b065688ef",
+      "title": "Search boost rules and profiles shows the boost profiles and opens the rules using one",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-vectordb"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/search_boost/test/scout_search_boost/ui/tests/boost_lists.spec.ts",
+        "line": 37,
+        "column": 13
+      }
+    },
     {
       "id": "9575e8fa09115fe-0b0b9a563df4b2b",
       "title": "Search boost landing a user with read access opens the landing from the nav link",

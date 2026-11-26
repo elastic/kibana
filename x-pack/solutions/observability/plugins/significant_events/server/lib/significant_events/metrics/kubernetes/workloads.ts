@@ -91,7 +91,7 @@ const WORKLOAD_TYPE_FILTERS: Record<WorkloadKind, Condition> = {
 };
 
 // ReplicaSet hashes and Job timestamp suffixes are removed to recover long-lived owners.
-const WORKLOAD_OWNER_DERIVATION = `| EVAL h = \`kubernetes.labels.pod-template-hash\`,
+export const WORKLOAD_OWNER_DERIVATION = `| EVAL h = \`kubernetes.labels.pod-template-hash\`,
        rs = kubernetes.replicaset.name,
        derived_deployment = CASE(
          kubernetes.deployment.name IS NULL AND h IS NOT NULL AND rs IS NOT NULL

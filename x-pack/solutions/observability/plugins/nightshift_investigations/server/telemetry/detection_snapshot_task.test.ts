@@ -35,7 +35,12 @@ const setup = ({
       rules: rules.slice((page - 1) * perPage, page * perPage),
       total: rules.length,
     })),
-    listExternalConnectorSources: jest.fn().mockResolvedValue(['datadog', 'datadog', 'other']),
+    listConnectors: jest.fn().mockResolvedValue([
+      { actionTypeId: '.datadog', isInboundEventsEnabled: true },
+      { actionTypeId: '.datadog', isInboundEventsEnabled: true },
+      { actionTypeId: '.datadog', isInboundEventsEnabled: false },
+      { actionTypeId: '.slack2', isInboundEventsEnabled: true },
+    ]),
     getAlertActivity: jest.fn().mockResolvedValue({
       activeConnectorSources: ['datadog'],
       external_sources_active_24h: 2,
@@ -82,7 +87,18 @@ describe('reportDetectionSnapshots', () => {
       rules_truncated: false,
       automations_total: 2,
       automations_enabled: 1,
-      external_connectors_configured: 3,
+      automations_alert_total: 2,
+      automations_alert_enabled: 1,
+      automations_schedule_total: 0,
+      automations_schedule_enabled: 0,
+      automations_slack_total: 0,
+      automations_slack_enabled: 0,
+      connectors_configured: 4,
+      connectors_by_type: [
+        { connector_type: '.datadog', count: 3 },
+        { connector_type: '.slack2', count: 1 },
+      ],
+      external_connectors_configured: 2,
       external_connectors_active_24h: 2,
       external_sources_active_24h: 2,
       external_alerts_24h: 7,
@@ -91,6 +107,41 @@ describe('reportDetectionSnapshots', () => {
       custom_context_snippets: 4,
       sandbox_allowlist_hosts: 5,
     });
+  });
+
+  it('counts an automation once under each trigger kind it has', async () => {
+    const { analytics, run } = setup({
+      automations: [
+        {
+          isEnabled: true,
+          workflowId: 'workflow',
+          trigger: {
+            rows: [
+              { kind: 'slack', event: 'message' },
+              { kind: 'slack', event: 'message', channels: ['C1'] },
+              { kind: 'schedule', schedulePreset: 'hourly' },
+            ],
+          },
+        },
+        automation({ kind: 'slack', event: 'message' }, false),
+      ],
+    });
+
+    await run();
+
+    expect(analytics.reportEvent).toHaveBeenCalledWith(
+      NIGHTSHIFT_DETECTION_SNAPSHOT_EVENT,
+      expect.objectContaining({
+        automations_total: 2,
+        automations_enabled: 1,
+        automations_alert_total: 0,
+        automations_alert_enabled: 0,
+        automations_schedule_total: 1,
+        automations_schedule_enabled: 1,
+        automations_slack_total: 2,
+        automations_slack_enabled: 1,
+      })
+    );
   });
 
   it('skips the rule scan when an automation has no rule filter', async () => {

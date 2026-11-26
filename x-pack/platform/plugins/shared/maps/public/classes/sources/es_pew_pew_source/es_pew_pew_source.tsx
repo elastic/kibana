@@ -78,7 +78,7 @@ export class ESPewPewSource extends AbstractESAggSource {
     });
   }
 
-  renderSourceSettingsEditor({ onChange }: SourceEditorArgs) {
+  renderSourceSettingsEditor({ onChange }: SourceEditorArgs<ESPewPewSourceDescriptor>) {
     return (
       <UpdateSourceEditor
         bucketsName={this.getBucketsName()}

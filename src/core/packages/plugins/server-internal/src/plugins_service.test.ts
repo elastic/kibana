@@ -1056,7 +1056,6 @@ describe('PluginsService', () => {
       const prebootUIConfig$ = preboot.uiPlugins.browserConfigs.get('plugin-with-expose-preboot')!;
       await expect(prebootUIConfig$.pipe(take(1)).toPromise()).resolves.toEqual({
         browserConfig: { sharedProp: 'sharedProp default value plugin-with-expose-preboot' },
-        exposedConfigKeys: { sharedProp: 'string?' },
       });
 
       const standardUIConfig$ = standard.uiPlugins.browserConfigs.get(
@@ -1064,7 +1063,6 @@ describe('PluginsService', () => {
       )!;
       await expect(standardUIConfig$.pipe(take(1)).toPromise()).resolves.toEqual({
         browserConfig: { sharedProp: 'sharedProp default value plugin-with-expose-standard' },
-        exposedConfigKeys: { sharedProp: 'string?' },
       });
     });
 
@@ -1240,12 +1238,14 @@ describe('PluginsService', () => {
             "publicAssetsDir": <absolute path>/path-1-preboot/public/assets,
             "publicTargetDir": <absolute path>/path-1-preboot/target/public,
             "requiredBundles": Array [],
+            "requiredPlugins": Array [],
             "version": "version-1",
           },
           "plugin-2-preboot" => Object {
             "publicAssetsDir": <absolute path>/path-2-preboot/public/assets,
             "publicTargetDir": <absolute path>/path-2-preboot/target/public,
             "requiredBundles": Array [],
+            "requiredPlugins": Array [],
             "version": "version-2",
           },
         }
@@ -1256,12 +1256,14 @@ describe('PluginsService', () => {
             "publicAssetsDir": <absolute path>/path-1-standard/public/assets,
             "publicTargetDir": <absolute path>/path-1-standard/target/public,
             "requiredBundles": Array [],
+            "requiredPlugins": Array [],
             "version": "version-1",
           },
           "plugin-2-standard" => Object {
             "publicAssetsDir": <absolute path>/path-2-standard/public/assets,
             "publicTargetDir": <absolute path>/path-2-standard/target/public,
             "requiredBundles": Array [],
+            "requiredPlugins": Array [],
             "version": "version-2",
           },
         }

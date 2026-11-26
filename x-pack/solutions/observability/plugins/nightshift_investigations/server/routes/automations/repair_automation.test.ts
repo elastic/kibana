@@ -95,6 +95,21 @@ it('recreates a deleted workflow disabled and links it with the saved version', 
   });
 });
 
+it('repairs an automation saved with a user id as its Slack destination', async () => {
+  soClient.get.mockResolvedValue({
+    id: 'automation',
+    attributes: {
+      ...attributes,
+      completions: [{ action: 'post_to_slack', targetMode: 'channel', destination: 'U012ABCDEF' }],
+    },
+    version: 'v1',
+  });
+
+  await callRepair();
+
+  expect(createWorkflow).toHaveBeenCalled();
+});
+
 it('returns an existing workflow unchanged without pausing or replacing it', async () => {
   assertWorkflowAccess.mockResolvedValue(undefined);
   expect(await callRepair()).toEqual({ id: 'automation', ...attributes });

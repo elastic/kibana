@@ -413,7 +413,13 @@
       "matchDepNames": [
         "monaco-yaml",
         "monaco-editor",
-        "monaco-promql"
+        "monaco-promql",
+        "@codemirror/autocomplete",
+        "@codemirror/language",
+        "@codemirror/lint",
+        "@codemirror/state",
+        "@codemirror/view",
+        "@lezer/common"
       ],
       "reviewers": ["team:appex-sharedux"],
       "matchBaseBranches": ["main"],
@@ -535,7 +541,7 @@
     {
       "groupName": "@elastic/contextual-security-apps dependencies",
       "matchDepNames": [
-        "@mswjs/http-middleware",
+        "@msw/serve",
         "@types/byte-size",
         "byte-size",
         "msw",
@@ -793,7 +799,8 @@
         "elastic-apm-node",
         "@elastic/apm-rum",
         "@elastic/apm-rum-react",
-        "@elastic/apm-rum-core"
+        "@elastic/apm-rum-core",
+        "@elastic/opentelemetry-browser"
       ],
       "reviewers": ["team:kibana-core"],
       "matchBaseBranches": ["main"],
@@ -2304,10 +2311,9 @@
       "groupName": "OpenTelemetry modules",
       "matchDepNames": [
         "@grpc/grpc-js",
-        "@elastic/opentelemetry-node",
         "@opentelemetry/api",
-        "@opentelemetry/api-logs",
         "@opentelemetry/context-async-hooks",
+        "@opentelemetry/core",
         "@opentelemetry/exporter-logs-otlp-grpc",
         "@opentelemetry/exporter-logs-otlp-http",
         "@opentelemetry/exporter-logs-otlp-proto",
@@ -2322,8 +2328,12 @@
         "@opentelemetry/instrumentation-http",
         "@opentelemetry/instrumentation-undici",
         "@opentelemetry/otlp-exporter-base",
+        "@opentelemetry/otlp-grpc-exporter-base",
         "@opentelemetry/otlp-transformer",
+        "@opentelemetry/resources",
         "@opentelemetry/sdk-logs",
+        "@opentelemetry/sdk-metrics",
+        "@opentelemetry/sdk-trace",
         "@opentelemetry/semantic-conventions"
       ],
       "reviewers": [
@@ -2561,6 +2571,15 @@
     {
       "groupName": "mysql2",
       "matchDepNames": ["mysql2"],
+      "reviewers": ["team:response-ops"],
+      "matchBaseBranches": ["main"],
+      "addLabels": ["Team:ResponseOps"],
+      "minimumReleaseAge": "14 days",
+      "enabled": true
+    },
+    {
+      "groupName": "ioredis",
+      "matchDepNames": ["ioredis"],
       "reviewers": ["team:response-ops"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Team:ResponseOps"],

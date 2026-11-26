@@ -5,18 +5,28 @@
  * 2.0.
  */
 
-import type { PayloadAction } from '@reduxjs/toolkit';
 import { createSlice } from '@reduxjs/toolkit';
 
-import type {
-  SignificantItem,
-  SignificantItemGroup,
-  SignificantItemHistogram,
-  SignificantItemGroupHistogram,
-} from '@kbn/ml-agg-utils';
-
+import type { SignificantItem, SignificantItemGroup } from '@kbn/ml-agg-utils';
 import type { WindowParameters } from '../window_parameters';
 import type { LogRateAnalysisType } from '../log_rate_analysis_type';
+
+import {
+  STREAM_SLICE_NAME,
+  addError,
+  addSignificantItems,
+  addSignificantItemsGroup,
+  addSignificantItemsGroupHistogram,
+  addSignificantItemsHistogram,
+  ping,
+  resetErrors,
+  resetGroups,
+  resetResults,
+  setCurrentAnalysisType,
+  setCurrentAnalysisWindowParameters,
+  setZeroDocsFallback,
+  updateLoadingState,
+} from './stream_actions';
 
 export interface StreamState {
   ccsWarning: boolean;
@@ -44,90 +54,69 @@ export const getDefaultState = (): StreamState => ({
 });
 
 export const logRateAnalysisResultsSlice = createSlice({
-  name: 'logRateAnalysisResults',
+  name: STREAM_SLICE_NAME,
   initialState: getDefaultState(),
-  reducers: {
-    addSignificantItems: (state, action: PayloadAction<SignificantItem[]>) => {
-      state.significantItems.push(...action.payload);
-    },
-    addSignificantItemsHistogram: (state, action: PayloadAction<SignificantItemHistogram[]>) => {
-      state.significantItems = state.significantItems.map((cp) => {
-        const cpHistogram = action.payload.find(
-          (h) => h.fieldName === cp.fieldName && h.fieldValue === cp.fieldValue
-        );
-        return {
-          ...cp,
-          ...(cpHistogram ? { histogram: cpHistogram.histogram } : {}),
-        };
+  reducers: {},
+  extraReducers: (builder) => {
+    builder
+      .addCase(addSignificantItems, (state, action) => {
+        state.significantItems.push(...action.payload);
+      })
+      .addCase(addSignificantItemsHistogram, (state, action) => {
+        state.significantItems = state.significantItems.map((cp) => {
+          const cpHistogram = action.payload.find(
+            (h) => h.fieldName === cp.fieldName && h.fieldValue === cp.fieldValue
+          );
+          return {
+            ...cp,
+            ...(cpHistogram ? { histogram: cpHistogram.histogram } : {}),
+          };
+        });
+      })
+      .addCase(addSignificantItemsGroup, (state, action) => {
+        state.significantItemsGroups = action.payload;
+      })
+      .addCase(addSignificantItemsGroupHistogram, (state, action) => {
+        state.significantItemsGroups = state.significantItemsGroups.map((cpg) => {
+          const cpHistogram = action.payload.find((h) => h.id === cpg.id);
+          if (cpHistogram) {
+            cpg.histogram = cpHistogram.histogram;
+          }
+          return cpg;
+        });
+      })
+      .addCase(addError, (state, action) => {
+        state.errors.push(action.payload);
+      })
+      .addCase(ping, () => {})
+      .addCase(resetErrors, (state) => {
+        state.errors = [];
+      })
+      .addCase(resetGroups, (state) => {
+        state.significantItemsGroups = [];
+      })
+      // Reset the results but keep the current analysis type and window parameters.
+      .addCase(resetResults, (state) => ({
+        ...getDefaultState(),
+        currentAnalysisType: state.currentAnalysisType,
+        currentAnalysisWindowParameters: state.currentAnalysisWindowParameters,
+      }))
+      .addCase(updateLoadingState, (state, action) => ({ ...state, ...action.payload }))
+      .addCase(setZeroDocsFallback, (state, action) => {
+        state.zeroDocsFallback = action.payload;
+      })
+      .addCase(setCurrentAnalysisType, (state, action) => {
+        state.currentAnalysisType = action.payload;
+      })
+      .addCase(setCurrentAnalysisWindowParameters, (state, action) => {
+        state.currentAnalysisWindowParameters = action.payload;
       });
-    },
-    addSignificantItemsGroup: (state, action: PayloadAction<SignificantItemGroup[]>) => {
-      state.significantItemsGroups = action.payload;
-    },
-    addSignificantItemsGroupHistogram: (
-      state,
-      action: PayloadAction<SignificantItemGroupHistogram[]>
-    ) => {
-      state.significantItemsGroups = state.significantItemsGroups.map((cpg) => {
-        const cpHistogram = action.payload.find((h) => h.id === cpg.id);
-        if (cpHistogram) {
-          cpg.histogram = cpHistogram.histogram;
-        }
-        return cpg;
-      });
-    },
-    addError: (state, action: PayloadAction<string>) => {
-      state.errors.push(action.payload);
-    },
-    ping: () => {},
-    resetErrors: (state) => {
-      state.errors = [];
-    },
-    resetGroups: (state) => {
-      state.significantItemsGroups = [];
-    },
-    // Reset the results but keep the current analysis type and window parameters.
-    resetResults: (state) => ({
-      ...getDefaultState(),
-      currentAnalysisType: state.currentAnalysisType,
-      currentAnalysisWindowParameters: state.currentAnalysisWindowParameters,
-    }),
-    updateLoadingState: (
-      state,
-      action: PayloadAction<{
-        ccsWarning: boolean;
-        loaded: number;
-        loadingState: string;
-        remainingKeywordFieldCandidates?: string[];
-        remainingTextFieldCandidates?: string[];
-        groupsMissing?: boolean;
-      }>
-    ) => {
-      return { ...state, ...action.payload };
-    },
-    setZeroDocsFallback: (state, action: PayloadAction<boolean>) => {
-      state.zeroDocsFallback = action.payload;
-    },
-    setCurrentAnalysisType: (state, action: PayloadAction<LogRateAnalysisType | undefined>) => {
-      state.currentAnalysisType = action.payload;
-    },
-    setCurrentAnalysisWindowParameters: (
-      state,
-      action: PayloadAction<WindowParameters | undefined>
-    ) => {
-      state.currentAnalysisWindowParameters = action.payload;
-    },
   },
 });
 
 export const streamReducer = logRateAnalysisResultsSlice.reducer;
-export const streamReducerActions = logRateAnalysisResultsSlice.actions;
 
-type StreamReducerActions = typeof streamReducerActions;
-export type ApiActionName = keyof StreamReducerActions;
-export type AiopsLogRateAnalysisApiAction = ReturnType<StreamReducerActions[ApiActionName]>;
-
-export const {
+export {
   addError,
   addSignificantItems,
   addSignificantItemsGroup,
@@ -141,4 +130,7 @@ export const {
   setCurrentAnalysisWindowParameters,
   setZeroDocsFallback,
   updateLoadingState,
-} = logRateAnalysisResultsSlice.actions;
+  streamReducerActions,
+  type ApiActionName,
+  type AiopsLogRateAnalysisApiAction,
+} from './stream_actions';
