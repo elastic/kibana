@@ -9,19 +9,20 @@ import type { JsonValue } from '@kbn/utility-types';
 import type {
   EsWorkflowExecution,
   EsWorkflowStepExecution,
+  SerializedError,
   StackFrame,
   WorkflowTokenUsage,
 } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
 import type { GraphNodeUnion } from '@kbn/workflows/graph';
 import { ExecutionError } from '@kbn/workflows/server';
-import type { StepIoService } from './step_io_service';
+import { buildStepIoContextId } from './parallel_branch_scope';
+import type { StepIoBatchValue, StepIoService } from './step_io_service';
 import type { WorkflowContextManager } from './workflow_context_manager';
 import type { WorkflowExecutionState } from './workflow_execution_state';
 import type { RuntimeGraphView } from './workflow_runtime_graph';
 import { WorkflowScopeStack } from './workflow_scope_stack';
 import { STEP_SIZE_LIMIT_EXCEEDED, toExecutionError } from '../step/errors';
-import type { RunStepResult } from '../step/node_implementation';
 import { extractConnectorId, extractTokenUsage, parseDuration, renderDuration } from '../utils';
 
 import type { IWorkflowEventLogger } from '../workflow_event_logger';
@@ -149,55 +150,43 @@ export class StepExecutionRuntime {
     return !!this.workflowExecutionState.getStepExecution(this.stepExecutionId);
   }
 
-  public getCurrentStepResult(): RunStepResult | undefined {
+  /** Reads this step's input. A missing step execution returns `undefined`. */
+  public async getCurrentStepInput(): Promise<unknown> {
+    return this.readCurrent('input');
+  }
+
+  /** Reads this step's output. A missing step execution returns `undefined`. */
+  public async getCurrentStepOutput(): Promise<unknown> {
+    return this.readCurrent('output');
+  }
+
+  /** Reads this step's error. A missing step execution returns `undefined`. */
+  public async getCurrentStepError(): Promise<ExecutionError | undefined> {
+    const error = await this.readCurrent('error');
+    if (error == null || typeof error !== 'object') {
+      return undefined;
+    }
+    return new ExecutionError(error as SerializedError);
+  }
+
+  private stepIoContextId(): string {
+    return buildStepIoContextId(this.node.stepId, this.stackFrames);
+  }
+
+  private async readCurrent(
+    type: 'input' | 'output' | 'error'
+  ): Promise<StepIoBatchValue | undefined> {
     if (!this.stepExecutionExists()) {
       return undefined;
     }
-    const error = this.stepIoService.getStepError(this.stepExecutionId);
-    return {
-      input: this.stepIoService.getStepInput(this.stepExecutionId) || {},
-      output: this.stepIoService.getStepOutput(this.stepExecutionId) || {},
-      error: error ? new ExecutionError(error) : undefined,
-    };
-  }
-
-  /**
-   * Brings the given step executions' outputs back into in-memory state so a
-   * subsequent {@link getCurrentStepResult} can read them.
-   *
-   * Needed by callers that read another step execution's output *directly*
-   * rather than through a template: the template path is pre-warmed by
-   * `StepIoService.prepareForRead`, which targets outputs by static template
-   * analysis and therefore cannot see a direct read. Resume-time `load()` marks
-   * every non-pinned step deferred, so without this a direct read of an output
-   * written in an earlier tick silently yields `{}`.
-   *
-   * Takes a list so a caller reading many outputs pays one ES round trip.
-   * No-op for ids that are already resident.
-   *
-   * Read-pins the whole requested set for `consumerId` before awaiting, and the
-   * caller MUST {@link releaseReadOutputPins} once its synchronous reads are
-   * done. Pinning is not bookkeeping: `rehydrateOutputs` snapshots only the ids
-   * that are evicted when it starts, so without a pin a *resident* id in the
-   * set can be flushed and evicted by the concurrent persistence loop during
-   * the ES round trip — after which it was neither fetched by that call nor
-   * still in memory, and reads back as `{}`. `prepareForRead` pins before its
-   * own await for exactly this reason.
-   */
-  public async rehydrateStepOutputs(
-    stepExecutionIds: ReadonlyArray<string>,
-    consumerId: string = this.stepExecutionId
-  ): Promise<void> {
-    this.stepIoService.pinOutputsForRead(consumerId, stepExecutionIds);
-    await this.stepIoService.rehydrateOutputs(stepExecutionIds);
-  }
-
-  /**
-   * Releases the pins taken by {@link rehydrateStepOutputs}. Idempotent, so it
-   * is safe in a `finally`.
-   */
-  public releaseReadOutputPins(consumerId: string = this.stepExecutionId): void {
-    this.stepIoService.releaseReadPins(consumerId);
+    const values = await this.stepIoService.readBatch({
+      type,
+      refs: [{ executionId: this.stepExecutionId, contextId: this.stepIoContextId() }],
+    });
+    if (!values.has(this.stepExecutionId)) {
+      return undefined;
+    }
+    return values.get(this.stepExecutionId);
   }
 
   public getCurrentStepState(): Record<string, unknown> | undefined {
@@ -235,7 +224,12 @@ export class StepExecutionRuntime {
   }
 
   public setInput(input: Record<string, unknown>): void {
-    this.stepIoService.setStepInput(this.stepExecutionId, input as JsonValue);
+    this.stepIoService.write({
+      executionId: this.stepExecutionId,
+      contextId: this.stepIoContextId(),
+      type: 'input',
+      value: input as JsonValue,
+    });
     if (this.isInputRecorded) {
       return;
     }
@@ -297,11 +291,13 @@ export class StepExecutionRuntime {
       ...(usage ? { usage } : {}),
       ...(executionTimeMs !== undefined ? { executionTimeMs } : {}),
     });
-    this.stepIoService.setStepOutput(
-      this.stepExecutionId,
-      (stepOutput ?? null) as JsonValue | null,
-      sizeBytes
-    );
+    this.stepIoService.write({
+      executionId: this.stepExecutionId,
+      contextId: this.stepIoContextId(),
+      type: 'output',
+      value: (stepOutput ?? null) as JsonValue | null,
+      sizeBytes,
+    });
     this.logStepComplete({
       id: this.stepExecutionId,
       status: ExecutionStatus.COMPLETED,
@@ -361,14 +357,12 @@ export class StepExecutionRuntime {
       ...(usage ? { usage } : {}),
       ...(executionTimeMs !== undefined ? { executionTimeMs } : {}),
     });
-    // When partial output is provided, persist it so it remains reachable via
-    // `steps.x.output`. Otherwise write the `null` FAILED-step sentinel —
-    // distinct from `undefined` (evicted) so the eviction predicate can keep
-    // them apart.
-    this.stepIoService.setStepOutput(
-      this.stepExecutionId,
-      partialOutput !== undefined ? (partialOutput as JsonValue) : null
-    );
+    this.stepIoService.write({
+      executionId: this.stepExecutionId,
+      contextId: this.stepIoContextId(),
+      type: 'output',
+      value: partialOutput !== undefined ? (partialOutput as JsonValue) : null,
+    });
     this.logStepFail(executionError);
   }
 
@@ -406,7 +400,12 @@ export class StepExecutionRuntime {
       error: serializedError,
       ...(executionTimeMs !== undefined ? { executionTimeMs } : {}),
     });
-    this.stepIoService.setStepOutput(this.stepExecutionId, null);
+    this.stepIoService.write({
+      executionId: this.stepExecutionId,
+      contextId: this.stepIoContextId(),
+      type: 'output',
+      value: null,
+    });
     this.logStepFail(executionError);
   }
 

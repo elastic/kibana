@@ -53,10 +53,16 @@ const configSchema = schema.object({
   maxResponseSize: schema.byteSize({ defaultValue: DEFAULT_MAX_STEP_SIZE }),
   eviction: schema.object({
     /**
-     * Minimum output payload size for a completed step to be eligible for eviction
-     * from in-memory state after it has been flushed to Elasticsearch.
-     * Payloads smaller than this threshold stay in memory to avoid ES round-trip latency.
-     * Set to "0b" to evict all completed step outputs, or a very large value to disable eviction.
+     * Maximum total byte size of the in-memory LRU output cache.
+     * When the cache exceeds this limit, the least-recently-used entries are evicted.
+     * Set to "0b" to keep (almost) nothing resident; outputs are then reloaded from
+     * Elasticsearch on demand.
+     */
+    maxCacheSize: schema.byteSize({ defaultValue: '10mb' }),
+    /**
+     * Maximum byte size of a single step output that may enter the in-memory LRU.
+     * Larger outputs are still returned for the current read and persisted to Elasticsearch,
+     * but are not retained in the cache for later nodes (they rehydrate from ES on demand).
      */
     minPayloadSize: schema.byteSize({ defaultValue: '10kb' }),
   }),

@@ -46,7 +46,6 @@ const signatureEntries = (type: 'match' | 'match_any') => [
  */
 export const describeBlocklistOperatorField = (artifact: ArtifactTabCase): void => {
   const { pagePrefix, listId, urlPath, entries, osTypes } = artifact;
-  const condition = `${pagePrefix}-card-criteriaConditions-condition`;
 
   spaceTest.describe('Blocklist signature operator field', { tag: ARTIFACT_LIST_PAGE_TAGS }, () => {
     spaceTest.beforeEach(async ({ browserAuth }) => {
@@ -82,7 +81,9 @@ export const describeBlocklistOperatorField = (artifact: ArtifactTabCase): void 
 
         const card = pageObjects.artifactListPage.cardByName(pagePrefix, name);
         await expect(card).toBeVisible();
-        await expect(card.getByTestId(condition)).toHaveText(IS_EXPECTED_CONDITION);
+        await expect(pageObjects.artifactListPage.cardCriteriaByName(pagePrefix, name)).toHaveText(
+          IS_EXPECTED_CONDITION
+        );
       }
     );
 
@@ -114,7 +115,9 @@ export const describeBlocklistOperatorField = (artifact: ArtifactTabCase): void 
 
         const card = pageObjects.artifactListPage.cardByName(pagePrefix, name);
         await expect(card).toBeVisible();
-        await expect(card.getByTestId(condition)).toHaveText(IS_ONE_OF_EXPECTED_CONDITION);
+        await expect(pageObjects.artifactListPage.cardCriteriaByName(pagePrefix, name)).toHaveText(
+          IS_ONE_OF_EXPECTED_CONDITION
+        );
       }
     );
 
@@ -137,9 +140,9 @@ export const describeBlocklistOperatorField = (artifact: ArtifactTabCase): void 
         await pageObjects.artifactListPage.submitFlyout(pagePrefix);
         await pageObjects.artifactListPage.flyout(pagePrefix).waitFor({ state: 'hidden' });
 
-        await expect(
-          pageObjects.artifactListPage.cardByName(pagePrefix, name).getByTestId(condition)
-        ).toHaveText(IS_EXPECTED_CONDITION);
+        await expect(pageObjects.artifactListPage.cardCriteriaByName(pagePrefix, name)).toHaveText(
+          IS_EXPECTED_CONDITION
+        );
       }
     );
 
@@ -162,9 +165,9 @@ export const describeBlocklistOperatorField = (artifact: ArtifactTabCase): void 
         await pageObjects.artifactListPage.submitFlyout(pagePrefix);
         await pageObjects.artifactListPage.flyout(pagePrefix).waitFor({ state: 'hidden' });
 
-        await expect(
-          pageObjects.artifactListPage.cardByName(pagePrefix, name).getByTestId(condition)
-        ).toHaveText(IS_ONE_OF_EXPECTED_CONDITION);
+        await expect(pageObjects.artifactListPage.cardCriteriaByName(pagePrefix, name)).toHaveText(
+          IS_ONE_OF_EXPECTED_CONDITION
+        );
       }
     );
   });

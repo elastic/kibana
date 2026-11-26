@@ -15,6 +15,7 @@ import { describeOperation, findOperation, listOperations } from './inspect_spec
 import { isJsonObject } from '../json_pointer';
 import { loadVendorSpec } from '../spec/load_vendor_spec';
 import type {
+  AglioSourceFormat,
   ManifestSource,
   MarkdownSourceFormat,
   ProtocolFormat,
@@ -31,8 +32,10 @@ export const LIST_LIMIT = 200;
 export interface InspectVendorApiOptions {
   /** Specs to inspect by source name; without them, the sources in the connector's manifest. */
   readonly sources: Readonly<Record<string, string>>;
-  /** Sources that are Markdown references, by name; GraphQL and MCP ones are skipped. */
-  readonly formats?: Readonly<Record<string, MarkdownSourceFormat | ProtocolFormat>>;
+  /** Sources that are Markdown or Aglio references, by name; GraphQL and MCP ones are skipped. */
+  readonly formats?: Readonly<
+    Record<string, MarkdownSourceFormat | AglioSourceFormat | ProtocolFormat>
+  >;
   /** Per Markdown reference, the URL prefixes of the pages to fetch; see `ManifestSource`. */
   readonly pages?: Readonly<Record<string, readonly string[]>>;
   /**
