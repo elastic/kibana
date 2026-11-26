@@ -37,11 +37,13 @@ const MESSAGE_COLUMN = createColumn('message', 'text');
 
 const setup = async ({
   esql = 'FROM logs-* | LIMIT 1000',
+  sourceEsql = esql,
   resultColumns = [MESSAGE_COLUMN],
   licenseType = 'platinum',
   isProductFeatureAvailable = true,
 }: {
   esql?: string;
+  sourceEsql?: string;
   resultColumns?: DatatableColumn[];
   licenseType?: LicenseType;
   isProductFeatureAvailable?: boolean;
@@ -81,7 +83,7 @@ const setup = async ({
   );
 
   act(() => {
-    currentDataSource$.next(createMockEsqlSource([], resultColumns, undefined, esql));
+    currentDataSource$.next(createMockEsqlSource([], resultColumns, undefined, sourceEsql));
   });
 
   const getQuery = () => selectTab(toolkit.internalState.getState(), tabId).appState.query;
@@ -90,6 +92,12 @@ const setup = async ({
 };
 
 describe('GroupSimilarMessagesButton', () => {
+  it('does not offer to group fields from the previous query', async () => {
+    await setup({ esql: 'FROM metrics-*', sourceEsql: 'FROM logs-*' });
+
+    expect(screen.queryByTestId('dscGroupSimilarMessagesButton')).not.toBeInTheDocument();
+  });
+
   it('rewrites the query to group messages by pattern and tracks the click', async () => {
     const { getQuery, trackEsqlCategorizeEvent } = await setup();
 

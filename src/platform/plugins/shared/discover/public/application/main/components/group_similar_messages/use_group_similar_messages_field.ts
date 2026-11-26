@@ -35,7 +35,11 @@ export const useGroupSimilarMessagesField = (): string | undefined => {
   const currentDataSource = useCurrentDataSource();
 
   return useMemo(() => {
-    if (!isOfAggregateQueryType(query) || currentDataSource?.kind !== 'esql') {
+    if (
+      !isOfAggregateQueryType(query) ||
+      currentDataSource?.kind !== 'esql' ||
+      currentDataSource.query !== query.esql.trim()
+    ) {
       return undefined;
     }
 
