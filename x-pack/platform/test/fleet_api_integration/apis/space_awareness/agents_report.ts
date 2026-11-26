@@ -11,7 +11,7 @@ import type { CreateAgentPolicyResponse } from '@kbn/fleet-plugin/common';
 import type { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
 import { SpaceTestApiClient } from './api_helper';
-import { cleanFleetIndices, createTestSpace } from './helpers';
+import { cleanFleetIndices, createFleetAgent, createTestSpace } from './helpers';
 
 const reportUrlPattern = /\/api\/reporting\/jobs\/download\/.+/;
 
@@ -33,6 +33,10 @@ export default function (providerContext: FtrProviderContext) {
     let testSpacePolicy: CreateAgentPolicyResponse;
     let allSpacesPolicy: CreateAgentPolicyResponse;
 
+    // The report selects agents on the `agent.id` field, which `createFleetAgent` does not set
+    const DEFAULT_SPACE_STALE_AGENT_ID = 'report-stale-agent-default-space';
+    const TEST_SPACE_STALE_AGENT_ID = 'report-stale-agent-test-space';
+
     before(async () => {
       TEST_SPACE_1 = spaces.getDefaultTestSpace();
       await kibanaServer.savedObjects.cleanStandardList();
@@ -44,11 +48,24 @@ export default function (providerContext: FtrProviderContext) {
 
       await apiClient.postEnableSpaceAwareness();
 
-      // every policy created by the api client has an inactivity timeout
+      // every policy created by the api client has an inactivity timeout (24,000 seconds)
       [defaultSpacePolicy, testSpacePolicy, allSpacesPolicy] = await Promise.all([
         apiClient.createAgentPolicy(),
         apiClient.createAgentPolicy(TEST_SPACE_1),
         apiClient.createAgentPolicy(undefined, { space_ids: ['*'] }),
+      ]);
+
+      // agents that checked in long before the inactivity timeout of their policy
+      const staleCheckin = new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString();
+      await Promise.all([
+        createFleetAgent(esClient, defaultSpacePolicy.item.id, 'default', {
+          agent: { id: DEFAULT_SPACE_STALE_AGENT_ID, version: '8.15.0' },
+          last_checkin: staleCheckin,
+        }),
+        createFleetAgent(esClient, testSpacePolicy.item.id, TEST_SPACE_1, {
+          agent: { id: TEST_SPACE_STALE_AGENT_ID, version: '8.15.0' },
+          last_checkin: staleCheckin,
+        }),
       ]);
     });
 
@@ -60,25 +77,27 @@ export default function (providerContext: FtrProviderContext) {
       await cleanFleetIndices(esClient);
     });
 
-    // The status script params, that hold the inactivity cutoff of each policy, are part of the
-    // report job payload which is returned by the reporting API. They must only list the policies
-    // available in the space the report is generated from.
-    async function getPolicyIdsInReportPayload(spaceId?: string): Promise<string[]> {
+    async function generateReport(agentIds: string[], spaceId?: string): Promise<string> {
       const prefix = spaceId ? `/s/${spaceId}` : '';
       const response = await supertest
         .post(`${prefix}/internal/fleet/agents/reporting/generate?apiVersion=1`)
         .set('kbn-xsrf', 'xxx')
         .send({
-          // the agent does not need to exist, only the payload of the job is checked
-          agents: ['agent-that-does-not-exist'],
+          agents: agentIds,
           fields: ['agent.id', 'status'],
           timezone: 'UTC',
         })
         .expect(200);
 
       expect(response.body.url).match(reportUrlPattern);
-      const jobId = response.body.url.split('/').pop();
+      return response.body.url.split('/').pop();
+    }
 
+    // The status script params, that hold the inactivity cutoff of each policy, are part of the
+    // report job payload which is returned by the reporting API. They must only list the policies
+    // available in the space the report is generated from.
+    async function getPolicyIdsInReportPayload(jobId: string, spaceId?: string) {
+      const prefix = spaceId ? `/s/${spaceId}` : '';
       const job = await pRetry(
         async () => {
           const jobResponse = await supertest
@@ -98,20 +117,45 @@ export default function (providerContext: FtrProviderContext) {
       return Object.keys(statusScript.params.inactivityCutoffs);
     }
 
+    // Checks what the report really contains: the cutoffs have to reach Elasticsearch for the status
+    // of the agents to be computed correctly.
+    async function getReportCsv(jobId: string): Promise<string> {
+      return pRetry(
+        async () => {
+          const response = await supertest.get(`/api/reporting/jobs/download/${jobId}`).expect(200);
+          return response.text as string;
+        },
+        { retries: 6, minTimeout: 1000 }
+      );
+    }
+
     it('should only list the policies of the default space and of all spaces in a report generated from the default space', async () => {
-      const policyIds = await getPolicyIdsInReportPayload();
+      const jobId = await generateReport([DEFAULT_SPACE_STALE_AGENT_ID]);
+      const policyIds = await getPolicyIdsInReportPayload(jobId);
 
       expect(policyIds).to.contain(defaultSpacePolicy.item.id);
       expect(policyIds).to.contain(allSpacesPolicy.item.id);
       expect(policyIds).not.to.contain(testSpacePolicy.item.id);
+
+      // the stale agent is inactive only if the cutoff of its policy reached the status script
+      const csv = await getReportCsv(jobId);
+      expect(csv).to.contain(DEFAULT_SPACE_STALE_AGENT_ID);
+      expect(csv).to.contain('inactive');
+      expect(csv).not.to.contain('offline');
     });
 
     it('should only list the policies of the test space and of all spaces in a report generated from the test space', async () => {
-      const policyIds = await getPolicyIdsInReportPayload(TEST_SPACE_1);
+      const jobId = await generateReport([TEST_SPACE_STALE_AGENT_ID], TEST_SPACE_1);
+      const policyIds = await getPolicyIdsInReportPayload(jobId, TEST_SPACE_1);
 
       expect(policyIds).to.contain(testSpacePolicy.item.id);
       expect(policyIds).to.contain(allSpacesPolicy.item.id);
       expect(policyIds).not.to.contain(defaultSpacePolicy.item.id);
+
+      const csv = await getReportCsv(jobId);
+      expect(csv).to.contain(TEST_SPACE_STALE_AGENT_ID);
+      expect(csv).to.contain('inactive');
+      expect(csv).not.to.contain('offline');
     });
   });
 }

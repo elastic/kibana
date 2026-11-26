@@ -378,6 +378,19 @@ export default function ({ getService }: FtrProviderContext) {
       // do not leave 1,700 policies behind for the tests that run after this one
       const notDeleted = await deletePolicies();
       if (testError) {
+        if (notDeleted.length > 0) {
+          // keep both failures in the output: the policies left behind can affect the next tests
+          const testErrorMessage =
+            testError instanceof Error ? testError.message : String(testError);
+          throw new Error(
+            `${testErrorMessage}\n\nIn addition, ${
+              notDeleted.length
+            } agent policies could not be deleted and may affect the next tests: ${notDeleted
+              .slice(0, 10)
+              .join(', ')}${notDeleted.length > 10 ? ', ...' : ''}`,
+            { cause: testError }
+          );
+        }
         throw testError;
       }
       expect(notDeleted).to.eql([]);
