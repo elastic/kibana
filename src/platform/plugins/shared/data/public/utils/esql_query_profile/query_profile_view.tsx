@@ -92,7 +92,9 @@ interface LoadedProfile {
 const useQueryProfile = (
   search: Pick<ISearchStart, 'esql'>,
   request: Request | undefined,
-  runKey: string
+  runKey: string,
+  /** Whether the results of the run are kept, for the AI suggestion to compare them. */
+  keepResults: boolean
 ): {
   view?: QueryProfileViewModel;
   error?: string;
@@ -103,6 +105,10 @@ const useQueryProfile = (
   const [loaded, setLoaded] = useState<LoadedProfile | undefined>();
   const latestRequest = useRef(request);
   latestRequest.current = request;
+  // Whether the suggestion can be offered is known a moment after the view opens, and the profile
+  // starts at once, so this is read when the response arrives.
+  const latestKeepResults = useRef(keepResults);
+  latestKeepResults.current = keepResults;
   // Once a request was logged this stays true. A refetch of the inspected panel empties the adapter
   // for a moment, and that must not cancel the run that is going on, nor start another one.
   const [hasSeenRequest, setHasSeenRequest] = useState(Boolean(request?.json));
@@ -121,7 +127,12 @@ const useQueryProfile = (
     }
 
     const controller = new AbortController();
-    loadEsqlQueryProfile({ search, requestJson, abortSignal: controller.signal })
+    loadEsqlQueryProfile({
+      search,
+      requestJson,
+      abortSignal: controller.signal,
+      keepResults: () => latestKeepResults.current,
+    })
       .then((view) => {
         if (!controller.signal.aborted) {
           setLoaded({ runKey, request: target, view });
@@ -310,7 +321,8 @@ export const QueryProfileView = ({
   const { view, error, profiledRequest, loading } = useQueryProfile(
     search,
     selected,
-    `${picked?.id ?? ''}:${reloadKey}`
+    `${picked?.id ?? ''}:${reloadKey}`,
+    Boolean(http) && hasEnterpriseLicense
   );
   // The request that was profiled can still be pending when the profile starts, so its time is read
   // from the latest copy of it while it is logged, and from the one taken once it is not.

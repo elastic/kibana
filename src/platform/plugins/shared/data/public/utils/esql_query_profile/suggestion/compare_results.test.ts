@@ -8,10 +8,10 @@
  */
 
 import { compareResults } from './compare_results';
-import { summarizeResults } from '../profile/result_summary';
+import { MAX_FINGERPRINTED_CELLS, summarizeResults } from '../profile/result_summary';
 
 const response = (names: string[], values: unknown[][]) =>
-  summarizeResults({ columns: names.map((name) => ({ name })), values });
+  summarizeResults({ columns: names.map((name) => ({ name, type: 'keyword' })), values });
 
 describe('compareResults', () => {
   const rows = [
@@ -101,6 +101,64 @@ describe('compareResults', () => {
     expect(compareResults(baseline, response(['t'], [[['a']], [null]]))).toEqual({
       kind: 'differentRows',
       rowCount: 2,
+    });
+  });
+
+  describe('for a result too large to fingerprint', () => {
+    const columnNames = Array.from({ length: 500 }, (_, index) => `c${index}`);
+    const largeRows = (rowCount: number, value: number) =>
+      Array.from({ length: rowCount }, () => columnNames.map(() => value));
+    const rowsOverTheLimit = Math.floor(MAX_FINGERPRINTED_CELLS / columnNames.length) + 1;
+
+    it('is summarized by its columns and row count, and fingerprinted just under the limit', () => {
+      const large = response(columnNames, largeRows(rowsOverTheLimit, 1));
+      const small = response(columnNames, largeRows(rowsOverTheLimit - 1, 1));
+
+      expect(large).toMatchObject({ rowCount: rowsOverTheLimit });
+      expect(large?.fingerprints).toBeUndefined();
+      expect(small?.fingerprints).toBeDefined();
+    });
+
+    it('says only that the shape matches, as it cannot tell whether the values do', () => {
+      const first = response(columnNames, largeRows(rowsOverTheLimit, 1));
+      const other = response(columnNames, largeRows(rowsOverTheLimit, 2));
+
+      expect(compareResults(first, other)).toEqual({
+        kind: 'sameShape',
+        rowCount: rowsOverTheLimit,
+      });
+    });
+
+    it('still tells a different row count or different columns apart', () => {
+      const first = response(columnNames, largeRows(rowsOverTheLimit, 1));
+
+      expect(
+        compareResults(first, response(columnNames, largeRows(rowsOverTheLimit + 1, 1)))
+      ).toEqual({
+        kind: 'differentRowCount',
+        baseline: rowsOverTheLimit,
+        current: rowsOverTheLimit + 1,
+      });
+      expect(
+        compareResults(
+          first,
+          response(['x', ...columnNames.slice(1)], largeRows(rowsOverTheLimit, 1))
+        )
+      ).toEqual({ kind: 'differentColumns' });
+    });
+
+    it('does not claim equal values when only one of the runs is too large', () => {
+      const small = response(['k'], [[1]]);
+      const large = summarizeResults({
+        columns: [{ name: 'k', type: 'keyword' }],
+        values: Array.from({ length: MAX_FINGERPRINTED_CELLS + 1 }, () => [1]),
+      });
+
+      expect(compareResults(small, large)).toEqual({
+        kind: 'differentRowCount',
+        baseline: 1,
+        current: MAX_FINGERPRINTED_CELLS + 1,
+      });
     });
   });
 });

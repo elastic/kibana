@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { once } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import type { ESQLSearchParams } from '@kbn/es-types';
 import type { IEsqlSearchParams } from '@kbn/search-types';
@@ -21,10 +22,16 @@ export async function loadEsqlQueryProfile({
   search,
   requestJson,
   abortSignal,
+  keepResults,
 }: {
   search: Pick<ISearchStart, 'esql'>;
   requestJson: object;
   abortSignal: AbortSignal;
+  /**
+   * Asked when the response arrives, and when it says yes the view can summarize the results. The
+   * rows are held for that, so a profile that has no use for them should say no.
+   */
+  keepResults: () => boolean;
 }): Promise<QueryProfileView> {
   if (!isRecord(requestJson) || typeof requestJson.query !== 'string') {
     throw new Error(
@@ -71,5 +78,11 @@ export async function loadEsqlQueryProfile({
     );
   }
 
-  return { ...aggregateEsqlProfile(profile), results: summarizeResults(rawResponse) };
+  const view = aggregateEsqlProfile(profile);
+  if (!keepResults()) {
+    return view;
+  }
+  // Only the rows are held, not the rest of the response, and they are summarized when asked for.
+  const { columns, values } = rawResponse;
+  return { ...view, readResults: once(() => summarizeResults({ columns, values })) };
 }

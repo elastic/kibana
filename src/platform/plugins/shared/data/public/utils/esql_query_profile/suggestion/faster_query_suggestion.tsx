@@ -75,7 +75,7 @@ function FailureCallout({ title, message }: { title: string; message: string }) 
   return <KbnDangerCallout announceOnMount title={title} text={<p>{message}</p>} />;
 }
 
-function Busy({ children }: { children: React.ReactNode }) {
+function LoadingMessage({ children }: { children: React.ReactNode }) {
   return (
     <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
       <EuiFlexItem grow={false}>
@@ -155,16 +155,18 @@ function SuggestedQuery({
         </>
       )}
       {stage.kind === 'profiling' && (
-        <Busy>
+        <LoadingMessage>
           <FormattedMessage
             id="data.inspector.queryProfile.profilingSuggestionDescription"
             defaultMessage="Running the suggested query with profiling."
           />
-        </Busy>
+        </LoadingMessage>
       )}
       {stage.kind === 'compared' && (
         <>
-          <ResultsCheck verdict={compareResults(originalView.results, stage.view.results)} />
+          <ResultsCheck
+            verdict={compareResults(originalView.readResults?.(), stage.view.readResults?.())}
+          />
           <EuiSpacer size="m" />
           <TimeComparison original={originalView} suggested={stage.view} />
           <EuiSpacer size="s" />
@@ -188,12 +190,12 @@ function SuggestionBody({
       return null;
     case 'suggesting':
       return (
-        <Busy>
+        <LoadingMessage>
           <FormattedMessage
             id="data.inspector.queryProfile.suggestingDescription"
             defaultMessage="Asking the AI for a faster version of this query."
           />
-        </Busy>
+        </LoadingMessage>
       );
     case 'error':
       // A missing connector is something to set up, not a failure, so it is not shown as an error.
@@ -337,6 +339,7 @@ export function FasterQuerySuggestion({
         search,
         requestJson: { ...requestJson, query },
         abortSignal: signal,
+        keepResults: () => true,
       });
       if (!signal.aborted) {
         setStage({ kind: 'compared', query, reason, view });

@@ -29,6 +29,12 @@ const describeVerdict = (verdict: ResultsVerdict): string => {
               'Same results: {rowCount, plural, one {# row} other {# rows}}, in a different order.',
             values: { rowCount: verdict.rowCount },
           });
+    case 'sameShape':
+      return i18n.translate('data.inspector.queryProfile.sameShapeLabel', {
+        defaultMessage:
+          'Same columns and {rowCount, plural, one {# row} other {# rows}}. The values were not compared because the results are large.',
+        values: { rowCount: verdict.rowCount },
+      });
     case 'differentColumns':
       return i18n.translate('data.inspector.queryProfile.differentColumnsLabel', {
         defaultMessage:
@@ -48,6 +54,14 @@ const describeVerdict = (verdict: ResultsVerdict): string => {
   }
 };
 
+const describeColor = ({ kind }: ResultsVerdict): 'success' | 'subdued' | 'danger' => {
+  if (kind === 'same') {
+    return 'success';
+  }
+  // The shape matches, but nothing says the values do.
+  return kind === 'sameShape' ? 'subdued' : 'danger';
+};
+
 export function ResultsCheck({ verdict }: { verdict: ResultsVerdict | undefined }) {
   if (!verdict) {
     return (
@@ -61,11 +75,7 @@ export function ResultsCheck({ verdict }: { verdict: ResultsVerdict | undefined 
   }
 
   return (
-    <EuiText
-      size="xs"
-      color={verdict.kind === 'same' ? 'success' : 'danger'}
-      data-test-subj="esqlQueryProfileResultsCheck"
-    >
+    <EuiText size="xs" color={describeColor(verdict)} data-test-subj="esqlQueryProfileResultsCheck">
       <strong>{describeVerdict(verdict)}</strong>
     </EuiText>
   );

@@ -11,6 +11,8 @@ import type { QueryResultsSummary } from '../profile/types';
 
 export type ResultsVerdict =
   | { kind: 'same'; rowCount: number; sameOrder: boolean }
+  /** The columns and the row count match, but a result was too large to compare its values. */
+  | { kind: 'sameShape'; rowCount: number }
   | { kind: 'differentColumns' }
   | { kind: 'differentRowCount'; baseline: number; current: number }
   | { kind: 'differentRows'; rowCount: number };
@@ -35,12 +37,17 @@ export function compareResults(
   if (baseline.rowCount !== current.rowCount) {
     return { kind: 'differentRowCount', baseline: baseline.rowCount, current: current.rowCount };
   }
-  if (baseline.rowsFingerprint !== current.rowsFingerprint) {
+  const { fingerprints: before } = baseline;
+  const { fingerprints: after } = current;
+  if (!before || !after) {
+    return { kind: 'sameShape', rowCount: current.rowCount };
+  }
+  if (before.unordered !== after.unordered) {
     return { kind: 'differentRows', rowCount: current.rowCount };
   }
   return {
     kind: 'same',
     rowCount: current.rowCount,
-    sameOrder: baseline.orderedFingerprint === current.orderedFingerprint,
+    sameOrder: before.ordered === after.ordered,
   };
 }
