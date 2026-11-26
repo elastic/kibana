@@ -54,7 +54,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     it('finds patterns in document results and opens matching logs', async () => {
-      await monacoEditor.setCodeEditorValue('FROM logstash-* | KEEP @timestamp, @message');
+      await monacoEditor.setCodeEditorValue(
+        'FROM logstash-* | SORT @timestamp DESC | LIMIT 1000 | WHERE @message IS NOT NULL | KEEP @timestamp, @message'
+      );
       await testSubjects.click('querySubmitButton');
       await discover.waitUntilTabIsLoaded();
 
@@ -104,7 +106,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       const matchingResultsQuery = await monacoEditor.getCodeEditorValue();
       expect(matchingResultsQuery).to.contain('FROM logstash-*');
-      expect(matchingResultsQuery).to.match(/MATCH\(\s*@message/);
+      expect(matchingResultsQuery).to.match(/\| LIMIT 1000\s+\| WHERE @message IS NOT NULL/);
+      expect(matchingResultsQuery).to.match(/MATCH\(\s*TO_TEXT\(TO_STRING\(@message\)\)/);
+      expect(matchingResultsQuery).to.match(/\| LIMIT 10000$/);
       expect(matchingResultsQuery).not.to.contain('STATS');
 
       await aiops.logPatternAnalysisPage.assertDiscoverDocCountExists();

@@ -637,6 +637,23 @@ describe('cascaded documents helpers utils', () => {
             aggregatable: false,
           };
 
+          it('matches only rows remaining after a retained LIMIT', () => {
+            const cascadeQuery = constructCascadeQuery({
+              query: {
+                esql: 'FROM logs-* | SORT @timestamp DESC | LIMIT 10 | WHERE message IS NOT NULL | STATS Count = COUNT(*) BY Pattern = CATEGORIZE(message)',
+              },
+              dataView: dataViewMock,
+              esqlVariables: [],
+              nodeType,
+              nodePath: ['Pattern'],
+              nodePathMap: { Pattern: '.*?payment.*?' },
+            });
+
+            expect(cascadeQuery?.esql).toBe(
+              'FROM logs-* | SORT @timestamp DESC | LIMIT 10 | WHERE message IS NOT NULL | WHERE MATCH(TO_TEXT(TO_STRING(message)), "payment", {"auto_generate_synonyms_phrase_query": FALSE, "fuzziness": 0, "operator": "AND"})'
+            );
+          });
+
           it('should throw an error if we attempt to construct a cascade query if the query contains a categorize function with a function argument', () => {
             const editorQuery: AggregateQuery = {
               esql: `
