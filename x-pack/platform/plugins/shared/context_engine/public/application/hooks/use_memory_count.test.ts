@@ -45,10 +45,10 @@ describe('useMemoryCount', () => {
     );
   });
 
-  it('retries a failed count request only once, so the wizard does not wait long', () => {
+  it('passes the retry to both count requests', () => {
     useListKi.mockReturnValue(listResult({ total: 0 }));
 
-    renderHook(() => useMemoryCount('my-ai-index', { enabled: true }));
+    renderHook(() => useMemoryCount('my-ai-index', { enabled: true, retry: 1 }));
 
     expect(useListKi).toHaveBeenCalledTimes(2);
     expect(useListKi).toHaveBeenNthCalledWith(1, expect.objectContaining({ retry: 1 }));

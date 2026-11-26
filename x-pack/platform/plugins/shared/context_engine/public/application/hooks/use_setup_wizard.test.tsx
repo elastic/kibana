@@ -10,36 +10,37 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { act, renderHook } from '@testing-library/react';
 import React from 'react';
 import { uiPrivileges } from '../../../common/features';
-import type { GetAiIndexResponse } from '../../../common/http_api/ai_indices';
+import { createTestStep, testAiIndex } from '../components/ai_index_detail/setup_wizard/test_utils';
 import {
   SETUP_WIZARD_STORAGE_KEY,
   readSetupWizardStoredValue,
   writeSetupWizardStoredValue,
-} from '../utils/setup_wizard';
+} from '../utils/setup_wizard_storage';
+import type { SetupWizardProgress } from '../utils/setup_wizard_view';
 import { useSetupWizard } from './use_setup_wizard';
 
-const aiIndex: GetAiIndexResponse = {
-  id: 'my-ai-index',
-  managed: false,
-  dest: { type: 'data_stream', value: 'ai-index-ds-my-ai-index' },
-  automations: [],
-  sources: [],
-  traces: [],
-  date_created: '2026-01-01T00:00:00.000Z',
-  date_modified: '2026-01-01T00:00:00.000Z',
+const steps = [
+  createTestStep({ id: 'a', isDone: ({ aiIndex }) => aiIndex.sources.length > 0 }),
+  createTestStep({ id: 'b', isDone: ({ memoryCount }) => memoryCount > 0, isOptional: true }),
+  createTestStep({ id: 'c', isDone: ({ aiIndex }) => aiIndex.description !== undefined }),
+];
+
+const progress: SetupWizardProgress = {
+  aiIndex: testAiIndex,
+  dreaming: undefined,
+  memoryCount: 0,
+  isMemoryEnabled: true,
 };
 
-const storageKey = { basePath: '', aiIndexId: aiIndex.id };
+const storageKey = { basePath: '', aiIndexId: testAiIndex.id };
 
 type Params = Parameters<typeof useSetupWizard>[0];
 
 const defaultParams: Params = {
-  aiIndexId: aiIndex.id,
-  aiIndex,
-  dreaming: undefined,
-  memoryCount: 0,
-  isMemoryEnabled: true,
-  isProgressReady: true,
+  aiIndexId: testAiIndex.id,
+  steps,
+  progress,
+  isProgressLoading: false,
   isProgressError: false,
   isActive: true,
 };
@@ -64,18 +65,24 @@ describe('useSetupWizard', () => {
     window.localStorage.clear();
   });
 
-  it('waits for the memory count and dreaming config before it decides', () => {
-    const { result, rerender } = renderSetupWizard({ isProgressReady: false });
+  it('waits for the progress data before it decides', () => {
+    const { result, rerender } = renderSetupWizard({ isProgressLoading: true });
 
     expect(result.current.status).toBe('loading');
 
-    rerender({ ...defaultParams, isProgressReady: true });
+    rerender(defaultParams);
 
-    expect(result.current).toMatchObject({ status: 'shown', currentStep: 'dreaming' });
+    expect(result.current).toMatchObject({ status: 'shown', currentStepId: 'a' });
+  });
+
+  it('waits while the AI index loads', () => {
+    const { result } = renderSetupWizard({ progress: undefined });
+
+    expect(result.current.status).toBe('loading');
   });
 
   it('hides the wizard right away for a user who cannot write', () => {
-    const { result } = renderSetupWizard({ aiIndex: undefined }, { canWrite: false });
+    const { result } = renderSetupWizard({ progress: undefined }, { canWrite: false });
 
     expect(result.current.status).toBe('hidden');
   });
@@ -87,48 +94,47 @@ describe('useSetupWizard', () => {
   });
 
   it('does not wait for the rest of the progress data when a request already failed', () => {
-    const { result } = renderSetupWizard({ isProgressReady: false, isProgressError: true });
+    const { result } = renderSetupWizard({ isProgressLoading: true, isProgressError: true });
 
     expect(result.current.status).toBe('hidden');
   });
 
-  it('shows the wizard when the progress loaded without an error', () => {
-    const { result } = renderSetupWizard({ isProgressReady: true, isProgressError: false });
-
-    expect(result.current).toMatchObject({ status: 'shown', currentStep: 'dreaming' });
-  });
-
-  it('hides the wizard of a closed AI index without waiting for its progress data', () => {
+  it('hides the wizard of a closed AI index without waiting for any data', () => {
     writeSetupWizardStoredValue(storageKey, 'closed');
 
-    const { result } = renderSetupWizard({ isProgressReady: false });
-
-    expect(result.current.status).toBe('hidden');
+    expect(renderSetupWizard({ progress: undefined }).result.current.status).toBe('hidden');
+    expect(renderSetupWizard({ isProgressLoading: true }).result.current.status).toBe('hidden');
   });
 
   it('hides the wizard of a managed AI index without waiting for its progress data', () => {
     const { result } = renderSetupWizard({
-      aiIndex: { ...aiIndex, managed: true },
-      isProgressReady: false,
+      progress: { ...progress, aiIndex: { ...testAiIndex, managed: true } },
+      isProgressLoading: true,
     });
 
     expect(result.current.status).toBe('hidden');
+  });
+
+  it('gives the steps that are done', () => {
+    const { result } = renderSetupWizard({ progress: { ...progress, memoryCount: 1 } });
+
+    expect(result.current).toMatchObject({ status: 'shown', doneStepIds: new Set(['b']) });
   });
 
   it('keeps its decision while the Overview stays open, and decides again on the next visit', () => {
     const { result, rerender } = renderSetupWizard();
     expect(result.current.status).toBe('shown');
 
-    const doneIndex: GetAiIndexResponse = {
-      ...aiIndex,
-      sources: [{ type: 'esql', value: 'FROM logs-*' }],
-      description: 'Answers questions about checkouts.',
-    };
     const doneParams: Params = {
       ...defaultParams,
-      aiIndex: doneIndex,
-      dreaming: { enabled: true },
-      memoryCount: 1,
+      progress: {
+        ...progress,
+        aiIndex: {
+          ...testAiIndex,
+          sources: [{ type: 'esql', value: 'FROM logs-*' }],
+          description: 'Answers questions about checkouts.',
+        },
+      },
     };
     rerender(doneParams);
     expect(result.current.status).toBe('shown');
@@ -140,16 +146,16 @@ describe('useSetupWizard', () => {
 
   it('keeps the step only in local storage and reads it live', () => {
     const { result } = renderSetupWizard();
-    expect(result.current).toMatchObject({ status: 'shown', currentStep: 'dreaming' });
+    expect(result.current).toMatchObject({ status: 'shown', currentStepId: 'a' });
 
     act(() => {
       if (result.current.status === 'shown') {
-        result.current.goToStep('sources');
+        result.current.goToStep('c');
       }
     });
 
-    expect(readSetupWizardStoredValue(storageKey)).toBe('sources');
-    expect(result.current).toMatchObject({ status: 'shown', currentStep: 'sources' });
+    expect(readSetupWizardStoredValue(storageKey)).toBe('c');
+    expect(result.current).toMatchObject({ status: 'shown', currentStepId: 'c' });
   });
 
   it('follows a step change made in another browser tab', () => {
@@ -158,12 +164,12 @@ describe('useSetupWizard', () => {
     act(() => {
       window.localStorage.setItem(
         SETUP_WIZARD_STORAGE_KEY,
-        JSON.stringify({ '/my-ai-index': 'describe' })
+        JSON.stringify({ '/my-ai-index': 'c' })
       );
       window.dispatchEvent(new StorageEvent('storage'));
     });
 
-    expect(result.current).toMatchObject({ status: 'shown', currentStep: 'describe' });
+    expect(result.current).toMatchObject({ status: 'shown', currentStepId: 'c' });
   });
 
   it('close hides the wizard for good', () => {

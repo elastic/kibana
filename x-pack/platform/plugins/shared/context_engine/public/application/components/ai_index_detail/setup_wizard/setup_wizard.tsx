@@ -5,45 +5,16 @@
  * 2.0.
  */
 
-import {
-  EuiButton,
-  EuiButtonEmpty,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiHorizontalRule,
-  EuiLink,
-  EuiPanel,
-  EuiSpacer,
-  EuiStepsHorizontal,
-  EuiText,
-  EuiTitle,
-} from '@elastic/eui';
+import { EuiSpacer, EuiStepsHorizontal } from '@elastic/eui';
 import type { EuiStepsHorizontalProps, UseEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { getEbtProps } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useRef, useState } from 'react';
-import { MAX_AI_INDEX_DESCRIPTION_LENGTH } from '../../../../../common/constants';
 import type { GetAiIndexResponse } from '../../../../../common/http_api/ai_indices';
 import { CONTEXT_ENGINE_UI_EBT } from '../../../../../common/telemetry';
 import { useKibana } from '../../../hooks/use_kibana';
-import { useSaveAiIndexDescription } from '../../../hooks/use_save_ai_index_description';
-import type { SetupWizardDoneSteps, SetupWizardStepId } from '../../../utils/setup_wizard';
-import { validateTextInput } from '../../../utils/validate_text_input';
-import { AiIndexDescriptionField } from '../../ai_index_description_field';
-import { SourcesPanel } from '../sources/sources_panel';
-import { SETUP_WIZARD_STEP_TEXTS } from './setup_wizard_texts';
-
-// Parts of the one bordered panel: no own border, shadow or rounded corners.
-const innerPanelProps = {
-  color: 'transparent',
-  hasBorder: false,
-  hasShadow: false,
-  borderRadius: 'none',
-} as const;
-
-const ebtElement = CONTEXT_ENGINE_UI_EBT.element.aiIndexDetailPageSetupWizard;
-const ebtAction = CONTEXT_ENGINE_UI_EBT.action.setupWizard;
+import type { SetupWizardStep } from './types';
 
 const finishedToast = i18n.translate('xpack.contextEngine.setupWizard.finishedToast', {
   defaultMessage: 'Setup finished. You can change any of it in Settings.',
@@ -53,33 +24,11 @@ const closedToast = i18n.translate('xpack.contextEngine.setupWizard.closedToast'
   defaultMessage: 'Setup closed. Everything is in Settings when you need it.',
 });
 
-const blankDescriptionError = i18n.translate('xpack.contextEngine.setupWizard.descriptionBlank', {
-  defaultMessage: 'Enter a description.',
-});
-
-const placeholderText = i18n.translate('xpack.contextEngine.setupWizard.placeholder', {
-  defaultMessage: 'This step is not ready yet. Skip it for now.',
-});
-
-const exitLabel = i18n.translate('xpack.contextEngine.setupWizard.exit', {
-  defaultMessage: 'Exit setup',
-});
-
-const skipLabel = i18n.translate('xpack.contextEngine.setupWizard.skip', {
-  defaultMessage: 'Skip',
-});
-
-const skipAndFinishLabel = i18n.translate('xpack.contextEngine.setupWizard.skipAndFinish', {
-  defaultMessage: 'Skip and finish',
-});
-
-const continueLabel = i18n.translate('xpack.contextEngine.setupWizard.continue', {
-  defaultMessage: 'Continue',
-});
-
-const finishLabel = i18n.translate('xpack.contextEngine.setupWizard.finish', {
-  defaultMessage: 'Finish setup',
-});
+const getSkippedStepLabel = (stepNumber: number, title: string): string =>
+  i18n.translate('xpack.contextEngine.setupWizard.skippedStepAriaLabel', {
+    defaultMessage: 'Step {stepNumber}: {title}, skipped',
+    values: { stepNumber, title },
+  });
 
 const wizardStyle = ({ euiTheme }: UseEuiTheme) =>
   css({ maxWidth: euiTheme.breakpoint.l, marginInline: 'auto', width: '100%' });
@@ -87,52 +36,25 @@ const wizardStyle = ({ euiTheme }: UseEuiTheme) =>
 type StepStatus = EuiStepsHorizontalProps['steps'][number]['status'];
 
 const getStepStatus = ({
-  stepId,
-  currentStep,
-  done,
+  isCurrent,
+  isDone,
 }: {
-  stepId: SetupWizardStepId;
-  currentStep: SetupWizardStepId;
-  done: SetupWizardDoneSteps;
+  isCurrent: boolean;
+  isDone: boolean;
 }): StepStatus => {
-  if (stepId === currentStep) {
+  if (isCurrent) {
     return 'current';
   }
-  return done[stepId] ? 'complete' : 'incomplete';
+  return isDone ? 'complete' : 'incomplete';
 };
-
-/**
- * A step before the current one that is not done is skipped. It follows from the current step
- * alone, so nothing else is stored. Skipping is fine, so a skipped step looks like any step that is
- * not done (no warning icon); only its label for screen readers says it was skipped.
- */
-const isStepSkipped = ({
-  stepId,
-  stepIndex,
-  currentIndex,
-  done,
-}: {
-  stepId: SetupWizardStepId;
-  stepIndex: number;
-  currentIndex: number;
-  done: SetupWizardDoneSteps;
-}): boolean => stepIndex < currentIndex && !done[stepId];
-
-const getSkippedStepLabel = (stepNumber: number, title: string): string =>
-  i18n.translate('xpack.contextEngine.setupWizard.skippedStepAriaLabel', {
-    defaultMessage: 'Step {stepNumber}: {title}, skipped',
-    values: { stepNumber, title },
-  });
 
 interface SetupWizardProps {
   aiIndex: GetAiIndexResponse;
-  steps: readonly SetupWizardStepId[];
+  steps: readonly SetupWizardStep[];
   /** The step to show. The wizard keeps no step of its own: it lives in local storage. */
-  currentStep: SetupWizardStepId;
-  done: SetupWizardDoneSteps;
-  /** Without memory no agent can save a memory, so Connect agent can't wait for one. */
-  isMemoryEnabled: boolean;
-  onStepChange: (stepId: SetupWizardStepId) => void;
+  currentStepId: string;
+  doneStepIds: ReadonlySet<string>;
+  onStepChange: (stepId: string) => void;
   onClose: () => void;
   onSaved: () => Promise<unknown>;
 }
@@ -141,67 +63,41 @@ interface SetupWizardProps {
 export const SetupWizard = ({
   aiIndex,
   steps,
-  currentStep,
-  done,
-  isMemoryEnabled,
+  currentStepId,
+  doneStepIds,
   onStepChange,
   onClose,
   onSaved,
 }: SetupWizardProps) => {
   const {
-    services: { docLinks, notifications },
+    services: { notifications },
   } = useKibana();
-  const { saveDescription, isSaving } = useSaveAiIndexDescription();
-  const [description, setDescription] = useState(aiIndex.description ?? '');
-  // Covers the save and the refetch after it, so Finish setup can't be clicked twice.
-  const [isFinishing, setIsFinishing] = useState(false);
-  // While a source saves, the wizard waits: a description saved now would send the old sources.
-  const [isSavingSources, setIsSavingSources] = useState(false);
+  // Covers a step's save and the reload after it, so Continue can't be clicked twice.
+  const [isContinuing, setIsContinuing] = useState(false);
+  // A step that saves on its own (Sources) holds the wizard: navigating now would lose the save.
+  const [isStepBusy, setIsStepBusy] = useState(false);
   const headingRef = useRef<HTMLHeadingElement>(null);
-  const shownStep = useRef(currentStep);
+  const shownStepId = useRef(currentStepId);
 
   // A step change moves focus to the new heading, so it doesn't stay on a button that is gone or
   // disabled. The first render keeps the page's focus.
   useEffect(() => {
-    if (shownStep.current === currentStep) {
+    if (shownStepId.current === currentStepId) {
       return;
     }
-    shownStep.current = currentStep;
+    shownStepId.current = currentStepId;
     headingRef.current?.focus();
-  }, [currentStep]);
+  }, [currentStepId]);
 
-  const currentIndex = steps.indexOf(currentStep);
+  const currentIndex = Math.max(
+    0,
+    steps.findIndex(({ id }) => id === currentStepId)
+  );
+  const currentStep = steps[currentIndex];
+  const previousStep: SetupWizardStep | undefined = steps[currentIndex - 1];
   // Skip and Continue jump over steps that are already done. With none left, they finish setup.
-  const nextOpenStep = steps.slice(currentIndex + 1).find((stepId) => !done[stepId]);
-  const isLastStep = nextOpenStep === undefined;
-  const texts = SETUP_WIZARD_STEP_TEXTS[currentStep];
-  const { overview, sources, memory, aiIndices } = docLinks.links.contextEngine;
-  const docsLinks: Readonly<Record<SetupWizardStepId, string>> = {
-    dreaming: memory,
-    connect: overview,
-    sources,
-    describe: aiIndices,
-  };
-
-  const trimmedDescription = description.trim();
-  const descriptionValidation = validateTextInput({
-    value: trimmedDescription,
-    maxLength: MAX_AI_INDEX_DESCRIPTION_LENGTH,
-  });
-  // Only spaces: Finish setup stays off, so say why. An untouched (empty) field shows nothing.
-  const isDescriptionBlank = description.length > 0 && trimmedDescription.length === 0;
-  const descriptionError = isDescriptionBlank ? blankDescriptionError : descriptionValidation.error;
-  const isBusy = isSaving || isFinishing || isSavingSources;
-
-  const getCanContinue = (): boolean => {
-    if (currentStep === 'describe') {
-      return trimmedDescription.length > 0 && descriptionValidation.valid;
-    }
-    if (currentStep === 'connect' && !isMemoryEnabled) {
-      return true;
-    }
-    return done[currentStep];
-  };
+  const nextOpenStep = steps.slice(currentIndex + 1).find(({ id }) => !doneStepIds.has(id));
+  const isBusy = isContinuing || isStepBusy;
 
   const close = (toast: string) => {
     onClose();
@@ -213,159 +109,82 @@ export const SetupWizard = ({
       close(finishedToast);
       return;
     }
-    onStepChange(nextOpenStep);
+    onStepChange(nextOpenStep.id);
   };
 
-  const continueOrFinish = async () => {
-    if (currentStep !== 'describe') {
+  const goToStep = (stepId: string) => {
+    if (isBusy) {
+      return;
+    }
+    onStepChange(stepId);
+  };
+
+  const continueWith = async (save?: () => Promise<boolean>) => {
+    if (save === undefined) {
       goToNextOpenStep();
       return;
     }
-    setIsFinishing(true);
-    if (await saveDescription(aiIndex, trimmedDescription)) {
-      await onSaved();
-      close(finishedToast);
+    setIsContinuing(true);
+    if (!(await save())) {
+      setIsContinuing(false);
       return;
     }
-    setIsFinishing(false);
+    await onSaved();
+    setIsContinuing(false);
+    goToNextOpenStep();
   };
 
-  const renderStepContent = () => {
-    if (currentStep === 'describe') {
-      return (
-        <AiIndexDescriptionField
-          value={description}
-          onChange={setDescription}
-          error={descriptionError}
-          warning={descriptionValidation.warning}
-          data-test-subj="contextSetupWizardDescription"
-        />
-      );
-    }
-    if (currentStep === 'sources') {
-      // The Sources tab's editor: each change saves right away, then the AI index reloads,
-      // so the step is done (and Continue works) once the first source is in.
-      return (
-        <SourcesPanel
-          isLoading={false}
-          aiIndex={aiIndex}
-          onSaved={onSaved}
-          isManaged={false}
-          showDescription={false}
-          onSavingChange={setIsSavingSources}
-        />
-      );
-    }
-    return (
-      <EuiText size="s" data-test-subj="contextSetupWizardPlaceholder">
-        <p>{placeholderText}</p>
-      </EuiText>
-    );
-  };
+  /**
+   * A step before the current one that is not done is skipped. It follows from the current step
+   * alone, so nothing else is stored. Skipping is fine, so a skipped step looks like any step that
+   * is not done (no warning icon); only its label for screen readers says it was skipped.
+   */
+  const stepsBar: EuiStepsHorizontalProps['steps'] = steps.map(({ id, texts }, stepIndex) => {
+    const isDone = doneStepIds.has(id);
+    return {
+      title: texts.stepTitle,
+      status: getStepStatus({ isCurrent: id === currentStep.id, isDone }),
+      ...(stepIndex < currentIndex &&
+        !isDone && { 'aria-label': getSkippedStepLabel(stepIndex + 1, texts.stepTitle) }),
+      onClick: () => goToStep(id),
+      'data-test-subj': `contextSetupWizardStep-${id}`,
+      ...getEbtProps({
+        element: CONTEXT_ENGINE_UI_EBT.element.aiIndexDetailPageSetupWizard,
+        action: CONTEXT_ENGINE_UI_EBT.action.setupWizard.GO_TO_STEP,
+        detail: id,
+      }),
+    };
+  });
 
-  const stepsBar: EuiStepsHorizontalProps['steps'] = steps.map((stepId, stepIndex) => ({
-    title: SETUP_WIZARD_STEP_TEXTS[stepId].stepTitle,
-    status: getStepStatus({ stepId, currentStep, done }),
-    ...(isStepSkipped({ stepId, stepIndex, currentIndex, done }) && {
-      'aria-label': getSkippedStepLabel(stepIndex + 1, SETUP_WIZARD_STEP_TEXTS[stepId].stepTitle),
-    }),
-    onClick: () => {
-      if (isBusy) {
-        return;
-      }
-      onStepChange(stepId);
-    },
-    'data-test-subj': `contextSetupWizardStep-${stepId}`,
-    ...getEbtProps({ element: ebtElement, action: ebtAction.GO_TO_STEP, detail: stepId }),
-  }));
+  const { Content } = currentStep;
 
   return (
     <div css={wizardStyle} data-test-subj="contextSetupWizard">
       <EuiStepsHorizontal steps={stepsBar} size="s" />
       <EuiSpacer size="l" />
-      <EuiPanel
-        hasBorder
-        paddingSize="none"
-        data-test-subj={`contextSetupWizardPanel-${currentStep}`}
-      >
-        <EuiPanel {...innerPanelProps} paddingSize="l">
-          <EuiTitle size="s">
-            <h2 ref={headingRef} tabIndex={-1}>
-              {texts.title}
-            </h2>
-          </EuiTitle>
-          <EuiSpacer size="s" />
-          <EuiText size="s" color="subdued">
-            <p>
-              {texts.description}{' '}
-              <EuiLink
-                href={docsLinks[currentStep]}
-                target="_blank"
-                external
-                {...getEbtProps({
-                  element: ebtElement,
-                  action: CONTEXT_ENGINE_UI_EBT.action.navigation.LEARN_MORE_DOCS,
-                  detail: currentStep,
-                })}
-              >
-                {texts.docsLinkLabel}
-              </EuiLink>
-            </p>
-          </EuiText>
-          <EuiSpacer size="l" />
-          {renderStepContent()}
-        </EuiPanel>
-        <EuiHorizontalRule margin="none" />
-        <EuiPanel {...innerPanelProps} paddingSize="m">
-          <EuiFlexGroup alignItems="center" responsive={false} wrap gutterSize="s">
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty
-                onClick={() => close(closedToast)}
-                isDisabled={isBusy}
-                data-test-subj="contextSetupWizardExit"
-                {...getEbtProps({
-                  element: ebtElement,
-                  action: ebtAction.EXIT,
-                  detail: currentStep,
-                })}
-              >
-                {exitLabel}
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-            <EuiFlexItem />
-            <EuiFlexItem grow={false}>
-              <EuiButton
-                onClick={goToNextOpenStep}
-                isDisabled={isBusy}
-                data-test-subj="contextSetupWizardSkip"
-                {...getEbtProps({
-                  element: ebtElement,
-                  action: isLastStep ? ebtAction.SKIP_AND_FINISH : ebtAction.SKIP,
-                  detail: currentStep,
-                })}
-              >
-                {isLastStep ? skipAndFinishLabel : skipLabel}
-              </EuiButton>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButton
-                fill
-                onClick={continueOrFinish}
-                isDisabled={!getCanContinue()}
-                isLoading={isBusy}
-                data-test-subj="contextSetupWizardContinue"
-                {...getEbtProps({
-                  element: ebtElement,
-                  action: isLastStep ? ebtAction.FINISH : ebtAction.CONTINUE,
-                  detail: currentStep,
-                })}
-              >
-                {isLastStep ? finishLabel : continueLabel}
-              </EuiButton>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiPanel>
-      </EuiPanel>
+      <Content
+        // A new step starts with its own fresh draft.
+        key={currentStep.id}
+        aiIndex={aiIndex}
+        onSaved={onSaved}
+        onBusyChange={setIsStepBusy}
+        layout={{
+          step: currentStep,
+          headingRef,
+          isDone: doneStepIds.has(currentStep.id),
+          isFirstStep: previousStep === undefined,
+          isLastStep: nextOpenStep === undefined,
+          isBusy,
+          onBack: () => {
+            if (previousStep !== undefined) {
+              goToStep(previousStep.id);
+            }
+          },
+          onSkip: goToNextOpenStep,
+          onExit: () => close(closedToast),
+          onContinue: continueWith,
+        }}
+      />
     </div>
   );
 };

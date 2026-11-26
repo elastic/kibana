@@ -5,242 +5,193 @@
  * 2.0.
  */
 
-import { EuiProvider } from '@elastic/eui';
-import { coreMock } from '@kbn/core/public/mocks';
-import { I18nProvider } from '@kbn/i18n-react';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { act, fireEvent, screen, waitFor } from '@testing-library/react';
 import React, { useState } from 'react';
-import type { GetAiIndexResponse } from '../../../../../common/http_api/ai_indices';
-import { CONTEXT_ENGINE_UI_EBT } from '../../../../../common/telemetry';
-import type { SetupWizardDoneSteps, SetupWizardStepId } from '../../../utils/setup_wizard';
 import { SetupWizard } from './setup_wizard';
+import { SetupWizardStepLayout } from './setup_wizard_step_layout';
+import { createTestStep, renderWithServices, testAiIndex } from './test_utils';
+import type { SetupWizardStep } from './types';
 
-jest.mock('../../../hooks/use_save_ai_index_description');
+const mockSave = jest.fn<Promise<boolean>, []>();
 
-// The Sources tab's editor has its own tests; here it only needs to show up on its step.
-const mockSourcesPanel = jest.fn();
-jest.mock('../sources/sources_panel', () => ({
-  SourcesPanel: (props: unknown) => {
-    mockSourcesPanel(props);
-    return <div data-test-subj="mockSourcesPanel" />;
+// A step that saves its draft on Continue.
+const savingStep = createTestStep({
+  id: 'saving',
+  Content: ({ layout }) => (
+    <SetupWizardStepLayout {...layout} canContinue onSave={mockSave}>
+      <div />
+    </SetupWizardStepLayout>
+  ),
+});
+
+// A step that saves on its own, like Sources.
+let reportBusy: (isBusy: boolean) => void = () => {};
+const busyStep = createTestStep({
+  id: 'busy',
+  Content: ({ layout, onBusyChange }) => {
+    reportBusy = onBusyChange;
+    return (
+      <SetupWizardStepLayout {...layout}>
+        <div />
+      </SetupWizardStepLayout>
+    );
   },
-}));
+});
 
-const { useSaveAiIndexDescription } = jest.requireMock(
-  '../../../hooks/use_save_ai_index_description'
-);
-
-const aiIndex: GetAiIndexResponse = {
-  id: 'my-ai-index',
-  managed: false,
-  dest: { type: 'data_stream', value: 'ai-index-ds-my-ai-index' },
-  automations: [],
-  sources: [],
-  traces: [],
-  date_created: '2026-01-01T00:00:00.000Z',
-  date_modified: '2026-01-01T00:00:00.000Z',
+const DraftStepContent: SetupWizardStep['Content'] = ({ layout }) => {
+  const [draft, setDraft] = useState('');
+  return (
+    <SetupWizardStepLayout {...layout}>
+      <input aria-label="Draft" value={draft} onChange={(event) => setDraft(event.target.value)} />
+    </SetupWizardStepLayout>
+  );
 };
 
-const noneDone: SetupWizardDoneSteps = {
-  dreaming: false,
-  connect: false,
-  sources: false,
-  describe: false,
-};
-
-const allSteps: readonly SetupWizardStepId[] = ['dreaming', 'connect', 'sources', 'describe'];
-
-const mockSaveDescription = jest.fn();
-let services: ReturnType<typeof coreMock.createStart>;
+const steps: readonly SetupWizardStep[] = [
+  createTestStep({ id: 'a' }),
+  createTestStep({ id: 'b' }),
+  createTestStep({ id: 'c' }),
+];
 
 type WizardProps = React.ComponentProps<typeof SetupWizard>;
 
 /** Holds the current step the way local storage does in the app: the wizard only reads it. */
-const ControlledWizard = ({ currentStep: startStep, onStepChange, ...props }: WizardProps) => {
-  const [currentStep, setCurrentStep] = useState(startStep);
+const ControlledWizard = ({ currentStepId: startStepId, onStepChange, ...props }: WizardProps) => {
+  const [currentStepId, setCurrentStepId] = useState(startStepId);
   return (
     <SetupWizard
       {...props}
-      currentStep={currentStep}
+      currentStepId={currentStepId}
       onStepChange={(stepId) => {
         onStepChange(stepId);
-        setCurrentStep(stepId);
+        setCurrentStepId(stepId);
       }}
     />
   );
 };
 
 const renderWizard = ({
-  initialStep = 'dreaming',
+  initialStepId = 'a',
+  doneStepIds = [],
   ...props
-}: Partial<Omit<WizardProps, 'currentStep'>> & { initialStep?: SetupWizardStepId } = {}) => {
+}: Partial<Omit<WizardProps, 'currentStepId' | 'doneStepIds'>> & {
+  initialStepId?: string;
+  doneStepIds?: string[];
+} = {}) => {
   const onStepChange = jest.fn();
   const onClose = jest.fn();
   const onSaved = jest.fn().mockResolvedValue(undefined);
-  services = coreMock.createStart();
-  render(
-    <I18nProvider>
-      <EuiProvider>
-        <KibanaContextProvider services={services}>
-          <ControlledWizard
-            aiIndex={aiIndex}
-            steps={allSteps}
-            currentStep={initialStep}
-            done={noneDone}
-            isMemoryEnabled={true}
-            onStepChange={onStepChange}
-            onClose={onClose}
-            onSaved={onSaved}
-            {...props}
-          />
-        </KibanaContextProvider>
-      </EuiProvider>
-    </I18nProvider>
+  const services = renderWithServices(
+    <ControlledWizard
+      aiIndex={testAiIndex}
+      steps={steps}
+      currentStepId={initialStepId}
+      doneStepIds={new Set(doneStepIds)}
+      onStepChange={onStepChange}
+      onClose={onClose}
+      onSaved={onSaved}
+      {...props}
+    />
   );
-  return { onStepChange, onClose, onSaved };
+  return { onStepChange, onClose, onSaved, services };
 };
+
+const finishedToast = 'Setup finished. You can change any of it in Settings.';
 
 describe('SetupWizard', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    mockSaveDescription.mockResolvedValue(true);
-    useSaveAiIndexDescription.mockReturnValue({
-      saveDescription: mockSaveDescription,
-      isSaving: false,
+    mockSave.mockResolvedValue(true);
+  });
+
+  it('shows every step in the steps bar and opens the current step', () => {
+    renderWizard({ initialStepId: 'b' });
+
+    steps.forEach(({ id }) => {
+      expect(screen.getByTestId(`contextSetupWizardStep-${id}`)).toBeInTheDocument();
     });
-  });
-
-  it('shows the 4 steps and opens the initial step', () => {
-    renderWizard({ initialStep: 'connect' });
-
-    allSteps.forEach((stepId) => {
-      expect(screen.getByTestId(`contextSetupWizardStep-${stepId}`)).toBeInTheDocument();
-    });
-    expect(screen.getByTestId('contextSetupWizardPanel-connect')).toBeInTheDocument();
-    expect(screen.getByRole('heading', { name: 'Connect your agent' })).toBeInTheDocument();
-  });
-
-  it('shows only the steps it gets, so memory off has no dreaming step', () => {
-    renderWizard({ steps: ['connect', 'sources', 'describe'], initialStep: 'connect' });
-
-    expect(screen.queryByTestId('contextSetupWizardStep-dreaming')).not.toBeInTheDocument();
-  });
-
-  it('disables Continue until the step is done', () => {
-    renderWizard({ initialStep: 'sources' });
-
-    expect(screen.getByTestId('contextSetupWizardContinue')).toBeDisabled();
-  });
-
-  it('with memory off, Continue on Connect agent works, as no memory can arrive', () => {
-    renderWizard({
-      steps: ['connect', 'sources', 'describe'],
-      initialStep: 'connect',
-      isMemoryEnabled: false,
-    });
-
-    expect(screen.getByTestId('contextSetupWizardContinue')).toBeEnabled();
+    expect(screen.getByTestId('contextSetupWizardPanel-b')).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Title b' })).toBeInTheDocument();
   });
 
   it('shows the step state to screen readers', () => {
-    renderWizard({ initialStep: 'connect', done: { ...noneDone, dreaming: true } });
+    renderWizard({ initialStepId: 'b', doneStepIds: ['a'] });
 
-    expect(screen.getByTestId('contextSetupWizardStep-dreaming')).toHaveAccessibleName(
+    expect(screen.getByTestId('contextSetupWizardStep-a')).toHaveAccessibleName(
       expect.stringMatching(/complete/i)
     );
   });
 
-  it('opening on a saved step marks the earlier steps that are not done as skipped', () => {
-    renderWizard({ initialStep: 'sources', done: { ...noneDone, connect: true } });
+  it('marks the earlier steps that are not done as skipped', () => {
+    renderWizard({ initialStepId: 'c', doneStepIds: ['b'] });
 
-    expect(screen.getByTestId('contextSetupWizardStep-dreaming')).toHaveAccessibleName(
-      'Step 1: Shape dreaming, skipped'
+    expect(screen.getByTestId('contextSetupWizardStep-a')).toHaveAccessibleName(
+      'Step 1: Step a, skipped'
     );
     // No warning icon: skipping is fine, so a skipped step looks like any step that is not done.
-    expect(screen.getByTestId('contextSetupWizardStep-dreaming')).toHaveAttribute(
+    expect(screen.getByTestId('contextSetupWizardStep-a')).toHaveAttribute(
       'data-step-status',
       'incomplete'
     );
-    expect(screen.getByTestId('contextSetupWizardStep-connect')).toHaveAccessibleName(
+    expect(screen.getByTestId('contextSetupWizardStep-b')).toHaveAccessibleName(
       expect.stringMatching(/complete/i)
-    );
-    expect(screen.getByTestId('contextSetupWizardStep-describe')).toHaveAccessibleName(
-      expect.stringMatching(/incomplete/i)
     );
   });
 
   it('skipped marks follow the current step, so going back clears them', () => {
-    renderWizard({ initialStep: 'sources' });
+    renderWizard({ initialStepId: 'c' });
 
-    fireEvent.click(screen.getByTestId('contextSetupWizardStep-dreaming'));
+    fireEvent.click(screen.getByTestId('contextSetupWizardStep-a'));
 
-    expect(screen.getByTestId('contextSetupWizardStep-connect')).toHaveAccessibleName(
+    expect(screen.getByTestId('contextSetupWizardStep-b')).toHaveAccessibleName(
       expect.stringMatching(/incomplete/i)
     );
   });
 
-  it('Continue opens the next step when the step is done', () => {
-    const { onStepChange } = renderWizard({
-      initialStep: 'sources',
-      done: { ...noneDone, sources: true },
-    });
+  it('tells which step a click in the steps bar went to', () => {
+    renderWizard();
+
+    expect(screen.getByTestId('contextSetupWizardStep-c')).toHaveAttribute('data-ebt-detail', 'c');
+  });
+
+  it('clicking a step opens it', () => {
+    const { onStepChange } = renderWizard();
+
+    fireEvent.click(screen.getByTestId('contextSetupWizardStep-c'));
+
+    expect(screen.getByTestId('contextSetupWizardPanel-c')).toBeInTheDocument();
+    expect(onStepChange).toHaveBeenCalledWith('c');
+  });
+
+  it('Continue on a done step opens the next step', () => {
+    const { onStepChange } = renderWizard({ doneStepIds: ['a'] });
 
     fireEvent.click(screen.getByTestId('contextSetupWizardContinue'));
 
-    expect(screen.getByTestId('contextSetupWizardPanel-describe')).toBeInTheDocument();
-    expect(onStepChange).toHaveBeenCalledWith('describe');
+    expect(screen.getByTestId('contextSetupWizardPanel-b')).toBeInTheDocument();
+    expect(onStepChange).toHaveBeenCalledWith('b');
   });
 
-  it('tells which step each click came from', () => {
-    renderWizard({ initialStep: 'sources', done: { ...noneDone, sources: true } });
-
-    expect(screen.getByTestId('contextSetupWizardStep-describe')).toHaveAttribute(
-      'data-ebt-detail',
-      'describe'
-    );
-    ['Exit', 'Skip', 'Continue'].forEach((name) => {
-      expect(screen.getByTestId(`contextSetupWizard${name}`)).toHaveAttribute(
-        'data-ebt-detail',
-        'sources'
-      );
-    });
-    expect(screen.getByRole('link', { name: /Sources and automations/ })).toHaveAttribute(
-      'data-ebt-detail',
-      'sources'
-    );
-  });
-
-  it('Skip opens the next step and saves nothing', () => {
+  it('Skip opens the next step', () => {
     const { onStepChange, onClose } = renderWizard();
-
-    expect(screen.getByTestId('contextSetupWizardSkip')).toHaveAttribute(
-      'data-ebt-action',
-      CONTEXT_ENGINE_UI_EBT.action.setupWizard.SKIP
-    );
 
     fireEvent.click(screen.getByTestId('contextSetupWizardSkip'));
 
-    expect(screen.getByTestId('contextSetupWizardPanel-connect')).toBeInTheDocument();
-    expect(onStepChange).toHaveBeenCalledWith('connect');
+    expect(screen.getByTestId('contextSetupWizardPanel-b')).toBeInTheDocument();
+    expect(onStepChange).toHaveBeenCalledWith('b');
     expect(onClose).not.toHaveBeenCalled();
-    expect(mockSaveDescription).not.toHaveBeenCalled();
   });
 
   it('Skip jumps over steps that are already done', () => {
-    const { onStepChange } = renderWizard({ done: { ...noneDone, connect: true } });
+    const { onStepChange } = renderWizard({ doneStepIds: ['b'] });
 
     fireEvent.click(screen.getByTestId('contextSetupWizardSkip'));
 
-    expect(screen.getByTestId('contextSetupWizardPanel-sources')).toBeInTheDocument();
-    expect(onStepChange).toHaveBeenCalledWith('sources');
+    expect(onStepChange).toHaveBeenCalledWith('c');
   });
 
   it('finishes setup when every later step is done', () => {
-    const { onClose } = renderWizard({
-      initialStep: 'connect',
-      done: { ...noneDone, sources: true, describe: true },
-    });
+    const { onClose, services } = renderWizard({ doneStepIds: ['b', 'c'] });
 
     expect(screen.getByTestId('contextSetupWizardSkip')).toHaveTextContent('Skip and finish');
     expect(screen.getByTestId('contextSetupWizardContinue')).toHaveTextContent('Finish setup');
@@ -248,122 +199,21 @@ describe('SetupWizard', () => {
     fireEvent.click(screen.getByTestId('contextSetupWizardSkip'));
 
     expect(onClose).toHaveBeenCalled();
-    expect(services.notifications.toasts.addSuccess).toHaveBeenCalledWith(
-      'Setup finished. You can change any of it in Settings.'
-    );
+    expect(services.notifications.toasts.addSuccess).toHaveBeenCalledWith(finishedToast);
   });
 
-  it('Add sources step shows the Sources tab editor without its description', () => {
-    const { onSaved } = renderWizard({ initialStep: 'sources' });
+  it('Back opens the previous step, and the first step has no Back', () => {
+    const { onStepChange } = renderWizard({ initialStepId: 'b' });
 
-    expect(screen.getByTestId('mockSourcesPanel')).toBeInTheDocument();
-    expect(screen.queryByTestId('contextSetupWizardPlaceholder')).not.toBeInTheDocument();
-    expect(mockSourcesPanel).toHaveBeenCalledWith(
-      expect.objectContaining({ aiIndex, onSaved, isManaged: false, showDescription: false })
-    );
-  });
+    fireEvent.click(screen.getByTestId('contextSetupWizardBack'));
 
-  it('Add sources step: holds every button while a source is saving', () => {
-    renderWizard({ initialStep: 'sources', done: { ...noneDone, sources: true } });
-    const { onSavingChange } = mockSourcesPanel.mock.calls[0][0] as {
-      onSavingChange: (isSaving: boolean) => void;
-    };
-
-    act(() => onSavingChange(true));
-
-    expect(screen.getByTestId('contextSetupWizardContinue')).toBeDisabled();
-    expect(screen.getByTestId('contextSetupWizardSkip')).toBeDisabled();
-    expect(screen.getByTestId('contextSetupWizardExit')).toBeDisabled();
-
-    act(() => onSavingChange(false));
-
-    expect(screen.getByTestId('contextSetupWizardContinue')).toBeEnabled();
-  });
-
-  it('while busy, the steps bar keeps its status and ignores clicks', () => {
-    const { onStepChange } = renderWizard({
-      initialStep: 'sources',
-      done: { ...noneDone, connect: true, sources: true },
-    });
-    const { onSavingChange } = mockSourcesPanel.mock.calls[0][0] as {
-      onSavingChange: (isSaving: boolean) => void;
-    };
-
-    act(() => onSavingChange(true));
-
-    expect(screen.getByTestId('contextSetupWizardStep-sources')).toHaveAttribute(
-      'data-step-status',
-      'current'
-    );
-    expect(screen.getByTestId('contextSetupWizardStep-connect')).toHaveAttribute(
-      'data-step-status',
-      'complete'
-    );
-    expect(screen.getByTestId('contextSetupWizardStep-describe')).not.toBeDisabled();
-
-    fireEvent.click(screen.getByTestId('contextSetupWizardStep-describe'));
-
-    expect(onStepChange).not.toHaveBeenCalled();
-    expect(screen.getByTestId('contextSetupWizardPanel-sources')).toBeInTheDocument();
-
-    act(() => onSavingChange(false));
-    fireEvent.click(screen.getByTestId('contextSetupWizardStep-describe'));
-
-    expect(onStepChange).toHaveBeenCalledWith('describe');
-  });
-
-  describe('focus', () => {
-    it('does not move focus on the first render', () => {
-      renderWizard({ initialStep: 'connect' });
-
-      expect(screen.getByRole('heading', { name: 'Connect your agent' })).not.toHaveFocus();
-      expect(document.body).toHaveFocus();
-    });
-
-    it('moves focus to the new step heading after Continue', () => {
-      renderWizard({ initialStep: 'sources', done: { ...noneDone, sources: true } });
-
-      fireEvent.click(screen.getByTestId('contextSetupWizardContinue'));
-
-      expect(screen.getByRole('heading', { name: 'Describe this index' })).toHaveFocus();
-    });
-
-    it('moves focus to the new step heading after Skip', () => {
-      renderWizard();
-
-      fireEvent.click(screen.getByTestId('contextSetupWizardSkip'));
-
-      expect(screen.getByRole('heading', { name: 'Connect your agent' })).toHaveFocus();
-    });
-
-    it('moves focus to the new step heading after a click on a step', () => {
-      renderWizard();
-
-      fireEvent.click(screen.getByTestId('contextSetupWizardStep-sources'));
-
-      expect(screen.getByRole('heading', { name: 'Add sources' })).toHaveFocus();
-    });
-  });
-
-  it('does not announce changes inside the step body as a live region', () => {
-    renderWizard({ initialStep: 'describe' });
-
-    expect(
-      screen.getByTestId('contextSetupWizardPanel-describe').querySelector('[aria-live]')
-    ).toBeNull();
-  });
-
-  it('clicking a step opens it', () => {
-    const { onStepChange } = renderWizard();
-
-    fireEvent.click(screen.getByTestId('contextSetupWizardStep-describe'));
-
-    expect(screen.getByTestId('contextSetupWizardPanel-describe')).toBeInTheDocument();
-    expect(onStepChange).toHaveBeenCalledWith('describe');
+    expect(onStepChange).toHaveBeenCalledWith('a');
+    expect(screen.getByTestId('contextSetupWizardPanel-a')).toBeInTheDocument();
+    expect(screen.queryByTestId('contextSetupWizardBack')).not.toBeInTheDocument();
   });
 
   it('Exit setup closes the wizard with a toast', () => {
-    const { onClose } = renderWizard();
+    const { onClose, services } = renderWizard();
 
     fireEvent.click(screen.getByTestId('contextSetupWizardExit'));
 
@@ -373,61 +223,49 @@ describe('SetupWizard', () => {
     );
   });
 
-  describe('Describe index step', () => {
-    it('shows the description field and no name field', () => {
-      renderWizard({ initialStep: 'describe' });
-
-      expect(screen.getByTestId('contextSetupWizardDescription')).toBeInTheDocument();
-      expect(screen.queryByRole('textbox', { name: /name/i })).not.toBeInTheDocument();
-      expect(screen.getByTestId('contextSetupWizardSkip')).toHaveTextContent('Skip and finish');
-      expect(screen.getByTestId('contextSetupWizardContinue')).toHaveTextContent('Finish setup');
+  it('a step starts with a fresh draft after a step change', () => {
+    renderWizard({
+      steps: [createTestStep({ id: 'draft', Content: DraftStepContent }), ...steps],
+      initialStepId: 'draft',
     });
 
-    it('disables Finish setup while the description is empty, with no message', () => {
-      renderWizard({ initialStep: 'describe' });
+    fireEvent.change(screen.getByRole('textbox', { name: 'Draft' }), {
+      target: { value: 'Not saved' },
+    });
+    fireEvent.click(screen.getByTestId('contextSetupWizardStep-a'));
+    fireEvent.click(screen.getByTestId('contextSetupWizardStep-draft'));
 
-      expect(screen.getByTestId('contextSetupWizardContinue')).toBeDisabled();
-      expect(screen.queryByText('Enter a description.')).not.toBeInTheDocument();
+    expect(screen.getByRole('textbox', { name: 'Draft' })).toHaveValue('');
+  });
+
+  describe('a step that saves on Continue', () => {
+    it('saves, reloads the AI index, then opens the next step instead of finishing', async () => {
+      const { onClose, onSaved, onStepChange } = renderWizard({
+        steps: [savingStep, ...steps],
+        initialStepId: 'saving',
+      });
+
+      fireEvent.click(screen.getByTestId('contextSetupWizardContinue'));
+
+      await waitFor(() => expect(onStepChange).toHaveBeenCalledWith('a'));
+      expect(mockSave).toHaveBeenCalledTimes(1);
+      expect(onSaved).toHaveBeenCalled();
+      expect(onClose).not.toHaveBeenCalled();
     });
 
-    it('explains why Finish setup is off when the description is only spaces', () => {
-      renderWizard({ initialStep: 'describe' });
-
-      fireEvent.change(screen.getByTestId('contextSetupWizardDescription'), {
-        target: { value: '   ' },
+    it('finishes setup when it is the last open step', async () => {
+      const { onClose, services } = renderWizard({
+        steps: [...steps, savingStep],
+        initialStepId: 'saving',
       });
 
-      expect(screen.getByText('Enter a description.')).toBeInTheDocument();
-      expect(screen.getByTestId('contextSetupWizardContinue')).toBeDisabled();
-
-      fireEvent.change(screen.getByTestId('contextSetupWizardDescription'), {
-        target: { value: 'Checkout failures.' },
-      });
-
-      expect(screen.queryByText('Enter a description.')).not.toBeInTheDocument();
-      expect(screen.getByTestId('contextSetupWizardContinue')).toBeEnabled();
-    });
-
-    it('Finish setup saves the description and closes the wizard', async () => {
-      const { onClose, onSaved } = renderWizard({ initialStep: 'describe' });
-
-      fireEvent.change(screen.getByTestId('contextSetupWizardDescription'), {
-        target: { value: '  Answers questions about failed checkouts.  ' },
-      });
       fireEvent.click(screen.getByTestId('contextSetupWizardContinue'));
 
       await waitFor(() => expect(onClose).toHaveBeenCalled());
-      expect(mockSaveDescription).toHaveBeenCalledWith(
-        aiIndex,
-        'Answers questions about failed checkouts.'
-      );
-      expect(onSaved).toHaveBeenCalled();
-      expect(services.notifications.toasts.addSuccess).toHaveBeenCalledWith(
-        'Setup finished. You can change any of it in Settings.'
-      );
+      expect(services.notifications.toasts.addSuccess).toHaveBeenCalledWith(finishedToast);
     });
 
-    it('keeps Finish setup busy until the data is reloaded, so it cannot be clicked twice', async () => {
+    it('holds every button until the AI index is reloaded, so it cannot run twice', async () => {
       let resolveSaved: () => void = () => {};
       const onSaved = jest.fn(
         () =>
@@ -435,48 +273,96 @@ describe('SetupWizard', () => {
             resolveSaved = resolve;
           })
       );
-      const { onClose } = renderWizard({ initialStep: 'describe', onSaved });
-
-      fireEvent.change(screen.getByTestId('contextSetupWizardDescription'), {
-        target: { value: 'Answers questions about failed checkouts.' },
+      const { onClose } = renderWizard({
+        steps: [...steps, savingStep],
+        initialStepId: 'saving',
+        onSaved,
       });
+
       fireEvent.click(screen.getByTestId('contextSetupWizardContinue'));
 
       await waitFor(() => expect(onSaved).toHaveBeenCalled());
       expect(screen.getByTestId('contextSetupWizardContinue')).toBeDisabled();
       expect(screen.getByTestId('contextSetupWizardSkip')).toBeDisabled();
+      expect(screen.getByTestId('contextSetupWizardBack')).toBeDisabled();
       expect(screen.getByTestId('contextSetupWizardExit')).toBeDisabled();
       expect(onClose).not.toHaveBeenCalled();
 
-      resolveSaved();
-      await waitFor(() => expect(onClose).toHaveBeenCalledTimes(1));
-      expect(mockSaveDescription).toHaveBeenCalledTimes(1);
+      await act(async () => resolveSaved());
+      expect(onClose).toHaveBeenCalledTimes(1);
+      expect(mockSave).toHaveBeenCalledTimes(1);
     });
 
-    it('keeps the wizard open when saving fails', async () => {
-      mockSaveDescription.mockResolvedValue(false);
-      const { onClose } = renderWizard({ initialStep: 'describe' });
-
-      fireEvent.change(screen.getByTestId('contextSetupWizardDescription'), {
-        target: { value: 'Answers questions about failed checkouts.' },
+    it('stays on the step when saving fails', async () => {
+      mockSave.mockResolvedValue(false);
+      const { onClose, onSaved, onStepChange } = renderWizard({
+        steps: [savingStep, ...steps],
+        initialStepId: 'saving',
       });
+
       fireEvent.click(screen.getByTestId('contextSetupWizardContinue'));
 
-      await waitFor(() => expect(mockSaveDescription).toHaveBeenCalled());
+      await waitFor(() => expect(screen.getByTestId('contextSetupWizardContinue')).toBeEnabled());
+      expect(mockSave).toHaveBeenCalled();
+      expect(onSaved).not.toHaveBeenCalled();
+      expect(onStepChange).not.toHaveBeenCalled();
       expect(onClose).not.toHaveBeenCalled();
     });
+  });
 
-    it('Skip and finish closes the wizard without saving', () => {
-      const { onClose } = renderWizard({ initialStep: 'describe' });
+  it('while a step saves on its own, every button is held and the steps bar ignores clicks', () => {
+    const { onStepChange } = renderWizard({
+      steps: [...steps, busyStep],
+      initialStepId: 'busy',
+      doneStepIds: ['b'],
+    });
 
-      expect(screen.getByTestId('contextSetupWizardSkip')).toHaveAttribute(
-        'data-ebt-action',
-        CONTEXT_ENGINE_UI_EBT.action.setupWizard.SKIP_AND_FINISH
-      );
+    act(() => reportBusy(true));
+
+    expect(screen.getByTestId('contextSetupWizardContinue')).toBeDisabled();
+    expect(screen.getByTestId('contextSetupWizardSkip')).toBeDisabled();
+    expect(screen.getByTestId('contextSetupWizardBack')).toBeDisabled();
+    expect(screen.getByTestId('contextSetupWizardExit')).toBeDisabled();
+    expect(screen.getByTestId('contextSetupWizardStep-busy')).toHaveAttribute(
+      'data-step-status',
+      'current'
+    );
+    expect(screen.getByTestId('contextSetupWizardStep-b')).toHaveAttribute(
+      'data-step-status',
+      'complete'
+    );
+
+    fireEvent.click(screen.getByTestId('contextSetupWizardStep-a'));
+    expect(onStepChange).not.toHaveBeenCalled();
+
+    act(() => reportBusy(false));
+    fireEvent.click(screen.getByTestId('contextSetupWizardStep-a'));
+
+    expect(onStepChange).toHaveBeenCalledWith('a');
+  });
+
+  describe('focus', () => {
+    it('does not move focus on the first render', () => {
+      renderWizard({ initialStepId: 'b' });
+
+      expect(screen.getByRole('heading', { name: 'Title b' })).not.toHaveFocus();
+      expect(document.body).toHaveFocus();
+    });
+
+    it('moves focus to the new step heading after Skip', () => {
+      renderWizard();
+
       fireEvent.click(screen.getByTestId('contextSetupWizardSkip'));
 
-      expect(onClose).toHaveBeenCalled();
-      expect(mockSaveDescription).not.toHaveBeenCalled();
+      expect(screen.getByRole('heading', { name: 'Title b' })).toHaveFocus();
+    });
+
+    it('moves focus to the new step heading after a click on a step', () => {
+      renderWizard();
+
+      fireEvent.click(screen.getByTestId('contextSetupWizardStep-c'));
+
+      expect(screen.getByRole('heading', { name: 'Title c' })).toHaveFocus();
     });
   });
 });

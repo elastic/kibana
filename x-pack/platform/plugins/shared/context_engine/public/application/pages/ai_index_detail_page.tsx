@@ -36,19 +36,18 @@ import {
 } from '../components/ai_index_detail';
 import { buildAiIndexOnboardingPrompt } from '../components/ai_index_detail/onboarding_prompt';
 import { SettingsTab } from '../components/ai_index_detail/settings';
-import { SetupWizard } from '../components/ai_index_detail/setup_wizard';
+import { SETUP_WIZARD_STEPS, SetupWizard } from '../components/ai_index_detail/setup_wizard';
 import { ListKiPanel } from '../components/ki';
 import { useAiIndex } from '../hooks/use_ai_index';
-import { useAiIndexDreaming } from '../hooks/use_ai_index_dreaming';
 import { useAiIndexDestLinks } from '../hooks/use_ai_index_dest_links';
 import { useAiIndexOverviewSections } from '../hooks/use_ai_index_overview_sections';
 import { useContextEngineBreadcrumbs } from '../hooks/use_context_engine_breadcrumbs';
 import { useKibanaUrl } from '../hooks/use_kibana_url';
 import { useListKi } from '../hooks/use_list_ki';
 import { useMemoryEnabled } from '../hooks/use_memory_enabled';
-import { useMemoryCount } from '../hooks/use_memory_count';
 import { useNavigation } from '../hooks/use_navigation';
 import { useSetupWizard } from '../hooks/use_setup_wizard';
+import { useSetupWizardProgress } from '../hooks/use_setup_wizard_progress';
 import { getVisibleAutomations, getVisibleWorkflowIds } from '../utils/visible_automations';
 import {
   ContextEngineSubPageHeader,
@@ -155,13 +154,6 @@ export const AiIndexDetailPage = () => {
   // `useListKi` keeps the previous AI index's response while this one loads.
   const isKiSummaryPending = isKiSummaryLoading || (isKiSummaryPreviousData && !kiSummaryError);
   const hasLoadedKiSummary = aiIndex !== undefined && !isKiSummaryPending;
-  const {
-    memoryCount,
-    isLoading: isMemoryCountLoading,
-    isError: isMemoryCountError,
-  } = useMemoryCount(aiIndex?.id, {
-    enabled: aiIndex !== undefined && isMemoryEnabled,
-  });
   const hasKnowledgeIndicators = hasLoadedKiSummary && !kiSummaryError && summary.total > 0;
   const showKnowledgeIndicatorsTabInHeader = isKnowledgeIndicatorsTab || hasKnowledgeIndicators;
 
@@ -186,23 +178,13 @@ export const AiIndexDetailPage = () => {
     [automations, isMemoryEnabled]
   );
   const isManaged = aiIndex?.managed === true;
-  // Only the setup wizard reads it here, and the wizard has no dreaming step without memory.
-  const {
-    dreaming,
-    isLoading: isDreamingLoading,
-    isError: isDreamingError,
-  } = useAiIndexDreaming(aiIndex?.id ?? '', {
-    enabled: aiIndex !== undefined && !isManaged && isMemoryEnabled,
-    retry: 1,
-  });
+  const setupWizardProgress = useSetupWizardProgress({ aiIndex, isMemoryEnabled });
   const setupWizard = useSetupWizard({
     aiIndexId: id,
-    aiIndex,
-    dreaming,
-    memoryCount,
-    isMemoryEnabled,
-    isProgressReady: !isMemoryCountLoading && !isDreamingLoading,
-    isProgressError: isMemoryCountError || isDreamingError,
+    steps: SETUP_WIZARD_STEPS,
+    progress: setupWizardProgress.progress,
+    isProgressLoading: setupWizardProgress.isLoading,
+    isProgressError: setupWizardProgress.isError,
     isActive: !isSourcesTab && !isKnowledgeIndicatorsTab && !isSettingsTab,
   });
   // The setup wizard replaces the "AI index created" callout.
@@ -419,9 +401,8 @@ export const AiIndexDetailPage = () => {
           key={aiIndex.id}
           aiIndex={aiIndex}
           steps={setupWizard.steps}
-          currentStep={setupWizard.currentStep}
-          done={setupWizard.done}
-          isMemoryEnabled={isMemoryEnabled}
+          currentStepId={setupWizard.currentStepId}
+          doneStepIds={setupWizard.doneStepIds}
           onStepChange={setupWizard.goToStep}
           onClose={setupWizard.close}
           onSaved={refetch}

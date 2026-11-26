@@ -28,7 +28,7 @@ import { useKibana } from '../../hooks/use_kibana';
 import { useNavigation } from '../../hooks/use_navigation';
 import { getAiIndexDetailPath } from '../../paths';
 import { validateAiIndexId } from '../../utils/ai_index_dest';
-import { removeSetupWizardStoredValue } from '../../utils/setup_wizard';
+import { removeSetupWizardStoredValue } from '../../utils/setup_wizard_storage';
 
 interface CreateAiIndexModalProps {
   onClose: () => void;

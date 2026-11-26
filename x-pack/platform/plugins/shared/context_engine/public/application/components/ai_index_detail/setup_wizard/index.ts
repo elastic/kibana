@@ -6,3 +6,5 @@
  */
 
 export { SetupWizard } from './setup_wizard';
+export { SETUP_WIZARD_STEPS } from './steps';
+export type { SetupWizardStep } from './types';

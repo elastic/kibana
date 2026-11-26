@@ -16,7 +16,10 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 import { CONTEXT_ENGINE_APP_ID } from '../../../../common/features';
 import { AI_INDEX_CREATED_LOCATION_STATE } from '../../ai_index_created_location_state';
-import { readSetupWizardStoredValue, writeSetupWizardStoredValue } from '../../utils/setup_wizard';
+import {
+  readSetupWizardStoredValue,
+  writeSetupWizardStoredValue,
+} from '../../utils/setup_wizard_storage';
 import { CreateAiIndexModal } from './create_ai_index_modal';
 
 const renderWithProviders = (core: CoreStart, onClose: () => void = jest.fn()) => {

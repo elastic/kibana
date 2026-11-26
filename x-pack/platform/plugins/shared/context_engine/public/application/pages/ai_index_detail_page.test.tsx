@@ -37,7 +37,8 @@ import {
 } from '../paths';
 import { CONTEXT_ENGINE_BACK_BUTTON_TEST_SUBJ } from '../layout/context_engine_page_header';
 import { AiIndexDetailPage } from './ai_index_detail_page';
-import { SETUP_WIZARD_STORAGE_KEY } from '../utils/setup_wizard';
+import { SETUP_WIZARD_STORAGE_KEY } from '../utils/setup_wizard_storage';
+import { SETUP_WIZARD_STEPS } from '../components/ai_index_detail/setup_wizard';
 import { RECENT_KNOWLEDGE_DOCUMENTS_QUERY } from '../components/ai_index_detail';
 import { useMemoryEnabled } from '../hooks/use_memory_enabled';
 import { useAiIndexDreaming } from '../hooks/use_ai_index_dreaming';
@@ -325,8 +326,10 @@ describe('AiIndexDetailPage', () => {
 
       expect(await screen.findByTestId('contextSetupWizard')).toBeInTheDocument();
       expect(screen.queryByTestId('contextOverviewStatCards')).not.toBeInTheDocument();
-      // Dreaming is not set up, so the wizard opens on its first step.
-      expect(screen.getByTestId('contextSetupWizardPanel-dreaming')).toBeInTheDocument();
+      // Nothing is set up, so the wizard opens on its first step.
+      expect(
+        screen.getByTestId(`contextSetupWizardPanel-${SETUP_WIZARD_STEPS[0].id}`)
+      ).toBeInTheDocument();
     });
 
     it('shows the spinner, not the Overview skeleton, while the AI index loads', async () => {
@@ -361,16 +364,19 @@ describe('AiIndexDetailPage', () => {
     });
 
     it('opens the step saved in local storage after a refresh', async () => {
+      const { id: lastStepId } = SETUP_WIZARD_STEPS[SETUP_WIZARD_STEPS.length - 1];
       window.localStorage.setItem(
         SETUP_WIZARD_STORAGE_KEY,
-        JSON.stringify({ '/my-ai-index': 'describe' })
+        JSON.stringify({ '/my-ai-index': lastStepId })
       );
       const services = createServices();
       services.http.get.mockResolvedValue({ ...aiIndex, sources: [] });
 
       renderWithProviders(services);
 
-      expect(await screen.findByTestId('contextSetupWizardPanel-describe')).toBeInTheDocument();
+      expect(
+        await screen.findByTestId(`contextSetupWizardPanel-${lastStepId}`)
+      ).toBeInTheDocument();
     });
 
     it('shows the normal Overview after Exit setup and remembers it', async () => {
@@ -405,10 +411,13 @@ describe('AiIndexDetailPage', () => {
       const services = createServices();
       services.http.get.mockResolvedValue({ ...aiIndex, sources: [] });
 
+      const { id: lastStepId } = SETUP_WIZARD_STEPS[SETUP_WIZARD_STEPS.length - 1];
+
       renderWithProviders(services);
-      // The KI list mock has memories, so Connect agent is done and Skip jumps to Add sources.
-      fireEvent.click(await screen.findByTestId('contextSetupWizardSkip'));
-      expect(await screen.findByTestId('contextSetupWizardPanel-sources')).toBeInTheDocument();
+      fireEvent.click(await screen.findByTestId(`contextSetupWizardStep-${lastStepId}`));
+      expect(
+        await screen.findByTestId(`contextSetupWizardPanel-${lastStepId}`)
+      ).toBeInTheDocument();
 
       fireEvent.click(screen.getByTestId('contextAiIndexDetailTab-settings'));
       await waitFor(() =>
@@ -416,7 +425,9 @@ describe('AiIndexDetailPage', () => {
       );
       fireEvent.click(screen.getByTestId('contextAiIndexDetailTab-overview'));
 
-      expect(await screen.findByTestId('contextSetupWizardPanel-sources')).toBeInTheDocument();
+      expect(
+        await screen.findByTestId(`contextSetupWizardPanel-${lastStepId}`)
+      ).toBeInTheDocument();
     });
 
     it('shows the normal Overview when the memory count request fails', async () => {
