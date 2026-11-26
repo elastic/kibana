@@ -17,8 +17,8 @@ type RenderAddFilterComponentProps = React.ComponentProps<typeof AddFilter>;
 
 const mockMakeRegExTest = jest.fn(() => true);
 
-jest.mock('@kbn/kibana-utils-plugin/common/field_wildcard', () => {
-  const originalModule = jest.requireActual('@kbn/kibana-utils-plugin/common/field_wildcard');
+jest.mock('@kbn/kibana-utils-plugin/common', () => {
+  const originalModule = jest.requireActual('@kbn/kibana-utils-plugin/common');
   return {
     ...originalModule,
     makeRegEx: () => {
