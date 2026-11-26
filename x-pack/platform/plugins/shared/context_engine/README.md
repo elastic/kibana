@@ -515,6 +515,59 @@ when neither `user_id` nor a caller profile is available, and `kibana.saved_obje
 when `_remember` rejects a request before assigning an id). The routes record in-handler rejections,
 background write errors, `not_found`, `failed`, and Elasticsearch errors as failures.
 
+## Recall
+
+Agents recall context for a question over HTTP. The route is public and experimental:
+
+```
+POST /api/context_engine/_recall
+```
+
+```json
+{
+  "query": "Why is checkout latency up?",
+  "user_id": "u_k8Yx2...",
+  "session_ids": ["8f3c2a1e"],
+  "include": ["session_memory", "ai_index:ops-memory"],
+  "token_budget": 4000,
+  "format": "json"
+}
+```
+
+`query`, `user_id` and `include` are required. `include` names the stores to search:
+`session_events`, `session_memory`, `ai_index:*` for every AI index in the space, or
+`ai_index:<id>` for one AI index. `session_ids` narrows the two session stores to those
+sessions. `token_budget` takes 1,000 to 25,000 and defaults to 6,000. `format` is `yaml`, the
+default, or `json`.
+
+The route splits a pool of 100 candidates across the stores in `include`, giving AI indices
+half when session stores are included too. Each store runs a hybrid lexical and semantic
+search. AI index results are the active, unexpired Knowledge Indicators that are scoped to the
+space and are either unowned or owned by `user_id`. The candidates from all stores are
+reranked together, most relevant first, and packed as whole results until the next one would
+overflow `token_budget`, so the context can be smaller than the budget. The first result is
+always kept. With `yaml` the response is `{ "context": "...", "took_ms": ... }`, a YAML string
+ready to add to a prompt; with `json` it is `{ "results": [...], "took_ms": ... }`.
+
+The route is gated by `contextEngine:enabled`. It is gated by the memory setting
+(`contextEngine:memoryEnabled`) only when `include` names `session_events` or
+`session_memory`, so AI index recall keeps working while memory is off. Either flag returns
+404 while off. The space comes from the request URL. When Elasticsearch rejects a search
+because it is overloaded, the route returns 429; retry with backoff.
+
+### Privileges and audit
+
+The route needs `contextEngine:read`. A `user_id` that names another user than the caller's
+profile also needs `contextEngine:manage_memory` in the request space, or the request gets a
+403.
+
+AI indices are searched as the caller, who needs the Elasticsearch `read` privilege on their
+backing indices. An AI index the caller cannot read returns no results rather than a 403.
+
+Each request that queries `session_events` or `session_memory` writes one `memory_recall`
+audit event. It records the target user in `user.target.id`, the stores searched, and how
+many memory results were returned. Failed requests are recorded as failures.
+
 ## Dreaming input
 
 Dreaming reads what agents saved in the two session stores, and nothing from the AI index it
