@@ -178,4 +178,23 @@ describe('registerOptimizeQueryRoute', () => {
     request.events.aborted$.complete();
     expect(signal.aborted).toBe(true);
   });
+
+  it('notices an abort that comes while the connector is still being looked up', async () => {
+    const { handler, requestHandlerContext, request, response } = buildMocks();
+    let resolveConnector: (id: string) => void = () => {};
+    resolveConnectorId.mockReturnValue(
+      new Promise<string>((resolve) => {
+        resolveConnector = resolve;
+      })
+    );
+    const invoke = modelReturning({ canImprove: false, query: '', reason: 'Already efficient.' });
+
+    const handled = handler(requestHandlerContext, request, response);
+    request.events.aborted$.next();
+    resolveConnector('connector-1');
+    await handled;
+
+    const { signal } = invoke.mock.calls[0][1] as { signal: AbortSignal };
+    expect(signal.aborted).toBe(true);
+  });
 });

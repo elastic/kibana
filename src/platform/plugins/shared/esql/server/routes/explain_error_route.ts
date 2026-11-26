@@ -127,6 +127,8 @@ export const registerExplainErrorRoute = (
     },
     async (_requestHandlerContext, request, response) => {
       const logger = context.logger.get();
+      // Subscribed before anything is awaited, so an abort while a connector is looked up is not missed.
+      const signal = getRequestAbortedSignal(request.events.aborted$);
       try {
         const { queryString, errorMessage } = request.body;
         const [, { inference, searchInferenceEndpoints }] = await getStartServices();
@@ -148,7 +150,7 @@ export const registerExplainErrorRoute = (
         const result = await chatModel
           .withStructuredOutput(ExplainErrorSchema, { name: 'explain_esql_error' })
           .invoke(buildMessages(queryString, errorMessage, deployment), {
-            signal: getRequestAbortedSignal(request.events.aborted$),
+            signal,
           });
 
         return response.ok({

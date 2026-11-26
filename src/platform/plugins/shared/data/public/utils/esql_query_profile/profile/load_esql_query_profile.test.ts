@@ -9,6 +9,7 @@
 
 import type { ISearchStart } from '../../../search';
 import { loadEsqlQueryProfile } from './load_esql_query_profile';
+import { MAX_FINGERPRINTED_CELLS } from './result_summary';
 
 describe('loadEsqlQueryProfile results', () => {
   const rawResponse = {
@@ -37,5 +38,28 @@ describe('loadEsqlQueryProfile results', () => {
     const first = readResults?.();
     expect(first).toMatchObject({ rowCount: 2, columns: [{ name: 'k', type: 'keyword' }] });
     expect(readResults?.()).toBe(first);
+  });
+
+  it('summarizes a result with many rows by its shape at once', async () => {
+    const wide = {
+      profile: rawResponse.profile,
+      columns: [{ name: 'k', type: 'keyword' }],
+      values: Array.from({ length: MAX_FINGERPRINTED_CELLS + 1 }, () => ['a']),
+    };
+    const wideSearch = {
+      esql: jest.fn(async () => ({ rawResponse: wide })),
+    } as unknown as Pick<ISearchStart, 'esql'>;
+
+    const { readResults } = await loadEsqlQueryProfile({
+      search: wideSearch,
+      requestJson: { query: 'FROM logs' },
+      abortSignal: new AbortController().signal,
+      keepResults: () => true,
+    });
+
+    expect(readResults?.()).toEqual({
+      columns: [{ name: 'k', type: 'keyword' }],
+      rowCount: MAX_FINGERPRINTED_CELLS + 1,
+    });
   });
 });

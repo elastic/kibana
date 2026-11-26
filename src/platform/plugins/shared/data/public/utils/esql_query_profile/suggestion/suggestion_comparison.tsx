@@ -43,23 +43,28 @@ const describeVerdict = (verdict: ResultsVerdict): string => {
     case 'differentRowCount':
       return i18n.translate('data.inspector.queryProfile.differentRowCountLabel', {
         defaultMessage:
-          'It returns {current, plural, one {# row} other {# rows}} and the original returned {baseline}. This is not an equivalent query.',
+          'It returns {current, plural, one {# row} other {# rows}} and the original returned {baseline}. The data may have changed since the original ran, or this is not an equivalent query.',
         values: { current: verdict.current, baseline: verdict.baseline },
       });
     case 'differentRows':
       return i18n.translate('data.inspector.queryProfile.differentRowsLabel', {
         defaultMessage:
-          'The number of rows matches but the values differ. Without a SORT, rows beyond the limit can vary between runs, otherwise this is not an equivalent query.',
+          'The number of rows matches but the values differ. The data may have changed since the original ran, and without a SORT, rows beyond the limit can vary between runs. Otherwise this is not an equivalent query.',
       });
   }
 };
 
-const describeColor = ({ kind }: ResultsVerdict): 'success' | 'subdued' | 'danger' => {
-  if (kind === 'same') {
-    return 'success';
+const describeColor = (verdict: ResultsVerdict): 'success' | 'warning' | 'subdued' | 'danger' => {
+  switch (verdict.kind) {
+    case 'same':
+      // The same rows in another order are a change when the query sorts its output.
+      return verdict.sameOrder ? 'success' : 'warning';
+    case 'sameShape':
+      // The shape matches, but nothing says the values do.
+      return 'subdued';
+    default:
+      return 'danger';
   }
-  // The shape matches, but nothing says the values do.
-  return kind === 'sameShape' ? 'subdued' : 'danger';
 };
 
 export function ResultsCheck({ verdict }: { verdict: ResultsVerdict | undefined }) {

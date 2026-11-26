@@ -761,7 +761,7 @@ describe('QueryProfileView faster query suggestion', () => {
     await userEvent.click(await screen.findByTestId('esqlQueryProfileProfileSuggestion'));
 
     expect(await screen.findByTestId('esqlQueryProfileResultsCheck')).toHaveTextContent(
-      'It returns 1 row and the original returned 2. This is not an equivalent query.'
+      'It returns 1 row and the original returned 2. The data may have changed since the original ran, or this is not an equivalent query.'
     );
   });
 

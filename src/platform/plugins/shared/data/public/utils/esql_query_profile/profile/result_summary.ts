@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { once } from 'lodash';
 import { Sha256 } from '@kbn/crypto-browser';
 import type { ESQLSearchResponse } from '@kbn/es-types';
 import type { QueryResultsSummary } from './types';
@@ -33,10 +34,14 @@ const normalizeValue = (value: unknown): string => JSON.stringify(value, roundDe
 
 const hash = (text: string): string => new Sha256().update(text, 'utf8').digest('hex');
 
+type Results = Partial<Pick<ESQLSearchResponse, 'columns' | 'values'>>;
+
+/** Whether the rows of a response are too many to fingerprint. */
+const isTooLarge = ({ columns, values }: Results): boolean =>
+  (columns?.length ?? 0) * (values?.length ?? 0) > MAX_FINGERPRINTED_CELLS;
+
 /** Summarizes the columns and values of an ES|QL response. */
-export function summarizeResults(
-  response: Partial<Pick<ESQLSearchResponse, 'columns' | 'values'>>
-): QueryResultsSummary | undefined {
+export function summarizeResults(response: Results): QueryResultsSummary | undefined {
   const { columns, values } = response;
   if (!Array.isArray(columns) || !Array.isArray(values)) {
     return undefined;
@@ -46,7 +51,7 @@ export function summarizeResults(
     columns: columns.map(({ name, type }) => ({ name, type })),
     rowCount: values.length,
   };
-  if (values.length * columns.length > MAX_FINGERPRINTED_CELLS) {
+  if (isTooLarge(response)) {
     return summary;
   }
 
@@ -60,3 +65,21 @@ export function summarizeResults(
     },
   };
 }
+
+/** A summary that is made at once, so that the rows are not held for it. */
+const summarizeNow = (response: Results): (() => QueryResultsSummary | undefined) => {
+  const summary = summarizeResults(response);
+  return () => summary;
+};
+
+/** A summary that is made on the first call, which holds the rows until then. */
+const summarizeLater = (response: Results): (() => QueryResultsSummary | undefined) =>
+  once(() => summarizeResults(response));
+
+/**
+ * Gives a function that returns the summary of a response. A response with many rows is only
+ * summarized by its columns and row count, which is quick, so it is done at once and the rows are
+ * let go. Any other is summarized when first asked for, and only then pays for the fingerprints.
+ */
+export const readResultsOf = (response: Results): (() => QueryResultsSummary | undefined) =>
+  isTooLarge(response) ? summarizeNow(response) : summarizeLater(response);

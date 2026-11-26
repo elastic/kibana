@@ -7,12 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { once } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import type { ESQLSearchParams } from '@kbn/es-types';
 import type { IEsqlSearchParams } from '@kbn/search-types';
 import type { ISearchStart } from '../../../search';
-import { summarizeResults } from './result_summary';
+import { readResultsOf } from './result_summary';
 import { aggregateEsqlProfile } from './aggregate_esql_profile';
 import type { QueryProfileView } from './types';
 import { isRecord } from '../shared/json_helpers';
@@ -82,7 +81,6 @@ export async function loadEsqlQueryProfile({
   if (!keepResults()) {
     return view;
   }
-  // Only the rows are held, not the rest of the response, and they are summarized when asked for.
   const { columns, values } = rawResponse;
-  return { ...view, readResults: once(() => summarizeResults({ columns, values })) };
+  return { ...view, readResults: readResultsOf({ columns, values }) };
 }
