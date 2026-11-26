@@ -12,7 +12,9 @@ import {
   validateDuplicatedObservableTypesInRequest,
   validateDuplicatedObservablesInRequest,
   validateObservableTypeKeyExists,
+  validateObservableTypeSettingsInRequest,
   validateObservableValue,
+  pruneObservableTypeSettings,
 } from './validators';
 
 describe('validators', () => {
@@ -235,6 +237,107 @@ describe('validators', () => {
       expect(() =>
         validateObservableValue(OBSERVABLE_TYPE_EMAIL.key, 'test@test.com')
       ).not.toThrow();
+    });
+  });
+
+  describe('validateObservableTypeSettingsInRequest', () => {
+    const observableTypes = [{ key: 'custom_type' }];
+
+    it('does not throw without settings', () => {
+      expect(() => validateObservableTypeSettingsInRequest({ observableTypes })).not.toThrow();
+    });
+
+    it('does not throw for valid settings of built-in and custom types', () => {
+      expect(() =>
+        validateObservableTypeSettingsInRequest({
+          observableTypes,
+          observableTypeSettings: [
+            { key: OBSERVABLE_TYPE_IPV4.key, paths: [{ path: 'source.ip' }] },
+            { key: 'custom_type', paths: [{ path: 'custom.field' }], valuePattern: '^[a-z]+$' },
+          ],
+        })
+      ).not.toThrow();
+    });
+
+    it('throws for a key that has more than one entry', () => {
+      expect(() =>
+        validateObservableTypeSettingsInRequest({
+          observableTypes,
+          observableTypeSettings: [{ key: 'custom_type' }, { key: 'custom_type' }],
+        })
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"Invalid observable type settings in request: observable type custom_type has more than one settings entry"`
+      );
+    });
+
+    it('throws for a key that is not a built-in or a custom type', () => {
+      expect(() =>
+        validateObservableTypeSettingsInRequest({
+          observableTypes,
+          observableTypeSettings: [{ key: 'unknown_type' }],
+        })
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"Invalid observable type settings in request: observable type unknown_type does not exist"`
+      );
+    });
+
+    it('throws for a value pattern on a built-in type', () => {
+      expect(() =>
+        validateObservableTypeSettingsInRequest({
+          observableTypeSettings: [{ key: OBSERVABLE_TYPE_IPV4.key, valuePattern: '^a$' }],
+        })
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"Invalid observable type settings in request: built-in observable type observable-type-ipv4 cannot have a value pattern"`
+      );
+    });
+
+    it('throws for a value pattern that does not compile', () => {
+      expect(() =>
+        validateObservableTypeSettingsInRequest({
+          observableTypes,
+          observableTypeSettings: [{ key: 'custom_type', valuePattern: '[' }],
+        })
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"Invalid observable type settings in request: observable type custom_type has an invalid value pattern"`
+      );
+    });
+
+    it('throws for duplicated paths', () => {
+      expect(() =>
+        validateObservableTypeSettingsInRequest({
+          observableTypes,
+          observableTypeSettings: [
+            { key: 'custom_type', paths: [{ path: 'custom.field' }, { path: 'custom.field' }] },
+          ],
+        })
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"Invalid observable type settings in request: observable type custom_type has duplicated paths"`
+      );
+    });
+
+    it('reports all errors', () => {
+      expect(() =>
+        validateObservableTypeSettingsInRequest({
+          observableTypeSettings: [{ key: 'unknown_type' }, { key: 'unknown_type' }],
+        })
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"Invalid observable type settings in request: observable type unknown_type does not exist, observable type unknown_type has more than one settings entry, observable type unknown_type does not exist"`
+      );
+    });
+  });
+
+  describe('pruneObservableTypeSettings', () => {
+    it('keeps the settings of built-in types and of the given custom types', () => {
+      expect(
+        pruneObservableTypeSettings({
+          observableTypes: [{ key: 'kept_type' }],
+          observableTypeSettings: [
+            { key: OBSERVABLE_TYPE_IPV4.key },
+            { key: 'kept_type' },
+            { key: 'deleted_type' },
+          ],
+        })
+      ).toEqual([{ key: OBSERVABLE_TYPE_IPV4.key }, { key: 'kept_type' }]);
     });
   });
 });

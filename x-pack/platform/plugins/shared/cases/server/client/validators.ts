@@ -83,6 +83,82 @@ export const validateDuplicatedObservableTypesInRequest = ({
   }
 };
 
+const isValidPattern = (pattern: string): boolean => {
+  try {
+    RegExp(pattern);
+    return true;
+  } catch {
+    return false;
+  }
+};
+
+/**
+ * Throws an error if an observable type settings entry has no built-in or custom type, repeats a key or a path,
+ * or has a value pattern that is on a built-in type or does not compile.
+ */
+export const validateObservableTypeSettingsInRequest = ({
+  observableTypes = [],
+  observableTypeSettings = [],
+}: {
+  observableTypes?: Array<{ key: string }>;
+  observableTypeSettings?: Array<{
+    key: string;
+    paths?: Array<{ path: string }>;
+    valuePattern?: string;
+  }>;
+}) => {
+  const builtinKeys = new Set(OBSERVABLE_TYPES_BUILTIN.map(({ key }) => key));
+  const customKeys = new Set(observableTypes.map(({ key }) => key));
+  const settingsKeys = new Set<string>();
+  const errors: string[] = [];
+
+  observableTypeSettings.forEach(({ key, paths = [], valuePattern }) => {
+    const isBuiltin = builtinKeys.has(key);
+
+    if (settingsKeys.has(key)) {
+      errors.push(`observable type ${key} has more than one settings entry`);
+    }
+    settingsKeys.add(key);
+
+    if (!isBuiltin && !customKeys.has(key)) {
+      errors.push(`observable type ${key} does not exist`);
+    }
+
+    if (isBuiltin && valuePattern !== undefined) {
+      errors.push(`built-in observable type ${key} cannot have a value pattern`);
+    }
+
+    if (valuePattern !== undefined && !isValidPattern(valuePattern)) {
+      errors.push(`observable type ${key} has an invalid value pattern`);
+    }
+
+    const pathNames = paths.map(({ path }) => path);
+    if (new Set(pathNames).size !== pathNames.length) {
+      errors.push(`observable type ${key} has duplicated paths`);
+    }
+  });
+
+  if (errors.length > 0) {
+    throw Boom.badRequest(`Invalid observable type settings in request: ${errors.join(', ')}`);
+  }
+};
+
+/**
+ * Removes the settings entries of custom types that are not in the given observable types.
+ */
+export const pruneObservableTypeSettings = <T extends { key: string }>({
+  observableTypes,
+  observableTypeSettings,
+}: {
+  observableTypes: Array<{ key: string }>;
+  observableTypeSettings: T[];
+}): T[] => {
+  const builtinKeys = new Set(OBSERVABLE_TYPES_BUILTIN.map(({ key }) => key));
+  const customKeys = new Set(observableTypes.map(({ key }) => key));
+
+  return observableTypeSettings.filter(({ key }) => builtinKeys.has(key) || customKeys.has(key));
+};
+
 /**
  * Throws an error if the request has observable types with duplicated labels.
  */

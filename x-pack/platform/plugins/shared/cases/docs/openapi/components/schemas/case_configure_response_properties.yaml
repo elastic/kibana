@@ -62,6 +62,45 @@ observableTypes:
         type: string
         description: The observable type label.
         example: My observable type
+observableTypeSettings:
+  type: array
+  description: >
+    The auto-extraction settings of the built-in and custom observable types.
+    A type without an entry uses its default settings.
+  items:
+    type: object
+    properties:
+      key:
+        type: string
+        description: The key of a built-in or custom observable type.
+        example: employee-id
+      paths:
+        type: array
+        description: >
+          The alert fields that auto-extraction reads for this type.
+          For a built-in type, these entries change or add to the default fields.
+        items:
+          type: object
+          properties:
+            path:
+              type: string
+              description: The name of the alert field.
+              example: user.employee_id
+            enabled:
+              type: boolean
+              description: When `false`, auto-extraction skips this field.
+              example: true
+            excludedValues:
+              type: array
+              description: Values of this field that auto-extraction skips. The match is exact and case-sensitive.
+              items:
+                type: string
+              example:
+                - E000000
+      valuePattern:
+        type: string
+        description: A regular expression. Auto-extraction keeps only the values that match it.
+        example: ^E\d{6}$
 extractObservables:
   type: boolean
   description: >
