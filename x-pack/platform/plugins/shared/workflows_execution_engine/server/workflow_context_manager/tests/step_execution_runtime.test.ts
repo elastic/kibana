@@ -28,40 +28,53 @@ function createPassthroughStepIoService(state: WorkflowExecutionState): StepIoSe
   const inputs = new Map<string, JsonValue>();
   const outputs = new Map<string, JsonValue | null>();
   const sizes = new Map<string, number>();
-  return {
-    setStepInput: (id: string, input: JsonValue) => {
-      inputs.set(id, input);
-    },
-    setStepOutput: (id: string, output: JsonValue | null, sizeBytes?: number) => {
-      outputs.set(id, output);
-      if (sizeBytes !== undefined && Number.isFinite(sizeBytes) && sizeBytes >= 0) {
-        sizes.set(id, sizeBytes);
+  const write = (args: {
+    executionId: string;
+    contextId: string;
+    type: 'input' | 'output';
+    value: JsonValue | null;
+    sizeBytes?: number;
+  }) => {
+    const { executionId, type, value, sizeBytes } = args;
+    if (type === 'input') {
+      if (value != null) {
+        inputs.set(executionId, value);
       }
-    },
-    getStepInput: jest.fn((id: string) => inputs.get(id)),
-    getStepOutput: jest.fn((id: string) => outputs.get(id)),
-    getStepError: jest.fn((id: string) => state.getStepExecution(id)?.error),
-    getLatestStepIO: jest.fn((stepId: string) => {
-      const latest = state.getLatestStepExecution(stepId);
-      if (!latest) return undefined;
-      return {
-        input: inputs.get(latest.id),
-        output: outputs.get(latest.id),
-        error: latest.error,
-      };
-    }),
-    getDataSetVariables: jest.fn(() => ({} as Record<string, unknown>)),
+      return;
+    }
+    outputs.set(executionId, value);
+    if (sizeBytes !== undefined && Number.isFinite(sizeBytes) && sizeBytes >= 0) {
+      sizes.set(executionId, sizeBytes);
+    }
+  };
+  return {
+    readBatch: jest.fn(
+      async (args: {
+        type: 'input' | 'output' | 'error';
+        refs: ReadonlyArray<{ executionId: string; contextId: string }>;
+      }) => {
+        const values = new Map<string, unknown>();
+        for (const { executionId } of args.refs) {
+          if (args.type === 'input' && inputs.has(executionId)) {
+            values.set(executionId, inputs.get(executionId));
+          }
+          if (args.type === 'output' && outputs.has(executionId)) {
+            values.set(executionId, outputs.get(executionId));
+          }
+          if (args.type === 'error') {
+            const error = state.getStepExecution(executionId)?.error;
+            if (error !== undefined) values.set(executionId, error);
+          }
+        }
+        return values;
+      }
+    ),
+    write: jest.fn(write),
     getOutputSizeStats: jest.fn(() => {
       let totalBytes = 0;
       for (const bytes of sizes.values()) totalBytes += bytes;
       return { totalBytes, stepCount: sizes.size };
     }),
-    hasEvictedOutputs: jest.fn().mockReturnValue(false),
-    pinOutputsForRead: jest.fn(),
-    rehydrateOutputs: jest.fn().mockResolvedValue(undefined),
-    prepareForRead: jest.fn().mockResolvedValue(undefined),
-    releaseReadPins: jest.fn(),
-    releaseTransientlyRehydratedOutputs: jest.fn(),
   } as unknown as StepIoService;
 }
 
@@ -196,12 +209,16 @@ describe('StepExecutionRuntime', () => {
       expect(underTest.isInputRecorded).toBe(false);
     });
 
-    it('sets the flag on step state and keeps fields already stored there', () => {
+    it('sets the flag on step state and keeps fields already stored there', async () => {
       installState({ dynamicTimeout: '72h' });
 
       underTest.setInput({ message: 'hi' });
 
-      expect(stepIoService.getStepInput(fakeStepExecutionId)).toEqual({ message: 'hi' });
+      const inputs = await stepIoService.readBatch({
+        type: 'input',
+        refs: [{ executionId: fakeStepExecutionId, contextId: 'fakeStepId1' }],
+      });
+      expect(inputs.get(fakeStepExecutionId)).toEqual({ message: 'hi' });
       expect(underTest.isInputRecorded).toBe(true);
       expect(underTest.getCurrentStepState()).toEqual({
         dynamicTimeout: '72h',
@@ -244,24 +261,43 @@ describe('StepExecutionRuntime', () => {
       });
     });
 
-    it('should be able to retrieve the step result', () => {
+    it('should be able to retrieve the step input, output, and error', async () => {
       (workflowExecutionState.getStepExecution as jest.Mock).mockReturnValue({
         stepId: 'node1',
         error: { type: 'Error', message: 'Fake error' },
       } as Partial<EsWorkflowStepExecution>);
       // IO lives in the service now — seed it through the passthrough mock.
-      stepIoService.setStepInput(fakeStepExecutionId, {});
-      stepIoService.setStepOutput(fakeStepExecutionId, { success: true, data: {} });
-
-      const stepResult = underTest.getCurrentStepResult();
-      expect(workflowExecutionState.getStepExecution).toHaveBeenCalledWith(
-        `fake_step_execution_id`
-      );
-      expect(stepResult).toEqual({
-        input: {},
-        output: { success: true, data: {} },
-        error: new ExecutionError({ type: 'Error', message: 'Fake error' }),
+      stepIoService.write({
+        executionId: fakeStepExecutionId,
+        contextId: 'fakeStepId1',
+        type: 'input',
+        value: {},
       });
+      stepIoService.write({
+        executionId: fakeStepExecutionId,
+        contextId: 'fakeStepId1',
+        type: 'output',
+        value: { success: true, data: {} },
+      });
+
+      await expect(underTest.getCurrentStepInput()).resolves.toEqual({});
+      await expect(underTest.getCurrentStepOutput()).resolves.toEqual({ success: true, data: {} });
+      await expect(underTest.getCurrentStepError()).resolves.toEqual(
+        new ExecutionError({ type: 'Error', message: 'Fake error' })
+      );
+      const ioRef = { executionId: fakeStepExecutionId, contextId: 'fakeStepId1' };
+      expect(stepIoService.readBatch).toHaveBeenCalledWith({ type: 'input', refs: [ioRef] });
+      expect(stepIoService.readBatch).toHaveBeenCalledWith({ type: 'output', refs: [ioRef] });
+      expect(stepIoService.readBatch).toHaveBeenCalledWith({ type: 'error', refs: [ioRef] });
+    });
+
+    it('returns undefined for a missing step execution', async () => {
+      (workflowExecutionState.getStepExecution as jest.Mock).mockReturnValue(undefined);
+
+      await expect(underTest.getCurrentStepInput()).resolves.toBeUndefined();
+      await expect(underTest.getCurrentStepOutput()).resolves.toBeUndefined();
+      await expect(underTest.getCurrentStepError()).resolves.toBeUndefined();
+      expect(stepIoService.readBatch).not.toHaveBeenCalled();
     });
   });
 
@@ -946,45 +982,6 @@ describe('StepExecutionRuntime', () => {
     it('returns undefined when the node has no timeout', () => {
       expect(createRuntime({ name: 'step' }).getStepTimeoutMs()).toBeUndefined();
       expect(createRuntime().getStepTimeoutMs()).toBeUndefined();
-    });
-  });
-
-  // The ordering here is the whole point: `StepIoService.rehydrateOutputs`
-  // snapshots only the ids that are evicted at entry, so an id that is resident
-  // at that moment is not in its fetch set. If the pin were taken after the
-  // await -- or not at all -- the concurrent eviction cycle could drop that
-  // output during the ES round trip, and it would be neither fetched nor
-  // resident when the caller reads it.
-  describe('rehydrateStepOutputs', () => {
-    it('pins the requested ids BEFORE awaiting rehydration', async () => {
-      const calls: string[] = [];
-      jest.spyOn(stepIoService, 'pinOutputsForRead').mockImplementation(() => {
-        calls.push('pin');
-      });
-      jest.spyOn(stepIoService, 'rehydrateOutputs').mockImplementation(async () => {
-        calls.push('rehydrate');
-      });
-
-      await underTest.rehydrateStepOutputs(['a', 'b']);
-
-      expect(calls).toEqual(['pin', 'rehydrate']);
-    });
-
-    it('pins the whole requested set, not just the evicted subset', async () => {
-      const pin = jest.spyOn(stepIoService, 'pinOutputsForRead').mockImplementation(() => {});
-      jest.spyOn(stepIoService, 'rehydrateOutputs').mockImplementation(async () => {});
-
-      await underTest.rehydrateStepOutputs(['a', 'b']);
-
-      expect(pin).toHaveBeenCalledWith(underTest.stepExecutionId, ['a', 'b']);
-    });
-
-    it('releases the pins under the same consumer id', () => {
-      const release = jest.spyOn(stepIoService, 'releaseReadPins').mockImplementation(() => {});
-
-      underTest.releaseReadOutputPins();
-
-      expect(release).toHaveBeenCalledWith(underTest.stepExecutionId);
     });
   });
 });
