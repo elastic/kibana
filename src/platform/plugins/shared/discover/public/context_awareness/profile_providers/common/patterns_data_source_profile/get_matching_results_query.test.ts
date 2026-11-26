@@ -27,7 +27,29 @@ describe('getMatchingResultsQuery', () => {
     );
     expect(result?.esql).toContain('"operator": "AND"');
     expect(result?.esql).not.toContain('STATS');
+    expect(result?.esql).toMatch(/\n {2}\| LIMIT 10000$/);
   });
+
+  it.each(['LIMIT 10', 'LIMIT 1 BY host.name'])(
+    'uses runtime matching after a retained %s',
+    (limit) => {
+      const result = getMatchingResultsQuery({
+        query: {
+          esql: `FROM logs-* | SORT @timestamp DESC | ${limit} | WHERE service.name == "checkout" | STATS Count = COUNT(*) BY Pattern = CATEGORIZE(message)`,
+        },
+        dataView: dataViewMock,
+        esqlVariables: [],
+        patternColumn: 'Pattern',
+        pattern: '.*?payment.+?failed.*?',
+      });
+
+      expect(result?.esql).toContain(
+        `| SORT @timestamp DESC\n  | ${limit}\n  | WHERE service.name == "checkout"`
+      );
+      expect(result?.esql).toMatch(/MATCH\(\s*TO_TEXT\(TO_STRING\(message\)\), "payment failed",/);
+      expect(result?.esql).toMatch(/\n {2}\| LIMIT 10000$/);
+    }
+  );
 
   it('falls back to an index-only query with an escaped pattern when the pattern column cannot be traced back', () => {
     const result = getMatchingResultsQuery({

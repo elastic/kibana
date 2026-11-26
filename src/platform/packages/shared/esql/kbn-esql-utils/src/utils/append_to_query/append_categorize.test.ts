@@ -49,6 +49,15 @@ describe('appendCategorizeToESQLQuery', () => {
     );
   });
 
+  it('keeps a grouped LIMIT and its sort while removing a trailing display limit', () => {
+    expect(
+      appendCategorizeToESQLQuery(
+        'FROM logs-* | SORT @timestamp DESC | LIMIT 1 BY host.name | KEEP message | LIMIT 1000',
+        'message'
+      )
+    ).toBe(`FROM logs-*\n  | SORT @timestamp DESC\n  | LIMIT 1 BY host.name${CATEGORIZE_PIPE}`);
+  });
+
   it('keeps comments of the remaining commands and drops the ones of removed commands', () => {
     expect(
       appendCategorizeToESQLQuery('FROM logs-* /* keep | me */ | LIMIT 10 /* drop me */', 'message')

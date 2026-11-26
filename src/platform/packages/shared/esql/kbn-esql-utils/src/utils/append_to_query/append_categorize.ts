@@ -25,7 +25,17 @@ export const appendCategorizeToESQLQuery = (esql: string, field: string): string
   const { root } = Parser.parse(esql, { withFormatting: true, withParens: true });
 
   let lastCommand = root.commands[root.commands.length - 1];
-  while (root.commands.length > 1 && DROPPABLE_TRAILING_COMMANDS.has(lastCommand.name)) {
+  while (
+    root.commands.length > 1 &&
+    DROPPABLE_TRAILING_COMMANDS.has(lastCommand.name) &&
+    // LIMIT BY selects rows per group, potentially using the preceding SORT.
+    !(
+      lastCommand.name === 'limit' &&
+      lastCommand.args.some(
+        (arg) => !Array.isArray(arg) && arg.type === 'option' && arg.name === 'by'
+      )
+    )
+  ) {
     mutate.generic.commands.remove(root, lastCommand);
     lastCommand = root.commands[root.commands.length - 1];
   }

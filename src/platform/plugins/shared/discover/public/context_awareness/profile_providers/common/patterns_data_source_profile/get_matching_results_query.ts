@@ -11,6 +11,7 @@ import type { AggregateQuery } from '@kbn/es-query';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { ESQLControlVariable } from '@kbn/esql-types';
 import {
+  appendLimitToQuery,
   constructCascadeQuery,
   escapeEsqlColumnName,
   escapeStringValue,
@@ -19,7 +20,7 @@ import {
   prettifyQuery,
 } from '@kbn/esql-utils';
 
-const FALLBACK_DOC_LIMIT = 10000;
+const DOC_LIMIT = 10000;
 
 /**
  * Builds the ES|QL query listing the documents that match a CATEGORIZE pattern, keeping the commands that precede the STATS.
@@ -48,7 +49,7 @@ export const getMatchingResultsQuery = ({
     });
     if (matchingResultsQuery) {
       // The cascade query is printed on a single line, wrap it like a query typed in the editor
-      return { esql: prettifyQuery(matchingResultsQuery.esql) };
+      return { esql: prettifyQuery(appendLimitToQuery(matchingResultsQuery.esql, DOC_LIMIT)) };
     }
   } catch {
     // The STATS shape is not supported (e.g. CATEGORIZE over a function), use the index-only query below
@@ -66,6 +67,6 @@ export const getMatchingResultsQuery = ({
       categoryField
     )}, ${escapeStringValue(
       tokens
-    )}, {"auto_generate_synonyms_phrase_query": false, "fuzziness": 0, "operator": "AND"})\n  | LIMIT ${FALLBACK_DOC_LIMIT}`,
+    )}, {"auto_generate_synonyms_phrase_query": false, "fuzziness": 0, "operator": "AND"})\n  | LIMIT ${DOC_LIMIT}`,
   };
 };

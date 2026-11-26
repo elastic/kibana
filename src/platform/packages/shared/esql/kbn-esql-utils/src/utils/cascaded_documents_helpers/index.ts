@@ -568,16 +568,21 @@ function handleStatsByCategorizeLeafOperation(
   }
 
   const matchValue = nodePathMap[removeBackticks(categorizeCommandNode.field)];
+  // Strip the keyword multi-field suffix to search the text field for individual tokens.
+  const matchField = Builder.identifier({ name: categorizedFieldName.replace(/\.keyword\b/i, '') });
+  // An indexed MATCH cannot run after LIMIT. Convert through keyword to search the remaining rows as text.
+  const matchTarget = cascadeOperationQuery.ast.commands.some(({ name }) => name === 'limit')
+    ? Builder.expression.func.call('to_text', [
+        Builder.expression.func.call('to_string', [matchField]),
+      ])
+    : matchField;
 
   // build a where command with match expressions for the selected categorize function
   const categorizeWhereCommand = Builder.command({
     name: 'where',
     args: [
       Builder.expression.func.call('match', [
-        // this search doesn't work well on the keyword field when used with the match function, so we remove the keyword suffix to get the actual field name
-        Builder.identifier({
-          name: categorizedFieldName.replace(/\.keyword\b/i, ''),
-        }),
+        matchTarget,
         Builder.expression.literal.string(extractCategorizeTokens(matchValue).join(' ')),
         Builder.expression.map({
           entries: [
