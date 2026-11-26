@@ -22,12 +22,17 @@ import type {
   ScorecardMeasure,
   ScorecardPeriod,
 } from '../../../../common/types/scorecard';
+import { canManageReports } from '../../../capabilities';
 import { ApplicationTabToolbar } from '../../../components/application_tab_toolbar';
 import { LoadErrorPrompt } from '../../../components/load_error_prompt';
 import { REPORTS_EBT_ELEMENTS } from '../../../ebt_constants';
+import { useEnvironment } from '../../../hooks/use_environment';
 import { useFormatters } from '../../../hooks/use_formatters';
+import { useKibanaServices } from '../../../hooks/use_kibana_services';
 import { useLastEnvironments } from '../../../hooks/use_last_environments';
+import { useEmailConnectors } from '../scheduled/use_email_connectors';
 import { formatMeasureChange, formatMeasureValue } from './format_measure';
+import { ScheduleReportButton } from './schedule_report_button';
 import { useScorecardReport } from './use_scorecard_report';
 
 const FETCH_ERROR_TITLE = i18n.translate('xpack.digitalExperience.report.scorecard.fetchError', {
@@ -89,8 +94,12 @@ const periodLabel = (
 
 /** The scorecard of one EDOT Browser application, each measure next to the previous period's. */
 export function ScorecardReport({ serviceName }: { serviceName: string }) {
+  const { application } = useKibanaServices();
   const { response, isLoading, error, refresh } = useScorecardReport(serviceName);
   const environments = useLastEnvironments(serviceName, response);
+  const { environment } = useEnvironment();
+  const canManage = canManageReports(application.capabilities);
+  const { available: schedulesAvailable } = useEmailConnectors(canManage);
   const formatters = useFormatters();
 
   const columns: Array<EuiBasicTableColumn<ScorecardMeasure>> = [
@@ -128,6 +137,15 @@ export function ScorecardReport({ serviceName }: { serviceName: string }) {
         environments={environments}
         isLoading={isLoading}
         onRefresh={refresh}
+        actions={
+          canManage && schedulesAvailable ? (
+            <ScheduleReportButton
+              serviceName={serviceName}
+              environment={environment}
+              environments={environments}
+            />
+          ) : undefined
+        }
       />
       <EuiSpacer size="m" />
       {error ? (

@@ -9,16 +9,34 @@ import React from 'react';
 import { fireEvent, render, screen, within } from '@testing-library/react';
 import { EuiProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
+import {
+  DIGITAL_EXPERIENCE_FEATURE_ID,
+  DIGITAL_EXPERIENCE_UI_PRIVILEGES,
+} from '../../../../common/feature';
 import type { ScorecardReport as ScorecardReportData } from '../../../../common/types/scorecard';
 import { useFormatters } from '../../../hooks/use_formatters';
+import { useKibanaServices } from '../../../hooks/use_kibana_services';
+import { useEmailConnectors } from '../scheduled/use_email_connectors';
 import { ScorecardReport } from './scorecard_report';
 import { useScorecardReport } from './use_scorecard_report';
 
 jest.mock('./use_scorecard_report');
 jest.mock('../../../hooks/use_formatters');
+jest.mock('../../../hooks/use_kibana_services');
+jest.mock('../scheduled/use_email_connectors');
+jest.mock('../../../hooks/use_environment', () => ({
+  useEnvironment: () => ({ environment: 'production', setEnvironment: jest.fn() }),
+}));
+jest.mock('./schedule_report_button', () => ({
+  ScheduleReportButton: ({ serviceName, environment }: Record<string, string>) => (
+    <button data-test-subj="schedule">{`${serviceName}/${environment}`}</button>
+  ),
+}));
 jest.mock('../../../components/application_tab_toolbar', () => {
   return {
-    ApplicationTabToolbar: () => <div data-test-subj="toolbar" />,
+    ApplicationTabToolbar: ({ actions }: { actions?: React.ReactNode }) => {
+      return <div data-test-subj="toolbar">{actions}</div>;
+    },
   };
 });
 
@@ -81,6 +99,19 @@ const REPORT: ScorecardReportData = {
 
 const refresh = jest.fn();
 
+const setCapabilities = (canManage: boolean) => {
+  jest.mocked(useKibanaServices).mockReturnValue({
+    application: {
+      capabilities: {
+        [DIGITAL_EXPERIENCE_FEATURE_ID]: {
+          [DIGITAL_EXPERIENCE_UI_PRIVILEGES.show]: true,
+          [DIGITAL_EXPERIENCE_UI_PRIVILEGES.save]: canManage,
+        },
+      },
+    },
+  } as never);
+};
+
 const renderReport = () =>
   render(
     <I18nProvider>
@@ -93,6 +124,7 @@ const renderReport = () =>
 describe('ScorecardReport', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    setCapabilities(true);
     jest.mocked(useFormatters).mockReturnValue({
       formatNumber: (value) => String(value),
       formatPercent: (share) => `${(share * 100).toFixed(1)}%`,
@@ -103,6 +135,13 @@ describe('ScorecardReport', () => {
       formatSignedPercent: (share) => `${share > 0 ? '+' : ''}${(share * 100).toFixed(1)}%`,
       formatDate: (date) => `date-${date}`,
       timeZone: 'UTC',
+    });
+    jest.mocked(useEmailConnectors).mockReturnValue({
+      available: true,
+      emailConnectors: [],
+      isLoading: false,
+      error: undefined,
+      refresh: jest.fn(),
     });
     useScorecardReportMock.mockReturnValue({
       response: REPORT,
@@ -157,6 +196,37 @@ describe('ScorecardReport', () => {
     expect(screen.getByTestId('digitalExperienceScorecardError')).toBeInTheDocument();
     fireEvent.click(screen.getByTestId('digitalExperienceScorecardRetry'));
     expect(refresh).toHaveBeenCalledTimes(1);
+  });
+
+  it('offers to schedule the report of the selected environment', () => {
+    renderReport();
+
+    expect(within(screen.getByTestId('toolbar')).getByTestId('schedule')).toHaveTextContent(
+      'shop/production'
+    );
+  });
+
+  it('hides Schedule report when the user lacks manage capability or Workflows is unavailable', () => {
+    setCapabilities(false);
+    const { rerender } = renderReport();
+    expect(screen.queryByTestId('schedule')).not.toBeInTheDocument();
+
+    setCapabilities(true);
+    jest.mocked(useEmailConnectors).mockReturnValue({
+      available: false,
+      emailConnectors: [],
+      isLoading: false,
+      error: undefined,
+      refresh: jest.fn(),
+    });
+    rerender(
+      <I18nProvider>
+        <EuiProvider>
+          <ScorecardReport serviceName="shop" />
+        </EuiProvider>
+      </I18nProvider>
+    );
+    expect(screen.queryByTestId('schedule')).not.toBeInTheDocument();
   });
 
   it('shows a spinner while the report loads', () => {

@@ -264,7 +264,7 @@ function WebApplicationPage({
           report === 'scorecard' ? (
             <ScorecardReport serviceName={serviceName} />
           ) : (
-            <ReportsTab hrefs={{ scorecard: scorecardReportHref }} />
+            <ReportsTab serviceName={serviceName} hrefs={{ scorecard: scorecardReportHref }} />
           )
         );
       default:

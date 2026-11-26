@@ -10,13 +10,20 @@ import { EuiCard, EuiFlexGrid, EuiFlexItem, EuiIcon, EuiSpacer, EuiText } from '
 import { i18n } from '@kbn/i18n';
 import type { ReportTemplateId } from './report_templates';
 import { REPORT_TEMPLATES } from './report_templates';
+import { ScheduledReports } from './scheduled/scheduled_reports_table';
 
 const DESCRIPTION = i18n.translate('xpack.digitalExperience.reports.description', {
   defaultMessage: 'Reports summarize an application over a period, to share and to schedule.',
 });
 
 /** The report templates of one EDOT Browser application, each linking to its report. */
-export function ReportsTab({ hrefs }: { hrefs: Record<ReportTemplateId, string> }) {
+export function ReportsTab({
+  serviceName,
+  hrefs,
+}: {
+  serviceName: string;
+  hrefs: Record<ReportTemplateId, string>;
+}) {
   return (
     <div data-test-subj="digitalExperienceReportsTab">
       <EuiText color="subdued" size="s">
@@ -36,6 +43,8 @@ export function ReportsTab({ hrefs }: { hrefs: Record<ReportTemplateId, string> 
           </EuiFlexItem>
         ))}
       </EuiFlexGrid>
+      <EuiSpacer size="xl" />
+      <ScheduledReports serviceName={serviceName} />
     </div>
   );
 }

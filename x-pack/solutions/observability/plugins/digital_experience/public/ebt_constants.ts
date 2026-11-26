@@ -71,6 +71,10 @@ export const DIGITAL_EXPERIENCE_EBT_ACTIONS = {
   TOGGLE_COMPARE: 'toggleCompare',
   /** The user moves to another page of a list. */
   CHANGE_PAGE: 'changePage',
+  /** The user opens the flyout to schedule a report. */
+  SCHEDULE_REPORT: 'scheduleReport',
+  /** The user opens the flyout to edit a scheduled report. */
+  EDIT_SCHEDULED_REPORT: 'editScheduledReport',
 } as const;
 
 /*
@@ -152,6 +156,10 @@ export const ERRORS_EBT_ELEMENTS = {
 
 export const REPORTS_EBT_ELEMENTS = {
   SCORECARD_RETRY: 'reportsScorecardRetry',
+  SCORECARD_SCHEDULE: 'reportsScorecardSchedule',
+  SCHEDULED_REPORT_CREATE: 'reportsScheduledReportCreate',
+  SCHEDULED_REPORT_EDIT: 'reportsScheduledReportEdit',
+  SCHEDULED_REPORTS_RETRY: 'reportsScheduledReportsRetry',
 } as const;
 
 export const NETWORK_EBT_ELEMENTS = {
