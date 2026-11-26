@@ -1029,9 +1029,9 @@ describe('RulesClient', () => {
         items.map((item, position) =>
           position === 1
             ? {
-              id: item.id,
-              error: { statusCode: 500, error: 'Internal Server Error', message: 'boom' },
-            }
+                id: item.id,
+                error: { statusCode: 500, error: 'Internal Server Error', message: 'boom' },
+              }
             : { id: item.id, attributes: item.attrs, references: item.references ?? [] }
         )
       );
@@ -1074,15 +1074,15 @@ describe('RulesClient', () => {
         items.map((item) =>
           item.id === 'rule-dup'
             ? {
-              id: item.id,
-              error: { statusCode: 409, error: 'Conflict', message: 'exists' },
-            }
+                id: item.id,
+                error: { statusCode: 409, error: 'Conflict', message: 'exists' },
+              }
             : {
-              id: item.id,
-              attributes: item.attrs,
-              version: 'v1',
-              references: item.references ?? [],
-            }
+                id: item.id,
+                attributes: item.attrs,
+                version: 'v1',
+                references: item.references ?? [],
+              }
         )
       );
       getRuleExecutorTaskIdMock.mockImplementation(
@@ -3714,9 +3714,9 @@ describe('RulesClient', () => {
     // Minimal BulkUpdateTaskResult builder for the task-manager mock: `tasks`
     // are the rotated task ids, `errors` the per-task failures.
     const rotationResult = (rotatedTaskIds: string[]) =>
-    ({ tasks: rotatedTaskIds.map((id) => ({ id })), errors: [] } as unknown as Awaited<
-      ReturnType<typeof taskManager.bulkUpdateSchedules>
-    >);
+      ({ tasks: rotatedTaskIds.map((id) => ({ id })), errors: [] } as unknown as Awaited<
+        ReturnType<typeof taskManager.bulkUpdateSchedules>
+      >);
 
     it('rotates the executor task API key and stamps audit metadata', async () => {
       const client = createClient();
