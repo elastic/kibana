@@ -25,6 +25,7 @@ export const cleanUpReviewCase = ({
   spaceId,
   ruleName,
   serviceAccountId,
+  executionIds,
 }: RuleTuningSpaceArgs & {
   apiServices: ApiServicesFixture;
   esClient: EsClient;
@@ -32,10 +33,12 @@ export const cleanUpReviewCase = ({
   ruleName: string;
   /** Set once the case created it. */
   serviceAccountId?: string;
+  /** The reviews the case found, cancelled even when the space cannot list them. */
+  executionIds?: string[];
 }): Promise<void> => {
   const space = { apiClient, headers, spaceId };
   return runCleanupSteps([
-    { name: 'cancel the reviews', run: () => cancelReviews(space) },
+    { name: 'cancel the reviews', run: () => cancelReviews({ ...space, executionIds }) },
     {
       name: 'disable the rule tuning worker',
       run: () => setRuleTuningWorker({ ...space, enabled: false }),

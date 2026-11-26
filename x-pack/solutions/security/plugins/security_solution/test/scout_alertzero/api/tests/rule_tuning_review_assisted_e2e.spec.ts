@@ -39,7 +39,7 @@ import {
  * positives, so a space with one rule gets exactly one review.
  */
 apiTest.describe(
-  'Rule Tuning review - assisted, end to end',
+  'Rule Tuning review - end to end - assisted',
   // Local only: the scripted model listens on the loopback of the test runner, which a Kibana on
   // Elastic Cloud cannot reach.
   { tag: [...getPlaywrightTagsFor('stateful', 'classic', 'local')] },

@@ -112,6 +112,7 @@ export const runReviewCase = async (
   const ruleName = `${spaceId}-rule`;
   let stopModel: (() => void) | undefined;
   let serviceAccountId: string | undefined;
+  const executionIds: string[] = [];
 
   try {
     await apiServices.spaces.create({ id: spaceId, name: spaceId });
@@ -139,6 +140,7 @@ export const runReviewCase = async (
       stepTimeoutMs: STEP_TIMEOUT_MS,
       onPoll,
       beforeDecision,
+      onExecutionId: (executionId) => executionIds.push(executionId),
     });
 
     verifyReview?.(review);
@@ -147,7 +149,14 @@ export const runReviewCase = async (
     await check({ review, rule, ruleAfter, space });
   } finally {
     stopModel?.();
-    await cleanUpReviewCase({ ...space, apiServices, esClient, ruleName, serviceAccountId });
+    await cleanUpReviewCase({
+      ...space,
+      apiServices,
+      esClient,
+      ruleName,
+      serviceAccountId,
+      executionIds,
+    });
   }
 };
 

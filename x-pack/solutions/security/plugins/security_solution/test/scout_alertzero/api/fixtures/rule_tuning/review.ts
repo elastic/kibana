@@ -195,6 +195,7 @@ export const driveReview = async ({
   decisionTimeoutMs = stepTimeoutMs,
   onPoll,
   beforeDecision,
+  onExecutionId,
 }: RuleTuningSpaceArgs & {
   /** Who lists and decides the proposals, when not the user that reads the review. */
   decisionHeaders?: Record<string, string>;
@@ -207,6 +208,8 @@ export const driveReview = async ({
   onPoll?: PollHook;
   /** Runs before the decision at `index` is looked for, e.g. to check what has not happened yet. */
   beforeDecision?: (index: number) => void | Promise<void>;
+  /** Called with the review's id as soon as it is known, so a failed case can still cancel it. */
+  onExecutionId?: (executionId: string) => void;
 }): Promise<WorkflowExecutionDto> => {
   const space = { apiClient, headers, spaceId };
   const executionId = await waitForReviewExecution({
@@ -214,6 +217,7 @@ export const driveReview = async ({
     timeoutMs: stepTimeoutMs,
     onPoll,
   });
+  onExecutionId?.(executionId);
   const conversationId = await waitForInvestigation({
     ...space,
     executionId,
@@ -252,24 +256,51 @@ const cancelExecution = async ({
 };
 
 /**
- * Cancels the reviews of the space that are still running. A failure to list or to cancel is an
- * error, because a review parked at its gate would stay active after its space is deleted.
+ * Cancels the reviews of the space that are still running: the ones the space lists, and the ones
+ * the case already found, which still get cancelled when the list fails. Every cancellation is
+ * attempted, and the failures are reported together, because a review parked at its gate would
+ * stay active after its space is deleted.
  */
 export const cancelReviews = async ({
   apiClient,
   headers,
   spaceId,
-}: RuleTuningSpaceArgs): Promise<void> => {
-  const response = await apiClient.get<{
-    results?: Array<{ id: string; status: ExecutionStatus }>;
-  }>(spaceUrl(`api/workflows/workflow/${RULE_TUNING_REVIEW_WORKFLOW_ID}/executions`, spaceId), {
-    headers,
-    responseType: 'json',
-  });
-  expectStatus('List the review executions', response);
-  for (const { id, status } of response.body.results ?? []) {
-    if (!isTerminalStatus(status)) {
-      await cancelExecution({ apiClient, headers, spaceId, executionId: id });
+  executionIds = [],
+}: RuleTuningSpaceArgs & { executionIds?: string[] }): Promise<void> => {
+  const failures: string[] = [];
+  const statuses = new Map<string, ExecutionStatus | undefined>();
+  try {
+    const response = await apiClient.get<{
+      results?: Array<{ id: string; status: ExecutionStatus }>;
+    }>(spaceUrl(`api/workflows/workflow/${RULE_TUNING_REVIEW_WORKFLOW_ID}/executions`, spaceId), {
+      headers,
+      responseType: 'json',
+    });
+    expectStatus('List the review executions', response);
+    for (const { id, status } of response.body.results ?? []) {
+      statuses.set(id, status);
     }
+  } catch (error) {
+    failures.push(error instanceof Error ? error.message : String(error));
+  }
+  for (const id of executionIds) {
+    if (!statuses.has(id)) {
+      statuses.set(id, undefined);
+    }
+  }
+  for (const [executionId, status] of statuses) {
+    try {
+      // A known execution the list did not return has no status, so read it.
+      const current =
+        status ?? (await getExecution({ apiClient, headers, spaceId, executionId }))?.status;
+      if (current === undefined || !isTerminalStatus(current)) {
+        await cancelExecution({ apiClient, headers, spaceId, executionId });
+      }
+    } catch (error) {
+      failures.push(error instanceof Error ? error.message : String(error));
+    }
+  }
+  if (failures.length > 0) {
+    throw new Error(`Could not cancel every review:\n${failures.join('\n')}`);
   }
 };
