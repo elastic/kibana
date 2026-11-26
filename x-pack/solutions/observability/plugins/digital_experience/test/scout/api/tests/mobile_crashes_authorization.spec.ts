@@ -7,13 +7,28 @@
 
 import { apiTest } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/api';
+import type { MobileCrashGroupsResponse } from '../../../../common/types/mobile';
 import { CRASH_APPS } from '../../common/fixtures/mobile_crash_data';
 import { FLAG_ON_OVERRIDE, FLAG_RESET_OVERRIDE } from '../../feature_flag';
 import { testData } from '../fixtures';
 import { DIGITAL_EXPERIENCE_TAGS } from '../../tags';
 
-const { APM_ONLY_ROLE, COMMON_HEADERS, DIGITAL_EXPERIENCE_ONLY_ROLE, mobileCrashGroupsPath } =
-  testData;
+const {
+  APM_ONLY_ROLE,
+  COMMON_HEADERS,
+  DIGITAL_EXPERIENCE_ONLY_ROLE,
+  createRole,
+  mobileCrashGroupsPath,
+} = testData;
+
+/** Both Kibana privileges, and the OTel logs, where crashes are, but not the traces. */
+const OTEL_LOGS_ONLY_ROLE = {
+  ...createRole({ digital_experience: ['read'], apm: ['read'] }),
+  elasticsearch: {
+    cluster: [],
+    indices: [{ names: ['logs-*.otel-*'], privileges: ['read'] }],
+  },
+};
 
 apiTest.describe(
   'Digital Experience mobile crashes API authorization',
@@ -51,5 +66,28 @@ apiTest.describe(
         }
       );
     }
+
+    apiTest(
+      "lists the crash groups of a user who can't read the traces, as partial",
+      async ({ apiClient, samlAuth }) => {
+        const { cookieHeader } = await samlAuth.asInteractiveUser(OTEL_LOGS_ONLY_ROLE);
+
+        const response = await apiClient.get(mobileCrashGroupsPath(CRASH_APPS.android), {
+          headers: { ...COMMON_HEADERS, ...cookieHeader },
+          responseType: 'json',
+        });
+
+        // The crashes are in the logs; the newest release, which marks groups new, also comes from
+        // spans, so the response says it may be off.
+        expect(response).toHaveStatusCode(200);
+        const { crashGroups, isPartial } = response.body as MobileCrashGroupsResponse;
+        expect(isPartial).toBe(true);
+        expect(crashGroups.map(({ type }) => type)).toStrictEqual([
+          'java.lang.NullPointerException',
+          'java.lang.IllegalStateException',
+          'java.lang.IllegalArgumentException',
+        ]);
+      }
+    );
   }
 );

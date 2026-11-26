@@ -12,6 +12,7 @@ import {
   EXPECTED_CRASH_FINGERPRINTS,
   crashFingerprintOf,
   crashFramesOf,
+  isIosReportOf,
 } from './crash_fingerprint.test_helpers';
 
 const fingerprintOf = (name: keyof typeof CRASH_FINGERPRINT_CASES) =>
@@ -61,6 +62,14 @@ describe('crash fingerprint rules', () => {
     );
   });
 
+  it("tells an iOS report by how it starts, not by a line an error's message can repeat", () => {
+    expect(isIosReportOf(CRASH_FINGERPRINT_CASES.iosLaunchA)).toBe(true);
+    expect(isIosReportOf(CRASH_FINGERPRINT_CASES.jvmMentioningCrashed)).toBe(false);
+    expect(isIosReportOf(CRASH_FINGERPRINT_CASES.javascriptMentioningCrashed)).toBe(false);
+    // Read with the JVM rules: the message line goes, so it groups with the same type's frames.
+    expect(fingerprintOf('jvmMentioningCrashed')).toBe(fingerprintOf('jvmOtherType'));
+  });
+
   it('keeps the stored fingerprint over the computed one', () => {
     expect(fingerprintOf('stored')).toBe('ingest-fingerprint');
   });
@@ -76,6 +85,6 @@ describe('crashFingerprint', () => {
   it('reads JavaScript errors from their message and other crashes from their stack trace', () => {
     expect(printed).toContain('`attributes.exception.type` LIKE "*JavascriptException"');
     expect(printed).toContain('REPLACE(`attributes.exception.message`, "(?s)\\\\n.*", "")');
-    expect(printed).toContain('`attributes.exception.stacktrace` LIKE "*Crashed:*"');
+    expect(printed).toContain('`attributes.exception.stacktrace` LIKE "Incident Identifier:*"');
   });
 });

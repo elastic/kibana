@@ -29,6 +29,10 @@ const applyRules = (input: string, kind: CrashKind): string =>
   );
 
 /** The frames `crashFrames` computes in ES|QL, computed in JavaScript from the same rules. */
+/** Whether `isIosReport` holds for a crash, computed in JavaScript. */
+export const isIosReportOf = ({ stacktrace }: CrashFields): boolean =>
+  stacktrace?.startsWith(IOS_REPORT_MARKER) ?? false;
+
 export const crashFramesOf = ({ type, message, stacktrace }: CrashFields): string | null => {
   if (type?.endsWith(JAVASCRIPT_EXCEPTION_SUFFIX)) {
     return message === undefined ? null : applyRules(message, 'javascript');
@@ -36,7 +40,7 @@ export const crashFramesOf = ({ type, message, stacktrace }: CrashFields): strin
   if (stacktrace === undefined) {
     return null;
   }
-  return applyRules(stacktrace, stacktrace.includes(IOS_REPORT_MARKER) ? 'ios' : 'jvm');
+  return applyRules(stacktrace, isIosReportOf({ stacktrace }) ? 'ios' : 'jvm');
 };
 
 /** The fingerprint `crashFingerprint` computes in ES|QL, computed in JavaScript. */
@@ -150,6 +154,12 @@ export const CRASH_FINGERPRINT_CASES = {
   javascriptMap: javascriptCrash(
     "TypeError: Cannot read property 'map' of undefined, js engine: hermes"
   ),
+  // Errors that mention an iOS report's line: still read as what they are, not as iOS reports.
+  jvmMentioningCrashed: {
+    type: 'java.lang.IllegalStateException',
+    stacktrace: jvmTrace('java.lang.IllegalStateException', 'Thread 0 Crashed: in native code', 88),
+  },
+  javascriptMentioningCrashed: javascriptCrash('Error: Thread 0 Crashed: in a native module'),
   noStacktrace: { type: 'SIGKILL' },
   stored: { ...javascriptCrash('TypeError: anything'), storedFingerprint: 'ingest-fingerprint' },
 } satisfies Record<string, CrashFields>;
@@ -167,6 +177,8 @@ export const EXPECTED_CRASH_FINGERPRINTS: Record<keyof typeof CRASH_FINGERPRINT_
   javascriptIndex7: '6fa897602de144d6484f9c78f7c7b442366dc466558d05a95c0c33b4d33190c2',
   javascriptIban: '9cd1dde79ac088d104d51199ed83de21adee4505e4618b2df6e9221aa9bea494',
   javascriptMap: '5637ee732bc0a49b4e67e4e8fc8ce33e76ffdf371129843438e41c46229f72fb',
+  jvmMentioningCrashed: '7a04469118d128cdbc214032c282877dad105bba1ed21e165fdaf7dbb4d6884c',
+  javascriptMentioningCrashed: '911c7fe74e02926a1dd689a73b2dd2635fad699bb11aa8c2af2fe929d4693390',
   noStacktrace: '3005496ec4d1df64b0b8dd7156f3dad8f0620a373c2670c1a7f5ac1888d1eaed',
   stored: 'ingest-fingerprint',
 };

@@ -50,7 +50,7 @@ const CRASH_LABEL = i18n.translate('xpack.digitalExperience.mobile.crashes.table
 
 const CRASH_TOOLTIP = i18n.translate('xpack.digitalExperience.mobile.crashes.table.crashTooltip', {
   defaultMessage:
-    '"New in" marks a group only the newest release had in the last 30 days. iOS groups are never marked: their stack traces have no symbols yet, so each build changes them.',
+    '"New in" marks a group only the newest release had in the 30 days before the end of the time range, or in the whole range when it is longer. iOS groups are never marked: their stack traces have no symbols yet, so each build changes them.',
 });
 
 const USERS_LABEL = i18n.translate('xpack.digitalExperience.mobile.crashes.table.users', {
@@ -79,7 +79,7 @@ const NEW_IN_RELEASE_TOOLTIP = i18n.translate(
   'xpack.digitalExperience.mobile.crashes.table.newInReleaseTooltip',
   {
     defaultMessage:
-      'Only the newest release crashed this way in the last 30 days: the release likely brought it.',
+      'Only the newest release crashed this way in the 30 days before the end of the time range, or in the whole range when it is longer: the release likely brought it.',
   }
 );
 

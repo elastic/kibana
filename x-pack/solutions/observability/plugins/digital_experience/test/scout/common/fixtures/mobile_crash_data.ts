@@ -19,7 +19,7 @@ export const CRASH_APPS = {
   breakdowns: 'scout-crash-breakdowns',
 } as const;
 
-/** The device models of the breakdown group's crashes, one each; one more crash has none. */
+/** The device models of the breakdown group's crashes, one each; two more crashes have none. */
 export const BREAKDOWN_DEVICE_MODELS = [
   'Model A',
   'Model B',
@@ -162,8 +162,9 @@ const CRASHES: Crash[] = [
     observedTimestamp: at('11:30:00'),
     stacktrace: CRASH_FINGERPRINT_CASES.iosLaunchB.stacktrace,
   },
-  // More device models than a breakdown shows, and a crash without one: "Other" must count both.
-  ...[...BREAKDOWN_DEVICE_MODELS, undefined].map((deviceModel, index) => ({
+  // More device models than a breakdown shows, and two crashes without one, which rank first and
+  // take a row: "Other" must count both, and the top must still be five models.
+  ...[...BREAKDOWN_DEVICE_MODELS, undefined, undefined].map((deviceModel, index) => ({
     serviceName: CRASH_APPS.breakdowns,
     osName: 'Android' as const,
     version: '1.0.0',

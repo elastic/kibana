@@ -84,7 +84,7 @@ describe('withCrashGroupStats', () => {
     expect(query).toContain('BY fingerprint');
     // EDOT iOS reports, whose fingerprint changes with every build, so they are never marked new.
     expect(query).toContain(
-      'ios_reports = COUNT(*) WHERE `attributes.exception.stacktrace` LIKE "*Crashed:*"'
+      'ios_reports = COUNT(*) WHERE `attributes.exception.stacktrace` LIKE "Incident Identifier:*"'
     );
   });
 

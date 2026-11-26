@@ -8,7 +8,11 @@
 import { countBy } from 'lodash';
 import { apiTest, type ApiClientFixture } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/api';
-import { EXPECTED_CRASH_FINGERPRINTS } from '../../../../common/mobile/crash_fingerprint.test_helpers';
+import {
+  CRASH_FINGERPRINT_CASES,
+  EXPECTED_CRASH_FINGERPRINTS,
+  isIosReportOf,
+} from '../../../../common/mobile/crash_fingerprint.test_helpers';
 import type {
   MobileCrashGroupDetailResponse,
   MobileCrashGroupsResponse,
@@ -151,6 +155,25 @@ apiTest.describe('Digital Experience mobile crashes API', { tag: DIGITAL_EXPERIE
       expect(
         Object.fromEntries(crashGroups.map(({ fingerprint, events }) => [fingerprint, events]))
       ).toStrictEqual(casesPerFingerprint);
+      // Every case is on the app's only release, so each group is new unless it is of iOS reports,
+      // told apart in Elasticsearch as `isIosReportOf` tells them apart here.
+      const iosFingerprints = new Set(
+        (Object.keys(CRASH_FINGERPRINT_CASES) as Array<keyof typeof CRASH_FINGERPRINT_CASES>)
+          .filter((name) => isIosReportOf(CRASH_FINGERPRINT_CASES[name]))
+          .map((name) => EXPECTED_CRASH_FINGERPRINTS[name])
+      );
+      expect(
+        Object.fromEntries(
+          crashGroups.map(({ fingerprint, newInRelease }) => [fingerprint, newInRelease])
+        )
+      ).toStrictEqual(
+        Object.fromEntries(
+          Object.keys(casesPerFingerprint).map((fingerprint) => [
+            fingerprint,
+            iosFingerprints.has(fingerprint) ? null : '1.0.0',
+          ])
+        )
+      );
     }
   );
 
@@ -236,11 +259,11 @@ apiTest.describe('Digital Experience mobile crashes API', { tag: DIGITAL_EXPERIE
 
       const detail = await getDetail(apiClient, CRASH_APPS.breakdowns, group.fingerprint);
 
-      // 7 device models with a crash each, and a crash without one: the top 5, then 2 more models
-      // and the crash without a model.
+      // 7 device models with a crash each, and 2 crashes without one, which rank first: still 5
+      // models, then 2 more models and the 2 crashes without one as Other.
       expect(detail.deviceModels).toStrictEqual({
         top: BREAKDOWN_DEVICE_MODELS.slice(0, 5).map((key) => ({ key, count: 1 })),
-        other: 3,
+        other: 4,
       });
     }
   );

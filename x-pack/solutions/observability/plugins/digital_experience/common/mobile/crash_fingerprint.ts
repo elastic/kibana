@@ -51,15 +51,16 @@ export const MAX_CRASH_FINGERPRINT_LENGTH = 256;
 
 /** `exception.type` suffix of the JavaScript errors React Native reports as crashes. */
 export const JAVASCRIPT_EXCEPTION_SUFFIX = 'JavascriptException';
-/** A line only PLCrashReporter reports have. */
-export const IOS_REPORT_MARKER = 'Crashed:';
+/** How a PLCrashReporter text report starts, which no exception's message or frames do. */
+export const IOS_REPORT_MARKER = 'Incident Identifier:';
 
 /**
- * Whether a crash is an EDOT iOS report: PLCrashReporter runs without symbolication, so its frames
- * are offsets into binaries, which a rebuild moves.
+ * Whether a crash is an EDOT iOS report, by how its stack trace starts rather than a line anywhere
+ * in it, which an error message can repeat. PLCrashReporter runs without symbolication, so its
+ * frames are offsets into binaries, which a rebuild moves.
  */
 export const isIosReport = (): ESQLAstExpression =>
-  esql.exp`${mobileColumn('exceptionStacktrace')} LIKE ${`*${IOS_REPORT_MARKER}*`}`;
+  esql.exp`${mobileColumn('exceptionStacktrace')} LIKE ${`${IOS_REPORT_MARKER}*`}`;
 
 const withRules = (input: ESQLAstExpression, kind: CrashKind): ESQLAstExpression =>
   CRASH_FRAME_RULES[kind].reduce<ESQLAstExpression>(
