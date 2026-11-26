@@ -540,3 +540,132 @@ describe('registerInternalConversationRoutes - _steer', () => {
     expect(appendSteer).not.toHaveBeenCalled();
   });
 });
+
+const THREAD_PATH = `${internalApiPath}/conversations/{parent_id}/_thread`;
+const THREAD_ID = '6f1f9a52-3c1e-4a3e-9d8f-1a2b3c4d5e6f';
+
+describe('registerInternalConversationRoutes - _thread', () => {
+  let routeHandler: (ctx: any, req: any, res: any) => Promise<any>;
+  let createThread: jest.Mock;
+  let getThread: jest.Mock;
+  let maybeExecuteAgent: jest.Mock;
+
+  const thread = { id: THREAD_ID, agent_id: 'agent-1', events: [] };
+
+  const createMockContext = ({ featureFlagEnabled = true } = {}) => ({
+    core: Promise.resolve({
+      uiSettings: { client: { get: jest.fn().mockResolvedValue(featureFlagEnabled) } },
+    }),
+    licensing: Promise.resolve({
+      license: { status: 'active', hasAtLeast: jest.fn().mockReturnValue(true) },
+    }),
+  });
+
+  const createRequest = (body: object = {}) =>
+    httpServerMock.createKibanaRequest({
+      method: 'post',
+      path: THREAD_PATH,
+      params: { parent_id: 'parent-1' },
+      body: { client_thread_id: THREAD_ID, ...body },
+    });
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+
+    createThread = jest.fn().mockResolvedValue({ thread, created: true });
+    getThread = jest.fn().mockResolvedValue(thread);
+    maybeExecuteAgent = jest.fn().mockResolvedValue({ executionId: 'exec-1' });
+
+    const getInternalServices = jest.fn().mockReturnValue({
+      conversations: {
+        getScopedClient: jest.fn().mockResolvedValue({ createThread, getThread }),
+      },
+      execution: { maybeExecuteAgent },
+    });
+
+    const routeHandlers: Record<string, (ctx: any, req: any, res: any) => Promise<any>> = {};
+
+    const router = {
+      post: jest
+        .fn()
+        .mockImplementation(
+          (config: { path: string }, handler: (ctx: any, req: any, res: any) => Promise<any>) => {
+            routeHandlers[config.path] = handler;
+          }
+        ),
+      patch: jest.fn(),
+      get: jest.fn(),
+    } as unknown as IRouter;
+
+    registerInternalConversationRoutes({
+      router,
+      getInternalServices,
+      logger: loggingSystemMock.createLogger(),
+    } as unknown as RouteDependencies);
+
+    routeHandler = routeHandlers[THREAD_PATH];
+  });
+
+  it('answers not found while the threads setting is off', async () => {
+    const response = await routeHandler(
+      createMockContext({ featureFlagEnabled: false }) as any,
+      createRequest(),
+      kibanaResponseFactory
+    );
+
+    expect(response.status).toBe(404);
+    expect(createThread).not.toHaveBeenCalled();
+  });
+
+  it('creates an empty thread without a run when there is no highlight', async () => {
+    const response = await routeHandler(
+      createMockContext() as any,
+      createRequest({ cut_event_id: 'r1::user_message' }),
+      kibanaResponseFactory
+    );
+
+    expect(createThread).toHaveBeenCalledWith(
+      { parentId: 'parent-1', threadId: THREAD_ID, cutEventId: 'r1::user_message' },
+      { source: 'http_api' }
+    );
+    expect(maybeExecuteAgent).not.toHaveBeenCalled();
+    expect(response.payload).toEqual({ thread_id: THREAD_ID, conversation: thread });
+  });
+
+  it('starts the first run on the highlight, without browser tools', async () => {
+    const response = await routeHandler(
+      createMockContext() as any,
+      createRequest({ highlight: { text: 'Why this host?' }, connector_id: 'connector-1' }),
+      kibanaResponseFactory
+    );
+
+    const [{ params, useTaskManager }] = maybeExecuteAgent.mock.calls[0];
+
+    expect(params).toMatchObject({
+      agentId: 'agent-1',
+      conversationId: THREAD_ID,
+      connectorId: 'connector-1',
+      nextInput: { message: 'Why this host?' },
+      triggerMode: 'always',
+    });
+    expect(params.browserApiTools).toBeUndefined();
+    expect(useTaskManager).toBe(true);
+    expect(response.payload).toMatchObject({ thread_id: THREAD_ID, execution_id: 'exec-1' });
+  });
+
+  it('starts no second run on a resend and returns the run in progress', async () => {
+    createThread.mockResolvedValue({
+      thread: { ...thread, active_execution: { execution_id: 'exec-1' } },
+      created: false,
+    });
+
+    const response = await routeHandler(
+      createMockContext() as any,
+      createRequest({ highlight: { text: 'Why this host?' } }),
+      kibanaResponseFactory
+    );
+
+    expect(maybeExecuteAgent).not.toHaveBeenCalled();
+    expect(response.payload).toMatchObject({ thread_id: THREAD_ID, execution_id: 'exec-1' });
+  });
+});

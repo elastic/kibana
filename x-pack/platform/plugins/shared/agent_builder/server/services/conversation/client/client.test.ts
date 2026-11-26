@@ -48,7 +48,7 @@ import type {
 import type { AgentRegistry } from '../../agents/agent_registry';
 import { CONVERSATION_BULK_GET_MAX_IDS } from '../../../../common/constants';
 import { createRound } from '../../../test_utils';
-import { pausedRoundTimeline } from '../../../test_utils/timeline';
+import { completedRoundTimeline, pausedRoundTimeline } from '../../../test_utils/timeline';
 import { buildPinnedFilter } from '../access_control/query';
 import { createClient, type ConversationClient } from './client';
 import type { Document } from './converters';
@@ -332,6 +332,190 @@ describe('ConversationClient', () => {
         username: 'test-user',
         isAdmin: false,
       },
+    });
+  });
+
+  describe('createThread', () => {
+    const PARENT_ID = 'parent-1';
+    const THREAD_ID = '6f1f9a52-3c1e-4a3e-9d8f-1a2b3c4d5e6f';
+    const parentEvents = [...completedRoundTimeline('r1'), ...completedRoundTimeline('r2')];
+
+    const parentDocument = (overrides: { parentConversation?: ConversationParentLink } = {}) =>
+      createConversationDocument({
+        id: PARENT_ID,
+        title: 'Parent',
+        schemaVersion: CONVERSATION_SCHEMA_VERSION,
+        events: parentEvents,
+        ...overrides,
+      });
+
+    let stored: Map<string, { source: Document['_source']; seqNo: number }>;
+
+    const serveParentAndIndexed = (parent: Document) => {
+      stored = new Map([[PARENT_ID, { source: parent._source, seqNo: 1 }]]);
+
+      mockEsClient.index.mockImplementation(
+        async ({
+          id,
+          document,
+          op_type: opType,
+        }: {
+          id: string;
+          document: Document['_source'];
+          op_type?: string;
+        }) => {
+          if (opType === 'create' && stored.has(id)) {
+            throw Object.assign(new Error('conflict'), { statusCode: 409 });
+          }
+
+          const seqNo = (stored.get(id)?.seqNo ?? 0) + 1;
+          stored.set(id, { source: document, seqNo });
+
+          return { _seq_no: seqNo, _primary_term: 1 };
+        }
+      );
+
+      mockRawEsClient.get.mockImplementation(async ({ id }: { id: string }) => {
+        const entry = stored.get(id);
+
+        if (!entry) {
+          throw Object.assign(new Error('not found'), { meta: { statusCode: 404 } });
+        }
+
+        return {
+          _id: id,
+          _index: TEST_CONVERSATION_INDEX,
+          _source: entry.source,
+          _seq_no: entry.seqNo,
+          _primary_term: 1,
+          found: true,
+        };
+      });
+    };
+
+    const indexedDocument = (id: string) => stored.get(id)?.source;
+
+    it('writes the thread with the copied events, thread_started and the parent link', async () => {
+      serveParentAndIndexed(parentDocument());
+
+      const { thread, created } = await client.createThread(
+        { parentId: PARENT_ID, threadId: THREAD_ID, cutEventId: 'r2::user_message' },
+        { source: 'http_api' }
+      );
+
+      expect(created).toBe(true);
+
+      const document = indexedDocument(THREAD_ID);
+      const types = document?.events?.map(({ type }) => type);
+
+      expect(document?.parent_conversation).toEqual({
+        id: PARENT_ID,
+        relation: ConversationParentRelation.thread,
+      });
+      expect(document?.access_control).toBeUndefined();
+      expect(document?.events?.slice(0, completedRoundTimeline('r1').length)).toEqual(
+        completedRoundTimeline('r1')
+      );
+      expect(types?.slice(-2)).toEqual([
+        TimelineEventType.threadStarted,
+        ConversationActivityEventType.conversationCreated,
+      ]);
+      expect(new Date(document?.created_at ?? 0).getTime()).toBeGreaterThan(
+        new Date(completedRoundTimeline('r1')[0].created_at).getTime()
+      );
+
+      expect(thread.events?.[0].type).toBe(TimelineEventType.threadStarted);
+      expect(thread.rounds).toEqual([]);
+    });
+
+    it('records thread_created on the parent', async () => {
+      serveParentAndIndexed(parentDocument());
+
+      await client.createThread(
+        { parentId: PARENT_ID, threadId: THREAD_ID, title: 'Side question' },
+        { source: 'http_api' }
+      );
+
+      const threadCreated = indexedDocument(PARENT_ID)?.events?.at(-1);
+
+      expect(threadCreated).toMatchObject({
+        id: `thread_created-${THREAD_ID}`,
+        type: TimelineEventType.threadCreated,
+        data: { thread_id: THREAD_ID, title: 'Side question' },
+      });
+    });
+
+    it('refuses to start a thread from a thread', async () => {
+      serveParentAndIndexed(
+        parentDocument({
+          parentConversation: { id: 'grand-parent', relation: ConversationParentRelation.thread },
+        })
+      );
+
+      await expect(
+        client.createThread({ parentId: PARENT_ID, threadId: THREAD_ID }, { source: 'http_api' })
+      ).rejects.toThrow(/is a thread/);
+      expect(mockEsClient.index).not.toHaveBeenCalled();
+    });
+
+    it('answers not found for a missing parent', async () => {
+      mockGetDocumentNotFound();
+
+      await expect(
+        client.createThread({ parentId: PARENT_ID, threadId: THREAD_ID }, { source: 'http_api' })
+      ).rejects.toThrow(/not found/i);
+    });
+
+    it('returns the existing thread on a resend and only redoes the parent event', async () => {
+      serveParentAndIndexed(parentDocument());
+
+      await client.createThread(
+        { parentId: PARENT_ID, threadId: THREAD_ID },
+        { source: 'http_api' }
+      );
+
+      const { created } = await client.createThread(
+        { parentId: PARENT_ID, threadId: THREAD_ID },
+        { source: 'http_api' }
+      );
+
+      expect(created).toBe(false);
+
+      const threadCreatedEvents = indexedDocument(PARENT_ID)?.events?.filter(
+        ({ type }) => type === TimelineEventType.threadCreated
+      );
+
+      expect(threadCreatedEvents).toHaveLength(1);
+    });
+  });
+
+  describe('getThread', () => {
+    it('refuses a conversation that is not a thread', async () => {
+      mockGetDocumentResponse(createConversationDocument());
+
+      await expect(client.getThread('conversation-1')).rejects.toThrow(/not a thread/);
+    });
+
+    it('returns the thread from thread_started on', async () => {
+      const threadStarted = {
+        id: 'thread-started',
+        type: TimelineEventType.threadStarted,
+        created_at: '2026-01-01T00:05:00.000Z',
+        actor: { type: EventActorType.user, id: 'user-1', username: 'test-user' },
+        data: { parent_conversation_id: 'parent-1', parent_title: 'Parent' },
+      };
+
+      mockGetDocumentResponse(
+        createConversationDocument({
+          schemaVersion: CONVERSATION_SCHEMA_VERSION,
+          events: [...completedRoundTimeline('r1'), threadStarted] as ConversationEvent[],
+          parentConversation: { id: 'parent-1', relation: ConversationParentRelation.thread },
+        })
+      );
+
+      const thread = await client.getThread('conversation-1');
+
+      expect(thread.events).toEqual([threadStarted]);
     });
   });
 

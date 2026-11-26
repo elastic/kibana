@@ -85,3 +85,22 @@ export interface AddConversationEventsRequestBody {
 export interface AddConversationEventsResponse {
   events: ConversationEvent[];
 }
+
+export interface CreateThreadRequest {
+  client_thread_id: string;
+  cut_event_id?: string;
+  highlight?: { text: string };
+  title?: string;
+  trigger?: 'always' | 'never';
+  connector_id?: string | null;
+  inference_id?: string | null;
+  project_routing?: string;
+  reasoning_level?: 'none' | 'minimal' | 'low' | 'medium' | 'high' | 'xhigh';
+}
+
+export interface CreateThreadResponse {
+  thread_id: string;
+  /** The first run, or on a resend the run still in progress. */
+  execution_id?: string;
+  conversation: ConversationWithPermissions;
+}

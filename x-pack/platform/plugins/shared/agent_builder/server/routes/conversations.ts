@@ -16,6 +16,7 @@ import {
   CONVERSATION_TITLE_MAX_LENGTH,
   ConversationAccessControlMode,
   ConversationAccessControlRole,
+  ConversationParentRelation,
   agentBuilderDefaultAgentId,
   agentIdMaxLength,
   isAgentNotFoundError,
@@ -23,6 +24,7 @@ import {
   isConversationAlreadyExistsError,
 } from '@kbn/agent-builder-common';
 import { createConversationPublicClient } from '../services/conversation/conversation_public_client';
+import { toThreadView } from '../services/conversation/client/thread_cut';
 import type { RouteDependencies } from './types';
 import { getHandlerWrapper } from './wrap_handler';
 import type {
@@ -264,9 +266,11 @@ export function registerConversationRoutes({
 
         const client = await conversationsService.getScopedClient({ request });
         const conversation = await client.get(conversationId);
+        const isThread =
+          conversation.parent_conversation?.relation === ConversationParentRelation.thread;
 
         return response.ok<GetConversationResponse>({
-          body: conversation,
+          body: isThread ? toThreadView(conversation) : conversation,
         });
       })
     );

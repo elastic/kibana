@@ -40,7 +40,10 @@ import type {
   UserMessageEvent,
 } from '@kbn/agent-builder-common';
 import type { ExecutionPeek } from '../../execution/persistence';
-import type { ConversationWithoutRoundsWithPermissions } from '../../../../common/http_api/conversations';
+import type {
+  ConversationWithPermissions,
+  ConversationWithoutRoundsWithPermissions,
+} from '../../../../common/http_api/conversations';
 
 export type ConversationCreateRequest = Omit<
   Conversation,
@@ -288,4 +291,19 @@ export type NormalizedConversation = Conversation & {
 export interface ConversationWriteOptions {
   /** The code path performing the write, recorded on the trigger event. */
   source: ConversationWriteSource;
+}
+
+export interface CreateThreadRequest {
+  parentId: string;
+  threadId: string;
+  /** Where the copy of the parent's history ends; see `cutIndexForThread`. */
+  cutEventId?: string;
+  highlight?: { text: string };
+  title?: string;
+}
+
+export interface CreateThreadResult {
+  thread: ConversationWithPermissions;
+  /** False when `threadId` already held this parent's thread, as on a resent request. */
+  created: boolean;
 }

@@ -1,5 +1,5 @@
 {
-  "sha1": "4310430e71bb035ddf22aea72a284d0f02cac5b2",
+  "sha1": "ffc686a9c9b9a61c68030c89290fe338aebe52da",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -28,8 +28,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/conversations/api/tests/conversations_access_control_api.spec.ts",
-        "line": 496,
-        "column": 7
+        "line": 509,
+        "column": 5
       }
     },
     {
@@ -42,8 +42,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/conversations/api/tests/conversations_access_control_api.spec.ts",
-        "line": 952,
-        "column": 20
+        "line": 966,
+        "column": 59
       }
     },
     {
@@ -56,7 +56,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/conversations/api/tests/conversations_access_control_api.spec.ts",
-        "line": 997,
+        "line": 1011,
         "column": 16
       }
     },
@@ -70,8 +70,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/conversations/api/tests/conversations_access_control_api.spec.ts",
-        "line": 1190,
-        "column": 26
+        "line": 1204,
+        "column": 18
       }
     },
     {
@@ -84,8 +84,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/conversations/api/tests/conversations_access_control_api.spec.ts",
-        "line": 1288,
-        "column": 26
+        "line": 1301,
+        "column": 13
       }
     },
     {
@@ -98,8 +98,22 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/conversations/api/tests/conversations_access_control_api.spec.ts",
-        "line": 1349,
-        "column": 19
+        "line": 1363,
+        "column": 12
+      }
+    },
+    {
+      "id": "82fdabaac554eba-b43c3a416f85492",
+      "title": "Agent Builder — conversations access-control API callback origin lookup never resolves to another user's public conversation",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/conversations/api/tests/conversations_access_control_api.spec.ts",
+        "line": 1415,
+        "column": 12
       }
     },
     {
@@ -112,8 +126,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/conversations/api/tests/conversations_access_control_api.spec.ts",
-        "line": 1401,
-        "column": 11
+        "line": 1478,
+        "column": 27
       }
     },
     {
@@ -1296,6 +1310,134 @@
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/conversations/api/tests/conversations_search_api.spec.ts",
         "line": 258,
         "column": 63
+      }
+    },
+    {
+      "id": "7f6e5f5e0a18156-dd0951a08830731",
+      "title": "Agent Builder — POST /internal/agent_builder/conversations/{parent_id}/_thread creates an empty thread with the parent history, and records it on the parent",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/conversations/api/tests/conversations_threads_api.spec.ts",
+        "line": 62,
+        "column": 13
+      }
+    },
+    {
+      "id": "7f6e5f5e0a18156-0f03e4234f6763c",
+      "title": "Agent Builder — POST /internal/agent_builder/conversations/{parent_id}/_thread a resend returns the same thread and records it once",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/conversations/api/tests/conversations_threads_api.spec.ts",
+        "line": 86,
+        "column": 16
+      }
+    },
+    {
+      "id": "7f6e5f5e0a18156-7c06292a8cf4a0b",
+      "title": "Agent Builder — POST /internal/agent_builder/conversations/{parent_id}/_thread starts the first run on the highlight",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/conversations/api/tests/conversations_threads_api.spec.ts",
+        "line": 101,
+        "column": 6
+      }
+    },
+    {
+      "id": "7f6e5f5e0a18156-23fa5b155aedd32",
+      "title": "Agent Builder — POST /internal/agent_builder/conversations/{parent_id}/_thread creates a thread of a parent without events",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/conversations/api/tests/conversations_threads_api.spec.ts",
+        "line": 121,
+        "column": 63
+      }
+    },
+    {
+      "id": "7f6e5f5e0a18156-55344bf361df93a",
+      "title": "Agent Builder — POST /internal/agent_builder/conversations/{parent_id}/_thread refuses to start a thread from a thread",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/conversations/api/tests/conversations_threads_api.spec.ts",
+        "line": 128,
+        "column": 55
+      }
+    },
+    {
+      "id": "7f6e5f5e0a18156-dd95e9e0dbd512a",
+      "title": "Agent Builder — POST /internal/agent_builder/conversations/{parent_id}/_thread answers 404 for a missing parent",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/conversations/api/tests/conversations_threads_api.spec.ts",
+        "line": 142,
+        "column": 16
+      }
+    },
+    {
+      "id": "7f6e5f5e0a18156-fe3db687c2d6f44",
+      "title": "Agent Builder — POST /internal/agent_builder/conversations/{parent_id}/_thread answers 400 for a cut at an event that is not a message or an end",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/conversations/api/tests/conversations_threads_api.spec.ts",
+        "line": 149,
+        "column": 70
+      }
+    },
+    {
+      "id": "7f6e5f5e0a18156-cf1c97ee7b92982",
+      "title": "Agent Builder — POST /internal/agent_builder/conversations/{parent_id}/_thread answers 404 while the threads setting is off",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/conversations/api/tests/conversations_threads_api.spec.ts",
+        "line": 155,
+        "column": 14
       }
     }
   ]
