@@ -191,21 +191,20 @@ export class SLOPlugin
     registerDataProviders({ core, plugins, logger: this.logger });
 
     const resourceInstallState = new ResourceInstallState({
-      installerFactory: async (options) => {
+      installerFactory: async (retryOptions) => {
         const [coreStart] = await core.getStartServices();
         return new DefaultResourceInstaller(
           coreStart.elasticsearch.client.asInternalUser,
           this.logger,
-          options
+          retryOptions
         );
       },
       lockManager,
       logger: this.logger,
     });
 
-    // Install failures are logged by ResourceInstallState; a lock-wait timeout means another node is installing.
     resourceInstallState.ensureInstalled(DEFAULT_RETRY_OPTIONS).catch((err) => {
-      this.logger.debug(`SLO common resources not installed at startup: ${err.message}`);
+      this.logger.error(`Failed to install SLO common resources: ${err.message}`);
     });
 
     registerServerRoutes({

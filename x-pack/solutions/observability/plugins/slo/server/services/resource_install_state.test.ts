@@ -45,16 +45,22 @@ describe('ResourceInstallState', () => {
     expect(installer.install).toHaveBeenCalledTimes(1);
   });
 
-  it.each([
-    ['request retry options by default', undefined, REQUEST_RETRY_OPTIONS],
-    ['the given retry options', DEFAULT_RETRY_OPTIONS, DEFAULT_RETRY_OPTIONS],
-  ])('builds the installer with %s', async (_name, given, expected) => {
+  it('builds the installer with request retry options by default', async () => {
     const { installer, installerFactory, state } = setup();
     installer.install.mockResolvedValue();
 
-    await state.ensureInstalled(given);
+    await state.ensureInstalled();
 
-    expect(installerFactory).toHaveBeenCalledWith({ retryOptions: expected });
+    expect(installerFactory).toHaveBeenCalledWith(REQUEST_RETRY_OPTIONS);
+  });
+
+  it('builds the installer with the given retry options', async () => {
+    const { installer, installerFactory, state } = setup();
+    installer.install.mockResolvedValue();
+
+    await state.ensureInstalled(DEFAULT_RETRY_OPTIONS);
+
+    expect(installerFactory).toHaveBeenCalledWith(DEFAULT_RETRY_OPTIONS);
   });
 
   it('shares one install between concurrent calls', async () => {
@@ -99,7 +105,7 @@ describe('ResourceInstallState', () => {
     await expect(state.reconcile()).resolves.toBe(true);
     await state.ensureInstalled();
 
-    expect(installerFactory).toHaveBeenCalledWith({ retryOptions: DEFAULT_RETRY_OPTIONS });
+    expect(installerFactory).toHaveBeenCalledWith(DEFAULT_RETRY_OPTIONS);
     expect(lockManager.withLock).toHaveBeenCalledTimes(1);
   });
 
@@ -125,6 +131,10 @@ describe('ResourceInstallState', () => {
     await expect(result).resolves.toBeUndefined();
     expect(lockManager.withLock).toHaveBeenCalledTimes(2);
     expect(installer.install).toHaveBeenCalledTimes(1);
+
+    // memoized once installed
+    await state.ensureInstalled();
+    expect(lockManager.withLock).toHaveBeenCalledTimes(2);
   });
 
   it('throws SLOResourcesNotInstalled when the lock is still held after the timeout', async () => {
@@ -139,7 +149,7 @@ describe('ResourceInstallState', () => {
     await jest.advanceTimersByTimeAsync(30_000);
     await assertion;
 
-    expect(lockManager.withLock.mock.calls.length).toBeGreaterThan(1);
+    expect(lockManager.withLock).toHaveBeenCalledTimes(16);
     expect(installer.install).not.toHaveBeenCalled();
   });
 
@@ -166,6 +176,16 @@ describe('ResourceInstallState', () => {
     await state.ensureInstalled();
 
     expect(lockManager.withLock).toHaveBeenCalledTimes(2);
+  });
+
+  it('passes the abort signal to the installer on reconcile', async () => {
+    const { installer, state } = setup();
+    installer.install.mockResolvedValue();
+    const { signal } = new AbortController();
+
+    await state.reconcile(DEFAULT_RETRY_OPTIONS, signal);
+
+    expect(installer.install).toHaveBeenCalledWith(signal);
   });
 
   it('times out when a single lock attempt outlasts the wait budget', async () => {
@@ -195,6 +215,8 @@ describe('ResourceInstallState', () => {
     resolveInstall();
 
     await expect(result).resolves.toBeUndefined();
+    await state.ensureInstalled();
+    expect(installer.install).toHaveBeenCalledTimes(1);
   });
 
   it('does not install when the lock is acquired after the wait budget elapsed', async () => {
@@ -223,8 +245,8 @@ describe('ResourceInstallState', () => {
     expect(installer.install).toHaveBeenCalledTimes(1);
   });
 
-  it('passes the reconcile signal to the installer and rethrows its abort unwrapped', async () => {
-    const { installer, installerFactory, logger, state } = setup();
+  it('rethrows an abort unwrapped and does not log it as an install failure', async () => {
+    const { installer, logger, state } = setup();
     const abortController = new AbortController();
     const abortError = new EsErrors.RequestAbortedError('Request aborted');
     installer.install.mockImplementation(async () => {
@@ -232,12 +254,10 @@ describe('ResourceInstallState', () => {
       throw abortError;
     });
 
-    await expect(state.reconcile(abortController.signal)).rejects.toBe(abortError);
+    await expect(state.reconcile(DEFAULT_RETRY_OPTIONS, abortController.signal)).rejects.toBe(
+      abortError
+    );
 
-    expect(installerFactory).toHaveBeenCalledWith({
-      retryOptions: DEFAULT_RETRY_OPTIONS,
-      signal: abortController.signal,
-    });
     expect(logger.warn).not.toHaveBeenCalled();
   });
 
@@ -245,7 +265,9 @@ describe('ResourceInstallState', () => {
     const { installer, logger, state } = setup();
     installer.install.mockRejectedValue(new EsErrors.RequestAbortedError('Response too large'));
 
-    await expect(state.reconcile(new AbortController().signal)).rejects.toThrow(
+    await expect(
+      state.reconcile(DEFAULT_RETRY_OPTIONS, new AbortController().signal)
+    ).rejects.toThrow(
       new SLOResourcesNotInstalled('SLO resources are not installed yet, try again later')
     );
 

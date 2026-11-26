@@ -10,7 +10,6 @@ import type { LoggerFactory } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
-import { SLOResourcesNotInstalled } from '../../../errors';
 import type { SLOPluginStartDependencies } from '../../../types';
 import type { ResourceInstallState } from '../../resource_install_state';
 import { ResourcesReconcileTask, TYPE } from './resources_reconcile_task';
@@ -55,6 +54,7 @@ describe('ResourcesReconcileTask', () => {
       expect(taskManager.ensureScheduled).toHaveBeenCalledWith(
         expect.objectContaining({ id: TASK_ID, taskType: TYPE, schedule: { interval: '1h' } })
       );
+      expect(taskManager.runSoon).not.toHaveBeenCalled();
     });
 
     it('does not schedule the task without a platinum license', async () => {
@@ -78,12 +78,10 @@ describe('ResourcesReconcileTask', () => {
       expect(resourceInstallState.reconcile).not.toHaveBeenCalled();
     });
 
-    it('reconciles the resources with the task signal', async () => {
-      const { signal } = new AbortController();
+    it('reconciles the resources', async () => {
+      const result = await task.runTask(createTaskInstance());
 
-      const result = await task.runTask(createTaskInstance(), signal);
-
-      expect(resourceInstallState.reconcile).toHaveBeenCalledWith(signal);
+      expect(resourceInstallState.reconcile).toHaveBeenCalledTimes(1);
       expect(result).toEqual({ state: {} });
     });
 
@@ -99,29 +97,23 @@ describe('ResourcesReconcileTask', () => {
     });
 
     it('logs at debug without a warning when the run is cancelled', async () => {
-      const abortController = new AbortController();
-      abortController.abort();
       resourceInstallState.reconcile.mockRejectedValue(
         new EsErrors.RequestAbortedError('Request aborted')
       );
 
-      await expect(task.runTask(createTaskInstance(), abortController.signal)).resolves.toEqual({
-        state: {},
-      });
-
-      expect(loggingSystemMock.collect(loggingSystem).debug).toContainEqual([
-        'SLO resources reconcile was cancelled',
-      ]);
-      expect(loggingSystemMock.collect(loggingSystem).warn).toEqual([]);
-    });
-
-    it('completes without logging the install failure again when the install fails', async () => {
-      resourceInstallState.reconcile.mockRejectedValue(new SLOResourcesNotInstalled('not ready'));
-
       await expect(task.runTask(createTaskInstance())).resolves.toEqual({ state: {} });
 
       expect(loggingSystemMock.collect(loggingSystem).warn).toEqual([]);
-      expect(loggingSystemMock.collect(loggingSystem).error).toEqual([]);
+    });
+
+    it('logs a warning and completes when the install fails', async () => {
+      resourceInstallState.reconcile.mockRejectedValue(new Error('health data stream failed'));
+
+      await expect(task.runTask(createTaskInstance())).resolves.toEqual({ state: {} });
+
+      expect(loggingSystemMock.collect(loggingSystem).warn).toContainEqual([
+        'Failed to reconcile SLO resources: health data stream failed',
+      ]);
     });
   });
 });
