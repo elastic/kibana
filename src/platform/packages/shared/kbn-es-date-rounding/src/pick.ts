@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { toDslDateRounding } from './date_histogram_rounding';
 import type { DateRounding } from './date_rounding';
 import { countBuckets } from './date_rounding';
 import type { IanaTimeZone } from './time_zone';
@@ -71,21 +72,6 @@ const SECONDARY: readonly DateInterval[] = [
   YEAR,
 ];
 
-const FIXED_UNIT_MS: Readonly<Record<string, number>> = {
-  ms: 1,
-  s: SECOND_MS,
-  m: MINUTE_MS,
-  h: HOUR_MS,
-  d: DAY_MS,
-};
-
-const CALENDAR_UNIT: Readonly<Record<string, 'day' | 'isoWeek' | 'month' | 'year'>> = {
-  d: 'day',
-  w: 'isoWeek',
-  M: 'month',
-  y: 'year',
-};
-
 /**
  * Epoch range `[0, durationMs)` for callers that only have a duration.
  * @throws {Error} If `durationMs` is not a positive finite number.
@@ -139,18 +125,15 @@ export const fitsInBuckets = (
   return fitsInRange(toRounding(interval), range, maxBuckets);
 };
 
-/** Map a picker or manual `Nms`/`Ns`/`Nm`/`Nh`/`Nd`/`Nw`/`NM`/`Ny` interval onto ES rounding. */
+/** Rounding for a picker or manual interval, read as the `date_histogram` parameter it is sent as. */
 const toRounding = ({ expression, kind }: DateInterval): DateRounding => {
-  const parsed = /^(\d+)(ms|s|m|h|d|w|M|y)$/.exec(expression);
-  const amount = parsed ? Number(parsed[1]) : 0;
-  const suffix = parsed?.[2] ?? '';
-  if (amount > 0 && kind === 'calendar' && suffix in CALENDAR_UNIT) {
-    return { kind: 'calendar', unit: CALENDAR_UNIT[suffix], amount };
+  const rounding = toDslDateRounding(
+    kind === 'calendar' ? { calendar_interval: expression } : { fixed_interval: expression }
+  );
+  if (!rounding) {
+    throw new Error(`Unknown date interval expression: ${expression}`);
   }
-  if (amount > 0 && kind === 'fixed' && suffix in FIXED_UNIT_MS) {
-    return { kind: 'fixed', widthMs: amount * FIXED_UNIT_MS[suffix] };
-  }
-  throw new Error(`Unknown date interval expression: ${expression}`);
+  return rounding;
 };
 
 const fitsInRange = (

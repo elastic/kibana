@@ -15,7 +15,7 @@ import {
   ianaTimeZone,
   pickDateRounding,
   roundToBucketKey,
-  toDateRounding,
+  toDslDateRounding,
 } from '@kbn/es-date-rounding';
 import type { EsClient } from '@kbn/scout';
 import { tags } from '@kbn/scout';
@@ -201,7 +201,11 @@ const ALL_TIMESTAMPS = CASES.flatMap((parityCase) => {
 
 /** Keys of the non-empty buckets for every indexed document in `range`, since case ranges overlap. */
 const expectedKeys = ({ from, to, timeZone }: ZonedDateRange, interval: DateInterval): number[] => {
-  const rounding = toDateRounding(interval.expression);
+  const rounding = toDslDateRounding(
+    interval.kind === 'calendar'
+      ? { calendar_interval: interval.expression }
+      : { fixed_interval: interval.expression }
+  );
   if (!rounding) {
     throw new Error(`Unsupported interval: ${interval.expression}`);
   }
