@@ -1519,3 +1519,104 @@ describe('useServiceSettings — reroute permissions', () => {
     expect(result.current.isReady).toBe(false);
   });
 });
+
+// --- custom fields ---
+
+describe('useServiceSettings — custom fields', () => {
+  const regular = makeEntry('svc_r', {
+    dataStreams: [],
+    deploymentMethods: [{ method: 'managed_integration', preferred: true }],
+  });
+  const ecfOnly = makeEntry('svc_e', {
+    dataStreams: [],
+    deploymentMethods: [{ method: 'ecf', preferred: true }],
+  });
+
+  const render = (
+    deploymentMethod: 'agent_based' | 'managed_integration' | 'ecf',
+    entries: AwsServiceMatrixEntry[]
+  ) => {
+    mockUseOnboardingFlow.mockReturnValue({
+      servicesStep: { selectedServiceIds: entries.map((e) => e.id) },
+      removeDeployInstance: jest.fn(),
+      awsServicesMap: new Map(entries.map((e) => [e.id, e])),
+      deploymentMethod,
+      setServiceSettingsMethod: jest.fn(),
+    } as unknown as ReturnType<typeof useOnboardingFlow>);
+    return renderHook(() => useServiceSettings({ onContinue: jest.fn() }));
+  };
+
+  const fill = (result: ReturnType<typeof render>['result']) => {
+    act(() => result.current.setGlobalRegion('us-east-1'));
+    act(() => result.current.setIntegrationName('my-aws'));
+  };
+
+  it('is offered under managed integration only', () => {
+    expect(render('managed_integration', [regular]).result.current.isCustomFieldsSupported).toBe(
+      true
+    );
+    expect(render('agent_based', [regular]).result.current.isCustomFieldsSupported).toBe(false);
+    expect(render('ecf', [regular]).result.current.isCustomFieldsSupported).toBe(false);
+  });
+
+  it('is not offered under managed integration when every service is ECF-only', () => {
+    expect(render('managed_integration', [ecfOnly]).result.current.isCustomFieldsSupported).toBe(
+      false
+    );
+  });
+
+  it('flags ECF services next to services that get a policy, which ignore the fields', () => {
+    expect(
+      render('managed_integration', [regular, ecfOnly]).result.current
+        .hasServicesIgnoringCustomFields
+    ).toBe(true);
+    expect(
+      render('managed_integration', [regular]).result.current.hasServicesIgnoringCustomFields
+    ).toBe(false);
+  });
+
+  it('does not block Continue with a leftover invalid value where the field is hidden', () => {
+    const { result } = render('agent_based', [regular]);
+    fill(result);
+    act(() =>
+      result.current.setPolicySetting(
+        'global_data_tags',
+        JSON.stringify([{ name: 'my team', value: '' }])
+      )
+    );
+
+    expect(result.current.customFieldsErrors).toBeUndefined();
+    expect(result.current.isReady).toBe(true);
+  });
+
+  it('blocks Continue with an invalid field where the field is shown, and unblocks once fixed', () => {
+    const { result } = render('managed_integration', [regular]);
+    fill(result);
+    act(() =>
+      result.current.setPolicySetting(
+        'global_data_tags',
+        JSON.stringify([{ name: 'my team', value: 'a' }])
+      )
+    );
+    expect(result.current.customFieldsErrors).toBeDefined();
+    expect(result.current.isReady).toBe(false);
+
+    act(() =>
+      result.current.setPolicySetting(
+        'global_data_tags',
+        JSON.stringify([{ name: 'team', value: 'a' }])
+      )
+    );
+    expect(result.current.customFieldsErrors).toBeUndefined();
+    expect(result.current.isReady).toBe(true);
+  });
+
+  it('reads a wrong-typed saved value as no fields instead of throwing', () => {
+    const { result } = render('managed_integration', [regular]);
+    fill(result);
+    act(() => result.current.setPolicySetting('global_data_tags', 'not json'));
+
+    expect(result.current.customFields).toEqual([]);
+    expect(result.current.isReady).toBe(true);
+  });
+});

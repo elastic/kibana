@@ -1278,7 +1278,7 @@ describe('install', () => {
       expect(response.error).toBeInstanceOf(PackageInvalidArchiveError);
       expect(response.error).toEqual(
         expect.objectContaining({
-          message: expect.stringMatching(/must be migrated or removed/),
+          message: expect.stringMatching(/not owned by package/),
         })
       );
       expect(installStateMachine._stateMachineInstallPackage).not.toHaveBeenCalled();

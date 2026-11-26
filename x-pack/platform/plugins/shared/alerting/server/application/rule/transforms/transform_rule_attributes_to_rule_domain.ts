@@ -9,8 +9,18 @@ import type { SavedObjectReference } from '@kbn/core/server';
 import { migrateLegacyLastRunOutcomeMsg } from '../../../rules_client/lib';
 import { ruleExecutionStatusValues } from '../constants';
 import { getRuleSnoozeEndTime } from '../../../lib';
+import {
+  normalizeExecutionStatusErrorReason,
+  normalizeLastRunWarning,
+} from '../../../lib/normalize_rule_execution_reasons';
 import type { RuleDomain, Monitoring, RuleParams } from '../types';
-import type { PartialRule, RawRule, RawRuleExecutionStatus, SanitizedRule } from '../../../types';
+import type {
+  PartialRule,
+  RawRule,
+  RawRuleExecutionStatus,
+  RawRuleLastRun,
+  SanitizedRule,
+} from '../../../types';
 import type { UntypedNormalizedRuleType } from '../../../rule_type_registry';
 import { injectReferencesIntoParams } from '../../../rules_client/common';
 import { getActiveScheduledSnoozes } from '../../../lib/is_rule_snoozed';
@@ -55,8 +65,18 @@ const transformEsExecutionStatus = (
     status,
     lastExecutionDate: new Date(parsedDateMillis),
     ...(lastDuration != null ? { lastDuration } : {}),
-    ...(error ? { error } : {}),
+    ...(error
+      ? { error: { ...error, reason: normalizeExecutionStatusErrorReason(error.reason) } }
+      : {}),
     ...(warning ? { warning } : {}),
+  };
+};
+
+const transformEsLastRun = (esLastRun: RawRuleLastRun): RuleDomain['lastRun'] => {
+  const { warning, ...lastRun } = migrateLegacyLastRunOutcomeMsg(esLastRun);
+  return {
+    ...lastRun,
+    ...(warning !== undefined ? { warning: normalizeLastRunWarning(warning) } : {}),
   };
 };
 
@@ -218,7 +238,7 @@ export const transformRuleAttributesToRuleDomain = <Params extends RuleParams = 
     snoozeSchedule: snoozeScheduleDates ?? [],
     activeSnoozes,
     isSnoozedUntil,
-    ...(lastRun ? { lastRun: migrateLegacyLastRunOutcomeMsg(lastRun) } : {}),
+    ...(lastRun ? { lastRun: transformEsLastRun(lastRun) } : {}),
     ...(esRule.nextRun ? { nextRun: new Date(esRule.nextRun) } : {}),
     ...(esRule.lastEnabledAt ? { lastEnabledAt: new Date(esRule.lastEnabledAt) } : {}),
     revision: esRule.revision,

@@ -38,8 +38,10 @@ export const useDeleteMigration = (migrationType: MigrationType) => {
       const { id: migrationId, vendor } = migrationStats;
       if (migrationType === 'rule') {
         return siemMigrations.rules.deleteMigration({ migrationId, vendor });
-      } else {
+      } else if (migrationType === 'dashboard') {
         return siemMigrations.dashboards.deleteMigration({ migrationId, vendor });
+      } else {
+        return siemMigrations.workflows.deleteMigration({ migrationId });
       }
     },
     [siemMigrations, migrationType]

@@ -6,7 +6,7 @@
  */
 
 import { z, lazySchema } from '@kbn/zod/v4';
-import { timeRangeSchema } from '@kbn/agent-builder-dashboards-common';
+import { optionsSchema, timeRangeSchema } from '@kbn/agent-builder-dashboards-common';
 import { controlInputSchema } from '../controls';
 import { upsertPanelContentSchema } from '../panels';
 
@@ -46,7 +46,7 @@ const upsertPanelSchema = lazySchema(() =>
     content: upsertPanelContentSchema
       .optional()
       .describe(
-        'Panel content. Required for new panels. For an existing panel, edits it (e.g. a request with a query describing the change) and must match its kind; to change the kind, remove the panel and add a new one with a new id. Omit to only move the panel.'
+        'Panel content. Required for new panels. For an existing panel, edits it (e.g. content with a `query` describing the change) and must match its kind; to change the kind, remove the panel and add a new one with a new id. Omit to only move the panel.'
       ),
   })
 );
@@ -70,6 +70,12 @@ export const upsertDashboardSchema = lazySchema(() =>
       .optional()
       .describe(
         'Set ONLY when the user asks for a time window (e.g. "last 7 days"); otherwise omit it and a data-aware default is applied. The screen context time range is not a request unless the user refers to it. Use Kibana date math or ISO 8601, e.g. { from: "now-7d", to: "now" } or { from: "2024-05-20T00:00:00.000Z", to: "2024-05-24T23:59:59.999Z", mode: "absolute" }.'
+      ),
+    options: optionsSchema
+      .loose()
+      .optional()
+      .describe(
+        'Dashboard-wide display and behavior settings. Set only the keys the user asks to change.'
       ),
     sections: z
       .array(upsertSectionSchema)

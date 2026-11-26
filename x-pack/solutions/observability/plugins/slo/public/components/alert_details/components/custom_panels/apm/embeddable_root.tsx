@@ -55,7 +55,7 @@ export function APMEmbeddableRoot({
   const groupingInput = getInputFromGroupings(slo);
   const indicator = slo.indicator;
 
-  const kuery = isKueryFilter ? filter : undefined;
+  const kuery = isKueryFilter ? filter : filter?.kqlQuery;
   const allFilters =
     !isKueryFilter && filter?.filters
       ? [...filter?.filters, ...groupingInput.filters]

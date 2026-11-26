@@ -12,7 +12,7 @@ import { render, renderHook, screen } from '@testing-library/react';
 import { mockTimelineData, TestProviders } from '../../../../../common/mock';
 import { useLicense } from '../../../../../common/hooks/use_license';
 import { useTimelineControlColumn } from './use_timeline_control_columns';
-import { TimelineId } from '@kbn/timelines-plugin/public/store/timeline';
+import { TimelineId } from '../../../../../../common/types/timeline';
 import { useUserPrivileges } from '../../../../../common/components/user_privileges';
 import { initialUserPrivilegesState } from '../../../../../common/components/user_privileges/user_privileges_context';
 import { BUTTON_TEST_ID } from '../../../../../common/components/header_actions/pin_event_action';

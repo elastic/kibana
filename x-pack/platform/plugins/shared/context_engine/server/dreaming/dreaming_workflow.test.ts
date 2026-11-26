@@ -41,15 +41,11 @@ const findStep = (candidates: Step[], name: string): Step | undefined =>
     .find(Boolean);
 
 describe.each([
-  [
-    'dreaming',
-    stepsOf(CONTEXT_ENGINE_DREAMING_WORKFLOW.yamlTemplate(values)),
-    ['read_memories', 'read_existing'],
-  ],
+  ['dreaming', stepsOf(CONTEXT_ENGINE_DREAMING_WORKFLOW.yamlTemplate(values)), ['read_existing']],
   [
     'relationships',
     stepsOf(CONTEXT_ENGINE_RELATIONSHIPS_WORKFLOW.yamlTemplate(values)),
-    ['read_items', 'read_entities', 'read_relationships'],
+    ['read_items', 'read_entities', 'read_relationships', 'match_facts', 'read_facts'],
   ],
 ])('the %s workflow', (_, steps, reads) => {
   it.each(reads)(

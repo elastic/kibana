@@ -8,6 +8,7 @@
  */
 
 import _ from 'lodash';
+import type { HttpSetup } from '@kbn/core/public';
 import { populateContext } from '../autocomplete/engine';
 
 import * as kb from '.';
@@ -143,6 +144,124 @@ describe('Knowledge base', () => {
   indexTest('Index integration 2', [['index1', 'index2']], [], {
     indices: ['index1', 'index2'],
     autoCompleteSet: ['_multi_indices', '_single_index'],
+  });
+
+  describe('loadActiveApi', () => {
+    const SPEC_RESPONSE = {
+      es: {
+        endpoints: {
+          search: {
+            methods: ['GET'],
+            patterns: ['_search'],
+            documentation: 'https://www.elastic.co/docs/api/doc/elasticsearch/operation/search',
+          },
+        },
+      },
+      kibana: { docLinks: { '/api/spaces/space/{id}': { get: 'get-spaces-space-id' } } },
+    };
+
+    let consoleErrorSpy: jest.SpyInstance;
+
+    beforeEach(() => {
+      kb._test.resetApiLoaded();
+      consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+    });
+
+    afterEach(() => {
+      consoleErrorSpy.mockRestore();
+      kb._test.resetApiLoaded();
+      kb._test.setKibanaApiDocLinks({});
+    });
+
+    const loadWithTimers = async (http: { get: jest.Mock }) => {
+      jest.useFakeTimers();
+      try {
+        const loaded = kb.loadActiveApi(http as unknown as HttpSetup);
+        // Let every backoff between the attempts elapse.
+        await jest.advanceTimersByTimeAsync(10_000);
+        return await loaded;
+      } finally {
+        jest.useRealTimers();
+      }
+    };
+
+    it('loads the definitions and resolves to true', async () => {
+      const http = { get: jest.fn().mockResolvedValue(SPEC_RESPONSE) };
+
+      await expect(kb.loadActiveApi(http as unknown as HttpSetup)).resolves.toBe(true);
+      expect(http.get).toHaveBeenCalledTimes(1);
+      expect(kb.getKibanaApiDocLinks()).toEqual(SPEC_RESPONSE.kibana.docLinks);
+      expect(kb.getEndpointDescriptionByEndpoint('search')).toMatchObject({
+        documentation: SPEC_RESPONSE.es.endpoints.search.documentation,
+      });
+    });
+
+    it('does not fetch again once the definitions are loaded', async () => {
+      const http = { get: jest.fn().mockResolvedValue(SPEC_RESPONSE) };
+
+      await kb.loadActiveApi(http as unknown as HttpSetup);
+      await expect(kb.loadActiveApi(http as unknown as HttpSetup)).resolves.toBe(true);
+      expect(http.get).toHaveBeenCalledTimes(1);
+    });
+
+    it('retries a transient failure instead of leaving Console without definitions', async () => {
+      const http = {
+        get: jest
+          .fn()
+          .mockRejectedValueOnce({ responseText: 'Not Found' })
+          .mockResolvedValue(SPEC_RESPONSE),
+      };
+
+      await expect(loadWithTimers(http)).resolves.toBe(true);
+      expect(http.get).toHaveBeenCalledTimes(2);
+      expect(kb.getKibanaApiDocLinks()).toEqual(SPEC_RESPONSE.kibana.docLinks);
+    });
+
+    it('resolves to false and allows a later retry once the attempts are exhausted', async () => {
+      const http = { get: jest.fn().mockRejectedValue({ responseText: 'Not Found' }) };
+
+      await expect(loadWithTimers(http)).resolves.toBe(false);
+      expect(http.get).toHaveBeenCalledTimes(3);
+      expect(consoleErrorSpy).toHaveBeenCalledTimes(3);
+
+      // The failure must not be remembered as a successful load.
+      http.get.mockResolvedValue(SPEC_RESPONSE);
+      await expect(kb.loadActiveApi(http as unknown as HttpSetup)).resolves.toBe(true);
+    });
+
+    it('shares the in-flight load with an overlapping call', async () => {
+      const http = { get: jest.fn().mockResolvedValue(SPEC_RESPONSE) };
+
+      await expect(
+        Promise.all([
+          kb.loadActiveApi(http as unknown as HttpSetup),
+          kb.loadActiveApi(http as unknown as HttpSetup),
+        ])
+      ).resolves.toEqual([true, true]);
+      expect(http.get).toHaveBeenCalledTimes(1);
+    });
+
+    it('does not report an overlapping call as loaded while the in-flight load fails', async () => {
+      const http = { get: jest.fn().mockRejectedValue({ responseText: 'Not Found' }) };
+
+      jest.useFakeTimers();
+      try {
+        const first = kb.loadActiveApi(http as unknown as HttpSetup);
+        const overlapping = kb.loadActiveApi(http as unknown as HttpSetup);
+        await jest.advanceTimersByTimeAsync(10_000);
+        await expect(Promise.all([first, overlapping])).resolves.toEqual([false, false]);
+      } finally {
+        jest.useRealTimers();
+      }
+      expect(http.get).toHaveBeenCalledTimes(3);
+    });
+
+    it('treats a response without Elasticsearch definitions as a failure', async () => {
+      const http = { get: jest.fn().mockResolvedValue({ kibana: { docLinks: {} } }) };
+
+      await expect(loadWithTimers(http)).resolves.toBe(false);
+      expect(http.get).toHaveBeenCalledTimes(3);
+    });
   });
 
   describe('Kibana API doc links', () => {

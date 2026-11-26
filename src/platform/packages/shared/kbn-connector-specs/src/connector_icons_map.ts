@@ -337,6 +337,10 @@ export const ConnectorIconsMap: Map<
     lazy(() => import(/* webpackChunkName: "connectorIconawsxray" */ './specs/aws_x_ray/icon')),
   ],
   [
+    '.aws_ssm',
+    lazy(() => import(/* webpackChunkName: "connectorIconAwsSsm" */ './specs/aws_ssm/icon')),
+  ],
+  [
     '.prometheus',
     lazy(() => import(/* webpackChunkName: "connectorIconPrometheus" */ './specs/prometheus/icon')),
   ],
@@ -434,6 +438,10 @@ export const ConnectorIconsMap: Map<
   ],
 
   [
+    '.aws_rds',
+    lazy(() => import(/* webpackChunkName: "connectorIconAwsRds" */ './specs/aws_rds/icon')),
+  ],
+  [
     '.azure_sql',
     lazy(() => import(/* webpackChunkName: "connectorIconazuresql" */ './specs/azure_sql/icon')),
   ],
@@ -446,4 +454,23 @@ export const ConnectorIconsMap: Map<
         )
     ),
   ],
+
+  [
+    '.microsoft_sql_server',
+    lazy(
+      () =>
+        import(
+          /* webpackChunkName: "connectorIconmicrosoftsqlserver" */ './specs/microsoft_sql_server/icon'
+        )
+    ),
+  ],
+
+  [
+    '.sentinelone2',
+    lazy(
+      () => import(/* webpackChunkName: "connectorIconSentinelone2" */ './specs/sentinelone/icon')
+    ),
+  ],
+
+  ['.redis', lazy(() => import(/* webpackChunkName: "connectorIconredis" */ './specs/redis/icon'))],
 ]);

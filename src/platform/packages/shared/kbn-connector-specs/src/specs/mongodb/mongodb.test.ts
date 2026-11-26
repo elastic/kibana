@@ -203,7 +203,7 @@ describe('listCollections', () => {
         { name: 'users', type: 'collection' },
       ],
     });
-    expect(mockListCollections).toHaveBeenCalledWith({});
+    expect(mockListCollections).toHaveBeenCalledWith({}, { signal: expect.any(AbortSignal) });
     expect(mockGetClient).toHaveBeenCalledWith('mongodb');
   });
 
@@ -217,7 +217,10 @@ describe('listCollections', () => {
     const result = await MongoDBConnector.actions.listCollections.handler(mockContext, {
       nameFilter: 'order',
     });
-    expect(mockListCollections).toHaveBeenCalledWith({ name: { $regex: 'order' } });
+    expect(mockListCollections).toHaveBeenCalledWith(
+      { name: { $regex: 'order' } },
+      { signal: expect.any(AbortSignal) }
+    );
     expect(result.count).toBe(2);
     expect(result.collections.map((c: { name: string }) => c.name)).toEqual([
       'orders',
@@ -231,7 +234,10 @@ describe('listCollections', () => {
     await MongoDBConnector.actions.listCollections.handler(mockContext, {
       nameFilter: 'my.log',
     });
-    expect(mockListCollections).toHaveBeenCalledWith({ name: { $regex: 'my\\.log' } });
+    expect(mockListCollections).toHaveBeenCalledWith(
+      { name: { $regex: 'my\\.log' } },
+      { signal: expect.any(AbortSignal) }
+    );
   });
 });
 
@@ -266,9 +272,61 @@ describe('find', () => {
     expect(mockCollection).toHaveBeenCalledWith('users');
     expect(collectionInstance.find).toHaveBeenCalledWith(
       { status: 'active' },
-      { projection: { name: 1, _id: 0 }, sort: { name: 1 }, limit: 10, skip: 5 }
+      {
+        projection: { name: 1, _id: 0 },
+        sort: { name: 1 },
+        limit: 10,
+        skip: 5,
+        signal: expect.any(AbortSignal),
+      }
     );
     expect(result).toEqual({ count: 1, documents: docs });
+  });
+
+  it('aborts a find after 30 seconds even while waiting for a cursor batch', async () => {
+    const started = Promise.withResolvers<AbortSignal>();
+    mockCollection.mockReturnValue({
+      find: jest.fn((_filter, { signal }: { signal: AbortSignal }) => {
+        started.resolve(signal);
+        return {
+          toArray: () =>
+            new Promise((_, reject) => {
+              signal.addEventListener('abort', () => reject(signal.reason), { once: true });
+            }),
+        };
+      }),
+    });
+
+    jest.useFakeTimers();
+    try {
+      const result = MongoDBConnector.actions.find.handler(mockContext, {
+        collection: 'orders',
+        database: 'test_db',
+      });
+      const rejection = expect(result).rejects.toThrow('The operation was aborted due to timeout');
+      const signal = await started.promise;
+
+      await jest.advanceTimersByTimeAsync(29_999);
+      expect(signal.aborted).toBe(false);
+      await jest.advanceTimersByTimeAsync(1);
+      expect(signal.aborted).toBe(true);
+      await rejection;
+    } finally {
+      jest.useRealTimers();
+    }
+  });
+
+  it('clears the deadline when a find completes', async () => {
+    jest.useFakeTimers();
+    try {
+      await MongoDBConnector.actions.find.handler(mockContext, {
+        collection: 'orders',
+        database: 'test_db',
+      });
+      expect(jest.getTimerCount()).toBe(0);
+    } finally {
+      jest.useRealTimers();
+    }
   });
 
   it('defaults to empty filter and limit 100 when omitted', async () => {
@@ -287,7 +345,7 @@ describe('find', () => {
 
     expect(collectionInstance.find).toHaveBeenCalledWith(
       {},
-      expect.objectContaining({ limit: 100 })
+      expect.objectContaining({ limit: 100, signal: expect.any(AbortSignal) })
     );
   });
 
@@ -347,10 +405,10 @@ describe('aggregate', () => {
 
     expect(result).toEqual({ count: 1, results });
     // A $limit stage should have been appended (default 100)
-    expect(collectionInstance.aggregate).toHaveBeenCalledWith([
-      { $group: { _id: '$region', count: { $sum: 1 } } },
-      { $limit: 100 },
-    ]);
+    expect(collectionInstance.aggregate).toHaveBeenCalledWith(
+      [{ $group: { _id: '$region', count: { $sum: 1 } } }, { $limit: 100 }],
+      { signal: expect.any(AbortSignal) }
+    );
   });
 
   it('preserves an existing $limit stage when it is within the cap', async () => {
@@ -370,10 +428,10 @@ describe('aggregate', () => {
       pipeline: [{ $match: { status: 'open' } }, { $limit: 5 }],
     });
 
-    expect(collectionInstance.aggregate).toHaveBeenCalledWith([
-      { $match: { status: 'open' } },
-      { $limit: 5 },
-    ]);
+    expect(collectionInstance.aggregate).toHaveBeenCalledWith(
+      [{ $match: { status: 'open' } }, { $limit: 5 }],
+      { signal: expect.any(AbortSignal) }
+    );
   });
 
   it('replaces an existing $limit stage that exceeds the cap', async () => {
@@ -395,7 +453,9 @@ describe('aggregate', () => {
     });
 
     // The oversized $limit should be replaced by the action-level limit
-    expect(collectionInstance.aggregate).toHaveBeenCalledWith([{ $match: {} }, { $limit: 50 }]);
+    expect(collectionInstance.aggregate).toHaveBeenCalledWith([{ $match: {} }, { $limit: 50 }], {
+      signal: expect.any(AbortSignal),
+    });
   });
 
   it('appends a $limit inside each $facet branch, not just the outer pipeline', async () => {
@@ -418,10 +478,10 @@ describe('aggregate', () => {
 
     // Without per-branch clamping, $facet would return the whole matching set inside
     // one document, defeating the outer $limit (which only ever bounds it to 1 doc).
-    expect(collectionInstance.aggregate).toHaveBeenCalledWith([
-      { $facet: { all: [{ $match: {} }, { $limit: 10 }] } },
-      { $limit: 10 },
-    ]);
+    expect(collectionInstance.aggregate).toHaveBeenCalledWith(
+      [{ $facet: { all: [{ $match: {} }, { $limit: 10 }] } }, { $limit: 10 }],
+      { signal: expect.any(AbortSignal) }
+    );
   });
 
   it('preserves an existing within-cap $limit inside a $facet branch', async () => {
@@ -441,10 +501,10 @@ describe('aggregate', () => {
       pipeline: [{ $facet: { all: [{ $match: {} }, { $limit: 5 }] } }],
     });
 
-    expect(collectionInstance.aggregate).toHaveBeenCalledWith([
-      { $facet: { all: [{ $match: {} }, { $limit: 5 }] } },
-      { $limit: 100 },
-    ]);
+    expect(collectionInstance.aggregate).toHaveBeenCalledWith(
+      [{ $facet: { all: [{ $match: {} }, { $limit: 5 }] } }, { $limit: 100 }],
+      { signal: expect.any(AbortSignal) }
+    );
   });
 
   it('clamps every branch of a multi-branch $facet independently', async () => {
@@ -472,15 +532,18 @@ describe('aggregate', () => {
       limit: 25,
     });
 
-    expect(collectionInstance.aggregate).toHaveBeenCalledWith([
-      {
-        $facet: {
-          all: [{ $match: {} }, { $limit: 25 }],
-          oversized: [{ $match: {} }, { $limit: 25 }],
+    expect(collectionInstance.aggregate).toHaveBeenCalledWith(
+      [
+        {
+          $facet: {
+            all: [{ $match: {} }, { $limit: 25 }],
+            oversized: [{ $match: {} }, { $limit: 25 }],
+          },
         },
-      },
-      { $limit: 25 },
-    ]);
+        { $limit: 25 },
+      ],
+      { signal: expect.any(AbortSignal) }
+    );
   });
 
   it('appends a $limit inside a $lookup sub-pipeline, not just the outer pipeline', async () => {
@@ -503,10 +566,13 @@ describe('aggregate', () => {
 
     // Without sub-pipeline clamping, the outer $limit only bounds the outer document count —
     // each joined document's "joined" array could still hold the entire matching set.
-    expect(collectionInstance.aggregate).toHaveBeenCalledWith([
-      { $lookup: { from: 'other', pipeline: [{ $match: {} }, { $limit: 10 }], as: 'joined' } },
-      { $limit: 10 },
-    ]);
+    expect(collectionInstance.aggregate).toHaveBeenCalledWith(
+      [
+        { $lookup: { from: 'other', pipeline: [{ $match: {} }, { $limit: 10 }], as: 'joined' } },
+        { $limit: 10 },
+      ],
+      { signal: expect.any(AbortSignal) }
+    );
   });
 
   it('preserves an existing within-cap $limit inside a $lookup sub-pipeline', async () => {
@@ -528,10 +594,13 @@ describe('aggregate', () => {
       ],
     });
 
-    expect(collectionInstance.aggregate).toHaveBeenCalledWith([
-      { $lookup: { from: 'other', pipeline: [{ $match: {} }, { $limit: 5 }], as: 'joined' } },
-      { $limit: 100 },
-    ]);
+    expect(collectionInstance.aggregate).toHaveBeenCalledWith(
+      [
+        { $lookup: { from: 'other', pipeline: [{ $match: {} }, { $limit: 5 }], as: 'joined' } },
+        { $limit: 100 },
+      ],
+      { signal: expect.any(AbortSignal) }
+    );
   });
 
   it('leaves a $lookup without its own pipeline (equality-match form) untouched', async () => {
@@ -553,10 +622,13 @@ describe('aggregate', () => {
       ],
     });
 
-    expect(collectionInstance.aggregate).toHaveBeenCalledWith([
-      { $lookup: { from: 'other', localField: 'id', foreignField: 'id', as: 'joined' } },
-      { $limit: 100 },
-    ]);
+    expect(collectionInstance.aggregate).toHaveBeenCalledWith(
+      [
+        { $lookup: { from: 'other', localField: 'id', foreignField: 'id', as: 'joined' } },
+        { $limit: 100 },
+      ],
+      { signal: expect.any(AbortSignal) }
+    );
   });
 
   it('appends a $limit inside a $unionWith object-form sub-pipeline', async () => {
@@ -577,10 +649,13 @@ describe('aggregate', () => {
       limit: 10,
     });
 
-    expect(collectionInstance.aggregate).toHaveBeenCalledWith([
-      { $unionWith: { coll: 'other', pipeline: [{ $match: {} }, { $limit: 10 }] } },
-      { $limit: 10 },
-    ]);
+    expect(collectionInstance.aggregate).toHaveBeenCalledWith(
+      [
+        { $unionWith: { coll: 'other', pipeline: [{ $match: {} }, { $limit: 10 }] } },
+        { $limit: 10 },
+      ],
+      { signal: expect.any(AbortSignal) }
+    );
   });
 
   it('leaves a bare-collection-name $unionWith untouched', async () => {
@@ -600,10 +675,10 @@ describe('aggregate', () => {
       pipeline: [{ $unionWith: 'other' }],
     });
 
-    expect(collectionInstance.aggregate).toHaveBeenCalledWith([
-      { $unionWith: 'other' },
-      { $limit: 100 },
-    ]);
+    expect(collectionInstance.aggregate).toHaveBeenCalledWith(
+      [{ $unionWith: 'other' }, { $limit: 100 }],
+      { signal: expect.any(AbortSignal) }
+    );
   });
 
   it.each(['$out', '$merge', '$function', '$accumulator'])(
@@ -703,7 +778,10 @@ describe('count', () => {
     });
 
     expect(mockCollection).toHaveBeenCalledWith('orders');
-    expect(mockCountDocuments).toHaveBeenCalledWith({ status: 'active' });
+    expect(mockCountDocuments).toHaveBeenCalledWith(
+      { status: 'active' },
+      { signal: expect.any(AbortSignal) }
+    );
     expect(result).toEqual({ count: 42 });
   });
 
@@ -720,7 +798,7 @@ describe('count', () => {
     mockCollection.mockReturnValue(collectionInstance);
 
     await MongoDBConnector.actions.count.handler(mockContext, { collection: 'orders' });
-    expect(mockCountDocuments).toHaveBeenCalledWith({});
+    expect(mockCountDocuments).toHaveBeenCalledWith({}, { signal: expect.any(AbortSignal) });
   });
 
   it('rejects $where in the filter', async () => {
@@ -747,7 +825,10 @@ describe('insertOne', () => {
     });
 
     expect(mockCollection).toHaveBeenCalledWith('orders');
-    expect(mockInsertOne).toHaveBeenCalledWith({ status: 'pending' });
+    expect(mockInsertOne).toHaveBeenCalledWith(
+      { status: 'pending' },
+      { signal: expect.any(AbortSignal) }
+    );
     expect(result).toEqual({ insertedId: 'abc123', acknowledged: true });
   });
 });
@@ -774,7 +855,7 @@ describe('updateOne', () => {
     expect(mockUpdateOne).toHaveBeenCalledWith(
       { _id: 'abc' },
       { $set: { status: 'shipped' } },
-      { upsert: false }
+      { upsert: false, signal: expect.any(AbortSignal) }
     );
     expect(result).toEqual({
       matchedCount: 1,
@@ -802,7 +883,7 @@ describe('updateOne', () => {
     expect(mockUpdateOne).toHaveBeenCalledWith(
       { _id: 'abc' },
       { $set: { status: 'shipped' } },
-      { upsert: true }
+      { upsert: true, signal: expect.any(AbortSignal) }
     );
     expect(result.upsertedId).toBe('new-id');
   });
@@ -821,7 +902,7 @@ describe('deleteOne', () => {
       filter: { _id: 'abc' },
     });
 
-    expect(mockDeleteOne).toHaveBeenCalledWith({ _id: 'abc' });
+    expect(mockDeleteOne).toHaveBeenCalledWith({ _id: 'abc' }, { signal: expect.any(AbortSignal) });
     expect(result).toEqual({ deletedCount: 1, acknowledged: true });
   });
 });
@@ -846,6 +927,7 @@ describe('test handler', () => {
     if (!testHandler) return;
     await testHandler.handler(mockContext);
     expect(mockDb).toHaveBeenCalledWith('admin');
+    expect(mockCommand).toHaveBeenCalledWith({ ping: 1 }, { signal: expect.any(AbortSignal) });
   });
 
   it('propagates a ping failure', async () => {

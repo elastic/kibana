@@ -144,11 +144,23 @@ export {
 } from './agent_policy_config';
 
 export {
+  DENIED_AGENT_POLICY_OVERRIDE_KEYS,
+  getDeniedAgentPolicyOverrideKey,
+  sanitizeAgentPolicyOverrides,
+} from './agent_policy_overrides';
+
+export {
   getFleetServerVersionMessage,
   isAgentVersionLessThanFleetServer,
 } from './check_fleet_server_versions';
 
-export { getIncompatibleIntegrations } from './agent_version_compatibility';
+export {
+  agentLosesPackageInputs,
+  agentSatisfiesPackageVersionCondition,
+  getAgentVersionBlockers,
+  getIncompatibleIntegrations,
+} from './agent_version_compatibility';
+export type { AgentVersionBlockers } from './agent_version_compatibility';
 export {
   removeSOAttributes,
   getSortConfig,

@@ -253,6 +253,27 @@ groups:
           ech: ga
           self: ga
 
+      - setting: xpack.actions.inboundEvents.enabled
+        description: |
+          Whether connectors can receive events from external systems, such as webhook requests that start workflows.
+
+          When `true`, you can turn on **Receive events** for connectors that support it, and you can create [Inbound Webhook](/reference/connectors-kibana/inbound-webhook-action-type.md) connectors.
+
+          When `false`:
+
+          - {{kib}} accepts no events for any connector.
+          - **Receive events** doesn't appear.
+          - The Inbound Webhook connector type isn't available.
+        datatype: bool
+        default: true
+        applies_to:
+          stack: preview 9.6+
+          ech: unavailable
+          ece: ga
+          eck: ga
+          self: ga
+          serverless: unavailable
+
       - setting: xpack.actions.inboundEvents.admission.enabled
         description: |
           When `true`, {{kib}} caps how many inbound event requests are in flight. When `false`, that cap is off. The per-minute rate limits stay in effect.
@@ -1486,6 +1507,28 @@ groups:
           stack: ga 7.7
           ech: ga
           self: ga
+
+  - group: "{{kib}} Universal Alerting settings"
+    id: alerting-v2-settings
+    settings:
+
+      - setting: xpack.alerting_v2.enabled
+        id: xpack-alerting-v2-enabled
+        description: |
+          Set to `false` to turn off Universal Alerting completely. Existing rules and action policies stop running, and Universal Alerting is hidden from the interface, including its pages and the **Universal Alerting** advanced setting. Its APIs aren't available either. Rules, action policies, and alert data stay in place, and rules start running again when you set it back to `true`.
+
+          To stop all rules and action policies from running, use this setting instead of the [`alerting:v2:enabled`](/reference/advanced-settings.md#alerting-v2-enabled) advanced setting. The advanced setting only hides the interface and rejects API requests, so existing rules and action policies keep running.
+        warning: |
+          Set this value back to `true` before you upgrade {{kib}}. If Universal Alerting rules or action policies exist while it's `false`, the upgrade fails.
+        datatype: bool
+        default: true
+        applies_to:
+          stack: ga 9.6+
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
+          serverless: unavailable
 
   - group: Rule Registry settings
     id: rule-registry-settings

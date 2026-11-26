@@ -1,0 +1,32 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+export { ProposalManager } from './proposed_changes';
+export type { DiffHunk, ProposalManagerOptions } from './proposed_changes';
+
+export { AttachmentBridge, baseProposalId } from './attachment_bridge';
+
+export { ProposalTracker } from './proposal_tracker';
+export type { ProposalStatus, ProposalRecord } from './proposal_tracker';
+
+export {
+  setActiveProposalManager,
+  acceptAllActiveProposals,
+  getActiveProposalContent,
+} from './active_proposal_manager';
+
+export { findLinkedWorkflowAttachment, WORKFLOW_EDITOR_ATTACHMENT_ID } from './attachment_link';
+
+export {
+  setLastCreateSessionId,
+  carryConversationToWorkflow,
+  hasPersistedConversation,
+  setSidebarOpen,
+  isSidebarOpen,
+  requestSidebarRestore,
+  consumeSidebarRestoreFor,
+} from './conversation_handoff';
