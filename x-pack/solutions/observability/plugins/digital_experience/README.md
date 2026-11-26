@@ -54,7 +54,8 @@ on serverless and stateful.
   review of the names; nothing reads it yet.
 - **Row metrics** (ES|QL, `server/routes/applications/mobile/`): sessions (distinct `session.id`),
   users (distinct `app.installation.id`), error rate (exceptions per session), last seen, and the
-  latest release. Rows are sorted by sessions and capped at 1,000. Crash-free sessions is `null`
+  latest release. The server returns rows by sessions, capped at 1,000; the table sorts them by
+  ingest (see [Ingest](#ingest)) once it loads. Crash-free sessions is `null`
   ("Not enough data") until a crash is defined and session start reaches the SDKs. The latest
   release query filters on the listed `service.name`s through the request's Query DSL `terms`
   filter, so its ES|QL text is the same on every request.
@@ -181,8 +182,8 @@ The monitored applications in the selected time range, served by
 `GET /internal/digital_experience/applications`, which requires the Digital Experience and APM
 privileges like the app.
 
-- **Summary:** applications, sessions, page loads, JS errors per page load, failed HTTP requests and
-  the applications with a poor Core Web Vital. Like the chart, it covers the selected environment and
+- **Summary:** applications, ingest, sessions, page loads, JS errors per page load, failed HTTP
+  requests and the applications with a poor Core Web Vital. Like the chart, it covers the selected environment and
   source; the search narrows only the table. The sessions are the total of the sessions that started
   in the range, over the EDOT Browser applications, so it shows a dash for Classic RUM, which has no
   sessions, and when the EDOT Browser source failed. It adds up to the same total as the sessions in
@@ -225,11 +226,14 @@ privileges like the app.
   the toggle disables **Sessions**, and says why, when only Classic RUM is selected or the EDOT
   Browser source failed. The choice is kept until they are back, the chart showing page loads
   meanwhile.
+- **Ingest over time:** beside the chart, the estimated ingest in the same buckets, stacked by the 10
+  applications with the most and "Other" (see [Ingest](#ingest)).
 - **Filters:** environment and source (kept in the URL), and a search on the name.
-- **Table:** per application, its source, page loads, JS errors per page load, LCP / INP / CLS / FCP /
-  TTFB p75 colored by rating (with the good / needs improvement / poor shares in the tooltip), JS
-  errors, failed HTTP requests and when it was last seen. Page loads, which the table is sorted by, is
-  always shown; a column selector, kept in local storage, hides FCP, TTFB and JS errors by default.
+- **Table:** per application, its source, ingest, page loads, JS errors per page load, LCP / INP /
+  CLS / FCP / TTFB p75 colored by rating (with the good / needs improvement / poor shares in the
+  tooltip), JS errors, failed HTTP requests and when it was last seen. Ingest, which the table is
+  sorted by, and page loads are always shown; a column selector, kept in local storage, hides FCP,
+  TTFB and JS errors by default.
 - **Empty states:** with no applications at all, a link to the EDOT Browser docs; with none in the
   selected environment, a button to show all environments.
 - With all sources, a name with data in both shows its EDOT Browser row with a "+ Classic RUM" hint
@@ -237,7 +241,8 @@ privileges like the app.
 
 **Where the EDOT Browser rows come from:** the sessions index only (see [Sessions](#sessions)), as
 the current user, over session summaries instead of aggregating every raw event; the list never
-reads `logs-*.otel-*` or `traces-*.otel-*`. Classic RUM reads its own indices. Two searches run at
+reads `logs-*.otel-*` or `traces-*.otel-*` (only the separate ingest request does, see
+[Ingest](#ingest)). Classic RUM reads its own indices. Two searches run at
 once, one for the metrics and one for the p75 of the vitals (see
 [Applications list performance](#applications-list-performance)).
 Without sessions set up there is no index and so no EDOT Browser application, and a failing
@@ -295,6 +300,31 @@ its time zone. Anything else is a 400. The page sends the four `dateFormat:tz` n
 rejects (`EST`, `HST`, `MST`, `ROC`) as the zones they link to. They return the bucket interval and
 the queried range next to the buckets: `pageLoadsOverTime.histogram` on the Applications route and
 `overview.trendHistogram` on the Overview route.
+
+#### Ingest
+
+The RUM telemetry stored for each application in the range, not its own network traffic, served
+by `GET /internal/digital_experience/applications/ingest` apart from the list, so the rows, summary
+and page loads chart never wait for it. The page asks only for the shown tab's applications
+(`applicationType`), as each source counts every document of the range. Nothing records stored
+bytes per `service.name`, and data streams hold many applications, so it is an estimate:
+
+- each application's documents per backing index in the range (EDOT Browser `webjs` documents,
+  every Classic RUM agent document, the EDOT mobile documents), grouped by `_index` as
+  `data_stream.dataset` and `namespace` read as `null` on EDOT data in ES|QL;
+- times the average stored size of a document of the index's data stream, primaries only (the data
+  set size, so searchable snapshots count): from `indices.stats` on stateful, which needs the
+  **`monitor`** index privilege on the raw indices on top of `read`, and from `_metering/stats` as
+  the secondary auth user on serverless;
+- the chart names each source's 10 applications with the most and the 10 of both sources, so any
+  source filter finds its 10 among them; the rest of each source is "Other".
+
+Each index is asked for as a wildcard, which Elasticsearch resolves to the indices the user may
+monitor, so an index they can't leaves out only itself. Applications without a size get a dash,
+sort last, and the tooltips say why (no `monitor`, remote indices, which neither API reads, or a
+failed search). Checked against exact per-application sizes on synthtrace data, shares were within
+about one percentage point; applications with unusually large documents, or data streams shared with
+backend services, drift more.
 
 ### Application details (`/{serviceName}?source=otel|classic`)
 

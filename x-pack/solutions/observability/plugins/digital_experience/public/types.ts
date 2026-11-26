@@ -29,7 +29,10 @@ export interface DigitalExperienceStartDeps {
   unifiedSearch: UnifiedSearchPublicPluginStart;
   /** Undefined on serverless, which disables the ux plugin and so has no Classic RUM data. */
   ux?: UxPluginStart;
-  /** The frustration dashboard needs both of these; without one the page shows a prompt. */
+  /**
+   * The frustration dashboard needs both of these, and the Overview's vitals trend needs Lens;
+   * without them the page shows a prompt and the Overview leaves the trend out.
+   */
   dashboard?: DashboardStart;
   lens?: LensPublicStart;
 }
