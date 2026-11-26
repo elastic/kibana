@@ -448,6 +448,24 @@ export const createDecisionSweep = ({
   /** Closes the alerts of each approved decision, as far as the work deadline allows. */
   const close = (byDecision: Map<string, string[]>) => eachDecision(byDecision, closeDecision);
 
+  /**
+   * Shadow: tags the matches of each approved decision, and counts in `blocked_by_verdict` the ones
+   * that `on` would not close because of a verdict, so shadow shows what `on` would do. Nothing is
+   * closed, so one lookup per page is fresh enough. A lookup that fails throws, so the page fails
+   * and the step reports it, instead of a count that looks like no verdicts.
+   */
+  const tagWouldClose = async (byDecision: Map<string, string[]>) => {
+    const unread = [...byDecision.keys()].filter((id) => !conflicting.has(id));
+    if (unread.length > 0 && !outOfTime()) {
+      const found = await findDecisionsWithConflictingVerdicts(contextManager, unread);
+      found.forEach((id) => conflicting.add(id));
+    }
+    await eachDecision(byDecision, async (id, alertIds) => {
+      if (conflicting.has(id)) totals.blocked_by_verdict += alertIds.length;
+      await tagDecision(TRIAGE_WOULD_CLOSE_TAG_PREFIX, id, alertIds);
+    });
+  };
+
   // --- Dismissed decisions: keep the alerts out of analysis ---
 
   /**
@@ -512,5 +530,5 @@ export const createDecisionSweep = ({
     });
   };
 
-  return { totals, decisionsById, outOfTime, tag, tagSkipped, close, flushNotes };
+  return { totals, decisionsById, outOfTime, tag, tagWouldClose, tagSkipped, close, flushNotes };
 };

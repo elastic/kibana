@@ -152,15 +152,23 @@ export const getTriageMatchFpDecisionsStepDefinition = ({
           excludedRuleTags: input.excluded_rule_tags,
         };
         const decisionsSeen = new Set<string>();
-        const { totals, decisionsById, outOfTime, tag, tagSkipped, close, flushNotes } =
-          createDecisionSweep({
-            contextManager,
-            logger,
-            now,
-            workDeadline,
-            totalDeadline,
-            noteConcurrency: NOTE_CONCURRENCY,
-          });
+        const {
+          totals,
+          decisionsById,
+          outOfTime,
+          tag,
+          tagWouldClose,
+          tagSkipped,
+          close,
+          flushNotes,
+        } = createDecisionSweep({
+          contextManager,
+          logger,
+          now,
+          workDeadline,
+          totalDeadline,
+          noteConcurrency: NOTE_CONCURRENCY,
+        });
 
         const count = (byDecision: Map<string, string[]>) =>
           [...byDecision.values()].reduce((sum, ids) => sum + ids.length, 0);
@@ -213,7 +221,13 @@ export const getTriageMatchFpDecisionsStepDefinition = ({
               await tag(TRIAGE_WOULD_SKIP_TAG_PREFIX, skip.held);
               totals.held_in_shadow += count(closing.held) + count(skip.held);
             } else {
-              await tag(TRIAGE_WOULD_CLOSE_TAG_PREFIX, matches.wouldClose);
+              // `on` holds these matches before it reads any verdict, so here they are only tagged.
+              const closing = splitHeld(
+                matches.wouldClose,
+                heldInShadowIds(found.candidates, new Set([...matches.wouldClose.values()].flat()))
+              );
+              await tagWouldClose(closing.act);
+              await tag(TRIAGE_WOULD_CLOSE_TAG_PREFIX, closing.held);
               await tag(TRIAGE_WOULD_SKIP_TAG_PREFIX, matches.wouldSkip);
             }
 

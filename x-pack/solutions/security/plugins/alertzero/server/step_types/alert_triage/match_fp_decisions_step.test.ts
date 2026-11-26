@@ -417,10 +417,14 @@ describe('triage match decisions step', () => {
       decisions: { [id]: stored('false_positive') },
     });
     const pages = [filler, [{ _id: 'late', _source: source('C:\\x.exe'), sort: [1, 'z'] }]];
-    callKibanaApi.mockImplementation(async ({ path }: { path: string }) =>
-      path.endsWith('/signals/search')
-        ? { body: { hits: { hits: pages.shift() ?? [] } } }
-        : { body: { updated: 1, timed_out: false, failures: [] } }
+    callKibanaApi.mockImplementation(
+      async ({ path, body }: { path: string; body?: Record<string, unknown> }) => {
+        // The verdict lookup finds none, and must not take a page of hits.
+        if (body?.aggs) return { body: { aggregations: { keys: { buckets: [] } } } };
+        return path.endsWith('/signals/search')
+          ? { body: { hits: { hits: pages.shift() ?? [] } } }
+          : { body: { updated: 1, timed_out: false, failures: [] } };
+      }
     );
 
     const { output } = await run();
@@ -567,6 +571,7 @@ describe('triage match decisions step', () => {
       decisions: { [one]: stored('false_positive'), [two]: stored('false_positive') },
     });
     callKibanaApi.mockImplementation(async ({ path, body }: any) => {
+      if (body?.aggs) return { body: { aggregations: { keys: { buckets: [] } } } };
       if (path.endsWith('/signals/search')) {
         return {
           body: {
@@ -1896,6 +1901,82 @@ describe('triage match decisions step in on mode', () => {
     expect(output).toEqual(expect.objectContaining({ closed: 1, blocked_by_verdict: 1 }));
   });
 
+  describe('verdicts in shadow', () => {
+    // Shadow is what a person reads before turning on `on`, so it counts what `on` would not close.
+    it('tags the matches of a decision blocked by a verdict, and counts them as blocked', async () => {
+      const { run, tags, closes } = setup({
+        mode: 'shadow',
+        alerts: [
+          ['a', source('C:\\x.exe')],
+          ['b', source('C:\\x.exe')],
+          ['c', source('C:\\y.exe')],
+        ],
+        decisions: { ...approved('C:\\x.exe'), ...approved('C:\\y.exe') },
+        conflictingVerdicts: [idOf('C:\\x.exe')],
+      });
+
+      const { output } = await run();
+
+      expect(closes()).toEqual([]);
+      expect(tags()).toEqual([
+        {
+          ids: ['a', 'b'],
+          tags: { tags_to_add: [`az:would_close:${idOf('C:\\x.exe')}`], tags_to_remove: [] },
+        },
+        {
+          ids: ['c'],
+          tags: { tags_to_add: [`az:would_close:${idOf('C:\\y.exe')}`], tags_to_remove: [] },
+        },
+      ]);
+      expect(output).toEqual(
+        expect.objectContaining({ status: 'ok', would_close: 3, blocked_by_verdict: 2, closed: 0 })
+      );
+    });
+
+    it('reads the verdicts of all the decisions of a page in one search', async () => {
+      const { run, callKibanaApi } = setup({
+        mode: 'shadow',
+        alerts: [
+          ['a', source('C:\\x.exe')],
+          ['c', source('C:\\y.exe')],
+        ],
+        decisions: { ...approved('C:\\x.exe'), ...approved('C:\\y.exe') },
+      });
+
+      await run();
+
+      const lookups = callKibanaApi.mock.calls.filter(([{ body }]) => body?.aggs);
+      expect(lookups).toHaveLength(1);
+    });
+
+    // A count of 0 must not stand for "the verdicts could not be read": the page fails instead.
+    it('fails the page when the verdicts cannot be read, instead of reporting none as blocked', async () => {
+      const { run, callKibanaApi, tags } = setup({
+        mode: 'shadow',
+        alerts: [['a', source('C:\\x.exe')]],
+        decisions: approved('C:\\x.exe'),
+        conflictingVerdicts: [idOf('C:\\x.exe')],
+      });
+      const inner = callKibanaApi.getMockImplementation()!;
+      callKibanaApi.mockImplementation(
+        async (params: { path: string; body?: Record<string, any> }) => {
+          if (params.path.endsWith('/signals/search') && params.body?.aggs) {
+            throw new Error('es down');
+          }
+          return inner(params);
+        }
+      );
+
+      const { output } = await run();
+
+      // The next sweep reads the page again and tags it.
+      expect(tags()).toEqual([]);
+      expect(output).toEqual(
+        expect.objectContaining({ status: 'failed', would_close: 0, blocked_by_verdict: 0 })
+      );
+    });
+  });
+
   it('closes nothing for an approved decision whose key has a later true positive or inconclusive verdict', async () => {
     const { run, tags, closes, notes } = setup({
       mode: 'on',
@@ -2153,6 +2234,24 @@ describe('triage match decisions step in on mode', () => {
         expect(output).toEqual(expect.objectContaining({ closed: 0, held_in_shadow: 1 }));
       }
     );
+
+    it('does not count a held process match as blocked in shadow, since `on` never reads its verdicts', async () => {
+      const doc = signed(true);
+      const id = idFor(doc);
+      const { run, tags } = setup({
+        mode: 'shadow',
+        alerts: [['t', doc]],
+        decisions: { [id]: stored('false_positive') },
+        conflictingVerdicts: [id],
+      });
+
+      const { output } = await run();
+
+      expect(tags()).toEqual([
+        { ids: ['t'], tags: { tags_to_add: [`az:would_close:${id}`], tags_to_remove: [] } },
+      ]);
+      expect(output).toEqual(expect.objectContaining({ would_close: 1, blocked_by_verdict: 0 }));
+    });
 
     it('still acts on a file match, whose key carries the file hash', async () => {
       const doc = source('C:\\x.exe');
