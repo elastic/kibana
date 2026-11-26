@@ -442,3 +442,26 @@ describe('Bitdefender GravityZone JSON-RPC envelope validation', () => {
     );
   });
 });
+
+// ---------------------------------------------------------------------------
+// URL building — proves URL object is used, not string concatenation
+// ---------------------------------------------------------------------------
+
+describe('Bitdefender GravityZone URL building', () => {
+  it('strips a query string from accessUrl before appending the service path', async () => {
+    const client = makeClient();
+    // Inject a URL with a query string directly into config, bypassing schema validation.
+    // With naive string concatenation this would yield …/api?version=1/v1.0/…, which is wrong.
+    // With URL parsing + parsed.search = '' it yields the correct path without the query string.
+    const ctx = makeCtx(client, {
+      accessUrl: 'https://cloudap.gravityzone.bitdefender.com/api?version=1',
+    });
+    stubJsonRpcOk(client, { items: [], page: 1, pagesCount: 0, perPage: 1, total: 0 });
+
+    const handler = BitdefenderGravityzone.actions.searchEndpoints.handler;
+    await handler(ctx as any, {});
+
+    const call = client.request.mock.calls[0][0];
+    expect(call.url).toBe('https://cloudap.gravityzone.bitdefender.com/api/v1.0/jsonrpc/network');
+  });
+});
