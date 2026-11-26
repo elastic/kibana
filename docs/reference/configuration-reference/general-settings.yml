@@ -992,7 +992,7 @@ groups:
       - setting: data.search.asyncSearch.pollInterval
         description: |
           Time in milliseconds between receiving a poll response and sending the next poll request. The minimum configurable interval is 200 milliseconds.
-          If you omit this setting, {{kib}} increases the delay between polls as the search runs over HTTP/1. Over HTTP/2 or HTTP/3, {{kib}} sends the next poll as soon as it receives the previous response.
+          If you omit this setting, the default depends on whether the browser has detected HTTP/2 or HTTP/3 when the search starts. If it has, {{kib}} sends the next poll as soon as it receives the previous response. Otherwise, {{kib}} increases the delay between polls as the search runs.
         datatype: int
         applies_to:
           stack: ga
@@ -1007,7 +1007,7 @@ groups:
 
       - setting: data.search.asyncSearch.pollLength
         description: |
-          Maximum time that each poll request waits for results.
+          Maximum time that each poll request waits for results. Accepts a duration string.
           If you omit this setting, {{kib}} uses `30s` for searches that use long polling over HTTP/2 or HTTP/3. Over HTTP/1, polls return the available results immediately by default.
         datatype: string
         applies_to:
