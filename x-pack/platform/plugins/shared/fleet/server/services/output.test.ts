@@ -259,6 +259,7 @@ function getMockedSoClient(
             auth_type: 'keytab',
             config_path: '/etc/krb5.conf',
             keytab: '/etc/kafka.keytab',
+            username: 'kafka',
             realm: 'EXAMPLE.COM',
           },
         });
@@ -532,6 +533,7 @@ function getMockedEncryptedSoClient() {
             auth_type: 'keytab',
             config_path: '/etc/krb5.conf',
             keytab: '/etc/kafka.keytab',
+            username: 'kafka',
             realm: 'EXAMPLE.COM',
           },
         });
