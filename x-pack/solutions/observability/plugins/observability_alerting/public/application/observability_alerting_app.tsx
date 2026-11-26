@@ -37,7 +37,6 @@ import {
 } from '../constants';
 import { hasObservabilityAlertingCapabilities } from './has_observability_alerting_privilege';
 import { MixedCreateRuleSession } from './combined_rules/mixed_create_rule_session';
-import { createMixedCreateRulesEmptyState } from './combined_rules/create_mixed_create_rules_empty_state';
 
 interface ObservabilityAlertingAppProps {
   coreStart: CoreStart;
@@ -102,14 +101,12 @@ const useObservabilityRulesTabs = (
 const ClassicRulesV1Route = ({
   coreStart,
   getClassicRulesPage,
-  triggersActionsUi,
   history,
   setBreadcrumbs,
   tabs,
 }: {
   coreStart: CoreStart;
   getClassicRulesPage: TriggersAndActionsUIPublicPluginStart['getClassicRulesPage'];
-  triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
   history: ScopedHistory;
   setBreadcrumbs: (crumbs: ChromeBreadcrumb[]) => void;
   tabs: AppHeaderTab[];
@@ -117,15 +114,6 @@ const ClassicRulesV1Route = ({
   const classicRulesHistory = useMemo(
     () => history.createSubHistory(OBSERVABILITY_ALERTING_RULES_V1_PATH),
     [history]
-  );
-
-  const EmptyState = useMemo(
-    () =>
-      createMixedCreateRulesEmptyState({
-        coreStart,
-        triggersActionsUi,
-      }),
-    [coreStart, triggersActionsUi]
   );
 
   return getClassicRulesPage({
@@ -138,7 +126,6 @@ const ClassicRulesV1Route = ({
       pathPrefix: OBSERVABILITY_ALERTING_RULES_V1_PATH,
     },
     tabs,
-    emptyState: <EmptyState />,
   });
 };
 
@@ -231,7 +218,6 @@ export const ObservabilityAlertingApp = ({
           <ClassicRulesV1Route
             coreStart={coreStart}
             getClassicRulesPage={triggersActionsUi.getClassicRulesPage}
-            triggersActionsUi={triggersActionsUi}
             history={history}
             setBreadcrumbs={setBreadcrumbs}
             tabs={rulesV1Tabs}

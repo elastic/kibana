@@ -66,11 +66,16 @@ export const MixedCreateRuleSession = ({
 
   const browseClassic = useCallback(
     (search?: string) => {
-      setCreateHistoryKey(Symbol('mixedCreateRule'));
+      // Keep the chooser's historyKey when stacking Classic on top. Reminting
+      // while the chooser is mounted tears down the EUI flyout session and can
+      // leave the overlay mask behind after close.
+      if (!isChooserOpen) {
+        setCreateHistoryKey(Symbol('mixedCreateRule'));
+      }
       setClassicInitialSearch(typeof search === 'string' ? search.trim() : '');
       openClassicChooser();
     },
-    [openClassicChooser]
+    [isChooserOpen, openClassicChooser]
   );
 
   const exploreLibrary = useCallback(() => {
@@ -79,12 +84,15 @@ export const MixedCreateRuleSession = ({
   }, [closeCreateSession, history]);
 
   const startCreate = useCallback(() => {
+    // Reminting historyKey while a create flyout is mounted runs the managed
+    // flyout cleanup (closeAllFlyouts) and can leave the overlay mask behind.
+    if (isChooserOpen || isClassicChooserOpen || isEsqlOptionsOpen) {
+      return;
+    }
     setCreateHistoryKey(Symbol('mixedCreateRule'));
     setV2InitialStep(undefined);
     setClassicInitialSearch('');
     setIsFlyoutMaximized(false);
-    closeEsqlOptions();
-    closeClassicChooser();
     if (includeEsql) {
       openChooser();
       return;
@@ -93,10 +101,11 @@ export const MixedCreateRuleSession = ({
       openClassicChooser();
     }
   }, [
-    closeClassicChooser,
-    closeEsqlOptions,
     includeClassic,
     includeEsql,
+    isChooserOpen,
+    isClassicChooserOpen,
+    isEsqlOptionsOpen,
     openChooser,
     openClassicChooser,
   ]);
@@ -118,11 +127,16 @@ export const MixedCreateRuleSession = ({
 
   const openV2Authoring = useCallback(
     (step: 'esql' | 'threshold') => {
-      setCreateHistoryKey(Symbol('mixedCreateRule'));
+      // Same historyKey as the open chooser so EUI stacks session="start"
+      // flyouts (authoring covers chooser; Back returns). A new Symbol here
+      // remounts the chooser mid-session and orphans the overlay mask.
+      if (!isChooserOpen) {
+        setCreateHistoryKey(Symbol('mixedCreateRule'));
+      }
       setV2InitialStep(step);
       openEsqlOptions();
     },
-    [openEsqlOptions]
+    [isChooserOpen, openEsqlOptions]
   );
 
   const onChooseAgent = useCallback(
@@ -201,6 +215,7 @@ export const MixedCreateRuleSession = ({
           showClassic={includeClassic}
           compactAskAnything={prototypeSettings.compactAskAnything}
           idleBuilderPresentation={prototypeSettings.idleBuilderPresentation}
+          showClassicIdleFooter={prototypeSettings.showClassicIdleFooter}
           http={coreStart.http}
           toasts={coreStart.notifications.toasts}
           registeredRuleTypes={triggersActionsUi.ruleTypeRegistry.list()}
@@ -209,7 +224,7 @@ export const MixedCreateRuleSession = ({
       ) : null}
       {isClassicChooserOpen ? (
         <MixedClassicRuleTypesFlyout
-          onClose={closeClassicChooser}
+          onClose={isChooserOpen ? closeClassicChooser : closeCreateSession}
           onSelectClassicRuleType={onSelectRuleType}
           onSelectTemplate={onSelectTemplate}
           http={coreStart.http}
@@ -224,7 +239,7 @@ export const MixedCreateRuleSession = ({
       {isEsqlOptionsOpen ? (
         <alertingVTwo.DefaultCreateRuleOptionsFlyout
           key={v2InitialStep}
-          onClose={closeEsqlOptions}
+          onClose={isChooserOpen ? closeEsqlOptions : closeCreateSession}
           onCreated={closeCreateSession}
           history={history}
           initialStep={v2InitialStep}

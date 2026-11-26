@@ -21,8 +21,6 @@ import {
 } from '@kbn/deeplinks-observability';
 import { from, map, switchMap } from 'rxjs';
 import { getObservabilityAlertingDeepLinks } from './get_observability_alerting_deep_links';
-import { createMixedCreateRuleOptionsFlyout } from './application/combined_rules/mixed_create_rule_options_flyout';
-import { createMixedCreateRulesEmptyState } from './application/combined_rules/create_mixed_create_rules_empty_state';
 import { registerMixedCreatePrototypeSettingsUserMenu } from './application/combined_rules/register_mixed_create_prototype_settings_user_menu';
 import type {
   ObservabilityAlertingPublicSetup,
@@ -99,22 +97,8 @@ export class ObservabilityAlertingPlugin
     coreStart: CoreStart,
     depsStart: ObservabilityAlertingStartDependencies
   ): ObservabilityAlertingPublicStart {
-    // Discover (and other hosts) open alertingVTwo.CreateRuleOptionsFlyout — register MixedCreate
-    // so they share the Rule management chooser while keeping Discover query prefill.
-    depsStart.alertingVTwo.registerCreateRuleOptionsFlyout(
-      createMixedCreateRuleOptionsFlyout({
-        DefaultCreateRuleOptionsFlyout: depsStart.alertingVTwo.DefaultCreateRuleOptionsFlyout,
-        coreStart,
-        triggersActionsUi: depsStart.triggersActionsUi,
-        agentBuilder: depsStart.agentBuilder,
-      })
-    );
-    depsStart.alertingVTwo.registerRulesListEmptyState(
-      createMixedCreateRulesEmptyState({
-        coreStart,
-        triggersActionsUi: depsStart.triggersActionsUi,
-      })
-    );
+    // Rule management MixedCreate is mounted from ObservabilityAlertingApp.
+    // Discover create-rule registration is deferred for a follow-up PR.
     this.stopPrototypeSettingsUserMenu = registerMixedCreatePrototypeSettingsUserMenu({
       coreStart,
       security: depsStart.security,

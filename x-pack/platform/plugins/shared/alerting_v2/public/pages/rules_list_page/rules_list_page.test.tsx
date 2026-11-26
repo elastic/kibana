@@ -386,17 +386,16 @@ describe('RulesListPage', () => {
     expect(screen.queryByTestId('rulesListTable')).not.toBeInTheDocument();
   });
 
-  it('hides the header create controls in the empty state (no rules, no active filters)', async () => {
+  it('keeps the header create controls in the empty state (no rules, no active filters)', async () => {
     resolveRules([], 0);
     renderPage();
 
     await waitFor(() => {
       expect(screen.getByTestId('esqlRulesEmptyState')).toBeInTheDocument();
     });
-    // Create / Get started live on the empty prompt only — header menu is hidden to avoid duplicates.
-    expect(screen.getByTestId('createRuleButton')).toBeInTheDocument();
-    expect(screen.queryByTestId('createRuleButton-secondary-button')).not.toBeInTheDocument();
-    expect(screen.queryByTestId('rulesListHeaderGetStartedButton')).not.toBeInTheDocument();
+    // Match Classic: header Create stays visible alongside the empty-state CTAs.
+    expect(screen.getAllByTestId('createRuleButton').length).toBeGreaterThanOrEqual(2);
+    expect(screen.getByTestId('app-menu-overflow-button')).toBeInTheDocument();
   });
 
   it('keeps the header create controls when filters are active even with zero matching rules', async () => {
@@ -426,8 +425,10 @@ describe('RulesListPage', () => {
     resolveRules([], 0);
     renderPage();
 
-    await waitFor(() => expect(screen.getByTestId('createRuleButton')).toBeInTheDocument());
-    fireEvent.click(screen.getByTestId('createRuleButton'));
+    await waitFor(() => expect(screen.getByTestId('esqlRulesEmptyState')).toBeInTheDocument());
+    fireEvent.click(
+      within(screen.getByTestId('esqlRulesEmptyState')).getByTestId('createRuleButton')
+    );
 
     expect(await screen.findByTestId('ruleCreateOptionsFlyout')).toBeInTheDocument();
   });

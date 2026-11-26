@@ -17,11 +17,17 @@ export type MixedCreatePrototypeSettings = {
   compactAskAnything: boolean;
   /** Idle builder starter presentation. */
   idleBuilderPresentation: IdleBuilderPresentation;
+  /**
+   * Idle "Looking for Classic rule types?" footer. Off = Classic only via
+   * search suggestions (Browse all on the Classic group).
+   */
+  showClassicIdleFooter: boolean;
 };
 
 const DEFAULT_SETTINGS: MixedCreatePrototypeSettings = {
   compactAskAnything: false,
   idleBuilderPresentation: 'panel',
+  showClassicIdleFooter: true,
 };
 
 const IDLE_BUILDER_PRESENTATIONS: IdleBuilderPresentation[] = ['badge', 'panel'];
@@ -42,6 +48,11 @@ const readSettings = (): MixedCreatePrototypeSettings => {
       idleBuilderPresentation: isIdleBuilderPresentation(parsed.idleBuilderPresentation)
         ? parsed.idleBuilderPresentation
         : DEFAULT_SETTINGS.idleBuilderPresentation,
+      // Missing key (older storage) defaults to on; explicit false is respected.
+      showClassicIdleFooter:
+        typeof parsed.showClassicIdleFooter === 'boolean'
+          ? parsed.showClassicIdleFooter
+          : DEFAULT_SETTINGS.showClassicIdleFooter,
     };
   } catch {
     return DEFAULT_SETTINGS;
@@ -85,6 +96,7 @@ export const useMixedCreatePrototypeSettings = (): {
   settings: MixedCreatePrototypeSettings;
   setCompactAskAnything: (enabled: boolean) => void;
   setIdleBuilderPresentation: (presentation: IdleBuilderPresentation) => void;
+  setShowClassicIdleFooter: (enabled: boolean) => void;
 } => {
   const settings = useSyncExternalStore(subscribe, getSnapshot, () => DEFAULT_SETTINGS);
 
@@ -96,5 +108,14 @@ export const useMixedCreatePrototypeSettings = (): {
     updateSettings((prev) => ({ ...prev, idleBuilderPresentation: presentation }));
   }, []);
 
-  return { settings, setCompactAskAnything, setIdleBuilderPresentation };
+  const setShowClassicIdleFooter = useCallback((enabled: boolean) => {
+    updateSettings((prev) => ({ ...prev, showClassicIdleFooter: enabled }));
+  }, []);
+
+  return {
+    settings,
+    setCompactAskAnything,
+    setIdleBuilderPresentation,
+    setShowClassicIdleFooter,
+  };
 };

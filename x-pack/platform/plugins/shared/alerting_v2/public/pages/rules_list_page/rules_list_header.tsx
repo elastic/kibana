@@ -62,7 +62,7 @@ export interface RulesListHeaderProps {
  * App header for the Universal rules list. Create opens the host create flow
  * (mixed chooser in Observability Alerting, or create-options flyout elsewhere).
  * Get started opens the same onboarding modal as the empty-state CTA.
- * Hidden during the empty state so create options live only in that prompt.
+ * Create stays visible in the empty state so the header matches Classic.
  * Must render under {@link ContentListProvider}.
  */
 export const RulesListHeader = ({
@@ -71,7 +71,7 @@ export const RulesListHeader = ({
   onHelpMeOnboard,
 }: RulesListHeaderProps) => {
   const phase = useContentListPhase();
-  const showHeaderMenu = canWrite && phase !== 'empty' && phase !== 'initialLoad';
+  const showHeaderMenu = canWrite && phase !== 'initialLoad';
   const application = useService(CoreStart('application'));
   const basePath = useService(CoreStart('http')).basePath;
   const hostTabs = useHostTabs();

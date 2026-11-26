@@ -6,15 +6,13 @@
  */
 
 import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
-import type { EuiSelectableOption, UseEuiTheme } from '@elastic/eui';
+import type { EuiSelectableOption } from '@elastic/eui';
 import {
   EuiBadge,
   EuiButtonEmpty,
   EuiButtonGroup,
-  EuiButtonIcon,
   EuiCard,
   EuiFieldSearch,
-  EuiToolTip,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyout,
@@ -30,120 +28,30 @@ import {
   EuiSpacer,
   EuiText,
   EuiTitle,
-  euiFontSizeFromScale,
-  euiLineHeightFromBaseline,
-  keys,
   useEuiShadow,
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import {
-  ConversationInputShell,
-  CONVERSATION_INPUT_SHELL_RADIUS,
-} from '@kbn/agent-builder-browser';
-import { AiButton } from '@kbn/ui-ai-components';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { useDebounceFn } from '@kbn/react-hooks';
 import { useGetRuleTypesPermissions } from '@kbn/alerts-ui-shared';
 import { useFindTemplatesQuery } from '@kbn/response-ops-rules-apis/hooks/use_find_templates_query';
+import { AiButton } from '@kbn/ui-ai-components';
 import type { CoreStart } from '@kbn/core/public';
 import type { IdleBuilderPresentation } from './mixed_create_prototype_settings';
 
 const TITLE_ID = 'mixedCreateRuleFlyoutTitle';
 const CLASSIC_TITLE_ID = 'mixedClassicRuleTypesFlyoutTitle';
 const MEASURE_SUGGESTIONS_LIST_ID = 'mixedRulesMeasureSuggestionsList';
+/** Title + description option rows (EUI default 32 overlaps). */
+const SUGGESTION_OPTION_ROW_HEIGHT = 48;
+/** Compact group labels (Universal / templates) — no divider band. */
+const SUGGESTION_GROUP_LABEL_HEIGHT = 32;
+/** Classic group — EUI default rowHeight + 16px divider/padding band. */
+const SUGGESTION_GROUP_LABEL_WITH_DIVIDER_HEIGHT = SUGGESTION_OPTION_ROW_HEIGHT + 16;
 const SEARCH_DEBOUNCE = { wait: 300 };
-
-const DISCOVER_QUERY_PILL_REMOVE_LABEL = i18n.translate(
-  'xpack.observabilityAlerting.mixedCreate.discoverQueryPillRemove',
-  { defaultMessage: 'Remove Discover query' }
-);
-
-/** Lightweight ES|QL attachment chip for the ask-anything shell (Agent Builder–style). */
-const DiscoverEsqlQueryPill = ({
-  query,
-  onRemove,
-}: {
-  query: string;
-  onRemove: () => void;
-}) => {
-  const { euiTheme } = useEuiTheme();
-  const [isHovered, setIsHovered] = useState(false);
-  const truncatedQuery =
-    query.length > 72 ? `${query.slice(0, 69).trimEnd()}…` : query;
-
-  return (
-    <EuiPanel
-      hasShadow={false}
-      hasBorder
-      color="subdued"
-      paddingSize="s"
-      css={css`
-        max-width: 100%;
-        border: ${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBaseSubdued};
-      `}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-      title={query}
-      data-test-subj="mixedRulesDiscoverQueryPill"
-    >
-      <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-        <EuiFlexItem grow={false}>
-          <div
-            css={css`
-              display: flex;
-              align-items: center;
-              justify-content: center;
-              width: ${euiTheme.size.xl};
-              height: ${euiTheme.size.xl};
-              border-radius: ${euiTheme.border.radius.small};
-              background-color: ${euiTheme.colors.backgroundBasePrimary};
-            `}
-          >
-            <EuiIcon type="code" size="m" color="primary" aria-hidden />
-          </div>
-        </EuiFlexItem>
-        <EuiFlexItem style={{ minWidth: 0 }}>
-          <EuiText size="xs">
-            <strong>
-              <FormattedMessage
-                id="xpack.observabilityAlerting.mixedCreate.discoverQueryPillLabel"
-                defaultMessage="ES|QL query"
-              />
-            </strong>
-          </EuiText>
-          <EuiText
-            size="xs"
-            color="subdued"
-            css={css`
-              overflow: hidden;
-              text-overflow: ellipsis;
-              white-space: nowrap;
-            `}
-          >
-            {truncatedQuery}
-          </EuiText>
-        </EuiFlexItem>
-        {isHovered ? (
-          <EuiFlexItem grow={false}>
-            <EuiToolTip content={DISCOVER_QUERY_PILL_REMOVE_LABEL} disableScreenReaderOutput>
-              <EuiButtonIcon
-                iconType="cross"
-                size="xs"
-                color="text"
-                aria-label={DISCOVER_QUERY_PILL_REMOVE_LABEL}
-                onClick={onRemove}
-                data-test-subj="mixedRulesDiscoverQueryPillRemove"
-              />
-            </EuiToolTip>
-          </EuiFlexItem>
-        ) : null}
-      </EuiFlexGroup>
-    </EuiPanel>
-  );
-};
 
 /** Match Workflows agentic-first landing: keep content readable when the flyout is maximized. */
 const maximizedFlyoutContentCss = css`
@@ -537,9 +445,9 @@ export const MixedCreateRuleFlyout = ({
   onSelectClassicRuleType,
   onMaximizeChange,
   showClassic,
-  discoverQuery,
   compactAskAnything = false,
   idleBuilderPresentation = 'panel',
+  showClassicIdleFooter = true,
   http,
   toasts,
   registeredRuleTypes,
@@ -555,12 +463,12 @@ export const MixedCreateRuleFlyout = ({
   onSelectClassicRuleType: (ruleTypeId: string) => void;
   onMaximizeChange?: (isMaximized: boolean) => void;
   showClassic: boolean;
-  /** Live ES|QL from Discover when create-rule was opened from Discover. */
-  discoverQuery?: string;
   /** Prototype: compact idle field that grows with typed content. */
   compactAskAnything?: boolean;
   /** Prototype: how Threshold / Sequence starters render. */
   idleBuilderPresentation?: IdleBuilderPresentation;
+  /** Prototype: idle Classic footer panel. */
+  showClassicIdleFooter?: boolean;
   http: CoreStart['http'];
   toasts: CoreStart['notifications']['toasts'];
   registeredRuleTypes: Array<{ id: string; description: string }>;
@@ -581,9 +489,9 @@ export const MixedCreateRuleFlyout = ({
         onSelectClassicRuleType={onSelectClassicRuleType}
         onMaximizeChange={onMaximizeChange}
         showClassic={showClassic}
-        discoverQuery={discoverQuery}
         compactAskAnything={compactAskAnything}
         idleBuilderPresentation={idleBuilderPresentation}
+        showClassicIdleFooter={showClassicIdleFooter}
         http={http}
         toasts={toasts}
         registeredRuleTypes={registeredRuleTypes}
@@ -604,9 +512,9 @@ const MixedCreateRuleFlyoutInner = ({
   onSelectClassicRuleType,
   onMaximizeChange,
   showClassic,
-  discoverQuery,
   compactAskAnything,
   idleBuilderPresentation,
+  showClassicIdleFooter,
   http,
   toasts,
   registeredRuleTypes,
@@ -622,9 +530,9 @@ const MixedCreateRuleFlyoutInner = ({
   onSelectClassicRuleType: (ruleTypeId: string) => void;
   onMaximizeChange?: (isMaximized: boolean) => void;
   showClassic: boolean;
-  discoverQuery?: string;
   compactAskAnything: boolean;
   idleBuilderPresentation: IdleBuilderPresentation;
+  showClassicIdleFooter: boolean;
   http: CoreStart['http'];
   toasts: CoreStart['notifications']['toasts'];
   registeredRuleTypes: Array<{ id: string; description: string }>;
@@ -670,14 +578,16 @@ const MixedCreateRuleFlyoutInner = ({
       data-test-subj="mixedRulesExperienceChooser"
     >
       <EuiFlyoutHeader>
-        <EuiTitle size="s" id={TITLE_ID}>
-          <h2>
-            <FormattedMessage
-              id="xpack.observabilityAlerting.mixedCreate.title"
-              defaultMessage="Create rule"
-            />
-          </h2>
-        </EuiTitle>
+        <div css={isMaximized ? maximizedFlyoutContentCss : undefined}>
+          <EuiTitle size="s" id={TITLE_ID}>
+            <h2>
+              <FormattedMessage
+                id="xpack.observabilityAlerting.mixedCreate.title"
+                defaultMessage="Create rule"
+              />
+            </h2>
+          </EuiTitle>
+        </div>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
         <MixedCreateChooserBody
@@ -694,10 +604,10 @@ const MixedCreateRuleFlyoutInner = ({
             description: ruleType.description,
           }))}
           showClassic={showClassic}
-          discoverQuery={discoverQuery}
           isMaximized={isMaximized}
           compactAskAnything={compactAskAnything}
           idleBuilderPresentation={idleBuilderPresentation}
+          showClassicIdleFooter={showClassicIdleFooter}
         />
       </EuiFlyoutBody>
     </EuiFlyout>
@@ -1222,10 +1132,7 @@ const looksLikeEsqlOrStructuredQuery = (text: string): boolean => {
   );
 };
 
-/**
- * Prototype heuristic: descriptive natural language → offer Enter AI mode.
- * Suggest only — never auto-switch. Short keywords and ES|QL stay on search.
- */
+/** Prototype heuristic used by domain inference for free-text measure queries. */
 const looksLikeDescriptiveNaturalLanguage = (text: string): boolean => {
   const value = text.trim();
   if (!value || looksLikeEsqlOrStructuredQuery(value)) {
@@ -1287,49 +1194,6 @@ const inferDataDomain = (text: string): InferredDataDomain | null => {
   return null;
 };
 
-const ASK_ANYTHING_COMPACT_MIN_ROWS = 1;
-const ASK_ANYTHING_COMPACT_MAX_ROWS = 6;
-const ASK_ANYTHING_GROW_TRANSITION = '180ms ease';
-
-const agentChatInputStyles = ({ euiTheme }: UseEuiTheme, compactAskAnything: boolean) => {
-  const lineHeight = euiLineHeightFromBaseline('s', euiTheme);
-  return {
-    textarea: css`
-      cursor: text;
-      background: transparent;
-      border: none;
-      outline: none;
-      resize: none;
-      box-sizing: border-box;
-      width: 100%;
-      font-size: ${euiFontSizeFromScale('s', euiTheme)};
-      line-height: ${lineHeight};
-      color: ${euiTheme.colors.textParagraph};
-      font-family: inherit;
-      ${compactAskAnything
-        ? `
-        /* flex:1 was locking height to the shell — grow from content instead. */
-        flex: none;
-        overflow-y: auto;
-        min-height: calc(${lineHeight} * ${ASK_ANYTHING_COMPACT_MIN_ROWS});
-        max-height: calc(${lineHeight} * ${ASK_ANYTHING_COMPACT_MAX_ROWS});
-        transition: height ${ASK_ANYTHING_GROW_TRANSITION};
-      `
-        : `
-        flex: 1;
-      `}
-
-      &::placeholder {
-        color: ${euiTheme.colors.textDisabled};
-      }
-
-      :focus:focus-visible {
-        outline-style: none;
-      }
-    `,
-  };
-};
-
 const CLASSIC_SUGGESTION_KEY_PREFIX = 'classic:';
 const PATH_SUGGESTION_KEY_PREFIX = 'path:';
 const TEMPLATE_SUGGESTION_KEY_PREFIX = 'template:';
@@ -1348,26 +1212,29 @@ const CREATE_PATH_SUGGESTIONS: Array<{
   id: CreatePathSuggestionId;
   label: string;
   description: string;
+  iconType: string;
   keywords: string[];
 }> = [
   {
     id: 'threshold',
-    label: i18n.translate('xpack.observabilityAlerting.mixedCreate.thresholdTitle', {
-      defaultMessage: 'Threshold',
+    label: i18n.translate('xpack.observabilityAlerting.mixedCreate.idleBuilder.threshold', {
+      defaultMessage: 'Monitor a threshold',
     }),
     description: i18n.translate('xpack.observabilityAlerting.mixedCreate.thresholdPathHint', {
       defaultMessage: 'Guided builder for counts and metric thresholds',
     }),
+    iconType: 'puzzlePiece',
     keywords: ['threshold', 'count', 'metric', 'builder'],
   },
   {
     id: 'sequence',
-    label: i18n.translate('xpack.observabilityAlerting.mixedCreate.sequenceTitle', {
-      defaultMessage: 'Sequence',
+    label: i18n.translate('xpack.observabilityAlerting.mixedCreate.idleBuilder.sequence', {
+      defaultMessage: 'Build a sequence',
     }),
     description: i18n.translate('xpack.observabilityAlerting.mixedCreate.sequencePathHint', {
       defaultMessage: 'Guided builder for multi-step patterns',
     }),
+    iconType: 'puzzlePiece',
     keywords: ['sequence', 'chain', 'multi-step', 'builder'],
   },
   {
@@ -1378,6 +1245,7 @@ const CREATE_PATH_SUGGESTIONS: Array<{
     description: i18n.translate('xpack.observabilityAlerting.mixedCreate.esqlPathHint', {
       defaultMessage: 'Write your own ES|QL query',
     }),
+    iconType: 'code',
     keywords: ['esql', 'query', 'sql', 'manual'],
   },
 ];
@@ -1392,13 +1260,13 @@ export type MixedCreateChooserBodyProps = {
   onSelectClassicRuleType: (ruleTypeId: string) => void;
   classicRuleTypes: Array<{ id: string; name: string; description?: string }>;
   showClassic: boolean;
-  discoverQuery?: string;
   isMaximized: boolean;
   compactAskAnything: boolean;
   idleBuilderPresentation: IdleBuilderPresentation;
+  showClassicIdleFooter: boolean;
 };
 
-/** Shared create-rule chooser body (flyout + rules-list empty state). */
+/** Shared create-rule chooser body used by the MixedCreate flyout. */
 export const MixedCreateChooserBody = ({
   onChooseThreshold,
   onChooseEsql,
@@ -1409,20 +1277,14 @@ export const MixedCreateChooserBody = ({
   onSelectClassicRuleType,
   classicRuleTypes,
   showClassic,
-  discoverQuery,
   isMaximized,
-  compactAskAnything,
+  compactAskAnything: _compactAskAnything,
   idleBuilderPresentation,
+  showClassicIdleFooter,
 }: MixedCreateChooserBodyProps) => {
-  const euiThemeContext = useEuiTheme();
-  const { euiTheme } = euiThemeContext;
-  const chatStyles = useMemo(
-    () => agentChatInputStyles(euiThemeContext, compactAskAnything),
-    [compactAskAnything, euiThemeContext]
-  );
+  const { euiTheme } = useEuiTheme();
   const [measureText, setMeasureText] = useState('');
   const [isSuggestionsOpen, setIsSuggestionsOpen] = useState(false);
-  const askAnythingTextareaRef = useRef<HTMLTextAreaElement>(null);
   // Popover close refocuses the input; ignore that one focus so Escape stay closed.
   const suppressSuggestionsFocusOpenRef = useRef(false);
 
@@ -1438,49 +1300,38 @@ export const MixedCreateChooserBody = ({
     setIsSuggestionsOpen(true);
   };
 
-  const isDescriptiveNaturalLanguage = useMemo(
-    () => looksLikeDescriptiveNaturalLanguage(measureText),
-    [measureText]
-  );
-
-  // Offer AI mode when free text reads like a description — body below stays unchanged.
-  const showAiModeOffer = isDescriptiveNaturalLanguage;
-
   const measureQuery = measureText.trim().toLowerCase();
   const hasSearchQuery = measureQuery.length > 0;
   const classicBrowseSearch = measureText.trim() || undefined;
+
+  const onBrowseClassicFromSuggestions = useCallback(
+    (event: React.MouseEvent<HTMLAnchorElement> | React.MouseEvent<HTMLButtonElement>) => {
+      event.preventDefault();
+      event.stopPropagation();
+      closeSuggestions({ suppressFocusReopen: true });
+      onBrowseClassic(classicBrowseSearch);
+    },
+    [classicBrowseSearch, onBrowseClassic]
+  );
 
   // Kept for future domain-aware template filtering; not used to reshape the idle body.
   const inferredDomain = useMemo(() => inferDataDomain(measureText), [measureText]);
 
   const suggestionOptions = useMemo<AskAnythingSuggestionOption[]>(() => {
-    // AI mode owns the CTA — don't compete with typeahead options.
-    if (!hasSearchQuery || showAiModeOffer) {
+    if (!hasSearchQuery) {
       return [];
     }
 
-    // Promote Universal builders first; never hide templates or Classic matches.
-    const matchingBuilders = CREATE_PATH_SUGGESTIONS.filter((path) => {
-      return (
-        path.label.toLowerCase().includes(measureQuery) ||
-        path.description.toLowerCase().includes(measureQuery) ||
-        path.keywords.some(
-          (keyword) => keyword.includes(measureQuery) || measureQuery.includes(keyword)
-        )
-      );
-    });
-
-    // No builder hit → keep Universal useful with Write ES|QL as the fallback path.
-    const universalPaths =
-      matchingBuilders.length > 0
-        ? matchingBuilders
-        : CREATE_PATH_SUGGESTIONS.filter((path) => path.id === 'esql');
-
-    const pathOptions: AskAnythingSuggestionOption[] = universalPaths.map((path) => ({
+    const pathOptions: AskAnythingSuggestionOption[] = CREATE_PATH_SUGGESTIONS.filter((path) => {
+      const haystack =
+        `${path.label} ${path.description} ${path.keywords.join(' ')}`.toLowerCase();
+      return haystack.includes(measureQuery);
+    }).map((path) => ({
       label: path.label,
       key: `${PATH_SUGGESTION_KEY_PREFIX}${path.id}`,
       description: path.description,
       suggestionKind: 'path' as const,
+      prepend: <EuiIcon type={path.iconType} />,
       'data-test-subj': `mixedRulesPathSuggestion-${path.id}`,
     }));
 
@@ -1533,8 +1384,8 @@ export const MixedCreateChooserBody = ({
 
     if (templateOptions.length > 0) {
       options.push({
-        label: i18n.translate('xpack.observabilityAlerting.mixedCreate.templateGroupLabel', {
-          defaultMessage: 'Start from a template',
+        label: i18n.translate('xpack.observabilityAlerting.mixedCreate.fromTemplatesGroupLabel', {
+          defaultMessage: 'From templates',
         }),
         key: TEMPLATE_GROUP_KEY,
         suggestionKind: 'group',
@@ -1552,47 +1403,32 @@ export const MixedCreateChooserBody = ({
         key: CLASSIC_GROUP_KEY,
         suggestionKind: 'group',
         isGroupLabel: true,
+        append: (
+          <EuiLink
+            onClick={onBrowseClassicFromSuggestions}
+            data-test-subj="mixedRulesBrowseClassicFromSuggestions"
+          >
+            <FormattedMessage
+              id="xpack.observabilityAlerting.mixedCreate.exploreRuleTypesList"
+              defaultMessage="Browse all"
+            />
+          </EuiLink>
+        ),
         'data-test-subj': 'mixedRulesSuggestionGroup-classic',
       });
       options.push(...classicRuleOptions);
     }
 
     return options;
-  }, [classicRuleTypes, hasSearchQuery, measureQuery, showAiModeOffer, showClassic]);
+  }, [
+    classicRuleTypes,
+    hasSearchQuery,
+    measureQuery,
+    onBrowseClassicFromSuggestions,
+    showClassic,
+  ]);
 
-  const syncAskAnythingHeight = useCallback(() => {
-    const textarea = askAnythingTextareaRef.current;
-    if (!textarea) {
-      return;
-    }
-    if (!compactAskAnything) {
-      textarea.style.height = '';
-      return;
-    }
-    const computed = window.getComputedStyle(textarea);
-    const lineHeight = Number.parseFloat(computed.lineHeight);
-    const resolvedLineHeight =
-      Number.isFinite(lineHeight) && lineHeight > 0
-        ? lineHeight
-        : Number.parseFloat(euiLineHeightFromBaseline('s', euiTheme)) || 20;
-    const minHeight = resolvedLineHeight * ASK_ANYTHING_COMPACT_MIN_ROWS;
-    const maxHeight = resolvedLineHeight * ASK_ANYTHING_COMPACT_MAX_ROWS;
-    // Reset so scrollHeight reflects content (including shrink).
-    textarea.style.height = '0px';
-    const nextHeight = Math.min(Math.max(textarea.scrollHeight, minHeight), maxHeight);
-    textarea.style.height = `${nextHeight}px`;
-  }, [compactAskAnything, euiTheme]);
-
-  const onMeasureTextChange = (value: string) => {
-    setMeasureText(value);
-  };
-
-  // Keep height in sync when content, mode, or chrome (AI footer) changes.
-  useLayoutEffect(() => {
-    syncAskAnythingHeight();
-  }, [measureText, showAiModeOffer, syncAskAnythingHeight]);
-
-  // Escape closes the portaled suggestion panel; Enter submits to the agent via the textarea handler.
+  // Escape closes the portaled suggestion panel.
   useEffect(() => {
     if (!isSuggestionsOpen) {
       return undefined;
@@ -1639,85 +1475,33 @@ export const MixedCreateChooserBody = ({
     onSelectDemoTemplate(template);
   };
 
-  const trimmedDiscoverQuery = discoverQuery?.trim();
-  const [isDiscoverQueryAttached, setIsDiscoverQueryAttached] = useState(
-    () => Boolean(trimmedDiscoverQuery)
-  );
-
-  // Keep the pill in sync when Discover's live query appears/changes; don't re-attach after dismiss.
-  const dismissedDiscoverQueryRef = useRef(false);
-  useEffect(() => {
-    if (!trimmedDiscoverQuery) {
-      setIsDiscoverQueryAttached(false);
-      return;
-    }
-    if (!dismissedDiscoverQueryRef.current) {
-      setIsDiscoverQueryAttached(true);
-    }
-  }, [trimmedDiscoverQuery]);
-
-  const attachedDiscoverQuery =
-    isDiscoverQueryAttached && trimmedDiscoverQuery ? trimmedDiscoverQuery : undefined;
-
   const onSubmitToAgent = (value: string) => {
     const trimmed = value.trim();
     if (!trimmed) {
       return;
     }
     closeSuggestions({ suppressFocusReopen: true });
-    onChooseAgent(trimmed, attachedDiscoverQuery);
-  };
-
-  const onAgentInputKeyDown = (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    if (event.key === keys.ESCAPE) {
-      event.preventDefault();
-      closeSuggestions({ suppressFocusReopen: true });
-      return;
-    }
-    if (event.key === keys.ENTER && !event.shiftKey) {
-      event.preventDefault();
-      onSubmitToAgent(measureText);
-    }
+    onChooseAgent(trimmed);
   };
 
   const hasSelectableSuggestions = suggestionOptions.some((option) => !option.isGroupLabel);
-  // AI mode replaces the empty/noisy suggestion panel — don't show "No options available".
-  const areSuggestionsVisible =
-    isSuggestionsOpen && hasSearchQuery && !showAiModeOffer && hasSelectableSuggestions;
+  // Keep the popover open for any non-empty query so a no-results state can
+  // still surface the agent footer.
+  const areSuggestionsVisible = isSuggestionsOpen && hasSearchQuery;
 
-  const askAnythingWrapperCss = css`
-    border-radius: ${CONVERSATION_INPUT_SHELL_RADIUS}px;
-    ${showAiModeOffer
-      ? `
-      border: ${euiTheme.border.thin};
-      border-color: ${euiTheme.colors.borderBaseSubdued};
-      overflow: hidden;
-    `
-      : ''}
-  `;
-
-  const askAnythingShellCss = css`
-    ${compactAskAnything
-      ? `
-      /* Tighter chrome so one-line idle reads as a search field, not a chat box. */
-      padding: ${euiTheme.size.s} ${euiTheme.size.m};
-      min-height: 0;
-    `
-      : ''}
-    ${showAiModeOffer
-      ? `
-      border-color: transparent !important;
-      box-shadow: none !important;
-      border-bottom-left-radius: 0 !important;
-      border-bottom-right-radius: 0 !important;
-      &:hover,
-      &:focus-within[aria-disabled='false'] {
-        border-color: transparent !important;
-        box-shadow: none !important;
+  const getSuggestionItemSize = useCallback(
+    (index: number) => {
+      const option = suggestionOptions[index];
+      if (!option?.isGroupLabel) {
+        return SUGGESTION_OPTION_ROW_HEIGHT;
       }
-    `
-      : ''}
-  `;
+      // Classic keeps EUI's divider band; other groups stay compact.
+      return option.key === CLASSIC_GROUP_KEY
+        ? SUGGESTION_GROUP_LABEL_WITH_DIVIDER_HEIGHT
+        : SUGGESTION_GROUP_LABEL_HEIGHT;
+    },
+    [suggestionOptions]
+  );
 
   return (
     <div
@@ -1737,134 +1521,53 @@ export const MixedCreateChooserBody = ({
       <EuiInputPopover
         fullWidth
         disableFocusTrap
-        panelPaddingSize="none"
+        panelPaddingSize="s"
         isOpen={areSuggestionsVisible}
         closePopover={closeSuggestions}
         input={
-          <div css={askAnythingWrapperCss}>
-            <ConversationInputShell
-              data-test-subj="mixedRulesAgentChatInput"
-              // Compact mode drops the Agent Builder 150px min-height so idle starts at one line.
-              isCollapsed={compactAskAnything}
-              suppressShadow={showAiModeOffer}
-              css={askAnythingShellCss}
-            >
-              {attachedDiscoverQuery ? (
-                <DiscoverEsqlQueryPill
-                  query={attachedDiscoverQuery}
-                  onRemove={() => {
-                    dismissedDiscoverQueryRef.current = true;
-                    setIsDiscoverQueryAttached(false);
-                  }}
-                />
-              ) : null}
-              <textarea
-                ref={askAnythingTextareaRef}
-                css={chatStyles.textarea}
-                rows={compactAskAnything ? ASK_ANYTHING_COMPACT_MIN_ROWS : 3}
-                value={measureText}
-                autoFocus={true}
-                onChange={(event) => {
-                  const nextValue = event.currentTarget.value;
-                  onMeasureTextChange(nextValue);
-                  // Resize before paint so growth tracks each keystroke.
-                  if (compactAskAnything) {
-                    syncAskAnythingHeight();
-                  }
-                  if (nextValue.trim()) {
-                    openSuggestions();
-                  } else {
-                    closeSuggestions({ suppressFocusReopen: true });
-                  }
-                }}
-                onFocus={() => {
-                  if (suppressSuggestionsFocusOpenRef.current) {
-                    suppressSuggestionsFocusOpenRef.current = false;
-                    return;
-                  }
-                  // Only open the list once the user has started searching.
-                  if (measureText.trim()) {
-                    openSuggestions();
-                  }
-                }}
-                onKeyDown={onAgentInputKeyDown}
-                placeholder={i18n.translate(
-                  'xpack.observabilityAlerting.mixedCreate.askAnythingPlaceholder',
-                  {
-                    defaultMessage:
-                      'Pick a suggestion, or describe what you want and send to the agent.',
-                  }
-                )}
-                role="combobox"
-                aria-expanded={areSuggestionsVisible}
-                aria-controls={MEASURE_SUGGESTIONS_LIST_ID}
-                aria-autocomplete="list"
-                aria-haspopup="listbox"
-                aria-label={i18n.translate(
-                  'xpack.observabilityAlerting.mixedCreate.askAnythingAriaLabel',
-                  {
-                    defaultMessage: 'Ask anything about the rule you want to create',
-                  }
-                )}
-                data-test-subj="mixedRulesMeasureSearch"
-                data-compact={compactAskAnything ? 'true' : 'false'}
-              />
-            </ConversationInputShell>
-            <div
-              data-test-subj={showAiModeOffer ? 'mixedRulesEnterAiMode' : undefined}
-              aria-hidden={!showAiModeOffer}
-              css={css`
-                display: grid;
-                grid-template-rows: ${showAiModeOffer ? '1fr' : '0fr'};
-                transition: grid-template-rows ${ASK_ANYTHING_GROW_TRANSITION};
-                background: ${euiTheme.colors.backgroundBaseSubdued};
-                border-top: ${showAiModeOffer ? euiTheme.border.thin : '0'};
-                border-top-color: ${euiTheme.colors.borderBaseSubdued};
-                overflow: hidden;
-              `}
-            >
-              <div
-                css={css`
-                  min-height: 0;
-                  opacity: ${showAiModeOffer ? 1 : 0};
-                  transition: opacity ${ASK_ANYTHING_GROW_TRANSITION};
-                  padding: ${showAiModeOffer ? `${euiTheme.size.s} ${euiTheme.size.base}` : '0'};
-                `}
-              >
-                <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-                  <EuiFlexItem
-                    css={css`
-                      min-width: 0;
-                    `}
-                  >
-                    <EuiText size="s" color="subdued">
-                      <FormattedMessage
-                        id="xpack.observabilityAlerting.mixedCreate.aiModeDetectedHint"
-                        defaultMessage="Send this description to the agent to create the rule."
-                      />
-                    </EuiText>
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <AiButton
-                      variant="empty"
-                      size="s"
-                      // Figma: AI Button empty + productAgent (left) + gradient label.
-                      iconType="productAgent"
-                      onClick={() => onSubmitToAgent(measureText)}
-                      data-test-subj="mixedRulesEnterAiModeButton"
-                      disabled={!showAiModeOffer}
-                      tabIndex={showAiModeOffer ? 0 : -1}
-                    >
-                      <FormattedMessage
-                        id="xpack.observabilityAlerting.mixedCreate.sendToAgent"
-                        defaultMessage="Send to Agent"
-                      />
-                    </AiButton>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </div>
-            </div>
-          </div>
+          <EuiFieldSearch
+            fullWidth
+            incremental
+            compressed={false}
+            value={measureText}
+            autoFocus={true}
+            onChange={(event) => {
+              const nextValue = event.currentTarget.value;
+              setMeasureText(nextValue);
+              if (nextValue.trim()) {
+                openSuggestions();
+              } else {
+                closeSuggestions({ suppressFocusReopen: true });
+              }
+            }}
+            onFocus={() => {
+              if (suppressSuggestionsFocusOpenRef.current) {
+                suppressSuggestionsFocusOpenRef.current = false;
+                return;
+              }
+              if (measureText.trim()) {
+                openSuggestions();
+              }
+            }}
+            placeholder={i18n.translate(
+              'xpack.observabilityAlerting.mixedCreate.askAnythingPlaceholder',
+              {
+                defaultMessage: 'Search builder, templates or describe a rule',
+              }
+            )}
+            role="combobox"
+            aria-expanded={areSuggestionsVisible}
+            aria-controls={MEASURE_SUGGESTIONS_LIST_ID}
+            aria-autocomplete="list"
+            aria-haspopup="listbox"
+            aria-label={i18n.translate(
+              'xpack.observabilityAlerting.mixedCreate.askAnythingAriaLabel',
+              {
+                defaultMessage: 'Search for a rule to create',
+              }
+            )}
+            data-test-subj="mixedRulesMeasureSearch"
+          />
         }
       >
         <EuiSelectable<AskAnythingSuggestionOption>
@@ -1874,20 +1577,21 @@ export const MixedCreateChooserBody = ({
           emptyMessage={<span />}
           noMatchesMessage={<span />}
           css={css`
-            .euiSelectableList__groupLabel {
-              color: ${euiTheme.colors.textSubdued};
-              font-weight: ${euiTheme.font.weight.medium};
-              font-size: ${euiFontSizeFromScale('xs', euiTheme)};
-              line-height: ${euiLineHeightFromBaseline('xs', euiTheme)};
-              min-height: 0;
-              padding-block: ${euiTheme.size.xxs};
-              padding-inline: ${euiTheme.size.m};
-              &:not(:first-child) {
-                padding-top: ${euiTheme.size.xs};
-                &::before {
-                  inset-block-start: ${euiTheme.size.xxs};
-                }
+            /*
+             * Universal + templates: compact, no divider. Classic keeps EUI's
+             * ::before rule and default padding (itemSize = rowHeight+16).
+             */
+            .euiSelectableList__groupLabel:not(
+                [data-test-subj='mixedRulesSuggestionGroup-classic']
+              ) {
+              padding-block: ${euiTheme.size.xs};
+              &::before {
+                content: none !important;
               }
+            }
+            [data-test-subj='mixedRulesSuggestionGroup-classic'] {
+              /* Group labels don't wrap append like list items — push Browse all right. */
+              justify-content: space-between;
             }
           `}
           onChange={(options) => {
@@ -1921,41 +1625,85 @@ export const MixedCreateChooserBody = ({
               );
             }
           }}
-          renderOption={(option) =>
-            option.isGroupLabel ? (
-              option.label
-            ) : (
-              <div>
-                <EuiText size="s">
-                  <strong>{option.label}</strong>
+          renderOption={(option) => (
+            <div>
+              <EuiText size="s">
+                <strong>{option.label}</strong>
+              </EuiText>
+              {option.description ? (
+                <EuiText size="xs" color="subdued">
+                  {option.description}
                 </EuiText>
-                {option.description ? (
-                  <EuiText size="xs" color="subdued">
-                    {option.description}
-                  </EuiText>
-                ) : null}
-              </div>
-            )
-          }
+              ) : null}
+            </div>
+          )}
           listProps={{
-            // Option rows stay 48px; group headings are shorter than EUI's default
-            // rowHeight+16 so section labels don't dominate the typeahead.
-            rowHeight: 48,
-            showIcons: true,
+            rowHeight: SUGGESTION_OPTION_ROW_HEIGHT,
+            showIcons: false,
             id: MEASURE_SUGGESTIONS_LIST_ID,
+            // Override EUI's groupLabel = rowHeight+16 so titles stay compact.
             windowProps: {
-              itemSize: (index: number) => {
-                const option = suggestionOptions[index];
-                if (option?.isGroupLabel) {
-                  return index === 0 ? 28 : 36;
-                }
-                return 48;
-              },
+              itemSize: getSuggestionItemSize,
             },
           }}
           data-test-subj="mixedRulesMeasureSuggestions"
         >
-          {(list) => list}
+          {(list) => (
+            <>
+              {hasSelectableSuggestions ? (
+                list
+              ) : (
+                <EuiText
+                  size="s"
+                  color="subdued"
+                  textAlign="center"
+                  data-test-subj="mixedRulesNoSuggestions"
+                  css={css`
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    min-block-size: ${SUGGESTION_OPTION_ROW_HEIGHT}px;
+                  `}
+                >
+                  <FormattedMessage
+                    id="xpack.observabilityAlerting.mixedCreate.noSearchSuggestions"
+                    defaultMessage="No matching builders, templates, or Classic rule types"
+                  />
+                </EuiText>
+              )}
+              <EuiHorizontalRule margin="xs" />
+              <EuiFlexGroup
+                alignItems="center"
+                gutterSize="s"
+                responsive={false}
+                data-test-subj="mixedRulesEnterAiMode"
+              >
+                <EuiFlexItem>
+                  <EuiText size="s" color="subdued">
+                    <FormattedMessage
+                      id="xpack.observabilityAlerting.mixedCreate.helpMeCreateRule"
+                      defaultMessage="Build this rule with the agent"
+                    />
+                  </EuiText>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <AiButton
+                    variant="empty"
+                    size="s"
+                    iconType="productAgent"
+                    onClick={() => onSubmitToAgent(measureText)}
+                    data-test-subj="mixedRulesEnterAiModeButton"
+                    disabled={!hasSearchQuery}
+                  >
+                    <FormattedMessage
+                      id="xpack.observabilityAlerting.mixedCreate.sendToAgent"
+                      defaultMessage="Send to Agent"
+                    />
+                  </AiButton>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </>
+          )}
         </EuiSelectable>
       </EuiInputPopover>
       <EuiSpacer size="m" />
@@ -1973,7 +1721,7 @@ export const MixedCreateChooserBody = ({
 
       {suggestedTemplates.length > 0 ? (
         <>
-          <EuiSpacer size="m" />
+          <EuiSpacer size="l" />
           <EuiHorizontalRule margin="none" />
           <EuiSpacer size="l" />
           <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" responsive={false}>
@@ -2035,7 +1783,7 @@ export const MixedCreateChooserBody = ({
         </>
       ) : null}
 
-      {showClassic ? (
+      {showClassic && showClassicIdleFooter ? (
         <>
           <EuiSpacer size="m" />
           <EuiPanel

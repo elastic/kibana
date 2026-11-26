@@ -225,9 +225,9 @@ describe('ObservabilityAlertingApp', () => {
           app: OBSERVABILITY_ALERTING_APP_ID,
           pathPrefix: OBSERVABILITY_ALERTING_RULES_V1_PATH,
         },
-        emptyState: expect.anything(),
       })
     );
+    expect(mockTriggersActionsUi.getClassicRulesPage.mock.calls[0][0].emptyState).toBeUndefined();
   });
 
   it('shows both rules tabs for a mixed v1 and v2 user on the classic rules page', async () => {

@@ -54,8 +54,12 @@ export const openMixedCreatePrototypeSettingsModal = (): void => {
 
 export const MixedCreatePrototypeSettingsModalHost = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const { settings, setCompactAskAnything, setIdleBuilderPresentation } =
-    useMixedCreatePrototypeSettings();
+  const {
+    settings,
+    setCompactAskAnything,
+    setIdleBuilderPresentation,
+    setShowClassicIdleFooter,
+  } = useMixedCreatePrototypeSettings();
 
   useEffect(() => {
     openListener = () => setIsOpen(true);
@@ -144,6 +148,42 @@ export const MixedCreatePrototypeSettingsModalHost = () => {
             buttonSize="compressed"
             isFullWidth
             data-test-subj="mixedRulesPrototypeBuilderPresentation"
+          />
+        </EuiFormRow>
+        <EuiSpacer size="s" />
+        <EuiFormRow
+          display="columnCompressedSwitch"
+          label={
+            <FormattedMessage
+              id="xpack.observabilityAlerting.mixedCreate.prototypeClassicIdleFooterLabel"
+              defaultMessage="Classic idle footer"
+            />
+          }
+          helpText={
+            <FormattedMessage
+              id="xpack.observabilityAlerting.mixedCreate.prototypeClassicIdleFooterHelp"
+              defaultMessage="“Looking for Classic rule types?” on the idle screen. Off = Classic only via search (Browse all on the Classic group)."
+            />
+          }
+        >
+          <EuiSwitch
+            compressed
+            label={
+              settings.showClassicIdleFooter ? (
+                <FormattedMessage
+                  id="xpack.observabilityAlerting.mixedCreate.prototypeClassicIdleFooterOn"
+                  defaultMessage="On"
+                />
+              ) : (
+                <FormattedMessage
+                  id="xpack.observabilityAlerting.mixedCreate.prototypeClassicIdleFooterOff"
+                  defaultMessage="Off"
+                />
+              )
+            }
+            checked={settings.showClassicIdleFooter}
+            onChange={(event) => setShowClassicIdleFooter(event.target.checked)}
+            data-test-subj="mixedRulesPrototypeClassicIdleFooter"
           />
         </EuiFormRow>
       </EuiModalBody>
