@@ -93,13 +93,74 @@ export const nextBucketKey = (
   timestamp: number,
   rounding: DateRounding,
   timeZone: IanaTimeZone
+): number => roundToBucketKey(bucketEnd(timestamp, rounding, timeZone), rounding, timeZone);
+
+/**
+ * Number of Elasticsearch date buckets that cover `[from, to)`. Stops counting as soon as it
+ * exceeds `limit`. Aligned fixed buckets inside a constant-offset period are counted
+ * arithmetically, so only the buckets around offset changes are walked one by one.
+ */
+export const countBuckets = (
+  from: number,
+  to: number,
+  rounding: DateRounding,
+  timeZone: IanaTimeZone,
+  limit: number
+): number => {
+  const periods = offsetPeriods(timeZone);
+  let cursor = from;
+  let count = 0;
+  for (;;) {
+    count += 1;
+    if (count > limit) {
+      return count;
+    }
+    const end = bucketEnd(cursor, rounding, timeZone);
+    if (end >= to) {
+      return count;
+    }
+    if (rounding.kind === 'fixed') {
+      cursor = skipAlignedBuckets(periods, end, to, rounding);
+      count += (cursor - end) / rounding.widthMs;
+    } else {
+      cursor = end;
+    }
+  }
+};
+
+/**
+ * Start of the last bucket before `to` in the run of aligned buckets starting at `start`,
+ * or `start` itself when it is not an aligned key of a constant-offset period.
+ */
+const skipAlignedBuckets = (
+  periods: readonly OffsetPeriod[],
+  start: number,
+  to: number,
+  { widthMs }: FixedDateRounding
+): number => {
+  const index = periodIndexAt(periods, start);
+  const { end, offsetMs } = periods[index];
+  const isAlignedKey =
+    roundFixed(periods, index, start, widthMs) === start &&
+    localFloor(start, offsetMs, widthMs) === start + offsetMs;
+  if (!isAlignedKey) {
+    return start;
+  }
+  const buckets = Math.ceil((Math.min(end, to) - start) / widthMs);
+  return start + Math.max(buckets - 1, 0) * widthMs;
+};
+
+/** First instant after the Elasticsearch date bucket that contains `timestamp`. */
+const bucketEnd = (
+  timestamp: number,
+  rounding: DateRounding,
+  timeZone: IanaTimeZone
 ): number => {
   const periods = offsetPeriods(timeZone);
   if (rounding.kind === 'fixed') {
     const width = rounding.widthMs;
     const key = roundFixed(periods, periodIndexAt(periods, timestamp), timestamp, width);
-    const end = fixedBucketEnd(periods, key, width);
-    return roundFixed(periods, periodIndexAt(periods, end), end, width);
+    return fixedBucketEnd(periods, key, width);
   }
   const start = calendarStart(localDate(periods, timestamp), rounding);
   const unit = rounding.unit === 'isoWeek' ? 'week' : rounding.unit;
