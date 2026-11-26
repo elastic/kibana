@@ -9,6 +9,7 @@ import { uniq } from 'lodash';
 import { Parser, Walker } from '@elastic/esql';
 import type { ESQLCommand } from '@elastic/esql/types';
 import { withAllProjectsRouting } from '@kbn/cps-server-utils';
+import { MAX_TEXT_LENGTH } from '../../../../common/detection_signal';
 import { KNOWN_FAILURES_SETTINGS } from './constants';
 
 /** Commands that decide which lines a knowledge indicator matches. */
@@ -258,21 +259,26 @@ interface EvidenceRange {
  * The newest lines the knowledge indicator matched over `[from, to)`, with literal timestamps, so
  * the judge can run it later and read what failed. Its `KEEP` and `DROP` come after the cap, so the
  * lines show the fields the indicator chose, and a `KEEP` without `@timestamp` cannot break the sort.
+ * They are left out when they would take the query past what a signal stores: the rule's length
+ * check does not count them, and a reading with a longer query would be dropped whole.
  *
  * @throws Error when the indicator cannot be counted, as {@link compileKnownFailureQuery} does.
  */
 export function compileEvidenceQuery({ esql, from, to, cpsEnabled }: EvidenceRange): string {
   const { filters, fieldChoice } = getCountableCommands(esql);
-  return withProjectRouting({
-    query: [
-      ...filters,
-      toTimeRange({ from, to }),
-      'SORT @timestamp DESC',
-      `LIMIT ${EVIDENCE_LINES}`,
-      ...fieldChoice,
-    ].join('\n| '),
-    cpsEnabled,
-  });
+  const toEvidence = (choice: string[]) =>
+    withProjectRouting({
+      query: [
+        ...filters,
+        toTimeRange({ from, to }),
+        'SORT @timestamp DESC',
+        `LIMIT ${EVIDENCE_LINES}`,
+        ...choice,
+      ].join('\n| '),
+      cpsEnabled,
+    });
+  const evidence = toEvidence(fieldChoice);
+  return evidence.length <= MAX_TEXT_LENGTH ? evidence : toEvidence([]);
 }
 
 /**

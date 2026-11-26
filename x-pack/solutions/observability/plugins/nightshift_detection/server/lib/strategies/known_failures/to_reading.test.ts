@@ -100,6 +100,34 @@ describe('toUnusualMinuteReading', () => {
     ).toMatch(/^SET project_routing=".+";\nFROM logs/);
   });
 
+  // The rule's length check leaves KEEP out, so a long one could push the evidence past the signal
+  // format and drop the whole reading.
+  it('leaves the indicator’s KEEP out of evidence that would not fit a signal', () => {
+    const keep = `KEEP ${Array.from({ length: 2_000 }, (_, index) => `field_${index}`).join(', ')}`;
+    const reading = toUnusualMinuteReading({
+      ...CONTEXT,
+      knowledgeIndicator: {
+        ...KNOWLEDGE_INDICATOR,
+        query: {
+          ...KNOWLEDGE_INDICATOR.query,
+          esql: { query: `FROM logs | WHERE message : "timeout" | ${keep}` },
+        },
+      },
+      unusual: UNUSUAL,
+    });
+
+    expect(reading.evidence_esql).toMatch(/\| LIMIT 100$/);
+    expect(
+      wrapReading({
+        reading,
+        strategyId: 'known_failures',
+        strategyVersion: 1,
+        spaceId: 'default',
+        scheduledMinute: Date.UTC(2026, 10, 20, 10, 35),
+      })
+    ).toMatchObject({ dropped: false });
+  });
+
   // The knowledge indicator write path stores any score; the signal format only accepts 0 to 100.
   it.each([
     [150, 100],
