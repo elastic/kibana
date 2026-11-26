@@ -10,14 +10,16 @@
 import { coreMock, elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 
-import { PlainIndexDataClientBundle } from './plain_index_data_client_bundle';
+import { PlainIndexEntityDataClient } from './plain_index_entity_data_client';
 import {
   WORKFLOWS_EXECUTIONS_INDEX,
   WORKFLOWS_STEP_EXECUTIONS_INDEX,
 } from '../../constants/execution_indexes';
+import { WORKFLOWS_STEP_EXECUTIONS_INDEX_MAPPINGS } from '../../mappings/step_executions_mappings';
+import { WORKFLOWS_EXECUTIONS_INDEX_MAPPINGS } from '../../mappings/workflow_executions_mappings';
 
-describe('PlainIndexDataClientBundle', () => {
-  it('creates workflow and step DAL instances backed by their system indices', async () => {
+describe('PlainIndexEntityDataClient', () => {
+  it('creates workflow and step clients backed by their system indices', async () => {
     const esClient = elasticsearchServiceMock.createElasticsearchClient();
     esClient.search.mockResolvedValue({ hits: { hits: [] } } as never);
     esClient.indices.exists.mockResolvedValue(true as never);
@@ -31,22 +33,29 @@ describe('PlainIndexDataClientBundle', () => {
     });
 
     const logger = loggerMock.create();
-    const bundle = new PlainIndexDataClientBundle({
-      source: 'plain_index',
-      dataRetention: '90d',
+    const workflow = new PlainIndexEntityDataClient({
       logger,
+      indexName: WORKFLOWS_EXECUTIONS_INDEX,
+      mappings: WORKFLOWS_EXECUTIONS_INDEX_MAPPINGS,
+    });
+    const step = new PlainIndexEntityDataClient({
+      logger,
+      indexName: WORKFLOWS_STEP_EXECUTIONS_INDEX,
+      mappings: WORKFLOWS_STEP_EXECUTIONS_INDEX_MAPPINGS,
     });
 
-    await expect(bundle.initSetup(coreSetup)).resolves.toBeUndefined();
-    await expect(bundle.initStart(coreStart)).resolves.toBeUndefined();
+    await expect(workflow.initSetup(coreSetup)).resolves.toBeUndefined();
+    await expect(step.initSetup(coreSetup)).resolves.toBeUndefined();
+    await expect(workflow.initStart(coreStart)).resolves.toBeUndefined();
+    await expect(step.initStart(coreStart)).resolves.toBeUndefined();
 
     expect(esClient.indices.exists).toHaveBeenCalledWith({ index: WORKFLOWS_EXECUTIONS_INDEX });
     expect(esClient.indices.exists).toHaveBeenCalledWith({
       index: WORKFLOWS_STEP_EXECUTIONS_INDEX,
     });
 
-    const workflowExecutionsDataClient = bundle.createWorkflowDataClient();
-    const stepExecutionsDataClient = bundle.createStepDataClient();
+    const workflowExecutionsDataClient = workflow.createClient();
+    const stepExecutionsDataClient = step.createClient();
 
     await workflowExecutionsDataClient.search({ query: { match_all: {} } });
     await stepExecutionsDataClient.search({ query: { match_all: {} } });

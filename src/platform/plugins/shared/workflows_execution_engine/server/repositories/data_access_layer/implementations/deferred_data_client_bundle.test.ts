@@ -10,37 +10,45 @@
 import { coreMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import { DeferredDataClientBundle } from './deferred_data_client_bundle';
-import { PlainIndexDataClientBundle } from './plain_index/plain_index_data_client_bundle';
+import { PlainIndexEntityDataClient } from './plain_index/plain_index_entity_data_client';
+import { WORKFLOWS_STEP_EXECUTIONS_INDEX } from '../constants/execution_indexes';
 import { createMockStepDataClient, createMockWorkflowDataClient } from '../mocks';
 
-jest.mock('./plain_index/plain_index_data_client_bundle');
+jest.mock('./plain_index/plain_index_entity_data_client');
 
-const MockBundle = PlainIndexDataClientBundle as jest.MockedClass<
-  typeof PlainIndexDataClientBundle
+interface EntityMock {
+  initSetup: jest.Mock;
+  initStart: jest.Mock;
+  stop: jest.Mock;
+  createClient: jest.Mock;
+}
+
+const mockPlain = PlainIndexEntityDataClient as unknown as jest.Mock<
+  EntityMock,
+  [{ indexName: string }]
 >;
 
+const createEntity = (): EntityMock => ({
+  initSetup: jest.fn().mockResolvedValue(undefined),
+  initStart: jest.fn().mockResolvedValue(undefined),
+  stop: jest.fn().mockResolvedValue(undefined),
+  createClient: jest.fn().mockReturnValue(createMockWorkflowDataClient()),
+});
+
 describe('DeferredDataClientBundle', () => {
-  let innerBundle: {
-    initSetup: jest.Mock;
-    initStart: jest.Mock;
-    stop: jest.Mock;
-    createWorkflowDataClient: jest.Mock;
-    createStepDataClient: jest.Mock;
-  };
+  let plainWorkflow: EntityMock;
+  let plainStep: EntityMock;
   let coreSetup: ReturnType<typeof coreMock.createSetup>;
   let coreStart: ReturnType<typeof coreMock.createStart>;
   let bundle: DeferredDataClientBundle;
 
   beforeEach(() => {
-    innerBundle = {
-      initSetup: jest.fn().mockResolvedValue(undefined),
-      initStart: jest.fn().mockResolvedValue(undefined),
-      stop: jest.fn().mockResolvedValue(undefined),
-      createWorkflowDataClient: jest.fn().mockReturnValue(createMockWorkflowDataClient()),
-      createStepDataClient: jest.fn().mockReturnValue(createMockStepDataClient()),
-    };
-
-    MockBundle.mockImplementation(() => innerBundle as unknown as PlainIndexDataClientBundle);
+    plainWorkflow = createEntity();
+    plainStep = createEntity();
+    plainStep.createClient.mockReturnValue(createMockStepDataClient());
+    mockPlain.mockImplementation((deps) =>
+      deps.indexName === WORKFLOWS_STEP_EXECUTIONS_INDEX ? plainStep : plainWorkflow
+    );
 
     coreSetup = coreMock.createSetup();
     coreStart = coreMock.createStart();
@@ -53,15 +61,19 @@ describe('DeferredDataClientBundle', () => {
   });
 
   describe('initSetup', () => {
-    it('delegates to the inner bundle', async () => {
+    it('sets up the workflow and step clients', async () => {
       await bundle.initSetup(coreSetup);
-      expect(innerBundle.initSetup).toHaveBeenCalledWith(coreSetup);
+
+      expect(plainWorkflow.initSetup).toHaveBeenCalledWith(coreSetup);
+      expect(plainStep.initSetup).toHaveBeenCalledWith(coreSetup);
     });
 
-    it('is idempotent — inner initSetup called only once', async () => {
+    it('is idempotent — each entity is set up only once', async () => {
       await bundle.initSetup(coreSetup);
       await bundle.initSetup(coreSetup);
-      expect(innerBundle.initSetup).toHaveBeenCalledTimes(1);
+
+      expect(plainWorkflow.initSetup).toHaveBeenCalledTimes(1);
+      expect(plainStep.initSetup).toHaveBeenCalledTimes(1);
     });
   });
 
@@ -70,16 +82,18 @@ describe('DeferredDataClientBundle', () => {
       expect(() => bundle.initStart(coreStart)).toThrow('initSetup must be called first');
     });
 
-    it('is idempotent — inner initStart called only once', async () => {
+    it('is idempotent — each entity starts only once', async () => {
       await bundle.initSetup(coreSetup);
       await bundle.initStart(coreStart);
       await bundle.initStart(coreStart);
-      expect(innerBundle.initStart).toHaveBeenCalledTimes(1);
+
+      expect(plainWorkflow.initStart).toHaveBeenCalledTimes(1);
+      expect(plainStep.initStart).toHaveBeenCalledTimes(1);
     });
 
-    it('chains inner initStart only after setupPromise resolves', async () => {
+    it('chains initStart only after setup resolves', async () => {
       let resolveSetup!: () => void;
-      innerBundle.initSetup.mockReturnValue(
+      plainWorkflow.initSetup.mockReturnValue(
         new Promise<void>((resolve) => {
           resolveSetup = resolve;
         })
@@ -88,19 +102,23 @@ describe('DeferredDataClientBundle', () => {
       void bundle.initSetup(coreSetup);
       const startPromise = bundle.initStart(coreStart);
 
-      expect(innerBundle.initStart).not.toHaveBeenCalled();
+      expect(plainWorkflow.initStart).not.toHaveBeenCalled();
+      expect(plainStep.initStart).not.toHaveBeenCalled();
 
       resolveSetup();
       await startPromise;
 
-      expect(innerBundle.initStart).toHaveBeenCalledWith(coreStart);
+      expect(plainWorkflow.initStart).toHaveBeenCalledWith(coreStart);
+      expect(plainStep.initStart).toHaveBeenCalledWith(coreStart);
     });
   });
 
   describe('stop', () => {
-    it('delegates to the inner bundle', async () => {
+    it('stops the workflow and step clients', async () => {
       await bundle.stop();
-      expect(innerBundle.stop).toHaveBeenCalledTimes(1);
+
+      expect(plainWorkflow.stop).toHaveBeenCalledTimes(1);
+      expect(plainStep.stop).toHaveBeenCalledTimes(1);
     });
   });
 
@@ -121,7 +139,7 @@ describe('DeferredDataClientBundle', () => {
 
     it('queues operations until initStart completes', async () => {
       let resolveSetup!: () => void;
-      innerBundle.initSetup.mockReturnValue(
+      plainWorkflow.initSetup.mockReturnValue(
         new Promise<void>((resolve) => {
           resolveSetup = resolve;
         })
@@ -129,7 +147,7 @@ describe('DeferredDataClientBundle', () => {
 
       const innerClient = createMockWorkflowDataClient();
       innerClient.search.mockResolvedValue({ hits: { hits: [] } } as never);
-      innerBundle.createWorkflowDataClient.mockReturnValue(innerClient);
+      plainWorkflow.createClient.mockReturnValue(innerClient);
 
       void bundle.initSetup(coreSetup);
       void bundle.initStart(coreStart);
@@ -148,7 +166,7 @@ describe('DeferredDataClientBundle', () => {
     it('creates the inner client only once regardless of how many operations run', async () => {
       const innerClient = createMockWorkflowDataClient();
       innerClient.search.mockResolvedValue({ hits: { hits: [] } } as never);
-      innerBundle.createWorkflowDataClient.mockReturnValue(innerClient);
+      plainWorkflow.createClient.mockReturnValue(innerClient);
 
       await bundle.initSetup(coreSetup);
       await bundle.initStart(coreStart);
@@ -157,11 +175,11 @@ describe('DeferredDataClientBundle', () => {
       await client.search({ query: { match_all: {} } });
       await client.search({ query: { match_all: {} } });
 
-      expect(innerBundle.createWorkflowDataClient).toHaveBeenCalledTimes(1);
+      expect(plainWorkflow.createClient).toHaveBeenCalledTimes(1);
     });
 
     it('creates a distinct inner client for each returned instance', async () => {
-      innerBundle.createWorkflowDataClient
+      plainWorkflow.createClient
         .mockReturnValueOnce(createMockWorkflowDataClient())
         .mockReturnValueOnce(createMockWorkflowDataClient());
 
@@ -173,7 +191,7 @@ describe('DeferredDataClientBundle', () => {
       await first.search({ query: { match_all: {} } });
       await second.search({ query: { match_all: {} } });
 
-      expect(innerBundle.createWorkflowDataClient).toHaveBeenCalledTimes(2);
+      expect(plainWorkflow.createClient).toHaveBeenCalledTimes(2);
     });
 
     it('delegates all methods to the inner client', async () => {
@@ -181,7 +199,7 @@ describe('DeferredDataClientBundle', () => {
       innerClient.search.mockResolvedValue({ hits: { hits: [] } } as never);
       innerClient.count.mockResolvedValue({ count: 3 } as never);
       innerClient.bulk.mockResolvedValue({ items: [], errors: false });
-      innerBundle.createWorkflowDataClient.mockReturnValue(innerClient);
+      plainWorkflow.createClient.mockReturnValue(innerClient);
 
       await bundle.initSetup(coreSetup);
       await bundle.initStart(coreStart);
@@ -215,7 +233,7 @@ describe('DeferredDataClientBundle', () => {
 
     it('queues operations until initStart completes', async () => {
       let resolveSetup!: () => void;
-      innerBundle.initSetup.mockReturnValue(
+      plainStep.initSetup.mockReturnValue(
         new Promise<void>((resolve) => {
           resolveSetup = resolve;
         })
@@ -223,7 +241,7 @@ describe('DeferredDataClientBundle', () => {
 
       const innerClient = createMockStepDataClient();
       innerClient.search.mockResolvedValue({ hits: { hits: [] } } as never);
-      innerBundle.createStepDataClient.mockReturnValue(innerClient);
+      plainStep.createClient.mockReturnValue(innerClient);
 
       void bundle.initSetup(coreSetup);
       void bundle.initStart(coreStart);

@@ -7,32 +7,32 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
 import type { CoreSetup, CoreStart, ElasticsearchClient, Logger } from '@kbn/core/server';
 import { isRetryableEsClientError } from '@kbn/core-elasticsearch-server-utils';
-import type { EsWorkflowExecution, EsWorkflowStepExecution } from '@kbn/workflows';
 import { createOrUpdateIndex } from './helpers';
 import { PlainIndexDataClient } from './plain_index_data_client';
 import { createRetryingEsClient } from '../../../../lib/create_retrying_es_client';
-import {
-  WORKFLOWS_EXECUTIONS_INDEX,
-  WORKFLOWS_STEP_EXECUTIONS_INDEX,
-} from '../../constants/execution_indexes';
-import { WORKFLOWS_STEP_EXECUTIONS_INDEX_MAPPINGS } from '../../mappings/step_executions_mappings';
-import { WORKFLOWS_EXECUTIONS_INDEX_MAPPINGS } from '../../mappings/workflow_executions_mappings';
-import type {
-  CreateDataClientDeps,
-  DataClientBundle,
-  StepExecutionsDataClient,
-  WorkflowExecutionsDataClient,
-} from '../../types';
+import type { DataClient, EntityDataClient } from '../../types';
 
-export class PlainIndexDataClientBundle implements DataClientBundle {
-  private esClient!: ElasticsearchClient;
+export interface PlainIndexEntityDataClientDeps<TDoc extends { id: string }> {
+  logger: Logger;
+  indexName: string;
+  mappings: MappingTypeMapping;
+}
+
+/** One plain-index execution entity. Index creation runs at start; setup has nothing to register. */
+export class PlainIndexEntityDataClient<TDoc extends { id: string }>
+  implements EntityDataClient<DataClient<TDoc>>
+{
+  private esClient: ElasticsearchClient | undefined;
   private stopped = false;
 
-  constructor(private readonly deps: CreateDataClientDeps) {}
+  constructor(private readonly deps: PlainIndexEntityDataClientDeps<TDoc>) {}
 
-  async initSetup(_coreSetup: CoreSetup): Promise<void> {}
+  initSetup(_coreSetup: CoreSetup): Promise<void> {
+    return Promise.resolve();
+  }
 
   async initStart(coreStart: CoreStart): Promise<void> {
     const esClient = createRetryingEsClient(
@@ -46,19 +46,17 @@ export class PlainIndexDataClientBundle implements DataClientBundle {
     this.stopped = true;
   }
 
-  createWorkflowDataClient(): WorkflowExecutionsDataClient {
-    return new PlainIndexDataClient<EsWorkflowExecution>({
-      esClient: this.esClient,
-      logger: this.deps.logger,
-      indexName: WORKFLOWS_EXECUTIONS_INDEX,
-    });
-  }
+  createClient(): DataClient<TDoc> {
+    if (!this.esClient) {
+      throw new Error(
+        'PlainIndexEntityDataClient.initStart() must complete before creating clients'
+      );
+    }
 
-  createStepDataClient(): StepExecutionsDataClient {
-    return new PlainIndexDataClient<EsWorkflowStepExecution>({
+    return new PlainIndexDataClient<TDoc>({
       esClient: this.esClient,
       logger: this.deps.logger,
-      indexName: WORKFLOWS_STEP_EXECUTIONS_INDEX,
+      indexName: this.deps.indexName,
     });
   }
 
@@ -67,20 +65,12 @@ export class PlainIndexDataClientBundle implements DataClientBundle {
 
     while (!this.stopped) {
       try {
-        await Promise.all([
-          createOrUpdateIndex({
-            esClient,
-            indexName: WORKFLOWS_EXECUTIONS_INDEX,
-            mappings: WORKFLOWS_EXECUTIONS_INDEX_MAPPINGS,
-            logger,
-          }),
-          createOrUpdateIndex({
-            esClient,
-            indexName: WORKFLOWS_STEP_EXECUTIONS_INDEX,
-            mappings: WORKFLOWS_STEP_EXECUTIONS_INDEX_MAPPINGS,
-            logger,
-          }),
-        ]);
+        await createOrUpdateIndex({
+          esClient,
+          indexName: this.deps.indexName,
+          mappings: this.deps.mappings,
+          logger,
+        });
         return esClient;
       } catch (error) {
         if (!isRetryableEsClientError(error)) {

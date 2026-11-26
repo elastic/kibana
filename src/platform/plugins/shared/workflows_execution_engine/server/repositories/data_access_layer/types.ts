@@ -112,7 +112,15 @@ export type DataClient<TExecution extends { id: string }> = ReadonlyDataClient<T
 export type WorkflowExecutionsDataClient = DataClient<EsWorkflowExecution>;
 export type StepExecutionsDataClient = DataClient<EsWorkflowStepExecution>;
 
-/** Pair of workflow/step data access instances plus lifecycle hooks from `createDataClientBundle`. */
+/** Lifecycle and factory for one execution entity (workflow or step). */
+export interface EntityDataClient<TClient> {
+  initSetup: (coreSetup: CoreSetup) => Promise<void>;
+  initStart: (coreStart: CoreStart) => Promise<void>;
+  stop: () => Promise<void>;
+  createClient: () => TClient;
+}
+
+/** Assembled workflow and step access. Implemented by `DeferredDataClientBundle`. */
 export interface DataClientBundle {
   initSetup: (coreSetup: CoreSetup) => Promise<void>;
   initStart: (coreStart: CoreStart) => Promise<void>;
