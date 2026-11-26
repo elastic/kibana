@@ -22,6 +22,7 @@ import type { AttachmentGetter } from './attachments/operations/get';
 import type { DeleteAttachmentArgs } from './attachments/types';
 import type { LicensingService } from './licensing';
 import type { EmailNotificationService } from './notifications/email_notification_service';
+import type { ObservableGetter } from './observables/operations/get';
 import type { UserActionPersister } from './user_actions/operations/create';
 import type { UserActionFinder } from './user_actions/operations/find';
 
@@ -34,7 +35,12 @@ interface AttachmentServiceOperations {
   getter: AttachmentGetterServiceMock;
 }
 
+interface ObservableServiceOperations {
+  getter: ObservableGetterServiceMock;
+}
+
 export type AttachmentGetterServiceMock = jest.Mocked<AttachmentGetter>;
+export type ObservableGetterServiceMock = jest.Mocked<ObservableGetter>;
 
 export type CaseServiceMock = jest.Mocked<CasesService>;
 export type CaseConfigureServiceMock = jest.Mocked<CaseConfigureService>;
@@ -50,7 +56,7 @@ export type LicensingServiceMock = jest.Mocked<LicensingService>;
 export type NotificationServiceMock = jest.Mocked<EmailNotificationService>;
 export type TemplatesServiceMock = jest.Mocked<TemplatesService>;
 export type FieldDefinitionsServiceMock = jest.Mocked<FieldDefinitionsService>;
-export type ObservableServiceMock = jest.Mocked<ObservableService>;
+export type ObservableServiceMock = jest.Mocked<ObservableService & ObservableServiceOperations>;
 
 export const createCaseServiceMock = (): CaseServiceMock => {
   const service: PublicMethodsOf<CaseServiceMock> = lazyObject({
@@ -274,16 +280,26 @@ export const createFieldDefinitionsServiceMock = (): FieldDefinitionsServiceMock
   return service as unknown as FieldDefinitionsServiceMock;
 };
 
-export const createObservableServiceMock = (): ObservableServiceMock => {
-  const service: PublicMethodsOf<ObservableService> = lazyObject({
-    bulkCreate: jest.fn(),
+const createObservableGetterServiceMock = (): ObservableGetterServiceMock => {
+  const service: PublicMethodsOf<ObservableGetter> = lazyObject({
     getForCase: jest.fn(),
-    update: jest.fn(),
-    bulkDelete: jest.fn(),
     countForCase: jest.fn().mockResolvedValue(0),
     findExisting: jest.fn().mockResolvedValue([]),
     findPage: jest.fn().mockResolvedValue({ items: [], total: 0 }),
     getPreviews: jest.fn().mockResolvedValue(new Map()),
+  });
+
+  return service as unknown as ObservableGetterServiceMock;
+};
+
+type FakeObservableService = PublicMethodsOf<ObservableService> & ObservableServiceOperations;
+
+export const createObservableServiceMock = (): ObservableServiceMock => {
+  const service: FakeObservableService = lazyObject({
+    getter: createObservableGetterServiceMock(),
+    bulkCreate: jest.fn(),
+    update: jest.fn(),
+    bulkDelete: jest.fn(),
   });
 
   return service as unknown as ObservableServiceMock;
