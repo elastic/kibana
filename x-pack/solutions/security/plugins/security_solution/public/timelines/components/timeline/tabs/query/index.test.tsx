@@ -161,13 +161,29 @@ const useStubbedTable = () => {
   mockStubTimelineTable = true;
 };
 
+// The tests of the grid never use the notes and pin buttons of the leading control column, and each
+// row mounts popovers there that are slow to set up in jsdom. They render the grid without it, as the
+// unified timeline tests do. The tests that use the stubbed body keep the real controls.
+let mockStubControlColumn = false;
+
+jest.mock('../shared/use_timeline_control_columns', () => {
+  const actual = jest.requireActual('../shared/use_timeline_control_columns');
+  return {
+    ...actual,
+    useTimelineControlColumn: (...args: unknown[]) =>
+      mockStubControlColumn ? undefined : actual.useTimelineControlColumn(...args),
+  };
+});
+
 const useRealGrid = () =>
   jest
     .mocked(UnifiedTimelineBody)
     .mockImplementation(jest.requireActual('../../body/unified_timeline_body').UnifiedTimelineBody);
 
-const useStubbedGrid = () =>
-  jest.mocked(UnifiedTimelineBody).mockImplementation(StubbedUnifiedTimelineBody);
+const useStubbedGrid = () => {
+  mockStubControlColumn = false;
+  return jest.mocked(UnifiedTimelineBody).mockImplementation(StubbedUnifiedTimelineBody);
+};
 
 const getUnifiedTimelineBodyProps = () => {
   const props = jest.mocked(UnifiedTimelineBody).mock.lastCall?.[0];
@@ -336,6 +352,7 @@ describe('query tab with unified timeline', () => {
 
     useRealGrid();
     mockStubTimelineTable = false;
+    mockStubControlColumn = true;
   });
 
   describe('render', () => {
