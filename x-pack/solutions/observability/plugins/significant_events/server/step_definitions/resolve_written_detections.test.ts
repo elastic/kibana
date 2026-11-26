@@ -82,12 +82,13 @@ describe('resolveWrittenDetectionsStepDefinition handler', () => {
   const findDetectionsWrittenByRun = jest.fn();
   const esClient = { esql: { query: jest.fn() } };
 
-  const run = async () => {
+  // `null` omits the report, as the workflow engine does when it renders `default: []` for an empty list.
+  const run = async (reportedRuleUuids: string[] | null = ['rule-b']) => {
     const logger = loggerMock.create();
     const input = {
       workflow_execution_id: 'execution-1',
       batch,
-      reported_rule_uuids: ['rule-b'],
+      reported_rule_uuids: reportedRuleUuids ?? undefined,
     };
     const { output } = await resolveWrittenDetectionsStepDefinition({ logger }).handler({
       input,
@@ -125,6 +126,56 @@ describe('resolveWrittenDetectionsStepDefinition handler', () => {
       unknown_reported_count: 0,
     });
     expect(logger.warn).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    ['an empty report', []],
+    ['an omitted report', null],
+  ])('still stamps the rules derived from written events with %s', async (_label, report) => {
+    findDetectionsWrittenByRun.mockResolvedValue({
+      pairs: [{ detection_id: 'detection-a', rule_uuid: 'rule-a' }],
+      truncated: false,
+    });
+
+    const { output } = await run(report);
+
+    expect(output).toEqual({
+      stamp_rule_uuids: ['rule-a'],
+      derived_count: 1,
+      unknown_reported_count: 0,
+    });
+  });
+
+  it.each([
+    ['an empty report', []],
+    ['an omitted report', null],
+  ])(
+    'stamps nothing without warning when %s meets a run that wrote no events',
+    async (_label, report) => {
+      findDetectionsWrittenByRun.mockResolvedValue({ pairs: [], truncated: false });
+
+      const { output, logger } = await run(report);
+
+      expect(output).toEqual({
+        stamp_rule_uuids: [],
+        derived_count: 0,
+        unknown_reported_count: 0,
+      });
+      expect(logger.warn).not.toHaveBeenCalled();
+    }
+  );
+
+  it('stamps nothing and warns when the lookup throws and the report is omitted', async () => {
+    findDetectionsWrittenByRun.mockRejectedValue(new Error('es unavailable'));
+
+    const { output, logger } = await run(null);
+
+    expect(output).toEqual({
+      stamp_rule_uuids: [],
+      derived_count: 0,
+      unknown_reported_count: 0,
+    });
+    expect(logger.warn).toHaveBeenCalled();
   });
 
   it('falls back to the reported rules and warns when the lookup throws, without failing the step', async () => {

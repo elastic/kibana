@@ -460,7 +460,8 @@ steps:
         required: [written_rule_uuids]
 
   - name: compute_written_rule_uuids
-    # Normalise the agent's self-reported summary before validating it against the batch.
+    # Normalise the agent's self-reported summary before validating it against the batch. This always
+    # yields a list (an empty or missing report gives `[]`), so the resolver reads it without `default`.
     type: data.set
     with:
       written_rule_uuids: '${{ steps.run_discovery_agent.output.structured_output.written_rule_uuids | default: [] | uniq }}'
@@ -471,7 +472,7 @@ steps:
     with:
       workflow_execution_id: '{{ execution.id }}'
       batch: '${{ steps.classify_detections.output.batch | default: [] }}'
-      reported_rule_uuids: '${{ steps.compute_written_rule_uuids.output.written_rule_uuids | default: [] }}'
+      reported_rule_uuids: '${{ steps.compute_written_rule_uuids.output.written_rule_uuids }}'
     # The agent has already written its events; a failed resolve falls back to the reported rules.
     on-failure:
       continue: true
