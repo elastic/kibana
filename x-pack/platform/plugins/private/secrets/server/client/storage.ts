@@ -26,7 +26,10 @@ export interface StoredSecretMetadata {
 export interface SecretsStorage {
   /** Lists the secrets without their values. */
   list(): Promise<SecretMetadata[]>;
-  /** Returns the secret with its value, or `undefined` when no secret has this name. */
+  /**
+   * Returns the secret with its value, or `undefined` when no secret has this name. Throws
+   * `SecretUndecryptableError` when the value no longer decrypts.
+   */
   get(params: { name: string }): Promise<StoredSecret | undefined>;
   /** Returns the secret without decrypting its value, or `undefined` when no secret has this name. */
   getMetadata(params: { name: string }): Promise<StoredSecretMetadata | undefined>;

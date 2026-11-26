@@ -17,6 +17,7 @@ import {
   SecretAlreadyExistsError,
   SecretConflictError,
   SecretNotFoundError,
+  SecretUndecryptableError,
   SecretValidationError,
 } from '@kbn/secrets';
 import { createSecretsClient } from '../client/secrets_client';
@@ -245,7 +246,7 @@ describe('secrets on Elasticsearch', () => {
       });
 
       await expect(client.update({ name, description: 'Rotated monthly' })).rejects.toThrow(
-        /Unable to decrypt/
+        SecretUndecryptableError
       );
       const updated = await client.update({ name, value: NEW_VALUE });
 

@@ -16,6 +16,7 @@ export {
   SecretConflictError,
   SecretNotFoundError,
   SecretsUnavailableError,
+  SecretUndecryptableError,
   SecretValidationError,
 } from './src/errors';
 export { isValidSecretName } from './src/secret_name';

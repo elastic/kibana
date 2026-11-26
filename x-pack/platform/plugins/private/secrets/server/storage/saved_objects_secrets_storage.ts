@@ -7,11 +7,20 @@
 
 import { SavedObjectsErrorHelpers, SavedObjectsUtils, SPACES_EXTENSION_ID } from '@kbn/core/server';
 import type { SavedObjectsClientContract, SavedObjectsServiceStart } from '@kbn/core/server';
+import {
+  EncryptionError,
+  EncryptionErrorOperation,
+} from '@kbn/encrypted-saved-objects-plugin/server';
 import type {
   EncryptedSavedObjectsClient,
   EncryptedSavedObjectsPluginStart,
 } from '@kbn/encrypted-saved-objects-plugin/server';
-import { SecretAlreadyExistsError, SecretConflictError, SecretNotFoundError } from '@kbn/secrets';
+import {
+  SecretAlreadyExistsError,
+  SecretConflictError,
+  SecretNotFoundError,
+  SecretUndecryptableError,
+} from '@kbn/secrets';
 import type { SecretMetadata } from '@kbn/secrets';
 import type { SecretsStorage } from '../client/storage';
 import type { SecretEntry } from '../client/types';
@@ -44,6 +53,28 @@ const toEntry = (attributes: SecretAttributes): SecretEntry => {
   return attributes;
 };
 
+/** Reads one secret with its version, or `undefined` when no secret has this name. */
+const readVersioned = async <T>({
+  name,
+  read,
+}: {
+  name: string;
+  read: () => Promise<{ attributes: T; version?: string }>;
+}): Promise<{ attributes: T; version: string } | undefined> => {
+  try {
+    const { attributes, version } = await read();
+    if (version === undefined) {
+      throw new Error(`Secret "${name}" has no version`);
+    }
+    return { attributes, version };
+  } catch (error) {
+    if (SavedObjectsErrorHelpers.isNotFoundError(error)) {
+      return undefined;
+    }
+    throw error;
+  }
+};
+
 /** Creates the storage that keeps the secrets of one space as encrypted saved objects. */
 export const createSavedObjectsSecretsStorage = ({
   spaceId,
@@ -52,6 +83,24 @@ export const createSavedObjectsSecretsStorage = ({
 }: CreateSavedObjectsSecretsStorageParams): SecretsStorage => {
   const namespace = SavedObjectsUtils.namespaceStringToId(spaceId);
   const idOf = (name: string): string => getSecretSavedObjectId({ spaceId, name });
+
+  const decrypt = async (name: string) => {
+    try {
+      return await encryptedClient.getDecryptedAsInternalUser<SecretAttributes>(
+        SECRET_SAVED_OBJECT_TYPE,
+        idOf(name),
+        { namespace }
+      );
+    } catch (error) {
+      if (
+        error instanceof EncryptionError &&
+        error.operation === EncryptionErrorOperation.Decryption
+      ) {
+        throw new SecretUndecryptableError(name);
+      }
+      throw error;
+    }
+  };
 
   return {
     list: async () => {
@@ -73,43 +122,20 @@ export const createSavedObjectsSecretsStorage = ({
     },
 
     get: async ({ name }) => {
-      try {
-        const { attributes, version } =
-          await encryptedClient.getDecryptedAsInternalUser<SecretAttributes>(
-            SECRET_SAVED_OBJECT_TYPE,
-            idOf(name),
-            { namespace }
-          );
-        if (version === undefined) {
-          throw new Error(`Secret "${name}" has no version`);
-        }
-        return { entry: toEntry(attributes), version };
-      } catch (error) {
-        if (SavedObjectsErrorHelpers.isNotFoundError(error)) {
-          return undefined;
-        }
-        throw error;
-      }
+      const secret = await readVersioned({ name, read: () => decrypt(name) });
+      return secret && { entry: toEntry(secret.attributes), version: secret.version };
     },
 
     getMetadata: async ({ name }) => {
-      try {
+      const secret = await readVersioned({
+        name,
         // A read that does not decrypt never returns the encrypted `value`.
-        const { attributes, version } = await savedObjectsClient.get<ListedSecretAttributes>(
-          SECRET_SAVED_OBJECT_TYPE,
-          idOf(name),
-          { namespace }
-        );
-        if (version === undefined) {
-          throw new Error(`Secret "${name}" has no version`);
-        }
-        return { metadata: attributes, version };
-      } catch (error) {
-        if (SavedObjectsErrorHelpers.isNotFoundError(error)) {
-          return undefined;
-        }
-        throw error;
-      }
+        read: () =>
+          savedObjectsClient.get<ListedSecretAttributes>(SECRET_SAVED_OBJECT_TYPE, idOf(name), {
+            namespace,
+          }),
+      });
+      return secret && { metadata: secret.attributes, version: secret.version };
     },
 
     create: async ({ entry }) => {
