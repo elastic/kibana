@@ -238,6 +238,21 @@ describe('buildDataContext', () => {
     });
   });
 
+  it('nests the shorter column whatever the column order, keeping the longer one by its flat name', () => {
+    const expected = {
+      'service.name': 'api',
+      'service.name.raw': 'API-01',
+      service: { name: 'api' },
+    };
+
+    expect(buildDataContext({ 'service.name': 'api', 'service.name.raw': 'API-01' })).toEqual(
+      expected
+    );
+    expect(buildDataContext({ 'service.name.raw': 'API-01', 'service.name': 'api' })).toEqual(
+      expected
+    );
+  });
+
   it('does not nest columns with empty path segments or unsafe keys, but keeps them by flat name', () => {
     const data = buildDataContext({ 'a..b': 1, '.a': 2, '__proto__.x': 3 });
 
