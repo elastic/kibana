@@ -8,17 +8,24 @@
 import type { Client } from '@elastic/elasticsearch';
 import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
 import { INDEX_SCHEMA_VERSION, POC_INDEX } from './constants';
-import type { LongMemEvalHistory, LongMemEvalHistorySession } from './dataset';
+import type { LongMemEvalHistory, LongMemEvalHistorySession, LongMemEvalMessage } from './dataset';
 
-export interface SessionDocument {
+/**
+ * One conversation turn: a user message and the assistant replies that follow it. Turns keep
+ * search results small (Agent Builder truncates tool results at 20k tokens) while the session
+ * fields let the agent fetch neighbouring turns.
+ */
+export interface TurnDocument {
   readonly benchmark: string;
   readonly index_schema_version: string;
   readonly session_id: string;
   readonly session_order: number;
   readonly session_date: string;
   readonly session_timestamp: string;
+  readonly turn_index: number;
+  readonly turn_count: number;
   readonly message_count: number;
-  readonly conversation: string;
+  readonly text: string;
 }
 
 export const POC_INDEX_MAPPINGS: MappingTypeMapping = {
@@ -30,8 +37,10 @@ export const POC_INDEX_MAPPINGS: MappingTypeMapping = {
     session_order: { type: 'integer' },
     session_date: { type: 'keyword' },
     session_timestamp: { type: 'date' },
+    turn_index: { type: 'integer' },
+    turn_count: { type: 'integer' },
     message_count: { type: 'integer' },
-    conversation: { type: 'text' },
+    text: { type: 'text' },
   },
 };
 
@@ -42,16 +51,40 @@ export const assertPocIndex = (indexName: string): void => {
   }
 };
 
-export const toSessionDocument = (session: LongMemEvalHistorySession): SessionDocument => ({
-  benchmark: 'longmemeval-s',
-  index_schema_version: INDEX_SCHEMA_VERSION,
-  session_id: session.sessionId,
-  session_order: session.sourceIndex,
-  session_date: session.occurredAtRaw,
-  session_timestamp: session.occurredAt,
-  message_count: session.messages.length,
-  conversation: session.messages.map(({ role, content }) => `${role}: ${content}`).join('\n'),
-});
+/** Splits a session into turns: each user message starts one; replies attach to it. */
+const groupIntoTurns = (messages: LongMemEvalHistorySession['messages']): LongMemEvalMessage[][] =>
+  messages.reduce<LongMemEvalMessage[][]>((turns, message) => {
+    const current = turns[turns.length - 1];
+    if (message.role === 'assistant' && current) {
+      current.push(message);
+    } else {
+      turns.push([message]);
+    }
+    return turns;
+  }, []);
+
+export const turnDocumentId = (sessionId: string, turnIndex: number): string =>
+  `${sessionId}-turn-${String(turnIndex).padStart(4, '0')}`;
+
+export const toTurnDocuments = (session: LongMemEvalHistorySession): TurnDocument[] => {
+  const turns = groupIntoTurns(session.messages);
+  return turns.map((turn, turnIndex) => ({
+    benchmark: 'longmemeval-s',
+    index_schema_version: INDEX_SCHEMA_VERSION,
+    session_id: session.sessionId,
+    session_order: session.sourceIndex,
+    session_date: session.occurredAtRaw,
+    session_timestamp: session.occurredAt,
+    turn_index: turnIndex,
+    turn_count: turns.length,
+    message_count: turn.length,
+    text: turn.map(({ role, content }) => `${role}: ${content}`).join('\n'),
+  }));
+};
+
+/** Every turn document of a history, in session and turn order. */
+export const toHistoryDocuments = (history: LongMemEvalHistory): TurnDocument[] =>
+  history.sessions.flatMap(toTurnDocuments);
 
 export const deletePocIndex = async (
   esClient: Client,
@@ -71,7 +104,7 @@ export const isPocIndexPresent = async (
 
 /**
  * Pre-flight check, run once before the agent: a full-text ES|QL query over the POC index
- * returns conversation text. Validates the index; it is never shown to the agent.
+ * returns turn text. Validates the index; it is never shown to the agent.
  */
 export const assertPocIndexSearchable = async (
   esClient: Client,
@@ -86,15 +119,14 @@ export const assertPocIndexSearchable = async (
   await loadHistoryIntoPocIndex(esClient, history);
   try {
     const response = await esClient.esql.query({
-      query: `FROM ${POC_INDEX} METADATA _score | WHERE MATCH(conversation, "${term}") | SORT _score DESC | KEEP session_id, session_date, conversation | LIMIT 3`,
+      query: `FROM ${POC_INDEX} METADATA _score | WHERE MATCH(text, "${term}") | SORT _score DESC | KEEP session_id, turn_index, session_date, text | LIMIT 3`,
     });
-    const conversationColumn = response.columns.findIndex(({ name }) => name === 'conversation');
+    const textColumn = response.columns.findIndex(({ name }) => name === 'text');
     const hasConversation = response.values.some(
-      (row) =>
-        typeof row[conversationColumn] === 'string' && String(row[conversationColumn]).length > 0
+      (row) => typeof row[textColumn] === 'string' && String(row[textColumn]).length > 0
     );
     if (!hasConversation) {
-      throw new Error(`Pre-flight ES|QL query on ${POC_INDEX} returned no conversation text.`);
+      throw new Error(`Pre-flight ES|QL query on ${POC_INDEX} returned no turn text.`);
     }
   } finally {
     await deletePocIndex(esClient);
@@ -102,7 +134,7 @@ export const assertPocIndexSearchable = async (
 };
 
 /**
- * Replaces the POC index with one document per session of `history`, refreshes it and
+ * Replaces the POC index with one document per conversation turn of `history`, refreshes it and
  * verifies the document count. Returns the load duration.
  */
 export const loadHistoryIntoPocIndex = async (
@@ -122,10 +154,11 @@ export const loadHistoryIntoPocIndex = async (
     mappings: POC_INDEX_MAPPINGS,
   });
 
-  const operations = history.sessions.flatMap((session) => {
-    const document = toSessionDocument(session);
-    return [{ index: { _index: indexName, _id: document.session_id } }, document];
-  });
+  const documents = toHistoryDocuments(history);
+  const operations = documents.flatMap((document) => [
+    { index: { _index: indexName, _id: turnDocumentId(document.session_id, document.turn_index) } },
+    document,
+  ]);
   const bulkResponse = await esClient.bulk({ operations, refresh: true });
   if (bulkResponse.errors) {
     const firstError = bulkResponse.items.find((item) => item.index?.error)?.index?.error;
@@ -133,10 +166,8 @@ export const loadHistoryIntoPocIndex = async (
   }
 
   const { count } = await esClient.count({ index: indexName });
-  if (count !== history.sessions.length) {
-    throw new Error(
-      `Expected ${history.sessions.length} documents in ${indexName}, found ${count}.`
-    );
+  if (count !== documents.length) {
+    throw new Error(`Expected ${documents.length} documents in ${indexName}, found ${count}.`);
   }
 
   return { durationMs: Date.now() - startedAt, documentCount: count };

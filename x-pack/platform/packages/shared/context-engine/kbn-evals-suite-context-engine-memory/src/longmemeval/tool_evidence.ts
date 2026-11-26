@@ -55,7 +55,7 @@ const ESQL_TOOLS = new Set([`${PLATFORM}execute_esql`, `${PLATFORM}generate_esql
 const READ_FILE_TOOLS = new Set(['read_file', `${PLATFORM}read_file`]);
 const SESSION_ID_PATTERN = /session-\d{4}/g;
 // Only the leading source command names indices. A later `from` inside a quoted search phrase
-// (`MATCH(conversation, "flight from Paris")`) must never be read as a source.
+// (`MATCH(text, "flight from Paris")`) must never be read as a source.
 const SOURCE_COMMAND_PATTERN = /^\s*(?:FROM|TS)\s+([^|]+?)(?:\s+METADATA\b[^|]*)?\s*(?:\||$)/is;
 const ESQL_COMMENTS = /\/\*[\s\S]*?\*\/|\/\/[^\n]*/g;
 

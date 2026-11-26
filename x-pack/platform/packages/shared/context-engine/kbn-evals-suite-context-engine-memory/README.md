@@ -7,7 +7,7 @@ Context Engine Memory evaluation suites for [kbn/evals](../../kbn-evals). Owned 
 A plumbing POC ([search-team#17382](https://github.com/elastic/search-team/issues/17382)) that runs five [LongMemEval-S](https://github.com/xiaowu0162/LongMemEval) questions through Agent Builder:
 
 1. Download the pinned public `longmemeval_s_cleaned.json` from Hugging Face (revision `98d7416c`), verify its size and SHA-256, and keep the five frozen IDs.
-2. For each question, index its full history into `longmemeval-memory-direct-index-poc`, one document per session (fields `session_id`, `session_order`, `session_date`, `session_timestamp`, `message_count`, `conversation`).
+2. For each question, index its full history into `longmemeval-memory-direct-index-poc`, one document per conversation turn, a user message plus the assistant replies that follow it (fields `session_id`, `session_order`, `session_date`, `session_timestamp`, `turn_index`, `turn_count`, `message_count`, `text`). Turns keep search results well under Agent Builder's 20k-token tool-result limit, and the session fields let the agent fetch neighbouring turns.
 3. Ask the default Agent Builder agent the question. The prompt names the index and gives the question date; the agent chooses its own tools and queries.
 4. Judge the answer with the LongMemEval task-specific prompts (copied verbatim from upstream `evaluate_qa.py`, MIT), through the evaluation connector at temperature 0.
 5. Delete the index, then read the scores back from the score store and fail unless every question produced a valid, judged, persisted answer.
@@ -44,4 +44,4 @@ node scripts/evals start \
 
 ### Versioning
 
-The dataset is `context-engine-memory: longmemeval-s-direct-index-v1`. Changing the selected IDs, source, sanitization, index representation, prompt or question-date rendering requires a new dataset version, so comparisons never pair incomparable runs.
+The dataset is `context-engine-memory: longmemeval-s-direct-index-v2`. Changing the selected IDs, source, sanitization, index representation, prompt or question-date rendering requires a new dataset version, so comparisons never pair incomparable runs.

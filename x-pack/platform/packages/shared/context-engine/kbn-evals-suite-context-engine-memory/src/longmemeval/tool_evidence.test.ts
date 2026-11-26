@@ -10,21 +10,19 @@ import { POC_INDEX } from './constants';
 
 describe('esqlSources', () => {
   it('extracts FROM sources, including METADATA and comma lists', () => {
-    expect(
-      esqlSources(`FROM ${POC_INDEX} METADATA _score | WHERE MATCH(conversation, "x")`)
-    ).toEqual([POC_INDEX]);
+    expect(esqlSources(`FROM ${POC_INDEX} METADATA _score | WHERE MATCH(text, "x")`)).toEqual([
+      POC_INDEX,
+    ]);
     expect(esqlSources('FROM a, b | LIMIT 3')).toEqual(['a', 'b']);
   });
 
   it('ignores `from` inside quoted text, later commands, comments and exclusions', () => {
     expect(
       esqlSources(
-        `FROM ${POC_INDEX} METADATA _score | WHERE MATCH(conversation, "flight from Paris") | LIMIT 5`
+        `FROM ${POC_INDEX} METADATA _score | WHERE MATCH(text, "flight from Paris") | LIMIT 5`
       )
     ).toEqual([POC_INDEX]);
-    expect(esqlSources(`FROM ${POC_INDEX} | WHERE conversation LIKE "*from home*"`)).toEqual([
-      POC_INDEX,
-    ]);
+    expect(esqlSources(`FROM ${POC_INDEX} | WHERE text LIKE "*from home*"`)).toEqual([POC_INDEX]);
     expect(esqlSources(`// find it\nFROM ${POC_INDEX},\n  -other-* | LIMIT 1`)).toEqual([
       POC_INDEX,
     ]);
@@ -49,7 +47,7 @@ describe('summarizeToolEvidence', () => {
       {
         type: 'tool_call',
         tool_id: 'platform.core.execute_esql',
-        params: { query: `FROM ${POC_INDEX} | WHERE MATCH(conversation, "bike") | LIMIT 3` },
+        params: { query: `FROM ${POC_INDEX} | WHERE MATCH(text, "bike") | LIMIT 3` },
         results: [{ type: 'esql_results', data: { values: [['session-0003', 'user: my bike']] } }],
       },
       {

@@ -45,7 +45,7 @@ export const buildAgentPrompt = ({
     '',
     "Treat the Current Date above as today's date for this question. Do not use the system clock or ES|QL NOW() for relative dates.",
     '',
-    `Our past conversations are stored in the Elasticsearch index \`${POC_INDEX}\`, one document per conversation session. Use your tools to find what is relevant, then answer. If the history does not contain the answer, say so.`,
+    `Our past conversations are stored in the Elasticsearch index \`${POC_INDEX}\`, one document per conversation turn (a user message and the assistant reply). Each document has the session it belongs to and its position in that session. Use your tools to find what is relevant, then answer. If the history does not contain the answer, say so.`,
     '',
     `Question: ${question}`,
   ].join('\n');
@@ -76,8 +76,11 @@ export const createLongMemEvalTask = ({
 
     let loadDurationMs: number;
     try {
-      ({ durationMs: loadDurationMs } = await loadHistoryIntoPocIndex(esClient, history));
-      log.info(`[${id}] indexed ${history.sessions.length} sessions in ${loadDurationMs}ms`);
+      const { durationMs, documentCount } = await loadHistoryIntoPocIndex(esClient, history);
+      loadDurationMs = durationMs;
+      log.info(
+        `[${id}] indexed ${history.sessions.length} sessions as ${documentCount} turn documents in ${loadDurationMs}ms`
+      );
     } catch (error) {
       await deletePocIndex(esClient);
       return {

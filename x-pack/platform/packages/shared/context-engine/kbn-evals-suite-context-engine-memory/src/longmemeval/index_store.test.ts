@@ -12,7 +12,9 @@ import {
   assertPocIndex,
   deletePocIndex,
   loadHistoryIntoPocIndex,
-  toSessionDocument,
+  toHistoryDocuments,
+  toTurnDocuments,
+  turnDocumentId,
 } from './index_store';
 
 const history: LongMemEvalHistory = {
@@ -60,18 +62,79 @@ describe('assertPocIndex', () => {
   });
 });
 
-describe('toSessionDocument', () => {
-  it('flattens messages in order and keeps dates', () => {
-    expect(toSessionDocument(history.sessions[0])).toEqual({
-      benchmark: 'longmemeval-s',
-      index_schema_version: 'session-per-document-v1',
-      session_id: 'session-0000',
-      session_order: 0,
-      session_date: '2023/05/22 (Mon) 21:18',
-      session_timestamp: '2023-05-22T21:18',
-      message_count: 2,
-      conversation: 'user: I painted my bike red\nassistant: Nice colour.',
-    });
+describe('toTurnDocuments', () => {
+  const session = (messages: LongMemEvalHistory['sessions'][number]['messages']) => ({
+    ...history.sessions[0],
+    messages,
+  });
+
+  it('turns a user message and its reply into one document with session fields', () => {
+    expect(toTurnDocuments(history.sessions[0])).toEqual([
+      {
+        benchmark: 'longmemeval-s',
+        index_schema_version: 'turn-per-document-v1',
+        session_id: 'session-0000',
+        session_order: 0,
+        session_date: '2023/05/22 (Mon) 21:18',
+        session_timestamp: '2023-05-22T21:18',
+        turn_index: 0,
+        turn_count: 1,
+        message_count: 2,
+        text: 'user: I painted my bike red\nassistant: Nice colour.',
+      },
+    ]);
+  });
+
+  it('starts a new turn at each user message and keeps every reply with its turn', () => {
+    const docs = toTurnDocuments(
+      session([
+        { role: 'user', content: 'a' },
+        { role: 'assistant', content: 'b' },
+        { role: 'assistant', content: 'c' },
+        { role: 'user', content: 'd' },
+        { role: 'user', content: 'e' },
+        { role: 'assistant', content: 'f' },
+      ])
+    );
+
+    expect(
+      docs.map(({ turn_index, turn_count, message_count }) => [
+        turn_index,
+        turn_count,
+        message_count,
+      ])
+    ).toEqual([
+      [0, 3, 3],
+      [1, 3, 1],
+      [2, 3, 2],
+    ]);
+    expect(docs.map(({ text }) => text)).toEqual([
+      'user: a\nassistant: b\nassistant: c',
+      'user: d',
+      'user: e\nassistant: f',
+    ]);
+  });
+
+  it('gives an assistant message before any user message its own turn', () => {
+    const docs = toTurnDocuments(
+      session([
+        { role: 'assistant', content: 'hello' },
+        { role: 'user', content: 'hi' },
+      ])
+    );
+
+    expect(docs.map(({ text }) => text)).toEqual(['assistant: hello', 'user: hi']);
+  });
+
+  it('creates no documents for an empty session and flattens a history in order', () => {
+    expect(toTurnDocuments(session([]))).toEqual([]);
+    expect(toHistoryDocuments(history).map(({ session_id }) => session_id)).toEqual([
+      'session-0000',
+    ]);
+  });
+
+  it('builds stable, opaque document IDs', () => {
+    expect(turnDocumentId('session-0007', 3)).toBe('session-0007-turn-0003');
   });
 });
 
@@ -86,7 +149,7 @@ describe('loadHistoryIntoPocIndex', () => {
       ignore_unavailable: true,
     });
     expect(client.bulk.mock.calls[0][0].operations[0]).toEqual({
-      index: { _index: POC_INDEX, _id: 'session-0000' },
+      index: { _index: POC_INDEX, _id: 'session-0000-turn-0000' },
     });
   });
 
