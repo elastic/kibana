@@ -18,3 +18,10 @@
  * deployment with no provider attached resolves the default format.
  */
 export const ESQL_RESPONSE_FORMAT_FEATURE_FLAG = 'alertingV2.esqlResponseFormat';
+
+/**
+ * Gates the unified rule creation experience (search input and results dropdown in the
+ * create rule flyout) while it is built. Off by default; enable it locally or in tests with
+ * `feature_flags.overrides`. Remove once the MVP ships.
+ */
+export const UNIFIED_RULE_CREATION_FEATURE_FLAG = 'alertingV2.unifiedRuleCreation.enabled';
