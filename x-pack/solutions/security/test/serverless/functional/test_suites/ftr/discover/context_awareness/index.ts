@@ -9,7 +9,7 @@ import moment from 'moment';
 import path from 'path';
 import type { FtrProviderContext } from '../../../../ftr_provider_context';
 import { SECURITY_ES_ARCHIVES_DIR } from '../../../constants';
-import { TEST_RULE_NAME } from './utils';
+import { createTestRuleName } from './utils';
 
 export default function ({ getService, getPageObjects, loadTestFile }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
@@ -29,9 +29,11 @@ export default function ({ getService, getPageObjects, loadTestFile }: FtrProvid
     before(async () => {
       await esArchiver.loadIfNeeded(path.join(SECURITY_ES_ARCHIVES_DIR, 'auditbeat_single'));
 
+      const ruleName = createTestRuleName();
+
       await detectionsApi.createRule({
         body: {
-          name: TEST_RULE_NAME,
+          name: ruleName,
           description: 'test rule',
           type: 'query',
           enabled: true,
@@ -65,7 +67,7 @@ export default function ({ getService, getPageObjects, loadTestFile }: FtrProvid
             bool: {
               filter: [
                 { term: { 'host.name': 'siem-kibana' } },
-                { term: { 'kibana.alert.rule.name': TEST_RULE_NAME } },
+                { term: { 'kibana.alert.rule.name': ruleName } },
               ],
             },
           },

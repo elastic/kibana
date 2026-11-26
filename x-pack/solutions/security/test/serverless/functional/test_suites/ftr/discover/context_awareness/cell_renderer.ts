@@ -13,7 +13,7 @@ import {
   INITIALIZE_SECURITY_SOLUTION_URL,
 } from '@kbn/security-solution-plugin/common/api/initialization';
 import type { FtrProviderContext } from '../../../../ftr_provider_context';
-import { getDiscoverESQLState, TEST_RULE_NAME } from './utils';
+import { getDiscoverESQLState, getTestRuleName } from './utils';
 import { SECURITY_SOLUTION_DATA_VIEW } from '../../../constants';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
@@ -46,7 +46,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     describe('ES|QL mode', () => {
       it('should render alert workflow status badge', async () => {
         const state = getDiscoverESQLState(
-          `from .alerts-security.alerts-default | WHERE host.name == "siem-kibana" and event.kind == "signal" and kibana.alert.rule.name == "${TEST_RULE_NAME}"`
+          `from .alerts-security.alerts-default | WHERE host.name == "siem-kibana" and event.kind == "signal" and kibana.alert.rule.name == "${getTestRuleName()}"`
         );
         await PageObjects.common.navigateToActualUrl('discover', `?_a=${state}`, {
           ensureCurrentUrl: false,
@@ -63,7 +63,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.discover.navigateToApp({ queryMode: 'classic' });
         await PageObjects.discover.selectIndexPattern(SECURITY_SOLUTION_DATA_VIEW);
         await queryBar.setQuery(
-          `host.name: "siem-kibana" AND event.kind: "signal" AND kibana.alert.rule.name: "${TEST_RULE_NAME}"`
+          `host.name: "siem-kibana" AND event.kind: "signal" AND kibana.alert.rule.name: "${getTestRuleName()}"`
         );
         await queryBar.clickQuerySubmitButton();
         await PageObjects.discover.waitUntilSearchingHasFinished();
