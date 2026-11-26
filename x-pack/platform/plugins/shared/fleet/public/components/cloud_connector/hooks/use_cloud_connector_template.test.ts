@@ -839,6 +839,58 @@ describe('useCloudConnectorTemplate', () => {
         expect(openedUrl).toContain(`&templateURL=${encodeURIComponent(ARTIFACT_URL)}`);
       });
 
+      it('hands the rendered template details to getLaunchStackParams and puts only its params on the update link', async () => {
+        // The updated stack reports to a record of its own, so its callback parameters replace
+        // the ones the stack was created with. The stack keeps every other parameter value.
+        const getLaunchStackParams = jest.fn().mockResolvedValue({
+          ElasticCallbackUrl: 'https://kb.example.com/api/fleet/iac_provisioner/callbacks/cb-2',
+          ElasticCallbackToken: 'tok-2',
+        });
+        const { result } = renderHook(() =>
+          useCloudConnectorTemplate({
+            ...HOOK_PARAMS,
+            deploymentId: STACK_ARN,
+            getLaunchStackParams,
+          })
+        );
+        await launch(result);
+
+        expect(getLaunchStackParams).toHaveBeenCalledWith({
+          iac_key: 'sha256:661cb7def1c7101f',
+          iac_blueprint_id: 'federated-identity',
+          iac_blueprint_version: 'v1',
+        });
+        const openedUrl = cloudFormationTab.location.href;
+        expect(openedUrl).toContain('#/stacks/update/template?stackId=');
+        // The update link has a query on the console URL and one after the hash.
+        const params = new URLSearchParams(openedUrl.split('?').pop());
+        expect(params.get('param_ElasticCallbackToken')).toBe('tok-2');
+        expect(params.get('param_ElasticCallbackUrl')).toBe(
+          'https://kb.example.com/api/fleet/iac_provisioner/callbacks/cb-2'
+        );
+        expect(params.get('param_ElasticResourceId')).toBeNull();
+        expect(result.current.hasLaunched).toBe(true);
+      });
+
+      it('closes the console and asks to try again when getLaunchStackParams rejects for an update', async () => {
+        const getLaunchStackParams = jest.fn().mockRejectedValue(new Error('callback down'));
+        const { result } = renderHook(() =>
+          useCloudConnectorTemplate({
+            ...HOOK_PARAMS,
+            deploymentId: STACK_ARN,
+            getLaunchStackParams,
+          })
+        );
+        await launch(result);
+
+        expect(cloudFormationTab.close).toHaveBeenCalled();
+        expect(cloudFormationTab.location.href).toBe('');
+        expect(result.current.hasLaunched).toBe(false);
+        expect(result.current.templateGenerationError).toBe(
+          'Kibana could not prepare this launch, so the stack would not be able to report back. Try again.'
+        );
+      });
+
       it('closes the pre-opened tab and surfaces an error when the launch URL cannot be built (malformed ARN)', async () => {
         const onTemplateRendered = jest.fn();
         const { result } = renderHook(() =>
@@ -1060,21 +1112,6 @@ describe('useCloudConnectorTemplate', () => {
         expect(result.current.templateGenerationError).toContain('Try again');
         expect(result.current.iacConfirm).toBeUndefined();
         expect(result.current.hasLaunched).toBe(false);
-      });
-
-      it('does not add callback params to a stack-update link', async () => {
-        const getLaunchStackParams = jest.fn().mockResolvedValue(CALLBACK_PARAMS);
-        const { result } = renderHook(() =>
-          useCloudConnectorTemplate({
-            ...HOOK_PARAMS,
-            deploymentId: 'arn:aws:cloudformation:us-east-1:123456789012:stack/my-stack/uuid',
-            getLaunchStackParams,
-          })
-        );
-        await launch(result);
-
-        expect(getLaunchStackParams).not.toHaveBeenCalled();
-        expect(cloudFormationTab.location.href).not.toContain('param_ElasticCallbackUrl');
       });
     });
   });

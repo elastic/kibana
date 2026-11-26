@@ -6,7 +6,8 @@
  */
 
 import type { TypeOf } from '@kbn/config-schema';
-import type { KibanaResponseFactory } from '@kbn/core/server';
+import type { KibanaResponseFactory, SavedObjectsClientContract } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 
 import { iacProvisionerService } from '../../services';
@@ -38,7 +39,10 @@ import type {
   ReceiveProvisioningCallbackRequestSchema,
 } from '../../types/rest_spec/provisioning_callback';
 import type { CloudConnectorCallback } from '../../../common/types/models/provisioning_callback';
-import { PROVISIONING_CALLBACK_TOKEN_HEADER } from '../../../common/constants';
+import {
+  CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
+  PROVISIONING_CALLBACK_TOKEN_HEADER,
+} from '../../../common/constants';
 import type { IacProvisionerRenderFlow } from '../../../common/telemetry/iac_provisioner_events';
 
 export const renderIacTemplateHandler: FleetRequestHandler<
@@ -206,6 +210,21 @@ const getCallbackInSpace = async (
   return item && item.space_id === spaceId ? item : undefined;
 };
 
+const isCloudConnectorInSpace = async (
+  spaceSoClient: SavedObjectsClientContract,
+  cloudConnectorId: string
+): Promise<boolean> => {
+  try {
+    await spaceSoClient.get(CLOUD_CONNECTOR_SAVED_OBJECT_TYPE, cloudConnectorId);
+    return true;
+  } catch (error) {
+    if (SavedObjectsErrorHelpers.isNotFoundError(error)) {
+      return false;
+    }
+    throw error;
+  }
+};
+
 const AWS_IDENTITY_FEDERATION_DISABLED = {
   body: { message: 'AWS identity federation is not enabled' },
 };
@@ -250,14 +269,26 @@ export const createProvisioningCallbackHandler: FleetRequestHandler<
       body: { message: availability.reason ?? 'Kibana cannot be reached at its public URL' },
     });
   }
-  const { spaceId } = await context.fleet;
+  const { spaceId, internalSoClient } = await context.fleet;
   const user = appContextService.getSecurityCore().authc.getCurrentUser(request) || undefined;
-  const { provider, ...identity } = request.body;
+  const { provider, cloud_connector_id: cloudConnectorId, ...identity } = request.body;
+
+  // A stack update reports to an identity that must exist in the space the update is launched
+  // from; a record for an identity of another space would let its report write that identity.
+  if (cloudConnectorId && !(await isCloudConnectorInSpace(internalSoClient, cloudConnectorId))) {
+    return response.notFound({ body: { message: 'Cloud connector not found' } });
+  }
 
   // The type is space-agnostic, hence the internal saved objects client.
   const { item, token } = await provisioningCallbackService.create(
     appContextService.getInternalUserSOClientWithoutSpaceExtension(),
-    { provider, createdBy: user?.username, spaceId, identity }
+    {
+      provider,
+      createdBy: user?.username,
+      spaceId,
+      ...(cloudConnectorId ? { cloudConnectorId } : {}),
+      identity,
+    }
   );
 
   return response.ok({ body: { item, token } });

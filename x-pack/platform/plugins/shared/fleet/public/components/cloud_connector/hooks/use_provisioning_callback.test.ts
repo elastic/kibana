@@ -152,6 +152,26 @@ describe('useProvisioningCallback', () => {
     expect(result.current.status).toBe('pending');
   });
 
+  it('start() names the identity a stack update belongs to on the record', async () => {
+    const { result } = renderHook(() => useProvisioningCallback({ enabled: true }));
+    await act(async () => {
+      await result.current.start({
+        cloudConnectorId: 'cc-1',
+        iacKey: 'sha256:new',
+        iacBlueprintId: 'federated-identity',
+        iacBlueprintVersion: '1.1.0',
+      });
+    });
+
+    expect(mockedCreate).toHaveBeenCalledWith({
+      provider: 'aws',
+      cloud_connector_id: 'cc-1',
+      iac_key: 'sha256:new',
+      iac_blueprint_id: 'federated-identity',
+      iac_blueprint_version: '1.1.0',
+    });
+  });
+
   it('leaves out a blank name and unset details', async () => {
     const { result } = renderHook(() => useProvisioningCallback({ enabled: true }));
     await act(async () => {

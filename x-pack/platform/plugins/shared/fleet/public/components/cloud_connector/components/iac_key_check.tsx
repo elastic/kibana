@@ -8,6 +8,7 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useQueryClient } from '@kbn/react-query';
 import { EuiSpacer } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { KbnDangerCallout } from '@kbn/ui-callout';
 
 import { CLOUD_CONNECTOR_IAC_CHECK_TEST_SUBJECTS } from '../../../../common/services/cloud_connectors/test_subjects';
@@ -16,10 +17,12 @@ import {
   type IacKeyCheckAction,
 } from '../../../../common/telemetry/iac_provisioner_events';
 import type { RenderIacTemplateIntegration } from '../../../../common/types/rest_spec/iac_provisioner';
+import type { CloudConnectorIacState } from '../../../../common/types/models/cloud_connector';
 import type { AccountType } from '../../../types';
 import { useIacProvisioner, useStartServices } from '../../../hooks';
-import { useVerifyIacKey } from '../hooks/use_verify_iac_key';
+import { useVerifyIacKey, VERIFY_IAC_KEY_QUERY_KEY } from '../hooks/use_verify_iac_key';
 import { updateCloudConnector } from '../hooks/use_update_cloud_connector';
+import { useProvisioningCallback } from '../hooks/use_provisioning_callback';
 import {
   useCloudConnectorTemplate,
   type TemplateRendered,
@@ -81,9 +84,22 @@ export const IacKeyCheck: React.FC<IacKeyCheckProps> = ({
   onTemplateRecorded,
 }) => {
   const { isIacProvisionerEnabled } = useIacProvisioner();
-  const { analytics, http } = useStartServices();
+  const { analytics, http, notifications } = useStartServices();
 
   const isCheckEnabled = isIacProvisionerEnabled && integrations.length > 0;
+
+  // The updated stack reports back to a record of its own, as a new stack does: the stack's
+  // callback custom resource only runs again when one of its properties changes, and the record's
+  // URL and token are the only ones Kibana can change on an update. The report records the
+  // rendered template on the identity, so Kibana sees the update applied instead of only trusting
+  // the launch. Without the callback (no public https URL) the launch alone lifts the block, as
+  // before.
+  const {
+    available: isCallbackAvailable,
+    status: callbackStatus,
+    created: callbackReported,
+    start: startCallback,
+  } = useProvisioningCallback({ enabled: isCheckEnabled });
 
   const { data, isInitialLoading } = useVerifyIacKey({
     cloudConnectorId,
@@ -152,6 +168,20 @@ export const IacKeyCheck: React.FC<IacKeyCheckProps> = ({
     [cloudConnectorId, http, integrations, integrationsKey, queryClient, writeOnRender]
   );
 
+  // The record carries the rendered template details, which the report writes to the identity.
+  // Hosts that defer the click-time write (`writeOnRender` false) are not bypassed: the record is
+  // only written once the stack has really been updated, which is what they wait for.
+  const getLaunchStackParams = useCallback(
+    (iac: CloudConnectorIacState | undefined) =>
+      startCallback({
+        cloudConnectorId: cloudConnectorId!,
+        iacKey: iac?.iac_key,
+        iacBlueprintId: iac?.iac_blueprint_id,
+        iacBlueprintVersion: iac?.iac_blueprint_version,
+      }),
+    [cloudConnectorId, startCallback]
+  );
+
   const { launchButtonProps, isGeneratingTemplate, templateGenerationError } =
     useCloudConnectorTemplate({
       provider: AWS_PROVIDER,
@@ -164,7 +194,27 @@ export const IacKeyCheck: React.FC<IacKeyCheckProps> = ({
       // would downgrade it.
       staticTemplateFallback: false,
       onTemplateRendered,
+      getLaunchStackParams:
+        isCallbackAvailable && cloudConnectorId ? getLaunchStackParams : undefined,
     });
+
+  // Once the stack has reported, the template it runs is on record: fetch the verdict again so
+  // the callout clears on what is stored, and let the identity lists pick the change up.
+  const handledReportIdRef = useRef<string | undefined>(undefined);
+  useEffect(() => {
+    if (!callbackReported || handledReportIdRef.current === callbackReported.id) {
+      return;
+    }
+    handledReportIdRef.current = callbackReported.id;
+    queryClient.invalidateQueries([VERIFY_IAC_KEY_QUERY_KEY]);
+    queryClient.invalidateQueries(['get-cloud-connectors']);
+    queryClient.invalidateQueries(['cloud-connector-usage', callbackReported.id]);
+    notifications.toasts.addSuccess({
+      title: i18n.translate('xpack.fleet.cloudConnector.iacCheck.stackUpdatedToast', {
+        defaultMessage: 'CloudFormation stack updated',
+      }),
+    });
+  }, [callbackReported, notifications, queryClient]);
 
   // A missing key blocks like a mismatched one: either way the deployed template is not known to
   // cover the selection.
@@ -233,6 +283,7 @@ export const IacKeyCheck: React.FC<IacKeyCheckProps> = ({
         }}
         isUpdating={isGeneratingTemplate}
         updateLaunched={updateLaunched}
+        isWaitingForReport={callbackStatus === 'pending' || callbackStatus === 'receiving'}
       />
       {templateGenerationError && (
         <>

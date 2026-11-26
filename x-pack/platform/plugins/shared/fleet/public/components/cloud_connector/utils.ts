@@ -762,7 +762,10 @@ export interface ArtifactLaunchUrlParams {
    * stack-update deep link. A malformed ARN (no parseable region) returns undefined.
    */
   deploymentId?: string;
-  /** Stack parameters set on the quick-create link. */
+  /**
+   * Stack parameters set on the link. A stack update keeps the stack's own values for every
+   * parameter the link does not set, so callers pass an update only what must change.
+   */
   stackParams?: StackParams;
   /**
    * Static quick-create URL from the package manifest (token-substituted). When it carries a
@@ -799,7 +802,11 @@ const setQuickCreateStackParams = (url: string, stackParams: StackParams): strin
     return `${acc}${acc.includes('?') ? '&' : '?'}${param}`;
   }, url);
 
-const getAwsStackUpdateUrl = (deploymentId: string, artifactUrl: string): string | undefined => {
+const getAwsStackUpdateUrl = (
+  deploymentId: string,
+  artifactUrl: string,
+  stackParams: StackParams
+): string | undefined => {
   // Only a CloudFormation stack ARN can be updated: a region alone does not make one (a
   // CloudWatch Logs ARN has a region too), so the same validator the fields and the API use
   // gates the link. A malformed value, a non-stack ARN, or a partition with no public console
@@ -811,11 +818,18 @@ const getAwsStackUpdateUrl = (deploymentId: string, artifactUrl: string): string
     return undefined;
   }
   // Console deep link on the ARN's own partition (GovCloud and China have their own console
-  // hosts). AWS does not document this format; it must be verified manually against the
-  // console before shipping.
-  return `https://${host}/cloudformation/home?region=${region}#/stacks/update/template?stackId=${encodeURIComponent(
-    deploymentId
-  )}&templateURL=${encodeURIComponent(artifactUrl)}`;
+  // hosts). AWS does not document this format, nor whether the update wizard pre-fills
+  // `param_` values the way quick-create links do; both must be verified manually against the
+  // console before shipping. The parameters are the callback the updated stack reports to: its
+  // custom resource only runs again when a property of it changes, and these are the only ones
+  // Kibana can change. If the console drops them, the stack keeps its old callback and the
+  // update goes unreported, as before.
+  return setQuickCreateStackParams(
+    `https://${host}/cloudformation/home?region=${region}#/stacks/update/template?stackId=${encodeURIComponent(
+      deploymentId
+    )}&templateURL=${encodeURIComponent(artifactUrl)}`,
+    stackParams
+  );
 };
 
 /**
@@ -900,9 +914,8 @@ export const getArtifactLaunchUrl = ({
   if (provider !== AWS_PROVIDER) {
     return undefined;
   }
-  // An existing stack keeps its parameter values, so the update link carries none.
   if (deploymentId) {
-    return getAwsStackUpdateUrl(deploymentId, artifactUrl);
+    return getAwsStackUpdateUrl(deploymentId, artifactUrl, stackParams);
   }
   return setQuickCreateStackParams(getQuickCreateUrl(artifactUrl, staticUrl), stackParams);
 };

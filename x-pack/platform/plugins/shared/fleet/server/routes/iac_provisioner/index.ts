@@ -132,7 +132,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       path: IAC_PROVISIONER_API_ROUTES.CALLBACK_CREATE_PATTERN,
       summary: 'Create a provisioning callback',
       description:
-        'Create a one-time record and the single-use token a launched CloudFormation stack presents to report its role back to Kibana. The token grants nothing but that report and is not an API key. The identity name, account type, and template details are stored on the record for the cloud connector the report creates.',
+        "Create a one-time record and the single-use token a launched CloudFormation stack presents to report its role back to Kibana. The token grants nothing but that report and is not an API key. The identity name, account type, and template details are stored on the record for the cloud connector the report creates. With `cloud_connector_id`, the record is for the update of that cloud connector's stack, and the report records the template details on it instead.",
       access: 'internal',
       security: PROVISIONING_CALLBACK_WRITE_SECURITY,
     })

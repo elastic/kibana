@@ -13,10 +13,8 @@ import {
   sendGetProvisioningCallback,
   useGetProvisioningCallbackAvailabilityQuery,
 } from '../../../hooks/use_request/provisioning_callback';
-import type {
-  CloudConnectorCallback,
-  CloudConnectorCallbackIdentity,
-} from '../../../../common/types/models/provisioning_callback';
+import type { CloudConnectorCallback } from '../../../../common/types/models/provisioning_callback';
+import type { CreateProvisioningCallbackRequest } from '../../../../common/types/rest_spec/provisioning_callback';
 import type { AccountType } from '../../../../common/types/models/cloud_connector';
 import { IAC_PROVISIONER_API_ROUTES } from '../../../../common/constants';
 
@@ -50,8 +48,13 @@ export interface CloudConnectorCallbackCreated {
   stack_arn?: string;
 }
 
-/** Identity details stored on the record at launch and used to create the cloud connector. */
+/**
+ * Identity details stored on the record at launch and used to create the cloud connector, or,
+ * with `cloudConnectorId`, the template details a stack update records on that connector.
+ */
 export interface CloudConnectorCallbackStartInput {
+  /** The identity whose stack is being updated. Omit when the stack creates a new identity. */
+  cloudConnectorId?: string;
   connectorName?: string;
   accountType?: AccountType;
   iacKey?: string | null;
@@ -99,10 +102,13 @@ const toCreated = (item: CloudConnectorCallback): CloudConnectorCallbackCreated 
       }
     : undefined;
 
-const toIdentityBody = (
+const toCreateBody = (
   identity: CloudConnectorCallbackStartInput
-): CloudConnectorCallbackIdentity => {
-  const body: CloudConnectorCallbackIdentity = {};
+): CreateProvisioningCallbackRequest['body'] => {
+  const body: CreateProvisioningCallbackRequest['body'] = { provider: 'aws' };
+  if (identity.cloudConnectorId) {
+    body.cloud_connector_id = identity.cloudConnectorId;
+  }
   const name = identity.connectorName?.trim();
   if (name) {
     body.connector_name = name;
@@ -302,10 +308,7 @@ export const useProvisioningCallback = ({
         sendDeleteProvisioningCallback(previousId).catch(() => {});
       }
 
-      const { data, error } = await sendCreateProvisioningCallback({
-        provider: 'aws',
-        ...toIdentityBody(identity),
-      });
+      const { data, error } = await sendCreateProvisioningCallback(toCreateBody(identity));
       if (error?.statusCode === 412) {
         // The server's public URL stopped being one a stack can report to; show its reason.
         recheckAvailability();

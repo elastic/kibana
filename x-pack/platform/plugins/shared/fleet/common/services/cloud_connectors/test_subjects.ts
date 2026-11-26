@@ -47,6 +47,7 @@ export const GCP_INPUT_FIELDS_TEST_SUBJECTS = {
 export const CLOUD_CONNECTOR_IAC_CHECK_TEST_SUBJECTS = {
   CALLOUT: 'cloudConnectorIacCheckCallout',
   UPDATE_STACK_BUTTON: 'cloudConnectorIacCheckUpdateStackButton',
+  WAITING_FOR_REPORT: 'cloudConnectorIacCheckWaitingForReport',
   IAC_CHECK_TEMPLATE_ERROR_CALLOUT: 'cloudConnectorIacCheckTemplateErrorCallout',
 };
 

@@ -1610,15 +1610,26 @@ describe('IaC launch URL helpers', () => {
     ).toBeUndefined();
   });
 
-  it('getArtifactLaunchUrl does not add stack params to the stack-update deep link', () => {
+  it('getArtifactLaunchUrl sets stack params on the stack-update deep link', () => {
+    // A stack update keeps the stack's own parameter values, so only the parameters given here
+    // (the callback the updated stack reports to) go on the link.
     const url = getArtifactLaunchUrl({
       provider: 'aws',
       artifactUrl: ARTIFACT,
       deploymentId: STACK_ARN,
-      stackParams: { ElasticOrganizationId: '2070044029' },
+      stackParams: {
+        ElasticCallbackUrl: 'https://kb.example.com/cb?x=1',
+        ElasticCallbackToken: 'tok-1',
+      },
     });
 
-    expect(url).not.toContain('param_');
+    expect(url).toBe(
+      `https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/update/template?stackId=${encodeURIComponent(
+        STACK_ARN
+      )}&templateURL=${encodeURIComponent(ARTIFACT)}&param_ElasticCallbackUrl=${encodeURIComponent(
+        'https://kb.example.com/cb?x=1'
+      )}&param_ElasticCallbackToken=tok-1`
+    );
   });
 
   it('getArtifactLaunchUrl builds the stack-update deep link when a deployment id is known', () => {

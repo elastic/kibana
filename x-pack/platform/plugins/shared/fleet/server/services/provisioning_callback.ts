@@ -47,6 +47,11 @@ export interface CreateProvisioningCallbackOptions {
   provider: 'aws';
   createdBy?: string;
   spaceId?: string;
+  /**
+   * For a stack update: the cloud connector whose stack is being updated. Its report records the
+   * template details of `identity` on that connector instead of creating one.
+   */
+  cloudConnectorId?: string;
   /** Name, account type and template details for the cloud connector created when the stack reports back. */
   identity?: CloudConnectorCallbackIdentity;
 }
@@ -169,6 +174,13 @@ const isAbandonedClaim = ({
   new Date(attributes.expires_at).getTime() <= Date.now() &&
   isClaimStale(updatedAt);
 
+/**
+ * A record launched for the update of an existing identity's stack: it names the connector from
+ * the start, where a record for a new identity only gets one once the report has created it.
+ */
+const isStackUpdate = (attributes: ProvisioningCallbackSOAttributes): boolean =>
+  attributes.cloud_connector_id !== undefined && attributes.status !== 'received';
+
 const isSamePayload = (
   stored: ProvisioningCallbackSOAttributes,
   payload: CloudConnectorCallbackReceivedValues
@@ -178,6 +190,19 @@ interface CreatedCloudConnector {
   id: string;
   name: string;
 }
+
+/** What a report for a stack update must agree with: the identity's role and, when known, its stack. */
+interface StoredCloudConnector extends CreatedCloudConnector {
+  roleArn: string | undefined;
+  deploymentId: string | undefined;
+}
+
+const reportMatchesConnector = (
+  { roleArn, deploymentId }: StoredCloudConnector,
+  payload: CloudConnectorCallbackReceivedValues
+): boolean =>
+  roleArn === payload.role_arn &&
+  (deploymentId === undefined || deploymentId === payload.stack_arn);
 
 class ProvisioningCallbackService {
   private get logger() {
@@ -191,7 +216,13 @@ class ProvisioningCallbackService {
    */
   public async create(
     soClient: SavedObjectsClientContract,
-    { provider, createdBy, spaceId, identity = {} }: CreateProvisioningCallbackOptions
+    {
+      provider,
+      createdBy,
+      spaceId,
+      cloudConnectorId,
+      identity = {},
+    }: CreateProvisioningCallbackOptions
   ): Promise<{ item: CloudConnectorCallback; token: string }> {
     const id = uuidv4();
     const now = new Date();
@@ -210,6 +241,7 @@ class ProvisioningCallbackService {
       ...(createdBy ? { created_by: createdBy } : {}),
       ...(spaceId ? { space_id: spaceId } : {}),
       expires_at: expiresAt,
+      ...(cloudConnectorId ? { cloud_connector_id: cloudConnectorId } : {}),
     };
     for (const field of IDENTITY_FIELDS) {
       if (identity[field] !== undefined) {
@@ -409,6 +441,25 @@ class ProvisioningCallbackService {
       };
     }
 
+    if (isStackUpdate(so.attributes)) {
+      // The report of a stack update is only good for the identity the update was launched for.
+      // Judged before any claim, so a report from some other stack never takes the record.
+      const target = await this.findCloudConnector(
+        appContextService.getInternalUserSOClientForSpaceId(so.attributes.space_id),
+        so.attributes.cloud_connector_id!
+      );
+      if (!target) {
+        return { outcome: 'gone' };
+      }
+      if (!reportMatchesConnector(target, payload)) {
+        return {
+          outcome: 'invalid',
+          message:
+            'role_arn and stack_arn must be those of the identity the stack update belongs to',
+        };
+      }
+    }
+
     let { attributes, version } = so;
     let updatedAt = so.updated_at;
     let claimedHere = false;
@@ -459,9 +510,10 @@ class ProvisioningCallbackService {
   }
 
   /**
-   * Makes the connector for a claim this attempt holds and marks the record received. When no
-   * connector could be made the claim is released, so a retry of the report or a cancel from
-   * the browser is not stuck behind a claim nobody is applying, and the error is rethrown.
+   * Makes the connector for a claim this attempt holds, or records the stack update on the one
+   * the record names, and marks the record received. When the connector could not be made or
+   * updated the claim is released, so a retry of the report or a cancel from the browser is not
+   * stuck behind a claim nobody is applying, and the error is rethrown.
    */
   private async apply(
     soClient: SavedObjectsClientContract,
@@ -472,7 +524,9 @@ class ProvisioningCallbackService {
   ): Promise<CloudConnectorCallback> {
     let connector: CreatedCloudConnector;
     try {
-      connector = await this.ensureCloudConnector(id, attributes, payload);
+      connector = isStackUpdate(attributes)
+        ? await this.updateCloudConnector(attributes, payload)
+        : await this.ensureCloudConnector(id, attributes, payload);
     } catch (error) {
       await this.releaseClaim(soClient, id, version);
       throw error;
@@ -499,6 +553,7 @@ class ProvisioningCallbackService {
     connector: CreatedCloudConnector,
     version?: string
   ): Promise<CloudConnectorCallback> {
+    const isUpdate = isStackUpdate(attributes);
     const update: Partial<ProvisioningCallbackSOAttributes> = {
       status: 'received',
       received_at: new Date().toISOString(),
@@ -529,11 +584,13 @@ class ProvisioningCallbackService {
     }
 
     auditLoggingService.writeCustomAuditLog({
-      message: 'Provisioning callback received, cloud connector created',
+      message: isUpdate
+        ? 'Provisioning callback received, cloud connector updated'
+        : 'Provisioning callback received, cloud connector created',
       event: {
         action: 'provisioning_callback_received',
         category: ['database'],
-        type: ['creation'],
+        type: [isUpdate ? 'change' : 'creation'],
         outcome: 'success',
       },
       kibana: { saved_object: { type: CLOUD_CONNECTOR_SAVED_OBJECT_TYPE, id: connector.id } },
@@ -725,13 +782,19 @@ class ProvisioningCallbackService {
   private async findCloudConnector(
     spaceClient: SavedObjectsClientContract,
     id: string
-  ): Promise<CreatedCloudConnector | undefined> {
+  ): Promise<StoredCloudConnector | undefined> {
     try {
       const so = await spaceClient.get<CloudConnectorSOAttributes>(
         CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
         id
       );
-      return { id: so.id, name: so.attributes.name };
+      const vars = so.attributes.vars as { role_arn?: { value?: string } } | undefined;
+      return {
+        id: so.id,
+        name: so.attributes.name,
+        roleArn: vars?.role_arn?.value,
+        deploymentId: so.attributes.iac_deployment_id,
+      };
     } catch (error) {
       if (SavedObjectsErrorHelpers.isNotFoundError(error)) {
         return undefined;
@@ -788,6 +851,44 @@ class ProvisioningCallbackService {
       const suffix = ` ${callbackId.slice(0, 8)}`;
       return create(`${preferred.slice(0, CONNECTOR_NAME_MAX_LENGTH - suffix.length)}${suffix}`);
     }
+  }
+
+  /**
+   * Records on the identity the stack update was launched for the template its stack now runs:
+   * the key and blueprint stored on the record at launch, and the stack itself when the identity
+   * did not have it on record. The identity is read again here: a report recovered from the
+   * record by a later poll was judged against it when it arrived, but the identity may have gone
+   * since, and that is an error to release the claim over, not a write to nothing.
+   */
+  private async updateCloudConnector(
+    attributes: ProvisioningCallbackSOAttributes,
+    payload: CloudConnectorCallbackReceivedValues
+  ): Promise<CreatedCloudConnector> {
+    const spaceClient = appContextService.getInternalUserSOClientForSpaceId(attributes.space_id);
+    const id = attributes.cloud_connector_id!;
+    const existing = await this.findCloudConnector(spaceClient, id);
+    if (!existing) {
+      throw new Error(`Cloud connector ${id} of the stack update no longer exists`);
+    }
+    if (!reportMatchesConnector(existing, payload)) {
+      throw new Error(`Report does not match the role or stack of cloud connector ${id}`);
+    }
+
+    const iac: CloudConnectorIacState = {};
+    if (attributes.iac_key !== undefined) {
+      iac.iac_key = attributes.iac_key;
+    }
+    if (attributes.iac_blueprint_id !== undefined) {
+      iac.iac_blueprint_id = attributes.iac_blueprint_id;
+    }
+    if (attributes.iac_blueprint_version !== undefined) {
+      iac.iac_blueprint_version = attributes.iac_blueprint_version;
+    }
+    if (existing.deploymentId === undefined) {
+      iac.iac_deployment_id = payload.stack_arn;
+    }
+    const updated = await cloudConnectorService.update(spaceClient, id, iac);
+    return { id: updated.id, name: updated.name };
   }
 
   private async getSavedObject(soClient: SavedObjectsClientContract, id: string) {

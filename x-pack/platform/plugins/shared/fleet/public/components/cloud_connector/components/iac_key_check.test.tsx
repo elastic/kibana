@@ -18,6 +18,8 @@ import {
   useCloudConnectorTemplate,
   type TemplateRendered,
 } from '../hooks/use_cloud_connector_template';
+import { useProvisioningCallback } from '../hooks/use_provisioning_callback';
+import { VERIFY_IAC_KEY_QUERY_KEY } from '../hooks/use_verify_iac_key';
 
 import { IacKeyCheck } from './iac_key_check';
 
@@ -25,6 +27,7 @@ import { IacKeyCheck } from './iac_key_check';
 
 jest.mock('../hooks/use_verify_iac_key');
 jest.mock('../hooks/use_cloud_connector_template');
+jest.mock('../hooks/use_provisioning_callback');
 jest.mock('../../../hooks', () => ({
   useIacProvisioner: jest.fn(),
   useStartServices: jest.fn(),
@@ -39,6 +42,9 @@ const mockUseVerifyIacKey = useVerifyIacKey as jest.MockedFunction<typeof useVer
 const mockUseCloudConnectorTemplate = useCloudConnectorTemplate as jest.MockedFunction<
   typeof useCloudConnectorTemplate
 >;
+const mockUseProvisioningCallback = useProvisioningCallback as jest.MockedFunction<
+  typeof useProvisioningCallback
+>;
 
 const { useIacProvisioner, useStartServices } = jest.requireMock('../../../hooks') as {
   useIacProvisioner: jest.MockedFunction<() => { isIacProvisionerEnabled: boolean }>;
@@ -52,6 +58,20 @@ const { updateCloudConnector: mockUpdateCloudConnector } = jest.requireMock(
 ) as { updateCloudConnector: jest.MockedFunction<(...args: unknown[]) => Promise<unknown>> };
 
 const mockHttp = { put: jest.fn() };
+const mockToastSuccess = jest.fn();
+const mockNotifications = { toasts: { addSuccess: mockToastSuccess } };
+
+const mockStartCallback = jest.fn();
+/** The callback hook in a given state; `start` resolves to the stack parameters of the record. */
+const setCallback = (overrides: Partial<ReturnType<typeof useProvisioningCallback>> = {}) =>
+  mockUseProvisioningCallback.mockReturnValue({
+    available: true,
+    isChecking: false,
+    status: 'idle',
+    start: mockStartCallback,
+    cancel: jest.fn().mockResolvedValue('cancelled'),
+    ...overrides,
+  });
 
 let queryClient: QueryClient;
 
@@ -99,7 +119,16 @@ beforeEach(() => {
   queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
 
   useIacProvisioner.mockReturnValue({ isIacProvisionerEnabled: true });
-  useStartServices.mockReturnValue({ analytics: { reportEvent: mockReportEvent }, http: mockHttp });
+  useStartServices.mockReturnValue({
+    analytics: { reportEvent: mockReportEvent },
+    http: mockHttp,
+    notifications: mockNotifications,
+  });
+  setCallback();
+  mockStartCallback.mockResolvedValue({
+    ElasticCallbackUrl: 'https://kb.example.com/api/fleet/iac_provisioner/callbacks/cb-2',
+    ElasticCallbackToken: 'tok-2',
+  });
 
   mockUseVerifyIacKey.mockReturnValue({
     data: undefined,
@@ -687,6 +716,117 @@ describe('IacKeyCheck', () => {
         expect(first).not.toHaveBeenCalled();
         expect(second).toHaveBeenCalledTimes(1);
       });
+    });
+  });
+
+  describe('reporting the applied update', () => {
+    /** The getLaunchStackParams the component hands the template hook, if any. */
+    const captureGetLaunchStackParams = () => {
+      let captured: Parameters<typeof useCloudConnectorTemplate>[0]['getLaunchStackParams'];
+      mockUseCloudConnectorTemplate.mockImplementation(({ getLaunchStackParams }) => {
+        captured = getLaunchStackParams;
+        return {
+          launchButtonProps: { onClick: mockLaunchOnClick },
+          isDisabled: false,
+          isGeneratingTemplate: false,
+          clearIacConfirm: jest.fn(),
+          isIacProvisionerEnabled: true,
+        };
+      });
+      return () => captured;
+    };
+    const RENDERED_IAC = {
+      iac_key: 'sha256:new',
+      iac_blueprint_id: 'federated-identity',
+      iac_blueprint_version: '1.0.0',
+    };
+
+    it('launches the update with a record of its own for the identity, carrying the rendered template details', async () => {
+      mockVerifyResult({ matches: false, reason: 'key_mismatch', integrations: [] });
+      const getLaunchStackParams = captureGetLaunchStackParams();
+
+      renderWithIntl(<IacKeyCheck {...defaultProps} />);
+
+      // The updated stack reports to this record, and its report records the template on the
+      // identity, so Kibana sees the update applied instead of trusting the launch.
+      expect(mockUseProvisioningCallback).toHaveBeenCalledWith({ enabled: true });
+      await expect(getLaunchStackParams()?.(RENDERED_IAC)).resolves.toEqual({
+        ElasticCallbackUrl: 'https://kb.example.com/api/fleet/iac_provisioner/callbacks/cb-2',
+        ElasticCallbackToken: 'tok-2',
+      });
+      expect(mockStartCallback).toHaveBeenCalledWith({
+        cloudConnectorId: 'connector-1',
+        iacKey: 'sha256:new',
+        iacBlueprintId: 'federated-identity',
+        iacBlueprintVersion: '1.0.0',
+      });
+    });
+
+    it('launches without a record when the stack cannot report back to this Kibana', () => {
+      mockVerifyResult({ matches: false, reason: 'key_mismatch', integrations: [] });
+      setCallback({ available: false, unavailableReason: 'no public URL' });
+      const getLaunchStackParams = captureGetLaunchStackParams();
+
+      renderWithIntl(<IacKeyCheck {...defaultProps} />);
+
+      expect(getLaunchStackParams()).toBeUndefined();
+    });
+
+    it('launches without a record while no identity is selected', () => {
+      mockVerifyResult({ matches: false, reason: 'key_mismatch', integrations: [] });
+      const getLaunchStackParams = captureGetLaunchStackParams();
+
+      renderWithIntl(<IacKeyCheck {...defaultProps} cloudConnectorId={undefined} />);
+
+      expect(getLaunchStackParams()).toBeUndefined();
+    });
+
+    it('says it is waiting for the stack to report while the record is pending', async () => {
+      mockVerifyResult({ matches: false, reason: 'key_mismatch', integrations: [] });
+      setCallback({ status: 'pending' });
+
+      renderWithIntl(<IacKeyCheck {...defaultProps} />);
+
+      expect(
+        await screen.findByTestId(CLOUD_CONNECTOR_IAC_CHECK_TEST_SUBJECTS.WAITING_FOR_REPORT)
+      ).toHaveTextContent('Waiting for CloudFormation to report the updated stack');
+    });
+
+    it('does not claim to be waiting once the wait is over without a report', () => {
+      mockVerifyResult({ matches: false, reason: 'key_mismatch', integrations: [] });
+      setCallback({ status: 'expired' });
+
+      renderWithIntl(<IacKeyCheck {...defaultProps} />);
+
+      expect(
+        screen.queryByTestId(CLOUD_CONNECTOR_IAC_CHECK_TEST_SUBJECTS.WAITING_FOR_REPORT)
+      ).not.toBeInTheDocument();
+    });
+
+    it('re-checks the identity and tells the user once the stack has reported, once per report', async () => {
+      mockVerifyResult({ matches: false, reason: 'key_mismatch', integrations: [] });
+      const invalidateQueriesSpy = jest.spyOn(queryClient, 'invalidateQueries');
+      const reported = {
+        id: 'connector-1',
+        name: 'my-identity',
+        role_arn: 'arn',
+        stack_arn: STACK_ARN,
+      };
+      setCallback({ status: 'received', created: reported });
+
+      const { rerender } = renderWithIntl(<IacKeyCheck {...defaultProps} />);
+
+      // The server recorded the template on the identity; the verdict is fetched again so the
+      // callout clears on what is stored, and the connector lists pick the change up.
+      await waitFor(() =>
+        expect(invalidateQueriesSpy).toHaveBeenCalledWith([VERIFY_IAC_KEY_QUERY_KEY])
+      );
+      expect(invalidateQueriesSpy).toHaveBeenCalledWith(['get-cloud-connectors']);
+      expect(invalidateQueriesSpy).toHaveBeenCalledWith(['cloud-connector-usage', 'connector-1']);
+      expect(mockToastSuccess).toHaveBeenCalledWith({ title: 'CloudFormation stack updated' });
+
+      rerender(withProviders(<IacKeyCheck {...defaultProps} />));
+      expect(mockToastSuccess).toHaveBeenCalledTimes(1);
     });
   });
 
