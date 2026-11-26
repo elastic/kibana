@@ -167,13 +167,13 @@ dependsOn:
   - '@kbn/deeplinks-analytics'
   - '@kbn/core-user-profile-common'
   - '@kbn/significant-events-plugin'
+  - '@kbn/osquery-plugin'
 tags:
   - test-helper
   - package
   - dev
   - group-platform
   - shared
-  - jest-unit-tests
 fileGroups:
   src:
     - index.d.ts

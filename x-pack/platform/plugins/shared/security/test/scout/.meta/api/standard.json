@@ -1,5 +1,5 @@
 {
-  "sha1": "aa22bdd03f2f5f2b7fe230d95a6d21603487142f",
+  "sha1": "3ec32beb1f13437f455a3087dc1f68753bff8e80",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -14,8 +14,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout/api/tests/builtin_roles_kibana_access.spec.ts",
-        "line": 122,
-        "column": 10
+        "line": 121,
+        "column": 17
       }
     },
     {
@@ -28,8 +28,22 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout/api/tests/builtin_roles_kibana_access.spec.ts",
-        "line": 152,
-        "column": 10
+        "line": 138,
+        "column": 7
+      }
+    },
+    {
+      "id": "34768dcfde18be8-8bca71c8308d16e",
+      "title": "Session IDs creates a URL-safe document ID and keeps the session usable",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout/api/tests/session_id.spec.ts",
+        "line": 43,
+        "column": 89
       }
     },
     {
@@ -42,8 +56,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout/api/tests/xsrf_authorization_scheme_bypass.spec.ts",
-        "line": 85,
-        "column": 12
+        "line": 79,
+        "column": 1
       }
     },
     {
@@ -56,8 +70,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout/api/tests/xsrf_authorization_scheme_bypass.spec.ts",
-        "line": 109,
-        "column": 12
+        "line": 103,
+        "column": 27
       }
     }
   ]

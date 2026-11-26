@@ -168,7 +168,9 @@ const InputMigrationCallout = () => (
 export const UpgradeStatusCallout: React.FunctionComponent<{
   dryRunData: UpgradePackagePolicyDryRunResponse;
   newSecrets: RegistryVarsEntry[];
-}> = ({ dryRunData, newSecrets }) => {
+  /** Set when the agent version callout already warns about this upgrade. */
+  hasAgentVersionIncompatibility?: boolean;
+}> = ({ dryRunData, newSecrets, hasAgentVersionIncompatibility = false }) => {
   const [isPreviousVersionFlyoutOpen, setIsPreviousVersionFlyoutOpen] = useState<boolean>(false);
 
   if (!dryRunData) {
@@ -212,11 +214,14 @@ export const UpgradeStatusCallout: React.FunctionComponent<{
         </EuiPortal>
       )}
 
+      {/* The upgrade isn't presented as ready while some agents would stop collecting data */}
       {isReadyForUpgrade ? (
-        <ReadyToUpgradeCallOut
-          currentPackagePolicy={currentPackagePolicy}
-          proposedUpgradePackagePolicy={proposedUpgradePackagePolicy}
-        />
+        hasAgentVersionIncompatibility ? null : (
+          <ReadyToUpgradeCallOut
+            currentPackagePolicy={currentPackagePolicy}
+            proposedUpgradePackagePolicy={proposedUpgradePackagePolicy}
+          />
+        )
       ) : (
         <HasConflictsCallout
           currentPackagePolicy={currentPackagePolicy}

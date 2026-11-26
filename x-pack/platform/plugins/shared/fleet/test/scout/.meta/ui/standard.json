@@ -1,5 +1,5 @@
 {
-  "sha1": "1249c0d8a98ee6d30603e1b8d1d584e62ae200d9",
+  "sha1": "0c91124b91a86c7e70caefe4b5fe1e4daa0e44f3",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -14,8 +14,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/fleet/test/scout/ui/tests/add_integration_navigation.spec.ts",
-        "line": 24,
-        "column": 7
+        "line": 16,
+        "column": 45
       }
     },
     {
@@ -28,8 +28,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/fleet/test/scout/ui/tests/browse_integration.spec.ts",
-        "line": 44,
-        "column": 7
+        "line": 35,
+        "column": 52
       }
     },
     {
@@ -42,8 +42,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/fleet/test/scout/ui/tests/browse_integration.spec.ts",
-        "line": 59,
-        "column": 7
+        "line": 42,
+        "column": 5
       }
     },
     {
@@ -56,8 +56,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/fleet/test/scout/ui/tests/browse_integration.spec.ts",
-        "line": 72,
-        "column": 7
+        "line": 54,
+        "column": 11
       }
     },
     {
@@ -69,8 +69,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/fleet/test/scout/ui/tests/copy_integration.spec.ts",
-        "line": 120,
-        "column": 7
+        "line": 130,
+        "column": 5
       }
     },
     {
@@ -83,8 +83,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/fleet/test/scout/ui/tests/privileges_editor_role.spec.ts",
-        "line": 15,
-        "column": 7
+        "line": 14,
+        "column": 14
       }
     },
     {
@@ -97,8 +97,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/fleet/test/scout/ui/tests/privileges_editor_role.spec.ts",
-        "line": 53,
-        "column": 7
+        "line": 40,
+        "column": 13
       }
     },
     {
@@ -111,8 +111,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/fleet/test/scout/ui/tests/privileges_editor_role.spec.ts",
-        "line": 87,
-        "column": 7
+        "line": 66,
+        "column": 20
       }
     },
     {
@@ -124,8 +124,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/fleet/test/scout/ui/tests/privileges_fleet_agents_read_integrations_none.spec.ts",
-        "line": 18,
-        "column": 9
+        "line": 15,
+        "column": 3
       }
     },
     {
@@ -137,8 +137,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/fleet/test/scout/ui/tests/privileges_fleet_agents_read_integrations_none.spec.ts",
-        "line": 39,
-        "column": 9
+        "line": 26,
+        "column": 23
       }
     },
     {
@@ -150,8 +150,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/fleet/test/scout/ui/tests/privileges_fleet_all_integrations_none.spec.ts",
-        "line": 17,
-        "column": 9
+        "line": 13,
+        "column": 14
       }
     },
     {
@@ -164,8 +164,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/fleet/test/scout/ui/tests/privileges_fleet_all_integrations_read.spec.ts",
-        "line": 40,
-        "column": 9
+        "line": 35,
+        "column": 7
       }
     },
     {
@@ -178,8 +178,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/fleet/test/scout/ui/tests/privileges_fleet_all_integrations_read.spec.ts",
-        "line": 61,
-        "column": 9
+        "line": 51,
+        "column": 24
       }
     },
     {
@@ -192,8 +192,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/fleet/test/scout/ui/tests/privileges_fleet_none_integrations_all.spec.ts",
-        "line": 18,
-        "column": 9
+        "line": 14,
+        "column": 14
       }
     },
     {
@@ -205,8 +205,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/fleet/test/scout/ui/tests/privileges_viewer_role.spec.ts",
-        "line": 15,
-        "column": 7
+        "line": 14,
+        "column": 14
       }
     },
     {
@@ -218,8 +218,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/fleet/test/scout/ui/tests/privileges_viewer_role.spec.ts",
-        "line": 36,
-        "column": 7
+        "line": 27,
+        "column": 24
       }
     },
     {
@@ -231,8 +231,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/fleet/test/scout/ui/tests/privileges_viewer_role.spec.ts",
-        "line": 51,
-        "column": 7
+        "line": 33,
+        "column": 11
       }
     },
     {
@@ -244,8 +244,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/fleet/test/scout/ui/tests/privileges_viewer_role.spec.ts",
-        "line": 67,
-        "column": 7
+        "line": 43,
+        "column": 21
       }
     }
   ]

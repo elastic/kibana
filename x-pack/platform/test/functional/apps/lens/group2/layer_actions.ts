@@ -15,6 +15,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
 
   describe('lens layer actions tests', () => {
+    afterEach(async () => {
+      // A failed test can leave the layer settings flyout open, covering the buttons the next test clicks.
+      await lens.closeFlyoutWithBackButton();
+    });
+
     it('should allow creation of lens xy chart', async () => {
       await visualize.navigateToNewVisualization();
       await visualize.clickVisType('lens');

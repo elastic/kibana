@@ -104,3 +104,4 @@ export type {
 export type { Locator, CDPSession } from 'playwright/test';
 
 export { ELASTICSEARCH_MAX_RESPONSE_SIZE_BYTES } from './src/servers/configs/config_sets/es_max_response_size/shared';
+export { getAgentBuilderSmokeEisModels } from './src/servers/configs/config_sets/agent_builder_smoke/eis_models';

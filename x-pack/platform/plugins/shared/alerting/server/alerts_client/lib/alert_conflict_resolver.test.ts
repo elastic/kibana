@@ -10,6 +10,7 @@ import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import {
   ALERT_CASE_IDS,
   ALERT_INSTANCE_ID,
+  ALERT_RULE_EXECUTION_UUID,
   ALERT_STATUS,
   ALERT_UUID,
   ALERT_WORKFLOW_STATUS,
@@ -42,6 +43,7 @@ const alertDoc = {
   [ALERT_CASE_IDS]: ['123', '456', '789'],
   [ALERT_UUID]: 'alert-uuid-from-doc',
   [ALERT_INSTANCE_ID]: 'instance-from-doc',
+  [ALERT_RULE_EXECUTION_UUID]: 'this-execution',
 };
 
 const noUnresolvedErrors = { unresolvedCount: 0, permanentCount: 0, unresolvedErrorTypes: {} };
@@ -685,9 +687,12 @@ describe('alert_conflict_resolver', () => {
       items: [getResponseItem('index', id, true, 429, 'es_rejected_execution_exception')],
     });
 
-    test('when other writes still fail after all retries, but not the ones whose create conflicted', async () => {
+    test('when other writes still fail after all retries, but not docs from an earlier run', async () => {
       const { bulkRequest, bulkResponse } = getReqRes('c cc cr ir');
 
+      esClient.mget.mockResolvedValueOnce({
+        docs: [getExistingDoc(2, { execution: 'earlier-execution', version: 3 })],
+      });
       esClient.bulk
         .mockResolvedValueOnce({
           errors: true,
@@ -724,6 +729,10 @@ describe('alert_conflict_resolver', () => {
         unresolvedErrorTypes: { es_rejected_execution_exception: 1 },
       });
       expect(esClient.bulk).toHaveBeenCalledTimes(4);
+      expect(esClient.mget).toHaveBeenCalledWith({
+        docs: [{ _id: 'id-2', _index: 'index-2' }],
+        _source_includes: [ALERT_RULE_EXECUTION_UUID],
+      });
       expect(esClient.bulk.mock.calls[3][0]).toEqual({
         refresh: 'wait_for',
         operations: [getCreatedDeleteOp(1), getCreatedDeleteOp(3)],
@@ -732,6 +741,97 @@ describe('alert_conflict_resolver', () => {
         `Deleted 2 alerts created by this run so the next run reports them as new ${ruleInfo}`,
         logTags
       );
+    });
+
+    test('including docs an earlier attempt of this run wrote, when nobody changed them since', async () => {
+      const { bulkRequest, bulkResponse } = getReqRes('cc ir');
+
+      esClient.mget.mockResolvedValueOnce({
+        docs: [getExistingDoc(1, { execution: 'this-execution', version: 1 })],
+      });
+      esClient.bulk
+        .mockResolvedValueOnce(stillRejected(2))
+        .mockResolvedValueOnce(stillRejected(2))
+        .mockResolvedValueOnce(stillRejected(2))
+        .mockResolvedValueOnce({
+          errors: false,
+          took: 0,
+          items: [getResponseItem('delete', 1, false, 200)],
+        });
+
+      await resolveAlertConflicts({
+        logger,
+        esClient,
+        bulkRequest,
+        bulkResponse,
+        ruleId,
+        ruleName,
+        ruleType,
+      });
+
+      expect(esClient.bulk).toHaveBeenCalledTimes(4);
+      expect(esClient.bulk.mock.calls[3][0]).toEqual({
+        refresh: 'wait_for',
+        operations: [
+          { delete: { _id: 'id-1', _index: 'index-1', if_seq_no: 5, if_primary_term: 1 } },
+        ],
+      });
+    });
+
+    test('but not docs changed since an earlier attempt of this run wrote them', async () => {
+      const { bulkRequest, bulkResponse } = getReqRes('cc ir');
+
+      esClient.mget.mockResolvedValueOnce({
+        docs: [getExistingDoc(1, { execution: 'this-execution', version: 2 })],
+      });
+      esClient.bulk.mockResolvedValue(stillRejected(2));
+
+      await resolveAlertConflicts({
+        logger,
+        esClient,
+        bulkRequest,
+        bulkResponse,
+        ruleId,
+        ruleName,
+        ruleType,
+      });
+
+      expect(esClient.mget).toHaveBeenCalledTimes(1);
+      expect(esClient.bulk).toHaveBeenCalledTimes(3);
+    });
+
+    test('and still deletes the other alerts when fetching the existing docs fails', async () => {
+      const { bulkRequest, bulkResponse } = getReqRes('c cc ir');
+
+      esClient.mget.mockRejectedValueOnce(new Error('mget failed'));
+      esClient.bulk
+        .mockResolvedValueOnce(stillRejected(3))
+        .mockResolvedValueOnce(stillRejected(3))
+        .mockResolvedValueOnce(stillRejected(3))
+        .mockResolvedValueOnce({
+          errors: false,
+          took: 0,
+          items: [getResponseItem('delete', 1, false, 200)],
+        });
+
+      await resolveAlertConflicts({
+        logger,
+        esClient,
+        bulkRequest,
+        bulkResponse,
+        ruleId,
+        ruleName,
+        ruleType,
+      });
+
+      expect(logger.warn).toHaveBeenCalledWith(
+        `Error fetching 1 alerts that already existed ${ruleInfo}, they are not deleted - mget failed`,
+        logTags
+      );
+      expect(esClient.bulk.mock.calls[3][0]).toEqual({
+        refresh: 'wait_for',
+        operations: [getCreatedDeleteOp(1)],
+      });
     });
 
     test('when a retry throws', async () => {
@@ -1022,6 +1122,22 @@ function getDeleteOp(id: number) {
       _id: `id-${id}`,
       _index: `index-${id}`,
     },
+  };
+}
+
+// the doc a create conflicted with, as returned by mget
+function getExistingDoc(
+  id: number,
+  { execution, version }: { execution: string; version: number }
+) {
+  return {
+    _index: `index-${id}`,
+    _id: `id-${id}`,
+    _version: version,
+    _seq_no: 5,
+    _primary_term: 1,
+    found: true,
+    _source: { [ALERT_RULE_EXECUTION_UUID]: execution },
   };
 }
 

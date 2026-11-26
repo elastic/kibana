@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-import axios from 'axios';
+import type { AxiosResponse } from 'axios';
+import axios, { AxiosError } from 'axios';
+import { applyNetworkErrorMessage } from '@kbn/actions-plugin/server/lib/network_error_message';
 
 import type { Logger } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
@@ -17,7 +19,7 @@ import {
   getAxiosInstance,
   throwIfAdditionalFieldsNotSupported,
 } from './utils';
-import type { ResponseError } from './types';
+import type { ResponseError, ServiceNowError } from './types';
 import { connectorTokenClientMock } from '@kbn/actions-plugin/server/lib/connector_token_client.mock';
 import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
 import { getOAuthJwtAccessToken } from '@kbn/actions-plugin/server/lib/get_oauth_jwt_access_token';
@@ -33,6 +35,19 @@ jest.mock('axios', () => ({
   AxiosError: jest.requireActual('axios').AxiosError,
 }));
 const createAxiosInstanceMock = axios.create as jest.Mock;
+
+const createServiceNowAxiosError = (
+  message: string,
+  code: string,
+  response?: Partial<AxiosResponse<ServiceNowError>>
+): ResponseError =>
+  new AxiosError<ServiceNowError>(
+    message,
+    code,
+    undefined,
+    undefined,
+    response as AxiosResponse<ServiceNowError> | undefined
+  );
 const axiosInstanceMock = {
   interceptors: {
     request: { eject: jest.fn(), use: jest.fn() },
@@ -132,7 +147,6 @@ describe('utils', () => {
     describe('OAuth errors', () => {
       test('it extracts error and error_description from JSON in error message', async () => {
         const error = new Error('{"error":"invalid_grant","error_description":"User not found"}');
-        // @ts-expect-error
         expect(addServiceMessageToError(error, 'Unable to do action').message).toBe(
           '[Action][ServiceNow]: Unable to do action. Error: invalid_grant Reason: User not found'
         );
@@ -140,11 +154,24 @@ describe('utils', () => {
 
       test('it handles OAuth error without error_description', async () => {
         const error = new Error('{"error":"invalid_grant"}');
-        // @ts-expect-error
         expect(addServiceMessageToError(error, 'Unable to do action').message).toBe(
           '[Action][ServiceNow]: Unable to do action. Error: invalid_grant'
         );
       });
+    });
+  });
+
+  describe('network-level errors', () => {
+    test('reports a connection reset with a descriptive message when getting choices', () => {
+      const err = createServiceNowAxiosError('read ECONNRESET', 'ECONNRESET');
+      err.cause = Object.assign(new Error('read ECONNRESET'), { code: 'ECONNRESET' });
+      applyNetworkErrorMessage(err);
+
+      addServiceMessageToError(err, 'Unable to get choices');
+
+      expect(err.message).toBe(
+        '[Action][ServiceNow]: Unable to get choices. Error: The connection was interrupted before a response was received (read ECONNRESET)'
+      );
     });
   });
 

@@ -44,6 +44,7 @@ import {
   sendCreatePackagePolicyForRq,
 } from '../../../../../hooks';
 import {
+  getAgentVersionBlockFromError,
   isVerificationError,
   packageToPackagePolicy,
   ExperimentalFeaturesService,
@@ -54,6 +55,7 @@ import {
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
   SO_SEARCH_LIMIT,
 } from '../../../../../../../../common';
+import type { AgentVersionBlock } from '../../../../../../../../common/types';
 import { getMaxPackageName } from '../../../../../../../../common/services';
 import { isInputAllowedForDeploymentMode } from '../../../../../../../../common/services/agentless_policy_helper';
 import { useConfirmForceInstall } from '../../../../../../integrations/hooks';
@@ -290,6 +292,13 @@ export function useOnSubmit({
   const [savedPackagePolicy, setSavedPackagePolicy] = useState<SavedPolicyResult>();
   // Create dataset templates toggle (checked/recommended by default)
   const [createDatasetTemplates, setCreateDatasetTemplates] = useState<boolean>(true);
+  // Set from the incompatible agent version callout, to create the package policy even though some
+  // agents don't satisfy the package's agent version condition
+  const [acknowledgeAgentVersionIncompatibility, setAcknowledgeAgentVersionIncompatibility] =
+    useState<boolean>(false);
+  // Set when Fleet rejected the package policy because some agents don't satisfy the package's
+  // agent version condition, so that it can be acknowledged even if the agent counts don't show it
+  const [serverAgentVersionBlock, setServerAgentVersionBlock] = useState<AgentVersionBlock>();
   // Form state
   const [formState, setFormState] = useState<PackagePolicyFormState>('VALID');
   const [submitAttempted, setSubmitAttempted] = useState(false);
@@ -304,6 +313,15 @@ export function useOnSubmit({
     ...DEFAULT_PACKAGE_POLICY,
   });
   const [integration, setIntegration] = useState<string | undefined>(integrationToEnable);
+
+  // An acknowledgement only applies to the agent policies and package version it was given for
+  const agentVersionGuardKey = `${packagePolicy.package?.version}|${packagePolicy.policy_ids.join(
+    ','
+  )}`;
+  useEffect(() => {
+    setAcknowledgeAgentVersionIncompatibility(false);
+    setServerAgentVersionBlock(undefined);
+  }, [agentVersionGuardKey]);
 
   // Validation state
   const [validationResults, setValidationResults] = useState<PackagePolicyValidationResults>();
@@ -732,6 +750,9 @@ export function useOnSubmit({
             policy_ids: agentPolicyIdToSave,
             force: forceInstall,
             create_dataset_templates: createDatasetTemplates,
+            ...(acknowledgeAgentVersionIncompatibility && {
+              acknowledge_agent_version_incompatibility: true,
+            }),
           },
           varGroups,
           packageInfo
@@ -843,6 +864,11 @@ export function useOnSubmit({
           }
           return;
         }
+        const agentVersionBlock = getAgentVersionBlockFromError(error);
+        if (agentVersionBlock) {
+          setServerAgentVersionBlock(agentVersionBlock);
+          setAcknowledgeAgentVersionIncompatibility(false);
+        }
         notifications.toasts.addError(error, {
           title: 'Error',
         });
@@ -871,6 +897,7 @@ export function useOnSubmit({
       onSaveNavigate,
       confirmForceInstall,
       createDatasetTemplates,
+      acknowledgeAgentVersionIncompatibility,
       reportCredentialsAdded,
       reportDeployClicked,
       reportEnrollmentSucceeded,
@@ -903,5 +930,8 @@ export function useOnSubmit({
     submitAttempted,
     createDatasetTemplates,
     setCreateDatasetTemplates,
+    acknowledgeAgentVersionIncompatibility,
+    setAcknowledgeAgentVersionIncompatibility,
+    serverAgentVersionBlock,
   };
 }

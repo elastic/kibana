@@ -1,5 +1,5 @@
 {
-  "sha1": "b00a65bf6d1abe6faeb621f05bc64ebf0fd46b19",
+  "sha1": "9787350b5be0dcc728fab41decb47cea72eb42b7",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -13,7 +13,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/tests/esql_conversion_disabled.spec.ts",
-        "line": 28,
+        "line": 19,
         "column": 7
       }
     },
@@ -26,8 +26,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/tests/esql_conversion_enabled.spec.ts",
-        "line": 57,
-        "column": 7
+        "line": 43,
+        "column": 21
       }
     },
     {
@@ -39,7 +39,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/tests/esql_conversion_enabled.spec.ts",
-        "line": 77,
+        "line": 54,
         "column": 7
       }
     },
@@ -52,8 +52,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/tests/esql_conversion_enabled.spec.ts",
-        "line": 108,
-        "column": 7
+        "line": 77,
+        "column": 8
       }
     },
     {
@@ -65,8 +65,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/tests/esql_conversion_enabled.spec.ts",
-        "line": 126,
-        "column": 7
+        "line": 88,
+        "column": 11
       }
     },
     {
@@ -78,8 +78,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/tests/metric_trendline_custom_time_field.spec.ts",
-        "line": 70,
-        "column": 9
+        "line": 56,
+        "column": 69
       }
     }
   ]

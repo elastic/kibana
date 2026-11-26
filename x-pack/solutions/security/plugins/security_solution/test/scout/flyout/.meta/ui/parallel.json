@@ -1,5 +1,5 @@
 {
-  "sha1": "4eced103d162a881b507a8ec4ec6633713428f8c",
+  "sha1": "5e8381f2f59e9c9ebad4752f56f340c7a16fa6a8",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -11,8 +11,8 @@
       "tags": [],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/flyout/ui/parallel_tests/global.setup.ts",
-        "line": 10,
-        "column": 16
+        "line": 5,
+        "column": 1
       }
     },
     {
@@ -27,8 +27,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/flyout/ui/parallel_tests/alert_details_url_sync.spec.ts",
-        "line": 33,
-        "column": 14
+        "line": 27,
+        "column": 7
       }
     },
     {
@@ -43,8 +43,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/flyout/ui/parallel_tests/flyout_v2/document/main/document_flyout.spec.ts",
-        "line": 41,
-        "column": 14
+        "line": 36,
+        "column": 52
       }
     },
     {
@@ -59,8 +59,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/flyout/ui/parallel_tests/flyout_v2/document/main/document_flyout.spec.ts",
-        "line": 75,
-        "column": 14
+        "line": 62,
+        "column": 9
       }
     },
     {
@@ -75,8 +75,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/flyout/ui/parallel_tests/flyout_v2/document/main/investigation.spec.ts",
-        "line": 37,
-        "column": 14
+        "line": 31,
+        "column": 64
       }
     },
     {
@@ -91,8 +91,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/flyout/ui/parallel_tests/flyout_v2/document/main/take_action.spec.ts",
-        "line": 41,
-        "column": 14
+        "line": 36,
+        "column": 15
       }
     },
     {
@@ -107,8 +107,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/flyout/ui/parallel_tests/flyout_v2/document/tools/analyzer.spec.ts",
-        "line": 47,
-        "column": 14
+        "line": 38,
+        "column": 25
       }
     },
     {
@@ -123,8 +123,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/flyout/ui/parallel_tests/flyout_v2/document/tools/analyzer.spec.ts",
-        "line": 70,
-        "column": 14
+        "line": 60,
+        "column": 34
       }
     },
     {
@@ -139,8 +139,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/flyout/ui/parallel_tests/flyout_v2/document/tools/correlations.spec.ts",
-        "line": 38,
-        "column": 14
+        "line": 32,
+        "column": 45
       }
     },
     {
@@ -155,8 +155,24 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/flyout/ui/parallel_tests/flyout_v2/document/tools/prevalence.spec.ts",
-        "line": 39,
-        "column": 14
+        "line": 33,
+        "column": 36
+      }
+    },
+    {
+      "id": "f0304b4b9a64817-3ea4a4b2b408d9a",
+      "title": "Document flyout v2 — Threat intelligence tool shows each matching indicator once and the insights count matches the tool",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/flyout/ui/parallel_tests/flyout_v2/document/tools/threat_intelligence.spec.ts",
+        "line": 104,
+        "column": 56
       }
     },
     {
@@ -171,8 +187,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/flyout/ui/parallel_tests/flyout_v2/entity/main/host_flyout.spec.ts",
-        "line": 51,
-        "column": 14
+        "line": 42,
+        "column": 25
       }
     },
     {
@@ -187,8 +203,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/flyout/ui/parallel_tests/flyout_v2/entity/main/user_flyout.spec.ts",
-        "line": 51,
-        "column": 14
+        "line": 42,
+        "column": 25
       }
     },
     {
@@ -203,8 +219,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/flyout/ui/parallel_tests/flyout_v2/entity/tools/host_alerts_insights.spec.ts",
-        "line": 47,
-        "column": 14
+        "line": 39,
+        "column": 7
       }
     },
     {
@@ -219,8 +235,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/flyout/ui/parallel_tests/flyout_v2/network/network_flyout.spec.ts",
-        "line": 43,
-        "column": 14
+        "line": 35,
+        "column": 7
       }
     },
     {
@@ -235,8 +251,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/flyout/ui/parallel_tests/flyout_v2/rule/rule_flyout.spec.ts",
-        "line": 39,
-        "column": 14
+        "line": 34,
+        "column": 15
       }
     }
   ]

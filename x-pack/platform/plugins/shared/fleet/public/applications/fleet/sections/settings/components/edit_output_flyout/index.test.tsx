@@ -1054,6 +1054,93 @@ describe('EditOutputFlyout', () => {
       });
     });
 
+    describe('otel_disable_beatsauth save payload', () => {
+      const renderEsFlyout = (otelDisableBeatsauth?: boolean | null) => {
+        jest.spyOn(ExperimentalFeaturesService, 'get').mockReturnValue({} as any);
+        mockedUseFleetStatus.mockReturnValue({
+          isLoading: false,
+          isReady: true,
+          isSecretsStorageEnabled: true,
+        } as any);
+
+        return renderFlyout({
+          type: 'elasticsearch',
+          name: 'elasticsearch output',
+          id: 'output123',
+          is_default: false,
+          is_default_monitoring: false,
+          hosts: ['http://localhost:9200'],
+          ...(otelDisableBeatsauth !== undefined
+            ? { otel_disable_beatsauth: otelDisableBeatsauth }
+            : {}),
+        }).utils;
+      };
+
+      const changeNameAndSave = (utils: ReturnType<typeof renderEsFlyout>) => {
+        fireEvent.change(utils.getByDisplayValue('elasticsearch output'), {
+          target: { value: 'updated output name' },
+        });
+        fireEvent.click(utils.getByText('Save and apply settings'));
+      };
+
+      it('should send null when the toggle was not touched and the output has it unset', async () => {
+        const utils = renderEsFlyout();
+        changeNameAndSave(utils);
+
+        await waitFor(() => {
+          expect(mockSendPutOutput).toHaveBeenCalledWith(
+            'output123',
+            expect.objectContaining({ otel_disable_beatsauth: null })
+          );
+        });
+      });
+
+      it.each([true, false])(
+        'should re-save the stored %s value when the toggle was not touched',
+        async (stored) => {
+          const utils = renderEsFlyout(stored);
+          changeNameAndSave(utils);
+
+          await waitFor(() => {
+            expect(mockSendPutOutput).toHaveBeenCalledWith(
+              'output123',
+              expect.objectContaining({ otel_disable_beatsauth: stored })
+            );
+          });
+        }
+      );
+
+      it('should send true when the toggle is turned on', async () => {
+        const utils = renderEsFlyout();
+        fireEvent.click(utils.getByText('OpenTelemetry exporter'));
+        fireEvent.click(utils.getByTestId('settingsOutputsFlyout.otelDisableBeatsauthToggle'));
+        changeNameAndSave(utils);
+
+        await waitFor(() => {
+          expect(mockSendPutOutput).toHaveBeenCalledWith(
+            'output123',
+            expect.objectContaining({ otel_disable_beatsauth: true })
+          );
+        });
+      });
+
+      it('should send false when the toggle is turned on and then off', async () => {
+        const utils = renderEsFlyout();
+        fireEvent.click(utils.getByText('OpenTelemetry exporter'));
+        const toggle = utils.getByTestId('settingsOutputsFlyout.otelDisableBeatsauthToggle');
+        fireEvent.click(toggle);
+        fireEvent.click(toggle);
+        changeNameAndSave(utils);
+
+        await waitFor(() => {
+          expect(mockSendPutOutput).toHaveBeenCalledWith(
+            'output123',
+            expect.objectContaining({ otel_disable_beatsauth: false })
+          );
+        });
+      });
+    });
+
     it.each([
       {
         type: 'elasticsearch' as const,

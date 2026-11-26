@@ -517,7 +517,7 @@
     },
     {
       "groupName": "@elastic/contextual-security-apps dependencies",
-      "matchDepNames": ["@mswjs/http-middleware", "@types/byte-size", "byte-size", "msw", "@xterm/xterm"],
+      "matchDepNames": ["@msw/serve", "@types/byte-size", "byte-size", "msw", "@xterm/xterm"],
       "reviewers": ["team:contextual-security-apps", "team:siem-beacon"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Team:Cloud Security"],
@@ -1569,15 +1569,6 @@
     {
       "groupName": "json-schema-typed",
       "matchDepNames": ["json-schema-typed"],
-      "reviewers": ["team:kibana-operations"],
-      "matchBaseBranches": ["main"],
-      "addLabels": ["Team:Operations"],
-      "minimumReleaseAge": "14 days",
-      "enabled": true
-    },
-    {
-      "groupName": "lmdb",
-      "matchDepNames": ["lmdb"],
       "reviewers": ["team:kibana-operations"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Team:Operations"],

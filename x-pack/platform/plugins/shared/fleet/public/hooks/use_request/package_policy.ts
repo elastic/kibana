@@ -211,12 +211,12 @@ export function sendUpgradePackagePolicyDryRun(
 
 export function useUpgradePackagePoliciesMutation() {
   return useMutation<
-    UpgradePackagePolicyDryRunResponse,
+    UpgradePackagePolicyResponse,
     RequestError,
     { packagePolicyIds: string[]; acknowledgeBreakingChanges?: boolean }
   >(
     ({ packagePolicyIds, acknowledgeBreakingChanges }) =>
-      sendRequestForRq<UpgradePackagePolicyDryRunResponse>({
+      sendRequestForRq<UpgradePackagePolicyResponse>({
         path: packagePolicyRouteService.getUpgradePath(),
         method: 'post',
         version: API_VERSIONS.public.v1,

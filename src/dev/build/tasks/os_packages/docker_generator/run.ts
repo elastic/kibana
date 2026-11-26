@@ -52,7 +52,7 @@ export async function runDockerGenerator(
    */
   if (flags.baseImage === 'wolfi')
     baseImageName =
-      'docker.elastic.co/wolfi/chainguard-base:latest@sha256:0a6f6d3cf5a9280ed2a5171e8fe97dbe98fc6f17de2f50d31de3b2168c5402e7';
+      'docker.elastic.co/wolfi/chainguard-base:latest@sha256:0e8c6084fa5d6a0e83d62d60b47555c1d550aa0eb507d70371ba078111e51b5f';
 
   let imageFlavor = '';
   if (flags.baseImage === 'wolfi' && !flags.serverless && !flags.cloud) imageFlavor += `-wolfi`;

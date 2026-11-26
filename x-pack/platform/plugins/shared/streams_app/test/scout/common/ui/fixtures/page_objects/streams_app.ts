@@ -120,12 +120,16 @@ export class StreamsApp {
     });
   }
 
-  async gotoStreamManagementTab(streamName: string, tabName: string) {
-    await this.page.gotoApp(`streams/${streamName}/management/${tabName}`);
+  async gotoStreamManagementTab(
+    streamName: string,
+    tabName: string,
+    options?: Parameters<ScoutPage['gotoApp']>[1]
+  ) {
+    await this.page.gotoApp(`streams/${streamName}/management/${tabName}`, options);
   }
 
-  async gotoPartitioningTab(streamName: string) {
-    await this.gotoStreamManagementTab(streamName, 'partitioning');
+  async gotoPartitioningTab(streamName: string, options?: Parameters<ScoutPage['gotoApp']>[1]) {
+    await this.gotoStreamManagementTab(streamName, 'partitioning', options);
   }
 
   async gotoDataRetentionTab(streamName: string) {
@@ -133,7 +137,13 @@ export class StreamsApp {
   }
 
   async gotoDataQualityTab(streamName: string) {
-    await this.gotoStreamManagementTab(streamName, 'dataQuality');
+    // The KPI cards sit behind the stream definition fetch, the dataset quality controller and two
+    // lazy chunks, and this card only gets its test subject once the last chunk has resolved
+    await this.gotoStreamManagementTab(streamName, 'dataQuality', {
+      readyWhen: this.page.testSubj.locator(
+        'datasetQualityDetailsSummaryKpiCard-Degraded documents'
+      ),
+    });
   }
 
   async gotoOverviewTab(streamName: string) {

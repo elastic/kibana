@@ -28,9 +28,10 @@ jest.mock('@kbn/expandable-flyout', () => ({
   useExpandableFlyoutState: jest.fn().mockReturnValue({ left: {} }),
 }));
 
-jest.mock('../../common/hooks/use_ai_connectors', () => ({
-  useAIConnectors: jest.fn().mockReturnValue({
-    aiConnectors: [
+jest.mock('@kbn/inference-connectors', () => ({
+  ...jest.requireActual('@kbn/inference-connectors'),
+  useLoadConnectors: jest.fn().mockReturnValue({
+    data: [
       {
         id: 'test-connector-id',
         name: 'Test Connector',
@@ -38,7 +39,6 @@ jest.mock('../../common/hooks/use_ai_connectors', () => ({
       },
     ],
     isLoading: false,
-    error: null,
   }),
 }));
 

@@ -143,6 +143,12 @@ export {
   isAgentVersionLessThanFleetServer,
 } from './check_fleet_server_versions';
 
+export {
+  agentLosesPackageInputs,
+  agentSatisfiesPackageVersionCondition,
+  getAgentVersionBlockers,
+} from './agent_version_compatibility';
+export type { AgentVersionBlockers } from './agent_version_compatibility';
 export { removeSOAttributes, getSortConfig, checkTargetVersionsValidity } from './agent_utils';
 
 export { isAwsCloudConnectorVars, isAzureCloudConnectorVars } from './cloud_connector_helpers';
