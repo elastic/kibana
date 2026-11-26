@@ -79,7 +79,7 @@ new RunWithCommands(
         characters, so the dataset fits the 5 MiB dataset upsert.
 
         --out writes one conversations file: the form a stored dataset is uploaded from (with
-        NIGHTSHIFT_WRITEUP_EXAMPLES_FILE) and kept in GCS. Rebuilding an existing file keeps each
+        NIGHTSHIFT_DATASET_NAME set to its path) and kept in GCS. Rebuilding an existing file keeps each
         conversation's reply_types and follow_ups.
 
         --goldens-dir writes the goldens as one Markdown file per round there instead of into the

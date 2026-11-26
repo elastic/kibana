@@ -8,14 +8,12 @@
 import type { CoreStart } from '@kbn/core/public';
 import type { ISearchMethods } from '@kbn/search-types';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
-import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { FilterManager } from '@kbn/data-plugin/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 
 interface Services {
   core: CoreStart;
   search: Pick<ISearchMethods, 'esql'>;
-  dataViews: DataViewsPublicPluginStart;
   agentBuilder: AgentBuilderPluginStart | undefined;
   uiActions: UiActionsStart;
   filterManager: FilterManager;
@@ -26,12 +24,11 @@ let services: Services | undefined;
 export const setServices = (
   core: CoreStart,
   search: Pick<ISearchMethods, 'esql'>,
-  dataViews: DataViewsPublicPluginStart,
   agentBuilder: AgentBuilderPluginStart | undefined,
   uiActions: UiActionsStart,
   filterManager: FilterManager
 ) => {
-  services = { core, search, dataViews, agentBuilder, uiActions, filterManager };
+  services = { core, search, agentBuilder, uiActions, filterManager };
 };
 
 export const getServices = (): Services => {
