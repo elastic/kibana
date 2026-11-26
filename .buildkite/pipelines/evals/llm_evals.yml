@@ -605,6 +605,34 @@ steps:
           automatic:
             - exit_status: '-1'
               limit: 3
+
+      - label: 'Evals: Memory LongMemEval-S Direct Index'
+        key: kbn-evals-weekly-memory-longmemeval-direct-index
+        command: bash .buildkite/scripts/steps/evals/run_suite.sh
+        env:
+          KBN_EVALS: '1'
+          FTR_EIS_CCM: '1'
+          EVAL_SUITE_ID: 'memory-longmemeval-direct-index'
+          EVAL_FANOUT: '1'
+          EVAL_INCLUDE_EIS_MODELS: '1'
+          # Keep in sync with `weeklyEisModelGroups` for memory-longmemeval-direct-index in evals.suites.json.
+          # One fixed model so weekly runs stay comparable.
+          EVAL_MODEL_GROUPS: 'eis/anthropic-claude-5.5-sonnet'
+          EVAL_SERVER_CONFIG_SET: 'evals_agent_builder'
+          # The suite's defaultJudge only applies to PR runs, so the weekly step names it too.
+          EVAL_CONNECTOR_ID: 'eis-zai-glm-5-2'
+        timeout_in_minutes: 60
+        agents:
+          image: family/kibana-ubuntu-2404
+          imageProject: elastic-images-prod
+          provider: gcp
+          machineType: n2-standard-8
+          preemptible: true
+          spotZones: asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c
+        retry:
+          automatic:
+            - exit_status: '-1'
+              limit: 3
   - wait: ~
     continue_on_failure: true
 

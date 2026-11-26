@@ -1301,6 +1301,7 @@ packages:
   - 'x-pack/platform/packages/shared/ai-infra/kbn-evals-suite-llm-tasks'
   - 'x-pack/platform/packages/shared/ai-infra/product-doc-common'
   - 'x-pack/platform/packages/shared/alerting-rule-utils'
+  - 'x-pack/platform/packages/shared/context-engine/kbn-evals-suite-context-engine-memory'
   - 'x-pack/platform/packages/shared/custom-content/custom-content-common'
   - 'x-pack/platform/packages/shared/custom-content/custom-content-renderer'
   - 'x-pack/platform/packages/shared/custom-content/custom-content-server'

@@ -1,0 +1,7 @@
+{
+  "type": "functional-tests",
+  "id": "@kbn/evals-suite-context-engine-memory",
+  "owner": "@elastic/context-eng",
+  "group": "platform",
+  "visibility": "private"
+}

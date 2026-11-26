@@ -268,6 +268,37 @@ describe('evals.suites.json weeklyEisModelGroups', () => {
   });
 });
 
+// `[suiteId, EVAL_CONNECTOR_ID]` for every suite step in llm_evals.yml, including nested ones.
+const weeklySuiteJudges = (steps: WeeklyStep[]): Array<[string, string | undefined]> =>
+  steps.flatMap(({ env = {}, steps: nested = [] }) => [
+    ...(env.EVAL_SUITE_ID
+      ? [[env.EVAL_SUITE_ID, env.EVAL_CONNECTOR_ID] as [string, string | undefined]]
+      : []),
+    ...weeklySuiteJudges(nested),
+  ]);
+
+describe('evals.suites.json defaultJudge on the weekly pipeline', () => {
+  it('is named by the suite step in llm_evals.yml, because defaultJudge only applies to PR runs', () => {
+    const judgesBySuite = new Map(
+      weeklySuiteJudges(
+        (parseYaml(Fs.readFileSync(Path.join(__dirname, 'llm_evals.yml'), 'utf-8')) as WeeklyStep)
+          .steps ?? []
+      )
+    );
+    const problems = suites
+      .filter(({ id, defaultJudge }) => defaultJudge && judgesBySuite.has(id))
+      .filter(({ id, defaultJudge }) => judgesBySuite.get(id) !== defaultJudge)
+      .map(
+        ({ id, defaultJudge }) =>
+          `${id}: weekly EVAL_CONNECTOR_ID "${judgesBySuite.get(
+            id
+          )}" differs from defaultJudge "${defaultJudge}"`
+      );
+
+    expect(problems).toEqual([]);
+  });
+});
+
 describe('evals.suites.json evals decision', () => {
   const decisionSuites = suites.filter((suite) => suite.requireDecisionOnPaths !== undefined);
   const gatedSuites = suites.filter((suite) => suite.regressionGate !== undefined);

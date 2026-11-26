@@ -5664,6 +5664,9 @@ importers:
       '@kbn/evals-suite-automatic-import':
         specifier: workspace:*
         version: link:x-pack/platform/packages/shared/kbn-evals-suite-automatic-import
+      '@kbn/evals-suite-context-engine-memory':
+        specifier: workspace:*
+        version: link:x-pack/platform/packages/shared/context-engine/kbn-evals-suite-context-engine-memory
       '@kbn/evals-suite-detection-watch-rule-creation':
         specifier: workspace:*
         version: link:x-pack/solutions/security/packages/kbn-evals-suite-detection-watch-rule-creation
@@ -9169,6 +9172,8 @@ importers:
   x-pack/platform/packages/shared/ai-infra/product-doc-common: {}
 
   x-pack/platform/packages/shared/alerting-rule-utils: {}
+
+  x-pack/platform/packages/shared/context-engine/kbn-evals-suite-context-engine-memory: {}
 
   x-pack/platform/packages/shared/custom-content/custom-content-common: {}
 

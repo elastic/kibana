@@ -48,6 +48,26 @@
       ]
     },
     {
+      "id": "memory-longmemeval-direct-index",
+      "name": "Memory LongMemEval-S Direct Index",
+      "slackChannel": "#context-engine",
+      "configPath": "x-pack/platform/packages/shared/context-engine/kbn-evals-suite-context-engine-memory/longmemeval_direct_index.playwright.config.ts",
+      "serverConfigSet": "evals_agent_builder",
+      "defaultJudge": "eis-zai-glm-5-2",
+      "description": "Recurring direct-index LongMemEval-S plumbing POC: full histories indexed one session per document, answered by the default Agent Builder agent (search-team#17382).",
+      "tags": [
+        "platform",
+        "context-engine",
+        "memory"
+      ],
+      "ciLabels": [
+        "evals:memory-longmemeval-direct-index"
+      ],
+      "weeklyEisModelGroups": [
+        "eis/anthropic-claude-5.5-sonnet"
+      ]
+    },
+    {
       "id": "ml",
       "name": "ML Agent Builder Skills",
       "slackChannel": "#agent-builder-alerts",
