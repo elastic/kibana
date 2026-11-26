@@ -13,7 +13,7 @@ import {
   TELEMETRY_SDK_LANGUAGE,
   URL_FULL,
 } from '@kbn/apm-types';
-import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import type { QueryDslQueryContainer, SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { dateRangeQuery, termQuery } from '@kbn/es-query';
 import { CORE_WEB_VITALS, type CoreWebVital } from '../../../common/core_web_vitals';
@@ -23,6 +23,9 @@ import {
   CLICK_EVENTS,
   EVENT_EXCEPTION,
   EVENT_WEB_VITAL,
+  EXCEPTION_STACKTRACE,
+  FRUSTRATION_CLICK_COUNT,
+  FRUSTRATION_EVENTS,
   OTEL_SPAN_NAME,
   PAGE_VIEW_EVENTS,
   WEB_VITAL_NAME,
@@ -41,12 +44,31 @@ import {
   type SessionSummary,
   type SessionTimelineEvent,
   type SessionTimelineEventKind,
+  type SessionTimelineException,
 } from '../../../common/sessions';
-import { SOURCE_SERVICE_NAME_FIELD, SOURCE_SESSION_ID_FIELD } from '../../lib/otel/source_fields';
+import {
+  SOURCE_SERVICE_NAME_FIELD,
+  SOURCE_SESSION_ID_FIELD,
+} from '../../../common/otel_source_fields';
 import { totalHitsOf } from '../../lib/helpers/values';
+import {
+  attributeNumber,
+  attributeString,
+  fieldString,
+  timestampMsOf,
+  type OtelEventFields,
+} from './event_fields';
 import { toSessionSummary, type StoredSessionDocument } from './list_sessions';
+import {
+  REQUEST_FIELDS,
+  SESSION_REQUESTS_SIZE,
+  buildRequests,
+  requestsQuery,
+} from './session_requests';
 
-/** Max raw events loaded for the session timeline. */
+export type { OtelEventFields } from './event_fields';
+
+/** Max raw page views, clicks, errors and web vitals loaded for the session timeline. */
 export const SESSION_TIMELINE_SIZE = 1000;
 
 /** Events of the browser SDK, or of none: every other SDK names itself and is left out. */
@@ -77,10 +99,11 @@ const TIMELINE_ATTRIBUTES = [
   EXCEPTION_MESSAGE,
   EXCEPTION_TYPE,
   ERROR_TYPE,
+  EXCEPTION_STACKTRACE,
   BROWSER_CSS_SELECTOR,
   TARGET_XPATH,
+  FRUSTRATION_CLICK_COUNT,
 ] as const;
-type TimelineAttribute = (typeof TIMELINE_ATTRIBUTES)[number];
 
 /**
  * Only the fields the timeline uses, flattened by the `fields` option whatever their stored shape:
@@ -90,40 +113,10 @@ const TIMELINE_FIELDS = [
   '@timestamp',
   OTEL_SPAN_NAME,
   OTEL_EVENT_NAME,
-  'duration',
   'trace_id',
   'span_id',
   ...TIMELINE_ATTRIBUTES.flatMap((name) => [attributeField(name), resourceAttributeField(name)]),
 ];
-
-/** A raw event as the `fields` option returns it: each field's values, by its dotted name. */
-export type OtelEventFields = Partial<Record<string, unknown[]>>;
-
-const firstValue = (event: OtelEventFields, field: string): unknown => event[field]?.[0];
-
-const stringValue = (value: unknown): string | null => {
-  if (typeof value === 'string' && value.length > 0) {
-    return value;
-  }
-  return typeof value === 'number' || typeof value === 'boolean' ? String(value) : null;
-};
-
-const fieldString = (event: OtelEventFields, field: string): string | null =>
-  stringValue(firstValue(event, field));
-
-/** An attribute of the event, else of its resource. */
-const attributeString = (event: OtelEventFields, name: TimelineAttribute): string | null =>
-  fieldString(event, attributeField(name)) ?? fieldString(event, resourceAttributeField(name));
-
-const attributeNumber = (event: OtelEventFields, name: TimelineAttribute): number | null => {
-  const value = attributeString(event, name);
-  return value !== null && Number.isFinite(Number(value)) ? Number(value) : null;
-};
-
-const durationOf = (event: OtelEventFields): number | null => {
-  const duration = firstValue(event, 'duration');
-  return typeof duration === 'number' ? duration : null;
-};
 
 const eventNameOf = (event: OtelEventFields): string =>
   fieldString(event, OTEL_EVENT_NAME) ?? fieldString(event, OTEL_SPAN_NAME) ?? '';
@@ -144,10 +137,11 @@ const webVitalOf = (event: OtelEventFields): { name: CoreWebVital; value: number
 };
 
 /**
- * The kind of a raw event. Errors are the exceptions the summary's `js_error_count` counts, so the
- * page journey and the summary above it agree; a failed request stays a span, counted separately.
+ * The kind of a raw event, or `null` for one the journey doesn't list. Errors are the exceptions the
+ * summary's `js_error_count` counts, so the page journey and the summary above it agree; a failed
+ * request is not one, and is counted separately.
  */
-const classify = (event: OtelEventFields): SessionTimelineEventKind => {
+const classify = (event: OtelEventFields): SessionTimelineEventKind | null => {
   const name = eventNameOf(event);
   if (name === EVENT_WEB_VITAL) {
     return 'web_vital';
@@ -155,13 +149,16 @@ const classify = (event: OtelEventFields): SessionTimelineEventKind => {
   if (name === EVENT_EXCEPTION) {
     return 'error';
   }
+  if (isOneOf(name, FRUSTRATION_EVENTS)) {
+    return 'frustration';
+  }
   if (isOneOf(name, CLICK_EVENTS)) {
     return 'click';
   }
   if (isOneOf(name, PAGE_VIEW_EVENTS)) {
     return 'page_view';
   }
-  return durationOf(event) !== null ? 'span' : 'log';
+  return null;
 };
 
 const detailOf = (kind: SessionTimelineEventKind, event: OtelEventFields): string | null => {
@@ -169,6 +166,7 @@ const detailOf = (kind: SessionTimelineEventKind, event: OtelEventFields): strin
     case 'error':
       return attributeString(event, EXCEPTION_MESSAGE) ?? attributeString(event, ERROR_TYPE);
     case 'click':
+    case 'frustration':
       return attributeString(event, BROWSER_CSS_SELECTOR) ?? attributeString(event, TARGET_XPATH);
     case 'web_vital':
       return attributeString(event, WEB_VITAL_VALUE);
@@ -187,6 +185,16 @@ const displayNameOf = (kind: SessionTimelineEventKind, event: OtelEventFields): 
   return eventNameOf(event) || kind;
 };
 
+/** The uncaught exception a frustration signal names, as an error click does, if any. */
+const exceptionOf = (event: OtelEventFields): SessionTimelineException | null => {
+  const type = attributeString(event, EXCEPTION_TYPE);
+  const message = attributeString(event, EXCEPTION_MESSAGE);
+  if (type === null && message === null) {
+    return null;
+  }
+  return { type, message, stacktrace: attributeString(event, EXCEPTION_STACKTRACE) };
+};
+
 const toTimelineEvent = (
   event: OtelEventFields,
   sessionStartMs: number
@@ -197,18 +205,22 @@ const toTimelineEvent = (
     return null;
   }
   const kind = classify(event);
-  const duration = durationOf(event);
+  if (kind === null) {
+    return null;
+  }
+  const exception = kind === 'frustration' ? exceptionOf(event) : null;
   return {
     kind,
     name: displayNameOf(kind, event),
     timestamp,
     offsetMs: Math.max(0, ms - sessionStartMs),
-    // OTel span durations are stored in nanoseconds.
-    durationMs: duration !== null ? duration / 1e6 : null,
     page: pageOf(event),
     detail: detailOf(kind, event),
+    clickCount: kind === 'frustration' ? attributeNumber(event, FRUSTRATION_CLICK_COUNT) : null,
+    stacktrace: kind === 'error' ? attributeString(event, EXCEPTION_STACKTRACE) : null,
     traceId: fieldString(event, 'trace_id'),
     spanId: fieldString(event, 'span_id'),
+    ...(exception ? { exception } : {}),
   };
 };
 
@@ -222,7 +234,9 @@ export const buildTimeline = (
 export const buildPageVisits = (
   events: OtelEventFields[],
   sessionStartMs: number,
-  sessionEnd: string
+  sessionEnd: string,
+  /** The newest request record: a session can be active with nothing but background fetches. */
+  latestRequestTime?: string
 ): SessionPageVisit[] => {
   const visits: SessionPageVisit[] = [];
   let current: SessionPageVisit | undefined;
@@ -272,7 +286,9 @@ export const buildPageVisits = (
         durationMs: 0,
         clickCount: 0,
         errorCount: 0,
+        frustrationCount: 0,
         webVitals: emptyWebVitals(),
+        load: null,
       };
     }
     if (!current) {
@@ -284,6 +300,9 @@ export const buildPageVisits = (
     if (kind === 'error') {
       current.errorCount += 1;
     }
+    if (kind === 'frustration') {
+      current.frustrationCount += 1;
+    }
     const vital = webVitalOf(event);
     if (vital) {
       // EDOT Browser reports a final value per page; keep the latest one.
@@ -294,11 +313,15 @@ export const buildPageVisits = (
     }
   }
   // Raw events can be newer than the summary, which is as fresh as the task's last run.
+  const lastActivityMs = Math.max(
+    lastEventTime ? Date.parse(lastEventTime) || -Infinity : -Infinity,
+    latestRequestTime ? Date.parse(latestRequestTime) || -Infinity : -Infinity
+  );
   const sessionEndMs = Date.parse(sessionEnd);
   const endsAfterSummary =
-    lastEventTime !== undefined &&
-    (!Number.isFinite(sessionEndMs) || Date.parse(lastEventTime) > sessionEndMs);
-  close(endsAfterSummary && lastEventTime ? lastEventTime : sessionEnd);
+    Number.isFinite(lastActivityMs) &&
+    (!Number.isFinite(sessionEndMs) || lastActivityMs > sessionEndMs);
+  close(endsAfterSummary ? new Date(lastActivityMs).toISOString() : sessionEnd);
   return visits;
 };
 
@@ -307,9 +330,31 @@ const sessionStartOf = (startMs: number, events: OtelEventFields[]): number => {
   if (Number.isFinite(startMs)) {
     return startMs;
   }
-  const first = events[0] ? fieldString(events[0], '@timestamp') : null;
-  return first ? Date.parse(first) || 0 : 0;
+  return (events[0] && timestampMsOf(events[0])) ?? 0;
 };
+
+/** The event names the journey shows, from the logs or, as span names, the traces. */
+const JOURNEY_EVENT_NAMES = [
+  ...PAGE_VIEW_EVENTS,
+  ...CLICK_EVENTS,
+  EVENT_EXCEPTION,
+  EVENT_WEB_VITAL,
+  ...FRUSTRATION_EVENTS,
+];
+
+/**
+ * Only the events the journey shows: requests have a query of their own, so that a page that loads
+ * many resources can't push the clicks and errors after it out of the timeline.
+ */
+const journeyQuery = (): QueryDslQueryContainer => ({
+  bool: {
+    should: [
+      { terms: { [OTEL_EVENT_NAME]: JOURNEY_EVENT_NAMES } },
+      { terms: { [OTEL_SPAN_NAME]: JOURNEY_EVENT_NAMES } },
+    ],
+    minimum_should_match: 1,
+  },
+});
 
 /**
  * The raw events of the session: from just before its summarized start up to the longest a session
@@ -344,40 +389,66 @@ export const getSession = async (
   const session: SessionSummary = toSessionSummary(doc);
   const startMs = Date.parse(session.startTime);
 
-  const eventsResponse = await client.search({
-    index: [...SESSIONS_SOURCE_INDICES],
-    ignore_unavailable: true,
-    allow_no_indices: true,
-    size: SESSION_TIMELINE_SIZE,
-    track_total_hits: SESSION_TIMELINE_SIZE + 1,
-    sort: [{ '@timestamp': 'asc' }],
-    _source: false,
-    fields: TIMELINE_FIELDS,
-    query: {
-      bool: {
-        filter: [
-          ...termQuery(SOURCE_SESSION_ID_FIELD, sessionId),
-          ...termQuery(SOURCE_SERVICE_NAME_FIELD, serviceName),
-          // No other SDK's events: a backend sharing the service name and passing the session id
-          // along would otherwise appear in the timeline. Events that name no SDK are kept, as
-          // requiring the browser's would empty the whole timeline wherever the attribute is
-          // dropped on the way in, rather than leave out the few events that aren't the browser's.
-          NOT_ANOTHER_SDK,
-          ...timelineTimeRange(startMs),
-        ],
-      },
-    },
-  });
+  const sessionFilter = [
+    ...termQuery(SOURCE_SESSION_ID_FIELD, sessionId),
+    ...termQuery(SOURCE_SERVICE_NAME_FIELD, serviceName),
+    // No other SDK's events: a backend sharing the service name and passing the session id
+    // along would otherwise appear in the timeline. Events that name no SDK are kept, as
+    // requiring the browser's would empty the whole timeline wherever the attribute is
+    // dropped on the way in, rather than leave out the few events that aren't the browser's.
+    NOT_ANOTHER_SDK,
+    ...timelineTimeRange(startMs),
+  ];
+  const searchEvents = (size: number, fields: string[], query: QueryDslQueryContainer) =>
+    client.search({
+      index: [...SESSIONS_SOURCE_INDICES],
+      ignore_unavailable: true,
+      allow_no_indices: true,
+      size,
+      track_total_hits: size + 1,
+      sort: [{ '@timestamp': 'asc' }],
+      _source: false,
+      fields,
+      query: { bool: { filter: [...sessionFilter, query] } },
+    });
+  const [eventsResponse, requestsResponse] = await Promise.all([
+    searchEvents(SESSION_TIMELINE_SIZE, TIMELINE_FIELDS, journeyQuery()),
+    searchEvents(SESSION_REQUESTS_SIZE, REQUEST_FIELDS, requestsQuery()),
+  ]);
 
-  const events: OtelEventFields[] = eventsResponse.hits.hits.flatMap(({ fields }) =>
-    fields ? [fields] : []
-  );
+  const fieldsOf = (response: SearchResponse): OtelEventFields[] =>
+    response.hits.hits.flatMap(({ fields }) => (fields ? [fields] : []));
+  const events = fieldsOf(eventsResponse);
+  const timelineTruncated = totalHitsOf(eventsResponse.hits.total) > events.length;
+  const requestEvents = fieldsOf(requestsResponse);
   const sessionStartMs = sessionStartOf(startMs, events);
+  // A cut-off timeline ends where its last event does: a newer request record is no sign that
+  // the last visit lasted until then.
+  const latestRequestMs = timelineTruncated
+    ? NaN
+    : Math.max(...requestEvents.map((event) => timestampMsOf(event) ?? -Infinity));
+  const pageVisits = buildPageVisits(
+    events,
+    sessionStartMs,
+    session.endTime,
+    Number.isFinite(latestRequestMs) ? new Date(latestRequestMs).toISOString() : undefined
+  );
+  const { requests: placedRequests, loads } = buildRequests(requestEvents, pageVisits);
+  // The requests that started after a cut-off timeline's last event would fall back to its last
+  // visit, and show on a page they were not made from. Judged by when they started, not when they
+  // were reported: a page load's timings are reported after it, and belong to the visit.
+  const lastEventMs = events.length > 0 ? timestampMsOf(events[events.length - 1]) : null;
+  const requests =
+    timelineTruncated && lastEventMs !== null
+      ? placedRequests.filter(({ startTime }) => Date.parse(startTime) <= lastEventMs)
+      : placedRequests;
 
   return {
     session,
     timeline: buildTimeline(events, sessionStartMs),
-    timelineTruncated: totalHitsOf(eventsResponse.hits.total) > events.length,
-    pageVisits: buildPageVisits(events, sessionStartMs, session.endTime),
+    timelineTruncated,
+    pageVisits: pageVisits.map((visit, index) => ({ ...visit, load: loads.get(index) ?? null })),
+    requests,
+    requestsTruncated: totalHitsOf(requestsResponse.hits.total) > requestEvents.length,
   };
 };

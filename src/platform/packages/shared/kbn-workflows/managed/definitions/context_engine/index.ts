@@ -8,9 +8,10 @@
  */
 
 import DREAMING_YAML from './dreaming.yaml';
-import TRACE_DREAMING_YAML from './dreaming_traces.yaml';
-import TRACE_DREAMING_BATCH_YAML from './dreaming_traces_batch.yaml';
+import TRANSCRIPT_DREAMING_YAML from './dreaming_transcripts.yaml';
+import TRANSCRIPT_DREAMING_BATCH_YAML from './dreaming_transcripts_batch.yaml';
 import FEEDBACK_ANALYSIS_YAML from './feedback_analysis.yaml';
+import MAINTENANCE_YAML from './maintenance.yaml';
 import RELATIONSHIPS_YAML from './relationships.yaml';
 import type { ManagedWorkflowDefinition, ManagedWorkflowTemplateValues } from '../../types';
 
@@ -85,17 +86,21 @@ const renderJsonTemplate = (template: string, values: Record<string, unknown>): 
       : token
   );
 
-/** Consolidates the memories of one AI index into long-term facts and entities. */
+/** The concurrency key shared by every workflow that writes an AI index's long-term memory. */
+export const memoryConcurrencyKeyFor = (instanceKey: string): string =>
+  `context-engine-memory-${instanceKey}`;
+
+/** Consolidates the session memories of one AI index into long-term facts and entities. */
 export const CONTEXT_ENGINE_DREAMING_WORKFLOW = {
   id: CONTEXT_ENGINE_DREAMING_WORKFLOW_ID,
   pluginId: 'contextEngine',
-  version: 5,
+  version: 8,
   billable: false,
   yamlTemplate: (values) =>
     renderJsonTemplate(DREAMING_YAML, {
       __NAME__: `Dreaming: ${values.aiIndexId}`,
       __AI_INDEX_ID__: values.aiIndexId,
-      __CONCURRENCY_KEY__: `context-engine-dreaming-${values.instanceKey}`,
+      __CONCURRENCY_KEY__: memoryConcurrencyKeyFor(values.instanceKey),
       __MEMORIES_INDEX__: values.memoriesIndex,
       __INTERVAL_MINUTES__: values.intervalMinutes,
       __CONNECTOR_ID__: values.connectorId,
@@ -106,51 +111,52 @@ export const CONTEXT_ENGINE_DREAMING_WORKFLOW = {
   management: CONTEXT_ENGINE_WORKFLOW_MANAGEMENT,
 } as const satisfies ManagedWorkflowDefinition<ContextEngineDreamingWorkflowTemplateValues>;
 
-export const CONTEXT_ENGINE_TRACE_DREAMING_WORKFLOW_ID = 'system-context-engine-trace-dreaming';
+export const CONTEXT_ENGINE_TRANSCRIPT_DREAMING_WORKFLOW_ID =
+  'system-context-engine-transcript-dreaming';
 
-/** The same config as dreaming, which trace dreaming runs alongside on the same schedule. */
-export type ContextEngineTraceDreamingWorkflowTemplateValues =
+/** The same config as dreaming, which transcript dreaming runs alongside on the same schedule. */
+export type ContextEngineTranscriptDreamingWorkflowTemplateValues =
   ContextEngineDreamingWorkflowTemplateValues;
 
 /**
- * Extracts long-term facts and entities from the agent conversations the trace sources of one AI
- * index record.
+ * Extracts long-term facts and entities from the agent conversations saved as session events for
+ * one AI index.
  */
-export const CONTEXT_ENGINE_TRACE_DREAMING_WORKFLOW = {
-  id: CONTEXT_ENGINE_TRACE_DREAMING_WORKFLOW_ID,
+export const CONTEXT_ENGINE_TRANSCRIPT_DREAMING_WORKFLOW = {
+  id: CONTEXT_ENGINE_TRANSCRIPT_DREAMING_WORKFLOW_ID,
   pluginId: 'contextEngine',
-  version: 5,
+  version: 7,
   billable: false,
   yamlTemplate: (values) =>
-    renderJsonTemplate(TRACE_DREAMING_YAML, {
-      __NAME__: `Trace dreaming: ${values.aiIndexId}`,
+    renderJsonTemplate(TRANSCRIPT_DREAMING_YAML, {
+      __NAME__: `Transcript dreaming: ${values.aiIndexId}`,
       __AI_INDEX_ID__: values.aiIndexId,
-      __CONCURRENCY_KEY__: `context-engine-trace-dreaming-${values.instanceKey}`,
+      __CONCURRENCY_KEY__: memoryConcurrencyKeyFor(values.instanceKey),
       __INTERVAL_MINUTES__: values.intervalMinutes,
-      __BATCH_WORKFLOW_ID__: `${CONTEXT_ENGINE_TRACE_DREAMING_BATCH_WORKFLOW_ID}-${values.instanceKey}`,
+      __BATCH_WORKFLOW_ID__: `${CONTEXT_ENGINE_TRANSCRIPT_DREAMING_BATCH_WORKFLOW_ID}-${values.instanceKey}`,
     }),
   management: CONTEXT_ENGINE_WORKFLOW_MANAGEMENT,
-} as const satisfies ManagedWorkflowDefinition<ContextEngineTraceDreamingWorkflowTemplateValues>;
+} as const satisfies ManagedWorkflowDefinition<ContextEngineTranscriptDreamingWorkflowTemplateValues>;
 
-export const CONTEXT_ENGINE_TRACE_DREAMING_BATCH_WORKFLOW_ID =
-  'system-context-engine-trace-dreaming-batch';
+export const CONTEXT_ENGINE_TRANSCRIPT_DREAMING_BATCH_WORKFLOW_ID =
+  'system-context-engine-transcript-dreaming-batch';
 
 /** The same config as dreaming: a batch is extracted with its types and instructions. */
-export type ContextEngineTraceDreamingBatchWorkflowTemplateValues =
+export type ContextEngineTranscriptDreamingBatchWorkflowTemplateValues =
   ContextEngineDreamingWorkflowTemplateValues;
 
 /**
- * Extracts long-term facts and entities from one batch of agent rounds, without reading the AI
+ * Extracts long-term facts and entities from one batch of agent turns, without reading the AI
  * index's existing ones.
  */
-export const CONTEXT_ENGINE_TRACE_DREAMING_BATCH_WORKFLOW = {
-  id: CONTEXT_ENGINE_TRACE_DREAMING_BATCH_WORKFLOW_ID,
+export const CONTEXT_ENGINE_TRANSCRIPT_DREAMING_BATCH_WORKFLOW = {
+  id: CONTEXT_ENGINE_TRANSCRIPT_DREAMING_BATCH_WORKFLOW_ID,
   pluginId: 'contextEngine',
-  version: 5,
+  version: 6,
   billable: false,
   yamlTemplate: (values) =>
-    renderJsonTemplate(TRACE_DREAMING_BATCH_YAML, {
-      __NAME__: `Trace dreaming batch: ${values.aiIndexId}`,
+    renderJsonTemplate(TRANSCRIPT_DREAMING_BATCH_YAML, {
+      __NAME__: `Transcript dreaming batch: ${values.aiIndexId}`,
       __AI_INDEX_ID__: values.aiIndexId,
       __CONNECTOR_ID__: values.connectorId,
       __INSTRUCTIONS__: values.instructions,
@@ -158,7 +164,7 @@ export const CONTEXT_ENGINE_TRACE_DREAMING_BATCH_WORKFLOW = {
       __ENTITY_TYPES__: values.entityTypes,
     }),
   management: CONTEXT_ENGINE_WORKFLOW_MANAGEMENT,
-} as const satisfies ManagedWorkflowDefinition<ContextEngineTraceDreamingBatchWorkflowTemplateValues>;
+} as const satisfies ManagedWorkflowDefinition<ContextEngineTranscriptDreamingBatchWorkflowTemplateValues>;
 
 export const CONTEXT_ENGINE_RELATIONSHIPS_WORKFLOW_ID = 'system-context-engine-relationships';
 
@@ -173,13 +179,13 @@ export type ContextEngineRelationshipsWorkflowTemplateValues =
 export const CONTEXT_ENGINE_RELATIONSHIPS_WORKFLOW = {
   id: CONTEXT_ENGINE_RELATIONSHIPS_WORKFLOW_ID,
   pluginId: 'contextEngine',
-  version: 1,
+  version: 4,
   billable: false,
   yamlTemplate: (values) =>
     renderJsonTemplate(RELATIONSHIPS_YAML, {
       __NAME__: `Relationships: ${values.aiIndexId}`,
       __AI_INDEX_ID__: values.aiIndexId,
-      __CONCURRENCY_KEY__: `context-engine-relationships-${values.instanceKey}`,
+      __CONCURRENCY_KEY__: memoryConcurrencyKeyFor(values.instanceKey),
       __MEMORIES_INDEX__: values.memoriesIndex,
       __INTERVAL_MINUTES__: values.intervalMinutes,
       __CONNECTOR_ID__: values.connectorId,
@@ -188,3 +194,41 @@ export const CONTEXT_ENGINE_RELATIONSHIPS_WORKFLOW = {
     }),
   management: CONTEXT_ENGINE_WORKFLOW_MANAGEMENT,
 } as const satisfies ManagedWorkflowDefinition<ContextEngineRelationshipsWorkflowTemplateValues>;
+
+export const CONTEXT_ENGINE_MAINTENANCE_WORKFLOW_ID = 'system-context-engine-maintenance';
+
+/** The part of the dreaming config maintenance reuses, and its own settings. */
+export interface ContextEngineMaintenanceWorkflowTemplateValues
+  extends ManagedWorkflowTemplateValues,
+    Pick<
+      ContextEngineDreamingWorkflowTemplateValues,
+      'aiIndexId' | 'instanceKey' | 'connectorId' | 'instructions'
+    > {
+  /** How often maintenance runs. */
+  maintenanceIntervalMinutes: number;
+  /** `report` plans changes and writes nothing; `apply` writes them. */
+  maintenanceMode: 'report' | 'apply';
+}
+
+/**
+ * Maintains the long-term facts and entities of one AI index: merges duplicates, settles
+ * contradictions, rewrites items whose memories were deleted, refreshes entity summaries, and
+ * removes duplicate and inverse relationships.
+ */
+export const CONTEXT_ENGINE_MAINTENANCE_WORKFLOW = {
+  id: CONTEXT_ENGINE_MAINTENANCE_WORKFLOW_ID,
+  pluginId: 'contextEngine',
+  version: 1,
+  billable: false,
+  yamlTemplate: (values) =>
+    renderJsonTemplate(MAINTENANCE_YAML, {
+      __NAME__: `Memory maintenance: ${values.aiIndexId}`,
+      __AI_INDEX_ID__: values.aiIndexId,
+      __CONCURRENCY_KEY__: memoryConcurrencyKeyFor(values.instanceKey),
+      __INTERVAL_MINUTES__: values.maintenanceIntervalMinutes,
+      __CONNECTOR_ID__: values.connectorId,
+      __INSTRUCTIONS__: values.instructions,
+      __MODE__: values.maintenanceMode,
+    }),
+  management: CONTEXT_ENGINE_WORKFLOW_MANAGEMENT,
+} as const satisfies ManagedWorkflowDefinition<ContextEngineMaintenanceWorkflowTemplateValues>;

@@ -5,54 +5,9 @@
  * 2.0.
  */
 
-import {
-  MAX_ID_LENGTH,
-  NEEDS_AGENT_REASONS,
-  PROBE_STATUSES,
-  baselineObservationSchema,
-} from '@kbn/significant-events-schema';
-import { lazySchema, z } from '@kbn/zod/v4';
+import type { BatchEntry } from '../../common/workflows/steps/detection_batch';
 
-/** Why a detection reached the agent, with the events its rule is already a member of. */
-const batchClassifierSchema = lazySchema(() =>
-  z.object({
-    reason: z.enum(NEEDS_AGENT_REASONS),
-    probe_status: z.enum(PROBE_STATUSES).optional(),
-    /** Whether the re-run stored query returned rows; with `live_events`, the direction of a change. */
-    probe_has_rows: z.boolean().optional(),
-    baseline: baselineObservationSchema.optional(),
-    live_events: z
-      .array(
-        z.object({
-          event_id: z.string().max(MAX_ID_LENGTH).optional(),
-          status: z.string().max(32),
-          stored_verdict: z.string().max(32),
-          /** For a `refutes` verdict: whether it was reached on found (healthy) rows. */
-          evidence_found: z.boolean().optional(),
-        })
-      )
-      .max(50),
-  })
-);
-
-/** One detection as the agent reads it: named fields only, no column positions. */
-export const batchEntrySchema = lazySchema(() =>
-  z.object({
-    '@timestamp': z.string().max(64).optional(),
-    detection_id: z.string().max(MAX_ID_LENGTH).optional(),
-    rule_uuid: z.string().max(MAX_ID_LENGTH).optional(),
-    rule_name: z.string().max(512).optional(),
-    source_id: z.string().max(MAX_ID_LENGTH).optional(),
-    change_point_type: z.string().max(64).optional(),
-    p_value: z.number().optional(),
-    recent_detection_count: z.number().optional(),
-    flaky_probe: z.boolean().optional(),
-    /** Only when the classifier is enforcing: while it only records, the agent judges unprompted. */
-    classifier: batchClassifierSchema.optional(),
-  })
-);
-
-export type BatchEntry = z.infer<typeof batchEntrySchema>;
+export { batchEntrySchema, type BatchEntry } from '../../common/workflows/steps/detection_batch';
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null && !Array.isArray(value);
@@ -74,6 +29,20 @@ export const isHeldBack = ({
   row: readonly unknown[];
 }): boolean => row[columns.indexOf('held_back')] === true;
 
+const timeColumn = ({
+  columns,
+  row,
+  name,
+}: {
+  columns: readonly string[];
+  row: readonly unknown[];
+  name: string;
+}): number | undefined => {
+  const value = row[columns.indexOf(name)];
+  const time = typeof value === 'string' ? Date.parse(value) : NaN;
+  return Number.isNaN(time) ? undefined : time;
+};
+
 /**
  * When the agent last reviewed the row's rule: the `last_reviewed_at` column, in epoch milliseconds.
  * Absent when the column is missing or does not hold a readable time.
@@ -84,11 +53,20 @@ export const lastReviewedAt = ({
 }: {
   columns: readonly string[];
   row: readonly unknown[];
-}): number | undefined => {
-  const value = row[columns.indexOf('last_reviewed_at')];
-  const time = typeof value === 'string' ? Date.parse(value) : NaN;
-  return Number.isNaN(time) ? undefined : time;
-};
+}): number | undefined => timeColumn({ columns, row, name: 'last_reviewed_at' });
+
+/**
+ * When the rule's oldest unprocessed detection fired: the `oldest_unprocessed` column, in epoch
+ * milliseconds. The row itself is the rule's newest detection, so this is how long the rule has waited.
+ * Absent when the column is missing or does not hold a readable time.
+ */
+export const oldestUnprocessedAt = ({
+  columns,
+  row,
+}: {
+  columns: readonly string[];
+  row: readonly unknown[];
+}): number | undefined => timeColumn({ columns, row, name: 'oldest_unprocessed' });
 
 /** Names a detection row's cells, and keeps the fields the agent reads. */
 export const toBatchEntry = ({

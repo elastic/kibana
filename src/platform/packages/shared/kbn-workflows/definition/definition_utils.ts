@@ -8,14 +8,7 @@
  */
 
 import type { Step, WorkflowYaml } from '../spec/schema';
-import {
-  isForeachStep,
-  isIfStep,
-  isMergeStep,
-  isParallelStep,
-  isSwitchStep,
-  isWhileStep,
-} from '../types/utils';
+import { isForeachStep, isIfStep, isParallelStep, isSwitchStep, isWhileStep } from '../types/utils';
 
 /**
  * IMPORTANT: This file is used to collect all steps from a workflow definition.
@@ -87,14 +80,14 @@ const nestedStepHandlers: ReadonlyArray<NestedStepHandler> = [
     collect: (step) => {
       const groups: NestedStepGroup[] = [];
 
-      if (isForeachStep(step) || isWhileStep(step) || isMergeStep(step)) {
+      if (isForeachStep(step) || isWhileStep(step)) {
         pushStepGroup(groups, '', step.steps);
       }
 
       return groups;
     },
     strip: (stripped, step) => {
-      if (isForeachStep(step) || isWhileStep(step) || isMergeStep(step)) {
+      if (isForeachStep(step) || isWhileStep(step)) {
         deleteNestedStepKey(stripped, 'steps', step.steps);
       }
     },

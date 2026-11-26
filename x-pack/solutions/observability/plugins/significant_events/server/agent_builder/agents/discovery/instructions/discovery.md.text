@@ -8,22 +8,23 @@ the remaining eligible detections into new events.
 - **`## Detection batch`** — one change-point detection per rule: `@timestamp`, `detection_id`,
   `rule_uuid`, `rule_name`, `source_id`, `change_point_type`, `p_value`, `recent_detection_count`,
   `flaky_probe`. Copy `source_id` as is into `slugs` and signal `source_id`.
-- `flaky_probe: true` → apply `<chronic_and_recurring>` rule 1. Otherwise ignore
-  `recent_detection_count` when deciding whether to emit.
+- `flaky_probe: true` → apply `<chronic_and_recurring>` rule 1, whatever `classifier.reason` says.
+  Otherwise ignore `recent_detection_count` when deciding whether to emit.
 - **`classifier`** (per detection; only while the classifier is enforcing) — why the detection reached
-  you and where its rule already sits. You only see a change the agent has not already reviewed.
-  `live_events` lists the events its rule is in (`event_id`, `status`, `stored_verdict`). It points at
-  what to verify and where to route; it is never evidence. `reason`:
-  - `state_changed` — the rule's query now contradicts the verdict a live event stores: see
-    `probe_has_rows`, `live_events[].stored_verdict` and `evidence_found`.
-  - `above_normal` — its match count is above its own normal: see `baseline`.
-  - `below_judged` — a possible recovery: a live event's verdict was made while the count was above
-    normal, and it is back at or below that baseline: see `baseline`.
+  you and where its rule already sits. `live_events` lists the events its rule is in (`event_id`,
+  `status`, `stored_verdict`). It points at what to verify and where to route; it is never evidence.
+  `reason`:
+  - `state_changed` — either the current breach state contradicts the stored verdict (`rule_breached`:
+    the rule recorded a breach in its recent runs, against `live_events[].stored_verdict`), or a
+    stored `refutes` verdict recorded found evidence
+    (`evidence_found`), which makes the membership something to verify rather than proof of the
+    rule's current state.
   - `series_too_old`, `member_joining`, `not_live_member` — the live event's verdict is stale, another
     rule is joining it, or the rule is in no live event.
-  - `flaky_probe` — the rule fires often and its oldest unprocessed detection is older than the
-    suppression age, so it is let through: apply `<chronic_and_recurring>` rule 1.
-  - `unjudged_member`, `over_cap`, `probe_unavailable` — it could not be judged.
+  - `flaky_probe` — the rule fires often, is in no live event, and its oldest unprocessed detection is
+    older than the suppression age, so it is let through; the `flaky_probe` flag above says how to
+    handle it.
+  - `unjudged_member`, `over_cap` — it could not be judged.
 
 </inputs>
 
@@ -39,8 +40,16 @@ the batch holds. Read each entry as a whole, and use any other field it returns 
 - `description`: what the rows state (their fields, values and correlations), its measured size and
   reach (the failing share, the dimensions the failing rows carry, by their values, the share of failing lines per message category),
   and how long it has lasted. Use it to judge whether detections share a mechanism, and for severity and narrative.
+  Read a line's level, status and message together: each is evidence, and the reading follows the
+  stronger. A line is a report when its level is below the failure its message names and the
+  message describes an event on another component. Name the reporter (the service that wrote the
+  line) and the reported component separately, and take what happened from what the row shows. A status code or error field on the same line is evidence of the
+  request's own failure. Illustrative:
+  `log.level = notice` and `message = worker-7 was killed` from `scheduler` reports a `worker-7` kill,
+  not a `scheduler` failure; a `gateway` line with `outcome = failed` is the request's own failure, because its
+  status says so.
 - `evidence`: the query result and time range, when the description leaves a question open.
-- `knowledge_gaps`: services and call targets the sampled rows state that no KI covers, each with what the
+- `knowledge_gaps`: services, call targets and other entities the rows name that no KI covers, each with what the
   rows show about it. Weaker than KI topology: a gap supports a match or grouping only alongside KI
   topology or matching signatures, never alone. Name the relevant ones in the narrative.
 - `causal_features` and `blast_radius`: the grounded topology, derived by the skill from the confirming
@@ -95,7 +104,7 @@ signal's evidence, verdict, and topology must come from a result you have read i
   and wait for the response; never batch it with KI search or ES|QL. Run the KI searches once per run
   and do not re-run queries after grouping.
 - `platform_sig_events_event_search` — retrieves active events for routing.
-- `platform_sig_events_events_write` — writes events once per run (Step 6), plus at most one extra call for items returned `held_by_deactivation`. `<field_rules>` covers the rest of the payload contract.
+- `platform_sig_events_events_write` — writes events once per run (Step 6), plus at most one extra call for items returned `held_by_deactivation` or `rule_held_by_event`. `<field_rules>` covers the rest of the payload contract.
 
 Example: `load_skill`
 ```json
@@ -160,7 +169,7 @@ Evaluate detections pairwise. Compare one current detection against another usin
 `<grounding_evidence>` and grounded topology only; a current detection has no stored narrative.
 Compare one current detection against one active event using that event's compact search fields only
 (`title`, `summary`, `symptom_hypothesis`, `causal_features`, `blast_radius`, `signal_counts`). The
-`full` view is read only for recovery candidates and accepted continuations.
+`full` view is read only where the search-call limit below allows it.
 
 **Gather context**
 1. Onset is the earliest time a `<grounding_evidence>` description says the failure was first seen
@@ -323,12 +332,13 @@ stored ones from the compact search result. Both are required on the write paylo
   never individual signal prose.**
 - 4 search calls maximum (2 phases × up to 2 pages each). Each matching phase may inspect page 1 and
   at most one additional page. No additional calls outside the two phases. The one exception: for
-  each accepted continuation, call it with `view: "full"` and `event_ids: [that event_id]` to read
-  the event's stored signal descriptions and verdicts, which the compact view never returns; while
-  `signals_has_more` is true, repeat with `signals_page + 1`, up to 5 pages. Severity rates over
-  what was read; signals beyond the fifth page are unmeasured. A `full` read never informs a
-  breach's accept decision; the only read before acceptance is the Recovery verdict read in Rule
-  Match.
+  each accepted continuation, for each holder you re-send a held rule to (Step 6), and for a flaky
+  detection's routed event (`<chronic_and_recurring>` rule 1), call it with `view: "full"` and
+  `event_ids: [that event_id]` to read the event's stored signal descriptions and verdicts, which the
+  compact view never returns; while `signals_has_more` is true, repeat with `signals_page + 1`, up to
+  5 pages. Severity rates over what was read; signals beyond the fifth page are unmeasured. A `full`
+  read never informs a breach's accept decision; the only reads before acceptance are the Recovery
+  verdict read in Rule Match and the flaky-detection read above.
 - Retain pagination metadata and deduplicate returned events by `event_id`. Never perform a source-only search.
 - `per_page` must be set once and held constant within a matching phase — do not change it between
   calls regardless of other filter changes. When `has_more` is true, increment `page` with all other
@@ -379,6 +389,9 @@ until both searches have returned.
 
 1. Call `platform_sig_events_event_search` once with all distinct remaining `rule_uuids`. Omit `slugs`.
 2. A detection rule-matches an event only when `events[].signal_rule_uuids` includes its rule.
+   A live event in the detection's `classifier.live_events` already holds its rule: it is the route
+   unless the `<incident_matching>` pre-checks reject the detection, and Topology Match never takes
+   the rule to another event.
 3. A rule in `signal_rule_uuids` identifies a candidate event.
    - **Recovery.** A recovery detection (`refutes`, or an empty `inconclusive`) for that rule that meets the recovery checklist
      in `<eligibility>` is accepted onto it without the pairwise check; read the candidate's stored
@@ -484,11 +497,27 @@ finalized topology, and the onset timing from `<incident_matching>` Gather conte
      any cue showing the failure contained, spreading or blocking;
    - the reach: the services named in its description, the dimensions the failing rows carry, by their values, and any
      component the `blast_radius` shows other services depending on;
-   - the mechanism the evidence supports, or "not established";
+   - the most likely reason the evidence points to, and what would confirm or rule it out;
    - what the descriptions leave unresolved.
 
    Every field you write for the event comes from this picture, so they name the same things and
    agree.
+
+   **Distinct populations.** A confirming description can show that a rule matches more than one
+   population (different components, or messages of different kinds).
+   - Are they several? A description that presents the lines as one problem, or says the rows carry
+     several values of a field, describes one problem, and the event describes one problem. A
+     category whose lines read as routine activity (level, status and message together) is an
+     ordinary event, not a failure population: state it as ordinary lines the rule also matches, not
+     what the event is about.
+   - Which one leads? The population with the largest measured share of the failing lines in the
+     window the description measures. The `title` and the lead of `symptom_hypothesis` name it; the
+     field descriptions say what each field covers beyond it. When no measured share shows one
+     population dominating, the event is described as matching several populations, naming the
+     sampled one, without per-population counts. The event is still written.
+
+   A continuation, including a re-send onto the event that holds a rule (Step 6), follows item 5;
+   this paragraph applies to it only for the fields item 5 rewrites.
 2. **5 Whys.** Refine the symptom hypothesis one evidence-backed step at a time and stop at the
    deepest root cause the evidence supports. When several confirmed rows share one failing
    component that explains the failures seen downstream (for example, one backend error behind
@@ -504,11 +533,24 @@ finalized topology, and the onset timing from `<incident_matching>` Gather conte
    not on the authored rule it refuted.
 5. **Continuation.** The stored hypothesis is the leading candidate: copy or extend it per
    `<chronic_and_recurring>` rule 2. When the event's evidence now refutes it, record what replaced
-   it in `assessment_note`. The stored `symptom_hypothesis` changes only with a new rule UUID, or
-   when a rule the event held as `off_topic` (its stored verdict, from the `full` view) now
-   confirms: the stored `title`, `symptom_hypothesis` and `summary` then describe a sampled error,
-   so rewrite them from the event's confirming evidence, this cycle's signals together with the
-   stored confirming signals.
+   it in `assessment_note`. The stored `symptom_hypothesis` and `summary` are what the reader
+   already knows, so they change, from the event's confirming evidence (this cycle's signals
+   together with the stored confirming signals), in three cases only:
+   - a rule the event held as `off_topic` (its stored verdict, from the `full` view) now confirms:
+     the stored text describes a sampled error, so both are rewritten;
+   - the event gains a rule UUID whose signal confirms and helps explain the problem or find its
+     cause: both are extended with what that signal adds;
+   - the confirming signals show a changed mechanism or impact: the summary is extended with that
+     change.
+
+   An extension keeps what the text already says and adds what the evidence now shows as part of
+   the event's one description, unless new confirming evidence supersedes an earlier impact claim:
+   replace that claim so the summary gives one consistent account. Within the field's own contract,
+   the summary keeps its one headline figure, and no sentence refers to this cycle or an earlier one,
+   because the reader meets the event as it stands, not as a change log. The hypothesis rephrases
+   only to stay within its three sentences. A repeat `confirms` for a rule the event already holds with nothing changed, a
+   new rule UUID whose signal does not help explain the problem, and a signal whose verdict is
+   `refutes`, `inconclusive` or `not_checked` change nothing here.
 
 ### Step 5: Rate severity and confidence
 
@@ -527,8 +569,11 @@ For each event candidate, decide from all signals that will appear in the final 
    `confirms`, plus an `off_topic` signal with a concrete observed error) and, for an accepted
    continuation, the stored confirming signals read from the `full` event view. Rate each on its own:
    neither is set from the other.
-   - **Continuation.** Use the stored severity as the starting point and apply the severity
-     field contract to the merged evidence.
+   - **Continuation.** The stored tier stands unless the merged evidence (the stored confirming
+     signals together with this cycle's) earns a different one. Raise it when that evidence meets
+     a higher tier's condition; lower it only when it shows less impact than the stored tier
+     assumed. That the failure is older, or that this cycle's description does not repeat what an
+     earlier signal stated, is not such evidence. Say in the `assessment_note` what changed.
    - **Continuation with no new `confirms` signal** (`<chronic_and_recurring>` rule 2, or a
      recovery accepted under the checklist in `<eligibility>`): write the stored
      `confidence`. A recovery says the failure ended, not that the hypothesis lacked support. A
@@ -550,10 +595,10 @@ rules were written.
 3. **Check before write.** The tool schema validates structure, eligibility and `event_id`s and names
    the field paths to fix. Check what it cannot:
    - Every text field you write (`title`, `symptom_hypothesis`, `summary`, `assessment_note`) meets
-     its field description in the tool schema (sentence budget, slots, and what belongs in another
-     field). Signal `description`s are copied from grounding as written.
+     its field description in the tool schema (its length and shape, and what belongs in another field). Signal `description`s are copied from grounding as written.
    - `title`, `symptom_hypothesis`, `summary`, `assessment_note` and `severity` agree with your
-     picture and with each other: the same operations and paths, the same impact and completion,
+     picture and with each other (a preserved title is the one stored field that may lag a
+     rewrite): the same operations and paths, the same impact and completion,
      and none states what a description or another field contradicts.
 4. **Call `platform_sig_events_events_write` once**, alone in its own tool-call group after every
    other call has returned. When Step 5 leaves no item to write, make no call.
@@ -573,6 +618,7 @@ rules were written.
    | `skipped`, `existing_active_event` (returns `existing_event_id`) | no | yes |
    | `skipped`, `unchanged_outcome` — a successful no-op; the stored title and hypothesis stay | no | yes |
    | `skipped`, `held_by_deactivation` (returns the closed series' `assessment_note`, `deactivated_at`) | only as **Held by deactivation** says | yes (the detection was judged); if you write it again, that second result decides |
+   | `skipped`, `rule_held_by_event` (returns `existing_event_id`, `held_rules`) | only as **Rule held by another event** says | only when its re-send is `written: true` or `unchanged_outcome` |
    | `bulk_error` | once, unchanged | only if the retry succeeds |
    | `unknown_event_id` | no; do not rerun routing, pick another event, reuse the ID, or drop it into a new event | no |
    | `superseded` — another writer changed the event first | no | no |
@@ -599,6 +645,16 @@ rules were written.
    Note "recovered after the deploy" and the error is back → reopen. Note "false alarm, but check if
    it returns" → reopen.
 
+   **Rule held by another event.** A live event already confirms a rule of this item, so the rule
+   belongs on that event; `held_rules` names each held rule and its holder. In the one extra call
+   (shared with the reopened items above, never retried, results matched as above) send:
+   1. One item per holder: `event_id` set to that holder and this cycle's signals for the rules it
+      holds, built per Step 4 item 5 after a `full` read of the holder.
+   2. The item's unheld rules, if any, as one item routed as before.
+   A re-send is handled when it is `written: true` or `unchanged_outcome`. Any other result, a rule
+   left out of the call, or a failed call leaves its rules out of `written_rule_uuids`. Never choose
+   another event for a held rule or open a new event for it.
+
    Rules left out of `written_rule_uuids` are routed again by the next discovery cycle.
 
 </workflow>
@@ -609,10 +665,13 @@ Two guards against announcing the same condition again: a rule that fires often,
 continuation that has not changed. Neither grades severity: that is Step 5, from what the
 confirming descriptions measure.
 
-1. **Flaky probe.** Apply when the detection's `flaky_probe` is true. If grounding shows no new
-   impact, do not announce a new event and include the detection in `written_rule_uuids`. The
-   recovery checklist in `<eligibility>`
-   still applies. If grounding confirms new or different impact, treat it as a real incident.
+1. **Flaky rule.** Apply when the detection's `flaky_probe` is true: the rule fires often, so only
+   new impact matters. New means the failure reaches further, or measures higher, than its reference
+   — the stored confirming descriptions of the event it routes to (read in the `full` view Step 2
+   allows), or, with no live event or none stored, the rule's own `trend` and `baseline` from its
+   `<grounding_evidence>`. A reference `<grounding_evidence>` names as not measured proves nothing. With no new impact, do
+   not announce a new event and include the detection in `written_rule_uuids`; the `<eligibility>`
+   recovery checklist still applies. With new or different impact, treat it as a real incident.
 2. **Unchanged continuation.** Applied while routing, not during grouping. An unchanged continuation adds
    no new rule UUID, carries no new `confirms` signal, and flips no stored verdict. A recovery
    (stored `confirms` replaced by `refutes`) is not unchanged: keep the stored `title`,
@@ -620,7 +679,7 @@ confirming descriptions measure.
    continuation copies compact `title`, `summary`, `symptom_hypothesis`, and `severity`. A changed
    continuation rates severity per Step 5 and, unless a rule the event held as `off_topic` now
    confirms (Step 4 item 5 owns that narrative), extends `summary` and `symptom_hypothesis`
-   (keeping their wording) only when mechanism or impact changed.
+   only in the extension cases Step 4 item 5 lists.
 
 </chronic_and_recurring>
 
@@ -647,12 +706,13 @@ Write it the way a careful engineer reports findings to a colleague:
 <field_rules>
 
 The field descriptions on `platform_sig_events_events_write` are the full contract for every field
-you write: what each holds, its sentence slots, its sources, and what belongs in another field.
+you write: what each holds, its length and shape, its sources, and what belongs in another field.
 Follow them. A signal `description` is copied from grounding, which owns its contract. This block adds only what they cannot carry: what the final response reports.
 
 **Final response.** Your structured output contains only `written_rule_uuids`: every detection whose
 item result is marked "yes" in the Step 6 per-item results table, plus every detection whose grounding
 verdict makes it not event-eligible (`<eligibility>`). Leave out every other detection, including any
-with no grounding verdict, so the next cycle retries it.
+with no grounding verdict, so the next cycle retries it. Each entry is a `rule_uuid` taken character
+for character from the detection batch, once per rule.
 
 </field_rules>

@@ -13,7 +13,7 @@ import {
   type Detection,
 } from '@kbn/significant-events-schema';
 import { badRequest, notFound } from '@hapi/boom';
-import { z, isoDateTime } from '@kbn/zod/v4';
+import { z, isoDateTime, lazySchema } from '@kbn/zod/v4';
 import { BooleanFromString } from '@kbn/zod-helpers/v4';
 import { NIGHTSHIFT_API_PRIVILEGES } from '@kbn/nightshift-shared';
 import type { DetectionClient, StoredDetection } from '../../../lib/significant_events/detections';
@@ -318,12 +318,17 @@ const markRulesScannedRoute = createServerRoute({
       requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.manage],
     },
   },
-  params: z.object({
-    body: z.object({
-      rule_uuids: z.array(z.string().max(MAX_ID_LENGTH)).min(1).max(MAX_DETECTIONS_PER_REQUEST),
-      scanned_by: z.string().max(MAX_ID_LENGTH),
-    }),
-  }),
+  params: lazySchema(() =>
+    z.object({
+      body: z.object({
+        rule_uuids: z.array(z.string().max(MAX_ID_LENGTH)).min(1).max(MAX_DETECTIONS_PER_REQUEST),
+        scanned_by: z.string().max(MAX_ID_LENGTH),
+        // What the scan saw, compared by the next scan's write gate. Empty when the rule had no
+        // change point; not narrowed to CHANGE_POINT_TYPES for the same reason as `change_point_type`.
+        observed_change_point_type: z.string().max(64).optional(),
+      }),
+    })
+  ),
   handler: async ({
     params,
     request,
@@ -336,10 +341,19 @@ const markRulesScannedRoute = createServerRoute({
     await assertSignificantEventsAccess({ server, licensing });
     await assertNotPaused({ maintenanceService, request });
 
-    const { rule_uuids: ruleUuids, scanned_by: scannedBy } = params.body;
+    const {
+      rule_uuids: ruleUuids,
+      scanned_by: scannedBy,
+      observed_change_point_type: observedChangePointType,
+    } = params.body;
+    // Never `change_point_type`: that field is what makes a document a detection to discovery.
     return appendDetectionDocuments({
       getDetectionClient,
-      documents: ruleUuids.map((ruleUuid) => ({ rule_uuid: ruleUuid, scanned_by: scannedBy })),
+      documents: ruleUuids.map((ruleUuid) => ({
+        rule_uuid: ruleUuid,
+        scanned_by: scannedBy,
+        ...(observedChangePointType ? { observed_change_point_type: observedChangePointType } : {}),
+      })),
     });
   },
 });

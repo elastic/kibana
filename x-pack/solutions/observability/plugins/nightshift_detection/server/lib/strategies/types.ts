@@ -6,8 +6,17 @@
  */
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-import type { CreateRuleData } from '@kbn/alerting-v2-schemas';
+import type {
+  AlertEventSeverity,
+  AlertEventStatus,
+  CreateRuleData,
+} from '@kbn/alerting-v2-schemas';
 import type { NightshiftSource } from '@kbn/nightshift-shared';
+import type { KnowledgeIndicatorReader } from '@kbn/significant-events-plugin/server';
+import type { z } from '@kbn/zod/v4';
+import type { detectionSignalReadingSchema } from '../../../common/detection_signal';
+import type { ManagedRuleReader } from '../rules/managed_rule_reader';
+import type { SeriesId } from './series_key';
 
 /** What a strategy declares about itself; the engine reads it to schedule the strategy. */
 export interface DetectionStrategyDescriptor {
@@ -16,6 +25,9 @@ export interface DetectionStrategyDescriptor {
   /**
    * Bump it when the strategy's logic changes what a reading means. The engine stamps it on every
    * signal, so history written by an older version stays distinguishable.
+   * A bump costs a baseline: the history read leaves older versions out, so every series of the
+   * strategy is `warming_up` until it has enough readings again, and nothing that compares with
+   * normal opens an event meanwhile. Don't bump it for a change that keeps the value comparable.
    */
   version: number;
   name: string;
@@ -33,45 +45,26 @@ export interface DetectionStrategyDescriptor {
  * `DetectionSignal`: it adds the strategy id, space, group hash and schedule time, so a reading
  * carries only what the generator knows.
  */
-export interface DetectionSignalReading {
+export type DetectionSignalReading = z.infer<typeof detectionSignalReadingSchema> & {
   /** `recovered` and `no_data` are reported as readings too, not only `breached`. */
-  status: 'breached' | 'recovered' | 'no_data';
-  /** Identifies the series within the strategy; the engine hashes it into the group hash. */
-  fingerprint: string;
-  rule_id?: string;
-  source_id?: string;
-  entity: { type: string; name: string };
-  /** Start of the bucket, in epoch milliseconds. */
-  bucket_start: number;
-  /** End of the bucket, in epoch milliseconds. */
-  bucket_end: number;
-  value: number;
-  unit: string;
-  title: string;
-  description: string;
-  /** 0 to 100. */
-  importance: number;
-  /** The ES|QL query that reproduces the reading. */
-  evidence_esql: string;
-  /** A supporting reading may join an open event but never opens one. */
-  role: 'primary' | 'supporting';
-  /** Whether the judge should compare the reading with what is normal for the series. */
-  compare_with_normal: boolean;
-  /** Strategy-specific detail, kept as reported. */
-  details: Record<string, unknown>;
-}
+  status: AlertEventStatus;
+  /** A severity decided outside the engine, such as an external alert's; most strategies omit it. */
+  severity?: AlertEventSeverity;
+};
 
 /** Reads back the readings a strategy wrote before, so a generator can compare with its history. */
 export interface SignalHistoryReader {
   /**
    * Readings of the calling strategy only, for the given series, whose bucket starts in
-   * `[from, to)` (epoch milliseconds), grouped by fingerprint. A fingerprint without readings is
-   * absent from the result.
+   * `[from, to)` (epoch milliseconds), keyed by `getSeriesKey`. A series without readings
+   * is absent from the result.
    */
   readHistory(params: {
-    fingerprints: string[];
+    series: SeriesId[];
     from: number;
     to: number;
+    /** Stops the search when the run is out of time or cancelled. */
+    abortSignal?: AbortSignal;
   }): Promise<Map<string, DetectionSignalReading[]>>;
 }
 
@@ -86,6 +79,12 @@ export interface GeneratorContext {
   esClient: ElasticsearchClient;
   /** The strategy's own history. */
   history: SignalHistoryReader;
+  /** The space's knowledge indicators, read as the detection service account, once per tick. */
+  knowledge: KnowledgeIndicatorReader;
+  /** The engine's managed rules in the space, and the rows they wrote. */
+  rules: Pick<ManagedRuleReader, 'listManaged' | 'readRows'>;
+  /** Whether cross-project search is on, so a strategy builds the same rule queries as its resources. */
+  cpsEnabled: boolean;
   /** Aborted when the run is out of time or cancelled; long queries should stop on it. */
   abortSignal: AbortSignal;
   logger: Logger;
@@ -93,7 +92,10 @@ export interface GeneratorContext {
 
 /** What a generator reports for one window. */
 export interface GenerateResult {
-  /** A reading for every series evaluated in every bucket of the window, breaching or not. */
+  /**
+   * A reading for every series evaluated in every bucket of the window, breaching or not. A strategy
+   * may report breaches only instead, and then sets `quiet_period_minutes` on them.
+   */
   readings: DetectionSignalReading[];
   /** Things the generator could not do, such as a source without the fields it needs. */
   notes: string[];
@@ -107,22 +109,56 @@ export interface DetectionSignalGenerator {
   generate(context: GeneratorContext): Promise<GenerateResult>;
 }
 
-/** An alerting rule the engine wants to exist for a strategy. */
-export interface DesiredRule {
+/**
+ * An Alerting v2 rule a strategy wants to exist. The engine owns its identity: it derives the rule
+ * id from the space, strategy, source and query, adds its ownership tags and prefixes the name.
+ */
+export interface AlertingRuleResource {
+  kind: 'alerting_rule';
   source_id: string;
-  data: CreateRuleData;
-  /** What the generator needs to read the rule's rows back, such as the condition used. */
-  meta?: Record<string, string>;
+  /** Whether the rule should run; false for the rules of a disabled source. */
+  enabled: boolean;
+  /**
+   * The rule as created. `metadata.name` is the strategy's title for it, without the prefix. No
+   * tags: the engine's are its ownership record, and `nightshift:source:*` belongs to
+   * significant_events, which deletes those rules.
+   */
+  data: Omit<CreateRuleData, 'metadata'> & {
+    metadata: Omit<CreateRuleData['metadata'], 'tags'>;
+  };
 }
 
-/** The rules a strategy needs, and the sources it cannot watch. */
-export interface DesiredRules {
-  rules: DesiredRule[];
+/**
+ * Something a strategy needs to exist outside the engine, tagged by `kind`. One kind for now; the
+ * union grows when a strategy needs another (an ML job, a connector check).
+ */
+export type DesiredResource = AlertingRuleResource;
+
+/** The resources a strategy needs, and the sources it cannot watch. */
+export interface DesiredResources {
+  resources: DesiredResource[];
+  /** Sources the strategy cannot watch for now. Their existing rules stay as they are. */
   skipped: Array<{ source_id: string; reason: string }>;
+  /**
+   * Single items the strategy cannot watch, such as one knowledge indicator, only logged. Unlike
+   * `skipped` they hold no rules back, so the rules of the source's other items still update.
+   */
+  notes?: string[];
 }
 
-/** What building a strategy's rules needs. */
-export type DesiredRulesContext = Pick<
-  GeneratorContext,
-  'spaceId' | 'sources' | 'esClient' | 'abortSignal'
->;
+/** What building a strategy's resources needs. */
+export interface ResourceContext
+  extends Pick<GeneratorContext, 'spaceId' | 'esClient' | 'abortSignal'> {
+  /**
+   * Every source of the space, enabled or not, so a strategy keeps a disabled source's rules,
+   * disabled, instead of leaving them out and having them deleted.
+   */
+  sources: NightshiftSource[];
+  /**
+   * The space's knowledge indicators, read as the internal user with no privilege check. Read only
+   * those of `sources`: the account's own read of the sources is what limits what it watches.
+   */
+  knowledge: KnowledgeIndicatorReader;
+  /** Whether cross-project search is on, so queries carry the project routing prefix. */
+  cpsEnabled: boolean;
+}

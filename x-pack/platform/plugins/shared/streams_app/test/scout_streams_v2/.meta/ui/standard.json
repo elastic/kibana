@@ -1,5 +1,5 @@
 {
-  "sha1": "5be7661ac38a844537ae4eb04894f3ee77f87f6f",
+  "sha1": "785d22fd3ce9c09d2f0a936dab309dbeff56b03d",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -25,8 +25,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout_streams_v2/ui/tests/canvas_processing.spec.ts",
-        "line": 140,
-        "column": 26
+        "line": 141,
+        "column": 12
       }
     },
     {
@@ -39,8 +39,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout_streams_v2/ui/tests/canvas_processing.spec.ts",
-        "line": 179,
-        "column": 41
+        "line": 190,
+        "column": 36
       }
     },
     {
@@ -53,8 +53,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout_streams_v2/ui/tests/canvas_processing.spec.ts",
-        "line": 239,
-        "column": 11
+        "line": 243,
+        "column": 19
       }
     },
     {
@@ -67,7 +67,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout_streams_v2/ui/tests/canvas_processing.spec.ts",
-        "line": 286,
+        "line": 303,
         "column": 24
       }
     },
@@ -237,6 +237,20 @@
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout_streams_v2/ui/tests/canvas.spec.ts",
         "line": 194,
         "column": 24
+      }
+    },
+    {
+      "id": "a570088069a2c16-b1ca2e5ba67df21",
+      "title": "Stream map warns before leaving the map with unsaved changes, but not for a flyout",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout_streams_v2/ui/tests/canvas.spec.ts",
+        "line": 190,
+        "column": 11
       }
     },
     {

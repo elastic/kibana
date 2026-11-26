@@ -7,18 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export {
-  ACL_LEVELS,
-  compareLevels,
-  isAclLevel,
-  isEntryLevel,
-  isGeneralAccessLevel,
-  lowestAllowed,
-  maxLevel,
-  type AclLevel,
-  type EntryLevel,
-  type GeneralAccessLevel,
-} from './src/levels';
+export type { AclAccess, EntryAccess, GeneralAccess } from './src/levels';
 export {
   PRINCIPAL_TYPES,
   type Principal,
@@ -42,20 +31,25 @@ export {
   toAclSource,
   type Acl,
   type AclEntry,
+  type AclGeneral,
   type AclGrant,
   type AclState,
   type StoredAcl,
   type StoredAclEntry,
+  type StoredAclGeneral,
 } from './src/acl';
 export { buildAclReadFilter, type BuildAclReadFilterParams } from './src/read_filter';
 export {
   evaluateAcl,
   generalAccessPermits,
+  getOperationsAtAccess,
   isRestricted,
+  ObjectAccessError,
   toObjectDecision,
   type AclDecision,
   type AclObjectDecision,
   type EvaluateAclParams,
+  type ObjectAccessErrorCode,
 } from './src/evaluation';
 export {
   AclChangeError,
@@ -65,6 +59,7 @@ export {
   readEditableAcl,
   type AclChange,
   type AclChangeErrorCode,
+  type AclWarning,
   type EditableAcl,
   type EditableAclEntry,
   type InitialAccess,

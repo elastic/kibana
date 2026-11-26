@@ -14,6 +14,7 @@ export interface ConnectorCreate {
   config: SavedObjectAttributes;
   secrets: SavedObjectAttributes;
   isInboundEventsEnabled?: boolean;
+  specVersion?: string;
 }
 
 export interface ConnectorCreateParams {

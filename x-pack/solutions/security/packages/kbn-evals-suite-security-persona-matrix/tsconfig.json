@@ -16,6 +16,9 @@
     "@kbn/security-evals-matrix",
     "@kbn/tooling-log",
     "@kbn/kbn-client",
-    "@kbn/evals-common"
+    "@kbn/evals-common",
+    "@kbn/inference-common",
+    "@kbn/inference-prompt-utils",
+    "@kbn/zod"
   ]
 }

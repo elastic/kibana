@@ -39,7 +39,7 @@ const SIGNIFICANT_EVENTS_CLEANUP_WORKFLOW_MANAGEMENT = {
 export const SIGNIFICANT_EVENTS_DETECTION_WORKFLOW = {
   id: SIGNIFICANT_EVENTS_DETECTION_WORKFLOW_ID,
   pluginId: 'significantEvents',
-  version: 8,
+  version: 9,
   billable: false,
   get yaml() {
     return readManagedWorkflowYaml(__dirname, 'significant_events/detection.yaml');
@@ -50,7 +50,7 @@ export const SIGNIFICANT_EVENTS_DETECTION_WORKFLOW = {
 export const SIGNIFICANT_EVENTS_DISCOVERY_WORKFLOW = {
   id: SIGNIFICANT_EVENTS_DISCOVERY_WORKFLOW_ID,
   pluginId: 'significantEvents',
-  version: 30,
+  version: 32,
   billable: false,
   get yaml() {
     return readManagedWorkflowYaml(__dirname, 'significant_events/discovery.yaml');

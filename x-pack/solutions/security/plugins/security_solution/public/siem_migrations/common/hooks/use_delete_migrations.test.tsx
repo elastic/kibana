@@ -15,6 +15,7 @@ const mockAddSuccess = jest.fn();
 const mockAddError = jest.fn();
 const mockDeleteRuleMigration = jest.fn();
 const mockDeleteDashboardMigration = jest.fn();
+const mockDeleteWorkflowMigration = jest.fn();
 
 jest.mock('../../../common/hooks/use_app_toasts', () => ({
   useAppToasts: () => ({ addSuccess: mockAddSuccess, addError: mockAddError }),
@@ -29,6 +30,9 @@ jest.mock('../../../common/lib/kibana/kibana_react', () => ({
         },
         dashboards: {
           deleteMigration: mockDeleteDashboardMigration,
+        },
+        workflows: {
+          deleteMigration: mockDeleteWorkflowMigration,
         },
       },
     },
@@ -80,6 +84,23 @@ describe('useDeleteMigration', () => {
       });
       expect(mockDeleteRuleMigration).not.toHaveBeenCalled();
     });
+  });
+
+  it('should delete a workflow migration through the workflows service', async () => {
+    const { result } = renderHook(() => useDeleteMigration('workflow'), {
+      wrapper: TestProviders,
+    });
+    act(() => {
+      result.current.mutate(defaultMigrationStats);
+    });
+
+    await waitFor(() => {
+      expect(mockDeleteWorkflowMigration).toHaveBeenCalledWith({
+        migrationId: defaultMigrationStats.id,
+      });
+    });
+    expect(mockDeleteRuleMigration).not.toHaveBeenCalled();
+    expect(mockDeleteDashboardMigration).not.toHaveBeenCalled();
   });
 
   it('calls addSuccess on success', async () => {

@@ -160,7 +160,7 @@ export const pinnedFiltersToAppFilters = (searchSource: SerializedSearchSourceFi
 };
 
 /** Omits references to the current inline view, leaving references to other views unchanged. */
-const omitInlineDataViewIdFromFilters = (
+export const omitInlineDataViewIdFromFilters = (
   filters: DiscoverSessionApiClassicTab['filters'],
   inlineDataViewId: string | undefined
 ) => {

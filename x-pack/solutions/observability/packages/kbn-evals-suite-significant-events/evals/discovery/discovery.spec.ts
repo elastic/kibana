@@ -131,6 +131,8 @@ evaluate.describe(
           seedStatus?: 'inactive';
           /** Rewrites the seeded event's signals so the event holds the rule only with this verdict. */
           seedVerdict?: 'off_topic';
+          /** Also seeds a second live event on the same topology that holds no rule. */
+          seedCompetingEvent?: boolean;
           stripSeedTopology?: boolean;
         }
 
@@ -423,6 +425,13 @@ evaluate.describe(
               'the same rule confirms while an active event holds it only as off_topic; the agent must continue that event instead of opening a second one',
             includesPath: (path: string) => path === 'rule-uuid-off-topic-holder',
           },
+          {
+            title:
+              'continuation - rule held by an event while another live event shares its topology',
+            description:
+              'the same rule confirms in an active event while a second active event overlaps its topology; the agent must continue the event that holds the rule',
+            includesPath: (path: string) => path === 'rule-uuid-held-with-competing-event',
+          },
         ] as const;
 
         for (const continuationSuite of continuationSuites) {
@@ -469,6 +478,11 @@ evaluate.describe(
                     sequence: [detections[0], detections[0]],
                     seedVerdict: 'off_topic',
                   },
+                  {
+                    path: 'rule-uuid-held-with-competing-event',
+                    sequence: [detections[0], detections[0]],
+                    seedCompetingEvent: true,
+                  },
                   ...continuationChains
                     .filter(([path]) => path === 'cascade')
                     .map(
@@ -497,6 +511,7 @@ evaluate.describe(
                   expectTopologyEventSearch: plan.expectTopologyEventSearch,
                   seedStatus: plan.seedStatus,
                   seedVerdict: plan.seedVerdict,
+                  seedCompetingEvent: plan.seedCompetingEvent,
                   stripSeedTopology: plan.stripSeedTopology,
                 }));
               });
@@ -533,6 +548,7 @@ evaluate.describe(
                             run.expectTopologyEventSearch ?? false,
                           continuation_seed_status: run.seedStatus,
                           continuation_seed_verdict: run.seedVerdict,
+                          continuation_seed_competing_event: run.seedCompetingEvent,
                           continuation_without_topology: run.stripSeedTopology,
                         },
                       })),
@@ -655,6 +671,9 @@ evaluate.describe(
                         const significantEvents = extractDiscoveriesFromToolCall(
                           converseResult.steps
                         );
+                        const writtenEvents = extractSignificantEventsFromToolCall(
+                          converseResult.steps
+                        );
                         if (significantEvents.some((event) => event.event_id)) {
                           await esClient.indices.refresh({
                             index: RULE_EVENTS_DATA_STREAM,
@@ -664,27 +683,44 @@ evaluate.describe(
                           .map((event) => event.event_id)
                           .filter((eventId): eventId is string => Boolean(eventId));
 
-                        cycles.push({
-                          ruleName: detection.rule_name,
-                          producedEventIds,
-                          producedEvents: significantEvents.map((event) => ({
-                            event_id: event.event_id,
-                            severity: event.severity,
-                            status: event.status,
-                          })),
-                          requestedEventIds: extractRequestedEventIdsFromToolCall(
-                            converseResult.steps
-                          ),
-                          writeItems: extractWriteItemsFromToolCall(converseResult.steps),
-                          expectReuse: i === 0 ? undefined : run.expectReuse ?? true,
-                          expectTopologyEventSearch: run.expectTopologyEventSearch,
-                          steps: converseResult.steps,
-                        });
-
-                        // Seed a SignificantEvent per produced event so event_search resolves it
-                        // as an active episode in subsequent cycles.
+                        // Seed each successful write so event_search resolves it as an active episode
+                        // in subsequent cycles. Skipped requests already refer to a stored event.
                         const seedVerdict = i === 0 ? run.seedVerdict : undefined;
-                        for (const event of significantEvents) {
+                        // A second live event on the same topology that confirms a different rule. It
+                        // passes the prompt's confirming-signal pre-check, so a topology search returns
+                        // an eligible event that does not hold the detection's rule.
+                        const competingEvents: SignificantEvent[] =
+                          i === 0 && run.seedCompetingEvent
+                            ? writtenEvents
+                                .filter((event) => event.event_id)
+                                .slice(0, 1)
+                                .map((event) => ({
+                                  ...event,
+                                  event_id: `${event.event_id}-competing`,
+                                  title: 'Competing event on the same topology',
+                                  signals: (event.signals ?? []).flatMap((signal) =>
+                                    signal.type === 'detection'
+                                      ? [
+                                          {
+                                            ...signal,
+                                            verdict: 'confirms' as const,
+                                            metadata: {
+                                              ...signal.metadata,
+                                              rule_uuid: `${
+                                                signal.metadata.rule_uuid ?? 'rule'
+                                              }-competing`,
+                                            },
+                                          },
+                                        ]
+                                      : []
+                                  ),
+                                }))
+                            : [];
+                        const narrativeEvents: SignificantEvent[] = [];
+                        for (const [eventIndex, event] of [
+                          ...writtenEvents,
+                          ...competingEvents,
+                        ].entries()) {
                           if (!event.event_id) continue;
                           const seededEvent: SignificantEvent = {
                             ...event,
@@ -721,6 +757,9 @@ evaluate.describe(
                               : {}),
                             ...(i === 0 && run.seedStatus ? { status: run.seedStatus } : {}),
                           };
+                          if (eventIndex < writtenEvents.length) {
+                            narrativeEvents.push(seededEvent);
+                          }
 
                           // Write to .rule-events so the agent's RuleEventsClient can find the
                           // seeded episode in the next cycle's event_search call.
@@ -754,6 +793,23 @@ evaluate.describe(
                           });
                           seededGroupHashes.push(groupHash);
                         }
+                        cycles.push({
+                          ruleName: detection.rule_name,
+                          producedEventIds,
+                          producedEvents: significantEvents.map((event) => ({
+                            event_id: event.event_id,
+                            severity: event.severity,
+                            status: event.status,
+                          })),
+                          requestedEventIds: extractRequestedEventIdsFromToolCall(
+                            converseResult.steps
+                          ),
+                          writeItems: extractWriteItemsFromToolCall(converseResult.steps),
+                          narrativeEvents,
+                          expectReuse: i === 0 ? undefined : run.expectReuse ?? true,
+                          expectTopologyEventSearch: run.expectTopologyEventSearch,
+                          steps: converseResult.steps,
+                        });
                         if (producedEventIds.length > 0) {
                           await esClient.indices.refresh({
                             index: RULE_EVENTS_DATA_STREAM,

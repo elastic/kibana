@@ -8,7 +8,7 @@
 import { useCallback } from 'react';
 
 import moment from 'moment';
-import type { DataProvider } from '@kbn/timelines-plugin/common';
+import type { DataProvider } from '@kbn/securitysolution-timeline-common';
 import { generateDataProvider } from '../modules/timeline/utils/data_provider';
 import {
   fieldAndValueValid,

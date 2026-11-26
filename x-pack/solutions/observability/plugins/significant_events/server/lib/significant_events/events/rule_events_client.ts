@@ -34,6 +34,7 @@ import {
   type SignificantEventCloseReason,
 } from '@kbn/significant-events-schema';
 import { ALERT_ACTIONS_DATA_STREAM } from '@kbn/alerting-v2-constants';
+import { lazySchema, z } from '@kbn/zod/v4';
 import {
   MAX_DEDUP_SCAN_LIMIT,
   type CommonSearchOptions,
@@ -219,6 +220,47 @@ interface RuleEventSourceRow {
 }
 
 type RuleEventSourceRowWithCreatedAt = RuleEventSourceRow & { created_at: string };
+
+export interface WrittenDetectionPair {
+  detection_id: string;
+  rule_uuid: string;
+}
+
+interface RuleEventDataRow extends Record<string, unknown> {
+  data_json: string;
+}
+
+const writtenDataSchema = lazySchema(() => z.object({ signals: z.array(z.unknown()) }));
+const writtenSignalSchema = lazySchema(() =>
+  z.object({
+    metadata: z.object({ detection_id: z.string(), rule_uuid: z.string() }),
+  })
+);
+
+const parseJson = (json: string): unknown => {
+  try {
+    return JSON.parse(json || '{}');
+  } catch {
+    return undefined;
+  }
+};
+
+/** A row that is not valid JSON, or a signal that lacks the pair, is skipped without failing the lookup. */
+const writtenDetectionPairs = (dataJson: string): WrittenDetectionPair[] => {
+  const data = writtenDataSchema.safeParse(parseJson(dataJson));
+  if (!data.success) return [];
+  return data.data.signals.flatMap((signal) => {
+    const parsed = writtenSignalSchema.safeParse(signal);
+    return parsed.success
+      ? [
+          {
+            detection_id: parsed.data.metadata.detection_id,
+            rule_uuid: parsed.data.metadata.rule_uuid,
+          },
+        ]
+      : [];
+  });
+};
 
 /**
  * `.rule-events` doesn't guarantee `source_ids` is an array — bridge docs write a scalar
@@ -722,6 +764,35 @@ export class RuleEventsClient {
     };
   }
 
+  async findDetectionsWrittenByRun({
+    workflowExecutionId,
+    limit,
+  }: {
+    workflowExecutionId: string;
+    limit: number;
+  }): Promise<{ pairs: WrittenDetectionPair[]; truncated: boolean }> {
+    const rows = esqlToObjects<RuleEventDataRow>(
+      await queryEsql({
+        esClient: this.clients.esClient,
+        query: withDataJsonProjection(
+          buildBaseQuery(this.clients.space).where`FIELD_EXTRACT(${esql.col('data')}, ${esql.str(
+            'workflow_execution_id'
+          )}) == ${esql.str(workflowExecutionId)}`
+        )
+          .sort(['@timestamp', 'DESC'])
+          .limit(limit + 1)
+          .keep('data_json'),
+      })
+    );
+    const truncated = rows.length > limit;
+    return {
+      pairs: rows
+        .slice(0, limit)
+        .flatMap(({ data_json: dataJson }) => writtenDetectionPairs(dataJson)),
+      truncated,
+    };
+  }
+
   /**
    * Returns the latest version per `group_hash` for all live (`active` or `recovering`) events
    * within the given time range, optionally narrowed to candidate source/rule identities so the
@@ -955,6 +1026,47 @@ export class RuleEventsClient {
     return live;
   }
 
+  /**
+   * When each rule last recorded a breach at or after `from`, as epoch milliseconds. A rule runs its
+   * query on a schedule and writes a `breached` signal whenever the query matches, so a recent one says
+   * the query returns rows now. A rule with none is absent: it matched nothing, or did not run. The two
+   * are the same input, so a stopped or failing rule reads as quiet and a healthy verdict resting on it
+   * is not distinguishable from a fresh one. A shard failure fails the lookup, because the rows of the
+   * shards that answered would read as rules that recorded no breach.
+   */
+  async findLatestBreachedSignals({
+    ruleUuids,
+    from,
+  }: {
+    ruleUuids: string[];
+    from: string;
+  }): Promise<Map<string, number>> {
+    const latest = new Map<string, number>();
+    if (ruleUuids.length === 0) return latest;
+
+    const query = esql.from([RULE_EVENTS_INDEX]).where`space_id == ${esql.str(
+      this.clients.space
+    )} AND type == ${esql.str('signal')} AND status == ${esql.str('breached')} AND ${esql.col(
+      'rule.id'
+    )} IN (${ruleUuids.map((ruleUuid) => esql.str(ruleUuid))}) AND @timestamp >= TO_DATETIME(${{
+      from,
+    }})`.pipe`STATS latest = MAX(@timestamp) BY ${esql.col('rule.id')}`;
+
+    const rows = esqlToObjects<Record<string, unknown>>(
+      await queryEsql({ esClient: this.clients.esClient, query, allowPartialResults: false })
+    );
+
+    for (const row of rows) {
+      const ruleUuid = row['rule.id'];
+      const at = typeof row.latest === 'string' ? Date.parse(row.latest) : NaN;
+      if (typeof ruleUuid !== 'string' || Number.isNaN(at)) {
+        throw new Error('findLatestBreachedSignals returned an invalid breach row');
+      }
+      latest.set(ruleUuid, at);
+    }
+    return latest;
+  }
+
   async findByEventId(eventId: string): Promise<{ hits: SignificantEventResponse[] }> {
     const query = withDataJsonProjection(
       buildBaseQuery(this.clients.space).where`${eventIdEquals(eventId)}`
@@ -1051,6 +1163,26 @@ export class RuleEventsClient {
   }
 
   async findLatestByEventIds(eventIds: string[]): Promise<Map<string, SignificantEvent>> {
+    const latest = await this.findLatestWithEpisodeByEventIds(eventIds);
+    return new Map([...latest].map(([eventId, { event }]) => [eventId, event]));
+  }
+
+  /**
+   * The episode (`alert.id`) of each event's latest version: its current episode. An event whose
+   * latest version has no episode id is absent.
+   */
+  async findCurrentEpisodeIdsByEventIds(eventIds: string[]): Promise<Map<string, string>> {
+    const latest = await this.findLatestWithEpisodeByEventIds(eventIds);
+    const episodeIds = new Map<string, string>();
+    latest.forEach(({ episodeId }, eventId) => {
+      if (episodeId) episodeIds.set(eventId, episodeId);
+    });
+    return episodeIds;
+  }
+
+  private async findLatestWithEpisodeByEventIds(
+    eventIds: string[]
+  ): Promise<Map<string, { event: SignificantEvent; episodeId?: string }>> {
     if (!eventIds.length) return new Map();
 
     let query = buildBaseQuery(this.clients.space).where`${eventIdIn(eventIds)}`;
@@ -1063,9 +1195,15 @@ export class RuleEventsClient {
       fields: ['data_json'],
     });
 
-    const map = new Map<string, SignificantEvent>();
-    for (const event of hits.map(decodeSignificantEvent)) {
-      if (event.event_id) map.set(event.event_id, event);
+    const map = new Map<string, { event: SignificantEvent; episodeId?: string }>();
+    for (const row of hits) {
+      const event = decodeSignificantEvent(row);
+      if (event.event_id) {
+        map.set(event.event_id, {
+          event,
+          ...(row.alert?.id !== undefined ? { episodeId: row.alert.id } : {}),
+        });
+      }
     }
     return map;
   }
@@ -1106,19 +1244,26 @@ export class RuleEventsClient {
    * Writes a severity as a new version through the head guard, retrying a head moved by another
    * change. A head whose severity another writer changed is left alone: that writer resolved it later.
    * A closed event is left alone too: a new version would move its close time and replace its closing
-   * note, which Discovery's reuse of closed series reads.
+   * note, which Discovery's reuse of closed series reads. So is an event whose head is on another
+   * episode than the one given.
    */
   async syncSeverity({
     eventId,
     severity,
+    episodeId,
   }: {
     eventId: string;
     severity: Severity;
+    /** The episode the severity was concluded for; a head on another episode is left alone. */
+    episodeId: string;
   }): Promise<'updated' | 'unchanged' | 'superseded' | 'not_found' | 'closed'> {
     let firstSeverity: Severity | undefined;
     for (let attempt = 0; attempt <= SYNC_SEVERITY_MAX_RETRIES; attempt++) {
-      const latest = (await this.findLatestByEventIds([eventId])).get(eventId);
-      if (!latest) return 'not_found';
+      const head = (await this.findLatestWithEpisodeByEventIds([eventId])).get(eventId);
+      if (!head) return 'not_found';
+      const { event: latest } = head;
+      // A reopen can land between the investigation read and this write: its severity is not ours.
+      if (head.episodeId !== episodeId) return 'superseded';
       if (latest.severity === severity) return 'unchanged';
       if (latest.status === ALERT_EPISODE_STATUS.INACTIVE) return 'closed';
       firstSeverity ??= latest.severity;
@@ -1139,35 +1284,6 @@ export class RuleEventsClient {
       if (written.updated) return 'updated';
     }
     return 'superseded';
-  }
-
-  /** Every episode (`alert.id`) each event has carried. An event with none is absent. */
-  async findEpisodeIdsByEventIds(eventIds: string[]): Promise<Map<string, string[]>> {
-    const episodeIdsByEvent = new Map<string, string[]>();
-    if (!eventIds.length) return episodeIdsByEvent;
-
-    const query = buildBaseQuery(this.clients.space).where`${eventIdIn(eventIds)}`
-      .pipe`EVAL ${esql.col('event_id')} = FIELD_EXTRACT(${esql.col('data')}, ${esql.str(
-      'event_id'
-    )}), ${esql.col('episode_id')} = ${esql.col('alert.id')}`.pipe`STATS n = COUNT(*) BY ${esql.col(
-      'event_id'
-    )}, ${esql.col('episode_id')}`.limit(MAX_EPISODE_PAIRS);
-
-    try {
-      const rows = assertEpisodePairsComplete(
-        esqlToObjects<{ episode_id: string | null; event_id: string }>(
-          await queryEsql({ esClient: this.clients.esClient, query })
-        )
-      );
-      for (const { episode_id: episodeId, event_id: eventId } of rows) {
-        if (!episodeId || !eventId) continue;
-        episodeIdsByEvent.set(eventId, [...(episodeIdsByEvent.get(eventId) ?? []), episodeId]);
-      }
-      return episodeIdsByEvent;
-    } catch (error) {
-      if (isIndexNotFoundError(error)) return episodeIdsByEvent;
-      throw error;
-    }
   }
 
   /** Writes the first version of an event; unguarded, as there is no prior version to compare. */

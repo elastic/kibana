@@ -97,6 +97,8 @@ export type {
   InvestigationSubjectType,
   SlackSeenEvent,
   SlackThreadSubject,
+  SubjectLocator,
+  SubjectVia,
 } from './subjects/subject';
 
 export {
