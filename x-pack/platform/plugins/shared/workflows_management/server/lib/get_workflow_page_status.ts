@@ -12,6 +12,7 @@ import type { WorkflowProperties } from '../storage/workflow_storage';
 
 export interface GetWorkflowPageStatusDeps {
   arePagesEnabled: () => Promise<boolean>;
+  canEncrypt: boolean;
   serviceAccountBindings: Pick<
     WorkflowsExecutionEnginePluginStart['serviceAccountBindings'],
     'isEnabled' | 'getWorkloadBinding' | 'getWorkloadServiceAccountSummary'
@@ -24,7 +25,7 @@ export interface GetWorkflowPageStatusDeps {
  * service account exists, which the public route leaves to the run.
  */
 export const getWorkflowPageStatus = async (
-  { arePagesEnabled, serviceAccountBindings }: GetWorkflowPageStatusDeps,
+  { arePagesEnabled, canEncrypt, serviceAccountBindings }: GetWorkflowPageStatusDeps,
   {
     page,
     workflow,
@@ -35,8 +36,7 @@ export const getWorkflowPageStatus = async (
   if (!(await arePagesEnabled())) reasons.push('pages_disabled');
   if (!page.access) reasons.push('no_access_level');
   if (!page.enabled) reasons.push('page_disabled');
-  // The page DTO is offline with an access level and the switch on only without an encryption key.
-  if (!page.online && page.access && page.enabled) reasons.push('encryption_unavailable');
+  if (!canEncrypt) reasons.push('encryption_unavailable');
   if (!workflow.enabled) reasons.push('workflow_disabled');
   if (!workflow.valid) reasons.push('workflow_invalid');
 

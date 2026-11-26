@@ -47,6 +47,8 @@ export interface WorkflowPagesServiceStart {
   getClient(params: { request: KibanaRequest }): Promise<WorkflowPagesClient>;
   /** Lifecycle and public-link checks, without a user. For workflows internals only. */
   getSystemClient(): WorkflowPagesSystemClient;
+  /** Whether Kibana has an encryption key, which a page needs to serve. */
+  canEncrypt: boolean;
 }
 
 /** Owns the `workflow-page` saved objects. Exists only with `workflowsManagement.pages.enabled`. */
@@ -128,6 +130,7 @@ export class WorkflowPagesService {
         });
       },
       getSystemClient: () => systemClient,
+      canEncrypt: this.canEncrypt,
     };
   }
 }

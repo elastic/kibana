@@ -421,6 +421,8 @@ export class WorkflowsService {
     spaceId: string
   ): Promise<WorkflowPageStatus> {
     await this.ensureInitialized();
+    if (!this.pages) throw new Error('Workflow pages are not set up');
+    const { canEncrypt } = this.pages;
     const workflow = await this.crudService.getWorkflowDocumentSource(page.workflowId, spaceId, {
       includeGlobal: false,
     });
@@ -428,6 +430,7 @@ export class WorkflowsService {
     return getWorkflowPageStatus(
       {
         arePagesEnabled: () => this.arePagesEnabled(),
+        canEncrypt,
         serviceAccountBindings: this.workflowsExecutionEngine.serviceAccountBindings,
       },
       { page, workflow, spaceId }

@@ -28,6 +28,7 @@ const boundWorkflow = {
 
 const setup = ({
   pagesEnabled = true,
+  canEncrypt = true,
   bindingsEnabled = true,
   boundAccountId = ACCOUNT as string | null,
   summary = { id: ACCOUNT, name: 'pages', enabled: true, assumable: true } as {
@@ -38,6 +39,7 @@ const setup = ({
   } | null,
 } = {}) => ({
   arePagesEnabled: jest.fn(async () => pagesEnabled),
+  canEncrypt,
   serviceAccountBindings: {
     isEnabled: jest.fn(() => bindingsEnabled),
     getWorkloadBinding: jest.fn(async () =>
@@ -74,7 +76,7 @@ describe('getWorkflowPageStatus', () => {
 
   it('lists every reason at once', async () => {
     const result = await status(
-      setup({ pagesEnabled: false }),
+      setup({ pagesEnabled: false, canEncrypt: false }),
       { access: null, enabled: false, online: false },
       { enabled: false, valid: false, definition: undefined }
     );
@@ -85,6 +87,7 @@ describe('getWorkflowPageStatus', () => {
         'pages_disabled',
         'no_access_level',
         'page_disabled',
+        'encryption_unavailable',
         'workflow_disabled',
         'workflow_invalid',
         'no_service_account',
@@ -92,8 +95,8 @@ describe('getWorkflowPageStatus', () => {
     });
   });
 
-  it('reports a missing encryption key when the page is set up but not online', async () => {
-    await expect(status(setup(), { online: false })).resolves.toEqual({
+  it('reports a missing encryption key from the deployment, not from the page', async () => {
+    await expect(status(setup({ canEncrypt: false }), { online: false })).resolves.toEqual({
       online: false,
       reasons: ['encryption_unavailable'],
     });
