@@ -6,6 +6,8 @@
  */
 
 import type { ContainerModuleLoadOptions } from 'inversify';
+import { DetectionStrategy } from '../lib/strategies/detection_strategy';
+import { KnownFailuresStrategy } from '../lib/strategies/known_failures/known_failures_strategy';
 import { StrategyCatalog } from '../lib/strategies/strategy_catalog';
 
 /**
@@ -14,4 +16,5 @@ import { StrategyCatalog } from '../lib/strategies/strategy_catalog';
  */
 export function bindStrategies({ bind }: ContainerModuleLoadOptions): void {
   bind(StrategyCatalog).toSelf().inSingletonScope();
+  bind(DetectionStrategy).to(KnownFailuresStrategy).inSingletonScope();
 }

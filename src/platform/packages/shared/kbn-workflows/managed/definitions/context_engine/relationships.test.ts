@@ -120,10 +120,7 @@ describe('CONTEXT_ENGINE_RELATIONSHIPS_WORKFLOW', () => {
     const dreaming = parse(CONTEXT_ENGINE_DREAMING_WORKFLOW.yamlTemplate(values));
 
     expect(workflow.name).toBe('Relationships: support-cases');
-    expect(workflow.settings.concurrency.key).toBe(
-      'context-engine-relationships-support-cases-0123456789abcdef'
-    );
-    expect(workflow.settings.concurrency.key).not.toBe(dreaming.settings.concurrency.key);
+    expect(workflow.settings.concurrency).toEqual(dreaming.settings.concurrency);
     expect(workflow.enabled).toBe(false);
     expect(workflow.triggers).toEqual([
       { type: 'scheduled', with: { every: '90m' } },
@@ -180,7 +177,10 @@ describe('CONTEXT_ENGINE_RELATIONSHIPS_WORKFLOW', () => {
 
     expect(types).toEqual({
       bool: {
-        should: [{ prefix: { type: 'fact.' } }, { prefix: { type: 'entity.' } }],
+        should: [
+          { prefix: { type: { value: 'fact.' } } },
+          { prefix: { type: { value: 'entity.' } } },
+        ],
         minimum_should_match: 1,
       },
     });
@@ -384,7 +384,7 @@ describe('CONTEXT_ENGINE_RELATIONSHIPS_WORKFLOW', () => {
     expect(match?._source).toBe(false);
     expect(match?.collapse).toEqual({ field: 'id' });
     expect(match?.query?.bool?.filter).toEqual(
-      expect.arrayContaining([{ prefix: { type: 'fact.' } }])
+      expect.arrayContaining([{ prefix: { type: { value: 'fact.' } } }])
     );
     expect(
       evaluate((match?.query?.bool?.must_not as Array<{ terms: { id: string } }>)[0].terms.id, {

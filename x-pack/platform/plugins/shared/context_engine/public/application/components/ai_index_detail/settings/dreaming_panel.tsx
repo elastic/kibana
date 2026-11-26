@@ -19,42 +19,84 @@ import {
   EuiModalFooter,
   EuiModalHeader,
   EuiModalHeaderTitle,
-  EuiPanel,
   EuiSkeletonText,
   EuiSpacer,
   EuiSwitch,
+  EuiText,
   EuiTextArea,
-  EuiTitle,
+  useEuiTheme,
   useGeneratedHtmlId,
+  useIsWithinMaxBreakpoint,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { KbnInfoCallout } from '@kbn/ui-callout';
-import React, { useMemo, useState } from 'react';
+import { useWorkflowsCapabilities } from '@kbn/workflows-ui';
+import { isEqual } from 'lodash';
+import React, { useCallback, useMemo, useState } from 'react';
 import {
   DEFAULT_DREAMING_INTERVAL,
   DREAMING_DISABLED,
+  maintenanceConfigOf,
   type AiIndexDreamingConfig,
+  type ResolvedMaintenanceConfig,
 } from '../../../../../common/dreaming';
 import { matchingTemplateId } from '../../../../../common/dreaming_templates';
 import type { AiIndexHttpItem } from '../../../../../common/http_api/ai_indices';
 import { validateDreamingInterval } from '../../../../../common/validation';
 import { useAiIndexDreaming } from '../../../hooks/use_ai_index_dreaming';
-import { useAllDreamingTemplates } from '../../../hooks/use_dreaming_templates';
-import { useNavigation } from '../../../hooks/use_navigation';
-import { useSaveDreamingConfig } from '../../../hooks/use_save_dreaming_config';
-import { getAiIndexDreamingTemplatePath } from '../../../paths';
 import {
-  DreamingConfigEditor,
+  useLatestWorkflowExecution,
+  type LatestWorkflowExecution,
+} from '../../../hooks/use_latest_workflow_execution';
+import { useApplyDreamingTemplate } from '../../../hooks/use_apply_dreaming_template';
+import { useDreamingTemplates } from '../../../hooks/use_dreaming_templates';
+import { useSaveDreamingConfig } from '../../../hooks/use_save_dreaming_config';
+import {
   draftBuildsAnything,
   draftOf,
   typesOfDraft,
   type DreamingConfigDraft,
 } from '../../dreaming_config/dreaming_config_editor';
-import { AiIndexDetailPanelDescription } from '../ai_index_detail_panel_description';
+import { discardChangesLabel, saveChangesLabel } from '../../dreaming_setup/translations';
+import { DreamingLastRunStatus } from './dreaming_last_run_status';
+import { DreamingLearnsRows } from './dreaming_learns_rows';
+import { DreamingSetupForm } from './dreaming_setup_form';
+import { DreamingRunsSection } from './dreaming_runs_section';
+import { MaintenanceSettings, maintenanceErrorsOf } from './maintenance_settings';
+import { SettingsPanel } from './settings_panel';
+import { SettingsRow } from './settings_row';
 
 /** Maximum height of the dreaming config JSON, in pixels, before it scrolls. */
 export const DREAMING_JSON_MAX_HEIGHT = 480;
+
+const enabledLabel = i18n.translate('xpack.contextEngine.aiIndexDetail.dreaming.enabledLabel', {
+  defaultMessage: 'Dream on a schedule',
+});
+const turnOnDreamingLabel = i18n.translate(
+  'xpack.contextEngine.aiIndexDetail.dreaming.setup.turnOnLabel',
+  { defaultMessage: 'Turn on dreaming' }
+);
+const notSetUpDescription = i18n.translate(
+  'xpack.contextEngine.aiIndexDetail.dreaming.notSetUpDescription',
+  {
+    defaultMessage:
+      'Dreaming is not set up. Turn it on to choose what this AI index learns from its memories. Nothing is saved until you save your changes.',
+  }
+);
+const scheduleDescription = i18n.translate(
+  'xpack.contextEngine.aiIndexDetail.dreaming.scheduleDescription',
+  { defaultMessage: 'How often dreaming runs.' }
+);
+const intervalPrependLabel = i18n.translate(
+  'xpack.contextEngine.aiIndexDetail.dreaming.intervalLabel',
+  {
+    defaultMessage: 'Every',
+  }
+);
+const intervalAriaLabel = i18n.translate(
+  'xpack.contextEngine.aiIndexDetail.dreaming.intervalAriaLabel',
+  { defaultMessage: 'Dreaming interval' }
+);
 
 const sameTypes = (a: DreamingConfigDraft, b: DreamingConfigDraft): boolean =>
   JSON.stringify(typesOfDraft(a)) === JSON.stringify(typesOfDraft(b));
@@ -107,16 +149,29 @@ const DreamingJsonModal = ({
 interface DreamingEditorProps {
   aiIndexId: string;
   dreaming: AiIndexDreamingConfig;
+  workflowIds: readonly string[];
+  latestExecution: LatestWorkflowExecution;
+  onStarted: (executionIds: string[]) => void;
 }
 
-const DreamingEditor = ({ aiIndexId, dreaming }: DreamingEditorProps) => {
+const DreamingEditor = ({
+  aiIndexId,
+  dreaming,
+  workflowIds,
+  latestExecution,
+  onStarted,
+}: DreamingEditorProps) => {
   const saved = useMemo(() => draftOf(dreaming), [dreaming]);
   const [edited, setEdited] = useState<DreamingConfigDraft>();
   const [editedInstructions, setEditedInstructions] = useState<string>();
   const [editedEnabled, setEditedEnabled] = useState<boolean>();
   const [editedInterval, setEditedInterval] = useState<string>();
+  const [editedMaintenance, setEditedMaintenance] = useState<ResolvedMaintenanceConfig>();
   const { saveConfig, isSaving } = useSaveDreamingConfig();
-  const { templates } = useAllDreamingTemplates();
+  const { templates } = useDreamingTemplates();
+  const { euiTheme } = useEuiTheme();
+  const isCompact = useIsWithinMaxBreakpoint('l');
+  const enabledSwitchId = useGeneratedHtmlId({ prefix: 'contextAiIndexDreamingEnabled' });
 
   const draft = edited ?? saved;
   const savedInstructions = dreaming.instructions ?? '';
@@ -124,12 +179,19 @@ const DreamingEditor = ({ aiIndexId, dreaming }: DreamingEditorProps) => {
   const enabled = editedEnabled ?? dreaming.enabled;
   const savedInterval = dreaming.schedule?.interval ?? DEFAULT_DREAMING_INTERVAL;
   const interval = editedInterval ?? savedInterval;
-  const intervalError = validateDreamingInterval(interval.trim());
+  const intervalError = enabled ? validateDreamingInterval(interval.trim()) : undefined;
+  const savedMaintenance = useMemo(
+    () => maintenanceConfigOf(dreaming.maintenance),
+    [dreaming.maintenance]
+  );
+  const maintenance = editedMaintenance ?? savedMaintenance;
+  const maintenanceIsValid = Object.keys(maintenanceErrorsOf(maintenance)).length === 0;
   const isDirty =
     (edited !== undefined && !sameTypes(edited, saved)) ||
     instructions !== savedInstructions ||
     enabled !== dreaming.enabled ||
-    interval.trim() !== savedInterval;
+    interval.trim() !== savedInterval ||
+    !isEqual(maintenance, savedMaintenance);
   const suggestedId = matchingTemplateId(dreaming, templates);
   const suggestedEntities = templates.find(({ id }) => id === suggestedId)?.dreaming.entities;
 
@@ -138,17 +200,29 @@ const DreamingEditor = ({ aiIndexId, dreaming }: DreamingEditorProps) => {
     setEditedInstructions(undefined);
     setEditedEnabled(undefined);
     setEditedInterval(undefined);
+    setEditedMaintenance(undefined);
   };
 
   const save = async () => {
     const { instructions: _, schedule: __, ...rest } = dreaming;
     const trimmed = instructions.trim();
+    const trimmedInterval = interval.trim();
+    const isIntervalValid = validateDreamingInterval(trimmedInterval) === undefined;
+    // Invalid interval while schedule is off: intervalError is undefined, so keep the saved value.
     const config: AiIndexDreamingConfig = {
       ...rest,
       enabled,
-      schedule: { interval: interval.trim() },
+      schedule: { interval: isIntervalValid ? trimmedInterval : savedInterval },
       ...(trimmed && { instructions: trimmed }),
       ...typesOfDraft(draft),
+      ...(editedMaintenance && {
+        maintenance: editedMaintenance.enabled
+          ? {
+              ...editedMaintenance,
+              schedule: { interval: editedMaintenance.schedule.interval.trim() },
+            }
+          : { ...savedMaintenance, enabled: false },
+      }),
     };
     if (await saveConfig({ aiIndexId, config })) {
       discard();
@@ -157,51 +231,89 @@ const DreamingEditor = ({ aiIndexId, dreaming }: DreamingEditorProps) => {
 
   return (
     <>
-      <EuiFlexGroup gutterSize="l" alignItems="flexEnd" responsive={false} wrap>
-        <EuiFlexItem grow={false}>
-          <EuiFormRow
-            hasEmptyLabelSpace
-            helpText={i18n.translate('xpack.contextEngine.aiIndexDetail.dreaming.enabledHelp', {
-              defaultMessage: 'Runs the dreaming workflow on its schedule.',
-            })}
-          >
-            <EuiSwitch
-              label={i18n.translate('xpack.contextEngine.aiIndexDetail.dreaming.enabledLabel', {
-                defaultMessage: 'Dream on a schedule',
-              })}
-              checked={enabled}
-              onChange={(event) => setEditedEnabled(event.target.checked)}
-              data-test-subj="contextAiIndexDreamingEnabled"
-            />
-          </EuiFormRow>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false} css={{ minWidth: 200 }}>
-          <EuiFormRow
-            label={i18n.translate('xpack.contextEngine.aiIndexDetail.dreaming.intervalLabel', {
-              defaultMessage: 'Every',
-            })}
-            helpText={i18n.translate('xpack.contextEngine.aiIndexDetail.dreaming.intervalHelp', {
-              defaultMessage: 'For example 30m, 6h or 1d.',
-            })}
-            isInvalid={intervalError !== undefined}
-            error={intervalError}
-          >
-            <EuiFieldText
-              value={interval}
-              isInvalid={intervalError !== undefined}
-              onChange={(event) => setEditedInterval(event.target.value)}
-              data-test-subj="contextAiIndexDreamingInterval"
-            />
-          </EuiFormRow>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      <EuiHorizontalRule margin="xl" />
-      <EuiFormRow
-        fullWidth
-        label={i18n.translate('xpack.contextEngine.aiIndexDetail.dreaming.instructionsLabel', {
+      <SettingsRow
+        title={i18n.translate('xpack.contextEngine.aiIndexDetail.dreaming.scheduleTitle', {
+          defaultMessage: 'Schedule',
+        })}
+        description={scheduleDescription}
+      >
+        <div
+          css={{
+            display: 'grid',
+            gridTemplateColumns: isCompact ? '1fr' : 'auto 1fr',
+            alignItems: 'start',
+            rowGap: euiTheme.size.s,
+            columnGap: euiTheme.size.l,
+          }}
+        >
+          <div css={{ display: 'flex', alignItems: 'center', minHeight: euiTheme.size.xl }}>
+            <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+              <EuiFlexItem grow={false}>
+                <EuiText size="s">
+                  <label htmlFor={enabledSwitchId}>{enabledLabel}</label>
+                </EuiText>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiSwitch
+                  id={enabledSwitchId}
+                  showLabel={false}
+                  label={enabledLabel}
+                  checked={enabled}
+                  onChange={(event) => setEditedEnabled(event.target.checked)}
+                  data-test-subj="contextAiIndexDreamingEnabled"
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </div>
+          {/* Spans the "Last run" row so help text and errors do not push it away from the toggle. */}
+          <div css={isCompact ? undefined : { gridRow: 'span 2' }}>
+            <EuiFlexGroup gutterSize="s" alignItems="flexStart" responsive={false}>
+              {enabled ? (
+                <EuiFlexItem grow={isCompact ? true : 4}>
+                  <EuiFormRow
+                    display="rowCompressed"
+                    fullWidth
+                    isInvalid={intervalError !== undefined}
+                    error={intervalError}
+                  >
+                    <EuiFieldText
+                      compressed
+                      fullWidth
+                      prepend={intervalPrependLabel}
+                      aria-label={intervalAriaLabel}
+                      value={interval}
+                      isInvalid={intervalError !== undefined}
+                      onChange={(event) => setEditedInterval(event.target.value)}
+                      data-test-subj="contextAiIndexDreamingInterval"
+                    />
+                  </EuiFormRow>
+                </EuiFlexItem>
+              ) : null}
+              {isCompact ? null : <EuiFlexItem grow={6} />}
+              <EuiFlexItem grow={false}>
+                <DreamingRunsSection
+                  aiIndexId={aiIndexId}
+                  savedDreaming={dreaming}
+                  latestIsRunning={latestExecution.isRunning}
+                  isDirty={isDirty}
+                  onStarted={onStarted}
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </div>
+          <DreamingLastRunStatus
+            workflowIds={workflowIds}
+            executions={latestExecution.executions}
+            unavailableWorkflowIds={latestExecution.unavailableWorkflowIds}
+          />
+        </div>
+      </SettingsRow>
+      <EuiHorizontalRule margin="m" />
+      <SettingsRow
+        title={i18n.translate('xpack.contextEngine.aiIndexDetail.dreaming.instructionsLabel', {
           defaultMessage: 'Instructions',
         })}
-        helpText={i18n.translate('xpack.contextEngine.aiIndexDetail.dreaming.instructionsHelp', {
+        description={i18n.translate('xpack.contextEngine.aiIndexDetail.dreaming.instructionsHelp', {
           defaultMessage:
             'What dreaming is told about this AI index: what it holds, who uses it, and what to record or skip.',
         })}
@@ -211,24 +323,42 @@ const DreamingEditor = ({ aiIndexId, dreaming }: DreamingEditorProps) => {
           rows={6}
           value={instructions}
           onChange={(event) => setEditedInstructions(event.target.value)}
+          aria-label={i18n.translate(
+            'xpack.contextEngine.aiIndexDetail.dreaming.instructionsAriaLabel',
+            { defaultMessage: 'Dreaming instructions' }
+          )}
           data-test-subj="contextAiIndexDreamingInstructions"
         />
-      </EuiFormRow>
-      <EuiHorizontalRule margin="xl" />
-      <DreamingConfigEditor
+      </SettingsRow>
+      <EuiHorizontalRule margin="m" />
+      <DreamingLearnsRows
         draft={draft}
         onChange={setEdited}
         {...(suggestedEntities && { suggestedEntities })}
       />
+      <EuiHorizontalRule margin="m" />
+      <SettingsRow
+        title={i18n.translate('xpack.contextEngine.aiIndexDetail.dreaming.maintenance.title', {
+          defaultMessage: 'Maintenance',
+        })}
+        description={i18n.translate('xpack.contextEngine.aiIndexDetail.dreaming.maintenance.help', {
+          defaultMessage:
+            'Merges duplicates, settles contradictions and removes items whose memories are gone. Items a person edited are never changed.',
+        })}
+      >
+        <MaintenanceSettings maintenance={maintenance} onChange={setEditedMaintenance} />
+      </SettingsRow>
       {isDirty && (
         <>
-          <EuiHorizontalRule margin="l" />
+          <EuiSpacer size="l" />
           <EuiFlexGroup justifyContent="flexEnd" gutterSize="s" responsive={false}>
             <EuiFlexItem grow={false}>
-              <EuiButtonEmpty onClick={discard} data-test-subj="contextAiIndexDreamingDiscard">
-                {i18n.translate('xpack.contextEngine.aiIndexDetail.dreaming.discard', {
-                  defaultMessage: 'Discard changes',
-                })}
+              <EuiButtonEmpty
+                onClick={discard}
+                isDisabled={isSaving}
+                data-test-subj="contextAiIndexDreamingDiscard"
+              >
+                {discardChangesLabel}
               </EuiButtonEmpty>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
@@ -236,12 +366,12 @@ const DreamingEditor = ({ aiIndexId, dreaming }: DreamingEditorProps) => {
                 fill
                 onClick={save}
                 isLoading={isSaving}
-                isDisabled={!draftBuildsAnything(draft) || intervalError !== undefined}
+                isDisabled={
+                  !draftBuildsAnything(draft) || intervalError !== undefined || !maintenanceIsValid
+                }
                 data-test-subj="contextAiIndexDreamingSave"
               >
-                {i18n.translate('xpack.contextEngine.aiIndexDetail.dreaming.save', {
-                  defaultMessage: 'Save changes',
-                })}
+                {saveChangesLabel}
               </EuiButton>
             </EuiFlexItem>
           </EuiFlexGroup>
@@ -257,29 +387,84 @@ interface DreamingPanelProps {
 
 /**
  * Shows and edits what an AI index's dreaming learns and how often it runs.
- * An AI index without dreaming set up links to the setup instead.
+ * When dreaming is not set up, a switch reveals the setup form.
  */
 export const DreamingPanel = ({ aiIndex }: DreamingPanelProps) => {
-  const { navigateToContextEngine } = useNavigation();
   const [isJsonOpen, setIsJsonOpen] = useState(false);
-  const { dreaming: savedDreaming, isLoading } = useAiIndexDreaming(aiIndex.id, { enabled: true });
+  const [isCreating, setIsCreating] = useState(false);
+  const { applyTemplate, isSaving: isApplying } = useApplyDreamingTemplate();
+  const {
+    dreaming: savedDreaming,
+    workflowIds,
+    isLoading,
+  } = useAiIndexDreaming(aiIndex.id, { enabled: true });
+  const [startedExecutionIds, setStartedExecutionIds] = useState<string[]>();
+  const clearStartedExecutionIds = useCallback(() => setStartedExecutionIds(undefined), []);
+  const { canReadWorkflow, canReadWorkflowExecution, canReadManagedWorkflowExecution } =
+    useWorkflowsCapabilities();
+  const canReadRunHistory =
+    canReadWorkflow && canReadWorkflowExecution && canReadManagedWorkflowExecution;
+  const latestExecution = useLatestWorkflowExecution(workflowIds, {
+    enabled: workflowIds.length > 0 && canReadRunHistory,
+    awaitedExecutionIds: startedExecutionIds,
+    onAwaitedObserved: clearStartedExecutionIds,
+  });
   const dreaming = savedDreaming ?? DREAMING_DISABLED;
   const isSetUp = dreaming.enabled || draftBuildsAnything(draftOf(dreaming));
 
+  const renderContent = () => {
+    if (isLoading) {
+      return <EuiSkeletonText lines={3} data-test-subj="contextAiIndexDreamingLoading" />;
+    }
+    if (isSetUp) {
+      return (
+        <DreamingEditor
+          key={JSON.stringify(dreaming)}
+          aiIndexId={aiIndex.id}
+          dreaming={dreaming}
+          workflowIds={workflowIds}
+          latestExecution={latestExecution}
+          onStarted={setStartedExecutionIds}
+        />
+      );
+    }
+    return (
+      <>
+        <SettingsRow title={turnOnDreamingLabel} description={notSetUpDescription}>
+          <EuiSwitch
+            showLabel={false}
+            label={turnOnDreamingLabel}
+            checked={isCreating}
+            disabled={isApplying}
+            onChange={(event) => setIsCreating(event.target.checked)}
+            data-test-subj="contextAiIndexDreamingSetUpToggle"
+          />
+        </SettingsRow>
+        {isCreating ? (
+          <>
+            <EuiHorizontalRule margin="m" />
+            <DreamingSetupForm
+              isSaving={isApplying}
+              onApply={(config) => applyTemplate({ aiIndexId: aiIndex.id, config })}
+              onDiscard={() => setIsCreating(false)}
+            />
+          </>
+        ) : null}
+      </>
+    );
+  };
+
   return (
-    <EuiPanel hasBorder paddingSize="l" data-test-subj="contextAiIndexDreamingPanel">
-      <EuiFlexGroup alignItems="center" responsive={false}>
-        <EuiFlexItem>
-          <EuiTitle size="s">
-            <h2>
-              <FormattedMessage
-                id="xpack.contextEngine.aiIndexDetail.dreaming.title"
-                defaultMessage="Dreaming"
-              />
-            </h2>
-          </EuiTitle>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
+    <>
+      <SettingsPanel
+        data-test-subj="contextAiIndexDreamingPanel"
+        title={
+          <FormattedMessage
+            id="xpack.contextEngine.aiIndexDetail.dreaming.title"
+            defaultMessage="Dreaming"
+          />
+        }
+        headerAction={
           <EuiButtonEmpty
             size="s"
             iconType="code"
@@ -290,42 +475,11 @@ export const DreamingPanel = ({ aiIndex }: DreamingPanelProps) => {
               defaultMessage: 'View JSON',
             })}
           </EuiButtonEmpty>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      <AiIndexDetailPanelDescription>
-        <FormattedMessage
-          id="xpack.contextEngine.aiIndexDetail.dreaming.description"
-          defaultMessage="What this AI index learns from its memories, and how often."
-        />
-      </AiIndexDetailPanelDescription>
-      <EuiSpacer size="l" />
-      {isLoading ? (
-        <EuiSkeletonText lines={3} data-test-subj="contextAiIndexDreamingLoading" />
-      ) : isSetUp ? (
-        <DreamingEditor key={JSON.stringify(dreaming)} aiIndexId={aiIndex.id} dreaming={dreaming} />
-      ) : (
-        <>
-          <KbnInfoCallout
-            size="s"
-            title={i18n.translate('xpack.contextEngine.aiIndexDetail.dreaming.notSetUpTitle', {
-              defaultMessage:
-                'Dreaming is not set up. Choose what this AI index learns from its memories.',
-            })}
-            data-test-subj="contextAiIndexDreamingNotSetUp"
-          />
-          <EuiSpacer size="m" />
-          <EuiButton
-            size="s"
-            onClick={() => navigateToContextEngine(getAiIndexDreamingTemplatePath(aiIndex.id))}
-            data-test-subj="contextAiIndexDreamingSetUp"
-          >
-            {i18n.translate('xpack.contextEngine.aiIndexDetail.dreaming.setUp', {
-              defaultMessage: 'Set up dreaming',
-            })}
-          </EuiButton>
-        </>
-      )}
+        }
+      >
+        {renderContent()}
+      </SettingsPanel>
       {isJsonOpen && <DreamingJsonModal dreaming={dreaming} onClose={() => setIsJsonOpen(false)} />}
-    </EuiPanel>
+    </>
   );
 };

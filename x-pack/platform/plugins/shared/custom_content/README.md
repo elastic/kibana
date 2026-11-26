@@ -63,7 +63,7 @@ The resulting HTML is rendered in an `<iframe sandbox="" srcDoc={...}>`. "Run Pr
 The embeddable subscribes to `fetch$` and republishes `timeRange`, `query`, `filters`, `isApproximate`, and `projectRouting` so ES|QL results respect the dashboard's time picker, KQL bar, filter pills, and approximation setting. It also publishes:
 
 - `usesEsql$` — whether the panel currently has a query.
-- `dataSources$` — an ad-hoc data view derived from the ES|QL query (`getESQLAdHocDataview`), which is what gives the KQL bar and filter builder field suggestions for this panel.
+- `dataSources$` — the source of the dataset each ES|QL query reads, one per distinct dataset. It gives the KQL bar and filter builder field suggestions for this panel and tells the dashboard whether to offer its time picker. It is a plain source, not a data view.
 
 ### Theming
 
@@ -136,7 +136,7 @@ This is why the tool's schema, `customContentPanelUpdateSchema` (`@kbn/custom-co
 
 Only panels the user explicitly sent to chat via "Refine with chat" have a context attachment. Asking a fresh conversation to update some other custom content panel therefore misses, even though the panel is visible on the dashboard.
 
-That is recoverable rather than fatal: the dashboard attachment is added automatically for a new conversation (`dashboard_app_integration.ts`), and `generate_dashboard` edits a panel listed by id in `panels` with `source: "request"`, `renderer: "custom_content"` content, needing no context attachment at all. Both the tool description and the not-found error therefore name `platform.dashboard.generate_dashboard` as the route to take, alongside the ids that *are* attached. Without that the agent dead-ends and invents its own remediation — in practice, asking the user to click the panel, which attaches nothing.
+That is recoverable rather than fatal: the dashboard attachment is added automatically for a new conversation (`dashboard_app_integration.ts`), and `generate_dashboard` edits a panel listed by id in `panels` with `type: "custom_content"` content, needing no context attachment at all. Both the tool description and the not-found error therefore name `platform.dashboard.generate_dashboard` as the route to take, alongside the ids that *are* attached. Without that the agent dead-ends and invents its own remediation — in practice, asking the user to click the panel, which attaches nothing.
 
 Two consequences worth knowing. The fallback applies the change through `api.setState(...)`, a whole-dashboard state replace, rather than the targeted `template$`/`esqlQuery$` update the attachment route uses. And the tool id is inlined as a string constant rather than imported from `@kbn/agent-builder-dashboards-common`, to avoid a plugin dependency for prompt copy — it needs keeping in sync with `dashboardTools.generateDashboard`.
 
@@ -150,7 +150,7 @@ Because each round's card is pinned to the version that round produced, clicking
 
 ### 2. Agent-driven dashboard creation and editing
 
-The dashboard generation tool in `agent_builder_dashboards` treats custom content as a generated panel, like Lens and Vega: `source: "request"` with `renderer: "custom_content"` (schemas in `.../dashboard-agent-authoring/src/panels/custom_content/index.ts`). The agent supplies `query` (what to display, or what to change) and `dataQueries` or `removeAllQueries` (one of them is required when adding a panel); it never supplies `template`. The server builds the panel in `.../resolvers/custom_content_panel_resolver.ts`, a thin adapter on the custom content builder (see below), in the same parallel phase as the tool's other generated panels.
+The dashboard generation tool in `agent_builder_dashboards` treats custom content as a generated panel, like Lens and Vega: `type: "custom_content"` (schemas in `.../dashboard-agent-authoring/src/panels/custom_content/index.ts`). The agent supplies `query` (what to display, or what to change) and `dataQueries` or `removeAllQueries` (one of them is required when adding a panel); it never supplies `template`. The server builds the panel in `.../resolvers/custom_content_panel_resolver.ts`, a thin adapter on the custom content builder (see below), in the same parallel phase as the tool's other generated panels.
 
 A static panel has no query: a new panel must say which kind it is (there is no default). `removeAllQueries: true` is static, so a banner never gets a stray `ROW` query, and omitting both is a validation error, so a panel that should show data can't silently be generated with no data and invented numbers. With `dataQueries` the server generates a query for each entry from its `description` (and `index`). On an edit, omitting `dataQueries` keeps the current queries, an entry with a `description` regenerates the query at its position from the stored one, `{}` keeps it, and `removeAllQueries: true` removes every query. The visualization tool (`create_visualization` with `target.type: "custom_content"`) uses the same vocabulary.
 

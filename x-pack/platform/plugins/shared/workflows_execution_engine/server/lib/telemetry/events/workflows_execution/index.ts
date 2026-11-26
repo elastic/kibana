@@ -6,7 +6,7 @@
  */
 
 import type { RootSchema } from '@kbn/core/server';
-import type { WellKnownWorkflowTriggerSource } from '@kbn/workflows';
+import type { WellKnownWorkflowTriggerSource, WorkflowTemplateOrigin } from '@kbn/workflows';
 import {
   type EventDrivenExecutionSuppressedParams,
   type TriggerEventDispatchedParams,
@@ -56,6 +56,9 @@ const baseWorkflowExecutionSchema: RootSchema<{
   managedBy?: string;
   originManagedWorkflowId?: string;
   managedVersion?: number;
+  templateSlug?: string;
+  templateVersion?: string;
+  templateOrigin?: WorkflowTemplateOrigin;
   runAs: WorkflowExecutionRunAs;
   runAsInherited?: boolean;
   ruleId?: string;
@@ -151,6 +154,30 @@ const baseWorkflowExecutionSchema: RootSchema<{
     _meta: {
       description:
         'Registered managed workflow definition version, when this execution came from one',
+      optional: true,
+    },
+  },
+  templateSlug: {
+    type: 'keyword',
+    _meta: {
+      description:
+        'Workflow Template library slug the workflow was created from, or `custom` for a template outside the catalog. Absent for workflows not created from a template.',
+      optional: true,
+    },
+  },
+  templateVersion: {
+    type: 'keyword',
+    _meta: {
+      description:
+        'Version (semver) of the template the workflow was created from. Absent for `custom` templates.',
+      optional: true,
+    },
+  },
+  templateOrigin: {
+    type: 'keyword',
+    _meta: {
+      description:
+        'How the workflow was created from the template: install (setup form), import (template file upload), or remix (Remix with AI)',
       optional: true,
     },
   },

@@ -20,6 +20,13 @@ export class StepExecutionRepositoryMock implements Required<StepExecutionReposi
    */
   private projectStoredIo: ((step: EsWorkflowStepExecution) => void) | undefined;
 
+  /**
+   * When true, drop `output` (and `input`) from stored docs after each upsert.
+   * Use for heap measurement so the fake ES store does not retain every payload.
+   * Default false — rehydration / eviction suites assert on stored output.
+   */
+  public discardOutputsAfterUpsert = false;
+
   public setIoProjection(project: (step: EsWorkflowStepExecution) => void): void {
     this.projectStoredIo = project;
   }
@@ -94,11 +101,16 @@ export class StepExecutionRepositoryMock implements Required<StepExecutionReposi
         throw new Error('Step execution ID is required for upsert');
       }
 
-      const merged = {
+      const merged: EsWorkflowStepExecution = {
         ...(this.stepExecutions.get(stepExecution.id) || {}),
         ...(stepExecution as EsWorkflowStepExecution),
       };
+
       this.projectStoredIo?.(merged);
+      if (this.discardOutputsAfterUpsert) {
+        delete (merged as { output?: unknown }).output;
+        delete (merged as { input?: unknown }).input;
+      }
       this.stepExecutions.set(stepExecution.id, merged);
     }
     return Promise.resolve();

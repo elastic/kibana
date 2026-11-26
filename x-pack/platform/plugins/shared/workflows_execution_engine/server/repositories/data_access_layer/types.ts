@@ -32,10 +32,10 @@ export interface CreateDataClientDeps {
   logger: Logger;
 }
 
-export type ExecutionSourceProjectionField<TExecution extends { id: string }> = Extract<
-  keyof TExecution,
-  string
->;
+/** A top-level field of the execution document, or a dotted path under one (e.g. `context.foo`). */
+export type ExecutionSourceProjectionField<TExecution extends { id: string }> =
+  | Extract<keyof TExecution, string>
+  | `${Extract<keyof TExecution, string>}.${string}`;
 
 export interface GetExecutionsByIdsOptions<TExecution extends { id: string }> {
   sourceIncludes?: ExecutionSourceProjectionField<TExecution>[];

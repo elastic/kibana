@@ -162,13 +162,13 @@ describe('OverviewTrends', () => {
     expect(screen.getByRole('button', { name: 'Bar' })).toHaveAttribute('aria-pressed', 'true');
   });
 
-  // As in Lens: bars shade from the range's edges, areas take whole buckets outside their domain,
-  // which draws nothing.
+  // As in Lens, both shade from the range's edges; the areas' domain reaches the last bucket's end,
+  // as their last point is at its start.
   it.each([
     [
       'area',
       { min: 1_000, max: 3_000, minInterval: 1_000 },
-      [{ coordinates: { x1: 1_000 } }, { coordinates: { x0: 3_000 } }],
+      [{ coordinates: { x1: 1_500 } }, { coordinates: { x0: 2_500 } }],
     ],
     [
       'bar',

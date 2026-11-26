@@ -5,59 +5,17 @@
  * 2.0.
  */
 
-import type { JsonValue } from '@kbn/utility-types';
 import type { EsWorkflowExecution, EsWorkflowStepExecution, StackFrame } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
 import type { StepExecutionRepository } from '../../repositories/step_execution_repository';
 import type { WorkflowExecutionRepository } from '../../repositories/workflow_execution_repository';
-import { StepIoService } from '../step_io_service';
 import { WorkflowExecutionState } from '../workflow_execution_state';
-
-/**
- * Test helper: seeds metadata through state and IO through the service —
- * mirrors the production split where lifecycle (status, scopeStack, ...) is
- * state's job and IO (input, output) is the service's. Tests in this file
- * exercise both halves through their respective owners.
- */
-function seedStep(
-  state: WorkflowExecutionState,
-  service: StepIoService,
-  step: Partial<EsWorkflowStepExecution> & { id: string }
-): void {
-  const { input, output, ...metadata } = step;
-  state.upsertStep(metadata);
-  if (input !== undefined) {
-    service.setStepInput(step.id, input as JsonValue);
-  }
-  if (output !== undefined) {
-    service.setStepOutput(step.id, output as JsonValue | null);
-  }
-}
 
 describe('WorkflowExecutionState', () => {
   let underTest: WorkflowExecutionState;
-  let ioService: StepIoService;
-  let ioClient: { getByIds: jest.Mock; bulkCreate: jest.Mock };
 
   let workflowExecutionRepository: WorkflowExecutionRepository;
   let stepExecutionRepository: StepExecutionRepository;
-
-  function buildService(
-    state: WorkflowExecutionState,
-    repo: StepExecutionRepository,
-    evictionMinBytes = Infinity
-  ): StepIoService {
-    ioClient = {
-      getByIds: jest.fn().mockResolvedValue({ items: [], missing: [] }),
-      bulkCreate: jest.fn().mockResolvedValue({ items: [], errors: false }),
-    };
-    return new StepIoService({
-      stepRepository: repo,
-      ioClient,
-      state,
-      evictionMinBytes,
-    });
-  }
 
   beforeEach(() => {
     workflowExecutionRepository = {} as unknown as WorkflowExecutionRepository;
@@ -82,7 +40,6 @@ describe('WorkflowExecutionState', () => {
       workflowExecutionRepository,
       stepExecutionRepository
     );
-    ioService = buildService(underTest, stepExecutionRepository);
   });
 
   it('should initialize with the provided workflow execution', () => {
@@ -128,6 +85,15 @@ describe('WorkflowExecutionState', () => {
     );
   });
 
+  it('should reject input/output writes through upsertStep', () => {
+    expect(() =>
+      underTest.upsertStep({
+        id: 'fake-id',
+        output: { a: 1 },
+      } as unknown as EsWorkflowStepExecution)
+    ).toThrow('WorkflowExecutionState: input/output writes must go through setStepIo');
+  });
+
   it('should create step execution with assigning workflowRunId, workflowId only in local state', () => {
     const stepExecution = {
       id: 'fake-id',
@@ -138,10 +104,7 @@ describe('WorkflowExecutionState', () => {
     // Reset mock and set a specific uuid for this test
 
     underTest.upsertStep(stepExecution);
-    // `as Partial<EsWorkflowStepExecution>` keeps the assertion focused on
-    // the fields that createStep actually fills in; spaceId/topologicalIndex
-    // come from upstream callers (workflow context / runtime) and are not
-    // injected by createStep itself.
+    // createStep stamps the IO document ids and copies spaceId from the run.
     expect(underTest.getLatestStepExecution('test-step-execution-id')).toEqual({
       id: 'fake-id',
       workflowRunId: 'test-workflow-execution-id',
@@ -157,6 +120,7 @@ describe('WorkflowExecutionState', () => {
       globalExecutionIndex: 0,
       isTestRun: false,
       managed: false,
+      spaceId: undefined,
       inputId: 'input:fake-id',
       outputId: 'output:fake-id',
     } as Partial<EsWorkflowStepExecution>);
@@ -172,7 +136,11 @@ describe('WorkflowExecutionState', () => {
       startedAt: '2025-08-05T20:00:00.000Z',
       isTestRun: false,
     } as EsWorkflowExecution;
-    const state = new WorkflowExecutionState(executionWithUid, workflowExecutionRepository);
+    const state = new WorkflowExecutionState(
+      executionWithUid,
+      workflowExecutionRepository,
+      stepExecutionRepository
+    );
 
     state.upsertStep({
       id: 'step-1',
@@ -205,7 +173,6 @@ describe('WorkflowExecutionState', () => {
       workflowExecutionRepository,
       stepExecutionRepository
     );
-    buildService(stateWithTestRun, stepExecutionRepository);
 
     stateWithTestRun.upsertStep({
       id: 'fake-id',
@@ -337,7 +304,7 @@ describe('WorkflowExecutionState', () => {
         cancelledBy: 'user',
       });
 
-      await underTest.flush();
+      await underTest.flushWorkflowAndSteps();
 
       expect(workflowExecutionRepository.updateWorkflowExecution).not.toHaveBeenCalled();
       expect(underTest.getWorkflowExecution()).toEqual(
@@ -355,7 +322,7 @@ describe('WorkflowExecutionState', () => {
         .fn()
         .mockResolvedValue({ cancelRequested: true });
 
-      await underTest.flush();
+      await underTest.flushWorkflowAndSteps();
 
       expect(underTest.getWorkflowExecution()).toEqual(
         expect.objectContaining({ cancelRequested: true, currentNodeId: 'node-in-memory' })
@@ -373,7 +340,7 @@ describe('WorkflowExecutionState', () => {
 
       underTest.updateWorkflowExecution(updatedWorkflowExecution);
 
-      await underTest.flush();
+      await underTest.flushWorkflowAndSteps();
 
       expect(workflowExecutionRepository.updateWorkflowExecution).toHaveBeenCalledWith(
         updatedWorkflowExecution,
@@ -386,7 +353,7 @@ describe('WorkflowExecutionState', () => {
 
       underTest.updateWorkflowExecution(updatedWorkflowExecution);
 
-      await underTest.flush();
+      await underTest.flushWorkflowAndSteps();
 
       expect(workflowExecutionRepository.updateWorkflowExecution).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -406,7 +373,7 @@ describe('WorkflowExecutionState', () => {
 
       underTest.upsertStep(stepExecution);
 
-      await underTest.flush();
+      await underTest.flushWorkflowAndSteps();
 
       expect(stepExecutionRepository.bulkUpsert).toHaveBeenCalledWith([
         expect.objectContaining({
@@ -427,7 +394,7 @@ describe('WorkflowExecutionState', () => {
         status: ExecutionStatus.RUNNING,
         startedAt: '2025-08-05T20:00:00.000Z',
       } as EsWorkflowStepExecution);
-      await underTest.flush(); // initial flush to create the step execution
+      await underTest.flushWorkflowAndSteps(); // initial flush to create the step execution
 
       // update step execution
       underTest.upsertStep({
@@ -438,7 +405,7 @@ describe('WorkflowExecutionState', () => {
         executionTimeMs: 60000,
       } as EsWorkflowStepExecution);
 
-      await underTest.flush();
+      await underTest.flushWorkflowAndSteps();
 
       expect(stepExecutionRepository.bulkUpsert).toHaveBeenCalledWith([
         {
@@ -470,7 +437,7 @@ describe('WorkflowExecutionState', () => {
         executionTimeMs: 2000,
       } as EsWorkflowStepExecution);
 
-      await underTest.flush();
+      await underTest.flushWorkflowAndSteps();
 
       expect(stepExecutionRepository.bulkUpsert).toHaveBeenCalledWith([
         expect.objectContaining({
@@ -485,73 +452,8 @@ describe('WorkflowExecutionState', () => {
       ]);
     });
 
-    it('writes step rows before the workflow document when the status is terminal', async () => {
-      let resolveSteps: () => void = () => {};
-      stepExecutionRepository.bulkUpsert = jest.fn(
-        () =>
-          new Promise<void>((resolve) => {
-            resolveSteps = resolve;
-          })
-      );
-
-      underTest.updateWorkflowExecution({ status: ExecutionStatus.COMPLETED });
-      underTest.upsertStep({
-        id: 'fake-uuid',
-        stepId: 'last-step',
-        status: ExecutionStatus.COMPLETED,
-      });
-
-      const flushed = underTest.flush();
-      await Promise.resolve();
-
-      expect(stepExecutionRepository.bulkUpsert).toHaveBeenCalled();
-      expect(workflowExecutionRepository.updateWorkflowExecution).not.toHaveBeenCalled();
-
-      resolveSteps();
-      await flushed;
-
-      expect(workflowExecutionRepository.updateWorkflowExecution).toHaveBeenCalledWith(
-        expect.objectContaining({ status: ExecutionStatus.COMPLETED }),
-        {}
-      );
-    });
-
-    it('writes the workflow document and step rows together while the run is still going', async () => {
-      let resolveSteps: () => void = () => {};
-      let resolveDoc: () => void = () => {};
-      stepExecutionRepository.bulkUpsert = jest.fn(
-        () =>
-          new Promise<void>((resolve) => {
-            resolveSteps = resolve;
-          })
-      );
-      workflowExecutionRepository.updateWorkflowExecution = jest.fn(
-        () =>
-          new Promise<void>((resolve) => {
-            resolveDoc = resolve;
-          })
-      );
-
-      underTest.updateWorkflowExecution({ currentNodeId: 'node-1' });
-      underTest.upsertStep({
-        id: 'fake-uuid',
-        stepId: 'running-step',
-        status: ExecutionStatus.RUNNING,
-      });
-
-      const flushed = underTest.flush();
-      await Promise.resolve();
-
-      expect(stepExecutionRepository.bulkUpsert).toHaveBeenCalled();
-      expect(workflowExecutionRepository.updateWorkflowExecution).toHaveBeenCalled();
-
-      resolveSteps();
-      resolveDoc();
-      await flushed;
-    });
-
     it('should not flush if there are no changes', async () => {
-      await underTest.flush();
+      await underTest.flushWorkflowAndSteps();
 
       expect(workflowExecutionRepository.updateWorkflowExecution).not.toHaveBeenCalled();
       expect(stepExecutionRepository.bulkUpsert).not.toHaveBeenCalled();
@@ -569,7 +471,7 @@ describe('WorkflowExecutionState', () => {
         status: ExecutionStatus.RUNNING,
         startedAt: '2025-08-05T20:00:00.000Z',
       } as EsWorkflowStepExecution);
-      await underTest.flush(); // initial flush to create the step execution
+      await underTest.flushWorkflowAndSteps(); // initial flush to create the step execution
 
       // update step execution
       underTest.upsertStep({
@@ -586,12 +488,109 @@ describe('WorkflowExecutionState', () => {
         status: ExecutionStatus.RUNNING,
         startedAt: '2025-08-05T20:00:00.000Z',
       } as EsWorkflowStepExecution);
-      await underTest.flush(); // first flush that flushes everything
-      await underTest.flush(); // second flush with no changes
-      await underTest.flush(); // third flush with no changes
+      await underTest.flushWorkflowAndSteps(); // first flush that flushes everything
+      await underTest.flushWorkflowAndSteps(); // second flush with no changes
+      await underTest.flushWorkflowAndSteps(); // third flush with no changes
 
       expect(workflowExecutionRepository.updateWorkflowExecution).toHaveBeenCalledTimes(2);
       expect(stepExecutionRepository.bulkUpsert).toHaveBeenCalledTimes(2);
+    });
+
+    it('should persist step IO together with step metadata in one bulk upsert', async () => {
+      underTest.upsertStep({
+        id: 'io-step',
+        stepId: 'test-step-execution-id',
+        status: ExecutionStatus.COMPLETED,
+      } as EsWorkflowStepExecution);
+      underTest.setStepIo('io-step', { input: { in: 1 }, output: { out: 2 } });
+
+      await underTest.flushStepChanges();
+
+      expect(stepExecutionRepository.bulkUpsert).toHaveBeenCalledTimes(1);
+      expect(stepExecutionRepository.bulkUpsert).toHaveBeenCalledWith([
+        expect.objectContaining({
+          id: 'io-step',
+          status: ExecutionStatus.COMPLETED,
+          input: { in: 1 },
+          output: { out: 2 },
+        }),
+      ]);
+    });
+
+    it('should drop flushed outputs from memory but keep inputs readable', async () => {
+      underTest.upsertStep({ id: 'io-step', stepId: 'test-step-execution-id' });
+      underTest.setStepIo('io-step', { input: { in: 1 }, output: { out: 2 } });
+
+      await underTest.flushStepChanges();
+
+      expect(underTest.getStepIo('io-step', 'output')).toBeUndefined();
+      expect(underTest.getStepIo('io-step', 'input')).toEqual({ in: 1 });
+    });
+
+    it('should keep an output that was rewritten while the bulk write was in flight', async () => {
+      underTest.upsertStep({ id: 'io-step', stepId: 'test-step-execution-id' });
+      underTest.setStepIo('io-step', { output: { version: 1 } });
+      (stepExecutionRepository.bulkUpsert as jest.Mock).mockImplementation(async () => {
+        underTest.setStepIo('io-step', { output: { version: 2 } });
+      });
+
+      await underTest.flushStepChanges();
+
+      expect(underTest.getStepIo('io-step', 'output')).toEqual({ version: 2 });
+    });
+
+    it('should requeue a failed flush and prefer newer in-flight IO on retry', async () => {
+      underTest.upsertStep({
+        id: 'io-step',
+        stepId: 'test-step-execution-id',
+        status: ExecutionStatus.RUNNING,
+      } as EsWorkflowStepExecution);
+      underTest.setStepIo('io-step', { output: { version: 1 } });
+
+      (stepExecutionRepository.bulkUpsert as jest.Mock).mockImplementationOnce(async () => {
+        underTest.upsertStep({
+          id: 'io-step',
+          status: ExecutionStatus.COMPLETED,
+        } as EsWorkflowStepExecution);
+        underTest.setStepIo('io-step', { output: { version: 2 } });
+        throw new Error('bulk upsert failed');
+      });
+
+      await expect(underTest.flushStepChanges()).rejects.toThrow('bulk upsert failed');
+
+      // Failed flush must not clear live IO; the newer write stays readable.
+      expect(underTest.getStepIo('io-step', 'output')).toEqual({ version: 2 });
+
+      (stepExecutionRepository.bulkUpsert as jest.Mock).mockResolvedValueOnce(undefined);
+      await underTest.flushStepChanges();
+
+      // Retry sends the restored pending changes with the in-flight write winning.
+      expect(stepExecutionRepository.bulkUpsert).toHaveBeenLastCalledWith([
+        expect.objectContaining({
+          id: 'io-step',
+          status: ExecutionStatus.COMPLETED,
+          output: { version: 2 },
+        }),
+      ]);
+      expect(underTest.getStepIo('io-step', 'output')).toBeUndefined();
+    });
+
+    it('should flush step changes before a terminal workflow status', async () => {
+      const callOrder: string[] = [];
+      (stepExecutionRepository.bulkUpsert as jest.Mock).mockImplementation(async () => {
+        callOrder.push('steps');
+      });
+      (workflowExecutionRepository.updateWorkflowExecution as jest.Mock).mockImplementation(
+        async () => {
+          callOrder.push('workflow');
+        }
+      );
+      underTest.upsertStep({ id: 'io-step', stepId: 'test-step-execution-id' });
+      underTest.updateWorkflowExecution({ status: ExecutionStatus.COMPLETED });
+
+      await underTest.flushWorkflowAndSteps();
+
+      expect(callOrder).toEqual(['steps', 'workflow']);
     });
   });
 
@@ -724,8 +723,8 @@ describe('WorkflowExecutionState', () => {
 
   describe('load', () => {
     it('should throw if stepExecutionIds is not set on the workflow execution', async () => {
-      await expect(ioService.load()).rejects.toThrow(
-        'StepIoService: Workflow execution must have step execution IDs to be loaded'
+      await expect(underTest.load()).rejects.toThrow(
+        'WorkflowExecutionState: Workflow execution must have step execution IDs to be loaded'
       );
     });
 
@@ -745,12 +744,12 @@ describe('WorkflowExecutionState', () => {
           status: ExecutionStatus.COMPLETED,
         } as EsWorkflowStepExecution,
       ]);
-      await ioService.load();
+      await underTest.load();
 
       expect(stepExecutionRepository.getStepExecutionsByIds).toHaveBeenCalledWith(
         ['11', '22'],
         undefined,
-        ['input', 'output']
+        ['output']
       );
       expect(underTest.getLatestStepExecution('testStep')).toEqual(
         expect.objectContaining({
@@ -768,18 +767,16 @@ describe('WorkflowExecutionState', () => {
       );
     });
 
-    it('should issue secondary fetch with id+output for pinned step types', async () => {
-      // State owns the ES fetch path; the IO service decides which IDs are
-      // pinned. Deferred-output / eviction semantics live in step_io_service.test.ts.
+    it('should load inputs of unfinished steps into the live IO map and leave outputs to on-demand rehydration', async () => {
       underTest.updateWorkflowExecution({ stepExecutionIds: ['11', '22'] });
-      const dataSetOutput = { myVar: 'hello' };
-      (stepExecutionRepository.getStepExecutionsByIds as jest.Mock).mockResolvedValueOnce([
+      (stepExecutionRepository.getStepExecutionsByIds as jest.Mock).mockResolvedValue([
         {
           id: '11',
           stepId: 'connectorStep',
           stepType: 'connector',
-          status: ExecutionStatus.COMPLETED,
-        } as EsWorkflowStepExecution,
+          status: ExecutionStatus.RUNNING,
+          input: { url: 'https://example.com' },
+        } as unknown as EsWorkflowStepExecution,
         {
           id: '22',
           stepId: 'dataSetStep',
@@ -787,25 +784,47 @@ describe('WorkflowExecutionState', () => {
           status: ExecutionStatus.COMPLETED,
         } as EsWorkflowStepExecution,
       ]);
-      ioClient.getByIds.mockResolvedValue({
-        items: [
-          {
-            document: {
-              id: 'output:22',
-              executionId: '22',
-              type: 'output',
-              value: dataSetOutput,
-              size: 1,
-            },
-          },
-        ],
-        missing: [],
-      });
-      await ioService.load();
+      await underTest.load();
 
-      expect(ioService.getStepOutput('22')).toEqual(dataSetOutput);
-      expect(ioClient.getByIds).toHaveBeenCalledWith(['input:11', 'input:22', 'output:22']);
+      expect(underTest.getStepIo('11', 'input')).toEqual({ url: 'https://example.com' });
+      expect(underTest.getStepIo('11', 'output')).toBeUndefined();
+      expect(underTest.getStepIo('22', 'output')).toBeUndefined();
+      expect(underTest.getDataSetStepExecutions().map((step) => step.id)).toEqual(['22']);
+      // A single fetch: outputs are no longer eagerly fetched for any step type.
       expect(stepExecutionRepository.getStepExecutionsByIds).toHaveBeenCalledTimes(1);
+    });
+
+    it('should not load inputs of finished steps into the live IO map but mark them evicted', async () => {
+      underTest.updateWorkflowExecution({ stepExecutionIds: ['11'] });
+      (stepExecutionRepository.getStepExecutionsByIds as jest.Mock).mockResolvedValue([
+        {
+          id: '11',
+          stepId: 'connectorStep',
+          stepType: 'connector',
+          status: ExecutionStatus.COMPLETED,
+          input: { url: 'https://example.com' },
+        } as unknown as EsWorkflowStepExecution,
+      ]);
+      await underTest.load();
+
+      expect(underTest.getStepIo('11', 'input')).toBeUndefined();
+      expect(underTest.isInputEvicted('11')).toBe(true);
+    });
+
+    it('should not queue loaded inputs for the next flush', async () => {
+      underTest.updateWorkflowExecution({ stepExecutionIds: ['11'] });
+      (stepExecutionRepository.getStepExecutionsByIds as jest.Mock).mockResolvedValue([
+        {
+          id: '11',
+          stepId: 'connectorStep',
+          input: { already: 'persisted' },
+        } as unknown as EsWorkflowStepExecution,
+      ]);
+      await underTest.load();
+
+      await underTest.flushStepChanges();
+
+      expect(stepExecutionRepository.bulkUpsert).not.toHaveBeenCalled();
     });
 
     it('should sort step executions by executionIndex when loaded from repository', async () => {
@@ -832,586 +851,11 @@ describe('WorkflowExecutionState', () => {
           stepExecutionIndex: 2,
         } as EsWorkflowStepExecution,
       ]);
-      await ioService.load();
+      await underTest.load();
 
       expect(
         underTest.getStepExecutionsByStepId('testStep')?.map((stepExecution) => stepExecution.id)
       ).toEqual(['11', '22', '33', '44']);
-    });
-  });
-
-  describe('evictStaleLoopOutputs', () => {
-    it('should nullify output and input on non-latest executions for given stepIds', () => {
-      seedStep(underTest, ioService, {
-        id: 'exec-1',
-        stepId: 'innerStep',
-        output: { data: 'iteration-0' },
-        input: { idx: 0 },
-      });
-      seedStep(underTest, ioService, {
-        id: 'exec-2',
-        stepId: 'innerStep',
-        output: { data: 'iteration-1' },
-        input: { idx: 1 },
-      });
-      seedStep(underTest, ioService, {
-        id: 'exec-3',
-        stepId: 'innerStep',
-        output: { data: 'iteration-2' },
-        input: { idx: 2 },
-      });
-
-      ioService.evictStaleLoopOutputs(['innerStep']);
-
-      const executions = underTest.getStepExecutionsByStepId('innerStep');
-      expect(ioService.getStepOutput(executions[0].id)).toBeUndefined();
-      expect(ioService.getStepInput(executions[0].id)).toBeUndefined();
-      expect(ioService.getStepOutput(executions[1].id)).toBeUndefined();
-      expect(ioService.getStepInput(executions[1].id)).toBeUndefined();
-      // Latest execution preserved
-      expect(ioService.getStepOutput(executions[2].id)).toEqual({ data: 'iteration-2' });
-      expect(ioService.getStepInput(executions[2].id)).toEqual({ idx: 2 });
-    });
-
-    it('should preserve all data.set step outputs', () => {
-      seedStep(underTest, ioService, {
-        id: 'ds-1',
-        stepId: 'setVar',
-        stepType: 'data.set',
-        output: { myVar: 'val-0' },
-        input: { myVar: 'val-0' },
-      });
-      seedStep(underTest, ioService, {
-        id: 'ds-2',
-        stepId: 'setVar',
-        stepType: 'data.set',
-        output: { myVar: 'val-1' },
-        input: { myVar: 'val-1' },
-      });
-      seedStep(underTest, ioService, {
-        id: 'ds-3',
-        stepId: 'setVar',
-        stepType: 'data.set',
-        output: { myVar: 'val-2' },
-        input: { myVar: 'val-2' },
-      });
-
-      ioService.evictStaleLoopOutputs(['setVar']);
-
-      const executions = underTest.getStepExecutionsByStepId('setVar');
-      expect(ioService.getStepOutput(executions[0].id)).toEqual({ myVar: 'val-0' });
-      expect(ioService.getStepOutput(executions[1].id)).toEqual({ myVar: 'val-1' });
-      expect(ioService.getStepOutput(executions[2].id)).toEqual({ myVar: 'val-2' });
-    });
-
-    it('should preserve metadata fields on evicted executions', () => {
-      seedStep(underTest, ioService, {
-        id: 'exec-1',
-        stepId: 'innerStep',
-        stepType: 'atomic',
-        status: ExecutionStatus.COMPLETED,
-        startedAt: '2025-01-01T00:00:00.000Z',
-        finishedAt: '2025-01-01T00:01:00.000Z',
-        executionTimeMs: 60000,
-        output: { large: 'payload' },
-        input: { some: 'input' },
-      });
-      seedStep(underTest, ioService, {
-        id: 'exec-2',
-        stepId: 'innerStep',
-        output: { latest: true },
-      });
-
-      ioService.evictStaleLoopOutputs(['innerStep']);
-
-      const evicted = underTest.getStepExecution('exec-1');
-      // Metadata is preserved by state (which doesn't store IO at all),
-      // and IO was cleared from the service maps by evictStaleLoopOutputs.
-      expect(evicted).toEqual(
-        expect.objectContaining({
-          id: 'exec-1',
-          stepId: 'innerStep',
-          stepType: 'atomic',
-          status: ExecutionStatus.COMPLETED,
-          startedAt: '2025-01-01T00:00:00.000Z',
-          finishedAt: '2025-01-01T00:01:00.000Z',
-          executionTimeMs: 60000,
-        })
-      );
-      expect(ioService.getStepOutput('exec-1')).toBeUndefined();
-      expect(ioService.getStepInput('exec-1')).toBeUndefined();
-    });
-
-    it('should not touch steps with only one execution', () => {
-      seedStep(underTest, ioService, {
-        id: 'only-exec',
-        stepId: 'singleStep',
-        output: { preserved: true },
-        input: { kept: true },
-      });
-
-      ioService.evictStaleLoopOutputs(['singleStep']);
-
-      expect(ioService.getStepOutput('only-exec')).toEqual({ preserved: true });
-      expect(ioService.getStepInput('only-exec')).toEqual({ kept: true });
-    });
-
-    it('should not touch steps not in the provided list', () => {
-      seedStep(underTest, ioService, {
-        id: 'outer-1',
-        stepId: 'outerStep',
-        output: { data: 'untouched-0' },
-      });
-      seedStep(underTest, ioService, {
-        id: 'outer-2',
-        stepId: 'outerStep',
-        output: { data: 'untouched-1' },
-      });
-
-      ioService.evictStaleLoopOutputs(['otherStep']);
-
-      const executions = underTest.getStepExecutionsByStepId('outerStep');
-      expect(ioService.getStepOutput(executions[0].id)).toEqual({ data: 'untouched-0' });
-      expect(ioService.getStepOutput(executions[1].id)).toEqual({ data: 'untouched-1' });
-    });
-
-    it('should handle empty innerStepIds', () => {
-      seedStep(underTest, ioService, {
-        id: 'exec-1',
-        stepId: 'someStep',
-        output: { data: true },
-      });
-
-      ioService.evictStaleLoopOutputs([]);
-
-      expect(ioService.getStepOutput('exec-1')).toEqual({ data: true });
-    });
-
-    it('should handle stepIds with no executions in the index', () => {
-      expect(() => ioService.evictStaleLoopOutputs(['nonexistent'])).not.toThrow();
-    });
-
-    it('should handle mixed data.set and non-data.set steps', () => {
-      seedStep(underTest, ioService, {
-        id: 'action-1',
-        stepId: 'actionStep',
-        stepType: 'atomic',
-        output: { result: 'iter-0' },
-      });
-      seedStep(underTest, ioService, {
-        id: 'action-2',
-        stepId: 'actionStep',
-        stepType: 'atomic',
-        output: { result: 'iter-1' },
-      });
-      seedStep(underTest, ioService, {
-        id: 'ds-1',
-        stepId: 'dataStep',
-        stepType: 'data.set',
-        output: { var: 'val-0' },
-      });
-      seedStep(underTest, ioService, {
-        id: 'ds-2',
-        stepId: 'dataStep',
-        stepType: 'data.set',
-        output: { var: 'val-1' },
-      });
-
-      ioService.evictStaleLoopOutputs(['actionStep', 'dataStep']);
-
-      // Non-latest atomic step output evicted
-      expect(ioService.getStepOutput('action-1')).toBeUndefined();
-      // Latest atomic step output preserved
-      expect(ioService.getStepOutput('action-2')).toEqual({ result: 'iter-1' });
-      // All data.set outputs preserved
-      expect(ioService.getStepOutput('ds-1')).toEqual({ var: 'val-0' });
-      expect(ioService.getStepOutput('ds-2')).toEqual({ var: 'val-1' });
-    });
-
-    it('should accept a Set as input', () => {
-      seedStep(underTest, ioService, {
-        id: 'exec-1',
-        stepId: 'innerStep',
-        output: { data: 'old' },
-      });
-      seedStep(underTest, ioService, {
-        id: 'exec-2',
-        stepId: 'innerStep',
-        output: { data: 'latest' },
-      });
-
-      ioService.evictStaleLoopOutputs(new Set(['innerStep']));
-
-      expect(ioService.getStepOutput('exec-1')).toBeUndefined();
-      expect(ioService.getStepOutput('exec-2')).toEqual({ data: 'latest' });
-    });
-
-    describe('data.set preservation within loops', () => {
-      it('should preserve data.set output for step A inside foreach step B', () => {
-        // Simulate: foreach B iterates 3 times, each iteration runs data.set step A
-        seedStep(underTest, ioService, {
-          id: 'ds-a-iter0',
-          stepId: 'stepA',
-          stepType: 'data.set',
-          output: { counter: 1 },
-          input: { counter: 1 },
-        });
-        seedStep(underTest, ioService, {
-          id: 'ds-a-iter1',
-          stepId: 'stepA',
-          stepType: 'data.set',
-          output: { counter: 2 },
-          input: { counter: 2 },
-        });
-        seedStep(underTest, ioService, {
-          id: 'ds-a-iter2',
-          stepId: 'stepA',
-          stepType: 'data.set',
-          output: { counter: 3 },
-          input: { counter: 3 },
-        });
-
-        ioService.evictStaleLoopOutputs(['stepA']);
-
-        // ALL data.set outputs must survive — getVariables() reads every one
-        const executions = underTest.getStepExecutionsByStepId('stepA');
-        expect(executions).toHaveLength(3);
-        expect(ioService.getStepOutput(executions[0].id)).toEqual({ counter: 1 });
-        expect(ioService.getStepInput(executions[0].id)).toEqual({ counter: 1 });
-        expect(ioService.getStepOutput(executions[1].id)).toEqual({ counter: 2 });
-        expect(ioService.getStepInput(executions[1].id)).toEqual({ counter: 2 });
-        expect(ioService.getStepOutput(executions[2].id)).toEqual({ counter: 3 });
-        expect(ioService.getStepInput(executions[2].id)).toEqual({ counter: 3 });
-      });
-
-      it('should preserve data.set but evict sibling non-data.set steps in the same loop', () => {
-        // foreach loop body: [data.set step, connector step]
-        for (let i = 0; i < 3; i++) {
-          seedStep(underTest, ioService, {
-            id: `ds-${i}`,
-            stepId: 'setVarStep',
-            stepType: 'data.set',
-            output: { accumulator: `val-${i}` },
-          });
-          seedStep(underTest, ioService, {
-            id: `conn-${i}`,
-            stepId: 'connectorStep',
-            stepType: 'slack',
-            output: { message: `sent-${i}` },
-          });
-        }
-
-        ioService.evictStaleLoopOutputs(['setVarStep', 'connectorStep']);
-
-        // All data.set outputs preserved
-        expect(ioService.getStepOutput('ds-0')).toEqual({ accumulator: 'val-0' });
-        expect(ioService.getStepOutput('ds-1')).toEqual({ accumulator: 'val-1' });
-        expect(ioService.getStepOutput('ds-2')).toEqual({ accumulator: 'val-2' });
-
-        // Non-latest connector outputs evicted, latest preserved
-        expect(ioService.getStepOutput('conn-0')).toBeUndefined();
-        expect(ioService.getStepOutput('conn-1')).toBeUndefined();
-        expect(ioService.getStepOutput('conn-2')).toEqual({ message: 'sent-2' });
-      });
-    });
-
-    describe('nested loop eviction', () => {
-      it('should handle inner loop eviction followed by outer loop eviction', () => {
-        // Outer loop (2 iters) -> Inner loop (3 iters) -> action step
-        // Outer iter 0: inner produces 3 executions of 'action'
-        for (let i = 0; i < 3; i++) {
-          seedStep(underTest, ioService, {
-            id: `action-outer0-inner${i}`,
-            stepId: 'action',
-            stepType: 'atomic',
-            output: { value: `0-${i}` },
-          });
-        }
-        // Inner loop finishes -> evict inner body (action)
-        ioService.evictStaleLoopOutputs(['action']);
-
-        // After inner eviction: only latest (inner iter 2) has output
-        expect(ioService.getStepOutput('action-outer0-inner0')).toBeUndefined();
-        expect(ioService.getStepOutput('action-outer0-inner1')).toBeUndefined();
-        expect(ioService.getStepOutput('action-outer0-inner2')).toEqual({
-          value: '0-2',
-        });
-
-        // Outer iter 1: inner produces 3 more executions
-        for (let i = 0; i < 3; i++) {
-          seedStep(underTest, ioService, {
-            id: `action-outer1-inner${i}`,
-            stepId: 'action',
-            stepType: 'atomic',
-            output: { value: `1-${i}` },
-          });
-        }
-        // Inner loop finishes again -> evict inner body
-        ioService.evictStaleLoopOutputs(['action']);
-
-        // Now 6 total executions. After second inner eviction,
-        // only the very latest (outer1-inner2) should have output
-        const allActionExecs = underTest.getStepExecutionsByStepId('action');
-        expect(allActionExecs).toHaveLength(6);
-        const withOutput = allActionExecs.filter(
-          (e) => ioService.getStepOutput(e.id) !== undefined
-        );
-        expect(withOutput).toHaveLength(1);
-        expect(withOutput[0].id).toBe('action-outer1-inner2');
-
-        // Outer loop finishes -> evict outer body (includes action and inner loop steps)
-        ioService.evictStaleLoopOutputs(['action', 'innerLoop']);
-
-        // After outer eviction: still only the very latest has output
-        const finalWithOutput = underTest
-          .getStepExecutionsByStepId('action')
-          .filter((e) => ioService.getStepOutput(e.id) !== undefined);
-        expect(finalWithOutput).toHaveLength(1);
-        expect(finalWithOutput[0].id).toBe('action-outer1-inner2');
-      });
-    });
-
-    describe('idempotency', () => {
-      it('should be safe to call eviction multiple times on the same step IDs', () => {
-        seedStep(underTest, ioService, {
-          id: 'exec-1',
-          stepId: 'step',
-          output: { data: 'old' },
-        });
-        seedStep(underTest, ioService, {
-          id: 'exec-2',
-          stepId: 'step',
-          output: { data: 'latest' },
-        });
-
-        ioService.evictStaleLoopOutputs(['step']);
-        ioService.evictStaleLoopOutputs(['step']);
-        ioService.evictStaleLoopOutputs(['step']);
-
-        expect(ioService.getStepOutput('exec-1')).toBeUndefined();
-        expect(ioService.getStepOutput('exec-2')).toEqual({ data: 'latest' });
-      });
-    });
-
-    describe('getLatestStepExecution correctness after eviction', () => {
-      it('should return the latest execution with its output intact', () => {
-        seedStep(underTest, ioService, {
-          id: 'exec-1',
-          stepId: 'step',
-          output: { data: 'first' },
-        });
-        seedStep(underTest, ioService, {
-          id: 'exec-2',
-          stepId: 'step',
-          output: { data: 'second' },
-        });
-        seedStep(underTest, ioService, {
-          id: 'exec-3',
-          stepId: 'step',
-          output: { data: 'latest' },
-        });
-
-        ioService.evictStaleLoopOutputs(['step']);
-
-        const latest = underTest.getLatestStepExecution('step');
-        expect(latest?.id).toBe('exec-3');
-        expect(ioService.getStepOutput('exec-3')).toEqual({ data: 'latest' });
-      });
-    });
-
-    describe('getAllStepExecutions after eviction', () => {
-      it('should still return all executions for telemetry', () => {
-        for (let i = 0; i < 5; i++) {
-          seedStep(underTest, ioService, {
-            id: `exec-${i}`,
-            stepId: 'loopBody',
-            stepType: 'atomic',
-            status: ExecutionStatus.COMPLETED,
-            output: { iteration: i },
-          });
-        }
-
-        ioService.evictStaleLoopOutputs(['loopBody']);
-
-        const all = underTest.getAllStepExecutions();
-        expect(all).toHaveLength(5);
-        // All should still have metadata
-        all.forEach((exec) => {
-          expect(exec.stepId).toBe('loopBody');
-          expect(exec.status).toBe(ExecutionStatus.COMPLETED);
-        });
-        // Only the last one should have output (IO lives in the service now).
-        expect(all.filter((e) => ioService.getStepOutput(e.id) !== undefined)).toHaveLength(1);
-      });
-    });
-
-    describe('state field preservation', () => {
-      it('should preserve step state (used by loops and retries) after eviction', () => {
-        seedStep(underTest, ioService, {
-          id: 'exec-1',
-          stepId: 'retryStep',
-          stepType: 'atomic',
-          state: { retryCount: 1, lastError: 'timeout' },
-          output: { result: 'retry-1' },
-        });
-        seedStep(underTest, ioService, {
-          id: 'exec-2',
-          stepId: 'retryStep',
-          stepType: 'atomic',
-          state: { retryCount: 2 },
-          output: { result: 'retry-2' },
-        });
-
-        ioService.evictStaleLoopOutputs(['retryStep']);
-
-        const evicted = underTest.getStepExecution('exec-1');
-        expect(evicted?.state).toEqual({ retryCount: 1, lastError: 'timeout' });
-        expect(ioService.getStepOutput('exec-1')).toBeUndefined();
-      });
-    });
-
-    describe('large iteration counts', () => {
-      it('should handle eviction of many iterations efficiently', () => {
-        const iterationCount = 1000;
-        for (let i = 0; i < iterationCount; i++) {
-          seedStep(underTest, ioService, {
-            id: `exec-${i}`,
-            stepId: 'heavyStep',
-            stepType: 'atomic',
-            output: { payload: 'x'.repeat(100) },
-            input: { idx: i },
-          });
-        }
-
-        ioService.evictStaleLoopOutputs(['heavyStep']);
-
-        const executions = underTest.getStepExecutionsByStepId('heavyStep');
-        expect(executions).toHaveLength(iterationCount);
-
-        // Only the very last one should retain output
-        const withOutput = executions.filter((e) => ioService.getStepOutput(e.id) !== undefined);
-        expect(withOutput).toHaveLength(1);
-        expect(withOutput[0].id).toBe(`exec-${iterationCount - 1}`);
-      });
-    });
-
-    describe('does not affect pending flush', () => {
-      it('should not add evicted changes to stepDocumentsChanges', async () => {
-        seedStep(underTest, ioService, {
-          id: 'exec-1',
-          stepId: 'step',
-          output: { data: 'old' },
-        });
-        seedStep(underTest, ioService, {
-          id: 'exec-2',
-          stepId: 'step',
-          output: { data: 'latest' },
-        });
-
-        // Flush the creates to ES
-        await underTest.flush();
-        (stepExecutionRepository.bulkUpsert as jest.Mock).mockClear();
-
-        // Now evict — this should NOT trigger another flush of the evicted data
-        ioService.evictStaleLoopOutputs(['step']);
-        await underTest.flush();
-
-        // No additional bulk upsert should have been triggered
-        expect(stepExecutionRepository.bulkUpsert).not.toHaveBeenCalled();
-      });
-
-      it('should not corrupt a pending flush entry when eviction runs before flush', async () => {
-        // createStep stores the same object ref in both stepExecutions and stepDocumentsChanges.
-        // Eviction must NOT mutate the pending flush entry, otherwise the step will be
-        // upserted to ES with output: undefined, contradicting the "in-memory only" contract.
-        seedStep(underTest, ioService, {
-          id: 'exec-1',
-          stepId: 'innerStep',
-          stepType: 'atomic',
-          output: { result: 'iter-0' },
-          input: { idx: 0 },
-        });
-        seedStep(underTest, ioService, {
-          id: 'exec-2',
-          stepId: 'innerStep',
-          stepType: 'atomic',
-          output: { result: 'iter-1' },
-          input: { idx: 1 },
-        });
-
-        // Evict BEFORE flushing — the pending metadata entry must stay intact.
-        // Payloads are not part of the metadata write.
-        ioService.evictStaleLoopOutputs(['innerStep']);
-
-        await underTest.flush();
-
-        const upserted = (stepExecutionRepository.bulkUpsert as jest.Mock).mock
-          .calls[0][0] as Array<{
-          id: string;
-          input?: unknown;
-          output?: unknown;
-        }>;
-        const exec1 = upserted.find((document) => document.id === 'exec-1');
-        expect(exec1).toEqual(expect.objectContaining({ id: 'exec-1' }));
-        expect(exec1?.input).toBeUndefined();
-        expect(exec1?.output).toBeUndefined();
-      });
-    });
-
-    describe('error field preservation', () => {
-      it('should preserve error field on evicted failed step executions', () => {
-        seedStep(underTest, ioService, {
-          id: 'exec-1',
-          stepId: 'failingStep',
-          stepType: 'atomic',
-          status: ExecutionStatus.FAILED,
-          error: { message: 'timeout', type: 'StepTimeout' },
-          output: null,
-          input: { request: 'data' },
-        });
-        seedStep(underTest, ioService, {
-          id: 'exec-2',
-          stepId: 'failingStep',
-          stepType: 'atomic',
-          status: ExecutionStatus.COMPLETED,
-          output: { result: 'success' },
-        });
-
-        ioService.evictStaleLoopOutputs(['failingStep']);
-
-        const evicted = underTest.getStepExecution('exec-1');
-        expect(evicted?.error).toEqual({ message: 'timeout', type: 'StepTimeout' });
-        expect(evicted?.status).toBe(ExecutionStatus.FAILED);
-        expect(ioService.getStepInput('exec-1')).toBeUndefined();
-      });
-    });
-
-    describe('scopeStack preservation', () => {
-      it('should preserve scopeStack on evicted executions', () => {
-        const scopeStack = [
-          {
-            stepId: 'outerLoop',
-            nestedScopes: [{ nodeId: 'enterForeach_outerLoop', nodeType: 'enter-foreach' }],
-          },
-        ];
-        seedStep(underTest, ioService, {
-          id: 'exec-1',
-          stepId: 'innerStep',
-          stepType: 'atomic',
-          scopeStack,
-          output: { data: 'old' },
-        });
-        seedStep(underTest, ioService, {
-          id: 'exec-2',
-          stepId: 'innerStep',
-          stepType: 'atomic',
-          output: { data: 'new' },
-        });
-
-        ioService.evictStaleLoopOutputs(['innerStep']);
-
-        expect(underTest.getStepExecution('exec-1')?.scopeStack).toEqual(scopeStack);
-      });
     });
   });
 

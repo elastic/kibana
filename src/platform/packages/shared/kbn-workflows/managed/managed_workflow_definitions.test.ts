@@ -26,9 +26,10 @@ import {
   ALERTZERO_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_WORKFLOW_ID,
   CONTEXT_ENGINE_DREAMING_WORKFLOW_ID,
   CONTEXT_ENGINE_FEEDBACK_ANALYSIS_WORKFLOW_ID,
+  CONTEXT_ENGINE_MAINTENANCE_WORKFLOW_ID,
   CONTEXT_ENGINE_RELATIONSHIPS_WORKFLOW_ID,
-  CONTEXT_ENGINE_TRACE_DREAMING_BATCH_WORKFLOW_ID,
-  CONTEXT_ENGINE_TRACE_DREAMING_WORKFLOW_ID,
+  CONTEXT_ENGINE_TRANSCRIPT_DREAMING_BATCH_WORKFLOW_ID,
+  CONTEXT_ENGINE_TRANSCRIPT_DREAMING_WORKFLOW_ID,
   EXAMPLE_MANAGED_WORKFLOW_ID,
   EXAMPLE_SERVICE_ACCOUNT_WORKFLOW_ID,
   NIGHTSHIFT_BOUND_AGENT_OPTIMIZE_WORKFLOW_ID,
@@ -37,16 +38,22 @@ import {
   NIGHTSHIFT_BOUND_SANDBOX_MATERIALIZE_WORKSPACE_WORKFLOW_ID,
   NIGHTSHIFT_BOUND_SLACK_THREAD_WORKFLOW_ID,
   NIGHTSHIFT_CONTINUOUS_DETECTION_WORKFLOW_ID,
+  NIGHTSHIFT_DETECTION_RECONCILE_WORKFLOW_ID,
   SECURITY_ALERT_ANALYSIS_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_SCHEDULED_REVIEW_WORKFLOW_ID,
 } from './definitions';
 import CONTEXT_ENGINE_DREAMING_YAML from './definitions/context_engine/dreaming.yaml';
-import CONTEXT_ENGINE_TRACE_DREAMING_YAML from './definitions/context_engine/dreaming_traces.yaml';
-import CONTEXT_ENGINE_TRACE_DREAMING_BATCH_YAML from './definitions/context_engine/dreaming_traces_batch.yaml';
+import CONTEXT_ENGINE_TRANSCRIPT_DREAMING_YAML from './definitions/context_engine/dreaming_transcripts.yaml';
+import CONTEXT_ENGINE_TRANSCRIPT_DREAMING_BATCH_YAML from './definitions/context_engine/dreaming_transcripts_batch.yaml';
+import CONTEXT_ENGINE_MAINTENANCE_YAML from './definitions/context_engine/maintenance.yaml';
 import CONTEXT_ENGINE_RELATIONSHIPS_YAML from './definitions/context_engine/relationships.yaml';
 import type { ManagedWorkflowDefinition, ManagedWorkflowTemplateValues } from './types';
-import { WorkflowSchemaBase } from '../spec/schema';
+import { isDynamicValue, isLiquidTagValue, isVariableValue } from '../common/utils';
+import { visitNestedSteps } from '../definition/definition_utils';
+import type { VisitNestedStepEntry, WorkflowStep } from '../definition/definition_utils';
+import { getElasticsearchConnectors } from '../spec/elasticsearch';
+import { ElasticsearchRequestStepInputSchema, WorkflowSchemaBase } from '../spec/schema';
 
 const ManagedWorkflowSchema = WorkflowSchemaBase.extend({
   triggers: z.array(z.object({ type: z.string().min(1) }).passthrough()).min(1),
@@ -78,6 +85,9 @@ const templateRepresentativeValuesById: ManagedWorkflowTemplateValuesById = {
   [NIGHTSHIFT_CONTINUOUS_DETECTION_WORKFLOW_ID]: {
     serviceAccountId: 'kibana/nightshift_detection',
   },
+  [NIGHTSHIFT_DETECTION_RECONCILE_WORKFLOW_ID]: {
+    serviceAccountId: 'kibana/nightshift_detection',
+  },
   [EXAMPLE_MANAGED_WORKFLOW_ID]: {
     recipient: 'World',
   },
@@ -96,7 +106,7 @@ const templateRepresentativeValuesById: ManagedWorkflowTemplateValuesById = {
     entityTypes: [{ type: 'customer', attributes: ['tier'] }, { type: 'city' }],
     relationshipTypes: [{ type: 'lives_in', description: 'A customer lives in a city.' }],
   },
-  [CONTEXT_ENGINE_TRACE_DREAMING_WORKFLOW_ID]: {
+  [CONTEXT_ENGINE_TRANSCRIPT_DREAMING_WORKFLOW_ID]: {
     aiIndexId: 'my-ai-index',
     instanceKey: 'my-ai-index-0123456789abcdef',
     memoriesIndex: 'ai-index-idx-my-ai-index',
@@ -118,7 +128,15 @@ const templateRepresentativeValuesById: ManagedWorkflowTemplateValuesById = {
     entityTypes: [{ type: 'customer', attributes: ['tier'] }, { type: 'city' }],
     relationshipTypes: [{ type: 'lives_in', description: 'A customer lives in a city.' }],
   },
-  [CONTEXT_ENGINE_TRACE_DREAMING_BATCH_WORKFLOW_ID]: {
+  [CONTEXT_ENGINE_MAINTENANCE_WORKFLOW_ID]: {
+    aiIndexId: 'my-ai-index',
+    instanceKey: 'my-ai-index-0123456789abcdef',
+    connectorId: 'my-connector',
+    instructions: 'Remember what customers "prefer".\nIgnore {{ small talk }}.',
+    maintenanceIntervalMinutes: 1440,
+    maintenanceMode: 'report',
+  },
+  [CONTEXT_ENGINE_TRANSCRIPT_DREAMING_BATCH_WORKFLOW_ID]: {
     aiIndexId: 'my-ai-index',
     instanceKey: 'my-ai-index-0123456789abcdef',
     memoriesIndex: 'ai-index-idx-my-ai-index',
@@ -226,6 +244,13 @@ function hasYaml(
   return typeof definition.yaml === 'string';
 }
 
+const elasticsearchConnectorsByType = new Map(
+  getElasticsearchConnectors().map((connector) => [connector.type, connector])
+);
+
+const SCHEMA_GAP_HINT =
+  'Hint: if Elasticsearch accepts this body, the generated schema is missing a case from the spec. Fix it in the OAS preprocessors (`kbn-workflows/scripts/shared/oas_*.ts`) and run `node scripts/generate_workflow_es_contracts.js`.';
+
 function renderWorkflowYaml(definition: ManagedWorkflowDefinition): string {
   const { id } = definition;
 
@@ -259,13 +284,18 @@ function createContentFingerprint(content: string): string {
 }
 
 it.each([
-  [CONTEXT_ENGINE_DREAMING_WORKFLOW_ID, CONTEXT_ENGINE_DREAMING_YAML, '5:2fc422ee'],
-  [CONTEXT_ENGINE_RELATIONSHIPS_WORKFLOW_ID, CONTEXT_ENGINE_RELATIONSHIPS_YAML, '2:b57ab856'],
-  [CONTEXT_ENGINE_TRACE_DREAMING_WORKFLOW_ID, CONTEXT_ENGINE_TRACE_DREAMING_YAML, '5:53938616'],
+  [CONTEXT_ENGINE_DREAMING_WORKFLOW_ID, CONTEXT_ENGINE_DREAMING_YAML, '8:0f093d1e'],
+  [CONTEXT_ENGINE_RELATIONSHIPS_WORKFLOW_ID, CONTEXT_ENGINE_RELATIONSHIPS_YAML, '4:8a38fbe6'],
+  [CONTEXT_ENGINE_MAINTENANCE_WORKFLOW_ID, CONTEXT_ENGINE_MAINTENANCE_YAML, '1:0ba262e3'],
   [
-    CONTEXT_ENGINE_TRACE_DREAMING_BATCH_WORKFLOW_ID,
-    CONTEXT_ENGINE_TRACE_DREAMING_BATCH_YAML,
-    '5:85da232f',
+    CONTEXT_ENGINE_TRANSCRIPT_DREAMING_WORKFLOW_ID,
+    CONTEXT_ENGINE_TRANSCRIPT_DREAMING_YAML,
+    '7:342b0877',
+  ],
+  [
+    CONTEXT_ENGINE_TRANSCRIPT_DREAMING_BATCH_WORKFLOW_ID,
+    CONTEXT_ENGINE_TRANSCRIPT_DREAMING_BATCH_YAML,
+    '6:7dd0638a',
   ],
 ] as const)(
   'requires bumping %s definition.version together with the fingerprint of its render inputs',
@@ -434,6 +464,84 @@ describe('managedWorkflowDefinitions', () => {
     (id, definition) => {
       const renderedYaml = renderWorkflowYaml(definition);
       assertWorkflowYamlIsValid(id, renderedYaml);
+    }
+  );
+
+  // Mirrors the editor's Run validation (POST /api/workflows/test): every elasticsearch.* step's
+  // `with` must satisfy the connector paramsSchema from spec/elasticsearch; a stored `valid: true`
+  // does not cover it. Values that are whole-string {{ }} / ${{ }} templates or contain {% %} tags
+  // are skipped, as parseWorkflowYamlToJSON does. elasticsearch.request has no package connector,
+  // so it is checked against the input schema its editor contract uses.
+  it.each(managedDefinitionsById)(
+    '%s elasticsearch steps satisfy the connector params schema',
+    (_id, definition) => {
+      // The raw parse is walked (not ManagedWorkflowSchema.parse) so zod stripping cannot hide a
+      // `with` key, and because the schema types settings.on-failure.fallback as BaseStep[], which
+      // visitNestedSteps does not accept.
+      const parsed = parse(renderWorkflowYaml(definition)) as {
+        steps: WorkflowStep[];
+        settings?: { 'on-failure'?: { fallback?: WorkflowStep[] } };
+      };
+      const failures: Array<{ path: string; issuePaths: string[]; error: string }> = [];
+
+      const visitor = ({ step, path }: VisitNestedStepEntry) => {
+        if (!step.type.startsWith('elasticsearch.')) {
+          return;
+        }
+        const paramsSchema =
+          step.type === 'elasticsearch.request'
+            ? ElasticsearchRequestStepInputSchema
+            : elasticsearchConnectorsByType.get(step.type)?.paramsSchema;
+        if (!paramsSchema) {
+          failures.push({
+            path,
+            issuePaths: [],
+            error: `Unknown elasticsearch step type '${step.type}': add a package connector`,
+          });
+          return;
+        }
+
+        const params = (step as { with?: unknown }).with;
+        const result = paramsSchema.safeParse(params ?? {});
+        if (result.success) {
+          return;
+        }
+
+        const survivingIssues = result.error.issues.filter((issue) => {
+          // An empty path is `with` itself, which Run also skips when it is a whole-value template.
+          let current: unknown = params;
+          for (const segment of issue.path) {
+            if (current === null || typeof current !== 'object') {
+              return true;
+            }
+            current = (current as Record<string, unknown>)[String(segment)];
+          }
+          if (current === undefined) {
+            return true;
+          }
+          return !(
+            isDynamicValue(current) ||
+            isVariableValue(current) ||
+            isLiquidTagValue(current)
+          );
+        });
+
+        if (survivingIssues.length > 0) {
+          failures.push({
+            path,
+            issuePaths: survivingIssues.map((issue) => issue.path.map(String).join('.')),
+            error: `${z.prettifyError(new z.ZodError(survivingIssues))}\n${SCHEMA_GAP_HINT}`,
+          });
+        }
+      };
+
+      visitNestedSteps(parsed.steps, visitor);
+      const fallback = parsed.settings?.['on-failure']?.fallback;
+      if (Array.isArray(fallback)) {
+        visitNestedSteps(fallback, visitor);
+      }
+
+      expect(failures).toEqual([]);
     }
   );
 

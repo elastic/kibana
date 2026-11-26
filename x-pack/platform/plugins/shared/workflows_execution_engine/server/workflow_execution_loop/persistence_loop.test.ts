@@ -24,13 +24,17 @@ const makeParams = (
       executionCursor: workflowExecutionCursor,
     },
     stepIoService: {
-      flush: jest
-        .fn()
-        .mockImplementation(() => new Promise<void>((resolve) => setTimeout(resolve, flushDelay))),
+      getOutputSizeStats: jest.fn().mockReturnValue({ totalBytes: 0, stepCount: 0 }),
+      flush: jest.fn().mockImplementation(
+        () =>
+          flushDelay > 0
+            ? new Promise<boolean>((resolve) => setTimeout(() => resolve(false), flushDelay))
+            : Promise.resolve(false)
+      ),
       hasPendingIo: jest.fn().mockReturnValue(false),
     },
     workflowExecutionState: {
-      flush: jest.fn().mockResolvedValue(undefined),
+      flushWorkflowAndSteps: jest.fn().mockResolvedValue(undefined),
       getWorkflowExecutionStatus: jest.fn().mockReturnValue(ExecutionStatus.RUNNING),
     },
     eventQueue: {
@@ -52,7 +56,7 @@ describe('persistenceLoop', () => {
   it('exits immediately when the execution cursor is not executing', async () => {
     const params = makeParams({ isExecuting: false });
     await persistenceLoop(params);
-    expect(params.stepIoService.flush).not.toHaveBeenCalled();
+    expect(params.workflowExecutionState.flushWorkflowAndSteps).not.toHaveBeenCalled();
   });
 
   it('exits when the persistenceAbortSignal fires during the wait interval', async () => {
@@ -133,13 +137,13 @@ describe('persistenceLoop', () => {
     expect(params.eventQueue.flush).toHaveBeenCalledWith({
       signal: params.signal,
     });
-    expect(params.workflowExecutionState.flush).not.toHaveBeenCalled();
+    expect(params.workflowExecutionState.flushWorkflowAndSteps).not.toHaveBeenCalled();
 
     resolveIo();
     await Promise.resolve();
     await Promise.resolve();
 
-    expect(params.workflowExecutionState.flush).toHaveBeenCalledTimes(1);
+    expect(params.workflowExecutionState.flushWorkflowAndSteps).toHaveBeenCalledTimes(1);
 
     abortController.abort();
     jest.advanceTimersByTime(500);
@@ -154,7 +158,7 @@ describe('persistenceLoop', () => {
     await persistenceLoop(params, abortController.signal);
 
     // The loop should return immediately without flushing
-    expect(params.stepIoService.flush).not.toHaveBeenCalled();
+    expect(params.workflowExecutionState.flushWorkflowAndSteps).not.toHaveBeenCalled();
   });
 
   it('stores IO queued during a terminal flush before writing the workflow document', async () => {
@@ -170,7 +174,7 @@ describe('persistenceLoop', () => {
       pending = order.length === 1;
       return false;
     });
-    (params.workflowExecutionState.flush as jest.Mock).mockImplementation(async () => {
+    (params.workflowExecutionState.flushWorkflowAndSteps as jest.Mock).mockImplementation(async () => {
       order.push('state');
     });
 
@@ -190,7 +194,7 @@ describe('persistenceLoop', () => {
       order.push('io');
       return true;
     });
-    (params.workflowExecutionState.flush as jest.Mock).mockImplementation(async () => {
+    (params.workflowExecutionState.flushWorkflowAndSteps as jest.Mock).mockImplementation(async () => {
       order.push('state');
     });
 

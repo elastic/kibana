@@ -36,7 +36,7 @@ export async function flushState(
       ) {
         failed = await params.stepIoService.flush();
       }
-      await params.workflowExecutionState.flush();
+      await params.workflowExecutionState.flushWorkflowAndSteps();
     })(),
     params.eventQueue.flush({ signal: options.workflowLogFlushSignal }),
   ]);
