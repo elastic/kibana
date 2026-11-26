@@ -31,8 +31,10 @@ const getDomainBounds = (
   const firstKey = roundToBucketKey(from, rounding, timeZone);
   const lastKey = roundToBucketKey(to, rounding, timeZone);
 
+  // Keys can go backward when a clock rollback repeats a date, so the endpoint keys are not
+  // always chronological bounds.
   if (!dropPartials) {
-    return { min: firstKey, max: lastKey };
+    return firstKey <= lastKey ? { min: firstKey, max: lastKey } : undefined;
   }
 
   // The bucket containing `to` always extends past it, so the last full bucket is the one before.

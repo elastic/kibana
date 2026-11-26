@@ -505,6 +505,38 @@ describe('lens_date_histogram_textbased', () => {
     expect(result).toBe(input);
   });
 
+  describe.each([true, false])(
+    'when a clock rollback repeats a date (dropPartials: %s)',
+    (dropPartials) => {
+      // America/St_Johns, 2009-11-01: at 00:01 NDT clocks go back to 23:01 NST on 2009-10-31, so
+      // the first midnight minute rounds to November 1 and the repeated hour to October 31.
+      it('does not compute a domain from out-of-order endpoint keys', async () => {
+        const stJohns = getDateHistogramTextBased(
+          createDatatableUtilitiesMock,
+          () => 'America/St_Johns'
+        );
+        const input: Datatable = {
+          type: 'datatable',
+          columns: [
+            buildBucketColumn({
+              bucket: { interval: 1, unit: 'day' },
+              dropPartials,
+              appliedTimeRange: {
+                from: '2009-11-01T02:30:10.000Z',
+                to: '2009-11-01T03:00:00.000Z',
+              },
+            }),
+          ],
+          rows: [],
+        };
+
+        const result = await stJohns.fn(input, {}, createMockExecutionContext());
+
+        expect(result.columns[0].meta.sourceParams?.computedDomain).toBeUndefined();
+      });
+    }
+  );
+
   it('returns the table unchanged when there is no date histogram bucket column', async () => {
     const input: Datatable = {
       type: 'datatable',
