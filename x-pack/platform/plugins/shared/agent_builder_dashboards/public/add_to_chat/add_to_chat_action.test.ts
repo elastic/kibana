@@ -148,6 +148,7 @@ const createAction = ({
     areEqual: jest.fn().mockResolvedValue(true),
     canWriteDashboards,
     draftAttachmentId,
+    nowProvider: { get: () => new Date() },
     stagedDashboards: createStagedDashboards(),
     toasts: { addWarning: jest.fn() } as unknown as DashboardAddToChatActionDeps['toasts'],
   });

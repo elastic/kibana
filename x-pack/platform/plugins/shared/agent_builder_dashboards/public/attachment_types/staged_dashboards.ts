@@ -62,6 +62,7 @@ export const createStagedDashboards = (): StagedDashboards => {
     },
     remove: (attachmentId) => {
       dashboardKeyByAttachmentId.delete(attachmentId);
+      stagedFromSavedDashboard.delete(attachmentId);
     },
     isStagedFrom: (attachmentId, api) =>
       dashboardKeyByAttachmentId.has(attachmentId) && isStagedFrom(attachmentId, api),
