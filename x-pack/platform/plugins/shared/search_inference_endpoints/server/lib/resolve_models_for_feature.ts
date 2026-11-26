@@ -6,11 +6,16 @@
  */
 
 import type { IUiSettingsClient, Logger } from '@kbn/core/server';
-import type { ApiInferenceConnector, InferenceConnector } from '@kbn/inference-common';
+import type {
+  ApiInferenceConnector,
+  InferenceConnector,
+  InferenceTaskType,
+} from '@kbn/inference-common';
 import {
   GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR,
   GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY,
 } from '@kbn/management-settings-ids';
+import { CHAT_COMPLETION_TASK_TYPE } from '../../common/constants';
 import { mergeConnectors } from './merge_connectors';
 import type { GetForFeatureOptions, ResolvedInferenceEndpoints } from '../types';
 
@@ -26,8 +31,7 @@ export interface ResolvedConnectorsForFeature {
  * Resolves the full, ordered model list for a feature.
  *
  * The priority resolution is:
- *   - If `isChatCompletion` is false, the global default never applies: neither the default only
- *     setting nor the default connector, which are chat models.
+ *   - If `taskType` is not chat completion, the default only setting does not apply: the default is a chat model.
  *   - If the default only setting is enabled, return just the default connector without feature-declared parameters (or nothing if not set).
  *   - If `opts.onlyReturnConfigured` is true, return only the explicitly configured endpoints
  *     (SO override or recommendedEndpoints) without prepending the global default or the full
@@ -56,7 +60,7 @@ export const resolveModelsForFeature = async ({
   uiSettingsClient,
   featureId,
   ignoreGlobalDefault = false,
-  isChatCompletion = true,
+  taskType = CHAT_COMPLETION_TASK_TYPE,
   opts,
   logger,
 }: {
@@ -66,7 +70,7 @@ export const resolveModelsForFeature = async ({
   uiSettingsClient: IUiSettingsClient;
   featureId: string;
   ignoreGlobalDefault?: boolean;
-  isChatCompletion?: boolean;
+  taskType?: InferenceTaskType;
   opts?: GetForFeatureOptions;
   logger: Logger;
 }): Promise<ResolvedConnectorsForFeature> => {
@@ -90,7 +94,7 @@ export const resolveModelsForFeature = async ({
       return { endpoints: [], warnings: [], soEntryFound: false };
     });
 
-  if (defaultConnectorOnly && isChatCompletion) {
+  if (defaultConnectorOnly && taskType === CHAT_COMPLETION_TASK_TYPE) {
     if (!defaultConnectorId || defaultConnectorId === NO_DEFAULT_CONNECTOR) {
       return { connectors: [], warnings: [], soEntryFound: false };
     }
@@ -129,7 +133,6 @@ export const resolveModelsForFeature = async ({
   if (
     !soEntryFound &&
     !ignoreGlobalDefault &&
-    isChatCompletion &&
     defaultConnectorId &&
     defaultConnectorId !== NO_DEFAULT_CONNECTOR
   ) {

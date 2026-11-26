@@ -27,7 +27,6 @@ import { NO_DEFAULT_CONNECTOR, resolveModelsForFeature } from './lib/resolve_mod
 import {
   getConnectorByIdAndTaskType,
   getConnectorListByTaskType,
-  isChatCompletionFeature,
 } from './lib/connectors_by_task_type';
 import { createInferenceSettingsSavedObjectType } from './saved_objects/inference_settings';
 import type {
@@ -273,7 +272,7 @@ export class SearchInferenceEndpointsPlugin
             uiSettingsClient,
             featureId,
             ignoreGlobalDefault: feature?.ignoreGlobalDefault ?? false,
-            isChatCompletion: isChatCompletionFeature(feature),
+            taskType: feature?.taskType,
             opts,
             logger: this.logger,
           });

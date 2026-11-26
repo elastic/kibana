@@ -237,7 +237,7 @@ describe('GET /internal/search_inference_endpoints/connectors', () => {
     });
   });
 
-  it('lists the models of the feature task type and ignores the global default for a non-chat feature', async () => {
+  it('lists the models of the feature task type and skips the default only setting for a non-chat feature', async () => {
     const decisionModel = inferenceConnector('decision-1');
     getForFeature.mockResolvedValue({ endpoints: [], warnings: [], soEntryFound: false });
     getConnectorList.mockResolvedValue([decisionModel]);
@@ -245,6 +245,7 @@ describe('GET /internal/search_inference_endpoints/connectors', () => {
       get: jest.fn(() => ({
         featureId: 'decision_feature',
         taskType: 'decision',
+        ignoreGlobalDefault: true,
         recommendedEndpoints: [],
       })),
     } as unknown as InferenceFeatureRegistry);

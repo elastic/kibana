@@ -7,11 +7,7 @@
 
 import { httpServerMock } from '@kbn/core/server/mocks';
 import type { InferenceConnector } from '@kbn/inference-common';
-import {
-  getConnectorByIdAndTaskType,
-  getConnectorListByTaskType,
-  isChatCompletionFeature,
-} from './connectors_by_task_type';
+import { getConnectorByIdAndTaskType, getConnectorListByTaskType } from './connectors_by_task_type';
 
 const connector = (connectorId: string) => ({ connectorId } as InferenceConnector);
 
@@ -71,17 +67,6 @@ describe('connectors by task type', () => {
       await expect(
         getConnectorByIdAndTaskType(inference, 'chat-1', request, 'decision')
       ).rejects.toMatchObject({ meta: { status: 404 } });
-    });
-  });
-
-  describe('isChatCompletionFeature', () => {
-    it('is true for a chat completion feature and for an unregistered one', () => {
-      expect(isChatCompletionFeature({ taskType: 'chat_completion' })).toBe(true);
-      expect(isChatCompletionFeature(undefined)).toBe(true);
-    });
-
-    it('is false for a feature of another task type', () => {
-      expect(isChatCompletionFeature({ taskType: 'decision' })).toBe(false);
     });
   });
 });

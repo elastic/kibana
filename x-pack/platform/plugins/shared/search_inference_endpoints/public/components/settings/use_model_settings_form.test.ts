@@ -492,7 +492,7 @@ describe('useModelSettingsForm', () => {
     ]);
   });
 
-  it('leaves a row of another task type empty instead of using chat models', () => {
+  it('does not inherit chat models from a parent of another task type', () => {
     const parentWithEndpoints: InferenceFeatureConfig = {
       ...parentFeature,
       recommendedEndpoints: ['parent-chat-ep'],
@@ -500,6 +500,7 @@ describe('useModelSettingsForm', () => {
     const decisionChild: InferenceFeatureConfig = {
       ...childFeature2,
       taskType: 'decision',
+      ignoreGlobalDefault: true,
       recommendedEndpoints: [],
     };
     mockUseRegisteredFeatures.mockReturnValue({

@@ -15,7 +15,6 @@ import type {
   InferenceFeatureResponse,
   ReasoningEffortLevel,
 } from '../../../common/types';
-import { CHAT_COMPLETION_TASK_TYPE } from '../../../common/constants';
 import type { EndpointEfforts } from '../../types';
 
 type Assignments = Record<string, string[]>;
@@ -65,8 +64,7 @@ const getEffectiveEndpoints = (
   }
   // A row that opts out of the global default, and has nothing of its own to recommend,
   // stays empty. Substituting the Kibana default would show a model the workers do not use.
-  // The same goes for a row of another task type: the Kibana default is a chat model.
-  if (feature.ignoreGlobalDefault || feature.taskType !== CHAT_COMPLETION_TASK_TYPE) {
+  if (feature.ignoreGlobalDefault) {
     return [];
   }
   return [defaultInferenceEndpoints.KIBANA_DEFAULT_CHAT_COMPLETION];

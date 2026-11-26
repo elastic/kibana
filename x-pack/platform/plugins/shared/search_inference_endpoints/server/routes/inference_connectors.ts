@@ -15,7 +15,6 @@ import type { InferenceTaskType, ResolvedInferenceEndpoints } from '../types';
 import type { InferenceFeatureRegistry } from '../inference_feature_registry';
 import { errorHandler } from '../utils/error_handler';
 import { resolveModelsForFeature } from '../lib/resolve_models_for_feature';
-import { isChatCompletionFeature } from '../lib/connectors_by_task_type';
 
 export const defineInferenceConnectorsRoute = ({
   logger,
@@ -81,7 +80,7 @@ export const defineInferenceConnectorsRoute = ({
           uiSettingsClient,
           featureId,
           ignoreGlobalDefault: feature?.ignoreGlobalDefault ?? false,
-          isChatCompletion: isChatCompletionFeature(feature),
+          taskType: feature?.taskType,
           logger,
         });
 

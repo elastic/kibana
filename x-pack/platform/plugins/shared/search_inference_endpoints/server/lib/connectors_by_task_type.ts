@@ -46,7 +46,3 @@ export const getConnectorByIdAndTaskType = async (
 
   return connector;
 };
-
-/** An unregistered feature counts as a chat completion one, as it did before task types. */
-export const isChatCompletionFeature = (feature?: { taskType: InferenceTaskType }): boolean =>
-  !feature || feature.taskType === CHAT_COMPLETION_TASK_TYPE;
