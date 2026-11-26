@@ -22,7 +22,22 @@ import {
   isAutoAnnotationColor,
   isEsqlAnnotationConfig,
 } from '@kbn/event-annotation-common';
+import type { DatatableColumn } from '@kbn/expressions-plugin/common';
+import type { DataType, FieldOption, FieldOptionValue } from '@kbn/visualization-ui-components';
 import { isQueryAnnotationConfig, isRangeAnnotationConfig } from '../..';
+
+/** ES|QL result columns as field picker options; the result has no data view to read fields from. */
+export const getColumnFieldOptions = (
+  columns: DatatableColumn[]
+): Array<FieldOption<FieldOptionValue>> =>
+  columns.map(({ name, meta }) => ({
+    label: name,
+    // Same cast as the ES|QL data layer field pickers; the icon falls back for other types
+    value: { type: 'field', field: name, dataType: meta.type as DataType },
+    exists: true,
+    compatible: true,
+    'data-test-subj': `lnsXY-annotation-fieldOption-${name}`,
+  }));
 
 export const defaultAnnotationLabel = i18n.translate(
   'eventAnnotationComponents.xyChart.defaultAnnotationLabel',

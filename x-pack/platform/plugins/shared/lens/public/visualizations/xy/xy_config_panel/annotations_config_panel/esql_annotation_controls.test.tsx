@@ -69,12 +69,14 @@ const submitQuery = () => {
   fireEvent.click(screen.getByText('Run'));
 };
 
-const renderControls = () => {
+const renderControls = ({
+  onColumnsChange,
+}: { onColumnsChange?: (columns: DatatableColumn[]) => void } = {}) => {
   const fetchColumns = jest
     .fn<Promise<FetchResult>, [typeof annotation.query, AbortSignal]>()
     .mockResolvedValue({ columns, timeField: '@timestamp' });
   const onChange = jest.fn();
-  const props = { annotation, onChange, fetchColumns };
+  const props = { annotation, onChange, fetchColumns, onColumnsChange };
   const rendered = render(<EsqlAnnotationControls {...props} />);
   return { ...rendered, props, fetchColumns, onChange };
 };
@@ -87,9 +89,16 @@ describe('EsqlAnnotationControls', () => {
 
     expect(fetchColumns).toHaveBeenCalledWith(annotation.query, expect.any(AbortSignal));
     expect(
-      within(screen.getByLabelText('Text field')).getByRole('option', { name: 'version' })
+      within(screen.getByLabelText('Target date field')).getByRole('option', { name: 'time' })
     ).toBeInTheDocument();
     expect(onChange).not.toHaveBeenCalled();
+  });
+
+  it('reports the loaded columns so text decoration can offer them', async () => {
+    const onColumnsChange = jest.fn();
+    renderControls({ onColumnsChange });
+
+    await waitFor(() => expect(onColumnsChange).toHaveBeenLastCalledWith(columns));
   });
 
   it('commits a submitted query only after success and preserves edits made while loading', async () => {
@@ -129,7 +138,7 @@ describe('EsqlAnnotationControls', () => {
     expect(onChange).not.toHaveBeenCalled();
     expect(screen.getByLabelText('Target date field')).toHaveValue('time');
     expect(
-      within(screen.getByLabelText('Text field')).getByRole('option', { name: 'version' })
+      within(screen.getByLabelText('Target date field')).getByRole('option', { name: 'time' })
     ).toBeInTheDocument();
   });
 

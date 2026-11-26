@@ -10,6 +10,7 @@ import type { DatatableUtilitiesService } from '@kbn/data-plugin/common';
 import { AnnotationEditorControls } from '@kbn/event-annotation-components';
 import type { EventAnnotationConfig } from '@kbn/event-annotation-common';
 import type { AggregateQuery } from '@kbn/es-query';
+import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { getESQLQueryColumns, getESQLTimeField } from '@kbn/esql-utils';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { DataViewsPublicPluginStart, DataView } from '@kbn/data-views-plugin/public';
@@ -73,6 +74,7 @@ export const AnnotationsPanel = (
   );
 
   const hideQueryBasedControls = isEsqlChart(frame.datasourceLayers);
+  const [esqlColumns, setEsqlColumns] = useState<DatatableColumn[]>([]);
 
   const [currentDataView, setCurrentDataView] = useState<DataView>();
 
@@ -141,12 +143,14 @@ export const AnnotationsPanel = (
         esql={
           hideQueryBasedControls
             ? {
+                columns: esqlColumns,
                 renderControls: (annotation, onChange) => (
                   <EsqlAnnotationControls
                     key={annotation.id}
                     annotation={annotation}
                     onChange={onChange}
                     fetchColumns={fetchColumns}
+                    onColumnsChange={setEsqlColumns}
                   />
                 ),
               }

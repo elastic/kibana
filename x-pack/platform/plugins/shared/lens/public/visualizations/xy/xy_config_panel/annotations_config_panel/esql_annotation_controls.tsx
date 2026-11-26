@@ -19,9 +19,16 @@ interface Props {
     query: AggregateQuery,
     abortSignal: AbortSignal
   ) => Promise<{ columns: DatatableColumn[]; timeField?: string }>;
+  /** Reports the result columns of the saved query whenever they change. */
+  onColumnsChange?: (columns: DatatableColumn[]) => void;
 }
 
-export const EsqlAnnotationControls = ({ annotation, onChange, fetchColumns }: Props) => {
+export const EsqlAnnotationControls = ({
+  annotation,
+  onChange,
+  fetchColumns,
+  onColumnsChange,
+}: Props) => {
   const [query, setQuery] = useState(annotation.query);
   const [columns, setColumns] = useState<DatatableColumn[]>([]);
   const [errors, setErrors] = useState<Error[]>([]);
@@ -30,6 +37,9 @@ export const EsqlAnnotationControls = ({ annotation, onChange, fetchColumns }: P
   const loadedResultRef = useRef<{ query: string; fetchColumns: Props['fetchColumns'] }>();
   const currentPropsRef = useRef({ annotation, onChange });
   currentPropsRef.current = { annotation, onChange };
+
+  // The editor's text decoration lives outside this component and needs the result columns
+  useEffect(() => onColumnsChange?.(columns), [columns, onColumnsChange]);
 
   const savedQuery = annotation.query.esql;
   useEffect(() => setQuery({ esql: savedQuery }), [savedQuery]);

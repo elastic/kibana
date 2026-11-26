@@ -63,11 +63,7 @@ describe('ConfigPanelEsqlAnnotation', () => {
         .getAllByRole('option')
         .map((option) => option.textContent)
     ).toEqual(['Select a field', 'start', 'end']);
-    expect(
-      within(screen.getByLabelText('Text field'))
-        .getAllByRole('option')
-        .map((option) => option.textContent)
-    ).toEqual(['None', 'start', 'end', 'version', 'duration']);
+    expect(screen.queryByLabelText('Text field')).not.toBeInTheDocument();
     expect(screen.queryByLabelText('End date field')).not.toBeInTheDocument();
   });
 
@@ -76,9 +72,18 @@ describe('ConfigPanelEsqlAnnotation', () => {
 
     fireEvent.change(screen.getByLabelText('Target date field'), { target: { value: 'end' } });
     expect(onChange).toHaveBeenLastCalledWith({ ...annotation, timeColumn: 'end' });
+  });
+
+  it('edits the text field of a range, which has no text decoration', () => {
+    const range: EsqlEventAnnotationConfig = {
+      ...annotation,
+      key: { type: 'range' },
+      endTimeColumn: 'end',
+    };
+    const { onChange } = renderPanel(range);
 
     fireEvent.change(screen.getByLabelText('Text field'), { target: { value: '' } });
-    expect(onChange).toHaveBeenLastCalledWith({ ...annotation, textColumn: undefined });
+    expect(onChange).toHaveBeenLastCalledWith({ ...range, textColumn: undefined });
   });
 
   it('edits the end column of a range without changing its fill or query', () => {
@@ -129,9 +134,8 @@ describe('ConfigPanelEsqlAnnotation', () => {
 
     expect(screen.getByLabelText('Target date field')).toHaveValue('start');
     expect(screen.getByLabelText('Target date field')).toHaveAttribute('aria-invalid', 'true');
-    expect(screen.getByLabelText('Text field')).toHaveValue('version');
     expect(screen.getByText('duration')).toBeInTheDocument();
-    expect(screen.getAllByText(/is missing or has an incompatible type/)).toHaveLength(3);
+    expect(screen.getAllByText(/is missing or has an incompatible type/)).toHaveLength(2);
     expect(onChange).not.toHaveBeenCalled();
   });
 

@@ -31,6 +31,7 @@ import {
 } from '@kbn/visualization-ui-components';
 import type { FieldOptionValue, FieldOption } from '@kbn/visualization-ui-components';
 import type { DataView } from '@kbn/data-views-plugin/common';
+import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { useExistingFieldsReader } from '@kbn/unified-field-list/src/hooks/use_existing_fields';
 import moment from 'moment';
 import { htmlIdGenerator } from '@elastic/eui';
@@ -47,7 +48,7 @@ import {
   isEsqlAnnotationConfig,
 } from '@kbn/event-annotation-common';
 import { isQueryAnnotationConfig, isRangeAnnotationConfig } from '../..';
-import { defaultAnnotationLabel, getRangeToPointOverrides } from './helpers';
+import { defaultAnnotationLabel, getColumnFieldOptions, getRangeToPointOverrides } from './helpers';
 import { annotationsIconSet } from './icon_set';
 import { sanitizeProperties } from './helpers';
 import { TooltipSection } from './tooltip_annotation_panel';
@@ -68,6 +69,8 @@ export interface Props {
    */
   hideQueryBasedControls?: boolean;
   esql?: {
+    /** Result columns of the annotation query, offered when text decoration is set to Field. */
+    columns: DatatableColumn[];
     renderControls: (
       annotation: EsqlEventAnnotationConfig,
       onChange: (annotation: EsqlEventAnnotationConfig) => void
@@ -276,7 +279,7 @@ const AnnotationEditorControls = ({
               customIconSet={annotationsIconSet}
             />
             <TextDecorationSetting
-              // ES|QL text bindings are edited in the placement section; remount to reflect them.
+              // Remount so the selected option follows ES|QL text bindings changed elsewhere.
               key={
                 isEsqlBased
                   ? `${currentAnnotation.textVisibility}-${currentAnnotation.textColumn}`
@@ -285,8 +288,12 @@ const AnnotationEditorControls = ({
               idPrefix={idPrefix}
               setConfig={
                 isEsqlBased
-                  ? ({ textVisibility, textField }) =>
-                      update<EsqlEventAnnotationConfig>({ textVisibility, textColumn: textField })
+                  ? (config) =>
+                      update<EsqlEventAnnotationConfig>({
+                        textVisibility: config.textVisibility,
+                        // Selecting "Field" sends no textField: keep the bound column
+                        ...('textField' in config ? { textColumn: config.textField } : {}),
+                      })
                   : update
               }
               currentConfig={
@@ -300,7 +307,43 @@ const AnnotationEditorControls = ({
               isQueryBased={isQueryBased || isEsqlBased}
             >
               {(textDecorationSelected) => {
-                if (textDecorationSelected !== 'field' || !dataView) {
+                if (textDecorationSelected !== 'field') {
+                  return null;
+                }
+                if (isEsqlBased) {
+                  const selectedColumn = currentAnnotation.textColumn;
+                  const columns = esql?.columns ?? [];
+                  return (
+                    <>
+                      <EuiSpacer size="xs" />
+                      <FieldPicker
+                        activeField={
+                          selectedColumn
+                            ? {
+                                label: selectedColumn,
+                                value: { type: 'field', field: selectedColumn },
+                              }
+                            : undefined
+                        }
+                        options={getColumnFieldOptions(columns)}
+                        onChoose={(choice: FieldOptionValue | undefined) => {
+                          if (choice) {
+                            update<EsqlEventAnnotationConfig>({
+                              textColumn: choice.field,
+                              textVisibility: true,
+                            });
+                          }
+                        }}
+                        fieldIsInvalid={Boolean(
+                          selectedColumn && !columns.some(({ name }) => name === selectedColumn)
+                        )}
+                        data-test-subj="lnsXY-annotation-esql-text-decoration-field-picker"
+                        autoFocus={!selectedColumn}
+                      />
+                    </>
+                  );
+                }
+                if (!dataView) {
                   return null;
                 }
                 const options = dataView.fields
