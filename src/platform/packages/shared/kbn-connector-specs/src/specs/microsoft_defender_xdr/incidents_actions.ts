@@ -50,20 +50,21 @@ export const incidentActions: Record<string, ActionDefinition<any, any, any>> = 
     isTool: true,
     scope: 'read',
     description:
-      'Retrieve full details for a single Microsoft Defender XDR incident by its numeric ID, ' +
-      'including all related alerts and affected assets. ' +
-      'Each alert in the response includes an evidence array with device evidence containing mdeDeviceId fields that can be passed to the Microsoft Defender for Endpoint connector.',
+      'Retrieve details for a single Microsoft Defender XDR incident by its numeric ID. ' +
+      'Set includeAlerts to true to expand related alerts and evidence (including mdeDeviceId for use with the Microsoft Defender for Endpoint connector). ' +
+      'Omit includeAlerts when you only need incident status, assignee, or classification to avoid oversized responses.',
     input: GetIncidentInputSchema,
-    handler: async (ctx, input: GetIncidentInput) =>
-      graphRequest(
+    handler: async (ctx, input: GetIncidentInput) => {
+      const params: Record<string, string> = {};
+      if (input.includeAlerts) params.$expand = 'alerts';
+      return graphRequest(
         ctx,
         'get',
         `/security/incidents/${encodeURIComponent(input.incidentId)}`,
         'getIncident',
-        {
-          params: { $expand: 'alerts' },
-        }
-      ),
+        { params }
+      );
+    },
   },
 
   updateIncident: {

@@ -411,12 +411,25 @@ describe('listIncidents handler', () => {
 // ---- getIncident handler ----
 
 describe('getIncident handler', () => {
-  it('calls GET /security/incidents/{id} with $expand=alerts', async () => {
-    const incident = { id: '42', status: 'active', alerts: [] };
+  it('calls GET /security/incidents/{id} without $expand by default', async () => {
+    const incident = { id: '42', status: 'active' };
     const client = makeClient(() => incident);
     const ctx = makeCtx(client);
     const action = MicrosoftDefenderXdr.actions?.getIncident;
     const result = await action?.handler(ctx as never, { incidentId: '42' });
+    expect(client.get).toHaveBeenCalledWith(
+      expect.stringContaining('/security/incidents/42'),
+      expect.objectContaining({ params: {} })
+    );
+    expect(result).toEqual(incident);
+  });
+
+  it('adds $expand=alerts when includeAlerts is true', async () => {
+    const incident = { id: '42', status: 'active', alerts: [] };
+    const client = makeClient(() => incident);
+    const ctx = makeCtx(client);
+    const action = MicrosoftDefenderXdr.actions?.getIncident;
+    const result = await action?.handler(ctx as never, { incidentId: '42', includeAlerts: true });
     expect(client.get).toHaveBeenCalledWith(
       expect.stringContaining('/security/incidents/42'),
       expect.objectContaining({ params: { $expand: 'alerts' } })

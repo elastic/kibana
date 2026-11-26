@@ -93,7 +93,7 @@ The following actions are available for the Microsoft Defender XDR connector. Ac
 | Action | Category | Required parameters | Optional parameters | Required Graph permission |
 |---|---|---|---|---|
 | `listIncidents` | Incident management | — | `filter`, `top`, `skip`, `includeAlerts` | `SecurityIncident.ReadWrite.All` |
-| `getIncident` | Incident management | `incidentId` | — | `SecurityIncident.ReadWrite.All` |
+| `getIncident` | Incident management | `incidentId` | `includeAlerts` | `SecurityIncident.ReadWrite.All` |
 | `updateIncident` _(API only)_ | Incident management | `incidentId` + at least one field | `status`, `assignedTo`, `classification`, `determination`, `severity`, `customTags` | `SecurityIncident.ReadWrite.All` |
 | `addIncidentComment` | Incident management | `incidentId`, `comment` | — | `SecurityIncident.ReadWrite.All` |
 | `mergeIncidents` _(API only)_ | Incident management | `incidentIds` (≥ 2 IDs) | `comment` | `SecurityIncident.ReadWrite.All` |
@@ -119,7 +119,7 @@ The following actions are available for the Microsoft Defender XDR connector. Ac
 :   Lists Defender XDR incidents with optional OData `$filter` expressions, pagination (`top`/`skip`), and optional expansion of related alerts. Use to get an overview of active threats or page through incident history.
 
 `getIncident`
-:   Retrieves full details for a single incident by its numeric ID, including all related alerts, evidence, and affected assets. Device evidence items include `mdeDeviceId` and `deviceDnsName`, which can be passed to the Microsoft Defender for Endpoint connector for containment or live-response actions.
+:   Retrieves details for a single incident by its numeric ID. Set `includeAlerts` to `true` to expand related alerts and evidence (device evidence items include `mdeDeviceId` and `deviceDnsName` for use with the Microsoft Defender for Endpoint connector). Omit `includeAlerts` when you only need the incident's status, assignee, or classification to avoid oversized responses.
 
 `updateIncident` _(API only)_
 :   Updates an incident — change `status` (`active`, `resolved`, `inProgress`, `redirected`), assign to an analyst (`assignedTo`), set `classification` and `determination`, adjust `severity`, or replace `customTags`. Only the fields you provide are changed. To add a comment, use `addIncidentComment` instead.

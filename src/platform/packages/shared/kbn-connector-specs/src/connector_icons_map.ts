@@ -460,6 +460,10 @@ export const ConnectorIconsMap: Map<
       () =>
         import(
           /* webpackChunkName: "connectorIconMicrosoftDefenderXdr" */ './specs/microsoft_defender_xdr/icon'
+        )
+    ),
+  ],
+  [
     '.microsoft_defender_endpoint2',
     lazy(
       () =>

@@ -329,7 +329,14 @@ export const GetIncidentInputSchema = lazySchema(() =>
       .string()
       .regex(/^\d+$/, 'incidentId must be a numeric string.')
       .max(MAX_ID_LENGTH)
-      .describe('Numeric incident ID, e.g. "29". Include alerts automatically.'),
+      .describe('Numeric incident ID, e.g. "29".'),
+    includeAlerts: z
+      .boolean()
+      .optional()
+      .describe(
+        'When true, expands the incident to include its related alerts and evidence. Defaults to false. ' +
+          'Omit when you only need the incident status, assignee, or classification to avoid oversized responses.'
+      ),
   })
 );
 export type GetIncidentInput = z.infer<typeof GetIncidentInputSchema>;
