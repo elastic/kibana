@@ -149,9 +149,42 @@ describe('token endpoints', () => {
       });
 
     const served = await post('https://auth.example.com/token');
+    const otherHost = await post('https://other.example.com/token');
     const asPath = await post('https://other.example.com//auth.example.com/token');
 
-    expect([served.status, asPath.status]).toEqual([200, 404]);
+    expect([served.status, otherHost.status, asPath.status]).toEqual([200, 404, 404]);
+  });
+
+  it('serves a scheme-relative token URL on the scheme a templated server defaults to', async () => {
+    const templated = {
+      ...spec,
+      servers: [
+        {
+          url: '{protocol}://api.example.com/v1',
+          variables: { protocol: { default: 'http', enum: ['http'] } },
+        },
+      ],
+      components: {
+        securitySchemes: {
+          oauth: {
+            type: 'oauth2',
+            flows: { clientCredentials: { tokenUrl: '//auth.example.com/token', scopes: {} } },
+          },
+        },
+      },
+    };
+    const { fetch: mockFetch } = createEmulatorFetch({ specs: [templated] });
+    const post = (url: string) =>
+      mockFetch(url, {
+        method: 'POST',
+        headers: FORM,
+        body: 'grant_type=client_credentials&client_id=id',
+      });
+
+    const http = await post('http://auth.example.com/token');
+    const https = await post('https://auth.example.com/token');
+
+    expect([http.status, https.status]).toEqual([200, 404]);
   });
 
   it('resolves relative token and refresh URLs against the server', async () => {

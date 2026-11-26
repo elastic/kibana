@@ -126,8 +126,11 @@ const resolveTokenUrl = (
   // Relative servers such as `/v1` have no origin, and their token URLs match on the path only.
   const [, origin = '', basePath = base] = ORIGIN.exec(base) ?? [];
   if (url.startsWith('//')) {
-    // A server such as `/v1` has no scheme to take, and the URL only matches by host with one.
-    const scheme = origin.split(':')[0] || 'https';
+    // A server such as `/v1` has no scheme to take, and the URL only matches by host with one. A
+    // scheme that is a variable, `{protocol}://…`, is the one its default names.
+    const templated = /^\{([^}]+)\}:\/\//.exec(base)?.[1];
+    const scheme =
+      (templated === undefined ? origin.split(':')[0] : variables[templated]?.default) || 'https';
     return { url: withoutQuery(`${scheme}:${url}`), variables };
   }
   const path = url.startsWith('/')
