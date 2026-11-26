@@ -42,11 +42,13 @@ export const useStartMigration = (onSuccess?: OnSuccess) => {
             settings: settings as { connectorId: string } | undefined,
           });
 
+          dispatch({ type: 'success' });
+          // When the service did not start the migration (e.g. missing privileges or no connector)
+          // it already told the user why, so there is nothing to confirm and the caller stays put.
           if (started) {
             notifications.toasts.addSuccess(WORKFLOWS_START_MIGRATION_SUCCESS);
+            onSuccess?.();
           }
-          dispatch({ type: 'success' });
-          onSuccess?.();
         } catch (err) {
           const apiError = err.body ?? err;
           notifications.toasts.addError(apiError, { title: WORKFLOWS_START_MIGRATION_ERROR });

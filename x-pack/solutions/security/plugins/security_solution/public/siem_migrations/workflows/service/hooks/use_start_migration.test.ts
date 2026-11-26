@@ -64,6 +64,18 @@ describe('useStartMigration (workflows)', () => {
     expect(onSuccess).toHaveBeenCalled();
   });
 
+  it('should not call onSuccess when the migration did not start', async () => {
+    mockStartWorkflowMigration.mockResolvedValue({ started: false });
+    const onSuccess = jest.fn();
+    const { result } = renderHook(() => useStartMigration(onSuccess));
+
+    await act(async () => {
+      result.current.startMigration(migrationStats, { connectorId: 'connector-1' });
+    });
+
+    expect(onSuccess).not.toHaveBeenCalled();
+  });
+
   it('should not show a success toast when the migration did not start', async () => {
     mockStartWorkflowMigration.mockResolvedValue({ started: false });
     const { result } = renderHook(() => useStartMigration());
