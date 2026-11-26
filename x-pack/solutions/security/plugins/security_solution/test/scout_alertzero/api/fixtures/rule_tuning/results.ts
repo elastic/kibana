@@ -12,7 +12,7 @@ import {
   createExceptionsApi,
   type DetectionsApi,
 } from '@kbn/security-solution-test-api-clients/scout';
-import type { WorkflowExecutionDto } from '@kbn/workflows';
+import { ExecutionStatus, type WorkflowExecutionDto } from '@kbn/workflows';
 import { pollFor } from '../helpers';
 import {
   expectStatus,
@@ -62,6 +62,15 @@ export const readBacktest = (review: WorkflowExecutionDto): BacktestOutcome | un
     proposed_alert_count: proposedAlertCount,
   };
 };
+
+/**
+ * True when the review ran its backtest. The review skips the step for a change that cannot alert
+ * on different events, and `record_preview_outcome` reports not succeeded either way.
+ */
+export const hasBacktestRun = ({ stepExecutions }: WorkflowExecutionDto): boolean =>
+  stepExecutions.some(
+    ({ stepId, status }) => stepId === 'run_previews' && status !== ExecutionStatus.SKIPPED
+  );
 
 export const readRule = async ({
   apiClient,

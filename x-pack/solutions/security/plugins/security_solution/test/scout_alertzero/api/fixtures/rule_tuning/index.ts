@@ -6,6 +6,22 @@
  */
 
 export { APPLIED_TAG, DISMISSED_TAG } from './common';
+export {
+  EXCEPTION_ENTRY,
+  EXCEPTION_PROPOSAL,
+  EXPECTED_BACKTEST_COUNTS,
+  FIXTURE_RISK_SCORE,
+  NARROWED_QUERY,
+  OVERBROAD_QUERY,
+  QUERY_PROPOSAL,
+  RISK_SCORE_PROPOSAL,
+} from './proposals';
+export {
+  runScriptedReviewCase,
+  startReviewHarness,
+  TEST_TIMEOUT_MS,
+  type ReviewCaseFixtures,
+} from './review_case';
 export { cleanUpReviewCase } from './cleanup';
 export {
   createWorkerServiceAccount,
@@ -23,6 +39,7 @@ export {
 } from './seed';
 export { driveReview } from './review';
 export {
+  hasBacktestRun,
   readBacktest,
   readRule,
   readRuleExceptionItems,

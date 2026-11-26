@@ -60,14 +60,23 @@ export const runCleanupSteps = async (
   }
 };
 
-/** Polls `read` until it returns a value and returns it, or throws with `what` after `timeoutMs`. */
+/**
+ * Polls `read` until it returns a value and returns it, or throws with `what` after `timeoutMs`.
+ * `onPoll` runs before each read, and a throw ends the wait, so a caller can fail fast on a state
+ * that will never lead to the value.
+ */
 export const pollFor = async <T>(
   what: string,
   read: () => Promise<T | undefined>,
-  { timeoutMs, intervalMs = 2_000 }: { timeoutMs: number; intervalMs?: number }
+  {
+    timeoutMs,
+    intervalMs = 2_000,
+    onPoll,
+  }: { timeoutMs: number; intervalMs?: number; onPoll?: () => void | Promise<void> }
 ): Promise<T> => {
   const deadline = Date.now() + timeoutMs;
   for (;;) {
+    await onPoll?.();
     const value = await read();
     if (value !== undefined) {
       return value;

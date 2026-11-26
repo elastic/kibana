@@ -23,6 +23,9 @@ import {
   type RuleTuningSpaceArgs,
 } from './common';
 
+/** Runs before each poll of a wait, and throws to fail the wait early. */
+type PollHook = () => void | Promise<void>;
+
 /** The execution, or undefined while its status is transient. */
 const getExecution = async ({
   apiClient,
@@ -47,7 +50,8 @@ export const waitForReviewExecution = ({
   headers,
   spaceId,
   timeoutMs,
-}: RuleTuningSpaceArgs & { timeoutMs: number }): Promise<string> =>
+  onPoll,
+}: RuleTuningSpaceArgs & { timeoutMs: number; onPoll?: PollHook }): Promise<string> =>
   pollFor(
     'the worker to start a rule tuning review',
     async () => {
@@ -66,7 +70,7 @@ export const waitForReviewExecution = ({
       }
       return reviews[0]?.id;
     },
-    { timeoutMs }
+    { timeoutMs, onPoll }
   );
 
 /** Waits for the review to open its investigation, and returns the conversation id. */
@@ -76,7 +80,12 @@ export const waitForInvestigation = ({
   spaceId,
   executionId,
   timeoutMs,
-}: RuleTuningSpaceArgs & { executionId: string; timeoutMs: number }): Promise<string> =>
+  onPoll,
+}: RuleTuningSpaceArgs & {
+  executionId: string;
+  timeoutMs: number;
+  onPoll?: PollHook;
+}): Promise<string> =>
   pollFor(
     `review ${executionId} to open its investigation`,
     async () => {
@@ -97,7 +106,7 @@ export const waitForInvestigation = ({
       )?.conversation_id;
       return typeof conversationId === 'string' ? conversationId : undefined;
     },
-    { timeoutMs }
+    { timeoutMs, onPoll }
   );
 
 /** Approves or dismisses the investigation's next pending proposal, and returns its id. */
@@ -109,11 +118,13 @@ export const decidePendingProposal = async ({
   decision,
   decidedIds = [],
   timeoutMs,
+  onPoll,
 }: RuleTuningSpaceArgs & {
   conversationId: string;
   decision: 'approve' | 'dismiss';
   decidedIds?: string[];
   timeoutMs: number;
+  onPoll?: PollHook;
 }): Promise<string> => {
   let lastConflict: string | undefined;
   try {
@@ -157,7 +168,7 @@ export const decidePendingProposal = async ({
         expectStatus(`${decision} proposal ${proposal.id}`, decided);
         return proposal.id;
       },
-      { timeoutMs }
+      { timeoutMs, onPoll }
     );
   } catch (error) {
     if (lastConflict === undefined) {
@@ -178,32 +189,49 @@ export const driveReview = async ({
   apiClient,
   headers,
   spaceId,
+  decisionHeaders = headers,
   decisions,
   stepTimeoutMs,
   decisionTimeoutMs = stepTimeoutMs,
+  onPoll,
+  beforeDecision,
 }: RuleTuningSpaceArgs & {
+  /** Who lists and decides the proposals, when not the user that reads the review. */
+  decisionHeaders?: Record<string, string>;
   decisions: Array<'approve' | 'dismiss'>;
   /** Budget of the review's start, its investigation and its end. */
   stepTimeoutMs: number;
   /** Budget of each decision, which waits for the proposal to exist. Defaults to a step. */
   decisionTimeoutMs?: number;
+  /** Runs before each poll of every wait. */
+  onPoll?: PollHook;
+  /** Runs before the decision at `index` is looked for, e.g. to check what has not happened yet. */
+  beforeDecision?: (index: number) => void | Promise<void>;
 }): Promise<WorkflowExecutionDto> => {
   const space = { apiClient, headers, spaceId };
-  const executionId = await waitForReviewExecution({ ...space, timeoutMs: stepTimeoutMs });
+  const executionId = await waitForReviewExecution({
+    ...space,
+    timeoutMs: stepTimeoutMs,
+    onPoll,
+  });
   const conversationId = await waitForInvestigation({
     ...space,
     executionId,
     timeoutMs: stepTimeoutMs,
+    onPoll,
   });
   const decidedIds: string[] = [];
-  for (const decision of decisions) {
+  for (const [index, decision] of decisions.entries()) {
+    await beforeDecision?.(index);
     decidedIds.push(
       await decidePendingProposal({
         ...space,
+        headers: decisionHeaders,
         conversationId,
         decision,
         decidedIds,
         timeoutMs: decisionTimeoutMs,
+        onPoll,
       })
     );
   }
