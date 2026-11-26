@@ -102,20 +102,6 @@ export const ConfigPanelEsqlAnnotation = ({
           required
         />
       )}
-      {isRange && (
-        // Points choose their text under Text decoration; ranges have no text decoration
-        <ColumnPicker
-          label={i18n.translate('eventAnnotationComponents.esqlAnnotation.textColumnLabel', {
-            defaultMessage: 'Text field',
-          })}
-          columns={columns}
-          value={annotation.textColumn ?? ''}
-          data-test-subj="lnsXY-annotation-esql-textColumn"
-          onChange={(textColumn) =>
-            onChange({ ...annotation, textColumn: textColumn || undefined })
-          }
-        />
-      )}
     </>
   );
 };

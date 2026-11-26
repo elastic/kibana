@@ -234,15 +234,72 @@ describe('ES|QL annotation editor', () => {
     );
   });
 
-  it('keeps the text field picker for ranges, which have no text decoration', () => {
-    renderEditor({
+  describe('label field of a range', () => {
+    const range = {
       ...annotation,
       key: { type: 'range' },
       endTimeColumn: 'end',
-    } as EsqlEventAnnotationConfig);
+    } as EsqlEventAnnotationConfig;
 
-    expect(screen.getByTestId('lnsXY-annotation-esql-textColumn')).toBeInTheDocument();
-    expect(screen.queryByTestId('lns-lineMarker-text-visibility')).not.toBeInTheDocument();
+    it('is picked in Appearance below Name, since ranges have no text decoration', () => {
+      renderEditor(range);
+
+      expect(screen.queryByTestId('lns-lineMarker-text-visibility')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('lnsXY-annotation-esql-textColumn')).not.toBeInTheDocument();
+      const picker = screen.getByTestId('lnsXY-annotation-esql-range-label-field-picker');
+      expect(within(picker).getByRole('combobox')).toHaveValue('version');
+      // document order: the name input comes first, then the label field
+      const order = Array.from(
+        document.querySelectorAll(
+          '[data-test-subj="name-input"], [data-test-subj="lnsXY-annotation-esql-range-label-field-picker"]'
+        )
+      ).map((element) => element.getAttribute('data-test-subj'));
+      expect(order).toEqual(['name-input', 'lnsXY-annotation-esql-range-label-field-picker']);
+    });
+
+    it('binds the chosen column as the label and keeps the rest of the range', async () => {
+      const onChange = renderEditor({ ...range, textColumn: undefined });
+
+      const picker = screen.getByTestId('lnsXY-annotation-esql-range-label-field-picker');
+      fireEvent.click(within(picker).getByRole('combobox'));
+      fireEvent.click(await screen.findByTestId('lnsXY-annotation-fieldOption-version'));
+
+      await waitFor(() =>
+        expect(onChange).toHaveBeenLastCalledWith(
+          expect.objectContaining({
+            key: { type: 'range' },
+            endTimeColumn: 'end',
+            textColumn: 'version',
+          })
+        )
+      );
+    });
+
+    it('clears the label column', async () => {
+      const onChange = renderEditor(range);
+
+      fireEvent.click(
+        within(screen.getByTestId('lnsXY-annotation-esql-range-label-field-picker')).getByTestId(
+          'comboBoxClearButton'
+        )
+      );
+
+      await waitFor(() =>
+        expect(onChange).toHaveBeenLastCalledWith(
+          expect.objectContaining({ textColumn: undefined })
+        )
+      );
+    });
+
+    it('marks a label column missing from the result as invalid', () => {
+      renderEditor({ ...range, textColumn: 'gone' } as EsqlEventAnnotationConfig);
+
+      expect(
+        within(screen.getByTestId('lnsXY-annotation-esql-range-label-field-picker')).getByRole(
+          'combobox'
+        )
+      ).toHaveAttribute('aria-invalid', 'true');
+    });
   });
 
   describe('tooltip fields', () => {

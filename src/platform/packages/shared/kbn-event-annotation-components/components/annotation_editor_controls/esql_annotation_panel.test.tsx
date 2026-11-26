@@ -82,16 +82,11 @@ describe('ConfigPanelEsqlAnnotation', () => {
     expect(onChange).toHaveBeenLastCalledWith({ ...annotation, timeColumn: 'end' });
   });
 
-  it('edits the text field of a range, which has no text decoration', () => {
-    const range: EsqlEventAnnotationConfig = {
-      ...annotation,
-      key: { type: 'range' },
-      endTimeColumn: 'end',
-    };
-    const { onChange } = renderPanel(range);
+  it('does not render a text field in the placement section for ranges; the label field lives in Appearance', () => {
+    renderPanel({ ...annotation, key: { type: 'range' }, endTimeColumn: 'end' });
 
-    fireEvent.change(screen.getByLabelText('Text field'), { target: { value: '' } });
-    expect(onChange).toHaveBeenLastCalledWith({ ...range, textColumn: undefined });
+    expect(screen.queryByLabelText('Text field')).not.toBeInTheDocument();
+    expect(screen.queryByLabelText('Label field')).not.toBeInTheDocument();
   });
 
   it('edits the end column of a range without changing its fill or query', () => {

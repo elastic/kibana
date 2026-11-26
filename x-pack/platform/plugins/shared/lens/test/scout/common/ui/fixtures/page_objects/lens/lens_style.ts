@@ -441,8 +441,10 @@ export class LensStyle {
       );
     }
     if (opts.textColumn && opts.endTimeColumn) {
-      // Ranges have no text decoration, so their text field is a plain picker next to the time fields
-      await this.selectEsqlAnnotationColumn('lnsXY-annotation-esql-textColumn', opts.textColumn);
+      // Ranges have no text decoration: their label field is picked in Appearance, below Name
+      await this.page.components
+        .comboBox('lnsXY-annotation-esql-range-label-field-picker')
+        .setSelectedOptions([opts.textColumn]);
     } else if (opts.textColumn) {
       // Points choose their text under Text decoration -> Field
       await this.setAnnotationTextVisibility('field');

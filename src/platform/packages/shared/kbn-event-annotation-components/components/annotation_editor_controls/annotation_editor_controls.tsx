@@ -270,6 +270,38 @@ const AnnotationEditorControls = ({
             update({ label: value });
           }}
         />
+        {isRange && isEsqlBased && (
+          // Ranges have no text decoration, so their label comes straight from a result column
+          <EuiFormRow
+            label={i18n.translate('eventAnnotationComponents.esqlAnnotation.labelFieldLabel', {
+              defaultMessage: 'Label field',
+            })}
+            display="columnCompressed"
+            fullWidth
+          >
+            <FieldPicker
+              activeField={
+                currentAnnotation.textColumn
+                  ? {
+                      label: currentAnnotation.textColumn,
+                      value: { type: 'field', field: currentAnnotation.textColumn },
+                    }
+                  : undefined
+              }
+              options={getColumnFieldOptions(esql?.columns ?? [], 'lnsXY-annotation-fieldOption-')}
+              onChoose={(choice: FieldOptionValue | undefined) => {
+                if (choice) update<EsqlEventAnnotationConfig>({ textColumn: choice.field });
+              }}
+              onDelete={() => update<EsqlEventAnnotationConfig>({ textColumn: undefined })}
+              isClearable
+              fieldIsInvalid={Boolean(
+                currentAnnotation.textColumn &&
+                  !(esql?.columns ?? []).some(({ name }) => name === currentAnnotation.textColumn)
+              )}
+              data-test-subj="lnsXY-annotation-esql-range-label-field-picker"
+            />
+          </EuiFormRow>
+        )}
         {!isRange && (
           <>
             <IconSelectSetting<AvailableAnnotationIcon>
