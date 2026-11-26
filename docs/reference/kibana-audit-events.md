@@ -54,7 +54,7 @@ A `service_account_assume` event marks the start of a workload run that executes
     ```
 
 $$$service-account-assume-failures$$$
-A `failure` event means {{kib}} couldn't run the workload as its service account, or couldn't keep running it. {{kib}} doesn't log a temporary failure, such as an unavailable {{es}} cluster. It logs a permanent failure once for each run. A failure at the start is logged without a request, so its correlation ID comes from the active tracing span instead of the run.
+A `failure` event means {{kib}} couldn't run the workload as its service account, or couldn't keep running it. {{kib}} doesn't log a temporary failure, such as an unavailable {{es}} cluster. It logs a permanent failure once for each run. A failure at the start is logged without a request. On {{stack}}, its `trace.id` comes from the active tracing span instead of the run. On {{serverless-full}}, it has no `http.request.id`, but can carry the active span's trace ID in the OpenTelemetry trace context.
 
 When the run starts, a failure means one of these:
 
