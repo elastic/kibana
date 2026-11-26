@@ -1678,20 +1678,6 @@ const getReplayTrigger = (
     : undefined;
 };
 
-const pickByWeight = <T extends { weight: number }>(
-  random: () => number,
-  items: readonly T[]
-): T => {
-  let threshold = random() * items.reduce((sum, { weight }) => sum + weight, 0);
-  for (const item of items) {
-    threshold -= item.weight;
-    if (threshold < 0) {
-      return item;
-    }
-  }
-  return items[items.length - 1];
-};
-
 const DAY_MS = 24 * HOUR_MS;
 // Traffic follows the day, from 35% of its peak at 04:00 UTC up to the peak at 16:00, and drifts
 // down by up to a quarter from one 10 minutes to the next. Sessions are generated at the peak rate
@@ -1912,9 +1898,10 @@ export const generateEdotBrowserSessions = (
         ): EdotBrowserEvent[] => {
           // The version comes from the session's number, so that a session in progress keeps it,
           // and so does a run that only simulates it to find its length
-          const { app, site } = pickByWeight(
+          const { app, site } = edotBrowser.pickWeighted(
             createSeededRandom(`${seed}:${sessionKey}:${index}:version`),
-            releases
+            releases,
+            (release) => release.weight
           );
           const random = createSeededRandom(`${seed}:${sessionKey}:${index}`);
           const pageViews = minPageViews + Math.floor(random() * (maxPageViews - minPageViews + 1));
