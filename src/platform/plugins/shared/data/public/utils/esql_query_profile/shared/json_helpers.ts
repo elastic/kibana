@@ -10,3 +10,7 @@
 /** True for a plain object, which is what a logged request body or a profile status is. */
 export const isRecord = (value: unknown): value is Record<string, unknown> =>
   Boolean(value) && typeof value === 'object' && !Array.isArray(value);
+
+/** The ES|QL text of a logged request body, when it has one. */
+export const readRequestQuery = (json: unknown): string | undefined =>
+  isRecord(json) && typeof json.query === 'string' ? json.query : undefined;

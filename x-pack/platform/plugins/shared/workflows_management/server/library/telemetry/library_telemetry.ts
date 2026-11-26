@@ -94,7 +94,7 @@ const buildTemplateInstalledEvent = (
 ): TemplateInstalledEvent => {
   // Only a catalog template's form is described: the field names and connector
   // types in an uploaded file are free text.
-  const describeForm = origin === 'install';
+  const describeForm = origin === 'catalog';
   const { templateSlug, templateVersion }: TemplateOriginFields = storedOrigin ?? {};
   const catalogTemplate = findCatalogTemplate(library.getCachedTemplates(), templateSlug);
 

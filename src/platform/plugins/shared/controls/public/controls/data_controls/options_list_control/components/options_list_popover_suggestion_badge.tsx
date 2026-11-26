@@ -23,7 +23,8 @@ export const OptionsListPopoverSuggestionBadge = ({ documentCount }: { documentC
         position={'right'}
       >
         <EuiText
-          tabIndex={0}
+          // Not tabbable: the badge is `aria-hidden` and sits inside a `role="option"`; the count is announced by the screen reader text below
+          tabIndex={-1}
           size="xs"
           aria-hidden={true}
           className="eui-textNumber"

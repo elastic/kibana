@@ -19,6 +19,7 @@ exports[`<ToolbarPopover /> is rendered 1`] = `
         test
       </span>
       <span
+        aria-hidden="true"
         color="inherit"
         data-euiicon-type="chevronSingleDown"
       />
