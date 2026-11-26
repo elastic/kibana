@@ -817,8 +817,9 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOutp
       managedOtlpUrl: cloud?.managedOtlp?.url,
     }
   );
-  // the client key is saved under `secrets`, which a preconfigured output allows editing separately
-  const isOtlpTlsKeyPemDisabled = isOtlpExporterDisabled || isDisabled('secrets');
+  // the client key is saved under `secrets` only, which a preconfigured output allows editing
+  // separately from the exporter
+  const isOtlpTlsKeyPemDisabled = isDisabled('secrets');
   const otlpTlsInputs = useOtlpTlsInputs(
     output && isOtlpOutput(output) ? output : undefined,
     isOtlp,

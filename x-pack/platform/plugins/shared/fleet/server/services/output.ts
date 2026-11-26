@@ -135,6 +135,7 @@ import {
   validateOutputSslPaths,
   ensureNoDuplicateSecrets,
   validateKafkaAuthMethods,
+  validateOtlpTlsCertificatesHaveNoPrivateKey,
   validateOutputServerless,
 } from './outputs/validators';
 
@@ -2152,6 +2153,7 @@ class OutputService {
       }
       ensureNoDuplicateSecrets(output);
       validateKafkaAuthMethods(output, keptAuthMethods);
+      validateOtlpTlsCertificatesHaveNoPrivateKey(output);
     } catch (e) {
       if (isPreconfigured && e instanceof OutputInvalidError) {
         appContextService.getLogger().warn(`Preconfigured output failed validation: ${e.message}`);

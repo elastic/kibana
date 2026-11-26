@@ -2283,6 +2283,26 @@ describe('Output Service', () => {
           expect(soClient.create).toHaveBeenCalled();
         });
 
+        it('rejects a private key in the client certificate, which is stored in plain text', async () => {
+          await expect(
+            outputService.create(
+              getMockedSoClient(),
+              esClientMock,
+              {
+                ...newOtlpOutput,
+                otlp_exporter: {
+                  ...newOtlpOutput.otlp_exporter,
+                  tls: {
+                    cert_pem:
+                      '-----BEGIN CERTIFICATE-----\nMIIB\n-----END CERTIFICATE-----\n-----BEGIN PRIVATE KEY-----\nMIIE\n-----END PRIVATE KEY-----',
+                  },
+                },
+              },
+              { id: 'output-test' }
+            )
+          ).rejects.toThrow('otlp_exporter.tls.cert_pem cannot contain a private key');
+        });
+
         it('accepts TLS secrets when secret storage is enabled', async () => {
           mockedIsOutputSecretStorageEnabled.mockResolvedValue(true);
           const soClient = getMockedSoClient();
@@ -5647,6 +5667,20 @@ describe('Output Service', () => {
           );
 
           expect(soClient.update).toHaveBeenCalled();
+        });
+
+        it('rejects a private key in the certificate authority, which is stored in plain text', async () => {
+          await expect(
+            outputService.update(getMockedSoClient({}), esClientMock, 'existing-otlp-output', {
+              otlp_exporter: {
+                endpoint: 'https://otel.example.com:4317',
+                protocol: 'grpc',
+                tls: {
+                  ca_pem: '-----BEGIN RSA PRIVATE KEY-----\nMIIE\n-----END RSA PRIVATE KEY-----',
+                },
+              },
+            })
+          ).rejects.toThrow('otlp_exporter.tls.ca_pem cannot contain a private key');
         });
 
         it('accepts a TLS secret when secret storage is enabled', async () => {

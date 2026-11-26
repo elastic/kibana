@@ -48,8 +48,9 @@ import {
   validateOtlpTlsFilePath,
   validateOtlpTlsKeyPemSecret,
   validateOtlpTlsPairedSettings,
-  validateOtlpTlsPem,
-  validateOtlpTlsPemSecret,
+  validateOtlpTlsCertificatePem,
+  validateOtlpTlsPrivateKeyPem,
+  validateOtlpTlsPrivateKeyPemSecret,
   validateOtlpTlsVersion,
   validateSSLCertificate,
   validateSSLKey,
@@ -926,28 +927,77 @@ describe('OTLP validators', () => {
     const pem = (label: string, body = 'MIIB') =>
       `-----BEGIN ${label}-----\n${body}\n-----END ${label}-----`;
 
-    it('validateOtlpTlsPem should accept PEM content up to 65536 characters', () => {
-      expect(validateOtlpTlsPem('')).toBeUndefined();
-      expect(validateOtlpTlsPem(pem('CERTIFICATE'))).toBeUndefined();
-      expect(validateOtlpTlsPem(`${pem('CERTIFICATE')}\n${pem('CERTIFICATE')}\n`)).toBeUndefined();
-      expect(validateOtlpTlsPem(pem('CERTIFICATE', 'a'.repeat(65537)))).toEqual([
+    it('validateOtlpTlsCertificatePem should accept CERTIFICATE blocks up to 65536 characters', () => {
+      expect(validateOtlpTlsCertificatePem('')).toBeUndefined();
+      expect(validateOtlpTlsCertificatePem(pem('CERTIFICATE'))).toBeUndefined();
+      // a bundle, with the subject lines that tools often add between the blocks
+      expect(
+        validateOtlpTlsCertificatePem(
+          `subject=CN = ca\n${pem('CERTIFICATE')}\nsubject=CN = intermediate\n${pem(
+            'CERTIFICATE'
+          )}\n`
+        )
+      ).toBeUndefined();
+      expect(validateOtlpTlsCertificatePem(pem('CERTIFICATE', 'a'.repeat(65537)))).toEqual([
         'Must be at most 65536 characters',
       ]);
     });
 
-    it('validateOtlpTlsPem should reject a value that is not PEM, such as a file path', () => {
-      expect(validateOtlpTlsPem('/etc/ssl/ca.pem')).toEqual([
-        expect.stringContaining('Paste the PEM content'),
-      ]);
-      expect(validateOtlpTlsPem('-----BEGIN CERTIFICATE-----\nMIIB')).toHaveLength(1);
+    it('validateOtlpTlsCertificatePem should reject a value that is not PEM, such as a file path', () => {
+      const invalid = [expect.stringContaining('Paste the PEM content')];
+      expect(validateOtlpTlsCertificatePem('/etc/ssl/ca.pem')).toEqual(invalid);
+      expect(validateOtlpTlsCertificatePem('-----BEGIN CERTIFICATE-----\nMIIB')).toEqual(invalid);
       expect(
-        validateOtlpTlsPem('-----END CERTIFICATE-----\n-----BEGIN CERTIFICATE-----')
-      ).toHaveLength(1);
+        validateOtlpTlsCertificatePem('-----END CERTIFICATE-----\n-----BEGIN CERTIFICATE-----')
+      ).toEqual(invalid);
+      // mismatched labels, and a body that is not base64
+      expect(
+        validateOtlpTlsCertificatePem(
+          '-----BEGIN CERTIFICATE-----\nMIIB\n-----END PRIVATE KEY-----'
+        )
+      ).toEqual(invalid);
+      expect(validateOtlpTlsCertificatePem(pem('CERTIFICATE', 'not base64!'))).toEqual(invalid);
     });
 
-    it('validateOtlpTlsPemSecret should accept a stored secret', () => {
-      expect(validateOtlpTlsPemSecret({ id: 'secret-id' })).toBeUndefined();
-      expect(validateOtlpTlsPemSecret('not a key')).toHaveLength(1);
+    it('validateOtlpTlsCertificatePem should reject a private key, which would be saved in plain text', () => {
+      ['PRIVATE KEY', 'RSA PRIVATE KEY', 'EC PRIVATE KEY'].forEach((label) =>
+        expect(validateOtlpTlsCertificatePem(`${pem('CERTIFICATE')}\n${pem(label)}`)).toEqual([
+          expect.stringContaining('Remove the private key: this setting is saved in plain text'),
+        ])
+      );
+    });
+
+    it('validateOtlpTlsCertificatePem should reject other blocks', () => {
+      expect(validateOtlpTlsCertificatePem(pem('X509 CRL'))).toEqual([
+        'Only CERTIFICATE blocks are supported, not X509 CRL',
+      ]);
+    });
+
+    it('validateOtlpTlsPrivateKeyPem should accept the private keys that the collector loads', () => {
+      ['PRIVATE KEY', 'RSA PRIVATE KEY', 'EC PRIVATE KEY'].forEach((label) =>
+        expect(validateOtlpTlsPrivateKeyPem(pem(label))).toBeUndefined()
+      );
+      // the parameters that openssl writes before an EC key are ignored
+      expect(
+        validateOtlpTlsPrivateKeyPem(`${pem('EC PARAMETERS')}\n${pem('EC PRIVATE KEY')}`)
+      ).toBeUndefined();
+    });
+
+    it('validateOtlpTlsPrivateKeyPem should reject a value without a key, and encrypted keys', () => {
+      expect(validateOtlpTlsPrivateKeyPem(pem('CERTIFICATE'))).toEqual([
+        expect.stringContaining('Paste a private key'),
+      ]);
+      expect(validateOtlpTlsPrivateKeyPem(pem('ENCRYPTED PRIVATE KEY'))).toEqual([
+        'Encrypted private keys are not supported. Paste the decrypted key.',
+      ]);
+      expect(validateOtlpTlsPrivateKeyPem('not a key')).toEqual([
+        expect.stringContaining('Paste the PEM content'),
+      ]);
+    });
+
+    it('validateOtlpTlsPrivateKeyPemSecret should accept a stored secret', () => {
+      expect(validateOtlpTlsPrivateKeyPemSecret({ id: 'secret-id' })).toBeUndefined();
+      expect(validateOtlpTlsPrivateKeyPemSecret('not a key')).toHaveLength(1);
     });
 
     it('validateOtlpTlsKeyPemSecret should require a replacement of a saved key', () => {

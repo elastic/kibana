@@ -7,7 +7,12 @@
 
 import { OutputInvalidError } from '../../errors';
 
-import { validateKafkaAuthMethods, validateKafkaKerberos, validateKafkaOAuth2 } from './validators';
+import {
+  validateKafkaAuthMethods,
+  validateKafkaKerberos,
+  validateKafkaOAuth2,
+  validateOtlpTlsCertificatesHaveNoPrivateKey,
+} from './validators';
 
 const kafkaOutput = (fields: Record<string, unknown>) =>
   ({
@@ -250,5 +255,45 @@ describe('validateKafkaKerberos', () => {
         'secrets.kerberos.password is required when kerberos.auth_type is password'
       )
     );
+  });
+});
+
+describe('validateOtlpTlsCertificatesHaveNoPrivateKey', () => {
+  const block = (label: string) => `-----BEGIN ${label}-----\nMIIB\n-----END ${label}-----`;
+  const otlpOutput = (tls: Record<string, unknown> | null) =>
+    ({
+      name: 'otlp',
+      type: 'otlp',
+      otlp_exporter: { endpoint: 'collector.example.com:4317', protocol: 'grpc', tls },
+    } as any);
+
+  it('accepts certificates, cleared settings and outputs without TLS', () => {
+    expect(() =>
+      validateOtlpTlsCertificatesHaveNoPrivateKey(
+        otlpOutput({ ca_pem: block('CERTIFICATE'), cert_pem: block('CERTIFICATE') })
+      )
+    ).not.toThrow();
+    expect(() =>
+      validateOtlpTlsCertificatesHaveNoPrivateKey(otlpOutput({ ca_pem: null, cert_pem: null }))
+    ).not.toThrow();
+    expect(() => validateOtlpTlsCertificatesHaveNoPrivateKey(otlpOutput(null))).not.toThrow();
+    expect(() =>
+      validateOtlpTlsCertificatesHaveNoPrivateKey(kafkaOutput({ auth_type: 'none' }))
+    ).not.toThrow();
+  });
+
+  it.each([
+    ['ca_pem', 'PRIVATE KEY'],
+    ['cert_pem', 'RSA PRIVATE KEY'],
+    ['cert_pem', 'EC PRIVATE KEY'],
+    ['cert_pem', 'ENCRYPTED PRIVATE KEY'],
+  ])('rejects a %s with a %s block', (field, label) => {
+    const validate = () =>
+      validateOtlpTlsCertificatesHaveNoPrivateKey(
+        otlpOutput({ [field]: `${block('CERTIFICATE')}\n${block(label)}` })
+      );
+
+    expect(validate).toThrow(OutputInvalidError);
+    expect(validate).toThrow(`otlp_exporter.tls.${field} cannot contain a private key`);
   });
 });

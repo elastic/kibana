@@ -1198,39 +1198,139 @@ const otlpTooLongError = (max: number) => [
   }),
 ];
 
-// the collector parses the PEM blocks: a value without one, such as a file path, cannot be loaded
-const PEM_BEGIN_REGEX = /-----BEGIN [^-\r\n]+-----/;
-const PEM_END_REGEX = /-----END [^-\r\n]+-----/;
+interface PemBlock {
+  label: string;
+  body: string;
+}
+
+const PEM_BEGIN = '-----BEGIN ';
+const PEM_END = '-----END ';
+const PEM_DASHES = '-----';
+const PEM_LABEL_REGEX = /^[A-Z0-9 ]+$/;
+// the body of a block is base64, possibly over several lines
+const PEM_BODY_REGEX = /^[A-Za-z0-9+/=\s]+$/;
 
 /**
- * Whether the value has a PEM block: a BEGIN line followed by an END line. Each delimiter is
- * searched once, so a large value without a matching END line is checked in linear time.
+ * The PEM blocks of the value, or `undefined` if a block is malformed: a BEGIN line without the END
+ * line of the same label, or a body that is not base64. Text outside the blocks, such as the
+ * subject lines of a certificate bundle, is ignored, as the collector does. The value is read once
+ * from start to end, so a large malformed value is checked in linear time.
  */
-const hasPemBlock = (value: string): boolean => {
-  const begin = value.search(PEM_BEGIN_REGEX);
-  return begin >= 0 && PEM_END_REGEX.test(value.slice(begin));
+const parsePemBlocks = (value: string): PemBlock[] | undefined => {
+  const blocks: PemBlock[] = [];
+  let position = 0;
+  while (true) {
+    const begin = value.indexOf(PEM_BEGIN, position);
+    if (begin < 0) {
+      return blocks;
+    }
+    const labelStart = begin + PEM_BEGIN.length;
+    const labelEnd = value.indexOf(PEM_DASHES, labelStart);
+    if (labelEnd < 0) {
+      return undefined;
+    }
+    const label = value.slice(labelStart, labelEnd);
+    const bodyStart = labelEnd + PEM_DASHES.length;
+    const end = value.indexOf(PEM_END, bodyStart);
+    if (end < 0) {
+      return undefined;
+    }
+    const endLabelStart = end + PEM_END.length;
+    const endLabelEnd = value.indexOf(PEM_DASHES, endLabelStart);
+    const body = value.slice(bodyStart, end);
+    if (
+      !PEM_LABEL_REGEX.test(label) ||
+      endLabelEnd < 0 ||
+      value.slice(endLabelStart, endLabelEnd) !== label ||
+      !PEM_BODY_REGEX.test(body)
+    ) {
+      return undefined;
+    }
+    blocks.push({ label, body });
+    position = endLabelEnd + PEM_DASHES.length;
+  }
 };
 
-/** An optional PEM-encoded certificate or key. */
-export function validateOtlpTlsPem(value: string) {
+const isPrivateKeyLabel = (label: string) =>
+  label === 'PRIVATE KEY' || label.endsWith(' PRIVATE KEY');
+
+const pemInvalidError = () => [
+  i18n.translate('xpack.fleet.settings.outputForm.otlpTlsPemInvalid', {
+    defaultMessage:
+      'Paste the PEM content, from "-----BEGIN" to "-----END". Use the file setting for a path to a file.',
+  }),
+];
+
+/** The blocks of an optional PEM value, or the errors of a value that is too long or malformed. */
+const getPemBlocks = (value: string): { blocks?: PemBlock[]; errors?: string[] } => {
   const pem = value?.trim() ?? '';
   if (!pem) {
-    return;
+    return {};
   }
   if (pem.length > OTLP_TLS_PEM_MAX_LENGTH) {
-    return otlpTooLongError(OTLP_TLS_PEM_MAX_LENGTH);
+    return { errors: otlpTooLongError(OTLP_TLS_PEM_MAX_LENGTH) };
   }
-  if (!hasPemBlock(pem)) {
+  const blocks = parsePemBlocks(pem);
+  return blocks?.length ? { blocks } : { errors: pemInvalidError() };
+};
+
+/**
+ * An optional PEM-encoded certificate authority or client certificate: CERTIFICATE blocks only. A
+ * private key is rejected explicitly: these settings are saved in plain text, unlike the client
+ * key, which is saved as a secret.
+ */
+export function validateOtlpTlsCertificatePem(value: string) {
+  const { blocks, errors } = getPemBlocks(value);
+  if (!blocks) {
+    return errors;
+  }
+  if (blocks.some(({ label }) => isPrivateKeyLabel(label))) {
     return [
-      i18n.translate('xpack.fleet.settings.outputForm.otlpTlsPemInvalid', {
+      i18n.translate('xpack.fleet.settings.outputForm.otlpTlsCertificatePemPrivateKey', {
         defaultMessage:
-          'Paste the PEM content, from "-----BEGIN" to "-----END". Use the file setting for a path to a file.',
+          'Remove the private key: this setting is saved in plain text. Put the client key in "Client key, PEM", which is saved as a secret.',
+      }),
+    ];
+  }
+  const otherBlock = blocks.find(({ label }) => label !== 'CERTIFICATE');
+  if (otherBlock) {
+    return [
+      i18n.translate('xpack.fleet.settings.outputForm.otlpTlsCertificatePemOtherBlock', {
+        defaultMessage: 'Only CERTIFICATE blocks are supported, not {label}',
+        values: { label: otherBlock.label },
       }),
     ];
   }
 }
 
-export const validateOtlpTlsPemSecret = toSecretValidator(validateOtlpTlsPem);
+/**
+ * An optional PEM-encoded client key: a PRIVATE KEY block, which can be PKCS #8, PKCS #1 (RSA) or
+ * SEC 1 (EC). Other blocks, such as EC PARAMETERS, are ignored, as the collector does. Encrypted
+ * keys are rejected: the collector cannot decrypt them.
+ */
+export function validateOtlpTlsPrivateKeyPem(value: string) {
+  const { blocks, errors } = getPemBlocks(value);
+  if (!blocks) {
+    return errors;
+  }
+  const keyBlock = blocks.find(({ label }) => isPrivateKeyLabel(label));
+  if (!keyBlock) {
+    return [
+      i18n.translate('xpack.fleet.settings.outputForm.otlpTlsKeyPemNoKey', {
+        defaultMessage: 'Paste a private key, from "-----BEGIN PRIVATE KEY-----" to its END line',
+      }),
+    ];
+  }
+  if (keyBlock.label === 'ENCRYPTED PRIVATE KEY') {
+    return [
+      i18n.translate('xpack.fleet.settings.outputForm.otlpTlsKeyPemEncrypted', {
+        defaultMessage: 'Encrypted private keys are not supported. Paste the decrypted key.',
+      }),
+    ];
+  }
+}
+
+export const validateOtlpTlsPrivateKeyPemSecret = toSecretValidator(validateOtlpTlsPrivateKeyPem);
 
 /**
  * The client key of the OTLP exporter. A saved key that is being replaced needs a new value: the
@@ -1248,7 +1348,7 @@ export function validateOtlpTlsKeyPemSecret(
       }),
     ];
   }
-  return validateOtlpTlsPemSecret(value);
+  return validateOtlpTlsPrivateKeyPemSecret(value);
 }
 
 /** An optional path to a file on the host of the agent. */

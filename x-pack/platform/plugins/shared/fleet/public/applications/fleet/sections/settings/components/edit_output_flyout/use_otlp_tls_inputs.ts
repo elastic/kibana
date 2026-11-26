@@ -18,11 +18,11 @@ import type { OtlpTlsPairedErrors } from './output_form_validators';
 import {
   validateOtlpDuration,
   validateOtlpShortString,
+  validateOtlpTlsCertificatePem,
   validateOtlpTlsCipherSuites,
   validateOtlpTlsFilePath,
   validateOtlpTlsKeyPemSecret,
   validateOtlpTlsPairedSettings,
-  validateOtlpTlsPem,
   validateOtlpTlsVersion,
 } from './output_form_validators';
 
@@ -37,7 +37,7 @@ const toInputValue = (value: string | null | undefined) => value ?? '';
 
 /**
  * The inputs of the TLS settings of the OTLP exporter. `disabled` makes the settings read-only,
- * and `keyPemDisabled` the client key, which is also saved under `secrets`. Read-only settings are
+ * and `keyPemDisabled` the client key, which is saved under `secrets` only. Read-only settings are
  * not validated: they are not sent, and the user could not fix them.
  */
 export function useOtlpTlsInputs(
@@ -68,7 +68,7 @@ export function useOtlpTlsInputs(
   // certificate authority
   const otlpTlsCaPemInput = useInput(
     toInputValue(tls?.ca_pem),
-    validateIfSelected(validateOtlpTlsPem),
+    validateIfSelected(validateOtlpTlsCertificatePem),
     disabled
   );
   const otlpTlsCaFileInput = useInput(
@@ -80,7 +80,7 @@ export function useOtlpTlsInputs(
   // client certificate
   const otlpTlsCertPemInput = useInput(
     toInputValue(tls?.cert_pem),
-    validateIfSelected(validateOtlpTlsPem),
+    validateIfSelected(validateOtlpTlsCertificatePem),
     disabled
   );
   const otlpTlsCertFileInput = useInput(
@@ -174,6 +174,23 @@ const list = <T extends string>(input: { value: string[] }) =>
   input.value.length ? (input.value.map((value) => value.trim()) as T[]) : null;
 
 /**
+ * Whether the TLS settings are read-only, such as those of a preconfigured output. Every setting
+ * gets the `disabled` flag of `useOtlpTlsInputs`, so any of them tells. The flag itself is not
+ * returned by the hook: what it returns is spread into the form inputs, which are all expected to
+ * be inputs (`hasChanged`, `validate`).
+ */
+const isOtlpTlsReadOnly = (inputs: OtlpTlsInputs): boolean =>
+  !!inputs.otlpTlsCaPemInput.props.disabled;
+
+/**
+ * Whether the saved client key can be removed. Replacing it only needs `secrets` to be editable,
+ * but removing it changes which TLS settings are valid (a client certificate needs a key), so it
+ * also needs the other TLS settings to be editable.
+ */
+export const isOtlpTlsKeyPemRemovable = (inputs: OtlpTlsInputs): boolean =>
+  !isOtlpTlsReadOnly(inputs) && !inputs.otlpTlsKeyPemInput.props.disabled;
+
+/**
  * Whether the saved client key is removed: the Remove action sets the value to `undefined`, while
  * Replace sets it to a string.
  */
@@ -221,15 +238,6 @@ export const hasOtlpTlsSettings = (inputs: OtlpTlsInputs): boolean =>
   inputs.otlpTlsCipherSuitesInput.value.length > 0 ||
   inputs.otlpTlsCurvePreferencesInput.value.length > 0 ||
   hasOtlpTlsKeyPem(inputs);
-
-/**
- * Whether the TLS settings are read-only, such as those of a preconfigured output. Every setting
- * gets the `disabled` flag of `useOtlpTlsInputs`, so any of them tells. The flag itself is not
- * returned by the hook: what it returns is spread into the form inputs, which are all expected to
- * be inputs (`hasChanged`, `validate`).
- */
-const isOtlpTlsReadOnly = (inputs: OtlpTlsInputs): boolean =>
-  !!inputs.otlpTlsCaPemInput.props.disabled;
 
 /**
  * The errors of the TLS settings that depend on each other. They are derived from the current

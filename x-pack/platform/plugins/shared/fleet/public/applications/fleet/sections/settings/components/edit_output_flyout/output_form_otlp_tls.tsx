@@ -18,6 +18,7 @@ import {
   getOtlpTlsPairedErrors,
   hasOtlpTlsErrors,
   hasOtlpTlsSettings,
+  isOtlpTlsKeyPemRemovable,
   isOtlpTlsKeyPemRemoved,
 } from './use_otlp_tls_inputs';
 import {
@@ -295,7 +296,11 @@ export const OtlpTlsSettings: React.FunctionComponent<{ inputs: OutputFormInputs
           useSecretsStorage={true}
           secretType="otlp"
           cancelEdit={otlpTlsKeyPemInput.cancelEdit}
-          onRemove={() => otlpTlsKeyPemInput.setValue(undefined)}
+          onRemove={
+            isOtlpTlsKeyPemRemovable(inputs)
+              ? () => otlpTlsKeyPemInput.setValue(undefined)
+              : undefined
+          }
           isRemoved={isOtlpTlsKeyPemRemoved(inputs)}
         >
           <EuiTextArea

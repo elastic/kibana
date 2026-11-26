@@ -4515,6 +4515,37 @@ describe('EditOutputFlyout', () => {
         expect(payload.otlp_exporter).toBeUndefined();
       });
 
+      it('should replace the client key of a preconfigured output that only allows editing secrets', async () => {
+        const { utils } = renderFlyout({
+          ...otlpOutputWithTls,
+          is_preconfigured: true,
+          allow_edit: ['secrets'],
+        } as Output);
+
+        expect(utils.getByTestId('settingsOutputsFlyout.otlpTlsCaPemInput')).toBeDisabled();
+        // removing the key would leave the read-only client certificate without its key
+        expect(utils.queryByText('Remove Client key, PEM')).toBeNull();
+
+        fireEvent.click(utils.getByText('Replace Client key, PEM'));
+        change(utils, 'otlpTlsKeyPemInput', KEY_PEM);
+        fireEvent.click(utils.getByText('Save and apply settings'));
+
+        const payload = await updatedPayload();
+        expect(payload.otlp_exporter).toBeUndefined();
+        expect(payload.secrets).toEqual({ otlp_exporter: { tls: { key_pem: KEY_PEM } } });
+      });
+
+      it('should reject a private key pasted in the client certificate', () => {
+        const { utils } = renderFlyout(otlpOutputWithTls);
+        change(utils, 'otlpTlsCertPemInput', `${CERT_PEM}\n${KEY_PEM}`);
+        fireEvent.blur(utils.getByTestId('settingsOutputsFlyout.otlpTlsCertPemInput'));
+
+        expect(
+          utils.getByText(/Remove the private key: this setting is saved in plain text/)
+        ).toBeInTheDocument();
+        expect(utils.getByTestId('saveApplySettingsBtn')).toBeDisabled();
+      });
+
       it('should not offer to change the client key of a preconfigured output that does not allow editing secrets', async () => {
         const { utils } = renderFlyout({
           ...otlpOutputWithTls,
