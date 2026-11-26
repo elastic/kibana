@@ -6,7 +6,8 @@
  */
 
 import { BEATS_OUTPUT_TYPES, kafkaAuthType, outputType } from '../../../common/constants';
-import type { OutputType, ValueOf } from '../../../common/types';
+import { getOtlpAuthSecretKey, OTLP_AUTH_SECRET_KEYS } from '../../../common/services/otlp_auth';
+import type { NewOtlpOutput, OutputType, ValueOf } from '../../../common/types';
 import type { SecretFieldDefinition } from '../secrets/preserve';
 
 /**
@@ -47,8 +48,16 @@ export function getOutputSecretFields(type: ValueOf<OutputType>): SecretFieldDef
   }
   if (type === outputType.Otlp) {
     fields.push(
-      // the credential belongs to the authentication, `auth: null` removes it
-      { secretPath: 'secrets.auth.credential', clearedBy: ['auth'] },
+      // the credentials belong to the authentication: `auth: null` removes them, and so does an
+      // authentication that does not use them, e.g. switching from a header to Azure
+      ...OTLP_AUTH_SECRET_KEYS.map((key) => ({
+        secretPath: `secrets.auth.${key}`,
+        clearedBy: ['auth'],
+        clearedWhen: (update: object) => {
+          const { auth } = update as Partial<NewOtlpOutput>;
+          return auth !== undefined && getOtlpAuthSecretKey(auth) !== key;
+        },
+      })),
       { secretPath: 'secrets.otlp_exporter.tls.key_pem', clearedBy: ['otlp_exporter.tls'] },
       {
         secretPath: 'secrets.otlp_exporter.tls.tpm.owner_auth',

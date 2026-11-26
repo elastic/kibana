@@ -9,9 +9,11 @@ import { appContextService } from '../app_context';
 
 import {
   getOtlpAuthHeaders,
+  getOtlpAzureAuthExtension,
   omitRemovedOtlpAuthSettings,
   validateOtlpAuth,
   validateOtlpAuthCredential,
+  validateOtlpAuthSecrets,
   withRemovedOtlpAuthSettings,
   withTrimmedOtlpAuthCredential,
 } from './otlp_auth';
@@ -56,6 +58,16 @@ describe('OTLP output authentication', () => {
       // a plain text value is never put in the policy
       expect(
         getOtlpAuthHeaders({ type: 'auth_header', scheme: 'api_key' }, 'plain' as any, exporter)
+      ).toBeUndefined();
+    });
+
+    it('returns nothing for the Azure authentication, the extension sets the header', () => {
+      expect(
+        getOtlpAuthHeaders(
+          { type: 'azure', azure_auth_method: 'service_principal' },
+          { id: 'id1' },
+          exporter
+        )
       ).toBeUndefined();
     });
 
@@ -116,6 +128,12 @@ describe('OTLP output authentication', () => {
     it('returns the output as it is without a value to trim', () => {
       const output = { secrets: { auth: { credential: { id: 'stored' } } } };
       expect(withTrimmedOtlpAuthCredential(output)).toBe(output);
+    });
+
+    it('trims the Azure client secret', () => {
+      expect(
+        withTrimmedOtlpAuthCredential({ secrets: { auth: { azure_client_secret: 'secret\n' } } })
+      ).toEqual({ secrets: { auth: { azure_client_secret: 'secret' } } });
     });
   });
 
@@ -209,6 +227,268 @@ describe('OTLP output authentication', () => {
           exporter: { ...exporter, headers: { 'x-api-key': 'value' } },
         })
       ).toThrow('otlp_exporter.headers cannot contain the "x-api-key" header, it is set by auth');
+    });
+
+    describe('Azure', () => {
+      const servicePrincipal = {
+        type: 'azure' as const,
+        azure_auth_method: 'service_principal' as const,
+        tenant_id: 'tenant',
+        client_id: 'client',
+      };
+      const managedIdentity = {
+        type: 'azure' as const,
+        azure_auth_method: 'managed_identity' as const,
+      };
+
+      it('accepts a service principal with its client secret', () => {
+        expect(() =>
+          validateOtlpAuth({
+            auth: servicePrincipal,
+            hasCredential: false,
+            hasAzureClientSecret: true,
+            exporter,
+          })
+        ).not.toThrow();
+      });
+
+      it('accepts a managed identity, with or without a client id', () => {
+        expect(() =>
+          validateOtlpAuth({ auth: managedIdentity, hasCredential: false, exporter })
+        ).not.toThrow();
+        expect(() =>
+          validateOtlpAuth({
+            auth: { ...managedIdentity, client_id: 'client', scopes: ['scope'] },
+            hasCredential: false,
+            exporter,
+          })
+        ).not.toThrow();
+      });
+
+      it('rejects the gRPC protocol', () => {
+        expect(() =>
+          validateOtlpAuth({
+            auth: managedIdentity,
+            hasCredential: false,
+            exporter: { endpoint: 'collector.example.com:4317', protocol: 'grpc' },
+          })
+        ).toThrow('auth.type "azure" requires otlp_exporter.protocol "http/protobuf"');
+      });
+
+      it('rejects a service principal without its tenant, client id or client secret', () => {
+        expect(() =>
+          validateOtlpAuth({
+            auth: { type: 'azure', azure_auth_method: 'service_principal' },
+            hasCredential: false,
+            hasAzureClientSecret: true,
+            exporter,
+          })
+        ).toThrow(
+          'auth.tenant_id and auth.client_id are required for the service_principal method'
+        );
+        expect(() =>
+          validateOtlpAuth({
+            auth: { ...servicePrincipal, client_id: undefined },
+            hasCredential: false,
+            hasAzureClientSecret: true,
+            exporter,
+          })
+        ).toThrow('auth.client_id is required for the service_principal method');
+        expect(() =>
+          validateOtlpAuth({ auth: servicePrincipal, hasCredential: false, exporter })
+        ).toThrow('secrets.auth.azure_client_secret is required for the service_principal method');
+      });
+
+      it('rejects a tenant or a client secret for a managed identity', () => {
+        expect(() =>
+          validateOtlpAuth({
+            auth: { ...managedIdentity, tenant_id: 'tenant' },
+            hasCredential: false,
+            exporter,
+          })
+        ).toThrow('auth.tenant_id can only be set for the service_principal method');
+        expect(() =>
+          validateOtlpAuth({
+            auth: managedIdentity,
+            hasCredential: false,
+            hasAzureClientSecret: true,
+            exporter,
+          })
+        ).toThrow(
+          'secrets.auth.azure_client_secret can only be set for the service_principal method of auth.type "azure"'
+        );
+      });
+
+      it('rejects the credential of the header types', () => {
+        expect(() =>
+          validateOtlpAuth({
+            auth: servicePrincipal,
+            hasCredential: true,
+            hasAzureClientSecret: true,
+            exporter,
+          })
+        ).toThrow('secrets.auth.credential cannot be set for auth.type "azure"');
+      });
+
+      it('rejects a client secret for the header types or without authentication', () => {
+        expect(() =>
+          validateOtlpAuth({
+            auth: { type: 'auth_header', scheme: 'api_key' },
+            hasCredential: true,
+            hasAzureClientSecret: true,
+            exporter,
+          })
+        ).toThrow('secrets.auth.azure_client_secret can only be set for the service_principal');
+        expect(() =>
+          validateOtlpAuth({
+            auth: null,
+            hasCredential: false,
+            hasAzureClientSecret: true,
+            exporter,
+          })
+        ).toThrow('secrets.auth.azure_client_secret can only be set together with auth');
+      });
+
+      it('rejects the Authorization header, that the extension sets', () => {
+        expect(() =>
+          validateOtlpAuth({
+            auth: managedIdentity,
+            hasCredential: false,
+            exporter: { ...exporter, headers: { Authorization: 'Basic abc' } },
+          })
+        ).toThrow(
+          'otlp_exporter.headers cannot contain the "Authorization" header, it is set by auth'
+        );
+      });
+
+      it('rejects the managed OTLP endpoint', () => {
+        expect(() =>
+          validateOtlpAuth({
+            auth: managedIdentity,
+            hasCredential: false,
+            exporter: {
+              endpoint: 'https://managed.ingest.elastic.cloud',
+              protocol: 'http/protobuf',
+            },
+          })
+        ).toThrow('auth cannot be set for an output that sends data to the managed OTLP endpoint');
+      });
+    });
+  });
+
+  describe('getOtlpAzureAuthExtension', () => {
+    const exporter = {
+      endpoint: 'https://collector.example.com:4318',
+      protocol: 'http/protobuf' as const,
+    };
+
+    it('returns the system-assigned managed identity', () => {
+      expect(
+        getOtlpAzureAuthExtension(
+          { type: 'azure', azure_auth_method: 'managed_identity' },
+          undefined,
+          exporter
+        )
+      ).toEqual({ managed_identity: {} });
+    });
+
+    it('returns the user-assigned managed identity, with the scopes', () => {
+      expect(
+        getOtlpAzureAuthExtension(
+          {
+            type: 'azure',
+            azure_auth_method: 'managed_identity',
+            client_id: 'client',
+            scopes: ['https://monitor.azure.com/.default'],
+          },
+          undefined,
+          exporter
+        )
+      ).toEqual({
+        managed_identity: { client_id: 'client' },
+        scopes: ['https://monitor.azure.com/.default'],
+      });
+    });
+
+    it('returns the service principal with the secret reference of its client secret', () => {
+      expect(
+        getOtlpAzureAuthExtension(
+          {
+            type: 'azure',
+            azure_auth_method: 'service_principal',
+            tenant_id: 'tenant',
+            client_id: 'client',
+          },
+          { id: 'secret-id' },
+          exporter
+        )
+      ).toEqual({
+        service_principal: {
+          tenant_id: 'tenant',
+          client_id: 'client',
+          client_secret: '$co.elastic.secret{secret-id}',
+        },
+      });
+    });
+
+    it('returns nothing for a service principal without a stored client secret', () => {
+      const auth = {
+        type: 'azure' as const,
+        azure_auth_method: 'service_principal' as const,
+        tenant_id: 'tenant',
+        client_id: 'client',
+      };
+      expect(getOtlpAzureAuthExtension(auth, undefined, exporter)).toBeUndefined();
+      // a plain text value is never put in the policy
+      expect(getOtlpAzureAuthExtension(auth, 'plain' as any, exporter)).toBeUndefined();
+    });
+
+    it('returns nothing for the header types, or for the managed OTLP endpoint', () => {
+      expect(
+        getOtlpAzureAuthExtension(
+          { type: 'auth_header', scheme: 'api_key' },
+          { id: 'id1' },
+          exporter
+        )
+      ).toBeUndefined();
+      expect(
+        getOtlpAzureAuthExtension(
+          { type: 'azure', azure_auth_method: 'managed_identity' },
+          undefined,
+          { endpoint: 'https://managed.ingest.elastic.cloud', protocol: 'http/protobuf' }
+        )
+      ).toBeUndefined();
+    });
+  });
+
+  describe('validateOtlpAuthSecrets', () => {
+    it('validates the client secret like the credential', () => {
+      expect(() =>
+        validateOtlpAuthSecrets({ auth: { azure_client_secret: 'my\nsecret' } })
+      ).toThrow('secrets.auth.azure_client_secret cannot contain control characters');
+      expect(() =>
+        validateOtlpAuthSecrets(
+          { auth: { azure_client_secret: { id: 'other' } } },
+          { auth: { azure_client_secret: { id: 'stored' } } }
+        )
+      ).toThrow(
+        'secrets.auth.azure_client_secret must be a new value, or the reference to the client secret of this output'
+      );
+      expect(() =>
+        validateOtlpAuthSecrets(
+          { auth: { azure_client_secret: { id: 'stored' } } },
+          { auth: { azure_client_secret: { id: 'stored' } } }
+        )
+      ).not.toThrow();
+    });
+
+    it('does not accept the reference to the credential as the client secret', () => {
+      expect(() =>
+        validateOtlpAuthSecrets(
+          { auth: { azure_client_secret: { id: 'stored' } } },
+          { auth: { credential: { id: 'stored' } } }
+        )
+      ).toThrow('secrets.auth.azure_client_secret must be a new value');
     });
   });
 

@@ -162,7 +162,20 @@ export const otlpAuthType = {
   AuthHeader: 'auth_header',
   // `<name>: <credential>`
   CustomHeader: 'custom_header',
+  // a Microsoft Entra ID token, that the collector requests with the identity of the host
+  Azure: 'azure',
 } as const;
+
+/** How the collector gets the Microsoft Entra ID token of an OTLP output with Azure authentication. */
+export const otlpAzureAuthMethod = {
+  // the managed identity of the Azure resource the agent runs on, no secret is involved
+  ManagedIdentity: 'managed_identity',
+  // an application registration, authenticated with its client secret
+  ServicePrincipal: 'service_principal',
+} as const;
+
+/** The OTel Collector extension that authenticates the exporter with a Microsoft Entra ID token. */
+export const OTLP_AZURE_AUTH_EXTENSION = 'azure_auth';
 
 export const otlpAuthScheme = {
   ApiKey: 'api_key',

@@ -26,13 +26,14 @@ import {
   FLEET_UNMANAGED_DATA_STREAM_TYPES,
   OTEL_COLLECTOR_INPUT_TYPE,
   otlpProtocol,
+  OTLP_AZURE_AUTH_EXTENSION,
   outputType,
   USE_APM_VAR_NAME,
 } from '../../../common/constants';
 import { FleetError } from '../../errors';
 import { getOutputIdForAgentPolicy } from '../../../common/services/output_helpers';
 import { pkgToPkgKey } from '../epm/registry';
-import { getOtlpAuthHeaders } from '../outputs/otlp_auth';
+import { getOtlpAuthHeaders, getOtlpAzureAuthExtension } from '../outputs/otlp_auth';
 import { hasDynamicSignalTypes } from '../../../common/services';
 
 import { buildOtelEsExporterConfig, parseYamlRecord } from './otel_output_settings';
@@ -857,11 +858,20 @@ function generateOtelcolExporter(
         dataOutput.secrets?.auth?.credential,
         dataOutput.otlp_exporter
       );
+      // the collector requests the Azure token itself, with the client secret Fleet Server resolves
+      const azureAuthExtension = getOtlpAzureAuthExtension(
+        dataOutput.auth,
+        dataOutput.secrets?.auth?.azure_client_secret,
+        dataOutput.otlp_exporter
+      );
+      const azureAuthID = `${OTLP_AZURE_AUTH_EXTENSION}/${outputID}`;
       return {
-        extensions: {},
+        extensions: azureAuthExtension ? { [azureAuthID]: azureAuthExtension } : {},
         exporters: {
           [exporterID]: {
             ...exporterConfig,
+            // the authenticator always takes precedence over the exporter settings
+            ...(azureAuthExtension ? { auth: { authenticator: azureAuthID } } : {}),
             ...(authHeaders
               ? {
                   headers: {

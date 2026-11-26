@@ -631,4 +631,62 @@ describe('Output model', () => {
       });
     });
   });
+
+  describe('OTLP Azure authentication', () => {
+    const validate = (auth: unknown, secrets?: unknown) =>
+      schema.object(OtlpSchema).validate({
+        name: 'otlp',
+        type: 'otlp',
+        otlp_exporter: { endpoint: 'https://otel.example.com:4318', protocol: 'http/protobuf' },
+        auth,
+        secrets,
+      });
+
+    it('accepts a service principal with its client secret', () => {
+      expect(() =>
+        validate(
+          {
+            type: 'azure',
+            azure_auth_method: 'service_principal',
+            tenant_id: 'tenant',
+            client_id: 'client',
+            scopes: ['https://monitor.azure.com/.default'],
+          },
+          { auth: { azure_client_secret: 'my-secret' } }
+        )
+      ).not.toThrow();
+    });
+
+    it('accepts a managed identity without any setting', () => {
+      expect(() =>
+        validate({ type: 'azure', azure_auth_method: 'managed_identity' })
+      ).not.toThrow();
+    });
+
+    it('rejects an unknown method', () => {
+      expect(() => validate({ type: 'azure', azure_auth_method: 'workload_identity' })).toThrow();
+    });
+
+    it('rejects the settings of the header types', () => {
+      expect(() =>
+        validate({ type: 'azure', azure_auth_method: 'managed_identity', scheme: 'api_key' })
+      ).toThrow();
+    });
+
+    it('rejects empty or too many scopes', () => {
+      const auth = { type: 'azure', azure_auth_method: 'managed_identity' };
+      expect(() => validate({ ...auth, scopes: [] })).toThrow();
+      expect(() => validate({ ...auth, scopes: [''] })).toThrow();
+      expect(() => validate({ ...auth, scopes: Array(11).fill('scope') })).toThrow();
+    });
+
+    it('accepts removing the client secret in an update', () => {
+      expect(() =>
+        UpdateOutputSchema.validate({
+          type: 'otlp',
+          secrets: { auth: { azure_client_secret: null } },
+        })
+      ).not.toThrow();
+    });
+  });
 });

@@ -292,6 +292,78 @@ describe('Outputs secrets', () => {
         '/_fleet/secret/credential-id',
       ]);
     });
+
+    describe('Azure client secret', () => {
+      const azureOutput = {
+        ...otlpAuthOutput,
+        otlp_exporter: {
+          endpoint: 'https://collector.example.com:4318',
+          protocol: 'http/protobuf',
+        },
+        auth: {
+          type: 'azure',
+          azure_auth_method: 'service_principal',
+          tenant_id: 'tenant',
+          client_id: 'client',
+        },
+      };
+
+      it('getOutputSecretReferences should list the client secret', () => {
+        expect(
+          getOutputSecretReferences({
+            ...azureOutput,
+            secrets: { auth: { azure_client_secret: { id: 'client-secret-id' } } },
+          })
+        ).toEqual([{ id: 'client-secret-id' }]);
+      });
+
+      it('extractAndWriteOutputSecrets should store the client secret', async () => {
+        const result = await extractAndWriteOutputSecrets({
+          output: { ...azureOutput, secrets: { auth: { azure_client_secret: 'my-secret' } } },
+          esClient: esClientMock,
+        });
+
+        expect(result.output.secrets).toEqual({
+          auth: { azure_client_secret: { id: expect.any(String) } },
+        });
+        expect(
+          esClientMock.transport.request.mock.calls.map(([req]: any) => req.body.value)
+        ).toEqual(['my-secret']);
+      });
+
+      it('extractAndUpdateOutputSecrets should delete the credential when switching to Azure', async () => {
+        const result = await extractAndUpdateOutputSecrets({
+          oldOutput: {
+            ...otlpAuthOutput,
+            secrets: { auth: { credential: { id: 'credential-id' } } },
+          },
+          outputUpdate: { ...azureOutput, secrets: { auth: { azure_client_secret: 'my-secret' } } },
+          esClient: esClientMock,
+        });
+
+        expect(result.secretsToDelete).toEqual([
+          { id: 'credential-id', path: 'secrets.auth.credential' },
+        ]);
+        // the reference to the deleted credential is cleared from the saved object
+        expect(result.outputUpdate.secrets).toEqual({
+          auth: { azure_client_secret: { id: expect.any(String) }, credential: null },
+        });
+      });
+
+      it('deleteOutputSecrets should delete the client secret', async () => {
+        await deleteOutputSecrets({
+          output: {
+            ...azureOutput,
+            secrets: { auth: { azure_client_secret: { id: 'client-secret-id' } } },
+          },
+          esClient: esClientMock,
+        });
+
+        expect(esClientMock.transport.request.mock.calls.map(([req]: any) => req.path)).toEqual([
+          '/_fleet/secret/client-secret-id',
+        ]);
+      });
+    });
   });
 
   describe('extractAndUpdateOutputSecrets', () => {

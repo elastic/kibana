@@ -16,6 +16,7 @@ import type {
   kafkaSaslMechanism,
   otlpAuthScheme,
   otlpAuthType,
+  otlpAzureAuthMethod,
   otlpProtocol,
   otlpCompressionType,
 } from '../../constants';
@@ -211,11 +212,29 @@ export interface OtlpCustomAuthHeader {
   name: string;
 }
 
+export type OtlpAzureAuthMethod = ValueOf<typeof otlpAzureAuthMethod>;
+
+/**
+ * `Authorization: Bearer <token>`, with a Microsoft Entra ID token that the collector requests
+ * itself. The client secret of a service principal is stored as a secret in
+ * `secrets.auth.azure_client_secret`.
+ */
+export interface OtlpAzureAuth {
+  type: typeof otlpAuthType.Azure;
+  azure_auth_method: OtlpAzureAuthMethod;
+  /** The client id of a user-assigned managed identity, or of the service principal. */
+  client_id?: string;
+  /** The tenant of the service principal. */
+  tenant_id?: string;
+  /** The scopes of the token, by default the one of the host of the endpoint. */
+  scopes?: string[];
+}
+
 /**
  * How an OTLP output authenticates with an endpoint that is not the managed OTLP endpoint. The
- * credential is stored as a secret in `secrets.auth.credential`.
+ * credential of the header types is stored as a secret in `secrets.auth.credential`.
  */
-export type OtlpOutputAuth = OtlpAuthHeader | OtlpCustomAuthHeader;
+export type OtlpOutputAuth = OtlpAuthHeader | OtlpCustomAuthHeader | OtlpAzureAuth;
 
 export interface NewOtlpOutput extends NewBaseOutput {
   type: OutputType['Otlp'];
@@ -227,6 +246,7 @@ export interface NewOtlpOutput extends NewBaseOutput {
 interface OtlpOutputSecrets {
   auth?: {
     credential?: SOSecret;
+    azure_client_secret?: SOSecret;
   };
   otlp_exporter?: {
     tls?: {

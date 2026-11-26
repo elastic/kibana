@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import { OTLP_AUTHORIZATION_HEADER, otlpAuthType, otlpProtocol } from '../constants/output';
+import {
+  OTLP_AUTHORIZATION_HEADER,
+  otlpAuthType,
+  otlpAzureAuthMethod,
+  otlpProtocol,
+} from '../constants/output';
 import type { OtlpExporterConfig, OtlpOutputAuth } from '../types/models/output';
 
 // RFC 9110 field name (token): the header is sent as an HTTP header or as gRPC metadata
@@ -45,7 +50,29 @@ export const isValidOtlpAuthCredential = (credential: string): boolean =>
 
 /** The name of the header that carries the credential of the authentication. */
 export const getOtlpAuthHeaderName = (auth: OtlpOutputAuth): string =>
-  auth.type === otlpAuthType.AuthHeader ? OTLP_AUTHORIZATION_HEADER : auth.name;
+  auth.type === otlpAuthType.CustomHeader ? auth.name : OTLP_AUTHORIZATION_HEADER;
+
+/** The secrets of an OTLP output, under `secrets.auth`, that its authentication can have. */
+export const OTLP_AUTH_SECRET_KEYS = ['credential', 'azure_client_secret'] as const;
+export type OtlpAuthSecretKey = (typeof OTLP_AUTH_SECRET_KEYS)[number];
+
+/**
+ * The secret, under `secrets.auth`, that the authentication uses: the credential of the header
+ * types, or the client secret of an Azure service principal. A managed identity has none.
+ */
+export const getOtlpAuthSecretKey = (
+  auth: OtlpOutputAuth | null | undefined
+): OtlpAuthSecretKey | undefined => {
+  if (!auth) {
+    return undefined;
+  }
+  if (auth.type !== otlpAuthType.Azure) {
+    return 'credential';
+  }
+  return auth.azure_auth_method === otlpAzureAuthMethod.ServicePrincipal
+    ? 'azure_client_secret'
+    : undefined;
+};
 
 /** The header of `headers` that has the name of the authentication header, whatever its case. */
 export const findOtlpAuthHeaderConflict = (

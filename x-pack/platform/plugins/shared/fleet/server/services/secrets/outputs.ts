@@ -155,6 +155,9 @@ export function getOutputSecretReferences(output: Output): SecretReference[] {
     if (typeof output.secrets?.auth?.credential === 'object') {
       outputSecretPaths.push({ id: output.secrets.auth.credential.id });
     }
+    if (typeof output.secrets?.auth?.azure_client_secret === 'object') {
+      outputSecretPaths.push({ id: output.secrets.auth.azure_client_secret.id });
+    }
     if (typeof output.secrets?.otlp_exporter?.tls?.key_pem === 'object') {
       outputSecretPaths.push({ id: output.secrets.otlp_exporter.tls.key_pem.id });
     }
@@ -193,6 +196,12 @@ function getOutputSecretPaths(
       outputSecretPaths.push({
         path: 'secrets.auth.credential',
         value: typed.secrets.auth.credential,
+      });
+    }
+    if (typed.secrets?.auth?.azure_client_secret) {
+      outputSecretPaths.push({
+        path: 'secrets.auth.azure_client_secret',
+        value: typed.secrets.auth.azure_client_secret,
       });
     }
     if (typed.secrets?.otlp_exporter?.tls?.key_pem) {

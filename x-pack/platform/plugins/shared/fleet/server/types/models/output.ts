@@ -22,6 +22,7 @@ import {
   MAX_HOSTS,
   otlpAuthScheme,
   otlpAuthType,
+  otlpAzureAuthMethod,
   otlpCompressionType,
   otlpProtocol,
   outputType,
@@ -852,19 +853,73 @@ const OtlpCustomAuthHeaderSchema = schema.object(
   { meta: { id: 'otlp_custom_auth_header' } }
 );
 
+// Microsoft Entra ID ids are GUIDs, a tenant can also be given by one of its domain names
+const OTLP_AZURE_ID_MAX_LENGTH = 256;
+const OTLP_AZURE_SCOPE_MAX_LENGTH = 2048;
+const OTLP_AZURE_SCOPES_MAX_SIZE = 10;
+
+const OtlpAzureAuthSchema = schema.object(
+  {
+    type: schema.literal(otlpAuthType.Azure),
+    azure_auth_method: schema.oneOf(
+      [
+        schema.literal(otlpAzureAuthMethod.ManagedIdentity),
+        schema.literal(otlpAzureAuthMethod.ServicePrincipal),
+      ],
+      {
+        meta: {
+          description:
+            'How the collector gets the Microsoft Entra ID token: `managed_identity` uses the managed identity of the Azure resource the agent runs on, `service_principal` uses an application registration and its client secret, set in `secrets.auth.azure_client_secret`.',
+        },
+      }
+    ),
+    client_id: schema.maybe(
+      schema.string({
+        minLength: 1,
+        maxLength: OTLP_AZURE_ID_MAX_LENGTH,
+        meta: {
+          description:
+            'The client id of the service principal, required for it. For a managed identity, the client id of a user-assigned identity, left out for the system-assigned one.',
+        },
+      })
+    ),
+    tenant_id: schema.maybe(
+      schema.string({
+        minLength: 1,
+        maxLength: OTLP_AZURE_ID_MAX_LENGTH,
+        meta: { description: 'The tenant of the service principal, required for it.' },
+      })
+    ),
+    scopes: schema.maybe(
+      schema.arrayOf(schema.string({ minLength: 1, maxLength: OTLP_AZURE_SCOPE_MAX_LENGTH }), {
+        minSize: 1,
+        maxSize: OTLP_AZURE_SCOPES_MAX_SIZE,
+        meta: {
+          description:
+            'The scopes of the token. By default `https://<host of the endpoint>/.default`, set them when the endpoint expects another audience, e.g. `https://monitor.azure.com/.default`.',
+        },
+      })
+    ),
+  },
+  { meta: { id: 'otlp_azure_auth' } }
+);
+
 /**
  * How the OTLP output authenticates with an endpoint that is not the managed OTLP endpoint. The
- * credential is in `secrets.auth.credential`, it is placed verbatim in the header.
+ * credential of the header types is in `secrets.auth.credential`, it is placed verbatim in the
+ * header.
  */
 const OtlpAuthSchema = schema.discriminatedUnion('type', [
   OtlpAuthHeaderSchema,
   OtlpCustomAuthHeaderSchema,
+  OtlpAzureAuthSchema,
 ]);
 
 // the response schema allows unknown keys: it has its own ids, as the exporter ones
 const OtlpAuthResponseSchema = schema.discriminatedUnion('type', [
   OtlpAuthHeaderSchema.extends({}, { meta: { id: 'otlp_response_auth_header' } }),
   OtlpCustomAuthHeaderSchema.extends({}, { meta: { id: 'otlp_response_custom_auth_header' } }),
+  OtlpAzureAuthSchema.extends({}, { meta: { id: 'otlp_response_azure_auth' } }),
 ]);
 
 // the credential is sent in a single header: it is bounded to what servers accept for a header
@@ -881,7 +936,12 @@ const OtlpAuthCredentialSchema = schema.oneOf([
 
 const OtlpSecretsSchema = schema.maybe(
   schema.object({
-    auth: schema.maybe(schema.object({ credential: schema.maybe(OtlpAuthCredentialSchema) })),
+    auth: schema.maybe(
+      schema.object({
+        credential: schema.maybe(OtlpAuthCredentialSchema),
+        azure_client_secret: schema.maybe(OtlpAuthCredentialSchema),
+      })
+    ),
     otlp_exporter: schema.maybe(
       schema.object({
         tls: schema.maybe(
@@ -905,6 +965,9 @@ const OtlpUpdateSecretsSchema = schema.maybe(
     auth: schema.maybe(
       schema.object({
         credential: schema.maybe(schema.oneOf([schema.literal(null), OtlpAuthCredentialSchema])),
+        azure_client_secret: schema.maybe(
+          schema.oneOf([schema.literal(null), OtlpAuthCredentialSchema])
+        ),
       })
     ),
     otlp_exporter: schema.maybe(
@@ -926,7 +989,7 @@ const OtlpUpdateSecretsSchema = schema.maybe(
 );
 
 const OTLP_AUTH_DESCRIPTION =
-  'How the output authenticates with the OTLP endpoint, by sending the credential in a request header. Not accepted for the managed OTLP endpoint. The credential itself is set in `secrets.auth.credential`.';
+  'How the output authenticates with the OTLP endpoint. `auth_header` and `custom_header` send the credential set in `secrets.auth.credential` in a request header. `azure` sends a Microsoft Entra ID token that the collector requests itself, it requires the `http/protobuf` protocol. Not accepted for the managed OTLP endpoint.';
 
 export const OtlpSchema = {
   ...BaseSchema,

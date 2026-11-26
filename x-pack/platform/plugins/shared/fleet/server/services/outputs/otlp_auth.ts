@@ -5,16 +5,29 @@
  * 2.0.
  */
 
-import { OTLP_AUTH_SCHEME_PREFIX, otlpAuthType, otlpProtocol } from '../../../common/constants';
+import {
+  OTLP_AUTH_SCHEME_PREFIX,
+  otlpAuthType,
+  otlpAzureAuthMethod,
+  otlpProtocol,
+} from '../../../common/constants';
 import {
   findOtlpAuthHeaderConflict,
   getOtlpAuthHeaderName,
+  getOtlpAuthSecretKey,
   getOtlpExporterEndpoints,
   isValidOtlpAuthCredential,
   isValidOtlpGrpcMetadataKey,
+  OTLP_AUTH_SECRET_KEYS,
   sendsToManagedOtlpHost,
 } from '../../../common/services/otlp_auth';
-import type { OtlpExporterConfig, OtlpOutputAuth, SOSecret } from '../../../common/types';
+import type { OtlpAuthSecretKey } from '../../../common/services/otlp_auth';
+import type {
+  OtlpAzureAuth,
+  OtlpExporterConfig,
+  OtlpOutputAuth,
+  SOSecret,
+} from '../../../common/types';
 import { OutputInvalidError } from '../../errors';
 import { toCompiledSecretRef } from '../secrets/common';
 import { getManagedOtlpEndpoint } from '../utils/managed_otlp';
@@ -34,7 +47,12 @@ export function getOtlpAuthHeaders(
   credential: SOSecret | null | undefined,
   exporter: Partial<OtlpExporterConfig>
 ): Record<string, string> | undefined {
-  if (!auth || typeof credential !== 'object' || !credential?.id) {
+  if (
+    !auth ||
+    auth.type === otlpAuthType.Azure ||
+    typeof credential !== 'object' ||
+    !credential?.id
+  ) {
     return undefined;
   }
   if (sendsToManagedOtlpEndpoint(exporter)) {
@@ -50,34 +68,79 @@ export function getOtlpAuthHeaders(
 }
 
 /**
- * Returns the secrets with the credential trimmed: a pasted value often ends with a line break,
- * which would make the header invalid.
+ * The Azure authentication extension of the exporter: the collector requests a Microsoft Entra ID
+ * token with it, and sends it in the `Authorization` header. The client secret of a service
+ * principal is a reference to a secret, that Fleet Server replaces with its value. There is none
+ * when the exporter sends data to the managed OTLP endpoint, which Fleet authenticates itself.
  */
-export function withTrimmedOtlpAuthCredential<T extends { secrets?: unknown }>(output: T): T {
-  const secrets = output.secrets as { auth?: { credential?: unknown } } | null | undefined;
-  const credential = secrets?.auth?.credential;
-  if (typeof credential !== 'string' || credential === credential.trim()) {
-    return output;
+export function getOtlpAzureAuthExtension(
+  auth: OtlpOutputAuth | null | undefined,
+  clientSecret: SOSecret | null | undefined,
+  exporter: Partial<OtlpExporterConfig>
+): Record<string, unknown> | undefined {
+  if (auth?.type !== otlpAuthType.Azure || sendsToManagedOtlpEndpoint(exporter)) {
+    return undefined;
+  }
+
+  const scopes = auth.scopes?.length ? { scopes: auth.scopes } : {};
+  if (auth.azure_auth_method === otlpAzureAuthMethod.ManagedIdentity) {
+    // without a client id, the system-assigned identity is used
+    return {
+      managed_identity: auth.client_id ? { client_id: auth.client_id } : {},
+      ...scopes,
+    };
+  }
+
+  if (typeof clientSecret !== 'object' || !clientSecret?.id) {
+    return undefined;
   }
 
   return {
-    ...output,
-    secrets: { ...secrets, auth: { ...secrets!.auth, credential: credential.trim() } },
+    service_principal: {
+      tenant_id: auth.tenant_id,
+      client_id: auth.client_id,
+      client_secret: toCompiledSecretRef(clientSecret.id),
+    },
+    ...scopes,
   };
 }
 
 /**
- * Throws if the credential that an output sends is not one it can save: a new value, or the
+ * Returns the secrets with the credentials trimmed: a pasted value often ends with a line break,
+ * which would make the header, or the token request, invalid.
+ */
+export function withTrimmedOtlpAuthCredential<T extends { secrets?: unknown }>(output: T): T {
+  const secrets = output.secrets as { auth?: Record<string, unknown> } | null | undefined;
+  const trimmed = OTLP_AUTH_SECRET_KEYS.filter((key) => {
+    const value = secrets?.auth?.[key];
+    return typeof value === 'string' && value !== value.trim();
+  });
+  if (!trimmed.length) {
+    return output;
+  }
+
+  const auth = { ...secrets!.auth };
+  trimmed.forEach((key) => {
+    auth[key] = (auth[key] as string).trim();
+  });
+
+  return { ...output, secrets: { ...secrets, auth } };
+}
+
+/**
+ * Throws if a credential that an output sends is not one it can save: a new value, or the
  * reference to the secret the output already has. A reference to any other secret is rejected, as
- * the value of that secret would be sent to the endpoint of the output.
+ * the value of that secret would be sent to the endpoint of the output, or to Microsoft Entra ID.
  */
 export function validateOtlpAuthCredential(
   credential: SOSecret | null | undefined,
-  storedCredential?: SOSecret | null
+  storedCredential?: SOSecret | null,
+  key: OtlpAuthSecretKey = 'credential'
 ): void {
+  const path = `secrets.auth.${key}`;
   if (typeof credential === 'string') {
     if (!isValidOtlpAuthCredential(credential)) {
-      throw new OutputInvalidError('secrets.auth.credential cannot contain control characters');
+      throw new OutputInvalidError(`${path} cannot contain control characters`);
     }
     return;
   }
@@ -87,7 +150,47 @@ export function validateOtlpAuthCredential(
   const storedId = typeof storedCredential === 'object' ? storedCredential?.id : undefined;
   if (!storedId || credential.id !== storedId) {
     throw new OutputInvalidError(
-      'secrets.auth.credential must be a new value, or the reference to the credential of this output'
+      `${path} must be a new value, or the reference to the ${
+        key === 'credential' ? 'credential' : 'client secret'
+      } of this output`
+    );
+  }
+}
+
+/** Throws if the secrets of the authentication of an output are not ones it can save. */
+export function validateOtlpAuthSecrets(
+  secrets: { auth?: { [key in OtlpAuthSecretKey]?: SOSecret | null } | null } | null | undefined,
+  storedSecrets?: { auth?: { [key in OtlpAuthSecretKey]?: SOSecret | null } | null } | null
+): void {
+  OTLP_AUTH_SECRET_KEYS.forEach((key) =>
+    validateOtlpAuthCredential(secrets?.auth?.[key], storedSecrets?.auth?.[key], key)
+  );
+}
+
+/** Throws if the Azure authentication of an output is not complete for its method. */
+function validateOtlpAzureAuth(
+  auth: OtlpAzureAuth,
+  exporter: Partial<OtlpExporterConfig> | null | undefined
+): void {
+  // the extension only authenticates HTTP requests, it cannot add the token to gRPC calls
+  if (exporter?.protocol !== otlpProtocol.HttpProtobuf) {
+    throw new OutputInvalidError(
+      `auth.type "${otlpAuthType.Azure}" requires otlp_exporter.protocol "${otlpProtocol.HttpProtobuf}"`
+    );
+  }
+
+  if (auth.azure_auth_method === otlpAzureAuthMethod.ServicePrincipal) {
+    const missing = (['tenant_id', 'client_id'] as const).filter((key) => !auth[key]);
+    if (missing.length) {
+      throw new OutputInvalidError(
+        `auth.${missing.join(' and auth.')} ${missing.length > 1 ? 'are' : 'is'} required for the ${
+          otlpAzureAuthMethod.ServicePrincipal
+        } method`
+      );
+    }
+  } else if (auth.tenant_id) {
+    throw new OutputInvalidError(
+      `auth.tenant_id can only be set for the ${otlpAzureAuthMethod.ServicePrincipal} method`
     );
   }
 }
@@ -99,15 +202,22 @@ export function validateOtlpAuthCredential(
 export function validateOtlpAuth({
   auth,
   hasCredential,
+  hasAzureClientSecret = false,
   exporter,
 }: {
   auth: OtlpOutputAuth | null | undefined;
   hasCredential: boolean;
+  hasAzureClientSecret?: boolean;
   exporter: Partial<OtlpExporterConfig> | null | undefined;
 }): void {
   if (!auth) {
     if (hasCredential) {
       throw new OutputInvalidError('secrets.auth.credential can only be set together with auth');
+    }
+    if (hasAzureClientSecret) {
+      throw new OutputInvalidError(
+        'secrets.auth.azure_client_secret can only be set together with auth'
+      );
     }
     return;
   }
@@ -119,8 +229,28 @@ export function validateOtlpAuth({
     );
   }
 
-  if (!hasCredential) {
+  if (auth.type === otlpAuthType.Azure) {
+    validateOtlpAzureAuth(auth, exporter);
+  }
+
+  const secretKey = getOtlpAuthSecretKey(auth);
+  if (hasCredential && secretKey !== 'credential') {
+    throw new OutputInvalidError(
+      `secrets.auth.credential cannot be set for auth.type "${auth.type}"`
+    );
+  }
+  if (hasAzureClientSecret && secretKey !== 'azure_client_secret') {
+    throw new OutputInvalidError(
+      `secrets.auth.azure_client_secret can only be set for the ${otlpAzureAuthMethod.ServicePrincipal} method of auth.type "${otlpAuthType.Azure}"`
+    );
+  }
+  if (secretKey === 'credential' && !hasCredential) {
     throw new OutputInvalidError('secrets.auth.credential is required when auth is set');
+  }
+  if (secretKey === 'azure_client_secret' && !hasAzureClientSecret) {
+    throw new OutputInvalidError(
+      `secrets.auth.azure_client_secret is required for the ${otlpAzureAuthMethod.ServicePrincipal} method`
+    );
   }
 
   if (

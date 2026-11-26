@@ -81,6 +81,8 @@ import {
 
 import type { ValueOf } from '../../common/types';
 import { normalizeHostsForAgents, validateFleetSavedObjectId } from '../../common/services';
+import { getOtlpAuthSecretKey } from '../../common/services/otlp_auth';
+import type { OtlpAuthSecretKey } from '../../common/services/otlp_auth';
 import { omitRemovedOtlpQueueSettings } from '../../common/services/otlp_sending_queue';
 import {
   FleetEncryptedSavedObjectEncryptionKeyRequired,
@@ -112,7 +114,7 @@ import { getOutputSecretFields } from './outputs/secret_fields';
 import {
   omitRemovedOtlpAuthSettings,
   validateOtlpAuth,
-  validateOtlpAuthCredential,
+  validateOtlpAuthSecrets,
   withRemovedOtlpAuthSettings,
   withTrimmedOtlpAuthCredential,
 } from './outputs/otlp_auth';
@@ -846,7 +848,7 @@ class OutputService {
     if (isOtlpOutput(output)) {
       const otlpOutput = withTrimmedOtlpAuthCredential(output);
       // a new output has no credential yet: it can only be sent as a value
-      validateOtlpAuthCredential(otlpOutput.secrets?.auth?.credential);
+      validateOtlpAuthSecrets(otlpOutput.secrets);
       output = otlpOutput;
     }
 
@@ -869,6 +871,7 @@ class OutputService {
       validateOtlpAuth({
         auth: output.auth,
         hasCredential: !!output.secrets?.auth?.credential,
+        hasAzureClientSecret: !!output.secrets?.auth?.azure_client_secret,
         exporter: output.otlp_exporter,
       });
     }
@@ -1386,10 +1389,10 @@ class OutputService {
 
     if (mergedType === outputType.Otlp) {
       data = withTrimmedOtlpAuthCredential(data);
-      // checked before the saved credential is added to the update
-      validateOtlpAuthCredential(
-        (data as Partial<NewOtlpOutput>).secrets?.auth?.credential,
-        isOtlpOutput(originalOutput) ? originalOutput.secrets?.auth?.credential : undefined
+      // checked before the saved credentials are added to the update
+      validateOtlpAuthSecrets(
+        (data as Partial<NewOtlpOutput>).secrets,
+        isOtlpOutput(originalOutput) ? originalOutput.secrets : undefined
       );
     }
 
@@ -2100,17 +2103,20 @@ class OutputService {
       throw new OutputInvalidError(OTLP_AUTH_REQUIRES_SECRET_STORAGE_MESSAGE);
     }
 
-    // `auth: null` removes the credential with the authentication
-    const credential =
-      data.secrets?.auth && 'credential' in data.secrets.auth
-        ? data.secrets.auth.credential
-        : auth
-        ? original?.secrets?.auth?.credential
+    // `auth: null` removes the credentials with the authentication, and an authentication that
+    // does not use a saved credential removes it too
+    const secretKey = getOtlpAuthSecretKey(auth);
+    const getSecret = (key: OtlpAuthSecretKey) =>
+      data.secrets?.auth && key in data.secrets.auth
+        ? data.secrets.auth[key]
+        : secretKey === key
+        ? original?.secrets?.auth?.[key]
         : undefined;
 
     validateOtlpAuth({
       auth,
-      hasCredential: !!credential,
+      hasCredential: !!getSecret('credential'),
+      hasAzureClientSecret: !!getSecret('azure_client_secret'),
       exporter: getMergedOtlpExporter(data.otlp_exporter, original?.otlp_exporter),
     });
   }
