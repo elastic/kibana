@@ -373,6 +373,63 @@ describe('OTLP output authentication', () => {
           })
         ).toThrow('auth cannot be set for an output that sends data to the managed OTLP endpoint');
       });
+
+      it('rejects an endpoint, or a signal endpoint, that is not https', () => {
+        expect(() =>
+          validateOtlpAuth({
+            auth: managedIdentity,
+            hasCredential: false,
+            exporter: { endpoint: 'http://collector.example.com:4318', protocol: 'http/protobuf' },
+          })
+        ).toThrow(
+          'auth.type "azure" requires https endpoints, "http://collector.example.com:4318" is not one'
+        );
+        expect(() =>
+          validateOtlpAuth({
+            auth: managedIdentity,
+            hasCredential: false,
+            exporter: { ...exporter, logs_endpoint: 'http://collector.example.com:4318/v1/logs' },
+          })
+        ).toThrow('"http://collector.example.com:4318/v1/logs" is not one');
+      });
+
+      it('rejects skipping the verification of the server certificate', () => {
+        expect(() =>
+          validateOtlpAuth({
+            auth: managedIdentity,
+            hasCredential: false,
+            exporter: { ...exporter, tls: { insecure_skip_verify: true } },
+          })
+        ).toThrow(
+          'auth.type "azure" cannot be set together with otlp_exporter.tls.insecure_skip_verify'
+        );
+      });
+
+      it('accepts a single scope only for a managed identity', () => {
+        const scopes = ['https://monitor.azure.com/.default', 'https://other.example.com/.default'];
+        expect(() =>
+          validateOtlpAuth({
+            auth: { ...managedIdentity, scopes },
+            hasCredential: false,
+            exporter,
+          })
+        ).toThrow('auth.scopes can only have one scope for the managed_identity method');
+        expect(() =>
+          validateOtlpAuth({
+            auth: { ...managedIdentity, scopes: scopes.slice(0, 1) },
+            hasCredential: false,
+            exporter,
+          })
+        ).not.toThrow();
+        expect(() =>
+          validateOtlpAuth({
+            auth: { ...servicePrincipal, scopes },
+            hasCredential: false,
+            hasAzureClientSecret: true,
+            exporter,
+          })
+        ).not.toThrow();
+      });
     });
   });
 

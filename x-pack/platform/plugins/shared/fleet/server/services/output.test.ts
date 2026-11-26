@@ -350,6 +350,18 @@ function getMockedSoClient(
         });
       }
 
+      case outputIdToUuid('existing-otlp-output-with-insecure-tls'): {
+        return mockOutputSO('existing-otlp-output-with-insecure-tls', {
+          type: 'otlp',
+          is_default: false,
+          otlp_exporter: {
+            endpoint: 'https://otel.example.com:4318',
+            protocol: 'http/protobuf',
+            tls: { insecure_skip_verify: true },
+          },
+        });
+      }
+
       case outputIdToUuid('existing-otlp-output-with-azure-auth'): {
         return mockOutputSO('existing-otlp-output-with-azure-auth', {
           type: 'otlp',
@@ -662,6 +674,18 @@ function getMockedEncryptedSoClient() {
           },
           auth: { type: 'auth_header', scheme: 'api_key' },
           secrets: { auth: { credential: { id: 'credential-secret-id' } } },
+        });
+      }
+
+      case outputIdToUuid('existing-otlp-output-with-insecure-tls'): {
+        return mockOutputSO('existing-otlp-output-with-insecure-tls', {
+          type: 'otlp',
+          is_default: false,
+          otlp_exporter: {
+            endpoint: 'https://otel.example.com:4318',
+            protocol: 'http/protobuf',
+            tls: { insecure_skip_verify: true },
+          },
         });
       }
 
@@ -5706,6 +5730,52 @@ describe('Output Service', () => {
                 { otlp_exporter: { endpoint: 'otel.example.com:4317', protocol: 'grpc' } }
               )
             ).rejects.toThrow('auth.type "azure" requires otlp_exporter.protocol "http/protobuf"');
+          });
+
+          it('rejects an endpoint that is not https while Azure is stored', async () => {
+            await expect(
+              outputService.update(
+                getMockedSoClient({}),
+                esClientMock,
+                'existing-otlp-output-with-azure-auth',
+                {
+                  otlp_exporter: {
+                    endpoint: 'http://otel.example.com:4318',
+                    protocol: 'http/protobuf',
+                  },
+                }
+              )
+            ).rejects.toThrow('auth.type "azure" requires https endpoints');
+          });
+
+          it('rejects Azure when the stored TLS settings skip the certificate verification', async () => {
+            await expect(
+              outputService.update(
+                getMockedSoClient({}),
+                esClientMock,
+                'existing-otlp-output-with-insecure-tls',
+                {
+                  // the update only changes another TLS setting: the stored one is kept
+                  otlp_exporter: {
+                    ...httpExporter,
+                    tls: { ca_pem: 'ca' },
+                  },
+                  auth: { type: 'azure', azure_auth_method: 'managed_identity' },
+                }
+              )
+            ).rejects.toThrow('cannot be set together with otlp_exporter.tls.insecure_skip_verify');
+          });
+
+          it('accepts Azure once the update stops skipping the certificate verification', async () => {
+            await outputService.update(
+              getMockedSoClient({}),
+              esClientMock,
+              'existing-otlp-output-with-insecure-tls',
+              {
+                otlp_exporter: { ...httpExporter, tls: { insecure_skip_verify: false } },
+                auth: { type: 'azure', azure_auth_method: 'managed_identity' },
+              }
+            );
           });
 
           it('rejects switching to a header without a new credential', async () => {

@@ -179,6 +179,31 @@ function validateOtlpAzureAuth(
     );
   }
 
+  // the token is a bearer token: it is only sent to an endpoint that proves its identity
+  const insecureEndpoint = getOtlpExporterEndpoints(exporter).find(
+    (endpoint) => !/^https:\/\//i.test(endpoint)
+  );
+  if (insecureEndpoint) {
+    throw new OutputInvalidError(
+      `auth.type "${otlpAuthType.Azure}" requires https endpoints, "${insecureEndpoint}" is not one`
+    );
+  }
+  if (exporter?.tls?.insecure_skip_verify) {
+    throw new OutputInvalidError(
+      `auth.type "${otlpAuthType.Azure}" cannot be set together with otlp_exporter.tls.insecure_skip_verify`
+    );
+  }
+
+  // a managed identity requests a token for a single resource
+  if (
+    auth.azure_auth_method === otlpAzureAuthMethod.ManagedIdentity &&
+    (auth.scopes?.length ?? 0) > 1
+  ) {
+    throw new OutputInvalidError(
+      `auth.scopes can only have one scope for the ${otlpAzureAuthMethod.ManagedIdentity} method`
+    );
+  }
+
   if (auth.azure_auth_method === otlpAzureAuthMethod.ServicePrincipal) {
     const missing = (['tenant_id', 'client_id'] as const).filter((key) => !auth[key]);
     if (missing.length) {

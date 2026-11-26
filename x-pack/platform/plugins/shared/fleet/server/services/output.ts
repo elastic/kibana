@@ -212,10 +212,18 @@ function getMergedOtlpExporter(
   // headers replace the stored ones, which are kept when they are left out, also by an update
   // that changes the protocol: they are shared by both protocols
   const headers = update.headers !== undefined ? update.headers : stored?.headers;
+  // the TLS settings are shared by both protocols too, and the saved object merges them key by
+  // key: `null` clears them
+  const tls =
+    update.tls === undefined
+      ? stored?.tls
+      : update.tls === null
+      ? undefined
+      : { ...stored?.tls, ...update.tls };
   if (!stored || update.protocol !== stored.protocol) {
-    return { ...update, headers } as Partial<OtlpExporterConfig>;
+    return { ...update, headers, tls } as Partial<OtlpExporterConfig>;
   }
-  return { ...stored, ...update, headers } as Partial<OtlpExporterConfig>;
+  return { ...stored, ...update, headers, tls } as Partial<OtlpExporterConfig>;
 }
 
 /** Drops the headers that an update removed, which the saved object keeps as `null`. */

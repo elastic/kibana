@@ -896,7 +896,7 @@ const OtlpAzureAuthSchema = schema.object(
         maxSize: OTLP_AZURE_SCOPES_MAX_SIZE,
         meta: {
           description:
-            'The scopes of the token. By default `https://<host of the endpoint>/.default`, set them when the endpoint expects another audience, e.g. `https://monitor.azure.com/.default`.',
+            'The scopes of the token. By default `https://<host of the endpoint>/.default`, set them when the endpoint expects another audience, e.g. `https://monitor.azure.com/.default`. A managed identity accepts a single scope.',
         },
       })
     ),
