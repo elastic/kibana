@@ -16,9 +16,9 @@ describe('topn', () => {
       { category: 'dockerd', expectedColor: '#F6726A' },
       { category: 'Other', expectedColor: '#EE72A6' },
       { category: 'node', expectedColor: '#61A2FF' },
-      { category: 'filebeat', expectedColor: '#16C5C0' },
+      { category: 'filebeat', expectedColor: '#00BDA0' },
       { category: 'containerd', expectedColor: '#FFC9C2' },
-      { category: 'C2 CompilerThre', expectedColor: '#A6EDEA' },
+      { category: 'C2 CompilerThre', expectedColor: '#93F0D9' },
       { category: '[metrics]>worke', expectedColor: '#FFC7DB' },
     ];
     const colors = euiPaletteColorBlind({

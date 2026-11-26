@@ -120,4 +120,23 @@ describe('useSessionsStatusState', () => {
       jest.useRealTimers();
     }
   });
+
+  it('checks a rebuild again at once when a page shows it again, as it may have finished meanwhile', async () => {
+    fetch
+      .mockResolvedValueOnce({ installed: true, rebuilding: true } as SessionsStatus)
+      .mockResolvedValue({ installed: true, rebuilding: false } as SessionsStatus);
+    const { result, rerender } = renderHook(
+      ({ isWatched }) => useSessionsStatusState({ isWatched }),
+      { initialProps: { isWatched: true } }
+    );
+    await waitFor(() => expect(result.current.status?.rebuilding).toBe(true));
+
+    rerender({ isWatched: false });
+    expect(fetch).toHaveBeenCalledTimes(1);
+    rerender({ isWatched: true });
+
+    // Without waiting for the next poll
+    await waitFor(() => expect(result.current.status?.rebuilding).toBe(false));
+    expect(fetch).toHaveBeenCalledTimes(2);
+  });
 });

@@ -3,6 +3,14 @@ id: task-manager-registration
 description: Reviews new or changed Task Manager task type registrations and scheduling for timeout, abort signal, error classification, capacity, and scheduling guideline compliance
 apply_to:
   - "x-pack/platform/test/plugin_api_integration/test_suites/task_manager/check_registered_task_types.ts"
+apply_if:
+  match: any
+  rules:
+    - instructions: "Does the change add or modify a Task Manager task type registration, its task runner, or the scheduling of a task?"
+      criteria:
+        "true": "Adds or changes a `registerTaskDefinitions` call or a task definition passed to it (`timeout`, `cost`, `priority`, `maxAttempts`, schemas, `createTaskRunner`, `run`, `cancel`), or adds or changes a Task Manager `ensureScheduled`, `schedule`, or `bulkSchedule` call."
+        "false": "Only changes tests, mocks, types, or documentation, only removes a task type, or uses Task Manager without changing a task definition, a task runner, or a scheduling call."
+      threshold: 0.75
 can_block: false
 ---
 
@@ -12,8 +20,9 @@ Review background tasks that a pull request registers or schedules with the Task
 
 ## Scope
 
-- This review is selected when the pull request changes the registered task types assertion, which means a task type was added, renamed, or removed. That file is only the trigger; do not review it beyond checking that the new id is present and the list stays sorted.
-- Find the task code itself in the pull request's other changed files: search them for `registerTaskDefinitions`, `createTaskRunner`, `ensureScheduled`, `schedule`, and `bulkSchedule`, and read the full diff of each matching file with `read_file_diff`. Follow the `run()` call chain into the functions it calls, including ones in files the pull request does not change.
+- This review is selected when the changes under review include the registered task types assertion, which means a task type was added, renamed, or removed, or when they add or modify a task registration, a task runner, or a scheduling call. A later push to a pull request can select it without the assertion file.
+- When the assertion file is among the changed files, do not review it beyond checking that the new id is present and the list stays sorted.
+- Find the task code itself in the other changed files: search them for `registerTaskDefinitions`, `createTaskRunner`, `ensureScheduled`, `schedule`, and `bulkSchedule`, and read the full diff of each matching file with `read_file_diff`. Follow the `run()` call chain into the functions it calls, including ones in files the pull request does not change.
 - For every task type id the pull request removes from the assertion, including the old id of a rename, check that the id is added to `REMOVED_TYPES` in `x-pack/platform/plugins/shared/task_manager/server/task_type_dictionary.ts` or that existing task documents of that type are migrated or deleted, so none are left unclaimable. If the pull request only removes task types, finish after this check.
 - If no task registration or scheduling code can be found, finish without findings.
 - Do not review backport pull requests. Use a version-prefixed title such as `[9.x]` or the `backport` label as the available backport signal.

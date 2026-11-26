@@ -543,7 +543,7 @@ describe('WorkflowExecutionTelemetryClient', () => {
       const workflowExecution = createMockWorkflowExecution({
         templateSlug: 'triage-alerts',
         templateVersion: '1.2.0',
-        templateOrigin: 'install',
+        templateOrigin: 'catalog',
       });
 
       client.reportWorkflowExecutionCompleted({
@@ -555,7 +555,7 @@ describe('WorkflowExecutionTelemetryClient', () => {
       expect(eventData).toMatchObject({
         templateSlug: 'triage-alerts',
         templateVersion: '1.2.0',
-        templateOrigin: 'install',
+        templateOrigin: 'catalog',
       });
     });
 

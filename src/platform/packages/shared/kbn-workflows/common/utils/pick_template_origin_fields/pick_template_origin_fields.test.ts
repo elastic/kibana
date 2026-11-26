@@ -15,12 +15,12 @@ describe('pickTemplateOriginFields', () => {
       pickTemplateOriginFields({
         templateSlug: 'triage-alerts',
         templateVersion: '1.2.0',
-        templateOrigin: 'install',
+        templateOrigin: 'catalog',
       })
     ).toEqual({
       templateSlug: 'triage-alerts',
       templateVersion: '1.2.0',
-      templateOrigin: 'install',
+      templateOrigin: 'catalog',
     });
   });
 

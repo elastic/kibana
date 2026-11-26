@@ -27,7 +27,6 @@ const _allowedExperimentalValues = {
   enableSloTemplates: true,
   enableVersionSpecificPolicies: true, // When enabled, version specific policies will be created when packages use agent version conditions
   enableIntegrationInactivityAlerting: true, // When enabled, an inactivity monitoring alerting rule template is created on fresh integration package install.
-  enableSimplifiedAgentlessUX: true, // When enabled, the agentless deployment mode will be simplified for single input/datastreams integrations.
   enableOpAMP: true, // When enabled, OpAMP features will be available in the API and UI.
   enableOTelVerifier: true, // When enabled, OTel-based cloud connector permission verification is active.
   enableResolveDependencies: true, // When enabled, the resolve dependencies step will be available during package installation.
