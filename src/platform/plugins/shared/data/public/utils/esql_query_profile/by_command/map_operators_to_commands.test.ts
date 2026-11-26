@@ -346,6 +346,19 @@ describe('mapOperatorsToCommands with subqueries', () => {
     ]);
   });
 
+  it('numbers the subqueries by the first row that is shown, not by one that is left out', () => {
+    const query = 'FROM (FROM (FROM a), (FROM b) | WHERE k IN (FROM c | KEEP k))';
+    const shownHeat = heatOf(query, []);
+
+    expect(shownHeat.commands.map(({ command, subquery }) => [command.text, subquery])).toEqual([
+      ['FROM a', 0],
+      ['FROM b', 1],
+      ['FROM c', 2],
+      ['KEEP k', 2],
+      ['WHERE k IN (FROM c | KEEP k)', 3],
+    ]);
+  });
+
   it('keeps the row of a FROM that has a source of its own besides the subqueries', () => {
     const query = 'FROM a, (FROM b | LIMIT 1) | LIMIT 5';
     const sourceHeat = heatOf(query, [

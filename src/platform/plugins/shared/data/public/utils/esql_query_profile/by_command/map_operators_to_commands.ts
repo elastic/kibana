@@ -86,8 +86,7 @@ const offsetOf = (
 
 /**
  * The commands of a query, with the commands of the subqueries of each command listed just before
- * the command that holds them. Subqueries are numbered in the order their first row is listed, so
- * a subquery inside another can come first, and the numbers read from the top as the work runs.
+ * the command that holds them. Each subquery has an id, counted in the order they are written.
  */
 const listEntries = (commands: QueryCommand[]): Entry[] => {
   let nextSubquery = 0;
@@ -96,17 +95,23 @@ const listEntries = (commands: QueryCommand[]): Entry[] => {
       ...(command.branches ?? []).flatMap((branch) => list(branch, nextSubquery++)),
       { command, subquery },
     ]);
-  const entries = list(commands);
+  return list(commands);
+};
 
-  const numberOfSubquery = new Map<number, number>();
-  entries.forEach(({ subquery }) => {
-    if (subquery !== undefined && !numberOfSubquery.has(subquery)) {
-      numberOfSubquery.set(subquery, numberOfSubquery.size);
+/**
+ * Numbers the subqueries of the rows that are shown, from 0, in the order their first row comes.
+ * So a subquery inside another can come first, and the numbers read from the top as the work runs.
+ */
+const numberSubqueries = (rows: CommandHeat[]): CommandHeat[] => {
+  const numbers = new Map<number, number>();
+  rows.forEach(({ subquery }) => {
+    if (subquery !== undefined && !numbers.has(subquery)) {
+      numbers.set(subquery, numbers.size);
     }
   });
-  return entries.map(({ command, subquery }) => ({
-    command,
-    subquery: subquery === undefined ? undefined : numberOfSubquery.get(subquery),
+  return rows.map((row) => ({
+    ...row,
+    subquery: row.subquery === undefined ? undefined : numbers.get(row.subquery),
   }));
 };
 
@@ -205,7 +210,9 @@ export function mapOperatorsToCommands({
   return {
     // A command that only holds subqueries is worth a row when it took time of its own. Any other
     // stays, such as FROM a, (...) with a source, or WHERE k IN (...) with an expression.
-    commands: heats.filter(({ command, share }) => !command.holdsOnlySubqueries || share > 0),
+    commands: numberSubqueries(
+      heats.filter(({ command, share }) => !command.holdsOnlySubqueries || share > 0)
+    ),
     unattributedShare: shareOf(unattributedNanos, totalNanos),
     unattributedOperators: slowestFirst(unattributedByOperator),
     hasSubqueries: commands.some((command) => Boolean(command.branches?.length)),
