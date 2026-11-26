@@ -380,10 +380,11 @@ export default function ({ getService }: FtrProviderContext) {
       if (testError) {
         if (notDeleted.length > 0) {
           // keep both failures in the output: the policies left behind can affect the next tests
-          const testErrorMessage =
-            testError instanceof Error ? testError.message : String(testError);
+          // `cause` is not serialized by all the test reporters, so the original stack is in the message
+          const testErrorDetails =
+            testError instanceof Error ? testError.stack ?? testError.message : String(testError);
           throw new Error(
-            `${testErrorMessage}\n\nIn addition, ${
+            `${testErrorDetails}\n\nIn addition, ${
               notDeleted.length
             } agent policies could not be deleted and may affect the next tests: ${notDeleted
               .slice(0, 10)

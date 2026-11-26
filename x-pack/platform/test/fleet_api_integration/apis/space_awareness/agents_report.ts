@@ -122,8 +122,20 @@ export default function (providerContext: FtrProviderContext) {
     async function getReportCsv(jobId: string): Promise<string> {
       return pRetry(
         async () => {
-          const response = await supertest.get(`/api/reporting/jobs/download/${jobId}`).expect(200);
-          return response.text as string;
+          const response = await supertest.get(`/api/reporting/jobs/download/${jobId}`);
+          if (response.status === 200) {
+            return response.text as string;
+          }
+          if (response.status === 503) {
+            // the report is still being generated
+            throw new Error(`Report ${jobId} is not ready yet (503)`);
+          }
+          // for example a 500 when the generation of the report failed, retrying will not help
+          throw new pRetry.AbortError(
+            `Report ${jobId} download failed with status ${response.status}: ${
+              response.text || JSON.stringify(response.body)
+            }`
+          );
         },
         { retries: 6, minTimeout: 1000 }
       );
