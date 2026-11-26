@@ -119,10 +119,13 @@ async function judgeMeasuredFailures({
           from: start - KNOWN_FAILURES_SETTINGS.data_start_lookback_minutes * MINUTE_MS,
         });
         const guarded = judge(dataFrom);
+        // Matched by minute, not counted: without an early run's event, a later minute can be
+        // found that the unguarded judgement did not, and would hide one that was dropped.
+        const keptMinutes = new Set(guarded.unusual.map(({ minute }) => minute));
+        const keptRises = new Set(guarded.rises.map(({ lastMinute }) => lastMinute));
         const dropped =
-          unguarded.unusual.length +
-          unguarded.rises.length -
-          (guarded.unusual.length + guarded.rises.length);
+          unguarded.unusual.filter(({ minute }) => !keptMinutes.has(minute)).length +
+          unguarded.rises.filter(({ lastMinute }) => !keptRises.has(lastMinute)).length;
         if (dropped > 0) {
           notes.push(
             `dropped ${dropped} finding(s) of knowledge indicator [${
