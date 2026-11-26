@@ -910,7 +910,7 @@ export const getFullAgentPolicy: FleetRequestHandler<
       soClient,
       agentPolicyId,
       agentVersion,
-      { standalone: request.query.standalone === true, redactProxySecrets: !canReadSettings }
+      { standalone: request.query.standalone === true, redactSecrets: !canReadSettings }
     );
     if (fullAgentConfigMap) {
       const body: GetFullAgentConfigMapResponse = {
@@ -928,7 +928,7 @@ export const getFullAgentPolicy: FleetRequestHandler<
   } else {
     const fullAgentPolicy = await agentPolicyService.getFullAgentPolicy(soClient, agentPolicyId, {
       standalone: request.query.standalone === true,
-      redactProxySecrets: !canReadSettings,
+      redactSecrets: !canReadSettings,
     });
     if (fullAgentPolicy) {
       const body: GetFullAgentPolicyResponse = {
@@ -1008,7 +1008,7 @@ export const downloadFullAgentPolicy: FleetRequestHandler<
       soClient,
       agentPolicyId,
       agentVersion,
-      { standalone: request.query.standalone === true, redactProxySecrets: !canReadSettings }
+      { standalone: request.query.standalone === true, redactSecrets: !canReadSettings }
     );
     if (!fullAgentConfigMap) {
       return response.customError({
@@ -1028,7 +1028,7 @@ export const downloadFullAgentPolicy: FleetRequestHandler<
   } else {
     const fullAgentPolicy = await agentPolicyService.getFullAgentPolicy(soClient, agentPolicyId, {
       standalone: request.query.standalone === true,
-      redactProxySecrets: !canReadSettings,
+      redactSecrets: !canReadSettings,
     });
     if (!fullAgentPolicy) {
       return response.customError({
