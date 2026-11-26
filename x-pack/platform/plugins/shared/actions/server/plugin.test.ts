@@ -7,6 +7,7 @@
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
+import { errors } from '@elastic/elasticsearch';
 import moment from 'moment';
 import { BehaviorSubject, of } from 'rxjs';
 import { ByteSizeValue } from '@kbn/config-schema';
@@ -39,6 +40,7 @@ import {
   DEFAULT_MICROSOFT_GRAPH_API_URL,
 } from '../common';
 import { cloudMock } from '@kbn/cloud-plugin/server/mocks';
+import { slack2HitlAction } from '@kbn/connector-topics';
 import { getConnectorType } from './fixtures';
 import {
   CONNECTOR_INGRESS_CREDENTIAL_SAVED_OBJECT_TYPE,
@@ -46,13 +48,14 @@ import {
 } from './constants/saved_objects';
 import { LeasePool } from './lib';
 import { defaultInboundEventsLimitConfigs } from './config';
-import { loadFixture } from './lib/declarative_connectors/__fixtures__/load_fixture';
-import { errors } from '@elastic/elasticsearch';
+import { registerConnectorEventTopics } from './inbound/register_connector_event_topics';
+import * as publishConnectorEvent from './inbound/publish_connector_event';
 import {
   CATALOG_START_LOAD_TIMEOUT_MS,
   CATALOG_REQUEST_WAIT_MS,
   CONNECTOR_TYPE_CATALOG_INDEX,
 } from './lib/connector_catalog';
+import { loadFixture } from './lib/declarative_connectors/__fixtures__/load_fixture';
 
 function getConfig(overrides = {}) {
   return {
@@ -124,6 +127,10 @@ const casesConnectorType = getConnectorType({
 });
 
 describe('Actions Plugin', () => {
+  afterEach(() => {
+    publishConnectorEvent.setConnectorEventPublisher(undefined);
+  });
+
   describe('setup()', () => {
     let context: PluginInitializerContext;
     let plugin: ActionsPlugin;
@@ -229,6 +236,37 @@ describe('Actions Plugin', () => {
       expect(() => setupContract.registerConnectorEventEmitter({ emit: jest.fn() })).toThrow(
         /only one emitter is supported/
       );
+    });
+
+    it('does not register connector event topics while inbound events are disabled', async () => {
+      await plugin.setup(coreSetup, pluginsSetup);
+
+      expect(coreSetup.pubsub.registerTopic).not.toHaveBeenCalled();
+    });
+
+    it('registers connector event topics when inbound events are enabled', async () => {
+      const enabledPlugin = new ActionsPlugin(
+        coreMock.createPluginInitializerContext<ActionsConfig>(
+          getConfig({
+            inboundEvents: {
+              enabled: true,
+              maxBodyBytes: new ByteSizeValue(1024 * 1024),
+              maxEmitted: 25,
+              ...defaultInboundEventsLimitConfigs,
+            },
+          })
+        )
+      );
+      const topics = registerConnectorEventTopics(jest.fn());
+
+      await enabledPlugin.setup(coreSetup, pluginsSetup);
+
+      const registeredNames = coreSetup.pubsub.registerTopic.mock.calls.map(
+        ([topic]) => topic.name
+      );
+      expect(registeredNames).toEqual([...topics.values()].map((topic) => topic.name));
+      expect([...topics.keys()]).not.toContain(slack2HitlAction.name);
+      expect(registeredNames).not.toContain(slack2HitlAction.name);
     });
 
     describe('routeHandlerContext.getActionsClient()', () => {
@@ -652,6 +690,55 @@ describe('Actions Plugin', () => {
       ).rejects.toThrowErrorMatchingInlineSnapshot(
         `"Action type \\"non-existing\\" is not registered."`
       );
+    });
+
+    describe('connector event publisher', () => {
+      let setPublisher: jest.SpiedFunction<typeof publishConnectorEvent.setConnectorEventPublisher>;
+
+      beforeEach(() => {
+        setPublisher = jest.spyOn(publishConnectorEvent, 'setConnectorEventPublisher');
+      });
+
+      afterEach(() => {
+        setPublisher.mockRestore();
+      });
+
+      it('does not install a publisher while inbound events are disabled', async () => {
+        await plugin.setup(coreSetup, pluginsSetup);
+        plugin.start(coreStart, pluginsStart);
+
+        expect(setPublisher).not.toHaveBeenCalled();
+      });
+
+      it('installs the publisher with the topics registered in setup', async () => {
+        const enabledPlugin = new ActionsPlugin(
+          coreMock.createPluginInitializerContext<ActionsConfig>(
+            getConfig({
+              inboundEvents: {
+                enabled: true,
+                maxBodyBytes: new ByteSizeValue(1024 * 1024),
+                maxEmitted: 25,
+                ...defaultInboundEventsLimitConfigs,
+              },
+            })
+          )
+        );
+        const topics = registerConnectorEventTopics(jest.fn());
+
+        await enabledPlugin.setup(coreSetup, pluginsSetup);
+        enabledPlugin.start(coreStart, pluginsStart);
+
+        expect(setPublisher).toHaveBeenCalledTimes(1);
+        const [publisher] = setPublisher.mock.calls[0];
+        expect(publisher).toEqual(
+          expect.objectContaining({
+            pubsub: coreStart.pubsub,
+          })
+        );
+        if (publisher) {
+          expect([...publisher.topics.keys()]).toEqual([...topics.keys()]);
+        }
+      });
     });
 
     describe('connector catalog feature flag', () => {

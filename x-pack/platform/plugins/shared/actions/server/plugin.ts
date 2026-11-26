@@ -83,6 +83,8 @@ import { getActionsConfigurationUtilities } from './actions_config';
 
 import { defineRoutes } from './routes';
 import { setupInboundEvents, type ConnectorEventEmitter } from './inbound';
+import { registerConnectorEventTopics } from './inbound/register_connector_event_topics';
+import { setConnectorEventPublisher } from './inbound/publish_connector_event';
 import { initializeActionsTelemetry, scheduleActionsTelemetry } from './usage/task';
 import {
   initializeOAuthStateCleanupTask,
@@ -337,6 +339,8 @@ export class ActionsPlugin
   private connectorUsageReportingTask: ConnectorUsageReportingTask | undefined;
   private connectorLifecycleListeners: ConnectorLifecycleListener[] = [];
   private connectorEventEmitter?: ConnectorEventEmitter;
+  /** Topics registered in setup when inbound events are enabled. `start` installs the publisher only when this is set. */
+  private connectorEventTopicsByEventId?: ReturnType<typeof registerConnectorEventTopics>;
   private skippedPreconfiguredConnectorIds: Set<string> = new Set();
   // Process-wide: a warm client must outlive a single action, and the per-action context is
   // discarded when the action returns, so the plugin instance owns the pool.
@@ -547,6 +551,11 @@ export class ActionsPlugin
       inMemoryConnectors: this.inMemoryConnectors,
       getConnectorEventEmitter: () => this.connectorEventEmitter,
     });
+    if (actionsConfigUtils.isInboundEventsEnabled()) {
+      this.connectorEventTopicsByEventId = registerConnectorEventTopics((topic) => {
+        core.pubsub.registerTopic(topic);
+      });
+    }
     defineRoutes({
       getSpaceId: (request) => this.spaces?.spacesService.getSpaceId(request) ?? 'default',
       router,
@@ -650,6 +659,14 @@ export class ActionsPlugin
   }
 
   public start(core: CoreStart, plugins: ActionsPluginsStart): PluginStartContract {
+    const connectorEventTopicsByEventId = this.connectorEventTopicsByEventId;
+    if (connectorEventTopicsByEventId) {
+      setConnectorEventPublisher({
+        pubsub: core.pubsub,
+        logger: this.logger,
+        topics: connectorEventTopicsByEventId,
+      });
+    }
     this.securityStart = plugins.security;
     if (this.actionsConfig.relay?.uiam?.enabled && !plugins.security?.authc.systemIdentity) {
       this.logger.warn(
@@ -1383,6 +1400,7 @@ export class ActionsPlugin
   };
 
   public stop() {
+    setConnectorEventPublisher(undefined);
     this.connectorCatalogFeatureFlagSubscription?.unsubscribe();
     this.connectorCatalogFeatureFlagSubscription = undefined;
     this.isCatalogFeatureFlagEnabled = false;

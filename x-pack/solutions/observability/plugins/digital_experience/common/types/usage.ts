@@ -9,10 +9,20 @@ import type { FrustrationCounts } from '../frustration';
 
 /** A page and the page loads of it. */
 export interface TopPage {
+  /** The route the app reports for the page, like `/products/{slug}`, or its URL without one. */
   url: string;
   pageLoads: number;
   /** 75th percentile of the load time in milliseconds, `null` without a timed page load. */
   loadTimeP75Ms: number | null;
+  /**
+   * 75th percentile of the page's web vitals (LCP and INP in milliseconds), and its JS errors.
+   * `null` when they are not known: a page without a route (they carry no URL to join on), or one
+   * outside the pages with the most of them.
+   */
+  lcpP75Ms: number | null;
+  inpP75Ms: number | null;
+  clsP75: number | null;
+  jsErrors: number | null;
 }
 
 /** A browser, operating system or device and the page loads from it. */

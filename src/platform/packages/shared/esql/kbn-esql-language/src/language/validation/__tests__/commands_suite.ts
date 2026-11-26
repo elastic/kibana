@@ -216,6 +216,13 @@ export const runCommandsValidationSuite = (setup: Setup) => {
     testErrorsAndWarnings(`from a_index | enrich policy with `, [
       expect.stringContaining('SyntaxError:'),
     ]);
+
+    for (const mode of ['any', 'coordinator', 'remote']) {
+      testErrorsAndWarnings(
+        `from a_index | enrich _${mode}:policy on textField | where yetAnotherField is null`,
+        []
+      );
+    }
   });
 
   describe('settings', () => {

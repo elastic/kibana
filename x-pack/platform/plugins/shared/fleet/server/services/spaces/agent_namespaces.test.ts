@@ -10,6 +10,7 @@ import type { Agent } from '../../types';
 
 import {
   agentsKueryNamespaceFilter,
+  agentsNamespaceQuery,
   buildFilterWithNamespace,
   isAgentInNamespace,
 } from './agent_namespaces';
@@ -131,6 +132,63 @@ describe('agentsKueryNamespaceFilter', () => {
         'namespaces:(space1) or namespaces:"*"'
       );
     });
+  });
+});
+
+describe('agentsNamespaceQuery', () => {
+  describe('with isSpaceAwarenessEnabled returning false', () => {
+    beforeEach(() => {
+      jest.mocked(isSpaceAwarenessEnabled).mockResolvedValue(false);
+    });
+
+    it('returns no query', async () => {
+      expect(await agentsNamespaceQuery('space1')).toBeUndefined();
+    });
+  });
+
+  describe('with isSpaceAwarenessEnabled returning true', () => {
+    beforeEach(() => {
+      jest.mocked(isSpaceAwarenessEnabled).mockResolvedValue(true);
+    });
+
+    it('returns no query without a namespace, or for all spaces', async () => {
+      expect(await agentsNamespaceQuery()).toBeUndefined();
+      expect(await agentsNamespaceQuery('*')).toBeUndefined();
+    });
+
+    it('matches the agents of the default space, of all spaces, and of none', async () => {
+      expect(await agentsNamespaceQuery('default')).toEqual({
+        bool: {
+          should: [
+            { term: { namespaces: 'default' } },
+            { term: { namespaces: ALL_SPACES_ID } },
+            { bool: { must_not: { exists: { field: 'namespaces' } } } },
+          ],
+          minimum_should_match: 1,
+        },
+      });
+    });
+
+    it('matches the agents of a space and of all spaces, and nothing else', async () => {
+      expect(await agentsNamespaceQuery('space1')).toEqual({
+        bool: {
+          should: [{ term: { namespaces: 'space1' } }, { term: { namespaces: ALL_SPACES_ID } }],
+          minimum_should_match: 1,
+        },
+      });
+    });
+
+    it.each(['null', 'a:b', 'my space', 'not', 'a*'])(
+      'takes the space id %j as the name of a space',
+      async (spaceId) => {
+        expect(await agentsNamespaceQuery(spaceId)).toEqual({
+          bool: {
+            should: [{ term: { namespaces: spaceId } }, { term: { namespaces: ALL_SPACES_ID } }],
+            minimum_should_match: 1,
+          },
+        });
+      }
+    );
   });
 });
 
