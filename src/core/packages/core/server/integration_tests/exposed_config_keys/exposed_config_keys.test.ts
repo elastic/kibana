@@ -443,8 +443,6 @@ const EXPECTED_ANONYMOUS_EXPOSED_CONFIG_KEYS = [
   'telemetry.optIn (boolean?)',
   'telemetry.sendUsageFrom (server?|browser?)',
   'telemetry.sendUsageTo (prod?|staging?)',
-  'usageCollection.uiCounters.debug (boolean?)',
-  'usageCollection.uiCounters.enabled (boolean?)',
 ];
 
 /**
