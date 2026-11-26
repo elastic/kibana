@@ -39,7 +39,7 @@ import type {
   InferenceSetupDependencies,
   InferenceStartDependencies,
 } from './types';
-import { getConnectorList, type ConnectorListFilter } from './util/get_connector_list';
+import { getConnectorList, type GetConnectorListFilter } from './util/get_connector_list';
 import { loadDefaultConnector } from './util/load_default_connector';
 import { getConnectorById, getConnectorByIdWithoutClientRequest } from './util/get_connector_by_id';
 import { getInferenceEndpoints } from './util/get_inference_endpoints';
@@ -420,7 +420,7 @@ export class InferencePlugin
         });
       },
 
-      getConnectorList: async (request: KibanaRequest, filter?: ConnectorListFilter) => {
+      getConnectorList: async (request: KibanaRequest, filter?: GetConnectorListFilter) => {
         const esClient = core.elasticsearch.client.asInternalUser;
         return getConnectorList({
           actions: pluginsStart.actions,

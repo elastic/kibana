@@ -39,7 +39,7 @@ import type {
   AnonymizationPluginSetup,
 } from '@kbn/anonymization-plugin/server';
 import type { AiAnonymizationSettingsPluginSetup } from '@kbn/ai-anonymization-settings-plugin/server';
-import type { ConnectorListFilter } from './util/get_connector_list';
+import type { GetConnectorListFilter } from './util/get_connector_list';
 import type { InferenceEndpoint } from './util/get_inference_endpoints';
 
 /* eslint-disable @typescript-eslint/no-empty-interface*/
@@ -252,7 +252,7 @@ export interface InferenceServerStart {
    */
   getConnectorList: (
     request: KibanaRequest,
-    filter?: ConnectorListFilter
+    filter?: GetConnectorListFilter
   ) => Promise<InferenceConnector[]>;
 
   /**

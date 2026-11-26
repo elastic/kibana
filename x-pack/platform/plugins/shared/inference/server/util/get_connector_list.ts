@@ -20,20 +20,7 @@ import { getInferenceEndpoints } from './get_inference_endpoints';
 
 const OCR_ONLY_PROPERTY = 'ocr-only';
 
-interface GetConnectorListWithRequestOptions {
-  actions: ActionsClientProvider;
-  request: KibanaRequest;
-  esClient: ElasticsearchClient;
-  logger: Logger;
-}
-
-interface GetConnectorListWithActionsClientOptions {
-  actionsClient: PublicMethodsOf<ActionsClient>;
-  esClient: ElasticsearchClient;
-  logger: Logger;
-}
-
-export interface ConnectorListFilter {
+export interface GetConnectorListFilter {
   /**
    * The task type of the inference endpoints to list, `chat_completion` by default. Any other task
    * type lists only inference endpoints: stack connectors are chat models.
@@ -41,11 +28,22 @@ export interface ConnectorListFilter {
   taskType?: InferenceTaskType;
 }
 
-type GetConnectorListOptions = (
+interface GetConnectorListWithRequestOptions extends GetConnectorListFilter {
+  actions: ActionsClientProvider;
+  request: KibanaRequest;
+  esClient: ElasticsearchClient;
+  logger: Logger;
+}
+
+interface GetConnectorListWithActionsClientOptions extends GetConnectorListFilter {
+  actionsClient: PublicMethodsOf<ActionsClient>;
+  esClient: ElasticsearchClient;
+  logger: Logger;
+}
+
+type GetConnectorListOptions =
   | GetConnectorListWithRequestOptions
-  | GetConnectorListWithActionsClientOptions
-) &
-  ConnectorListFilter;
+  | GetConnectorListWithActionsClientOptions;
 
 const getActionsClient = async (
   options: GetConnectorListOptions
