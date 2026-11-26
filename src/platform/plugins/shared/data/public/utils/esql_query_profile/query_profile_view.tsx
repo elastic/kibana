@@ -21,7 +21,7 @@ import {
 } from '@elastic/eui';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import type { ApplicationStart, HttpStart } from '@kbn/core/public';
-import { getConnectorsUrl } from '@kbn/esql-utils';
+import { getConnectorsUrl, readRequestErrorMessage } from '@kbn/esql-utils';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import { KbnDangerCallout } from '@kbn/ui-callout';
 import { i18n } from '@kbn/i18n';
@@ -44,10 +44,6 @@ type TabId = 'timeline' | 'byCommand';
 /** The query of a logged request, or nothing when it has none or an empty one. */
 const readQuery = (request: Request | undefined): string | undefined =>
   readRequestQuery(request?.json) || undefined;
-
-/** The message of a caught error, or the fallback when it has none. */
-const readErrorMessage = (caught: unknown, fallback: string): string =>
-  caught instanceof Error && caught.message ? caught.message : fallback;
 
 const completedRequestTime = (request: Request | undefined): string | undefined => {
   const value = request?.stats?.queryTime?.value;
@@ -145,7 +141,7 @@ const useQueryProfile = (
         setLoaded({
           runKey,
           request: target,
-          error: readErrorMessage(
+          error: readRequestErrorMessage(
             caught,
             i18n.translate('data.inspector.queryProfile.unknownErrorMessage', {
               defaultMessage: 'The query profile failed.',

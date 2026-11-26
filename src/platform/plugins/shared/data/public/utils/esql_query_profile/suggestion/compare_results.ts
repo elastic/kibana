@@ -15,7 +15,7 @@ export type ResultsVerdict =
   | { kind: 'sameShape'; rowCount: number }
   | { kind: 'differentColumns' }
   | { kind: 'differentRowCount'; baseline: number; current: number }
-  | { kind: 'differentRows'; rowCount: number };
+  | { kind: 'differentRows' };
 
 /** Tells whether two runs returned the same results. Returns nothing when either is unknown. */
 export function compareResults(
@@ -43,7 +43,7 @@ export function compareResults(
     return { kind: 'sameShape', rowCount: current.rowCount };
   }
   if (before.unordered !== after.unordered) {
-    return { kind: 'differentRows', rowCount: current.rowCount };
+    return { kind: 'differentRows' };
   }
   return {
     kind: 'same',

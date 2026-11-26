@@ -226,6 +226,16 @@ describe('QueryProfileView', () => {
     expect(screen.getByText('boom')).toBeInTheDocument();
   });
 
+  it('shows the message the server sent when the profile fails', async () => {
+    const failing = {
+      esql: jest.fn().mockRejectedValue({ body: { message: 'Unknown column [y]' } }),
+    } as unknown as Pick<ISearchStart, 'esql'>;
+    renderProfileOf(QUERY, failing);
+
+    expect(await screen.findByText('Unable to profile this query')).toBeInTheDocument();
+    expect(screen.getByText('Unknown column [y]')).toBeInTheDocument();
+  });
+
   it('profiles the request chosen in the picker', async () => {
     const requests = new RequestAdapter();
     logRequest(requests, 'Documents', { query: QUERY, include_execution_metadata: true });

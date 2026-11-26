@@ -72,7 +72,7 @@ describe('compareResults', () => {
       response(['t'], [[1_700_000_000_999]])
     );
 
-    expect(verdict).toEqual({ kind: 'differentRows', rowCount: 1 });
+    expect(verdict).toEqual({ kind: 'differentRows' });
   });
 
   it('reports different columns, row counts and rows', () => {
@@ -88,7 +88,6 @@ describe('compareResults', () => {
     });
     expect(compareResults(baseline, response(['k', 'v'], [rows[0], rows[1], ['c', 4]]))).toEqual({
       kind: 'differentRows',
-      rowCount: 3,
     });
   });
 
@@ -100,7 +99,6 @@ describe('compareResults', () => {
     });
     expect(compareResults(baseline, response(['t'], [[['a']], [null]]))).toEqual({
       kind: 'differentRows',
-      rowCount: 2,
     });
   });
 
