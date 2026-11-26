@@ -16,7 +16,8 @@ export interface SourceVolume {
   status: SourceVolumeStatus;
   has_remote: boolean;
   doc_count?: number;
-  bytes_estimated?: number;
+  raw_bytes_estimated?: number;
+  disk_bytes_estimated?: number;
   clusters_total?: number;
   clusters_unsuccessful?: number;
   error?: string;
@@ -72,14 +73,14 @@ export const sourceVolumeEventType: EventTypeOpts<SourceVolumePayload> = {
             type: 'keyword',
             _meta: {
               description:
-                'ok, partial, error or timeout. partial: the query ran but some clusters or shards did not answer, so doc_count is a lower bound. doc_count is set when ok or partial; bytes_estimated only when ok',
+                'ok, partial, error or timeout. partial: the query ran but some clusters or shards did not answer, so doc_count is a lower bound. doc_count is set when ok or partial; raw_bytes_estimated and disk_bytes_estimated only when ok',
             },
           },
           has_remote: {
             type: 'boolean',
             _meta: {
               description:
-                'The source also reads a remote cluster, whose documents are in doc_count and priced at the local average',
+                'The source also reads a remote cluster, whose documents are in doc_count and, in disk_bytes_estimated, priced at the local average',
             },
           },
           doc_count: {
@@ -90,12 +91,20 @@ export const sourceVolumeEventType: EventTypeOpts<SourceVolumePayload> = {
                 'Documents matched by the source query within the window, including linked projects under cross-project search and remote clusters. A lower bound when status is partial',
             },
           },
-          bytes_estimated: {
+          raw_bytes_estimated: {
             type: 'long',
             _meta: {
               optional: true,
               description:
-                'Estimate: doc_count times the average document size of the local indices the source reads; that average is extrapolated to linked-project and remote documents, whose size cannot be read. Absent when no local index exists or its size could not be read',
+                'Estimate of the raw JSON size: doc_count times the average _source size of a random sample of about 10000 documents the source query matched within the window, local or remote. On synthetic-source indices the size is of the rebuilt JSON. Absent when _source could not be sampled, for instance a source over a view',
+            },
+          },
+          disk_bytes_estimated: {
+            type: 'long',
+            _meta: {
+              optional: true,
+              description:
+                'Estimate of the on-disk size: doc_count times the average stored document size of the local indices the source reads; that average is extrapolated to linked-project and remote documents, whose size cannot be read. Absent when no local index exists (a remote-only source) or its size could not be read',
             },
           },
           clusters_total: {
