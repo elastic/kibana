@@ -38,12 +38,8 @@ const DATASTREAM_WORKFLOWS_EXECUTIONS_INDEX_MAPPINGS = {
 
 export const WORKFLOW_EXECUTIONS_DATA_STREAM_DEFINITION = {
   name: WORKFLOWS_EXECUTIONS_DATA_STREAM,
-<<<<<<< HEAD:src/platform/plugins/shared/workflows_execution_engine/server/repositories/data_access_layer/implementations/data_stream/data_stream_definitions/workflow_executions.ts
-  version: 1,
-=======
-  // Version 2 rolled out `executedByUser`, version 3 `workflowUid`. Version 4 rolls out `executionChain`.
-  version: 4,
->>>>>>> cd74fef14a94 ([Workflows] Index the execution chain on child workflow runs (#307391)):x-pack/platform/plugins/shared/workflows_execution_engine/server/repositories/data_access_layer/implementations/data_stream/data_stream_definitions/workflow_executions.ts
+  // Version 2 rolls out `executionChain`. Keep it below the 9.7 version (4), so upgrading to 9.7 applies its full mappings.
+  version: 2,
   hidden: true,
   settings: {
     auto_expand_replicas: '0-1',

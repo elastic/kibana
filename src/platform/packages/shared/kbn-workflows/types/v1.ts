@@ -137,16 +137,6 @@ export type WorkflowTokenUsage = z.infer<typeof WorkflowTokenUsageSchema>;
 
 export type WorkflowStepTokenUsage = z.infer<typeof WorkflowStepTokenUsageSchema>;
 
-<<<<<<< HEAD
-=======
-/** Identity snapshot of the user who triggered an execution, captured at trigger time. */
-export interface WorkflowExecutionExecutedByUser {
-  /** Display name: the user's full name when set, otherwise the username. */
-  name: string;
-  username: string;
-  profileUid?: string;
-}
-
 /** One ancestor in a sub-workflow chain, and how it invoked the next run down. */
 export interface ExecutionChainHop {
   readonly executionId: string;
@@ -154,7 +144,6 @@ export interface ExecutionChainHop {
   readonly workflowId: string;
 }
 
->>>>>>> cd74fef14a94 ([Workflows] Index the execution chain on child workflow runs (#307391))
 export interface EsWorkflowExecution {
   spaceId: string;
   id: string;
