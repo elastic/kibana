@@ -3986,6 +3986,9 @@ x-pack/solutions/observability/plugins/synthetics/server/saved_objects/synthetic
 # Kibana accessibility
 /.agents/skills/accessibility/** @elastic/kibana-accessibility
 
+# Kibana Core: OAS generation guidance
+/.agents/skills/improve-oas/** @elastic/kibana-core
+
 # No owner - generated files covered by CI checks
 **/moon.yml
 # Only the workflow step schema sync PR changes these (auto-approved), feature PRs never do
