@@ -31,7 +31,6 @@ import {
   ENDPOINT_DEVICE_INDEX,
   ENDPOINT_EVENTS_INDEX,
 } from '../../../../../scripts/endpoint/common/constants';
-import { withMetadataTransformLock } from '../../common/with_metadata_transform_lock';
 import { createSystemIndicesEsClient } from './system_indices_es_client';
 import { scopeKbnClientToSpace } from './scope_kbn_client_to_space';
 
