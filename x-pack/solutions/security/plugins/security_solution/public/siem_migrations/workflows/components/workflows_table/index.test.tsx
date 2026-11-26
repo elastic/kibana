@@ -110,7 +110,7 @@ describe('MigrationWorkflowsTable', () => {
   it.each([
     ['translationStatus-full', 'Translated'],
     ['translationStatus-partial', 'Partially translated'],
-    ['translationStatus-failed', 'Error'],
+    ['translationStatus-failed', 'Failed'],
   ])('should show the %s status as "%s"', async (testId, text) => {
     renderTable();
 

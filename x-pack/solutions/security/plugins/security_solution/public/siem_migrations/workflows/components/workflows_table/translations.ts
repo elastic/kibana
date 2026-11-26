@@ -32,11 +32,6 @@ export const COLUMN_ACTIONS = i18n.translate(
   { defaultMessage: 'Actions' }
 );
 
-export const WORKFLOW_STATUS_ERROR = i18n.translate(
-  'xpack.securitySolution.siemMigrations.workflows.table.statusError',
-  { defaultMessage: 'Error' }
-);
-
 export const SEARCH_PLACEHOLDER = i18n.translate(
   'xpack.securitySolution.siemMigrations.workflows.table.searchPlaceholder',
   { defaultMessage: 'Search by name' }

@@ -26,8 +26,6 @@ export interface StatusBadgeProps {
   translationResult?: MigrationTranslationResultType;
   /** Why the translation failed, shown on hover, e.g. the first comment of the item */
   failedMessage?: string;
-  /** How a failed item is labelled, "Failed" by default */
-  failedLabel?: string;
   'data-test-subj'?: string;
 }
 
@@ -41,7 +39,6 @@ export const StatusBadge: React.FC<StatusBadgeProps> = React.memo(
     isFailed,
     translationResult = MigrationTranslationResult.UNTRANSLATABLE,
     failedMessage,
-    failedLabel = i18n.STATUS_FAILED,
     'data-test-subj': dataTestSubj = 'translation-result',
   }) => {
     const colors = useResultVisColors();
@@ -67,13 +64,16 @@ export const StatusBadge: React.FC<StatusBadgeProps> = React.memo(
 
     if (isFailed) {
       return (
-        <EuiToolTip data-test-subj="failedStatusTooltip" content={failedMessage ?? failedLabel}>
+        <EuiToolTip
+          data-test-subj="failedStatusTooltip"
+          content={failedMessage ?? i18n.STATUS_FAILED}
+        >
           <EuiFlexGroup gutterSize="xs" alignItems="center">
             <EuiFlexItem grow={false}>
               <EuiIcon type="warningFill" color="danger" aria-hidden={true} />
             </EuiFlexItem>
             <EuiFlexItem data-test-subj={dataTestSubj} grow={false}>
-              {failedLabel}
+              {i18n.STATUS_FAILED}
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiToolTip>

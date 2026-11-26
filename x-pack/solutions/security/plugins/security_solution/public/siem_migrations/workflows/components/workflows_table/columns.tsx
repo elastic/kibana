@@ -105,7 +105,6 @@ export const createStatusColumn = (): TableColumn => ({
       isFailed={workflow.status === SiemMigrationStatus.FAILED}
       translationResult={workflow.translation_result}
       failedMessage={workflow.comments?.[0]?.message}
-      failedLabel={i18n.WORKFLOW_STATUS_ERROR}
     />
   ),
   sortable: true,

@@ -47,12 +47,6 @@ describe('StatusBadge', () => {
       expect(screen.getByText('Failed')).toBeInTheDocument();
     });
 
-    it('should show the given label when the item failed', () => {
-      renderBadge({ isFailed: true, failedLabel: 'Error' });
-
-      expect(screen.getByText('Error')).toBeInTheDocument();
-    });
-
     it('should show the failure message in a tooltip', async () => {
       renderBadge({ isFailed: true, failedMessage: 'Something went wrong' });
 
@@ -64,12 +58,12 @@ describe('StatusBadge', () => {
     });
 
     it('should fall back to the label in the tooltip when there is no failure message', async () => {
-      renderBadge({ isFailed: true, failedLabel: 'Error' });
+      renderBadge({ isFailed: true });
 
       hoverBadge();
 
       await waitFor(() =>
-        expect(screen.getByTestId('failedStatusTooltip')).toHaveTextContent('Error')
+        expect(screen.getByTestId('failedStatusTooltip')).toHaveTextContent('Failed')
       );
     });
   });
