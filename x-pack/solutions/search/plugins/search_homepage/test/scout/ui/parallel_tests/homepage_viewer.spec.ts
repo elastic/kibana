@@ -9,7 +9,8 @@ import { tags } from '@kbn/scout-search';
 import { expect } from '@kbn/scout-search/ui';
 import { test } from '../fixtures';
 
-test.describe(
+// Failing: See https://github.com/elastic/kibana/issues/307824
+test.describe.skip(
   'Homepage - Viewer',
   { tag: [...tags.serverless.search, ...tags.stateful.classic] },
   () => {
