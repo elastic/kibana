@@ -141,7 +141,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await cases.common.addTag(tag);
 
         // validate tag was added
-        await testSubjects.existOrFail('tag-' + tag);
+        expect(await comboBox.getComboBoxSelectedOptions('case-tags')).to.contain(tag);
 
         // validate user action
         await find.byCssSelector('[data-test-subj*="tags-add-action"]');
