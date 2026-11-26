@@ -7,7 +7,7 @@
 
 import { addSpaceIdToPath, getSpaceIdFromPath } from '@kbn/core-spaces-common';
 import type { GetInfoResponse } from '@kbn/fleet-plugin/common';
-import { API_VERSIONS, epmRouteService } from '@kbn/fleet-plugin/common';
+import { AGENT_POLICY_API_ROUTES, API_VERSIONS, epmRouteService } from '@kbn/fleet-plugin/common';
 import { KbnClient } from '@kbn/kbn-client';
 import type { ScoutLogger } from '@kbn/scout-security';
 import {
@@ -28,7 +28,9 @@ export interface ScoutEndpointPolicyRequestOptions {
  * Playwright's 60s worker-fixture budget before the real error surfaces.
  * That reason holds only for callers without their own fixture timeout, so
  * `retryRequests: true` keeps KbnClient's default retries for callers whose
- * fixture has a budget that fits the nested retries.
+ * fixture has a budget that fits the nested retries. With it on,
+ * `deleteScoutEndpointPolicy` also treats a 404 on the agent-policy delete as
+ * already deleted.
  */
 const withNoRequestRetries = (kbnClient: KbnClient): KbnClient => {
   const originalRequest = kbnClient.request.bind(kbnClient);
@@ -136,10 +138,26 @@ export const deleteScoutEndpointPolicy = async (
   spaceId?: string,
   options?: ScoutEndpointPolicyRequestOptions
 ): Promise<void> => {
-  await deleteIndexedFleetEndpointPolicies(
-    createSpaceUrlKbnClient(kbnClient, log, spaceId, options),
-    indexed
-  );
+  const client = createSpaceUrlKbnClient(kbnClient, log, spaceId, options);
+
+  if (options?.retryRequests !== true) {
+    await deleteIndexedFleetEndpointPolicies(client, indexed);
+    return;
+  }
+
+  // A retried delete whose first response was lost (e.g. a gateway 502) finds the
+  // agent policy already gone and gets a 404, so a 404 means deleted here. The
+  // package-policy bulk delete reports a missing id per item, not as a 404.
+  await deleteIndexedFleetEndpointPolicies(client, { ...indexed, agentPolicies: [] });
+  for (const { id } of indexed.agentPolicies) {
+    await client.request({
+      path: AGENT_POLICY_API_ROUTES.DELETE_PATTERN,
+      headers: { 'elastic-api-version': API_VERSIONS.public.v1 },
+      method: 'POST',
+      body: { agentPolicyId: id, force: true },
+      ignoreErrors: [404],
+    });
+  }
 };
 
 export const getCreatedPackagePolicy = (
