@@ -19,7 +19,7 @@ const buildBucketColumn = ({
 }: {
   bucket: { interval: number; unit: string };
   dropPartials?: boolean;
-  appliedTimeRange?: { from: string; to: string };
+  appliedTimeRange?: { from?: string; to?: string };
 }): Datatable['columns'][number] => ({
   id: 'a',
   name: 'A',
@@ -485,6 +485,8 @@ describe('lens_date_histogram_textbased', () => {
   it.each([
     ['from', { from: '', to: '2026-06-29T02:30:00.000Z' }],
     ['to', { from: '2026-06-29T00:00:00.000Z', to: '' }],
+    ['from (missing)', { to: '2026-06-29T02:30:00.000Z' }],
+    ['to (missing)', { from: '2026-06-29T00:00:00.000Z' }],
   ])('returns the table unchanged when the time range %s is unparseable', async (_, range) => {
     const input: Datatable = {
       type: 'datatable',

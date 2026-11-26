@@ -90,10 +90,15 @@ export const dateHistogramTextBasedFn =
     // Bucket boundaries must match the timezone ES|QL BUCKET uses so calendar intervals stay aligned.
     const timeZone = ianaTimeZoneOrUtc(meta.timeZone || contextTimeZone);
 
+    // Moment reads a missing endpoint as now, which would clip bars against an invented bound.
+    if (!timeRange.from || !timeRange.to) {
+      return input;
+    }
+
     const from = moment.tz(timeRange.from, timeZone).valueOf();
     const to = moment.tz(timeRange.to, timeZone).valueOf();
 
-    // An unparseable endpoint (such as a null applied time range) cannot be rounded.
+    // An unparseable endpoint cannot be rounded.
     if (!Number.isFinite(from) || !Number.isFinite(to)) {
       return input;
     }
