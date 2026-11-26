@@ -482,6 +482,27 @@ describe('lens_date_histogram_textbased', () => {
     expect(result).toBe(input);
   });
 
+  it.each([
+    ['from', { from: '', to: '2026-06-29T02:30:00.000Z' }],
+    ['to', { from: '2026-06-29T00:00:00.000Z', to: '' }],
+  ])('returns the table unchanged when the time range %s is unparseable', async (_, range) => {
+    const input: Datatable = {
+      type: 'datatable',
+      columns: [
+        buildBucketColumn({
+          bucket: { interval: 1, unit: 'hour' },
+          dropPartials: true,
+          appliedTimeRange: range,
+        }),
+      ],
+      rows: [{ a: '2026-06-29T00:00:00.000Z' }, { a: '2026-06-29T01:00:00.000Z' }],
+    };
+
+    const result = await dateHistogram.fn(input, {}, createMockExecutionContext());
+
+    expect(result).toBe(input);
+  });
+
   it('returns the table unchanged when there is no date histogram bucket column', async () => {
     const input: Datatable = {
       type: 'datatable',

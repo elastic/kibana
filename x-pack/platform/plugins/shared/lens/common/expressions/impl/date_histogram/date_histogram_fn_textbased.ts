@@ -93,6 +93,11 @@ export const dateHistogramTextBasedFn =
     const from = moment.tz(timeRange.from, timeZone).valueOf();
     const to = moment.tz(timeRange.to, timeZone).valueOf();
 
+    // An unparseable endpoint (such as a null applied time range) cannot be rounded.
+    if (!Number.isFinite(from) || !Number.isFinite(to)) {
+      return input;
+    }
+
     const computedDomain = getDomainBounds(from, to, rounding, timeZone, dropPartials);
 
     const columns = computedDomain
