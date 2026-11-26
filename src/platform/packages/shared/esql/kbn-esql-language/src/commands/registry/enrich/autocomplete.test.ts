@@ -124,6 +124,12 @@ describe('ENRICH Autocomplete', () => {
         ' = ',
         ...getPolicyFields('policy'),
       ]);
+      for (const mode of ['any', 'coordinator', 'remote']) {
+        await enrichExpectSuggestions(`from a | enrich _${mode}:policy on field with /`, [
+          ' = ',
+          ...getPolicyFields('policy'),
+        ]);
+      }
       await enrichExpectSuggestions(`from a | enrich policy on field with fi/`, [
         ' = ',
         ...getPolicyFields('policy'),

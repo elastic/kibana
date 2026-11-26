@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { test } from '@kbn/scout';
+import { euiSelectors, test } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 
 test.describe('Content Management Examples', { tag: ['@local-stateful-classic'] }, () => {
@@ -119,7 +119,9 @@ test.describe('Content Management Examples', { tag: ['@local-stateful-classic'] 
       '[Flights] Flight Log',
     ];
 
-    const titles = page.testSubj.locator('savedObjectFinderTitle').locator('.euiLink');
+    const titles = page.testSubj
+      .locator('savedObjectFinderTitle')
+      .locator(euiSelectors.link.ROOT_SELECTOR);
     await expect
       .poll(() => titles.allTextContents())
       .toStrictEqual(expect.arrayContaining(expectedItems));

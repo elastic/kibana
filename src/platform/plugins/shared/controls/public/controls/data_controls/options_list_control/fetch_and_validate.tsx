@@ -8,7 +8,15 @@
  */
 
 import type { BehaviorSubject, Observable } from 'rxjs';
-import { combineLatest, debounceTime, startWith, switchMap, tap, withLatestFrom } from 'rxjs';
+import {
+  combineLatest,
+  debounceTime,
+  finalize,
+  startWith,
+  switchMap,
+  tap,
+  withLatestFrom,
+} from 'rxjs';
 
 import { fetch$, type PublishingSubject } from '@kbn/presentation-publishing';
 import type {
@@ -157,6 +165,14 @@ export function fetchAndValidate$({
     ),
     tap(() => {
       api.loadingSuggestions$.next(false);
+    }),
+    // Unsubscribing, as the control does when it unmounts, does not stop the async fetch above,
+    // so abort its request: the route then cancels the search it started.
+    finalize(() => {
+      if (abortController) {
+        abortController.abort();
+        abortController = undefined;
+      }
     })
   );
 

@@ -21,6 +21,7 @@ import {
   TRIAGE_PENDING_TAG,
   TRIAGE_WOULD_CLOSE_TAG_PREFIX,
   TRIAGE_CLOSED_BY_DECISION_TAG_PREFIX,
+  closedByDecisionTag,
   TRIAGE_WOULD_SKIP_TAG_PREFIX,
   VERDICT_TAGS,
   type AlertSeverity,
@@ -487,6 +488,32 @@ export const findOpenAlertIds = async (
   return (body.hits?.hits ?? []).map(({ _id }) => _id);
 };
 
+/**
+ * Which of the given alerts are `open` right now, not acknowledged: the status the close acts on.
+ * The tags route takes ids only, so a write that must not reach an alert an analyst has moved on
+ * is narrowed to these just before it, and checked again just after.
+ */
+export const findStillOpenAlertIds = async (
+  { callKibanaApi }: KibanaApi,
+  alertIds: readonly string[]
+): Promise<string[]> => {
+  const { body } = await callKibanaApi<SearchCompleteness & { hits?: { hits?: AlertHit[] } }>({
+    method: 'POST',
+    path: SIGNALS_SEARCH_PATH,
+    body: {
+      size: alertIds.length,
+      _source: false,
+      query: {
+        bool: {
+          filter: [{ ids: { values: [...alertIds] } }, { term: { [ALERT_FIELDS.status]: 'open' } }],
+        },
+      },
+    },
+  });
+  assertCompleteSearch(body);
+  return (body.hits?.hits ?? []).map(({ _id }) => _id);
+};
+
 /** Which of the given alerts carry the tag. Used to undo only what a failed tag call wrote. */
 export const findAlertIdsWithTag = async (
   { callKibanaApi }: KibanaApi,
@@ -502,6 +529,40 @@ export const findAlertIdsWithTag = async (
       query: {
         bool: {
           filter: [{ ids: { values: [...alertIds] } }, { term: { [ALERT_FIELDS.tags]: tag } }],
+        },
+      },
+    },
+  });
+  assertCompleteSearch(body);
+  return (body.hits?.hits ?? []).map(({ _id }) => _id);
+};
+
+/**
+ * Which of the given alerts are closed as a false positive and carry `carryingTag`. Used to find
+ * out which alerts a close whose outcome is unknown did close: the tag is the evidence that the
+ * sweep did it, because the cleanup after a failed close takes it off the alerts that stayed open,
+ * so an alert that an analyst closes after that does not carry it. The cleanup is best effort. A
+ * partial result throws: an alert missed would read as not closed and get no note.
+ */
+export const findAlertsClosedAsFalsePositive = async (
+  { callKibanaApi }: KibanaApi,
+  alertIds: readonly string[],
+  carryingTag: string
+): Promise<string[]> => {
+  const { body } = await callKibanaApi<SearchCompleteness & { hits?: { hits?: AlertHit[] } }>({
+    method: 'POST',
+    path: SIGNALS_SEARCH_PATH,
+    body: {
+      size: alertIds.length,
+      _source: false,
+      query: {
+        bool: {
+          filter: [
+            { ids: { values: [...alertIds] } },
+            { term: { [ALERT_FIELDS.status]: 'closed' } },
+            { term: { [ALERT_FIELDS.reason]: 'false_positive' } },
+            { term: { [ALERT_FIELDS.tags]: carryingTag } },
+          ],
         },
       },
     },
@@ -618,9 +679,7 @@ export const countClosedByDecision = async (
       query: {
         bool: {
           filter: [
-            {
-              term: { [ALERT_FIELDS.tags]: `${TRIAGE_CLOSED_BY_DECISION_TAG_PREFIX}${decisionId}` },
-            },
+            { term: { [ALERT_FIELDS.tags]: closedByDecisionTag(decisionId) } },
             {
               range: {
                 'kibana.alert.workflow_status_updated_at': { gte: new Date(since).toISOString() },
@@ -962,16 +1021,21 @@ export const loadAlertsByIds = async (
 };
 
 /**
- * Which of the given alerts an analyst closed with a reason other than false positive (a true
- * positive, for example). A closed alert with no reason is not one of them. A failed read throws,
- * so no decision is written on a guess.
+ * The given alerts that are closed without the reason false positive, in two lists:
+ * - `closedAsOther`: closed with another reason (a true positive, for example). Such an alert is a
+ *   verdict against the pattern.
+ * - `closedWithoutReason`: closed with no reason at all. It is no evidence of a false positive, and
+ *   the approval's close leaves an already closed alert as it is, so it would stay without one. It
+ *   says nothing against the pattern either.
+ * A failed read throws, so no decision is written on a guess.
  */
-export const findAlertIdsClosedAsOther = async (
+export const findAlertsClosedWithoutFalsePositiveReason = async (
   { callKibanaApi }: KibanaApi,
   alertIds: readonly string[]
-): Promise<string[]> => {
-  const found: string[] = [];
-  // The search reads no `_source` and the filter runs in Elasticsearch, so a chunk can be large.
+): Promise<{ closedAsOther: string[]; closedWithoutReason: string[] }> => {
+  const closedAsOther: string[] = [];
+  const closedWithoutReason: string[] = [];
+  // The filter runs in Elasticsearch and only the reason is read, so a chunk can be large.
   for (let from = 0; from < alertIds.length; from += CLOSE_REASON_CHUNK_SIZE) {
     const ids = alertIds.slice(from, from + CLOSE_REASON_CHUNK_SIZE);
     const { body } = await callKibanaApi<SearchCompleteness & { hits?: { hits?: AlertHit[] } }>({
@@ -979,23 +1043,22 @@ export const findAlertIdsClosedAsOther = async (
       path: SIGNALS_SEARCH_PATH,
       body: {
         size: ids.length,
-        _source: false,
+        _source: [ALERT_FIELDS.reason],
         query: {
           bool: {
-            filter: [
-              { ids: { values: ids } },
-              { term: { [ALERT_FIELDS.status]: 'closed' } },
-              { exists: { field: ALERT_FIELDS.reason } },
-            ],
+            filter: [{ ids: { values: ids } }, { term: { [ALERT_FIELDS.status]: 'closed' } }],
             must_not: [{ term: { [ALERT_FIELDS.reason]: 'false_positive' } }],
           },
         },
       },
     });
     assertCompleteSearch(body);
-    found.push(...(body.hits?.hits ?? []).map(({ _id }) => _id));
+    for (const { _id, _source = {} } of body.hits?.hits ?? []) {
+      const reason = readField(_source, ALERT_FIELDS.reason);
+      (typeof reason === 'string' && reason !== '' ? closedAsOther : closedWithoutReason).push(_id);
+    }
   }
-  return found;
+  return { closedAsOther, closedWithoutReason };
 };
 
 const CLOSE_REASON_CHUNK_SIZE = 1000;
