@@ -13,7 +13,9 @@ import {
   getEntityFieldsDescriptions,
   isNotEmptyCondition,
 } from './common_fields';
-import { newestValue } from './field_retention_operations';
+import { managedValue, newestValue } from './field_retention_operations';
+import type { AiAgentContext } from './ai_agent_context';
+import { AI_AGENT_CONTEXT_FIELD_TYPES, getAiAgentContextFieldPath } from './ai_agent_context';
 
 /**
  * Only the agent's own events create or update an agent. A descendant can run as another OS user
@@ -103,6 +105,13 @@ export const aiAgentEntityDefinition: ManagedEntityDefinitionWithoutId & {
       newestValue({ source: 'process.ai_agent.api_key_auth', mapping: { type: 'boolean' } }),
       ...getCommonFieldDescriptions('entity'),
       ...getEntityFieldsDescriptions(),
+      // Written by the AI agent context maintainer, never by extraction or the CRUD API.
+      ...(Object.keys(AI_AGENT_CONTEXT_FIELD_TYPES) as Array<keyof AiAgentContext>).map((key) =>
+        managedValue({
+          destination: getAiAgentContextFieldPath(key),
+          mapping: { type: AI_AGENT_CONTEXT_FIELD_TYPES[key] },
+        })
+      ),
     ],
   },
 } as const satisfies ManagedEntityDefinitionWithoutId;

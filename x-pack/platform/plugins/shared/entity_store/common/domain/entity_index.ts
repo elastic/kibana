@@ -20,7 +20,7 @@ export const MAPPING_VERSION = 1;
 // Bump this integer whenever the properties of the latest index mappings change (any definition field
 // with a mapping). Stored in the latest index `_meta`; existing indices are updated in place on startup.
 // Unrelated to MAPPING_VERSION, which is the index-name suffix.
-export const LATEST_INDEX_MAPPINGS_VERSION = 2;
+export const LATEST_INDEX_MAPPINGS_VERSION = 3;
 export const LATEST_INDEX_MAPPINGS_VERSION_META_KEY = 'latestMappingsVersion';
 
 type SchemaVersion = `v${number}`;

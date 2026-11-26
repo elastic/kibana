@@ -10,7 +10,7 @@ import { getLatestIndexMappingProperties } from './latest_index_mappings';
 
 describe('getLatestIndexMappingProperties', () => {
   it("please bump 'LATEST_INDEX_MAPPINGS_VERSION' when the latest index mappings change", () => {
-    expect(LATEST_INDEX_MAPPINGS_VERSION).toEqual(2);
+    expect(LATEST_INDEX_MAPPINGS_VERSION).toEqual(3);
     // The version sits in the snapshot too, so a change of the properties shows an unchanged version in the diff.
     expect({
       version: LATEST_INDEX_MAPPINGS_VERSION,

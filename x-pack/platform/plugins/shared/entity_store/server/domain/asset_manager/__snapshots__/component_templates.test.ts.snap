@@ -47,6 +47,27 @@ Object {
         "entity.EngineMetadata.UntypedId": Object {
           "type": "keyword",
         },
+        "entity.attributes.ai_agent_context.computed_at": Object {
+          "type": "date",
+        },
+        "entity.attributes.ai_agent_context.host_criticality": Object {
+          "type": "keyword",
+        },
+        "entity.attributes.ai_agent_context.person_criticality": Object {
+          "type": "keyword",
+        },
+        "entity.attributes.ai_agent_context.person_mfa_enabled": Object {
+          "type": "boolean",
+        },
+        "entity.attributes.ai_agent_context.person_watchlists": Object {
+          "type": "keyword",
+        },
+        "entity.attributes.ai_agent_context.runs_as_root": Object {
+          "type": "boolean",
+        },
+        "entity.attributes.ai_agent_context.shared_account_installs": Object {
+          "type": "long",
+        },
         "entity.attributes.asset": Object {
           "type": "boolean",
         },
@@ -403,6 +424,27 @@ Object {
         },
         "entity.EngineMetadata.UntypedId": Object {
           "type": "keyword",
+        },
+        "entity.attributes.ai_agent_context.computed_at": Object {
+          "type": "date",
+        },
+        "entity.attributes.ai_agent_context.host_criticality": Object {
+          "type": "keyword",
+        },
+        "entity.attributes.ai_agent_context.person_criticality": Object {
+          "type": "keyword",
+        },
+        "entity.attributes.ai_agent_context.person_mfa_enabled": Object {
+          "type": "boolean",
+        },
+        "entity.attributes.ai_agent_context.person_watchlists": Object {
+          "type": "keyword",
+        },
+        "entity.attributes.ai_agent_context.runs_as_root": Object {
+          "type": "boolean",
+        },
+        "entity.attributes.ai_agent_context.shared_account_installs": Object {
+          "type": "long",
         },
         "entity.attributes.asset": Object {
           "type": "boolean",
@@ -2576,7 +2618,7 @@ Object {
   "template": Object {
     "mappings": Object {
       "_meta": Object {
-        "latestMappingsVersion": 2,
+        "latestMappingsVersion": 3,
         "mappingsVersion": 1,
       },
       "date_detection": false,
