@@ -54,6 +54,12 @@ const shardItemSchema = schema.object({
   value: schema.number(),
 });
 
+const targetingWarningSchema = schema.object({
+  untargeted_agent_policy_names: schema.arrayOf(schema.string({ maxLength: 1024 }), {
+    maxSize: 10000,
+  }),
+});
+
 const packDataSchema = schema.object(
   {
     saved_object_id: schema.string(),
@@ -85,6 +91,7 @@ const packDataSchema = schema.object(
       )
     ),
     read_only: schema.maybe(schema.boolean()),
+    targeting_warning: schema.maybe(targetingWarningSchema),
     // V5: pack-level execution defaults
     min_osquery_version: schema.maybe(schema.nullable(schema.string())),
     platform: schema.maybe(schema.nullable(schema.string())),

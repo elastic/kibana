@@ -62,6 +62,13 @@ export interface PackSavedObject {
   interval?: number;
   /** Pack-level RRULE schedule. Only present when `schedule_type === 'rrule'`. */
   rrule_schedule?: RRuleScheduleConfig;
+  /**
+   * Returned by create/update when the pack could not be confined to its target
+   * set because the Osquery Manager integration is shared. Absent otherwise.
+   */
+  targeting_warning?: {
+    untargeted_agent_policy_names: string[];
+  };
   /** Pack-level minimum osquery version default. Fans out to queries that do not override. */
   min_osquery_version?: string;
   /** Pack-level result type default. Fans out to queries that do not override. */
