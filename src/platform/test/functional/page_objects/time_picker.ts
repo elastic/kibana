@@ -678,9 +678,9 @@ export class TimePickerPageObject extends FtrService {
   public async pauseAutoRefresh() {
     this.log.debug('pauseAutoRefresh');
     if (await this.isNewDateRangePicker()) {
-      // Disable auto-refresh via the auto-refresh switch so that
-      // onRefreshChange fires with isPaused: true (the play/pause button
-      // only toggles isPaused locally without notifying the timefilter).
+      // Turn off the auto-refresh switch instead of clicking the play/pause
+      // button: getRefreshConfig reports isPaused from the switch, so a paused
+      // but still enabled auto-refresh would read as running.
       await this.openNewPickerAutoRefreshPanel();
       const toggleChecked = await this.testSubjects.getAttribute(
         'dateRangePickerAutoRefreshToggle',
