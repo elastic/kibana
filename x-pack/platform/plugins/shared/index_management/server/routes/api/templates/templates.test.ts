@@ -183,10 +183,8 @@ describe('Component templates API', () => {
         },
       });
 
-      expect(updateIndexTemplate).toHaveBeenCalledWith(
-        expect.objectContaining({
-          template: expect.not.objectContaining({ data_stream_options: expect.anything() }),
-        })
+      expect(updateIndexTemplate.mock.calls[0][0].template).not.toHaveProperty(
+        'data_stream_options'
       );
     });
     it('does not re-apply stored data_stream_options when the template is not a data stream template', async () => {
@@ -205,10 +203,8 @@ describe('Component templates API', () => {
 
       await router.runRequest(mockRequest);
 
-      expect(updateIndexTemplate).toHaveBeenCalledWith(
-        expect.objectContaining({
-          template: expect.not.objectContaining({ data_stream_options: expect.anything() }),
-        })
+      expect(updateIndexTemplate.mock.calls[0][0].template).not.toHaveProperty(
+        'data_stream_options'
       );
     });
   });
