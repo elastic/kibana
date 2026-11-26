@@ -16,17 +16,11 @@ import type { AttributeValuesParams } from './use_attribute_values';
 
 const mockGetFilterValues = jest.fn();
 
+// Created once per test: a new `inventoryApi` on every render would make the hook fetch again.
+let services: ReturnType<typeof createAppServicesMock>;
+
 const wrapper = ({ children }: { children: React.ReactNode }) => (
-  <KibanaContextProvider
-    services={createAppServicesMock({
-      inventoryApi: {
-        ...createFixtureEntityInventoryApiClient(),
-        getFilterValues: mockGetFilterValues,
-      },
-    })}
-  >
-    {children}
-  </KibanaContextProvider>
+  <KibanaContextProvider services={services}>{children}</KibanaContextProvider>
 );
 
 const params: AttributeValuesParams = {
@@ -52,6 +46,12 @@ const lastBody = () => mockGetFilterValues.mock.calls[mockGetFilterValues.mock.c
 describe('useAttributeValues', () => {
   beforeEach(() => {
     mockGetFilterValues.mockReset();
+    services = createAppServicesMock({
+      inventoryApi: {
+        ...createFixtureEntityInventoryApiClient(),
+        getFilterValues: mockGetFilterValues,
+      },
+    });
   });
 
   it('loads the values', async () => {
