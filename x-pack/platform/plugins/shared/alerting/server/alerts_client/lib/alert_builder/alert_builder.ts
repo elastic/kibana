@@ -341,24 +341,30 @@ export class AlertBuilder<
     // Tracked AAD docs that are not in this run's working set will never be
     // rebuilt, so they must stop matching the tracked query. An active one is
     // untracked, otherwise it would stay active forever with nothing left to
-    // recover it. Any other status only has tracked flipped to false.
+    // recover it. Any other status only has tracked flipped to false, and a
+    // delayed one is then deleted instead of written (see getBulkOperation).
     // Backfill runs reach this loop too, with an empty task state. It finds
     // nothing there only because backfills are limited to rule types without
     // autoRecoverAlerts (see getBackfillRuleError), and tracked alerts are not
     // loaded for those. Revisit this loop before allowing backfills for
     // lifecycle rule types, or it would untrack alerts the rule still tracks.
     const untrackedInstanceIds: string[] = [];
+    const deletedInstanceIds: string[] = [];
     for (const [uuid, alert] of Object.entries(this.trackedAlerts.all)) {
       if (keepUuids.has(uuid) || get(alert, ALERT_TRACKED) === false) {
         continue;
       }
-      if (get(alert, ALERT_STATUS) === ALERT_STATUS_ACTIVE) {
+      const status = get(alert, ALERT_STATUS);
+      if (status === ALERT_STATUS_ACTIVE) {
         recoveredAlertsToIndex.push(
           buildUntrackedAlert<AlertData>({ alert, timestamp: this.currentTime })
         );
         untrackedInstanceIds.push(get(alert, ALERT_INSTANCE_ID) ?? uuid);
       } else {
         recoveredAlertsToIndex.push({ ...alert, [ALERT_TRACKED]: false });
+        if (status === ALERT_STATUS_DELAYED) {
+          deletedInstanceIds.push(get(alert, ALERT_INSTANCE_ID) ?? uuid);
+        }
       }
     }
 
@@ -369,6 +375,16 @@ export class AlertBuilder<
         } active alert document(s) that this run does not track ${
           this.ruleInfoMessage
         }: ${formatInstanceIds(untrackedInstanceIds)}`,
+        this.logTags
+      );
+    }
+    if (deletedInstanceIds.length > 0) {
+      this.logger.warn(
+        `Deleting ${
+          deletedInstanceIds.length
+        } delayed alert document(s) that this run does not track ${
+          this.ruleInfoMessage
+        }: ${formatInstanceIds(deletedInstanceIds)}`,
         this.logTags
       );
     }
@@ -404,6 +420,22 @@ export class AlertBuilder<
     isUsingDataStreams: boolean,
     alert: Alert & AlertData
   ) {
+    if (this.isLeftoverDelayedAlert(alert)) {
+      // A delayed document only carries data into the active document, so one that no run
+      // tracks is never read again. The delete is conditional: if the document changed after
+      // this run loaded it, for example it became active, it is kept.
+      return [
+        {
+          delete: {
+            _id: uuid,
+            _index: index,
+            if_seq_no: seqNo,
+            if_primary_term: primaryTerm,
+          },
+        },
+      ];
+    }
+
     const shouldDelete = this.isRecoveredDelayedAlert(alert);
     if (shouldDelete) {
       // recovered delayed alerts should always create a new document
@@ -448,5 +480,11 @@ export class AlertBuilder<
       get(alert, ALERT_STATUS) === ALERT_STATUS_DELAYED &&
       get(alert, ALERT_ACTION_GROUP) === undefined
     );
+  }
+
+  // Delayed documents built for this run's alerts are always tracked. Only buildRecoveredAlerts
+  // sets tracked to false on one, when the run does not track it.
+  private isLeftoverDelayedAlert(alert: Alert & AlertData) {
+    return get(alert, ALERT_STATUS) === ALERT_STATUS_DELAYED && get(alert, ALERT_TRACKED) === false;
   }
 }
