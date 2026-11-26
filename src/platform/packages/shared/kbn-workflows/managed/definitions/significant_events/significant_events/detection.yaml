@@ -38,13 +38,9 @@ triggers:
         description: "Every active rule must be scanned at least once within this many minutes. scan_cycles = floor(targetCoverageMinutes / detectionIntervalMinutes), min 1. Round-robin spreads the fleet only when targetCoverageMinutes > detectionIntervalMinutes; equal or less scans the whole fleet each run. The scheduler overrides this at run time; the default here (equal to detectionIntervalMinutes) scans the whole fleet on a manual/standalone run."
 consts:
   DETECTIONS_INDEX: ".significant_events-detections"
-  # Window used to look up a rule's most recent change-point detection when deciding whether the
-  # currently observed change_point_type is a transition. Must comfortably exceed the scan
-  # cadence so the prior detection is still visible.
-  LAST_DETECTION_LOOKBACK: "now-24h"
   # Window used by the recency agg to find when each rule was last scanned (detection or bare touch
-  # marker). Mirrors LAST_DETECTION_LOOKBACK so a just-scanned rule is never miscounted as
-  # never-scanned within a realistic coverage cycle.
+  # marker). Wide enough that a just-scanned rule is never miscounted as never-scanned within a
+  # realistic coverage cycle.
   SCAN_RECENCY_WINDOW: "now-24h"
   # Max buckets returned by the recency agg; must be >= max active rules per space.
   SCAN_RECENCY_AGG_SIZE: 1000
@@ -195,11 +191,19 @@ steps:
     with:
       batch_rule_uuids: "${{ variables.never_scanned_uuids | concat: variables.scanned_uuids | slice: 0, variables.scan_batch_size }}"
 
+  - name: compute_scan_gap
+    # Longest expected gap between two scans of one rule: a full coverage cycle plus one dropped
+    # run (concurrency strategy is drop) plus the run that finally picks the rule. Rounded up
+    # because the settings accept fractional minutes and ES date math does not.
+    type: data.set
+    with:
+      scan_gap_minutes: "${{ inputs.detectionIntervalMinutes | times: 2 | plus: inputs.targetCoverageMinutes | ceil }}"
+
   # -----------------------------------------------------------------------
   # Step 3: Foreach rule bucket — observe the change_point type and write a DETECTION on transition.
   # A detection is an immutable observation of a non-stationary change_point_type (`stationary` is
   # ambient noise and is never written). We write exactly one detection when the observed type
-  # differs from that rule's most recent detection — no lifecycle determination, no per-scan firehose.
+  # differs from what the rule's previous scan observed — no lifecycle determination, no per-scan firehose.
   # Out-of-batch rules skip both the lookup and the write via has_rule_uuid.
   # -----------------------------------------------------------------------
   - name: foreach_rule
@@ -215,11 +219,21 @@ steps:
         with:
           change_point_type: "${{ foreach.item.change_points.type | entries | map: 'key' | first | default: '' }}"
           has_rule_uuid: "${{ foreach.item.key != null and foreach.item.key != '' and variables.batch_rule_uuids contains foreach.item.key }}"
+          # How far back check_last_scan looks. At least the window this rule was scanned over
+          # (lookback_minutes, set per analysis profile by the scan route), so a rule that went quiet
+          # for longer than that is not compared with a record its scan cannot contain; and at least
+          # the scan gap, so a continuing incident still finds the previous scan's record.
+          gate_window_minutes: "${{ foreach.item.lookback_minutes | at_least: variables.scan_gap_minutes }}"
 
-      - name: check_last_detection
-        # Most recent DETECTION for this rule (detections carry change_point_type; processed markers do not,
-        # so `exists: change_point_type` excludes markers). Used to decide whether the observed
-        # type is a transition.
+      - name: check_last_scan
+        # Most recent scan record for this rule that observed a type: a detection (change_point_type)
+        # or a scan marker (observed_change_point_type). Processed and skip markers carry no
+        # rule_uuid, so the term filter excludes them. Markers with no observed type (an
+        # inconclusive scan, or one written before markers recorded it) are skipped, so they neither
+        # reset the gate nor hide the record before them. Comparing against the last scan rather
+        # than the last detection is what lets a `stationary` scan reset the gate, since `stationary`
+        # is never written as a detection. Bounded by gate_window_minutes: a rule that went quiet
+        # has no scans to reset it, so its old record must age out of the window.
         if: "${{ steps.compute_rule_context.output.has_rule_uuid }}"
         type: elasticsearch.request
         with:
@@ -237,32 +251,40 @@ steps:
                       kibana.space_ids: "{{ variables.spaceId }}"
                   - term:
                       rule_uuid: "{{ foreach.item.key }}"
-                  - exists:
-                      field: change_point_type
+                  - bool:
+                      should:
+                        - exists:
+                            field: change_point_type
+                        - exists:
+                            field: observed_change_point_type
+                      minimum_should_match: 1
                   - range:
                       "@timestamp":
-                        gte: '{{ consts.LAST_DETECTION_LOOKBACK }}'
+                        gte: 'now-{{ steps.compute_rule_context.output.gate_window_minutes }}m'
         on-failure:
           continue: true
       - name: compute_transition
         type: data.set
         with:
-          # "" when the rule has no prior detection in the window; any observed type then reads as a
-          # transition (first observation for the rule).
-          last_change_point_type: "{% if steps.check_last_detection.output.hits.total.value > 0 %}{{ steps.check_last_detection.output.hits.hits[0]._source.change_point_type | default: '' }}{% else %}{% endif %}"
+          # "" when the rule has no typed scan record in the window; any observed type then reads as
+          # a transition.
+          last_change_point_type: "{% if steps.check_last_scan.output.hits.total.value > 0 %}{{ steps.check_last_scan.output.hits.hits[0]._source.change_point_type | default: steps.check_last_scan.output.hits.hits[0]._source.observed_change_point_type | default: '' }}{% else %}{% endif %}"
           detection_p_value: "${{ foreach.item.change_points.type[steps.compute_rule_context.output.change_point_type].p_value | default: 0 }}"
 
       - name: compute_write_gate
         type: data.set
         with:
-          # Write only when the observed change_point_type differs from the rule's last detection.
-          # A transient lookup error (check_last_detection runs on-failure:continue) must not force a
+          # Write only when the observed change_point_type differs from the rule's last scan.
+          # A transient lookup error (check_last_scan runs on-failure:continue) must not force a
           # write, so require error == null.
           # `stationary` (flat alert rate) is overwhelmingly ambient noise and is never written;
           # post-escalation recovery is handled by the judge's re-evaluation queries instead.
+          # A rule flipping between a type and `stationary` writes a detection on every flip back.
+          # Discovery's flaky-rule hold-back limits how many of those reach review, except for rules
+          # at or above its exempt severity score; it does not limit the writes here.
           is_transition: >-
             ${{ steps.compute_rule_context.output.has_rule_uuid
-            and steps.check_last_detection.error == null
+            and steps.check_last_scan.error == null
             and steps.compute_rule_context.output.change_point_type != ''
             and steps.compute_rule_context.output.change_point_type != 'stationary'
             and steps.compute_rule_context.output.change_point_type != steps.compute_transition.output.last_change_point_type }}
@@ -298,12 +320,13 @@ steps:
         # Bare touch doc written when the rule was in-batch but its change_point_type did NOT
         # transition (write_detection did not fire). This advances the rule's last_touched
         # timestamp in the recency agg so it is not treated as perpetually stale and re-picked
-        # every run. Carries no change_point_type so it remains invisible to check_last_detection,
-        # discovery's get_detections, and DetectionClient.findLatest (all filter `exists: change_point_type`).
+        # every run, and records the observed type for the next scan's check_last_scan. It carries
+        # observed_change_point_type, never change_point_type, so it stays invisible to discovery's
+        # get_detections and DetectionClient.findLatest (both filter `exists: change_point_type`).
         # When a detection IS written its own @timestamp already advances last_touched — no marker needed.
         # No idempotency guard: foreach_rule visits each rule once per run and markers are
         # intentionally append-per-scan touch records.
-        if: "${{ steps.compute_rule_context.output.has_rule_uuid and steps.check_last_detection.error == null and steps.compute_write_gate.output.is_transition == false }}"
+        if: "${{ steps.compute_rule_context.output.has_rule_uuid and steps.check_last_scan.error == null and steps.compute_write_gate.output.is_transition == false }}"
         type: kibana.request
         with:
           method: POST
@@ -314,5 +337,6 @@ steps:
             rule_uuids:
               - "{{ foreach.item.key }}"
             scanned_by: "{{ execution.id }}"
+            observed_change_point_type: "{{ steps.compute_rule_context.output.change_point_type }}"
         on-failure:
           continue: true

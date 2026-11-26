@@ -34,7 +34,8 @@ export interface ValidateDestinationsDeps {
   validateWorkflow?: (
     yaml: string,
     spaceId: string,
-    request: KibanaRequest
+    request: KibanaRequest,
+    options?: { isManaged?: boolean }
   ) => Promise<ValidateWorkflowResponseDto>;
   request?: KibanaRequest;
   logger?: LoggerServiceContract;

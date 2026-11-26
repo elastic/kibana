@@ -6,13 +6,13 @@
  */
 
 import type { CoreSetup, KibanaRequest, Logger } from '@kbn/core/server';
-import { SavedObjectsClient } from '@kbn/core/server';
 import { APMEventClient, type ApmDataAccessServices } from '@kbn/apm-data-access-plugin/server';
 import type {
   ObservabilityAgentBuilderPluginSetupDependencies,
   ObservabilityAgentBuilderPluginStart,
   ObservabilityAgentBuilderPluginStartDependencies,
 } from '../types';
+import { getApmIndices } from './get_apm_indices';
 
 export interface ApmResources {
   apmEventClient: APMEventClient;
@@ -34,11 +34,8 @@ export async function buildApmResources({
   logger: Logger;
 }): Promise<ApmResources> {
   const [coreStart] = await core.getStartServices();
-  const savedObjectsClient = new SavedObjectsClient(
-    coreStart.savedObjects.createInternalRepository()
-  );
   const esClient = coreStart.elasticsearch.client.asScoped(request).asCurrentUser;
-  const indices = await plugins.apmDataAccess.getApmIndices(savedObjectsClient);
+  const indices = await getApmIndices({ core, plugins, request, logger });
 
   const apmEventClient = new APMEventClient({
     esClient,

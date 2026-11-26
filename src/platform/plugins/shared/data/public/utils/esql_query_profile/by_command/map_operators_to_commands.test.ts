@@ -124,6 +124,8 @@ describe('mapOperatorsToCommands', () => {
     ]);
     expect(heat.commands[2].operators).toEqual(['ValuesSourceReader', 'HashAggregation']);
     expect(heat.unattributedShare).toBeCloseTo(0.1);
+    // The operators with time that was not matched to a command are named, the slowest first.
+    expect(heat.unattributedOperators).toEqual(['Output']);
   });
 
   it('tells apart two commands of the same kind by where they are in the query', () => {
@@ -171,6 +173,7 @@ describe('mapOperatorsToCommands', () => {
     expect(planned.commands[1].share).toBe(1);
     expect(edited.commands[1].share).toBe(0);
     expect(edited.unattributedShare).toBe(1);
+    expect(edited.unattributedOperators).toEqual(['Limit']);
   });
 
   it('counts a plan node id on its own node only', () => {
@@ -188,6 +191,17 @@ describe('mapOperatorsToCommands', () => {
 
     expect(heat.commands.every(({ share }) => share === 0)).toBe(true);
     expect(heat.unattributedShare).toBe(1);
+  });
+
+  it('names no operator that reports no time among those that were not matched to a command', () => {
+    const heat = heatOf('FROM logs', [
+      { operator: 'LuceneSourceOperator', node: { id: '1', text: 'FROM logs' }, nanos: 10 },
+      { operator: 'OutputOperator', node: { id: '2' } },
+      { operator: 'ExchangeSinkOperator', node: { id: '3' }, nanos: 5 },
+      { operator: 'ProjectOperator', node: { id: '4' }, nanos: 20 },
+    ]);
+
+    expect(heat.unattributedOperators).toEqual(['Project', 'ExchangeSink']);
   });
 
   it('keeps an operator that reports no time in the list of its command', () => {
@@ -320,6 +334,31 @@ describe('mapOperatorsToCommands with subqueries', () => {
     ]);
   });
 
+  it('numbers a subquery by its first row, even when a nested one is listed after it', () => {
+    const query = 'FROM (FROM a | WHERE k IN (FROM b | KEEP k))';
+    const firstRowHeat = heatOf(query, []);
+
+    expect(firstRowHeat.commands.map(({ command, subquery }) => [command.text, subquery])).toEqual([
+      ['FROM a', 0],
+      ['FROM b', 1],
+      ['KEEP k', 1],
+      ['WHERE k IN (FROM b | KEEP k)', 0],
+    ]);
+  });
+
+  it('numbers the subqueries by the first row that is shown, not by one that is left out', () => {
+    const query = 'FROM (FROM (FROM a), (FROM b) | WHERE k IN (FROM c | KEEP k))';
+    const shownHeat = heatOf(query, []);
+
+    expect(shownHeat.commands.map(({ command, subquery }) => [command.text, subquery])).toEqual([
+      ['FROM a', 0],
+      ['FROM b', 1],
+      ['FROM c', 2],
+      ['KEEP k', 2],
+      ['WHERE k IN (FROM c | KEEP k)', 3],
+    ]);
+  });
+
   it('keeps the row of a FROM that has a source of its own besides the subqueries', () => {
     const query = 'FROM a, (FROM b | LIMIT 1) | LIMIT 5';
     const sourceHeat = heatOf(query, [
@@ -358,8 +397,30 @@ describe('mapOperatorsToCommands with subqueries', () => {
     expect(
       nestedHeat.commands.map(({ command, subquery, share }) => [command.text, subquery, share])
     ).toEqual([
-      ['FROM logs', 1, 0],
-      ['LIMIT 5', 1, 1],
+      ['FROM logs', 0, 0],
+      ['LIMIT 5', 0, 1],
+    ]);
+  });
+
+  it('numbers a subquery inside another before it, so the numbers read from the top', () => {
+    const query =
+      'FROM (FROM (FROM logs | WHERE a > 1 | LIMIT 5) | STATS c = COUNT(*) BY a) | SORT c DESC';
+    const orderHeat = heatOf(query, [
+      { operator: 'LimitOperator', node: { id: '1', text: 'LIMIT 5' }, nanos: 10 },
+      {
+        operator: 'HashAggregationOperator',
+        node: { id: '2', text: 'STATS c = COUNT(*) BY a' },
+        nanos: 20,
+      },
+      { operator: 'TopNOperator', node: { id: '3', text: 'SORT c DESC' }, nanos: 30 },
+    ]);
+
+    expect(orderHeat.commands.map(({ command, subquery }) => [command.name, subquery])).toEqual([
+      ['FROM', 0],
+      ['WHERE', 0],
+      ['LIMIT', 0],
+      ['STATS', 1],
+      ['SORT', undefined],
     ]);
   });
 });

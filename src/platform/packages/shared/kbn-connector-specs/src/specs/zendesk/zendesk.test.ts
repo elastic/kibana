@@ -7,7 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ActionContext } from '../../connector_spec';
+import axios from 'axios';
+import type { ActionContext, AuthContext, AuthTypeDef } from '../../connector_spec';
+import { OAuthAuthorizationCode } from '../../auth_types/oauth_authorization_code';
 import { ZendeskConnector } from './zendesk';
 
 describe('ZendeskConnector', () => {
@@ -24,6 +26,37 @@ describe('ZendeskConnector', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+  });
+
+  describe('auth', () => {
+    const findType = (type: string) =>
+      ZendeskConnector.auth?.types.find(
+        (t): t is AuthTypeDef => typeof t === 'object' && t.type === type
+      );
+
+    it('sends the client credentials in the token request body instead of a Basic header', async () => {
+      const defaults = findType('oauth_authorization_code')?.defaults;
+      const getToken = jest.fn().mockResolvedValue('Bearer access-token');
+      const ctx = {
+        logger: { debug: jest.fn(), info: jest.fn(), warn: jest.fn(), error: jest.fn() },
+        getCustomHostSettings: () => undefined,
+        getToken,
+        proxySettings: undefined,
+        sslSettings: { verificationMode: 'full' as const },
+      } as unknown as AuthContext;
+
+      await OAuthAuthorizationCode.configure(ctx, axios.create(), {
+        authorizationUrl: 'https://test-company.zendesk.com/oauth/authorizations/new',
+        tokenUrl: 'https://test-company.zendesk.com/oauth/tokens',
+        clientId: 'client-id',
+        clientSecret: 'client-secret',
+        ...defaults,
+      });
+
+      expect(getToken).toHaveBeenCalledWith(
+        expect.objectContaining({ tokenEndpointAuthMethod: 'client_secret_post' })
+      );
+    });
   });
 
   describe('search action', () => {

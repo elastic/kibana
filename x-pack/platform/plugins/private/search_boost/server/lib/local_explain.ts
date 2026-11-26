@@ -9,14 +9,15 @@
  * Temporary. Elasticsearch plans to let `GET _boost/explain` run without an index, returning every
  * index and data stream that isn't a system one, with the rules that match it by rank. Until then,
  * this file works that out in Kibana, following the same matching and ranking as Elasticsearch.
- * Once it's available, the rules route calls it in place of `getBoostTargets` and `explainTargets`,
- * mapping its response to `BoostExplanation`, and this file goes away.
+ * Once it's available, the rules route calls it in place of `resolveIndices`, `getBoostTargets`
+ * and `explainTargets`, mapping its response to `BoostExplanation`, and this file goes away.
  */
 
-import { errors } from '@elastic/elasticsearch';
+import type { estypes } from '@elastic/elasticsearch';
 import type { IScopedClusterClient } from '@kbn/core/server';
 import type { BoostProfile, BoostProfileType, BoostRule } from '../../common/types';
 import type { BoostExplanation } from './coverage';
+import { emptyIfForbidden } from './es_errors';
 
 /** An index or data stream that boost rules can apply to. */
 export interface BoostTarget {
@@ -25,55 +26,34 @@ export interface BoostTarget {
   type: BoostProfileType;
 }
 
-/**
- * Elasticsearch rejects a lookup the user has no index privileges for instead of listing nothing.
- * `_data_stream` needs more than `_resolve/index`, so each one falls back to an empty list alone.
- */
-const emptyIfForbidden = async <T>(request: Promise<T>, empty: T): Promise<T> => {
-  try {
-    return await request;
-  } catch (error) {
-    if (error instanceof errors.ResponseError && error.statusCode === 403) {
-      return empty;
-    }
-    throw error;
-  }
+export const resolveIndices = async (
+  client: IScopedClusterClient
+): Promise<estypes.IndicesResolveIndexResolveIndexItem[]> => {
+  const { indices } = await emptyIfForbidden(
+    client.asCurrentUser.indices.resolveIndex({ name: '*', expand_wildcards: ['open', 'hidden'] }),
+    { indices: [], aliases: [], data_streams: [] }
+  );
+  return indices;
 };
 
 /**
  * Lists the regular indices and the data streams of the project, hidden ones included. Data stream
  * backing indices and system indices and data streams are left out, since rules don't apply to them.
  */
-export const getBoostTargets = async (client: IScopedClusterClient): Promise<BoostTarget[]> => {
-  const [{ indices }, { data_streams: dataStreams }] = await Promise.all([
-    emptyIfForbidden(
-      client.asCurrentUser.indices.resolveIndex({
-        name: '*',
-        expand_wildcards: ['open', 'hidden'],
-      }),
-      { indices: [], aliases: [], data_streams: [] }
-    ),
-    // Resolved names don't say whether a data stream is a system one.
-    emptyIfForbidden(
-      client.asCurrentUser.indices.getDataStream({
-        name: '*',
-        expand_wildcards: ['open', 'hidden'],
-      }),
-      { data_streams: [] }
-    ),
-  ]);
-
-  return [
-    ...indices
-      .filter(
-        ({ data_stream: dataStream, attributes }) => !dataStream && !attributes.includes('system')
-      )
-      .map(({ name }): BoostTarget => ({ name, type: 'indices' })),
-    ...dataStreams
-      .filter(({ system }) => !system)
-      .map(({ name }): BoostTarget => ({ name, type: 'data_streams' })),
-  ];
-};
+export const getBoostTargets = (
+  indices: estypes.IndicesResolveIndexResolveIndexItem[],
+  /** Resolved names don't say whether a data stream is a system one. */
+  dataStreams: estypes.IndicesDataStream[]
+): BoostTarget[] => [
+  ...indices
+    .filter(
+      ({ data_stream: dataStream, attributes }) => !dataStream && !attributes.includes('system')
+    )
+    .map(({ name }): BoostTarget => ({ name, type: 'indices' })),
+  ...dataStreams
+    .filter(({ system }) => !system)
+    .map(({ name }): BoostTarget => ({ name, type: 'data_streams' })),
+];
 
 /**
  * Matches names against a pattern where each `*` stands for any characters. It looks for the parts

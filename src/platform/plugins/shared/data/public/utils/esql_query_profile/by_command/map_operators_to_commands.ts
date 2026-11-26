@@ -31,6 +31,11 @@ export interface QueryHeat {
   commands: CommandHeat[];
   /** Share of the operator time that no command explains, such as the final output. From 0 to 1. */
   unattributedShare: number;
+  /**
+   * Short names of the operators that took time that could not be matched to a command, slowest
+   * first. An operator can also be on a command, as each instance of it is matched on its own.
+   */
+  unattributedOperators: string[];
   /** True when the query has subqueries, so the commands belong to different queries. */
   hasSubqueries: boolean;
 }
@@ -81,18 +86,38 @@ const offsetOf = (
 
 /**
  * The commands of a query, with the commands of the subqueries of each command listed just before
- * the command that holds them. Subqueries are counted across the whole query, in the order they
- * are written.
+ * the command that holds them. Each subquery has an id, counted in the order they are written.
  */
 const listEntries = (commands: QueryCommand[]): Entry[] => {
   let nextSubquery = 0;
   const list = (inCommands: QueryCommand[], subquery?: number): Entry[] =>
-    inCommands.flatMap((command): Entry[] => {
-      const inner = (command.branches ?? []).flatMap((branch) => list(branch, nextSubquery++));
-      return [...inner, { command, subquery }];
-    });
+    inCommands.flatMap((command): Entry[] => [
+      ...(command.branches ?? []).flatMap((branch) => list(branch, nextSubquery++)),
+      { command, subquery },
+    ]);
   return list(commands);
 };
+
+/**
+ * Numbers the subqueries of the rows that are shown, from 0, in the order their first row comes.
+ * So a subquery inside another can come first, and the numbers read from the top as the work runs.
+ */
+const numberSubqueries = (rows: CommandHeat[]): CommandHeat[] => {
+  const numbers = new Map<number, number>();
+  rows.forEach(({ subquery }) => {
+    if (subquery !== undefined && !numbers.has(subquery)) {
+      numbers.set(subquery, numbers.size);
+    }
+  });
+  return rows.map((row) => ({
+    ...row,
+    subquery: row.subquery === undefined ? undefined : numbers.get(row.subquery),
+  }));
+};
+
+/** The names of a map of operator time, the slowest first. */
+const slowestFirst = (nanosByOperator: Map<string, number>): string[] =>
+  [...nanosByOperator.entries()].sort((left, right) => right[1] - left[1]).map(([title]) => title);
 
 /** The operator time found for one command, while the operators are being attributed. */
 interface CommandAccumulator {
@@ -151,6 +176,7 @@ export function mapOperatorsToCommands({
     return commandOfNode.get(key);
   };
   let unattributedNanos = 0;
+  const unattributedByOperator = new Map<string, number>();
   let totalNanos = 0;
 
   operators.forEach(({ title, drivers }) => {
@@ -161,6 +187,12 @@ export function mapOperatorsToCommands({
         planNodeId === undefined ? undefined : commandOf(planNodeKey(nodeName, planNodeId));
       if (!target) {
         unattributedNanos += processNanos;
+        if (processNanos > 0) {
+          unattributedByOperator.set(
+            title,
+            (unattributedByOperator.get(title) ?? 0) + processNanos
+          );
+        }
         return;
       }
       target.nanos += processNanos;
@@ -172,16 +204,17 @@ export function mapOperatorsToCommands({
     command: entry.command,
     subquery: entry.subquery,
     share: shareOf(nanos, totalNanos),
-    operators: [...operatorNanos.entries()]
-      .sort((left, right) => right[1] - left[1])
-      .map(([title]) => title),
+    operators: slowestFirst(operatorNanos),
   }));
 
   return {
     // A command that only holds subqueries is worth a row when it took time of its own. Any other
     // stays, such as FROM a, (...) with a source, or WHERE k IN (...) with an expression.
-    commands: heats.filter(({ command, share }) => !command.holdsOnlySubqueries || share > 0),
+    commands: numberSubqueries(
+      heats.filter(({ command, share }) => !command.holdsOnlySubqueries || share > 0)
+    ),
     unattributedShare: shareOf(unattributedNanos, totalNanos),
+    unattributedOperators: slowestFirst(unattributedByOperator),
     hasSubqueries: commands.some((command) => Boolean(command.branches?.length)),
   };
 }
