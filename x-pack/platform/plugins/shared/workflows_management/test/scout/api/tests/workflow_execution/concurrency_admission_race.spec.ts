@@ -164,8 +164,7 @@ const rankByAdmissionOrder = async (
   return [...admitted].sort(compareAdmissionOrder);
 };
 
-// Failing: See https://github.com/elastic/kibana/issues/307704
-spaceTest.describe.skip(
+spaceTest.describe(
   'Workflow execution concurrency admission race',
   { tag: tags.deploymentAgnostic },
   () => {

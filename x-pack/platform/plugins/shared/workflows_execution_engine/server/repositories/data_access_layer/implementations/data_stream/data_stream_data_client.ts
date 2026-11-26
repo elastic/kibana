@@ -486,13 +486,23 @@ export class DataStreamDataClient<TExecution extends { id: string }>
     const preFailed: Array<{ id: string; originalIndex: number; error: estypes.ErrorCause }> = [];
     const pendingIndexes: number[] = [];
 
-    // DataStream requires @timestamp to be set on create and update.
-    // We inject the @timestamp into the document from the date field.
-    const withTimestamp = (item: BulkPlainItem<TExecution>): BulkPlainItem<TExecution> => {
+    // DataStream requires @timestamp on create. Copy it from the date field.
+    // An upsert of a document that is not in the data stream becomes a create; when that
+    // write has no date field (a cancel flush has no startedAt), stamp the current time.
+    const withTimestamp = (
+      item: BulkPlainItem<TExecution>,
+      fallbackToNow = false
+    ): BulkPlainItem<TExecution> => {
       if (!this.deps.dateField) return item;
       const ts = item.document[this.deps.dateField];
-      if (typeof ts !== 'string') return item;
-      return { ...item, document: { ...item.document, '@timestamp': ts } };
+      const timestamp =
+        typeof ts === 'string'
+          ? ts
+          : fallbackToNow
+          ? new Date(Date.now()).toISOString()
+          : undefined;
+      if (timestamp === undefined) return item;
+      return { ...item, document: { ...item.document, '@timestamp': timestamp } };
     };
 
     for (let i = 0; i < items.length; i++) {
@@ -545,7 +555,7 @@ export class DataStreamDataClient<TExecution extends { id: string }>
           if (item.operation === 'upsert') {
             sendable.push({
               item: {
-                ...withTimestamp(item),
+                ...withTimestamp(item, true),
                 operation: 'create',
                 index: this.deps.dataStreamName,
               },

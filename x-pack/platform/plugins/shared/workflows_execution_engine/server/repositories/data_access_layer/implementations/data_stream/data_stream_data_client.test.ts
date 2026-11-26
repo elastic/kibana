@@ -136,6 +136,48 @@ describe('DataStreamDataClient', () => {
     );
   });
 
+  it('stamps the current time when an upsert creates a document with no date field', async () => {
+    jest.useFakeTimers();
+    jest.setSystemTime(new Date('2026-03-03T00:00:00.000Z'));
+    try {
+      const { esClient, dataAccess } = createClient();
+      esClient.bulk.mockResolvedValue({
+        errors: false,
+        items: [
+          {
+            create: {
+              _id: 'a',
+              _index: BACKING_INDEX,
+              result: 'created',
+              _seq_no: 1,
+              _primary_term: 1,
+            },
+          },
+        ],
+      } as never);
+
+      const result = await dataAccess.bulk({
+        items: [{ operation: 'upsert', document: { id: 'a', status: 'cancelled' } }],
+      });
+
+      expect(result.errors).toBe(false);
+      expect(esClient.bulk).toHaveBeenCalledWith(
+        expect.objectContaining({
+          operations: [
+            { create: { _id: 'a', _index: DATA_STREAM } },
+            {
+              id: 'a',
+              status: 'cancelled',
+              '@timestamp': '2026-03-03T00:00:00.000Z',
+            },
+          ],
+        })
+      );
+    } finally {
+      jest.useRealTimers();
+    }
+  });
+
   it('does not rewrite a true create 409 into an update', async () => {
     const { esClient, dataAccess } = createClient();
 
