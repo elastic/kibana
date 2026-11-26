@@ -815,12 +815,17 @@ const BLOCKED_KEYS_CHUNK = 500;
  * The strict key tags among `keyTags` that some alert carries with a verdict against a false
  * positive: a true positive, an inconclusive verdict from the model or from an analyst who
  * dismissed a proposal, or an analyst's close with a reason other than false positive (the same
- * rule the store step applies to the alerts of an approval). An alert with `az:inconclusive` and `az:model_fp` does not count: the model
- * judged it a false positive, and its proposal failed, expired or was never reviewed, so nobody
- * judged otherwise. Only the batch writes the strict key tag, so the `az:inconclusive` a
- * dismissal's skip adds never counts. Every alert counts, with no time limit: the consistency rule
- * is about every earlier verdict of the key. A failed read throws, so no decision is written on a
- * guess.
+ * rule the store step applies to the alerts of an approval). An alert with `az:inconclusive` and
+ * `az:model_fp` does not count: the model judged it a false positive, and its proposal failed,
+ * expired or was never reviewed, so nobody judged otherwise. Only the batch writes the strict key
+ * tag, so the `az:inconclusive` a dismissal's skip adds never counts. Every alert counts, with no
+ * time limit: the consistency rule is about every earlier verdict of the key. A failed read
+ * throws, so no decision is written on a guess.
+ *
+ * shortcut: alerts an analyst removed from an approved proposal, or dismissed when the proposal
+ * could not be read, kept `az:model_fp` before the review workflow dropped it on those paths, so
+ * those older rejections do not count. Tagging the unreviewed paths instead would leave every older
+ * failed or expired proposal blocking its key. Backfill the older alerts if this gap matters.
  */
 export const findKeyTagsWithVerdicts = async (
   { callKibanaApi }: KibanaApi,
