@@ -16,13 +16,22 @@ export interface ResolvedConversationStarters {
   source: ConversationStartersSource;
 }
 
-/** Trims the labels and drops starters without a label and repeated labels, keeping the first. */
+/**
+ * Trims the labels and prompts, drops starters without a label and repeated labels, keeping the
+ * first, and drops blank prompts.
+ */
 const normalizeStarters = (
   starters: readonly ConversationStarter[] | undefined
 ): ConversationStarter[] => {
-  const normalized = (starters ?? []).flatMap(({ label }): ConversationStarter[] => {
+  const normalized = (starters ?? []).flatMap(({ label, prompt }): ConversationStarter[] => {
     const trimmedLabel = label.trim();
-    return trimmedLabel ? [{ label: trimmedLabel }] : [];
+    const trimmedPrompt = prompt?.trim();
+    if (!trimmedLabel) {
+      return [];
+    }
+    return [
+      trimmedPrompt ? { label: trimmedLabel, prompt: trimmedPrompt } : { label: trimmedLabel },
+    ];
   });
   return normalized.filter(
     (starter, index) => normalized.findIndex(({ label }) => label === starter.label) === index
@@ -32,8 +41,8 @@ const normalizeStarters = (
 /**
  * Picks the starters to show, and says where they came from: the first of the starters of the app,
  * those of the solution and the default ones that is left with a starter after cleaning it. It
- * replaces the others, with no backfill. Labels are trimmed, starters without a label and repeated
- * labels are dropped, and at most MAX_CONVERSATION_STARTERS are returned.
+ * replaces the others, with no backfill. Labels and prompts are trimmed, starters without a label
+ * and repeated labels are dropped, and at most MAX_CONVERSATION_STARTERS are returned.
  */
 export const resolveConversationStarters = ({
   appStarters,

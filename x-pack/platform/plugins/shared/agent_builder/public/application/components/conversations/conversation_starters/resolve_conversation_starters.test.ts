@@ -58,6 +58,17 @@ describe('resolveConversationStarters', () => {
     ).toEqual(labels('a', 'b'));
   });
 
+  it('keeps and trims the prompts, and drops blank ones', () => {
+    expect(
+      resolveConversationStarters({
+        appStarters: [
+          { label: 'a', prompt: '  Tell me about a  ' },
+          { label: 'b', prompt: '   ' },
+        ],
+      }).starters
+    ).toEqual([{ label: 'a', prompt: 'Tell me about a' }, { label: 'b' }]);
+  });
+
   it('keeps at most three starters', () => {
     expect(
       resolveConversationStarters({ appStarters: labels('1', '2', '3', '4', '5') }).starters

@@ -264,9 +264,10 @@ export interface AgentBuilderPluginStart {
   /**
    * Opens the conversation sidebar.
    *
-   * With any option, `options` replace the config set with `setChatConfig` instead of being merged
-   * with it, so pass again whatever of that config is needed, such as `conversationStarters`. Without
-   * options, the config set with `setChatConfig` is used.
+   * With any option other than `conversationId`, `options` replace the config set with
+   * `setChatConfig` instead of being merged with it, so pass again whatever of that config is
+   * needed, such as `conversationStarters`. With no options, or only a `conversationId`, the config
+   * set with `setChatConfig` is used.
    *
    * @param options - Configuration options for the sidebar
    * @returns An object containing the sidebar reference

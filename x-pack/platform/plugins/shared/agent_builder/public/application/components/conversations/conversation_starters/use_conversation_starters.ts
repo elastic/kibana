@@ -26,7 +26,7 @@ const NO_STARTERS: ResolvedConversationStarters = { starters: [], source: 'defau
  * of the solution of the space, or else the default list. They are shown for the default Elastic AI
  * agent only. The lists of the solution and the default one also wait for the solution to be known,
  * and show only while the experimental features setting is on, until their copy is final. A click
- * sends the label as the message, which creates the conversation and moves the user to it.
+ * sends the prompt of the starter, or its label when it has none, as the message, which creates the conversation and moves the user to it.
  */
 export const useConversationStarters = ({
   solution,
@@ -58,8 +58,8 @@ export const useConversationStarters = ({
   );
 
   const onSelect = useCallback(
-    ({ label }: ConversationStarter) => {
-      void submitMessage(label);
+    ({ label, prompt }: ConversationStarter) => {
+      void submitMessage(prompt ?? label);
     },
     [submitMessage]
   );

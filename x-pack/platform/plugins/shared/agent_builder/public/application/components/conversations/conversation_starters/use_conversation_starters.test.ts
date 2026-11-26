@@ -113,7 +113,7 @@ describe('useConversationStarters', () => {
     expect(result.current.starters).toEqual([]);
   });
 
-  it('sends the label of the starter as the message', () => {
+  it('sends the label of the starter as the message when it has no prompt', () => {
     const { result } = renderStarters();
 
     act(() => {
@@ -121,6 +121,16 @@ describe('useConversationStarters', () => {
     });
 
     expect(submitMessage).toHaveBeenCalledWith('first');
+  });
+
+  it('sends the prompt of the starter instead of the label when it has one', () => {
+    const { result } = renderStarters();
+
+    act(() => {
+      result.current.onSelect({ label: 'first', prompt: 'Tell me about the first' });
+    });
+
+    expect(submitMessage).toHaveBeenCalledWith('Tell me about the first');
   });
 
   it('is disabled while a conversation is being created', () => {
