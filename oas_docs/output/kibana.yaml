@@ -221111,8 +221111,9 @@ components:
             type: string
           type: array
         alert_ids:
-          description: A list of alert IDs associated with the live query. At most 100 distinct IDs are accepted. Every ID must refer to an alert you can read; otherwise the request fails with a 404.
+          description: A list of alert IDs associated with the live query. At most 100 distinct IDs are accepted. Every ID must refer to an alert you can read; otherwise the request fails with a 404. IDs must not be empty.
           items:
+            minLength: 1
             type: string
           type: array
         case_ids:
