@@ -34,4 +34,18 @@ describe('resolveWrittenDetectionsPublicStepDefinition', () => {
       ],
     });
   });
+
+  it('accepts an input without a reported rule list but still bounds one that is given', () => {
+    const { inputSchema } = resolveWrittenDetectionsPublicStepDefinition;
+    const input = { workflow_execution_id: 'execution-1', batch: [] };
+
+    expect(inputSchema.safeParse(input).success).toBe(true);
+    expect(inputSchema.safeParse({ ...input, reported_rule_uuids: [] }).success).toBe(true);
+    expect(
+      inputSchema.safeParse({ ...input, reported_rule_uuids: Array(1_001).fill('rule-1') }).success
+    ).toBe(false);
+    expect(
+      inputSchema.safeParse({ ...input, reported_rule_uuids: ['r'.repeat(1_000)] }).success
+    ).toBe(false);
+  });
 });
