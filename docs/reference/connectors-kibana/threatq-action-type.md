@@ -83,8 +83,8 @@ Actions return the ThreatQ JSON response, including `data`, `total`, and cursor 
 
 | Action | Required parameters | Optional parameters and behavior |
 | --- | --- | --- |
-| `searchIndicators` | None | `criteria`, `filters`, `fields`, `limit`, `offset`, and `sort`. Uses `POST /api/indicators/query`. Does not return related objects; use `getIndicator`. |
-| `searchObjects` | `objectType` | `criteria`, `filters`, `fields`, `limit`, `offset`, `sort`, and `cursorMark`. Uses `POST /api/{objectType}/query`. Does not return related objects; use `getObject` or `getRelatedObjects`. |
+| `searchIndicators` | None | `criteria`, `filters`, `fields`, `limit`, `offset`, and `sort`. Uses `POST /api/indicators/query`. You can't request related objects with `with`. Use `getIndicator`. |
+| `searchObjects` | `objectType` | `criteria`, `filters`, `fields`, `limit`, `offset`, `sort`, and `cursorMark`. Uses `POST /api/{objectType}/query`. You can't request related objects with `with`. Use `getObject` or `getRelatedObjects`. |
 | `getIndicator` | `indicatorId` | `with` selects related fields. Defaults to attributes, sources, score, status, adversaries, and events. |
 | `getObject` | `objectType`, `objectId` | `with` selects related fields for an adversary, event, report, or another supported object type. |
 | `getRelatedObjects` | `objectType`, `objectId`, `relatedType` | `limit`, `offset`, `sort`, and `with`. Starting and related types can include custom object endpoints. |
@@ -95,7 +95,7 @@ Actions return the ThreatQ JSON response, including `data`, `total`, and cursor 
 
 The `sort` parameter accepts comma-separated fields, such as `-created_at,id`. A minus sign reverses the sort order.
 
-Search criteria and filters use ThreatQ's structured query format. Optional `fields` selects the response fields and is sent in the JSON body. The connector sends criteria and filters in the request body and pagination fields in the query string. The search actions don't take `with`, because the query routes don't declare it; read related data with the detail actions. For example:
+Search criteria and filters use ThreatQ's structured query format. Optional `fields` selects the response fields and is sent in the JSON body. The connector sends criteria and filters in the request body and pagination fields in the query string. The search actions don't take `with`, because the query routes don't declare it. To read related data, use the detail actions. For example:
 
 ```json
 {

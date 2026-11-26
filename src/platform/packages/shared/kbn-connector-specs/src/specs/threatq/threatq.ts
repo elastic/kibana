@@ -501,7 +501,7 @@ export const ThreatQ: ConnectorSpec = {
   skill: [
     '## ThreatQ investigation',
     '',
-    'Search an alert indicator, then use getIndicator to read its score, status, attributes, and sources. The search actions do not return related objects; read those with getIndicator, getObject, or getRelatedObjects and their with parameter.',
+    'Search an alert indicator, then use getIndicator to read its score, status, attributes, and sources. The search actions do not take with. To choose which related objects to read, use getIndicator, getObject, or getRelatedObjects and their with parameter.',
     'Use getRelatedObjects to find linked indicators, events, or adversaries; use getObject to read each result.',
     'For report details, use report. For report searches, use the endpoint name supported by the instance (the API reference lists reports). The with relationship names vary by ThreatQ version and installed object definitions.',
     'Use the IDs returned by listIndicatorStatuses and listIndicatorTypes before creating or updating indicators.',
