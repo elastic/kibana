@@ -164,8 +164,9 @@ describe('createBulkIndexer', () => {
         { signal: abortController.signal }
       );
       expect(getDocumentId(document.url)).toBe(
-        createHash('sha256').update(document.url).digest('hex')
+        createHash('sha256').update('example.com/page-0').digest('hex')
       );
+      expect(getDocumentId('http://example.com/page-0/')).toBe(getDocumentId(document.url));
     });
 
     it('buffers documents while a request is in flight, until they fill a batch', async () => {

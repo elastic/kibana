@@ -55,8 +55,9 @@ rate-limited extraction is retried twice with a backoff.
 A crawl starts from one or more URLs and stays on the sites those are on, each with its own
 `robots.txt`, crawl delay and sitemaps. It takes a maximum depth and a maximum number of pages.
 
-Indexing runs beside extraction. Each page is indexed once, keyed by its URL, with its markdown in
-`content` and copied into the `semantic_text` field `content_semantic`. A bulk request closes at
+Indexing runs beside extraction. Each page is crawled and indexed once, keyed by its URL without
+the scheme and a trailing slash, so the `http` and `https` URLs of a page are one document. Its
+markdown is in `content` and copied into the `semantic_text` field `content_semantic`. A bulk request closes at
 twenty pages or one megabyte of content, and up to three run at once. Requests and documents that
 Elasticsearch turns away as too many are sent again twice, with a backoff.
 

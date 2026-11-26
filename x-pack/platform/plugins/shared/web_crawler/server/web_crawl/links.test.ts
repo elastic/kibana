@@ -7,6 +7,7 @@
 
 import {
   extractLinks,
+  getPageKey,
   getSiteKey,
   getUrlFields,
   isSameSitePage,
@@ -132,6 +133,29 @@ describe('getSiteKey', () => {
     expect(getSiteKey('https://www.example.com/')).toBe('example.com');
     expect(getSiteKey('https://docs.example.com/')).toBe('docs.example.com');
     expect(getSiteKey('https://wwwexample.com/')).toBe('wwwexample.com');
+  });
+});
+
+describe('getPageKey', () => {
+  it.each([
+    ['http://example.com/docs', 'https://example.com/docs'],
+    ['https://example.com/docs/', 'https://example.com/docs'],
+    ['http://example.com', 'https://example.com/'],
+    ['https://example.com/docs/?page=2', 'https://example.com/docs?page=2'],
+    ['https://example.com:443/docs', 'https://example.com/docs'],
+  ])('is the same for %s and %s', (url, otherUrl) => {
+    expect(getPageKey(url)).toBe(getPageKey(otherUrl));
+  });
+
+  it.each([
+    ['https://example.com/docs', 'https://example.com/Docs'],
+    ['https://example.com/docs', 'https://example.com/docs?page=2'],
+    ['https://example.com/docs?a=1&b=2', 'https://example.com/docs?b=2&a=1'],
+    ['https://example.com/docs', 'https://www.example.com/docs'],
+    ['https://example.com/docs', 'https://example.com:8443/docs'],
+    ['https://example.com/docs', 'https://example.com/docs//'],
+  ])('differs between %s and %s', (url, otherUrl) => {
+    expect(getPageKey(url)).not.toBe(getPageKey(otherUrl));
   });
 });
 

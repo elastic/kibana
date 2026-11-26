@@ -8,6 +8,7 @@
 import { createHash } from 'crypto';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { waitFor } from './document_extraction';
+import { getPageKey } from './links';
 
 // `semantic_text` runs inference on every document at ingest, so a single request stays small.
 export const BULK_SIZE = 20;
@@ -60,8 +61,9 @@ export interface BulkIndexer {
   getCounts: () => { documentsCount: number; failedCount: number; lastError?: Error };
 }
 
+/** The same for every URL of a page, so a page found under another of its URLs replaces its document. */
 export const getDocumentId = (url: string): string =>
-  createHash('sha256').update(url).digest('hex');
+  createHash('sha256').update(getPageKey(url)).digest('hex');
 
 /**
  * Indexes crawled pages without holding up the extraction of further pages.

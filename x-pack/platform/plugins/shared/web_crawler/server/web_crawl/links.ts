@@ -96,6 +96,15 @@ export const normalizeUrl = (
 /** Identifies the site a URL belongs to, treating the `www.` host as the bare host. */
 export const getSiteKey = (url: string): string => new URL(url).hostname.replace(/^www\./, '');
 
+/**
+ * Identifies the page a URL leads to: the `http` and `https` URLs of a page are one page, and so
+ * are its URLs with and without a trailing slash.
+ */
+export const getPageKey = (url: string): string => {
+  const { host, pathname, search } = new URL(url);
+  return `${host}${pathname.endsWith('/') ? pathname.slice(0, -1) : pathname}${search}`;
+};
+
 export interface UrlFields {
   url_host: string;
   url_path: string;

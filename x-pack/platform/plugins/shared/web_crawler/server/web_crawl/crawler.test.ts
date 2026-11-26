@@ -23,7 +23,7 @@ import {
 } from './crawler';
 import type { ExtractedPage } from './document_extraction';
 import { extractPage, waitFor } from './document_extraction';
-import { MAX_LINKS_PER_PAGE } from './links';
+import { MAX_LINKS_PER_PAGE, getPageKey } from './links';
 
 jest.mock('./document_extraction');
 
@@ -58,7 +58,8 @@ interface IndexedDocument {
   depth: number;
 }
 
-const sha256 = (value: string): string => createHash('sha256').update(value).digest('hex');
+const toDocumentId = (url: string): string =>
+  createHash('sha256').update(getPageKey(url)).digest('hex');
 
 const range = <T>(count: number, toItem: (position: number) => T): T[] =>
   Array.from({ length: count }, (_, position) => toItem(position));
@@ -387,6 +388,22 @@ describe('crawlSite', () => {
       expect(getIndexedDocuments()[0]).toEqual(
         expect.objectContaining({ content: 'a'.repeat(499_999) })
       );
+    });
+
+    it('crawls a page once when it is linked by its http and https URLs, with and without a trailing slash', async () => {
+      mockPages((url) =>
+        pageLinkingTo(
+          url === SEED_URL
+            ? ['/docs', '/docs/', 'http://example.com/docs', 'http://example.com/', '/other/']
+            : ['http://example.com/other', ORIGIN]
+        )
+      );
+
+      await expect(
+        crawl({ additionalSeedUrls: ['http://example.com/', 'http://example.com'] })
+      ).resolves.toEqual(toResult({ documentsCount: 3 }));
+
+      expect(getPageRequests()).toEqual([SEED_URL, `${ORIGIN}/docs`, `${ORIGIN}/other/`]);
     });
 
     it('does not follow the links found on pages at the maximum depth', async () => {
@@ -919,7 +936,9 @@ describe('crawlSite', () => {
         [`${ORIGIN}/empty`]: undefined,
         [`${ORIGIN}/rejected`]: pageLinkingTo([]),
       });
-      mockBulk((id) => (id === sha256(`${ORIGIN}/rejected`) ? 'inference failed' : undefined));
+      mockBulk((id) =>
+        id === toDocumentId(`${ORIGIN}/rejected`) ? 'inference failed' : undefined
+      );
 
       await expect(crawl({ onProgress })).resolves.toEqual(
         toResult({ documentsCount: 2, failedCount: 3 })
@@ -1296,11 +1315,12 @@ describe('crawlSite', () => {
       const linksPerPage = 10;
       const sections = ['/a', '/b', '/c'];
       const toSkippedLink = (pathname: string, link: number) => `/skipped${pathname}/${link}`;
-      const skippedLinkLength = `${ORIGIN}${toSkippedLink(sections[0], 0)}`.length;
+      const toKeyLength = (path: string) => getPageKey(`${ORIGIN}${path}`).length;
       jest.replaceProperty(
         CRAWL_LIMITS,
         'maxSeenUrlsLength',
-        sections.join('').length + sections.length * ORIGIN.length + 15 * skippedLinkLength
+        sections.reduce((total, section) => total + toKeyLength(section), 0) +
+          15 * toKeyLength(toSkippedLink(sections[0], 0))
       );
       mockPages((url) => {
         const { pathname } = new URL(url);
@@ -1352,7 +1372,7 @@ describe('crawlSite', () => {
         'Elasticsearch could not index a page',
         () => {
           mockSmallSite();
-          mockBulk((id) => (id === sha256(`${ORIGIN}/b`) ? 'inference failed' : undefined));
+          mockBulk((id) => (id === toDocumentId(`${ORIGIN}/b`) ? 'inference failed' : undefined));
         },
         {},
       ],

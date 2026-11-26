@@ -8,7 +8,7 @@
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { createBulkIndexer } from './bulk_indexer';
 import { extractPage, waitFor } from './document_extraction';
-import { MAX_LINKS_PER_PAGE, extractLinks, getSiteKey, getUrlFields } from './links';
+import { MAX_LINKS_PER_PAGE, extractLinks, getPageKey, getSiteKey, getUrlFields } from './links';
 import type { PathRules } from './path_rules';
 import { NO_PATH_RULES, isPathAllowed } from './path_rules';
 import { purgeStaleDocuments } from './purge';
@@ -19,7 +19,7 @@ import { MAX_SITEMAP_REQUESTS, discoverSitemapPages } from './sitemap';
 export const EXTRACTION_CONCURRENCY = 10;
 const MAX_CONTENT_LENGTH = 500_000;
 export const CRAWL_LIMITS = {
-  /** The combined length of the URLs a crawl remembers having seen, which a site could otherwise grow without end. */
+  /** The combined length of the pages a crawl remembers having seen, which a site could otherwise grow without end. */
   maxSeenUrlsLength: 10_000_000,
 };
 // Pages are fetched by the inference endpoint, so this only selects which robots.txt group applies.
@@ -142,7 +142,14 @@ export const crawlSite = async ({
   const abortCrawl = () => crawlAbort.abort();
   taskSignal.addEventListener('abort', abortCrawl, { once: true });
 
-  const seedUrls = [...new Set([url, ...additionalSeedUrls])];
+  // Keyed by page, so a page is crawled once however many of its URLs the crawl comes across.
+  const seen = new Set<string>();
+  const seedUrls = [url, ...additionalSeedUrls].filter((seedUrl) => {
+    const pageKey = getPageKey(seedUrl);
+    const isNew = !seen.has(pageKey);
+    seen.add(pageKey);
+    return isNew;
+  });
   // The first start URL of each site, which is where that site's robots.txt and sitemap are looked for.
   const siteSeeds = new Map<string, string>();
   for (const seedUrl of seedUrls) {
@@ -152,7 +159,7 @@ export const crawlSite = async ({
     }
   }
   // Sitemaps a page links to are not pages to crawl.
-  const seen = new Set<string>([...seedUrls, ...sitemapUrls]);
+  sitemapUrls.forEach((sitemapUrl) => seen.add(getPageKey(sitemapUrl)));
   let seenUrlsLength = 0;
   // Set when a limit made the crawl drop links without counting them against the page limit.
   let hasDroppedLinks = false;
@@ -236,7 +243,7 @@ export const crawlSite = async ({
     await Promise.all(
       [...siteSeeds].map(async ([siteKey, seedUrl]) => {
         const robotsUrl = new URL('/robots.txt', seedUrl).href;
-        seen.add(robotsUrl);
+        seen.add(getPageKey(robotsUrl));
         const robotsContent = await fetchContent(robotsUrl);
         robotsBySite.set(
           siteKey,
@@ -276,15 +283,16 @@ export const crawlSite = async ({
         if (queue.length - queueCursors[depth] >= maxDocuments - requestedCount) {
           break;
         }
-        if (seen.has(link)) {
+        const pageKey = getPageKey(link);
+        if (seen.has(pageKey)) {
           continue;
         }
-        if (seenUrlsLength + link.length > CRAWL_LIMITS.maxSeenUrlsLength) {
+        if (seenUrlsLength + pageKey.length > CRAWL_LIMITS.maxSeenUrlsLength) {
           hasDroppedLinks = true;
           break;
         }
-        seen.add(link);
-        seenUrlsLength += link.length;
+        seen.add(pageKey);
+        seenUrlsLength += pageKey.length;
         if (!isPathAllowed(link, pathRules)) {
           skippedByRulesCount++;
         } else if (!getRobots(link).isAllowed(link)) {
