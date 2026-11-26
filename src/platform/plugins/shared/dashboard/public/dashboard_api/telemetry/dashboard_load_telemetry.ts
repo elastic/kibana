@@ -121,7 +121,10 @@ export function startTrackingDashboardLoadTelemetry(
           panelCount,
           totalLoadTime: completeLoadDuration,
           loadType,
-          isReplayedLoad: dashboard.replayCacheLastFetched$.value !== undefined,
+          // Only the load that opens the dashboard replays; later loads in the session fetch.
+          isReplayedLoad:
+            loadType !== 'dashboardSubsequentLoad' &&
+            dashboard.replayCacheLastFetched$.value !== undefined,
           children: Object.values(dashboard.children$.getValue()),
         });
       }
