@@ -8,10 +8,15 @@
 /**
  * AESOP-shaped alert-queue token-cost lab (security-team#21037).
  *
- * Seeds 4 threshold failed-logon alerts from one rule and asks 15 queue-style
- * questions. Forced skill binding (skillIds) compares arms without relying on
- * router selection. CODE evaluators count triage-tool calls that drive the
- * token cost the issue reported.
+ * Seeds 4 threshold failed-logon alerts from one rule and asks plain queue questions plus questions
+ * worded to tempt triage tools. Forced skill binding (skillIds) compares arms without relying on
+ * router selection. CODE evaluators count triage-tool calls that drive the token cost the issue
+ * reported.
+ *
+ * Every arm turns off the default agent's built-in tools and the other skills
+ * (enable_elastic_capabilities: false) and grants only what the arm needs. The token deltas are for
+ * that leaner setup, not for the default agent in production, which carries about 15 more platform
+ * tools and the other skills in every request.
  *
  * Four synthetic alerts with no events behind them: this checks tool-call cost on queue questions,
  * not the evidence step for judgment questions.
@@ -65,7 +70,7 @@ const buildQueueAlertDoc = (index: number) => {
   };
 };
 
-/** 15 queue prompts, AESOP-shaped: inventory / count / prioritize over a thin alert queue. */
+/** Plain queue prompts, AESOP-shaped: inventory, count and summary over a thin alert queue. */
 const QUEUE_PROMPTS: Array<{ id: string; question: string; expected: string }> = [
   {
     id: 'count-open',
@@ -108,11 +113,6 @@ const QUEUE_PROMPTS: Array<{ id: string; question: string; expected: string }> =
     expected: `Lists alerts that involve ${HOST}.`,
   },
   {
-    id: 'prioritize',
-    question: 'Which open alerts should I look at first?',
-    expected: 'Prioritizes open alerts, putting higher severity ahead of lower severity.',
-  },
-  {
     id: 'summarize-queue',
     question: 'Summarize the current alert queue.',
     expected: 'Summarizes the open alerts without inventing alerts that are not in the queue.',
@@ -144,12 +144,23 @@ const QUEUE_PROMPTS: Array<{ id: string; question: string; expected: string }> =
   },
 ];
 
-/** Queue questions worded to tempt triage tools (related alerts, Security Labs, entity risk). */
+/**
+ * Queue questions worded to tempt triage tools (related alerts, Security Labs, entity risk). The skill
+ * sends these to the judgment path, which allows bounded triage calls, so they are not expected to
+ * stay on security.alerts alone.
+ */
 const TEMPTING_PROMPTS: Array<{ id: string; question: string; expected: string }> = [
+  {
+    id: 'prioritize',
+    question: 'Which open alerts should I look at first?',
+    expected:
+      'Ranks the open alerts by severity and says that the events behind them were not checked.',
+  },
   {
     id: 'worth-escalating',
     question: 'Is anything in the open alert queue worth escalating?',
-    expected: 'Judges the open alerts from the queue and names the highest severity one.',
+    expected:
+      'Judges the open alerts from the queue, names the highest severity one, and says that the events behind them were not checked.',
   },
   {
     id: 'related-to-each-other',
@@ -294,6 +305,8 @@ evaluate.describe(
       await esClient.deleteByQuery({
         index: ALERTS_INDEX,
         query: { prefix: { 'kibana.alert.uuid': QUEUE_ALERT_ID_PREFIX } },
+        conflicts: 'proceed',
+        refresh: true,
       });
     });
 
@@ -319,14 +332,15 @@ evaluate.describe(
       });
     });
 
-    // Queue questions that invite triage; measures whether the skill keeps the model on security.alerts.
+    // Queue questions that invite triage; measures whether the skill keeps triage calls bounded.
     evaluate('Alert queue — tempting questions, skill bound', async ({ evaluateAlertQueue }) => {
       await evaluateAlertQueue({
         dataset: {
           name: 'agent builder: security-alert-queue-tempting-skill',
           description:
             'Queue questions worded to invite related-alert, Security Labs, or entity-risk calls, ' +
-            'with configuration_overrides.skill_ids=[alert-analysis].',
+            'with configuration_overrides.skill_ids=[alert-analysis]. Expects bounded triage calls: at most ' +
+            'one call to each tool, and one get_entity call per named entity.',
           examples: TEMPTING_PROMPTS.map(({ id, question, expected }) => ({
             id,
             input: { question },
@@ -512,6 +526,8 @@ evaluate.describe(
       await esClient.deleteByQuery({
         index: ALERTS_INDEX,
         query: { prefix: { 'kibana.alert.uuid': EVIDENCE_ALERT_ID_PREFIX } },
+        conflicts: 'proceed',
+        refresh: true,
       });
       await esClient.indices.delete({ index: EVIDENCE_EVENTS_INDEX, ignore_unavailable: true });
     });

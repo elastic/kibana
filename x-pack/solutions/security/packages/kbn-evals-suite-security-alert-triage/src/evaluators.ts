@@ -124,11 +124,13 @@ export const createSkillLoadedEvaluator = (skillName: string) => ({
 const MAX_EVIDENCE_ESQL_CALLS = 3;
 
 /**
- * CODE evaluator: 1 when the agent ran at least one ES|QL query that returned a result, and ran at most
- * three ES|QL queries. Checks the evidence step from the tool steps, not from the answer.
+ * CODE evaluator: 1 when the agent ran at least one ES|QL query that returned rows, and ran at most
+ * three ES|QL queries. Checks the evidence step from the tool steps, not from the answer. The tool
+ * returns an `esql_results` entry even when `values` is empty, so a search over the wrong time window
+ * must not count as finding the events.
  */
 export const createEvidenceLookupEvaluator = (log: ToolingLog) => ({
-  name: 'ES|QL evidence lookup (one success, at most three calls)',
+  name: 'ES|QL evidence lookup (one query with rows, at most three calls)',
   kind: 'CODE' as const,
   direction: 'maximize' as const,
   evaluate: async ({ output }: { output: unknown }) => {
@@ -136,9 +138,13 @@ export const createEvidenceLookupEvaluator = (log: ToolingLog) => ({
       ({ tool_id: toolId }) => toolId === platformCoreTools.executeEsql
     );
     const succeeded = esqlCalls.filter(({ results = [] }) =>
-      results.some(({ type }) => type === ToolResultType.esqlResults)
+      results.some(
+        ({ type, data }) =>
+          type === ToolResultType.esqlResults &&
+          ((data as { values?: unknown[] } | undefined)?.values?.length ?? 0) > 0
+      )
     ).length;
-    log.info(`ES|QL evidence calls: ${esqlCalls.length}, with results: ${succeeded}`);
+    log.info(`ES|QL evidence calls: ${esqlCalls.length}, with rows: ${succeeded}`);
     return {
       score: succeeded > 0 && esqlCalls.length <= MAX_EVIDENCE_ESQL_CALLS ? 1 : 0,
       metadata: { calls: esqlCalls.length, succeeded },
