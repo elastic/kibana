@@ -92,4 +92,22 @@ describe('UserProfilesSearch', () => {
     );
     expect(testProps.onUsersSelect).toHaveBeenCalledWith([mockSecondUser, MOCK_USER_PROFILE]);
   });
+
+  it('keeps a selected user checked when the profile lookup omits them', () => {
+    mockUseUserProfiles.mockReturnValue({ data: [] });
+    render(
+      <TestProviders>
+        <UserProfilesSearch {...testProps} />
+      </TestProviders>
+    );
+    expect(
+      screen
+        .getByTestId(`userProfileSelectableOption-${MOCK_USER_PROFILE.user.username}`)
+        .getAttribute('aria-checked')
+    ).toEqual('true');
+    fireEvent.click(
+      screen.getByTestId(`userProfileSelectableOption-${mockSecondUser.user.username}`)
+    );
+    expect(testProps.onUsersSelect).toHaveBeenCalledWith([mockSecondUser, MOCK_USER_PROFILE]);
+  });
 });

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { UserProfilesSelectable, type UserProfileWithAvatar } from '@kbn/user-profile-components';
 import type { UserProfile } from '@kbn/core-user-profile-common';
 import { useUserProfiles } from './use_user_profiles';
@@ -23,8 +23,13 @@ const UserProfilesSearchComponent: React.FC<Props> = ({
   selectedUsers,
 }) => {
   const { data: loadedUserProfiles } = useUserProfiles(selectedUsers.map((user) => user.uid));
-  // while the profiles load, the selection must still hold selectedUsers, or the next pick replaces them
-  const selectedUserProfiles = loadedUserProfiles ?? selectedUsers;
+  // selectedUsers decides who is checked; a loaded profile only enriches its entry, so a slow or partial lookup never changes the selection
+  const selectedUserProfiles = useMemo<UserProfile[]>(() => {
+    const loadedByUid = new Map(
+      (loadedUserProfiles ?? []).map((profile) => [profile.uid, profile])
+    );
+    return selectedUsers.map((user) => loadedByUid.get(user.uid) ?? user);
+  }, [loadedUserProfiles, selectedUsers]);
   const [searchTerm, setSearchTerm] = useState('');
   const { data: userProfiles, isLoading } = useSuggestUserProfiles({
     forbiddenUsers,
