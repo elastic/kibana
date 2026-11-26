@@ -108,4 +108,38 @@ describe('SearchNavigationPlugin', () => {
 
     expect(adapter.getClassicNavigation(history)).toBeUndefined();
   });
+
+  describe('setSearchBreadCrumbs with forClassicChromeStyle', () => {
+    const startWithChromeStyle = (chromeStyle: 'classic' | 'project') => {
+      const coreStart = createCoreStart();
+      const plugin = createPlugin();
+      coreStart.chrome.getChromeStyle$.mockReturnValue(new BehaviorSubject(chromeStyle));
+
+      plugin.setup(coreMock.createSetup(), { share: sharePluginMock.createSetupContract() });
+      const { breadcrumbs } = plugin.start(coreStart, {
+        share: sharePluginMock.createStartContract(),
+      });
+
+      return { breadcrumbs, coreStart };
+    };
+
+    it('applies breadcrumbs in classic chrome', () => {
+      const { breadcrumbs, coreStart } = startWithChromeStyle('classic');
+
+      breadcrumbs.setSearchBreadCrumbs([{ text: 'Home' }], { forClassicChromeStyle: true });
+
+      expect(coreStart.chrome.setBreadcrumbs).toHaveBeenCalledWith([
+        expect.objectContaining({ text: 'Elasticsearch' }),
+        { text: 'Home' },
+      ]);
+    });
+
+    it('skips breadcrumbs in project chrome', () => {
+      const { breadcrumbs, coreStart } = startWithChromeStyle('project');
+
+      breadcrumbs.setSearchBreadCrumbs([{ text: 'Home' }], { forClassicChromeStyle: true });
+
+      expect(coreStart.chrome.setBreadcrumbs).not.toHaveBeenCalled();
+    });
+  });
 });

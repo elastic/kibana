@@ -56,6 +56,7 @@
 - [PagerDuty](/reference/connectors-kibana/pagerduty-mcp-action-type.md): Access and manage incidents, escalation policies, schedules, on-calls, users, and teams in PagerDuty.
 - [PostHog](/reference/connectors-kibana/posthog-action-type.md): Triage error-tracking issues, run HogQL queries, and control feature flags.
 - [Prometheus](/reference/connectors-kibana/prometheus-action-type.md): Run PromQL queries, and read, silence, and manage alerts and alert groups in Alertmanager.
+- [Redis](/reference/connectors-kibana/redis-action-type.md): Browse keys, read values of every data type, inspect server info, and run commands in Redis.
 - [Rootly](/reference/connectors-kibana/rootly-action-type.md): Declare and drive incidents through their lifecycle.
 - [Salesforce](/reference/connectors-kibana/salesforce-action-type.md): Query and retrieve data from your Salesforce org using SOQL and the REST API.
 - [Sentry](/reference/connectors-kibana/sentry-action-type.md): Triage Sentry issues and provision issue alert rules.
@@ -82,9 +83,18 @@
 - [Google Cloud IAM](/reference/connectors-kibana/gcp-iam-action-type.md): Disable service accounts, revoke leaked keys, and grant or revoke IAM role bindings.
 - [Google Cloud Secret Manager](/reference/connectors-kibana/gcp-secret-manager-action-type.md): Inspect secrets, add and disable secret versions, and read access policy.
 
+**Endpoint security**
+
+- [Microsoft Defender for Endpoint (v2)](/reference/connectors-kibana/microsoft-defender-for-endpoint-action-type.md): Contain and investigate devices in Microsoft Defender for Endpoint. List, isolate, and release devices, run live response scripts and antivirus scans, and manage block and allow indicators.
+
 **Email security**
 
 - [Sublime Security](/reference/connectors-kibana/sublime-security-action-type.md): Search flagged email, get verdicts, and quarantine, trash, or restore message groups in Sublime Security.
+
+**Endpoint security**
+
+- [SentinelOne (v2)](/reference/connectors-kibana/sentinelone-v2-action-type.md): Find and isolate endpoints, triage and mitigate threats, run remote scripts, retrieve files, and manage blocklists, exclusions, indicators, firewall and detection rules.
+- [TrendAI Vision One](/reference/connectors-kibana/trend-vision-one-action-type.md): Read Workbench alerts, Observed Attack Techniques detections, endpoints, response tasks, and sandbox analysis results.
 
 **Threat intelligence**
 
