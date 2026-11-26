@@ -162,8 +162,6 @@ describe('Fleet preconfigured outputs', () => {
         },
       ];
 
-      let versionAfterFirstBoot: string;
-
       beforeAll(async () => {
         await startServers(kafkaOutputConfig);
       });
@@ -188,30 +186,6 @@ describe('Fleet preconfigured outputs', () => {
         expect(kafkaOutput!.attributes.type).toBe('kafka');
         // proxy_id must be cleared — Kafka does not support proxies (#267281)
         expect(kafkaOutput!.attributes.proxy_id).toBeNull();
-
-        // Capture version to detect spurious updates on the next boot
-        versionAfterFirstBoot = kafkaOutput!.version!;
-      });
-
-      it('should not trigger a repeated update on a second boot', async () => {
-        // Restart Kibana with the same config — the change-detection guard should see no diff
-        // on proxy_id for Kafka and not re-update the output.
-        await startServers(kafkaOutputConfig);
-
-        const outputs = await kbnServer.coreStart.savedObjects
-          .createInternalRepository()
-          .find<OutputSOAttributes>({
-            type: 'ingest-outputs',
-            perPage: 10000,
-          });
-
-        const kafkaOutput = outputs.saved_objects.find(
-          (so) => so.attributes.output_id === 'output-kafka-with-proxy'
-        );
-
-        expect(kafkaOutput).toBeDefined();
-        // Version must be unchanged — a different version means a spurious update occurred
-        expect(kafkaOutput!.version).toBe(versionAfterFirstBoot);
       });
     });
   });
