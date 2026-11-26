@@ -6,6 +6,7 @@
  */
 
 import { mount } from 'enzyme';
+import { render } from '@testing-library/react';
 import React from 'react';
 import useResizeObserver from 'use-resize-observer/polyfilled';
 
