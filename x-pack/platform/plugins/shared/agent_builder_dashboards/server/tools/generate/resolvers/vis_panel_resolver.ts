@@ -11,6 +11,7 @@ import {
   type VisualizationConfig,
 } from '@kbn/agent-builder-visualizations-server';
 import { VEGA_EMBEDDABLE_TYPE } from '@kbn/vega-constants';
+import { toHjsonSpec } from '@kbn/vega-utils';
 import type { ModelProvider, ToolEventEmitter } from '@kbn/agent-builder-server';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { Logger } from '@kbn/logging';
@@ -85,7 +86,7 @@ export const createVisPanelResolver = ({
             type: VEGA_EMBEDDABLE_TYPE,
             config: {
               ...existingConfig,
-              spec: { format: 'hjson', value: spec },
+              spec: toHjsonSpec(spec),
               ...(title ? { title } : {}),
             },
           },

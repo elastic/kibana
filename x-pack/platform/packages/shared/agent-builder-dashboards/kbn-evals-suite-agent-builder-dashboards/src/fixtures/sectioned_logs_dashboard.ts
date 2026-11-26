@@ -12,6 +12,7 @@ import {
   type DashboardSection,
 } from '@kbn/agent-builder-dashboards-common';
 import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
+import { VEGA_EMBEDDABLE_TYPE } from '@kbn/vega-constants';
 import {
   SAMPLE_LOGS_CONTROLS,
   dataViewBarPanel,
@@ -272,7 +273,7 @@ export const SECTIONED_LOGS_DASHBOARD_DSL_VEGA: DashboardAttachmentData = {
       ? {
           ...widget,
           panels: widget.panels.map((panel) =>
-            panel.type === 'vega' ? dslVegaPanel(panel.id, panel.grid) : panel
+            panel.type === VEGA_EMBEDDABLE_TYPE ? dslVegaPanel(panel.id, panel.grid) : panel
           ),
         }
       : widget

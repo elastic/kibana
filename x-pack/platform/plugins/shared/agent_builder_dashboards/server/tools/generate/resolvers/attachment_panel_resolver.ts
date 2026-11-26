@@ -22,6 +22,7 @@ import {
   type PanelContentAttempt,
   type RequestPanelType,
 } from '@kbn/dashboard-agent-authoring';
+import { toHjsonSpec } from '@kbn/vega-utils';
 
 const PANEL_TYPE_BY_RENDERER: Readonly<Record<VisualizationRenderer, RequestPanelType>> = {
   lens: 'vis',
@@ -49,7 +50,7 @@ const toPanelContent = (data: VisualizationAttachmentData): PanelContent => {
   // Vega attachments store the spec as text; the native `vega` panel takes `{ format, value }`.
   if (renderer === 'vega') {
     const { spec, ...vegaConfig } = data.visualization as VegaConfig;
-    return { type, config: { ...vegaConfig, spec: { format: 'hjson', value: spec } } };
+    return { type, config: { ...vegaConfig, spec: toHjsonSpec(spec) } };
   }
 
   return { type, config: data.visualization };

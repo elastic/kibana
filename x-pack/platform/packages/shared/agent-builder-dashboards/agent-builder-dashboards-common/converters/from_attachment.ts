@@ -13,6 +13,7 @@ import type {
 import { isLensAPIFormat, LensConfigBuilder } from '@kbn/lens-embeddable-utils';
 import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
 import { VEGA_EMBEDDABLE_TYPE } from '@kbn/vega-constants';
+import { toHjsonSpec } from '@kbn/vega-utils';
 import type {
   AttachmentPanel,
   DashboardSection as AgentDashboardSection,
@@ -29,7 +30,7 @@ import { EMPTY_DASHBOARD_STATE } from '../dashboard_state_helpers';
  */
 const buildPanelFromConfig = ({ config, type, id, grid }: AttachmentPanel): DashboardPanel => {
   if (type === VEGA_EMBEDDABLE_TYPE && typeof config.spec === 'string') {
-    return { type, id, grid, config: { ...config, spec: { format: 'hjson', value: config.spec } } };
+    return { type, id, grid, config: { ...config, spec: toHjsonSpec(config.spec) } };
   }
 
   let configObject = config;

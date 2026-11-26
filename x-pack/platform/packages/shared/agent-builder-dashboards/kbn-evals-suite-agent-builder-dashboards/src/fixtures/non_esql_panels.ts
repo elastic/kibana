@@ -10,6 +10,7 @@ import type {
   DashboardAttachmentData,
 } from '@kbn/agent-builder-dashboards-common';
 import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
+import { VEGA_EMBEDDABLE_TYPE } from '@kbn/vega-constants';
 
 const LOGS = 'kibana_sample_data_logs';
 
@@ -91,7 +92,7 @@ const DSL_REQUESTS_BY_OS_SPEC = requestsByOsSpec(
 
 /** A Vega-Lite bar chart over ES|QL, a panel kind the agent edits by spec rather than Lens config. */
 export const vegaPanel = (id: string, grid: AttachmentPanel['grid']): AttachmentPanel => ({
-  type: 'vega',
+  type: VEGA_EMBEDDABLE_TYPE,
   id,
   grid,
   config: { title: 'Requests by OS (Vega)', spec: ESQL_REQUESTS_BY_OS_SPEC },

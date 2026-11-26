@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { VEGA_MAX_SPEC_LENGTH } from '@kbn/vega-constants';
+
 /**
  * The `savedVis.type` of a Vega visualization that Kibana's legacy-vis embeddable renders. A Vega
  * dashboard panel's `type` is `VEGA_EMBEDDABLE_TYPE` from `@kbn/vega-constants`.
@@ -71,9 +73,6 @@ export const normalizeVegaConfig = (input: unknown): VegaConfig | undefined => {
   return config;
 };
 
-/** The longest spec a native `vega` panel accepts. */
-const MAX_NATIVE_VEGA_SPEC_LENGTH = 1_000_000;
-
 /**
  * Read the serialized Vega spec out of a legacy-vis (`visualization`) panel's
  * by-value `config`, i.e. `config.savedVis.params.spec`. Returns `undefined` when
@@ -89,7 +88,7 @@ export const extractVegaSpecFromSavedVis = (
     return undefined;
   }
   const spec = savedVis.params?.spec;
-  if (typeof spec !== 'string' || spec.length === 0 || spec.length > MAX_NATIVE_VEGA_SPEC_LENGTH) {
+  if (typeof spec !== 'string' || spec.length === 0 || spec.length > VEGA_MAX_SPEC_LENGTH) {
     return undefined;
   }
   return {

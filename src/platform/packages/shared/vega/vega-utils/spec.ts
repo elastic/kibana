@@ -10,6 +10,9 @@
 import { parse } from 'hjson';
 import type { VegaSpec } from '@kbn/vega-schemas';
 
+/** An HJSON spec for the text. */
+export const toHjsonSpec = (value: string): VegaSpec => ({ format: 'hjson', value });
+
 /** The text the spec editor shows for a spec. */
 export const specToEditorValue = (spec: VegaSpec): string =>
   spec.format === 'json' ? JSON.stringify(spec.value, null, 2) : spec.value;
@@ -20,10 +23,10 @@ export const specFromEditor = (text: string, format: VegaSpec['format']): VegaSp
     try {
       return { format: 'json', value: JSON.parse(text) };
     } catch {
-      return { format: 'hjson', value: text };
+      return toHjsonSpec(text);
     }
   }
-  return { format: 'hjson', value: text };
+  return toHjsonSpec(text);
 };
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>

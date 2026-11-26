@@ -12,6 +12,7 @@ import {
 } from '@kbn/agent-builder-dashboards-common';
 import { parseVegaSpec } from '@kbn/dashboard-agent-authoring';
 import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
+import { VEGA_EMBEDDABLE_TYPE } from '@kbn/vega-constants';
 
 export const GRID_COLUMNS = 48;
 
@@ -102,7 +103,7 @@ const collectVegaDataSources = (value: unknown): PanelDataSources => {
 
 /** The data behind a Lens or Vega panel. */
 export const getPanelDataSources = (panel: AttachmentPanel): PanelDataSources =>
-  panel.type === 'vega'
+  panel.type === VEGA_EMBEDDABLE_TYPE
     ? collectVegaDataSources(parseVegaSpec(panel.config.spec))
     : { queries: getPanelQueries(panel), indices: [] };
 

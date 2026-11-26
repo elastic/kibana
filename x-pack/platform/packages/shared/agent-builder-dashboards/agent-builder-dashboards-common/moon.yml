@@ -17,6 +17,7 @@ project:
   owner: '@elastic/kibana-dashboards'
   sourceRoot: x-pack/platform/packages/shared/agent-builder-dashboards/agent-builder-dashboards-common
 dependsOn:
+  - '@kbn/vega-utils'
   - '@kbn/vega-constants'
   - '@kbn/agent-builder-common'
   - '@kbn/agent-builder-visualizations-common'

@@ -7,4 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { VEGA_EMBEDDABLE_TYPE, VEGA_MAX_FILTERS } from './constants';
+export { VEGA_EMBEDDABLE_TYPE, VEGA_MAX_FILTERS, VEGA_MAX_SPEC_LENGTH } from './constants';

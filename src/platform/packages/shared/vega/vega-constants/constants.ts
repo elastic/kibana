@@ -12,3 +12,6 @@ export const VEGA_EMBEDDABLE_TYPE = 'vega';
 
 /** The most filters a library item or a panel can store. */
 export const VEGA_MAX_FILTERS = 100;
+
+/** The longest spec a library item or a panel can store. */
+export const VEGA_MAX_SPEC_LENGTH = 1_000_000;
