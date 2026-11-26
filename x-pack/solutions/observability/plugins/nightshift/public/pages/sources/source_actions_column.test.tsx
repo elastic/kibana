@@ -97,7 +97,10 @@ describe('SourceActionsColumn', () => {
     // jsdom cannot reproduce that ordering, so the test pins the deferral.
     const { props } = renderActions();
 
-    fireEvent.click(screen.getByTestId('significantEventsAppSourcesTableOnboardButton'));
+    const runButton = screen.getByTestId('significantEventsAppSourcesTableOnboardButton');
+    expect(runButton).toHaveAttribute('data-ebt-action', 'runSourceOnboarding');
+
+    fireEvent.click(runButton);
 
     expect(props.onOnboard).not.toHaveBeenCalled();
     await waitFor(() => {
