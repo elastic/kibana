@@ -178977,16 +178977,18 @@ components:
           maxItems: 1000
           type: array
         auth:
-          description: How the output authenticates with the OTLP endpoint, by sending the credential in a request header. Not accepted for the managed OTLP endpoint. The credential itself is set in `secrets.auth.credential`.
+          description: How the output authenticates with the OTLP endpoint. `auth_header` and `custom_header` send the credential set in `secrets.auth.credential` in a request header. `azure` sends a Microsoft Entra ID token that the collector requests itself, it requires the `http/protobuf` protocol. Not accepted for the managed OTLP endpoint.
           discriminator:
             mapping:
               auth_header: '#/components/schemas/Kibana_HTTP_APIs_otlp_auth_header'
+              azure: '#/components/schemas/Kibana_HTTP_APIs_otlp_azure_auth'
               custom_header: '#/components/schemas/Kibana_HTTP_APIs_otlp_custom_auth_header'
             propertyName: type
           nullable: true
           oneOf:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_otlp_auth_header'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_otlp_custom_auth_header'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_otlp_azure_auth'
         id:
           type: string
         is_default:
@@ -179018,6 +179020,23 @@ components:
               additionalProperties: false
               type: object
               properties:
+                azure_client_secret:
+                  anyOf:
+                    - additionalProperties: false
+                      type: object
+                      properties:
+                        hash:
+                          maxLength: 512
+                          type: string
+                        id:
+                          maxLength: 512
+                          minLength: 1
+                          type: string
+                      required:
+                        - id
+                    - maxLength: 8192
+                      minLength: 1
+                      type: string
                 credential:
                   anyOf:
                     - additionalProperties: false
@@ -180005,6 +180024,43 @@ components:
         - scheme
       title: otlp_auth_header
       type: object
+    Kibana_HTTP_APIs_otlp_azure_auth:
+      additionalProperties: false
+      properties:
+        azure_auth_method:
+          description: 'How the collector gets the Microsoft Entra ID token: `managed_identity` uses the managed identity of the Azure resource the agent runs on, `service_principal` uses an application registration and its client secret, set in `secrets.auth.azure_client_secret`.'
+          enum:
+            - managed_identity
+            - service_principal
+          type: string
+        client_id:
+          description: The client id of the service principal, required for it. For a managed identity, the client id of a user-assigned identity, left out for the system-assigned one.
+          maxLength: 256
+          minLength: 1
+          type: string
+        scopes:
+          description: The scopes of the token. By default `https://<host of the endpoint>/.default`, set them when the endpoint expects another audience, e.g. `https://monitor.azure.com/.default`.
+          items:
+            maxLength: 2048
+            minLength: 1
+            type: string
+          maxItems: 10
+          minItems: 1
+          type: array
+        tenant_id:
+          description: The tenant of the service principal, required for it.
+          maxLength: 256
+          minLength: 1
+          type: string
+        type:
+          enum:
+            - azure
+          type: string
+      required:
+        - type
+        - azure_auth_method
+      title: otlp_azure_auth
+      type: object
     Kibana_HTTP_APIs_otlp_custom_auth_header:
       additionalProperties: false
       properties:
@@ -180550,6 +180606,43 @@ components:
         - type
         - scheme
       title: otlp_response_auth_header
+      type: object
+    Kibana_HTTP_APIs_otlp_response_azure_auth:
+      additionalProperties: true
+      properties:
+        azure_auth_method:
+          description: 'How the collector gets the Microsoft Entra ID token: `managed_identity` uses the managed identity of the Azure resource the agent runs on, `service_principal` uses an application registration and its client secret, set in `secrets.auth.azure_client_secret`.'
+          enum:
+            - managed_identity
+            - service_principal
+          type: string
+        client_id:
+          description: The client id of the service principal, required for it. For a managed identity, the client id of a user-assigned identity, left out for the system-assigned one.
+          maxLength: 256
+          minLength: 1
+          type: string
+        scopes:
+          description: The scopes of the token. By default `https://<host of the endpoint>/.default`, set them when the endpoint expects another audience, e.g. `https://monitor.azure.com/.default`.
+          items:
+            maxLength: 2048
+            minLength: 1
+            type: string
+          maxItems: 10
+          minItems: 1
+          type: array
+        tenant_id:
+          description: The tenant of the service principal, required for it.
+          maxLength: 256
+          minLength: 1
+          type: string
+        type:
+          enum:
+            - azure
+          type: string
+      required:
+        - type
+        - azure_auth_method
+      title: otlp_response_azure_auth
       type: object
     Kibana_HTTP_APIs_otlp_response_custom_auth_header:
       additionalProperties: true
@@ -181628,16 +181721,18 @@ components:
           maxItems: 1000
           type: array
         auth:
-          description: How the output authenticates with the OTLP endpoint, by sending the credential in a request header. Not accepted for the managed OTLP endpoint. The credential itself is set in `secrets.auth.credential`.
+          description: How the output authenticates with the OTLP endpoint. `auth_header` and `custom_header` send the credential set in `secrets.auth.credential` in a request header. `azure` sends a Microsoft Entra ID token that the collector requests itself, it requires the `http/protobuf` protocol. Not accepted for the managed OTLP endpoint.
           discriminator:
             mapping:
               auth_header: '#/components/schemas/Kibana_HTTP_APIs_otlp_response_auth_header'
+              azure: '#/components/schemas/Kibana_HTTP_APIs_otlp_response_azure_auth'
               custom_header: '#/components/schemas/Kibana_HTTP_APIs_otlp_response_custom_auth_header'
             propertyName: type
           nullable: true
           oneOf:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_otlp_response_auth_header'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_otlp_response_custom_auth_header'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_otlp_response_azure_auth'
         id:
           type: string
         is_default:
@@ -181669,6 +181764,23 @@ components:
               additionalProperties: true
               type: object
               properties:
+                azure_client_secret:
+                  anyOf:
+                    - additionalProperties: true
+                      type: object
+                      properties:
+                        hash:
+                          maxLength: 512
+                          type: string
+                        id:
+                          maxLength: 512
+                          minLength: 1
+                          type: string
+                      required:
+                        - id
+                    - maxLength: 8192
+                      minLength: 1
+                      type: string
                 credential:
                   anyOf:
                     - additionalProperties: true
@@ -189465,16 +189577,18 @@ components:
           maxItems: 1000
           type: array
         auth:
-          description: How the output authenticates with the OTLP endpoint, by sending the credential in a request header. Not accepted for the managed OTLP endpoint. The credential itself is set in `secrets.auth.credential`.
+          description: How the output authenticates with the OTLP endpoint. `auth_header` and `custom_header` send the credential set in `secrets.auth.credential` in a request header. `azure` sends a Microsoft Entra ID token that the collector requests itself, it requires the `http/protobuf` protocol. Not accepted for the managed OTLP endpoint.
           discriminator:
             mapping:
               auth_header: '#/components/schemas/Kibana_HTTP_APIs_otlp_auth_header'
+              azure: '#/components/schemas/Kibana_HTTP_APIs_otlp_azure_auth'
               custom_header: '#/components/schemas/Kibana_HTTP_APIs_otlp_custom_auth_header'
             propertyName: type
           nullable: true
           oneOf:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_otlp_auth_header'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_otlp_custom_auth_header'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_otlp_azure_auth'
         id:
           type: string
         is_default:
@@ -189504,6 +189618,24 @@ components:
               additionalProperties: false
               type: object
               properties:
+                azure_client_secret:
+                  anyOf:
+                    - additionalProperties: false
+                      type: object
+                      properties:
+                        hash:
+                          maxLength: 512
+                          type: string
+                        id:
+                          maxLength: 512
+                          minLength: 1
+                          type: string
+                      required:
+                        - id
+                    - maxLength: 8192
+                      minLength: 1
+                      type: string
+                  nullable: true
                 credential:
                   anyOf:
                     - additionalProperties: false
