@@ -48,15 +48,21 @@ const APPLIES_TO_SUFFIX_RE = /^(\{applies_to\}`[^`]*`\s*)*$/;
  * this parser so they derive the same heading key regardless of trailing markup after the marker.
  */
 const headingBeforeNonToolMarker = (line: string): string | undefined => {
+  // Whether the line is an ATX heading (optional leading spaces then one or more #).
+  const isAtxHeading = /^\s*#+/.test(line);
   for (const marker of [NOT_YET_AVAILABLE_MARKER, API_ONLY_MARKER]) {
     const idx = line.indexOf(marker);
     if (idx === -1) {
       continue;
     }
-    // Strip a CommonMark ATX closing sequence (space + one-or-more # + optional space) before
-    // checking the badge suffix, so headings like `#### Foo _(API only)_ {badge} ####` are
-    // recognized rather than silently dropped.
-    const trailing = line.slice(idx + marker.length).trim().replace(/\s+#+\s*$/, '');
+    // Strip a CommonMark ATX closing sequence (space + one-or-more # + optional space) BEFORE
+    // trimming — only on ATX headings — so that `#### Foo _(API only)_ ####` is recognized.
+    // The strip must precede trim: trim removes the space that the \s+ requires, so reversing
+    // the order would leave bare `####` unmatched and silently drop the heading.
+    // Non-heading lines are intentionally left alone to prevent prose ending in `###` from
+    // being accepted as a marked action heading.
+    const rawTrailing = line.slice(idx + marker.length);
+    const trailing = (isAtxHeading ? rawTrailing.replace(/\s+#+\s*$/, '') : rawTrailing).trim();
     // Accept as an action heading only when nothing follows the marker, or only {applies_to} badges do.
     if (APPLIES_TO_SUFFIX_RE.test(trailing)) {
       return line.slice(0, idx).trim();
@@ -481,6 +487,24 @@ describe('connector spec quality contracts', () => {
       expect(
         headingBeforeNonToolMarker(
           '#### Update tamper protection _(API only)_ {applies_to}`stack: preview 9.7` some trailing prose'
+        )
+      ).toBeUndefined();
+    });
+
+    it('returns the heading for an ATX heading with a closing hash sequence and no badge', () => {
+      // Regression: trim-before-replace drops the space that \s+ requires, leaving bare `####`
+      // unmatched so the parser returns undefined and the contract silently passes.
+      expect(headingBeforeNonToolMarker('#### List alerts _(API only)_ ####')).toBe(
+        '#### List alerts'
+      );
+    });
+
+    it('returns undefined for a prose line that ends in a badge and literal hashes', () => {
+      // Regression: without the ATX-heading guard the closing-hash strip would remove the `###`,
+      // leaving only the badge and causing the line to be reported as a marked action heading.
+      expect(
+        headingBeforeNonToolMarker(
+          'This action is _(API only)_ {applies_to}`stack: preview 9.7` ###'
         )
       ).toBeUndefined();
     });
