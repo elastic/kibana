@@ -61,7 +61,9 @@ export const useAttributeValues = (params: AttributeValuesParams) => {
         { signal: controller.signal }
       )
       .then(({ values, invalidSelections }) => {
-        setState({ values, invalidSelections, isLoading: false });
+        if (!controller.signal.aborted) {
+          setState({ values, invalidSelections, isLoading: false });
+        }
       })
       .catch((error: Error) => {
         if (!controller.signal.aborted) {
