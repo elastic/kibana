@@ -32,16 +32,14 @@ interface UseVisorNlToEsqlParams {
 const generatedBlockStillPresent = (
   model: monaco.editor.ITextModel,
   state: ReviewState,
-  block: string
+  untouchedPreview: string
 ): boolean => {
-  if (!block || state.generatedLineEnd < state.generatedLineStart) return false;
+  if (state.generatedLineEnd < state.generatedLineStart) return false;
   if (model.getLineCount() < state.generatedLineEnd) return false;
 
-  const lines: string[] = [];
-  for (let line = state.generatedLineStart; line <= state.generatedLineEnd; line++) {
-    lines.push(model.getLineContent(line));
-  }
-  return lines.join('\n') === block;
+  const getBlock = (lines: string[]) =>
+    lines.slice(state.generatedLineStart - 1, state.generatedLineEnd).join('\n');
+  return getBlock(model.getValue().split('\n')) === getBlock(untouchedPreview.split('\n'));
 };
 
 export const useVisorNlToEsql = ({
@@ -54,14 +52,11 @@ export const useVisorNlToEsql = ({
 }: UseVisorNlToEsqlParams) => {
   const { euiTheme } = useEuiTheme();
   const reviewRef = useRef<Parameters<VisorNlResultHandler>[1] | undefined>(undefined);
-  const isSupersedingRef = useRef(false);
-  const isDismissingEditRef = useRef(false);
+  const isSilentRejectRef = useRef(false);
   const untouchedPreviewRef = useRef<string | null>(null);
-  const generatedBlockRef = useRef('');
 
   const clearPreviewSnapshot = useCallback(() => {
     untouchedPreviewRef.current = null;
-    generatedBlockRef.current = '';
   }, []);
 
   const onAfterAccept = useCallback(
@@ -82,7 +77,7 @@ export const useVisorNlToEsql = ({
   const onAfterReject = useCallback(
     ({ generatedLineStart, generatedLineEnd }: ReviewState) => {
       clearPreviewSnapshot();
-      if (isSupersedingRef.current || isDismissingEditRef.current) return;
+      if (isSilentRejectRef.current) return;
       telemetryService?.trackVisorNlReviewed({
         action: AiReviewAction.REJECT,
         linesChanged: generatedLineEnd - generatedLineStart + 1,
@@ -133,9 +128,9 @@ export const useVisorNlToEsql = ({
 
       // Revert any outstanding review so the next plan is against the original query,
       // not leftover generated lines from the previous result.
-      isSupersedingRef.current = true;
+      isSilentRejectRef.current = true;
       reject();
-      isSupersedingRef.current = false;
+      isSilentRejectRef.current = false;
 
       reviewRef.current = review;
 
@@ -159,12 +154,6 @@ export const useVisorNlToEsql = ({
           ]);
         }
 
-        const { generatedLineStart, generatedLineEnd } = plan.review;
-        const blockLines: string[] = [];
-        for (let line = generatedLineStart; line <= generatedLineEnd; line++) {
-          blockLines.push(model.getLineContent(line));
-        }
-        generatedBlockRef.current = blockLines.join('\n');
         untouchedPreviewRef.current = model.getValue();
 
         onAfterInsert?.();
@@ -187,10 +176,10 @@ export const useVisorNlToEsql = ({
     const snapshot = untouchedPreviewRef.current;
     if (model && snapshot != null && model.getValue() !== snapshot) {
       const state = getReviewState();
-      if (state && generatedBlockStillPresent(model, state, generatedBlockRef.current)) {
-        isDismissingEditRef.current = true;
+      if (state && generatedBlockStillPresent(model, state, snapshot)) {
+        isSilentRejectRef.current = true;
         reject();
-        isDismissingEditRef.current = false;
+        isSilentRejectRef.current = false;
       } else {
         discardReview();
       }
