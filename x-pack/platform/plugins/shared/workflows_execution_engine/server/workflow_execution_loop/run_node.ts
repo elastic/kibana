@@ -79,6 +79,7 @@ export async function runNode(params: WorkflowExecutionLoopParams): Promise<void
   let monitorAbortController: AbortController | undefined;
   let stepExecutionRuntime: StepExecutionRuntime | undefined;
   let nodeImplementation: NodeImplementation | undefined;
+  let contextStarted = false;
 
   if (!node) {
     return;
@@ -138,9 +139,10 @@ export async function runNode(params: WorkflowExecutionLoopParams): Promise<void
       return;
     }
 
-    // Pre-warm: rehydrate any evicted step outputs that the upcoming step will need.
+    // Load this node's context once. Drop the snapshot on every exit, including failure.
     // This must happen before getContext() is called (which is synchronous).
-    await stepExecutionRuntime.contextManager.ensureContextReady();
+    contextStarted = true;
+    await stepExecutionRuntime.contextManager.prepareContext();
 
     monitorAbortController = new AbortController();
 
@@ -193,19 +195,9 @@ export async function runNode(params: WorkflowExecutionLoopParams): Promise<void
       catchErrorSpan?.end();
     }
 
-    // Note: predecessor outputs that `prepareForRead` rehydrated for this
-    // step are released by the *next* step's `prepareForRead` (deferred
-    // release) so that consecutive consumers of the same predecessor reuse
-    // the in-memory copy instead of re-fetching from ES. The execution
-    // loop's final-flush path is responsible for the workflow-end cleanup
-    // — see `releaseTransientlyRehydratedOutputs` in `workflow_execution_loop`.
-
-    // Release the read-pins set by ensureContextReady so outputs that were
-    // only needed by this node become eviction-eligible again. Must run after
-    // the node's synchronous getContext() reads have all completed.
-    // Idempotent — safe even if ensureContextReady took the eviction-disabled
-    // fast path and never set any pins.
-    stepExecutionRuntime?.contextManager.releaseReadPins();
+    if (contextStarted && stepExecutionRuntime) {
+      stepExecutionRuntime.contextManager.releaseContext();
+    }
 
     nodeSpan?.end();
   }
