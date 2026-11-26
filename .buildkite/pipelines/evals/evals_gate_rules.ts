@@ -263,10 +263,11 @@ export const decideSuite = ({
   return regressionDecision(id, labels, verdict, headSha);
 };
 
-export const truncateDescription = (description: string): string =>
-  description.length <= STATUS_DESCRIPTION_MAX_LENGTH
-    ? description
-    : `${description.slice(0, STATUS_DESCRIPTION_MAX_LENGTH - 1)}…`;
+export const truncateDescription = (
+  description: string,
+  maxLength = STATUS_DESCRIPTION_MAX_LENGTH
+): string =>
+  description.length <= maxLength ? description : `${description.slice(0, maxLength - 1)}…`;
 
 /** Folds per-suite decisions into the single `evals gate` status. */
 export const combineDecisions = (
@@ -315,11 +316,31 @@ export interface VerdictLookup {
 
 const MAX_VERDICT_LOOKBACK = 20;
 
+const REUSED_VERDICT_SUFFIX = / \(from [0-9a-f]{7}\)$/;
+
 /**
- * The newest passing verdict on an earlier PR commit, when nothing changed since then under the
+ * The description of a pass copied onto a later commit: the original, marked with the commit it was
+ * measured on. The marker survives truncation, so the reuse search can tell copies apart.
+ */
+export const formatReusedVerdictDescription = (description: string, fromSha: string): string => {
+  const suffix = ` (from ${fromSha.slice(0, 7)})`;
+  return `${truncateDescription(
+    description,
+    STATUS_DESCRIPTION_MAX_LENGTH - suffix.length
+  )}${suffix}`;
+};
+
+/** Whether a verdict is a pass copied from an earlier commit rather than measured on its own. */
+export const isReusedVerdict = ({ description }: EvalsVerdict): boolean =>
+  REUSED_VERDICT_SUFFIX.test(description);
+
+/**
+ * The newest measured pass on an earlier PR commit, when nothing changed since then under the
  * suite's decision paths. Only passes are reused: a regression re-runs on the next commit so a noisy
  * result can clear, and the search stops there so an older pass behind it isn't picked up.
- * Inconclusive and pending verdicts are skipped over.
+ * Inconclusive and pending verdicts, and passes copied from other commits, are skipped over, so a
+ * regression measured behind a copy still stops the search. Nothing is reused over a regression
+ * measured on the head itself.
  */
 export const findReusableVerdict = async ({
   lookup,
@@ -340,12 +361,16 @@ export const findReusableVerdict = async ({
   const earlier = shas.slice(0, headIndex).reverse().slice(0, MAX_VERDICT_LOOKBACK);
   const context = getVerdictStatusContext(suite.id);
 
+  if ((await lookup.getVerdict(headSha, context))?.state === 'failure') {
+    return undefined;
+  }
+
   for (const sha of earlier) {
     const verdict = await lookup.getVerdict(sha, context);
     if (verdict?.state === 'failure') {
       return undefined;
     }
-    if (verdict?.state !== 'success') {
+    if (verdict?.state !== 'success' || isReusedVerdict(verdict)) {
       continue;
     }
     const files = await lookup.listFilesBetween(sha, headSha);

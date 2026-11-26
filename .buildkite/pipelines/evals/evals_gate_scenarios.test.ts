@@ -195,6 +195,8 @@ describe('evals gate against evals.suites.json', () => {
       'the production investigation model',
       'x-pack/platform/packages/shared/kbn-significant-events-schema/src/nightshift_models.ts',
     ],
+    // Nightshift imports the impact entity limit through this barrel.
+    ['the impact exports', `${AGENTIC}/common/impact/index.ts`],
   ])('requires a decision for %s, despite the folder excludes around it', (_label, file) => {
     expect(touchedSuites([file])).toEqual(['nightshift-investigations']);
   });
@@ -203,7 +205,6 @@ describe('evals gate against evals.suites.json', () => {
     [`${NIGHTSHIFT}/server/routes/onboarding.ts`],
     [`${NIGHTSHIFT}/server/saved_objects/automation_saved_object.ts`],
     [`${AGENTIC}/server/impact/services/impact_client.ts`],
-    [`${AGENTIC}/common/impact/index.ts`],
   ])('needs no decision for %s', (file) => {
     expect(touchedSuites([file])).toEqual([]);
   });

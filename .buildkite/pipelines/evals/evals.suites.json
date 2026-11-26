@@ -201,7 +201,6 @@
           "x-pack/platform/plugins/shared/agentic_investigations/server/impact/services/*pills*.ts",
           "x-pack/platform/plugins/shared/agentic_investigations/server/impact/services/entity_store_names.ts",
           "x-pack/platform/plugins/shared/agentic_investigations/common/impact/impact_pills.ts",
-          "x-pack/platform/plugins/shared/agentic_investigations/common/impact/index.ts",
           "x-pack/platform/plugins/shared/agentic_investigations/server/impact/services/impact_client.ts"
         ]
       },

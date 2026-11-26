@@ -25,10 +25,10 @@ import type { VerdictLookup } from '../../../pipelines/evals/evals_gate_rules.ts
 import {
   EVALS_SKIP_LABEL_PREFIX,
   findReusableVerdict,
+  formatReusedVerdictDescription,
   getVerdictStatusContext,
   requestsModelsBeyondDefaults,
   toVerdict,
-  truncateDescription,
 } from '../../../pipelines/evals/evals_gate_rules.ts';
 import {
   getChangedFilesBetween,
@@ -70,19 +70,18 @@ const main = async (): Promise<void> => {
         console.error(
           `Reusing the ${suite.id} verdict from ${verdict.sha}: no decision path changed since.`
         );
-        labels.push(`${EVALS_SKIP_LABEL_PREFIX}${suite.id}`);
         // The gate ignores a verdict that lands on a commit that's no longer the head, so a pass
         // reused here would never reach it. Copy it onto the head; its status event settles the gate.
+        // Skip the run only once that worked, so a failed copy still runs the suite.
         await setCommitStatus({
           sha: headSha,
           // Only passes are ever reused.
           state: 'success',
           context: getVerdictStatusContext(suite.id),
-          description: truncateDescription(
-            `${verdict.description} (from ${verdict.sha.slice(0, 7)})`
-          ),
+          description: formatReusedVerdictDescription(verdict.description, verdict.sha),
           targetUrl: process.env.BUILDKITE_BUILD_URL,
         });
+        labels.push(`${EVALS_SKIP_LABEL_PREFIX}${suite.id}`);
       }
     } catch (error) {
       console.error(`Could not look up an earlier ${suite.id} verdict; running it.`, error);
