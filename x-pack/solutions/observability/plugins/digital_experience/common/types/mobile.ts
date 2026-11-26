@@ -100,6 +100,11 @@ export interface MobileCrashGroupsResponse {
   /** Most affected users first. */
   crashGroups: MobileCrashGroup[];
   /**
+   * The releases that crashed in the range, whatever the release filter, with their crashes: the
+   * Crashes tab's release picker, which filters on the release that crashed.
+   */
+  releases: FacetBucket[];
+  /**
    * Whether the user can't read every OTel logs and traces index, so crashes may be missing and
    * the newest release, which marks groups new, may be wrong.
    */

@@ -14,14 +14,18 @@ import {
   withCrashFingerprint,
   withCrashGroupHistory,
   withCrashGroupStats,
+  withCrashReleaseCounts,
   type CrashGroupHistoryRow,
   type CrashGroupRow,
+  type CrashReleaseRow,
 } from '../../../../common/mobile/crash_groups';
 import { RESULT_COLUMNS } from '../../../../common/mobile/fields';
 import { mobilePanelQuery, type MobilePanelFilters } from '../../../../common/mobile/filters';
+import type { FacetBucket } from '../../../../common/sessions';
 import type { MobileCrashGroup } from '../../../../common/types/mobile';
 import { runEsql, timeFilter } from '../../../lib/esql';
 import { withLatestReleases } from '../../../lib/mobile/queries';
+import { toRelease } from '../../../lib/mobile/rows';
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 
@@ -122,5 +126,28 @@ export const getCrashGroups = async ({
       releases.length === 1 &&
       releases[0] === latestRelease;
     return toCrashGroup(row, history, isNew ? latestRelease : null);
+  });
+};
+
+/**
+ * The releases that crashed in the range, whatever the release filter, most crashes first: what
+ * the Crashes tab's release picker lists, as its filter is on the release that crashed.
+ */
+export const getCrashReleases = async ({
+  esClient,
+  filters,
+  start,
+  end,
+  environment,
+}: GetCrashGroupsParams): Promise<FacetBucket[]> => {
+  const rows = await runEsql<CrashReleaseRow>(
+    esClient,
+    'get_mobile_crash_releases',
+    withCrashReleaseCounts(crashEvents({ ...omit(filters, 'release'), start, end })),
+    timeFilter(start, end + CRASH_DELAY_MS, environment)
+  );
+  return rows.flatMap((row) => {
+    const release = toRelease(row[RESULT_COLUMNS.release]);
+    return release ? [{ key: release, count: row[RESULT_COLUMNS.events] }] : [];
   });
 };

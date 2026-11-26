@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { mobilePanelDiscoverEsql, mobileSessionDiscoverEsql } from './discover';
+import {
+  mobileCrashesDiscoverEsql,
+  mobilePanelDiscoverEsql,
+  mobileSessionDiscoverEsql,
+} from './discover';
 
 describe('mobilePanelDiscoverEsql', () => {
   it('writes the filters and the environment into the query, as Discover takes no params', () => {
@@ -43,6 +47,28 @@ describe('mobilePanelDiscoverEsql', () => {
       /^SET unmapped_fields = "nullify";\s*FROM traces-\*\.otel-\*, logs-\*\.otel-\*/
     );
     expect(query).toContain('`service.name` == "shop-mobile"');
+  });
+});
+
+describe('mobileCrashesDiscoverEsql', () => {
+  const query = mobileCrashesDiscoverEsql(
+    { serviceName: 'ride-ios', osName: 'iOS', release: '8.4.0' },
+    { environment: 'production' }
+  );
+
+  it('lists the crashes that happened in the time range, sent up to a day after it', () => {
+    expect(query).toContain('FROM logs-*.otel-*');
+    expect(query).toContain(
+      'WHERE @timestamp >= ?_tstart AND @timestamp < TO_DATETIME(?_tend) + 24 hours AND crash_time >= ?_tstart AND crash_time < ?_tend'
+    );
+    expect(query).toContain('SORT crash_time DESC');
+  });
+
+  it('filters on the release that crashed, with the values written into the text', () => {
+    expect(query).toContain('WHERE crash_release == "8.4.0"');
+    expect(query).not.toContain('`service.version` == "8.4.0"');
+    expect(query).toContain('`resource.attributes.os.name` == "iOS"');
+    expect(query).toContain('`service.environment` == "production"');
   });
 });
 

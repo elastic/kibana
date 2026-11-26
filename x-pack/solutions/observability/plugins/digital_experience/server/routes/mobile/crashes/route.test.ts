@@ -14,7 +14,7 @@ import type {
 } from '../../../../common/types/mobile';
 import { hasPartialReadAccess } from '../../applications/get_partial_access';
 import { getCrashGroup } from './get_crash_group';
-import { getCrashGroups } from './get_crash_groups';
+import { getCrashGroups, getCrashReleases } from './get_crash_groups';
 import {
   MOBILE_CRASH_GROUPS_ENDPOINT,
   MOBILE_CRASH_GROUP_ENDPOINT,
@@ -73,6 +73,10 @@ const DETAIL: Omit<MobileCrashGroupDetailResponse, 'isPartial'> = {
 
 beforeEach(() => {
   jest.mocked(getCrashGroups).mockReset().mockResolvedValue([GROUP]);
+  jest
+    .mocked(getCrashReleases)
+    .mockReset()
+    .mockResolvedValue([{ key: '4.2.0', count: 3 }]);
   jest.mocked(getCrashGroup).mockReset().mockResolvedValue(DETAIL);
   jest.mocked(hasPartialReadAccess).mockReset().mockResolvedValue(false);
 });
@@ -87,7 +91,17 @@ describe('mobile crash groups route', () => {
       release: '4.2.0',
     });
 
-    expect(response).toEqual({ crashGroups: [GROUP], isPartial: false });
+    expect(response).toStrictEqual({
+      crashGroups: [GROUP],
+      releases: [{ key: '4.2.0', count: 3 }],
+      isPartial: false,
+    });
+    // The picker's releases are read with the same filters, which drop the release itself.
+    expect(jest.mocked(getCrashReleases)).toHaveBeenCalledWith(
+      expect.objectContaining({
+        filters: { serviceName: 'trailmap-android', osName: 'Android', release: '4.2.0' },
+      })
+    );
     expect(jest.mocked(getCrashGroups)).toHaveBeenCalledWith(
       expect.objectContaining({
         esClient: expect.objectContaining({ client: esClient }),

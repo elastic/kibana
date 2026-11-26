@@ -6,7 +6,9 @@
  */
 
 import { esql } from '@elastic/esql';
+import { crashEventsInDiscoverRange } from './crash_groups';
 import { mobilePanelQuery, withEnvironment, type MobilePanelFilters } from './filters';
+import { resultColumn } from './fields';
 import { mobileSessionDocuments } from './session_events';
 
 /**
@@ -26,6 +28,20 @@ export const mobilePanelDiscoverEsql = (
 ): string =>
   withEnvironment(mobilePanelQuery(filters), environment).pipe`WHERE ${inDiscoverTimeRange()}`
     .pipe`SORT @timestamp DESC`
+    .inlineParams()
+    .print('pipe-multiline');
+
+/**
+ * The ES|QL that Discover opens for the Crashes tab: the crashes it lists, by when they happened
+ * and the release that crashed, newest first, with the values written into the text.
+ */
+export const mobileCrashesDiscoverEsql = (
+  filters: MobilePanelFilters,
+  { environment }: { environment?: string }
+): string =>
+  withEnvironment(crashEventsInDiscoverRange(filters), environment).pipe`SORT ${resultColumn(
+    'crashTime'
+  )} DESC`
     .inlineParams()
     .print('pipe-multiline');
 

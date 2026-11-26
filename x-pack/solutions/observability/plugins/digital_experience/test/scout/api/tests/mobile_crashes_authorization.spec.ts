@@ -153,7 +153,7 @@ apiTest.describe(
         );
 
         expect(list).toHaveStatusCode(200);
-        expect(list.body).toStrictEqual({ crashGroups: [], isPartial: true });
+        expect(list.body).toStrictEqual({ crashGroups: [], releases: [], isPartial: true });
         expect(detail).toHaveStatusCode(200);
         expect(detail.body).toMatchObject({ latestCrash: null, beforeCrash: [], isPartial: true });
       }

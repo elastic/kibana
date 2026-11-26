@@ -20,6 +20,7 @@ import { useEnvironment } from '../../../hooks/use_environment';
 import { useFormatters } from '../../../hooks/use_formatters';
 import { useQueryParam } from '../../../hooks/use_query_param';
 import { useUpdateUrlQuery } from '../../../hooks/use_update_url_query';
+import type { FacetBucket } from '../../../../common/sessions';
 import type { MobileKpisResponse } from '../../../../common/types/mobile';
 
 const OS_LABEL = i18n.translate('xpack.digitalExperience.mobile.filter.os', {
@@ -63,17 +64,22 @@ export const useMobileFilters = (): { isFiltered: boolean; clearFiltersButton?: 
 
 /**
  * The toolbar every mobile tab shares: the environment, OS and release filters, kept in the URL so
- * a reload or a shared link keeps them, and the date picker. The options come from the KPIs.
+ * a reload or a shared link keeps them, and the date picker. The options come from the KPIs,
+ * unless a tab gives its own releases.
  */
 export function MobileToolbar({
   kpis,
+  releases,
   isLoading,
   onRefresh,
 }: {
   kpis: MobileKpisResponse | undefined;
+  /** The releases to pick from instead of the KPIs': the Crashes tab's, the releases that crashed. */
+  releases?: FacetBucket[];
   isLoading: boolean;
   onRefresh: () => void;
 }) {
+  const releaseBuckets = releases ?? kpis?.releases;
   const formatters = useFormatters();
   const { value: release, setValue: setRelease } = useQueryParam('release');
   const { value: osName, setValue: setOsName } = useQueryParam('osName');
@@ -101,11 +107,11 @@ export function MobileToolbar({
             data-test-subj="digitalExperienceMobileReleaseFilter"
             ebtElement={MOBILE_APPLICATION_EBT_ELEMENTS.RELEASE_FILTER}
             label={RELEASE_LABEL}
-            buckets={kpis?.releases ?? []}
+            buckets={releaseBuckets ?? []}
             selected={release}
             onChange={setRelease}
             formatters={formatters}
-            isLoading={isLoading && !kpis}
+            isLoading={isLoading && !releaseBuckets}
           />
         </>
       }

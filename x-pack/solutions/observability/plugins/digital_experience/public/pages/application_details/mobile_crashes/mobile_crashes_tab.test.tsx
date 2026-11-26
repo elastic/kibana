@@ -55,6 +55,8 @@ const GROUP: MobileCrashGroup = {
   newInRelease: null,
 };
 
+const RELEASES = [{ key: '4.2.0', count: 3 }];
+
 const KPIS_STATE: MobileKpisState = {
   kpis: undefined,
   currentKpis: undefined,
@@ -67,8 +69,8 @@ const setCrashGroup = jest.fn();
 
 const mockCrashGroups = (state: Partial<MobileCrashGroupsState>) =>
   jest.mocked(useMobileCrashGroups).mockReturnValue({
-    response: { crashGroups: [GROUP], isPartial: false },
-    lastResponse: { crashGroups: [GROUP], isPartial: false },
+    response: { crashGroups: [GROUP], releases: RELEASES, isPartial: false },
+    lastResponse: { crashGroups: [GROUP], releases: RELEASES, isPartial: false },
     isLoading: false,
     error: undefined,
     refresh: jest.fn(),
@@ -117,6 +119,14 @@ describe('MobileCrashesTab', () => {
     );
   });
 
+  it('picks among the releases that crashed, which its filter is on', () => {
+    renderTab();
+
+    expect(jest.mocked(MobileToolbar).mock.calls.at(-1)?.[0]).toEqual(
+      expect.objectContaining({ releases: RELEASES })
+    );
+  });
+
   it('shows the error with a retry', () => {
     const refresh = jest.fn();
     mockCrashGroups({
@@ -134,14 +144,14 @@ describe('MobileCrashesTab', () => {
   });
 
   it("says when the user can't read every logs index", () => {
-    mockCrashGroups({ response: { crashGroups: [GROUP], isPartial: true } });
+    mockCrashGroups({ response: { crashGroups: [GROUP], releases: RELEASES, isPartial: true } });
     renderTab();
 
     expect(screen.getByTestId('digitalExperienceMobileCrashesPartialAccess')).toBeInTheDocument();
   });
 
   it('says there are no crashes, rather than showing an empty table', () => {
-    mockCrashGroups({ response: { crashGroups: [], isPartial: false } });
+    mockCrashGroups({ response: { crashGroups: [], releases: [], isPartial: false } });
     renderTab();
 
     expect(screen.getByTestId('digitalExperienceMobileCrashesEmpty')).toHaveTextContent(
@@ -155,7 +165,7 @@ describe('MobileCrashesTab', () => {
       isFiltered: true,
       clearFiltersButton: <button type="button">Clear filters</button>,
     });
-    mockCrashGroups({ response: { crashGroups: [], isPartial: false } });
+    mockCrashGroups({ response: { crashGroups: [], releases: [], isPartial: false } });
     renderTab();
 
     expect(screen.getByTestId('digitalExperienceMobileCrashesEmpty')).toHaveTextContent(

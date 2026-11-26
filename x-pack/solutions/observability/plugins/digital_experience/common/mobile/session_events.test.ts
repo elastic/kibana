@@ -36,9 +36,10 @@ describe('sessionEventsBefore', () => {
   });
 
   it('lists a span an SDK sent twice once, before the limit', () => {
-    expect(query).toContain('FROM traces-*.otel-*, logs-*.otel-* METADATA _id |');
+    expect(query).toContain('FROM traces-*.otel-*, logs-*.otel-* METADATA _index, _id |');
+    // A span id is only unique within a trace, and a document id within an index.
     expect(query).toContain(
-      '| INLINE STATS kept_id = MIN(_id) BY span_id, event_kind | WHERE NOT (event_kind IN ("request", "screen")) OR _id == kept_id | SORT @timestamp DESC | LIMIT 20'
+      '| EVAL document_key = CONCAT(_index, "/", _id) | INLINE STATS kept_key = MIN(document_key) BY trace_id, span_id, event_kind | WHERE NOT (event_kind IN ("request", "screen")) OR trace_id IS NULL OR span_id IS NULL OR document_key == kept_key | SORT @timestamp DESC | LIMIT 20'
     );
   });
 

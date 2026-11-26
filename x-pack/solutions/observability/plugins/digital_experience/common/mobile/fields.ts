@@ -134,7 +134,8 @@ export const RESULT_COLUMNS = {
   statusCode: 'status_code',
   durationMs: 'duration_ms',
   page: 'page',
-  keptId: 'kept_id',
+  documentKey: 'document_key',
+  keptKey: 'kept_key',
 } as const;
 
 /** A column the mobile queries compute, as an ES|QL column. */

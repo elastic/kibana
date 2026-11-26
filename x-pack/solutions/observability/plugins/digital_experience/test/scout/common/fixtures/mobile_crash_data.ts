@@ -263,6 +263,26 @@ const SESSION_EVENTS = [
       },
     },
   },
+  // Another request, in another trace, whose span id happens to be the same: listed too.
+  {
+    index: TRACES_INDEX,
+    resource: npeSession,
+    document: {
+      '@timestamp': at('12:39:57'),
+      name: 'GET',
+      kind: 'Client',
+      trace_id: 'f'.repeat(32),
+      span_id: 'c'.repeat(15) + '2',
+      duration: 80_000_000,
+      attributes: {
+        'session.id': NPE_LATEST_SESSION,
+        'app.screen.name': 'Map',
+        'http.request.method': 'GET',
+        'url.full': 'https://api.example.com/tiles',
+        'http.response.status_code': 200,
+      },
+    },
+  },
   {
     index: LOGS_INDEX,
     resource: npeSession,

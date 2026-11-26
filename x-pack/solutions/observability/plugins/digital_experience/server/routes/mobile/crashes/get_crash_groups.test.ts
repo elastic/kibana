@@ -9,7 +9,7 @@ import {
   createTracedEsClientMock,
   esqlResponse,
 } from '../../../lib/create_digital_experience_traced_es_client.test_helpers';
-import { getCrashGroups } from './get_crash_groups';
+import { getCrashGroups, getCrashReleases } from './get_crash_groups';
 
 const DAY = 24 * 60 * 60 * 1000;
 const START = Date.parse('2021-01-18T12:00:00.000Z');
@@ -241,5 +241,38 @@ describe('getCrashGroups', () => {
 
     expect(group.firstSeen).toEqual({ time: '2021-01-18T12:05:00.000Z', release: '4.2.0' });
     expect(group.newInRelease).toBeNull();
+  });
+});
+
+describe('getCrashReleases', () => {
+  it('counts the crashes per release that crashed, whatever the release filter', async () => {
+    const { client, esClient } = createTracedEsClientMock();
+    client.esql.query.mockResolvedValue(
+      esqlResponse([
+        { release: '8.5.0', events: 2 },
+        { release: '8.4.0', events: 1 },
+        { release: null, events: 4 },
+      ])
+    );
+
+    const releases = await getCrashReleases({
+      esClient,
+      filters: { serviceName: 'ride-ios', osName: 'iOS', release: '8.4.0' },
+      start: START,
+      end: END,
+    });
+
+    expect(releases).toEqual([
+      { key: '8.5.0', count: 2 },
+      { key: '8.4.0', count: 1 },
+    ]);
+    const [[request]] = client.esql.query.mock.calls;
+    expect(request.query).toContain('STATS events = COUNT(*) BY release = crash_release');
+    expect(request.query).not.toContain('crash_release == ?release');
+    expect(request.params).toEqual(expect.arrayContaining([{ os_name: 'iOS' }]));
+    // Crashes sent on the next launch are in the timestamp filter, a day past the range.
+    expect(request.filter.bool.filter[0]).toEqual({
+      range: { '@timestamp': { gte: START, lt: END + DAY, format: 'epoch_millis' } },
+    });
   });
 });

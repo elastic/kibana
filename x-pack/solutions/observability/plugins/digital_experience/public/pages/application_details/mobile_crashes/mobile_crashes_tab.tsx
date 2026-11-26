@@ -103,6 +103,8 @@ export function MobileCrashesTab({
     <>
       <MobileToolbar
         kpis={kpisState.kpis}
+        // The releases that crashed, kept while the list refreshes: its filter is on them.
+        releases={lastResponse?.releases}
         isLoading={isLoading || kpisState.isLoading}
         onRefresh={refreshAll}
       />

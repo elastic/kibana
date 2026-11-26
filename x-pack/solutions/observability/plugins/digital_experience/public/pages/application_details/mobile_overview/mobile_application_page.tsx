@@ -69,7 +69,7 @@ export function MobileApplicationPage({
   // A web application's tab isn't one of this page's: its URL is replaced by the Overview's.
   const tab: MobileApplicationTabId = isMobileTab(selectedTab) ? selectedTab : 'overview';
   const shareAction = useShareAction({ serviceName, source: SOURCE, tab });
-  const discoverHref = useMobileDiscoverHref(serviceName);
+  const discoverHref = useMobileDiscoverHref(serviceName, tab);
   const kpisState = useMobileKpis(serviceName);
 
   const isUnsupportedTab = !isMobileTab(selectedTab);

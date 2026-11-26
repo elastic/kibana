@@ -177,6 +177,11 @@ apiTest.describe('Digital Experience mobile crashes API', { tag: DIGITAL_EXPERIE
 
       const sending = await getGroups(apiClient, CRASH_APPS.ios, { release: '8.5.0' });
       expect(sending.crashGroups.map(({ events }) => events)).toStrictEqual([2]);
+      // The picker lists the release that crashed, which no resource has, whatever the filter.
+      expect(sending.releases).toStrictEqual([
+        { key: '8.5.0', count: 2 },
+        { key: IOS_CRASHED_RELEASE, count: 1 },
+      ]);
     }
   );
 
@@ -228,7 +233,8 @@ apiTest.describe('Digital Experience mobile crashes API', { tag: DIGITAL_EXPERIE
       });
       expect(detail.latestCrash?.stacktrace).toContain('MainActivity.onResume(MainActivity.kt:88)');
       expect(detail.releases).toStrictEqual({ top: [{ key: '4.2.0', count: 3 }], other: 0 });
-      // Its session's request was sent twice; the timeline below lists it once.
+      // Its session's POST was sent twice, listed once; the GET in another trace reuses its span
+      // id, and is listed too.
       expect(detail.osVersions).toStrictEqual({
         top: [
           { key: '15', count: 2 },
@@ -248,6 +254,7 @@ apiTest.describe('Digital Experience mobile crashes API', { tag: DIGITAL_EXPERIE
       ).toStrictEqual([
         { kind: 'screen', name: 'Map', page: 'Map', statusCode: null },
         { kind: 'request', name: 'POST', page: 'Map', statusCode: 503 },
+        { kind: 'request', name: 'GET', page: 'Map', statusCode: 200 },
         { kind: 'tap', name: 'Start recording', page: 'Map', statusCode: null },
       ]);
       expect(detail.beforeCrash[1]).toMatchObject({

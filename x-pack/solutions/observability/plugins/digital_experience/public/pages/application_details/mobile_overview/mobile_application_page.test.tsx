@@ -129,7 +129,7 @@ describe('MobileApplicationPage', () => {
     const discover = screen.getByTestId('digitalExperienceMobileOpenInDiscover');
     expect(discover).toHaveTextContent('Open in Discover');
     expect(discover).toHaveAttribute('href', DISCOVER_HREF);
-    expect(useMobileDiscoverHref).toHaveBeenCalledWith('shop-mobile');
+    expect(useMobileDiscoverHref).toHaveBeenCalledWith('shop-mobile', 'overview');
   });
 
   it('has no Open in Discover without access to Discover', () => {
