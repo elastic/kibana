@@ -4,6 +4,10 @@ name: nightshift-risk-shadow
 # nightshift:risk-low and explains why; it never approves. Nightshift's files are the ones
 # owned only by @elastic/nightshift in the base branch's CODEOWNERS. See
 # .github/scripts/nightshift_risk_shadow.js for the rules.
+#
+# Labels and comments use an ephemeral GitHub token (not GITHUB_TOKEN) so the labeled
+# event can start other workflows (for example automerge). Token policy:
+# token-policy-fa51d6a337cc in elastic/catalog-info.
 
 on:
   pull_request_target:
@@ -21,12 +25,15 @@ concurrency:
   group: nightshift-risk-shadow-${{ github.event.pull_request.number }}
   cancel-in-progress: true
 
+permissions:
+  contents: read
+
 jobs:
   classify:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      pull-requests: write
+      id-token: write # create-token (Vault login via OIDC)
     steps:
       # pull_request_target checks out the base branch, so a PR can't change the rules it's
       # judged by. PR code is never checked out or run; its diff is read through the API.
@@ -38,10 +45,18 @@ jobs:
           sparse-checkout-cone-mode: true
           fetch-depth: 1
 
+      # Explicit token-policy: bound_claims.workflow_ref uses @* in catalog-info.
+      # SHA-pinned: pull_request_target + Vault OIDC must not float on @v1.
+      - name: Create ephemeral GitHub token
+        id: create-token
+        uses: elastic/oblt-actions/github/create-token@37d142a1daa0cac6eaa7bb622a6dfaf1124eea0e # v1.44.0
+        with:
+          token-policy: token-policy-fa51d6a337cc
+
       - name: Classify Nightshift risk
         uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
         with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+          github-token: ${{ steps.create-token.outputs.token }}
           script: |
             const run = require('./.github/scripts/nightshift_risk_shadow');
             await run({ github, context, core });
