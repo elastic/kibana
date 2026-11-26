@@ -752,6 +752,43 @@ describe('renderDriftIssue', () => {
     );
     expect(otherBody).not.toContain('adds `apiKey`');
 
+    // A scheme one failing endpoint drops and another adds is a change to both, not a regrouping
+    const { body: acrossBody } = renderDriftIssue(
+      {
+        ...withChanges(
+          security(
+            'api-security-removed',
+            'the endpoint scheme security `oauth2: [read]` was removed from the API'
+          ),
+          security(
+            'api-security-added',
+            'the endpoint scheme security `oauth2: [read]` was added to the API',
+            'GET /profile'
+          )
+        ),
+        actions: withOAuth.actions?.map((action) =>
+          action.action === 'search'
+            ? {
+                ...action,
+                operations: [
+                  ...action.operations,
+                  { source: 'main', operation: 'GET /profile', latest: { status: 'present' } },
+                ],
+                latestViolations: [
+                  ...latestViolations,
+                  { source: 'main', operation: 'GET /profile' },
+                ],
+              }
+            : action
+        ),
+      },
+      { owners: [] }
+    );
+    expect(acrossBody).toContain(
+      'For the endpoints it calls, the latest spec adds `oauth2` (scope `read`)'
+    );
+    expect(acrossBody).toContain('no longer accepts `oauth2`');
+
     // With another failure, the advice follows the credentials sentence
     const { body: mixed } = renderDriftIssue(
       withAuthChange(

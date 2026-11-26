@@ -91,40 +91,73 @@ const scopeNamer = (scopes: Iterable<string>): ((scope: string) => string) => {
   };
 };
 
-/**
- * Why a request the connector doesn't authenticate as the latest spec wants fails: what the
- * validator expected, then how the spec's security for it changed. An added scheme may be one of
- * several the endpoint accepts, so the change is told apart from what is required.
- */
-const credentialsDetails = (
-  authChanges: readonly SpecChange[],
-  expected: string,
-  endpoints: number
-): string => {
-  const requires = `The latest spec requires credentials the connector doesn't send: ${expected}.`;
-  const schemesAdded = schemesOf(authChanges, 'api-security-added');
-  const schemesRemoved = schemesOf(authChanges, 'api-security-removed');
-  // A scheme removed and added again, as oasdiff reports regrouped requirements, keeps the scopes
-  // both name: only the difference is a change, so it is netted out with the scope changes.
-  const regrouped = [...schemesAdded.keys()].filter((scheme) => schemesRemoved.has(scheme));
+// How the security of an endpoint changed, as schemes and their scopes.
+interface AuthChange {
+  readonly schemesAdded: Map<string, Set<string>>;
+  readonly schemesRemoved: Map<string, Set<string>>;
+  readonly scopesAdded: Map<string, Set<string>>;
+  readonly scopesRemoved: Map<string, Set<string>>;
+}
+
+// The security changes of one endpoint. A scheme it removes and adds again, as oasdiff reports
+// regrouped requirements, keeps the scopes both name: only the difference is a change, so it is
+// netted out with the scope changes. Regrouping is per endpoint, so this never mixes endpoints.
+const authChangeOf = (changes: readonly SpecChange[]): AuthChange => {
+  const added = schemesOf(changes, 'api-security-added');
+  const removed = schemesOf(changes, 'api-security-removed');
+  const regrouped = [...added.keys()].filter((scheme) => removed.has(scheme));
   const scopesOf = (
     rule: string,
-    others: Map<string, Set<string>>,
-    side: Map<string, Set<string>>
+    side: Map<string, Set<string>>,
+    others: Map<string, Set<string>>
   ) => {
-    const scopes = schemesOf(authChanges, rule);
+    const scopes = schemesOf(changes, rule);
     for (const scheme of regrouped) {
-      const own = side.get(scheme) ?? new Set<string>();
       const other = others.get(scheme) ?? new Set<string>();
-      const net = [...own].filter((scope) => !other.has(scope));
+      const net = [...(side.get(scheme) ?? [])].filter((scope) => !other.has(scope));
       if (net.length > 0) {
         scopes.set(scheme, new Set([...(scopes.get(scheme) ?? []), ...net]));
       }
     }
     return scopes;
   };
-  const scopesAdded = scopesOf('api-security-scope-added', schemesRemoved, schemesAdded);
-  const scopesRemoved = scopesOf('api-security-scope-removed', schemesAdded, schemesRemoved);
+  const without = (schemes: Map<string, Set<string>>) =>
+    new Map([...schemes].filter(([scheme]) => !regrouped.includes(scheme)));
+  return {
+    schemesAdded: without(added),
+    schemesRemoved: without(removed),
+    scopesAdded: scopesOf('api-security-scope-added', added, removed),
+    scopesRemoved: scopesOf('api-security-scope-removed', removed, added),
+  };
+};
+
+const mergedSchemes = (all: ReadonlyArray<Map<string, Set<string>>>): Map<string, Set<string>> => {
+  const merged = new Map<string, Set<string>>();
+  for (const schemes of all) {
+    for (const [scheme, scopes] of schemes) {
+      merged.set(scheme, new Set([...(merged.get(scheme) ?? []), ...scopes]));
+    }
+  }
+  return merged;
+};
+
+/**
+ * Why a request the connector doesn't authenticate as the latest spec wants fails: what the
+ * validator expected, then how the spec's security for it changed, endpoint by endpoint. An added
+ * scheme may be one of several the endpoint accepts, so the change is told apart from what is
+ * required.
+ */
+const credentialsDetails = (
+  authChangesByEndpoint: ReadonlyArray<readonly SpecChange[]>,
+  expected: string
+): string => {
+  const requires = `The latest spec requires credentials the connector doesn't send: ${expected}.`;
+  const changes = authChangesByEndpoint.map(authChangeOf);
+  const merged = (key: keyof AuthChange) => mergedSchemes(changes.map((change) => change[key]));
+  const schemesAdded = merged('schemesAdded');
+  const schemesRemoved = merged('schemesRemoved');
+  const scopesAdded = merged('scopesAdded');
+  const scopesRemoved = merged('scopesRemoved');
   const nameOf = scopeNamer(
     [schemesAdded, scopesAdded, scopesRemoved].flatMap((schemes) =>
       [...schemes.values()].flatMap((scopes) => [...scopes])
@@ -135,24 +168,20 @@ const credentialsDetails = (
       [...scopes].map((scope) => code(nameOf(scope)))
     )}`;
   const what = [
-    ...[...schemesAdded]
-      .filter(([scheme]) => !schemesRemoved.has(scheme))
-      .map(
-        ([scheme, scopes]) =>
-          `adds ${code(scheme)}${scopes.size > 0 ? ` (${scopesText(scopes)})` : ''}`
-      ),
+    ...[...schemesAdded].map(
+      ([scheme, scopes]) =>
+        `adds ${code(scheme)}${scopes.size > 0 ? ` (${scopesText(scopes)})` : ''}`
+    ),
     ...[...scopesAdded].map(([scheme, scopes]) => `adds ${scopesText(scopes)} to ${code(scheme)}`),
     ...[...scopesRemoved].map(
       ([scheme, scopes]) => `removes ${scopesText(scopes)} from ${code(scheme)}`
     ),
-    ...[...schemesRemoved.keys()]
-      .filter((scheme) => !schemesAdded.has(scheme))
-      .map((scheme) => `no longer accepts ${code(scheme)}`),
+    ...[...schemesRemoved.keys()].map((scheme) => `no longer accepts ${code(scheme)}`),
   ];
   if (what.length === 0) {
     return requires;
   }
-  const where = endpoints > 1 ? 'the endpoints it calls' : 'this endpoint';
+  const where = authChangesByEndpoint.length > 1 ? 'the endpoints it calls' : 'this endpoint';
   return `${requires} For ${where}, the latest spec ${listed(what)}.`;
 };
 
@@ -234,7 +263,7 @@ export const statusOf = (
     if (expected.length === latestProblems.length) {
       // Only the requests that failed: another operation's auth changes say nothing about them.
       const failing = violatedOperationsOf(action);
-      const authChanges = failing.flatMap(({ source, operation }) =>
+      const authChangesByEndpoint = failing.map(({ source, operation }) =>
         changesOf(source, operation).filter(({ id }) => id.startsWith('api-security-'))
       );
       return {
@@ -242,9 +271,8 @@ export const statusOf = (
         reason: 'credentials',
         outcome: 'fails',
         details: credentialsDetails(
-          authChanges,
-          problemText(`expected ${listed([...new Set(expected)])}`),
-          failing.length
+          authChangesByEndpoint,
+          problemText(`expected ${listed([...new Set(expected)])}`)
         ),
       };
     }
