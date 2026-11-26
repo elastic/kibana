@@ -63,7 +63,7 @@ mapped_pages:
 | [kibanaOverview](https://github.com/elastic/kibana/blob/main/src/platform/plugins/private/kibana_overview/README.md) | An overview page highlighting Kibana apps |
 | [kibanaReact](https://github.com/elastic/kibana/blob/main/src/platform/plugins/shared/kibana_react/README.md) | Tools for building React applications in Kibana. |
 | [kibanaUsageCollection](https://github.com/elastic/kibana/blob/main/src/platform/plugins/private/kibana_usage_collection/README.md) | This plugin registers the Platform Usage Collectors in Kibana. |
-| [kibanaUtils](https://github.com/elastic/kibana/blob/main/src/platform/plugins/shared/kibana_utils/README.md) | Utilities for building Kibana plugins. |
+| [kibanaUtils](https://github.com/elastic/kibana/blob/main/src/platform/plugins/shared/kibana_utils/README.md) | Deprecated compatibility plugin; use the runtime-specific @kbn/kibana-utils-* packages instead. |
 | [kql](https://github.com/elastic/kibana/blob/main/src/platform/plugins/shared/kql/README.md) | This plugin contains the kql autocomplete service and the UI KQL searchbar. |
 | [links](https://github.com/elastic/kibana/blob/main/src/platform/plugins/private/links/README.md) | This plugin adds the Links panel which allows authors to create hard links to navigate on click and bring all context from the source dashboard to the destination dashboard. |
 | [management](https://github.com/elastic/kibana/blob/main/src/platform/plugins/shared/management/README.md) | This plugins contains the "Stack Management" page framework. It offers navigation and an API to link individual management section into it. This plugin does not contain any individual management section itself. |
