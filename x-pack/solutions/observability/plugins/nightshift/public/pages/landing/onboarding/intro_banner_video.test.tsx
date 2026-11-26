@@ -84,7 +84,11 @@ describe('IntroBannerVideo', () => {
     });
     const clickActions: Array<string | null> = [];
     const recordClick = (event: MouseEvent) =>
-      clickActions.push((event.target as HTMLElement).getAttribute('data-ebt-action'));
+      clickActions.push(
+        (event.target as HTMLElement)
+          .closest('[data-ebt-action]')
+          ?.getAttribute('data-ebt-action') ?? null
+      );
     window.addEventListener('click', recordClick);
     fireEvent.keyDown(preview, { key: 'Enter' });
     window.removeEventListener('click', recordClick);
