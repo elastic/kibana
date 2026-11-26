@@ -6,45 +6,9 @@
  */
 
 import { AGENT_BUILDER_APP_ID } from '@kbn/deeplinks-agent-builder';
-import { WORKFLOWS_APP_ID } from '@kbn/deeplinks-workflows';
-import { isDreamingWorkflowId } from '../../../../../../common/dreaming';
 import type { KiJsonValue } from '../../../../../../common/http_api/knowledge_indicators';
-import {
-  KI_WRITER_URI_SCHEME_TOOL,
-  KI_WRITER_URI_SCHEME_WORKFLOW,
-  WRITER_URI_PATTERN,
-} from '../view_ki_constants';
-import { formatKiJsonValueAsString, type KiGovernanceWriter } from './view_ki_document_helpers';
-
-export interface ParsedWriterUri {
-  scheme: string;
-  identifier: string;
-}
-
-/** Splits provenance URIs such as `workflow://id` or `tool://platform.foo.bar`. */
-export const parseWriterUri = (uri: string): ParsedWriterUri | undefined => {
-  const match = WRITER_URI_PATTERN.exec(uri);
-  if (!match) {
-    return undefined;
-  }
-  const scheme = match[1];
-  const identifier = match[2];
-  if (scheme.length === 0 || identifier.length === 0) {
-    return undefined;
-  }
-  return { scheme, identifier };
-};
-
-export const isDreamingWorkflowWriter = (writer: KiGovernanceWriter | undefined): boolean => {
-  if (writer?.uri === undefined) {
-    return false;
-  }
-  const parsed = parseWriterUri(writer.uri);
-  return (
-    parsed?.scheme.toLowerCase() === KI_WRITER_URI_SCHEME_WORKFLOW &&
-    isDreamingWorkflowId(parsed.identifier)
-  );
-};
+import { formatKiJsonValueAsString } from './view_ki_document_helpers';
+import type { KiGetUrlForApp } from './view_ki_uri_helpers';
 
 export const getWriterAgentId = (metadata: Record<string, KiJsonValue>): string | undefined => {
   const value = metadata.agent_id;
@@ -55,43 +19,10 @@ export const getWriterAgentId = (metadata: Record<string, KiJsonValue>): string 
   return formatted.length > 0 ? formatted : undefined;
 };
 
-export type KiGetUrlForApp = (appId: string, options?: { path?: string }) => string;
-
 export const getKiWriterAgentManageHref = (
   getUrlForApp: KiGetUrlForApp,
   agentId: string
 ): string | undefined =>
   getUrlForApp(AGENT_BUILDER_APP_ID, {
     path: `/manage/agents/${encodeURIComponent(agentId)}`,
-  });
-
-export const getKiWriterUriHref = (
-  getUrlForApp: KiGetUrlForApp,
-  uri: string
-): string | undefined => {
-  const parsed = parseWriterUri(uri);
-  if (!parsed) {
-    return undefined;
-  }
-  const scheme = parsed.scheme.toLowerCase();
-  if (scheme === KI_WRITER_URI_SCHEME_WORKFLOW) {
-    return getUrlForApp(WORKFLOWS_APP_ID, {
-      path: `/${encodeURIComponent(parsed.identifier)}`,
-    });
-  }
-  if (scheme === KI_WRITER_URI_SCHEME_TOOL) {
-    return getUrlForApp(AGENT_BUILDER_APP_ID, {
-      path: `/manage/tools/${encodeURIComponent(parsed.identifier)}`,
-    });
-  }
-  return undefined;
-};
-
-// The link uses the current space. It cannot open the conversation if it was recorded in another space.
-export const getKiConversationHref = (
-  getUrlForApp: KiGetUrlForApp,
-  conversationId: string
-): string =>
-  getUrlForApp(AGENT_BUILDER_APP_ID, {
-    path: `/conversations/${encodeURIComponent(conversationId)}`,
   });

@@ -26011,7 +26011,6 @@
     "xpack.contextEngine.viewKi.missingIndex.title": "缺少索引参数",
     "xpack.contextEngine.viewKi.writerProvenance.agentTooltip": "代理 {agentId}",
     "xpack.contextEngine.viewKi.writerProvenance.agentWithWriterDetail": "代理 {agent} 与 {writer}",
-    "xpack.contextEngine.viewKi.writerProvenance.schemeDetail": "{scheme} {identifier}",
     "xpack.contextEngine.viewKi.writerProvenance.schemeTooltip": "{scheme} {identifier}",
     "xpack.contextEngine.workflows.steps.createKi.description": "在 AI 索引中创建知识指标 (KI)。",
     "xpack.contextEngine.workflows.steps.createKi.documentation.details": "将知识指标文档写入指定 AI 索引的后备存储。当 AI 索引尚不存在时，系统会自动创建该索引，并创建一个根据其 ID 派生的索引后备存储。传入 ki_id 以设置稳定 ID；使用相同 ID 重新运行时，会在索引中替换 KI，并在数据流中追加一个新修订版本。传入验证器，以便在写入前运行 KI 验证器：只要有任一验证器失败，就不会写入任何内容，输出不带 ID，且 verification.results 会列出失败的验证器。除非 refresh 为 true，否则写入不会刷新；因此，如果同一次运行中的后续步骤需要读回 KI，请将 refresh 设为 true。该步骤会返回所创建 KI 的 id，后续步骤可使用该 id 对其进行更新或删除。",

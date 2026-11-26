@@ -144,6 +144,7 @@ describe('groupKiReferences', () => {
       {
         relation: 'derived_from',
         items: [
+          { kind: 'other', uri: 'trace://t1' },
           { kind: 'ki', id: 'm1', uri: 'ki://m1' },
           { kind: 'conversation', id: 'c1', uri: 'conversation://c1' },
         ],

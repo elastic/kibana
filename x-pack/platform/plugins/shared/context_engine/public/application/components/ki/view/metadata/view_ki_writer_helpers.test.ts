@@ -5,32 +5,7 @@
  * 2.0.
  */
 
-import {
-  getKiConversationHref,
-  getKiWriterAgentManageHref,
-  getKiWriterUriHref,
-  getWriterAgentId,
-  isDreamingWorkflowWriter,
-  parseWriterUri,
-} from './view_ki_writer_helpers';
-
-describe('parseWriterUri', () => {
-  it('parses scheme and identifier', () => {
-    expect(parseWriterUri('workflow://quick-test-metadata-2')).toEqual({
-      scheme: 'workflow',
-      identifier: 'quick-test-metadata-2',
-    });
-    expect(parseWriterUri('tool://platform.context_engine.remember')).toEqual({
-      scheme: 'tool',
-      identifier: 'platform.context_engine.remember',
-    });
-  });
-
-  it('returns undefined for non-uri values', () => {
-    expect(parseWriterUri('not-a-uri')).toBeUndefined();
-    expect(parseWriterUri('workflow://')).toBeUndefined();
-  });
-});
+import { getKiWriterAgentManageHref, getWriterAgentId } from './view_ki_writer_helpers';
 
 describe('getWriterAgentId', () => {
   it('reads agent_id from writer metadata', () => {
@@ -41,42 +16,6 @@ describe('getWriterAgentId', () => {
   });
 });
 
-describe('getKiWriterUriHref', () => {
-  const getUrlForApp = (appId: string, options?: { path?: string }) =>
-    `/app/${appId}${options?.path ?? ''}`;
-
-  it('maps workflow and tool URIs to app paths', () => {
-    expect(getKiWriterUriHref(getUrlForApp, 'workflow://quick-test-metadata-2')).toBe(
-      '/app/workflows/quick-test-metadata-2'
-    );
-    expect(getKiWriterUriHref(getUrlForApp, 'tool://platform.context_engine.remember')).toBe(
-      '/app/agent_builder/manage/tools/platform.context_engine.remember'
-    );
-  });
-
-  it('returns undefined for non-linkable schemes', () => {
-    expect(getKiWriterUriHref(getUrlForApp, 'https://example.com/wf')).toBeUndefined();
-    expect(getKiWriterUriHref(getUrlForApp, 'crawler://sml')).toBeUndefined();
-    expect(getKiWriterUriHref(getUrlForApp, 'custom://foo')).toBeUndefined();
-  });
-});
-
-describe('isDreamingWorkflowWriter', () => {
-  const dreamingWorkflowId = 'system-context-engine-dreaming-ai-index-1';
-
-  it('returns true for dreaming workflow URIs', () => {
-    expect(
-      isDreamingWorkflowWriter({ uri: `workflow://${dreamingWorkflowId}`, metadata: {} })
-    ).toBe(true);
-  });
-
-  it('returns false for other workflow and scheme URIs', () => {
-    expect(isDreamingWorkflowWriter({ uri: 'workflow://custom-wf', metadata: {} })).toBe(false);
-    expect(isDreamingWorkflowWriter({ uri: 'tool://platform.foo', metadata: {} })).toBe(false);
-    expect(isDreamingWorkflowWriter(undefined)).toBe(false);
-  });
-});
-
 describe('getKiWriterAgentManageHref', () => {
   const getUrlForApp = (appId: string, options?: { path?: string }) =>
     `/app/${appId}${options?.path ?? ''}`;
@@ -84,23 +23,6 @@ describe('getKiWriterAgentManageHref', () => {
   it('maps agent ids to manage paths', () => {
     expect(getKiWriterAgentManageHref(getUrlForApp, 'elastic-ai-agent')).toBe(
       '/app/agent_builder/manage/agents/elastic-ai-agent'
-    );
-  });
-});
-
-describe('getKiConversationHref', () => {
-  const getUrlForApp = (appId: string, options?: { path?: string }) =>
-    `/app/${appId}${options?.path ?? ''}`;
-
-  it('maps conversation ids to Agent Builder paths', () => {
-    expect(getKiConversationHref(getUrlForApp, 'conv-1')).toBe(
-      '/app/agent_builder/conversations/conv-1'
-    );
-  });
-
-  it('encodes special characters in the conversation id', () => {
-    expect(getKiConversationHref(getUrlForApp, 'conv/special id')).toBe(
-      '/app/agent_builder/conversations/conv%2Fspecial%20id'
     );
   });
 });

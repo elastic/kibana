@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiBadge, EuiBadgeGroup } from '@elastic/eui';
+import { EuiBadge, EuiBadgeGroup, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import type {
@@ -81,24 +81,27 @@ export const buildKiMetadataListItems = (
     })),
     {
       title: i18n.translate('xpack.contextEngine.viewKi.metadata.visibleIn', {
-        defaultMessage: 'Visible in',
+        defaultMessage: 'Visible in spaces',
       }),
       description: (
-        <span data-test-subj="contextViewKiVisibleIn">
+        <div data-test-subj="contextViewKiVisibleIn">
           {visibleInAllSpaces ? (
             i18n.translate('xpack.contextEngine.viewKi.metadata.visibleInAllSpaces', {
               defaultMessage: 'All spaces',
             })
           ) : (
-            <EuiBadgeGroup>
-              {visibleInSpaces.map((space) => (
-                <EuiBadge key={space} color="hollow">
-                  {space}
-                </EuiBadge>
-              ))}
-            </EuiBadgeGroup>
+            <>
+              <EuiSpacer size="xs" />
+              <EuiBadgeGroup>
+                {visibleInSpaces.map((space) => (
+                  <EuiBadge key={space} color="hollow">
+                    {space}
+                  </EuiBadge>
+                ))}
+              </EuiBadgeGroup>
+            </>
           )}
-        </span>
+        </div>
       ),
     },
     ...whenDefined(expiresAt, (at) => ({

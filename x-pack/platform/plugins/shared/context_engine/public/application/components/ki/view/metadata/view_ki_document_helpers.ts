@@ -112,9 +112,6 @@ export interface KiReferenceGroup {
   items: KiReferenceItem[];
 }
 
-const isOpenableDerivedFromItem = (item: KiReferenceItem): boolean =>
-  item.kind === 'ki' || item.kind === 'conversation';
-
 const toKiReferenceItem = (uri: string, description?: string): KiReferenceItem => {
   const kiId = kiIdFromUri(uri);
   if (kiId !== undefined) {
@@ -138,7 +135,7 @@ const isKnownRelation = (relation: string | undefined): boolean =>
 
 /**
  * Groups references by relation in a fixed order, followed by an `other` group for references
- * without a known relation. `derived_from` keeps only sources the UI can open: KIs and conversations.
+ * without a known relation.
  */
 export const groupKiReferences = (
   references: Array<KiDocumentReference | null> | undefined
@@ -153,8 +150,7 @@ export const groupKiReferences = (
   const knownGroups = REFERENCE_GROUP_ORDER.flatMap((relation) => {
     const items = referencesWithUri
       .filter(({ relation: itemRelation }) => itemRelation === relation)
-      .map(({ uri = '', description }) => toKiReferenceItem(uri, description))
-      .filter((item) => relation !== 'derived_from' || isOpenableDerivedFromItem(item));
+      .map(({ uri = '', description }) => toKiReferenceItem(uri, description));
     return items.length > 0 ? [{ relation, items }] : [];
   });
   const otherItems = referencesWithUri

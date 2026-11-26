@@ -26013,7 +26013,6 @@
     "xpack.contextEngine.viewKi.missingIndex.title": "インデックスパラメーターがありません",
     "xpack.contextEngine.viewKi.writerProvenance.agentTooltip": "エージェント {agentId}",
     "xpack.contextEngine.viewKi.writerProvenance.agentWithWriterDetail": "エージェント{agent}と{writer}",
-    "xpack.contextEngine.viewKi.writerProvenance.schemeDetail": "{scheme} {identifier}",
     "xpack.contextEngine.viewKi.writerProvenance.schemeTooltip": "{scheme} {identifier}",
     "xpack.contextEngine.workflows.steps.createKi.description": "AIインデックスにナレッジインジケーター（KI）を作成してください。",
     "xpack.contextEngine.workflows.steps.createKi.documentation.details": "指定されたAIインデックスの基盤ストアにナレッジインジケーターのドキュメントをインデックスします。AIインデックスがまだ存在しない場合、そのIDから派生したインデックスの基盤ストアとともに自動的に作成されます。安定したIDを設定するにはki_idを渡します。同じIDで再実行すると、インデックス上のKIは置き換えられ、データストリームでは新しいリビジョンが追加されます。書き込み前にKI検証器を実行するにはverifiersを渡します。いずれかが失敗すると、何も書き込まれず、出力にIDは含まれず、verification.resultsに失敗した検証器が示されます。refreshがtrueでない限り、書き込みはリフレッシュされません。そのため、同じ実行内の後続ステップでKIを読み戻す場合は、refreshを設定してください。このステップは、作成されたKIのidを返します。このidは後続のステップでKIを更新または削除するために使用できます。",

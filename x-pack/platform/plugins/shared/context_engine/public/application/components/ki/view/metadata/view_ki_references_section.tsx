@@ -11,8 +11,10 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback, useMemo, useState } from 'react';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { useSelectedKi } from '../../../../hooks/use_selected_ki';
+import { parseKiUri } from '../../../../../../common/ki_uri';
 import type { KiReferenceGroup, KiReferenceItem } from './view_ki_document_helpers';
-import { getKiConversationHref, type KiGetUrlForApp } from './view_ki_writer_helpers';
+import { ViewKiSidebarUriLabel } from './view_ki_uri_label';
+import { getKiConversationHref, type KiGetUrlForApp } from './view_ki_uri_helpers';
 import {
   ViewKiSidebarBreakableText,
   ViewKiSidebarDescriptionList,
@@ -91,11 +93,19 @@ const KiReferenceItemContent = ({
     return text;
   }
 
-  return (
-    <ViewKiSidebarBreakableText title={description ? uri : undefined}>
-      {description || uri}
-    </ViewKiSidebarBreakableText>
-  );
+  if (description) {
+    return <ViewKiSidebarBreakableText title={uri}>{description}</ViewKiSidebarBreakableText>;
+  }
+
+  if (parseKiUri(uri)) {
+    return (
+      <span title={uri} className="eui-textBreakWord">
+        <ViewKiSidebarUriLabel uri={uri} />
+      </span>
+    );
+  }
+
+  return <ViewKiSidebarBreakableText>{uri}</ViewKiSidebarBreakableText>;
 };
 
 const COLLAPSED_ITEMS_COUNT = 3;

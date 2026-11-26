@@ -33,17 +33,6 @@ const renderWriter = (writer: KiGovernanceWriter) => {
 };
 
 describe('ViewKiSidebarWriterProvenance', () => {
-  it('renders parsed workflow URI without agent metadata', () => {
-    renderWriter({ uri: 'workflow://my-wf', metadata: {} });
-
-    expect(screen.getByText('workflow')).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: 'my-wf' })).toHaveAttribute(
-      'href',
-      '/app/workflows/my-wf'
-    );
-    expect(screen.queryByText('agent')).not.toBeInTheDocument();
-  });
-
   it('renders parsed workflow URI with agent metadata', () => {
     renderWriter({
       uri: 'workflow://my-wf',
@@ -60,21 +49,6 @@ describe('ViewKiSidebarWriterProvenance', () => {
     );
   });
 
-  it('renders crawler URI without a link', () => {
-    renderWriter({ uri: 'crawler://sml', metadata: {} });
-
-    expect(screen.getByText('crawler')).toBeInTheDocument();
-    expect(screen.getByText('sml')).toBeInTheDocument();
-    expect(screen.queryByRole('link')).not.toBeInTheDocument();
-  });
-
-  it('renders unparsed URI without agent metadata', () => {
-    renderWriter({ uri: 'not-a-uri', metadata: {} });
-
-    expect(screen.getByText('not-a-uri')).toBeInTheDocument();
-    expect(screen.queryByRole('link')).not.toBeInTheDocument();
-  });
-
   it('renders unparsed URI with agent metadata', () => {
     renderWriter({
       uri: 'not-a-uri',
@@ -86,23 +60,5 @@ describe('ViewKiSidebarWriterProvenance', () => {
       '/app/agent_builder/manage/agents/elastic-ai-agent'
     );
     expect(screen.getByText('not-a-uri')).toBeInTheDocument();
-  });
-
-  it('renders Dreaming label for a dreaming workflow URI', () => {
-    const dreamingWorkflowId = 'system-context-engine-dreaming-ai-index-1';
-    renderWriter({ uri: `workflow://${dreamingWorkflowId}`, metadata: {} });
-
-    expect(screen.getByRole('link', { name: 'Dreaming' })).toHaveAttribute(
-      'href',
-      `/app/workflows/${dreamingWorkflowId}`
-    );
-    expect(screen.queryByText('workflow')).not.toBeInTheDocument();
-  });
-
-  it('keeps non-dreaming workflow identifier label', () => {
-    renderWriter({ uri: 'workflow://custom-wf', metadata: {} });
-
-    expect(screen.getByRole('link', { name: 'custom-wf' })).toBeInTheDocument();
-    expect(screen.queryByRole('link', { name: 'Dreaming' })).not.toBeInTheDocument();
   });
 });

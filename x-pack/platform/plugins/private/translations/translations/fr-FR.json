@@ -25931,7 +25931,6 @@
     "xpack.contextEngine.viewKi.missingIndex.title": "Paramètre d’index manquant",
     "xpack.contextEngine.viewKi.writerProvenance.agentTooltip": "agent {agentId}",
     "xpack.contextEngine.viewKi.writerProvenance.agentWithWriterDetail": "agent {agent} avec {writer}",
-    "xpack.contextEngine.viewKi.writerProvenance.schemeDetail": "{scheme} {identifier}",
     "xpack.contextEngine.viewKi.writerProvenance.schemeTooltip": "{scheme} {identifier}",
     "xpack.contextEngine.workflows.steps.createKi.description": "Créez un indicateur de connaissances (KI) dans un index d’IA.",
     "xpack.contextEngine.workflows.steps.createKi.documentation.details": "Indexe un document d'indicateur de connaissances dans le stockage sous-jacent de l'index d'IA spécifié. Lorsque l'index d'IA n'existe pas encore, il est créé automatiquement avec un stockage sous-jacent d'index dérivé de son id. Transmettez ki_id pour définir un id stable ; les réexécutions avec le même id remplacent le KI sur un index et ajoutent une nouvelle révision sur un flux de données. Transmettez \"verifiers\" pour exécuter les vérificateurs de KI avant l'écriture : si l'un d'entre eux échoue, rien n'est écrit, la sortie ne contient aucun id et verification.results nomme les vérificateurs qui ont échoué. L'écriture n'est pas actualisée sauf si \"refresh\" a pour valeur true. Définissez-le donc lorsqu'une étape ultérieure au cours de la même exécution relit le KI. L'étape renvoie l'identifiant du KI créé, qui peut être utilisé par des étapes ultérieures pour le mettre à jour ou le supprimer.",

@@ -51,7 +51,7 @@ describe('ViewKiReferencesSection', () => {
     });
   });
 
-  it('renders derived_from ki sources as links and hides sources it cannot open', () => {
+  it('renders derived_from ki sources as links and other sources as plain text', () => {
     renderSection({
       references: [
         { uri: 'trace://t1', relation: 'derived_from' },
@@ -61,7 +61,9 @@ describe('ViewKiReferencesSection', () => {
 
     const list = screen.getByTestId('contextViewKiReferencesList');
     expect(within(list).getByText('Created from')).toBeInTheDocument();
-    expect(within(list).queryByText('trace://t1')).not.toBeInTheDocument();
+    expect(within(list).getByText('trace')).toBeInTheDocument();
+    expect(within(list).getByText('t1')).toBeInTheDocument();
+    expect(screen.getAllByTestId('contextViewKiReferenceLink')).toHaveLength(1);
 
     fireEvent.click(within(list).getByTestId('contextViewKiReferenceLink'));
     expect(mockSelectKi).toHaveBeenCalledWith({ id: 'm1', index: 'my-index' });
@@ -86,10 +88,64 @@ describe('ViewKiReferencesSection', () => {
     expect(screen.queryByText('conv-1')).not.toBeInTheDocument();
   });
 
-  it('renders no section when derived_from sources are all unopenable', () => {
-    renderSection({ references: [{ uri: 'session://s1', relation: 'derived_from' }] });
+  it('renders session and dashboard derived_from sources as plain text', () => {
+    renderSection({
+      references: [
+        { uri: 'session://s1/turn-1', relation: 'derived_from' },
+        { uri: 'dashboard://d1', relation: 'derived_from' },
+      ],
+    });
 
-    expect(screen.queryByTestId('contextViewKiReferencesSection')).not.toBeInTheDocument();
+    const list = screen.getByTestId('contextViewKiReferencesList');
+    expect(within(list).getByText('session')).toBeInTheDocument();
+    expect(within(list).getByText('s1/turn-1')).toBeInTheDocument();
+    expect(within(list).getByText('dashboard')).toBeInTheDocument();
+    expect(within(list).getByText('d1')).toBeInTheDocument();
+    expect(screen.queryByTestId('contextViewKiReferenceLink')).not.toBeInTheDocument();
+  });
+
+  it('renders workflow reference with scheme label and link', () => {
+    renderSection({
+      references: [{ uri: 'workflow://my-wf', relation: 'derived_from' }],
+    });
+
+    const list = screen.getByTestId('contextViewKiReferencesList');
+    expect(within(list).getByText('workflow')).toBeInTheDocument();
+    expect(within(list).getByRole('link', { name: 'my-wf' })).toHaveAttribute(
+      'href',
+      '/app/workflows/my-wf'
+    );
+  });
+
+  it('renders Dreaming label for a dreaming workflow reference', () => {
+    const dreamingWorkflowId = 'system-context-engine-dreaming-ai-index-1';
+    renderSection({
+      references: [{ uri: `workflow://${dreamingWorkflowId}`, relation: 'derived_from' }],
+    });
+
+    const list = screen.getByTestId('contextViewKiReferencesList');
+    expect(within(list).getByRole('link', { name: 'Dreaming' })).toHaveAttribute(
+      'href',
+      `/app/workflows/${dreamingWorkflowId}`
+    );
+    expect(within(list).queryByText('workflow')).not.toBeInTheDocument();
+  });
+
+  it('shows description for workflow reference when description is set', () => {
+    renderSection({
+      references: [
+        {
+          uri: 'workflow://my-wf',
+          relation: 'derived_from',
+          description: 'Source workflow',
+        },
+      ],
+    });
+
+    const list = screen.getByTestId('contextViewKiReferencesList');
+    expect(within(list).getByText('Source workflow')).toBeInTheDocument();
+    expect(within(list).queryByText('workflow')).not.toBeInTheDocument();
+    expect(within(list).queryByText('my-wf')).not.toBeInTheDocument();
   });
 
   it('calls selectKi with the referenced id and current index when a link is clicked', () => {
@@ -124,7 +180,9 @@ describe('ViewKiReferencesSection', () => {
       ],
     });
 
-    expect(screen.getAllByText('index://logs-*')).toHaveLength(2);
+    expect(
+      within(screen.getByTestId('contextViewKiReferencesList')).getAllByText('logs-*')
+    ).toHaveLength(2);
     expect(
       consoleError.mock.calls.filter(([message]) => String(message).includes('same key'))
     ).toHaveLength(0);
@@ -141,7 +199,8 @@ describe('ViewKiReferencesSection', () => {
 
     const list = screen.getByTestId('contextViewKiReferencesList');
     expect(within(list).getByText('Other')).toBeInTheDocument();
-    expect(within(list).getByText('index://logs-*')).toBeInTheDocument();
+    expect(within(list).getByText('index')).toBeInTheDocument();
+    expect(within(list).getByText('logs-*')).toBeInTheDocument();
     expect(within(list).getByText('custom related')).toBeInTheDocument();
   });
 
@@ -150,7 +209,9 @@ describe('ViewKiReferencesSection', () => {
       references: [{ uri: 'index://logs-*', relation: 'relates_to' }],
     });
 
-    expect(screen.getByText('index://logs-*')).toBeInTheDocument();
+    const list = screen.getByTestId('contextViewKiReferencesList');
+    expect(within(list).getByText('index')).toBeInTheDocument();
+    expect(within(list).getByText('logs-*')).toBeInTheDocument();
     expect(screen.queryByTestId('contextViewKiReferenceLink')).not.toBeInTheDocument();
   });
 

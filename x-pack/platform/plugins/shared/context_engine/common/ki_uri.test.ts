@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { conversationIdFromUri, conversationUri, kiIdFromUri, kiUri } from './ki_uri';
+import { conversationIdFromUri, conversationUri, kiIdFromUri, kiUri, parseKiUri } from './ki_uri';
 
 describe('ki uris', () => {
   it('round-trips KI URIs', () => {
@@ -32,5 +32,23 @@ describe('ki uris', () => {
     const conversationId = 'conv/with spaces?query=1';
     expect(conversationUri(conversationId)).toBe(`conversation://${conversationId}`);
     expect(conversationIdFromUri(conversationUri(conversationId))).toBe(conversationId);
+  });
+});
+
+describe('parseKiUri', () => {
+  it('parses scheme and identifier', () => {
+    expect(parseKiUri('workflow://quick-test-metadata-2')).toEqual({
+      scheme: 'workflow',
+      identifier: 'quick-test-metadata-2',
+    });
+    expect(parseKiUri('tool://platform.context_engine.remember')).toEqual({
+      scheme: 'tool',
+      identifier: 'platform.context_engine.remember',
+    });
+  });
+
+  it('returns undefined for non-uri values', () => {
+    expect(parseKiUri('not-a-uri')).toBeUndefined();
+    expect(parseKiUri('workflow://')).toBeUndefined();
   });
 });

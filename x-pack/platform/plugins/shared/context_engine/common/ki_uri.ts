@@ -24,3 +24,27 @@ export const conversationUri = (conversationId: string): string =>
 
 export const conversationIdFromUri = (uri: string): string | undefined =>
   idFromUri(uri, CONVERSATION_URI_PREFIX);
+
+export interface ParsedKiUri {
+  scheme: string;
+  identifier: string;
+}
+
+const KI_URI_PATTERN = /^([^:]+):\/\/(.+)$/;
+
+export const KI_URI_SCHEME_WORKFLOW = 'workflow';
+export const KI_URI_SCHEME_TOOL = 'tool';
+
+/** Splits URIs such as `workflow://id` or `tool://platform.foo.bar`. */
+export const parseKiUri = (uri: string): ParsedKiUri | undefined => {
+  const match = KI_URI_PATTERN.exec(uri);
+  if (!match) {
+    return undefined;
+  }
+  const scheme = match[1];
+  const identifier = match[2];
+  if (scheme.length === 0 || identifier.length === 0) {
+    return undefined;
+  }
+  return { scheme, identifier };
+};
