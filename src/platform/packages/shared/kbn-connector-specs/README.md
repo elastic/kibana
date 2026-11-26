@@ -320,6 +320,12 @@ return value (including `{}` or optional data) is treated as success. Set `enabl
 after migrating the handler to this contract. An inbound-only spec (events, no actions) keeps
 `enabled: false`: Test is an outbound call.
 
+### Receive-only connectors
+
+A spec with inbound events and outbound actions is dual. The framework appends a `none` auth type to every dual spec and installs a connector validator. With `authType: 'none'`, `selectedActions` must be `[]`. Any other auth type skips that check. Specs do not declare the auth type or the validator.
+
+Inbound-only specs (events, no actions) and outbound specs that use `none` as "no credentials" do not get this check.
+
 ### Policies (Optional)
 
 Configure connector behavior:

@@ -272,5 +272,60 @@ describe('ConnectorFormFields', () => {
         expect(result.getByTestId('test-connector-text-field')).toBeInTheDocument();
       });
     });
+
+    describe('Run actions switch', () => {
+      const renderDual = (showInboundEvents = true) =>
+        appMockRenderer.render(
+          <FormTestProvider
+            onSubmit={onSubmit}
+            defaultValue={{ ...dualDefaultValue, secrets: { authType: 'basic' } }}
+          >
+            <ConnectorFormFields
+              actionTypeModel={dualActionTypeModel}
+              isEdit={false}
+              registerPreSubmitValidator={() => {}}
+              showInboundEvents={showInboundEvents}
+            />
+          </FormTestProvider>
+        );
+
+      it('shows the switch with the outbound fields for a dual connector', async () => {
+        const result = renderDual();
+
+        expect(result.getAllByTestId('connector-outbound-label')).toHaveLength(1);
+        expect(result.getByTestId('outbound-actions-enabled-switch')).toBeChecked();
+        await waitFor(() => {
+          expect(result.getByTestId('test-connector-text-field')).toBeInTheDocument();
+        });
+      });
+
+      it('does not show the switch for a connector that is not dual', async () => {
+        const actionTypeModel = actionTypeRegistryMock.createMockActionTypeModel({
+          actionConnectorFields: lazy(() => import('./connector_mock')),
+        });
+
+        const result = appMockRenderer.render(
+          <FormTestProvider onSubmit={onSubmit} defaultValue={defaultValue}>
+            <ConnectorFormFields
+              actionTypeModel={actionTypeModel}
+              isEdit={false}
+              registerPreSubmitValidator={() => {}}
+              showInboundEvents
+            />
+          </FormTestProvider>
+        );
+
+        expect(result.queryByTestId('outbound-actions-enabled-switch')).not.toBeInTheDocument();
+        await waitFor(() => {
+          expect(result.getByTestId('test-connector-text-field')).toBeInTheDocument();
+        });
+      });
+
+      it('does not show the switch when inbound events are hidden', () => {
+        const result = renderDual(false);
+
+        expect(result.queryByTestId('outbound-actions-enabled-switch')).not.toBeInTheDocument();
+      });
+    });
   });
 });

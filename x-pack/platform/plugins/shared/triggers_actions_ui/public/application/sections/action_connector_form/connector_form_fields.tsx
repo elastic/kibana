@@ -19,7 +19,11 @@ import { readClusterInboundEventsEnabled } from '../../lib/inbound_ingress';
 import { useKibana } from '../../../common/lib/kibana';
 import { ConnectorContext } from '../../context/connector_context';
 import { ConnectorFormFieldsGlobal } from './connector_form_fields_global';
-import { InboundEventsFormSection, OutboundSectionTitle } from './inbound_events_form_section';
+import {
+  InboundEventsFormSection,
+  OutboundFormSection,
+  OutboundSectionTitle,
+} from './inbound_events_form_section';
 
 interface ConnectorFormFieldsProps {
   actionTypeModel: ActionTypeModel | null;
@@ -57,6 +61,7 @@ const ConnectorFormFieldsComponent: React.FC<ConnectorFormFieldsProps> = ({
   const actionTypeId = actionTypeModel?.id;
   const isDual = actionTypeId != null && connectorTypeIsDual(actionTypeId);
   const showDualInbound = isDual && isClusterInboundEventsEnabled && showInboundEvents;
+  const showRunActionsSwitch = isDual && showInboundEvents;
   const showSettingsSection =
     FieldsComponent !== null || settingsContent != null || showDualInbound;
   const showSettingsTitle =
@@ -99,7 +104,7 @@ const ConnectorFormFieldsComponent: React.FC<ConnectorFormFieldsProps> = ({
               settingsContent={settingsContent}
             />
           ) : null}
-          {isDual && showInboundEvents ? <OutboundSectionTitle /> : null}
+          {isDual && showInboundEvents && !showRunActionsSwitch ? <OutboundSectionTitle /> : null}
           {showSettingsTitle ? (
             <>
               <EuiTitle size="xxs" data-test-subj="connector-settings-label">
@@ -114,7 +119,11 @@ const ConnectorFormFieldsComponent: React.FC<ConnectorFormFieldsProps> = ({
             </>
           ) : null}
           {!isDual ? settingsContent : null}
-          {fieldsComponent}
+          {showRunActionsSwitch ? (
+            <OutboundFormSection canSave={canSave}>{fieldsComponent}</OutboundFormSection>
+          ) : (
+            fieldsComponent
+          )}
         </>
       ) : null}
     </>

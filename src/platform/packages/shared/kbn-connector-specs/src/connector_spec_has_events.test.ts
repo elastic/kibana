@@ -7,25 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from '@kbn/zod/v4';
-import type { ConnectorSpec } from './connector_spec';
 import { connectorSpecHasEvents, connectorTypeHasInboundEvents } from './connector_spec_has_events';
 import { InboundWebhook } from './specs/inbound_webhook/inbound_webhook';
 import { Unifi } from './specs/unifi/unifi';
 import { INBOUND_WEBHOOK_CONNECTOR_TYPE_ID } from './specs/inbound_webhook/constants';
-
-const createSpec = (overrides: Partial<ConnectorSpec>): ConnectorSpec => ({
-  metadata: {
-    id: '.test',
-    displayName: 'Test',
-    description: 'Test',
-    minimumLicense: 'gold',
-    supportedFeatureIds: ['workflows'],
-  },
-  actions: {},
-  test: { enabled: false, handler: async () => ({}) },
-  ...overrides,
-});
+import { createTestDualConnectorSpec } from './test/create_test_dual_connector_spec';
 
 describe('connectorSpecHasEvents', () => {
   it('is true for inbound-only .inboundWebhook', () => {
@@ -37,28 +23,7 @@ describe('connectorSpecHasEvents', () => {
   });
 
   it('is true for a dual spec with actions and events', () => {
-    const spec = createSpec({
-      actions: {
-        ping: {
-          input: z.object({}),
-          handler: async () => ({}),
-          scope: 'read',
-        },
-      },
-      events: {
-        definitions: {
-          received: {
-            eventId: 'test.received',
-            title: 'Received',
-            description: 'Inbound',
-            eventSchema: z.object({ body: z.unknown() }),
-          },
-        },
-        handleEvents: async () => ({ type: 'emit', events: [] }),
-      },
-    });
-
-    expect(connectorSpecHasEvents(spec)).toBe(true);
+    expect(connectorSpecHasEvents(createTestDualConnectorSpec())).toBe(true);
   });
 });
 
