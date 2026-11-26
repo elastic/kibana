@@ -78,7 +78,7 @@ describe(
     it('should remember esql query when navigating away and back to discover ', () => {
       submitDiscoverSearchBar();
       addNameToTimelineAndSave(mockTimeline.title);
-      cy.wait(`@${TIMELINE_REQ_WITH_SAVED_SEARCH}`);
+      cy.wait(`@${TIMELINE_REQ_WITH_SAVED_SEARCH}`).its('response.statusCode').should('eq', 200);
       closeTimeline();
       navigateFromHeaderTo(CSP_FINDINGS);
       navigateFromHeaderTo(ALERTS);
@@ -91,7 +91,7 @@ describe(
       addFieldToTable('host.name', TIMELINE_DISCOVER_TAB);
       addFieldToTable('user.name', TIMELINE_DISCOVER_TAB);
       addNameAndDescriptionToTimeline(mockTimeline);
-      cy.wait(`@${TIMELINE_REQ_WITH_SAVED_SEARCH}`);
+      cy.wait(`@${TIMELINE_REQ_WITH_SAVED_SEARCH}`).its('response.statusCode').should('eq', 200);
       closeTimeline();
       navigateFromHeaderTo(CSP_FINDINGS);
       navigateFromHeaderTo(ALERTS);
