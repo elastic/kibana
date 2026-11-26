@@ -991,7 +991,7 @@ const OtlpUpdateSecretsSchema = schema.maybe(
 );
 
 const OTLP_AUTH_DESCRIPTION =
-  'How the output authenticates with the OTLP endpoint. `auth_header` and `custom_header` send the credential set in `secrets.auth.credential` in a request header. `azure` sends a Microsoft Entra ID token that the collector requests itself: it requires the `http/protobuf` protocol, `https://` URLs for the endpoint and the signal endpoints that are set (one of them at least), and cannot be used with `otlp_exporter.tls.insecure_skip_verify`. Not accepted for the managed OTLP endpoint.';
+  'How the output authenticates with the OTLP endpoint. `auth_header` and `custom_header` send the credential set in `secrets.auth.credential` in a request header. `azure` sends a Microsoft Entra ID token that the collector requests itself: it requires the `http/protobuf` protocol, an `https://` URL for `endpoint`, and for the signal endpoints that are set, and cannot be used with `otlp_exporter.tls.insecure_skip_verify`. Not accepted for the managed OTLP endpoint.';
 
 export const OtlpSchema = {
   ...BaseSchema,

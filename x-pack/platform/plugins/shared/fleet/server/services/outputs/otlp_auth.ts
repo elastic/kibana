@@ -189,21 +189,16 @@ function validateOtlpAzureAuth(
   }
 
   // the token is a bearer token: it is only sent to an endpoint that proves its identity. The
-  // error names the setting, not its value: a URL can carry credentials. An empty URL is not
-  // used: a signal without its own endpoint is sent to `endpoint`, and an output can send its
-  // signals to their own endpoints only. One URL at least is needed.
-  const configuredEndpointFields = OTLP_HTTP_ENDPOINT_FIELDS.filter((field) => {
+  // error names the setting, not its value: a URL can carry credentials. `endpoint` is required:
+  // the signals without their own endpoint are sent to it, whichever signals the policies of the
+  // output send. An empty signal endpoint is not used.
+  const insecureEndpointField = OTLP_HTTP_ENDPOINT_FIELDS.find((field) => {
     const endpoint = exporter[field as keyof typeof exporter];
-    return typeof endpoint === 'string' && endpoint !== '';
+    if (field !== 'endpoint' && (endpoint === '' || endpoint === null || endpoint === undefined)) {
+      return false;
+    }
+    return typeof endpoint !== 'string' || !/^https:\/\//i.test(endpoint);
   });
-  if (!configuredEndpointFields.length) {
-    throw new OutputInvalidError(
-      `auth.type "${otlpAuthType.Azure}" requires an https endpoint, otlp_exporter.endpoint or a signal endpoint`
-    );
-  }
-  const insecureEndpointField = configuredEndpointFields.find(
-    (field) => !/^https:\/\//i.test(exporter[field as keyof typeof exporter] as string)
-  );
   if (insecureEndpointField) {
     throw new OutputInvalidError(
       `auth.type "${otlpAuthType.Azure}" requires https endpoints, otlp_exporter.${insecureEndpointField} is not one`
