@@ -221,6 +221,8 @@ export const createDashboardAddToChatAction = (
       const { attributes: dashboardState } = dashboardApi.getSerializedState();
       const dashboardData = dashboardStateToAttachmentData(dashboardState);
       const panel = findPanelById(dashboardData.panels, embeddable.uuid);
+      // the dashboard state has a time range only when the dashboard stores one
+      const timeRange = dashboardApi.timeRange$.getValue();
       const buildDashboardAttachment = (
         id: string,
         origin: string | undefined
@@ -244,6 +246,7 @@ export const createDashboardAddToChatAction = (
           panel_type: panel?.type ?? embeddable.type,
           editable: canWriteDashboards && panel ? isAgentEditablePanel(panel) : false,
           ...(canWriteDashboards ? {} : { read_only: true }),
+          ...(timeRange ? { time_range: { from: timeRange.from, to: timeRange.to } } : {}),
           request_id: uuidv4(),
         },
       });

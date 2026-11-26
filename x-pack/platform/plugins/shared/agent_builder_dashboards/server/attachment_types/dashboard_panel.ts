@@ -37,7 +37,7 @@ export const createDashboardPanelAttachmentType = (): AttachmentTypeDefinition<
     }),
   }),
   getAgentDescription: () =>
-    `A dashboard panel attachment points at one panel of a dashboard attachment in this conversation: the user is referring to that panel in the message it is attached to. It carries no configuration: read it with \`attachment_read\` to get its \`dashboard_attachment_id\`, panel id and type. The panel's config, with the ES|QL of a chart or the text of a markdown panel, and the dashboard's \`time_range\` are in the dashboard attachment: read that by its \`dashboard_attachment_id\` and find the panel by id.
+    `A dashboard panel attachment points at one panel of a dashboard attachment in this conversation: the user is referring to that panel in the message it is attached to. It carries no configuration: read it with \`attachment_read\` to get its \`dashboard_attachment_id\`, panel id and type. The panel's config, with the ES|QL of a chart or the text of a markdown panel, is in the dashboard attachment: read that by its \`dashboard_attachment_id\` and find the panel by id. The pointer's \`time_range\` is the time range the user saw the panel in: query its data in that range, not the dashboard attachment's, unless the panel's own config sets one.
 - The message a pointer is attached to is about that panel, even when it does not mention it. A message with several pointers is about all of their panels. Tell from the message what the user wants:
   - A question about the panel or its data (what it shows, why a value looks the way it does, an error): read the panel, then answer in chat with whichever skill fits the question. Do not change the dashboard.
   - A change to the panel: load the dashboards skill and edit the panel in place through \`${dashboardTools.generateDashboard}\`, with \`dashboardId\` set to its \`dashboard_attachment_id\` and the panel edit the pointer's text gives, by its panel id. Never create a new visualization attachment or add a new panel to refine a panel that already exists. After editing, render only the dashboard attachment.
@@ -73,6 +73,7 @@ const formatDashboardPanelAttachment = ({
     panel_type: panelType,
     editable,
     read_only: readOnly,
+    time_range: timeRange,
   },
 }: DashboardPanelAttachment): string => {
   const quotedDashboardId = JSON.stringify(dashboardAttachmentId);
@@ -81,7 +82,13 @@ const formatDashboardPanelAttachment = ({
     label ? `${JSON.stringify(label)} ` : ''
   }(panelId: ${quotedPanelId}, type: ${JSON.stringify(
     panelType
-  )}) on the dashboard attachment ${quotedDashboardId}.`;
+  )}) on the dashboard attachment ${quotedDashboardId}.${
+    timeRange
+      ? ` The user saw it from ${JSON.stringify(timeRange.from)} to ${JSON.stringify(
+          timeRange.to
+        )}: query its data in that time range unless its own config sets one.`
+      : ''
+  }`;
   if (readOnly) {
     return `${panelText} The user cannot change dashboards: read the panel's config in the dashboard attachment to answer questions about it or its data, but do not edit, move, copy, recreate or remove it. If they ask for a change, tell them they don't have permission to change dashboards.`;
   }

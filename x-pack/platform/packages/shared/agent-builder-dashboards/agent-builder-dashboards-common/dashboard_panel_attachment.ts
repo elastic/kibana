@@ -13,6 +13,7 @@ import type {
   VersionedAttachment,
 } from '@kbn/agent-builder-common/attachments';
 import { DASHBOARD_PANEL_ATTACHMENT_TYPE } from './constants';
+import { timeRangeSchema } from './dashboard_schema_types';
 
 const MAX_ID_LENGTH = 256;
 export const DASHBOARD_PANEL_LABEL_MAX_LENGTH = 512;
@@ -28,6 +29,11 @@ export const dashboardPanelAttachmentDataSchema = lazySchema(() =>
     editable: z.boolean(),
     /** Set when the user can't write dashboards: the agent only answers questions about the panel. */
     read_only: z.boolean().optional(),
+    /**
+     * The time range the dashboard showed the panel in. The dashboard attachment has a time range
+     * only when the dashboard stores one, so the panel's data is read in this one.
+     */
+    time_range: timeRangeSchema.optional(),
     /**
      * New on every send, so re-sending an unchanged pointer is a new version that the message
      * references, rather than content the conversation already has.
