@@ -18,6 +18,7 @@ import {
 import type { Case, Observable } from '@kbn/cases-plugin/common/types/domain';
 import { ObjectRemover as ActionsRemover } from '../../../../../alerting_api_integration/common/lib';
 import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
+import { superUser } from '../../../../common/lib/authentication/users';
 import { getPostCaseRequest, postCommentUserReq } from '../../../../common/lib/mock';
 import type { ObservableToSeed } from '../../../../common/lib/api';
 import {
@@ -203,6 +204,30 @@ export default ({ getService }: FtrProviderContext): void => {
 
       expect(values(retrievedCase)).to.eql([FIELD_VALUE, 'default.example']);
       expect(retrievedCase.total_observables).to.be(2);
+    });
+
+    it('lists and counts the objects of a case in a non-default space', async () => {
+      const auth = { user: superUser, space: 'space1' };
+      const postedCase = await createCase(supertest, getPostCaseRequest(), 200, auth);
+      await addObservable({
+        supertest,
+        caseId: postedCase.id,
+        params: {
+          observable: { typeKey: OBSERVABLE_TYPE_IPV4.key, value: FIELD_VALUE, description: null },
+        },
+        auth,
+      });
+      await seedObservables({
+        es,
+        caseId: postedCase.id,
+        space: 'space1',
+        observables: createdTogether('space1', ['first.example', 'second.example']),
+      });
+
+      const retrievedCase = await getCase({ supertest, caseId: postedCase.id, auth });
+
+      expect(values(retrievedCase)).to.eql([FIELD_VALUE, 'first.example', 'second.example']);
+      expect(retrievedCase.total_observables).to.be(3);
     });
 
     describe('read routes', () => {

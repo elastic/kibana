@@ -149,6 +149,28 @@ describe('update', () => {
 
       expect(previewsRequestedBeforeTotals).toBe(true);
     });
+
+    /*
+     * FAILURE SCENARIO: the preview search fails after the cases are patched.
+     * Symptom: the update succeeds and its response lists the case field's observables only.
+     * Log signature: `Failed to get the observables previews of 1 cases` (error, from the service).
+     * Trigger: Elasticsearch rejects or times out the search on `.kibana_alerting_cases`.
+     * Recovery: none needed; user actions, notifications and events still run, and the next read
+     *   lists both stores.
+     */
+    it('records the user actions and emits the update when the preview fails', async () => {
+      clientArgs.services.observableService.getter.getPreviews.mockRejectedValue(
+        new Error('search failed')
+      );
+
+      const [updatedCase] = await bulkUpdate(titleUpdate, clientArgs, casesClientMock);
+
+      expect(updatedCase).toMatchObject({ observables: [fieldObservable], total_observables: 1 });
+      expect(
+        clientArgs.services.userActionService.creator.bulkCreateUpdateCase
+      ).toHaveBeenCalledTimes(1);
+      expect(clientArgs.casesEventBus.emitCaseUpdated).toHaveBeenCalledTimes(1);
+    });
   });
 
   describe('assignee identity population', () => {

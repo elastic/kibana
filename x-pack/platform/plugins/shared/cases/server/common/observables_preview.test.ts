@@ -10,9 +10,12 @@ import type { Observable } from '../../common/types/domain';
 import { createObservableServiceMock } from '../services/mocks';
 import {
   getObservablesPreview,
+  getObservablesPreviewAfterWrite,
   getObservablesPreviews,
+  getObservablesPreviewsAfterWrite,
   mergeObservablesPreview,
   withObservablesPreview,
+  withObservablesPreviewAfterWrite,
 } from './observables_preview';
 
 const createObservables = (count: number, prefix: string): Observable[] =>
@@ -172,7 +175,9 @@ describe('observables preview', () => {
       const observableService = createObservableServiceMock();
       const field = createObservables(2, 'field');
       const oldest = createObservables(3, 'type');
-      observableService.getter.getPreviews.mockResolvedValue(new Map([['case-1', { count: 3, oldest }]]));
+      observableService.getter.getPreviews.mockResolvedValue(
+        new Map([['case-1', { count: 3, oldest }]])
+      );
 
       const merged = await withObservablesPreview(observableService, {
         id: 'case-1',
@@ -182,6 +187,85 @@ describe('observables preview', () => {
       expect(observableService.getter.getPreviews).toHaveBeenCalledWith(['case-1'], 48);
       expect(ids(merged.observables)).toEqual([...ids(field), ...ids(oldest)]);
       expect(merged.total_observables).toBe(5);
+    });
+
+    it('fails when the preview fails', async () => {
+      const observableService = createObservableServiceMock();
+      observableService.getter.getPreviews.mockRejectedValue(new Error('search failed'));
+
+      await expect(
+        withObservablesPreview(observableService, { id: 'case-1', observables: [] })
+      ).rejects.toThrow('search failed');
+    });
+  });
+
+  describe('after a write', () => {
+    const field = createObservables(2, 'field');
+    const oldest = createObservables(3, 'type');
+
+    it('getObservablesPreviewsAfterWrite returns the previews the service found', async () => {
+      const observableService = createObservableServiceMock();
+      const previews = new Map([['case-1', { count: 3, oldest }]]);
+      observableService.getter.getPreviews.mockResolvedValue(previews);
+
+      await expect(
+        getObservablesPreviewsAfterWrite(observableService, [{ id: 'case-1', observables: field }])
+      ).resolves.toBe(previews);
+      expect(observableService.getter.getPreviews).toHaveBeenCalledWith(['case-1'], 48);
+    });
+
+    /*
+     * FAILURE SCENARIO: the preview search fails after a write is saved.
+     * Symptom: the write response lists the case field's observables only, and its total counts
+     *   the field alone, until the next read.
+     * Log signature: `Failed to get the observables previews of <n> cases` (error, from the service).
+     * Trigger: Elasticsearch rejects or times out the search on `.kibana_alerting_cases`.
+     * Recovery: none needed; the write and everything after it ran, and the next read lists both stores.
+     */
+    it('getObservablesPreviewsAfterWrite returns no previews when the preview fails', async () => {
+      const observableService = createObservableServiceMock();
+      observableService.getter.getPreviews.mockRejectedValue(new Error('search failed'));
+
+      await expect(
+        getObservablesPreviewsAfterWrite(observableService, [{ id: 'case-1', observables: field }])
+      ).resolves.toEqual(new Map());
+    });
+
+    it('getObservablesPreviewAfterWrite returns undefined when the preview fails', async () => {
+      const observableService = createObservableServiceMock();
+      observableService.getter.getPreviews.mockRejectedValue(new Error('search failed'));
+
+      await expect(
+        getObservablesPreviewAfterWrite(observableService, { id: 'case-1', observables: field })
+      ).resolves.toBeUndefined();
+    });
+
+    it('withObservablesPreviewAfterWrite adds the preview and the total to one case', async () => {
+      const observableService = createObservableServiceMock();
+      observableService.getter.getPreviews.mockResolvedValue(
+        new Map([['case-1', { count: 3, oldest }]])
+      );
+
+      const merged = await withObservablesPreviewAfterWrite(observableService, {
+        id: 'case-1',
+        observables: field,
+      });
+
+      expect(ids(merged.observables)).toEqual([...ids(field), ...ids(oldest)]);
+      expect(merged.total_observables).toBe(5);
+    });
+
+    it('withObservablesPreviewAfterWrite lists and counts the field alone when the preview fails', async () => {
+      const observableService = createObservableServiceMock();
+      observableService.getter.getPreviews.mockRejectedValue(new Error('search failed'));
+
+      const merged = await withObservablesPreviewAfterWrite(observableService, {
+        id: 'case-1',
+        observables: field,
+      });
+
+      expect(ids(merged.observables)).toEqual(ids(field));
+      expect(merged.total_observables).toBe(2);
     });
   });
 });

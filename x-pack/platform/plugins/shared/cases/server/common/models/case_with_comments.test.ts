@@ -1797,5 +1797,24 @@ describe('CaseCommentModel', () => {
 
       expect(previewRequestedBeforeComments).toBe(true);
     });
+
+    /*
+     * FAILURE SCENARIO: the preview search fails after an attachment write is saved.
+     * Symptom: the write succeeds and its response lists the case field's observables only.
+     * Log signature: `Failed to get the observables previews of 1 cases` (error, from the service).
+     * Trigger: Elasticsearch rejects or times out the search on `.kibana_alerting_cases`.
+     * Recovery: none needed; the next read lists both stores.
+     */
+    it('lists and counts the field alone when the preview fails', async () => {
+      const modelWithObservables = await createModel();
+      clientArgs.services.observableService.getter.getPreviews.mockRejectedValue(
+        new Error('search failed')
+      );
+
+      const encoded = await modelWithObservables.encodeWithComments();
+
+      expect(encoded.observables).toEqual([fieldObservable]);
+      expect(encoded.total_observables).toBe(1);
+    });
   });
 });

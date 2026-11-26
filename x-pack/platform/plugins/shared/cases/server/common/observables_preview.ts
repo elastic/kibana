@@ -69,3 +69,33 @@ export const withObservablesPreview = async <T extends CaseWithFieldObservables>
   theCase: T
 ): Promise<T & { total_observables: number }> =>
   mergeObservablesPreview(theCase, await getObservablesPreview(observableService, theCase));
+
+/**
+ * {@link getObservablesPreviews} for the response of a write that is already saved. A failed
+ * preview must not report the write as failed or skip what runs after it, so the response lists
+ * the field alone; the service logs the failure.
+ */
+export const getObservablesPreviewsAfterWrite = async (
+  observableService: ObservableService,
+  cases: CaseWithFieldObservables[]
+): Promise<Map<string, ObservablesPreview>> =>
+  getObservablesPreviews(observableService, cases).catch(
+    () => new Map<string, ObservablesPreview>()
+  );
+
+/** {@link getObservablesPreviewsAfterWrite} for one case. */
+export const getObservablesPreviewAfterWrite = async (
+  observableService: ObservableService,
+  theCase: CaseWithFieldObservables
+): Promise<ObservablesPreview | undefined> =>
+  (await getObservablesPreviewsAfterWrite(observableService, [theCase])).get(theCase.id);
+
+/** {@link withObservablesPreview} for the response of a write that is already saved. */
+export const withObservablesPreviewAfterWrite = async <T extends CaseWithFieldObservables>(
+  observableService: ObservableService,
+  theCase: T
+): Promise<T & { total_observables: number }> =>
+  mergeObservablesPreview(
+    theCase,
+    await getObservablesPreviewAfterWrite(observableService, theCase)
+  );

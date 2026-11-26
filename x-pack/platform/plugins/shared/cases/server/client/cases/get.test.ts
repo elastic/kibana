@@ -501,7 +501,10 @@ describe('get', () => {
 
         expect(result.observables).toEqual([fieldObservable, typeObservable]);
         expect(result.total_observables).toBe(4);
-        expect(args.services.observableService.getter.getPreviews).toHaveBeenCalledWith([caseSO.id], 49);
+        expect(args.services.observableService.getter.getPreviews).toHaveBeenCalledWith(
+          [caseSO.id],
+          49
+        );
       });
 
       /**
@@ -513,7 +516,9 @@ describe('get', () => {
        */
       it('fails the read when the preview fails, rather than returning a wrong total', async () => {
         const args = createArgs();
-        args.services.observableService.getter.getPreviews.mockRejectedValue(new Error('search failed'));
+        args.services.observableService.getter.getPreviews.mockRejectedValue(
+          new Error('search failed')
+        );
 
         await expect(get({ id: caseSO.id, includeComments }, args)).rejects.toThrow(
           'Failed to get case id: mock-id-1: Error: search failed'
@@ -559,7 +564,10 @@ describe('get', () => {
 
         expect(theCase.observables).toEqual([fieldObservable, typeObservable]);
         expect(theCase.total_observables).toBe(4);
-        expect(args.services.observableService.getter.getPreviews).toHaveBeenCalledWith([caseSO.id], 49);
+        expect(args.services.observableService.getter.getPreviews).toHaveBeenCalledWith(
+          [caseSO.id],
+          49
+        );
       });
     });
 

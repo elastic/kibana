@@ -48,7 +48,10 @@ import {
   flattenCaseSavedObject,
   getAlertInfoFromComments,
 } from '../../common/utils';
-import { getObservablesPreview, mergeObservablesPreview } from '../../common/observables_preview';
+import {
+  getObservablesPreviewAfterWrite,
+  mergeObservablesPreview,
+} from '../../common/observables_preview';
 import type { CasesClient, CasesClientArgs } from '..';
 import { Operations } from '../../authorization';
 import { casesConnectors } from '../../connectors';
@@ -306,7 +309,7 @@ export const push = async (
         requestWithoutType: true,
       }),
 
-      getObservablesPreview(observableService, {
+      getObservablesPreviewAfterWrite(observableService, {
         id: myCase.id,
         observables: myCase.attributes.observables,
       }),

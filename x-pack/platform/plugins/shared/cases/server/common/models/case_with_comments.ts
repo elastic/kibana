@@ -48,7 +48,7 @@ import {
   countEventsForID,
 } from '../utils';
 import { decodeOrThrowZod } from '../runtime_types';
-import { getObservablesPreview, mergeObservablesPreview } from '../observables_preview';
+import { getObservablesPreviewAfterWrite, mergeObservablesPreview } from '../observables_preview';
 import { extractCommentContent, isUnifiedPayloadCommentAttachment } from '../attachments/comment';
 import type {
   AttachmentAttributesV2,
@@ -746,7 +746,7 @@ export class CaseCommentModel {
             perPage: MAX_DOCS_PER_PAGE,
           },
         }),
-        getObservablesPreview(this.params.services.observableService, {
+        getObservablesPreviewAfterWrite(this.params.services.observableService, {
           id: this.caseInfo.id,
           observables: this.caseInfo.attributes.observables,
         }),

@@ -32,7 +32,7 @@ import type { Authorization } from '../../authorization';
 import { Operations } from '../../authorization';
 import type { CaseSavedObjectTransformed } from '../../common/types/case';
 import { flattenCaseSavedObject } from '../../common/utils';
-import { withObservablesPreview } from '../../common/observables_preview';
+import { withObservablesPreviewAfterWrite } from '../../common/observables_preview';
 import { LICENSING_CASE_OBSERVABLES_FEATURE } from '../../common/constants';
 import {
   validateChangedObservableLengths,
@@ -319,7 +319,7 @@ export const addObservable = async (
         : Boom.badRequest('Invalid duplicated observables in request.');
     }
 
-    const res = await withObservablesPreview(
+    const res = await withObservablesPreviewAfterWrite(
       observableService,
       flattenCaseSavedObject({ savedObject: applied.caseWithPatch })
     );
@@ -436,7 +436,7 @@ export const updateObservable = async (
       },
     });
 
-    const res = await withObservablesPreview(
+    const res = await withObservablesPreviewAfterWrite(
       observableService,
       flattenCaseSavedObject({
         savedObject: {
@@ -567,7 +567,7 @@ export const bulkAddObservables = async (
     if (applied.status === 'skipped') {
       throw Boom.badRequest(`Failed to add observable`);
     }
-    const res = await withObservablesPreview(
+    const res = await withObservablesPreviewAfterWrite(
       observableService,
       flattenCaseSavedObject({ savedObject: applied.caseWithPatch })
     );
@@ -653,7 +653,7 @@ export const bulkDeleteObservables = async (
     },
   });
 
-  const res = await withObservablesPreview(
+  const res = await withObservablesPreviewAfterWrite(
     observableService,
     flattenCaseSavedObject({
       savedObject: {
