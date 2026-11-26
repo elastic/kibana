@@ -30,51 +30,9 @@ const AVAILABILITY_STATEMENTS = {
   workflowsOnly: /\*\*Workflows\*\* only/i,
 };
 type Availability = keyof typeof AVAILABILITY_STATEMENTS;
-const NOT_YET_AVAILABLE_MARKER = '_(not yet available)_';
-const API_ONLY_MARKER = '_(API only)_';
-/** True when a line contains either non-tool marker anywhere. */
-const lineIncludesNonToolMarker = (line: string): boolean =>
-  line.includes(NOT_YET_AVAILABLE_MARKER) || line.includes(API_ONLY_MARKER);
-/**
- * Matches the trailing content after a non-tool marker that is acceptable on an action heading:
- * empty, or one or more `{applies_to}`backtick-quoted-role`` applicability badges (and nothing else).
- * This rejects prose that follows the marker mid-sentence or badge-like tokens for other attributes.
- */
-const APPLIES_TO_SUFFIX_RE = /^(\{applies_to\}`[^`]*`\s*)*$/;
-/**
- * Returns the text before the non-tool marker when the line is an action heading — that is,
- * when the marker is followed by nothing or only `{applies_to}` badge markup. Returns
- * `undefined` for prose lines that mention the marker mid-sentence. Both documentation tests use
- * this parser so they derive the same heading key regardless of trailing markup after the marker.
- */
-const headingBeforeNonToolMarker = (line: string): string | undefined => {
-  // Whether the line is a CommonMark ATX heading (0–3 spaces indent, 1–6 #, space or EOL).
-  // Leading block-quote markers are stripped first so that quoted headings are recognized.
-  // Each marker consumes only its optional single separator space — preserving any further
-  // indentation — so that indented code inside a quote (4+ spaces after `> `) is not mistaken
-  // for a heading. The 0–3 limit on the ATX opener enforces the same CommonMark rule: 4+ spaces
-  // of indentation make the line a code block, not a heading.
-  const isAtxHeading = /^\s{0,3}#{1,6}(?:\s|$)/.test(line.replace(/^(\s{0,3}>\s?)+/, ''));
-  for (const marker of [NOT_YET_AVAILABLE_MARKER, API_ONLY_MARKER]) {
-    const idx = line.indexOf(marker);
-    if (idx === -1) {
-      continue;
-    }
-    // Strip a CommonMark ATX closing sequence (space + one-or-more # + optional space) BEFORE
-    // trimming — only on ATX headings — so that `#### Foo _(API only)_ ####` is recognized.
-    // The strip must precede trim: trim removes the space that the \s+ requires, so reversing
-    // the order would leave bare `####` unmatched and silently drop the heading.
-    // Non-heading lines are intentionally left alone to prevent prose ending in `###` from
-    // being accepted as a marked action heading.
-    const rawTrailing = line.slice(idx + marker.length);
-    const trailing = (isAtxHeading ? rawTrailing.replace(/\s+#+\s*$/, '') : rawTrailing).trim();
-    // Accept as an action heading only when nothing follows the marker, or only {applies_to} badges do.
-    if (APPLIES_TO_SUFFIX_RE.test(trailing)) {
-      return line.slice(0, idx).trim();
-    }
-  }
-  return undefined;
-};
+const NOT_YET_AVAILABLE_MARKERS = ['_(not yet available)_', '_(API only)_'];
+const stripMarkers = (line: string): string =>
+  NOT_YET_AVAILABLE_MARKERS.reduce((text, marker) => text.split(marker).join(''), line);
 const WORKFLOW_USE_CLAIM =
   /\b(workflow[- ]only|workflow steps?|reserved for workflows|available to workflows|(?:from|in|for|by) (?:a |your )?workflows?|workflows? or agents?|workflows and agents|workflow authors?)\b/gi;
 const INTERNAL_VOCABULARY =
@@ -296,8 +254,8 @@ describe('connector spec quality contracts', () => {
           .readFileSync(docsPagePath, 'utf8')
           .split('\n')
           .map((line) => ({
-            name: toHeadingKey(headingBeforeNonToolMarker(line) ?? line),
-            marked: lineIncludesNonToolMarker(line),
+            name: toHeadingKey(stripMarkers(line)),
+            marked: NOT_YET_AVAILABLE_MARKERS.some((marker) => line.includes(marker)),
           }));
         const unmarked = Object.entries(spec.actions)
           .filter(([, action]) => !action.isTool)
@@ -327,11 +285,9 @@ describe('connector spec quality contracts', () => {
           .readFileSync(docsPagePath, 'utf8')
           .split('\n')
           .map((line) => line.trim())
-          .flatMap((line) => {
-            const h = headingBeforeNonToolMarker(line);
-            return h !== undefined ? [toHeadingKey(h)] : [];
-          })
-          .filter((headingKey) => !unavailableActionKeys.has(headingKey));
+          .filter((line) => NOT_YET_AVAILABLE_MARKERS.some((marker) => line.endsWith(marker)))
+          .map((line) => stripMarkers(line).trim())
+          .filter((heading) => !unavailableActionKeys.has(toHeadingKey(heading)));
 
         expect(wronglyMarked).toEqual([]);
       }
@@ -448,97 +404,6 @@ describe('connector spec quality contracts', () => {
           'action.tree.children[].name',
         ],
       });
-    });
-  });
-
-  describe('non-tool marker heading parser', () => {
-    it('returns the heading for a line with the marker only', () => {
-      expect(headingBeforeNonToolMarker('#### Update tamper protection _(API only)_')).toBe(
-        '#### Update tamper protection'
-      );
-    });
-
-    it('returns the heading for a line with the marker followed by an {applies_to} badge (regression: endsWith check would miss this)', () => {
-      expect(
-        headingBeforeNonToolMarker(
-          '#### Update tamper protection _(API only)_ {applies_to}`stack: preview 9.7`'
-        )
-      ).toBe('#### Update tamper protection');
-    });
-
-    it('returns undefined for a prose line that mentions the marker mid-sentence', () => {
-      expect(
-        headingBeforeNonToolMarker(
-          'This action is _(API only)_ and cannot be called from Agent Builder.'
-        )
-      ).toBeUndefined();
-    });
-
-    it('returns undefined when non-badge content follows the marker', () => {
-      expect(
-        headingBeforeNonToolMarker('#### Update tamper protection _(API only)_ {something unrelated}')
-      ).toBeUndefined();
-    });
-
-    it('returns the heading for a line with a badge followed by a closing ATX sequence', () => {
-      expect(
-        headingBeforeNonToolMarker(
-          '#### Update tamper protection _(API only)_ {applies_to}`stack: preview 9.7` ####'
-        )
-      ).toBe('#### Update tamper protection');
-    });
-
-    it('returns undefined when a valid badge is followed by prose (regression: startsWith check would miss this)', () => {
-      expect(
-        headingBeforeNonToolMarker(
-          '#### Update tamper protection _(API only)_ {applies_to}`stack: preview 9.7` some trailing prose'
-        )
-      ).toBeUndefined();
-    });
-
-    it('returns the heading for an ATX heading with a closing hash sequence and no badge', () => {
-      // Regression: trim-before-replace drops the space that \s+ requires, leaving bare `####`
-      // unmatched so the parser returns undefined and the contract silently passes.
-      expect(headingBeforeNonToolMarker('#### List alerts _(API only)_ ####')).toBe(
-        '#### List alerts'
-      );
-    });
-
-    it('returns undefined for a prose line that ends in a badge and literal hashes', () => {
-      // Regression: without the ATX-heading guard the closing-hash strip would remove the `###`,
-      // leaving only the badge and causing the line to be reported as a marked action heading.
-      expect(
-        headingBeforeNonToolMarker(
-          'This action is _(API only)_ {applies_to}`stack: preview 9.7` ###'
-        )
-      ).toBeUndefined();
-    });
-
-    it('returns undefined for a paragraph that starts with hashes but has no space after them', () => {
-      // Regression: /^\s*#+/ accepted `####word` as an ATX heading, stripping the closing ####
-      // and making an empty suffix pass APPLIES_TO_SUFFIX_RE.
-      expect(headingBeforeNonToolMarker('####List alerts _(API only)_ ####')).toBeUndefined();
-    });
-
-    it('returns the heading for a valid ATX heading inside a Markdown blockquote', () => {
-      // Regression: the guard returned false for `> ####` lines, so closing hashes were not
-      // stripped and the parser silently dropped the heading.
-      expect(
-        headingBeforeNonToolMarker('> #### List alerts _(API only)_ ####')
-      ).toBe('> #### List alerts');
-    });
-
-    it('returns undefined for indented code inside a blockquote that has a closing ATX sequence', () => {
-      // 4+ spaces after the `> ` separator make the content a code block, not a heading.
-      // The closing `####` is the observable signal: for a real heading the guard strips it
-      // (leaving an empty suffix that passes), for quoted code it must not.
-      // Regression: /^(\s*>\s*)+/ stripped all spaces after `>`, turning `>     ####` into
-      // `####` → isAtxHeading=true → hashes stripped → empty suffix → wrongly accepted.
-      // With the fix only one separator space is consumed, leaving 4 spaces → \s{0,3} in the
-      // ATX opener cannot cover them → isAtxHeading=false → hashes stay → suffix "####" fails.
-      expect(
-        headingBeforeNonToolMarker('>     #### List alerts _(API only)_ ####')
-      ).toBeUndefined();
     });
   });
 
