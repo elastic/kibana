@@ -55,11 +55,16 @@ import {
   isAgentNotFoundError,
   isAgentUnavailableError,
   isAttachmentEvent,
+  isConversationAlreadyExistsError,
   isConversationNotFoundError,
   isExecutionTerminalEvent,
   pendingSteersFor,
   STEERS_PER_RUN_MAX,
   TimelineEventType,
+  ConversationParentRelation,
+  DEFAULT_CONVERSATION_TITLE,
+  type ThreadCreatedEvent,
+  type ThreadStartedEvent,
   type UserMessageEvent,
 } from '@kbn/agent-builder-common';
 import type { ConversationInternalState } from '@kbn/agent-builder-common/chat';
@@ -100,6 +105,8 @@ import type {
   NormalizedConversation,
   ReplaceRoundEventsRequest,
   ConversationListResult,
+  CreateThreadRequest,
+  CreateThreadResult,
 } from './types';
 import { createSpaceDslFilter, isDefaultSpace } from '../../../utils/spaces';
 import { SteerSignal } from './steer_signals';
@@ -157,6 +164,7 @@ import {
   type Document,
 } from './converters';
 import { currentUserActor } from './rounds_to_events';
+import { copyForThread, toThreadView } from './thread_cut';
 import type {
   ConversationMetadataPatchedPayload,
   ScopedConversationEventEmitter,
@@ -193,8 +201,15 @@ export interface ConversationClient {
   getByOrigin(origin: ConversationOrigin): Promise<Conversation | undefined>;
   create(
     conversation: ConversationCreateRequest,
-    options: ConversationWriteOptions & { activity?: ActivityContext }
+    options: ConversationWriteOptions & { activity?: ActivityContext; copiedEventCount?: number }
   ): Promise<ConversationWithPermissions>;
+  /** Creates a thread of `parentId`, or returns the existing one when `threadId` is taken by it. */
+  createThread(
+    request: CreateThreadRequest,
+    options: ConversationWriteOptions
+  ): Promise<CreateThreadResult>;
+  /** A thread without the events copied from its parent. */
+  getThread(threadId: string): Promise<ConversationWithPermissions>;
   update(
     conversation: ConversationUpdateRequest,
     options: ConversationWriteOptions & {
@@ -1059,7 +1074,11 @@ class ConversationClientImpl implements ConversationClient {
 
   async create(
     conversation: ConversationCreateRequest,
-    { source, activity }: ConversationWriteOptions & { activity?: ActivityContext }
+    {
+      source,
+      activity,
+      copiedEventCount = 0,
+    }: ConversationWriteOptions & { activity?: ActivityContext; copiedEventCount?: number }
   ): Promise<ConversationWithPermissions> {
     const now = new Date();
     const id = conversation.id ?? uuidv4();
@@ -1121,7 +1140,8 @@ class ConversationClientImpl implements ConversationClient {
     // The chat path stamps its first `user_message` before calling `create`, so the document and
     // its creation event take the earliest caller timestamp: the event stays first in any
     // `created_at`-ordered view and never predates the conversation itself.
-    const callerTimestamps = (conversation.events ?? []).map((event) => event.created_at);
+    const ownEvents = (conversation.events ?? []).slice(copiedEventCount);
+    const callerTimestamps = ownEvents.map((event) => event.created_at);
     const createdAt = [now.toISOString(), ...callerTimestamps].sort()[0];
     const createdEvent = conversationCreatedEvent(
       {
@@ -1147,11 +1167,12 @@ class ConversationClientImpl implements ConversationClient {
           ? { template_version: resolvedTemplateVersion }
           : {}),
         active_execution: activeExecution && toActiveExecution(activeExecution),
+        ...(copiedEventCount > 0 ? { events: [...(conversation.events ?? []), createdEvent] } : {}),
       },
       currentUser: this.getUser(),
       creationDate: new Date(createdAt),
       space: this.space,
-      leadingEvents: [createdEvent],
+      leadingEvents: copiedEventCount > 0 ? [] : [createdEvent],
     });
 
     let indexed: { _seq_no?: number; _primary_term?: number };
@@ -1174,7 +1195,7 @@ class ConversationClientImpl implements ConversationClient {
       throw createInternalError(`Conversation ${id} was indexed without version metadata`);
     }
 
-    this.notifyAttachmentEvents(id, conversation.events ?? []);
+    this.notifyAttachmentEvents(id, ownEvents);
     const seqNo = indexed._seq_no;
     const primaryTerm = indexed._primary_term;
     const readCreated = () =>
@@ -1199,6 +1220,105 @@ class ConversationClientImpl implements ConversationClient {
     }
 
     return this.get(id);
+  }
+
+  async createThread(
+    { parentId, threadId, cutEventId, highlight, title }: CreateThreadRequest,
+    { source }: ConversationWriteOptions
+  ): Promise<CreateThreadResult> {
+    const parent = fromEs(
+      await this.getDocumentWithAccess({ conversationId: parentId, access: 'converse' }),
+      this.getUser()
+    );
+
+    if (parent.parent_conversation?.relation === ConversationParentRelation.thread) {
+      throw createBadRequestError(`Conversation ${parentId} is a thread and cannot have threads`);
+    }
+
+    const copy = copyForThread(parent, cutEventId);
+    const actor = currentUserActor(this.getUser());
+    const threadTitle = title ?? DEFAULT_CONVERSATION_TITLE;
+    const resolvedCutEventId = cutEventId ?? copy.cutEventId;
+
+    const threadStarted: ThreadStartedEvent = {
+      id: uuidv4(),
+      type: TimelineEventType.threadStarted,
+      created_at: new Date().toISOString(),
+      actor,
+      data: {
+        parent_conversation_id: parentId,
+        parent_title: parent.title,
+        ...(resolvedCutEventId ? { cut_event_id: resolvedCutEventId } : {}),
+        ...(highlight ? { highlight } : {}),
+      },
+    };
+
+    let created = true;
+
+    try {
+      await this.create(
+        {
+          id: threadId,
+          agent_id: parent.agent_id,
+          title: threadTitle,
+          rounds: copy.rounds,
+          events: [...copy.events, threadStarted],
+          parent_conversation: { id: parentId, relation: ConversationParentRelation.thread },
+          ...(copy.compactionSummary
+            ? { state: { compaction_summary: copy.compactionSummary } }
+            : {}),
+        },
+        { source, copiedEventCount: copy.events.length }
+      );
+    } catch (error) {
+      if (!isConversationAlreadyExistsError(error)) {
+        throw error;
+      }
+
+      created = false;
+    }
+
+    const thread = await this.get(threadId);
+
+    if (
+      thread.parent_conversation?.id !== parentId ||
+      thread.parent_conversation.relation !== ConversationParentRelation.thread
+    ) {
+      throw createConversationAlreadyExistsError({ conversationId: threadId });
+    }
+
+    const threadCreated: ThreadCreatedEvent = {
+      id: `thread_created-${threadId}`,
+      type: TimelineEventType.threadCreated,
+      created_at: threadStarted.created_at,
+      actor,
+      data: {
+        thread_id: threadId,
+        title: thread.title,
+        ...(resolvedCutEventId ? { cut_event_id: resolvedCutEventId } : {}),
+      },
+    };
+
+    try {
+      await this.appendEvents(
+        { id: parentId, events: [threadCreated] },
+        { source, access: 'converse' }
+      );
+    } catch (error) {
+      this.logger.warn(`Failed to record thread ${threadId} on conversation ${parentId}: ${error}`);
+    }
+
+    return { thread: toThreadView(thread), created };
+  }
+
+  async getThread(threadId: string): Promise<ConversationWithPermissions> {
+    const thread = await this.get(threadId);
+
+    if (thread.parent_conversation?.relation !== ConversationParentRelation.thread) {
+      throw createBadRequestError(`Conversation ${threadId} is not a thread`);
+    }
+
+    return toThreadView(thread);
   }
 
   async update(

@@ -9,14 +9,18 @@ import { schema } from '@kbn/config-schema';
 import { validate as isUuid } from 'uuid';
 import type { FeedbackChipId } from '@kbn/agent-builder-common';
 import {
+  CHAT_MESSAGE_MAX_LENGTH,
   CONVERSATION_ID_MAX_LENGTH,
   CONVERSATION_TITLE_MAX_LENGTH,
+  ChatTriggerMode,
   STEER_MESSAGE_MAX_LENGTH,
   agentIdMaxLength,
 } from '@kbn/agent-builder-common';
+import { AGENT_BUILDER_THREADS_SETTING_ID } from '@kbn/management-settings-ids';
 import type { RouteDependencies } from '../types';
 import { getHandlerWrapper } from '../wrap_handler';
 import type {
+  CreateThreadResponse,
   MarkPinnedConversationResponse,
   MarkReadConversationResponse,
   RenameConversationResponse,
@@ -24,6 +28,8 @@ import type {
   SteerConversationResponse,
 } from '../../../common/http_api/conversations';
 import { currentUserActor } from '../../services/conversation/client/rounds_to_events';
+import { conversePayloadSchema } from '../chat';
+import { getConverseHelpers } from '../converse_helpers';
 import type { ApplyTemplateResponse } from '../../../common/http_api/apply_template';
 import type { PatchConversationMetadataResponse } from '../../../common/http_api/patch_metadata';
 import { apiPrivileges } from '../../../common/features';
@@ -40,6 +46,13 @@ export function registerInternalConversationRoutes({
   logger,
 }: RouteDependencies) {
   const wrapHandler = getHandlerWrapper({ logger });
+  const { maybeExecuteAgent } = getConverseHelpers({ getInternalServices });
+  const {
+    connector_id: connectorIdSchema,
+    inference_id: inferenceIdSchema,
+    project_routing: projectRoutingSchema,
+    reasoning_level: reasoningLevelSchema,
+  } = conversePayloadSchema.getPropSchemas();
 
   // rename conversation
   router.post(
@@ -371,5 +384,100 @@ export function registerInternalConversationRoutes({
         body: { event, ...(alreadyStored ? { already_stored: true } : {}) },
       });
     })
+  );
+
+  // create a thread from a conversation
+  router.post(
+    {
+      path: `${internalApiPath}/conversations/{parent_id}/_thread`,
+      validate: {
+        params: schema.object({
+          parent_id: schema.string({ maxLength: CONVERSATION_ID_MAX_LENGTH }),
+        }),
+        body: schema.object({
+          client_thread_id: schema.string({
+            minLength: 36,
+            maxLength: 36,
+            validate: (value) => (isUuid(value) ? undefined : 'must be a UUID'),
+          }),
+          cut_event_id: schema.maybe(schema.string({ maxLength: CONVERSATION_ID_MAX_LENGTH })),
+          highlight: schema.maybe(
+            schema.object({
+              text: schema.string({ minLength: 1, maxLength: CHAT_MESSAGE_MAX_LENGTH }),
+            })
+          ),
+          title: schema.maybe(schema.string({ maxLength: CONVERSATION_TITLE_MAX_LENGTH })),
+          trigger: schema.maybe(
+            schema.oneOf([
+              schema.literal(ChatTriggerMode.Always),
+              schema.literal(ChatTriggerMode.Never),
+            ])
+          ),
+          connector_id: connectorIdSchema,
+          inference_id: inferenceIdSchema,
+          project_routing: projectRoutingSchema,
+          reasoning_level: reasoningLevelSchema,
+        }),
+      },
+      options: { access: 'internal' },
+      security: {
+        authz: { requiredPrivileges: [apiPrivileges.readAgentBuilder] },
+      },
+    },
+    wrapHandler(
+      async (ctx, request, response) => {
+        const { conversations: conversationsService, execution: executionService } =
+          getInternalServices();
+        const { parent_id: parentId } = request.params;
+        const {
+          client_thread_id: threadId,
+          cut_event_id: cutEventId,
+          highlight,
+          title,
+          trigger,
+          ...runSettings
+        } = request.body;
+
+        const client = await conversationsService.getScopedClient({ request });
+        const { thread, created } = await client.createThread(
+          { parentId, threadId, cutEventId, highlight, title },
+          { source: 'http_api' }
+        );
+
+        if (!created || !highlight) {
+          return response.ok<CreateThreadResponse>({
+            body: {
+              thread_id: threadId,
+              ...(thread.active_execution
+                ? { execution_id: thread.active_execution.execution_id }
+                : {}),
+              conversation: thread,
+            },
+          });
+        }
+
+        const { executionId } = await maybeExecuteAgent({
+          payload: {
+            ...runSettings,
+            agent_id: thread.agent_id,
+            conversation_id: threadId,
+            input: highlight.text,
+            trigger_mode: trigger ?? ChatTriggerMode.Always,
+            _execution_mode: 'task_manager',
+          },
+          request,
+          executionService,
+        });
+
+        return response.ok<CreateThreadResponse>({
+          body: {
+            thread_id: threadId,
+            ...(executionId ? { execution_id: executionId } : {}),
+            conversation: await client.getThread(threadId),
+          },
+        });
+      },
+      { featureFlag: AGENT_BUILDER_THREADS_SETTING_ID }
+    )
   );
 }
