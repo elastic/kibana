@@ -144,7 +144,8 @@ export function getUncountableReason(esql: string): string | undefined {
  * as zero, and returns exactly one row. Its columns, by prefix:
  * - `newest_minute_counts`: the newest minutes, oldest first, as `<minute start>=<count>` strings;
  * - `baseline_*`: the median, median absolute deviation, mean and standard deviation of the hour
- *   before the newest minutes, the knowledge indicator's normal level;
+ *   before the newest minutes, the knowledge indicator's normal level. The mean and standard
+ *   deviation leave out that hour's spikes;
  * - `change_point_*`: the latest step or trend change `CHANGE_POINT` found in the window, with the
  *   median from the change before it up to it, and the median from it on;
  * - `recent_median` and `earlier_median`: the median of the last minutes, and of the window's oldest

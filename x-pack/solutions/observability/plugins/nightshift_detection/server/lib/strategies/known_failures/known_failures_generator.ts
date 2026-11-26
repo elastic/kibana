@@ -70,15 +70,17 @@ export class KnownFailuresGenerator implements DetectionSignalGenerator {
 }
 
 /**
- * Runs both checks for every measured knowledge indicator. The history read gives each one the
- * minutes an earlier tick already reported and the event it has open. When a check finds something,
- * it runs again knowing when the source's data begins: the minutes before count as zero matches, so
- * a new source would look like a rise.
+ * Runs both checks for every measured knowledge indicator, after reading what earlier ticks
+ * reported for it.
  *
- * Only the start is guarded, not a gap. A source back from an outage that emptied the whole baseline
- * hour still has documents from before it, so its return can be reported. Telling that gap from a
- * sparse index that was only quiet would take another read per breach, and a false report costs
- * less than a missed failure.
+ * The rule counts the minutes before a source had any data as zero matches, so a brand new source
+ * would look like a rise. Only when a check finds something, the generator reads when the index's
+ * data begins and checks again without the runs that reach before it. If that read fails, the
+ * finding stands, with a note: a missed failure costs more than one false report.
+ *
+ * This guards a source's start, not a gap: a source back from an outage that emptied the whole
+ * hour before can still be reported. Telling that gap from an index that was only quiet would take
+ * another read per finding.
  */
 async function judgeMeasuredFailures({
   context,

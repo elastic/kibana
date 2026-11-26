@@ -11,9 +11,9 @@ import { compileDataStartQuery } from './compile_known_failure_query';
 const MINUTE_MS = 60_000;
 
 /**
- * Reads when the data of a knowledge indicator's index begins, from `from` on, as the start of that
- * minute, and throws when there is no data from `from` on. Remembered per query for the
- * tick, so the indicators of one `FROM` whose rules ran in the same minute share one read.
+ * Returns a function that reads the start of the first minute with any data in a knowledge
+ * indicator's index, looking from `from` on. It throws when there is none. Each answer is kept for
+ * the tick, so indicators reading the same index from the same minute share one read.
  */
 export function memoizeDataStart({ esClient, cpsEnabled, abortSignal }: GeneratorContext) {
   const dataFromByQuery = new Map<string, Promise<number>>();

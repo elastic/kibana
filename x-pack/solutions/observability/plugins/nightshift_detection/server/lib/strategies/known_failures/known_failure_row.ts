@@ -153,7 +153,11 @@ export interface RunWindow {
   lastMinute: number;
 }
 
-/** Where the parts of a run's window start, in epoch milliseconds. */
+/**
+ * Where a run's window and its parts start. Example: a run whose newest minute is 12:00 covers
+ * 06:01 to 12:00 (`start` 06:01), measures its normal level from 10:54 (`baselineStart`), and
+ * returns counts for 11:54 to 12:00.
+ */
 export function getRunWindow({ minutes }: Pick<KnownFailureMeasurement, 'minutes'>): RunWindow {
   const {
     window_minutes: window,

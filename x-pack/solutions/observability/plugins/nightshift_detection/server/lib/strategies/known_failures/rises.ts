@@ -16,11 +16,11 @@ import {
 const MINUTE_MS = 60_000;
 const LEVEL_CHANGE_TYPES = new Set(['step_change', 'trend_change']);
 
-/** A rise of the knowledge indicator's level that still holds. */
+/** The knowledge indicator's level went up and is still up. */
 export interface KnownFailureRise {
   /**
-   * `lasting_rise`: a step or trend change `CHANGE_POINT` found. `slow_rise`: a climb too slow for a
-   * change point, seen as the last minutes standing above the window's oldest hours.
+   * `lasting_rise`: `CHANGE_POINT` found a step or trend up. `slow_rise`: a climb too gradual for
+   * `CHANGE_POINT`, seen by comparing the last 15 minutes with the window's oldest 4 hours.
    */
   check: 'lasting_rise' | 'slow_rise';
   /** When the higher level began, in epoch milliseconds; for a slow rise, the end of the earlier hours. */
@@ -45,10 +45,10 @@ export interface RiseAtMinute {
 }
 
 /**
- * The rise of each run that still holds, on the run's newest minute. Every run counts, not only the
- * newest: a tick that reads two runs reports what two ticks reading one each would, so a rise that
- * held in the older run and faded by the newer one is not lost. A minute an earlier tick already
- * reported a rise on is skipped, and two runs ending on the same minute count once, the newer.
+ * The rise found in each run, reported on the run's newest minute. Every run is checked, not only
+ * the newest, so a tick that reads two runs reports the same as two ticks reading one each. A minute
+ * an earlier tick already reported a rise on is skipped; two runs ending on the same minute count
+ * once, the newer.
  */
 export function findRises({
   measurements,
@@ -73,23 +73,25 @@ export function findRises({
   });
 }
 
-/** `max(min_rise, √(level + 1))`: a Poisson-like floor for a rise, growing with the level. */
+/**
+ * The smallest rise that counts: at least 3 more matches a minute, and more at higher levels
+ * (√(level + 1)), the way random noise grows with the count. At a level of 2 that is 3; at 99, 10.
+ */
 function getMinRise(levelBefore: number): number {
   return Math.max(KNOWN_FAILURES_SETTINGS.lasting_rise.min_rise, Math.sqrt(levelBefore + 1));
 }
 
 /**
- * The rise of the knowledge indicator's level that still holds in a run, or `undefined`.
- * - A lasting rise: the latest step or trend change, confident (p-value below `max_pvalue`),
- *   measured from at least `min_before_minutes` of data, rising at least `getMinRise` over the level
- *   before, with the last minutes still half that above it, so a rise that faded back reports
- *   nothing.
- * - Otherwise a slow rise: the last minutes `slow_rise.factor` times `getMinRise` above the window's
- *   oldest hours, and the baseline hour half that, so a climb too slow for `CHANGE_POINT` still
- *   shows and a burst in the last minutes does not.
+ * The rise still holding in one run, or `undefined`. Two checks, the first that finds one wins:
+ * - Lasting rise: the latest step or trend change `CHANGE_POINT` found, with a p-value under 0.05
+ *   and at least 10 minutes of data before it. The level after it must be at least the smallest
+ *   rise above the level before, and the last 15 minutes still half that, so a rise that already
+ *   faded reports nothing. Example: 5 a minute, then 10 and still 9 now, is a rise of 5.
+ * - Slow rise: the last 15 minutes at least twice the smallest rise above the window's oldest 4
+ *   hours, and the hour before them half that, so a climb shows and a short burst does not.
  *
- * Neither counts minutes from before `dataFrom`: before the source had data they count as zero
- * matches, so its first data would look like a rise.
+ * Neither looks at minutes from before the source had any data (`dataFrom`): those count as zero
+ * matches, so the source's first data would look like a rise.
  */
 export function findRise({
   measurement,
