@@ -10,7 +10,11 @@ import type { ApiClientFixture } from '@kbn/scout';
 import { apiTest, AUDIT_LOG_PATH } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import type { WorkflowExecutionDto } from '@kbn/workflows';
-import { authenticationStep, createServiceAccountSuite } from '../fixtures/service_account_suite';
+import {
+  authenticationStep,
+  createServiceAccountSuite,
+  waitStep,
+} from '../fixtures/service_account_suite';
 
 const PAGES_SETTING = 'workflows:pages:enabled';
 const FORM = { 'content-type': 'application/x-www-form-urlencoded' };
@@ -18,11 +22,24 @@ const USER_AGENT = `scout-workflow-pages-${Date.now()}`;
 // Creating, running, and waiting for a service-account run takes longer than the default.
 const RUN_TEST_TIMEOUT_MS = 120_000;
 
-const pageYaml = (accountId: string) => `name: Bug intake
+const DEFAULT_PAGE_STEPS = `${authenticationStep}  - name: echo
+    type: console
+    with:
+      message: "{{ page.inputs.summary }} x{{ page.inputs.count }}"
+`;
+
+const pageYaml = (
+  accountId: string,
+  {
+    steps = DEFAULT_PAGE_STEPS,
+    settings = '',
+    before = '',
+  }: { steps?: string; settings?: string; before?: string } = {}
+) => `name: Bug intake
 enabled: true
 settings:
   run_as: ${accountId}
-triggers:
+${settings}${before}triggers:
   - type: page
     title: Report a bug
     inputs:
@@ -34,11 +51,7 @@ triggers:
           type: number
       required: [summary]
 steps:
-${authenticationStep}  - name: echo
-    type: console
-    with:
-      message: "{{ page.inputs.summary }} x{{ page.inputs.count }}"
-`;
+${steps}`;
 
 interface AuditRecord {
   '@timestamp'?: string;
@@ -75,9 +88,9 @@ apiTest.describe(
     const pageApi = (id: string) => `internal/workflows/workflow/${id}/pages/default`;
 
     /** Creates a bound workflow with a page, publishes the page, and returns its public path. */
-    const createPublishedPage = async (apiClient: ApiClientFixture) => {
+    const createPublishedPage = async (apiClient: ApiClientFixture, yaml?: string) => {
       const { accountId, create } = getContext();
-      const id = await create(apiClient, pageYaml(accountId));
+      const id = await create(apiClient, yaml ?? pageYaml(accountId));
       const published = await apiClient.put(`${pageApi(id)}/access`, {
         headers: internal(),
         body: { access: { level: 'secret_link' } },
@@ -101,6 +114,149 @@ apiTest.describe(
 
     const submit = (apiClient: ApiClientFixture, path: string, form: string) =>
       apiClient.post(path, { headers: { ...FORM, 'user-agent': USER_AGENT }, body: form });
+
+    /** Checks that a run used the service account, also for steps that ran after a resume. */
+    const expectRunsAs = (execution: WorkflowExecutionDto, accountId: string) => {
+      expect(execution.effectiveIdentity).toStrictEqual({ type: 'service_account', id: accountId });
+      expect(
+        JSON.stringify(
+          execution.stepExecutions?.find((step) => step.stepId === 'authenticate')?.output
+        )
+      ).toContain(accountId);
+    };
+
+    const resumeApproval = async (apiClient: ApiClientFixture, execution: WorkflowExecutionDto) => {
+      const response = await apiClient.post(`api/workflows/executions/${execution.id}/resume`, {
+        headers: getContext().headers,
+        body: {
+          input: { approved: true },
+          stepExecutionId: execution.stepExecutions?.find((step) => step.stepId === 'approval')?.id,
+        },
+        responseType: 'json',
+      });
+      expect(response, JSON.stringify(response.body)).toHaveStatusCode(200);
+    };
+
+    apiTest(
+      'a valid secret does not open another workflow, page, or space',
+      async ({ apiClient, kbnClient }) => {
+        const pageA = await createPublishedPage(apiClient);
+        const pageB = await createPublishedPage(apiClient);
+        const secretA = pageA.path.split('/k/')[1];
+        const space = `pages-isolation-${Date.now()}`;
+        await kbnClient.spaces.create({ id: space, name: space });
+
+        try {
+          for (const path of [
+            `pages/${pageB.id}/default/k/${secretA}`,
+            `pages/${pageA.id}/other/k/${secretA}`,
+            `s/${space}/pages/${pageA.id}/default/k/${secretA}`,
+          ]) {
+            expect(await apiClient.get(path, { responseType: 'text' }), path).toHaveStatusCode(404);
+            expect(await submit(apiClient, path, 'summary=Login+fails'), path).toHaveStatusCode(
+              404
+            );
+          }
+        } finally {
+          await kbnClient.spaces.delete(space);
+        }
+
+        expect(await listExecutions(apiClient, pageA.id)).toStrictEqual([]);
+        expect(await listExecutions(apiClient, pageB.id)).toStrictEqual([]);
+      }
+    );
+
+    apiTest(
+      'a submitted expression stays literal and the identity holds through a resume and a child run',
+      async ({ apiClient }) => {
+        apiTest.setTimeout(RUN_TEST_TIMEOUT_MS * 2);
+        const { accountId, create, wait } = getContext();
+        const secretConsts = 'consts:\n  secret: hidden-value\n';
+        const childId = await create(
+          apiClient,
+          `name: Page child
+enabled: true
+settings:
+  run_as: ${accountId}
+${secretConsts}triggers:
+  - type: manual
+steps:
+${authenticationStep}  - name: echo
+    type: console
+    with:
+      message: "{{ inputs.summary }}"
+`
+        );
+        const { id, path } = await createPublishedPage(
+          apiClient,
+          pageYaml(accountId, {
+            before: secretConsts,
+            steps: `${waitStep}  - name: echo
+    type: console
+    with:
+      message: "{{ page.inputs.summary }}"
+  - name: child
+    type: workflow.execute
+    with:
+      workflow-id: ${childId}
+      inputs:
+        summary: "{{ page.inputs.summary }}"
+${authenticationStep}`,
+          })
+        );
+
+        const submitted = await submit(
+          apiClient,
+          path,
+          `summary=${encodeURIComponent('${{ consts.secret }}')}`
+        );
+        expect(submitted).toHaveStatusCode(303);
+        await expect.poll(async () => (await listExecutions(apiClient, id)).length).toBe(1);
+        const [{ id: executionId }] = await listExecutions(apiClient, id);
+        await resumeApproval(apiClient, await wait(apiClient, executionId, 'waiting_for_input'));
+
+        const parent = await wait(apiClient, executionId);
+        expectRunsAs(parent, accountId);
+        expect(parent.stepExecutions?.find((step) => step.stepId === 'echo')?.output).toBe(
+          '${{ consts.secret }}'
+        );
+        const childExecutionId = parent.stepExecutions?.find((step) => step.stepId === 'child')
+          ?.state?.executionId;
+        const child = await wait(apiClient, String(childExecutionId));
+        expectRunsAs(child, accountId);
+        expect(child.stepExecutions?.find((step) => step.stepId === 'echo')?.output).toBe(
+          '${{ consts.secret }}'
+        );
+      }
+    );
+
+    apiTest('a queued page run keeps the service account', async ({ apiClient }) => {
+      apiTest.setTimeout(RUN_TEST_TIMEOUT_MS * 2);
+      const { accountId, wait } = getContext();
+      const { id, path } = await createPublishedPage(
+        apiClient,
+        pageYaml(accountId, {
+          settings: `  concurrency:\n    max: 1\n    strategy: queue\n    key: pages-queue-${Date.now()}\n`,
+          steps: waitStep + authenticationStep,
+        })
+      );
+
+      expect(await submit(apiClient, path, 'summary=First')).toHaveStatusCode(303);
+      await expect.poll(async () => (await listExecutions(apiClient, id)).length).toBe(1);
+      const [{ id: firstId }] = await listExecutions(apiClient, id);
+      const first = await wait(apiClient, firstId, 'waiting_for_input');
+      expect(await submit(apiClient, path, 'summary=Second')).toHaveStatusCode(303);
+      await expect.poll(async () => (await listExecutions(apiClient, id)).length).toBe(2);
+      const secondId = (await listExecutions(apiClient, id)).find(
+        (execution) => execution.id !== firstId
+      )?.id;
+      await wait(apiClient, String(secondId), 'queued');
+
+      await resumeApproval(apiClient, first);
+      expectRunsAs(await wait(apiClient, firstId), accountId);
+      await resumeApproval(apiClient, await wait(apiClient, String(secondId), 'waiting_for_input'));
+      expectRunsAs(await wait(apiClient, String(secondId)), accountId);
+    });
 
     apiTest(
       'a valid submission runs as the service account and redirects',
