@@ -101,10 +101,15 @@ export function decodeKnownFailureRow(row: RuleRow): KnownFailureMeasurement | u
 function parseMinuteCount(packed: string): { minute: number; count: number } | undefined {
   const separator = packed.lastIndexOf('=');
   const minute = Date.parse(packed.slice(0, separator));
-  // Digits only: `Number('')` is 0, and a count is never negative.
+  // Digits only: `Number('')` is 0, and a count is never negative. Safe, because a long enough
+  // run of digits converts to `Infinity`.
   const countText = packed.slice(separator + 1);
-  return separator > 0 && Number.isFinite(minute) && /^\d+$/.test(countText)
-    ? { minute, count: Number(countText) }
+  const count = Number(countText);
+  return separator > 0 &&
+    Number.isFinite(minute) &&
+    /^\d+$/.test(countText) &&
+    Number.isSafeInteger(count)
+    ? { minute, count }
     : undefined;
 }
 

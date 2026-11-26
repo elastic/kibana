@@ -408,6 +408,13 @@ describe('KnownFailuresGenerator', () => {
       { ...createRow(-5, [2]).data, newest_minute_counts: ['2026-11-20T10:00:00.000Z='] },
     ],
     [
+      'with a count too long to be a number',
+      {
+        ...createRow(-5, [2]).data,
+        newest_minute_counts: [`2026-11-20T10:00:00.000Z=${'9'.repeat(400)}`],
+      },
+    ],
+    [
       'with a negative count',
       { ...createRow(-5, [2]).data, newest_minute_counts: ['2026-11-20T10:00:00.000Z=-3'] },
     ],
