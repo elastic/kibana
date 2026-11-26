@@ -10,7 +10,13 @@
 import { randomUUID } from 'crypto';
 import type { estypes } from '@elastic/elasticsearch';
 import type { DateInterval, ZonedDateRange } from '@kbn/es-date-rounding';
-import { fitsInBuckets, ianaTimeZone, pickDateRounding } from '@kbn/es-date-rounding';
+import {
+  fitsInBuckets,
+  ianaTimeZone,
+  pickDateRounding,
+  roundToBucketKey,
+  toDateRounding,
+} from '@kbn/es-date-rounding';
 import type { EsClient } from '@kbn/scout';
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
@@ -187,6 +193,24 @@ const toRange = ({ zone, from, to }: ParityCase): ZonedDateRange => ({
   timeZone: ianaTimeZone(zone),
 });
 
+const ALL_TIMESTAMPS = CASES.flatMap((parityCase) => {
+  const { from, to } = toRange(parityCase);
+  const { stepMs } = parityCase;
+  return Array.from({ length: Math.ceil((to - from) / stepMs) }, (_, i) => from + i * stepMs);
+});
+
+/** Keys of the non-empty buckets for every indexed document in `range`, since case ranges overlap. */
+const expectedKeys = ({ from, to, timeZone }: ZonedDateRange, interval: DateInterval): number[] => {
+  const rounding = toDateRounding(interval.expression);
+  if (!rounding) {
+    throw new Error(`Unsupported interval: ${interval.expression}`);
+  }
+  const keys = ALL_TIMESTAMPS.filter((timestamp) => timestamp >= from && timestamp < to).map(
+    (timestamp) => roundToBucketKey(timestamp, rounding, timeZone)
+  );
+  return [...new Set(keys)].sort((a, b) => a - b);
+};
+
 const histogramParams = (
   interval: DateInterval
 ): Pick<estypes.AggregationsDateHistogramAggregation, 'calendar_interval' | 'fixed_interval'> =>
@@ -241,15 +265,13 @@ apiTest.describe(
         index: INDEX,
         mappings: { properties: { '@timestamp': { type: 'date' } } },
       });
-      const timestamps = CASES.flatMap((parityCase) => {
-        const { from, to } = toRange(parityCase);
-        const { stepMs } = parityCase;
-        return Array.from({ length: Math.ceil((to - from) / stepMs) }, (_, i) => from + i * stepMs);
-      });
       await esClient.bulk({
         index: INDEX,
         refresh: 'wait_for',
-        operations: timestamps.flatMap((timestamp) => [{ index: {} }, { '@timestamp': timestamp }]),
+        operations: ALL_TIMESTAMPS.flatMap((timestamp) => [
+          { index: {} },
+          { '@timestamp': timestamp },
+        ]),
       });
     });
 
@@ -273,6 +295,20 @@ apiTest.describe(
               },
               `${parityCase.zone} ${interval.expression} has ${esBuckets} ES buckets`
             ).toStrictEqual({ fits: true, fitsOneLess: false });
+          }
+        }
+      );
+
+      apiTest(
+        `roundToBucketKey matches date_histogram bucket keys: ${parityCase.name}`,
+        async ({ esClient }) => {
+          const range = toRange(parityCase);
+          const keysByInterval = await dateHistogramKeys(esClient, range, parityCase.intervals);
+          for (const interval of parityCase.intervals) {
+            expect(
+              keysByInterval.get(interval.expression),
+              `${parityCase.zone} ${interval.expression}`
+            ).toStrictEqual(expectedKeys(range, interval));
           }
         }
       );
