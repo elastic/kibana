@@ -322,9 +322,7 @@ const MERGED_STATS: Stat[] = [...SESSION_STATS, ...VITAL_STATS, ...LOAD_TIME_STA
 
 // The branch filters are on the source fields: the COALESCE of `event` and `span` keeps Lucene
 // from applying them.
-const PAGE_VIEW_FILTER = `${OTEL_EVENT_NAME} IN (${texts(
-  PAGE_VIEW_EVENTS
-)}) OR ${OTEL_SPAN_NAME} IN (${texts(PAGE_VIEW_EVENTS)})`;
+const PAGE_VIEW_FILTER = `${OTEL_EVENT_NAME} IN (${texts(PAGE_VIEW_EVENTS)})`;
 const WEB_VITAL_FILTER = `(${OTEL_EVENT_NAME} == ${escapeStringValue(
   EVENT_WEB_VITAL
 )} OR ${OTEL_SPAN_NAME} == ${escapeStringValue(
@@ -367,7 +365,7 @@ export const sessionSummaryQuery: SummaryQueryOf = (
 ${browserSessionEvents('rebuild_from', 'changed_to')}
   AND ${SOURCE_SESSION_ID_FIELD} IN (${texts(sessionIds)})
 | EVAL event = COALESCE(${OTEL_EVENT_NAME}, ""), span = COALESCE(${OTEL_SPAN_NAME}, "")
-| EVAL is_page_view = event IN (${texts(PAGE_VIEW_EVENTS)}) OR span IN (${texts(PAGE_VIEW_EVENTS)}),
+| EVAL is_page_view = event IN (${texts(PAGE_VIEW_EVENTS)}),
        is_click = event IN (${texts(CLICK_EVENTS)}) OR span IN (${texts(CLICK_EVENTS)}),
        is_frustration = event IN (${texts(FRUSTRATION_EVENTS)}),
        ${HTTP_REQUEST_EVALS},

@@ -29,7 +29,6 @@ const startMs = Date.parse(START);
 const at = (offsetMs: number) => new Date(startMs + offsetMs).toISOString();
 const DAY_MS = 24 * 60 * 60 * 1000;
 const JOURNEY_EVENT_NAMES = [
-  'documentLoad',
   'browser.navigation',
   'click',
   'browser.user_action.click',
@@ -44,10 +43,14 @@ const JOURNEY_EVENT_NAMES = [
 const events: OtelEventFields[] = [
   {
     '@timestamp': [at(0)],
+    event_name: ['browser.navigation'],
+    'attributes.url.full': ['https://shop.example.com/?ref=ad'],
+  },
+  // EDOT Browser's span for the same page load, which is not a page view of its own.
+  {
+    '@timestamp': [at(0)],
     name: ['documentLoad'],
     duration: [850_000_000],
-    trace_id: ['t1'],
-    span_id: ['s1'],
     'attributes.url.full': ['https://shop.example.com/?ref=ad'],
   },
   {
@@ -125,13 +128,12 @@ describe('buildTimeline', () => {
     expect(
       timeline.map(({ kind, name, offsetMs, page }) => ({ kind, name, offsetMs, page }))
     ).toEqual([
-      { kind: 'page_view', name: 'documentLoad', offsetMs: 0, page: '/' },
+      { kind: 'page_view', name: 'browser.navigation', offsetMs: 0, page: '/' },
       { kind: 'web_vital', name: 'LCP', offsetMs: 1_000, page: null },
       { kind: 'click', name: 'browser.user_action.click', offsetMs: 2_000, page: '/' },
       { kind: 'page_view', name: 'browser.navigation', offsetMs: 5_000, page: '/cart' },
       { kind: 'error', name: 'TypeError', offsetMs: 6_000, page: '/cart' },
     ]);
-    expect(timeline[0]).toEqual(expect.objectContaining({ traceId: 't1', spanId: 's1' }));
     expect(timeline[1].detail).toBe('1200');
     expect(timeline[2].detail).toBe('button.add');
     expect(timeline[4].detail).toBe('x is undefined');
@@ -443,7 +445,7 @@ describe('getSession', () => {
       .mockResolvedValueOnce(
         summaryResponse(sessionSource({ start_time: START, end_time: at(10_000) }))
       )
-      .mockResolvedValueOnce(eventsResponse(events.slice(0, 5)))
+      .mockResolvedValueOnce(eventsResponse(events.slice(0, 6)))
       .mockResolvedValueOnce(eventsResponse([]));
 
     const detail = await getSession(client, { serviceName: 'web', sessionId: 'abc' });
@@ -525,7 +527,7 @@ describe('getSession', () => {
       .mockResolvedValueOnce(
         summaryResponse(sessionSource({ start_time: START, end_time: at(10_000) }))
       )
-      .mockResolvedValueOnce(eventsResponse(events.slice(0, 5)))
+      .mockResolvedValueOnce(eventsResponse(events.slice(0, 6)))
       .mockResolvedValueOnce(
         eventsResponse(
           [
@@ -564,7 +566,7 @@ describe('getSession', () => {
       .mockResolvedValueOnce(
         summaryResponse(sessionSource({ start_time: START, end_time: at(10_000) }))
       )
-      .mockResolvedValueOnce(eventsResponse(events.slice(0, 5), SESSION_TIMELINE_SIZE + 1))
+      .mockResolvedValueOnce(eventsResponse(events.slice(0, 6), SESSION_TIMELINE_SIZE + 1))
       .mockResolvedValueOnce(eventsResponse([]));
 
     const detail = await getSession(client, { serviceName: 'web', sessionId: 'abc' });
@@ -589,7 +591,7 @@ describe('getSession', () => {
         .mockResolvedValueOnce(
           summaryResponse(sessionSource({ start_time: START, end_time: at(10_000) }))
         )
-        .mockResolvedValueOnce(eventsResponse(events.slice(0, 5), timelineTotal))
+        .mockResolvedValueOnce(eventsResponse(events.slice(0, 6), timelineTotal))
         .mockResolvedValueOnce(eventsResponse([lateRequest]));
       return getSession(client, { serviceName: 'web', sessionId: 'abc' });
     };
@@ -603,7 +605,7 @@ describe('getSession', () => {
         .mockResolvedValueOnce(
           summaryResponse(sessionSource({ start_time: START, end_time: at(10_000) }))
         )
-        .mockResolvedValueOnce(eventsResponse(events.slice(0, 5), SESSION_TIMELINE_SIZE + 1))
+        .mockResolvedValueOnce(eventsResponse(events.slice(0, 6), SESSION_TIMELINE_SIZE + 1))
         .mockResolvedValueOnce(
           eventsResponse([
             {
@@ -648,7 +650,7 @@ describe('getSession', () => {
       .mockResolvedValueOnce(
         summaryResponse(sessionSource({ start_time: START, end_time: at(3_000) }))
       )
-      .mockResolvedValueOnce(eventsResponse(events.slice(0, 5)))
+      .mockResolvedValueOnce(eventsResponse(events.slice(0, 6)))
       .mockResolvedValueOnce(eventsResponse([]));
 
     const detail = await getSession(client, { serviceName: 'web', sessionId: 'abc' });
@@ -662,7 +664,7 @@ describe('getSession', () => {
   it('opens a visit per page view, so reloading a page does not merge it into the last one', async () => {
     const load = (offsetMs: number) => ({
       '@timestamp': [at(offsetMs)],
-      name: ['documentLoad'],
+      event_name: ['browser.navigation'],
       'attributes.url.full': ['https://shop.example.com/'],
     });
     const lcp = (offsetMs: number, value: number) => ({
@@ -693,7 +695,7 @@ describe('getSession', () => {
   it('does not throw when the summary has no start or end time', async () => {
     client.search
       .mockResolvedValueOnce(summaryResponse(sessionSource({})))
-      .mockResolvedValueOnce(eventsResponse(events.slice(0, 5)))
+      .mockResolvedValueOnce(eventsResponse(events.slice(0, 6)))
       .mockResolvedValueOnce(eventsResponse([]));
 
     const detail = await getSession(client, { serviceName: 'web', sessionId: 'abc' });

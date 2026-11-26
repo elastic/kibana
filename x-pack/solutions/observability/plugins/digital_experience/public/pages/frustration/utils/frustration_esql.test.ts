@@ -472,8 +472,17 @@ describe('frustration ES|QL', () => {
       expect(query).not.toContain(EVENT_RAGE_CLICK);
       expect(query).not.toContain(EVENT_DEAD_CLICK);
       expect(query).toContain(
-        `STATS signals = COUNT(*),\n        sessions = COUNT_DISTINCT(${SOURCE_SESSION_ID_FIELD}) WHERE ${SOURCE_SESSION_ID_FIELD} IS NOT NULL AND ${SOURCE_SESSION_ID_FIELD} != ""\n    BY type = COALESCE(${SOURCE_EXCEPTION_TYPE_FIELD}, "No exception"), message = ${SOURCE_EXCEPTION_MESSAGE_FIELD}`
+        `STATS signals = COUNT(*),\n        sessions = COUNT_DISTINCT(${SOURCE_SESSION_ID_FIELD}) WHERE ${SOURCE_SESSION_ID_FIELD} IS NOT NULL AND ${SOURCE_SESSION_ID_FIELD} != ""\n    BY type = CASE(${SOURCE_EXCEPTION_TYPE_FIELD} IS NOT NULL, ${SOURCE_EXCEPTION_TYPE_FIELD},`
       );
+      expect(query).toContain(`message = ${SOURCE_EXCEPTION_MESSAGE_FIELD}`);
+    });
+
+    it('labels an exception without a type apart from an error click without an exception', () => {
+      const query = errorClicksQuery(params);
+      expect(query).toContain(
+        `${SOURCE_EXCEPTION_MESSAGE_FIELD} IS NOT NULL, "Unknown exception",`
+      );
+      expect(query).toContain('"No exception")');
     });
 
     it('lists the 20 most frequent first', () => {

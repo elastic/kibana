@@ -148,7 +148,7 @@ const detail = (overrides: Partial<SessionDetailResponse> = {}): SessionDetailRe
     webVitals: { ...emptyWebVitals(), lcp: 1800, cls: 0.3 },
   },
   timeline: [
-    event('page_view', 0, 'documentLoad', 'https://shop.example.com/'),
+    event('page_view', 0, 'browser.navigation', 'https://shop.example.com/'),
     event('click', 5_000, 'click', 'button#add'),
     event('page_view', 30_000, 'navigation', 'https://shop.example.com/cart'),
     event(
@@ -582,7 +582,7 @@ describe('SessionDetailPage', () => {
     expect(
       within(visits[0]).getByTestId('digitalExperienceSessionEvent-page_view')
     ).toHaveTextContent('Page view');
-    expect(visits[0]).not.toHaveTextContent('documentLoad');
+    expect(visits[0]).not.toHaveTextContent('browser.navigation');
     const error = within(visits[1]).getByTestId('digitalExperienceSessionEvent-error');
     // From the start of the page, to a hundredth of a second.
     expect(error).toHaveTextContent('15.00 s');

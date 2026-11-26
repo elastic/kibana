@@ -382,18 +382,26 @@ const NO_EXCEPTION_LABEL = i18n.translate(
   'xpack.digitalExperience.frustrationDashboard.exceptions.noException',
   { defaultMessage: 'No exception' }
 );
+const UNKNOWN_EXCEPTION_LABEL = i18n.translate(
+  'xpack.digitalExperience.frustrationDashboard.exceptions.unknownType',
+  { defaultMessage: 'Unknown exception' }
+);
+const EXCEPTION_TYPE = `CASE(${SOURCE_EXCEPTION_TYPE_FIELD} IS NOT NULL, ${SOURCE_EXCEPTION_TYPE_FIELD},
+          ${SOURCE_EXCEPTION_MESSAGE_FIELD} IS NOT NULL, ${escapeStringValue(
+  UNKNOWN_EXCEPTION_LABEL
+)},
+          ${escapeStringValue(NO_EXCEPTION_LABEL)})`;
 
 /**
  * The most frequent error click exceptions, with their signals and sessions. Error clicks without
- * an exception, e.g. on a slow request, share a labeled row.
+ * an exception, e.g. on a slow request, share a labeled row; an exception without a type, e.g. a
+ * thrown string, has its message.
  */
 export const errorClicksQuery = (params: FrustrationQueryParams): string =>
   `${applicationEvents(params)}
   AND ${SOURCE_EVENT_NAME_FIELD} == ${escapeStringValue(EVENT_ERROR_CLICK)}
 | STATS signals = COUNT(*),
         sessions = COUNT_DISTINCT(${SOURCE_SESSION_ID_FIELD}) WHERE ${NON_EMPTY_SESSION}
-    BY type = COALESCE(${SOURCE_EXCEPTION_TYPE_FIELD}, ${escapeStringValue(
-    NO_EXCEPTION_LABEL
-  )}), message = ${SOURCE_EXCEPTION_MESSAGE_FIELD}
+    BY type = ${EXCEPTION_TYPE}, message = ${SOURCE_EXCEPTION_MESSAGE_FIELD}
 | SORT signals DESC
 | LIMIT ${ERROR_CLICK_ROWS}`;

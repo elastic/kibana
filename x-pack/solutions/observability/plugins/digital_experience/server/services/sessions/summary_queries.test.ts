@@ -123,9 +123,7 @@ describe('sessionSummaryQuery', () => {
       'BY service = resource.attributes.service.name, session = attributes.session.id)'
     );
     // On the source fields, so that Lucene applies the filter.
-    expect(query).toContain(
-      '(WHERE event_name IN ("documentLoad", "browser.navigation") OR name IN ("documentLoad", "browser.navigation")'
-    );
+    expect(query).toContain('(WHERE event_name IN ("browser.navigation")\n');
     expect(query).toContain(
       'BY service = resource.attributes.service.name, session = attributes.session.id, page_url = attributes.url.full)'
     );

@@ -630,7 +630,10 @@ it never left the page it landed on, counted from the distinct pages it saw rath
 views, as a browser can report more than one of those for the same page. Sessions without a captured
 page (only clicks or errors) aren't bounces, and the bounce rate is over sessions with at least one
 page view. `page_view_count` counts
-page loads and in-app navigations (`documentLoad`, `browser.navigation`); `page_load_count`,
+page loads and in-app navigations, which EDOT Browser both logs as `browser.navigation`. Its
+`documentLoad` span is left out: since 1.0 it is sent for every page load, so counting it too
+would count each load twice. Summaries built before this change keep the double count until their
+session gets new events, as it didn't bump `SESSIONS_VERSION`. `page_load_count`,
 `js_error_count` and the HTTP request counts use the applications list's own definitions. The
 summary also keeps a lowercased `search` field (`wildcard`) of the session id, user, browser, OS,
 country, city and pages, which the list's search matches anywhere in.
