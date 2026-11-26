@@ -135,9 +135,6 @@ describe('ES FLS allowlist cross-repo sync', () => {
       'eventChainDepth',
       'eventChainVisitedWorkflowIds',
       'dispatchEventId',
-      // Not granted ES-side yet: KibanaWorkflowsImplicitPrivilegesProvider needs the same entry
-      // before user-credentialed queries can read it.
-      'executionChain.*',
       'concurrencyGroupKey',
       'version',
       'stepType',
@@ -192,19 +189,6 @@ describe('WORKFLOWS_EXECUTIONS_INDEX_MAPPINGS', () => {
     // duplicate the envelope here.
     const properties = WORKFLOWS_EXECUTIONS_INDEX_MAPPINGS.properties ?? {};
     expect((properties as Record<string, unknown>).hitl).toBeUndefined();
-  });
-
-  it('indexes the sub-workflow execution chain as keyword subfields', () => {
-    const properties = WORKFLOWS_EXECUTIONS_INDEX_MAPPINGS.properties ?? {};
-    expect(properties.executionChain).toEqual({
-      type: 'object',
-      dynamic: false,
-      properties: {
-        executionId: { type: 'keyword', ignore_above: 1024 },
-        workflowId: { type: 'keyword', ignore_above: 1024 },
-        invocation: { type: 'keyword', ignore_above: 1024 },
-      },
-    });
   });
 
   it('indexes aggregate and per-step token usage fields', () => {

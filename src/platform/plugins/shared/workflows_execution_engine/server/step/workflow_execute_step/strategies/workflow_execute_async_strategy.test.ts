@@ -55,7 +55,6 @@ describe('WorkflowExecuteAsyncStrategy', () => {
         isTestRun: false,
       },
       node: { stepId: 'async-step-1' },
-      stepExecutionId: 'async-step-exec-1',
     } as any;
 
     mockLogger = {
@@ -109,7 +108,6 @@ describe('WorkflowExecuteAsyncStrategy', () => {
         parentWorkflowId: 'parent-workflow-id',
         parentWorkflowExecutionId: 'parent-exec-1',
         parentStepId: 'async-step-1',
-        parentStepExecutionId: 'async-step-exec-1',
         parentDepth: 0,
       }),
       mockRequest

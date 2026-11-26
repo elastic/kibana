@@ -7,12 +7,13 @@
 
 import { SYSTEM_SECURITY_WORKER_IDS } from '@kbn/alertzero-common';
 import type { Logger } from '@kbn/core/server';
-import type { ExecutionChainHop, WorkflowExecutionDto, WorkflowYaml } from '@kbn/workflows';
+import type { WorkflowExecutionDto, WorkflowYaml } from '@kbn/workflows';
 import { isTopLevelWorkflowExecution } from '@kbn/workflows';
 import { ALERTZERO_MANAGED_WORKFLOW_OWNER_ID } from '../../../common/constants';
 import type { AlertZeroEnvelopeRoot } from '../../telemetry';
 import { describeError } from './describe_error';
 import { getParentExecutionId } from './get_parent_execution_id';
+import type { ExecutionChainHop } from './parse_execution_chain';
 import { parseExecutionChain } from './parse_execution_chain';
 import type { ReportWorkerOutcomeSkipReason } from './skip_reasons';
 import { withTimeout } from './with_timeout';

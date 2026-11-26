@@ -48,7 +48,6 @@ export type {
   WorkflowStepExecutionListDto,
   WorkflowMgetResponseDto,
   ChildWorkflowExecutionItem,
-  ExecutionChainHop,
   WorkflowExecutionCollapseField,
   WorkflowExecutionSortField,
   WorkflowExecutionSortOrder,

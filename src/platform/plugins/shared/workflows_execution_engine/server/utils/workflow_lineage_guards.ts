@@ -7,7 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ExecutionChainHop } from '@kbn/workflows';
+/** One ancestor in a sub-workflow chain, and how it invoked the next run down. */
+export interface ExecutionChainHop {
+  readonly executionId: string;
+  readonly invocation: 'sync' | 'async';
+  readonly workflowId: string;
+}
 
 const isExecutionChainHop = (value: unknown): value is ExecutionChainHop => {
   if (typeof value !== 'object' || value === null) {

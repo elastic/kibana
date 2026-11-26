@@ -11,10 +11,10 @@ import { ExecutionStatus, isTopLevelWorkflowExecution } from '@kbn/workflows';
 import type {
   EsWorkflowExecution,
   EsWorkflowStepExecution,
-  ExecutionChainHop,
   WorkflowExecutionEventDispatchMetadata,
 } from '@kbn/workflows';
 import type { WorkflowYaml } from '@kbn/workflows/spec/schema';
+import type { ExecutionChainHop } from '../../../utils';
 import { hasExecutionChain, parseDuration, toExecutionChainHop } from '../../../utils';
 import type {
   OutputSizeStats,
