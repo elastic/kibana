@@ -58,6 +58,15 @@ export interface AgentRegistry {
   getIds(opts?: AgentListOptions): Promise<string[]>;
   create(createRequest: AgentCreateRequest): Promise<InternalAgentDefinition>;
   update(agentId: string, update: AgentUpdateRequest): Promise<InternalAgentDefinition>;
+  /**
+   * Binds the agent to a service account, or unbinds it with `null`. Needs write access to the
+   * agent and the `manage_security` privilege; every conversation with the agent then runs as
+   * that account.
+   */
+  setServiceAccount(
+    agentId: string,
+    serviceAccountId: string | null
+  ): Promise<InternalAgentDefinition>;
   delete(args: AgentDeleteRequest): Promise<boolean>;
   getAccessControl(agentId: string): Promise<AgentAccessControlResult>;
   updateAccessControl(
@@ -124,16 +133,24 @@ class AgentRegistryImpl implements AgentRegistry {
   }
 
   async get(agentId: string, opts?: GetAgentOptions): Promise<InternalAgentDefinition> {
+    // Only persisted agents can be bound, and the account running one holds no read access to
+    // it, so a bound run skips the access-checked `has` lookups and resolves the agent directly.
+    if (opts?.runAs !== undefined) {
+      return this.ensureAvailable(await this.persistedProvider.get(agentId, opts));
+    }
     for (const provider of this.orderedProviders) {
       if (await provider.has(agentId)) {
-        const agent = await provider.get(agentId, opts);
-        if (!(await this.isAvailable(agent))) {
-          throw createAgentUnavailableError({ agentId });
-        }
-        return agent;
+        return this.ensureAvailable(await provider.get(agentId, opts));
       }
     }
     throw createAgentNotFoundError({ agentId });
+  }
+
+  private async ensureAvailable(agent: InternalAgentDefinition): Promise<InternalAgentDefinition> {
+    if (!(await this.isAvailable(agent))) {
+      throw createAgentUnavailableError({ agentId: agent.id });
+    }
+    return agent;
   }
 
   async list(opts: AgentListOptions = {}): Promise<InternalAgentDefinition[]> {
@@ -196,6 +213,21 @@ class AgentRegistryImpl implements AgentRegistry {
         } else {
           return provider.update(agentId, update);
         }
+      }
+    }
+    throw createAgentNotFoundError({ agentId });
+  }
+
+  async setServiceAccount(
+    agentId: string,
+    serviceAccountId: string | null
+  ): Promise<InternalAgentDefinition> {
+    for (const provider of this.orderedProviders) {
+      if (await provider.has(agentId)) {
+        if (isReadonlyProvider(provider)) {
+          throw createBadRequestError(`Agent ${agentId} is read-only and can't be updated`);
+        }
+        return provider.setServiceAccount(agentId, serviceAccountId);
       }
     }
     throw createAgentNotFoundError({ agentId });

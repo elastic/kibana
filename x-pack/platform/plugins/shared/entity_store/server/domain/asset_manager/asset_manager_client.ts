@@ -29,6 +29,10 @@ import {
 import { scheduleStatusReportTask, stopStatusReportTask } from '../../tasks/status_report_task';
 import { scheduleResilienceTask, stopResilienceTask } from '../../tasks/resilience_task';
 import { removeEntityMaintainer } from '../../tasks/entity_maintainers';
+import {
+  regenerateEntityStoreTaskApiKeys,
+  type RegenerateTaskApiKeysResult,
+} from '../../tasks/regenerate_task_api_keys';
 import { entityMaintainersRegistry } from '../../tasks/entity_maintainers/entity_maintainers_registry';
 import { installSharedElasticsearchAssets, uninstallElasticsearchAssets } from './install_assets';
 import { deleteLegacyRemoteStateSavedObjects } from '../saved_objects/remote_log_extraction_state/types';
@@ -288,6 +292,16 @@ export class AssetManagerClient {
     }
   }
 
+  /** Re-grants the API key of every Entity Store task in this namespace as the requesting user. */
+  public async regenerateTaskApiKeys(request: KibanaRequest): Promise<RegenerateTaskApiKeysResult> {
+    return regenerateEntityStoreTaskApiKeys({
+      taskManager: this.taskManager,
+      logger: this.logger,
+      namespace: this.namespace,
+      request,
+    });
+  }
+
   /**
    * Removes both extraction tasks. Runs regardless of the flag: a task scheduled while it was on
    * must not survive a stop issued after it was turned off. `priority` and `single` resolve to the
@@ -453,6 +467,7 @@ export class AssetManagerClient {
     await Promise.all([
       stopHistorySnapshotTask({
         taskManager: this.taskManager,
+        esClient: this.internalEsClient,
         logger: this.logger,
         namespace: this.namespace,
       }),
@@ -595,6 +610,13 @@ export class AssetManagerClient {
         ? engine.nonPriorityLogExtractionConfig
         : undefined
     );
+  }
+
+  /** Extra source index patterns the installed engines are configured to extract from. */
+  public async getStoredAdditionalIndexPatterns(): Promise<string[]> {
+    const engines = await this.engineDescriptorClient.getAll();
+    const configs = await Promise.all(engines.map(({ type }) => this.getLogExtractionConfig(type)));
+    return [...new Set(configs.flatMap(({ additionalIndexPatterns }) => additionalIndexPatterns))];
   }
 
   private async initEntity(request: KibanaRequest, type: EntityType): Promise<boolean> {
@@ -765,11 +787,13 @@ export class AssetManagerClient {
     };
   }
 
+  // Component probes run as the internal user: the status must describe the cluster, not what the
+  // requesting user is allowed to see (a 403 would otherwise read as "not installed").
   private async getIndexTemplateComponents(): Promise<EngineComponentStatus[]> {
     const resource = 'index_template';
     const latestId = getLatestIndexTemplateId(this.namespace);
-    const latestExists = await this.tryAsBoolean(
-      this.esClient.indices.getIndexTemplate({ name: latestId })
+    const latestExists = await this.existsOrFalseOnNotFound(
+      this.internalEsClient.indices.getIndexTemplate({ name: latestId })
     );
     return [{ id: latestId, installed: latestExists, resource }];
   }
@@ -777,7 +801,7 @@ export class AssetManagerClient {
   private async getIndexComponents(): Promise<EngineComponentStatus[]> {
     const resource: EngineComponentResource = 'index';
     const latestIndex = getLatestEntitiesIndexName(this.namespace);
-    const latestExists = await this.esClient.indices.exists({ index: latestIndex });
+    const latestExists = await this.internalEsClient.indices.exists({ index: latestIndex });
     return [{ id: latestIndex, installed: latestExists, resource }];
   }
 
@@ -786,8 +810,8 @@ export class AssetManagerClient {
   ): Promise<EngineComponentStatus[]> {
     const resource: EngineComponentResource = 'component_template';
     const latestName = getComponentTemplateName(definition.type, this.namespace);
-    const latestExists = await this.tryAsBoolean(
-      this.esClient.cluster.getComponentTemplate({ name: latestName })
+    const latestExists = await this.existsOrFalseOnNotFound(
+      this.internalEsClient.cluster.getComponentTemplate({ name: latestName })
     );
     return [{ id: latestName, installed: latestExists, resource }];
   }
@@ -897,6 +921,19 @@ export class AssetManagerClient {
       allowLegacyMigration: await this.isLegacySecurityAssetsMigrationEnabled(),
     });
     return true;
+  }
+
+  private async existsOrFalseOnNotFound(promise: Promise<unknown>): Promise<boolean> {
+    try {
+      await promise;
+      return true;
+    } catch (error) {
+      const { statusCode, meta } = error as { statusCode?: number; meta?: { statusCode?: number } };
+      if ((meta?.statusCode ?? statusCode) === 404) {
+        return false;
+      }
+      throw error;
+    }
   }
 
   /**

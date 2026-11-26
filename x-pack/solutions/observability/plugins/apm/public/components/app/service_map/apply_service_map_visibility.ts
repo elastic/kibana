@@ -15,12 +15,18 @@ import type {
   ServiceMapNode,
   ServiceNodeData,
 } from '../../../../common/service_map';
-import { isServiceNode, isServiceNodeData } from '../../../../common/service_map';
+import {
+  isServiceGroupNode,
+  isServiceGroupNodeData,
+  isServiceNode,
+  isServiceNodeData,
+} from '../../../../common/service_map';
 
 /**
  * Connection-based filter values.
  * - `orphaned`: show only nodes with 0 edges (no connections at all).
  * - `connected`: show only nodes with ≥1 edge.
+ * Calls between the members of the same open group do not count as edges.
  */
 export type ConnectionFilter = 'orphaned' | 'connected';
 
@@ -41,10 +47,27 @@ export const DEFAULT_SERVICE_MAP_VIEW_FILTERS: ServiceMapViewFilters = {
   anomalySeverityFilter: [],
 };
 
-/** Builds a Set of node IDs that appear on at least one edge (as source or target). */
+/**
+ * Badge fields a service and a closed group both carry. Filters read only these,
+ * so a group is not treated as a service.
+ */
+type ServiceMapFilterNodeData = Pick<
+  ServiceNodeData,
+  'alertsCount' | 'alertsByStatus' | 'sloStatus' | 'serviceAnomalyStats'
+>;
+
+/**
+ * Builds a Set of node IDs that appear on at least one edge (as source or target). Calls between
+ * the members of an open group are left out, as they are not on the map while the group is closed:
+ * a node is connected or orphaned the same way whether its group is open or closed, so opening a
+ * group never hides it from a connection filter that showed it closed.
+ */
 export function buildConnectedNodeIdSet(edges: ServiceMapEdgeType[]): Set<string> {
   const connected = new Set<string>();
   for (const edge of edges) {
+    if (edge.data?.isIntraGroup) {
+      continue;
+    }
     connected.add(edge.source);
     connected.add(edge.target);
   }
@@ -55,7 +78,7 @@ export function buildConnectedNodeIdSet(edges: ServiceMapEdgeType[]): Set<string
  * SLO bucket for map filters and option counts: `undefined` or `noSLOs` (no SLO summary on the node)
  * is treated as **`noData`** so tallies and combo options stay aligned with `SloStatus`.
  */
-export function getNormalizedSloStatusForMapFilters(data: ServiceNodeData): SloStatus {
+export function getNormalizedSloStatusForMapFilters(data: ServiceMapFilterNodeData): SloStatus {
   const raw = data.sloStatus;
   if (raw === undefined || raw === 'noSLOs') {
     return 'noData';
@@ -65,7 +88,7 @@ export function getNormalizedSloStatusForMapFilters(data: ServiceNodeData): SloS
 
 /** Alert count for a status on one service (used by filters and filter-option counts). */
 export function getServiceNodeAlertCountForStatus(
-  data: ServiceNodeData,
+  data: ServiceMapFilterNodeData,
   status: AlertStatus
 ): number {
   const fromBreakdown = data.alertsByStatus?.[status];
@@ -92,12 +115,14 @@ function nodeMatchesConnectionFilter(
 }
 
 /** ML severity band for map filters, derived from the same score → severity rules as service inventory. */
-export function getMlSeverityForServiceMapNode(data: ServiceNodeData): ML_ANOMALY_SEVERITY {
+export function getMlSeverityForServiceMapNode(
+  data: ServiceMapFilterNodeData
+): ML_ANOMALY_SEVERITY {
   return getSeverity(data.serviceAnomalyStats?.anomalyScore);
 }
 
 function serviceMatchesFilters(
-  data: ServiceNodeData,
+  data: ServiceMapFilterNodeData,
   nodeId: string,
   connectedIds: Set<string>,
   filters: ServiceMapViewFilters
@@ -136,9 +161,10 @@ function serviceMatchesFilters(
 }
 
 /**
- * Applies client-side visibility for service map nodes and edges. Service nodes must match all
- * active filters. Dependency and grouped nodes are shown when connected to any visible node;
- * non-matching services are never pulled in through dependencies.
+ * Applies client-side visibility for service map nodes and edges. Service and closed service-group
+ * nodes must match all active filters. Dependency and resource-group nodes are shown when connected
+ * to any visible node; non-matching services/groups are never pulled in through dependencies. The
+ * box of an open group is shown when any of its members is.
  */
 export function applyServiceMapVisibility(
   nodes: ServiceMapNode[],
@@ -151,7 +177,7 @@ export function applyServiceMapVisibility(
 
   for (const node of nodes) {
     if (
-      isServiceNodeData(node.data) &&
+      (isServiceNodeData(node.data) || isServiceGroupNodeData(node.data)) &&
       serviceMatchesFilters(node.data, node.id, connectedIds, filters)
     ) {
       visibleIds.add(node.id);
@@ -180,11 +206,19 @@ export function applyServiceMapVisibility(
         continue;
       }
       const neighbor = nodeById.get(neighborId);
-      if (!neighbor || isServiceNode(neighbor)) {
+      // Only pull in dependencies / resource groups — never other services or service groups.
+      if (!neighbor || isServiceNode(neighbor) || isServiceGroupNode(neighbor)) {
         continue;
       }
       visibleIds.add(neighborId);
       queue.push(neighborId);
+    }
+  }
+
+  // The box of an open group has no edges of its own: it stays while any of its members does.
+  for (const node of nodes) {
+    if (node.parentId && visibleIds.has(node.id)) {
+      visibleIds.add(node.parentId);
     }
   }
 

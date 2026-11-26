@@ -28,7 +28,7 @@ fi
 git fetch origin $branch_to_merge_into
 git checkout -B "$branch_to_merge_into" "origin/$branch_to_merge_into"
 
-# Re-source after the checkout so the Node version matches the branches .node-version
+# Re-source after the checkout so the Node version matches the branches .nvmrc
 source .buildkite/scripts/common/setup_node.sh
 
 .buildkite/scripts/bootstrap.sh
@@ -44,8 +44,6 @@ store_old_version() {
   old_version=$(jq -r '.version' package.json)
   echo "Current version: $old_version"
   echo "New version: $TARGET_VERSION"
-
-  buildkite-agent meta-data set "OLD_VERSION" "$old_version"
 }
 
 update_package_json_version() {

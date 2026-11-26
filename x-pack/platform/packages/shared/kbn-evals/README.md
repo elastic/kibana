@@ -67,10 +67,10 @@ node scripts/evals init
 
 #### Loading datasets from Golden Cluster
 
-Use `--datasets-profile` when dataset credentials should come from the shared golden cluster:
+Use `--evaluations-kbn-profile` when the Kibana holding datasets, scores and results should come from the shared golden cluster:
 
 ```bash
-node scripts/evals start --suite agent-builder --datasets-profile dev-vault
+node scripts/evals start --suite agent-builder --evaluations-kbn-profile dev-vault
 ```
 
 #### Filtering, model selection, judge, repetitions, concurrency
@@ -195,8 +195,20 @@ Add GitHub labels to trigger evals in PR CI:
 | `models:judge:<connector-id>` | Override the judge connector                                      |
 | `models:weekly-eis-models`    | Per-suite EIS model alias (resolves from `evals.suites.json`)     |
 | `evals:skip-<suite-id>`       | Skip a suite, e.g. `evals:skip-smoke-tests`                       |
+| `evals:skip`                  | Skip every suite that [requires an evals decision](#requiring-an-evals-decision-on-prs) |
+| `evals:accept-regression`     | Merge despite a [regression gate](#regression-gate) failure       |
 
 Model groups follow the pattern `eis/<modelId>` for EIS or `openrouter/<provider>-<model>` for OpenRouter.
+
+A suite whose results are only comparable under one fixed judge (e.g. one scored against a pinned baseline) can set `defaultJudge` to a judge connector id in its `evals.suites.json` entry:
+
+```json
+"defaultJudge": "eis-abc-1"
+```
+
+The judge is resolved in this order: `models:judge:` label (locally `--evaluation-connector-id`, then `EVAL_CONNECTOR_ID`), then the suite's `defaultJudge`, then the Vault `evaluationConnectorId`.
+
+`defaultJudge` applies to PR (label-triggered) runs and the local CLI. Weekly and on-demand runs go straight to `run_suite.sh`, where the Vault default is already exported, so they use `EVAL_CONNECTOR_ID` or the Vault default and ignore the `defaultJudge`.
 
 PRs touching the eval framework get `evals:smoke-tests` automatically
 ([`.github/paths-labeller.yml`](../../../../../.github/paths-labeller.yml)). Add
@@ -206,6 +218,81 @@ When the labels match, PR CI triggers the dedicated
 [`kibana-evals-pr-llm-evals`](https://buildkite.com/elastic/kibana-evals-pr-llm-evals) pipeline. Results
 surface on the PR as a separate `kibana-evals` commit status — open its build for per-suite/per-model
 results and triage.
+
+Every run logs a link to its experiments in the evals UI
+(`/app/management/ai/evals/experiments/<experiment-id>?execution_id=<execution-id>`) after the
+score table. The link points at the Kibana that received the scores: `EVAL_KBN_URL` when set
+(by CI, `--evaluations-kbn-url`, or the evaluations-kbn profile's `evaluationsKbn.url`; `dev-vault` and a
+synced `config.json` point it at the golden cluster), otherwise the Kibana Scout ran against. On Buildkite (PR, weekly and on-demand builds) the same
+links are added to a `kbn-evals-experiments-<suite>` build annotation, one row per model and
+shard, so they show at the top of the build. Logged URLs never include credentials.
+
+#### Requiring an evals decision on PRs
+
+A suite can require PR authors to decide whether its evals run when their PR changes code the suite
+depends on. Opt in with `requireDecisionOnPaths` in the suite's
+[`evals.suites.json`](../../../../../.buildkite/pipelines/evals/evals.suites.json) entry, plus
+`defaultModelGroups` so the run label alone starts a run:
+
+```json
+"defaultModelGroups": ["eis/anthropic-claude-5.5-sonnet"],
+"requireDecisionOnPaths": {
+  "include": ["x-pack/solutions/my_solution/plugins/my_plugin/server/agents/**"],
+  "exclude": ["**/*.test.ts", "**/__snapshots__/**"]
+}
+```
+
+The [`evals-gate`](../../../../../.github/workflows/evals-gate.yml) workflow matches the PR's
+changed files against these globs and posts the `evals gate` commit status. When files match and the
+PR has neither label, the status fails with "Evals decision required" and a comment lists the
+matched files. The comment is removed once the PR has a decision:
+
+- `evals:<suite-id>` runs the suite.
+- `evals:skip` skips every suite that requires a decision. It doesn't affect other suites, such as
+  `smoke-tests`. A skip wins over a run label, but not over a regression already measured on the
+  head commit (see [Regression gate](#regression-gate)).
+
+Prefer directory globs over file lists, so new files are covered without editing the config. A
+config test fails when an include glob stops matching any tracked file, and the weekly runs catch
+what the globs miss. `**` doesn't match dot directories or dotfiles (e.g. `server/.agents/` or
+`server/.prompt.md`), so list those with their own glob. Opting in needs no new GitHub labels.
+
+The eval trigger step reads the labels again once the PR's Kibana build step finishes, so a run
+label added before then takes effect. A label added after that needs a new push or a `/ci` comment.
+
+##### Regression gate
+
+A suite can also block merging when its run regresses. Add `regressionGate`, naming one
+pre-registered dataset and evaluator:
+
+```json
+"regressionGate": {
+  "dataset": "my-golden-dataset",
+  "evaluator": "goal_pass",
+  "minAbsoluteDrop": 0.1,
+  "alpha": 0.05,
+  "maxBaselineAgeDays": 3
+}
+```
+
+The comparison against the latest `main` baseline for the suite's first `defaultModelGroups` model
+posts a `kibana-evals/<suite-id>` status, which the `evals gate` reads:
+
+- **Regression**: the metric got worse by at least `minAbsoluteDrop`, with p < `alpha`. The gate
+  fails until the regression is fixed or the PR gets `evals:accept-regression`. Adding `evals:skip`
+  or removing the run label doesn't clear a regression measured on the PR's head commit. A new
+  push while `evals:skip` is on the PR does: the new head has no verdict, and the suite is skipped.
+- **Pass**: anything else. All other evaluators stay advisory in the comparison comment.
+- **Inconclusive**: no baseline, a baseline older than `maxBaselineAgeDays`, too few paired
+  examples, a PR run with no scores, a failed comparison, or an eval build that finished without a
+  verdict. The gate passes and says the result was not enforced; infra problems never block a PR.
+  A run with no scores can't be told apart from an infra failure, so it doesn't block; a broken
+  agent that still runs scores low and does block.
+
+`models:*` labels add models to a gated suite's run instead of replacing its default model, so they
+can't bypass the gate. A passing verdict from an earlier PR commit is reused when no file under
+`requireDecisionOnPaths` changed since, so unrelated pushes don't re-run the suite. A regression is
+never reused: the next commit re-runs the suite, so a noisy result can clear.
 
 #### Per-spec model groups
 
@@ -229,7 +316,9 @@ fewer models, list it under `specModelGroups` in
 - Every model in `specModelGroups` must be in `weeklyEisModelGroups`, and every model there must
   be in the weekly step's `EVAL_MODEL_GROUPS` in `llm_evals.yml`. Both are checked in PR CI. The
   weekly run requests `EVAL_MODEL_GROUPS`; EIS provisions every model it discovers.
-- `shards` are unrelated. They decide which specs share a CI step, not which models run.
+- `shards` are unrelated. They decide which specs share a CI step, not which models run. A shard
+  can also set `judge` to an evaluation connector id (for example `"judge": "eis-openai-gpt-5-4"`)
+  to pin the judge for its steps only; shards without one keep the suite-wide judge.
 - Only the weekly run (`KBN_EVALS_WEEKLY=1`) applies this. PR and on-demand runs still run every
   model against every spec.
 
@@ -237,12 +326,12 @@ fewer models, list it under `specModelGroups` in
 names a model outside the weekly list, or leaves a spec on disk unlisted.
 
 **Preview the fanout locally.** `get_fanout_matrix.js` prints one `{ connectorId, shardId,
-specFiles }` line per CI step. It needs an endpoint for every weekly model, so fake them from the
+specFiles, judge? }` line per CI step. It needs an endpoint for every weekly model, so fake them from the
 suite config. Drop `KBN_EVALS_WEEKLY=1` to see the PR / on-demand fanout.
 
 ```bash
 CI=x-pack/platform/packages/shared/kbn-evals/scripts/ci
-export EVAL_SUITE_INFO="$(node $CI/get_suite_info.js significant-events)"
+export EVAL_SUITE_INFO="$(node $CI/get_suite_info.js nightshift-investigations)"
 export EVAL_MODEL_GROUPS="$(jq -r '.weeklyEisModelGroups | join(",")' <<<"$EVAL_SUITE_INFO")"
 export KIBANA_TESTING_INFERENCE_ENDPOINTS="$(jq -c '[.weeklyEisModelGroups[] | ltrimstr("eis/")]
   | map({ key: ("eis-" + gsub("[^a-zA-Z0-9]+"; "-")), value: { provider: "elastic", providerConfig: { model_id: . } } })
@@ -251,10 +340,10 @@ KBN_EVALS_WEEKLY=1 node $CI/get_fanout_matrix.js
 ```
 
 **Run it on real agents.** Start an [on-demand build](#13-on-demand-evals-buildkite) with
-`KBN_EVALS_WEEKLY=1` in the build environment. `KBN_EVALS_WEEKLY` also makes the notify step post
-to the suite's team Slack channel, so build from a branch name in `elastic/kibana` (not
-`refs/pull/<N>/head`) and leave `EVAL_SLACK_NOTIFICATION_CHANNEL` unset. Then no notify step is
-created.
+`KBN_EVALS_WEEKLY=1` in the build environment, from any branch other than `main`. On `main`,
+`KBN_EVALS_WEEKLY` makes the notify step post to the suite's team Slack channel, whether the run
+passes or fails. A build on another branch never posts to Slack; on `refs/pull/<N>/head` a failure
+is still posted as a comment on that PR.
 
 ---
 
@@ -347,6 +436,10 @@ Give the suite its own Vault secret with `vaultSecret`, so rotating its credenti
 | `--profile dev-vault`        | `secret/kibana-issues/dev/kbn-evals/<vaultSecret>` in the dev Vault                           |
 | `--profile <file profile>`   | `config.<profile>.json`, which holds the suite's blocks next to the general keys              |
 | No `vaultSecret` (any place) | The general config (`--profile` config locally, `KBN_EVALS_CONFIG_B64` in CI)                 |
+
+CI forwards the initial hook input as `KBN_EVALS_SCOUT_HOOK_CONFIG_B64`. The native `evals run`
+command reuses it when no evaluations-kbn profile is selected, so both hook invocations see the same
+suite secret without another Vault read. Explicit profiles retain their own configuration.
 
 Manage the secret with the Vault scripts' `--suite` flag, which keeps the local copy in a gitignored `vault/config.json` next to the suite's `playwright.config.ts` (copy `vault/config.example.json` to start):
 
@@ -505,11 +598,15 @@ You can use these as-is or build your own directly in the suite.
 
 #### LLM-as-a-judge
 
-Set `--judge` to select which model judges results. Judge evaluators receive the judge connector automatically.
+Judge evaluators receive the judge connector automatically. Without `--judge`, the [default judge](#default-judge) is used; set `--judge` to pick another model.
 
 ```bash
 node scripts/evals start --suite agent-builder --judge eis-claude-4-5-sonnet
 ```
+
+#### Default judge
+
+Without `--judge` / `EVAL_CONNECTOR_ID`, the judge comes from `evaluationConnectorId` in the profile config (`dev-vault`, or a `config.<profile>.json` synced from Vault). Profiles without it, such as `local`, still prompt (or fail without a TTY).
 
 #### Selecting evaluators at runtime
 

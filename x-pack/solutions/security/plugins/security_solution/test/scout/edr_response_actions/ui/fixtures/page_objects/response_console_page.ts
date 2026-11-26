@@ -8,11 +8,24 @@
 import type { Locator, ScoutPage } from '@kbn/scout-security';
 
 const LAST_7_DAYS_TEST_SUBJ = 'superDatePickerCommonlyUsed_Last_7 days';
+const CONSOLE_PREFIX = 'endpointResponseActionsConsole';
+const GET_FILE_DOWNLOAD_LINK = 'getFile-actionResult-getFileResults-getFileDownloadLink';
+
+type ConsoleCommand = 'getFile' | 'isolate';
+type ConsoleCommandState = 'pending' | 'success';
 
 /**
- * Response console overlay opened from an alert flyout. Actions only; the spec asserts.
+ * Response console overlay for an Endpoint host, opened from an alert flyout or
+ * the endpoint list. Actions only; the spec asserts.
  */
 export class ResponseConsolePage {
+  readonly commandInput: Locator;
+  readonly helpOutput: Locator;
+  readonly submitButton: Locator;
+  readonly getFileSuccess: Locator;
+  readonly getFileDownloadButton: Locator;
+  readonly getFilePasscodeMessage: Locator;
+  readonly getFileDeleteMessage: Locator;
   readonly overlay: Locator;
   readonly respondAction: Locator;
   readonly userMenu: Locator;
@@ -24,11 +37,25 @@ export class ResponseConsolePage {
   readonly dateQuickMenu: Locator;
   private readonly last7DaysOption: Locator;
 
-  constructor(page: ScoutPage) {
+  constructor(private readonly page: ScoutPage) {
+    this.commandInput = page.testSubj.locator(`${CONSOLE_PREFIX}-inputCapture`);
+    this.submitButton = page.testSubj.locator(`${CONSOLE_PREFIX}-inputTextSubmitButton`);
+    this.helpOutput = page.testSubj.locator(`${CONSOLE_PREFIX}-helpOutput`);
+    this.getFileSuccess = page.testSubj.locator('getFile-success');
+    this.getFileDownloadButton = this.getFileSuccess.getByTestId(
+      `${GET_FILE_DOWNLOAD_LINK}-downloadButton`
+    );
+    this.getFilePasscodeMessage = this.getFileSuccess.getByTestId(
+      `${GET_FILE_DOWNLOAD_LINK}-passcodeMessage`
+    );
+    this.getFileDeleteMessage = this.getFileSuccess.getByTestId(
+      `${GET_FILE_DOWNLOAD_LINK}-fileDeleteMessage`
+    );
     this.overlay = page.testSubj.locator('consolePageOverlay');
     this.respondAction = page.testSubj.locator('endpointResponseActions-action-item');
     this.userMenu = page.testSubj.locator('userMenuButton');
-    this.backLink = page.testSubj.locator('consolePageOverlay-header-back-link');
+    // Scoped to the overlay: the page underneath can render its own app header back button
+    this.backLink = this.overlay.getByTestId('appHeaderBack');
     this.actionLogButton = page.testSubj.locator('responderShowActionLogButton');
     this.actionLogFlyout = page.testSubj.locator('responderActionLogFlyout');
     this.actionLogDateQuickMenuButton = this.actionLogFlyout.getByTestId(
@@ -39,9 +66,26 @@ export class ResponseConsolePage {
     this.last7DaysOption = page.testSubj.locator(LAST_7_DAYS_TEST_SUBJ);
   }
 
+  /** Host status line in the pending or success output of a submitted `command`. */
+  hostStatusFor(command: ConsoleCommand, state: ConsoleCommandState): Locator {
+    return this.page.testSubj
+      .locator(`${command}-${state}`)
+      .getByTestId(`${command}-actionResult-hostStatus`);
+  }
+
   async openFromRespondAction(): Promise<void> {
     await this.respondAction.click();
     await this.overlay.waitFor({ state: 'visible' });
+  }
+
+  /** Types `command` into the console input. The input listens for key events, not `fill`. */
+  async enterCommand(command: string): Promise<void> {
+    await this.commandInput.click();
+    await this.page.keyboard.type(command);
+  }
+
+  async submitCommand(): Promise<void> {
+    await this.submitButton.click();
   }
 
   async openActionLog(): Promise<void> {

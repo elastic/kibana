@@ -39,7 +39,7 @@ describe('customize panel editor', () => {
 
     api = {
       viewMode$,
-      dataViews$: new BehaviorSubject<DataView[] | undefined>([]),
+      dataSources$: new BehaviorSubject<DataView[] | undefined>([]),
       title$,
       setTitle,
       description$,

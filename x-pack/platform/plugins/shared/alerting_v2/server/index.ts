@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import { ContainerModule } from 'inversify';
+import { KibanaContainerModule } from '@kbn/core-di';
 import type { PluginConfigDescriptor } from '@kbn/core/server';
 import type { PluginConfig } from './config';
 import { configSchema } from './config';
 import { bindAgentBuilder } from './setup/bind_agent_builder';
 import { bindArtifactTypes } from './setup/bind_artifact_types';
+import { bindBuilderTypes } from './setup/bind_builder_types';
 import { bindContract } from './setup/bind_contract';
 import { bindOnSetup } from './setup/bind_on_setup';
 import { bindOnStart } from './setup/bind_on_start';
@@ -28,9 +29,10 @@ export const config: PluginConfigDescriptor<PluginConfig> = {
   },
 };
 
-const pluginModule = new ContainerModule((options) => {
+const pluginModule = new KibanaContainerModule((options) => {
   bindOnSetup(options);
   bindArtifactTypes(options);
+  bindBuilderTypes(options);
   bindAgentBuilder(options);
   bindOnStart(options);
   bindContract(options);
@@ -51,11 +53,14 @@ export type {
   RulesClientApi,
   InternalRulesClientApi,
   ActionPolicyClientApi,
+  AlertActionsClientApi,
   AlertEventsClientApi,
 } from './types';
 export type { ArtifactTypeDefinition, ArtifactReferenceDescriptor } from './lib/artifact_types';
+export type { BuilderTypeDefinition } from './lib/builder_types';
 export type { FindRulesArgs, CreateRulesClientOptions } from './lib/rules_client';
 export type { FindActionPoliciesArgs } from './lib/action_policy_client';
+export type { AlertStatusChangedOptIn } from './lib/alert_status_changed';
 
 /**
  * Public catalog of machine-readable error codes emitted by alerting v2 HTTP

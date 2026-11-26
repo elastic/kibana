@@ -8,7 +8,7 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import type { Subscription } from 'rxjs';
-import { BehaviorSubject, combineLatestWith, Subject } from 'rxjs';
+import { BehaviorSubject, combineLatestWith, firstValueFrom, ReplaySubject, Subject } from 'rxjs';
 import type * as H from 'history';
 import type {
   AppMountParameters,
@@ -108,8 +108,10 @@ import { registerTimelineFlyoutGroupedAttachment } from './agent_builder/attachm
 import { registerRulesFlyoutGroupedAttachment } from './agent_builder/attachment_types/rule/register_rules_flyout_grouped_attachment';
 import type { SecurityCanvasEmbeddedBundle } from './agent_builder/components/security_redux_embedded_provider';
 import { registerWorkflowSteps } from './workflows/step_types';
+import { registerEndpointWorkflowSteps } from './workflows/step_types/endpoint/register_workflow_steps';
 import { registerSecurityWorkflowTriggers } from './workflows/triggers';
 import { registerThreatIntelWorkflowSteps } from './threat_intel/workflows/step_types';
+import { flyoutV2DocViewerStateSchema } from './flyout_v2/shared/url_state/flyout_v2_doc_viewer_state_schema';
 
 export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, StartPlugins> {
   private config: SecuritySolutionUiConfigType;
@@ -120,6 +122,11 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
   private isServerless: boolean;
 
   private appUpdater$ = new Subject<AppUpdater>();
+  /**
+   * Emits once the application deepLinks have been registered, or once it is known they never
+   * will be. `appUpdater$` does not replay, this is what late consumers can await instead.
+   */
+  private deepLinksRegistered$ = new ReplaySubject<void>(1);
   private storage = new Storage(localStorage);
   private saveRuleSub?: Subscription;
   private saveRuleHandlerStopped = false;
@@ -171,6 +178,9 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
 
     if (workflowsExtensions) {
       registerWorkflowSteps(workflowsExtensions);
+      registerEndpointWorkflowSteps(workflowsExtensions, {
+        experimentalFeatures: this.experimentalFeatures,
+      });
       registerSecurityWorkflowTriggers(workflowsExtensions);
       if (plugins.alertzero?.enabled) {
         registerThreatIntelWorkflowSteps(workflowsExtensions);
@@ -234,11 +244,10 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         const [coreStart] = await core.getStartServices();
 
         const { manageOldSiemRoutes } = await this.lazyHelpersForRoutes();
-        const subscription = this.appUpdater$.subscribe(() => {
-          // wait for app initialization to set the links
-          manageOldSiemRoutes(coreStart);
-          subscription.unsubscribe();
-        });
+        // The legacy routes are resolved through the Security Solution app deepLinks, so the
+        // redirect can only happen once those deepLinks have been registered.
+        await firstValueFrom(this.deepLinksRegistered$);
+        manageOldSiemRoutes(coreStart);
 
         return () => true;
       },
@@ -411,9 +420,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         application: core.application,
         agentBuilder: plugins.agentBuilder,
         chrome: core.chrome,
-        experimentalFeatures: this.experimentalFeatures,
         searchSession: plugins.data.search.session,
-        uiSettings: core.uiSettings,
       });
       registerEntityGraphAttachment({
         attachments: plugins.agentBuilder.attachments,
@@ -422,8 +429,6 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         agentBuilder: plugins.agentBuilder,
         chrome: core.chrome,
         searchSession: plugins.data.search.session,
-        experimentalFeatures: this.experimentalFeatures,
-        uiSettings: core.uiSettings,
       });
       if (this.experimentalFeatures.riskScoreHistoryEnabled) {
         registerEntityRiskScoreHistoryAttachment({
@@ -431,9 +436,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
           application: core.application,
           agentBuilder: plugins.agentBuilder,
           chrome: core.chrome,
-          experimentalFeatures: this.experimentalFeatures,
           searchSession: plugins.data.search.session,
-          uiSettings: core.uiSettings,
         });
       }
       registerExceptionAttachment({ attachments: plugins.agentBuilder.attachments });
@@ -446,8 +449,8 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         resolveSecurityCanvasContext: () =>
           this.getSecurityCanvasContext(core, plugins as StartPluginsDependencies),
         searchSession: plugins.data.search.session,
-        uiSettings: core.uiSettings,
         rendering: core.rendering,
+        spaces: plugins.spaces,
         registerImpactEntityOpener: plugins.agenticInvestigations?.registerImpactEntityOpener,
       });
       if (this.experimentalFeatures.rulePreviewAttachmentEnabled) {
@@ -629,7 +632,17 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
 
     const alertFlyoutOverviewTabFeature: SecuritySolutionAlertFlyoutOverviewTabFeature = {
       id: 'security-solution-alert-flyout-overview-tab',
-      render: ({ hit, onAlertUpdated, columns, filter, onAddColumn, onRemoveColumn }) => {
+      shareableStateSchema: flyoutV2DocViewerStateSchema,
+      render: ({
+        hit,
+        onAlertUpdated,
+        columns,
+        filter,
+        onAddColumn,
+        onRemoveColumn,
+        initialState,
+        onInitialStateChange,
+      }) => {
         const servicesPromise = this.getDiscoverFlyoutServices(core);
         const storePromise = this.getDiscoverFlyoutStore(core);
 
@@ -644,6 +657,8 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
               filter={filter}
               onAddColumn={onAddColumn}
               onRemoveColumn={onRemoveColumn}
+              initialState={initialState}
+              onInitialStateChange={onInitialStateChange}
             />
           </React.Suspense>
         );
@@ -710,7 +725,16 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
 
     const iocFlyoutOverviewTabFeature: SecuritySolutionIOCFlyoutOverviewTabFeature = {
       id: 'security-solution-ioc-flyout-overview-tab',
-      render: ({ hit, columns, filter, onAddColumn, onRemoveColumn }) => {
+      shareableStateSchema: flyoutV2DocViewerStateSchema,
+      render: ({
+        hit,
+        columns,
+        filter,
+        onAddColumn,
+        onRemoveColumn,
+        initialState,
+        onInitialStateChange,
+      }) => {
         const servicesPromise = this.getDiscoverFlyoutServices(core);
         const storePromise = this.getDiscoverFlyoutStore(core);
 
@@ -724,6 +748,8 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
               filter={filter}
               onAddColumn={onAddColumn}
               onRemoveColumn={onRemoveColumn}
+              initialState={initialState}
+              onInitialStateChange={onInitialStateChange}
             />
           </React.Suspense>
         );
@@ -790,7 +816,17 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
 
     const attackFlyoutOverviewTabFeature: SecuritySolutionAttackFlyoutOverviewTabFeature = {
       id: 'security-solution-attack-flyout-overview-tab',
-      render: ({ hit, onAttackUpdated, columns, filter, onAddColumn, onRemoveColumn }) => {
+      shareableStateSchema: flyoutV2DocViewerStateSchema,
+      render: ({
+        hit,
+        onAttackUpdated,
+        columns,
+        filter,
+        onAddColumn,
+        onRemoveColumn,
+        initialState,
+        onInitialStateChange,
+      }) => {
         const servicesPromise = this.getDiscoverFlyoutServices(core);
         const storePromise = this.getDiscoverFlyoutStore(core);
 
@@ -805,6 +841,8 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
               filter={filter}
               onAddColumn={onAddColumn}
               onRemoveColumn={onRemoveColumn}
+              initialState={initialState}
+              onInitialStateChange={onInitialStateChange}
             />
           </React.Suspense>
         );
@@ -960,9 +998,6 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         this.experimentalFeatures
       );
     }
-    if (startPlugins.timelines) {
-      startPlugins.timelines.setTimelineEmbeddedStore(this._store);
-    }
     return this._store;
   }
 
@@ -991,6 +1026,8 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     // This is necessary to hide security solution from the selectable solutions in the spaces UI
     if (!isSecuritySolutionAccessible(capabilities)) {
       this.appUpdater$.next(() => ({ status: AppStatus.inaccessible, visibleIn: [] }));
+      // no deepLinks will ever be registered, release the consumers waiting for them
+      this.deepLinksRegistered$.next();
       // no need to register the links updater when the plugin is inaccessible. return early
       return;
     }
@@ -1003,6 +1040,13 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     } = await this.lazyApplicationLinks();
 
     registerDeepLinksUpdater(this.appUpdater$, solutionNavigationTree$);
+
+    // `appUpdater$` does not replay, this subscription is registered along with the updater so
+    // the first deepLinks registration cannot be missed by consumers that await it later.
+    const deepLinksSubscription = this.appUpdater$.subscribe(() => {
+      this.deepLinksRegistered$.next();
+      deepLinksSubscription.unsubscribe();
+    });
 
     const appLinksToUpdate$ = new BehaviorSubject<AppLinkItems>(initialAppLinks);
 

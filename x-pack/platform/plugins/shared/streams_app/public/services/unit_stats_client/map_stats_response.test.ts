@@ -1,0 +1,393 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { StreamsUnit } from '@kbn/streams-schema';
+import { streamsUnitStatsResponseSchema } from '@kbn/streams-schema';
+import { STATS_FIXTURE_RESPONSES } from './fixture_unit_stats_client';
+import type { StatsFixtureScenario } from './fixture_unit_stats_client';
+import { EMPTY_DESTINATION_FAILED, mapStatsResponse } from './map_stats_response';
+
+const destination = (id: string): StreamsUnit.StatsComponentRef => ({ kind: 'destination', id });
+const processor = (id: string): StreamsUnit.StatsComponentRef => ({ kind: 'processor', id });
+const source = (id: string): StreamsUnit.StatsComponentRef => ({ kind: 'source', id });
+
+const map = (scenario: StatsFixtureScenario, requested: StreamsUnit.StatsComponentRef[]) =>
+  mapStatsResponse(STATS_FIXTURE_RESPONSES[scenario], requested);
+
+const STANDARD_REQUEST = [
+  destination('es-prod'),
+  destination('es-dev'),
+  processor('uppercase-message'),
+];
+
+describe('stats fixtures', () => {
+  it.each(Object.entries(STATS_FIXTURE_RESPONSES))(
+    '%s parses with the response schema',
+    (_, response) => {
+      expect(() => streamsUnitStatsResponseSchema.parse(response)).not.toThrow();
+    }
+  );
+});
+
+describe('mapStatsResponse', () => {
+  it('maps data and keeps the window', () => {
+    const result = map('data', STANDARD_REQUEST);
+
+    expect(result.window).toEqual(STATS_FIXTURE_RESPONSES.data.meta.window);
+    expect(result.destinations['es-prod']).toMatchObject({
+      status: 'ready',
+      stats: {
+        eventsRate: 3700,
+        eventsTotal: 3330000,
+        failed: { total: { rate: 0, unit: '{item}', percentage: null } },
+        latencyAverage: 0.012,
+        series: { bucketMs: 300000 },
+      },
+    });
+    expect(result.destinations['es-prod'].stats.series.points).toHaveLength(3);
+    expect(result.destinations['es-prod'].error).toBeUndefined();
+  });
+
+  it('treats zero as data', () => {
+    const result = map('data', STANDARD_REQUEST);
+
+    expect(result.destinations['es-dev']).toMatchObject({
+      status: 'ready',
+      stats: { eventsRate: 0, eventsTotal: 0 },
+    });
+  });
+
+  it('maps the accepted rate of a source, and treats zero as data', () => {
+    const result = map('data', [source('otlp-input'), source('idle-input')]);
+
+    expect(result.sources['otlp-input']).toEqual({
+      status: 'ready',
+      stats: { acceptedRate: 3700 },
+    });
+    expect(result.sources['idle-input']).toEqual({ status: 'ready', stats: { acceptedRate: 0 } });
+  });
+
+  it('classifies a source with a null rate as no data', () => {
+    const result = map('noData', [source('otlp-input')]);
+
+    expect(result.sources['otlp-input']).toEqual({
+      status: 'noData',
+      stats: { acceptedRate: null },
+    });
+  });
+
+  it('maps every instance of a processor with its pipeline and route', () => {
+    const result = map('data', STANDARD_REQUEST);
+
+    expect(result.processors['uppercase-message']).toEqual({
+      status: 'ready',
+      stats: {
+        instances: [
+          {
+            pipelineId: 'main',
+            routeIndex: null,
+            eventsRate: 3700,
+            failedRate: null,
+            durationAverage: 0.008,
+          },
+          {
+            pipelineId: 'main',
+            routeIndex: 0,
+            eventsRate: 1200,
+            failedRate: null,
+            durationAverage: 0.0004,
+          },
+          {
+            pipelineId: 'main',
+            routeIndex: 1,
+            eventsRate: 2500,
+            failedRate: null,
+            durationAverage: null,
+          },
+        ],
+      },
+    });
+  });
+
+  it('classifies all-null destinations and a processor with no instances as no data', () => {
+    const result = map('noData', STANDARD_REQUEST);
+
+    expect(result.destinations['es-prod']).toMatchObject({
+      status: 'noData',
+      stats: {
+        eventsRate: null,
+        eventsTotal: null,
+        failed: EMPTY_DESTINATION_FAILED,
+        latencyAverage: null,
+      },
+    });
+    expect(result.destinations['es-dev'].status).toBe('noData');
+    expect(result.processors['uppercase-message']).toEqual({
+      status: 'noData',
+      stats: { instances: [] },
+    });
+  });
+
+  it('keeps data next to a component error', () => {
+    const result = map('partial', STANDARD_REQUEST);
+
+    expect(result.destinations['es-prod'].status).toBe('ready');
+    expect(result.destinations['es-dev']).toMatchObject({
+      status: 'error',
+      error: STATS_FIXTURE_RESPONSES.partial.components.destinations['es-dev'].error,
+    });
+    expect(result.processors['uppercase-message'].status).toBe('ready');
+  });
+
+  describe('failure stats of a destination', () => {
+    it('maps the total and both classes with their units, and the percentage as a number', () => {
+      const { stats } = map('authFailures', [destination('es-dev')]).destinations['es-dev'];
+
+      expect(stats.failed.total).toEqual({ rate: 2.4, unit: '{item}', percentage: 57.1 });
+      expect(stats.failed.authentication).toEqual({
+        rate: 0.5,
+        unit: '{item}',
+        percentage: 11.9,
+        breakdown: [],
+      });
+      expect(stats.failed.authorization).toEqual({
+        rate: 1.9,
+        unit: '{item}',
+        percentage: 45.2,
+        breakdown: [
+          {
+            collection: 'logs-generic.otel-default',
+            reason: 'security_exception',
+            rate: 1.1,
+            unit: '{item}',
+            percentage: 26.2,
+          },
+          {
+            collection: 'logs-nginx.access-default',
+            reason: 'security_exception',
+            rate: 0.5,
+            unit: '{item}',
+            percentage: 11.9,
+          },
+          {
+            collection: 'metrics-system.cpu-default',
+            reason: 'security_exception',
+            rate: 0.3,
+            unit: '{item}',
+            percentage: 7.1,
+          },
+        ],
+      });
+    });
+
+    it('keeps the unit of an S3 destination in requests, and a null collection', () => {
+      const { stats } = map('s3Failures', [destination('s3-test')]).destinations['s3-test'];
+
+      // The incoming rate stays in items. Only the failures are upload attempts.
+      expect(stats.eventsRate).toBe(0.28);
+      expect(stats.failed.total).toEqual({ rate: 0.44, unit: '{request}', percentage: 100 });
+      expect(stats.failed.authentication.breakdown).toEqual([
+        {
+          collection: null,
+          reason: 'SignatureDoesNotMatch',
+          rate: 0.44,
+          unit: '{request}',
+          percentage: 100,
+        },
+      ]);
+      expect(stats.failed.authorization).toEqual({
+        rate: 0,
+        unit: '{request}',
+        percentage: 0,
+        breakdown: [],
+      });
+    });
+
+    it('maps the delivery series with its unit and the window of the response, which it does not repeat', () => {
+      const { stats } = map('authFailures', [destination('es-dev')]).destinations['es-dev'];
+      const { window } = STATS_FIXTURE_RESPONSES.authFailures.meta;
+
+      expect(stats.failed.series).toEqual({
+        bucketMs: 30_000,
+        unit: '{item}',
+        window,
+        points: expect.any(Array),
+      });
+      const [first, ...rest] = stats.failed.series?.points ?? [];
+      expect(first).toEqual({
+        start: window.start,
+        total: 40,
+        failed: 0,
+        authentication: 0,
+        authorization: 0,
+      });
+      expect(rest.at(-1)).toEqual(
+        expect.objectContaining({ total: 40, authentication: 5, authorization: 18 })
+      );
+    });
+
+    it('keeps the unit of an S3 series in requests', () => {
+      const { stats } = map('s3Failures', [destination('s3-test')]).destinations['s3-test'];
+
+      expect(stats.failed.series?.unit).toBe('{request}');
+    });
+
+    it('has no series for a destination that the response sends none for', () => {
+      const { stats } = map('authFailures', [destination('es-prod')]).destinations['es-prod'];
+
+      expect(stats.failed.series).toBeUndefined();
+    });
+
+    it('keeps a rate and a percentage of 0 as values, and a null as no data', () => {
+      const { failed } = map('s3Failures', [destination('s3-test')]).destinations['s3-test'].stats;
+      const { failed: none } = map('noData', [destination('es-prod')]).destinations['es-prod']
+        .stats;
+
+      expect(failed.authorization.rate).toBe(0);
+      expect(failed.authorization.percentage).toBe(0);
+      expect(none.authentication.rate).toBeNull();
+      expect(none.authentication.percentage).toBeNull();
+    });
+
+    it('is ready with the failures and no error, so a refused destination is not an error', () => {
+      const result = map('authFailures', [destination('es-dev')]).destinations['es-dev'];
+
+      expect(result.status).toBe('ready');
+      expect(result.error).toBeUndefined();
+    });
+
+    it('keeps real values next to an error, with no failure rates', () => {
+      const result = map('partialFailure', [destination('es-dev')]).destinations['es-dev'];
+
+      expect(result).toMatchObject({
+        status: 'ready',
+        error: { code: 'error' },
+        stats: { eventsRate: 4.2, failed: { total: { rate: 2.4 } } },
+      });
+      expect(result.stats.failed.authentication).toEqual(EMPTY_DESTINATION_FAILED.authentication);
+    });
+  });
+
+  describe('a component with an error and values', () => {
+    const error = { code: 'error', reason: 'The stats query failed.' };
+    const { components } = STATS_FIXTURE_RESPONSES.data;
+    const withError = (id: 'es-prod' | 'es-dev') =>
+      mapStatsResponse(
+        {
+          ...STATS_FIXTURE_RESPONSES.data,
+          components: {
+            ...components,
+            destinations: {
+              ...components.destinations,
+              [id]: { ...components.destinations[id], error },
+            },
+          },
+        },
+        STANDARD_REQUEST
+      );
+
+    it('is ready, and keeps its error and its stats, when only a part of its stats failed', () => {
+      expect(withError('es-prod').destinations['es-prod']).toMatchObject({
+        status: 'ready',
+        error,
+        stats: { eventsRate: 3700, eventsTotal: 3330000, latencyAverage: 0.012 },
+      });
+    });
+
+    it('counts a rate of 0 as values', () => {
+      expect(withError('es-dev').destinations['es-dev']).toMatchObject({ status: 'ready', error });
+    });
+
+    it('does not touch a component with no error', () => {
+      expect(withError('es-prod').destinations['es-dev'].error).toBeUndefined();
+    });
+  });
+
+  it('sets the error on every component of a kind that failed, and keeps the other kind', () => {
+    const result = map('kindError', STANDARD_REQUEST);
+
+    expect(result.destinations['es-prod']).toMatchObject({
+      status: 'error',
+      error: { code: 'unavailable' },
+    });
+    expect(result.destinations['es-dev']).toMatchObject({
+      status: 'error',
+      error: { code: 'unavailable' },
+    });
+    expect(result.processors['uppercase-message'].status).toBe('ready');
+  });
+
+  it('sets the error of a source, and shows one that is not in the unit as no data', () => {
+    expect(map('kindError', [source('otlp-input')]).sources['otlp-input']).toMatchObject({
+      status: 'error',
+      error: { code: 'unavailable' },
+    });
+
+    const notFound = map('notFound', [source('otlp-staged')]).sources['otlp-staged'];
+
+    expect(notFound.status).toBe('noData');
+    expect(notFound.error).toBeUndefined();
+  });
+
+  it('shows a destination type that reports no metrics as no data, not as an error', () => {
+    const result = map('unsupportedDestination', [destination('s3-archive')]);
+
+    expect(result.destinations['s3-archive'].status).toBe('noData');
+    expect(result.destinations['s3-archive'].error).toBeUndefined();
+  });
+
+  it('shows a destination that is not in the persisted unit as no data, not as an error', () => {
+    const result = map('notFound', [destination('es-staged')]);
+
+    expect(result.destinations['es-staged'].status).toBe('noData');
+    expect(result.destinations['es-staged'].error).toBeUndefined();
+  });
+
+  it('shows a requested component that the response leaves out as no data', () => {
+    const result = map('data', [
+      destination('es-missing'),
+      processor('missing-processor'),
+      source('missing-source'),
+    ]);
+
+    expect(result.destinations['es-missing']).toMatchObject({
+      status: 'noData',
+      stats: {
+        eventsRate: null,
+        eventsTotal: null,
+        failed: EMPTY_DESTINATION_FAILED,
+        latencyAverage: null,
+      },
+    });
+    expect(result.processors['missing-processor']).toEqual({
+      status: 'noData',
+      stats: { instances: [] },
+    });
+    expect(result.sources['missing-source']).toEqual({
+      status: 'noData',
+      stats: { acceptedRate: null },
+    });
+  });
+
+  it('maps only the requested components', () => {
+    const result = map('data', [destination('es-prod')]);
+
+    expect(Object.keys(result.destinations)).toEqual(['es-prod']);
+    expect(result.processors).toEqual({});
+    expect(result.sources).toEqual({});
+  });
+
+  it('drops a component kind it does not know', () => {
+    // A kind added to the schema later must not break the nodes that exist today.
+    const unknownKind = { kind: 'index', id: 'logs-1' } as unknown as StreamsUnit.StatsComponentRef;
+
+    const result = map('data', [unknownKind, destination('es-prod')]);
+
+    expect(Object.keys(result.destinations)).toEqual(['es-prod']);
+    expect(result.processors).toEqual({});
+  });
+});

@@ -28,7 +28,7 @@ export const inlineStatsCommand = {
     docPreserving: true,
     hidden: false,
     preview: false,
-    description: i18n.translate('kbn-esql-language.esql.definitions.inlineStatsDoc', {
+    description: i18n.translate('esqlLanguage.esql.definitions.inlineStatsDoc', {
       defaultMessage:
         'Unlike STATS, INLINE STATS preserves all columns from the previous pipe and returns them together with the new aggregate columns.',
     }),

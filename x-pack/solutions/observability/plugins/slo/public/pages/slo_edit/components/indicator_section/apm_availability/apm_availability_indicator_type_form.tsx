@@ -9,7 +9,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiIconTip } from '@elastic/eui';
 import type { APMTransactionErrorRateIndicator } from '@kbn/slo-schema';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { useFormContext } from 'react-hook-form';
+import { useFormContext, useWatch } from 'react-hook-form';
 import { useApmDefaultValues } from '../apm_common/use_apm_default_values';
 import { DATA_VIEW_FIELD } from '../custom_common/index_selection';
 import { useCreateDataView } from '../../../../../hooks/use_create_data_view';
@@ -23,11 +23,11 @@ import { formatAllFilters } from '../../../helpers/format_filters';
 import { getGroupByCardinalityFilters } from '../apm_common/get_group_by_cardinality_filters';
 
 export function ApmAvailabilityIndicatorTypeForm() {
-  const { watch } = useFormContext<CreateSLOForm<APMTransactionErrorRateIndicator>>();
+  const { control } = useFormContext<CreateSLOForm<APMTransactionErrorRateIndicator>>();
   const {
     data: { metric: apmIndex },
   } = useFetchApmIndices();
-  const dataViewId = watch(DATA_VIEW_FIELD);
+  const dataViewId = useWatch({ control, name: DATA_VIEW_FIELD });
 
   const [
     serviceName = '',
@@ -35,13 +35,16 @@ export function ApmAvailabilityIndicatorTypeForm() {
     transactionType = '',
     transactionName = '',
     globalFilters,
-  ] = watch([
-    'indicator.params.service',
-    'indicator.params.environment',
-    'indicator.params.transactionType',
-    'indicator.params.transactionName',
-    'indicator.params.filter',
-  ]);
+  ] = useWatch({
+    control,
+    name: [
+      'indicator.params.service',
+      'indicator.params.environment',
+      'indicator.params.transactionType',
+      'indicator.params.transactionName',
+      'indicator.params.filter',
+    ],
+  });
   const indicatorParamsFilters = getGroupByCardinalityFilters({
     serviceName,
     environment,

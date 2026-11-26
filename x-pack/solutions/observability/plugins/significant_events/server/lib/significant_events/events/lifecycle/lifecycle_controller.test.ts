@@ -122,6 +122,7 @@ describe('requestedStatus', () => {
     ['an operator deactivating', DEACTIVATE, 'inactive'],
     ['an operator activating', { kind: 'operator', status: 'active' }, 'active'],
     ['a rule that no longer exists', { kind: 'rule_deleted' }, 'inactive'],
+    ['a recovery that timed out', { kind: 'recovery_timeout' }, 'inactive'],
     ['an assessment', assessment('breached'), 'active'],
   ])('is the status %s asks for', (_label, change, status) => {
     expect(requestedStatus(change)).toBe(status);
@@ -167,8 +168,13 @@ describe('decideLifecycle', () => {
         'no_data',
         RECOVERING,
       ],
-      ['does not open a new series on healthy members', undefined, 'recovered', NOT_A_BREACH],
-      ['does not open a new series on unjudged members', undefined, 'no_data', NOT_A_BREACH],
+      [
+        'does not open a series from healthy members: only evidence of an error is born',
+        undefined,
+        'recovered',
+        NOT_A_BREACH,
+      ],
+      ['opens a new series active when a member cannot be judged', undefined, 'no_data', ACTIVE],
       ['does not reopen a closed series on healthy members', 'inactive', 'recovered', NOT_A_BREACH],
       ['does not reopen a closed series on unjudged members', 'inactive', 'no_data', NOT_A_BREACH],
     ])('%s', (_label, status, outcome, expected) => {
@@ -212,6 +218,19 @@ describe('decideLifecycle', () => {
     });
   });
 
+  describe('recovery_timeout', () => {
+    it('closes a recovering series', () => {
+      expect(decide('recovering', { kind: 'recovery_timeout' })).toEqual(INACTIVE);
+    });
+
+    it.each<SignificantEventStatus | undefined>(['active', 'inactive', undefined])(
+      'leaves a %s series alone',
+      (status) => {
+        expect(decide(status, { kind: 'recovery_timeout' })).toEqual(ALREADY_IN_STATE);
+      }
+    );
+  });
+
   describe('invariants over every state and change', () => {
     const statuses: Array<SignificantEventStatus | undefined> = [
       undefined,
@@ -226,6 +245,7 @@ describe('decideLifecycle', () => {
       { kind: 'operator', status: 'active' },
       { kind: 'operator', status: 'inactive' },
       { kind: 'rule_deleted' },
+      { kind: 'recovery_timeout' },
     ];
     const everyCase = statuses.flatMap((status) =>
       inputs.map((change) => ({ status, change, decision: decide(status, change) }))
@@ -237,18 +257,18 @@ describe('decideLifecycle', () => {
       });
     });
 
-    it('enters recovering only from an assessment of an active series', () => {
+    it('enters recovering only from an assessment of an active or new series', () => {
       everyCase.forEach(({ status, change, decision }) => {
         if (decision.write && decision.status === 'recovering' && status !== 'recovering') {
           expect(change.kind).toBe('assessment');
-          expect(status).toBe('active');
+          expect(['active', undefined]).toContain(status);
         }
       });
     });
 
-    it('never lets an assessment close a series, and lets it leave recovering only back to active', () => {
+    it('never lets an assessment close a live series, and lets it leave recovering only back to active', () => {
       everyCase.forEach(({ status, change, decision }) => {
-        if (change.kind === 'assessment' && decision.write) {
+        if (change.kind === 'assessment' && decision.write && status !== undefined) {
           expect(decision.status).not.toBe('inactive');
           if (status === 'recovering') {
             expect(['recovering', 'active']).toContain(decision.status);
@@ -257,19 +277,31 @@ describe('decideLifecycle', () => {
       });
     });
 
-    it('never lets an assessment open or reopen a series unless it is breaching', () => {
+    it('never lets a non-breaching assessment reopen a closed series', () => {
       everyCase.forEach(({ status, change, decision }) => {
-        const notLive = status === undefined || status === 'inactive';
-        if (change.kind === 'assessment' && change.outcome !== 'breached' && notLive) {
+        if (
+          change.kind === 'assessment' &&
+          change.outcome !== 'breached' &&
+          status === 'inactive'
+        ) {
           expect(decision.write).toBe(false);
         }
       });
     });
 
-    it('closes a series only through an operator or a deleted rule', () => {
-      everyCase.forEach(({ change, decision }) => {
-        if (decision.write && decision.status === 'inactive') {
-          expect(['operator', 'rule_deleted']).toContain(change.kind);
+    it('closes a live series only through an operator, a deleted rule or a recovery timeout', () => {
+      everyCase.forEach(({ status, change, decision }) => {
+        const wasLive = status === 'active' || status === 'recovering';
+        if (wasLive && decision.write && decision.status === 'inactive') {
+          expect(['operator', 'rule_deleted', 'recovery_timeout']).toContain(change.kind);
+        }
+      });
+    });
+
+    it('never lets a recovery timeout write from anything but a recovering series', () => {
+      everyCase.forEach(({ status, change, decision }) => {
+        if (change.kind === 'recovery_timeout' && decision.write) {
+          expect(status).toBe('recovering');
         }
       });
     });

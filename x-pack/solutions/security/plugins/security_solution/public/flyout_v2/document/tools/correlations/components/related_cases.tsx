@@ -25,6 +25,7 @@ const EXPAND_PROPERTIES = {
   expandable: true,
   expandedOnFirstRender: true,
 };
+const urlParamOverride = { timeline: { isOpen: false } };
 
 const getColumns: (data: RelatedCase[]) => Array<EuiBasicTableColumn<RelatedCase>> = (data) => [
   {
@@ -37,7 +38,12 @@ const getColumns: (data: RelatedCase[]) => Array<EuiBasicTableColumn<RelatedCase
     ),
     render: (_: string, caseData: RelatedCase) => (
       <EuiToolTip content={caseData.title}>
-        <CaseDetailsLink detailName={caseData.id} title={caseData.title} openInNewTab={true}>
+        <CaseDetailsLink
+          detailName={caseData.id}
+          title={caseData.title}
+          openInNewTab={true}
+          override={urlParamOverride}
+        >
           {caseData.title}
           <EuiIcon
             type="external"

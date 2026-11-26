@@ -19,7 +19,13 @@ import { useQueryInspector } from '../../../../common/components/page/manage_que
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { buildHostNamesFilter } from '../../../../../common/search_strategy';
 import { useUiSetting, useKibana } from '../../../../common/lib/kibana';
-import { FLYOUT_ORIGIN, FLYOUT_TYPE, type FlyoutOrigin } from '../../../../common/lib/telemetry';
+import {
+  FLYOUT_ORIGIN,
+  FLYOUT_TYPE,
+  type FlyoutOrigin,
+  type GraphEntryPoint,
+} from '../../../../common/lib/telemetry';
+import { getGraphEntryPoint } from '../../../shared/utils/get_graph_entry_point';
 import type { EntityDetailsPath } from '../../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
 import {
   CspInsightLeftPanelSubTab,
@@ -37,7 +43,7 @@ import {
   getHeaderRiskLevel,
 } from '../../../../flyout/entity_details/shared/entity_store_risk_utils';
 import { useNewEntityAnalyticsPage } from '../../../../entity_analytics/hooks/use_new_entity_analytics_page';
-import { isEntityGroupView } from '../../../../flyout/entity_details/shared/entity_store_group_utils';
+import { isEntityGroupView } from '../../shared/utils/entity_store_group_utils';
 import {
   useEntityFromStore,
   type EntityStoreRecord,
@@ -49,13 +55,10 @@ import {
   type IdentityFields,
 } from '../../../../flyout/document_details/shared/utils';
 import { HOST_PANEL_RISK_SCORE_QUERY_ID } from './constants';
-import {
-  useEntityPanelTabs,
-  TABLE_TAB_ID,
-} from '../../../../flyout/entity_details/shared/hooks/use_entity_panel_tabs';
-import { EntityPanelHeaderTabs } from '../../../../flyout/entity_details/shared/components/entity_panel_tabs';
-import { EntityStoreTableTab } from '../../../../flyout/entity_details/shared/components/entity_store_table_tab';
-import { EntitySummaryGrid } from '../../../../flyout/entity_details/shared/components/entity_summary_grid';
+import { useEntityPanelTabs, TABLE_TAB_ID } from '../../shared/hooks/use_entity_panel_tabs';
+import { EntityPanelHeaderTabs } from '../../shared/components/entity_panel_tabs';
+import { EntityStoreTableTab } from '../../shared/components/entity_store_table_tab';
+import { EntitySummaryGrid } from '../../shared/components/entity_summary_grid';
 import type { EntityViewMode } from '../../../../../common/entity_analytics/entity_store/resolution_group';
 
 export interface HostProps {
@@ -88,6 +91,11 @@ export interface HostProps {
    * Stable identifier for the host panel context (defaults to `scopeId` or a static fallback).
    */
   contextID?: string;
+  /**
+   * Where the graph reached from this flyout was opened from (e.g. the AI chat attachment). Used by
+   * the graph preview and the graph view it opens; defaults to the entity flyout entry point.
+   */
+  graphEntryPoint?: GraphEntryPoint;
 }
 
 const FIRST_RECORD_PAGINATION = {
@@ -109,6 +117,7 @@ export const Host: FC<HostProps> = memo(function Host({
   mode: requestedMode = 'single',
   scopeId = '',
   contextID,
+  graphEntryPoint,
 }) {
   const { services } = useKibana();
   const { uiSettings } = services;
@@ -143,6 +152,7 @@ export const Host: FC<HostProps> = memo(function Host({
   const assetInventoryEnabled = uiSettings.get(ENABLE_ASSET_INVENTORY_SETTING, true);
   const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2);
 
+  const entryPoint = graphEntryPoint ?? getGraphEntryPoint({ mode: 'entity' });
   const safeContextID = contextID ?? scopeId ?? 'host-panel';
   const { setQuery, deleteQuery, isInitializing } = useGlobalTime();
 
@@ -269,6 +279,7 @@ export const Host: FC<HostProps> = memo(function Host({
 
   const { tabs, selectedTabId, setSelectedTabId } = useEntityPanelTabs({
     entityRecord: observedHost.entityRecord ?? null,
+    isGroupView,
   });
 
   const tabsNode = tabs ? (
@@ -335,6 +346,7 @@ export const Host: FC<HostProps> = memo(function Host({
             entityType: EntityType.host,
             entityName: hostName,
             entityId: entityStoreEntityId,
+            scopeId,
             onShowEntity: onShowHost,
             title: hostName,
             subTab: path.subTab as RiskScoreLeftPanelSubTab | undefined,
@@ -349,6 +361,7 @@ export const Host: FC<HostProps> = memo(function Host({
             value: hostName,
             entityId: entityStoreEntityId,
             mode,
+            scopeId,
             onOpenEntity: onShowHost,
             title: hostName,
             origin: FLYOUT_ORIGIN.ANOMALIES_SECTION,
@@ -398,6 +411,7 @@ export const Host: FC<HostProps> = memo(function Host({
             title: hostName,
             flyoutType: FLYOUT_TYPE.HOST,
             origin: FLYOUT_ORIGIN.VISUALIZATIONS_GRAPH,
+            entryPoint,
           });
         case EntityDetailsLeftPanelTab.RESOLUTION_GROUP:
           if (!entityStoreEntityId) return;
@@ -430,6 +444,7 @@ export const Host: FC<HostProps> = memo(function Host({
       onShowHost,
       onShowRelatedEntityFromGraph,
       onShowRelatedEntityFromResolution,
+      entryPoint,
     ]
   );
 
@@ -462,6 +477,7 @@ export const Host: FC<HostProps> = memo(function Host({
             onCriticalitySave={onCriticalitySave}
           />
         )}
+        {isGroupView && !tabs && <EuiSpacer size="l" />}
         {tabsNode}
         {tabs && <EuiSpacer size="l" />}
         {tabs && selectedTabId === TABLE_TAB_ID && observedHost.entityRecord ? (
@@ -489,6 +505,7 @@ export const Host: FC<HostProps> = memo(function Host({
             hideHeaderIcons
             riskScoreQueryId={HOST_PANEL_RISK_SCORE_QUERY_ID}
             isGroupView={isGroupView}
+            graphEntryPoint={entryPoint}
           />
         )}
       </EuiFlyoutBody>

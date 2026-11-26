@@ -38,6 +38,29 @@ describe('confirmedEvidencesEvaluator', () => {
     expect(result.score).toBe(0);
   });
 
+  it('accepts an open event that confirms nothing when it is rated low, whatever its confidence', async () => {
+    const events = [
+      {
+        status: 'active',
+        severity: 'low',
+        confidence: 0.9,
+        signals: [{ type: 'detection', description: 'No rows.', verdict: 'inconclusive' }],
+      },
+    ];
+    expect((await evaluate(events, [esqlStep])).score).toBe(1);
+  });
+
+  it('scores 0 for an unconfirmed open event rated above low', async () => {
+    const events = [
+      {
+        status: 'active',
+        severity: 'medium',
+        signals: [{ type: 'detection', description: 'No rows.', verdict: 'inconclusive' }],
+      },
+    ];
+    expect((await evaluate(events, [esqlStep])).score).toBe(0);
+  });
+
   it('is unavailable when dismissed', async () => {
     const result = await evaluate([{ status: 'inactive', severity: 'low' }], [esqlStep]);
     expect(result.score).toBeNull();

@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { distinctUntilChanged, type Subscription } from 'rxjs';
 import type { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import type { Plugin as ExpressionsPublicPlugin } from '@kbn/expressions-plugin/public';
 import type { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
@@ -23,6 +22,7 @@ import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import type { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import type { SavedObjectTaggingOssPluginStart } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import {
   ADD_CANVAS_ELEMENT_TRIGGER,
   ADD_PANEL_TRIGGER,
@@ -45,8 +45,8 @@ import type { ConfigSchema } from '../server/config';
 
 import { getVegaInspectorView } from './vega_inspector/vega_inspector';
 import { getServiceSettingsLazy } from './vega_view/vega_map_view/service_settings/get_service_settings_lazy';
-import { VEGA_EMBEDDABLE_TYPE, VEGA_STANDALONE_EMBEDDABLE_FLAG } from '../common/constants';
-import { ADD_VEGA_EMBEDDABLE_ACTION_ID, ADD_VEGA_PANEL_ACTION_ID } from './constants';
+import { VEGA_EMBEDDABLE_TYPE } from '../common/constants';
+import { ADD_VEGA_EMBEDDABLE_ACTION_ID } from './constants';
 
 /** @internal */
 export interface VegaVisualizationDependencies {
@@ -75,6 +75,7 @@ export interface VegaPluginStartDependencies {
   dataViews: DataViewsPublicPluginStart;
   uiActions: UiActionsStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
+  savedObjectsTaggingOss?: SavedObjectTaggingOssPluginStart;
   usageCollection: UsageCollectionStart;
   inspector: InspectorStart;
 }
@@ -82,7 +83,6 @@ export interface VegaPluginStartDependencies {
 /** @internal */
 export class VegaPlugin implements Plugin<void, void> {
   initializerContext: PluginInitializerContext<ConfigSchema>;
-  private standaloneEmbeddableFlagSubscription?: Subscription;
 
   constructor(initializerContext: PluginInitializerContext<ConfigSchema>) {
     this.initializerContext = initializerContext;
@@ -106,6 +106,15 @@ export class VegaPlugin implements Plugin<void, void> {
 
     inspector.registerView(getVegaInspectorView({ uiSettings: core.uiSettings }));
 
+    // Resolves when the editor closes.
+    const openLibraryEditor = async (id: string) => {
+      const [[coreStart, startDeps], { openVegaLibraryEditor }] = await Promise.all([
+        core.getStartServices(),
+        import('./library/open_vega_library_editor'),
+      ]);
+      await openVegaLibraryEditor({ core: coreStart, deps: startDeps, id });
+    };
+
     visualizations.createBaseVisualizationAsync('vega', async () => {
       const [[, startPlugins], { vegaVisType, createVegaFn, getVegaVisRenderer }] =
         await Promise.all([core.getStartServices(), import('./async_module')]);
@@ -117,14 +126,21 @@ export class VegaPlugin implements Plugin<void, void> {
     });
 
     embeddable.registerEmbeddablePublicDefinition(VEGA_EMBEDDABLE_TYPE, async () => {
-      const [startCore, startDeps] = await core.getStartServices();
-      const { vegaEmbeddableFactory } = await import('./embeddable/vega_embeddable');
+      const [[startCore, startDeps], { vegaEmbeddableFactory }] = await Promise.all([
+        core.getStartServices(),
+        import('./embeddable/vega_embeddable'),
+      ]);
       return vegaEmbeddableFactory(startCore, {
         uiActions: startDeps.uiActions,
         SearchBar: startDeps.unifiedSearch.ui.SearchBar,
         visualizationDependencies,
+        libraryEditorDependencies: startDeps,
       });
     });
+
+    void import('./library/register_vega_library').then(({ registerVegaLibrary }) =>
+      registerVegaLibrary({ visualizations, embeddable, openLibraryEditor })
+    );
   }
 
   public start(core: CoreStart, deps: VegaPluginStartDependencies) {
@@ -137,38 +153,15 @@ export class VegaPlugin implements Plugin<void, void> {
     setThemeService(core.theme);
     setUsageCollectionStart(deps.usageCollection);
 
-    deps.uiActions.registerActionAsync(ADD_VEGA_PANEL_ACTION_ID, async () => {
-      const { getAddVegaPanelAction } = await import('./add_vega_panel_action');
-      return getAddVegaPanelAction(deps);
-    });
-
-    // The embeddable definition is always registered (see setup) so existing Vega panels keep
-    // rendering even after a flag rollback.
     deps.uiActions.registerActionAsync(ADD_VEGA_EMBEDDABLE_ACTION_ID, async () => {
       const { getAddVegaEmbeddableAction } = await import(
         './embeddable/add_vega_embeddable_action'
       );
       return getAddVegaEmbeddableAction(core);
     });
-
-    // The feature flag swaps both Dashboard and Canvas from legacy Visualize action to the
-    // standalone embeddable action.
-    this.standaloneEmbeddableFlagSubscription = core.featureFlags
-      .getBooleanValue$(VEGA_STANDALONE_EMBEDDABLE_FLAG, false)
-      .pipe(distinctUntilChanged())
-      .subscribe((useEmbeddableAction) => {
-        const [actionToAttach, actionToDetach] = useEmbeddableAction
-          ? [ADD_VEGA_EMBEDDABLE_ACTION_ID, ADD_VEGA_PANEL_ACTION_ID]
-          : [ADD_VEGA_PANEL_ACTION_ID, ADD_VEGA_EMBEDDABLE_ACTION_ID];
-
-        for (const trigger of [ADD_PANEL_TRIGGER, ADD_CANVAS_ELEMENT_TRIGGER]) {
-          deps.uiActions.attachAction(trigger, actionToAttach);
-          deps.uiActions.detachAction(trigger, actionToDetach);
-        }
-      });
+    deps.uiActions.attachAction(ADD_PANEL_TRIGGER, ADD_VEGA_EMBEDDABLE_ACTION_ID);
+    deps.uiActions.attachAction(ADD_CANVAS_ELEMENT_TRIGGER, ADD_VEGA_EMBEDDABLE_ACTION_ID);
   }
 
-  public stop() {
-    this.standaloneEmbeddableFlagSubscription?.unsubscribe();
-  }
+  public stop() {}
 }

@@ -47,9 +47,16 @@ import {
   FIT_VIEW_DEFER_MS,
   MIN_ZOOM,
   MAX_ZOOM,
+  OPENED_GROUP_MAX_ZOOM,
 } from './constants';
+import { findElementByDataId } from './find_element_by_data_id';
 import { getServiceMapViewTarget } from './get_service_map_view_target';
+import type { SwitchedGroup } from './get_switched_group';
+import { getSwitchedGroup } from './get_switched_group';
 import { ServiceNode } from '../../shared/service_map/service_node';
+import { ServiceGroupNode } from '../../shared/service_map/service_group_node';
+import { ServiceGroupBoxNode } from '../../shared/service_map/service_group_box_node';
+import { ServiceMapGroupActionsProvider } from '../../shared/service_map/service_map_group_actions_context';
 import { DependencyNode } from '../../shared/service_map/dependency_node';
 import { GroupedResourcesNode } from '../../shared/service_map/grouped_resources_node';
 import { ServiceMapEdge } from './service_map_edge';
@@ -57,6 +64,7 @@ import { useEdgeHighlighting } from './use_edge_highlighting';
 import { useReducedMotion } from './use_reduced_motion';
 import { useKeyboardNavigation } from './use_keyboard_navigation';
 import { MapPopover } from './popover';
+import { ServiceMapGroupingCountLine } from './service_map_grouping_count_line';
 import { ServiceMapMinimap } from './service_map_minimap';
 import {
   DEFAULT_SERVICE_MAP_VIEW_FILTERS,
@@ -84,6 +92,8 @@ import type { Environment } from '../../../../common/environment_rt';
 import { isEnvironmentDefined } from '../../../../common/environment_filter_values';
 import {
   isServiceNode,
+  isServiceGroupNode,
+  isServiceGroupBoxNode,
   type ServiceMapNode,
   type ServiceNodeData,
   type ServiceMapEdge as ServiceMapEdgeType,
@@ -94,14 +104,23 @@ import { SERVICE_FLYOUT_SOURCE_SERVICE_MAP } from '../../shared/service_flyout/c
 import type { ServiceFlyoutOptions } from '../../shared/service_flyout/types';
 import { useServiceMapFlyoutProps } from './use_service_map_flyout_props';
 import { ServiceMapDiagnosticButton } from './service_map_diagnostic_button';
+import { RequestFlyout } from '../../shared/request_flyout';
+import { useServiceMapEdgeFlyoutProps } from './use_service_map_edge_flyout_props';
 
 type ServiceMapServiceNode = Node<ServiceNodeData>;
 
 const nodeTypes: NodeTypes = {
   service: ServiceNode,
+  serviceGroup: ServiceGroupNode,
+  serviceGroupBox: ServiceGroupBoxNode,
   dependency: DependencyNode,
   groupedResources: GroupedResourcesNode,
 };
+
+/** Dependency / resource popovers only: service groups open or close in place instead. */
+function shouldOpenNodePopover(node: ServiceMapNode): boolean {
+  return !isServiceNode(node) && !isServiceGroupNode(node) && !isServiceGroupBoxNode(node);
+}
 
 const edgeTypes: EdgeTypes = {
   default: ServiceMapEdge,
@@ -161,6 +180,10 @@ interface GraphProps {
    */
   rangeFrom?: string;
   rangeTo?: string;
+  /** Closed-groups count line rendered as a ReactFlow Panel overlay. */
+  groupingCountLine?: string;
+  onOpenGroup?: (groupId: string) => void;
+  onCloseGroup?: (groupId: string) => void;
 }
 
 function GraphInner({
@@ -190,6 +213,9 @@ function GraphInner({
   serviceGroupId,
   rangeFrom,
   rangeTo,
+  groupingCountLine,
+  onOpenGroup,
+  onCloseGroup,
 }: GraphProps) {
   const { services } = useKibana<ApmPluginStartDeps & ApmServices>();
   const { telemetry } = services;
@@ -200,7 +226,7 @@ function GraphInner({
     [observabilityAgentBuilder]
   );
   const { euiTheme } = useEuiTheme();
-  const { fitView, zoomIn, zoomOut, setCenter, getNodes, getNodesBounds } =
+  const { fitView, zoomIn, zoomOut, setCenter, getNodes, getNodesBounds, getViewport } =
     useReactFlow<ServiceMapNode>();
   const viewportWidth = useReactFlowStore((state) => state.width);
   const viewportHeight = useReactFlowStore((state) => state.height);
@@ -216,9 +242,10 @@ function GraphInner({
     start,
     end,
   });
-  const [selectedEdgeForPopover, setSelectedEdgeForPopover] = useState<ServiceMapEdgeType | null>(
+  const [selectedEdgeForFlyout, setSelectedEdgeForFlyout] = useState<ServiceMapEdgeType | null>(
     null
   );
+  const edgeFlyoutConnection = useServiceMapEdgeFlyoutProps({ selectedEdgeForFlyout });
   const serviceMapId = useGeneratedHtmlId({ prefix: 'serviceMap' });
   const mapRegionRef = useRef<HTMLDivElement | null>(null);
 
@@ -291,8 +318,8 @@ function GraphInner({
   // Track the current selected node for use in layout effect without triggering re-layout
   const selectedNodeIdRef = useRef<string | null>(null);
   selectedNodeIdRef.current = selectedNodeId;
-  const selectedEdgeForPopoverRef = useRef<string | null>(null);
-  selectedEdgeForPopoverRef.current = selectedEdgeForPopover?.id ?? null;
+  const selectedEdgeForFlyoutRef = useRef<string | null>(null);
+  selectedEdgeForFlyoutRef.current = selectedEdgeForFlyout?.id ?? null;
   const selectedServiceNodeForFlyoutRef = useRef<ServiceMapServiceNode | null>(null);
   selectedServiceNodeForFlyoutRef.current = selectedServiceNodeForFlyout;
 
@@ -345,6 +372,10 @@ function GraphInner({
   // The first time nodes appear we place the viewport without animation to avoid the visible
   // "hunt for center" caused by multiple animated fits on mount. Subsequent fits animate.
   const hasPerformedInitialFitRef = useRef(false);
+  // Whether each group was closed or open at the last fit, to tell when one was opened or closed.
+  const fitGroupTypesRef = useRef(new Map<string, string>());
+  // The group that was opened or closed and that the view has not moved to yet.
+  const pendingGroupFitRef = useRef<SwitchedGroup | undefined>(undefined);
 
   // EBT + console fire once per failed layout computation (each useMemo re-run that throws),
   // not strictly once per page visit—intentional for measuring failure frequency.
@@ -378,16 +409,35 @@ function GraphInner({
     onDagreLayoutFailure,
   });
 
+  const highlightedNodeIds = useMemo(() => {
+    if (!highlightedServiceNames?.length) {
+      return undefined;
+    }
+    const selected = new Set(highlightedServiceNames);
+    const ids = new Set<string>();
+    for (const node of nodesAfterFilters) {
+      if (isServiceNode(node) && selected.has(node.id)) {
+        ids.add(node.id);
+      } else if (
+        isServiceGroupNode(node) &&
+        node.data.memberServiceIds.some((memberId) => selected.has(memberId))
+      ) {
+        ids.add(node.id);
+      }
+    }
+    return ids;
+  }, [nodesAfterFilters, highlightedServiceNames]);
+
   const nodesWithContextHighlight = useMemo(
     () =>
       nodesAfterFilters.map((n) => {
-        if (!isServiceNode(n)) {
+        if (!isServiceNode(n) && !isServiceGroupNode(n)) {
           return n;
         }
-        const contextHighlight = Boolean(highlightedServiceNames?.includes(n.id));
+        const contextHighlight = Boolean(highlightedNodeIds?.has(n.id));
         return { ...n, data: { ...n.data, contextHighlight } };
       }),
-    [nodesAfterFilters, highlightedServiceNames]
+    [nodesAfterFilters, highlightedNodeIds]
   );
 
   const [nodes, setNodes, onNodesChange] = useNodesState<ServiceMapNode>(nodesWithContextHighlight);
@@ -397,28 +447,64 @@ function GraphInner({
     setNodes(nodesWithContextHighlight);
 
     const highlightedEdges = applyEdgeHighlighting(edgesAfterFilters, {
-      selectedNodeId: selectedEdgeForPopoverRef.current ? null : selectedNodeIdRef.current,
-      selectedEdgeId: selectedEdgeForPopoverRef.current,
+      selectedNodeId: selectedEdgeForFlyoutRef.current ? null : selectedNodeIdRef.current,
+      selectedEdgeId: selectedEdgeForFlyoutRef.current,
     });
 
     const edgesWithContextHighlight =
-      highlightedServiceNames && highlightedServiceNames.length > 0
+      highlightedNodeIds && highlightedNodeIds.size > 0
         ? highlightedEdges.map((edge) => ({
             ...edge,
             data: {
               ...edge.data,
-              sourceContextHighlight: highlightedServiceNames.includes(edge.source),
-              targetContextHighlight: highlightedServiceNames.includes(edge.target),
+              sourceContextHighlight: highlightedNodeIds.has(edge.source),
+              targetContextHighlight: highlightedNodeIds.has(edge.target),
             },
           }))
         : highlightedEdges;
 
     setEdges(edgesWithContextHighlight as ServiceMapEdgeType[]);
 
+    // Opening or closing a group re-lays out the whole map. Fitting all of it would shrink the group
+    // that was just opened to a few pixels on a big map, so the view follows that group instead.
+    const { currentTypes, switchedGroup: newlySwitchedGroup } = getSwitchedGroup(
+      fitGroupTypesRef.current,
+      nodesWithContextHighlight
+    );
+    fitGroupTypesRef.current = currentTypes;
+    // Kept until the view has moved: if this effect runs again before the timer below does, that
+    // run's timer takes over, and it has to frame the group too, not fit the whole map.
+    if (newlySwitchedGroup) {
+      pendingGroupFitRef.current = newlySwitchedGroup;
+    }
+
     if (nodesAfterFilters.length > 0) {
       const isInitialFit = !hasPerformedInitialFitRef.current;
       hasPerformedInitialFitRef.current = true;
-      const timer = setTimeout(() => handleFitView(!isInitialFit), FIT_VIEW_DEFER_MS);
+      const timer = setTimeout(() => {
+        const switchedGroup = pendingGroupFitRef.current;
+        pendingGroupFitRef.current = undefined;
+        // Only a group that is shown: React Flow leaves hidden nodes out of the fit, and a filter can
+        // hide the group before this runs, which would leave the view where it was.
+        if (
+          !switchedGroup ||
+          !nodesWithContextHighlight.some(({ id, hidden }) => id === switchedGroup.id && !hidden)
+        ) {
+          handleFitView(!isInitialFit);
+          return;
+        }
+        // An opened group fills the view, at a readable size; a closed one is centred at the zoom
+        // the user is at, as a single node would otherwise be zoomed in on.
+        const { zoom } = getViewport();
+        fitView({
+          nodes: [{ id: switchedGroup.id }],
+          padding: FIT_VIEW_PADDING,
+          duration: getAnimationDuration(FIT_VIEW_DURATION),
+          ...(switchedGroup.isOpened
+            ? { maxZoom: OPENED_GROUP_MAX_ZOOM }
+            : { minZoom: zoom, maxZoom: zoom }),
+        });
+      }, FIT_VIEW_DEFER_MS);
       return () => clearTimeout(timer);
     }
   }, [
@@ -427,13 +513,24 @@ function GraphInner({
     setNodes,
     setEdges,
     handleFitView,
+    fitView,
+    getViewport,
+    getAnimationDuration,
     applyEdgeHighlighting,
     nodesAfterFilters.length,
-    highlightedServiceNames,
+    highlightedNodeIds,
   ]);
 
   const handleNodeClick: NodeMouseHandler<ServiceMapNode> = useCallback(
     (_, node) => {
+      // The box of an open group is only a frame: it closes from its button or the keyboard.
+      if (isServiceGroupBoxNode(node)) {
+        return;
+      }
+      if (onOpenGroup && isServiceGroupNode(node)) {
+        onOpenGroup(node.id);
+        return;
+      }
       // Use ref so toggle logic always matches last committed selection without stale closure issues,
       // and keep this callback stable for React Flow.
       const newSelectedId = selectedNodeIdRef.current === node.id ? null : node.id;
@@ -444,19 +541,19 @@ function GraphInner({
           selectedEdgeId: null,
         })
       );
-      setSelectedNodeForPopover(newSelectedId && !isServiceNode(node) ? node : null);
+      setSelectedNodeForPopover(newSelectedId && shouldOpenNodePopover(node) ? node : null);
       setSelectedServiceNodeForFlyout(newSelectedId && isServiceNode(node) ? node : null);
-      setSelectedEdgeForPopover(null);
+      setSelectedEdgeForFlyout(null);
     },
-    [setEdges, applyEdgeHighlighting]
+    [setEdges, applyEdgeHighlighting, onOpenGroup]
   );
   const handleEdgeClick: EdgeMouseHandler<ServiceMapEdgeType> = useCallback(
     (_, edge) => {
       setSelectedNodeId(null);
       setSelectedNodeForPopover(null);
       setSelectedServiceNodeForFlyout(null);
-      const newSelectedEdge = selectedEdgeForPopover?.id === edge.id ? null : edge;
-      setSelectedEdgeForPopover(newSelectedEdge);
+      const newSelectedEdge = selectedEdgeForFlyout?.id === edge.id ? null : edge;
+      setSelectedEdgeForFlyout(newSelectedEdge);
       setEdges((currentEdges) =>
         applyEdgeHighlighting(currentEdges, {
           selectedNodeId: null,
@@ -464,16 +561,18 @@ function GraphInner({
         })
       );
     },
-    [selectedEdgeForPopover, setEdges, applyEdgeHighlighting]
+    [selectedEdgeForFlyout, setEdges, applyEdgeHighlighting]
   );
 
   const handlePaneClick = useCallback(() => {
+    // Pane clicks don't close the service flyout or the edge flyout: both survive map interaction.
     if (selectedServiceNodeForFlyoutRef.current) return;
+    if (selectedEdgeForFlyoutRef.current) return;
 
     setSelectedNodeId(null);
     setSelectedNodeForPopover(null);
     setSelectedServiceNodeForFlyout(null);
-    setSelectedEdgeForPopover(null);
+    setSelectedEdgeForFlyout(null);
     setNodes((currentNodes) =>
       currentNodes.map((n) => ({
         ...n,
@@ -487,7 +586,7 @@ function GraphInner({
     setSelectedNodeId(null);
     setSelectedNodeForPopover(null);
     setSelectedServiceNodeForFlyout(null);
-    setSelectedEdgeForPopover(null);
+    setSelectedEdgeForFlyout(null);
     setNodes((currentNodes) =>
       currentNodes.map((n) => ({
         ...n,
@@ -497,6 +596,18 @@ function GraphInner({
     setEdges((currentEdges) => applyEdgeHighlighting(currentEdges, null));
   }, [setNodes, setEdges, applyEdgeHighlighting]);
 
+  // A selected node that is gone, such as a member of a group that was closed, takes with it
+  // whatever was open for it. Not while the map is empty, e.g. when it reloads.
+  useEffect(() => {
+    if (
+      selectedNodeId &&
+      nodesAfterFilters.length > 0 &&
+      !nodesAfterFilters.some((n) => n.id === selectedNodeId)
+    ) {
+      handlePopoverClose();
+    }
+  }, [nodesAfterFilters, selectedNodeId, handlePopoverClose]);
+
   const flyoutSource = SERVICE_FLYOUT_SOURCE_SERVICE_MAP;
 
   useEffect(() => {
@@ -504,6 +615,32 @@ function GraphInner({
       handlePopoverClose();
     }
   }, [nodesAfterFilters, selectedNodeId, handlePopoverClose]);
+
+  // An edge that cannot open a flyout is not left selected.
+  useEffect(() => {
+    if (selectedEdgeForFlyout && !edgeFlyoutConnection) {
+      handlePopoverClose();
+    }
+  }, [selectedEdgeForFlyout, edgeFlyoutConnection, handlePopoverClose]);
+
+  // Close the edge flyout when the source or the target of its edge is filtered out, or the edge is
+  // gone, such as a call inside a group that was closed. Not while the map is empty, e.g. when it
+  // reloads.
+  useEffect(() => {
+    if (!selectedEdgeForFlyout) return;
+    const { id, source, target } = selectedEdgeForFlyout;
+    const isHidden = nodesAfterFilters.some(
+      (n) => (n.id === source || n.id === target) && n.hidden
+    );
+    const isGone =
+      nodesAfterFilters.length > 0 && !edgesAfterFilters.some((edge) => edge.id === id);
+    if (isHidden || isGone) handlePopoverClose();
+  }, [nodesAfterFilters, edgesAfterFilters, selectedEdgeForFlyout, handlePopoverClose]);
+
+  const requestFlyoutDeps = useMemo(
+    () => ({ core, share, lens, dataViews }),
+    [core, share, lens, dataViews]
+  );
 
   useEffect(() => {
     // Find-in-page (and its Cmd/Ctrl+K shortcut) only exists in the standalone view; when
@@ -544,19 +681,29 @@ function GraphInner({
   }, [isEmbedded]);
 
   const handleDragStart = useCallback(() => {
-    if (selectedNodeForPopover || selectedEdgeForPopover) {
+    // Only the node popover closes on drag: the flyouts survive panning.
+    if (selectedNodeForPopover) {
       handlePopoverClose();
     }
-  }, [selectedNodeForPopover, selectedEdgeForPopover, handlePopoverClose]);
+  }, [selectedNodeForPopover, handlePopoverClose]);
 
   // Handle node selection from keyboard navigation
   const handleKeyboardNodeSelect = useCallback(
     (node: ServiceMapNode | null) => {
+      // Enter / Space on a group opens it, and on the box of an open group closes it.
+      if (node && onCloseGroup && isServiceGroupBoxNode(node)) {
+        onCloseGroup(node.id);
+        return;
+      }
+      if (node && onOpenGroup && isServiceGroupNode(node)) {
+        onOpenGroup(node.id);
+        return;
+      }
       if (node) {
         setSelectedNodeId(node.id);
-        setSelectedNodeForPopover(!isServiceNode(node) ? node : null);
+        setSelectedNodeForPopover(shouldOpenNodePopover(node) ? node : null);
         setSelectedServiceNodeForFlyout(isServiceNode(node) ? node : null);
-        setSelectedEdgeForPopover(null);
+        setSelectedEdgeForFlyout(null);
         setEdges((currentEdges) =>
           applyEdgeHighlighting(currentEdges, {
             selectedNodeId: node.id,
@@ -567,7 +714,7 @@ function GraphInner({
         handlePopoverClose();
       }
     },
-    [setEdges, applyEdgeHighlighting, handlePopoverClose]
+    [setEdges, applyEdgeHighlighting, handlePopoverClose, onOpenGroup, onCloseGroup]
   );
 
   // Handle edge selection from keyboard navigation
@@ -577,7 +724,7 @@ function GraphInner({
         setSelectedNodeId(null);
         setSelectedNodeForPopover(null);
         setSelectedServiceNodeForFlyout(null);
-        setSelectedEdgeForPopover(edge);
+        setSelectedEdgeForFlyout(edge);
         setEdges((currentEdges) =>
           applyEdgeHighlighting(currentEdges, {
             selectedNodeId: null,
@@ -592,21 +739,50 @@ function GraphInner({
   );
 
   // Use keyboard navigation hook for accessibility
-  const { screenReaderAnnouncement } = useKeyboardNavigation({
+  const { screenReaderAnnouncement, announce } = useKeyboardNavigation({
     nodes,
     edges,
     selectedNodeId,
     selectedNodeForPopover,
-    selectedEdgeForPopover,
+    selectedEdgeForFlyout,
     onNodeSelect: handleKeyboardNodeSelect,
     onEdgeSelect: handleKeyboardEdgeSelect,
     onPopoverClose: handlePopoverClose,
     isInteractive,
   });
 
+  // A group keeps its id when it opens or closes, and React Flow keeps the element of a node with the
+  // same id, but the button or shape inside it that had the focus is replaced and the focus would be
+  // lost with it. So when a group switches between closed and open, the focus moves to its element.
+  // It is announced here, from the state that was committed, so it is also for a group opened with
+  // the pointer or closed with the button of its box, and not only for the keys.
+  const announcedGroupTypesRef = useRef(new Map<string, string>());
+  useEffect(() => {
+    const { currentTypes, switchedGroup } = getSwitchedGroup(announcedGroupTypesRef.current, nodes);
+    announcedGroupTypesRef.current = currentTypes;
+
+    if (!switchedGroup) {
+      return;
+    }
+    const { id, label: groupLabel, isOpened } = switchedGroup;
+    announce(
+      isOpened
+        ? i18n.translate('xpack.apm.serviceMap.groupOpened', {
+            defaultMessage: 'Opened group {groupLabel}. Press Enter or Escape on it to close.',
+            values: { groupLabel },
+          })
+        : i18n.translate('xpack.apm.serviceMap.groupClosed', {
+            defaultMessage: 'Closed group {groupLabel}.',
+            values: { groupLabel },
+          })
+    );
+    findElementByDataId(mapRegionRef.current, id)?.focus();
+  }, [nodes, announce]);
+
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
-      if (e.key === keys.ESCAPE && isFullscreen && onToggleFullscreen) {
+      // Not when something else took the Escape, such as closing an open group
+      if (e.key === keys.ESCAPE && !e.defaultPrevented && isFullscreen && onToggleFullscreen) {
         e.preventDefault();
         onToggleFullscreen();
       }
@@ -713,10 +889,19 @@ function GraphInner({
       'This is an interactive service map showing application services and their dependencies. ' +
       'Use Tab to navigate between service nodes. Use Arrow keys to move between adjacent nodes. ' +
       'Press Enter or Space to select a node and view its details including connections. ' +
-      'Press Escape to close the details popover. ' +
+      'Press Escape to close the details panel. ' +
       'When focus is in the map region or on the page background (no text field focused), press Command K or Control K to open find in page and focus the search field. ' +
       'The options panel and zoom controls in the top left allow you to filter, change layout, zoom in, zoom out, and fit the view.',
   });
+  // Its own message, added only to a map that has groups, so the one above keeps its translations.
+  const hasGroups = nodes.some((node) => isServiceGroupNode(node) || isServiceGroupBoxNode(node));
+  const groupScreenReaderInstructions = i18n.translate(
+    'xpack.apm.serviceMap.screenReaderInstructions.groups',
+    {
+      defaultMessage:
+        'Press Enter or Space on a group to open it, and Enter or Escape on an open group to close it.',
+    }
+  );
 
   return (
     <ServiceMapInteractivityProvider isInteractive={isInteractive}>
@@ -730,12 +915,16 @@ function GraphInner({
             tabIndex={0}
             aria-label={i18n.translate('xpack.apm.serviceMap.regionLabel', {
               defaultMessage: 'Service map with {nodeCount} services and dependencies.',
-              values: { nodeCount: nodes.length },
+              values: { nodeCount: nodes.filter((node) => !isServiceGroupBoxNode(node)).length },
             })}
             aria-describedby={serviceMapId}
           >
             <EuiScreenReaderOnly>
-              <div id={serviceMapId}>{screenReaderInstructions}</div>
+              <div id={serviceMapId}>
+                {hasGroups
+                  ? `${screenReaderInstructions} ${groupScreenReaderInstructions}`
+                  : screenReaderInstructions}
+              </div>
             </EuiScreenReaderOnly>
             <EuiScreenReaderLive>{screenReaderAnnouncement}</EuiScreenReaderLive>
             <ReactFlow
@@ -926,6 +1115,9 @@ function GraphInner({
                       highlightedServiceNames={highlightedServiceNames}
                     />
                   )}
+                  <ServiceMapDiagnosticButton
+                    selection={selectedServiceNodeForFlyout ?? undefined}
+                  />
                   <EuiPanel
                     hasBorder
                     hasShadow={false}
@@ -950,11 +1142,10 @@ function GraphInner({
                 </Panel>
               )}
               {showControls && <ServiceMapMinimap />}
-              <ServiceMapDiagnosticButton selection={selectedServiceNodeForFlyout ?? undefined} />
+              <ServiceMapGroupingCountLine countLine={groupingCountLine} />
             </ReactFlow>
             <MapPopover
               selectedNode={selectedNodeForPopover}
-              selectedEdge={selectedEdgeForPopover}
               focusedServiceName={serviceName}
               environment={environment}
               kuery={kuery}
@@ -976,6 +1167,17 @@ function GraphInner({
                 onClose={handlePopoverClose}
               />
             )}
+            {edgeFlyoutConnection && (
+              <RequestFlyout
+                key={selectedEdgeForFlyout?.id}
+                deps={requestFlyoutDeps}
+                connection={edgeFlyoutConnection}
+                environment={environment}
+                rangeFrom={rangeFrom ?? start}
+                rangeTo={rangeTo ?? end}
+                onClose={handlePopoverClose}
+              />
+            )}
           </div>
         </ServiceMapAlertsNavigateProvider>
       </ServiceMapHighlightProvider>
@@ -986,7 +1188,9 @@ function GraphInner({
 export function ServiceMapGraph(props: GraphProps) {
   return (
     <ReactFlowProvider>
-      <GraphInner {...props} />
+      <ServiceMapGroupActionsProvider closeGroup={props.onCloseGroup}>
+        <GraphInner {...props} />
+      </ServiceMapGroupActionsProvider>
     </ReactFlowProvider>
   );
 }

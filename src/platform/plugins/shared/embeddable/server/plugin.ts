@@ -7,7 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { CoreSetup, CoreStart, Plugin, RequestHandlerContext } from '@kbn/core/server';
+import type {
+  CoreSetup,
+  CoreStart,
+  Plugin,
+  PluginInitializerContext,
+  RequestHandlerContext,
+} from '@kbn/core/server';
 import { identity } from 'lodash';
 import { distinctUntilChanged, skip } from 'rxjs';
 
@@ -18,6 +24,7 @@ import type {
   PersistableState,
 } from '@kbn/kibana-utils-plugin/common';
 import type { ZodObjectType } from '@kbn/zod';
+import type { StateComparators } from '@kbn/presentation-publishing';
 import type { EmbeddableFactoryRegistry, EmbeddableRegistryDefinition } from './types';
 import type { EmbeddableStateWithType } from './persistable_state/types';
 import {
@@ -63,6 +70,15 @@ export type EmbeddableStart = PersistableStateService<EmbeddableStateWithType> &
    */
   getAllEmbeddableSchemas: () => { [key: string]: { schema: ZodObjectType; title: string } };
 
+  /**
+   * Returns comparators registered with registerEmbeddableServerDefinition for the embeddable type.
+   * Resolves to undefined when the type is not registered or does not provide comparators.
+   */
+  getComparators: (
+    type: string,
+    embeddableState: object
+  ) => Promise<StateComparators<object> | undefined>;
+
   getTransforms: (type: string) =>
     | (EmbeddableTransforms & {
         schema?: ZodObjectType;
@@ -76,6 +92,8 @@ export class EmbeddableServerPlugin implements Plugin<EmbeddableSetup, Embeddabl
   private migrateFn: PersistableStateMigrateFn | undefined;
   private drilldownRegistry = getDrilldownRegistry();
   private transformsRegistry = getEmbeddableServerRegistry(this.drilldownRegistry);
+
+  constructor(private readonly initializerContext: PluginInitializerContext) {}
 
   public setup(core: CoreSetup): EmbeddableSetup {
     this.migrateFn = getMigrateFunction(this.getEmbeddableFactory);
@@ -100,9 +118,11 @@ export class EmbeddableServerPlugin implements Plugin<EmbeddableSetup, Embeddabl
   public start(core: CoreStart): EmbeddableStart {
     // Changing lens.apiFormat feature flag changes output of lens getSchema, so
     // we cannot use the cached value.
+    // The fallback must match Lens' own (`false`, or `true` in dev mode) so an explicit override
+    // of the dev default is seen as a change and resets the cache.
     // TODO: remove when lens.apiFormat feature flag is removed.
     core.featureFlags
-      .getBooleanValue$('lens.apiFormat', false)
+      .getBooleanValue$('lens.apiFormat', this.initializerContext.env.mode.dev)
       .pipe(skip(1), distinctUntilChanged())
       .subscribe((lensApiFormatFlag) => {
         this.transformsRegistry.resetCache();
@@ -111,6 +131,7 @@ export class EmbeddableServerPlugin implements Plugin<EmbeddableSetup, Embeddabl
     return {
       getAllEmbeddableSchemas: this.transformsRegistry.getAllEmbeddableSchemas,
       getTransforms: this.transformsRegistry.getEmbeddableTransforms,
+      getComparators: this.transformsRegistry.getComparators,
       telemetry: getTelemetryFunction(this.getEmbeddableFactory),
       extract: getExtractFunction(this.getEmbeddableFactory),
       inject: getInjectFunction(this.getEmbeddableFactory),

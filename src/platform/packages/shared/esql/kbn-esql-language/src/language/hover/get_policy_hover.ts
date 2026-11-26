@@ -26,23 +26,25 @@ export async function getPolicyHover(
 
   const result: Array<{ value: string }> = [];
   const { getPolicyMetadata } = getPolicyHelper(callbacks);
-  const policyMetadata = await getPolicyMetadata(source.name);
+  // source.name keeps a mode prefix (_any, _coordinator, _remote). Policies are keyed by the bare name.
+  const policyName = source.index?.valueUnquoted ?? source.name;
+  const policyMetadata = await getPolicyMetadata(policyName);
 
   if (policyMetadata) {
     result.push(
       ...[
         {
-          value: `${i18n.translate('kbn-esql-language.esql.hover.policyIndexes', {
+          value: `${i18n.translate('esqlLanguage.esql.hover.policyIndexes', {
             defaultMessage: '**Indexes**',
           })}: ${policyMetadata.sourceIndices.join(', ')}`,
         },
         {
-          value: `${i18n.translate('kbn-esql-language.esql.hover.policyMatchingField', {
+          value: `${i18n.translate('esqlLanguage.esql.hover.policyMatchingField', {
             defaultMessage: '**Matching field**',
           })}: ${policyMetadata.matchField}`,
         },
         {
-          value: `${i18n.translate('kbn-esql-language.esql.hover.policyEnrichedFields', {
+          value: `${i18n.translate('esqlLanguage.esql.hover.policyEnrichedFields', {
             defaultMessage: '**Fields**',
           })}: ${policyMetadata.enrichFields.join(', ')}`,
         },

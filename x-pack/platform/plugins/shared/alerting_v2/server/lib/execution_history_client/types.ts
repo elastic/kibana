@@ -20,7 +20,7 @@ export type ListRuleExecutionsArgs = Omit<FindRuleExecutionsQuery, 'spaceId'> & 
 };
 
 export interface RuleSearchMatches {
-  rules: number;
+  ruleCount: number;
   isTruncated: boolean;
 }
 

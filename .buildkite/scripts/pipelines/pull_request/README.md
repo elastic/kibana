@@ -6,7 +6,7 @@ E2E steps (FTR, Scout, Cypress) start as soon as `build` completes. If a gate st
 
 ### How it works
 
-1. **Gate steps** in `base.yml` are tagged with `env: { CHECK_GATE: 'true' }`.
+1. **Gate steps** in the base steps (`pipeline-utils/step-library/steps/pull_request_base.ts`) are tagged with `env: { CHECK_GATE: 'true' }`.
 2. **E2E steps** are registered at pipeline upload time by passing `{ cancelOnGateFailure: true }` to `getPipeline()`, or by writing a single batch metadata key (e.g. `cancel_on_gate_failure_batch:<namespace>`) containing a JSON array of step keys.
 3. When a gate step fails permanently, `post_command.sh` runs `scripts/steps/gate_failure/cancel.ts`, which reads `cancel_on_gate_failure_batch:*` metadata keys (each containing a JSON array of step keys) and cancels those steps.
 

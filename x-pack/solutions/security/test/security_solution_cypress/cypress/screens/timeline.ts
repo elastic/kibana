@@ -13,13 +13,7 @@ export const ADD_FILTER =
   '[data-test-subj="timeline-search-or-filter"] [data-test-subj="addFilter"]';
 
 export const ATTACH_TIMELINE_TO_CASE_BUTTON =
-  '[data-test-subj="timeline-modal-attach-to-case-dropdown-button"]';
-
-export const ATTACH_TIMELINE_TO_NEW_CASE_ICON =
-  '[data-test-subj="timeline-modal-attach-timeline-to-new-case"]';
-
-export const ATTACH_TIMELINE_TO_EXISTING_CASE_ICON =
-  '[data-test-subj="timeline-modal-attach-timeline-to-existing-case"]';
+  '[data-test-subj="timeline-modal-attach-to-case-button"]';
 
 export const SELECT_CASE = (id: string) => {
   return `[data-test-subj="cases-table-row-select-${id}"]`;

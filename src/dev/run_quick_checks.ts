@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { execFile, execFileSync } from 'child_process';
+import { execFile, execFileSync, spawn } from 'child_process';
 import { availableParallelism } from 'os';
 import { isAbsolute, join } from 'path';
 import { existsSync, readdirSync, readFileSync, unlinkSync } from 'fs';
@@ -22,6 +22,14 @@ const buildkiteQuickchecksFolder = join('.buildkite', 'scripts', 'steps', 'check
 const quickChecksList = join(buildkiteQuickchecksFolder, 'quick_checks.json');
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 const COLLECT_COMMITS_MARKER_FILE = join(REPO_ROOT, '.collect_commits_marker');
+const CANCEL_ON_GATE_FAILURE_SCRIPT = join(
+  REPO_ROOT,
+  '.buildkite',
+  'scripts',
+  'steps',
+  'gate_failure',
+  'cancel.sh'
+);
 const MAX_ANNOTATION_OUTPUT_LINES = 50;
 
 interface QuickCheck {
@@ -200,6 +208,7 @@ async function runAllChecks(
         .then((result) => {
           checksRunning.splice(checksRunning.indexOf(check), 1);
           checksFinished.push(result);
+          cancelGatedStepsOnFirstCommit(logger);
         })
         .catch((error) => {
           checksRunning.splice(checksRunning.indexOf(check), 1);
@@ -216,6 +225,29 @@ async function runAllChecks(
   }
 
   return checksFinished;
+}
+
+let gatedStepsCanceled = false;
+
+/**
+ * Cancels the cancel-on-gate-failure steps once the first auto-fix commit is recorded.
+ */
+export function cancelGatedStepsOnFirstCommit(log: ToolingLog): void {
+  if (
+    gatedStepsCanceled ||
+    process.env.CHECK_GATE !== 'true' ||
+    !existsSync(COLLECT_COMMITS_MARKER_FILE)
+  ) {
+    return;
+  }
+
+  // Commits are pushed only after every check finishes; the push supersedes this build anyway.
+  gatedStepsCanceled = true;
+  log.info('Auto-fix commit recorded, canceling gated steps before the push');
+  spawn('bash', [CANCEL_ON_GATE_FAILURE_SCRIPT], { cwd: REPO_ROOT, stdio: 'inherit' }).on(
+    'error',
+    (error) => log.warning(`Failed to cancel gated steps early: ${error}`)
+  );
 }
 
 async function runCheckAsync(script: string): Promise<CheckResult> {

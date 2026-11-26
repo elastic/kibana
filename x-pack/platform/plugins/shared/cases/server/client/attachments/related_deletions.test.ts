@@ -9,6 +9,7 @@ import { z } from '@kbn/zod/v4';
 import { mockCaseComments } from '../../mocks';
 import { createCasesClientMockArgs } from '../mocks';
 import { collectRelatedAttachmentIds } from './related_deletions';
+import { buildAttachmentTypeFilter } from './type_filter';
 
 const PARENT_TYPE = 'test.parent';
 const OTHER_PARENT_TYPE = 'test.other-parent';
@@ -37,12 +38,15 @@ describe('collectRelatedAttachmentIds', () => {
     clientArgs.unifiedAttachmentTypeRegistry.register({
       id: PARENT_TYPE,
       schema: z.object({}),
-      getRelatedAttachments: hook,
+      relatedAttachments: hook != null ? { readTypes: ['test.child'], get: hook } : undefined,
     });
     clientArgs.unifiedAttachmentTypeRegistry.register({
       id: OTHER_PARENT_TYPE,
       schema: z.object({}),
-      getRelatedAttachments: otherHook,
+      relatedAttachments:
+        otherHook != null
+          ? { readTypes: ['test.child', 'test.other-child'], get: otherHook }
+          : undefined,
     });
     clientArgs.services.caseService.getAllCaseComments.mockResolvedValue({
       saved_objects: [parent, otherParent, child, unrelated].map((so) => ({ ...so, score: 0 })),
@@ -99,6 +103,23 @@ describe('collectRelatedAttachmentIds', () => {
       [{ id: parent.id, attributes: parent.attributes }],
       [{ id: otherParent.id, attributes: otherParent.attributes }],
     ]);
+  });
+
+  it('reads only the attachment types the deleting hooks declare', async () => {
+    const hook = jest.fn().mockResolvedValue([]);
+    const otherHook = jest.fn().mockResolvedValue([]);
+    const clientArgs = setup({ hook, otherHook });
+
+    await collectRelatedAttachmentIds({
+      caseId: 'mock-id-1',
+      attachments: [parent, otherParent],
+      clientArgs,
+    });
+
+    expect(clientArgs.services.caseService.getAllCaseComments).toHaveBeenCalledWith({
+      id: 'mock-id-1',
+      options: { filter: buildAttachmentTypeFilter(['test.child', 'test.other-child']) },
+    });
   });
 
   it('skips a deleted attachment whose attributes did not decode', async () => {

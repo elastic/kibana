@@ -11,7 +11,6 @@ const _allowedExperimentalValues = {
   enableAutomaticAgentUpgrades: true,
   enableSyncIntegrationsOnRemote: true,
   enableSSLSecrets: true,
-  installedIntegrationsTabularUI: true,
   enabledUpgradeAgentlessDeploymentsTask: true,
   enablePackageRollback: true,
   enableAutoInstallContentPackages: true,
@@ -26,15 +25,13 @@ const _allowedExperimentalValues = {
   enableAgentlessPoliciesUI: true, // When enabled, the UI reads/writes agentless integration policies through the managed integrations API. Disable as a kill switch to fall back to the legacy APIs — but disableAgentlessLegacyAPI overrides it (the fallback would 400).
   enableEsqlViewInstall: false,
   enableSloTemplates: true,
-  newBrowseIntegrationUx: true, // When enabled integrations, browse integrations page will use the new UX.
   enableVersionSpecificPolicies: true, // When enabled, version specific policies will be created when packages use agent version conditions
   enableIntegrationInactivityAlerting: true, // When enabled, an inactivity monitoring alerting rule template is created on fresh integration package install.
-  enableSimplifiedAgentlessUX: true, // When enabled, the agentless deployment mode will be simplified for single input/datastreams integrations.
   enableOpAMP: true, // When enabled, OpAMP features will be available in the API and UI.
   enableOTelVerifier: true, // When enabled, OTel-based cloud connector permission verification is active.
   enableResolveDependencies: true, // When enabled, the resolve dependencies step will be available during package installation.
   enableOtelUI: true, // When enabled, OTel-specific UI elements (e.g. Collector Config tab) will be shown.
-  enableIncludeTagsInEvents: false, // When enabled, the include_tags_in_events agent policy advanced setting is available in the UI.
+  enableIncludeTagsInEvents: true, // When enabled, the include_tags_in_events agent policy advanced setting is available in the UI.
   enableIntegrationCollectionTiles: true, // When enabled, packages sharing a `group` id are collapsed into a single collection tile in the integrations marketplace.
   enableIntegrationTileClickToAdd: true, // When enabled, clicking an integration tile navigates directly to the add-integration page instead of the overview page.
   // NOTE: Prefer Kibana feature flags over adding new entries here. See x-pack/platform/plugins/shared/fleet/common/constants/feature_flags.ts

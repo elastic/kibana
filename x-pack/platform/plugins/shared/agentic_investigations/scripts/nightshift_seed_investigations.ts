@@ -35,6 +35,7 @@ import { types } from '@kbn/storage-adapter';
 import type { StorageSchema } from '@kbn/storage-adapter';
 import { agentBuilderDefaultAgentId } from '@kbn/agent-builder-common';
 import {
+  PROPOSAL_CATEGORY_TODO,
   PROPOSALS_API_VERSION,
   PROPOSALS_INDEX_NAME,
   PROPOSALS_INTERNAL_URL,
@@ -1183,10 +1184,33 @@ const createProposals = async (
   for (const { title, comment, confidence } of proposals) {
     const before = (await listProposals(client, conversationId)).length;
     await client.publicApi('POST', `/api/workflows/workflow/${CREATE_PROPOSAL_WORKFLOW_ID}/run`, {
-      inputs: { conversationId, title, comment, origin: 'agent_builder', confidence },
+      inputs: {
+        conversationId,
+        title,
+        comment,
+        origin: 'agent_builder',
+        confidence,
+        // As the Nightshift investigator proposes them: the analyst carries them out.
+        category: PROPOSAL_CATEGORY_TODO,
+      },
     });
     await waitFor(`proposal "${title}"`, async () =>
       (await listProposals(client, conversationId)).length > before ? true : undefined
+    );
+  }
+
+  // The gate workflow writes the proposal, and its inputs carry no waiver, so the flag the real
+  // Nightshift producer sets (`findings_recorder`) is stamped on afterwards — without it a
+  // seeded investigation would ask for a decline reason the product no longer asks for.
+  if (proposals.length > 0) {
+    await client.es(
+      'POST',
+      `/${PROPOSALS_INDEX_NAME}/_update_by_query?refresh=true`,
+      {
+        query: { term: { conversationId } },
+        script: { source: 'ctx._source.skipDiscardReason = true', lang: 'painless' },
+      },
+      [409]
     );
   }
   // The gate's create step indexes the proposal, then attaches its card.

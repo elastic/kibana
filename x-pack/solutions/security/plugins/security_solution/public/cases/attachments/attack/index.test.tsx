@@ -38,14 +38,9 @@ import {
 import { TestProviders } from '../../../common/mock/test_providers';
 import { useFlyoutApi } from '../../../flyout_v2/use_flyout_api';
 import { createFlyoutApiMock } from '../../../flyout_v2/use_flyout_api.mock';
-import { useIsNewFlyoutEnabled } from '../../../common/hooks/use_is_new_flyout_enabled';
 import { FLYOUT_ORIGIN } from '../../../common/lib/telemetry';
 
-jest.mock('@kbn/expandable-flyout', () => ({
-  useExpandableFlyoutApi: () => ({ openFlyout: jest.fn() }),
-}));
 jest.mock('../../../flyout_v2/use_flyout_api');
-jest.mock('../../../common/hooks/use_is_new_flyout_enabled');
 
 type Props = UnifiedReferenceAttachmentViewProps<AttackAttachmentPayload['metadata']>;
 
@@ -82,7 +77,6 @@ describe('Attack attachment', () => {
     jest.clearAllMocks();
     flyoutApi = createFlyoutApiMock();
     jest.mocked(useFlyoutApi).mockReturnValue(flyoutApi);
-    jest.mocked(useIsNewFlyoutEnabled).mockReturnValue(true);
   });
 
   it('creates the attachment type correctly', () => {
@@ -95,6 +89,7 @@ describe('Attack attachment', () => {
       getIcon: expect.any(Function),
       getLabel: expect.any(Function),
       getCountLabel: expect.any(Function),
+      getRelatedRemoval: expect.any(Function),
       schema: AttackAttachmentPayloadSchema,
       getCreationActivity: expect.any(Function),
       getRemovalActivity: expect.any(Function),
@@ -165,6 +160,23 @@ describe('Attack attachment', () => {
 
     expect(attackType.getCountLabel?.({ count: 1 })).toBe('1 attack');
     expect(attackType.getCountLabel?.({ count: 3 })).toBe('3 attacks');
+  });
+
+  it('offers to keep the alerts the removed attacks brought to the case', () => {
+    const attackType = getAttackAttachment();
+
+    expect(attackType.getRelatedRemoval?.({ count: 1 })).toEqual({
+      description:
+        'Also remove the alerts this attack added to the case? Alerts that also belong to another attack in this case stay.',
+      removeOnlyLabel: 'Remove attack only',
+      removeWithRelatedLabel: 'Remove attack and alerts',
+    });
+    expect(attackType.getRelatedRemoval?.({ count: 2 })).toEqual({
+      description:
+        'Also remove the alerts these attacks added to the case? Alerts that also belong to another attack in this case stay.',
+      removeOnlyLabel: 'Remove attacks only',
+      removeWithRelatedLabel: 'Remove attacks and alerts',
+    });
   });
 
   it('returns no actions when the metadata is missing', () => {

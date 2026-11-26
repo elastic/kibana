@@ -289,6 +289,14 @@ export class Config {
     return Boolean(this.buildOptions.tarZstd);
   }
 
+  shouldSkipDockerImageArchive() {
+    return Boolean(this.buildOptions.skipDockerImageArchive);
+  }
+
+  shouldForceNodePointerCompression() {
+    return Boolean(this.buildOptions.forceNodePointerCompression);
+  }
+
   getDistPluginsFromRepo() {
     return getPackages(this.repoRoot).filter((p) => !p.isDevOnly() && this.pluginFilter(p));
   }

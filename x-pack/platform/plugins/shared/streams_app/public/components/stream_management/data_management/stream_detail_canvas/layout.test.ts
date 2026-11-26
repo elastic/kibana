@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { COLUMN_GAP } from './canvas_constants';
-import { applyLayout, layoutGraph } from './layout';
+import { COLUMN_GAP, ROW_GAP } from './canvas_constants';
+import { applyLayout, getConnectedNodeIds, layoutGraph } from './layout';
 import { DESTINATION_NODE_TYPE, SOURCE_NODE_TYPE } from './types';
 
 describe('layoutGraph', () => {
@@ -44,13 +44,13 @@ describe('layoutGraph', () => {
     expect(positions.get('s1')!.y).not.toEqual(positions.get('s2')!.y);
   });
 
-  it('places disconnected unit nodes on rows that do not overlap classic flows', () => {
+  it('places disconnected unit nodes on rows that do not overlap connected flows', () => {
     const positions = layoutGraph(
       [
         { id: 'classic-source' },
         { id: 'classic-destination' },
         { id: 'configured-source' },
-        { id: 'unconfigured-source' },
+        { id: 'standalone-source' },
       ],
       [{ source: 'classic-source', target: 'classic-destination' }]
     );
@@ -60,9 +60,60 @@ describe('layoutGraph', () => {
       new Set([
         positions.get('classic-source')!.y,
         positions.get('configured-source')!.y,
-        positions.get('unconfigured-source')!.y,
+        positions.get('standalone-source')!.y,
       ]).size
     ).toBe(3);
+  });
+
+  it('places a destination with no source in the column to the right of the sources', () => {
+    const positions = layoutGraph(
+      [
+        { id: 's1', type: SOURCE_NODE_TYPE },
+        { id: 's2', type: SOURCE_NODE_TYPE },
+        { id: 'd1', type: DESTINATION_NODE_TYPE },
+      ],
+      []
+    );
+
+    expect(positions.get('s1')!.x).toBe(0);
+    expect(positions.get('s2')!.x).toBe(0);
+    expect(positions.get('d1')!.x).toBe(COLUMN_GAP);
+  });
+
+  it('stacks a destination with no source below the connected destinations', () => {
+    const positions = layoutGraph(
+      [
+        { id: 'source', type: SOURCE_NODE_TYPE },
+        { id: 'connected', type: DESTINATION_NODE_TYPE },
+        { id: 'new-1', type: DESTINATION_NODE_TYPE },
+        { id: 'new-2', type: DESTINATION_NODE_TYPE },
+      ],
+      [{ source: 'source', target: 'connected' }]
+    );
+
+    const connected = positions.get('connected')!;
+    const first = positions.get('new-1')!;
+    const second = positions.get('new-2')!;
+
+    expect(first.x).toBe(connected.x);
+    expect(second.x).toBe(connected.x);
+    expect(first.y - connected.y).toBe(ROW_GAP);
+    expect(second.y - first.y).toBe(ROW_GAP);
+  });
+
+  it('fans destination cards out from a source', () => {
+    const positions = layoutGraph(
+      [{ id: 'source' }, { id: 'd1' }, { id: 'd2' }],
+      [
+        { source: 'source', target: 'd1' },
+        { source: 'source', target: 'd2' },
+      ]
+    );
+
+    expect(positions.get('source')!.x).toBe(0);
+    expect(positions.get('d1')!.x).toBe(COLUMN_GAP);
+    expect(positions.get('d2')!.x).toBe(COLUMN_GAP);
+    expect(positions.get('d1')!.y).not.toEqual(positions.get('d2')!.y);
   });
 
   it('lays a multi-node chain into one column per depth (extensible topology)', () => {
@@ -126,8 +177,52 @@ describe('applyLayout', () => {
     expect(source.position.y).toBe(destination.position.y);
   });
 
+  it('anchors the tidied block to the anchor nodes only', () => {
+    const nodes = [
+      { id: 'source', position: { x: 1000, y: 1000 } },
+      // Just added, so still at its default spot near the origin.
+      { id: 'processing', position: { x: COLUMN_GAP, y: 0 } },
+      { id: 'destination', position: { x: 1000 + COLUMN_GAP, y: 1000 } },
+    ];
+    const flowEdges = [
+      { source: 'source', target: 'processing' },
+      { source: 'processing', target: 'destination' },
+    ];
+
+    const result = applyLayout(nodes, flowEdges, {
+      onlyIds: new Set(['source', 'processing', 'destination']),
+      anchorIds: new Set(['source', 'destination']),
+    });
+    const positionOf = (id: string) => result.find((node) => node.id === id)!.position;
+
+    expect(positionOf('source')).toEqual({ x: 1000, y: 1000 });
+    expect(positionOf('processing')).toEqual({ x: 1000 + COLUMN_GAP, y: 1000 });
+    expect(positionOf('destination')).toEqual({ x: 1000 + COLUMN_GAP * 2, y: 1000 });
+  });
+
   it('returns the input untouched when the selection is empty', () => {
     const nodes = [{ id: 'source', position: { x: 1, y: 2 } }];
     expect(applyLayout(nodes, edges, { onlyIds: new Set() })).toBe(nodes);
+  });
+});
+
+describe('getConnectedNodeIds', () => {
+  it('collects the whole flow a node belongs to and nothing else', () => {
+    const connected = getConnectedNodeIds(
+      ['processing'],
+      [
+        { source: 's1', target: 'processing' },
+        { source: 'processing', target: 'routing' },
+        { source: 'routing', target: 'd1' },
+        { source: 'routing', target: 'd2' },
+        { source: 's2', target: 'd3' },
+      ]
+    );
+
+    expect([...connected].sort()).toEqual(['d1', 'd2', 'processing', 'routing', 's1']);
+  });
+
+  it('returns only the node itself when nothing is wired to it', () => {
+    expect([...getConnectedNodeIds(['alone'], [])]).toEqual(['alone']);
   });
 });

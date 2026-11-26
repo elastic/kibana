@@ -17,6 +17,7 @@ import {
   getProductTourStepTestId,
   type ProductTourStepConfig,
 } from './constants';
+import { useIsAnchorInView } from './use_is_anchor_in_view';
 import { STEP_CLOSE_TOUR, STEP_FINISH_TOUR, STEP_NEXT } from './translations';
 
 export interface ProductTourProps {
@@ -43,6 +44,7 @@ const ProductTourStep: React.FC<ProductTourStepProps> = ({
   onEnd,
 }) => {
   const isAnchorMounted = useIsAnchorMounted(step.anchor);
+  const isAnchorInView = useIsAnchorInView(step.anchor, isAnchorMounted);
 
   useEffect(() => {
     if (isAnchorMounted) return;
@@ -52,11 +54,14 @@ const ProductTourStep: React.FC<ProductTourStepProps> = ({
 
   useEffect(() => {
     if (!isAnchorMounted) return;
-    document.querySelector(step.anchor)?.scrollIntoView({ block: 'nearest' });
+    // Centered rather than `nearest`, which leaves a partly visible anchor, and so the popover
+    // beside it, where it is and can tuck the anchor under the sticky page header.
+    document.querySelector(step.anchor)?.scrollIntoView({ block: 'center' });
   }, [isAnchorMounted, step.anchor]);
 
-  // EuiTourStep resolves its anchor once on mount, so wait for the element.
-  if (!isAnchorMounted) return null;
+  // EuiTourStep resolves its anchor once on mount, so wait for the element. Unmounted rather than
+  // closed out of view, as only unmounting gives the anchor back (see below).
+  if (!isAnchorMounted || !isAnchorInView) return null;
 
   const isLastStep = stepNumber === stepsTotal;
 

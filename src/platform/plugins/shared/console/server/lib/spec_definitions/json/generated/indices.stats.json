@@ -17,6 +17,7 @@
       "fields": [],
       "forbid_closed_indices": "__flag__",
       "groups": [],
+      "include_auto_calibration": "__flag__",
       "include_segment_file_sizes": "__flag__",
       "include_unloaded_segments": "__flag__",
       "level": [

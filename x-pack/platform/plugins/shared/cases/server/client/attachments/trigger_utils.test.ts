@@ -24,7 +24,7 @@ describe('emitAttachmentsAddedEvent', () => {
 
     expect(clientArgs.casesEventBus.emitAttachmentsAdded).toHaveBeenCalledWith(clientArgs.request, {
       caseId: 'case-1',
-      attachmentIds: ['attachment-1', 'attachment-2'],
+      ids: ['attachment-1', 'attachment-2'],
       attachmentType: 'comment',
       owner: 'securitySolution',
     });
@@ -53,13 +53,13 @@ describe('emitAttachmentsDeletedEvents', () => {
     expect(emitAttachmentsDeleted).toHaveBeenCalledTimes(2);
     expect(emitAttachmentsDeleted).toHaveBeenNthCalledWith(1, clientArgs.request, {
       caseId: 'case-1',
-      attachmentIds: ['mock-comment-1'],
+      ids: ['mock-comment-1'],
       attachmentType: 'user',
       owner: 'securitySolution',
     });
     expect(emitAttachmentsDeleted).toHaveBeenNthCalledWith(2, clientArgs.request, {
       caseId: 'case-1',
-      attachmentIds: ['mock-comment-4', 'mock-comment-5'],
+      ids: ['mock-comment-4', 'mock-comment-5'],
       attachmentType: 'alert',
       owner: 'securitySolution',
       alertIds: ['test-id', 'test-id-2'],
@@ -107,7 +107,7 @@ describe('emitAttachmentsDeletedEvents', () => {
       clientArgs.request,
       {
         caseId: 'case-1',
-        attachmentIds: ['unified-alert-1'],
+        ids: ['unified-alert-1'],
         attachmentType: SECURITY_ALERT_ATTACHMENT_TYPE,
         owner: 'securitySolution',
         alertIds: ['alert-1'],
@@ -134,7 +134,7 @@ describe('emitAttachmentsDeletedEvents', () => {
       clientArgs.request,
       {
         caseId: 'case-1',
-        attachmentIds: ['event-attachment-1'],
+        ids: ['event-attachment-1'],
         attachmentType: 'event',
         owner: 'securitySolution',
         eventIds: ['event-1'],

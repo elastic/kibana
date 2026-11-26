@@ -177,6 +177,22 @@ export class EndpointMetadataGenerator extends BaseDataGenerator {
       capabilities.push('memdump_raw');
     }
 
+    // v9.7.0 introduced `get-file` support for multiple paths (`parameters.paths`)
+    if (gte(agentVersion, '9.7.0')) {
+      capabilities.push('get_file_multi_path');
+    }
+
+    // v9.7.0 introduced `get-file --force` capability (Windows only)
+    if (gte(agentVersion, '9.7.0') && (hostOs.platform ?? '').toLowerCase() === 'windows') {
+      capabilities.push('get_file_force');
+    }
+
+    // v9.7.0 introduced `file_export` capability (export `get-file` / `memory-dump` output to
+    // external storage). Reported on every OS.
+    if (gte(agentVersion, '9.7.0')) {
+      capabilities.push('file_export');
+    }
+
     const hostMetadataDoc: HostMetadataInterface = {
       '@timestamp': ts,
       event: {
