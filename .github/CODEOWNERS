@@ -274,12 +274,12 @@ src/core/packages/mount-utils/browser-internal @elastic/kibana-core
 src/core/packages/node/server @elastic/kibana-core
 src/core/packages/node/server-internal @elastic/kibana-core
 src/core/packages/node/server-mocks @elastic/kibana-core
-src/core/packages/notifications/browser @elastic/kibana-core
-src/core/packages/notifications/browser-internal @elastic/kibana-core
-src/core/packages/notifications/browser-mocks @elastic/kibana-core
-src/core/packages/overlays/browser @elastic/kibana-core
-src/core/packages/overlays/browser-internal @elastic/kibana-core
-src/core/packages/overlays/browser-mocks @elastic/kibana-core
+src/core/packages/notifications/browser @elastic/appex-sharedux
+src/core/packages/notifications/browser-internal @elastic/appex-sharedux
+src/core/packages/notifications/browser-mocks @elastic/appex-sharedux
+src/core/packages/overlays/browser @elastic/appex-sharedux
+src/core/packages/overlays/browser-internal @elastic/appex-sharedux
+src/core/packages/overlays/browser-mocks @elastic/appex-sharedux
 src/core/packages/plugins/base-server-internal @elastic/kibana-core
 src/core/packages/plugins/browser @elastic/kibana-core
 src/core/packages/plugins/browser-internal @elastic/kibana-core
@@ -934,7 +934,7 @@ src/platform/plugins/shared/esql @elastic/kibana-discover
 src/platform/plugins/shared/esql_datagrid @elastic/kibana-discover
 src/platform/plugins/shared/expressions @elastic/kibana-dashboards
 src/platform/plugins/shared/field_formats @elastic/kibana-discover
-src/platform/plugins/shared/files @elastic/appex-sharedux
+src/platform/plugins/shared/files @elastic/kibana-core @elastic/appex-sharedux
 src/platform/plugins/shared/home @elastic/appex-sharedux
 src/platform/plugins/shared/inspector @elastic/kibana-dashboards
 src/platform/plugins/shared/kibana_react @elastic/appex-sharedux
@@ -1323,7 +1323,7 @@ x-pack/platform/plugins/shared/maintenance_windows @elastic/response-ops
 x-pack/platform/plugins/shared/maps @elastic/kibana-dashboards
 x-pack/platform/plugins/shared/ml @elastic/search-ml-ux
 x-pack/platform/plugins/shared/notification_center @elastic/search-ml-ux
-x-pack/platform/plugins/shared/notifications @elastic/appex-sharedux
+x-pack/platform/plugins/shared/notifications @elastic/response-ops
 x-pack/platform/plugins/shared/observability_ai_assistant @elastic/nightshift-context-and-research-team
 x-pack/platform/plugins/shared/osquery @elastic/security-defend-workflows
 x-pack/platform/plugins/shared/proposals @elastic/alertzero-common-layer
@@ -2458,6 +2458,7 @@ x-pack/platform/test/plugin_api_integration/test_suites/platform/ @elastic/kiban
 /x-pack/platform/test/saved_objects_field_count/ @elastic/kibana-core
 /x-pack/platform/test/serverless/**/test_suites/saved_objects_management/ @elastic/kibana-core
 /x-pack/platform/test/serverless/api_integration/test_suites/telemetry/ @elastic/kibana-core
+/src/platform/plugins/shared/files/server @elastic/kibana-core
 
 #CC# /src/core/packages/core/server/csp/ @elastic/kibana-core
 #CC# /src/plugins/saved_objects/ @elastic/kibana-core
@@ -3904,6 +3905,7 @@ x-pack/solutions/observability/plugins/observability_shared/public/components/pr
 /x-pack/platform/plugins/shared/spaces/test/scout/ui/fixtures/ @elastic/appex-sharedux
 /x-pack/platform/plugins/shared/spaces/test/scout/ui/tests/spaces_selection_serverless.spec.ts @elastic/appex-sharedux
 /x-pack/platform/test/serverless/functional/page_objects/svl_common_navigation.ts @elastic/appex-sharedux
+/src/platform/plugins/shared/files/public @elastic/appex-sharedux
 
 # OpenAPI spec files
 oas_docs/linters                              @elastic/ski-docs
