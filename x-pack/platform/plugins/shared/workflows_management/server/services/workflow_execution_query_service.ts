@@ -13,7 +13,10 @@ import type {
   WorkflowExecutionListDto,
 } from '@kbn/workflows';
 import type { ChildWorkflowExecutionItem } from '@kbn/workflows/types/v1';
-import type { LogSearchResult } from '@kbn/workflows-execution-engine/server';
+import type {
+  GetStepExecutionsByIdsOptions,
+  LogSearchResult,
+} from '@kbn/workflows-execution-engine/server';
 import { bulkUpdaterItem, getBulkUpdaterWriteResult } from '@kbn/workflows-execution-engine/server';
 import type {
   ExecutionLogsParams,
@@ -63,6 +66,12 @@ const DEFAULT_PAGE_SIZE = 100;
 
 /** Max completed steps fetched per page when resolving predecessor `output.reasoning`. */
 const PREDECESSOR_REASONING_MAX_HITS = 1000;
+
+/**
+ * Ids per step `_mget`, and hits per page of a step search. Keeps the data stream client's search
+ * fallback for ids its `_mget` misses within the result window.
+ */
+const STEP_EXECUTIONS_BATCH_SIZE = 1000;
 
 const PROCESSED_WAIT_FOR_INPUT_SHOULD: estypes.QueryDslQueryContainer[] = [
   { exists: { field: 'finishedAt' } },
@@ -1041,28 +1050,70 @@ export class WorkflowExecutionQueryService {
     spaceId: string
   ): Promise<EsWorkflowStepExecution[]> {
     if (!stepExecutionIds?.length) {
-      const { results } = await searchStepExecutions({
-        stepExecutionsDataClient: this.deps.stepExecutionsDataClient,
-        logger: this.deps.logger,
-        workflowExecutionId: executionId,
-        stepId,
-        spaceId,
-      });
-      return results;
+      return this.searchAllStepExecutionsByStepId(executionId, stepId, spaceId);
     }
-    const { items: candidates } = await this.deps.stepExecutionsDataClient.getByIds(
-      stepExecutionIds,
-      { sourceIncludes: ['id', 'stepId'] }
-    );
-    const ids = candidates
-      .filter(({ document }) => document.stepId === stepId)
-      .map(({ document }) => document.id);
+    const candidates = await this.getStepExecutionsInBatches(stepExecutionIds, {
+      sourceIncludes: ['id', 'stepId'],
+    });
+    const ids = candidates.filter((step) => step.stepId === stepId).map(({ id }) => id);
     if (ids.length === 0) return [];
-    const { items } = await this.deps.stepExecutionsDataClient.getByIds(ids);
-    return items
-      .map(({ document }) => document)
+    const steps = await this.getStepExecutionsInBatches(ids);
+    return steps
       .filter((step) => step.workflowRunId === executionId && step.spaceId === spaceId)
       .sort((a, b) => b.startedAt.localeCompare(a.startedAt));
+  }
+
+  private async getStepExecutionsInBatches(
+    ids: string[],
+    options?: GetStepExecutionsByIdsOptions
+  ): Promise<EsWorkflowStepExecution[]> {
+    const steps: EsWorkflowStepExecution[] = [];
+    for (let start = 0; start < ids.length; start += STEP_EXECUTIONS_BATCH_SIZE) {
+      const { items } = await this.deps.stepExecutionsDataClient.getByIds(
+        ids.slice(start, start + STEP_EXECUTIONS_BATCH_SIZE),
+        options
+      );
+      steps.push(...items.map(({ document }) => document));
+    }
+    return steps;
+  }
+
+  /** Pages with `search_after`, so a step that ran more times than the result window is complete. */
+  private async searchAllStepExecutionsByStepId(
+    executionId: string,
+    stepId: string,
+    spaceId: string
+  ): Promise<EsWorkflowStepExecution[]> {
+    const steps: EsWorkflowStepExecution[] = [];
+    let searchAfter: estypes.SortResults | undefined;
+    try {
+      do {
+        const { hits } = await this.deps.stepExecutionsDataClient.search({
+          query: {
+            bool: {
+              must: [
+                { term: { spaceId } },
+                { term: { workflowRunId: executionId } },
+                { term: { stepId } },
+              ],
+            },
+          },
+          sort: [{ startedAt: { order: 'desc' } }, { id: { order: 'asc' } }],
+          size: STEP_EXECUTIONS_BATCH_SIZE,
+          track_total_hits: false,
+          ...(searchAfter ? { search_after: searchAfter } : {}),
+        });
+        steps.push(...hits.hits.map((hit) => hit._source as EsWorkflowStepExecution));
+        searchAfter =
+          hits.hits.length === STEP_EXECUTIONS_BATCH_SIZE ? hits.hits.at(-1)?.sort : undefined;
+      } while (searchAfter);
+    } catch (error) {
+      if (isIndexNotFoundError(error)) {
+        return [];
+      }
+      throw error;
+    }
+    return steps;
   }
 
   /**

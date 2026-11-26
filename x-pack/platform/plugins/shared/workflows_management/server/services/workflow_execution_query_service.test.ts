@@ -861,7 +861,7 @@ describe('WorkflowExecutionQueryService', () => {
       expect(mockStepDataClient.getByIds).toHaveBeenNthCalledWith(1, ['se-1', 'se-2', 'se-3'], {
         sourceIncludes: ['id', 'stepId'],
       });
-      expect(mockStepDataClient.getByIds).toHaveBeenNthCalledWith(2, ['se-1', 'se-3']);
+      expect(mockStepDataClient.getByIds).toHaveBeenNthCalledWith(2, ['se-1', 'se-3'], undefined);
       expect(mockEsClient.search).not.toHaveBeenCalled();
     });
 
@@ -904,17 +904,61 @@ describe('WorkflowExecutionQueryService', () => {
       ).resolves.toEqual([]);
     });
 
+    it('reads the ids of a long run in batches of 1000', async () => {
+      const stepExecutionIds = Array.from({ length: 2500 }, (_, i) => `se-${i}`);
+      mockStepDataClient.getByIds.mockImplementation(async (ids) =>
+        createMockGetExecutionsByIdsResponse(
+          ids.map((id) => step(id, 'gate', id === 'se-2499' ? 'z' : 'a'))
+        )
+      );
+
+      const result = await service.getStepExecutionsByStepId(
+        { executionId: 'exec-1', stepId: 'gate', stepExecutionIds },
+        'default'
+      );
+
+      expect(result).toHaveLength(2500);
+      expect(result[0].id).toBe('se-2499');
+      expect(mockStepDataClient.getByIds.mock.calls.map(([ids]) => ids.length)).toEqual([
+        1000, 1000, 500, 1000, 1000, 500,
+      ]);
+    });
+
     it('searches the step of a run that predates stepExecutionIds', async () => {
       const older = step('se-1', 'gate', 's');
       mockEsClient.search.mockResolvedValue({
-        hits: { hits: [{ _source: older }], total: { value: 1 } },
+        hits: { hits: [{ _source: older, sort: ['s', 'se-1'] }] },
       } as any);
 
       await expect(
         service.getStepExecutionsByStepId({ executionId: 'exec-1', stepId: 'gate' }, 'default')
       ).resolves.toEqual([older]);
       expect(mockStepDataClient.getByIds).not.toHaveBeenCalled();
+      expect(mockEsClient.search).toHaveBeenCalledTimes(1);
       expect(JSON.stringify(mockEsClient.search.mock.calls[0][0])).toContain('"gate"');
+    });
+
+    it('pages the search of an older run past the first 1000 hits', async () => {
+      const page = (from: number, length: number) =>
+        Array.from({ length }, (_, i) => ({
+          _source: step(`se-${from + i}`, 'gate', 's'),
+          sort: ['s', `se-${from + i}`],
+        }));
+      mockEsClient.search
+        .mockResolvedValueOnce({ hits: { hits: page(0, 1000) } } as any)
+        .mockResolvedValueOnce({ hits: { hits: page(1000, 3) } } as any);
+
+      const result = await service.getStepExecutionsByStepId(
+        { executionId: 'exec-1', stepId: 'gate' },
+        'default'
+      );
+
+      expect(result).toHaveLength(1003);
+      expect(mockEsClient.search).toHaveBeenCalledTimes(2);
+      expect(mockEsClient.search.mock.calls[0][0]).not.toHaveProperty('search_after');
+      expect(mockEsClient.search.mock.calls[1][0]).toMatchObject({
+        search_after: ['s', 'se-999'],
+      });
     });
   });
 
