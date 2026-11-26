@@ -148,7 +148,7 @@ export const DetonateSubmitModal = memo(
                               {(copy) => (
                                 <EuiToolTip content={i18n.COPY_SHA} disableScreenReaderOutput>
                                   <EuiButtonIcon
-                                    iconType="copyClipboard"
+                                    iconType="copy"
                                     aria-label={i18n.COPY_SHA}
                                     size="xs"
                                     color="text"
@@ -232,6 +232,10 @@ export const DetonateSubmitModal = memo(
               />
             </EuiFormRow>
           </EuiForm>
+          <EuiSpacer size="m" />
+          <EuiText size="xs" color="subdued" data-test-subj="detonateProcessingTime">
+            {i18n.PROCESSING_TIME}
+          </EuiText>
         </EuiModalBody>
         <EuiModalFooter>
           <EuiButtonEmpty onClick={onClose} data-test-subj="detonateCancel">

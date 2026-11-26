@@ -46,6 +46,7 @@ import { useFlyoutApi } from '../../../use_flyout_api';
 import { DETONATE_ACTION } from '../../../detonation/translations';
 import type { DetonateSample } from '../../../detonation/submit_modal';
 import { DetonateSubmitModal } from '../../../detonation/submit_modal';
+import { DetonateChat } from '../../../detonation/detonate_chat';
 import type { DetonateFileOption } from '../../../detonation/select_file_panel';
 import {
   DETONATE_FILE_PANEL_ID,
@@ -301,16 +302,27 @@ export const TakeActionButton = memo(
       ],
       [hit, hostName]
     );
+    const [isDetonateChatOpen, setIsDetonateChatOpen] = useState(false);
     const detonateItems = useMemo(
       () => [
-        {
-          'data-test-subj': DETONATE_ACTION_ID,
-          key: DETONATE_ACTION_ID,
-          name: DETONATE_ACTION,
-          panel: DETONATE_FILE_PANEL_ID,
-        },
+        flowVariant === 'chat'
+          ? {
+              'data-test-subj': DETONATE_ACTION_ID,
+              key: DETONATE_ACTION_ID,
+              name: DETONATE_ACTION,
+              onClick: () => {
+                closePopoverHandler();
+                setIsDetonateChatOpen(true);
+              },
+            }
+          : {
+              'data-test-subj': DETONATE_ACTION_ID,
+              key: DETONATE_ACTION_ID,
+              name: DETONATE_ACTION,
+              panel: DETONATE_FILE_PANEL_ID,
+            },
       ],
-      []
+      [flowVariant, closePopoverHandler]
     );
     const detonatePanels = useMemo<EuiContextMenuPanelDescriptor[]>(
       () => [
@@ -496,6 +508,13 @@ export const TakeActionButton = memo(
             onClose={() => setDetonateSample(null)}
             onSubmit={handleDetonateSubmit}
             onSeeAnalysis={handleSeeAnalysis}
+          />
+        )}
+        {isDetonateChatOpen && (
+          <DetonateChat
+            files={detonateFiles}
+            onClose={() => setIsDetonateChatOpen(false)}
+            onViewReport={handleSeeAnalysis}
           />
         )}
         {osqueryAgentId && (

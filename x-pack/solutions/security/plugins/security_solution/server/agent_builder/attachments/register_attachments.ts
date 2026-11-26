@@ -11,6 +11,7 @@ import type { MlPluginSetup } from '@kbn/ml-plugin/server';
 import type { ExperimentalFeatures } from '../../../common';
 import type { SecuritySolutionPluginCoreSetupDependencies } from '../../plugin_contract';
 import { createRuleAttachmentType } from './rule';
+import { createDetonationAttachmentType } from './detonation';
 import { createAlertAttachmentType } from './alert';
 import { createBulkAlertsAttachmentType } from './alerts';
 import { createEntityAttachmentType } from './entity';
@@ -42,6 +43,7 @@ export const registerAttachments = async (
   ml?: MlPluginSetup
 ) => {
   agentBuilder.attachments.registerType(createAlertAttachmentType());
+  agentBuilder.attachments.registerType(createDetonationAttachmentType());
   agentBuilder.attachments.registerType(createBulkAlertsAttachmentType(core, logger));
   agentBuilder.attachments.registerType(createEntityAttachmentType());
   agentBuilder.attachments.registerType(createEntityAnalyticsDashboardAttachmentType());

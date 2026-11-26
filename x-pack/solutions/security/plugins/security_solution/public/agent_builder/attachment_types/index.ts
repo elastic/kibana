@@ -85,6 +85,16 @@ export const registerAttachmentUiDefinitions = ({
     ...createAttachmentTypeConfig(ALERT_ATTACHMENT_CONFIG.label, ALERT_ATTACHMENT_CONFIG.icon),
   });
 
+  attachments.addAttachmentType<UnknownAttachmentWithLabel>(
+    SecurityAgentBuilderAttachments.detonation,
+    createAttachmentTypeConfig(
+      i18n.translate('xpack.securitySolution.agentBuilder.attachments.detonation.label', {
+        defaultMessage: 'Detonation report',
+      }),
+      'bug'
+    )
+  );
+
   attachments.addAttachmentType<AlertsBatchAttachment>(SecurityAgentBuilderAttachments.alerts, {
     getLabel: (attachment) => {
       // The label renders synchronously, so a batch referenced by tag cannot count its alerts.

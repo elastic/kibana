@@ -200,9 +200,50 @@ export const ADD_TO_NEW_CASE = i18n.translate(
 );
 export const OPEN_GH_ISSUE = i18n.translate(
   'xpack.securitySolution.flyoutV2.detonation.openGhIssue',
-  { defaultMessage: 'Open GH issue' }
+  { defaultMessage: 'Open GH issue with AI Agent' }
 );
 export const AI_GENERATED_ACTION = i18n.translate(
   'xpack.securitySolution.flyoutV2.detonation.aiAction',
   { defaultMessage: 'AI-assisted action' }
+);
+export const SEE_DETONATIONS = i18n.translate(
+  'xpack.securitySolution.flyoutV2.detonation.seeDetonations',
+  { defaultMessage: 'See detonations' }
+);
+export const TAB_OVERVIEW = i18n.translate(
+  'xpack.securitySolution.flyoutV2.detonation.tabOverview',
+  {
+    defaultMessage: 'Overview',
+  }
+);
+export const TAB_DETAILS = i18n.translate('xpack.securitySolution.flyoutV2.detonation.tabDetails', {
+  defaultMessage: 'Details',
+});
+export const TURN_ON_RULE = i18n.translate(
+  'xpack.securitySolution.flyoutV2.detonation.turnOnRule',
+  {
+    defaultMessage: 'Turn on rule',
+  }
+);
+export const TURN_ON_RULE_DESCRIPTION = (ruleName: string) =>
+  i18n.translate('xpack.securitySolution.flyoutV2.detonation.turnOnRuleDescription', {
+    defaultMessage:
+      'The file is malicious. Turn on {ruleName} to prevent this behavior, and open a case to track the response.',
+    values: { ruleName },
+  });
+export const ADJUST_RULE = i18n.translate('xpack.securitySolution.flyoutV2.detonation.adjustRule', {
+  defaultMessage: 'Adjust rule',
+});
+export const ADJUST_RULE_DESCRIPTION = (ruleName: string) =>
+  i18n.translate('xpack.securitySolution.flyoutV2.detonation.adjustRuleDescription', {
+    defaultMessage:
+      'The file is not malicious, so this alert is a false positive. Adjust {ruleName} and open a GH ticket to inform the Detections team.',
+    values: { ruleName },
+  });
+export const OPEN_CASE = i18n.translate('xpack.securitySolution.flyoutV2.detonation.openCase', {
+  defaultMessage: 'Open a case',
+});
+export const OPEN_GH_TICKET = i18n.translate(
+  'xpack.securitySolution.flyoutV2.detonation.openGhTicket',
+  { defaultMessage: 'Open GH ticket' }
 );

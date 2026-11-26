@@ -39,3 +39,4 @@ export const SOURCE_URL = t('sourceUrl', 'URL');
 export const UPLOAD_PROMPT = t('uploadPrompt', 'Select or drag and drop a file');
 export const URL_LABEL = t('urlLabel', 'Sample URL');
 export const URL_PLACEHOLDER = t('urlPlaceholder', 'https://example.com/sample.exe');
+export const PROCESSING_TIME = t('processingTime', 'Processing can take up to 10 minutes.');

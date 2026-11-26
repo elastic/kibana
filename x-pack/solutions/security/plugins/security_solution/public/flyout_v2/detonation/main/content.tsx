@@ -9,12 +9,14 @@ import React, { memo, useMemo, useState } from 'react';
 import {
   EuiBadge,
   EuiBasicTable,
+  EuiButton,
   EuiCallOut,
   EuiCode,
   EuiDescriptionList,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
+  EuiIcon,
   EuiLink,
   EuiPanel,
   EuiSpacer,
@@ -26,12 +28,12 @@ import {
 } from '@elastic/eui';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import { ExpandableSection } from '../../shared/components/expandable_section';
-import { AiSummary } from './ai_summary';
 import { HighlightedFields } from './highlighted_fields';
 import type { ActivityAction, ActivityKind, NetworkFlag, Severity } from '../report_data';
 import {
   ACTIVITY_COUNTS,
   ACTIVITY_ROWS,
+  AI_SUMMARY_HIGHLIGHTS,
   FILE_CONTEXT_ROWS,
   NETWORK_ROWS,
   RELATED_FILES,
@@ -148,7 +150,13 @@ ScoreRing.displayName = 'ScoreRing';
 const VerdictPanel = memo(() => {
   const { euiTheme } = useEuiTheme();
   return (
-    <EuiPanel color="danger" hasBorder paddingSize="m" data-test-subj="detonationVerdictPanel">
+    <EuiPanel
+      color="plain"
+      hasBorder
+      hasShadow={false}
+      paddingSize="m"
+      data-test-subj="detonationVerdictPanel"
+    >
       <EuiFlexGroup gutterSize="m" alignItems="center" responsive={false}>
         <EuiFlexItem grow={false}>
           <ScoreRing score={REPORT.score} />
@@ -162,6 +170,29 @@ const VerdictPanel = memo(() => {
           </EuiText>
         </EuiFlexItem>
       </EuiFlexGroup>
+      <EuiSpacer size="m" />
+      <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+        <EuiFlexItem grow={false}>
+          <Eyebrow>{i18n.AI_SUMMARY}</Eyebrow>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiIcon type="sparkles" size="m" aria-hidden={true} />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiSpacer size="s" />
+      <div data-test-subj="detonationAiSummary">
+        {AI_SUMMARY_HIGHLIGHTS.map(({ title, text }, index) => (
+          <React.Fragment key={title}>
+            <EuiText size="s">
+              <strong>{title}</strong>
+            </EuiText>
+            <EuiText size="xs" color="subdued">
+              {text}
+            </EuiText>
+            {index < AI_SUMMARY_HIGHLIGHTS.length - 1 && <EuiSpacer size="s" />}
+          </React.Fragment>
+        ))}
+      </div>
       <EuiSpacer size="m" />
       <Eyebrow>{i18n.WHY_THIS_VERDICT}</Eyebrow>
       {VERDICT_REASONS.map((reason) => (
@@ -193,6 +224,43 @@ const VerdictPanel = memo(() => {
   );
 });
 VerdictPanel.displayName = 'VerdictPanel';
+
+const RecommendedActions = memo(() => {
+  const isMalicious = REPORT.verdict === 'Malicious';
+  return (
+    <EuiPanel
+      hasBorder
+      hasShadow={false}
+      paddingSize="m"
+      data-test-subj="detonationRecommendedActions"
+    >
+      <Eyebrow>{i18n.RECOMMENDED_ACTIONS}</Eyebrow>
+      <EuiSpacer size="s" />
+      <EuiFlexGroup gutterSize="m" alignItems="center" responsive={false}>
+        <EuiFlexItem>
+          <EuiText size="s">
+            <strong>{isMalicious ? i18n.TURN_ON_RULE : i18n.ADJUST_RULE}</strong>
+          </EuiText>
+          <EuiText size="xs" color="subdued">
+            {isMalicious
+              ? i18n.TURN_ON_RULE_DESCRIPTION(REPORT.ruleName)
+              : i18n.ADJUST_RULE_DESCRIPTION(REPORT.ruleName)}
+          </EuiText>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiButton
+            size="s"
+            iconType={isMalicious ? 'briefcase' : 'logoGithub'}
+            data-test-subj={isMalicious ? 'detonationOpenCase' : 'detonationOpenGhTicket'}
+          >
+            {isMalicious ? i18n.OPEN_CASE : i18n.OPEN_GH_TICKET}
+          </EuiButton>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiPanel>
+  );
+});
+RecommendedActions.displayName = 'RecommendedActions';
 
 const NetworkActivity = memo(() => {
   const columns: Array<EuiBasicTableColumn<(typeof NETWORK_ROWS)[number]>> = [
@@ -226,7 +294,7 @@ const NetworkActivity = memo(() => {
     <Section
       title={i18n.NETWORK_ACTIVITY}
       badge={<CountBadge count={NETWORK_ROWS.length} />}
-      expanded={false}
+      expanded={true}
       data-test-subj="detonationNetworkActivity"
     >
       <EuiBasicTable
@@ -274,7 +342,7 @@ const FileAndSystemActivity = memo(() => {
     <Section
       title={i18n.FILE_AND_SYSTEM_ACTIVITY}
       badge={<CountBadge count={ACTIVITY_COUNTS.all} />}
-      expanded={false}
+      expanded={true}
       data-test-subj="detonationFileAndSystemActivity"
     >
       <EuiTabs size="s" bottomBorder={false}>
@@ -410,41 +478,73 @@ const Enrichment = memo(() => (
 ));
 Enrichment.displayName = 'Enrichment';
 
+type DetonationTab = 'overview' | 'details';
+
+const TABS: Array<{ id: DetonationTab; name: string }> = [
+  { id: 'overview', name: i18n.TAB_OVERVIEW },
+  { id: 'details', name: i18n.TAB_DETAILS },
+];
+
 /**
- * Body of the detonation report flyout.
+ * Body of the detonation report flyout: an Overview tab (verdict, highlighted fields) and a
+ * Details tab (the rest of the report).
  */
-export const Content = memo(() => (
-  <EuiFlexGroup
-    direction="column"
-    gutterSize="m"
-    responsive={false}
-    data-test-subj={DETONATION_CONTENT_TEST_ID}
-  >
-    <EuiFlexItem>
-      <AiSummary />
-    </EuiFlexItem>
-    <EuiFlexItem>
-      <VerdictPanel />
-    </EuiFlexItem>
-    <EuiFlexItem>
-      <HighlightedFields />
-    </EuiFlexItem>
-    <EuiFlexItem>
-      <NetworkActivity />
-    </EuiFlexItem>
-    <EuiFlexItem>
-      <FileAndSystemActivity />
-    </EuiFlexItem>
-    <EuiFlexItem>
-      <SuricataAndYara />
-    </EuiFlexItem>
-    <EuiFlexItem>
-      <FileContext />
-    </EuiFlexItem>
-    <EuiFlexItem>
-      <Enrichment />
-    </EuiFlexItem>
-  </EuiFlexGroup>
-));
+export const Content = memo(() => {
+  const [selectedTab, setSelectedTab] = useState<DetonationTab>('overview');
+  return (
+    <EuiFlexGroup
+      direction="column"
+      gutterSize="m"
+      responsive={false}
+      data-test-subj={DETONATION_CONTENT_TEST_ID}
+    >
+      <EuiFlexItem grow={false}>
+        <EuiTabs size="m" data-test-subj="detonationTabs">
+          {TABS.map((tab) => (
+            <EuiTab
+              key={tab.id}
+              isSelected={tab.id === selectedTab}
+              onClick={() => setSelectedTab(tab.id)}
+              data-test-subj={`detonationTab-${tab.id}`}
+            >
+              {tab.name}
+            </EuiTab>
+          ))}
+        </EuiTabs>
+      </EuiFlexItem>
+      {selectedTab === 'overview' ? (
+        <>
+          <EuiFlexItem>
+            <VerdictPanel />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <RecommendedActions />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <HighlightedFields />
+          </EuiFlexItem>
+        </>
+      ) : (
+        <>
+          <EuiFlexItem>
+            <NetworkActivity />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <FileAndSystemActivity />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <SuricataAndYara />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <FileContext />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <Enrichment />
+          </EuiFlexItem>
+        </>
+      )}
+    </EuiFlexGroup>
+  );
+});
 
 Content.displayName = 'Content';

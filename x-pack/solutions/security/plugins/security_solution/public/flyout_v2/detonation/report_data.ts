@@ -19,6 +19,10 @@ export const REPORT = {
   sourceLink: 'Case #4821',
   sourceText: 'File upload (222 KiB, PE32)',
   score: 92,
+  verdict: 'Malicious' as 'Malicious' | 'Suspicious' | 'Benign',
+  /** Rule that fired for the alert this file came from. */
+  ruleName: 'Fake - Malicious file detected',
+  ruleId: '5f69c4d5-e670-4688-853e-acbe088edbee',
 };
 
 export const VERDICT_REASONS: Array<{

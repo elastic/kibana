@@ -12,11 +12,12 @@ import { useSyncExternalStore } from 'react';
  * - `modal`: pick a file, fill in the "Submit for detonation" modal, then see the report flyout.
  * - `toast`: pick a file, wait a moment, then get a "Detonation submitted" toast.
  */
-export type FlowVariant = 'modal' | 'toast';
+export type FlowVariant = 'modal' | 'toast' | 'chat';
 
 export const FLOW_VARIANT_OPTIONS: Array<{ value: FlowVariant; text: string }> = [
   { value: 'modal', text: 'Flow modal' },
   { value: 'toast', text: 'Flow toast' },
+  { value: 'chat', text: 'Flow chat' },
 ];
 
 // Tiny external store: the selector lives in the Kibana top bar, outside the app's React tree.

@@ -13,11 +13,31 @@ import {
   EuiCopy,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
   EuiPopover,
 } from '@elastic/eui';
+import { useKibana } from '../../../common/lib/kibana';
+import { SecurityAgentBuilderAttachments } from '../../../../common/constants';
+import { REPORT, VERDICT_REASONS, AI_SUMMARY_HIGHLIGHTS } from '../report_data';
 import { useFlowVariant } from '../flow_variant';
 import * as i18n from '../translations';
+
+const getAgentPrompt = (verdict: string, ruleName: string) =>
+  verdict === 'Benign'
+    ? `Help me open a GH ticket to inform the Detections team so they can fine tune this rule: ${ruleName}`
+    : `Help me notify the Trade team so they can turn on this rule: ${ruleName} to prevent malicious behavior`;
+
+const getReportText = () =>
+  [
+    `Detonation report for ${REPORT.fileName}`,
+    `SHA-256: ${REPORT.sha256}`,
+    `Verdict: ${REPORT.verdict} (threat score ${REPORT.score}/100)`,
+    `Rule: ${REPORT.ruleName}`,
+    '',
+    ...AI_SUMMARY_HIGHLIGHTS.map(({ title, text }) => `${title}: ${text}`),
+    '',
+    'Why this verdict:',
+    ...VERDICT_REASONS.map((r) => `- [${r.severity}] ${r.title} (+${r.points})`),
+  ].join('\n');
 
 export const DETONATION_FOOTER_TEST_ID = 'detonationReportFooter';
 export const DETONATION_TAKE_ACTION_TEST_ID = 'detonationReportTakeAction';
@@ -29,6 +49,31 @@ export const DETONATION_TAKE_ACTION_TEST_ID = 'detonationReportTakeAction';
 const TakeAction = memo(() => {
   const [isOpen, setIsOpen] = useState(false);
   const close = useCallback(() => setIsOpen(false), []);
+  const { agentBuilder, http } = useKibana().services;
+  const ruleUrl = `${window.location.origin}${http.basePath.prepend(
+    `/app/security/rules/id/${REPORT.ruleId}`
+  )}`;
+
+  // Opens a new AI Agent conversation with the detonation report attached and a prompt that
+  // depends on the verdict.
+  const openAgentChat = useCallback(() => {
+    agentBuilder?.openChat?.({
+      autoSendInitialMessage: false,
+      newConversation: true,
+      initialMessage: getAgentPrompt(REPORT.verdict, `[${REPORT.ruleName}](${ruleUrl})`),
+      attachments: [
+        {
+          id: `${SecurityAgentBuilderAttachments.detonation}-${REPORT.reportId}`,
+          type: SecurityAgentBuilderAttachments.detonation,
+          data: {
+            attachmentLabel: `${REPORT.fileName} · ${i18n.DETONATION_REPORT_TITLE}`,
+            report: getReportText(),
+          },
+        },
+      ],
+      sessionTag: 'security',
+    });
+  }, [agentBuilder, ruleUrl]);
 
   const panels = useMemo<EuiContextMenuPanelDescriptor[]>(
     () => [
@@ -48,28 +93,18 @@ const TakeAction = memo(() => {
             'data-test-subj': 'detonationActionAddToCase',
           },
           {
-            name: (
-              <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
-                <EuiFlexItem grow={false}>{i18n.OPEN_GH_ISSUE}</EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiIcon
-                    type="sparkles"
-                    size="m"
-                    color="accent"
-                    title={i18n.AI_GENERATED_ACTION}
-                    data-test-subj="detonationActionAiIcon"
-                  />
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            ),
-            icon: 'logoGithub',
-            onClick: close,
+            name: i18n.OPEN_GH_ISSUE,
+            icon: 'productAgent',
+            onClick: () => {
+              close();
+              openAgentChat();
+            },
             'data-test-subj': 'detonationActionOpenGhIssue',
           },
         ],
       },
     ],
-    [close]
+    [close, openAgentChat]
   );
 
   return (

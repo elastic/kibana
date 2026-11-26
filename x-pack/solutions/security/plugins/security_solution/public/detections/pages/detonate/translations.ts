@@ -16,7 +16,7 @@ export const COLUMN_FILE = t('columnFile', 'File');
 export const COLUMN_VERDICT = t('columnVerdict', 'Verdict');
 export const COLUMN_SUBMITTED = t('columnSubmitted', 'Submitted');
 export const SUBMIT_FILE_URL = t('submitFileUrl', 'Submit file/URL');
-export const COLUMN_DETONATION = t('columnDetonation', 'Detonation');
+export const COLUMN_DETONATION = t('columnDetonation', 'Submitted by');
 export const COLUMN_ACTIONS = t('columnActions', 'Actions');
 export const ORIGIN_AUTO = t('originAuto', 'Auto-detonated');
 export const ORIGIN_MANUAL = t('originManual', 'Submitted manually');
@@ -47,3 +47,12 @@ export const SEARCH_PLACEHOLDER = t(
   'searchPlaceholder',
   'Search by file, hash, verdict, status or environment'
 );
+
+export const WIDGET_VERDICTS = t('widgetVerdicts', 'Verdicts');
+export const WIDGET_FILE_TYPES = t('widgetFileTypes', 'File types');
+export const WIDGET_FILES = t('widgetFiles', 'files');
+export const FILTER_VERDICT = t('filterVerdict', 'Verdict');
+export const FILTER_SUBMITTED_BY = t('filterSubmittedBy', 'Submitted by');
+export const FILTER_STATUS = t('filterStatus', 'Status');
+export const WIDGET_TREND = t('widgetTrend', 'Detonations over time');
+export const WIDGET_DETONATIONS = t('widgetDetonations', 'Detonations');

@@ -75,7 +75,7 @@ const CopyableValue = memo(
           {(copy) => (
             <EuiToolTip content={COPY_TO_CLIPBOARD} disableScreenReaderOutput>
               <EuiButtonIcon
-                iconType="copyClipboard"
+                iconType="copy"
                 size="xs"
                 color="text"
                 aria-label={COPY_TO_CLIPBOARD}

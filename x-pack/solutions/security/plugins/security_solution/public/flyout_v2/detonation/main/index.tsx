@@ -8,6 +8,7 @@
 import type { FC } from 'react';
 import React, { memo } from 'react';
 import {
+  EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyoutBody,
@@ -18,6 +19,8 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { KbnInfoCallout } from '@kbn/ui-callout';
+import { useKibana } from '../../../common/lib/kibana';
+import { APP_UI_ID, SecurityPageName } from '../../../../common/constants';
 import { Header } from './header';
 import { Content } from './content';
 import { Footer } from './footer';
@@ -41,6 +44,7 @@ export const DetonationReport: FC<DetonationReportProps> = memo(
   ({ skipDetonation = false, jobId }) => {
     const isJobDone = useIsDetonationJobDone(skipDetonation ? undefined : jobId);
     const isDetonating = !isJobDone;
+    const { application } = useKibana().services;
 
     if (isDetonating) {
       return (
@@ -73,13 +77,31 @@ export const DetonationReport: FC<DetonationReportProps> = memo(
                   {i18n.DETONATING_SANDBOX}
                 </EuiText>
               </EuiFlexItem>
-              <EuiFlexItem grow={false}>
+              <EuiFlexItem grow={false} css={{ alignSelf: 'stretch' }}>
                 <KbnInfoCallout
                   size="s"
-                  title={i18n.DETONATING_DURATION}
-                  text={<p>{i18n.DETONATING_NOTIFY}</p>}
+                  title={
+                    <>
+                      <div>{i18n.DETONATING_DURATION}</div>
+                      <div css={{ fontWeight: 'normal' }}>{i18n.DETONATING_NOTIFY}</div>
+                    </>
+                  }
                   data-test-subj="detonationLoadingCallout"
                 />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false} css={{ alignSelf: 'stretch' }}>
+                <EuiButton
+                  fullWidth
+                  color="primary"
+                  onClick={() =>
+                    application.navigateToApp(APP_UI_ID, {
+                      deepLinkId: SecurityPageName.detonate,
+                    })
+                  }
+                  data-test-subj="detonationSeeDetonations"
+                >
+                  {i18n.SEE_DETONATIONS}
+                </EuiButton>
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlyoutBody>

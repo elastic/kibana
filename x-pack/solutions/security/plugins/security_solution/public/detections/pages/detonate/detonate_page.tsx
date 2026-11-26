@@ -7,6 +7,7 @@
 
 import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import {
+  EuiAvatar,
   EuiBadge,
   EuiBasicTable,
   EuiButtonIcon,
@@ -35,13 +36,11 @@ import {
   isDetonationDone,
   usePendingDetonations,
 } from '../../../flyout_v2/detonation/pending_detonations';
-import type {
-  DetonationOrigin,
-  DetonationRow,
-  DetonationStatus,
-  DetonationVerdict,
-} from './detonation_rows';
-import { DETONATION_ROWS } from './detonation_rows';
+import type { DetonationRow, DetonationStatus, DetonationVerdict } from './detonation_rows';
+import { CURRENT_USER, DETONATION_ROWS } from './detonation_rows';
+import { DetonateWidgets } from './detonate_widgets';
+import type { DetonateFiltersValue } from './detonate_filters';
+import { DetonateFilters } from './detonate_filters';
 import * as i18n from './translations';
 
 export const DETONATE_PAGE_TEST_ID = 'detonatePage';
@@ -93,7 +92,7 @@ const HashCell = memo(({ hash }: { hash: string }) => (
         <EuiToolTip content={i18n.COPY_HASH} disableScreenReaderOutput>
           <EuiButtonIcon
             className="detonateHashCopy"
-            iconType="copyClipboard"
+            iconType="copy"
             size="xs"
             color="text"
             aria-label={i18n.COPY_HASH}
@@ -147,6 +146,11 @@ export const DetonatePage = memo(() => {
   const { application } = useKibana().services;
   const [isSubmitModalOpen, setIsSubmitModalOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
+  const [filters, setFilters] = useState<DetonateFiltersValue>({
+    verdicts: [],
+    submitters: [],
+    statuses: [],
+  });
   const pendingDetonations = usePendingDetonations();
   const [now, setNow] = useState(() => Date.now());
 
@@ -174,6 +178,7 @@ export const DetonatePage = memo(() => {
           environment: 'Windows 11 x64',
           submitted: detonation.submittedAt,
           origin: 'manual',
+          submittedBy: CURRENT_USER,
           status: isDone ? 'complete' : 'in_progress',
           progress: Math.min(99, (elapsed / DETONATION_DURATION_MS) * 100),
           ...(isDone ? { verdict: 'Malicious', score: 92 } : {}),
@@ -184,22 +189,49 @@ export const DetonatePage = memo(() => {
     [pendingDetonations, now]
   );
 
+  const verdictOptions = useMemo(
+    () => (['Malicious', 'Suspicious', 'Benign'] as const).map((v) => ({ value: v, label: v })),
+    []
+  );
+  const statusOptions = useMemo(
+    () =>
+      (Object.keys(STATUS_LABEL) as DetonationStatus[]).map((v) => ({
+        value: v,
+        label: STATUS_LABEL[v],
+      })),
+    []
+  );
+  const submitterOptions = useMemo(
+    () =>
+      [...new Set(rows.map((row) => row.submittedBy))].sort().map((v) => ({ value: v, label: v })),
+    [rows]
+  );
+
   const filteredRows = useMemo(() => {
     const term = searchTerm.trim().toLowerCase();
-    if (!term) {
-      return rows;
-    }
-    return rows.filter((row) =>
-      [
+    return rows.filter((row) => {
+      if (filters.verdicts.length > 0 && !filters.verdicts.includes(row.verdict ?? '')) {
+        return false;
+      }
+      if (filters.submitters.length > 0 && !filters.submitters.includes(row.submittedBy)) {
+        return false;
+      }
+      if (filters.statuses.length > 0 && !filters.statuses.includes(row.status)) {
+        return false;
+      }
+      if (!term) {
+        return true;
+      }
+      return [
         row.fileName,
         row.sha256,
         row.environment,
         row.verdict ?? '',
         STATUS_LABEL[row.status],
-        row.origin === 'auto' ? i18n.ORIGIN_AUTO : i18n.ORIGIN_MANUAL,
-      ].some((value) => value.toLowerCase().includes(term))
-    );
-  }, [rows, searchTerm]);
+        row.submittedBy,
+      ].some((value) => value.toLowerCase().includes(term));
+    });
+  }, [rows, searchTerm, filters]);
 
   const handleSubmit = useCallback(() => {
     setIsSubmitModalOpen(false);
@@ -261,16 +293,26 @@ export const DetonatePage = memo(() => {
         render: (_status: DetonationStatus, row: DetonationRow) => <StatusCell row={row} />,
       },
       {
-        field: 'origin',
+        field: 'submittedBy',
         name: i18n.COLUMN_DETONATION,
-        render: (origin: DetonationOrigin) => (
-          <EuiBadge
-            color="hollow"
-            iconType={origin === 'auto' ? 'bolt' : 'user'}
-            data-test-subj={`detonateOrigin-${origin}`}
+        render: (submittedBy: string, row: DetonationRow) => (
+          <EuiFlexGroup
+            gutterSize="s"
+            alignItems="center"
+            responsive={false}
+            data-test-subj={`detonateOrigin-${row.origin}`}
           >
-            {origin === 'auto' ? i18n.ORIGIN_AUTO : i18n.ORIGIN_MANUAL}
-          </EuiBadge>
+            <EuiFlexItem grow={false}>
+              {row.origin === 'auto' ? (
+                <EuiAvatar name={submittedBy} iconType="bolt" color="subdued" size="s" />
+              ) : (
+                <EuiAvatar name={submittedBy} initials={submittedBy.charAt(0)} size="s" />
+              )}
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiText size="s">{submittedBy}</EuiText>
+            </EuiFlexItem>
+          </EuiFlexGroup>
         ),
       },
       { field: 'environment', name: i18n.COLUMN_ENVIRONMENT },
@@ -320,18 +362,36 @@ export const DetonatePage = memo(() => {
   );
 
   return (
-    <SecuritySolutionPageWrapper data-test-subj={DETONATE_PAGE_TEST_ID}>
+    <SecuritySolutionPageWrapper
+      data-test-subj={DETONATE_PAGE_TEST_ID}
+      css={{ '[data-test-subj="appHeader"]': { borderBottom: 'none' } }}
+    >
       <SecurityAppHeader title={i18n.PAGE_TITLE} menu={appMenu} spacing="compact" />
       <EuiSpacer size="m" />
-      <EuiFieldSearch
-        fullWidth
-        isClearable
-        placeholder={i18n.SEARCH_PLACEHOLDER}
-        value={searchTerm}
-        onChange={(e) => setSearchTerm(e.target.value)}
-        aria-label={i18n.SEARCH_PLACEHOLDER}
-        data-test-subj="detonateSearch"
-      />
+      <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
+        <EuiFlexItem>
+          <EuiFieldSearch
+            fullWidth
+            isClearable
+            placeholder={i18n.SEARCH_PLACEHOLDER}
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            aria-label={i18n.SEARCH_PLACEHOLDER}
+            data-test-subj="detonateSearch"
+          />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <DetonateFilters
+            value={filters}
+            onChange={setFilters}
+            verdictOptions={verdictOptions}
+            submitterOptions={submitterOptions}
+            statusOptions={statusOptions}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiSpacer size="m" />
+      <DetonateWidgets rows={rows} />
       <EuiSpacer size="m" />
       <EuiBasicTable
         tableCaption={i18n.TABLE_CAPTION}
