@@ -91,6 +91,14 @@ const assertListedModelsHaveConnectors = (connectors, groups) => {
   }
 };
 
+// The suite concurrency group with the lowest limit, or '' when the suite defines none.
+const tightestConcurrencyGroup = (concurrencyGroups) => {
+  const [tightest] = Object.entries(
+    concurrencyGroups && typeof concurrencyGroups === 'object' ? concurrencyGroups : {}
+  ).sort(([, left], [, right]) => left - right);
+  return tightest ? tightest[0] : '';
+};
+
 // A shard's `judge` pins the evaluation connector of its steps; otherwise the suite-wide judge applies.
 // A shard's `concurrencyGroup` names the suite group its steps share a concurrency limit in.
 // A step that isn't one shard (a grep run, or a suite without shards) can run any spec, so it takes
@@ -106,14 +114,6 @@ const shardFields = (shard, concurrencyGroups) => {
   const judge = typeof shard?.judge === 'string' ? shard.judge.trim() : '';
   const concurrencyGroup = shardConcurrencyGroup(shard, concurrencyGroups);
   return { ...(judge ? { judge } : {}), ...(concurrencyGroup ? { concurrencyGroup } : {}) };
-};
-
-// The suite concurrency group with the lowest limit, or '' when the suite defines none.
-const tightestConcurrencyGroup = (concurrencyGroups) => {
-  const [tightest] = Object.entries(
-    concurrencyGroups && typeof concurrencyGroups === 'object' ? concurrencyGroups : {}
-  ).sort(([, left], [, right]) => left - right);
-  return tightest ? tightest[0] : '';
 };
 
 // Connector x shard: every requested connector runs every spec file in each shard, or the whole
