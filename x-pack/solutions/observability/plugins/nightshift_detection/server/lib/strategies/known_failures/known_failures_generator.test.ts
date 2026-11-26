@@ -6,7 +6,7 @@
  */
 
 import type { QueryLink } from '@kbn/significant-events-schema';
-import type { RuleRow } from '../../rules/managed_rule_reader';
+import { MAX_ROWS, type RuleRow } from '../../rules/managed_rule_reader';
 import { getSeriesKey } from '../series_key';
 import type { DetectionSignalReading, GeneratorContext } from '../types';
 import { getKnownFailureRuleId } from './known_failure_rule';
@@ -349,6 +349,20 @@ describe('KnownFailuresGenerator', () => {
     );
 
     expect(readDataStart).not.toHaveBeenCalled();
+  });
+
+  // The reader stops at its cap, so a full page means the window's oldest rows were left out.
+  it.each([
+    [MAX_ROWS, true],
+    [MAX_ROWS - 1, false],
+  ])('with %i rows read, reports truncated as %s', async (rowCount, truncated) => {
+    const row = createRow(0, [2, 2, 2, 2, 2, 2, 2]);
+
+    const result = await new KnownFailuresGenerator().generate(
+      createContext({ rows: Array.from({ length: rowCount }, () => row) })
+    );
+
+    expect(result.truncated).toBe(truncated);
   });
 
   // A rule reconciled during the window has had no chance to run.
