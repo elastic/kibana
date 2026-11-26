@@ -155123,7 +155123,21 @@ components:
             - title
         override:
           default: false
-          description: Override an existing data view if a data view with the provided title already exists.
+          description: |
+            When `true`, overwrites an existing data view instead of failing with a duplicate error.  
+            Kibana does this in two steps:  
+
+            1. It looks for a data view with the same name in the current space and deletes it from all spaces.  
+               The name is `data_view.name`, or `data_view.title` if the name is omitted or empty.  
+            2. It saves the new data view under `data_view.id`, overwriting any data view that has that ID.  
+               If you provide `data_view.namespaces`, the new data view goes in those spaces only, even if they don't include the current space.  
+               Otherwise, it keeps the spaces of the data view it overwrites, or goes in the current space if it overwrites none.  
+
+            If step 2 fails after step 1, Kibana doesn't restore the data view it deleted in step 1.  
+            If you don't provide `data_view.id`, Kibana generates a new one, and references to the old ID stop working.  
+            The name search covers only the current space. If the existing data view isn't in the current space and you don't provide `data_view.id`, the request creates a duplicate.  
+            If you provide an ID that exists only in other spaces, the request fails with a conflict error.  
+            To change which spaces a data view belongs to, update its spaces instead of using `override`.  
           type: boolean
       required:
         - data_view
