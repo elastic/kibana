@@ -89,6 +89,13 @@ describe('withChatCompleteSpan token attributes', () => {
       expect(attributes[GenAISemanticConventions.GenAIUsageOutputTokens]).toBe(12);
     });
 
+    it('leaves the output tokens unset when neither completion nor reasoning usage is reported', async () => {
+      await run({ prompt: 100, total: 100 } as unknown as ChatCompletionTokenCount);
+      const attributes = getTokenAttributes();
+      expect(GenAISemanticConventions.GenAIUsageOutputTokens in attributes).toBe(false);
+      expect(GenAISemanticConventions.GenAIUsageReasoningOutputTokens in attributes).toBe(false);
+    });
+
     it('records the cache read and write tokens', async () => {
       await run({ prompt: 100, completion: 10, total: 110, cached: 40, cacheWrite: 20 });
       const attributes = getTokenAttributes();

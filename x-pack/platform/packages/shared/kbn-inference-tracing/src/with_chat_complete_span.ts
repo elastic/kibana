@@ -152,8 +152,11 @@ function setTokens(
   }
   const attributes: Record<string, number> = {
     [GenAISemanticConventions.GenAIUsageInputTokens]: prompt,
-    [GenAISemanticConventions.GenAIUsageOutputTokens]: (completion ?? 0) + (thinking ?? 0),
   };
+  if (completion != null || thinking != null) {
+    attributes[GenAISemanticConventions.GenAIUsageOutputTokens] =
+      (completion ?? 0) + (thinking ?? 0);
+  }
   if (thinking != null) {
     attributes[GenAISemanticConventions.GenAIUsageReasoningOutputTokens] = thinking;
   }

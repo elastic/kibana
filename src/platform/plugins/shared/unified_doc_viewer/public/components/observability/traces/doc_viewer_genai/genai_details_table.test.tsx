@@ -216,6 +216,7 @@ describe('GenAiDetailsTable', () => {
     { field: 'attributes.gen_ai.usage.reasoning.output_tokens', count: 12 },
     { field: 'gen_ai.usage.reasoning.output_tokens', count: 0 },
     { field: 'labels.gen_ai_usage_reasoning_output_tokens', count: 5 },
+    { field: 'numeric_labels.gen_ai_usage_reasoning_output_tokens', count: 7 },
   ])('shows $field immediately after the output total', ({ field, count }) => {
     const outputField = 'attributes.gen_ai.usage.output_tokens';
     const hit = buildHit({ [field]: [count], [outputField]: [30] });
