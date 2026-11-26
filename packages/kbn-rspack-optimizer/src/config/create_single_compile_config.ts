@@ -172,8 +172,9 @@ export async function createSingleCompileConfig(
     allowlistPluginGroups,
   });
 
-  // Create a SINGLE unified entry that imports ALL plugins
-  // This ensures RSPack can properly deduplicate modules across all plugins
+  // Create a SINGLE unified entry with statically analyzable loaders for ALL plugins.
+  // The browser invokes only the page-selected loaders at runtime, while keeping the
+  // full graph available so RSPack can deduplicate modules across all plugins.
   const wrapperDir = resolveEntryWrappersDir(outputRoot);
   if (!Fs.existsSync(wrapperDir)) {
     Fs.mkdirSync(wrapperDir, { recursive: true });
@@ -182,8 +183,7 @@ export async function createSingleCompileConfig(
   // Collect all plugin entries (core + plugins)
   const pluginEntries = collectPluginEntries(repoRoot, plugins);
 
-  // Create unified entry that imports and registers all plugins
-  // Uses relative paths for cache portability across machines
+  // Create the unified loader entry. Uses relative paths for cache portability.
   const unifiedEntryPath = createUnifiedEntry(wrapperDir, repoRoot, pluginEntries);
 
   const extraTargets = pluginEntries.length - 1 - plugins.length;
@@ -225,7 +225,7 @@ export async function createSingleCompileConfig(
     context: repoRoot,
 
     entry: {
-      // Single entry point that imports all plugins
+      // Single entry point containing the generated plugin loader registry
       // When HMR is enabled, prepend the HMR client for SSE-based update notifications
       kibana: hmr
         ? [Path.resolve(__dirname, '../hmr/hmr_client.js'), unifiedEntryPath]
@@ -403,8 +403,7 @@ export async function createSingleCompileConfig(
       // cannot detect (e.g. public/ -> same-plugin common/ -> other-plugin common/).
       ...(dist ? [new CrossPluginTargetValidationPlugin(plugins)] : []),
 
-      // Emit chunk-manifest.json with allChunks (for eager loading via the
-      // bootstrap load() array)
+      // Emit page-selectable preload chunks plus an allChunks compatibility fallback.
       new ChunkPreloadManifestPlugin(),
 
       // Bundle metrics -- collects per-plugin sizes and module counts, emits metrics.json
