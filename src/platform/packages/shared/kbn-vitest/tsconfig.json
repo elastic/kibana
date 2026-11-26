@@ -16,5 +16,11 @@
   ],
   "kbn_references": [
     "@kbn/repo-info",
+    "@kbn/jest",
+    "@kbn/peggy",
+    "@kbn/i18n",
+    "@kbn/react-mute-legacy-root-warning",
+    "@kbn/json-ast",
+    "@kbn/swc-register",
   ]
 }

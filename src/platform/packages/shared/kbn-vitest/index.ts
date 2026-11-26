@@ -8,3 +8,4 @@
  */
 
 export { runVitest } from './src/run_vitest';
+export { run as runVitestMigrate } from './src/codemod/cli';

@@ -18,6 +18,12 @@ project:
   sourceRoot: src/platform/packages/shared/kbn-vitest
 dependsOn:
   - '@kbn/repo-info'
+  - '@kbn/jest'
+  - '@kbn/peggy'
+  - '@kbn/i18n'
+  - '@kbn/react-mute-legacy-root-warning'
+  - '@kbn/json-ast'
+  - '@kbn/swc-register'
 tags:
   - shared-common
   - package

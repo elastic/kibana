@@ -8,6 +8,7 @@
  */
 
 const Path = require('path');
+const { kbnNodePlugins } = require('./src/plugins');
 
 const SETUP_DIR = Path.resolve(__dirname, 'src/setup');
 // Setup and mocks shared with the Jest presets stay in @kbn/jest.
@@ -27,6 +28,7 @@ module.exports = {
       'elastic-apm-node': Path.resolve(KBN_JEST_DIR, 'src/mocks/apm_agent_mock.ts'),
     },
   },
+  plugins: kbnNodePlugins(),
   test: {
     globals: true,
     environment: 'node',
@@ -38,6 +40,17 @@ module.exports = {
       '**/target/**',
     ],
     retry: process.env.CI ? 3 : 0,
+    // Vitest clears mock calls before every test by default; Jest (and @kbn/jest) doesn't, and
+    // tests that call mocks in beforeAll or describe bodies rely on that.
+    clearMocks: false,
+    // Vitest truncates values interpolated into `.each` titles to 40 characters; Jest doesn't, and
+    // snapshot keys and test names must stay the same.
+    taskTitleValueFormatTruncate: 0,
+    // Snapshots of colored output (chalk) were recorded with color on, as Jest workers run; Vitest
+    // forks inherit the parent's pipe and would detect no color support outside a TTY. An explicit
+    // NO_COLOR wins: Node warns when both are set, which fails child processes run with
+    // @kbn/setup-node-env.
+    env: process.env.NO_COLOR ? {} : { FORCE_COLOR: '1' },
     // Kibana runs with --disallow-code-generation-from-strings, so eval() and new Function()
     // throw in production. Test workers get the same V8 flag, unlike Jest, which can only shim
     // eval and Function. The flag is process-wide, so it needs the `forks` pool.
@@ -45,6 +58,8 @@ module.exports = {
     execArgv: ['--disallow-code-generation-from-strings'],
     setupFiles: [
       Path.resolve(SETUP_DIR, 'jest_global.js'),
+      Path.resolve(SETUP_DIR, 'swc_register.js'),
+      Path.resolve(SETUP_DIR, 'native_loader.js'),
       Path.resolve(SETUP_DIR, 'mocks.moment_timezone.js'),
     ],
     snapshotFormat: {
