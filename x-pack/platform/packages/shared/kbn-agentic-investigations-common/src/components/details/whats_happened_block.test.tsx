@@ -43,6 +43,22 @@ describe('WhatsHappenedBlock', () => {
     expect(screen.getByText('Session cookie replayed')).toBeInTheDocument();
   });
 
+  it('renders a time tag in the summary as a relative time', () => {
+    const { container } = render(
+      <WhatsHappenedBlock
+        summary='Errors began at <time datetime="2020-11-24T17:20:00Z"></time>.'
+        attachments={[]}
+        groupedAttachments={groupedAttachments}
+      />
+    );
+
+    expect(screen.getByTestId('agenticInvestigationsMarkdownTime')).toHaveAttribute(
+      'datetime',
+      '2020-11-24T17:20:00Z'
+    );
+    expect(container).not.toHaveTextContent('<time');
+  });
+
   it('renders the attachments alone under the heading', () => {
     render(
       <WhatsHappenedBlock attachments={[attachment]} groupedAttachments={groupedAttachments} />

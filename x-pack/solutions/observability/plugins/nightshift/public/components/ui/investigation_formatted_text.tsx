@@ -7,33 +7,11 @@
 
 import { css } from '@emotion/react';
 import React from 'react';
-import {
-  EuiMarkdownFormat,
-  getDefaultEuiMarkdownParsingPlugins,
-  getDefaultEuiMarkdownProcessingPlugins,
-  useEuiTheme,
-} from '@elastic/eui';
-import { markdownTimeComponents, markdownTimeParser } from './markdown_time_plugin';
+import { useEuiTheme } from '@elastic/eui';
+import { TimeAwareMarkdown } from '@kbn/agentic-investigations-common';
 
 /** Inline code size in flyouts that use 14px body text (matches event flyout markdown code). */
 export const NIGHTSHIFT_INLINE_CODE_FONT_SIZE = '12px';
-
-const buildPluginLists = () => {
-  const processingPlugins = getDefaultEuiMarkdownProcessingPlugins();
-  const [, rehypeToReactOptions] = processingPlugins[1];
-  rehypeToReactOptions.components = {
-    ...rehypeToReactOptions.components,
-    ...markdownTimeComponents,
-  };
-
-  return {
-    parsingPluginList: [...getDefaultEuiMarkdownParsingPlugins(), markdownTimeParser],
-    processingPluginList: processingPlugins,
-  };
-};
-
-// The lists do not depend on props, so they are built once and keep a stable identity.
-const { parsingPluginList, processingPluginList } = buildPluginLists();
 
 export function InvestigationFormattedText({
   text,
@@ -87,14 +65,12 @@ export function InvestigationFormattedText({
           : ''}
       `}
     >
-      <EuiMarkdownFormat
+      <TimeAwareMarkdown
         textSize={fontSize ? 'relative' : textSize}
         color={subdued ? 'subdued' : undefined}
-        parsingPluginList={parsingPluginList}
-        processingPluginList={processingPluginList}
       >
         {text}
-      </EuiMarkdownFormat>
+      </TimeAwareMarkdown>
     </div>
   );
 }

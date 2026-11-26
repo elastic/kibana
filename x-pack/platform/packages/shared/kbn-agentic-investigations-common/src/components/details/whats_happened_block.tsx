@@ -6,7 +6,7 @@
  */
 
 import React, { memo, useMemo, useState } from 'react';
-import { EuiButtonEmpty, EuiMarkdownFormat } from '@elastic/eui';
+import { EuiButtonEmpty } from '@elastic/eui';
 import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
 import {
   FLYOUT_GROUPED_ATTACHMENTS_ORDER,
@@ -17,6 +17,7 @@ import type { FlyoutGroupedAttachmentsRegistry } from '../grouped_attachments';
 import { DetailsBlock } from './detail_block';
 import { DETAILS_FLYOUT_LABELS } from './translations';
 import { firstParagraph } from '../../utils/to_plain_summary';
+import { TimeAwareMarkdown } from '../markdown_time/time_aware_markdown';
 
 export interface WhatsHappenedBlockProps {
   summary?: string;
@@ -51,9 +52,9 @@ export const WhatsHappenedBlock = memo<WhatsHappenedBlockProps>(
     return (
       <DetailsBlock title={DETAILS_FLYOUT_LABELS.sections.overview}>
         {summary && (
-          <EuiMarkdownFormat textSize="s" color="subdued">
+          <TimeAwareMarkdown textSize="s" color="subdued">
             {displayedSummary ?? ''}
-          </EuiMarkdownFormat>
+          </TimeAwareMarkdown>
         )}
         {isCondensed && (
           <div>

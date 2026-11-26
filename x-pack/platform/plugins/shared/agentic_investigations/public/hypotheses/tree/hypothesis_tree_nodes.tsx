@@ -14,12 +14,12 @@ import {
   EuiIcon,
   EuiLink,
   EuiLoadingSpinner,
-  EuiMarkdownFormat,
   EuiPanel,
   EuiText,
   useEuiTheme,
   type IconType,
 } from '@elastic/eui';
+import { TimeAwareMarkdown } from '@kbn/agentic-investigations-common';
 import { Handle, Position, type Node, type NodeProps } from '@xyflow/react';
 import type { HypothesisStatus } from '../../../common/hypotheses/hypotheses';
 import type { InvestigationProposalSummary } from '../../../common/investigations/investigation';
@@ -340,9 +340,9 @@ const ClampedMarkdown = ({
       ${clampLines(lines)}
     `}
   >
-    <EuiMarkdownFormat textSize="s" color={color}>
+    <TimeAwareMarkdown textSize="s" color={color}>
       {text}
-    </EuiMarkdownFormat>
+    </TimeAwareMarkdown>
   </div>
 );
 

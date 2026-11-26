@@ -11,8 +11,8 @@ import { act, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { EuiProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
-import { InvestigationFormattedText } from './investigation_formatted_text';
-import { parseTimeTagDatetime } from './markdown_time_plugin';
+import { TimeAwareMarkdown } from './time_aware_markdown';
+import { parseTimeTagDatetime } from './time_tag';
 
 let mockDateFormat: string | undefined = 'MMM D, YYYY @ HH:mm:ss.SSS';
 
@@ -31,7 +31,7 @@ const renderText = (text: string) =>
   render(
     <I18nProvider>
       <EuiProvider>
-        <InvestigationFormattedText text={text} />
+        <TimeAwareMarkdown>{text}</TimeAwareMarkdown>
       </EuiProvider>
     </I18nProvider>
   );
@@ -81,7 +81,7 @@ describe('markdown time tag', () => {
     ])('renders %s as a relative time with no raw markup', (_, tag) => {
       const { container } = renderText(`Errors began at ${tag}, then recovered.`);
 
-      const time = screen.getByTestId('nightshiftMarkdownTime');
+      const time = screen.getByTestId('agenticInvestigationsMarkdownTime');
       expect(time).toHaveTextContent('2 days ago');
       expect(time).toHaveAttribute('datetime', '2026-11-24T17:20:00Z');
       expect(container).toHaveTextContent('Errors began at 2 days ago, then recovered.');
@@ -92,14 +92,16 @@ describe('markdown time tag', () => {
     it('renders a tag that opens a block as a time', () => {
       renderText(`<time datetime="2026-11-24T17:20:00Z"/>\nstarted the incident`);
 
-      expect(screen.getByTestId('nightshiftMarkdownTime')).toHaveTextContent('2 days ago');
+      expect(screen.getByTestId('agenticInvestigationsMarkdownTime')).toHaveTextContent(
+        '2 days ago'
+      );
       expect(screen.getByText(/started the incident/)).toBeInTheDocument();
     });
 
     it('renders several times, in lists and next to other markdown', () => {
       renderText(`- **on** at ${TAG}\n- off at <time datetime="2026-11-24T19:05:00Z"></time>`);
 
-      expect(screen.getAllByTestId('nightshiftMarkdownTime')).toHaveLength(2);
+      expect(screen.getAllByTestId('agenticInvestigationsMarkdownTime')).toHaveLength(2);
       expect(screen.getByText('on').tagName).toBe('STRONG');
       expect(screen.getAllByRole('listitem')).toHaveLength(2);
     });
@@ -108,7 +110,7 @@ describe('markdown time tag', () => {
       renderText(`at ${TAG}`);
 
       await act(async () => {
-        await userEvent.hover(screen.getByTestId('nightshiftMarkdownTime'));
+        await userEvent.hover(screen.getByTestId('agenticInvestigationsMarkdownTime'));
       });
 
       const tooltip = await screen.findByRole('tooltip');
@@ -122,7 +124,7 @@ describe('markdown time tag', () => {
       renderText(`at ${TAG}`);
 
       await act(async () => {
-        await userEvent.hover(screen.getByTestId('nightshiftMarkdownTime'));
+        await userEvent.hover(screen.getByTestId('agenticInvestigationsMarkdownTime'));
       });
 
       expect(await screen.findByRole('tooltip')).toHaveTextContent('2026-11-24 09:20');
@@ -133,7 +135,7 @@ describe('markdown time tag', () => {
       renderText(`at ${TAG}`);
 
       await act(async () => {
-        await userEvent.hover(screen.getByTestId('nightshiftMarkdownTime'));
+        await userEvent.hover(screen.getByTestId('agenticInvestigationsMarkdownTime'));
       });
 
       expect(await screen.findByRole('tooltip')).toHaveTextContent('Nov 25, 2026 @ 02:20:00.000');
@@ -164,14 +166,14 @@ describe('markdown time tag', () => {
     ])('renders %s as text', (_, tag, expected) => {
       const { container } = renderText(`before ${tag} after`);
 
-      expect(screen.queryByTestId('nightshiftMarkdownTime')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('agenticInvestigationsMarkdownTime')).not.toBeInTheDocument();
       expect(container).toHaveTextContent(`before ${expected} after`);
     });
 
     it('renders the inner text of a tag with a bad datetime', () => {
       const { container } = renderText('at <time datetime="soon">17:20Z</time> sharp');
 
-      expect(screen.queryByTestId('nightshiftMarkdownTime')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('agenticInvestigationsMarkdownTime')).not.toBeInTheDocument();
       expect(container).toHaveTextContent('at 17:20Z sharp');
     });
 
@@ -194,7 +196,7 @@ describe('markdown time tag', () => {
       'https://elastic.co'
     );
     expect(screen.getAllByRole('listitem')).toHaveLength(2);
-    expect(screen.queryByTestId('nightshiftMarkdownTime')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('agenticInvestigationsMarkdownTime')).not.toBeInTheDocument();
     expect(container).not.toHaveTextContent('ago');
   });
 });

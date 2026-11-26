@@ -191,6 +191,19 @@ describe('OverviewTab', () => {
     );
   });
 
+  it('renders a time tag in the conclusion as a relative time', () => {
+    render(
+      <OverviewTab
+        investigation={investigation}
+        attachments={[]}
+        groupedAttachments={groupedAttachments}
+        sections={{ conclusion: 'Switched on at <time datetime="2020-11-24T17:20:00Z"></time>.' }}
+      />
+    );
+
+    expect(screen.getByTestId('agenticInvestigationsMarkdownTime')).toBeInTheDocument();
+  });
+
   it('keeps the reasoning mounted when a conclusion arrives', () => {
     const Reasoning = () => {
       const [isOpen, setIsOpen] = React.useState(false);

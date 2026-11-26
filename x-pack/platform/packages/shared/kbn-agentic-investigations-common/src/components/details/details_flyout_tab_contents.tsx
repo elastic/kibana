@@ -6,7 +6,7 @@
  */
 
 import React, { memo } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiMarkdownFormat } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
 import type { Investigation } from '../../types';
 import type { FlyoutGroupedAttachmentsRegistry } from '../grouped_attachments';
@@ -15,6 +15,7 @@ import { ImpactSection } from './impact_section';
 import { DETAILS_FLYOUT_LABELS } from './translations';
 import { OverviewLoadingSection } from './overview_loading_section';
 import { WhatsHappenedBlock } from './whats_happened_block';
+import { TimeAwareMarkdown } from '../markdown_time/time_aware_markdown';
 
 export interface OverviewTabProps {
   investigation: Investigation;
@@ -97,7 +98,7 @@ export const OverviewTab = memo<OverviewTabProps>(
         {conclusion && (
           <EuiFlexItem data-test-subj="investigationOverviewConclusion">
             <DetailsBlock title={DETAILS_FLYOUT_LABELS.sections.conclusion}>
-              <EuiMarkdownFormat textSize="s">{conclusion}</EuiMarkdownFormat>
+              <TimeAwareMarkdown textSize="s">{conclusion}</TimeAwareMarkdown>
             </DetailsBlock>
           </EuiFlexItem>
         )}

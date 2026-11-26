@@ -25,6 +25,7 @@ export {
 } from './src/components/actions/base_actions';
 
 export { toPlainSummary } from './src/utils/to_plain_summary';
+export { TimeAwareMarkdown } from './src/components/markdown_time/time_aware_markdown';
 
 export { ConversationCard } from './src/components/conversation_card/conversation_card';
 export { ConversationCardCompact } from './src/components/conversation_card/conversation_card_compact';

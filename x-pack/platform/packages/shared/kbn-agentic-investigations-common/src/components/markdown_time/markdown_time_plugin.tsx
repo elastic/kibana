@@ -7,33 +7,23 @@
 
 import { css } from '@emotion/react';
 import React from 'react';
-import moment from 'moment';
 import type { Parent, Text } from 'mdast';
 import type { Node } from 'unist';
 import { EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { COMPLETE_TIME_TAG, getTimeTagDatetime, parseTimeTagDatetime } from './time_tag';
 
 /** Kibana's default `dateFormat`, for when the UI settings are not available in context. */
 const FALLBACK_DATE_FORMAT = 'MMM D, YYYY @ HH:mm:ss.SSS';
 
 const TIME_TAG_NAME = 'time';
-const TIME_NODE_TYPE = 'nightshiftTime';
+const TIME_NODE_TYPE = 'agenticInvestigationsTime';
 
 /** Matches `<time ...>` and `</time>`, but not other tags that start with "time". */
 const TIME_TAG_START = /^<\/?time(?=[\s/>]|$)/i;
 const OPEN_TAG = /^<time(\s[^>]*)?>$/i;
 const CLOSE_TAG = /^<\/time\s*>$/i;
-const COMPLETE_TAG = /<time(?=[\s/>])[^>]*?(?:\/>|>([^<]*)<\/time\s*>)/gi;
-const DATETIME_ATTRIBUTE = /\sdatetime\s*=\s*(?:"([^"]*)"|'([^']*)')/i;
-const ISO_WITH_ZONE = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(:\d{2}(\.\d+)?)?(Z|[+-]\d{2}(:?\d{2})?)$/i;
-
-/** The moment for an ISO 8601 value that carries a time zone, or undefined for anything else. */
-export const parseTimeTagDatetime = (value: string | undefined): moment.Moment | undefined => {
-  if (!value || !ISO_WITH_ZONE.test(value)) return undefined;
-  const parsed = moment(value, moment.ISO_8601, true);
-  return parsed.isValid() ? parsed : undefined;
-};
 
 interface TimeNode extends Node {
   data: { hName: typeof TIME_TAG_NAME; hProperties: { dateTime: string } };
@@ -57,9 +47,8 @@ const createTimeNode = ({
   fallbackText: string;
   position: Node['position'];
 }): Node => {
-  const [, doubleQuoted, singleQuoted] = DATETIME_ATTRIBUTE.exec(openTag) ?? [];
-  const datetime = doubleQuoted ?? singleQuoted;
-  if (!parseTimeTagDatetime(datetime)) {
+  const datetime = getTimeTagDatetime(openTag);
+  if (!datetime || !parseTimeTagDatetime(datetime)) {
     return createTextNode(fallbackText || raw, position);
   }
   const node: TimeNode = {
@@ -76,7 +65,7 @@ const splitHtmlNode = (node: Node & { value: string }): Node[] => {
   const replacements: Node[] = [];
   let lastIndex = 0;
 
-  for (const match of value.matchAll(COMPLETE_TAG)) {
+  for (const match of value.matchAll(new RegExp(COMPLETE_TIME_TAG, 'gi'))) {
     const [raw, fallbackText = ''] = match;
     if (match.index > lastIndex) {
       replacements.push(createTextNode(value.slice(lastIndex, match.index), position));
@@ -191,7 +180,7 @@ export const MarkdownTime = ({
     <>
       <div>{parsed.format(dateFormat)}</div>
       <div>
-        {i18n.translate('xpack.nightshift.markdownTime.utcValue', {
+        {i18n.translate('xpack.agenticInvestigations.markdownTime.utcValue', {
           defaultMessage: 'UTC: {value}',
           values: { value: parsed.clone().utc().format('YYYY-MM-DDTHH:mm:ss[Z]') },
         })}
@@ -203,7 +192,7 @@ export const MarkdownTime = ({
     <EuiToolTip content={tooltipContent} disableScreenReaderOutput>
       <time
         dateTime={dateTime}
-        data-test-subj="nightshiftMarkdownTime"
+        data-test-subj="agenticInvestigationsMarkdownTime"
         tabIndex={0}
         css={css`
           text-decoration: underline dotted;

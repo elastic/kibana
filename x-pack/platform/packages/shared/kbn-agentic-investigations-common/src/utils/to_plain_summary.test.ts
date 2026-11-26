@@ -8,6 +8,37 @@
 import { firstParagraph, toPlainSummary } from './to_plain_summary';
 
 describe('toPlainSummary', () => {
+  describe('time tags', () => {
+    const NOW = new Date('2026-11-26T17:20:00Z').getTime();
+    let originalNow: () => number;
+
+    beforeEach(() => {
+      originalNow = Date.now;
+      Date.now = () => NOW;
+    });
+
+    afterEach(() => {
+      Date.now = originalNow;
+    });
+
+    it.each([
+      '<time datetime="2026-11-24T17:20:00Z"></time>',
+      '<time datetime="2026-11-24T17:20:00Z"/>',
+      '<time datetime="2026-11-24T17:20:00Z">17:20Z</time>',
+    ])('replaces %s with a relative time', (tag) => {
+      expect(toPlainSummary(`Jumped at ${tag} and **ended** later.`)).toBe(
+        'Jumped at 2 days ago and ended later.'
+      );
+    });
+
+    it('keeps the inner text of a tag with a bad datetime, else its raw text', () => {
+      expect(toPlainSummary('At <time datetime="soon">noon</time> sharp')).toBe('At noon sharp');
+      expect(toPlainSummary('At <time datetime="soon"></time> sharp')).toBe(
+        'At <time datetime="soon"></time> sharp'
+      );
+    });
+  });
+
   it('removes emphasis and joins paragraphs on one line', () => {
     expect(toPlainSummary('AlertZero found a gap in **Payroll rule**.\n\nReview it _now_.')).toBe(
       'AlertZero found a gap in Payroll rule. Review it now.'
