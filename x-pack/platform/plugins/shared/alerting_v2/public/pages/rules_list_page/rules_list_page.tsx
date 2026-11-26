@@ -20,6 +20,8 @@ import { useAlertingV2ExperimentalFeatures } from '../../hooks/use_alerting_v2_e
 import { useNavigateToAgentBuilder } from '../../hooks/use_navigate_to_agent_builder';
 import { RuleCreateOptionsPanel } from '../../components/rule_create_options/rule_create_options_panel';
 import { RuleCreateOptionsFlyout } from '../../components/rule_create_options/rule_create_options_flyout';
+import type { RuleCreateSearchProps } from '../../components/rule_create_search';
+import { useUnifiedRuleCreationEnabled } from '../../hooks/use_unified_rule_creation_enabled';
 import {
   KindFilter,
   RULES_LIST_FEATURES_FIELDS,
@@ -33,10 +35,17 @@ import { useRulesDataSource } from './rules_data_source';
 import { UniversalAlertingIntroBanner } from './universal_alerting_intro_banner';
 import { RULES_LIST_DEFAULT_SORT } from './rules_list_columns';
 
+// Sections are wired by their own issues; until then the search shows no results.
+const RULE_CREATE_SEARCH: RuleCreateSearchProps = {
+  sections: {},
+  onQueryChange: () => {},
+};
+
 export const RulesListPage = () => {
   useBreadcrumbs('rules_list');
 
   const canWrite = useService(UserCapabilities).canWrite('rules');
+  const isUnifiedRuleCreationEnabled = useUnifiedRuleCreationEnabled();
   const dataSource = useRulesDataSource();
 
   const [
@@ -192,6 +201,7 @@ export const RulesListPage = () => {
           onCreateWithAgent={onCreateWithAgentFromOptionsFlyout}
           onCreateThresholdRule={onCreateThresholdRuleFromOptionsFlyout}
           onBuildSequence={showBuildSequence ? onBuildSequenceFromOptionsFlyout : undefined}
+          search={isUnifiedRuleCreationEnabled ? RULE_CREATE_SEARCH : undefined}
         />
       ) : null}
       {flyout}

@@ -82,6 +82,31 @@ describe('RuleCreateOptionsFlyout', () => {
     expect(screen.queryByText(/welcome to the new alerting experience/i)).not.toBeInTheDocument();
   });
 
+  it('does not render the search without the search prop', () => {
+    renderFlyout();
+
+    expect(screen.queryByTestId('ruleCreateSearchInput')).not.toBeInTheDocument();
+  });
+
+  it('renders the search above the options when the search prop is set', () => {
+    render(
+      <I18nProvider>
+        <RuleCreateOptionsFlyout
+          onClose={onClose}
+          onCreateEsqlRule={onCreateEsqlRule}
+          onCreateWithAgent={onCreateWithAgent}
+          search={{ sections: {}, onQueryChange: jest.fn() }}
+        />
+      </I18nProvider>
+    );
+
+    const searchInput = screen.getByTestId('ruleCreateSearchInput');
+    expect(
+      searchInput.compareDocumentPosition(screen.getByText('ES|QL rule')) &
+        Node.DOCUMENT_POSITION_FOLLOWING
+    ).toBeTruthy();
+  });
+
   it('shows the Create rule title and closes from the header when stacked', () => {
     render(
       <I18nProvider>

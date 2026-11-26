@@ -32,6 +32,7 @@ let mockAgentBuilderShow = true;
 let mockExperimentalFeaturesEnabled = true;
 let mockAlertingV2ExperimentalFeaturesEnabled = true;
 let mockCanWriteRules = true;
+let mockUnifiedRuleCreationEnabled = false;
 
 jest.mock('@kbn/core-di-browser', () => {
   const { UserCapabilities: ActualUserCapabilities } = jest.requireActual(
@@ -66,6 +67,12 @@ jest.mock('@kbn/core-di-browser', () => {
               : id === 'alerting:v2:experimentalFeatures'
               ? mockAlertingV2ExperimentalFeaturesEnabled
               : undefined,
+        },
+        featureFlags: {
+          useBooleanValue: (flagName: string, fallback: boolean) =>
+            flagName === 'alertingV2.unifiedRuleCreation.enabled'
+              ? mockUnifiedRuleCreationEnabled
+              : fallback,
         },
         chrome: { docTitle: { change: mockDocTitleChange } },
         http: { basePath: { prepend: (p: string) => p } },
@@ -258,6 +265,7 @@ describe('RulesListPage', () => {
     mockExperimentalFeaturesEnabled = true;
     mockAlertingV2ExperimentalFeaturesEnabled = true;
     mockCanWriteRules = true;
+    mockUnifiedRuleCreationEnabled = false;
     latestComposeHistoryBack = undefined;
     mockUseDeleteRule.mockReturnValue({
       mutate: mockDeleteMutate,
@@ -653,6 +661,27 @@ describe('RulesListPage', () => {
     expect(screen.getByTestId('ruleCreateOptionsFlyout')).toBeInTheDocument();
     expect(screen.getByText('ES|QL rule')).toBeInTheDocument();
     expect(mockNavigateToUrl).not.toHaveBeenCalled();
+  });
+
+  it('does not show the create rule search when unified rule creation is disabled', async () => {
+    renderPage();
+    await waitFor(() => expect(screen.getByTestId('createRuleButton')).toBeInTheDocument());
+
+    fireEvent.click(screen.getByTestId('createRuleButton'));
+
+    expect(screen.getByTestId('ruleCreateOptionsFlyout')).toBeInTheDocument();
+    expect(screen.queryByTestId('ruleCreateSearchInput')).not.toBeInTheDocument();
+  });
+
+  it('shows the create rule search above the options when unified rule creation is enabled', async () => {
+    mockUnifiedRuleCreationEnabled = true;
+    renderPage();
+    await waitFor(() => expect(screen.getByTestId('createRuleButton')).toBeInTheDocument());
+
+    fireEvent.click(screen.getByTestId('createRuleButton'));
+
+    expect(screen.getByTestId('ruleCreateSearchInput')).toBeInTheDocument();
+    expect(screen.getByText('ES|QL rule')).toBeInTheDocument();
   });
 
   it('closes create rule options flyout without navigating', async () => {
