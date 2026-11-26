@@ -9,7 +9,7 @@ import type { QueryLink } from '@kbn/significant-events-schema';
 import { Parser } from '@elastic/esql';
 import { wrapReading } from '../../signals/wrap_reading';
 import { compileDataStartQuery } from './compile_known_failure_query';
-import type { KnownFailureRise } from './judge_known_failure';
+import type { KnownFailureRise } from './rises';
 import { toRiseReading, toUnusualMinuteReading } from './to_reading';
 
 const KNOWLEDGE_INDICATOR: QueryLink = {

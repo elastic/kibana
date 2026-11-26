@@ -9,7 +9,8 @@ import type { QueryLink } from '@kbn/significant-events-schema';
 import type { DetectionSignalReading } from '../types';
 import { compileCountEvidenceQuery, compileEvidenceQuery } from './compile_known_failure_query';
 import { KNOWN_FAILURES_SETTINGS, KNOWN_FAILURES_STRATEGY_ID } from './constants';
-import type { KnownFailureRise, UnusualMinute } from './judge_known_failure';
+import type { KnownFailureRise } from './rises';
+import type { UnusualMinute } from './unusual_minutes';
 
 const MINUTE_MS = 60_000;
 /** How much of the level before a lasting rise its evidence shows. */

@@ -7,6 +7,7 @@
 
 import { z, lazySchema } from '@kbn/zod/v4';
 import type { RuleRow } from '../../rules/managed_rule_reader';
+import { KNOWN_FAILURES_SETTINGS } from './constants';
 
 /**
  * The columns the rule query returns, as `.rule-events` stores them: dates as epoch milliseconds, a
@@ -140,5 +141,29 @@ function toChange(data: z.infer<typeof knownFailureRowSchema>): KnownFailureChan
     before_median: beforeMedian,
     before_minutes: beforeMinutes,
     after_median: afterMedian,
+  };
+}
+
+const MINUTE_MS = 60_000;
+
+/** Where the parts of a run's window start, in epoch milliseconds. */
+export interface RunWindow {
+  start: number;
+  baselineStart: number;
+  lastMinute: number;
+}
+
+/** Where the parts of a run's window start, in epoch milliseconds. */
+export function getRunWindow({ minutes }: Pick<KnownFailureMeasurement, 'minutes'>): RunWindow {
+  const {
+    window_minutes: window,
+    newest_minutes: newest,
+    baseline_minutes: baseline,
+  } = KNOWN_FAILURES_SETTINGS;
+  const end = minutes[minutes.length - 1].minute + MINUTE_MS;
+  return {
+    start: end - window * MINUTE_MS,
+    baselineStart: end - (newest + baseline) * MINUTE_MS,
+    lastMinute: end - MINUTE_MS,
   };
 }
