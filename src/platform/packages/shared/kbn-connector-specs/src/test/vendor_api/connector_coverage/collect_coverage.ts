@@ -9,6 +9,7 @@
 
 import fs from 'fs/promises';
 import path from 'path';
+import type { TokenUrlServer } from '@kbn/connector-emulate';
 import { resolveTokenUrlAgainstServers } from '@kbn/connector-emulate';
 import { vendorApiExemptionsSchema } from '../exemptions';
 import { listConnectors } from '../find_connector';
@@ -23,13 +24,37 @@ interface OpenApiSecurityScheme {
   flows?: Record<string, { tokenUrl?: string }>;
 }
 
+interface SnapshotServerVariable {
+  default?: unknown;
+  enum?: unknown;
+}
+
 interface SnapshotDocument {
-  servers?: Array<{ url?: string }>;
+  servers?: Array<{ url?: string; variables?: Record<string, SnapshotServerVariable> }>;
   components?: { securitySchemes?: Record<string, OpenApiSecurityScheme> };
 }
 
-const serverUrlsOf = ({ servers }: SnapshotDocument): string[] =>
-  (servers ?? []).map(({ url }) => url).filter((url): url is string => typeof url === 'string');
+const isString = (value: unknown): value is string => typeof value === 'string';
+
+// The snapshot's servers with their variables, so a token URL resolves as the emulator resolves it.
+const serversOf = ({ servers }: SnapshotDocument): TokenUrlServer[] =>
+  (servers ?? []).flatMap(({ url, variables = {} }) => {
+    if (!isString(url)) return [];
+    const declared = Object.entries(variables).flatMap(([name, variable]) =>
+      isString(variable.default)
+        ? [
+            [
+              name,
+              {
+                default: variable.default,
+                ...(Array.isArray(variable.enum) ? { enum: variable.enum.filter(isString) } : {}),
+              },
+            ] as const,
+          ]
+        : []
+    );
+    return [{ url, variables: Object.fromEntries(declared) }];
+  });
 
 const exists = (file: string): Promise<boolean> =>
   fs.access(file).then(
@@ -64,7 +89,7 @@ export const readServedTokenUrls = async (directory: string): Promise<string[]> 
         // Taken verbatim it would never match a connector's absolute token URL, so the
         // connector would be reported as not served when the emulator does serve it.
         if (tokenUrl) {
-          for (const url of resolveTokenUrlAgainstServers(tokenUrl, serverUrlsOf(snapshot))) {
+          for (const url of resolveTokenUrlAgainstServers(tokenUrl, serversOf(snapshot))) {
             urls.add(url);
           }
         }

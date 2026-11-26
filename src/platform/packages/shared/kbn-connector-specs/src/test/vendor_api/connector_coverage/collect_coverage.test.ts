@@ -163,7 +163,7 @@ describe('readServedTokenUrls', () => {
     await fs.rm(directory, { recursive: true, force: true });
   });
 
-  const withTokenUrl = (tokenUrl: string, servers: Array<{ url: string }>) => ({
+  const withTokenUrl = (tokenUrl: string, servers: Array<{ url: string; variables?: object }>) => ({
     openapi: '3.0.3',
     servers,
     components: {
@@ -188,6 +188,22 @@ describe('readServedTokenUrls', () => {
 
     await expect(readServedTokenUrls(directory)).resolves.toEqual([
       'https://{yourOktaDomain}/oauth2/v1/token',
+    ]);
+  });
+
+  // The emulator serves such a token URL on each scheme the variable allows, and so must coverage.
+  it("resolves a scheme-relative token URL on a templated server's schemes", async () => {
+    await writeSnapshot(
+      withTokenUrl('//auth.example.com/token', [
+        {
+          url: '{protocol}://api.example.com/v1',
+          variables: { protocol: { default: 'http', enum: ['http'] } },
+        },
+      ])
+    );
+
+    await expect(readServedTokenUrls(directory)).resolves.toEqual([
+      'http://auth.example.com/token',
     ]);
   });
 
