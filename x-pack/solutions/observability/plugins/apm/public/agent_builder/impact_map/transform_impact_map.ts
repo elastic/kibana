@@ -87,6 +87,8 @@ export type ImpactServiceNodeData = ServiceNodeData & {
   impactState?: ImpactState;
   /** Events recorded against the entity, shown as a count on the node. */
   eventCount?: number;
+  /** A customer impact event happened to the entity: customers felt it here. */
+  hasCustomerImpact?: boolean;
 };
 
 const KUBERNETES_TYPE =
@@ -101,6 +103,7 @@ export type ImpactDependencyNodeData = DependencyNodeData & {
   impactState?: ImpactState;
   euiIcon?: string;
   eventCount?: number;
+  hasCustomerImpact?: boolean;
 };
 
 export type ImpactServiceMapNode =
@@ -150,6 +153,13 @@ export const transformImpactMap = (
     }
   });
 
+  // Where customers felt the problem: the entities a customer impact event happened to.
+  const customerImpactIds = new Set(
+    events
+      .filter(({ kind, entity_id: entityId }) => kind === 'customer_impact' && entityId)
+      .map(({ entity_id: entityId }) => entityId as string)
+  );
+
   // A link that was on the critical path is fine again when the entity it comes from has recovered.
   const recoveredIds = new Set(
     entities
@@ -183,6 +193,7 @@ export const transformImpactMap = (
             impactState,
             euiIcon,
             eventCount,
+            hasCustomerImpact: customerImpactIds.has(id),
           },
         };
       }
@@ -200,6 +211,7 @@ export const transformImpactMap = (
             severityScore: score,
             impactState,
             eventCount,
+            hasCustomerImpact: customerImpactIds.has(id),
           },
         };
       }
@@ -213,6 +225,7 @@ export const transformImpactMap = (
           isService: true,
           impactState,
           eventCount,
+          hasCustomerImpact: customerImpactIds.has(id),
           agentName,
           ...(score !== undefined && { serviceAnomalyStats: { anomalyScore: score } }),
           ...(annotations?.alert_count && { alertsCount: annotations.alert_count }),

@@ -736,3 +736,34 @@ describe('limitBulletList', () => {
     expect(out.split('\n')).toHaveLength(2);
   });
 });
+
+describe('limitEvidence sample', () => {
+  it('keeps a sample of records, trimmed to five rows and six columns', () => {
+    const rows = Array.from({ length: 8 }, (_, index) => ({
+      a: `a${index}`,
+      b: 'b',
+      c: 'c',
+      d: 'd',
+      e: 'e',
+      f: 'f',
+      g: 'dropped',
+    }));
+    const evidence = limitEvidence({ description: 'Errors.', sample: { title: 'Spans', rows } });
+
+    expect(evidence?.sample?.title).toBe('Spans');
+    expect(evidence?.sample?.rows).toHaveLength(5);
+    expect(Object.keys(evidence?.sample?.rows[0] ?? {})).toEqual(['a', 'b', 'c', 'd', 'e', 'f']);
+  });
+
+  it('shortens long values, and keeps a sample on its own', () => {
+    const evidence = limitEvidence({ sample: { rows: [{ message: 'x'.repeat(2_000) }] } });
+
+    expect((evidence?.sample?.rows[0].message as string).length).toBe(500);
+  });
+
+  it('drops a sample with no values', () => {
+    expect(limitEvidence({ description: 'Errors.', sample: { rows: [{}, {}] } })).toEqual({
+      description: 'Errors.',
+    });
+  });
+});

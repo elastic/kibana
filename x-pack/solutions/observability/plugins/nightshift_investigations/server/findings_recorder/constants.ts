@@ -14,7 +14,7 @@ export const FINDINGS_RECORDER_EVERY_CYCLES = 4;
  * The final pass blocks the end of the execution, so it is bounded. It may read workspace files
  * over a few model calls before it answers, so it gets longer than a live pass.
  */
-export const FINDINGS_RECORDER_FINAL_TIMEOUT_MS = 120_000;
+export const FINDINGS_RECORDER_FINAL_TIMEOUT_MS = 240_000;
 /** A live pass is abandoned after this long, so a hung model call cannot pin the guard. */
 export const FINDINGS_RECORDER_LIVE_TIMEOUT_MS = 90_000;
 

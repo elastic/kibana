@@ -201,6 +201,12 @@ const PREVIOUS_LABEL = i18n.translate('xpack.agenticInvestigations.impactMap.eve
 const BACK_LABEL = i18n.translate('xpack.agenticInvestigations.impactMap.events.back', {
   defaultMessage: 'All events',
 });
+const SAMPLE_DATA_LABEL = i18n.translate(
+  'xpack.agenticInvestigations.impactMap.events.sampleData',
+  {
+    defaultMessage: 'Sample data',
+  }
+);
 const DESCRIPTION_LABEL = i18n.translate(
   'xpack.agenticInvestigations.impactMap.events.description',
   {
@@ -902,6 +908,87 @@ export const EventGlance: React.FC<{
   ) : null;
 
 /**
+ * A few of the records the event's data came from, such as the log lines or spans that show the
+ * problem, as a small table under its chart. Nothing when the event holds none.
+ */
+export const EventSampleData: React.FC<{ event: ImpactMapEvent }> = ({ event }) => {
+  const { euiTheme } = useEuiTheme();
+  const sample = event.evidence?.sample;
+  if (!sample || sample.rows.length === 0) {
+    return null;
+  }
+  const columns: string[] = [];
+  sample.rows.forEach((row) =>
+    Object.keys(row).forEach((key) => {
+      if (!columns.includes(key)) columns.push(key);
+    })
+  );
+  return (
+    <div data-test-subj="agenticInvestigationsImpactMapEventSample">
+      <EuiTitle size="xxs">
+        <h4>{SAMPLE_DATA_LABEL}</h4>
+      </EuiTitle>
+      {sample.title && (
+        <EuiText size="xs" color="subdued">
+          {sample.title}
+        </EuiText>
+      )}
+      <EuiSpacer size="xs" />
+      <div
+        css={css`
+          overflow-x: auto;
+          border: ${euiTheme.border.thin};
+          border-radius: ${euiTheme.border.radius.medium};
+        `}
+      >
+        <table
+          css={css`
+            inline-size: 100%;
+            border-collapse: collapse;
+            font-size: ${euiTheme.size.m};
+            th,
+            td {
+              padding: ${euiTheme.size.xs} ${euiTheme.size.s};
+              text-align: start;
+              vertical-align: top;
+            }
+            th {
+              color: ${euiTheme.colors.textSubdued};
+              font-weight: ${euiTheme.font.weight.medium};
+              white-space: nowrap;
+              background: ${euiTheme.colors.backgroundBaseSubdued};
+            }
+            td {
+              font-family: ${euiTheme.font.familyCode};
+              white-space: pre-wrap;
+              overflow-wrap: anywhere;
+              border-block-start: ${euiTheme.border.thin};
+            }
+          `}
+        >
+          <thead>
+            <tr>
+              {columns.map((column) => (
+                <th key={column}>{column}</th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {sample.rows.map((row, index) => (
+              <tr key={index}>
+                {columns.map((column) => (
+                  <td key={column}>{row[column] === null ? '' : String(row[column] ?? '')}</td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+};
+
+/**
  * An event's chart and, under it, where its data came from and the query that asked for it: what
  * a check shows when it opens. Nothing when the event holds neither.
  */
@@ -919,6 +1006,12 @@ export const EventChartAndSource: React.FC<{
         }}
         referenceTime={event.at}
       />
+    )}
+    {event.evidence?.sample && (
+      <>
+        <EuiSpacer size="m" />
+        <EventSampleData event={event} />
+      </>
     )}
     {event.data_source && (
       <>
@@ -973,6 +1066,12 @@ export const EventDetail: React.FC<{
           }}
           referenceTime={event.at}
         />
+      </>
+    )}
+    {event.evidence?.sample && (
+      <>
+        <EuiSpacer size="m" />
+        <EventSampleData event={event} />
       </>
     )}
     {event.links?.length ? (

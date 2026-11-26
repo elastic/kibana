@@ -29,15 +29,20 @@ export {
   MAX_EVIDENCE_CHART_LABEL_LENGTH,
   MAX_EVIDENCE_CHART_POINTS,
   MAX_EVIDENCE_CHART_SERIES,
+  MAX_EVIDENCE_SAMPLE_COLUMNS,
+  MAX_EVIDENCE_SAMPLE_ROWS,
+  MAX_EVIDENCE_SAMPLE_VALUE_LENGTH,
   MAX_EVIDENCE_SHORT_TEXT_LENGTH,
   MAX_EVIDENCE_TEXT_LENGTH,
   evidenceChartSchema,
+  evidenceSampleSchema,
   investigationEvidenceSchema,
 } from './evidence';
 export type {
   EvidenceChart,
   EvidenceChartAnnotation,
   EvidenceChartSeries,
+  EvidenceSample,
   InvestigationEvidence,
 } from './evidence';
 
@@ -162,11 +167,7 @@ export {
   isInsideWindow,
   selectTimelineSummary,
 } from './impact_map/timeline';
-export type {
-  TimeScale,
-  TimeScaleTick,
-  TimelineSummaryData,
-} from './impact_map/timeline';
+export type { TimeScale, TimeScaleTick, TimelineSummaryData } from './impact_map/timeline';
 
 export type {
   ImpactMapAnnotations,

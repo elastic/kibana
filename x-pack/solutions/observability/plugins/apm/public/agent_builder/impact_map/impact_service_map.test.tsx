@@ -304,3 +304,31 @@ describe('a recovered impact map', () => {
     });
   });
 });
+
+describe('customer impact on the map', () => {
+  it('marks the entities a customer impact event happened to', () => {
+    const map = {
+      ...impactMap,
+      events: [
+        {
+          id: 'ci',
+          kind: 'customer_impact' as const,
+          title: 'Checkout failed',
+          at: '2026-11-07T10:00:00Z',
+          entity_id: 'checkout',
+        },
+        {
+          id: 'f',
+          kind: 'failure' as const,
+          title: 'Payments slow',
+          at: '2026-11-07T10:00:00Z',
+          entity_id: 'payments-db',
+        },
+      ],
+    };
+    const { nodes } = transformImpactMap(map, { criticalPath: 'red', recovered: 'green' });
+
+    expect(nodes.find(({ id }) => id === 'checkout')?.data.hasCustomerImpact).toBe(true);
+    expect(nodes.find(({ id }) => id === 'payments-db')?.data.hasCustomerImpact).toBe(false);
+  });
+});

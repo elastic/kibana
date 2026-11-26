@@ -23,6 +23,9 @@ import {
   MAX_EVIDENCE_CHART_LABEL_LENGTH,
   MAX_EVIDENCE_CHART_POINTS,
   MAX_EVIDENCE_CHART_SERIES,
+  MAX_EVIDENCE_SAMPLE_COLUMNS,
+  MAX_EVIDENCE_SAMPLE_ROWS,
+  MAX_EVIDENCE_SAMPLE_VALUE_LENGTH,
   MAX_EVIDENCE_SHORT_TEXT_LENGTH,
   MAX_EVIDENCE_TEXT_LENGTH,
   MAX_HYPOTHESES,
@@ -50,6 +53,7 @@ import {
   sanitizeDataSource,
   clockTimeToIso,
   buildProposalComment,
+  type EvidenceSample,
   type InvestigationEvidence,
 } from '@kbn/agentic-investigations-plugin/common';
 import {
@@ -100,6 +104,14 @@ export const findingsOutputSchema = lazySchema(() => {
   const evidenceSchema = z.object({
     description: z.string().optional(),
     chart: chartSchema.optional(),
+    sample: z
+      .object({
+        title: z.string().optional(),
+        rows: z.array(
+          z.record(z.string(), z.union([z.string(), z.number(), z.boolean(), z.null()]))
+        ),
+      })
+      .optional(),
   });
   const hypothesisSchema = z.object({
     candidate: z.string().min(1),
@@ -312,6 +324,43 @@ const chartTimeToIso = (raw: string): string | undefined => {
 };
 
 /**
+ * A sample of records trimmed to what the store accepts: the first few rows, the first few columns
+ * across them, each value shortened. Nothing when no row has a value left.
+ */
+const limitSample = (raw: RawEvidence['sample']): EvidenceSample | undefined => {
+  if (!raw) return undefined;
+  const rows = raw.rows.slice(0, MAX_EVIDENCE_SAMPLE_ROWS);
+  const columns: string[] = [];
+  rows.forEach((row) =>
+    Object.keys(row).forEach((key) => {
+      if (key.trim() && !columns.includes(key) && columns.length < MAX_EVIDENCE_SAMPLE_COLUMNS) {
+        columns.push(key);
+      }
+    })
+  );
+  const limited = rows
+    .map((row) =>
+      Object.fromEntries(
+        columns
+          .filter((column) => row[column] !== undefined)
+          .map((column) => {
+            const value = row[column];
+            return [
+              column.slice(0, 96),
+              typeof value === 'string' ? truncate(value, MAX_EVIDENCE_SAMPLE_VALUE_LENGTH) : value,
+            ];
+          })
+      )
+    )
+    .filter((row) => Object.keys(row).length > 0);
+  if (limited.length === 0) return undefined;
+  const title = raw.title?.trim()
+    ? truncate(raw.title, MAX_EVIDENCE_CHART_LABEL_LENGTH)
+    : undefined;
+  return { ...(title ? { title } : {}), rows: limited };
+};
+
+/**
  * Trims evidence to what the stores accept. A chart is only the model's reading of numbers in the
  * conversation, so a chart that does not fit (no usable points, or a shape the schema rejects) is
  * dropped and the description is kept.
@@ -378,11 +427,15 @@ export const limitEvidence = (
             : {}),
         }
       : undefined;
+  const sample = limitSample(raw.sample);
   const parsed = investigationEvidenceSchema.safeParse({
     ...(description ? { description } : {}),
     ...(chart ? { chart } : {}),
+    ...(sample ? { sample } : {}),
   });
-  if (parsed.success && (parsed.data.description || parsed.data.chart)) return parsed.data;
+  if (parsed.success && (parsed.data.description || parsed.data.chart || parsed.data.sample)) {
+    return parsed.data;
+  }
   return description ? { description } : undefined;
 };
 
@@ -1026,6 +1079,26 @@ const EVIDENCE_JSON_SCHEMA = {
       type: 'string',
       description:
         'Markdown: what was observed and why it matters, only what a chart does not already show.',
+    },
+    sample: {
+      type: 'object',
+      description:
+        'A few of the records the query returned (log lines, spans, documents), copied exactly from the tool results, so a person sees the data behind the observation. At most 5 rows and 6 columns: the fields that matter, such as @timestamp, service or pod, and the message. Never invent a row, and leave out secrets.',
+      properties: {
+        title: {
+          type: 'string',
+          description: 'What the rows are, such as "Failing shipping spans".',
+        },
+        rows: {
+          type: 'array',
+          items: {
+            type: 'object',
+            description: 'One record: field name to value.',
+            additionalProperties: { type: ['string', 'number', 'boolean', 'null'] },
+          },
+        },
+      },
+      required: ['rows'],
     },
     chart: {
       type: 'object',

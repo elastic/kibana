@@ -104,16 +104,25 @@ export const registerFindingsRecorder = ({
             !conversationId ||
             conversationAccess === 'readOnly'
           ) {
+            if (agentId === NIGHTSHIFT_INVESTIGATION_AGENT_ID && conversationId) {
+              logger.info(
+                `Findings recorder skipped the final pass for ${conversationId}: the conversation is read only`
+              );
+            }
             return;
           }
           if (round.status !== ConversationRoundStatus.completed) {
+            logger.info(
+              `Findings recorder skipped the final pass for ${conversationId}: the round is ${round.status}`
+            );
             coordinator.release(conversationId);
             return;
           }
 
           try {
+            const startedAt = Date.now();
             const answer = extractAnswer({ responseMessage: round.response?.message }) ?? '';
-            await coordinator.runFinal({
+            const wrote = await coordinator.runFinal({
               conversationId,
               timeoutMs: FINDINGS_RECORDER_FINAL_TIMEOUT_MS,
               run: (guard) =>
@@ -129,6 +138,11 @@ export const registerFindingsRecorder = ({
                   allowedConnectorIds: agentConfiguration?.connector_ids ?? [],
                 }),
             });
+            logger.info(
+              `Findings recorder final pass for ${conversationId} ${
+                wrote ? 'wrote' : 'wrote nothing'
+              } after ${Math.round((Date.now() - startedAt) / 1000)}s`
+            );
           } catch (error) {
             // The investigation is already done: a recording failure must not fail it.
             logger.warn(

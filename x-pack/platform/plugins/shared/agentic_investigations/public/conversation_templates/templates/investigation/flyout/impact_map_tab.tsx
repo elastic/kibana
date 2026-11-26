@@ -217,13 +217,29 @@ const ImpactMapPanel: React.FC<{
   const openEntity = (id: string) => setSelection({ kind: 'entity', id });
   const openRelationship = (id: string) => open({ kind: 'relationship', id });
   const [hover, setHover] = useState<{ id: string; element: HTMLElement }>();
+  // The card has events to click, so it stays open a moment after the pointer leaves the node, for
+  // the pointer to reach it.
+  const hoverTimer = useRef<ReturnType<typeof setTimeout>>();
+  const keepHover = () => clearTimeout(hoverTimer.current);
+  const leaveHover = () => {
+    clearTimeout(hoverTimer.current);
+    hoverTimer.current = setTimeout(() => setHover(undefined), 200);
+  };
+  useEffect(() => () => clearTimeout(hoverTimer.current), []);
   const map = (
     <Renderer
       impactMap={withRecoveredHealth(impactMap)}
       isFullScreen={isMaximized}
       onToggleFullScreen={() => setIsMaximized(!isMaximized)}
       onEntityClick={openEntity}
-      onEntityHover={(id, element) => setHover(id && element ? { id, element } : undefined)}
+      onEntityHover={(id, element) => {
+        if (id && element) {
+          keepHover();
+          setHover({ id, element });
+        } else {
+          leaveHover();
+        }
+      }}
       onRelationshipClick={openRelationship}
     />
   );
@@ -235,9 +251,21 @@ const ImpactMapPanel: React.FC<{
       anchorPosition="rightCenter"
       panelPaddingSize="m"
       ownFocus={false}
-      panelProps={{ css: { pointerEvents: 'none', inlineSize: 340, maxInlineSize: '90vw' } }}
+      panelProps={{
+        css: { inlineSize: 340, maxInlineSize: '90vw' },
+        onMouseEnter: keepHover,
+        onMouseLeave: leaveHover,
+      }}
     >
-      <EntityHoverCard entityId={hover.id} impactMap={impactMap} />
+      <EntityHoverCard
+        entityId={hover.id}
+        impactMap={impactMap}
+        onOpenEvent={(eventId) => {
+          keepHover();
+          setHover(undefined);
+          open({ kind: 'event', id: eventId });
+        }}
+      />
     </EuiWrappingPopover>
   );
 

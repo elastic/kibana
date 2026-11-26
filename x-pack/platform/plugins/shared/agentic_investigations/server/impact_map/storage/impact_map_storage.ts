@@ -46,6 +46,9 @@ export const impactMapStorageSettings = {
       entityTypes: types.object({ enabled: false }),
       relationshipTypes: types.object({ enabled: false }),
       events: types.object({ enabled: false }),
+      // What the summary timeline shows. The mapping is strict, so a stored field must be listed or
+      // the whole write is rejected.
+      timeline: types.object({ enabled: false }),
       createdAt: types.date({}),
       updatedAt: types.date({}),
       createdBy: userMapping,

@@ -54,7 +54,8 @@ type BadgeState = 'root_cause' | 'recovered';
 
 const BADGES: Record<BadgeState, { icon: IconType; label: string }> = {
   root_cause: {
-    icon: 'bullseye',
+    // The icon the events give a root cause.
+    icon: 'crosshair',
     label: i18n.translate('xpack.apm.impactMap.badge.rootCause', {
       defaultMessage: 'Root cause',
     }),
@@ -103,18 +104,58 @@ function StateBadge({ state, floating }: { state: BadgeState; floating?: boolean
           width: ${BADGE_SIZE}px;
           height: ${BADGE_SIZE}px;
           border-radius: 50%;
-          background: ${isRecovered
-            ? euiTheme.colors.success
-            : getSeverityColor(IMPACT_SEVERITY_SCORES.rootCause)};
+          /* The colours of the same kinds on the timeline: red for the cause, green for recovered. */
+          background: ${isRecovered ? euiTheme.colors.success : euiTheme.colors.danger};
           border: 2px solid ${euiTheme.colors.backgroundBasePlain};
         `}
       >
-        <EuiIcon
-          type={icon}
-          size="s"
-          color={isRecovered ? euiTheme.colors.emptyShade : euiTheme.colors.darkestShade}
-          aria-hidden="true"
-        />
+        <EuiIcon type={icon} size="s" color={euiTheme.colors.emptyShade} aria-hidden="true" />
+      </span>
+    </EuiToolTip>
+  );
+}
+
+const CUSTOMER_IMPACT_LABEL = i18n.translate('xpack.apm.impactMap.badge.customerImpact', {
+  defaultMessage: 'Customer impact',
+});
+
+/** The customer impact icon, in the colour the timeline gives it, for an entity customers felt. */
+function CustomerImpactBadge({ floating }: { floating?: boolean }) {
+  const { euiTheme } = useEuiTheme();
+  return (
+    <EuiToolTip
+      content={<EuiText size="xs">{CUSTOMER_IMPACT_LABEL}</EuiText>}
+      position="top"
+      disableScreenReaderOutput
+      anchorProps={{
+        css: floating
+          ? css`
+              position: absolute;
+              top: -8px;
+              left: 50%;
+              transform: translateX(-50%);
+            `
+          : undefined,
+      }}
+    >
+      <span
+        role="img"
+        tabIndex={0}
+        aria-label={CUSTOMER_IMPACT_LABEL}
+        data-test-subj="impactMapBadge-customer_impact"
+        css={css`
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          flex: none;
+          width: ${BADGE_SIZE}px;
+          height: ${BADGE_SIZE}px;
+          border-radius: 50%;
+          background: ${euiTheme.colors.accent};
+          border: 2px solid ${euiTheme.colors.backgroundBasePlain};
+        `}
+      >
+        <EuiIcon type="users" size="s" color={euiTheme.colors.emptyShade} aria-hidden="true" />
       </span>
     </EuiToolTip>
   );
@@ -175,6 +216,7 @@ const ImpactServiceNode = memo((props: NodeProps<Node<ImpactServiceNodeData>>) =
     {(props.data.impactState === 'root_cause' || props.data.impactState === 'recovered') && (
       <StateBadge state={props.data.impactState} floating />
     )}
+    {props.data.hasCustomerImpact && <CustomerImpactBadge floating />}
     <EventCountBadge count={props.data.eventCount} />
   </>
 ));
@@ -199,6 +241,7 @@ const ImpactDependencyNode = memo(
       {(data.impactState === 'root_cause' || data.impactState === 'recovered') && (
         <StateBadge state={data.impactState} floating />
       )}
+      {data.hasCustomerImpact && <CustomerImpactBadge floating />}
       <EventCountBadge count={data.eventCount} />
     </>
   )
@@ -211,6 +254,7 @@ const ImpactInfrastructureNode = memo((props: NodeProps<Node<ImpactDependencyNod
     {(props.data.impactState === 'root_cause' || props.data.impactState === 'recovered') && (
       <StateBadge state={props.data.impactState} floating />
     )}
+    {props.data.hasCustomerImpact && <CustomerImpactBadge floating />}
     <EventCountBadge count={props.data.eventCount} />
   </>
 ));
@@ -240,9 +284,11 @@ const LEGEND = {
 function ImpactMapLegend({
   criticalPathColor,
   hasRecovered,
+  hasCustomerImpact,
 }: {
   criticalPathColor: string;
   hasRecovered: boolean;
+  hasCustomerImpact: boolean;
 }) {
   const { euiTheme } = useEuiTheme();
   return (
@@ -268,6 +314,14 @@ function ImpactMapLegend({
             <EuiText size="xs">{LEGEND.impacted}</EuiText>
           </EuiFlexGroup>
         </EuiFlexItem>
+        {hasCustomerImpact && (
+          <EuiFlexItem grow={false}>
+            <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+              <CustomerImpactBadge />
+              <EuiText size="xs">{CUSTOMER_IMPACT_LABEL}</EuiText>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        )}
         {hasRecovered && (
           <EuiFlexItem grow={false}>
             <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
@@ -614,6 +668,7 @@ export function ImpactServiceMap({
                 <ImpactMapLegend
                   criticalPathColor={criticalPathColor}
                   hasRecovered={nodes.some(({ data }) => data.impactState === 'recovered')}
+                  hasCustomerImpact={nodes.some(({ data }) => data.hasCustomerImpact)}
                 />
               </EuiFlexItem>
             </EuiFlexGroup>

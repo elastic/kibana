@@ -24,6 +24,13 @@ export const MAX_EVIDENCE_CHART_ANNOTATIONS = 5;
 /** Max length of axis labels, series names, and x values. */
 export const MAX_EVIDENCE_CHART_LABEL_LENGTH = 128;
 
+/** Rows of the data an observation rests on, shown under its chart. */
+export const MAX_EVIDENCE_SAMPLE_ROWS = 5;
+/** Columns of a sample: the fields that matter, not every field of a document. */
+export const MAX_EVIDENCE_SAMPLE_COLUMNS = 6;
+export const MAX_EVIDENCE_SAMPLE_VALUE_LENGTH = 500;
+const MAX_EVIDENCE_SAMPLE_FIELD_LENGTH = 96;
+
 export const EVIDENCE_CHART_TYPES = ['line', 'bar'] as const;
 export const EVIDENCE_CHART_X_AXIS_TYPES = ['time', 'category'] as const;
 export const EVIDENCE_CHART_Y_AXIS_UNITS = ['number', 'percent', 'bytes', 'ms', 's'] as const;
@@ -93,6 +100,29 @@ export type EvidenceChartSeries = z.infer<typeof evidenceChartSeriesSchema>;
 export type EvidenceChartAnnotation = z.infer<typeof evidenceChartAnnotationSchema>;
 
 /**
+ * A few of the records a query returned, such as log lines or spans, as rows of field and value, so
+ * a person sees the data behind the observation without running the query.
+ */
+export const evidenceSampleSchema = z.object({
+  /** What the rows are: 'Failing shipping spans', 'Logs from the pod'. */
+  title: z.string().max(MAX_EVIDENCE_CHART_LABEL_LENGTH).optional(),
+  rows: z
+    .array(
+      z.record(
+        z.string().max(MAX_EVIDENCE_SAMPLE_FIELD_LENGTH),
+        z.union([
+          z.string().max(MAX_EVIDENCE_SAMPLE_VALUE_LENGTH),
+          z.number(),
+          z.boolean(),
+          z.null(),
+        ])
+      )
+    )
+    .max(MAX_EVIDENCE_SAMPLE_ROWS),
+});
+export type EvidenceSample = z.infer<typeof evidenceSampleSchema>;
+
+/**
  * One observation supporting a claim an investigation makes. Self-contained: a Markdown
  * description, a static chart, or both, so it works for data that is not in the local cluster.
  */
@@ -102,6 +132,8 @@ export const investigationEvidenceSchema = lazySchema(() =>
     description: z.string().max(MAX_EVIDENCE_TEXT_LENGTH).optional(),
     /** Static chart visualizing the observation. */
     chart: evidenceChartSchema.optional(),
+    /** A few of the records the data came from, shown under the chart. */
+    sample: evidenceSampleSchema.optional(),
   })
 );
 export type InvestigationEvidence = z.infer<typeof investigationEvidenceSchema>;

@@ -578,9 +578,25 @@ export const runFindingsPass = async (
     }
   }
 
-  // A final pass that could not extract writes nothing: the chat reply is not a conclusion.
-  if (!output) return false;
-  if (!guard.claimWrite()) return false;
+  // A final pass that could not extract writes nothing: the chat reply is not a conclusion. Say so:
+  // a pass that ended by timeout or by a newer pass is otherwise silent, and the investigation is
+  // left without settled hypotheses or proposals.
+  if (!output) {
+    logger.warn(
+      `Findings recorder ${final ? 'final' : 'live'} pass for ${conversationId} wrote nothing: ${
+        guard.signal.aborted ? 'it was aborted (timed out or superseded)' : 'no usable answer'
+      }`
+    );
+    return false;
+  }
+  if (!guard.claimWrite()) {
+    logger.warn(
+      `Findings recorder ${
+        final ? 'final' : 'live'
+      } pass for ${conversationId} did not write: a newer pass took over`
+    );
+    return false;
+  }
 
   // While the investigation runs only the summary and the hypotheses are recorded. A live answer
   // that carries more is not written: the rest is written once, from the final pass.

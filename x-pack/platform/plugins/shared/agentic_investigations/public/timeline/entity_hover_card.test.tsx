@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import type { InvestigationImpactMapResponse } from '../../common';
 import { EntityHoverCard } from './entity_hover_card';
 
@@ -39,5 +39,25 @@ describe('EntityHoverCard', () => {
 
     expect(screen.getByText('shipping-pod')).toBeInTheDocument();
     expect(screen.getByText(/No events on the timeline/)).toBeInTheDocument();
+  });
+
+  it("lists the entity's events, oldest first, and opens one on a click", () => {
+    const onOpenEvent = jest.fn();
+    render(<EntityHoverCard entityId="checkout" impactMap={impactMap} onOpenEvent={onOpenEvent} />);
+
+    expect(screen.getByTestId('agenticInvestigationsEntityHoverEvents')).toHaveTextContent(
+      'High latency'
+    );
+    expect(screen.queryByText('Deploy')).not.toBeInTheDocument();
+    fireEvent.click(screen.getByTestId('agenticInvestigationsEntityHoverEvent-a'));
+
+    expect(onOpenEvent).toHaveBeenCalledWith('a');
+  });
+
+  it('keeps the plain count when nothing can open an event', () => {
+    render(<EntityHoverCard entityId="checkout" impactMap={impactMap} />);
+
+    expect(screen.queryByTestId('agenticInvestigationsEntityHoverEvents')).not.toBeInTheDocument();
+    expect(screen.getByText(/1 event on the timeline/)).toBeInTheDocument();
   });
 });
