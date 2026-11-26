@@ -11,7 +11,7 @@ import {
   esqlLogConditions,
   esqlPageLoadConditions,
 } from './overview_filters_esql';
-import { FILTER_SOURCE_FIELDS } from './overview_filters';
+import { FILTER_SOURCE_FIELDS } from './overview_filter_fields';
 
 describe('overview filters as ES|QL', () => {
   it('has nothing to evaluate or keep without a selection', () => {

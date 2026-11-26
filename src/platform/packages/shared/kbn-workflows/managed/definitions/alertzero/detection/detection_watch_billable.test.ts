@@ -11,8 +11,8 @@ import {
   ALERTZERO_RULE_WORKFLOW_IDS,
   ALERTZERO_WORKER_DETECTION_RULE_COVERAGE_WORKFLOW_ID,
   ALERTZERO_WORKER_DETECTION_RULE_TUNING_WORKFLOW_ID,
-} from '.';
-import { managedWorkflowDefinitions } from '../..';
+} from '..';
+import { managedWorkflowDefinitions } from '../../..';
 
 // Metering reads the persisted `billable` flag, so a regression here silently stops metering
 // the Detection Watch workers and the rule workflows they run.
