@@ -10,11 +10,7 @@
 import { isColumn } from '@elastic/esql';
 import type { ESQLAstCommand, ESQLColumn } from '@elastic/esql/types';
 import type { ESQLCommandSummary, ESQLCommandSummaryContext } from '@kbn/esql-language';
-import {
-  createQuerySummaryContext,
-  getQuerySummaryFromCommands,
-  getSummaryPerCommand,
-} from './get_query_summary';
+import { createQuerySummaryContext, getSummaryPerCommand } from './get_query_summary';
 import { parseEsqlCached } from './parse_esql_cached';
 
 interface CommandWithSummary {
@@ -196,10 +192,16 @@ export function buildRenameSourceFieldMapFromCommands(
  */
 export function buildRenameSourceFieldMap(query: string): Map<string, string> {
   const { root } = parseEsqlCached(query);
-  // Keep identity mappings in nested summaries to distinguish source fields from computed columns.
-  const summaryContext = createQuerySummaryContext(root, query, (commands, source, context) => ({
-    ...getQuerySummaryFromCommands(commands, source, context),
-    renamedColumnsPairs: new Set(renameMapFromContext(buildContext(commands, source, context))),
-  }));
+  const summaryContext = createQuerySummaryContext(root, query, (commands, source, context) => {
+    const resolution = buildContext(commands, source, context);
+    const newColumns = new Set<string>();
+    // A branch that drops its computed column cannot shadow the same name in a sibling.
+    for (const [index, { summary }] of resolution.commandSummaries.entries()) {
+      summary.newColumns.forEach((name) => newColumns.add(name));
+      resolution.droppedColumnNamesByIndex[index]?.forEach((name) => newColumns.delete(name));
+    }
+    // Keep identity mappings in nested summaries to distinguish source fields from computed columns.
+    return { newColumns, renamedColumnsPairs: new Set(renameMapFromContext(resolution)) };
+  });
   return buildRenameSourceFieldMapFromCommands(root.commands, query, summaryContext);
 }
