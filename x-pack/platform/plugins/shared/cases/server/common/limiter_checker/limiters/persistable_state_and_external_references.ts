@@ -19,7 +19,14 @@ import {
 import { BaseLimiter } from '../base_limiter';
 
 export class PersistableStateAndExternalReferencesLimiter extends BaseLimiter {
-  constructor(private readonly attachmentService: AttachmentService) {
+  /**
+   * @param isUnifiedAttachmentsEnabled `xpack.cases.attachments.enabled`: legacy `actions`
+   * requests are only stored as counted `security.endpoint` rows when it is on.
+   */
+  constructor(
+    private readonly attachmentService: AttachmentService,
+    private readonly isUnifiedAttachmentsEnabled: boolean
+  ) {
     super({
       limit: MAX_PERSISTABLE_STATE_AND_EXTERNAL_REFERENCES,
       attachmentType: [AttachmentType.persistableState, AttachmentType.externalReference],
@@ -37,7 +44,7 @@ export class PersistableStateAndExternalReferencesLimiter extends BaseLimiter {
     return requests.filter((request) =>
       isLegacyAttachmentRequest(request)
         ? (isPersistableStateOrExternalReference(request) && !isFileAttachmentRequest(request)) ||
-          isCommentRequestTypeActions(request)
+          (this.isUnifiedAttachmentsEnabled && isCommentRequestTypeActions(request))
         : isUnifiedPersistableStateOrExternalReference(request)
     ).length;
   }

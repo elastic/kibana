@@ -28,7 +28,7 @@ describe('PersistableStateAndExternalReferencesLimiter', () => {
   const attachmentService = createAttachmentServiceMock();
   attachmentService.countPersistableStateAndExternalReferenceAttachments.mockResolvedValue(1);
 
-  const limiter = new PersistableStateAndExternalReferencesLimiter(attachmentService);
+  const limiter = new PersistableStateAndExternalReferencesLimiter(attachmentService, true);
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -103,6 +103,15 @@ describe('PersistableStateAndExternalReferencesLimiter', () => {
 
     it('counts legacy actions attachments, which are stored as security.endpoint', () => {
       expect(limiter.countOfItemsInRequest([actionComment])).toBe(1);
+    });
+
+    it('does not count legacy actions attachments when unified attachments are disabled', () => {
+      const legacyLimiter = new PersistableStateAndExternalReferencesLimiter(
+        attachmentService,
+        false
+      );
+
+      expect(legacyLimiter.countOfItemsInRequest([actionComment])).toBe(0);
     });
 
     it('excludes unified file attachments from the count', () => {
