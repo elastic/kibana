@@ -131,7 +131,10 @@ export class DiscoverServerPlugin
         // ES|QL CATEGORIZE is not available on the Observability logs essentials tier
         id: ESQL_CATEGORIZE_PRODUCT_FEATURE_ID,
         description: 'Grouping similar messages with ES|QL CATEGORIZE in Discover',
-        products: [{ name: 'observability', tier: 'complete' }],
+        products: [
+          { name: 'observability', tier: 'complete' },
+          { name: 'security', tier: 'complete' },
+        ],
       },
     ]);
 
