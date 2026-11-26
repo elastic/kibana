@@ -57,22 +57,50 @@ export function getSelectionCounts({
   const lowRow = selection.minDuration <= 0 ? 0 : rowOf(selection.minDuration);
   const highRow = rowOf(selection.maxDuration);
 
-  let spans = 0;
-  let failed = 0;
-  let estimated = false;
-  grid.cells.forEach((cell) => {
-    const share =
-      overlap(fromEdge, toEdge, cell.xi, cell.xi + 1) *
-      overlap(lowRow, highRow, cell.yi, cell.yi + 1);
-    if (share < NEGLIGIBLE) return;
-    if (share < 1 - NEGLIGIBLE) estimated = true;
-    spans += cell.spans * share;
-    failed += cell.failed * share;
-  });
-  spans = Math.round(spans);
-  failed = Math.round(failed);
+  const totals = [...grid.cells.values()].reduce(
+    (sum, cell) => {
+      const share =
+        overlap(fromEdge, toEdge, cell.xi, cell.xi + 1) *
+        overlap(lowRow, highRow, cell.yi, cell.yi + 1);
+      if (share < NEGLIGIBLE) return sum;
+      return {
+        spans: sum.spans + cell.spans * share,
+        failed: sum.failed + cell.failed * share,
+        // A cell partially covered makes the counts an estimate.
+        estimated: sum.estimated || share < 1 - NEGLIGIBLE,
+      };
+    },
+    { spans: 0, failed: 0, estimated: false }
+  );
+  const spans = Math.round(totals.spans);
+  const failed = Math.round(totals.failed);
   // A selection about failures selects the failed spans only.
   return selection.failedOnly
-    ? { spans: failed, failed: 0, estimated }
-    : { spans, failed, estimated };
+    ? { spans: failed, failed: 0, estimated: totals.estimated }
+    : { spans, failed, estimated: totals.estimated };
+}
+
+/** The spans and failures of the whole map. */
+export function getGridTotals(grid: LatencyGrid): { spans: number; failed: number } {
+  return [...grid.cells.values()].reduce(
+    (sum, cell) => ({ spans: sum.spans + cell.spans, failed: sum.failed + cell.failed }),
+    { spans: 0, failed: 0 }
+  );
+}
+
+/**
+ * Whether a region is about failures: they concentrate in it, with at least a tenth of its
+ * spans failed and at least three times the failure rate of the rest of the map. A selection
+ * drawn over such a region is marked failed only, saving the switch for the common intent.
+ */
+export function isFailureRegion(
+  region: { spans: number; failed: number },
+  map: { spans: number; failed: number }
+): boolean {
+  if (region.spans <= 0 || region.failed / region.spans < 0.1) return false;
+  const restSpans = map.spans - region.spans;
+  // A region covering the whole map has nothing outside it to concentrate against.
+  if (restSpans <= 0) return false;
+  const restRate = Math.max(0, map.failed - region.failed) / restSpans;
+  return region.failed / region.spans >= 3 * restRate;
 }

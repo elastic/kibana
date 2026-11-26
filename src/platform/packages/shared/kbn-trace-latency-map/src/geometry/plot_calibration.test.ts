@@ -7,8 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { LATENCY_MAP_ROWS } from '../query/duration_rows';
 import { LAYOUT } from './layout';
-import { GRID_ORIGIN, calibratePlot, isSamePlot } from './plot_calibration';
+import { GRID_ORIGIN, calibratePlot, estimatePlot, isSamePlot } from './plot_calibration';
 
 /** A cell as the chart reports it: a gap smaller than its place on the grid, half a gap in. */
 const cellAt = (column: number, row: number, pitchX = 9.6, pitchY = 10) => ({
@@ -44,5 +45,35 @@ describe('calibratePlot', () => {
     expect(isSamePlot(plot, { ...plot, left: 64.2 })).toBe(true);
     expect(isSamePlot(plot, { ...plot, left: 70 })).toBe(false);
     expect(isSamePlot(plot, { ...plot, colWidth: 9.7 })).toBe(false);
+  });
+});
+
+describe('estimatePlot', () => {
+  const chart = { width: 600, height: 200, rightMargin: LAYOUT.bandLabelsWidth, bins: 40 };
+
+  it('starts the plot at the grid origin', () => {
+    const plot = estimatePlot(chart);
+    expect(plot.left).toBe(GRID_ORIGIN.left);
+    expect(plot.top).toBe(GRID_ORIGIN.top);
+  });
+
+  it('ends the columns half a gap short of the right margin', () => {
+    const plot = estimatePlot(chart);
+    expect(plot.left + chart.bins * plot.colWidth).toBeCloseTo(
+      chart.width - chart.rightMargin - LAYOUT.cellGap / 2
+    );
+  });
+
+  it('ends the rows where the time labels start', () => {
+    const plot = estimatePlot(chart);
+    expect(plot.top + LATENCY_MAP_ROWS * plot.rowHeight).toBeCloseTo(
+      chart.height - LAYOUT.xAxisHeight
+    );
+  });
+
+  it('gives a chart too small for a plot cells of no size, not of a negative one', () => {
+    const plot = estimatePlot({ ...chart, width: 0, height: 0 });
+    expect(plot.colWidth).toBe(0);
+    expect(plot.rowHeight).toBe(0);
   });
 });

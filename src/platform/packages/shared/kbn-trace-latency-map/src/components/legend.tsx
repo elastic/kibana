@@ -9,7 +9,7 @@
 
 import React from 'react';
 import { css } from '@emotion/react';
-import { EuiColorPaletteDisplay, EuiFlexGroup, EuiText } from '@elastic/eui';
+import { EuiColorPaletteDisplay, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { LatencyMapColors } from '../hooks/use_latency_map_colors';
 import type { LatencyMapUnit } from '../types';
@@ -57,24 +57,30 @@ export function LatencyMapLegend({
 }) {
   return (
     <EuiFlexGroup gutterSize="l" wrap responsive={false} data-test-subj="traceLatencyMapLegend">
-      <Ramp
-        colors={colors.densityRamp}
-        label={
-          unit === 'traces'
-            ? i18n.translate('traceLatencyMap.legend.tracesLabel', { defaultMessage: 'Traces' })
-            : i18n.translate('traceLatencyMap.legend.spansLabel', { defaultMessage: 'Spans' })
-        }
-        low={i18n.translate('traceLatencyMap.legend.few', { defaultMessage: 'few' })}
-        high={i18n.translate('traceLatencyMap.legend.many', { defaultMessage: 'many' })}
-      />
-      <Ramp
-        colors={colors.failureRamp}
-        label={i18n.translate('traceLatencyMap.legend.failureLabel', {
-          defaultMessage: 'Failure rate',
-        })}
-        low="0%"
-        high="100%"
-      />
+      {/* grow={false}, so the two ramps sit next to each other on the left instead of
+          splitting the row. */}
+      <EuiFlexItem grow={false}>
+        <Ramp
+          colors={colors.densityRamp}
+          label={
+            unit === 'traces'
+              ? i18n.translate('traceLatencyMap.legend.tracesLabel', { defaultMessage: 'Traces' })
+              : i18n.translate('traceLatencyMap.legend.spansLabel', { defaultMessage: 'Spans' })
+          }
+          low={i18n.translate('traceLatencyMap.legend.few', { defaultMessage: 'few' })}
+          high={i18n.translate('traceLatencyMap.legend.many', { defaultMessage: 'many' })}
+        />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <Ramp
+          colors={colors.failureRamp}
+          label={i18n.translate('traceLatencyMap.legend.failureLabel', {
+            defaultMessage: 'Failure rate',
+          })}
+          low="0%"
+          high="100%"
+        />
+      </EuiFlexItem>
     </EuiFlexGroup>
   );
 }

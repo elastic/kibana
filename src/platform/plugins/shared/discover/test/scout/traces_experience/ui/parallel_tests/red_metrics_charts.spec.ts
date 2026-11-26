@@ -50,6 +50,11 @@ spaceTest.describe(
         await pageObjects.discover.writeAndSubmitEsqlQuery(TRACES.ESQL_QUERY);
       });
 
+      await spaceTest.step('switch to the Health metrics view', async () => {
+        // The latency map is the default view of an ES|QL traces session.
+        await pageObjects.tracesExperience.charts.healthMetricsToggle.click();
+      });
+
       await spaceTest.step('verify RED metrics charts are visible', async () => {
         const { charts } = pageObjects.tracesExperience;
 
@@ -69,6 +74,10 @@ spaceTest.describe(
         await pageObjects.discover.writeAndSubmitEsqlQuery(
           `${TRACES.ESQL_QUERY} | WHERE service.name == "${RICH_TRACE.SERVICE_NAME}"`
         );
+      });
+
+      await spaceTest.step('switch to the Health metrics view', async () => {
+        await pageObjects.tracesExperience.charts.healthMetricsToggle.click();
       });
 
       await spaceTest.step('verify RED metrics charts are visible', async () => {
@@ -128,6 +137,11 @@ spaceTest.describe(
           await discover.writeAndSubmitEsqlQuery(TRACES.ESQL_QUERY);
         });
 
+        await spaceTest.step('switch to the Health metrics view', async () => {
+          // The latency map is the default view of an ES|QL traces session.
+          await charts.healthMetricsToggle.click();
+        });
+
         await spaceTest.step('select breakdown field from toolbar', async () => {
           await discover.chooseBreakdownField(BREAKDOWN.FIELD);
         });
@@ -160,6 +174,11 @@ spaceTest.describe(
 
         await spaceTest.step('run ESQL query for traces', async () => {
           await discover.writeAndSubmitEsqlQuery(TRACES.ESQL_QUERY);
+        });
+
+        await spaceTest.step('switch to the Health metrics view', async () => {
+          // The latency map is the default view of an ES|QL traces session.
+          await charts.healthMetricsToggle.click();
         });
 
         await spaceTest.step('set breakdown by dimension from field list', async () => {

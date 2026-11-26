@@ -1,5 +1,5 @@
 {
-  "sha1": "234db8f1bb87153ee42fae6172f726352c1cdb67",
+  "sha1": "044059e64d74d34b41f8c00b1dd0716a4d3006e8",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -269,6 +269,86 @@
         "file": "src/platform/plugins/shared/discover/test/scout/traces_experience/ui/parallel_tests/flyout_cascade_close.spec.ts",
         "line": 51,
         "column": 61
+      }
+    },
+    {
+      "id": "ca8a0d625d823f2-342e4b3387b8fa6",
+      "title": "Traces in Discover - latency map shows the latency map by default and the RED charts on demand",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/traces_experience/ui/parallel_tests/latency_map.spec.ts",
+        "line": 36,
+        "column": 25
+      }
+    },
+    {
+      "id": "ca8a0d625d823f2-2f22c17cedecd0e",
+      "title": "Traces in Discover - latency map a drawn selection rewrites the query and clearing it restores the query",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/traces_experience/ui/parallel_tests/latency_map.spec.ts",
+        "line": 53,
+        "column": 24
+      }
+    },
+    {
+      "id": "ca8a0d625d823f2-6e27b9c1cc69ea4",
+      "title": "Traces in Discover - latency map a reload with the selection in the query restores the map and the selection",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/traces_experience/ui/parallel_tests/latency_map.spec.ts",
+        "line": 95,
+        "column": 19
+      }
+    },
+    {
+      "id": "ca8a0d625d823f2-c0769ca6f0131c6",
+      "title": "Traces in Discover - latency map focusing an operation from the suggestions dropdown narrows the query",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/traces_experience/ui/parallel_tests/latency_map.spec.ts",
+        "line": 110,
+        "column": 71
+      }
+    },
+    {
+      "id": "ca8a0d625d823f2-6ce231b71ac41ae",
+      "title": "Traces in Discover - latency map a click on a cell opens the document flyout",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/traces_experience/ui/parallel_tests/latency_map.spec.ts",
+        "line": 140,
+        "column": 29
       }
     },
     {
@@ -623,7 +703,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/traces_experience/ui/parallel_tests/red_metrics_charts.spec.ts",
-        "line": 54,
+        "line": 59,
         "column": 40
       }
     },
@@ -639,7 +719,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/traces_experience/ui/parallel_tests/red_metrics_charts.spec.ts",
-        "line": 72,
+        "line": 81,
         "column": 9
       }
     },
@@ -655,7 +735,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/traces_experience/ui/parallel_tests/red_metrics_charts.spec.ts",
-        "line": 84,
+        "line": 93,
         "column": 7
       }
     },
@@ -671,7 +751,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/traces_experience/ui/parallel_tests/red_metrics_charts.spec.ts",
-        "line": 99,
+        "line": 108,
         "column": 11
       }
     },
@@ -687,8 +767,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/traces_experience/ui/parallel_tests/red_metrics_charts.spec.ts",
-        "line": 122,
-        "column": 27
+        "line": 132,
+        "column": 44
       }
     },
     {

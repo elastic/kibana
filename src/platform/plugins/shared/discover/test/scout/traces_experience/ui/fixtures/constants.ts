@@ -57,6 +57,22 @@ export const PRODUCER_TRACE = {
   KAFKA_SPAN_NAME: 'Publish to kafka/orders',
 };
 
+/**
+ * The latency map fixture's service, named after the Scout run: the fixture shares the APM
+ * streams with every other run against the same cluster, and the run id (set once by the
+ * Scout config, before the global setup) keeps each run's spans, query and teardown to
+ * itself.
+ */
+const LATENCY_SERVICE_NAME = `synth-traces-latency-${process.env.TEST_RUN_ID ?? 'local'}`;
+
+export const LATENCY_TRACE = {
+  SERVICE_NAME: LATENCY_SERVICE_NAME,
+  TRANSACTION_NAME: 'GET /latency',
+  /** A second operation whose durations fall into two clear groups, for the bands. */
+  TRANSACTION_NAME_MIXED: 'GET /latency-mixed',
+  ESQL_QUERY: `FROM traces-apm* | WHERE service.name == "${LATENCY_SERVICE_NAME}"`,
+};
+
 export const OTEL_SERVICE = {
   SERVICE_NAME: 'synth-traces-otel',
   NAMESPACE: 'production',

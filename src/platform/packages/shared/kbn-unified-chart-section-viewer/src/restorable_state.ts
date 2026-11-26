@@ -33,8 +33,13 @@ export interface MetricsExperienceRestorableState {
   flyoutState?: FlyoutState;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface TracesRestorableState {}
+/** What the traces chart section shows: the RED charts or the latency map. */
+export type TracesChartView = 'metrics' | 'latencyMap';
+
+export interface TracesRestorableState {
+  // Selected view, kept per tab. The default depends on the query, so it is optional.
+  chartView?: TracesChartView;
+}
 export type UnifiedMetricsGridRestorableState =
   | MetricsExperienceRestorableState
   | TracesRestorableState;
@@ -44,3 +49,8 @@ export type UnifiedMetricsGridRestorableState =
 // and move this createRestorableStateProvider into the new folder
 export const { withRestorableState, useRestorableState } =
   createRestorableStateProvider<MetricsExperienceRestorableState>();
+
+export const {
+  withRestorableState: withTracesRestorableState,
+  useRestorableState: useTracesRestorableState,
+} = createRestorableStateProvider<TracesRestorableState>();

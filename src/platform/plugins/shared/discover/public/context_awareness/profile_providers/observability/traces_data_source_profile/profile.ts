@@ -31,13 +31,14 @@ export const OBSERVABILITY_TRACES_DATA_SOURCE_PROFILE_ID =
 export const createTracesDataSourceProfileProvider = ({
   apmContextService,
   uiSettings,
+  core,
 }: ProfileProviderServices): DataSourceProfileProvider => ({
   profileId: OBSERVABILITY_TRACES_DATA_SOURCE_PROFILE_ID,
   restrictedToProductFeature: TRACES_PRODUCT_FEATURE_ID,
   profile: {
     getDefaultAppState,
     getCellRenderers,
-    getChartSectionConfiguration: getChartSectionConfiguration(),
+    getChartSectionConfiguration: getChartSectionConfiguration({ core }),
     getDeepAnalysisPlaybook,
   },
   resolve: (params) => {

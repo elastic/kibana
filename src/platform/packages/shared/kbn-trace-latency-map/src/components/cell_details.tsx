@@ -8,6 +8,7 @@
  */
 
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 import { EuiText } from '@elastic/eui';
 import type { LatencyMapUnit } from '../types';
 import { formatDuration, formatTimestamp } from '../geometry/ticks';
@@ -23,10 +24,14 @@ export interface CellDetailsProps {
   unit: LatencyMapUnit;
   /** Counts are estimates from a sample. */
   sampled: boolean;
+  /** The counts are of failed spans alone: the readout says so. */
+  failedOnly?: boolean;
+  /** A line hinting at what the pointer can do, in the tooltip only. */
+  hint?: string;
   timeZone?: string;
 }
 
-/** The time window, duration range and counts of one cell: the tooltip, and the keyboard's readout. */
+/** The time window, duration range and counts of a cell or region: the tooltip, and the keyboard's readout. */
 export function CellDetails({
   fromMs,
   toMs,
@@ -36,6 +41,8 @@ export function CellDetails({
   failed,
   unit,
   sampled,
+  failedOnly,
+  hint,
   timeZone,
 }: CellDetailsProps) {
   return (
@@ -46,6 +53,10 @@ export function CellDetails({
         </strong>
         {' · '}
         {getCountText(unit, spans, sampled)}
+        {failedOnly &&
+          ` · ${i18n.translate('traceLatencyMap.cellDetails.failedOnly', {
+            defaultMessage: 'failed only',
+          })}`}
       </div>
       {failed > 0 && (
         <EuiText size="xs" color="danger">
@@ -55,6 +66,11 @@ export function CellDetails({
       <EuiText size="xs" color="subdued">
         {formatTimestamp(fromMs, timeZone)} – {formatTimestamp(toMs, timeZone)}
       </EuiText>
+      {hint && (
+        <EuiText size="xs" color="subdued">
+          {hint}
+        </EuiText>
+      )}
     </EuiText>
   );
 }

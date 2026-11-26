@@ -8,16 +8,23 @@
  */
 
 import { LAYOUT } from '../geometry/layout';
-import { moveRange, resizeRange } from '../geometry/cell_range';
+import { moveRange, rangeFromCells, resizeRange } from '../geometry/cell_range';
 import type { Cell, CellRange, HandleId } from '../geometry/cell_range';
 import { findHandle, isInsideRect } from '../geometry/map_geometry';
 import type { MapGeometry, Point } from '../geometry/map_geometry';
 
 /**
- * What the pointer is doing to the selection. Drawing a new one is the chart's own brush; this
- * moves or resizes the one there. A press inside it that does not travel is a click on a cell.
+ * What the pointer is doing on the map: drawing a new region, or moving or resizing the one
+ * there. A press that does not travel is a click on a cell.
  */
 export type Gesture =
+  | {
+      kind: 'drawing';
+      /** The press, clamped to the plot: where the drawn region anchors. */
+      origin: Point;
+      /** The press as it landed, for telling a click from a drag. */
+      rawOrigin: Point;
+    }
   | { kind: 'moving'; origin: Point; start: CellRange }
   | { kind: 'resizing'; handle: HandleId; start: CellRange };
 
@@ -29,22 +36,28 @@ export type GestureEnd =
 const cellAt = (point: Point, geometry: MapGeometry) =>
   geometry.pointToCell(geometry.clampToPlot(point))!;
 
-/** The gesture a press starts: on a handle or inside the region of `range`; else none. */
-export function startGesture(
-  point: Point,
-  geometry: MapGeometry,
-  range?: CellRange
-): Gesture | undefined {
-  if (!range) return undefined;
-  const rect = geometry.rangeToRect(range);
-  const handle = findHandle(point, geometry.getHandles(rect), rect);
-  if (handle) return { kind: 'resizing', handle, start: range };
-  if (isInsideRect(point, rect)) return { kind: 'moving', origin: point, start: range };
-  return undefined;
+/**
+ * The gesture a press starts: on a handle of `range` it resizes, inside it it moves, and
+ * anywhere else it draws a new region. A press just outside the plot (the axes, the margin
+ * above the top row) draws from the nearest plot edge, so the edge rows and columns are easy
+ * to catch, as in the prototype.
+ */
+export function startGesture(point: Point, geometry: MapGeometry, range?: CellRange): Gesture {
+  if (range) {
+    const rect = geometry.rangeToRect(range);
+    const handle = findHandle(point, geometry.getHandles(rect), rect);
+    if (handle) return { kind: 'resizing', handle, start: range };
+    if (isInsideRect(point, rect)) return { kind: 'moving', origin: point, start: range };
+  }
+  return { kind: 'drawing', origin: geometry.clampToPlot(point), rawOrigin: point };
 }
 
 /** The region the gesture makes with the pointer at `point`. */
 export function moveGesture(gesture: Gesture, point: Point, geometry: MapGeometry): CellRange {
+  if (gesture.kind === 'drawing') {
+    // Whole cells between the two corners, whichever way the drag runs.
+    return rangeFromCells(cellAt(gesture.origin, geometry), cellAt(point, geometry));
+  }
   if (gesture.kind === 'moving') {
     return moveRange(
       gesture.start,
@@ -65,6 +78,16 @@ export function moveGesture(gesture: Gesture, point: Point, geometry: MapGeometr
 
 /** What the pointer leaves when released at `point`. */
 export function endGesture(gesture: Gesture, point: Point, geometry: MapGeometry): GestureEnd {
+  if (gesture.kind === 'drawing') {
+    // Measured where the press really landed, not at its clamped anchor: a stationary
+    // press on an axis label must not read as a drag into the plot.
+    const travel = Math.hypot(point.x - gesture.rawOrigin.x, point.y - gesture.rawOrigin.y);
+    if (travel < LAYOUT.dragThresholdPx) {
+      return geometry.isInPlot(gesture.rawOrigin)
+        ? { type: 'click', cell: cellAt(gesture.origin, geometry) }
+        : { type: 'none' };
+    }
+  }
   if (
     gesture.kind === 'moving' &&
     Math.hypot(point.x - gesture.origin.x, point.y - gesture.origin.y) < LAYOUT.dragThresholdPx
