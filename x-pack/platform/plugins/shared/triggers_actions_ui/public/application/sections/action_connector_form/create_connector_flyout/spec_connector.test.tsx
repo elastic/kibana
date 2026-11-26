@@ -319,6 +319,47 @@ describe('spec connector with API fetch', () => {
       );
     });
 
+    it('omits the spec version on save when the catalog is enabled but the spec is unversioned', async () => {
+      appMockRenderer.coreStart.actions = {
+        ...appMockRenderer.coreStart.actions,
+        isCatalogEnabled: true,
+      };
+      appMockRenderer.coreStart.http.get = jest.fn().mockResolvedValue(mockSpecResponse);
+      appMockRenderer.coreStart.http.post = jest.fn().mockResolvedValue({
+        id: 'created-connector-id',
+        name: 'My spec connector',
+        connector_type_id: 'spec-connector-test',
+        config: {},
+        is_preconfigured: false,
+        is_deprecated: false,
+        is_missing_secrets: false,
+        is_system_action: false,
+      });
+
+      appMockRenderer.render(
+        <CreateConnectorFlyout
+          actionTypeRegistry={actionTypeRegistry}
+          onClose={onClose}
+          onConnectorCreated={onConnectorCreated}
+        />
+      );
+
+      await fillAndSave();
+
+      expect(appMockRenderer.coreStart.http.get).toHaveBeenCalledWith(
+        '/internal/actions/connector_types/spec-connector-test/spec',
+        expect.objectContaining({ query: { spec_version: '1' } })
+      );
+
+      await waitFor(() => {
+        expect(appMockRenderer.coreStart.http.post).toHaveBeenCalledTimes(1);
+      });
+      const [, { body }] = (appMockRenderer.coreStart.http.post as jest.Mock).mock.calls[0];
+      expect(JSON.parse(body)).not.toHaveProperty('spec_version');
+      expect(onConnectorCreated).toHaveBeenCalledTimes(1);
+      expect(onConnectorCreated.mock.calls[0][0]).not.toHaveProperty('specVersion');
+    });
+
     it('does not post a spec version when the catalog is disabled', async () => {
       appMockRenderer.coreStart.actions = {
         ...appMockRenderer.coreStart.actions,
