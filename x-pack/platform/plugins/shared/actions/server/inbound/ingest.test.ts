@@ -908,8 +908,9 @@ describe('ingestInboundEvent', () => {
       expect(emitConnectorEvents).toHaveBeenCalledWith(
         expect.objectContaining({ eventId: 'slack2.hitl_action' })
       );
-      expect(logger.warn).toHaveBeenCalledWith(
-        'Connector event topic is not registered (eventId=slack2.hitl_action)'
+      expect(logger.warn).not.toHaveBeenCalled();
+      expect(logger.debug).toHaveBeenCalledWith(
+        'Connector event is not a bus topic (eventId=slack2.hitl_action)'
       );
       expect(JSON.stringify(logger.warn.mock.calls)).not.toContain('emit_partial');
     });
@@ -991,6 +992,46 @@ describe('ingestInboundEvent', () => {
       );
       expectOutcome('info', 'accepted');
       expect(JSON.stringify(logger.warn.mock.calls)).not.toContain('emit_partial');
+    });
+
+    it('publishes nothing when a later event in the batch fails validation', async () => {
+      const pubsub = installPublisher('slack2.message');
+      const handleEvents = jest.fn().mockResolvedValue({
+        type: 'emit',
+        events: [
+          {
+            eventId: 'slack2.message',
+            correlationKey: 'corr-1',
+            payload: { body: { hello: 'world' } },
+          },
+          {
+            eventId: 'slack2.not_a_topic',
+            correlationKey: 'corr-2',
+            payload: { body: {} },
+          },
+        ],
+      });
+      getConnectorSpecMock.mockReturnValue({
+        ...createFakeSpec(handleEvents),
+        events: {
+          definitions: {
+            message: {
+              eventId: 'slack2.message',
+              title: 'Received',
+              description: 'test',
+              eventSchema: z.object({ body: z.unknown() }),
+            },
+          },
+          handleEvents,
+        },
+      } as ReturnType<typeof getConnectorSpec>);
+
+      const { response: res } = await run();
+
+      expect(res.customError).toHaveBeenCalledWith(expect.objectContaining({ statusCode: 500 }));
+      expect(pubsub.publish).not.toHaveBeenCalled();
+      expect(emitConnectorEvents).not.toHaveBeenCalled();
+      expectOutcome('error', 'validate_fail');
     });
 
     it('publishes nothing when no events are emitted', async () => {

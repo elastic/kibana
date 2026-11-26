@@ -6,7 +6,7 @@
  */
 
 import { createHash } from 'crypto';
-import type { ConnectorEventHubFields } from '@kbn/connector-topics';
+import { slack2HitlAction, type ConnectorEventHubFields } from '@kbn/connector-topics';
 import { PUBSUB_MAX_ID_LENGTH, type Logger, type PubSubStart, type Topic } from '@kbn/core/server';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -62,6 +62,10 @@ export const publishConnectorEvent = async <TSpoke extends object>(
 
   const topic = publisher.topics.get(eventId);
   if (!topic) {
+    if (eventId === slack2HitlAction.name) {
+      publisher.logger.debug(`Connector event is not a bus topic (eventId=${eventId})`);
+      return;
+    }
     publisher.logger.warn(`Connector event topic is not registered (eventId=${eventId})`);
     return;
   }

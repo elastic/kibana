@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ConnectorEventHubFields } from '@kbn/connector-topics';
+import { slack2HitlAction, type ConnectorEventHubFields } from '@kbn/connector-topics';
 import { defineTopic, type Topic } from '@kbn/core/server';
 import { coreMock, loggingSystemMock } from '@kbn/core/server/mocks';
 
@@ -136,6 +136,23 @@ describe('publishConnectorEvent', () => {
     });
   });
 
+  it('does not warn when slack2.hitl_action has no topic', async () => {
+    const pubsub = coreMock.createStart().pubsub;
+    setConnectorEventPublisher({
+      pubsub,
+      logger,
+      topics: new Map([[slackMessageTopic.name, slackMessageTopic]]),
+    });
+
+    await expect(publishConnectorEvent(slack2HitlAction.name, message)).resolves.toBeUndefined();
+
+    expect(pubsub.publish).not.toHaveBeenCalled();
+    expect(logger.warn).not.toHaveBeenCalled();
+    expect(logger.debug).toHaveBeenCalledWith(
+      `Connector event is not a bus topic (eventId=${slack2HitlAction.name})`
+    );
+  });
+
   it('logs a missing topic and does not publish', async () => {
     const pubsub = coreMock.createStart().pubsub;
     setConnectorEventPublisher({
@@ -144,11 +161,11 @@ describe('publishConnectorEvent', () => {
       topics: new Map([[slackMessageTopic.name, slackMessageTopic]]),
     });
 
-    await expect(publishConnectorEvent('slack2.hitl_action', message)).resolves.toBeUndefined();
+    await expect(publishConnectorEvent('github.unknown', message)).resolves.toBeUndefined();
 
     expect(pubsub.publish).not.toHaveBeenCalled();
     expect(logger.warn).toHaveBeenCalledWith(
-      'Connector event topic is not registered (eventId=slack2.hitl_action)'
+      'Connector event topic is not registered (eventId=github.unknown)'
     );
   });
 
