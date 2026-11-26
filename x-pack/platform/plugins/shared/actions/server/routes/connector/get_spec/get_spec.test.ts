@@ -16,6 +16,7 @@ import { DEFAULT_ACTION_ROUTE_SECURITY } from '../../constants';
 import { actionsClientMock } from '../../../mocks';
 import { getConnectorSpecQuerySchemaV1 } from '../../../../common/routes/connector/apis/get_spec';
 import { CONNECTOR_SPEC_VERSION_MAX_LENGTH } from '../../../../common';
+import type { GetConnectorSpecResponseV1 } from '../../../../common/routes/connector/response';
 import type { Type } from '@kbn/config-schema';
 
 jest.mock('../../verify_access_and_context', () => ({
@@ -41,6 +42,22 @@ const createActionsConfigUtilsMock = (
     isEarsEnabled: jest.fn(() => overrides.earsEnabled ?? false),
     isCatalogEnabled: jest.fn(() => overrides.catalogEnabled ?? false),
   } as unknown as ActionsConfigurationUtilities);
+
+const createConnectorSpecResponseBody = (
+  includeSpecVersion: boolean
+): GetConnectorSpecResponseV1 => ({
+  metadata: {
+    id: 'test-connector',
+    display_name: 'Test Connector',
+    description: 'A test connector',
+    minimum_license: 'basic',
+    supported_feature_ids: ['alerting'],
+    ...(includeSpecVersion && { spec_version: '1.3' }),
+  },
+  schema: {},
+  is_testable: true,
+  actions: [],
+});
 
 describe('getConnectorSpecRoute', () => {
   it('registers the route with correct path', async () => {
@@ -395,18 +412,53 @@ describe('getConnectorSpecRoute', () => {
     expect(validateConfig.request?.query).toBeDefined();
   });
 
-  it('has proper response schema validation', async () => {
+  it('registers a response schema that includes optional spec_version when catalog is enabled', () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
 
-    getConnectorSpecRoute(router, licenseState, createActionsConfigUtilsMock());
+    getConnectorSpecRoute(
+      router,
+      licenseState,
+      createActionsConfigUtilsMock({ catalogEnabled: true })
+    );
 
     const [config] = router.get.mock.calls[0];
-
-    const validateConfig = config.validate as { response?: Record<number, unknown> };
-    expect(validateConfig.response?.[200]).toBeDefined();
+    const validateConfig = config.validate as {
+      response?: Record<number, { body?: () => Type<GetConnectorSpecResponseV1> }>;
+    };
+    const responseSchema = validateConfig.response?.[200].body?.();
     expect(validateConfig.response?.[400]).toBeDefined();
     expect(validateConfig.response?.[404]).toBeDefined();
     expect(validateConfig.response?.[500]).toBeDefined();
+
+    expect(responseSchema!.validate(createConnectorSpecResponseBody(true))).toEqual(
+      createConnectorSpecResponseBody(true)
+    );
+    expect(responseSchema!.validate(createConnectorSpecResponseBody(false))).toEqual(
+      createConnectorSpecResponseBody(false)
+    );
+  });
+
+  it('registers a response schema that omits spec_version when catalog is disabled', () => {
+    const licenseState = licenseStateMock.create();
+    const router = httpServiceMock.createRouter();
+
+    getConnectorSpecRoute(
+      router,
+      licenseState,
+      createActionsConfigUtilsMock({ catalogEnabled: false })
+    );
+
+    const [config] = router.get.mock.calls[0];
+    const validateConfig = config.validate as {
+      response?: Record<number, { body?: () => Type<GetConnectorSpecResponseV1> }>;
+    };
+    const responseSchema = validateConfig.response?.[200].body?.();
+    expect(responseSchema!.validate(createConnectorSpecResponseBody(false))).toEqual(
+      createConnectorSpecResponseBody(false)
+    );
+    expect(() => responseSchema!.validate(createConnectorSpecResponseBody(true))).toThrow(
+      'spec_version'
+    );
   });
 });

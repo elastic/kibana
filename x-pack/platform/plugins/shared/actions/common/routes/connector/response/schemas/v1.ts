@@ -358,7 +358,18 @@ export const getConnectorSpecResponseBodySchema = ({ includeSpecVersionField = f
             },
           })
         ),
-        ...(includeSpecVersionField ? specVersionResponseField : {}),
+        ...(includeSpecVersionField
+          ? {
+              spec_version: schema.maybe(
+                schema.string({
+                  meta: {
+                    description:
+                      'The exact major.minor version of the connector form schema returned by this endpoint.',
+                  },
+                })
+              ),
+            }
+          : {}),
       },
       {
         meta: {
