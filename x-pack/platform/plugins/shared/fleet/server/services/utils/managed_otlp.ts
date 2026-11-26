@@ -5,10 +5,18 @@
  * 2.0.
  */
 
-import { mergeWith } from 'lodash';
+import { isPlainObject, mergeWith } from 'lodash';
 
 import { MANAGED_OTLP_EXPORTER_DEFAULTS } from '../../../common/constants/output';
 import type { OtlpExporterConfig } from '../../../common/types';
+import { isManagedOtlpEndpointUrl } from '../../../common/services/managed_otlp_endpoint';
+import {
+  getOtlpSendingQueueSizeError,
+  mergeOtlpSendingQueue,
+  withRemovedStoredSettings,
+} from '../../../common/services/otlp_sending_queue';
+import type { OtlpSendingQueue } from '../../../common/services/otlp_sending_queue';
+import { OutputInvalidError } from '../../errors';
 
 import { appContextService } from '..';
 
@@ -16,47 +24,102 @@ export const getManagedOtlpEndpoint = (): string | undefined => {
   return appContextService.getCloud()?.managedOtlp?.url;
 };
 
-const normalizeEndpoint = (endpoint: string): string => {
-  const withScheme = endpoint.includes('://') ? endpoint : `https://${endpoint}`;
-  try {
-    const url = new URL(withScheme);
-    const path = url.pathname === '/' ? '' : url.pathname;
-    return `${url.hostname}${path}`;
-  } catch {
-    return endpoint.toLowerCase();
-  }
-};
-
-export const isManagedOtlpEndpoint = (endpoint: string): boolean => {
-  const managedUrl = getManagedOtlpEndpoint();
-  if (!managedUrl) return false;
-  return normalizeEndpoint(endpoint) === normalizeEndpoint(managedUrl);
-};
+export const isManagedOtlpEndpoint = (endpoint: string): boolean =>
+  isManagedOtlpEndpointUrl(endpoint, getManagedOtlpEndpoint());
 
 /**
  * Deep-merges managed-OTLP sending_queue defaults into the exporter config when the endpoint
- * points at the managed OTLP service. User-supplied fields win at every level.
+ * points at the managed OTLP service. User-supplied fields win at every level, and a setting that
+ * is left out or `null` gets the default.
  *
- * `sending_queue: null` is the explicit user opt-out (schema allows null | object | undefined).
- * null means "disable queuing entirely" — it is not a defaulted/uninitialized value, so we
- * preserve it as-is. Undefined means "user didn't say anything" → apply managed defaults.
+ * A `null` block is an explicit opt-out and is kept: `sending_queue: null` leaves the queue to the
+ * spec defaults, and `batch: null` turns batching off.
  *
  * Uses lodash mergeWith with an array-replacement customizer (same pattern as otel_collector.ts)
- * so that array values are replaced wholesale rather than concatenated, and nested null values
- * (e.g. `batch: null`) are preserved to disable that sub-block.
+ * so that array values are replaced wholesale rather than concatenated. The Elastic queue size is
+ * only filled in for a queue that counts bytes.
  */
 export const applyManagedOtlpDefaults = (exporter: OtlpExporterConfig): OtlpExporterConfig => {
   if (!isManagedOtlpEndpoint(exporter.endpoint) || exporter.sending_queue === null) {
     return exporter;
   }
+  const sendingQueue: OtlpSendingQueue = mergeWith(
+    {},
+    MANAGED_OTLP_EXPORTER_DEFAULTS.sending_queue,
+    exporter.sending_queue,
+    (dst: unknown, src: unknown) => {
+      if (Array.isArray(src)) {
+        return src;
+      }
+      if (src === null) {
+        return isPlainObject(dst) ? null : dst;
+      }
+    }
+  );
+  // the Elastic queue size is in bytes: a queue that counts requests or items keeps the size it
+  // was given, so the spec default applies when it has none
+  if (sendingQueue.sizer !== MANAGED_OTLP_EXPORTER_DEFAULTS.sending_queue.sizer) {
+    const queueSize = exporter.sending_queue?.queue_size;
+    if (queueSize === undefined) {
+      delete sendingQueue.queue_size;
+    } else {
+      sendingQueue.queue_size = queueSize;
+    }
+  }
+  return { ...exporter, sending_queue: sendingQueue };
+};
+
+/**
+ * Checks the sizes of the sending queue of an output. Sizes that the collector rejects are an error,
+ * except for a preconfigured output, which only logs a warning so that it does not stop the Fleet
+ * setup.
+ */
+export const validateOtlpSendingQueueSizes = ({
+  queue,
+  fromPreconfiguration,
+}: {
+  queue: OtlpSendingQueue | null | undefined;
+  fromPreconfiguration: boolean;
+}) => {
+  const error = getOtlpSendingQueueSizeError(queue);
+  if (!error) {
+    return;
+  }
+  if (fromPreconfiguration) {
+    appContextService
+      .getLogger()
+      .warn(`The OTLP output has a sending queue that the collector rejects: ${error}`);
+    return;
+  }
+  throw new OutputInvalidError(error);
+};
+
+/**
+ * The exporter of an update of an OTLP output. The update of the sending queue is merged into the
+ * stored queue first, so the defaults of the managed endpoint only fill what neither sets, and the
+ * sizes are checked as they are saved. The whole queue is then written, with the stored settings it
+ * no longer has set to `null`.
+ */
+export const getOtlpExporterUpdate = ({
+  update,
+  stored,
+  fromPreconfiguration,
+}: {
+  update: OtlpExporterConfig;
+  stored: OtlpExporterConfig | undefined;
+  fromPreconfiguration: boolean;
+}): OtlpExporterConfig => {
+  const storedQueue = stored?.sending_queue;
+  const exporter = applyManagedOtlpDefaults({
+    ...update,
+    sending_queue: mergeOtlpSendingQueue(storedQueue, update.sending_queue),
+  } as OtlpExporterConfig);
+  validateOtlpSendingQueueSizes({ queue: exporter.sending_queue, fromPreconfiguration });
+  if (exporter.sending_queue === undefined) {
+    return update;
+  }
   return {
-    ...exporter,
-    sending_queue: mergeWith(
-      {},
-      MANAGED_OTLP_EXPORTER_DEFAULTS.sending_queue,
-      exporter.sending_queue,
-      // Arrays replace wholesale; a null value disables a nested block (e.g. batch: null).
-      (_dst: unknown, src: unknown) => (Array.isArray(src) || src === null ? src : undefined)
-    ),
+    ...update,
+    sending_queue: withRemovedStoredSettings(exporter.sending_queue, storedQueue),
   } as OtlpExporterConfig;
 };
