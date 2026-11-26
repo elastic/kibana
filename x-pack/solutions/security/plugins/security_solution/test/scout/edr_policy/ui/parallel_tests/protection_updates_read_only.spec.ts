@@ -23,32 +23,49 @@ spaceTest.describe(
       await browserAuth.loginAsSecurityRole('t3_analyst');
     });
 
-    spaceTest('with note', async ({ kbnClient, scoutSpace, pageObjects, endpointPolicy }) => {
-      const { protectionUpdates } = pageObjects;
-      const oneWeekAgo = moment.utc().subtract(7, 'days');
-      await setManifestVersion(
+    spaceTest(
+      'with note',
+      async ({
         kbnClient,
-        scoutSpace.id,
-        endpointPolicy.id,
-        oneWeekAgo.format('YYYY-MM-DD')
-      );
-      await setProtectionUpdatesNote(kbnClient, scoutSpace.id, endpointPolicy.id, NOTE);
+        samlAuth,
+        endpointManagementApi,
+        scoutSpace,
+        pageObjects,
+        endpointPolicy,
+      }) => {
+        const { protectionUpdates } = pageObjects;
+        const oneWeekAgo = moment.utc().subtract(7, 'days');
+        await setManifestVersion(
+          kbnClient,
+          scoutSpace.id,
+          endpointPolicy.id,
+          oneWeekAgo.format('YYYY-MM-DD')
+        );
+        const { cookieHeader } = await samlAuth.asInteractiveUser('admin');
+        await setProtectionUpdatesNote({
+          endpointManagementApi,
+          authHeaders: cookieHeader,
+          spaceId: scoutSpace.id,
+          policyId: endpointPolicy.id,
+          note: NOTE,
+        });
 
-      await protectionUpdates.goto(endpointPolicy.id);
-      await expect(protectionUpdates.automaticUpdatesViewMode).toBeVisible();
-      await expect(protectionUpdates.automaticUpdatesSwitch).toBeHidden();
-      await expect(protectionUpdates.deployedVersionTitle).toBeVisible();
-      await expect(protectionUpdates.deployedVersion).toHaveText(
-        oneWeekAgo.format('MMMM DD, YYYY')
-      );
-      await expect(protectionUpdates.versionToDeployTitle).toBeVisible();
-      await expect(protectionUpdates.versionToDeployViewMode).toBeVisible();
-      await expect(protectionUpdates.versionToDeployPicker).toBeHidden();
-      await expect(protectionUpdates.noteTitle).toBeVisible();
-      await expect(protectionUpdates.noteViewMode).toHaveText(NOTE);
-      await expect(protectionUpdates.note).toBeHidden();
-      await expect(protectionUpdates.saveButton).toBeDisabled();
-    });
+        await protectionUpdates.goto(endpointPolicy.id);
+        await expect(protectionUpdates.automaticUpdatesViewMode).toBeVisible();
+        await expect(protectionUpdates.automaticUpdatesSwitch).toBeHidden();
+        await expect(protectionUpdates.deployedVersionTitle).toBeVisible();
+        await expect(protectionUpdates.deployedVersion).toHaveText(
+          oneWeekAgo.format('MMMM DD, YYYY')
+        );
+        await expect(protectionUpdates.versionToDeployTitle).toBeVisible();
+        await expect(protectionUpdates.versionToDeployViewMode).toBeVisible();
+        await expect(protectionUpdates.versionToDeployPicker).toBeHidden();
+        await expect(protectionUpdates.noteTitle).toBeVisible();
+        await expect(protectionUpdates.noteViewMode).toHaveText(NOTE);
+        await expect(protectionUpdates.note).toBeHidden();
+        await expect(protectionUpdates.saveButton).toBeDisabled();
+      }
+    );
 
     spaceTest(
       'without note',

@@ -151,31 +151,48 @@ spaceTest.describe(
       });
     });
 
-    spaceTest('update note', async ({ kbnClient, scoutSpace, pageObjects, endpointPolicy }) => {
-      const { protectionUpdates } = pageObjects;
-      await setManifestVersion(
+    spaceTest(
+      'update note',
+      async ({
         kbnClient,
-        scoutSpace.id,
-        endpointPolicy.id,
-        daysAgo(7).format(MANIFEST_DATE_FORMAT)
-      );
-      await setProtectionUpdatesNote(kbnClient, scoutSpace.id, endpointPolicy.id, NOTE);
+        samlAuth,
+        endpointManagementApi,
+        scoutSpace,
+        pageObjects,
+        endpointPolicy,
+      }) => {
+        const { protectionUpdates } = pageObjects;
+        await setManifestVersion(
+          kbnClient,
+          scoutSpace.id,
+          endpointPolicy.id,
+          daysAgo(7).format(MANIFEST_DATE_FORMAT)
+        );
+        const { cookieHeader } = await samlAuth.asInteractiveUser('admin');
+        await setProtectionUpdatesNote({
+          endpointManagementApi,
+          authHeaders: cookieHeader,
+          spaceId: scoutSpace.id,
+          policyId: endpointPolicy.id,
+          note: NOTE,
+        });
 
-      await spaceTest.step('replace the note and save', async () => {
-        await protectionUpdates.goto(endpointPolicy.id);
-        await expect(protectionUpdates.saveButton).toBeEnabled();
-        await expect(protectionUpdates.note).toHaveValue(NOTE);
-        await protectionUpdates.replaceNote(UPDATED_NOTE);
-        await protectionUpdates.save();
-        await expect(protectionUpdates.successToast).toBeVisible();
-        await expect(protectionUpdates.note).toHaveValue(UPDATED_NOTE);
-        await expect(protectionUpdates.saveButton).toBeDisabled();
-      });
+        await spaceTest.step('replace the note and save', async () => {
+          await protectionUpdates.goto(endpointPolicy.id);
+          await expect(protectionUpdates.saveButton).toBeEnabled();
+          await expect(protectionUpdates.note).toHaveValue(NOTE);
+          await protectionUpdates.replaceNote(UPDATED_NOTE);
+          await protectionUpdates.save();
+          await expect(protectionUpdates.successToast).toBeVisible();
+          await expect(protectionUpdates.note).toHaveValue(UPDATED_NOTE);
+          await expect(protectionUpdates.saveButton).toBeDisabled();
+        });
 
-      await spaceTest.step('the new note persists after a reload', async () => {
-        await protectionUpdates.goto(endpointPolicy.id);
-        await expect(protectionUpdates.note).toHaveValue(UPDATED_NOTE);
-      });
-    });
+        await spaceTest.step('the new note persists after a reload', async () => {
+          await protectionUpdates.goto(endpointPolicy.id);
+          await expect(protectionUpdates.note).toHaveValue(UPDATED_NOTE);
+        });
+      }
+    );
   }
 );

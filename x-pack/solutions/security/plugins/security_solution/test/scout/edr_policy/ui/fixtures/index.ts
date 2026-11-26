@@ -5,13 +5,15 @@
  * 2.0.
  */
 
-import { spaceTest as baseSpaceTest, tags } from '@kbn/scout-security';
+import { mergeTests, spaceTest as baseSpaceTest, tags } from '@kbn/scout-security';
 import type {
   ScoutPage,
   SecurityPageObjects,
   SecurityParallelTestFixtures,
   SecurityParallelWorkerFixtures,
 } from '@kbn/scout-security';
+import { securitySolutionApiFixture } from '@kbn/security-solution-test-api-clients/scout';
+import type { SecuritySolutionApiFixtures } from '@kbn/security-solution-test-api-clients/scout';
 import type { PolicyData } from '../../../../../common/endpoint/types';
 import {
   createScoutEndpointPolicy,
@@ -33,7 +35,10 @@ export interface PolicyTestFixtures extends SecurityParallelTestFixtures {
  */
 const ENDPOINT_POLICY_FIXTURE_TIMEOUT_MS = 300_000;
 
-export const spaceTest = baseSpaceTest.extend<PolicyTestFixtures, SecurityParallelWorkerFixtures>({
+export const spaceTest = mergeTests(baseSpaceTest, securitySolutionApiFixture).extend<
+  PolicyTestFixtures,
+  SecurityParallelWorkerFixtures & SecuritySolutionApiFixtures
+>({
   pageObjects: async (
     { pageObjects, page }: { pageObjects: SecurityPageObjects; page: ScoutPage },
     use: (pageObjects: PolicyPageObjects) => Promise<void>

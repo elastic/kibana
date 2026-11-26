@@ -38,6 +38,7 @@
     "@kbn/proposals-common",
     "@kbn/deeplinks-security",
     "@kbn/inference-common",
-    "@kbn/std"
+    "@kbn/std",
+    "@kbn/security-solution-test-api-clients"
   ]
 }
