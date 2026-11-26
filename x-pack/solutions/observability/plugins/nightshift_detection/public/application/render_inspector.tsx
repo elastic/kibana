@@ -8,23 +8,26 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import type { CoreStart } from '@kbn/core/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import { InspectorPage } from './inspector_page';
-import { createGetSignalsHref } from './signals_in_discover';
+import { createDiscoverLinks } from './signals_in_discover';
 
 /** Mounts the inspector into the app's element and returns its unmount function. */
 export function renderInspector({
   coreStart,
   element,
   isServerless,
+  data,
   share,
   spaceId,
 }: {
   coreStart: CoreStart;
   element: HTMLElement;
   isServerless: boolean;
+  data: DataPublicPluginStart;
   share?: SharePluginStart;
-  /** The active space, whose signals the Discover links show. */
+  /** The active space, whose signals the page shows. */
   spaceId: string;
 }): () => void {
   // The app element clips its content by default, and results pile up past the fold.
@@ -36,7 +39,9 @@ export function renderInspector({
       <InspectorPage
         http={coreStart.http}
         isServerless={isServerless}
-        getSignalsHref={createGetSignalsHref({ share, spaceId })}
+        data={data}
+        spaceId={spaceId}
+        discoverLinks={createDiscoverLinks({ share, spaceId })}
       />
     ),
     element

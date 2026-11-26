@@ -11,12 +11,17 @@ import type {
   Plugin,
   PluginInitializerContext,
 } from '@kbn/core/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import { DETECTION_INSPECTOR_APP_ID } from '../common/constants';
 
-/** What the inspector reads from other plugins: the active space, and Discover links when `share` is on. */
+/**
+ * What the inspector reads from other plugins: the active space, the signals through `data`'s
+ * ES|QL search, and Discover links when `share` is on.
+ */
 export interface NightshiftDetectionStartDependencies {
+  data: DataPublicPluginStart;
   spaces: SpacesPluginStart;
   share?: SharePluginStart;
 }
@@ -38,7 +43,7 @@ export class NightshiftDetectionPlugin
       visibleIn: [],
       mount: async ({ element }: AppMountParameters) => {
         // Loaded on mount so the page stays out of every page-load bundle.
-        const [[coreStart, { spaces, share }], { renderInspector }] = await Promise.all([
+        const [[coreStart, { data, spaces, share }], { renderInspector }] = await Promise.all([
           core.getStartServices(),
           import('./application/render_inspector'),
         ]);
@@ -46,6 +51,7 @@ export class NightshiftDetectionPlugin
         return renderInspector({
           coreStart,
           element,
+          data,
           share,
           spaceId,
           isServerless: this.context.env.packageInfo.buildFlavor === 'serverless',

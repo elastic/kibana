@@ -14,36 +14,50 @@ import { DETECTION_SIGNAL_SOURCE } from '../../common/constants';
 
 const MINUTE_MS = 60_000;
 
-/** A Discover link to the space's detection signals over a time range. */
-export type GetSignalsHref = (timeRange: TimeRange) => string;
-
 /**
- * Builds Discover links to the detection signals of a space. `data` is `flattened`, so ES|QL
- * can't filter on the strategy or the bucket inside it; it is kept whole for reading instead.
- * Returns `undefined` when Discover can't be linked to.
+ * The ES|QL commands that read the engine's signals of a space, newest first. `data` is
+ * `flattened`, so ES|QL can't filter on the strategy or the bucket inside it; it is kept whole.
  */
-export function createGetSignalsHref({
-  share,
-  spaceId,
-}: {
-  share?: SharePluginStart;
-  spaceId: string;
-}): GetSignalsHref | undefined {
-  const locator = share?.url.locators.get<DiscoverAppLocatorParams>(DISCOVER_APP_LOCATOR);
-  if (!locator) {
-    return undefined;
-  }
-
-  const esql = [
+export function getSignalsEsqlCommands(spaceId: string): string[] {
+  return [
     `FROM ${ALERT_EVENTS_DATA_STREAM}`,
     `WHERE type == "signal" AND source == ${JSON.stringify(
       DETECTION_SIGNAL_SOURCE
     )} AND space_id == ${JSON.stringify(spaceId)}`,
     'KEEP @timestamp, status, severity, group_hash, data',
     'SORT @timestamp DESC',
-  ].join('\n| ');
+  ];
+}
 
-  return (timeRange) => locator.getRedirectUrl({ query: { esql }, timeRange });
+/** Discover links for the inspector. */
+export interface DiscoverLinks {
+  /** The space's signals over a time range. */
+  getSignalsHref: (timeRange: TimeRange) => string;
+  /** Any ES|QL query, such as a signal's evidence query, over a time range. */
+  getEsqlHref: (params: { esql: string; timeRange: TimeRange }) => string;
+}
+
+/** Builds the inspector's Discover links, or `undefined` when Discover can't be linked to. */
+export function createDiscoverLinks({
+  share,
+  spaceId,
+}: {
+  share?: SharePluginStart;
+  spaceId: string;
+}): DiscoverLinks | undefined {
+  const locator = share?.url.locators.get<DiscoverAppLocatorParams>(DISCOVER_APP_LOCATOR);
+  if (!locator) {
+    return undefined;
+  }
+
+  const getEsqlHref: DiscoverLinks['getEsqlHref'] = ({ esql, timeRange }) =>
+    locator.getRedirectUrl({ query: { esql }, timeRange });
+  const signalsEsql = getSignalsEsqlCommands(spaceId).join('\n| ');
+
+  return {
+    getEsqlHref,
+    getSignalsHref: (timeRange) => getEsqlHref({ esql: signalsEsql, timeRange }),
+  };
 }
 
 /**

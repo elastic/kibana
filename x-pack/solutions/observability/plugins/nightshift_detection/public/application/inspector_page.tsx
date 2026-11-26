@@ -16,6 +16,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 import type { HttpStart } from '@kbn/core/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { KbnInfoCallout } from '@kbn/ui-callout';
 import {
   createHttpServiceAccountsApi,
@@ -27,7 +28,9 @@ import type { DetectionEngineEnableBody } from '../../common/service_account';
 import type { TickResult } from '../../common/tick';
 import type { ActionOutcome, ActionResult } from './result_card';
 import { ResultCard } from './result_card';
-import type { GetSignalsHref } from './signals_in_discover';
+import type { DiscoverLinks } from './signals_in_discover';
+import { SignalsPanel } from './signals/signals_panel';
+import { useLiveSignals } from './signals/use_live_signals';
 
 /** One thing the inspector can do; `run` returns the response tagged with the view that shows it. */
 interface EngineAction {
@@ -129,15 +132,26 @@ function toErrorResponse(error: unknown): unknown {
 interface InspectorPageProps {
   http: HttpStart;
   isServerless: boolean;
-  /** Links to the space's signals in Discover; absent when Discover can't be linked to. */
-  getSignalsHref?: GetSignalsHref;
+  data: DataPublicPluginStart;
+  /** The active space, whose signals the page lists. */
+  spaceId: string;
+  /** Absent when Discover can't be linked to. */
+  discoverLinks?: DiscoverLinks;
 }
 
 /** The engine inspector: calls the engine's routes in the current space and shows what they return. */
-export function InspectorPage({ http, isServerless, getSignalsHref }: InspectorPageProps) {
+export function InspectorPage({
+  http,
+  isServerless,
+  data,
+  spaceId,
+  discoverLinks,
+}: InspectorPageProps) {
   const engineActions = getEngineActions({ isServerless });
   const [runningActionId, setRunningActionId] = useState<string | null>(null);
   const [results, setResults] = useState<ActionResult[]>([]);
+  const [isLive, setIsLive] = useState(true);
+  const liveSignals = useLiveSignals({ data, spaceId, isLive });
 
   const handleRunAction = async (action: EngineAction) => {
     setRunningActionId(action.id);
@@ -157,6 +171,8 @@ export function InspectorPage({ http, isServerless, getSignalsHref }: InspectorP
 
     try {
       record(true, await action.run(http));
+      // A tick may have written signals; show them without waiting for the next read.
+      liveSignals.refresh();
     } catch (error) {
       record(false, { view: 'raw', response: toErrorResponse(error) });
     } finally {
@@ -169,12 +185,12 @@ export function InspectorPage({ http, isServerless, getSignalsHref }: InspectorP
       <EuiPageTemplate.Header
         pageTitle="Detection engine inspector"
         rightSideItems={
-          getSignalsHref
+          discoverLinks
             ? [
                 <EuiButtonEmpty
                   key="signals"
                   iconType="discoverApp"
-                  href={getSignalsHref({ from: 'now-24h', to: 'now' })}
+                  href={discoverLinks.getSignalsHref({ from: 'now-24h', to: 'now' })}
                   data-test-subj="nightshiftDetectionInspectorSignalsLink"
                 >
                   Signals of the last 24 hours in Discover
@@ -204,6 +220,13 @@ export function InspectorPage({ http, isServerless, getSignalsHref }: InspectorP
           ))}
         </EuiFlexGroup>
         <EuiSpacer />
+        <SignalsPanel
+          live={liveSignals}
+          isLive={isLive}
+          onLiveChange={setIsLive}
+          discoverLinks={discoverLinks}
+        />
+        <EuiSpacer />
         {results.length === 0 ? (
           <EuiText color="subdued" size="s">
             <p>Nothing run yet in this session.</p>
@@ -211,7 +234,7 @@ export function InspectorPage({ http, isServerless, getSignalsHref }: InspectorP
         ) : (
           results.map((result) => (
             <React.Fragment key={result.key}>
-              <ResultCard result={result} getSignalsHref={getSignalsHref} />
+              <ResultCard result={result} getSignalsHref={discoverLinks?.getSignalsHref} />
               <EuiSpacer size="m" />
             </React.Fragment>
           ))

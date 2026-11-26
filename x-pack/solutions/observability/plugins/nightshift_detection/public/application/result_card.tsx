@@ -20,7 +20,7 @@ import {
 import type { ReconcileRulesResponse } from '../../common/reconcile';
 import type { TickResult } from '../../common/tick';
 import { ReconcileResultView } from './reconcile_result_view';
-import type { GetSignalsHref } from './signals_in_discover';
+import type { DiscoverLinks } from './signals_in_discover';
 import { getTickTimeRange } from './signals_in_discover';
 import { TickResultView } from './tick_result_view';
 
@@ -45,7 +45,7 @@ function OutcomeView({
   getSignalsHref,
 }: {
   result: ActionResult;
-  getSignalsHref?: GetSignalsHref;
+  getSignalsHref?: DiscoverLinks['getSignalsHref'];
 }) {
   const { outcome } = result;
   switch (outcome.view) {
@@ -69,7 +69,7 @@ function OutcomeView({
 
 interface ResultCardProps {
   result: ActionResult;
-  getSignalsHref?: GetSignalsHref;
+  getSignalsHref?: DiscoverLinks['getSignalsHref'];
 }
 
 /** One call: what was run and how long it took, its shaped view, and the raw response. */
