@@ -41,6 +41,7 @@
     "@kbn/analytics",
     "@kbn/saved-objects-management-plugin",
     "@kbn/lens-plugin",
+    "@kbn/lens-embeddable-utils",
     "@kbn/es-query",
     "@kbn/utility-types",
     "@kbn/i18n",

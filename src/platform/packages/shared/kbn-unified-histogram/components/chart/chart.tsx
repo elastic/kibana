@@ -17,7 +17,9 @@ import type {
   EmbeddableComponentProps,
   LensEmbeddableInput,
   LensEmbeddableOutput,
+  TypedLensByValueInput,
 } from '@kbn/lens-plugin/public';
+import type { TimeRange } from '@kbn/es-query';
 import type { Datatable, DefaultInspectorAdapters } from '@kbn/expressions-plugin/common';
 import type { DataViewField } from '@kbn/data-views-plugin/public';
 import { apiPublishesEsql } from '@kbn/presentation-publishing';
@@ -53,6 +55,14 @@ import { useLensProps } from './hooks/use_lens_props';
 import { buildBucketInterval } from './utils/build_bucket_interval';
 import { ChartSectionTemplate } from './chart_section_template';
 
+/** What the chart shows, for consumers adding their own toolbar actions. */
+export interface UnifiedHistogramChartActionContext {
+  isEsql: boolean;
+  /** The Lens attributes without their embedded ES|QL result tables. */
+  attributes: TypedLensByValueInput['attributes'];
+  relativeTimeRange: TimeRange;
+}
+
 export interface UnifiedHistogramChartProps {
   isChartAvailable: boolean;
   hiddenPanel?: boolean;
@@ -80,6 +90,10 @@ export interface UnifiedHistogramChartProps {
   withLensActions?: boolean;
   lensActionsOptions?: UnifiedHistogramLensActionsOptions;
   onApiAvailable?: EmbeddableComponentProps['onApiAvailable'];
+  /** Extra toolbar buttons for the rendered chart. */
+  getAdditionalActions?: (
+    context: UnifiedHistogramChartActionContext
+  ) => IconButtonGroupProps['buttons'];
 }
 
 const RequestStatusError: typeof RequestStatus.ERROR = 2;
@@ -106,6 +120,7 @@ export function UnifiedHistogramChart({
   onApiAvailable: consumerOnApiAvailable,
   withLensActions = true,
   lensActionsOptions,
+  getAdditionalActions,
   ...histogramProps
 }: UnifiedHistogramChartProps) {
   const lensVisServiceCurrentSuggestionContext = lensVisServiceState.currentSuggestionContext;
@@ -343,6 +358,16 @@ export function UnifiedHistogramChart({
       'data-test-subj': 'unifiedHistogramSaveVisualization',
       onClick: () => setIsSaveModalVisible(true),
     });
+  }
+
+  if (getAdditionalActions && visContext?.attributes) {
+    actions.push(
+      ...getAdditionalActions({
+        isEsql,
+        attributes: removeTablesFromLensAttributes(visContext.attributes).attributes,
+        relativeTimeRange,
+      })
+    );
   }
 
   return (
