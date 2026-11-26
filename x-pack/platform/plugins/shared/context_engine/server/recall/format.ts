@@ -6,7 +6,7 @@
  */
 
 import { stringify } from 'yaml';
-import { RECALL_AI_INDEX_PREFIX } from '../../common/constants';
+import { DEFAULT_RECALL_FORMAT, RECALL_AI_INDEX_PREFIX } from '../../common/constants';
 import type { AiIndexRecallResult, RecallFormat, RecallResult } from '../../common/http_api/recall';
 
 const YAML_RESULTS_HEADER = 'results:\n';
@@ -14,13 +14,15 @@ const YAML_RESULTS_HEADER = 'results:\n';
 /** `lineWidth: 0` keeps long lines unwrapped; no aliases so shared objects never become anchors. */
 const YAML_OPTIONS = { lineWidth: 0, aliasDuplicateObjects: false } as const;
 
-const hasEntries = (attributes: object | undefined): boolean =>
-  attributes !== undefined && Object.keys(attributes).length > 0;
+/** V1 default: naive character-to-token ratio mirroring `server/dreaming/trace_batches.ts`. */
+const CHARS_PER_TOKEN = 4;
+
+const estimateTokens = (charLength: number): number => Math.ceil(charLength / CHARS_PER_TOKEN);
 
 const isAiIndexResult = (result: RecallResult): result is AiIndexRecallResult =>
   result.source.startsWith(RECALL_AI_INDEX_PREFIX);
 
-export const normalizeRecallResult = (result: RecallResult): RecallResult => {
+const normalizeRecallResult = (result: RecallResult): RecallResult => {
   if (result.source === 'session_events') {
     const { id, session_id: sessionId, source, date, role, content } = result;
     return { id, session_id: sessionId, source, date, role, content };
@@ -33,7 +35,7 @@ export const normalizeRecallResult = (result: RecallResult): RecallResult => {
       source,
       date,
       content,
-      ...(attributes !== undefined && hasEntries(attributes) && { attributes }),
+      ...(attributes && Object.keys(attributes).length > 0 && { attributes }),
     };
   }
   if (isAiIndexResult(result)) {
@@ -43,27 +45,14 @@ export const normalizeRecallResult = (result: RecallResult): RecallResult => {
       source,
       ...(date !== undefined && { date }),
       content,
-      ...(attributes !== undefined && hasEntries(attributes) && { attributes }),
+      ...(attributes && Object.keys(attributes).length > 0 && { attributes }),
     };
   }
   const exhaustive: never = result;
   throw new Error(`Unsupported recall result ${JSON.stringify(exhaustive)}`);
 };
 
-export const formatRecallYaml = (results: readonly RecallResult[]): string =>
-  stringify({ results: results.map(normalizeRecallResult) }, YAML_OPTIONS);
-
-export const recallContainerChars: Readonly<
-  Record<RecallFormat, { readonly wrapper: number; readonly separator: number }>
-> = {
-  yaml: { wrapper: YAML_RESULTS_HEADER.length, separator: 0 },
-  json: { wrapper: '[]'.length, separator: ','.length },
-};
-
-export const serializedRecallItemChars = (
-  normalized: RecallResult,
-  format: RecallFormat
-): number => {
+const serializedItemChars = (normalized: RecallResult, format: RecallFormat): number => {
   switch (format) {
     case 'yaml':
       return stringify({ results: [normalized] }, YAML_OPTIONS).length - YAML_RESULTS_HEADER.length;
@@ -74,4 +63,47 @@ export const serializedRecallItemChars = (
       throw new Error(`Unsupported recall format ${exhaustive}`);
     }
   }
+};
+
+export interface PackedRecallResults {
+  readonly results: RecallResult[];
+  readonly tokensReturned: number;
+}
+
+/** Formats recall results as canonical YAML under a top-level `results` key. */
+export const formatRecallYaml = (results: readonly RecallResult[]): string =>
+  stringify({ results: results.map(normalizeRecallResult) }, YAML_OPTIONS);
+
+/**
+ * V1 default: packs whole results in reranked order without truncation, always keeping result #1
+ * even when it exceeds `tokenBudget`, and stops on the first later result that overflows.
+ */
+export const packRecallResults = ({
+  results,
+  tokenBudget,
+  format = DEFAULT_RECALL_FORMAT,
+}: {
+  results: readonly RecallResult[];
+  tokenBudget: number;
+  format?: RecallFormat;
+}): PackedRecallResults => {
+  if (results.length === 0) {
+    return { results: [], tokensReturned: 0 };
+  }
+
+  const separator = format === 'yaml' ? 0 : 1;
+  let totalChars = format === 'yaml' ? YAML_RESULTS_HEADER.length : 2;
+  const packed: RecallResult[] = [];
+
+  for (const result of results) {
+    const normalized = normalizeRecallResult(result);
+    const nextChars =
+      totalChars + (packed.length > 0 ? separator : 0) + serializedItemChars(normalized, format);
+    if (packed.length > 0 && estimateTokens(nextChars) > tokenBudget) {
+      break;
+    }
+    packed.push(normalized);
+    totalChars = nextChars;
+  }
+  return { results: packed, tokensReturned: estimateTokens(totalChars) };
 };

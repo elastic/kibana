@@ -8,16 +8,12 @@
 import { parse } from 'yaml';
 import type {
   AiIndexRecallResult,
+  RecallFormat,
   RecallResult,
   SessionEventRecallResult,
   SessionMemoryRecallResult,
 } from '../../common/http_api/recall';
-import {
-  formatRecallYaml,
-  normalizeRecallResult,
-  recallContainerChars,
-  serializedRecallItemChars,
-} from './format';
+import { formatRecallYaml, packRecallResults } from './format';
 
 const event: SessionEventRecallResult = {
   id: 'evt-1',
@@ -45,11 +41,20 @@ const ki: AiIndexRecallResult = {
   attributes: { priority: 2, owner: 'sre', tags: ['security', 'keys'], meta: { reviewed: true } },
 };
 
-const parseResults = (yaml: string): unknown => parse(yaml).results;
+const item = (id: string, content: string): AiIndexRecallResult => ({
+  id,
+  source: 'ai_index:docs',
+  content,
+});
+
+const render = (results: RecallResult[], format: RecallFormat): string =>
+  format === 'yaml' ? formatRecallYaml(results) : JSON.stringify(results);
+
+const expectedTokens = (text: string): number => Math.ceil(text.length / 4);
 
 describe('formatRecallYaml', () => {
   it('roundtrips every result variant', () => {
-    expect(parseResults(formatRecallYaml([event, memory, ki]))).toEqual([event, memory, ki]);
+    expect(parse(formatRecallYaml([event, memory, ki])).results).toEqual([event, memory, ki]);
   });
 
   it('writes fields in canonical order regardless of input order', () => {
@@ -61,8 +66,9 @@ describe('formatRecallYaml', () => {
       session_id: event.session_id,
       id: event.id,
     } as const;
-    expect(formatRecallYaml([shuffled])).toBe(formatRecallYaml([event]));
-    expect(Object.keys(normalizeRecallResult(shuffled))).toEqual([
+    const yaml = formatRecallYaml([shuffled]);
+    expect(yaml).toBe(formatRecallYaml([event]));
+    expect(Object.keys(parse(yaml).results[0])).toEqual([
       'id',
       'session_id',
       'source',
@@ -125,24 +131,91 @@ describe('formatRecallYaml', () => {
   });
 });
 
-describe('serializedRecallItemChars', () => {
-  const results: RecallResult[] = [event, normalizeRecallResult({ ...memory, attributes: {} }), ki];
-
-  it('sums with YAML container overhead to the exact formatRecallYaml length', () => {
-    const { wrapper, separator } = recallContainerChars.yaml;
-    const total =
-      wrapper +
-      results.reduce((sum, result) => sum + serializedRecallItemChars(result, 'yaml'), 0) +
-      separator * (results.length - 1);
-    expect(total).toBe(formatRecallYaml(results).length);
+describe('packRecallResults', () => {
+  it('returns nothing for no results', () => {
+    expect(packRecallResults({ results: [], tokenBudget: 1000 })).toEqual({
+      results: [],
+      tokensReturned: 0,
+    });
   });
 
-  it('sums with JSON container overhead to the exact JSON.stringify length', () => {
-    const { wrapper, separator } = recallContainerChars.json;
-    const total =
-      wrapper +
-      results.reduce((sum, result) => sum + serializedRecallItemChars(result, 'json'), 0) +
-      separator * (results.length - 1);
-    expect(total).toBe(JSON.stringify(results).length);
+  it('always keeps the first result even when it alone exceeds the budget', () => {
+    const big = item('big', 'x'.repeat(10_000));
+    const packed = packRecallResults({
+      results: [big, item('small', 'y')],
+      tokenBudget: 10,
+    });
+    expect(packed.results).toEqual([big]);
+    expect(packed.tokensReturned).toBe(expectedTokens(formatRecallYaml([big])));
+    expect(packed.tokensReturned).toBeGreaterThan(10);
+  });
+
+  it('stops at the first result that overflows instead of skipping to a smaller one', () => {
+    const first = item('a', 'x'.repeat(100));
+    const overflowing = item('b', 'x'.repeat(4000));
+    const small = item('c', 'x');
+    const budget = expectedTokens(formatRecallYaml([first, small]));
+    const packed = packRecallResults({ results: [first, overflowing, small], tokenBudget: budget });
+    expect(packed.results).toEqual([first]);
+  });
+
+  it.each<RecallFormat>(['yaml', 'json'])(
+    'fits results that land exactly on the budget (%s)',
+    (format) => {
+      const results = [item('a', 'x'.repeat(100)), item('b', 'x'.repeat(100))];
+      const exact = expectedTokens(render(results, format));
+      expect(packRecallResults({ results, tokenBudget: exact, format }).results).toEqual(results);
+      expect(packRecallResults({ results, tokenBudget: exact - 1, format }).results).toEqual([
+        results[0],
+      ]);
+    }
+  );
+
+  it('rounds token counts up at the 4-character boundary', () => {
+    for (const content of ['', 'x', 'xx', 'xxx']) {
+      const candidate = item('a', content);
+      const { tokensReturned } = packRecallResults({
+        results: [candidate],
+        tokenBudget: 1000,
+        format: 'json',
+      });
+      expect(tokensReturned).toBe(expectedTokens(JSON.stringify([candidate])));
+    }
+  });
+
+  it('strips empty attributes from packed results', () => {
+    const packed = packRecallResults({
+      results: [{ ...item('a', 'text'), attributes: {} }],
+      tokenBudget: 1000,
+    });
+    expect(packed.results).toEqual([item('a', 'text')]);
+  });
+
+  it.each<RecallFormat>(['yaml', 'json'])(
+    'reports the tokens of the rendered %s output',
+    (format) => {
+      const results: RecallResult[] = [
+        {
+          ...event,
+          role: 'assistant',
+          content: 'Line one\nLine two: with colon',
+        },
+        {
+          ...memory,
+          content: '**Prefers** Terraform',
+        },
+        item('ki-1', 'x'.repeat(250)),
+      ];
+      const packed = packRecallResults({ results, tokenBudget: 25_000, format });
+      expect(packed.results).toEqual(results);
+      expect(packed.tokensReturned).toBe(expectedTokens(render(results, format)));
+    }
+  );
+
+  it('defaults to measuring YAML', () => {
+    const results = [item('a', 'x'.repeat(100)), item('b', 'x'.repeat(100))];
+    expect(packRecallResults({ results, tokenBudget: 25_000 }).tokensReturned).toBe(
+      expectedTokens(formatRecallYaml(results))
+    );
   });
 });

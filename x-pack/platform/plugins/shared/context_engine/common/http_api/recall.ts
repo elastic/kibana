@@ -10,8 +10,7 @@ import type { KiJsonValue } from './knowledge_indicators';
 export const RECALL_FORMATS = ['yaml', 'json'] as const;
 export type RecallFormat = (typeof RECALL_FORMATS)[number];
 
-export const RECALL_SESSION_STORES = ['session_events', 'session_memory'] as const;
-export type RecallSessionStore = (typeof RECALL_SESSION_STORES)[number];
+export type RecallSessionStore = 'session_events' | 'session_memory';
 
 export type RecallEventRole = 'user' | 'assistant';
 
