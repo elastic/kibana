@@ -44,4 +44,4 @@ node scripts/evals start \
 
 ### Versioning
 
-The dataset is `context-engine-memory: longmemeval-s-direct-index-v2`. Changing the selected IDs, source, sanitization, index representation, prompt or question-date rendering requires a new dataset version, so comparisons never pair incomparable runs.
+The dataset is `context-engine-memory: longmemeval-s-direct-index-v1`. Changing the selected IDs, source, sanitization, index representation, prompt or question-date rendering requires a new dataset version, so comparisons never pair incomparable runs.

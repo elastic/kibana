@@ -31,11 +31,11 @@ export const SELECTED_EXAMPLE_IDS = [
 ] as const;
 export const SELECTED_EXAMPLE_SPLIT = 'dev';
 
-export const DATASET_NAME = 'context-engine-memory: longmemeval-s-direct-index-v2';
+export const DATASET_NAME = 'context-engine-memory: longmemeval-s-direct-index-v1';
 export const POC_INDEX = 'longmemeval-memory-direct-index-poc';
 
-export const SUITE_VERSION = 'longmemeval-direct-index-suite-v2';
-export const PROMPT_VERSION = 'longmemeval-direct-index-prompt-v2';
+export const SUITE_VERSION = 'longmemeval-direct-index-suite-v1';
+export const PROMPT_VERSION = 'longmemeval-direct-index-prompt-v1';
 export const INDEX_SCHEMA_VERSION = 'turn-per-document-v1';
 export const ARM_ID = 'direct-index-native-tools';
 
