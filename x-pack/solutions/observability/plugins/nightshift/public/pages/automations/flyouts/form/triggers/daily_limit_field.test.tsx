@@ -31,6 +31,32 @@ describe('DailyLimitField', () => {
     expect(onChange).toHaveBeenCalledWith('5');
   });
 
+  it('warns only when the limit is below the schedule runs per day', () => {
+    const renderField = (value: string) =>
+      render(
+        <I18nProvider>
+          <DailyLimitField
+            value={value}
+            helpText="Help text"
+            onChange={jest.fn()}
+            scheduledRunsPerDay={24}
+          />
+        </I18nProvider>
+      );
+    const callout = 'automationDailyLimitBelowScheduleCallout';
+
+    const { unmount } = renderField('5');
+    expect(screen.getByTestId(callout)).toBeInTheDocument();
+    unmount();
+
+    const { unmount: unmountAtLimit } = renderField('24');
+    expect(screen.queryByTestId(callout)).not.toBeInTheDocument();
+    unmountAtLimit();
+
+    renderField('unlimited');
+    expect(screen.queryByTestId(callout)).not.toBeInTheDocument();
+  });
+
   it('flags an invalid limit', () => {
     render(
       <I18nProvider>
@@ -59,7 +85,7 @@ describe('DailyLimitField', () => {
   it('shows no deployment limit callout for an automation that has no usage yet', () => {
     (useGlobalLimit as jest.Mock).mockReturnValue({
       isReached: true,
-      blockingLimit: 'investigation',
+      blockingLimit: 'automatic_investigation',
       limit: 6,
     });
     render(
@@ -74,7 +100,7 @@ describe('DailyLimitField', () => {
   it('replaces the per-automation callout with the deployment limit callout', () => {
     (useGlobalLimit as jest.Mock).mockReturnValue({
       isReached: true,
-      blockingLimit: 'investigation',
+      blockingLimit: 'automatic_investigation',
       limit: 6,
       settingsHref: '/app/nightshift/settings/investigations',
     });

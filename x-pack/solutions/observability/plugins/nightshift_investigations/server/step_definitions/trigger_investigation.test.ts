@@ -9,15 +9,16 @@ import Boom from '@hapi/boom';
 import type { KibanaRequest } from '@kbn/core/server';
 import { loggingSystemMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
-import { MAX_ARRAY_LENGTH, MAX_ID_LENGTH, MAX_TEXT_LENGTH } from '@kbn/significant-events-schema';
+import { MAX_TEXT_LENGTH } from '@kbn/significant-events-schema';
 import { InvestigationQuotaDeniedError } from '../client/errors';
 import type { GetInvestigationsClient } from '../routes/types';
 import { fetchInvestigationAlertSnapshots } from '../lib/alert_snapshot';
-import { notifyInvestigationQuotaReached } from '../lib/notifications/notify_investigation_quota_reached';
+import { notifyInvestigationLimitReached } from '../lib/notifications/notify_investigation_quota_reached';
 import { triggerInvestigationStepDefinition } from './trigger_investigation';
 
 jest.mock('../lib/notifications/notify_investigation_quota_reached', () => ({
-  notifyInvestigationQuotaReached: jest.fn().mockResolvedValue(undefined),
+  ...jest.requireActual('../lib/notifications/notify_investigation_quota_reached'),
+  notifyInvestigationLimitReached: jest.fn().mockResolvedValue(undefined),
 }));
 
 jest.mock('../lib/alert_snapshot', () => ({ fetchInvestigationAlertSnapshots: jest.fn() }));
@@ -28,7 +29,12 @@ jest.mock('@kbn/workflows-extensions/server', () => ({
 
 const request = {} as KibanaRequest;
 const logger = loggingSystemMock.createLogger();
-const createContext = (input: Record<string, unknown>) =>
+const createContext = (
+  input: Record<string, unknown>,
+  triggeredBy = 'scheduled',
+  metadata: Record<string, string> = {},
+  event?: Record<string, unknown>
+) =>
   ({
     input,
     logger,
@@ -36,6 +42,9 @@ const createContext = (input: Record<string, unknown>) =>
       getFakeRequest: jest.fn().mockReturnValue(request),
       getContext: jest.fn().mockReturnValue({
         workflow: { id: 'wf-1', spaceId: 'test-space' },
+        execution: { triggeredBy },
+        event,
+        metadata,
         kibanaUrl: 'https://kibana.example.com',
       }),
     },
@@ -88,6 +97,70 @@ describe('triggerInvestigationStepDefinition', () => {
       expect(start).toHaveBeenCalledWith(
         expect.objectContaining({ context: { alerts: snapshots } }),
         expect.anything()
+      );
+    });
+
+    it('reads the producer run from significant event alert data, ignoring the step context', async () => {
+      const significantEventAlerts = [
+        {
+          alert_version: 'v2',
+          id: 'episode-1',
+          source: 'elastic.significant_events',
+          data: { workflow_execution_id: 'discovery-run-1' },
+        },
+      ];
+      (fetchInvestigationAlertSnapshots as jest.Mock).mockResolvedValue(significantEventAlerts);
+      const start = jest.fn().mockResolvedValue({ investigation_id: 'investigation-1' });
+      const { definition } = createDefinition(start);
+
+      await definition.handler(
+        createContext({
+          subject_type: 'alert',
+          subject_id: 'episode-1',
+          context: { source_workflow_execution_id: 'forged-run' },
+        })
+      );
+
+      expect(start).toHaveBeenCalledWith(
+        expect.objectContaining({
+          context: {
+            alerts: significantEventAlerts,
+            source_workflow_execution_id: 'discovery-run-1',
+          },
+        }),
+        expect.anything()
+      );
+    });
+
+    describe('title fallback', () => {
+      it.each([
+        ['an empty title', 'elastic.significant_events', undefined, 'Checkout event'],
+        [
+          'a title equal to the alert id',
+          'elastic.significant_events',
+          'episode-1',
+          'Checkout event',
+        ],
+        ['a provided title', 'elastic.significant_events', 'Rule name', 'Rule name'],
+        ['another v2 source', 'other.source', 'episode-1', 'episode-1'],
+      ])(
+        'uses the alert data title for %s only when needed',
+        async (_name, source, title, expected) => {
+          (fetchInvestigationAlertSnapshots as jest.Mock).mockResolvedValue([
+            { alert_version: 'v2', id: 'episode-1', source, data: { title: 'Checkout event' } },
+          ]);
+          const start = jest.fn().mockResolvedValue({ investigation_id: 'investigation-1' });
+          const { definition } = createDefinition(start);
+
+          await definition.handler(
+            createContext({ subject_type: 'alert', subject_id: 'episode-1', title })
+          );
+
+          expect(start).toHaveBeenCalledWith(
+            expect.objectContaining({ title: expected }),
+            expect.anything()
+          );
+        }
       );
     });
 
@@ -147,7 +220,7 @@ describe('triggerInvestigationStepDefinition', () => {
         id: 'a1',
         type: 'nightshift-automation',
         references: [],
-        attributes: { workflowId: 'wf-1', runtime: {} },
+        attributes: { workflowId: 'wf-1', isEnabled: true, runtime: {} },
       });
       const start = jest.fn().mockResolvedValue({ investigation_id: 'inv-1' });
       const { definition } = createDefinition(start, soClient);
@@ -167,6 +240,25 @@ describe('triggerInvestigationStepDefinition', () => {
       );
     }
   );
+
+  it('passes the automation name to the start, so the investigation records what started it', async () => {
+    const soClient = savedObjectsClientMock.create();
+    soClient.get.mockResolvedValue({
+      id: 'a1',
+      type: 'nightshift-automation',
+      references: [],
+      attributes: { name: 'Payments alerts', workflowId: 'wf-1', isEnabled: true, runtime: {} },
+    });
+    const start = jest.fn().mockResolvedValue({ investigation_id: 'inv-1' });
+    const { definition } = createDefinition(start, soClient);
+    await definition.handler(
+      createContext({ automation_id: 'a1', subject_type: 'manual', message: 'Review errors.' })
+    );
+    expect(start).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({ automationId: 'a1', automationName: 'Payments alerts' })
+    );
+  });
 
   it('rejects oversized instructions before starting an investigation', async () => {
     const start = jest.fn();
@@ -258,7 +350,7 @@ describe('triggerInvestigationStepDefinition', () => {
     );
   });
 
-  it('forwards an explicit prompt and source ids unchanged', async () => {
+  it('forwards an explicit prompt unchanged', async () => {
     const start = jest.fn().mockResolvedValue({ investigation_id: 'investigation-1' });
     const { definition } = createDefinition(start);
 
@@ -268,14 +360,12 @@ describe('triggerInvestigationStepDefinition', () => {
         subject_id: 'event-1',
         title: 'Checkout latency breach',
         message: 'Checkout latency breach\n\nThe probable cause is Redis saturation.',
-        source_ids: ['logs.checkout', 'metrics.checkout'],
       })
     );
 
     expect(start).toHaveBeenCalledWith(
       expect.objectContaining({
         message: 'Checkout latency breach\n\nThe probable cause is Redis saturation.',
-        source_ids: ['logs.checkout', 'metrics.checkout'],
       }),
       expect.anything()
     );
@@ -358,6 +448,34 @@ describe('triggerInvestigationStepDefinition', () => {
     );
   });
 
+  it('summarizes a Slack thread by the message that started the run, not the step summary', async () => {
+    const start = jest.fn().mockResolvedValue({ investigation_id: 'investigation-1' });
+    const { definition } = createDefinition(start);
+
+    await definition.handler(
+      createContext(
+        {
+          subject_type: 'slack_thread',
+          summary: 'Investigate alerts posted in #alerts',
+          message: 'Slack message from O11y Alert in channel C1: ...',
+          slack_thread: { workspace: 'T1', channel: 'C1', thread_ts: '1.1' },
+        },
+        'slack2.message',
+        {},
+        { text: '*CRITICAL:* burn rate above 20 <https://kibana.example.com/a|Alert details>' }
+      )
+    );
+
+    expect(start).toHaveBeenCalledWith(
+      expect.objectContaining({
+        subject: expect.objectContaining({
+          summary: 'CRITICAL: burn rate above 20 Alert details',
+        }),
+      }),
+      expect.anything()
+    );
+  });
+
   it('rejects a Slack thread without a workspace', async () => {
     const start = jest.fn();
     const { definition } = createDefinition(start);
@@ -392,7 +510,7 @@ describe('triggerInvestigationStepDefinition', () => {
     expect(start).not.toHaveBeenCalled();
   });
 
-  it('rejects invalid prompt and source inputs before starting', async () => {
+  it('rejects invalid prompts before starting', async () => {
     const start = jest.fn();
     const { definition } = createDefinition(start);
 
@@ -412,18 +530,7 @@ describe('triggerInvestigationStepDefinition', () => {
           subject_type: 'significant_event',
           subject_id: 'event-1',
           title: 'Checkout latency breach',
-          source_ids: Array.from({ length: MAX_ARRAY_LENGTH + 1 }, () => 'logs.checkout'),
-        })
-      )
-    ).rejects.toThrow();
-    await expect(
-      definition.handler(
-        createContext({
-          subject_type: 'significant_event',
-          subject_id: 'event-1',
-          title: 'Checkout latency breach',
           message: 'x'.repeat(MAX_TEXT_LENGTH + 1),
-          source_ids: ['x'.repeat(MAX_ID_LENGTH + 1)],
         })
       )
     ).rejects.toThrow();
@@ -458,10 +565,16 @@ describe('investigation quota notice', () => {
     slack_thread: slackThread,
     message: 'Check this.',
   };
+  const channelDestination = {
+    type: 'slack',
+    connector_id: 'slack-connector',
+    params: { channel: 'C2' },
+  };
+  const alertInput = { subject_type: 'alert', subject_id: 'alert-1', context: { alerts: [] } };
 
-  beforeEach(() => jest.mocked(notifyInvestigationQuotaReached).mockClear());
+  beforeEach(() => jest.mocked(notifyInvestigationLimitReached).mockClear());
 
-  it('tells the Slack thread when the global limit denies the start', async () => {
+  it('passes the denying limit, the workflow space and its saved objects client', async () => {
     const error = new InvestigationQuotaDeniedError('all', 5);
     const soClient = savedObjectsClientMock.create();
     const { definition, getActions } = createDefinition(
@@ -473,32 +586,50 @@ describe('investigation quota notice', () => {
       output: { skip_reason: 'investigation_limit' },
     });
 
-    const [params] = jest.mocked(notifyInvestigationQuotaReached).mock.calls[0];
+    const [params] = jest.mocked(notifyInvestigationLimitReached).mock.calls[0];
     expect(params).toEqual(
       expect.objectContaining({
         getActions,
         spaceId: 'test-space',
-        slackThread,
         kibanaUrl: 'https://kibana.example.com',
-        deniedBy: 'all',
-        limit: 5,
+        reason: { type: 'quota', deniedBy: 'all', limit: 5 },
       })
     );
     expect(params.getSoClient()).toBe(soClient);
   });
 
   it.each([
-    ['an alert', { subject_type: 'alert', subject_id: 'alert-1', context: { alerts: [] } }],
-    ['a manual question', { subject_type: 'manual', message: 'Review errors.' }],
-  ])('does not post for %s', async (_name, input) => {
+    [
+      'a Slack message, in its thread',
+      { ...slackInput, notificationDestinations: [channelDestination] },
+      [{ connectorId: 'elastic-apps-slack', channel: 'C1', threadTs: slackThread.thread_ts }],
+    ],
+    [
+      'an alert, in the channels its automation posts to',
+      { ...alertInput, notificationDestinations: [channelDestination] },
+      [{ connectorId: 'slack-connector', channel: 'C2' }],
+    ],
+    [
+      'a scheduled question with a thread-mode destination, nowhere',
+      {
+        subject_type: 'manual',
+        message: 'Review errors.',
+        notificationDestinations: [
+          { ...channelDestination, params: { channel: 'C2', thread_ts: '1.1' } },
+        ],
+      },
+      [],
+    ],
+    ['an alert without a Slack destination, nowhere', alertInput, []],
+  ])('tells %s', async (_name, input, targets) => {
     const error = new InvestigationQuotaDeniedError('all');
     const { definition } = createDefinition(jest.fn().mockRejectedValue(error));
 
-    expect(await definition.handler(createContext(input))).toEqual({
-      output: { skip_reason: 'investigation_limit' },
-    });
+    await definition.handler(createContext(input));
 
-    expect(notifyInvestigationQuotaReached).not.toHaveBeenCalled();
+    expect(notifyInvestigationLimitReached).toHaveBeenCalledWith(
+      expect.objectContaining({ targets })
+    );
   });
 
   it('does not post for other start failures', async () => {
@@ -507,18 +638,18 @@ describe('investigation quota notice', () => {
 
     await expect(definition.handler(createContext(slackInput))).rejects.toBe(error);
 
-    expect(notifyInvestigationQuotaReached).not.toHaveBeenCalled();
+    expect(notifyInvestigationLimitReached).not.toHaveBeenCalled();
   });
 });
 
-it('starts a manual question with a fresh subject and forwards scope and timeout', async () => {
+it('starts a manual question with a fresh subject and forwards context and timeout', async () => {
   const start = jest.fn().mockResolvedValue({ investigation_id: 'investigation-1' });
   const { definition } = createDefinition(start);
   await definition.handler(
     createContext({
       subject_type: 'manual',
       message: 'Review checkout errors.',
-      scope_query: 'service.name:checkout',
+      context: { service: 'checkout' },
       timeout_seconds: 30,
     })
   );
@@ -527,7 +658,7 @@ it('starts a manual question with a fresh subject and forwards scope and timeout
       subject: { type: 'manual', id: 'manual', summary: undefined },
       message: 'Review checkout errors.',
       trigger_type: 'automatic',
-      context: { scope_query: 'service.name:checkout' },
+      context: { service: 'checkout' },
       timeout_seconds: 30,
     }),
     expect.anything()
@@ -559,6 +690,8 @@ it.each([
 });
 
 describe('automation budget enforcement before dispatch', () => {
+  beforeEach(() => jest.mocked(notifyInvestigationLimitReached).mockClear());
+
   const input = { automation_id: 'a1', subject_type: 'manual', message: 'Review errors.' };
   const setup = (limit: number, used: number) => {
     const soClient = savedObjectsClientMock.create();
@@ -569,7 +702,13 @@ describe('automation budget enforcement before dispatch', () => {
       version: 'v1',
       attributes:
         type === 'nightshift-automation'
-          ? { workflowId: 'wf-1', runtime: { dailyDispatchLimit: limit } }
+          ? {
+              name: 'Checkout errors',
+              workflowId: 'wf-1',
+              isEnabled: true,
+              trigger: { rows: [{ kind: 'schedule' }] },
+              runtime: { dailyDispatchLimit: limit },
+            }
           : { automationId: 'a1', date: new Date().toISOString().slice(0, 10), used },
     }));
     const start = jest.fn().mockResolvedValue({ investigation_id: 'inv-1' });
@@ -586,7 +725,14 @@ describe('automation budget enforcement before dispatch', () => {
       });
       expect(
         await definition.handler(
-          createContext({ ...input, subject_type: subjectType, subject_id: 'subject-1' })
+          createContext({
+            ...input,
+            subject_type: subjectType,
+            subject_id: 'subject-1',
+            notificationDestinations: [
+              { type: 'slack', connector_id: 'slack-connector', params: { channel: 'C2' } },
+            ],
+          })
         )
       ).toEqual({
         output: { skip_reason: 'daily_limit', daily_limit: 2 },
@@ -596,13 +742,102 @@ describe('automation budget enforcement before dispatch', () => {
         origin: subjectType,
         automation_id: 'a1',
         skip_reason: 'automation_daily_limit',
+        event_id: subjectType === 'significant_event' ? 'subject-1' : undefined,
+        ...(subjectType === 'alert'
+          ? { alert_version: 'v2', alert_source: 'other.source', source_kind: 'external' }
+          : {}),
       });
       expect(soClient.update).not.toHaveBeenCalled();
       expect(logger.info).toHaveBeenCalledWith(
         expect.stringContaining('for automation a1: daily limit of 2 reached')
       );
+      expect(notifyInvestigationLimitReached).toHaveBeenCalledWith(
+        expect.objectContaining({
+          targets: [{ connectorId: 'slack-connector', channel: 'C2' }],
+          reason: {
+            type: 'automation',
+            automationId: 'a1',
+            automationName: 'Checkout errors',
+            limit: 2,
+          },
+        })
+      );
     }
   );
+
+  it('dispatches a manual automation with a fresh subject and manual accounting', async () => {
+    const { definition, soClient, start } = setup(1, 1);
+    soClient.get.mockResolvedValueOnce({
+      id: 'a1',
+      type: 'nightshift-automation',
+      references: [],
+      attributes: {
+        workflowId: 'wf-1',
+        isEnabled: true,
+        trigger: { rows: [{ kind: 'schedule' }] },
+        runtime: { dailyDispatchLimit: 1 },
+      },
+    });
+    await definition.handler(
+      createContext(
+        {
+          ...input,
+          subject_id: 'shared-old-subject',
+          trigger_type: 'automatic',
+          timeout_seconds: 30,
+          notificationDestinations: [
+            { type: 'slack', connector_id: 'slack', params: { channel: 'C1' } },
+          ],
+        },
+        'nightshift-automation-manual'
+      )
+    );
+    expect(start).toHaveBeenCalledWith(
+      expect.objectContaining({
+        subject: expect.objectContaining({ type: 'manual', id: 'manual' }),
+        trigger_type: 'manual',
+        timeout_seconds: 30,
+        message: 'Review errors.',
+        notificationDestinations: [
+          { type: 'slack', connector_id: 'slack', params: { channel: 'C1' } },
+        ],
+      }),
+      expect.objectContaining({ automationBudget: undefined, entryPoint: 'automation' })
+    );
+    expect(soClient.update).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    undefined,
+    { triggeredBy: 'nightshift-automation-manual', nightshiftManualAutomationId: 'a1' },
+  ])('keeps Workflows UI runs on automatic accounting despite metadata: %j', async (metadata) => {
+    const { definition, start } = setup(1, 1);
+    start.mockImplementation(async (_request, { automationBudget }) => {
+      await automationBudget.consume();
+      return { investigation_id: 'inv-1' };
+    });
+    expect(await definition.handler(createContext(input, 'manual', metadata))).toEqual({
+      output: { skip_reason: 'daily_limit', daily_limit: 1 },
+    });
+    expect(start).toHaveBeenCalledWith(
+      expect.objectContaining({ trigger_type: 'automatic' }),
+      expect.objectContaining({ automationBudget: expect.anything() })
+    );
+  });
+
+  it('rejects a manual invocation of a non-scheduled automation', async () => {
+    const { definition, soClient, start } = setup(1, 1);
+    soClient.get.mockResolvedValueOnce({
+      id: 'a1',
+      type: 'nightshift-automation',
+      references: [],
+      attributes: { workflowId: 'wf-1', isEnabled: true, trigger: { rows: [{ kind: 'alert' }] } },
+    });
+    await expect(
+      definition.handler(createContext(input, 'nightshift-automation-manual'))
+    ).rejects.toThrow('Only automations with a schedule');
+    expect(start).not.toHaveBeenCalled();
+  });
 
   it('leaves the deployment quota denial to the client', async () => {
     const { start, definition, telemetry } = setup(2, 0);

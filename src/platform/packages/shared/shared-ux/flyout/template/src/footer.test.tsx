@@ -10,6 +10,7 @@
 import React from 'react';
 import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { EuiButton } from '@elastic/eui';
 import { FlyoutTemplate } from './flyout_template';
 
 const noop = () => {};
@@ -73,6 +74,57 @@ describe('FlyoutTemplate footer', () => {
     expect(screen.getByTestId('primaryContent')).toBeInTheDocument();
   });
 
+  it.each([
+    { color: undefined, expected: 'primary' as const },
+    { color: 'primary' as const, expected: 'primary' as const },
+    { color: 'danger' as const, expected: 'danger' as const },
+  ])(
+    'renders PrimaryAction with the $expected color when color is $color',
+    ({ color, expected }) => {
+      renderTemplate(
+        <>
+          <EuiButton fill color={expected} data-test-subj="reference">
+            Reference
+          </EuiButton>
+          <FlyoutTemplate onClose={noop} session="never">
+            <FlyoutTemplate.Body>
+              <span>content</span>
+            </FlyoutTemplate.Body>
+            <FlyoutTemplate.Footer>
+              <FlyoutTemplate.Footer.PrimaryAction
+                label="Save"
+                onClick={noop}
+                color={color}
+                data-test-subj="primarySave"
+              />
+            </FlyoutTemplate.Footer>
+          </FlyoutTemplate>
+        </>
+      );
+
+      const { backgroundColor } = window.getComputedStyle(screen.getByTestId('reference'));
+      expect(backgroundColor).not.toBe('');
+      expect(screen.getByTestId('primarySave')).toHaveStyle({ backgroundColor });
+    }
+  );
+
+  it('renders danger and primary PrimaryActions with different colors', () => {
+    renderTemplate(
+      <>
+        <EuiButton fill color="primary" data-test-subj="primaryReference">
+          Primary
+        </EuiButton>
+        <EuiButton fill color="danger" data-test-subj="dangerReference">
+          Danger
+        </EuiButton>
+      </>
+    );
+
+    expect(window.getComputedStyle(screen.getByTestId('dangerReference')).backgroundColor).not.toBe(
+      window.getComputedStyle(screen.getByTestId('primaryReference')).backgroundColor
+    );
+  });
+
   it('forwards a custom data attribute and an EuiButtonEmpty prop through SecondaryAction', () => {
     renderTemplate(
       <FlyoutTemplate onClose={noop} session="never" data-test-subj="withFooter">
@@ -111,6 +163,21 @@ describe('FlyoutTemplate footer', () => {
     );
 
     expect(screen.getByTestId('paddedFooter')).toHaveStyle({ padding: '16px' });
+  });
+
+  it('gives the footer the plain background of the flyout', () => {
+    renderTemplate(
+      <FlyoutTemplate onClose={noop} session="never" data-test-subj="plain">
+        <FlyoutTemplate.Body>
+          <span>content</span>
+        </FlyoutTemplate.Body>
+        <FlyoutTemplate.Footer>
+          <FlyoutTemplate.Footer.PrimaryAction label="Save" onClick={noop} />
+        </FlyoutTemplate.Footer>
+      </FlyoutTemplate>
+    );
+
+    expect(screen.getByTestId('plainFooter')).toHaveStyle({ backgroundColor: '#FFFFFF' });
   });
 
   it('shows an action tooltip on hover', async () => {
@@ -198,6 +265,37 @@ describe('FlyoutTemplate footer', () => {
 
       const text = screen.getByTestId('withFooterFooter').textContent ?? '';
       expect(text.indexOf('Open chat')).toBeLessThan(text.indexOf('Save'));
+
+      await userEvent.click(button);
+      expect(onClick).toHaveBeenCalledTimes(1);
+    });
+
+    it('uses the shared Add to chat label and icon, and sits left of the primary action', async () => {
+      const onClick = jest.fn();
+      renderTemplate(
+        <FlyoutTemplate onClose={noop} session="never" data-test-subj="withFooter">
+          <FlyoutTemplate.Body>
+            <span>content</span>
+          </FlyoutTemplate.Body>
+          <FlyoutTemplate.Footer>
+            <FlyoutTemplate.Footer.SecondaryAction
+              variant="ai"
+              iconType="addToChat"
+              onClick={onClick}
+              data-test-subj="addToChat"
+            />
+            <FlyoutTemplate.Footer.PrimaryAction label="Save" onClick={noop} />
+          </FlyoutTemplate.Footer>
+        </FlyoutTemplate>
+      );
+
+      const button = screen.getByRole('button', { name: 'Add to chat' });
+      expect(button).toHaveAttribute('data-test-subj', 'addToChat');
+      expect(button.querySelector('[data-euiicon-type="addToChat"]')).toBeInTheDocument();
+      expect(screen.getByTestId('withFooterFooter').querySelector('linearGradient')).not.toBeNull();
+
+      const text = screen.getByTestId('withFooterFooter').textContent ?? '';
+      expect(text.indexOf('Add to chat')).toBeLessThan(text.indexOf('Save'));
 
       await userEvent.click(button);
       expect(onClick).toHaveBeenCalledTimes(1);

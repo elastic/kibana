@@ -147,23 +147,33 @@ describe('streams unit stats request schema', () => {
     ).toBe(true);
   });
 
+  it('accepts the delivery series option on a destination only, and no other option', () => {
+    const parse = (component: object) =>
+      streamsUnitStatsRequestSchema.safeParse({ components: [component] }).success;
+    const include = { delivery_series: true };
+
+    expect(parse({ kind: 'destination', id: 'es-prod', include })).toBe(true);
+    expect(parse({ kind: 'destination', id: 'es-prod', include: {} })).toBe(true);
+    expect(parse({ kind: 'destination', id: 'es-prod', include: { unknown: true } })).toBe(false);
+    expect(parse({ kind: 'processor', id: 'p', include })).toBe(false);
+    expect(parse({ kind: 'source', id: 's', include })).toBe(false);
+  });
+
   it('treats an empty request and an empty components list as valid', () => {
     expect(streamsUnitStatsRequestSchema.safeParse({}).success).toBe(true);
     expect(streamsUnitStatsRequestSchema.safeParse({ components: [] }).success).toBe(true);
   });
 
-  it('accepts destination and processor components and rejects other kinds', () => {
+  it('accepts destination, processor and source components and rejects other kinds', () => {
     expect(
       streamsUnitStatsRequestSchema.safeParse({
         components: [
           { kind: 'destination', id: 'es-prod' },
           { kind: 'processor', id: 'add-env' },
+          { kind: 'source', id: 'otlp-input' },
         ],
       }).success
     ).toBe(true);
-    expect(
-      streamsUnitStatsRequestSchema.safeParse({ components: [{ kind: 'source', id: 'a' }] }).success
-    ).toBe(false);
     expect(
       streamsUnitStatsRequestSchema.safeParse({ components: [{ kind: 'step', id: 'a' }] }).success
     ).toBe(false);
@@ -205,7 +215,18 @@ describe('streams unit stats response schema', () => {
         rate: { value: null, unit: '{item}', time_unit: 's' },
         series: { bucket_ms: 10000, points: [] },
       },
-      failed: { rate: { value: null, unit: '{item}', time_unit: 's' } },
+      failed: {
+        rate: { value: null, unit: '{item}', time_unit: 's' },
+        percentage: { value: null, unit: '%' },
+        authentication: {
+          rate: { value: null, unit: '{item}', time_unit: 's' },
+          percentage: { value: null, unit: '%' },
+        },
+        authorization: {
+          rate: { value: null, unit: '{item}', time_unit: 's' },
+          percentage: { value: null, unit: '%' },
+        },
+      },
     },
   };
   const meta = { window: { start: '2026-10-16T12:00:00.000Z', end: '2026-10-16T12:15:00.000Z' } };
@@ -213,13 +234,17 @@ describe('streams unit stats response schema', () => {
   it('parses null values, empty series points and empty component maps', () => {
     expect(
       streamsUnitStatsResponseSchema.safeParse({
-        components: { destinations: { 'es-prod': noDataDestination }, processors: {} },
+        components: {
+          destinations: { 'es-prod': noDataDestination },
+          processors: {},
+          sources: {},
+        },
         meta,
       }).success
     ).toBe(true);
     expect(
       streamsUnitStatsResponseSchema.safeParse({
-        components: { destinations: {}, processors: {} },
+        components: { destinations: {}, processors: {}, sources: {} },
         meta,
       }).success
     ).toBe(true);
@@ -228,7 +253,7 @@ describe('streams unit stats response schema', () => {
   it('requires a unit on a value with no data, and a time unit on a rate', () => {
     const parse = (destination: object) =>
       streamsUnitStatsResponseSchema.safeParse({
-        components: { destinations: { 'es-prod': destination }, processors: {} },
+        components: { destinations: { 'es-prod': destination }, processors: {}, sources: {} },
         meta,
       }).success;
 
@@ -240,8 +265,85 @@ describe('streams unit stats response schema', () => {
         ...noDataDestination,
         events: {
           ...noDataDestination.events,
-          failed: { rate: { value: null, unit: '{item}', time_unit: null } },
+          failed: {
+            ...noDataDestination.events.failed,
+            rate: { value: null, unit: '{item}', time_unit: null },
+          },
         },
+      })
+    ).toBe(false);
+  });
+
+  it('parses authentication and authorization failure rates', () => {
+    const rate = (value: number | null) => ({ value, unit: '{item}', time_unit: 's' });
+    const parse = (failed: object) =>
+      streamsUnitStatsResponseSchema.safeParse({
+        components: {
+          destinations: {
+            'es-prod': {
+              ...noDataDestination,
+              events: { ...noDataDestination.events, failed },
+            },
+          },
+          processors: {},
+          sources: {},
+        },
+        meta,
+      }).success;
+
+    const percentage = (value: number | null) => ({ value, unit: '%' });
+    const failedWith = (breakdown: object[]) => ({
+      rate: rate(1.9),
+      percentage: percentage(40),
+      authentication: { rate: rate(0), percentage: percentage(0) },
+      authorization: { rate: rate(1.9), percentage: percentage(40), breakdown },
+    });
+    const cause = (collection: string | null, reason: string | null) => ({
+      collection,
+      reason,
+      rate: rate(1.9),
+      percentage: percentage(40),
+    });
+
+    expect(parse(failedWith([cause('logs-generic.otel-default', 'security_exception')]))).toBe(
+      true
+    );
+    // A failure of a whole request has a reason and no collection. A cause can also have only a collection.
+    expect(parse(failedWith([cause(null, 'AccessDenied'), cause('logs-a-default', null)]))).toBe(
+      true
+    );
+    expect(
+      parse({
+        rate: rate(1.9),
+        percentage: percentage(40),
+        authentication: { rate: rate(0), percentage: percentage(0) },
+        authorization: { rate: rate(1.9), percentage: percentage(40) },
+      })
+    ).toBe(true);
+    // A percentage with no data is null, and it keeps its unit.
+    expect(parse({ ...failedWith([]), percentage: percentage(null) })).toBe(true);
+    // The API always says that a collection or a reason is missing, with null.
+    expect(
+      parse(failedWith([{ reason: 'AccessDenied', rate: rate(1.9), percentage: percentage(40) }]))
+    ).toBe(false);
+    expect(
+      parse(
+        failedWith([
+          { collection: 'logs-a-default', reason: 7, rate: rate(1.9), percentage: percentage(40) },
+        ])
+      )
+    ).toBe(false);
+    expect(parse(failedWith([{ collection: 'logs-a-default', reason: null }]))).toBe(false);
+    expect(
+      parse(failedWith([{ collection: 'logs-a-default', reason: null, rate: rate(1.9) }]))
+    ).toBe(false);
+    expect(parse({ ...failedWith([]), percentage: { value: 40 } })).toBe(false);
+    expect(parse({ ...failedWith([]), percentage: undefined })).toBe(false);
+    expect(
+      parse({
+        rate: rate(0),
+        percentage: percentage(0),
+        authentication: { rate: rate(0), percentage: percentage(0) },
       })
     ).toBe(false);
   });
@@ -256,7 +358,7 @@ describe('streams unit stats response schema', () => {
     };
     const parse = (processor: object) =>
       streamsUnitStatsResponseSchema.safeParse({
-        components: { destinations: {}, processors: { 'add-tags': processor } },
+        components: { destinations: {}, processors: { 'add-tags': processor }, sources: {} },
         meta,
       }).success;
 
@@ -274,6 +376,34 @@ describe('streams unit stats response schema', () => {
     expect(parse({})).toBe(false);
   });
 
+  it('parses a source with an accepted rate, none, and an error, and requires the sources map', () => {
+    const accepted = (value: number | null) => ({
+      events: { accepted: { rate: { value, unit: '{item}', time_unit: 's' } } },
+    });
+    const parse = (source: object) =>
+      streamsUnitStatsResponseSchema.safeParse({
+        components: { destinations: {}, processors: {}, sources: { 'otlp-input': source } },
+        meta,
+      }).success;
+
+    expect(parse(accepted(120.5))).toBe(true);
+    expect(parse(accepted(0))).toBe(true);
+    expect(parse(accepted(null))).toBe(true);
+    expect(parse({ ...accepted(null), error: { code: 'not_found', reason: 'Not in unit.' } })).toBe(
+      true
+    );
+    expect(parse({})).toBe(false);
+    expect(
+      parse({ events: { accepted: { rate: { value: 1, unit: '{item}', time_unit: null } } } })
+    ).toBe(false);
+    expect(
+      streamsUnitStatsResponseSchema.safeParse({
+        components: { destinations: {}, processors: {} },
+        meta,
+      }).success
+    ).toBe(false);
+  });
+
   it('parses a component-level error with an unknown code', () => {
     expect(
       streamsUnitStatsResponseSchema.safeParse({
@@ -285,6 +415,7 @@ describe('streams unit stats response schema', () => {
             },
           },
           processors: {},
+          sources: {},
         },
         meta,
       }).success

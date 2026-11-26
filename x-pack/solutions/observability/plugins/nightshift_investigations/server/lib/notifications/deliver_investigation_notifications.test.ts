@@ -10,7 +10,7 @@ import type { InvestigationNotificationDestination } from '../../../common';
 import type { NotifiableInvestigation, NotificationExecution } from './notification_delivery';
 import type { NotificationPhase } from './notification_routing';
 import { deliverInvestigationNotifications } from './deliver_investigation_notifications';
-import { createRoutingTestContext } from './notification_routing.mock';
+import { createRoutingTestContext, getTestIsomerRuntime } from './notification_routing.mock';
 
 const destination = {
   type: 'slack',
@@ -38,7 +38,8 @@ const setup = (spaceId = 'default') => {
   const send = (
     phase: NotificationPhase,
     executionId = 'exec-1',
-    destinations: InvestigationNotificationDestination[] = [destination]
+    destinations: InvestigationNotificationDestination[] = [destination],
+    signal = controller.signal
   ) =>
     deliverInvestigationNotifications({
       investigation,
@@ -50,7 +51,8 @@ const setup = (spaceId = 'default') => {
       investigationUrl: 'https://kibana.example/app/nightshift',
       routingClient: context.client,
       getExecute,
-      signal: controller.signal,
+      getIsomerRuntime: getTestIsomerRuntime,
+      signal,
       logger,
     });
   return { ...context, controller, execute, getExecute, logger, send };
@@ -387,17 +389,39 @@ describe('investigation notification lifecycle', () => {
     expect(execute).not.toHaveBeenCalled();
   });
 
-  it('cancellation after claiming skips the connector and remains unconfirmed', async () => {
-    const { send, controller, execute, client } = setup();
-    const claim = client.claim.bind(client);
-    jest.spyOn(client, 'claim').mockImplementation(async (...args) => {
-      const attempt = await claim(...args);
-      controller.abort();
-      return attempt;
-    });
-    expect(await send('started')).toEqual({ sent: 0, failed: 0, unconfirmed: 1 });
-    expect(execute).not.toHaveBeenCalled();
-  });
+  it.each(['claim', 'isActive'] as const)(
+    'cancellation during %s skips the connector and lets a failure start the thread',
+    async (abortPoint) => {
+      const { send, controller, execute, client } = setup();
+      const claim = client.claim.bind(client);
+      const isActive = client.isActive.bind(client);
+      let claimed = false;
+      jest.spyOn(client, 'claim').mockImplementationOnce(async (...args) => {
+        const attempt = await claim(...args);
+        claimed = true;
+        if (abortPoint === 'claim') controller.abort();
+        return attempt;
+      });
+      const isActiveSpy = jest.spyOn(client, 'isActive').mockImplementation(async () => {
+        if (controller.signal.aborted) {
+          throw new Error('Attachment read failed');
+        }
+        const active = await isActive();
+        if (abortPoint === 'isActive' && claimed) controller.abort();
+        return active;
+      });
+      expect(await send('started')).toEqual({ sent: 0, failed: 1, unconfirmed: 0 });
+      expect(execute).not.toHaveBeenCalled();
+      isActiveSpy.mockRestore();
+
+      expect(await send('failed', 'exec-1', [destination], new AbortController().signal)).toEqual({
+        sent: 1,
+        failed: 0,
+        unconfirmed: 0,
+      });
+      expect(execute.mock.calls[0][0].params.subActionParams).not.toHaveProperty('threadTs');
+    }
+  );
 
   it('cancellation during posting passes the signal and stops later destinations', async () => {
     const { send, controller, execute } = setup();

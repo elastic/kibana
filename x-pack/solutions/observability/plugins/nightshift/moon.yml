@@ -97,6 +97,7 @@ dependsOn:
   - '@kbn/user-profile-components'
   - '@kbn/shared-ux-utility'
   - '@kbn/alerting-v2-constants'
+  - '@kbn/alerting-v2-schemas'
 tags:
   - plugin
   - prod

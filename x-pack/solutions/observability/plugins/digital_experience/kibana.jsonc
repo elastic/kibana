@@ -9,8 +9,16 @@
     "browser": true,
     "server": true,
     "configPath": ["xpack", "digital_experience"],
-    "requiredPlugins": ["features", "observabilityShared", "data", "unifiedSearch"],
-    "optionalPlugins": ["ux", "apmDataAccess", "taskManager"],
-    "requiredBundles": ["kibanaReact", "fieldFormats", "observability"]
+    "requiredPlugins": ["features", "observabilityShared", "data", "unifiedSearch", "share"],
+    "optionalPlugins": [
+      "ux",
+      "apmDataAccess",
+      "taskManager",
+      "encryptedSavedObjects",
+      "security",
+      "dashboard",
+      "lens"
+    ],
+    "requiredBundles": ["kibanaReact", "fieldFormats", "observability", "charts"]
   }
 }

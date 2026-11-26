@@ -40,7 +40,6 @@
     "@kbn/rison",
     "@kbn/field-formats-plugin",
     "@kbn/axe-config",
-    "@kbn/config-schema",
     "@kbn/analytics",
     "@kbn/ftr-screenshot-filename",
     "@kbn/es-archiver",
@@ -56,7 +55,6 @@
     "@kbn/links-plugin",
     "@kbn/ftr-common-functional-ui-services",
     "@kbn/core-chrome-browser",
-    "@kbn/core-saved-objects-import-export-server-internal",
     "@kbn/data-grid-in-table-search",
     "@kbn/scout-info",
     "@kbn/synthtrace",
@@ -70,5 +68,6 @@
     "@kbn/deeplinks-analytics",
     "@kbn/core-chrome-browser-components",
     "@kbn/monaco",
+    "@kbn/dashboard-constants"
   ]
 }

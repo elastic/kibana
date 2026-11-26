@@ -177,9 +177,6 @@ export const mongodbClientType: ClientTypeSpec<MongoClient> = {
       ...(connectionString.searchParams.has('authSource') ? {} : { authSource: 'admin' }),
       serverSelectionTimeoutMS: 10_000,
       connectTimeoutMS: 10_000,
-      // Bounds in-flight query execution; prevents a runaway scan from holding a pooled
-      // connection indefinitely and starving other calls that reuse the same client.
-      timeoutMS: 30_000,
     });
     await client.connect();
     return client;

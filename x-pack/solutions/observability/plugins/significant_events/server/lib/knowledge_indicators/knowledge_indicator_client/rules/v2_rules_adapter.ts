@@ -7,11 +7,11 @@
 
 import { isBoom } from '@hapi/boom';
 import { ALERTING_ERROR_CODES, type RulesClientApi } from '@kbn/alerting-v2-plugin/server';
+import { withAllProjectsRouting } from '@kbn/cps-server-utils';
 import pLimit from 'p-limit';
 import { uniq } from 'lodash';
 import { deleteRules } from '../../../significant_events/rules/bulk_rule_operations';
 import { compileMatchCountBreachQuery } from '../../../significant_events/rules/match_count_query_compiler';
-import { withAllProjectsRouting } from '../../../significant_events/rules/project_routing';
 import {
   METRIC_SERIES_GROUPING_FIELDS,
   METRIC_SERIES_RULE_TAG,
@@ -80,8 +80,7 @@ export class RulesAdapterV2 implements IRulesManagementClient {
   async createRule(id: string, definition: SignificantEventsRuleDefinition): Promise<void> {
     await this.rulesClient
       .createRule({
-        data: toV2CreateBody({ definition, cpsEnabled: this.cpsEnabled }),
-        options: { id },
+        data: { ...toV2CreateBody({ definition, cpsEnabled: this.cpsEnabled }), id },
       })
       .catch((error) => {
         if (isBoom(error) && error.output.statusCode === 409) {
@@ -337,8 +336,7 @@ export class RulesAdapterV2 implements IRulesManagementClient {
   ): Promise<void> {
     await this.rulesClient
       .createRule({
-        data: toV2CreateBody({ definition, cpsEnabled: this.cpsEnabled }),
-        options: { id },
+        data: { ...toV2CreateBody({ definition, cpsEnabled: this.cpsEnabled }), id },
       })
       .catch((error) => {
         if (isBoom(error) && error.output.statusCode === 409) {

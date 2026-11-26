@@ -320,6 +320,7 @@ describe('Quick search visor', () => {
     const enterpriseServices = {
       ...services,
       esql: {
+        isInferenceAvailable: true,
         getLicense: jest.fn().mockResolvedValue({
           status: 'active',
           hasAtLeast: jest.fn().mockReturnValue(true),

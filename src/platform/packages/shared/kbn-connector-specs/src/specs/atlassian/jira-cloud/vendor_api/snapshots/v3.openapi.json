@@ -2961,6 +2961,14 @@
               "default": false,
               "type": "boolean"
             }
+          },
+          {
+            "in": "query",
+            "name": "preferFieldAssociatedErrors",
+            "schema": {
+              "default": false,
+              "type": "boolean"
+            }
           }
         ],
         "requestBody": {
@@ -3653,6 +3661,14 @@
             "required": true,
             "schema": {
               "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "preferFieldAssociatedErrors",
+            "schema": {
+              "default": false,
+              "type": "boolean"
             }
           }
         ],

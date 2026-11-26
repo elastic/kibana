@@ -1,5 +1,5 @@
 {
-  "sha1": "7a80c9d8e8270c92b4cf7131d845b76613d62a4b",
+  "sha1": "6db8529ba79f9690579b725adc5790a608b6750f",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -117,8 +117,8 @@
       }
     },
     {
-      "id": "0a2d86604b0fa20-a002c74d8ee8d0a",
-      "title": "Tags management create shows errors when validation fails",
+      "id": "0a2d86604b0fa20-d4c457ad86329cb",
+      "title": "Tags management create shows errors without resizing the modal",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -140,8 +140,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_create.spec.ts",
-        "line": 47,
-        "column": 11
+        "line": 51,
+        "column": 67
       }
     },
     {
@@ -154,8 +154,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_create.spec.ts",
-        "line": 66,
-        "column": 8
+        "line": 72,
+        "column": 5
       }
     },
     {

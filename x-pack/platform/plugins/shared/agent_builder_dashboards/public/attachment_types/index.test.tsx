@@ -7,6 +7,7 @@
 
 import { BehaviorSubject, of, Subject } from 'rxjs';
 import type { ChromeStart } from '@kbn/core/public';
+import { notificationServiceMock } from '@kbn/core/public/mocks';
 import type {
   DashboardApi,
   DashboardRendererProps,
@@ -104,7 +105,11 @@ const createMockDashboardApi = (
     filters$,
     query$,
     timeRange$,
+    getAppContext: () => ({ currentAppId: 'dashboards' }),
+    isEditableByUser: true,
+    isManaged: false,
     setState,
+    setViewMode: jest.fn(),
     getSerializedState,
     setSavedObjectId: (id: string | undefined) => savedObjectId$.next(id),
     emitSave: (event: DashboardSaveEvent) => onSave$.next(event),
@@ -182,6 +187,7 @@ describe('registerDashboardAttachmentUiDefinition', () => {
     const agentBuilder: AgentBuilderPluginStart = {
       attachments: { addAttachmentType },
       addAttachment: mockAddAttachment,
+      removeAttachment: jest.fn(),
       updateAttachmentOrigin,
       events: {
         getChatEvents$: jest.fn((conversationId: string) =>
@@ -200,6 +206,7 @@ describe('registerDashboardAttachmentUiDefinition', () => {
     const dashboardPlugin: DashboardStart = {
       dashboardAppClientApi$,
       findDashboardsService,
+      areEqual: jest.fn().mockResolvedValue(false),
     } as unknown as DashboardStart;
 
     const data = dataPluginMock.createStartContract();
@@ -227,6 +234,7 @@ describe('registerDashboardAttachmentUiDefinition', () => {
       },
       currentAppId$,
       draftAttachmentId: createIdGenerator(),
+      toasts: notificationServiceMock.createStartContract().toasts,
     };
   };
 
@@ -300,6 +308,7 @@ describe('registerDashboardAttachmentUiDefinition', () => {
       agentBuilder: {
         attachments: { addAttachmentType },
         addAttachment: jest.fn(),
+        removeAttachment: jest.fn(),
         updateAttachmentOrigin: jest.fn().mockResolvedValue(undefined),
         events: {
           getChatEvents$: jest.fn(() => new Subject<ChatEvent>().asObservable()),
@@ -320,12 +329,14 @@ describe('registerDashboardAttachmentUiDefinition', () => {
       dashboardPlugin: {
         dashboardAppClientApi$,
         findDashboardsService,
+        areEqual: jest.fn().mockResolvedValue(false),
       } as unknown as DashboardStart,
       data: dataPluginMock.createStartContract(),
       unifiedSearch: {
         ui: { SearchBar: jest.fn() },
       } as unknown as UnifiedSearchPublicPluginStart,
       draftAttachmentId: createIdGenerator(),
+      toasts: notificationServiceMock.createStartContract().toasts,
     };
 
     let cleanup: (() => void) | undefined;

@@ -388,11 +388,13 @@
           "authorizationCode": {
             "authorizationUrl": "https://app.hubspot.com/oauth/authorize",
             "scopes": {
+              "cpq.price_books.read": "",
               "crm.objects.appointments.read": "",
               "crm.objects.appointments.sensitive.read.v2": "",
               "crm.objects.appointments.sensitive.write.v2": "",
               "crm.objects.appointments.write": "",
               "crm.objects.calls.read": "",
+              "crm.objects.calls.write": "",
               "crm.objects.carts.read": "",
               "crm.objects.carts.write": "",
               "crm.objects.commercepayments.read": "",
@@ -409,6 +411,7 @@
               "crm.objects.contacts.sensitive.read.v2": "",
               "crm.objects.contacts.sensitive.write.v2": "",
               "crm.objects.contacts.write": "",
+              "crm.objects.contracts.read": "",
               "crm.objects.courses.read": "",
               "crm.objects.courses.write": "",
               "crm.objects.custom.highly_sensitive.read.v2": "",
@@ -424,6 +427,9 @@
               "crm.objects.deals.sensitive.write.v2": "",
               "crm.objects.deals.write": "",
               "crm.objects.emails.read": "",
+              "crm.objects.emails.write": "",
+              "crm.objects.feedback_submissions.read": "",
+              "crm.objects.forecasts.read": "",
               "crm.objects.goals.read": "",
               "crm.objects.goals.write": "",
               "crm.objects.invoices.read": "",
@@ -435,7 +441,9 @@
               "crm.objects.listings.read": "",
               "crm.objects.listings.write": "",
               "crm.objects.meetings.read": "",
+              "crm.objects.meetings.write": "",
               "crm.objects.notes.read": "",
+              "crm.objects.notes.write": "",
               "crm.objects.orders.read": "",
               "crm.objects.orders.write": "",
               "crm.objects.partner-clients.read": "",
@@ -457,14 +465,19 @@
               "crm.objects.subscriptions.read": "",
               "crm.objects.subscriptions.write": "",
               "crm.objects.tasks.read": "",
+              "crm.objects.tasks.write": "",
               "crm.objects.tickets.highly_sensitive.read": "",
               "crm.objects.tickets.highly_sensitive.write": "",
+              "crm.objects.tickets.read": "",
               "crm.objects.tickets.sensitive.read": "",
               "crm.objects.tickets.sensitive.write": "",
+              "crm.objects.tickets.write": "",
               "crm.objects.users.read": "",
               "crm.objects.users.write": "",
               "e-commerce": "",
               "media_bridge.read": "",
+              "oauth": "",
+              "revenue.contracts.read": "",
               "tickets.highly_sensitive.v2": "",
               "tickets.sensitive.v2": ""
             },
@@ -541,17 +554,27 @@
         "security": [
           {
             "oauth2": [
+              "crm.objects.tickets.write"
+            ]
+          },
+          {
+            "oauth2": [
+              "crm.objects.tickets.read"
+            ]
+          },
+          {
+            "oauth2": [
               "crm.objects.deals.read"
             ]
           },
           {
             "oauth2": [
-              "crm.objects.subscriptions.read"
+              "crm.objects.services.read"
             ]
           },
           {
             "oauth2": [
-              "crm.objects.services.read"
+              "crm.objects.subscriptions.read"
             ]
           },
           {
@@ -581,12 +604,12 @@
           },
           {
             "oauth2": [
-              "crm.objects.tasks.read"
+              "crm.objects.custom.sensitive.write.v2"
             ]
           },
           {
             "oauth2": [
-              "crm.objects.custom.sensitive.write.v2"
+              "crm.objects.tasks.read"
             ]
           },
           {
@@ -601,12 +624,17 @@
           },
           {
             "oauth2": [
+              "crm.objects.appointments.sensitive.read.v2"
+            ]
+          },
+          {
+            "oauth2": [
               "crm.objects.contacts.highly_sensitive.read.v2"
             ]
           },
           {
             "oauth2": [
-              "crm.objects.appointments.sensitive.read.v2"
+              "crm.objects.forecasts.read"
             ]
           },
           {
@@ -641,6 +669,11 @@
           },
           {
             "oauth2": [
+              "crm.objects.contracts.read"
+            ]
+          },
+          {
+            "oauth2": [
               "crm.objects.companies.highly_sensitive.read.v2"
             ]
           },
@@ -661,17 +694,12 @@
           },
           {
             "oauth2": [
-              "crm.objects.users.write"
-            ]
-          },
-          {
-            "oauth2": [
               "crm.objects.calls.read"
             ]
           },
           {
             "oauth2": [
-              "crm.objects.meetings.read"
+              "crm.objects.users.write"
             ]
           },
           {
@@ -681,17 +709,22 @@
           },
           {
             "oauth2": [
+              "crm.objects.meetings.read"
+            ]
+          },
+          {
+            "oauth2": [
               "crm.objects.users.read"
             ]
           },
           {
             "oauth2": [
-              "crm.objects.partner-services.read"
+              "crm.objects.orders.write"
             ]
           },
           {
             "oauth2": [
-              "crm.objects.orders.write"
+              "crm.objects.partner-services.read"
             ]
           },
           {
@@ -721,7 +754,22 @@
           },
           {
             "oauth2": [
+              "crm.objects.tasks.write"
+            ]
+          },
+          {
+            "oauth2": [
               "crm.objects.commercepayments.read"
+            ]
+          },
+          {
+            "oauth2": [
+              "revenue.contracts.read"
+            ]
+          },
+          {
+            "oauth2": [
+              "crm.objects.feedback_submissions.read"
             ]
           },
           {
@@ -732,6 +780,11 @@
           {
             "oauth2": [
               "crm.objects.services.write"
+            ]
+          },
+          {
+            "oauth2": [
+              "crm.objects.emails.write"
             ]
           },
           {
@@ -756,6 +809,16 @@
           },
           {
             "oauth2": [
+              "cpq.price_books.read"
+            ]
+          },
+          {
+            "oauth2": [
+              "crm.objects.meetings.write"
+            ]
+          },
+          {
+            "oauth2": [
               "crm.objects.invoices.read"
             ]
           },
@@ -766,12 +829,17 @@
           },
           {
             "oauth2": [
-              "tickets.sensitive.v2"
+              "crm.objects.custom.write"
             ]
           },
           {
             "oauth2": [
-              "crm.objects.custom.write"
+              "crm.objects.notes.write"
+            ]
+          },
+          {
+            "oauth2": [
+              "tickets.sensitive.v2"
             ]
           },
           {
@@ -801,6 +869,11 @@
           },
           {
             "oauth2": [
+              "crm.objects.companies.highly_sensitive.write.v2"
+            ]
+          },
+          {
+            "oauth2": [
               "crm.objects.custom.highly_sensitive.read.v2"
             ]
           },
@@ -811,7 +884,7 @@
           },
           {
             "oauth2": [
-              "crm.objects.companies.highly_sensitive.write.v2"
+              "crm.objects.calls.write"
             ]
           },
           {
@@ -856,12 +929,12 @@
           },
           {
             "oauth2": [
-              "crm.objects.projects.sensitive.write"
+              "crm.objects.deals.sensitive.read.v2"
             ]
           },
           {
             "oauth2": [
-              "crm.objects.deals.sensitive.read.v2"
+              "crm.objects.projects.sensitive.write"
             ]
           },
           {
@@ -896,12 +969,12 @@
           },
           {
             "oauth2": [
-              "crm.objects.quotes.read"
+              "crm.objects.courses.write"
             ]
           },
           {
             "oauth2": [
-              "crm.objects.courses.write"
+              "crm.objects.quotes.read"
             ]
           },
           {
@@ -911,12 +984,12 @@
           },
           {
             "oauth2": [
-              "crm.objects.notes.read"
+              "crm.objects.courses.read"
             ]
           },
           {
             "oauth2": [
-              "crm.objects.courses.read"
+              "crm.objects.notes.read"
             ]
           },
           {

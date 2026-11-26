@@ -45,7 +45,7 @@ Do not review backport pull requests. Use a version-prefixed title such as `[9.x
 
 ## Reporting
 
-Report only concrete, line-specific findings. Do not report lint, formatting, or naming nits, and do not report a missing PR description as a finding.
+Report only concrete, line-specific findings. Do not report lint, formatting, or naming nits, and do not report a missing PR description as a finding. Untranslated user-facing UI strings are not nits: report them as described in the skill's Medium checks.
 
 - Use Libra's injected severity rubric to determine finding severity. Do not use the tier names (High, Medium, Low) as a severity scale. They describe how risky the touched area is, not how severe the finding is.
 - In each finding's `evidence`, name the risk area that applies, for example "High: authorization".

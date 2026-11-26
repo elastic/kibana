@@ -9,6 +9,7 @@ import React from 'react';
 import { renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import type { InvestigationSummary } from '@kbn/agentic-investigations-plugin/common';
+import { useStatusSignal } from '@kbn/agentic-investigations-plugin/public';
 import { useFetchInvestigations, type FetchInvestigationsParams } from './use_fetch_investigations';
 import { useInvestigationSections } from './use_investigation_sections';
 import { useKibana } from '../../hooks/use_kibana';
@@ -17,11 +18,15 @@ jest.mock('./use_fetch_investigations', () => ({
   ...jest.requireActual('./use_fetch_investigations'),
   useFetchInvestigations: jest.fn(),
 }));
+jest.mock('@kbn/agentic-investigations-plugin/public', () => ({
+  useStatusSignal: jest.fn(),
+}));
 jest.mock('../../hooks/use_kibana');
 
 const mockUseFetchInvestigations = useFetchInvestigations as jest.MockedFunction<
   typeof useFetchInvestigations
 >;
+const mockUseStatusSignal = useStatusSignal as jest.MockedFunction<typeof useStatusSignal>;
 const mockUseKibana = useKibana as jest.Mock;
 const httpGet = jest.fn();
 
@@ -40,16 +45,19 @@ const investigation = (id: string): InvestigationSummary => ({
 const sectionResult = ({
   ids = [],
   total = ids.length,
+  matchTotal = total,
   isPreviousData = false,
   refetch = jest.fn(),
 }: {
   ids?: string[];
   total?: number;
+  matchTotal?: number;
   isPreviousData?: boolean;
   refetch?: jest.Mock;
 } = {}) => ({
   investigations: ids.map(investigation),
   total,
+  matchTotal,
   hasMore: false,
   isInitialLoading: false,
   isFetchingNextPage: false,
@@ -65,16 +73,25 @@ const isCritical = ({ severities }: FetchInvestigationsParams) => severities?.[0
 const withInProgress =
   ({
     ids,
+    total,
+    matchTotal,
     isPreviousData,
     refetchCritical,
+    refetchClosed = jest.fn(),
   }: {
     ids: string[];
+    total?: number;
+    matchTotal?: number;
     isPreviousData?: boolean;
     refetchCritical: jest.Mock;
+    refetchClosed?: jest.Mock;
   }) =>
   (params: FetchInvestigationsParams) => {
     if (params.inProgress) {
-      return sectionResult({ ids, isPreviousData });
+      return sectionResult({ ids, total, matchTotal, isPreviousData });
+    }
+    if (params.status === 'closed') {
+      return sectionResult({ refetch: refetchClosed });
     }
     if (isCritical(params)) {
       return sectionResult({ total: 3, refetch: refetchCritical });
@@ -90,16 +107,34 @@ const createWrapper = () => {
   return Wrapper;
 };
 
-const renderSections = (query?: string) =>
-  renderHook((props: { query?: string }) => useInvestigationSections(props), {
-    initialProps: { query },
-    wrapper: createWrapper(),
-  });
+const renderSections = (
+  props: {
+    query?: string;
+    updatedAfter?: string;
+    updatedBefore?: string;
+  } = {}
+) =>
+  renderHook(
+    (hookProps: { query?: string; updatedAfter?: string; updatedBefore?: string }) =>
+      useInvestigationSections(hookProps),
+    {
+      initialProps: props,
+      wrapper: createWrapper(),
+    }
+  );
 
 describe('useInvestigationSections', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    httpGet.mockResolvedValue({ critical: 3, high: 1, medium: 0, low: 2 });
+    httpGet.mockImplementation((url: string) => {
+      if (String(url).includes('_severity_counts')) {
+        return Promise.resolve({ critical: 3, high: 1, medium: 0, low: 2 });
+      }
+      return Promise.resolve({
+        results: [],
+        pagination: { total: 2, page: 1, per_page: 1 },
+      });
+    });
     mockUseKibana.mockReturnValue({
       services: { http: { get: httpGet }, agenticInvestigations: {} },
     });
@@ -109,7 +144,7 @@ describe('useInvestigationSections', () => {
   });
 
   it('fetches in progress, then each severity tier, then the investigations without a severity', () => {
-    const { result } = renderSections('checkout');
+    const { result } = renderSections({ query: 'checkout' });
 
     expect(
       mockUseFetchInvestigations.mock.calls
@@ -130,11 +165,38 @@ describe('useInvestigationSections', () => {
       'medium',
       'low',
       'not-rated',
+      'closed',
     ]);
   });
 
+  it('does not filter running investigations by a window that ends now', () => {
+    renderHook(() => useInvestigationSections({ updatedAfter: '2026-11-07T12:00:00.000Z' }), {
+      wrapper: createWrapper(),
+    });
+
+    const [inProgressParams, ...finishedParams] = mockUseFetchInvestigations.mock.calls
+      .slice(0, 6)
+      .map(([{ updatedAfter, updatedBefore }]) => ({ updatedAfter, updatedBefore }));
+    expect(inProgressParams).toEqual({ updatedAfter: undefined, updatedBefore: undefined });
+    finishedParams.forEach((params) =>
+      expect(params).toEqual({ updatedAfter: '2026-11-07T12:00:00.000Z', updatedBefore: undefined })
+    );
+  });
+
+  it('filters running investigations by a window that ended in the past', () => {
+    const updatedWindow = {
+      updatedAfter: '2026-11-02T12:00:00.000Z',
+      updatedBefore: '2026-11-08T12:00:00.000Z',
+    };
+    renderHook(() => useInvestigationSections(updatedWindow), { wrapper: createWrapper() });
+
+    mockUseFetchInvestigations.mock.calls
+      .slice(0, 6)
+      .forEach(([params]) => expect(params).toEqual(expect.objectContaining(updatedWindow)));
+  });
+
   it('maps the shared severity counts onto the tiers for the tiles', async () => {
-    const { result } = renderSections('checkout');
+    const { result } = renderSections({ query: 'checkout' });
 
     await waitFor(() =>
       expect(result.current.severityCounts).toEqual({
@@ -147,8 +209,86 @@ describe('useInvestigationSections', () => {
     expect(httpGet).toHaveBeenCalledWith(
       '/internal/investigations/investigations/_severity_counts',
       expect.objectContaining({
-        query: { in_progress: false, query: 'checkout' },
+        query: { in_progress: false, status: 'open', query: 'checkout' },
         version: '1',
+      })
+    );
+  });
+
+  it('fetches a no-search severity baseline while a query is active', async () => {
+    httpGet.mockImplementation((url, options) => {
+      if (!String(url).includes('_severity_counts')) {
+        return Promise.resolve({
+          results: [],
+          pagination: { total: 2, page: 1, per_page: 1 },
+        });
+      }
+      const requestQuery = options?.query as { query?: string } | undefined;
+      if (requestQuery?.query) {
+        return Promise.resolve({ critical: 0, high: 1, medium: 0, low: 9 });
+      }
+      return Promise.resolve({ critical: 0, high: 4, medium: 2, low: 9 });
+    });
+
+    const { result } = renderSections({ query: 'tr' });
+
+    await waitFor(() =>
+      expect(result.current.severityCounts).toEqual({
+        critical: 0,
+        high: 1,
+        medium: 0,
+        low: 9,
+      })
+    );
+    await waitFor(() =>
+      expect(result.current.unfilteredSeverityCounts).toEqual({
+        critical: 0,
+        high: 4,
+        medium: 2,
+        low: 9,
+      })
+    );
+  });
+
+  it('reuses filtered counts as the unfiltered baseline when there is no search', async () => {
+    const { result } = renderSections();
+
+    await waitFor(() => expect(result.current.severityCounts.critical).toBe(3));
+    expect(result.current.unfilteredSeverityCounts).toEqual(result.current.severityCounts);
+    expect(httpGet).toHaveBeenCalledTimes(1);
+  });
+
+  it('falls back to filtered counts when the no-search baseline fails', async () => {
+    httpGet.mockImplementation((url, options) => {
+      if (!String(url).includes('_severity_counts')) {
+        return Promise.resolve({
+          results: [],
+          pagination: { total: 0, page: 1, per_page: 1 },
+        });
+      }
+      const requestQuery = options?.query as { query?: string } | undefined;
+      if (requestQuery?.query) {
+        return Promise.resolve({ critical: 0, high: 1, medium: 0, low: 9 });
+      }
+      return Promise.reject(new Error('baseline unavailable'));
+    });
+
+    const { result } = renderSections({ query: 'tr' });
+
+    await waitFor(() =>
+      expect(result.current.severityCounts).toEqual({
+        critical: 0,
+        high: 1,
+        medium: 0,
+        low: 9,
+      })
+    );
+    await waitFor(() =>
+      expect(result.current.unfilteredSeverityCounts).toEqual({
+        critical: 0,
+        high: 1,
+        medium: 0,
+        low: 9,
       })
     );
   });
@@ -159,7 +299,7 @@ describe('useInvestigationSections', () => {
     await waitFor(() => expect(result.current.severityCounts.critical).toBe(3));
     expect(httpGet).toHaveBeenCalledWith(
       '/internal/investigations/investigations/_severity_counts',
-      expect.objectContaining({ query: { in_progress: false } })
+      expect.objectContaining({ query: { in_progress: false, status: 'open' } })
     );
   });
 
@@ -171,10 +311,28 @@ describe('useInvestigationSections', () => {
       return params.severities?.[0] === 'none' ? sectionResult({ total: 4 }) : sectionResult();
     });
 
-    const { result } = renderSections('checkout');
+    const { result } = renderSections({ query: 'checkout' });
 
     // 1 running + 4 unrated: the tiers are empty because their sections are.
     await waitFor(() => expect(result.current.totalCount).toBe(5));
+  });
+
+  it('includes Closed in totalCount while keeping openTotalCount and loadedCount open-only', () => {
+    mockUseFetchInvestigations.mockImplementation((params) => {
+      if (params.inProgress) {
+        return sectionResult({ ids: ['running-a'] });
+      }
+      if (params.status === 'closed') {
+        return sectionResult({ ids: ['closed-a', 'closed-b'], total: 3 });
+      }
+      return sectionResult();
+    });
+
+    const { result } = renderSections();
+
+    expect(result.current.totalCount).toBe(4);
+    expect(result.current.openTotalCount).toBe(1);
+    expect(result.current.loadedCount).toBe(1);
   });
 
   it('treats a non-empty in-progress section as active and polls only that section', () => {
@@ -186,17 +344,48 @@ describe('useInvestigationSections', () => {
     ).toEqual([5_000, undefined, undefined, undefined, undefined, undefined]);
   });
 
-  it('refetches the other sections when work leaves the in-progress section', () => {
+  it('refetches the other sections including Closed when work leaves the in-progress section', () => {
     const refetchCritical = jest.fn();
+    const refetchClosed = jest.fn();
     mockUseFetchInvestigations.mockImplementation(
-      withInProgress({ ids: ['running-a', 'running-b'], refetchCritical })
+      withInProgress({ ids: ['running-a', 'running-b'], refetchCritical, refetchClosed })
+    );
+    const { rerender } = renderSections();
+    expect(refetchCritical).not.toHaveBeenCalled();
+    expect(refetchClosed).not.toHaveBeenCalled();
+
+    // One left In progress (finished or closed while running): the total stays flat, but an id left.
+    mockUseFetchInvestigations.mockImplementation(
+      withInProgress({ ids: ['running-b', 'running-c'], refetchCritical, refetchClosed })
+    );
+    rerender({ query: undefined });
+
+    expect(refetchCritical).toHaveBeenCalledTimes(1);
+    expect(refetchClosed).toHaveBeenCalledTimes(1);
+  });
+
+  it('refetches when the API total drops even if the capped loaded rows stay the same', () => {
+    const refetchCritical = jest.fn();
+    const cappedIds = Array.from({ length: 20 }, (_, index) => `running-${index}`);
+    mockUseFetchInvestigations.mockImplementation(
+      withInProgress({
+        ids: cappedIds,
+        total: cappedIds.length,
+        matchTotal: 21,
+        refetchCritical,
+      })
     );
     const { rerender } = renderSections();
     expect(refetchCritical).not.toHaveBeenCalled();
 
-    // One finished as another started: the total stays flat, but an id left.
+    // A finish past the loaded window shrinks matchTotal without changing the capped page.
     mockUseFetchInvestigations.mockImplementation(
-      withInProgress({ ids: ['running-b', 'running-c'], refetchCritical })
+      withInProgress({
+        ids: cappedIds,
+        total: cappedIds.length,
+        matchTotal: 20,
+        refetchCritical,
+      })
     );
     rerender({ query: undefined });
 
@@ -208,7 +397,7 @@ describe('useInvestigationSections', () => {
     mockUseFetchInvestigations.mockImplementation(
       withInProgress({ ids: ['running-a'], refetchCritical })
     );
-    const { rerender } = renderSections('checkout');
+    const { rerender } = renderSections({ query: 'checkout' });
 
     mockUseFetchInvestigations.mockImplementation(
       withInProgress({ ids: ['running-a', 'running-b'], refetchCritical })
@@ -220,5 +409,62 @@ describe('useInvestigationSections', () => {
     rerender({ query: 'checkout errors' });
 
     expect(refetchCritical).not.toHaveBeenCalled();
+  });
+
+  it('refetches every section and the severity counts when the status signal bumps', async () => {
+    const refetchBySeverity = {
+      inProgress: jest.fn(),
+      critical: jest.fn(),
+      high: jest.fn(),
+      medium: jest.fn(),
+      low: jest.fn(),
+      none: jest.fn(),
+      closed: jest.fn(),
+    };
+
+    mockUseFetchInvestigations.mockImplementation((params) => {
+      if (params.inProgress) {
+        return sectionResult({ ids: ['running-a'], refetch: refetchBySeverity.inProgress });
+      }
+      if (params.status === 'closed') {
+        return sectionResult({ refetch: refetchBySeverity.closed });
+      }
+
+      const severity = params.severities?.[0];
+      if (severity === 'critical') {
+        return sectionResult({ refetch: refetchBySeverity.critical });
+      }
+      if (severity === 'high') {
+        return sectionResult({ refetch: refetchBySeverity.high });
+      }
+      if (severity === 'medium') {
+        return sectionResult({ refetch: refetchBySeverity.medium });
+      }
+      if (severity === 'low') {
+        return sectionResult({ refetch: refetchBySeverity.low });
+      }
+      if (severity === 'none') {
+        return sectionResult({ refetch: refetchBySeverity.none });
+      }
+      return sectionResult();
+    });
+
+    renderSections();
+
+    await waitFor(() => expect(httpGet).toHaveBeenCalled());
+    httpGet.mockClear();
+
+    const onBump = mockUseStatusSignal.mock.calls.at(-1)?.[0];
+    expect(onBump).toEqual(expect.any(Function));
+    onBump!();
+
+    expect(refetchBySeverity.inProgress).toHaveBeenCalledTimes(1);
+    expect(refetchBySeverity.critical).toHaveBeenCalledTimes(1);
+    expect(refetchBySeverity.high).toHaveBeenCalledTimes(1);
+    expect(refetchBySeverity.medium).toHaveBeenCalledTimes(1);
+    expect(refetchBySeverity.low).toHaveBeenCalledTimes(1);
+    expect(refetchBySeverity.none).toHaveBeenCalledTimes(1);
+    expect(refetchBySeverity.closed).toHaveBeenCalledTimes(1);
+    await waitFor(() => expect(httpGet).toHaveBeenCalledTimes(1));
   });
 });

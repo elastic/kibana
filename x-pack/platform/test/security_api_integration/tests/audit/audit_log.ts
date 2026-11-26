@@ -7,6 +7,7 @@
 
 import Path from 'path';
 
+import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
 import expect from '@kbn/expect';
 
 import { FileWrapper } from './file_wrapper';
@@ -18,7 +19,10 @@ export default function ({ getService }: FtrProviderContext) {
   const { username, password } = getService('config').get('servers.kibana');
 
   describe('Audit Log', function () {
-    const logFilePath = Path.resolve(__dirname, '../../plugins/audit_log/audit.log');
+    const logFilePath = Path.resolve(
+      __dirname,
+      '../../../../test_plugins/security_api_integration/plugins/audit_log/audit.log'
+    );
     const logFile = new FileWrapper(logFilePath, retry);
 
     beforeEach(async () => {
@@ -76,6 +80,7 @@ export default function ({ getService }: FtrProviderContext) {
     it('logs audit events when logging in successfully', async () => {
       await supertest
         .post('/internal/security/login')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .set('kbn-xsrf', 'xxx')
         .set('X-Forwarded-For', '1.1.1.1, 2.2.2.2')
         .send({
@@ -101,6 +106,7 @@ export default function ({ getService }: FtrProviderContext) {
     it('logs audit events when failing to log in', async () => {
       await supertest
         .post('/internal/security/login')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .set('kbn-xsrf', 'xxx')
         .set('X-Forwarded-For', '1.1.1.1, 2.2.2.2')
         .send({

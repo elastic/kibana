@@ -35,6 +35,7 @@ import {
 import { createStorage as createAgentStorage } from './services/agents/persisted/client/storage';
 import { registerRoutes } from './routes';
 import { agentBuilderSpaceSettingsType } from './saved_objects';
+import { pinnedBaselinesDataStreamDefinition } from './services/eval_baselines/pinned_baselines_data_stream';
 import { registerUISettings } from './ui_settings';
 import { getRunAgentStepDefinition, rerankStepDefinition } from './step_types';
 import type { AgentBuilderHandlerContext } from './request_handler_context';
@@ -49,7 +50,10 @@ import { registerAfterExecutionWorkflowsHook } from './hooks/agent_workflows/reg
 import { registerSkillToolsLoaderHook } from './hooks/skills/register_skill_tools_loader_hook';
 import { createRelevantSkillsCycleHook } from './services/execution/run_agent/cycle_hooks/relevant_skills_hook';
 import { registerTaskDefinitions } from './services/execution';
-import { createModelProviderFactory } from './services/execution/runner/model_provider';
+import {
+  createModelProviderFactory,
+  createRuntimeModelProviderFactory,
+} from './services/execution/runner/model_provider';
 import { createSmlTools } from './services/tools/builtin/sml';
 import { createConnectorTools } from './services/tools/builtin/connectors';
 import { createAdminPrivilegeSwitcher } from './capabilities/admin_privilege_switcher';
@@ -182,6 +186,15 @@ export class AgentBuilderPlugin
 
     coreSetup.savedObjects.registerType(agentBuilderSpaceSettingsType);
 
+    // Pinned regression baselines for eval suites; served through the internal
+    // `/internal/agent_builder/evals/baselines` routes on the evaluations cluster. Only
+    // registered where the evals product runs, so ordinary deployments install no
+    // template for it (the routes are gated the same way). The evals setup contract
+    // reports the configured mode even when the plugin is disabled, so check both.
+    if (setupDeps.evals?.enabled && setupDeps.evals.mode === 'full') {
+      coreSetup.dataStreams.registerDataStream(pinnedBaselinesDataStreamDefinition);
+    }
+
     // Phantom capability: not a registered feature privilege. Used as an admin check
     // (e.g. superuser / wildcard roles get true). Resolved in the switcher via ES hasPrivileges.
     coreSetup.capabilities.registerProvider(() => ({
@@ -283,7 +296,6 @@ export class AgentBuilderPlugin
       workflowsManagement: setupDeps.workflowsManagement,
       logger: this.logger,
       getInternalServices,
-      getStartServices: coreSetup.getStartServices,
     });
 
     registerSkillToolsLoaderHook(serviceSetups, {
@@ -492,7 +504,7 @@ export class AgentBuilderPlugin
         findExecutions: execution.findExecutions.bind(execution),
       },
       runtime: {
-        createModelProvider: modelProviderFactory,
+        createModelProvider: createRuntimeModelProviderFactory(modelProviderFactory),
       },
       conversations: {
         getScopedClient: async ({ request }) => {

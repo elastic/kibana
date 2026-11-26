@@ -40,6 +40,7 @@ import {
   getConfiguredDestinations,
   getDestinationCreateSpec,
   getUnitDestinations,
+  localElasticsearchCredentialName,
   toDestinationViewModel,
   toRemoteElasticsearchDestinationViewModel,
   toS3DestinationViewModel,
@@ -102,10 +103,16 @@ export interface DestinationCreationContext {
   pendingDestination?: PendingDestination;
   /** Id of the key minted for the pending destination, revoked if the save fails. */
   pendingApiKeyId?: string;
+  /** Encoded API key sent as a unit secret, never embedded in the unit. */
+  pendingApiKey?: string;
   createdDestination?: DestinationViewModel;
 }
 
 export type ResolvedIndicesStatus = 'loading' | 'ready' | 'unavailable';
+
+export interface LoadResolvedIndicesInput {
+  timeRange: DestinationIndexStatsTimeRange;
+}
 
 export interface ResolvedIndicesError {
   message: string;
@@ -161,9 +168,10 @@ export type DestinationsStateEvent =
 
 /** Values for the unit PUT `secrets`. The created node references them by credential name. */
 const getCreateSecrets = (
-  formData: DestinationCreationFormData,
+  creationContext: DestinationCreationContext,
   destinationId: string
 ): StreamsUnit.Secrets | undefined => {
+  const { formData } = creationContext;
   switch (formData.storageKind) {
     case 'external_storage': {
       const names = s3CredentialNames(destinationId);
@@ -178,7 +186,11 @@ const getCreateSecrets = (
           formData.remoteElasticsearch.apiKey.trim(),
       };
     case 'local_elasticsearch':
-      return undefined;
+      return creationContext.pendingApiKey
+        ? {
+            [localElasticsearchCredentialName(destinationId)]: creationContext.pendingApiKey,
+          }
+        : undefined;
   }
 };
 
@@ -233,10 +245,6 @@ export const destinationsStateMachine = setup({
         ),
         resolvedIndicesError: undefined,
       };
-    }),
-    clearResolvedIndices: assign({
-      resolvedIndicesByDestination: () => new Map(),
-      resolvedIndicesError: undefined,
     }),
     spawnDestinationDetail: assign(({ context, event, spawn }) => {
       if (event.type !== 'destinationDetail.show') {
@@ -360,9 +368,11 @@ export const destinationsStateMachine = setup({
       }
       enqueue.assign({ destinationDetailRefs, destinationDetailViewerIds });
     }),
+    // The previous indices are of another range or unit, so they aren't kept past a failed reload.
     storeResolvedIndicesError: assign(({ event }) =>
       event.type === 'xstate.error.actor.loadResolvedIndices'
         ? {
+            resolvedIndicesByDestination: new Map(),
             resolvedIndicesError: {
               message: getFormattedError(event.error).message,
               forbidden: isHttpFetchError(event.error) && event.error.body?.statusCode === 403,
@@ -493,7 +503,7 @@ export const destinationsStateMachine = setup({
         signals,
         indexBySignal,
         writePatternsBySignal,
-        apiKey: event.output.encoded,
+        apiKeyCredential: localElasticsearchCredentialName(id),
       });
       const createdDestination = toDestinationViewModel(unitDestination);
       if (!createdDestination) {
@@ -509,6 +519,7 @@ export const destinationsStateMachine = setup({
         creationContext: {
           ...context.creationContext,
           pendingApiKeyId: event.output.id,
+          pendingApiKey: event.output.encoded,
           createdDestination,
         },
         unitDefinition,
@@ -533,7 +544,7 @@ export const destinationsStateMachine = setup({
           unitDefinition: context.unitDefinition,
           destinationIds: [createdDestination.id],
           intent: 'create',
-          secrets: getCreateSecrets(context.creationContext.formData, createdDestination.id),
+          secrets: getCreateSecrets(context.creationContext, createdDestination.id),
         };
       }
     ),
@@ -594,6 +605,7 @@ export const destinationsStateMachine = setup({
             creationContext: context.creationContext
               ? {
                   ...context.creationContext,
+                  pendingApiKey: undefined,
                   formData: {
                     ...context.creationContext.formData,
                     s3: {
@@ -618,6 +630,7 @@ export const destinationsStateMachine = setup({
     ),
   },
   guards: {
+    hasTimeRange: ({ context }) => context.timeRange !== undefined,
     hasDestinationDetail: ({ context, event }) =>
       event.type === 'destinationDetail.show' &&
       context.destinationDetailRefs.has(event.destinationId),
@@ -672,7 +685,6 @@ export const destinationsStateMachine = setup({
   }),
   invoke: { id: 'watchTimefilter', src: 'watchTimefilter' },
   on: {
-    'timefilter.changed': { actions: 'updateTimeRange' },
     'destinationDetail.hide': { actions: 'hideDestinationDetail' },
     'unit.persistenceFailed': {
       guard: 'isDeletePersistenceFailure',
@@ -790,22 +802,59 @@ export const destinationsStateMachine = setup({
     },
     // This region handles every unit event, which overrides any root handler for them,
     // so syncing the unit and the delete toast have to happen here.
+    // Indices are the ones written to in the page time range, so each range change, refresh or
+    // unit change reloads them. Every reload keeps the previous indices until the new ones arrive,
+    // so their views keep their place; the views mark what depends on the range as loading.
     resolvedIndices: {
       initial: 'loading',
       on: {
         'resolvedIndices.reload': { target: '.loading' },
+        'timefilter.changed': {
+          target: '.loading',
+          actions: ['resetDestinationDetails', 'updateTimeRange'],
+        },
         'unit.persisted': {
           target: '.loading',
           actions: ['syncLoadedUnit', 'notifyDestinationDeleted'],
         },
         'unit.loaded': [
-          { guard: 'hasPreviouslyLoadedUnit', target: '.loading', actions: 'syncLoadedUnit' },
+          {
+            guard: 'hasPreviouslyLoadedUnit',
+            target: '.loading',
+            actions: 'syncLoadedUnit',
+          },
           { actions: 'syncLoadedUnit' },
         ],
       },
       states: {
         loading: {
-          entry: ['resetDestinationDetails', 'clearResolvedIndices'],
+          entry: 'resetDestinationDetails',
+          initial: 'awaitingTimeRange',
+          states: {
+            awaitingTimeRange: {
+              always: { guard: 'hasTimeRange', target: 'fetching' },
+            },
+            fetching: {
+              invoke: {
+                id: 'loadResolvedIndices',
+                src: 'loadResolvedIndices',
+                input: ({ context }): LoadResolvedIndicesInput => {
+                  if (!context.timeRange) {
+                    throw new Error('Expected a time range');
+                  }
+                  return { timeRange: context.timeRange };
+                },
+                onDone: {
+                  target: '#destinationsResolvedIndicesReady',
+                  actions: 'storeResolvedIndices',
+                },
+                onError: {
+                  target: '#destinationsResolvedIndicesUnavailable',
+                  actions: ['storeResolvedIndicesError', 'notifyResolvedIndicesError'],
+                },
+              },
+            },
+          },
           on: {
             'destinationDetail.show': [
               {
@@ -821,20 +870,9 @@ export const destinationsStateMachine = setup({
               },
             ],
           },
-          invoke: {
-            id: 'loadResolvedIndices',
-            src: 'loadResolvedIndices',
-            onDone: {
-              target: 'ready',
-              actions: 'storeResolvedIndices',
-            },
-            onError: {
-              target: 'unavailable',
-              actions: ['storeResolvedIndicesError', 'notifyResolvedIndicesError'],
-            },
-          },
         },
         ready: {
+          id: 'destinationsResolvedIndicesReady',
           entry: 'updateDestinationDetails',
           on: {
             'destinationDetail.show': [
@@ -853,9 +891,9 @@ export const destinationsStateMachine = setup({
           },
         },
         unavailable: {
+          id: 'destinationsResolvedIndicesUnavailable',
           entry: 'updateDestinationDetails',
           on: {
-            'resolvedIndices.reload': { target: 'loading' },
             'destinationDetail.show': [
               {
                 guard: 'hasDestinationDetail',
@@ -928,8 +966,8 @@ type Toasts = CoreStart['notifications']['toasts'];
 function createNotifyDestinationCreatedAction({ toasts }: { toasts: Toasts }) {
   return () => {
     toasts.addSuccess({
-      title: i18n.translate('xpack.streams.destinations.destinationCreatedSuccessTitle', {
-        defaultMessage: 'New destination configured',
+      title: i18n.translate('xpack.streams.destinations.destinationCreatedToastTitle', {
+        defaultMessage: 'New destination created',
       }),
     });
   };
@@ -1007,12 +1045,25 @@ function createLoadResolvedIndicesActor({
   streamsRepositoryClient,
   unitId,
 }: DestinationApiKeyGenerationDeps) {
-  return fromPromise(async ({ signal }): Promise<ResolveUnitIndicesResponse> => {
-    return streamsRepositoryClient.fetch('GET /internal/streams/unit/{id}/_resolve_indices', {
-      params: { path: { id: unitId } },
+  return fromPromise(
+    async ({
+      input: { timeRange },
       signal,
-    });
-  });
+    }: {
+      input: LoadResolvedIndicesInput;
+      signal: AbortSignal;
+    }): Promise<ResolveUnitIndicesResponse> =>
+      streamsRepositoryClient.fetch('GET /internal/streams/unit/{id}/_resolve_indices', {
+        params: {
+          path: { id: unitId },
+          query: {
+            start: new Date(timeRange.start).toISOString(),
+            end: new Date(timeRange.end).toISOString(),
+          },
+        },
+        signal,
+      })
+  );
 }
 
 function createWatchTimefilterActor({ timeState, timeState$ }: DestinationsTimeDeps) {

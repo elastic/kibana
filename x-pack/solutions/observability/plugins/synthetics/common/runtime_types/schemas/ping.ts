@@ -31,6 +31,14 @@ export const ObserverCodec = lazySchema(() =>
   })
 );
 
+/**
+ * `monitor.timespan` is indexed as `{ gte, lt }`, but synthetic `_source` (enabled by the `logsdb`
+ * index mode) returns it as `{ gte, lte }`. Read the end through `getTimespanEnd`.
+ */
+export const TimespanType = lazySchema(() =>
+  z.looseObject({ gte: z.string(), lt: z.string().optional(), lte: z.string().optional() })
+);
+
 export const StateEndsCodec = lazySchema(() =>
   z.looseObject({
     duration_ms: z.union([z.string(), z.number()]),
@@ -119,7 +127,7 @@ export const JourneyStepType = lazySchema(() =>
       name: z.string().optional(),
       status: z.string().optional(),
       type: z.string().optional(),
-      timespan: z.looseObject({ gte: z.string(), lt: z.string() }).optional(),
+      timespan: TimespanType.optional(),
     }),
     observer: ObserverCodec.optional(),
     synthetics: z.looseObject({
@@ -300,7 +308,7 @@ export const MonitorType = lazySchema(() =>
     status: z.string(),
     type: z.string(),
     check_group: z.string(),
-    timespan: z.looseObject({ gte: z.string(), lt: z.string() }),
+    timespan: TimespanType,
     duration: z.looseObject({ us: z.number() }).optional(),
     ip: z.string().optional(),
     fleet_managed: z.boolean().optional(),

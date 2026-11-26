@@ -18,7 +18,7 @@ import Boom from '@hapi/boom';
 import { euid, getBuiltInEntityDefinition } from '@kbn/entity-store/common/euid_helpers';
 import { DEFAULT_RISK_SCORE_PAGE_SIZE } from '../../../../common/constants';
 import type { EntityType } from '../../../../common/entity_analytics/types';
-import { getConfiguration } from '../risk_engine/utils/saved_object_configuration';
+import { getConfiguration } from './configuration/saved_object_configuration';
 import { getRiskInputsIndex } from './get_risk_inputs_index';
 import { buildAlertFilters } from './maintainer/steps/build_alert_filters';
 import { getLookupIndexName } from './maintainer/lookup/lookup_index';
@@ -49,11 +49,6 @@ export interface RecalculateEntityRiskScoreParams {
    * from a fresh RiskScoreDataClient instance in non-HTTP contexts such as tools).
    */
   getWriter: (namespace: string) => Promise<RiskEngineDataWriter>;
-  /**
-   * Whether id-based risk scoring (Entity Store V2) is enabled.
-   * HTTP route callers can derive this from getIsIdBasedRiskScoringEnabled().
-   */
-  idBasedRiskScoringEnabled: boolean;
   logger: Logger;
   telemetry: AnalyticsServiceSetup;
   profiling: PageProfilingOptions;
@@ -73,7 +68,6 @@ export const recalculateEntityRiskScore = async ({
   entityId,
   identifierType,
   getWriter,
-  idBasedRiskScoringEnabled,
   logger,
   alertSampleSizePerShard = DEFAULT_ALERT_SAMPLE_SIZE,
   collectScores = false,
@@ -147,7 +141,6 @@ export const recalculateEntityRiskScore = async ({
         watchlistConfigs,
         calculationRunId,
         writer,
-        idBasedRiskScoringEnabled,
         // The entity was already confirmed to exist in buildScoringContext above, so there's nothing
         // for create-if-missing to do here.
         createMissingEntities: false,
@@ -173,7 +166,6 @@ export const recalculateEntityRiskScore = async ({
       watchlistConfigs,
       calculationRunId,
       writer,
-      idBasedRiskScoringEnabled,
       refresh: 'wait_for',
     });
   }
@@ -194,7 +186,6 @@ export const recalculateEntityRiskScore = async ({
         now,
         calculationRunId,
         watchlistConfigs,
-        idBasedRiskScoringEnabled,
         writer,
         targetEntityIds: [resolutionTargetId],
         alertFilters: resolutionAlertFilters,
