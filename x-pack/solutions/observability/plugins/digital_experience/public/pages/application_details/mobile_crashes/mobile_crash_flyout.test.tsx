@@ -178,11 +178,18 @@ describe('MobileCrashFlyout', () => {
       .getAllByRole('row')
       .slice(1);
     expect(rows).toHaveLength(3);
-    // The request's URL without its query, and its failed status.
+    // The request's URL without its query, its failed status and how long it took.
     expect(rows[0]).toHaveTextContent('Request');
     expect(rows[0]).toHaveTextContent('https://api.example.com/tracks');
     expect(rows[0]).not.toHaveTextContent('?id=1');
     expect(rows[0]).toHaveTextContent('503');
+    expect(
+      within(rows[0]).getByTestId('digitalExperienceMobileCrashTimelineDuration')
+    ).toHaveTextContent('420 ms');
+    // Only requests have a duration.
+    expect(
+      within(rows[1]).queryByTestId('digitalExperienceMobileCrashTimelineDuration')
+    ).toBeNull();
     expect(within(rows[0]).getAllByRole('cell')[0]).toHaveTextContent(/ before$/);
     expect(rows[1]).toHaveTextContent('Tap');
     expect(rows[1]).toHaveTextContent('Map');

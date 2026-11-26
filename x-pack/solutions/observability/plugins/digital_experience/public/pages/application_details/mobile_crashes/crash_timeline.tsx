@@ -11,6 +11,7 @@ import type { EuiBasicTableColumn } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { MobileSessionEventKind, SessionTimelineEvent } from '../../../../common/sessions';
 import type { MobileCrash } from '../../../../common/types/mobile';
+import { formatDurationMs } from '../../../utils/format_duration';
 import { formatElapsed, urlWithoutQuery } from '../../session_detail/utils/visit_activity';
 
 type CrashTimelineKind = MobileSessionEventKind | 'crash';
@@ -73,6 +74,8 @@ interface TimelineRow {
   page: string | null;
   detail: string | null;
   statusCode: number | null;
+  /** A request's. */
+  durationMs: number | null;
 }
 
 const isMobileKind = (kind: SessionTimelineEvent['kind']): kind is MobileSessionEventKind =>
@@ -94,6 +97,7 @@ const toRows = (events: SessionTimelineEvent[], crash: MobileCrash): TimelineRow
           page: event.page,
           detail: kind === 'request' && event.detail ? urlWithoutQuery(event.detail) : event.detail,
           statusCode: event.statusCode ?? null,
+          durationMs: event.durationMs ?? null,
         },
       ];
     }),
@@ -105,6 +109,7 @@ const toRows = (events: SessionTimelineEvent[], crash: MobileCrash): TimelineRow
       page: null,
       detail: crash.message,
       statusCode: null,
+      durationMs: null,
     },
   ];
 };
@@ -129,7 +134,7 @@ const columns: Array<EuiBasicTableColumn<TimelineRow>> = [
   {
     field: 'name',
     name: DETAIL_LABEL,
-    render: (name: string, { detail, page, statusCode }: TimelineRow) => (
+    render: (name: string, { detail, page, statusCode, durationMs }: TimelineRow) => (
       <div className="eui-textTruncate">
         <EuiText size="xs" className="eui-textTruncate">
           <strong>{name}</strong>
@@ -138,6 +143,12 @@ const columns: Array<EuiBasicTableColumn<TimelineRow>> = [
               {' '}
               <EuiBadge color={statusCode >= 400 ? 'danger' : 'hollow'}>{statusCode}</EuiBadge>
             </>
+          )}
+          {durationMs !== null && (
+            <span data-test-subj="digitalExperienceMobileCrashTimelineDuration">
+              {' '}
+              {formatDurationMs(durationMs)}
+            </span>
           )}{' '}
           {detail && <span title={detail}>{detail}</span>}
         </EuiText>
