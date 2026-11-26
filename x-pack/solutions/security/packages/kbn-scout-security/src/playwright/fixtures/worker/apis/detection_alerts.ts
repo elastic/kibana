@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { estypes } from '@elastic/elasticsearch';
 import type { EsClient, ScoutLogger, ScoutParallelWorkerFixtures } from '@kbn/scout';
 import { measurePerformanceAsync } from '@kbn/scout';
 
@@ -15,6 +16,8 @@ export interface DetectionAlertsApiService {
   deleteAll: () => Promise<void>;
   /** Polls until ≥ minCount alerts for ruleName exist; rejects on timeout (default 30s). */
   waitForAlerts: (ruleName: string, minCount?: number, timeout?: number) => Promise<number>;
+  /** Returns the earliest and latest `@timestamp` (ISO) of the existing alerts for ruleName. */
+  getAlertsTimeRange: (ruleName: string) => Promise<{ from: string; to: string }>;
 }
 
 export const getDetectionAlertsApiService = ({
@@ -78,6 +81,37 @@ export const getDetectionAlertsApiService = ({
           `waitForAlerts timed out after ${timeout}ms: expected >=${minCount} alert(s) for rule "${ruleName}" in space "${space}"`
         );
       });
+    },
+
+    getAlertsTimeRange: async (ruleName: string) => {
+      return measurePerformanceAsync(
+        log,
+        'security.detectionAlerts.getAlertsTimeRange',
+        async () => {
+          const index = `${DEFAULT_ALERTS_INDEX_PATTERN}${space}`;
+          await esClient.indices.refresh({ index });
+          const { aggregations } = await esClient.search<
+            unknown,
+            { earliest: estypes.AggregationsMinAggregate; latest: estypes.AggregationsMaxAggregate }
+          >({
+            index,
+            size: 0,
+            query: {
+              term: { 'kibana.alert.rule.name': ruleName },
+            },
+            aggs: {
+              earliest: { min: { field: '@timestamp' } },
+              latest: { max: { field: '@timestamp' } },
+            },
+          });
+          const from = aggregations?.earliest.value_as_string;
+          const to = aggregations?.latest.value_as_string;
+          if (!from || !to) {
+            throw new Error(`No alerts found for rule "${ruleName}" in space "${space}"`);
+          }
+          return { from, to };
+        }
+      );
     },
   };
 };
