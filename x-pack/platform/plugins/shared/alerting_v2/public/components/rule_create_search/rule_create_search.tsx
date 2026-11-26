@@ -25,7 +25,7 @@ import {
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { useDebouncedValue } from '@kbn/react-hooks';
-import { AiButton, AiButtonEmpty } from '@kbn/ui-ai-components';
+import { AiButtonEmpty } from '@kbn/ui-ai-components';
 import { getSearchOptions } from './get_search_options';
 import type { RuleCreateSearchOption, RuleCreateSearchOptionData } from './get_search_options';
 import type { RuleCreateSearchSections } from './types';
@@ -93,30 +93,32 @@ export const RuleCreateSearch = ({
     gap: ${euiTheme.size.s};
   `;
 
-  const options = getSearchOptions(sections).map(
-    (option): RuleCreateSearchOption =>
-      option.isGroupLabel
-        ? {
-            ...option,
-            css: groupLabelCss,
-            append: option.isLoading ? (
-              <EuiLoadingSpinner size="s" aria-label={LOADING_LABEL} />
-            ) : option.headerAction ? (
-              <EuiLink
-                onClick={option.headerAction.onClick}
-                data-test-subj={`ruleCreateSearchHeaderAction-${option.sectionId}`}
-              >
-                {option.headerAction.label}
-              </EuiLink>
-            ) : undefined,
-          }
-        : {
-            ...option,
-            prepend: option.item?.iconType ? (
-              <EuiIcon type={option.item.iconType} aria-hidden={true} />
-            ) : undefined,
-            'data-test-subj': `ruleCreateSearchItem-${option.sectionId}-${option.item?.id}`,
-          }
+  const options = getSearchOptions(sections).map((option): RuleCreateSearchOption => {
+    const { sectionId, item, isLoading, headerAction } = option.data;
+    return option.isGroupLabel
+      ? {
+          ...option,
+          css: groupLabelCss,
+          append: isLoading ? (
+            <EuiLoadingSpinner size="s" aria-label={LOADING_LABEL} />
+          ) : headerAction ? (
+            <EuiLink
+              onClick={headerAction.onClick}
+              data-test-subj={`ruleCreateSearchHeaderAction-${sectionId}`}
+            >
+              {headerAction.label}
+            </EuiLink>
+          ) : undefined,
+        }
+      : {
+          ...option,
+          prepend: item?.iconType ? <EuiIcon type={item.iconType} aria-hidden={true} /> : undefined,
+          'data-test-subj': `ruleCreateSearchItem-${sectionId}-${item?.id}`,
+        };
+  });
+
+  const descriptionsByKey = new Map(
+    options.map(({ key, data }) => [key, data.item?.description] as const)
   );
 
   const sendToAgent = () => {
@@ -146,28 +148,32 @@ export const RuleCreateSearch = ({
     _event: unknown,
     changedOption: RuleCreateSearchOption
   ) => {
-    if (!changedOption.item) {
+    const { item } = changedOption.data;
+    if (!item) {
       return;
     }
     setIsDismissed(true);
-    changedOption.item.onSelect();
+    item.onSelect();
   };
 
-  const renderOption = (option: RuleCreateSearchOption) => (
-    <>
-      <EuiText size="s">
-        <strong>{option.label}</strong>
-      </EuiText>
-      {option.item?.description ? (
-        <EuiText size="xs" color="subdued">
-          {option.item.description}
+  const renderOption = ({ key, label }: RuleCreateSearchOption) => {
+    const description = descriptionsByKey.get(key);
+    return (
+      <>
+        <EuiText size="s">
+          <strong>{label}</strong>
         </EuiText>
-      ) : null}
-    </>
-  );
+        {description ? (
+          <EuiText size="xs" color="subdued">
+            {description}
+          </EuiText>
+        ) : null}
+      </>
+    );
+  };
 
   return (
-    <EuiSelectable<RuleCreateSearchOptionData>
+    <EuiSelectable<{ data: RuleCreateSearchOptionData }>
       aria-label={SEARCH_LABEL}
       options={options}
       onChange={handleOptionChange}
@@ -231,27 +237,14 @@ export const RuleCreateSearch = ({
                   </EuiText>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  {/* Highlighted while no result is active, because Enter then sends to the agent. */}
-                  {hasActiveOption ? (
-                    <AiButtonEmpty
-                      iconType="productAgent"
-                      size="s"
-                      onClick={sendToAgent}
-                      data-test-subj="ruleCreateSearchSendToAgent"
-                    >
-                      {SEND_TO_AGENT_LABEL}
-                    </AiButtonEmpty>
-                  ) : (
-                    <AiButton
-                      variant="base"
-                      iconType="productAgent"
-                      size="s"
-                      onClick={sendToAgent}
-                      data-test-subj="ruleCreateSearchSendToAgent"
-                    >
-                      {SEND_TO_AGENT_LABEL}
-                    </AiButton>
-                  )}
+                  <AiButtonEmpty
+                    iconType="productAgent"
+                    size="s"
+                    onClick={sendToAgent}
+                    data-test-subj="ruleCreateSearchSendToAgent"
+                  >
+                    {SEND_TO_AGENT_LABEL}
+                  </AiButtonEmpty>
                 </EuiFlexItem>
               </EuiFlexGroup>
             </>

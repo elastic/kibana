@@ -25,7 +25,8 @@ export interface RuleCreateSearchOptionData {
   readonly headerAction?: RuleCreateSearchSectionHeaderAction;
 }
 
-export type RuleCreateSearchOption = EuiSelectableOption<RuleCreateSearchOptionData>;
+/** Custom fields live under `data` so EUI does not spread them onto the DOM. */
+export type RuleCreateSearchOption = EuiSelectableOption<{ data: RuleCreateSearchOptionData }>;
 
 /** Flattens the sections into selectable options: a group label per visible section followed by its items. */
 export const getSearchOptions = (sections: RuleCreateSearchSections): RuleCreateSearchOption[] =>
@@ -45,17 +46,14 @@ export const getSearchOptions = (sections: RuleCreateSearchSections): RuleCreate
       key: `group:${sectionId}`,
       label: RULE_CREATE_SEARCH_SECTION_TITLES[sectionId],
       isGroupLabel: true,
-      sectionId,
-      isLoading: isLoading && visibleItems.length === 0,
-      headerAction,
+      data: { sectionId, isLoading: isLoading && visibleItems.length === 0, headerAction },
     };
 
     const itemOptions = visibleItems.map(
       (item): RuleCreateSearchOption => ({
         key: `item:${sectionId}:${item.id}`,
         label: item.title,
-        sectionId,
-        item,
+        data: { sectionId, item },
       })
     );
 
