@@ -52,7 +52,7 @@ function toRows({ columns, values }: ESQLSearchResponse): StoredSignalRow[] {
 
 /**
  * The space's newest detection signals, read from `.rule-events` with ES|QL as the current user,
- * again every {@link SIGNALS_REFRESH_MS} while `isLive`. A read that fails keeps the last list.
+ * again {@link SIGNALS_REFRESH_MS} after each read settles while `isLive`. A read that fails keeps the last list.
  */
 export function useLiveSignals({
   data,
@@ -103,12 +103,14 @@ export function useLiveSignals({
   }, [data, spaceId, readCount]);
 
   useEffect(() => {
-    if (!isLive) {
+    // The next read is scheduled once the current one settles, so a slow read is never aborted by
+    // the timer and always gets to finish.
+    if (!isLive || isLoading) {
       return;
     }
-    const interval = setInterval(refresh, SIGNALS_REFRESH_MS);
-    return () => clearInterval(interval);
-  }, [isLive, refresh]);
+    const timeout = setTimeout(refresh, SIGNALS_REFRESH_MS);
+    return () => clearTimeout(timeout);
+  }, [isLive, isLoading, refresh]);
 
   return { signals, error, isLoading, updatedAt, refresh };
 }
