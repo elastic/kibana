@@ -1133,6 +1133,30 @@ describe('UnifiedDataTable', () => {
       );
 
       it(
+        'should reset the state of leading controls when a document with the same id from another index takes the row',
+        async () => {
+          const buildRecordWithBareId = (index: string) => {
+            const hit = { ...esHitsMock[0], _index: index };
+            return { ...buildDataTableRecord(hit, dataViewMock), id: hit._id };
+          };
+          const props = { ...getProps(), rows: [buildRecordWithBareId('first_index')] };
+          const { rerender } = await openFirstRowControl(props);
+
+          rerender(
+            <DataTableWithI18n
+              {...props}
+              rows={[buildRecordWithBareId('second_index')]}
+              rowAdditionalLeadingControls={getControls('second')}
+            />
+          );
+
+          expect(screen.getAllByTestId('statefulRowControl')[0]).toHaveTextContent('second 0');
+          expect(screen.getAllByTestId('statefulRowControl')[0]).not.toHaveTextContent('open');
+        },
+        EXTENDED_JEST_TIMEOUT
+      );
+
+      it(
         'should reset the state of a leading control when another control takes its slot',
         async () => {
           const props = getProps();

@@ -28,10 +28,11 @@ const ActionsCell = ({
   const record = getRowByIndex(props.rowIndex);
 
   // The grid reuses cells by position, so keying by document resets the controls' local
-  // state (e.g. an open menu) when a different document takes this row.
+  // state (e.g. an open menu) when a different document takes this row. Some consumers set
+  // `id` to the bare `_id`, which is only unique within an index.
   return (
     <EuiFlexGroup
-      key={record?.id}
+      key={record && [record.raw._index, record.id].join('::')}
       data-test-subj="unifiedDataTable_actionsColumnCell"
       responsive={false}
       alignItems="center"
