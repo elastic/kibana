@@ -74,6 +74,24 @@ describe('formSerializer', () => {
     );
   });
 
+  it.each([
+    [' Bearer ', 'Bearer'],
+    ['', undefined],
+    ['   ', undefined],
+    [undefined, undefined],
+  ])('serializes tokenType %p as %p', (tokenType, expected) => {
+    const formData = {
+      actionTypeId: '.connector-test',
+      isDeprecated: false,
+      __internal__: { headers: [], hasProxy: false },
+      config: { tokenType },
+      secrets: {},
+      isMissingSecrets: false,
+    };
+
+    expect(formSerializer(formData).config.tokenType).toBe(expected);
+  });
+
   it('should correctly serialize secretQueryParams', () => {
     const formData = {
       actionTypeId: '.connector-test',
