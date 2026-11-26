@@ -183,8 +183,11 @@ describe('Component templates API', () => {
         },
       });
 
-      const arg = updateIndexTemplate.mock.calls[0][0] as any;
-      expect(arg.template?.data_stream_options).toBeUndefined();
+      expect(updateIndexTemplate).toHaveBeenCalledWith(
+        expect.objectContaining({
+          template: expect.not.objectContaining({ data_stream_options: expect.anything() }),
+        })
+      );
     });
     it('does not re-apply stored data_stream_options when the template is not a data stream template', async () => {
       transportRequest.mockResolvedValue({
@@ -202,8 +205,11 @@ describe('Component templates API', () => {
 
       await router.runRequest(mockRequest);
 
-      const arg = updateIndexTemplate.mock.calls[0][0] as any;
-      expect(arg.template?.data_stream_options).toBeUndefined();
+      expect(updateIndexTemplate).toHaveBeenCalledWith(
+        expect.objectContaining({
+          template: expect.not.objectContaining({ data_stream_options: expect.anything() }),
+        })
+      );
     });
   });
 });
