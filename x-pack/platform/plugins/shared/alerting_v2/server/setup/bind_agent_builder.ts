@@ -158,7 +158,8 @@ export function bindAgentBuilder({ bind }: ContainerModuleLoadOptions) {
         getActiveSpace: (request) => spacesService.getActiveSpace(request),
         projectType,
       }),
-      validateWorkflow: (yaml, sid, req) => workflowsManagementApi.validateWorkflow(yaml, sid, req),
+      validateWorkflow: (yaml, sid, req, options) =>
+        workflowsManagementApi.validateWorkflow(yaml, sid, req, options),
     });
   });
 }

@@ -8,6 +8,7 @@
 import {
   automationCompletionSchema,
   automationCompletionInputSchema,
+  savedAutomationCompletionSchema,
   MAX_PROMPT_TEMPLATE_LENGTH,
   promptTemplateSchema,
 } from './schemas';
@@ -25,6 +26,38 @@ describe('automation completion input', () => {
       ).toBe(false);
     }
   );
+  it.each(['U012ABCDEF', 'W012ABCDEF', 'D012ABCDEF'])(
+    'rejects the user or DM id %s as a channel destination',
+    (destination) => {
+      expect(
+        savedAutomationCompletionSchema.safeParse({
+          action: 'post_to_slack',
+          targetMode: 'channel',
+          destination,
+        }).success
+      ).toBe(false);
+    }
+  );
+
+  it('accepts a user or DM id for a custom Slack connector', () => {
+    expect(
+      savedAutomationCompletionSchema.safeParse({
+        action: 'post_to_slack',
+        targetMode: 'channel',
+        destination: 'D012ABCDEF',
+        connectorId: 'my-slack',
+      }).success
+    ).toBe(true);
+  });
+  it('accepts a channel id as a channel destination', () => {
+    expect(
+      savedAutomationCompletionSchema.safeParse({
+        action: 'post_to_slack',
+        targetMode: 'channel',
+        destination: 'C012ABCDEF',
+      }).success
+    ).toBe(true);
+  });
   it('allows a partial update before merged validation', () => {
     expect(automationCompletionInputSchema.safeParse({ targetMode: 'channel' }).success).toBe(true);
   });
