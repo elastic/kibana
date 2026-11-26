@@ -294,7 +294,7 @@ export function IntroBannerVideo(): React.ReactElement {
         onKeyDown={(event) => {
           if (event.key === keys.ENTER || event.key === ' ') {
             event.preventDefault();
-            openExpanded();
+            event.currentTarget.click();
           }
         }}
       >
