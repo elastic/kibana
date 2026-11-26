@@ -171,7 +171,8 @@
           "x-pack/solutions/observability/packages/kbn-nightshift-decision-trees/src/**",
           "x-pack/solutions/observability/packages/kbn-nightshift-decision-trees/index.ts",
           "src/platform/packages/shared/kbn-workflows/managed/definitions/nightshift_investigations/**",
-          "x-pack/platform/packages/shared/kbn-nightshift-ai/src/resolve_nightshift_model*.ts"
+          "x-pack/platform/packages/shared/kbn-nightshift-ai/src/resolve_nightshift_model*.ts",
+          "x-pack/platform/packages/shared/kbn-significant-events-schema/src/nightshift_models.ts"
         ],
         "exclude": [
           "**/*.test.ts",
@@ -183,9 +184,9 @@
           "**/*.md",
           "**/online_evals/**",
           "**/*online_evals*.ts",
-          "x-pack/solutions/observability/plugins/nightshift_investigations/server/routes/**",
+          "x-pack/solutions/observability/plugins/nightshift_investigations/server/routes/**/!(start_investigation).ts",
           "x-pack/solutions/observability/plugins/nightshift_investigations/server/telemetry/**",
-          "x-pack/solutions/observability/plugins/nightshift_investigations/server/saved_objects/**",
+          "x-pack/solutions/observability/plugins/nightshift_investigations/server/saved_objects/!(custom_context_saved_object).ts",
           "x-pack/solutions/observability/plugins/nightshift_investigations/server/purge/**",
           "x-pack/solutions/observability/plugins/nightshift_investigations/server/tracing/**",
           "x-pack/solutions/observability/plugins/nightshift_investigations/server/lib/automations/**",
@@ -199,7 +200,9 @@
           "x-pack/platform/plugins/shared/agentic_investigations/server/impact/routes/**",
           "x-pack/platform/plugins/shared/agentic_investigations/server/impact/services/*pills*.ts",
           "x-pack/platform/plugins/shared/agentic_investigations/server/impact/services/entity_store_names.ts",
-          "x-pack/platform/plugins/shared/agentic_investigations/common/impact/impact_pills.ts"
+          "x-pack/platform/plugins/shared/agentic_investigations/common/impact/impact_pills.ts",
+          "x-pack/platform/plugins/shared/agentic_investigations/common/impact/index.ts",
+          "x-pack/platform/plugins/shared/agentic_investigations/server/impact/services/impact_client.ts"
         ]
       },
       "regressionGate": {

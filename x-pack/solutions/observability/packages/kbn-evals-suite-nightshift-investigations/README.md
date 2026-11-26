@@ -407,9 +407,9 @@ these labels ([how the gate works](../../../../platform/packages/shared/kbn-eval
 - `evals:nightshift-investigations` runs the suite on Sonnet 5.5.
 - `evals:skip` skips it.
 
-A run blocks the PR only if `goal_pass` on the golden cut drops by 0.10 or more with p < 0.05
+A run fails the check only if `goal_pass` on the golden cut drops by 0.10 or more with p < 0.05
 against `main`. Fix it, or add `evals:accept-regression`. Infra problems and stale baselines never
-block.
+fail it. The check is advisory until the gate is calibrated, so it doesn't stop a merge on its own.
 
 The gated paths are `requireDecisionOnPaths` in
 [`evals.suites.json`](../../../../../.buildkite/pipelines/evals/evals.suites.json): all of the

@@ -213,13 +213,17 @@ describe('evals.suites.json evals decision', () => {
   it('never hides a prompt behind an exclude', () => {
     // Suites include whole plugins and exclude the folders that don't change agent behaviour, so a
     // new folder is gated by default. An exclude is the one way a prompt can slip out, so none may
-    // cover a prompt file, except tests and online eval judge prompts, which aren't agent prompts.
+    // cover a prompt file, except test artefacts, docs and online eval judge prompts, which aren't
+    // agent prompts. Plain `.md` is exempt because the agent's prompts are `.md.text`.
     const isPromptFile = (file: string): boolean =>
       file.endsWith('.text') ||
       /prompt/i.test(Path.basename(file)) ||
       file.includes('/instructions/');
     const isExemptPromptFile = (file: string): boolean =>
       /\.test\.tsx?$/.test(file) ||
+      /\.(snap|md)$/.test(file) ||
+      /\.mock\.ts$/.test(file) ||
+      /\/(__snapshots__|__fixtures__|test)\//.test(file) ||
       file.includes('/online_evals/') ||
       Path.basename(file).includes('online_evals');
 

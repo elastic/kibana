@@ -13,7 +13,7 @@ import {
   decideSuite,
   findReusableVerdict,
   getDecisionPathMatches,
-  hasExplicitModelRequest,
+  requestsModelsBeyondDefaults,
   isSuiteSkipped,
   truncateDescription,
 } from './evals_gate_rules.ts';
@@ -70,11 +70,20 @@ describe('getDecisionPathMatches', () => {
   });
 });
 
-describe('hasExplicitModelRequest', () => {
-  it('counts model labels but not the judge label', () => {
-    expect(hasExplicitModelRequest(['evals:gated', 'models:eis/openai-gpt-5.4'])).toBe(true);
-    expect(hasExplicitModelRequest(['evals:gated', 'models:judge:eis/openai-gpt-5.4'])).toBe(false);
-    expect(hasExplicitModelRequest(['evals:gated'])).toBe(false);
+describe('requestsModelsBeyondDefaults', () => {
+  const suite = { defaultModelGroups: ['eis/anthropic-claude-5.5-sonnet'] };
+
+  it('counts a model label for a model the suite does not run by default', () => {
+    expect(requestsModelsBeyondDefaults(['models:eis/openai-gpt-5.4'], suite)).toBe(true);
+    expect(requestsModelsBeyondDefaults(['models:weekly-eis-models'], suite)).toBe(true);
+  });
+
+  it('ignores the default model, the judge label, and PRs without model labels', () => {
+    expect(requestsModelsBeyondDefaults(['models:eis/anthropic-claude-5.5-sonnet'], suite)).toBe(
+      false
+    );
+    expect(requestsModelsBeyondDefaults(['models:judge:eis/openai-gpt-5.4'], suite)).toBe(false);
+    expect(requestsModelsBeyondDefaults(['evals:gated'], suite)).toBe(false);
   });
 });
 

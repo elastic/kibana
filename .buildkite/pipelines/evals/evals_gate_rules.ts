@@ -92,11 +92,17 @@ export const isSuiteSkipped = (labels: readonly string[], suite: EvalsDecisionSu
   (suite.requireDecisionOnPaths !== undefined && labels.includes(EVALS_SKIP_LABEL));
 
 /**
- * Whether the PR asks for specific models (`models:*`, not `models:judge:*`). A reused verdict only
- * covers a suite's default model, so reusing it must not skip a run the author asked for.
+ * Whether the PR's `models:*` labels (not `models:judge:*`) ask for a model beyond the suite's
+ * defaults. A reused verdict only covers the defaults, so reusing it must not skip such a run.
+ * Aliases like `models:weekly-eis-models` count as beyond, since they expand to other models.
  */
-export const hasExplicitModelRequest = (labels: readonly string[]): boolean =>
-  labels.some((label) => label.startsWith('models:') && !label.startsWith('models:judge:'));
+export const requestsModelsBeyondDefaults = (
+  labels: readonly string[],
+  { defaultModelGroups = [] }: { defaultModelGroups?: string[] | null }
+): boolean =>
+  labels
+    .filter((label) => label.startsWith('models:') && !label.startsWith('models:judge:'))
+    .some((label) => !(defaultModelGroups ?? []).includes(label.slice('models:'.length)));
 
 export const isSuiteRunRequested = (
   labels: readonly string[],

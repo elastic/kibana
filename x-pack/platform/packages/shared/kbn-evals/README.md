@@ -266,14 +266,16 @@ To also block merging on a regression, add `regressionGate` with one pre-registe
 }
 ```
 
-The run is compared with the latest `main` baseline for the suite's first default model. It blocks
-only if the metric drops by at least `minAbsoluteDrop` with p < `alpha`; fix it or add
-`evals:accept-regression` (`evals:skip` doesn't clear a regression on the same commit). A missing or
-stale baseline, too few examples, or an infra failure counts as inconclusive and never blocks. Other
-evaluators stay advisory.
+The run is compared with the latest `main` baseline for the suite's first default model. It fails the
+`evals gate` check only if the metric drops by at least `minAbsoluteDrop` with p < `alpha`; fix it or
+add `evals:accept-regression` (`evals:skip` doesn't clear a regression on the same commit). A missing
+or stale baseline, too few examples, or an infra failure counts as inconclusive and never fails it.
+Other evaluators stay advisory. The check isn't required yet, so a failing verdict doesn't stop a
+merge on its own.
 
-A passing verdict carries over to later pushes that don't touch the suite's paths, and `models:*`
-labels add to the default model rather than replace it.
+A passing verdict carries over to later pushes that don't touch the suite's paths, unless the PR asks
+for models beyond the suite's defaults. `models:*` labels add to the default model rather than
+replace it.
 
 #### Per-spec model groups
 

@@ -10,6 +10,7 @@
 import Fs from 'fs';
 import Path from 'path';
 import type { EvalsSuiteMetadataEntry } from './eval_pipeline.ts';
+import { getEvalTriggerStep, getRunnableEvalSuites, shouldRunEvals } from './eval_pipeline.ts';
 import { getDecisionPathMatches } from './evals_gate_rules.ts';
 import type { GateApi } from './evals_gate_workflow.ts';
 import { runEvalsGate } from './evals_gate_workflow.ts';
@@ -182,5 +183,57 @@ describe('evals gate against evals.suites.json', () => {
     await expect(gate([file], ['evals:nightshift-investigations'])).resolves.toMatchObject({
       status: { state: 'pending' },
     });
+  });
+
+  it.each([
+    ['the start route the golden eval calls', `${NIGHTSHIFT}/server/routes/start_investigation.ts`],
+    [
+      'the custom context schema',
+      `${NIGHTSHIFT}/server/saved_objects/custom_context_saved_object.ts`,
+    ],
+    [
+      'the production investigation model',
+      'x-pack/platform/packages/shared/kbn-significant-events-schema/src/nightshift_models.ts',
+    ],
+  ])('requires a decision for %s, despite the folder excludes around it', (_label, file) => {
+    expect(touchedSuites([file])).toEqual(['nightshift-investigations']);
+  });
+
+  it.each([
+    [`${NIGHTSHIFT}/server/routes/onboarding.ts`],
+    [`${NIGHTSHIFT}/server/saved_objects/automation_saved_object.ts`],
+    [`${AGENTIC}/server/impact/services/impact_client.ts`],
+    [`${AGENTIC}/common/impact/index.ts`],
+  ])('needs no decision for %s', (file) => {
+    expect(touchedSuites([file])).toEqual([]);
+  });
+});
+
+// The gate waiting on a run is only useful if Buildkite actually starts one, so check the trigger
+// and selection against the real config too. Both read it relative to the working directory.
+describe('Buildkite scheduling for a gated change', () => {
+  const originalCwd = process.cwd();
+  beforeAll(() => process.chdir(Path.resolve(__dirname, '../../..')));
+  afterAll(() => process.chdir(originalCwd));
+
+  const prompt = `${NIGHTSHIFT}/server/agents/investigation/instructions/investigator.md.text`;
+
+  it('emits the eval trigger step before any label is added', () => {
+    expect(getEvalTriggerStep('', [prompt])).not.toBeNull();
+  });
+
+  it('runs Nightshift on the run label alone, without a models:* label', () => {
+    expect(shouldRunEvals('evals:nightshift-investigations')).toBe(true);
+    expect(getRunnableEvalSuites('evals:nightshift-investigations').map(({ id }) => id)).toEqual([
+      'nightshift-investigations',
+    ]);
+  });
+
+  it('runs nothing for an Agent Builder change', () => {
+    expect(
+      getEvalTriggerStep('', [
+        'x-pack/platform/plugins/shared/agent_builder/server/audit/helpers.ts',
+      ])
+    ).toBeNull();
   });
 });
