@@ -196,6 +196,17 @@ export const riskScoreFieldMap: FieldMap = {
     required: false,
   },
   ...buildIdentityRiskFields(EntityType.service),
+  'ai_agent.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'ai_agent.risk': {
+    type: 'object',
+    array: false,
+    required: false,
+  },
+  ...buildIdentityRiskFields(EntityType.ai_agent),
 } as const;
 
 export const mappingComponentName = '.risk-score-mappings';

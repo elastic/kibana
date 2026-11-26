@@ -7,6 +7,146 @@ Object {
     "required": false,
     "type": "date",
   },
+  "ai_agent.name": Object {
+    "array": false,
+    "required": false,
+    "type": "keyword",
+  },
+  "ai_agent.risk": Object {
+    "array": false,
+    "required": false,
+    "type": "object",
+  },
+  "ai_agent.risk.calculated_level": Object {
+    "array": false,
+    "required": false,
+    "type": "keyword",
+  },
+  "ai_agent.risk.calculated_score": Object {
+    "array": false,
+    "required": false,
+    "type": "float",
+  },
+  "ai_agent.risk.calculated_score_norm": Object {
+    "array": false,
+    "required": false,
+    "type": "float",
+  },
+  "ai_agent.risk.calculation_run_id": Object {
+    "array": false,
+    "required": false,
+    "type": "keyword",
+  },
+  "ai_agent.risk.category_1_count": Object {
+    "array": false,
+    "required": false,
+    "type": "long",
+  },
+  "ai_agent.risk.category_1_score": Object {
+    "array": false,
+    "required": false,
+    "type": "float",
+  },
+  "ai_agent.risk.id_field": Object {
+    "array": false,
+    "required": false,
+    "type": "keyword",
+  },
+  "ai_agent.risk.id_value": Object {
+    "array": false,
+    "required": false,
+    "type": "keyword",
+  },
+  "ai_agent.risk.inputs": Object {
+    "array": true,
+    "required": false,
+    "type": "object",
+  },
+  "ai_agent.risk.inputs.category": Object {
+    "array": false,
+    "required": false,
+    "type": "keyword",
+  },
+  "ai_agent.risk.inputs.description": Object {
+    "array": false,
+    "required": false,
+    "type": "keyword",
+  },
+  "ai_agent.risk.inputs.id": Object {
+    "array": false,
+    "required": false,
+    "type": "keyword",
+  },
+  "ai_agent.risk.inputs.index": Object {
+    "array": false,
+    "required": false,
+    "type": "keyword",
+  },
+  "ai_agent.risk.inputs.risk_score": Object {
+    "array": false,
+    "required": false,
+    "type": "float",
+  },
+  "ai_agent.risk.inputs.timestamp": Object {
+    "array": false,
+    "required": false,
+    "type": "date",
+  },
+  "ai_agent.risk.modifiers": Object {
+    "array": true,
+    "required": false,
+    "type": "object",
+  },
+  "ai_agent.risk.modifiers.contribution": Object {
+    "array": false,
+    "required": false,
+    "type": "float",
+  },
+  "ai_agent.risk.modifiers.metadata": Object {
+    "array": false,
+    "required": false,
+    "type": "flattened",
+  },
+  "ai_agent.risk.modifiers.modifier_value": Object {
+    "array": false,
+    "required": false,
+    "type": "float",
+  },
+  "ai_agent.risk.modifiers.subtype": Object {
+    "array": false,
+    "required": false,
+    "type": "keyword",
+  },
+  "ai_agent.risk.modifiers.type": Object {
+    "array": false,
+    "required": false,
+    "type": "keyword",
+  },
+  "ai_agent.risk.notes": Object {
+    "array": false,
+    "required": false,
+    "type": "keyword",
+  },
+  "ai_agent.risk.related_entities": Object {
+    "array": true,
+    "required": false,
+    "type": "object",
+  },
+  "ai_agent.risk.related_entities.entity_id": Object {
+    "array": false,
+    "required": false,
+    "type": "keyword",
+  },
+  "ai_agent.risk.related_entities.relationship_type": Object {
+    "array": false,
+    "required": false,
+    "type": "keyword",
+  },
+  "ai_agent.risk.score_type": Object {
+    "array": false,
+    "required": false,
+    "type": "keyword",
+  },
   "event.ingested": Object {
     "array": false,
     "required": false,

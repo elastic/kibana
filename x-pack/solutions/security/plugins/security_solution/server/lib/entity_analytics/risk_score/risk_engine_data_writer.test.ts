@@ -293,6 +293,59 @@ describe('RiskEngineDataWriter', () => {
       `);
     });
 
+    describe('ai_agent risk scores', () => {
+      const agentScores = [
+        createRiskScoreMock({
+          id_field: 'entity.id',
+          id_value: 'ai_agent:test-agent@host-a@alice',
+        }),
+        createRiskScoreMock({
+          id_field: 'entity.id',
+          id_value: 'ai_agent:test-agent@host-b@bob',
+        }),
+      ];
+
+      it('writes each agent score under ai_agent.risk', async () => {
+        await writer.bulk({ ai_agent: agentScores });
+
+        const [{ operations }] = (esClientMock.bulk as jest.Mock).mock.lastCall;
+
+        expect(operations).toHaveLength(4);
+        expect(operations[1]).toEqual({
+          '@timestamp': '2023-02-15T00:15:19.231Z',
+          ai_agent: {
+            name: 'ai_agent:test-agent@host-a@alice',
+            risk: expect.objectContaining({
+              id_field: 'entity.id',
+              id_value: 'ai_agent:test-agent@host-a@alice',
+              calculated_score_norm: 85.332,
+            }),
+          },
+        });
+        expect(operations[3]).toEqual(
+          expect.objectContaining({
+            ai_agent: expect.objectContaining({ name: 'ai_agent:test-agent@host-b@bob' }),
+          })
+        );
+      });
+
+      it('reports docs_written equal to the agent scores given', async () => {
+        (esClientMock.bulk as jest.Mock).mockImplementation(
+          async ({ operations }: { operations: unknown[] }) => ({
+            took: 1,
+            errors: false,
+            items: operations
+              .filter((_, index) => index % 2 === 0)
+              .map(() => ({ create: { status: 201 } })),
+          })
+        );
+
+        const { docs_written: docsWritten } = await writer.bulk({ ai_agent: agentScores });
+
+        expect(docsWritten).toEqual(agentScores.length);
+      });
+    });
+
     it('returns an error if something went wrong', async () => {
       (esClientMock.bulk as jest.Mock).mockRejectedValue(new Error('something went wrong'));
 

@@ -20,8 +20,16 @@ interface BulkParams {
   host?: EntityRiskScoreRecord[];
   user?: EntityRiskScoreRecord[];
   service?: EntityRiskScoreRecord[];
+  ai_agent?: EntityRiskScoreRecord[];
   refresh?: 'wait_for';
 }
+
+const WRITTEN_ENTITY_TYPES = [
+  EntityType.host,
+  EntityType.user,
+  EntityType.service,
+  EntityType.ai_agent,
+] as const;
 
 export interface RiskEngineDataWriter {
   bulk: (params: BulkParams) => Promise<WriterBulkResponse>;
@@ -39,7 +47,7 @@ export class RiskEngineDataWriter implements RiskEngineDataWriter {
 
   public bulk = async (params: BulkParams) => {
     try {
-      if (!params.host?.length && !params.user?.length && !params.service?.length) {
+      if (!WRITTEN_ENTITY_TYPES.some((entityType) => params[entityType]?.length)) {
         return { errors: [], docs_written: 0, took: 0 };
       }
 
@@ -69,27 +77,14 @@ export class RiskEngineDataWriter implements RiskEngineDataWriter {
     }
   };
 
-  private buildBulkOperations = (params: BulkParams): BulkOperationContainer[] => {
-    const hostBody =
-      params.host?.flatMap((score) => [
-        { create: { _index: this.options.index } },
-        this.scoreToEcs(score, EntityType.host),
-      ]) ?? [];
-
-    const userBody =
-      params.user?.flatMap((score) => [
-        { create: { _index: this.options.index } },
-        this.scoreToEcs(score, EntityType.user),
-      ]) ?? [];
-
-    const serviceBody =
-      params.service?.flatMap((score) => [
-        { create: { _index: this.options.index } },
-        this.scoreToEcs(score, EntityType.service),
-      ]) ?? [];
-    // TODO get enabled entity types and loop through them to build the array
-    return [...hostBody, ...userBody, ...serviceBody] as BulkOperationContainer[];
-  };
+  private buildBulkOperations = (params: BulkParams): BulkOperationContainer[] =>
+    WRITTEN_ENTITY_TYPES.flatMap(
+      (entityType) =>
+        params[entityType]?.flatMap((score) => [
+          { create: { _index: this.options.index } },
+          this.scoreToEcs(score, entityType),
+        ]) ?? []
+    ) as BulkOperationContainer[];
 
   private scoreToEcs = (score: EntityRiskScoreRecord, identifierType: EntityType): unknown => {
     const { '@timestamp': _, ...rest } = score;
