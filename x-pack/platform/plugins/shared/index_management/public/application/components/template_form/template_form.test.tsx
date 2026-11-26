@@ -591,6 +591,7 @@ describe('TemplateForm wizard integration', () => {
     it('SHOULD show them in the Request tab while Data stream is on', async () => {
       const requestBody = await goToReviewRequestTab({ ...sourceTemplate, template: undefined });
 
+      expect(requestBody).toHaveProperty('data_stream');
       expect(requestBody.template.data_stream_options).toEqual(dataStreamOptions);
     });
 
@@ -602,6 +603,8 @@ describe('TemplateForm wizard integration', () => {
         template: undefined,
       });
 
+      // The request no longer declares a data stream, so ES would reject any data stream options.
+      expect(requestBody).not.toHaveProperty('data_stream');
       expect(requestBody.template ?? {}).not.toHaveProperty('data_stream_options');
       expect(requestBody).not.toHaveProperty('data_stream_options');
     });
