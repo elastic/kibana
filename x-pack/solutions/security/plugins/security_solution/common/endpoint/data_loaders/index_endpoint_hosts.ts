@@ -54,6 +54,7 @@ import {
 } from './index_fleet_endpoint_policy';
 import {
   METADATA_DATASTREAM,
+  METADATA_UNITED_INDEX,
   metadataCurrentIndexPattern,
   POLICY_RESPONSE_INDEX,
 } from '../constants';
@@ -506,6 +507,18 @@ export const indexEndpointHostForPolicy = async ({
 
   await stopMetadataTransforms(esClient, integrationPolicy.package?.version ?? '');
 
+  const hostDocId = uuidv4();
+  // Rollback may only remove what this call created: an agent id that already has metadata keeps its history.
+  const hadMetadata =
+    (
+      await esClient
+        .count({
+          index: METADATA_DATASTREAM,
+          query: { term: { 'agent.id': hostMetadataDoc.agent.id } },
+        })
+        .catch(() => ({ count: 0 }))
+    ).count > 0;
+
   try {
     // Create the Fleet agent
     const indexedFleetAgent = await indexFleetAgentForHost(
@@ -525,7 +538,7 @@ export const indexEndpointHostForPolicy = async ({
     await esClient
       .index({
         index: METADATA_DATASTREAM,
-        id: uuidv4(),
+        id: hostDocId,
         body: hostMetadataDoc,
         op_type: 'create',
         refresh: 'wait_for',
@@ -548,10 +561,49 @@ export const indexEndpointHostForPolicy = async ({
     return response;
   } catch (error) {
     // The Fleet agent and host metadata are indexed before the transforms start. A throw after that
-    // point never returns `response`, so the caller has no cleanup handles: roll those documents back here.
-    if (response.hosts.length > 0 || response.agents.length > 0) {
-      await deleteIndexedEndpointHosts(esClient, kbnClient, response).catch(() => undefined);
-    }
+    // point never returns `response`, so the caller has no cleanup handles: roll back what this call wrote.
+    await rollbackIndexedHost(esClient, response, hostDocId, hadMetadata);
     throw error;
   }
+};
+
+/** Best effort: each step runs even if an earlier one failed, and the caller rethrows the original error. */
+const rollbackIndexedHost = async (
+  esClient: Client,
+  indexed: IndexedHostsResponse,
+  hostDocId: string,
+  hadMetadata: boolean
+): Promise<void> => {
+  const agentIds = indexed.hosts.map((host) => host.agent.id);
+  const steps: Array<() => Promise<unknown>> = [];
+
+  if (indexed.hosts.length > 0) {
+    steps.push(() =>
+      esClient.deleteByQuery({
+        index: METADATA_DATASTREAM,
+        wait_for_completion: true,
+        query: { ids: { values: [hostDocId] } },
+      })
+    );
+
+    if (!hadMetadata) {
+      // The transforms may have copied the new host into their destinations before the failure.
+      const query = { bool: { filter: [{ terms: { 'agent.id': agentIds } }] } };
+
+      steps.push(() =>
+        esClient.deleteByQuery({
+          index: [metadataCurrentIndexPattern, METADATA_UNITED_INDEX],
+          ignore_unavailable: true,
+          wait_for_completion: true,
+          query,
+        })
+      );
+    }
+  }
+
+  if (indexed.agents.length > 0) {
+    steps.push(() => deleteIndexedFleetAgents(esClient, indexed));
+  }
+
+  await Promise.allSettled(steps.map(async (step) => step()));
 };

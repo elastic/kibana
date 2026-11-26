@@ -8,6 +8,11 @@
 import type { Client } from '@elastic/elasticsearch';
 import type { KbnClient } from '@kbn/test';
 import { indexEndpointHostForPolicy } from './index_endpoint_hosts';
+import {
+  METADATA_DATASTREAM,
+  METADATA_UNITED_INDEX,
+  metadataCurrentIndexPattern,
+} from '../constants';
 import { startMetadataTransforms, stopMetadataTransforms } from '../utils/transforms';
 import { deleteIndexedFleetAgents, indexFleetAgentForHost } from './index_fleet_agent';
 import { deleteIndexedEndpointAndFleetActions } from './index_endpoint_fleet_actions';
@@ -27,7 +32,7 @@ describe('indexEndpointHostForPolicy', () => {
     'Metadata transforms for endpoint package version [9.0.0] not found after waiting; endpoint metadata is unavailable'
   );
 
-  let esClient: { index: jest.Mock; deleteByQuery: jest.Mock };
+  let esClient: { index: jest.Mock; count: jest.Mock; deleteByQuery: jest.Mock };
   let kbnClient: { request: jest.Mock };
 
   const callIndexEndpointHostForPolicy = () =>
@@ -40,6 +45,7 @@ describe('indexEndpointHostForPolicy', () => {
   beforeEach(() => {
     esClient = {
       index: jest.fn().mockResolvedValue({}),
+      count: jest.fn().mockResolvedValue({ count: 0 }),
       deleteByQuery: jest.fn().mockResolvedValue({}),
     };
     kbnClient = {
@@ -90,14 +96,28 @@ describe('indexEndpointHostForPolicy', () => {
     expect(deleteIndexedFleetAgentsMock).not.toHaveBeenCalled();
   });
 
-  it('rolls back the indexed host and Fleet agent when the metadata transforms are missing', async () => {
+  const deleteQueryFor = (index: unknown) =>
+    esClient.deleteByQuery.mock.calls.map(([params]) => params).find((p) => p.index === index) ??
+    esClient.deleteByQuery.mock.calls
+      .map(([params]) => params)
+      .find((p) => JSON.stringify(p.index) === JSON.stringify(index));
+
+  it('rolls back the host document and Fleet agent this call wrote when the transforms are missing', async () => {
     startMetadataTransformsMock.mockRejectedValue(transformsMissingError);
 
     await expect(callIndexEndpointHostForPolicy()).rejects.toBe(transformsMissingError);
 
-    expect(esClient.deleteByQuery).toHaveBeenCalledWith(
+    const indexed = esClient.index.mock.calls[0][0];
+    expect(indexed.index).toBe(METADATA_DATASTREAM);
+
+    // The original host document is removed by its own id, not by agent id.
+    expect(deleteQueryFor(METADATA_DATASTREAM)).toEqual(
+      expect.objectContaining({ query: { ids: { values: [indexed.id] } } })
+    );
+    // The new host is also removed from the transform destinations, for this agent only.
+    expect(deleteQueryFor([metadataCurrentIndexPattern, METADATA_UNITED_INDEX])).toEqual(
       expect.objectContaining({
-        query: { bool: { filter: [{ terms: { 'agent.id': [expect.any(String)] } }] } },
+        query: { bool: { filter: [{ terms: { 'agent.id': [indexed.body.agent.id] } }] } },
       })
     );
     expect(deleteIndexedFleetAgentsMock).toHaveBeenCalledWith(
@@ -105,10 +125,34 @@ describe('indexEndpointHostForPolicy', () => {
       expect.objectContaining({
         agents: [{ agent: { id: 'agent-1' } }],
         hosts: [
-          expect.objectContaining({ agent: expect.objectContaining({ id: expect.any(String) }) }),
+          expect.objectContaining({
+            agent: expect.objectContaining({ id: indexed.body.agent.id }),
+          }),
         ],
       })
     );
+  });
+
+  it('keeps existing metadata for the agent id when it was there before this call', async () => {
+    esClient.count.mockResolvedValue({ count: 3 });
+    startMetadataTransformsMock.mockRejectedValue(transformsMissingError);
+
+    await expect(callIndexEndpointHostForPolicy()).rejects.toBe(transformsMissingError);
+
+    const indexed = esClient.index.mock.calls[0][0];
+    expect(esClient.deleteByQuery).toHaveBeenCalledTimes(1);
+    expect(deleteQueryFor(METADATA_DATASTREAM)).toEqual(
+      expect.objectContaining({ query: { ids: { values: [indexed.id] } } })
+    );
+  });
+
+  it('still removes the Fleet agent when deleting the metadata fails', async () => {
+    startMetadataTransformsMock.mockRejectedValue(transformsMissingError);
+    esClient.deleteByQuery.mockRejectedValue(new Error('version conflict'));
+
+    await expect(callIndexEndpointHostForPolicy()).rejects.toBe(transformsMissingError);
+
+    expect(deleteIndexedFleetAgentsMock).toHaveBeenCalledTimes(1);
   });
 
   it('does not try to clean up when nothing was indexed yet', async () => {
