@@ -34,8 +34,10 @@ export const LEGACY_ALERT_USER_CRITICALITY = `${ALERT_NAMESPACE}.user.criticalit
  *
  * Host, user and service EUIDs are present for every alert with derivable identity fields at rule
  * execution, regardless of whether the entity was in the store. An `ai_agent:` EUID is present only
- * when that agent is in the store, because a descendant running as another OS user (`sudo`) would
- * otherwise name an agent that doesn't exist.
+ * when that agent is in the store. Descendants take the agent's OS user from their nearest agent
+ * ancestor process, so a `sudo` child running as root still names its agent; when that ancestor
+ * can't be found they fall back to their own `user.name`, and the store check keeps them from
+ * naming an agent that doesn't exist.
  */
 export const ALERT_ENTITY_ID = `${ALERT_NAMESPACE}.entity.id` as const;
 

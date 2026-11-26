@@ -75,14 +75,21 @@ export type EntityStoreEnrichmentType = 'host' | 'user' | 'service' | 'ai_agent'
  * Resolves the agent EUID from the agent fields alone, so a descendant
  * (`process.ai_agent.is_descendant: true`) resolves to the agent that spawned it. The agent
  * definition's documents filter rejects descendants, because they must not create agents.
+ *
+ * `ancestorUserName` is the OS user of the agent process the descendant descends from. It replaces
+ * the alert's own `user.name`, which for a `sudo` child is root rather than the agent's user.
  */
 export const getAiAgentEuidFromAlert = <T extends DetectionAlertLatest>(
-  event: EventsForEnrichment<T>
+  event: EventsForEnrichment<T>,
+  ancestorUserName?: string
 ): string | undefined => {
   const definition = getBuiltInEntityDefinition('ai_agent');
   const { identitySourceFields } = euid.getEuidSourceFields(definition);
   const identityDoc = Object.fromEntries(
-    identitySourceFields.map((field) => [field, getEventValue(event, field)])
+    identitySourceFields.map((field) => [
+      field,
+      field === 'user.name' && ancestorUserName ? ancestorUserName : getEventValue(event, field),
+    ])
   );
   return euid.getEuidFromObjectForSearch(definition, identityDoc);
 };
@@ -118,6 +125,7 @@ export const createEntityStoreEnrichment = async <T extends DetectionAlertLatest
   events,
   enrichmentFields,
   createEnrichmentFunction,
+  getEuid = (event) => getEuidForEntityType(entityType, event),
 }: {
   name: string;
   entityType: EntityStoreEnrichmentType;
@@ -126,6 +134,8 @@ export const createEntityStoreEnrichment = async <T extends DetectionAlertLatest
   events: Array<EventsForEnrichment<T>>;
   enrichmentFields: string[];
   createEnrichmentFunction: CreateV2EnrichmentFunction;
+  /** Overrides how each event's EUID is derived for this entity type. */
+  getEuid?: (event: EventsForEnrichment<T>) => string | undefined;
 }): Promise<EventsMapByEnrichments> => {
   try {
     logger.debug(`Enrichment ${name}: started`);
@@ -137,7 +147,7 @@ export const createEntityStoreEnrichment = async <T extends DetectionAlertLatest
     const eventsMapByEuid: Record<string, Array<EventsForEnrichment<T>>> = {};
     const eventsMapById: EventsMapByEnrichments = {};
     for (const event of events) {
-      const computedEuid = getEuidForEntityType(entityType, event);
+      const computedEuid = getEuid(event);
       if (computedEuid) {
         (eventsMapByEuid[computedEuid] ??= []).push(event);
         if (!stampRequiresStoredEntity) {
