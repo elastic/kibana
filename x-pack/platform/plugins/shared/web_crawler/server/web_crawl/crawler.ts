@@ -100,7 +100,8 @@ const truncateContent = (content: string): string => {
  * At most `maxDocuments` pages are requested, so that is also the ceiling on indexed documents.
  * The crawl starts from one or more pages, and stays on the sites those pages are on. The
  * robots.txt of every site is read first and honoured for its pages, as is the pause between
- * requests it asks for, up to a limit. The sitemaps are read while the seed page
+ * requests it asks for, up to a limit. A site whose robots.txt request fails is not crawled, and its
+ * start URLs count as failed. The sitemaps are read while the seed page
  * is crawled, and the pages they list join the links of the seed page at depth 1. Pages,
  * robots.txt and sitemaps are all fetched by the inference endpoint; the work left on this process
  * is parsing, which yields to the event loop as it goes.
@@ -238,31 +239,53 @@ export const crawlSite = async ({
   };
 
   try {
-    // A robots.txt that cannot be read is treated as absent, which allows everything.
+    // The endpoint answers with no content for a site without a robots.txt, which allows
+    // everything. A request that fails says nothing about the rules of the site, so that site is
+    // left out of the crawl rather than crawled as if it had none.
     const robotsBySite = new Map<string, RobotsRules>();
+    const robotsErrorBySite = new Map<string, Error>();
     await Promise.all(
       [...siteSeeds].map(async ([siteKey, seedUrl]) => {
         const robotsUrl = new URL('/robots.txt', seedUrl).href;
         seen.add(getPageKey(robotsUrl));
-        const robotsContent = await fetchContent(robotsUrl);
-        robotsBySite.set(
-          siteKey,
-          robotsContent ? parseRobotsTxt(robotsContent, ROBOTS_USER_AGENT) : ALLOW_ALL_ROBOTS
-        );
+        try {
+          const robots = await extractPage(esClient, { inferenceId, url: robotsUrl, signal });
+          robotsBySite.set(
+            siteKey,
+            robots ? parseRobotsTxt(robots.content, ROBOTS_USER_AGENT) : ALLOW_ALL_ROBOTS
+          );
+        } catch (error) {
+          if (!signal.aborted) {
+            robotsErrorBySite.set(siteKey, error);
+            logger.warn(`Web crawl could not read ${robotsUrl}: ${error.message}`);
+          }
+        }
       })
     );
     const getRobots = (pageUrl: string): RobotsRules =>
       robotsBySite.get(getSiteKey(pageUrl)) ?? ALLOW_ALL_ROBOTS;
 
-    const allowedSeedUrls = seedUrls.filter((seedUrl) => getRobots(seedUrl).isAllowed(seedUrl));
+    robotsErrorBySite.forEach((_, siteKey) => siteSeeds.delete(siteKey));
+    const readableSeedUrls = seedUrls.filter(
+      (seedUrl) => !robotsErrorBySite.has(getSiteKey(seedUrl))
+    );
+    const allowedSeedUrls = readableSeedUrls.filter((seedUrl) =>
+      getRobots(seedUrl).isAllowed(seedUrl)
+    );
     if (allowedSeedUrls.length === 0) {
+      const [unreadableSite] = robotsErrorBySite;
+      if (unreadableSite) {
+        const [siteKey, error] = unreadableSite;
+        throw new Error(`The robots.txt of ${siteKey} could not be read: ${error.message}`);
+      }
       throw new Error(
         seedUrls.length === 1
           ? `The site's robots.txt does not allow crawling ${url}`
           : 'The robots.txt of the sites does not allow crawling any of the start URLs'
       );
     }
-    skippedByRobotsCount += seedUrls.length - allowedSeedUrls.length;
+    skippedByRobotsCount += readableSeedUrls.length - allowedSeedUrls.length;
+    extractionFailedCount += seedUrls.length - readableSeedUrls.length;
     queues[0].push(...allowedSeedUrls);
 
     // Spaces out the requests of all workers to a site by the pause that site asked for.

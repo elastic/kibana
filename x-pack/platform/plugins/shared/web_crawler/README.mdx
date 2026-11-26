@@ -35,8 +35,9 @@ path segments or more than 10 query parameters are not followed, as those are mo
 faceted listings.
 
 `robots.txt` is honoured using the `Elastic-Crawler` group when the file has one and the `*` group
-otherwise, including its `Crawl-delay` and the sitemaps it names. Sitemaps and sitemap indexes are
-read within a small request budget.
+otherwise, including its `Crawl-delay` and the sitemaps it names. A site without a `robots.txt`
+allows everything; a site whose `robots.txt` request fails is left out of the crawl, and the crawl
+fails when that leaves no site. Sitemaps and sitemap indexes are read within a small request budget.
 
 A crawl can be narrowed with path prefixes: with `includePaths` only pages under one of them are
 followed, and pages under an `excludePaths` prefix never are.

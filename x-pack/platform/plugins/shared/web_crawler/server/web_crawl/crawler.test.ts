@@ -521,11 +521,8 @@ describe('crawlSite', () => {
       ]);
     });
 
-    it.each([
-      ['cannot be read', new Error('robots.txt unavailable')],
-      ['has no content', undefined],
-    ])('allows everything when robots.txt %s', async (_, robotsTxt) => {
-      siteFiles[ROBOTS_URL] = robotsTxt;
+    it('allows everything when robots.txt has no content', async () => {
+      siteFiles[ROBOTS_URL] = undefined;
       siteFiles[SITEMAP_URL] = new Error('sitemap unavailable');
       mockSite({
         [SEED_URL]: pageLinkingTo(['/private']),
@@ -533,6 +530,37 @@ describe('crawlSite', () => {
       });
 
       await expect(crawl()).resolves.toEqual(toResult({ documentsCount: 2 }));
+    });
+
+    it('rejects without requesting a page when the request for robots.txt fails', async () => {
+      siteFiles[ROBOTS_URL] = new Error('rate limited');
+      mockSmallSite();
+
+      await expect(crawl()).rejects.toThrow(
+        'The robots.txt of example.com could not be read: rate limited'
+      );
+
+      expect(getRequestedUrls()).toEqual([ROBOTS_URL]);
+      expect(logger.warn).toHaveBeenCalledWith(
+        `Web crawl could not read ${ROBOTS_URL}: rate limited`
+      );
+    });
+
+    it('leaves out a site whose robots.txt request fails, counts its start URLs as failed and deletes nothing', async () => {
+      siteFiles[OTHER_ROBOTS_URL] = new Error('rate limited');
+      siteFiles[EXPLICIT_SITEMAP_URL] = toSitemap([`${ORIGIN}/listed`, `${OTHER_ORIGIN}/listed`]);
+      mockPages((url) => pageLinkingTo(url === SEED_URL ? ['/a'] : []));
+
+      await expect(
+        crawl({
+          additionalSeedUrls: [OTHER_SEED_URL, `${OTHER_ORIGIN}/docs`],
+          sitemapUrls: [EXPLICIT_SITEMAP_URL],
+        })
+      ).resolves.toEqual(toResult({ documentsCount: 3, failedCount: 2 }));
+
+      expect(getPageRequests()).toEqual([SEED_URL, `${ORIGIN}/a`, `${ORIGIN}/listed`]);
+      expect(getSiteFileRequests()).not.toContain(OTHER_SITEMAP_URL);
+      expect(esClient.deleteByQuery).not.toHaveBeenCalled();
     });
   });
 
