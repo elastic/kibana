@@ -62,6 +62,7 @@ export interface RelatedEntity {
   readonly accountIds: readonly string[];
   readonly ownsInferredIds: readonly string[];
   readonly agentName?: string;
+  readonly mfaEnabled?: boolean;
 }
 
 /** Account state from an identity provider's user documents. */
@@ -75,6 +76,13 @@ export interface IdpAccount {
   readonly fullName?: string;
 }
 
+/** Employment record from the HR index, keyed by `user.email`. */
+export interface HrRecord {
+  readonly email: string;
+  readonly status?: string;
+  readonly terminationDate?: string;
+}
+
 /** The person an agent acts for, from one of its accounts. */
 export interface AgentPerson {
   readonly email: string;
@@ -82,6 +90,7 @@ export interface AgentPerson {
   readonly rows: readonly RelatedEntity[];
   readonly primary?: RelatedEntity;
   readonly idpAccounts: readonly IdpAccount[];
+  readonly hr?: HrRecord;
   readonly watchlistIds: readonly string[];
 }
 

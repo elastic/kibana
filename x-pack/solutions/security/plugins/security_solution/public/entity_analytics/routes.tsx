@@ -27,6 +27,8 @@ import { EntityAnalyticsHomePage } from './pages/entity_analytics_home_page';
 import { EntityAnalyticsNewHomePage } from './pages/entity_analytics_new_home_page';
 import { useIsExperimentalFeatureEnabled } from '../common/hooks/use_experimental_features';
 import { useKibana } from '../common/lib/kibana';
+import { EntityAnalyticsAiAgentsPage } from './pages/entity_analytics_ai_agents_page';
+import { ENTITY_ANALYTICS_AI_AGENTS_PATH } from './components/ai_agents/constants';
 
 // ---- Management routes ----
 const EntityAnalyticsManagementWrapper = () => (
@@ -163,6 +165,29 @@ const EntityAnalyticsHomePageContainer: React.FC = React.memo(() => {
 
 EntityAnalyticsHomePageContainer.displayName = 'EntityAnalyticsHomePageContainer';
 
+// ---- AI agents routes (proof of concept, behind `entityAnalyticsAiAgentsPoc`) ----
+const EntityAnalyticsAiAgentsContainer: React.FC = React.memo(() => {
+  const isAiAgentsPocEnabled = useIsExperimentalFeatureEnabled('entityAnalyticsAiAgentsPoc');
+  return (
+    <Routes>
+      {isAiAgentsPocEnabled && (
+        <Route
+          path={ENTITY_ANALYTICS_AI_AGENTS_PATH}
+          exact
+          render={() => (
+            <PluginTemplateWrapper>
+              <EntityAnalyticsAiAgentsPage />
+            </PluginTemplateWrapper>
+          )}
+        />
+      )}
+      <Route component={NotFoundPage} />
+    </Routes>
+  );
+});
+
+EntityAnalyticsAiAgentsContainer.displayName = 'EntityAnalyticsAiAgentsContainer';
+
 const RedirectToEntityAnalyticsHome: React.FC = () => (
   <Redirect to={ENTITY_ANALYTICS_HOME_PAGE_PATH} />
 );
@@ -195,6 +220,13 @@ export const routes = [
     path: ENTITY_ANALYTICS_HOME_PAGE_PATH,
     component: withSecurityRoutePageWrapper(
       EntityAnalyticsHomePageContainer,
+      SecurityPageName.entityAnalyticsHomePage
+    ),
+  },
+  {
+    path: ENTITY_ANALYTICS_AI_AGENTS_PATH,
+    component: withSecurityRoutePageWrapper(
+      EntityAnalyticsAiAgentsContainer,
       SecurityPageName.entityAnalyticsHomePage
     ),
   },

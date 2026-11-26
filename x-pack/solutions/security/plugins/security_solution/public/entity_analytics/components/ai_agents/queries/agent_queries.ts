@@ -19,7 +19,9 @@ import {
   AI_AGENT_ID_PREFIX,
   AI_AGENTS_MAX_ROWS,
   ENDPOINT_PROCESS_INDEX,
-  IDP_USER_INDICES,
+  ENTRA_USER_INDEX,
+  HR_INDEX,
+  OKTA_USER_INDEX,
 } from '../constants';
 import type { AgentIdentity } from '../types';
 
@@ -51,6 +53,7 @@ export const ENTITY_ROW_COLUMNS = [
   'user.name',
   'user.email',
   'user.full_name',
+  'entity.attributes.mfa_enabled',
 ] as const;
 
 const ACCOUNT_EMAILS_FIELD = 'entity.relationships.acts_on_behalf_of.raw_identifiers.user.email';
@@ -59,7 +62,9 @@ const ACCOUNT_EMAILS_FIELD = 'entity.relationships.acts_on_behalf_of.raw_identif
 const anyOf = (field: string, values: readonly string[]): string =>
   values.length === 0
     ? 'false'
-    : `(${values.map((value) => `MV_CONTAINS(${field}, ${escapeStringValue(value)})`).join(' OR ')})`;
+    : `(${values
+        .map((value) => `MV_CONTAINS(${field}, ${escapeStringValue(value)})`)
+        .join(' OR ')})`;
 
 /** One row per agent install in the space. */
 export const buildAgentInventoryQuery = (spaceId: string): string =>
@@ -110,10 +115,9 @@ export const buildAgentContextQuery = ({
   );
   const conditions = [
     `entity.id IN (${toList(directIds)})`,
-    `(entity.EngineMetadata.Type == "user" AND ${anyOf(
-      'entity.relationships.owns_inferred.ids',
-      [entityId]
-    )})`,
+    `(entity.EngineMetadata.Type == "user" AND ${anyOf('entity.relationships.owns_inferred.ids', [
+      entityId,
+    ])})`,
     `(entity.EngineMetadata.Type == "${AI_AGENT_ENGINE_TYPE}" AND host.id == ${escapeStringValue(
       hostId
     )})`,
@@ -155,22 +159,47 @@ export const buildEntitiesByIdQuery = (spaceId: string, entityIds: readonly stri
   ].join('\n');
 
 /**
- * Account state per email and identity provider, from the raw Okta and Entra ID user documents.
- * Field names follow the Okta integration (`asset.status`, `user.account.status.*`). MFA has no
- * common field, so a few candidates are read.
+ * Okta account state per email, from the raw user documents (`asset.status`,
+ * `user.account.status.*`). MFA has no integration field, so the storyline writes
+ * `user.entity.attributes.mfa_enabled`. Each provider is read on its own, because a field mapped in
+ * one integration and loaded from `_source` in the other would conflict.
  */
-export const buildIdpAccountsQuery = (emails: readonly string[]): string =>
+export const buildOktaAccountsQuery = (emails: readonly string[]): string =>
   [
     SET_UNMAPPED_LOAD,
-    `FROM ${IDP_USER_INDICES}`,
+    `FROM ${OKTA_USER_INDEX}`,
     `| WHERE user.email IN (${toList(emails)})`,
     '| STATS status = LAST(asset.status, @timestamp),',
     '    deprovisioned = LAST(user.account.status.deprovisioned, @timestamp),',
     '    suspended = LAST(user.account.status.suspended, @timestamp),',
-    '    account_enabled = LAST(user.account.enabled, @timestamp),',
-    '    mfa_enabled = LAST(user.mfa.enabled, @timestamp),',
+    '    mfa_enabled = LAST(user.entity.attributes.mfa_enabled, @timestamp),',
     '    full_name = LAST(user.full_name, @timestamp)',
     '  BY user.email, event.module',
+    '| LIMIT 100',
+  ].join('\n');
+
+/** Entra ID account state per email: `account_enabled` false reads as deprovisioned. */
+export const buildEntraAccountsQuery = (emails: readonly string[]): string =>
+  [
+    SET_UNMAPPED_LOAD,
+    `FROM ${ENTRA_USER_INDEX}`,
+    `| WHERE user.email IN (${toList(emails)})`,
+    '| STATS account_enabled = LAST(entityanalytics_entra_id.user.account_enabled, @timestamp),',
+    '    mfa_enabled = LAST(user.entity.attributes.mfa_enabled, @timestamp),',
+    '    full_name = LAST(user.full_name, @timestamp)',
+    '  BY user.email, event.module',
+    '| LIMIT 100',
+  ].join('\n');
+
+/** Employment status per email from the storyline's HR index. */
+export const buildHrRecordsQuery = (emails: readonly string[]): string =>
+  [
+    SET_UNMAPPED_LOAD,
+    `FROM ${HR_INDEX}`,
+    `| WHERE user.email IN (${toList(emails)})`,
+    '| STATS employment_status = LAST(employment.status, @timestamp),',
+    '    termination_date = LAST(employment.termination_date, @timestamp)',
+    '  BY user.email',
     '| LIMIT 100',
   ].join('\n');
 

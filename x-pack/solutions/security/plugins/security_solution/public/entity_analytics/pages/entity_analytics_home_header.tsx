@@ -8,11 +8,14 @@
 import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { AppHeaderMenu } from '@kbn/app-header';
-import { USE_NEW_ENTITY_ANALYTICS_HOME_PAGE_FLAG } from '../../../common/constants';
+import { APP_UI_ID, USE_NEW_ENTITY_ANALYTICS_HOME_PAGE_FLAG } from '../../../common/constants';
 import { SecurityPageName } from '../../app/types';
 import { SecurityAppHeader } from '../../common/components/app_header';
 import { useKibana } from '../../common/lib/kibana';
 import { useGetSecuritySolutionUrl } from '../../common/components/link_to';
+import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
+import { ENTITY_ANALYTICS_AI_AGENTS_PATH } from '../components/ai_agents/constants';
+import { NAV_LINK_LABEL as AI_AGENTS_LABEL } from '../components/ai_agents/translations';
 
 const PAGE_TITLE = i18n.translate('xpack.securitySolution.entityAnalytics.homePage.pageTitle', {
   defaultMessage: 'Entity analytics',
@@ -32,6 +35,8 @@ export const ENTITY_ANALYTICS_HOME_MANAGEMENT_MENU_ITEM_TEST_ID =
   'entityAnalyticsHomeSettingsMenuItem';
 export const ENTITY_ANALYTICS_HOME_PRODUCT_TOUR_MENU_ITEM_TEST_ID =
   'entityAnalyticsHomeProductTourMenuItem';
+export const ENTITY_ANALYTICS_HOME_AI_AGENTS_MENU_ITEM_TEST_ID =
+  'entityAnalyticsHomeAiAgentsMenuItem';
 
 export interface EntityAnalyticsHomeHeaderProps {
   /** Adds a Product tour menu item that starts the page tour. */
@@ -41,16 +46,31 @@ export interface EntityAnalyticsHomeHeaderProps {
 export const EntityAnalyticsHomeHeader = React.memo(
   ({ onStartTour }: EntityAnalyticsHomeHeaderProps) => {
     const getSecuritySolutionUrl = useGetSecuritySolutionUrl();
-    const { docLinks, featureFlags } = useKibana().services;
+    const { application, docLinks, featureFlags } = useKibana().services;
     // The new page's route drops the template padding that `largeBleed` reaches out of.
     const isNewHomePageEnabled = featureFlags.useBooleanValue(
       USE_NEW_ENTITY_ANALYTICS_HOME_PAGE_FLAG,
       true
     );
+    const isAiAgentsPocEnabled = useIsExperimentalFeatureEnabled('entityAnalyticsAiAgentsPoc');
 
     const menu = useMemo<AppHeaderMenu>(
       () => ({
         items: [
+          ...(isAiAgentsPocEnabled
+            ? [
+                {
+                  id: 'entityAnalyticsAiAgents',
+                  label: AI_AGENTS_LABEL,
+                  iconType: 'sparkles' as const,
+                  href: application.getUrlForApp(APP_UI_ID, {
+                    path: ENTITY_ANALYTICS_AI_AGENTS_PATH,
+                  }),
+                  order: 0,
+                  testId: ENTITY_ANALYTICS_HOME_AI_AGENTS_MENU_ITEM_TEST_ID,
+                },
+              ]
+            : []),
           {
             id: 'entityAnalyticsSettings',
             label: SETTINGS_LABEL,
@@ -77,7 +97,7 @@ export const EntityAnalyticsHomeHeader = React.memo(
             : []),
         ],
       }),
-      [getSecuritySolutionUrl, onStartTour]
+      [getSecuritySolutionUrl, onStartTour, isAiAgentsPocEnabled, application]
     );
 
     return (

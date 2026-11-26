@@ -18,6 +18,8 @@ export interface ProcessRecord {
   readonly commandLine?: string;
   /** Arguments in order, from `_source`. ES|QL returns keyword arrays sorted, so they come separately. */
   readonly args?: readonly string[];
+  /** Arguments as ES|QL returns them, sorted. Only for matching, never for display. */
+  readonly unorderedArgs: readonly string[];
   readonly workingDirectory?: string;
   readonly userName?: string;
   readonly sessionId?: string;

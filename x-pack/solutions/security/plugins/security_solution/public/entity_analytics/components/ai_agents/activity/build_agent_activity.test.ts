@@ -26,6 +26,7 @@ const identity: AgentIdentity = {
 const proc = (overrides: Partial<ProcessRecord> & { entityId: string }): ProcessRecord => ({
   timestamp: '2026-11-26T10:00:00.000Z',
   ancestry: [],
+  unorderedArgs: [],
   isDescendant: true,
   hasExec: true,
   userName: 'ec2-user',
@@ -221,15 +222,26 @@ describe('buildAgentActivity', () => {
 
     const [section] = activity.runs[0].sections;
     expect(section.steps.map((step) => step.kind)).toEqual(['process', 'prompt', 'tool_call']);
-    expect(section.modelUsage).toEqual({ requests: 1, models: ['m'], inputTokens: 0, outputTokens: 0 });
-    expect(activity.layers).toMatchObject({ otelEvents: true, otelToolCalls: true, otelPrompts: true });
+    expect(section.modelUsage).toEqual({
+      requests: 1,
+      models: ['m'],
+      inputTokens: 0,
+      outputTokens: 0,
+    });
+    expect(activity.layers).toMatchObject({
+      otelEvents: true,
+      otelToolCalls: true,
+      otelPrompts: true,
+    });
     expect(activity.otelMatch).toBe('session');
   });
 
   it('says prompts are missing when OTel logs prompt events without text', () => {
     const activity = build({
       ownEvents: [proc({ entityId: 'agent', isDescendant: false, sessionId: 's1' })],
-      otelEvents: [{ timestamp: 'T1', conversationId: 's1', eventName: 'user_prompt', isMock: false }],
+      otelEvents: [
+        { timestamp: 'T1', conversationId: 's1', eventName: 'user_prompt', isMock: false },
+      ],
     });
     expect(activity.layers.otelEvents).toBe(true);
     expect(activity.layers.otelPrompts).toBe(false);
@@ -262,6 +274,35 @@ describe('buildAgentActivity', () => {
     });
     expect(activity.runs[0]).toMatchObject({ isHeadless: true, headlessPrompt: 'Restart nginx' });
     expect(activity.layers.headlessPrompts).toBe(true);
+  });
+});
+
+describe('setup steps', () => {
+  it('treats the children of a setup command as setup', () => {
+    const activity = build({
+      ownEvents: [proc({ entityId: 'agent', isDescendant: false })],
+      descendantEvents: [
+        proc({
+          entityId: 'snapshot',
+          parentEntityId: 'agent',
+          commandLine: 'bash -c -l SNAPSHOT_FILE=/tmp/x',
+          timestamp: 'T1',
+        }),
+        proc({ entityId: 'sed', parentEntityId: 'snapshot', name: 'sed', timestamp: 'T2' }),
+        proc({
+          entityId: 'npm',
+          parentEntityId: 'agent',
+          commandLine: 'npm test',
+          timestamp: 'T3',
+        }),
+      ],
+    });
+    const steps = processSteps(activity.runs[0].sections[0].steps);
+    expect(steps.map((step) => [step.process.entityId, step.isSetup])).toEqual([
+      ['snapshot', true],
+      ['sed', true],
+      ['npm', false],
+    ]);
   });
 });
 
@@ -313,10 +354,15 @@ describe('isSetupProcess', () => {
     expect(
       isSetupProcess(proc({ entityId: 'g', commandLine: 'git -c core.hooksPath=/dev/null status' }))
     ).toBe(true);
-    expect(isSetupProcess(proc({ entityId: 's', commandLine: 'sudo systemctl restart nginx' }))).toBe(
-      false
-    );
+    expect(
+      isSetupProcess(proc({ entityId: 's', commandLine: 'sudo systemctl restart nginx' }))
+    ).toBe(false);
     expect(isSetupProcess(proc({ entityId: 'a', name: 'env', isDescendant: false }))).toBe(false);
+    expect(
+      isSetupProcess(
+        proc({ entityId: 'p', name: 'git', unorderedArgs: ['core.hooksPath=/dev/null', 'git'] })
+      )
+    ).toBe(true);
   });
 });
 

@@ -33,6 +33,7 @@ export const PROCESS_COLUMNS = [
   'process.name',
   'process.executable',
   'process.command_line',
+  'process.args',
   'process.working_directory',
   'user.name',
   'process.ai_agent.session_id',

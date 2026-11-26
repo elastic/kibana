@@ -25,7 +25,11 @@ import type {
 const RUN_END_MARGIN_MS = 5 * 60_000;
 const MAX_PARENT_DEPTH = 100;
 
-/** Commands the agents run for themselves at start-up and before each Bash tool call (lab, plan.md). */
+/**
+ * Commands the agents run for themselves at start-up and before each Bash tool call (lab, plan.md).
+ * Markers only match start-up scripts, never the `eval '<command>'` wrapper a Bash tool call runs
+ * in, because a setup process hides its whole subtree.
+ */
 const SETUP_PROCESS_NAMES: ReadonlySet<string> = new Set([
   'env',
   'uname',
@@ -42,11 +46,9 @@ const SETUP_COMMAND_MARKERS: readonly string[] = [
   'SNAPSHOT_FILE=',
   '/usr/libexec/grepconf.sh',
   'GREP_COLORS',
-  'ps aux',
-  'grep -v grep',
+  'grep -E "code|cursor',
   'grep -E code|cursor',
   '/etc/debuginfod',
-  '/proc/',
 ];
 
 type EsqlRecord = Record<string, unknown>;
@@ -66,6 +68,7 @@ export const toProcessEvent = (row: EsqlRecord): ProcessRecord | undefined => {
     name: firstString(row['process.name']),
     executable: firstString(row['process.executable']),
     commandLine: firstString(row['process.command_line']),
+    unorderedArgs: toStringArray(row['process.args']),
     workingDirectory: firstString(row['process.working_directory']),
     userName: firstString(row['user.name']),
     sessionId: firstString(row['process.ai_agent.session_id']),
@@ -148,6 +151,8 @@ const mergeTwo = (first: ProcessRecord, second: ProcessRecord): ProcessRecord =>
     executable: primary.executable ?? secondary.executable,
     commandLine: primary.commandLine ?? secondary.commandLine,
     args: primary.args ?? secondary.args,
+    unorderedArgs:
+      primary.unorderedArgs.length > 0 ? primary.unorderedArgs : secondary.unorderedArgs,
     workingDirectory: primary.workingDirectory ?? secondary.workingDirectory,
     userName: primary.userName ?? secondary.userName,
     sessionId: primary.sessionId ?? secondary.sessionId,
@@ -198,8 +203,8 @@ export const parseHeadlessPrompt = (
 export const isSetupProcess = (process: ProcessRecord): boolean => {
   if (!process.isDescendant) return false;
   if (process.name && SETUP_PROCESS_NAMES.has(process.name)) return true;
-  const { commandLine } = process;
-  return !!commandLine && SETUP_COMMAND_MARKERS.some((marker) => commandLine.includes(marker));
+  const text = process.commandLine ?? process.unorderedArgs.join(' ');
+  return text !== '' && SETUP_COMMAND_MARKERS.some((marker) => text.includes(marker));
 };
 
 const addMs = (timestamp: string, ms: number): string =>
@@ -305,16 +310,17 @@ export const buildAgentActivity = ({
     const bySession = process.sessionId
       ? draftList.find((draft) => sessionsOf(draft).has(process.sessionId as string))
       : undefined;
-    const byTerminal = !bySession && process.entryLeaderEntityId
-      ? draftList.filter((draft) => {
-          const { start, end } = runWindow(draft);
-          return (
-            draft.root.entryLeaderEntityId === process.entryLeaderEntityId &&
-            process.timestamp >= start &&
-            process.timestamp <= end
-          );
-        })
-      : [];
+    const byTerminal =
+      !bySession && process.entryLeaderEntityId
+        ? draftList.filter((draft) => {
+            const { start, end } = runWindow(draft);
+            return (
+              draft.root.entryLeaderEntityId === process.entryLeaderEntityId &&
+              process.timestamp >= start &&
+              process.timestamp <= end
+            );
+          })
+        : [];
     const target = bySession ?? (byTerminal.length === 1 ? byTerminal[0] : undefined);
     if (target) {
       target.members.push(process);
@@ -337,13 +343,24 @@ export const buildAgentActivity = ({
     target?.otel.push(event);
   }
 
+  // A setup command's children (the shell snapshot's `head`, `sed` and `awk`) are setup too.
+  const setupIds = new Set<string>();
+  for (const process of sortByTime([...all.values()])) {
+    if (
+      isSetupProcess(process) ||
+      (process.isDescendant && !!process.parentEntityId && setupIds.has(process.parentEntityId))
+    ) {
+      setupIds.add(process.entityId);
+    }
+  }
+
   const toProcessStep = (process: ProcessRecord): ProcessStep => ({
     kind: 'process',
     timestamp: process.timestamp,
     process,
     sideEffects: sideEffects.get(process.entityId),
     isAgentProcess: !process.isDescendant,
-    isSetup: isSetupProcess(process),
+    isSetup: setupIds.has(process.entityId),
     ranAsOtherUser:
       process.userName && process.userName !== identity.userName ? process.userName : undefined,
   });

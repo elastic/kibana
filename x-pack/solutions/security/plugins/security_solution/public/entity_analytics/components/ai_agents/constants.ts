@@ -19,7 +19,10 @@ export const ENDPOINT_PROCESS_INDEX = 'logs-endpoint.events.process-*';
 export const ENDPOINT_FILE_INDEX = 'logs-endpoint.events.file-*';
 export const ENDPOINT_NETWORK_INDEX = 'logs-endpoint.events.network-*';
 export const CLAUDE_CODE_OTEL_INDEX = 'logs-claude_code.events*';
-export const IDP_USER_INDICES = 'logs-entityanalytics_okta.user-*, logs-entityanalytics_entra_id.user-*';
+export const OKTA_USER_INDEX = 'logs-entityanalytics_okta.user-*';
+export const ENTRA_USER_INDEX = 'logs-entityanalytics_entra_id.user-*';
+/** The storyline's HR index (lane A generator). A made-up shape: no HR integration was looked at. */
+export const HR_INDEX = 'hr-workday-demo*';
 
 /** Agents read at most this many rows on the page. */
 export const AI_AGENTS_MAX_ROWS = 1000;
