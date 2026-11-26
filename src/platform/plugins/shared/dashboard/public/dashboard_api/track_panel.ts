@@ -8,7 +8,16 @@
  */
 
 import type { Observable } from 'rxjs';
-import { BehaviorSubject, combineLatest, map, of, Subject, switchMap } from 'rxjs';
+import {
+  BehaviorSubject,
+  combineLatest,
+  distinctUntilChanged,
+  filter,
+  map,
+  of,
+  Subject,
+  switchMap,
+} from 'rxjs';
 import {
   scrollToTop,
   scrollToBottom,
@@ -19,6 +28,7 @@ import {
 import type { ViewMode } from '@kbn/presentation-publishing';
 import { apiPublishesRelatedPanels } from '@kbn/presentation-publishing';
 import type { DashboardChildren } from './layout_manager/types';
+import { reportPanelSelectionStarted } from './telemetry/report_panel_selection_started';
 
 export const highlightAnimationDuration = 2000;
 
@@ -124,6 +134,13 @@ export function initializeTrackPanel(
       if (next.length !== current.length) selectedPanelIds$.next(next);
     }
   );
+  const selectionStartedSubscription = selectedPanelIds$
+    .pipe(
+      map((ids) => ids.length > 0),
+      distinctUntilChanged(),
+      filter(Boolean)
+    )
+    .subscribe(() => reportPanelSelectionStarted());
 
   return {
     api: {
@@ -227,6 +244,7 @@ export function initializeTrackPanel(
     cleanup: () => {
       blurredPanelIdsSubscription.unsubscribe();
       selectionCleanupSubscription.unsubscribe();
+      selectionStartedSubscription.unsubscribe();
     },
   };
 }
