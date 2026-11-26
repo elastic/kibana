@@ -93,6 +93,10 @@ function resolveOneField(
   for (let i = commandSummaries.length - 1; i >= 0; i--) {
     const { summary } = commandSummaries[i];
     const pairMap = renameNewToOldByCommandIndex[i];
+    // A field introduced after DROP cannot trace back through that DROP to the source.
+    if (droppedColumnNamesByIndex[i]?.has(current)) {
+      return undefined;
+    }
     // A command that creates this name without aliasing a field starts a new lineage.
     if (summary.newColumns.has(current) && !pairMap?.has(current)) {
       return undefined;
@@ -195,10 +199,17 @@ export function buildRenameSourceFieldMap(query: string): Map<string, string> {
   const summaryContext = createQuerySummaryContext(root, query, (commands, source, context) => {
     const resolution = buildContext(commands, source, context);
     const newColumns = new Set<string>();
-    // A branch that drops its computed column cannot shadow the same name in a sibling.
+    const lastJoinIndex = commands.findLastIndex(({ name }) => name === 'join');
     for (const [index, { summary }] of resolution.commandSummaries.entries()) {
       summary.newColumns.forEach((name) => newColumns.add(name));
-      resolution.droppedColumnNamesByIndex[index]?.forEach((name) => newColumns.delete(name));
+      for (const name of resolution.droppedColumnNamesByIndex[index] ?? []) {
+        // A later join can reintroduce this name from the lookup index without listing it in its summary.
+        if (index < lastJoinIndex) {
+          newColumns.add(name);
+        } else {
+          newColumns.delete(name);
+        }
+      }
     }
     // Keep identity mappings in nested summaries to distinguish source fields from computed columns.
     return { newColumns, renamedColumnsPairs: new Set(renameMapFromContext(resolution)) };

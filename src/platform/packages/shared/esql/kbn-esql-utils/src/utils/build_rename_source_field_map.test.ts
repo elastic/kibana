@@ -171,6 +171,8 @@ describe('buildRenameSourceFieldMap', () => {
   describe('FORK branches', () => {
     it.each([
       ['EVAL name = "temporary" | DROP name', 'extension'],
+      ['DROP name | LOOKUP JOIN owners ON host', undefined],
+      ['DROP name | LOOKUP JOIN owners ON host | DROP name', 'extension'],
       ['EVAL name = "temporary"', undefined],
       ['DROP name | EVAL name = "replacement"', undefined],
     ])('resolves the surviving name after FORK (%s) (KEEP name)', (branch, expectedSource) => {
@@ -187,6 +189,13 @@ describe('buildRenameSourceFieldMap', () => {
   });
 
   describe('nested pipelines', () => {
+    it.each([
+      'FROM (FROM logs | EVAL owner = "temporary" | DROP owner | LOOKUP JOIN owners ON host) | RENAME owner AS label',
+      'FROM logs | DROP owner | LOOKUP JOIN owners ON host | RENAME owner AS label',
+    ])('does not map a lookup field back through DROP: %s', (query) => {
+      expect(buildRenameSourceFieldMap(query).has('label')).toBe(false);
+    });
+
     it('preserves rename provenance through an identity EVAL', () => {
       const query = 'FROM (FROM logs | EVAL bytes = bytes | RENAME bytes AS size)';
 
