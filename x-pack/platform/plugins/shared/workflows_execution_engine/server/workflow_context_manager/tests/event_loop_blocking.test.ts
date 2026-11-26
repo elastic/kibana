@@ -178,7 +178,14 @@ const createBroaderSurfaceContainer = () => {
       return undefined;
     });
   workflowExecutionState.getStepExecution = jest.fn().mockReturnValue(undefined);
+  workflowExecutionState.getStepIo = jest.fn((id: string, type: 'input' | 'output') => {
+    if (type === 'output' && id in largeStepOutputs) {
+      return largeStepOutputs[id as keyof typeof largeStepOutputs];
+    }
+    return undefined;
+  });
   workflowExecutionState.getAllStepExecutions = jest.fn().mockReturnValue([]);
+  workflowExecutionState.getDataSetStepExecutions = jest.fn().mockReturnValue([]);
 
   const esClient = {
     search: jest.fn(),
@@ -195,29 +202,10 @@ const createBroaderSurfaceContainer = () => {
     return actualRender(obj, context);
   });
 
-  // IO maps live entirely in the service mock now (state holds metadata only).
   const stepIoService = {
-    hasEvictedOutputs: jest.fn().mockReturnValue(false),
-    prepareForRead: jest.fn().mockResolvedValue(undefined),
-    releaseReadPins: jest.fn(),
-    releaseTransientlyRehydratedOutputs: jest.fn(),
-    getStepInput: jest.fn().mockReturnValue(undefined),
-    getStepOutput: jest.fn(
-      (id: string) =>
-        (largeStepOutputs as Record<string, unknown>)[id as keyof typeof largeStepOutputs]
-    ),
-    getStepError: jest.fn().mockReturnValue(undefined),
-    getLatestStepIO: jest.fn((stepId: string) => {
-      if (stepId in largeStepOutputs) {
-        return {
-          input: undefined,
-          output: largeStepOutputs[stepId as keyof typeof largeStepOutputs],
-          error: undefined,
-        };
-      }
-      return undefined;
-    }),
-    getDataSetVariables: jest.fn((): Record<string, unknown> => ({})),
+    readBatch: jest.fn(async () => new Map()),
+    write: jest.fn(),
+    getOutputSizeStats: jest.fn(() => ({ totalBytes: 0, stepCount: 0 })),
   } as unknown as StepIoService;
 
   const contextManager = new WorkflowContextManager({

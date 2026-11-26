@@ -7,6 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const TRANSFORMATIONAL_COMMANDS = ['keep', 'stats', 'promql'];
+export const TRANSFORMATIONAL_COMMANDS = ['keep', 'stats', 'promql', 'describe'];
 export const MAX_PRELOADED_RESOURCE_ITEMS = 200;
 export const MAX_PRELOADED_RESOURCE_PAYLOAD = 20000;

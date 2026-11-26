@@ -35,13 +35,9 @@ export interface IngestChartStatisticsProps {
   timeStart: number;
   /** End of the current time range as a Unix timestamp in ms. */
   timeEnd: number;
-  /** ES|QL source for the stream (stream name, or query view for query streams). */
+  /** ES|QL source for the stream. */
   esqlSource: string;
   streamName: string;
-  /** Query streams are views over other streams and have no dedicated index, so storage / total docs are not shown. */
-  isQueryStream: boolean;
-  /** Draft streams have no backing data stream, so storage / total docs are not shown. */
-  isDraft: boolean;
   /** The histogram failed, so values derived from it are unknown rather than zero. */
   histogramUnavailable?: boolean;
 }
@@ -55,8 +51,6 @@ export function IngestChartStatistics({
   timeEnd,
   esqlSource,
   streamName,
-  isQueryStream,
-  isDraft,
   histogramUnavailable = false,
 }: IngestChartStatisticsProps) {
   const {
@@ -70,19 +64,13 @@ export function IngestChartStatistics({
     },
   } = useKibana();
 
-  // Query and Draft streams are temporary in nature and don't have real backing indices.
-  const showTotalDocs = !isQueryStream && !isDraft;
-  const showStorageSize = !isQueryStream && !isDraft && !isServerless;
-
   const totalDocsFetch = useStreamsAppFetch(
     ({ signal }) =>
-      showTotalDocs
-        ? streamsRepositoryClient.fetch('GET /internal/streams/doc_counts/total', {
-            signal,
-            params: { query: { stream: streamName } },
-          })
-        : Promise.resolve([]),
-    [showTotalDocs, streamName, streamsRepositoryClient]
+      streamsRepositoryClient.fetch('GET /internal/streams/doc_counts/total', {
+        signal,
+        params: { query: { stream: streamName } },
+      }),
+    [streamName, streamsRepositoryClient]
   );
 
   // Count docs for the equivalent period one week ago to compute trends.
@@ -101,13 +89,13 @@ export function IngestChartStatistics({
 
   const storeStatsFetch = useStreamsAppFetch(
     ({ signal }) =>
-      !isQueryStream && !isServerless
+      !isServerless
         ? streamsRepositoryClient.fetch('GET /internal/streams/{name}/_store_stats', {
             signal,
             params: { path: { name: streamName } },
           })
         : Promise.resolve({ store_size_bytes: 0 }),
-    [isQueryStream, isServerless, streamName, streamsRepositoryClient]
+    [isServerless, streamName, streamsRepositoryClient]
   );
 
   const { docsInRange, peakRateDocsSec, avgDocsPerDay } = useMemo(() => {
@@ -151,26 +139,24 @@ export function IngestChartStatistics({
       <EuiHorizontalRule margin="m" />
 
       <EuiFlexGroup responsive wrap={false} gutterSize="xl">
-        {showTotalDocs && (
-          <StatCell
-            data-test-subj="streamsAppIngestStatDocsTotal"
-            title={i18n.translate('xpack.streams.ingestChartStatistics.docsTotal.label', {
-              defaultMessage: 'Docs total',
-            })}
-            value={
-              totalDocsLoading ? (
-                <EuiLoadingSpinner size="m" />
-              ) : totalDocs === undefined ? (
-                UNKNOWN_STAT_VALUE
-              ) : (
-                formatNumber(totalDocs, '0,0')
-              )
-            }
-            unit={i18n.translate('xpack.streams.ingestChartStatistics.docsTotal.unit', {
-              defaultMessage: 'total docs',
-            })}
-          />
-        )}
+        <StatCell
+          data-test-subj="streamsAppIngestStatDocsTotal"
+          title={i18n.translate('xpack.streams.ingestChartStatistics.docsTotal.label', {
+            defaultMessage: 'Docs total',
+          })}
+          value={
+            totalDocsLoading ? (
+              <EuiLoadingSpinner size="m" />
+            ) : totalDocs === undefined ? (
+              UNKNOWN_STAT_VALUE
+            ) : (
+              formatNumber(totalDocs, '0,0')
+            )
+          }
+          unit={i18n.translate('xpack.streams.ingestChartStatistics.docsTotal.unit', {
+            defaultMessage: 'total docs',
+          })}
+        />
 
         <StatCell
           data-test-subj="streamsAppIngestStatDocsInRange"
@@ -209,7 +195,7 @@ export function IngestChartStatistics({
           }
         />
 
-        {showStorageSize && (
+        {!isServerless && (
           <StatCell
             title={i18n.translate('xpack.streams.ingestChartStatistics.storageSize.label', {
               defaultMessage: 'Storage size',

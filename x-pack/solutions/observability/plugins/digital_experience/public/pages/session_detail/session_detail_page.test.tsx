@@ -89,8 +89,8 @@ const withFrustration = (): SessionDetailResponse => {
     },
     timeline: [
       ...base.timeline,
-      frustrationEvent('browser.frustration.rage_click', 40_000, '#pay', 5),
-      frustrationEvent('browser.frustration.dead_click', 42_000, 'a.help'),
+      frustrationEvent('elastic.frustration.rage_click', 40_000, '#pay', 5),
+      frustrationEvent('elastic.frustration.dead_click', 42_000, 'a.help'),
     ],
     pageVisits: [base.pageVisits[0], { ...base.pageVisits[1], frustrationCount: 2 }],
   };
@@ -472,7 +472,7 @@ describe('SessionDetailPage', () => {
     const [rage, dead] = within(cart).getAllByTestId('digitalExperienceSessionEvent-frustration');
     expect(rage).toHaveTextContent('Rage click (5 clicks)');
     expect(rage).toHaveTextContent('#pay');
-    expect(rage).not.toHaveTextContent('browser.frustration');
+    expect(rage).not.toHaveTextContent('elastic.frustration');
     expect(dead).toHaveTextContent('Dead click');
     expect(dead).not.toHaveTextContent('clicks');
     expect(within(cart).getByTestId('digitalExperienceVisitFrustration')).toHaveTextContent(
@@ -672,7 +672,7 @@ describe('SessionDetailPage', () => {
       timeline: [
         ...base.timeline,
         {
-          ...frustrationEvent('browser.frustration.error_click', 44_000, '#checkout'),
+          ...frustrationEvent('elastic.frustration.error_click', 44_000, '#checkout'),
           exception: {
             type: 'TypeError',
             message: 'cart is undefined',
@@ -717,7 +717,7 @@ describe('SessionDetailPage', () => {
       timeline: [
         ...base.timeline,
         {
-          ...frustrationEvent('browser.frustration.error_click', 44_000, '#checkout'),
+          ...frustrationEvent('elastic.frustration.error_click', 44_000, '#checkout'),
           exception: { type: null, message: 'out of stock', stacktrace: null },
         },
       ],
