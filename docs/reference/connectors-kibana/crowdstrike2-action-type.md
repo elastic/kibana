@@ -41,7 +41,7 @@ To use the CrowdStrike Falcon connector, create an API client in the Falcon cons
    - With the matching subscriptions: **Indicators (Falcon Intelligence)**: Read, **Sandbox (Falcon Sandbox)**: Write, **Sample uploads**: Write, and **Vulnerabilities (Spotlight)**: Read.
    - **NGSIEM**: Read and Write (API scope `humio-auth-proxy`) for the Next-Gen SIEM search actions.
 4. Select **Create**, then copy the client ID and secret. The secret is shown only once.
-5. Note the base URL shown with the client; it identifies your Falcon cloud.
+5. Note the base URL shown with the client. It identifies your Falcon cloud.
 
 #### Real Time Response tiers [crowdstrike2-rtr-tiers]
 
@@ -96,7 +96,9 @@ API URL
 :   The HTTPS base URL of the Falcon API. Used only when the Falcon cloud is Custom. The host must be allowed by the {{kib}} `xpack.actions.allowedHosts` setting.
 
 Token URL
-:   The API URL of your Falcon cloud followed by `/oauth2/token`, for example `https://api.us-2.crowdstrike.com/oauth2/token`. It defaults to the US-1 token URL, `https://api.crowdstrike.com/oauth2/token`; change it when your Falcon cloud is another one. {{kib}} sends the client ID and secret to this URL to get an access token, so enter only the token URL of your Falcon cloud. When the token URL is not on the host of the selected Falcon cloud, actions fail: usually with an error that names both hosts, but a token URL of another Falcon cloud can also be refused by that cloud while {{kib}} requests the token, and then the error is an OAuth error (for example 401) that does not name the hosts. In either case, check that the token URL and the Falcon cloud match.
+:   The API URL of your Falcon cloud followed by `/oauth2/token`, for example `https://api.us-2.crowdstrike.com/oauth2/token`. It defaults to the US-1 token URL, `https://api.crowdstrike.com/oauth2/token`, so change it if your tenant is on another Falcon cloud.
+
+    {{kib}} sends the client ID and secret to this URL to get an access token, so enter only the token URL of your Falcon cloud. If the token URL and the Falcon cloud don't match, actions fail. The error usually names both hosts, but it can also be an OAuth error, such as 401, that doesn't. In either case, check that the token URL matches the Falcon cloud.
 
 Client ID
 :   The client ID of a Falcon API client.
@@ -122,7 +124,7 @@ The CrowdStrike Falcon connector exposes the following actions. List and search 
 :   Get the sensor connection state (online, offline or unknown) for up to 100 device IDs.
 
 `containHost`
-:   Network-contain hosts. The connector first reads each host's containment state: a host that is already `contained` or `containing` is skipped, and an unknown device ID is reported as `notFound`; only the other hosts are sent. Returns `outcomes`, one per device ID with the status `requested`, `skipped` (with the reason), `notFound` or `failed` (with Falcon's message). Containment is asynchronous: read the state back with `getAgentDetails`.
+:   Network-contain hosts. The connector first reads each host's containment state: a host that is already `contained` or `containing` is skipped, and an unknown device ID is reported as `notFound`. Only the other hosts are sent. Returns `outcomes`, one per device ID with the status `requested`, `skipped` (with the reason), `notFound` or `failed` (with Falcon's message). Containment is asynchronous: read the state back with `getAgentDetails`.
 
 `liftContainment` _(API only)_
 :   Lift network containment on hosts. Like `containHost`, the connector first reads each host's state: a host that is already `normal` or `lift_pending` is skipped and an unknown device ID is `notFound`. Returns `outcomes` per device ID.
@@ -294,7 +296,11 @@ Containment and Real Time Response
 :   Containment is asynchronous: `getAgentDetails` reports `containing`, then `contained`, and `lift_pending`, then `normal`. RTR actions wait up to their timeout (at most 300 seconds); a host whose command is still running returns `complete: false` with a `cloud_request_id` for `getRTRCommandStatus`. `rtrRetrieveFile` returns files up to 1 MiB.
 
 Real Time Response sessions
-:   Real Time Response sessions are opened and closed by the connector. Batch sessions, used by `executeRTRCommand`, `batchActiveResponderExecuteRTR`, `batchAdminExecuteRTR` and `rtrRetrieveFile`, open one session per host; the connector deletes each host's session when that host's command completes or fails (`rtrRetrieveFile`: when the file is returned or the action fails). Single-host sessions, used by `rtrKillProcess` and `rtrListProcesses`, are deleted when the command completes or fails. A session is kept when the command is still running at the timeout (so that its status can be read; `rtrRetrieveFile`: while the file is still being prepared) or when the host is offline and the command is queued for it (deleting the session would drop the queued command); Falcon closes a kept session after 10 minutes without activity. A failed delete is only logged and does not fail the action. The batch and session IDs in the results (`batch_id`, `session_id`) are for audit only, except that `rtrRetrieveFile` takes back the `session_id` and `batch_get_cmd_req_id` of a result that was not complete. Sessions of a large batch are deleted 10 at a time, for at most 30 seconds in total; sessions left open after that are closed by Falcon after 10 minutes without activity.
+:   Real Time Response sessions are opened and closed by the connector. Batch sessions, used by `executeRTRCommand`, `batchActiveResponderExecuteRTR`, `batchAdminExecuteRTR` and `rtrRetrieveFile`, open one session per host. The connector deletes each host's session when that host's command completes or fails, or for `rtrRetrieveFile`, when the file is returned or the action fails. Single-host sessions, used by `rtrKillProcess` and `rtrListProcesses`, are deleted when the command completes or fails.
+
+    A session is kept in two cases: when the command is still running at the timeout, so that its status can be read (for `rtrRetrieveFile`, while the file is still being prepared), and when the host is offline and the command is queued for it, because deleting the session would drop the queued command. Falcon closes a kept session after 10 minutes without activity.
+
+    A failed delete is only logged and does not fail the action. Sessions of a large batch are deleted 10 at a time, for at most 30 seconds in total. Sessions left open after that are closed by Falcon after 10 minutes without activity. The batch and session IDs in the results (`batch_id`, `session_id`) are for audit only, except that `rtrRetrieveFile` takes back the `session_id` and `batch_get_cmd_req_id` of a result that was not complete.
 
 Real Time Response timeout
 :   Real Time Response commands wait 30 seconds by default (60 seconds for `rtrRetrieveFile`) and at most 300 seconds (Falcon's 5-minute maximum). A command that is still running at the timeout returns a request ID (`cloud_request_id`) per host; read its result with `getRTRCommandStatus`.
@@ -303,7 +309,13 @@ Response size
 :   {{kib}} limits the size of a connector response (`xpack.actions.maxResponseContentLength`, 1 MB by default). Large pages, such as thousands of device records from `getAgentDetails` or many Next-Gen SIEM events, can exceed it; the action then fails with an error that says the response is too large. Request fewer items with a lower `limit` or fewer IDs, or raise the setting.
 
 Next-Gen SIEM search
-:   Next-Gen SIEM search uses the same client ID and secret as the other actions, but the API client also needs the **NGSIEM** scope (Read and Write), which is separate from the endpoint scopes; without it Falcon answers with an access-denied error that the connector reports with the scope name. A search runs in three steps: `startNgSiemSearch` with a CQL query and a time range returns a search ID; `getNgSiemSearchResults` returns `done: false` while the search runs, so repeat it with a wait of at least 2 seconds until `done` is `true`, then page the events with `offset` and `limit` (up to 1,000 per page); `stopNgSiemSearch` cancels a search that is no longer needed.
+:   Next-Gen SIEM search uses the same client ID and secret as the other actions, but the API client also needs the **NGSIEM** scope (Read and Write), which is separate from the endpoint scopes. Without it, Falcon answers with an access-denied error, and the connector reports it with the scope name.
+
+    A search runs in three steps:
+
+    1. `startNgSiemSearch` with a CQL query and a time range returns a search ID.
+    2. `getNgSiemSearchResults` returns `done: false` while the search runs. Repeat it with a wait of at least 2 seconds until `done` is `true`, then page the events with `offset` and `limit` (up to 1,000 per page).
+    3. To cancel a search that is no longer needed, use `stopNgSiemSearch`.
 
     Searches run on the `search-all` view, which covers every repository the API client may read. To search one repository, add `#repo=<repository name>` to the query. Time ranges are relative (for example `15m`, `24h`, `7d`, and `now`) or epoch milliseconds (13 digits). `start` cannot be `now`, and `end` defaults to `now`. Searches are never live. A failed start is not repeated on a server error, because a repeat could start a second search. Keep time ranges short, and stop searches you no longer need.
 
