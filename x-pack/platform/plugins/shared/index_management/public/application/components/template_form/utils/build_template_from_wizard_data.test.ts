@@ -173,6 +173,39 @@ describe('buildTemplateFromWizardData', () => {
     expect(result.template?.data_stream_options).toEqual({ failure_store: { enabled: true } });
   });
 
+  test('omits data stream options when the template is not a data stream template', () => {
+    const initialTemplate: TemplateDeserialized = {
+      name: 'template_without_data_stream',
+      indexPatterns: ['indexPattern1'],
+      indexMode: 'standard',
+      template: {},
+      allowAutoCreate: 'NO_OVERWRITE',
+      ignoreMissingComponentTemplates: [],
+      composedOf: [],
+      _kbnMeta: {
+        type: 'default',
+        hasDatastream: false,
+        isLegacy: false,
+      },
+    };
+
+    const { _kbnMeta: _ignoredKbnMeta, template: _ignoredTemplate, ...logistics } = initialTemplate;
+
+    const result = buildTemplateFromWizardData({
+      initialTemplate,
+      wizardData: {
+        logistics,
+        settings: undefined,
+        mappings: undefined,
+        aliases: undefined,
+        components: [],
+      },
+      dataStreamOptions: { failure_store: { enabled: true } },
+    });
+
+    expect(result.template?.data_stream_options).toBeUndefined();
+  });
+
   test('keeps mappings when added in the wizard', () => {
     const initialTemplate: TemplateDeserialized = {
       name: 'index_template_without_mappings',

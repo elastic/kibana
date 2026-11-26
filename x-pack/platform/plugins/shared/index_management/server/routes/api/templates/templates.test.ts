@@ -46,6 +46,10 @@ describe('Component templates API', () => {
         },
       },
     };
+    const dataStreamMockRequest: RequestMock = {
+      ...mockRequest,
+      body: { ...mockRequest.body, dataStream: {} },
+    };
     it('updates a component template with data_stream_options successfully', async () => {
       transportRequest.mockResolvedValue({
         index_templates: [
@@ -67,7 +71,7 @@ describe('Component templates API', () => {
       indexTemplateExists.mockResolvedValue({ acknowledged: true });
       updateIndexTemplate.mockResolvedValue(true);
 
-      const res = await router.runRequest(mockRequest);
+      const res = await router.runRequest(dataStreamMockRequest);
 
       expect(
         router.contextMock.core.elasticsearch.client.asCurrentUser.transport.request
@@ -89,6 +93,7 @@ describe('Component templates API', () => {
             },
           },
         },
+        data_stream: {},
         version: 1,
         _meta: { description: 'Test template' },
         deprecated: false,
@@ -109,7 +114,7 @@ describe('Component templates API', () => {
       indexTemplateExists.mockResolvedValue({ acknowledged: true });
       updateIndexTemplate.mockResolvedValue(true);
 
-      const res = await router.runRequest(mockRequest);
+      const res = await router.runRequest(dataStreamMockRequest);
 
       expect(
         router.contextMock.core.elasticsearch.client.asCurrentUser.transport.request
@@ -126,6 +131,7 @@ describe('Component templates API', () => {
             },
           },
         },
+        data_stream: {},
         version: 1,
         _meta: { description: 'Test template' },
         deprecated: false,
@@ -149,9 +155,9 @@ describe('Component templates API', () => {
       updateIndexTemplate.mockResolvedValue(true);
 
       await router.runRequest({
-        ...mockRequest,
+        ...dataStreamMockRequest,
         body: {
-          ...mockRequest.body,
+          ...dataStreamMockRequest.body,
           template: { data_stream_options: { failure_store: { enabled: false } } },
         },
       });
@@ -170,12 +176,31 @@ describe('Component templates API', () => {
       updateIndexTemplate.mockResolvedValue(true);
 
       await router.runRequest({
-        ...mockRequest,
+        ...dataStreamMockRequest,
         body: {
-          ...mockRequest.body,
+          ...dataStreamMockRequest.body,
           template: { data_stream_options: { failure_store: { enabled: false } } },
         },
       });
+
+      const arg = updateIndexTemplate.mock.calls[0][0] as any;
+      expect(arg.template?.data_stream_options).toBeUndefined();
+    });
+    it('does not re-apply stored data_stream_options when the template is not a data stream template', async () => {
+      transportRequest.mockResolvedValue({
+        index_templates: [
+          {
+            name: 'test-template',
+            index_template: {
+              template: { data_stream_options: { failure_store: { enabled: true } } },
+            },
+          },
+        ],
+      });
+      indexTemplateExists.mockResolvedValue({ acknowledged: true });
+      updateIndexTemplate.mockResolvedValue(true);
+
+      await router.runRequest(mockRequest);
 
       const arg = updateIndexTemplate.mock.calls[0][0] as any;
       expect(arg.template?.data_stream_options).toBeUndefined();

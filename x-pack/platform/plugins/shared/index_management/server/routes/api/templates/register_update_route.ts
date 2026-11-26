@@ -54,11 +54,15 @@ export function registerUpdateRoute({ router, lib: { handleEsError } }: RouteDep
           return response.notFound();
         }
 
-        const dataStreamOptions = await getTemplateDataStreamOptions({
-          name,
-          client,
-          isLegacy,
-        });
+        // ES rejects data_stream_options on templates that are not data stream templates,
+        // so only re-apply the stored options when the template has a data stream.
+        const dataStreamOptions = template.dataStream
+          ? await getTemplateDataStreamOptions({
+              name,
+              client,
+              isLegacy,
+            })
+          : undefined;
 
         // Next, update index template
         const responseBody = await saveTemplate({
