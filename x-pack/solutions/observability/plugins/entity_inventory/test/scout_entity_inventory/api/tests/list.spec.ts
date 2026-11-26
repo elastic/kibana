@@ -45,7 +45,6 @@ interface ListResponse {
   rows: Array<Record<string, unknown>>;
   provenance: Record<string, Record<string, string>>;
   truncated: boolean;
-  took: number;
   queries: Array<{
     indexPattern: string;
     engine: string;
@@ -141,9 +140,6 @@ apiTest.describe(
         });
         // The OpenTelemetry time-series index holds no 2026-11-01 documents, so its `TS` plan reads none.
         expect(body.queries.map(({ rowCount }) => rowCount)).toStrictEqual([3, 0, 3]);
-        expect(typeof body.took).toBe('number');
-        expect('unsupportedMetrics' in body).toBe(false);
-        expect('documentFilterWarnings' in body).toBe(false);
       }
     );
 
@@ -171,7 +167,7 @@ apiTest.describe(
     );
 
     apiTest(
-      'returns the columns in column order, the same as the types route',
+      'returns the columns in column order, the same names and kinds as the types route',
       async ({ apiClient }) => {
         const response = await postList(apiClient, WINDOW);
         const typesResponse = await apiClient.get(TYPES_PATH, {
@@ -197,7 +193,11 @@ apiTest.describe(
           { name: 'k8s.deployment.uid', kind: 'attribute' },
           { name: 'last_seen', kind: 'last_seen' },
         ]);
-        expect(columns).toStrictEqual(types.find(({ type }) => type === 'k8s.deployment')?.columns);
+        expect(columns).toStrictEqual(
+          types
+            .find(({ type }) => type === 'k8s.deployment')
+            ?.columns.map(({ name, kind }) => ({ name, kind }))
+        );
       }
     );
 

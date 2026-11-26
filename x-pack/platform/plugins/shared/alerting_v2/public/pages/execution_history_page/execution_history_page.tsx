@@ -145,7 +145,6 @@ export const ExecutionHistoryPage = () => {
   return (
     <div data-test-subj="executionHistoryPage" css={pageCss}>
       <AppHeader
-        sticky={false}
         title={EXECUTION_HISTORY_PAGE_TITLE}
         badges={[universalRulesOnlyBadge]}
         spacing="bleed"

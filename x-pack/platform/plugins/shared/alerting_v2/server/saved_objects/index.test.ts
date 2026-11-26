@@ -12,9 +12,12 @@ import { createLoggerService } from '../lib/services/logger_service/logger_servi
 import {
   ACTION_POLICY_SAVED_OBJECT_TYPE,
   API_KEY_PENDING_INVALIDATION_TYPE,
+  EXTERNAL_SOURCE_SAVED_OBJECT_TYPE,
   registerSavedObjects,
   RULE_SAVED_OBJECT_TYPE,
 } from '.';
+import { externalSourceMappings } from './external_source_mappings';
+import { externalSourceModelVersions } from './model_versions';
 
 describe('registerSavedObjects', () => {
   const createDeps = () => {
@@ -34,12 +37,12 @@ describe('registerSavedObjects', () => {
     };
   };
 
-  it('registers the rule, action policy, API-key, and ESO types', () => {
+  it('registers the rule, action policy, external source, API-key, and ESO types', () => {
     const { logger, savedObjects, encryptedSavedObjects } = createDeps();
 
     registerSavedObjects({ savedObjects, encryptedSavedObjects, logger });
 
-    expect(savedObjects.registerType).toHaveBeenCalledTimes(3);
+    expect(savedObjects.registerType).toHaveBeenCalledTimes(4);
     expect(savedObjects.registerType).toHaveBeenCalledWith(
       expect.objectContaining({ name: RULE_SAVED_OBJECT_TYPE })
     );
@@ -47,11 +50,45 @@ describe('registerSavedObjects', () => {
       expect.objectContaining({ name: ACTION_POLICY_SAVED_OBJECT_TYPE })
     );
     expect(savedObjects.registerType).toHaveBeenCalledWith(
+      expect.objectContaining({ name: EXTERNAL_SOURCE_SAVED_OBJECT_TYPE })
+    );
+    expect(savedObjects.registerType).toHaveBeenCalledWith(
       expect.objectContaining({ name: API_KEY_PENDING_INVALIDATION_TYPE })
     );
     expect(encryptedSavedObjects.registerType).toHaveBeenCalledWith(
       expect.objectContaining({ type: ACTION_POLICY_SAVED_OBJECT_TYPE })
     );
+  });
+
+  it('registers external sources as hidden, space-isolated and not importable', () => {
+    const { logger, savedObjects, encryptedSavedObjects } = createDeps();
+
+    registerSavedObjects({ savedObjects, encryptedSavedObjects, logger });
+
+    expect(savedObjects.registerType).toHaveBeenCalledWith(
+      expect.objectContaining({
+        name: EXTERNAL_SOURCE_SAVED_OBJECT_TYPE,
+        hidden: true,
+        namespaceType: 'multiple-isolated',
+        mappings: externalSourceMappings,
+        modelVersions: externalSourceModelVersions,
+        management: expect.objectContaining({ importableAndExportable: false }),
+      })
+    );
+  });
+
+  it('titles an external source by its name', () => {
+    const { logger, savedObjects, encryptedSavedObjects } = createDeps();
+
+    registerSavedObjects({ savedObjects, encryptedSavedObjects, logger });
+
+    const externalSourceType = (savedObjects.registerType as jest.Mock).mock.calls
+      .map(([type]) => type)
+      .find(({ name }) => name === EXTERNAL_SOURCE_SAVED_OBJECT_TYPE);
+
+    expect(
+      externalSourceType.management.getTitle({ attributes: { metadata: { name: 'Prod' } } })
+    ).toBe('External source: [Prod]');
   });
 
   it('logs SAVED_OBJECTS_TYPE_REGISTRATION_FAILED and rethrows when a type fails to register', () => {

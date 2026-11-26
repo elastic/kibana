@@ -307,4 +307,162 @@ describe('createSessionEventsService', () => {
     ).rejects.toThrow('non-empty userId');
     expect(esClient.bulk).not.toHaveBeenCalled();
   });
+
+  describe('reading events', () => {
+    const stored = (
+      id: string,
+      overrides: Partial<StoredSessionEvent> & { type?: 'user' | 'assistant' } = {}
+    ): StoredSessionEvent =>
+      ({
+        '@timestamp': '2026-11-16T09:00:00.000Z',
+        event_at: '2026-11-16T08:59:00.000Z',
+        id,
+        space: 'default',
+        ai_index_id: ['ops-memory'],
+        session_id: 'session-1',
+        turn_id: 'turn-1',
+        user_id: 'jdoe',
+        type: 'user',
+        content: id,
+        raw: { type: 'user', id, content: id, ...base },
+        ...overrides,
+      } as StoredSessionEvent);
+    const searchResponseOf = (sources: StoredSessionEvent[]) => ({
+      took: 1,
+      timed_out: false,
+      _shards: { total: 1, successful: 1, failed: 0 },
+      hits: {
+        hits: sources.map((_source, index) => ({ _index: '.ds', _id: `d${index}`, _source })),
+      },
+    });
+    const input = {
+      space: 'default',
+      aiIndexId: 'ops-memory',
+      since: '2026-11-16T00:00:00.000Z',
+      until: '2026-11-16T09:55:00.000Z',
+      size: 100,
+    };
+
+    beforeEach(() => {
+      esClient.search.mockReset();
+    });
+
+    describe('listEvents', () => {
+      it('lists the events saved in the window, oldest first, with their positions', async () => {
+        esClient.search.mockResolvedValueOnce(searchResponseOf([stored('e-2')]));
+
+        const positions = await service.listEvents(input);
+
+        expect(esClient.search.mock.calls[0][0]).toEqual(
+          expect.objectContaining({
+            index: SESSION_EVENTS_DATA_STREAM,
+            sort: [{ '@timestamp': 'asc' }, { session_id: 'asc' }, { id: 'asc' }],
+            size: 100,
+            query: {
+              bool: {
+                filter: [
+                  { term: { space: 'default' } },
+                  { term: { ai_index_id: 'ops-memory' } },
+                  { range: { '@timestamp': { gt: input.since, lte: input.until } } },
+                ],
+              },
+            },
+          })
+        );
+        expect(esClient.search.mock.calls[0][0]).not.toHaveProperty('search_after');
+        expect(positions).toEqual([
+          {
+            savedAt: '2026-11-16T09:00:00.000Z',
+            sessionId: 'session-1',
+            eventId: 'e-2',
+            turnId: 'turn-1',
+          },
+        ]);
+      });
+
+      it('continues after the last event listed at the same time', async () => {
+        esClient.search.mockResolvedValueOnce(searchResponseOf([]));
+
+        await service.listEvents({
+          ...input,
+          after: { sessionId: 'session-1', eventId: 'e-2' },
+        });
+
+        expect(esClient.search.mock.calls[0][0]).toEqual(
+          expect.objectContaining({ search_after: [Date.parse(input.since), 'session-1', 'e-2'] })
+        );
+        expect(JSON.stringify(esClient.search.mock.calls[0][0]?.query)).toContain(
+          JSON.stringify({ range: { '@timestamp': { gte: input.since, lte: input.until } } })
+        );
+      });
+
+      it('requires a space', async () => {
+        await expect(service.listEvents({ ...input, space: '' })).rejects.toThrow('space');
+      });
+    });
+
+    describe('getTurn', () => {
+      const turn = {
+        space: 'default',
+        aiIndexId: 'ops-memory',
+        sessionId: 'session-1',
+        turnId: 'turn-1',
+        limit: 1000,
+      };
+
+      it('reads the events of one session and turn', async () => {
+        esClient.search.mockResolvedValueOnce(searchResponseOf([stored('e-1')]));
+
+        await service.getTurn(turn);
+
+        expect(esClient.search.mock.calls[0][0]).toEqual(
+          expect.objectContaining({
+            index: SESSION_EVENTS_DATA_STREAM,
+            size: 1000,
+            query: {
+              bool: {
+                filter: [
+                  { term: { space: 'default' } },
+                  { term: { ai_index_id: 'ops-memory' } },
+                  { term: { session_id: 'session-1' } },
+                  { term: { turn_id: 'turn-1' } },
+                ],
+              },
+            },
+          })
+        );
+      });
+
+      it('orders by seq, and drops resent copies', async () => {
+        esClient.search.mockResolvedValueOnce(
+          searchResponseOf([
+            stored('late', { seq: 2 }),
+            stored('early', { seq: 1, '@timestamp': '2026-11-16T09:01:00.000Z' }),
+            stored('late', { seq: 2, '@timestamp': '2026-11-16T09:02:00.000Z' }),
+          ])
+        );
+
+        const events = await service.getTurn(turn);
+
+        expect(events.map(({ id }) => id)).toEqual(['early', 'late']);
+      });
+
+      it('orders by seq only when every event has one, else by when the agent created them', async () => {
+        esClient.search.mockResolvedValueOnce(
+          searchResponseOf([
+            stored('a', { seq: 5, event_at: '2026-11-16T08:00:00.000Z' }),
+            stored('b', { event_at: '2026-11-16T07:00:00.000Z' }),
+          ])
+        );
+
+        const events = await service.getTurn(turn);
+
+        expect(events.map(({ id }) => id)).toEqual(['b', 'a']);
+      });
+
+      it('requires a space', async () => {
+        await expect(service.getTurn({ ...turn, space: ' ' })).rejects.toThrow('space');
+      });
+    });
+  });
 });

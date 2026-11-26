@@ -17,6 +17,7 @@ function mockParams() {
     jsDependencyPaths: ['/js-1', '/js-2'],
     styleSheetPaths: ['/style-1', '/style-2'],
     publicPathMap: '{"foo": "bar"}',
+    pluginIdsToLoad: ['core', 'security'],
   };
 }
 
@@ -106,6 +107,7 @@ async function runBootstrap(params = mockParams()) {
     console: { log: jest.fn(), error: consoleError },
     performance: { mark: jest.fn() },
     location: { reload: jest.fn() },
+    __kbnPluginIdsToLoad__: [] as string[],
   };
   window.window = window;
 
@@ -116,6 +118,7 @@ async function runBootstrap(params = mockParams()) {
     loadingMessage,
     consoleError,
     injectedAssets: document.head.children,
+    window,
     failToLoad: (asset: ElementDouble) => asset.dispatchEvent('error'),
   };
 }
@@ -137,6 +140,12 @@ describe('renderTemplate', () => {
       colorMode: 'system',
     });
     expect(content).toMatchSnapshot();
+  });
+
+  test('exposes the selected plugin IDs before loading bundles', async () => {
+    const { window } = await runBootstrap();
+
+    expect(window.__kbnPluginIdsToLoad__).toEqual(['core', 'security']);
   });
 
   describe('bootstrap failure', () => {

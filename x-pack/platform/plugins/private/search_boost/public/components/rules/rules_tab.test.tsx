@@ -110,7 +110,14 @@ describe('RulesTab', () => {
       within(popover)
         .getAllByTestId('searchBoostMatchesPopoverItem')
         .map((item) => item.textContent)
-    ).toEqual(['catalog-productsOutranked', 'catalog-reviewsOutranked', 'customers', 'orders']);
+    ).toEqual([
+      'catalog-productsOutranked',
+      'catalog-reviewsOutranked',
+      'customers',
+      'orders',
+      '.kibana-observability-ai-assistant',
+      '.internal-alerts',
+    ]);
   });
 
   it('searches rule names and profile names, not patterns', async () => {
