@@ -156,7 +156,7 @@ apiTest.describe(
         index: INDEX,
         mappings: { properties: { '@timestamp': { type: 'date' } } },
       });
-      await esClient.bulk({
+      const bulkResponse = await esClient.bulk({
         index: INDEX,
         refresh: 'wait_for',
         operations: ALL_TIMESTAMPS.flatMap((timestamp) => [
@@ -164,6 +164,10 @@ apiTest.describe(
           { '@timestamp': timestamp },
         ]),
       });
+      expect(
+        bulkResponse.items.filter((item) => item.index?.error),
+        'documents rejected by bulk indexing'
+      ).toStrictEqual([]);
     });
 
     apiTest.afterAll(async ({ esClient }) => {
