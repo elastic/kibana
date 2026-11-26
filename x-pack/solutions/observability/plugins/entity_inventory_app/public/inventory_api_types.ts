@@ -5,26 +5,7 @@
  * 2.0.
  */
 
-// TODO: these types mimic the responses of the `types` and values routes. Replace them with the types the server exposes, whose definitions carry the sources in a `dynamic` block, in https://github.com/elastic/observability-dev/issues/6355
-
-export interface EntityInventoryTypeAttribute {
-  name: string;
-  // TODO: check if the backend returns a label, or if labels need translating client side
-  label?: string;
-}
-
-export interface EntityInventoryTypeSource {
-  indexPattern: string;
-}
-
-export interface EntityInventoryTypeDefinition {
-  type: string;
-  name: string;
-  category?: string;
-  sources: EntityInventoryTypeSource[];
-  attributes: EntityInventoryTypeAttribute[];
-  suggestedFilters: string[];
-}
+// TODO: the values types mimic the response of the values route. Replace them with the types the server exposes in https://github.com/elastic/observability-dev/issues/6355
 
 export interface EntityInventoryAttributeValuesParams {
   attribute: string;
