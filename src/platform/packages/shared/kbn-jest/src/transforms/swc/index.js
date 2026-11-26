@@ -662,7 +662,8 @@ function forEachStatementList(ast, callback) {
   callback(ast.body, ast);
 
   visitAst(ast, (node) => {
-    if (node.type === 'BlockStatement') {
+    // @swc/core >= 1.16 parses function bodies as FunctionBody rather than BlockStatement.
+    if (node.type === 'BlockStatement' || node.type === 'FunctionBody') {
       callback(node.stmts, node);
     }
   });
