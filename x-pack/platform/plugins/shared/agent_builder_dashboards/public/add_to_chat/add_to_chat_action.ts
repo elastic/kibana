@@ -28,6 +28,7 @@ import {
   type PendingDashboardPanelAttachment,
 } from '@kbn/agent-builder-dashboards-common';
 import { CUSTOM_CONTENT_EMBEDDABLE_TYPE } from '@kbn/custom-content-common';
+import { getAbsoluteTimeRange } from '@kbn/data-plugin/common';
 import { MARKDOWN_EMBEDDABLE_TYPE } from '@kbn/dashboard-markdown-schemas';
 import type { DashboardApi, DashboardStart } from '@kbn/dashboard-plugin/public';
 import { ADD_TO_CHAT_ACTION_ID } from '@kbn/embeddable-plugin/public';
@@ -36,6 +37,7 @@ import {
   apiHasParentApi,
   apiHasType,
   apiHasUniqueId,
+  apiPublishesTimeslice,
   apiPublishesTitle,
   getTitle,
   type EmbeddableApiContext,
@@ -133,6 +135,25 @@ const getPointerLabel = (
   );
 };
 
+/**
+ * The bounds the panel showed, absolute so the agent reads the same data however late the message
+ * is sent: the time slider's selection, which panels without their own time range use, else the
+ * dashboard's time range.
+ */
+const getShownTimeRange = (
+  dashboardApi: DashboardApi
+): { from: string; to: string } | undefined => {
+  const timeslice = apiPublishesTimeslice(dashboardApi)
+    ? dashboardApi.timeslice$.getValue()
+    : undefined;
+  if (timeslice) {
+    const [from, to] = timeslice;
+    return { from: new Date(from).toISOString(), to: new Date(to).toISOString() };
+  }
+  const timeRange = dashboardApi.timeRange$.getValue();
+  return timeRange ? getAbsoluteTimeRange(timeRange) : undefined;
+};
+
 const hasPanel = (attachment: ConversationDashboardAttachment, panelId: string): boolean => {
   const data = getLatestVersion(attachment)?.data;
   return Boolean(data && findPanelById(data.panels, panelId));
@@ -222,7 +243,7 @@ export const createDashboardAddToChatAction = (
       const dashboardData = dashboardStateToAttachmentData(dashboardState);
       const panel = findPanelById(dashboardData.panels, embeddable.uuid);
       // the dashboard state has a time range only when the dashboard stores one
-      const timeRange = dashboardApi.timeRange$.getValue();
+      const timeRange = getShownTimeRange(dashboardApi);
       const buildDashboardAttachment = (
         id: string,
         origin: string | undefined
