@@ -65,4 +65,14 @@ describe('getBrowserEnvWithoutProxy', () => {
     }
     expect(env).toMatchObject({ USE_CITADEL_PROXY: 'true', NO_PROXY: 'localhost,127.0.0.1' });
   });
+
+  it('reads the given environment instead of process.env', () => {
+    const env = getBrowserEnvWithoutProxy({
+      USE_CITADEL_PROXY: 'true',
+      HTTPS_PROXY: PROXY_URL,
+      PATH: '/usr/bin',
+    });
+
+    expect(env).toEqual({ USE_CITADEL_PROXY: 'true', PATH: '/usr/bin' });
+  });
 });
