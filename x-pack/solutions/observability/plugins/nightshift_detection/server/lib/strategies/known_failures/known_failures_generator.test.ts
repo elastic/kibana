@@ -298,6 +298,10 @@ describe('KnownFailuresGenerator', () => {
     );
 
     expect(result.readings).toEqual([]);
+    // A source back from a long silence reads the same as a new one, so the drop must show.
+    expect(result.notes).toEqual([
+      expect.stringMatching(/dropped 1 finding\(s\) of knowledge indicator \[watched\]/),
+    ]);
     // An hour before the run's six-hour window, which ends after its newest minute: a sparse index
     // with no line in the window's first minute still had data when the window began.
     const lookupFrom = new Date(WINDOW.from + (7 - 360 - 60) * MINUTE_MS).toISOString();

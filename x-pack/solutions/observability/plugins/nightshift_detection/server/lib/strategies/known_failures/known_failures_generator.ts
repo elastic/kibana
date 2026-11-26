@@ -79,8 +79,9 @@ export class KnownFailuresGenerator implements DetectionSignalGenerator {
  * finding stands, with a note: a missed failure costs more than one false report.
  *
  * This guards a source's start, not a gap: a source back from an outage that emptied the whole
- * hour before can still be reported. Telling that gap from an index that was only quiet would take
- * another read per finding.
+ * hour before can still be reported. An index silent for the whole lookback reads like a new one,
+ * so its findings are dropped with a note. Telling that gap from a new source would take another
+ * read per finding.
  */
 async function judgeMeasuredFailures({
   context,
@@ -117,7 +118,21 @@ async function judgeMeasuredFailures({
           esql: knowledgeIndicator.query.esql.query,
           from: start - KNOWN_FAILURES_SETTINGS.data_start_lookback_minutes * MINUTE_MS,
         });
-        return { ...failure, ...judge(dataFrom) };
+        const guarded = judge(dataFrom);
+        const dropped =
+          unguarded.unusual.length +
+          unguarded.rises.length -
+          (guarded.unusual.length + guarded.rises.length);
+        if (dropped > 0) {
+          notes.push(
+            `dropped ${dropped} finding(s) of knowledge indicator [${
+              knowledgeIndicator.query.id
+            }] measured against minutes before its index's data begins at ${new Date(
+              dataFrom
+            ).toISOString()}: a new source, or one silent for the whole lookback`
+          );
+        }
+        return { ...failure, ...guarded };
       } catch (error) {
         // Fail open: a check that found something reports it, though it may be a source warming up.
         notes.push(
