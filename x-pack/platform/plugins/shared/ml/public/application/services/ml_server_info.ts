@@ -18,6 +18,7 @@ let defaults: MlServerDefaults = {
 };
 let limits: MlServerLimits = {};
 let loaded = false;
+let isMlEsqlDatafeedEnabled = false;
 
 const cloudInfo: CloudInfo = {
   cloudId: null,
@@ -39,6 +40,7 @@ export async function loadMlServerInfo(mlApi: MlApi) {
     cloudInfo.isCloudTrial = resp.isCloudTrial === true;
     cloudInfo.deploymentId = !resp.cloudId ? null : extractDeploymentId(resp.cloudId);
     cloudInfo.isMlCpsEnabled = resp.isMlCpsEnabled;
+    isMlEsqlDatafeedEnabled = resp.isMlEsqlDatafeedEnabled === true;
     loaded = true;
     return { defaults, limits, cloudId: cloudInfo };
   } catch (error) {
@@ -72,6 +74,11 @@ export function getCloudDeploymentId(): string | null {
 
 export function getIsMlCpsEnabled(): boolean {
   return cloudInfo.isMlCpsEnabled;
+}
+
+/** Returns whether Elasticsearch supports ES|QL queries in anomaly detection datafeeds. */
+export function getIsMlEsqlDatafeedEnabled(): boolean {
+  return isMlEsqlDatafeedEnabled;
 }
 
 export function isMlServerInfoLoaded(): boolean {

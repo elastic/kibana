@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 import type { AppHeaderMenu } from '@kbn/app-header';
 import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
 import { useCreateAndNavigateToManagementMlLink } from '../../../contexts/kibana/use_create_url';
+import { getCreateJobPage } from '../create_job_page';
 import { usePermissionCheck } from '../../../capabilities/check_capabilities';
 import { mlNodesAvailable } from '../../../ml_nodes_check/check_ml_nodes';
 import { useEnabledFeatures } from '../../../contexts/ml';
@@ -41,7 +42,7 @@ export const useAnomalyDetectionJobsMenu = ({
     'ad_settings'
   );
   const navigateToCreateJob = useCreateAndNavigateToManagementMlLink(
-    ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_SELECT_DATA_SOURCE,
+    getCreateJobPage(),
     'anomaly_detection'
   );
   const { isADEnabled, isDFAEnabled } = useEnabledFeatures();

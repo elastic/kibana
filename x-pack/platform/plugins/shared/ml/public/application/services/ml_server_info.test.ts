@@ -14,6 +14,7 @@ import {
   getNewJobDefaults,
   getNewJobLimits,
   extractDeploymentId,
+  getIsMlEsqlDatafeedEnabled,
 } from './ml_server_info';
 import mockMlInfoResponse from './__mocks__/ml_info_response.json';
 
@@ -25,6 +26,7 @@ describe('ml_server_info initial state', () => {
   it('should fail to get server info ', () => {
     expect(isCloud()).toBe(false);
     expect(getCloudDeploymentId()).toBe(null);
+    expect(getIsMlEsqlDatafeedEnabled()).toBe(false);
   });
 });
 
@@ -49,6 +51,20 @@ describe('ml_server_info', () => {
       expect(defaults.anomaly_detectors.categorization_examples_limit).toBe(4);
       expect(defaults.anomaly_detectors.model_snapshot_retention_days).toBe(1);
       expect(defaults.datafeeds.scroll_size).toBe(1000);
+    });
+  });
+
+  describe('ES|QL datafeeds', () => {
+    it('should get whether ES|QL datafeeds are enabled', async () => {
+      expect(getIsMlEsqlDatafeedEnabled()).toBe(false);
+
+      await loadMlServerInfo({
+        mlInfo: jest.fn(() =>
+          Promise.resolve({ ...mockMlInfoResponse, isMlEsqlDatafeedEnabled: true })
+        ),
+      } as unknown as MlApi);
+
+      expect(getIsMlEsqlDatafeedEnabled()).toBe(true);
     });
   });
 

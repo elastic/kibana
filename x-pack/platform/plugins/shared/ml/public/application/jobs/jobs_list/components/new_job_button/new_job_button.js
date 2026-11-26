@@ -12,14 +12,14 @@ import React from 'react';
 
 import { EuiButton } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
+import { getCreateJobPage } from '../../create_job_page';
 import { useCreateAndNavigateToManagementMlLink } from '../../../../contexts/kibana/use_create_url';
 
 export function NewJobButton({ size = 's' }) {
   const canCreateJob = usePermissionCheck('canCreateJob');
   const buttonEnabled = canCreateJob && mlNodesAvailable();
   const redirectToCreateJobSelectIndexPage = useCreateAndNavigateToManagementMlLink(
-    ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_SELECT_DATA_SOURCE,
+    getCreateJobPage(),
     'anomaly_detection'
   );
 

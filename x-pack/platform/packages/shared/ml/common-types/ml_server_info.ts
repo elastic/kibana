@@ -47,6 +47,8 @@ export interface MlInfoResponse {
   cloudUrl?: string;
   isMlAutoscalingEnabled: boolean;
   isMlCpsEnabled: boolean;
+  /** Whether Elasticsearch supports ES|QL queries in anomaly detection datafeeds. */
+  isMlEsqlDatafeedEnabled: boolean;
   showNodeInfo: boolean;
   showLicenseInfo: boolean;
 }

@@ -9,6 +9,7 @@ import type { estypes } from '@elastic/elasticsearch';
 
 import { i18n } from '@kbn/i18n';
 import { ALLOWED_DATA_UNITS, JOB_ID_MAX_LENGTH } from '@kbn/ml-validators';
+import { parseInterval } from '@kbn/ml-parse-interval';
 
 import type { Datafeed } from '@kbn/ml-common-types/anomaly_detection_jobs/datafeed';
 import type { Job } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
@@ -220,3 +221,23 @@ export function invalidTimeIntervalMessage(value: estypes.Duration | undefined) 
     }
   );
 }
+
+/**
+ * Returns whether a datafeed frequency is a whole multiple of an ES|QL query's BUCKET interval.
+ * Intervals that cannot be parsed are reported by the time interval format checks instead.
+ */
+export const isFrequencyMultipleOfInterval = (frequency: string, interval: string): boolean => {
+  const frequencyMs = parseInterval(frequency)?.asMilliseconds() ?? 0;
+  const intervalMs = parseInterval(interval)?.asMilliseconds() ?? 0;
+  if (frequencyMs <= 0 || intervalMs <= 0) {
+    return true;
+  }
+  return frequencyMs % intervalMs === 0;
+};
+
+export const frequencyNotMultipleOfIntervalMessage = (frequency: string, interval: string) =>
+  i18n.translate('xpack.ml.newJob.wizard.validateJob.frequencyNotMultipleOfQueryInterval', {
+    defaultMessage:
+      'Frequency must be a multiple of the query BUCKET interval ({interval}). {frequency} is not.',
+    values: { frequency, interval },
+  });

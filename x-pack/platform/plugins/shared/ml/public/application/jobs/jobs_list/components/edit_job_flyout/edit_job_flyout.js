@@ -36,6 +36,7 @@ import { validateModelMemoryLimit, validateGroupNames } from '../validate_job';
 import { toastNotificationServiceProvider } from '../../../../services/toast_notification_service';
 import { XJson } from '@kbn/es-ui-shared-plugin/public';
 import { DATAFEED_STATE, JOB_STATE } from '../../../../../../common/constants/states';
+import { isEsqlDatafeed } from '../../../../../../common/util/esql_metric_query';
 import { CustomUrlsWrapper, isValidCustomUrls } from '../../../../components/custom_urls';
 import { isManagedJob } from '../../../jobs_utils';
 import { ManagedJobsWarningCallout } from '../confirm_modals/managed_jobs_warning_callout';
@@ -46,6 +47,10 @@ import { showProjectRoutingChangeConfirmModal } from '../../../components/projec
 import { getIsMlCpsEnabled } from '../../../../services/ml_server_info';
 
 const { collapseLiteralStrings } = XJson;
+
+// an ES|QL datafeed's query is its ES|QL text, otherwise it is the DSL query as JSON
+const getDatafeedQueryText = (datafeedConfig, isEsql) =>
+  isEsql ? datafeedConfig.esql_query : JSON.stringify(datafeedConfig.query, null, 2);
 
 export class EditJobFlyoutUI extends Component {
   static contextType = context;
@@ -69,6 +74,7 @@ export class EditJobFlyoutUI extends Component {
       jobDetectorDescriptions: [],
       jobCustomUrls: [],
       datafeedQuery: '',
+      isEsqlDatafeed: false,
       datafeedQueryDelay: '',
       datafeedFrequency: '',
       datafeedScrollSize: '',
@@ -169,6 +175,7 @@ export class EditJobFlyoutUI extends Component {
     const bucketSpan = job.analysis_config ? job.analysis_config.bucket_span : '';
 
     const datafeedConfig = { ...job.datafeed_config };
+    const isEsql = hasDatafeed && isEsqlDatafeed(datafeedConfig);
     const frequency = datafeedConfig.frequency !== undefined ? datafeedConfig.frequency : '';
     const customUrls =
       job.custom_settings && job.custom_settings.custom_urls
@@ -185,10 +192,11 @@ export class EditJobFlyoutUI extends Component {
       jobDetectorDescriptions: detectors.map((d) => d.detector_description),
       jobBucketSpan: bucketSpan,
       jobCustomUrls: customUrls,
-      datafeedQuery: hasDatafeed ? JSON.stringify(datafeedConfig.query, null, 2) : '',
+      datafeedQuery: hasDatafeed ? getDatafeedQueryText(datafeedConfig, isEsql) : '',
       datafeedQueryDelay: hasDatafeed ? datafeedConfig.query_delay : '',
       datafeedFrequency: hasDatafeed ? frequency : '',
-      datafeedScrollSize: hasDatafeed ? +datafeedConfig.scroll_size : null,
+      // ES|QL datafeeds have no scroll size
+      datafeedScrollSize: hasDatafeed && !isEsql ? +datafeedConfig.scroll_size : null,
       datafeedProjectRouting: hasDatafeed ? datafeedConfig.project_routing : undefined,
     });
   }
@@ -200,11 +208,24 @@ export class EditJobFlyoutUI extends Component {
     const defaultProjectRouting = DEFAULT_ML_PROJECT_ROUTING;
 
     if (jobClosed && job.datafeed_config && job.data_counts) {
+      const { datafeed_config: datafeedConfig } = job;
+      // ES|QL datafeeds have no indices or DSL query; the estimate uses their ES|QL query instead
+      const esqlDatafeedConfig = isEsqlDatafeed(datafeedConfig)
+        ? {
+            datafeedConfig: {
+              datafeed_id: datafeedConfig.datafeed_id,
+              job_id: datafeedConfig.job_id,
+              esql_query: datafeedConfig.esql_query,
+              project_routing: datafeedConfig.project_routing,
+            },
+          }
+        : {};
       this.estimateModelMemoryLimit({
+        ...esqlDatafeedConfig,
         earliestMs: job.data_counts.earliest_record_timestamp,
         latestMs: job.data_counts.latest_record_timestamp,
-        indexPattern: job.datafeed_config.indices.join(','),
-        query: job.datafeed_config.query,
+        indexPattern: datafeedConfig.indices?.join(',') ?? '',
+        query: datafeedConfig.query,
         timeFieldName: job.data_description.time_field,
         analysisConfig: job.analysis_config,
       });
@@ -219,6 +240,7 @@ export class EditJobFlyoutUI extends Component {
       jobClosed,
       jobModelMemoryLimitValidationError: '',
       jobGroupsValidationError: '',
+      isEsqlDatafeed: hasDatafeed && isEsqlDatafeed(job.datafeed_config),
       ...cloneDeep(this._initialJobFormState),
       ...(datafeedRunning === false &&
       isMlCpsEnabled &&
@@ -411,6 +433,7 @@ export class EditJobFlyoutUI extends Component {
         datafeedFrequency,
         datafeedScrollSize,
         datafeedProjectRouting,
+        isEsqlDatafeed: isEsql,
         jobGroupsValidationError,
         jobModelMemoryLimitValidationError,
         isValidJobDetails,
@@ -473,6 +496,7 @@ export class EditJobFlyoutUI extends Component {
               datafeedQueryDelay={datafeedQueryDelay}
               datafeedFrequency={datafeedFrequency}
               datafeedScrollSize={datafeedScrollSize}
+              isEsqlDatafeed={isEsql}
               jobBucketSpan={jobBucketSpan}
               setDatafeed={this.setDatafeed}
               datafeedRunning={datafeedRunning}

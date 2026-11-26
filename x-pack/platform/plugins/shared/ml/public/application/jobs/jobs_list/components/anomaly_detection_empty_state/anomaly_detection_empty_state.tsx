@@ -11,11 +11,11 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { EuiEmptyPromptProps } from '@elastic/eui';
 import { EuiButton, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
 import type { SerializedStyles } from '@emotion/serialize';
 import adImage from './machine_learning_cog.svg';
 import { useMlKibana } from '../../../../contexts/kibana';
 import { useCreateAndNavigateToManagementMlLink } from '../../../../contexts/kibana/use_create_url';
+import { getCreateJobPage } from '../../create_job_page';
 import { usePermissionCheck } from '../../../../capabilities/check_capabilities';
 import { mlNodesAvailable } from '../../../../ml_nodes_check';
 import { MLEmptyPromptCard } from '../../../../components/overview/ml_empty_prompt_card';
@@ -35,7 +35,7 @@ export const AnomalyDetectionEmptyState: FC<{
   } = useMlKibana();
 
   const redirectToCreateJobSelectIndexPage = useCreateAndNavigateToManagementMlLink(
-    ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_SELECT_DATA_SOURCE,
+    getCreateJobPage(),
     'anomaly_detection'
   );
 

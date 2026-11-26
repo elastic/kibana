@@ -17,8 +17,12 @@ import {
 } from '../../../../../../common/util/job_utils';
 import { getNewJobLimits } from '../../../../services/ml_server_info';
 import type { JobCreator, JobCreatorType } from '../job_creator';
-import { isCategorizationJobCreator } from '../job_creator';
-import { populateValidationMessages } from './util';
+import { isCategorizationJobCreator, isEsqlJobCreator } from '../job_creator';
+import {
+  frequencyNotMultipleOfIntervalMessage,
+  isFrequencyMultipleOfInterval,
+  populateValidationMessages,
+} from './util';
 import type { CardinalityValidatorResult, JobExistsResult, GroupsExistResult } from './validators';
 import { cardinalityValidator, jobIdValidator, groupIdsValidator } from './validators';
 
@@ -218,9 +222,34 @@ export class JobValidator {
       datafeedConfig
     );
 
+    this._validateEsqlFrequency();
+
     this._validationSummary.basic = this._isOverallBasicValid();
     // Update validation results subject
     this._basicValidationResult$.next(this._basicValidations);
+  }
+
+  /**
+   * An ES|QL datafeed's frequency must be a multiple of the query's BUCKET interval, which is
+   * also the job's bucket span.
+   */
+  private _validateEsqlFrequency() {
+    const jobCreator = this._jobCreator;
+    if (isEsqlJobCreator(jobCreator) === false || jobCreator.isBucketSpanFromQuery === false) {
+      return;
+    }
+    const { frequency: validation } = this._basicValidations;
+    const { frequency } = jobCreator;
+    const interval = String(jobCreator.bucketSpan);
+    if (
+      validation.valid === false ||
+      frequency === null ||
+      isFrequencyMultipleOfInterval(frequency, interval)
+    ) {
+      return;
+    }
+    validation.valid = false;
+    validation.message = frequencyNotMultipleOfIntervalMessage(frequency, interval);
   }
 
   private _runAdvancedValidation() {
@@ -309,10 +338,15 @@ export class JobValidator {
    * Indicates if the Pick Fields step has a valid input
    */
   public get isPickFieldsStepValid(): boolean {
+    const { type } = this._jobCreator;
+    const isAdvanced = type === JOB_TYPE.ADVANCED || type === JOB_TYPE.ESQL_ADVANCED;
+    // the advanced ES|QL wizard has no datafeed step, so its query delay and frequency are set
+    // on this step
+    const hasDatafeedSettings = type === JOB_TYPE.ESQL_ADVANCED;
     return (
       this._jobCreator.detectors.length > 0 &&
-      (this._jobCreator.type !== JOB_TYPE.ADVANCED ||
-        (this._jobCreator.type === JOB_TYPE.ADVANCED && this.modelMemoryLimit.valid)) &&
+      (isAdvanced === false || this.modelMemoryLimit.valid) &&
+      (hasDatafeedSettings === false || (this.queryDelay.valid && this.frequency.valid)) &&
       this.bucketSpan.valid &&
       this.duplicateDetectors.valid &&
       this.categorizerMissingPerPartition.valid &&
