@@ -221,8 +221,14 @@ apiTest.describe(
         expect(response).toHaveStatusCode(200);
         expect(typesResponse).toHaveStatusCode(200);
         const { columns }: ListResponse = response.body;
-        const { types }: { types: Array<{ type: string; columns: ListResponse['columns'] }> } =
-          typesResponse.body;
+        const {
+          types,
+        }: {
+          types: Array<{
+            type: string;
+            columns: Array<ListResponse['columns'][number] & { label?: string }>;
+          }>;
+        } = typesResponse.body;
 
         expect(columns).toStrictEqual([
           { name: 'entity.id', kind: 'id' },
@@ -253,10 +259,13 @@ apiTest.describe(
           },
           { name: 'last_seen', kind: 'last_seen' },
         ]);
-        expect(columns.map(({ name, kind }) => ({ name, kind }))).toStrictEqual(
-          types
-            .find(({ type }) => type === 'k8s.deployment')
-            ?.columns.map(({ name, kind }) => ({ name, kind }))
+        // /types adds display labels that /list does not carry; everything else must match.
+        const typeColumns = types.find(({ type }) => type === 'k8s.deployment')?.columns;
+        expect(columns).toStrictEqual(
+          typeColumns?.map((column) => {
+            const { label, ...rest } = column;
+            return rest;
+          })
         );
       }
     );
