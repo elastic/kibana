@@ -164,12 +164,17 @@ const candidatePayload = (candidates: IocAdjudicationCandidate[]) =>
   }));
 
 const iocCandidateInstructions = `IOC candidates were extracted deterministically from the complete source. Return IDs only for
-URLs, domains, or file hashes the source explicitly attributes to attacker-controlled
-infrastructure, a malware sample, or attacker tooling. Never approve citations,
+URLs, domains, file hashes, or email addresses the source explicitly attributes to
+attacker-controlled infrastructure, a malware sample, or attacker tooling. Approve an email
+address only when the source says the attacker used or controls it, for example a phishing or
+spoofed sender (including one shown in a quoted message header), a ransom or extortion contact,
+a registrant, or an attacker-created account. Never approve citations,
 vendor/documentation links, researcher PoCs, navigation, shared-platform roots, examples,
 same-origin article links, git commit or object SHAs, certificate or key fingerprints,
-package or patch checksums, or hashes of legitimate or vendor-signed binaries. Candidate IDs
-preserve exact values; do not rewrite an IOC.`;
+package or patch checksums, or hashes of legitimate or vendor-signed binaries. Never approve
+contact, reporting, support, or press addresses of the publisher, a vendor, or an agency;
+researcher addresses; victim or recipient addresses; or addresses used only to illustrate a
+format or a proof of concept. Candidate IDs preserve exact values; do not rewrite an IOC.`;
 
 const buildPrompt = (
   params: EnrichReportCoreParams,

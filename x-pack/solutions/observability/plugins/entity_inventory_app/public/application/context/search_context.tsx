@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { createContext, useCallback, useContext, useMemo, useState } from 'react';
+import React, { createContext, useCallback, useContext, useEffect, useMemo } from 'react';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import type { EntityInventoryEntityCategory } from '../../types';
 import { ENTITY_INVENTORY_MAX_TIME_RANGE_DAYS } from '../constants';
@@ -14,6 +14,8 @@ import { INVALID_QUERY_TOAST_TITLE, TIME_RANGE_NOT_ALLOWED_TOAST_TITLE } from '.
 import { checkTimeRange } from '../utils/check_time_range';
 import { validateQuery } from '../utils/validate_query';
 import type { FilterControlsSelection } from '../filters/utils/selection';
+import { useEntityInventoryDateRange } from './date_range_context';
+import { useRefreshToken } from './use_refresh_token';
 import { useUrlSearchState } from './use_url_search_state';
 
 export interface EntityInventorySearchSubmitPayload {
@@ -51,10 +53,16 @@ export const EntityInventorySearchProvider = ({
   } = useKibana();
   const isTimeRangeLimited = !config.timeRangeLimit.disabled;
   const maxDays = isTimeRangeLimited ? ENTITY_INVENTORY_MAX_TIME_RANGE_DAYS : Infinity;
+  const { dateRange: lastDateRange, setDateRange: setLastDateRange } =
+    useEntityInventoryDateRange();
   const [{ query, filters, dateRange, filterControls }, updateSearchState] = useUrlSearchState({
     maxDays,
+    defaultDateRange: lastDateRange,
   });
-  const [refreshToken, setRefreshToken] = useState(0);
+  useEffect(() => {
+    setLastDateRange(dateRange);
+  }, [dateRange, setLastDateRange]);
+  const { refreshToken, bumpRefreshToken } = useRefreshToken(entityCategory);
 
   const setFilters = useCallback(
     (nextFilters: Filter[]) => updateSearchState({ filters: nextFilters }),
@@ -89,12 +97,12 @@ export const EntityInventorySearchProvider = ({
         });
       }
       if (isRangeAccepted) {
-        setRefreshToken((token) => token + 1);
+        bumpRefreshToken();
       }
 
       return isRangeAccepted ? submittedRange : dateRange;
     },
-    [dateRange, maxDays, notifications, updateSearchState, uiSettings]
+    [dateRange, maxDays, notifications, updateSearchState, uiSettings, bumpRefreshToken]
   );
 
   const value = useMemo(

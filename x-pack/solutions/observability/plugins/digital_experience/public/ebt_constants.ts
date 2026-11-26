@@ -35,12 +35,20 @@ export const DIGITAL_EXPERIENCE_EBT_ACTIONS = {
   SELECT_COLUMNS: 'selectColumns',
   /** The user loads the list again after it failed. */
   RETRY_LOAD: 'retryLoad',
-  /** The user sets up sessions, or updates them. */
+  /** The user sets up sessions, updates them, or turns them back on. */
   ENABLE_SESSIONS: 'enableSessions',
+  /** The user asks to turn sessions off, and then confirms it. */
+  DISABLE_SESSIONS: 'disableSessions',
+  /** The user keeps sessions on after asking to turn them off. */
+  CANCEL_DISABLE_SESSIONS: 'cancelDisableSessions',
   /** The user opens the sessions list narrowed to what they clicked, e.g. a browser. */
   VIEW_SESSIONS: 'viewSessions',
   /** The user opens the full list behind a summary, e.g. every error from the Overview. */
   VIEW_ALL: 'viewAll',
+  /** The user opens a dashboard of an application from its Overview. */
+  VIEW_DASHBOARD: 'viewDashboard',
+  /** The user saves a page's panels as a Kibana dashboard. */
+  SAVE_AS_DASHBOARD: 'saveAsDashboard',
   /** The user opens a session's details. */
   VIEW_SESSION: 'viewSession',
   /** The user jumps from the session timeline to one of its page visits. */
@@ -81,6 +89,7 @@ export const MOBILE_APPLICATION_EBT_ELEMENTS = {
   OS_FILTER: 'mobileOsFilter',
   RETRY: 'mobileRetry',
   CLEAR_FILTERS: 'mobileClearFilters',
+  COMPARE_TOGGLE: 'mobileCompareToggle',
 } as const;
 
 export const APPLICATIONS_LIST_EBT_ELEMENTS = {
@@ -93,13 +102,17 @@ export const APPLICATIONS_LIST_EBT_ELEMENTS = {
   COLUMN_SELECTOR: 'columnSelector',
   RETRY: 'applicationsRetry',
   SHOW_ALL_ENVIRONMENTS: 'showAllEnvironments',
+  ENABLE_SESSIONS: 'applicationsEnableSessions',
 } as const;
 
 export const APPLICATION_OVERVIEW_EBT_ELEMENTS = {
   RETRY: 'overviewRetry',
+  KPIS_RETRY: 'overviewKpisRetry',
   USAGE_RETRY: 'overviewUsageRetry',
   BROWSER_SESSIONS_LINK: 'overviewBrowserSessionsLink',
   OS_SESSIONS_LINK: 'overviewOsSessionsLink',
+  FRUSTRATION_SESSIONS_LINK: 'overviewFrustrationSessionsLink',
+  FRUSTRATION_DASHBOARD_LINK: 'overviewFrustrationDashboardLink',
   BROWSER_FILTER: 'overviewBrowserFilter',
   OS_FILTER: 'overviewOsFilter',
   DEVICE_FILTER: 'overviewDeviceFilter',
@@ -120,6 +133,10 @@ export const APPLICATION_OVERVIEW_EBT_ELEMENTS = {
   PERCENTILE: 'overviewPercentile',
 } as const;
 
+export const FRUSTRATION_EBT_ELEMENTS = {
+  USAGE_RETRY: 'frustrationUsageRetry',
+} as const;
+
 export const ERRORS_EBT_ELEMENTS = {
   RETRY: 'errorsRetry',
   ERROR: 'errorsError',
@@ -135,11 +152,18 @@ export const NETWORK_EBT_ELEMENTS = {
 export const SESSIONS_EBT_ELEMENTS = {
   ENABLE: 'sessionsEnable',
   UPDATE: 'sessionsUpdate',
+  TURN_ON: 'sessionsTurnOn',
+  TURN_OFF: 'sessionsTurnOff',
+  TURN_OFF_CONFIRM: 'sessionsTurnOffConfirm',
+  TURN_OFF_CANCEL: 'sessionsTurnOffCancel',
   RETRY: 'sessionsRetry',
   SESSION_RETRY: 'sessionRetry',
   SESSION_LINK: 'sessionLink',
   ERRORS_FILTER: 'sessionsErrorsFilter',
   FAILED_REQUESTS_FILTER: 'sessionsFailedRequestsFilter',
+  FRUSTRATION_FILTER: 'sessionsFrustrationFilter',
+  FRUSTRATION_TARGET_FILTER: 'sessionsFrustrationTargetFilter',
+  FRUSTRATION_PAGE_FILTER: 'sessionsFrustrationPageFilter',
   DURATION_FILTER: 'sessionsDurationFilter',
   BROWSER_FILTER: 'sessionsBrowserFilter',
   OS_FILTER: 'sessionsOsFilter',

@@ -35,6 +35,27 @@ export const getParallelBranchScopes = (
 };
 
 /**
+ * Returns every scope instance the stack frames are nested in (foreach iterations, and
+ * `parallel` branches, while iterations or retry attempts identified by `scopeId`), outermost
+ * first, in the shape {@link areParallelBranchesCompatible} compares.
+ */
+export const getScopeInstances = (stackFrames: readonly StackFrame[]): ParallelBranchScope[] => {
+  const path: string[] = [];
+  const instances: ParallelBranchScope[] = [];
+  for (const frame of stackFrames) {
+    for (const scope of frame.nestedScopes) {
+      if (scope.nodeType === 'enter-foreach-iteration') {
+        instances.push({ fanOut: path.join('/'), branch: frame.stepId });
+      } else if (scope.scopeId !== undefined) {
+        instances.push({ fanOut: [...path, scope.nodeId].join('/'), branch: scope.scopeId });
+      }
+      path.push(`${scope.nodeId}:${scope.scopeId ?? ''}`);
+    }
+  }
+  return instances;
+};
+
+/**
  * True unless the two lineages sit in different branches of the same `parallel` fan-out.
  * Branches of an unrelated (e.g. already joined) fan-out stay visible.
  */
@@ -52,4 +73,29 @@ export const areParallelBranchesCompatible = (
     }
   }
   return true;
+};
+
+/**
+ * Accessibility id for step IO cache addressing: the step name plus parallel
+ * branch lineage. Foreach/while/retry attempt `scopeId`s are omitted so sequential
+ * loop iterations share one id. `getParallelBranchScopes` keeps those ids in its
+ * `fanOut` path for sibling filtering — do not reuse it here.
+ *
+ * Examples: `process`; `process|fanOut=parallel_1|branch=0`.
+ */
+export const buildStepIoContextId = (
+  stepId: string,
+  stackFrames: readonly StackFrame[]
+): string => {
+  const parts: string[] = [stepId];
+  const path: string[] = [];
+  for (const frame of stackFrames) {
+    for (const scope of frame.nestedScopes) {
+      if (scope.nodeType === 'enter-parallel') {
+        parts.push(`fanOut=${[...path, scope.nodeId].join('/')}`, `branch=${scope.scopeId ?? ''}`);
+      }
+      path.push(scope.nodeId);
+    }
+  }
+  return parts.join('|');
 };

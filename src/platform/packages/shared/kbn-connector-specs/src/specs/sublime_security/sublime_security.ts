@@ -528,7 +528,7 @@ Gotchas:
       isTool: true,
       scope: 'read',
       description:
-        'Get the status of an asynchronous Sublime task by ID: pending, started, succeeded, failed, or retrying, plus an error message when failed. ' +
+        'Get the status of an asynchronous Sublime task by ID: started, succeeded, or failed, plus an error message when failed. ' +
         'Quarantine, trash, and restore return a task_id; poll this until the state is succeeded or failed before reporting the outcome.',
       input: GetTaskInputSchema,
       handler: async (ctx, input: GetTaskInput) => {

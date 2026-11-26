@@ -18,6 +18,10 @@ import { validateConfig, validateConnector, validateSecrets } from '../../../../
 import { ensureConfigAuthType } from '../../../../lib/ensure_config_auth_type';
 import { ensureNotKibanaManagedAuthType } from '../../../../lib/ensure_not_kibana_managed_auth_type';
 import { inferAuthMode } from '../../../../lib/infer_auth_mode';
+import {
+  parseSpecVersion,
+  resolveConnectorSpecVersion,
+} from '../../../../lib/resolve_connector_spec_version';
 import { getAuthMode, isConnectorDeprecated } from '../../lib';
 import type { RawAction, HookServices } from '../../../../types';
 import { tryCatch } from '../../../../lib';
@@ -85,7 +89,13 @@ export async function update({ context, id, action }: ConnectorUpdateParams): Pr
   const { attributes, references, version } =
     await context.unsecuredSavedObjectsClient.get<RawAction>('action', id);
   const { actionTypeId, authMode } = attributes;
-  const { name, config, secrets, isInboundEventsEnabled: requestedInboundEventsEnabled } = action;
+  const {
+    name,
+    config,
+    secrets,
+    specVersion: requestedSpecVersion,
+    isInboundEventsEnabled: requestedInboundEventsEnabled,
+  } = action;
 
   const currentAuthMode = authMode ?? 'shared';
   const currentAuthTypeId = getAuthTypeId(attributes.secrets, attributes.config);
@@ -123,8 +133,22 @@ export async function update({ context, id, action }: ConnectorUpdateParams): Pr
     );
   }
 
-  const actionType = context.actionTypeRegistry.get(actionTypeId);
+  const registeredActionType = context.actionTypeRegistry.get(actionTypeId);
   const configurationUtilities = context.actionTypeRegistry.getUtils();
+
+  const pinnedMajor =
+    configurationUtilities.isCatalogEnabled() && registeredActionType.specs
+      ? parseSpecVersion(attributes.specVersion ?? '')?.major
+      : undefined;
+  const { resolvedSpecVersion, actionTypeForValidation: actionType } =
+    configurationUtilities.isCatalogEnabled()
+      ? resolveConnectorSpecVersion({
+          actionType: registeredActionType,
+          specVersion: requestedSpecVersion ?? pinnedMajor?.toString(),
+          configurationUtilities,
+        })
+      : { resolvedSpecVersion: undefined, actionTypeForValidation: registeredActionType };
+
   const validatedActionTypeConfig = validateConfig(actionType, config, {
     configurationUtilities,
   });
@@ -235,6 +259,7 @@ export async function update({ context, id, action }: ConnectorUpdateParams): Pr
           isMissingSecrets: false,
           config: configForSave,
           secrets: validatedActionTypeSecrets,
+          ...(resolvedSpecVersion !== undefined ? { specVersion: resolvedSpecVersion } : {}),
           ...(identityAttributes ? toRawActionIdentityAttributes(identityAttributes) : {}),
           hasInboundEventIdentity: Boolean(identityAttributes),
         },
@@ -322,6 +347,9 @@ export async function update({ context, id, action }: ConnectorUpdateParams): Pr
     isDeprecated: isConnectorDeprecated(result.attributes),
     isConnectorTypeDeprecated: context.actionTypeRegistry.isDeprecated(actionTypeId),
     authMode: resolvedAuthMode,
+    ...(result.attributes.specVersion !== undefined
+      ? { specVersion: result.attributes.specVersion }
+      : {}),
     ...(connectorTypeHasInboundEvents(actionTypeId) ? { isInboundEventsEnabled } : {}),
   };
 }

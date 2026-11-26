@@ -24,12 +24,15 @@ import {
 } from '../../../common/otel_data';
 import { SESSIONS_MAX_SESSION_HOURS } from '../../../common/sessions';
 import { SESSION_ATTRIBUTE_FIELDS } from '../../../common/session_attribute_fields';
-import { SOURCE_SERVICE_NAME_FIELD, SOURCE_SESSION_ID_FIELD } from '../../lib/otel/source_fields';
+import {
+  NULLIFY_UNMAPPED_FIELDS,
+  SOURCE_SERVICE_NAME_FIELD,
+  SOURCE_SESSION_ID_FIELD,
+} from '../../../common/otel_source_fields';
 import {
   ESQL_MAX_ROWS,
   HTTP_REQUEST_CONDITIONS,
   HTTP_REQUEST_EVALS,
-  NULLIFY_UNMAPPED_FIELDS,
   RAW_PREFIX,
   attributeQueryParts,
   renderStats,

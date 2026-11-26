@@ -12,6 +12,7 @@ export interface BootstrapTemplateData {
   themeTagName: string;
   jsDependencyPaths: string[];
   publicPathMap: string;
+  pluginIdsToLoad: string[];
   useHMR?: boolean;
 }
 
@@ -20,6 +21,7 @@ export const renderTemplate = ({
   colorMode,
   jsDependencyPaths,
   publicPathMap,
+  pluginIdsToLoad,
   useHMR = false,
 }: BootstrapTemplateData) => {
   const kbnThemeTagTemplate =
@@ -89,6 +91,7 @@ window.__kbnHardenPrototypes__ = kbnHardenPrototypes.hardenPrototypes;
 window.__kbnStrictCsp__ = kbnCsp.strictCsp;
 ${kbnThemeTagTemplate}
 window.__kbnPublicPath__ = ${publicPathMap};
+window.__kbnPluginIdsToLoad__ = ${JSON.stringify(pluginIdsToLoad)};
 ${useHMR ? 'window.__kbnHmrActive__ = true;' : ''}
 window.__kbnBundles__ = kbnBundlesLoader();
 

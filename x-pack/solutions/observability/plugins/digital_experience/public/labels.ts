@@ -6,7 +6,6 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { SESSIONS_LOOKBACK_DAYS } from '../common/sessions';
 import type {
   ApplicationSource,
   ApplicationTabId,
@@ -25,13 +24,40 @@ export const PAGE_LOADS_LABEL = i18n.translate('xpack.digitalExperience.pageLoad
   defaultMessage: 'Page loads',
 });
 
+export const INGEST_LABEL = i18n.translate('xpack.digitalExperience.ingest.label', {
+  defaultMessage: 'Ingest',
+});
+
+/** How ingest is estimated, wherever it is shown. */
+export const INGEST_DESCRIPTION = i18n.translate('xpack.digitalExperience.ingest.description', {
+  defaultMessage:
+    "Estimated RUM telemetry stored in the time range, not the application's own network traffic: its documents in each data stream times that data stream's average stored document size, without replicas.",
+});
+
+/** Why some applications have no ingest estimate: their indices' sizes can't be read. */
+export const INGEST_MISSING_PRIVILEGES_LABEL = i18n.translate(
+  'xpack.digitalExperience.ingest.missingPrivileges',
+  {
+    defaultMessage:
+      'Some applications have no estimate: it needs the monitor privilege on their indices.',
+  }
+);
+
+/** Why some estimates may be low: remote clusters' sizes can't be read. */
+export const INGEST_REMOTE_LABEL = i18n.translate('xpack.digitalExperience.ingest.remote', {
+  defaultMessage: 'Data in remote clusters is not counted, so some estimates may be low.',
+});
+
+/** Why some applications have no ingest estimate: a search failed. */
+export const INGEST_FAILED_LABEL = i18n.translate('xpack.digitalExperience.ingest.failed', {
+  defaultMessage: 'Some applications have no estimate: their data could not be read.',
+});
+
 /** What the sessions of the applications are counted from, for where they can't be shown. */
 export const SESSIONS_UNAVAILABLE_LABEL = i18n.translate(
   'xpack.digitalExperience.sessions.unavailable',
   {
-    defaultMessage:
-      'Counted for EDOT Browser applications from their session summaries, for time ranges within the last {days} days.',
-    values: { days: SESSIONS_LOOKBACK_DAYS },
+    defaultMessage: 'Counted for EDOT Browser applications only, from their session summaries.',
   }
 );
 
@@ -158,3 +184,20 @@ export const valueWithChangeLabel = (value: string, change: string): string =>
     defaultMessage: '{value} ({change})',
     values: { value, change },
   });
+
+/** The header's toggle that compares the KPIs with the period of equal length before. */
+export const COMPARE_LABEL = i18n.translate('xpack.digitalExperience.compare', {
+  defaultMessage: 'Compare to the previous period',
+});
+
+/** A value with its share of the total, e.g. "600 (60%)". */
+export const valueWithShareLabel = (value: string, share: string): string =>
+  i18n.translate('xpack.digitalExperience.mobile.valueWithShare', {
+    defaultMessage: '{value} ({share})',
+    values: { value, share },
+  });
+
+/** The release health's group of every release but the top ones. */
+export const OTHER_RELEASE_LABEL = i18n.translate('xpack.digitalExperience.mobile.releases.other', {
+  defaultMessage: 'Other',
+});

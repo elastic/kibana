@@ -41,7 +41,7 @@ const samples = { count: 4, good: 2, needs_improvement: 1, poor: 1 };
 /** A summary with every field set, so each one's path can be checked against the mappings. */
 const fullDocument: SessionDocument = {
   session: { id: 'session-a' },
-  service: { name: 'storefront-web' },
+  service: { name: 'storefront-web', version: '2.4.0' },
   start_time: '2026-10-27T10:00:00.000Z',
   end_time: '2026-10-27T10:05:00.000Z',
   duration_ms: 300_000,
@@ -50,6 +50,12 @@ const fullDocument: SessionDocument = {
   page_load_count: 1,
   click_count: 4,
   js_error_count: 2,
+  rage_click_count: 2,
+  dead_click_count: 1,
+  error_click_count: 0,
+  frustration_count: 3,
+  frustration_targets: ['#buy'],
+  frustration_pages: ['/cart'],
   http_request_count: 5,
   http_failed_request_count: 1,
   bounced: false,
@@ -63,6 +69,7 @@ const fullDocument: SessionDocument = {
   geo: { country_iso: 'ES', region: 'Madrid', city: 'Madrid' },
   web_vitals: { lcp: 2100, inp: 120, cls: 0.05, fcp: 900, ttfb: 300 },
   web_vital_samples: { lcp: samples, inp: samples, cls: samples, fcp: samples, ttfb: samples },
+  load_time: { p75: 1800, count: 1 },
   search: ['session-a', 'ana@example.com'],
 };
 
@@ -117,6 +124,21 @@ describe('sessions index', () => {
 
     it('searches anywhere in a value with a wildcard field', () => {
       expect(sessionsIndexMappings.properties.search).toEqual({ type: 'wildcard' });
+    });
+
+    it('maps the frustration counts as numbers, and the frustrated selectors and pages as keywords', () => {
+      const { properties } = sessionsIndexMappings;
+
+      for (const field of [
+        properties.rage_click_count,
+        properties.dead_click_count,
+        properties.error_click_count,
+        properties.frustration_count,
+      ]) {
+        expect(field).toEqual({ type: 'long' });
+      }
+      expect(properties.frustration_targets).toEqual({ type: 'keyword', ignore_above: 1024 });
+      expect(properties.frustration_pages).toEqual({ type: 'keyword', ignore_above: 1024 });
     });
 
     it('bounds the environment, which the browser sets', () => {
