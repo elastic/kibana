@@ -29,6 +29,13 @@ if ! printf '%s' "$config" | jq -e 'type == "object"' >/dev/null 2>&1; then
   exit 1
 fi
 
+# The ORCA re-grade reads stored runs from Golden and starts no investigation, so it needs no shard,
+# connector set, sandbox or knowledge: Scout starts plain evals_tracing, whatever else is exported.
+if [[ "$(printf '%s' "${NIGHTSHIFT_DATASETS:-}" | tr -d ' ')" == orcabench-regrade ]]; then
+  echo '{}'
+  exit 0
+fi
+
 # Config value at a jq path, ignoring `REPLACE_ME` placeholders.
 config_value() {
   printf '%s' "$config" | jq -r --arg placeholder REPLACE_ME \
@@ -128,10 +135,6 @@ if [[ "${EVAL_SHARD_ID:-}" == orcabench || -n "$orca_slice" || "${NIGHTSHIFT_DAT
   es_url="$(config_value '.nightshiftOrcaEs.url')"
   orca_username="$(config_value '.nightshiftOrcaEs.username')"
   orca_password="$(config_value '.nightshiftOrcaEs.password')"
-elif [[ "${NIGHTSHIFT_DATASETS:-}" == orcabench-regrade ]]; then
-  # The ORCA re-grade reads stored runs from Golden and starts no investigation, so it needs no
-  # connector set, and so no sandbox credentials.
-  :
 else
   # The Elasticsearch URL and key come from one source, so a partial profile block is never
   # completed from the shell. The Vault field keeps its original name, `nightshift.telemetry`.

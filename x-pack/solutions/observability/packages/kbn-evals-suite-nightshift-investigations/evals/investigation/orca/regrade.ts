@@ -100,6 +100,41 @@ export const buildOrcaRegradeDataset = (
   };
 };
 
+/**
+ * Stores the re-grade dataset and returns it with the stored example ids. The executor writes each
+ * score under its example's id, and the examples still carry the release's, which this dataset does
+ * not have.
+ */
+export const storeOrcaRegradeDataset = async (
+  client: Pick<EvalsClient, 'getDatasetByName' | 'upsertDataset'>,
+  dataset: EvaluationDataset<InvestigationExample>
+): Promise<EvaluationDataset<InvestigationExample>> => {
+  await client.upsertDataset({
+    name: dataset.name,
+    description: dataset.description,
+    tags: dataset.tags,
+    maturity: dataset.maturity,
+    examples: dataset.examples.map(({ input, output, metadata }) => ({ input, output, metadata })),
+  });
+  const stored = await client.getDatasetByName(dataset.name);
+  assert(stored, `ORCA re-grade dataset ${dataset.name} is missing after it was stored`);
+  const idsByCase = new Map(
+    stored.examples.map(({ id, metadata }) => [metadata?.case_id, id] as const)
+  );
+  assert(
+    stored.examples.length === dataset.examples.length &&
+      dataset.examples.every(({ metadata }) => idsByCase.has(metadata.case_id)),
+    `ORCA re-grade dataset ${dataset.name} does not hold exactly the stored runs' cases`
+  );
+  return {
+    ...dataset,
+    examples: dataset.examples.map((example) => ({
+      ...example,
+      id: idsByCase.get(example.metadata.case_id),
+    })),
+  };
+};
+
 /** A stored run from before the report step, whose investigation ORCA can still grade. */
 export const needsOrcaReport = (output: InvestigationTaskOutput): boolean =>
   output.orca_report_md === undefined &&

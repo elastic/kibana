@@ -14,6 +14,7 @@ import {
   loadStoredOrcaRuns,
   needsOrcaReport,
   resolveOrcaRegradeExperiment,
+  storeOrcaRegradeDataset,
 } from './regrade';
 
 type Client = Pick<
@@ -104,6 +105,35 @@ describe('ORCA re-grade', () => {
     expect(run({ execution_error: 'Investigation round failed: boom' })).toBe(false);
     expect(run({ execution_error: NO_CONCLUSION_ERROR })).toBe(false);
     expect(run({ report_truncated: true })).toBe(false);
+  });
+
+  it("scores under the stored re-grade dataset's example ids, not the release's", async () => {
+    const dataset = {
+      name: 'nightshift/orca-bench-public755-v2/regrade-experiment',
+      description: 'Re-grade.',
+      examples: ['a', 'b'].map((caseId) => ({
+        id: `release-${caseId}`,
+        input: { question: caseId },
+        metadata: { case_id: caseId },
+      })),
+    } as EvaluationDataset<InvestigationExample>;
+    const client = {
+      upsertDataset: jest.fn().mockResolvedValue('regrade-dataset'),
+      getDatasetByName: jest.fn().mockResolvedValue({
+        examples: ['b', 'a'].map((caseId) => ({
+          id: `regrade-${caseId}`,
+          metadata: { case_id: caseId },
+        })),
+      }),
+    } as unknown as Pick<EvalsClient, 'getDatasetByName' | 'upsertDataset'>;
+    const stored = await storeOrcaRegradeDataset(client, dataset);
+    // The executor reads `id` off each example, which `InvestigationExample` doesn't declare.
+    expect((stored.examples as Array<{ id?: string }>).map(({ id }) => id)).toEqual([
+      'regrade-a',
+      'regrade-b',
+    ]);
+    // The release's ids are not sent with the examples it stores.
+    expect(jest.mocked(client.upsertDataset).mock.calls[0][0].examples[0]).not.toHaveProperty('id');
   });
 
   it('needs the experiment id', () => {

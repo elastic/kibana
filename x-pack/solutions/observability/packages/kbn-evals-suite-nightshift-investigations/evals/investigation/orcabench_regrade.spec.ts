@@ -19,6 +19,7 @@ import {
   loadStoredOrcaRuns,
   needsOrcaReport,
   resolveOrcaRegradeExperiment,
+  storeOrcaRegradeDataset,
 } from './orca/regrade';
 import { assertScoresWithinQueryLimit } from './score_budget';
 
@@ -55,8 +56,11 @@ evaluate.describe(
         ).toBe(stored.taskModelId);
         // The pinned release, not the experiment's dataset, so earlier releases get orca_expected.
         const release = await loadOrcaDataset(evalsClient, run.release);
-        // The executor stores this dataset under its own name as it runs, like any ORCA run.
-        const dataset = buildOrcaRegradeDataset(release, stored.outputs, experimentId);
+        // Stored first, so each score is written under this dataset's own example ids.
+        const dataset = await storeOrcaRegradeDataset(
+          evalsClient,
+          buildOrcaRegradeDataset(release, stored.outputs, experimentId)
+        );
         const rubrics = await loadOrcaRubrics(evalsClient);
         assertOrcaRubricsCover(dataset.examples, rubrics);
         const judgeConnector = orcaJudgeConnector(evaluationConnector);
