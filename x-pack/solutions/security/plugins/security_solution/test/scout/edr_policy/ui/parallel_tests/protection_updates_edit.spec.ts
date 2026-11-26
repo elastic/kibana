@@ -9,14 +9,12 @@ import moment from 'moment';
 import { expect } from '@kbn/scout-security/ui';
 import { spaceTest, tags } from '../fixtures';
 import {
-  getNoteWriterAuthHeaders,
-  NOTE_WRITER_ROLE,
+  DISPLAY_DATE_FORMAT,
+  MANIFEST_DATE_FORMAT,
   setManifestVersion,
   setProtectionUpdatesNote,
 } from '../fixtures/protection_updates_data';
 
-const DISPLAY_DATE_FORMAT = 'MMMM DD, YYYY';
-const MANIFEST_DATE_FORMAT = 'YYYY-MM-DD';
 const NOTE = 'test note';
 const UPDATED_NOTE = 'updated test note';
 
@@ -27,8 +25,7 @@ spaceTest.describe(
   { tag: [...tags.stateful.classic, ...tags.serverless.security.complete] },
   () => {
     spaceTest.beforeEach(async ({ browserAuth }) => {
-      // The note writer, so that seeding the note on stateful keeps the worker's custom role as is.
-      await browserAuth.loginAsSecurityRole(NOTE_WRITER_ROLE);
+      await browserAuth.loginAsSecurityRole('endpoint_operations_analyst');
     });
 
     spaceTest('renders tab content', async ({ page, pageObjects, endpointPolicy }) => {
@@ -157,48 +154,31 @@ spaceTest.describe(
       });
     });
 
-    spaceTest(
-      'update note',
-      async ({
+    spaceTest('update note', async ({ kbnClient, scoutSpace, pageObjects, endpointPolicy }) => {
+      const { protectionUpdates } = pageObjects;
+      await setManifestVersion(
         kbnClient,
-        samlAuth,
-        config,
-        endpointManagementApi,
-        scoutSpace,
-        pageObjects,
-        endpointPolicy,
-      }) => {
-        const { protectionUpdates } = pageObjects;
-        await setManifestVersion(
-          kbnClient,
-          scoutSpace.id,
-          endpointPolicy.id,
-          daysAgo(7).format(MANIFEST_DATE_FORMAT)
-        );
-        await setProtectionUpdatesNote({
-          endpointManagementApi,
-          authHeaders: await getNoteWriterAuthHeaders(samlAuth, config),
-          spaceId: scoutSpace.id,
-          policyId: endpointPolicy.id,
-          note: NOTE,
-        });
+        scoutSpace.id,
+        endpointPolicy.id,
+        daysAgo(7).format(MANIFEST_DATE_FORMAT)
+      );
+      await setProtectionUpdatesNote(kbnClient, scoutSpace.id, endpointPolicy.id, NOTE);
 
-        await spaceTest.step('replace the note and save', async () => {
-          await protectionUpdates.goto(endpointPolicy.id);
-          await expect(protectionUpdates.saveButton).toBeEnabled();
-          await expect(protectionUpdates.note).toHaveValue(NOTE);
-          await protectionUpdates.replaceNote(UPDATED_NOTE);
-          await protectionUpdates.save();
-          await expect(protectionUpdates.successToast).toBeVisible();
-          await expect(protectionUpdates.note).toHaveValue(UPDATED_NOTE);
-          await expect(protectionUpdates.saveButton).toBeDisabled();
-        });
+      await spaceTest.step('replace the note and save', async () => {
+        await protectionUpdates.goto(endpointPolicy.id);
+        await expect(protectionUpdates.saveButton).toBeEnabled();
+        await expect(protectionUpdates.note).toHaveValue(NOTE);
+        await protectionUpdates.replaceNote(UPDATED_NOTE);
+        await protectionUpdates.save();
+        await expect(protectionUpdates.successToast).toBeVisible();
+        await expect(protectionUpdates.note).toHaveValue(UPDATED_NOTE);
+        await expect(protectionUpdates.saveButton).toBeDisabled();
+      });
 
-        await spaceTest.step('the new note persists after a reload', async () => {
-          await protectionUpdates.goto(endpointPolicy.id);
-          await expect(protectionUpdates.note).toHaveValue(UPDATED_NOTE);
-        });
-      }
-    );
+      await spaceTest.step('the new note persists after a reload', async () => {
+        await protectionUpdates.goto(endpointPolicy.id);
+        await expect(protectionUpdates.note).toHaveValue(UPDATED_NOTE);
+      });
+    });
   }
 );
