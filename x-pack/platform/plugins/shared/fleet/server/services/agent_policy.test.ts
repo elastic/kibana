@@ -3772,6 +3772,30 @@ describe('Agent policy', () => {
       );
       expect(await agentPolicyService.getInactivityTimeouts()).toEqual([]);
     });
+    it('should read the policies of all spaces by default', async () => {
+      const mockSoClient = createMockSoClientThatReturns([]);
+      mockedAppContextService.getInternalUserSOClientWithoutSpaceExtension.mockReturnValueOnce(
+        mockSoClient
+      );
+      await agentPolicyService.getInactivityTimeouts();
+
+      expect(mockSoClient.find).toHaveBeenCalledWith(
+        expect.objectContaining({ namespaces: ['*'] })
+      );
+    });
+    it('should only read the policies of the given space', async () => {
+      const mockSoClient = createMockSoClientThatReturns([createPolicySO('policy1', 1000)]);
+      mockedAppContextService.getInternalUserSOClientWithoutSpaceExtension.mockReturnValueOnce(
+        mockSoClient
+      );
+      expect(await agentPolicyService.getInactivityTimeouts({ spaceId: 'space-a' })).toEqual([
+        { inactivityTimeout: 1000, policyIds: ['policy1'] },
+      ]);
+
+      expect(mockSoClient.find).toHaveBeenCalledWith(
+        expect.objectContaining({ namespaces: ['space-a'] })
+      );
+    });
     it('should return single inactivity timeout', async () => {
       const mockSoClient = createMockSoClientThatReturns([createPolicySO('policy1', 1000)]);
       mockedAppContextService.getInternalUserSOClientWithoutSpaceExtension.mockReturnValueOnce(

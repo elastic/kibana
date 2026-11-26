@@ -10,8 +10,6 @@ import { type RequestHandler, SavedObjectsErrorHelpers } from '@kbn/core/server'
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import type { TypeOf } from '@kbn/config-schema';
 
-import type { Script } from '@elastic/elasticsearch/lib/api/types';
-
 import type {
   GetAgentsResponse,
   GetOneAgentResponse,
@@ -57,7 +55,6 @@ import {
   generateNamespaceTemplateIndexPattern,
 } from '../../services/epm/elasticsearch/template/template';
 import { isOtelDataStream } from '../../services/epm/packages/namespace_template_utils';
-import { buildAgentStatusRuntimeField } from '../../services/agents/build_status_runtime_field';
 import { appContextService, agentPolicyService } from '../../services';
 import { AGENTS_INDEX } from '../../constants';
 import type { AgentClient } from '../../services';
@@ -598,20 +595,6 @@ function combineIncomingDataResults(
 function isStringArray(arr: unknown | string[]): arr is string[] {
   return Array.isArray(arr) && arr.every((p) => typeof p === 'string');
 }
-
-/**
- * @deprecated Unused. The returned source reads its inactivity cutoffs from script `params`, which
- * this route does not return, so it can't be run on its own. To be removed in a follow-up.
- */
-export const getAgentStatusRuntimeFieldHandler: RequestHandler = async (
-  context,
-  request,
-  response
-) => {
-  const runtimeFields = await buildAgentStatusRuntimeField();
-
-  return response.ok({ body: (runtimeFields.status.script as Script)!.source! });
-};
 
 export const getAvailableVersionsHandler: RequestHandler = async (context, request, response) => {
   const availableVersions = await AgentService.getAvailableVersions();

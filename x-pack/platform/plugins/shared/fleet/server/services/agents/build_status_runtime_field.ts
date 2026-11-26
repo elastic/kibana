@@ -141,14 +141,22 @@ export function _buildStatusRuntimeField(opts: {
   const { inactivityTimeouts, pathPrefix } = opts;
   const now = Date.now();
 
-  const inactivityCutoffs: Record<string, number> = {};
+  // Policy ids are user provided, a Map avoids collisions with `Object.prototype` members such as
+  // `toString` and the `__proto__` setter, which a plain object would silently mishandle.
+  const cutoffsByPolicyId = new Map<string, number>();
   for (const { inactivityTimeout, policyIds } of inactivityTimeouts) {
     const cutoff = now - inactivityTimeout * 1000;
     for (const policyId of policyIds) {
       // a policy should only be in one group, if not the shortest timeout (largest cutoff) wins
-      inactivityCutoffs[policyId] = Math.max(inactivityCutoffs[policyId] ?? -Infinity, cutoff);
+      const existingCutoff = cutoffsByPolicyId.get(policyId);
+      cutoffsByPolicyId.set(
+        policyId,
+        existingCutoff === undefined ? cutoff : Math.max(existingCutoff, cutoff)
+      );
     }
   }
+  // `Object.fromEntries` defines own properties, so `__proto__` is kept as a regular key
+  const inactivityCutoffs: Record<string, number> = Object.fromEntries(cutoffsByPolicyId);
 
   return {
     status: {
@@ -169,11 +177,17 @@ export function _buildStatusRuntimeField(opts: {
 // pathPrefix is used to prefix the field path in the source
 // pathPrefix is used by the endpoint team currently to run
 // agent queries against the endpoint metadata index
+// spaceId limits the inactivity timeouts to the agent policies available in that space, it is used
+// when the result is exposed to users (for example in the CSV report job) so that it does not list
+// the policies of other spaces. By default the policies of all spaces are used.
 export async function buildAgentStatusRuntimeField(
   soClient?: SavedObjectsClientContract, // Deprecated, it's now using an internal client
-  pathPrefix?: string
+  pathPrefix?: string,
+  options: { spaceId?: string } = {}
 ) {
-  const inactivityTimeouts = await agentPolicyService.getInactivityTimeouts();
+  const inactivityTimeouts = await agentPolicyService.getInactivityTimeouts({
+    spaceId: options.spaceId,
+  });
 
   return _buildStatusRuntimeField({
     inactivityTimeouts,

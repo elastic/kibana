@@ -450,19 +450,6 @@ export function useGetAgentsAvailableVersionsQuery(options: Partial<{ enabled: b
   );
 }
 
-export function sendGetAgentStatusRuntimeField() {
-  return sendRequestForRq<string>({
-    method: 'get',
-    path: '/internal/fleet/agents/status_runtime_field',
-    version: API_VERSIONS.internal.v1,
-  });
-}
-
-export function useGetAgentStatusRuntimeFieldQuery(options: Partial<{ enabled: boolean }> = {}) {
-  return useQuery(['status_runtime_field'], () => sendGetAgentStatusRuntimeField(), {
-    enabled: options.enabled,
-  });
-}
 export function sendMigrateSingleAgent(options: MigrateSingleAgentRequest['body']) {
   return sendRequestForRq<MigrateSingleAgentResponse>({
     path: agentRouteService.postMigrateSingleAgent(options.id),

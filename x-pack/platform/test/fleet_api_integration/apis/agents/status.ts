@@ -277,36 +277,62 @@ export default function ({ getService }: FtrProviderContext) {
     it('should still mark agents as inactive with more agent policies with inactivity timeout than the previous limit', async function () {
       // Policy ids used to be written in the status script source, which Elasticsearch limits to 64KB
       // (~1,600 policies). They are now script params so there is no limit on the number of policies.
-      this.timeout(10 * 60 * 1000);
-      const { body: before } = await supertest.get(`/api/fleet/agent_status`).expect(200);
-      expect(before.results.inactive).to.be.greaterThan(0);
+      this.timeout(15 * 60 * 1000);
 
-      const policiesToAdd = new Array(1700).fill(0).map((_, i) => `policy-inactivity-timeout-${i}`);
-
-      const CHUNK_SIZE = 50;
-      for (let i = 0; i < policiesToAdd.length; i += CHUNK_SIZE) {
-        await Promise.all(
-          policiesToAdd.slice(i, i + CHUNK_SIZE).map((policyId) =>
-            supertest
-              .post(`/api/fleet/agent_policies`)
-              .set('kbn-xsrf', 'xxxx')
-              .send({
-                id: 'fleet-agent-policies:' + policyId,
-                name: policyId,
-                namespace: 'default',
-                description: 'Policy with inactivity timeout',
-                is_default: true,
-                monitoring_enabled: ['logs', 'metrics'],
-                inactivity_timeout: 60,
-              })
-              .expect(200)
+      // agent4 and agent5 are on a policy with a 1 minute inactivity timeout and are already inactive,
+      // they can only stay inactive. The other fixtures can change status while the policies are
+      // created (for example agents that are not inactive yet), so they are not asserted on.
+      const getInactiveAgentIds = async (): Promise<string[]> => {
+        const { body } = await supertest
+          .get(
+            `/api/fleet/agents?showInactive=true&perPage=100&kuery=${encodeURIComponent(
+              'status:inactive'
+            )}`
           )
+          .expect(200);
+        return body.items.map((agent: { id: string }) => agent.id);
+      };
+
+      const inChunks = async (ids: string[], fn: (id: string) => Promise<unknown>) => {
+        const CHUNK_SIZE = 50;
+        for (let i = 0; i < ids.length; i += CHUNK_SIZE) {
+          await Promise.all(ids.slice(i, i + CHUNK_SIZE).map(fn));
+        }
+      };
+
+      const inactiveBefore = await getInactiveAgentIds();
+      expect(inactiveBefore).to.contain('agent4');
+      expect(inactiveBefore).to.contain('agent5');
+
+      const policyIds = new Array(1700).fill(0).map((_, i) => `policy-inactivity-timeout-${i}`);
+      const createdPolicyIds: string[] = [];
+      try {
+        await inChunks(policyIds, async (policyId) => {
+          await supertest
+            .post(`/api/fleet/agent_policies`)
+            .set('kbn-xsrf', 'xxxx')
+            .send({
+              id: policyId,
+              name: policyId,
+              namespace: 'default',
+              inactivity_timeout: 60,
+            })
+            .expect(200);
+          createdPolicyIds.push(policyId);
+        });
+
+        const inactiveAfter = await getInactiveAgentIds();
+        expect(inactiveAfter).to.contain('agent4');
+        expect(inactiveAfter).to.contain('agent5');
+      } finally {
+        // do not leave 1,700 policies behind for the tests that run after this one
+        await inChunks(createdPolicyIds, (policyId) =>
+          supertest
+            .post(`/api/fleet/agent_policies/delete`)
+            .set('kbn-xsrf', 'xxxx')
+            .send({ agentPolicyId: policyId })
         );
       }
-
-      // the new policies have no agents, so the status counts must not change
-      const { body: after } = await supertest.get(`/api/fleet/agent_status`).expect(200);
-      expect(after).to.eql(before);
     });
 
     it('should get a list of agent policies by kuery', async () => {

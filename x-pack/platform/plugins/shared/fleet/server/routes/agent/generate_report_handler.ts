@@ -20,6 +20,7 @@ import { appContextService } from '../../services/app_context';
 import { buildAgentStatusRuntimeField } from '../../services/agents/build_status_runtime_field';
 import { FleetError } from '../../errors';
 import { _joinFilters, getSpaceAwarenessFilterForAgents } from '../../services/agents/crud';
+import { isSpaceAwarenessEnabled } from '../../services/spaces/helpers';
 
 type HandleResponseFunc = Parameters<ReportingStart['handleGenerateSystemReportRequest']>[2];
 
@@ -33,7 +34,12 @@ export const generateReportHandler: FleetRequestHandler<
   const spaceId = fleetContext.spaceId;
   const logger = appContextService.getLogger();
 
-  const runtimeFieldsResult = await buildAgentStatusRuntimeField();
+  // The status script and its params are part of the report job payload, which Reporting returns in
+  // the job metadata. Only include the inactivity timeouts of the policies in the user's space (the
+  // agents of the report are filtered on the same space), not the ones of other spaces.
+  const runtimeFieldsResult = await buildAgentStatusRuntimeField(undefined, undefined, {
+    spaceId: (await isSpaceAwarenessEnabled()) ? spaceId : undefined,
+  });
   const statusScript = runtimeFieldsResult.status.script;
 
   const reporting = appContextService.getReportingStart();

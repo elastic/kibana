@@ -100,7 +100,6 @@ import {
   deleteAgentUploadFileHandler,
   postAgentReassignHandler,
   postRetrieveAgentsByActionsHandler,
-  getAgentStatusRuntimeFieldHandler,
   getAgentEffectiveConfigHandler,
 } from './handlers';
 import {
@@ -1253,37 +1252,6 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
         },
       },
       getAvailableVersionsHandler
-    );
-
-  // route used by export CSV feature on the UI to generate report
-  router.versioned
-    .get({
-      path: '/internal/fleet/agents/status_runtime_field',
-      access: 'internal',
-      security: {
-        authz: {
-          requiredPrivileges: [FLEET_API_PRIVILEGES.AGENTS.READ],
-        },
-      },
-    })
-    .addVersion(
-      {
-        version: API_VERSIONS.internal.v1,
-        validate: {
-          request: {},
-          response: {
-            200: {
-              description: 'OK: A successful request.',
-              body: () => schema.string(),
-            },
-            400: {
-              description: 'A bad request.',
-              body: genericErrorResponse,
-            },
-          },
-        },
-      },
-      getAgentStatusRuntimeFieldHandler
     );
 
   // Change agent privilege level

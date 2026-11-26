@@ -76,6 +76,28 @@ describe('buildStatusRuntimeField', () => {
     expect(params.inactivityCutoffs).toEqual({ [`it's a "weird-id" \\ #1`]: now - 60_000 });
   });
 
+  it('should keep policy ids that match Object.prototype members as regular cutoffs', () => {
+    const inactivityTimeouts: InactivityTimeouts = [
+      { inactivityTimeout: 60, policyIds: ['toString', 'constructor', '__proto__', 'policy-1'] },
+      // same id in a second group: the shortest timeout (largest cutoff) wins
+      { inactivityTimeout: 30, policyIds: ['toString'] },
+    ];
+
+    const { params } = _buildStatusRuntimeField({ inactivityTimeouts }).status.script;
+    // what is sent to Elasticsearch
+    const serialized = JSON.parse(JSON.stringify(params));
+
+    expect(Object.keys(params.inactivityCutoffs).sort()).toEqual(
+      ['__proto__', 'constructor', 'policy-1', 'toString'].sort()
+    );
+    expect(serialized.inactivityCutoffs).toEqual({
+      toString: now - 30_000,
+      constructor: now - 60_000,
+      ['__proto__']: now - 60_000,
+      'policy-1': now - 60_000,
+    });
+  });
+
   it('should use the same source whatever the inactivity timeouts and the time are', () => {
     const withoutTimeouts = _buildStatusRuntimeField({ inactivityTimeouts: [] }).status.script;
 

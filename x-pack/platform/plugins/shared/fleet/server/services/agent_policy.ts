@@ -2614,9 +2614,23 @@ class AgentPolicyService {
     );
   }
 
-  public async getInactivityTimeouts(): Promise<
-    Array<{ policyIds: string[]; inactivityTimeout: number }>
-  > {
+  /**
+   * Returns the ids of the agent policies with an inactivity timeout, grouped by timeout.
+   * It reads the policies of all spaces unless `spaceId` is set, in which case only the policies
+   * available in that space are returned.
+   *
+   * Limitation: policies are read with a single `find` limited to `SO_SEARCH_LIMIT` (10,000) and
+   * are not paginated. If more policies than that have an inactivity timeout, the extra ones are
+   * not returned (which ones is not predictable, the request has no sort) and their agents never
+   * get the `inactive` status. Everything that relies on that status, such as the unenroll
+   * inactive agents task, is affected. Every policy has a default inactivity timeout, so this is
+   * in practice a limit of about 10,000 agent policies.
+   */
+  public async getInactivityTimeouts({
+    spaceId,
+  }: {
+    spaceId?: string;
+  } = {}): Promise<Array<{ policyIds: string[]; inactivityTimeout: number }>> {
     const savedObjectType = await getAgentPolicySavedObjectType();
     const internalSoClientWithoutSpaceExtension =
       appContextService.getInternalUserSOClientWithoutSpaceExtension();
@@ -2626,7 +2640,7 @@ class AgentPolicyService {
       perPage: SO_SEARCH_LIMIT,
       filter: `${savedObjectType}.attributes.inactivity_timeout > 0`,
       fields: [`inactivity_timeout`],
-      namespaces: ['*'],
+      namespaces: [spaceId ?? '*'],
     });
 
     const groupedResults = groupBy(findRes.saved_objects, (so) => so.attributes.inactivity_timeout);
