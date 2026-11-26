@@ -7,9 +7,13 @@
 
 import expect from '@kbn/expect';
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
-import { INITIALIZE_SECURITY_SOLUTION_URL } from '@kbn/security-solution-plugin/common/api/initialization';
+import {
+  INITIALIZATION_FLOW_SECURITY_DATA_VIEWS,
+  INITIALIZATION_FLOW_STATUS_READY,
+  INITIALIZE_SECURITY_SOLUTION_URL,
+} from '@kbn/security-solution-plugin/common/api/initialization';
 import type { FtrProviderContext } from '../../../../ftr_provider_context';
-import { getDiscoverESQLState } from './utils';
+import { getDiscoverESQLState, TEST_RULE_NAME } from './utils';
 import { SECURITY_SOLUTION_DATA_VIEW } from '../../../constants';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
@@ -28,17 +32,21 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         useCookieHeader: true,
         withInternalHeaders: true,
       });
-      await adminSupertest
+      const { body } = await adminSupertest
         .post(INITIALIZE_SECURITY_SOLUTION_URL)
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
-        .send({ flows: ['security-data-views'] })
+        .send({ flows: [INITIALIZATION_FLOW_SECURITY_DATA_VIEWS] })
         .expect(200);
+      expect(body.flows[INITIALIZATION_FLOW_SECURITY_DATA_VIEWS]).to.have.property(
+        'status',
+        INITIALIZATION_FLOW_STATUS_READY
+      );
     });
 
     describe('ES|QL mode', () => {
       it('should render alert workflow status badge', async () => {
         const state = getDiscoverESQLState(
-          'from .alerts-security.alerts-default | WHERE host.name == "siem-kibana" and event.kind == "signal"'
+          `from .alerts-security.alerts-default | WHERE host.name == "siem-kibana" and event.kind == "signal" and kibana.alert.rule.name == "${TEST_RULE_NAME}"`
         );
         await PageObjects.common.navigateToActualUrl('discover', `?_a=${state}`, {
           ensureCurrentUrl: false,
@@ -54,7 +62,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('should render alert workflow status badge', async () => {
         await PageObjects.discover.navigateToApp({ queryMode: 'classic' });
         await PageObjects.discover.selectIndexPattern(SECURITY_SOLUTION_DATA_VIEW);
-        await queryBar.setQuery('host.name: "siem-kibana" AND event.kind: "signal"');
+        await queryBar.setQuery(
+          `host.name: "siem-kibana" AND event.kind: "signal" AND kibana.alert.rule.name: "${TEST_RULE_NAME}"`
+        );
         await queryBar.clickQuerySubmitButton();
         await PageObjects.discover.waitUntilSearchingHasFinished();
         const alertWorkflowStatus = await testSubjects.findAll('rule-status-badge', 2500);

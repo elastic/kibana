@@ -6,7 +6,11 @@
  */
 
 import kbnRison from '@kbn/rison';
+import { v4 as uuidv4 } from 'uuid';
 import { SECURITY_SOLUTION_INDEX_PATTERN } from '../../../constants';
+
+/** Name of the detection rule the suite creates, unique per run so alerts from earlier runs never match. */
+export const TEST_RULE_NAME = `Test Rule - ${uuidv4()}`;
 
 export const getDiscoverESQLState = (query?: string) => {
   return kbnRison.encode({

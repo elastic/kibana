@@ -6,10 +6,10 @@
  */
 
 import moment from 'moment';
-import { v4 as uuidv4 } from 'uuid';
 import path from 'path';
 import type { FtrProviderContext } from '../../../../ftr_provider_context';
 import { SECURITY_ES_ARCHIVES_DIR } from '../../../constants';
+import { TEST_RULE_NAME } from './utils';
 
 export default function ({ getService, getPageObjects, loadTestFile }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
@@ -29,12 +29,9 @@ export default function ({ getService, getPageObjects, loadTestFile }: FtrProvid
     before(async () => {
       await esArchiver.loadIfNeeded(path.join(SECURITY_ES_ARCHIVES_DIR, 'auditbeat_single'));
 
-      const testRunUuid = uuidv4();
-      const ruleName = `Test Rule - ${testRunUuid}`;
-
       await detectionsApi.createRule({
         body: {
-          name: ruleName,
+          name: TEST_RULE_NAME,
           description: 'test rule',
           type: 'query',
           enabled: true,
@@ -64,7 +61,14 @@ export default function ({ getService, getPageObjects, loadTestFile }: FtrProvid
         await es.indices.refresh({ index: '.alerts-security.alerts-default' }).catch(() => {});
         const { count } = await es.count({
           index: '.alerts-security.alerts-default',
-          query: { term: { 'host.name': 'siem-kibana' } },
+          query: {
+            bool: {
+              filter: [
+                { term: { 'host.name': 'siem-kibana' } },
+                { term: { 'kibana.alert.rule.name': TEST_RULE_NAME } },
+              ],
+            },
+          },
         });
         if (count === 0) {
           throw new Error('Waiting for detection rule alerts with host.name: siem-kibana');
