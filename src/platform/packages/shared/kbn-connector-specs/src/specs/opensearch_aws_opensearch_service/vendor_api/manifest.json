@@ -1,13 +1,82 @@
 {
   "operations": {
-    "acknowledgeAlert": [],
-    "acknowledgeDetectorAlert": [],
-    "createMonitor": [],
-    "deleteMonitor": [],
-    "disableMonitor": [],
-    "enableMonitor": [],
-    "executeMonitor": [],
-    "getAlerts": [],
+    "acknowledgeAlert": [
+      {
+        "method": "post",
+        "path": "/_plugins/_alerting/monitors/{monitor_id}/_acknowledge/alerts",
+        "source": "alerting"
+      }
+    ],
+    "acknowledgeDetectorAlert": [
+      {
+        "method": "post",
+        "path": "/_plugins/_security_analytics/detectors/{detector_id}/_acknowledge/alerts",
+        "source": "core"
+      }
+    ],
+    "createMonitor": [
+      {
+        "method": "post",
+        "path": "/_plugins/_alerting/monitors",
+        "source": "alerting"
+      }
+    ],
+    "deleteMonitor": [
+      {
+        "method": "delete",
+        "path": "/_plugins/_alerting/monitors/{monitor_id}",
+        "source": "alerting"
+      }
+    ],
+    "disableMonitor": [
+      {
+        "method": "get",
+        "path": "/_plugins/_alerting/monitors/{monitor_id}",
+        "source": "alerting"
+      },
+      {
+        "method": "put",
+        "path": "/_plugins/_alerting/monitors/{monitor_id}",
+        "source": "alerting"
+      }
+    ],
+    "enableMonitor": [
+      {
+        "method": "get",
+        "path": "/_plugins/_alerting/monitors/{monitor_id}",
+        "source": "alerting"
+      },
+      {
+        "method": "put",
+        "path": "/_plugins/_alerting/monitors/{monitor_id}",
+        "source": "alerting"
+      }
+    ],
+    "executeMonitor": [
+      {
+        "method": "post",
+        "path": "/_plugins/_alerting/monitors/{monitor_id}/_execute",
+        "source": "alerting"
+      }
+    ],
+    "getAlerts": [
+      {
+        "method": "get",
+        "pagination": {
+          "defaultSize": 20,
+          "request": {
+            "offsetParam": "startIndex",
+            "sizeParam": "size"
+          },
+          "response": {
+            "itemsPath": "alerts"
+          },
+          "style": "offset"
+        },
+        "path": "/_plugins/_alerting/monitors/alerts",
+        "source": "alerting"
+      }
+    ],
     "getDetectorFindings": [
       {
         "method": "get",
@@ -27,7 +96,13 @@
         "source": "core"
       }
     ],
-    "getMonitor": [],
+    "getMonitor": [
+      {
+        "method": "get",
+        "path": "/_plugins/_alerting/monitors/{monitor_id}",
+        "source": "alerting"
+      }
+    ],
     "indexDocument": [
       {
         "method": "post",
@@ -85,89 +160,35 @@
       {
         "method": "post",
         "path": "/_plugins/_alerting/monitors/_search",
-        "source": "core"
+        "source": "alerting"
       }
     ],
-    "updateMonitor": []
+    "updateMonitor": [
+      {
+        "method": "get",
+        "path": "/_plugins/_alerting/monitors/{monitor_id}",
+        "source": "alerting"
+      },
+      {
+        "method": "put",
+        "path": "/_plugins/_alerting/monitors/{monitor_id}",
+        "source": "alerting"
+      }
+    ]
   },
   "sources": {
+    "alerting": {
+      "apiVersion": "1.0.0",
+      "fetchedAt": "2026-11-20T13:49:49.193Z",
+      "format": "openapi",
+      "note": "The Alerting namespace of opensearch-project/opensearch-api-specification, which its main-latest release (the core source) doesn't have yet. It's added by https://github.com/opensearch-project/opensearch-api-specification/pull/1186, not merged, so the source is pinned to that PR's head commit. Once it merges, the core source covers these operations and this source can go.",
+      "url": "https://raw.githubusercontent.com/opensearch-project/opensearch-api-specification/62d1538deb3d45ace2ddb790dfd3004980480164/spec/namespaces/alerting.yaml"
+    },
     "core": {
       "apiVersion": "0.3.0",
       "fetchedAt": "2026-10-07T20:20:24.121Z",
       "format": "openapi",
       "url": "https://github.com/opensearch-project/opensearch-api-specification/releases/download/main-latest/opensearch-openapi.yaml"
     }
-  },
-  "unmatched": {
-    "acknowledgeAlert": [
-      {
-        "method": "post",
-        "path": "/_plugins/_alerting/monitors/{monitorId}/_acknowledge/alerts",
-        "reason": "Alerting plugin API, which the OpenSearch spec does not cover; see https://docs.opensearch.org/latest/observing-your-data/alerting/api/#acknowledge-alert"
-      }
-    ],
-    "acknowledgeDetectorAlert": [
-      {
-        "method": "post",
-        "path": "/_plugins/_security_analytics/detectors/{detectorId}/_acknowledge/alerts",
-        "reason": "Security Analytics detector API, which the OpenSearch spec does not cover; see https://docs.opensearch.org/latest/security-analytics/api-tools/alert-finding-api/#acknowledge-alerts"
-      }
-    ],
-    "createMonitor": [
-      {
-        "method": "post",
-        "path": "/_plugins/_alerting/monitors",
-        "reason": "Alerting plugin API, which the OpenSearch spec does not cover; see https://docs.opensearch.org/latest/observing-your-data/alerting/api/#create-a-query-level-monitor"
-      }
-    ],
-    "deleteMonitor": [
-      {
-        "method": "delete",
-        "path": "/_plugins/_alerting/monitors/{monitorId}",
-        "reason": "Alerting plugin API, which the OpenSearch spec does not cover; see https://docs.opensearch.org/latest/observing-your-data/alerting/api/#delete-monitor"
-      }
-    ],
-    "disableMonitor": [
-      {
-        "method": "get",
-        "path": "/_plugins/_alerting/monitors/{monitorId}",
-        "reason": "Alerting plugin API, which the OpenSearch spec does not cover; see https://docs.opensearch.org/latest/observing-your-data/alerting/api/#get-monitor"
-      }
-    ],
-    "enableMonitor": [
-      {
-        "method": "get",
-        "path": "/_plugins/_alerting/monitors/{monitorId}",
-        "reason": "Alerting plugin API, which the OpenSearch spec does not cover; see https://docs.opensearch.org/latest/observing-your-data/alerting/api/#get-monitor"
-      }
-    ],
-    "executeMonitor": [
-      {
-        "method": "post",
-        "path": "/_plugins/_alerting/monitors/{monitorId}/_execute",
-        "reason": "Alerting plugin API, which the OpenSearch spec does not cover; see https://docs.opensearch.org/latest/observing-your-data/alerting/api/#run-monitor"
-      }
-    ],
-    "getAlerts": [
-      {
-        "method": "get",
-        "path": "/_plugins/_alerting/monitors/alerts",
-        "reason": "Alerting plugin API, which the OpenSearch spec does not cover; see https://docs.opensearch.org/latest/observing-your-data/alerting/api/#get-alerts"
-      }
-    ],
-    "getMonitor": [
-      {
-        "method": "get",
-        "path": "/_plugins/_alerting/monitors/{monitorId}",
-        "reason": "Alerting plugin API, which the OpenSearch spec does not cover; see https://docs.opensearch.org/latest/observing-your-data/alerting/api/#get-monitor"
-      }
-    ],
-    "updateMonitor": [
-      {
-        "method": "get",
-        "path": "/_plugins/_alerting/monitors/{monitorId}",
-        "reason": "Alerting plugin API, which the OpenSearch spec does not cover; see https://docs.opensearch.org/latest/observing-your-data/alerting/api/#get-monitor"
-      }
-    ]
   }
 }
