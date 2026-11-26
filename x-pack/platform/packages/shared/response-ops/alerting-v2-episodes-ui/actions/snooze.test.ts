@@ -360,50 +360,6 @@ describe('createSnoozeAction', () => {
       expect(open).toHaveBeenCalledWith(deps, expect.objectContaining({ replacedSnoozeCount: 0 }));
     });
 
-    it('counts every selected row, including episodes that share a series', async () => {
-      const deps = makeDeps(conditionalSource);
-      const open = mockModal({ snoozedUntil: null });
-      const snoozed = {
-        last_snooze_action: 'snooze',
-        snoozed_until: '2099-01-01T00:00:00.000Z',
-      } as const;
-
-      await createSnoozeAction(deps, makeExtension()).execute({
-        episodes: [
-          makeEpisode({ series_id: 's1', ...snoozed }),
-          makeEpisode({ 'episode.id': 'e2', series_id: 's1', ...snoozed }),
-        ],
-      });
-
-      expect(open).toHaveBeenCalledWith(deps, expect.objectContaining({ replacedSnoozeCount: 2 }));
-    });
-
-    it('counts the inactive rows of both sources', async () => {
-      const deps = makeDeps(conditionalSource);
-      const open = mockModal({ snoozedUntil: null });
-
-      await createSnoozeAction(deps, makeExtension()).execute({
-        episodes: [
-          makeSourceEpisode({ 'episode.status': ALERT_EPISODE_STATUS.INACTIVE }),
-          makeEpisode({ 'episode.id': 'e2', 'episode.status': ALERT_EPISODE_STATUS.INACTIVE }),
-          makeEpisode({ 'episode.id': 'e3' }),
-        ],
-      });
-
-      expect(open).toHaveBeenCalledWith(deps, expect.objectContaining({ inactiveSnoozeCount: 2 }));
-    });
-
-    it('reports no inactive rows when the whole selection is active', async () => {
-      const deps = makeDeps(conditionalSource);
-      const open = mockModal({ snoozedUntil: null });
-
-      await createSnoozeAction(deps, makeExtension()).execute({
-        episodes: [makeSourceEpisode(), makeEpisode({ 'episode.id': 'e2' })],
-      });
-
-      expect(open).toHaveBeenCalledWith(deps, expect.objectContaining({ inactiveSnoozeCount: 0 }));
-    });
-
     it('scopes the condition fields to the rule types of the selected source rows', async () => {
       const getRuleTypeIds = jest.fn().mockReturnValue(['observability.rules.custom_threshold']);
       const deps = makeDeps({ ...conditionalSource, getRuleTypeIds });

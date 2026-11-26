@@ -60,13 +60,6 @@ export const INDEFINITE_SNOOZE_NOT_APPLIED = i18n.translate(
   }
 );
 
-export const getInactiveSnoozeWarning = (count: number): string =>
-  i18n.translate('xpack.alertingV2EpisodesUi.episodesUi.snoozeAction.inactiveSnoozeWarning', {
-    defaultMessage:
-      '{count, plural, one {# selected alert is no longer active. Snoozing it silences its next alert.} other {# selected alerts are no longer active. Snoozing them silences their next alert.}}',
-    values: { count },
-  });
-
 export const getReplacedSnoozeWarning = (count: number): string =>
   i18n.translate('xpack.alertingV2EpisodesUi.episodesUi.snoozeAction.replacedSnoozeWarning', {
     defaultMessage:

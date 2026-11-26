@@ -56,7 +56,6 @@ export interface SnoozeModalOptions {
   ruleTypeIds?: string[];
   conditionalTabDisabledReason?: string;
   replacedSnoozeCount?: number;
-  inactiveSnoozeCount?: number;
 }
 
 interface SnoozeModalProps extends SnoozeModalOptions {
@@ -83,7 +82,6 @@ const SnoozeModal = ({
   ruleTypeIds,
   conditionalTabDisabledReason,
   replacedSnoozeCount = 0,
-  inactiveSnoozeCount = 0,
   onConfirm,
   onCancel,
 }: SnoozeModalProps) => {
@@ -119,17 +117,6 @@ const SnoozeModal = ({
         <EuiText size="xs" color="subdued">
           <p>{QUICK_SNOOZE_POPOVER_SUBTITLE}</p>
         </EuiText>
-        {inactiveSnoozeCount > 0 && (
-          <>
-            <EuiSpacer size="s" />
-            <KbnWarningCallout
-              announceOnMount
-              data-test-subj="snoozeModalInactiveAlertsWarning"
-              size="s"
-              title={i18n.getInactiveSnoozeWarning(inactiveSnoozeCount)}
-            />
-          </>
-        )}
         {replacedSnoozeCount > 0 && (
           <>
             <EuiSpacer size="s" />
@@ -187,7 +174,6 @@ export const openSnoozeModal = (
             ruleTypeIds={options.ruleTypeIds}
             conditionalTabDisabledReason={options.conditionalTabDisabledReason}
             replacedSnoozeCount={options.replacedSnoozeCount}
-            inactiveSnoozeCount={options.inactiveSnoozeCount}
             onConfirm={(payload) => {
               ref.close();
               resolve(payload);
