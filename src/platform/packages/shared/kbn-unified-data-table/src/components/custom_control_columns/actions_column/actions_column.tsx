@@ -9,8 +9,9 @@
 
 import type { EuiDataGridCellValueElementProps, RenderCellValue } from '@elastic/eui';
 import { EuiFlexGroup } from '@elastic/eui';
-import React from 'react';
+import React, { useContext } from 'react';
 import { DEFAULT_CONTROL_COLUMN_WIDTH } from '../../../constants';
+import { UnifiedDataTableContext } from '../../../table_context';
 import {
   getAdditionalRowControlColumns,
   type AdditionalRowControlsLayout,
@@ -18,6 +19,30 @@ import {
 import { ActionsHeader } from './actions_header';
 
 const COLUMN_ID = 'actions';
+
+const ActionsCell = ({
+  actions,
+  ...props
+}: EuiDataGridCellValueElementProps & { actions: RenderCellValue[] }) => {
+  const { getRowByIndex } = useContext(UnifiedDataTableContext);
+  const record = getRowByIndex(props.rowIndex);
+
+  // The grid reuses cells by position, so keying by document resets the controls' local
+  // state (e.g. an open menu) when a different document takes this row.
+  return (
+    <EuiFlexGroup
+      key={record?.id}
+      data-test-subj="unifiedDataTable_actionsColumnCell"
+      responsive={false}
+      alignItems="center"
+      gutterSize="none"
+    >
+      {actions.map((Action, idx) => (
+        <Action key={idx} {...props} />
+      ))}
+    </EuiFlexGroup>
+  );
+};
 
 /**
  * Builds the actions column. Its cells depend only on `baseColumns` and the row controls
@@ -47,16 +72,7 @@ export const getActionsColumn = ({
     width: columnWidth,
     headerCellProps: { className: 'unifiedDataTable__headerCell' },
     rowCellRender: (props: EuiDataGridCellValueElementProps) => (
-      <EuiFlexGroup
-        data-test-subj="unifiedDataTable_actionsColumnCell"
-        responsive={false}
-        alignItems="center"
-        gutterSize="none"
-      >
-        {actions.map((Action, idx) => (
-          <Action key={idx} {...props} />
-        ))}
-      </EuiFlexGroup>
+      <ActionsCell {...props} actions={actions} />
     ),
     headerCellRender: () => <ActionsHeader maxWidth={columnWidth} />,
   };

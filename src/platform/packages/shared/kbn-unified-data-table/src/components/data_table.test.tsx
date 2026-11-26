@@ -1066,28 +1066,23 @@ describe('UnifiedDataTable', () => {
       EXTENDED_JEST_TIMEOUT
     );
 
-    it(
-      'should keep the state of leading controls when rows and controls are replaced',
-      async () => {
-        const StatefulRowControl = ({ label }: { label: string }) => {
-          const [isOpen, setIsOpen] = useState(false);
-          return (
-            <EuiButton data-test-subj="statefulRowControl" onClick={() => setIsOpen(true)}>
-              {isOpen ? `${label} open` : label}
-            </EuiButton>
-          );
-        };
-        const getControls = (label: string): RowControlColumn[] => [
-          {
-            id: 'stateful',
-            render: (_Control, { rowIndex }) => (
-              <StatefulRowControl label={`${label} ${rowIndex}`} />
-            ),
-          },
-        ];
-        const props = getProps();
-
-        const { rerender } = await renderComponent({
+    describe('stateful leading controls', () => {
+      const StatefulRowControl = ({ label }: { label: string }) => {
+        const [isOpen, setIsOpen] = useState(false);
+        return (
+          <EuiButton data-test-subj="statefulRowControl" onClick={() => setIsOpen(true)}>
+            {isOpen ? `${label} open` : label}
+          </EuiButton>
+        );
+      };
+      const getControls = (label: string, id = 'stateful'): RowControlColumn[] => [
+        {
+          id,
+          render: (_Control, { rowIndex }) => <StatefulRowControl label={`${label} ${rowIndex}`} />,
+        },
+      ];
+      const openFirstRowControl = async (props: UnifiedDataTableProps) => {
+        const result = await renderComponent({
           ...props,
           rowAdditionalLeadingControls: getControls('first'),
         });
@@ -1095,18 +1090,67 @@ describe('UnifiedDataTable', () => {
         await userEvent.click(screen.getAllByTestId('statefulRowControl')[0]);
         expect(screen.getAllByTestId('statefulRowControl')[0]).toHaveTextContent('first 0 open');
 
-        rerender(
-          <DataTableWithI18n
-            {...props}
-            rows={esHitsMock.map((hit) => buildDataTableRecord(hit, dataViewMock))}
-            rowAdditionalLeadingControls={getControls('second')}
-          />
-        );
+        return result;
+      };
 
-        expect(screen.getAllByTestId('statefulRowControl')[0]).toHaveTextContent('second 0 open');
-      },
-      EXTENDED_JEST_TIMEOUT
-    );
+      it(
+        'should keep the state of leading controls when rows and controls are replaced',
+        async () => {
+          const props = getProps();
+          const { rerender } = await openFirstRowControl(props);
+
+          rerender(
+            <DataTableWithI18n
+              {...props}
+              rows={esHitsMock.map((hit) => buildDataTableRecord(hit, dataViewMock))}
+              rowAdditionalLeadingControls={getControls('second')}
+            />
+          );
+
+          expect(screen.getAllByTestId('statefulRowControl')[0]).toHaveTextContent('second 0 open');
+        },
+        EXTENDED_JEST_TIMEOUT
+      );
+
+      it(
+        'should reset the state of leading controls when a different document takes the row',
+        async () => {
+          const props = getProps();
+          const { rerender } = await openFirstRowControl(props);
+
+          rerender(
+            <DataTableWithI18n
+              {...props}
+              rows={[...esHitsMock].reverse().map((hit) => buildDataTableRecord(hit, dataViewMock))}
+              rowAdditionalLeadingControls={getControls('second')}
+            />
+          );
+
+          expect(screen.getAllByTestId('statefulRowControl')[0]).toHaveTextContent('second 0');
+          expect(screen.getAllByTestId('statefulRowControl')[0]).not.toHaveTextContent('open');
+        },
+        EXTENDED_JEST_TIMEOUT
+      );
+
+      it(
+        'should reset the state of a leading control when another control takes its slot',
+        async () => {
+          const props = getProps();
+          const { rerender } = await openFirstRowControl(props);
+
+          rerender(
+            <DataTableWithI18n
+              {...props}
+              rowAdditionalLeadingControls={getControls('second', 'other')}
+            />
+          );
+
+          expect(screen.getAllByTestId('statefulRowControl')[0]).toHaveTextContent('second 0');
+          expect(screen.getAllByTestId('statefulRowControl')[0]).not.toHaveTextContent('open');
+        },
+        EXTENDED_JEST_TIMEOUT
+      );
+    });
 
     it(
       'should be able to customise the trailing controls',

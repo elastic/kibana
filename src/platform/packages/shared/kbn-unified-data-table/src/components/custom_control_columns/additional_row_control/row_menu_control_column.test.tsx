@@ -11,7 +11,7 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { getRowMenuControlColumn } from './row_menu_control_column';
 import { createAvailableControlsGetter } from './row_control_column';
-import { RowControlsContext } from './row_controls_context';
+import { RowControlsContext, type GetAvailableRowControls } from './row_controls_context';
 import { dataTableContextMock } from '../../../../__mocks__/table_context';
 import { mockRowAdditionalLeadingControls } from '../../../../__mocks__/external_control_columns';
 import { UnifiedDataTableContext } from '../../../table_context';
@@ -73,5 +73,38 @@ describe('getRowMenuControlColumn', () => {
     await userEvent.click(button);
 
     expect(mockClick).toHaveBeenCalledWith({ record: contextMock.getRowByIndex(1), rowIndex: 1 });
+  });
+
+  it('should close the menu when its last item disappears', async () => {
+    const RowMenuControlColumn = getRowMenuControlColumn();
+    const getAvailableControls = createAvailableControlsGetter(mockRowAdditionalLeadingControls);
+    const renderMenu = (getControls: GetAvailableRowControls) => (
+      <UnifiedDataTableContext.Provider value={contextMock}>
+        <RowControlsContext.Provider value={getControls}>
+          <RowMenuControlColumn
+            rowIndex={1}
+            setCellProps={jest.fn()}
+            columnId="actions"
+            colIndex={0}
+            isDetails={false}
+            isExpandable={false}
+            isExpanded={false}
+          />
+        </RowControlsContext.Provider>
+      </UnifiedDataTableContext.Provider>
+    );
+    const { rerender } = render(renderMenu(getAvailableControls));
+
+    await userEvent.click(screen.getByTestId('unifiedDataTable_additionalRowControl_actionsMenu'));
+    expect(screen.getByTestId('exampleRowControl-heart')).toBeInTheDocument();
+
+    rerender(renderMenu(() => []));
+    expect(
+      screen.queryByTestId('unifiedDataTable_additionalRowControl_actionsMenu')
+    ).not.toBeInTheDocument();
+
+    rerender(renderMenu(getAvailableControls));
+    expect(screen.getByTestId('unifiedDataTable_additionalRowControl_actionsMenu')).toBeVisible();
+    expect(screen.queryByTestId('exampleRowControl-heart')).not.toBeInTheDocument();
   });
 });

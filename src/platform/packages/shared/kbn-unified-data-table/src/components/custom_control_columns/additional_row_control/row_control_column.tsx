@@ -85,20 +85,21 @@ export const getRowControlColumn = (rowControlColumn: RowControlColumn) => {
 
 /**
  * Returns a per-row getter backed by a WeakMap so `isAvailable` is evaluated at most once
- * per record across all consumers (inline slots and the overflow menu).
+ * per record and row index across all consumers (inline slots and the overflow menu).
  */
 export const createAvailableControlsGetter = (
   rowControlColumns: RowControlColumn[]
 ): ((rowProps: RowControlRowProps) => RowControlColumn[]) => {
-  const cache = new WeakMap<DataTableRecord, RowControlColumn[]>();
+  const cache = new WeakMap<DataTableRecord, { rowIndex: number; available: RowControlColumn[] }>();
   return ({ record, rowIndex }) => {
-    let available = cache.get(record);
-    if (!available) {
-      available = rowControlColumns.filter(
-        (col) => col.isAvailable?.({ record, rowIndex }) ?? true
-      );
-      cache.set(record, available);
+    const cached = cache.get(record);
+    if (cached?.rowIndex === rowIndex) {
+      return cached.available;
     }
+    const available = rowControlColumns.filter(
+      (col) => col.isAvailable?.({ record, rowIndex }) ?? true
+    );
+    cache.set(record, { rowIndex, available });
     return available;
   };
 };
@@ -116,7 +117,9 @@ export const getCompatibleSlotRenderers = (
       const { record, rowIndex } = useControlColumn(props);
       if (!record) return null;
       const column = getAvailableControls({ record, rowIndex })[slotIndex];
-      return column ? <RowControlCell {...props} rowControlColumn={column} /> : null;
+      return column ? (
+        <RowControlCell key={column.id} {...props} rowControlColumn={column} />
+      ) : null;
     };
     return CompatibleSlotCell;
   });

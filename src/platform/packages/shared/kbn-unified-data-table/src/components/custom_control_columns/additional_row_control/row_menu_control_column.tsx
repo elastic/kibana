@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { Fragment, useCallback, useContext, useMemo, useState } from 'react';
+import React, { Fragment, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import type { EuiDataGridCellValueElementProps } from '@elastic/eui';
 import {
   EuiButtonIcon,
@@ -74,7 +74,15 @@ export const RowMenuControlCell = ({
     });
   }, [getAvailableControls, startIndex, getControlComponent, record, rowIndex]);
 
-  if (!popoverMenuItems.length) return null;
+  const hasMenuItems = popoverMenuItems.length > 0;
+
+  useEffect(() => {
+    if (!hasMenuItems) {
+      setIsMoreActionsPopoverOpen(false);
+    }
+  }, [hasMenuItems]);
+
+  if (!hasMenuItems) return null;
 
   return (
     <EuiPopover
