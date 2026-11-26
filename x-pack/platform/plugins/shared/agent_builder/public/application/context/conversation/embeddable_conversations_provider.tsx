@@ -48,7 +48,7 @@ export const PinnedConversationProvider: React.FC<
   );
   return (
     <ConversationContext.Provider value={value}>
-      <ConversationChangeNotifier agentId={agentId} />
+      <ConversationChangeNotifier agentId={agentId} sessionTag={baseValue.sessionTag} />
       {isReady ? children : <RedirectLoading />}
     </ConversationContext.Provider>
   );

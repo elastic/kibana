@@ -68,6 +68,32 @@ describe('ConversationChangeNotifier', () => {
     });
   });
 
+  it('publishes the session tag of an embedded chat so listeners can tell surfaces apart', () => {
+    const { rerender } = render(<ConversationChangeNotifier sessionTag="workflow-editor:a" />);
+
+    expect(mockEventsService.setActiveConversation).toHaveBeenLastCalledWith({
+      id: undefined,
+      agentId: 'elastic-ai-agent',
+      sessionTag: 'workflow-editor:a',
+    });
+
+    mockEventsService.setActiveConversation.mockClear();
+    rerender(<ConversationChangeNotifier sessionTag="workflow-execution-diagnose:e:s" />);
+
+    expect(mockEventsService.setActiveConversation).toHaveBeenCalledTimes(1);
+    expect(mockEventsService.setActiveConversation).toHaveBeenLastCalledWith({
+      id: undefined,
+      agentId: 'elastic-ai-agent',
+      sessionTag: 'workflow-execution-diagnose:e:s',
+    });
+  });
+
+  it('publishes no session tag for the routed chat', () => {
+    render(<ConversationChangeNotifier />);
+
+    expect(mockEventsService.setActiveConversation.mock.lastCall?.[0].sessionTag).toBeUndefined();
+  });
+
   it('publishes an agent switch even when both conversations are new', () => {
     const { rerender } = render(<ConversationChangeNotifier />);
     mockEventsService.setActiveConversation.mockClear();

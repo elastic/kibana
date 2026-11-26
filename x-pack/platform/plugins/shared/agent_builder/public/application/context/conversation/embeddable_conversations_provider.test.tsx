@@ -57,10 +57,16 @@ const mockNotifyConversationChange = jest.fn();
 jest.mock('./conversation_change_notifier', () => {
   const { useEffect } = jest.requireActual<typeof import('react')>('react');
   return {
-    ConversationChangeNotifier: () => {
+    ConversationChangeNotifier: ({
+      agentId,
+      sessionTag,
+    }: {
+      agentId?: string;
+      sessionTag?: string;
+    }) => {
       useEffect(() => {
-        mockNotifyConversationChange();
-      }, []);
+        mockNotifyConversationChange({ agentId, sessionTag });
+      }, [agentId, sessionTag]);
       return null;
     },
   };
@@ -200,6 +206,28 @@ describe('PinnedConversationProvider', () => {
     expect(screen.getByText('agent:elastic-ai-agent')).toBeInTheDocument();
   });
 
+  it('tells the notifier which chat it belongs to', () => {
+    mockUseEffectiveSpaceDefaultAgent.mockReturnValue({
+      effectiveDefaultAgentId: null,
+      isRestricted: false,
+      isReady: true,
+    });
+
+    render(
+      <PinnedConversationProvider
+        baseValue={{ ...baseValue, sessionTag: 'workflow-editor:a' }}
+        agentId="custom-workflow-agent"
+      >
+        <AgentIdConsumer />
+      </PinnedConversationProvider>
+    );
+
+    expect(mockNotifyConversationChange).toHaveBeenLastCalledWith({
+      agentId: 'custom-workflow-agent',
+      sessionTag: 'workflow-editor:a',
+    });
+  });
+
   it('withholds the chat (spinner) until the effective default is ready', () => {
     mockUseEffectiveSpaceDefaultAgent.mockReturnValue({
       effectiveDefaultAgentId: null,
@@ -242,6 +270,14 @@ describe('EmbeddableConversationsProvider initial message', () => {
     });
 
     expect(order).toEqual(['callbacks', 'conversation']);
+  });
+
+  it('publishes the conversation binding under the chat session tag', () => {
+    renderEmbeddableProvider({ sessionTag: TAG_B });
+
+    expect(mockNotifyConversationChange).toHaveBeenLastCalledWith(
+      expect.objectContaining({ sessionTag: TAG_B })
+    );
   });
 
   it('keeps the initial message when there is no conversation to continue', async () => {

@@ -15,6 +15,8 @@ import { useConversationListMutations } from '../../hooks/use_conversation_list_
 interface ConversationChangeNotifierProps {
   /** Explicit selection for embedded chat; omit the prop for routed chat. */
   agentId?: string;
+  /** Session tag of embedded chat, so listeners can tell chat surfaces apart. */
+  sessionTag?: string;
 }
 
 /** Publishes the active agent and conversation binding, clearing it on unmount. */
@@ -24,6 +26,7 @@ export const ConversationChangeNotifier = (props: ConversationChangeNotifierProp
   const { conversation, isError, isFetched } = useConversation();
   const effectiveAgentId = useAgentId();
   const agentId = 'agentId' in props ? props.agentId : effectiveAgentId;
+  const { sessionTag } = props;
 
   const { markAsRead } = useConversationListMutations({
     routeConversationId: conversationId,
@@ -36,9 +39,10 @@ export const ConversationChangeNotifier = (props: ConversationChangeNotifierProp
     eventsService.setActiveConversation({
       id: conversationId,
       agentId,
+      sessionTag,
       ...(conversationId && isFetched && !isError && conversation ? { conversation } : {}),
     });
-  }, [agentId, conversationId, conversation, isError, isFetched, eventsService]);
+  }, [agentId, sessionTag, conversationId, conversation, isError, isFetched, eventsService]);
 
   useEffect(() => {
     return () => {

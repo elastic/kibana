@@ -12,6 +12,14 @@
 const SESSION_TAG_PREFIX = 'workflow-editor:';
 const STORAGE_KEY_PREFIX = 'agentBuilder.lastConversation.';
 
+/** Tag of the chat session a workflow editor shares with the sidebar. */
+export const getWorkflowEditorSessionTag = (sessionId: string): string =>
+  `${SESSION_TAG_PREFIX}${sessionId}`;
+
+/** True for any workflow editor's chat session, false for other chat surfaces such as diagnosis. */
+export const isWorkflowEditorSessionTag = (sessionTag: string): boolean =>
+  sessionTag.startsWith(SESSION_TAG_PREFIX);
+
 // Session id of the `/workflows/create` chat, so its conversation can be moved
 // onto the saved workflow's session tag. This is the id the tag is built from,
 // not the id of the attachment the chat carries.
@@ -19,6 +27,27 @@ let lastCreateSessionId: string | undefined;
 
 export const setLastCreateSessionId = (sessionId: string | undefined): void => {
   lastCreateSessionId = sessionId;
+};
+
+// Agent the `/workflows/create` chat has selected. Its conversation is stored under
+// that agent's key, so the saved workflow's chat has to use the same agent to find it.
+let lastCreateAgentId: string | undefined;
+
+export const setLastCreateAgentId = (agentId: string | undefined): void => {
+  lastCreateAgentId = agentId;
+};
+
+let carriedAgent: { workflowId: string; agentId: string } | undefined;
+
+/**
+ * Single-shot: the agent `carryConversationToWorkflow` handed over to the chat of
+ * `workflowId`, if the create-route chat had one selected.
+ */
+export const takeCarriedAgentFor = (workflowId: string): string | undefined => {
+  if (carriedAgent?.workflowId !== workflowId) return undefined;
+  const { agentId } = carriedAgent;
+  carriedAgent = undefined;
+  return agentId;
 };
 
 let sidebarOpen = false;
@@ -61,18 +90,22 @@ export const hasPersistedConversation = (sessionId: string): boolean => {
 /**
  * Rewrite persisted conversation-id localStorage entries from the create
  * session's tag onto `savedWorkflowId`'s tag. Iterates a prefix because keys
- * include a trailing agentId we don't know here. No-op if no create session
- * was tracked or `localStorage` is unavailable.
+ * include a trailing agentId we don't know here; the agent the create chat had
+ * selected is kept for `takeCarriedAgentFor`. No-op if no create session was
+ * tracked or `localStorage` is unavailable.
  */
 export const carryConversationToWorkflow = (savedWorkflowId: string): void => {
   const from = lastCreateSessionId;
   lastCreateSessionId = undefined;
+  const agentId = lastCreateAgentId;
+  lastCreateAgentId = undefined;
 
   if (!from || from === savedWorkflowId) return;
+  carriedAgent = agentId ? { workflowId: savedWorkflowId, agentId } : undefined;
   if (typeof window === 'undefined' || !window.localStorage) return;
 
-  const fromTag = `${SESSION_TAG_PREFIX}${from}`;
-  const toTag = `${SESSION_TAG_PREFIX}${savedWorkflowId}`;
+  const fromTag = getWorkflowEditorSessionTag(from);
+  const toTag = getWorkflowEditorSessionTag(savedWorkflowId);
   const fromPrefix = `${STORAGE_KEY_PREFIX}${fromTag}.`;
 
   // Snapshot keys first — mutating localStorage while iterating can shift indexes.

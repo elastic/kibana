@@ -62,6 +62,12 @@ interface PendingAttachment {
   origin?: string;
 }
 
+interface ChatOptions {
+  agentId?: string;
+  sessionTag?: string;
+  attachments?: PendingAttachment[];
+}
+
 /**
  * Stand-in for `agent_builder`'s browser contract, keeping the behaviour this
  * integration depends on:
@@ -80,6 +86,7 @@ const createFakeAgentBuilder = () => {
   let acceptsAttachments = false;
   let pending: PendingAttachment[] = [];
   let sessionTag: string | undefined;
+  let agentId: string | undefined;
   const boundConversations: Array<string | undefined> = [];
 
   const upsert = (into: PendingAttachment[], next: PendingAttachment[]) => {
@@ -101,8 +108,8 @@ const createFakeAgentBuilder = () => {
     return stream;
   };
 
-  const lastConversationKey = (tag?: string) =>
-    `agentBuilder.lastConversation.${tag ?? 'default'}.default`;
+  const lastConversationKey = (tag?: string, agent?: string) =>
+    `agentBuilder.lastConversation.${tag ?? 'default'}.${agent ?? 'default'}`;
 
   const contract = {
     getAgentBuilderAccess: jest
@@ -121,16 +128,20 @@ const createFakeAgentBuilder = () => {
       if (!acceptsAttachments) return;
       pending = pending.filter((attachment) => attachment.id !== attachmentId);
     }),
-    setChatConfig: jest.fn((config: { sessionTag?: string; attachments?: PendingAttachment[] }) => {
+    setChatConfig: jest.fn((config: ChatOptions) => {
       sessionTag = config.sessionTag;
+      agentId = config.agentId;
       if (acceptsAttachments && config.attachments) pending = upsert(pending, config.attachments);
     }),
     clearChatConfig: jest.fn(),
-    openChat: jest.fn((options: { sessionTag?: string; attachments?: PendingAttachment[] }) => {
+    openChat: jest.fn((options: ChatOptions) => {
       sessionTag = options.sessionTag;
+      agentId = options.agentId;
       pending = [...(options.attachments ?? [])];
 
-      const stored = window.localStorage.getItem(lastConversationKey(options.sessionTag));
+      const stored = window.localStorage.getItem(
+        lastConversationKey(options.sessionTag, options.agentId)
+      );
       const restoredId = stored ? (JSON.parse(stored) as string) : undefined;
       boundConversations.push(restoredId);
 
@@ -182,11 +193,20 @@ const createFakeAgentBuilder = () => {
       }
     }
     conversations.set(conversationId, stored);
-    window.localStorage.setItem(lastConversationKey(sessionTag), JSON.stringify(conversationId));
+    window.localStorage.setItem(
+      lastConversationKey(sessionTag, agentId),
+      JSON.stringify(conversationId)
+    );
     activeConversation$.next({
       id: conversationId,
       conversation: { attachments: stored },
     } as ActiveConversation);
+  };
+
+  /** Picks another agent in the open chat, which starts a new conversation with it. */
+  const selectAgent = (nextAgentId: string) => {
+    agentId = nextAgentId;
+    activeConversation$.next({ id: undefined, agentId: nextAgentId, sessionTag });
   };
 
   /** A conversation and its attachments as a fresh page load would find them. */
@@ -251,6 +271,7 @@ const createFakeAgentBuilder = () => {
     contract,
     lastBoundConversation,
     submitRound,
+    selectAgent,
     seedConversation,
     pointSessionAtConversation,
     emitYamlChange,
@@ -324,6 +345,29 @@ describe('workflow attachment sync', () => {
     act(() => fake.submitRound('conv-1'));
 
     expect(fake.workflowAttachmentIds('conv-1')).toEqual([draftId]);
+  });
+
+  it('keeps the agent the create route selected across the first save', async () => {
+    const fake = createFakeAgentBuilder();
+    setupKibana(fake.contract);
+
+    const createSession = await renderEditor(undefined);
+    act(() => createSession.result.current.openAgentChat());
+    act(() => fake.selectAgent('custom-workflow-agent'));
+    act(() => fake.submitRound('conv-with-agent'));
+
+    // The conversation is stored under the selected agent, and the editor remounts
+    // without remembering it.
+    carryConversationToWorkflow('workflow-with-agent');
+    createSession.unmount();
+
+    const savedSession = await renderEditor('workflow-with-agent');
+    act(() => savedSession.result.current.openAgentChat());
+
+    expect(fake.contract.openChat).toHaveBeenLastCalledWith(
+      expect.objectContaining({ agentId: 'custom-workflow-agent' })
+    );
+    expect(fake.lastBoundConversation()).toBe('conv-with-agent');
   });
 
   describe('after a page reload', () => {
