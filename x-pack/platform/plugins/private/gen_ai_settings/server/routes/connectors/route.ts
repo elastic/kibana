@@ -13,7 +13,8 @@ const listConnectorsRoute = createGenAiSettingsServerRoute({
   security: {
     authz: {
       enabled: false,
-      reason: 'The route is protected by the actions plugin',
+      reason:
+        'This route relies on the actions plugin to authorize stack connectors and intentionally lists inference endpoints for LLM features using the Kibana internal ES user',
     },
   },
   handler: async (resources): Promise<InferenceConnector[]> => {
@@ -30,7 +31,8 @@ const getConnectorByIdRoute = createGenAiSettingsServerRoute({
   security: {
     authz: {
       enabled: false,
-      reason: 'The route is protected by the actions plugin',
+      reason:
+        'This route relies on the actions plugin to authorize stack connectors and intentionally resolves inference endpoints for LLM features using the Kibana internal ES user',
     },
   },
   params: z.object({
