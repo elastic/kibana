@@ -164,7 +164,7 @@
     "@elastic/ems-client": "8.8.1",
     "@elastic/esql": "4.44.0",
     "@elastic/esql-definitions": "4.44.0",
-    "@elastic/eui": "123.6.0",
+    "@elastic/eui": "file:./elastic_eui_123.6.0_10338.tgz",
     "@elastic/eui-illustrations": "1.1.0",
     "@elastic/eui-theme-borealis": "8.3.0",
     "@elastic/eui-theme-common": "10.2.0",
