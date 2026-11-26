@@ -8,6 +8,7 @@
 import type { PageTrigger } from '@kbn/workflows';
 import {
   getPageForm,
+  isPageRequestVerified,
   PAGE_PHISHING_NOTICE,
   PAGE_SUBMITTED_QUERY,
   submitPage,
@@ -55,6 +56,8 @@ describe('getPageForm', () => {
     expect(result.html).toContain('Report a bug');
     expect(result.html).toContain('<form method="POST"');
     expect(result.html).toContain(PAGE_PHISHING_NOTICE);
+    // The URL holds the secret, so no request from the page may send it as a referrer.
+    expect(result.html).toContain('<meta name="referrer" content="no-referrer" />');
   });
 
   it('renders the confirmation, not the form, after the redirect from a submit', async () => {
@@ -137,6 +140,19 @@ describe('submitPage', () => {
     expect(deps.executeWorkflowAsServiceAccount).not.toHaveBeenCalled();
     expect(result.html).toContain('role="alert"');
     expect(result.html).toContain('value="ab"');
+  });
+});
+
+describe('isPageRequestVerified', () => {
+  it.each([
+    ['a served form', undefined, true],
+    ['a miss after the secret matched', 'workflow_disabled', true],
+    ['a wrong secret', 'secret_mismatch', false],
+    ['a missing page', 'page_not_found', false],
+    ['the kill switch', 'pages_disabled', false],
+    ['an unexpected error', 'unexpected_error', false],
+  ] as const)('is %p for %s', (_, reason, verified) => {
+    expect(isPageRequestVerified({ reason })).toBe(verified);
   });
 });
 

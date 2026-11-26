@@ -54,6 +54,7 @@ const EXTERNAL_RESUME_INVALID_LINK_MESSAGE = i18n.translate(
 export const EXTERNAL_RESUME_HTML_HEADERS = {
   'content-type': 'text/html; charset=utf-8',
   'cache-control': 'no-store',
+  // Core replaces this header with its default. The page templates also set a referrer meta tag.
   'referrer-policy': 'no-referrer',
   // Belt-and-suspenders: block script execution if schema-derived markup is ever mishandled.
   'content-security-policy': "default-src 'none'; style-src 'unsafe-inline'; form-action 'self'",

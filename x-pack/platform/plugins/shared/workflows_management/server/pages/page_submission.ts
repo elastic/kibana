@@ -54,6 +54,20 @@ export type PageRequest = WorkflowPageRef & { secret: string };
 /** Why a page request got the 404. Only the audit log sees it. */
 export type PageMissReason = WorkflowPageMissReason | 'pages_disabled' | 'unexpected_error';
 
+// Misses decided before the secret matched. The URL's workflow and page ids are only a claim.
+const UNVERIFIED_REASONS: ReadonlySet<PageMissReason> = new Set<PageMissReason>([
+  'pages_disabled',
+  'global_space',
+  'page_not_found',
+  'page_offline',
+  'secret_mismatch',
+  'unexpected_error',
+]);
+
+/** True when the secret matched the page, so the ids in the URL are real. */
+export const isPageRequestVerified = ({ reason }: Pick<PageResponse, 'reason'>): boolean =>
+  reason === undefined || !UNVERIFIED_REASONS.has(reason);
+
 interface ServablePage {
   workflow: WorkflowProperties;
   trigger: PageTrigger;

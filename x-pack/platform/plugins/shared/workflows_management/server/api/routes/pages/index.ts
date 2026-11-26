@@ -11,6 +11,7 @@ import { registerPageManagementRoutes } from './page_management_routes';
 import type { PageRequest, PageResponse, PageSubmissionDeps } from '../../../pages/page_submission';
 import {
   getPageForm,
+  isPageRequestVerified,
   notFoundPage,
   PAGE_SUBMITTED_QUERY,
   submitPage,
@@ -96,6 +97,7 @@ export function registerPageRoutes(routeDeps: RouteDependencies) {
       spaceId,
       outcome: result.outcome,
       reason: result.reason,
+      verified: isPageRequestVerified(result),
       executionId: result.executionId,
       error,
     });
