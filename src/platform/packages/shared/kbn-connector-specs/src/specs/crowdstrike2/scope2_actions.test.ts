@@ -301,14 +301,14 @@ describe('CrowdStrike Falcon connector, scope change 2 actions', () => {
       expect(accepts('getCaseDetails', { case_ids: [] })).toBe(false);
     });
 
-    it('updateCase patches only the fields given, a numeric severity as a number', async () => {
+    it('updateCase patches only the fields given, severity as a number', async () => {
       const { result, calls } = await run(
         'updateCase',
         {
           case_id: CASE_ID,
           status: 'in_progress',
           assigned_to_user_uuid: USER,
-          severity: '4',
+          severity: 40,
           expected_version: 7,
         },
         [ok({ resources: [{ id: CASE_ID, status: 'in_progress', version: 8 }] })]
@@ -318,7 +318,7 @@ describe('CrowdStrike Falcon connector, scope change 2 actions', () => {
         url: `${BASE}/cases/entities/cases/v2`,
         data: {
           id: CASE_ID,
-          fields: { status: 'in_progress', assigned_to_user_uuid: USER, severity: 4 },
+          fields: { status: 'in_progress', assigned_to_user_uuid: USER, severity: 40 },
           expected_version: 7,
         },
       });
@@ -329,12 +329,11 @@ describe('CrowdStrike Falcon connector, scope change 2 actions', () => {
       });
     });
 
-    it('updateCase sends a named severity as a string and returns case null when Falcon returns none', async () => {
+    it('updateCase returns case null when Falcon returns none', async () => {
       const { result, calls } = await run(
         'updateCase',
         {
           case_id: CASE_ID,
-          severity: 'high',
           remove_user_assignment: true,
           name: 'n',
           description: '',
@@ -343,7 +342,7 @@ describe('CrowdStrike Falcon connector, scope change 2 actions', () => {
       );
       expect(calls()[0].data).toEqual({
         id: CASE_ID,
-        fields: { remove_user_assignment: true, name: 'n', description: '', severity: 'high' },
+        fields: { remove_user_assignment: true, name: 'n', description: '' },
       });
       expect(result).toMatchObject({ case: null });
     });
@@ -367,6 +366,10 @@ describe('CrowdStrike Falcon connector, scope change 2 actions', () => {
         false
       );
       expect(accepts('updateCase', { case_id: CASE_ID, description: 'd'.repeat(4000) })).toBe(true);
+      expect(accepts('updateCase', { case_id: CASE_ID, severity: 'high' })).toBe(false);
+      expect(accepts('updateCase', { case_id: CASE_ID, severity: 0 })).toBe(false);
+      expect(accepts('updateCase', { case_id: CASE_ID, severity: 101 })).toBe(false);
+      expect(accepts('updateCase', { case_id: CASE_ID, severity: 60 })).toBe(true);
     });
 
     it('updateCase does not repeat a 500 and reports a 409 version conflict', async () => {

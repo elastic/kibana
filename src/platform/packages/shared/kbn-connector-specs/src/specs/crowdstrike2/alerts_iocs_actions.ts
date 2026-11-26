@@ -102,7 +102,7 @@ export const alertAndIocActions: ConnectorSpec['actions'] = {
           sort: input.sort ?? 'created_timestamp.desc',
           limit: input.limit,
           offset: input.offset,
-          include_hidden: input.include_hidden,
+          include_hidden: input.include_hidden ?? false,
         },
         scope: SCOPES.alertsRead,
         window: ALERTS_RESULT_WINDOW,
@@ -118,7 +118,7 @@ export const alertAndIocActions: ConnectorSpec['actions'] = {
       const response = await falconRequest(ctx, {
         method: 'POST',
         path: '/alerts/entities/alerts/v2',
-        params: { include_hidden: input.include_hidden },
+        params: { include_hidden: input.include_hidden ?? false },
         data: { composite_ids: input.composite_ids },
         retryServerErrors: true,
         allowNotFound: true,

@@ -939,11 +939,12 @@ export const UpdateCaseInputSchema = lazySchema(() =>
       name: z.string().min(1).max(255).optional().describe('New case name'),
       description: z.string().max(4000).optional().describe('New case description'),
       severity: z
-        .string()
+        .number()
+        .int()
         .min(1)
-        .max(20)
+        .max(100)
         .optional()
-        .describe('New severity, sent as given; a numeric value is sent as a number'),
+        .describe('New severity as a number, 1-100 (the severity value getCaseDetails returns)'),
       expected_version: z
         .number()
         .int()

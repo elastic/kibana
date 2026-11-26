@@ -24,9 +24,7 @@ import {
   UpdateCaseInputSchema,
 } from './types';
 
-const NUMERIC = /^\d+$/;
-
-/** The PATCH fields of updateCase: only the fields given; a numeric severity is sent as a number. */
+/** The PATCH fields of updateCase: only the fields given. */
 export const buildCaseFields = (input: UpdateCaseInput): Record<string, unknown> => {
   const fields: Record<string, unknown> = {};
   if (input.status !== undefined) fields.status = input.status;
@@ -39,7 +37,7 @@ export const buildCaseFields = (input: UpdateCaseInput): Record<string, unknown>
   if (input.name !== undefined) fields.name = input.name;
   if (input.description !== undefined) fields.description = input.description;
   if (input.severity !== undefined) {
-    fields.severity = NUMERIC.test(input.severity) ? Number(input.severity) : input.severity;
+    fields.severity = input.severity;
   }
   return fields;
 };

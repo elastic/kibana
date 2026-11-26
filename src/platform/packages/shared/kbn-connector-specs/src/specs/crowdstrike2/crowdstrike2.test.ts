@@ -363,6 +363,7 @@ describe('CrowdStrike Falcon connector', () => {
         "(tactic:'Execution')+status:'new'+severity:>=50+device.hostname:'o\\'brien'+created_timestamp:>='2026-11-01T00:00:00Z'"
       );
       expect(url.searchParams.get('sort')).toBe('created_timestamp.desc');
+      expect(url.searchParams.get('include_hidden')).toBe('false');
     });
 
     it('[C-edge-alert-search-beyond-10000] searchAlerts rejects offset + limit beyond 10,000', () => {
@@ -382,6 +383,13 @@ describe('CrowdStrike Falcon connector', () => {
         data: { composite_ids: [COMPOSITE] },
       });
       expect(result).toMatchObject({ resources: [{ severity: 70 }] });
+    });
+
+    it('getAlertDetails sends include_hidden=false when it is not given', async () => {
+      const { calls } = await run('getAlertDetails', { composite_ids: [COMPOSITE] }, [
+        ok({ resources: [] }),
+      ]);
+      expect(calls()[0].url).toBe(`${BASE}/alerts/entities/alerts/v2?include_hidden=false`);
     });
 
     it('updateAlert sends one PATCH with removals before additions', async () => {
