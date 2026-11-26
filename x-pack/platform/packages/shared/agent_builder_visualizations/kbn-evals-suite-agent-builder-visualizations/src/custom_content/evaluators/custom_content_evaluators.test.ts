@@ -602,6 +602,22 @@ describe('Template columns of several queries', () => {
     expect([...(references.get(0) ?? [])].sort()).toEqual(['0', '1', 'host']);
   });
 
+  it('does not read a query whose position is not a whole number', () => {
+    expect([
+      ...readColumnReferencesByQuery(
+        '{{ queries[1.5].rows[0].host }}{% for r in queries[2.5].rows %}{{ r.x.value }}{% endfor %}'
+      ),
+    ]).toEqual([]);
+  });
+
+  it('does not take the counter of a range for a row of the query in its bounds', () => {
+    const references = readColumnReferencesByQuery(
+      '{% for i in (1..queries[1].rows.size) %}{{ i.x }}{{ rows[0].host.value }}{% endfor %}'
+    );
+    expect(references.get(0)).toEqual(['host']);
+    expect(references.get(1)).toEqual([]);
+  });
+
   it('does not read a query chosen by a variable', () => {
     expect([...readColumnReferencesByQuery('{{ queries[i].rows[0].host }}')]).toEqual([]);
   });

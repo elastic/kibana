@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Liquid, type Template } from 'liquidjs';
+import { Liquid, TokenKind, type Template } from 'liquidjs';
 import { CUSTOM_CONTENT_LIQUID_OPTIONS } from '@kbn/custom-content-common';
 
 const liquid = new Liquid(CUSTOM_CONTENT_LIQUID_OPTIONS);
@@ -19,7 +19,7 @@ interface Loop {
 
 interface LoopTag {
   variable: string;
-  collection: { input: string; begin: number; end: number };
+  collection: { kind: TokenKind; input: string; begin: number; end: number };
   templates: Template[];
   elseTemplates?: Template[];
 }
@@ -37,6 +37,8 @@ const isRowPick = (segment: unknown): boolean =>
   typeof segment === 'number' || segment === 'first' || segment === 'last' || isVariable(segment);
 
 const isVariable = (segment: unknown): boolean => typeof segment === 'object' && segment !== null;
+
+const isQueryPosition = (segment: unknown): segment is number => Number.isInteger(segment);
 
 const asColumn = (segment: unknown): string | undefined => {
   if (typeof segment === 'number') {
@@ -57,7 +59,7 @@ const readReference = (
     return { query: 0, column: asColumn(first) };
   }
   if (root === 'queries') {
-    if (typeof first !== 'number') {
+    if (!isQueryPosition(first)) {
       return undefined;
     }
     if (second === 'rows') {
@@ -75,12 +77,17 @@ const readSegments = (expression: string): Segments | undefined => {
 };
 
 /** The query whose rows a loop goes through: `rows` is the first, `queries[n].rows` the n-th. */
-const readLoopQuery = ({ collection: { input, begin, end } }: LoopTag): number | undefined => {
+const readLoopQuery = ({
+  collection: { kind, input, begin, end },
+}: LoopTag): number | undefined => {
+  if (kind !== TokenKind.PropertyAccess) {
+    return undefined;
+  }
   const [root, first, second] = readSegments(input.slice(begin, end)) ?? [];
   if (root === 'rows') {
     return 0;
   }
-  return root === 'queries' && typeof first === 'number' && second === 'rows' ? first : undefined;
+  return root === 'queries' && isQueryPosition(first) && second === 'rows' ? first : undefined;
 };
 
 /** The loops of these templates that are not inside another loop, however deep in other tags. */
