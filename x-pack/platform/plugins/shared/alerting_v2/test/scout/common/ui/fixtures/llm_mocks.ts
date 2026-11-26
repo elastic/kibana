@@ -57,6 +57,15 @@ export const mockTitleGeneration = (proxy: LlmProxy, title: string) => {
     .completeAfterIntercept();
 };
 
+/** Answers the user's message with a plain text reply, so a spec that only opens a chat can finish the round. */
+export const mockAgentAnswer = (proxy: LlmProxy, answer: string) => {
+  void proxy.interceptors.userMessage({
+    name: 'agent:answer',
+    when: ({ messages }) => !isTitleGenerationRequest(messages),
+    response: answer,
+  });
+};
+
 /** Answers the user's message by loading an Agent Builder skill, which unlocks its inline tools. */
 export const mockLoadSkill = (proxy: LlmProxy, skill: string) => {
   void proxy.interceptors.userMessage({
