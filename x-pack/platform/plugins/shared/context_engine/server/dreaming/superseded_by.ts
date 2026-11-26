@@ -10,7 +10,7 @@ import { ENTITY_TYPE_PREFIX } from '../../common/dreaming';
 import type { AiIndexDest } from '../../common/http_api/ai_indices';
 import { isKiDeleted } from '../ai_indices/ki_revision';
 import { kindOf, type DreamedKi } from './dreamed_ki';
-import { kiUri } from './ids';
+import { kiUri } from '../../common/ki_uri';
 import { isVisibleInSpace } from './permissions';
 import type { DreamingOperation, UpsertEntityOperation } from './resolve_change_set';
 

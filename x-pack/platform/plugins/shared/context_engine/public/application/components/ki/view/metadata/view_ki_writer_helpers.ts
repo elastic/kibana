@@ -7,6 +7,7 @@
 
 import { AGENT_BUILDER_APP_ID } from '@kbn/deeplinks-agent-builder';
 import { WORKFLOWS_APP_ID } from '@kbn/deeplinks-workflows';
+import { isDreamingWorkflowId } from '../../../../../../common/dreaming';
 import type { KiJsonValue } from '../../../../../../common/http_api/knowledge_indicators';
 import { type KiReferenceRelation } from '../../../../../../common/step_types/ki';
 import {
@@ -14,7 +15,7 @@ import {
   KI_WRITER_URI_SCHEME_WORKFLOW,
   WRITER_URI_PATTERN,
 } from '../view_ki_constants';
-import { formatKiJsonValueAsString } from './view_ki_document_helpers';
+import { formatKiJsonValueAsString, type KiGovernanceWriter } from './view_ki_document_helpers';
 
 export interface KiReferenceDisplayRow {
   uri: string;
@@ -39,6 +40,17 @@ export const parseWriterUri = (uri: string): ParsedWriterUri | undefined => {
     return undefined;
   }
   return { scheme, identifier };
+};
+
+export const isDreamingWorkflowWriter = (writer: KiGovernanceWriter | undefined): boolean => {
+  if (writer?.uri === undefined) {
+    return false;
+  }
+  const parsed = parseWriterUri(writer.uri);
+  return (
+    parsed?.scheme.toLowerCase() === KI_WRITER_URI_SCHEME_WORKFLOW &&
+    isDreamingWorkflowId(parsed.identifier)
+  );
 };
 
 export const getWriterAgentId = (metadata: Record<string, KiJsonValue>): string | undefined => {
@@ -81,3 +93,11 @@ export const getKiWriterUriHref = (
   }
   return undefined;
 };
+
+export const getKiConversationHref = (
+  getUrlForApp: KiGetUrlForApp,
+  conversationId: string
+): string =>
+  getUrlForApp(AGENT_BUILDER_APP_ID, {
+    path: `/conversations/${encodeURIComponent(conversationId)}`,
+  });

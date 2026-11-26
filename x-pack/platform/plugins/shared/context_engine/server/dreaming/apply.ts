@@ -19,6 +19,7 @@ import {
 } from '../../common/dreaming';
 import type { AccessPattern } from '../../common/step_types/apply_dream_changes';
 import type { AiIndexDest } from '../../common/http_api/ai_indices';
+import { kiUri } from '../../common/ki_uri';
 import { MAX_KI_REFERENCES } from '../../common/step_types/ki';
 import { KiConflictError, KiNotFoundError } from '../ai_indices/errors';
 import {
@@ -46,7 +47,7 @@ import {
   type DreamedKiAttributes,
   type DreamedKiReference,
 } from './dreamed_ki';
-import { kiUri, memoryUri } from './ids';
+import { memoryUri } from './ids';
 import {
   derivedPermissions,
   isVisibleInSpace,

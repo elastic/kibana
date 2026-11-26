@@ -15,7 +15,7 @@ import {
 import { isKiDeleted } from '../ai_indices/ki_revision';
 import type { ApplyContext, PlannedWrite } from '../dreaming/apply';
 import type { DreamedKi } from '../dreaming/dreamed_ki';
-import { kiUri } from '../dreaming/ids';
+import { kiUri } from '../../common/ki_uri';
 import { applyMaintenanceGroups, emptyApplyResult } from '../maintenance/apply_maintenance';
 import { audienceOf, parseRelationship } from '../maintenance/gather';
 import { parseMaintenanceChanges } from '../maintenance/parse_changes';

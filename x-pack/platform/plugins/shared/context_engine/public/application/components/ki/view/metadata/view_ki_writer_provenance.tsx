@@ -15,6 +15,7 @@ import {
   getKiWriterAgentManageHref,
   getKiWriterUriHref,
   getWriterAgentId,
+  isDreamingWorkflowWriter,
   parseWriterUri,
 } from './view_ki_writer_helpers';
 
@@ -68,18 +69,31 @@ export const ViewKiSidebarWriterProvenance = ({ writer }: ViewKiSidebarWriterPro
       })
     : undefined;
 
-  const writerNode = parsed ? (
-    <FormattedMessage
-      id="xpack.contextEngine.viewKi.writerProvenance.schemeDetail"
-      defaultMessage="{scheme} {identifier}"
-      values={{
-        scheme: <span>{parsed.scheme.toLowerCase()}</span>,
-        identifier: <ViewKiSidebarWriterValue value={parsed.identifier} href={writerHref} />,
-      }}
-    />
-  ) : (
-    <ViewKiSidebarWriterValue value={writer.uri} href={writerHref} />
-  );
+  const workflowDreamingLabel = isDreamingWorkflowWriter(writer);
+
+  const dreamingWriterLabel = i18n.translate('xpack.contextEngine.viewKi.metadata.dreamingWriter', {
+    defaultMessage: 'Dreaming',
+  });
+
+  const renderWriterNode = () => {
+    if (workflowDreamingLabel) {
+      return <ViewKiSidebarWriterValue value={dreamingWriterLabel} href={writerHref} />;
+    }
+    if (!parsed) {
+      return <ViewKiSidebarWriterValue value={writer.uri} href={writerHref} />;
+    }
+    return (
+      <FormattedMessage
+        id="xpack.contextEngine.viewKi.writerProvenance.schemeDetail"
+        defaultMessage="{scheme} {identifier}"
+        values={{
+          scheme: <span>{parsed.scheme.toLowerCase()}</span>,
+          identifier: <ViewKiSidebarWriterValue value={parsed.identifier} href={writerHref} />,
+        }}
+      />
+    );
+  };
+  const writerNode = renderWriterNode();
 
   const writerTooltip = parsed
     ? i18n.translate('xpack.contextEngine.viewKi.writerProvenance.schemeTooltip', {

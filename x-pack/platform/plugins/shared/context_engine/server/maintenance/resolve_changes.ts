@@ -11,6 +11,7 @@ import {
   RELATIONSHIP_KEY_ATTRIBUTE,
   RELATIONSHIP_KI_TYPE,
 } from '../../common/dreaming';
+import { kiUri } from '../../common/ki_uri';
 import type { MaintenanceChangeSet } from '../../common/step_types/apply_maintenance_changes';
 import type {
   MaintenanceBatch,
@@ -35,7 +36,7 @@ import {
   type DreamedKi,
   type DreamedKiReference,
 } from '../dreaming/dreamed_ki';
-import { kiUri, relationshipId, relationshipKey } from '../dreaming/ids';
+import { relationshipId, relationshipKey } from '../dreaming/ids';
 import { derivedPermissions, isVisibleInSpace, samePermissions } from '../dreaming/permissions';
 import { audienceOf, isUserScoped, parseRelationship } from './gather';
 

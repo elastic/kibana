@@ -10,7 +10,12 @@ import React, { useMemo } from 'react';
 import type { KiDocument } from '../../../../../../common/http_api/knowledge_indicators';
 import { viewKiLoadingPanelCss } from '../view_ki_constants';
 import { ViewKiAttributesSection } from './view_ki_attributes_section';
-import { documentAttributesToRows, readKiGovernance } from './view_ki_document_helpers';
+import {
+  documentAttributesToRows,
+  groupKiReferences,
+  readKiGovernance,
+} from './view_ki_document_helpers';
+import { ViewKiReferencesSection } from './view_ki_references_section';
 import { ViewKiSidebarDescriptionList } from './view_ki_sidebar_primitives';
 import { buildKiMetadataListItems } from './view_ki_metadata_helpers';
 
@@ -29,6 +34,10 @@ export const ViewKiMetadataPanel = ({
   isLoading = false,
 }: ViewKiMetadataPanelProps) => {
   const showAttributes = document ? hasViewKiAttributes(document) : false;
+  const referenceGroups = useMemo(
+    () => groupKiReferences(document?.references),
+    [document?.references]
+  );
   const governance = readKiGovernance(document ?? {});
   const listItems = useMemo(
     () => buildKiMetadataListItems(kiId, document ?? {}, governance),
@@ -61,6 +70,12 @@ export const ViewKiMetadataPanel = ({
         <>
           <EuiHorizontalRule margin="m" />
           <ViewKiAttributesSection document={document} />
+        </>
+      ) : null}
+      {referenceGroups.length > 0 ? (
+        <>
+          <EuiHorizontalRule margin="m" />
+          <ViewKiReferencesSection groups={referenceGroups} />
         </>
       ) : null}
     </EuiPanel>

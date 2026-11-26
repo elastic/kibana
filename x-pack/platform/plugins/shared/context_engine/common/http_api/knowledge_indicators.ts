@@ -83,6 +83,12 @@ export interface KiDocumentReference {
   description?: string;
 }
 
+export interface KiDocumentPermissions {
+  kibana?: {
+    privileges?: Array<{ space: string; name?: string[]; count?: number }>;
+  };
+}
+
 export interface KiDocument {
   id?: string;
   type?: string;
@@ -96,6 +102,7 @@ export interface KiDocument {
   attributes?: Record<string, KiJsonValue>;
   references?: KiDocumentReference[];
   governance?: KiDocumentGovernance;
+  permissions?: KiDocumentPermissions;
 }
 
 export interface GetKiResponse {

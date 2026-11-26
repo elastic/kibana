@@ -87,4 +87,22 @@ describe('ViewKiSidebarWriterProvenance', () => {
     );
     expect(screen.getByText('not-a-uri')).toBeInTheDocument();
   });
+
+  it('renders Dreaming label for a dreaming workflow URI', () => {
+    const dreamingWorkflowId = 'system-context-engine-dreaming-ai-index-1';
+    renderWriter({ uri: `workflow://${dreamingWorkflowId}`, metadata: {} });
+
+    expect(screen.getByRole('link', { name: 'Dreaming' })).toHaveAttribute(
+      'href',
+      `/app/workflows/${dreamingWorkflowId}`
+    );
+    expect(screen.queryByText('workflow')).not.toBeInTheDocument();
+  });
+
+  it('keeps non-dreaming workflow identifier label', () => {
+    renderWriter({ uri: 'workflow://custom-wf', metadata: {} });
+
+    expect(screen.getByRole('link', { name: 'custom-wf' })).toBeInTheDocument();
+    expect(screen.queryByRole('link', { name: 'Dreaming' })).not.toBeInTheDocument();
+  });
 });

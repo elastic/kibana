@@ -30,7 +30,7 @@ import {
 import { isKiDeleted } from '../ai_indices/ki_revision';
 import { isPersonEdited } from '../ai_indices/ki_write';
 import { kindOf, occurrencesOf, type DreamedKi } from '../dreaming/dreamed_ki';
-import { kiUri } from '../dreaming/ids';
+import { kiUri } from '../../common/ki_uri';
 import {
   audienceKeyOf,
   derivedPermissions,

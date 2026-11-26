@@ -10,8 +10,6 @@ import {
   entityId,
   factId,
   isMemoryKiId,
-  kiIdFromUri,
-  kiUri,
   memoryIdFromUri,
   memoryUri,
   relationshipId,
@@ -85,11 +83,6 @@ describe('dreaming ids', () => {
     expect(relationshipId(key)).not.toBe(
       relationshipId(relationshipKey('entity-person--alex', 'manages', 'entity-person--priya'))
     );
-  });
-
-  it('round-trips KI URIs', () => {
-    expect(kiIdFromUri(kiUri('mem-1'))).toBe('mem-1');
-    expect(kiIdFromUri('index://logs')).toBeUndefined();
   });
 
   it('cites each source of memories by a scheme of its own, and reads the citation back', () => {

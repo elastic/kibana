@@ -15,22 +15,49 @@ import { ViewKiSidebarWriterProvenance } from './view_ki_writer_provenance';
 interface KiMetadataProvenanceRowProps {
   at?: string;
   writer?: KiGovernanceWriter;
+  derivedFromSourceCount?: number;
 }
 
-export const KiMetadataProvenanceRow = ({ at, writer }: KiMetadataProvenanceRowProps) => {
+export const KiMetadataProvenanceRow = ({
+  at,
+  writer,
+  derivedFromSourceCount,
+}: KiMetadataProvenanceRowProps) => {
+  const hasDerivedFromSources = derivedFromSourceCount !== undefined && derivedFromSourceCount > 0;
+
   if (at && writer) {
     return (
       <span className="eui-textBreakWord">
-        <FormattedMessage
-          id="xpack.contextEngine.viewKi.metadata.provenanceAtBy"
-          defaultMessage="{time} by {writer}"
-          values={{
-            time: (
-              <KiFormattedDate value={at} className={KI_FORMATTED_DATE_SENTENCE_START_CLASS_NAME} />
-            ),
-            writer: <ViewKiSidebarWriterProvenance writer={writer} />,
-          }}
-        />
+        {hasDerivedFromSources ? (
+          <FormattedMessage
+            id="xpack.contextEngine.viewKi.metadata.provenanceAtByFromSources"
+            defaultMessage="{time} by {writer} from {count, plural, one {# source} other {# sources}}"
+            values={{
+              time: (
+                <KiFormattedDate
+                  value={at}
+                  className={KI_FORMATTED_DATE_SENTENCE_START_CLASS_NAME}
+                />
+              ),
+              writer: <ViewKiSidebarWriterProvenance writer={writer} />,
+              count: derivedFromSourceCount,
+            }}
+          />
+        ) : (
+          <FormattedMessage
+            id="xpack.contextEngine.viewKi.metadata.provenanceAtBy"
+            defaultMessage="{time} by {writer}"
+            values={{
+              time: (
+                <KiFormattedDate
+                  value={at}
+                  className={KI_FORMATTED_DATE_SENTENCE_START_CLASS_NAME}
+                />
+              ),
+              writer: <ViewKiSidebarWriterProvenance writer={writer} />,
+            }}
+          />
+        )}
       </span>
     );
   }
@@ -42,13 +69,24 @@ export const KiMetadataProvenanceRow = ({ at, writer }: KiMetadataProvenanceRowP
   if (writer) {
     return (
       <span className="eui-textBreakWord">
-        <FormattedMessage
-          id="xpack.contextEngine.viewKi.metadata.provenanceByOnly"
-          defaultMessage="by {writer}"
-          values={{
-            writer: <ViewKiSidebarWriterProvenance writer={writer} />,
-          }}
-        />
+        {hasDerivedFromSources ? (
+          <FormattedMessage
+            id="xpack.contextEngine.viewKi.metadata.provenanceByFromSources"
+            defaultMessage="by {writer} from {count, plural, one {# source} other {# sources}}"
+            values={{
+              writer: <ViewKiSidebarWriterProvenance writer={writer} />,
+              count: derivedFromSourceCount,
+            }}
+          />
+        ) : (
+          <FormattedMessage
+            id="xpack.contextEngine.viewKi.metadata.provenanceByOnly"
+            defaultMessage="by {writer}"
+            values={{
+              writer: <ViewKiSidebarWriterProvenance writer={writer} />,
+            }}
+          />
+        )}
       </span>
     );
   }

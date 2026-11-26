@@ -9,6 +9,7 @@ import {
   getKiWriterAgentManageHref,
   getKiWriterUriHref,
   getWriterAgentId,
+  isDreamingWorkflowWriter,
   parseWriterUri,
 } from './view_ki_writer_helpers';
 
@@ -56,6 +57,22 @@ describe('getKiWriterUriHref', () => {
     expect(getKiWriterUriHref(getUrlForApp, 'https://example.com/wf')).toBeUndefined();
     expect(getKiWriterUriHref(getUrlForApp, 'crawler://sml')).toBeUndefined();
     expect(getKiWriterUriHref(getUrlForApp, 'custom://foo')).toBeUndefined();
+  });
+});
+
+describe('isDreamingWorkflowWriter', () => {
+  const dreamingWorkflowId = 'system-context-engine-dreaming-ai-index-1';
+
+  it('returns true for dreaming workflow URIs', () => {
+    expect(
+      isDreamingWorkflowWriter({ uri: `workflow://${dreamingWorkflowId}`, metadata: {} })
+    ).toBe(true);
+  });
+
+  it('returns false for other workflow and scheme URIs', () => {
+    expect(isDreamingWorkflowWriter({ uri: 'workflow://custom-wf', metadata: {} })).toBe(false);
+    expect(isDreamingWorkflowWriter({ uri: 'tool://platform.foo', metadata: {} })).toBe(false);
+    expect(isDreamingWorkflowWriter(undefined)).toBe(false);
   });
 });
 

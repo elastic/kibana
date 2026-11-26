@@ -9,6 +9,8 @@ import { EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useMemo } from 'react';
 import type { KiDocument } from '../../../../../../common/http_api/knowledge_indicators';
+import { KiFormattedDate } from '../../shared/ki_formatted_date';
+import { KI_FORMATTED_DATE_SENTENCE_START_CLASS_NAME } from '../view_ki_constants';
 import { documentAttributesToRows } from './view_ki_document_helpers';
 import {
   ViewKiSidebarBreakableText,
@@ -23,10 +25,22 @@ interface ViewKiAttributesSectionProps {
 export const ViewKiAttributesSection = ({ document }: ViewKiAttributesSectionProps) => {
   const viewItems = useMemo(
     () =>
-      documentAttributesToRows(document).map((row) => ({
-        title: row.key,
-        description: <ViewKiSidebarBreakableText>{row.value}</ViewKiSidebarBreakableText>,
-      })),
+      documentAttributesToRows(document).map((row) => {
+        const description =
+          row.isDate && row.value.length > 0 ? (
+            <KiFormattedDate
+              value={row.value}
+              className={KI_FORMATTED_DATE_SENTENCE_START_CLASS_NAME}
+            />
+          ) : (
+            <ViewKiSidebarBreakableText>{row.value}</ViewKiSidebarBreakableText>
+          );
+
+        return {
+          title: row.label,
+          description,
+        };
+      }),
     [document]
   );
 
