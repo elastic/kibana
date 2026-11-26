@@ -104,8 +104,27 @@ const credentialsDetails = (
   const requires = `The latest spec requires credentials the connector doesn't send: ${expected}.`;
   const schemesAdded = schemesOf(authChanges, 'api-security-added');
   const schemesRemoved = schemesOf(authChanges, 'api-security-removed');
-  const scopesAdded = schemesOf(authChanges, 'api-security-scope-added');
-  const scopesRemoved = schemesOf(authChanges, 'api-security-scope-removed');
+  // A scheme removed and added again, as oasdiff reports regrouped requirements, keeps the scopes
+  // both name: only the difference is a change, so it is netted out with the scope changes.
+  const regrouped = [...schemesAdded.keys()].filter((scheme) => schemesRemoved.has(scheme));
+  const scopesOf = (
+    rule: string,
+    others: Map<string, Set<string>>,
+    side: Map<string, Set<string>>
+  ) => {
+    const scopes = schemesOf(authChanges, rule);
+    for (const scheme of regrouped) {
+      const own = side.get(scheme) ?? new Set<string>();
+      const other = others.get(scheme) ?? new Set<string>();
+      const net = [...own].filter((scope) => !other.has(scope));
+      if (net.length > 0) {
+        scopes.set(scheme, new Set([...(scopes.get(scheme) ?? []), ...net]));
+      }
+    }
+    return scopes;
+  };
+  const scopesAdded = scopesOf('api-security-scope-added', schemesRemoved, schemesAdded);
+  const scopesRemoved = scopesOf('api-security-scope-removed', schemesAdded, schemesRemoved);
   const nameOf = scopeNamer(
     [schemesAdded, scopesAdded, scopesRemoved].flatMap((schemes) =>
       [...schemes.values()].flatMap((scopes) => [...scopes])
@@ -116,13 +135,12 @@ const credentialsDetails = (
       [...scopes].map((scope) => code(nameOf(scope)))
     )}`;
   const what = [
-    ...[...schemesAdded].flatMap(([scheme, scopes]) => {
-      if (!schemesRemoved.has(scheme)) {
-        return [`adds ${code(scheme)}${scopes.size > 0 ? ` (${scopesText(scopes)})` : ''}`];
-      }
-      // Removed and added again: only its scopes can have changed.
-      return scopes.size > 0 ? [`now asks for ${scopesText(scopes)} of ${code(scheme)}`] : [];
-    }),
+    ...[...schemesAdded]
+      .filter(([scheme]) => !schemesRemoved.has(scheme))
+      .map(
+        ([scheme, scopes]) =>
+          `adds ${code(scheme)}${scopes.size > 0 ? ` (${scopesText(scopes)})` : ''}`
+      ),
     ...[...scopesAdded].map(([scheme, scopes]) => `adds ${scopesText(scopes)} to ${code(scheme)}`),
     ...[...scopesRemoved].map(
       ([scheme, scopes]) => `removes ${scopesText(scopes)} from ${code(scheme)}`

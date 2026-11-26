@@ -663,6 +663,31 @@ describe('renderDriftIssue', () => {
       'adds `oauth2` (scopes `https://a.example/auth/read` and `https://b.example/auth/read`)'
     );
 
+    // A scheme removed and added again only changes by the scopes that differ
+    const regroup = (before: string, after: string) =>
+      renderDriftIssue(
+        withChanges(
+          security(
+            'api-security-removed',
+            `the endpoint scheme security \`oauth2: [${before}]\` was removed from the API`
+          ),
+          security(
+            'api-security-added',
+            `the endpoint scheme security \`oauth2: [${after}]\` was added to the API`
+          )
+        ),
+        { owners: [] }
+      ).body;
+    expect(regroup('a, b', 'b, a')).toContain(
+      'For this endpoint, the latest spec no longer accepts `basicAuth`. |'
+    );
+    expect(regroup('a, b', 'a')).toContain(
+      'For this endpoint, the latest spec removes scope `b` from `oauth2` and no longer accepts `basicAuth`. |'
+    );
+    expect(regroup('a', 'a, c')).toContain(
+      'For this endpoint, the latest spec adds scope `c` to `oauth2` and no longer accepts `basicAuth`. |'
+    );
+
     // An operation that moved is matched by its latest path
     const { body: movedBody } = renderDriftIssue(
       {
