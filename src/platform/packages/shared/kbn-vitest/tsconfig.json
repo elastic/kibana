@@ -21,6 +21,6 @@
     "@kbn/i18n",
     "@kbn/react-mute-legacy-root-warning",
     "@kbn/json-ast",
-    "@kbn/swc-register",
+    "@kbn/swc-config",
   ]
 }
