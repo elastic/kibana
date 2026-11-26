@@ -583,25 +583,27 @@ describe('TemplateForm wizard integration', () => {
       }
 
       fireEvent.click(await screen.findByText('Request'));
-      return screen.getByTestId('requestTab');
+      // The tab renders `PUT _index_template/<name>` followed by the JSON body.
+      const request = screen.getByTestId('requestTab').textContent ?? '';
+      return JSON.parse(request.slice(request.indexOf('{')));
     };
 
     it('SHOULD show them in the Request tab while Data stream is on', async () => {
-      const requestTab = await goToReviewRequestTab({ ...sourceTemplate, template: undefined });
+      const requestBody = await goToReviewRequestTab({ ...sourceTemplate, template: undefined });
 
-      expect(requestTab).toHaveTextContent('data_stream_options');
-      expect(requestTab).toHaveTextContent('failure_store');
+      expect(requestBody.template.data_stream_options).toEqual(dataStreamOptions);
     });
 
     it('SHOULD omit them from the Request tab once Data stream is turned off', async () => {
       const { dataStream: _dataStream, ...logisticsWithoutDataStream } = sourceTemplate;
 
-      const requestTab = await goToReviewRequestTab({
+      const requestBody = await goToReviewRequestTab({
         ...logisticsWithoutDataStream,
         template: undefined,
       });
 
-      expect(requestTab).not.toHaveTextContent('data_stream_options');
+      expect(requestBody.template ?? {}).not.toHaveProperty('data_stream_options');
+      expect(requestBody).not.toHaveProperty('data_stream_options');
     });
   });
 });

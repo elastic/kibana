@@ -133,11 +133,13 @@ describe('StepReview', () => {
         </I18nProvider>
       );
       fireEvent.click(screen.getByText('Request'));
-      return screen.getByTestId('requestTab');
+      // The tab renders `PUT _index_template/<name>` followed by the JSON body.
+      const request = screen.getByTestId('requestTab').textContent ?? '';
+      return JSON.parse(request.slice(request.indexOf('{')));
     };
 
     it('SHOULD show them in the Request tab for a data stream template', () => {
-      const requestTab = renderRequestTab(
+      const requestBody = renderRequestTab(
         makeTemplate({
           dataStream: {},
           template: { data_stream_options: dataStreamOptions },
@@ -145,15 +147,14 @@ describe('StepReview', () => {
         })
       );
 
-      expect(requestTab).toHaveTextContent('data_stream_options');
-      expect(requestTab).toHaveTextContent('failure_store');
+      expect(requestBody.template.data_stream_options).toEqual(dataStreamOptions);
     });
 
     it('SHOULD NOT show them when the template is not a data stream template', () => {
       // The wizard builder omits the options in this case, so the review must not add them back.
-      const requestTab = renderRequestTab(makeTemplate());
+      const requestBody = renderRequestTab(makeTemplate());
 
-      expect(requestTab).not.toHaveTextContent('data_stream_options');
+      expect(requestBody.template).not.toHaveProperty('data_stream_options');
     });
   });
 
