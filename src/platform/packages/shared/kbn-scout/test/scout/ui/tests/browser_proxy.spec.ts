@@ -8,21 +8,15 @@
  */
 
 import http from 'http';
-import { test as baseTest, expect, tags } from '../../../../src/playwright';
-import { getBrowserEnvWithoutProxy } from '../../../../src/playwright/utils/browser_env';
+import { createPlaywrightConfig, test as baseTest, expect, tags } from '../../../../src/playwright';
 
 // Chromium never proxies loopback names, so the site needs a name of its own.
 const SITE_HOST = 'scout-proxy-check.test';
 const SITE_BODY = 'answered by the site';
 const PROXY_BODY = 'answered by the proxy';
 
-type BrowserEnv = Record<string, string> | undefined;
-
-interface ProxyCheck {
-  proxyVars: Record<string, string>;
-  scoutBrowserEnv: BrowserEnv;
-  loadSite: (env: BrowserEnv) => Promise<string | undefined>;
-}
+type ScoutUseOptions = NonNullable<ReturnType<typeof createPlaywrightConfig>['use']>;
+type LoadSite = (launchOptions?: ScoutUseOptions['launchOptions']) => Promise<string | undefined>;
 
 const serve = (body: string): Promise<http.Server> =>
   new Promise((resolve, reject) => {
@@ -39,40 +33,42 @@ const getPort = (server: http.Server): number => {
   return address.port;
 };
 
-const test = baseTest.extend<{ proxyCheck: ProxyCheck }>({
-  proxyCheck: async ({ playwright }, use) => {
+const test = baseTest.extend<{ loadSite: LoadSite }>({
+  loadSite: async ({ playwright }, use) => {
     const [site, proxy] = await Promise.all([serve(SITE_BODY), serve(PROXY_BODY)]);
     const proxyUrl = `http://127.0.0.1:${getPort(proxy)}`;
-    const proxyVars = {
+    // What a Citadel job exports. The test runs with these set, like a real job.
+    const jobEnv: Record<string, string> = {
+      USE_CITADEL_PROXY: 'true',
       HTTP_PROXY: proxyUrl,
       http_proxy: proxyUrl,
       HTTPS_PROXY: proxyUrl,
       https_proxy: proxyUrl,
     };
+    const originalEnv = Object.keys(jobEnv).map((name) => [name, process.env[name]] as const);
+    Object.assign(process.env, jobEnv);
 
-    await use({
-      proxyVars,
-      // What Scout gives the browser in a Citadel job that exports these variables.
-      scoutBrowserEnv: getBrowserEnvWithoutProxy({
-        ...process.env,
-        ...proxyVars,
-        USE_CITADEL_PROXY: 'true',
-      }),
-      loadSite: async (env) => {
-        const browser = await playwright.chromium.launch({
-          env,
-          args: [`--host-resolver-rules=MAP ${SITE_HOST} 127.0.0.1`],
-        });
-        try {
-          const page = await browser.newPage();
-          const response = await page.goto(`http://${SITE_HOST}:${getPort(site)}/`);
-          return await response?.text();
-        } finally {
-          await browser.close();
-        }
-      },
+    await use(async (launchOptions = {}) => {
+      const browser = await playwright.chromium.launch({
+        ...launchOptions,
+        args: [...(launchOptions.args ?? []), `--host-resolver-rules=MAP ${SITE_HOST} 127.0.0.1`],
+      });
+      try {
+        const page = await browser.newPage();
+        const response = await page.goto(`http://${SITE_HOST}:${getPort(site)}/`);
+        return await response?.text();
+      } finally {
+        await browser.close();
+      }
     });
 
+    for (const [name, value] of originalEnv) {
+      if (value === undefined) {
+        delete process.env[name];
+      } else {
+        process.env[name] = value;
+      }
+    }
     site.close();
     proxy.close();
   },
@@ -84,15 +80,13 @@ test.describe('Browser proxy environment', { tag: [...tags.stateful.classic] }, 
     'Chromium reads proxy environment variables only on Linux'
   );
 
-  test('uses the proxy when the browser sees the proxy variables', async ({ proxyCheck }) => {
-    const { proxyVars, scoutBrowserEnv, loadSite } = proxyCheck;
-
-    expect(await loadSite({ ...scoutBrowserEnv, ...proxyVars })).toBe(PROXY_BODY);
+  test('uses the proxy when launched without the Scout launch options', async ({ loadSite }) => {
+    expect(await loadSite()).toBe(PROXY_BODY);
   });
 
-  test('connects directly with the environment Scout gives the browser', async ({ proxyCheck }) => {
-    const { scoutBrowserEnv, loadSite } = proxyCheck;
+  test('connects directly when launched with the Scout launch options', async ({ loadSite }) => {
+    const { launchOptions } = createPlaywrightConfig({ testDir: '.' }).use ?? {};
 
-    expect(await loadSite(scoutBrowserEnv)).toBe(SITE_BODY);
+    expect(await loadSite(launchOptions)).toBe(SITE_BODY);
   });
 });

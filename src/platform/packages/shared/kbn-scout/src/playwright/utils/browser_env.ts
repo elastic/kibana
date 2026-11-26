@@ -17,15 +17,13 @@ const PROXY_ENV_VARS: readonly string[] = [
 ];
 
 /** Returns the browser's environment without proxy variables on Citadel builds, `undefined` otherwise. */
-export const getBrowserEnvWithoutProxy = (
-  jobEnv: NodeJS.ProcessEnv = process.env
-): Record<string, string> | undefined => {
-  if (jobEnv.USE_CITADEL_PROXY !== 'true') {
+export const getBrowserEnvWithoutProxy = (): Record<string, string> | undefined => {
+  if (process.env.USE_CITADEL_PROXY !== 'true') {
     return undefined;
   }
 
   const env: Record<string, string> = {};
-  for (const [name, value] of Object.entries(jobEnv)) {
+  for (const [name, value] of Object.entries(process.env)) {
     if (value !== undefined && !PROXY_ENV_VARS.includes(name)) {
       env[name] = value;
     }
