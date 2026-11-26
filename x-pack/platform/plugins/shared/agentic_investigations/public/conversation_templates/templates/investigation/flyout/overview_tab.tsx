@@ -116,7 +116,7 @@ export const InvestigationOverview: React.FC<
   OverviewSlotRenderProps & {
     /** Present when a solution registered an entity flyout. Entity-store ids open it. */
     onOpenEntity?: (entity: ImpactEntityTarget) => void;
-    overviewSection?: InvestigationOverviewSection;
+    footer?: InvestigationOverviewSection;
   }
 > = ({
   conversation,
@@ -124,7 +124,7 @@ export const InvestigationOverview: React.FC<
   proposedActionsContent,
   proposedActionsCount,
   onOpenEntity,
-  overviewSection: OverviewSection,
+  footer: OverviewFooter,
 }) => {
   const { data } = useInvestigation(conversation.id);
   useRefetchProposalsOnChange(conversation.id, data?.proposals);
@@ -158,9 +158,9 @@ export const InvestigationOverview: React.FC<
         sections={sections}
         showLoadingSection={(data?.in_progress ?? false) && !hasFindings}
       />
-      {OverviewSection && (
+      {OverviewFooter && (
         <KibanaErrorBoundary>
-          <OverviewSection investigationId={conversation.id} />
+          <OverviewFooter investigationId={conversation.id} />
         </KibanaErrorBoundary>
       )}
     </>

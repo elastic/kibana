@@ -134,7 +134,7 @@ export const investigationTemplate: TemplateDefinition = {
           React.createElement(InvestigationOverview, {
             ...props,
             onOpenEntity: getImpactEntityOpener(),
-            overviewSection: props.conversation.agent_id
+            footer: props.conversation.agent_id
               ? getOverviewSection?.(props.conversation.agent_id)
               : undefined,
           });
