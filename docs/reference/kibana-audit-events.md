@@ -12,7 +12,7 @@ Refer to [enabling](docs-content://deploy-manage/security/logging-configuration/
 
 This section describes {{kib}} events that can be logged for auditing purposes.
 
-Each event is broken down into `category`, `type`, `action`, and `outcome` fields to make it easy to filter, query and aggregate the resulting logs. The `trace.id` field can be used to correlate multiple events that originate from the same request or, for a workload that runs as a service account, from the same run.
+Each event is broken down into `category`, `type`, `action`, and `outcome` fields to make it easy to filter, query and aggregate the resulting logs. The `trace.id` field (`http.request.id` in {{serverless-full}}) can be used to correlate multiple events that originate from the same request or, for a workload that runs as a service account, from the same run.
 
 Refer to [audit schema](#xpack-security-ecs-audit-schema) for a table of fields logged with audit events.
 
@@ -41,17 +41,17 @@ serverless: ga
 A `service_account_assume` event marks the start of a workload run that executes as a service account. Use it to find everything that run did.
 
 * **Who acted:** The service account is the actor. `user.id` and `user.name` are the account ID, and `user.roles` is omitted.
-* **What the run did:** Every event the run causes shares this event's `trace.id`. Search on that value to list them. When the plugin supplies a run ID, it appears in `kibana.workload.execution_id` and in the message as `[executionId=…]`.
-* **How to reduce volume:** A workload that runs often writes one `success` event for each run. To drop them, add this filter to [`xpack.security.audit.ignore_filters`](/reference/configuration-reference/security-settings.md#audit-logging-ignore-filters):
+* **What the run did:** Every event the run causes shares this event's `trace.id` (`http.request.id` in {{serverless-full}}). Search on that value to list them. When the plugin supplies a run ID, it appears in `kibana.workload.execution_id` and in the message as `[executionId=…]`.
+* {applies_to}`{stack: ga 9.6+, serverless: unavailable}` **How to reduce volume:** A workload that runs often writes one `success` event for each run. To drop them, add this filter to [`xpack.security.audit.ignore_filters`](/reference/configuration-reference/security-settings.md#audit-logging-ignore-filters):
 
-  ```yaml
-  xpack.security.audit.ignore_filters:
-    - actions: [service_account_assume]
-      outcomes: [success]
-  ```
+    ```yaml
+    xpack.security.audit.ignore_filters:
+      - actions: [service_account_assume]
+        outcomes: [success]
+    ```
 
 $$$service-account-assume-failures$$$
-A `failure` event means {{kib}} couldn't run the workload as its service account, or couldn't keep running it. {{kib}} doesn't log a temporary failure, such as an unavailable {{es}} cluster. It logs a permanent failure once for each run. A failure at the start is logged without a request, so its `trace.id` comes from the active tracing span instead of the run.
+A `failure` event means {{kib}} couldn't run the workload as its service account, or couldn't keep running it. {{kib}} doesn't log a temporary failure, such as an unavailable {{es}} cluster. It logs a permanent failure once for each run. A failure at the start is logged without a request, so its correlation ID comes from the active tracing span instead of the run.
 
 When the run starts, a failure means one of these:
 
@@ -542,7 +542,7 @@ serverless: preview
 
 | **Field** | **Description** |
 | --- | --- |
-| `trace.id` | Unique identifier allowing events of the same transaction from {{kib}} and {{es}} to be correlated. For a workload that runs as a service account, the events of one run share it. Refer to [Trace what a workload did as a service account](#service-account-assume-details). |
+| `trace.id` | Unique identifier allowing events of the same transaction from {{kib}} and {{es}} to be correlated. For a workload that runs as a service account, the events of one run share it. In {{serverless-full}}, this field is delivered as `http.request.id`. Refer to [Trace what a workload did as a service account](#service-account-assume-details). |
 
 ### Serverless OpenTelemetry field names [serverless-otel-field-names]
 
