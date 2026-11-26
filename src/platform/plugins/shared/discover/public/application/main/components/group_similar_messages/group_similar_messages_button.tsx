@@ -58,7 +58,7 @@ export const GroupSimilarMessagesButton = () => {
   return (
     <EuiToolTip
       content={i18n.translate('discover.esql.groupSimilarMessages.tooltip', {
-        defaultMessage: 'Group the messages in {field} by pattern to spot trends and anomalies.',
+        defaultMessage: 'Group {field} by pattern to spot trends and anomalies.',
         values: { field: groupByField },
       })}
     >
