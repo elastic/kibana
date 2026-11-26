@@ -90,12 +90,7 @@ export interface AppliedStatsFunction {
 }
 
 /**
- * Reasons why a query might not yield cascade metadata.
- *
- * {@link getESQLStatsQueryMeta} returns empty `groupByFields` both for queries that simply don't
- * describe a grouping and for queries that do but use a shape the cascade experience cannot serve.
- * The reason tells those cases apart, so callers can surface or track the ones they care about
- * instead of inferring intent from an empty result.
+ * Reasons why a query might not yield cascade metadata. used by {@link getESQLStatsQueryMeta} for reporting.
  */
 export const ESQL_STATS_QUERY_META_EXCLUSION_REASON = {
   /** The query could not be parsed, or computing its metadata threw unexpectedly. */
@@ -157,10 +152,7 @@ const getStatsGroupingField = (
 ): FieldSummary | undefined => summary.grouping[field] ?? summary.grouping[`\`${field}\``];
 
 /**
- * This method is used to get the metadata on STATS command to drive the cascade experience from an ESQL query,
- * if a valid STATS command is found information about the group by fields and applied functions is returned.
- * This method will exclude queries contain commands that are not valid for the cascade experience,
- * reporting why it did so through {@link ESQLStatsQueryMeta.exclusionReason}.
+ * Returns metadata for the STATS command driving the cascade experience from an ESQL query.
  */
 export const getESQLStatsQueryMeta = (queryString: string): ESQLStatsQueryMeta => {
   try {
@@ -180,9 +172,6 @@ const computeESQLStatsQueryMeta = (queryString: string): ESQLStatsQueryMeta => {
   const esqlQuery = EsqlQuery.fromSrc(queryString);
 
   if (esqlQuery.errors.length) {
-    // the parser reports a malformed query on the result rather than throwing, and every helper
-    // below treats the half built AST as a query that simply declares nothing, so without this
-    // the query would be reported as one we understood and found no cascade in
     return excludedESQLStatsQueryMeta(ESQL_STATS_QUERY_META_EXCLUSION_REASON.PARSE_FAILURE);
   }
 
@@ -197,9 +186,6 @@ const computeESQLStatsQueryMeta = (queryString: string): ESQLStatsQueryMeta => {
         ESQL_STATS_QUERY_META_EXCLUSION_REASON.TIMESERIES_INFO_SOURCE
       );
     } else if (isUnsupportedTimeseriesCascadeQuery(esqlQuery)) {
-      // the query possibly declares valid grouping options, but we cannot build leaf queries for its rows,
-      // because it won't be safe to apply our treatment of the operation stats command only,
-      // it's other STATS commands might define aggregate functions that are exclusive to TS queries
       return excludedESQLStatsQueryMeta(
         ESQL_STATS_QUERY_META_EXCLUSION_REASON.TIMESERIES_MULTIPLE_STATS
       );

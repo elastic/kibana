@@ -758,7 +758,7 @@ describe('DiscoverDocumentFlyout', () => {
 
     // the aggregate values are what the expansion narrowed on, so a link copied from the flyout
     // has to carry them too, otherwise it reopens a broader set of documents than was on screen
-    expect(cascadeQuery?.esql).toContain('MATCH_PHRASE(extension, "png")');
+    expect(cascadeQuery?.esql).toContain('extension IN ("png")');
     expect(
       constructCascadeQuery({
         query: groupingQuery,
@@ -768,7 +768,7 @@ describe('DiscoverDocumentFlyout', () => {
         nodePath: expandedDocCascadePath.nodePath,
         nodePathMap: expandedDocCascadePath.nodePathMap,
       })?.esql
-    ).not.toContain('MATCH_PHRASE');
+    ).not.toContain('extension IN');
 
     await toolkit.initializeTabs();
     toolkit.internalState.dispatch(

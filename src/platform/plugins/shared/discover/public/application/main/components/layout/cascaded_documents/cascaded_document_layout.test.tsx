@@ -66,6 +66,12 @@ jest.mock('@kbn/esql-utils', () => ({
   // this suite stubs the package rather than loading it, so the helpers the cascade hooks reach
   // for have to be stubbed too
   isAggregateFilteringFunction: jest.fn().mockReturnValue(false),
+  // loading the real package here fails against the partial @kbn/esql-language stub below, and the
+  // telemetry event definitions read these reasons as soon as they are loaded
+  ESQL_STATS_QUERY_META_EXCLUSION_REASON: {
+    TIMESERIES_MULTIPLE_STATS: 'timeseries_multiple_stats',
+    FORK_COMMAND: 'fork_command',
+  },
 }));
 
 jest.mock('@kbn/esql-utils/src/utils/cascaded_documents_helpers/utils', () => ({

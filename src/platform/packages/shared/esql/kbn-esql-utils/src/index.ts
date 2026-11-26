@@ -118,7 +118,7 @@ export {
 } from './utils/cascaded_documents_helpers';
 export {
   getStatsGroupFieldType,
-  getFieldParamDefinition as getFieldParamDefinition,
+  getFieldParamDefinition,
   isAggregateFilteringFunction,
 } from './utils/cascaded_documents_helpers/utils';
 export { getProjectRoutingFromEsqlQuery } from './utils/set_instructions_helpers';

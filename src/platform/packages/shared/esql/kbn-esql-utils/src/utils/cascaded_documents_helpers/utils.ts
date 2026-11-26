@@ -24,10 +24,7 @@ import type {
   ESQLColumn,
   ESQLLiteral,
 } from '@elastic/esql/types';
-import type { FieldSummary } from '@kbn/esql-language';
-// the helper is not re-exported from the package root, and inlining a second wildcard matcher
-// would only duplicate the escaping this one already gets right
-import { matchesWildcardPattern } from '@kbn/esql-language/src/commands/definitions/utils/regex';
+import { type FieldSummary, matchesWildcardPattern } from '@kbn/esql-language';
 import type { ESQLControlVariable } from '@kbn/esql-types';
 import { getFieldDefinitionFromArg, getFieldTerminals, type Terminal } from '../esql_fields_utils';
 import {
@@ -82,7 +79,7 @@ export const isSupportedFieldType = (fieldType: unknown): fieldType is Supported
 };
 
 /**
- * if value is a text or keyword field and it's not "aggregatable", we opt to use match phrase for the where command
+ * Computes whether the field requires a match phrase predicate for the filtering where command
  */
 export const requiresMatchPhrase = (fieldName: string, dataViewFields: DataView['fields']) => {
   let dataViewField = dataViewFields.getByName(fieldName);
@@ -162,11 +159,6 @@ const columnNodeTargets = (node: ESQLColumn, columnName: string): boolean => {
 /**
  * Reports whether a column the command at `fromCommandIndex` produced fails to reach the end of the
  * query, because a later KEEP leaves it out or a later DROP names it.
- *
- * Knowing this matters because the query is the only place it can be read from. A column the query
- * projected away is absent from every result row, and an aggregate that held null for every group is
- * equally absent once the search drops its all null columns, so the records alone cannot tell the two
- * apart.
  */
 export function isColumnStrippedFromOutput(
   esqlQuery: EsqlQuery,
@@ -292,16 +284,10 @@ export const isAggregateFilteringFunction = (functionName: string | undefined): 
   Boolean(functionName) && AGGREGATE_FILTERING_FUNCTIONS.includes(functionName!.toLowerCase());
 
 /**
- * Kibana field types for which an exact phrase match is the appropriate document level predicate
+ * Remaining Kibana field types supported by the currently supported aggregate filtering functions, that the IN operator can target,
+ * spatial types are intentionally absent.
  */
-const MATCH_PHRASE_FIELD_TYPES = ['string'];
-
-/**
- * Remaining Kibana field types supported by the currently supported aggregate filtering functions, that the MATCH function can target,
- * spatial types are intentionally absent because no full text predicate exists for them.
- * {@link https://www.elastic.co/docs/reference/query-languages/esql/functions-operators/search-functions/match | here}
- */
-const MATCH_FIELD_TYPES = ['boolean', 'date', 'date_nanos', 'ip', 'number', 'version'];
+const MATCH_FIELD_TYPES = ['boolean', 'date', 'date_nanos', 'ip', 'number', 'string', 'version'];
 
 /**
  * Returns the full text function that can be used to filter documents on the provided field,
@@ -313,21 +299,23 @@ const getAggregateValueMatchFunction = (
 ): 'match_phrase' | 'match' | undefined => {
   let dataViewField: DataViewField | undefined = dataViewFields.getByName(fieldName);
 
-  const multiSubtype = dataViewField && getDataViewFieldSubtypeMulti(dataViewField);
-
-  if (multiSubtype) {
-    // the parent field holds the type information we care about for multi fields
-    dataViewField = dataViewFields.getByName(multiSubtype.multi.parent) ?? dataViewField;
-  }
-
   // full text functions require the field to be searchable,
   // so when we can't resolve the field or it isn't searchable we don't attempt to filter on it
   if (!dataViewField || dataViewField.searchable === false) {
     return undefined;
   }
 
-  if (MATCH_PHRASE_FIELD_TYPES.includes(dataViewField.type)) {
+  // requiresMatchPhrase resolves multi fields to their parent on its own, so it is the only
+  // place that decides this, and it has to be asked for every field and not only for multi fields
+  if (requiresMatchPhrase(fieldName, dataViewFields)) {
     return 'match_phrase';
+  }
+
+  const multiSubtype = getDataViewFieldSubtypeMulti(dataViewField);
+
+  if (multiSubtype) {
+    // the parent field holds the type information we care about for multi fields
+    dataViewField = dataViewFields.getByName(multiSubtype.multi.parent) ?? dataViewField;
   }
 
   if (MATCH_FIELD_TYPES.includes(dataViewField.type)) {
@@ -371,12 +359,7 @@ export interface ValuesAggregateFilterArgs {
 
 /**
  * Builds the document level predicates that constrain the documents fetched for a cascade row
- * considering applied aggregates functions that can act as filters,
- * e.g. VALUES.
- *
- * This is only relevant for cascade queries that omit the STATS command,
- * because such queries would then include documents holding values that should not be present
- * in the row the user expanded.
+ * considering applied aggregates functions (e.g. VALUES.) that can act as filters.
  */
 export const buildValuesAggregateFilterExpressions = ({
   editorQuery,
@@ -465,37 +448,54 @@ export const buildValuesAggregateFilterExpressions = ({
         return filters;
       }
 
-      const valueExpressions = aggregateValues.map((value) => {
-        // An empty string is a value the row displays like any other, but no full text predicate
-        // can single it out, because analysing it yields no term to match against. So we choose
-        // to identify these documents by the length of what they hold instead.
-        //
-        // MV_MIN stands between the field and the measurement because a scalar function reads a
-        // multivalued field as null, which would drop the very documents this predicate exists to
-        // reach. The empty string sorts ahead of every other value, so the minimum is empty
-        // exactly when the document holds an empty value.
-        //
-        // Only a string field can be measured this way, so a field reached through MATCH keeps
-        // the full text treatment, and so does a value made of whitespace: the documents really
-        // hold it, and measuring it would read it as empty.
-        if (value === '' && matchFunction === 'match_phrase') {
-          return Builder.expression.func.binary('==', [
-            Builder.expression.func.call('length', [
-              Builder.expression.func.call('mv_min', [
-                Builder.expression.column({
-                  args: [Builder.identifier({ name: aggregatedColumnName })],
-                }),
-              ]),
-            ]),
-            Builder.expression.literal.integer(0),
-          ]);
-        }
+      const valueExpressions: ESQLAstExpression[] = [];
 
-        return Builder.expression.func.call(matchFunction, [
-          Builder.identifier({ name: aggregatedColumnName }),
-          buildAggregateValueLiteral(value),
-        ]);
-      });
+      switch (matchFunction) {
+        case 'match': {
+          valueExpressions.push(
+            Builder.expression.func.binary('in', [
+              Builder.expression.column({
+                args: [Builder.identifier({ name: aggregatedColumnName })],
+              }),
+              Builder.expression.list.tuple({
+                values: aggregateValues.map(buildAggregateValueLiteral),
+              }),
+            ])
+          );
+
+          break;
+        }
+        case 'match_phrase': {
+          aggregateValues.forEach((value) => {
+            if (value === '') {
+              valueExpressions.push(
+                Builder.expression.func.binary('==', [
+                  Builder.expression.func.call('length', [
+                    Builder.expression.func.call('mv_min', [
+                      Builder.expression.column({
+                        args: [Builder.identifier({ name: aggregatedColumnName })],
+                      }),
+                    ]),
+                  ]),
+                  Builder.expression.literal.integer(0),
+                ])
+              );
+            } else {
+              valueExpressions.push(
+                Builder.expression.func.call(matchFunction, [
+                  Builder.identifier({ name: aggregatedColumnName }),
+                  buildAggregateValueLiteral(value),
+                ])
+              );
+            }
+          });
+
+          break;
+        }
+        default: {
+          break;
+        }
+      }
 
       filters.push(
         // the row displays every value the aggregate holds, a document only needs to match one of them
@@ -510,33 +510,12 @@ export const buildValuesAggregateFilterExpressions = ({
   );
 };
 
-/**
- * Combines the provided expressions into a single AND expression.
- *
- * The AST Builder is used instead of a synth template because the latter prints each expression
- * on its own before glueing the result back together, which loses the grouping nested operands carried.
- */
 export const combineFilterExpressionsWithAnd = (expressions: ESQLAstExpression[]) =>
   expressions.reduce((left, right) => Builder.expression.func.binary('and', [left, right]));
 
-/**
- * Returns true when the query being operated on sources its data from a TS (timeseries) command.
- */
 export const isTimeseriesSourceQuery = (esqlQuery: EsqlQuery) =>
   getESQLQueryDataSourceCommand(esqlQuery)?.name === 'ts';
 
-/**
- * Returns true when the query declares a FORK command.
- *
- * A FORK splits the query into branches and then interleaves their rows, so a row of the result
- * does not describe one pipeline the leaf query could be rebuilt from: the branches may select
- * different columns, aggregate differently, or not aggregate at all, and nothing in the row says
- * which branch produced it. The cascade has no way to resolve such a row back to its documents,
- * so these queries are opted out of the experience in the same way subquery sources are.
- *
- * The walker is what finds a FORK nested inside another command's branches, rather than only the
- * ones declared at the top level of the pipeline.
- */
 export const hasForkCommand = (esqlQuery: EsqlQuery): boolean => {
   let containsFork = false;
 
@@ -552,13 +531,6 @@ export const hasForkCommand = (esqlQuery: EsqlQuery): boolean => {
 /**
  * Returns true when a TS (timeseries) query declares a shape whose cascade rows cannot be
  * resolved back to documents.
- *
- * Leaf (document fetch) queries for the cascade experience are always rewritten to read from FROM,
- * because INLINE STATS is not supported for TS queries. Any STATS command other than the one
- * driving the cascade has to be carried over verbatim, and when it applies an aggregate function
- * exclusive to TS queries (the `*_OVER_TIME` family) the resulting FROM query is not valid ES|QL,
- * so there is no way to resolve the documents behind such a row. Rather than emit a query that
- * silently returns nothing, these queries are opted out of the cascade experience entirely.
  */
 export const isUnsupportedTimeseriesCascadeQuery = (esqlQuery: EsqlQuery): boolean =>
   isTimeseriesSourceQuery(esqlQuery) &&

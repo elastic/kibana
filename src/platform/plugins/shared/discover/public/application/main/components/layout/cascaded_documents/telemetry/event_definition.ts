@@ -8,7 +8,10 @@
  */
 
 import type { EventTypeOpts } from '@elastic/ebt/client';
-import type { ESQLStatsQueryMetaExclusionReason } from '@kbn/esql-utils';
+import {
+  type ESQLStatsQueryMetaExclusionReason,
+  ESQL_STATS_QUERY_META_EXCLUSION_REASON,
+} from '@kbn/esql-utils';
 
 export const CASCADE_EVENT_TYPE = 'discover_cascade';
 
@@ -24,20 +27,9 @@ export enum CascadeEventName {
   UNSUPPORTED_QUERY = 'cascaded_documents_unsupported_query',
 }
 
-/**
- * The reasons `getESQLStatsQueryMeta` withholds cascade metadata for that are worth reporting.
- *
- * Most reasons simply mean the query does not describe a grouping, which is the common case and
- * carries no signal. These are the ones where the user asked for something the cascade experience
- * cannot serve yet, so their volume tells us what to invest in next.
- *
- * The reasons are spelled out rather than referenced off `ESQL_STATS_QUERY_META_EXCLUSION_REASON`,
- * so this module carries no runtime import of `@kbn/esql-utils`. The union type still rejects a
- * value that is not one of the reasons the helper reports.
- */
 export const TRACKED_CASCADE_EXCLUSION_REASONS = new Set<ESQLStatsQueryMetaExclusionReason>([
-  'timeseries_multiple_stats',
-  'fork_command',
+  ESQL_STATS_QUERY_META_EXCLUSION_REASON.TIMESERIES_MULTIPLE_STATS,
+  ESQL_STATS_QUERY_META_EXCLUSION_REASON.FORK_COMMAND,
 ]);
 
 export enum CascadeEventDataKeys {

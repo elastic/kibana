@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import assert from 'assert';
 import { EsqlQuery } from '@elastic/esql';
 import type { AggregateQuery } from '@kbn/es-query';
 import { type ESQLControlVariable, ESQLVariableType } from '@kbn/esql-types';
@@ -807,6 +808,14 @@ describe('cascaded documents helpers utils', () => {
           searchable: true,
         };
 
+        // not aggregatable, which is what requires the match phrase predicate
+        const textField = {
+          type: 'string',
+          esTypes: ['text'],
+          aggregatable: false,
+          searchable: true,
+        };
+
         afterEach(() => {
           jest.restoreAllMocks();
         });
@@ -822,7 +831,7 @@ describe('cascaded documents helpers utils', () => {
 
           mockDataViewFields({
             'host.name': keywordField,
-            'component.id': keywordField,
+            'component.id': textField,
           });
 
           const cascadeQuery = constructCascadeQuery({
@@ -835,8 +844,8 @@ describe('cascaded documents helpers utils', () => {
             nodeAggregatedValues: { 'values(component.id)': ['elastic-otel-collector'] },
           });
 
-          expect(cascadeQuery).toBeDefined();
-          expect(cascadeQuery!.esql).toBe(
+          assert(cascadeQuery);
+          expect(cascadeQuery.esql).toBe(
             'FROM metrics-elastic_agent.elastic_agent* | WHERE beat.stats.libbeat.output.write.bytes IS NOT NULL | WHERE `host.name` == "kahr-agent-wire-test" AND MATCH_PHRASE(`component.id`, "elastic-otel-collector")'
           );
         });
@@ -860,8 +869,8 @@ describe('cascaded documents helpers utils', () => {
             nodePathMap: { 'agent.keyword': 'Mozilla/5.0' },
           });
 
-          expect(cascadeQuery).toBeDefined();
-          expect(cascadeQuery!.esql).toBe(
+          assert(cascadeQuery);
+          expect(cascadeQuery.esql).toBe(
             'FROM kibana_sample_data_logstsdb | WHERE `agent.keyword` == "Mozilla/5.0"'
           );
         });
@@ -922,7 +931,7 @@ describe('cascaded documents helpers utils', () => {
 
           mockDataViewFields({
             host: { type: 'string', esTypes: ['text'], aggregatable: false, searchable: true },
-            tags: keywordField,
+            tags: textField,
           });
 
           const cascadeQuery = constructCascadeQuery({
@@ -935,13 +944,13 @@ describe('cascaded documents helpers utils', () => {
             nodeAggregatedValues: { 'values(tags)': ['info'] },
           });
 
-          expect(cascadeQuery).toBeDefined();
-          expect(cascadeQuery!.esql).toBe(
+          assert(cascadeQuery);
+          expect(cascadeQuery.esql).toBe(
             'FROM kibana_sample_data_logstsdb | WHERE clientip IS NOT NULL | WHERE MATCH_PHRASE(host, "www.elastic.co") AND MATCH_PHRASE(tags, "info")'
           );
         });
 
-        it('combines the values of an aggregate with OR, and multiple aggregates with AND', () => {
+        it('combines the values of an aggregate with OR, and multiple aggregates with AND, using IN for the fields that do not require a match phrase', () => {
           const editorQuery: AggregateQuery = {
             esql: `
               TS kibana_sample_data_logstsdb | STATS values(tags), level_values = VALUES(log.level) BY host.name
@@ -950,7 +959,7 @@ describe('cascaded documents helpers utils', () => {
 
           mockDataViewFields({
             'host.name': keywordField,
-            tags: keywordField,
+            tags: textField,
             'log.level': keywordField,
           });
 
@@ -967,13 +976,13 @@ describe('cascaded documents helpers utils', () => {
             },
           });
 
-          expect(cascadeQuery).toBeDefined();
-          expect(cascadeQuery!.esql).toBe(
-            'FROM kibana_sample_data_logstsdb | WHERE `host.name` == "www.elastic.co" AND (MATCH_PHRASE(tags, "info") OR MATCH_PHRASE(tags, "warning")) AND MATCH_PHRASE(`log.level`, "error")'
+          assert(cascadeQuery);
+          expect(cascadeQuery.esql).toBe(
+            'FROM kibana_sample_data_logstsdb | WHERE `host.name` == "www.elastic.co" AND (MATCH_PHRASE(tags, "info") OR MATCH_PHRASE(tags, "warning")) AND (`log.level` IN ("error"))'
           );
         });
 
-        it('uses the MATCH function for fields that are not text or keyword fields', () => {
+        it('uses the IN operator for fields that do not require a match phrase', () => {
           const editorQuery: AggregateQuery = {
             esql: `
               TS kibana_sample_data_logstsdb | STATS values(bytes), values(@timestamp) BY host.name
@@ -999,9 +1008,9 @@ describe('cascaded documents helpers utils', () => {
             },
           });
 
-          expect(cascadeQuery).toBeDefined();
-          expect(cascadeQuery!.esql).toBe(
-            'FROM kibana_sample_data_logstsdb | WHERE `host.name` == "www.elastic.co" AND (MATCH(bytes, 1024) OR MATCH(bytes, 2048.5)) AND MATCH(@timestamp, "2026-10-29T19:46:14.000Z")'
+          assert(cascadeQuery);
+          expect(cascadeQuery.esql).toBe(
+            'FROM kibana_sample_data_logstsdb | WHERE `host.name` == "www.elastic.co" AND (bytes IN (1024, 2048.5)) AND (@timestamp IN ("2026-10-29T19:46:14.000Z"))'
           );
         });
 
@@ -1012,7 +1021,7 @@ describe('cascaded documents helpers utils', () => {
             `,
           };
 
-          mockDataViewFields({ 'host.name': keywordField, tags: keywordField });
+          mockDataViewFields({ 'host.name': keywordField, tags: textField });
 
           const cascadeQuery = constructCascadeQuery({
             query: editorQuery,
@@ -1025,8 +1034,8 @@ describe('cascaded documents helpers utils', () => {
             nodeAggregatedValues: { 'values(tags)': ['info', 'warning', 'info'] },
           });
 
-          expect(cascadeQuery).toBeDefined();
-          expect(cascadeQuery!.esql).toBe(
+          assert(cascadeQuery);
+          expect(cascadeQuery.esql).toBe(
             'FROM kibana_sample_data_logstsdb | WHERE `host.name` == "www.elastic.co" AND (MATCH_PHRASE(tags, "info") OR MATCH_PHRASE(tags, "warning"))'
           );
         });
@@ -1038,7 +1047,7 @@ describe('cascaded documents helpers utils', () => {
             `,
           };
 
-          mockDataViewFields({ 'host.name': keywordField, tags: keywordField });
+          mockDataViewFields({ 'host.name': keywordField, tags: textField });
 
           const cascadeQuery = constructCascadeQuery({
             query: editorQuery,
@@ -1052,8 +1061,8 @@ describe('cascaded documents helpers utils', () => {
             nodeAggregatedValues: { 'values(tags)': null },
           });
 
-          expect(cascadeQuery).toBeDefined();
-          expect(cascadeQuery!.esql).toBe(
+          assert(cascadeQuery);
+          expect(cascadeQuery.esql).toBe(
             'FROM kibana_sample_data_logstsdb | WHERE `host.name` == "www.elastic.co" AND tags IS NULL'
           );
         });
@@ -1070,7 +1079,7 @@ describe('cascaded documents helpers utils', () => {
               `,
             };
 
-            mockDataViewFields({ 'host.name': keywordField, tags: keywordField });
+            mockDataViewFields({ 'host.name': keywordField, tags: textField });
 
             return constructCascadeQuery({
               query: editorQuery,
@@ -1090,8 +1099,8 @@ describe('cascaded documents helpers utils', () => {
             // several values as null and drops it, which is the shape VALUES is reached for
             const cascadeQuery = buildCascadeQueryForDisplayedValues(['']);
 
-            expect(cascadeQuery).toBeDefined();
-            expect(cascadeQuery!.esql).toBe(
+            assert(cascadeQuery);
+            expect(cascadeQuery.esql).toBe(
               'FROM kibana_sample_data_logstsdb | WHERE `host.name` == "www.elastic.co" AND LENGTH(MV_MIN(tags)) == 0'
             );
           });
@@ -1099,8 +1108,8 @@ describe('cascaded documents helpers utils', () => {
           it('keeps the empty value alongside the values it displays next to it', () => {
             const cascadeQuery = buildCascadeQueryForDisplayedValues(['', 'info']);
 
-            expect(cascadeQuery).toBeDefined();
-            expect(cascadeQuery!.esql).toBe(
+            assert(cascadeQuery);
+            expect(cascadeQuery.esql).toBe(
               'FROM kibana_sample_data_logstsdb | WHERE `host.name` == "www.elastic.co" AND (LENGTH(MV_MIN(tags)) == 0 OR MATCH_PHRASE(tags, "info"))'
             );
           });
@@ -1108,8 +1117,8 @@ describe('cascaded documents helpers utils', () => {
           it('measures the length once for an empty value collected from several result rows', () => {
             const cascadeQuery = buildCascadeQueryForDisplayedValues(['', 'info', '']);
 
-            expect(cascadeQuery).toBeDefined();
-            expect(cascadeQuery!.esql).toBe(
+            assert(cascadeQuery);
+            expect(cascadeQuery.esql).toBe(
               'FROM kibana_sample_data_logstsdb | WHERE `host.name` == "www.elastic.co" AND (LENGTH(MV_MIN(tags)) == 0 OR MATCH_PHRASE(tags, "info"))'
             );
           });
@@ -1126,8 +1135,8 @@ describe('cascaded documents helpers utils', () => {
               // the row was built from
               const cascadeQuery = buildCascadeQueryForDisplayedValues([whitespaceValue]);
 
-              expect(cascadeQuery).toBeDefined();
-              expect(cascadeQuery!.esql).toBe(
+              assert(cascadeQuery);
+              expect(cascadeQuery.esql).toBe(
                 `FROM kibana_sample_data_logstsdb | WHERE \`host.name\` == "www.elastic.co" AND MATCH_PHRASE(tags, "${printedValue}")`
               );
             }
@@ -1139,10 +1148,12 @@ describe('cascaded documents helpers utils', () => {
             const emptyValueQuery = buildCascadeQueryForDisplayedValues(['']);
             const nullAggregateQuery = buildCascadeQueryForDisplayedValues(null);
 
-            expect(emptyValueQuery!.esql).toContain('LENGTH(MV_MIN(tags)) == 0');
-            expect(emptyValueQuery!.esql).not.toContain('IS NULL');
-            expect(nullAggregateQuery!.esql).toContain('tags IS NULL');
-            expect(nullAggregateQuery!.esql).not.toContain('LENGTH');
+            assert(emptyValueQuery);
+            assert(nullAggregateQuery);
+            expect(emptyValueQuery.esql).toContain('LENGTH(MV_MIN(tags)) == 0');
+            expect(emptyValueQuery.esql).not.toContain('IS NULL');
+            expect(nullAggregateQuery.esql).toContain('tags IS NULL');
+            expect(nullAggregateQuery.esql).not.toContain('LENGTH');
           });
 
           it('keeps measuring the length when the value sits among the numbers of another aggregate', () => {
@@ -1152,7 +1163,7 @@ describe('cascaded documents helpers utils', () => {
               `,
             };
 
-            mockDataViewFields({ 'host.name': keywordField, tags: keywordField });
+            mockDataViewFields({ 'host.name': keywordField, tags: textField });
 
             const cascadeQuery = constructCascadeQuery({
               query: editorQuery,
@@ -1165,8 +1176,8 @@ describe('cascaded documents helpers utils', () => {
               nodeAggregatedValues: { 'values(tags)': [''], count: 12 },
             });
 
-            expect(cascadeQuery).toBeDefined();
-            expect(cascadeQuery!.esql).toBe(
+            assert(cascadeQuery);
+            expect(cascadeQuery.esql).toBe(
               'FROM kibana_sample_data_logstsdb | WHERE `host.name` == "www.elastic.co" AND LENGTH(MV_MIN(tags)) == 0'
             );
           });
@@ -1197,8 +1208,8 @@ describe('cascaded documents helpers utils', () => {
             nodeAggregatedValues: { tags_seen: null },
           });
 
-          expect(cascadeQuery).toBeDefined();
-          expect(cascadeQuery!.esql).toBe(
+          assert(cascadeQuery);
+          expect(cascadeQuery.esql).toBe(
             'FROM kibana_sample_data_logstsdb | WHERE `host.name` == "www.elastic.co"'
           );
         });
@@ -1222,8 +1233,8 @@ describe('cascaded documents helpers utils', () => {
             nodeAggregatedValues: { tags_seen: null },
           });
 
-          expect(cascadeQuery).toBeDefined();
-          expect(cascadeQuery!.esql).toBe(
+          assert(cascadeQuery);
+          expect(cascadeQuery.esql).toBe(
             'FROM kibana_sample_data_logstsdb | WHERE `host.name` == "www.elastic.co" AND tags IS NULL'
           );
         });
@@ -1248,8 +1259,8 @@ describe('cascaded documents helpers utils', () => {
             nodeAggregatedValues: { 'COUNT(*)': 12 },
           });
 
-          expect(cascadeQuery).toBeDefined();
-          expect(cascadeQuery!.esql).toBe(
+          assert(cascadeQuery);
+          expect(cascadeQuery.esql).toBe(
             'FROM kibana_sample_data_logstsdb | WHERE `host.name` == "www.elastic.co"'
           );
         });
@@ -1278,8 +1289,8 @@ describe('cascaded documents helpers utils', () => {
             },
           });
 
-          expect(cascadeQuery).toBeDefined();
-          expect(cascadeQuery!.esql).toBe(
+          assert(cascadeQuery);
+          expect(cascadeQuery.esql).toBe(
             'FROM kibana_sample_data_logstsdb | WHERE `host.name` == "www.elastic.co"'
           );
         });
@@ -1317,8 +1328,8 @@ describe('cascaded documents helpers utils', () => {
             },
           });
 
-          expect(cascadeQuery).toBeDefined();
-          expect(cascadeQuery!.esql).toBe(
+          assert(cascadeQuery);
+          expect(cascadeQuery.esql).toBe(
             'FROM kibana_sample_data_logstsdb | WHERE `host.name` == "www.elastic.co"'
           );
         });
@@ -1342,8 +1353,8 @@ describe('cascaded documents helpers utils', () => {
             nodeAggregatedValues: { 'values(tags)': ['info'] },
           });
 
-          expect(cascadeQuery).toBeDefined();
-          expect(cascadeQuery!.esql).toBe(
+          assert(cascadeQuery);
+          expect(cascadeQuery.esql).toBe(
             'FROM kibana_sample_data_logs | INLINE STATS VALUES(tags) BY host.name | WHERE `host.name` == "www.elastic.co"'
           );
         });
@@ -1367,8 +1378,8 @@ describe('cascaded documents helpers utils', () => {
             nodeAggregatedValues: { 'values(tags)': ['info'] },
           });
 
-          expect(cascadeQuery).toBeDefined();
-          expect(cascadeQuery!.esql).toBe(
+          assert(cascadeQuery);
+          expect(cascadeQuery.esql).toBe(
             // CATEGORIZE is only available to sources that support INLINE STATS, so the row's
             // aggregates never disagree with the documents behind it
             'FROM kibana_sample_data_logs | WHERE MATCH(message, "some random pattern", {"auto_generate_synonyms_phrase_query": FALSE, "fuzziness": 0, "operator": "AND"})'

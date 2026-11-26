@@ -297,46 +297,69 @@ describe('useEsqlDataCascadeRowActionHelpers', () => {
     });
   });
 
-  it('opens a new tab with the values displayed for the row when "Open in new tab" is clicked for a TS query', async () => {
-    const editorQuery: AggregateQuery = {
-      esql: 'TS logstash-* | STATS values(tags) BY clientip',
+  describe('when "Open in new tab" is clicked for a TS query', () => {
+    const mockDataViewFields = (tagsField: Partial<DataViewField>) => {
+      jest.spyOn(dataView.fields, 'getByName').mockImplementation(
+        (fieldName) =>
+          ({
+            name: fieldName,
+            type: 'string',
+            esTypes: ['keyword'],
+            aggregatable: true,
+            searchable: true,
+            filterable: true,
+            ...(fieldName === 'tags' ? tagsField : {}),
+          } as unknown as DataViewField)
+      );
     };
-    const updateESQLQuery = jest.fn();
-    const openInNewTab = jest.fn();
 
-    jest.spyOn(dataView.fields, 'getByName').mockImplementation(
-      (fieldName) =>
-        ({
-          name: fieldName,
-          type: 'string',
-          esTypes: ['keyword'],
-          aggregatable: true,
-          searchable: true,
-          filterable: true,
-        } as unknown as DataViewField)
-    );
+    const openInNewTabForTsQuery = async () => {
+      const openInNewTab = jest.fn();
 
-    render(
-      <RowActionsTestComponent
-        editorQuery={editorQuery}
-        openInNewTab={openInNewTab}
-        updateESQLQuery={updateESQLQuery}
-        aggregatedValues={{ 'values(tags)': ['info'] }}
-      />,
-      { wrapper: TestProvider }
-    );
+      render(
+        <RowActionsTestComponent
+          editorQuery={{ esql: 'TS logstash-* | STATS values(tags) BY clientip' }}
+          openInNewTab={openInNewTab}
+          updateESQLQuery={jest.fn()}
+          aggregatedValues={{ 'values(tags)': ['info'] }}
+        />,
+        { wrapper: TestProvider }
+      );
 
-    await openRowActionsMenu();
+      await openRowActionsMenu();
 
-    const user = userEvent.setup();
-    await user.click(screen.getByTestId('dscCascadeRowContextActionOpenInNewTab'));
+      const user = userEvent.setup();
+      await user.click(screen.getByTestId('dscCascadeRowContextActionOpenInNewTab'));
 
-    expect(openInNewTab).toHaveBeenCalledWith({
-      appState: {
-        query: {
-          esql: 'FROM logstash-* | WHERE clientip == "192.168.1.1" AND MATCH_PHRASE(tags, "info")',
+      return openInNewTab;
+    };
+
+    it('opens a new tab with a match phrase for the values displayed when the field requires one', async () => {
+      mockDataViewFields({ esTypes: ['text'], aggregatable: false });
+
+      const openInNewTab = await openInNewTabForTsQuery();
+
+      expect(openInNewTab).toHaveBeenCalledWith({
+        appState: {
+          query: {
+            esql: 'FROM logstash-* | WHERE clientip == "192.168.1.1" AND MATCH_PHRASE(tags, "info")',
+          },
         },
-      },
+      });
+    });
+
+    it('opens a new tab with the IN operator for the values displayed when the field does not require a match phrase', async () => {
+      mockDataViewFields({});
+
+      const openInNewTab = await openInNewTabForTsQuery();
+
+      expect(openInNewTab).toHaveBeenCalledWith({
+        appState: {
+          query: {
+            esql: 'FROM logstash-* | WHERE clientip == "192.168.1.1" AND (tags IN ("info"))',
+          },
+        },
+      });
     });
   });
 });
