@@ -440,8 +440,15 @@ export class LensStyle {
         opts.endTimeColumn
       );
     }
-    if (opts.textColumn) {
+    if (opts.textColumn && opts.endTimeColumn) {
+      // Ranges have no text decoration, so their text field is a plain picker next to the time fields
       await this.selectEsqlAnnotationColumn('lnsXY-annotation-esql-textColumn', opts.textColumn);
+    } else if (opts.textColumn) {
+      // Points choose their text under Text decoration -> Field
+      await this.setAnnotationTextVisibility('field');
+      await this.page.components
+        .comboBox('lnsXY-annotation-esql-text-decoration-field-picker')
+        .setSelectedOptions([opts.textColumn]);
     }
     // ES|QL annotations share the DSL tooltip section, which allows up to three fields
     for (const tooltipColumn of opts.tooltipColumns ?? []) {

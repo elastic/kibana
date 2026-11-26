@@ -63,7 +63,7 @@ spaceTest.describe('Lens ES|QL annotations', { tag: '@local-stateful-classic' },
           textColumn: 'geo.dest',
           tooltipColumns: ['geo.src'],
         });
-        // Selecting a text column switches text decoration to the column ("Field")
+        // The text column is chosen under text decoration, which stays on "Field"
         await expect(page.testSubj.locator('lnsXY_textVisibility_field')).toHaveAttribute(
           'aria-pressed',
           'true'
@@ -108,9 +108,24 @@ spaceTest.describe('Lens ES|QL annotations', { tag: '@local-stateful-classic' },
         await expect(page.testSubj.locator('lnsXY-annotation-esql-timeColumn')).toHaveValue(
           '@timestamp'
         );
-        await expect(page.testSubj.locator('lnsXY-annotation-esql-textColumn')).toHaveValue(
-          'geo.dest'
+        await expect(page.testSubj.locator('lnsXY_textVisibility_field')).toHaveAttribute(
+          'aria-pressed',
+          'true'
         );
+        await expect
+          .poll(() =>
+            page.components
+              .comboBox('lnsXY-annotation-esql-text-decoration-field-picker')
+              .getSelectedOptions()
+          )
+          .toStrictEqual(['geo.dest']);
+        await expect
+          .poll(() =>
+            page.components
+              .comboBox('lnsXY-annotation-tooltip-field-picker--0')
+              .getSelectedOptions()
+          )
+          .toStrictEqual(['geo.src']);
         await lens.closeDimensionEditor();
 
         await lens.dimensions.openDimensionEditor(`${ANNOTATIONS} > lns-dimensionTrigger`, 1, 1);

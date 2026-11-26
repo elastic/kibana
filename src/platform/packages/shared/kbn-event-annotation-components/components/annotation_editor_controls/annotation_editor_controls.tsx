@@ -279,12 +279,6 @@ const AnnotationEditorControls = ({
               customIconSet={annotationsIconSet}
             />
             <TextDecorationSetting
-              // Remount so the selected option follows ES|QL text bindings changed elsewhere.
-              key={
-                isEsqlBased
-                  ? `${currentAnnotation.textVisibility}-${currentAnnotation.textColumn}`
-                  : undefined
-              }
               idPrefix={idPrefix}
               setConfig={
                 isEsqlBased

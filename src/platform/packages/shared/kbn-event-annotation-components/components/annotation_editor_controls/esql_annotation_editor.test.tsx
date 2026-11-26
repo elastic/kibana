@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import { EuiThemeProvider } from '@elastic/eui';
 import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import type {
@@ -65,6 +65,42 @@ const renderEditor = (currentAnnotation: EventAnnotationConfig = annotation) => 
     { wrapper: EuiThemeProvider }
   );
   return onAnnotationChange;
+};
+
+// Re-renders with the edited annotation, as the Lens panel does; a mocked callback alone never
+// updates the props and hides remount or selection-state bugs.
+const StatefulEditor = ({
+  initial,
+  onChange,
+}: {
+  initial: EventAnnotationConfig;
+  onChange: (annotation: EventAnnotationConfig) => void;
+}) => {
+  const [current, setCurrent] = useState(initial);
+  return (
+    <AnnotationEditorControls
+      annotation={current}
+      onAnnotationChange={(next) => {
+        onChange(next);
+        setCurrent(next);
+      }}
+      getDefaultRangeEnd={() => '2026-01-02T00:00:00Z'}
+      queryInputServices={{} as QueryInputServices}
+      appName="lens"
+      hideQueryBasedControls
+      esql={{
+        columns,
+        renderControls: (annotationToEdit, onEdit) => (
+          <ConfigPanelEsqlAnnotation
+            annotation={annotationToEdit}
+            onChange={onEdit}
+            columns={columns}
+            queryEditor={<div data-test-subj="esql-query-editor" />}
+          />
+        ),
+      }}
+    />
+  );
 };
 
 describe('ES|QL annotation editor', () => {
@@ -131,6 +167,38 @@ describe('ES|QL annotation editor', () => {
       textVisibility: true,
       textColumn: undefined,
     });
+  });
+
+  it('keeps the Field picker open and binds the column once the annotation re-renders', async () => {
+    const onChange = jest.fn();
+    render(
+      <StatefulEditor
+        initial={{ ...annotation, textColumn: undefined, textVisibility: undefined }}
+        onChange={onChange}
+      />,
+      { wrapper: EuiThemeProvider }
+    );
+
+    fireEvent.click(screen.getByTestId('lnsXY_textVisibility_field'));
+
+    const picker = await screen.findByTestId('lnsXY-annotation-esql-text-decoration-field-picker');
+    expect(screen.getByTestId('lnsXY_textVisibility_field')).toHaveAttribute(
+      'aria-pressed',
+      'true'
+    );
+    fireEvent.click(within(picker).getByRole('combobox'));
+    fireEvent.click(await screen.findByTestId('lnsXY-annotation-fieldOption-version'));
+
+    await waitFor(() =>
+      expect(onChange).toHaveBeenLastCalledWith(
+        expect.objectContaining({ textColumn: 'version', textVisibility: true })
+      )
+    );
+    expect(
+      within(screen.getByTestId('lnsXY-annotation-esql-text-decoration-field-picker')).getByRole(
+        'combobox'
+      )
+    ).toHaveValue('version');
   });
 
   it('keeps the bound column when Field is selected again', () => {
