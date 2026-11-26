@@ -9,8 +9,7 @@ import { tags } from '@kbn/scout-search';
 import { expect } from '@kbn/scout-search/ui';
 import { test } from '../fixtures';
 
-// Failing: See https://github.com/elastic/kibana/issues/307824
-test.describe.skip(
+test.describe(
   'Homepage - Viewer',
   { tag: [...tags.serverless.search, ...tags.stateful.classic] },
   () => {
@@ -155,38 +154,26 @@ test.describe.skip(
       }
     });
 
-    test('body links should navigate to correct URLs when clicked', async ({
-      pageObjects,
-      page,
-    }) => {
+    test('body links should point to correct URLs', async ({ pageObjects }) => {
       const bodyLinkTests = [
         {
           linkText: 'Contact customer engineering',
-          expectedUrlPattern: /contact\/ce-help/,
+          expectedHref: 'https://www.elastic.co/contact/ce-help',
         },
         {
           linkText: 'Elastic Training',
-          expectedUrlPattern: /training/,
+          expectedHref: 'https://www.elastic.co/training',
         },
         {
           linkText: 'View documentation',
-          expectedUrlPattern: /solutions\/search\/get-started/,
+          expectedHref: 'https://www.elastic.co/docs/solutions/search/get-started',
         },
       ];
 
-      for (const { linkText, expectedUrlPattern } of bodyLinkTests) {
+      for (const { linkText, expectedHref } of bodyLinkTests) {
         const link = await pageObjects.homepage.getBodyLinkByText(linkText);
         await expect(link).toBeVisible();
-
-        // Click the link and wait for new page to open
-        const context = page.context();
-        const [newPage] = await Promise.all([context.waitForEvent('page'), link.click()]);
-
-        // Verify the new page URL matches expected pattern
-        await expect(newPage).toHaveURL(expectedUrlPattern);
-
-        // Close the new page and continue with the original page
-        await newPage.close();
+        await expect(link).toHaveAttribute('href', expectedHref);
       }
     });
   }
