@@ -630,6 +630,7 @@ export class NightshiftInvestigationsClient {
     let isFollowUp: boolean;
     let executionId: string;
     let claimedNew = false;
+    let newSubjects: WorkflowSubjectInput[];
     // A start that fails before its workflow launches runs nothing, so it gives its slots back and
     // drops the claims it took: a retry then opens a new investigation, and is charged for it.
     try {
@@ -672,7 +673,7 @@ export class NightshiftInvestigationsClient {
       // step's visibility retry: the workflow owns that, and this request path should not pay for it.
       await this.installAgents(agentBuilder, spaceId);
 
-      const newSubjects = withoutRecordedSubjects(subjects, recorded);
+      newSubjects = withoutRecordedSubjects(subjects, recorded);
       const newAlertIds = new Set(newSubjects.map(({ id }) => id));
 
       const roundMessage = isFollowUp
@@ -721,7 +722,13 @@ export class NightshiftInvestigationsClient {
     }
 
     if (!isFollowUp) {
-      await this.createAcceptedInvestigation({ conversations, investigationId, executionId });
+      await this.createAcceptedInvestigation({
+        conversations,
+        agenticInvestigations,
+        investigationId,
+        executionId,
+        subjects: newSubjects,
+      });
     }
 
     const correlation = correlationFromContext(prepared.context);
@@ -752,30 +759,42 @@ export class NightshiftInvestigationsClient {
 
   /**
    * Creates the conversation of a new investigation as soon as its start is accepted, with the
-   * accepted run recorded, so the investigation is listed as in progress right away and the
-   * subject claims point at an open investigation even while the run waits in a busy task queue.
-   * Without it, a claim older than its pending window would look abandoned and the next start for
-   * the same subject would open a second investigation. The run's `_ensure` step gets this
-   * conversation and records the subjects. A failure here does not fail the start: the run creates
-   * the conversation itself.
+   * accepted run and its subjects recorded, so the investigation is listed as in progress, and
+   * named after its subject, right away. The subjects are what names an investigation until Agent
+   * Builder titles it; left to the run's `_ensure` step, they would only appear once the workflow
+   * has started, seconds later. It also keeps the subject claims pointing at an open investigation
+   * even while the run waits in a busy task queue. Without it, a claim older than its pending
+   * window would look abandoned and the next start for the same subject would open a second
+   * investigation. The run's `_ensure` step gets this conversation and records any subject that is
+   * still missing. A failure here does not fail the start: the run creates the conversation, and
+   * records the subjects, itself.
    */
   private async createAcceptedInvestigation({
     conversations,
+    agenticInvestigations,
     investigationId,
     executionId,
+    subjects,
   }: {
     conversations: ConversationPublicClient;
+    agenticInvestigations: AgenticInvestigationsPluginStart;
     investigationId: string;
     executionId: string;
+    subjects: WorkflowSubjectInput[];
   }): Promise<void> {
     try {
       // Records the run in the creating write. If the run's `_ensure` step created the
-      // conversation first, it already recorded itself, so there is nothing to add.
-      await getOrCreateInvestigationConversation({
+      // conversation first, it already recorded itself and the subjects, so there is nothing to add.
+      const conversation = await getOrCreateInvestigationConversation({
         conversations,
         id: investigationId,
         workflowExecutionId: executionId,
       });
+      if (conversation.created && subjects.length > 0) {
+        await agenticInvestigations
+          .getSubjectsClient(this.request)
+          .upsertSubjects(investigationId, subjects);
+      }
     } catch (error) {
       this.logger.warn(
         `Could not create the conversation of investigation "${investigationId}" on start; its run creates it: ${

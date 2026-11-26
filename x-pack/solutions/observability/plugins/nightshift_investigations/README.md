@@ -331,13 +331,11 @@ A start is charged to the limit for its trigger type and to the limit for all in
 
 A Slack mention of the Nightshift assistant or investigation agent that opens a new Agent Builder conversation is charged as a manual start, through an Agent Builder on-before-new-conversation hook (`registerOnBeforeNewConversation`). The hook runs after the caller is authorized to run the agent and before the conversation is written, and never for a replayed delivery. The slot is given back when the turn is refused before it writes anything (a failed or duplicate execution record, or a busy or conflicting conversation write); after any other failure it stays taken. A mention in a thread that already has a conversation is not charged. A denied mention is refused with 429, or with 503 when the quota check is unavailable, and leaves nothing behind.
 
-The start then runs the `system-nightshift-investigation` workflow with `investigation_id` and the new subjects, and returns `{ investigation_id }`. It does not write to the investigation itself. The workflow's `_ensure` step does all of that:
+The start then runs the `system-nightshift-investigation` workflow with `investigation_id` and the new subjects, and returns `{ investigation_id }`. Once the workflow is launched, a start that opens a new investigation also creates the conversation and records the subjects on it, so the shared GET returns the investigation, already named after its subject, right away. If that write fails, the start still succeeds. The workflow's `_ensure` step is the guarantee that the work is done wherever an investigation runs:
 
-- creates the conversation;
-- records the subjects;
+- creates the conversation, when the start did not;
+- records the subjects the start did not;
 - reopens a closed investigation.
-
-Until `_ensure` has run, the shared GET for a new investigation returns 404. That gap is usually a few seconds.
 
 ### Titles
 

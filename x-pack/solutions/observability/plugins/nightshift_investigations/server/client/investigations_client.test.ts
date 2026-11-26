@@ -1602,12 +1602,11 @@ describe('NightshiftInvestigationsClient.start() on investigations', () => {
     mockManagement.runWorkflow.mockResolvedValue('exec-1');
   });
 
-  it('claims the subjects, runs the workflow, and leaves recording the subjects to it', async () => {
+  it('claims the subjects and runs the workflow with them, which `_ensure` records if the start did not', async () => {
     await expect(startAlerts('alert-1', 'alert-2')).resolves.toEqual({
       investigation_id: 'inv-new',
     });
 
-    expect(subjectsClient.upsertSubjects).not.toHaveBeenCalled();
     expect(subjectsClient.claimSubjects).toHaveBeenCalledWith(
       expect.objectContaining({
         conversationId: 'inv-new',
@@ -1648,6 +1647,39 @@ describe('NightshiftInvestigationsClient.start() on investigations', () => {
     );
   });
 
+  it('records the subjects on the conversation it creates, so the investigation is named right away', async () => {
+    await expect(startAlerts('alert-1', 'alert-2')).resolves.toEqual({
+      investigation_id: 'inv-new',
+    });
+
+    expect(subjectsClient.upsertSubjects).toHaveBeenCalledTimes(1);
+    expect(subjectsClient.upsertSubjects).toHaveBeenCalledWith('inv-new', runInputs().subjects);
+    expect(conversations.create.mock.invocationCallOrder[0]).toBeLessThan(
+      subjectsClient.upsertSubjects.mock.invocationCallOrder[0]
+    );
+  });
+
+  it("records a manual start's title as the subject summary on the conversation it creates", async () => {
+    await startFromApi(makeClient(), {
+      title: 'Checkout spans failing',
+      subject: { type: 'manual', id: 'manual' },
+      trigger_type: 'manual',
+      message: 'In traces-* on production, why are checkout spans failing?',
+    });
+
+    expect(subjectsClient.upsertSubjects).toHaveBeenCalledWith('inv-new', [
+      expect.objectContaining({ type: 'manual', summary: 'Checkout spans failing' }),
+    ]);
+  });
+
+  it('still starts the investigation when recording the subjects on its conversation fails', async () => {
+    subjectsClient.upsertSubjects.mockRejectedValueOnce(new Error('Subject write failed'));
+
+    await expect(startAlerts('alert-1')).resolves.toEqual({ investigation_id: 'inv-new' });
+
+    expect(mockLogger.warn).toHaveBeenCalledWith(expect.stringContaining('Subject write failed'));
+  });
+
   it('does not record the run again when the workflow created the conversation first', async () => {
     withConversations(makeConversation({ id: 'inv-new', workflowExecutionIds: ['exec-1'] }));
 
@@ -1655,6 +1687,7 @@ describe('NightshiftInvestigationsClient.start() on investigations', () => {
 
     expect(conversations.create).not.toHaveBeenCalled();
     expect(conversations.patchMetadata).not.toHaveBeenCalled();
+    expect(subjectsClient.upsertSubjects).not.toHaveBeenCalled();
   });
 
   it('still starts the investigation when creating its conversation fails', async () => {
