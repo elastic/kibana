@@ -54,13 +54,11 @@ export const MANAGED_BLOCK_START = '# >>> nightshift local-dev (managed by setup
 export const MANAGED_BLOCK_END = '# <<< nightshift local-dev (managed by setup_local_dev.js) <<<';
 
 /**
- * River sessions hold no real credential: the River daemon relays sandbox-api on this loopback port
- * over TLS with a certificate from a CA it publishes, and River's control plane attaches the real
- * sandbox-api key and substitutes the ORCA key for its placeholder on the way out.
+ * River sessions hold no real credential. Kibana calls sandbox-api at its real host through the River
+ * daemon's HTTPS proxy (`grpc_proxy`), trusting the proxy's CA, and River's control plane attaches
+ * the real sandbox-api key and substitutes the ORCA key for its placeholder on the way out. The
+ * address must match what River's `RIVER_SANDBOX_API_ADDRESS` lists.
  */
-export const RIVER_SANDBOX_RELAY_HOST = 'localhost';
-export const RIVER_SANDBOX_RELAY_PORT = 3003;
-export const RIVER_RELAY_CA_PATH = '/etc/river/relay-ca.pem';
 /** Placeholders River replaces. Neither grants anything inside the session. */
 export const RIVER_SANDBOX_API_KEY_PLACEHOLDER = 'river-relay';
 export const RIVER_ORCA_KEY_PLACEHOLDER = 'river-secret:orca-es';

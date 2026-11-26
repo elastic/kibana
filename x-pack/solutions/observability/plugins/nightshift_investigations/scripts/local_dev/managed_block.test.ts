@@ -89,20 +89,20 @@ describe('redactManagedBlock', () => {
 });
 
 describe('getLocalDevSettings', () => {
-  it('trusts the given CA only when one is set, as for the River relay', () => {
+  it('trusts the given CA only when one is set, as for the River proxy', () => {
     expect(settings).not.toHaveProperty('xpack.sandbox.ssl.certificate_authorities');
     expect(
       getLocalDevSettings({
-        host: 'localhost',
-        port: 3003,
+        host: 'sandbox.example',
+        port: 9090,
         apiKey: 'river-relay',
-        certificateAuthorities: '/etc/river/relay-ca.pem',
+        certificateAuthorities: '/home/user/.cache/river/proxy-ca.pem',
       })
     ).toMatchObject({
-      'xpack.sandbox.host': 'localhost',
-      'xpack.sandbox.port': 3003,
+      'xpack.sandbox.host': 'sandbox.example',
+      'xpack.sandbox.port': 9090,
       'xpack.sandbox.api_key': 'river-relay',
-      'xpack.sandbox.ssl.certificate_authorities': '/etc/river/relay-ca.pem',
+      'xpack.sandbox.ssl.certificate_authorities': '/home/user/.cache/river/proxy-ca.pem',
     });
   });
 });
