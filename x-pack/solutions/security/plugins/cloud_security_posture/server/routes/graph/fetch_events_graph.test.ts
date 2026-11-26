@@ -96,6 +96,27 @@ describe('fetchEvents', () => {
     );
   });
 
+  it('resolves actors and targets from user, host, service and generic fields only', async () => {
+    await fetchEvents({
+      esClient,
+      logger,
+      start: 0,
+      end: 1000,
+      originEventIds: [],
+      showUnknownTarget: false,
+      indexPatterns: ['valid_index'],
+      spaceId: 'default',
+      esQuery: undefined,
+    });
+    const [args] = esClient.asCurrentUser.helpers.esql.mock.calls[0];
+    const query = args.query ?? '';
+
+    expect(query).toContain('_target_generic_euid');
+    expect(query).not.toContain('_actor_ai_agent_euid');
+    expect(query).not.toContain('_target_ai_agent_euid');
+    expect(query).not.toContain('process.ai_agent.name');
+  });
+
   it('casts user.id to keyword before the enrichment EVAL to prevent CASE type conflicts', () => {
     // When user.id is mapped as "long" (e.g. aws_bedrock.invocation), the merged enrichment
     // CASE has a preserve branch "user.id IS NOT NULL, user.id" that returns long, while all

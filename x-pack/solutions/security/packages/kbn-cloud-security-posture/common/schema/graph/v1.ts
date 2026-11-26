@@ -215,6 +215,7 @@ export const entitySchema = schema.object({
       schema.literal('user'),
       schema.literal('service'),
       schema.literal('generic'),
+      schema.literal('ai_agent'),
     ])
   ),
   host: schema.maybe(

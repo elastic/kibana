@@ -26,7 +26,14 @@ export const GRAPH_TARGET_EUID_SOURCE_FIELDS = getGraphTargetEuidSourceFields({
  * Entity type prefixes that carry an explicit `<type>:` EUID prefix.
  * Anything not starting with one of these is treated as a generic entity.
  */
-export const TYPED_ENTITY_PREFIXES = ['user', 'host', 'service'] as const;
+export const TYPED_ENTITY_PREFIXES = ['user', 'host', 'service', 'ai_agent'] as const;
+
+/**
+ * Typed entity types the events graph resolves from event fields. Agents are drawn from Entity
+ * Store rows only: event actors always carry `user.name`, which ranks first, and no event has
+ * agent target fields.
+ */
+export const EVENT_TYPED_ENTITY_TYPES = ['user', 'host', 'service'] as const;
 
 /**
  * ES|QL FORK supports a maximum of 8 branches. buildRelationshipsEsqlQuery emits one FORK

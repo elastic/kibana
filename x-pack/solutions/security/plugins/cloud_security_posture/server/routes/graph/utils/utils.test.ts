@@ -74,6 +74,10 @@ describe('utils', () => {
         expect(getEntityTypeIcon(entityType)).toBe('storage');
       });
     });
+
+    it('should map AI agents to the agent icon', () => {
+      expect(getEntityTypeIcon('AI Agent')).toBe('productAgent');
+    });
   });
 
   describe('resolveEntitiesIndexName', () => {

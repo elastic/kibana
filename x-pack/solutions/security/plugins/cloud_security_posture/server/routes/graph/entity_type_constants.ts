@@ -176,6 +176,10 @@ const buildEntityTypeMappings = (): EntityTypeMappings => {
       icon: 'magnifyExclamation',
       values: ['Entities', 'Entity'],
     },
+    {
+      icon: 'productAgent',
+      values: ['AI Agent'],
+    },
   ];
 
   const icons = rawMappings.reduce<EntityTypeIconMapping>((acc, mapping) => {

@@ -119,6 +119,7 @@ export const CLOUD_SECURITY_PLUGIN_VERSION = '1.9.0';
 export const ENTITY_RELATIONSHIP_FIELDS = [
   'accesses_frequently',
   'accesses_infrequently',
+  'acts_on_behalf_of',
   'administers',
   'communicates_with',
   'depends_on',
@@ -134,6 +135,7 @@ export const ENTITY_RELATIONSHIP_LABELS: Record<
 > = {
   accesses_frequently: 'Accesses frequently',
   accesses_infrequently: 'Accesses infrequently',
+  acts_on_behalf_of: 'Acts on behalf of',
   administers: 'Administers',
   communicates_with: 'Communicates with',
   depends_on: 'Depends on',
@@ -204,6 +206,9 @@ export const getGraphActorEuidSourceFields = ({
     generic: [
       ...euid.getEuidSourceFields(getBuiltInEntityDefinition('generic')).identitySourceFields,
     ],
+    ai_agent: [
+      ...euid.getEuidSourceFields(getBuiltInEntityDefinition('ai_agent')).identitySourceFields,
+    ],
     all: [...ENTITY_NAMESPACE_SOURCE_FIELDS],
   };
 };
@@ -241,6 +246,8 @@ export const getGraphTargetEuidSourceFields = ({
         .getEuidSourceFields(getBuiltInEntityDefinition('generic'))
         .identitySourceFields.map(toTargetField),
     ],
+    // No event names an agent as its target. The key keeps both source field maps one shape.
+    ai_agent: [],
     // Namespace sources describe the event, not the actor/target side, so they are not
     // rewritten to the `.target.` namespace.
     all: [...ENTITY_NAMESPACE_SOURCE_FIELDS],
