@@ -4565,6 +4565,10 @@ describe('EditOutputFlyout', () => {
       it.each([
         ['no client certificate', { ca_pem: CA_PEM }],
         ['a key file', { cert_file: '/etc/cert.pem', key_file: '/etc/key.pem' }],
+        [
+          'a client certificate set both as PEM and as a file',
+          { cert_pem: CERT_PEM, cert_file: '/etc/cert.pem' },
+        ],
       ])('should not offer to add a client key to read-only TLS settings with %s', (_name, tls) => {
         const { utils } = renderFlyout({
           ...otlpOutput,

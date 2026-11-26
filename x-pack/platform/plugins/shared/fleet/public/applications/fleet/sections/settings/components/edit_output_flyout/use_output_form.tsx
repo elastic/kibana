@@ -819,13 +819,13 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOutp
   );
   // the client key is saved under `secrets` only, which a preconfigured output allows editing
   // separately from the exporter. While the other TLS settings are read-only, a saved key can be
-  // replaced, and a key can only be added when those settings need one: a client certificate
-  // without a key file.
+  // replaced, and a key can only be added when those settings need one: a client certificate, set
+  // either as PEM or as a file (not both), without a key file.
   const savedOtlpOutput = output && isOtlpOutput(output) ? output : undefined;
   const savedOtlpTls = savedOtlpOutput?.otlp_exporter?.tls;
   const canSetOtlpTlsKeyPemWithReadOnlyTls =
     !!savedOtlpOutput?.secrets?.otlp_exporter?.tls?.key_pem ||
-    (!!(savedOtlpTls?.cert_pem || savedOtlpTls?.cert_file) && !savedOtlpTls?.key_file);
+    (!!savedOtlpTls?.cert_pem !== !!savedOtlpTls?.cert_file && !savedOtlpTls?.key_file);
   const isOtlpTlsKeyPemDisabled =
     isDisabled('secrets') || (isOtlpExporterDisabled && !canSetOtlpTlsKeyPemWithReadOnlyTls);
   const otlpTlsInputs = useOtlpTlsInputs(

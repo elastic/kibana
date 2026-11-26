@@ -1489,7 +1489,15 @@ describe('Outputs preconfiguration', () => {
           expect.anything(),
           expect.anything(),
           'existing-otlp-output-1',
-          expect.objectContaining({ name: 'OTLP Output 1 renamed' }),
+          expect.objectContaining({
+            name: 'OTLP Output 1 renamed',
+            // the saved exporter, not the one of the config with the key
+            otlp_exporter: {
+              endpoint: 'https://otel.example.com:4317',
+              protocol: 'grpc',
+              tls: { ca_pem: null },
+            },
+          }),
           expect.anything()
         );
       });
