@@ -2766,6 +2766,7 @@ src/platform/packages/shared/kbn-connector-specs/src/specs/opensearch_aws_opense
 src/platform/packages/shared/kbn-connector-specs/src/specs/outlook/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/pagerduty/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/prometheus/** @elastic/nightshift
+src/platform/packages/shared/kbn-connector-specs/src/specs/redis/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/salesforce/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/sentinelone/** @elastic/workflows-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/servicenow_search/** @elastic/workchat-eng
@@ -3985,6 +3986,9 @@ x-pack/solutions/observability/plugins/synthetics/server/saved_objects/synthetic
 # Kibana accessibility
 /.agents/skills/accessibility/** @elastic/kibana-accessibility
 
+# Kibana Core: OAS generation guidance
+/.agents/skills/improve-oas/** @elastic/kibana-core
+
 # No owner - generated files covered by CI checks
 **/moon.yml
 # Only the workflow step schema sync PR changes these (auto-approved), feature PRs never do
@@ -4001,6 +4005,7 @@ x-pack/solutions/observability/plugins/synthetics/server/saved_objects/synthetic
 /.github/workflows/ @elastic/kibana-operations
 /.github/workflows/failed-test-investigator.* @elastic/kibana-operations @elastic/appex-qa
 /.github/workflows/flaky-test-fixer.* @elastic/kibana-operations @elastic/appex-qa
+/.github/workflows/evals-gate.yml @elastic/kibana-operations @elastic/nightshift-context-and-research-team
 /.github/workflows/flaky-fix-verifier.* @elastic/kibana-operations @elastic/appex-qa
 /.github/workflows/flaky-fix-curator.* @elastic/kibana-operations @elastic/appex-qa
 /.github/workflows/flaky-fix-retrospective.* @elastic/kibana-operations @elastic/appex-qa
