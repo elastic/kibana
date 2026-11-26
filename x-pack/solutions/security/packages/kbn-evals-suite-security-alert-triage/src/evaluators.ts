@@ -123,14 +123,24 @@ export const createSkillLoadedEvaluator = (skillName: string) => ({
 
 const MAX_EVIDENCE_ESQL_CALLS = 3;
 
+// An ungrouped STATS over zero matches still returns one row, holding 0, so a row alone is not a match.
+const isEmptyCell = (cell: unknown): boolean =>
+  cell === null || cell === undefined || cell === 0 || cell === '' || cell === false;
+
+const hasMatchingRow = (data: unknown): boolean =>
+  ((data as { values?: unknown[][] } | undefined)?.values ?? []).some((row) =>
+    row.some((cell) => !isEmptyCell(cell))
+  );
+
 /**
- * CODE evaluator: 1 when the agent ran at least one ES|QL query that returned rows, and ran at most
- * three ES|QL queries. Checks the evidence step from the tool steps, not from the answer. The tool
- * returns an `esql_results` entry even when `values` is empty, so a search over the wrong time window
- * must not count as finding the events.
+ * CODE evaluator: 1 when the agent ran at least one ES|QL query that returned a row with data, and ran
+ * at most three ES|QL queries. Checks the evidence step from the tool steps, not from the answer. The
+ * tool returns an `esql_results` entry even when `values` is empty, and an ungrouped aggregate over
+ * zero matches returns a row of zeros, so a search over the wrong time window must not count as
+ * finding the events.
  */
 export const createEvidenceLookupEvaluator = (log: ToolingLog) => ({
-  name: 'ES|QL evidence lookup (one query with rows, at most three calls)',
+  name: 'ES|QL evidence lookup (one query with data, at most three calls)',
   kind: 'CODE' as const,
   direction: 'maximize' as const,
   evaluate: async ({ output }: { output: unknown }) => {
@@ -138,13 +148,9 @@ export const createEvidenceLookupEvaluator = (log: ToolingLog) => ({
       ({ tool_id: toolId }) => toolId === platformCoreTools.executeEsql
     );
     const succeeded = esqlCalls.filter(({ results = [] }) =>
-      results.some(
-        ({ type, data }) =>
-          type === ToolResultType.esqlResults &&
-          ((data as { values?: unknown[] } | undefined)?.values?.length ?? 0) > 0
-      )
+      results.some(({ type, data }) => type === ToolResultType.esqlResults && hasMatchingRow(data))
     ).length;
-    log.info(`ES|QL evidence calls: ${esqlCalls.length}, with rows: ${succeeded}`);
+    log.info(`ES|QL evidence calls: ${esqlCalls.length}, with data: ${succeeded}`);
     return {
       score: succeeded > 0 && esqlCalls.length <= MAX_EVIDENCE_ESQL_CALLS ? 1 : 0,
       metadata: { calls: esqlCalls.length, succeeded },

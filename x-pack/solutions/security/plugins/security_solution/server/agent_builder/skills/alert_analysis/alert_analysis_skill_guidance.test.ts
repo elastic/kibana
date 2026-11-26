@@ -101,6 +101,11 @@ describe('alertAnalysisSkill guidance for literal-following models (security-tea
     expect(content).toMatch(/### Queue path \(plain list, count, or summary/i);
     expect(queuePath).not.toMatch(/prioritize/i);
     expect(queuePath).toMatch(/which alert to handle first[^\n]*use the next two sections/i);
+    // The redirect must come before the queue-only instructions, or the model stops before it reads it.
+    const redirectAt = queuePath.search(/use the next two sections/i);
+    expect(redirectAt).toBeGreaterThanOrEqual(0);
+    expect(redirectAt).toBeLessThan(queuePath.search(/call only 'security\.alerts'/i));
+    expect(redirectAt).toBeLessThan(queuePath.search(/\bStop\./));
   });
 
   // Why: the shipped guardrail said prioritization questions use only security.alerts, which contradicts
