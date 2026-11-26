@@ -14,6 +14,7 @@
 
 /* eslint-disable @kbn/eslint/scout_require_api_client_in_api_test */
 
+import { randomUUID } from 'crypto';
 import { keyBy } from 'lodash';
 import { expect } from '@kbn/scout/api';
 import type { AlertEvent } from '../../../../../server/resources/datastreams/alert_events';
@@ -2373,12 +2374,14 @@ apiTest.describe('Rule executor', { tag: testData.API_ENGINE_TAG }, () => {
   apiTest(
     'writes the rendered reason on the breached event, with query columns and rule variables',
     async ({ apiServices }) => {
+      // A unique host keeps the event count at 1 even if a previous run left documents in the shared index
+      const host = `host-reason-rendered-${randomUUID()}`;
       await apiServices.alertingV2.sourceIndex.indexDocs({
         index: SOURCE_INDEX,
         docs: [
           {
             '@timestamp': new Date().toISOString(),
-            'host.name': 'host-reason-rendered',
+            'host.name': host,
             severity: 'high',
             value: 1,
           },
@@ -2389,7 +2392,7 @@ apiTest.describe('Rule executor', { tag: testData.API_ENGINE_TAG }, () => {
         buildCreateRuleData({
           metadata: { name: 'executor-reason-rendered' },
           query: {
-            base: `FROM ${SOURCE_INDEX} | WHERE host.name == "host-reason-rendered" | STATS count = COUNT(*) BY host.name`,
+            base: `FROM ${SOURCE_INDEX} | WHERE host.name == "${host}" | STATS count = COUNT(*) BY host.name`,
           },
           reason: {
             template: 'Host {{ data.host.name }} has {{ data.count }} event(s) ({{ rule.name }})',
@@ -2402,9 +2405,7 @@ apiTest.describe('Rule executor', { tag: testData.API_ENGINE_TAG }, () => {
       const [firstBreach] = await apiServices.alertingV2.ruleEvents.find(rule.id, {
         status: 'breached',
       });
-      expect(firstBreach.reason).toBe(
-        'Host host-reason-rendered has 1 event(s) (executor-reason-rendered)'
-      );
+      expect(firstBreach.reason).toBe(`Host ${host} has 1 event(s) (executor-reason-rendered)`);
     }
   );
 
