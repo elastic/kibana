@@ -293,7 +293,10 @@ describe('applyReasons', () => {
   it('does not change the stored data of the event', async () => {
     const events = [createEvent({ 'host.name': 'host-a', cpu: 94 })];
 
-    await applyReasons(events, renderer(() => 'CPU high'));
+    await applyReasons(
+      events,
+      renderer(() => 'CPU high')
+    );
 
     expect(events[0].data).toEqual({ 'host.name': 'host-a', cpu: 94 });
   });
@@ -301,7 +304,10 @@ describe('applyReasons', () => {
   it('leaves events without a reason when the renderer returns undefined', async () => {
     const events = [createEvent({ cpu: 1 })];
 
-    await applyReasons(events, renderer(() => undefined));
+    await applyReasons(
+      events,
+      renderer(() => undefined)
+    );
 
     expect(events[0]).not.toHaveProperty('reason');
   });
