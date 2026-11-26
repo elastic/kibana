@@ -93,10 +93,16 @@ const subjectOf = ({
   return { name: names[0], rest: names.slice(1) };
 };
 
+// A composition selector that is a whole segment of a path, `…/oneOf[subschema #1]/…`; one stuck
+// to a property's name, `payload-oneOf[…]`, is part of that name, as the field type lookup reads it.
+const SELECTOR_SEGMENT = /(^|\/)(?:allOf|oneOf|anyOf)\[([^\]]*)\](?=\/|$)/g;
+
+/** A path without its selector segments, `a/allOf[x]/b` as `a//b`. */
+const withoutSelectors = (path: string): string => path.replace(SELECTOR_SEGMENT, '$1');
+
 /** `clusters/items/allOf[#/components/schemas/Cluster]/status` as `clusters/status`. */
 const tidy = (path: string): string => {
-  const shorter = path
-    .replace(/(^|\/)(allOf|oneOf|anyOf)\[[^\]]*\]/g, '$1')
+  const shorter = withoutSelectors(path)
     .replace(/(^|\/)items(?=\/|$)/g, '$1')
     .replace(/\/{2,}/g, '/')
     .replace(/^\/|\/$/g, '');
@@ -115,11 +121,10 @@ const fieldOf = (path: string): string => {
   const tidied = tidy(path);
   // Nothing but composition selectors are left: the root of a shape, named by the schema the last
   // one selects, `allOf[#/…/baseItem]/allOf[subschema #1: entity]` as `entity`.
-  const selectors = [...tidied.matchAll(/(?:allOf|oneOf|anyOf)\[([^\]]*)\]/g)];
-  const onlySelectors =
-    tidied.replace(/(?:allOf|oneOf|anyOf)\[[^\]]*\]/g, '').replace(/\//g, '') === '';
+  const selectors = [...tidied.matchAll(SELECTOR_SEGMENT)];
+  const onlySelectors = withoutSelectors(tidied).replace(/\//g, '') === '';
   if (selectors.length > 0 && onlySelectors) {
-    const [, selected] = selectors[selectors.length - 1];
+    const [, , selected] = selectors[selectors.length - 1];
     const named = selected.includes(': ')
       ? selected.slice(selected.lastIndexOf(': ') + 2)
       : selected.slice(selected.lastIndexOf('/') + 1);
@@ -255,7 +260,7 @@ const variantNames = (list: string): string[] =>
 
 /** The schema a path ends by selecting, `…/allOf[subschema #2: outlookItem]` as `outlookItem`. */
 const baseNameOf = (path: string): string | undefined => {
-  const selected = /(?:allOf|oneOf|anyOf)\[([^\]]*)\]$/.exec(path)?.[1];
+  const selected = /(?:^|\/)(?:allOf|oneOf|anyOf)\[([^\]]*)\]$/.exec(path)?.[1];
   if (selected === undefined) {
     return undefined;
   }
@@ -383,8 +388,7 @@ const entriesOf = (change: SpecChange): Entry[] | undefined => {
       // The owner as the snapshot resolves it, else as the text reads; only the schema tells a
       // property named `items` from an array's items.
       const resolved = change.owner;
-      const unselected = (path: string): string =>
-        path.replace(/(?:allOf|oneOf|anyOf)\[[^\]]*\]/g, '').replace(/\/{2,}/g, '/');
+      const unselected = (path: string): string => withoutSelectors(path).replace(/\/{2,}/g, '/');
       // Only parts left once the owner's selectors go: the part is of the body itself.
       const ofBody =
         resolved === undefined

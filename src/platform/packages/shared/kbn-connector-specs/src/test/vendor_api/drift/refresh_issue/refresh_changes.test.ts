@@ -736,6 +736,31 @@ describe('describeChanges', () => {
     ).toEqual(object('Response', '! items: Slot (base: + Key)'));
   });
 
+  it('keeps a selector stuck to a property name as part of that name', () => {
+    const keys = (path: string, owner: string): SpecChange => ({
+      ...change(
+        'response-property-discriminator-mapping-added',
+        `added \`#Key\` discriminator mapping keys to the \`${path}\` response property`,
+        'Slot',
+        'Slot'
+      ),
+      owner,
+    });
+
+    expect(
+      describeChanges([
+        keys('itemsoneOf[subschema #1]/allOf[subschema #1: base]', 'itemsoneOf[subschema #1]'),
+        keys('items/allOf[subschema #1: base]', 'items'),
+      ])
+    ).toEqual(
+      object(
+        'Response',
+        '! items: Slot (base: + Key)',
+        '! itemsoneOf[subschema #1]: Slot (base: + Key)'
+      )
+    );
+  });
+
   it('names an array, not its items, when a variant of its items extends the base', () => {
     expect(
       describeChanges([
