@@ -374,6 +374,10 @@ import type {
   ListWatchlistEntitySourcesResponse,
 } from './entity_analytics/watchlists/data_source/list.gen';
 import type {
+  UpdateWatchlistEntitySourceApiKeyRequestParamsInput,
+  UpdateWatchlistEntitySourceApiKeyResponse,
+} from './entity_analytics/watchlists/data_source/update_api_key.gen';
+import type {
   UpdateWatchlistEntitySourceRequestParamsInput,
   UpdateWatchlistEntitySourceRequestBodyInput,
   UpdateWatchlistEntitySourceResponse,
@@ -1763,7 +1767,7 @@ finishes and then call this operation once.
           props.params
         ),
         headers: {
-          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
         },
         method: 'POST',
         body: props.body,
@@ -1782,7 +1786,7 @@ finishes and then call this operation once.
           props.params
         ),
         headers: {
-          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
         },
         method: 'POST',
         body: props.body,
@@ -2337,7 +2341,7 @@ Requires the **Timeline and Notes** read privilege (`notes_read`).
 - The `Content-Type: multipart/form-data` HTTP header.
 - A link to the `.ndjson` file containing the rules.
 > warn
-> When used with [API key](https://www.elastic.co/docs/deploy-manage/api-keys) authentication, the user's key gets assigned to the affected rules. If the user's key gets deleted or the user becomes inactive, the rules will stop running.
+> When used with [API key](https://www.elastic.co/docs/deploy-manage/api-keys) authentication, the user's key gets assigned to the created or updated rules. If the user's key gets deleted or the user becomes inactive, the rules will stop running.
 
 > If the API key that is used for authorization has different privileges than the key that created or most recently updated the rule, the rule behavior might change.
 > info
@@ -3709,6 +3713,24 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
+   * Replace the API key of an index entity source with a new one owned by the user making this request, for example after the user who created the source is removed or loses access to the index. The new key is created and saved first; the previous key is invalidated only afterwards, so a failure leaves the source with its previous key. The user must be able to read the source's index pattern.
+   */
+  async updateWatchlistEntitySourceApiKey(props: UpdateWatchlistEntitySourceApiKeyProps) {
+    this.log.info(`${new Date().toISOString()} Calling API UpdateWatchlistEntitySourceApiKey`);
+    return this.kbnClient
+      .request<UpdateWatchlistEntitySourceApiKeyResponse>({
+        path: replaceParams(
+          '/api/entity_analytics/watchlists/{watchlist_id}/entity_source/{id}/_update_api_key',
+          props.params
+        ),
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        },
+        method: 'POST',
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
     * **Deprecated in 9.4.0.** Use `POST /internal/asset_criticality/upload_csv_v2` instead.
 
     */
@@ -4254,6 +4276,9 @@ export interface UpdateWatchlistProps {
 export interface UpdateWatchlistEntitySourceProps {
   params: UpdateWatchlistEntitySourceRequestParamsInput;
   body: UpdateWatchlistEntitySourceRequestBodyInput;
+}
+export interface UpdateWatchlistEntitySourceApiKeyProps {
+  params: UpdateWatchlistEntitySourceApiKeyRequestParamsInput;
 }
 export interface UploadAssetCriticalityRecordsProps {
   attachment: FormData;

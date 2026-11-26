@@ -47,7 +47,7 @@ declare module '*.text' {
 
 /**
  * YAML files are loaded as raw strings via asset/source in webpack,
- * the yaml transform in kbn-babel-register for Node runtime,
+ * the yaml transform in kbn-swc-register for Node runtime,
  * and the raw transform in Jest.
  */
 declare module '*.yaml' {

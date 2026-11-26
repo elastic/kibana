@@ -17,7 +17,7 @@ export function UptimeNavigationProvider({ getService, getPageObjects }: FtrProv
   const goToUptimeRoot = async () => {
     // Check if are already on overview uptime page, we don't need to repeat the step
     await retry.tryForTime(60 * 1000, async () => {
-      if (await testSubjects.exists('uptimeSettingsToOverviewLink', { timeout: 0 })) {
+      if (await testSubjects.exists('uptimeSettingsToOverviewLink')) {
         await testSubjects.click('uptimeSettingsToOverviewLink');
         await PageObjects.header.waitUntilLoadingHasFinished();
         await testSubjects.existOrFail('uptimeOverviewPage', { timeout: 2000 });
@@ -47,7 +47,7 @@ export function UptimeNavigationProvider({ getService, getPageObjects }: FtrProv
     },
 
     checkIfOnMonitorPage: async (monitorId: string) => {
-      const monitorPage = await testSubjects.exists('uptimeMonitorPage', { timeout: 1000 });
+      const monitorPage = await testSubjects.exists('uptimeMonitorPage');
       if (monitorId && monitorPage) {
         const thisMonitorPage =
           (await testSubjects.getVisibleText('monitor-page-title')) === monitorId;
@@ -59,7 +59,7 @@ export function UptimeNavigationProvider({ getService, getPageObjects }: FtrProv
 
     goToMonitor: async (monitorId: string) => {
       // only go to monitor page if not already there
-      if (!(await testSubjects.exists('uptimeMonitorPage', { timeout: 0 }))) {
+      if (!(await testSubjects.exists('uptimeMonitorPage'))) {
         return retry.try(async () => {
           await testSubjects.click(`monitor-page-link-${monitorId}`);
         });
@@ -70,7 +70,7 @@ export function UptimeNavigationProvider({ getService, getPageObjects }: FtrProv
     },
 
     goToCertificates: async () => {
-      if (!(await testSubjects.exists('uptimeCertificatesPage', { timeout: 0 }))) {
+      if (!(await testSubjects.exists('uptimeCertificatesPage'))) {
         return retry.try(async () => {
           if (await find.existsByCssSelector('[href="/app/uptime/certificates"]', 0)) {
             await find.clickByCssSelector('[href="/app/uptime/certificates"]');
@@ -87,7 +87,7 @@ export function UptimeNavigationProvider({ getService, getPageObjects }: FtrProv
     },
 
     async isOnDetailsPage() {
-      return await testSubjects.exists('uptimeMonitorPage', { timeout: 0 });
+      return await testSubjects.exists('uptimeMonitorPage');
     },
 
     async goToHomeViaBreadCrumb() {

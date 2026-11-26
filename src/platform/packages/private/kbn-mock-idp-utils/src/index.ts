@@ -51,6 +51,7 @@ export {
   ensureSAMLRoleMapping,
   generateCosmosDBApiRequestHeaders,
   getSAMLRequestId,
+  parseSAMLRequest,
   createUiamSessionTokens,
   createUiamOAuthAccessToken,
   projectTypeToAlias,

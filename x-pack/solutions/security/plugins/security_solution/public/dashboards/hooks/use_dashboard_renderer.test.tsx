@@ -26,4 +26,21 @@ describe('useDashboardRenderer', () => {
     expect(result.current.dashboardContainer).toEqual(mockDashboardContainer);
     expect(result.current.dashboardInternalApi).toEqual(mockDashboardInternalApi);
   });
+
+  it('should clear the dashboard container when savedObjectId changes', () => {
+    const { result, rerender } = renderHook(
+      ({ savedObjectId }: { savedObjectId?: string }) => useDashboardRenderer(savedObjectId),
+      { initialProps: { savedObjectId: 'dashboard-1' } }
+    );
+
+    act(() => {
+      result.current.handleDashboardLoaded(mockDashboardContainer, mockDashboardInternalApi);
+    });
+    expect(result.current.dashboardContainer).toEqual(mockDashboardContainer);
+
+    rerender({ savedObjectId: 'dashboard-2' });
+
+    expect(result.current.dashboardContainer).toBeUndefined();
+    expect(result.current.dashboardInternalApi).toBeUndefined();
+  });
 });

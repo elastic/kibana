@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { asyncGlobalParamsPropagation } from './sync_global_params_task';
+import {
+  asyncGlobalParamsPropagation,
+  SyncGlobalParamsPrivateLocationsTask,
+} from './sync_global_params_task';
+import * as getPrivateLocationsModule from '../synthetics_service/get_private_locations';
 import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
 
 describe('asyncGlobalParamsPropagation', () => {
@@ -54,5 +58,63 @@ describe('asyncGlobalParamsPropagation', () => {
     const scheduled = ensureScheduled.mock.calls[0][0];
     expect(scheduled.state).toEqual({ paramsSpaceToSync: ALL_SPACES_ID });
     expect(scheduled.taskType).toBe('Synthetics:Sync-Global-Params-Private-Locations');
+  });
+});
+
+describe('SyncGlobalParamsPrivateLocationsTask.runTask', () => {
+  const buildTask = ({ editMonitors }: { editMonitors: jest.Mock }) => {
+    const serverSetup = {
+      coreStart: { savedObjects: { createInternalRepository: jest.fn().mockReturnValue({}) } },
+      encryptedSavedObjects: {},
+      fleet: { runWithCache: (fn: () => Promise<unknown>) => fn() },
+      logger: { error: jest.fn(), debug: jest.fn() },
+    } as any;
+    const task = new SyncGlobalParamsPrivateLocationsTask(
+      serverSetup,
+      {} as any,
+      {
+        privateLocationAPI: { editMonitors },
+      } as any
+    );
+
+    jest
+      .spyOn(getPrivateLocationsModule, 'getPrivateLocations')
+      .mockResolvedValue([{ id: 'pl-1' }] as any);
+    jest.spyOn(task.deployPackagePolicies, 'getAllMonitorConfigs').mockResolvedValue({
+      configsBySpaces: { space1: [{ id: 'm1' }] },
+      monitorSpaceIds: new Set(['space1']),
+      paramsBySpace: {},
+      maintenanceWindows: [],
+    } as any);
+    jest
+      .spyOn(task.deployPackagePolicies, 'parseLocations')
+      .mockReturnValue({ privateLocations: [{ id: 'pl-1' }], publicLocations: [] } as any);
+
+    return { task, serverSetup };
+  };
+
+  const taskInstance = { state: { paramsSpaceToSync: 'space1' } } as any;
+
+  test('does not fail the task when some package policies could not be created', async () => {
+    const editMonitors = jest
+      .fn()
+      .mockResolvedValue({ failedUpdates: [], failedCreates: [{ packagePolicy: { id: 'p1' } }] });
+    const { task, serverSetup } = buildTask({ editMonitors });
+
+    // a single broken monitor must not make the whole space's param propagation
+    // fail and re-run; the deploy layer logs it instead
+    await expect(task.runTask({ taskInstance })).resolves.toBeUndefined();
+    expect(serverSetup.logger.error).toHaveBeenCalledWith(
+      expect.stringContaining('Failed to create policies during sync')
+    );
+  });
+
+  test('still fails the task when the sync itself throws', async () => {
+    const editMonitors = jest.fn().mockRejectedValue(new Error('boom'));
+    const { task } = buildTask({ editMonitors });
+
+    const result = await task.runTask({ taskInstance });
+
+    expect(result?.error).toBeDefined();
   });
 });

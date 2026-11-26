@@ -61,10 +61,8 @@ export function* setDynamicSettingsEffect() {
         };
         yield call(setDynamicSettings, { settings: action.payload });
 
-        const { privateLocationsSyncInterval: _prev, ...prevAlertSettings } = prevSettings ?? {};
-        const { privateLocationsSyncInterval: _next, ...nextAlertSettings } = action.payload;
         const alertSettingsChanged =
-          JSON.stringify(prevAlertSettings) !== JSON.stringify(nextAlertSettings);
+          JSON.stringify(prevSettings ?? {}) !== JSON.stringify(action.payload);
 
         if (alertSettingsChanged) {
           yield put(updateDefaultAlertingAction.get());

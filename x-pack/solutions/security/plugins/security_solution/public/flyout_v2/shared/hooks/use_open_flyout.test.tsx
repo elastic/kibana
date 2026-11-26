@@ -11,6 +11,7 @@ import { useOpenFlyout } from './use_open_flyout';
 import { useKibana } from '../../../common/lib/kibana';
 import { useIsInSecurityApp } from '../../../common/hooks/is_in_security_app';
 import { flyoutProviders } from '../components/flyout_provider';
+import { FLYOUT_WIDTH_LOCAL_STORAGE } from '../constants/local_storage';
 import {
   FlyoutV2EventTypes,
   FLYOUT_ORIGIN,
@@ -36,6 +37,7 @@ jest.mock('../components/flyout_provider', () => ({
 
 const mockOpenSystemFlyout = jest.fn();
 const mockReportEvent = jest.fn();
+const mockStorage = { get: jest.fn(), set: jest.fn() };
 
 /** Builds a deferred `OverlayRef`-like value, letting the test resolve `onClose` on demand. */
 const createOverlayRef = () => {
@@ -53,9 +55,12 @@ describe('useOpenFlyout', () => {
       services: {
         overlays: { openSystemFlyout: mockOpenSystemFlyout },
         telemetry: { reportEvent: mockReportEvent },
+        storage: mockStorage,
       },
     });
     (useIsInSecurityApp as jest.Mock).mockReturnValue(true);
+    // No persisted preference by default → falls back to 'overlay'.
+    mockStorage.get.mockReturnValue(undefined);
   });
 
   it('opens the system flyout with the wrapped children and given properties', () => {
@@ -68,7 +73,122 @@ describe('useOpenFlyout', () => {
     expect(mockOpenSystemFlyout).toHaveBeenCalledWith('FLYOUT_CONTENT', {
       size: 's',
       session: 'start',
+      type: 'overlay',
+      defaultSize: 's',
+      onResize: expect.any(Function),
     });
+  });
+
+  it('injects the persisted push/overlay preference from storage', () => {
+    mockStorage.get.mockImplementation((key: string) =>
+      key === FLYOUT_WIDTH_LOCAL_STORAGE ? undefined : 'push'
+    );
+    mockOpenSystemFlyout.mockReturnValue(createOverlayRef().ref);
+
+    const { result } = renderHook(() => useOpenFlyout());
+    result.current(<div />, { size: 's', session: 'start' });
+
+    expect(mockOpenSystemFlyout).toHaveBeenCalledWith(
+      'FLYOUT_CONTENT',
+      expect.objectContaining({ size: 's', session: 'start', type: 'push' })
+    );
+  });
+
+  it('lets an explicit type override the persisted preference', () => {
+    mockStorage.get.mockImplementation((key: string) =>
+      key === FLYOUT_WIDTH_LOCAL_STORAGE ? undefined : 'push'
+    );
+    mockOpenSystemFlyout.mockReturnValue(createOverlayRef().ref);
+
+    const { result } = renderHook(() => useOpenFlyout());
+    result.current(<div />, { size: 's', session: 'start', type: 'overlay' });
+
+    expect(mockOpenSystemFlyout).toHaveBeenCalledWith(
+      'FLYOUT_CONTENT',
+      expect.objectContaining({ size: 's', session: 'start', type: 'overlay' })
+    );
+  });
+
+  it('restores the persisted main width and wires resize capture for main flyouts', () => {
+    mockStorage.get.mockImplementation((key: string) =>
+      key === FLYOUT_WIDTH_LOCAL_STORAGE ? 720 : undefined
+    );
+    mockOpenSystemFlyout.mockReturnValue(createOverlayRef().ref);
+
+    const { result } = renderHook(() => useOpenFlyout());
+    result.current(<div />, { size: 's', session: 'start' });
+
+    expect(mockOpenSystemFlyout).toHaveBeenCalledWith(
+      'FLYOUT_CONTENT',
+      expect.objectContaining({ size: 720, defaultSize: 's', onResize: expect.any(Function) })
+    );
+  });
+
+  it('does not persist or restore a width for tool flyouts', () => {
+    // A saved width exists, but tool flyouts must ignore it (they can open side-by-side).
+    mockStorage.get.mockImplementation((key: string) =>
+      key === FLYOUT_WIDTH_LOCAL_STORAGE ? 720 : undefined
+    );
+    mockOpenSystemFlyout.mockReturnValue(createOverlayRef().ref);
+
+    const { result } = renderHook(() => useOpenFlyout());
+    result.current(
+      <div />,
+      { size: 'm', session: 'start' },
+      {
+        surface: FLYOUT_SURFACE.TOOL,
+        tool: FLYOUT_TOOL.ANALYZER,
+        flyoutType: FLYOUT_TYPE.DOCUMENT,
+        session: FLYOUT_SESSION_KIND.START,
+      }
+    );
+
+    const properties = mockOpenSystemFlyout.mock.calls[0][1];
+    expect(properties.size).toBe('m'); // keeps its named default, not the saved width
+    expect(properties.defaultSize).toBeUndefined();
+    expect(properties.onResize).toBeUndefined();
+  });
+
+  it('does not apply a numeric size or resize capture to child flyouts', () => {
+    mockStorage.get.mockImplementation((key: string) =>
+      key === FLYOUT_WIDTH_LOCAL_STORAGE ? 720 : undefined
+    );
+    mockOpenSystemFlyout.mockReturnValue(createOverlayRef().ref);
+
+    const { result } = renderHook(() => useOpenFlyout());
+    result.current(<div />, { size: 's', session: 'inherit' });
+
+    const properties = mockOpenSystemFlyout.mock.calls[0][1];
+    expect(properties.size).toBe('s');
+    expect(properties.defaultSize).toBeUndefined();
+    expect(properties.onResize).toBeUndefined();
+  });
+
+  it('persists the main width when the flyout reports a resize', () => {
+    mockOpenSystemFlyout.mockReturnValue(createOverlayRef().ref);
+
+    const { result } = renderHook(() => useOpenFlyout());
+    result.current(<div />, { size: 's', session: 'start' });
+
+    const { onResize } = mockOpenSystemFlyout.mock.calls[0][1];
+    onResize(812);
+
+    expect(mockStorage.set).toHaveBeenCalledWith(FLYOUT_WIDTH_LOCAL_STORAGE, 812);
+  });
+
+  it('composes with, rather than overwrites, a caller-supplied onResize', () => {
+    mockOpenSystemFlyout.mockReturnValue(createOverlayRef().ref);
+    const callerOnResize = jest.fn();
+
+    const { result } = renderHook(() => useOpenFlyout());
+    result.current(<div />, { size: 's', session: 'start', onResize: callerOnResize });
+
+    const { onResize } = mockOpenSystemFlyout.mock.calls[0][1];
+    onResize(812);
+
+    // Width is still persisted, and the caller's own handler still fires.
+    expect(mockStorage.set).toHaveBeenCalledWith(FLYOUT_WIDTH_LOCAL_STORAGE, 812);
+    expect(callerOnResize).toHaveBeenCalledWith(812);
   });
 
   it('returns the OverlayRef from openSystemFlyout', () => {

@@ -9,6 +9,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import {
   EuiButton,
   EuiDescribedFormGroup,
+  EuiEmptyPrompt,
   EuiFieldNumber,
   EuiFieldText,
   EuiFlexGroup,
@@ -29,7 +30,6 @@ import { ConnectorSelector } from '@kbn/security-solution-connectors';
 import { useLoadConnectors } from '@kbn/inference-connectors';
 import { AiIcon } from '@kbn/shared-ux-ai-components';
 import { agentBuilderDefaultAgentId } from '@kbn/agent-builder-common';
-import { WorkflowsManagementUiActions } from '@kbn/workflows';
 import { TAG_PREFIX_PATTERN } from '../../../../../common/workflows/alert_analysis_workflow';
 import { SecuritySolutionPageWrapper } from '../../../../common/components/page_wrapper';
 import { HeaderPage } from '../../../../common/components/header_page';
@@ -58,17 +58,25 @@ type AlertAnalysisWorkflowSettingsError = Error & { body?: { message?: string } 
 
 export const AlertAnalysisWorkflowPage: React.FC = () => {
   const {
+    services: { application },
+  } = useKibana();
+  const isEnterprise = useLicense().isEnterprise();
+  const { read: canReadRules, edit: canEditRules } = useUserPrivileges().rulesPrivileges.rules;
+  const canSaveAdvancedSettings = application.capabilities.advancedSettings?.save === true;
+  const canAccessPage = isEnterprise && canReadRules && canEditRules && canSaveAdvancedSettings;
+
+  if (!canAccessPage) {
+    return <NotFoundPage />;
+  }
+
+  return <AlertAnalysisWorkflowContent />;
+};
+
+const AlertAnalysisWorkflowContent: React.FC = () => {
+  const {
     services: { application, http, notifications, settings },
   } = useKibana();
   const queryClient = useQueryClient();
-  const isEnterprise = useLicense().isEnterprise();
-  const { edit: canEditRules } = useUserPrivileges().rulesPrivileges.rules;
-  const canEditWorkflow =
-    application.capabilities.workflowsManagement?.[WorkflowsManagementUiActions.update] === true;
-  const canEditAdvancedSettings = Boolean(
-    application.capabilities.advancedSettings?.save && canEditRules && canEditWorkflow
-  );
-  const canAccessPage = isEnterprise && canEditAdvancedSettings;
   const { data: loadedAiConnectors, isLoading: isLoadingConnectors } = useLoadConnectors({
     http,
     toasts: notifications.toasts,
@@ -78,10 +86,16 @@ export const AlertAnalysisWorkflowPage: React.FC = () => {
     () => loadedAiConnectors?.filter((connector) => !connector.isMissingSecrets) ?? [],
     [loadedAiConnectors]
   );
-  const { agents, isLoading: isLoadingAgents } = useAlertAnalysisWorkflowAgents(canAccessPage);
-  const { data: savedSettingsResponse, isLoading } = useQuery({
+  const { agents, isLoading: isLoadingAgents } = useAlertAnalysisWorkflowAgents(true);
+  const {
+    data: savedSettingsResponse,
+    isError: isSettingsError,
+    isFetching: isFetchingSettings,
+    isLoading: isLoadingSettings,
+    refetch: refetchSettings,
+  } = useQuery({
     queryKey: ALERT_ANALYSIS_WORKFLOW_SETTINGS_QUERY_KEY,
-    enabled: canAccessPage,
+    retry: false,
     queryFn: async () => {
       return fetchAlertAnalysisWorkflowSettings({ http });
     },
@@ -145,10 +159,6 @@ export const AlertAnalysisWorkflowPage: React.FC = () => {
     }
   }, [savedSettings, pageSettings]);
 
-  if (!canAccessPage) {
-    return <NotFoundPage />;
-  }
-
   return (
     <>
       <SecuritySolutionPageWrapper data-test-subj="alertAnalysisWorkflowPage">
@@ -190,7 +200,24 @@ export const AlertAnalysisWorkflowPage: React.FC = () => {
             />
           }
         />
-        {isLoading || !pageSettings ? (
+        {isSettingsError && !pageSettings ? (
+          <EuiEmptyPrompt
+            color="danger"
+            iconType="error"
+            data-test-subj="alertAnalysisWorkflowSettingsError"
+            title={<h2>{translations.LOAD_ERROR_TITLE}</h2>}
+            body={<p>{translations.LOAD_ERROR_BODY}</p>}
+            actions={
+              <EuiButton
+                data-test-subj="alertAnalysisWorkflowSettingsRetryButton"
+                isLoading={isFetchingSettings}
+                onClick={() => refetchSettings()}
+              >
+                {translations.LOAD_ERROR_RETRY}
+              </EuiButton>
+            }
+          />
+        ) : isLoadingSettings || !pageSettings ? (
           <EuiLoadingSpinner data-test-subj="alertAnalysisWorkflowSettingsLoading" />
         ) : (
           <>
@@ -220,7 +247,6 @@ export const AlertAnalysisWorkflowPage: React.FC = () => {
                   aria-label={translations.WORKFLOW_ENABLED_ARIA_LABEL}
                   label={translations.WORKFLOW_ENABLED_HIDDEN_LABEL}
                   checked={pageSettings.workflowEnabled ?? true}
-                  disabled={!canEditAdvancedSettings}
                   onChange={(event) =>
                     setPageSettings({
                       ...pageSettings,
@@ -255,7 +281,7 @@ export const AlertAnalysisWorkflowPage: React.FC = () => {
                   connectors={aiConnectors}
                   selectedId={pageSettings.connectorId}
                   isLoading={isLoadingConnectors}
-                  isDisabled={!canEditAdvancedSettings || !isWorkflowEnabled}
+                  isDisabled={!isWorkflowEnabled}
                   settings={settings}
                   onChange={(connectorId) =>
                     setPageSettings((prev) => (prev ? { ...prev, connectorId } : prev))
@@ -288,7 +314,7 @@ export const AlertAnalysisWorkflowPage: React.FC = () => {
                   options={agentOptions}
                   valueOfSelected={selectedAgentId}
                   isLoading={isLoadingAgents}
-                  disabled={!canEditAdvancedSettings || !isWorkflowEnabled}
+                  disabled={!isWorkflowEnabled}
                   aria-label={translations.AGENT_ARIA_LABEL}
                   onChange={(agentId) =>
                     setPageSettings((prev) => (prev ? { ...prev, agentId } : prev))
@@ -322,7 +348,7 @@ export const AlertAnalysisWorkflowPage: React.FC = () => {
                   aria-label={translations.CREATE_CONVERSATION_ARIA_LABEL}
                   label={translations.CREATE_CONVERSATION_HIDDEN_LABEL}
                   checked={pageSettings.createConversation ?? true}
-                  disabled={!canEditAdvancedSettings || !isWorkflowEnabled}
+                  disabled={!isWorkflowEnabled}
                   onChange={(event) =>
                     setPageSettings({
                       ...pageSettings,
@@ -358,7 +384,7 @@ export const AlertAnalysisWorkflowPage: React.FC = () => {
                   aria-label={translations.AUTO_CLOSE_ENABLED_ARIA_LABEL}
                   label={translations.AUTO_CLOSE_ENABLED_HIDDEN_LABEL}
                   checked={pageSettings.autoCloseEnabled}
-                  disabled={!canEditAdvancedSettings || !isWorkflowEnabled}
+                  disabled={!isWorkflowEnabled}
                   onChange={(event) =>
                     setPageSettings({
                       ...pageSettings,
@@ -394,9 +420,7 @@ export const AlertAnalysisWorkflowPage: React.FC = () => {
                   max={1}
                   step={0.01}
                   value={pageSettings.autoCloseConfidenceScoreMinThreshold}
-                  disabled={
-                    !canEditAdvancedSettings || !isWorkflowEnabled || !pageSettings.autoCloseEnabled
-                  }
+                  disabled={!isWorkflowEnabled || !pageSettings.autoCloseEnabled}
                   isInvalid={isThresholdRangeInvalid}
                   aria-label={translations.MIN_THRESHOLD_ARIA_LABEL}
                   onChange={(event) =>
@@ -438,9 +462,7 @@ export const AlertAnalysisWorkflowPage: React.FC = () => {
                   max={1}
                   step={0.01}
                   value={pageSettings.autoCloseConfidenceScoreMaxThreshold}
-                  disabled={
-                    !canEditAdvancedSettings || !isWorkflowEnabled || !pageSettings.autoCloseEnabled
-                  }
+                  disabled={!isWorkflowEnabled || !pageSettings.autoCloseEnabled}
                   isInvalid={isThresholdRangeInvalid}
                   aria-label={translations.MAX_THRESHOLD_ARIA_LABEL}
                   onChange={(event) =>
@@ -479,7 +501,7 @@ export const AlertAnalysisWorkflowPage: React.FC = () => {
                 <EuiFieldText
                   data-test-subj="alertAnalysisWorkflowTagPrefix"
                   value={pageSettings.tagPrefix ?? ''}
-                  disabled={!canEditAdvancedSettings || !isWorkflowEnabled}
+                  disabled={!isWorkflowEnabled}
                   isInvalid={isTagPrefixInvalid}
                   aria-label={translations.TAG_PREFIX_ARIA_LABEL}
                   onChange={(event) =>
@@ -494,12 +516,7 @@ export const AlertAnalysisWorkflowPage: React.FC = () => {
             <EuiButton
               data-test-subj="alertAnalysisWorkflowSaveButton"
               fill
-              disabled={
-                !canEditAdvancedSettings ||
-                !isDirty ||
-                isThresholdRangeInvalid ||
-                isTagPrefixInvalid
-              }
+              disabled={!isDirty || isThresholdRangeInvalid || isTagPrefixInvalid}
               isLoading={saveSettingsMutation.isLoading}
               onClick={() => {
                 if (pageSettings) {

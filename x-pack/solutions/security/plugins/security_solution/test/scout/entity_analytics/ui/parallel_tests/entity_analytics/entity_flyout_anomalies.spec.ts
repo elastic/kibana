@@ -83,7 +83,9 @@ spaceTest.describe(
       // calls the security solution search strategy for risk scores. Without this mock the call
       // takes several seconds, keeping the section in a loading state that continuously shifts
       // the anomalies section's Y position — preventing Playwright's stability check from
-      // passing before the test timeout.
+      // passing before the test timeout. This blanket route also serves the observed-host
+      // `HostsQueries.details` search, whose real backend always returns `hostDetails: {}`; omit
+      // it and `hostData.details` is `undefined`, crashing the page into the fatal error boundary.
       await page.route('**/internal/search/securitySolutionSearchStrategy', async (route) => {
         await route.fulfill({
           status: 200,
@@ -93,6 +95,7 @@ spaceTest.describe(
             isPartial: false,
             totalCount: 0,
             data: [],
+            hostDetails: {},
             rawResponse: {
               took: 0,
               timed_out: false,

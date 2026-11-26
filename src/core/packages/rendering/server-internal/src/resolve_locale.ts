@@ -8,6 +8,7 @@
  */
 
 import type { KibanaRequest } from '@kbn/core-http-server';
+import type { LocaleSource } from '@kbn/core-injected-metadata-common-internal';
 import { EN_LOCALE } from '@kbn/i18n';
 
 /**
@@ -37,6 +38,11 @@ export interface ResolveLocaleArgs {
    * written to the response. Controlled by `i18n.allowLocaleCookie`.
    */
   allowLocaleCookie: boolean;
+  /**
+   * When false, the Accept-Language step is skipped. The browser preference is
+   * still computed for telemetry. Controlled by `i18n.detectBrowserLocale`.
+   */
+  detectBrowserLocale: boolean;
 }
 
 export interface ResolveLocaleResult {
@@ -47,6 +53,14 @@ export interface ResolveLocaleResult {
    * Always present — the cookie is rewritten on every render.
    */
   setCookieHeader: string;
+  /**
+   * The normalized locale the browser's Accept-Language header resolves to,
+   * regardless of what the display language resolved to. Undefined when the
+   * browser's preference cannot be served.
+   */
+  browserPreferredLocale: string | undefined;
+  /** Which step of the priority chain produced {@link locale}. */
+  source: LocaleSource;
 }
 
 /**
@@ -54,7 +68,7 @@ export interface ResolveLocaleResult {
  *   1. User profile setting (when value is in `translationHashes`)
  *   2. KBN_LOCALE cookie (only when `allowLocaleCookie` is `true` and value is in `translationHashes`)
  *   3. Explicitly-configured `configLocale` (any `i18n.defaultLocale` other than the built-in `en`)
- *   4. Accept-Language header (exact match against `configuredLocales`, else language-level (region-optional) fallback)
+ *   4. Accept-Language header (only when `detectBrowserLocale` is `true`; exact match against `configuredLocales`, else language-level (region-optional) fallback)
  *   5. `configLocale` (the built-in `en` default)
  */
 export const resolveLocale = (args: ResolveLocaleArgs): ResolveLocaleResult => {
@@ -66,35 +80,45 @@ export const resolveLocale = (args: ResolveLocaleArgs): ResolveLocaleResult => {
     translationHashes,
     serverBasePath,
     allowLocaleCookie,
+    detectBrowserLocale,
   } = args;
 
+  // Computed for every render so telemetry sees the browser preference even when
+  // a higher-priority step wins.
+  const browserPreferredLocale = pickFromAcceptLanguage(
+    getHeader(request, 'accept-language'),
+    configuredLocales,
+    translationHashes
+  );
+
+  const resolved = (locale: string, source: LocaleSource): ResolveLocaleResult => ({
+    ...finalize(locale, request, serverBasePath),
+    browserPreferredLocale,
+    source,
+  });
+
   if (userSettingLocale && translationHashes[userSettingLocale]) {
-    return finalize(userSettingLocale, request, serverBasePath);
+    return resolved(userSettingLocale, 'profile');
   }
 
   if (allowLocaleCookie) {
     const cookieLocale = readCookie(getHeader(request, 'cookie'), KBN_LOCALE_COOKIE_NAME);
     if (cookieLocale && translationHashes[cookieLocale]) {
-      return finalize(cookieLocale, request, serverBasePath);
+      return resolved(cookieLocale, 'cookie');
     }
   }
 
   // An explicitly-configured default locale (any value other than the built-in
   // EN_LOCALE) outranks Accept-Language detection.
   if (configLocale !== EN_LOCALE) {
-    return finalize(configLocale, request, serverBasePath);
+    return resolved(configLocale, 'config');
   }
 
-  const headerLocale = pickFromAcceptLanguage(
-    getHeader(request, 'accept-language'),
-    configuredLocales,
-    translationHashes
-  );
-  if (headerLocale) {
-    return finalize(headerLocale, request, serverBasePath);
+  if (detectBrowserLocale && browserPreferredLocale) {
+    return resolved(browserPreferredLocale, 'browser');
   }
 
-  return finalize(configLocale, request, serverBasePath);
+  return resolved(configLocale, 'default');
 };
 
 const getHeader = (request: KibanaRequest, name: string): string => {
@@ -133,6 +157,9 @@ export const readCookie = (cookieHeader: string, name: string): string | undefin
  * servable candidate, matched case-insensitively (exact, else primary-subtag
  * fallback). Returns `undefined` if no entry yields a servable candidate.
  * Entries with `q=0` are ignored.
+ *
+ * Must stay synchronous and allocation-light: it runs on the render path for
+ * every request, so any I/O or async lookup here is paid per response.
  */
 export const pickFromAcceptLanguage = (
   header: string,
@@ -191,7 +218,7 @@ const finalize = (
   locale: string,
   request: KibanaRequest,
   serverBasePath: string
-): ResolveLocaleResult => {
+): Pick<ResolveLocaleResult, 'locale' | 'setCookieHeader'> => {
   const isHttps = request.url.protocol === 'https:';
   const path = serverBasePath || '/';
   const parts = [

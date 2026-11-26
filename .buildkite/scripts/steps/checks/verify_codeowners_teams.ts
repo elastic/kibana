@@ -7,7 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { getCodeOwnersEntries, getTeams } from '@kbn/code-owners';
+import { basename } from 'node:path';
+import { loadKibanaModule } from '../../../pipeline-utils/load_kibana_module.ts';
+
+const { getCodeOwnersEntries, getTeams } =
+  loadKibanaModule<typeof import('@kbn/code-owners')>('@kbn/code-owners');
 
 /**
  * Collect the GitHub team handles tracked in the public team registry.
@@ -87,6 +91,6 @@ function main(): void {
   console.log('All CODEOWNERS teams are valid.');
 }
 
-if (require.main === module) {
+if (basename(process.argv[1] ?? '') === 'verify_codeowners_teams.ts') {
   main();
 }

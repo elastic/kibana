@@ -146,7 +146,6 @@ const fetchPage = async (
   const { liveRows, sortValuesMap } = await processLiveHistory({
     liveHits,
     osqueryContext: mockOsqueryContext,
-    spaceId: 'default',
     logger: mockLogger,
   });
 

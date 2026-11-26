@@ -11,7 +11,7 @@ import type { FileJSON } from '@kbn/shared-ux-file-types';
 
 import { EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
 
-import type { CommonAttachmentTabViewProps } from '../../../client/attachment_framework/types';
+import type { CommonAttachmentListViewProps } from '../../../client/attachment_framework/types';
 import type { CaseFilesFilteringOptions } from '../../../containers/use_get_case_files';
 
 import { useGetCaseFiles } from '../../../containers/use_get_case_files';
@@ -24,7 +24,7 @@ export const DEFAULT_CASE_FILES_FILTERING_OPTIONS = {
   perPage: 10,
 };
 
-export const CaseViewFiles = ({ caseData, searchTerm }: CommonAttachmentTabViewProps) => {
+export const CaseViewFiles = ({ caseData, searchTerm }: CommonAttachmentListViewProps) => {
   const searchTermRef = useRef<string | undefined>(searchTerm);
   const [filteringOptions, setFilteringOptions] = useState<CaseFilesFilteringOptions>({
     ...DEFAULT_CASE_FILES_FILTERING_OPTIONS,

@@ -69,11 +69,12 @@ import type {
   AttachmentAttributes,
   CustomFieldsConfiguration,
 } from '../../../common/types/domain';
-import { CaseStatuses, AttachmentType } from '../../../common/types/domain';
+import { CaseStatuses, AttachmentType, UserActionTypes } from '../../../common/types/domain';
 import {
   validateCustomFields,
   validateCaseExtendedFields,
   validateExtendedFieldsInRequest,
+  validateTemplateInRequest,
   validateExtendedFieldsOnClose,
   resolveTemplateFieldsForClose,
   resolveGlobalFields,
@@ -95,6 +96,11 @@ import {
   throwIfFieldRepresentationConflicts,
   throwIfInvalidLinkedFieldValues,
 } from '../../common/utils/pair_field_representations';
+import {
+  APPLY_TEMPLATE_COUNTER,
+  CLEAR_TEMPLATE_COUNTER,
+  incrementCasesClientCounter,
+} from '../usage_counters';
 /**
  * Throws an error if any of the requests attempt to update the owner of a case.
  */
@@ -107,9 +113,12 @@ function throwIfUpdateOwner(requests: UpdateRequestWithOriginalCase[]) {
   }
 }
 
+const isCloseCaseUserAction = ({ parameters: { attributes } }: UserActionEvent): boolean =>
+  attributes.type === UserActionTypes.status && attributes.payload.status === CaseStatuses.closed;
+
 /**
  * Throws an error if any of the requests attempt to create a number of user actions that would put
- * it's case over the limit.
+ * it's case over the limit. Closing a case is exempt so a case at the limit can always be closed.
  */
 async function throwIfMaxUserActionsReached({
   userActionsDict,
@@ -127,9 +136,11 @@ async function throwIfMaxUserActionsReached({
   });
 
   Object.keys(currentTotals).forEach((caseId) => {
-    const totalToAdd = userActionsDict?.[caseId]?.length ?? 0;
+    const totalToAdd = (userActionsDict?.[caseId] ?? []).filter(
+      (userAction) => !isCloseCaseUserAction(userAction)
+    ).length;
 
-    if (currentTotals[caseId] + totalToAdd > MAX_USER_ACTIONS_PER_CASE) {
+    if (totalToAdd > 0 && currentTotals[caseId] + totalToAdd > MAX_USER_ACTIONS_PER_CASE) {
       throw Boom.badRequest(
         `The case with case id ${caseId} has reached the limit of ${MAX_USER_ACTIONS_PER_CASE} user actions.`
       );
@@ -467,6 +478,69 @@ export interface UpdateRequestWithOriginalCase {
 }
 
 /**
+ * Counts the cases that had a template applied or cleared, once per case.
+ *
+ * A `template` key only survives into `updateReq` when it differs from the case's current
+ * template, so re-sending an unchanged one is not an apply. Restricted to the cases that actually
+ * persisted, since a bulk update can partially fail, and deduped by id so a request repeating a
+ * case id counts that case once, keeping the first change as `updatedFieldsByCaseId` does.
+ */
+const countTemplateChanges = (
+  casesToUpdate: UpdateRequestWithOriginalCase[],
+  persistedCaseIds: Set<string>
+): {
+  appliedCases: number;
+  clearedCases: number;
+  casesPerTemplateId: Map<string, number>;
+} => {
+  const countedCaseIds = new Set<string>();
+  const casesPerTemplateId = new Map<string, number>();
+  let appliedCases = 0;
+  let clearedCases = 0;
+
+  for (const { updateReq } of casesToUpdate) {
+    const { id, template } = updateReq;
+    const isCountable =
+      template !== undefined && persistedCaseIds.has(id) && !countedCaseIds.has(id);
+
+    if (isCountable) {
+      countedCaseIds.add(id);
+
+      if (template === null) {
+        clearedCases += 1;
+      } else {
+        appliedCases += 1;
+        casesPerTemplateId.set(template.id, (casesPerTemplateId.get(template.id) ?? 0) + 1);
+      }
+    }
+  }
+
+  return { appliedCases, clearedCases, casesPerTemplateId };
+};
+
+/**
+ * Adds the cases that just received a template to each template's usage tally.
+ *
+ * Best effort: the tally is a display concern, so a failure is logged and swallowed rather than
+ * failing an update whose cases are already persisted.
+ */
+const incrementTemplateUsageStats = async (
+  casesPerTemplateId: Map<string, number>,
+  templatesService: TemplatesService,
+  logger: CasesClientArgs['logger']
+): Promise<void> => {
+  await Promise.allSettled(
+    [...casesPerTemplateId].map(async ([templateId, caseCount]) => {
+      try {
+        await templatesService.incrementUsageStats(templateId, caseCount);
+      } catch (error) {
+        logger.warn(`Failed to update template usage stats for template ${templateId}: ${error}`);
+      }
+    })
+  );
+};
+
+/**
  * Updates the specified cases with new values
  *
  * @ignore
@@ -633,6 +707,42 @@ export const bulkUpdate = async (
           return [owner, fields] as const;
         })
       )
+    );
+
+    // Pre-fetch unique templates (deduplicate by id@version so N cases switching to the
+    // same template version issue exactly one SO search, not one per case).
+    const prefetchedTemplates = new Map<
+      string,
+      Promise<Awaited<ReturnType<typeof templatesService.getTemplate>>>
+    >();
+    for (const { updateReq } of casesToUpdate) {
+      if (updateReq.template != null && updateReq.template.id) {
+        const { id, version } = updateReq.template;
+        const key = `${id}@${version}`;
+        if (!prefetchedTemplates.has(key)) {
+          prefetchedTemplates.set(key, templatesService.getTemplate(id, String(version)));
+        }
+      }
+    }
+
+    // Owner/existence check must complete before field validation: a foreign or deleted
+    // template can leak schema details through the field-validation error path.
+    await Promise.all(
+      casesToUpdate.map(async ({ updateReq, originalCase }) => {
+        const { template } = updateReq;
+        // Coerce undefined (template not found) to null so the validator can distinguish
+        // a cached miss from an absent prefetch and avoids a redundant getTemplate call.
+        const prefetchedTemplate =
+          template != null && template.id
+            ? (await prefetchedTemplates.get(`${template.id}@${template.version}`)) ?? null
+            : undefined;
+        return validateTemplateInRequest({
+          updateReq,
+          originalCase,
+          templatesService,
+          prefetchedTemplate,
+        });
+      })
     );
 
     await Promise.all(
@@ -906,6 +1016,17 @@ export const bulkUpdate = async (
     await notificationService.bulkNotifyAssignees(casesAndAssigneesToNotifyForAssignment);
 
     const updatedCasesResponse = decodeOrThrow(PatchCasesResponseRt)(returnUpdatedCase);
+
+    const { appliedCases, clearedCases, casesPerTemplateId } = countTemplateChanges(
+      casesToUpdate,
+      new Set(updatedCasesResponse.map(({ id }) => id))
+    );
+
+    incrementCasesClientCounter(clientArgs, APPLY_TEMPLATE_COUNTER, appliedCases);
+    incrementCasesClientCounter(clientArgs, CLEAR_TEMPLATE_COUNTER, clearedCases);
+
+    await incrementTemplateUsageStats(casesPerTemplateId, templatesService, logger);
+
     const updatedFieldsByCaseId = casesToUpdate.reduce<Map<string, string[]>>(
       (acc, { updateReq }) => {
         // Keep first occurrence for duplicate ids handling.

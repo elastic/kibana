@@ -126,7 +126,12 @@ export function usePackagePolicyWithRelatedData(
   const [validationResults, setValidationResults] = useState<PackagePolicyValidationResults>();
   const hasErrors = validationResults ? validationHasErrors(validationResults) : false;
 
-  const savePackagePolicy = async (packagePolicyOverride?: Partial<PackagePolicy>) => {
+  const savePackagePolicy = async (
+    packagePolicyOverride?: Partial<PackagePolicy>,
+    {
+      acknowledgeAgentVersionIncompatibility,
+    }: { acknowledgeAgentVersionIncompatibility?: boolean } = {}
+  ) => {
     setFormState('LOADING');
     // Wrap the whole save  so *every* failure resolves to the `{ data, error }` shape `onSubmit` expects.
     try {
@@ -173,7 +178,12 @@ export function usePackagePolicyWithRelatedData(
         return { data: { item }, error: null };
       }
 
-      const result = await sendUpdatePackagePolicy(packagePolicyId, restPackagePolicy);
+      const result = await sendUpdatePackagePolicy(packagePolicyId, {
+        ...restPackagePolicy,
+        ...(acknowledgeAgentVersionIncompatibility && {
+          acknowledge_agent_version_incompatibility: true,
+        }),
+      });
 
       setFormState('SUBMITTED');
 

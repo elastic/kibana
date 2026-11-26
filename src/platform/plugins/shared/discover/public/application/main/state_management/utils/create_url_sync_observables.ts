@@ -21,6 +21,7 @@ import {
   type InternalStateDependencies,
 } from '../redux';
 import { createTabAppStateObservable } from './create_tab_app_state_observable';
+import { isTimeRangeValid } from '../../../../utils/validate_time';
 
 /**
  * Create observables and state containers for 2-directional syncing of appState and globalState with the URL
@@ -30,11 +31,13 @@ export const createUrlSyncObservables = ({
   dispatch,
   getState,
   internalState$,
+  services,
 }: {
   tabId: string;
   dispatch: ThunkDispatch<DiscoverInternalState, InternalStateDependencies, AnyAction>;
   getState: () => DiscoverInternalState;
   internalState$: Observable<DiscoverInternalState>;
+  services: InternalStateDependencies['services'];
 }) => {
   const getAppState = (): DiscoverAppState => {
     return selectTabAppState(getState(), tabId);
@@ -81,12 +84,15 @@ export const createUrlSyncObservables = ({
       }
 
       const { time: timeRange, refreshInterval, filters } = state;
+      const normalizedTimeRange = isTimeRangeValid(timeRange)
+        ? timeRange
+        : services.timefilter.getTimeDefaults();
 
       dispatch(
         internalStateActions.setGlobalState({
           tabId,
           globalState: {
-            timeRange,
+            timeRange: normalizedTimeRange,
             refreshInterval,
             filters,
           },

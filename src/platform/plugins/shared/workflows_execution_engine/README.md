@@ -751,13 +751,13 @@ workflows_execution_engine/
 
 ```bash
 # Run unit tests
-yarn test:jest src/platform/plugins/shared/workflows_execution_engine
+pnpm test:jest src/platform/plugins/shared/workflows_execution_engine
 
 # Run integration tests
-yarn test:jest_integration src/platform/plugins/shared/workflows_execution_engine
+pnpm test:jest_integration src/platform/plugins/shared/workflows_execution_engine
 
 # Run with watch mode for development
-yarn test:jest --watch src/platform/plugins/shared/workflows_execution_engine
+pnpm test:jest --watch src/platform/plugins/shared/workflows_execution_engine
 ```
 
 ### Debugging

@@ -317,7 +317,8 @@ export const HostPanel = memo(function HostPanel({
             isPreviewMode={isPreviewMode}
             entityRecord={observedHost.entityRecord ?? undefined}
             refetchEntityRecord={entityFromStoreResult.refetch}
-            skipRiskAndCriticality={noEntityInStore}
+            noEntityInStore={noEntityInStore}
+            entityStoreV2Enabled
             entityStoreEntityId={entityStoreEntityId}
             riskScoreQueryId={HOST_PANEL_RISK_SCORE_QUERY_ID}
           />

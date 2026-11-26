@@ -7,10 +7,19 @@
 
 import { createServerRouteFactory } from '@kbn/server-route-repository';
 import type { CreateServerRouteFactory } from '@kbn/server-route-repository-utils/src/typings';
-import { badRequest, conflict, forbidden, internal, notFound } from '@hapi/boom';
+import { badRequest, conflict, forbidden, internal, isBoom, notFound } from '@hapi/boom';
 import { errors } from '@elastic/elasticsearch';
 import type { SignificantEventsRouteHandlerResources } from './types';
-import { StatusError } from '../lib/errors/status_error';
+import type { StatusError } from '../lib/errors/status_error';
+
+// The streams plugin throws its own StatusError class (e.g. SecurityError from
+// StreamsClient.ensureStream), so match status errors by shape, not by class.
+const isStatusErrorLike = (error: unknown): error is StatusError =>
+  error instanceof Error &&
+  !(error instanceof errors.ResponseError) &&
+  !isBoom(error) &&
+  'statusCode' in error &&
+  typeof error.statusCode === 'number';
 
 const createPlainSignificantEventsServerRoute =
   createServerRouteFactory<SignificantEventsRouteHandlerResources>();
@@ -27,7 +36,7 @@ export const createServerRoute: CreateServerRouteFactory<
     },
     handler: (options) => {
       return handler(options).catch((error) => {
-        if (error instanceof StatusError) {
+        if (isStatusErrorLike(error)) {
           switch (error.statusCode) {
             case 400:
               throw badRequest(error.message);

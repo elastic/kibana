@@ -10,7 +10,12 @@
 import { firstValueFrom } from 'rxjs';
 import type { Transaction } from '@elastic/apm-rum';
 import { apm } from '@elastic/apm-rum';
-import { type Client, OpenFeature, type Provider } from '@openfeature/web-sdk';
+import {
+  type Client,
+  ClientProviderEvents,
+  OpenFeature,
+  type Provider,
+} from '@openfeature/web-sdk';
 import { coreContextMock } from '@kbn/core-base-browser-mocks';
 import type { FeatureFlagsSetup, FeatureFlagsStart } from '@kbn/core-feature-flags-browser';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
@@ -66,6 +71,15 @@ describe('FeatureFlagsService Browser', () => {
       expect(() => setProvider(fakeProvider)).toThrowErrorMatchingInlineSnapshot(
         `"A provider has already been set. This API cannot be called twice."`
       );
+    });
+
+    test('registers a handler to reevaluate flags when the provider is ready', () => {
+      const { setProvider } = featureFlagsService.setup(createSetupDeps());
+      const addHandlerSpy = jest.spyOn(OpenFeature, 'addHandler');
+      const fakeProvider = { metadata: { name: 'fake provider' } } as Provider;
+      setProvider(fakeProvider);
+      expect(addHandlerSpy).toHaveBeenCalledWith(ClientProviderEvents.Ready, expect.any(Function));
+      addHandlerSpy.mockRestore();
     });
 
     test('awaits initialization in the start context', async () => {
@@ -502,6 +516,34 @@ describe('FeatureFlagsService Browser', () => {
         });
         subscription.unsubscribe();
       });
+    });
+
+    test('reevaluates subscribed flags when the provider becomes ready', async () => {
+      // setProvider is not called in this suite's beforeEach, so register it here.
+      const openFeatureAddHandlerSpy = jest.spyOn(OpenFeature, 'addHandler');
+      const { setProvider } = featureFlagsService.setup(createSetupDeps());
+      jest.spyOn(OpenFeature, 'setProviderAndWait').mockResolvedValue();
+      setProvider({ metadata: { name: 'fake provider' } } as Provider);
+
+      const getBooleanValueSpy = jest.spyOn(featureFlagsClient, 'getBooleanValue');
+      getBooleanValueSpy.mockReturnValue(false);
+
+      const observedValues: boolean[] = [];
+      const flag$ = startContract.getBooleanValue$('my-flag', false);
+      flag$.subscribe((v) => observedValues.push(v));
+      await expect(firstValueFrom(flag$)).resolves.toEqual(false);
+      expect(observedValues).toEqual([false]);
+
+      const readyHandler = openFeatureAddHandlerSpy.mock.calls.find(
+        ([event]) => event === ClientProviderEvents.Ready
+      )?.[1];
+      expect(readyHandler).toBeDefined();
+
+      getBooleanValueSpy.mockReturnValue(true);
+      await readyHandler!();
+      expect(observedValues).toEqual([false, true]);
+
+      openFeatureAddHandlerSpy.mockRestore();
     });
   });
 });

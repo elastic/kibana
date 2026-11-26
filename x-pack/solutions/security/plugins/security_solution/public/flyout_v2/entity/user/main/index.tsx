@@ -461,7 +461,8 @@ export const User: FC<UserProps> = memo(function User({
             onAssetCriticalityChange={onAssetCriticalityChanged}
             isPreviewMode={false}
             entityRecord={entityStoreV2Enabled ? observedUser.entityRecord ?? undefined : undefined}
-            skipRiskAndCriticality={noEntityInStore}
+            noEntityInStore={noEntityInStore}
+            entityStoreV2Enabled={entityStoreV2Enabled}
             entityStoreEntityId={entityStoreEntityId}
             onShowEntity={onShowRelatedEntityFromResolution}
             hideHeaderIcons

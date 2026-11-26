@@ -115,6 +115,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboard.loadSavedDashboard('Delayed 5s');
 
       await searchSessions.save({ isSubmitButton: true, withRefresh: true });
+      await dashboard.waitForRenderComplete();
 
       const searchResponse = await dashboardPanelActions.getSearchResponseByTitle(
         'Sum of Bytes by Extension (Delayed 5s)'

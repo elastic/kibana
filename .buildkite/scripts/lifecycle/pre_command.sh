@@ -13,11 +13,3 @@ else
   source .buildkite/scripts/common/setup_node.sh
   source .buildkite/scripts/common/setup_buildkite_deps.sh
 fi
-
-if [[ "${BUILDKITE_LABEL:-}" == *"Run Dynamic Pipeline"* || "${BUILDKITE_LABEL:-}" == *"Upload Pipeline"* ]]; then
-  cat << EOF | buildkite-agent annotate --context "ctx-gobld-metrics" --style "info"
-<details>
-
-<summary>Agent information from gobld</summary>
-EOF
-fi

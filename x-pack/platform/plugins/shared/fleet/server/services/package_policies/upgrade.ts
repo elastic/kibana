@@ -50,7 +50,7 @@ import type { PackagePolicyClient } from '../package_policy_service';
 import type { InputsOverride } from '../package_policy';
 import { _compilePackagePolicyInputs, updatePackageInputs } from '../package_policy';
 
-import { packageToPackagePolicyInputs } from '../../../common/services';
+import { inferVarGroupSelections, packageToPackagePolicyInputs } from '../../../common/services';
 import { getAgentTemplateAssetsMap } from '../epm/packages/get';
 import { appContextService } from '../app_context';
 import { storedPackagePolicyToAgentInputs } from '../agent_policies';
@@ -59,6 +59,13 @@ import {
   type UpdateEventType,
   sendTelemetryEvents,
 } from '../upgrade_sender';
+
+import type { AgentVersionGuardItem } from './agent_version_guard';
+import {
+  getAgentVersionBlocksOrErrors,
+  getAgentVersionGuardScope,
+  getCurrentAgentVersionCondition,
+} from './agent_version_guard';
 
 export async function _getUpgradePackagePolicyInfo({
   packagePolicyService,
@@ -149,6 +156,19 @@ async function doUpgrade(
     packageInfo,
     packageToPackagePolicyInputs(packageInfo) as InputsOverride[]
   );
+
+  // Policies created before the package introduced var_groups have no stored
+  // var_group_selections; without them the UI falls back to the first visible option,
+  // which may not match the policy's actual configuration (e.g. a Direct Access Keys
+  // policy presented as Identity Federation). Infer and persist the selection from the
+  // pre-upgrade var values so the stored policy reflects reality.
+  if (!updatePackagePolicy.var_group_selections && packageInfo.var_groups?.length) {
+    updatePackagePolicy.var_group_selections = inferVarGroupSelections(
+      packageInfo.var_groups,
+      packagePolicy.vars
+    );
+  }
+
   const assetsMap = await getAgentTemplateAssetsMap({
     logger: appContextService.getLogger(),
     packageInfo,
@@ -355,7 +375,12 @@ export async function _packagePoliciesBulkUpgrade({
   soClient: SavedObjectsClientContract;
   esClient: ElasticsearchClient;
   ids: string[];
-  options?: { user?: AuthenticatedUser; force?: boolean };
+  options?: {
+    user?: AuthenticatedUser;
+    force?: boolean;
+    batchSize?: number;
+    acknowledgeAgentVersionIncompatibility?: boolean;
+  };
   pkgVersion?: string;
 }): Promise<UpgradePackagePolicyResponse> {
   // Bulk upgrade packages policies
@@ -365,7 +390,10 @@ export async function _packagePoliciesBulkUpgrade({
   // 4. bulkUpdate policies
   return runWithCache(async () => {
     const result: UpgradePackagePolicyResponse = [];
-    for (const chunkedIds of chunk(MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS, ids)) {
+    for (const chunkedIds of chunk(
+      options?.batchSize ?? MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS,
+      ids
+    )) {
       const { packagePoliciesById, packagePolicies, packageVersionMap } =
         await getPackagePoliciesWithRelatedPackageVersionForUpgrade({
           soClient,
@@ -423,6 +451,7 @@ export async function _packagePoliciesBulkUpgrade({
           force: options?.force,
           user: options?.user,
           oldPackagePolicies: packagePolicies,
+          acknowledgeAgentVersionIncompatibility: options?.acknowledgeAgentVersionIncompatibility,
         }
       );
 
@@ -437,6 +466,7 @@ export async function _packagePoliciesBulkUpgrade({
       for (const res of bulkUpdateResults.failedPolicies ?? []) {
         result.push({
           id: res.packagePolicy.id as string,
+          name: res.packagePolicy.name,
           success: false,
           ...fleetErrorToResponseOptions(res.error as FleetError),
         });
@@ -459,7 +489,11 @@ export async function _packagePoliciesUpgrade({
   esClient: ElasticsearchClient;
   packagePolicyService: PackagePolicyClient;
   id: string;
-  options?: { user?: AuthenticatedUser; force?: boolean };
+  options?: {
+    user?: AuthenticatedUser;
+    force?: boolean;
+    acknowledgeAgentVersionIncompatibility?: boolean;
+  };
   packagePolicy?: PackagePolicy;
   pkgVersion?: string;
 }): Promise<UpgradePackagePolicyResponse> {
@@ -508,19 +542,66 @@ export async function _packagePoliciesUpgrade({
   });
 }
 
-export async function _packagePoliciesGetUpgradeDryRunDiff({
-  soClient,
-  packagePolicyService,
-  id,
-  packagePolicy,
-  pkgVersion,
-}: {
+interface DryRunDiffArgs {
   soClient: SavedObjectsClientContract;
   packagePolicyService: PackagePolicyClient;
   id: string;
   packagePolicy?: PackagePolicy;
   pkgVersion?: string;
-}): Promise<UpgradePackagePolicyDryRunResponseItem> {
+}
+
+interface DryRunDiffWithGuardItem {
+  result: UpgradePackagePolicyDryRunResponseItem;
+  /** Set when the agent version guard applies to the upgrade. */
+  guardItem?: AgentVersionGuardItem;
+}
+
+/** The dry runs of `entries`, with their agent version blocks. */
+async function withAgentVersionBlocks(
+  entries: DryRunDiffWithGuardItem[]
+): Promise<UpgradePackagePolicyDryRunResponseItem[]> {
+  const { blocks, errors } = await getAgentVersionBlocksOrErrors(
+    entries.flatMap(({ guardItem }) => (guardItem ? [guardItem] : []))
+  );
+  return entries.map(({ result, guardItem }) => {
+    const error = guardItem && errors.get(guardItem.key);
+    // Without the agents, the upgrade can't be shown as eligible
+    if (error) {
+      return { hasErrors: true, ...fleetErrorToResponseOptions(error) };
+    }
+    const agentVersionBlock = guardItem && blocks.get(guardItem.key);
+    return agentVersionBlock ? { ...result, agent_version_block: agentVersionBlock } : result;
+  });
+}
+
+export async function _packagePoliciesGetUpgradeDryRunDiff(
+  args: DryRunDiffArgs
+): Promise<UpgradePackagePolicyDryRunResponseItem> {
+  const [result] = await withAgentVersionBlocks([await getDryRunDiffWithGuardItem(args)]);
+  return result;
+}
+
+/** Same as {@link _packagePoliciesGetUpgradeDryRunDiff} for several package policies. */
+export async function _packagePoliciesGetUpgradeDryRunDiffs({
+  ids,
+  ...args
+}: Omit<DryRunDiffArgs, 'id' | 'packagePolicy'> & {
+  ids: string[];
+}): Promise<UpgradePackagePolicyDryRunResponseItem[]> {
+  const entries: DryRunDiffWithGuardItem[] = [];
+  for (const id of ids) {
+    entries.push(await getDryRunDiffWithGuardItem({ ...args, id }));
+  }
+  return withAgentVersionBlocks(entries);
+}
+
+async function getDryRunDiffWithGuardItem({
+  soClient,
+  packagePolicyService,
+  id,
+  packagePolicy,
+  pkgVersion,
+}: DryRunDiffArgs): Promise<DryRunDiffWithGuardItem> {
   try {
     let packageInfo: PackageInfo;
     let experimentalDataStreamFeatures;
@@ -546,11 +627,40 @@ export async function _packagePoliciesGetUpgradeDryRunDiff({
       packagePolicy.package.experimental_data_stream_features = experimentalDataStreamFeatures;
     }
 
-    return calculateDiff(packagePolicy, packageInfo, assetsMap);
+    const diff = await calculateDiff(packagePolicy, packageInfo, assetsMap);
+
+    // The current package version's condition is only needed when the new one has a condition
+    const agentVersionGuardScope = getAgentVersionGuardScope({
+      oldPackageVersion: packagePolicy.package?.version,
+      newPackageVersion: packageInfo.version,
+      oldPolicyIds: packagePolicy.policy_ids ?? [],
+      newPolicyIds: packagePolicy.policy_ids ?? [],
+      oldVersionCondition:
+        packageInfo.conditions?.agent?.version &&
+        packagePolicy.package?.version !== packageInfo.version
+          ? await getCurrentAgentVersionCondition(soClient, packagePolicy.package)
+          : undefined,
+    });
+
+    return {
+      result: diff,
+      ...(agentVersionGuardScope
+        ? {
+            guardItem: {
+              key: id,
+              pkgInfo: packageInfo,
+              agentPolicyIds: agentVersionGuardScope.agentPolicyIds,
+              currentCondition: agentVersionGuardScope.currentCondition,
+            },
+          }
+        : {}),
+    };
   } catch (error) {
     return {
-      hasErrors: true,
-      ...fleetErrorToResponseOptions(error),
+      result: {
+        hasErrors: true,
+        ...fleetErrorToResponseOptions(error),
+      },
     };
   }
 }

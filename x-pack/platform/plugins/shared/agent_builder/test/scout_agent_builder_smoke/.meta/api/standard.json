@@ -1,5 +1,8 @@
 {
-  "sha1": "96825f755567c2ee9ae9da5b811adb16a9fc4521",
+  "sha1": "0bb55df1c875ea13e1836e5ce4dde0b7403b21b7",
+  "testChannels": [
+    "ci-on-commit"
+  ],
   "tests": [
     {
       "id": "69056a2d02da36d-4a8c5e89b96ac8d",
@@ -11,8 +14,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_smoke/api/tests/smoke_llm_converse.spec.ts",
-        "line": 166,
-        "column": 14
+        "line": 216,
+        "column": 22
       }
     }
   ]

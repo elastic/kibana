@@ -22,6 +22,37 @@ import type { DashboardChildren } from './layout_manager/types';
 
 export const highlightAnimationDuration = 2000;
 
+const getRelatedPanelsFromSiblings = (
+  children: DashboardChildren,
+  idToCompareForBlur: string
+): Observable<string[]> => {
+  const relatedPanelPublishers = Object.entries(children)
+    .map(([id, sibling]) =>
+      apiPublishesRelatedPanels(sibling)
+        ? sibling.relatedPanels$.pipe(
+            map((relatedPanels) => ({
+              id,
+              relatedPanels,
+            }))
+          )
+        : null
+    )
+    .filter((result) => result !== null);
+
+  // combineLatest([]) completes without emitting, so use of([]) when nobody publishes relatedPanels$.
+  if (!relatedPanelPublishers.length) {
+    return of([]);
+  }
+
+  return combineLatest(relatedPanelPublishers).pipe(
+    map((entries) =>
+      entries
+        .map(({ id, relatedPanels }) => (relatedPanels.includes(idToCompareForBlur) ? id : null))
+        .filter((result) => result !== null)
+    )
+  );
+};
+
 export function initializeTrackPanel(
   untilLoaded: (id: string) => Promise<undefined>,
   children$: Observable<DashboardChildren>,
@@ -67,29 +98,8 @@ export function initializeTrackPanel(
         const focusedChild = children[idToCompareForBlur];
         const relatedPanels$ = apiPublishesRelatedPanels(focusedChild)
           ? focusedChild.relatedPanels$
-          : // If the focused child doesn't publish related panels, derive which panels it's related to from all other panels that do
-            combineLatest(
-              Object.entries(children)
-                .map(([id, sibling]) =>
-                  apiPublishesRelatedPanels(sibling)
-                    ? sibling.relatedPanels$.pipe(
-                        map((relatedPanels) => ({
-                          id,
-                          relatedPanels,
-                        }))
-                      )
-                    : null
-                )
-                .filter((result) => result !== null)
-            ).pipe(
-              map((entries) =>
-                entries
-                  .map(({ id, relatedPanels }) =>
-                    relatedPanels.includes(idToCompareForBlur) ? id : null
-                  )
-                  .filter((result) => result !== null)
-              )
-            );
+          : // If the focused child doesn't publish related panels, derive which panels it's related to from siblings that do
+            getRelatedPanelsFromSiblings(children, idToCompareForBlur);
         return relatedPanels$.pipe(
           map((relatedPanels) => ({ focusedChildId: idToCompareForBlur, relatedPanels, siblings }))
         );

@@ -287,6 +287,38 @@ describe('EditOutputFlyout', () => {
     });
   });
 
+  it('should send dynamic kafka topic verbatim without wrapping on save', async () => {
+    const { utils } = renderFlyout({
+      type: 'kafka',
+      name: 'kafka output',
+      id: 'outputK',
+      is_default: false,
+      is_default_monitoring: false,
+      hosts: ['kafka:443'],
+      topic: '%{[data_stream.type]}-%{[data_stream.namespace]}',
+      auth_type: 'none',
+      version: '1.0.0',
+      compression: 'none',
+    });
+
+    mockSendPutOutput.mockResolvedValue({ data: {} } as any);
+
+    fireEvent.change(utils.getByTestId('settingsOutputsFlyout.nameInput'), {
+      target: { value: 'kafka output updated' },
+    });
+
+    fireEvent.click(utils.getByText('Save and apply settings'));
+
+    await waitFor(() => {
+      expect(mockSendPutOutput).toHaveBeenCalledWith(
+        'outputK',
+        expect.objectContaining({
+          topic: '%{[data_stream.type]}-%{[data_stream.namespace]}',
+        })
+      );
+    });
+  });
+
   it('should populate secret password input with plain text value when editing kafka output', async () => {
     jest.spyOn(ExperimentalFeaturesService, 'get').mockReturnValue({} as any);
 
@@ -500,6 +532,83 @@ describe('EditOutputFlyout', () => {
 
     await new Promise((resolve) => setTimeout(resolve, 100));
     expect(mockSendPutOutput).not.toHaveBeenCalled();
+  });
+
+  it('should remove the stored secret key of an elasticsearch output when the user clears it', async () => {
+    // the API keeps a stored secret an update leaves out, so a cleared one is sent as null
+    jest
+      .spyOn(ExperimentalFeaturesService, 'get')
+      .mockReturnValue({ enableSSLSecrets: true } as any);
+
+    mockedUseFleetStatus.mockReturnValue({
+      isLoading: false,
+      isReady: true,
+      isSecretsStorageEnabled: true,
+    } as any);
+
+    const { utils } = renderFlyout({
+      type: 'elasticsearch',
+      name: 'elasticsearch output',
+      id: 'outputES',
+      is_default: false,
+      is_default_monitoring: false,
+      hosts: ['http://localhost:9200'],
+      ssl: { certificate: 'cert', certificate_authorities: [] },
+      secrets: { ssl: { key: { id: 'stored-key-id' } } },
+    });
+
+    fireEvent.click(utils.getByText('Replace Client SSL certificate key'));
+    fireEvent.change(utils.getByDisplayValue('cert'), { target: { value: '' } });
+
+    fireEvent.click(utils.getByText('Save and apply settings'));
+
+    await waitFor(() => {
+      expect(mockSendPutOutput).toHaveBeenCalledWith(
+        'outputES',
+        expect.objectContaining({
+          secrets: { ssl: { key: null } },
+          ssl: { certificate: '', certificate_authorities: [] },
+        })
+      );
+    });
+  });
+
+  it('should keep the stored secret key of an elasticsearch output the user does not change', async () => {
+    jest
+      .spyOn(ExperimentalFeaturesService, 'get')
+      .mockReturnValue({ enableSSLSecrets: true } as any);
+
+    mockedUseFleetStatus.mockReturnValue({
+      isLoading: false,
+      isReady: true,
+      isSecretsStorageEnabled: true,
+    } as any);
+
+    const { utils } = renderFlyout({
+      type: 'elasticsearch',
+      name: 'elasticsearch output',
+      id: 'outputES',
+      is_default: false,
+      is_default_monitoring: false,
+      hosts: ['http://localhost:9200'],
+      ssl: { certificate: 'cert', certificate_authorities: [] },
+      secrets: { ssl: { key: { id: 'stored-key-id' } } },
+    });
+
+    fireEvent.change(utils.getByDisplayValue('elasticsearch output'), {
+      target: { value: 'elasticsearch output updated' },
+    });
+
+    fireEvent.click(utils.getByText('Save and apply settings'));
+
+    await waitFor(() => {
+      expect(mockSendPutOutput).toHaveBeenCalledWith(
+        'outputES',
+        expect.objectContaining({
+          secrets: { ssl: { key: { id: 'stored-key-id' } } },
+        })
+      );
+    });
   });
 
   it('should show a callout in the flyout if the selected output is logstash and no encrypted key is set', async () => {
@@ -942,6 +1051,93 @@ describe('EditOutputFlyout', () => {
             otel_exporter_config_yaml: null,
           })
         );
+      });
+    });
+
+    describe('otel_disable_beatsauth save payload', () => {
+      const renderEsFlyout = (otelDisableBeatsauth?: boolean | null) => {
+        jest.spyOn(ExperimentalFeaturesService, 'get').mockReturnValue({} as any);
+        mockedUseFleetStatus.mockReturnValue({
+          isLoading: false,
+          isReady: true,
+          isSecretsStorageEnabled: true,
+        } as any);
+
+        return renderFlyout({
+          type: 'elasticsearch',
+          name: 'elasticsearch output',
+          id: 'output123',
+          is_default: false,
+          is_default_monitoring: false,
+          hosts: ['http://localhost:9200'],
+          ...(otelDisableBeatsauth !== undefined
+            ? { otel_disable_beatsauth: otelDisableBeatsauth }
+            : {}),
+        }).utils;
+      };
+
+      const changeNameAndSave = (utils: ReturnType<typeof renderEsFlyout>) => {
+        fireEvent.change(utils.getByDisplayValue('elasticsearch output'), {
+          target: { value: 'updated output name' },
+        });
+        fireEvent.click(utils.getByText('Save and apply settings'));
+      };
+
+      it('should send null when the toggle was not touched and the output has it unset', async () => {
+        const utils = renderEsFlyout();
+        changeNameAndSave(utils);
+
+        await waitFor(() => {
+          expect(mockSendPutOutput).toHaveBeenCalledWith(
+            'output123',
+            expect.objectContaining({ otel_disable_beatsauth: null })
+          );
+        });
+      });
+
+      it.each([true, false])(
+        'should re-save the stored %s value when the toggle was not touched',
+        async (stored) => {
+          const utils = renderEsFlyout(stored);
+          changeNameAndSave(utils);
+
+          await waitFor(() => {
+            expect(mockSendPutOutput).toHaveBeenCalledWith(
+              'output123',
+              expect.objectContaining({ otel_disable_beatsauth: stored })
+            );
+          });
+        }
+      );
+
+      it('should send true when the toggle is turned on', async () => {
+        const utils = renderEsFlyout();
+        fireEvent.click(utils.getByText('OpenTelemetry exporter'));
+        fireEvent.click(utils.getByTestId('settingsOutputsFlyout.otelDisableBeatsauthToggle'));
+        changeNameAndSave(utils);
+
+        await waitFor(() => {
+          expect(mockSendPutOutput).toHaveBeenCalledWith(
+            'output123',
+            expect.objectContaining({ otel_disable_beatsauth: true })
+          );
+        });
+      });
+
+      it('should send false when the toggle is turned on and then off', async () => {
+        const utils = renderEsFlyout();
+        fireEvent.click(utils.getByText('OpenTelemetry exporter'));
+        const toggle = utils.getByTestId('settingsOutputsFlyout.otelDisableBeatsauthToggle');
+        fireEvent.click(toggle);
+        fireEvent.click(toggle);
+        changeNameAndSave(utils);
+
+        await waitFor(() => {
+          expect(mockSendPutOutput).toHaveBeenCalledWith(
+            'output123',
+            expect.objectContaining({ otel_disable_beatsauth: false })
+          );
+        });
       });
     });
 

@@ -18,8 +18,12 @@ export const visit = (
   }
 ) => {
   cy.visit(url, {
-    onBeforeLoad: disableNewFeaturesTours,
     ...options?.visitOptions,
+    onBeforeLoad: (win) => {
+      options?.visitOptions?.onBeforeLoad?.(win);
+
+      disableNewFeaturesTours(win);
+    },
   });
 };
 

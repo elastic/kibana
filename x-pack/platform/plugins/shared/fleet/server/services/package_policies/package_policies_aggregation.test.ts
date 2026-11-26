@@ -17,6 +17,21 @@ jest.mock('../package_policy', () => ({
 }));
 
 describe('getPackagePoliciesCountByPackageName', () => {
+  it('queries across all namespaces so the count spans every space', async () => {
+    const soClient = savedObjectsClientMock.create();
+    soClient.find.mockResolvedValue({
+      page: 1,
+      per_page: 0,
+      total: 0,
+      saved_objects: [],
+      aggregations: { count_by_package_name: { buckets: [] } },
+    });
+
+    await getPackagePoliciesCountByPackageName(soClient);
+
+    expect(soClient.find).toHaveBeenCalledWith(expect.objectContaining({ namespaces: ['*'] }));
+  });
+
   it('uses NOT latest_revision:false filter so policies without the field are included', async () => {
     const soClient = savedObjectsClientMock.create();
     soClient.find.mockResolvedValue({

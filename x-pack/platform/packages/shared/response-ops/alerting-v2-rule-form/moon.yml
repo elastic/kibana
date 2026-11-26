@@ -9,8 +9,6 @@ owners:
   defaultOwner: '@elastic/rna-project-team'
 toolchains:
   default: node
-  javascript:
-    rootPackageDependenciesOnly: false
 language: typescript
 project:
   title: '@kbn/alerting-v2-rule-form'
@@ -70,6 +68,4 @@ fileGroups:
     - .storybook/**/*.ts
     - .storybook/**/*.tsx
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

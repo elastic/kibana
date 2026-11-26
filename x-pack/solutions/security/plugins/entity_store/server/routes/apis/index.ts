@@ -18,6 +18,7 @@ export { registerCRUDBulkUpdate } from './crud/bulk_update';
 export { registerCRUDGet } from './crud/get';
 export { registerCRUDDelete } from './crud/delete';
 export { registerStart } from './start';
+export { registerUpdateApiKey } from './update_api_key';
 export { registerUpdate } from './update';
 export { registerResolutionLink } from './resolution/link';
 export { registerResolutionUnlink } from './resolution/unlink';

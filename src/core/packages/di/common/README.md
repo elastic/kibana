@@ -60,7 +60,9 @@ The services marked as globally available will be registered in the global scope
 
 ## Usage
 ### Get Started
-To get started, just create an empty plugin and declare a named export called `module` in your `index.ts`:
+To get started, just create an empty plugin and declare a named export called `module` in your `index.ts`.
+
+> **Note:** Export the container module through an alias (`export { pluginModule as module }`) instead of `export const module = …`. Under `@kbn/swc-register`, the CommonJS output of `export const module` declares a top-level `module` binding that collides with the module-scoped `module` variable and fails to load.
 
 ```ts
 import { ContainerModule, inject, injectable } from 'inversify';
@@ -72,9 +74,11 @@ export class Greeting {
   }
 }
 
-export const module = new ContainerModule(({ bind }) => {
+const pluginModule = new ContainerModule(({ bind }) => {
   bind(Greeting).toSelf();
 });
+
+export { pluginModule as module };
 ```
 
 The service should now be available in other container modules.
@@ -92,9 +96,11 @@ class HelloWorld {
   }
 }
 
-export const module = new ContainerModule(({ bind }) => {
+const pluginModule = new ContainerModule(({ bind }) => {
   bind(HelloWorld).toSelf();
 });
+
+export { pluginModule as module };
 ```
 
 ### Exposing Contracts
@@ -105,13 +111,15 @@ import { ContainerModule } from 'inversify';
 import { Start } from '@kbn/core-di';
 import { HelloWorld } from './src/hello-world';
 
-export const module = new ContainerModule(({ bind }) => {
+const pluginModule = new ContainerModule(({ bind }) => {
   bind(HelloWorld).toSelf();
   bind(Start).toResolvedValue(
     (helloWorld) => ({ helloWorld }),
     [HelloWorld]
   );
 });
+
+export { pluginModule as module };
 ```
 
 Plugins may define both classic and module-based contracts simultaneously.
@@ -134,13 +142,15 @@ import { OnSetup, OnStart } from '@kbn/core-di';
 import { HelloWorld } from '@kbn/hello-world';
 import { download } from './src/chromium',
 
-export const module = new ContainerModule(({ bind }) => {
+const pluginModule = new ContainerModule(({ bind }) => {
   bind(OnSetup).toConstantValue(download);
   bind(OnStart).toResolvedValue(
     (helloWorld) => () => console.log(helloWorld.run()),
     [HelloWorld]
   );
 });
+
+export { pluginModule as module };
 ```
 
 ### Existing Plugins
@@ -228,9 +238,11 @@ class GreetingRoute {
   }
 }
 
-export const module = new ContainerModule(({ bind }) => {
+const pluginModule = new ContainerModule(({ bind }) => {
   bind(Route).toConstantValue(GreetingRoute);
 });
+
+export { pluginModule as module };
 ```
 
 ### Browser-Side Applications
@@ -265,9 +277,11 @@ class HelloWorldApplication {
   }
 }
 
-export const module = new ContainerModule(({ bind }) => {
+const pluginModule = new ContainerModule(({ bind }) => {
   bind(Application).toConstantValue(HelloWorldApplication);
 });
+
+export { pluginModule as module };
 ```
 
 ### React
@@ -326,11 +340,13 @@ import type { IHeavyService } from './heavy-service';
 
 export const HeavyServiceToken = Symbol.for('HeavyService') as ServiceIdentifier<IHeavyService>;
 
-export const module = new ContainerModule(({ bind }) => {
+const pluginModule = new ContainerModule(({ bind }) => {
   bind(HeavyServiceToken)
     .toResolvedValue(() => import('./heavy-service').HeavyService)
     .inSingletonScope();
 });
+
+export { pluginModule as module };
 ```
 
 In this case, the services will be resolved asynchronously, and, hence, the destination code should take it into account:
@@ -348,7 +364,7 @@ class SomeService {
   }
 }
 
-export const module = new ContainerModule(({ bind }) => {
+const pluginModule = new ContainerModule(({ bind }) => {
   bind(SomeService).toSelf();
   bind(OnSetup).toConstantValue(async (container) => {
     const someService = await container.getAsync(SomeService);
@@ -356,6 +372,8 @@ export const module = new ContainerModule(({ bind }) => {
     someService.run();
   });
 });
+
+export { pluginModule as module };
 ```
 
 ### Circular Dependencies
@@ -371,9 +389,11 @@ export interface ISomeService {
 
 export const SomeServiceToken = Symbol.for('SomeService') as ServiceIdentifier<ISomeService>;
 
-export const module = new ContainerModule(({ bind }) => {
+const pluginModule = new ContainerModule(({ bind }) => {
   bind(SomeServiceToken).to(SomeService);
 });
+
+export { pluginModule as module };
 ```
 
 In this case, if `SomeService` depends on another service from a different plugin, which also has dependencies on `SomeService`, an intermediate package should be created to expose static injection tokens with public interfaces.
@@ -423,12 +443,14 @@ class TestUser implements IUser {
 export const GreetingToken = Symbol.for('Greeting') as ServiceIdentifier<IGreeting>;
 export const UserToken = Symbol.for('User') as ServiceIdentifier<IUser>;
 
-export const module = new ContainerModule(({ bind }) => {
+const pluginModule = new ContainerModule(({ bind }) => {
   bind(GreetingToken).to(Greeting);
   bind(UserToken).to(TestUser).onActivation(({ get }, user) => {
     user.greeting = get(GreetingToken);
   });
 });
+
+export { pluginModule as module };
 ```
 
 In most cases, the underlying problem is either duplicating some functionality or insufficient decomposition.

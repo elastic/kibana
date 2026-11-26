@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { CoreStart, IRouter, Logger } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { ATTACK_DISCOVERY_API_ACTION_ALL } from '@kbn/security-solution-features/actions';
@@ -37,17 +37,21 @@ import { getWorkflowExecutionsTracking } from './helpers/get_workflow_executions
 const ROUTE_PATH = '/internal/attack_discovery/workflow/{workflow_id}/execution/{execution_id}';
 
 /** Zod schema for validating path parameters */
-export const GetPipelineDataRequestParams = z.object({
-  execution_id: z.string().max(1024),
-  workflow_id: z.string().max(1024),
-});
+export const GetPipelineDataRequestParams = lazySchema(() =>
+  z.object({
+    execution_id: z.string().max(1024),
+    workflow_id: z.string().max(1024),
+  })
+);
 
 /** Zod schema for validating optional query parameters */
-export const GetPipelineDataRequestQuery = z.object({
-  /** Fallback generation workflow run ID — used by the client when the event
-   *  log hasn't been indexed yet (provided mode / early polling). */
-  generation_workflow_run_id: z.string().max(1024).optional(),
-});
+export const GetPipelineDataRequestQuery = lazySchema(() =>
+  z.object({
+    /** Fallback generation workflow run ID — used by the client when the event
+     *  log hasn't been indexed yet (provided mode / early polling). */
+    generation_workflow_run_id: z.string().max(1024).optional(),
+  })
+);
 
 /** snake_case response shape for a single workflow execution tracking entry */
 interface WorkflowExecutionTrackingResponse {

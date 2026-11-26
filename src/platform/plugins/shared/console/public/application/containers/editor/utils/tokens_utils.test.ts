@@ -150,10 +150,90 @@ describe('tokens_utils', () => {
       expect(urlPathTokens).toEqual([]);
       expect(urlParamsTokens).toEqual([]);
     });
+    it.each([
+      ['get', 'GET'],
+      ['Post ', 'POST'],
+      ['DeLeTe ', 'DELETE'],
+    ])('normalizes the method to upper case when the url is empty: "%s"', (line, expected) => {
+      const { method, url, urlPathTokens, urlParamsTokens } = parseLine(line);
+      expect(method).toBe(expected);
+      expect(url).toBe('');
+      expect(urlPathTokens).toEqual([]);
+      expect(urlParamsTokens).toEqual([]);
+    });
   });
 
   describe('parseBody', () => {
+    describe.each(['// comment\n', '# comment\n', '/* comment */'])('after %s', (comment) => {
+      it('skips indentation before the opening object', () => {
+        expect(parseBody(`${comment}\n  { "description": "`)).toEqual(['{', 'description']);
+      });
+
+      it('keeps the property value context after an indented comment', () => {
+        expect(parseBody(`{"value": [], ${comment}\n  "description": "`)).toEqual([
+          '{',
+          'description',
+        ]);
+      });
+
+      it('keeps the array item context after an indented comment', () => {
+        expect(parseBody(`{"items": [${comment}\n  {"description": "`)).toEqual([
+          '{',
+          'items',
+          '[',
+          '{',
+          'description',
+        ]);
+      });
+
+      it('keeps the nested value context after an indented comment', () => {
+        expect(parseBody(`{"items": ${comment}\n  [{"description": "`)).toEqual([
+          '{',
+          'items',
+          '[',
+          '{',
+          'description',
+        ]);
+      });
+
+      it('keeps the property value context after a comment before the colon', () => {
+        expect(parseBody(`{"value" ${comment}\n  : "`)).toEqual(['{', 'value']);
+      });
+
+      it('skips consecutive comments separated by indentation', () => {
+        expect(
+          parseBody(`{${comment}\n  // another comment\n  /* last comment */\n  "description": "`)
+        ).toEqual(['{', 'description']);
+      });
+    });
+
     const testCases: Array<{ value: string; tokens: string[] }> = [
+      {
+        value: '{"value": /* unfinished',
+        tokens: ['{', 'value'],
+      },
+      {
+        value: '{"value": [ // unfinished',
+        tokens: ['{', 'value', '['],
+      },
+      {
+        value: '{"value": [ # unfinished',
+        tokens: ['{', 'value', '['],
+      },
+      {
+        value: '{"value": "https://example.test/#fragment/*literal*/", "description": "',
+        tokens: ['{', 'description'],
+      },
+      {
+        // an escaped quote doesn't end the property name
+        value: '{"key\\" /* literal */ : \\"x": {"description": "',
+        tokens: ['{', 'key\\" /* literal */ : \\"x', '{', 'description'],
+      },
+      {
+        // an escaped quote doesn't end the string value
+        value: '{"value": "a\\" // literal", "description": "',
+        tokens: ['{', 'description'],
+      },
       {
         // add opening curly brackets to tokens
         value: '{',
@@ -209,6 +289,14 @@ describe('tokens_utils', () => {
       },
       {
         value: '{"test":123,',
+        tokens: ['{'],
+      },
+      {
+        value: '{"test":1e-7,',
+        tokens: ['{'],
+      },
+      {
+        value: '{"test":1e+21,',
         tokens: ['{'],
       },
       {

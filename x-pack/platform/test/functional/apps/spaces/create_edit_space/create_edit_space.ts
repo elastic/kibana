@@ -192,9 +192,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
         await testSubjects.click('confirmModalConfirmButton');
 
-        await testSubjects.existOrFail('spaces-view-page');
+        // Saving navigates back to the grid and then reloads the window. Wait for the grid,
+        // then re-open the edit page by URL instead of clicking a row that the reload replaces.
+        await testSubjects.existOrFail('spaces-grid-page');
 
-        await testSubjects.click('foo-space-hyperlink');
+        await PageObjects.common.navigateToUrl('management', 'kibana/spaces/edit/foo-space', {
+          shouldUseHashForSubUrl: false,
+        });
 
         await testSubjects.existOrFail('spaces-view-page');
 

@@ -7,8 +7,6 @@
 
 import type { Logger } from '@kbn/logging';
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { UiSettingsServiceStart } from '@kbn/core-ui-settings-server';
-import type { SavedObjectsServiceStart } from '@kbn/core-saved-objects-server';
 import { EffortLevels } from '@kbn/agent-builder-common/model_provider';
 import type {
   ModelProvider,
@@ -22,18 +20,18 @@ import type { SearchInferenceEndpointsPluginStart } from '@kbn/search-inference-
 import { getConnectorProvider, getConnectorModel } from '@kbn/inference-common';
 import type { ConnectorTelemetryMetadata } from '@kbn/inference-common';
 import type { InferenceCompleteCallbackHandler } from '@kbn/inference-common/src/chat_complete';
-import { AGENT_BUILDER_FAST_INFERENCE_FEATURE_ID } from '@kbn/agent-builder-common/constants';
+import {
+  AGENT_BUILDER_FAST_INFERENCE_FEATURE_ID,
+  AGENT_BUILDER_INFERENCE_FEATURE_ID,
+} from '@kbn/agent-builder-common/constants';
 import type { TrackingService } from '../../../telemetry';
 import { MODEL_TELEMETRY_METADATA } from '../../../telemetry';
-import { resolveSelectedConnectorId } from '../../../utils/resolve_selected_connector_id';
 
 export interface CreateModelProviderOpts {
   inference: InferenceServerStart;
   request: KibanaRequest;
   defaultConnectorId?: string;
   trackingService?: TrackingService;
-  uiSettings: UiSettingsServiceStart;
-  savedObjects: SavedObjectsServiceStart;
   logger: Logger;
   searchInferenceEndpoints: SearchInferenceEndpointsPluginStart;
   telemetryMetadata?: ConnectorTelemetryMetadata;
@@ -77,8 +75,6 @@ export const createModelProvider = ({
   request,
   defaultConnectorId,
   trackingService,
-  uiSettings,
-  savedObjects,
   searchInferenceEndpoints,
   logger,
   telemetryMetadata,
@@ -86,14 +82,14 @@ export const createModelProvider = ({
 }: CreateModelProviderOpts): ModelProvider => {
   const resolvedTelemetryMetadata = telemetryMetadata ?? MODEL_TELEMETRY_METADATA;
   const getDefaultConnectorId = memoizeAsync(async () => {
-    const resolvedConnectorId = await resolveSelectedConnectorId({
-      uiSettings,
-      savedObjects,
-      request,
-      connectorId: defaultConnectorId,
-      inference,
-      searchInferenceEndpoints,
-    });
+    const resolvedConnectorId =
+      defaultConnectorId ??
+      (
+        await searchInferenceEndpoints.endpoints.getForFeature(
+          AGENT_BUILDER_INFERENCE_FEATURE_ID,
+          request
+        )
+      ).endpoints[0]?.connectorId;
     if (!resolvedConnectorId) {
       throw new Error('No connector available');
     }

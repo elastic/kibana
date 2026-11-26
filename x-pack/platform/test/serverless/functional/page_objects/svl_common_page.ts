@@ -116,7 +116,7 @@ export function SvlCommonPageProvider({ getService, getPageObjects }: FtrProvide
             );
           }
           // Verifying that we are logged in
-          if (await testSubjects.exists('userMenuButton', { timeout: 10_000 })) {
+          if (await testSubjects.waitForExists('userMenuButton', { timeout: 10_000 })) {
             log.debug('userMenuButton found, login passed');
             return true;
           } else {
@@ -160,8 +160,8 @@ export function SvlCommonPageProvider({ getService, getPageObjects }: FtrProvide
     /**
      * Login to Kibana using SAML authentication with Editor/Developer role
      */
-    async loginWithPrivilegedRole() {
-      await this.loginWithRole(svlUserManager.DEFAULT_ROLE);
+    async loginWithPrivilegedRole(options: LoginWithRoleOptions = {}) {
+      await this.loginWithRole(svlUserManager.DEFAULT_ROLE, options);
     },
 
     /**

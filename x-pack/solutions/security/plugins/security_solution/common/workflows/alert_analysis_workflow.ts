@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 export const ALERT_ANALYSIS_WORKFLOW_API_VERSION = '1' as const;
 
@@ -37,19 +37,21 @@ export const TAG_PREFIX_PATTERN = /^(?=.*[a-zA-Z0-9])[a-zA-Z0-9._-]+$/;
 export const TAG_PREFIX_VALIDATION_MESSAGE =
   'Tag prefix may only contain letters, numbers, dots, dashes, and underscores, and must include at least one letter or number';
 
-export const AlertAnalysisWorkflowSettings = z.object({
-  autoCloseEnabled: z.boolean(),
-  autoCloseConfidenceScoreMinThreshold: z.number().min(0).max(1),
-  autoCloseConfidenceScoreMaxThreshold: z.number().min(0).max(1),
-  // Agent Builder agent id the workflow's ai.agent step runs with. Non-empty (defaults to the
-  // platform default agent) so the workflow step always has a real agent to invoke. Max length
-  // matches Agent Builder's `agentIdMaxLength`.
-  agentId: z.string().min(1).max(64),
-  tagPrefix: z
-    .string()
-    .max(TAG_PREFIX_MAX_LENGTH)
-    .regex(TAG_PREFIX_PATTERN, TAG_PREFIX_VALIDATION_MESSAGE),
-});
+export const AlertAnalysisWorkflowSettings = lazySchema(() =>
+  z.object({
+    autoCloseEnabled: z.boolean(),
+    autoCloseConfidenceScoreMinThreshold: z.number().min(0).max(1),
+    autoCloseConfidenceScoreMaxThreshold: z.number().min(0).max(1),
+    // Agent Builder agent id the workflow's ai.agent step runs with. Non-empty (defaults to the
+    // platform default agent) so the workflow step always has a real agent to invoke. Max length
+    // matches Agent Builder's `agentIdMaxLength`.
+    agentId: z.string().min(1).max(64),
+    tagPrefix: z
+      .string()
+      .max(TAG_PREFIX_MAX_LENGTH)
+      .regex(TAG_PREFIX_PATTERN, TAG_PREFIX_VALIDATION_MESSAGE),
+  })
+);
 
 export type AlertAnalysisWorkflowSettings = z.infer<typeof AlertAnalysisWorkflowSettings>;
 
@@ -74,21 +76,25 @@ export const THRESHOLD_RANGE_REFINEMENT: { message: string; path: string[] } = {
 export const RULE_ATTACHMENT_FILTERS = ['all', 'attached', 'not_attached'] as const;
 export type RuleAttachmentFilter = (typeof RULE_ATTACHMENT_FILTERS)[number];
 
-export const AlertAnalysisWorkflowRuleAttachmentListRequestQuery = z.object({
-  search: z.string().max(1000).optional().default(''),
-  attachment_filter: z.enum(RULE_ATTACHMENT_FILTERS).optional().default('all'),
-  page: z.coerce.number().int().min(1).optional().default(1),
-  per_page: z.coerce.number().int().min(1).max(100).optional().default(20),
-});
+export const AlertAnalysisWorkflowRuleAttachmentListRequestQuery = lazySchema(() =>
+  z.object({
+    search: z.string().max(1000).optional().default(''),
+    attachment_filter: z.enum(RULE_ATTACHMENT_FILTERS).optional().default('all'),
+    page: z.coerce.number().int().min(1).optional().default(1),
+    per_page: z.coerce.number().int().min(1).max(100).optional().default(20),
+  })
+);
 
 export type AlertAnalysisWorkflowRuleAttachmentListRequestQuery = z.infer<
   typeof AlertAnalysisWorkflowRuleAttachmentListRequestQuery
 >;
 
-export const AlertAnalysisWorkflowRuleAttachmentStatsRequestQuery = z.object({
-  search: z.string().max(1000).optional().default(''),
-  attachment_filter: z.enum(RULE_ATTACHMENT_FILTERS).optional().default('all'),
-});
+export const AlertAnalysisWorkflowRuleAttachmentStatsRequestQuery = lazySchema(() =>
+  z.object({
+    search: z.string().max(1000).optional().default(''),
+    attachment_filter: z.enum(RULE_ATTACHMENT_FILTERS).optional().default('all'),
+  })
+);
 
 export type AlertAnalysisWorkflowRuleAttachmentStatsRequestQuery = z.infer<
   typeof AlertAnalysisWorkflowRuleAttachmentStatsRequestQuery
@@ -101,15 +107,17 @@ export type AlertAnalysisWorkflowRuleAttachmentSelectionRequestQuery = z.infer<
   typeof AlertAnalysisWorkflowRuleAttachmentSelectionRequestQuery
 >;
 
-export const AlertAnalysisWorkflowRuleAttachmentUpdateRequestBody = z
-  .object({
-    attachRuleIds: z.array(z.string()).max(2000).optional().default([]),
-    detachRuleIds: z.array(z.string()).max(2000).optional().default([]),
-    dryRun: z.boolean().optional().default(false),
-  })
-  .refine(({ attachRuleIds, detachRuleIds }) => attachRuleIds.length + detachRuleIds.length > 0, {
-    message: 'At least one rule update is required',
-  });
+export const AlertAnalysisWorkflowRuleAttachmentUpdateRequestBody = lazySchema(() =>
+  z
+    .object({
+      attachRuleIds: z.array(z.string()).max(2000).optional().default([]),
+      detachRuleIds: z.array(z.string()).max(2000).optional().default([]),
+      dryRun: z.boolean().optional().default(false),
+    })
+    .refine(({ attachRuleIds, detachRuleIds }) => attachRuleIds.length + detachRuleIds.length > 0, {
+      message: 'At least one rule update is required',
+    })
+);
 
 export type AlertAnalysisWorkflowRuleAttachmentUpdateRequestBody = z.infer<
   typeof AlertAnalysisWorkflowRuleAttachmentUpdateRequestBody

@@ -6,6 +6,7 @@
  */
 
 export { AuditService } from './audit_service';
+export type { AuditLogWriteAccess } from './audit_write_access';
 export {
   userLoginEvent,
   userLogoutEvent,

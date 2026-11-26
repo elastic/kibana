@@ -6,7 +6,12 @@
  */
 
 export * from './routes';
-export { validateFleetSavedObjectId } from './validate_fleet_id';
+export {
+  validateFleetSavedObjectId,
+  isPathTraversalId,
+  validateNoPathTraversalId,
+  validateNoPathTraversalIdSchema,
+} from './validate_fleet_id';
 export { isValidDuration, isValidEnrollmentKeyExpiration } from './validate_duration';
 export * as AgentStatusKueryHelper from './agent_status';
 export * from './package_helpers';
@@ -128,10 +133,22 @@ export {
 } from './agent_policy_config';
 
 export {
+  DENIED_AGENT_POLICY_OVERRIDE_KEYS,
+  getDeniedAgentPolicyOverrideKey,
+  sanitizeAgentPolicyOverrides,
+} from './agent_policy_overrides';
+
+export {
   getFleetServerVersionMessage,
   isAgentVersionLessThanFleetServer,
 } from './check_fleet_server_versions';
 
+export {
+  agentLosesPackageInputs,
+  agentSatisfiesPackageVersionCondition,
+  getAgentVersionBlockers,
+} from './agent_version_compatibility';
+export type { AgentVersionBlockers } from './agent_version_compatibility';
 export { removeSOAttributes, getSortConfig, checkTargetVersionsValidity } from './agent_utils';
 
 export { isAwsCloudConnectorVars, isAzureCloudConnectorVars } from './cloud_connector_helpers';
@@ -145,6 +162,7 @@ export {
   shouldShowVar,
   isVarRequiredByVarGroup,
   isVarInSelectedVarGroupOption,
+  inferVarGroupSelections,
 } from './var_group_helpers';
 
 // Cloud Connector accessor module
@@ -173,3 +191,15 @@ export {
   buildPolicyBaseIdWithFallbackKuery,
   buildPolicyBaseIdsWithFallbackKuery,
 } from './version_specific_policies_utils';
+
+export {
+  parseYamlChangelog,
+  formatChangelog,
+  getBreakingChanges,
+  getBreakingChangesInRange,
+  ChangeType,
+  type Changelog,
+  type ChangelogEntry,
+  type BreakingChangesLog,
+  type YamlParseFn,
+} from './changelog_utils';

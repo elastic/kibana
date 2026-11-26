@@ -61,18 +61,18 @@ dependsOn:
   - '@kbn/scout'
   - '@kbn/esql-utils'
   - '@kbn/licensing-plugin'
+  - '@kbn/field-formats-common'
 tags:
   - plugin
   - prod
   - group-platform
   - shared
   - jest-unit-tests
+  - scout-tests
 fileGroups:
   src:
     - public/**/*
     - public/**/*.json
     - test/**/*
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

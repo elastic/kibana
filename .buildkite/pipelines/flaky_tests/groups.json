@@ -109,10 +109,6 @@
       "name": "Fleet - Cypress"
     },
     {
-      "key": "cypress/apm_cypress",
-      "name": "APM - Cypress"
-    },
-    {
       "key": "cypress/cloud_security_posture",
       "name": "Cloud Security Posture - Cypress"
     },

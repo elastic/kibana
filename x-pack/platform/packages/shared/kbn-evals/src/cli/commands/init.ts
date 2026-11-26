@@ -117,7 +117,7 @@ export const ensureLocalConfig = async (repoRoot: string, log: ToolingLog): Prom
     'Note: the local profile expects Elasticsearch on localhost:9200 and Kibana on localhost:5601.'
   );
   log.info(
-    'Make sure both are running before starting evals (e.g. yarn es snapshot && yarn start).'
+    'Make sure both are running before starting evals (e.g. pnpm es snapshot && pnpm start).'
   );
 };
 

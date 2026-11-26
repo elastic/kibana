@@ -21,9 +21,7 @@ export const fromCounterRateAPItoLensState = (
     operationType: 'counter_rate',
     references: [], // populated later when we have the ID of the referenced column
     ...sharedProps,
-    params: {
-      ...(format ? { format: fromFormatAPIToLensState(format) } : {}),
-    },
+    ...(format ? { params: { format: fromFormatAPIToLensState(format) } } : {}),
   };
 };
 

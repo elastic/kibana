@@ -32,7 +32,17 @@ export class RulesAdapterV1 implements IRulesManagementClient {
       .create<EsqlRuleParams>({ data: body, options: { id } })
       .catch((error) => {
         if (isBoom(error) && error.output.statusCode === 409) {
-          return this.rulesClient.update<EsqlRuleParams>({ id, data: body });
+          // `enabled` is not updatable through the update API, so it is left out here.
+          return this.rulesClient.update<EsqlRuleParams>({
+            id,
+            data: {
+              name: body.name,
+              actions: body.actions,
+              params: body.params,
+              tags: body.tags,
+              schedule: body.schedule,
+            },
+          });
         }
         throw error;
       });

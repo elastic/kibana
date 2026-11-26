@@ -47,6 +47,8 @@ const getQueryValueStartIndex = (text: string, quoteIndex: number, quoteLen: 1 |
 
 type CommentRange = readonly [start: number, end: number];
 
+type StringRange = readonly [start: number, end: number];
+
 interface JsonScanState {
   containers: Array<'object' | 'array'>;
   lastSignificantChar?: string;
@@ -73,17 +75,22 @@ interface ScanState {
   esqlQueryStartIndex: number;
   tripleQuoteIsJsonValue: boolean;
   commentRanges?: CommentRange[];
+  // Offset where the currently open string started; only read when collecting string ranges.
+  stringOpenIndex: number;
+  stringRanges?: StringRange[];
   json?: JsonScanState;
 }
 
 interface ScanOptions {
   collectCommentRanges?: boolean;
+  collectStringRanges?: boolean;
   requestLineMode?: boolean;
   trackJsonValue?: boolean;
 }
 
 interface ScanResult {
   commentRanges?: CommentRange[];
+  stringRanges?: StringRange[];
   esqlQueryIndex: number;
   insideComment: boolean;
   insideEsqlQuery: boolean;
@@ -299,11 +306,13 @@ const consumeComment: ScanConsumer = (text, state) => {
 };
 
 const enterString = (text: string, state: ScanState, quoteLen: 1 | 3): void => {
+  state.stringOpenIndex = state.index;
   state.esqlQueryStartIndex = getQueryValueStartIndex(text, state.index, quoteLen);
   state.inQueryValueString = state.esqlQueryStartIndex !== -1;
 };
 
 const leaveString = (state: ScanState, closingQuoteOffset = 0): void => {
+  state.stringRanges?.push([state.stringOpenIndex, state.index + closingQuoteOffset]);
   if (state.json) {
     state.json.lastSignificantChar = '"';
     state.json.lastSignificantCharIndex = state.index + closingQuoteOffset;
@@ -385,6 +394,7 @@ const scanConsoleText = (
   text: string,
   {
     collectCommentRanges = false,
+    collectStringRanges = false,
     requestLineMode = false,
     trackJsonValue = false,
   }: ScanOptions = {}
@@ -400,7 +410,9 @@ const scanConsoleText = (
     inEsqlQueryRequest: false,
     esqlQueryStartIndex: -1,
     tripleQuoteIsJsonValue: false,
+    stringOpenIndex: -1,
     ...(collectCommentRanges && { commentRanges: [] }),
+    ...(collectStringRanges && { stringRanges: [] }),
     ...(trackJsonValue && { json: { containers: [] } }),
   };
 
@@ -410,6 +422,11 @@ const scanConsoleText = (
         break;
       }
     }
+  }
+
+  if (state.stringRanges && isInsideAnyString(state)) {
+    // An unterminated string extends to the end of the text.
+    state.stringRanges.push([state.stringOpenIndex, text.length]);
   }
 
   return {
@@ -422,6 +439,7 @@ const scanConsoleText = (
     lastSignificantCharIndex: state.json?.lastSignificantCharIndex,
     trailingCommentStartIndex: state.json?.trailingCommentStartIndex,
     commentRanges: state.commentRanges,
+    stringRanges: state.stringRanges,
     insideTripleQuotedJsonValue:
       state.json !== undefined && state.inTripleQuoteString && state.tripleQuoteIsJsonValue,
   };
@@ -520,6 +538,33 @@ export const isInsideConsoleComment = (text: string): boolean => scanConsoleEnd(
 
 /** Returns true when the end of `text` is inside a standard or triple-quoted Console string. */
 export const isInsideConsoleString = (text: string): boolean => scanConsoleEnd(text).insideString;
+
+/**
+ * Scans `text` once and returns a checker that reports whether an offset falls inside a standard
+ * or triple-quoted Console string. The offset of an opening quote is outside its string, offsets
+ * within the closing delimiter are inside, and an unterminated string extends to the end of the
+ * text. Unlike `isInsideConsoleString`, which rescans its whole argument on every call, the
+ * returned checker answers in O(log n).
+ */
+export const createInsideConsoleStringChecker = (text: string): ((offset: number) => boolean) => {
+  const { stringRanges = [] } = scanConsoleText(text, { collectStringRanges: true });
+  return (offset: number): boolean => {
+    let low = 0;
+    let high = stringRanges.length - 1;
+    while (low <= high) {
+      const mid = Math.floor((low + high) / 2);
+      const [start, end] = stringRanges[mid];
+      if (offset <= start) {
+        high = mid - 1;
+      } else if (offset > end) {
+        low = mid + 1;
+      } else {
+        return true;
+      }
+    }
+    return false;
+  };
+};
 
 /** Returns true when the last line's final Console code token opens another body value. */
 export const endsWithConsoleBodyContinuation = (text: string): boolean => {

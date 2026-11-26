@@ -17,6 +17,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const inspector = getService('inspector');
   const testSubjects = getService('testSubjects');
+  const queryBar = getService('queryBar');
 
   const STATS_ROW_NAME_INDEX = 0;
   const STATS_ROW_VALUE_INDEX = 1;
@@ -50,32 +51,27 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     afterEach(async () => {
       await inspector.close();
+      await queryBar.clearQuery();
+      await queryBar.submitQuery();
+      await discover.waitUntilSearchingHasFinished();
     });
 
     it('should display request stats with no results', async () => {
+      await queryBar.setQuery('extension: "no-such-extension"');
+      await queryBar.submitQuery();
+      await discover.waitUntilSearchingHasFinished();
       await discover.openInspectorFromTabMenu();
-      let foundZero = false;
-      for (const subj of ['Documents', 'Data']) {
-        await testSubjects.click('inspectorRequestChooser');
-        await testSubjects.click(`inspectorRequestChooser${subj}`);
-        if (await testSubjects.exists('inspectorRequestDetailStatistics', { timeout: 500 })) {
-          await testSubjects.click(`inspectorRequestDetailStatistics`);
-          const requestStatsTotalHits = getHitCount(await inspector.getTableData());
-          if (requestStatsTotalHits === '0') {
-            foundZero = true;
-            break;
-          }
-        }
-      }
-      expect(foundZero).to.be(true);
+      await testSubjects.click('inspectorRequestDetailStatistics');
+      const requestStats = await inspector.getTableData();
+
+      expect(getHitCount(requestStats)).to.be('0');
     });
 
     it('should display request stats with results', async () => {
       await timePicker.setDefaultAbsoluteRange();
+      await discover.waitUntilSearchingHasFinished();
       await discover.openInspectorFromTabMenu();
-      await testSubjects.click('inspectorRequestChooser');
-      await testSubjects.click(`inspectorRequestChooserDocuments`);
-      await testSubjects.click(`inspectorRequestDetailStatistics`);
+      await testSubjects.click('inspectorRequestDetailStatistics');
       const requestStats = await inspector.getTableData();
 
       expect(getHitCount(requestStats)).to.be('500');

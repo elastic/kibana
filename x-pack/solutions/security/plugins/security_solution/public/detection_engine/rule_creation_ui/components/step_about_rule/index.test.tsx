@@ -251,11 +251,13 @@ describe('StepAboutRuleComponent', () => {
   });
 
   it('is invalid if no "name" is present', async () => {
-    const { user } = setup(<TestComp />);
-
-    await user.type(
-      within(screen.getByTestId('detectionEngineStepAboutRuleDescription')).getByRole('textbox'),
-      'Test description text'
+    setup(
+      <TestComp
+        aboutStepDefaultOverride={{
+          ...stepAboutDefaultValue,
+          description: 'Test description text',
+        }}
+      />
     );
 
     await submitForm();
@@ -348,16 +350,11 @@ describe('StepAboutRuleComponent', () => {
       />
     );
 
-    await submitForm();
-
-    await waitFor(() => {
-      expect(handleSubmit).toHaveBeenCalledWith(
-        expect.objectContaining({ riskScore: expect.objectContaining({ value: 21 }) }),
-        true
-      );
-    });
-
-    handleSubmit.mockClear();
+    expect(
+      within(screen.getByTestId('detectionEngineStepAboutRuleRiskScore-defaultRisk')).getByRole(
+        'spinbutton'
+      )
+    ).toHaveValue(21);
 
     await user.click(
       within(screen.getByTestId('detectionEngineStepAboutRuleSeverity')).getByTestId('select')

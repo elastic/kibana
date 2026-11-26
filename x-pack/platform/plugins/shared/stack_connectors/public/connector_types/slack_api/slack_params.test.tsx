@@ -571,5 +571,84 @@ describe('SlackParamsFields', () => {
         });
       }
     );
+
+    describe('block kit', () => {
+      const blockKitParams = {
+        subAction: 'postBlockkit' as const,
+        subActionParams: {
+          channelNames: ['#my-channel'],
+          text: testBlock,
+        },
+      };
+
+      it('renders the Block Kit editor', async () => {
+        appMockRenderer.render(
+          <SlackParamsFields
+            actionParams={blockKitParams}
+            editAction={editAction}
+            index={0}
+            errors={{ message: [] }}
+            actionConnector={actionConnector}
+          />
+        );
+
+        expect(await screen.findByTestId('webApiBlock')).toBeInTheDocument();
+        expect(screen.queryByTestId('webApiTextTextArea')).not.toBeInTheDocument();
+      });
+
+      it('preserves the postBlockkit subAction on first render', async () => {
+        appMockRenderer.render(
+          <SlackParamsFields
+            actionParams={blockKitParams}
+            editAction={editAction}
+            index={0}
+            errors={{ message: [] }}
+            actionConnector={actionConnector}
+          />
+        );
+
+        await waitFor(() => {
+          expect(editAction).toHaveBeenCalledWith('subAction', 'postBlockkit', 0);
+        });
+
+        expect(editAction).not.toHaveBeenCalledWith('subAction', 'postMessage', 0);
+      });
+
+      it('keeps the postBlockkit subAction when editing the Block Kit message', async () => {
+        appMockRenderer.render(
+          <SlackParamsFields
+            actionParams={blockKitParams}
+            editAction={editAction}
+            index={0}
+            errors={{ message: [] }}
+            actionConnector={actionConnector}
+          />
+        );
+
+        expect(await screen.findByTestId('webApiBlock')).toBeInTheDocument();
+
+        await waitFor(() => {
+          expect(editAction).toHaveBeenCalledWith('subAction', 'postBlockkit', 0);
+        });
+
+        editAction.mockClear();
+
+        const jsonEditor = screen.getByTestId('webApiBlockJsonEditor');
+        await userEvent.clear(jsonEditor);
+        await userEvent.click(jsonEditor);
+        await userEvent.paste(testBlock);
+
+        await waitFor(() => {
+          expect(editAction).toHaveBeenCalledWith('subAction', 'postBlockkit', 0);
+          expect(editAction).toHaveBeenCalledWith(
+            'subActionParams',
+            { channels: [], channelIds: [], channelNames: ['#my-channel'], text: testBlock },
+            0
+          );
+        });
+
+        expect(editAction).not.toHaveBeenCalledWith('subAction', 'postMessage', 0);
+      });
+    });
   });
 });

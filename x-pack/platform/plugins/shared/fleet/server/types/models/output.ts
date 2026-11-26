@@ -57,6 +57,22 @@ const secretRefSchema = schema.oneOf([
   schema.string(),
 ]);
 
+// an update removes a secret by setting it to `null`: leaving it out keeps the saved one
+const nullableSecretRefSchema = schema.oneOf([
+  schema.literal(null),
+  schema.object({
+    id: schema.string(),
+    hash: schema.maybe(schema.string()),
+  }),
+  schema.string(),
+]);
+
+const BeatsUpdateSecretsSchema = schema.maybe(
+  schema.object({
+    ssl: schema.maybe(schema.object({ key: schema.maybe(nullableSecretRefSchema) })),
+  })
+);
+
 /**
  * Shared sub-schemas (extracted to avoid type explosion when variants become named components)
  */
@@ -126,6 +142,7 @@ const UpdateSchema = {
   name: schema.maybe(schema.string()),
   is_default: schema.maybe(schema.boolean()),
   is_default_monitoring: schema.maybe(schema.boolean()),
+  secrets: BeatsUpdateSecretsSchema,
 };
 
 const PresetSchema = schema.oneOf([
@@ -190,8 +207,8 @@ const RemoteElasticSearchUpdateSchema = {
   service_token: schema.maybe(schema.oneOf([schema.literal(null), schema.string()])),
   secrets: schema.maybe(
     schema.object({
-      service_token: schema.maybe(secretRefSchema),
-      ssl: schema.maybe(schema.object({ key: schema.maybe(secretRefSchema) })),
+      service_token: schema.maybe(nullableSecretRefSchema),
+      ssl: schema.maybe(schema.object({ key: schema.maybe(nullableSecretRefSchema) })),
     })
   ),
   sync_integrations: schema.maybe(schema.boolean()),
@@ -220,11 +237,6 @@ const LogstashUpdateSchema = {
     schema.arrayOf(schema.string({ validate: validateLogstashHost }), {
       minSize: 1,
       maxSize: MAX_HOSTS,
-    })
-  ),
-  secrets: schema.maybe(
-    schema.object({
-      ssl: schema.maybe(schema.object({ key: schema.maybe(secretRefSchema) })),
     })
   ),
 };
@@ -336,6 +348,12 @@ const KafkaUpdateSchema = {
       schema.literal(kafkaAuthType.Ssl),
       schema.literal(kafkaAuthType.Kerberos),
     ])
+  ),
+  secrets: schema.maybe(
+    schema.object({
+      password: schema.maybe(nullableSecretRefSchema),
+      ssl: schema.maybe(schema.object({ key: nullableSecretRefSchema })),
+    })
   ),
 };
 

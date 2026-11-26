@@ -211,17 +211,18 @@ export function sendUpgradePackagePolicyDryRun(
 
 export function useUpgradePackagePoliciesMutation() {
   return useMutation<
-    UpgradePackagePolicyDryRunResponse,
+    UpgradePackagePolicyResponse,
     RequestError,
-    { packagePolicyIds: string[] }
+    { packagePolicyIds: string[]; acknowledgeBreakingChanges?: boolean }
   >(
-    ({ packagePolicyIds }) =>
-      sendRequestForRq<UpgradePackagePolicyDryRunResponse>({
+    ({ packagePolicyIds, acknowledgeBreakingChanges }) =>
+      sendRequestForRq<UpgradePackagePolicyResponse>({
         path: packagePolicyRouteService.getUpgradePath(),
         method: 'post',
         version: API_VERSIONS.public.v1,
         body: JSON.stringify({
           packagePolicyIds,
+          ...(acknowledgeBreakingChanges ? { acknowledge_breaking_changes: true } : {}),
         }),
       }),
     {

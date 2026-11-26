@@ -65,6 +65,7 @@ export function useSingleAgentMenuItems({
   const authz = useAuthz();
   const licenseService = useLicense();
 
+  const isAgentless = agentPolicy?.supports_agentless === true;
   const isUnenrolling = agent.status === 'unenrolling';
   const isAgentUpdating = isStuckInUpdating(agent);
   const hasFleetAllPrivileges = authz.fleet.allAgents;
@@ -135,6 +136,11 @@ export function useSingleAgentMenuItems({
       });
     }
 
+    // Agentless agents are managed by Elastic: no action is available for them
+    if (isAgentless) {
+      return items;
+    }
+
     // Top-level (common-use) items (only if has privileges and not managed)
     if (hasFleetAllPrivileges && !agentPolicy?.is_managed) {
       items.push(
@@ -162,7 +168,7 @@ export function useSingleAgentMenuItems({
             />
           ),
           icon: 'pencil',
-          disabled: (!agent.active && !agentPolicy) || agentPolicy?.supports_agentless === true,
+          disabled: !agent.active && !agentPolicy,
           onClick: () => {
             callbacks.onReassignClick();
           },
@@ -176,7 +182,7 @@ export function useSingleAgentMenuItems({
             />
           ),
           icon: 'refresh',
-          disabled: !isAgentUpgradeable(agent) || agentPolicy?.supports_agentless === true,
+          disabled: !isAgentUpgradeable(agent),
           onClick: () => {
             callbacks.onUpgradeClick();
           },
@@ -259,7 +265,13 @@ export function useSingleAgentMenuItems({
             />
           ),
           icon: 'inspect',
-          disabled: !authz.fleet.readAgentPolicies || !agent.policy_id,
+          disabled: !authz.integrations.readIntegrationPolicies || !agent.policy_id,
+          toolTipContent: !authz.integrations.readIntegrationPolicies ? (
+            <FormattedMessage
+              id="xpack.fleet.agentList.viewAgentPolicyDisabledTooltip"
+              defaultMessage="Agent policies and Integrations 'Read' privileges are required to view the policy."
+            />
+          ) : undefined,
           onClick: () => {
             callbacks.onViewAgentPolicyClick();
           },
@@ -352,7 +364,7 @@ export function useSingleAgentMenuItems({
         ),
         icon: 'trash',
         iconColor: 'danger',
-        disabled: !agent.active || agentPolicy?.supports_agentless === true,
+        disabled: !agent.active,
         onClick: () => {
           callbacks.onUnenrollClick();
         },
@@ -360,7 +372,7 @@ export function useSingleAgentMenuItems({
       });
 
       // Uninstall agent
-      if (agent.policy_id && !agentPolicy?.supports_agentless) {
+      if (agent.policy_id) {
         securityChildren.push({
           id: 'uninstall',
           name: (
@@ -398,6 +410,7 @@ export function useSingleAgentMenuItems({
   }, [
     callbacks,
     hasFleetAllPrivileges,
+    isAgentless,
     agentPolicy,
     agent,
     authz.fleet.allAgents,
@@ -408,7 +421,7 @@ export function useSingleAgentMenuItems({
     agentHasValidRollback,
     licenseService,
     isUnenrolling,
-    authz.fleet.readAgentPolicies,
+    authz.integrations.readIntegrationPolicies,
   ]);
 
   return menuItems;

@@ -162,6 +162,7 @@ dependsOn:
   - '@kbn/apm-types'
   - '@kbn/apm-types-shared'
   - '@kbn/cps'
+  - '@kbn/cps-utils'
   - '@kbn/expressions-plugin'
   - '@kbn/ingest-hub-plugin'
   - '@kbn/core-spaces-common'
@@ -172,6 +173,7 @@ tags:
   - group-observability
   - private
   - jest-unit-tests
+  - scout-tests
 fileGroups:
   src:
     - common/**/*
@@ -180,6 +182,4 @@ fileGroups:
     - server/**/*
     - test/scout/**/*
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

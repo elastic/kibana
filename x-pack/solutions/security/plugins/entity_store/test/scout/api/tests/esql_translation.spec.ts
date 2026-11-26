@@ -19,7 +19,7 @@ import { getEuidEsqlFilterBasedOnDocument } from '../../../../common/domain/euid
 import {
   USER_SCOUT_INVALID_PER_DOCUMENT_FILTER_EXAMPLES,
   USER_TS_EXTRACTION_CASES,
-} from '../fixtures/user_ts_extraction_cases';
+} from '../../../fixtures/user_ts_extraction_cases';
 
 apiTest.describe('ESQL query translation', { tag: ENTITY_STORE_TAGS }, () => {
   let defaultHeaders: Record<string, string>;

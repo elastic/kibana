@@ -12,7 +12,7 @@ steps:
       - sparse-checkout#v1.6.0:
           paths:
             - .buildkite
-            - .node-version
+            - .nvmrc
             - package.json
             - tsconfig.base.json
             - versions.json

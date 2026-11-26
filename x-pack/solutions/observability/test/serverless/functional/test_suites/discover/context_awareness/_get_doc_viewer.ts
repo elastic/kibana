@@ -9,7 +9,7 @@ import kbnRison from '@kbn/rison';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const PageObjects = getPageObjects(['common', 'discover', 'svlCommonPage']);
+  const PageObjects = getPageObjects(['common', 'discover', 'svlCommonPage', 'context']);
   const testSubjects = getService('testSubjects');
   const dataViews = getService('dataViews');
   const dataGrid = getService('dataGrid');
@@ -71,8 +71,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const [, surroundingActionEl] = await dataGrid.getRowActions();
         await surroundingActionEl.click();
         await PageObjects.discover.waitUntilTabIsLoaded();
+        await PageObjects.context.waitUntilContextLoadingHasFinished();
         await browser.refresh(); // To make sure context awareness even works when a page is refreshed
         await PageObjects.discover.waitUntilTabIsLoaded();
+        await PageObjects.context.waitUntilContextLoadingHasFinished();
 
         await dataGrid.clickRowToggle({ isAnchorRow: true });
         await testSubjects.existOrFail('docViewerTab-doc_view_table');
@@ -110,8 +112,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const [, surroundingActionEl] = await dataGrid.getRowActions();
         await surroundingActionEl.click();
         await PageObjects.discover.waitUntilTabIsLoaded();
+        await PageObjects.context.waitUntilContextLoadingHasFinished();
         await browser.refresh(); // To make sure context awareness even works when a page is refreshed
         await PageObjects.discover.waitUntilTabIsLoaded();
+        await PageObjects.context.waitUntilContextLoadingHasFinished();
 
         await dataGrid.clickRowToggle({ isAnchorRow: true });
         await testSubjects.existOrFail('docViewerTab-doc_view_table');

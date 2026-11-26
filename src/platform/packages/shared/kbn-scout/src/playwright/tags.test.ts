@@ -7,7 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { getPlaywrightTagsFor, tags } from './tags';
+import {
+  getPlaywrightLimitGrepInvert,
+  getPlaywrightLimitOptions,
+  getPlaywrightTagsFor,
+  tags,
+} from './tags';
 
 describe('getPlaywrightTagsFor', () => {
   it('returns tags for stateful classic with location "all"', () => {
@@ -121,5 +126,80 @@ describe('tags', () => {
     it('contains perf tag', () => {
       expect(tags.performance).toEqual(['@perf']);
     });
+  });
+
+  describe('limit', () => {
+    it('exposes limit tags in the @limit/<selection-method>-<target-attr> format', () => {
+      expect(tags.limit.only.fips).toBe('@limit/only-fips');
+      expect(tags.limit.except.fips).toBe('@limit/except-fips');
+      expect(tags.limit.only.upgradeAssistant).toBe('@limit/only-upgradeAssistant');
+      expect(tags.limit.except.upgradeAssistant).toBe('@limit/except-upgradeAssistant');
+    });
+
+    it('never overlaps with test target tags', () => {
+      expect(tags.deploymentAgnostic).not.toContain(tags.limit.only.fips);
+      expect(tags.deploymentAgnostic).not.toContain(tags.limit.except.fips);
+      expect(tags.deploymentAgnostic).not.toContain(tags.limit.only.upgradeAssistant);
+      expect(tags.deploymentAgnostic).not.toContain(tags.limit.except.upgradeAssistant);
+    });
+  });
+});
+
+describe('getPlaywrightLimitGrepInvert', () => {
+  it('excludes only-fips tests when no attributes are declared', () => {
+    const pattern = getPlaywrightLimitGrepInvert([])!;
+
+    expect(pattern.test('a test @local-stateful-classic @limit/only-fips')).toBe(true);
+    expect(pattern.test('a test @local-stateful-classic @limit/except-fips')).toBe(false);
+    expect(pattern.test('a test @local-stateful-classic')).toBe(false);
+  });
+
+  it('excludes except-fips tests when fips is declared', () => {
+    const pattern = getPlaywrightLimitGrepInvert(['fips'])!;
+
+    expect(pattern.test('a test @local-stateful-classic @limit/except-fips')).toBe(true);
+    expect(pattern.test('a test @local-stateful-classic @limit/only-fips')).toBe(false);
+    expect(pattern.test('a test @local-stateful-classic')).toBe(false);
+  });
+
+  it('excludes only-upgradeAssistant tests unless upgradeAssistant is declared', () => {
+    const tagged = 'a test @local-stateful-classic @limit/only-upgradeAssistant';
+
+    expect(getPlaywrightLimitGrepInvert([])!.test(tagged)).toBe(true);
+    expect(getPlaywrightLimitGrepInvert(['fips'])!.test(tagged)).toBe(true);
+    expect(getPlaywrightLimitGrepInvert(['upgradeAssistant'])!.test(tagged)).toBe(false);
+  });
+
+  it('does not match tags that merely extend an unsatisfied tag', () => {
+    const pattern = getPlaywrightLimitGrepInvert([])!;
+
+    expect(pattern.test('a test @local-stateful-classic @limit/only-fips140')).toBe(false);
+    expect(pattern.test('a test @limit/only-fips140 @local-stateful-classic')).toBe(false);
+  });
+
+  it('matches an unsatisfied tag in any tag position', () => {
+    const pattern = getPlaywrightLimitGrepInvert([])!;
+
+    expect(pattern.test('a test @limit/only-fips @local-stateful-classic')).toBe(true);
+  });
+});
+
+describe('getPlaywrightLimitOptions', () => {
+  it('carries the limit pattern as a grepInvert option', () => {
+    expect(getPlaywrightLimitOptions([])).toEqual({
+      grepInvert: getPlaywrightLimitGrepInvert([])!.source,
+    });
+    expect(getPlaywrightLimitOptions(['fips'])).toEqual({
+      grepInvert: getPlaywrightLimitGrepInvert(['fips'])!.source,
+    });
+  });
+
+  it('produces a string Playwright turns back into the same pattern', () => {
+    const { grepInvert } = getPlaywrightLimitOptions([]);
+    const pattern = new RegExp(grepInvert!, 'gi');
+
+    expect(pattern.test('a test @local-stateful-classic @limit/only-fips')).toBe(true);
+    pattern.lastIndex = 0;
+    expect(pattern.test('a test @local-stateful-classic @limit/except-fips')).toBe(false);
   });
 });

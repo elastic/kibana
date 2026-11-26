@@ -127,7 +127,7 @@ export function registerBundleRoutes({
       routePath: staticAssets.prependServerPath(coreBundlePath) + '/',
       bundlesPath: isDist
         ? fromRoot('node_modules/@kbn/core/target/public')
-        : fromRoot('src/core/target/public'),
+        : fromRoot('src/core/packages/core/target/public'),
       fileHashCache,
       isDist,
     });

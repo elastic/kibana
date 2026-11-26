@@ -1632,6 +1632,62 @@ describe('Fleet - storedPackagePoliciesToAgentInputs - version specific inputs b
       expect.stringContaining('the saved object changed concurrently')
     );
   });
+
+  it('scopes soClient.get and soClient.update to the packagePoliciesNamespace for a custom-space policy', async () => {
+    const soClient = makeSoClient(undefined);
+
+    await storedPackagePoliciesToAgentInputs(
+      [versionedPackagePolicy],
+      packageInfoCache,
+      undefined,
+      undefined,
+      undefined,
+      '9.6',
+      soClient,
+      true,
+      'my-space'
+    );
+
+    expect(soClient.get).toHaveBeenCalledWith(
+      LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+      versionedPackagePolicy.id,
+      { namespace: 'my-space' }
+    );
+    expect(soClient.update).toHaveBeenCalledWith(
+      LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+      versionedPackagePolicy.id,
+      expect.anything(),
+      expect.objectContaining({ namespace: 'my-space' })
+    );
+  });
+
+  it('omits namespace from soClient.get and soClient.update for a shared (all-spaces) policy', async () => {
+    const soClient = makeSoClient(undefined);
+
+    await storedPackagePoliciesToAgentInputs(
+      [versionedPackagePolicy],
+      packageInfoCache,
+      undefined,
+      undefined,
+      undefined,
+      '9.6',
+      soClient,
+      true,
+      undefined
+    );
+
+    expect(soClient.get).toHaveBeenCalledWith(
+      LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+      versionedPackagePolicy.id,
+      undefined
+    );
+    expect(soClient.update).toHaveBeenCalledWith(
+      LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+      versionedPackagePolicy.id,
+      expect.anything(),
+      expect.not.objectContaining({ namespace: expect.anything() })
+    );
+  });
 });
 
 describe('storedPackagePolicyToAgentInputs - dynamic_signal_types handling', () => {
@@ -1954,6 +2010,65 @@ describe('storedPackagePolicyToAgentInputs - condition handling', () => {
     });
     expect('condition' in result[0]).toBe(false);
     expect('condition' in (result[0].streams?.[0] ?? {})).toBe(false);
+  });
+
+  it('boolean stream condition is preserved as string in emitted output', () => {
+    // The Fleet UI can persist condition as boolean `true`; combineConditions must coerce
+    // it to the string 'true' rather than dropping it or throwing.
+    const result = storedPackagePolicyToAgentInputs({
+      ...basePolicy,
+      inputs: [
+        makeInput({
+          streams: [
+            {
+              id: 'stream-1',
+              enabled: true,
+              data_stream: { dataset: 'foo', type: 'logs' },
+              condition: true as any,
+            },
+          ],
+        }),
+      ],
+    });
+    expect(result[0].streams?.[0]?.condition).toBe('true');
+  });
+
+  it('boolean false stream condition is preserved as string in emitted output', () => {
+    const result = storedPackagePolicyToAgentInputs({
+      ...basePolicy,
+      inputs: [
+        makeInput({
+          streams: [
+            {
+              id: 'stream-1',
+              enabled: true,
+              data_stream: { dataset: 'foo', type: 'logs' },
+              condition: false as any,
+            },
+          ],
+        }),
+      ],
+    });
+    expect(result[0].streams?.[0]?.condition).toBe('false');
+  });
+
+  it('boolean input-level condition is preserved as string in emitted output', () => {
+    const result = storedPackagePolicyToAgentInputs({
+      ...basePolicy,
+      inputs: [
+        makeInput({
+          condition: true as any,
+          streams: [
+            {
+              id: 'stream-1',
+              enabled: true,
+              data_stream: { dataset: 'foo', type: 'logs' },
+            },
+          ],
+        }),
+      ],
+    });
+    expect(result[0].condition).toBe('true');
   });
 
   it('overrides.inputs[id].condition still wins (no regression)', () => {

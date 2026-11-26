@@ -6,7 +6,7 @@
  */
 
 module.exports = {
-  preset: '@kbn/test/jest_node',
+  preset: '@kbn/jest/jest_node',
   rootDir: '../../../../../..',
   roots: ['<rootDir>/x-pack/platform/packages/private/ml/category_validator'],
 };

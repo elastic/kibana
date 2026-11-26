@@ -55,7 +55,7 @@ fi
 
 if [ "${FN}" == "es" ]; then
   ARGS="$2"
-  yarn es snapshot $ARGS
+  pnpm es snapshot $ARGS
   exit 0;
 fi
 

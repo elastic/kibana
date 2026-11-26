@@ -48,9 +48,9 @@ These skills describe test file conventions, runner commands, authentication pat
 
 | Type | File pattern | Runner |
 |---|---|---|
-| Unit | `*.test.ts` (co-located with source) | `yarn test:jest` |
-| Integration (Jest) | `*.test.ts` under `__tests__/` or adjacent; `jest.integration.config.js` | `yarn test:jest_integration` |
-| API integration (FTR) | `x-pack/solutions/security/test/security_solution_api_integration/` | `node scripts/functional_tests` |
+| Unit | `*.test.ts` (co-located with source) | `pnpm test:jest` |
+| Integration (Jest) | `*.test.ts` under `__tests__/` or adjacent; `jest.integration.config.js` | `pnpm test:jest_integration` |
+| API integration (FTR) | `x-pack/solutions/security/test_suites/test-suites-security-solution-apis/` | `node scripts/functional_tests` |
 | Functional / E2E (FTR) | `x-pack/solutions/security/test/functional/` | `node scripts/functional_tests` |
 | Cypress E2E | `x-pack/solutions/security/test/security_solution_cypress/cypress/e2e/**/*.cy.ts` | Cypress runner |
 | Scout API | `<plugin>/test/scout*/api/**/*.spec.ts` | `node scripts/scout.js run-tests` |
@@ -68,8 +68,8 @@ These skills describe test file conventions, runner commands, authentication pat
 | Unit | `plugins/security_solution/public/detections/**/*.test.ts` |
 | Cypress E2E | `test/security_solution_cypress/cypress/e2e/detection_response/detection_engine/` |
 | Cypress E2E | `test/security_solution_cypress/cypress/e2e/detection_response/rule_management/` |
-| API integration | `test/security_solution_api_integration/test_suites/detections_response/detection_engine/` |
-| API integration | `test/security_solution_api_integration/test_suites/detections_response/rules_management/` |
+| API integration | `test_suites/test-suites-security-solution-apis/test_suites/detections_response/detection_engine/` |
+| API integration | `test_suites/test-suites-security-solution-apis/test_suites/detections_response/rules_management/` |
 
 ### Alerts
 
@@ -86,7 +86,7 @@ These skills describe test file conventions, runner commands, authentication pat
 | Unit | `plugins/security_solution/public/timelines/**/*.test.ts` |
 | Cypress E2E | `test/security_solution_cypress/cypress/e2e/investigations/timelines/` |
 | Cypress E2E | `test/security_solution_cypress/cypress/e2e/investigations/timeline_templates/` |
-| API integration | `test/security_solution_api_integration/test_suites/investigation/timeline/` |
+| API integration | `test_suites/test-suites-security-solution-apis/test_suites/investigation/timeline/` |
 
 ### Cases
 
@@ -103,9 +103,9 @@ These skills describe test file conventions, runner commands, authentication pat
 | Cypress E2E | `test/security_solution_cypress/cypress/e2e/entity_analytics/` |
 | Cypress E2E (dashboards) | `test/security_solution_cypress/cypress/e2e/entity_analytics/dashboards/` |
 | Cypress E2E (hosts/watchlists) | `test/security_solution_cypress/cypress/e2e/entity_analytics/hosts/`, `watchlists/` |
-| API integration | `test/security_solution_api_integration/test_suites/entity_analytics/entity_details/` |
-| API integration | `test/security_solution_api_integration/test_suites/entity_analytics/entity_store/` |
-| API integration | `test/security_solution_api_integration/test_suites/entity_analytics/risk_engine/` |
+| API integration | `test_suites/test-suites-security-solution-apis/test_suites/entity_analytics/entity_details/` |
+| API integration | `test_suites/test-suites-security-solution-apis/test_suites/entity_analytics/entity_store/` |
+| API integration | `test_suites/test-suites-security-solution-apis/test_suites/entity_analytics/risk_engine/` |
 | Scout API | `plugins/entity_store/test/scout/api/` |
 
 ### Explore (Hosts, Network, Users, Overview)
@@ -114,19 +114,19 @@ These skills describe test file conventions, runner commands, authentication pat
 |---|---|
 | Unit | `plugins/security_solution/public/explore/**/*.test.ts` |
 | Cypress E2E | `test/security_solution_cypress/cypress/e2e/explore/` |
-| API integration | `test/security_solution_api_integration/test_suites/explore/hosts/` |
-| API integration | `test/security_solution_api_integration/test_suites/explore/network/` |
-| API integration | `test/security_solution_api_integration/test_suites/explore/overview/` |
-| API integration | `test/security_solution_api_integration/test_suites/explore/users/` |
+| API integration | `test_suites/test-suites-security-solution-apis/test_suites/explore/hosts/` |
+| API integration | `test_suites/test-suites-security-solution-apis/test_suites/explore/network/` |
+| API integration | `test_suites/test-suites-security-solution-apis/test_suites/explore/overview/` |
+| API integration | `test_suites/test-suites-security-solution-apis/test_suites/explore/users/` |
 
 ### Exceptions & Value Lists
 
 | Test type | Directory |
 |---|---|
 | Cypress E2E | `test/security_solution_cypress/cypress/e2e/detection_response/rule_management/` |
-| API integration | `test/security_solution_api_integration/test_suites/lists_and_exception_lists/exception_lists_items/` |
-| API integration | `test/security_solution_api_integration/test_suites/lists_and_exception_lists/lists_items/` |
-| API integration | `test/security_solution_api_integration/test_suites/lists_and_exception_lists/authorization/` |
+| API integration | `test_suites/test-suites-security-solution-apis/test_suites/lists_and_exception_lists/exception_lists_items/` |
+| API integration | `test_suites/test-suites-security-solution-apis/test_suites/lists_and_exception_lists/lists_items/` |
+| API integration | `test_suites/test-suites-security-solution-apis/test_suites/lists_and_exception_lists/authorization/` |
 
 ### AI Assistant / GenAI (Attack Discovery, Conversations, Knowledge Base)
 
@@ -135,25 +135,25 @@ These skills describe test file conventions, runner commands, authentication pat
 | Unit | `plugins/security_solution/public/assistant/**/*.test.ts` |
 | Unit | `plugins/security_solution/public/attack_discovery/**/*.test.ts` |
 | Cypress E2E | `test/security_solution_cypress/cypress/e2e/ai_assistant/` |
-| API integration | `test/security_solution_api_integration/test_suites/genai/attack_discovery/` |
-| API integration | `test/security_solution_api_integration/test_suites/genai/conversations/` |
-| API integration | `test/security_solution_api_integration/test_suites/genai/knowledge_base/` |
-| API integration | `test/security_solution_api_integration/test_suites/genai/evaluations/` |
-| API integration | `test/security_solution_api_integration/test_suites/genai/startup/` |
+| API integration | `test_suites/test-suites-security-solution-apis/test_suites/genai/attack_discovery/` |
+| API integration | `test_suites/test-suites-security-solution-apis/test_suites/genai/conversations/` |
+| API integration | `test_suites/test-suites-security-solution-apis/test_suites/genai/knowledge_base/` |
+| API integration | `test_suites/test-suites-security-solution-apis/test_suites/genai/evaluations/` |
+| API integration | `test_suites/test-suites-security-solution-apis/test_suites/genai/startup/` |
 
 ### AI4DSOC / Security AI Features
 
 | Test type | Directory |
 |---|---|
 | Cypress E2E | `test/security_solution_cypress/cypress/e2e/ai4dsoc/` |
-| API integration | `test/security_solution_api_integration/test_suites/ai4dsoc/` |
+| API integration | `test_suites/test-suites-security-solution-apis/test_suites/ai4dsoc/` |
 
 ### SIEM Migrations
 
 | Test type | Directory |
 |---|---|
 | Cypress E2E | `test/security_solution_cypress/cypress/e2e/investigations/siem_migrations/` |
-| API integration | `test/security_solution_api_integration/test_suites/siem_migrations/rules/` |
+| API integration | `test_suites/test-suites-security-solution-apis/test_suites/siem_migrations/rules/` |
 
 ### Flyout / Expandable Flyout
 
@@ -184,14 +184,14 @@ These skills describe test file conventions, runner commands, authentication pat
 |---|---|
 | Functional (FTR) | `test/security_solution_endpoint/` |
 | Cypress E2E | `test/defend_workflows_cypress/` |
-| API integration | `test/security_solution_api_integration/test_suites/edr_workflows/` |
+| API integration | `test_suites/test-suites-security-solution-apis/test_suites/edr_workflows/` |
 
 ### Telemetry
 
 | Test type | Directory |
 |---|---|
-| API integration | `test/security_solution_api_integration/test_suites/telemetry/` |
-| API integration | `test/security_solution_api_integration/test_suites/detections_response/telemetry/` |
+| API integration | `test_suites/test-suites-security-solution-apis/test_suites/telemetry/` |
+| API integration | `test_suites/test-suites-security-solution-apis/test_suites/detections_response/telemetry/` |
 
 ### Investigations (Cross-feature: dashboards, data view, threat intelligence)
 
@@ -235,5 +235,5 @@ These skills describe test file conventions, runner commands, authentication pat
 - When reading PR diffs, look for changed files matching any of the paths above to find associated tests.
 - Unit tests are always the first coverage signal — check for `*.test.ts` files adjacent to any modified source file before assuming there is no coverage.
 - Cypress tests are the legacy E2E layer. Scout is the current standard — new E2E and API tests should use Scout.
-- FTR API integration tests under `security_solution_api_integration/` remain the primary API test layer for Security Solution until Scout coverage reaches parity.
+- FTR API integration tests under `test-suites-security-solution-apis/` remain the primary API test layer for Security Solution until Scout coverage reaches parity.
 - The `entity_store` plugin has its own Scout API scaffold at `plugins/entity_store/test/scout/api/`.

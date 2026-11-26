@@ -19,7 +19,7 @@ import { Chance } from 'chance';
 import React, { Fragment } from 'react';
 import moment from 'moment';
 import { useHistory, useLocation, useParams } from 'react-router-dom';
-import { from } from 'rxjs';
+import { of } from 'rxjs';
 import { useFetchAlertDetail } from '../../hooks/use_fetch_alert_detail';
 import type { ConfigSchema } from '../../plugin';
 import type { Subset } from '../../typings';
@@ -129,12 +129,15 @@ const kibanaStartMockServicesWithLocator = {
   },
 };
 
+const mockRegisterAppAccess = jest.fn();
+
 const mockKibana = () => {
   useKibanaMock.mockReturnValue({
     services: {
       ...kibanaStartMockServicesWithLocator,
       cases: casesPluginMock.createStartContract(),
-      application: { currentAppId$: from('mockedApp') },
+      application: { currentAppId$: of('mockedApp') },
+      cps: { cpsManager: { registerAppAccess: mockRegisterAppAccess } },
       http: {
         basePath: {
           prepend: jest.fn(),
@@ -247,7 +250,7 @@ describe('Alert details', () => {
     });
     useParamsMock.mockReturnValue(params);
     useLocationMock.mockReturnValue({ pathname: '/alerts/uuid', search: '', state: '', hash: '' });
-    useHistoryMock.mockReturnValue({ replace: jest.fn() });
+    useHistoryMock.mockReturnValue({ replace: jest.fn(), location: { pathname: '/alerts/uuid' } });
     useBreadcrumbsMock.mockReturnValue([]);
     TagsListMock.mockReturnValue(<div data-test-subj="TagsList" />);
     ruleTypeRegistry.list.mockReturnValue([ruleType]);
@@ -401,6 +404,69 @@ describe('Alert details', () => {
         from: moment(alertDetail.formatted.start).subtract(30, 'minutes').toISOString(),
         to: moment(alertDetail.formatted.start).add(30, 'minutes').toISOString(),
       },
+    });
+  });
+
+  describe('CPS project routing', () => {
+    beforeEach(() => {
+      useFetchAlertDetailMock.mockReturnValue([false, alertDetail]);
+    });
+
+    it('registers READONLY access for the current app on mount', async () => {
+      renderComponent();
+      await waitFor(() => expect(mockRegisterAppAccess).toHaveBeenCalled());
+      const [appId, resolver] = mockRegisterAppAccess.mock.calls[0];
+      expect(appId).toBe('mockedApp');
+      // The resolver should grant READONLY for the alert-details route
+      expect(resolver('/app/observability/alerts/uuid')).toBe('readonly');
+    });
+
+    it('resolver returns DISABLED for sibling observability routes', async () => {
+      renderComponent();
+      await waitFor(() => expect(mockRegisterAppAccess).toHaveBeenCalled());
+      const resolver = mockRegisterAppAccess.mock.calls[0][1];
+      expect(resolver('/app/observability/alerts')).toBe('disabled');
+      expect(resolver('/app/observability/alerts/rules/abc')).toBe('disabled');
+      expect(resolver('/app/observability/cases')).toBe('disabled');
+      expect(resolver('/app/observability/overview')).toBe('disabled');
+    });
+
+    it('resolver returns READONLY behind a space prefix', async () => {
+      renderComponent();
+      await waitFor(() => expect(mockRegisterAppAccess).toHaveBeenCalled());
+      const resolver = mockRegisterAppAccess.mock.calls[0][1];
+      expect(resolver('/s/my-space/app/observability/alerts/uuid')).toBe('readonly');
+    });
+
+    it('registers a cleanup DISABLED resolver on unmount', async () => {
+      const { unmount } = renderComponent();
+      await waitFor(() => expect(mockRegisterAppAccess).toHaveBeenCalled());
+      unmount();
+      const lastCall = mockRegisterAppAccess.mock.calls.at(-1);
+      const cleanupResolver = lastCall![1];
+      expect(cleanupResolver('/app/observability/alerts/uuid')).toBe('disabled');
+    });
+
+    it('is a no-op when cps is absent (stateful / cpsEnabled off)', async () => {
+      useKibanaMock.mockReturnValue({
+        services: {
+          ...kibanaStartMockServicesWithLocator,
+          cases: casesPluginMock.createStartContract(),
+          application: { currentAppId$: of('mockedApp') },
+          // No cps key — simulates stateful or flag-off
+          http: {
+            basePath: { prepend: jest.fn() },
+            get: jest.fn().mockReturnValue({ alertContext: [] }),
+          },
+          observabilityAIAssistant: mockObservabilityAIAssistant,
+          theme: {},
+          dashboard: {},
+          spaces: mockSpaces,
+          telemetryClient: createTelemetryClientMock(),
+        },
+      });
+      renderComponent();
+      await waitFor(() => expect(mockRegisterAppAccess).not.toHaveBeenCalled());
     });
   });
 });

@@ -72,6 +72,59 @@ describe('deanonymize', () => {
       ).toolCalls?.[0].function.arguments;
       expect(args.to).toBe(value);
     });
+
+    it('preserves the tool call ids of assistant messages', () => {
+      const assistantMsg: AssistantMessage = {
+        role: MessageRole.Assistant,
+        content: '',
+        toolCalls: [
+          {
+            function: { name: 'sendEmail', arguments: { to: mask } },
+            toolCallId: 'call-1',
+          },
+          {
+            function: { name: 'lookupUser', arguments: { query: `find ${mask}` } },
+            toolCallId: 'call-2',
+          },
+        ],
+      };
+
+      const { message: deanonymized } = deanonymize(assistantMsg, [anonymization]);
+
+      expect(deanonymized.toolCalls).toEqual([
+        {
+          function: { name: 'sendEmail', arguments: { to: value } },
+          toolCallId: 'call-1',
+        },
+        {
+          function: { name: 'lookupUser', arguments: { query: `find ${value}` } },
+          toolCallId: 'call-2',
+        },
+      ]);
+    });
+
+    it('preserves the tool call ids of assistant messages with content', () => {
+      const assistantMsg: AssistantMessage = {
+        role: MessageRole.Assistant,
+        content: `Sending to ${mask}`,
+        toolCalls: [
+          {
+            function: { name: 'sendEmail', arguments: { to: mask } },
+            toolCallId: 'call-1',
+          },
+        ],
+      };
+
+      const { message: deanonymized } = deanonymize(assistantMsg, [anonymization]);
+
+      expect(deanonymized.content).toBe(`Sending to ${value}`);
+      expect(deanonymized.toolCalls).toEqual([
+        {
+          function: { name: 'sendEmail', arguments: { to: value } },
+          toolCallId: 'call-1',
+        },
+      ]);
+    });
   });
 
   describe('multiple entities offset regression', () => {

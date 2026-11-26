@@ -248,7 +248,6 @@ export const getUnifiedHistoryRoute = (router: IRouter, osqueryContext: OsqueryA
           const { liveRows: filteredLiveRows, sortValuesMap } = await processLiveHistory({
             liveHits,
             osqueryContext,
-            spaceId,
             integrationNamespaces,
             ccsEnabled,
             logger,

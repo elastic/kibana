@@ -141,7 +141,14 @@ function convertFittingToAPIFormat(
   };
 }
 
-export function convertStylingToStateFormat(config: XYStyling): XYLensAppearanceState {
+export function convertStylingToStateFormat(
+  config: XYStyling,
+  layerPresence: LayerPresence
+): XYLensAppearanceState {
+  const hasLinesOrAreas = layerPresence.hasLines || layerPresence.hasAreas;
+
+  // The runtime applies fitting only to line and area series, and the bar settings (minimum
+  // height, value labels) only to bar series, so they are not stored without such a layer.
   return stripUndefined<XYLensAppearanceState>({
     hideEndzones:
       config.overlays?.partial_buckets?.visible != null
@@ -149,17 +156,21 @@ export function convertStylingToStateFormat(config: XYStyling): XYLensAppearance
         : undefined,
     showCurrentTimeMarker: config.overlays?.current_time_marker?.visible,
     valueLabels:
-      config.bars?.data_labels != null
+      layerPresence.hasBars && config.bars?.data_labels != null
         ? config.bars.data_labels.visible
           ? 'show'
           : 'hide'
         : undefined,
     pointVisibility: pointVisibilityCompat.toState(config.points?.visibility),
     curveType: curveTypeCompat.toState(config.interpolation),
-    minBarHeight: config.bars?.minimum_height,
+    minBarHeight: layerPresence.hasBars ? config.bars?.minimum_height : undefined,
     fillOpacity: config.areas?.fill_opacity,
-    fittingFunction: fittingFunctionCompat.toState(config.fitting?.type),
-    emphasizeFitting: config.fitting?.emphasize,
-    endValue: extendCompat.toState(config.fitting?.extend),
+    ...(hasLinesOrAreas
+      ? {
+          fittingFunction: fittingFunctionCompat.toState(config.fitting?.type),
+          emphasizeFitting: config.fitting?.emphasize,
+          endValue: extendCompat.toState(config.fitting?.extend),
+        }
+      : {}),
   });
 }

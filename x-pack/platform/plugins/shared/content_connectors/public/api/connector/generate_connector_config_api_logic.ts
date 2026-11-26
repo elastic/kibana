@@ -17,7 +17,9 @@ export interface GenerateConfigApiArgs {
 export type GenerateConfigApiActions = Actions<GenerateConfigApiArgs, {}>;
 
 export const generateConnectorConfig = async ({ connectorId, http }: GenerateConfigApiArgs) => {
-  const route = `/internal/content_connectors/connectors/${connectorId}/generate_config`;
+  const route = `/internal/content_connectors/connectors/${encodeURIComponent(
+    connectorId
+  )}/generate_config`;
   return await http?.post(route);
 };
 

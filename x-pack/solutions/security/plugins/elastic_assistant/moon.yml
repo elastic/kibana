@@ -127,6 +127,4 @@ fileGroups:
     - server/**/*.json
     - public/**/*
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

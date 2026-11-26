@@ -564,6 +564,42 @@ describe('riskScoreDocFactory', () => {
     expect(result.category_1_score).toBeCloseTo(100, 0);
   });
 
+  describe('a saturated score', () => {
+    const saturatedBucket: RiskScoreBucket = {
+      ...mockBucket,
+      top_inputs: {
+        ...mockBucket.top_inputs,
+        risk_details: {
+          value: { ...mockBucket.top_inputs.risk_details.value, normalized_score: 100 },
+        },
+      },
+    };
+
+    it('stays at 100 and Critical without modifiers', () => {
+      const factory = riskScoreDocFactory({ now, identifierField, globalWeight: undefined });
+
+      const result = factory(saturatedBucket, undefined, []);
+
+      expect(result.calculated_score_norm).toBe(100);
+      expect(result.calculated_level).toBe('Critical');
+    });
+
+    it('stays at 100 with modifiers and attributes no contribution to them', () => {
+      const factory = riskScoreDocFactory({ now, identifierField, globalWeight: undefined });
+      const criticalityFields: Modifier<'asset_criticality'> = {
+        type: 'asset_criticality',
+        modifier_value: 1.5,
+        metadata: { criticality_level: 'high_impact' },
+      };
+
+      const result = factory(saturatedBucket, criticalityFields, []);
+
+      expect(result.calculated_score_norm).toBe(100);
+      expect(result.calculated_level).toBe('Critical');
+      expect(result.modifiers?.[0].contribution).toBe(0);
+    });
+  });
+
   it('should apply global weight to calculated_score', () => {
     const globalWeight = 0.8;
     const factory = riskScoreDocFactory({ now, identifierField, globalWeight });

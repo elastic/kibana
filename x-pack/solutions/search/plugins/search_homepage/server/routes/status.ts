@@ -49,7 +49,7 @@ export function registerStatusRoutes(router: IRouter, logger: Logger) {
       },
       validate: {
         params: schema.object({
-          indexName: schema.string(),
+          indexName: schema.string({ maxLength: 1024 }),
         }),
       },
       options: {

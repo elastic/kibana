@@ -252,6 +252,47 @@ describe('computeEdgePath', () => {
       expect(r1.path).toContain(String(busY));
       expect(r2.path).toContain(String(busY));
     });
+
+    it('six isMerge edges with different sourceYs all bend at targetY − MERGE_BUS_TRUNK', () => {
+      // Regression: before the fix, isMerge was only set when a bypass lane was
+      // present, so real-step fan-ins fell through to getSmoothStepPath which bends
+      // at (sourceY + targetY) / 2 — a different Y for each source, producing a
+      // broad horizontal band. With isMerge set, all six must share the same busY.
+      const targetX = 300;
+      const targetY = 800;
+      const busY = targetY - MERGE_BUS_TRUNK; // 780
+      const sourceYs = [100, 200, 300, 400, 500, 600];
+      for (const sourceY of sourceYs) {
+        const r = computeEdgePath({
+          sourceX: 50, // fixed X so no accidental coordinate collision
+          sourceY,
+          targetX,
+          targetY,
+          sourcePosition: Position.Bottom,
+          targetPosition: Position.Top,
+          isMerge: true,
+        });
+        expect(r.path).toContain(String(busY));
+      }
+    });
+
+    it('x-aligned isMerge edge (same sourceX as targetX) renders a straight path without NaN or Q', () => {
+      // Multi-trigger fan-ins (e.g. Manual + Scheduled → first step) can produce
+      // a source that is x-aligned with the target. buildRoundedOrthogonalPath
+      // collapses the zero-length bus segment via the lenIn/lenOut < EPS guard.
+      const r = computeEdgePath({
+        sourceX: 300,
+        sourceY: 100,
+        targetX: 300,
+        targetY: 500,
+        sourcePosition: Position.Bottom,
+        targetPosition: Position.Top,
+        isMerge: true,
+      });
+      expect(r.path).not.toContain('NaN');
+      expect(r.path).not.toContain('Q');
+      expect(r.path.length).toBeGreaterThan(0);
+    });
   });
 
   describe('dagre-waypoints TB routing', () => {

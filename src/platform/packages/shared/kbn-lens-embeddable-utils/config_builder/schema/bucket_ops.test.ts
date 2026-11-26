@@ -243,6 +243,52 @@ describe('Bucket Operation Schemas', () => {
         expect(() => bucketTermsOperationSchema.validate(input)).toThrow();
       });
     });
+
+    it('validates rank_by custom last_value with a time_field', () => {
+      const withTimeField = {
+        operation: 'terms',
+        fields: ['category'],
+        rank_by: {
+          type: 'custom',
+          operation: 'last_value',
+          field: 'bytes',
+          direction: 'desc',
+          time_field: 'timestamp',
+        },
+      };
+
+      expect(bucketTermsOperationSchema.validate(withTimeField).rank_by).toEqual(
+        withTimeField.rank_by
+      );
+    });
+
+    it('validates rank_by custom last_value without a time_field', () => {
+      const withoutTimeField = {
+        operation: 'terms',
+        fields: ['category'],
+        rank_by: { type: 'custom', operation: 'last_value', field: 'bytes', direction: 'desc' },
+      };
+
+      expect(bucketTermsOperationSchema.validate(withoutTimeField).rank_by).toEqual(
+        withoutTimeField.rank_by
+      );
+    });
+
+    it('rejects rank_by custom last_value with an empty time_field', () => {
+      const input = {
+        operation: 'terms',
+        fields: ['category'],
+        rank_by: {
+          type: 'custom',
+          operation: 'last_value',
+          field: 'bytes',
+          direction: 'desc',
+          time_field: '',
+        },
+      };
+
+      expect(() => bucketTermsOperationSchema.validate(input)).toThrow();
+    });
   });
 
   describe('filter operation', () => {

@@ -10,6 +10,7 @@ import Boom from '@hapi/boom';
 import { isEqual } from 'lodash';
 
 import type { BuildFlavor } from '@kbn/config/src/types';
+import { sanitizeImageDataUrl } from '@kbn/content-sanitization';
 import type {
   ISavedObjectsPointInTimeFinder,
   ISavedObjectsRepository,
@@ -188,6 +189,9 @@ export class SpacesClient implements ISpacesClient {
       throw Boom.badRequest('Unable to create Space, solution property cannot be empty');
     }
 
+    // Sanitize before any side effects so an invalid image never leaves a partial write behind.
+    const imageUrl = this.sanitizeImageUrl(space.imageUrl);
+
     let projectRoutingExpression: string | undefined;
     if (Object.hasOwn(space, 'projectRouting')) {
       if (!this.npreClient) {
@@ -208,7 +212,11 @@ export class SpacesClient implements ISpacesClient {
     this.debugLogger(`SpacesClient.create(), using RBAC. Attempting to create space`);
 
     const id = space.id;
-    const attributes = this.generateSpaceAttributes({ ...space, name: space.name.trim() });
+    const attributes = this.generateSpaceAttributes({
+      ...space,
+      name: space.name.trim(),
+      imageUrl,
+    });
 
     const createdSavedObject = await this.repository.create('space', attributes, { id });
 
@@ -249,6 +257,9 @@ export class SpacesClient implements ISpacesClient {
       throw Boom.badRequest('Unable to update Space, solution property cannot be empty');
     }
 
+    // Sanitize before any side effects so an invalid image never leaves a partial write behind.
+    const imageUrl = this.sanitizeImageUrl(space.imageUrl);
+
     const npreName = getSpaceDefaultNpreName(id);
     if (Object.hasOwn(space, 'projectRouting')) {
       if (!this.npreClient) {
@@ -286,7 +297,11 @@ export class SpacesClient implements ISpacesClient {
     // but trim if a new name is being set to prevent introducing new whitespace.
     const existingName = existingSpaceSavedObject.attributes.name as string;
     const resolvedName = space.name === existingName ? space.name : space.name.trim();
-    const attributes = this.generateSpaceAttributes({ ...spaceToPersist, name: resolvedName });
+    const attributes = this.generateSpaceAttributes({
+      ...spaceToPersist,
+      name: resolvedName,
+      imageUrl,
+    });
     await this.repository.update('space', id, attributes);
     const updatedSpace = this.transformSavedObjectToSpace({
       id,
@@ -380,6 +395,22 @@ export class SpacesClient implements ISpacesClient {
       ...(!this.isServerless && space.solution ? { solution: space.solution } : {}),
     };
   };
+
+  /**
+   * Strips active content (scripts, event handlers, links) from SVG avatars before they are persisted.
+   * Raster images and empty values are returned unchanged.
+   */
+  private sanitizeImageUrl(imageUrl: string | undefined) {
+    if (!imageUrl) {
+      return imageUrl;
+    }
+
+    try {
+      return sanitizeImageDataUrl(imageUrl);
+    } catch (error) {
+      throw Boom.badRequest(`Unable to save Space, the image is not a valid SVG: ${error.message}`);
+    }
+  }
 
   /**
    * Collects a map of all deprecated feature IDs and the feature IDs that replace them.

@@ -10,6 +10,9 @@ import type { ElasticsearchErrorDetails } from '@kbn/es-errors';
 
 import { isObjectLike } from 'lodash';
 
+import type { AgentVersionBlock } from '../../common/types';
+import type { BreakingChangesLog } from '../../common/services/changelog_utils';
+
 import { FleetError } from '../../common/errors';
 
 import { isESClientError } from './utils';
@@ -60,6 +63,20 @@ export class RegistryResponseError extends RegistryError {
 
 export class PackageInvalidDeploymentMode extends FleetError {}
 export class PackageOutdatedError extends FleetError {}
+/**
+ * An update by query stopped before it went through all of its documents: it was cancelled for
+ * running too long, or it timed out. The documents it did update stay updated.
+ */
+export class UpdateByQueryIncompleteError extends FleetError {}
+export class PackageBreakingChangesNotAcknowledgedError extends FleetError {
+  constructor(message: string, breakingChanges: BreakingChangesLog) {
+    super(message);
+    this.attributes = {
+      type: 'breaking_changes_not_acknowledged',
+      breaking_changes: breakingChanges,
+    };
+  }
+}
 export class PackageFailedVerificationError extends FleetError {
   constructor(pkgName: string, pkgVersion: string) {
     super(`${pkgName}-${pkgVersion} failed signature verification.`);
@@ -153,6 +170,7 @@ export class CloudConnectorUpdateError extends FleetError {
 
 export class AgentPolicyNameExistsError extends AgentPolicyError {}
 export class AgentReassignmentError extends FleetError {}
+export class AgentAlreadyAssignedError extends AgentReassignmentError {}
 export class AgentRollbackError extends FleetError {
   constructor(message: string) {
     super(`Error rolling back agent in Fleet: ${message}`);
@@ -160,6 +178,19 @@ export class AgentRollbackError extends FleetError {
 }
 export class PackagePolicyIneligibleForUpgradeError extends FleetError {}
 export class PackagePolicyValidationError extends FleetError {}
+export class PackagePolicyAgentVersionIncompatibleError extends FleetError {
+  constructor(
+    message: string,
+    public readonly agentVersionBlock: AgentVersionBlock,
+    public readonly operation: 'upgrade' | 'add'
+  ) {
+    super(message);
+    this.attributes = {
+      type: 'agent_version_incompatible',
+      agent_version_block: agentVersionBlock,
+    };
+  }
+}
 export class PackagePolicyNameExistsError extends FleetError {}
 export class BundledPackageLocationNotFoundError extends FleetError {}
 
@@ -183,6 +214,13 @@ export class HostedAgentPolicyRestrictionRelatedError extends FleetError {
     );
   }
 }
+export class AgentlessAgentRestrictionError extends FleetError {
+  constructor(message = 'Cannot perform that action') {
+    super(
+      `${message} in Fleet because managed agents are managed by Elastic and do not support this action.`
+    );
+  }
+}
 export class PackagePolicyRestrictionRelatedError extends FleetError {
   constructor(message = 'Cannot perform that action') {
     super(
@@ -198,6 +236,7 @@ export class FleetNotFoundError<TMeta = unknown> extends FleetError<TMeta> {}
 export class FleetTooManyRequestsError extends FleetError {}
 
 export class OutputUnauthorizedError extends FleetError {}
+export class FleetServerHostInvalidError extends FleetError {}
 export class OutputLicenceError extends FleetError {}
 export class DownloadSourceError extends FleetError {}
 export class DeleteUnenrolledAgentsPreconfiguredError extends FleetError {}

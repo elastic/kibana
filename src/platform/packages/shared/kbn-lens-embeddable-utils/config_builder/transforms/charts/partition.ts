@@ -274,9 +274,13 @@ function convertLegendStatsToWaffleAPIValues(
   return undefined;
 }
 
-function convertAPIStaticColorToLensState(config: PartitionConfig) {
-  if (isAPIMosaicChartLayer(config)) {
-    return undefined;
+function convertAPIStaticColorToLensState(
+  config: PartitionConfig
+): Pick<LensPartitionLayerState, 'colorsByDimension'> {
+  // Mosaic metrics have no color. Other charts ignore the static metric color while a group is
+  // active (not collapsed), so it is not stored, mirroring `fromLensStateToAPIMetrics`.
+  if (isAPIMosaicChartLayer(config) || config.group_by?.some(groupIsNotCollapsed)) {
+    return {};
   }
 
   // Key colorsByDimension by the metric's position in `config.metrics`
@@ -294,23 +298,20 @@ function convertAPIStaticColorToLensState(config: PartitionConfig) {
 function convertCollapseAPItoCollapseFns<P extends 'group_by' | 'group_breakdown_by'>(
   config: Partial<Record<P, { collapse_by?: CollapseBySchema }[]>>,
   prop: P
-) {
-  if (!(prop in config) || config[prop] == null) {
-    return [];
-  }
-  return config[prop]
-    .filter(
-      (
-        groupBy
-      ): groupBy is {
-        collapse_by: CollapseBySchema;
-      } => groupBy.collapse_by != null
-    )
-    .map(({ collapse_by }, index) => [getAccessorName(prop, index), collapse_by]);
+): Array<[string, CollapseBySchema]> {
+  // Key by the group's position in the request, as the group columns are, not by its position
+  // among the collapsed groups.
+  return (config[prop] ?? []).flatMap(({ collapse_by }, index) =>
+    collapse_by != null ? [[getAccessorName(prop, index), collapse_by]] : []
+  );
 }
 
 function computeSharedPartitionLayerState(config: PartitionConfig) {
-  const groupColouring = config.group_by?.find(({ color }) => color != null)?.color;
+  // Only the first non-collapsed group is colored, as in `fromLensStateToAPIGroups`.
+  const coloredGroup = config.group_by?.find(groupIsNotCollapsed);
+  const groupColouring = coloredGroup
+    ? coloredGroup.color ?? DEFAULT_CATEGORICAL_COLOR_MAPPING
+    : undefined;
   const hasColorMapping = groupColouring != null && !('type' in groupColouring);
   const collapseFns = Object.fromEntries(
     convertCollapseAPItoCollapseFns(config, 'group_by').concat(

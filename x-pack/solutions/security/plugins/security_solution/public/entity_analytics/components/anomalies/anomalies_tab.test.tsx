@@ -115,7 +115,18 @@ jest.mock('@elastic/eui', () => {
 });
 
 jest.mock('../../../common/lib/kibana', () => ({
-  useKibana: () => ({ services: { ml: {} } }),
+  useKibana: () => ({
+    services: {
+      ml: {},
+      uiSettings: {
+        get: (key: 'dateFormat:tz' | 'dateFormat:dow') =>
+          ({
+            'dateFormat:tz': 'Japan',
+            'dateFormat:dow': 'Wednesday',
+          }[key]),
+      },
+    },
+  }),
 }));
 
 jest.mock('@kbn/ml-plugin/public', () => ({

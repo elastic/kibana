@@ -31,7 +31,7 @@ import {
 } from '../../simulated_function_calling';
 import { getTemperatureIfValid } from '../../utils/get_temperature';
 import type { InferenceEndpointExecutor } from '../../utils/inference_endpoint_executor';
-import { sanitizeToolSchemasForVertex } from './sanitize_tool_schemas_for_vertex';
+import { sanitizeToolSchemasForVertex } from '../../utils/sanitize_tool_schemas_for_vertex';
 import type { OpenAIRequest } from '../openai/types';
 
 export interface InferenceEndpointAdapterChatCompleteOptions {
@@ -90,6 +90,7 @@ export const inferenceEndpointAdapter = {
       temperature,
       modelName,
       endpointModelId,
+      logger,
     });
 
     return defer(() =>
@@ -118,6 +119,7 @@ const createEndpointRequest = ({
   temperature,
   modelName,
   endpointModelId,
+  logger,
 }: {
   system?: string;
   messages: Message[];
@@ -127,6 +129,7 @@ const createEndpointRequest = ({
   temperature?: number;
   modelName?: string;
   endpointModelId?: string;
+  logger?: Logger;
 }): OpenAIRequest => {
   const temperatureOptions = getTemperatureIfValid(temperature, {
     modelId: endpointModelId ?? modelName,
@@ -155,7 +158,10 @@ const createEndpointRequest = ({
     messages: messagesToOpenAI({ system, messages }),
     ...(hasTools
       ? {
-          tool_choice: toolChoiceToOpenAI(toolChoice),
+          tool_choice: toolChoiceToOpenAI(toolChoice, {
+            modelId: endpointModelId ?? modelName,
+            logger,
+          }),
           tools: openAiTools,
         }
       : {}),

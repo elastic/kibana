@@ -7,8 +7,11 @@
 
 import { schema } from '@kbn/config-schema';
 
-import { isValidNamespace } from '../../services';
-import { MAX_REUSABLE_AGENT_POLICIES_PER_PACKAGE_POLICY } from '../../constants/package_policy';
+import { isValidNamespace, validateNoPathTraversalIdSchema } from '../../services';
+import {
+  ACKNOWLEDGE_AGENT_VERSION_INCOMPATIBILITY_DESCRIPTION,
+  MAX_REUSABLE_AGENT_POLICIES_PER_PACKAGE_POLICY,
+} from '../../constants/package_policy';
 
 const PACKAGE_POLICY_ID_MAX_LENGTH = 255;
 const PACKAGE_POLICY_NAME_MAX_LENGTH = 255;
@@ -18,7 +21,8 @@ const PACKAGE_POLICY_PACKAGE_VERSION_MAX_LENGTH = 50;
 const PACKAGE_POLICY_DATA_STREAM_MAX_LENGTH = 1024;
 const PACKAGE_POLICY_DATA_STREAM_PERMISSION_MAX_LENGTH = 256;
 const PACKAGE_POLICY_VARIABLE_NAME_MAX_LENGTH = 1024;
-const PACKAGE_POLICY_VARIABLE_VALUE_MAX_LENGTH = 10000;
+const PACKAGE_POLICY_VARIABLE_VALUE_UNBOUNDED_REASON =
+  'Variable values (SQL queries, scripts, YAML) have no natural size; the request body is already bounded by server.maxPayload, and the legacy inputs format has never had a per-value limit';
 const PACKAGE_POLICY_DEPRECATION_DESCRIPTION_MAX_LENGTH = 4096;
 
 export const PackagePolicyNamespaceSchema = schema.string({
@@ -349,6 +353,19 @@ export const NewPackagePolicySchema = schema.object(
   { meta: { id: 'new_package_policy' } }
 );
 
+// REST-only input and stream IDs. PackagePolicyInputsSchema and PackagePolicyStreamsSchema stay
+// unchanged because they feed the frozen SO model-version schemas.
+// `validate` rejects path-traversal ids early; the service layer enforces the same check for
+// non-REST callers.
+const RestPackagePolicyInputIdSchema = schema.maybe(
+  schema.string({ validate: validateNoPathTraversalIdSchema })
+);
+
+const RestPackagePolicyStreamSchema = schema.object({
+  ...PackagePolicyStreamsSchema,
+  id: schema.maybe(schema.string({ validate: validateNoPathTraversalIdSchema })), // BWC < 7.11
+});
+
 const CreatePackagePolicyProps = {
   ...PackagePolicyBaseSchema,
   enabled: schema.maybe(schema.boolean()),
@@ -356,9 +373,8 @@ const CreatePackagePolicyProps = {
   inputs: schema.arrayOf(
     schema.object({
       ...PackagePolicyInputsSchema,
-      streams: schema.maybe(
-        schema.arrayOf(schema.object(PackagePolicyStreamsSchema), { maxSize: 1000 })
-      ),
+      id: RestPackagePolicyInputIdSchema,
+      streams: schema.maybe(schema.arrayOf(RestPackagePolicyStreamSchema, { maxSize: 1000 })),
     }),
     { maxSize: 1000 }
   ),
@@ -391,6 +407,14 @@ export const CreatePackagePolicyRequestBodySchema = schema.object(
         },
       })
     ),
+    acknowledge_agent_version_incompatibility: schema.maybe(
+      schema.boolean({
+        meta: {
+          description: ACKNOWLEDGE_AGENT_VERSION_INCOMPATIBILITY_DESCRIPTION,
+          availability: { since: '9.5.0', stability: 'stable' },
+        },
+      })
+    ),
     // supports_agentless is deprecated for package policy creation in favor of the managed integrations API
     supports_agentless: schema.maybe(
       schema.nullable(
@@ -412,12 +436,13 @@ export const SimplifiedVarsSchema = schema.recordOf(
   schema.string({ maxLength: PACKAGE_POLICY_VARIABLE_NAME_MAX_LENGTH }),
   schema.nullable(
     schema.oneOf([
-      schema.string({ maxLength: PACKAGE_POLICY_VARIABLE_VALUE_MAX_LENGTH }),
+      schema.unboundedString({ reason: PACKAGE_POLICY_VARIABLE_VALUE_UNBOUNDED_REASON }),
       schema.number(),
       schema.boolean(),
-      schema.arrayOf(schema.string({ maxLength: PACKAGE_POLICY_VARIABLE_VALUE_MAX_LENGTH }), {
-        maxSize: 100,
-      }),
+      schema.arrayOf(
+        schema.unboundedString({ reason: PACKAGE_POLICY_VARIABLE_VALUE_UNBOUNDED_REASON }),
+        { maxSize: 100 }
+      ),
       schema.arrayOf(schema.number(), { maxSize: 100 }),
       // Secrets
       schema.object({
@@ -637,6 +662,14 @@ export const SimplifiedCreatePackagePolicyRequestBodySchema =
           },
         })
       ),
+      acknowledge_agent_version_incompatibility: schema.maybe(
+        schema.boolean({
+          meta: {
+            description: ACKNOWLEDGE_AGENT_VERSION_INCOMPATIBILITY_DESCRIPTION,
+            availability: { since: '9.5.0', stability: 'stable' },
+          },
+        })
+      ),
       package: PackagePolicyPackageSchema,
       // supports_agentless is deprecated for package policy creation in favor of the managed integrations API
       supports_agentless: schema.maybe(
@@ -671,15 +704,22 @@ export const UpdatePackagePolicyRequestBodySchema = schema.object(
       schema.arrayOf(
         schema.object({
           ...PackagePolicyInputsSchema,
-          streams: schema.maybe(
-            schema.arrayOf(schema.object(PackagePolicyStreamsSchema), { maxSize: 1000 })
-          ),
+          id: RestPackagePolicyInputIdSchema,
+          streams: schema.maybe(schema.arrayOf(RestPackagePolicyStreamSchema, { maxSize: 1000 })),
         }),
         { maxSize: 1000 }
       )
     ),
     version: schema.maybe(schema.string()),
     force: schema.maybe(schema.boolean()),
+    acknowledge_agent_version_incompatibility: schema.maybe(
+      schema.boolean({
+        meta: {
+          description: ACKNOWLEDGE_AGENT_VERSION_INCOMPATIBILITY_DESCRIPTION,
+          availability: { since: '9.5.0', stability: 'stable' },
+        },
+      })
+    ),
   },
   { meta: { id: 'update_package_policy_request' } }
 );
@@ -881,7 +921,23 @@ export const PackagePolicyStatusResponseSchema = schema.object(
     success: schema.boolean(),
     name: schema.maybe(schema.string()),
     statusCode: schema.maybe(schema.number()),
-    body: schema.maybe(schema.object({ message: schema.string() })),
+    body: schema.maybe(
+      schema.object({
+        message: schema.string(),
+        attributes: schema.maybe(
+          schema.object(
+            {},
+            {
+              unknowns: 'allow',
+              meta: {
+                description:
+                  'Details of the error. `type` is `agent_version_incompatible` when the package policy was not upgraded because some active agents do not satisfy the package agent version condition.',
+              },
+            }
+          )
+        ),
+      })
+    ),
   },
   { meta: { id: 'package_policy_status_response' } }
 );

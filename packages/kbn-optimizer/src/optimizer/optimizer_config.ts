@@ -10,6 +10,7 @@
 import Path from 'path';
 import Os from 'os';
 import { getPackages, getPluginPackagesFilter, type PluginSelector } from '@kbn/repo-packages';
+import type { KibanaGroup } from '@kbn/projects-solutions-groups';
 import type { ThemeTag, ThemeTags } from '@kbn/core-ui-settings-common';
 import { parseThemeTags } from '@kbn/core-ui-settings-common';
 
@@ -113,6 +114,8 @@ interface Options {
   pluginPaths?: string[];
   /** absolute paths to directories, any plugins in these directories will be built */
   pluginScanDirs?: string[];
+  /** restrict discovery to plugins belonging to these groups */
+  allowlistPluginGroups?: readonly KibanaGroup[];
 
   /**
    * array of comma separated patterns that will be matched against bundle ids.
@@ -235,6 +238,7 @@ export class OptimizerConfig {
         testPlugins,
         paths: pluginPaths,
         parentDirs: pluginScanDirs,
+        allowlistPluginGroups: options.allowlistPluginGroups,
       },
     };
   }
@@ -253,8 +257,8 @@ export class OptimizerConfig {
               type: 'entry',
               id: 'core',
               sourceRoot: options.repoRoot,
-              contextDir: Path.resolve(options.repoRoot, 'src/core'),
-              outputDir: Path.resolve(options.outputRoot, 'src/core/target/public'),
+              contextDir: Path.resolve(options.repoRoot, 'src/core/packages/core'),
+              outputDir: Path.resolve(options.outputRoot, 'src/core/packages/core/target/public'),
               pageLoadAssetSizeLimit: limits.pageLoadAssetSize?.core,
               remoteInfo: {
                 pkgId: '@kbn/core',

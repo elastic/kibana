@@ -19,6 +19,7 @@ import { useStableMenuItemsReference } from './use_stable_menu_items_reference';
 
 interface ResponsiveMenuState {
   primaryMenuRef: MutableRefObject<HTMLElement | null>;
+  isOverflowMeasured: boolean;
   visibleMenuItems: MenuItem[];
   overflowMenuItems: MenuItem[];
 }
@@ -46,6 +47,7 @@ export function useResponsiveMenu(
   const heightsCacheRef = useRef<number[]>([]);
 
   const [visibleCount, setVisibleCount] = useState<number>(items.length);
+  const [isOverflowMeasured, setIsOverflowMeasured] = useState(false);
 
   const visibleMenuItems = useMemo(() => items.slice(0, visibleCount), [items, visibleCount]);
   const overflowMenuItems = useMemo(() => items.slice(visibleCount), [items, visibleCount]);
@@ -77,6 +79,7 @@ export function useResponsiveMenu(
 
     // 3. Update the visible count if needed
     setVisibleCount(nextVisibleCount);
+    setIsOverflowMeasured(true);
   }, [stableItemsReference, hasForcedMoreButton]);
 
   const [scheduleRecalculation, cancelRecalculation] =
@@ -85,6 +88,7 @@ export function useResponsiveMenu(
   useLayoutEffect(() => {
     // Invalidate the cache when items change
     setVisibleCount(stableItemsReference.length);
+    setIsOverflowMeasured(false);
     heightsCacheRef.current = [];
 
     const observer = new ResizeObserver(() => {
@@ -112,6 +116,7 @@ export function useResponsiveMenu(
 
   return {
     primaryMenuRef,
+    isOverflowMeasured,
     visibleMenuItems,
     overflowMenuItems,
   };

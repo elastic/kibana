@@ -181,7 +181,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             await dashboard.waitForRenderComplete();
 
             await retry.try(async () => {
-              const el = await elasticChart.getCanvas();
+              const panel = await testSubjects.find(`embeddablePanelHoverActions-${visName}`);
+              const el = await panel.findByCssSelector('.echChart canvas:last-of-type');
 
               await el.clickMouseButton({
                 xOffset: clickCoordinates.x,
@@ -215,6 +216,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             await act('viz_1', { x: 143, y: 123 });
             const hasMachineRawFilter = await filterBar.hasFilter('machine.os.raw', 'win 7');
             expect(hasMachineRawFilter).to.be(true);
+            await filterBar.removeFilter('machine.os.raw');
+            await filterBar.expectNoFilter('machine.os.raw', 'win 7');
           });
 
           it('should create a filter for series with multiple split by terms fields one of which has formatting', async () => {
@@ -227,7 +230,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             await visualBuilder.setChartType('Bar');
             await visChart.waitForVisualizationRenderingStabilized();
             await visualBuilder.clickPanelOptions('timeSeries');
+            const renderingCount = await elasticChart.getVisualizationRenderingCount();
             await visualBuilder.setIntervalValue('1w');
+            await elasticChart.waitForRenderingCount(renderingCount + 1);
+            await visChart.waitForVisualizationRenderingStabilized();
 
             await act('vis_2', { x: -130, y: 10 });
 

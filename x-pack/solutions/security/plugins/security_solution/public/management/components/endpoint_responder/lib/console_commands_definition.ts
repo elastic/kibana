@@ -39,6 +39,7 @@ import type {
   ResponseActionAgentType,
 } from '../../../../../common/endpoint/service/response_actions/constants';
 import {
+  GET_FILE_MAX_PATHS,
   RESPONSE_CONSOLE_ACTION_COMMANDS_TO_ENDPOINT_CAPABILITY,
   RESPONSE_CONSOLE_COMMAND_TO_API_COMMAND_MAP,
 } from '../../../../../common/endpoint/service/response_actions/constants';
@@ -188,6 +189,8 @@ export interface GetEndpointConsoleCommandsOptions {
   platform: SupportedHostOsType;
 }
 
+// A refactor of response action command definition will be done in the near(ish) future
+
 export const getEndpointConsoleCommands = ({
   endpointAgentId,
   agentType,
@@ -202,6 +205,7 @@ export const getEndpointConsoleCommands = ({
     microsoftDefenderEndpointCancelEnabled,
     responseActionsEndpointCancel,
     responseActionsEndpointMemoryDump,
+    responseActionsEndpointMemoryDumpRaw,
     responseActionsEndpointRunScript,
   } = featureFlags;
   const commandMeta: EndpointCommandDefinitionMeta = {
@@ -232,6 +236,35 @@ export const getEndpointConsoleCommands = ({
   const canCancelForCurrentContext = () => {
     return isCancelFeatureAvailable(endpointPrivileges, featureFlags, agentType);
   };
+
+  // `get-file` with multiple `--path` arguments applies only to the Elastic Defend Endpoint and
+  // requires that the host's Endpoint supports it (via the `get_file_multi_path` capability).
+  const getFileAllowsMultiplePaths = agentType === 'endpoint';
+  const isGetFileMultiPathSupportedByEndpoint = (
+    endpointCapabilities as EndpointCapabilities[]
+  ).includes('get_file_multi_path');
+  // The "can be used multiple times" help text is only shown when the Endpoint reports support for it
+  const getFilePathAbout =
+    getFileAllowsMultiplePaths && isGetFileMultiPathSupportedByEndpoint
+      ? CONSOLE_COMMANDS.getFile.args.path.aboutMultiple
+      : CONSOLE_COMMANDS.getFile.args.path.about;
+
+  // `get-file --force` applies only to the Elastic Defend Endpoint and is only offered when the
+  // host's Endpoint supports it (reported via the `get_file_force` capability, Windows only).
+  const isGetFileForceSupportedByEndpoint = (
+    endpointCapabilities as EndpointCapabilities[]
+  ).includes('get_file_force');
+  const getFileForceArg: Record<string, CommandArgDefinition> =
+    agentType === 'endpoint' && isGetFileForceSupportedByEndpoint
+      ? {
+          force: {
+            required: false,
+            allowMultiples: false,
+            mustHaveValue: false,
+            about: CONSOLE_COMMANDS.getFile.args.force.about,
+          },
+        }
+      : {};
 
   let consoleCommands: CommandDefinition[] = [
     {
@@ -392,12 +425,24 @@ export const getEndpointConsoleCommands = ({
       args: {
         path: {
           required: true,
-          allowMultiples: false,
-          about: CONSOLE_COMMANDS.getFile.args.path.about,
+          allowMultiples: getFileAllowsMultiplePaths,
+          mustHaveValue: 'non-empty-string',
+          about: getFilePathAbout,
           validate: (argData) => {
-            return emptyArgumentValidator(argData);
+            if (argData.length > 1) {
+              if (!isGetFileMultiPathSupportedByEndpoint) {
+                return CONSOLE_COMMANDS.getFile.args.path.multipleNotSupported;
+              }
+
+              if (argData.length > GET_FILE_MAX_PATHS) {
+                return CONSOLE_COMMANDS.getFile.args.path.tooManyPaths(GET_FILE_MAX_PATHS);
+              }
+            }
+
+            return true;
           },
         },
+        ...getFileForceArg,
         ...commandCommentArgument(),
       },
       helpGroupLabel: HELP_GROUPS.responseActions.label,
@@ -720,6 +765,9 @@ export const getEndpointConsoleCommands = ({
     const endpointSupportsProcessDump = (endpointCapabilities as EndpointCapabilities[]).includes(
       'memdump_process'
     );
+    const endpointSupportsRawDump = (endpointCapabilities as EndpointCapabilities[]).includes(
+      'memdump_raw'
+    );
     const getMemoryDumpTypeNotSupportedMessage = (type: 'process' | 'kernel') =>
       i18n.translate(
         'xpack.securitySolution.consoleCommandsDefinition.memoryDump.kernelTypeNotSupported',
@@ -754,18 +802,23 @@ export const getEndpointConsoleCommands = ({
           return true;
         }
 
-        const memoryDumpType = argsInterface.hasArg('kernel') ? 'kernel' : 'process';
+        const memoryDumpType = argsInterface.hasArg('kernel')
+          ? 'kernel'
+          : argsInterface.hasArg('raw')
+          ? 'raw'
+          : 'process';
 
         // PID and Entity ID are only supported for process memory dumps
         if (
-          memoryDumpType === 'kernel' &&
+          (memoryDumpType === 'kernel' || memoryDumpType === 'raw') &&
           (argsInterface.hasArg('pid') || argsInterface.hasArg('entityId'))
         ) {
           return i18n.translate(
             'xpack.securitySolution.consoleCommandsDefinition.memoryDump.pidAndEntityIdNotSupportedForKernel',
             {
               defaultMessage:
-                '"pid" and "entityId" arguments are not supported for "kernel" memory dumps',
+                '"pid" and "entityId" arguments are not supported for "{type}" memory dumps',
+              values: { type: memoryDumpType },
             }
           );
         }
@@ -820,6 +873,19 @@ export const getEndpointConsoleCommands = ({
             return true;
           },
         },
+        ...(agentType === 'endpoint' &&
+        responseActionsEndpointMemoryDumpRaw &&
+        endpointSupportsRawDump
+          ? {
+              raw: {
+                about: CONSOLE_COMMANDS.memoryDump.rawArgAbout,
+                required: false,
+                allowMultiples: false,
+                mustHaveValue: false,
+                exclusiveOr: true,
+              },
+            }
+          : {}),
         entityId: {
           required: false,
           allowMultiples: false,
@@ -839,7 +905,9 @@ export const getEndpointConsoleCommands = ({
       helpCommandPosition: 6,
       helpDisabled: !doesEndpointSupportCommand('memory-dump'),
       helpHidden: !getRbacControl({ commandName: 'execute', privileges: endpointPrivileges }),
-      helpUsage: getMemoryDumpHelpUsage(),
+      helpUsage: getMemoryDumpHelpUsage(
+        agentType === 'endpoint' && responseActionsEndpointMemoryDumpRaw && endpointSupportsRawDump
+      ),
     });
   }
 

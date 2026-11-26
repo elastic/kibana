@@ -53,3 +53,24 @@ responses:
               statusCode: 400
               error: 'Bad Request'
               message: 'An error message describing what went wrong'
+  403:
+    description: 'Forbidden. The caller lacks a Kibana API privilege required by an asset in the archive. No assets are written.'
+    content:
+      application/json:
+        examples:
+          insufficientPrivilegesExample:
+            summary: 'Missing rules-all privilege'
+            description: 'Caller lacks a privilege required by a gated asset type in the archive'
+            value:
+              statusCode: 403
+              error: 'Forbidden'
+              message: 'Insufficient privileges to upload this package'
+      application/gzip; application/zip:
+        examples:
+          insufficientPrivilegesExample:
+            summary: 'Missing rules-all privilege'
+            description: 'Caller lacks a privilege required by a gated asset type in the archive'
+            value:
+              statusCode: 403
+              error: 'Forbidden'
+              message: 'Insufficient privileges to upload this package'

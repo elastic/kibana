@@ -13,7 +13,11 @@ import type { PackageInfo } from '../../../../../../../../common';
 import type { TestRenderer } from '../../../../../../../mock';
 import { createFleetTestRendererMock } from '../../../../../../../mock';
 
-import { useGetAgentPolicies, useMultipleAgentPolicies } from '../../../../../hooks';
+import {
+  useGetAgentPolicies,
+  useMultipleAgentPolicies,
+  sendBulkGetAgentPolicies,
+} from '../../../../../hooks';
 
 import { StepSelectAgentPolicy } from './step_select_agent_policy';
 
@@ -63,6 +67,9 @@ const useGetAgentPoliciesMock = useGetAgentPolicies as jest.MockedFunction<
 const useMultipleAgentPoliciesMock = useMultipleAgentPolicies as jest.MockedFunction<
   typeof useMultipleAgentPolicies
 >;
+const sendBulkGetAgentPoliciesMock = sendBulkGetAgentPolicies as jest.MockedFunction<
+  typeof sendBulkGetAgentPolicies
+>;
 
 describe('stepStepSelectAgentPolicy', () => {
   let testRenderer: TestRenderer;
@@ -108,6 +115,37 @@ describe('stepStepSelectAgentPolicy', () => {
         const select = renderResult.container.querySelector('[data-test-subj="agentPolicySelect"]');
         expect((select as any)?.value).toEqual('');
       });
+    });
+
+    test('should not block save when all agents are incompatible with the integration version requirement', async () => {
+      useGetAgentPoliciesMock.mockReturnValue({
+        data: { items: [{ id: 'policy-1', name: 'Policy 1' }] },
+        error: undefined,
+        isLoading: false,
+        resendRequest: jest.fn(),
+      } as any);
+      sendBulkGetAgentPoliciesMock.mockResolvedValueOnce({
+        data: {
+          items: [
+            {
+              id: 'policy-1',
+              package_policies: [],
+              agents_per_version: [{ version: '7.17.0', count: 3 }],
+            },
+          ],
+        },
+      } as any);
+
+      render({ name: 'test-integration', conditions: { agent: { version: '>=8.0.0' } } } as any);
+      await act(async () => {});
+      await act(async () => {});
+
+      expect(
+        renderResult.queryByText(
+          /None of the agents using the selected agent policies are compatible/
+        )
+      ).not.toBeInTheDocument();
+      expect(mockSetHasAgentPolicyError).toHaveBeenCalledWith(false);
     });
 
     test('should select agent policy by default if one exists', async () => {

@@ -18,9 +18,10 @@ import {
 import { getColorCategories } from '@kbn/chart-expressions-common';
 import { useDebouncedValue } from '@kbn/visualization-utils';
 import type { KbnPalettes } from '@kbn/palettes';
-import type {
-  VisualizationDimensionEditorProps,
-  DatatableVisualizationState,
+import {
+  LENS_DATATABLE_DEFAULT_COLOR_STEPS,
+  type VisualizationDimensionEditorProps,
+  type DatatableVisualizationState,
 } from '@kbn/lens-common';
 import { DatatableInspectorTables } from '../../../../common/expressions';
 
@@ -295,6 +296,7 @@ export function TableDimensionEditor(props: TableDimensionEditorProps) {
                 paletteService={props.paletteService}
                 panelRef={props.panelRef}
                 dataBounds={currentMinMax}
+                defaultBandCount={LENS_DATATABLE_DEFAULT_COLOR_STEPS}
               />
             ))}
         </>

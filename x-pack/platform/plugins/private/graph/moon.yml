@@ -66,6 +66,7 @@ tags:
   - group-platform
   - private
   - jest-unit-tests
+  - scout-tests
 fileGroups:
   src:
     - '*.ts'
@@ -74,6 +75,4 @@ fileGroups:
     - server/**/*
     - test/scout/**/*
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

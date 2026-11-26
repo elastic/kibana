@@ -20,7 +20,11 @@ import {
   validateSharedListLinkedRules,
   waitForExceptionListDetailToBeLoaded,
 } from '../../../../../../tasks/exceptions_table';
-import { createExceptionList } from '../../../../../../tasks/api_calls/exceptions';
+import {
+  createExceptionList,
+  deleteExceptionLists,
+} from '../../../../../../tasks/api_calls/exceptions';
+import { deleteAlertsAndRules } from '../../../../../../tasks/api_calls/common';
 import {
   EXCEPTIONS_LIST_MANAGEMENT_NAME,
   EXCEPTIONS_LIST_MANAGEMENT_DESCRIPTION,
@@ -44,6 +48,8 @@ const EXCEPTION_LIST_NAME = 'Newly created list';
 describe('Exception list detail page', { tags: ['@ess', '@serverless'] }, () => {
   beforeEach(() => {
     login();
+    deleteAlertsAndRules();
+    deleteExceptionLists();
 
     // Create exception list associated with a rule
     createExceptionList(getExceptionList1(), getExceptionList1().list_id).then((response) =>

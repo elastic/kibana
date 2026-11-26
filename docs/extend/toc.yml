@@ -69,6 +69,7 @@ toc:
           - file: system-user.md
           - file: encrypted-saved-objects.md
           - file: audit-logging.md
+          - file: bounded-string-schemas.md
       - file: saved-objects.md
         children:
           - file: saved-objects/structure.md

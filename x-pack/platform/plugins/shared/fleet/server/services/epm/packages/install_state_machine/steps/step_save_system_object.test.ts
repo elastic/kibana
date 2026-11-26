@@ -185,6 +185,120 @@ describe('updateLatestExecutedState', () => {
     );
   });
 
+  it('Should log the package policies that failed to upgrade, without failing the install', async () => {
+    soClient.get.mockResolvedValue({
+      id: 'test-integration',
+      attributes: {
+        title: 'title',
+        name: 'test-integration',
+        version: '1.0.0',
+        install_source: 'registry',
+        install_status: 'installed',
+        package_assets: [],
+        keep_policies_up_to_date: true,
+      },
+    } as any);
+    mockedPackagePolicyService.listIds.mockReturnValue({
+      items: ['packagePolicy1', 'packagePolicy2', 'packagePolicy3'],
+    } as any);
+    mockedPackagePolicyService.bulkUpgrade.mockResolvedValue([
+      { id: 'packagePolicy1', success: true },
+      { id: 'packagePolicy2', success: false, statusCode: 400, body: { message: 'Invalid input' } },
+      { id: 'packagePolicy3', success: false, statusCode: 409, body: { message: 'Conflict' } },
+    ]);
+    logger.warn.mockClear();
+
+    await expect(
+      stepSaveSystemObject({
+        savedObjectsClient: soClient,
+        // @ts-ignore
+        savedObjectsImporter: jest.fn(),
+        esClient,
+        logger,
+        packageInstallContext: {
+          archiveIterator: createArchiveIteratorFromMap(new Map()),
+          paths: [],
+          packageInfo: {
+            title: 'title',
+            name: 'test-integration',
+            version: '1.0.0',
+            description: 'test',
+            type: 'integration',
+            categories: ['cloud', 'custom'],
+            format_version: 'string',
+            release: 'experimental',
+            conditions: { kibana: { version: 'x.y.z' } },
+            owner: { github: 'elastic/fleet' },
+          },
+        },
+        installType: 'install',
+        installSource: 'registry',
+        spaceId: DEFAULT_SPACE_ID,
+      })
+    ).resolves.toBeUndefined();
+
+    expect(logger.warn).toHaveBeenCalledTimes(1);
+    expect(logger.warn).toHaveBeenCalledWith(
+      'Failed to upgrade 2 of 3 package policies of package test-integration: packagePolicy2: Invalid input; packagePolicy3: Conflict'
+    );
+  });
+
+  it('Should not warn when every package policy upgraded', async () => {
+    soClient.get.mockResolvedValue({
+      id: 'test-integration',
+      attributes: {
+        title: 'title',
+        name: 'test-integration',
+        version: '1.0.0',
+        install_source: 'registry',
+        install_status: 'installed',
+        package_assets: [],
+        keep_policies_up_to_date: true,
+      },
+    } as any);
+    mockedPackagePolicyService.listIds.mockReturnValue({
+      items: ['packagePolicy1', 'packagePolicy2', 'packagePolicy3'],
+    } as any);
+    mockedPackagePolicyService.bulkUpgrade.mockResolvedValue([
+      { id: 'packagePolicy1', success: true },
+      { id: 'packagePolicy2', success: true },
+      { id: 'packagePolicy3', success: true },
+    ]);
+    logger.warn.mockClear();
+
+    await expect(
+      stepSaveSystemObject({
+        savedObjectsClient: soClient,
+        // @ts-ignore
+        savedObjectsImporter: jest.fn(),
+        esClient,
+        logger,
+        packageInstallContext: {
+          archiveIterator: createArchiveIteratorFromMap(new Map()),
+          paths: [],
+          packageInfo: {
+            title: 'title',
+            name: 'test-integration',
+            version: '1.0.0',
+            description: 'test',
+            type: 'integration',
+            categories: ['cloud', 'custom'],
+            format_version: 'string',
+            release: 'experimental',
+            conditions: { kibana: { version: 'x.y.z' } },
+            owner: { github: 'elastic/fleet' },
+          },
+        },
+        installType: 'install',
+        installSource: 'registry',
+        spaceId: DEFAULT_SPACE_ID,
+      })
+    ).resolves.toBeUndefined();
+
+    expect(mockedPackagePolicyService.bulkUpgrade).toHaveBeenCalled();
+    expect(logger.warn).not.toHaveBeenCalled();
+  });
+
   it('Should save the SO with rolled_back:true if update version is less than current version', async () => {
     soClient.get.mockResolvedValue({
       id: 'test-integration',
@@ -565,6 +679,120 @@ describe('updateLatestExecutedState', () => {
       ).rejects.toThrow('boom');
 
       expect(soClient.update).toHaveBeenCalledTimes(2);
+    });
+  });
+
+  describe('es_index_patterns recompute for input packages', () => {
+    const INPUT_OTEL_PACKAGE_INFO = {
+      title: 'AWS CloudWatch (OpenTelemetry)',
+      name: 'aws_cloudwatch_input_otel',
+      version: '0.6.0',
+      description: 'test',
+      type: 'input',
+      categories: ['custom'],
+      format_version: 'string',
+      release: 'beta',
+      conditions: { kibana: { version: 'x.y.z' } },
+      owner: { github: 'elastic/fleet' },
+      policy_templates: [
+        {
+          name: 'aws.ec2',
+          title: 'AWS EC2 OpenTelemetry Metrics',
+          description: 'test',
+          type: 'metrics',
+          input: 'otelcol',
+          template_path: 'input.yml.hbs',
+        },
+      ],
+    } as any;
+
+    let experimentalFeaturesSpy: jest.SpyInstance;
+
+    beforeEach(() => {
+      experimentalFeaturesSpy = jest
+        .spyOn(appContextService, 'getExperimentalFeatures')
+        .mockReturnValue({ enableOtelIntegrations: true } as any);
+      soClient.get.mockResolvedValue({
+        id: 'aws_cloudwatch_input_otel',
+        attributes: {
+          name: 'aws_cloudwatch_input_otel',
+          version: '0.6.0',
+          install_status: 'installed',
+          package_assets: [],
+        },
+      } as any);
+    });
+
+    afterEach(() => {
+      experimentalFeaturesSpy.mockRestore();
+      mockedPackagePolicyService.list.mockReset();
+    });
+
+    const runStep = () =>
+      stepSaveSystemObject({
+        savedObjectsClient: soClient,
+        esClient,
+        logger,
+        packageInstallContext: {
+          archiveIterator: createArchiveIteratorFromMap(new Map()),
+          paths: [],
+          packageInfo: INPUT_OTEL_PACKAGE_INFO,
+        },
+        installType: 'install',
+        installSource: 'registry',
+        spaceId: DEFAULT_SPACE_ID,
+      });
+
+    it('recomputes per-policy dataset patterns with .otel for an input package', async () => {
+      mockedPackagePolicyService.list.mockResolvedValue({
+        items: [
+          {
+            id: 'pp-1',
+            package: { name: 'aws_cloudwatch_input_otel', version: '0.6.0' },
+            inputs: [
+              {
+                type: 'otelcol',
+                streams: [
+                  {
+                    data_stream: { type: 'metrics' },
+                    vars: {
+                      'data_stream.dataset': { value: 'aws_cloudwatch_input_otel.aws.ec2' },
+                    },
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+        total: 1,
+        page: 1,
+        perPage: 100,
+      } as any);
+
+      await runStep();
+
+      expect(soClient.update).toHaveBeenCalledWith(
+        PACKAGES_SAVED_OBJECT_TYPE,
+        'aws_cloudwatch_input_otel',
+        expect.objectContaining({
+          es_index_patterns: expect.objectContaining({
+            'aws_cloudwatch_input_otel.aws.ec2': 'metrics-aws_cloudwatch_input_otel.aws.ec2.otel-*',
+          }),
+        }),
+        expect.anything()
+      );
+    });
+
+    it('does not fail the install when listing package policies fails', async () => {
+      mockedPackagePolicyService.list.mockRejectedValue(new Error('boom'));
+
+      await expect(runStep()).resolves.not.toThrow();
+      expect(soClient.update).toHaveBeenCalledWith(
+        PACKAGES_SAVED_OBJECT_TYPE,
+        'aws_cloudwatch_input_otel',
+        expect.objectContaining({ es_index_patterns: expect.anything() }),
+        expect.anything()
+      );
     });
   });
 });

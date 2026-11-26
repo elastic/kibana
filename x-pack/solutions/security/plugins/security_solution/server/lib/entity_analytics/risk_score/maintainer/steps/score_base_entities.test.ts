@@ -95,6 +95,7 @@ describe('score_base_entities', () => {
     const compositeCall = (esClient.search as jest.Mock).mock.calls[0][0];
     expect(compositeCall.index).toBe(baseParams.alertsIndex);
     expect(compositeCall.aggs.by_entity_id.composite.size).toBe(baseParams.pageSize);
+    expect(compositeCall.ignore_unavailable).toBe(true);
 
     const esqlQuery = (esClient.esql.query as jest.Mock).mock.calls[0][0].query as string;
     expect(esqlQuery).toContain('entity_id <= "user:a@okta"');

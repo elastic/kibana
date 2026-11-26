@@ -31,6 +31,7 @@ import {
   WATCHLIST_CSV_DATA_SOURCE_DESCRIPTION,
 } from './translations';
 import { RuleBasedSourceInput } from './rule_based_source_input';
+import type { useRuleBasedSourceState } from './hooks/use_rule_based_source_state';
 import { WatchlistCsvUpload } from './csv_upload';
 import { ManagedWatchlistSourceInput } from './managed_watchlist_source_input';
 import {
@@ -50,7 +51,7 @@ export interface WatchlistFormProps {
     key: K,
     value: CreateWatchlistRequestBodyInput[K]
   ) => void;
-  onSourceValidationChange: (valid: boolean) => void;
+  ruleBasedSource: ReturnType<typeof useRuleBasedSourceState>;
 }
 
 const getTooLongError = (isTooLong: boolean, maxLength: number, fieldId: string) =>
@@ -72,7 +73,7 @@ export const WatchlistForm = ({
   isDescriptionTooLong,
   isRiskModifierInvalid,
   onFieldChange,
-  onSourceValidationChange,
+  ruleBasedSource,
 }: WatchlistFormProps) => {
   const isManaged = watchlist.managed === true;
   const isNameDisabled = isEditMode && !canUpdateWatchlistField('name', isManaged);
@@ -164,14 +165,9 @@ export const WatchlistForm = ({
         </Suspense>
       )}
       <RuleBasedSourceInput
-        watchlistName={watchlist.name}
         watchlistId={watchlistId}
         indexSourceWithMissingApiKey={indexSourceWithMissingApiKey}
-        isEditMode={isEditMode}
-        isManaged={watchlist.managed}
-        onFieldChange={onFieldChange}
-        initialEntitySources={watchlist.entitySources}
-        onSourceValidationChange={onSourceValidationChange}
+        ruleBasedSource={ruleBasedSource}
       />
     </EuiForm>
   );

@@ -12,6 +12,7 @@ import { createAppContextStartContractMock } from '../../mocks';
 import { appContextService } from '../../services';
 import { packagePolicyService } from '../../services/package_policy';
 import { installPackage } from '../../services/epm/packages';
+import { PackageBreakingChangesNotAcknowledgedError } from '../../errors';
 
 import { _runBulkUpgradeTask } from './run_bulk_upgrade';
 
@@ -24,6 +25,7 @@ describe('Bulk upgrade task', () => {
     appContextService.start(mockContract);
 
     jest.mocked(installPackage).mockReset();
+    jest.mocked(packagePolicyService.listIds).mockReset();
     jest.mocked(installPackage).mockImplementation(async (params) => {
       if (!('pkgkey' in params)) {
         throw new Error('Invalid call to installPackage');
@@ -116,6 +118,132 @@ describe('Bulk upgrade task', () => {
 
       expect(installPackage).toBeCalled();
       expect(packagePolicyService.bulkUpgrade).toBeCalled();
+    });
+
+    it('should succeed when package policies are blocked by their agents versions', async () => {
+      jest.mocked(packagePolicyService.bulkUpgrade).mockResolvedValue([
+        { id: 'id1', success: true },
+        {
+          id: 'id2',
+          name: 'policy-2',
+          success: false,
+          statusCode: 400,
+          body: {
+            message: 'blocked',
+            attributes: {
+              type: 'agent_version_incompatible',
+              agent_version_block: {
+                package_name: 'test_valid',
+                package_version: '1.1.0',
+                version_condition: '^9.4.0',
+                blocked_count: 1,
+                observed_versions: ['9.3.0'],
+              },
+            },
+          },
+        },
+      ]);
+
+      const res = await _runBulkUpgradeTask({
+        abortController: new AbortController(),
+        logger: loggingSystemMock.createLogger(),
+        taskParams: {
+          type: 'bulk_upgrade',
+          packages: [{ name: 'test_valid' }],
+          upgradePackagePolicies: true,
+        },
+        request: {} as KibanaRequest,
+      });
+
+      expect(res).toEqual([
+        {
+          name: 'test_valid',
+          success: true,
+          skipped_package_policies: [{ id: 'id2', name: 'policy-2', version_condition: '^9.4.0' }],
+        },
+      ]);
+    });
+
+    it('should fail when package policies fail for another reason', async () => {
+      jest.mocked(packagePolicyService.bulkUpgrade).mockResolvedValue([
+        {
+          id: 'id1',
+          success: false,
+          statusCode: 400,
+          body: { message: 'blocked', attributes: { type: 'agent_version_incompatible' } },
+        },
+        { id: 'id2', success: false, statusCode: 500, body: { message: 'boom' } },
+      ]);
+
+      const res = await _runBulkUpgradeTask({
+        abortController: new AbortController(),
+        logger: loggingSystemMock.createLogger(),
+        taskParams: {
+          type: 'bulk_upgrade',
+          packages: [{ name: 'test_valid' }],
+          upgradePackagePolicies: true,
+        },
+        request: {} as KibanaRequest,
+      });
+
+      expect(res).toEqual([
+        {
+          name: 'test_valid',
+          success: false,
+          error: { message: 'Package policies upgrade for test_valid failed:\n500: boom' },
+        },
+      ]);
+    });
+
+    it('should check breaking changes and pass the acknowledgement to installPackage', async () => {
+      await _runBulkUpgradeTask({
+        abortController: new AbortController(),
+        logger: loggingSystemMock.createLogger(),
+        taskParams: {
+          type: 'bulk_upgrade',
+          packages: [{ name: 'test_valid' }],
+          acknowledgeBreakingChanges: true,
+        },
+        request: {} as KibanaRequest,
+      });
+
+      expect(installPackage).toHaveBeenCalledWith(
+        expect.objectContaining({ checkBreakingChanges: true, acknowledgeBreakingChanges: true })
+      );
+    });
+
+    it('should not upgrade package policies of a package rejected for breaking changes', async () => {
+      jest.mocked(installPackage).mockResolvedValueOnce({
+        error: new PackageBreakingChangesNotAcknowledgedError(
+          'Upgrading test_breaking includes breaking changes',
+          []
+        ),
+      } as any);
+
+      const res = await _runBulkUpgradeTask({
+        abortController: new AbortController(),
+        logger: loggingSystemMock.createLogger(),
+        taskParams: {
+          type: 'bulk_upgrade',
+          packages: [{ name: 'test_breaking' }, { name: 'test_valid' }],
+          upgradePackagePolicies: true,
+        },
+        request: {} as KibanaRequest,
+      });
+
+      expect(res).toEqual([
+        {
+          name: 'test_breaking',
+          success: false,
+          error: { message: 'Upgrading test_breaking includes breaking changes' },
+        },
+        { name: 'test_valid', success: true },
+      ]);
+      expect(packagePolicyService.listIds).toHaveBeenCalledTimes(1);
+      expect(packagePolicyService.listIds).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({ kuery: expect.stringContaining('test_valid') })
+      );
     });
 
     it('should not continue to upgrade packages when task is cancelled', async () => {

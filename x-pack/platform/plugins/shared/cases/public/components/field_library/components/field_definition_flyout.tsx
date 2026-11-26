@@ -292,6 +292,7 @@ export const FieldDefinitionFlyout: React.FC<FieldDefinitionFlyoutProps> = ({
             <FieldDefinitionYamlEditor
               value={definition}
               onChange={setDefinition}
+              isEditing={isEditing}
               data-test-subj="fieldDefinitionYamlInput"
             />
           </EuiFormRow>

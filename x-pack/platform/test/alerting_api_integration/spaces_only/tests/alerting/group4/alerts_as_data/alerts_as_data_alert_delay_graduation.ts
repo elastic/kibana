@@ -22,10 +22,12 @@ import {
 import type { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 import { Spaces } from '../../../../scenarios';
 import {
+  AlertUtils,
   getEventLog,
   getTestRuleData,
   getUrlPrefix,
   ObjectRemover,
+  TaskManagerUtils,
 } from '../../../../../common/lib';
 
 // Regression test for https://github.com/elastic/kibana/issues/259886.
@@ -43,6 +45,8 @@ export default function alertsAsDataAlertDelayGraduationTests({ getService }: Ft
   const retry = getService('retry');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const objectRemover = new ObjectRemover(supertestWithoutAuth);
+  const alertUtils = new AlertUtils({ space: Spaces.space1, supertestWithoutAuth });
+  const taskManagerUtils = new TaskManagerUtils(es, retry);
 
   type PatternFiringAlert = Alert & { patternIndex: number; instancePattern: boolean[] };
 
@@ -105,7 +109,7 @@ export default function alertsAsDataAlertDelayGraduationTests({ getService }: Ft
       // Drive runs 1..6.
       await waitForExecutionCount(ruleId, 1);
       for (let runCount = 2; runCount <= 6; runCount++) {
-        await runRuleSoon(ruleId);
+        await alertUtils.runSoonWhenIdle(ruleId, retry, taskManagerUtils);
         await waitForExecutionCount(ruleId, runCount);
       }
 
@@ -159,13 +163,6 @@ export default function alertsAsDataAlertDelayGraduationTests({ getService }: Ft
       },
     });
     return result.hits.hits as Array<SearchHit<PatternFiringAlert>>;
-  }
-
-  async function runRuleSoon(ruleId: string) {
-    const runSoon = await supertestWithoutAuth
-      .post(`${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rule/${ruleId}/_run_soon`)
-      .set('kbn-xsrf', 'foo');
-    expect(runSoon.status).to.eql(204);
   }
 
   async function waitForExecutionCount(ruleId: string, count: number): Promise<IValidatedEvent[]> {

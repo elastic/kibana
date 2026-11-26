@@ -59,4 +59,48 @@ describe('UserActionPropertyActions', () => {
     expect(screen.queryByTestId('property-actions-user-action')).not.toBeInTheDocument();
     expect(screen.queryByTestId('user-action-title-loading')).not.toBeInTheDocument();
   });
+
+  it('does not render the ellipsis when every custom action renders null', () => {
+    renderWithTestingProviders(
+      <UserActionPropertyActions
+        isLoading={false}
+        propertyActions={[
+          {
+            type: AttachmentActionType.CUSTOM,
+            render: () => null,
+          },
+        ]}
+      />
+    );
+
+    expect(screen.queryByTestId('property-actions-user-action')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('property-actions-user-action-ellipses')).not.toBeInTheDocument();
+  });
+
+  it('renders the ellipsis when at least one overflow action is visible', async () => {
+    renderWithTestingProviders(
+      <UserActionPropertyActions
+        isLoading={false}
+        propertyActions={[
+          {
+            type: AttachmentActionType.CUSTOM,
+            render: () => null,
+          },
+          {
+            type: AttachmentActionType.BUTTON as const,
+            iconType: 'download',
+            label: 'Download',
+            onClick,
+          },
+        ]}
+      />
+    );
+
+    expect(await screen.findByTestId('property-actions-user-action-ellipses')).toBeInTheDocument();
+
+    await userEvent.click(await screen.findByTestId('property-actions-user-action-ellipses'));
+    await waitForEuiPopoverOpen();
+
+    expect(await screen.findByTestId('property-actions-user-action-download')).toBeInTheDocument();
+  });
 });

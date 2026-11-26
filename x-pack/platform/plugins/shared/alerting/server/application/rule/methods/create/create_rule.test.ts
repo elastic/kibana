@@ -2104,7 +2104,10 @@ describe('create()', () => {
     });
 
     await rulesClient.create({ data });
-    expect(rulesClientParams.createAPIKey).toHaveBeenCalledWith('Alerting: 123/my rule name');
+    expect(rulesClientParams.createAPIKey).toHaveBeenCalledWith(
+      'Alerting: 123/my rule name',
+      undefined
+    );
   });
 
   test('should create rule with given notifyWhen value if notifyWhen is not null', async () => {

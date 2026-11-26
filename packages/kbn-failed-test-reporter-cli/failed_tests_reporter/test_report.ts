@@ -19,6 +19,8 @@ export type TestReport =
         /* attributes on the root <testsuites> element, e.g. name="ftr" | "jest" */
         $?: {
           name?: string;
+          /* FTR only: the Scout test target tag of the run, e.g. "cloud-serverless-search" */
+          target?: string;
         };
         testsuite: TestSuite[];
       };
@@ -67,6 +69,8 @@ export interface TestCase {
     'command-line'?: string;
     /* the codeowners of the file */
     owners?: string;
+    /* "true" when this failure only happened because an earlier Mocha timeout aborted the run */
+    'cascading-failure'?: string;
   };
   /* contents of system-out elements */
   'system-out'?: Array<string | { _: string }>;

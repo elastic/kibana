@@ -19,9 +19,12 @@ import {
   MAX_CUSTOM_FIELDS_PER_CASE,
 } from '../../../common/constants';
 import { SECURITY_SOLUTION_OWNER, OBSERVABILITY_OWNER } from '../../../common/constants/owners';
+import { usageCollectionPluginMock } from '@kbn/usage-collection-plugin/server/mocks';
+import type { CaseSavedObjectTransformed } from '../../common/types/case';
 import { mockCaseComments, mockCases } from '../../mocks';
 import { createCasesClientMock, createCasesClientMockArgs } from '../mocks';
 import { Operations } from '../../authorization';
+import type { UserActionEvent } from '../../services/user_actions/types';
 import { bulkUpdate, getOperationsToAuthorize } from './bulk_update';
 
 describe('update', () => {
@@ -843,9 +846,16 @@ describe('update', () => {
     });
 
     it('resolves the applied template name and passes it to buildUserActions', async () => {
-      clientArgs.services.templatesService.getTemplate.mockResolvedValue({
-        attributes: { name: 'My Template' },
-      } as Awaited<ReturnType<typeof clientArgs.services.templatesService.getTemplate>>);
+      clientArgs.services.templatesService.getTemplate.mockImplementation(
+        async (templateId: string) =>
+          ({
+            attributes: {
+              name: 'My Template',
+              templateId,
+              owner: mockCases[0].attributes.owner,
+            },
+          } as Awaited<ReturnType<typeof clientArgs.services.templatesService.getTemplate>>)
+      );
 
       await bulkUpdate(
         {
@@ -869,8 +879,162 @@ describe('update', () => {
       );
     });
 
-    it('omits the applied template from templateNamesByKey when it cannot be resolved', async () => {
+    it('rejects a template that cannot be found', async () => {
       clientArgs.services.templatesService.getTemplate.mockResolvedValue(undefined);
+
+      await expect(
+        bulkUpdate(
+          {
+            cases: [
+              {
+                id: mockCases[0].id,
+                version: mockCases[0].version ?? '',
+                template: { id: 'tmpl-missing', version: 1 },
+              },
+            ],
+          },
+          clientArgs,
+          casesClientMock
+        )
+      ).rejects.toThrow('Template tmpl-missing version 1 not found');
+
+      expect(clientArgs.services.caseService.patchCases).not.toHaveBeenCalled();
+    });
+
+    it("rejects a template that belongs to another case's owner", async () => {
+      clientArgs.services.templatesService.getTemplate.mockResolvedValue({
+        attributes: {
+          name: 'Foreign Template',
+          templateId: 'tmpl-foreign',
+          owner: 'some-other-owner',
+        },
+      } as Awaited<ReturnType<typeof clientArgs.services.templatesService.getTemplate>>);
+
+      await expect(
+        bulkUpdate(
+          {
+            cases: [
+              {
+                id: mockCases[0].id,
+                version: mockCases[0].version ?? '',
+                template: { id: 'tmpl-foreign', version: 1 },
+              },
+            ],
+          },
+          clientArgs,
+          casesClientMock
+        )
+      ).rejects.toThrow('Template tmpl-foreign version 1 not found');
+
+      expect(clientArgs.services.caseService.patchCases).not.toHaveBeenCalled();
+      expect(clientArgs.services.userActionService.creator.buildUserActions).not.toHaveBeenCalled();
+    });
+
+    it('rejects an empty template id without looking the template up', async () => {
+      await expect(
+        bulkUpdate(
+          {
+            cases: [
+              {
+                id: mockCases[0].id,
+                version: mockCases[0].version ?? '',
+                template: { id: '', version: 1 },
+              },
+            ],
+          },
+          clientArgs,
+          casesClientMock
+        )
+      ).rejects.toThrow('Template id must not be empty');
+
+      expect(clientArgs.services.templatesService.getTemplate).not.toHaveBeenCalled();
+      expect(clientArgs.services.caseService.patchCases).not.toHaveBeenCalled();
+    });
+
+    it('rejects a template whose stored id differs from the requested id', async () => {
+      clientArgs.services.templatesService.getTemplate.mockResolvedValue({
+        attributes: {
+          name: 'Other Template',
+          templateId: 'tmpl-other',
+          owner: mockCases[0].attributes.owner,
+        },
+      } as Awaited<ReturnType<typeof clientArgs.services.templatesService.getTemplate>>);
+
+      await expect(
+        bulkUpdate(
+          {
+            cases: [
+              {
+                id: mockCases[0].id,
+                version: mockCases[0].version ?? '',
+                template: { id: 'tmpl-1', version: 1 },
+              },
+            ],
+          },
+          clientArgs,
+          casesClientMock
+        )
+      ).rejects.toThrow('Template tmpl-1 version 1 not found');
+    });
+  });
+
+  describe('Template counters', () => {
+    const usageCounter = usageCollectionPluginMock
+      .createSetupContract()
+      .createUsageCounter('cases');
+    const caseWithTemplate = {
+      ...mockCases[0],
+      attributes: { ...mockCases[0].attributes, template: { id: 'tmpl-1', version: 3 } },
+    };
+
+    type PatchedCaseResult = Awaited<
+      ReturnType<
+        ReturnType<typeof createCasesClientMockArgs>['services']['caseService']['patchCases']
+      >
+    >['saved_objects'][number];
+
+    const setupArgs = ({
+      clientSource = 'rest_api',
+      originalCases = [mockCases[0]],
+      patchedCases,
+    }: {
+      clientSource?: 'rest_api' | 'connector';
+      originalCases?: CaseSavedObjectTransformed[];
+      patchedCases?: PatchedCaseResult[];
+    } = {}) => {
+      const args = { ...createCasesClientMockArgs(), usageCounter, clientSource };
+
+      args.services.caseService.getCases.mockResolvedValue({ saved_objects: originalCases });
+      args.services.caseService.getAllCaseComments.mockResolvedValue({
+        saved_objects: [],
+        total: 0,
+        per_page: 10,
+        page: 1,
+      });
+      args.services.attachmentService.getter.getCaseAttatchmentStats.mockResolvedValue(new Map());
+      args.services.caseService.patchCases.mockResolvedValue({
+        saved_objects: patchedCases ?? originalCases,
+      });
+      args.services.templatesService.getTemplate.mockImplementation(
+        async (templateId: string) =>
+          ({
+            attributes: {
+              name: 'My Template',
+              templateId,
+              owner: mockCases[0].attributes.owner,
+            },
+          } as Awaited<ReturnType<typeof args.services.templatesService.getTemplate>>)
+      );
+
+      return args;
+    };
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
+
+    it('counts a template applied to an existing case', async () => {
+      const clientArgs = setupArgs();
 
       await bulkUpdate(
         {
@@ -878,7 +1042,7 @@ describe('update', () => {
             {
               id: mockCases[0].id,
               version: mockCases[0].version ?? '',
-              template: { id: 'tmpl-missing', version: 1 },
+              template: { id: 'tmpl-1', version: 3 },
             },
           ],
         },
@@ -886,11 +1050,383 @@ describe('update', () => {
         casesClientMock
       );
 
-      expect(clientArgs.services.userActionService.creator.buildUserActions).toHaveBeenCalledWith(
-        expect.objectContaining({
-          templateNamesByKey: new Map(),
-        })
+      expect(usageCounter.incrementCounter).toHaveBeenCalledWith({
+        counterName: 'apply_template',
+        counterType: 'cases_client.rest_api',
+        incrementBy: 1,
+      });
+      expect(usageCounter.incrementCounter).toHaveBeenCalledTimes(1);
+    });
+
+    it('counts a template cleared from an existing case', async () => {
+      const clientArgs = setupArgs({ originalCases: [caseWithTemplate] });
+
+      await bulkUpdate(
+        {
+          cases: [
+            {
+              id: caseWithTemplate.id,
+              version: caseWithTemplate.version ?? '',
+              template: null,
+            },
+          ],
+        },
+        clientArgs,
+        casesClientMock
       );
+
+      expect(usageCounter.incrementCounter).toHaveBeenCalledWith({
+        counterName: 'clear_template',
+        counterType: 'cases_client.rest_api',
+        incrementBy: 1,
+      });
+      expect(usageCounter.incrementCounter).toHaveBeenCalledTimes(1);
+    });
+
+    it('does not count clearing a template from a case that never had one', async () => {
+      const clientArgs = setupArgs();
+
+      await bulkUpdate(
+        {
+          cases: [
+            {
+              id: mockCases[0].id,
+              version: mockCases[0].version ?? '',
+              template: null,
+              title: 'A new title',
+            },
+          ],
+        },
+        clientArgs,
+        casesClientMock
+      );
+
+      expect(usageCounter.incrementCounter).not.toHaveBeenCalledWith(
+        expect.objectContaining({ counterName: 'clear_template' })
+      );
+    });
+
+    // The no-op filter drops an unchanged template before the update logic runs, so this counts
+    // effective changes rather than what the caller happened to send.
+    it('does not count re-sending the template a case already has', async () => {
+      const clientArgs = setupArgs({ originalCases: [caseWithTemplate] });
+
+      await bulkUpdate(
+        {
+          cases: [
+            {
+              id: caseWithTemplate.id,
+              version: caseWithTemplate.version ?? '',
+              template: { id: 'tmpl-1', version: 3 },
+              title: 'A new title',
+            },
+          ],
+        },
+        clientArgs,
+        casesClientMock
+      );
+
+      expect(usageCounter.incrementCounter).not.toHaveBeenCalledWith(
+        expect.objectContaining({ counterName: 'apply_template' })
+      );
+    });
+
+    it('counts cases, not update calls', async () => {
+      const secondCase = { ...mockCases[0], id: 'mock-id-2' };
+      const clientArgs = setupArgs({ originalCases: [mockCases[0], secondCase] });
+
+      await bulkUpdate(
+        {
+          cases: [
+            {
+              id: mockCases[0].id,
+              version: mockCases[0].version ?? '',
+              template: { id: 'tmpl-1', version: 3 },
+            },
+            {
+              id: secondCase.id,
+              version: secondCase.version ?? '',
+              template: { id: 'tmpl-1', version: 3 },
+            },
+          ],
+        },
+        clientArgs,
+        casesClientMock
+      );
+
+      expect(usageCounter.incrementCounter).toHaveBeenCalledWith({
+        counterName: 'apply_template',
+        counterType: 'cases_client.rest_api',
+        incrementBy: 2,
+      });
+      expect(usageCounter.incrementCounter).toHaveBeenCalledTimes(1);
+    });
+
+    it('splits one update across both buckets', async () => {
+      const secondCase = { ...caseWithTemplate, id: 'mock-id-2' };
+      const clientArgs = setupArgs({ originalCases: [mockCases[0], secondCase] });
+
+      await bulkUpdate(
+        {
+          cases: [
+            {
+              id: mockCases[0].id,
+              version: mockCases[0].version ?? '',
+              template: { id: 'tmpl-1', version: 3 },
+            },
+            {
+              id: secondCase.id,
+              version: secondCase.version ?? '',
+              template: null,
+            },
+          ],
+        },
+        clientArgs,
+        casesClientMock
+      );
+
+      expect(usageCounter.incrementCounter).toHaveBeenCalledWith({
+        counterName: 'apply_template',
+        counterType: 'cases_client.rest_api',
+        incrementBy: 1,
+      });
+      expect(usageCounter.incrementCounter).toHaveBeenCalledWith({
+        counterName: 'clear_template',
+        counterType: 'cases_client.rest_api',
+        incrementBy: 1,
+      });
+      expect(usageCounter.incrementCounter).toHaveBeenCalledTimes(2);
+    });
+
+    it('counts a case once when the request repeats its id', async () => {
+      const clientArgs = setupArgs();
+
+      await bulkUpdate(
+        {
+          cases: [
+            {
+              id: mockCases[0].id,
+              version: mockCases[0].version ?? '',
+              template: { id: 'tmpl-1', version: 3 },
+            },
+            {
+              id: mockCases[0].id,
+              version: mockCases[0].version ?? '',
+              template: { id: 'tmpl-1', version: 3 },
+            },
+          ],
+        },
+        clientArgs,
+        casesClientMock
+      );
+
+      expect(usageCounter.incrementCounter).toHaveBeenCalledWith({
+        counterName: 'apply_template',
+        counterType: 'cases_client.rest_api',
+        incrementBy: 1,
+      });
+    });
+
+    // Matches how the adjacent updatedFieldsByCaseId reducer resolves a repeated id.
+    it('keeps the first template change when the request repeats an id with conflicting ones', async () => {
+      const clientArgs = setupArgs({ originalCases: [caseWithTemplate] });
+
+      await bulkUpdate(
+        {
+          cases: [
+            {
+              id: caseWithTemplate.id,
+              version: caseWithTemplate.version ?? '',
+              template: null,
+            },
+            {
+              id: caseWithTemplate.id,
+              version: caseWithTemplate.version ?? '',
+              template: { id: 'tmpl-2', version: 1 },
+            },
+          ],
+        },
+        clientArgs,
+        casesClientMock
+      );
+
+      expect(usageCounter.incrementCounter).toHaveBeenCalledWith({
+        counterName: 'clear_template',
+        counterType: 'cases_client.rest_api',
+        incrementBy: 1,
+      });
+      expect(usageCounter.incrementCounter).toHaveBeenCalledTimes(1);
+    });
+
+    it('attributes counters to the calling source', async () => {
+      const clientArgs = setupArgs({ clientSource: 'connector' });
+
+      await bulkUpdate(
+        {
+          cases: [
+            {
+              id: mockCases[0].id,
+              version: mockCases[0].version ?? '',
+              template: { id: 'tmpl-1', version: 3 },
+            },
+          ],
+        },
+        clientArgs,
+        casesClientMock
+      );
+
+      expect(usageCounter.incrementCounter).toHaveBeenCalledWith({
+        counterName: 'apply_template',
+        counterType: 'cases_client.connector',
+        incrementBy: 1,
+      });
+      expect(usageCounter.incrementCounter).toHaveBeenCalledTimes(1);
+    });
+
+    // On this branch `bulkUpdate` keeps error results in the patch response, so a case whose update
+    // failed still reaches the counter. The guard that skips them (elastic/kibana#277223) is 9.6
+    // only, so counting the failed case is the behavior here rather than the intended one.
+    it('counts a case whose update failed to persist', async () => {
+      const secondCase = { ...mockCases[0], id: 'mock-id-2' };
+      const clientArgs = setupArgs({
+        originalCases: [mockCases[0], secondCase],
+        patchedCases: [
+          mockCases[0],
+          {
+            type: 'cases',
+            id: secondCase.id,
+            attributes: {},
+            references: [],
+            error: { error: 'Conflict', message: 'conflict', statusCode: 409 },
+          },
+        ],
+      });
+
+      await bulkUpdate(
+        {
+          cases: [
+            {
+              id: mockCases[0].id,
+              version: mockCases[0].version ?? '',
+              template: { id: 'tmpl-1', version: 3 },
+            },
+            {
+              id: secondCase.id,
+              version: secondCase.version ?? '',
+              template: { id: 'tmpl-1', version: 3 },
+            },
+          ],
+        },
+        clientArgs,
+        casesClientMock
+      );
+
+      expect(usageCounter.incrementCounter).toHaveBeenCalledWith({
+        counterName: 'apply_template',
+        counterType: 'cases_client.rest_api',
+        incrementBy: 2,
+      });
+      expect(usageCounter.incrementCounter).toHaveBeenCalledTimes(1);
+    });
+
+    it('adds one use per case to the applied template usage stats', async () => {
+      const secondCase = { ...mockCases[0], id: 'mock-id-2' };
+      const clientArgs = setupArgs({ originalCases: [mockCases[0], secondCase] });
+
+      await bulkUpdate(
+        {
+          cases: [
+            {
+              id: mockCases[0].id,
+              version: mockCases[0].version ?? '',
+              template: { id: 'tmpl-1', version: 3 },
+            },
+            {
+              id: secondCase.id,
+              version: secondCase.version ?? '',
+              template: { id: 'tmpl-1', version: 3 },
+            },
+          ],
+        },
+        clientArgs,
+        casesClientMock
+      );
+
+      expect(clientArgs.services.templatesService.incrementUsageStats).toHaveBeenCalledTimes(1);
+      expect(clientArgs.services.templatesService.incrementUsageStats).toHaveBeenCalledWith(
+        'tmpl-1',
+        2
+      );
+    });
+
+    it('does not touch usage stats when a template is only cleared', async () => {
+      const clientArgs = setupArgs({ originalCases: [caseWithTemplate] });
+
+      await bulkUpdate(
+        {
+          cases: [
+            {
+              id: caseWithTemplate.id,
+              version: caseWithTemplate.version ?? '',
+              template: null,
+            },
+          ],
+        },
+        clientArgs,
+        casesClientMock
+      );
+
+      expect(clientArgs.services.templatesService.incrementUsageStats).not.toHaveBeenCalled();
+    });
+
+    it('does not fail the update when the template usage stats write fails', async () => {
+      const clientArgs = setupArgs();
+      clientArgs.services.templatesService.incrementUsageStats.mockRejectedValueOnce(
+        new Error('stats update failed')
+      );
+
+      await expect(
+        bulkUpdate(
+          {
+            cases: [
+              {
+                id: mockCases[0].id,
+                version: mockCases[0].version ?? '',
+                template: { id: 'tmpl-1', version: 3 },
+              },
+            ],
+          },
+          clientArgs,
+          casesClientMock
+        )
+      ).resolves.not.toThrow();
+
+      expect(clientArgs.logger.warn).toHaveBeenCalledWith(
+        expect.stringContaining('Failed to update template usage stats')
+      );
+    });
+
+    it('does not count an update that failed', async () => {
+      const clientArgs = setupArgs();
+      clientArgs.services.caseService.patchCases.mockRejectedValueOnce(new Error('update failed'));
+
+      await expect(
+        bulkUpdate(
+          {
+            cases: [
+              {
+                id: mockCases[0].id,
+                version: mockCases[0].version ?? '',
+                template: { id: 'tmpl-1', version: 3 },
+              },
+            ],
+          },
+          clientArgs,
+          casesClientMock
+        )
+      ).rejects.toThrow();
+
+      expect(usageCounter.incrementCounter).not.toHaveBeenCalled();
     });
   });
 
@@ -2032,6 +2568,30 @@ describe('update', () => {
     });
 
     describe('Validate max user actions per page', () => {
+      const createUserAction = (
+        type: string,
+        payload: Record<string, unknown> = {}
+      ): UserActionEvent => ({
+        parameters: {
+          attributes: {
+            action: 'update',
+            type,
+            payload,
+            created_at: '2026-10-28T00:00:00.000Z',
+            created_by: { username: 'elastic', full_name: null, email: null },
+            owner: SECURITY_SOLUTION_OWNER,
+          },
+          references: [],
+        },
+        eventDetails: {
+          getMessage: () => 'message',
+          action: 'update',
+          descriptiveAction: 'case_user_action_update',
+          savedObjectId: mockCases[0].id,
+          savedObjectType: 'cases',
+        },
+      });
+
       beforeEach(() => {
         jest.clearAllMocks();
         clientArgsMock.services.caseService.getCases.mockResolvedValue({
@@ -2052,9 +2612,8 @@ describe('update', () => {
           }
         );
 
-        // @ts-ignore: only the array length matters here
         clientArgsMock.services.userActionService.creator.buildUserActions.mockReturnValue({
-          [mockCases[0].id]: [1],
+          [mockCases[0].id]: [createUserAction('title')],
         });
 
         clientArgsMock.services.caseService.patchCases.mockResolvedValue({
@@ -2085,9 +2644,12 @@ describe('update', () => {
           }
         );
 
-        // @ts-ignore: only the array length matters here
         clientArgsMock.services.userActionService.creator.buildUserActions.mockReturnValue({
-          [mockCases[0].id]: [1, 2, 3],
+          [mockCases[0].id]: [
+            createUserAction('title'),
+            createUserAction('tags'),
+            createUserAction('description'),
+          ],
         });
 
         await expect(
@@ -2117,10 +2679,13 @@ describe('update', () => {
           }
         );
 
-        // @ts-ignore: only the array length matters here
         clientArgsMock.services.userActionService.creator.buildUserActions.mockReturnValue({
-          [mockCases[0].id]: [1, 2, 3],
-          [mockCases[1].id]: [1],
+          [mockCases[0].id]: [
+            createUserAction('title'),
+            createUserAction('tags'),
+            createUserAction('description'),
+          ],
+          [mockCases[1].id]: [createUserAction('title')],
         });
 
         await expect(
@@ -2139,6 +2704,100 @@ describe('update', () => {
                   title: 'This is supposed to pass',
                 },
               ],
+            },
+            clientArgsMock,
+            casesClientMock
+          )
+        ).rejects.toThrow(
+          `Error: The case with case id ${mockCases[0].id} has reached the limit of ${MAX_USER_ACTIONS_PER_CASE} user actions.`
+        );
+      });
+
+      it.each([MAX_USER_ACTIONS_PER_CASE, MAX_USER_ACTIONS_PER_CASE + 5])(
+        'closes a case that has %s user actions',
+        async (totalUserActions) => {
+          clientArgsMock.services.userActionService.getMultipleCasesUserActionsTotal.mockResolvedValue(
+            { [mockCases[0].id]: totalUserActions }
+          );
+
+          clientArgsMock.services.userActionService.creator.buildUserActions.mockReturnValue({
+            [mockCases[0].id]: [
+              createUserAction('status', {
+                status: CaseStatuses.closed,
+                closeReason: 'false_positive',
+              }),
+            ],
+          });
+
+          clientArgsMock.services.caseService.patchCases.mockResolvedValue({
+            saved_objects: [{ ...mockCases[0] }],
+          });
+
+          await expect(
+            bulkUpdate(
+              {
+                cases: [
+                  {
+                    id: mockCases[0].id,
+                    version: mockCases[0].version ?? '',
+                    status: CaseStatuses.closed,
+                  },
+                ],
+              },
+              clientArgsMock,
+              casesClientMock
+            )
+          ).resolves.not.toThrow();
+        }
+      );
+
+      it('throws when closing a case at the limit also changes another field', async () => {
+        clientArgsMock.services.userActionService.getMultipleCasesUserActionsTotal.mockResolvedValue(
+          { [mockCases[0].id]: MAX_USER_ACTIONS_PER_CASE }
+        );
+
+        clientArgsMock.services.userActionService.creator.buildUserActions.mockReturnValue({
+          [mockCases[0].id]: [
+            createUserAction('status', { status: CaseStatuses.closed }),
+            createUserAction('title'),
+          ],
+        });
+
+        await expect(
+          bulkUpdate(
+            {
+              cases: [
+                {
+                  id: mockCases[0].id,
+                  version: mockCases[0].version ?? '',
+                  status: CaseStatuses.closed,
+                  title: 'This is a test case!!',
+                },
+              ],
+            },
+            clientArgsMock,
+            casesClientMock
+          )
+        ).rejects.toThrow(
+          `Error: The case with case id ${mockCases[0].id} has reached the limit of ${MAX_USER_ACTIONS_PER_CASE} user actions.`
+        );
+      });
+
+      it('throws when moving a case at the limit to in progress', async () => {
+        const status = CaseStatuses['in-progress'];
+
+        clientArgsMock.services.userActionService.getMultipleCasesUserActionsTotal.mockResolvedValue(
+          { [mockCases[0].id]: MAX_USER_ACTIONS_PER_CASE }
+        );
+
+        clientArgsMock.services.userActionService.creator.buildUserActions.mockReturnValue({
+          [mockCases[0].id]: [createUserAction('status', { status })],
+        });
+
+        await expect(
+          bulkUpdate(
+            {
+              cases: [{ id: mockCases[0].id, version: mockCases[0].version ?? '', status }],
             },
             clientArgsMock,
             casesClientMock
@@ -2851,7 +3510,9 @@ describe('update', () => {
           clientArgs,
           casesClientMock
         )
-      ).rejects.toThrow('are not global (isGlobal) field definitions');
+      ).rejects.toThrow(
+        'Unknown extended field key: "risk_score_as_keyword". No fields are available for this case'
+      );
     });
   });
 

@@ -35,7 +35,7 @@ export function UptimeOverviewProvider({ getService }: FtrProviderContext) {
 
     async clickDefineSettings() {
       return retry.tryForTime(60 * 1000, async () => {
-        if (await testSubjects.exists('errorToastMessage', { timeout: 0 })) {
+        if (await testSubjects.exists('errorToastMessage')) {
           await testSubjects.click('toastCloseButton');
         }
         await testSubjects.click('uptimeSettingsLink');

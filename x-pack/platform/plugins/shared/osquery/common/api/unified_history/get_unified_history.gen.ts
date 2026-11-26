@@ -97,7 +97,7 @@ export const UnifiedHistoryRowBase = lazySchema(() =>
      */
     spaceId: z.string().optional(),
     /**
-     * The number of agents targeted by the query.
+     * For live queries, the number of agents targeted by the query. For scheduled rows, the number of distinct agents that responded.
      */
     agentCount: z.number().int(),
     /**

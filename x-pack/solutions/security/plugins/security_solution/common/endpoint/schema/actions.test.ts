@@ -24,6 +24,7 @@ import {
   NoParametersRequestSchema,
   RunScriptActionRequestSchema,
   CancelActionRequestSchema,
+  EndpointActionGetFileSchema,
 } from '../../api/endpoint';
 import type { MemoryDumpActionRequestBody } from '../../api/endpoint/actions/response_actions/memory_dump';
 import { MemoryDumpActionRequestSchema } from '../../api/endpoint/actions/response_actions/memory_dump';
@@ -1369,10 +1370,14 @@ describe('actions schemas', () => {
       }).toThrow();
     });
 
-    it('should only accept process or kernel as value for type', () => {
+    it('should only accept process, kernel or raw as value for type', () => {
       expect(() => MemoryDumpActionRequestSchema.body.validate(memDumpBody)).not.toThrow();
 
       Object.assign(memDumpBody.parameters, { type: 'process', pid: 1 });
+
+      expect(() => MemoryDumpActionRequestSchema.body.validate(memDumpBody)).not.toThrow();
+
+      memDumpBody.parameters = { type: 'raw' };
 
       expect(() => MemoryDumpActionRequestSchema.body.validate(memDumpBody)).not.toThrow();
 
@@ -1387,6 +1392,20 @@ describe('actions schemas', () => {
 
       delete memDumpBody.parameters.pid;
       memDumpBody.parameters.entity_id = 'some-value';
+      expect(() => MemoryDumpActionRequestSchema.body.validate(memDumpBody)).toThrow();
+    });
+
+    it('should accept type of raw without pid or entity id', () => {
+      memDumpBody.parameters = { type: 'raw' };
+
+      expect(() => MemoryDumpActionRequestSchema.body.validate(memDumpBody)).not.toThrow();
+    });
+
+    it('should throw if pid or entity id is used with type = raw', () => {
+      memDumpBody.parameters = { type: 'raw', pid: 1 };
+      expect(() => MemoryDumpActionRequestSchema.body.validate(memDumpBody)).toThrow();
+
+      memDumpBody.parameters = { type: 'raw', entity_id: 'some-value' };
       expect(() => MemoryDumpActionRequestSchema.body.validate(memDumpBody)).toThrow();
     });
 
@@ -1438,6 +1457,195 @@ describe('actions schemas', () => {
       memDumpBody.parameters.entity_id = 'some-value';
 
       expect(() => MemoryDumpActionRequestSchema.body.validate(memDumpBody)).toThrow();
+    });
+  });
+
+  describe('EndpointActionGetFileSchema', () => {
+    const charsOfLength = (length: number) => 'a'.repeat(length);
+
+    it('should reject when neither `path` nor `paths` are defined', () => {
+      expect(() => {
+        EndpointActionGetFileSchema.body.validate({
+          endpoint_ids: ['endpoint_id'],
+          parameters: {},
+        });
+      }).toThrow('[parameters]: one of [path] or [paths] must be defined');
+    });
+
+    describe('and `paths` parameter', () => {
+      it('should accept `paths` without `path`', () => {
+        expect(() => {
+          EndpointActionGetFileSchema.body.validate({
+            endpoint_ids: ['endpoint_id'],
+            parameters: { paths: ['/one', '/two'] },
+          });
+        }).not.toThrow();
+      });
+
+      it('should accept `paths` with agent type `endpoint`', () => {
+        expect(() => {
+          EndpointActionGetFileSchema.body.validate({
+            agent_type: 'endpoint',
+            endpoint_ids: ['endpoint_id'],
+            parameters: { paths: ['/one', '/two'] },
+          });
+        }).not.toThrow();
+      });
+
+      it('should accept a single entry in `paths`', () => {
+        expect(() => {
+          EndpointActionGetFileSchema.body.validate({
+            endpoint_ids: ['endpoint_id'],
+            parameters: { paths: ['/one'] },
+          });
+        }).not.toThrow();
+      });
+
+      it('should reject `paths` used together with `path`', () => {
+        expect(() => {
+          EndpointActionGetFileSchema.body.validate({
+            endpoint_ids: ['endpoint_id'],
+            parameters: { path: '/one', paths: ['/two'] },
+          });
+        }).toThrow('[parameters]: [path] and [paths] cannot be used together');
+      });
+
+      it('should reject an empty `paths` array', () => {
+        expect(() => {
+          EndpointActionGetFileSchema.body.validate({
+            endpoint_ids: ['endpoint_id'],
+            parameters: { paths: [] },
+          });
+        }).toThrow();
+      });
+
+      it('should reject `paths` with an empty string entry', () => {
+        expect(() => {
+          EndpointActionGetFileSchema.body.validate({
+            endpoint_ids: ['endpoint_id'],
+            parameters: { paths: ['/one', ''] },
+          });
+        }).toThrow();
+      });
+
+      it('should reject `paths` that is not an array of strings', () => {
+        expect(() => {
+          EndpointActionGetFileSchema.body.validate({
+            endpoint_ids: ['endpoint_id'],
+            parameters: { paths: '/one' },
+          });
+        }).toThrow();
+        expect(() => {
+          EndpointActionGetFileSchema.body.validate({
+            endpoint_ids: ['endpoint_id'],
+            parameters: { paths: [1] },
+          });
+        }).toThrow();
+      });
+
+      it('should reject a `paths` entry longer than 4096 characters', () => {
+        expect(() => {
+          EndpointActionGetFileSchema.body.validate({
+            endpoint_ids: ['endpoint_id'],
+            parameters: { paths: [charsOfLength(4097)] },
+          });
+        }).toThrow();
+      });
+
+      it('should accept a `paths` entry of exactly 4096 characters', () => {
+        expect(() => {
+          EndpointActionGetFileSchema.body.validate({
+            endpoint_ids: ['endpoint_id'],
+            parameters: { paths: [charsOfLength(4096)] },
+          });
+        }).not.toThrow();
+      });
+
+      it('should accept exactly 100 entries in `paths`', () => {
+        expect(() => {
+          EndpointActionGetFileSchema.body.validate({
+            endpoint_ids: ['endpoint_id'],
+            parameters: { paths: Array.from({ length: 100 }, (_, i) => `/file/${i}`) },
+          });
+        }).not.toThrow();
+      });
+
+      it('should reject more than 100 entries in `paths`', () => {
+        expect(() => {
+          EndpointActionGetFileSchema.body.validate({
+            endpoint_ids: ['endpoint_id'],
+            parameters: { paths: Array.from({ length: 101 }, (_, i) => `/file/${i}`) },
+          });
+        }).toThrow();
+      });
+
+      it.each(['sentinel_one', 'crowdstrike', 'microsoft_defender_endpoint'])(
+        'should reject `paths` with agent type `%s`',
+        (agentType) => {
+          expect(() => {
+            EndpointActionGetFileSchema.body.validate({
+              agent_type: agentType,
+              endpoint_ids: ['endpoint_id'],
+              parameters: { paths: ['/one', '/two'] },
+            });
+          }).toThrow(`[parameters.paths]: is not valid with agent type of ${agentType}`);
+        }
+      );
+
+      it('should accept `path` for non-endpoint agent types', () => {
+        expect(() => {
+          EndpointActionGetFileSchema.body.validate({
+            agent_type: 'sentinel_one',
+            endpoint_ids: ['endpoint_id'],
+            parameters: { path: '/one' },
+          });
+        }).not.toThrow();
+      });
+    });
+
+    describe('and `force` parameter', () => {
+      it.each([true, false])('should accept `force` set to `%s`', (force) => {
+        expect(() => {
+          EndpointActionGetFileSchema.body.validate({
+            endpoint_ids: ['endpoint_id'],
+            parameters: { path: 'C:\\locked.dat', force },
+          });
+        }).not.toThrow();
+      });
+
+      it('should accept `force` with agent type `endpoint`', () => {
+        expect(() => {
+          EndpointActionGetFileSchema.body.validate({
+            agent_type: 'endpoint',
+            endpoint_ids: ['endpoint_id'],
+            parameters: { path: 'C:\\locked.dat', force: true },
+          });
+        }).not.toThrow();
+      });
+
+      it('should reject a `force` that is not a boolean', () => {
+        expect(() => {
+          EndpointActionGetFileSchema.body.validate({
+            endpoint_ids: ['endpoint_id'],
+            parameters: { path: 'C:\\locked.dat', force: 'yes' },
+          });
+        }).toThrow();
+      });
+
+      describe.each(['sentinel_one', 'crowdstrike', 'microsoft_defender_endpoint'])(
+        'with agent type `%s`',
+        (agentType) => {
+          it.each([true, false])('should reject `force` set to `%s`', (force) => {
+            expect(() => {
+              EndpointActionGetFileSchema.body.validate({
+                agent_type: agentType,
+                endpoint_ids: ['endpoint_id'],
+                parameters: { path: 'C:\\locked.dat', force },
+              });
+            }).toThrow(`[parameters.force]: is not valid with agent type of ${agentType}`);
+          });
+        }
+      );
     });
   });
 });

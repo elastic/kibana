@@ -56,7 +56,7 @@ describe('PreviewController', () => {
         fieldTypeToProcess: 'runtime' as InternalFieldType,
       });
 
-      const debouncedLoadDocumentMock = jest.fn();
+      const debouncedLoadDocumentMock = Object.assign(jest.fn(), { cancel: jest.fn() });
       (controller as ControllerWithPrivate).debouncedLoadDocument =
         debouncedLoadDocumentMock as unknown as DebouncedFuncLeading<(id: string) => Promise<void>>;
       controller.setCustomDocIdToLoad(customDocIdToLoad);
@@ -67,21 +67,38 @@ describe('PreviewController', () => {
       const { state, debouncedLoadDocumentMock } = setup('');
       expect(state.customId).toBe('');
       expect(state.customDocIdToLoad).toBe('');
+      expect(state.isFetchingDocument).toBe(false);
       expect(debouncedLoadDocumentMock).not.toHaveBeenCalled();
+      // clearing the ID must cancel a pending document load
+      expect(debouncedLoadDocumentMock.cancel).toHaveBeenCalled();
+    });
+
+    it('should treat a whitespace-only ID like clearing the ID', () => {
+      const { state, debouncedLoadDocumentMock } = setup('   ');
+      // The raw value is kept so the input is not rewritten while the user types
+      expect(state.customId).toBe('   ');
+      expect(state.customDocIdToLoad).toBe('   ');
+      expect(state.isFetchingDocument).toBe(false);
+      expect(debouncedLoadDocumentMock).not.toHaveBeenCalled();
+      expect(debouncedLoadDocumentMock.cancel).toHaveBeenCalled();
     });
 
     it('should properly handle valid IDs for customDocIdToLoad', () => {
       const { state, debouncedLoadDocumentMock } = setup('doc123');
       expect(state.customId).toBe('doc123');
       expect(state.customDocIdToLoad).toBe('doc123');
+      expect(state.isFetchingDocument).toBe(true);
       expect(debouncedLoadDocumentMock).toHaveBeenCalledWith('doc123');
+      expect(debouncedLoadDocumentMock.cancel).not.toHaveBeenCalled();
     });
 
     it('should properly handle null for customDocIdToLoad', () => {
       const { state, debouncedLoadDocumentMock } = setup(null);
       expect(state.customId).toBeUndefined();
       expect(state.customDocIdToLoad).toBeNull();
+      expect(state.isFetchingDocument).toBe(false);
       expect(debouncedLoadDocumentMock).not.toHaveBeenCalled();
+      expect(debouncedLoadDocumentMock.cancel).toHaveBeenCalled();
     });
   });
 });

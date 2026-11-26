@@ -381,4 +381,45 @@ describe('gatherResourceDescriptors', () => {
     const result = await gatherResourceDescriptors({ indexPattern: 'nonexistent-*', esClient });
     expect(result).toEqual([]);
   });
+
+  it('skips data streams ES omits from mappings response due to missing view_index_metadata', async () => {
+    listSearchSourcesMock.mockResolvedValue({
+      datasets: [],
+      indices: [],
+      aliases: [],
+      data_streams: [
+        {
+          type: EsResourceType.dataStream,
+          name: 'logs-nginx',
+          indices: [],
+          timestamp_field: '@timestamp',
+        },
+        {
+          type: EsResourceType.dataStream,
+          name: 'metrics-endpoint.policy-default',
+          indices: [],
+          timestamp_field: '@timestamp',
+        },
+      ],
+    });
+
+    // ES silently omits data streams the user lacks view_index_metadata on —
+    // 'metrics-endpoint.policy-default' is absent from the response.
+    getDataStreamMappingsMock.mockResolvedValue({
+      'logs-nginx': {
+        mappings: { properties: { '@timestamp': { type: 'date' } } },
+      },
+    });
+
+    const result = await gatherResourceDescriptors({ indexPattern: '*', esClient });
+
+    // Both streams are returned; the unauthorized one has empty fields.
+    expect(result).toHaveLength(2);
+    const nginx = result.find((r) => r.name === 'logs-nginx');
+    const denied = result.find((r) => r.name === 'metrics-endpoint.policy-default');
+    expect(nginx?.fields).toEqual(
+      expect.arrayContaining([expect.objectContaining({ path: '@timestamp' })])
+    );
+    expect(denied?.fields).toEqual([]);
+  });
 });

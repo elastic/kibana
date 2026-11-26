@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
 import {
   type ConfigKey,
   type SyntheticsMonitor,
@@ -13,6 +14,26 @@ import {
 import { PARAMS_KEYS_TO_SKIP } from './common';
 
 export const SHELL_PARAMS_REGEX = /\$\{[a-zA-Z_][a-zA-Z0-9\._\-?:]*\}/g;
+
+/**
+ * Returns the effective params for a monitor living in `spaceId`, always folding in
+ * params that are shared across all spaces (`ALL_SPACES_ID`).
+ *
+ * `getSyntheticsParams` buckets params by their own `namespaces`, so a param shared
+ * across all spaces only ever lands in the `'*'` bucket. When that method is called
+ * with `spaceId: '*'` (the global-params sync path), it never materializes a bucket
+ * for a concrete space that has no space-specific params, so a direct
+ * `paramsBySpace[spaceId]` lookup returns `undefined` and silently drops the shared
+ * params. Callers that inject params into private-location configs must go through
+ * this helper (or the equivalent spread) so shared params are never lost.
+ */
+export const getParamsForSpace = (
+  paramsBySpace: Record<string, Record<string, string>>,
+  spaceId: string
+): Record<string, string> => ({
+  ...(paramsBySpace[spaceId] ?? {}),
+  ...(paramsBySpace[ALL_SPACES_ID] ?? {}),
+});
 
 export const hasNoParams = (strVal: string) => {
   return strVal.match(SHELL_PARAMS_REGEX) === null;

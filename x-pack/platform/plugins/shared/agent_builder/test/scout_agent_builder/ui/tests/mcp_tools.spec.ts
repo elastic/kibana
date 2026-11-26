@@ -66,6 +66,9 @@ test.describe(
         await expect(page.testSubj.locator('agentBuilderMcpToolSelect')).toBeVisible();
         await pageObjects.agentBuilder.selectMcpTool('echo');
         await pageObjects.agentBuilder.setToolId(toolId);
+        await pageObjects.agentBuilder.expectConfirmationPolicyValueToBeVisible();
+        await pageObjects.agentBuilder.expectConfirmationPolicyValue('never');
+        await pageObjects.agentBuilder.setConfirmationPolicyValue('once');
         await pageObjects.agentBuilder.saveTool();
         await pageObjects.agentBuilder.navigateToToolsLanding();
         expect(await pageObjects.agentBuilder.isToolInTable(toolId)).toBe(true);
@@ -92,6 +95,30 @@ test.describe(
 
         await pageObjects.agentBuilder.navigateToTool(toolId);
         expect(await pageObjects.agentBuilder.getToolDescriptionValue()).toContain(newDescription);
+      });
+
+      await test.step('edits an MCP tool confirmation policy', async () => {
+        const toolId = `scout.mcp.edit.confirmation.${Date.now()}`;
+        await createToolViaKbn(kbnClient, {
+          id: toolId,
+          type: 'mcp',
+          description: 'description',
+          tags: [],
+          configuration: {
+            connector_id: connectorId,
+            tool_name: 'echo',
+          },
+        });
+
+        await pageObjects.agentBuilder.navigateToTool(toolId);
+        await expect(page.testSubj.locator('agentBuilderToolFormPage')).toBeVisible();
+        await pageObjects.agentBuilder.expectConfirmationPolicyValueToBeVisible();
+        await pageObjects.agentBuilder.expectConfirmationPolicyValue('never');
+        await pageObjects.agentBuilder.setConfirmationPolicyValue('always');
+        await pageObjects.agentBuilder.saveTool();
+
+        await pageObjects.agentBuilder.navigateToTool(toolId);
+        await pageObjects.agentBuilder.expectConfirmationPolicyValue('always');
       });
 
       await test.step('clones an MCP tool and selects a different server tool', async () => {

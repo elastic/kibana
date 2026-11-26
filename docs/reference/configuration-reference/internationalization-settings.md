@@ -51,6 +51,7 @@ When a user sets a preferred language, it is stored in their user profile and ta
    the browser's `Accept-Language` preferences. The first weighted
    preference matching an entry in `i18n.locales`, exactly or by language
    (`fr-CH` or bare `fr` can resolve to a configured `fr-FR`), wins.
+   Skipped when `i18n.detectBrowserLocale` is `false`.
 5. **`i18n.defaultLocale` config** — The server-wide default (`en` unless
    overridden) set in `kibana.yml`, used when nothing above matches.
 
@@ -95,4 +96,8 @@ i18n.locale: "ja-JP"
 
 # 5. Disable the KBN_LOCALE cookie:
 i18n.allowLocaleCookie: false
+
+# 6. Keep language selection, but never pick the language from the browser.
+#    Users see i18n.defaultLocale until they choose a language themselves:
+i18n.detectBrowserLocale: false
 ```

@@ -172,6 +172,39 @@ export const i18nMessages = {
           }
         ),
       },
+      confirmation: {
+        label: i18n.translate(
+          'xpack.agentBuilder.tools.newTool.configuration.form.confirmation.label',
+          {
+            defaultMessage: 'Require user confirmation',
+          }
+        ),
+        helpText: i18n.translate(
+          'xpack.agentBuilder.tools.newTool.configuration.form.confirmation.helpText',
+          {
+            defaultMessage:
+              'Sets the policy for when the agent should require user confirmation before executing the tool.',
+          }
+        ),
+        neverOption: i18n.translate(
+          'xpack.agentBuilder.tools.newTool.configuration.form.confirmation.neverOptionLabel',
+          {
+            defaultMessage: 'Never',
+          }
+        ),
+        onceOption: i18n.translate(
+          'xpack.agentBuilder.tools.newTool.configuration.form.confirmation.onceOptionLabel',
+          {
+            defaultMessage: 'Once',
+          }
+        ),
+        alwaysOption: i18n.translate(
+          'xpack.agentBuilder.tools.newTool.configuration.form.confirmation.alwaysOptionLabel',
+          {
+            defaultMessage: 'Always',
+          }
+        ),
+      },
       indexSearch: {
         patternLabel: i18n.translate(
           'xpack.agentBuilder.tools.newTool.configuration.form.indexSearch.patternLabel',
@@ -222,6 +255,27 @@ export const i18nMessages = {
           'xpack.agentBuilder.tools.newTool.configuration.form.esql.parametersLabel',
           {
             defaultMessage: 'ES|QL Parameters',
+          }
+        ),
+      },
+      dataTiers: {
+        label: i18n.translate(
+          'xpack.agentBuilder.tools.newTool.configuration.form.dataTiers.label',
+          {
+            defaultMessage: 'Data tiers',
+          }
+        ),
+        includeFrozenHelpText: i18n.translate(
+          'xpack.agentBuilder.tools.newTool.configuration.form.dataTiers.includeFrozenHelpText',
+          {
+            defaultMessage:
+              'Frozen tier data is excluded by default. Searching it recovers data from object storage, which is slow and can cause the tool to time out.',
+          }
+        ),
+        includeFrozenCheckboxLabel: i18n.translate(
+          'xpack.agentBuilder.tools.newTool.configuration.form.dataTiers.includeFrozenCheckboxLabel',
+          {
+            defaultMessage: 'Include frozen tier data',
           }
         ),
       },

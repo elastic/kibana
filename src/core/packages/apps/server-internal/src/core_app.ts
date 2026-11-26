@@ -72,6 +72,7 @@ export class CoreAppsService {
   private readonly config$: Observable<CoreAppConfig>;
   private readonly savedObjectsStart$ = new ReplaySubject<InternalSavedObjectsServiceStart>(1);
   private readonly stop$ = new Subject<void>();
+  private dynamicConfigWriteCount = 0;
 
   constructor(core: CoreContext) {
     this.logger = core.logger.get('core-app');
@@ -292,10 +293,15 @@ export class CoreAppsService {
         .pipe(
           switchMap(async ([soClient]) => {
             try {
+              const writeCountAtRead = this.dynamicConfigWriteCount;
               const persistedOverrides = await soClient.get<Record<string, unknown>>(
                 DYNAMIC_CONFIG_OVERRIDES_SO_TYPE,
                 DYNAMIC_CONFIG_OVERRIDES_SO_ID
               );
+              // A local write completed while this read was in flight, so the read is outdated.
+              if (writeCountAtRead !== this.dynamicConfigWriteCount) {
+                return;
+              }
               if (latestOverrideVersion !== persistedOverrides.version) {
                 this.configService.setDynamicConfigOverrides(persistedOverrides.attributes);
                 latestOverrideVersion = persistedOverrides.version;
@@ -359,6 +365,7 @@ export class CoreAppsService {
             });
             // set it again in memory in case the timer polling the SO for updates has overridden it during this update.
             this.configService.setDynamicConfigOverrides(req.body);
+            ++this.dynamicConfigWriteCount;
           } catch (err) {
             if (err instanceof ValidationError) {
               return res.badRequest({ body: err });

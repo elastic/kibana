@@ -28,6 +28,7 @@ export * from './os_packages';
 export * from './package_json';
 export * from './assert_file_time';
 export * from './assert_no_uuid';
+export * from './assert_package_entry_points';
 export * from './assert_path_length';
 export * from './replace_favicon';
 export * from './verify_env_task';
@@ -35,3 +36,5 @@ export * from './write_sha_sums_task';
 export * from './fetch_agent_versions_list';
 
 export { InstallChromium } from './install_chromium';
+
+export { CreateDistributionDefaults } from './create_distribution_defaults_task';

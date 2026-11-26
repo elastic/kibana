@@ -387,7 +387,11 @@ export const getDefaultRecoveredSummary = ({
       agent: {
         name: hit['agent.name'] || '',
       },
-      '@timestamp': String(hit['@timestamp']),
+      // A missing alert time must stay absent. String(undefined) becomes the
+      // literal "undefined", which FormatDate cannot parse.
+      ...(typeof hit['@timestamp'] === 'string' && hit['@timestamp']
+        ? { '@timestamp': hit['@timestamp'] }
+        : {}),
       ...(hit['error.message'] ? { error: { message: hit['error.message'] } } : {}),
       ...(hit['url.full'] ? { url: { full: hit['url.full'] } } : {}),
     } as unknown as OverviewPing,

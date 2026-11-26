@@ -1,15 +1,16 @@
 steps:
-  - command: .buildkite/scripts/steps/cloud/build_and_deploy.sh
-    label: 'Build and Deploy to Cloud'
+  # Cloud deploy keys are only granted to kibana-deploy-cloud-from-pr, so the PR build hands the deploy off to it
+  - command: .buildkite/scripts/steps/trigger_from_pr.sh kibana-deploy-cloud-from-pr
+    label: 'Trigger Cloud Deployment'
     key: deploy_cloud
     agents:
+      provider: gcp
+      image: family/kibana-ubuntu-2404
+      imageProject: elastic-images-prod
       machineType: n2-standard-2
-      preemptible: true
-    depends_on:
-      - build
-    timeout_in_minutes: 30
+    timeout_in_minutes: 10
     soft_fail: true
     retry:
       automatic:
         - exit_status: '-1'
-          limit: 3
+          limit: 1

@@ -1,5 +1,8 @@
 {
-  "sha1": "dfc2f3f740332a594f47d95b52a6ef26dbdbce50",
+  "sha1": "56658a33b1e1303a3361d8f7941cfe723335ab19",
+  "testChannels": [
+    "ci-on-commit"
+  ],
   "tests": [
     {
       "id": "6a1a7d28753a6bb-37b3571f127ad93",
@@ -23,8 +26,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/data_views/crud_create_main.spec.ts",
-        "line": 42,
-        "column": 12
+        "line": 34,
+        "column": 32
       }
     },
     {
@@ -49,8 +52,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/data_views/crud_create_main.spec.ts",
-        "line": 63,
-        "column": 12
+        "line": 51,
+        "column": 15
       }
     },
     {
@@ -75,8 +78,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/data_views/crud_create_main.spec.ts",
-        "line": 85,
-        "column": 12
+        "line": 71,
+        "column": 15
       }
     },
     {
@@ -101,8 +104,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/data_views/crud_create_main.spec.ts",
-        "line": 115,
-        "column": 12
+        "line": 98,
+        "column": 20
       }
     },
     {
@@ -127,8 +130,34 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/data_views/crud_create_main.spec.ts",
-        "line": 144,
-        "column": 12
+        "line": 125,
+        "column": 17
+      }
+    },
+    {
+      "id": "6a1a7d28753a6bb-cd88c2ca7f17d00",
+      "title": "POST api/data_views/data_view - main (data view api) can create a data view with allowNoIndex targeting a non-existing remote cluster",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/data_views/crud_create_main.spec.ts",
+        "line": 155,
+        "column": 14
       }
     },
     {
@@ -153,8 +182,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/data_views/crud_create_main.spec.ts",
-        "line": 174,
-        "column": 12
+        "line": 182,
+        "column": 20
       }
     },
     {
@@ -179,8 +208,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/data_views/crud_create_main.spec.ts",
-        "line": 194,
-        "column": 12
+        "line": 203,
+        "column": 13
       }
     },
     {
@@ -205,8 +234,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/data_views/crud_create_main.spec.ts",
-        "line": 229,
-        "column": 12
+        "line": 233,
+        "column": 17
       }
     },
     {
@@ -231,8 +260,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/data_views/crud_create_main.spec.ts",
-        "line": 263,
-        "column": 12
+        "line": 266,
+        "column": 15
       }
     },
     {
@@ -257,8 +286,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/data_views/crud_create_main.spec.ts",
-        "line": 296,
-        "column": 12
+        "line": 295,
+        "column": 18
       }
     },
     {
@@ -283,8 +312,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/data_views/crud_create_main.spec.ts",
-        "line": 320,
-        "column": 12
+        "line": 314,
+        "column": 9
       }
     },
     {
@@ -309,8 +338,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/data_views/crud_create_main.spec.ts",
-        "line": 350,
-        "column": 12
+        "line": 344,
+        "column": 9
       }
     },
     {
@@ -335,8 +364,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/data_views/crud_create_main.spec.ts",
-        "line": 387,
-        "column": 12
+        "line": 381,
+        "column": 16
       }
     },
     {
@@ -361,8 +390,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/data_views/crud_create_spaces.spec.ts",
-        "line": 59,
-        "column": 12
+        "line": 46,
+        "column": 7
       }
     },
     {
@@ -387,8 +416,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/data_views/crud_create_spaces.spec.ts",
-        "line": 100,
-        "column": 12
+        "line": 80,
+        "column": 16
       }
     },
     {
@@ -413,8 +442,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/data_views/crud_create_validation.spec.ts",
-        "line": 24,
-        "column": 12
+        "line": 20,
+        "column": 13
       }
     },
     {
@@ -439,8 +468,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/data_views/crud_create_validation.spec.ts",
-        "line": 41,
-        "column": 12
+        "line": 30,
+        "column": 23
       }
     },
     {
@@ -465,8 +494,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/data_views/crud_create_validation.spec.ts",
-        "line": 60,
-        "column": 12
+        "line": 47,
+        "column": 23
       }
     },
     {
@@ -491,8 +520,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/data_views/crud_create_validation.spec.ts",
-        "line": 82,
-        "column": 12
+        "line": 67,
+        "column": 15
       }
     },
     {
@@ -517,7 +546,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/data_views/crud_create_validation.spec.ts",
-        "line": 107,
+        "line": 89,
         "column": 12
       }
     },
@@ -543,8 +572,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/data_views/crud_delete_errors.spec.ts",
-        "line": 24,
-        "column": 12
+        "line": 20,
+        "column": 13
       }
     },
     {
@@ -569,8 +598,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/data_views/crud_delete_errors.spec.ts",
-        "line": 37,
-        "column": 12
+        "line": 28,
+        "column": 14
       }
     },
     {
@@ -595,8 +624,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/data_views/crud_delete_main.spec.ts",
-        "line": 32,
-        "column": 12
+        "line": 25,
+        "column": 32
       }
     },
     {
@@ -621,8 +650,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/data_views/crud_delete_main.spec.ts",
-        "line": 83,
-        "column": 12
+        "line": 72,
+        "column": 13
       }
     },
     {
@@ -647,8 +676,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/data_views/crud_get_all.spec.ts",
-        "line": 24,
-        "column": 12
+        "line": 20,
+        "column": 13
       }
     },
     {
@@ -673,8 +702,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/data_views/crud_get_errors.spec.ts",
-        "line": 24,
-        "column": 12
+        "line": 20,
+        "column": 13
       }
     },
     {
@@ -699,8 +728,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/data_views/crud_get_errors.spec.ts",
-        "line": 37,
-        "column": 12
+        "line": 28,
+        "column": 14
       }
     },
     {
@@ -725,8 +754,34 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/data_views/crud_get_main.spec.ts",
-        "line": 32,
-        "column": 12
+        "line": 25,
+        "column": 32
+      }
+    },
+    {
+      "id": "d7a01c9bea5cfca-98f79c56f8a7f76",
+      "title": "GET api/data_views/data_view/{id} - main (data view api) can retrieve a data view with allowNoIndex targeting a non-existing remote cluster",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/data_views/crud_get_main.spec.ts",
+        "line": 53,
+        "column": 18
       }
     },
     {
@@ -751,8 +806,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/data_views/crud_update_errors.spec.ts",
-        "line": 32,
-        "column": 12
+        "line": 25,
+        "column": 32
       }
     },
     {
@@ -777,8 +832,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/data_views/crud_update_errors.spec.ts",
-        "line": 49,
-        "column": 12
+        "line": 36,
+        "column": 14
       }
     },
     {
@@ -803,8 +858,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/data_views/crud_update_errors.spec.ts",
-        "line": 68,
-        "column": 12
+        "line": 53,
+        "column": 14
       }
     },
     {
@@ -829,7 +884,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/data_views/crud_update_errors.spec.ts",
-        "line": 93,
+        "line": 75,
         "column": 12
       }
     },
@@ -855,8 +910,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/data_views/crud_update_main.spec.ts",
-        "line": 32,
-        "column": 12
+        "line": 25,
+        "column": 32
       }
     },
     {
@@ -881,8 +936,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/data_views/crud_update_main.spec.ts",
-        "line": 82,
-        "column": 12
+        "line": 71,
+        "column": 18
       }
     },
     {
@@ -907,8 +962,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/data_views/crud_update_main.spec.ts",
-        "line": 134,
-        "column": 12
+        "line": 120,
+        "column": 14
       }
     },
     {
@@ -933,8 +988,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/data_views/crud_update_main.spec.ts",
-        "line": 184,
-        "column": 12
+        "line": 167,
+        "column": 9
       }
     },
     {
@@ -959,8 +1014,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/data_views/crud_update_main.spec.ts",
-        "line": 240,
-        "column": 12
+        "line": 237,
+        "column": 9
       }
     },
     {
@@ -985,8 +1040,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/data_views/crud_update_main.spec.ts",
-        "line": 306,
-        "column": 12
+        "line": 302,
+        "column": 40
       }
     },
     {
@@ -1011,8 +1066,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/data_views/crud_update_main.spec.ts",
-        "line": 356,
-        "column": 12
+        "line": 348,
+        "column": 10
       }
     },
     {
@@ -1037,8 +1092,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/data_views/crud_update_main.spec.ts",
-        "line": 406,
-        "column": 12
+        "line": 398,
+        "column": 10
       }
     },
     {
@@ -1063,8 +1118,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/data_views/crud_update_main.spec.ts",
-        "line": 461,
-        "column": 12
+        "line": 449,
+        "column": 18
       }
     },
     {
@@ -1089,8 +1144,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/data_views/default_data_view.spec.ts",
-        "line": 71,
-        "column": 12
+        "line": 61,
+        "column": 24
       }
     },
     {
@@ -1115,8 +1170,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/data_views/default_data_view.spec.ts",
-        "line": 92,
-        "column": 12
+        "line": 77,
+        "column": 14
       }
     },
     {
@@ -1141,8 +1196,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/data_views/default_data_view.spec.ts",
-        "line": 123,
-        "column": 12
+        "line": 105,
+        "column": 9
       }
     },
     {
@@ -1167,8 +1222,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/data_views/fields_api_update_errors.spec.ts",
-        "line": 32,
-        "column": 12
+        "line": 25,
+        "column": 32
       }
     },
     {
@@ -1193,8 +1248,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/data_views/fields_api_update_errors.spec.ts",
-        "line": 50,
-        "column": 12
+        "line": 39,
+        "column": 23
       }
     },
     {
@@ -1219,8 +1274,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/data_views/fields_api_update_errors.spec.ts",
-        "line": 86,
-        "column": 12
+        "line": 71,
+        "column": 14
       }
     },
     {
@@ -1245,8 +1300,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/data_views/fields_api_update_errors.spec.ts",
-        "line": 124,
-        "column": 12
+        "line": 109,
+        "column": 23
       }
     },
     {
@@ -1271,8 +1326,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/data_views/fields_api_update_main.spec.ts",
-        "line": 56,
-        "column": 12
+        "line": 45,
+        "column": 26
       }
     },
     {
@@ -1297,8 +1352,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/data_views/fields_api_update_main.spec.ts",
-        "line": 87,
-        "column": 12
+        "line": 72,
+        "column": 14
       }
     },
     {
@@ -1323,8 +1378,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/data_views/fields_api_update_main.spec.ts",
-        "line": 111,
-        "column": 12
+        "line": 95,
+        "column": 78
       }
     },
     {
@@ -1349,8 +1404,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/data_views/fields_api_update_main.spec.ts",
-        "line": 138,
-        "column": 12
+        "line": 124,
+        "column": 23
       }
     },
     {
@@ -1375,8 +1430,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/data_views/fields_api_update_main.spec.ts",
-        "line": 164,
-        "column": 12
+        "line": 149,
+        "column": 13
       }
     },
     {
@@ -1401,8 +1456,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/data_views/fields_api_update_main.spec.ts",
-        "line": 187,
-        "column": 12
+        "line": 168,
+        "column": 42
       }
     },
     {
@@ -1427,8 +1482,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/data_views/fields_api_update_main.spec.ts",
-        "line": 213,
-        "column": 12
+        "line": 192,
+        "column": 83
       }
     },
     {
@@ -1453,8 +1508,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/data_views/fields_api_update_main.spec.ts",
-        "line": 229,
-        "column": 12
+        "line": 207,
+        "column": 23
       }
     },
     {
@@ -1479,8 +1534,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/data_views/fields_api_update_main.spec.ts",
-        "line": 255,
-        "column": 12
+        "line": 234,
+        "column": 53
       }
     },
     {
@@ -1505,8 +1560,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/data_views/fields_api_update_main.spec.ts",
-        "line": 284,
-        "column": 12
+        "line": 260,
+        "column": 25
       }
     },
     {
@@ -1531,8 +1586,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/data_views/fields_api_update_main.spec.ts",
-        "line": 321,
-        "column": 12
+        "line": 296,
+        "column": 14
       }
     },
     {
@@ -1557,8 +1612,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/data_views/has_user_data_view.spec.ts",
-        "line": 55,
-        "column": 12
+        "line": 45,
+        "column": 7
       }
     },
     {
@@ -1583,8 +1638,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/data_views/has_user_data_view.spec.ts",
-        "line": 65,
-        "column": 12
+        "line": 55,
+        "column": 62
       }
     },
     {
@@ -1609,8 +1664,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/data_views/has_user_data_view.spec.ts",
-        "line": 88,
-        "column": 12
+        "line": 73,
+        "column": 49
       }
     },
     {
@@ -1635,8 +1690,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/data_views/integration.spec.ts",
-        "line": 36,
-        "column": 10
+        "line": 29,
+        "column": 11
       }
     },
     {
@@ -1653,8 +1708,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/data_views/rollup_data_views.spec.ts",
-        "line": 35,
-        "column": 12
+        "line": 32,
+        "column": 24
       }
     },
     {
@@ -1679,8 +1734,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/data_views/runtime_fields_create_errors.spec.ts",
-        "line": 32,
-        "column": 12
+        "line": 25,
+        "column": 32
       }
     },
     {
@@ -1705,8 +1760,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/data_views/runtime_fields_create_main.spec.ts",
-        "line": 33,
-        "column": 12
+        "line": 26,
+        "column": 13
       }
     },
     {
@@ -1731,8 +1786,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/data_views/runtime_fields_create_main.spec.ts",
-        "line": 70,
-        "column": 12
+        "line": 54,
+        "column": 11
       }
     },
     {
@@ -1757,8 +1812,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/data_views/runtime_fields_create_main.spec.ts",
-        "line": 135,
-        "column": 12
+        "line": 108,
+        "column": 16
       }
     },
     {
@@ -1783,8 +1838,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/data_views/runtime_fields_delete_errors.spec.ts",
-        "line": 38,
-        "column": 12
+        "line": 27,
+        "column": 19
       }
     },
     {
@@ -1809,8 +1864,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/data_views/runtime_fields_delete_errors.spec.ts",
-        "line": 55,
-        "column": 12
+        "line": 38,
+        "column": 13
       }
     },
     {
@@ -1835,8 +1890,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/data_views/runtime_fields_delete_errors.spec.ts",
-        "line": 70,
-        "column": 12
+        "line": 50,
+        "column": 8
       }
     },
     {
@@ -1861,8 +1916,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/data_views/runtime_fields_delete_main.spec.ts",
-        "line": 38,
-        "column": 12
+        "line": 31,
+        "column": 13
       }
     },
     {
@@ -1887,8 +1942,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/data_views/runtime_fields_get_errors.spec.ts",
-        "line": 42,
-        "column": 12
+        "line": 31,
+        "column": 16
       }
     },
     {
@@ -1913,8 +1968,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/data_views/runtime_fields_get_errors.spec.ts",
-        "line": 55,
-        "column": 12
+        "line": 42,
+        "column": 13
       }
     },
     {
@@ -1939,8 +1994,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/data_views/runtime_fields_get_errors.spec.ts",
-        "line": 67,
-        "column": 12
+        "line": 50,
+        "column": 9
       }
     },
     {
@@ -1965,8 +2020,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/data_views/runtime_fields_get_main.spec.ts",
-        "line": 38,
-        "column": 12
+        "line": 31,
+        "column": 13
       }
     },
     {
@@ -1991,8 +2046,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/data_views/runtime_fields_put_errors.spec.ts",
-        "line": 38,
-        "column": 12
+        "line": 31,
+        "column": 13
       }
     },
     {
@@ -2017,8 +2072,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/data_views/runtime_fields_put_errors.spec.ts",
-        "line": 59,
-        "column": 12
+        "line": 49,
+        "column": 25
       }
     },
     {
@@ -2043,8 +2098,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/data_views/runtime_fields_put_main.spec.ts",
-        "line": 38,
-        "column": 12
+        "line": 31,
+        "column": 13
       }
     },
     {
@@ -2069,8 +2124,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/data_views/runtime_fields_put_main.spec.ts",
-        "line": 96,
-        "column": 12
+        "line": 88,
+        "column": 18
       }
     },
     {
@@ -2095,8 +2150,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/data_views/runtime_fields_update_errors.spec.ts",
-        "line": 24,
-        "column": 12
+        "line": 20,
+        "column": 13
       }
     },
     {
@@ -2121,8 +2176,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/data_views/runtime_fields_update_errors.spec.ts",
-        "line": 40,
-        "column": 12
+        "line": 32,
+        "column": 31
       }
     },
     {
@@ -2147,8 +2202,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/data_views/runtime_fields_update_main.spec.ts",
-        "line": 38,
-        "column": 12
+        "line": 31,
+        "column": 13
       }
     },
     {
@@ -2173,8 +2228,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/data_views/swap_references_errors.spec.ts",
-        "line": 28,
-        "column": 12
+        "line": 22,
+        "column": 9
       }
     },
     {
@@ -2199,8 +2254,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/data_views/swap_references_errors.spec.ts",
-        "line": 38,
-        "column": 12
+        "line": 31,
+        "column": 18
       }
     },
     {
@@ -2225,8 +2280,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/data_views/swap_references_limit.spec.ts",
-        "line": 61,
-        "column": 12
+        "line": 50,
+        "column": 13
       }
     },
     {
@@ -2251,8 +2306,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/data_views/swap_references_limit.spec.ts",
-        "line": 79,
-        "column": 12
+        "line": 64,
+        "column": 23
       }
     },
     {
@@ -2277,8 +2332,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/data_views/swap_references_limit.spec.ts",
-        "line": 106,
-        "column": 12
+        "line": 93,
+        "column": 23
       }
     },
     {
@@ -2303,8 +2358,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/data_views/swap_references_main.spec.ts",
-        "line": 56,
-        "column": 12
+        "line": 46,
+        "column": 13
       }
     },
     {
@@ -2329,8 +2384,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/data_views/swap_references_main.spec.ts",
-        "line": 69,
-        "column": 12
+        "line": 56,
+        "column": 53
       }
     },
     {
@@ -2355,8 +2410,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/data_views/swap_references_main.spec.ts",
-        "line": 83,
-        "column": 12
+        "line": 69,
+        "column": 53
       }
     },
     {
@@ -2381,8 +2436,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/data_views/swap_references_main.spec.ts",
-        "line": 99,
-        "column": 12
+        "line": 83,
+        "column": 42
       }
     },
     {
@@ -2407,8 +2462,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/existing_indices_route/params.spec.ts",
-        "line": 26,
-        "column": 10
+        "line": 21,
+        "column": 40
       }
     },
     {
@@ -2433,8 +2488,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/existing_indices_route/params.spec.ts",
-        "line": 38,
-        "column": 10
+        "line": 28,
+        "column": 16
       }
     },
     {
@@ -2459,8 +2514,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/existing_indices_route/params.spec.ts",
-        "line": 50,
-        "column": 10
+        "line": 38,
+        "column": 84
       }
     },
     {
@@ -2485,8 +2540,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/existing_indices_route/params.spec.ts",
-        "line": 64,
-        "column": 10
+        "line": 50,
+        "column": 83
       }
     },
     {
@@ -2511,8 +2566,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/existing_indices_route/params.spec.ts",
-        "line": 79,
-        "column": 10
+        "line": 64,
+        "column": 54
       }
     },
     {
@@ -2537,8 +2592,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/existing_indices_route/params.spec.ts",
-        "line": 94,
-        "column": 10
+        "line": 73,
+        "column": 21
       }
     },
     {
@@ -2563,8 +2618,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/existing_indices_route/response.spec.ts",
-        "line": 29,
-        "column": 12
+        "line": 24,
+        "column": 42
       }
     },
     {
@@ -2589,8 +2644,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/existing_indices_route/response.spec.ts",
-        "line": 46,
-        "column": 12
+        "line": 38,
+        "column": 10
       }
     },
     {
@@ -2603,8 +2658,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/feature_controls.spec.ts",
-        "line": 31,
-        "column": 10
+        "line": 26,
+        "column": 29
       }
     },
     {
@@ -2617,8 +2672,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/feature_controls.spec.ts",
-        "line": 46,
-        "column": 10
+        "line": 36,
+        "column": 42
       }
     },
     {
@@ -2631,8 +2686,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/feature_controls.spec.ts",
-        "line": 61,
-        "column": 10
+        "line": 49,
+        "column": 15
       }
     },
     {
@@ -2645,8 +2700,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/feature_controls.spec.ts",
-        "line": 76,
-        "column": 10
+        "line": 62,
+        "column": 5
       }
     },
     {
@@ -2659,8 +2714,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/feature_controls.spec.ts",
-        "line": 92,
-        "column": 10
+        "line": 70,
+        "column": 14
       }
     },
     {
@@ -2685,8 +2740,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/fields_for_wildcard_route/conflicts.spec.ts",
-        "line": 30,
-        "column": 12
+        "line": 24,
+        "column": 44
       }
     },
     {
@@ -2711,8 +2766,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/fields_for_wildcard_route/filter.spec.ts",
-        "line": 43,
-        "column": 12
+        "line": 39,
+        "column": 46
       }
     },
     {
@@ -2737,8 +2792,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/fields_for_wildcard_route/params.spec.ts",
-        "line": 30,
-        "column": 12
+        "line": 24,
+        "column": 44
       }
     },
     {
@@ -2763,8 +2818,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/fields_for_wildcard_route/params.spec.ts",
-        "line": 42,
-        "column": 12
+        "line": 32,
+        "column": 18
       }
     },
     {
@@ -2789,8 +2844,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/fields_for_wildcard_route/params.spec.ts",
-        "line": 58,
-        "column": 12
+        "line": 45,
+        "column": 21
       }
     },
     {
@@ -2815,8 +2870,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/fields_for_wildcard_route/params.spec.ts",
-        "line": 74,
-        "column": 12
+        "line": 59,
+        "column": 26
       }
     },
     {
@@ -2841,8 +2896,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/fields_for_wildcard_route/params.spec.ts",
-        "line": 90,
-        "column": 12
+        "line": 75,
+        "column": 26
       }
     },
     {
@@ -2867,8 +2922,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/fields_for_wildcard_route/params.spec.ts",
-        "line": 107,
-        "column": 12
+        "line": 90,
+        "column": 93
       }
     },
     {
@@ -2893,8 +2948,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/fields_for_wildcard_route/params.spec.ts",
-        "line": 123,
-        "column": 12
+        "line": 105,
+        "column": 7
       }
     },
     {
@@ -2919,8 +2974,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/fields_for_wildcard_route/params.spec.ts",
-        "line": 139,
-        "column": 12
+        "line": 118,
+        "column": 9
       }
     },
     {
@@ -2945,8 +3000,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/fields_for_wildcard_route/params.spec.ts",
-        "line": 155,
-        "column": 12
+        "line": 132,
+        "column": 10
       }
     },
     {
@@ -2971,8 +3026,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/fields_for_wildcard_route/params.spec.ts",
-        "line": 174,
-        "column": 12
+        "line": 148,
+        "column": 10
       }
     },
     {
@@ -2997,8 +3052,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/fields_for_wildcard_route/params.spec.ts",
-        "line": 194,
-        "column": 12
+        "line": 165,
+        "column": 16
       }
     },
     {
@@ -3023,8 +3078,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/fields_for_wildcard_route/params.spec.ts",
-        "line": 210,
-        "column": 12
+        "line": 182,
+        "column": 26
       }
     },
     {
@@ -3049,8 +3104,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/fields_for_wildcard_route/response.spec.ts",
-        "line": 94,
-        "column": 12
+        "line": 100,
+        "column": 23
       }
     },
     {
@@ -3075,8 +3130,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/fields_for_wildcard_route/response.spec.ts",
-        "line": 113,
-        "column": 12
+        "line": 120,
+        "column": 14
       }
     },
     {
@@ -3101,8 +3156,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/fields_for_wildcard_route/response.spec.ts",
-        "line": 133,
-        "column": 12
+        "line": 144,
+        "column": 9
       }
     },
     {
@@ -3127,8 +3182,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/fields_for_wildcard_route/response.spec.ts",
-        "line": 237,
-        "column": 12
+        "line": 284,
+        "column": 7
       }
     },
     {
@@ -3153,8 +3208,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/fields_for_wildcard_route/response.spec.ts",
-        "line": 259,
-        "column": 12
+        "line": 303,
+        "column": 6
       }
     },
     {
@@ -3179,8 +3234,60 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/fields_for_wildcard_route/response.spec.ts",
-        "line": 274,
-        "column": 12
+        "line": 317,
+        "column": 10
+      }
+    },
+    {
+      "id": "0ee43e9dd0c5ceb-eb0ae82ac16c18e",
+      "title": "GET /internal/data_views/_fields_for_wildcard - response returns 200 when remote cluster does not exist and allow_no_index is true",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/fields_for_wildcard_route/response.spec.ts",
+        "line": 328,
+        "column": 24
+      }
+    },
+    {
+      "id": "0ee43e9dd0c5ceb-a09a5ab8864f93b",
+      "title": "GET /internal/data_views/_fields_for_wildcard - response returns fields of the existing indices when the pattern also targets a non-existing remote cluster",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/fields_for_wildcard_route/response.spec.ts",
+        "line": 346,
+        "column": 9
       }
     },
     {
@@ -3205,8 +3312,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/fields_for_wildcard_route/response.spec.ts",
-        "line": 286,
-        "column": 12
+        "line": 365,
+        "column": 16
       }
     },
     {
@@ -3231,8 +3338,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/fields_for_wildcard_route/response.spec.ts",
-        "line": 308,
-        "column": 12
+        "line": 381,
+        "column": 23
       }
     },
     {
@@ -3257,8 +3364,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/fields_for_wildcard_route/response.spec.ts",
-        "line": 330,
-        "column": 12
+        "line": 363,
+        "column": 24
       }
     },
     {
@@ -3283,8 +3390,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/index_patterns/crud_create_main.spec.ts",
-        "line": 42,
-        "column": 12
+        "line": 34,
+        "column": 32
       }
     },
     {
@@ -3309,8 +3416,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/index_patterns/crud_create_main.spec.ts",
-        "line": 63,
-        "column": 12
+        "line": 51,
+        "column": 15
       }
     },
     {
@@ -3335,8 +3442,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/index_patterns/crud_create_main.spec.ts",
-        "line": 85,
-        "column": 12
+        "line": 71,
+        "column": 15
       }
     },
     {
@@ -3361,8 +3468,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/index_patterns/crud_create_main.spec.ts",
-        "line": 115,
-        "column": 12
+        "line": 98,
+        "column": 20
       }
     },
     {
@@ -3387,8 +3494,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/index_patterns/crud_create_main.spec.ts",
-        "line": 144,
-        "column": 12
+        "line": 125,
+        "column": 17
       }
     },
     {
@@ -3413,8 +3520,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/index_patterns/crud_create_main.spec.ts",
-        "line": 174,
-        "column": 12
+        "line": 155,
+        "column": 14
       }
     },
     {
@@ -3439,8 +3546,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/index_patterns/crud_create_main.spec.ts",
-        "line": 194,
-        "column": 12
+        "line": 174,
+        "column": 83
       }
     },
     {
@@ -3465,8 +3572,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/index_patterns/crud_create_main.spec.ts",
-        "line": 229,
-        "column": 12
+        "line": 206,
+        "column": 14
       }
     },
     {
@@ -3491,7 +3598,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/index_patterns/crud_create_main.spec.ts",
-        "line": 263,
+        "line": 239,
         "column": 12
       }
     },
@@ -3517,8 +3624,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/index_patterns/crud_create_main.spec.ts",
-        "line": 296,
-        "column": 12
+        "line": 268,
+        "column": 14
       }
     },
     {
@@ -3543,8 +3650,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/index_patterns/crud_create_main.spec.ts",
-        "line": 320,
-        "column": 12
+        "line": 288,
+        "column": 14
       }
     },
     {
@@ -3569,8 +3676,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/index_patterns/crud_create_main.spec.ts",
-        "line": 350,
-        "column": 12
+        "line": 318,
+        "column": 6
       }
     },
     {
@@ -3595,8 +3702,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/index_patterns/crud_create_main.spec.ts",
-        "line": 387,
-        "column": 12
+        "line": 353,
+        "column": 23
       }
     },
     {
@@ -3621,8 +3728,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/index_patterns/crud_create_validation.spec.ts",
-        "line": 28,
-        "column": 12
+        "line": 24,
+        "column": 13
       }
     },
     {
@@ -3647,8 +3754,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/index_patterns/crud_create_validation.spec.ts",
-        "line": 48,
-        "column": 12
+        "line": 36,
+        "column": 25
       }
     },
     {
@@ -3673,8 +3780,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/index_patterns/crud_create_validation.spec.ts",
-        "line": 67,
-        "column": 12
+        "line": 54,
+        "column": 23
       }
     },
     {
@@ -3699,8 +3806,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/index_patterns/crud_create_validation.spec.ts",
-        "line": 89,
-        "column": 12
+        "line": 74,
+        "column": 15
       }
     },
     {
@@ -3725,7 +3832,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/index_patterns/crud_create_validation.spec.ts",
-        "line": 114,
+        "line": 96,
         "column": 12
       }
     },
@@ -3751,8 +3858,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/index_patterns/crud_delete_errors.spec.ts",
-        "line": 28,
-        "column": 12
+        "line": 24,
+        "column": 13
       }
     },
     {
@@ -3777,8 +3884,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/index_patterns/crud_delete_errors.spec.ts",
-        "line": 41,
-        "column": 12
+        "line": 32,
+        "column": 14
       }
     },
     {
@@ -3803,8 +3910,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/index_patterns/crud_delete_main.spec.ts",
-        "line": 36,
-        "column": 12
+        "line": 29,
+        "column": 32
       }
     },
     {
@@ -3829,8 +3936,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/index_patterns/crud_delete_main.spec.ts",
-        "line": 87,
-        "column": 12
+        "line": 76,
+        "column": 13
       }
     },
     {
@@ -3855,8 +3962,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/index_patterns/crud_get_errors.spec.ts",
-        "line": 28,
-        "column": 12
+        "line": 24,
+        "column": 13
       }
     },
     {
@@ -3881,8 +3988,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/index_patterns/crud_get_errors.spec.ts",
-        "line": 41,
-        "column": 12
+        "line": 32,
+        "column": 14
       }
     },
     {
@@ -3907,8 +4014,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/index_patterns/crud_get_main.spec.ts",
-        "line": 36,
-        "column": 12
+        "line": 29,
+        "column": 32
       }
     },
     {
@@ -3933,8 +4040,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/index_patterns/crud_update_errors.spec.ts",
-        "line": 36,
-        "column": 12
+        "line": 29,
+        "column": 32
       }
     },
     {
@@ -3959,8 +4066,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/index_patterns/crud_update_errors.spec.ts",
-        "line": 53,
-        "column": 12
+        "line": 40,
+        "column": 14
       }
     },
     {
@@ -3985,8 +4092,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/index_patterns/crud_update_errors.spec.ts",
-        "line": 72,
-        "column": 12
+        "line": 57,
+        "column": 14
       }
     },
     {
@@ -4011,7 +4118,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/index_patterns/crud_update_errors.spec.ts",
-        "line": 97,
+        "line": 79,
         "column": 12
       }
     },
@@ -4037,8 +4144,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/index_patterns/crud_update_main.spec.ts",
-        "line": 36,
-        "column": 12
+        "line": 29,
+        "column": 32
       }
     },
     {
@@ -4063,8 +4170,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/index_patterns/crud_update_main.spec.ts",
-        "line": 86,
-        "column": 12
+        "line": 75,
+        "column": 18
       }
     },
     {
@@ -4089,8 +4196,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/index_patterns/crud_update_main.spec.ts",
-        "line": 138,
-        "column": 12
+        "line": 124,
+        "column": 14
       }
     },
     {
@@ -4115,8 +4222,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/index_patterns/crud_update_main.spec.ts",
-        "line": 188,
-        "column": 12
+        "line": 171,
+        "column": 9
       }
     },
     {
@@ -4141,8 +4248,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/index_patterns/crud_update_main.spec.ts",
-        "line": 246,
-        "column": 12
+        "line": 243,
+        "column": 9
       }
     },
     {
@@ -4167,8 +4274,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/index_patterns/crud_update_main.spec.ts",
-        "line": 312,
-        "column": 12
+        "line": 308,
+        "column": 40
       }
     },
     {
@@ -4193,8 +4300,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/index_patterns/crud_update_main.spec.ts",
-        "line": 362,
-        "column": 12
+        "line": 354,
+        "column": 10
       }
     },
     {
@@ -4219,8 +4326,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/index_patterns/crud_update_main.spec.ts",
-        "line": 412,
-        "column": 12
+        "line": 404,
+        "column": 10
       }
     },
     {
@@ -4245,8 +4352,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/index_patterns/crud_update_main.spec.ts",
-        "line": 467,
-        "column": 12
+        "line": 455,
+        "column": 18
       }
     },
     {
@@ -4271,8 +4378,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/index_patterns/default_index_pattern.spec.ts",
-        "line": 73,
-        "column": 12
+        "line": 63,
+        "column": 24
       }
     },
     {
@@ -4297,8 +4404,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/index_patterns/default_index_pattern.spec.ts",
-        "line": 94,
-        "column": 12
+        "line": 79,
+        "column": 14
       }
     },
     {
@@ -4323,8 +4430,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/index_patterns/default_index_pattern.spec.ts",
-        "line": 128,
-        "column": 12
+        "line": 105,
+        "column": 24
       }
     },
     {
@@ -4349,8 +4456,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/index_patterns/fields_api_update_errors.spec.ts",
-        "line": 36,
-        "column": 12
+        "line": 29,
+        "column": 32
       }
     },
     {
@@ -4375,8 +4482,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/index_patterns/fields_api_update_errors.spec.ts",
-        "line": 54,
-        "column": 12
+        "line": 43,
+        "column": 23
       }
     },
     {
@@ -4401,8 +4508,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/index_patterns/fields_api_update_errors.spec.ts",
-        "line": 90,
-        "column": 12
+        "line": 75,
+        "column": 14
       }
     },
     {
@@ -4427,8 +4534,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/index_patterns/fields_api_update_errors.spec.ts",
-        "line": 128,
-        "column": 12
+        "line": 113,
+        "column": 23
       }
     },
     {
@@ -4453,8 +4560,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/index_patterns/fields_api_update_main.spec.ts",
-        "line": 56,
-        "column": 12
+        "line": 45,
+        "column": 26
       }
     },
     {
@@ -4479,8 +4586,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/index_patterns/fields_api_update_main.spec.ts",
-        "line": 90,
-        "column": 12
+        "line": 75,
+        "column": 14
       }
     },
     {
@@ -4505,8 +4612,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/index_patterns/fields_api_update_main.spec.ts",
-        "line": 117,
-        "column": 12
+        "line": 100,
+        "column": 80
       }
     },
     {
@@ -4531,8 +4638,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/index_patterns/fields_api_update_main.spec.ts",
-        "line": 144,
-        "column": 12
+        "line": 130,
+        "column": 23
       }
     },
     {
@@ -4557,8 +4664,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/index_patterns/fields_api_update_main.spec.ts",
-        "line": 170,
-        "column": 12
+        "line": 155,
+        "column": 13
       }
     },
     {
@@ -4583,8 +4690,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/index_patterns/fields_api_update_main.spec.ts",
-        "line": 196,
-        "column": 12
+        "line": 174,
+        "column": 42
       }
     },
     {
@@ -4609,8 +4716,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/index_patterns/fields_api_update_main.spec.ts",
-        "line": 222,
-        "column": 12
+        "line": 201,
+        "column": 90
       }
     },
     {
@@ -4635,8 +4742,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/index_patterns/fields_api_update_main.spec.ts",
-        "line": 238,
-        "column": 12
+        "line": 216,
+        "column": 23
       }
     },
     {
@@ -4661,8 +4768,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/index_patterns/fields_api_update_main.spec.ts",
-        "line": 264,
-        "column": 12
+        "line": 243,
+        "column": 60
       }
     },
     {
@@ -4687,8 +4794,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/index_patterns/fields_api_update_main.spec.ts",
-        "line": 296,
-        "column": 12
+        "line": 269,
+        "column": 25
       }
     },
     {
@@ -4713,8 +4820,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/index_patterns/fields_api_update_main.spec.ts",
-        "line": 333,
-        "column": 12
+        "line": 308,
+        "column": 14
       }
     },
     {
@@ -4739,8 +4846,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/index_patterns/has_user_index_pattern.spec.ts",
-        "line": 55,
-        "column": 12
+        "line": 45,
+        "column": 7
       }
     },
     {
@@ -4765,8 +4872,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/index_patterns/has_user_index_pattern.spec.ts",
-        "line": 65,
-        "column": 12
+        "line": 55,
+        "column": 66
       }
     },
     {
@@ -4791,8 +4898,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/index_patterns/has_user_index_pattern.spec.ts",
-        "line": 91,
-        "column": 12
+        "line": 75,
+        "column": 58
       }
     },
     {
@@ -4817,8 +4924,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/index_patterns/integration.spec.ts",
-        "line": 39,
-        "column": 12
+        "line": 32,
+        "column": 13
       }
     },
     {
@@ -4843,8 +4950,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/index_patterns/runtime_fields_create_errors.spec.ts",
-        "line": 32,
-        "column": 12
+        "line": 25,
+        "column": 32
       }
     },
     {
@@ -4869,8 +4976,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/index_patterns/runtime_fields_create_main.spec.ts",
-        "line": 38,
-        "column": 12
+        "line": 31,
+        "column": 13
       }
     },
     {
@@ -4895,8 +5002,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/index_patterns/runtime_fields_create_main.spec.ts",
-        "line": 77,
-        "column": 12
+        "line": 60,
+        "column": 15
       }
     },
     {
@@ -4921,8 +5028,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/index_patterns/runtime_fields_create_main.spec.ts",
-        "line": 145,
-        "column": 12
+        "line": 118,
+        "column": 16
       }
     },
     {
@@ -4947,8 +5054,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/index_patterns/runtime_fields_delete_errors.spec.ts",
-        "line": 42,
-        "column": 12
+        "line": 31,
+        "column": 19
       }
     },
     {
@@ -4973,8 +5080,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/index_patterns/runtime_fields_delete_errors.spec.ts",
-        "line": 59,
-        "column": 12
+        "line": 42,
+        "column": 13
       }
     },
     {
@@ -4999,8 +5106,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/index_patterns/runtime_fields_delete_errors.spec.ts",
-        "line": 74,
-        "column": 12
+        "line": 54,
+        "column": 8
       }
     },
     {
@@ -5025,8 +5132,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/index_patterns/runtime_fields_delete_main.spec.ts",
-        "line": 38,
-        "column": 12
+        "line": 31,
+        "column": 13
       }
     },
     {
@@ -5051,8 +5158,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/index_patterns/runtime_fields_get_errors.spec.ts",
-        "line": 42,
-        "column": 12
+        "line": 31,
+        "column": 16
       }
     },
     {
@@ -5077,8 +5184,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/index_patterns/runtime_fields_get_errors.spec.ts",
-        "line": 55,
-        "column": 12
+        "line": 42,
+        "column": 13
       }
     },
     {
@@ -5103,8 +5210,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/index_patterns/runtime_fields_get_errors.spec.ts",
-        "line": 70,
-        "column": 12
+        "line": 50,
+        "column": 9
       }
     },
     {
@@ -5129,8 +5236,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/index_patterns/runtime_fields_get_main.spec.ts",
-        "line": 38,
-        "column": 12
+        "line": 31,
+        "column": 13
       }
     },
     {
@@ -5155,8 +5262,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/index_patterns/runtime_fields_put_errors.spec.ts",
-        "line": 38,
-        "column": 12
+        "line": 31,
+        "column": 13
       }
     },
     {
@@ -5181,8 +5288,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/index_patterns/runtime_fields_put_errors.spec.ts",
-        "line": 62,
-        "column": 12
+        "line": 51,
+        "column": 27
       }
     },
     {
@@ -5207,8 +5314,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/index_patterns/runtime_fields_put_main.spec.ts",
-        "line": 38,
-        "column": 12
+        "line": 31,
+        "column": 13
       }
     },
     {
@@ -5233,8 +5340,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/index_patterns/runtime_fields_put_main.spec.ts",
-        "line": 103,
-        "column": 12
+        "line": 94,
+        "column": 20
       }
     },
     {
@@ -5259,8 +5366,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/index_patterns/runtime_fields_update_errors.spec.ts",
-        "line": 24,
-        "column": 12
+        "line": 20,
+        "column": 13
       }
     },
     {
@@ -5285,8 +5392,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/index_patterns/runtime_fields_update_errors.spec.ts",
-        "line": 40,
-        "column": 12
+        "line": 32,
+        "column": 31
       }
     },
     {
@@ -5311,8 +5418,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/index_patterns/runtime_fields_update_main.spec.ts",
-        "line": 38,
-        "column": 12
+        "line": 31,
+        "column": 13
       }
     },
     {
@@ -5329,8 +5436,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/scripted_fields_disabled.spec.ts",
-        "line": 45,
-        "column": 12
+        "line": 39,
+        "column": 11
       }
     }
   ]

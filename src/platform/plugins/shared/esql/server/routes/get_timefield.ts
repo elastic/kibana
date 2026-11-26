@@ -187,12 +187,13 @@ export const registerGetTimeFieldRoute = (
       },
       validate: {
         body: schema.object({
-          query: schema.string(),
+          query: schema.string({ maxLength: 1000000 }),
         }),
       },
     },
     async (requestHandlerContext, request, response) => {
       const { query } = request.body;
+
       const core = await requestHandlerContext.core;
       const client = core.elasticsearch.client.asCurrentUser;
 

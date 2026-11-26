@@ -9,6 +9,9 @@ import type { FtrConfigProviderContext } from '@kbn/test';
 import { getPreconfiguredConnectorConfig } from '@kbn/gen-ai-functional-testing';
 import { services } from './ftr_provider_context';
 
+// EIS QA environment URL for Cloud Connected Mode; used by the LLM failure judge.
+const EIS_QA_URL = 'https://inference.eu-west-1.aws.svc.qa.elastic.cloud';
+
 // eslint-disable-next-line import/no-default-export
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const xpackFunctionalConfig = await readConfigFile(
@@ -21,6 +24,13 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     ...xpackFunctionalConfig.getAll(),
     services,
     testFiles: [require.resolve('./tests')],
+    esTestCluster: {
+      ...xpackFunctionalConfig.get('esTestCluster'),
+      serverArgs: [
+        ...xpackFunctionalConfig.get('esTestCluster.serverArgs'),
+        `xpack.inference.elastic.url=${EIS_QA_URL}`,
+      ],
+    },
     kbnTestServer: {
       ...xpackFunctionalConfig.get('kbnTestServer'),
       serverArgs: [

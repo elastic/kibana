@@ -25,13 +25,15 @@ export const alertAnalysisSkill = defineSkillType({
   name: 'alert-analysis',
   basePath: 'skills/security/alerts',
   description:
-    'Alert triage and investigation: fetch alerts, correlate related alerts via a focused inline tool, ' +
-    'enrich with Security Labs threat intelligence, and assess entity risk to determine disposition.',
+    'Count, list, prioritize, and investigate Security detection alerts in the current Kibana space. ' +
+    'Use for questions like "how many alerts", "high/critical alerts in last 24h", or triage of a specific alert. ' +
+    'Fetches alerts via security.alerts (space-scoped), correlates related alerts, enriches with Security Labs, and assesses entity risk.',
   content: `# Alert Analysis Guide
 
 ## When to Use This Skill
 
 Use this skill when:
+- Counting, listing, prioritizing, or summarizing security alerts in the current space (e.g. "how many alerts in the last 24 hours")
 - Triaging a specific security alert to determine if it is a true or false positive
 - Investigating alerts to understand their context and impact
 - Finding related alerts that share entities (hosts, users, IPs) with a known alert
@@ -77,11 +79,11 @@ Use this skill when:
 - Reference the entity-analytics skill for deeper entity profiling or asset criticality review
 
 ## Tool Selection Guardrails
-- For list/prioritization questions (e.g. "high/critical alerts in last 24h"), use only 'security.alerts' unless explicit correlation by alertId is requested.
+- For list/prioritization/count questions about security alerts (e.g. "how many alerts", "high/critical alerts in last 24h"), use only 'security.alerts' unless explicit correlation by alertId is requested.
 - For Security Labs intel questions (e.g. "Lazarus Group techniques"), use only 'security.security_labs_search'.
 - For risk score questions (e.g. "risk score for host DC01"), use only 'security.entity_risk_score'.
 - For correlation requests that include an alertId, call 'security.alert-analysis.get-related-alerts' directly.
-- Do NOT use platform.core.search or workflow tools for related-alert correlation when an alertId is available.
+- Do NOT use platform.core.generate_esql, platform.core.execute_esql, platform.core.search, or workflow tools for alert inventory, count, or related-alert correlation. Those platform tools can cross Kibana spaces; 'security.alerts' stays scoped to the current space.
 
 ## Best Practices
 - Always start with the alert details before expanding investigation scope

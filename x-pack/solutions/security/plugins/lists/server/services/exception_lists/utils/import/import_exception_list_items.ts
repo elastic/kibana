@@ -9,6 +9,7 @@ import type {
   ImportExceptionListItemSchemaDecoded,
   NamespaceType,
 } from '@kbn/securitysolution-io-ts-list-types';
+import { withSpan } from '@kbn/apm-utils';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 
 import type { ImportDataResponse, ImportResponse } from '../../import_exception_list_and_items';
@@ -39,63 +40,62 @@ export const importExceptionListItems = async ({
   isOverwrite: boolean;
   savedObjectsClient: SavedObjectsClientContract;
   user: string;
-}): Promise<ImportDataResponse> => {
-  let importExceptionListItemsResponse: ImportResponse[] = [];
+}): Promise<ImportDataResponse> =>
+  withSpan({ name: 'exceptionLists.importExceptionListItems', type: 'lists' }, async () => {
+    let importExceptionListItemsResponse: ImportResponse[] = [];
 
-  for await (const itemsChunk of itemsChunks) {
-    // sort by namespaceType
-    const [agnosticListItems, nonAgnosticListItems] = sortItemsImportsByNamespace(itemsChunk);
-    const mapList = (
-      list: ImportExceptionListItemSchemaDecoded
-    ): { listId: string; namespaceType: NamespaceType } => ({
-      listId: list.list_id,
-      namespaceType: list.namespace_type,
-    });
+    for await (const itemsChunk of itemsChunks) {
+      // sort by namespaceType
+      const [agnosticListItems, nonAgnosticListItems] = sortItemsImportsByNamespace(itemsChunk);
+      const mapList = (
+        list: ImportExceptionListItemSchemaDecoded
+      ): { listId: string; namespaceType: NamespaceType } => ({
+        listId: list.list_id,
+        namespaceType: list.namespace_type,
+      });
 
-    // Gather lists referenced by items
-    // Dictionary of found lists
-    const foundLists = await getAllListTypes(
-      agnosticListItems.map(mapList),
-      nonAgnosticListItems.map(mapList),
-      savedObjectsClient
-    );
+      // Gather lists referenced by items
+      // Dictionary of found lists
+      const foundLists = await getAllListTypes(
+        agnosticListItems.map(mapList),
+        nonAgnosticListItems.map(mapList),
+        savedObjectsClient
+      );
 
-    // Find any existing items with matching item_id
-    // Dictionary of found items
-    const foundItems = await getAllListItemTypes(
-      agnosticListItems,
-      nonAgnosticListItems,
-      savedObjectsClient
-    );
+      // Find any existing items with matching item_id
+      // Dictionary of found items
+      const foundItems = await getAllListItemTypes(
+        agnosticListItems,
+        nonAgnosticListItems,
+        savedObjectsClient
+      );
 
-    // Figure out which items need to be bulk created/updated
-    const { errors, itemsToCreate, itemsToUpdate } = sortExceptionItemsToUpdateOrCreate({
-      existingItems: foundItems,
-      existingLists: foundLists,
-      isOverwrite,
-      items: itemsChunk,
-      user,
-    });
+      // Figure out which items need to be bulk created/updated
+      const { errors, itemsToCreate, itemsToUpdate } = sortExceptionItemsToUpdateOrCreate({
+        existingItems: foundItems,
+        existingLists: foundLists,
+        isOverwrite,
+        items: itemsChunk,
+        user,
+      });
 
-    // Items to bulk create
-    const bulkCreateResponse = await bulkCreateImportedItems({
-      itemsToCreate,
-      savedObjectsClient,
-    });
+      const bulkCreateResponse = await bulkCreateImportedItems({
+        itemsToCreate,
+        savedObjectsClient,
+      });
 
-    // Items to bulk update
-    const bulkUpdateResponse = await bulkUpdateImportedItems({
-      itemsToUpdate,
-      savedObjectsClient,
-    });
+      const bulkUpdateResponse = await bulkUpdateImportedItems({
+        itemsToUpdate,
+        savedObjectsClient,
+      });
 
-    importExceptionListItemsResponse = [
-      ...importExceptionListItemsResponse,
-      ...bulkCreateResponse,
-      ...bulkUpdateResponse,
-      ...errors,
-    ];
-  }
+      importExceptionListItemsResponse = [
+        ...importExceptionListItemsResponse,
+        ...bulkCreateResponse,
+        ...bulkUpdateResponse,
+        ...errors,
+      ];
+    }
 
-  return sortImportResponses(importExceptionListItemsResponse);
-};
+    return sortImportResponses(importExceptionListItemsResponse);
+  });

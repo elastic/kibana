@@ -153,6 +153,7 @@ test.describe(
       pageObjects: { nodeDetailsPage },
     }) => {
       await nodeDetailsPage.clickOverviewTab();
+
       await test.step('verify collapsible sections exist', async () => {
         await expect(nodeDetailsPage.metadataCollapsible).toBeVisible();
         await expect(nodeDetailsPage.alertsCollapsible).toBeVisible();
@@ -163,6 +164,7 @@ test.describe(
 
     test('Overview Tab - shows alerts', async ({ pageObjects: { nodeDetailsPage } }) => {
       await nodeDetailsPage.clickOverviewTab();
+
       await test.step('verify alerts title exists', async () => {
         await expect(nodeDetailsPage.alertsTitle).toBeVisible();
       });
@@ -172,6 +174,7 @@ test.describe(
       pageObjects: { nodeDetailsPage },
     }) => {
       await nodeDetailsPage.clickOverviewTab();
+
       await test.step('verify alerts section is collapsible', async () => {
         await expect(nodeDetailsPage.alertsCollapsible).toBeVisible();
       });

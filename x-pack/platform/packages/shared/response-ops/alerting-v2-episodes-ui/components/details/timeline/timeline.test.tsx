@@ -22,7 +22,7 @@ const makeAction = (id: string, ts: string): ActionEntry => ({
     actor: 'user-1',
     episode_id: 'ep-1',
     group_hash: 'hash-1',
-    tags: null,
+    tags: [],
     assignee_uid: null,
     expiry: null,
     reason: null,

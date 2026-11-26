@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { recurse } from 'cypress-recurse';
 import {
   MANAGE_NAVIGATION_ITEMS,
   SECURITY_SOLUTION_NAVBAR_MANAGE_ITEM,
@@ -108,13 +107,7 @@ export const openBarchartPopoverMenu = () => {
  * Performs click on element that require a mouse hover first
  */
 export const clickAction = (propertySelector: string, rowIndex: number, actionSelector: string) => {
-  recurse(
-    () => {
-      cy.get(propertySelector).filter(':visible').eq(rowIndex).trigger('mouseover');
-      return cy.get(actionSelector).first();
-    },
-    ($el) => $el.is(':visible')
-  );
+  cy.get(propertySelector).filter(':visible').eq(rowIndex).trigger('mouseover');
 
   // while { force: true } shouldn't really be used, here it allows us to get rid of flakiness on things that need an mouse hover
   cy.get(actionSelector).first().click({ force: true });

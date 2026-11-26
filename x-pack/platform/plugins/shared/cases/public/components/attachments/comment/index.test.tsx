@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import React from 'react';
 import type { EuiThemeComputed } from '@elastic/eui';
 import { COMMENT_ATTACHMENT_TYPE } from '../../../../common/constants/attachments';
 import {
@@ -13,6 +14,7 @@ import {
 } from '../../../client/attachment_framework/types';
 import type { CommentAttachmentData } from '../../../../common/types/domain_zod/attachment/comment/v2';
 import { basicCase } from '../../../containers/mock';
+import { allCasesPermissions } from '../../../common/mock';
 import { getCommentAttachmentType } from '.';
 
 type CommentViewProps = UnifiedValueAttachmentViewProps<CommentAttachmentData>;
@@ -30,6 +32,7 @@ describe('getCommentAttachmentType', () => {
     version: '1',
     savedObjectId: 'comment-1',
     caseData: { title: basicCase.title, id: basicCase.id },
+    permissions: allCasesPermissions(),
     rowContext: {
       appId: 'cases',
       manageMarkdownEditIds: [],
@@ -47,27 +50,29 @@ describe('getCommentAttachmentType', () => {
   it('creates the attachment type correctly', () => {
     const commentType = getCommentAttachmentType();
 
+    expect(React.isValidElement(commentType.getIcon(attachmentViewProps))).toBe(true);
+    expect(commentType.getLabel()).toBe('Comments');
     expect(commentType).toStrictEqual({
       id: COMMENT_ATTACHMENT_TYPE,
-      icon: 'editorComment',
-      displayName: 'Comments',
-      getAttachmentViewObject: expect.any(Function),
-      getAttachmentRemovalObject: expect.any(Function),
+      getIcon: expect.any(Function),
+      getLabel: expect.any(Function),
+      getCreationActivity: expect.any(Function),
+      getRemovalActivity: expect.any(Function),
       schema: expect.any(Object),
     });
   });
 
-  describe('getAttachmentViewObject', () => {
+  describe('getCreationActivity', () => {
     it('renders the event correctly', () => {
       const commentType = getCommentAttachmentType();
-      const { event } = commentType.getAttachmentViewObject(attachmentViewProps);
+      const { event } = commentType.getCreationActivity(attachmentViewProps);
 
       expect(event).toBe('added a comment');
     });
 
     it('hides the default actions', () => {
       const commentType = getCommentAttachmentType();
-      const { hideDefaultActions } = commentType.getAttachmentViewObject(attachmentViewProps);
+      const { hideDefaultActions } = commentType.getCreationActivity(attachmentViewProps);
 
       expect(hideDefaultActions).toBe(true);
     });
@@ -75,7 +80,7 @@ describe('getCommentAttachmentType', () => {
     it('sets a primary custom action', () => {
       const commentType = getCommentAttachmentType();
       const actions = commentType
-        .getAttachmentViewObject(attachmentViewProps)
+        .getCreationActivity(attachmentViewProps)
         .getActions?.(attachmentViewProps);
 
       expect(actions).toHaveLength(1);
@@ -88,21 +93,21 @@ describe('getCommentAttachmentType', () => {
 
     it('exposes a children component for the comment body', () => {
       const commentType = getCommentAttachmentType();
-      const { children } = commentType.getAttachmentViewObject(attachmentViewProps);
+      const { children } = commentType.getCreationActivity(attachmentViewProps);
 
       expect(children).toEqual(expect.any(Object));
     });
 
     it('returns a className when rowContext is present', () => {
       const commentType = getCommentAttachmentType();
-      const { className } = commentType.getAttachmentViewObject(attachmentViewProps);
+      const { className } = commentType.getCreationActivity(attachmentViewProps);
 
       expect(className).toContain('userAction__comment');
     });
 
     it('marks the className as outlined when the comment is selected', () => {
       const commentType = getCommentAttachmentType();
-      const { className } = commentType.getAttachmentViewObject({
+      const { className } = commentType.getCreationActivity({
         ...attachmentViewProps,
         rowContext: {
           ...attachmentViewProps.rowContext,
@@ -115,7 +120,7 @@ describe('getCommentAttachmentType', () => {
 
     it('marks the className as isEdit when the comment is being edited', () => {
       const commentType = getCommentAttachmentType();
-      const { className } = commentType.getAttachmentViewObject({
+      const { className } = commentType.getCreationActivity({
         ...attachmentViewProps,
         rowContext: {
           ...attachmentViewProps.rowContext,
@@ -127,10 +132,10 @@ describe('getCommentAttachmentType', () => {
     });
   });
 
-  describe('getAttachmentRemovalObject', () => {
+  describe('getRemovalActivity', () => {
     it('renders the removal event correctly', () => {
       const commentType = getCommentAttachmentType();
-      const removal = commentType.getAttachmentRemovalObject?.(attachmentViewProps);
+      const removal = commentType.getRemovalActivity?.(attachmentViewProps);
 
       expect(removal).toEqual({ event: 'removed comment' });
     });

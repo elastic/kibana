@@ -8,13 +8,13 @@
 import React, { useMemo } from 'react';
 import { css } from '@emotion/react';
 import {
+  EuiBadge,
   EuiFlexGroup,
+  type EuiFlexGroupProps,
   EuiFlexItem,
   EuiText,
-  EuiBadge,
-  useEuiTheme,
   useEuiFontSize,
-  type EuiFlexGroupProps,
+  useEuiTheme,
 } from '@elastic/eui';
 import { DistributionBar } from '@kbn/security-solution-distribution-bar';
 
@@ -54,7 +54,7 @@ export const InsightDistributionBar: React.FC<InsightDistributionBarProps> = ({
 
   const barComponent = useMemo(
     () => (
-      <EuiFlexGroup gutterSize="xs" responsive={false}>
+      <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
         <EuiFlexItem>
           <DistributionBar
             stats={stats}

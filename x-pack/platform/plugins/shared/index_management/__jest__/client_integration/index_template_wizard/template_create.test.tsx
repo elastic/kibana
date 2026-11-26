@@ -34,6 +34,10 @@ import {
 
 jest.mock('@kbn/code-editor');
 
+// Driving the full multi-step wizard in setup hooks is intrinsically heavy and runs
+// ~10x slower under CI parallel load, so give every hook and test a single generous budget.
+jest.setTimeout(60000);
+
 describe('<TemplateCreate />', () => {
   let httpSetup: ReturnType<typeof setupEnvironment>['httpSetup'];
   let httpRequestsMockHelpers: ReturnType<typeof setupEnvironment>['httpRequestsMockHelpers'];
@@ -113,7 +117,7 @@ describe('<TemplateCreate />', () => {
     describe('component templates (step 2)', () => {
       beforeEach(async () => {
         await completeStepOne({ name: TEMPLATE_NAME, indexPatterns: ['index1'] });
-      }, 20000);
+      });
 
       it('should set the correct page title', async () => {
         expect(await screen.findByTestId('stepComponents')).toBeInTheDocument();
@@ -252,7 +256,7 @@ describe('<TemplateCreate />', () => {
         });
         // Component templates
         await completeStepTwo();
-      }, 20000);
+      });
 
       it('should set the correct page title', async () => {
         expect(await screen.findByTestId('stepSettings')).toBeInTheDocument();
@@ -300,7 +304,7 @@ describe('<TemplateCreate />', () => {
 
       beforeEach(async () => {
         await navigateToMappingsStep();
-      }, 20000);
+      });
 
       it('should set the correct page title', async () => {
         expect(await screen.findByTestId('stepMappings')).toBeInTheDocument();
@@ -334,7 +338,7 @@ describe('<TemplateCreate />', () => {
         fireEvent.click(confirmButton);
 
         await waitFor(() => expect(getFieldsListItems()).toHaveLength(1));
-      }, 16000);
+      });
     });
 
     describe('aliases (step 5)', () => {
@@ -347,7 +351,7 @@ describe('<TemplateCreate />', () => {
         await completeStepThree('{}');
         // Mappings
         await completeStepFour();
-      }, 20000);
+      });
 
       it('should set the correct page title', async () => {
         expect(await screen.findByTestId('stepAliases')).toBeInTheDocument();
@@ -359,7 +363,7 @@ describe('<TemplateCreate />', () => {
         await completeStepFive('{ invalidJsonString ', false);
 
         expect(await screen.findByText('Invalid JSON format.')).toBeInTheDocument();
-      }, 10000);
+      });
     });
   });
 
@@ -378,14 +382,14 @@ describe('<TemplateCreate />', () => {
         await completeStepThree(JSON.stringify(SETTINGS));
         await completeStepFour();
         await completeStepFive(JSON.stringify(ALIASES));
-      }, 20000);
+      });
 
       it('should set the correct step title', async () => {
         expect(await screen.findByTestId('stepSummary')).toBeInTheDocument();
         expect(screen.getByTestId('stepTitle')).toHaveTextContent(
           `Review details for '${TEMPLATE_NAME}'`
         );
-      }, 10000);
+      });
 
       describe('tabs', () => {
         test('should have 3 tabs', () => {
@@ -441,7 +445,7 @@ describe('<TemplateCreate />', () => {
           'All new indices that you create will use this template. Edit index patterns.'
         );
       }
-    }, 20000);
+    });
   });
 
   describe('form payload & api errors', () => {
@@ -462,7 +466,7 @@ describe('<TemplateCreate />', () => {
       await completeStepThree(JSON.stringify(SETTINGS));
       await completeStepFour(MAPPING_FIELDS);
       await completeStepFive(JSON.stringify(ALIASES));
-    }, 20000);
+    });
 
     it('should surface API errors and send the correct payload on success', async () => {
       // First attempt fails and surfaces an error
@@ -514,7 +518,7 @@ describe('<TemplateCreate />', () => {
           aliases: ALIASES,
         },
       });
-    }, 20000);
+    });
   });
 
   describe('Data stream lifecycle', () => {
@@ -532,7 +536,7 @@ describe('<TemplateCreate />', () => {
           unit: 'd',
         },
       });
-    }, 20000);
+    });
 
     test('should include data stream lifecycle in summary when set in step 1', async () => {
       await completeStepTwo();
@@ -542,7 +546,7 @@ describe('<TemplateCreate />', () => {
 
       expect(await screen.findByTestId('lifecycleValue')).toBeInTheDocument();
       expect(screen.getByTestId('lifecycleValue')).toHaveTextContent('1 day');
-    }, 20000);
+    });
 
     test('preview data stream', async () => {
       await completeStepTwo();
@@ -575,6 +579,6 @@ describe('<TemplateCreate />', () => {
         expect(body.index_patterns).toEqual(DEFAULT_INDEX_PATTERNS);
         expect(body.data_stream).toEqual({});
       });
-    }, 20000);
+    });
   });
 });

@@ -13,6 +13,7 @@ export function SearchQueryRulesPageProvider({ getService }: FtrProviderContext)
   const find = getService('find');
   const comboBox = getService('comboBox');
   const browser = getService('browser');
+  const retry = getService('retry');
 
   return {
     QueryRulesEmptyPromptPage: {
@@ -167,12 +168,21 @@ export function SearchQueryRulesPageProvider({ getService }: FtrProviderContext)
         await testSubjects.click(this.TEST_IDS.DELETE_QUERY_RULES_RULESET_MODAL_DELETE_BUTTON);
       },
       async clickAcknowledgeButton() {
-        await testSubjects.click(this.TEST_IDS.DELETE_QUERY_RULES_RULESET_MODAL_ACKNOWLEDGE_BUTTON);
+        await testSubjects.setCheckbox(
+          this.TEST_IDS.DELETE_QUERY_RULES_RULESET_MODAL_ACKNOWLEDGE_BUTTON,
+          'check'
+        );
+        await retry.waitFor('delete ruleset acknowledge checkbox to be checked', () =>
+          testSubjects.isChecked(this.TEST_IDS.DELETE_QUERY_RULES_RULESET_MODAL_ACKNOWLEDGE_BUTTON)
+        );
       },
       async clickCancelButton() {
         await testSubjects.click(this.TEST_IDS.DELETE_QUERY_RULES_RULESET_MODAL_CANCEL_BUTTON);
       },
       async clickConfirmDeleteModal() {
+        await retry.waitFor('delete ruleset confirm button to be enabled', () =>
+          testSubjects.isEnabled('confirmModalConfirmButton')
+        );
         await testSubjects.click('confirmModalConfirmButton');
       },
     },

@@ -22,6 +22,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { MAX_ARTIFACTS_INVESTIGATION_GUIDE_LENGTH } from '@kbn/alerting-types/rule/latest';
+import { useGetRuleTagsQuery } from '@kbn/response-ops-rules-apis/hooks/use_get_rule_tags_query';
 import {
   RULE_INVESTIGATION_GUIDE_LABEL,
   RULE_INVESTIGATION_GUIDE_LABEL_TOOLTIP_CONTENT,
@@ -38,10 +39,12 @@ import { LabelWithTooltip } from './label_with_tooltip';
 
 export const RULE_DETAIL_MIN_ROW_WIDTH = 600;
 
+const TAG_SUGGESTIONS_PER_PAGE = 10000;
+
 export const RuleDetails = () => {
   const { euiTheme } = useEuiTheme();
   const { formData, baseErrors, plugins } = useRuleFormState();
-  const { uiActions } = plugins;
+  const { uiActions, http, notifications } = plugins;
 
   const dispatch = useRuleFormDispatch();
 
@@ -50,6 +53,18 @@ export const RuleDetails = () => {
   const tagsOptions = useMemo(() => {
     return tags.map((tag: string) => ({ label: tag }));
   }, [tags]);
+
+  const { tags: existingTags, isLoading: isLoadingTagSuggestions } = useGetRuleTagsQuery({
+    http,
+    toasts: notifications.toasts,
+    perPage: TAG_SUGGESTIONS_PER_PAGE,
+    enabled: true,
+  });
+
+  const suggestedTagsOptions = useMemo(
+    () => existingTags.map((tag: string) => ({ label: tag })),
+    [existingTags]
+  );
 
   const onNameChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -207,9 +222,10 @@ export const RuleDetails = () => {
             <EuiComboBox
               isInvalid={!!baseErrors?.tags?.length}
               fullWidth
-              noSuggestions
               placeholder={RULE_TAG_PLACEHOLDER}
               data-test-subj="ruleDetailsTagsInput"
+              options={suggestedTagsOptions}
+              isLoading={isLoadingTagSuggestions}
               selectedOptions={tagsOptions}
               onCreateOption={onAddTag}
               onChange={onSetTag}

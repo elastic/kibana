@@ -2956,11 +2956,11 @@ describe('updatePackRoute', () => {
       ).not.toHaveProperty('default--my-pack');
     });
 
-    it('keeps an enabled pack on the wire when an edit-only PUT hits the empty-reference drift state', async () => {
+    it('repairs wire-attached policies in the empty-reference drift state (edit-only PUT writes to wire, never adds new blocks)', async () => {
       // Drift state: SO references are empty but the wire still carries the
-      // pack. An edit that never mentions policy_ids or shards is not a
-      // retarget request, so it must leave the wire alone — detaching here
-      // would unschedule an enabled pack on every agent.
+      // pack on two package policies. An edit-only PUT (no policy_ids/shards)
+      // must rewrite those existing blocks with current metadata — wire-first
+      // discovery means references no longer gate the repair.
       const currentSO = {
         ...basePackSO,
         references: [],
@@ -2968,11 +2968,14 @@ describe('updatePackRoute', () => {
           ...basePackSO.attributes,
           name: 'my-pack',
           enabled: true,
-          queries: [{ id: 'q1', name: 'q1', query: 'SELECT 1', interval: 60 }],
+          queries: [
+            { id: 'q1', name: 'q1', query: 'SELECT 1', interval: 60, schedule_id: 'sched-q1' },
+          ],
           shards: [],
           schedule_type: 'interval' as const,
           interval: 60,
           rrule_schedule: null,
+          created_at: '2026-01-01T00:00:00.000Z',
         },
       };
       const updatedSO = { ...currentSO };
@@ -3037,7 +3040,17 @@ describe('updatePackRoute', () => {
       await routeHandler(buildMockContext() as any, mockRequest, mockResponse);
 
       expect(mockResponse.badRequest).not.toHaveBeenCalled();
-      expect(packagePolicyUpdate).not.toHaveBeenCalled();
+      // Both wire-attached policies get repaired even though SO references are empty.
+      expect(packagePolicyUpdate).toHaveBeenCalledTimes(2);
+      const writtenIds = packagePolicyUpdate.mock.calls.map((call) => call[2]);
+      expect(writtenIds).toContain('package-policy-1');
+      expect(writtenIds).toContain('package-policy-2');
+      // Blocks are updated with current metadata — not added to new policies.
+      const [, , , pp1] = packagePolicyUpdate.mock.calls[0];
+      expect(pp1.inputs[0].config.osquery.value.packs['default--my-pack']).toBeDefined();
+      expect(
+        pp1.inputs[0].config.osquery.value.packs['default--my-pack'].queries.q1.schedule_id
+      ).toBe('sched-q1');
     });
 
     it('still detaches drifted policies when the request does ask to retarget', async () => {
@@ -3220,6 +3233,850 @@ describe('updatePackRoute', () => {
 
       // The stored `*` shard must survive an edit that never mentions shards.
       expect(mockClient.update.mock.calls[0][2].shards).toEqual([{ key: '*', value: 100 }]);
+    });
+
+    it('edit-only save attaches the block to a REFERENCED policy whose wire lacks it (drift repair)', async () => {
+      // Write targets are the union of the wire scan and reference-resolved
+      // policies. Wire-only would 200 advertising `policy_ids: [policy-extra]`
+      // while writing nothing to it.
+      const currentSO = {
+        ...basePackSO,
+        references: [
+          { id: 'policy-1', name: 'policy-1', type: 'ingest-agent-policies' },
+          { id: 'policy-extra', name: 'policy-extra', type: 'ingest-agent-policies' },
+        ],
+        attributes: {
+          ...basePackSO.attributes,
+          name: 'my-pack',
+          enabled: true,
+          queries: [
+            { id: 'q1', name: 'q1', query: 'SELECT 1', interval: 60, schedule_id: 'sched-q1' },
+          ],
+          shards: [],
+          schedule_type: 'interval' as const,
+          interval: 60,
+          rrule_schedule: null,
+          created_at: '2026-01-01T00:00:00.000Z',
+        },
+      };
+      const updatedSO = { ...currentSO };
+
+      let getCallCount = 0;
+      const mockClient = {
+        get: jest.fn().mockImplementation(() => {
+          getCallCount += 1;
+
+          return Promise.resolve(getCallCount === 1 ? currentSO : updatedSO);
+        }),
+        find: jest.fn().mockResolvedValue({ saved_objects: [] }),
+        update: jest.fn().mockResolvedValue({
+          id: 'pack-id',
+          attributes: updatedSO.attributes,
+          references: currentSO.references,
+        }),
+        list: jest.fn().mockResolvedValue({ items: [] }),
+      };
+
+      const packagePolicyUpdate = jest.fn().mockResolvedValue({});
+      // Only policy-1 carries the pack on the wire; policy-extra does not.
+      const policyWithPack = buildWirePolicyWithPack('package-policy-1', ['policy-1']);
+      const policyWithoutPack = {
+        id: 'package-policy-extra',
+        policy_ids: ['policy-extra'],
+        package: { name: 'osquery_manager', version: '1.0.0' },
+        inputs: [{ type: 'osquery', streams: [], config: { osquery: { value: { packs: {} } } } }],
+      };
+      const packagePolicyList = jest.fn().mockResolvedValue({
+        items: [policyWithPack, policyWithoutPack],
+      });
+
+      (createInternalSavedObjectsClientForSpaceId as jest.Mock).mockResolvedValue(mockClient);
+
+      const mockRouter = createMockRouter();
+      mockOsqueryContext = {
+        logFactory: { get: jest.fn().mockReturnValue(loggingSystemMock.createLogger()) },
+        security: {},
+        getStartServices: jest.fn().mockResolvedValue([{}, { security: {} }, {}]),
+        experimentalFeatures: { rruleScheduling: true },
+        service: {
+          getActiveSpace: jest.fn().mockResolvedValue({ id: 'default' }),
+          getAgentPolicyService: jest.fn().mockReturnValue({
+            getByIds: jest.fn().mockResolvedValue([
+              { id: 'policy-1', name: 'policy-1' },
+              { id: 'policy-extra', name: 'policy-extra' },
+            ]),
+          }),
+          getPackagePolicyService: jest.fn().mockReturnValue({
+            list: packagePolicyList,
+            fetchAllItems: fetchAllItemsFromListMock(packagePolicyList),
+            update: packagePolicyUpdate,
+          }),
+        },
+      } as unknown as OsqueryAppContext;
+
+      updatePackRoute(mockRouter, mockOsqueryContext);
+      const route = mockRouter.versioned.getRoute('put', '/api/osquery/packs/{id}');
+      const routeVersion = route.versions[API_VERSIONS.public.v1];
+      if (!routeVersion) throw new Error('no route version');
+      routeHandler = routeVersion.handler;
+
+      const mockRequest = httpServerMock.createKibanaRequest({
+        params: { id: 'pack-id' },
+        body: { description: 'edit-only, no policy change' },
+      });
+      const mockResponse = httpServerMock.createResponseFactory();
+
+      await routeHandler(buildMockContext() as any, mockRequest, mockResponse);
+
+      expect(mockResponse.badRequest).not.toHaveBeenCalled();
+      // Both are written: the wire-carrying policy is refreshed, and the
+      // referenced-but-unwired one has the block created.
+      expect(packagePolicyUpdate).toHaveBeenCalledTimes(2);
+      const writtenPolicyIds = packagePolicyUpdate.mock.calls.map((call) => call[2]).sort();
+      expect(writtenPolicyIds).toEqual(['package-policy-1', 'package-policy-extra']);
+
+      // The newly attached block carries the pack's real schedule metadata, not
+      // an empty shell — the whole point of reaching this policy at all.
+      const extraCall = packagePolicyUpdate.mock.calls.find(
+        (call) => call[2] === 'package-policy-extra'
+      );
+      const attachedBlock = extraCall![3].inputs[0].config.osquery.value.packs['default--my-pack'];
+      expect(attachedBlock.queries.q1.schedule_id).toBe('sched-q1');
+      expect(attachedBlock.queries.q1.start_date).toBe('2026-01-01T00:00:00.000Z');
+    });
+
+    it('edit-only save heals SO references when wire-attached policies are missing from them', async () => {
+      // Wire carries the pack on policy-2 but SO only references policy-1.
+      // An edit-only save should repair the SO references to include policy-2.
+      const currentSO = {
+        ...basePackSO,
+        references: [{ id: 'policy-1', name: 'policy-1', type: 'ingest-agent-policies' }],
+        attributes: {
+          ...basePackSO.attributes,
+          name: 'my-pack',
+          enabled: true,
+          queries: [
+            { id: 'q1', name: 'q1', query: 'SELECT 1', interval: 60, schedule_id: 'sched-q1' },
+          ],
+          shards: [],
+          schedule_type: 'interval' as const,
+          interval: 60,
+          rrule_schedule: null,
+          created_at: '2026-01-01T00:00:00.000Z',
+        },
+      };
+      const updatedSO = { ...currentSO };
+
+      let getCallCount = 0;
+      const mockClient = {
+        get: jest.fn().mockImplementation(() => {
+          getCallCount += 1;
+
+          return Promise.resolve(getCallCount === 1 ? currentSO : updatedSO);
+        }),
+        find: jest.fn().mockResolvedValue({ saved_objects: [] }),
+        update: jest.fn().mockResolvedValue({
+          id: 'pack-id',
+          attributes: updatedSO.attributes,
+          references: updatedSO.references,
+        }),
+        list: jest.fn().mockResolvedValue({ items: [] }),
+      };
+
+      const packagePolicyUpdate = jest.fn().mockResolvedValue({});
+      // Both policy-1 and policy-2 carry the pack on the wire.
+      const packagePolicyList = jest.fn().mockResolvedValue({
+        items: [
+          buildWirePolicyWithPack('package-policy-1', ['policy-1']),
+          buildWirePolicyWithPack('package-policy-2', ['policy-2']),
+        ],
+      });
+
+      (createInternalSavedObjectsClientForSpaceId as jest.Mock).mockResolvedValue(mockClient);
+
+      const mockRouter = createMockRouter();
+      mockOsqueryContext = {
+        logFactory: { get: jest.fn().mockReturnValue(loggingSystemMock.createLogger()) },
+        security: {},
+        getStartServices: jest.fn().mockResolvedValue([{}, { security: {} }, {}]),
+        experimentalFeatures: { rruleScheduling: true },
+        service: {
+          getActiveSpace: jest.fn().mockResolvedValue({ id: 'default' }),
+          getAgentPolicyService: jest.fn().mockReturnValue({
+            getByIds: jest.fn().mockResolvedValue([
+              { id: 'policy-1', name: 'policy-1' },
+              { id: 'policy-2', name: 'policy-2' },
+            ]),
+          }),
+          getPackagePolicyService: jest.fn().mockReturnValue({
+            list: packagePolicyList,
+            fetchAllItems: fetchAllItemsFromListMock(packagePolicyList),
+            update: packagePolicyUpdate,
+          }),
+        },
+      } as unknown as OsqueryAppContext;
+
+      updatePackRoute(mockRouter, mockOsqueryContext);
+      const route = mockRouter.versioned.getRoute('put', '/api/osquery/packs/{id}');
+      const routeVersion = route.versions[API_VERSIONS.public.v1];
+      if (!routeVersion) throw new Error('no route version');
+      routeHandler = routeVersion.handler;
+
+      const mockRequest = httpServerMock.createKibanaRequest({
+        params: { id: 'pack-id' },
+        body: { description: 'edit-only with reference drift' },
+      });
+      const mockResponse = httpServerMock.createResponseFactory();
+
+      await routeHandler(buildMockContext() as any, mockRequest, mockResponse);
+
+      expect(mockResponse.badRequest).not.toHaveBeenCalled();
+      // Wire update: both policies get repaired.
+      expect(packagePolicyUpdate).toHaveBeenCalledTimes(2);
+      // Reference healing: SO update is called a 2nd time with healed references.
+      // First call is the normal SO update; second is the reference heal.
+      const soUpdateCalls = mockClient.update.mock.calls;
+      const healCall = soUpdateCalls.find(
+        (call) =>
+          call[0] === 'osquery-pack' && call[2] !== undefined && Object.keys(call[2]).length === 0
+      );
+      expect(healCall).toBeDefined();
+      const healedRefs = healCall![3].references as Array<{ id: string; type: string }>;
+      const refIds = healedRefs.filter((r) => r.type === 'ingest-agent-policies').map((r) => r.id);
+      expect(refIds).toContain('policy-1');
+      expect(refIds).toContain('policy-2');
+    });
+
+    it('edit-only reference healing preserves a referenced policy that is absent from the wire', async () => {
+      // Regression: healing must be an additive union of SO references and wire
+      // attachments, not a wire-derived replacement. policy-3 has the osquery
+      // integration (so it passes `getInitialPolicies` validation) but does not
+      // carry THIS pack on the wire. Healing is triggered by policy-2 being
+      // wire-only, and must NOT drop the policy-3 reference while repairing.
+      const currentSO = {
+        ...basePackSO,
+        references: [
+          { id: 'policy-1', name: 'policy-1', type: 'ingest-agent-policies' },
+          { id: 'policy-3', name: 'policy-3', type: 'ingest-agent-policies' },
+        ],
+        attributes: {
+          ...basePackSO.attributes,
+          name: 'my-pack',
+          enabled: true,
+          queries: [
+            { id: 'q1', name: 'q1', query: 'SELECT 1', interval: 60, schedule_id: 'sched-q1' },
+          ],
+          shards: [],
+          schedule_type: 'interval' as const,
+          interval: 60,
+          rrule_schedule: null,
+          created_at: '2026-01-01T00:00:00.000Z',
+        },
+      };
+      const updatedSO = { ...currentSO };
+
+      let getCallCount = 0;
+      const mockClient = {
+        get: jest.fn().mockImplementation(() => {
+          getCallCount += 1;
+
+          return Promise.resolve(getCallCount === 1 ? currentSO : updatedSO);
+        }),
+        find: jest.fn().mockResolvedValue({ saved_objects: [] }),
+        update: jest.fn().mockResolvedValue({
+          id: 'pack-id',
+          attributes: updatedSO.attributes,
+          references: updatedSO.references,
+        }),
+        list: jest.fn().mockResolvedValue({ items: [] }),
+      };
+
+      const packagePolicyUpdate = jest.fn().mockResolvedValue({});
+      // policy-1 and policy-2 carry THIS pack on the wire. policy-3 has the
+      // osquery integration too (a package policy exists for it, so it is a
+      // valid target) but carries no pack block for `my-pack`.
+      const emptyOsqueryPolicy = {
+        id: 'package-policy-3',
+        policy_ids: ['policy-3'],
+        package: { name: 'osquery_manager', version: '1.0.0' },
+        inputs: [
+          {
+            type: 'osquery',
+            streams: [],
+            config: { osquery: { value: { packs: {} } } },
+          },
+        ],
+      };
+      const packagePolicyList = jest.fn().mockResolvedValue({
+        items: [
+          buildWirePolicyWithPack('package-policy-1', ['policy-1']),
+          buildWirePolicyWithPack('package-policy-2', ['policy-2']),
+          emptyOsqueryPolicy,
+        ],
+      });
+
+      (createInternalSavedObjectsClientForSpaceId as jest.Mock).mockResolvedValue(mockClient);
+
+      const mockRouter = createMockRouter();
+      mockOsqueryContext = {
+        logFactory: { get: jest.fn().mockReturnValue(loggingSystemMock.createLogger()) },
+        security: {},
+        getStartServices: jest.fn().mockResolvedValue([{}, { security: {} }, {}]),
+        experimentalFeatures: { rruleScheduling: true },
+        service: {
+          getActiveSpace: jest.fn().mockResolvedValue({ id: 'default' }),
+          getAgentPolicyService: jest.fn().mockReturnValue({
+            getByIds: jest.fn().mockResolvedValue([
+              { id: 'policy-1', name: 'Policy One' },
+              { id: 'policy-2', name: 'Policy Two' },
+              { id: 'policy-3', name: 'Policy Three' },
+            ]),
+          }),
+          getPackagePolicyService: jest.fn().mockReturnValue({
+            list: packagePolicyList,
+            fetchAllItems: fetchAllItemsFromListMock(packagePolicyList),
+            update: packagePolicyUpdate,
+          }),
+        },
+      } as unknown as OsqueryAppContext;
+
+      updatePackRoute(mockRouter, mockOsqueryContext);
+      const route = mockRouter.versioned.getRoute('put', '/api/osquery/packs/{id}');
+      const routeVersion = route.versions[API_VERSIONS.public.v1];
+      if (!routeVersion) throw new Error('no route version');
+      routeHandler = routeVersion.handler;
+
+      const mockRequest = httpServerMock.createKibanaRequest({
+        params: { id: 'pack-id' },
+        body: { description: 'edit-only, refs must not shrink' },
+      });
+      const mockResponse = httpServerMock.createResponseFactory();
+
+      await routeHandler(buildMockContext() as any, mockRequest, mockResponse);
+
+      expect(mockResponse.badRequest).not.toHaveBeenCalled();
+
+      const healCall = mockClient.update.mock.calls.find(
+        (call) =>
+          call[0] === 'osquery-pack' && call[2] !== undefined && Object.keys(call[2]).length === 0
+      );
+      expect(healCall).toBeDefined();
+      const healedRefs = healCall![3].references as Array<{
+        id: string;
+        name?: string;
+        type: string;
+      }>;
+      const agentRefs = healedRefs.filter((r) => r.type === 'ingest-agent-policies');
+      const refIds = agentRefs.map((r) => r.id).sort();
+
+      // policy-3 survives even though it carries no block for this pack.
+      expect(refIds).toEqual(['policy-1', 'policy-2', 'policy-3']);
+      // Healed references carry real policy names, not raw ids.
+      expect(agentRefs.find((r) => r.id === 'policy-2')?.name).toBe('Policy Two');
+    });
+
+    it('edit-only save succeeds when a wire policy_id points at a DELETED agent policy (heal skips it, no 500)', async () => {
+      // The wire can reference an agent policy that no longer exists — drift is
+      // the premise of this whole branch. Healing is best-effort: the dangling
+      // id is dropped (getByIds ignoreMissing), the response stays 200, and no
+      // reference to the dead policy is minted.
+      const currentSO = {
+        ...basePackSO,
+        references: [{ id: 'policy-1', name: 'policy-1', type: 'ingest-agent-policies' }],
+        attributes: {
+          ...basePackSO.attributes,
+          name: 'my-pack',
+          enabled: true,
+          queries: [
+            { id: 'q1', name: 'q1', query: 'SELECT 1', interval: 60, schedule_id: 'sched-q1' },
+          ],
+          shards: [],
+          schedule_type: 'interval' as const,
+          interval: 60,
+          rrule_schedule: null,
+          created_at: '2026-01-01T00:00:00.000Z',
+        },
+      };
+      const updatedSO = { ...currentSO };
+
+      let getCallCount = 0;
+      const mockClient = {
+        get: jest.fn().mockImplementation(() => {
+          getCallCount += 1;
+
+          return Promise.resolve(getCallCount === 1 ? currentSO : updatedSO);
+        }),
+        find: jest.fn().mockResolvedValue({ saved_objects: [] }),
+        update: jest.fn().mockResolvedValue({
+          id: 'pack-id',
+          attributes: updatedSO.attributes,
+          references: currentSO.references,
+        }),
+        list: jest.fn().mockResolvedValue({ items: [] }),
+      };
+
+      const packagePolicyUpdate = jest.fn().mockResolvedValue({});
+      // policy-2's agent policy was deleted, but its package policy still
+      // carries the pack block and lists it in policy_ids.
+      const packagePolicyList = jest.fn().mockResolvedValue({
+        items: [
+          buildWirePolicyWithPack('package-policy-1', ['policy-1']),
+          buildWirePolicyWithPack('package-policy-2', ['policy-2']),
+        ],
+      });
+
+      (createInternalSavedObjectsClientForSpaceId as jest.Mock).mockResolvedValue(mockClient);
+
+      const mockRouter = createMockRouter();
+      mockOsqueryContext = {
+        logFactory: { get: jest.fn().mockReturnValue(loggingSystemMock.createLogger()) },
+        security: {},
+        getStartServices: jest.fn().mockResolvedValue([{}, { security: {} }, {}]),
+        experimentalFeatures: { rruleScheduling: true },
+        service: {
+          getActiveSpace: jest.fn().mockResolvedValue({ id: 'default' }),
+          getAgentPolicyService: jest.fn().mockReturnValue({
+            // Only policy-1 still exists; ignoreMissing drops policy-2.
+            getByIds: jest
+              .fn()
+              .mockImplementation(async (_soClient, ids: string[]) =>
+                ids.filter((id) => id === 'policy-1').map((id) => ({ id, name: 'Policy One' }))
+              ),
+          }),
+          getPackagePolicyService: jest.fn().mockReturnValue({
+            list: packagePolicyList,
+            fetchAllItems: fetchAllItemsFromListMock(packagePolicyList),
+            update: packagePolicyUpdate,
+          }),
+        },
+      } as unknown as OsqueryAppContext;
+
+      updatePackRoute(mockRouter, mockOsqueryContext);
+      const route = mockRouter.versioned.getRoute('put', '/api/osquery/packs/{id}');
+      const routeVersion = route.versions[API_VERSIONS.public.v1];
+      if (!routeVersion) throw new Error('no route version');
+      routeHandler = routeVersion.handler;
+
+      const mockRequest = httpServerMock.createKibanaRequest({
+        params: { id: 'pack-id' },
+        body: { description: 'edit-only with a dangling wire policy id' },
+      });
+      const mockResponse = httpServerMock.createResponseFactory();
+
+      await routeHandler(buildMockContext() as any, mockRequest, mockResponse);
+
+      // The save succeeds; the heal failure mode never surfaces as an error.
+      expect(mockResponse.ok).toHaveBeenCalled();
+      expect(mockResponse.customError).not.toHaveBeenCalled();
+      expect(mockResponse.badRequest).not.toHaveBeenCalled();
+      // Both wire blocks were still repaired.
+      expect(packagePolicyUpdate).toHaveBeenCalledTimes(2);
+      // No heal write happened: the only unresolved id was the dangling one.
+      const healCall = mockClient.update.mock.calls.find(
+        (call) =>
+          call[0] === 'osquery-pack' && call[2] !== undefined && Object.keys(call[2]).length === 0
+      );
+      expect(healCall).toBeUndefined();
+    });
+
+    it('edit-only save preserves a deliberate shard on a SHARED package policy (no reset to 100)', async () => {
+      // `policyShards` is keyed off the pack's own targets, so co-tenants
+      // resolve to DEFAULT_PACK_SHARD and `Math.max` promotes 25 to 100 — the
+      // SO would read 25 while the wire ran on every agent.
+      const currentSO = {
+        ...basePackSO,
+        references: [{ id: 'policy-a', name: 'policy-a', type: 'ingest-agent-policies' }],
+        attributes: {
+          ...basePackSO.attributes,
+          name: 'my-pack',
+          enabled: true,
+          queries: [
+            { id: 'q1', name: 'q1', query: 'SELECT 1', interval: 60, schedule_id: 'sched-q1' },
+          ],
+          shards: [{ key: 'policy-a', value: 25 }],
+          schedule_type: 'interval' as const,
+          interval: 60,
+          rrule_schedule: null,
+          created_at: '2026-01-01T00:00:00.000Z',
+        },
+      };
+      const updatedSO = { ...currentSO };
+
+      let getCallCount = 0;
+      const mockClient = {
+        get: jest.fn().mockImplementation(() => {
+          getCallCount += 1;
+
+          return Promise.resolve(getCallCount === 1 ? currentSO : updatedSO);
+        }),
+        find: jest.fn().mockResolvedValue({ saved_objects: [] }),
+        update: jest.fn().mockResolvedValue({
+          id: 'pack-id',
+          attributes: updatedSO.attributes,
+          references: currentSO.references,
+        }),
+        list: jest.fn().mockResolvedValue({ items: [] }),
+      };
+
+      const packagePolicyUpdate = jest.fn().mockResolvedValue({});
+      // One package policy shared by BOTH agent policies; the pack targets only policy-a.
+      const sharedPolicy = buildWirePolicyWithPack('package-policy-shared', [
+        'policy-a',
+        'policy-b',
+      ]);
+      sharedPolicy.inputs[0].config.osquery.value.packs['default--my-pack'].shard = 25;
+      const packagePolicyList = jest.fn().mockResolvedValue({ items: [sharedPolicy] });
+
+      (createInternalSavedObjectsClientForSpaceId as jest.Mock).mockResolvedValue(mockClient);
+
+      const mockRouter = createMockRouter();
+      mockOsqueryContext = {
+        logFactory: { get: jest.fn().mockReturnValue(loggingSystemMock.createLogger()) },
+        security: {},
+        getStartServices: jest.fn().mockResolvedValue([{}, { security: {} }, {}]),
+        experimentalFeatures: { rruleScheduling: true },
+        service: {
+          getActiveSpace: jest.fn().mockResolvedValue({ id: 'default' }),
+          getAgentPolicyService: jest.fn().mockReturnValue({
+            getByIds: jest.fn().mockResolvedValue([{ id: 'policy-a', name: 'policy-a' }]),
+          }),
+          getPackagePolicyService: jest.fn().mockReturnValue({
+            list: packagePolicyList,
+            fetchAllItems: fetchAllItemsFromListMock(packagePolicyList),
+            update: packagePolicyUpdate,
+          }),
+        },
+      } as unknown as OsqueryAppContext;
+
+      updatePackRoute(mockRouter, mockOsqueryContext);
+      const route = mockRouter.versioned.getRoute('put', '/api/osquery/packs/{id}');
+      const routeVersion = route.versions[API_VERSIONS.public.v1];
+      if (!routeVersion) throw new Error('no route version');
+      routeHandler = routeVersion.handler;
+
+      const mockRequest = httpServerMock.createKibanaRequest({
+        params: { id: 'pack-id' },
+        body: { description: 'edit-only, shards untouched' },
+      });
+      const mockResponse = httpServerMock.createResponseFactory();
+
+      await routeHandler(buildMockContext() as any, mockRequest, mockResponse);
+
+      expect(mockResponse.badRequest).not.toHaveBeenCalled();
+      expect(packagePolicyUpdate).toHaveBeenCalledTimes(1);
+      const writtenBlock =
+        packagePolicyUpdate.mock.calls[0][3].inputs[0].config.osquery.value.packs[
+          'default--my-pack'
+        ];
+      // The pack's own shard survives; policy-b never promotes it to 100.
+      expect(writtenBlock.shard).toBe(25);
+    });
+
+    it('edit-only save preserves a deliberate shard on a LEGACY bare-keyed block', async () => {
+      // `policyHasPack` matches the bare `my-pack` key too, which is how a
+      // pre-space-key block enters the write set. Reading `existingShard` from
+      // the canonical key only would leave it undefined, and an empty target
+      // intersection then falls through to DEFAULT_PACK_SHARD — resetting a
+      // deliberate 25 to 100 while the SO still reads 25.
+      const currentSO = {
+        ...basePackSO,
+        references: [{ id: 'policy-a', name: 'policy-a', type: 'ingest-agent-policies' }],
+        attributes: {
+          ...basePackSO.attributes,
+          name: 'my-pack',
+          enabled: true,
+          queries: [
+            { id: 'q1', name: 'q1', query: 'SELECT 1', interval: 60, schedule_id: 'sched-q1' },
+          ],
+          shards: [{ key: 'policy-a', value: 25 }],
+          schedule_type: 'interval' as const,
+          interval: 60,
+          rrule_schedule: null,
+          created_at: '2026-01-01T00:00:00.000Z',
+        },
+      };
+      const updatedSO = { ...currentSO };
+
+      let getCallCount = 0;
+      const mockClient = {
+        get: jest.fn().mockImplementation(() => {
+          getCallCount += 1;
+
+          return Promise.resolve(getCallCount === 1 ? currentSO : updatedSO);
+        }),
+        find: jest.fn().mockResolvedValue({ saved_objects: [] }),
+        update: jest.fn().mockResolvedValue({
+          id: 'pack-id',
+          attributes: updatedSO.attributes,
+          references: currentSO.references,
+        }),
+        list: jest.fn().mockResolvedValue({ items: [] }),
+      };
+
+      const packagePolicyUpdate = jest.fn().mockResolvedValue({});
+      // The drifted package policy carries the block under the LEGACY bare key
+      // with the deliberate 25, and hosts only policy-b — a co-tenant the pack
+      // does not target. So its target intersection is EMPTY and only the wire
+      // shard can save the 25 from DEFAULT_PACK_SHARD.
+      const legacyPolicy = buildWirePolicyWithPack('package-policy-legacy', ['policy-b']);
+      const legacyPacks = legacyPolicy.inputs[0].config.osquery.value.packs as Record<
+        string,
+        unknown
+      >;
+      delete legacyPacks['default--my-pack'];
+      legacyPacks['my-pack'] = {
+        shard: 25,
+        pack_id: 'pack-id',
+        default_native_schedule: { interval: 60 },
+        queries: {},
+      };
+      // A second, block-less package policy hosts policy-a so the pack's own
+      // shard key validates (`getInitialPolicies` intersects against ALL drained
+      // policy_ids) without putting policy-a on the drifted policy above.
+      const siblingPolicy = buildWirePolicyWithPack('package-policy-sibling', ['policy-a']);
+      delete (siblingPolicy.inputs[0].config.osquery.value.packs as Record<string, unknown>)[
+        'default--my-pack'
+      ];
+      const packagePolicyList = jest
+        .fn()
+        .mockResolvedValue({ items: [legacyPolicy, siblingPolicy] });
+
+      (createInternalSavedObjectsClientForSpaceId as jest.Mock).mockResolvedValue(mockClient);
+
+      const mockRouter = createMockRouter();
+      mockOsqueryContext = {
+        logFactory: { get: jest.fn().mockReturnValue(loggingSystemMock.createLogger()) },
+        security: {},
+        getStartServices: jest.fn().mockResolvedValue([{}, { security: {} }, {}]),
+        experimentalFeatures: { rruleScheduling: true },
+        service: {
+          getActiveSpace: jest.fn().mockResolvedValue({ id: 'default' }),
+          getAgentPolicyService: jest.fn().mockReturnValue({
+            getByIds: jest.fn().mockResolvedValue([{ id: 'policy-a', name: 'policy-a' }]),
+          }),
+          getPackagePolicyService: jest.fn().mockReturnValue({
+            list: packagePolicyList,
+            fetchAllItems: fetchAllItemsFromListMock(packagePolicyList),
+            update: packagePolicyUpdate,
+          }),
+        },
+      } as unknown as OsqueryAppContext;
+
+      updatePackRoute(mockRouter, mockOsqueryContext);
+      const route = mockRouter.versioned.getRoute('put', '/api/osquery/packs/{id}');
+      const routeVersion = route.versions[API_VERSIONS.public.v1];
+      if (!routeVersion) throw new Error('no route version');
+      routeHandler = routeVersion.handler;
+
+      const mockRequest = httpServerMock.createKibanaRequest({
+        params: { id: 'pack-id' },
+        body: { description: 'edit-only over a legacy bare-keyed block' },
+      });
+      const mockResponse = httpServerMock.createResponseFactory();
+
+      await routeHandler(buildMockContext() as any, mockRequest, mockResponse);
+
+      expect(mockResponse.badRequest).not.toHaveBeenCalled();
+      // Both are written: the drifted policy via the wire scan, the sibling via
+      // the reference-resolved half of the union (attach-on-edit).
+      const legacyWrite = packagePolicyUpdate.mock.calls.find(
+        (call) => call[2] === 'package-policy-legacy'
+      );
+      if (!legacyWrite) throw new Error('drifted package policy was not written');
+      const writtenPacks = legacyWrite[3].inputs[0].config.osquery.value.packs;
+      // Migrated to the canonical key, and the legacy 25 survived the move.
+      expect(writtenPacks['default--my-pack'].shard).toBe(25);
+      expect(writtenPacks['my-pack']).toBeUndefined();
+    });
+
+    it('edit-only reference heal does NOT invent targeting from a co-tenant on a shared package policy', async () => {
+      // The edit form prefills policy_ids from the response, so inventing
+      // policy-b here would persist as an explicit retarget on the next save.
+      const currentSO = {
+        ...basePackSO,
+        references: [{ id: 'policy-a', name: 'policy-a', type: 'ingest-agent-policies' }],
+        attributes: {
+          ...basePackSO.attributes,
+          name: 'my-pack',
+          enabled: true,
+          queries: [
+            { id: 'q1', name: 'q1', query: 'SELECT 1', interval: 60, schedule_id: 'sched-q1' },
+          ],
+          shards: [],
+          schedule_type: 'interval' as const,
+          interval: 60,
+          rrule_schedule: null,
+          created_at: '2026-01-01T00:00:00.000Z',
+        },
+      };
+      const updatedSO = { ...currentSO };
+
+      let getCallCount = 0;
+      const mockClient = {
+        get: jest.fn().mockImplementation(() => {
+          getCallCount += 1;
+
+          return Promise.resolve(getCallCount === 1 ? currentSO : updatedSO);
+        }),
+        find: jest.fn().mockResolvedValue({ saved_objects: [] }),
+        update: jest.fn().mockResolvedValue({
+          id: 'pack-id',
+          attributes: updatedSO.attributes,
+          references: currentSO.references,
+        }),
+        list: jest.fn().mockResolvedValue({ items: [] }),
+      };
+
+      const packagePolicyUpdate = jest.fn().mockResolvedValue({});
+      const packagePolicyList = jest.fn().mockResolvedValue({
+        items: [buildWirePolicyWithPack('package-policy-shared', ['policy-a', 'policy-b'])],
+      });
+
+      (createInternalSavedObjectsClientForSpaceId as jest.Mock).mockResolvedValue(mockClient);
+
+      const mockRouter = createMockRouter();
+      mockOsqueryContext = {
+        logFactory: { get: jest.fn().mockReturnValue(loggingSystemMock.createLogger()) },
+        security: {},
+        getStartServices: jest.fn().mockResolvedValue([{}, { security: {} }, {}]),
+        experimentalFeatures: { rruleScheduling: true },
+        service: {
+          getActiveSpace: jest.fn().mockResolvedValue({ id: 'default' }),
+          getAgentPolicyService: jest.fn().mockReturnValue({
+            getByIds: jest.fn().mockResolvedValue([
+              { id: 'policy-a', name: 'policy-a' },
+              { id: 'policy-b', name: 'policy-b' },
+            ]),
+          }),
+          getPackagePolicyService: jest.fn().mockReturnValue({
+            list: packagePolicyList,
+            fetchAllItems: fetchAllItemsFromListMock(packagePolicyList),
+            update: packagePolicyUpdate,
+          }),
+        },
+      } as unknown as OsqueryAppContext;
+
+      updatePackRoute(mockRouter, mockOsqueryContext);
+      const route = mockRouter.versioned.getRoute('put', '/api/osquery/packs/{id}');
+      const routeVersion = route.versions[API_VERSIONS.public.v1];
+      if (!routeVersion) throw new Error('no route version');
+      routeHandler = routeVersion.handler;
+
+      const mockRequest = httpServerMock.createKibanaRequest({
+        params: { id: 'pack-id' },
+        body: { description: 'edit-only on a shared package policy' },
+      });
+      const mockResponse = httpServerMock.createResponseFactory();
+
+      await routeHandler(buildMockContext() as any, mockRequest, mockResponse);
+
+      expect(mockResponse.badRequest).not.toHaveBeenCalled();
+      // No heal write: policy-b is a co-tenant, not this pack's drifted target.
+      const healCall = mockClient.update.mock.calls.find(
+        (call) =>
+          call[0] === 'osquery-pack' && call[2] !== undefined && Object.keys(call[2]).length === 0
+      );
+      expect(healCall).toBeUndefined();
+      // And the response must not advertise the invented target.
+      const responseBody = (mockResponse.ok.mock.calls[0][0]?.body as any).data;
+      expect(responseBody.policy_ids).toEqual(['policy-a']);
+    });
+
+    it('edit-only save survives a THROWING reference heal (best-effort, never fails the response)', async () => {
+      // The wire save has already committed when healing runs, so a heal
+      // failure must be swallowed, not surfaced as a 500.
+      const currentSO = {
+        ...basePackSO,
+        references: [{ id: 'policy-1', name: 'policy-1', type: 'ingest-agent-policies' }],
+        attributes: {
+          ...basePackSO.attributes,
+          name: 'my-pack',
+          enabled: true,
+          queries: [
+            { id: 'q1', name: 'q1', query: 'SELECT 1', interval: 60, schedule_id: 'sched-q1' },
+          ],
+          shards: [],
+          schedule_type: 'interval' as const,
+          interval: 60,
+          rrule_schedule: null,
+          created_at: '2026-01-01T00:00:00.000Z',
+        },
+      };
+      const updatedSO = { ...currentSO };
+
+      let getCallCount = 0;
+      const mockClient = {
+        get: jest.fn().mockImplementation(() => {
+          getCallCount += 1;
+
+          return Promise.resolve(getCallCount === 1 ? currentSO : updatedSO);
+        }),
+        find: jest.fn().mockResolvedValue({ saved_objects: [] }),
+        update: jest.fn().mockResolvedValue({
+          id: 'pack-id',
+          attributes: updatedSO.attributes,
+          references: currentSO.references,
+        }),
+        list: jest.fn().mockResolvedValue({ items: [] }),
+      };
+
+      const packagePolicyUpdate = jest.fn().mockResolvedValue({});
+      const packagePolicyList = jest.fn().mockResolvedValue({
+        items: [
+          buildWirePolicyWithPack('package-policy-1', ['policy-1']),
+          buildWirePolicyWithPack('package-policy-2', ['policy-2']),
+        ],
+      });
+
+      (createInternalSavedObjectsClientForSpaceId as jest.Mock).mockResolvedValue(mockClient);
+
+      const mockRouter = createMockRouter();
+      mockOsqueryContext = {
+        logFactory: { get: jest.fn().mockReturnValue(loggingSystemMock.createLogger()) },
+        security: {},
+        getStartServices: jest.fn().mockResolvedValue([{}, { security: {} }, {}]),
+        experimentalFeatures: { rruleScheduling: true },
+        service: {
+          getActiveSpace: jest.fn().mockResolvedValue({ id: 'default' }),
+          getAgentPolicyService: jest.fn().mockReturnValue({
+            // Resolving the drifted id throws — the heal path's own I/O failing.
+            getByIds: jest.fn().mockImplementation((_client, ids: string[]) => {
+              if (ids.includes('policy-2')) {
+                return Promise.reject(new Error('es_unavailable'));
+              }
+
+              return Promise.resolve([{ id: 'policy-1', name: 'policy-1' }]);
+            }),
+          }),
+          getPackagePolicyService: jest.fn().mockReturnValue({
+            list: packagePolicyList,
+            fetchAllItems: fetchAllItemsFromListMock(packagePolicyList),
+            update: packagePolicyUpdate,
+          }),
+        },
+      } as unknown as OsqueryAppContext;
+
+      updatePackRoute(mockRouter, mockOsqueryContext);
+      const route = mockRouter.versioned.getRoute('put', '/api/osquery/packs/{id}');
+      const routeVersion = route.versions[API_VERSIONS.public.v1];
+      if (!routeVersion) throw new Error('no route version');
+      routeHandler = routeVersion.handler;
+
+      const mockRequest = httpServerMock.createKibanaRequest({
+        params: { id: 'pack-id' },
+        body: { description: 'edit-only, heal blows up' },
+      });
+      const mockResponse = httpServerMock.createResponseFactory();
+
+      await routeHandler(buildMockContext() as any, mockRequest, mockResponse);
+
+      // The save still succeeds; the heal failure is swallowed.
+      expect(mockResponse.ok).toHaveBeenCalled();
+      expect(mockResponse.customError).not.toHaveBeenCalled();
+      expect(packagePolicyUpdate).toHaveBeenCalledTimes(2);
+      // No heal write committed, so the response reports the pre-heal refs.
+      const responseBody = (mockResponse.ok.mock.calls[0][0]?.body as any).data;
+      expect(responseBody.policy_ids).toEqual(['policy-1']);
     });
   });
 });

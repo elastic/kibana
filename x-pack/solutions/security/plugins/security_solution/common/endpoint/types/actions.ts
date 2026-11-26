@@ -91,6 +91,20 @@ export interface ResponseActionGetFileOutputContent {
     type: string;
   }>;
   /**
+   * `true` when `contents` does not list every file in the zip (the list is capped when the
+   * response action retrieves many files). Only for Endpoint that support `get_file_multi_path`
+   */
+  contents_truncated?: boolean;
+  /**
+   * A summary of all the files processed. Only for Endpoint that support `get_file_multi_path`
+   */
+  totals?: {
+    files: number;
+    bytes: number;
+    /** The number of files by status */
+    counts: Record<string, number>;
+  };
+  /**
    * The relative API path to download the output file for this response action
    */
   downloadUri?: string;
@@ -279,7 +293,18 @@ export type ResponseActionParametersWithProcessData =
   | ResponseActionParametersWithProcessName;
 
 export interface ResponseActionGetFileParameters {
-  path: string;
+  /** The path of the file to retrieve. Mutually exclusive with `paths` */
+  path?: string;
+  /**
+   * The list of paths to retrieve. Mutually exclusive with `path`.
+   * Only for Endpoint that support the `get_file_multi_path` capability
+   */
+  paths?: string[];
+  /**
+   * Read a file that the OS has locked from a snapshot of its volume. Valid for `endpoint` agent
+   * type only, and supported on Windows only (requires the `get_file_force` capability).
+   */
+  force?: boolean;
 }
 
 export interface ResponseActionsExecuteParameters {
@@ -307,6 +332,27 @@ export interface ResponseActionMemoryDumpOutputContent {
   path: string;
   /** The remaining free disk space in bytes (after creating memory dump) */
   disk_free_space: number;
+  /** Returned for `raw` memory dump. The size of the dump's memory */
+  total_memory_size?: number;
+  /** Returned for `raw` memory dump. The amount of bytes captured by the dump */
+  total_bytes_captured?: number;
+  /**
+   * Returned for `raw` memory dump.
+   * Calculated as `total_bytes_captured `/ (double) `total_memory_size` - tells the percentage
+   * of RAM successfully captured into a dump
+   */
+  success_ratio?: number;
+  /**
+   * Returned for `kernel` memory dump.
+   * If true, the dump was executed from the driver, which means it doesn't have the same restrictions
+   * as a dump executed from user mode (e.g. it will work on older systems and will contain user mode memory)
+   */
+  dump_executed_from_driver?: boolean;
+  /**
+   * Returned for `kernel` memory dump.
+   * Indicates if the user space memory was included in the dump
+   */
+  user_space_included?: boolean;
 }
 
 export type EndpointActionDataParameterTypes =

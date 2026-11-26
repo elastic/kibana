@@ -102,11 +102,20 @@ export interface AgentPolicyAgentVersionCondition {
   version_condition: string;
 }
 
+export interface AgentPolicyPackagePoliciesSummary {
+  count: number;
+  has_fleet_server: boolean;
+  has_managed: boolean;
+  has_root_integrations: boolean;
+  has_shared: boolean;
+}
+
 export interface AgentPolicy extends Omit<NewAgentPolicy, 'id'> {
   id: string;
   space_ids?: string[] | undefined;
   status: ValueOf<AgentPolicyStatus>;
   package_policies?: PackagePolicy[];
+  package_policies_summary?: AgentPolicyPackagePoliciesSummary;
   is_managed: boolean; // required for created policy
   created_at?: string;
   updated_at: string;
@@ -116,6 +125,8 @@ export interface AgentPolicy extends Omit<NewAgentPolicy, 'id'> {
   unprivileged_agents?: number;
   fips_agents?: number;
   agents_per_version?: Array<{ version: string; count: number }>;
+  /** Active agents per version, excluding OpAMP agents: the agents agent version conditions apply to. */
+  active_agents_per_version?: Array<{ version: string; count: number }>;
   is_protected: boolean;
   version?: string;
   min_agent_version?: string | null;

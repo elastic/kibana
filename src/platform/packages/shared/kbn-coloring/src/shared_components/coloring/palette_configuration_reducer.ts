@@ -147,13 +147,15 @@ export const paletteConfigurationReducer: Reducer<
       return withUpdatingColorRanges(palettes, newPalette, dataBounds);
     }
     case 'changeColorPalette': {
-      const { dataBounds, palettes, palette, disableSwitchingContinuity } = action.payload;
+      const { dataBounds, palettes, palette, disableSwitchingContinuity, defaultBandCount } =
+        action.payload;
       const newPalette = changeColorPalette(
         palette,
         state.activePalette,
         palettes,
         dataBounds,
-        disableSwitchingContinuity
+        disableSwitchingContinuity,
+        defaultBandCount
       );
       return withUpdatingColorRanges(palettes, newPalette, dataBounds);
     }

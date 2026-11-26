@@ -20,6 +20,7 @@ import type { IUiSettingsClient } from '@kbn/core-ui-settings-server';
 import type { UiPlugins } from '@kbn/core-plugins-base-server-internal';
 import type { CustomBranding } from '@kbn/core-custom-branding-common';
 import type { UserStorageServiceStart } from '@kbn/core-user-storage-server';
+import type { UserSettings } from '@kbn/core-user-settings-server-internal';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import {
   type DarkModeValue,
@@ -173,7 +174,7 @@ export class RenderingService {
       client: IUiSettingsClient;
       globalClient: IUiSettingsClient;
     },
-    { isAnonymousPage = false, includeExposedConfigKeys }: IRenderOptions = {}
+    { isAnonymousPage = false }: IRenderOptions = {}
   ) {
     const {
       elasticsearch,
@@ -204,8 +205,7 @@ export class RenderingService {
       defaultSettings,
       settingsUserValues = {},
       globalSettingsUserValues = {},
-      userSettingDarkMode,
-      userSettingLocale,
+      { darkMode: userSettingDarkMode, locale: userSettingLocale } = {},
       userStorageValues = {},
     ] = await Promise.all(
       isAnonymousPage
@@ -214,18 +214,14 @@ export class RenderingService {
             withAsyncDefaultValues(request, uiSettings.client?.getRegistered()),
             uiSettings.client?.getUserProvided(true),
             uiSettings.globalClient?.getUserProvided(true),
-            // dark mode
-            userSettings?.getUserSettingDarkMode(request),
-            // locale
-            userSettings?.getUserSettingLocale(request),
+            userSettings?.getUserSettings(request),
             // user storage
             this.fetchUserStorage(request),
           ] as [
             ReturnType<typeof withAsyncDefaultValues>,
             Promise<Record<string, UserProvidedValues>>,
             Promise<Record<string, UserProvidedValues>>,
-            Promise<DarkModeValue> | undefined,
-            Promise<string> | undefined,
+            Promise<UserSettings> | undefined,
             Promise<Record<string, unknown>>
           ])
     );
@@ -290,7 +286,12 @@ export class RenderingService {
     const configLocale = i18nLib.getLocale();
     const translationHashes = i18n.getTranslationHashes();
     const availableLocales = i18n.getAvailableLocales();
-    const { locale: effectiveLocale, setCookieHeader } = resolveLocale({
+    const {
+      locale: effectiveLocale,
+      setCookieHeader,
+      browserPreferredLocale,
+      source: localeSource,
+    } = resolveLocale({
       request,
       userSettingLocale,
       configLocale,
@@ -298,6 +299,7 @@ export class RenderingService {
       translationHashes,
       serverBasePath,
       allowLocaleCookie: i18n.allowLocaleCookie,
+      detectBrowserLocale: i18n.detectBrowserLocale,
     });
     // When the effective locale is English, the browser's pre-allocated `intl`
     // instance is already wired to English (see kbn-i18n module initialisation).
@@ -376,6 +378,10 @@ export class RenderingService {
         i18n: {
           translationsUrl,
           availableLocales: availableLocales.map(({ id, label }) => ({ id, label })),
+          locale: effectiveLocale,
+          browserPreferredLocale,
+          localeSource,
+          configDefaultLocale: configLocale,
         },
         theme: {
           darkMode,
@@ -395,12 +401,11 @@ export class RenderingService {
         externalUrl: http.externalUrl,
         uiPlugins: await Promise.all(
           filteredPlugins.map(async ([id, plugin]) => {
-            const { browserConfig, exposedConfigKeys } = await getUiConfig(uiPlugins, id);
+            const { browserConfig } = await getUiConfig(uiPlugins, id);
             return {
               id,
               plugin,
               config: browserConfig,
-              ...(includeExposedConfigKeys && { exposedConfigKeys }),
             };
           })
         ),
@@ -455,8 +460,7 @@ const getUiConfig = async (uiPlugins: UiPlugins, pluginId: string) => {
   const browserConfig = uiPlugins.browserConfigs.get(pluginId);
   return ((await browserConfig?.pipe(take(1)).toPromise()) ?? {
     browserConfig: {},
-    exposedConfigKeys: {},
-  }) as { browserConfig: Record<string, unknown>; exposedConfigKeys: Record<string, string> };
+  }) as { browserConfig: Record<string, unknown> };
 };
 
 const isAuthenticated = (auth: HttpAuth, request: KibanaRequest) => {

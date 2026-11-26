@@ -53,18 +53,14 @@ export async function updateSessionStatus(
     }
   }
 
-  const updatedSession: SavedObject<SearchSessionSavedObjectAttributes> = {
-    ...session,
-    attributes: {
-      ...session.attributes,
-      status: sessionStatus.status,
-      idMapping: updatedIdMapping || session.attributes.idMapping,
-    },
-  };
+  // Computed fields only: session.attributes is a stale read that would revert concurrent writes.
   await deps.savedObjectsClient.update<SearchSessionSavedObjectAttributes>(
     SEARCH_SESSION_TYPE,
     session.id,
-    updatedSession.attributes
+    {
+      status: sessionStatus.status,
+      ...(updatedIdMapping && { idMapping: updatedIdMapping }),
+    }
   );
 
   return sessionStatus;

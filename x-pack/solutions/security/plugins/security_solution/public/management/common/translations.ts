@@ -8,6 +8,14 @@
 import { i18n } from '@kbn/i18n';
 import { OperatingSystem } from '@kbn/securitysolution-utils';
 
+export const YES_LABEL = i18n.translate('xpack.securitySolution.translations.yesLabel', {
+  defaultMessage: 'Yes',
+});
+
+export const NO_LABEL = i18n.translate('xpack.securitySolution.translations.noLabel', {
+  defaultMessage: 'No',
+});
+
 export const ENDPOINTS_TAB = i18n.translate('xpack.securitySolution.endpointsTab', {
   defaultMessage: 'Endpoints',
 });
@@ -241,6 +249,35 @@ export const CONSOLE_COMMANDS = {
             defaultMessage: 'The full file path to be retrieved',
           }
         ),
+        /** Used when the argument can be used more than once (Elastic Defend Endpoint) */
+        aboutMultiple: i18n.translate(
+          'xpack.securitySolution.endpointConsoleCommands.getFile.pathArgAboutMultiple',
+          {
+            defaultMessage:
+              'The full file path to be retrieved. Use this argument multiple times to retrieve more than one file',
+          }
+        ),
+        multipleNotSupported: i18n.translate(
+          'xpack.securitySolution.endpointConsoleCommands.getFile.pathArgMultipleNotSupported',
+          {
+            defaultMessage:
+              'This version of the Endpoint does not support retrieving multiple paths. Upgrade your Agent in Fleet to use this parameter.',
+          }
+        ),
+        tooManyPaths: (maxPaths: number) =>
+          i18n.translate('xpack.securitySolution.endpointConsoleCommands.getFile.pathArgTooMany', {
+            defaultMessage: 'Argument can be used at most {maxPaths} times',
+            values: { maxPaths },
+          }),
+      },
+      force: {
+        about: i18n.translate(
+          'xpack.securitySolution.endpointConsoleCommands.getFile.force.about',
+          {
+            defaultMessage:
+              'Read a file that is locked by the operating system from a snapshot of its volume (Windows only)',
+          }
+        ),
       },
     },
   },
@@ -351,6 +388,9 @@ export const CONSOLE_COMMANDS = {
           'Process Entity ID to generate a memory dump for. Valid only when "--process" is used',
       }
     ),
+    rawArgAbout: i18n.translate('xpack.securitySolution.translations.memoryDump.rawArgAbout', {
+      defaultMessage: 'Generates a raw memory dump',
+    }),
     agentResultMissing: i18n.translate(
       'xpack.securitySolution.translations.memoryDump.agentResultMissing',
       { defaultMessage: 'Agent result missing' }
@@ -367,6 +407,21 @@ export const CONSOLE_COMMANDS = {
       'xpack.securitySolution.translations.memoryDump.resultRemainingFreeDiskSpaceLabel',
       { defaultMessage: 'Disk free space' }
     ),
+    resultUserSpaceIncludedLabel: i18n.translate(
+      'xpack.securitySolution.translations.memoryDump.resultUserSpaceIncludedLabel',
+      { defaultMessage: 'User space included' }
+    ),
+    resultTotalMemorySizeLabel: i18n.translate(
+      'xpack.securitySolution.translations.memoryDump.resultTotalMemorySizeLabel',
+      { defaultMessage: 'Total memory size' }
+    ),
+    resultTotalBytesCapturedLabel: i18n.translate(
+      'xpack.securitySolution.translations.memoryDump.resultTotalBytesCapturedLabel',
+      { defaultMessage: 'Total bytes captured' }
+    ),
+    bytesValue: i18n.translate('xpack.securitySolution.translations.memoryDump.bytesValue', {
+      defaultMessage: 'bytes',
+    }),
   },
 };
 
@@ -517,4 +572,16 @@ export const RESPONSE_ACTION_STATUS = Object.freeze({
   successMessage: i18n.translate('xpack.securitySolution.responseActionStatus.success', {
     defaultMessage: 'Action successful',
   }),
+});
+
+export const ENDPOINT_VERSION_NOT_SUPPORTED = (unsupportedFeature: string): string => {
+  return i18n.translate('xpack.securitySolution.translations.endpointVersionNotSupported', {
+    defaultMessage:
+      'The version of Endpoint running on this host does not support {unsupportedFeature}.',
+    values: { unsupportedFeature },
+  });
+};
+
+export const HOST_ISOLATION = i18n.translate('xpack.securitySolution.translations.hostIsolation', {
+  defaultMessage: 'host isolation',
 });

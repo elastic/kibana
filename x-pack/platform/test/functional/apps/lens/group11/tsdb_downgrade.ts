@@ -137,7 +137,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
 
         runTestsForEachScenario(tsdbConvertedToStream, 'tsdb', (indexes) => {
-          it('should keep TSDB restrictions only if a tsdb stream is in the dataView mix', async () => {
+          it('should allow average for a downgraded counter field', async () => {
             await lens.configureDimension({
               dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
               operation: 'date_histogram',
@@ -151,11 +151,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
               keepOpen: true,
             });
 
-            expect(
-              testSubjects.exists(`lns-indexPatternDimension-average incompatible`, {
-                timeout: 500,
-              })
-            ).to.eql(indexes.some(({ mode }) => mode === 'tsdb'));
+            await testSubjects.missingOrFail('lns-indexPatternDimension-average incompatible');
             await lens.closeDimensionEditor();
           });
 

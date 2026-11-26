@@ -6,6 +6,7 @@
  */
 
 import type { Message, Deanonymization, Anonymization } from '@kbn/inference-common';
+import { MessageRole } from '@kbn/inference-common';
 import { isEmpty } from 'lodash';
 import { getAnonymizableMessageParts } from './get_anonymizable_message_parts';
 
@@ -41,6 +42,36 @@ function deanonymizeStructure(
     );
   }
   return value;
+}
+
+/**
+ * Only the `function` of each tool call is deanonymized, so the other tool call
+ * fields (like `toolCallId`) are restored from the original message by index.
+ */
+function restoreToolCallFields<TMessage extends Message>(
+  original: TMessage,
+  deanonymized: TMessage
+): TMessage {
+  const originalMessage: Message = original;
+  const deanonymizedMessage: Message = deanonymized;
+
+  if (
+    originalMessage.role !== MessageRole.Assistant ||
+    deanonymizedMessage.role !== MessageRole.Assistant ||
+    !originalMessage.toolCalls
+  ) {
+    return deanonymized;
+  }
+
+  const { toolCalls: deanonymizedToolCalls } = deanonymizedMessage;
+
+  return {
+    ...deanonymized,
+    toolCalls: originalMessage.toolCalls.map((toolCall, index) => ({
+      ...toolCall,
+      function: deanonymizedToolCalls?.[index]?.function ?? toolCall.function,
+    })),
+  };
 }
 
 export function deanonymize<TMessage extends Message>(
@@ -120,11 +151,11 @@ export function deanonymize<TMessage extends Message>(
       : undefined;
 
     return {
-      message: {
+      message: restoreToolCallFields(message, {
         ...message,
         ...(deanonymizedRest ?? {}),
         content: contentDeanonymization.output,
-      },
+      }),
       deanonymizations: allDeanonymizations,
     };
   }
@@ -136,10 +167,10 @@ export function deanonymize<TMessage extends Message>(
   ) as typeof anonymized;
 
   return {
-    message: {
+    message: restoreToolCallFields(message, {
       ...message,
       ...deanonymizedParts,
-    },
+    }),
     deanonymizations: allDeanonymizations,
   };
 }

@@ -46,6 +46,7 @@ import type { UpgradeManagedPackagePoliciesResult } from './setup/managed_packag
 import { setupUpgradeManagedPackagePolicies } from './setup/managed_package_policies';
 import { upgradePackageInstallVersion } from './setup/upgrade_package_install_version';
 import { upgradeAgentPolicySchemaVersion } from './setup/upgrade_agent_policy_schema_version';
+import { removeDeniedAgentPolicyOverrides } from './setup/remove_denied_agent_policy_overrides';
 import { migrateSettingsToFleetServerHost } from './fleet_server_host';
 import {
   ensurePreconfiguredFleetServerHosts,
@@ -61,7 +62,6 @@ import {
   getPreconfiguredDeleteUnenrolledAgentsSettingFromConfig,
 } from './preconfiguration/delete_unenrolled_agent_setting';
 import { backfillPackagePolicySupportsAgentless } from './backfill_agentless';
-import { backfillPolicyBaseId } from './backfill_policy_base_id';
 import { updateDeprecatedComponentTemplates } from './setup/update_deprecated_component_templates';
 import { createCCSIndexPatterns } from './setup/fleet_synced_integrations';
 import { ensureCorrectAgentlessSettingsIds } from './agentless_settings_ids';
@@ -278,6 +278,20 @@ async function createSetupSideEffects(
   await upgradeAgentPolicySchemaVersion(soClient);
   stepSpan?.end();
 
+  // After preconfiguration, which already strips the denied overrides of preconfigured policies.
+  // Non-fatal: the keys are still stripped whenever a policy is deployed, so a failure here must not
+  // fail Fleet setup.
+  let removeDeniedAgentPolicyOverridesError;
+  stepSpan = apm.startSpan('Remove denied agent policy overrides', 'preconfiguration');
+  try {
+    logger.debug('Removing denied overrides from stored agent policies');
+    await removeDeniedAgentPolicyOverrides(esClient);
+  } catch (error) {
+    logger.warn(`Failed to remove denied overrides from stored agent policies: ${error.message}`);
+    removeDeniedAgentPolicyOverridesError = { error };
+  }
+  stepSpan?.end();
+
   // Bump the revision of agent policies whose package policies were flagged for a bump by a
   // saved object migration (no span: this only schedules a background task).
   logger.debug('Scheduling agent policy revision bump for migrated package policies');
@@ -306,14 +320,6 @@ async function createSetupSideEffects(
     ensureCorrectAgentlessSettingsIdsError = { error };
   }
 
-  let backfillPolicyBaseIdError;
-  try {
-    logger.debug('Backfilling policy_base_id on fleet-agents and fleet-policies');
-    await backfillPolicyBaseId(esClient);
-  } catch (error) {
-    backfillPolicyBaseIdError = { error };
-  }
-
   logger.debug('Update deprecated _source.mode in component templates');
   await updateDeprecatedComponentTemplates(esClient);
 
@@ -324,11 +330,11 @@ async function createSetupSideEffects(
   const rawNonFatalErrors = [
     ...preconfiguredPackagesNonFatalErrors,
     ...(messageSigningServiceNonFatalError ? [messageSigningServiceNonFatalError] : []),
+    ...(removeDeniedAgentPolicyOverridesError ? [removeDeniedAgentPolicyOverridesError] : []),
     ...(backfillPackagePolicySupportsAgentlessError
       ? [backfillPackagePolicySupportsAgentlessError]
       : []),
     ...(ensureCorrectAgentlessSettingsIdsError ? [ensureCorrectAgentlessSettingsIdsError] : []),
-    ...(backfillPolicyBaseIdError ? [backfillPolicyBaseIdError] : []),
   ];
 
   logger.info('Scheduling async setup tasks');

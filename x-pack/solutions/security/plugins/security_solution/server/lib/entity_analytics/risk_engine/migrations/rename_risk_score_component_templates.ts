@@ -24,6 +24,7 @@ export const renameRiskScoreComponentTemplate = async ({
   logger,
   getStartServices,
   kibanaVersion,
+  spaceId,
 }: EntityAnalyticsMigrationsParams) => {
   const [coreStart] = await getStartServices();
   const soClientKibanaUser = coreStart.savedObjects.createInternalRepository();
@@ -42,7 +43,7 @@ export const renameRiskScoreComponentTemplate = async ({
   const savedObjectsResponse = await soClientKibanaUser.find<RiskEngineConfiguration>({
     type: riskEngineConfigurationTypeName,
     perPage: MAX_PER_PAGE,
-    namespaces: ['*'],
+    namespaces: spaceId ? [spaceId] : ['*'],
   });
 
   const settledPromises = await Promise.allSettled(
@@ -78,15 +79,17 @@ export const renameRiskScoreComponentTemplate = async ({
     (promise) => promise.status === 'rejected'
   ) as PromiseRejectedResult[];
 
-  // Migration successfully ran on all spaces
   if (rejectedPromises.length === 0) {
-    // Delete the legacy component template without the namespace in the name
-    await esClient.cluster.deleteComponentTemplate(
-      {
-        name: mappingComponentName,
-      },
-      { ignore: [404] }
-    );
+    // Only delete the legacy global component template when migrating all spaces — when scoped
+    // to a single space, other spaces may still reference it.
+    if (!spaceId) {
+      await esClient.cluster.deleteComponentTemplate(
+        {
+          name: mappingComponentName,
+        },
+        { ignore: [404] }
+      );
+    }
   } else {
     const errorMessages = rejectedPromises.map((promise) => promise.reason?.message).join('\n');
     throw new Error(

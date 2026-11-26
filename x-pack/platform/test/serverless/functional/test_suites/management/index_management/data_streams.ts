@@ -181,7 +181,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         // Close the edit flyout (ESC closes the EuiFlyout). Close the details panel too if it is
         // still open afterwards.
         await browser.pressKeys(browser.keys.ESCAPE);
-        if (await testSubjects.exists('closeDetailsButton', { timeout: 3000 })) {
+        if (await testSubjects.waitForExists('closeDetailsButton', { timeout: 3000 })) {
           await testSubjects.click('closeDetailsButton');
         }
       });

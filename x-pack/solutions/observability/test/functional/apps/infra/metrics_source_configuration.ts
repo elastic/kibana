@@ -27,7 +27,7 @@ const DATE_WITH_DATA = DATES.metricsAndLogs.hosts.withData;
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
   const infraSourceConfigurationForm = getService('infraSourceConfigurationForm');
-  const pageObjects = getPageObjects(['common', 'infraHome']);
+  const pageObjects = getPageObjects(['common', 'infraHome', 'infraSavedViews']);
   const kibanaServer = getService('kibanaServer');
 
   describe('Infrastructure Source Configuration', function () {
@@ -53,6 +53,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     describe('with metrics present', () => {
       it('renders the waffle map', async () => {
         await pageObjects.common.navigateToApp('infraOps');
+        await pageObjects.infraSavedViews.ensureViewIsLoaded('Default view');
         await pageObjects.infraHome.goToTime(DATE_WITH_DATA);
         await pageObjects.infraHome.getWaffleMap();
       });
@@ -132,6 +133,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       it('renders the waffle map again', async () => {
         await pageObjects.common.navigateToApp('infraOps');
+        await pageObjects.infraSavedViews.ensureViewIsLoaded('Default view');
         await pageObjects.infraHome.goToTime(DATE_WITH_DATA);
         await pageObjects.infraHome.getWaffleMap();
       });

@@ -57,14 +57,35 @@ export const RULES_WITH_NON_SOLVABLE_CONFLICTS_TOTAL = (
   />
 );
 
-export const RULES_WITH_SOLVABLE_CONFLICTS_TOTAL = (numOfRulesWithSolvableConflicts: number) => (
-  <FormattedMessage
-    id="xpack.securitySolution.detectionEngine.upgradeConflictsModal.rulesWithSolvableConflictsTotal"
-    defaultMessage="Rules with auto-resolved conflicts: {numOfRulesWithSolvableConflictsStrong}"
-    values={{
-      numOfRulesWithSolvableConflictsStrong: <strong>{numOfRulesWithSolvableConflicts}</strong>,
-    }}
-  />
+export const RULES_WITH_SOLVABLE_CONFLICTS_TOTAL = ({
+  numOfRulesWithSolvableConflicts,
+  numOfRulesWithRuleTypeChange,
+}: {
+  numOfRulesWithSolvableConflicts: number;
+  numOfRulesWithRuleTypeChange: number;
+}) => (
+  <>
+    <FormattedMessage
+      id="xpack.securitySolution.detectionEngine.upgradeConflictsModal.rulesWithSolvableConflictsTotal"
+      defaultMessage="Rules with auto-resolved conflicts: {numOfRulesWithSolvableConflictsStrong}"
+      values={{
+        numOfRulesWithSolvableConflictsStrong: <strong>{numOfRulesWithSolvableConflicts}</strong>,
+      }}
+    />
+    {numOfRulesWithRuleTypeChange > 0 && (
+      <>
+        {' '}
+        <FormattedMessage
+          id="xpack.securitySolution.detectionEngine.upgradeConflictsModal.rulesWithSolvableConflictsRuleTypeChangeSubset"
+          defaultMessage="({numOfRulesWithRuleTypeChangeStrong} unmodified {numOfRulesWithRuleTypeChange, plural, =1 {rule with a rule type change} other {rules with rule type changes}})"
+          values={{
+            numOfRulesWithRuleTypeChange,
+            numOfRulesWithRuleTypeChangeStrong: <strong>{numOfRulesWithRuleTypeChange}</strong>,
+          }}
+        />
+      </>
+    )}
+  </>
 );
 
 export const RULES_WITHOUT_CONFLICTS_TOTAL = (numOfRulesWithoutConflicts: number) => (
@@ -103,9 +124,11 @@ const ACCEPT_SOLVABLE_CONFLICTS_WARNING = i18n.translate(
 export const RULES_WITH_AUTO_RESOLVED_CONFLICTS_GUIDANCE = ({
   numOfRulesWithSolvableConflicts,
   numOfRulesWithoutConflicts,
+  numOfRulesWithRuleTypeChange,
 }: {
   numOfRulesWithSolvableConflicts: number;
   numOfRulesWithoutConflicts: number;
+  numOfRulesWithRuleTypeChange: number;
 }) => {
   const docsUrl = useKibana().services.docLinks.links.securitySolution.resolvePrebuiltRuleConflicts;
 
@@ -158,7 +181,23 @@ export const RULES_WITH_AUTO_RESOLVED_CONFLICTS_GUIDANCE = ({
             title={ACCEPT_SOLVABLE_CONFLICTS_WARNING}
             color="warning"
             iconType="warning"
-          />
+            data-test-subj="upgradeConflictsModalSolvableConflictsWarning"
+          >
+            {numOfRulesWithRuleTypeChange > 0 && (
+              <p data-test-subj="upgradeConflictsModalRuleTypeChangeWarning">
+                <FormattedMessage
+                  id="xpack.securitySolution.detectionEngine.upgradeConflictsModal.rulesWithRuleTypeChangeWarning"
+                  defaultMessage="Auto-resolved conflicts include a rule type change for {numOfRulesWithRuleTypeChangeStrong} unmodified {numOfRulesWithRuleTypeChange, plural, =1 {rule} other {rules}}. After updating, review your actions and exceptions, as some may need to be updated."
+                  values={{
+                    numOfRulesWithRuleTypeChange,
+                    numOfRulesWithRuleTypeChangeStrong: (
+                      <strong>{numOfRulesWithRuleTypeChange}</strong>
+                    ),
+                  }}
+                />
+              </p>
+            )}
+          </EuiCallOut>
         </ul>
       </div>
       <br />

@@ -73,6 +73,16 @@ export const executionTranslations = Object.freeze({
     });
   },
 
+  argDoesNotAcceptAnyValue: (argName: string): string => {
+    return i18n.translate(
+      'xpack.securitySolution.console.commandValidation.argDoesNotAcceptAnyValue',
+      {
+        defaultMessage: 'Invalid argument usage: --{argName} does not accept a value',
+        values: { argName },
+      }
+    );
+  },
+
   missingArguments: (missingArgs: string): string => {
     return i18n.translate('xpack.securitySolution.console.commandValidation.mustHaveArgs', {
       defaultMessage: 'Missing required arguments: {missingArgs}',
@@ -128,4 +138,14 @@ export const executionTranslations = Object.freeze({
       </ConsoleCodeBlock>
     );
   },
+
+  unsupportedPositionalArguments: (params: string) => (
+    <ConsoleCodeBlock>
+      <FormattedMessage
+        id="xpack.securitySolution.console.commandValidation.unsupportedPositionalArguments"
+        defaultMessage="Positional arguments ({params}) are not supported. All command arguments must be prefixed with '--'"
+        values={{ params }}
+      />
+    </ConsoleCodeBlock>
+  ),
 });

@@ -5,12 +5,21 @@
  * 2.0.
  */
 
-export type FleetErrorType = 'verification_failed';
+import type { BreakingChangesLog } from '../../services/changelog_utils';
+
+import type { AgentVersionBlock } from './package_policy';
+
+export type FleetErrorType =
+  | 'verification_failed'
+  | 'breaking_changes_not_acknowledged'
+  | 'agent_version_incompatible';
 
 export interface FleetErrorResponse {
   message: string;
   statusCode: number;
   attributes?: {
     type?: FleetErrorType;
+    breaking_changes?: BreakingChangesLog;
+    agent_version_block?: AgentVersionBlock;
   };
 }

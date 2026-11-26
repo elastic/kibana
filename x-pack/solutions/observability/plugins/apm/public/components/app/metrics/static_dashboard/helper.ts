@@ -9,6 +9,7 @@ import Mustache from 'mustache';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { DashboardState } from '@kbn/dashboard-plugin/common';
 import type { APMIndices } from '@kbn/apm-sources-access-plugin/public';
+import type { FormBasedPrivateState, TextBasedPrivateState } from '@kbn/lens-common';
 import type { DashboardFileName } from './dashboards/dashboard_catalog';
 import { loadDashboardFile } from './dashboards/dashboard_catalog';
 import { getDashboardFileName } from './dashboards/get_dashboard_file_name';
@@ -25,6 +26,21 @@ interface DashboardFileProps {
 export interface MetricsDashboardProps extends DashboardFileProps {
   dataView: DataView;
   apmIndices?: APMIndices;
+}
+
+interface FormBasedDatasourceState extends Partial<Pick<FormBasedPrivateState, 'layers'>> {
+  [key: string]: unknown;
+}
+
+interface TextBasedDatasourceState
+  extends Partial<Pick<TextBasedPrivateState, 'layers' | 'indexPatternRefs'>> {
+  [key: string]: unknown;
+}
+
+interface DatasourceStates {
+  formBased?: FormBasedDatasourceState;
+  textBased?: TextBasedDatasourceState;
+  [key: string]: unknown;
 }
 
 export function getDashboardFileNameFromProps({
@@ -54,6 +70,50 @@ const getAdhocDataView = (dataView: DataView) => {
     [dataView.id!]: {
       ...dataView,
     },
+  };
+};
+
+const syncDatasourceStatesWithDataView = (
+  datasourceStates: DatasourceStates,
+  dataView: DataView
+): DatasourceStates => {
+  const dataViewId = dataView.id!;
+  const textBased = datasourceStates.textBased;
+  const formBased = datasourceStates.formBased;
+
+  return {
+    ...datasourceStates,
+    ...(textBased && {
+      textBased: {
+        ...textBased,
+        layers: Object.fromEntries(
+          Object.entries(textBased.layers ?? {}).map(([layerId, layer]) => [
+            layerId,
+            { ...layer, index: dataViewId },
+          ])
+        ),
+        indexPatternRefs: textBased.indexPatternRefs?.map((reference) => ({
+          ...reference,
+          id: dataViewId,
+          title: dataView.getIndexPattern(),
+          timeField: reference.timeField ?? dataView.timeFieldName ?? '@timestamp',
+        })),
+      },
+    }),
+    ...(formBased && {
+      formBased: {
+        ...formBased,
+        layers: Object.fromEntries(
+          Object.entries(formBased.layers ?? {}).map(([layerId, layer]) => [
+            layerId,
+            {
+              ...layer,
+              ...(layer.indexPatternId && { indexPatternId: dataViewId }),
+            },
+          ])
+        ),
+      },
+    }),
   };
 };
 
@@ -125,6 +185,7 @@ export async function convertSavedDashboardToPanels(
           references: [],
           state: {
             ...(attributes?.state ?? {}),
+            datasourceStates: syncDatasourceStatesWithDataView(datasourceStates, dataView),
             adHocDataViews: getAdhocDataView(dataView),
             internalReferences: Object.keys(layers).map((layerId) => ({
               id: dataView.id,

@@ -84,6 +84,7 @@ import {
   getNotifiableFeatures,
   getUnsupportedOperationsWarningMessage,
   getPrecisionErrorWarningMessages,
+  getCustomRankLastValueSortFieldWarningMessages,
 } from './utils';
 import { getUniqueLabelGenerator, isDraggedDataViewField, nonNullable } from '../../utils';
 import { hasField, normalizeOperationDataType } from './pure_utils';
@@ -850,6 +851,12 @@ export function getFormBasedDatasource({
         core.docLinks
       );
 
+      const customRankLastValueSortFieldWarningMsg = getCustomRankLastValueSortFieldWarningMessages(
+        state,
+        framePublicAPI,
+        setState
+      );
+
       const infoMessages = getNotifiableFeatures(state, framePublicAPI, visualizationInfo);
 
       return layerErrorMessages.concat(
@@ -857,6 +864,7 @@ export function getFormBasedDatasource({
         timeShiftWarningMessages,
         precisionErrorWarningMsg,
         unsupportedOpsWarningMsg,
+        customRankLastValueSortFieldWarningMsg,
         infoMessages
       );
     },

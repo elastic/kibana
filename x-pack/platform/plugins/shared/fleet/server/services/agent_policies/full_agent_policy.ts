@@ -8,6 +8,7 @@
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { parse } from 'yaml';
 import deepMerge from 'deepmerge';
+import { castArray, isEmpty, omit, pick } from 'lodash';
 import { set } from '@kbn/safer-lodash-set';
 
 import {
@@ -47,12 +48,14 @@ import { pkgToPkgKey, splitPkgKey } from '../epm/registry';
 import { appContextService } from '../app_context';
 
 import {
+  collectCompiledSecretRefIds,
   getFleetServerHostsSecretReferences,
   getOutputSecretReferences,
   getDownloadSourceSecretReferences,
 } from '../secrets';
 
 import { getOutputIdForAgentPolicy } from '../../../common/services/output_helpers';
+import { sanitizeAgentPolicyOverrides } from '../../../common/services/agent_policy_overrides';
 
 import { getMonitoringPermissions } from './monitoring_permissions';
 import { storedPackagePoliciesToAgentInputs } from '.';
@@ -63,9 +66,13 @@ import {
 import { fetchRelatedSavedObjects } from './related_saved_objects';
 import { generateOtelcolConfig } from './otel_collector';
 
-async function fetchAgentPolicy(soClient: SavedObjectsClientContract, id: string) {
+async function fetchAgentPolicy(
+  soClient: SavedObjectsClientContract,
+  id: string,
+  options?: { spaceId?: string }
+) {
   try {
-    return await agentPolicyService.get(soClient, id);
+    return await agentPolicyService.get(soClient, id, true, { spaceId: options?.spaceId });
   } catch (err) {
     if (!err.isBoom || err.output.statusCode !== 404) {
       throw err;
@@ -81,8 +88,12 @@ export async function getFullAgentPolicy(
     standalone?: boolean;
     agentPolicy?: AgentPolicy;
     agentVersion?: string;
-    /** When true, redact proxy_headers and ssl.key from all proxy references in the response */
-    redactProxySecrets?: boolean;
+    /**
+     * When true, redact secrets from the response: proxy_headers and ssl.key from all proxy
+     * references, and the Fleet Server host's agent key (`fleet.ssl.key`)
+     */
+    redactSecrets?: boolean;
+    spaceId?: string;
   }
 ): Promise<FullAgentPolicy | null> {
   const logger = appContextService.getLogger().get('getFullAgentPolicy');
@@ -94,7 +105,7 @@ export async function getFullAgentPolicy(
   );
 
   const standalone = options?.standalone ?? false;
-  const redactProxySecrets = options?.redactProxySecrets ?? false;
+  const redactSecrets = options?.redactSecrets ?? false;
 
   let agentPolicy: AgentPolicy | null;
   if (options?.agentPolicy?.package_policies) {
@@ -102,7 +113,11 @@ export async function getFullAgentPolicy(
     agentPolicy = options.agentPolicy;
   } else {
     logger.debug(`Fetching agent policy doc for [${id}]`);
-    agentPolicy = await fetchAgentPolicy(soClient, id);
+    agentPolicy = await fetchAgentPolicy(
+      soClient,
+      id,
+      options?.spaceId ? { spaceId: options.spaceId } : {}
+    );
   }
 
   if (!agentPolicy) {
@@ -153,9 +168,19 @@ export async function getFullAgentPolicy(
       packageInfoCache.set(pkgKey, packageInfo);
     })
   );
-  const bootstrapOutputConfig = generateFleetServerOutputSSLConfig(fleetServerHost);
 
   logger.debug(() => `Fetching agent inputs for policy [${id}]`);
+
+  // For cross-space callers (spaceId '*'), derive the actual SO namespace from the policy's
+  // own space_ids so that package-policy reads/writes are scoped to the right namespace.
+  // When space_ids[0] is '*' (policy shared to all spaces), pass undefined: shared-policy
+  // package policies are accessible from any namespace and soClient.get rejects '*' as a namespace.
+  const packagePoliciesNamespace =
+    options?.spaceId === '*'
+      ? agentPolicy.space_ids?.[0] === '*'
+        ? undefined
+        : agentPolicy.space_ids?.[0]
+      : options?.spaceId;
 
   const agentInputs = await storedPackagePoliciesToAgentInputs(
     agentPolicy.package_policies as PackagePolicy[],
@@ -165,7 +190,8 @@ export async function getFullAgentPolicy(
     agentPolicy.global_data_tags,
     options?.agentVersion,
     soClient,
-    agentPolicy.has_agent_version_conditions
+    agentPolicy.has_agent_version_conditions,
+    packagePoliciesNamespace
   );
 
   let otelcolConfig;
@@ -197,6 +223,22 @@ export async function getFullAgentPolicy(
     });
   }
 
+  const getOutputProxy = (output: Output) =>
+    output.proxy_id ? proxies.find((proxy) => output.proxy_id === proxy.id) : undefined;
+
+  const fullPolicyOutputs = outputs.reduce<FullAgentPolicy['outputs']>((acc, output) => {
+    acc[getOutputIdForAgentPolicy(output)] = transformOutputToFullPolicyOutput(
+      output,
+      getOutputProxy(output),
+      standalone,
+      redactSecrets
+    );
+    return acc;
+  }, {});
+
+  // outputs generated for the fleet-server input from the ES SSL settings of the fleet server host
+  const bootstrapOutputs: FullAgentPolicy['outputs'] = {};
+
   const inputs = agentInputs
     // filter out the otelcol inputs, they will be added at the root of the policy
     .filter((input) => input.type !== OTEL_COLLECTOR_INPUT_TYPE)
@@ -207,16 +249,20 @@ export async function getFullAgentPolicy(
         input.use_output = getOutputIdForAgentPolicy(output);
       }
       if (input.type === 'fleet-server' && fleetServerHost) {
-        const sslInputConfig = generateSSLConfigForFleetServerInput(fleetServerHost);
-        if (sslInputConfig) {
-          input = {
-            ...input,
-            ...sslInputConfig,
-            ...(bootstrapOutputConfig
-              ? { use_output: `fleetserver-output-${fleetServerHost.id}` }
-              : {}),
-          };
-        }
+        const inputOutput = outputs.find(
+          (policyOutput) => getOutputIdForAgentPolicy(policyOutput) === input.use_output
+        );
+        const bootstrapOutput = generateFleetServerOutputSSLConfig(
+          fleetServerHost,
+          input.use_output ? fullPolicyOutputs[input.use_output] : undefined,
+          inputOutput ? getOutputProxy(inputOutput) : undefined
+        );
+        input = {
+          ...input,
+          ...generateSSLConfigForFleetServerInput(fleetServerHost),
+          ...(bootstrapOutput ? { use_output: Object.keys(bootstrapOutput)[0] } : {}),
+        };
+        Object.assign(bootstrapOutputs, bootstrapOutput);
       }
       return input;
     });
@@ -233,23 +279,56 @@ export async function getFullAgentPolicy(
   const downloadSourceSecretReferences = downloadSource
     ? getDownloadSourceSecretReferences(downloadSource)
     : [];
-  const packagePolicySecretReferences = (agentPolicy?.package_policies || []).flatMap(
+  // Only include package policy secret refs that appear inline as `$co.elastic.secret{<id>}`
+  // placeholders in the compiled policy. Disabled inputs/policies, never-rendered secret vars,
+  // and stale SO entries would otherwise make Fleet Server fetch ids nothing references.
+  //
+  // Scan `agentInputs` (pre-OTel-filter) PLUS `otelcolConfig`: OTel inputs are removed from
+  // `inputs` below and re-emitted at the policy root, so their placeholders only appear there.
+  //
+  // Fail open: if the scan cannot serialize, keep every reference rather than dropping valid ones.
+  const rawPackagePolicySecretReferences = (agentPolicy?.package_policies || []).flatMap(
     (policy) => policy.secret_references || []
   );
+  const compiledSecretIds =
+    rawPackagePolicySecretReferences.length > 0
+      ? collectCompiledSecretRefIds([agentInputs, otelcolConfig])
+      : new Set<string>();
+  let packagePolicySecretReferences = compiledSecretIds
+    ? rawPackagePolicySecretReferences.filter(({ id: refId }) => compiledSecretIds.has(refId))
+    : rawPackagePolicySecretReferences;
+
+  if (
+    compiledSecretIds &&
+    packagePolicySecretReferences.length < rawPackagePolicySecretReferences.length
+  ) {
+    const droppedIds = rawPackagePolicySecretReferences
+      .filter(({ id: refId }) => !compiledSecretIds.has(refId))
+      .map(({ id: refId }) => refId);
+    appContextService
+      .getLogger()
+      .info(
+        `Pruned ${
+          droppedIds.length
+        } package policy secret reference(s) not present in the compiled agent policy (agent policy: ${
+          agentPolicy.id
+        }): ${droppedIds.join(', ')}`
+      );
+  }
+
+  // Deduplicate: two package policies on one agent policy can legitimately share a secret id.
+  const seenSecretIds = new Set<string>();
+  packagePolicySecretReferences = packagePolicySecretReferences.filter(({ id: refId }) => {
+    if (seenSecretIds.has(refId)) return false;
+    seenSecretIds.add(refId);
+    return true;
+  });
 
   const fullAgentPolicy: FullAgentPolicy = {
     id: agentPolicy.id,
     outputs: {
-      ...(bootstrapOutputConfig ? bootstrapOutputConfig : {}),
-      ...outputs.reduce<FullAgentPolicy['outputs']>((acc, output) => {
-        acc[getOutputIdForAgentPolicy(output)] = transformOutputToFullPolicyOutput(
-          output,
-          output.proxy_id ? proxies.find((proxy) => output.proxy_id === proxy.id) : undefined,
-          standalone,
-          redactProxySecrets
-        );
-        return acc;
-      }, {}),
+      ...bootstrapOutputs,
+      ...fullPolicyOutputs,
     },
     inputs,
     ...(otelcolConfig ? otelcolConfig : {}),
@@ -261,7 +340,7 @@ export async function getFullAgentPolicy(
     ],
     revision: agentPolicy.revision,
     agent: {
-      download: getBinarySourceSettings(downloadSource, downloadSourceProxy, redactProxySecrets),
+      download: getBinarySourceSettings(downloadSource, downloadSourceProxy, redactSecrets),
       monitoring: getFullMonitoringSettings(agentPolicy, monitoringOutput),
       features,
       protection: {
@@ -384,7 +463,7 @@ export async function getFullAgentPolicy(
 
   // only add fleet server hosts if not in standalone
   if (!standalone && fleetServerHost) {
-    fullAgentPolicy.fleet = generateFleetConfig(fleetServerHost, proxies, redactProxySecrets);
+    fullAgentPolicy.fleet = generateFleetConfig(fleetServerHost, proxies, redactSecrets);
   }
 
   const settingsValues = getSettingsValuesForAgentPolicy(
@@ -437,7 +516,16 @@ export async function getFullAgentPolicy(
   }
 
   if (agentPolicy.overrides) {
-    return deepMerge<FullAgentPolicy>(fullAgentPolicy, agentPolicy.overrides);
+    // Overrides stored before the API validation was extended may still contain denied keys
+    const { overrides, removedKeys } = sanitizeAgentPolicyOverrides(agentPolicy.overrides);
+    if (removedKeys.length > 0) {
+      logger.warn(
+        `Ignoring disallowed overrides [${removedKeys.join(', ')}] on agent policy [${
+          fullAgentPolicy.id
+        }]`
+      );
+    }
+    return deepMerge<FullAgentPolicy>(fullAgentPolicy, overrides);
   }
   if (options?.standalone) {
     delete fullAgentPolicy.agent?.protection;
@@ -452,7 +540,7 @@ export async function getFullAgentPolicy(
 export function generateFleetConfig(
   fleetServerHost: FleetServerHost,
   proxies: FleetProxy[],
-  redactProxySecrets = false
+  redactSecrets = false
 ): FullAgentPolicy['fleet'] {
   const config: FullAgentPolicy['fleet'] = {
     hosts: fleetServerHost.host_urls,
@@ -472,7 +560,8 @@ export function generateFleetConfig(
       ...(fleetServerHost.ssl?.agent_certificate && {
         certificate: fleetServerHost.ssl.agent_certificate,
       }),
-      ...(fleetServerHost.ssl?.agent_key &&
+      ...(!redactSecrets &&
+        fleetServerHost.ssl?.agent_key &&
         !fleetServerHost.secrets?.ssl?.agent_key && {
           key: fleetServerHost.ssl.agent_key,
         }),
@@ -490,7 +579,7 @@ export function generateFleetConfig(
     : null;
   if (fleetServerHostproxy) {
     config.proxy_url = fleetServerHostproxy.url;
-    if (!redactProxySecrets && fleetServerHostproxy.proxy_headers) {
+    if (!redactSecrets && fleetServerHostproxy.proxy_headers) {
       config.proxy_headers = fleetServerHostproxy.proxy_headers;
     }
     if (
@@ -505,7 +594,7 @@ export function generateFleetConfig(
           certificate_authorities: [fleetServerHostproxy.certificate_authorities],
         }),
         ...(fleetServerHostproxy.certificate && { certificate: fleetServerHostproxy.certificate }),
-        ...(!redactProxySecrets &&
+        ...(!redactSecrets &&
           fleetServerHostproxy.certificate_key && { key: fleetServerHostproxy.certificate_key }),
       };
     }
@@ -551,7 +640,7 @@ export function transformOutputToFullPolicyOutput(
   output: Output,
   proxy?: FleetProxy,
   standalone = false,
-  redactProxySecrets = false
+  redactSecrets = false
 ): FullAgentPolicyOutput {
   const {
     config_yaml,
@@ -678,7 +767,7 @@ export function transformOutputToFullPolicyOutput(
 
   if (proxy && type !== outputType.Kafka) {
     newOutput.proxy_url = proxy.url;
-    if (!redactProxySecrets && proxy.proxy_headers) {
+    if (!redactSecrets && proxy.proxy_headers) {
       newOutput.proxy_headers = proxy.proxy_headers;
     }
 
@@ -697,7 +786,7 @@ export function transformOutputToFullPolicyOutput(
       }
       newOutput.ssl.certificate = proxy.certificate;
     }
-    if (!redactProxySecrets && proxy.certificate_key) {
+    if (!redactSecrets && proxy.certificate_key) {
       if (!newOutput.ssl) {
         newOutput.ssl = {};
       }
@@ -723,40 +812,137 @@ export function transformOutputToFullPolicyOutput(
   return newOutput;
 }
 
+type OutputSsl = NonNullable<FullAgentPolicyOutput['ssl']>;
+
+// ssl settings of the client certificate that Fleet Server presents to Elasticsearch
+const CLIENT_CERTIFICATE_SSL_KEYS = ['certificate', 'key', 'key_passphrase', 'key_passphrase_path'];
+
 // Generate the SSL configs for fleet server connection to ES
 // Corresponding to --fleet-server-es-ca, --fleet-server-es-cert, --fleet-server-es-cert-key cli options
 // This function generates a `bootstrap output` to be sent directly to elastic-agent
-export function generateFleetServerOutputSSLConfig(fleetServerHost: FleetServerHost | undefined):
+//
+// The output is only generated when at least one ES SSL setting is set on the fleet server host.
+// When the output used by the fleet-server input is an elasticsearch output (`baseOutput`), the bootstrap
+// output is a copy of it, so that the hosts configured on the policy's output are not lost, and the ES SSL
+// settings of the fleet server host only fill the settings that the output does not set. The precedence is
+// output > fleet server host > install time `--fleet-server-es*` flags (filled in by fleet-server).
+// The CA of the proxy of the output is not an ES setting of the output: it is added to the CA list on top of the
+// ones of the output or of the fleet server host.
+// Otherwise it only contains the ES SSL settings and elastic-agent/fleet-server fill the remaining attributes
+// from the bootstrap configuration.
+export function generateFleetServerOutputSSLConfig(
+  fleetServerHost: FleetServerHost | undefined,
+  baseOutput?: FullAgentPolicyOutput,
+  baseOutputProxy?: FleetProxy
+):
   | {
       [key: string]: FullAgentPolicyOutput;
     }
   | undefined {
-  if (!fleetServerHost || (!fleetServerHost?.ssl && !fleetServerHost.secrets)) return undefined;
+  if (!fleetServerHost) return undefined;
 
-  const outputConfig: FullAgentPolicyOutput = { type: 'elasticsearch' };
-  if (fleetServerHost?.ssl) {
-    outputConfig.ssl = {
-      ...(fleetServerHost.ssl.es_certificate_authorities && {
-        certificate_authorities: fleetServerHost.ssl.es_certificate_authorities,
+  const esSecretKey = fleetServerHost.secrets?.ssl?.es_key;
+  const esSsl = {
+    ...(fleetServerHost.ssl?.es_certificate_authorities && {
+      certificate_authorities: fleetServerHost.ssl.es_certificate_authorities,
+    }),
+    ...(fleetServerHost.ssl?.es_certificate && {
+      certificate: fleetServerHost.ssl.es_certificate,
+    }),
+    // if both ssl.es_key and secrets.ssl.es_key are present, prefer the secrets'
+    ...(fleetServerHost.ssl?.es_key &&
+      !esSecretKey && {
+        key: fleetServerHost.ssl.es_key,
       }),
-      ...(fleetServerHost.ssl.es_certificate && {
-        certificate: fleetServerHost.ssl.es_certificate,
-      }),
-      ...(fleetServerHost.ssl.es_key &&
-        !fleetServerHost?.secrets?.ssl?.es_key && {
-          key: fleetServerHost.ssl.es_key,
-        }),
-    };
+  };
+
+  if (Object.keys(esSsl).length === 0 && !esSecretKey) return undefined;
+
+  // only an elasticsearch output can be copied, with its proxy; for any other one only the ES ssl settings are used
+  const esBaseOutput = baseOutput?.type === 'elasticsearch' ? baseOutput : undefined;
+  const {
+    secrets: baseSecrets,
+    ssl: baseNestedSsl,
+    ...baseWithDottedSsl
+  } = esBaseOutput ?? ({} as Partial<FullAgentPolicyOutput>);
+
+  // The Advanced YAML of an output (config_yaml) is copied as is into the compiled output, so its dotted
+  // keys (e.g. `ssl.certificate`) are flat keys next to the nested `ssl`. Move them into `ssl`, otherwise the
+  // output would have two definitions of the same setting once the ES ssl settings are layered on top.
+  const baseRest: Partial<FullAgentPolicyOutput> = {};
+  const baseDottedSsl: OutputSsl = {};
+  for (const [key, value] of Object.entries(baseWithDottedSsl)) {
+    if (key.startsWith('ssl.')) {
+      set(baseDottedSsl, key.slice('ssl.'.length), value);
+    } else {
+      baseRest[key] = value;
+    }
   }
-  // if both ssl.es_key and secrets.ssl.es_key are present, prefer the secrets'
-  if (fleetServerHost?.secrets?.ssl?.es_key) {
-    outputConfig.secrets = {
-      ssl: { key: fleetServerHost.secrets?.ssl?.es_key },
-    };
+  // The nested ssl wins over the dotted keys, except for the CA list where both are combined: when the output CA is
+  // only set with a dotted key, the nested list only has the CA of the proxy of the output (see
+  // transformOutputToFullPolicyOutput). The nested list goes last to keep the proxy CA at the end of the list.
+  const certificateAuthorities = [
+    ...castArray(baseDottedSsl.certificate_authorities ?? []),
+    ...castArray(baseNestedSsl?.certificate_authorities ?? []),
+  ];
+  const baseSsl: OutputSsl = {
+    ...baseDottedSsl,
+    ...baseNestedSsl,
+    ...(certificateAuthorities.length > 0
+      ? { certificate_authorities: certificateAuthorities }
+      : {}),
+  };
+
+  const outputConfig: FullAgentPolicyOutput = { ...baseRest, type: 'elasticsearch' };
+
+  // The client certificate, its key and its passphrase only work together, so they always come from the same
+  // source: if the output sets any of them, the whole group comes from the output and the one of the fleet
+  // server host is ignored.
+  const baseSetsClientCertificate =
+    !isEmpty(pick(baseSsl, CLIENT_CERTIFICATE_SSL_KEYS)) || Boolean(baseSecrets?.ssl?.key);
+
+  // transformOutputToFullPolicyOutput appends the CA of the proxy of the output to the CA list, so it is not
+  // a CA set by the output itself: take it out here and add it back once the CA list is merged.
+  const proxyCertificateAuthority = esBaseOutput
+    ? baseOutputProxy?.certificate_authorities
+    : undefined;
+  const baseCertificateAuthorities = baseSsl.certificate_authorities;
+  const outputCertificateAuthorities =
+    proxyCertificateAuthority &&
+    baseCertificateAuthorities?.[baseCertificateAuthorities.length - 1] ===
+      proxyCertificateAuthority
+      ? baseCertificateAuthorities.slice(0, -1)
+      : baseCertificateAuthorities;
+
+  // the ssl settings of the output win over the ones of the fleet server host, which only fill the gaps
+  const hostSsl = baseSetsClientCertificate ? omit(esSsl, CLIENT_CERTIFICATE_SSL_KEYS) : esSsl;
+  const ssl: OutputSsl = {
+    ...hostSsl,
+    ...omit(baseSsl, 'certificate_authorities'),
+    ...(outputCertificateAuthorities?.length
+      ? { certificate_authorities: outputCertificateAuthorities }
+      : {}),
+  };
+  if (proxyCertificateAuthority) {
+    ssl.certificate_authorities = [
+      ...(ssl.certificate_authorities ?? []),
+      proxyCertificateAuthority,
+    ];
+  }
+  if (Object.keys(ssl).length > 0) {
+    outputConfig.ssl = ssl;
+  }
+
+  const secrets: { ssl?: { key?: NonNullable<typeof esSecretKey> } } = { ...baseSecrets };
+  if (esSecretKey && !baseSetsClientCertificate) {
+    secrets.ssl = { ...secrets.ssl, key: esSecretKey };
+  }
+  if (Object.keys(secrets).length > 0) {
+    outputConfig.secrets = secrets;
   }
 
   return {
-    [`fleetserver-output-${fleetServerHost?.id}`]: outputConfig,
+    [`fleetserver-output-${fleetServerHost.id}`]: outputConfig,
   };
 }
 
@@ -876,7 +1062,7 @@ function buildShipperQueueData(shipper: ShipperOutput) {
 export function getBinarySourceSettings(
   downloadSource: DownloadSource,
   downloadSourceProxy: FleetProxy | undefined,
-  redactProxySecrets = false
+  redactSecrets = false
 ) {
   const config: FullAgentPolicyDownload = {
     sourceURI: downloadSource.host,
@@ -956,7 +1142,7 @@ export function getBinarySourceSettings(
     if (downloadSourceProxy.url) {
       config.proxy_url = downloadSourceProxy.url;
     }
-    if (!redactProxySecrets && downloadSourceProxy.proxy_headers) {
+    if (!redactSecrets && downloadSourceProxy.proxy_headers) {
       config.proxy_headers = downloadSourceProxy.proxy_headers;
     }
     // if the proxy is configured, get the ssl settings from it
@@ -967,7 +1153,7 @@ export function getBinarySourceSettings(
       ...(downloadSourceProxy?.certificate && {
         certificate: downloadSourceProxy.certificate,
       }),
-      ...(!redactProxySecrets &&
+      ...(!redactSecrets &&
         downloadSourceProxy?.certificate_key && {
           key: downloadSourceProxy?.certificate_key,
         }),
@@ -978,14 +1164,17 @@ export function getBinarySourceSettings(
 }
 
 /**
- * Strip proxy_headers and proxy-derived ssl.key from a FullAgentPolicy that was already
+ * Strip proxy_headers and secret ssl keys from a FullAgentPolicy that was already
  * composed (e.g. retrieved verbatim from the .fleet-policies index via ?revision=N).
  * Mutates in place and returns the policy for convenience.
  *
+ * fleet.ssl.key is always redacted: it is either a proxy's certificate_key or the Fleet
+ * Server host's agent key.
+ *
  * proxyUrlsWithCertKey: URLs of proxies that have a certificate_key. When provided,
- * ssl.key is redacted on fleet/agent.download sections only if their proxy_url is in this
- * set — distinguishing proxy-derived keys from the entity's own TLS keys. Without this
- * set, ssl.key on fleet/agent.download is left untouched (conservative: avoids
+ * ssl.key is redacted on the agent.download section only if its proxy_url is in this
+ * set — distinguishing proxy-derived keys from the download source's own TLS key. Without
+ * this set, ssl.key on agent.download is left untouched (conservative: avoids
  * over-redaction but may miss proxy keys).
  */
 export function redactProxySecretsFromPolicy(
@@ -1003,12 +1192,9 @@ export function redactProxySecretsFromPolicy(
   }
   if (policy.fleet && 'hosts' in policy.fleet) {
     delete policy.fleet.proxy_headers;
-    // Only redact ssl.key if we can confirm it came from a proxy with a certificate_key
-    if (
-      policy.fleet.proxy_url &&
-      proxyUrlsWithCertKey?.has(policy.fleet.proxy_url) &&
-      policy.fleet.ssl
-    ) {
+    // fleet.ssl.key is either the proxy's certificate_key or the Fleet Server host's agent key,
+    // and both are secrets, so always redact it. The certificate and CAs are kept.
+    if (policy.fleet.ssl) {
       delete policy.fleet.ssl.key;
     }
   }

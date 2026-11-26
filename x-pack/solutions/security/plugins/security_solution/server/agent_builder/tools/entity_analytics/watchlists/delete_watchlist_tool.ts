@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { ToolType, ToolResultType } from '@kbn/agent-builder-common';
 import { ConfirmationStatus } from '@kbn/agent-builder-common/agents/prompts';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
@@ -21,14 +21,16 @@ import { securityTool } from '../../constants';
 import { checkWatchlistAccess } from './check_watchlist_access';
 import { getWatchlistToolAvailability } from './watchlist_availability';
 
-const schema = z.object({
-  watchlistId: z
-    .string()
-    .min(1)
-    .describe(
-      'The id of the watchlist to delete. Use `security.list_watchlists` to resolve a watchlist name to its id first, passing `nameContains` when the user referred to the watchlist by name.'
-    ),
-});
+const schema = lazySchema(() =>
+  z.object({
+    watchlistId: z
+      .string()
+      .min(1)
+      .describe(
+        'The id of the watchlist to delete. Use `security.list_watchlists` to resolve a watchlist name to its id first, passing `nameContains` when the user referred to the watchlist by name.'
+      ),
+  })
+);
 
 export const SECURITY_DELETE_WATCHLIST_TOOL_ID = securityTool('delete_watchlist');
 

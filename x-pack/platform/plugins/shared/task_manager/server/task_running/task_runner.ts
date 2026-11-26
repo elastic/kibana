@@ -56,6 +56,7 @@ import type {
   SuccessfulRunResult,
   TaskDefinition,
   TaskEventLogger,
+  TaskTypeGroup,
 } from '../task';
 import { isFailedRunResult, TaskStatus, TaskCost, getTaskCostFromInstance } from '../task';
 import type { TaskTypeDictionary } from '../task_type_dictionary';
@@ -65,7 +66,7 @@ import { type TaskManagerConfig, CLAIM_STRATEGY_MGET } from '../config';
 import type { ApiKeyStrategy } from '../api_key_strategy';
 import { TaskValidator } from '../task_validator';
 import { getRetryAt, getRetryDate, getTimeout } from '../lib/get_retry_at';
-import { getNextRunAt } from '../lib/get_next_run_at';
+import { getNextRunAt, getRRuleScheduleDurationMs } from '../lib/get_next_run_at';
 import { TaskErrorSource } from '../../common/constants';
 import { getExecutionId } from '../lib/get_execution_id';
 import { EVENT_LOG_ACTIONS, EventLogOutcomes } from '../constants';
@@ -751,15 +752,19 @@ export class TaskManagerRunner implements TaskRunner {
   }
 
   private shouldUpdateExpiredTask(): boolean {
-    if (!this.instance.task.schedule || !this.instance.task.schedule.interval) {
-      // if the task does not have a schedule interval, we will not update it on timeout
-      return false;
+    const { interval, rrule } = this.instance.task.schedule ?? {};
+    const timeoutDuration = parseIntervalAsMillisecond(this.timeout);
+
+    if (interval) {
+      return parseIntervalAsMillisecond(interval) > timeoutDuration;
     }
 
-    const timeoutDuration = parseIntervalAsMillisecond(this.timeout);
-    const scheduleDuration = parseIntervalAsMillisecond(this.instance.task.schedule.interval);
+    if (rrule) {
+      return getRRuleScheduleDurationMs(rrule, this.instance.task.runAt) > timeoutDuration;
+    }
 
-    return scheduleDuration > timeoutDuration;
+    // if the task does not have a schedule, we will not update it on timeout
+    return false;
   }
 
   private rescheduleFailedRun = (
@@ -979,12 +984,16 @@ export class TaskManagerRunner implements TaskRunner {
     const debugLogger = createWrappedLogger({ logger: this.logger, tags: [`metrics-debugger`] });
 
     const taskHasExpired = this.isExpired;
+    const taskTypeGroup = this.definitions.get(this.taskType)?.taskTypeGroup as
+      | TaskTypeGroup
+      | undefined;
 
     await eitherAsync(
       result,
       async ({ runAt, schedule, taskRunError }: SuccessfulRunResult) => {
         const taskPersistence =
           schedule || task.schedule ? TaskPersistence.Recurring : TaskPersistence.NonRecurring;
+
         try {
           const processedResult = {
             task,
@@ -1003,7 +1012,12 @@ export class TaskManagerRunner implements TaskRunner {
             this.onTaskEvent(
               asTaskRunEvent(
                 this.id,
-                asErr({ ...processedResult, isExpired: taskHasExpired, error: taskRunError }),
+                asErr({
+                  ...processedResult,
+                  isExpired: taskHasExpired,
+                  error: taskRunError,
+                  taskTypeGroup,
+                }),
                 taskTiming
               )
             );
@@ -1018,7 +1032,7 @@ export class TaskManagerRunner implements TaskRunner {
             this.onTaskEvent(
               asTaskRunEvent(
                 this.id,
-                asOk({ ...processedResult, isExpired: taskHasExpired }),
+                asOk({ ...processedResult, isExpired: taskHasExpired, taskTypeGroup }),
                 taskTiming
               )
             );
@@ -1039,6 +1053,7 @@ export class TaskManagerRunner implements TaskRunner {
                 result: TaskRunResult.Failed,
                 isExpired: taskHasExpired,
                 error: err,
+                taskTypeGroup,
               }),
               taskTiming
             )
@@ -1064,6 +1079,7 @@ export class TaskManagerRunner implements TaskRunner {
               result: await this.processResultForRecurringTask(result),
               isExpired: taskHasExpired,
               error,
+              taskTypeGroup,
             }),
             taskTiming
           )

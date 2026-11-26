@@ -153,9 +153,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             });
 
             expect(
-              testSubjects.exists(`lns-indexPatternDimension-average incompatible`, {
-                timeout: 500,
-              })
+              await testSubjects.exists(`lns-indexPatternDimension-average incompatible`)
             ).to.eql(indexes.some(({ mode }) => mode === 'tsdb'));
             await lens.closeDimensionEditor();
           });

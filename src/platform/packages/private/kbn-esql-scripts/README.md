@@ -21,6 +21,6 @@ The generators read input from a local Elasticsearch checkout and write their ou
 
 ```sh
 # from this package directory
-yarn make:defs /path/to/elasticsearch   # function/command/settings definitions
-yarn make:docs /path/to/elasticsearch   # inline function/command documentation
+pnpm make:defs /path/to/elasticsearch   # function/command/settings definitions
+pnpm make:docs /path/to/elasticsearch   # inline function/command documentation
 ```

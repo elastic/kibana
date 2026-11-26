@@ -31,8 +31,8 @@ const runInWorktree = async (
   // Bootstrap if needed
   const nodeModulesExist = Fs.existsSync(resolve(wsRoot, 'node_modules'));
   if (!nodeModulesExist) {
-    log.info(`[${label}] Running yarn kbn bootstrap...`);
-    execSync('yarn kbn bootstrap', { cwd: wsRoot, stdio: 'inherit' });
+    log.info(`[${label}] Running node scripts/kbn bootstrap...`);
+    execSync('node scripts/kbn bootstrap', { cwd: wsRoot, stdio: 'inherit' });
   }
 
   // Build dist if requested

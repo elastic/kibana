@@ -88,27 +88,38 @@ describe('usePreferredTransactionDataSource', () => {
       expect(result.current.dataSource?.documentType).toBe('transactionEvent');
     });
 
-    it('falls back to transactionMetric/1m when all sources have hasDocs: false', async () => {
+    it('falls back to transactionEvent/none when all sources have hasDocs: false', async () => {
       const { http, start, end } = withSources([
         { documentType: 'transactionMetric', rollupInterval: '1m', hasDocs: false },
+        { documentType: 'transactionEvent', rollupInterval: 'none', hasDocs: false },
       ]);
       const { result } = renderHook(() => usePreferredTransactionDataSource({ http, start, end }));
       await waitFor(() => expect(result.current.dataSource).toBeDefined());
       expect(result.current.dataSource).toEqual({
-        documentType: 'transactionMetric',
-        rollupInterval: '1m',
+        documentType: 'transactionEvent',
+        rollupInterval: 'none',
       });
     });
 
-    it('falls back to transactionMetric/1m when only ineligible document types are present', async () => {
+    it('falls back to transactionEvent/none when the sources list is empty', async () => {
+      const { http, start, end } = withSources([]);
+      const { result } = renderHook(() => usePreferredTransactionDataSource({ http, start, end }));
+      await waitFor(() => expect(result.current.dataSource).toBeDefined());
+      expect(result.current.dataSource).toEqual({
+        documentType: 'transactionEvent',
+        rollupInterval: 'none',
+      });
+    });
+
+    it('falls back to transactionEvent/none when only ineligible document types are present', async () => {
       const { http, start, end } = withSources([
         { documentType: 'serviceTransactionMetric', rollupInterval: '1m', hasDocs: true },
       ]);
       const { result } = renderHook(() => usePreferredTransactionDataSource({ http, start, end }));
       await waitFor(() => expect(result.current.dataSource).toBeDefined());
       expect(result.current.dataSource).toEqual({
-        documentType: 'transactionMetric',
-        rollupInterval: '1m',
+        documentType: 'transactionEvent',
+        rollupInterval: 'none',
       });
     });
 

@@ -7,54 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { TSESTree } from '@typescript-eslint/typescript-estree';
-import * as Bt from '@babel/types';
 import type { Rule } from 'eslint';
 import type { Node } from 'estree';
 import { parseKbnImportReq } from '@kbn/repo-packages';
 
-import type { Importer } from '../helpers/visit_all_import_statements';
+import { isTypeOnlyImport } from '../helpers/ast';
 import { visitAllImportStatements } from '../helpers/visit_all_import_statements';
 import { getSourcePath } from '../helpers/source';
 import { getRepoSourceClassifier } from '../helpers/repo_source_classifier';
 import { getImportResolver } from '../get_import_resolver';
-
-/**
- * Detect type-only imports. Replicated from no_boundary_crossing.ts since
- * these are declaration-level checks (importKind/exportKind).
- */
-const isTypeOnlyImport = (importer: Importer) => {
-  if (Bt.isImportDeclaration(importer)) {
-    return (
-      importer.importKind === 'type' ||
-      importer.specifiers.some((s) => ('importKind' in s ? s.importKind === 'type' : false))
-    );
-  }
-
-  if (importer.type === TSESTree.AST_NODE_TYPES.ImportDeclaration) {
-    return (
-      importer.importKind === 'type' ||
-      importer.specifiers.some(
-        (s) => s.type === TSESTree.AST_NODE_TYPES.ImportSpecifier && s.importKind === 'type'
-      )
-    );
-  }
-
-  if (Bt.isExportNamedDeclaration(importer)) {
-    return (
-      importer.exportKind === 'type' ||
-      importer.specifiers.some((s) => (Bt.isExportSpecifier(s) ? s.exportKind === 'type' : false))
-    );
-  }
-
-  if (importer.type === TSESTree.AST_NODE_TYPES.ExportNamedDeclaration) {
-    return (
-      importer.exportKind === 'type' || importer.specifiers.some((s) => s.exportKind === 'type')
-    );
-  }
-
-  return false;
-};
 
 /**
  * ESLint rule that validates cross-plugin imports target declared `extraPublicDirs`.

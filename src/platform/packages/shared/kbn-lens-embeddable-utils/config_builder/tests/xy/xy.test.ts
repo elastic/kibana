@@ -7,8 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { XYVisualizationState } from '@kbn/lens-common';
-import type { XYConfig, XYConfigNoESQL } from '../../schema/charts/xy';
+import type { XYDataLayerConfig, XYVisualizationState } from '@kbn/lens-common';
+import {
+  xyConfigSchema,
+  type DataLayerType,
+  type XYConfig,
+  type XYConfigNoESQL,
+} from '../../schema/charts/xy';
 import { AUTO_COLOR, DEFAULT_CATEGORICAL_COLOR_MAPPING } from '../../schema/color';
 import { LensConfigBuilder } from '../../config_builder';
 import type { LensAttributes } from '../../types';
@@ -1080,6 +1085,90 @@ describe('XY', () => {
       );
     });
 
+    it('should store the default categorical color mapping on breakdown_by for bar charts', () => {
+      const config = {
+        type: 'xy',
+        title: 'Bar breakdown color default in state',
+        layers: [
+          {
+            data_source: {
+              type: 'esql',
+              query: 'FROM logs | STATS count = count() BY product',
+            },
+            type: 'bar',
+            ignore_global_filters: false,
+            sampling: 1,
+            y: [{ column: 'count' }],
+            breakdown_by: { column: 'product' },
+          },
+        ],
+      } satisfies XYConfig;
+
+      const builder = new LensConfigBuilder();
+      const lensState = builder.fromAPIFormat(config);
+      const vizState = lensState.state.visualization as XYVisualizationState;
+      const dataLayer = vizState.layers[0] as XYDataLayerConfig;
+
+      expect(dataLayer.colorMapping).toEqual({
+        colorMode: { type: 'categorical' },
+        paletteId: 'default',
+        assignments: [],
+        specialAssignments: [{ rules: [{ type: 'other' }], color: { type: 'loop' } }],
+      });
+    });
+
+    it('should store the elastic_line_optimized color mapping on breakdown_by for line charts', () => {
+      const config = {
+        type: 'xy',
+        title: 'Line breakdown color default in state',
+        layers: [
+          {
+            data_source: { type: AS_CODE_DATA_VIEW_REFERENCE_TYPE, ref_id: 'myDataView' },
+            type: 'line',
+            ignore_global_filters: false,
+            sampling: 1,
+            y: [{ operation: 'count', empty_as_null: false }],
+            breakdown_by: { operation: 'terms', fields: ['product'], limit: 3 },
+          },
+        ],
+      } satisfies XYConfig;
+
+      const builder = new LensConfigBuilder();
+      const lensState = builder.fromAPIFormat(config);
+      const vizState = lensState.state.visualization as XYVisualizationState;
+      const dataLayer = vizState.layers[0] as XYDataLayerConfig;
+
+      expect(dataLayer.colorMapping).toEqual({
+        colorMode: { type: 'categorical' },
+        paletteId: 'elastic_line_optimized',
+        assignments: [],
+        specialAssignments: [{ rules: [{ type: 'other' }], color: { type: 'loop' } }],
+      });
+    });
+
+    it('should not store a color mapping without breakdown_by', () => {
+      const config = {
+        type: 'xy',
+        title: 'No breakdown, no color mapping in state',
+        layers: [
+          {
+            data_source: { type: AS_CODE_DATA_VIEW_REFERENCE_TYPE, ref_id: 'myDataView' },
+            type: 'bar',
+            ignore_global_filters: false,
+            sampling: 1,
+            y: [{ operation: 'count', empty_as_null: false }],
+          },
+        ],
+      } satisfies XYConfig;
+
+      const builder = new LensConfigBuilder();
+      const lensState = builder.fromAPIFormat(config);
+      const vizState = lensState.state.visualization as XYVisualizationState;
+      const dataLayer = vizState.layers[0] as XYDataLayerConfig;
+
+      expect(dataLayer.colorMapping).toBeUndefined();
+    });
+
     it('should emit AUTO_COLOR on reference line when no color is specified', () => {
       const config = {
         type: 'xy',
@@ -1171,6 +1260,424 @@ describe('XY', () => {
           expect(event.color).toEqual(AUTO_COLOR);
         }
       }
+    });
+
+    it('should neither store nor emit a static y-axis color under an active breakdown in DSL layer', () => {
+      const config = {
+        type: 'xy',
+        title: 'Y-axis static color with active breakdown',
+        layers: [
+          {
+            data_source: { type: AS_CODE_DATA_VIEW_REFERENCE_TYPE, ref_id: 'myDataView' },
+            type: 'bar',
+            ignore_global_filters: false,
+            sampling: 1,
+            y: [
+              {
+                operation: 'count',
+                empty_as_null: false,
+                color: { type: 'static', color: '#e5281e' },
+              },
+            ],
+            breakdown_by: { operation: 'terms', fields: ['clientip'], limit: 5 },
+          },
+        ],
+      } satisfies XYConfig;
+
+      const builder = new LensConfigBuilder();
+      const lensState = builder.fromAPIFormat(config);
+      const apiOutput = builder.toAPIFormat(lensState) as XYConfig;
+
+      const stateLayer = (lensState.state.visualization as XYVisualizationState)
+        .layers[0] as XYDataLayerConfig;
+      expect(stateLayer.yConfig?.[0]?.color).toBeUndefined();
+      const dataLayer = apiOutput.layers[0];
+      expect('y' in dataLayer && dataLayer.y[0].color).toBeUndefined();
+      expect(xyConfigSchema.validate(apiOutput)).toEqual(apiOutput);
+    });
+
+    it('should neither store nor emit a static y-axis color under an active breakdown in ES|QL layer', () => {
+      const config = {
+        type: 'xy',
+        title: 'Y-axis static color with active breakdown',
+        layers: [
+          {
+            data_source: {
+              type: 'esql',
+              query: 'FROM logs | STATS count = count() BY product',
+            },
+            type: 'bar',
+            ignore_global_filters: false,
+            sampling: 1,
+            y: [{ column: 'count', color: { type: 'static', color: '#e5281e' } }],
+            breakdown_by: { column: 'product' },
+          },
+        ],
+      } satisfies XYConfig;
+
+      const builder = new LensConfigBuilder();
+      const lensState = builder.fromAPIFormat(config);
+      const apiOutput = builder.toAPIFormat(lensState) as XYConfig;
+
+      const stateLayer = (lensState.state.visualization as XYVisualizationState)
+        .layers[0] as XYDataLayerConfig;
+      expect(stateLayer.yConfig?.[0]?.color).toBeUndefined();
+      const dataLayer = apiOutput.layers[0];
+      expect('y' in dataLayer && dataLayer.y[0].color).toBeUndefined();
+      expect(xyConfigSchema.validate(apiOutput)).toEqual(apiOutput);
+    });
+
+    it('should keep a static y-axis color under a collapsed breakdown in DSL layer', () => {
+      const config = {
+        type: 'xy',
+        title: 'Y-axis static color with collapsed breakdown',
+        layers: [
+          {
+            data_source: { type: AS_CODE_DATA_VIEW_REFERENCE_TYPE, ref_id: 'myDataView' },
+            type: 'bar',
+            ignore_global_filters: false,
+            sampling: 1,
+            y: [
+              {
+                operation: 'count',
+                empty_as_null: false,
+                color: { type: 'static', color: '#e5281e' },
+              },
+            ],
+            breakdown_by: {
+              operation: 'terms',
+              fields: ['clientip'],
+              limit: 5,
+              collapse_by: 'sum',
+            },
+          },
+        ],
+      } satisfies XYConfig;
+
+      const builder = new LensConfigBuilder();
+      const lensState = builder.fromAPIFormat(config);
+      const apiOutput = builder.toAPIFormat(lensState) as XYConfig;
+
+      const stateLayer = (lensState.state.visualization as XYVisualizationState)
+        .layers[0] as XYDataLayerConfig;
+      expect(stateLayer.yConfig?.[0]?.color).toBe('#e5281e');
+      const dataLayer = apiOutput.layers[0];
+      expect('y' in dataLayer && dataLayer.y[0].color).toEqual({
+        type: 'static',
+        color: '#e5281e',
+      });
+      expect(xyConfigSchema.validate(apiOutput)).toEqual(apiOutput);
+    });
+
+    it('should keep a static y-axis color under a collapsed breakdown in ES|QL layer', () => {
+      const config = {
+        type: 'xy',
+        title: 'Y-axis static color with collapsed breakdown',
+        layers: [
+          {
+            data_source: {
+              type: 'esql',
+              query: 'FROM logs | STATS count = count() BY product',
+            },
+            type: 'bar',
+            ignore_global_filters: false,
+            sampling: 1,
+            y: [{ column: 'count', color: { type: 'static', color: '#e5281e' } }],
+            breakdown_by: { column: 'product', collapse_by: 'sum' },
+          },
+        ],
+      } satisfies XYConfig;
+
+      const builder = new LensConfigBuilder();
+      const lensState = builder.fromAPIFormat(config);
+      const apiOutput = builder.toAPIFormat(lensState) as XYConfig;
+
+      const stateLayer = (lensState.state.visualization as XYVisualizationState)
+        .layers[0] as XYDataLayerConfig;
+      expect(stateLayer.yConfig?.[0]?.color).toBe('#e5281e');
+      const dataLayer = apiOutput.layers[0];
+      expect('y' in dataLayer && dataLayer.y[0].color).toEqual({
+        type: 'static',
+        color: '#e5281e',
+      });
+      expect(xyConfigSchema.validate(apiOutput)).toEqual(apiOutput);
+    });
+
+    it('should emit AUTO_COLOR on y-axis metrics when the breakdown is collapsed and no color is set', () => {
+      const config = {
+        type: 'xy',
+        title: 'Y-axis color default with collapsed breakdown',
+        layers: [
+          {
+            data_source: {
+              type: 'esql',
+              query: 'FROM logs | STATS count = count() BY product',
+            },
+            type: 'bar',
+            ignore_global_filters: false,
+            sampling: 1,
+            y: [{ column: 'count' }],
+            breakdown_by: { column: 'product', collapse_by: 'sum' },
+          },
+        ],
+      } satisfies XYConfig;
+
+      const builder = new LensConfigBuilder();
+      const lensState = builder.fromAPIFormat(config);
+      const apiOutput = builder.toAPIFormat(lensState) as XYConfig;
+
+      const dataLayer = apiOutput.layers[0];
+      expect('y' in dataLayer && dataLayer.y[0].color).toEqual(AUTO_COLOR);
+      expect(xyConfigSchema.validate(apiOutput)).toEqual(apiOutput);
+    });
+
+    it('should neither store nor emit a breakdown color under a collapsed breakdown in DSL layer', () => {
+      const config = {
+        type: 'xy',
+        title: 'Breakdown color with collapsed breakdown',
+        layers: [
+          {
+            data_source: { type: AS_CODE_DATA_VIEW_REFERENCE_TYPE, ref_id: 'myDataView' },
+            type: 'bar',
+            ignore_global_filters: false,
+            sampling: 1,
+            y: [{ operation: 'count', empty_as_null: false }],
+            breakdown_by: {
+              operation: 'terms',
+              fields: ['clientip'],
+              limit: 5,
+              collapse_by: 'sum',
+              color: {
+                mode: 'categorical',
+                palette: 'default',
+                mapping: [{ values: ['a'], color: { type: 'color_code', value: '#ff0000' } }],
+              },
+            },
+          },
+        ],
+      } satisfies XYConfig;
+
+      const builder = new LensConfigBuilder();
+      const lensState = builder.fromAPIFormat(config);
+      const apiOutput = builder.toAPIFormat(lensState) as XYConfig;
+
+      const stateLayer = (lensState.state.visualization as XYVisualizationState)
+        .layers[0] as XYDataLayerConfig;
+      expect(stateLayer.colorMapping).toBeUndefined();
+      const dataLayer = apiOutput.layers[0];
+      expect('breakdown_by' in dataLayer && dataLayer.breakdown_by?.color).toBeUndefined();
+      expect('breakdown_by' in dataLayer && dataLayer.breakdown_by?.collapse_by).toBe('sum');
+      expect(xyConfigSchema.validate(apiOutput)).toEqual(apiOutput);
+    });
+  });
+
+  describe('axis settings', () => {
+    const dslConfig = {
+      data_source: { type: AS_CODE_DATA_VIEW_REFERENCE_TYPE, ref_id: 'myDataView' },
+      type: 'bar',
+      ignore_global_filters: false,
+      sampling: 1,
+    } as const;
+
+    const esqlConfig = {
+      data_source: {
+        type: 'esql',
+        query: 'FROM logs | STATS count = count(), max = max(bytes) BY product',
+      },
+      type: 'bar',
+      ignore_global_filters: false,
+      sampling: 1,
+      x: { column: 'product' },
+    } as const;
+
+    type AxisSettingsConfig = Omit<XYConfig, 'layers'> & { layers: DataLayerType[] };
+
+    const layersByDataSource: Array<[string, DataLayerType, DataLayerType, DataLayerType]> = [
+      [
+        'DSL',
+        { ...dslConfig, y: [{ operation: 'count', empty_as_null: false }] },
+        { ...dslConfig, y: [{ operation: 'count', empty_as_null: false, axis: 'y2' }] },
+        {
+          ...dslConfig,
+          y: [
+            { operation: 'count', empty_as_null: false },
+            { operation: 'max', field: 'bytes', axis: 'y2' },
+          ],
+        },
+      ],
+      [
+        'ES|QL',
+        { ...esqlConfig, y: [{ column: 'count' }] },
+        { ...esqlConfig, y: [{ column: 'count', axis: 'y2' }] },
+        { ...esqlConfig, y: [{ column: 'count' }, { column: 'max', axis: 'y2' }] },
+      ],
+    ];
+
+    describe.each(layersByDataSource)('with %s layers', (_name, onY, onY2, onBoth) => {
+      it('should not store the settings of the second Y axis when every metric is on the first', () => {
+        const config = {
+          type: 'xy',
+          title: 'Second Y axis settings without a metric on it',
+          axis: {
+            y: { title: { text: 'Left', visible: true }, scale: 'log' },
+            y2: {
+              title: { text: 'Right', visible: true },
+              scale: 'log',
+              ticks: { visible: false },
+            },
+          },
+          layers: [onY],
+        } satisfies AxisSettingsConfig;
+
+        const builder = new LensConfigBuilder();
+        const lensState = builder.fromAPIFormat(config as XYConfig);
+        const vizState = lensState.state.visualization as XYVisualizationState;
+
+        expect(vizState.yTitle).toBe('Left');
+        expect(vizState.yLeftScale).toBe('log');
+        expect(vizState.yRightTitle).toBeUndefined();
+        expect(vizState.yRightScale).toBeUndefined();
+        expect(vizState.tickLabelsVisibilitySettings).toBeUndefined();
+      });
+
+      it('should store the settings of the second Y axis when a metric is on it', () => {
+        const config = {
+          type: 'xy',
+          title: 'Second Y axis settings with a metric on it',
+          axis: {
+            y: { title: { text: 'Left', visible: true }, scale: 'log' },
+            y2: {
+              title: { text: 'Right', visible: true },
+              scale: 'log',
+              ticks: { visible: false },
+            },
+          },
+          layers: [onBoth],
+        } satisfies AxisSettingsConfig;
+
+        const builder = new LensConfigBuilder();
+        const lensState = builder.fromAPIFormat(config as XYConfig);
+        const vizState = lensState.state.visualization as XYVisualizationState;
+
+        expect(vizState.yTitle).toBe('Left');
+        expect(vizState.yRightTitle).toBe('Right');
+        expect(vizState.yRightScale).toBe('log');
+        expect(vizState.tickLabelsVisibilitySettings).toEqual({
+          x: true,
+          yLeft: true,
+          yRight: false,
+        });
+      });
+
+      it('should not store the settings of the first Y axis when every metric is on the second', () => {
+        const config = {
+          type: 'xy',
+          title: 'First Y axis settings without a metric on it',
+          axis: {
+            y: { title: { text: 'Left', visible: true }, scale: 'log' },
+            y2: { title: { text: 'Right', visible: true } },
+          },
+          layers: [onY2],
+        } satisfies AxisSettingsConfig;
+
+        const builder = new LensConfigBuilder();
+        const lensState = builder.fromAPIFormat(config as XYConfig);
+        const vizState = lensState.state.visualization as XYVisualizationState;
+
+        expect(vizState.yTitle).toBeUndefined();
+        expect(vizState.yLeftScale).toBeUndefined();
+        expect(vizState.yRightTitle).toBe('Right');
+      });
+
+      it('should not store the text of a hidden axis title', () => {
+        const config = {
+          type: 'xy',
+          title: 'Hidden axis titles',
+          axis: {
+            x: { title: { text: 'X label', visible: false } },
+            y: { title: { text: 'Y label', visible: false } },
+            y2: { title: { text: 'Y2 label', visible: false } },
+          },
+          layers: [onBoth],
+        } satisfies AxisSettingsConfig;
+
+        const builder = new LensConfigBuilder();
+        const lensState = builder.fromAPIFormat(config as XYConfig);
+        const vizState = lensState.state.visualization as XYVisualizationState;
+        const apiOutput = builder.toAPIFormat(lensState) as XYConfig;
+
+        expect(vizState.xTitle).toBeUndefined();
+        expect(vizState.yTitle).toBeUndefined();
+        expect(vizState.yRightTitle).toBeUndefined();
+        expect(vizState.axisTitlesVisibilitySettings).toEqual({
+          x: false,
+          yLeft: false,
+          yRight: false,
+        });
+        expect(apiOutput.axis?.x?.title).toEqual({ visible: false });
+      });
+
+      it.each<[string, { visible?: boolean }]>([
+        ['the title is visible', { visible: true }],
+        ['the title visibility is not set', {}],
+      ])('should store the text of an axis title when %s', (_visibility, visibility) => {
+        const config = {
+          type: 'xy',
+          title: 'Axis titles with text',
+          axis: {
+            x: { title: { text: 'X label', ...visibility } },
+            y: { title: { text: 'Y label', ...visibility } },
+            y2: { title: { text: 'Y2 label', ...visibility } },
+          },
+          layers: [onBoth],
+        } satisfies AxisSettingsConfig;
+
+        const builder = new LensConfigBuilder();
+        const lensState = builder.fromAPIFormat(config as XYConfig);
+        const vizState = lensState.state.visualization as XYVisualizationState;
+
+        expect(vizState.xTitle).toBe('X label');
+        expect(vizState.yTitle).toBe('Y label');
+        expect(vizState.yRightTitle).toBe('Y2 label');
+      });
+    });
+
+    it('should not store the settings of the second Y axis when only a reference line is on it', () => {
+      const config = {
+        type: 'xy',
+        title: 'Second Y axis settings with only a reference line on it',
+        axis: {
+          y2: { title: { text: 'Right', visible: true }, ticks: { visible: false } },
+        },
+        layers: [
+          {
+            data_source: { type: AS_CODE_DATA_VIEW_REFERENCE_TYPE, ref_id: 'myDataView' },
+            type: 'bar',
+            ignore_global_filters: false,
+            sampling: 1,
+            y: [{ operation: 'count', empty_as_null: false }],
+          },
+          {
+            data_source: {
+              type: AS_CODE_DATA_VIEW_SPEC_TYPE,
+              index_pattern: 'test-index',
+              time_field: '@timestamp',
+            },
+            type: 'reference_lines',
+            ignore_global_filters: false,
+            sampling: 1,
+            thresholds: [{ operation: 'median', field: 'bytes', label: 'Median', axis: 'y2' }],
+          },
+        ],
+      } satisfies XYConfig;
+
+      const builder = new LensConfigBuilder();
+      const lensState = builder.fromAPIFormat(config);
+      const vizState = lensState.state.visualization as XYVisualizationState;
+
+      expect(vizState.yRightTitle).toBeUndefined();
+      expect(vizState.tickLabelsVisibilitySettings).toBeUndefined();
+      expect(vizState.axisTitlesVisibilitySettings).toBeUndefined();
     });
   });
 });
