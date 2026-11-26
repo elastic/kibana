@@ -32,6 +32,7 @@ import {
   checkKafkaOAuth2Allowed,
 } from './outputs/helpers';
 import { outputSavedObjectToOutput, withRemovedOtlpHeaders } from './output';
+import { OutputResponseSchema, UpdateOutputSchema } from '../types/models/output';
 import {
   extractAndWriteOutputSecrets,
   extractAndUpdateOutputSecrets,
@@ -2425,6 +2426,29 @@ describe('Output Service', () => {
               otlp_exporter: expect.objectContaining({ sending_queue: null }),
             }),
             expect.anything()
+          );
+        });
+
+        it('rejects a sending queue whose sizes the collector rejects', async () => {
+          await expect(
+            outputService.create(
+              getMockedSoClient(),
+              esClientMock,
+              {
+                is_default: false,
+                is_default_monitoring: false,
+                name: 'OTLP batch too big',
+                type: 'otlp',
+                otlp_exporter: {
+                  endpoint: 'my-own-collector.example.com:4317',
+                  protocol: 'grpc',
+                  sending_queue: { sizer: 'items', queue_size: 100, batch: { sizer: 'items' } },
+                },
+              },
+              { id: 'output-test' }
+            )
+          ).rejects.toThrow(
+            /min_size \(8192\) can not be more than sending_queue.queue_size \(100\)/
           );
         });
 
@@ -6705,6 +6729,82 @@ describe('Output Service', () => {
   });
 
   describe('outputSavedObjectToOutput', () => {
+    it('should leave out the OTLP queue settings that an update removed, but keep the opt-outs', () => {
+      const so = mockOutputSO('output-test', {
+        type: 'otlp',
+        otlp_exporter: {
+          protocol: 'grpc',
+          endpoint: 'collector.example.com:4317',
+          sending_queue: {
+            enabled: null,
+            sizer: null,
+            wait_for_result: null,
+            block_on_overflow: null,
+            queue_size: null,
+            batch: { sizer: null, min_size: null },
+          },
+        },
+      } as any);
+
+      expect((outputSavedObjectToOutput(so) as any).otlp_exporter.sending_queue).toEqual({
+        queue_size: null,
+        batch: { min_size: null },
+      });
+
+      const optedOut = mockOutputSO('output-test', {
+        type: 'otlp',
+        otlp_exporter: {
+          protocol: 'grpc',
+          endpoint: 'collector.example.com:4317',
+          sending_queue: null,
+        },
+      } as any);
+      expect((outputSavedObjectToOutput(optedOut) as any).otlp_exporter.sending_queue).toBeNull();
+    });
+
+    it('should read an OTLP queue whose batch was reset as an output that can be sent back', () => {
+      // what an update with `batch: {}` writes over a stored batch
+      const so = mockOutputSO('output-test', {
+        type: 'otlp',
+        is_default: false,
+        is_default_monitoring: false,
+        otlp_exporter: {
+          protocol: 'grpc',
+          endpoint: 'collector.example.com:4317',
+          sending_queue: {
+            sizer: 'items',
+            queue_size: 10_000,
+            batch: { sizer: null, min_size: null },
+          },
+        },
+      } as any);
+
+      const output = outputSavedObjectToOutput(so) as any;
+
+      expect(() => OutputResponseSchema.validate({ item: output })).not.toThrow();
+      expect(() =>
+        UpdateOutputSchema.validate({ type: 'otlp', otlp_exporter: output.otlp_exporter })
+      ).not.toThrow();
+    });
+
+    it.each([
+      ['keeps a batch that is turned off', null, null],
+      ['keeps a batch without settings, which batches with the defaults', { sizer: null }, {}],
+    ])('should read the OTLP queue: %s', (_label, batch, expected) => {
+      const so = mockOutputSO('output-test', {
+        type: 'otlp',
+        otlp_exporter: {
+          protocol: 'grpc',
+          endpoint: 'collector.example.com:4317',
+          sending_queue: { batch },
+        },
+      } as any);
+
+      expect((outputSavedObjectToOutput(so) as any).otlp_exporter.sending_queue.batch).toEqual(
+        expected
+      );
+    });
+
     it('should return output object with parsed SSL when SSL is a valid JSON string', () => {
       const so = mockOutputSO('output-test', {
         type: 'elasticsearch',

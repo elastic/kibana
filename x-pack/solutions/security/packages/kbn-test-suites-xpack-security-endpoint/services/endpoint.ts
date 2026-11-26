@@ -53,6 +53,16 @@ export type IndexedHostsAndAlertsResponseExtended = IndexedHostsAndAlertsRespons
   spaceId: string;
 };
 
+/** The unique agent ids of one or more loaded data sets: the ids united metadata is expected to report. */
+const getUniqueAgentIds = (dataSets: IndexedHostsAndAlertsResponse[]): string[] =>
+  Array.from(
+    new Set(
+      dataSets
+        .flatMap(({ agents }) => agents.map((agent) => agent.agent?.id))
+        .filter((id): id is string => Boolean(id))
+    )
+  );
+
 // Document Generator override that uses a custom Endpoint Metadata generator and sets the
 // `agent.version` to the current version
 const createDocGeneratorClass = async (kbnClient: KbnClient, isServerless: boolean) => {
@@ -190,13 +200,7 @@ export function EndpointTestResourcesProvider({ getService }: FtrProviderContext
           );
 
       if (waitUntilTransformed) {
-        const agentIds = Array.from(
-          new Set(
-            indexedData.agents
-              .map((agent) => agent.agent?.id)
-              .filter((id): id is string => Boolean(id))
-          )
-        );
+        const agentIds = getUniqueAgentIds([indexedData]);
 
         if (customIndexFn) {
           // United metadata joins fleet agents, not host-only metadata docs.
@@ -311,6 +315,31 @@ export function EndpointTestResourcesProvider({ getService }: FtrProviderContext
           };
 
       await this.waitForIndex(ids, METADATA_UNITED_INDEX, body, timeout);
+    }
+
+    /**
+     * Re-establishes the metadata transforms and waits until united metadata is available for every
+     * agent in the data sets provided. Rejects if it does not become available in time.
+     *
+     * Each `loadEndpointData()` call reinstalls the Endpoint Fleet package, which recreates the
+     * transforms that every space's metadata is derived from. A suite that loads data more than once
+     * must therefore re-establish them after the last load, since the readiness gate of an earlier
+     * load no longer holds.
+     *
+     * @param dataSets the responses of every `loadEndpointData()` call made by the suite
+     * @param [spaceId] space used to look up the installed Endpoint package version
+     */
+    async ensureUnitedMetadata(
+      dataSets: IndexedHostsAndAlertsResponse[],
+      spaceId: string = DEFAULT_SPACE_ID
+    ): Promise<void> {
+      const agentIds = getUniqueAgentIds(dataSets);
+      const endpointPackage = await getEndpointPackageInfo(this.getScopedKbnClient(spaceId));
+
+      // `startMetadataTransforms` only warns when a transform is still missing, so wait for the
+      // agents explicitly: this fails here instead of later in the suite on an empty response.
+      await startMetadataTransforms(this.esClient, agentIds, endpointPackage.version);
+      await this.waitForUnitedEndpoints(agentIds);
     }
 
     /**

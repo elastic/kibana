@@ -7,9 +7,7 @@
 
 import { alertEventSchema } from '@kbn/alerting-v2-schemas';
 import { z, lazySchema } from '@kbn/zod/v4';
-
-/** `source` of every signal the engine writes. */
-export const DETECTION_SIGNAL_SOURCE = 'elastic.nightshift_detection_engine';
+import { DETECTION_SIGNAL_SOURCE } from './constants';
 
 /**
  * Longest free-text value in `data`. `data` is `flattened`, so each string is indexed as one

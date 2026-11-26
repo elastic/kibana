@@ -6,7 +6,6 @@
  */
 
 import type { NeedsAgentReason, SignalVerdict, SkipReason } from '@kbn/significant-events-schema';
-import type { ProbeOutcome } from '../lib/significant_events/rules/run_probe';
 
 export type DetectionClassification =
   | { decision: 'skip'; reason: SkipReason }
@@ -27,36 +26,39 @@ const needsAgent = (reason: NeedsAgentReason): DetectionClassification => ({
 });
 
 /**
- * Decides whether a detection needs the discovery agent, by comparing fresh evidence (does the
- * stored query still return rows) with the member's stored state in every live series it is in.
- * The agent is only needed when the two disagree; a skip requires positive evidence that nothing
- * changed, so any gap in that evidence sends the detection to the agent.
+ * Decides whether a detection needs the discovery agent, by comparing whether the rule's query returns
+ * rows now (`breached`: the rule recorded a breach in its last runs) with the member's stored state in
+ * every live series it is in. The agent is only needed when the two disagree; a skip requires positive
+ * evidence that nothing changed, so any gap in that evidence sends the detection to the agent.
  */
 export const classifyDetection = ({
   memberships,
-  probe,
+  breached,
 }: {
   memberships: ReadonlyArray<{ verdict: SignalVerdict; evidenceFound?: boolean }>;
-  probe: ProbeOutcome;
+  breached: boolean;
 }): DetectionClassification => {
   if (memberships.length === 0) return needsAgent('not_live_member');
 
   const states = memberships.map(({ verdict }) => toMemberState(verdict));
-  if (states.includes('unjudged')) return needsAgent('unjudged_member');
 
-  if (probe.status !== 'ok') return needsAgent('probe_unavailable');
-
+  // A change seen in any judged membership is observable whatever the others say, so it is checked
+  // before the unjudged ones: a recovery candidate must reach the agent, not wait behind a member
+  // whose verdict cannot be read.
+  //
   // A healthy verdict reached on found rows cannot be revalidated by row presence alone, because the
-  // probe does not inspect row content.
+  // breach record does not say what the rows were.
   if (memberships.some(({ verdict, evidenceFound }) => verdict === 'refutes' && evidenceFound)) {
     return needsAgent('state_changed');
   }
 
   // A breach expects rows; a healthy verdict expects none.
-  if (states.some((state) => (state === 'breaching') !== probe.hasRows)) {
+  if (states.some((state) => state !== 'unjudged' && (state === 'breaching') !== breached)) {
     return needsAgent('state_changed');
   }
 
-  // The probe agrees with every member, so they all expect what it found.
-  return { decision: 'skip', reason: probe.hasRows ? 'still_breaching' : 'still_healthy' };
+  if (states.includes('unjudged')) return needsAgent('unjudged_member');
+
+  // The rule agrees with every member, so they all expect what it recorded.
+  return { decision: 'skip', reason: breached ? 'still_breaching' : 'still_healthy' };
 };
