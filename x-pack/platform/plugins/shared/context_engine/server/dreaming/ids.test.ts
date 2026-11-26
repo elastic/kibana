@@ -95,6 +95,7 @@ describe('dreaming ids', () => {
       expect(memoryIdFromUri(uri)).toBe(memoryId);
     }
     expect(memoryIdFromUri('index://logs')).toBeUndefined();
+    expect(memoryIdFromUri('ki://')).toBeUndefined();
   });
 
   it('tells a memory KI of the AI index from a memory read from outside it', () => {

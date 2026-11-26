@@ -56,7 +56,7 @@ describe('ViewKiAttributesSection', () => {
     expect(within(list).queryByText('memory.number_of_occurrences')).not.toBeInTheDocument();
   });
 
-  it('hides internal memory.key attribute', () => {
+  it('hides the internal memory.key attribute', () => {
     renderSection({
       attributes: {
         [RELATIONSHIP_KEY_ATTRIBUTE]: 'from|rel|to',
@@ -71,14 +71,14 @@ describe('ViewKiAttributesSection', () => {
   });
 
   it('formats date attributes with KiFormattedDate', () => {
-    const { container } = renderSection({
+    renderSection({
       attributes: {
         [LAST_SEEN_AT_ATTRIBUTE]: '2026-01-15T12:00:00.000Z',
       },
     });
 
     expect(screen.getByText('Last seen')).toBeInTheDocument();
-    expect(container.querySelector('span[tabindex="-1"]')).toBeInTheDocument();
+    expect(screen.getByTestId('contextViewKiAttributeDate')).toBeInTheDocument();
   });
 
   it('renders nothing when there are no attributes', () => {

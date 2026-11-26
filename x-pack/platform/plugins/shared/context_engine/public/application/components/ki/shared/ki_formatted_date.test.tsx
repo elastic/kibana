@@ -11,19 +11,26 @@ import { render, screen } from '@testing-library/react';
 import React from 'react';
 import { KiFormattedDate } from './ki_formatted_date';
 
-const renderDate = (value: string, className?: string) =>
+const renderDate = (value: string, className?: string, dataTestSubj?: string) =>
   render(
     <I18nProvider>
       <EuiProvider>
-        <KiFormattedDate value={value} className={className} />
+        <KiFormattedDate value={value} className={className} data-test-subj={dataTestSubj} />
       </EuiProvider>
     </I18nProvider>
   );
 
 describe('KiFormattedDate', () => {
   it('renders relative date for valid ISO values', () => {
-    const { container } = renderDate('2026-01-15T12:00:00.000Z');
-    expect(container.querySelector('span[tabindex="-1"]')).toBeInTheDocument();
+    renderDate('2026-01-15T12:00:00.000Z', undefined, 'contextKiFormattedDate');
+    const date = screen.getByTestId('contextKiFormattedDate');
+    expect(date).toBeInTheDocument();
+    expect(date).toHaveAttribute('tabindex', '-1');
+  });
+
+  it('forwards data-test-subj for invalid dates', () => {
+    renderDate('not-a-date', 'ki-date-fallback', 'contextKiFormattedDateFallback');
+    expect(screen.getByTestId('contextKiFormattedDateFallback')).toHaveTextContent('not-a-date');
   });
 
   it('falls back to the raw value for invalid dates', () => {

@@ -17,12 +17,21 @@ const parseIsoDate = (value: string): Date | undefined => {
 interface KiFormattedDateProps {
   value: string;
   className?: string;
+  'data-test-subj'?: string;
 }
 
-export const KiFormattedDate = ({ value, className }: KiFormattedDateProps) => {
+export const KiFormattedDate = ({
+  value,
+  className,
+  'data-test-subj': dataTestSubj,
+}: KiFormattedDateProps) => {
   const date = parseIsoDate(value);
   if (!date) {
-    return <span className={className}>{value}</span>;
+    return (
+      <span className={className} data-test-subj={dataTestSubj}>
+        {value}
+      </span>
+    );
   }
 
   return (
@@ -39,7 +48,7 @@ export const KiFormattedDate = ({ value, className }: KiFormattedDateProps) => {
         />
       }
     >
-      <span className={className} tabIndex={-1}>
+      <span className={className} tabIndex={-1} data-test-subj={dataTestSubj}>
         <FormattedRelative value={date} />
       </span>
     </EuiToolTip>

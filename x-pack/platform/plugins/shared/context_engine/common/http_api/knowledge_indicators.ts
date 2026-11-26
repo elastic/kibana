@@ -83,9 +83,15 @@ export interface KiDocumentReference {
   description?: string;
 }
 
+export interface KiPrivilegeGroup {
+  space: string;
+  name?: string[];
+  count?: number;
+}
+
 export interface KiDocumentPermissions {
   kibana?: {
-    privileges?: Array<{ space: string; name?: string[]; count?: number }>;
+    privileges?: KiPrivilegeGroup[];
   };
 }
 

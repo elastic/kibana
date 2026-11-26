@@ -69,14 +69,16 @@ export const ViewKiSidebarWriterProvenance = ({ writer }: ViewKiSidebarWriterPro
       })
     : undefined;
 
-  const workflowDreamingLabel = isDreamingWorkflowWriter(writer);
-
-  const dreamingWriterLabel = i18n.translate('xpack.contextEngine.viewKi.metadata.dreamingWriter', {
-    defaultMessage: 'Dreaming',
-  });
+  const isDreamingWorkflow = isDreamingWorkflowWriter(writer);
 
   const renderWriterNode = () => {
-    if (workflowDreamingLabel) {
+    if (isDreamingWorkflow) {
+      const dreamingWriterLabel = i18n.translate(
+        'xpack.contextEngine.viewKi.metadata.dreamingWriter',
+        {
+          defaultMessage: 'Dreaming',
+        }
+      );
       return <ViewKiSidebarWriterValue value={dreamingWriterLabel} href={writerHref} />;
     }
     if (!parsed) {

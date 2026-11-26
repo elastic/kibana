@@ -6,6 +6,7 @@
  */
 
 import {
+  getKiConversationHref,
   getKiWriterAgentManageHref,
   getKiWriterUriHref,
   getWriterAgentId,
@@ -83,6 +84,23 @@ describe('getKiWriterAgentManageHref', () => {
   it('maps agent ids to manage paths', () => {
     expect(getKiWriterAgentManageHref(getUrlForApp, 'elastic-ai-agent')).toBe(
       '/app/agent_builder/manage/agents/elastic-ai-agent'
+    );
+  });
+});
+
+describe('getKiConversationHref', () => {
+  const getUrlForApp = (appId: string, options?: { path?: string }) =>
+    `/app/${appId}${options?.path ?? ''}`;
+
+  it('maps conversation ids to Agent Builder paths', () => {
+    expect(getKiConversationHref(getUrlForApp, 'conv-1')).toBe(
+      '/app/agent_builder/conversations/conv-1'
+    );
+  });
+
+  it('encodes special characters in the conversation id', () => {
+    expect(getKiConversationHref(getUrlForApp, 'conv/special id')).toBe(
+      '/app/agent_builder/conversations/conv%2Fspecial%20id'
     );
   });
 });

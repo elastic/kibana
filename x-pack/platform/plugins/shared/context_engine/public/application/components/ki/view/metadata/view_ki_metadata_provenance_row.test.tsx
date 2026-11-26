@@ -72,25 +72,4 @@ describe('KiMetadataProvenanceRow', () => {
       '/app/workflows/updated-wf'
     );
   });
-
-  it('appends derived_from count after timestamp and dreaming writer', () => {
-    const dreamingWorkflowId = 'system-context-engine-dreaming-ai-index-1';
-    const { container } = renderProvenanceRow({
-      at: '2026-11-25T10:00:00.000Z',
-      writer: { uri: `workflow://${dreamingWorkflowId}`, metadata: {} },
-      derivedFromSourceCount: 4,
-    });
-    expect(within(container).getByText(/from 4 sources/)).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: 'Dreaming' })).toBeInTheDocument();
-  });
-
-  it('uses singular source text for one derived_from reference', () => {
-    const dreamingWorkflowId = 'system-context-engine-dreaming-ai-index-1';
-    renderProvenanceRow({
-      at: '2026-11-25T10:00:00.000Z',
-      writer: { uri: `workflow://${dreamingWorkflowId}`, metadata: {} },
-      derivedFromSourceCount: 1,
-    });
-    expect(screen.getByText(/from 1 source/)).toBeInTheDocument();
-  });
 });

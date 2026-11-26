@@ -27,10 +27,10 @@ import {
   type MaintenanceReviewItem,
   type MaintenanceReviewReason,
 } from '../../common/step_types/gather_maintenance';
+import { kiUri } from '../../common/ki_uri';
 import { isKiDeleted } from '../ai_indices/ki_revision';
 import { isPersonEdited } from '../ai_indices/ki_write';
 import { kindOf, occurrencesOf, type DreamedKi } from '../dreaming/dreamed_ki';
-import { kiUri } from '../../common/ki_uri';
 import {
   audienceKeyOf,
   derivedPermissions,

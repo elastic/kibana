@@ -37,6 +37,8 @@ const groupTitle = ({ relation }: KiReferenceGroup): string => {
       return i18n.translate('xpack.contextEngine.viewKi.references.supersedes', {
         defaultMessage: 'Replaces',
       });
+    default:
+      return relation;
   }
 };
 
@@ -51,22 +53,31 @@ const KiReferenceItemContent = ({
   onSelectKi,
   conversationHref,
 }: KiReferenceItemContentProps) => {
-  const { kiId, conversationId, uri, description } = item;
-  const idLabel = kiId ?? conversationId ?? uri;
-  const text = (
-    <ViewKiSidebarBreakableText title={description ? uri : undefined}>
-      {description ?? idLabel}
-    </ViewKiSidebarBreakableText>
-  );
-  const renderValue = () => {
-    if (kiId && onSelectKi) {
+  const { uri, description } = item;
+
+  if (item.kind === 'ki') {
+    const text = (
+      <ViewKiSidebarBreakableText title={description ? uri : undefined}>
+        {description ?? item.id}
+      </ViewKiSidebarBreakableText>
+    );
+    if (onSelectKi) {
       return (
-        <EuiLink onClick={() => onSelectKi(kiId)} data-test-subj="contextViewKiReferenceLink">
+        <EuiLink onClick={() => onSelectKi(item.id)} data-test-subj="contextViewKiReferenceLink">
           {text}
         </EuiLink>
       );
     }
-    if (conversationId && conversationHref) {
+    return text;
+  }
+
+  if (item.kind === 'conversation') {
+    const text = (
+      <ViewKiSidebarBreakableText title={description ? uri : undefined}>
+        {description ?? item.id}
+      </ViewKiSidebarBreakableText>
+    );
+    if (conversationHref) {
       return (
         <EuiLink href={conversationHref} data-test-subj="contextViewKiReferenceLink">
           {text}
@@ -74,9 +85,13 @@ const KiReferenceItemContent = ({
       );
     }
     return text;
-  };
+  }
 
-  return renderValue();
+  return (
+    <ViewKiSidebarBreakableText title={description ? uri : undefined}>
+      {description ?? uri}
+    </ViewKiSidebarBreakableText>
+  );
 };
 
 const COLLAPSED_ITEMS_COUNT = 3;
@@ -90,26 +105,26 @@ interface KiReferenceGroupItemsProps {
 const KiReferenceGroupItems = ({ group, onSelectKi, getUrlForApp }: KiReferenceGroupItemsProps) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const { relation, items } = group;
-  const hiddenCount = items.length - COLLAPSED_ITEMS_COUNT;
+  const collapsedHiddenCount = items.length - COLLAPSED_ITEMS_COUNT;
   const visibleItems = isExpanded ? items : items.slice(0, COLLAPSED_ITEMS_COUNT);
 
   return (
     <>
       {visibleItems.map((item, index) => (
-        <React.Fragment key={`${relation}-${item.uri}-${index}`}>
+        <React.Fragment key={`${relation}-${item.uri}`}>
           {index > 0 ? <EuiSpacer size="s" /> : null}
           <KiReferenceItemContent
             item={item}
             onSelectKi={onSelectKi}
             conversationHref={
-              item.conversationId
-                ? getKiConversationHref(getUrlForApp, item.conversationId)
+              item.kind === 'conversation'
+                ? getKiConversationHref(getUrlForApp, item.id)
                 : undefined
             }
           />
         </React.Fragment>
       ))}
-      {hiddenCount > 0 ? (
+      {collapsedHiddenCount > 0 ? (
         <>
           <EuiSpacer size="xs" />
           <EuiButtonEmpty
@@ -124,7 +139,7 @@ const KiReferenceGroupItems = ({ group, onSelectKi, getUrlForApp }: KiReferenceG
                 })
               : i18n.translate('xpack.contextEngine.viewKi.references.showMore', {
                   defaultMessage: 'Show {count} more',
-                  values: { count: hiddenCount },
+                  values: { count: collapsedHiddenCount },
                 })}
           </EuiButtonEmpty>
         </>

@@ -137,18 +137,18 @@ describe('groupKiReferences', () => {
       {
         relation: 'derived_from',
         items: [
-          { uri: 'ki://m1', kiId: 'm1' },
-          { uri: 'conversation://c1', conversationId: 'c1' },
+          { kind: 'ki', id: 'm1', uri: 'ki://m1' },
+          { kind: 'conversation', id: 'c1', uri: 'conversation://c1' },
         ],
       },
       {
         relation: 'relates_to',
         items: [
-          { uri: 'ki://a', description: 'from', kiId: 'a' },
-          { uri: 'ki://b', description: 'to', kiId: 'b' },
+          { kind: 'ki', id: 'a', uri: 'ki://a', description: 'from' },
+          { kind: 'ki', id: 'b', uri: 'ki://b', description: 'to' },
         ],
       },
-      { relation: 'supersedes', items: [{ uri: 'ki://old', kiId: 'old' }] },
+      { relation: 'supersedes', items: [{ kind: 'ki', id: 'old', uri: 'ki://old' }] },
     ]);
   });
 

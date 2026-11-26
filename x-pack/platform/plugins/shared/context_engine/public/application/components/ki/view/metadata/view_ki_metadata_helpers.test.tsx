@@ -148,9 +148,10 @@ describe('buildKiMetadataListItems', () => {
       expect(within(visibleIn).getByText('marketing')).toBeInTheDocument();
     });
 
-    it('does not show the row without permissions and a non-dreaming creator', () => {
+    it('shows All spaces without permissions and a non-dreaming creator', () => {
       renderItems('ki-1', {}, { createdBy: { uri: 'workflow://custom-wf', metadata: {} } });
-      expect(screen.queryByTestId('title-Visible in')).not.toBeInTheDocument();
+      expect(screen.getByTestId('title-Visible in')).toBeInTheDocument();
+      expect(screen.getByTestId('contextViewKiVisibleIn')).toHaveTextContent('All spaces');
     });
   });
 
@@ -171,33 +172,6 @@ describe('buildKiMetadataListItems', () => {
       ).not.toBeInTheDocument();
     });
 
-    it('appends derived_from source count for dreaming documents', () => {
-      renderItems(
-        'ki-1',
-        {
-          '@timestamp': '2026-11-25T10:00:00.000Z',
-          references: [
-            { uri: 'ki://m-1', relation: 'derived_from' },
-            { uri: 'ki://m-2', relation: 'derived_from' },
-            { uri: 'ki://m-3', relation: 'derived_from' },
-            { uri: 'ki://m-4', relation: 'derived_from' },
-            { uri: 'trace://t-1', relation: 'relates_to' },
-          ],
-        },
-        { createdBy: { uri: `workflow://${DREAMING_WORKFLOW_ID}`, metadata: {} } }
-      );
-      expect(screen.getByTestId('desc-Created')).toHaveTextContent(/from 4 sources/);
-    });
-
-    it('omits source suffix when there are no derived_from references', () => {
-      renderItems(
-        'ki-1',
-        { '@timestamp': '2026-11-25T10:00:00.000Z' },
-        { createdBy: { uri: `workflow://${DREAMING_WORKFLOW_ID}`, metadata: {} } }
-      );
-      expect(screen.getByTestId('desc-Created')).not.toHaveTextContent(/from \d+ source/);
-    });
-
     it('labels the dreaming workflow as Dreaming in the Updated row too', () => {
       renderItems(
         'ki-1',
@@ -206,7 +180,6 @@ describe('buildKiMetadataListItems', () => {
       );
       const updated = screen.getByTestId('desc-Updated');
       expect(within(updated).getByRole('link', { name: 'Dreaming' })).toBeInTheDocument();
-      expect(updated).not.toHaveTextContent(/from \d+ source/);
     });
 
     it('keeps non-dreaming workflow writer label unchanged', () => {

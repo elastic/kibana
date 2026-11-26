@@ -8,14 +8,15 @@
 import { EuiBadge, EuiBadgeGroup } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import type { KiDocument } from '../../../../../../common/http_api/knowledge_indicators';
+import type {
+  KiDocument,
+  KiPrivilegeGroup,
+} from '../../../../../../common/http_api/knowledge_indicators';
 import { KiFormattedDate } from '../../shared/ki_formatted_date';
-import type { KiGovernanceView, KiGovernanceWriter } from './view_ki_document_helpers';
+import type { KiGovernanceView } from './view_ki_document_helpers';
 import { KiMetadataProvenanceRow } from './view_ki_metadata_provenance_row';
 import { KI_FORMATTED_DATE_SENTENCE_START_CLASS_NAME } from '../view_ki_constants';
 import { ViewKiSidebarBreakableText } from './view_ki_sidebar_primitives';
-import { isDreamingWorkflowWriter } from './view_ki_writer_helpers';
-
 export interface KiMetadataListItem {
   title: string;
   description: React.ReactElement | string;
@@ -25,19 +26,9 @@ export const when = <T,>(condition: boolean, value: () => T): T[] => (condition 
 export const whenDefined = <T,>(value: T | undefined, build: (defined: T) => KiMetadataListItem) =>
   value !== undefined ? [build(value)] : [];
 
-const countDerivedFromReferences = (document: KiDocument): number =>
-  (document.references ?? []).filter((reference) => reference.relation === 'derived_from').length;
-
-const distinctVisibleSpaces = (
-  privileges: Array<{ space: string; name?: string[]; count?: number }>
-): string[] => [
+const distinctVisibleSpaces = (privileges: KiPrivilegeGroup[]): string[] => [
   ...new Set(privileges.map((privilege) => privilege.space).filter((space) => space !== '*')),
 ];
-
-const shouldShowVisibleInRow = (
-  document: KiDocument,
-  createdBy: KiGovernanceWriter | undefined
-): boolean => document.permissions !== undefined || isDreamingWorkflowWriter(createdBy);
 
 export const buildKiMetadataListItems = (
   kiId: string,
@@ -47,7 +38,6 @@ export const buildKiMetadataListItems = (
   const tags = Array.isArray(document.tags) ? document.tags : [];
   const { description, updated_at: updatedAt, expires_at: expiresAt } = document;
   const createdAt = document['@timestamp'];
-  const derivedFromSourceCount = countDerivedFromReferences(document);
   const privileges = document.permissions?.kibana?.privileges ?? [];
   const visibleInAllSpaces =
     privileges.length === 0 || privileges.some((privilege) => privilege.space === '*');
@@ -72,13 +62,7 @@ export const buildKiMetadataListItems = (
       title: i18n.translate('xpack.contextEngine.viewKi.metadata.created', {
         defaultMessage: 'Created',
       }),
-      description: (
-        <KiMetadataProvenanceRow
-          at={createdAt}
-          writer={governance.createdBy}
-          derivedFromSourceCount={derivedFromSourceCount}
-        />
-      ),
+      description: <KiMetadataProvenanceRow at={createdAt} writer={governance.createdBy} />,
     })),
     ...when(updatedAt !== undefined || governance.updatedBy !== undefined, () => ({
       title: i18n.translate('xpack.contextEngine.viewKi.metadata.updated', {
@@ -86,7 +70,7 @@ export const buildKiMetadataListItems = (
       }),
       description: <KiMetadataProvenanceRow at={updatedAt} writer={governance.updatedBy} />,
     })),
-    ...when(shouldShowVisibleInRow(document, governance.createdBy), () => ({
+    {
       title: i18n.translate('xpack.contextEngine.viewKi.metadata.visibleIn', {
         defaultMessage: 'Visible in',
       }),
@@ -107,7 +91,7 @@ export const buildKiMetadataListItems = (
           )}
         </span>
       ),
-    })),
+    },
     ...whenDefined(expiresAt, (at) => ({
       title: i18n.translate('xpack.contextEngine.viewKi.metadata.expiresAt', {
         defaultMessage: 'Expires at',

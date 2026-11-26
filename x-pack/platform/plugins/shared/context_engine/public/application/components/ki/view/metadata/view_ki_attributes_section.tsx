@@ -31,6 +31,7 @@ export const ViewKiAttributesSection = ({ document }: ViewKiAttributesSectionPro
             <KiFormattedDate
               value={row.value}
               className={KI_FORMATTED_DATE_SENTENCE_START_CLASS_NAME}
+              data-test-subj="contextViewKiAttributeDate"
             />
           ) : (
             <ViewKiSidebarBreakableText>{row.value}</ViewKiSidebarBreakableText>

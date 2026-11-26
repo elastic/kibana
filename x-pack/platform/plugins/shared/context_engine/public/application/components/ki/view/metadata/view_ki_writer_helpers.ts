@@ -9,19 +9,12 @@ import { AGENT_BUILDER_APP_ID } from '@kbn/deeplinks-agent-builder';
 import { WORKFLOWS_APP_ID } from '@kbn/deeplinks-workflows';
 import { isDreamingWorkflowId } from '../../../../../../common/dreaming';
 import type { KiJsonValue } from '../../../../../../common/http_api/knowledge_indicators';
-import { type KiReferenceRelation } from '../../../../../../common/step_types/ki';
 import {
   KI_WRITER_URI_SCHEME_TOOL,
   KI_WRITER_URI_SCHEME_WORKFLOW,
   WRITER_URI_PATTERN,
 } from '../view_ki_constants';
 import { formatKiJsonValueAsString, type KiGovernanceWriter } from './view_ki_document_helpers';
-
-export interface KiReferenceDisplayRow {
-  uri: string;
-  relation: KiReferenceRelation | '';
-  description: string;
-}
 
 export interface ParsedWriterUri {
   scheme: string;

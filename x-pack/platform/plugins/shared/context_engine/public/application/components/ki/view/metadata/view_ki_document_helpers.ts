@@ -98,19 +98,30 @@ export const formatKiJsonValueAsString = (value: KiJsonValue): string => {
   return '';
 };
 
-export interface KiReferenceItem {
-  uri: string;
-  description?: string;
-  /** The id of the referenced KI, set for `ki://` URIs only. */
-  kiId?: string;
-  /** The id of the referenced Agent Builder conversation, set for `conversation://` URIs only. */
-  conversationId?: string;
-}
+export type KiReferenceItem =
+  | { kind: 'ki'; id: string; uri: string; description?: string }
+  | { kind: 'conversation'; id: string; uri: string; description?: string }
+  | { kind: 'other'; uri: string; description?: string };
 
 export interface KiReferenceGroup {
   relation: KiReferenceRelation;
   items: KiReferenceItem[];
 }
+
+const isOpenableDerivedFromItem = (item: KiReferenceItem): boolean =>
+  item.kind === 'ki' || item.kind === 'conversation';
+
+const toKiReferenceItem = (uri: string, description?: string): KiReferenceItem => {
+  const kiId = kiIdFromUri(uri);
+  if (kiId !== undefined) {
+    return { kind: 'ki', id: kiId, uri, description };
+  }
+  const conversationId = conversationIdFromUri(uri);
+  if (conversationId !== undefined) {
+    return { kind: 'conversation', id: conversationId, uri, description };
+  }
+  return { kind: 'other', uri, description };
+};
 
 const REFERENCE_GROUP_ORDER: readonly KiReferenceRelation[] = [
   'derived_from',
@@ -129,20 +140,8 @@ export const groupKiReferences = (references: KiDocument['references']): KiRefer
   return REFERENCE_GROUP_ORDER.flatMap((relation) => {
     const items = references
       .filter(({ relation: itemRelation, uri }) => itemRelation === relation && Boolean(uri))
-      .map(({ uri = '', description }): KiReferenceItem => {
-        const kiId = kiIdFromUri(uri);
-        const conversationId = conversationIdFromUri(uri);
-        return {
-          uri,
-          ...(description ? { description } : {}),
-          ...(kiId ? { kiId } : {}),
-          ...(conversationId ? { conversationId } : {}),
-        };
-      })
-      .filter(
-        ({ kiId, conversationId }) =>
-          relation !== 'derived_from' || kiId !== undefined || conversationId !== undefined
-      );
+      .map(({ uri = '', description }) => toKiReferenceItem(uri, description))
+      .filter((item) => relation !== 'derived_from' || isOpenableDerivedFromItem(item));
     return items.length > 0 ? [{ relation, items }] : [];
   });
 };
