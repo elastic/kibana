@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useEffect } from 'react';
+import React, { useCallback, useEffect, useRef, type Ref } from 'react';
 import { i18n } from '@kbn/i18n';
 import { useIsWithinBreakpoints } from '@elastic/eui';
 import { IconButtonGroup } from '@kbn/shared-ux-button-toolbar';
@@ -40,9 +40,11 @@ export interface PanelsToggleProps {
 const getSidebarButton = ({
   isHidden,
   toggleSidebar,
+  buttonRef,
 }: {
   isHidden: boolean;
   toggleSidebar: () => void;
+  buttonRef: Ref<HTMLButtonElement>;
 }) => {
   const label = isHidden
     ? i18n.translate('discover.panelsToggle.showSidebarButton', {
@@ -60,6 +62,7 @@ const getSidebarButton = ({
     'aria-controls': 'discover-sidebar',
     toolTipContent: label,
     onClick: toggleSidebar,
+    buttonRef,
   };
 };
 
@@ -158,15 +161,15 @@ export const PanelsToggle: React.FC<PanelsToggleProps> = ({
     dispatch(updateAppState({ appState: { hideSidebar } }));
   }, [dispatch, isSidebarHidden, storage, updateAppState]);
 
+  const sidebarButtonRef = useRef<HTMLButtonElement>(null);
+
   useEffect(() => {
     if (!shouldRestoreSidebarToggleFocus) {
       return;
     }
     shouldRestoreSidebarToggleFocus = false;
-    const testSubj = isSidebarHidden ? 'dscShowSidebarButton' : 'dscHideSidebarButton';
-    const groupSelector = `[data-test-subj="dscPanelsToggle${dataTestSubjSuffix ?? ''}"]`;
-    document.querySelector<HTMLElement>(`${groupSelector} [data-test-subj="${testSubj}"]`)?.focus();
-  }, [isSidebarHidden, dataTestSubjSuffix]);
+    sidebarButtonRef.current?.focus();
+  }, [isSidebarHidden]);
 
   const disableHideChart = isTableHidden && !isChartHidden;
   const disableHideTable = isChartHidden && !isTableHidden;
@@ -178,6 +181,7 @@ export const PanelsToggle: React.FC<PanelsToggleProps> = ({
       getSidebarButton({
         isHidden: isSidebarHidden,
         toggleSidebar: onToggleSidebar,
+        buttonRef: sidebarButtonRef,
       })
     );
   }
