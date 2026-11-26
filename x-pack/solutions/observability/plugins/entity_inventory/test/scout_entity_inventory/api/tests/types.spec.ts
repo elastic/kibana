@@ -6,9 +6,9 @@
  */
 
 import { randomUUID } from 'crypto';
-import { tags } from '@kbn/scout-oblt';
+import { apiTest, tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/api';
-import { apiTest, INTERNAL_HEADERS, TYPES_PATH } from '../fixtures';
+import { INTERNAL_HEADERS, TYPES_PATH } from '../fixtures';
 
 // Unique per run, so setup and teardown touch only the space this run created.
 const SPACE_ID = `entity-inventory-types-${randomUUID()}`;
