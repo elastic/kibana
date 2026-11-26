@@ -341,9 +341,9 @@ Until `_ensure` has run, the shared GET for a new investigation returns 404. Tha
 
 ### Titles
 
-Agent Builder titles the investigation. `_ensure` creates the conversation without a title, so it carries Agent Builder's `New conversation` placeholder, and Agent Builder generates the title from the first round's message when that round ends. Until then the shared API reports `title_pending: true`, and the shared UI names the investigation after its first subject (an alert's rule name, the question, a Slack thread's question), or else "New investigation".
+Agent Builder titles the investigation. `_ensure` creates the conversation without a title, so it carries Agent Builder's `New conversation` placeholder, and Agent Builder generates the title from the first round's message when that round ends. Until then the shared API reports `title_pending: true`, and the shared UI names the investigation after its first subject (an alert's rule name, a manual start's `title` or else its question, a Slack thread's question), or else "New investigation".
 
-The `title` of the start route, the `nightshift.triggerInvestigation` step, and the investigation workflow is still accepted for compatibility, but it is not stored as the title. The start passes it on as the workflow's `title` input only. The `_slack_thread` route's `title` is the generated title, or until then a headline from the thread's question.
+The `title` of the start route, the `nightshift.triggerInvestigation` step, and the investigation workflow is not stored as the title, so Agent Builder can still generate it. The start passes it on as the workflow's `title` input. For a manual subject without its own `summary`, the start also uses the `title` (whitespace collapsed, at most 200 characters) as the subject summary, so the investigation is named after it, rather than after the prompt, until Agent Builder titles it. Without a `title`, the prompt is the summary. The `_slack_thread` route's `title` is the generated title, or until then a headline from the thread's question.
 
 The workflow's concurrency key is `investigation:<id>` with a `queue` strategy, so runs of one investigation never overlap. The investigation reads as in progress while its agent runs.
 

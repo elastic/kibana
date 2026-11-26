@@ -637,7 +637,7 @@ describe('NightshiftInvestigationsClient.start()', () => {
     expect(investigationQuotaCallback).toHaveBeenCalledTimes(2);
   });
 
-  it('labels a manual run with its prompt so it does not read as "manual" while running', async () => {
+  it('labels a manual run without a title with its prompt so it does not read as "manual" while running', async () => {
     mockManagement.getWorkflow.mockResolvedValue({
       id: BOUND_WORKFLOW_ID,
       enabled: true,
@@ -647,7 +647,6 @@ describe('NightshiftInvestigationsClient.start()', () => {
     mockManagement.runWorkflow.mockResolvedValue('exec-manual');
 
     await startFromApi(makeClient(), {
-      title: 'Latency is too high',
       subject: { type: 'manual', id: 'manual' },
       trigger_type: 'manual',
       message: '  Why did payment\n  timeouts increase?  ',
@@ -684,7 +683,6 @@ describe('NightshiftInvestigationsClient.start()', () => {
     mockManagement.runWorkflow.mockResolvedValue('exec-manual');
 
     await startFromApi(makeClient(), {
-      title: 'Latency is too high',
       subject: { type: 'manual', id: 'manual' },
       trigger_type: 'manual',
       message: 'a'.repeat(500),
@@ -695,6 +693,63 @@ describe('NightshiftInvestigationsClient.start()', () => {
     };
     expect(context.summary).toHaveLength(200);
     expect(context.summary.endsWith('…')).toBe(true);
+  });
+
+  describe('manual subject summary from the caller title', () => {
+    const startManual = async (request: Partial<StartInvestigationRequest>) => {
+      mockManagement.getWorkflow.mockResolvedValue({
+        id: BOUND_WORKFLOW_ID,
+        enabled: true,
+        valid: true,
+        definition: BOUND_DEFINITION,
+      });
+      mockManagement.runWorkflow.mockResolvedValue('exec-manual');
+
+      await startFromApi(makeClient(), {
+        subject: { type: 'manual', id: 'manual' },
+        trigger_type: 'manual',
+        message: 'In traces-* on production, why are checkout spans failing?',
+        ...request,
+      } as StartInvestigationRequest);
+
+      return mockManagement.runWorkflow.mock.calls[0][2] as {
+        message: string;
+        context: Record<string, unknown>;
+        subjects: Array<{ summary?: string }>;
+      };
+    };
+
+    it('uses the title rather than the prompt as the summary', async () => {
+      const inputs = await startManual({ title: '  Checkout spans\n failing ' });
+
+      expect(inputs.subjects[0].summary).toBe('Checkout spans failing');
+      expect(inputs.context.summary).toBe('Checkout spans failing');
+      expect(inputs.message).toContain('why are checkout spans failing?');
+    });
+
+    it('truncates a long title', async () => {
+      const inputs = await startManual({ title: 'a'.repeat(500) });
+
+      expect(inputs.subjects[0].summary).toHaveLength(200);
+      expect(inputs.subjects[0].summary?.endsWith('…')).toBe(true);
+    });
+
+    it('falls back to the prompt for a whitespace-only title', async () => {
+      const inputs = await startManual({ title: '   ' });
+
+      expect(inputs.subjects[0].summary).toBe(
+        'In traces-* on production, why are checkout spans failing?'
+      );
+    });
+
+    it('keeps an explicit subject summary over the title', async () => {
+      const inputs = await startManual({
+        title: 'Checkout spans failing',
+        subject: { type: 'manual', id: 'manual', summary: 'Checkout latency' },
+      });
+
+      expect(inputs.subjects[0].summary).toBe('Checkout latency');
+    });
   });
 
   it('keeps an explicit subject summary over the prompt', async () => {

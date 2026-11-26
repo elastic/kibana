@@ -27,8 +27,8 @@ const startInvestigationModel = {
 };
 
 /**
- * Accepted for compatibility but not stored as the investigation's title: Agent Builder generates
- * that from the investigation's first round.
+ * Not stored as the investigation's title: Agent Builder generates that from the first round. A
+ * manual start uses it as the subject summary, which names the investigation until then.
  */
 const titleSchema = z.string().min(1).max(MAX_TITLE_LENGTH);
 
