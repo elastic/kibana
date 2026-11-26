@@ -97,12 +97,12 @@ describe('WorkflowPageShareModal', () => {
     expect(await screen.findByTestId('workflowPageShareUrl')).toBeInTheDocument();
   });
 
-  it('asks before it creates a new link', async () => {
+  it('asks before it rotates the link', async () => {
     const { services } = setup();
     fireEvent.click(await screen.findByTestId('workflowPageShareRotate'));
 
     expect(services.http.post).not.toHaveBeenCalled();
-    fireEvent.click(screen.getByTestId('workflowPageShareRotateConfirm'));
+    fireEvent.click(screen.getByTestId('workflowPageShareConfirm'));
 
     await waitFor(() =>
       expect(services.http.post).toHaveBeenCalledWith(`${PAGE_PATH}/_rotate`, { version: '1' })
@@ -125,7 +125,9 @@ describe('WorkflowPageShareModal', () => {
         body: JSON.stringify({ enabled: false }),
       })
     );
-    expect(await screen.findByText('The page is offline. The link stays the same.')).toBeVisible();
+    expect(
+      await screen.findByText('The page is offline. Turning it back on keeps the same link.')
+    ).toBeVisible();
     expect(screen.getByTestId('workflowPageShareStatus')).toHaveTextContent('Offline');
   });
 
@@ -144,11 +146,23 @@ describe('WorkflowPageShareModal', () => {
     expect(screen.getByTestId('workflowPageShareUnpublish')).toBeDisabled();
   });
 
+  it('asks before it unpublishes, and keeps the page when cancelled', async () => {
+    const { services } = setup();
+    fireEvent.click(await screen.findByTestId('workflowPageShareUnpublish'));
+
+    expect(screen.getByTestId('workflowPageShareConfirm-unpublish')).toBeVisible();
+    fireEvent.click(screen.getByText('Cancel'));
+
+    expect(screen.queryByTestId('workflowPageShareConfirm-unpublish')).not.toBeInTheDocument();
+    expect(services.http.put).not.toHaveBeenCalled();
+  });
+
   it('shows the server message when a change fails', async () => {
     const { services } = setup();
     services.http.put.mockRejectedValue(new Error('Publishing needs manage_security'));
 
     fireEvent.click(await screen.findByTestId('workflowPageShareUnpublish'));
+    fireEvent.click(screen.getByTestId('workflowPageShareConfirm'));
 
     expect(await screen.findByTestId('workflowPageShareActionError')).toHaveTextContent(
       'Publishing needs manage_security'
