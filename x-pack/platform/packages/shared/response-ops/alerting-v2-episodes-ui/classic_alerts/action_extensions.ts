@@ -45,6 +45,16 @@ const toSnoozeTargets = (episodes: AlertEpisode[]): SnoozeTarget[] =>
     return ruleId && instanceId ? [{ episode, ruleId, instanceId }] : [];
   });
 
+const groupTargetsByRuleId = (targets: SnoozeTarget[]): SnoozeTarget[][] => {
+  const byRuleId = new Map<string, SnoozeTarget[]>();
+  for (const target of targets) {
+    const ruleTargets = byRuleId.get(target.ruleId) ?? [];
+    ruleTargets.push(target);
+    byRuleId.set(target.ruleId, ruleTargets);
+  }
+  return [...byRuleId.values()];
+};
+
 const groupByIndex = (episodes: AlertEpisode[]): Array<{ index: string; ids: string[] }> => {
   const groups = new Map<string, string[]>();
   for (const ep of episodes) {
@@ -161,23 +171,30 @@ const snoozeExtension: EpisodeActionExtension<EpisodeSnoozePayload> = {
     // Only an expiry-less snooze with nothing to lift it is a plain mute; a
     // conditions-only snooze still needs the snooze API to record them.
     if (snoozedUntil === null && !conditions?.length) {
-      const rules = groupByRule(eps);
       try {
-        await bulkMuteAlerts({ http, rules });
-        succeeded = eps.length;
+        await bulkMuteAlerts({ http, rules: groupByRule(eps) });
       } catch (e) {
-        failed = eps.length;
-        errors.push(getErrorMessage(e));
+        return { succeeded: 0, failed: eps.length, errors: [getErrorMessage(e)] };
       }
 
-      return { succeeded, failed, errors };
-    }
+      const replacedTargets = toSnoozeTargets(eps.filter(hasSnoozedInstance));
+      succeeded = eps.length - replacedTargets.length;
 
-    const targetsByRuleId = new Map<string, SnoozeTarget[]>();
-    for (const target of toSnoozeTargets(eps)) {
-      const ruleTargets = targetsByRuleId.get(target.ruleId) ?? [];
-      ruleTargets.push(target);
-      targetsByRuleId.set(target.ruleId, ruleTargets);
+      await Promise.allSettled(
+        groupTargetsByRuleId(replacedTargets).map(async (sameRuleTargets) => {
+          for (const { ruleId, instanceId } of sameRuleTargets) {
+            try {
+              await unsnoozeAlertInstance({ http, id: ruleId, instanceId });
+              succeeded++;
+            } catch (e) {
+              failed++;
+              errors.push(getErrorMessage(e));
+            }
+          }
+        })
+      );
+
+      return { succeeded, failed, errors };
     }
 
     // The snooze runs first so that a failure leaves the alert as it was. Clearing
@@ -185,7 +202,7 @@ const snoozeExtension: EpisodeActionExtension<EpisodeSnoozePayload> = {
     const snoozedMuted: AlertEpisode[] = [];
 
     await Promise.allSettled(
-      [...targetsByRuleId.values()].map(async (sameRuleTargets) => {
+      groupTargetsByRuleId(toSnoozeTargets(eps)).map(async (sameRuleTargets) => {
         for (const { episode, ruleId, instanceId } of sameRuleTargets) {
           try {
             await snoozeAlertInstance({

@@ -8,8 +8,8 @@
 import { useMemo } from 'react';
 import { useQuery } from '@kbn/react-query';
 import type { HttpStart } from '@kbn/core-http-browser';
+import { toLeafScalarFieldNames } from '@kbn/alerts-ui-shared';
 import type { EpisodeDataSource } from '../types/episode_data_source';
-import { toConditionFieldNames } from '../utils/to_condition_field_names';
 import { queryKeys } from '../query_keys';
 
 export type ConditionFieldsSource = Pick<EpisodeDataSource, 'id' | 'fetchSearchFields'>;
@@ -38,7 +38,7 @@ export const useConditionFieldNames = ({
     queryKey: queryKeys.conditionFieldNames(dataSource?.id ?? '', ruleTypeIds ?? []),
     queryFn: async ({ signal }) => {
       if (!fetchSearchFields) return [];
-      return toConditionFieldNames(
+      return toLeafScalarFieldNames(
         await fetchSearchFields({ services: { http }, abortSignal: signal, ruleTypeIds })
       );
     },

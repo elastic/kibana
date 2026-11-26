@@ -298,6 +298,78 @@ describe('classicActionExtensions', () => {
       expect(result).toEqual({ succeeded: 0, failed: 1, errors: ['mute failed'] });
     });
 
+    it('execute with null expiry clears the snooze it replaces after muting', async () => {
+      const callOrder: string[] = [];
+      mockedBulkMute.mockImplementationOnce(async () => {
+        callOrder.push('mute');
+      });
+      mockedUnsnooze.mockImplementationOnce(async () => {
+        callOrder.push('unsnooze');
+      });
+
+      const episodes = [
+        makeClassicEpisode('c1', 'open', { snoozed_until: '2099-01-01T00:00:00.000Z' }),
+        makeClassicEpisode('c2', 'open', { instanceId: 'inst-2' }),
+      ];
+      const result = await snoozeExtension.execute(episodes, http, { snoozedUntil: null });
+
+      expect(mockedUnsnooze).toHaveBeenCalledTimes(1);
+      expect(mockedUnsnooze).toHaveBeenCalledWith({ http, id: 'r1', instanceId: 'inst-1' });
+      expect(callOrder).toEqual(['mute', 'unsnooze']);
+      expect(result).toEqual({ succeeded: 2, failed: 0, errors: [] });
+    });
+
+    it('execute with null expiry clears a condition based snooze it replaces', async () => {
+      const episodes = [
+        makeClassicEpisode('c1', 'open', {
+          snooze_conditions: [{ type: 'severity_change' }],
+        }),
+      ];
+      await snoozeExtension.execute(episodes, http, { snoozedUntil: null });
+
+      expect(mockedUnsnooze).toHaveBeenCalledWith({ http, id: 'r1', instanceId: 'inst-1' });
+    });
+
+    it('execute with null expiry leaves the mute in place when clearing the old snooze fails', async () => {
+      mockedUnsnooze.mockRejectedValueOnce(new Error('unsnooze failed'));
+
+      const episodes = [
+        makeClassicEpisode('c1', 'open', { snoozed_until: '2099-01-01T00:00:00.000Z' }),
+      ];
+      const result = await snoozeExtension.execute(episodes, http, { snoozedUntil: null });
+
+      expect(mockedBulkMute).toHaveBeenCalled();
+      expect(result).toEqual({ succeeded: 0, failed: 1, errors: ['unsnooze failed'] });
+    });
+
+    it('execute with null expiry skips the unsnooze when nothing was snoozed', async () => {
+      const episodes = [makeClassicEpisode('c1', 'open')];
+      await snoozeExtension.execute(episodes, http, { snoozedUntil: null });
+
+      expect(mockedUnsnooze).not.toHaveBeenCalled();
+    });
+
+    it('execute with null expiry clears the snoozes of one rule one after another', async () => {
+      const callOrder: string[] = [];
+      mockedUnsnooze.mockImplementation(async ({ instanceId }) => {
+        callOrder.push(instanceId);
+      });
+
+      const episodes = [
+        makeClassicEpisode('c1', 'open', {
+          instanceId: 'inst-1',
+          snoozed_until: '2099-01-01T00:00:00.000Z',
+        }),
+        makeClassicEpisode('c2', 'open', {
+          instanceId: 'inst-2',
+          snoozed_until: '2099-01-01T00:00:00.000Z',
+        }),
+      ];
+      await snoozeExtension.execute(episodes, http, { snoozedUntil: null });
+
+      expect(callOrder).toEqual(['inst-1', 'inst-2']);
+    });
+
     it('execute with expiry calls snoozeAlertInstance per episode sequentially within a rule', async () => {
       const callOrder: string[] = [];
       mockedSnooze.mockImplementation(async ({ instanceId }) => {
