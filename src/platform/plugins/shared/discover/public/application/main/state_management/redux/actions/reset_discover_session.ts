@@ -94,7 +94,6 @@ export const resetDiscoverSession = createInternalStateAsyncThunk(
           } else if (missingDataViewId) {
             // The saved data view no longer exists, so instead of keeping the replacement with the
             // saved state, the tab is initialized again and asks for a replacement like when opened
-            await dispatch(clearTabRuntimeState({ tabId: tab.id }));
             reinitializedTabIds.push(tab.id);
 
             return fromSavedObjectTabToTabState({
@@ -133,6 +132,11 @@ export const resetDiscoverSession = createInternalStateAsyncThunk(
     );
 
     const selectedTab = allTabs.find((tab) => tab.id === selectedTabId) ?? allTabs[0];
+
+    // Torn down only once every tab state is ready, so a failed reset leaves the tabs usable
+    await Promise.all(
+      reinitializedTabIds.map((tabId) => dispatch(clearTabRuntimeState({ tabId })))
+    );
 
     await dispatch(
       updateTabs({ items: allTabs, selectedItem: selectedTab, updatedDiscoverSession })

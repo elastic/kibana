@@ -15,27 +15,35 @@ import { getDiscoverInternalStateMock } from '../../../../__mocks__/discover_sta
 import { dataViewWithTimefieldMock } from '../../../../__mocks__/data_view_with_timefield';
 import { MissingDataViewPrompt } from './missing_data_view_prompt';
 
+const setup = async () => {
+  const toolkit = getDiscoverInternalStateMock({
+    persistedDataViews: [dataViewWithTimefieldMock],
+  });
+  await toolkit.initializeTabs();
+  const onSelectDataView = jest.fn();
+  const onDataViewCreated = jest.fn();
+
+  render(
+    <DiscoverTestProvider
+      services={toolkit.services}
+      internalState={toolkit.internalState}
+      runtimeStateManager={toolkit.runtimeStateManager}
+    >
+      <MissingDataViewPrompt
+        missingDataViewId="deleted-data-view-id"
+        adHocDataViews={[]}
+        onSelectDataView={onSelectDataView}
+        onDataViewCreated={onDataViewCreated}
+      />
+    </DiscoverTestProvider>
+  );
+
+  return { services: toolkit.services, onSelectDataView, onDataViewCreated };
+};
+
 describe('MissingDataViewPrompt', () => {
   it('should let the user pick a replacement for the missing data view', async () => {
-    const toolkit = getDiscoverInternalStateMock({
-      persistedDataViews: [dataViewWithTimefieldMock],
-    });
-    await toolkit.initializeTabs();
-    const onSelectDataView = jest.fn();
-
-    render(
-      <DiscoverTestProvider
-        services={toolkit.services}
-        internalState={toolkit.internalState}
-        runtimeStateManager={toolkit.runtimeStateManager}
-      >
-        <MissingDataViewPrompt
-          missingDataViewId="deleted-data-view-id"
-          adHocDataViews={[]}
-          onSelectDataView={onSelectDataView}
-        />
-      </DiscoverTestProvider>
-    );
+    const { onSelectDataView } = await setup();
 
     expect(screen.getByText('Data view not found')).toBeInTheDocument();
     expect(screen.getByText('deleted-data-view-id')).toBeInTheDocument();
@@ -44,5 +52,17 @@ describe('MissingDataViewPrompt', () => {
     await userEvent.click(await screen.findByTestId(`dataView-${dataViewWithTimefieldMock.name}`));
 
     expect(onSelectDataView).toHaveBeenCalledWith(dataViewWithTimefieldMock.id);
+  });
+
+  it('should let the user create a replacement data view', async () => {
+    const { services, onDataViewCreated } = await setup();
+
+    await userEvent.click(await screen.findByTestId('discoverMissingDataViewPicker'));
+    await userEvent.click(await screen.findByTestId('dataview-create-new'));
+
+    expect(services.dataViewEditor.openEditor).toHaveBeenCalledTimes(1);
+    const [{ onSave }] = jest.mocked(services.dataViewEditor.openEditor).mock.calls[0];
+    onSave(dataViewWithTimefieldMock);
+    expect(onDataViewCreated).toHaveBeenCalledWith(dataViewWithTimefieldMock);
   });
 });

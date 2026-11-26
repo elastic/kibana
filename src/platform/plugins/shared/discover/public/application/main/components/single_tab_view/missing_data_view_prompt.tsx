@@ -19,10 +19,12 @@ export const MissingDataViewPrompt = ({
   missingDataViewId,
   adHocDataViews,
   onSelectDataView,
+  onDataViewCreated,
 }: {
   missingDataViewId: string;
   adHocDataViews: DataView[];
   onSelectDataView: (dataViewId: string) => void;
+  onDataViewCreated: (dataView: DataView) => void;
 }) => {
   const savedDataViews = useInternalStateSelector((state) => state.savedDataViews);
 
@@ -62,6 +64,7 @@ export const MissingDataViewPrompt = ({
               savedDataViews={savedDataViews}
               adHocDataViews={adHocDataViews}
               onChangeDataView={onSelectDataView}
+              onDataViewCreated={onDataViewCreated}
             />
           </EuiFlexItem>
         </EuiFlexGroup>

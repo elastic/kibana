@@ -323,6 +323,64 @@ describe('resetDiscoverSession', () => {
     });
   });
 
+  it('should keep a tab with a replacement data view usable when resetting another tab fails', async () => {
+    const services = createDiscoverServicesMock();
+    const toolkit = getDiscoverInternalStateMock({
+      services,
+      persistedDataViews: [dataViewWithTimefieldMock],
+    });
+    const missingDataViewTab = getPersistedTabMock({
+      tabId: 'missing',
+      dataView: dataViewWithNoTimefieldMock,
+      services,
+    });
+    const otherTab = getPersistedTabMock({
+      tabId: 'other',
+      dataView: dataViewWithTimefieldMock,
+      services,
+    });
+
+    await toolkit.initializeTabs({
+      persistedDiscoverSession: createDiscoverSessionMock({
+        id: 'test-id',
+        tabs: [missingDataViewTab, otherTab],
+      }),
+    });
+    await toolkit.initializeSingleTab({
+      tabId: missingDataViewTab.id,
+      skipWaitForDataFetching: true,
+    });
+    await toolkit.initializeSingleTab({
+      tabId: missingDataViewTab.id,
+      defaultUrlState: {
+        dataSource: createDataViewDataSource({ dataViewId: dataViewWithTimefieldMock.id! }),
+      },
+    });
+    await toolkit.initializeSingleTab({ tabId: otherTab.id });
+
+    // The lookup of the other tab's data view fails while resetting
+    const createSearchSource = services.data.search.searchSource.create;
+    services.data.search.searchSource.create = jest.fn(async (fields) =>
+      fields?.index === dataViewWithTimefieldMock.id
+        ? Promise.reject(new Error('lookup failed'))
+        : createSearchSource(fields)
+    );
+
+    await expect(
+      toolkit.internalState.dispatch(internalStateActions.resetDiscoverSession()).unwrap()
+    ).rejects.toHaveProperty('message', 'lookup failed');
+
+    const tabRuntimeState = selectTabRuntimeState(
+      toolkit.runtimeStateManager,
+      missingDataViewTab.id
+    );
+    expect(getTabDataView(tabRuntimeState)).toBe(dataViewWithTimefieldMock);
+    expect(tabRuntimeState.dataStateContainer$.getValue()).toBeDefined();
+    expect(
+      selectTab(toolkit.internalState.getState(), missingDataViewTab.id).initializationState
+    ).toEqual({ initializationStatus: TabInitializationStatus.Complete });
+  });
+
   it('resolves an ES|QL tab with its control variables', async () => {
     const services = createDiscoverServicesMock();
     const toolkit = getDiscoverInternalStateMock({

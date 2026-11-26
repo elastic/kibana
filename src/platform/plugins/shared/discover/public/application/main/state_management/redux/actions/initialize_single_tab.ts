@@ -8,7 +8,7 @@
  */
 
 import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/common';
-import { isEmptyEsqlQuery, isOfAggregateQueryType, updateFilterReferences } from '@kbn/es-query';
+import { isEmptyEsqlQuery, isOfAggregateQueryType } from '@kbn/es-query';
 import type { AggregateQuery, Query } from '@kbn/es-query';
 import { cloneDeep, isEqual, pick } from 'lodash';
 import type { GlobalQueryStateFromUrl } from '@kbn/data-plugin/public';
@@ -319,12 +319,15 @@ export const initializeSingleTab = createInternalStateAsyncThunk(
       query: openingQuery,
     });
 
-    // Filters of the deleted data view are rebound to the replacement so they remain editable
+    // Filters of the deleted data view are rebound to the replacement so they remain editable,
+    // except scripted ones, which getValidFilters disables below since their scripts may fail
+    // with the replacement data view
     if (missingDataViewId && !esqlSource && dataView.id && initialAppState.filters) {
-      initialAppState.filters = updateFilterReferences(
-        initialAppState.filters,
-        missingDataViewId,
-        dataView.id
+      const replacementDataViewId = dataView.id;
+      initialAppState.filters = initialAppState.filters.map((filter) =>
+        filter.meta.index === missingDataViewId && !filter.query?.script
+          ? { ...filter, meta: { ...filter.meta, index: replacementDataViewId } }
+          : filter
       );
     }
 

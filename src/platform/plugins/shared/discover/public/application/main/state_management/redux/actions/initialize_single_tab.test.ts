@@ -82,10 +82,21 @@ describe('initializeSingleTab', () => {
       expect(services.toastNotifications.addWarning).not.toHaveBeenCalled();
     });
 
-    it('rebinds the filters of the deleted data view to the replacement', async () => {
+    it('rebinds the filters of the deleted data view to the replacement except scripted ones', async () => {
       const deletedDataViewFilter = buildPhraseFilter(
         { name: 'saved-field', type: 'string' },
         'saved-value',
+        deletedDataView
+      );
+      const scriptedFilter = buildPhraseFilter(
+        {
+          name: 'scripted-field',
+          type: 'number',
+          scripted: true,
+          script: 'doc["saved-field"].value',
+          lang: 'painless',
+        },
+        1,
         deletedDataView
       );
       const otherDataViewFilter = buildPhraseFilter(
@@ -94,7 +105,7 @@ describe('initializeSingleTab', () => {
         { id: 'other-data-view-id', title: 'other-data-view' }
       );
       const { toolkit, services, persistedTab } = await setup({
-        filters: [deletedDataViewFilter, otherDataViewFilter],
+        filters: [deletedDataViewFilter, scriptedFilter, otherDataViewFilter],
       });
       await toolkit.initializeSingleTab({ tabId: persistedTab.id, skipWaitForDataFetching: true });
 
@@ -108,6 +119,8 @@ describe('initializeSingleTab', () => {
           ...deletedDataViewFilter,
           meta: { ...deletedDataViewFilter.meta, index: dataViewWithTimefieldMock.id },
         },
+        // Stays on the deleted data view, so getValidFilters disables it as for any other data view
+        scriptedFilter,
         otherDataViewFilter,
       ]);
     });

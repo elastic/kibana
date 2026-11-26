@@ -153,19 +153,39 @@ export const SingleTabView = ({
   if (
     currentTabInitializationState.initializationStatus === TabInitializationStatus.MissingDataView
   ) {
+    const selectReplacementDataView = (dataViewId: string) => {
+      initializeTab.current({
+        defaultUrlState: {
+          ...getCurrentUrlState(urlStateStorage, services),
+          dataSource: createDataViewDataSource({ dataViewId }),
+        },
+      });
+    };
+
     return (
       <>
         <ResetDiscoverTopNavMenu />
         <MissingDataViewPrompt
           missingDataViewId={currentTabInitializationState.missingDataViewId}
           adHocDataViews={adHocDataViews}
-          onSelectDataView={(dataViewId) => {
-            initializeTab.current({
-              defaultUrlState: {
-                ...getCurrentUrlState(urlStateStorage, services),
-                dataSource: createDataViewDataSource({ dataViewId }),
-              },
-            });
+          onSelectDataView={selectReplacementDataView}
+          onDataViewCreated={async (dataView) => {
+            if (dataView.isPersisted()) {
+              await dispatch(internalStateActions.loadDataViewList());
+              // The availability check runs once, so a data view created afterwards is marked here
+              dispatch(
+                internalStateActions.setInitializationState({
+                  hasESData: true,
+                  hasDataView: true,
+                })
+              );
+            } else {
+              dispatch(internalStateActions.appendAdHocDataViews(dataView));
+            }
+
+            if (dataView.id) {
+              selectReplacementDataView(dataView.id);
+            }
           }}
         />
       </>
