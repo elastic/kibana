@@ -31,6 +31,7 @@ interface WorkflowStep {
     method?: string;
     path?: string;
     message?: string;
+    attachments?: string;
     body?: Record<string, unknown>;
   };
   'on-failure'?: unknown;
@@ -73,7 +74,7 @@ const workflow = parse(NIGHTSHIFT_INVESTIGATION_WORKFLOW.yaml) as {
 describe('Nightshift investigation workflow', () => {
   it('records the investigation through the agent tools rather than persist steps', () => {
     expect(NIGHTSHIFT_INVESTIGATION_WORKFLOW.id).toBe('system-nightshift-investigation');
-    expect(NIGHTSHIFT_INVESTIGATION_WORKFLOW.version).toBe(6);
+    expect(NIGHTSHIFT_INVESTIGATION_WORKFLOW.version).toBe(7);
     expect(investigation.name).toBe('Nightshift Investigation');
     expect(investigation.steps.map((step) => step.name)).toEqual([
       'resolve_model',
@@ -87,7 +88,41 @@ describe('Nightshift investigation workflow', () => {
       'classify_for_online_evals',
       'start_online_evals',
     ]);
-    expect(requireStep('investigate').with?.message).toContain('{{ inputs.context | json }}');
+  });
+
+  describe('trigger context attachment', () => {
+    const { message, attachments } = requireStep('investigate').with ?? {};
+    const engine = createWorkflowLiquidEngine();
+    const renderAttachments = (inputs: Record<string, unknown>): unknown =>
+      engine.evalValueSync((attachments ?? '').trim().slice(3, -2).trim(), { inputs });
+
+    it('keeps the context out of the message', () => {
+      expect(message).toBe('{{ inputs.message }}');
+      expect(NIGHTSHIFT_INVESTIGATION_WORKFLOW.yaml).not.toContain('Additional context');
+    });
+
+    it.each([
+      ['a manual investigation', { source: 'manual', manual_id: 'm1', entry_point: 'ui' }],
+      ['a user follow-up', { source: 'slack', is_follow_up: true, summary: 'He said "hi"\n' }],
+    ])('attaches the context as a text attachment on %s', (_case, context) => {
+      const [attachment, ...rest] = renderAttachments({ message: 'Why?', context }) as Array<{
+        id: string;
+        type: string;
+        data: { content: string };
+      }>;
+      expect(rest).toEqual([]);
+      expect(attachment).toMatchObject({ id: 'investigation_context', type: 'text' });
+      expect(attachment).not.toHaveProperty('hidden');
+      expect(JSON.parse(attachment.data.content)).toEqual(context);
+    });
+
+    it.each([
+      ['an alert', { source: 'alert', alerts: [{ rule_type_id: 'apm' }] }],
+      ['an empty context', {}],
+      ['no context', undefined],
+    ])('attaches nothing for %s', (_case, context) => {
+      expect(renderAttachments({ message: 'Why?', context })).toEqual([]);
+    });
   });
 
   it('resolves the requested model before persistence and passes it to the agent', () => {

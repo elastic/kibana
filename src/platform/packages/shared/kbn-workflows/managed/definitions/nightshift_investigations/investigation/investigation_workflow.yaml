@@ -187,12 +187,17 @@ steps:
       # The agent records its findings on the investigation with its tools, so the step has no
       # output schema.
       conversation_id: '${{ steps.persist_investigation_started.output.conversation_id }}'
-      message: |
-        {{ inputs.message }}
-
-        {% if inputs.context and inputs.context.size > 0 and inputs.context.source != 'alert' %}
-        Additional context: {{ inputs.context | json }}
-        {% endif %}
+      message: '{{ inputs.message }}'
+      # The trigger context (source, entry point, ...) goes along as a text attachment, so it is not
+      # part of the user's message in the chat. Liquid has no list literal, so the one-item list is
+      # built as JSON and parsed; the filter leaves it empty for alerts, which carry their evidence
+      # in the message.
+      attachments: >-
+        ${{ inputs.context | json | json
+        | prepend: '[{"id":"investigation_context","type":"text","data":{"content":'
+        | append: '}' | append: '}]'
+        | json_parse
+        | where_exp: 'attachment', 'inputs.context.size > 0 and inputs.context.source != "alert"' }}
 
   - name: emit_investigation_completed
     type: kibana.request
