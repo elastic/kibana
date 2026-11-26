@@ -1041,7 +1041,7 @@ class ConversationClientImpl implements ConversationClient {
     try {
       const document = await this.getDocumentWithAccess({
         conversationId: hit._id,
-        access: 'owner',
+        access: 'converse',
       });
 
       return toConversationResponseFromDocument({

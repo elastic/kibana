@@ -1480,24 +1480,22 @@ describe('ConversationClient', () => {
   });
 
   describe('getByOrigin', () => {
-    it('does not return a public conversation owned by another user', async () => {
-      const document = createConversationDocument({
-        userId: 'other-user-id',
-        username: 'other-user',
-        accessMode: ConversationAccessControlMode.Public,
-      });
+    it('does not return an owned conversation whose agent the caller can no longer use', async () => {
+      const document = createConversationDocument();
       mockEsClient.search.mockResolvedValueOnce({
         hits: {
           hits: [document],
         },
       });
       mockGetDocumentResponseOnce(document);
+      agentRegistry.get.mockRejectedValue(createAgentNotFoundError({ agentId: 'agent-1' }));
 
       const result = await client.getByOrigin({
         external_conversation_id: 'team:T123/channel:C123/thread:1712345678.000100',
       });
 
       expect(result).toBeUndefined();
+      expect(agentRegistry.get).toHaveBeenCalledWith('agent-1', { access: 'use' });
     });
 
     it('finds a conversation by first-class origin in the current space', async () => {

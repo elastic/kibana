@@ -12,6 +12,7 @@ import {
   ConversationAccessControlMode,
   ConversationAccessControlRole,
   ConversationOriginType,
+  isRoundCompleteEvent,
   type Conversation,
   type ConversationWithoutRounds,
   type VersionedAttachment,
@@ -20,7 +21,10 @@ import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import { createLlmProxy, type LlmProxy } from '@kbn/ftr-llm-proxy';
 import type { ChatResponse } from '../../../../../common/http_api/chat';
-import type { ChatCallbackAcceptedResponse } from '../../../../../common/http_api/chat_callback';
+import type {
+  ChatCallbackAcceptedResponse,
+  ChatCallbackResponse,
+} from '../../../../../common/http_api/chat_callback';
 import { CallbackTestServer } from '../../../../scout_agent_builder_shared/lib/callback_test_server';
 import type {
   GetConversationResponse,
@@ -40,6 +44,9 @@ import {
 } from '../fixtures';
 
 const ACCESS_CONTROL_TEST_PREFIX = 'conversation-access-control-test';
+
+const isRoundCompletePayload = (payload: ChatCallbackResponse): boolean =>
+  'event' in payload && isRoundCompleteEvent(payload.event);
 
 function mockAgent(id: string, accessMode: AgentAccessControlMode) {
   return {
@@ -1466,6 +1473,14 @@ apiTest.describe(
           });
 
           expect(response).toHaveStatusCode(202);
+
+          let roundComplete = false;
+
+          while (!roundComplete) {
+            const { body } = await callbackServer.waitForRequest();
+
+            roundComplete = isRoundCompletePayload(body as ChatCallbackResponse);
+          }
 
           await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
 
