@@ -458,7 +458,7 @@ export class EdotBrowserClient {
   }) {
     const distroVersion = this.resourceAttributes['telemetry.distro.version'];
     return new EdotLog({ _index: BROWSER_LOGS_INDEX })
-      .eventName(`browser.frustration.${kind}`)
+      .eventName(`elastic.frustration.${kind}`)
       .scope({
         name: DISTRO_SCOPE_NAME,
         ...(typeof distroVersion === 'string' ? { version: distroVersion } : {}),
@@ -470,7 +470,7 @@ export class EdotBrowserClient {
         'browser.page.x': Math.round(pageX),
         'browser.page.y': Math.round(pageY),
         'url.full': url,
-        ...(clickCount !== undefined ? { 'browser.frustration.click_count': clickCount } : {}),
+        ...(clickCount !== undefined ? { 'elastic.frustration.click_count': clickCount } : {}),
         ...(exception?.type ? { 'exception.type': exception.type } : {}),
         ...(exception ? { 'exception.message': exception.message } : {}),
         ...this.processorAttributes,

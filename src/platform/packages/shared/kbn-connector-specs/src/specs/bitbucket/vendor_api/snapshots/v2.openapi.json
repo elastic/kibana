@@ -864,6 +864,9 @@
               "description": {
                 "type": "string"
               },
+              "enforced_signed_commits": {
+                "type": "boolean"
+              },
               "has_publicly_visible_repos": {
                 "type": "boolean"
               },
@@ -1448,6 +1451,9 @@
               },
               "description": {
                 "type": "string"
+              },
+              "enforced_signed_commits": {
+                "type": "boolean"
               },
               "fork_policy": {
                 "enum": [
@@ -2215,7 +2221,7 @@
         "security": [
           {
             "oauth2": [
-              "pipeline"
+              "pipeline:write"
             ]
           },
           {
@@ -2895,7 +2901,25 @@
             }
           },
           "202": {},
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            }
+          },
           "409": {},
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            }
+          },
           "555": {
             "content": {
               "application/json": {

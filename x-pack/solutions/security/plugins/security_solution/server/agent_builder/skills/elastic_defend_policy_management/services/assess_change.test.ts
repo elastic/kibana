@@ -233,14 +233,10 @@ describe('assessChange', () => {
 
   it.each([
     [
-      { linuxRansomwareProtection: false, perOsPolicySettings: true },
+      { linuxRansomwareProtection: false },
       { eligible: false, reason: 'linux_ransomware_protection_experimental_disabled' },
     ],
-    [
-      { linuxRansomwareProtection: true, perOsPolicySettings: false },
-      { eligible: false, reason: 'linux_ransomware_protection_experimental_disabled' },
-    ],
-    [{ linuxRansomwareProtection: true, perOsPolicySettings: true }, { eligible: true }],
+    [{ linuxRansomwareProtection: true }, { eligible: true }],
   ])('threads experimental flags %o into Linux ransomware eligibility', async (flags, expected) => {
     const { access, endpointAppContextService, getById, getAgentStatusForAgentPolicy } =
       await createCountAccess();
@@ -272,7 +268,6 @@ describe('assessChange', () => {
     jest.replaceProperty(endpointAppContextService, 'experimentalFeatures', {
       ...endpointAppContextService.experimentalFeatures,
       linuxRansomwareProtection: true,
-      perOsPolicySettings: true,
     });
     const policy = createEndpointPolicy({
       id: 'policy-id-1',

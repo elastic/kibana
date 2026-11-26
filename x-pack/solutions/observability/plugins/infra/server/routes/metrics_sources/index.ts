@@ -7,7 +7,6 @@
 
 import { schema } from '@kbn/config-schema';
 import Boom from '@hapi/boom';
-import type { KibanaRequest } from '@kbn/core/server';
 import { createRouteValidationFunction } from '@kbn/io-ts-utils';
 import {
   getHasDataQueryParamsRT,
@@ -19,53 +18,18 @@ import { getHasData } from './has_data';
 import type { InfraBackendLibs } from '../../lib/infra_types';
 import { hasData } from '../../lib/sources/has_data';
 import { createSearchClient } from '../../lib/create_search_client';
-import { AnomalyThresholdRangeError, NoSuchRemoteClusterError } from '../../lib/sources/errors';
-import type { MetricsSourceStatus } from '../../../common/metrics_sources';
+import { AnomalyThresholdRangeError } from '../../lib/sources/errors';
+import { composeSourceStatus, defaultSourceStatus } from './compose_source_status';
 import {
   metricsSourceConfigurationResponseRT,
   partialMetricsSourceConfigurationReqPayloadRT,
 } from '../../../common/metrics_sources';
 import type { InfraSource } from '../../lib/sources';
-import type { InfraPluginRequestHandlerContext } from '../../types';
 import { getInfraMetricsClient } from '../../lib/helpers/get_infra_metrics_client';
 import { getPreferredSchema } from '../../lib/helpers/get_preferred_schema';
 
-const defaultStatus = {
-  metricIndicesExist: false,
-  remoteClustersExist: false,
-};
-
 export const initMetricsSourceConfigurationRoutes = (libs: InfraBackendLibs) => {
   const { framework, logger } = libs;
-
-  const composeSourceStatus = async (
-    requestContext: InfraPluginRequestHandlerContext,
-    metricAlias: string,
-    request: KibanaRequest
-  ): Promise<MetricsSourceStatus> => {
-    try {
-      const hasMetricIndices = await libs.sourceStatus.hasMetricIndices(
-        requestContext,
-        metricAlias,
-        request
-      );
-      return {
-        metricIndicesExist: hasMetricIndices,
-        remoteClustersExist: true,
-      };
-    } catch (err) {
-      logger.error(err);
-
-      if (err instanceof NoSuchRemoteClusterError) {
-        return defaultStatus;
-      }
-
-      return {
-        metricIndicesExist: false,
-        remoteClustersExist: true,
-      };
-    }
-  };
 
   framework.registerRoute(
     {
@@ -100,8 +64,15 @@ export const initMetricsSourceConfigurationRoutes = (libs: InfraBackendLibs) => 
         }
 
         const status = includeStatus
-          ? await composeSourceStatus(requestContext, source.configuration.metricAlias, request)
-          : defaultStatus;
+          ? await composeSourceStatus({
+              logger,
+              sourceStatus: libs.sourceStatus,
+              requestContext,
+              request,
+              sourceId,
+              metricAlias: source.configuration.metricAlias,
+            })
+          : defaultSourceStatus;
 
         const sourceResponse = {
           source: {
@@ -155,11 +126,14 @@ export const initMetricsSourceConfigurationRoutes = (libs: InfraBackendLibs) => 
           ? sources.updateSourceConfiguration(soClient, sourceId, sourceConfigurationPayload)
           : sources.createSourceConfiguration(soClient, sourceId, sourceConfigurationPayload));
 
-        const status = await composeSourceStatus(
+        const status = await composeSourceStatus({
+          logger,
+          sourceStatus: libs.sourceStatus,
           requestContext,
-          patchedSourceConfiguration.configuration.metricAlias,
-          request
-        );
+          request,
+          sourceId,
+          metricAlias: patchedSourceConfiguration.configuration.metricAlias,
+        });
 
         const sourceResponse = {
           source: { ...patchedSourceConfiguration, status },

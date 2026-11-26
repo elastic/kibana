@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import { dreamingConfigSchema } from './dreaming_schema';
+import {
+  dreamingConfigSchema,
+  dreamingResponseSchema,
+  getDreamingResponseSchema,
+  runDreamingResponseSchema,
+} from './dreaming_schema';
 
 const config = {
   enabled: true,
@@ -157,5 +162,46 @@ describe('dreamingConfigSchema', () => {
         dreamingConfigSchema.validate({ enabled: false, maintenance: { enabled: true } })
       ).toThrow('Maintenance needs at least one fact or entity type to maintain.');
     });
+  });
+});
+
+describe('dreamingResponseSchema', () => {
+  it('accepts dreaming with workflow ids', () => {
+    const schema = dreamingResponseSchema();
+    const body = { dreaming: { enabled: false }, workflow_ids: [] };
+    expect(schema.validate(body)).toEqual(body);
+  });
+});
+
+describe('getDreamingResponseSchema', () => {
+  const schema = getDreamingResponseSchema();
+
+  it('accepts dreaming with workflow ids', () => {
+    const body = {
+      dreaming: { enabled: false },
+      workflow_ids: [],
+    };
+    expect(schema.validate(body)).toEqual(body);
+  });
+
+  it('accepts attached workflow ids', () => {
+    const body = {
+      dreaming: { enabled: true, facts: [{ type: 'note' }] },
+      workflow_ids: ['system-context-engine-dreaming-support'],
+    };
+    expect(schema.validate(body)).toEqual(body);
+  });
+});
+
+describe('runDreamingResponseSchema', () => {
+  const schema = runDreamingResponseSchema();
+
+  it('accepts started executions, failures, and skipped workflows', () => {
+    const body = {
+      executions: [{ workflow_id: 'wf-1', execution_id: 'exec-1' }],
+      failed: ['wf-2'],
+      skipped: ['wf-3'],
+    };
+    expect(schema.validate(body)).toEqual(body);
   });
 });

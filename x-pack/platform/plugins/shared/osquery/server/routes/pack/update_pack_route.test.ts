@@ -9,10 +9,12 @@ import { keyBy } from 'lodash';
 import { httpServerMock, httpServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import type { RequestHandler } from '@kbn/core/server';
 import { LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
+import type { SharedIntegrationWarning } from '../../../common/api/packs/shared_integration_warning';
 import { API_VERSIONS } from '../../../common/constants';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 import type { PackSavedObject } from '../../common/types';
 import { updatePackRoute } from './update_pack_route';
+import { updatePackResponseSchema } from './response_schemas';
 import { updatePacksRequestBodySchema } from '../../../common/api/packs/update_packs_route';
 import { buildRouteValidation } from '../../utils/build_validation/route_validation';
 import { createInternalSavedObjectsClientForSpaceId } from '../../utils/get_internal_saved_object_client';
@@ -135,6 +137,146 @@ describe('updatePackRoute', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     (getUserInfo as jest.Mock).mockResolvedValue({ username: 'tester', profile_uid: 'uid-1' });
+  });
+
+  describe('shared integration warnings', () => {
+    const runWarningCase = async (
+      policyIds: string[],
+      enabled = true,
+      global = false,
+      wasEnabled = false,
+      omitTargeting = false
+    ) => {
+      const packagePolicyUpdate = jest.fn().mockResolvedValue({});
+      const packagePolicies = [
+        {
+          id: 'shared',
+          name: 'Shared integration',
+          policy_ids: ['A', 'B', 'C'],
+          package: { name: 'osquery_manager', version: '1.0.0' },
+          inputs: [{ type: 'osquery', streams: [], config: { osquery: { value: { packs: {} } } } }],
+        },
+        {
+          id: 'dedicated',
+          name: 'Dedicated integration',
+          policy_ids: ['D'],
+          package: { name: 'osquery_manager', version: '1.0.0' },
+          inputs: [{ type: 'osquery', streams: [], config: { osquery: { value: { packs: {} } } } }],
+        },
+      ];
+      setupRoute();
+      const currentSO = {
+        ...basePackSO,
+        references: policyIds.map((id) => ({
+          id,
+          name: id,
+          type: LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE,
+        })),
+        attributes: {
+          ...basePackSO.attributes,
+          enabled: wasEnabled,
+          shards: global ? [{ key: '*', value: 100 }] : [],
+        },
+      };
+      const updatedSO = { ...currentSO, attributes: { ...currentSO.attributes, enabled } };
+      const mockClient = {
+        get: jest.fn().mockResolvedValueOnce(currentSO).mockResolvedValue(updatedSO),
+        find: jest.fn().mockResolvedValue({ saved_objects: [] }),
+        update: jest.fn().mockResolvedValue(updatedSO),
+      };
+      (createInternalSavedObjectsClientForSpaceId as jest.Mock).mockResolvedValue(mockClient);
+      jest.mocked(mockOsqueryContext.service.getAgentPolicyService).mockReturnValue({
+        getByIds: jest.fn().mockResolvedValue(policyIds.map((id) => ({ id, name: id }))),
+      } as unknown as ReturnType<typeof mockOsqueryContext.service.getAgentPolicyService>);
+      jest.mocked(mockOsqueryContext.service.getPackagePolicyService).mockReturnValue({
+        fetchAllItems: mockFetchAllItems(packagePolicies),
+        update: packagePolicyUpdate,
+      } as unknown as ReturnType<typeof mockOsqueryContext.service.getPackagePolicyService>);
+      const request = httpServerMock.createKibanaRequest({
+        params: { id: 'pack-id' },
+        body: {
+          name: 'my-pack',
+          queries: {},
+          ...(omitTargeting
+            ? { description: 'edit only' }
+            : { enabled, policy_ids: policyIds, shards: global ? { '*': 100 } : {} }),
+        },
+      });
+      const response = httpServerMock.createResponseFactory();
+      await routeHandler(buildMockContext() as Parameters<RequestHandler>[0], request, response);
+      expect(response.ok).toHaveBeenCalledTimes(1);
+      const responseBody = response.ok.mock.calls[0][0]?.body as {
+        data: { policy_ids?: string[] };
+        warnings?: SharedIntegrationWarning[];
+      };
+      expect(() => updatePackResponseSchema.validate(responseBody)).not.toThrow();
+      const references = mockClient.update.mock.calls[0][3].references as Array<{ id: string }>;
+      expect(references.map(({ id }) => id)).toEqual(global ? ['A', 'B', 'C', 'D'] : policyIds);
+
+      return { responseBody, writes: packagePolicyUpdate.mock.calls.map((call) => call[3]) };
+    };
+
+    it('warns for a partial selection without expanding persisted policy_ids or Fleet delivery', async () => {
+      const partial = await runWarningCase(['A']);
+      expect(partial.responseBody.warnings).toEqual([
+        {
+          code: 'shared_integration_overdelivery',
+          package_policy_id: 'shared',
+          package_policy_name: 'Shared integration',
+          additional_policy_ids: ['B', 'C'],
+        },
+      ]);
+      const full = await runWarningCase(['A', 'B', 'C']);
+      expect(full.responseBody).not.toHaveProperty('warnings');
+      expect(partial.writes).toHaveLength(1);
+      expect(partial.writes).toEqual(full.writes);
+    });
+
+    it('omits warnings for an unshared integration', async () => {
+      expect((await runWarningCase(['D'])).responseBody).not.toHaveProperty('warnings');
+    });
+
+    it('omits warnings for a global pack', async () => {
+      expect((await runWarningCase([], true, true)).responseBody).not.toHaveProperty('warnings');
+    });
+
+    it('omits warnings for a disabled pack', async () => {
+      expect((await runWarningCase(['A'], false)).responseBody).not.toHaveProperty('warnings');
+    });
+
+    it('omits warnings when disabling a previously enabled pack', async () => {
+      expect((await runWarningCase(['A'], false, false, true)).responseBody).not.toHaveProperty(
+        'warnings'
+      );
+    });
+
+    it('warns when retargeting an already enabled pack', async () => {
+      expect((await runWarningCase(['A'], true, false, true)).responseBody.warnings).toEqual([
+        {
+          code: 'shared_integration_overdelivery',
+          package_policy_id: 'shared',
+          package_policy_name: 'Shared integration',
+          additional_policy_ids: ['B', 'C'],
+        },
+      ]);
+    });
+
+    it('warns when editing an enabled pack without explicit targeting', async () => {
+      expect((await runWarningCase(['A'], true, false, true, true)).responseBody.warnings).toEqual([
+        {
+          code: 'shared_integration_overdelivery',
+          package_policy_id: 'shared',
+          package_policy_name: 'Shared integration',
+          additional_policy_ids: ['B', 'C'],
+        },
+      ]);
+    });
+
+    it('omits warnings on the disabled edit-only early return', async () => {
+      expect(
+        (await runWarningCase(['A'], false, false, false, true)).responseBody
+      ).not.toHaveProperty('warnings');
+    });
   });
 
   describe('schedule_type transition', () => {

@@ -61,9 +61,9 @@ Note that changing this setting will also affect the \`wait_for_active_shards\` 
     bodyParams: ['aliases', 'mappings', 'settings'],
   },
   paramsSchema: z.object({
-    ...getShapeAt(indices_create_request, 'body'),
-    ...getShapeAt(indices_create_request, 'path'),
     ...getShapeAt(indices_create_request, 'query'),
+    ...getShapeAt(indices_create_request, 'path'),
+    ...getShapeAt(indices_create_request, 'body'),
   }),
   outputSchema: indices_create_response,
 };

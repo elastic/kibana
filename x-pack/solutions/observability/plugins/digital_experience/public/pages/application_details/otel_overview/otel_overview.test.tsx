@@ -17,11 +17,15 @@ import { encodeOverviewFilters } from '../../../../common/overview_filters_param
 import type { FilterValue } from '../../../../common/filter_values';
 import type { OverviewFilters, OverviewPercentile } from '../../../../common/overview_filters';
 import type { ApplicationErrorsResponse } from '../../../../common/types/errors';
-import type { ApplicationOverviewResponse } from '../../../../common/types/overview';
+import type {
+  ApplicationOverviewKpisResponse,
+  ApplicationOverviewResponse,
+} from '../../../../common/types/overview';
 import type { ApplicationUsageResponse } from '../../../../common/types/usage';
 import { useEnvironment } from '../../../hooks/use_environment';
 import { useKibanaServices } from '../../../hooks/use_kibana_services';
 import { useOverviewFilters } from '../../../hooks/use_overview_filters';
+import { useQueryParam } from '../../../hooks/use_query_param';
 import {
   useOverviewKuery,
   useOverviewPercentile,
@@ -29,6 +33,7 @@ import {
 } from '../../../hooks/use_overview_search';
 import { useTimeRange } from '../../../hooks/use_time_range';
 import { createUiSettingsMock } from '../../../test_utils/ui_settings_mock';
+import { VitalsTrendPanel } from './components/vitals_trend_panel';
 import { OtelOverview } from './otel_overview';
 
 const mockBrushEndListeners: BrushEndListener[] = [];
@@ -65,6 +70,11 @@ jest.mock('../../../hooks/use_application_links', () => {
 jest.mock('../../../hooks/use_environment');
 jest.mock('../../../hooks/use_overview_filters');
 jest.mock('../../../hooks/use_overview_search');
+jest.mock('../../../hooks/use_query_param');
+// Its own test covers the chart; here the Overview only has to reload it on Refresh.
+jest.mock('./components/vitals_trend_panel', () => ({
+  VitalsTrendPanel: jest.fn(() => null),
+}));
 // Stand in for the Unified Search bars, which the Overview's own test does not render: the date
 // picker's Refresh button loads the Overview again.
 jest.mock('./components/overview_search_bar', () => ({
@@ -83,6 +93,8 @@ jest.mock('../../../hooks/use_time_range', () => ({
 }));
 
 const OVERVIEW_ENDPOINT = 'GET /internal/digital_experience/applications/{serviceName}/overview';
+
+const KPIS_ENDPOINT = 'GET /internal/digital_experience/applications/{serviceName}/overview/kpis';
 
 const USAGE_ENDPOINT = 'GET /internal/digital_experience/applications/{serviceName}/usage';
 
@@ -103,19 +115,35 @@ const ERRORS_RESPONSE: ApplicationErrorsResponse = {
   environments: ['production'],
 };
 
-const respond = async (endpoint: string) => {
+/** The responses of every endpoint, the Overview's and its KPIs' with `pageLoads` page loads. */
+const respondWith = (pageLoads: number) => async (endpoint: string) => {
   if (endpoint === USAGE_ENDPOINT) {
     return USAGE_RESPONSE;
   }
-  return endpoint === ERRORS_ENDPOINT ? ERRORS_RESPONSE : response(1533);
+  if (endpoint === KPIS_ENDPOINT) {
+    return kpisResponse(pageLoads);
+  }
+  return endpoint === ERRORS_ENDPOINT ? ERRORS_RESPONSE : response(pageLoads);
 };
+
+const respond = respondWith(1533);
 
 const NO_VITAL = { p75Ms: null, sampleCount: 0, ratings: null };
 
 const USAGE_RESPONSE: ApplicationUsageResponse = {
   serviceName: 'shop',
   environments: [],
-  topPages: [{ url: 'https://shop.example.com/', pageLoads: 9, loadTimeP75Ms: 1200 }],
+  topPages: [
+    {
+      url: 'https://shop.example.com/',
+      pageLoads: 9,
+      loadTimeP75Ms: 1200,
+      lcpP75Ms: null,
+      inpP75Ms: null,
+      clsP75: null,
+      jsErrors: null,
+    },
+  ],
   breakdowns: {
     pageLoads: 9,
     browsers: [{ name: 'Chrome', pageLoads: 9 }],
@@ -134,9 +162,7 @@ const response = (pageLoads: number): ApplicationOverviewResponse => ({
     serviceName: 'shop',
     percentile: 75,
     pageLoads: { count: pageLoads },
-    loadTime: { percentileMs: 2412.5, sampleCount: pageLoads },
-    jsErrors: { count: 3 },
-    httpRequests: { count: 8, failedCount: 2, failedRatio: 0.25 },
+    loadTime: { percentileMs: 2412.5 },
     webVitals: {
       lcp: { p75Ms: 2412.5, sampleCount: 2, ratings: { good: 1, needsImprovement: 0, poor: 0 } },
       inp: NO_VITAL,
@@ -162,6 +188,29 @@ const response = (pageLoads: number): ApplicationOverviewResponse => ({
     ],
     pageUrl: [{ key: 'https://shop.example.com/cart', count: 40 }],
     pageContains: [],
+  },
+});
+
+const compared = (value: number | null, previous: number | null) => ({
+  value,
+  previous,
+  delta: value !== null && previous !== null ? value - previous : null,
+});
+
+const kpisResponse = (pageLoads: number): ApplicationOverviewKpisResponse => ({
+  percentile: 75,
+  sessions: compared(400, 320),
+  errorFreeSessions: compared(0.9, 0.95),
+  pageLoads: compared(pageLoads, 1000),
+  loadTime: compared(2412.5, 3000),
+  jsErrors: compared(3, 3),
+  failedHttpRequests: compared(0.25, 0.25),
+  requestLatency: compared(180, null),
+  counts: {
+    sessionsWithErrors: 40,
+    loadTimeSamples: pageLoads,
+    httpRequests: 8,
+    failedHttpRequests: 2,
   },
 });
 
@@ -239,6 +288,7 @@ beforeEach(() => {
   jest.clearAllMocks();
   mockBrushEndListeners.length = 0;
   fetch.mockImplementation(respond);
+  jest.mocked(useQueryParam).mockReturnValue({ value: undefined, setValue: jest.fn() });
   jest
     .mocked(createRepositoryClient)
     .mockReturnValue({ fetch } as unknown as ReturnType<typeof createRepositoryClient>);
@@ -344,17 +394,20 @@ describe('OtelOverview', () => {
     };
     await waitFor(() => expectFetchedWith(query));
     await waitFor(() => expectFetchedWith(query, USAGE_ENDPOINT));
-    // The errors carry no page URL, so the page is not sent for them.
+    // The errors carry the route of their page, so the page narrows them too.
+    await waitFor(() => expectFetchedWith(query, ERRORS_ENDPOINT));
+  });
+
+  it('leaves the URL text out of the errors request, as errors carry no URL', async () => {
+    mockFilters({ browser: include('Chrome'), pageContains: include('/cart') });
+    renderOverview();
+
     await waitFor(() =>
       expectFetchedWith(
         {
           start: timeRange.rangeFrom,
           end: timeRange.rangeTo,
-          filters:
-            encodeOverviewFilters({
-              browser: [...include('Chrome'), ...exclude('Safari')],
-              country: include('DE'),
-            }) ?? '',
+          filters: encodeOverviewFilters({ browser: include('Chrome') }) ?? '',
         },
         ERRORS_ENDPOINT
       )
@@ -549,7 +602,7 @@ describe('OtelOverview', () => {
     await findPageLoads('1,533');
 
     expect(screen.getByTestId('digitalExperienceOverviewPageFilterNote')).toHaveTextContent(
-      'apply to page loads, with their load time, trend, pages and breakdowns, and to frustration signals only'
+      'Page applies to every browser event but HTTP requests'
     );
     unmount();
 
@@ -771,10 +824,21 @@ describe('OtelOverview', () => {
 
     fireEvent.click(screen.getByRole('button', { name: 'Refresh' }));
 
-    // The Overview, its usage and its top errors, on mount and on Refresh.
+    // The Overview, its KPIs, its usage and its top errors, on mount and on Refresh.
     await waitFor(() => {
-      return expect(fetch).toHaveBeenCalledTimes(6);
+      return expect(fetch).toHaveBeenCalledTimes(8);
     });
+  });
+
+  it('reloads the vitals chart on Refresh, as a relative range stays the same', async () => {
+    renderOverview();
+    const reloadTime = () =>
+      jest.mocked(VitalsTrendPanel).mock.calls.at(-1)?.[0].lastReloadRequestTime;
+    expect(reloadTime()).toBeUndefined();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Refresh' }));
+
+    await waitFor(() => expect(reloadTime()).toEqual(expect.any(Number)));
   });
 
   it('shows the usage panels below the trends', async () => {
@@ -834,7 +898,7 @@ describe('OtelOverview', () => {
     let usageFails = true;
     fetch.mockImplementation(async (endpoint: string) => {
       if (endpoint !== USAGE_ENDPOINT) {
-        return response(1533);
+        return respond(endpoint);
       }
       if (usageFails) {
         throw new Error('Could not load the usage.');
@@ -895,16 +959,24 @@ describe('OtelOverview', () => {
   });
 
   it('never shows the response of the previous environment when it arrives last', async () => {
-    let resolvePrevious: (value: ApplicationOverviewResponse) => void = () => {};
-    fetch.mockReturnValueOnce(new Promise((resolve) => (resolvePrevious = resolve)));
+    let resolvePrevious: (value: ApplicationOverviewKpisResponse) => void = () => {};
+    fetch.mockImplementation(
+      (endpoint: string, { params }: { params: { query: { environment?: string } } }) => {
+        if (params.query.environment === 'staging') {
+          return respondWith(7)(endpoint);
+        }
+        return endpoint === KPIS_ENDPOINT
+          ? new Promise((resolve) => (resolvePrevious = resolve))
+          : new Promise(() => {});
+      }
+    );
     const { rerender } = renderOverview();
 
-    fetch.mockResolvedValueOnce(response(7));
     jest.mocked(useEnvironment).mockReturnValue({ environment: 'staging', setEnvironment });
     rerender(<OtelOverview serviceName="shop" />);
     await findPageLoads('7');
 
-    await act(async () => resolvePrevious(response(1533)));
+    await act(async () => resolvePrevious(kpisResponse(1533)));
 
     expect(pageLoadsKpi()).toHaveTextContent('7');
     expect(screen.queryByText('1,533')).not.toBeInTheDocument();
@@ -924,19 +996,95 @@ describe('OtelOverview', () => {
     });
   });
 
-  it('shows the error with a retry that loads the Overview again', async () => {
-    fetch.mockRejectedValue(new Error('Could not load the Overview.'));
+  it('shows the error with a retry that loads the Overview again, and keeps the KPIs', async () => {
+    fetch.mockImplementation(async (endpoint: string) => {
+      if (endpoint === OVERVIEW_ENDPOINT) {
+        throw new Error('Could not load the Overview.');
+      }
+      return respond(endpoint);
+    });
     renderOverview();
 
     expect(await screen.findByTestId('digitalExperienceOverviewError')).toHaveTextContent(
       'Could not load the Overview'
     );
-    expect(screen.queryByTestId('digitalExperienceOverviewKpis')).not.toBeInTheDocument();
+    await findPageLoads('1,533');
+    expect(screen.queryByTestId('digitalExperienceOverviewPageLoadsTrend')).not.toBeInTheDocument();
 
-    fetch.mockResolvedValue(response(7));
+    fetch.mockImplementation(respond);
     fireEvent.click(screen.getByTestId('digitalExperienceOverviewRetry'));
 
-    await findPageLoads('7');
+    expect(
+      await screen.findByTestId('digitalExperienceOverviewPageLoadsTrend')
+    ).toBeInTheDocument();
     expect(screen.queryByTestId('digitalExperienceOverviewError')).not.toBeInTheDocument();
+  });
+
+  it('shows the KPIs error with a retry, and keeps the panels below', async () => {
+    fetch.mockImplementation(async (endpoint: string) => {
+      if (endpoint === KPIS_ENDPOINT) {
+        throw new Error('Could not load the KPIs.');
+      }
+      return respond(endpoint);
+    });
+    renderOverview();
+
+    expect(await screen.findByTestId('digitalExperienceOverviewKpisError')).toHaveTextContent(
+      'Could not load the KPIs'
+    );
+    expect(
+      await screen.findByTestId('digitalExperienceOverviewPageLoadsTrend')
+    ).toBeInTheDocument();
+
+    fetch.mockImplementation(respond);
+    fireEvent.click(screen.getByTestId('digitalExperienceOverviewKpisRetry'));
+
+    await findPageLoads('1,533');
+    expect(screen.queryByTestId('digitalExperienceOverviewKpisError')).not.toBeInTheDocument();
+  });
+
+  it('asks for the KPIs with the filters, the query and the percentile', async () => {
+    mockFilters({ browser: [{ value: 'Chrome', exclude: false }] });
+    mockSearch({ percentile: 95, kuery: 'user.id : "u-1"' });
+    renderOverview();
+
+    await waitFor(() =>
+      expectFetchedWith(
+        {
+          start: timeRange.rangeFrom,
+          end: timeRange.rangeTo,
+          ...filterParams,
+          kuery: 'user.id : "u-1"',
+          percentile: '95',
+        },
+        KPIS_ENDPOINT
+      )
+    );
+  });
+
+  it('shows the change against the previous period when Compare is on', async () => {
+    jest.mocked(useQueryParam).mockReturnValue({ value: 'true', setValue: jest.fn() });
+    renderOverview();
+    await findPageLoads('1,533');
+
+    // More sessions, but fewer of them without errors.
+    expect(screen.getByTestId('digitalExperienceOverviewSessionsChange')).toHaveTextContent('+25%');
+    expect(screen.getByTestId('digitalExperienceOverviewSessionsPrevious')).toHaveTextContent(
+      'vs 320'
+    );
+    expect(
+      screen.getByTestId('digitalExperienceOverviewErrorFreeSessionsChange')
+    ).toHaveTextContent('-5 pp');
+    // No change without a previous value.
+    expect(
+      screen.queryByTestId('digitalExperienceOverviewRequestLatencyChange')
+    ).not.toBeInTheDocument();
+  });
+
+  it('shows no change while Compare is off', async () => {
+    renderOverview();
+    await findPageLoads('1,533');
+
+    expect(screen.queryByTestId('digitalExperienceOverviewLoadTimeChange')).not.toBeInTheDocument();
   });
 });

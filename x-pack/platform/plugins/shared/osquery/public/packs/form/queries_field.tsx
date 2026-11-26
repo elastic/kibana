@@ -7,7 +7,7 @@
 
 import { isEmpty, findIndex, indexOf, pickBy, uniq, map } from 'lodash';
 import type { EuiComboBoxProps } from '@elastic/eui';
-import { EuiFlexGroup, EuiFlexItem, EuiButton, EuiSpacer } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiButton, EuiSpacer, EuiText } from '@elastic/eui';
 import { produce } from 'immer-v9';
 import React, { useCallback, useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -254,39 +254,47 @@ const QueriesFieldComponent: React.FC<QueriesFieldProps> = ({
 
   return (
     <>
-      {!isReadOnly && (
-        <>
-          <EuiFlexGroup justifyContent="flexEnd">
-            <EuiFlexItem grow={false}>
-              {!tableSelectedItems.length ? (
-                <EuiButton
-                  data-test-subj="add-query-button"
-                  fill
-                  onClick={handleShowAddFlyout}
-                  iconType="plusCircle"
-                >
-                  <FormattedMessage
-                    id="xpack.osquery.pack.queriesForm.addQueryButtonLabel"
-                    defaultMessage="Add query"
-                  />
-                </EuiButton>
-              ) : (
-                <EuiButton color="danger" onClick={handleDeleteQueries} iconType="trash">
-                  <FormattedMessage
-                    id="xpack.osquery.pack.table.deleteQueriesButtonLabel"
-                    defaultMessage="Delete {queriesCount, plural, one {# query} other {# queries}}"
-                    // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
-                    values={{
-                      queriesCount: tableSelectedItems.length,
-                    }}
-                  />
-                </EuiButton>
-              )}
-            </EuiFlexItem>
-          </EuiFlexGroup>
-          <EuiSpacer />
-        </>
-      )}
+      <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
+        <EuiFlexItem>
+          <EuiText size="s" color="subdued">
+            <p>
+              <FormattedMessage
+                id="xpack.osquery.pack.form.queriesStepDescription"
+                defaultMessage="These queries inherit the pack's settings, but you can customize the defaults by editing them individually."
+              />
+            </p>
+          </EuiText>
+        </EuiFlexItem>
+        {!isReadOnly && (
+          <EuiFlexItem grow={false}>
+            {!tableSelectedItems.length ? (
+              <EuiButton
+                data-test-subj="add-query-button"
+                color="text"
+                onClick={handleShowAddFlyout}
+                iconType="plusCircle"
+              >
+                <FormattedMessage
+                  id="xpack.osquery.pack.queriesForm.addQueryButtonLabel"
+                  defaultMessage="Add query"
+                />
+              </EuiButton>
+            ) : (
+              <EuiButton color="danger" onClick={handleDeleteQueries} iconType="trash">
+                <FormattedMessage
+                  id="xpack.osquery.pack.table.deleteQueriesButtonLabel"
+                  defaultMessage="Delete {queriesCount, plural, one {# query} other {# queries}}"
+                  // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
+                  values={{
+                    queriesCount: tableSelectedItems.length,
+                  }}
+                />
+              </EuiButton>
+            )}
+          </EuiFlexItem>
+        )}
+      </EuiFlexGroup>
+      <EuiSpacer />
       {fieldValue?.length ? (
         <PackQueriesTable
           data={tableData}

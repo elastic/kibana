@@ -8,6 +8,9 @@
 import { FRUSTRATION_EVENTS } from '../../../../common/otel_data';
 import { usageSearch } from './search_request';
 
+/** The runtime field of the page filter, which reads the route of a page and then its URL. */
+const PAGE_FIELD = 'digital_experience_filter_pageUrl';
+
 const PARAMS = { serviceName: 'shop', start: 1000, end: 2000 };
 
 const inEnvironment = (request: ReturnType<typeof usageSearch>) => {
@@ -24,7 +27,7 @@ describe('usageSearch', () => {
     });
   });
 
-  it('filters the browser documents of the application, page loads, clicks and frustration only', () => {
+  it('filters the browser documents of the application, page loads, clicks, frustration, vitals and errors only', () => {
     const { filter } = usageSearch(PARAMS).query.bool;
 
     expect(filter).toContainEqual({ term: { 'telemetry.sdk.language': 'webjs' } });
@@ -34,11 +37,35 @@ describe('usageSearch', () => {
         event_name: [
           'browser.navigation_timing',
           'browser.user_action.click',
-          'browser.frustration.rage_click',
-          'browser.frustration.dead_click',
-          'browser.frustration.error_click',
+          'elastic.frustration.rage_click',
+          'elastic.frustration.dead_click',
+          'elastic.frustration.error_click',
+          'browser.web_vital',
+          'exception',
         ],
       },
+    });
+  });
+
+  it('groups the web vitals and JS errors by route, to join them to the rows of the top pages', () => {
+    const { pageSignals } = inEnvironment(usageSearch(PARAMS)).aggs;
+
+    expect(pageSignals.filter).toEqual({
+      bool: { filter: [{ terms: { event_name: ['browser.web_vital', 'exception'] } }] },
+    });
+    // By the indexed route, no script: these events carry no URL to fall back to. More candidates
+    // than rows, as the pages with the most vitals need not be the most loaded.
+    expect(pageSignals.aggs.pages.terms).toEqual({ field: 'attributes.url.template', size: 30 });
+    expect(pageSignals.aggs.pages.aggs.lcp).toEqual({
+      filter: { term: { 'browser.web_vital.name': { value: 'lcp', case_insensitive: true } } },
+      aggs: {
+        value: {
+          percentiles: { field: 'browser.web_vital.value', percents: [75], keyed: false },
+        },
+      },
+    });
+    expect(pageSignals.aggs.pages.aggs.jsErrors).toEqual({
+      filter: { term: { event_name: 'exception' } },
     });
   });
 
@@ -60,7 +87,11 @@ describe('usageSearch', () => {
     expect(pageLoads.filter.bool.filter).toEqual([
       { term: { event_name: 'browser.navigation_timing' } },
     ]);
-    expect(pageLoads.aggs.topPages.terms).toEqual({ field: 'url.full', size: 10 });
+    // The route of the page, or its URL for an app that reports none: the field the page filter reads
+    expect(pageLoads.aggs.topPages.terms).toEqual({
+      field: 'digital_experience_filter_pageUrl',
+      size: 10,
+    });
     expect(pageLoads.aggs.topPages.aggs.loadTime.percentiles).toMatchObject({
       field: 'browser.navigation_timing.load_event_end',
       percents: [75],
@@ -136,10 +167,11 @@ describe('usageSearch with filters', () => {
       'digital_experience_filter_device',
       'digital_experience_filter_country',
       'digital_experience_filter_appVersion',
+      'digital_experience_filter_pageUrl',
     ]);
   });
 
-  it('narrows the pages, breakdowns and clicks to the selected browser, OS, device and country', () => {
+  it('narrows the pages, breakdowns and clicks to the selected browser, country and page', () => {
     const { filter } = inEnvironment(usageSearch({ ...PARAMS, filters: FILTERS }));
 
     expect(filter).toEqual({
@@ -149,27 +181,23 @@ describe('usageSearch with filters', () => {
           { terms: { digital_experience_filter_browser: ['Chrome'] } },
           { bool: { must_not: [{ terms: { digital_experience_filter_browser: ['Safari'] } }] } },
           { terms: { digital_experience_filter_country: ['DE'] } },
+          { terms: { [PAGE_FIELD]: ['https://shop.example.com/'] } },
         ],
       },
     });
   });
 
-  it('narrows the page loads and frustration to the selected page, not the clicks', () => {
+  it('narrows the page loads and frustration to the URL text, not the clicks', () => {
+    const filters = { pageContains: [{ value: 'cart', exclude: false }] };
     const { pageLoads, clicks, frustration } = inEnvironment(
-      usageSearch({ ...PARAMS, filters: FILTERS })
+      usageSearch({ ...PARAMS, filters })
     ).aggs;
 
-    expect(pageLoads.filter.bool.filter).toEqual([
-      { term: { event_name: 'browser.navigation_timing' } },
-      { terms: { 'attributes.url.full': ['https://shop.example.com/'] } },
-    ]);
+    expect(JSON.stringify(pageLoads.filter)).toContain('*cart*');
+    expect(JSON.stringify(frustration.filter)).toContain('*cart*');
     expect(clicks.filter).toEqual({
       bool: { filter: [{ term: { event_name: 'browser.user_action.click' } }] },
     });
-    expect(frustration.filter.bool.filter).toEqual([
-      { terms: { event_name: [...FRUSTRATION_EVENTS] } },
-      { terms: { 'attributes.url.full': ['https://shop.example.com/'] } },
-    ]);
   });
 
   it('is unchanged without a selection', () => {
