@@ -109,12 +109,12 @@ export interface TelemetryPluginStart {
 }
 
 interface TelemetryPluginSetupDependencies {
-  screenshotMode: ScreenshotModePluginSetup;
+  screenshotMode?: ScreenshotModePluginSetup;
   home?: HomePublicPluginSetup;
 }
 
 interface TelemetryPluginStartDependencies {
-  screenshotMode: ScreenshotModePluginStart;
+  screenshotMode?: ScreenshotModePluginStart;
 }
 
 declare global {
@@ -359,8 +359,8 @@ export class TelemetryPlugin
    * @param screenshotMode {@link ScreenshotModePluginSetup}
    * @internal
    */
-  private shouldSkipTelemetry(screenshotMode: ScreenshotModePluginSetup): boolean {
-    return screenshotMode.isScreenshotMode() || isSyntheticsMonitor();
+  private shouldSkipTelemetry(screenshotMode?: ScreenshotModePluginSetup): boolean {
+    return screenshotMode?.isScreenshotMode() === true || isSyntheticsMonitor();
   }
 
   private getTelemetryServicePublicApis(): TelemetryServicePublicApis {

@@ -63,6 +63,16 @@ describe('TelemetryPlugin', () => {
         });
       });
     });
+
+    it('does not skip telemetry when screenshotMode is unavailable', () => {
+      const initializerContext = coreMock.createPluginInitializerContext({ optIn: true });
+      const plugin = new TelemetryPlugin(initializerContext);
+
+      const { telemetryService } = plugin.setup(coreMock.createSetup(), { home });
+
+      expect(telemetryService.canSendTelemetry()).toBe(true);
+    });
+
     describe('EBT shipper registration', () => {
       it('registers the UI telemetry shipper', () => {
         const initializerContext = coreMock.createPluginInitializerContext();
