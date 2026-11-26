@@ -29,6 +29,7 @@ import {
 import { LOADED_ALERT_FIELDS } from '../../alert_triage/loaded_alert_fields';
 import { PATTERN_KEY_FIELDS, getDetection } from '../../alert_triage/pattern_key';
 import type { SweepPorts } from '../../alert_triage/plan_sweep';
+import { FP_DECISION_NEUTRAL_CLOSE_REASONS } from '../../alert_triage/fp_decisions';
 import type { MatchCandidate } from '../../alert_triage/fp_decisions';
 import type { TriageAlert } from '../../alert_triage/types';
 
@@ -814,8 +815,8 @@ const BLOCKED_KEYS_CHUNK = 500;
 /**
  * The strict key tags among `keyTags` that some alert carries with a verdict against a false
  * positive: a true positive, an inconclusive verdict from the model or from an analyst who
- * dismissed a proposal, or an analyst's close with a reason other than false positive (the same
- * rule the store step applies to the alerts of an approval). An alert with `az:inconclusive` and
+ * dismissed a proposal, or an analyst's close with a reason that is not neutral
+ * (`FP_DECISION_NEUTRAL_CLOSE_REASONS`, the rule the store step applies to an approval's alerts). An alert with `az:inconclusive` and
  * `az:model_fp` does not count: the model judged it a false positive, and its proposal failed,
  * expired or was never reviewed, so nobody judged otherwise. Only the batch writes the strict key
  * tag, so the `az:inconclusive` a dismissal's skip adds never counts. Every alert counts, with no
@@ -864,7 +865,13 @@ export const findKeyTagsWithVerdicts = async (
                           { term: { [ALERT_FIELDS.status]: 'closed' } },
                           { exists: { field: ALERT_FIELDS.reason } },
                         ],
-                        must_not: [{ term: { [ALERT_FIELDS.reason]: 'false_positive' } }],
+                        must_not: [
+                          {
+                            terms: {
+                              [ALERT_FIELDS.reason]: [...FP_DECISION_NEUTRAL_CLOSE_REASONS],
+                            },
+                          },
+                        ],
                       },
                     },
                   ],
@@ -1055,19 +1062,20 @@ export const loadAlertsByIds = async (
 
 /**
  * The given alerts that are closed without the reason false positive, in two lists:
- * - `closedAsOther`: closed with another reason (a true positive, for example). Such an alert is a
- *   verdict against the pattern.
- * - `closedWithoutReason`: closed with no reason at all. It is no evidence of a false positive, and
- *   the approval's close leaves an already closed alert as it is, so it would stay without one. It
- *   says nothing against the pattern either.
+ * - `closedAsOther`: closed with a reason that is not neutral (a true positive, for example). Such
+ *   an alert is a verdict against the pattern.
+ * - `closedWithoutVerdict`: closed with no reason, or with a neutral one
+ *   (`FP_DECISION_NEUTRAL_CLOSE_REASONS`). It is no evidence of a false positive, and the approval's
+ *   close leaves an already closed alert as it is. It says nothing against the pattern either.
  * A failed read throws, so no decision is written on a guess.
  */
 export const findAlertsClosedWithoutFalsePositiveReason = async (
   { callKibanaApi }: KibanaApi,
   alertIds: readonly string[]
-): Promise<{ closedAsOther: string[]; closedWithoutReason: string[] }> => {
+): Promise<{ closedAsOther: string[]; closedWithoutVerdict: string[] }> => {
+  const neutral = new Set<unknown>(FP_DECISION_NEUTRAL_CLOSE_REASONS);
   const closedAsOther: string[] = [];
-  const closedWithoutReason: string[] = [];
+  const closedWithoutVerdict: string[] = [];
   // The filter runs in Elasticsearch and only the reason is read, so a chunk can be large.
   for (let from = 0; from < alertIds.length; from += CLOSE_REASON_CHUNK_SIZE) {
     const ids = alertIds.slice(from, from + CLOSE_REASON_CHUNK_SIZE);
@@ -1088,10 +1096,11 @@ export const findAlertsClosedWithoutFalsePositiveReason = async (
     assertCompleteSearch(body);
     for (const { _id, _source = {} } of body.hits?.hits ?? []) {
       const reason = readField(_source, ALERT_FIELDS.reason);
-      (typeof reason === 'string' && reason !== '' ? closedAsOther : closedWithoutReason).push(_id);
+      const isVerdict = typeof reason === 'string' && reason !== '' && !neutral.has(reason);
+      (isVerdict ? closedAsOther : closedWithoutVerdict).push(_id);
     }
   }
-  return { closedAsOther, closedWithoutReason };
+  return { closedAsOther, closedWithoutVerdict };
 };
 
 const CLOSE_REASON_CHUNK_SIZE = 1000;

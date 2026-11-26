@@ -98,19 +98,19 @@ export const getTriageStoreFpDecisionsStepDefinition = ({
         const entries = alerts.map((doc) => ({ id: String(doc._id), doc }));
         // The approval keeps earlier closures, so an alert that is already closed can be in the
         // proposal. One closed as a true positive is no evidence of a false positive, and its
-        // pattern is blocked. One closed with no reason is no evidence either, but it says nothing
-        // against the pattern, so it only leaves the count.
-        const { closedAsOther, closedWithoutReason } =
+        // pattern is blocked. One closed with no reason or a neutral one is no evidence either, but
+        // it says nothing against the pattern, so it only leaves the count.
+        const { closedAsOther, closedWithoutVerdict } =
           kind === 'false_positive'
             ? await findAlertsClosedWithoutFalsePositiveReason(
                 contextManager,
                 entries.map(({ id }) => id)
               )
-            : { closedAsOther: [], closedWithoutReason: [] };
+            : { closedAsOther: [], closedWithoutVerdict: [] };
         const blockingIds = new Set(closedAsOther);
         // Alerts closed as another reason are left out of the grouping by `blockingIds`, so the
         // evidence filter only has the ones closed with no reason left to take out.
-        const noEvidenceIds = new Set(closedWithoutReason);
+        const noEvidenceIds = new Set(closedWithoutVerdict);
         const conflictedKeys = groupByStrictKey({
           alerts: entries.filter(({ id }) => blockingIds.has(id)),
           spaceId,

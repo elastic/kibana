@@ -35,6 +35,18 @@ export const FP_DECISION_MIN_ALERTS = 3;
 /** Most decisions one approval stores, so a very mixed proposal cannot flood the index. A starting value. */
 export const FP_DECISIONS_MAX_PER_APPROVAL = 20;
 
+/**
+ * Close reasons that say nothing against a false positive: the decision's own, a correct detection
+ * of harmless activity, a duplicate, and a close by automation. Any other reason, custom ones
+ * included, is an analyst's verdict against the pattern.
+ */
+export const FP_DECISION_NEUTRAL_CLOSE_REASONS = [
+  'false_positive',
+  'benign_positive',
+  'duplicate',
+  'automated_closure',
+] as const;
+
 const MAX_CONDITION_VALUE_LENGTH = 1000;
 
 export type FpDecisionKind = 'false_positive' | 'do_not_propose';

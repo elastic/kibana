@@ -185,7 +185,18 @@ describe('findKeyTagsWithVerdicts', () => {
                   { term: { 'kibana.alert.workflow_status': 'closed' } },
                   { exists: { field: 'kibana.alert.workflow_reason' } },
                 ],
-                must_not: [{ term: { 'kibana.alert.workflow_reason': 'false_positive' } }],
+                must_not: [
+                  {
+                    terms: {
+                      'kibana.alert.workflow_reason': [
+                        'false_positive',
+                        'benign_positive',
+                        'duplicate',
+                        'automated_closure',
+                      ],
+                    },
+                  },
+                ],
               },
             },
           ],
@@ -889,7 +900,8 @@ describe('helpers that drive a write, on a partial search result', () => {
 });
 
 describe('findAlertsClosedWithoutFalsePositiveReason', () => {
-  it('tells a close for another reason apart from a close with no reason, and leaves false positives out of the query', async () => {
+  // A duplicate or a close by automation is no evidence for the pattern and none against it.
+  it('tells a close with a verdict apart from one with no reason or a neutral reason, and leaves false positives out of the query', async () => {
     const callKibanaApi = jest.fn().mockResolvedValue({
       status: 200,
       headers: {},
@@ -897,7 +909,11 @@ describe('findAlertsClosedWithoutFalsePositiveReason', () => {
         hits: {
           hits: [
             { _id: 'tp', _source: { 'kibana.alert.workflow_reason': 'true_positive' } },
+            { _id: 'custom', _source: { 'kibana.alert.workflow_reason': 'my_own_reason' } },
             { _id: 'none', _source: {} },
+            { _id: 'auto', _source: { 'kibana.alert.workflow_reason': 'automated_closure' } },
+            { _id: 'dup', _source: { 'kibana.alert.workflow_reason': 'duplicate' } },
+            { _id: 'benign', _source: { 'kibana.alert.workflow_reason': 'benign_positive' } },
           ],
         },
       },
@@ -909,7 +925,10 @@ describe('findAlertsClosedWithoutFalsePositiveReason', () => {
       'fp',
     ]);
 
-    expect(found).toEqual({ closedAsOther: ['tp'], closedWithoutReason: ['none'] });
+    expect(found).toEqual({
+      closedAsOther: ['tp', 'custom'],
+      closedWithoutVerdict: ['none', 'auto', 'dup', 'benign'],
+    });
     const { query } = callKibanaApi.mock.calls[0][0].body;
     expect(query.bool.must_not).toEqual([
       { term: { 'kibana.alert.workflow_reason': 'false_positive' } },
