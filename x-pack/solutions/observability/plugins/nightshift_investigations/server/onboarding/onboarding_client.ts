@@ -8,6 +8,7 @@
 import type { ElasticsearchServiceStart, KibanaRequest, Logger } from '@kbn/core/server';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
+import { isToolCallEvent } from '@kbn/agent-builder-common';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import type { AgentAvailabilityConfig } from '@kbn/agent-builder-server/agents';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
@@ -15,9 +16,14 @@ import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { WorkflowExecutionDto } from '@kbn/workflows';
 import { NIGHTSHIFT_ONBOARDING_SUGGESTIONS_WORKFLOW_ID } from '@kbn/workflows/managed';
+import {
+  MAX_ONBOARDING_PROGRESS_INTENT_LENGTH,
+  MAX_ONBOARDING_PROGRESS_STEPS,
+} from '../../common/onboarding';
 import type {
   EnableOnboardingResponse,
   GetOnboardingResponse,
+  OnboardingProgressStep,
   OnboardingSuggestionsExecution,
   OnboardingSuggestionsStatus,
   StartOnboardingSuggestionsResponse,
@@ -121,6 +127,48 @@ export const createOnboardingClient = ({
     }
   };
 
+  /**
+   * The newest tool calls of the agent exploring for this workflow execution. The agent execution
+   * is found by the `workflow_execution_id` metadata the managed workflow's `suggest` step sets, so
+   * that tag has to stay in the workflow definition. Best effort: progress is a nicety, never a
+   * reason to fail the onboarding response.
+   */
+  const getProgress = async (
+    request: KibanaRequest,
+    workflowExecutionId: string
+  ): Promise<OnboardingProgressStep[] | undefined> => {
+    const executionService = getDeps().agentBuilder?.execution;
+    if (!executionService) return undefined;
+    try {
+      const [agentExecution] = await executionService.findExecutions(request, {
+        filter: { metadata: { workflow_execution_id: workflowExecutionId } },
+        sort: { field: '@timestamp', order: 'desc' },
+        size: 1,
+      });
+      if (!agentExecution) return undefined;
+      const withEvents = await executionService.getExecution(agentExecution.executionId);
+      // Only ids and the intent leave the server: params and results can hold queries and secrets.
+      const steps = (withEvents?.events ?? []).filter(isToolCallEvent).map(
+        ({ data }): OnboardingProgressStep => {
+          const intent = data.intent?.trim().slice(0, MAX_ONBOARDING_PROGRESS_INTENT_LENGTH);
+          return {
+            tool_call_id: data.tool_call_id,
+            tool_id: data.tool_id,
+            ...(intent ? { intent } : {}),
+          };
+        }
+      );
+      return steps.length > 0 ? steps.slice(-MAX_ONBOARDING_PROGRESS_STEPS) : undefined;
+    } catch (error) {
+      logger.warn(
+        `Could not read the onboarding agent's progress for execution "${workflowExecutionId}": ${
+          (error as Error).message
+        }`
+      );
+      return undefined;
+    }
+  };
+
   return {
     get: async (request) => {
       const agentInstalled = await isAgentInstalled(request);
@@ -144,9 +192,13 @@ export const createOnboardingClient = ({
         omitStepExecutions: true,
         request,
       });
+      if (!execution) return { agent_installed: agentInstalled };
+      const response = toExecutionResponse(execution);
+      const progress =
+        response.status === 'running' ? await getProgress(request, execution.id) : undefined;
       return {
         agent_installed: agentInstalled,
-        ...(execution ? { execution: toExecutionResponse(execution) } : {}),
+        execution: progress ? { ...response, progress } : response,
       };
     },
 
