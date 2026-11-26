@@ -17,27 +17,21 @@ import {
 } from '@kbn/as-code-discover-schema';
 import type { SerializedSearchSourceFields } from '@kbn/data-plugin/common';
 import { DiscoverTabType } from '@kbn/discover-session-constants';
-import { isOfAggregateQueryType } from '@kbn/es-query';
 import {
   areComparatorsEqual,
   diffComparators,
   type StateComparators,
 } from '@kbn/presentation-publishing';
-import type { DiscoverSessionTab } from '@kbn/saved-search-plugin/common';
 import type { DiscoverSessionInternalData } from '../../../server/api/internal_schema';
 import { fromStoredEmbeddableTab } from '../../../common/embeddable';
 import { fromStoredTableSettings, toStoredTab } from '../../../common/embeddable/transform_utils';
-import { migrateLegacyQuery } from '../../../common/migrate_legacy_query';
 import { getInlineDataView } from '../../../common/session/inline_data_view';
 import {
   toStoredSearchAndTable,
   toStoredSearchSource,
   type StoredTableSettings,
 } from '../../../common/session/search_and_table_mapping';
-import {
-  omitInlineDataViewIdFromFilters,
-  pinnedFiltersToAppFilters,
-} from '../../../common/session/session_tab_mapping';
+import { omitInlineDataViewIdFromFilters } from '../../../common/session/session_tab_mapping';
 import { toStoredTabTypeState } from '../../../common/session/tab_type_state';
 import { isDiscoverSessionEsqlTab } from '../../../common/session/type_guards';
 import type {
@@ -102,35 +96,6 @@ export const fromSessionApiTab = (
   return { id, label, tab: { ...tab, data_source: dataSource }, inlineDataViewId };
 };
 
-/** Reads a Content Management session tab as a linked panel shows it. */
-export const fromDiscoverSessionTab = (
-  sessionTab: DiscoverSessionTab
-): SearchEmbeddableSessionTab => {
-  const { id, label, serializedSearchSource } = sessionTab;
-  const query = migrateStoredQuery(serializedSearchSource.query);
-  const isEsqlTab = isOfAggregateQueryType(query);
-
-  if (!isEsqlTab && !hasDataView(serializedSearchSource.index)) {
-    return { id, label };
-  }
-
-  const searchSource = { ...serializedSearchSource, ...(query && { query }) };
-  // The query decides the tab type, since old sessions can mark a Classic query as text based
-  const panelSearchSource = isEsqlTab ? searchSource : pinnedFiltersToAppFilters(searchSource);
-
-  return {
-    id,
-    label,
-    // Like the session API, an ES|QL tab has no sample size, so a panel keeps only its own one
-    tab: fromStoredEmbeddableTab(
-      isEsqlTab ? { ...sessionTab, sampleSize: undefined } : sessionTab,
-      panelSearchSource
-    ),
-    inlineDataViewId: getInlineDataView(panelSearchSource)?.id,
-    ...(!isEsqlTab && { filters: panelSearchSource.filter }),
-  };
-};
-
 /** Converts a panel tab to the attributes the panel searches and renders with. */
 export const toSearchEmbeddableAttributes = (
   tab: DiscoverSessionApiEmbeddableTab,
@@ -164,26 +129,12 @@ const toPanelTableSettings = (
   });
 
 /** Converts the tab a panel shows to the attributes the panel searches and renders with. */
-export const toSessionTabAttributes = ({
+export const toPanelTabAttributes = ({
   tab,
   inlineDataViewId,
-  filters,
-}: SearchEmbeddablePanelTab): SearchEmbeddableSerializedAttributes => {
+}: SearchEmbeddablePanelTab): SearchEmbeddableSerializedAttributes =>
   // Without a Data View, the panel shows a prompt instead of a table
-  if (!tab) {
-    return { serializedSearchSource: {} };
-  }
-
-  const { serializedSearchSource, ...attributes } = toSearchEmbeddableAttributes(
-    tab,
-    inlineDataViewId
-  );
-
-  return {
-    ...attributes,
-    serializedSearchSource: { ...serializedSearchSource, ...(filters && { filter: filters }) },
-  };
-};
+  tab ? toSearchEmbeddableAttributes(tab, inlineDataViewId) : { serializedSearchSource: {} };
 
 /** Applies the table settings changed on the panel, in the format the grid uses, to a panel tab. */
 export const withTableSettings = (
@@ -264,20 +215,6 @@ export const areTableSettingOverridesEqual = (
     applyTableSettingOverrides(tab, otherOverrides),
     TABLE_SETTING_DEFAULTS
   );
-
-const migrateStoredQuery = (query: SerializedSearchSourceFields['query']) => {
-  // A query saved without a language is Lucene. Old queries can be strings, which the ES|QL check
-  // does not accept.
-  if (!query || (typeof query === 'object' && isOfAggregateQueryType(query))) {
-    return query;
-  }
-
-  return migrateLegacyQuery(query);
-};
-
-// Without a Data View, a Classic tab cannot be converted to the public format
-const hasDataView = (index: SerializedSearchSourceFields['index']) =>
-  typeof index === 'string' ? index.length > 0 : Boolean(index?.title);
 
 const withInlineDataViewId = (
   searchSource: SerializedSearchSourceFields,

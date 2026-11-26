@@ -56,8 +56,8 @@ import type {
 } from './types';
 import type { StoredTableSettings } from '../../common/session/search_and_table_mapping';
 import {
+  toPanelTabAttributes,
   toSearchEmbeddableAttributes,
-  toSessionTabAttributes,
   withSearchSource,
   withTableSettings,
 } from './utils/panel_tab';
@@ -166,7 +166,7 @@ export const initializeSearchEmbeddableApi = async ({
 }> => {
   /** The tab the panel shows, which the subjects below publish */
   let panelTab = initialTab;
-  const initialState = toSessionTabAttributes(initialTab);
+  const initialState = toPanelTabAttributes(initialTab);
 
   /** We **must** have a search source, so start by initializing it  */
   const { searchSource, dataView, esqlSource } = await initializeSearchSource(
@@ -343,7 +343,7 @@ export const initializeSearchEmbeddableApi = async ({
   };
 
   const reinitializeState = async (nextPanelTab: SearchEmbeddablePanelTab) => {
-    const state = toSessionTabAttributes(nextPanelTab);
+    const state = toPanelTabAttributes(nextPanelTab);
 
     // Trigger dataLoading$ and clear rows$ to show the initial loading state
     dataLoading$.next(true);

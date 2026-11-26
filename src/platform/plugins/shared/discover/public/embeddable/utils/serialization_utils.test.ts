@@ -21,7 +21,7 @@ import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { discoverServiceMock } from '../../__mocks__/services';
 import { getPersistedTabMock } from '../../application/main/state_management/redux/__mocks__/internal_state.mocks';
 import { deserializeState, serializeState } from './serialization_utils';
-import { applyTableSettingOverrides, toSessionTabAttributes } from './panel_tab';
+import { applyTableSettingOverrides, toPanelTabAttributes } from './panel_tab';
 import type { SearchEmbeddablePanelTab, SearchEmbeddableRuntimeState } from '../types';
 import { toDiscoverSessionApiData } from '../../session/session_conversions';
 import { discoverSessionInternalDataSchema } from '../../../server/api/internal_schema';
@@ -158,7 +158,7 @@ describe('Serialization utils', () => {
   };
 
   const getAttributes = ({ panelTab }: SearchEmbeddableRuntimeState) =>
-    toSessionTabAttributes(panelTab);
+    toPanelTabAttributes(panelTab);
 
   const getSessionTabsWithMetrics = (): DiscoverSessionTab[] => [
     {

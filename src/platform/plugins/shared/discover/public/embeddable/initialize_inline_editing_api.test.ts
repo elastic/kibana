@@ -9,29 +9,11 @@
 
 import { analyticsServiceMock } from '@kbn/core-analytics-browser-mocks';
 import { BehaviorSubject } from 'rxjs';
-import { createDiscoverServicesMock } from '../__mocks__/services';
-import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
-import { getPersistedTabMock } from '../application/main/state_management/redux/__mocks__/internal_state.mocks';
 import { initializeInlineEditingApi } from './initialize_inline_editing_api';
-import { fromDiscoverSessionTab } from './utils/panel_tab';
+import type { SearchEmbeddableSessionTab } from './types';
 
-const defaultServices = createDiscoverServicesMock();
-
-const tab1 = fromDiscoverSessionTab(
-  getPersistedTabMock({
-    dataView: dataViewMock,
-    services: defaultServices,
-    tabId: 'tab-1',
-  })
-);
-
-const tab2 = fromDiscoverSessionTab(
-  getPersistedTabMock({
-    dataView: dataViewMock,
-    services: defaultServices,
-    tabId: 'tab-2',
-  })
-);
+const tab1: SearchEmbeddableSessionTab = { id: 'tab-1', label: 'Tab 1' };
+const tab2: SearchEmbeddableSessionTab = { id: 'tab-2', label: 'Tab 2' };
 
 const buildSearchEmbeddable = () => ({
   getTab: jest.fn().mockReturnValue(tab1),
