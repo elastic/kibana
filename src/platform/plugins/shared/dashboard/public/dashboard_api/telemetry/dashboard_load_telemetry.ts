@@ -121,6 +121,7 @@ export function startTrackingDashboardLoadTelemetry(
           panelCount,
           totalLoadTime: completeLoadDuration,
           loadType,
+          isReplayedLoad: dashboard.replayCacheLastFetched$.value !== undefined,
           children: Object.values(dashboard.children$.getValue()),
         });
       }
@@ -141,12 +142,14 @@ function reportPerformanceMetrics({
   panelCount,
   totalLoadTime,
   loadType,
+  isReplayedLoad,
   children,
 }: {
   timeToData: number;
   panelCount: number;
   totalLoadTime: number;
   loadType: DashboardLoadType;
+  isReplayedLoad: boolean;
   children: unknown[];
 }) {
   const duration =
@@ -179,6 +182,7 @@ function reportPerformanceMetrics({
     value9: meanPanelRenderComplete,
     meta: {
       approximationApplied: getApproximationApplied(children),
+      ...(isReplayedLoad ? { isReplayedLoad: true } : {}),
     },
   };
 
