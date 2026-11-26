@@ -61,8 +61,20 @@ describe('WorkflowPageShareModal', () => {
     expect(screen.getByTestId<HTMLInputElement>('workflowPageShareUrl').value).toBe(
       `${window.location.origin}/s/team/pages/wf-1/default/k/secret-1`
     );
-    expect(screen.getByText('kibana/pages')).toBeInTheDocument();
-    expect(screen.getByTestId('workflowPageShareEnabled')).toBeChecked();
+    expect(screen.getByTestId('workflowPageShareServiceAccount')).toHaveTextContent(
+      'service account'
+    );
+    expect(screen.getByText(/Treat the link as a password/)).toBeInTheDocument();
+    expect(screen.queryByText('kibana/pages')).not.toBeInTheDocument();
+    expect(screen.getByText('Rotate link')).toBeInTheDocument();
+    expect(
+      screen.getByText('Replace the current link. The old one stops working immediately.')
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText('Take the page offline. Publishing again brings back the same link.')
+    ).toBeInTheDocument();
+    expect(screen.getByTestId('workflowPageShareEnabled')).not.toBeChecked();
+    expect(screen.getByTestId('workflowPageShareOpen')).toHaveAttribute('href');
   });
 
   it('shows only the blockers, with no link and no publish button, when the page cannot run', async () => {
@@ -84,6 +96,8 @@ describe('WorkflowPageShareModal', () => {
       status: { online: false, reasons: ['no_access_level'] },
     });
     expect(await screen.findByTestId('workflowPageShareStatus')).toHaveTextContent('Not published');
+    expect(screen.getByTestId('workflowPageShareCancel')).toBeInTheDocument();
+    expect(screen.queryByTestId('workflowPageShareDone')).not.toBeInTheDocument();
     services.http.get.mockResolvedValue(livePage);
 
     fireEvent.click(screen.getByTestId('workflowPageSharePublish'));
@@ -101,12 +115,24 @@ describe('WorkflowPageShareModal', () => {
     const { services } = setup();
     fireEvent.click(await screen.findByTestId('workflowPageShareRotate'));
 
+    expect(screen.getByTestId('workflowPageShareConfirm-rotate')).toHaveTextContent(
+      'The current link stops working at once.'
+    );
+    expect(
+      screen.queryByText('Replace the current link. The old one stops working immediately.')
+    ).not.toBeInTheDocument();
+    expect(screen.queryByTestId('workflowPageShareRotate')).not.toBeInTheDocument();
     expect(services.http.post).not.toHaveBeenCalled();
     fireEvent.click(screen.getByTestId('workflowPageShareConfirm'));
 
     await waitFor(() =>
       expect(services.http.post).toHaveBeenCalledWith(`${PAGE_PATH}/_rotate`, { version: '1' })
     );
+    expect(services.notifications.toasts.addSuccess).toHaveBeenCalledWith({
+      title: 'Link rotated',
+      text: 'Copy the new link. The previous one stopped working.',
+    });
+    expect(document.activeElement).toBe(screen.getByTestId('workflowPageShareCopy'));
   });
 
   it('turns submissions off and explains that the link stays the same', async () => {
@@ -126,16 +152,21 @@ describe('WorkflowPageShareModal', () => {
       })
     );
     expect(
-      await screen.findByText('The page is offline. Turning it back on keeps the same link.')
+      await screen.findByText('Submissions are paused but the link stays the same.')
     ).toBeVisible();
+    expect(screen.queryByTestId('workflowPageShareOfflineReasons')).not.toBeInTheDocument();
     expect(screen.getByTestId('workflowPageShareStatus')).toHaveTextContent('Offline');
+    expect(screen.getByTestId('workflowPageShareUrl')).toBeDisabled();
+    expect(screen.getByTestId('workflowPageShareOpen')).toHaveAttribute('href');
   });
 
   it('warns when the workflow is disabled', async () => {
     setup({ status: { online: false, reasons: ['workflow_disabled'] } });
 
     expect(await screen.findByText(/The workflow is disabled/)).toBeVisible();
-    expect(screen.getByTestId('workflowPageShareUrl')).toBeInTheDocument();
+    expect(screen.getByTestId('workflowPageShareOfflineReasons')).toBeVisible();
+    expect(screen.getByTestId('workflowPageShareUrl')).toBeDisabled();
+    expect(screen.getByTestId('workflowPageShareOpen')).toHaveAttribute('href');
   });
 
   it('disables every change without the Manage pages privilege', async () => {
@@ -150,7 +181,10 @@ describe('WorkflowPageShareModal', () => {
     const { services } = setup();
     fireEvent.click(await screen.findByTestId('workflowPageShareUnpublish'));
 
-    expect(screen.getByTestId('workflowPageShareConfirm-unpublish')).toBeVisible();
+    expect(screen.getByTestId('workflowPageShareConfirm-unpublish')).toHaveTextContent(
+      'The link stops working until you publish again.'
+    );
+    expect(screen.queryByTestId('workflowPageShareUnpublish')).not.toBeInTheDocument();
     fireEvent.click(screen.getByText('Cancel'));
 
     expect(screen.queryByTestId('workflowPageShareConfirm-unpublish')).not.toBeInTheDocument();

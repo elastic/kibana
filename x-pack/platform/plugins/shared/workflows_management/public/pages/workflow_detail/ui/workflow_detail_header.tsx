@@ -18,11 +18,19 @@ import { ChangeHistoryModalContext } from '@kbn/change-history-ui';
 import type { AppMenuConfig, AppMenuItemType } from '@kbn/core-chrome-app-menu-components';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { i18n } from '@kbn/i18n';
+import { useQuery } from '@kbn/react-query';
 import { getPageTriggerId, isPageTrigger } from '@kbn/workflows';
 import { useWorkflowsCapabilities } from '@kbn/workflows-ui';
+import {
+  getPageShareStatusView,
+  WORKFLOW_PAGE_API_VERSION,
+  workflowPageApiPath,
+  workflowPageQueryKey,
+} from './page_share_model';
 import { WorkflowAccessControlModal } from './workflow_access_control_modal';
 import { WorkflowPageShareModal } from './workflow_page_share_modal';
 import { PLUGIN_ID, WORKFLOWS_DOCUMENTATION_URL } from '../../../../common';
+import type { WorkflowPageResponse } from '../../../../common/pages';
 import { useUpdateWorkflow } from '../../../entities/workflows/model/use_update_workflow';
 import {
   selectHasChanges,
@@ -122,7 +130,7 @@ export const WorkflowDetailHeader = React.memo(
     onOpenExecutionList,
   }: WorkflowDetailHeaderProps) => {
     const { id: workflowId } = useParams<{ id?: string }>();
-    const { application } = useKibana().services;
+    const { application, http } = useKibana().services;
     const back = useWorkflowDetailHeaderBack();
     const styles = useMemoCss(componentStyles);
     const [isAccessOpen, setIsAccessOpen] = useState(false);
@@ -316,6 +324,25 @@ export const WorkflowDetailHeader = React.memo(
           : undefined,
       [workflow?.definition?.triggers]
     );
+    const pageId = savedPageTrigger ? getPageTriggerId(savedPageTrigger) : undefined;
+    const { data: sharedPage } = useQuery({
+      queryKey: workflowPageQueryKey(workflowId ?? '', pageId ?? ''),
+      queryFn: () => {
+        if (!workflowId || !pageId) {
+          throw new Error('Workflow page query ran without a workflow or page id');
+        }
+        return http.get<WorkflowPageResponse>(
+          workflowPageApiPath(workflowId, pageId),
+          WORKFLOW_PAGE_API_VERSION
+        );
+      },
+      enabled: Boolean(workflowId && pageId),
+      refetchOnWindowFocus: false,
+    });
+    const pageShareStatus = useMemo(
+      () => (sharedPage ? getPageShareStatusView(sharedPage, 'header') : undefined),
+      [sharedPage]
+    );
 
     const sharePageItem = useMemo<AppMenuItemType | undefined>(() => {
       if (!workflowId || !savedPageTrigger || !canExecuteWorkflow || isViewingExecution) {
@@ -329,10 +356,11 @@ export const WorkflowDetailHeader = React.memo(
           defaultMessage: 'Share page',
         }),
         iconType: 'link',
+        tooltipContent: pageShareStatus?.tooltip,
         run: () => setIsPageShareOpen(true),
         testId: 'workflowDetailSharePageButton',
       };
-    }, [workflowId, savedPageTrigger, canExecuteWorkflow, isViewingExecution]);
+    }, [workflowId, savedPageTrigger, canExecuteWorkflow, isViewingExecution, pageShareStatus]);
 
     const enabledSwitchConfig = useMemo<NonNullable<AppMenuConfig['switch']> | undefined>(() => {
       if (!workflowId) {
@@ -375,6 +403,20 @@ export const WorkflowDetailHeader = React.memo(
 
     const badges = useMemo<AppHeaderBadge[]>(() => {
       const result: AppHeaderBadge[] = [];
+
+      if (pageShareStatus) {
+        result.push({
+          label: pageShareStatus.label,
+          color: pageShareStatus.color,
+          tooltip: pageShareStatus.tooltip,
+          onClick: () => setIsPageShareOpen(true),
+          onClickAriaLabel: i18n.translate('workflows.workflowDetailHeader.sharePageStatusBadge', {
+            defaultMessage: 'Share page, {status}',
+            values: { status: pageShareStatus.label },
+          }),
+          'data-test-subj': 'workflowDetailPageStatusBadge',
+        });
+      }
 
       if (isManagedWorkflow) {
         result.push({
@@ -433,6 +475,7 @@ export const WorkflowDetailHeader = React.memo(
 
       return result;
     }, [
+      pageShareStatus,
       isManagedWorkflow,
       hasUnsavedChanges,
       workflowId,
