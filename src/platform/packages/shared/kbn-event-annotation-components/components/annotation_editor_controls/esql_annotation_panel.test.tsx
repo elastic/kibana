@@ -9,7 +9,6 @@
 
 import React from 'react';
 import { fireEvent, render, screen, within } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import type { EsqlEventAnnotationConfig } from '@kbn/event-annotation-common';
 import { ConfigPanelEsqlAnnotation } from './esql_annotation_panel';
@@ -118,24 +117,12 @@ describe('ConfigPanelEsqlAnnotation', () => {
     expect(screen.getByText(hint)).toBeInTheDocument();
   });
 
-  it('adds tooltip columns without changing the existing configuration', async () => {
-    const { onChange } = renderPanel();
-
-    await userEvent.click(screen.getByRole('combobox', { name: 'Tooltip fields' }));
-    await userEvent.click(
-      within(screen.getByRole('listbox')).getByRole('option', { name: 'version' })
-    );
-
-    expect(onChange).toHaveBeenCalledWith({ ...annotation, extraColumns: ['duration', 'version'] });
-  });
-
   it('retains missing bindings and reports errors instead of choosing another column', () => {
     const { onChange } = renderPanel(annotation, [columns[1]]);
 
     expect(screen.getByLabelText('Target date field')).toHaveValue('start');
     expect(screen.getByLabelText('Target date field')).toHaveAttribute('aria-invalid', 'true');
-    expect(screen.getByText('duration')).toBeInTheDocument();
-    expect(screen.getAllByText(/is missing or has an incompatible type/)).toHaveLength(2);
+    expect(screen.getAllByText(/is missing or has an incompatible type/)).toHaveLength(1);
     expect(onChange).not.toHaveBeenCalled();
   });
 

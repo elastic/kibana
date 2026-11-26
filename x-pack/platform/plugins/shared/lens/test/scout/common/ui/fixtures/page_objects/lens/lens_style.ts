@@ -443,10 +443,9 @@ export class LensStyle {
     if (opts.textColumn) {
       await this.selectEsqlAnnotationColumn('lnsXY-annotation-esql-textColumn', opts.textColumn);
     }
-    if (opts.tooltipColumns) {
-      await this.page.components
-        .comboBox('lnsXY-annotation-esql-tooltip-columns')
-        .setSelectedOptions(opts.tooltipColumns);
+    // ES|QL annotations share the DSL tooltip section, which allows up to three fields
+    for (const tooltipColumn of opts.tooltipColumns ?? []) {
+      await this.addFieldToTooltip(tooltipColumn);
     }
   }
 

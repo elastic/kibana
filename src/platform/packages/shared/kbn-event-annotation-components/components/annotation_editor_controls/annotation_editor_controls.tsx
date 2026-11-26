@@ -51,7 +51,7 @@ import { isQueryAnnotationConfig, isRangeAnnotationConfig } from '../..';
 import { defaultAnnotationLabel, getColumnFieldOptions, getRangeToPointOverrides } from './helpers';
 import { annotationsIconSet } from './icon_set';
 import { sanitizeProperties } from './helpers';
-import { TooltipSection } from './tooltip_annotation_panel';
+import { TooltipFieldsEditor, TooltipSection } from './tooltip_annotation_panel';
 import { ConfigPanelManualAnnotation } from './manual_annotation_panel';
 import { ConfigPanelQueryAnnotation } from './query_annotation_panel';
 
@@ -325,7 +325,7 @@ const AnnotationEditorControls = ({
                               }
                             : undefined
                         }
-                        options={getColumnFieldOptions(columns)}
+                        options={getColumnFieldOptions(columns, 'lnsXY-annotation-fieldOption-')}
                         onChoose={(choice: FieldOptionValue | undefined) => {
                           if (choice) {
                             update<EsqlEventAnnotationConfig>({
@@ -489,6 +489,28 @@ const AnnotationEditorControls = ({
               currentConfig={currentAnnotation}
               setConfig={update}
               dataView={dataView}
+            />
+          </EuiFormRow>
+        </DimensionEditorSection>
+      )}
+      {isEsqlBased && esql && currentAnnotation && (
+        <DimensionEditorSection
+          title={i18n.translate('eventAnnotationComponents.xyChart.tooltip', {
+            defaultMessage: 'Tooltip',
+          })}
+        >
+          <EuiFormRow
+            display="rowCompressed"
+            fullWidth
+            label={i18n.translate('eventAnnotationComponents.xyChart.annotation.tooltip', {
+              defaultMessage: 'Show additional fields',
+            })}
+          >
+            <TooltipFieldsEditor
+              extraFields={currentAnnotation.extraColumns}
+              onChange={(extraColumns) => update<EsqlEventAnnotationConfig>({ extraColumns })}
+              options={getColumnFieldOptions(esql.columns, 'lnsXY-annotation-tooltip-fieldOption-')}
+              isFieldValid={(fieldName) => esql.columns.some(({ name }) => name === fieldName)}
             />
           </EuiFormRow>
         </DimensionEditorSection>

@@ -28,7 +28,8 @@ import { isQueryAnnotationConfig, isRangeAnnotationConfig } from '../..';
 
 /** ES|QL result columns as field picker options; the result has no data view to read fields from. */
 export const getColumnFieldOptions = (
-  columns: DatatableColumn[]
+  columns: DatatableColumn[],
+  optionTestSubjPrefix: string
 ): Array<FieldOption<FieldOptionValue>> =>
   columns.map(({ name, meta }) => ({
     label: name,
@@ -36,7 +37,7 @@ export const getColumnFieldOptions = (
     value: { type: 'field', field: name, dataType: meta.type as DataType },
     exists: true,
     compatible: true,
-    'data-test-subj': `lnsXY-annotation-fieldOption-${name}`,
+    'data-test-subj': `${optionTestSubjPrefix}${name}`,
   }));
 
 export const defaultAnnotationLabel = i18n.translate(

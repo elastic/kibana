@@ -177,6 +177,59 @@ describe('ES|QL annotation editor', () => {
     expect(screen.queryByTestId('lns-lineMarker-text-visibility')).not.toBeInTheDocument();
   });
 
+  describe('tooltip fields', () => {
+    it('lists the bound tooltip columns in a Tooltip section below Appearance', () => {
+      renderEditor();
+
+      expect(screen.getByText('Show additional fields')).toBeInTheDocument();
+      expect(
+        within(screen.getByTestId('lnsXY-annotation-tooltip-field-picker--0')).getByRole('combobox')
+      ).toHaveValue('version');
+      expect(screen.queryByTestId('lnsXY-annotation-esql-tooltip-columns')).not.toBeInTheDocument();
+    });
+
+    it('adds a tooltip column without changing the rest of the configuration', async () => {
+      const onChange = renderEditor();
+
+      fireEvent.click(screen.getByTestId('lnsXY-annotation-tooltip-add_field'));
+      const picker = await screen.findByTestId('lnsXY-annotation-tooltip-field-picker--1');
+      fireEvent.click(within(picker).getByRole('combobox'));
+      fireEvent.click(await screen.findByTestId('lnsXY-annotation-tooltip-fieldOption-start'));
+
+      await waitFor(() =>
+        expect(onChange).toHaveBeenLastCalledWith({
+          ...annotation,
+          extraColumns: ['version', 'start'],
+        })
+      );
+    });
+
+    it('does not offer more tooltip columns than DSL annotations', () => {
+      renderEditor({ ...annotation, extraColumns: ['start', 'end', 'version'] });
+
+      expect(screen.getByTestId('lnsXY-annotation-tooltip-add_field')).toBeDisabled();
+    });
+
+    it('marks a tooltip column missing from the result as invalid and keeps it', () => {
+      const onChange = renderEditor({ ...annotation, extraColumns: ['gone'] });
+
+      expect(
+        within(screen.getByTestId('lnsXY-annotation-tooltip-field-picker--0')).getByRole('combobox')
+      ).toHaveAttribute('aria-invalid', 'true');
+      expect(onChange).not.toHaveBeenCalled();
+    });
+
+    it('offers tooltip columns for ranges too, since range tooltips show them', () => {
+      renderEditor({
+        ...annotation,
+        key: { type: 'range' },
+        endTimeColumn: 'end',
+      } as EsqlEventAnnotationConfig);
+
+      expect(screen.getByTestId('lnsXY-annotation-tooltip-field-picker--0')).toBeInTheDocument();
+    });
+  });
+
   it('keeps query and column bindings when editing appearance', async () => {
     const onChange = renderEditor();
 

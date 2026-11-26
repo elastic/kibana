@@ -9,7 +9,7 @@
 
 import React, { useId } from 'react';
 import type { ReactNode } from 'react';
-import { EuiComboBox, EuiFormRow, EuiSelect, EuiSpacer, EuiSwitch } from '@elastic/eui';
+import { EuiFormRow, EuiSelect, EuiSpacer, EuiSwitch } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import type { EsqlEventAnnotationConfig } from '@kbn/event-annotation-common';
@@ -28,14 +28,9 @@ export const ConfigPanelEsqlAnnotation = ({
   onChange,
   queryEditor,
 }: Props) => {
-  const tooltipColumnsId = useId();
   const rangeSwitchId = useId();
   const isRange = 'endTimeColumn' in annotation;
   const dateColumns = columns.filter(({ meta }) => meta.type === 'date');
-  const extraColumns = annotation.extraColumns ?? [];
-  const missingExtraColumns = extraColumns.filter(
-    (name) => !columns.some(({ name: columnName }) => columnName === name)
-  );
 
   return (
     <>
@@ -117,28 +112,6 @@ export const ConfigPanelEsqlAnnotation = ({
           }
         />
       )}
-      <EuiFormRow
-        id={tooltipColumnsId}
-        label={i18n.translate('eventAnnotationComponents.esqlAnnotation.extraColumnsLabel', {
-          defaultMessage: 'Tooltip fields',
-        })}
-        display="rowCompressed"
-        fullWidth
-        isInvalid={missingExtraColumns.length > 0}
-        error={missingExtraColumns.map((column) => getMissingColumnError(column))}
-      >
-        <EuiComboBox
-          compressed
-          fullWidth
-          options={columns.map(({ name }) => ({ label: name }))}
-          selectedOptions={extraColumns.map((name) => ({ label: name }))}
-          onChange={(selected) =>
-            onChange({ ...annotation, extraColumns: selected.map(({ label }) => label) })
-          }
-          isInvalid={missingExtraColumns.length > 0}
-          data-test-subj="lnsXY-annotation-esql-tooltip-columns"
-        />
-      </EuiFormRow>
     </>
   );
 };
