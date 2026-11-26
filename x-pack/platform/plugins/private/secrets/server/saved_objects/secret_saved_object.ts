@@ -18,7 +18,7 @@ import {
 
 export const SECRET_SAVED_OBJECT_TYPE = 'secret';
 
-const USERNAME_MAX_LENGTH = 1024;
+const PROFILE_ID_MAX_LENGTH = 1024;
 const TIMESTAMP_MAX_LENGTH = 64;
 // The schema sees the stored value: the base64 ciphertext of the value as JSON. JSON takes at most
 // six bytes per character, which base64 turns into eight, and encryption adds a short header.
@@ -27,9 +27,9 @@ const ENCRYPTED_VALUE_MAX_LENGTH = 8 * SECRET_VALUE_MAX_LENGTH + 1024;
 const secretSchemaV1 = schema.object({
   name: schema.string({ minLength: 1, maxLength: SECRET_NAME_MAX_LENGTH }),
   description: schema.maybe(schema.string({ maxLength: SECRET_DESCRIPTION_MAX_LENGTH })),
-  createdBy: schema.nullable(schema.string({ maxLength: USERNAME_MAX_LENGTH })),
+  createdBy: schema.nullable(schema.string({ maxLength: PROFILE_ID_MAX_LENGTH })),
   createdAt: schema.string({ maxLength: TIMESTAMP_MAX_LENGTH }),
-  updatedBy: schema.nullable(schema.string({ maxLength: USERNAME_MAX_LENGTH })),
+  updatedBy: schema.nullable(schema.string({ maxLength: PROFILE_ID_MAX_LENGTH })),
   updatedAt: schema.string({ maxLength: TIMESTAMP_MAX_LENGTH }),
   value: schema.string({ minLength: 1, maxLength: ENCRYPTED_VALUE_MAX_LENGTH }),
 });
@@ -93,6 +93,8 @@ export const registerSecretType = ({
 
   encryptedSavedObjects.registerType({
     type: SECRET_SAVED_OBJECT_TYPE,
+    // The id is derived from the space and the name, so that a name is unique in its space.
+    enforceRandomId: false,
     attributesToEncrypt: new Set(ATTRIBUTES_TO_ENCRYPT),
     attributesToIncludeInAAD: new Set(ATTRIBUTES_INCLUDED_IN_AAD),
   });

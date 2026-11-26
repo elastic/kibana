@@ -35,6 +35,8 @@ const OTHER_SPACE_ID = 'team-a';
 const VALUE = 'correct-horse-battery-staple';
 const NEW_VALUE = 'another-long-secret-value';
 const DESCRIPTION = 'Token of the release bot';
+const CREATOR_PROFILE_ID = 'u_creator_0';
+const UPDATER_PROFILE_ID = 'u_updater_0';
 
 type KibanaRoot = ReturnType<typeof createRootWithCorePlugins>;
 
@@ -74,7 +76,7 @@ describe('secrets on Elasticsearch', () => {
       await action();
       return replace(params);
     });
-    return createSecretsClient({ storage, username: null });
+    return createSecretsClient({ storage, profileId: null });
   };
 
   beforeAll(async () => {
@@ -257,15 +259,21 @@ describe('secrets on Elasticsearch', () => {
     it('keeps who created the secret and records who updated it', async () => {
       const name = 'attributed_token';
       const storage = createStorage();
-      await createSecretsClient({ storage, username: 'alice' }).create({ name, value: VALUE });
+      await createSecretsClient({ storage, profileId: CREATOR_PROFILE_ID }).create({
+        name,
+        value: VALUE,
+      });
       const created = await getStored(name);
 
-      await createSecretsClient({ storage, username: 'bob' }).update({ name, value: NEW_VALUE });
+      await createSecretsClient({ storage, profileId: UPDATER_PROFILE_ID }).update({
+        name,
+        value: NEW_VALUE,
+      });
 
       expect(await getStored(name)).toMatchObject({
-        createdBy: 'alice',
+        createdBy: CREATOR_PROFILE_ID,
         createdAt: created?.createdAt,
-        updatedBy: 'bob',
+        updatedBy: UPDATER_PROFILE_ID,
       });
     });
 

@@ -84,7 +84,7 @@ describe('checking changes on all registered encrypted SO types', () => {
         "ingest-outputs": "d66716d5333484a25c57f7917bead5ac2576ec57a4b9eb61701b573f35ab62ad",
         "oauth_state": "b01289e5c133db9d4d802a2b838e43cce4a8399566dedb21de551da57c88894a",
         "privmon-api-key": "7d7b76b3bc5287a784518731ba66d4f761052177fc04b1a85e5605846ab9de42",
-        "secret": "8d398c5a48baa48ebed4889b5c96dc28004c1bb659a9ff3e4476fb6229e2c72c",
+        "secret": "19968be7613bec09fe516cc675842fe699878bbee9415c399a2831abb2ea987d",
         "service-account-credential": "5d9f328d92718249b324fbd5d01332bcef80be980003d510a3bd24af230244ff",
         "service-account-workload-binding": "bdac5e0e6513a9644fcd9e2195d0fe3a105629dd798f2b23fe7d8b33d2d41d2b",
         "synthetics-monitor": "de18413761b36881d871e677c248336a70c90f0508e58f4162ee4cd579be2148",
