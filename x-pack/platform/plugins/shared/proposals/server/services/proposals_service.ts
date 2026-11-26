@@ -1313,9 +1313,11 @@ export class ProposalsService {
   }
 
   /**
-   * Deletes the undecided proposals (pending, expired, superseded) of a conversation that no
-   * longer exists. The gate executions still parked on a pending proposal are cancelled first,
-   * so they do not idle until their deadline.
+   * Deletes the undecided proposals of a conversation that no longer exists. The gate executions
+   * still parked on a pending proposal are cancelled first, so they do not idle until their
+   * deadline. A proposal whose gate was already released by an approval is kept, so the approved
+   * action still runs and records its decision. Kept proposals that pointed at a deleted
+   * successor have the pointer cleared.
    */
   async deleteByConversation(
     conversationId: string,
@@ -1328,7 +1330,7 @@ export class ProposalsService {
       query: {
         bool: {
           filter: [{ term: { spaceId } }, { term: { conversationId } }],
-          must_not: [{ exists: { field: 'decision' } }],
+          must_not: [{ exists: { field: 'decision' } }, { exists: { field: 'gateReleasedAt' } }],
         },
       },
       conflicts: 'proceed',
@@ -1338,6 +1340,71 @@ export class ProposalsService {
     if (failures?.length) {
       this.deps.logger.warn(
         `Could not delete ${failures.length} proposal(s) of deleted conversation [${conversationId}]`
+      );
+    }
+    await this.clearDeletedSuccessors(conversationId, spaceId);
+  }
+
+  /**
+   * Best-effort: removes `supersededBy` from the kept proposals of the conversation whose
+   * successor no longer exists.
+   */
+  private async clearDeletedSuccessors(conversationId: string, spaceId: string): Promise<void> {
+    try {
+      const successorsById = new Map<string, string>();
+      const pages = this.deps.esClient.helpers.scrollSearch<Pick<ProposalDocument, 'supersededBy'>>(
+        {
+          index: PROPOSALS_INDEX_NAME,
+          ignore_unavailable: true,
+          _source: ['supersededBy'],
+          query: {
+            bool: {
+              filter: [
+                { term: { spaceId } },
+                { term: { conversationId } },
+                { exists: { field: 'supersededBy' } },
+              ],
+            },
+          },
+        }
+      );
+      for await (const { body } of pages) {
+        for (const { _id: id, _source: source } of body.hits.hits) {
+          const successorId = blankToUndefined(source?.supersededBy);
+          if (id !== undefined && successorId !== undefined) {
+            successorsById.set(id, successorId);
+          }
+        }
+      }
+      if (successorsById.size === 0) {
+        return;
+      }
+
+      const { docs } = await this.deps.esClient.mget({
+        index: PROPOSALS_INDEX_NAME,
+        ids: [...new Set(successorsById.values())],
+        _source: false,
+      });
+      const existing = new Set(
+        docs.filter((doc) => 'found' in doc && doc.found).map(({ _id: id }) => id)
+      );
+      const orphaned = [...successorsById]
+        .filter(([, successorId]) => !existing.has(successorId))
+        .map(([id]) => id);
+      if (orphaned.length === 0) {
+        return;
+      }
+
+      await this.deps.esClient.updateByQuery({
+        index: PROPOSALS_INDEX_NAME,
+        query: { bool: { filter: [{ term: { spaceId } }, { ids: { values: orphaned } }] } },
+        script: { source: "ctx._source.remove('supersededBy')", lang: 'painless' },
+        conflicts: 'proceed',
+        refresh: true,
+      });
+    } catch (error) {
+      this.deps.logger.warn(
+        `Could not clear the deleted successors of conversation [${conversationId}]: ${error}`
       );
     }
   }
@@ -1364,6 +1431,7 @@ export class ProposalsService {
               { term: { status: 'pending' } },
               { exists: { field: 'workflowExecutionId' } },
             ],
+            must_not: [{ exists: { field: 'gateReleasedAt' } }],
           },
         },
       });

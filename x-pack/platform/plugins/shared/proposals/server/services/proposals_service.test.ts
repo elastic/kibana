@@ -2865,6 +2865,32 @@ describe('ProposalsService', () => {
       } as never);
     };
 
+    const mockKept = (
+      esClient: ReturnType<typeof createService>['esClient'],
+      supersededByIds: Record<string, string>,
+      existingIds: string[]
+    ) => {
+      esClient.helpers.scrollSearch.mockImplementation(async function* () {
+        yield {
+          body: {
+            hits: {
+              hits: Object.entries(supersededByIds).map(([id, supersededBy]) => ({
+                _id: id,
+                _source: { supersededBy },
+              })),
+            },
+          },
+        };
+      } as never);
+      esClient.mget.mockImplementation((async ({ ids }: { ids: string[] }) => ({
+        docs: ids.map((id) => ({
+          _id: id,
+          _index: PROPOSALS_INDEX_NAME,
+          found: existingIds.includes(id),
+        })),
+      })) as never);
+    };
+
     it('deletes only the undecided proposals of the conversation in the space', async () => {
       const { service, esClient } = createService(createStorage());
       mockScroll(esClient);
@@ -2880,7 +2906,10 @@ describe('ProposalsService', () => {
                 { term: { spaceId: SPACE_ID } },
                 { term: { conversationId: 'conversation-1' } },
               ],
-              must_not: [{ exists: { field: 'decision' } }],
+              must_not: [
+                { exists: { field: 'decision' } },
+                { exists: { field: 'gateReleasedAt' } },
+              ],
             },
           },
         })
@@ -2904,6 +2933,7 @@ describe('ProposalsService', () => {
                 { term: { status: 'pending' } },
                 { exists: { field: 'workflowExecutionId' } },
               ],
+              must_not: [{ exists: { field: 'gateReleasedAt' } }],
             },
           },
         })
@@ -2960,6 +2990,67 @@ describe('ProposalsService', () => {
       await service.deleteByConversation('conversation-1', SPACE_ID, request);
 
       expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('2 proposal(s)'));
+    });
+
+    it('clears supersededBy on kept proposals whose successor was deleted', async () => {
+      const { service, esClient } = createService(createStorage());
+      mockScroll(esClient);
+      mockKept(esClient, { 'kept-1': 'deleted-retry', 'kept-2': 'live-retry' }, ['live-retry']);
+
+      await service.deleteByConversation('conversation-1', SPACE_ID, request);
+
+      expect(esClient.helpers.scrollSearch).toHaveBeenCalledWith(
+        expect.objectContaining({
+          query: {
+            bool: {
+              filter: [
+                { term: { spaceId: SPACE_ID } },
+                { term: { conversationId: 'conversation-1' } },
+                { exists: { field: 'supersededBy' } },
+              ],
+            },
+          },
+        })
+      );
+      expect(esClient.updateByQuery).toHaveBeenCalledTimes(1);
+      expect(esClient.updateByQuery).toHaveBeenCalledWith(
+        expect.objectContaining({
+          index: PROPOSALS_INDEX_NAME,
+          query: {
+            bool: {
+              filter: [{ term: { spaceId: SPACE_ID } }, { ids: { values: ['kept-1'] } }],
+            },
+          },
+          script: expect.objectContaining({ source: "ctx._source.remove('supersededBy')" }),
+        })
+      );
+    });
+
+    it('looks for deleted successors only after the delete', async () => {
+      const { service, esClient } = createService(createStorage());
+      mockScroll(esClient);
+      mockKept(esClient, { 'kept-1': 'deleted-retry' }, []);
+
+      await service.deleteByConversation('conversation-1', SPACE_ID, request);
+
+      const [deleteOrder] = esClient.deleteByQuery.mock.invocationCallOrder;
+      const [lookupOrder] = esClient.mget.mock.invocationCallOrder;
+      expect(lookupOrder).toBeGreaterThan(deleteOrder);
+    });
+
+    it('warns instead of failing when the successors cannot be cleared', async () => {
+      const { service, esClient, logger } = createService(createStorage());
+      mockScroll(esClient);
+      esClient.helpers.scrollSearch.mockImplementation(async function* () {
+        throw new Error('boom');
+      } as never);
+
+      await expect(
+        service.deleteByConversation('conversation-1', SPACE_ID, request)
+      ).resolves.toBeUndefined();
+
+      expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('deleted successors'));
+      expect(esClient.updateByQuery).not.toHaveBeenCalled();
     });
   });
 
