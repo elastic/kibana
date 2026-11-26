@@ -170,7 +170,7 @@ const isRequired = (schema: z.ZodType): boolean => !schema.safeParse(undefined).
 const readMetaLabel = (schema: z.ZodType): string | undefined => {
   const meta = readFieldMeta(schema);
   const found = [meta?.title, meta?.label].find(
-    (value): value is string => typeof value === 'string' && value.trim() !== ''
+    (value): value is string => value !== undefined && value.trim() !== ''
   );
   return found?.trim();
 };
@@ -179,10 +179,48 @@ const readMetaLabel = (schema: z.ZodType): string | undefined => {
 const resolveFieldLabel = (key: string, schema: z.ZodType): string =>
   readMetaLabel(schema) ?? prettifyCatalogKey(key);
 
-const readFieldMeta = (schema: z.ZodType): Record<string, unknown> | undefined => {
+/** The `.meta()` keys the form reads; a value of another type is ignored. */
+interface StepFormMeta {
+  readonly title?: string;
+  readonly label?: string;
+  readonly advanced?: boolean;
+  readonly language?: StepFieldLanguage;
+  readonly preferData?: boolean;
+  readonly templatable?: boolean;
+  readonly keyValue?: boolean;
+}
+
+const STEP_FIELD_LANGUAGES: ReadonlySet<string> = new Set<StepFieldLanguage>([
+  'json',
+  'kuery',
+  'plaintext',
+  'esql',
+  'json-liquid',
+]);
+
+const isStepFieldLanguage = (value: unknown): value is StepFieldLanguage =>
+  typeof value === 'string' && STEP_FIELD_LANGUAGES.has(value);
+
+const stringOrUndefined = (value: unknown): string | undefined =>
+  typeof value === 'string' ? value : undefined;
+
+const booleanOrUndefined = (value: unknown): boolean | undefined =>
+  typeof value === 'boolean' ? value : undefined;
+
+const readFieldMeta = (schema: z.ZodType): StepFormMeta | undefined => {
   for (const candidate of [schema, unwrapSchema(schema)]) {
     const meta = candidate.meta();
-    if (meta) return meta;
+    if (meta) {
+      return {
+        title: stringOrUndefined(meta.title),
+        label: stringOrUndefined(meta.label),
+        advanced: booleanOrUndefined(meta.advanced),
+        language: isStepFieldLanguage(meta.language) ? meta.language : undefined,
+        preferData: booleanOrUndefined(meta.preferData),
+        templatable: booleanOrUndefined(meta.templatable),
+        keyValue: booleanOrUndefined(meta.keyValue),
+      };
+    }
   }
   return undefined;
 };
@@ -381,14 +419,8 @@ const resolveKind = (
 
   // Schema-level `.meta({ language })` annotation takes priority over name-based overrides,
   // so step types can declare their language without a hardcoded entry in this file.
-  const metaLanguage = readFieldMeta(schema)?.language as StepFieldLanguage | undefined;
-  if (
-    metaLanguage === 'json' ||
-    metaLanguage === 'kuery' ||
-    metaLanguage === 'plaintext' ||
-    metaLanguage === 'esql' ||
-    metaLanguage === 'json-liquid'
-  ) {
+  const metaLanguage = readFieldMeta(schema)?.language;
+  if (metaLanguage) {
     return { kind: 'code', language: metaLanguage };
   }
 

@@ -7,10 +7,12 @@
 
 import { act, fireEvent, render, waitFor } from '@testing-library/react';
 import React from 'react';
+import { monaco } from '@kbn/code-editor';
 import { useWorkflowsCapabilities } from '@kbn/workflows-ui';
 import { SkipUnsavedRunConfirmationStorageKey } from './use_run_workflow_with_confirmation';
 import { WorkflowDetailEditor } from './workflow_detail_editor';
 import { createMockStore } from '../../../entities/workflows/store/__mocks__/store.mock';
+import type { RootState } from '../../../entities/workflows/store/types';
 import {
   selectEditorWorkflowDefinition,
   selectFocusedStepId,
@@ -29,16 +31,19 @@ import {
   HIGHLIGHTED_STEP_TRIGGER,
   setYamlString,
 } from '../../../entities/workflows/store/workflow_detail/slice';
+import type { WorkflowVisualEditor } from '../../../features/workflow_visual_editor';
 import { mockWorkflowsManagementCapabilities } from '../../../hooks/__mocks__/use_workflows_capabilities';
 import { useWorkflowsExperimentalUiSetting } from '../../../hooks/use_workflows_experimental_ui_setting';
-import { TestWrapper } from '../../../shared/test_utils';
+import { createMockMonacoEditor, TestWrapper } from '../../../shared/test_utils';
+import type { WorkflowYAMLEditorProps } from '../../../widgets/workflow_yaml_editor/ui/workflow_yaml_editor';
 
 // Mock hooks
 const mockUseKibana = jest.fn();
 const mockUseUiSetting$ = jest.fn();
 const mockUseWorkflowUrlState = jest.fn();
 const mockUseWorkflowActions = jest.fn();
-const mockUseSelector = jest.fn();
+type StateSelector = (state: RootState) => unknown;
+const mockUseSelector = jest.fn<unknown, [StateSelector]>();
 const mockUseParams = jest.fn();
 
 jest.mock('@kbn/kibana-react-plugin/public', () => ({
@@ -60,7 +65,7 @@ jest.mock('../../../entities/connectors/model/use_available_connectors', () => (
 }));
 jest.mock('react-redux-v7', () => ({
   ...jest.requireActual('react-redux-v7'),
-  useSelector: (selector: any) => mockUseSelector(selector),
+  useSelector: (selector: StateSelector) => mockUseSelector(selector),
 }));
 
 // Mock lazy loaded components
@@ -70,9 +75,19 @@ const WorkflowYAMLEditorMock = ({
   editorRef,
   onToggleEditorMode,
   onValidationPanelHeightChange,
-}: any) => {
+}: Pick<
+  WorkflowYAMLEditorProps,
+  | 'highlightDiff'
+  | 'onStepRun'
+  | 'editorRef'
+  | 'onToggleEditorMode'
+  | 'onValidationPanelHeightChange'
+>) => {
   if (editorRef) {
-    editorRef.current = { getPosition: () => ({ lineNumber: 4 }) };
+    // The panel only reads the caret line from the editor.
+    editorRef.current = createMockMonacoEditor('', {
+      getPosition: () => new monaco.Position(4, 1),
+    }).editor;
   }
   return (
     <div data-test-subj="workflow-yaml-editor">
@@ -111,7 +126,14 @@ jest.mock('../../../widgets/workflow_yaml_editor', () => ({
 }));
 
 jest.mock('../../../features/workflow_visual_editor', () => ({
-  WorkflowVisualEditor: ({ onStepRun, onRunWorkflow, canRunStepDirectly }: any) => (
+  WorkflowVisualEditor: ({
+    onStepRun,
+    onRunWorkflow,
+    canRunStepDirectly,
+  }: Pick<
+    React.ComponentProps<typeof WorkflowVisualEditor>,
+    'onStepRun' | 'onRunWorkflow' | 'canRunStepDirectly'
+  >) => (
     <div data-test-subj="workflow-visual-editor">
       <div data-test-subj="visual-editor-content">{'Visual Editor'}</div>
       <div data-test-subj="visual-editor-can-run-directly">
@@ -173,7 +195,7 @@ describe('WorkflowDetailEditor', () => {
     'version: "1"\nname: Test Workflow\ntriggers:\n  - type: manual\nsteps:\n  - type: log\n    with:\n      message: hello';
 
   // Named base implementation so tests can extend it without creating infinite recursion
-  const baseUseSelectorImpl = (selector: any) => {
+  const baseUseSelectorImpl = (selector: StateSelector) => {
     if (selector === selectIsEditorExecutionYaml) return false;
     if (selector === selectIsExecutionsTab) return false;
     if (selector === selectWorkflow) return { managed: false };
@@ -290,7 +312,7 @@ describe('WorkflowDetailEditor', () => {
     });
 
     it('does not show the read-only badge on the executions tab without a selection', () => {
-      mockUseSelector.mockImplementation((selector: any) => {
+      mockUseSelector.mockImplementation((selector: StateSelector) => {
         if (selector === selectIsExecutionsTab) return true;
         return baseUseSelectorImpl(selector);
       });
@@ -327,7 +349,7 @@ describe('WorkflowDetailEditor', () => {
     });
 
     it('shows the read-only badge for managed workflows', () => {
-      mockUseSelector.mockImplementation((selector: any) => {
+      mockUseSelector.mockImplementation((selector: StateSelector) => {
         if (selector === selectWorkflow) return { managed: true };
         return baseUseSelectorImpl(selector);
       });
@@ -380,7 +402,7 @@ describe('WorkflowDetailEditor', () => {
       );
 
       // Simulate cursor being inside the triggers block via Redux-derived focusedTriggerId
-      mockUseSelector.mockImplementation((selector: any) => {
+      mockUseSelector.mockImplementation((selector: StateSelector) => {
         if (selector === selectFocusedTriggerId) return HIGHLIGHTED_STEP_TRIGGER;
         if (selector === selectFocusedStepId) return undefined;
         return baseUseSelectorImpl(selector);
@@ -408,7 +430,7 @@ describe('WorkflowDetailEditor', () => {
         (settingId: string) => settingId === 'workflows:experimentalFeatures'
       );
 
-      mockUseSelector.mockImplementation((selector: any) => {
+      mockUseSelector.mockImplementation((selector: StateSelector) => {
         if (selector === selectFocusedTriggerId) return undefined;
         if (selector === selectFocusedStepId) return 'test-step';
         return baseUseSelectorImpl(selector);
@@ -480,7 +502,7 @@ describe('WorkflowDetailEditor', () => {
         updateUrlState: jest.fn(),
         clearResumeParam: jest.fn(),
       });
-      mockUseSelector.mockImplementation((selector: any) => {
+      mockUseSelector.mockImplementation((selector: StateSelector) => {
         if (selector === selectWorkflow) return { managed: true };
         return baseUseSelectorImpl(selector);
       });
@@ -543,7 +565,7 @@ describe('WorkflowDetailEditor', () => {
           ...mockUseWorkflowUrlState(),
           editorView: 'graph',
         });
-        mockUseSelector.mockImplementation((selector: any) =>
+        mockUseSelector.mockImplementation((selector: StateSelector) =>
           selector === selectWorkflow ? workflow : baseUseSelectorImpl(selector)
         );
         return renderEditor();
@@ -657,7 +679,7 @@ describe('WorkflowDetailEditor', () => {
         runIndividualStep: { mutateAsync: mockMutateAsync },
       });
 
-      mockUseSelector.mockImplementation((selector: any) => {
+      mockUseSelector.mockImplementation((selector: StateSelector) => {
         if (selector === selectIsExecutionsTab) return true; // on the executions tab
         return baseUseSelectorImpl(selector);
       });
@@ -767,7 +789,7 @@ describe('WorkflowDetailEditor', () => {
       hasChanges?: boolean;
       isSaving?: boolean;
     } = {}) => {
-      mockUseSelector.mockImplementation((selector: any) => {
+      mockUseSelector.mockImplementation((selector: StateSelector) => {
         if (selector === selectIsYamlSyntaxValid) return isValid;
         if (selector === selectHasChanges) return hasChanges;
         if (selector === selectIsSavingYaml) return isSaving;

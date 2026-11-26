@@ -21,11 +21,52 @@ export interface Range {
   readonly endColumn: number;
 }
 
-interface Edit {
+/** One `executeEdits` operation; `text` is `null` for a pure deletion, as in Monaco. */
+export interface Edit {
   readonly range: Range;
-  readonly text: string;
+  readonly text: string | null;
   readonly forceMoveMarkers?: boolean;
 }
+
+/** A change as Monaco reports it in a content-changed event. */
+export interface ResolvedChange {
+  readonly rangeOffset: number;
+  readonly rangeLength: number;
+  readonly text: string;
+}
+
+type Disposable = monaco.IDisposable;
+
+/** The part of the model API the editor doubles implement. */
+export type ModelDouble = Pick<
+  monaco.editor.ITextModel,
+  'getValue' | 'getValueLength' | 'getOffsetAt'
+> & {
+  readonly getPositionAt: (offset: number) => Position;
+};
+
+/**
+ * The part of the editor API every double implements, checked against the real signatures.
+ * A method that is not listed here is `undefined` on the double, so add it to the double and to
+ * this type together instead of reaching for a cast.
+ */
+export type EditorDoubleCore = Pick<
+  Editor,
+  'focus' | 'revealPosition' | 'executeEdits' | 'getValue' | 'getDomNode' | 'onDidBlurEditorText'
+> & {
+  readonly getModel: () => ModelDouble | null;
+  readonly getPosition: () => Position | null;
+  readonly setPosition: (position: Position) => void;
+  readonly onDidChangeCursorPosition: (
+    listener: (event: { position: Position }) => void
+  ) => Disposable;
+  readonly createDecorationsCollection: (
+    decorations?: monaco.editor.IModelDeltaDecoration[]
+  ) => Pick<monaco.editor.IEditorDecorationsCollection, 'clear'>;
+};
+
+/** The API of the `createFakeMonacoEditor` double. */
+export type FakeMonacoEditorApi = EditorDoubleCore & Pick<Editor, 'getScrolledVisiblePosition'>;
 
 export interface FakeDecorationsCollection {
   readonly decorations: readonly monaco.editor.IModelDeltaDecoration[];
@@ -34,7 +75,10 @@ export interface FakeDecorationsCollection {
 }
 
 export interface FakeMonacoEditor {
-  /** Cast once, here: the fake implements the subset of the editor API the panel code uses. */
+  /**
+   * The double as the editor type production code asks for. It implements `FakeMonacoEditorApi`
+   * only; see the one cast in `createFakeMonacoEditor`.
+   */
   readonly editor: Editor;
   readonly getText: () => string;
   /** Replaces the document without going through an edit, like a controlled `value` prop would. */
@@ -79,6 +123,30 @@ export const positionAt = (text: string, offset: number): Position => {
 };
 
 /**
+ * Applies a batch of `executeEdits` operations like Monaco: every range refers to the text before
+ * the batch, and the changes come back from the end of the text to the start.
+ */
+export const applyEdits = (
+  text: string,
+  edits: readonly Edit[]
+): { readonly text: string; readonly changes: readonly ResolvedChange[] } => {
+  const changes = edits
+    .map(({ range, text: inserted }) => {
+      const from = offsetAt(text, { lineNumber: range.startLineNumber, column: range.startColumn });
+      const to = offsetAt(text, { lineNumber: range.endLineNumber, column: range.endColumn });
+      return { rangeOffset: from, rangeLength: to - from, text: inserted ?? '' };
+    })
+    // From the end, so earlier offsets stay valid while the batch is applied.
+    .sort((a, b) => b.rangeOffset - a.rangeOffset);
+  const next = changes.reduce(
+    (acc, { rangeOffset, rangeLength, text: inserted }) =>
+      `${acc.slice(0, rangeOffset)}${inserted}${acc.slice(rangeOffset + rangeLength)}`,
+    text
+  );
+  return { text: next, changes };
+};
+
+/**
  * A Monaco editor double with a real document model (multi-line offsets, edits, positions) and
  * decoration collections that record what was drawn. Pass `withModel: false` for an editor that
  * has not got a model yet.
@@ -92,7 +160,7 @@ export const createFakeMonacoEditor = (
     position === undefined ? { lineNumber: 1, column: 1 } : position;
   const collections: FakeDecorationsCollection[] = [];
 
-  const model = {
+  const model: ModelDouble = {
     getValue: () => text,
     getValueLength: () => text.length,
     getOffsetAt: (pos: Position) => offsetAt(text, pos),
@@ -130,22 +198,12 @@ export const createFakeMonacoEditor = (
   }));
   const focus = jest.fn();
   const revealPosition = jest.fn();
-  const executeEdits = jest.fn((_source: string, edits: readonly Edit[]) => {
-    const resolved = edits.map(({ range, text: inserted }) => ({
-      from: offsetAt(text, { lineNumber: range.startLineNumber, column: range.startColumn }),
-      to: offsetAt(text, { lineNumber: range.endLineNumber, column: range.endColumn }),
-      inserted,
-    }));
-    // Apply from the end so earlier offsets stay valid, like Monaco does for a batch.
-    resolved
-      .sort((a, b) => b.from - a.from)
-      .forEach(({ from, to, inserted }) => {
-        text = `${text.slice(0, from)}${inserted}${text.slice(to)}`;
-      });
+  const executeEdits = jest.fn((_source: string | null | undefined, edits: readonly Edit[]) => {
+    text = applyEdits(text, edits).text;
     return true;
   });
 
-  const editor = {
+  const editor: FakeMonacoEditorApi = {
     getModel: () => (withModel ? model : null),
     getPosition: () => currentPosition,
     setPosition: (next: Position) => {
@@ -160,13 +218,13 @@ export const createFakeMonacoEditor = (
     onDidChangeCursorPosition: (listener: (event: { position: Position }) => void) =>
       subscribe(cursorListeners, listener),
     onDidBlurEditorText: (listener: () => void) => subscribe(blurListeners, listener),
-    createDecorationsCollection: (decorations: readonly monaco.editor.IModelDeltaDecoration[]) => {
+    createDecorationsCollection: (decorations) => {
       let cleared = false;
       const clear = jest.fn(() => {
         cleared = true;
       });
       const collection: FakeDecorationsCollection = {
-        decorations,
+        decorations: decorations ?? [],
         clear,
         isCleared: () => cleared,
       };
@@ -176,7 +234,9 @@ export const createFakeMonacoEditor = (
   };
 
   return {
-    editor: editor as unknown as Editor,
+    // The one cast: production code takes the full editor type, the double implements the
+    // `FakeMonacoEditorApi` subset (checked above), so calling anything else is a test bug.
+    editor: editor as Editor,
     getText: () => text,
     setText: (next) => {
       text = next;

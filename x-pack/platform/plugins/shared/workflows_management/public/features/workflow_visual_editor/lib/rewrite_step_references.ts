@@ -5,11 +5,10 @@
  * 2.0.
  */
 
+import { escapeRegExp } from 'lodash';
 import { parseDocument, visit } from 'yaml';
 import { detectIndent } from '@kbn/workflows-yaml';
 import { appendPathSegment } from './reference_path';
-
-const escapeRegExp = (text: string): string => text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
 const PLAIN_NAME = /^[A-Za-z_][A-Za-z0-9_-]*$/;
 

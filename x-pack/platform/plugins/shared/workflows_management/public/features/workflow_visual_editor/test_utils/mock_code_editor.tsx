@@ -7,8 +7,8 @@
 
 import React, { useEffect, useRef } from 'react';
 import type { monaco } from '@kbn/code-editor';
-import type { Position } from './fake_monaco_editor';
-import { offsetAt, positionAt } from './fake_monaco_editor';
+import type { EditorDoubleCore, ModelDouble, Position } from './fake_monaco_editor';
+import { applyEdits, offsetAt, positionAt } from './fake_monaco_editor';
 
 type Editor = monaco.editor.IStandaloneCodeEditor;
 
@@ -35,6 +35,16 @@ export const changeBetween = (
   while (start < limit && previous[start] === next[start]) start++;
   return { rangeOffset: start, rangeLength: previousEnd - start, text: next.slice(start, caret) };
 };
+
+/** The API of the editor the mocked `CodeEditor` hands to `editorDidMount`. */
+export type MockCodeEditorApi = EditorDoubleCore &
+  Pick<Editor, 'setSelection'> & {
+    readonly onKeyDown: (listener: (event: MockKeyEvent) => void) => monaco.IDisposable;
+    readonly getTargetAtClientPoint: (
+      clientX: number,
+      clientY: number
+    ) => { readonly position: Position | null } | null;
+  };
 
 /** What Monaco hands an `onKeyDown` listener: the browser event, and ways to stop it. */
 export interface MockKeyEvent {
@@ -92,13 +102,13 @@ const MockCodeEditor = ({
 
   useEffect(() => {
     const caretOffset = () => textareaRef.current?.selectionStart ?? latest.current.value.length;
-    const model = {
+    const model: ModelDouble = {
       getValue: () => latest.current.value,
       getValueLength: () => latest.current.value.length,
       getOffsetAt: (position: Position) => offsetAt(latest.current.value, position),
       getPositionAt: (offset: number) => positionAt(latest.current.value, offset),
     };
-    const mounted = {
+    const mounted: MockCodeEditorApi = {
       focus: () => textareaRef.current?.focus(),
       getValue: () => latest.current.value,
       getModel: () => model,
@@ -125,33 +135,13 @@ const MockCodeEditor = ({
       getTargetAtClientPoint: () => ({
         position: { lineNumber: 1, column: mockCodeEditorState.dropColumn },
       }),
-      // Like Monaco: apply the edit to the text and report it as a change.
-      executeEdits: (
-        _source: string,
-        edits: ReadonlyArray<{
-          range: {
-            startLineNumber: number;
-            startColumn: number;
-            endLineNumber: number;
-            endColumn: number;
-          };
-          text: string;
-        }>
-      ) => {
-        const [{ range, text }] = edits;
-        const current = latest.current.value;
-        const from = offsetAt(current, {
-          lineNumber: range.startLineNumber,
-          column: range.startColumn,
-        });
-        const to = offsetAt(current, { lineNumber: range.endLineNumber, column: range.endColumn });
-        latest.current.onChange?.(`${current.slice(0, from)}${text}${current.slice(to)}`, {
-          changes: [{ rangeOffset: from, rangeLength: to - from, text }],
-        });
+      // Like Monaco: apply the whole batch to the text and report it as changes.
+      executeEdits: (_source, edits) => {
+        const { text, changes } = applyEdits(latest.current.value, edits);
+        latest.current.onChange?.(text, { changes });
+        return true;
       },
-      createDecorationsCollection: (
-        decorations: readonly monaco.editor.IModelDeltaDecoration[]
-      ) => {
+      createDecorationsCollection: (decorations = []) => {
         const entry = { decorations, cleared: false };
         mockCodeEditorState.decorations.push(entry);
         return {
@@ -161,8 +151,9 @@ const MockCodeEditor = ({
         };
       },
     };
-    // The mock implements the part of the editor API the panel code uses.
-    latest.current.editorDidMount?.(mounted as unknown as Editor);
+    // The one cast: `editorDidMount` is typed with the full editor, the mock implements the
+    // `MockCodeEditorApi` subset (checked above), so calling anything else is a test bug.
+    latest.current.editorDidMount?.(mounted as Editor);
   }, []);
 
   return (

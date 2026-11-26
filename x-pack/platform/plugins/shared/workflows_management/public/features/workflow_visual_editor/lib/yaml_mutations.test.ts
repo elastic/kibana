@@ -381,14 +381,17 @@ steps:
         path: ['steps', 1, 'branches', 0, 'steps', 0],
       },
     ];
-    const getAt = (value: unknown, path: ReadonlyArray<string | number>): any =>
-      path.reduce<any>((acc, key) => acc?.[key], value);
+    const isContainer = (value: unknown): value is Record<string | number, unknown> =>
+      typeof value === 'object' && value !== null;
+    // Walks objects and arrays alike; yields undefined when the path leaves the document.
+    const getAt = (value: unknown, path: ReadonlyArray<string | number>): unknown =>
+      path.reduce<unknown>((acc, key) => (isContainer(acc) ? acc[key] : undefined), value);
 
     it.each(slots)('replaceStepFragment edits a step inserted into the $label slot', (s) => {
       const inserted = insertStepIntoBranch(branching, child, s.owner, s.slot).yaml;
       const r = replaceStepFragment(inserted, 'child', withMessage);
       expect(r.success).toBe(true);
-      expect(getAt(parse(r.yaml), s.path).with).toEqual({ message: 'hi' });
+      expect(getAt(parse(r.yaml), [...s.path, 'with'])).toEqual({ message: 'hi' });
     });
 
     it.each(slots)('getStepFragment finds a step in the $label slot', (s) => {

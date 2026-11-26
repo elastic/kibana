@@ -7,7 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { fireEvent, render, screen } from '@testing-library/react';
+import { EuiProvider, useEuiTheme } from '@elastic/eui';
+import { fireEvent, render, renderHook, screen } from '@testing-library/react';
+import { Position } from '@xyflow/react';
 import React from 'react';
 import { ExecutionStatus, type WorkflowStepExecutionDto } from '@kbn/workflows';
 import { ERROR_PORT_ALONG } from './port_geometry';
@@ -36,28 +38,43 @@ jest.mock('@xyflow/react', () => ({
   useUpdateNodeInternals: () => mockUpdateNodeInternals,
 }));
 
-// Minimal NodeProps-shaped object for `WorkflowGraphNode`.
+// Complete NodeProps for `WorkflowGraphNode`, so every field React Flow passes is present.
 const makeNodeProps = (
   data: Partial<WorkflowGraphNodeData> = {},
   selected = false
-): Parameters<typeof WorkflowGraphNode>[0] =>
-  ({
-    id: 'node-1',
-    type: 'step',
-    data: {
-      label: 'Test Step',
-      stepType: 'http',
-      ...data,
-    },
-    selected,
-    dragging: false,
-    isConnectable: false,
-    zIndex: 0,
-    xPos: 0,
-    yPos: 0,
-    targetPosition: 'top' as any,
-    sourcePosition: 'bottom' as any,
-  } as any);
+): Parameters<typeof WorkflowGraphNode>[0] => ({
+  id: 'node-1',
+  type: 'step',
+  data: {
+    label: 'Test Step',
+    stepType: 'http',
+    ...data,
+  },
+  selected,
+  dragging: false,
+  draggable: false,
+  selectable: true,
+  deletable: false,
+  isConnectable: false,
+  zIndex: 0,
+  positionAbsoluteX: 0,
+  positionAbsoluteY: 0,
+  targetPosition: Position.Top,
+  sourcePosition: Position.Bottom,
+});
+
+const makeStepExecution = (status: ExecutionStatus): WorkflowStepExecutionDto => ({
+  id: `execution-${status}`,
+  stepId: 'node-1',
+  scopeStack: [],
+  workflowRunId: 'run-1',
+  workflowId: 'workflow-1',
+  status,
+  startedAt: '2026-01-01T00:00:00.000Z',
+  topologicalIndex: 0,
+  globalExecutionIndex: 0,
+  stepExecutionIndex: 0,
+});
 
 const renderNode = (
   data: Partial<WorkflowGraphNodeData> = {},
@@ -83,44 +100,28 @@ describe('WorkflowGraphNode', () => {
 
   it('shows "Completed successfully" status label on success', () => {
     renderNode({
-      stepExecution: {
-        id: 'e1',
-        stepId: 'node-1',
-        status: ExecutionStatus.COMPLETED,
-      } as WorkflowStepExecutionDto,
+      stepExecution: makeStepExecution(ExecutionStatus.COMPLETED),
     });
     expect(screen.getByLabelText('Completed successfully')).toBeInTheDocument();
   });
 
   it('shows "Failed" status label on failure', () => {
     renderNode({
-      stepExecution: {
-        id: 'e1',
-        stepId: 'node-1',
-        status: ExecutionStatus.FAILED,
-      } as any,
+      stepExecution: makeStepExecution(ExecutionStatus.FAILED),
     });
     expect(screen.getByLabelText('Failed')).toBeInTheDocument();
   });
 
   it('shows "Failed" status label on TIMED_OUT', () => {
     renderNode({
-      stepExecution: {
-        id: 'e1',
-        stepId: 'node-1',
-        status: ExecutionStatus.TIMED_OUT,
-      } as any,
+      stepExecution: makeStepExecution(ExecutionStatus.TIMED_OUT),
     });
     expect(screen.getByLabelText('Failed')).toBeInTheDocument();
   });
 
   it('shows "Running" status label for RUNNING', () => {
     renderNode({
-      stepExecution: {
-        id: 'e1',
-        stepId: 'node-1',
-        status: ExecutionStatus.RUNNING,
-      } as any,
+      stepExecution: makeStepExecution(ExecutionStatus.RUNNING),
     });
     expect(screen.getByLabelText('Running')).toBeInTheDocument();
   });
@@ -241,11 +242,7 @@ describe('WorkflowGraphNode', () => {
   it('includes execution status in the accessible name when an execution exists', () => {
     renderNode({
       label: 'step-x',
-      stepExecution: {
-        id: 'e2',
-        stepId: 'node-1',
-        status: ExecutionStatus.FAILED,
-      } as any,
+      stepExecution: makeStepExecution(ExecutionStatus.FAILED),
     });
     const node = screen.getByRole('button');
     expect(node.getAttribute('aria-label')).toContain(ExecutionStatus.FAILED);
@@ -255,11 +252,7 @@ describe('WorkflowGraphNode', () => {
     renderNode({
       label: 'Fetch Data',
       stepType: 'http',
-      stepExecution: {
-        id: 'e3',
-        stepId: 'node-1',
-        status: ExecutionStatus.COMPLETED,
-      } as any,
+      stepExecution: makeStepExecution(ExecutionStatus.COMPLETED),
     });
     expect(
       screen.getByRole('button', { name: 'http step: Fetch Data, status: completed' })
@@ -285,45 +278,13 @@ describe('WorkflowGraphNode', () => {
 });
 
 describe('resolveNodeColors', () => {
-  const theme = {
-    colors: {
-      backgroundBaseAccent: 'accent-bg',
-      borderBaseAccent: 'accent-border',
-      textAccent: 'accent-text',
-      backgroundBaseAccentSecondary: 'flow-bg',
-      borderBaseAccentSecondary: 'flow-border',
-      textAccentSecondary: 'flow-text',
-      backgroundBaseWarning: 'data-bg',
-      borderBaseWarning: 'data-border',
-      textWarning: 'data-text',
-      backgroundBasePrimary: 'code-bg',
-      borderBasePrimary: 'code-border',
-      textPrimary: 'code-text',
-      backgroundBaseSubdued: 'neutral-bg',
-      borderBaseSubdued: 'neutral-border',
-      textSubdued: 'neutral-text',
-      backgroundBaseSuccess: 'success-bg',
-      borderBaseSuccess: 'success-border',
-      textSuccess: 'success-text',
-      backgroundBaseDanger: 'danger-bg',
-      borderBaseDanger: 'danger-border',
-      textDanger: 'danger-text',
-      borderBasePlain: 'plain-border',
-      textHeading: 'heading-color',
-      success: 'success-color',
-      danger: 'danger-color',
+  // Real EUI theme tokens: the assertions compare against what the theme actually provides.
+  const {
+    result: {
+      current: { euiTheme: theme },
     },
-    border: {
-      radius: {
-        medium: 'medium-radius',
-        small: 'small-radius',
-        inline: 'inline-radius',
-        control: 'control-radius',
-        panel: 'panel-radius',
-        frame: 'frame-radius',
-      },
-    },
-  } as any;
+  } = renderHook(() => useEuiTheme(), { wrapper: EuiProvider });
+  const { colors } = theme;
 
   const idle = { isRunning: false, isSuccess: false, isFailed: false };
   const running = { isRunning: true, isSuccess: false, isFailed: false };
@@ -331,38 +292,38 @@ describe('resolveNodeColors', () => {
   const failed = { isRunning: false, isSuccess: false, isFailed: true };
 
   it('uses a plain panel border when idle', () => {
-    expect(resolveNodeColors(theme, 'http', false, idle).panelBorder).toBe('plain-border');
-    expect(resolveNodeColors(theme, 'manual', true, idle).panelBorder).toBe('plain-border');
+    expect(resolveNodeColors(theme, 'http', false, idle).panelBorder).toBe(colors.borderBasePlain);
+    expect(resolveNodeColors(theme, 'manual', true, idle).panelBorder).toBe(colors.borderBasePlain);
   });
 
   it('uses the success color token for the panel border on success', () => {
-    expect(resolveNodeColors(theme, 'http', false, success).panelBorder).toBe('success-color');
+    expect(resolveNodeColors(theme, 'http', false, success).panelBorder).toBe(colors.success);
     expect(resolveNodeColors(theme, 'elasticsearch.search', false, success).panelBorder).toBe(
-      'success-color'
+      colors.success
     );
   });
 
   it('uses the danger color token for the panel border on failure', () => {
-    expect(resolveNodeColors(theme, 'if', false, failed).panelBorder).toBe('danger-color');
+    expect(resolveNodeColors(theme, 'if', false, failed).panelBorder).toBe(colors.danger);
   });
 
   it('recolors category chips on success and failure', () => {
     const completed = resolveNodeColors(theme, 'if', false, success);
-    expect(completed.chipBackground).toBe('success-bg');
-    expect(completed.chipBorder).toBe('success-color');
-    expect(completed.chipIconColor).toBe('success-color');
+    expect(completed.chipBackground).toBe(colors.backgroundBaseSuccess);
+    expect(completed.chipBorder).toBe(colors.success);
+    expect(completed.chipIconColor).toBe(colors.success);
 
     const errored = resolveNodeColors(theme, 'console', false, failed);
-    expect(errored.chipBackground).toBe('danger-bg');
-    expect(errored.chipBorder).toBe('danger-color');
-    expect(errored.chipIconColor).toBe('danger-color');
+    expect(errored.chipBackground).toBe(colors.backgroundBaseDanger);
+    expect(errored.chipBorder).toBe(colors.danger);
+    expect(errored.chipIconColor).toBe(colors.danger);
   });
 
   it('recolors brand tiles on execution outcome but leaves the logo untinted', () => {
     const completed = resolveNodeColors(theme, 'elasticsearch.search', false, success);
     expect(completed.isBrandChip).toBe(true);
-    expect(completed.chipBackground).toBe('success-bg');
-    expect(completed.chipBorder).toBe('success-color');
+    expect(completed.chipBackground).toBe(colors.backgroundBaseSuccess);
+    expect(completed.chipBorder).toBe(colors.success);
     expect(completed.chipIconColor).toBeUndefined();
   });
 
@@ -373,8 +334,8 @@ describe('resolveNodeColors', () => {
       true,
       idle
     );
-    expect(chipBackground).toBe('accent-bg');
-    expect(chipIconColor).toBe('accent-text');
+    expect(chipBackground).toBe(colors.backgroundBaseAccent);
+    expect(chipIconColor).toBe(colors.textAccent);
     expect(isBrandChip).toBe(false);
   });
 

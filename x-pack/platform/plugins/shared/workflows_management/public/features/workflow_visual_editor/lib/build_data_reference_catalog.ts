@@ -10,6 +10,7 @@ import type { ConnectorContractUnion, WorkflowYaml } from '@kbn/workflows';
 import {
   extractSchemaPropertyPaths,
   getBuiltInStepDefinition,
+  getTriggerName,
   WorkflowDataContextSchema,
   WorkflowExecutionContextSchema,
 } from '@kbn/workflows';
@@ -104,14 +105,6 @@ export const isDataReferenceExpandable = (item: DataReferenceItem): boolean =>
  */
 export const isDataReferenceDraggable = (item: DataReferenceItem): boolean =>
   isDataReferenceInsertable(item);
-
-const TRIGGER_LABEL: Record<string, string> = {
-  manual: 'Manual',
-  alert: 'Alert',
-  scheduled: 'Scheduled',
-};
-
-const triggerLabelFor = (type: string): string => TRIGGER_LABEL[type] ?? type;
 
 /** Lowercase alphanumerics only — used to decide if a step type adds a second line. */
 const normalizeLabelKey = (value: string): string => value.toLowerCase().replace(/[^a-z0-9]+/g, '');
@@ -333,7 +326,7 @@ const buildTriggerGroup = (definition: WorkflowYaml): DataReferenceGroup => {
     const type = trigger.type ?? 'manual';
     const originLabel = i18n.translate('workflows.dataReferencePicker.originTrigger', {
       defaultMessage: 'Trigger · {name}',
-      values: { name: triggerLabelFor(type) },
+      values: { name: getTriggerName(type) },
     });
     const schema = buildEventSchemaForTrigger(trigger, manualInputsSchema);
     return {
@@ -346,7 +339,7 @@ const buildTriggerGroup = (definition: WorkflowYaml): DataReferenceGroup => {
 
   const items: DataReferenceItem[] = triggers.map((trigger, index) => {
     const type = trigger.type ?? 'manual';
-    const name = triggerLabelFor(type);
+    const name = getTriggerName(type);
     const originLabel = i18n.translate('workflows.dataReferencePicker.originTrigger', {
       defaultMessage: 'Trigger · {name}',
       values: { name },

@@ -7,6 +7,8 @@
 
 import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
+import type { monaco } from '@kbn/code-editor';
+import { createFakeMonacoEditor } from './fake_monaco_editor';
 import { changeBetween, createCodeEditorModuleMock } from './mock_code_editor';
 import { caretAfterChange } from '../ui/use_reference_editor';
 
@@ -59,6 +61,58 @@ describe('the mocked code editor', () => {
 
     expect(onChange).toHaveBeenCalledWith('abd', {
       changes: [{ rangeOffset: 2, rangeLength: 1, text: '' }],
+    });
+  });
+
+  describe('executeEdits', () => {
+    const range = (startColumn: number, endColumn: number) => ({
+      startLineNumber: 1,
+      startColumn,
+      endLineNumber: 1,
+      endColumn,
+    });
+    // Both ranges refer to the text before the batch: replace "ab" and delete "ef".
+    const batch: monaco.editor.IIdentifiedSingleEditOperation[] = [
+      { range: range(1, 3), text: 'X' },
+      { range: range(5, 7), text: null },
+    ];
+
+    const mountEditor = (value: string, onChange: jest.Mock) => {
+      let mounted: monaco.editor.IStandaloneCodeEditor | undefined;
+      render(
+        <CodeEditor
+          value={value}
+          languageId="plaintext"
+          onChange={onChange}
+          editorDidMount={(editor) => {
+            mounted = editor;
+          }}
+        />
+      );
+      if (!mounted) throw new Error('the editor did not mount');
+      return mounted;
+    };
+
+    it('applies every edit of the batch, not just the first', () => {
+      const onChange = jest.fn();
+      mountEditor('abcdefgh', onChange).executeEdits('test', batch);
+
+      expect(onChange).toHaveBeenCalledTimes(1);
+      expect(onChange).toHaveBeenCalledWith('Xcdgh', {
+        changes: [
+          { rangeOffset: 4, rangeLength: 2, text: '' },
+          { rangeOffset: 0, rangeLength: 2, text: 'X' },
+        ],
+      });
+    });
+
+    it('produces the same text as the fake Monaco editor for the same batch', () => {
+      const onChange = jest.fn();
+      mountEditor('abcdefgh', onChange).executeEdits('test', batch);
+      const fake = createFakeMonacoEditor('abcdefgh');
+      fake.editor.executeEdits('test', batch);
+
+      expect(onChange.mock.calls[0][0]).toBe(fake.getText());
     });
   });
 });

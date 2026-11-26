@@ -238,6 +238,11 @@ describe('DataReferencePicker as a typeahead', () => {
 
     it('scrolls the highlighted row into view as the arrows move it', () => {
       const scrollIntoView = jest.fn();
+      // jsdom has no scrollIntoView: remember the descriptor (or its absence) to restore it exactly.
+      const originalDescriptor = Object.getOwnPropertyDescriptor(
+        window.HTMLElement.prototype,
+        'scrollIntoView'
+      );
       window.HTMLElement.prototype.scrollIntoView = scrollIntoView;
       try {
         const { press } = renderTypeahead('');
@@ -249,8 +254,11 @@ describe('DataReferencePicker as a typeahead', () => {
         const scrolled = scrollIntoView.mock.instances[scrollIntoView.mock.instances.length - 1];
         expect(scrolled).toBe(screen.getByTestId('workflowDataReferenceRow-event.f1'));
       } finally {
-        // @ts-expect-error jsdom has no scrollIntoView to restore
-        delete window.HTMLElement.prototype.scrollIntoView;
+        if (originalDescriptor) {
+          Object.defineProperty(window.HTMLElement.prototype, 'scrollIntoView', originalDescriptor);
+        } else {
+          Reflect.deleteProperty(window.HTMLElement.prototype, 'scrollIntoView');
+        }
       }
     });
 

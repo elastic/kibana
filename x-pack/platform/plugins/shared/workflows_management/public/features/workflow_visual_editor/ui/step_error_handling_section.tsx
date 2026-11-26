@@ -204,9 +204,6 @@ export function StepErrorHandlingSection({
     rowGap: euiTheme.size.xs,
   };
 
-  // TODO(review): retry state may surface as a small badge on the canvas node
-  // (decoupled from failure-branch visuals) — pending Marco visual-builder review.
-
   return (
     <div
       data-test-subj="workflowStepConfigErrorHandling"
