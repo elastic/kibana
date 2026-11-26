@@ -170030,6 +170030,63 @@ components:
               default: true
               description: When true, the panel uses the dashboard filters, query, and ES|QL variables. When false, it uses static_context.
               type: boolean
+            configuration:
+              description: Optional Dashboard form configuration used to reopen the change point editor.
+              discriminator:
+                propertyName: mode
+              oneOf:
+                - additionalProperties: false
+                  type: object
+                  properties:
+                    aggregation_function:
+                      description: The aggregation function used to calculate the metric values.
+                      enum:
+                        - avg
+                        - sum
+                        - min
+                        - max
+                      type: string
+                    data_view_id:
+                      description: The data view ID used to generate the change point query.
+                      maxLength: 512
+                      minLength: 1
+                      type: string
+                    metric_field:
+                      description: The metric field used by the aggregation function.
+                      maxLength: 256
+                      minLength: 1
+                      type: string
+                    mode:
+                      enum:
+                        - form
+                      type: string
+                    partitions:
+                      description: Optional split field values included in the query.
+                      items:
+                        maxLength: 2048
+                        minLength: 1
+                        type: string
+                      maxItems: 100
+                      type: array
+                    split_field:
+                      description: The optional field used to split change point results.
+                      maxLength: 256
+                      minLength: 1
+                      type: string
+                  required:
+                    - mode
+                    - data_view_id
+                    - aggregation_function
+                    - metric_field
+                - additionalProperties: false
+                  type: object
+                  properties:
+                    mode:
+                      enum:
+                        - esql
+                      type: string
+                  required:
+                    - mode
             description:
               description: A short description of the panel.
               type: string

@@ -12,7 +12,6 @@ import { startWith } from 'rxjs';
 import { buildEsQuery, type Filter, type Query } from '@kbn/es-query';
 import { usePageUrlState } from '@kbn/ml-url-state';
 import { useTimefilter } from '@kbn/ml-date-picker';
-import { ES_FIELD_TYPES } from '@kbn/field-types';
 import { type QueryDslQueryContainer } from '@kbn/data-views-plugin/common/types';
 import type { TimeBuckets, TimeBucketsInterval } from '@kbn/ml-time-buckets';
 import { useTimeBuckets } from '@kbn/ml-time-buckets';
@@ -24,6 +23,7 @@ import { type ChangePointType, DEFAULT_AGG_FUNCTION } from './constants';
 import { getEsQueryFromSavedSearch } from '../../application/utils/search_utils';
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 import { useDataSource } from '../../hooks/use_data_source';
+import { isChangePointMetricField, isChangePointSplitField } from './change_point_field_utils';
 
 export interface ChangePointDetectionPageUrlState {
   pageKey: 'changePoint';
@@ -99,26 +99,22 @@ export const useChangePointDetectionControlsContext = () => {
   return useContext(ChangePointDetectionControlsContext);
 };
 
-export const ChangePointDetectionControlsContextProvider: FC<PropsWithChildren<unknown>> = ({
-  children,
-}) => {
+export const ChangePointDetectionControlsContextProvider: FC<
+  PropsWithChildren<{ fieldFilter?: (field: DataViewField) => boolean }>
+> = ({ children, fieldFilter }) => {
   const { dataView } = useDataSource();
 
   const metricFieldOptions = useMemo<DataViewField[]>(() => {
-    return dataView.fields.filter(({ aggregatable, type }) => aggregatable && type === 'number');
-  }, [dataView]);
+    return dataView.fields.filter(
+      (field) => isChangePointMetricField(field) && (fieldFilter ? fieldFilter(field) : true)
+    );
+  }, [dataView, fieldFilter]);
 
   const splitFieldsOptions = useMemo<DataViewField[]>(() => {
     return dataView.fields.filter(
-      ({ aggregatable, esTypes, displayName }) =>
-        aggregatable &&
-        esTypes &&
-        esTypes.some((el) =>
-          [ES_FIELD_TYPES.KEYWORD, ES_FIELD_TYPES.IP].includes(el as ES_FIELD_TYPES)
-        ) &&
-        !['_id', '_index'].includes(displayName)
+      (field) => isChangePointSplitField(field) && (fieldFilter ? fieldFilter(field) : true)
     );
-  }, [dataView]);
+  }, [dataView, fieldFilter]);
 
   const value = { metricFieldOptions, splitFieldsOptions };
 
@@ -180,19 +176,11 @@ export const ChangePointDetectionContextProvider: FC<PropsWithChildren<unknown>>
   }, []);
 
   const metricFieldOptions = useMemo<DataViewField[]>(() => {
-    return dataView.fields.filter(({ aggregatable, type }) => aggregatable && type === 'number');
+    return dataView.fields.filter(isChangePointMetricField);
   }, [dataView]);
 
   const splitFieldsOptions = useMemo<DataViewField[]>(() => {
-    return dataView.fields.filter(
-      ({ aggregatable, esTypes, displayName }) =>
-        aggregatable &&
-        esTypes &&
-        esTypes.some((el) =>
-          [ES_FIELD_TYPES.KEYWORD, ES_FIELD_TYPES.IP].includes(el as ES_FIELD_TYPES)
-        ) &&
-        !['_id', '_index'].includes(displayName)
-    );
+    return dataView.fields.filter(isChangePointSplitField);
   }, [dataView]);
 
   const [requestParamsFromUrl, updateRequestParams] =

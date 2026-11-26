@@ -13,6 +13,9 @@ export class ChangePointChartPage {
   readonly embeddable: Locator;
   readonly noDataWarning: Locator;
   readonly noChangePointsCallout: Locator;
+  readonly previewReady: Locator;
+  readonly changePointGridRendered: Locator;
+  readonly viewTypeSelector: Locator;
 
   constructor(private readonly page: ScoutPage) {
     this.initializer = this.page.testSubj.locator('aiopsChangePointChartEmbeddableInitializer');
@@ -22,6 +25,14 @@ export class ChangePointChartPage {
     this.embeddable = this.page.testSubj.locator('aiopsEmbeddableChangePointChart');
     this.noDataWarning = this.page.testSubj.locator('aiopsNoDataFoundWarning');
     this.noChangePointsCallout = this.page.testSubj.locator('aiopsNoChangePointsWarningCallout');
+    // The ready preview carries several test subjects, so match one word.
+    this.previewReady = this.page.testSubj.locator('~aiopsChangePointPreviewReady');
+    // Dashboard panels render ChangePointGridRenderer, which marks each card
+    // changePointLensChart-<index>. changePointExperienceRendered is Discover-only.
+    this.changePointGridRendered = this.page.testSubj
+      .locator('embeddablePanel')
+      .getByTestId('changePointLensChart-0');
+    this.viewTypeSelector = this.page.testSubj.locator('aiopsChangePointViewTypeSelector');
   }
 
   async openInitializer(): Promise<void> {
@@ -41,6 +52,10 @@ export class ChangePointChartPage {
     await this.page.components
       .comboBox('aiopsChangePointChartEmbeddableDataViewSelector')
       .setSelectedOptions([dataViewTitle]);
+  }
+
+  async selectViewType(viewType: 'Charts' | 'Table'): Promise<void> {
+    await this.viewTypeSelector.getByText(viewType, { exact: true }).click();
   }
 
   async confirmInitializer(): Promise<void> {

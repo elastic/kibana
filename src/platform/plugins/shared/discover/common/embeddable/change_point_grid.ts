@@ -7,6 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const CHANGE_POINT_GRID_EMBEDDABLE_TYPE = 'change_point_grid';
+export { CHANGE_POINT_GRID_EMBEDDABLE_TYPE } from '@kbn/discover-utils';
 
 export const CHANGE_POINT_GRID_MAX_SERIES = 8;

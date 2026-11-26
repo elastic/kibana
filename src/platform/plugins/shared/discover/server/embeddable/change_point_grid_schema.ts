@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { lazySchema, z } from '@kbn/zod';
+import { lazySchema, savedObjectId, z } from '@kbn/zod';
 import { asCodeFilterSchema } from '@kbn/as-code-filters-schema';
 import { asCodeQuerySchema } from '@kbn/as-code-shared-schemas';
 import { ESQLVariableType } from '@kbn/esql-types';
@@ -17,6 +17,7 @@ const MAX_ESQL_LENGTH = 10_000;
 const MAX_TEXT_LENGTH = 2_048;
 const MAX_FIELD_LENGTH = 256;
 const MAX_FILTERS = 100;
+const MAX_PARTITIONS = 100;
 const MAX_VARIABLES = 50;
 const MAX_VARIABLE_VALUES = 100;
 
@@ -79,6 +80,46 @@ const changePointGridStaticContextSchema = lazySchema(() =>
     .strip()
 );
 
+const changePointGridConfigurationSchema = lazySchema(() =>
+  z
+    .discriminatedUnion('mode', [
+      z
+        .object({
+          mode: z.literal('form'),
+          data_view_id: savedObjectId().meta({
+            description: 'The data view ID used to generate the change point query.',
+          }),
+          aggregation_function: z.enum(['avg', 'sum', 'min', 'max']).meta({
+            description: 'The aggregation function used to calculate the metric values.',
+          }),
+          metric_field: z.string().min(1).max(MAX_FIELD_LENGTH).meta({
+            description: 'The metric field used by the aggregation function.',
+          }),
+          split_field: z.string().min(1).max(MAX_FIELD_LENGTH).optional().meta({
+            description: 'The optional field used to split change point results.',
+          }),
+          partitions: z
+            .array(z.string().min(1).max(MAX_TEXT_LENGTH))
+            .max(MAX_PARTITIONS)
+            .optional()
+            .meta({
+              description: 'Optional split field values included in the query.',
+            }),
+        })
+        .strip(),
+      z
+        .object({
+          mode: z.literal('esql'),
+        })
+        .strip(),
+    ])
+    .refine(
+      (value) =>
+        value.mode !== 'form' || value.partitions === undefined || Boolean(value.split_field),
+      { message: '`partitions` requires `split_field` to be set' }
+    )
+);
+
 export const changePointGridEmbeddableSchema = lazySchema(() =>
   z
     .object({
@@ -96,6 +137,10 @@ export const changePointGridEmbeddableSchema = lazySchema(() =>
       static_context: changePointGridStaticContextSchema.optional().meta({
         description:
           'Filters, query, and ES|QL variables captured from Discover. Used only when apply_dashboard_context is false.',
+      }),
+      configuration: changePointGridConfigurationSchema.optional().meta({
+        description:
+          'Optional Dashboard form configuration used to reopen the change point editor.',
       }),
     })
     .strip()

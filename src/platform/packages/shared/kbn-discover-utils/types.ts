@@ -8,6 +8,10 @@
  */
 
 export type {
+  ChangePointGridAggregationFunction,
+  ChangePointGridConfiguration,
+  ChangePointGridEsqlConfiguration,
+  ChangePointGridFormConfiguration,
   DataTableRecord,
   EsHitRecord,
   IgnoredReason,

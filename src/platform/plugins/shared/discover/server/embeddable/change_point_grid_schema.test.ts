@@ -7,8 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { ChangePointGridConfiguration } from '@kbn/discover-utils';
 import { ESQLVariableType } from '@kbn/esql-types';
-import { changePointGridEmbeddableSchema } from './change_point_grid_schema';
+import {
+  changePointGridEmbeddableSchema,
+  type ChangePointGridEmbeddableState,
+} from './change_point_grid_schema';
+
+type AssertEqual<A, B> = [A] extends [B] ? ([B] extends [A] ? true : never) : never;
+const configurationMatchesSharedContract: AssertEqual<
+  NonNullable<ChangePointGridEmbeddableState['configuration']>,
+  ChangePointGridConfiguration
+> = true;
 
 const validState = {
   esql: 'FROM logs-* | CHANGE_POINT count ON @timestamp',
@@ -77,5 +87,88 @@ describe('changePointGridEmbeddableSchema', () => {
         esql_variables: [{ key: 'service', value: 'orders', type: ESQLVariableType.VALUES }],
       },
     });
+  });
+
+  it('accepts form and direct-ES|QL configurations and keeps the shared type contract aligned', () => {
+    expect(configurationMatchesSharedContract).toBe(true);
+
+    const formParsed = changePointGridEmbeddableSchema.safeParse({
+      ...validState,
+      configuration: {
+        mode: 'form',
+        data_view_id: 'logs-*',
+        aggregation_function: 'avg',
+        metric_field: 'bytes',
+        split_field: 'host.name',
+        partitions: ['web-1', 'web-2'],
+        extra: 'ignored',
+      },
+    });
+    expect(formParsed.success).toBe(true);
+    if (formParsed.success) {
+      expect(formParsed.data.configuration).toEqual({
+        mode: 'form',
+        data_view_id: 'logs-*',
+        aggregation_function: 'avg',
+        metric_field: 'bytes',
+        split_field: 'host.name',
+        partitions: ['web-1', 'web-2'],
+      });
+    }
+
+    const esqlParsed = changePointGridEmbeddableSchema.safeParse({
+      ...validState,
+      configuration: {
+        mode: 'esql',
+        extra: 'ignored',
+      },
+    });
+    expect(esqlParsed.success).toBe(true);
+    if (esqlParsed.success) {
+      expect(esqlParsed.data.configuration).toEqual({ mode: 'esql' });
+    }
+  });
+
+  it('rejects oversized partition values, too many partitions, and partitions without split_field', () => {
+    expect(
+      changePointGridEmbeddableSchema.safeParse({
+        ...validState,
+        configuration: {
+          mode: 'form',
+          data_view_id: 'logs-*',
+          aggregation_function: 'avg',
+          metric_field: 'bytes',
+          split_field: 'host.name',
+          partitions: ['x'.repeat(2_049)],
+        },
+      }).success
+    ).toBe(false);
+
+    expect(
+      changePointGridEmbeddableSchema.safeParse({
+        ...validState,
+        configuration: {
+          mode: 'form',
+          data_view_id: 'logs-*',
+          aggregation_function: 'avg',
+          metric_field: 'bytes',
+          split_field: 'host.name',
+          partitions: Array.from({ length: 101 }, (_, index) => `host-${index}`),
+        },
+      }).success
+    ).toBe(false);
+
+    expect(
+      changePointGridEmbeddableSchema.safeParse({
+        ...validState,
+        configuration: {
+          mode: 'form',
+          data_view_id: 'logs-*',
+          aggregation_function: 'avg',
+          metric_field: 'bytes',
+          partitions: ['web-1'],
+        },
+      }).success
+    ).toBe(false);
   });
 });

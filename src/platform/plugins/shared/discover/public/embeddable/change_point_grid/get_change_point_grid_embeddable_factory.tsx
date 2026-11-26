@@ -11,6 +11,7 @@ import { EuiLoadingChart } from '@elastic/eui';
 import type { ChangePointCardModel } from '@kbn/change-point-chart-viewer';
 import { getAbsoluteTimeRange } from '@kbn/data-plugin/common';
 import type { DataView } from '@kbn/data-views-plugin/common';
+import type { ChangePointGridConfiguration } from '@kbn/discover-utils';
 import type { AggregateQuery } from '@kbn/es-query';
 import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 import { i18n } from '@kbn/i18n';
@@ -19,6 +20,7 @@ import {
   apiPublishesDataLoading,
   combineCompatibleChildrenApis,
   initializeStateApi,
+  initializeStateManager,
   initializeTimeRangeManager,
   initializeTitleManager,
   timeRangeComparators,
@@ -31,8 +33,11 @@ import {
   type PublishesDataSources,
   type PublishesEsql,
   type PublishesRendered,
+  type PublishesUnsavedChanges,
   type PublishesWritableTimeRange,
+  type PublishesWritableTitle,
   type PublishingSubject,
+  type StateComparators,
 } from '@kbn/presentation-publishing';
 import type {
   DefaultEmbeddableApi,
@@ -67,6 +72,13 @@ const getDefaultPanelTitle = (esql: string): string => {
   });
 };
 
+type ChangePointGridQueryState = Pick<ChangePointGridEmbeddableState, 'esql' | 'configuration'>;
+
+const queryStateComparators: StateComparators<ChangePointGridQueryState> = {
+  esql: 'referenceEquality',
+  configuration: 'deepEquality',
+};
+
 type ChangePointGridApi = DefaultEmbeddableApi<ChangePointGridEmbeddableState> &
   HasTypeDisplayName &
   CanCancelRequests &
@@ -75,9 +87,16 @@ type ChangePointGridApi = DefaultEmbeddableApi<ChangePointGridEmbeddableState> &
   PublishesRendered &
   PublishesDataSources<DataView> &
   PublishesEsql &
+  PublishesUnsavedChanges &
+  PublishesWritableTitle &
   PublishesWritableTimeRange & {
     searchContext$: PublishingSubject<ChangePointGridSearchRequest | undefined>;
     applyDashboardContext: boolean;
+    configuration$: PublishingSubject<ChangePointGridConfiguration | undefined>;
+    updateChangePointQuery: (update: {
+      esql: string;
+      configuration: ChangePointGridConfiguration | undefined;
+    }) => void;
   };
 
 export const getChangePointGridEmbeddableFactory = ({
@@ -89,6 +108,17 @@ export const getChangePointGridEmbeddableFactory = ({
   buildEmbeddable: async ({ initialState, finalizeApi, parentApi, uuid }) => {
     const titleManager = initializeTitleManager(initialState);
     const timeRangeManager = initializeTimeRangeManager(initialState);
+    const queryStateManager = initializeStateManager<ChangePointGridQueryState>(
+      {
+        esql: initialState.esql,
+        configuration: initialState.configuration,
+      },
+      {
+        esql: '',
+        configuration: undefined,
+      },
+      queryStateComparators
+    );
     const defaultTitle$ = new BehaviorSubject<string | undefined>(
       getDefaultPanelTitle(initialState.esql)
     );
@@ -105,6 +135,14 @@ export const getChangePointGridEmbeddableFactory = ({
     const blockingError$ = new BehaviorSubject<Error | undefined>(undefined);
     const refresh$ = new ReplaySubject<UnifiedHistogramFetch$Arguments>(1);
     const setRendered = (rendered: boolean) => rendered$.next(rendered);
+
+    const syncDerivedEsqlSubjects = (previousEsql: string) => {
+      const nextEsql = queryStateManager.api.esql$.getValue();
+      if (nextEsql !== previousEsql) {
+        esql$.next([{ esql: nextEsql }]);
+        defaultTitle$.next(getDefaultPanelTitle(nextEsql));
+      }
+    };
 
     // The mini Lens charts run their own queries after the main search. They are not dashboard
     // children, so the panel tracks and cancels them itself.
@@ -132,24 +170,35 @@ export const getChangePointGridEmbeddableFactory = ({
     const stateApi = initializeStateApi<ChangePointGridEmbeddableState>({
       uuid,
       parentApi,
-      serializeState: () => ({
-        ...titleManager.getLatestState(),
-        ...timeRangeManager.getLatestState(),
-        esql: initialState.esql,
-        apply_dashboard_context: applyDashboardContext,
-        ...(applyDashboardContext ? {} : { static_context: initialState.static_context }),
-      }),
-      anyStateChange$: merge(titleManager.anyStateChange$, timeRangeManager.anyStateChange$),
+      serializeState: () => {
+        const { esql, configuration } = queryStateManager.getLatestState();
+        return {
+          ...titleManager.getLatestState(),
+          ...timeRangeManager.getLatestState(),
+          esql,
+          apply_dashboard_context: applyDashboardContext,
+          ...(applyDashboardContext ? {} : { static_context: initialState.static_context }),
+          ...(configuration ? { configuration } : {}),
+        };
+      },
+      anyStateChange$: merge(
+        titleManager.anyStateChange$,
+        timeRangeManager.anyStateChange$,
+        queryStateManager.anyStateChange$
+      ),
       getComparators: () => ({
         ...titleComparators,
         ...timeRangeComparators,
-        esql: 'skip',
+        ...queryStateComparators,
         apply_dashboard_context: 'skip',
         static_context: 'skip',
       }),
       applySerializedState: (state) => {
+        const previousEsql = queryStateManager.api.esql$.getValue();
         titleManager.reinitializeState(state);
         timeRangeManager.reinitializeState(state);
+        queryStateManager.reinitializeState(state);
+        syncDerivedEsqlSubjects(previousEsql);
       },
     });
 
@@ -167,6 +216,13 @@ export const getChangePointGridEmbeddableFactory = ({
       approximationApplied$,
       searchContext$,
       applyDashboardContext,
+      configuration$: queryStateManager.api.configuration$,
+      updateChangePointQuery: ({ esql: nextEsql, configuration: nextConfiguration }) => {
+        const previousEsql = queryStateManager.api.esql$.getValue();
+        queryStateManager.api.setEsql(nextEsql);
+        queryStateManager.api.setConfiguration(nextConfiguration);
+        syncDerivedEsqlSubjects(previousEsql);
+      },
       getTypeDisplayName: () => defaultTitle,
       cancelRequests: (reason?: AbortReason) => {
         cancelSearch(reason);
@@ -179,6 +235,7 @@ export const getChangePointGridEmbeddableFactory = ({
     const { cleanup: cleanupFetch, cancelRequests: cancelFetch } = initializeChangePointGridFetch({
       api,
       state: initialState,
+      esqlQuery$: queryStateManager.api.esql$,
       discoverServices,
       cards$,
       searchContext$,
@@ -207,10 +264,11 @@ export const getChangePointGridEmbeddableFactory = ({
       Component: () => {
         useEffect(() => cleanup, []);
 
-        const [cards, searchContext, isLoading] = useBatchedPublishingSubjects(
+        const [cards, searchContext, isLoading, currentEsql] = useBatchedPublishingSubjects(
           cards$,
           searchContext$,
-          dataLoading$
+          dataLoading$,
+          queryStateManager.api.esql$
         );
         const fetchParams = useMemo(
           () =>
@@ -233,7 +291,7 @@ export const getChangePointGridEmbeddableFactory = ({
 
         return (
           <ChangePointGridRenderer
-            esql={initialState.esql}
+            esql={currentEsql}
             cards={cards}
             services={discoverServices}
             fetchParams={fetchParams}

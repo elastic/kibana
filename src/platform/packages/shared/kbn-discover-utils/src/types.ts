@@ -187,3 +187,22 @@ export interface UserAgentFields {
   'user_agent.name': string;
   'user_agent.version': string;
 }
+
+export type ChangePointGridAggregationFunction = 'avg' | 'sum' | 'min' | 'max';
+
+export interface ChangePointGridFormConfiguration {
+  mode: 'form';
+  data_view_id: string;
+  aggregation_function: ChangePointGridAggregationFunction;
+  metric_field: string;
+  split_field?: string;
+  partitions?: string[];
+}
+
+export interface ChangePointGridEsqlConfiguration {
+  mode: 'esql';
+}
+
+export type ChangePointGridConfiguration =
+  | ChangePointGridFormConfiguration
+  | ChangePointGridEsqlConfiguration;

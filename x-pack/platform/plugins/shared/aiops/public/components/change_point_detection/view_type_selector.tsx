@@ -38,20 +38,37 @@ const viewTypeOptions: EuiButtonGroupOptionProps[] = [
 export interface ViewTypeSelectorProps {
   value: ChangePointDetectionViewType;
   onChange: (update: ChangePointDetectionViewType) => void;
+  showTableOption?: boolean;
+  isDisabled?: boolean;
+  fullWidth?: boolean;
 }
 
-export const ViewTypeSelector: FC<ViewTypeSelectorProps> = ({ value, onChange }) => {
+export const ViewTypeSelector: FC<ViewTypeSelectorProps> = ({
+  value,
+  onChange,
+  showTableOption = true,
+  isDisabled = false,
+  fullWidth = true,
+}) => {
+  const options = showTableOption
+    ? viewTypeOptions
+    : viewTypeOptions.filter((option) => option.id !== 'table');
+
   return (
     <EuiFormRow
-      fullWidth
+      fullWidth={fullWidth}
       label={i18n.translate('xpack.aiops.embeddableChangePointChart.viewTypeLabel', {
         defaultMessage: 'View type',
       })}
     >
       <EuiButtonGroup
-        isFullWidth
-        legend="This is a basic group"
-        options={viewTypeOptions}
+        data-test-subj="aiopsChangePointViewTypeSelector"
+        isDisabled={isDisabled}
+        isFullWidth={fullWidth}
+        legend={i18n.translate('xpack.aiops.embeddableChangePointChart.viewTypeLegend', {
+          defaultMessage: 'View type',
+        })}
+        options={options}
         idSelected={value}
         onChange={onChange as (id: string) => void}
       />

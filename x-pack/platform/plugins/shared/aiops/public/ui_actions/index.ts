@@ -50,6 +50,11 @@ export function registerAiopsUiActions(
     return createOpenChangePointInMlAppAction(getStartServices);
   });
 
+  uiActions.addTriggerActionAsync(ON_OPEN_PANEL_MENU, 'edit-change-point-grid', async () => {
+    const { createEditChangePointGridAction } = await import('./actions');
+    return createEditChangePointGridAction(getStartServices);
+  });
+
   uiActions.addTriggerActionAsync(
     ADD_PANEL_TRIGGER,
     'create-log-rate-analysis-embeddable',

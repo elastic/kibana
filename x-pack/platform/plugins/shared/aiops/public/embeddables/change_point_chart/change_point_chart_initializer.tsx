@@ -75,7 +75,10 @@ const getInitialFormControls = (
   };
 };
 
-const getTitle = (formInput?: FormControlsProps) => {
+/** Formats the panel title for a form-configured change point panel. */
+export const getChangePointFormTitle = (
+  formInput?: Pick<ChangePointDetectionProps, 'fn' | 'metricField' | 'splitField'>
+): string => {
   if (!isPopulatedObject(formInput)) return '';
 
   return i18n.translate('xpack.aiops.changePointDetection.attachmentTitle', {
@@ -133,7 +136,7 @@ export const ChangePointChartInitializer: FC<AnomalyChartsInitializerProps> = ({
   const embeddableState = useMemo<ChangePointChartEmbeddableState | undefined>(() => {
     if (!dataViewId || !formInput?.metricField) return undefined;
     return {
-      title: getTitle(formInput),
+      title: getChangePointFormTitle(formInput),
       view_type: viewType,
       data_view_id: dataViewId,
       aggregation_function: formInput.fn,
@@ -232,7 +235,7 @@ export const ChangePointChartInitializer: FC<AnomalyChartsInitializerProps> = ({
   );
 };
 
-type FormControlsProps = Pick<
+export type FormControlsProps = Pick<
   ChangePointDetectionProps,
   'fn' | 'metricField' | 'splitField' | 'partitions'
 > &
@@ -241,8 +244,9 @@ type FormControlsProps = Pick<
 export const FormControls: FC<{
   formInput?: FormControlsProps;
   onChange: (update: FormControlsProps) => void;
-  onValidationChange: (isValid: boolean) => void;
-}> = ({ formInput, onChange, onValidationChange }) => {
+  onValidationChange?: (isValid: boolean) => void;
+  showMaxSeries?: boolean;
+}> = ({ formInput, onChange, onValidationChange, showMaxSeries = true }) => {
   const { metricFieldOptions, splitFieldsOptions } = useChangePointDetectionControlsContext();
 
   const prevMetricFieldOptions = usePrevious(metricFieldOptions);
@@ -329,13 +333,15 @@ export const FormControls: FC<{
         />
       ) : null}
 
-      <MaxSeriesControl
-        inline={false}
-        disabled={!!formInput?.partitions?.length}
-        value={formInput.maxSeriesToPlot}
-        onChange={(v) => updateCallback({ maxSeriesToPlot: v })}
-        onValidationChange={(result) => onValidationChange(result === null)}
-      />
+      {showMaxSeries ? (
+        <MaxSeriesControl
+          inline={false}
+          disabled={!!formInput?.partitions?.length}
+          value={formInput.maxSeriesToPlot}
+          onChange={(v) => updateCallback({ maxSeriesToPlot: v })}
+          onValidationChange={(result) => onValidationChange?.(result === null)}
+        />
+      ) : null}
     </>
   );
 };

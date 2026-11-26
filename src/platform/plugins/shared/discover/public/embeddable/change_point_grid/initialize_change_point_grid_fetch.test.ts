@@ -10,7 +10,7 @@
 import { buildChangePointCards } from '@kbn/change-point-chart-viewer';
 import { fetch$ } from '@kbn/presentation-publishing';
 import { ESQLVariableType } from '@kbn/esql-types';
-import { BehaviorSubject, Subject } from 'rxjs';
+import { BehaviorSubject, type Observable, Subject } from 'rxjs';
 import { fetchEsql } from '../../application/main/data_fetching/fetch_esql';
 import { resolveEsqlSource } from '../../application/main/data_fetching/resolve_esql_source';
 import type { DiscoverServices } from '../../build_services';
@@ -75,13 +75,22 @@ describe('initializeChangePointGridFetch', () => {
     );
   });
 
-  const start = (panelState: ChangePointGridEmbeddableState = state) => {
+  const start = (
+    panelState: ChangePointGridEmbeddableState = state,
+    esqlQuery$?: Observable<string>
+  ) => {
     const setDataLoading = jest.fn();
     const setDataViews = jest.fn();
     const setSearchError = jest.fn();
     const setApproximationApplied = jest.fn();
     const onCardsUpdated = jest.fn();
+    const trackRenderEsqlChangePointResults = jest.fn();
     const discoverServices = {
+      aiops: {
+        aiopsUsage: {
+          trackRenderEsqlChangePointResults,
+        },
+      },
       profilesManager: {
         createScopedProfilesManager: jest.fn().mockReturnValue({}),
       },
@@ -93,6 +102,7 @@ describe('initializeChangePointGridFetch', () => {
     const { cleanup, cancelRequests } = initializeChangePointGridFetch({
       api: {},
       state: panelState as never,
+      ...(esqlQuery$ ? { esqlQuery$ } : {}),
       discoverServices,
       cards$,
       searchContext$,
@@ -113,6 +123,7 @@ describe('initializeChangePointGridFetch', () => {
       setApproximationApplied,
       onCardsUpdated,
       discoverServices,
+      trackRenderEsqlChangePointResults,
     };
   };
 
@@ -310,5 +321,95 @@ describe('initializeChangePointGridFetch', () => {
       from: 'now-1h',
       to: 'now',
     });
+  });
+
+  it('refetches and clears stale cards when esqlQuery$ emits a new query', async () => {
+    jest.mocked(fetchEsql).mockClear();
+    jest.mocked(resolveEsqlSource).mockClear();
+    const esqlQuery$ = new BehaviorSubject<string>(state.esql);
+    start({ ...state, apply_dashboard_context: false }, esqlQuery$);
+
+    fetchContext$.next(dashboardContext);
+    await Promise.resolve();
+    resolveSearch({
+      records: [],
+      dataSource: { kind: 'esql', id: 'source-1', resultColumns: [] },
+    });
+    await Promise.resolve();
+    await Promise.resolve();
+    await Promise.resolve();
+    expect(cards$.getValue()).toBeDefined();
+
+    const updatedEsql = 'FROM metrics-* | CHANGE_POINT latency ON @timestamp';
+    esqlQuery$.next(updatedEsql);
+    expect(cards$.getValue()).toBeUndefined();
+    await Promise.resolve();
+
+    expect(jest.mocked(resolveEsqlSource)).toHaveBeenLastCalledWith(
+      expect.objectContaining({ esql: updatedEsql })
+    );
+    expect(jest.mocked(fetchEsql)).toHaveBeenLastCalledWith(
+      expect.objectContaining({ query: { esql: updatedEsql } })
+    );
+  });
+
+  it('reports render_esql_change_point_results once per successful query value until the query changes', async () => {
+    const esqlQuery$ = new BehaviorSubject<string>(state.esql);
+    const { trackRenderEsqlChangePointResults } = start(state, esqlQuery$);
+
+    fetchContext$.next(dashboardContext);
+    await Promise.resolve();
+    expect(trackRenderEsqlChangePointResults).not.toHaveBeenCalled();
+
+    resolveSearch({
+      records: [],
+      dataSource: { kind: 'esql', id: 'source-1', resultColumns: [] },
+    });
+    await Promise.resolve();
+    await Promise.resolve();
+    await Promise.resolve();
+
+    expect(trackRenderEsqlChangePointResults).toHaveBeenCalledTimes(1);
+    expect(trackRenderEsqlChangePointResults).toHaveBeenCalledWith();
+
+    fetchContext$.next({ ...dashboardContext, isReload: true });
+    await Promise.resolve();
+    resolveSearch({
+      records: [],
+      dataSource: { kind: 'esql', id: 'source-1', resultColumns: [] },
+    });
+    await Promise.resolve();
+    await Promise.resolve();
+    await Promise.resolve();
+
+    expect(trackRenderEsqlChangePointResults).toHaveBeenCalledTimes(1);
+
+    const updatedEsql = 'FROM metrics-* | CHANGE_POINT latency ON @timestamp';
+    esqlQuery$.next(updatedEsql);
+    await Promise.resolve();
+    resolveSearch({
+      records: [],
+      dataSource: { kind: 'esql', id: 'source-2', resultColumns: [] },
+    });
+    await Promise.resolve();
+    await Promise.resolve();
+    await Promise.resolve();
+
+    expect(trackRenderEsqlChangePointResults).toHaveBeenCalledTimes(2);
+    expect(trackRenderEsqlChangePointResults).toHaveBeenLastCalledWith();
+  });
+
+  it('does not report render_esql_change_point_results when the search fails', async () => {
+    const { trackRenderEsqlChangePointResults, setSearchError } = start();
+
+    fetchContext$.next(dashboardContext);
+    await Promise.resolve();
+    rejectSearch(new Error('search failed'));
+    await Promise.resolve();
+    await Promise.resolve();
+    await Promise.resolve();
+
+    expect(setSearchError).toHaveBeenCalledWith(expect.any(Error));
+    expect(trackRenderEsqlChangePointResults).not.toHaveBeenCalled();
   });
 });

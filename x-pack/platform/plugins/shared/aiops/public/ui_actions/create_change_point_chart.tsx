@@ -7,9 +7,9 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
+import { ENABLE_ESQL } from '@kbn/esql-utils';
 import { openLazyFlyout } from '@kbn/presentation-util';
-import type { PresentationContainer } from '@kbn/presentation-publishing';
-import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
+import type { PresentationContainer, EmbeddableApiContext } from '@kbn/presentation-publishing';
 import type { UiActionsActionDefinition } from '@kbn/ui-actions-plugin/public';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import { EMBEDDABLE_CHANGE_POINT_CHART_TYPE } from '@kbn/aiops-change-point-detection/constants';
@@ -59,6 +59,8 @@ export function createAddChangePointChartAction(
       ]);
       if (!presentationContainerParent) throw new IncompatibleActionError();
 
+      const isEsqlEnabled = coreStart.uiSettings.get<boolean>(ENABLE_ESQL);
+
       openLazyFlyout({
         core: coreStart,
         parentApi: context.embeddable,
@@ -69,6 +71,30 @@ export function createAddChangePointChartAction(
           focusedPanelId: context.embeddable.uuid,
         },
         loadContent: async ({ closeFlyout }) => {
+          if (isEsqlEnabled) {
+            const [{ EmbeddableChangePointEsqlUserInput }, { buildChangePointPanelPackage }] =
+              await Promise.all([
+                import('../embeddables/change_point_chart/change_point_esql_config_input'),
+                import('../embeddables/change_point_chart/build_change_point_panel_state'),
+              ]);
+            const showTableOption = Boolean(coreStart.application.capabilities.discover_v2?.show);
+
+            return (
+              <EmbeddableChangePointEsqlUserInput
+                coreStart={coreStart}
+                pluginStart={pluginStart}
+                dashboardParentApi={presentationContainerParent}
+                showTableOption={showTableOption}
+                onConfirm={(submission) => {
+                  const panelPackage = buildChangePointPanelPackage(submission);
+                  void presentationContainerParent.addNewPanel(panelPackage);
+                  closeFlyout();
+                }}
+                onCancel={closeFlyout}
+              />
+            );
+          }
+
           const { EmbeddableChangePointUserInput } = await import(
             '../embeddables/change_point_chart/change_point_config_input'
           );

@@ -16,7 +16,13 @@ import { SHOW_FIELD_STATISTICS } from '@kbn/discover-utils';
 import { DiscoverTabType } from '@kbn/discover-session-constants';
 import { buildDataViewMock, deepMockedFields } from '@kbn/discover-utils/src/__mocks__';
 import type { PresentationContainer } from '@kbn/presentation-publishing';
-import type { PhaseEvent, PublishesUnifiedSearch } from '@kbn/presentation-publishing';
+import {
+  apiHasUniqueId,
+  apiPublishesEsql,
+  apiPublishesTimeRange,
+  type PhaseEvent,
+  type PublishesUnifiedSearch,
+} from '@kbn/presentation-publishing';
 import { VIEW_MODE } from '@kbn/saved-search-plugin/common';
 import { act, render, waitFor } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
@@ -27,6 +33,8 @@ import { createProfileStateRegistry, METRICS_STATE_DEF } from '../../common/cont
 import { createDataViewDataSource } from '../../common/data_sources';
 import type { SearchEmbeddableState } from '../../common/embeddable/types';
 import { discoverServiceMock } from '../__mocks__/services';
+import { createStartContractMock } from '../__mocks__/start_contract';
+import { ViewSavedSearchAction } from './actions/view_saved_search_action';
 import { getSearchEmbeddableFactory } from './get_search_embeddable_factory';
 import { deserializeState } from './utils/serialization_utils';
 import type {
@@ -1141,6 +1149,62 @@ describe('saved search embeddable', () => {
       await waitOneTick();
 
       expect(capturedToolkit?.actions.addFilter).toBeUndefined();
+    });
+
+    it('retains per-panel time range, View ES|QL query publication, and Open in Discover for by-value ES|QL change-point table panels', async () => {
+      const { deserializeState: actualDeserializeState } = jest.requireActual<
+        typeof import('./utils/serialization_utils')
+      >('./utils/serialization_utils');
+      jest.mocked(deserializeState).mockImplementationOnce(actualDeserializeState);
+      jest.mocked(discoverServiceMock.locator.navigate).mockClear();
+
+      const esql =
+        'FROM logs-* | STATS `avg_bytes` = AVG(`bytes`) BY bucket = BUCKET(`@timestamp`, 75, ?_tstart, ?_tend) | CHANGE_POINT `avg_bytes` ON bucket';
+      const fixedTimeRange: TimeRange = { from: 'now-7d', to: 'now' };
+      discoverServiceMock.data.search.searchSource.create = jest
+        .fn()
+        .mockImplementation(async () => createSearchSourceMock({ query: { esql } }));
+
+      editableDashboardViewMode$.next('view');
+
+      const { api } = await factory.buildEmbeddable({
+        initializeDrilldownsManager: mockInitializeDrilldownsManager,
+        initialState: {
+          title: 'Change point: avg(bytes)',
+          time_range: fixedTimeRange,
+          tabs: [
+            {
+              type: DiscoverTabType.Default,
+              data_source: { type: 'esql', query: esql },
+              sort: [],
+              column_order: ['type', '_source', 'pvalue'],
+              row_height: 3,
+            },
+          ],
+        },
+        finalizeApi: finalizeEditableApiMock,
+        uuid,
+        parentApi: mockedEditableDashboardApi,
+      });
+
+      expect(apiPublishesTimeRange(api)).toBe(true);
+      expect(api.timeRange$.getValue()).toEqual(fixedTimeRange);
+
+      expect(apiPublishesEsql(api) && apiHasUniqueId(api)).toBe(true);
+      expect(api.esql$.getValue()).toEqual([{ esql }]);
+
+      const viewInDiscoverAction = new ViewSavedSearchAction(
+        createStartContractMock(),
+        discoverServiceMock.locator
+      );
+      expect(await viewInDiscoverAction.isCompatible({ embeddable: api })).toBe(true);
+      await viewInDiscoverAction.execute({ embeddable: api });
+      expect(discoverServiceMock.locator.navigate).toHaveBeenCalledWith(
+        expect.objectContaining({
+          columns: ['type', '_source', 'pvalue'],
+          query: { esql },
+        })
+      );
     });
   });
 });

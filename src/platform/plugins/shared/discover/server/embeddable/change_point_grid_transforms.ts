@@ -14,14 +14,31 @@ import {
   type StoredFilter,
 } from '@kbn/as-code-filters-transforms';
 import { extractReferences, injectReferences } from '@kbn/data-plugin/common';
+import { DATA_VIEW_SAVED_OBJECT_TYPE } from '@kbn/data-views-plugin/common';
+import type {
+  ChangePointGridEsqlConfiguration,
+  ChangePointGridFormConfiguration,
+} from '@kbn/discover-utils';
 import type { Filter } from '@kbn/es-query';
 import type { ChangePointGridEmbeddableState } from './change_point_grid_schema';
 
-type StaticContext = NonNullable<ChangePointGridEmbeddableState['static_context']>;
+export const CHANGE_POINT_GRID_CONFIG_DATA_VIEW_REF_NAME =
+  'change_point_grid_configuration_data_view';
 
-/** Static filters are stored in the saved-filter shape so their data views become references. */
-export type StoredChangePointGridState = Omit<ChangePointGridEmbeddableState, 'static_context'> & {
+type StaticContext = NonNullable<ChangePointGridEmbeddableState['static_context']>;
+type Configuration = NonNullable<ChangePointGridEmbeddableState['configuration']>;
+
+type StoredChangePointGridConfiguration =
+  | Omit<ChangePointGridFormConfiguration, 'data_view_id'>
+  | ChangePointGridEsqlConfiguration;
+
+/** Static filters and the form data view are stored as saved-object references. */
+export type StoredChangePointGridState = Omit<
+  ChangePointGridEmbeddableState,
+  'static_context' | 'configuration'
+> & {
   static_context?: Omit<StaticContext, 'filters'> & { filters?: StoredFilter[] };
+  configuration?: StoredChangePointGridConfiguration;
 };
 
 const toFilters = (storedFilters: StoredFilter[]): Filter[] =>
@@ -58,39 +75,95 @@ const transformFiltersOut = (
   return fromStoredFilters(filters, logger);
 };
 
+const transformConfigurationIn = (
+  configuration: Configuration
+): { configuration: StoredChangePointGridConfiguration; references: SavedObjectReference[] } => {
+  if (configuration.mode !== 'form') {
+    return { configuration, references: [] };
+  }
+  const { data_view_id: dataViewId, ...storedConfiguration } = configuration;
+  return {
+    configuration: storedConfiguration,
+    references: [
+      {
+        type: DATA_VIEW_SAVED_OBJECT_TYPE,
+        name: CHANGE_POINT_GRID_CONFIG_DATA_VIEW_REF_NAME,
+        id: dataViewId,
+      },
+    ],
+  };
+};
+
+const transformConfigurationOut = (
+  storedConfiguration: StoredChangePointGridConfiguration,
+  references: SavedObjectReference[] = [],
+  logger?: Logger
+): Configuration => {
+  if (storedConfiguration.mode !== 'form') {
+    return storedConfiguration;
+  }
+  const dataViewId = references.find(
+    (ref) => ref.name === CHANGE_POINT_GRID_CONFIG_DATA_VIEW_REF_NAME
+  )?.id;
+  // The panel still has its query, so it stays editable as direct ES|QL.
+  if (!dataViewId) {
+    logger?.warn('Unable to inject change point grid panel configuration data view reference.');
+    return { mode: 'esql' };
+  }
+  return { ...storedConfiguration, data_view_id: dataViewId };
+};
+
 export const getChangePointGridTransforms = (logger?: Logger) => ({
   transformIn: (
     state: ChangePointGridEmbeddableState
   ): { state: StoredChangePointGridState; references: SavedObjectReference[] } => {
-    const filters = state.static_context?.filters;
-    if (!state.static_context || !filters?.length) {
-      return { state: state as StoredChangePointGridState, references: [] };
+    const { configuration, ...panelState } = state;
+    let storedState = panelState as StoredChangePointGridState;
+    const references: SavedObjectReference[] = [];
+
+    const filters = panelState.static_context?.filters;
+    if (panelState.static_context && filters?.length) {
+      const filtersIn = transformFiltersIn(filters, logger);
+      storedState = {
+        ...storedState,
+        static_context: { ...panelState.static_context, filters: filtersIn.filters },
+      };
+      references.push(...filtersIn.references);
     }
 
-    const { filters: storedFilters, references } = transformFiltersIn(filters, logger);
-    return {
-      state: {
-        ...state,
-        static_context: { ...state.static_context, filters: storedFilters },
-      },
-      references,
-    };
+    if (configuration) {
+      const configurationIn = transformConfigurationIn(configuration);
+      storedState = { ...storedState, configuration: configurationIn.configuration };
+      references.push(...configurationIn.references);
+    }
+
+    return { state: storedState, references };
   },
   transformOut: (
     storedState: StoredChangePointGridState,
     panelReferences?: SavedObjectReference[]
   ): ChangePointGridEmbeddableState => {
-    const filters = storedState.static_context?.filters;
-    if (!storedState.static_context || !filters?.length) {
-      return storedState as ChangePointGridEmbeddableState;
+    const { configuration: storedConfiguration, ...storedPanelState } = storedState;
+    let state = storedPanelState as ChangePointGridEmbeddableState;
+
+    const filters = storedPanelState.static_context?.filters;
+    if (storedPanelState.static_context && filters?.length) {
+      state = {
+        ...state,
+        static_context: {
+          ...storedPanelState.static_context,
+          filters: transformFiltersOut(filters, panelReferences, logger),
+        },
+      };
     }
 
-    return {
-      ...storedState,
-      static_context: {
-        ...storedState.static_context,
-        filters: transformFiltersOut(filters, panelReferences, logger),
-      },
-    };
+    if (storedConfiguration) {
+      state = {
+        ...state,
+        configuration: transformConfigurationOut(storedConfiguration, panelReferences, logger),
+      };
+    }
+
+    return state;
   },
 });
