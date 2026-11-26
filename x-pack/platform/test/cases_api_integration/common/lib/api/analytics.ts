@@ -6,6 +6,7 @@
  */
 
 import type SuperTest from 'supertest';
+import { v4 as uuidv4 } from 'uuid';
 
 import {
   getCAIActivityBackfillTaskId,
@@ -33,12 +34,16 @@ import {
 } from '@kbn/cases-plugin/server/cases_analytics/comments_index/constants';
 import { getSynchronizationTaskId } from '@kbn/cases-plugin/server/cases_analytics/tasks/synchronization_task';
 
+// The plugin schedules a one-time backfill under its own task id when it creates an index, and
+// ensureScheduled on that id keeps the pending task's runAt, so a run-now backfill needs a fresh id.
+const getRunNowBackfillTaskId = (taskId: string): string => `${taskId}-${uuidv4()}`;
+
 export const runCasesBackfillTask = async (supertest: SuperTest.Agent) => {
   await supertest
     .post('/api/analytics_index/backfill/run_soon')
     .set('kbn-xsrf', 'xxx')
     .send({
-      taskId: getCAICasesBackfillTaskId('default', 'securitySolution'),
+      taskId: getRunNowBackfillTaskId(getCAICasesBackfillTaskId('default', 'securitySolution')),
       sourceIndex: CAI_CASES_SOURCE_INDEX,
       destIndex: getCasesDestinationIndexName('default', 'securitySolution'),
       sourceQuery: JSON.stringify(getCasesSourceQuery('default', 'securitySolution')),
@@ -66,7 +71,7 @@ export const runAttachmentsBackfillTask = async (
     .post('/api/analytics_index/backfill/run_soon')
     .set('kbn-xsrf', 'xxx')
     .send({
-      taskId: getCAIAttachmentsBackfillTaskId(spaceId, owner),
+      taskId: getRunNowBackfillTaskId(getCAIAttachmentsBackfillTaskId(spaceId, owner)),
       sourceIndex: CAI_ATTACHMENTS_SOURCE_INDEX,
       destIndex: getAttachmentsDestinationIndexName(spaceId, owner),
       sourceQuery: JSON.stringify(getAttachmentsSourceQuery(spaceId, owner)),
@@ -87,7 +92,7 @@ export const runCommentsBackfillTask = async (supertest: SuperTest.Agent) => {
     .post('/api/analytics_index/backfill/run_soon')
     .set('kbn-xsrf', 'xxx')
     .send({
-      taskId: getCAICommentsBackfillTaskId('default', 'securitySolution'),
+      taskId: getRunNowBackfillTaskId(getCAICommentsBackfillTaskId('default', 'securitySolution')),
       sourceIndex: CAI_COMMENTS_SOURCE_INDEX,
       destIndex: getCommentsDestinationIndexName('default', 'securitySolution'),
       sourceQuery: JSON.stringify(getCommentsSourceQuery('default', 'securitySolution')),
@@ -100,7 +105,7 @@ export const runActivityBackfillTask = async (supertest: SuperTest.Agent) => {
     .post('/api/analytics_index/backfill/run_soon')
     .set('kbn-xsrf', 'xxx')
     .send({
-      taskId: getCAIActivityBackfillTaskId('default', 'securitySolution'),
+      taskId: getRunNowBackfillTaskId(getCAIActivityBackfillTaskId('default', 'securitySolution')),
       sourceIndex: CAI_ACTIVITY_SOURCE_INDEX,
       destIndex: getActivityDestinationIndexName('default', 'securitySolution'),
       sourceQuery: JSON.stringify(getActivitySourceQuery('default', 'securitySolution')),
