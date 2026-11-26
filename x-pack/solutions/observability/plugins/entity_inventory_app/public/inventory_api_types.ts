@@ -5,17 +5,10 @@
  * 2.0.
  */
 
-// TODO: the values types mimic the response of the values route. Replace them with the types the server exposes in https://github.com/elastic/observability-dev/issues/6355
-
 export interface EntityInventoryAttributeValuesParams {
   attribute: string;
   types: string[];
   filters: Record<string, string[]>;
   selected: string[];
   timeRange: { from: string; to: string };
-}
-
-export interface EntityInventoryAttributeValuesResponse {
-  values: string[];
-  invalidSelections: string[];
 }

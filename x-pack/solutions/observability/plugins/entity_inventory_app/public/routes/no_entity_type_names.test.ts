@@ -13,8 +13,7 @@ const PUBLIC_DIR = join(__dirname, '..');
 // The page-to-type map lives here until entity definitions carry a category.
 const CATEGORIES_FILE = 'application/utils/entity_categories.ts';
 const ALLOWED_FILES: readonly string[] = [CATEGORIES_FILE];
-// `mock_inventory_api/` is the filters' stand-in for the values route until the filters read it.
-const ALLOWED_DIRECTORIES: readonly string[] = ['mock_inventory_api', '__fixtures__'];
+const ALLOWED_DIRECTORIES: readonly string[] = ['__fixtures__'];
 const TEST_ONLY_FILE = /(\.test\.tsx?$)|(^mocks\.tsx$)/;
 const TYPE_NAME_LITERAL = /(['"`])(host|k8s\.deployment)\1/;
 // A relative import of a `__fixtures__/` module or of the plugin's `mocks` module.
