@@ -582,26 +582,27 @@ describe('StepDefinePackagePolicy', () => {
     expect(jest.mocked(AwsIdentityFederationSetup).mock.lastCall?.[0]).toEqual(
       expect.objectContaining({
         onReadyChange,
+        onIacTemplateRecorded: expect.any(Function),
         integrations: [
-          {
-            name: 'aws',
-            version: '8.17.0',
-            policyTemplates: [{ name: 'guardduty', enabledInputs: ['httpjson'] }],
-          },
+          { name: 'aws', policyTemplates: [{ name: 'guardduty', enabledInputs: ['httpjson'] }] },
         ],
       })
     );
 
+    const firstMount = renderResult.getByTestId('sharedAwsIdentityFederationSetup');
+    renderResult.rerender(step({ ...awsPolicy }));
+    expect(renderResult.getByTestId('sharedAwsIdentityFederationSetup')).toBe(firstMount);
+
     renderResult.rerender(
       step({ ...awsPolicy, inputs: awsPolicy.inputs.map((input) => ({ ...input, enabled: true })) })
     );
+    expect(renderResult.getByTestId('sharedAwsIdentityFederationSetup')).not.toBe(firstMount);
 
     expect(jest.mocked(AwsIdentityFederationSetup).mock.lastCall?.[0]).toEqual(
       expect.objectContaining({
         integrations: [
           {
             name: 'aws',
-            version: '8.17.0',
             policyTemplates: [{ name: 'guardduty', enabledInputs: ['aws-s3', 'httpjson'] }],
           },
         ],

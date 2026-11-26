@@ -17,13 +17,16 @@ type Props = Pick<
   'cloud' | 'accountType' | 'iacTemplateUrl' | 'onReadyChange'
 > & {
   packageName: string;
-  packageVersion: string;
   inputs: NewPackagePolicy['inputs'];
 };
 
+// Policy Save is blocked on this page, so a launch must not write the rendered template to the
+// saved connector. The identity attachment issue (ingest-dev#10669) supplies the real recorder.
+const noopOnIacTemplateRecorded: AwsIdentityFederationSetupProps['onIacTemplateRecorded'] =
+  () => {};
+
 export function PackagePolicyAwsIdentityFederationSetup({
   packageName,
-  packageVersion,
   inputs,
   ...setupProps
 }: Props) {
@@ -31,18 +34,21 @@ export function PackagePolicyAwsIdentityFederationSetup({
     () => [
       {
         name: packageName,
-        version: packageVersion,
         policyTemplates: getEnabledInputsByPolicyTemplate({ inputs }),
       },
     ],
-    [packageName, packageVersion, inputs]
+    [packageName, inputs]
   );
 
   return (
     <AwsIdentityFederationSetup
+      // The setup renders its template for one integration set and must be remounted when the
+      // enabled inputs change (see the `integrations` prop contract).
+      key={JSON.stringify(integrations)}
       {...setupProps}
       packageName={packageName}
       integrations={integrations}
+      onIacTemplateRecorded={noopOnIacTemplateRecorded}
     />
   );
 }

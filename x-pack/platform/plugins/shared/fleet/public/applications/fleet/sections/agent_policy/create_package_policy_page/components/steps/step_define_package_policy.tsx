@@ -889,7 +889,6 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
                           identityFederation?.provider === cloudProvider ? (
                             <PackagePolicyAwsIdentityFederationSetup
                               packageName={packageInfo.name}
-                              packageVersion={packageInfo.version}
                               inputs={packagePolicy.inputs}
                               accountType={accountType}
                               cloud={cloud}
