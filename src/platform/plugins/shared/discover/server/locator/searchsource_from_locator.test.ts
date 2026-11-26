@@ -553,6 +553,47 @@ describe('locator params validation', () => {
     ).rejects.toThrow('"sort" must be an array of [field, "asc" | "desc"] pairs');
   });
 
+  test.each([
+    [
+      'an object (the spec of an ad hoc data view)',
+      { title: 'logs-*', timeFieldName: '@timestamp' },
+    ],
+    ['an empty string', ''],
+    ['a number', 123],
+    ['null', null],
+  ])('throws for a data view id that is %s', async (_description, dataViewId) => {
+    const provider = searchSourceFromLocatorFactory(mockServices);
+    await expect(provider({ dataViewId: dataViewId as unknown as string })).rejects.toThrow(
+      '"dataViewId" must be a non-empty string'
+    );
+
+    // an object must not reach the search source, which would create an ad hoc data view with it
+    expect(searchSourceStart.create).not.toHaveBeenCalled();
+    expect(dataViewsService.get).not.toHaveBeenCalled();
+  });
+
+  test.each([
+    ['an object', { id: 'abc' }],
+    ['an empty string', ''],
+    ['a number', 123],
+    ['null', null],
+  ])('throws for a saved search id that is %s', async (_description, savedSearchId) => {
+    const provider = searchSourceFromLocatorFactory(mockServices);
+    await expect(provider({ savedSearchId: savedSearchId as unknown as string })).rejects.toThrow(
+      '"savedSearchId" must be a non-empty string'
+    );
+  });
+
+  test('throws for an invalid data view id, even with a saved search id', async () => {
+    const provider = searchSourceFromLocatorFactory(mockServices);
+    await expect(
+      provider({
+        savedSearchId: mockSavedSearchId,
+        dataViewId: { title: 'logs-*' } as unknown as string,
+      })
+    ).rejects.toThrow('"dataViewId" must be a non-empty string');
+  });
+
   test('accepts an empty sort', async () => {
     const provider = searchSourceFromLocatorFactory(mockServices);
     await expect(provider({ savedSearchId: mockSavedSearchId, sort: [] })).resolves.toBeDefined();

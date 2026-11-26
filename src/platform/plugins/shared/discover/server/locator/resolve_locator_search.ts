@@ -27,6 +27,8 @@ export interface ResolvedLocatorSearch {
 
 const isString = (value: unknown): value is string => typeof value === 'string';
 
+const isNonEmptyString = (value: unknown): value is string => isString(value) && value.length > 0;
+
 // An absolute date or date math (like `now-15m`). `roundUp` is how the end of a range is resolved.
 const isDateOrDateMath = (value: unknown, roundUp = false): boolean =>
   isString(value) && dateMath.parse(value, { roundUp })?.isValid() === true;
@@ -45,7 +47,24 @@ const isSortOrderPair = (item: unknown): boolean =>
  * that are used to build the request are validated here. An invalid value fails the report: skipping
  * it would silently export more data than requested, for example without a time range filter.
  */
-const validateParams = ({ columns, sort, timeRange, filters }: DiscoverAppLocatorParams): void => {
+const validateParams = ({
+  savedSearchId,
+  dataViewId,
+  columns,
+  sort,
+  timeRange,
+  filters,
+}: DiscoverAppLocatorParams): void => {
+  // The ids must be strings: `dataViewId` is used as the `index` of a search source, which takes an object as
+  // the spec of an ad hoc data view, and that is not supported here.
+  if (savedSearchId !== undefined && !isNonEmptyString(savedSearchId)) {
+    throw new Error('Invalid DiscoverAppLocatorParams: "savedSearchId" must be a non-empty string');
+  }
+
+  if (dataViewId !== undefined && !isNonEmptyString(dataViewId)) {
+    throw new Error('Invalid DiscoverAppLocatorParams: "dataViewId" must be a non-empty string');
+  }
+
   if (columns !== undefined && !(Array.isArray(columns) && columns.every(isString))) {
     throw new Error('Invalid DiscoverAppLocatorParams: "columns" must be an array of strings');
   }
@@ -104,13 +123,13 @@ export const resolveLocatorSearch = async (
 ): Promise<ResolvedLocatorSearch> => {
   const { savedSearchId, dataViewId } = params;
 
+  validateParams(params);
+
   if (!savedSearchId && !dataViewId) {
     throw new Error(
       'DiscoverAppLocatorParams must contain a saved search reference (savedSearchId) or a data view reference (dataViewId)'
     );
   }
-
-  validateParams(params);
 
   try {
     const searchSourceStart = dataViewId
