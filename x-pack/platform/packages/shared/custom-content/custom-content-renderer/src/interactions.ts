@@ -123,10 +123,11 @@ export const readInteraction = (
 
   try {
     // Only a button: it is what the prompt asks for, and a `div` or a `span` is not something a
-    // viewer knows they can press.
+    // viewer knows they can press. And only an enabled one: some browsers still deliver a click on an
+    // element inside a disabled button.
     const element: Element | null = Element.prototype.closest.call(
       target,
-      `button[${attribute('action')}]`
+      `button[${attribute('action')}]:not(:disabled)`
     );
     if (!element) return undefined;
 

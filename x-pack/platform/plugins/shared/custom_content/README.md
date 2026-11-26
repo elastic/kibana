@@ -110,8 +110,8 @@ An element of the template can add a filter to the dashboard when it is clicked.
 
 - `data-cc-action` is `filter`, the only action there is.
 - `data-cc-field` is a column the panel's queries returned, and it has to be a plain, filterable field of the data the panel reads (a column that is renamed, computed or aggregated is not one, and the click does nothing).
-- `data-cc-value` is the value, written from the row. For a number field it must be a plain number, in any notation Liquid prints (`12.5`, `1e-7`), and for a boolean field `true` or `false`. The platform's own conversion (`getConvertedValueForField`) types it, so that clicking a value that is already filtered flips that filter.
-- `data-cc-op` is `is` (the default) or `is_not`. Clicking a value that is already filtered flips the filter that is there instead of adding another.
+- `data-cc-value` is the value, written from the row. For a number field it must be a plain number, in any notation Liquid prints (`12.5`, `1e-7`), and for a boolean field `true` or `false`. The platform's own conversion (`getConvertedValueForField`) types it, so that clicking a value that already has a filter changes that filter instead of adding another.
+- `data-cc-op` is `is` (the default) or `is_not`. Clicking a value that already has a filter sets that filter to the operator of the button (and turns it on again if it was off) instead of adding another one: an `is_not` button after an `is` one changes the pill, and clicking the same button twice changes nothing. It is not a toggle.
 
 Write every attribute value that holds data in double quotes, as in the example. Escaping cannot protect an unquoted value, which ends at its first space: `data-cc-value={{ x }}` would filter on `New` for `New York`. That is true of `{{ }}` in any attribute, not only of these.
 

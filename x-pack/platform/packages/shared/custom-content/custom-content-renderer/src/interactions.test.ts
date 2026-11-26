@@ -76,6 +76,11 @@ describe('readInteraction', () => {
     expect(read(render(FILTER_HOST, { tag }))).toBeUndefined();
   });
 
+  it('ignores a disabled button, and a click on something inside it', () => {
+    // `render` returns the span inside the button, which is where such a click lands.
+    expect(read(render({ ...FILTER_HOST, disabled: '' }))).toBeUndefined();
+  });
+
   it('negates with is_not', () => {
     expect(read(render({ ...FILTER_HOST, 'data-cc-op': 'is_not' }))?.negate).toBe(true);
   });
