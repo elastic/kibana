@@ -53,7 +53,10 @@ const headingBeforeNonToolMarker = (line: string): string | undefined => {
     if (idx === -1) {
       continue;
     }
-    const trailing = line.slice(idx + marker.length).trim();
+    // Strip a CommonMark ATX closing sequence (space + one-or-more # + optional space) before
+    // checking the badge suffix, so headings like `#### Foo _(API only)_ {badge} ####` are
+    // recognized rather than silently dropped.
+    const trailing = line.slice(idx + marker.length).trim().replace(/\s+#+\s*$/, '');
     // Accept as an action heading only when nothing follows the marker, or only {applies_to} badges do.
     if (APPLIES_TO_SUFFIX_RE.test(trailing)) {
       return line.slice(0, idx).trim();
@@ -463,6 +466,22 @@ describe('connector spec quality contracts', () => {
     it('returns undefined when non-badge content follows the marker', () => {
       expect(
         headingBeforeNonToolMarker('#### Update tamper protection _(API only)_ {something unrelated}')
+      ).toBeUndefined();
+    });
+
+    it('returns the heading for a line with a badge followed by a closing ATX sequence', () => {
+      expect(
+        headingBeforeNonToolMarker(
+          '#### Update tamper protection _(API only)_ {applies_to}`stack: preview 9.7` ####'
+        )
+      ).toBe('#### Update tamper protection');
+    });
+
+    it('returns undefined when a valid badge is followed by prose (regression: startsWith check would miss this)', () => {
+      expect(
+        headingBeforeNonToolMarker(
+          '#### Update tamper protection _(API only)_ {applies_to}`stack: preview 9.7` some trailing prose'
+        )
       ).toBeUndefined();
     });
   });
