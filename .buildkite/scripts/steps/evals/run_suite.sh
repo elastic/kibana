@@ -360,6 +360,7 @@ EOF
       fi
 
       if [[ "${enable_suite_owner_notify}" == "true" ]]; then
+        fanout_step_keys_csv="$(IFS=,; echo "${fanout_step_keys[*]}")"
         cat >>"$FANOUT_PIPELINE_FILE" <<EOF
       - label: "LLM Evals: ${EVAL_SUITE_ID} (suite owner notify)"
         key: "kbn-evals-${group_key_safe}-suite-owner-notify"
@@ -373,6 +374,7 @@ EOF
           EVAL_SLACK_NOTIFICATION_CHANNEL: "${EVAL_SLACK_NOTIFICATION_CHANNEL:-}"
           EVAL_PR_NUMBER: "${resolved_pr_number}"
           EVAL_SUITE_NAME: "${EVAL_SUITE_NAME:-}"
+          EVAL_FANOUT_STEP_KEYS: "${fanout_step_keys_csv}"
         depends_on:
 EOF
         for key in "${fanout_step_keys[@]}"; do
@@ -501,6 +503,12 @@ EOF
           | awk 'NF && !seen[$0]++' | tr '\n' ',' | sed 's/,$//'
       )"
       buildkite-agent meta-data set "kbn-evals:connectors:${EVAL_SUITE_ID}" "$_connectors_csv" 2>/dev/null || true
+
+      # The `evals gate` waits on this status until the post-comparison step replaces it with the
+      # verdict. No-op for suites without a regressionGate.
+      if [[ -n "${BUILDKITE_PULL_REQUEST:-}" && "${BUILDKITE_PULL_REQUEST}" != "false" ]]; then
+        node .buildkite/scripts/steps/evals/regression_gate.ts pending "$EVAL_SUITE_ID" || true
+      fi
 
       echo "Fanout uploaded. Exiting parent step."
       exit 0

@@ -8,7 +8,7 @@
  */
 
 import type { ConnectorContractUnion } from '@kbn/workflows';
-import { generateYamlSchemaFromConnectors } from '@kbn/workflows';
+import { generateYamlSchemaFromConnectors, getElasticsearchConnectors } from '@kbn/workflows';
 import type { ZodSafeParseResult } from '@kbn/zod/v4';
 import { z } from '@kbn/zod/v4';
 import { parseWorkflowYamlToJSON } from './parse_workflow_yaml_to_json';
@@ -139,6 +139,106 @@ describe('parseWorkflowYamlToJSON', () => {
       `;
       const result = parseWorkflowYamlToJSON(yaml, schema);
       expect(result.success).toBe(true);
+    });
+
+    it.each(['"{{ inputs.x }}"', '"${{ inputs.x }}"', '"{% if x %}y{% endif %}"'])(
+      'should reject a document that is only the template value %s',
+      (yaml) => {
+        const result = parseWorkflowYamlToJSON(yaml, z.object({ name: z.string() }));
+        expect(result.success).toBe(false);
+      }
+    );
+
+    describe('inside a union', () => {
+      // Same shape as the generated ES shortcut types: `anyOf: [full object, shortcut]`.
+      const schema = z.object({
+        prefix: z.union([
+          z.object({ value: z.string(), case_insensitive: z.optional(z.boolean()) }),
+          z.string(),
+        ]),
+      });
+
+      it('should suppress the union error when one branch fails only at template values', () => {
+        const yaml = `prefix:
+          value: web
+          case_insensitive: "{{ inputs.ci }}"
+        `;
+        const result = parseWorkflowYamlToJSON(yaml, schema);
+        expect(result).toMatchObject({
+          success: true,
+          data: { prefix: { value: 'web', case_insensitive: '{{ inputs.ci }}' } },
+        });
+      });
+
+      describe('with the generated Elasticsearch schema', () => {
+        const esSchema = generateYamlSchemaFromConnectors(getElasticsearchConnectors(), []);
+        const toWorkflowYaml = (withLines: string[]) =>
+          [
+            'name: templated-union-fields',
+            'enabled: true',
+            'triggers:',
+            '  - type: manual',
+            'steps:',
+            '  - name: search',
+            '    type: elasticsearch.search',
+            '    with:',
+            '      index: logs',
+            ...withLines.map((line) => `      ${line}`),
+          ].join('\n');
+
+        // Each case has one templated field, so it cannot hide behind another template.
+        it.each([
+          [
+            'prefix full form',
+            [
+              'query:',
+              '  prefix:',
+              '    host.name:',
+              '      value: web',
+              '      case_insensitive: VALUE',
+            ],
+          ],
+          [
+            'match_phrase full form',
+            [
+              'query:',
+              '  match_phrase:',
+              '    message:',
+              '      query: refused',
+              '      slop: VALUE',
+            ],
+          ],
+          [
+            // `_source` is a union whose source filter branch is a union at the same value.
+            '_source filter inside two nested unions',
+            ['_source:', '  includes: ["host.*"]', '  exclude_vectors: VALUE'],
+          ],
+        ])('%s: accepts a template and rejects a wrong literal', (_name, withLines) => {
+          const templated = parseWorkflowYamlToJSON(
+            toWorkflowYaml(withLines.map((line) => line.replace('VALUE', '"{{ inputs.value }}"'))),
+            esSchema
+          );
+          expect(templated.success ? undefined : templated.error.message).toBeUndefined();
+          expect(JSON.stringify(templated.success && templated.data)).toContain(
+            '{{ inputs.value }}'
+          );
+
+          const wrongLiteral = parseWorkflowYamlToJSON(
+            toWorkflowYaml(withLines.map((line) => line.replace('VALUE', '"not-a-valid-value"'))),
+            esSchema
+          );
+          expect(wrongLiteral.success).toBe(false);
+        });
+      });
+
+      it('should keep the union error when a branch also fails at a non-template value', () => {
+        const yaml = `prefix:
+          value: 42
+          case_insensitive: "{{ inputs.ci }}"
+        `;
+        const result = parseWorkflowYamlToJSON(yaml, schema);
+        expect(result.success).toBe(false);
+      });
     });
 
     it('should still show validation errors for non-dynamic invalid values', () => {

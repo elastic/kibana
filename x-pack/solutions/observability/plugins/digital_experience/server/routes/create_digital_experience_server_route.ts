@@ -9,8 +9,22 @@ import { notFound } from '@hapi/boom';
 import { createServerRouteFactory } from '@kbn/server-route-repository';
 import type { DefaultRouteHandlerResources } from '@kbn/server-route-repository-utils';
 import type { ApmDataAccessPluginSetup } from '@kbn/apm-data-access-plugin/server';
+import type { AuthorizationServiceSetup } from '@kbn/security-plugin-types-server';
+import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import { DIGITAL_EXPERIENCE_ENABLED_FLAG } from '../../common/feature_flags';
+import type { SessionsSettings } from '../../common/sessions';
+import type { SessionsSetUpBackoff } from '../services/sessions/sessions_set_up_backoff';
 import { describeError, toClientError } from '../lib/helpers/errors';
+
+/** What sessions need from other plugins, available once they have started. */
+export interface SessionsServices {
+  /** Runs the summaries task; without it, sessions can't be enabled. */
+  taskManager: TaskManagerStartContract | undefined;
+  /** Whether Kibana can store the task's API key, which needs an encryption key. */
+  canEncrypt: boolean;
+  /** Checks privileges across spaces; undefined without the security plugin. */
+  authz: AuthorizationServiceSetup | undefined;
+}
 
 export interface DigitalExperienceRouteHandlerResources extends DefaultRouteHandlerResources {
   /** Optional: only the Classic source needs it. */
@@ -18,6 +32,10 @@ export interface DigitalExperienceRouteHandlerResources extends DefaultRouteHand
   isServerless: boolean;
   /** Whether the ux plugin is enabled; the Classic RUM source needs it, like the browser does. */
   isUxEnabled: boolean;
+  /** `xpack.digital_experience.sessions` config: how often the summaries task runs. */
+  sessionsSettings: SessionsSettings;
+  getSessionsServices: () => Promise<SessionsServices>;
+  sessionsSetUpBackoff: SessionsSetUpBackoff;
 }
 
 const createServerRoute = createServerRouteFactory<

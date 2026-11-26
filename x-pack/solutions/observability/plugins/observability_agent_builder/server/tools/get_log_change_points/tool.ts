@@ -83,9 +83,9 @@ Uses "categorize_text" aggregation to group similar unstructured messages into p
         return getAgentBuilderResourceAvailability({ core, request, logger });
       },
     },
-    handler: async ({ start, end, index, kqlFilter, messageField }, { esClient }) => {
+    handler: async ({ start, end, index, kqlFilter, messageField }, { esClient, request }) => {
       try {
-        const logIndexPatterns = await getLogsIndices({ core, logger });
+        const logIndexPatterns = await getLogsIndices({ core, request, logger });
 
         const topLogChangePoints = await getToolHandler({
           esClient,

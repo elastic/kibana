@@ -6,12 +6,15 @@
  */
 
 import { ENVIRONMENT_NOT_DEFINED_VALUE } from '@kbn/apm-types';
-import { getBucketSizeSeconds } from '../../../lib/helpers/time_series';
+import { getHistogramInterval } from '../../../lib/helpers/time_series';
 import { MAX_APPLICATIONS_PER_SOURCE, MAX_ENVIRONMENTS_PER_APPLICATION } from '../constants';
-import { sessionsSearch } from './sessions_search_requests';
+import { sessionOverlapFilters } from '../../sessions/list_sessions';
+import { sessionsSearch, sessionsVitalsSearch } from './sessions_search_requests';
 
 const START = Date.parse('2021-01-18T12:00:00.000Z');
 const END = Date.parse('2021-01-18T13:00:00.000Z');
+const TIME_ZONE = 'America/New_York';
+const INTERVAL = getHistogramInterval(START, END);
 
 // The part of an aggregation the tests read; the client types it too loosely to navigate.
 interface Aggregation {
@@ -23,17 +26,25 @@ interface Aggregation {
 }
 
 const aggregationsOf = (environment?: string) =>
-  sessionsSearch({ start: START, end: END, environment }).aggs as unknown as Record<
-    string,
-    Aggregation
-  >;
+  sessionsSearch({
+    start: START,
+    end: END,
+    environment,
+    histogram: { interval: INTERVAL, timeZone: TIME_ZONE },
+  }).aggs as unknown as Record<string, Aggregation>;
 
 const inEnvironment = (environment?: string) => aggregationsOf(environment).inEnvironment;
 
 describe('sessionsSearch', () => {
   it('reads the sessions index without hits, failing rather than returning partial results', () => {
-    expect(sessionsSearch({ start: START, end: END })).toMatchObject({
-      index: 'digital-experience-sessions-*',
+    expect(
+      sessionsSearch({
+        start: START,
+        end: END,
+        histogram: { interval: INTERVAL, timeZone: TIME_ZONE },
+      })
+    ).toMatchObject({
+      index: 'digital-experience-sessions-browser-*',
       size: 0,
       track_total_hits: false,
       ignore_unavailable: true,
@@ -41,15 +52,22 @@ describe('sessionsSearch', () => {
     });
   });
 
-  it('matches the sessions that overlap the time range', () => {
-    expect(sessionsSearch({ start: START, end: END }).query).toEqual({
-      bool: {
-        filter: [
-          { range: { start_time: { lte: END, format: 'epoch_millis' } } },
-          { range: { end_time: { gte: START, format: 'epoch_millis' } } },
-        ],
-      },
+  it('matches the sessions that overlap the time range, as the Sessions tab does', () => {
+    const range = { start: new Date(START).toISOString(), end: new Date(END).toISOString() };
+
+    expect(
+      sessionsSearch({
+        start: START,
+        end: END,
+        histogram: { interval: INTERVAL, timeZone: TIME_ZONE },
+      }).query
+    ).toEqual({
+      bool: { filter: sessionOverlapFilters(range) },
     });
+    expect(sessionOverlapFilters(range)).toEqual([
+      { range: { start_time: { lte: range.end } } },
+      { range: { end_time: { gte: range.start } } },
+    ]);
   });
 
   it('adds up the counts the session summaries keep, per application', () => {
@@ -70,31 +88,53 @@ describe('sessionsSearch', () => {
     });
   });
 
-  it('adds up the samples of each vital and takes the p75 of the sessions p75', () => {
+  it('counts the sessions of each application that started in the time range', () => {
+    const { startedSessions } = inEnvironment().aggs.applications.aggs;
+
+    expect(startedSessions.filter).toEqual({
+      range: { start_time: { gte: new Date(START).toISOString() } },
+    });
+  });
+
+  it('adds up the samples of each vital, leaving the p75 to the vitals search', () => {
     const { aggs } = inEnvironment().aggs.applications;
 
     expect(aggs.lcp.aggs).toEqual({
       samples: { sum: { field: 'web_vital_samples.lcp.count' } },
       good: { sum: { field: 'web_vital_samples.lcp.good' } },
       needsImprovement: { sum: { field: 'web_vital_samples.lcp.needs_improvement' } },
-      p75: { percentiles: { field: 'web_vitals.lcp', percents: [75], keyed: false } },
     });
     for (const vital of ['inp', 'cls', 'fcp', 'ttfb']) {
-      expect(aggs[vital].aggs.p75.percentiles?.field).toBe(`web_vitals.${vital}`);
+      expect(aggs[vital].aggs.samples).toEqual({
+        sum: { field: `web_vital_samples.${vital}.count` },
+      });
     }
   });
 
-  it('charts the page loads by session start, in the buckets of the time range only', () => {
-    const { pageLoadsOverTime } = inEnvironment().aggs;
+  describe('over time', () => {
+    const { startedInRange } = inEnvironment().aggs;
 
-    expect(pageLoadsOverTime.date_histogram).toEqual({
-      field: 'start_time',
-      fixed_interval: `${getBucketSizeSeconds(START, END)}s`,
-      min_doc_count: 0,
-      extended_bounds: { min: START, max: END },
-      hard_bounds: { min: START, max: END },
+    it('buckets only the sessions that started in the time range', () => {
+      // The bounds of a histogram limit its buckets, not the sessions in a boundary bucket, so an
+      // overlapping session that started before the range in the first bucket needs a filter.
+      expect(startedInRange.filter).toEqual({
+        range: { start_time: { gte: new Date(START).toISOString() } },
+      });
     });
-    expect(pageLoadsOverTime.aggs).toEqual({ pageLoads: { sum: { field: 'page_load_count' } } });
+
+    it('charts the page loads by session start, in the buckets of the time range', () => {
+      const { pageLoadsOverTime } = startedInRange.aggs;
+
+      // The latest bucket is not bounded away: sessions that started in it are in the range.
+      expect(pageLoadsOverTime.date_histogram).toEqual({
+        field: 'start_time',
+        fixed_interval: `${INTERVAL.value}s`,
+        time_zone: TIME_ZONE,
+        min_doc_count: 0,
+        extended_bounds: { min: START, max: END },
+      });
+      expect(pageLoadsOverTime.aggs).toEqual({ pageLoads: { sum: { field: 'page_load_count' } } });
+    });
   });
 
   describe('environment', () => {
@@ -127,6 +167,49 @@ describe('sessionsSearch', () => {
       expect(JSON.stringify(inEnvironment(ENVIRONMENT_NOT_DEFINED_VALUE).filter)).toContain(
         '"must_not":[{"exists":{"field":"environment"}}]'
       );
+    });
+  });
+});
+
+describe('sessionsVitalsSearch', () => {
+  const range = { start: new Date(START).toISOString(), end: new Date(END).toISOString() };
+
+  it('reads the same sessions as the metrics, failing rather than returning partial results', () => {
+    expect(sessionsVitalsSearch({ start: START, end: END })).toMatchObject({
+      index: 'digital-experience-sessions-browser-*',
+      size: 0,
+      track_total_hits: false,
+      ignore_unavailable: true,
+      allow_partial_search_results: false,
+      query: { bool: { filter: [...sessionOverlapFilters(range), { match_all: {} }] } },
+    });
+  });
+
+  it('narrows the sessions to the selected environment', () => {
+    expect(
+      sessionsVitalsSearch({ start: START, end: END, environment: 'production' }).query
+    ).toEqual({
+      bool: {
+        filter: [
+          ...sessionOverlapFilters(range),
+          inEnvironment('production').filter as Record<string, unknown>,
+        ],
+      },
+    });
+  });
+
+  it('takes the p75 of the sessions p75 of each vital, for the applications the metrics list', () => {
+    const { applications } = sessionsVitalsSearch({ start: START, end: END })
+      .aggs as unknown as Record<string, Aggregation>;
+
+    expect(applications.terms).toEqual(inEnvironment().aggs.applications.terms);
+    expect(applications.aggs).toEqual({
+      pageLoads: { sum: { field: 'page_load_count' } },
+      lcp: { percentiles: { field: 'web_vitals.lcp', percents: [75], keyed: false } },
+      inp: { percentiles: { field: 'web_vitals.inp', percents: [75], keyed: false } },
+      cls: { percentiles: { field: 'web_vitals.cls', percents: [75], keyed: false } },
+      fcp: { percentiles: { field: 'web_vitals.fcp', percents: [75], keyed: false } },
+      ttfb: { percentiles: { field: 'web_vitals.ttfb', percents: [75], keyed: false } },
     });
   });
 });

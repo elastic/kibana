@@ -21,13 +21,11 @@ import React, { useMemo } from 'react';
 import { SparkPlot } from '../../../components/ui/spark_plot';
 import { useSourcesById } from '../../../data/sources/use_sources_by_id';
 import { DurabilityBadge } from './components/durability_badge';
+import { KnowledgeIndicatorSourceBadge } from './components/knowledge_indicator_source_badge';
 import { getKnowledgeIndicatorExpiresAt } from './utils/get_knowledge_indicator_expires_at';
 import { KnowledgeIndicatorActionsCell } from './components/knowledge_indicator_actions_cell';
 import { getKnowledgeIndicatorItemId } from './utils/get_knowledge_indicator_item_id';
-import {
-  getKnowledgeIndicatorSourceId,
-  getKnowledgeIndicatorSourceIds,
-} from './utils/get_knowledge_indicator_source_id';
+import { getKnowledgeIndicatorSourceId } from './utils/get_knowledge_indicator_source_id';
 import { getKnowledgeIndicatorTitle } from './use_knowledge_indicators_table';
 import {
   TITLE_COLUMN_LABEL,
@@ -42,11 +40,9 @@ import {
   MINIMIZE_DETAILS_ARIA_LABEL,
   OCCURRENCES_TOOLTIP_NAME,
 } from './translations';
+import { getFeatureTypeLabel } from './utils/get_feature_type_label';
 
 const EMPTY_ANNOTATIONS: never[] = [];
-const capitalizeStyle = css`
-  text-transform: capitalize;
-`;
 
 const TITLE_COLUMN_WIDTH = '240px';
 
@@ -164,11 +160,7 @@ export const useKnowledgeIndicatorsColumns = ({
         width: '192px',
         render: (ki: KnowledgeIndicator) => {
           if (ki.kind === 'feature') {
-            return (
-              <EuiBadge color="hollow" css={capitalizeStyle}>
-                {ki.feature.type}
-              </EuiBadge>
-            );
+            return <EuiBadge color="hollow">{getFeatureTypeLabel(ki.feature.type)}</EuiBadge>;
           }
           return (
             <EuiBadge color="hollow">
@@ -182,19 +174,12 @@ export const useKnowledgeIndicatorsColumns = ({
         width: '192px',
         render: (ki: KnowledgeIndicator) => {
           const representativeId = getKnowledgeIndicatorSourceId(ki);
-          const representativeTitle = getSourceTitle(representativeId);
-          const otherTitles = getKnowledgeIndicatorSourceIds(ki)
-            .filter((id) => id !== representativeId)
-            .map(getSourceTitle);
-          if (otherTitles.length === 0) {
-            return <EuiBadge color="hollow">{representativeTitle}</EuiBadge>;
-          }
           return (
-            <EuiToolTip content={[representativeTitle, ...otherTitles].join(', ')}>
-              <EuiBadge color="hollow" tabIndex={0}>
-                {`${representativeTitle} +${otherTitles.length}`}
-              </EuiBadge>
-            </EuiToolTip>
+            <KnowledgeIndicatorSourceBadge
+              knowledgeIndicator={ki}
+              sourceId={representativeId}
+              getSourceTitle={getSourceTitle}
+            />
           );
         },
       },

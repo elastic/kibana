@@ -116,13 +116,7 @@ export const InvestigationLimitRow = ({
         step={1}
         isInvalid={invalid}
         disabled={disabled}
-        onChange={(event) => {
-          const next = parseInvestigationLimitDraft(event.target.value);
-          // A limit of 0 would deny every start, so it is not a value the input can hold.
-          if (next !== 0) {
-            onChange(next);
-          }
-        }}
+        onChange={(event) => onChange(parseInvestigationLimitDraft(event.target.value))}
       />
     </EuiFormRow>
   ) : (

@@ -106,6 +106,9 @@ const savePinnedFieldsToStorage = (newFields: string[], dataViewId: string, stor
   });
 };
 
+const getOwnValue = (flattened: Record<string, unknown>, field: string): unknown =>
+  Object.hasOwn(flattened, field) ? flattened[field] : undefined;
+
 const InternalDocViewerTable = ({
   columns,
   dataSource,
@@ -196,7 +199,7 @@ const InternalDocViewerTable = ({
     (field: string, isPinned: boolean): FieldRow => {
       return new FieldRow({
         name: field,
-        flattenedValue: flattened[field],
+        flattenedValue: getOwnValue(flattened, field),
         hit,
         dataView,
         fieldFormats,
@@ -219,6 +222,18 @@ const InternalDocViewerTable = ({
     [showOnlySelectedFields, isShowOnlySelectedFieldsDisabled]
   );
 
+  const allFieldNames = useMemo(() => {
+    const names = Object.keys(flattened);
+    if (dataSource?.kind !== 'esql') {
+      return names;
+    }
+    const presentNames = new Set(names);
+    const emptyColumnNames = dataSource
+      .getEmptyColumnNames()
+      .filter((name) => !presentNames.has(name));
+    return emptyColumnNames.length ? [...names, ...emptyColumnNames] : names;
+  }, [flattened, dataSource]);
+
   const displayedFieldNames = useMemo(() => {
     if (shouldShowOnlySelectedFields) {
       return getVisibleColumns(
@@ -232,7 +247,7 @@ const InternalDocViewerTable = ({
         )
       );
     }
-    return Object.keys(flattened).sort((fieldA, fieldB) => {
+    return [...allFieldNames].sort((fieldA, fieldB) => {
       const mappingA = mapping(fieldA);
       const mappingB = mapping(fieldB);
       const nameA = !mappingA || !mappingA.displayName ? fieldA : mappingA.displayName;
@@ -241,7 +256,7 @@ const InternalDocViewerTable = ({
     });
   }, [
     fieldsFromColumns,
-    flattened,
+    allFieldNames,
     shouldShowOnlySelectedFields,
     mapping,
     dataView,
@@ -257,7 +272,8 @@ const InternalDocViewerTable = ({
           if (!shouldShowOnlySelectedFields && !shouldShowFieldHandler(curFieldName)) {
             return acc;
           }
-          const shouldHideNullValue = hideNullValues && flattened[curFieldName] == null;
+          const shouldHideNullValue =
+            hideNullValues && getOwnValue(flattened, curFieldName) == null;
           if (shouldHideNullValue) {
             return acc;
           }
@@ -430,7 +446,6 @@ const InternalDocViewerTable = ({
             columns={columns}
             onFindSearchTermMatch={tableFiltersCallbacks.onFindSearchTermMatch}
             searchTerm={searchTerm}
-            pinnedFields={pinnedFields}
             onTogglePinned={onTogglePinned}
             hideFilteringOnComputedColumns={hideFilteringOnComputedColumns}
           />

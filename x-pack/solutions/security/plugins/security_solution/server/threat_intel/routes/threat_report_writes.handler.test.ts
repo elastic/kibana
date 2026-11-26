@@ -227,7 +227,7 @@ describe('threat report write routes', () => {
       it.each([
         ['extracted', { extracted: { iocs: [{ type: 'ipv4', value: '1.2.3.4' }] } }],
         ['geography', { geography: { regions: ['EU'] } }],
-        ['lineage', { lineage: { extraction_method: 'workflow_v4' } }],
+        ['lineage', { lineage: { extraction_method: 'enrich_workflow' } }],
         ['severity', { severity: { level: 'high', score: 8 } }],
         ['rank_score', { rank_score: 6.4 }],
       ])('accepts the %s section the enrichment steps write', (_name, doc) => {

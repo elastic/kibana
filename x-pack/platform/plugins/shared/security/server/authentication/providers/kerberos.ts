@@ -11,6 +11,7 @@ import Boom from '@hapi/boom';
 import type { KibanaRequest } from '@kbn/core/server';
 import { HTTPAuthorizationHeader } from '@kbn/core-security-server';
 
+import type { AuthenticationOptions } from './base';
 import { BaseAuthenticationProvider } from './base';
 import type { AuthenticationInfo } from '../../elasticsearch';
 import { getDetailedErrorMessage, getErrorStatusCode, InvalidGrantError } from '../../errors';
@@ -67,15 +68,25 @@ export class KerberosAuthenticationProvider extends BaseAuthenticationProvider<P
 
   /**
    * Performs Kerberos request authentication.
+   * During session renewal, ignore the expired token that Core put in the Authorization header.
+   * Use the supplied session and contact Elasticsearch, even on minimal-authentication routes.
+   * The request headers stay unchanged.
    * @param request Request instance.
    * @param [session] Optional session object associated with the provider.
+   * @param [options] Explicit session reauthentication controls.
    */
-  public async authenticate(request: KibanaRequest, session?: SessionValue<ProviderState> | null) {
+  public async authenticate(
+    request: KibanaRequest,
+    session?: SessionValue<ProviderState> | null,
+    options?: AuthenticationOptions
+  ) {
     this.logger.debug(
       `Trying to authenticate user request to ${request.url.pathname}${request.url.search}.`
     );
 
-    const authorizationHeader = HTTPAuthorizationHeader.parseFromRequest(request);
+    const authorizationHeader = options?.reauthenticate
+      ? null
+      : HTTPAuthorizationHeader.parseFromRequest(request);
     if (authorizationHeader && authorizationHeader.scheme.toLowerCase() !== 'negotiate') {
       this.logger.debug(`Unsupported authentication scheme: ${authorizationHeader.scheme}`);
       return AuthenticationResult.notHandled();
@@ -83,7 +94,7 @@ export class KerberosAuthenticationProvider extends BaseAuthenticationProvider<P
 
     let authenticationResult = AuthenticationResult.notHandled();
     if (session) {
-      authenticationResult = await this.authenticateViaState(request, session);
+      authenticationResult = await this.authenticateViaState(request, session, options);
       if (
         authenticationResult.failed() &&
         Tokens.isAccessTokenExpiredError(authenticationResult.error)
@@ -233,8 +244,13 @@ export class KerberosAuthenticationProvider extends BaseAuthenticationProvider<P
    * forwarded to Elasticsearch backend.
    * @param request Request instance.
    * @param session Session object associated with the provider.
+   * @param [options] Reauthentication options forwarded to full backend credential validation.
    */
-  private async authenticateViaState(request: KibanaRequest, session: SessionValue<ProviderState>) {
+  private async authenticateViaState(
+    request: KibanaRequest,
+    session: SessionValue<ProviderState>,
+    options?: AuthenticationOptions
+  ) {
     this.logger.debug('Trying to authenticate via state.');
 
     if (!session.state.accessToken) {
@@ -247,7 +263,7 @@ export class KerberosAuthenticationProvider extends BaseAuthenticationProvider<P
     };
 
     try {
-      const user = await this.getUser(request, authHeaders, session);
+      const user = await this.getUser(request, authHeaders, session, options);
 
       this.logger.debug('Request has been authenticated via state.');
       return AuthenticationResult.succeeded(user, { authHeaders });

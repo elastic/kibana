@@ -24,6 +24,12 @@ export interface MobileHealthProfile {
   errorLogRate: number;
   /** Probability that the app crashes during a visit. */
   crashRate: number;
+  /** Share of screen views of EDOT Android with an ANR, with proposed signals; none when unset. */
+  anrRate?: number;
+  /** Share of screen views of EDOT iOS with a hang, with proposed signals; none when unset. */
+  hangRate?: number;
+  /** Share of screen views with a handled exception, with proposed signals; none when unset. */
+  handledErrorRate?: number;
   /** Share of sessions on a cellular connection rather than wifi. */
   cellularRate: number;
 }
@@ -38,6 +44,9 @@ export const MOBILE_HEALTH_PROFILES: Readonly<Record<HealthProfileName, MobileHe
     networkErrorRate: 0.005,
     errorLogRate: 0.01,
     crashRate: 0.002,
+    anrRate: 0.002,
+    hangRate: 0.002,
+    handledErrorRate: 0.02,
     cellularRate: 0.3,
   },
   slow: {
@@ -49,6 +58,9 @@ export const MOBILE_HEALTH_PROFILES: Readonly<Record<HealthProfileName, MobileHe
     networkErrorRate: 0.03,
     errorLogRate: 0.02,
     crashRate: 0.005,
+    anrRate: 0.01,
+    hangRate: 0.01,
+    handledErrorRate: 0.04,
     cellularRate: 0.6,
   },
   erroring: {
@@ -60,6 +72,9 @@ export const MOBILE_HEALTH_PROFILES: Readonly<Record<HealthProfileName, MobileHe
     networkErrorRate: 0.02,
     errorLogRate: 0.12,
     crashRate: 0.04,
+    anrRate: 0.03,
+    hangRate: 0.03,
+    handledErrorRate: 0.1,
     cellularRate: 0.35,
   },
   critical: {
@@ -71,6 +86,9 @@ export const MOBILE_HEALTH_PROFILES: Readonly<Record<HealthProfileName, MobileHe
     networkErrorRate: 0.08,
     errorLogRate: 0.3,
     crashRate: 0.15,
+    anrRate: 0.1,
+    hangRate: 0.1,
+    handledErrorRate: 0.2,
     cellularRate: 0.7,
   },
 };

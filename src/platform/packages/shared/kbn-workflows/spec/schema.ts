@@ -644,34 +644,36 @@ export type DataSetStep = z.infer<typeof DataSetStepSchema>;
 
 // Fetcher configuration for HTTP request customization (shared across formats)
 export const IGNORED_KIBANA_FETCHER_SETTING_MESSAGE =
-  'The "fetcher" setting is deprecated and some options are already ignored. Please remove this setting. Configure self HTTP routing, TLS, and redirects with `server.selfHttp`. Use `max-step-size` for response limits.';
+  'The "fetcher" setting is deprecated and ignored. Please remove this setting. Configure self HTTP routing, TLS, and redirects with `server.selfHttp`. Use `max-step-size` for response limits.';
 
-/** Editor schema copy. Unlike the warning above, this is shown while the self client is still off. */
 const KIBANA_FETCHER_SCHEMA_DESCRIPTION =
-  'Deprecated. Still applied unless Kibana steps use the Core self HTTP client. When that client is in use, these options are ignored: configure routing, TLS, and redirects with `server.selfHttp`, and use `max-step-size` for response limits.';
+  'Deprecated and ignored. Configure routing, TLS, and redirects with `server.selfHttp`, and use `max-step-size` for response limits.';
 
-const FetcherConfigObjectSchema = z
-  .object({
-    skip_ssl_verification: z
-      .boolean()
-      .optional()
-      .describe('Skip SSL/TLS certificate verification for the request'),
-    follow_redirects: z
-      .boolean()
-      .optional()
-      .describe('Whether to follow HTTP redirects. Defaults to true'),
-    max_redirects: z.number().optional().describe('Maximum number of redirects to follow'),
-    keep_alive: z.boolean().optional().describe('Enable HTTP keep-alive for connection reuse'),
-    max_content_length: z
-      .number()
-      .positive()
-      .finite()
-      .optional()
-      .describe('Maximum response body size in bytes. Aborts the request mid-stream if exceeded.'),
-  })
-  .meta({ $id: 'fetcher', description: 'Fetcher configuration for HTTP request customization' });
-
-export const FetcherConfigSchema = FetcherConfigObjectSchema.optional();
+const FetcherConfigObjectSchema = lazySchema(() =>
+  z
+    .object({
+      skip_ssl_verification: z
+        .boolean()
+        .optional()
+        .describe('Ignored. Configure TLS verification with `server.selfHttp.ssl`.'),
+      follow_redirects: z
+        .boolean()
+        .optional()
+        .describe('Ignored. Configure redirects with `server.selfHttp.maxRedirects`.'),
+      max_redirects: z
+        .number()
+        .optional()
+        .describe('Ignored. Configure redirects with `server.selfHttp.maxRedirects`.'),
+      keep_alive: z.boolean().optional().describe('Ignored. Kibana manages self HTTP connections.'),
+      max_content_length: z
+        .number()
+        .positive()
+        .finite()
+        .optional()
+        .describe('Ignored. Use `max-step-size` for response limits.'),
+    })
+    .meta({ $id: 'fetcher', description: 'Fetcher configuration for HTTP request customization' })
+);
 
 export const KibanaFetcherConfigSchema = FetcherConfigObjectSchema.meta({
   $id: 'kibanaFetcher',
@@ -722,14 +724,22 @@ export type ElasticsearchStep = z.infer<typeof ElasticsearchStepSchema>;
 
 // Kibana step meta options that control routing and debugging (not forwarded as HTTP params)
 export const KibanaStepMetaSchema = {
-  use_server_info: z
-    .boolean()
-    .optional()
-    .describe('Use the server info URL (internal host:port) instead of the public URL'),
-  use_localhost: z
-    .boolean()
-    .optional()
-    .describe('Use localhost:5601 instead of the configured URL'),
+  use_server_info: lazySchema(() =>
+    z
+      .boolean()
+      .optional()
+      .describe(
+        'Send the request to the local Kibana listener (`server.selfHttp` local target) instead of the public URL'
+      )
+  ),
+  use_localhost: lazySchema(() =>
+    z
+      .boolean()
+      .optional()
+      .describe(
+        'Same as `use_server_info`: send the request to the local Kibana listener (`server.selfHttp` local target). Cannot be combined with `use_server_info`.'
+      )
+  ),
   debug: z
     .boolean()
     .optional()
@@ -1180,33 +1190,6 @@ export const getParallelStepSchema = (stepSchema: z.ZodType, loose: boolean = fa
   return applyParallelModeRefinement(schema);
 };
 
-export const MergeStepConfigSchema = z.object({
-  sources: z
-    .array(z.string())
-    .describe('References to branch or step names whose results to merge'),
-  steps: z.array(BaseStepSchema).describe('Steps to execute after merging'),
-});
-export const MergeStepSchema = BaseStepSchema.extend({
-  type: z
-    .literal('merge')
-    .describe('Merge results from parallel branches and continue with subsequent steps'),
-  ...MergeStepConfigSchema.shape,
-});
-export type MergeStep = z.infer<typeof MergeStepSchema>;
-
-export const getMergeStepSchema = (stepSchema: z.ZodType, loose: boolean = false) => {
-  const schema = MergeStepSchema.extend({
-    steps: z.array(stepSchema), // steps to run after merge
-  });
-
-  if (loose) {
-    // make all fields optional, but require type to be present for discriminated union
-    return schema.partial().required({ type: true });
-  }
-
-  return schema;
-};
-
 export const LoopBreakStepSchema = BaseStepSchema.extend({
   type: z
     .literal('loop.break')
@@ -1226,6 +1209,17 @@ export type LoopContinueStep = z.infer<typeof LoopContinueStepSchema>;
 export const ConsoleStepInputSchema = lazySchema(() =>
   z.object({
     message: z.string(),
+  })
+);
+
+/** Params of the generic `elasticsearch.request` step, which calls an Elasticsearch API by method and path. */
+export const ElasticsearchRequestStepInputSchema = lazySchema(() =>
+  z.object({
+    method: z.string(),
+    path: z.string(),
+    body: z.any().optional(),
+    params: z.any().optional(),
+    headers: z.any().optional(),
   })
 );
 
@@ -1295,6 +1289,100 @@ export const WorkflowExecuteAsyncStepOutputSchema = z.object({
   startedAt: z.string().optional(),
 });
 
+export const WORKFLOW_AWAIT_EXECUTIONS_MAX_IDS = 100;
+
+const AwaitedExecutionIdSchema = lazySchema(() => z.string().min(1).max(1024));
+
+export const WorkflowAwaitExecutionsModeSchema = lazySchema(() =>
+  z
+    .enum(['fail-fast', 'settled'])
+    .describe(
+      'fail-fast (default): fail as soon as one execution ends in any status other than completed. ' +
+        'The remaining executions keep running; they are not cancelled. ' +
+        'settled: wait for every execution to reach a terminal status and report each result.'
+    )
+);
+export type WorkflowAwaitExecutionsMode = z.infer<typeof WorkflowAwaitExecutionsModeSchema>;
+
+export const AWAIT_EXECUTIONS_SOURCE_MESSAGE =
+  'Provide exactly one of `from-steps` or `execution-ids`.';
+
+export const WorkflowAwaitExecutionsStepInputSchema = lazySchema(() =>
+  z
+    .object({
+      'from-steps': z
+        .array(
+          z
+            .string()
+            .min(1)
+            .max(1024)
+            .regex(/^(?![\s\S]*\{[{%])[\s\S]+$/, 'Step names in from-steps must be literal names')
+        )
+        .min(1)
+        .max(WORKFLOW_AWAIT_EXECUTIONS_MAX_IDS)
+        .optional()
+        .describe(
+          'Names of earlier steps whose workflow.executeAsync executions to await. A step that ' +
+            'contains others (parallel, foreach, if) covers every workflow.executeAsync run inside it, ' +
+            'including each loop iteration. When the await is inside the same loop or retry as the ' +
+            'referenced step, only executions from its current iteration or attempt are awaited; ' +
+            'place the await after the loop to collect every iteration. The listed steps can resolve ' +
+            `to at most ${WORKFLOW_AWAIT_EXECUTIONS_MAX_IDS} executions in total; more fails the step ` +
+            'after the executions have started.'
+        ),
+      'execution-ids': z
+        .union([
+          AwaitedExecutionIdSchema,
+          z.array(AwaitedExecutionIdSchema).min(1).max(WORKFLOW_AWAIT_EXECUTIONS_MAX_IDS),
+        ])
+        .optional()
+        .describe(
+          'Execution IDs to await, for example IDs returned by a sub-workflow that started them. ' +
+            'Prefer `from-steps` for workflow.executeAsync steps in this workflow. Only executions ' +
+            'started by this run or by one of its sub-workflows can be awaited; any other ID fails ' +
+            'the step as not found.'
+        ),
+      mode: WorkflowAwaitExecutionsModeSchema.optional(),
+    })
+    .refine(
+      (input) => (input['from-steps'] === undefined) !== (input['execution-ids'] === undefined),
+      { message: AWAIT_EXECUTIONS_SOURCE_MESSAGE }
+    )
+);
+
+export const WorkflowAwaitExecutionsStepSchema = lazySchema(() =>
+  BaseStepSchema.extend({
+    type: z.literal('workflow.awaitExecutions'),
+    with: WorkflowAwaitExecutionsStepInputSchema,
+    ...TimeoutPropSchema.shape,
+  }).merge(StepWithOnFailureSchema)
+);
+export type WorkflowAwaitExecutionsStep = z.infer<typeof WorkflowAwaitExecutionsStepSchema>;
+
+export const AwaitedExecutionResultSchema = lazySchema(() =>
+  z.object({
+    executionId: z.string(),
+    workflowId: z.string(),
+    status: z.string(),
+    output: z.unknown().optional(),
+    error: z.object({ type: z.string(), message: z.string() }).optional(),
+    startedAt: z.string().optional(),
+    finishedAt: z.string().optional(),
+  })
+);
+export type AwaitedExecutionResult = z.infer<typeof AwaitedExecutionResultSchema>;
+
+export const WorkflowAwaitExecutionsStepOutputSchema = lazySchema(() =>
+  z.object({
+    results: z
+      .array(AwaitedExecutionResultSchema)
+      .describe('One entry per awaited execution, in the order the IDs were given.'),
+  })
+);
+export type WorkflowAwaitExecutionsStepOutput = z.infer<
+  typeof WorkflowAwaitExecutionsStepOutputSchema
+>;
+
 export const WorkflowOutputStepInputSchema = lazySchema(() => z.record(z.string(), z.any()));
 export const WorkflowOutputStepConfigSchema = lazySchema(() =>
   z.object({
@@ -1356,9 +1444,9 @@ const StepSchema = z.lazy(() =>
     ElasticsearchStepSchema,
     KibanaStepSchema,
     ParallelStepSchema,
-    MergeStepSchema,
     WorkflowExecuteStepSchema,
     WorkflowExecuteAsyncStepSchema,
+    WorkflowAwaitExecutionsStepSchema,
     WorkflowOutputStepSchema,
     WorkflowFailStepSchema,
     LoopBreakStepSchema,
@@ -1379,13 +1467,13 @@ export const BuiltInStepTypes = [
   IfStepSchema.shape.type.value,
   SwitchStepSchema.shape.type.value,
   ParallelStepObjectSchema.shape.type.value,
-  MergeStepSchema.shape.type.value,
   DataSetStepSchema.shape.type.value,
   WaitStepSchema.shape.type.value,
   WaitForInputStepSchema.shape.type.value,
   WaitForApprovalStepSchema.shape.type.value,
   WorkflowExecuteStepSchema.shape.type.value,
   WorkflowExecuteAsyncStepSchema.shape.type.value,
+  WorkflowAwaitExecutionsStepSchema.shape.type.value,
   WorkflowOutputStepSchema.shape.type.value,
   WorkflowFailStepSchema.shape.type.value,
   LoopBreakStepSchema.shape.type.value,

@@ -20,15 +20,15 @@ import { GridLayout } from '@kbn/grid-layout';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 
 import type { GridData } from '@kbn/as-code-dashboard-schema';
-import { DASHBOARD_GRID_COLUMN_COUNT } from '../../../common/page_bundle_constants';
+import {
+  DASHBOARD_GRID_COLUMN_COUNT,
+  DASHBOARD_GRID_MARGIN_SIZE,
+  DASHBOARD_GRID_ROW_HEIGHT,
+} from '@kbn/dashboard-constants';
 import { areLayoutsEqual, type DashboardLayout } from '../../dashboard_api/layout_manager';
 import { useDashboardApi } from '../../dashboard_api/use_dashboard_api';
 import { useDashboardInternalApi } from '../../dashboard_api/use_dashboard_internal_api';
-import {
-  DASHBOARD_GRID_HEIGHT,
-  DASHBOARD_MARGIN_SIZE,
-  DEFAULT_DASHBOARD_DRAG_TOP_OFFSET,
-} from './constants';
+import { DEFAULT_DASHBOARD_DRAG_TOP_OFFSET } from './constants';
 import { DashboardGridItem } from './dashboard_grid_item';
 import { PanelSelectHint } from './panel_select_hint';
 import { SelectionMarquee } from './selection_marquee';
@@ -196,8 +196,8 @@ export const DashboardGrid = () => {
         css={layoutStyles}
         layout={layout}
         gridSettings={{
-          gutterSize: useMargins ? DASHBOARD_MARGIN_SIZE : 0,
-          rowHeight: DASHBOARD_GRID_HEIGHT,
+          gutterSize: useMargins ? DASHBOARD_GRID_MARGIN_SIZE : 0,
+          rowHeight: DASHBOARD_GRID_ROW_HEIGHT,
           columnCount: DASHBOARD_GRID_COLUMN_COUNT,
           keyboardDragTopLimit: topOffset,
         }}
@@ -271,10 +271,26 @@ const dashboardGridStyles = {
           zIndex: euiTheme.levels.toast,
         },
 
-      // Hide hover actions when dashboard has an overlay
-      '.dshDashboardGrid__item--hideHoverActions .embPanel__hoverActions': {
-        visibility: 'hidden !important' as 'hidden',
-      },
+      // Hide hover actions when dashboard has an overlay (blurred panels).
+      '.dshDashboardGrid__item--hideHoverActions:not(.dshDashboardGrid__item--focused) .embPanel__hoverActions':
+        {
+          visibility: 'hidden !important' as 'hidden',
+        },
+      // When a panel is focused for flyout edit, keep the drag handle visible and hide the
+      // rest of the default hover actions so they leave layout. Combined-wrapper chrome is
+      // undone in useHoverActionStyles so the remaining handle matches an individual pill.
+      // Overridden hover actions (inline edit chrome) must stay visible — they replace the
+      // default actions and are the editing UI.
+      // https://github.com/elastic/kibana/issues/278578
+      '.dshDashboardGrid__item--hideHoverActions.dshDashboardGrid__item--focused .embPanel__hoverActions:not(.embPanel__hoverActions--overridden)':
+        {
+          visibility: 'visible !important' as 'visible',
+          opacity: 1,
+          zIndex: euiTheme.levels.menu,
+          '& > :not(.embPanel--dragHandle)': {
+            display: 'none',
+          },
+        },
       // ... and do not offer selection on a panel that is being edited in a flyout (the drag handle stays)
       '.dshDashboardGrid__item--hideHoverActions .embPanel__selectPanel': {
         display: 'none',

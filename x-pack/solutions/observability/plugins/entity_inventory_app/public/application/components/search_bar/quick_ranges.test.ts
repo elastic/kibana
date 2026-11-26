@@ -7,19 +7,15 @@
 
 import { ENTITY_INVENTORY_MAX_TIME_RANGE_DAYS } from '../../constants';
 import { QUICK_RANGES } from './quick_ranges';
-import { clampTimeRange } from '../../utils/clamp_time_range';
+import { checkTimeRange } from '../../utils/check_time_range';
 
 describe('QUICK_RANGES', () => {
   it.each(QUICK_RANGES.map(({ label, start, end }) => ({ label, start, end })))(
     '$label fits in the maximum time range',
     ({ start, end }) => {
-      const { wasClamped, isValid } = clampTimeRange(
-        { from: start, to: end },
-        ENTITY_INVENTORY_MAX_TIME_RANGE_DAYS
+      expect(checkTimeRange({ from: start, to: end }, ENTITY_INVENTORY_MAX_TIME_RANGE_DAYS)).toBe(
+        'valid'
       );
-
-      expect(isValid).toBe(true);
-      expect(wasClamped).toBe(false);
     }
   );
 

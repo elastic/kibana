@@ -204,6 +204,7 @@ export interface SearchBarOwnProps<QT extends AggregateQuery | Query = Query> {
 
   hasDirtyState?: boolean;
   useBackgroundSearchButton?: boolean;
+  cachedResultsLoadedAt?: QueryBarTopRowProps['cachedResultsLoadedAt'];
   /**
    * Enable data source browser suggestion in ES|QL editor.
    */
@@ -887,6 +888,7 @@ export class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> ex
           esqlQueryStats={this.props.esqlQueryStats}
           onOpenQueryInNewTab={this.props.onOpenQueryInNewTab}
           useBackgroundSearchButton={this.props.useBackgroundSearchButton}
+          cachedResultsLoadedAt={this.props.cachedResultsLoadedAt}
           enableDateRangePicker={this.props.enableDateRangePicker}
           showTimeWindowButtons={this.props.showTimeWindowButtons}
           legacyDatePickerProps={this.props.legacyDatePickerProps}

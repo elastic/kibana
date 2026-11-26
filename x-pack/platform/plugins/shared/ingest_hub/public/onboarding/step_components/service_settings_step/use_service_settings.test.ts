@@ -1429,3 +1429,194 @@ describe('useServiceSettings — dedicated index template choice', () => {
     expect(result.current.getServiceVars('svc_a').createDatasetTemplates).toBeUndefined();
   });
 });
+
+// --- reroute permissions ---
+
+describe('useServiceSettings — reroute permissions', () => {
+  const regular = makeEntry('svc_r', {
+    dataStreams: [],
+    deploymentMethods: [{ method: 'managed_integration', preferred: true }],
+  });
+  const ecfOnly = makeEntry('svc_e', {
+    dataStreams: [],
+    deploymentMethods: [{ method: 'ecf', preferred: true }],
+  });
+
+  const render = (
+    deploymentMethod: 'agent_based' | 'managed_integration' | 'ecf',
+    entries: AwsServiceMatrixEntry[]
+  ) => {
+    mockUseOnboardingFlow.mockReturnValue({
+      servicesStep: { selectedServiceIds: entries.map((e) => e.id) },
+      removeDeployInstance: jest.fn(),
+      awsServicesMap: new Map(entries.map((e) => [e.id, e])),
+      deploymentMethod,
+      setServiceSettingsMethod: jest.fn(),
+    } as unknown as ReturnType<typeof useOnboardingFlow>);
+    return renderHook(() => useServiceSettings({ onContinue: jest.fn() }));
+  };
+
+  it.each(['agent_based', 'managed_integration'] as const)('is offered for %s', (method) => {
+    expect(render(method, [regular]).result.current.isReroutePermissionsSupported).toBe(true);
+  });
+
+  it('is not offered for ECF', () => {
+    expect(render('ecf', [regular]).result.current.isReroutePermissionsSupported).toBe(false);
+  });
+
+  it('is not offered under managed integration when every service is ECF-only', () => {
+    expect(
+      render('managed_integration', [ecfOnly]).result.current.isReroutePermissionsSupported
+    ).toBe(false);
+  });
+
+  it('is offered under managed integration when one service of several gets a policy', () => {
+    expect(
+      render('managed_integration', [ecfOnly, regular]).result.current.isReroutePermissionsSupported
+    ).toBe(true);
+  });
+
+  it('is offered under agent-based for an ECF-only service, which agent-based deploys too', () => {
+    expect(render('agent_based', [ecfOnly]).result.current.isReroutePermissionsSupported).toBe(
+      true
+    );
+  });
+
+  it('does not block Continue with a leftover invalid value where the field is hidden', () => {
+    const { result } = render('managed_integration', [ecfOnly]);
+    act(() => result.current.setGlobalRegion('us-east-1'));
+    act(() => result.current.setIntegrationName('my-aws'));
+    act(() => result.current.setPolicySetting('additional_datastreams_permissions', ['foo-bar']));
+
+    expect(result.current.reroutePermissionsError).toBeUndefined();
+    expect(result.current.isReady).toBe(true);
+  });
+
+  it('reads a wrong-typed saved value as no permissions instead of throwing', () => {
+    const { result } = render('agent_based', [regular]);
+    act(() => result.current.setGlobalRegion('us-east-1'));
+    act(() => result.current.setIntegrationName('my-aws'));
+    // The saved object allows a plain string for any key, so an API write can leave one here.
+    act(() =>
+      result.current.setPolicySetting(
+        'additional_datastreams_permissions',
+        'logs-a-default' as unknown as string[]
+      )
+    );
+
+    expect(result.current.reroutePermissions).toEqual([]);
+    expect(result.current.reroutePermissionsError).toBeUndefined();
+    expect(result.current.isReady).toBe(true);
+  });
+
+  it('blocks Continue with an invalid value where the field is shown', () => {
+    const { result } = render('agent_based', [regular]);
+    act(() => result.current.setGlobalRegion('us-east-1'));
+    act(() => result.current.setIntegrationName('my-aws'));
+    act(() => result.current.setPolicySetting('additional_datastreams_permissions', ['foo-bar']));
+
+    expect(result.current.reroutePermissionsError).toBeDefined();
+    expect(result.current.isReady).toBe(false);
+  });
+});
+
+// --- custom fields ---
+
+describe('useServiceSettings — custom fields', () => {
+  const regular = makeEntry('svc_r', {
+    dataStreams: [],
+    deploymentMethods: [{ method: 'managed_integration', preferred: true }],
+  });
+  const ecfOnly = makeEntry('svc_e', {
+    dataStreams: [],
+    deploymentMethods: [{ method: 'ecf', preferred: true }],
+  });
+
+  const render = (
+    deploymentMethod: 'agent_based' | 'managed_integration' | 'ecf',
+    entries: AwsServiceMatrixEntry[]
+  ) => {
+    mockUseOnboardingFlow.mockReturnValue({
+      servicesStep: { selectedServiceIds: entries.map((e) => e.id) },
+      removeDeployInstance: jest.fn(),
+      awsServicesMap: new Map(entries.map((e) => [e.id, e])),
+      deploymentMethod,
+      setServiceSettingsMethod: jest.fn(),
+    } as unknown as ReturnType<typeof useOnboardingFlow>);
+    return renderHook(() => useServiceSettings({ onContinue: jest.fn() }));
+  };
+
+  const fill = (result: ReturnType<typeof render>['result']) => {
+    act(() => result.current.setGlobalRegion('us-east-1'));
+    act(() => result.current.setIntegrationName('my-aws'));
+  };
+
+  it('is offered under managed integration only', () => {
+    expect(render('managed_integration', [regular]).result.current.isCustomFieldsSupported).toBe(
+      true
+    );
+    expect(render('agent_based', [regular]).result.current.isCustomFieldsSupported).toBe(false);
+    expect(render('ecf', [regular]).result.current.isCustomFieldsSupported).toBe(false);
+  });
+
+  it('is not offered under managed integration when every service is ECF-only', () => {
+    expect(render('managed_integration', [ecfOnly]).result.current.isCustomFieldsSupported).toBe(
+      false
+    );
+  });
+
+  it('flags ECF services next to services that get a policy, which ignore the fields', () => {
+    expect(
+      render('managed_integration', [regular, ecfOnly]).result.current
+        .hasServicesIgnoringCustomFields
+    ).toBe(true);
+    expect(
+      render('managed_integration', [regular]).result.current.hasServicesIgnoringCustomFields
+    ).toBe(false);
+  });
+
+  it('does not block Continue with a leftover invalid value where the field is hidden', () => {
+    const { result } = render('agent_based', [regular]);
+    fill(result);
+    act(() =>
+      result.current.setPolicySetting(
+        'global_data_tags',
+        JSON.stringify([{ name: 'my team', value: '' }])
+      )
+    );
+
+    expect(result.current.customFieldsErrors).toBeUndefined();
+    expect(result.current.isReady).toBe(true);
+  });
+
+  it('blocks Continue with an invalid field where the field is shown, and unblocks once fixed', () => {
+    const { result } = render('managed_integration', [regular]);
+    fill(result);
+    act(() =>
+      result.current.setPolicySetting(
+        'global_data_tags',
+        JSON.stringify([{ name: 'my team', value: 'a' }])
+      )
+    );
+    expect(result.current.customFieldsErrors).toBeDefined();
+    expect(result.current.isReady).toBe(false);
+
+    act(() =>
+      result.current.setPolicySetting(
+        'global_data_tags',
+        JSON.stringify([{ name: 'team', value: 'a' }])
+      )
+    );
+    expect(result.current.customFieldsErrors).toBeUndefined();
+    expect(result.current.isReady).toBe(true);
+  });
+
+  it('reads a wrong-typed saved value as no fields instead of throwing', () => {
+    const { result } = render('managed_integration', [regular]);
+    fill(result);
+    act(() => result.current.setPolicySetting('global_data_tags', 'not json'));
+
+    expect(result.current.customFields).toEqual([]);
+    expect(result.current.isReady).toBe(true);
+  });
+});
