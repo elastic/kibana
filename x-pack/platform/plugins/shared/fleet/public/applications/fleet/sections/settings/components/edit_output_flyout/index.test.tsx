@@ -4546,7 +4546,7 @@ describe('EditOutputFlyout', () => {
         expect(utils.getByTestId('saveApplySettingsBtn')).toBeDisabled();
       });
 
-      it('should not offer to add a client key to a preconfigured output whose TLS settings are read-only', () => {
+      it('should add the first client key of a read-only client certificate that needs one', async () => {
         const { utils } = renderFlyout({
           ...otlpOutput,
           is_preconfigured: true,
@@ -4554,7 +4554,26 @@ describe('EditOutputFlyout', () => {
           otlp_exporter: { ...otlpOutput.otlp_exporter, tls: storedTls },
         } as Output);
 
-        // with no saved key, a new key could not be checked against the read-only certificate
+        change(utils, 'otlpTlsKeyPemInput', KEY_PEM);
+        fireEvent.click(utils.getByText('Save and apply settings'));
+
+        const payload = await updatedPayload();
+        expect(payload.otlp_exporter).toBeUndefined();
+        expect(payload.secrets).toEqual({ otlp_exporter: { tls: { key_pem: KEY_PEM } } });
+      });
+
+      it.each([
+        ['no client certificate', { ca_pem: CA_PEM }],
+        ['a key file', { cert_file: '/etc/cert.pem', key_file: '/etc/key.pem' }],
+      ])('should not offer to add a client key to read-only TLS settings with %s', (_name, tls) => {
+        const { utils } = renderFlyout({
+          ...otlpOutput,
+          is_preconfigured: true,
+          allow_edit: ['secrets'],
+          otlp_exporter: { ...otlpOutput.otlp_exporter, tls },
+        } as Output);
+
+        // a key would make the read-only settings invalid, and they cannot be changed
         expect(utils.getByTestId('settingsOutputsFlyout.otlpTlsKeyPemInput')).toBeDisabled();
       });
 

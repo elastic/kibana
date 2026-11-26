@@ -1448,6 +1448,67 @@ describe('Outputs preconfiguration', () => {
       expect(spyAgentPolicyServicBumpAllAgentPoliciesForOutput).not.toHaveBeenCalled();
     });
 
+    describe('OTLP output with a private key in a certificate setting', () => {
+      const privateKeyPem = '-----BEGIN PRIVATE KEY-----\nMIIE\n-----END PRIVATE KEY-----';
+      const existingOtlpOutput = (tls: Record<string, unknown>) =>
+        ({
+          id: 'existing-otlp-output-1',
+          is_default: false,
+          is_default_monitoring: false,
+          name: 'OTLP Output 1',
+          type: 'otlp',
+          is_preconfigured: true,
+          allow_edit: ['otlp_exporter'],
+          otlp_exporter: { endpoint: 'https://otel.example.com:4317', protocol: 'grpc', tls },
+        } as Output);
+      const preconfiguredOtlpOutput = (tls: Record<string, unknown>) => ({
+        id: 'existing-otlp-output-1',
+        is_default: false,
+        is_default_monitoring: false,
+        name: 'OTLP Output 1 renamed',
+        type: 'otlp' as const,
+        allow_edit: ['otlp_exporter'],
+        otlp_exporter: {
+          endpoint: 'https://otel.example.com:4317',
+          protocol: 'grpc' as const,
+          tls,
+        },
+      });
+
+      it('should update the output when the key is only in a setting that allow_edit keeps', async () => {
+        mockedOutputService.bulkGet.mockResolvedValue([existingOtlpOutput({ ca_pem: null })]);
+        const soClient = savedObjectsClientMock.create();
+        const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+        // the saved exporter is kept, so the key in the config is never saved
+        await createOrUpdatePreconfiguredOutputs(soClient, esClient, [
+          preconfiguredOtlpOutput({ cert_pem: privateKeyPem }),
+        ]);
+
+        expect(mockedOutputService.update).toHaveBeenCalledWith(
+          expect.anything(),
+          expect.anything(),
+          'existing-otlp-output-1',
+          expect.objectContaining({ name: 'OTLP Output 1 renamed' }),
+          expect.anything()
+        );
+      });
+
+      it('should skip the output when the kept exporter has the key', async () => {
+        mockedOutputService.bulkGet.mockResolvedValue([
+          existingOtlpOutput({ cert_pem: privateKeyPem }),
+        ]);
+        const soClient = savedObjectsClientMock.create();
+        const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+        await createOrUpdatePreconfiguredOutputs(soClient, esClient, [
+          preconfiguredOtlpOutput({ ca_pem: null }),
+        ]);
+
+        expect(mockedOutputService.update).not.toHaveBeenCalled();
+      });
+    });
+
     it('should not update output on repeated setup if stored otel_disable_beatsauth is false and preconfigured does not set it', async () => {
       mockedOutputService.bulkGet.mockResolvedValue([
         {

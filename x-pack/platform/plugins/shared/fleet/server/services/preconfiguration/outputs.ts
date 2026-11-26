@@ -255,15 +255,6 @@ export async function createOrUpdatePreconfiguredOutputs(
       logger.warn(`Skipping preconfigured OTLP output ${output.id}: ${otlpCheck.error}`);
       return;
     }
-    if (isOtlpOutput(output)) {
-      // a private key in a certificate setting would be stored and returned in plain text
-      try {
-        validateOtlpTlsCertificatesHaveNoPrivateKey(output);
-      } catch (error) {
-        logger.warn(`Skipping preconfigured OTLP output ${output.id}: ${error.message}`);
-        return;
-      }
-    }
 
     for (const method of KAFKA_AUTH_METHODS) {
       if (!usesKafkaAuth(method, output)) continue;
@@ -306,6 +297,17 @@ export async function createOrUpdatePreconfiguredOutputs(
         existingOutput as unknown as Record<string, unknown>,
         output.allow_edit
       );
+    }
+
+    // the output as it is saved, with the settings that `allow_edit` keeps: a private key in a
+    // certificate setting would be stored and returned in plain text, and the service rejects it
+    if (isOtlpOutput(data)) {
+      try {
+        validateOtlpTlsCertificatesHaveNoPrivateKey(data);
+      } catch (error) {
+        logger.warn(`Skipping preconfigured OTLP output ${output.id}: ${error.message}`);
+        return;
+      }
     }
 
     const isUpdateWithNewData =
