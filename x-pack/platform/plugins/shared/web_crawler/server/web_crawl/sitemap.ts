@@ -96,6 +96,8 @@ interface DiscoverSitemapPagesOptions {
   maxPages: number;
   signal: AbortSignal;
   fetchContent: (url: string) => Promise<string | undefined>;
+  /** Called when sitemaps or pages were left unread because a budget ran out. */
+  onIncomplete?: () => void;
 }
 
 /**
@@ -110,6 +112,7 @@ export const discoverSitemapPages = async ({
   maxPages,
   signal,
   fetchContent,
+  onIncomplete,
 }: DiscoverSitemapPagesOptions): Promise<string[]> => {
   const declared = declaredSitemaps
     .map((sitemap) => normalizeUrl(sitemap, siteUrl, { isDiscovered: false }))
@@ -147,6 +150,11 @@ export const discoverSitemapPages = async ({
       pageUrls.forEach((pageUrl) => pages.add(pageUrl));
       queue.push(...sitemapUrls);
     });
+  }
+
+  const hasUnreadSitemaps = queue.some((sitemapUrl) => !requested.has(sitemapUrl));
+  if (!signal.aborted && (hasUnreadSitemaps || pages.size >= maxPages)) {
+    onIncomplete?.();
   }
 
   return [...pages];

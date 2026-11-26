@@ -408,6 +408,32 @@ describe('parseRobotsTxt', () => {
     });
   });
 
+  describe('percent-encoding', () => {
+    it('matches a path spelled out in robots.txt against its percent-encoded form in a URL', () => {
+      const robotsTxt = lines('User-agent: *', 'Disallow: /café', 'Disallow: /my files/');
+
+      expect(isAllowed(robotsTxt, '/café/menu')).toBe(false);
+      expect(isAllowed(robotsTxt, '/caf%C3%A9/menu')).toBe(false);
+      expect(isAllowed(robotsTxt, '/my%20files/a')).toBe(false);
+      expect(isAllowed(robotsTxt, '/cafe')).toBe(true);
+    });
+
+    it('matches percent-escapes whatever their case', () => {
+      const robotsTxt = lines('User-agent: *', 'Disallow: /caf%c3%a9', 'Disallow: /a%2Fb');
+
+      expect(isAllowed(robotsTxt, '/caf%C3%A9')).toBe(false);
+      expect(isAllowed(robotsTxt, '/a%2fb')).toBe(false);
+      expect(isAllowed(robotsTxt, '/a/b')).toBe(true);
+    });
+
+    it('keeps a pattern it cannot encode', () => {
+      const robotsTxt = lines('User-agent: *', 'Disallow: /broken\ud800', 'Disallow: /private');
+
+      expect(isAllowed(robotsTxt, '/private')).toBe(false);
+      expect(isAllowed(robotsTxt, '/broken')).toBe(true);
+    });
+  });
+
   describe('pathological input', () => {
     it('stays fast on a very large file with many rules', () => {
       const rules = Array.from({ length: 150_000 }, (_, index) => `Disallow: /path-${index}/*/x$`);

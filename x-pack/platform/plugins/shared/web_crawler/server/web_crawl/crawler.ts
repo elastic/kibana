@@ -8,7 +8,7 @@
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { createBulkIndexer } from './bulk_indexer';
 import { extractPage, waitFor } from './document_extraction';
-import { extractLinks, getSiteKey, getUrlFields } from './links';
+import { MAX_LINKS_PER_PAGE, extractLinks, getSiteKey, getUrlFields } from './links';
 import type { PathRules } from './path_rules';
 import { NO_PATH_RULES, isPathAllowed } from './path_rules';
 import { purgeStaleDocuments } from './purge';
@@ -18,6 +18,10 @@ import { MAX_SITEMAP_REQUESTS, discoverSitemapPages } from './sitemap';
 
 export const EXTRACTION_CONCURRENCY = 10;
 const MAX_CONTENT_LENGTH = 500_000;
+export const CRAWL_LIMITS = {
+  /** The combined length of the URLs a crawl remembers having seen, which a site could otherwise grow without end. */
+  maxSeenUrlsLength: 10_000_000,
+};
 // Pages are fetched by the inference endpoint, so this only selects which robots.txt group applies.
 export const ROBOTS_USER_AGENT = 'Elastic-Crawler';
 const ROBOTS_CHECKS_PER_TICK = 100;
@@ -74,6 +78,18 @@ interface QueuedPage {
 
 const yieldToEventLoop = (): Promise<void> => new Promise((resolve) => setImmediate(resolve));
 
+const isHighSurrogate = (charCode: number): boolean => charCode >= 0xd800 && charCode <= 0xdbff;
+
+const truncateContent = (content: string): string => {
+  if (content.length <= MAX_CONTENT_LENGTH) {
+    return content;
+  }
+  const end = isHighSurrogate(content.charCodeAt(MAX_CONTENT_LENGTH - 1))
+    ? MAX_CONTENT_LENGTH - 1
+    : MAX_CONTENT_LENGTH;
+  return content.slice(0, end);
+};
+
 /**
  * Crawls a site and indexes every extracted page.
  *
@@ -90,8 +106,9 @@ const yieldToEventLoop = (): Promise<void> => new Promise((resolve) => setImmedi
  * is parsing, which yields to the event loop as it goes.
  *
  * A crawl that read the whole site without a failure ends by deleting the pages earlier crawls
- * indexed and this one did not find. One that failed on a page, hit the page limit or was stopped
- * cannot tell a removed page from one it did not get to, so it deletes nothing.
+ * indexed and this one did not find, within its path rules. One that failed on a page, hit the page
+ * limit or another of its limits, or was stopped cannot tell a removed page from one it did not get
+ * to, so it deletes nothing.
  */
 export const crawlSite = async ({
   esClient,
@@ -136,6 +153,9 @@ export const crawlSite = async ({
   }
   // Sitemaps a page links to are not pages to crawl.
   const seen = new Set<string>([...seedUrls, ...sitemapUrls]);
+  let seenUrlsLength = 0;
+  // Set when a limit made the crawl drop links without counting them against the page limit.
+  let hasDroppedLinks = false;
   const queues: string[][] = Array.from({ length: maxDepth + 1 }, () => []);
   const queueCursors: number[] = queues.map(() => 0);
   let idleWorkers: Array<() => void> = [];
@@ -259,7 +279,12 @@ export const crawlSite = async ({
         if (seen.has(link)) {
           continue;
         }
+        if (seenUrlsLength + link.length > CRAWL_LIMITS.maxSeenUrlsLength) {
+          hasDroppedLinks = true;
+          break;
+        }
         seen.add(link);
+        seenUrlsLength += link.length;
         if (!isPathAllowed(link, pathRules)) {
           skippedByRulesCount++;
         } else if (!getRobots(link).isAllowed(link)) {
@@ -325,14 +350,18 @@ export const crawlSite = async ({
 
       // Links are queued before the page is indexed, so idle workers start on them right away.
       if (depth < maxDepth) {
-        await enqueue(extractLinks(page.content, pageUrl), depth + 1);
+        const links = extractLinks(page.content, pageUrl);
+        if (links.length >= MAX_LINKS_PER_PAGE) {
+          hasDroppedLinks = true;
+        }
+        await enqueue(links, depth + 1);
       }
 
       await indexer.add({
         url: pageUrl,
         title: page.title ?? pageUrl,
         description: page.description,
-        content: page.content.slice(0, MAX_CONTENT_LENGTH),
+        content: truncateContent(page.content),
         depth,
         crawl_id: crawlId,
         crawled_at: new Date().toISOString(),
@@ -385,6 +414,9 @@ export const crawlSite = async ({
           maxPages: maxDocuments,
           signal: sitemapAbort.signal,
           fetchContent: (sitemapUrl: string) => fetchContent(sitemapUrl, sitemapAbort.signal),
+          onIncomplete: () => {
+            hasDroppedLinks = true;
+          },
         };
         const sitemapPages = (
           await Promise.all([
@@ -440,6 +472,7 @@ export const crawlSite = async ({
       indexedCount > 0 &&
       extractionFailedCount === 0 &&
       indexingFailedCount === 0 &&
+      !hasDroppedLinks &&
       requestedCount < maxDocuments;
     if (sawWholeSite) {
       try {
@@ -449,6 +482,7 @@ export const crawlSite = async ({
           indexName,
           crawlId,
           maxDepth,
+          pathRules,
           // A site none of whose start URLs could be crawled was not read, so its pages stay.
           hosts: [...new Set(allowedSeedUrls.map(getSiteKey))].flatMap((siteKey) => [
             siteKey,

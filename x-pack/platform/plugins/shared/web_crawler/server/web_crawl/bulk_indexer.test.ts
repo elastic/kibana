@@ -11,12 +11,18 @@ import type { ElasticsearchClientMock } from '@kbn/core/server/mocks';
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import type { BulkIndexer, CrawledDocument } from './bulk_indexer';
 import {
+  BULK_RETRY_DELAYS_MS,
   BULK_SIZE,
   MAX_BULK_BYTES,
   MAX_CONCURRENT_BULKS,
   createBulkIndexer,
   getDocumentId,
 } from './bulk_indexer';
+import { waitFor } from './document_extraction';
+
+jest.mock('./document_extraction', () => ({ waitFor: jest.fn() }));
+
+const mockWaitFor = waitFor as jest.MockedFunction<typeof waitFor>;
 
 const INDEX_NAME = 'web-crawl-example.com';
 const MAX_BUFFERED_DOCUMENTS = BULK_SIZE * MAX_CONCURRENT_BULKS;
@@ -25,7 +31,17 @@ const MAX_BUFFERED_BYTES = MAX_BULK_BYTES * MAX_CONCURRENT_BULKS;
 interface ItemError {
   type: string;
   reason?: string;
+  status?: number;
 }
+
+const TOO_MANY_REQUESTS: ItemError = {
+  type: 'es_rejected_execution_exception',
+  reason: 'rate limited',
+  status: 429,
+};
+
+const createEsError = (statusCode: number) =>
+  Object.assign(new Error(`status ${statusCode}`), { statusCode });
 
 interface PendingBulk {
   succeed: () => void;
@@ -77,10 +93,10 @@ describe('createBulkIndexer', () => {
     getError: (url: string) => ItemError | undefined = () => undefined
   ): estypes.BulkResponse => {
     const items = urls.map((url) => {
-      const error = getError(url);
+      const { status = 400, ...error } = getError(url) ?? { type: undefined };
       return {
-        index: error
-          ? { _index: INDEX_NAME, _id: getDocumentId(url), status: 400, error }
+        index: error.type
+          ? { _index: INDEX_NAME, _id: getDocumentId(url), status, error }
           : { _index: INDEX_NAME, _id: getDocumentId(url), status: 201 },
       };
     });
@@ -114,6 +130,8 @@ describe('createBulkIndexer', () => {
   };
 
   beforeEach(() => {
+    mockWaitFor.mockReset();
+    mockWaitFor.mockResolvedValue(undefined);
     esClient = elasticsearchServiceMock.createElasticsearchClient();
     logger = loggingSystemMock.createLogger();
     abortController = new AbortController();
@@ -416,6 +434,80 @@ describe('createBulkIndexer', () => {
       expect(lastError?.message).toBe('version_conflict_engine_exception');
       expect(onError).not.toHaveBeenCalled();
       expect(esClient.bulk).toHaveBeenCalledTimes(3);
+    });
+  });
+
+  describe('too many requests', () => {
+    it('sends the documents Elasticsearch turned away again after a pause, and only those', async () => {
+      const documents = toDocuments(3);
+      let attempts = 0;
+      esClient.bulk.mockImplementation(async () =>
+        toResponse(getSentUrls().at(-1) ?? [], (url) =>
+          url === documents[1].url && attempts++ === 0 ? TOO_MANY_REQUESTS : undefined
+        )
+      );
+
+      await addAll(documents);
+      await indexer.drain();
+
+      expect(getSentUrls()).toEqual([
+        [documents[0].url],
+        toUrls(documents.slice(1)),
+        [documents[1].url],
+      ]);
+      expect(mockWaitFor).toHaveBeenCalledTimes(1);
+      expect(mockWaitFor).toHaveBeenCalledWith(BULK_RETRY_DELAYS_MS[0], abortController.signal);
+      expect(indexer.getCounts()).toEqual({ documentsCount: 3, failedCount: 0 });
+      expect(onError).not.toHaveBeenCalled();
+    });
+
+    it('counts a document as failed once it was turned away on every attempt', async () => {
+      answerBulks(() => TOO_MANY_REQUESTS);
+
+      await indexer.add(toDocument(0));
+      await indexer.drain();
+
+      expect(esClient.bulk).toHaveBeenCalledTimes(1 + BULK_RETRY_DELAYS_MS.length);
+      expect(mockWaitFor.mock.calls.map(([delayMs]) => delayMs)).toEqual(BULK_RETRY_DELAYS_MS);
+      const { lastError, ...counts } = indexer.getCounts();
+      expect(counts).toEqual({ documentsCount: 0, failedCount: 1 });
+      expect(lastError?.message).toBe('rate limited');
+      expect(onError).not.toHaveBeenCalled();
+    });
+
+    it('sends a request that was turned away as a whole again', async () => {
+      answerBulks();
+      esClient.bulk.mockRejectedValueOnce(createEsError(429));
+
+      await indexer.add(toDocument(0));
+      await indexer.drain();
+
+      expect(esClient.bulk).toHaveBeenCalledTimes(2);
+      expect(indexer.getCounts()).toEqual({ documentsCount: 1, failedCount: 0 });
+      expect(onError).not.toHaveBeenCalled();
+    });
+
+    it('reports the error of a request that was turned away on every attempt', async () => {
+      const error = createEsError(429);
+      esClient.bulk.mockRejectedValue(error);
+
+      await indexer.add(toDocument(0));
+      await indexer.drain();
+
+      expect(esClient.bulk).toHaveBeenCalledTimes(1 + BULK_RETRY_DELAYS_MS.length);
+      expect(onError).toHaveBeenCalledWith(error);
+    });
+
+    it('does not send again once the signal is aborted during the pause', async () => {
+      answerBulks(() => TOO_MANY_REQUESTS);
+      mockWaitFor.mockImplementation(async () => abortController.abort());
+
+      await indexer.add(toDocument(0));
+      await indexer.settle();
+
+      expect(esClient.bulk).toHaveBeenCalledTimes(1);
+      expect(indexer.getCounts()).toEqual({ documentsCount: 0, failedCount: 0 });
+      expect(onError).not.toHaveBeenCalled();
     });
   });
 

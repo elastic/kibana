@@ -9,7 +9,7 @@ const MAX_URL_LENGTH = 2048;
 // Deeper paths and longer queries are mostly calendars, faceted listings and other URL traps.
 const MAX_URL_SEGMENTS = 16;
 const MAX_URL_PARAMS = 10;
-const MAX_LINKS_PER_PAGE = 2000;
+export const MAX_LINKS_PER_PAGE = 2000;
 const LINK_TARGET_OPEN = '](';
 
 const SKIPPED_EXTENSIONS = new Set([
@@ -124,14 +124,14 @@ const hasSkippedExtension = (url: string): boolean => {
   return dotIndex !== -1 && SKIPPED_EXTENSIONS.has(lastSegment.slice(dotIndex + 1).toLowerCase());
 };
 
-const isLinkTargetEnd = (char: string): boolean =>
-  char === ')' || char === ' ' || char === '\n' || char === '\t' || char === '\r';
+const isWhitespace = (char: string): boolean =>
+  char === ' ' || char === '\n' || char === '\t' || char === '\r';
 
 /**
  * Yields the raw target of every markdown link in a document.
  *
  * Scans with a forward-only cursor instead of a regular expression, so the cost stays linear in
- * the document length whatever the page contains.
+ * the document length whatever the page contains. Balanced parentheses are part of the target.
  */
 export function* iterateLinkTargets(markdown: string): Generator<string> {
   let cursor = 0;
@@ -145,8 +145,17 @@ export function* iterateLinkTargets(markdown: string): Generator<string> {
     const targetStart = openIndex + LINK_TARGET_OPEN.length;
     const scanLimit = Math.min(markdown.length, targetStart + MAX_URL_LENGTH);
     let targetEnd = targetStart;
-    while (targetEnd < scanLimit && !isLinkTargetEnd(markdown[targetEnd])) {
-      targetEnd++;
+    let openParentheses = 0;
+    for (; targetEnd < scanLimit; targetEnd++) {
+      const char = markdown[targetEnd];
+      if (isWhitespace(char) || (char === ')' && openParentheses === 0)) {
+        break;
+      }
+      if (char === '(') {
+        openParentheses++;
+      } else if (char === ')') {
+        openParentheses--;
+      }
     }
     cursor = targetEnd;
 

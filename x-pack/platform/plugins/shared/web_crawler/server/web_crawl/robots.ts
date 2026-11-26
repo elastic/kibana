@@ -11,6 +11,20 @@ const MAX_SITEMAPS = 20;
 const WILDCARD_AGENT = '*';
 const DECIMAL_NUMBER = /^\d{1,9}(\.\d{1,9})?$/;
 
+const NOT_PRINTABLE_ASCII = /[^\x21-\x7e]+/g;
+const PERCENT_ESCAPE = /%[0-9a-f]{2}/gi;
+
+// A URL carries its path percent-encoded, while a robots.txt may spell the same path out.
+const toComparablePath = (path: string): string => {
+  let encoded = path;
+  try {
+    encoded = path.replace(NOT_PRINTABLE_ASCII, encodeURIComponent);
+  } catch {
+    // A lone surrogate cannot be encoded, and cannot be in a URL either.
+  }
+  return encoded.replace(PERCENT_ESCAPE, (escape) => escape.toUpperCase());
+};
+
 interface RobotsRule {
   allow: boolean;
   pattern: string;
@@ -111,7 +125,7 @@ export const parseRobotsTxt = (content: string, userAgentToken: string): RobotsR
       if (value.length > 0) {
         for (const { rules } of groupTargets) {
           if (rules.length < MAX_RULES_PER_GROUP) {
-            rules.push({ allow: field === 'allow', pattern: value });
+            rules.push({ allow: field === 'allow', pattern: toComparablePath(value) });
           }
         }
       }
@@ -136,7 +150,7 @@ export const parseRobotsTxt = (content: string, userAgentToken: string): RobotsR
 
   const isAllowed = (url: string): boolean => {
     const { pathname, search } = new URL(url);
-    const path = `${pathname}${search}`;
+    const path = toComparablePath(`${pathname}${search}`);
     let longestMatch = -1;
     let allowed = true;
     for (const { allow, pattern } of rules) {

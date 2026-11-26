@@ -47,6 +47,16 @@ describe('getCrawlIndexName', () => {
   });
 });
 
+describe('getCrawlIndexName for a very long host', () => {
+  it('cuts the name down to the longest one a crawl accepts', () => {
+    const label = 'a'.repeat(62);
+    const indexName = getCrawlIndexName(`https://${label}.${label}.${label}.${label}/`);
+
+    expect(indexName).toHaveLength(255);
+    expect(isValidCrawlIndexName(indexName)).toBe(true);
+  });
+});
+
 describe('isValidCrawlIndexName', () => {
   it.each(['a', '9docs', 'docs-2024.01.31_v2', 'a'.repeat(255)])('accepts %s', (indexName) => {
     expect(isValidCrawlIndexName(indexName)).toBe(true);

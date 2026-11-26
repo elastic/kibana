@@ -15,6 +15,7 @@ import {
 import { BULK_SIZE, MAX_CONCURRENT_BULKS } from './bulk_indexer';
 import type { CrawlOptions, CrawlProgress, CrawlResult } from './crawler';
 import {
+  CRAWL_LIMITS,
   EXTRACTION_CONCURRENCY,
   MAX_CRAWL_DELAY_MS,
   ROBOTS_USER_AGENT,
@@ -22,6 +23,7 @@ import {
 } from './crawler';
 import type { ExtractedPage } from './document_extraction';
 import { extractPage, waitFor } from './document_extraction';
+import { MAX_LINKS_PER_PAGE } from './links';
 
 jest.mock('./document_extraction');
 
@@ -281,6 +283,10 @@ describe('crawlSite', () => {
       ...options,
     });
 
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
   beforeEach(() => {
     jest.clearAllMocks();
     esClient = elasticsearchServiceMock.createElasticsearchClient();
@@ -370,6 +376,16 @@ describe('crawlSite', () => {
       expect(getPageRequests()).toEqual([SEED_URL, `${ORIGIN}/late`]);
       expect(getIndexedDocuments()[0]).toEqual(
         expect.objectContaining({ content: 'a'.repeat(500_000) })
+      );
+    });
+
+    it('does not cut very large page content in the middle of a character', async () => {
+      mockSite({ [SEED_URL]: { content: `${'a'.repeat(499_999)}😀 and more` } });
+
+      await crawl();
+
+      expect(getIndexedDocuments()[0]).toEqual(
+        expect.objectContaining({ content: 'a'.repeat(499_999) })
       );
     });
 
@@ -1253,8 +1269,74 @@ describe('crawlSite', () => {
       );
     });
 
+    it('deletes only within the path rules of the crawl', async () => {
+      mockSmallSite({ [SEED_URL]: pageLinkingTo(['/a', '/b', '/docs/internal']) });
+      const pathRules = { includePaths: ['/a', '/b', '/docs'], excludePaths: ['/docs/internal'] };
+
+      await crawl({ pathRules });
+
+      expect(esClient.deleteByQuery).toHaveBeenCalledTimes(1);
+      const [{ query }] = esClient.deleteByQuery.mock.calls[0];
+      expect(query?.bool).toEqual({
+        filter: [
+          { range: { depth: { lte: WEB_CRAWL_DEFAULT_MAX_DEPTH } } },
+          { terms: { url_host: ['example.com', 'www.example.com'] } },
+          {
+            bool: {
+              should: pathRules.includePaths.map((prefix) => ({ prefix: { url_path: prefix } })),
+              minimum_should_match: 1,
+            },
+          },
+        ],
+        must_not: [{ term: { crawl_id: CRAWL_ID } }, { prefix: { url_path: '/docs/internal' } }],
+      });
+    });
+
+    it('deletes nothing when the URLs it remembers reached their limit', async () => {
+      const linksPerPage = 10;
+      const sections = ['/a', '/b', '/c'];
+      const toSkippedLink = (pathname: string, link: number) => `/skipped${pathname}/${link}`;
+      const skippedLinkLength = `${ORIGIN}${toSkippedLink(sections[0], 0)}`.length;
+      jest.replaceProperty(
+        CRAWL_LIMITS,
+        'maxSeenUrlsLength',
+        sections.join('').length + sections.length * ORIGIN.length + 15 * skippedLinkLength
+      );
+      mockPages((url) => {
+        const { pathname } = new URL(url);
+        return pageLinkingTo(
+          pathname === '/' ? sections : range(linksPerPage, (link) => toSkippedLink(pathname, link))
+        );
+      });
+
+      await expect(
+        crawl({ pathRules: { includePaths: [], excludePaths: ['/skipped'] } })
+      ).resolves.toEqual(toResult({ documentsCount: 4, skippedByRulesCount: 15 }));
+
+      expect(esClient.deleteByQuery).not.toHaveBeenCalled();
+    });
+
     it.each<[string, () => void, Partial<CrawlOptions>]>([
       ['the crawl reached the page limit', () => mockSmallSite(), { maxDocuments: 3 }],
+      [
+        'a page had more links than the crawl reads from one page',
+        () =>
+          mockSmallSite({
+            [`${ORIGIN}/b`]: pageLinkingTo(range(MAX_LINKS_PER_PAGE, (link) => `/skipped/${link}`)),
+          }),
+        { pathRules: { includePaths: [], excludePaths: ['/skipped'] } },
+      ],
+      [
+        'the sitemaps listed more sitemaps than the crawl reads',
+        () => {
+          siteFiles[SITEMAP_URL] = `<sitemapindex>${range(
+            4,
+            (sitemap) => `<sitemap><loc>${ORIGIN}/sitemap-${sitemap}.xml</loc></sitemap>`
+          ).join('')}</sitemapindex>`;
+          mockSmallSite();
+        },
+        {},
+      ],
       [
         'a page could not be extracted',
         () => mockSmallSite({ [`${ORIGIN}/b`]: new Error('extraction failed') }),

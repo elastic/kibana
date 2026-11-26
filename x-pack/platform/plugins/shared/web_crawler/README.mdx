@@ -57,8 +57,10 @@ A crawl starts from one or more URLs and stays on the sites those are on, each w
 
 Indexing runs beside extraction. Each page is indexed once, keyed by its URL, with its markdown in
 `content` and copied into the `semantic_text` field `content_semantic`. A bulk request closes at
-twenty pages or one megabyte of content, and up to three run at once.
+twenty pages or one megabyte of content, and up to three run at once. Requests and documents that
+Elasticsearch turns away as too many are sent again twice, with a backoff.
 
 A crawl that read the whole site ends by deleting the documents earlier crawls indexed and it did
-not find again. One that failed on a page, reached the page maximum or was stopped deletes nothing,
-because it cannot tell a removed page from one it did not get to.
+not find again, on the hosts it covered and within its path rules. One that failed on a page,
+reached the page maximum or another of its limits, or was stopped deletes nothing, because it cannot
+tell a removed page from one it did not get to.

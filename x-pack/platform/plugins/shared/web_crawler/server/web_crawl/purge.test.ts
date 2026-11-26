@@ -7,6 +7,8 @@
 
 import type { ElasticsearchClientMock } from '@kbn/core/server/mocks';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import type { PathRules } from './path_rules';
+import { NO_PATH_RULES } from './path_rules';
 import { purgeStaleDocuments } from './purge';
 
 const INDEX_NAME = 'web-crawl-example.com';
@@ -16,7 +18,11 @@ describe('purgeStaleDocuments', () => {
   let esClient: ElasticsearchClientMock;
   let abortController: AbortController;
 
-  const purge = (maxDepth: number = 2, hosts: string[] = ['example.com', 'www.example.com']) =>
+  const purge = (
+    maxDepth: number = 2,
+    hosts: string[] = ['example.com', 'www.example.com'],
+    pathRules: PathRules = NO_PATH_RULES
+  ) =>
     purgeStaleDocuments({
       esClient,
       signal: abortController.signal,
@@ -24,6 +30,7 @@ describe('purgeStaleDocuments', () => {
       crawlId: CRAWL_ID,
       maxDepth,
       hosts,
+      pathRules,
     });
 
   beforeEach(() => {
@@ -57,6 +64,37 @@ describe('purgeStaleDocuments', () => {
       );
     }
   );
+
+  it('leaves alone the pages the path rules kept the crawl away from', async () => {
+    await purge(2, ['example.com'], {
+      includePaths: ['/docs', '/guides'],
+      excludePaths: ['/docs/internal'],
+    });
+
+    expect(esClient.deleteByQuery).toHaveBeenCalledWith(
+      expect.objectContaining({
+        query: {
+          bool: {
+            filter: [
+              { range: { depth: { lte: 2 } } },
+              { terms: { url_host: ['example.com'] } },
+              {
+                bool: {
+                  should: [{ prefix: { url_path: '/docs' } }, { prefix: { url_path: '/guides' } }],
+                  minimum_should_match: 1,
+                },
+              },
+            ],
+            must_not: [
+              { term: { crawl_id: CRAWL_ID } },
+              { prefix: { url_path: '/docs/internal' } },
+            ],
+          },
+        },
+      }),
+      { signal: abortController.signal }
+    );
+  });
 
   it('returns how many pages were deleted, and 0 when Elasticsearch does not say', async () => {
     esClient.deleteByQuery.mockResolvedValueOnce({ deleted: 250, version_conflicts: 3 });

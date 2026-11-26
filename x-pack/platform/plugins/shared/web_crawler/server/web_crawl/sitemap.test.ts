@@ -213,6 +213,7 @@ describe('discoverSitemapPages', () => {
     maxPages?: number;
     siteKeys?: string[];
     maxRequests?: number;
+    onIncomplete?: () => void;
   } = {}) =>
     discoverSitemapPages({
       siteUrl,
@@ -368,6 +369,52 @@ describe('discoverSitemapPages', () => {
     it('does not fetch anything when maxPages is 0', async () => {
       await expect(discover({ maxPages: 0 })).resolves.toEqual([]);
       expect(fetchContent).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('onIncomplete', () => {
+    let onIncomplete: jest.Mock<void, []>;
+
+    beforeEach(() => {
+      onIncomplete = jest.fn();
+    });
+
+    it('is not called when every sitemap was read', async () => {
+      mockSitemaps({
+        [SITEMAP_URL]: toSitemapIndex([`${ORIGIN}/nested.xml`, SITEMAP_URL]),
+        [`${ORIGIN}/nested.xml`]: toUrlSet(toPages(3)),
+      });
+
+      await discover({ onIncomplete });
+
+      expect(onIncomplete).not.toHaveBeenCalled();
+    });
+
+    it('is called once when the request budget left sitemaps unread', async () => {
+      mockOnePagePerSitemap(toSitemapIndex(toSitemapUrls(5)));
+
+      await discover({ onIncomplete });
+
+      expect(onIncomplete).toHaveBeenCalledTimes(1);
+    });
+
+    it('is called when the page budget was used up', async () => {
+      mockSitemaps({ [SITEMAP_URL]: toUrlSet(toPages(10)) });
+
+      await discover({ maxPages: 4, onIncomplete });
+
+      expect(onIncomplete).toHaveBeenCalledTimes(1);
+    });
+
+    it('is not called when the signal is aborted', async () => {
+      fetchContent.mockImplementation(async () => {
+        abortController.abort();
+        return toSitemapIndex(toSitemapUrls(5));
+      });
+
+      await discover({ onIncomplete });
+
+      expect(onIncomplete).not.toHaveBeenCalled();
     });
   });
 

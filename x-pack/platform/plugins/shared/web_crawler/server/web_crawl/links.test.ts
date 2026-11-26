@@ -200,6 +200,20 @@ describe('iterateLinkTargets', () => {
 });
 
 describe('extractLinks', () => {
+  it('keeps the balanced parentheses of a link target', () => {
+    const markdown = [
+      '[article](/wiki/Mercury_(planet)) ([aside](/wiki/Venus))',
+      '[nested](/wiki/A_(b_(c))_d) [unbalanced](/wiki/Open_(paren "title")',
+    ].join('\n');
+
+    expect(extractLinks(markdown, PAGE_URL)).toEqual([
+      `${ORIGIN}/wiki/Mercury_(planet)`,
+      `${ORIGIN}/wiki/Venus`,
+      `${ORIGIN}/wiki/A_(b_(c))_d`,
+      `${ORIGIN}/wiki/Open_(paren`,
+    ]);
+  });
+
   it('returns the absolute and relative links of a page, without duplicates', () => {
     const markdown = [
       '[absolute](https://example.com/absolute) [root](/root) [sibling](sibling) [up](../up)',

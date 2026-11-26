@@ -7,6 +7,7 @@
 
 import { createHash } from 'crypto';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import { waitFor } from './document_extraction';
 
 // `semantic_text` runs inference on every document at ingest, so a single request stays small.
 export const BULK_SIZE = 20;
@@ -15,6 +16,8 @@ export const MAX_BULK_BYTES = 1024 * 1024;
 export const MAX_CONCURRENT_BULKS = 3;
 const MAX_BUFFERED_DOCUMENTS = BULK_SIZE * MAX_CONCURRENT_BULKS;
 const MAX_BUFFERED_BYTES = MAX_BULK_BYTES * MAX_CONCURRENT_BULKS;
+const TOO_MANY_REQUESTS = 429;
+export const BULK_RETRY_DELAYS_MS = [1_000, 4_000];
 
 export interface CrawledDocument {
   url: string;
@@ -64,7 +67,8 @@ export const getDocumentId = (url: string): string =>
  * Indexes crawled pages without holding up the extraction of further pages.
  *
  * A request is sent as soon as there is a document and nothing in flight, so a slow crawl indexes
- * promptly, while a fast one fills whole batches and runs several requests side by side.
+ * promptly, while a fast one fills whole batches and runs several requests side by side. Requests
+ * and documents that Elasticsearch turns away as too many are sent again after a pause.
  */
 export const createBulkIndexer = ({
   esClient,
@@ -83,8 +87,8 @@ export const createBulkIndexer = ({
   let hasFailed = false;
   let isDraining = false;
 
-  const send = async (batch: CrawledDocument[]): Promise<void> => {
-    const { items } = await esClient.bulk(
+  const requestBulk = (batch: CrawledDocument[]) =>
+    esClient.bulk(
       {
         index: indexName,
         operations: batch.flatMap((document) => [
@@ -94,16 +98,43 @@ export const createBulkIndexer = ({
       },
       { signal }
     );
-    for (const { index: result } of items) {
-      if (result?.error) {
-        failedCount++;
-        lastError = new Error(result.error.reason ?? result.error.type);
-        logger.debug(`Web crawl could not index a page into ${indexName}: ${result.error.reason}`);
-      } else {
-        documentsCount++;
+
+  const send = async (batch: CrawledDocument[]): Promise<void> => {
+    let pending = batch;
+    for (let attempt = 0; pending.length > 0; attempt++) {
+      const retryDelayMs = BULK_RETRY_DELAYS_MS[attempt];
+      const canRetry = retryDelayMs !== undefined;
+      const rejected: CrawledDocument[] = [];
+      try {
+        const { items } = await requestBulk(pending);
+        items.forEach(({ index: result }, position) => {
+          if (result?.status === TOO_MANY_REQUESTS && canRetry) {
+            rejected.push(pending[position]);
+          } else if (result?.error) {
+            failedCount++;
+            lastError = new Error(result.error.reason ?? result.error.type);
+            logger.debug(
+              `Web crawl could not index a page into ${indexName}: ${result.error.reason}`
+            );
+          } else {
+            documentsCount++;
+          }
+        });
+        onIndexed();
+      } catch (error) {
+        if (error?.statusCode !== TOO_MANY_REQUESTS || !canRetry || signal.aborted) {
+          throw error;
+        }
+        rejected.push(...pending);
+      }
+      pending = rejected;
+      if (pending.length > 0) {
+        await waitFor(retryDelayMs ?? 0, signal);
+        if (signal.aborted) {
+          return;
+        }
       }
     }
-    onIndexed();
   };
 
   const takeBatch = (): CrawledDocument[] => {

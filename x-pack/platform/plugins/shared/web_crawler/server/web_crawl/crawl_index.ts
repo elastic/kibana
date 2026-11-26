@@ -48,7 +48,7 @@ const CRAWL_INDEX_PROPERTIES: Record<string, estypes.MappingProperty> = {
 export const getCrawlIndexName = (url: string): string =>
   `${INDEX_NAME_PREFIX}${getSiteKey(url)
     .toLowerCase()
-    .replace(/[^a-z0-9._-]+/g, '-')}`;
+    .replace(/[^a-z0-9._-]+/g, '-')}`.slice(0, WEB_CRAWL_MAX_INDEX_NAME_LENGTH);
 
 /** Whether a crawl may be pointed at an index of this name. Stricter than Elasticsearch, on purpose. */
 export const isValidCrawlIndexName = (indexName: string): boolean =>
