@@ -506,41 +506,131 @@ export const indexEndpointHostForPolicy = async ({
 
   await stopMetadataTransforms(esClient, integrationPolicy.package?.version ?? '');
 
-  // Create the Fleet agent
-  const indexedFleetAgent = await indexFleetAgentForHost(
-    esClient,
-    hostMetadataDoc,
-    agentPolicyId ?? integrationPolicy.policy_ids[0],
-    kibanaVersion,
-    undefined,
-    agentPolicy.space_ids
-  );
-
-  mergeAndAppendArrays(response, indexedFleetAgent);
-
-  logger.info(`New fleet agent indexed [${indexedFleetAgent.agents[0]?.agent?.id}]`);
-  logger.verbose(JSON.stringify(indexedFleetAgent.agents, null, 2));
-
-  await esClient
-    .index({
+  const hostDocId = uuidv4();
+  // Rollback may only remove what this call created: an agent id that already has metadata keeps its
+  // history. A missing data stream (fresh stack) means there is none; any other failed read is
+  // inconclusive, so it is treated like existing metadata (the safe side).
+  const existingMetadata = await esClient
+    .count({
       index: METADATA_DATASTREAM,
-      id: uuidv4(),
-      body: hostMetadataDoc,
-      op_type: 'create',
-      refresh: 'wait_for',
+      query: { term: { 'agent.id': hostMetadataDoc.agent.id } },
     })
-    .catch(catchHttpErrorFormatAndThrow);
+    .catch((error) => (isNotFoundError(error) ? { count: 0 } : undefined));
+  const hadMetadata = existingMetadata === undefined || existingMetadata.count > 0;
 
-  response.hosts.push(hostMetadataDoc);
-  response.metadataIndex = METADATA_DATASTREAM;
+  try {
+    // Create the Fleet agent
+    const indexedFleetAgent = await indexFleetAgentForHost(
+      esClient,
+      hostMetadataDoc,
+      agentPolicyId ?? integrationPolicy.policy_ids[0],
+      kibanaVersion,
+      undefined,
+      agentPolicy.space_ids
+    );
 
-  logger.info(`New endpoint host metadata doc indexed with agent id [${hostMetadataDoc.agent.id}]`);
+    mergeAndAppendArrays(response, indexedFleetAgent);
 
-  await startMetadataTransforms(
-    esClient,
-    [hostMetadataDoc.agent.id],
-    integrationPolicy.package?.version ?? ''
-  );
+    logger.info(`New fleet agent indexed [${indexedFleetAgent.agents[0]?.agent?.id}]`);
+    logger.verbose(JSON.stringify(indexedFleetAgent.agents, null, 2));
 
-  return response;
+    await esClient
+      .index({
+        index: METADATA_DATASTREAM,
+        id: hostDocId,
+        body: hostMetadataDoc,
+        op_type: 'create',
+        refresh: 'wait_for',
+      })
+      .catch(catchHttpErrorFormatAndThrow);
+
+    response.hosts.push(hostMetadataDoc);
+    response.metadataIndex = METADATA_DATASTREAM;
+
+    logger.info(
+      `New endpoint host metadata doc indexed with agent id [${hostMetadataDoc.agent.id}]`
+    );
+
+    await startMetadataTransforms(
+      esClient,
+      [hostMetadataDoc.agent.id],
+      integrationPolicy.package?.version ?? ''
+    );
+
+    return response;
+  } catch (error) {
+    // The Fleet agent and host metadata are indexed before the transforms start. A throw after that
+    // point never returns `response`, so the caller has no cleanup handles: roll back what this call wrote.
+    await rollbackIndexedHost(esClient, response, hostDocId, hadMetadata);
+    throw error;
+  }
+};
+
+const isNotFoundError = (error: unknown): boolean => {
+  const { statusCode, body } =
+    (error as { meta?: { statusCode?: number; body?: { error?: { type?: string } } } })?.meta ?? {};
+  return statusCode === 404 || body?.error?.type === 'index_not_found_exception';
+};
+
+/** Best effort: the Fleet agent is cleaned up even if the metadata cleanup fails; the caller rethrows the original error. */
+const rollbackIndexedHost = async (
+  esClient: Client,
+  indexed: IndexedHostsResponse,
+  hostDocId: string,
+  hadMetadata: boolean
+): Promise<void> => {
+  const agentIds = indexed.hosts.map((host) => host.agent.id);
+
+  const removeHostMetadata = async () => {
+    // The source goes first and is refreshed: the transforms read it, so a destination cleanup that
+    // ran alongside could be undone by a transform republishing the host afterwards.
+    // A source stream that is already gone is already clean: carry on to the destinations.
+    await esClient
+      .deleteByQuery({
+        index: METADATA_DATASTREAM,
+        wait_for_completion: true,
+        refresh: true,
+        query: { ids: { values: [hostDocId] } },
+      })
+      .catch((error) => {
+        if (!isNotFoundError(error)) {
+          throw error;
+        }
+      });
+
+    if (hadMetadata) {
+      return;
+    }
+
+    // The transforms may have copied the new host into their destinations before the failure. The
+    // two destinations keep the agent id under different fields.
+    await Promise.allSettled([
+      esClient.deleteByQuery({
+        index: metadataCurrentIndexPattern,
+        ignore_unavailable: true,
+        wait_for_completion: true,
+        query: { terms: { 'agent.id': agentIds } },
+      }),
+      esClient.deleteByQuery({
+        index: METADATA_UNITED_INDEX,
+        ignore_unavailable: true,
+        wait_for_completion: true,
+        // A united doc can hold the Fleet agent without endpoint metadata yet, so match its root id too.
+        query: {
+          bool: {
+            should: [
+              { terms: { 'united.endpoint.agent.id': agentIds } },
+              { terms: { 'agent.id': agentIds } },
+            ],
+            minimum_should_match: 1,
+          },
+        },
+      }),
+    ]);
+  };
+
+  await Promise.allSettled([
+    indexed.hosts.length > 0 ? removeHostMetadata() : undefined,
+    indexed.agents.length > 0 ? deleteIndexedFleetAgents(esClient, indexed) : undefined,
+  ]);
 };
