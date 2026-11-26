@@ -69,14 +69,14 @@ export class UnsecuredActionsClient {
     relatedSavedObjects,
     spaceId,
   }: UnsecuredExecuteOptions) {
-    await this.opts.waitForCatalog();
-
     // Check that requesterId is allowed
     if (!ALLOWED_REQUESTER_IDS.includes(requesterId)) {
       throw new Error(
         `"${requesterId}" feature is not allow-listed for UnsecuredActionsClient access.`
       );
     }
+
+    await this.opts.waitForCatalog();
 
     if (!relatedSavedObjects) {
       this.opts.logger.warn(
@@ -100,14 +100,14 @@ export class UnsecuredActionsClient {
     requesterId: string,
     actionsToExecute: ExecuteOptions[]
   ): Promise<ExecutionResponse> {
-    await this.opts.waitForCatalog();
-
     // Check that requesterId is allowed
     if (!ALLOWED_REQUESTER_IDS.includes(requesterId)) {
       throw new Error(
         `"${requesterId}" feature is not allow-listed for UnsecuredActionsClient access.`
       );
     }
+
+    await this.opts.waitForCatalog();
 
     // Inject source based on requesterId
     const actionsToEnqueue = actionsToExecute.map((action) => {

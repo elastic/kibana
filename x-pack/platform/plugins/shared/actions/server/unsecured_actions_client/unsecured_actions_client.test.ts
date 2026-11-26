@@ -375,4 +375,34 @@ describe('catalog readiness', () => {
     await promise;
     expect(executionEnqueuer).toHaveBeenCalledTimes(1);
   });
+
+  test('execute() rejects a not allowed requester without waiting for ready', async () => {
+    createPendingReady();
+
+    await expect(
+      unsecuredActionsClient.execute({
+        requesterId: 'not-allowed',
+        id: 'testPreconfigured',
+        params: {},
+        spaceId: DEFAULT_SPACE_ID,
+        relatedSavedObjects: [{ id: 'some-id', type: 'task' }],
+      })
+    ).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"\\"not-allowed\\" feature is not allow-listed for UnsecuredActionsClient access."`
+    );
+    expect(waitForCatalog).not.toHaveBeenCalled();
+  });
+
+  test('bulkEnqueueExecution() rejects a not allowed requester without waiting for ready', async () => {
+    createPendingReady();
+
+    await expect(
+      unsecuredActionsClient.bulkEnqueueExecution('not-allowed', [
+        { id: 'testPreconfigured', params: {} },
+      ])
+    ).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"\\"not-allowed\\" feature is not allow-listed for UnsecuredActionsClient access."`
+    );
+    expect(waitForCatalog).not.toHaveBeenCalled();
+  });
 });

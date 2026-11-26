@@ -907,25 +907,39 @@ describe('Actions Plugin', () => {
             pluginStart.getActionsClientWithRequest(httpServerMock.createKibanaRequest())
           );
 
-        it('lets a request at boot continue at 10 s with in-tree types only when the load hangs', async () => {
-          getEsClient().get.mockReturnValue(new Promise(() => {}));
+        it('lets a request at boot continue at 10 s with in-tree types only, and the load still ends later', async () => {
+          seedCatalog();
+          const catalogRead = Promise.withResolvers<object>();
+          getEsClient().get.mockReturnValue(catalogRead.promise);
           await setupPlugin();
-          const pluginStart = plugin.start(coreStart, pluginsStart);
+          const taskManager = taskManagerMock.createStart();
+          taskManager.aggregate.mockResolvedValue({
+            took: 1,
+            timed_out: false,
+            _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+            hits: { total: { value: 0, relation: 'eq' }, max_score: null, hits: [] },
+          });
+          const internalRepository = coreStart.savedObjects.createInternalRepository();
+          jest.mocked(internalRepository.bulkCreate).mockResolvedValue({ saved_objects: [] });
+          const pluginStart = plugin.start(coreStart, { ...pluginsStart, taskManager });
 
           const [, contextHandler] = coreSetup.http.registerRouteHandlerContext.mock
             .calls[0] as unknown as [string, Function];
-          const request = requestClient(pluginStart);
-          const routeContext = trackSettled(
-            contextHandler(
-              { core: { elasticsearch: { client: jest.fn() }, savedObjects: { client: {} } } },
-              httpServerMock.createKibanaRequest(),
-              httpServerMock.createResponseFactory()
-            )
+          const clientPromise = pluginStart.getActionsClientWithRequest(
+            httpServerMock.createKibanaRequest()
           );
-          // A disallowed requester makes the call reject right after the wait.
-          const unsecuredClient = trackSettled(
-            pluginStart.getUnsecuredActionsClient().bulkEnqueueExecution('not-allowed', [])
+          const request = trackSettled(clientPromise);
+          const routeContextPromise: Promise<ActionsApiRequestHandlerContext> = contextHandler(
+            { core: { elasticsearch: { client: jest.fn() }, savedObjects: { client: {} } } },
+            httpServerMock.createKibanaRequest(),
+            httpServerMock.createResponseFactory()
           );
+          const routeContext = trackSettled(routeContextPromise);
+          // An allowed requester waits for the catalog before it enqueues.
+          const unsecuredPromise = pluginStart
+            .getUnsecuredActionsClient()
+            .bulkEnqueueExecution('functional_tester', []);
+          const unsecuredClient = trackSettled(unsecuredPromise);
           const ready = trackSettled(pluginStart.whenCatalogReady());
 
           await jest.advanceTimersByTimeAsync(CATALOG_REQUEST_WAIT_MS - 1);
@@ -934,11 +948,18 @@ describe('Actions Plugin', () => {
           expect(unsecuredClient.settled).toBe(false);
 
           await jest.advanceTimersByTimeAsync(1);
-          expect(request.settled).toBe(true);
-          expect(routeContext.settled).toBe(true);
-          expect(unsecuredClient.settled).toBe(true);
+          await expect(clientPromise).resolves.toBeDefined();
+          await expect(routeContextPromise).resolves.toBeDefined();
+          await expect(unsecuredPromise).resolves.toBeDefined();
+          expect(internalRepository.bulkCreate).toHaveBeenCalledTimes(1);
           expect(ready.settled).toBe(false);
           expect(getTypeIds(pluginStart)).not.toContain(SPEC_TYPE_ID);
+
+          catalogRead.resolve(manifestDoc);
+          await jest.advanceTimersByTimeAsync(0);
+
+          await expect(pluginStart.whenCatalogReady()).resolves.toBeUndefined();
+          expect(getTypeIds(pluginStart)).toContain(SPEC_TYPE_ID);
         });
 
         it('does not make a request made after 10 s wait', async () => {
@@ -967,7 +988,8 @@ describe('Actions Plugin', () => {
           expect(jest.getTimerCount()).toBe(0);
         });
 
-        it('does not wait and creates no timer when the catalog config is off', async () => {
+        it('does not wait and creates no timer when the catalog config is off, even with the feature flag on', async () => {
+          coreStart.featureFlags.getBooleanValue$.mockReturnValue(of(true));
           await setupPlugin(undefined, { catalogEnabled: false });
           const pluginStart = plugin.start(coreStart, pluginsStart);
 
