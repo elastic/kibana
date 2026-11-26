@@ -131,9 +131,30 @@ describe('navigateToApp', () => {
     expect(annotations).toEqual([
       {
         type: SLOW_KIBANA_BOOT_ANNOTATION,
-        description: 'Kibana took 12400ms to boot after the load event of /app/console',
+        description: 'Kibana took 12400ms to boot after loading /app/console',
       },
     ]);
+  });
+
+  it('keeps only the URL path in the annotation', async () => {
+    const annotations = setProjectTimeouts({ navigationTimeout: 20_000, actionTimeout: 10_000 });
+    mockBootDuration(12_400);
+    const url = 'http://elastic:changeme@localhost:5620/s/my-space/app/discover?foo=bar#/view/1';
+
+    await navigateToApp(createPage().page, () => url);
+
+    expect(annotations[0].description).toBe(
+      'Kibana took 12400ms to boot after loading /s/my-space/app/discover'
+    );
+  });
+
+  it('uses the default threshold when the action timeout is disabled', async () => {
+    const annotations = setProjectTimeouts({ navigationTimeout: 20_000, actionTimeout: 0 });
+    mockBootDuration(3_000);
+
+    await navigateToApp(createPage().page, () => '/app/console');
+
+    expect(annotations).toEqual([]);
   });
 
   it('does not annotate the test when Kibana boots within the action timeout', async () => {

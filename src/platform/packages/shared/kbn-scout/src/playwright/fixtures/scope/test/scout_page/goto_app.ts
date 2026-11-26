@@ -31,6 +31,15 @@ const resolveAppReadyTimeout = (): number => {
 
 export const SLOW_KIBANA_BOOT_ANNOTATION = 'slow-kibana-boot';
 
+/** Keeps only the path, so reports never store credentials, query params or app state. */
+const toPath = (url: string): string => {
+  try {
+    return new URL(url).pathname;
+  } catch {
+    return url.split(/[?#]/)[0];
+  }
+};
+
 /**
  * Records a Kibana boot that outlasted the action timeout. The test keeps running, but the
  * annotation reaches the Playwright report and the Scout reporting events, so slow boots stay
@@ -38,13 +47,14 @@ export const SLOW_KIBANA_BOOT_ANNOTATION = 'slow-kibana-boot';
  */
 const reportSlowKibanaBoot = (url: string, bootMs: number): void => {
   const testInfo = test.info();
-  const slowBootMs = testInfo.project.use.actionTimeout ?? FALLBACK_ACTION_TIMEOUT_MS;
+  // An `actionTimeout` of 0 disables the deadline in Playwright, so fall back for it too.
+  const slowBootMs = testInfo.project.use.actionTimeout || FALLBACK_ACTION_TIMEOUT_MS;
   if (bootMs <= slowBootMs) {
     return;
   }
   testInfo.annotations.push({
     type: SLOW_KIBANA_BOOT_ANNOTATION,
-    description: `Kibana took ${Math.round(bootMs)}ms to boot after the load event of ${url}`,
+    description: `Kibana took ${Math.round(bootMs)}ms to boot after loading ${toPath(url)}`,
   });
 };
 
