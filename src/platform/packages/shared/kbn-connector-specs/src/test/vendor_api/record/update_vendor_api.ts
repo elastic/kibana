@@ -107,6 +107,10 @@ export interface UpdateVendorApiResult {
   readonly problems: readonly string[];
   /** The `problems` of each action, without the action's name in front. */
   readonly problemsByAction: Readonly<Record<string, readonly string[]>>;
+  /** Per action, the operations of its requests that break the spec, as `METHOD /path`. */
+  readonly violatedOperationsByAction: Readonly<
+    Record<string, readonly { readonly source: string; readonly operation: string }[]>
+  >;
   /** The `problems` that concern no single action, e.g. a missing pagination declaration. */
   readonly otherProblems: readonly DriftProblem[];
   /** The specs the actions were recorded against, by source, without the overlay. */
@@ -459,8 +463,16 @@ export const updateVendorApi = async ({
     own.add(text);
     problemsByAction.set(action, own);
   };
+  const violated = new Map<string, Map<string, { source: string; operation: string }>>();
   const warnings = new Set<string>();
   for (const finding of recording.findings) {
+    if (finding.kind === 'request-violation' && finding.operation !== undefined) {
+      const { source, method, path: operationPath } = finding.operation;
+      const operation = `${method.toUpperCase()} ${operationPath}`;
+      const own = violated.get(finding.action) ?? new Map();
+      own.set(`${source} ${operation}`, { source, operation });
+      violated.set(finding.action, own);
+    }
     if (isProblem(finding)) {
       addProblem(describeFinding(finding), actionOf(finding));
     } else {
@@ -639,6 +651,9 @@ export const updateVendorApi = async ({
     problems: [...problems],
     problemsByAction: Object.fromEntries(
       [...problemsByAction].map(([action, own]) => [action, [...own]])
+    ),
+    violatedOperationsByAction: Object.fromEntries(
+      [...violated].map(([action, own]) => [action, [...own.values()]])
     ),
     otherProblems: [...otherProblems.values()],
     specs: raw,

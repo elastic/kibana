@@ -561,6 +561,8 @@ describe('renderDriftIssue', () => {
   it('says when actions only fail on credentials, and to check the vendor before the connector', () => {
     const credentials =
       'GET https://api.example.com/items breaks the spec: Request has no credentials for the operation; expected Authorization: Bearer';
+    // The operation the emulator matched the failing request to
+    const latestViolations = [{ source: 'main', operation: 'GET /items' }];
     const withAuthChange = (actions: ConnectorDrift['actions']): ConnectorDrift => ({
       ...drifted,
       sources: {
@@ -584,7 +586,9 @@ describe('renderDriftIssue', () => {
     const { body } = renderDriftIssue(
       withAuthChange(
         drifted.actions?.map((action) =>
-          action.action === 'search' ? { ...action, latestProblems: [credentials] } : action
+          action.action === 'search'
+            ? { ...action, latestProblems: [credentials], latestViolations }
+            : action
         )
       ),
       { owners: [] }
@@ -600,7 +604,9 @@ describe('renderDriftIssue', () => {
     // What the spec requires instead, when it says so, as Zendesk's did with OAuth.
     const withOAuth = withAuthChange(
       drifted.actions?.map((action) =>
-        action.action === 'search' ? { ...action, latestProblems: [credentials] } : action
+        action.action === 'search'
+          ? { ...action, latestProblems: [credentials], latestViolations }
+          : action
       )
     );
     const withChanges = (...extra: SpecChange[]): ConnectorDrift => ({
@@ -657,6 +663,35 @@ describe('renderDriftIssue', () => {
       'adds `oauth2` (scopes `https://a.example/auth/read` and `https://b.example/auth/read`)'
     );
 
+    // An operation that moved is matched by its latest path
+    const { body: movedBody } = renderDriftIssue(
+      {
+        ...withChanges(
+          security(
+            'api-security-added',
+            'the endpoint scheme security `apiKey` was added to the API',
+            'GET /v1/items'
+          )
+        ),
+        actions: withOAuth.actions?.map((action) =>
+          action.action === 'search'
+            ? {
+                ...action,
+                operations: [
+                  {
+                    source: 'main',
+                    operation: 'GET /v1/items',
+                    latest: { status: 'moved', path: '/items', serverPath: '/v1' },
+                  },
+                ],
+              }
+            : action
+        ),
+      },
+      { owners: [] }
+    );
+    expect(movedBody).toContain('For this endpoint, the latest spec adds `apiKey`. |');
+
     // Only the auth changes of the request that failed count, not those of another it makes
     const { body: otherBody } = renderDriftIssue(
       {
@@ -697,6 +732,7 @@ describe('renderDriftIssue', () => {
       withAuthChange(
         drifted.actions?.map((action) => ({
           ...action,
+          ...(action.action === 'search' ? { latestViolations } : {}),
           latestProblems:
             action.action === 'search'
               ? [credentials]

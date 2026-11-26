@@ -138,41 +138,23 @@ const credentialsDetails = (
   return `${requires} For ${where}, the latest spec ${listed(what)}.`;
 };
 
-// The request a problem is about: `GET https://api.example.com/v2/items/1 breaks the spec: …`.
-const PROBLEM_REQUEST = /(?:^|\s)([A-Z]+) (\S+) breaks the spec: /;
-
-const escapedForRegExp = (text: string): string => text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-
 /**
- * Whether a request is a call of an operation: `GET https://api.example.com/v2/items/1` of
- * `GET /items/{id}`, as the server URL may hold the start of the path.
+ * The operations of an action whose requests broke the latest spec, as the emulator matched them:
+ * by their path in the manifest, or the one they moved to.
  */
-const isCallOf = (method: string, url: string, operation: string): boolean => {
-  const [operationMethod, template] = operation.split(' ');
-  if (operationMethod !== method || template === undefined) {
-    return false;
-  }
-  const path = url.replace(/^[a-z][a-z0-9+.-]*:\/\/[^/]+/i, '').replace(/[?#].*$/, '');
-  const pattern = template
-    .split(/\{[^}]*\}/)
-    .map(escapedForRegExp)
-    .join('[^/]+');
-  return new RegExp(`${pattern}$`).test(path);
-};
-
-/** The operations of an action that the requests its problems name call. */
-const operationsOf = (
-  operations: ActionDrift['operations'],
-  problems: readonly string[]
-): ActionDrift['operations'] => {
-  const requests = problems.flatMap((problem) => {
-    const match = PROBLEM_REQUEST.exec(problem);
-    return match === null ? [] : [{ method: match[1], url: match[2] }];
+const violatedOperationsOf = ({
+  operations,
+  latestViolations = [],
+}: ActionDrift): ActionDrift['operations'] =>
+  operations.filter(({ source, operation, latest }) => {
+    const method = operation.slice(0, operation.indexOf(' '));
+    const latestOperation = latest?.status === 'moved' ? `${method} ${latest.path}` : operation;
+    return latestViolations.some(
+      (violation) =>
+        violation.source === source &&
+        (violation.operation === operation || violation.operation === latestOperation)
+    );
   });
-  return operations.filter(({ operation }) =>
-    requests.some(({ method, url }) => isCallOf(method, url, operation))
-  );
-};
 
 // The one violation a request with credentials the operation doesn't accept has.
 const MISSING_CREDENTIALS =
@@ -233,7 +215,7 @@ export const statusOf = (
     });
     if (expected.length === latestProblems.length) {
       // Only the requests that failed: another operation's auth changes say nothing about them.
-      const failing = operationsOf(action.operations, latestProblems);
+      const failing = violatedOperationsOf(action);
       const authChanges = failing.flatMap(({ source, operation }) =>
         changesOf(source, operation).filter(({ id }) => id.startsWith('api-security-'))
       );

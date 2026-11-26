@@ -105,6 +105,11 @@ export interface ActionDrift {
   /** Problems recording it against the latest specs; undefined when those didn't load. */
   readonly latestProblems?: readonly string[];
   /**
+   * The operations whose requests broke the latest specs, as those name them, so `METHOD /path`
+   * of a moved operation is its latest path.
+   */
+  readonly latestViolations?: readonly { readonly source: string; readonly operation: string }[];
+  /**
    * What it did with the responses of each operation it calls, by `source METHOD /path`, across
    * the runs against the committed snapshot and the latest spec.
    */
@@ -775,7 +780,12 @@ const describeAction = ({
       })
     ),
     snapshotProblems: snapshotResult?.problemsByAction[action] ?? [],
-    ...(latestResult ? { latestProblems: latestResult.problemsByAction[action] ?? [] } : {}),
+    ...(latestResult
+      ? {
+          latestProblems: latestResult.problemsByAction[action] ?? [],
+          latestViolations: latestResult.violatedOperationsByAction[action] ?? [],
+        }
+      : {}),
     ...(recorded.length > 0 ? { fieldUse, tracked, fieldChanges } : {}),
   };
 };

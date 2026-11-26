@@ -135,6 +135,7 @@ describe('detectDrift', () => {
           unmatched: [],
           snapshotProblems: [],
           latestProblems: [],
+          latestViolations: [],
           fieldUse: { 'main GET /items': { read: [], copied: [], returned: [''] } },
           tracked: true,
           fieldChanges: [],
