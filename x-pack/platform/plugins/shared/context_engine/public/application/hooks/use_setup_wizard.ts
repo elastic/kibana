@@ -32,6 +32,8 @@ interface UseSetupWizardParams {
   isProgressError: boolean;
   /** Whether the Overview tab is open. Each visit to it makes a fresh decision. */
   isActive: boolean;
+  /** Off: the wizard never shows. */
+  isEnabled: boolean;
 }
 
 export type UseSetupWizardResult =
@@ -61,6 +63,7 @@ export const useSetupWizard = ({
   isProgressLoading,
   isProgressError,
   isActive,
+  isEnabled,
 }: UseSetupWizardParams): UseSetupWizardResult => {
   const {
     services: { http },
@@ -109,7 +112,7 @@ export const useSetupWizard = ({
     writeSetupWizardStoredValue({ basePath, aiIndexId }, SETUP_WIZARD_CLOSED);
   }, [aiIndexId, basePath]);
 
-  if (!canWrite) {
+  if (!isEnabled || !canWrite) {
     // Every step saves something, so a read-only user would only hit errors.
     return { status: 'hidden' };
   }

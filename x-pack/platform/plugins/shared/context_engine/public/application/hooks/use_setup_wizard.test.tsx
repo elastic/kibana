@@ -43,6 +43,7 @@ const defaultParams: Params = {
   isProgressLoading: false,
   isProgressError: false,
   isActive: true,
+  isEnabled: true,
 };
 
 const renderSetupWizard = (params: Partial<Params> = {}, { canWrite = true } = {}) => {
@@ -79,6 +80,12 @@ describe('useSetupWizard', () => {
     const { result } = renderSetupWizard({ progress: undefined });
 
     expect(result.current.status).toBe('loading');
+  });
+
+  it('hides the wizard right away while the setup wizard setting is off', () => {
+    const { result } = renderSetupWizard({ progress: undefined, isEnabled: false });
+
+    expect(result.current.status).toBe('hidden');
   });
 
   it('hides the wizard right away for a user who cannot write', () => {

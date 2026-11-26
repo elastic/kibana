@@ -13,6 +13,7 @@ export const CONTEXT_ENGINE_PATHS = {
   /** A selected Knowledge document: backing index in the path, document id in `?doc=`. */
   detailKnowledgeDocument: '/ai_index/:id/knowledge_documents/:index',
   detailSettings: '/ai_index/:id/settings',
+  dreamingTemplate: '/ai_index/:id/dreaming_template',
 } as const;
 
 /** Query param that holds the id of the Knowledge document selected on the tab. */
@@ -32,6 +33,10 @@ export const AUTOMATIONS_HASH = '#automations';
 
 export const getAiIndexAutomationsPath = (id: string): string =>
   `${getAiIndexSettingsPath(id)}${AUTOMATIONS_HASH}`;
+
+/** Path of the page for picking an example dreaming config for a new AI index with memory. */
+export const getAiIndexDreamingTemplatePath = (id: string): string =>
+  `/ai_index/${id}/dreaming_template`;
 
 /**
  * Path of the Knowledge documents tab with a backing index selected. Index names can't contain

@@ -47,6 +47,7 @@ import { useListKi } from '../hooks/use_list_ki';
 import { useMemoryEnabled } from '../hooks/use_memory_enabled';
 import { useNavigation } from '../hooks/use_navigation';
 import { useSetupWizard } from '../hooks/use_setup_wizard';
+import { useSetupWizardEnabled } from '../hooks/use_setup_wizard_enabled';
 import { useSetupWizardProgress } from '../hooks/use_setup_wizard_progress';
 import { getVisibleAutomations, getVisibleWorkflowIds } from '../utils/visible_automations';
 import {
@@ -178,7 +179,12 @@ export const AiIndexDetailPage = () => {
     [automations, isMemoryEnabled]
   );
   const isManaged = aiIndex?.managed === true;
-  const setupWizardProgress = useSetupWizardProgress({ aiIndex, isMemoryEnabled });
+  const isSetupWizardEnabled = useSetupWizardEnabled();
+  const setupWizardProgress = useSetupWizardProgress({
+    aiIndex,
+    isMemoryEnabled,
+    isSetupWizardEnabled,
+  });
   const setupWizard = useSetupWizard({
     aiIndexId: id,
     steps: SETUP_WIZARD_STEPS,
@@ -186,6 +192,7 @@ export const AiIndexDetailPage = () => {
     isProgressLoading: setupWizardProgress.isLoading,
     isProgressError: setupWizardProgress.isError,
     isActive: !isSourcesTab && !isKnowledgeIndicatorsTab && !isSettingsTab,
+    isEnabled: isSetupWizardEnabled,
   });
   // The setup wizard replaces the "AI index created" callout.
   const isSetupWizardShown = setupWizard.status === 'shown';

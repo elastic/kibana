@@ -41,7 +41,9 @@ describe('useSetupWizardProgress', () => {
   });
 
   it('collects the data the steps read, retrying a failed request only once', () => {
-    const { result } = renderHook(() => useSetupWizardProgress({ aiIndex, isMemoryEnabled: true }));
+    const { result } = renderHook(() =>
+      useSetupWizardProgress({ aiIndex, isMemoryEnabled: true, isSetupWizardEnabled: true })
+    );
 
     expect(result.current).toEqual({
       progress: { aiIndex, dreaming: { enabled: true }, memoryCount: 2, isMemoryEnabled: true },
@@ -54,17 +56,24 @@ describe('useSetupWizardProgress', () => {
 
   it('has no progress until the AI index loads', () => {
     const { result } = renderHook(() =>
-      useSetupWizardProgress({ aiIndex: undefined, isMemoryEnabled: true })
+      useSetupWizardProgress({
+        aiIndex: undefined,
+        isMemoryEnabled: true,
+        isSetupWizardEnabled: true,
+      })
     );
 
     expect(result.current.progress).toBeUndefined();
   });
 
   it.each([
-    ['the AI index is managed', { ...aiIndex, managed: true }, true],
-    ['memory is off', aiIndex, false],
-  ])('loads nothing when %s', (_label, index, isMemoryEnabled) => {
-    renderHook(() => useSetupWizardProgress({ aiIndex: index, isMemoryEnabled }));
+    ['the AI index is managed', { ...aiIndex, managed: true }, true, true],
+    ['memory is off', aiIndex, false, true],
+    ['the setup wizard setting is off', aiIndex, true, false],
+  ])('loads nothing when %s', (_label, index, isMemoryEnabled, isSetupWizardEnabled) => {
+    renderHook(() =>
+      useSetupWizardProgress({ aiIndex: index, isMemoryEnabled, isSetupWizardEnabled })
+    );
 
     expect(mockUseMemoryCount).toHaveBeenCalledWith(index.id, { enabled: false, retry: 1 });
     expect(mockUseAiIndexDreaming).toHaveBeenCalledWith(index.id, { enabled: false, retry: 1 });
@@ -79,7 +88,9 @@ describe('useSetupWizardProgress', () => {
       isError: true,
     });
 
-    const { result } = renderHook(() => useSetupWizardProgress({ aiIndex, isMemoryEnabled: true }));
+    const { result } = renderHook(() =>
+      useSetupWizardProgress({ aiIndex, isMemoryEnabled: true, isSetupWizardEnabled: true })
+    );
 
     expect(result.current).toMatchObject({ isLoading: true, isError: true });
   });

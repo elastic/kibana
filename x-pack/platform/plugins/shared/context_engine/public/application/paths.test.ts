@@ -11,6 +11,7 @@ import {
   getAiIndexKnowledgeDocumentsPath,
   getKnowledgeDocumentPath,
   getAiIndexSettingsPath,
+  getAiIndexDreamingTemplatePath,
 } from './paths';
 
 describe('getAiIndexDetailPath', () => {
@@ -36,6 +37,14 @@ describe('getAiIndexKnowledgeDocumentsPath', () => {
 describe('getAiIndexSettingsPath', () => {
   it('builds the settings tab path', () => {
     expect(getAiIndexSettingsPath('my-ai-index')).toBe('/ai_index/my-ai-index/settings');
+  });
+});
+
+describe('getAiIndexDreamingTemplatePath', () => {
+  it('builds the dreaming setup path', () => {
+    expect(getAiIndexDreamingTemplatePath('my-ai-index')).toBe(
+      '/ai_index/my-ai-index/dreaming_template'
+    );
   });
 });
 

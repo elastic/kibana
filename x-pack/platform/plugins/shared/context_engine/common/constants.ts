@@ -190,6 +190,9 @@ export const MAX_IMPROVEMENT_RATIONALE_LENGTH = 4096;
 /** Advanced setting that gates the Context Engine feedback loop. */
 export const CONTEXT_ENGINE_FEEDBACK_LOOP_ENABLED_SETTING_ID = 'contextEngine:feedbackLoopEnabled';
 
+/** Temporary advanced setting that shows the AI index setup wizard while its steps are built. */
+export const CONTEXT_ENGINE_SETUP_WIZARD_ENABLED_SETTING_ID = 'contextEngine:setupWizardEnabled';
+
 /** Task Manager type, id, and schedule for the global signal-generation task. */
 export const SIGNAL_GENERATOR_TASK_TYPE = 'contextEngine:signalGenerator';
 export const SIGNAL_GENERATOR_TASK_ID = 'contextengine-signal-generator';

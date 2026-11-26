@@ -19,7 +19,10 @@ import { schema } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
 import { CONTEXT_ENGINE_MEMORY_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
 import { WorkflowsManagementOperationPrivileges } from '@kbn/workflows';
-import { CONTEXT_ENGINE_FEEDBACK_LOOP_ENABLED_SETTING_ID } from '../common/constants';
+import {
+  CONTEXT_ENGINE_FEEDBACK_LOOP_ENABLED_SETTING_ID,
+  CONTEXT_ENGINE_SETUP_WIZARD_ENABLED_SETTING_ID,
+} from '../common/constants';
 import { apiPrivileges } from '../common/features';
 import type {
   ContextEnginePluginSetup,
@@ -200,6 +203,20 @@ export class ContextEnginePlugin
         }),
         description: i18n.translate('xpack.contextEngine.uiSettings.memory.description', {
           defaultMessage: 'Enables memory capabilities for Context Engine AI indices.',
+        }),
+        schema: schema.boolean(),
+        value: false,
+        experimental: true,
+        requiresPageReload: false,
+        readonly: false,
+      },
+      [CONTEXT_ENGINE_SETUP_WIZARD_ENABLED_SETTING_ID]: {
+        name: i18n.translate('xpack.contextEngine.uiSettings.setupWizard.name', {
+          defaultMessage: 'Context Engine setup wizard',
+        }),
+        description: i18n.translate('xpack.contextEngine.uiSettings.setupWizard.description', {
+          defaultMessage:
+            'Shows a setup wizard on the Overview of an AI index that is not set up yet.',
         }),
         schema: schema.boolean(),
         value: false,

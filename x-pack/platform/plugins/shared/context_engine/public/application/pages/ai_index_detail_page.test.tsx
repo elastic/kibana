@@ -41,6 +41,7 @@ import { SETUP_WIZARD_STORAGE_KEY } from '../utils/setup_wizard_storage';
 import { SETUP_WIZARD_STEPS } from '../components/ai_index_detail/setup_wizard';
 import { RECENT_KNOWLEDGE_DOCUMENTS_QUERY } from '../components/ai_index_detail';
 import { useMemoryEnabled } from '../hooks/use_memory_enabled';
+import { useSetupWizardEnabled } from '../hooks/use_setup_wizard_enabled';
 import { useAiIndexDreaming } from '../hooks/use_ai_index_dreaming';
 import type { LatestWorkflowExecution } from '../hooks/use_latest_workflow_execution';
 
@@ -129,6 +130,10 @@ jest.mock('../hooks/use_memory_enabled', () => ({
   useMemoryEnabled: jest.fn(() => true),
 }));
 
+jest.mock('../hooks/use_setup_wizard_enabled', () => ({
+  useSetupWizardEnabled: jest.fn(() => true),
+}));
+
 jest.mock('../hooks/use_ai_index_dreaming', () => ({
   useAiIndexDreaming: jest.fn(),
 }));
@@ -156,6 +161,7 @@ jest.mock('../hooks/use_agent_builder_agents', () => ({
 }));
 
 const mockUseMemoryEnabled = jest.mocked(useMemoryEnabled);
+const mockUseSetupWizardEnabled = jest.mocked(useSetupWizardEnabled);
 const mockUseAiIndexDreaming = jest.mocked(useAiIndexDreaming);
 const preferenceDreaming = { enabled: true, facts: [{ type: 'preference' }] };
 
@@ -297,6 +303,7 @@ describe('AiIndexDetailPage', () => {
     mockGetWorkflowExecutions.mockResolvedValue({ results: [] });
     mockUseListKi.mockImplementation(() => defaultListKiMock);
     mockUseMemoryEnabled.mockReturnValue(true);
+    mockUseSetupWizardEnabled.mockReturnValue(true);
     mockUseAiIndexDreaming.mockReturnValue({
       dreaming: undefined,
       workflowIds: [],
@@ -445,6 +452,18 @@ describe('AiIndexDetailPage', () => {
       await waitFor(() =>
         expect(screen.queryByTestId('contextAiIndexOverviewLoading')).not.toBeInTheDocument()
       );
+      expect(screen.queryByTestId('contextSetupWizard')).not.toBeInTheDocument();
+    });
+
+    it('shows the normal Overview while the setup wizard setting is off', async () => {
+      mockUseSetupWizardEnabled.mockReturnValue(false);
+      const services = createServices();
+      services.http.get.mockResolvedValue({ ...aiIndex, sources: [] });
+
+      renderWithProviders(services);
+      await waitForAiIndexDetailLoaded();
+
+      expect(screen.queryByTestId('contextAiIndexOverviewLoading')).not.toBeInTheDocument();
       expect(screen.queryByTestId('contextSetupWizard')).not.toBeInTheDocument();
     });
 

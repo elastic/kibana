@@ -26,12 +26,15 @@ export interface UseSetupWizardProgressResult {
 export const useSetupWizardProgress = ({
   aiIndex,
   isMemoryEnabled,
+  isSetupWizardEnabled,
 }: {
   aiIndex: GetAiIndexResponse | undefined;
   isMemoryEnabled: boolean;
+  isSetupWizardEnabled: boolean;
 }): UseSetupWizardProgressResult => {
   // A managed AI index never shows the wizard, and without memory no step reads this data.
-  const enabled = aiIndex !== undefined && !aiIndex.managed && isMemoryEnabled;
+  const enabled =
+    isSetupWizardEnabled && aiIndex !== undefined && !aiIndex.managed && isMemoryEnabled;
   const memory = useMemoryCount(aiIndex?.id, { enabled, retry: PROGRESS_RETRY });
   const dreaming = useAiIndexDreaming(aiIndex?.id ?? '', { enabled, retry: PROGRESS_RETRY });
 
