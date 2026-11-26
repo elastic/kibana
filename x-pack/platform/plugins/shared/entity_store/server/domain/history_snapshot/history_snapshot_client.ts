@@ -509,7 +509,8 @@ export class HistorySnapshotClient {
       });
 
       if (poll.status === 'pending') {
-        const stopped = await stopIfDisabled();
+        // A failed read must not drop the run: the Elasticsearch task is still going.
+        const stopped = await stopIfDisabled().catch(() => undefined);
         return stopped ?? { ok: true, inProgress: true, run };
       }
 
