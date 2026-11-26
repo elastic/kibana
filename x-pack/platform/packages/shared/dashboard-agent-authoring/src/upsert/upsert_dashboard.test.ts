@@ -288,6 +288,18 @@ describe('executeDashboardUpsert', () => {
       expect(result.dashboardData.options).toEqual({ hide_panel_titles: true });
     });
 
+    it('leaves a dashboard without options unchanged when the call sets no option', async () => {
+      const dashboardData: DashboardAttachmentData = { title: 'Title', panels: [] };
+
+      const result = await executeDashboardUpsert({
+        dashboardData,
+        upsert: { options: {} },
+        logger,
+      });
+
+      expect(result.dashboardData).toEqual(dashboardData);
+    });
+
     it('keeps the settings a call leaves out', async () => {
       const result = await executeDashboardUpsert({
         dashboardData: dashboardWithSettings,
