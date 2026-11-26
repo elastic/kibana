@@ -156,6 +156,7 @@ import { communicatesWithMaintainer } from './lib/entity_analytics/maintainers/c
 import { administersMaintainer } from './lib/entity_analytics/maintainers/administers';
 import { supervisesMaintainer } from './lib/entity_analytics/maintainers/supervises';
 import { ownsMaintainer } from './lib/entity_analytics/maintainers/owns';
+import { ownsInferredMaintainer } from './lib/entity_analytics/maintainers/owns_inferred';
 import { registerProtectionUpdatesNoteRoutes } from './endpoint/routes/protection_updates_note';
 import {
   allRiskScoreIndexPattern,
@@ -442,6 +443,7 @@ export class Plugin implements ISecuritySolutionPlugin {
     plugins.entityStore?.registerEntityMaintainer(administersMaintainer);
     plugins.entityStore?.registerEntityMaintainer(supervisesMaintainer);
     plugins.entityStore?.registerEntityMaintainer(ownsMaintainer);
+    plugins.entityStore?.registerEntityMaintainer(ownsInferredMaintainer);
 
     registerPrivilegeMonitoringTask({
       getStartServices: core.getStartServices,

@@ -49,6 +49,7 @@ const RELATIONSHIP_METADATA_FIELD_PATHS = [
   'entity.relationships.administers.target',
   'entity.relationships.depends_on.target',
   'entity.relationships.owns.target',
+  'entity.relationships.owns_inferred.target',
   'entity.relationships.supervises.target',
 ] as const satisfies ReadonlyArray<keyof RelationshipMetadataDoc>;
 

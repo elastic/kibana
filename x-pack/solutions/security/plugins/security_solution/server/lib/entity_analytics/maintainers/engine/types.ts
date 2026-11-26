@@ -17,7 +17,7 @@ export interface CompositeBucket {
   doc_count: number;
 }
 
-export type TargetEntityType = 'host' | 'user' | 'service';
+export type TargetEntityType = 'host' | 'user' | 'service' | 'ai_agent';
 
 /**
  * ES|QL identifier-quoting convention for config authors.
@@ -385,4 +385,5 @@ export type RelationshipMaintainerName =
   | 'accesses_frequently_and_infrequently'
   | 'administers'
   | 'supervises'
-  | 'owns';
+  | 'owns'
+  | 'owns_inferred';
