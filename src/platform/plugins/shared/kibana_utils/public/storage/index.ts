@@ -7,5 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { Storage } from './storage';
-export type { IStorage, IStorageWrapper } from './types';
+/**
+ * @deprecated Import from `@kbn/kibana-utils-browser`.
+ */
+export type {
+  IStorage,
+  IStorageWrapper,
+} from '@kbn/kibana-utils-browser';
+export { Storage } from '@kbn/kibana-utils-browser';

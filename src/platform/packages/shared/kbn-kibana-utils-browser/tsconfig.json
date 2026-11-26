@@ -1,0 +1,32 @@
+{
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+    "types": [
+      "jest",
+      "node",
+      "react"
+    ]
+  },
+  "include": [
+    "**/*.ts",
+    "**/*.tsx"
+  ],
+  "exclude": [
+    "target/**/*"
+  ],
+  "kbn_references": [
+    "@kbn/core",
+    "@kbn/core-notifications-browser-mocks",
+    "@kbn/core-theme-browser",
+    "@kbn/core-user-profile-browser",
+    "@kbn/core-user-profile-browser-mocks",
+    "@kbn/i18n",
+    "@kbn/kibana-utils-common",
+    "@kbn/react-kibana-context-theme",
+    "@kbn/rison",
+    "@kbn/test-jest-helpers",
+    "@kbn/utility-types",
+    "@kbn/utility-types-jest"
+  ]
+}

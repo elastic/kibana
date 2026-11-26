@@ -8,37 +8,34 @@
  */
 
 /**
- * State containers are Redux-store-like objects meant to help you manage state in your services or apps.
- * Refer to {@link https://github.com/elastic/kibana/tree/main/src/platform/plugins/shared/kibana_utils/docs/state_containers | guides and examples} for more info
- *
- * @packageDocumentation
+ * @deprecated Import from `@kbn/kibana-utils-common`.
  */
-
 export type {
   BaseState,
   BaseStateContainer,
-  StateContainer,
-  ReduxLikeStateContainer,
-  Dispatch,
-  Middleware,
-  Selector,
   Comparator,
-  MapStateToProps,
   Connect,
-  Reducer,
-  UnboxState,
+  CreateStateContainerOptions,
+  Dispatch,
+  EnsurePureSelector,
+  EnsurePureTransition,
+  MapStateToProps,
+  Middleware,
+  PureSelector,
   PureSelectorToSelector,
   PureSelectorsToSelectors,
-  EnsurePureSelector,
-  PureTransitionsToTransitions,
-  PureTransitionToTransition,
-  EnsurePureTransition,
-  PureSelector,
   PureTransition,
+  PureTransitionToTransition,
+  PureTransitionsToTransitions,
+  Reducer,
+  ReduxLikeStateContainer,
+  Selector,
+  StateContainer,
   Transition,
   TransitionDescription,
-} from './types';
-
-export type { CreateStateContainerOptions } from './create_state_container';
-
-export { createStateContainer, defaultFreeze } from './create_state_container';
+  UnboxState,
+} from '@kbn/kibana-utils-common';
+export {
+  createStateContainer,
+  defaultFreeze,
+} from '@kbn/kibana-utils-common';

@@ -7,15 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export type { Get, Set } from '../common';
+/**
+ * @deprecated Import server utilities from `@kbn/kibana-utils-server`.
+ */
+export type { Get, Set } from '@kbn/kibana-utils-server';
 export {
   AbortError,
+  KbnServerError,
   abortSignalToPromise,
   createGetterSetter,
   fieldWildcardFilter,
   fieldWildcardMatcher,
-  url,
+  getKbnServerError,
   mergeMigrationFunctionMaps,
-} from '../common';
-
-export { KbnServerError, reportServerError, getKbnServerError } from './report_server_error';
+  reportServerError,
+  url,
+} from '@kbn/kibana-utils-server';

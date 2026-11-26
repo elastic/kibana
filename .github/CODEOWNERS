@@ -657,6 +657,9 @@ src/platform/packages/shared/kbn-io-ts-utils @elastic/observability-ui
 src/platform/packages/shared/kbn-jest @elastic/kibana-operations
 src/platform/packages/shared/kbn-jest-benchmarks @elastic/observability-ui
 src/platform/packages/shared/kbn-kbn-client @elastic/kibana-operations @elastic/appex-qa
+src/platform/packages/shared/kbn-kibana-utils-browser @elastic/appex-sharedux
+src/platform/packages/shared/kbn-kibana-utils-common @elastic/appex-sharedux
+src/platform/packages/shared/kbn-kibana-utils-server @elastic/appex-sharedux
 src/platform/packages/shared/kbn-lazy-object @elastic/kibana-operations @elastic/observability-ui
 src/platform/packages/shared/kbn-lens-common @elastic/kibana-dashboards
 src/platform/packages/shared/kbn-lens-common-2 @elastic/kibana-dashboards

@@ -2615,9 +2615,18 @@ importers:
       '@kbn/kibana-usage-collection-plugin':
         specifier: workspace:*
         version: link:src/platform/plugins/private/kibana_usage_collection
+      '@kbn/kibana-utils-browser':
+        specifier: workspace:*
+        version: link:src/platform/packages/shared/kbn-kibana-utils-browser
+      '@kbn/kibana-utils-common':
+        specifier: workspace:*
+        version: link:src/platform/packages/shared/kbn-kibana-utils-common
       '@kbn/kibana-utils-plugin':
         specifier: workspace:*
         version: link:src/platform/plugins/shared/kibana_utils
+      '@kbn/kibana-utils-server':
+        specifier: workspace:*
+        version: link:src/platform/packages/shared/kbn-kibana-utils-server
       '@kbn/kql':
         specifier: workspace:*
         version: link:src/platform/plugins/shared/kql
@@ -8295,6 +8304,12 @@ importers:
   src/platform/packages/shared/kbn-jest-benchmarks: {}
 
   src/platform/packages/shared/kbn-kbn-client: {}
+
+  src/platform/packages/shared/kbn-kibana-utils-browser: {}
+
+  src/platform/packages/shared/kbn-kibana-utils-common: {}
+
+  src/platform/packages/shared/kbn-kibana-utils-server: {}
 
   src/platform/packages/shared/kbn-lazy-object: {}
 

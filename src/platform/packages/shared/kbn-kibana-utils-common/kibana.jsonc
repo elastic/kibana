@@ -1,0 +1,10 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/kibana-utils-common",
+  "owner": [
+    "@elastic/appex-sharedux"
+  ],
+  "description": "Cross-runtime utilities shared by Kibana browser and server code.",
+  "group": "platform",
+  "visibility": "shared"
+}

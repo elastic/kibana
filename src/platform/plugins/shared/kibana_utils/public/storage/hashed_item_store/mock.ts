@@ -8,22 +8,8 @@
  */
 
 import { StubBrowserStorage } from '@kbn/test-jest-helpers';
-import { HashedItemStore } from './hashed_item_store';
 
 /**
- * Useful for mocking state_storage from jest,
- *
- * import { mockSessionStorage } from '../state_storage/mock;
- *
- * And all tests in the test file will use HashedItemStoreSingleton
- * with underlying mockSessionStorage we have access to
+ * @deprecated Instantiate `StubBrowserStorage` directly.
  */
 export const mockStorage = new StubBrowserStorage();
-const mockHashedItemStore = new HashedItemStore(mockStorage);
-jest.mock('.', () => {
-  return {
-    // eslint-disable-next-line @kbn/compat/typescript-no-var-requires
-    HashedItemStore: require('./hashed_item_store').HashedItemStore,
-    hashedItemStore: mockHashedItemStore,
-  };
-});

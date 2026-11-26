@@ -7,15 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+/**
+ * @deprecated Import from `@kbn/kibana-utils-common`.
+ */
 export type {
-  VersionedState,
+  GetMigrationFunctionObjectFn,
+  MigrateFunction,
+  MigrateFunctionsObject,
   PersistableState,
   PersistableStateDefinition,
   PersistableStateMigrateFn,
   PersistableStateService,
-  MigrateFunctionsObject,
-  MigrateFunction,
-  GetMigrationFunctionObjectFn,
-} from './types';
-export { migrateToLatest } from './migrate_to_latest';
-export { mergeMigrationFunctionMaps } from './merge_migration_function_map';
+  VersionedState,
+} from '@kbn/kibana-utils-common';
+export {
+  mergeMigrationFunctionMaps,
+  migrateToLatest,
+} from '@kbn/kibana-utils-common';

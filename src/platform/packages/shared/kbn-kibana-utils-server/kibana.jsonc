@@ -1,0 +1,10 @@
+{
+  "type": "shared-server",
+  "id": "@kbn/kibana-utils-server",
+  "owner": [
+    "@elastic/appex-sharedux"
+  ],
+  "description": "Server utilities for Kibana plugins and services.",
+  "group": "platform",
+  "visibility": "shared"
+}

@@ -146,7 +146,7 @@ export const moduleMigrationRule: DummyRule = [
     },
     {
       from: '@kbn/kibana-utils-plugin',
-      to: '@kbn/kibana-utils-plugin/common',
+      to: '@kbn/kibana-utils-common',
       exact: true,
     },
     {
