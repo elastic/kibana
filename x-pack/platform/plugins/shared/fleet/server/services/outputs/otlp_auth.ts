@@ -167,6 +167,15 @@ export function validateOtlpAuthSecrets(
   );
 }
 
+/** The settings of the HTTP exporter that hold a URL it sends data to. */
+const OTLP_HTTP_ENDPOINT_FIELDS = [
+  'endpoint',
+  'traces_endpoint',
+  'metrics_endpoint',
+  'logs_endpoint',
+  'profiles_endpoint',
+] as const;
+
 /** Throws if the Azure authentication of an output is not complete for its method. */
 function validateOtlpAzureAuth(
   auth: OtlpAzureAuth,
@@ -179,28 +188,20 @@ function validateOtlpAzureAuth(
     );
   }
 
-  // the token is a bearer token: it is only sent to an endpoint that proves its identity
-  const insecureEndpoint = getOtlpExporterEndpoints(exporter).find(
-    (endpoint) => !/^https:\/\//i.test(endpoint)
-  );
-  if (insecureEndpoint) {
+  // the token is a bearer token: it is only sent to an endpoint that proves its identity. The
+  // error names the setting, not its value: a URL can carry credentials.
+  const insecureEndpointField = OTLP_HTTP_ENDPOINT_FIELDS.find((field) => {
+    const endpoint = exporter[field as keyof typeof exporter];
+    return typeof endpoint === 'string' && !/^https:\/\//i.test(endpoint);
+  });
+  if (insecureEndpointField) {
     throw new OutputInvalidError(
-      `auth.type "${otlpAuthType.Azure}" requires https endpoints, "${insecureEndpoint}" is not one`
+      `auth.type "${otlpAuthType.Azure}" requires https endpoints, otlp_exporter.${insecureEndpointField} is not one`
     );
   }
-  if (exporter?.tls?.insecure_skip_verify) {
+  if (exporter.tls?.insecure_skip_verify) {
     throw new OutputInvalidError(
       `auth.type "${otlpAuthType.Azure}" cannot be set together with otlp_exporter.tls.insecure_skip_verify`
-    );
-  }
-
-  // a managed identity requests a token for a single resource
-  if (
-    auth.azure_auth_method === otlpAzureAuthMethod.ManagedIdentity &&
-    (auth.scopes?.length ?? 0) > 1
-  ) {
-    throw new OutputInvalidError(
-      `auth.scopes can only have one scope for the ${otlpAzureAuthMethod.ManagedIdentity} method`
     );
   }
 

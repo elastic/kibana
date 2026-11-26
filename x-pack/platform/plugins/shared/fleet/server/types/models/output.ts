@@ -856,7 +856,9 @@ const OtlpCustomAuthHeaderSchema = schema.object(
 // Microsoft Entra ID ids are GUIDs, a tenant can also be given by one of its domain names
 const OTLP_AZURE_ID_MAX_LENGTH = 256;
 const OTLP_AZURE_SCOPE_MAX_LENGTH = 2048;
-const OTLP_AZURE_SCOPES_MAX_SIZE = 10;
+// a token is issued for a single resource: a managed identity requires exactly one scope, and
+// Microsoft Entra ID rejects a client credentials request for several resources
+const OTLP_AZURE_SCOPES_MAX_SIZE = 1;
 
 const OtlpAzureAuthSchema = schema.object(
   {
@@ -896,7 +898,7 @@ const OtlpAzureAuthSchema = schema.object(
         maxSize: OTLP_AZURE_SCOPES_MAX_SIZE,
         meta: {
           description:
-            'The scopes of the token. By default `https://<host of the endpoint>/.default`, set them when the endpoint expects another audience, e.g. `https://monitor.azure.com/.default`. A managed identity accepts a single scope.',
+            'The scope of the token, a single one. By default `https://<host of the endpoint>/.default`, set it when the endpoint expects another audience, e.g. `https://monitor.azure.com/.default`.',
         },
       })
     ),
@@ -989,7 +991,7 @@ const OtlpUpdateSecretsSchema = schema.maybe(
 );
 
 const OTLP_AUTH_DESCRIPTION =
-  'How the output authenticates with the OTLP endpoint. `auth_header` and `custom_header` send the credential set in `secrets.auth.credential` in a request header. `azure` sends a Microsoft Entra ID token that the collector requests itself, it requires the `http/protobuf` protocol. Not accepted for the managed OTLP endpoint.';
+  'How the output authenticates with the OTLP endpoint. `auth_header` and `custom_header` send the credential set in `secrets.auth.credential` in a request header. `azure` sends a Microsoft Entra ID token that the collector requests itself: it requires the `http/protobuf` protocol, `https://` URLs for the endpoint and every signal endpoint, and cannot be used with `otlp_exporter.tls.insecure_skip_verify`. Not accepted for the managed OTLP endpoint.';
 
 export const OtlpSchema = {
   ...BaseSchema,

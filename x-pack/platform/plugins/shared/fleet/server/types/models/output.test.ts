@@ -677,7 +677,22 @@ describe('Output model', () => {
       const auth = { type: 'azure', azure_auth_method: 'managed_identity' };
       expect(() => validate({ ...auth, scopes: [] })).toThrow();
       expect(() => validate({ ...auth, scopes: [''] })).toThrow();
-      expect(() => validate({ ...auth, scopes: Array(11).fill('scope') })).toThrow();
+      // a token is issued for a single resource, whatever the method
+      expect(() =>
+        validate({
+          ...auth,
+          scopes: ['https://monitor.azure.com/.default', 'https://other.example.com/.default'],
+        })
+      ).toThrow();
+      expect(() =>
+        validate({
+          type: 'azure',
+          azure_auth_method: 'service_principal',
+          tenant_id: 'tenant',
+          client_id: 'client',
+          scopes: ['https://monitor.azure.com/.default', 'https://other.example.com/.default'],
+        })
+      ).toThrow();
     });
 
     it('accepts removing the client secret in an update', () => {
