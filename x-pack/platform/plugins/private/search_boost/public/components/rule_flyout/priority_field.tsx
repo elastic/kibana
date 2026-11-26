@@ -57,7 +57,10 @@ export const PriorityField = ({
       }
     }}
     onBlur={() => {
-      onChange(String(parsePriority(value)));
+      const normalized = String(parsePriority(value));
+      if (normalized !== value) {
+        onChange(normalized);
+      }
       onBlur();
     }}
     data-test-subj="searchBoostRuleFlyoutPriority"

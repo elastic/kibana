@@ -647,6 +647,22 @@ describe('RuleFlyout', () => {
       expect(await screen.findByText('Ties with rule "storefront-catalogs".')).toBeInTheDocument();
     });
 
+    it('keeps the tie when the user leaves the priority field without changing it', async () => {
+      const { onSave, rerender } = renderFlyout({ rule: indicesRule });
+
+      await save();
+      await waitFor(() => expect(onSave).toHaveBeenCalled());
+      rerender({ tiedRuleName: 'storefront-catalogs' });
+      await waitFor(() =>
+        expect(screen.getByTestId('searchBoostRuleFlyoutPriority')).toHaveFocus()
+      );
+
+      await userEvent.tab();
+
+      expect(screen.getByText('Ties with rule "storefront-catalogs".')).toBeInTheDocument();
+      expect(screen.queryByTestId('searchBoostAppliesToFooter')).not.toBeInTheDocument();
+    });
+
     it('disables the fields while saving', () => {
       renderFlyout({ rule: indicesRule, isSaving: true });
 
