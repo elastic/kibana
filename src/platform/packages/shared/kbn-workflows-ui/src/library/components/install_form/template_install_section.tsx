@@ -184,7 +184,7 @@ export const TemplateInstallSection = React.memo<TemplateInstallSectionProps>(
         });
         return;
       }
-      // The connector pickers on the setup step load the same list, so this adds no request.
+      // Reuses the list the setup step's connector pickers load, so this adds no request.
       loadConnectors()
         .then((connectors) => {
           const connectorTypesExisting = connectorTypes.filter((connectorType) =>

@@ -35,15 +35,15 @@ export function useConnectors(connectorType: string) {
 }
 
 /**
- * Returns a function that loads the full connector list through the cache
- * `useConnectors` shares, so a load while the pickers fetch it makes no extra request.
+ * Returns a function that resolves the full connector list `useConnectors` caches. It reuses
+ * the cached list or a request in flight, and fetches only when there's no list yet.
  */
 export function useLoadConnectors() {
   const queryClient = useQueryClient();
   const { http } = useKibana<{ http: HttpStart }>().services;
   return useCallback(
     () =>
-      queryClient.fetchQuery({
+      queryClient.ensureQueryData({
         queryKey: CONNECTORS_QUERY_KEY,
         queryFn: () => fetchConnectors({ http }),
       }),
