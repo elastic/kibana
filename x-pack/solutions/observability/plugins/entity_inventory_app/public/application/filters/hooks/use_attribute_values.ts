@@ -6,45 +6,63 @@
  */
 
 import { useEffect, useRef, useState } from 'react';
-import { getEntityInventoryAttributeValues } from '../../../mock_inventory_api/get_attribute_values';
-import type {
-  EntityInventoryAttributeValuesParams,
-  EntityInventoryAttributeValuesResponse,
-} from '../../../inventory_api_types';
+import type { AttributeValuesResponse } from '@kbn/entity-inventory-plugin/common';
+import { useKibana } from '../../../hooks/use_kibana';
+import { toAbsoluteTimeRange } from '../../utils/to_absolute_time_range';
+import type { EntityInventoryAttributeValuesParams } from '../../../inventory_api_types';
+
+type AttributeValuesState = Pick<AttributeValuesResponse, 'values' | 'invalidSelections'> & {
+  isLoading: boolean;
+  error?: Error;
+};
 
 export const useAttributeValues = (params: EntityInventoryAttributeValuesParams) => {
-  // TODO: the implementation is temporary. Replace the mock call and the loading state with a `useQuery` that calls the real route in https://github.com/elastic/observability-dev/issues/6355
+  const {
+    services: { inventoryApi },
+  } = useKibana();
   const { selected, ...otherParams } = params;
+  // The selection is read when the values are fetched, and does not trigger a fetch by itself.
   const selectedRef = useRef(selected);
   selectedRef.current = selected;
   const paramsKey = JSON.stringify(otherParams);
-  const [state, setState] = useState<
-    EntityInventoryAttributeValuesResponse & { isLoading: boolean; error?: Error }
-  >({
+  const [state, setState] = useState<AttributeValuesState>({
     values: [],
     invalidSelections: [],
     isLoading: true,
   });
 
   useEffect(() => {
-    let isCurrent = true;
+    const { attribute, types, filters, timeRange } = JSON.parse(paramsKey) as typeof otherParams;
+    const controller = new AbortController();
     setState((current) => ({ ...current, isLoading: true, error: undefined }));
-    getEntityInventoryAttributeValues({ ...JSON.parse(paramsKey), selected: selectedRef.current })
-      .then((response) => {
-        if (isCurrent) {
-          setState({ ...response, isLoading: false });
-        }
+
+    const range = toAbsoluteTimeRange(timeRange);
+    if (!range) {
+      setState({
+        values: [],
+        invalidSelections: [],
+        isLoading: false,
+        error: new Error(`Invalid time range: ${timeRange.from} to ${timeRange.to}`),
+      });
+      return;
+    }
+
+    inventoryApi
+      .getFilterValues(
+        { attribute, types, filters, selected: selectedRef.current, ...range },
+        { signal: controller.signal }
+      )
+      .then(({ values, invalidSelections }) => {
+        setState({ values, invalidSelections, isLoading: false });
       })
       .catch((error: Error) => {
-        if (isCurrent) {
+        if (!controller.signal.aborted) {
           setState({ values: [], invalidSelections: [], isLoading: false, error });
         }
       });
 
-    return () => {
-      isCurrent = false;
-    };
-  }, [paramsKey]);
+    return () => controller.abort();
+  }, [paramsKey, inventoryApi]);
 
   return state;
 };
