@@ -22,22 +22,8 @@ export interface TemplateOriginFields {
   templateOrigin?: WorkflowTemplateOrigin;
 }
 
-const isWorkflowTemplateOrigin = (value: unknown): value is WorkflowTemplateOrigin =>
-  typeof value === 'string' && (WORKFLOW_TEMPLATE_ORIGINS as readonly string[]).includes(value);
-
-/** Workflows and executions stored before `catalog` replaced `install` keep `install`. */
-const LEGACY_CATALOG_TEMPLATE_ORIGIN = 'install';
-
-const readTemplateOrigin = (value: unknown): WorkflowTemplateOrigin | undefined => {
-  if (value === LEGACY_CATALOG_TEMPLATE_ORIGIN) {
-    return 'catalog';
-  }
-  return isWorkflowTemplateOrigin(value) ? value : undefined;
-};
-
 /**
- * Strips null template-origin fields for workflow, execution, and telemetry payloads, and
- * reads a stored legacy `install` origin as `catalog`.
+ * Strips null template-origin fields for workflow, execution, and telemetry payloads.
  */
 export const pickTemplateOriginFields = (
   source: TemplateOriginFieldsSource | null | undefined
@@ -46,14 +32,16 @@ export const pickTemplateOriginFields = (
     return {};
   }
 
-  const { templateSlug, templateVersion, templateOrigin: storedOrigin } = source;
-  const templateOrigin = readTemplateOrigin(storedOrigin);
+  const { templateSlug, templateVersion, templateOrigin } = source;
   return {
     ...(templateSlug != null ? { templateSlug } : {}),
     ...(templateVersion != null ? { templateVersion } : {}),
-    ...(templateOrigin ? { templateOrigin } : {}),
+    ...(templateOrigin != null ? { templateOrigin } : {}),
   };
 };
+
+const isWorkflowTemplateOrigin = (value: unknown): value is WorkflowTemplateOrigin =>
+  typeof value === 'string' && (WORKFLOW_TEMPLATE_ORIGINS as readonly string[]).includes(value);
 
 /**
  * Reads template-origin fields from an untyped `_source`, ignoring values of the wrong type.
@@ -69,6 +57,6 @@ export const parseTemplateOriginFields = (
   return pickTemplateOriginFields({
     templateSlug: typeof templateSlug === 'string' ? templateSlug : undefined,
     templateVersion: typeof templateVersion === 'string' ? templateVersion : undefined,
-    templateOrigin: readTemplateOrigin(templateOrigin),
+    templateOrigin: isWorkflowTemplateOrigin(templateOrigin) ? templateOrigin : undefined,
   });
 };
