@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { MAX_BATCH_ENTRIES } from '../../../common/workflows/steps/resolve_written_detections';
 import { resolveWrittenDetectionsPublicStepDefinition } from './resolve_written_detections';
 
 describe('resolveWrittenDetectionsPublicStepDefinition', () => {
@@ -42,7 +43,10 @@ describe('resolveWrittenDetectionsPublicStepDefinition', () => {
     expect(inputSchema.safeParse(input).success).toBe(true);
     expect(inputSchema.safeParse({ ...input, reported_rule_uuids: [] }).success).toBe(true);
     expect(
-      inputSchema.safeParse({ ...input, reported_rule_uuids: Array(1_001).fill('rule-1') }).success
+      inputSchema.safeParse({
+        ...input,
+        reported_rule_uuids: Array(MAX_BATCH_ENTRIES + 1).fill('rule-1'),
+      }).success
     ).toBe(false);
     expect(
       inputSchema.safeParse({ ...input, reported_rule_uuids: ['r'.repeat(1_000)] }).success
