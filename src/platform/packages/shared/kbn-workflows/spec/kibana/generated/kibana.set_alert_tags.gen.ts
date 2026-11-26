@@ -49,9 +49,9 @@ And tags to detection alerts, and remove them from alerts.
     bodyParams: ['ids', 'tags'],
   },
   paramsSchema: z.object({
-    ...getShapeAt(set_alert_tags_request, 'body'),
-    ...getShapeAt(set_alert_tags_request, 'path'),
     ...getShapeAt(set_alert_tags_request, 'query'),
+    ...getShapeAt(set_alert_tags_request, 'path'),
+    ...getShapeAt(set_alert_tags_request, 'body'),
     fetcher: KibanaFetcherConfigSchema,
     ...KibanaStepMetaSchema,
   }),

@@ -830,6 +830,25 @@ apiTest.describe('Update rule API', { tag: testData.API_ENGINE_TAG }, () => {
   );
 
   apiTest(
+    'builder: should reject a patch that sets an unregistered builder type',
+    async ({ apiClient, apiServices }) => {
+      const created = await apiServices.alertingV2.rules.create(
+        buildCreateRuleData({ metadata: { name: 'esql-rule-to-builder' } })
+      );
+      const response = await apiClient.patch(getRuleUrl(created.id), {
+        headers: writerHeaders,
+        body: { metadata: { builder: { type: 'not-a-builder' } } },
+      });
+      expect(response).toHaveStatusCode(400);
+      expect(response.body.code).toBe('BUILDER_TYPE_UNKNOWN');
+      expect(response.body.details).toStrictEqual({ builder_type: 'not-a-builder' });
+
+      const stored = await apiServices.alertingV2.rules.get(created.id);
+      expect(stored.metadata.builder).toBeUndefined();
+    }
+  );
+
+  apiTest(
     'merge: patches the breach segment and preserves query.base',
     async ({ apiClient, apiServices }) => {
       const created = await apiServices.alertingV2.rules.create(

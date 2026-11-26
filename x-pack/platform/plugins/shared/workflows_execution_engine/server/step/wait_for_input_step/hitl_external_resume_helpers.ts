@@ -93,12 +93,12 @@ export function removeHitlExternalResumeTokenFields(
   };
 }
 
-const readStepInput = (stepExecutionRuntime: StepExecutionRuntime): unknown =>
-  stepExecutionRuntime.getCurrentStepResult()?.input;
+const readStepInput = (stepExecutionRuntime: StepExecutionRuntime): Promise<unknown> =>
+  stepExecutionRuntime.getCurrentStepInput();
 
-export function invalidateHitlExternalResumeTokenIfPresent(
+export async function invalidateHitlExternalResumeTokenIfPresent(
   stepExecutionRuntime: StepExecutionRuntime
-): void {
+): Promise<void> {
   const state = stepExecutionRuntime.getCurrentStepState() ?? {};
   if (readHitlExternalResumeToken({ state })) {
     stepExecutionRuntime.setCurrentStepState({
@@ -108,7 +108,7 @@ export function invalidateHitlExternalResumeTokenIfPresent(
     });
   }
 
-  const stepInput = readStepInput(stepExecutionRuntime);
+  const stepInput = await readStepInput(stepExecutionRuntime);
   if (stepInput == null || typeof stepInput !== 'object' || Array.isArray(stepInput)) {
     return;
   }

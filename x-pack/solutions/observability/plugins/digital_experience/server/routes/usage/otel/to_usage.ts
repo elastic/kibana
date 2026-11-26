@@ -24,6 +24,23 @@ import { firstBucketKey, getP75 } from '../../../lib/helpers/aggregations';
 import type { UsageAggregations } from './search_response';
 
 type Frustration = UsageAggregations['inEnvironment']['frustration'];
+type PageSignals = UsageAggregations['inEnvironment']['pageSignals'];
+
+const NO_PAGE_SIGNALS = { lcpP75Ms: null, inpP75Ms: null, clsP75: null, jsErrors: null };
+
+/** The web vitals and JS errors of each page, by the page's key. */
+const toPageSignals = (pageSignals?: PageSignals) =>
+  new Map(
+    (pageSignals?.pages.buckets ?? []).map(({ key, lcp, inp, cls, jsErrors }) => [
+      String(key),
+      {
+        lcpP75Ms: getP75(lcp.value),
+        inpP75Ms: getP75(inp.value),
+        clsP75: getP75(cls.value),
+        jsErrors: jsErrors.doc_count,
+      },
+    ])
+  );
 
 const toBreakdowns = (logs?: UsageAggregations): Breakdowns => {
   const pageLoads = logs?.inEnvironment.pageLoads;
@@ -99,6 +116,7 @@ const toFrustratedPages = (frustration?: Frustration): FrustratedPage[] => {
  */
 export const toUsage = (logs?: UsageAggregations): ApplicationUsage => {
   const metrics = logs?.inEnvironment;
+  const pageSignals = toPageSignals(metrics?.pageSignals);
   return {
     topPages: (metrics?.pageLoads.topPages.buckets ?? []).map(
       ({ key, doc_count: pageLoads, loadTime }) => {
@@ -106,6 +124,7 @@ export const toUsage = (logs?: UsageAggregations): ApplicationUsage => {
           url: String(key),
           pageLoads,
           loadTimeP75Ms: getP75(loadTime),
+          ...(pageSignals.get(String(key)) ?? NO_PAGE_SIGNALS),
         };
       }
     ),
