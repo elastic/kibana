@@ -839,6 +839,7 @@ exports[`Uncommon Process Table Component rendering it renders the default Uncom
               Rows per page: 10
             </span>
             <span
+              aria-hidden="true"
               color="inherit"
               data-euiicon-type="chevronSingleDown"
             />

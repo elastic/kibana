@@ -26,6 +26,9 @@ const EMPTY_USAGE = {
   breakdowns: { pageLoads: 0, browsers: [], operatingSystems: [], devices: [] },
   topClicks: [],
   totalClicks: 0,
+  frustration: { rageClicks: 0, deadClicks: 0, errorClicks: 0, total: 0, sessions: 0 },
+  frustratedElements: [],
+  frustratedPages: [],
 };
 
 const usagePath = (serviceName: string, environment?: string) => {
@@ -57,6 +60,11 @@ apiTest.describe('Digital Experience usage API', { tag: DIGITAL_EXPERIENCE_TAGS 
       expect(usage.breakdowns).toStrictEqual(OTEL_SHOP_USAGE.breakdowns);
       expect(usage.topClicks).toStrictEqual(OTEL_SHOP_USAGE.topClicks);
       expect(usage.totalClicks).toBe(OTEL_SHOP_USAGE.totalClicks);
+      expect(usage.frustration).toStrictEqual(OTEL_SHOP_USAGE.frustration);
+      expect(usage.frustratedElements).toStrictEqual(OTEL_SHOP_USAGE.frustratedElements);
+      expect(usage.frustratedPages).toStrictEqual(OTEL_SHOP_USAGE.frustratedPages);
+      expect(usage.serviceName).toBe(OTEL_APPS.shop);
+      expect(usage.environments).toStrictEqual(['production']);
     }
   );
 
@@ -71,7 +79,11 @@ apiTest.describe('Digital Experience usage API', { tag: DIGITAL_EXPERIENCE_TAGS 
       });
 
       expect(response).toHaveStatusCode(200);
-      expect(response.body).toStrictEqual(EMPTY_USAGE);
+      expect(response.body).toStrictEqual({
+        serviceName: 'no-such-application',
+        ...EMPTY_USAGE,
+        environments: [],
+      });
     }
   );
 
@@ -97,7 +109,12 @@ apiTest.describe('Digital Experience usage API', { tag: DIGITAL_EXPERIENCE_TAGS 
       });
 
       expect(response).toHaveStatusCode(200);
-      expect(response.body).toStrictEqual(EMPTY_USAGE);
+      // The picker still lists the application's environments.
+      expect(response.body).toStrictEqual({
+        serviceName: OTEL_APPS.shop,
+        ...EMPTY_USAGE,
+        environments: ['production'],
+      });
     });
   });
 

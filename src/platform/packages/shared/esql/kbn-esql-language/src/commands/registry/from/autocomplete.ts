@@ -6,7 +6,6 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { SOURCES_TYPES } from '@kbn/esql-types';
 import type { ESQLAstAllCommands } from '@elastic/esql/types';
 import { isSubQuery, isSource } from '@elastic/esql';
 import {
@@ -98,13 +97,13 @@ async function handleFromAutocomplete(
 
   const indexes = getSourcesFromCommands([command], SOURCE_TYPE_INDEX);
 
-  // Check if there are any sources (including subqueries)
-  const hasAnySources = command.args.some(
+  // Sources including subqueries
+  const sourceCount = command.args.filter(
     (arg) => !Array.isArray(arg) && (isSource(arg) || isSubQuery(arg))
-  );
+  ).length;
 
   // Case 1: FROM | (no sources yet)
-  if (!hasAnySources) {
+  if (sourceCount === 0) {
     const suggestions = suggestInitialSources(
       context,
       innerText,
@@ -133,10 +132,13 @@ async function handleFromAutocomplete(
     callbacks,
     indexes,
     subquerySuggestions,
-    {
-      textBeforeCursor: innerText,
-      commandStart: command.location.min, // Full-query offset of this FROM command.
-    }
+    // Rewriting to TS replaces the whole command, so it would drop any other source.
+    sourceCount === 1
+      ? {
+          textBeforeCursor: innerText,
+          commandStart: command.location.min, // Full-query offset of this FROM command.
+        }
+      : undefined
   );
   if (shouldSuggestIndicesBrowserInAdditionalSlot && indicesBrowserSuggestion) {
     suggestions.unshift(indicesBrowserSuggestion);
@@ -266,11 +268,7 @@ function getVisibleSources(context: ICommandContext | undefined) {
 
   return {
     namedSubqueries,
-    sources: (context?.sources ?? []).filter(
-      (source) =>
-        isVisible(source) &&
-        !(context?.isCursorInSubquery && source.type === SOURCES_TYPES.TIMESERIES)
-    ),
+    sources: (context?.sources ?? []).filter(isVisible),
     views: (context?.views ?? []).filter(isVisible),
     datasets: (context?.datasets ?? []).filter(isVisible),
   };

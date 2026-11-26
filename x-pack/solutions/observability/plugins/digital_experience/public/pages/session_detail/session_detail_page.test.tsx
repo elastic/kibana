@@ -15,6 +15,7 @@ import { MockAppHeaderProvider } from '@kbn/app-header/mocks';
 import { openAppMenuOverflow } from '@kbn/app-header/test_helpers';
 import { I18nProvider } from '@kbn/i18n-react';
 import { RouterProvider } from '@kbn/typed-react-router-config';
+import { emptyFrustration } from '../../../common/frustration';
 import {
   emptyWebVitals,
   type SessionDetailResponse,
@@ -61,10 +62,39 @@ const event = (
   offsetMs,
   page: null,
   detail,
+  clickCount: null,
   stacktrace,
   traceId: null,
   spanId: null,
 });
+
+const frustrationEvent = (
+  name: string,
+  offsetMs: number,
+  selector: string,
+  clickCount: number | null = null
+): SessionTimelineEvent => ({
+  ...event('frustration', offsetMs, name, selector),
+  page: '/cart',
+  clickCount,
+});
+
+const withFrustration = (): SessionDetailResponse => {
+  const base = detail();
+  return {
+    ...base,
+    session: {
+      ...base.session,
+      frustration: { rageClicks: 1, deadClicks: 1, errorClicks: 0, total: 2 },
+    },
+    timeline: [
+      ...base.timeline,
+      frustrationEvent('elastic.frustration.rage_click', 40_000, '#pay', 5),
+      frustrationEvent('elastic.frustration.dead_click', 42_000, 'a.help'),
+    ],
+    pageVisits: [base.pageVisits[0], { ...base.pageVisits[1], frustrationCount: 2 }],
+  };
+};
 
 const request = (
   url: string,
@@ -106,6 +136,7 @@ const detail = (overrides: Partial<SessionDetailResponse> = {}): SessionDetailRe
     jsErrorCount: 1,
     httpRequestCount: 8,
     failedRequestCount: 2,
+    frustration: emptyFrustration(),
     bounced: false,
     entryPage: '/',
     exitPage: '/cart',
@@ -139,6 +170,7 @@ const detail = (overrides: Partial<SessionDetailResponse> = {}): SessionDetailRe
       durationMs: 30_000,
       clickCount: 1,
       errorCount: 0,
+      frustrationCount: 0,
       webVitals: { ...emptyWebVitals(), lcp: 1800 },
       load: {
         navigationStart: START,
@@ -155,6 +187,7 @@ const detail = (overrides: Partial<SessionDetailResponse> = {}): SessionDetailRe
       durationMs: 30_000,
       clickCount: 0,
       errorCount: 1,
+      frustrationCount: 0,
       webVitals: { ...emptyWebVitals(), cls: 0.3 },
       load: null,
     },
@@ -209,7 +242,7 @@ function SessionRoute() {
   return <SessionDetailPage serviceName="shop" sessionId={sessionId} />;
 }
 
-const renderPage = () => {
+const renderPage = (extraSearch = '') => {
   jest.mocked(useKibanaServices).mockReturnValue({
     notifications: { toasts: { addSuccess: mockAddSuccess } },
     share: {
@@ -229,7 +262,7 @@ const renderPage = () => {
   } as unknown as ReturnType<typeof useKibanaServices>);
   const history = createMemoryHistory({
     initialEntries: [
-      `/shop/sessions/abcdef123456?${TIME_QUERY}&source=otel&withJsErrors=true&page=2`,
+      `/shop/sessions/abcdef123456?${TIME_QUERY}&source=otel&withJsErrors=true&page=2${extraSearch}`,
     ],
   });
   render(
@@ -412,6 +445,119 @@ describe('SessionDetailPage', () => {
     expect(marker.parentElement).toHaveStyle({ left: '75%', transform: 'translateX(-75%)' });
   });
 
+  it('marks frustration on the waterfall, apart from errors', async () => {
+    mockDetail.mockResolvedValue(withFrustration());
+    renderPage();
+
+    const waterfall = await screen.findByTestId('digitalExperienceSessionWaterfall');
+    const markers = within(waterfall).getAllByTestId(
+      'digitalExperienceSessionWaterfallFrustration'
+    );
+    expect(markers.map((marker) => marker.getAttribute('aria-label'))).toEqual([
+      'Rage click (5 clicks) on #pay',
+      'Dead click on a.help',
+    ]);
+    expect(markers[0]).toHaveAttribute('tabindex', '0');
+    expect(within(waterfall).getAllByTestId('digitalExperienceSessionWaterfallError')).toHaveLength(
+      1
+    );
+  });
+
+  it('lists frustration on its page, with the number of clicks of a rage click', async () => {
+    mockDetail.mockResolvedValue(withFrustration());
+    renderPage();
+
+    const [home, cart] = await screen.findAllByTestId('digitalExperiencePageVisit');
+    expect(within(home).queryByTestId('digitalExperienceSessionEvent-frustration')).toBeNull();
+    const [rage, dead] = within(cart).getAllByTestId('digitalExperienceSessionEvent-frustration');
+    expect(rage).toHaveTextContent('Rage click (5 clicks)');
+    expect(rage).toHaveTextContent('#pay');
+    expect(rage).not.toHaveTextContent('elastic.frustration');
+    expect(dead).toHaveTextContent('Dead click');
+    expect(dead).not.toHaveTextContent('clicks');
+    expect(within(cart).getByTestId('digitalExperienceVisitFrustration')).toHaveTextContent(
+      '2 frustration signals'
+    );
+    expect(within(home).queryByTestId('digitalExperienceVisitFrustration')).toBeNull();
+  });
+
+  it('breaks the frustration of the session down by type in its summary', async () => {
+    mockDetail.mockResolvedValue(withFrustration());
+    renderPage();
+
+    const stat = await screen.findByTestId('digitalExperienceSessionStat-frustration');
+    expect(stat).toHaveTextContent('Frustration signals');
+    expect(stat).toHaveTextContent('2');
+    expect(
+      screen.getByTestId('digitalExperienceSessionStatBreakdown-frustration')
+    ).toHaveTextContent('1 rage, 1 dead, 0 error clicks');
+    expect(
+      screen.getByTestId('digitalExperienceSessionStatBreakdown-frustration')
+    ).not.toHaveTextContent('Needs EDOT Browser');
+  });
+
+  it('counts the frustration signals of the session, not clicks, in its header and the rail', async () => {
+    const base = withFrustration();
+    // The header shows two badges at most, and the others collapse.
+    const frustrated = {
+      ...base,
+      session: { ...base.session, jsErrorCount: 0, failedRequestCount: 0 },
+    };
+    mockDetail.mockResolvedValue(frustrated);
+    mockList.mockResolvedValue({
+      sessions: [
+        {
+          ...listedSession('abcdef123456', 'jane@example.com'),
+          frustration: frustrated.session.frustration,
+        },
+        {
+          ...listedSession('first111', 'sam@example.com'),
+          frustration: { rageClicks: 1, deadClicks: 0, errorClicks: 0, total: 1 },
+        },
+      ],
+      total: 2,
+      page: 0,
+      perPage: 25,
+    });
+    renderPage();
+
+    expect(
+      await screen.findByTestId('digitalExperienceSessionBadge-frustration')
+    ).toHaveTextContent('2 frustration signals');
+    const rail = await screen.findByTestId('digitalExperienceSessionsRail');
+    expect(
+      await within(rail).findByTestId('digitalExperienceSessionsRailItem-abcdef123456')
+    ).toHaveTextContent('2 frustration signals');
+    expect(
+      within(rail).getByTestId('digitalExperienceSessionsRailItem-first111')
+    ).toHaveTextContent('1 frustration signal');
+  });
+
+  it('says a session without frustration signals was reported by EDOT Browser with detection', async () => {
+    mockDetail.mockResolvedValue(detail());
+    renderPage();
+
+    await screen.findByTestId('digitalExperienceSessionStat-frustration');
+    const hint = screen.getByTestId('digitalExperienceSessionStatBreakdown-frustration');
+    expect(hint).toHaveTextContent('None. Reported by EDOT Browser with frustration detection.');
+    expect(hint).not.toHaveTextContent('rage');
+  });
+
+  it('filters the journey to frustration', async () => {
+    mockDetail.mockResolvedValue(withFrustration());
+    renderPage();
+
+    await screen.findAllByTestId('digitalExperiencePageVisit');
+    const chip = screen.getByTestId('digitalExperienceActivityFilter-frustration');
+    expect(chip).toHaveTextContent('Frustration');
+    expect(chip).toHaveTextContent('2');
+    expect(screen.getAllByTestId('digitalExperienceSessionEvent-frustration')).toHaveLength(2);
+    expect(screen.getAllByTestId('digitalExperienceSessionEvent-click').length).toBeGreaterThan(0);
+    fireEvent.click(chip);
+    expect(screen.queryAllByTestId('digitalExperienceSessionEvent-frustration')).toHaveLength(0);
+    expect(screen.getAllByTestId('digitalExperienceSessionEvent-click').length).toBeGreaterThan(0);
+  });
+
   it('lists what happened on each page', async () => {
     mockDetail.mockResolvedValue(detail());
     const scrollIntoView = jest.fn();
@@ -517,6 +663,76 @@ describe('SessionDetailPage', () => {
     expect(within(error).getByTestId('digitalExperienceErrorStacktrace')).toHaveTextContent(
       'at render (cart.js:12:3)'
     );
+  });
+
+  it('shows the exception behind an error click, and its trace, on demand', async () => {
+    const base = withFrustration();
+    mockDetail.mockResolvedValue({
+      ...base,
+      timeline: [
+        ...base.timeline,
+        {
+          ...frustrationEvent('elastic.frustration.error_click', 44_000, '#checkout'),
+          exception: {
+            type: 'TypeError',
+            message: 'cart is undefined',
+            stacktrace: 'TypeError: cart is undefined\n    at pay (cart.js:3:1)',
+          },
+          traceId: 'trace-2',
+          spanId: 'span-2',
+        },
+      ],
+    });
+    renderPage();
+
+    const [, cart] = await screen.findAllByTestId('digitalExperiencePageVisit');
+    const [rage, dead, errorClick] = within(cart).getAllByTestId(
+      'digitalExperienceSessionEvent-frustration'
+    );
+    // Nothing to show for a rage or dead click without an exception or a trace.
+    expect(within(rage).queryByRole('button')).toBeNull();
+    expect(within(dead).queryByRole('button')).toBeNull();
+    expect(errorClick).toHaveTextContent('Error click');
+
+    fireEvent.click(within(errorClick).getByRole('button'));
+    expect(
+      within(errorClick).getByTestId('digitalExperienceFrustrationException')
+    ).toHaveTextContent('Uncaught errorTypeError: cart is undefined');
+    expect(within(errorClick).getByTestId('digitalExperienceErrorStacktrace')).toHaveTextContent(
+      'at pay (cart.js:3:1)'
+    );
+    expect(
+      new URL(
+        within(errorClick).getByTestId('digitalExperienceEventTraceLink').getAttribute('href') ??
+          '',
+        'http://localhost'
+      ).pathname
+    ).toBe('/app/apm/link-to/trace/trace-2');
+  });
+
+  it('expands an error click without a stack trace to its exception alone', async () => {
+    const base = withFrustration();
+    mockDetail.mockResolvedValue({
+      ...base,
+      timeline: [
+        ...base.timeline,
+        {
+          ...frustrationEvent('elastic.frustration.error_click', 44_000, '#checkout'),
+          exception: { type: null, message: 'out of stock', stacktrace: null },
+        },
+      ],
+    });
+    renderPage();
+
+    const [, cart] = await screen.findAllByTestId('digitalExperiencePageVisit');
+    const errorClick = within(cart).getAllByTestId('digitalExperienceSessionEvent-frustration')[2];
+    fireEvent.click(within(errorClick).getByRole('button'));
+    expect(
+      within(errorClick).getByTestId('digitalExperienceFrustrationException')
+    ).toHaveTextContent('out of stock');
+    expect(within(errorClick).queryByTestId('digitalExperienceErrorStacktrace')).toBeNull();
+    expect(within(errorClick).queryByTestId('digitalExperienceErrorNoStacktrace')).toBeNull();
+    expect(within(errorClick).queryByTestId('digitalExperienceEventTraceLink')).toBeNull();
   });
 
   it('filters the journey by kind and by text', async () => {
@@ -667,6 +883,38 @@ describe('SessionDetailPage', () => {
     expect(within(rail).getByTestId('digitalExperienceSessionsRailEditFilters')).toHaveAttribute(
       'href',
       SESSIONS_HREF
+    );
+  });
+
+  it('keeps the frustration filters of the list in the rail and its links', async () => {
+    mockDetail.mockResolvedValue(detail());
+    renderPage('&withFrustration=true&frustrationTarget=%23pay&frustrationPage=%2Fcheckout');
+
+    const rail = await screen.findByTestId('digitalExperienceSessionsRail');
+    const paramsOf = (testId: string) =>
+      Object.fromEntries(
+        new URL(within(rail).getByTestId(testId).getAttribute('href') ?? '', 'http://localhost')
+          .searchParams
+      );
+    const frustrationParams = {
+      withFrustration: 'true',
+      frustrationTarget: '#pay',
+      frustrationPage: '/checkout',
+    };
+    await within(rail).findByTestId('digitalExperienceSessionsRailItem-first111');
+    expect(paramsOf('digitalExperienceSessionsRailItem-first111')).toEqual(
+      expect.objectContaining(frustrationParams)
+    );
+    expect(paramsOf('digitalExperienceSessionsRailEditFilters')).toEqual(
+      expect.objectContaining(frustrationParams)
+    );
+    expect(mockList).toHaveBeenCalledWith(
+      'GET /internal/digital_experience/applications/{serviceName}/sessions',
+      expect.objectContaining({
+        params: expect.objectContaining({
+          query: expect.objectContaining(frustrationParams),
+        }),
+      })
     );
   });
 

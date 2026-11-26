@@ -149,24 +149,24 @@ This situation can occur because the splitting criterion is based on Lucene docu
   },
   paramsSchema: z.union([
     z.object({
-      ...getShapeAt(search_request, 'body'),
-      ...getShapeAt(search_request, 'path'),
       ...getShapeAt(search_request, 'query'),
+      ...getShapeAt(search_request, 'path'),
+      ...getShapeAt(search_request, 'body'),
     }),
     z.object({
-      ...getShapeAt(search1_request, 'body'),
-      ...getShapeAt(search1_request, 'path'),
       ...getShapeAt(search1_request, 'query'),
+      ...getShapeAt(search1_request, 'path'),
+      ...getShapeAt(search1_request, 'body'),
     }),
     z.object({
-      ...getShapeAt(search2_request, 'body'),
-      ...getShapeAt(search2_request, 'path'),
       ...getShapeAt(search2_request, 'query'),
+      ...getShapeAt(search2_request, 'path'),
+      ...getShapeAt(search2_request, 'body'),
     }),
     z.object({
-      ...getShapeAt(search3_request, 'body'),
-      ...getShapeAt(search3_request, 'path'),
       ...getShapeAt(search3_request, 'query'),
+      ...getShapeAt(search3_request, 'path'),
+      ...getShapeAt(search3_request, 'body'),
     }),
   ]),
   outputSchema: z.union([search_response, search1_response, search2_response, search3_response]),

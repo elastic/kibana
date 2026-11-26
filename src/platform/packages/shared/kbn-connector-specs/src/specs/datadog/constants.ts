@@ -7,11 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { buildEventId } from '../../event_type_id';
-
 export const DATADOG_CONNECTOR_TYPE_ID = '.datadog' as const;
 export const DATADOG_ALERT_EVENT_KEY = 'alert' as const;
-export const DATADOG_ALERT_EVENT_ID = buildEventId(
-  DATADOG_CONNECTOR_TYPE_ID,
-  DATADOG_ALERT_EVENT_KEY
-);
