@@ -135,8 +135,32 @@ describe('MigrationWorkflowsTable', () => {
 
       const row = within(await getRow('Phishing triage'));
 
-      expect(row.getByTestId('installWorkflowButton')).toBeInTheDocument();
-      expect(row.queryByTestId('viewWorkflowButton')).not.toBeInTheDocument();
+      expect(row.getByTestId('installWorkflow')).toBeInTheDocument();
+      expect(row.queryByTestId('viewWorkflow')).not.toBeInTheDocument();
+    });
+
+    it('should label the actions with words, as the Rules and Dashboards tables do', async () => {
+      mockWorkflows([
+        getWorkflow(),
+        getWorkflow({
+          id: 'item-installed',
+          original_workflow: {
+            id: 'story-installed',
+            vendor: 'tines',
+            title: 'Installed story',
+            data: '{}',
+            format: 'json',
+          },
+          elastic_workflow: { id: 'elastic-workflow-1', title: 'Installed story' },
+        }),
+      ]);
+      renderTable();
+
+      const installRow = within(await getRow('Phishing triage'));
+      const viewRow = within(await getRow('Installed story'));
+
+      expect(installRow.getByTestId('installWorkflow')).toHaveTextContent('Install');
+      expect(viewRow.getByTestId('viewWorkflow')).toHaveTextContent('View');
     });
 
     it('should offer to install a partially translated workflow', async () => {
@@ -144,7 +168,7 @@ describe('MigrationWorkflowsTable', () => {
 
       const row = within(await getRow('Enrich IOCs'));
 
-      expect(row.getByTestId('installWorkflowButton')).toBeInTheDocument();
+      expect(row.getByTestId('installWorkflow')).toBeInTheDocument();
     });
 
     it('should offer to view, and not to install, a workflow that is installed', async () => {
@@ -157,8 +181,8 @@ describe('MigrationWorkflowsTable', () => {
 
       const row = within(await getRow('Phishing triage elastic'));
 
-      expect(row.getByTestId('viewWorkflowButton')).toBeInTheDocument();
-      expect(row.queryByTestId('installWorkflowButton')).not.toBeInTheDocument();
+      expect(row.getByTestId('viewWorkflow')).toBeInTheDocument();
+      expect(row.queryByTestId('installWorkflow')).not.toBeInTheDocument();
     });
 
     it('should not offer any action for a workflow that failed', async () => {
@@ -166,8 +190,8 @@ describe('MigrationWorkflowsTable', () => {
 
       const row = within(await getRow('Broken story'));
 
-      expect(row.queryByTestId('installWorkflowButton')).not.toBeInTheDocument();
-      expect(row.queryByTestId('viewWorkflowButton')).not.toBeInTheDocument();
+      expect(row.queryByTestId('installWorkflow')).not.toBeInTheDocument();
+      expect(row.queryByTestId('viewWorkflow')).not.toBeInTheDocument();
     });
 
     it('should not offer any action for an untranslatable workflow', async () => {
@@ -176,8 +200,8 @@ describe('MigrationWorkflowsTable', () => {
 
       const row = within(await getRow('Phishing triage'));
 
-      expect(row.queryByTestId('installWorkflowButton')).not.toBeInTheDocument();
-      expect(row.queryByTestId('viewWorkflowButton')).not.toBeInTheDocument();
+      expect(row.queryByTestId('installWorkflow')).not.toBeInTheDocument();
+      expect(row.queryByTestId('viewWorkflow')).not.toBeInTheDocument();
     });
   });
 

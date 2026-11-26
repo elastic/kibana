@@ -32,16 +32,6 @@ export const COLUMN_ACTIONS = i18n.translate(
   { defaultMessage: 'Actions' }
 );
 
-export const INSTALL_WORKFLOW = i18n.translate(
-  'xpack.securitySolution.siemMigrations.workflows.table.installWorkflow',
-  { defaultMessage: 'Install workflow' }
-);
-
-export const VIEW_WORKFLOW = i18n.translate(
-  'xpack.securitySolution.siemMigrations.workflows.table.viewWorkflow',
-  { defaultMessage: 'View workflow' }
-);
-
 export const WORKFLOW_STATUS_ERROR = i18n.translate(
   'xpack.securitySolution.siemMigrations.workflows.table.statusError',
   { defaultMessage: 'Error' }

@@ -7,14 +7,7 @@
 
 import React, { useCallback } from 'react';
 import type { EuiBasicTableColumn } from '@elastic/eui';
-import {
-  EuiButtonIcon,
-  EuiHorizontalRule,
-  EuiLink,
-  EuiText,
-  EuiToolTip,
-  useEuiTheme,
-} from '@elastic/eui';
+import { EuiHorizontalRule, EuiLink, EuiText, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { WorkflowMigrationWorkflow } from '../../../../../common/siem_migrations/model/workflow_migration.gen';
 import {
@@ -136,31 +129,15 @@ const isInstallable = (workflow: WorkflowMigrationWorkflow) =>
 
 /**
  * Only one action is shown at a time: "View" once the workflow is installed, otherwise "Install" for
- * a translated one. Failed and untranslatable workflows have no action.
- * Both actions are placeholders for now, installing and viewing are not wired yet.
+ * a translated one. Failed and untranslatable workflows have no action. The actions are words, like
+ * in the Rules and Dashboards tables, and are placeholders for now: installing and viewing are not wired yet.
  */
 const ActionsCell = ({ workflow }: { workflow: WorkflowMigrationWorkflow }) => {
   if (workflow.elastic_workflow?.id) {
-    return (
-      <EuiToolTip content={i18n.VIEW_WORKFLOW} disableScreenReaderOutput>
-        <EuiButtonIcon
-          data-test-subj="viewWorkflowButton"
-          iconType="workflow"
-          aria-label={i18n.VIEW_WORKFLOW}
-        />
-      </EuiToolTip>
-    );
+    return <EuiLink data-test-subj="viewWorkflow">{i18n.ACTIONS_VIEW_LABEL}</EuiLink>;
   }
   if (isInstallable(workflow)) {
-    return (
-      <EuiToolTip content={i18n.INSTALL_WORKFLOW} disableScreenReaderOutput>
-        <EuiButtonIcon
-          data-test-subj="installWorkflowButton"
-          iconType="download"
-          aria-label={i18n.INSTALL_WORKFLOW}
-        />
-      </EuiToolTip>
-    );
+    return <EuiLink data-test-subj="installWorkflow">{i18n.ACTIONS_INSTALL_LABEL}</EuiLink>;
   }
   return null;
 };
