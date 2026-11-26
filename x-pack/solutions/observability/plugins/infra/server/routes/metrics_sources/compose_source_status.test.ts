@@ -230,6 +230,29 @@ describe('composeSourceStatus', () => {
     expect(message).toContain('default error forged line');
   });
 
+  it('strips other control characters (for example backspace) from the request-controlled source id', async () => {
+    // Kibana's plain-text logger passes control characters other than CR/LF straight through, so a
+    // backspace in a request-controlled value could overwrite earlier text in a terminal and make
+    // the source or the log prefix misleading. They must be stripped alongside line breaks.
+    const hasMetricIndices = jest
+      .fn()
+      .mockRejectedValue(new errors.TimeoutError('Request timed out'));
+
+    await composeSourceStatus({
+      logger,
+      sourceStatus: { hasMetricIndices },
+      requestContext,
+      request,
+      sourceId: 'default\b\b\b\berror',
+      metricAlias,
+    });
+
+    const [message] = logger.warn.mock.calls[0];
+    // eslint-disable-next-line no-control-regex
+    expect(message).not.toMatch(/[\u0000-\u001f\u007f]/);
+    expect(message).toContain('default error');
+  });
+
   it('collapses line breaks in the request-controlled metric alias so it cannot forge log lines', async () => {
     const hasMetricIndices = jest
       .fn()
