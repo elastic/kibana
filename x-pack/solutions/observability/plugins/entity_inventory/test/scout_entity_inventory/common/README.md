@@ -126,6 +126,11 @@ Elasticsearch's built-in `metrics-otel@template` and `metrics` (`metrics-*-*`) t
 `entity-inventory-scout-aliased-*` names match no built-in template. esArchiver creates the alias
 from the indices' `aliases` key.
 
+The archive's data stream templates use Scout-specific names (`entity-inventory-scout-*`) and match
+only their own `-default` stream, so they never overwrite or shadow the Fleet integration's
+`metrics-kubernetes.*` templates on a shared cluster. When the worker finishes, the fixture deletes
+the data streams, plain indices (and with them the aliases) and templates the archive created.
+
 The fixture loads with `loadIfNeeded`, which skips an index that already exists. After changing the
 archive, delete its data streams, indices, aliases and templates on a running Scout server before
 the next run. `node scripts/scout run-tests` starts its own servers on a fresh cluster, so it always

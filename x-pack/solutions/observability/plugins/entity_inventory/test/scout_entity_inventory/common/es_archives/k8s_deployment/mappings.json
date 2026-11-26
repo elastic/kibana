@@ -8,9 +8,9 @@
         "hidden": false
       },
       "index_patterns": [
-        "metrics-kubernetes.state_deployment-*"
+        "metrics-kubernetes.state_deployment-default"
       ],
-      "name": "metrics-kubernetes.state_deployment",
+      "name": "entity-inventory-scout-state-deployment",
       "priority": 200,
       "template": {
         "mappings": {
@@ -88,9 +88,9 @@
         "hidden": false
       },
       "index_patterns": [
-        "metrics-kubernetes.state_container-*"
+        "metrics-kubernetes.state_container-default"
       ],
-      "name": "metrics-kubernetes.state_container",
+      "name": "entity-inventory-scout-state-container",
       "priority": 200,
       "template": {
         "mappings": {
@@ -157,7 +157,7 @@
       "index_patterns": [
         "metrics-k8sclusterreceiver.otel-default"
       ],
-      "name": "metrics-k8sclusterreceiver.otel",
+      "name": "entity-inventory-scout-k8sclusterreceiver-otel",
       "priority": 200,
       "template": {
         "mappings": {

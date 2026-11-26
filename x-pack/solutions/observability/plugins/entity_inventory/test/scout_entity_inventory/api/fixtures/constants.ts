@@ -15,6 +15,22 @@ export const K8S_TSDS_INDEX = 'metrics-k8sclusterreceiver.otel-tsds';
 export const K8S_STATE_TSDS_INDEX = 'metrics-kubernetes.state_container_ts-tsds';
 export const K8S_TSDS_INDEX_TEMPLATE = 'entity-inventory-scout-k8s-tsds-index';
 
+// Templates the archive installs for its data streams. Scout-specific names and exact stream patterns
+// keep them from overwriting or matching the Fleet integration's `metrics-kubernetes.*` templates.
+export const K8S_FIXTURE_DATA_STREAM_TEMPLATES = {
+  'metrics-kubernetes.state_deployment-default': 'entity-inventory-scout-state-deployment',
+  'metrics-kubernetes.state_container-default': 'entity-inventory-scout-state-container',
+  'metrics-k8sclusterreceiver.otel-default': 'entity-inventory-scout-k8sclusterreceiver-otel',
+} as const;
+
+// Plain indices the archive creates. Deleting them also removes the `otel-filtered` alias.
+export const K8S_FIXTURE_PLAIN_INDICES = [
+  K8S_TSDS_INDEX,
+  K8S_STATE_TSDS_INDEX,
+  'entity-inventory-scout-aliased-standard',
+  'entity-inventory-scout-aliased-tsds',
+];
+
 // Everything the archive creates that a source pattern reaches: data streams, plain indices and the
 // filtered alias.
 const K8S_FIXTURE_INDICES = [
