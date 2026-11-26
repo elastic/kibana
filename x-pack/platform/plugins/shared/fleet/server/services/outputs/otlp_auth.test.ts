@@ -407,6 +407,16 @@ describe('OTLP output authentication', () => {
         ).not.toThrow();
       });
 
+      it('rejects an empty endpoint, the signals would have nowhere to be sent', () => {
+        expect(() =>
+          validateOtlpAuth({
+            auth: managedIdentity,
+            hasCredential: false,
+            exporter: { endpoint: '', protocol: 'http/protobuf' },
+          })
+        ).toThrow('auth.type "azure" requires https endpoints, otlp_exporter.endpoint is not one');
+      });
+
       it('rejects skipping the verification of the server certificate', () => {
         expect(() =>
           validateOtlpAuth({

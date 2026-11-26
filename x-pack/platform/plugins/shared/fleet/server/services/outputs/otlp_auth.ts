@@ -193,7 +193,10 @@ function validateOtlpAzureAuth(
   // is not used, the collector sends that signal to the endpoint.
   const insecureEndpointField = OTLP_HTTP_ENDPOINT_FIELDS.find((field) => {
     const endpoint = exporter[field as keyof typeof exporter];
-    return typeof endpoint === 'string' && endpoint !== '' && !/^https:\/\//i.test(endpoint);
+    if (field !== 'endpoint' && (endpoint === '' || endpoint === null || endpoint === undefined)) {
+      return false;
+    }
+    return typeof endpoint !== 'string' || !/^https:\/\//i.test(endpoint);
   });
   if (insecureEndpointField) {
     throw new OutputInvalidError(
