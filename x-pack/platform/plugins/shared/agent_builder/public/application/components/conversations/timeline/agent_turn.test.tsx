@@ -162,7 +162,7 @@ describe('AgentTurn', () => {
     expect(morph).toHaveAttribute('data-state', 'thinking');
     expect(morph).toHaveAttribute('data-size', '16');
     expect(screen.getByTestId('agentBuilderAvatarLoaderFrame')).toContainElement(morph);
-    expect(morph.querySelectorAll('circle')).toHaveLength(16);
+    expect(morph.querySelectorAll('circle')).toHaveLength(12);
     expect(screen.queryByTestId('genericDotMorphLoader')).not.toBeInTheDocument();
     expect(screen.queryByTestId('agentBuilderAgentIconAvatar')).not.toBeInTheDocument();
 

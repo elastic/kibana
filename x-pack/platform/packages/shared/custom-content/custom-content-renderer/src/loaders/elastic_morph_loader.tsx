@@ -10,6 +10,7 @@ import type { CSSProperties } from 'react';
 import { EuiIcon, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import {
+  MORPH_CORNERS,
   MORPH_DOT_COUNT,
   MORPH_DOT_RADIUS,
   MORPH_DOTS,
@@ -239,7 +240,7 @@ export const ElasticMorphLoader: React.FC<ElasticMorphLoaderProps> = ({
       for (let pick = 0; pick < picks; pick++) {
         const free: number[] = [];
         for (let cell = 0; cell < MORPH_DOT_COUNT; cell++) {
-          if (current[cell] == null && !recent.includes(cell)) {
+          if (!MORPH_CORNERS.has(cell) && current[cell] == null && !recent.includes(cell)) {
             free.push(cell);
           }
         }

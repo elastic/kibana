@@ -19,6 +19,8 @@ export const MORPH_GRID_SIZE = 4;
 export const MORPH_DOT_PITCH = 10;
 export const MORPH_DOT_RADIUS = 2.5;
 export const MORPH_DOT_COUNT = MORPH_GRID_SIZE * MORPH_GRID_SIZE;
+/** The four corner cells (top left and right, bottom left and right) have no dot. */
+export const MORPH_CORNERS = new Set([0, 3, 12, 15]);
 /** The grid is drawn in a 32px box, then scaled to the avatar. */
 export const MORPH_RENDER_SIZE = 32;
 export const MORPH_TWINKLE_DENSITY = 2;
@@ -66,4 +68,4 @@ export const MORPH_DOTS: MorphDot[] = Array.from({ length: MORPH_DOT_COUNT }, (_
       '--dout': `calc(${(44 - dist).toFixed(2)} * var(--speed-extra-fast) / 22)`,
     },
   };
-});
+}).filter((dot) => !MORPH_CORNERS.has(dot.cell));

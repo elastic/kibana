@@ -11,6 +11,7 @@ import { useEuiTheme } from '@elastic/eui';
 import { css, keyframes } from '@emotion/react';
 import {
   GENERIC_DOT_ORDER,
+  MORPH_CORNERS,
   MORPH_DOT_COUNT,
   MORPH_DOT_PITCH,
   MORPH_DOT_RADIUS,
@@ -152,15 +153,17 @@ export const GenericMorphLoader: React.FC<GenericMorphLoaderProps> = ({
       </span>
       <span css={[layerStyles, motionLayerStyles, !shown && hiddenLayerStyles]} aria-hidden={true}>
         <svg css={dotStyles} viewBox="0 0 32 32" width={size} height={size}>
-          {Array.from({ length: MORPH_DOT_COUNT }, (_, cell) => (
-            <circle
-              key={cell}
-              cx={1 + MORPH_DOT_PITCH * (cell % MORPH_GRID_SIZE)}
-              cy={1 + MORPH_DOT_PITCH * Math.floor(cell / MORPH_GRID_SIZE)}
-              r={MORPH_DOT_RADIUS}
-              style={{ '--n': GENERIC_DOT_ORDER[cell] } as CSSProperties}
-            />
-          ))}
+          {Array.from({ length: MORPH_DOT_COUNT }, (_, cell) => cell)
+            .filter((cell) => !MORPH_CORNERS.has(cell))
+            .map((cell) => (
+              <circle
+                key={cell}
+                cx={1 + MORPH_DOT_PITCH * (cell % MORPH_GRID_SIZE)}
+                cy={1 + MORPH_DOT_PITCH * Math.floor(cell / MORPH_GRID_SIZE)}
+                r={MORPH_DOT_RADIUS}
+                style={{ '--n': GENERIC_DOT_ORDER[cell] } as CSSProperties}
+              />
+            ))}
         </svg>
       </span>
     </span>
