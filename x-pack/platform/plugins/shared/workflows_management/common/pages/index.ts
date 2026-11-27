@@ -5,6 +5,15 @@
  * 2.0.
  */
 
+/** Why the page's service account can't run it. */
+export type WorkflowPageAccountReason =
+  | 'no_service_account'
+  | 'service_accounts_disabled'
+  | 'not_bound'
+  | 'service_account_missing'
+  | 'service_account_disabled'
+  | 'service_account_not_assumable';
+
 /** Why a page does not serve. The Share modal shows every reason that applies. */
 export type WorkflowPageOfflineReason =
   | 'pages_disabled'
@@ -13,11 +22,8 @@ export type WorkflowPageOfflineReason =
   | 'page_disabled'
   | 'workflow_disabled'
   | 'workflow_invalid'
-  | 'no_service_account'
-  | 'service_accounts_disabled'
-  | 'not_bound'
-  | 'service_account_missing'
-  | 'service_account_disabled';
+  | 'workflow_private'
+  | WorkflowPageAccountReason;
 
 export interface WorkflowPageStatus {
   online: boolean;
@@ -31,7 +37,7 @@ export interface WorkflowPageResponse {
   access: { level: 'secret_link' } | null;
   /** The page switch. The URL stays the same while it is off. */
   enabled: boolean;
-  /** The page URL, with the server base path and the space prefix. */
-  url: string;
+  /** The page URL, with the server base path and the space prefix. Null without an encryption key. */
+  url: string | null;
   status: WorkflowPageStatus;
 }

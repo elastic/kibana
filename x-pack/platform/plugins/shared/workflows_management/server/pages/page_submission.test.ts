@@ -130,6 +130,18 @@ describe('submitPage', () => {
     expect(deps.executeWorkflowAsServiceAccount).not.toHaveBeenCalled();
   });
 
+  it('returns the 404 page with a verified reason when the run fails to start', async () => {
+    const error = new Error('mint failed');
+    const deps = setup({ executeWorkflowAsServiceAccount: jest.fn().mockRejectedValue(error) });
+
+    const result = await submitPage(deps, request, body);
+
+    expect(result).toEqual(
+      expect.objectContaining({ statusCode: 404, outcome: 'error', reason: 'run_failed', error })
+    );
+    expect(isPageRequestVerified(result)).toBe(true);
+  });
+
   it('returns the form with the errors and the values on invalid input, and starts no run', async () => {
     const deps = setup();
 
@@ -147,6 +159,8 @@ describe('isPageRequestVerified', () => {
   it.each([
     ['a served form', undefined, true],
     ['a miss after the secret matched', 'workflow_disabled', true],
+    ['a real link to an offline page', 'page_offline', true],
+    ['a run that failed to start', 'run_failed', true],
     ['a wrong secret', 'secret_mismatch', false],
     ['a missing page', 'page_not_found', false],
     ['the kill switch', 'pages_disabled', false],
@@ -157,9 +171,11 @@ describe('isPageRequestVerified', () => {
 });
 
 describe('validatePageSubmission', () => {
-  it('returns every field error', () => {
+  it('returns parse errors and schema errors together', () => {
     const result = validatePageSubmission({ count: 'many' }, trigger.inputs);
-    expect(result).toEqual({ errors: [expect.stringContaining('count')] });
+    expect(result).toEqual({
+      errors: [expect.stringContaining('count'), expect.stringContaining('summary')],
+    });
   });
 
   it('returns errors for each invalid field', () => {

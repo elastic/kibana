@@ -78,6 +78,27 @@ describe('WorkflowPageShareModal', () => {
     expect(screen.queryByTestId('workflowPageSharePublish')).not.toBeInTheDocument();
   });
 
+  it('keeps the controls of a published page that cannot run, so its link can be revoked', async () => {
+    setup({ status: { online: false, reasons: ['service_account_disabled'] } });
+
+    expect(await screen.findByTestId('workflowPageShareBlockers')).toHaveTextContent('disabled');
+    expect(screen.getByTestId('workflowPageShareUrl')).toBeInTheDocument();
+    expect(screen.getByTestId('workflowPageShareRotate')).toBeEnabled();
+    expect(screen.getByTestId('workflowPageShareUnpublish')).toBeEnabled();
+    expect(screen.getByTestId('workflowPageShareEnabled')).toBeEnabled();
+  });
+
+  it('shows the encryption blocker and no link when the server has no secret', async () => {
+    setup({ url: null, status: { online: false, reasons: ['encryption_unavailable'] } });
+
+    expect(await screen.findByTestId('workflowPageShareBlockers')).toHaveTextContent(
+      'encryption key'
+    );
+    expect(screen.queryByTestId('workflowPageShareUrl')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('workflowPageShareRotate')).not.toBeInTheDocument();
+    expect(screen.getByTestId('workflowPageShareUnpublish')).toBeInTheDocument();
+  });
+
   it('publishes an unpublished page and loads it again', async () => {
     const { services } = setup({
       access: null,

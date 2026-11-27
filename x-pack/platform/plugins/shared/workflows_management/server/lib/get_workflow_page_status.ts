@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import type { WorkflowsExecutionEnginePluginStart } from '@kbn/workflows-execution-engine/server';
+import type { PageServiceAccountBindings } from './check_page_service_account';
+import { checkPageServiceAccount, isPrivateWorkflow } from './check_page_service_account';
 import type { WorkflowPageOfflineReason, WorkflowPageStatus } from '../../common/pages';
 import type { WorkflowPageDto } from '../pages/types';
 import type { WorkflowProperties } from '../storage/workflow_storage';
@@ -13,16 +14,12 @@ import type { WorkflowProperties } from '../storage/workflow_storage';
 export interface GetWorkflowPageStatusDeps {
   arePagesEnabled: () => Promise<boolean>;
   canEncrypt: boolean;
-  serviceAccountBindings: Pick<
-    WorkflowsExecutionEnginePluginStart['serviceAccountBindings'],
-    'isEnabled' | 'getWorkloadBinding' | 'getWorkloadServiceAccountSummary'
-  >;
+  serviceAccountBindings: PageServiceAccountBindings;
 }
 
 /**
  * Lists every reason a page does not serve, for authors. The public route stops at the first
- * miss; this reads everything, so the author can fix all of it at once. It also checks that the
- * service account exists, which the public route leaves to the run.
+ * miss; this reads everything, so the author can fix all of it at once.
  */
 export const getWorkflowPageStatus = async (
   { arePagesEnabled, canEncrypt, serviceAccountBindings }: GetWorkflowPageStatusDeps,
@@ -40,23 +37,12 @@ export const getWorkflowPageStatus = async (
   if (!workflow.enabled) reasons.push('workflow_disabled');
   if (!workflow.valid) reasons.push('workflow_invalid');
 
-  const accountId = workflow.definition?.settings?.run_as;
-  if (!accountId) {
-    reasons.push('no_service_account');
-  } else if (!serviceAccountBindings.isEnabled()) {
-    reasons.push('service_accounts_disabled');
-  } else {
-    const coordinates = { workloadType: 'workflow', workloadId: page.workflowId, spaceId };
-    const binding = await serviceAccountBindings.getWorkloadBinding(coordinates);
-    if (binding?.serviceAccountId !== accountId) {
-      reasons.push('not_bound');
-    } else {
-      const summary = await serviceAccountBindings.getWorkloadServiceAccountSummary(coordinates);
-      if (!summary) reasons.push('service_account_missing');
-      else if (!summary.enabled) reasons.push('service_account_disabled');
-    }
-  }
-  // shortcut: an account deleted and re-created after the bind still reads as healthy here, and
-  // fails at mint time (`account_replaced`). Add a reason when core exposes that check.
+  if (isPrivateWorkflow(workflow)) reasons.push('workflow_private');
+  const accountReason = await checkPageServiceAccount(serviceAccountBindings, {
+    workflow,
+    workflowId: page.workflowId,
+    spaceId,
+  });
+  if (accountReason) reasons.push(accountReason);
   return { online: reasons.length === 0, reasons };
 };

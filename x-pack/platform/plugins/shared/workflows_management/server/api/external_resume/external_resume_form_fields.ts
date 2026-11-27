@@ -138,9 +138,9 @@ function buildFieldHtml(
         <label class="field" for="${escapeHtml(name)}">
           <span class="field-label">${label}${requiredMarker}</span>
           ${description}
-          <input type="number" id="${escapeHtml(name)}" name="${escapeHtml(
-      name
-    )}"${requiredAttr}${valueAttr} />
+          <input type="number" id="${escapeHtml(name)}" name="${escapeHtml(name)}"${
+      field.type === 'number' ? ' step="any"' : ''
+    }${requiredAttr}${valueAttr} />
         </label>`;
   }
 
@@ -209,32 +209,53 @@ function parseFieldValue(name: string, field: FlatFieldSchema, raw: unknown): un
     }
 
     const values = Array.isArray(raw) ? raw : [raw];
-    return values.map((value) => String(value));
+    // The browser sends strings. Map each back to its enum value, so `[1, 2]` stays numbers.
+    return values.map(
+      (value) =>
+        arrayEnumChoices.find((choice) => String(choice) === String(value)) ?? String(value)
+    );
   }
 
   return String(raw);
+}
+
+/** Parses every field of a form post. Returns the values and one error per field that fails. */
+export function parseExternalResumeFormFields(
+  body: Record<string, unknown>,
+  schema: JsonModelSchemaType | undefined
+): { input: Record<string, unknown>; errors: Record<string, string> } {
+  const input: Record<string, unknown> = {};
+  const errors: Record<string, string> = {};
+  const properties = schema?.properties;
+  if (!properties || typeof properties !== 'object') {
+    return { input, errors };
+  }
+
+  for (const [name, propertySchema] of Object.entries(properties)) {
+    if (propertySchema != null && typeof propertySchema === 'object') {
+      try {
+        const parsed = parseFieldValue(name, propertySchema as FlatFieldSchema, body[name]);
+        if (parsed !== undefined || (propertySchema as FlatFieldSchema).type === 'boolean') {
+          input[name] = parsed;
+        }
+      } catch (error) {
+        errors[name] = error instanceof Error ? error.message : String(error);
+      }
+    }
+  }
+
+  return { input, errors };
 }
 
 export function parseExternalResumeFormBody(
   body: Record<string, unknown>,
   schema: JsonModelSchemaType | undefined
 ): Record<string, unknown> {
-  const properties = schema?.properties;
-  if (!properties || typeof properties !== 'object') {
-    return {};
+  const { input, errors } = parseExternalResumeFormFields(body, schema);
+  const [firstError] = Object.values(errors);
+  if (firstError) {
+    throw new Error(firstError);
   }
-
-  const input: Record<string, unknown> = {};
-
-  for (const [name, propertySchema] of Object.entries(properties)) {
-    if (propertySchema != null && typeof propertySchema === 'object') {
-      const parsed = parseFieldValue(name, propertySchema as FlatFieldSchema, body[name]);
-      if (parsed !== undefined || (propertySchema as FlatFieldSchema).type === 'boolean') {
-        input[name] = parsed;
-      }
-    }
-  }
-
   return input;
 }
 

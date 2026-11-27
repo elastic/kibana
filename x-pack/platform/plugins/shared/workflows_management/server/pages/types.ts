@@ -9,6 +9,7 @@ import type { KibanaRequest } from '@kbn/core/server';
 import type { WorkflowAccessOperation } from '@kbn/workflows';
 import type { WorkflowPageAccess } from './page_saved_object';
 import type { WorkflowPageRef } from './page_secret';
+import type { WorkflowPageAccountReason } from '../../common/pages';
 
 /** Why a page URL did not resolve. For the audit log only: the visitor always gets a plain 404. */
 export type WorkflowPageMissReason =
@@ -21,7 +22,8 @@ export type WorkflowPageMissReason =
   | 'workflow_disabled'
   | 'workflow_invalid'
   | 'trigger_missing'
-  | 'not_bound';
+  | 'workflow_private'
+  | WorkflowPageAccountReason;
 
 /** What callers see of a page. Never holds the secret or its hash. */
 export interface WorkflowPageDto {

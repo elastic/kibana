@@ -8,6 +8,7 @@
 import { schema } from '@kbn/config-schema';
 import type { KibanaRequest, KibanaResponseFactory } from '@kbn/core/server';
 import { registerPageManagementRoutes } from './page_management_routes';
+import { isLicenseValid } from '../../../availability/is_license_valid';
 import type { PageRequest, PageResponse, PageSubmissionDeps } from '../../../pages/page_submission';
 import {
   getPageForm,
@@ -16,6 +17,7 @@ import {
   PAGE_SUBMITTED_QUERY,
   submitPage,
 } from '../../../pages/page_submission';
+import type { WorkflowsRequestHandlerContext } from '../../../types';
 import { EXTERNAL_RESUME_HTML_HEADERS } from '../executions/external_resume_route_helpers';
 import type { RouteDependencies } from '../types';
 
@@ -57,6 +59,15 @@ const respond = (response: KibanaResponseFactory, { statusCode, html, location }
       : EXTERNAL_RESUME_HTML_HEADERS,
   });
 
+// The license and offering gate of the other workflow routes. A page answers it with the same 404.
+const isAvailable = async (context: WorkflowsRequestHandlerContext): Promise<boolean> => {
+  const [{ isWorkflowsAvailable }, { license }] = await Promise.all([
+    context.workflows,
+    context.licensing,
+  ]);
+  return isWorkflowsAvailable && license.isAvailable && license.isActive && isLicenseValid(license);
+};
+
 /** Registers the page routes. Only with `workflowsManagement.pages.enabled`. */
 export function registerPageRoutes(routeDeps: RouteDependencies) {
   const { router, workflowsService, spaces, audit, logger } = routeDeps;
@@ -74,6 +85,7 @@ export function registerPageRoutes(routeDeps: RouteDependencies) {
 
   const handle = async (
     kind: 'view' | 'submit',
+    context: WorkflowsRequestHandlerContext,
     request: KibanaRequest<{ workflowId: string; pageId: string; secret: string }>,
     response: KibanaResponseFactory,
     run: (pageRequest: PageRequest) => Promise<PageResponse>
@@ -81,14 +93,16 @@ export function registerPageRoutes(routeDeps: RouteDependencies) {
     const { workflowId, pageId, secret } = request.params;
     const spaceId = spaces.getSpaceId(request);
     let result: PageResponse;
-    let error: unknown;
     try {
-      result = await run({ workflowId, pageId, spaceId, secret });
-    } catch (e) {
+      result = (await isAvailable(context))
+        ? await run({ workflowId, pageId, spaceId, secret })
+        : notFoundPage('pages_disabled');
+    } catch (error) {
       // Fail closed: an unexpected error looks like any other miss to the visitor.
-      logger.warn(`Workflow page request failed [workflowId=${workflowId}]: ${e}`);
-      error = e;
-      result = { ...notFoundPage('unexpected_error'), outcome: 'error' };
+      result = { ...notFoundPage('unexpected_error'), outcome: 'error', error };
+    }
+    if (result.error) {
+      logger.warn(`Workflow page request failed [workflowId=${workflowId}]: ${result.error}`);
     }
     audit.logPageRequest(request, {
       kind,
@@ -99,7 +113,7 @@ export function registerPageRoutes(routeDeps: RouteDependencies) {
       reason: result.reason,
       verified: isPageRequestVerified(result),
       executionId: result.executionId,
-      error,
+      error: result.error,
     });
     return respond(response, result);
   };
@@ -118,7 +132,7 @@ export function registerPageRoutes(routeDeps: RouteDependencies) {
       },
     },
     (context, request, response) =>
-      handle('view', request, response, (pageRequest) =>
+      handle('view', context, request, response, (pageRequest) =>
         getPageForm(deps, pageRequest, {
           submitted: request.query[PAGE_SUBMITTED_QUERY] === '1',
         })
@@ -143,7 +157,7 @@ export function registerPageRoutes(routeDeps: RouteDependencies) {
       },
     },
     (context, request, response) =>
-      handle('submit', request, response, (pageRequest) =>
+      handle('submit', context, request, response, (pageRequest) =>
         submitPage(deps, pageRequest, request.body)
       )
   );

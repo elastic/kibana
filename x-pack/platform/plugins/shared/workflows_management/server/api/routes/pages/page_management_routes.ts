@@ -64,10 +64,14 @@ export function registerPageManagementRoutes({
           const client = await workflowsService.getPagesClient(request);
           const page = await client.get({ workflowId, pageId });
           const [secret, status] = await Promise.all([
-            client.getSecret({ workflowId, pageId }),
+            // Without an encryption key there is no secret. The status names that blocker.
+            client.getSecret({ workflowId, pageId }).catch((error) => {
+              if (error instanceof WorkflowPagesUnavailableError) return null;
+              throw error;
+            }),
             workflowsService.getWorkflowPageStatus(page, spaces.getSpaceId(request)),
           ]);
-          const url = buildPageUrl(request.basePath, workflowId, pageId, secret);
+          const url = secret && buildPageUrl(request.basePath, workflowId, pageId, secret);
           return response.ok({ body: { ...page, url, status }, headers: NO_STORE });
         } catch (error) {
           return handlePageError(response, error);

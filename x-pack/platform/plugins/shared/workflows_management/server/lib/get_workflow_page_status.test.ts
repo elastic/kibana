@@ -111,8 +111,18 @@ describe('getWorkflowPageStatus', () => {
       'service_account_disabled',
       { summary: { id: ACCOUNT, name: 'pages', enabled: false, assumable: true } },
     ],
+    [
+      'service_account_not_assumable',
+      { summary: { id: ACCOUNT, name: 'pages', enabled: true, assumable: false } },
+    ],
   ])('reports %s', async (reason, options) => {
     await expect(status(setup(options))).resolves.toEqual({ online: false, reasons: [reason] });
+  });
+
+  it('reports a private workflow', async () => {
+    await expect(
+      status(setup(), {}, { access_control: { access_mode: 'private', entries: [] } })
+    ).resolves.toEqual({ online: false, reasons: ['workflow_private'] });
   });
 
   it('skips the account read when the binding does not match', async () => {

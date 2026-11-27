@@ -20,7 +20,7 @@ import type { WorkflowPageRef } from './page_secret';
 import type { WorkflowPageMissReason } from './types';
 import {
   buildExternalResumeFormFieldsHtml,
-  parseExternalResumeFormBody,
+  parseExternalResumeFormFields,
 } from '../api/external_resume/external_resume_form_fields';
 import {
   renderExternalResumeErrorPage,
@@ -52,14 +52,18 @@ const PAGE_NOT_FOUND_MESSAGE = i18n.translate('workflows.pages.notFoundMessage',
 export type PageRequest = WorkflowPageRef & { secret: string };
 
 /** Why a page request got the 404. Only the audit log sees it. */
-export type PageMissReason = WorkflowPageMissReason | 'pages_disabled' | 'unexpected_error';
+export type PageMissReason =
+  | WorkflowPageMissReason
+  | 'pages_disabled'
+  | 'run_failed'
+  | 'unexpected_error';
 
 // Misses decided before the secret matched. The URL's workflow and page ids are only a claim.
+// `page_offline` is decided after the secret matched: it means a real link to an offline page.
 const UNVERIFIED_REASONS: ReadonlySet<PageMissReason> = new Set<PageMissReason>([
   'pages_disabled',
   'global_space',
   'page_not_found',
-  'page_offline',
   'secret_mismatch',
   'unexpected_error',
 ]);
@@ -92,6 +96,8 @@ export interface PageResponse {
   outcome: WorkflowPageRequestOutcome;
   reason?: PageMissReason;
   executionId?: string;
+  /** The error behind an `error` outcome, for the audit log. */
+  error?: unknown;
 }
 
 /** Every miss looks the same: a bad secret, an offline page, a disabled kill switch. */
@@ -140,21 +146,18 @@ export const validatePageSubmission = (
   body: Record<string, unknown>,
   schema: JsonModelSchemaType | undefined
 ): { inputs: Record<string, unknown> } | { errors: string[] } => {
-  let parsed: Record<string, unknown>;
-  try {
-    parsed = parseExternalResumeFormBody(body, schema);
-  } catch (error) {
-    return { errors: [error instanceof Error ? error.message : String(error)] };
-  }
-  const result = buildFieldsZodValidator(schema).safeParse(parsed);
-  if (result.success) {
+  const { input, errors: parseErrors } = parseExternalResumeFormFields(body, schema);
+  const result = buildFieldsZodValidator(schema).safeParse(input);
+  if (result.success && Object.keys(parseErrors).length === 0) {
     return { inputs: result.data };
   }
-  return {
-    errors: result.error.issues.map(({ path, message }) =>
-      path.length > 0 ? `${path.join('.')}: ${message}` : message
-    ),
-  };
+  // A field that failed to parse already has its error. Skip the schema error for the same field.
+  const schemaErrors = result.success
+    ? []
+    : result.error.issues
+        .filter(({ path }) => !(String(path[0]) in parseErrors))
+        .map(({ path, message }) => (path.length > 0 ? `${path.join('.')}: ${message}` : message));
+  return { errors: [...Object.values(parseErrors), ...schemaErrors] };
 };
 
 /** GET: renders the form, or the confirmation after the redirect from a successful submit. */
@@ -197,17 +200,23 @@ export const submitPage = async (
     };
   }
 
-  const { workflowExecutionId } = await deps.executeWorkflowAsServiceAccount(
-    toWorkflowExecutionEngineModel({ ...page.workflow, id: request.workflowId }),
-    {
-      spaceId: request.spaceId,
-      // Steps read a submission as `page.inputs`. `inputs` holds only manual, API, and child values.
-      inputs: {},
-      page: { inputs: validation.inputs },
-      triggeredBy: PAGE_TRIGGER_SOURCE,
-      metadata: { pageId: request.pageId },
-    }
-  );
+  let workflowExecutionId: string;
+  try {
+    ({ workflowExecutionId } = await deps.executeWorkflowAsServiceAccount(
+      toWorkflowExecutionEngineModel({ ...page.workflow, id: request.workflowId }),
+      {
+        spaceId: request.spaceId,
+        // Steps read a submission as `page.inputs`. `inputs` holds only manual, API, and child values.
+        inputs: {},
+        page: { inputs: validation.inputs },
+        triggeredBy: PAGE_TRIGGER_SOURCE,
+        metadata: { pageId: request.pageId },
+      }
+    ));
+  } catch (error) {
+    // The secret matched, so the audit keeps the ids as verified.
+    return { ...notFoundPage('run_failed'), outcome: 'error', error };
+  }
   return {
     statusCode: 303,
     html: '',

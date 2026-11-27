@@ -41,7 +41,7 @@ import { useKibana } from '../../../hooks/use_kibana';
 const API_VERSION = { version: '1' } as const;
 const PAGE_API_PATH = '/internal/workflows/workflow/{id}/pages/{pageId}';
 
-/** Reasons the author must fix elsewhere before the page can have a link. */
+/** Reasons the author must fix elsewhere before the page can run. */
 const BLOCKER_TEXT: Partial<Record<WorkflowPageOfflineReason, string>> = {
   no_service_account: i18n.translate('workflows.pageShare.blocker.noServiceAccount', {
     defaultMessage: 'Set settings.run_as to a service account, then save the workflow.',
@@ -57,6 +57,12 @@ const BLOCKER_TEXT: Partial<Record<WorkflowPageOfflineReason, string>> = {
   }),
   service_account_disabled: i18n.translate('workflows.pageShare.blocker.accountDisabled', {
     defaultMessage: 'The service account is disabled.',
+  }),
+  service_account_not_assumable: i18n.translate('workflows.pageShare.blocker.notAssumable', {
+    defaultMessage: 'Kibana has no credential for the service account. Ask an administrator.',
+  }),
+  workflow_private: i18n.translate('workflows.pageShare.blocker.private', {
+    defaultMessage: "A private workflow can't have a page yet. Make the workflow public.",
   }),
   workflow_invalid: i18n.translate('workflows.pageShare.blocker.invalid', {
     defaultMessage: 'Fix the errors in the workflow, then save it.',
@@ -227,7 +233,10 @@ export const WorkflowPageShareModal = ({
   const blockers = reasons.filter((reason) => BLOCKER_TEXT[reason]);
   const warnings = reasons.filter((reason) => WARNING_TEXT[reason]);
   const isPublished = page?.access != null;
-  const absoluteUrl = page ? new URL(page.url, window.location.origin).href : '';
+  // The link is for people outside Kibana, so prefer the public address over the browser's.
+  const absoluteUrl = page?.url
+    ? new URL(page.url, http.basePath.publicBaseUrl ?? window.location.origin).href
+    : '';
 
   const runsAs = serviceAccountId ? (
     <FormattedMessage
@@ -264,30 +273,32 @@ export const WorkflowPageShareModal = ({
     if (!page) {
       return <EuiSkeletonText lines={4} />;
     }
-    if (blockers.length > 0) {
-      return (
-        <KbnDangerCallout
-          title={i18n.translate('workflows.pageShare.blockedTitle', {
-            defaultMessage: "This page can't run yet",
-          })}
-          data-test-subj="workflowPageShareBlockers"
-        >
-          <ul>
-            {blockers.map((reason) => (
-              <li key={reason}>{BLOCKER_TEXT[reason]}</li>
-            ))}
-          </ul>
-          {serviceAccountId && (
-            <p>
-              <FormattedMessage
-                id="workflows.pageShare.configuredAccount"
-                defaultMessage="settings.run_as: {account}"
-                values={{ account: <EuiCode>{serviceAccountId}</EuiCode> }}
-              />
-            </p>
-          )}
-        </KbnDangerCallout>
-      );
+    // A published page keeps its controls, so a leaked link can still be revoked.
+    const blockersCallout = blockers.length > 0 && (
+      <KbnDangerCallout
+        title={i18n.translate('workflows.pageShare.blockedTitle', {
+          defaultMessage: "This page can't run",
+        })}
+        data-test-subj="workflowPageShareBlockers"
+      >
+        <ul>
+          {blockers.map((reason) => (
+            <li key={reason}>{BLOCKER_TEXT[reason]}</li>
+          ))}
+        </ul>
+        {serviceAccountId && (
+          <p>
+            <FormattedMessage
+              id="workflows.pageShare.configuredAccount"
+              defaultMessage="settings.run_as: {account}"
+              values={{ account: <EuiCode>{serviceAccountId}</EuiCode> }}
+            />
+          </p>
+        )}
+      </KbnDangerCallout>
+    );
+    if (blockersCallout && !isPublished) {
+      return blockersCallout;
     }
     if (!isPublished) {
       return (
@@ -319,53 +330,68 @@ export const WorkflowPageShareModal = ({
     }
     return (
       <>
-        <EuiText size="s">
-          <p>{runsAs}</p>
-        </EuiText>
-        <EuiSpacer />
-        <EuiFormRow
-          label={i18n.translate('workflows.pageShare.linkLabel', { defaultMessage: 'Page link' })}
-          labelAppend={
-            <EuiText size="xs">
-              <EuiLink
-                href={absoluteUrl}
-                target="_blank"
-                external
-                data-test-subj="workflowPageShareOpen"
-              >
-                {OPEN_PAGE}
-              </EuiLink>
+        {blockersCallout ? (
+          <>
+            {blockersCallout}
+            <EuiSpacer size="m" />
+          </>
+        ) : (
+          <>
+            <EuiText size="s">
+              <p>{runsAs}</p>
             </EuiText>
-          }
-          helpText={i18n.translate('workflows.pageShare.linkHelp', {
-            defaultMessage: 'Treat the link like a password. Rotate it if it leaks.',
-          })}
-          fullWidth
-        >
-          <EuiCopy
-            textToCopy={absoluteUrl}
-            beforeMessage={COPY_LINK}
-            tooltipProps={{ anchorClassName: 'eui-displayBlock' }}
-          >
-            {(copy) => (
-              <EuiFieldText
-                value={absoluteUrl}
-                readOnly
-                fullWidth
-                onFocus={(event) => event.target.select()}
-                data-test-subj="workflowPageShareUrl"
-                icon={{
-                  type: 'copy',
-                  side: 'right',
-                  onClick: copy,
-                  'aria-label': COPY_LINK,
-                  'data-test-subj': 'workflowPageShareCopy',
-                }}
-              />
-            )}
-          </EuiCopy>
-        </EuiFormRow>
-        <EuiSpacer />
+            <EuiSpacer />
+          </>
+        )}
+        {absoluteUrl && (
+          <>
+            <EuiFormRow
+              label={i18n.translate('workflows.pageShare.linkLabel', {
+                defaultMessage: 'Page link',
+              })}
+              labelAppend={
+                <EuiText size="xs">
+                  <EuiLink
+                    href={absoluteUrl}
+                    target="_blank"
+                    external
+                    data-test-subj="workflowPageShareOpen"
+                  >
+                    {OPEN_PAGE}
+                  </EuiLink>
+                </EuiText>
+              }
+              helpText={i18n.translate('workflows.pageShare.linkHelp', {
+                defaultMessage: 'Treat the link like a password. Rotate it if it leaks.',
+              })}
+              fullWidth
+            >
+              <EuiCopy
+                textToCopy={absoluteUrl}
+                beforeMessage={COPY_LINK}
+                tooltipProps={{ anchorClassName: 'eui-displayBlock' }}
+              >
+                {(copy) => (
+                  <EuiFieldText
+                    value={absoluteUrl}
+                    readOnly
+                    fullWidth
+                    onFocus={(event) => event.target.select()}
+                    data-test-subj="workflowPageShareUrl"
+                    icon={{
+                      type: 'copy',
+                      side: 'right',
+                      onClick: copy,
+                      'aria-label': COPY_LINK,
+                      'data-test-subj': 'workflowPageShareCopy',
+                    }}
+                  />
+                )}
+              </EuiCopy>
+            </EuiFormRow>
+            <EuiSpacer />
+          </>
+        )}
         {withManageTooltip(
           <EuiSwitch
             label={i18n.translate('workflows.pageShare.acceptSubmissions', {
@@ -405,19 +431,21 @@ export const WorkflowPageShareModal = ({
           />
         ) : (
           <EuiFlexGroup gutterSize="s" responsive={false}>
-            <EuiFlexItem grow={false}>
-              {withManageTooltip(
-                <EuiButton
-                  size="s"
-                  color="warning"
-                  onClick={() => setConfirming('rotate')}
-                  isDisabled={!canManageWorkflowPages || pending !== undefined}
-                  data-test-subj="workflowPageShareRotate"
-                >
-                  {ROTATE_LINK}
-                </EuiButton>
-              )}
-            </EuiFlexItem>
+            {absoluteUrl && (
+              <EuiFlexItem grow={false}>
+                {withManageTooltip(
+                  <EuiButton
+                    size="s"
+                    color="warning"
+                    onClick={() => setConfirming('rotate')}
+                    isDisabled={!canManageWorkflowPages || pending !== undefined}
+                    data-test-subj="workflowPageShareRotate"
+                  >
+                    {ROTATE_LINK}
+                  </EuiButton>
+                )}
+              </EuiFlexItem>
+            )}
             <EuiFlexItem grow={false}>
               {withManageTooltip(
                 <EuiButton

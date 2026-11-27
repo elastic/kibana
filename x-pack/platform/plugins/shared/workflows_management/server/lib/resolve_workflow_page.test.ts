@@ -20,7 +20,11 @@ const boundPageDefinition = (pageId?: string) => ({
 
 const setup = (
   overrides: Partial<WorkflowProperties> | null = {},
-  { bindingsEnabled = true, boundAccountId = 'service-account-1' as string | null } = {}
+  {
+    bindingsEnabled = true,
+    boundAccountId = 'service-account-1' as string | null,
+    account = { enabled: true, assumable: true } as { enabled: boolean; assumable: boolean } | null,
+  } = {}
 ) => {
   const workflow =
     overrides === null
@@ -52,6 +56,9 @@ const setup = (
             boundBy: { type: 'user' as const, username: 'admin' },
             boundAt: WORKFLOW_CREATED_AT,
           }
+    ),
+    getWorkloadServiceAccountSummary: jest.fn(async () =>
+      account === null ? null : { id: 'service-account-1', name: 'pages', ...account }
     ),
   };
   const resolve = (ref: WorkflowPageRef, secret: string) =>
@@ -95,7 +102,8 @@ describe('resolveWorkflowPage', () => {
     ['workflow_disabled', { enabled: false }],
     ['workflow_invalid', { valid: false }],
     ['trigger_missing', { definition: boundPageDefinition('other-page') }],
-    ['not_bound', { definition: pageDefinition() }],
+    ['no_service_account', { definition: pageDefinition() }],
+    ['workflow_private', { access_control: { access_mode: 'private', entries: [] } }],
   ])('returns %s with the right secret', async (reason, overrides) => {
     const { resolve } = setup(overrides);
     await expect(resolve(pageRef, 'the-secret')).resolves.toEqual({ reason });
@@ -114,12 +122,23 @@ describe('resolveWorkflowPage', () => {
   });
 
   it.each([
-    ['service account execution is off', { bindingsEnabled: false }],
-    ['the workflow has no binding', { boundAccountId: null }],
-    ['the binding names another account', { boundAccountId: 'service-account-2' }],
-  ])('returns not_bound when %s', async (_, bindingState) => {
-    const { resolve } = setup({}, bindingState);
-    await expect(resolve(pageRef, 'the-secret')).resolves.toEqual({ reason: 'not_bound' });
+    ['service_accounts_disabled', 'service account execution is off', { bindingsEnabled: false }],
+    ['not_bound', 'the workflow has no binding', { boundAccountId: null }],
+    ['not_bound', 'the binding names another account', { boundAccountId: 'service-account-2' }],
+    ['service_account_missing', 'the account does not exist', { account: null }],
+    [
+      'service_account_disabled',
+      'the account is disabled',
+      { account: { enabled: false, assumable: true } },
+    ],
+    [
+      'service_account_not_assumable',
+      'Kibana has no credential for the account',
+      { account: { enabled: true, assumable: false } },
+    ],
+  ])('returns %s when %s', async (reason, _, accountState) => {
+    const { resolve } = setup({}, accountState);
+    await expect(resolve(pageRef, 'the-secret')).resolves.toEqual({ reason });
   });
 
   it('never resolves a page in the global space', async () => {
