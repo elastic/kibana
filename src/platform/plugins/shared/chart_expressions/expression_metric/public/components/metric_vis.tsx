@@ -37,6 +37,7 @@ import { resolveVisIcon } from '@kbn/chart-icons';
 import { DEFAULT_TRENDLINE_NAME } from '../../common/constants';
 import type { MetricVisParam, VisParams } from '../../common';
 import { getThemeService, getFormatService } from '../services';
+import { useExperimentalColors } from '../experimental_colors';
 import { getColor, getMetricFormatter } from './helpers';
 import { getSecondaryMetricInfo } from './secondary_metric_info';
 import type { TrendConfig } from './secondary_metric_info';
@@ -130,6 +131,7 @@ export const MetricVis = ({
     highContrastMode,
   } = useEuiTheme();
   const defaultColor = colors.emptyShade;
+  const experimentalColors = useExperimentalColors(config.metric.palette?.params?.colors);
 
   const onRenderChange = useCallback<RenderChangeListener>(
     (isRendered) => {
@@ -198,6 +200,7 @@ export const MetricVis = ({
     data.rows.length ? data.rows : [{ [primaryMetricColumn.id]: null }]
   ).slice(0, 1);
 
+  const titleColors: Array<string | undefined> = [];
   // TODO: optimize this so it doesn't run many times
   const metricConfigs: MetricSpec['data'][number] = (
     breakdownByColumn ? data.rows : firstRowForNonBreakdown
@@ -272,6 +275,25 @@ export const MetricVis = ({
         : { ...nonNumericMetricBase, value: formatPrimaryMetric(value) };
     }
 
+    const trendId = breakdownByColumn ? row[breakdownByColumn.id] : DEFAULT_TRENDLINE_NAME;
+    const trend = config.metric.trends?.[trendId];
+
+    // Trend tiles always paint their color as the background.
+    const isBackground = config.metric.applyColorTo === 'background' || Boolean(trend);
+    const {
+      fill,
+      valueColor: experimentalValueColor,
+      titleColor,
+      bar,
+    } = experimentalColors.tile({
+      rowIdx,
+      color: tileColor,
+      fromPalette: Boolean(paletteColor),
+      hasTrend: Boolean(trend),
+      isBackground,
+    }) ?? {};
+    titleColors.push(titleColor);
+
     const baseMetric: MetricWNumber = {
       value,
       valueFormatter: formatPrimaryMetric,
@@ -279,14 +301,14 @@ export const MetricVis = ({
       subtitle,
       icon: config.metric?.icon ? getIcon(config.metric?.icon) : undefined,
       extra: secondaryMetricProps,
-      color: tileColor,
+      color: fill ?? tileColor,
+      ...(fill ? { valueColor: experimentalValueColor } : {}),
     };
 
-    const trendId = breakdownByColumn ? row[breakdownByColumn.id] : DEFAULT_TRENDLINE_NAME;
-    if (config.metric.trends && config.metric.trends[trendId]) {
+    if (trend) {
       const metricWTrend: MetricWTrend = {
         ...baseMetric,
-        trend: config.metric.trends[trendId],
+        trend,
         trendShape: 'area',
         trendA11yTitle: i18n.translate('expressionMetricVis.trendA11yTitle', {
           defaultMessage: '{dataTitle} over time.',
@@ -307,6 +329,8 @@ export const MetricVis = ({
         ...baseMetric,
         domainMax: row[maxColId],
         progressBarDirection: config.metric.progressDirection,
+        // On progress tiles the color is the bar's, so the fill goes to the background.
+        ...(fill && bar ? { color: bar, background: fill } : {}),
       };
 
       return metricWProgress;
@@ -318,14 +342,17 @@ export const MetricVis = ({
       // Override the background and main value color when the color is applied to the value
       ...(config.metric.applyColorTo === 'value' && {
         color: defaultColor,
-        valueColor: tileColor === defaultColor ? undefined : tileColor,
+        valueColor: tileColor === defaultColor ? undefined : experimentalValueColor ?? tileColor,
       }),
       ...(config.metric.applyColorTo === 'background' && {
-        color: tileColor,
-        valueColor: undefined,
+        color: fill ?? tileColor,
+        valueColor: fill && experimentalValueColor,
       }),
     };
   });
+
+  // The theme colors every tile's title, so only a chart of one tile can take its tile's.
+  const titleColor = metricConfigs.length === 1 ? titleColors[0] : undefined;
 
   if (config.metric.minTiles) {
     while (metricConfigs.length < config.metric.minTiles) {
@@ -381,56 +408,59 @@ export const MetricVis = ({
           height: ${scrollChildHeight};
         `}
       >
-        <Chart {...getOverridesFor(overrides, 'chart')}>
-          <Settings
-            onWillRender={onWillRender}
-            locale={i18n.getLocale()}
-            theme={[
-              {
-                background: { color: defaultColor },
-                metric: {
-                  barBackground: colors.lightestShade,
-                  emptyBackground: colors.emptyShade,
-                  blendingBackground: colors.emptyShade,
-                  titlesTextAlign: config.metric.titlesTextAlign,
-                  valueTextAlign: config.metric.primaryAlign,
-                  extraTextAlign: config.metric.secondaryAlign,
-                  iconAlign: config.metric.iconAlign,
-                  valueFontSize: config.metric.valueFontSize,
-                  spacing: getMetricSpacing(config.metric.density),
-                  valuePosition: config.metric.primaryPosition,
+        {experimentalColors.decorate(
+          <Chart {...getOverridesFor(overrides, 'chart')}>
+            <Settings
+              onWillRender={onWillRender}
+              locale={i18n.getLocale()}
+              theme={[
+                {
+                  background: { color: defaultColor },
+                  metric: {
+                    barBackground: colors.lightestShade,
+                    emptyBackground: colors.emptyShade,
+                    blendingBackground: colors.emptyShade,
+                    titlesTextAlign: config.metric.titlesTextAlign,
+                    valueTextAlign: config.metric.primaryAlign,
+                    extraTextAlign: config.metric.secondaryAlign,
+                    iconAlign: config.metric.iconAlign,
+                    valueFontSize: config.metric.valueFontSize,
+                    spacing: getMetricSpacing(config.metric.density),
+                    valuePosition: config.metric.primaryPosition,
+                    ...(titleColor && { textLightColor: titleColor, textDarkColor: titleColor }),
+                  },
                 },
-              },
-              ...(Array.isArray(settingsThemeOverrides)
-                ? settingsThemeOverrides
-                : [settingsThemeOverrides]),
-            ]}
-            baseTheme={chartBaseTheme}
-            onRenderChange={onRenderChange}
-            onElementClick={
-              filterable
-                ? (events) => {
-                    const colRef = breakdownByColumn ?? primaryMetricColumn;
-                    const rowLength = grid.current[0].length;
-                    events.forEach((event) => {
-                      if (isMetricElementEvent(event)) {
-                        const colIdx = data.columns.findIndex((col) => col === colRef);
-                        fireEvent(
-                          buildFilterEvent(
-                            event.rowIndex * rowLength + event.columnIndex,
-                            colIdx,
-                            data
-                          )
-                        );
-                      }
-                    });
-                  }
-                : undefined
-            }
-            {...settingsOverrides}
-          />
-          <Metric id="metric" data={grid.current} />
-        </Chart>
+                ...(Array.isArray(settingsThemeOverrides)
+                  ? settingsThemeOverrides
+                  : [settingsThemeOverrides]),
+              ]}
+              baseTheme={chartBaseTheme}
+              onRenderChange={onRenderChange}
+              onElementClick={
+                filterable
+                  ? (events) => {
+                      const colRef = breakdownByColumn ?? primaryMetricColumn;
+                      const rowLength = grid.current[0].length;
+                      events.forEach((event) => {
+                        if (isMetricElementEvent(event)) {
+                          const colIdx = data.columns.findIndex((col) => col === colRef);
+                          fireEvent(
+                            buildFilterEvent(
+                              event.rowIndex * rowLength + event.columnIndex,
+                              colIdx,
+                              data
+                            )
+                          );
+                        }
+                      });
+                    }
+                  : undefined
+              }
+              {...settingsOverrides}
+            />
+            <Metric id="metric" data={grid.current} />
+          </Chart>
+        )}
       </div>
     </div>
   );

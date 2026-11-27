@@ -9,7 +9,7 @@
 
 import React from 'react';
 import userEvent from '@testing-library/user-event';
-import { screen } from '@testing-library/react';
+import { act, screen } from '@testing-library/react';
 import type { Datatable, DatatableColumn } from '@kbn/expressions-plugin/common';
 import type { MetricVisComponentProps } from './metric_vis';
 import { MetricVis } from './metric_vis';
@@ -19,6 +19,8 @@ import type { SerializableRecord } from '@kbn/utility-types';
 import type { CustomPaletteState } from '@kbn/charts-plugin/common/expressions/palette/types';
 import type { MetricVisParam } from '../../common';
 import { DEFAULT_TRENDLINE_NAME } from '../../common/constants';
+import type { ExperimentalColorsId } from '../experimental_colors/flag';
+import { EuiThemeProvider } from '@elastic/eui';
 import type { PaletteOutput } from '@kbn/coloring';
 import { faker } from '@faker-js/faker';
 import {
@@ -29,9 +31,16 @@ import {
 } from '@kbn/chart-test-jest-helpers';
 // Static EUI token values for assertions
 // eslint-disable-next-line @elastic/eui/no-restricted-eui-imports
-import { euiThemeVars } from '@kbn/ui-theme';
+import { euiDarkVars, euiThemeVars } from '@kbn/ui-theme';
 
 import * as secondaryMetricInfoModule from './secondary_metric_info';
+import {
+  metricTileColors,
+  metricValueColor,
+  neutralTrendColors,
+} from '../experimental_colors/variants/b/colors';
+import { aTileColors } from '../experimental_colors/variants/a';
+import { VARIANTS } from '../experimental_colors/variants';
 
 const mockDeserialize = jest.fn(({ id }: { id: string }) => {
   const convertFn = (v: unknown) => `${id}-${v === null ? NaN : v}`;
@@ -44,6 +53,12 @@ const CURRENCY_DEFAULT_FORMAT = '$0.0';
 
 const mockFormatSettingLookup = jest.fn(() => CURRENCY_DEFAULT_FORMAT);
 const mockIsOverridden = jest.fn();
+const mockExperimentalColors = jest.fn((): ExperimentalColorsId => 'B');
+
+jest.mock('../experimental_colors/flag', () => ({
+  ...jest.requireActual('../experimental_colors/flag'),
+  useExperimentalColorsId: () => mockExperimentalColors(),
+}));
 
 jest.mock('../services', () => ({
   getFormatService: () => {
@@ -250,6 +265,7 @@ describe('MetricVisComponent', function () {
 
   afterEach(() => {
     mockDeserialize.mockClear();
+    mockExperimentalColors.mockReturnValue('B');
   });
 
   async function renderMetricChart(props: RenderChartPropsType) {
@@ -1003,7 +1019,13 @@ describe('MetricVisComponent', function () {
           },
         });
 
-        expect(screen.getByRole('figure')).toHaveStyle({ backgroundColor: colorFromPalette });
+        const subdued = metricTileColors(colorFromPalette, 'light', {
+          ramp: false,
+          hasTrend: false,
+        });
+        expect(screen.getByRole('figure')).toHaveStyle({
+          backgroundColor: subdued?.fill ?? colorFromPalette,
+        });
       });
 
       it('applies no value color when applyColorTo is "value" and the value is outside the palette range', async () => {
@@ -1152,8 +1174,189 @@ describe('MetricVisComponent', function () {
           },
         });
 
-        expect(screen.getByRole('figure')).toHaveStyle({ backgroundColor: staticColor });
+        const subdued = metricTileColors(staticColor, 'light', {
+          ramp: false,
+          hasTrend: false,
+        });
+        expect(screen.getByRole('figure')).toHaveStyle({
+          backgroundColor: subdued?.fill ?? staticColor,
+        });
         expect(mockGetColorForValue).not.toHaveBeenCalled();
+      });
+
+      it('subdues a background color to its faint fill, with the value in ink', async () => {
+        const blue = '#61A2FF';
+        const subdued = metricTileColors(blue, 'light', { ramp: false, hasTrend: false })!;
+
+        const { container } = await renderMetricChart({
+          config: {
+            dimensions: { metric: basePriceColumnId },
+            metric: { ...defaultMetricParams, color: blue, palette: undefined },
+          },
+        });
+
+        expect(screen.getByRole('figure')).toHaveStyle({ backgroundColor: subdued.fill });
+        expect(container.querySelector<HTMLElement>('.echMetricText__value')).toHaveStyle({
+          color: subdued.ink,
+        });
+      });
+
+      it('gives a tile with no color a neutral trend gradient', async () => {
+        const { trend } = neutralTrendColors(euiThemeVars.euiColorEmptyShade, 'light');
+
+        const { container } = await renderMetricChart({
+          config: {
+            dimensions: { metric: basePriceColumnId },
+            metric: {
+              ...defaultMetricParams,
+              palette: undefined,
+              trends: {
+                [DEFAULT_TRENDLINE_NAME]: [
+                  { x: 1, y: 1 },
+                  { x: 2, y: 3 },
+                ],
+              },
+            },
+          },
+        });
+
+        const stops = container.querySelectorAll('stop');
+        expect(stops.length).toBeGreaterThan(0);
+        stops.forEach((stop) => expect(stop).toHaveAttribute('stop-color', trend));
+      });
+
+      it('skips the trend gradient when it is turned off', async () => {
+        VARIANTS.B.targets.set({ trendGradient: false });
+
+        const { container } = await renderMetricChart({
+          config: {
+            dimensions: { metric: basePriceColumnId },
+            metric: {
+              ...defaultMetricParams,
+              palette: undefined,
+              trends: {
+                [DEFAULT_TRENDLINE_NAME]: [
+                  { x: 1, y: 1 },
+                  { x: 2, y: 3 },
+                ],
+              },
+            },
+          },
+        });
+
+        expect(container.querySelectorAll('stop')).toHaveLength(0);
+        act(() => VARIANTS.B.targets.reset());
+      });
+
+      it("keeps a tile with no color on dark's tinted empty shade, with a neutral trend", async () => {
+        const emptyShade = euiDarkVars.euiColorEmptyShade;
+        const { trend } = neutralTrendColors(emptyShade, 'dark');
+        const DarkMetricVis = (props: MetricVisComponentProps) => (
+          <EuiThemeProvider colorMode="dark">
+            <MetricVis {...props} />
+          </EuiThemeProvider>
+        );
+
+        const {
+          component: { container },
+        } = await renderChart(
+          {
+            ...getDefaultProps(),
+            data: table,
+            config: {
+              dimensions: { metric: basePriceColumnId },
+              metric: {
+                ...defaultMetricParams,
+                palette: undefined,
+                trends: {
+                  [DEFAULT_TRENDLINE_NAME]: [
+                    { x: 1, y: 1 },
+                    { x: 2, y: 3 },
+                  ],
+                },
+              },
+            },
+          },
+          DarkMetricVis
+        );
+
+        expect(screen.getByRole('figure')).toHaveStyle({ backgroundColor: emptyShade });
+        const stops = container.querySelectorAll('stop');
+        expect(stops.length).toBeGreaterThan(0);
+        stops.forEach((stop) => expect(stop).toHaveAttribute('stop-color', trend));
+      });
+
+      it('paints the full color as the background with the default colors', async () => {
+        const blue = '#61A2FF';
+        mockExperimentalColors.mockReturnValue('default');
+
+        await renderMetricChart({
+          config: {
+            dimensions: { metric: basePriceColumnId },
+            metric: { ...defaultMetricParams, color: blue, palette: undefined },
+          },
+        });
+
+        expect(screen.getByRole('figure')).toHaveStyle({ backgroundColor: blue });
+      });
+
+      describe('variant A colors', () => {
+        const blue = '#61A2FF';
+        const config: Props['config'] = {
+          dimensions: { metric: basePriceColumnId },
+          metric: { ...defaultMetricParams, color: blue, palette: undefined },
+        };
+
+        beforeEach(() => mockExperimentalColors.mockReturnValue('A'));
+
+        it('paints the muted fill, with the value in ink, in light mode', async () => {
+          const subtle = aTileColors(blue, 'light', false)!;
+
+          const { container } = await renderMetricChart({ config });
+
+          expect(screen.getByRole('figure')).toHaveStyle({ backgroundColor: subtle.fill });
+          expect(container.querySelector<HTMLElement>('.echMetricText__value')).toHaveStyle({
+            color: subtle.ink,
+          });
+        });
+
+        it('keeps the full color in dark mode', async () => {
+          const DarkMetricVis = (props: MetricVisComponentProps) => (
+            <EuiThemeProvider colorMode="dark">
+              <MetricVis {...props} />
+            </EuiThemeProvider>
+          );
+
+          await renderChart({ ...getDefaultProps(), data: table, config }, DarkMetricVis);
+
+          expect(screen.getByRole('figure')).toHaveStyle({ backgroundColor: blue });
+        });
+      });
+
+      it('colors the value with its hue ink on the surface when applyColorTo is "value"', async () => {
+        const blue = '#61A2FF';
+        const ink = metricValueColor(blue, 'light', false);
+
+        const { container } = await renderMetricChart({
+          config: {
+            dimensions: { metric: basePriceColumnId },
+            metric: {
+              ...defaultMetricParams,
+              applyColorTo: 'value',
+              color: blue,
+              palette: undefined,
+            },
+          },
+        });
+
+        expect(screen.getByRole('figure')).toHaveStyle({
+          backgroundColor: euiThemeVars.euiColorEmptyShade,
+        });
+        expect(ink).toBeDefined();
+        expect(ink).not.toBe(blue);
+        expect(container.querySelector<HTMLElement>('.echMetricText__value')).toHaveStyle({
+          color: ink,
+        });
       });
 
       it('defaults if no static color', async () => {

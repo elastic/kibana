@@ -27,7 +27,8 @@
     "@kbn/ebt-tools",
     "@kbn/chart-test-jest-helpers",
     "@kbn/visualizations-common",
-    "@kbn/chart-icons"
+    "@kbn/chart-icons",
+    "@kbn/contrast-roles"
   ],
   "exclude": [
     "target/**/*",

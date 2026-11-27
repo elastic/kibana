@@ -19,7 +19,8 @@
       "data"
     ],
     "optionalPlugins": [
-      "usageCollection"
+      "usageCollection",
+      "developerToolbar"
     ],
     "requiredBundles": [
       "kibanaUtils"

@@ -14,11 +14,15 @@ import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import { createStartServicesGetter } from '@kbn/kibana-utils-plugin/public';
 import { metricVisFunction } from '../common';
-import { setFormatService, setPaletteService } from './services';
+import { setFeatureFlagsService, setFormatService, setPaletteService } from './services';
 import { getMetricVisRenderer } from './expression_renderers';
 import { setThemeService } from './services/theme_service';
 import { setUiSettingsService } from './services/ui_settings';
 import { metricTrendlineFunction } from '../common/expression_functions/metric_trendline_function';
+import {
+  registerExperimentalColorsToolbarItem,
+  type DeveloperToolbarStart,
+} from './experimental_colors/register_toolbar_item';
 
 /** @internal */
 export interface ExpressionMetricPluginSetup {
@@ -30,10 +34,13 @@ export interface ExpressionMetricPluginSetup {
 export interface ExpressionMetricPluginStart {
   fieldFormats: FieldFormatsStart;
   usageCollection?: UsageCollectionStart;
+  developerToolbar?: DeveloperToolbarStart;
 }
 
 /** @internal */
 export class ExpressionMetricPlugin implements Plugin {
+  private unregisterExperimentalColors?: () => void;
+
   public setup(
     core: CoreSetup<ExpressionMetricPluginStart, void>,
     { expressions, charts }: ExpressionMetricPluginSetup
@@ -54,7 +61,14 @@ export class ExpressionMetricPlugin implements Plugin {
     setThemeService(charts.theme);
   }
 
-  public start(core: CoreStart, { fieldFormats }: ExpressionMetricPluginStart) {
+  public start(core: CoreStart, { fieldFormats, developerToolbar }: ExpressionMetricPluginStart) {
     setFormatService(fieldFormats);
+    setFeatureFlagsService(core.featureFlags);
+
+    this.unregisterExperimentalColors = registerExperimentalColorsToolbarItem(developerToolbar);
+  }
+
+  public stop() {
+    this.unregisterExperimentalColors?.();
   }
 }
