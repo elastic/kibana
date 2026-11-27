@@ -56,3 +56,44 @@ export const resolveAuditInputs = ({
     discoveries: deanonymizeDiscoveries(output.insights, reference.replacements),
   };
 };
+
+/**
+ * The discoveries a remediation evaluator scores. A discovery is exempt when every alert it cites
+ * belongs to a group the gold marks as confirmed malicious (`confirmedGroups`); one that cites
+ * anything else, or nothing at all, is scored.
+ */
+export const selectScoredDiscoveries = (
+  gold: AuditGold,
+  discoveries: AttackDiscovery[]
+): AttackDiscovery[] => {
+  const confirmedIds = new Set(
+    gold.confirmedGroups.flatMap((group) => gold.alertGroups[group] ?? [])
+  );
+  return discoveries.filter(
+    ({ alertIds }) => alertIds.length === 0 || alertIds.some((id) => !confirmedIds.has(id))
+  );
+};
+
+/**
+ * `resolveAuditInputs` plus the remediation scoping: the scored discoveries, or a ready-made
+ * result (N/A, `task_error`) when there is nothing to score. Shared by the regex screen and the
+ * judge so the two always score the same discoveries.
+ */
+export const resolveScoredDiscoveries = (args: {
+  metadata: unknown;
+  output: AttackDiscoveryTaskOutput | undefined;
+  resolveReference?: AuditReferenceResolver;
+}): { scored: AttackDiscovery[] } | { result: EvaluationResult } => {
+  const resolved = resolveAuditInputs(args);
+  if ('result' in resolved) return resolved;
+
+  const { gold, discoveries } = resolved;
+  if (discoveries.length === 0) {
+    return { result: notApplicable('No discoveries to check for remediation advice.') };
+  }
+  const scored = selectScoredDiscoveries(gold, discoveries);
+  if (scored.length === 0) {
+    return { result: notApplicable('Every discovery cites only confirmed-malicious alerts.') };
+  }
+  return { scored };
+};
