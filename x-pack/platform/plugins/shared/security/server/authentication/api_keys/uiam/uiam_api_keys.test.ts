@@ -535,10 +535,7 @@ describe('UiamAPIKeys', () => {
         const result = await uiamApiKeys.copy(buildRequest(), { name: 'copy-name' });
 
         expect(result).toEqual({ id: 'cloned_id', name: 'copy-name', api_key: 'essu_cloned_key' });
-        expect(mockUiam.cloneApiKey).toHaveBeenCalledWith(
-          expect.objectContaining({ scheme: 'ApiKey', credentials: 'essu_internal_key' }),
-          { name: 'copy-name' }
-        );
+        expect(mockUiam.cloneApiKey).toHaveBeenCalledWith('essu_internal_key', 'copy-name');
         expect(mockUiam.grantApiKey).not.toHaveBeenCalled();
         expect(recordFallback).not.toHaveBeenCalled();
       });

@@ -327,14 +327,11 @@ export interface UiamServicePublic {
    * client certificate alone, so it carries neither the key's authorization nor client
    * authentication. A key that can't be cloned, such as a revoked one, is refused with a 400. The
    * clone has no expiration of its own: it expires when the key it copies does.
-   * @param authorization The `ApiKey` credential of the internal key to clone.
-   * @param params The name of the new key.
+   * @param apiKey The secret of the internal key to clone.
+   * @param description The description of the new key.
    * @returns A promise that resolves to the cloned key's details.
    */
-  cloneApiKey(
-    authorization: HTTPAuthorizationHeader,
-    params: { name: string }
-  ): Promise<CloneUiamApiKeyResponse>;
+  cloneApiKey(apiKey: string, description: string): Promise<CloneUiamApiKeyResponse>;
 
   /**
    * Exchanges an OAuth access token for an ephemeral UIAM token. Validates that the audience
@@ -870,17 +867,14 @@ export class UiamService implements UiamServicePublic {
   /**
    * See {@link UiamServicePublic.cloneApiKey}.
    */
-  async cloneApiKey(
-    authorization: HTTPAuthorizationHeader,
-    { name }: { name: string }
-  ): Promise<CloneUiamApiKeyResponse> {
+  async cloneApiKey(apiKey: string, description: string): Promise<CloneUiamApiKeyResponse> {
     this.#logger.debug('Attempting to clone an API key.');
 
     // The key goes in the body, because the client certificate authenticates the call.
     const requestOptions: RequestInit & { dispatcher?: Agent } = {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'User-Agent': this.#userAgentHeader },
-      body: JSON.stringify({ api_key: authorization.credentials, description: name }),
+      body: JSON.stringify({ api_key: apiKey, description }),
       dispatcher: this.#dispatcher,
     };
 

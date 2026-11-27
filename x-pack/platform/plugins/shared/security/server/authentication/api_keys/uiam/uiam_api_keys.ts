@@ -194,7 +194,7 @@ export class UiamAPIKeys implements UiamAPIKeysType {
 
     this.logger.debug('Trying to clone an API key');
     try {
-      const { id, key, description } = await this.uiam.cloneApiKey(authorization, { name });
+      const { id, key, description } = await this.uiam.cloneApiKey(authorization.credentials, name);
       this.logger.debug('API key was cloned successfully');
       return { id, name: description, api_key: key };
     } catch (e) {

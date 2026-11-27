@@ -1395,7 +1395,7 @@ describe('UiamService', () => {
   });
 
   describe('#cloneApiKey', () => {
-    const source = new HTTPAuthorizationHeader('ApiKey', 'essu_source_key');
+    const source = 'essu_source_key';
 
     it('asks UIAM to clone the key, authenticated by the client certificate alone', async () => {
       fetchSpy.mockResolvedValue({
@@ -1411,7 +1411,7 @@ describe('UiamService', () => {
         }),
       });
 
-      await expect(uiamService.cloneApiKey(source, { name: 'my-clone' })).resolves.toEqual({
+      await expect(uiamService.cloneApiKey(source, 'my-clone')).resolves.toEqual({
         id: 'clone-id',
         key: 'essu_clone_key',
         description: 'my-clone',
@@ -1435,7 +1435,7 @@ describe('UiamService', () => {
     ])('rejects a response with %s', async (_, body) => {
       fetchSpy.mockResolvedValue({ ok: true, status: 200, json: async () => body });
 
-      await expect(uiamService.cloneApiKey(source, { name: 'my-clone' })).rejects.toThrow(
+      await expect(uiamService.cloneApiKey(source, 'my-clone')).rejects.toThrow(
         'UIAM returned an unexpected response when cloning an API key'
       );
     });
@@ -1446,7 +1446,7 @@ describe('UiamService', () => {
         json: async () => ({ id: 'clone-id', key: 'essu_clone_key', description: 'my-clone' }),
       });
 
-      await uiamService.cloneApiKey(source, { name: 'my-clone' });
+      await uiamService.cloneApiKey(source, 'my-clone');
 
       const logged = JSON.stringify(uiamServiceLogger.debug.mock.calls);
       expect(logged).not.toContain('essu_source_key');
