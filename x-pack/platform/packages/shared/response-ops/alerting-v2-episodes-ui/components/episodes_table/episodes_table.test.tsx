@@ -15,6 +15,9 @@ import { useFetchAlertingEpisodesQuery } from '../../hooks/use_fetch_alerting_ep
 import { useAlertingRulesCache } from '../../hooks/use_alerting_rules_cache';
 import { AlertHostProvider, type AlertHostContextValue } from '../../context/alert_host_context';
 import { EpisodeRuleCell } from '../episodes_table_cell_renderers';
+import { ClassicAlertDetailsFlyoutContent } from '../classic_alert_details_flyout';
+import { AlertEpisodeDetailsFlyoutContent } from '../details/details_flyout';
+import { AlertDetailsFrame } from '../details/alert_details_frame';
 import {
   EpisodesTable,
   type EpisodesTableProps,
@@ -86,6 +89,20 @@ jest.mock('../episodes_table_cell_renderers', () => {
   const actual = jest.requireActual('../episodes_table_cell_renderers');
   return { ...actual, EpisodeRuleCell: jest.fn(() => null) };
 });
+
+jest.mock('../classic_alert_details_flyout', () => ({
+  CLASSIC_ALERT_DETAILS_FLYOUT_TEST_SUBJ: 'classicFlyout',
+  ClassicAlertDetailsFlyoutContent: jest.fn(() => null),
+}));
+
+jest.mock('../details/details_flyout', () => ({
+  ALERT_EPISODE_DETAILS_FLYOUT_TEST_SUBJ: 'episodeFlyout',
+  AlertEpisodeDetailsFlyoutContent: jest.fn(() => null),
+}));
+
+jest.mock('../details/alert_details_frame', () => ({
+  AlertDetailsFrame: jest.fn(({ children }: { children: React.ReactNode }) => children),
+}));
 
 jest.mock('@kbn/cell-actions', () => ({
   CellActionsProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
@@ -353,6 +370,71 @@ describe('EpisodesTable', () => {
       act(() => lastGridProps().setExpandedDoc(undefined));
 
       expect(closeRuleFlyout).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('details flyout', () => {
+    const record = (id: string, supportsTimeline: boolean) => ({
+      id,
+      raw: {},
+      flattened: { 'episode.id': id, supports_timeline: supportsTimeline },
+    });
+    const universalA = record('universal-a', true);
+    const classicB = record('classic-b', false);
+    const universalC = record('universal-c', true);
+    const displayedRows = [universalA, classicB, universalC];
+
+    const lastProps = (component: unknown) => {
+      const { calls } = (component as jest.Mock).mock;
+      return calls[calls.length - 1][0];
+    };
+
+    const documentView = (hit: ReturnType<typeof record>) => (
+      <>{lastGridProps().renderDocumentView(hit, displayedRows, [])}</>
+    );
+
+    it('opens Universal details in the frame with its position in the displayed rows', () => {
+      renderTable();
+      render(documentView(universalA));
+
+      expect(ClassicAlertDetailsFlyoutContent).not.toHaveBeenCalled();
+      expect(lastProps(AlertEpisodeDetailsFlyoutContent).episodeId).toBe('universal-a');
+      expect(lastProps(AlertDetailsFrame)).toEqual(
+        expect.objectContaining({
+          'data-test-subj': 'episodeFlyout',
+          pagination: expect.objectContaining({ currentIndex: 0, total: 3 }),
+        })
+      );
+    });
+
+    it('opens Classic details in the frame with its position in the displayed rows', () => {
+      renderTable();
+      render(documentView(classicB));
+
+      expect(AlertEpisodeDetailsFlyoutContent).not.toHaveBeenCalled();
+      expect(lastProps(ClassicAlertDetailsFlyoutContent).alertId).toBe('classic-b');
+      expect(lastProps(AlertDetailsFrame)).toEqual(
+        expect.objectContaining({
+          'data-test-subj': 'classicFlyout',
+          pagination: expect.objectContaining({ currentIndex: 1, total: 3 }),
+        })
+      );
+    });
+
+    it('moves the expanded row across Universal and Classic rows', () => {
+      renderTable();
+      const { rerender } = render(documentView(universalA));
+
+      act(() => lastProps(AlertDetailsFrame).pagination.onNext());
+      expect(lastGridProps().expandedDoc).toBe(classicB);
+
+      rerender(documentView(classicB));
+      act(() => lastProps(AlertDetailsFrame).pagination.onNext());
+      expect(lastGridProps().expandedDoc).toBe(universalC);
+
+      rerender(documentView(universalC));
+      act(() => lastProps(AlertDetailsFrame).pagination.onPrevious());
+      expect(lastGridProps().expandedDoc).toBe(classicB);
     });
   });
 });

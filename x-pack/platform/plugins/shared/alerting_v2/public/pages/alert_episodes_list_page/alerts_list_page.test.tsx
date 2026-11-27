@@ -11,7 +11,9 @@ import { QueryClient } from '@kbn/react-query';
 import { createMockLocators, ListPageTestProviders } from '../../test_utils/test_providers';
 import { ManageRulesHrefProvider } from '../../application/manage_rules_href_context';
 import { AlertsListPage } from './alerts_list_page';
-import type { CustomBulkActions } from '@kbn/unified-data-table';
+import type { CustomBulkActions, RenderDocumentViewCallback } from '@kbn/unified-data-table';
+import type { DataTableRecord } from '@kbn/discover-utils/types';
+import { ClassicAlertDetailsFlyoutContent } from '@kbn/alerting-v2-episodes-ui/components/classic_alert_details_flyout';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { UnifiedDataTable, getRenderCustomToolbarWithElements } from '@kbn/unified-data-table';
 import { fetchAlertingEpisodes } from '@kbn/alerting-v2-episodes-ui/apis/fetch_alerting_episodes';
@@ -82,7 +84,8 @@ jest.mock('@kbn/alerting-v2-episodes-ui/actions', () => ({
 }));
 
 jest.mock('@kbn/alerting-v2-episodes-ui/components/details/details_flyout', () => ({
-  AlertEpisodeDetailsFlyout: jest.fn(() => <div data-test-subj="alertEpisodeFlyoutStub" />),
+  ALERT_EPISODE_DETAILS_FLYOUT_TEST_SUBJ: 'alertingV2EpisodeFlyout',
+  AlertEpisodeDetailsFlyoutContent: jest.fn(() => <div data-test-subj="alertEpisodeFlyoutStub" />),
 }));
 
 jest.mock('../../hooks/use_compose_discover_flyout', () => ({
@@ -193,6 +196,16 @@ jest.mock('@kbn/kibana-react-plugin/public', () => ({
 }));
 
 const mockUnifiedDataTable = jest.mocked(UnifiedDataTable);
+
+/** Calls the grid's `renderDocumentView` for a row and returns the details declared in the frame. */
+const renderDetailsFor = (flattened: Record<string, unknown>): React.ReactElement => {
+  const { renderDocumentView } = mockUnifiedDataTable.mock.calls.at(-1)![0] as {
+    renderDocumentView: RenderDocumentViewCallback;
+  };
+  const hit: DataTableRecord = { id: String(flattened['episode.id']), raw: {}, flattened };
+  const frame = renderDocumentView(hit, [hit], []) as React.ReactElement;
+  return frame.props.children;
+};
 
 const mockDataView = {
   fields: { forEach: jest.fn() },
@@ -431,31 +444,18 @@ describe('AlertsListPage', () => {
   });
 
   it('renderDocumentView returns a node when invoked with a hit containing episode.id', () => {
-    const lastCall = mockUnifiedDataTable.mock.calls.at(-1)?.[0];
-    const renderDocumentView = lastCall?.renderDocumentView as (hit: {
-      flattened: Record<string, unknown>;
-    }) => React.ReactNode;
-    const node = renderDocumentView({ flattened: { 'episode.id': 'ep-1' } });
-    expect(node).toBeTruthy();
+    expect(renderDetailsFor({ 'episode.id': 'ep-1' })).toBeTruthy();
   });
 
   it('passes host-aware getRuleDetailsHref into the episode details flyout', () => {
-    const lastCall = mockUnifiedDataTable.mock.calls.at(-1)?.[0];
-    const renderDocumentView = lastCall?.renderDocumentView as (hit: {
-      flattened: Record<string, unknown>;
-    }) => React.ReactElement;
-    const node = renderDocumentView({ flattened: { 'episode.id': 'ep-1' } });
+    const node = renderDetailsFor({ 'episode.id': 'ep-1' });
     expect(typeof node.props.getRuleDetailsHref).toBe('function');
     expect(node.props.getRuleDetailsHref('rule-1')).toBe('/mock-locator-url');
     expect(mockLocators.rulesLocators.getRedirectUrl).toHaveBeenCalledWith({ ruleId: 'rule-1' });
   });
 
   it('passes host-aware getEpisodeDetailsHref into the episode details flyout', () => {
-    const lastCall = mockUnifiedDataTable.mock.calls.at(-1)?.[0];
-    const renderDocumentView = lastCall?.renderDocumentView as (hit: {
-      flattened: Record<string, unknown>;
-    }) => React.ReactElement;
-    const node = renderDocumentView({ flattened: { 'episode.id': 'ep-1' } });
+    const node = renderDetailsFor({ 'episode.id': 'ep-1' });
     expect(typeof node.props.getEpisodeDetailsHref).toBe('function');
     expect(node.props.getEpisodeDetailsHref('ep-1')).toBe('/mock-locator-url');
     expect(mockLocators.episodesLocators.getRedirectUrl).toHaveBeenCalledWith({
@@ -463,16 +463,9 @@ describe('AlertsListPage', () => {
     });
   });
 
-  it('renderDocumentView returns the ClassicAlertDetailsFlyout for classic-sourced rows', () => {
-    const lastCall = mockUnifiedDataTable.mock.calls.at(-1)?.[0];
-    const renderDocumentView = lastCall?.renderDocumentView as (hit: {
-      flattened: Record<string, unknown>;
-    }) => React.ReactElement;
-    const node = renderDocumentView({
-      flattened: { 'episode.id': 'classic-alert-id', supports_timeline: false },
-    });
-    expect(node).toBeTruthy();
-    expect(node.type).toBeDefined();
+  it('renderDocumentView returns the Classic alert details for classic-sourced rows', () => {
+    const node = renderDetailsFor({ 'episode.id': 'classic-alert-id', supports_timeline: false });
+    expect(node.type).toBe(ClassicAlertDetailsFlyoutContent);
     expect(node.props.alertId).toBe('classic-alert-id');
   });
 
@@ -711,11 +704,7 @@ describe('privilege gating', () => {
     return (lastCall?.rowAdditionalLeadingControls ?? []).map((control) => control.id);
   };
   const getFlyoutActionIds = (): string[] => {
-    const lastCall = mockUnifiedDataTable.mock.calls.at(-1)?.[0];
-    const renderDocumentView = lastCall?.renderDocumentView as (hit: {
-      flattened: Record<string, unknown>;
-    }) => React.ReactElement;
-    const node = renderDocumentView({ flattened: { 'episode.id': 'ep-1' } });
+    const node = renderDetailsFor({ 'episode.id': 'ep-1' });
     return node.props.actions.map(({ id }: { id: string }) => id);
   };
 

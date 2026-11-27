@@ -31,6 +31,25 @@ import {
 import { AlertEpisodeDetailsFlyout } from './details_flyout';
 
 jest.mock('../../hooks/use_episode_details_header_data');
+
+const mockEuiFlyout = jest.fn();
+
+jest.mock('@elastic/eui', () => {
+  const actual = jest.requireActual('@elastic/eui');
+  const react = jest.requireActual('react');
+  return {
+    ...actual,
+    EuiFlyout: (props: Record<string, unknown>) => {
+      mockEuiFlyout(props);
+      return react.createElement(actual.EuiFlyout, props);
+    },
+  };
+});
+
+const episodeFlyoutProps = () =>
+  mockEuiFlyout.mock.calls
+    .filter(([props]) => props['data-test-subj'] === 'alertingV2EpisodeFlyout')
+    .at(-1)![0];
 jest.mock('../../hooks/use_invalidate_episode_queries', () => ({
   useInvalidateEpisodeQueries: () => jest.fn(),
 }));
@@ -162,6 +181,15 @@ describe('AlertEpisodeDetailsFlyout', () => {
     // EUI hardcodes data-test-subj="euiFlyoutCloseButton" on the close button and ignores
     // closeButtonProps['data-test-subj'], so we assert the EUI default here.
     expect(screen.getByTestId('euiFlyoutCloseButton')).toBeInTheDocument();
+  });
+
+  it('opens standalone in the shared alert details frame without pagination', () => {
+    render(<AlertEpisodeDetailsFlyout {...baseProps} />, { wrapper: Wrapper });
+
+    expect(episodeFlyoutProps().flyoutMenuProps).toEqual({
+      title: 'Alert details',
+      pagination: undefined,
+    });
   });
 
   it('exposes view details behind the footer take action menu', () => {
@@ -313,6 +341,37 @@ describe('AlertEpisodeDetailsFlyout', () => {
     expect(screen.queryByTestId('alertingV2EpisodeFlyoutTabMetadata')).not.toBeInTheDocument();
   });
 
+  describe('while the alert loads', () => {
+    beforeEach(() => {
+      mockUseEpisodeDetailsHeaderData.mockReturnValue({
+        ...baseHeaderData,
+        isLoading: true,
+        ruleState: { status: RuleStateStatus.idle },
+        isActionStateLoaded: false,
+      });
+    });
+
+    it('holds the title, status and header values with skeletons', () => {
+      render(<AlertEpisodeDetailsFlyout {...baseProps} />, { wrapper: Wrapper });
+
+      expect(screen.getByTestId('alertDetailsTitleSkeleton')).toBeInTheDocument();
+      // Description, status badge, severity, assignee and duration.
+      expect(screen.getAllByTestId('alertDetailsValueSkeleton')).toHaveLength(5);
+    });
+
+    it('keeps the metadata tab and shows a skeleton until the rule loads', () => {
+      render(<AlertEpisodeDetailsFlyout {...baseProps} />, { wrapper: Wrapper });
+
+      fireEvent.click(screen.getByTestId('alertingV2EpisodeFlyoutTabMetadata'));
+
+      expect(screen.getByRole('progressbar', { name: 'Loading data container' })).toHaveAttribute(
+        'data-test-subj',
+        'alertingV2EpisodeFlyoutMetadataSkeleton'
+      );
+      expect(screen.queryByTestId('metadataSectionStub')).not.toBeInTheDocument();
+    });
+  });
+
   it('does not render a close button in the footer', () => {
     render(<AlertEpisodeDetailsFlyout {...baseProps} />, { wrapper: Wrapper });
     expect(screen.queryByTestId('alertingV2EpisodeFlyoutCloseButton')).not.toBeInTheDocument();
@@ -411,16 +470,37 @@ describe('AlertEpisodeDetailsFlyout', () => {
     expect(onClose).not.toHaveBeenCalled();
   });
 
+  it('opens the runbook in the episode flyout history group, so it has a Back button', () => {
+    render(<AlertEpisodeDetailsFlyout {...baseProps} />, { wrapper: Wrapper });
+
+    const { onShowFullGuide } = mockRunbookSection.mock.calls.at(-1)![0];
+    act(() => onShowFullGuide!());
+
+    const runbookFlyoutProps = mockEuiFlyout.mock.calls
+      .filter(([props]) => props['data-test-subj'] === 'alertingV2EpisodeRunbookFlyout')
+      .at(-1)![0];
+    expect(runbookFlyoutProps).toMatchObject({ session: 'start' });
+    expect(runbookFlyoutProps.historyKey).toBe(episodeFlyoutProps().historyKey);
+  });
+
+  it('keeps the runbook open when switching tabs in the episode flyout', () => {
+    render(<AlertEpisodeDetailsFlyout {...baseProps} />, { wrapper: Wrapper });
+
+    const { onShowFullGuide } = mockRunbookSection.mock.calls.at(-1)![0];
+    act(() => onShowFullGuide!());
+    fireEvent.click(screen.getByTestId('alertingV2EpisodeFlyoutTabTimeline'));
+
+    expect(screen.getByTestId('alertingV2EpisodeRunbookFlyout')).toBeInTheDocument();
+    expect(screen.getByTestId('alertingV2EpisodeFlyout')).toBeInTheDocument();
+  });
+
   it('keeps the episode flyout mounted underneath the runbook flyout', () => {
     render(<AlertEpisodeDetailsFlyout {...baseProps} />, { wrapper: Wrapper });
 
     const { onShowFullGuide } = mockRunbookSection.mock.calls.at(-1)![0];
     act(() => onShowFullGuide!());
 
-    // Going back has to land on the episode flyout, so it must not unmount.
-    // The manager-supplied back button is not assertable here: the Jest build of
-    // EuiFlyout is a stub that drops `session` along with type/size/ownFocus, so no
-    // manager session is ever created.
+    // Closing the runbook has to land on the episode flyout, so it must not unmount.
     expect(screen.getByTestId('alertingV2EpisodeFlyout')).toBeInTheDocument();
     expect(screen.getByTestId('alertingV2EpisodeRunbookFlyout')).toBeInTheDocument();
   });

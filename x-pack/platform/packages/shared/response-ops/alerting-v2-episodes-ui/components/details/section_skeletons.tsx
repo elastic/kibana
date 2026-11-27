@@ -12,10 +12,13 @@ import {
   EuiSkeletonCircle,
   EuiSkeletonRectangle,
   EuiSkeletonText,
+  EuiSkeletonTitle,
 } from '@elastic/eui';
 
 export interface AlertEpisodeDescriptionListSkeletonProps {
   rows?: number;
+  /** Announces what loads when the skeleton stands in for a whole panel. */
+  'aria-label'?: string;
   'data-test-subj'?: string;
 }
 
@@ -24,9 +27,17 @@ export interface AlertEpisodeDescriptionListSkeletonProps {
  */
 export const AlertEpisodeDescriptionListSkeleton = ({
   rows = 5,
+  'aria-label': ariaLabel,
   'data-test-subj': dataTestSubj,
 }: AlertEpisodeDescriptionListSkeletonProps) => (
-  <EuiFlexGroup direction="column" gutterSize="m" responsive={false} data-test-subj={dataTestSubj}>
+  <EuiFlexGroup
+    direction="column"
+    gutterSize="m"
+    responsive={false}
+    role={ariaLabel ? 'progressbar' : undefined}
+    aria-label={ariaLabel}
+    data-test-subj={dataTestSubj}
+  >
     {Array.from({ length: rows }, (_, index) => (
       <EuiFlexGroup key={index} gutterSize="m" responsive={false} alignItems="center">
         <EuiFlexItem grow={1}>
@@ -87,4 +98,33 @@ export const AlertEpisodeTimelineSkeleton = ({
       </EuiFlexGroup>
     ))}
   </EuiFlexGroup>
+);
+
+/**
+ * Loading placeholder for the alert details flyout title, shared by the Universal and Classic
+ * details so both load the same way.
+ */
+export const AlertDetailsTitleSkeleton = () => (
+  <EuiSkeletonTitle size="xs" data-test-subj="alertDetailsTitleSkeleton" />
+);
+
+export interface AlertDetailsValueSkeletonProps {
+  width?: number;
+  height?: number;
+}
+
+/**
+ * Loading placeholder for a one-line value in the alert details flyout header, such as an info
+ * block, a badge or the description. It holds the value's space so the header keeps its height.
+ */
+export const AlertDetailsValueSkeleton = ({
+  width = 80,
+  height = 16,
+}: AlertDetailsValueSkeletonProps) => (
+  <EuiSkeletonRectangle
+    width={width}
+    height={height}
+    borderRadius="s"
+    data-test-subj="alertDetailsValueSkeleton"
+  />
 );
