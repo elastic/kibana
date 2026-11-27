@@ -154,6 +154,36 @@ describe('addCrawlFields', () => {
 
     expect(esClient.indices.putMapping).not.toHaveBeenCalled();
   });
+
+  it.each(['epoch_millis', 'epoch_second||epoch_millis'])(
+    'refuses a crawled_at that only takes the format %s',
+    async (format) => {
+      await expect(
+        addCrawlFields(esClient, INDEX_NAME, {
+          [INDEX_NAME]: {
+            properties: { ...CRAWL_FIELDS, crawled_at: { type: 'date' as const, format } },
+          },
+        })
+      ).rejects.toThrow(
+        new IncompatibleCrawlIndexError(
+          `Index ${INDEX_NAME} maps crawled_at with the format ${format}, and a crawl writes ISO 8601 timestamps`
+        )
+      );
+    }
+  );
+
+  it.each(['strict_date_optional_time||epoch_millis', 'yyyy-MM-dd||epoch_millis'])(
+    'accepts a crawled_at with the format %s',
+    async (format) => {
+      await expect(
+        addCrawlFields(esClient, INDEX_NAME, {
+          [INDEX_NAME]: {
+            properties: { ...CRAWL_FIELDS, crawled_at: { type: 'date' as const, format } },
+          },
+        })
+      ).resolves.toBeUndefined();
+    }
+  );
 });
 
 describe('getIndexPrivileges', () => {

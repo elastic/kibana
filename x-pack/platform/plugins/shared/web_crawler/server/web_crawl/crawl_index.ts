@@ -40,6 +40,15 @@ const CRAWL_INDEX_PROPERTIES: Record<string, estypes.MappingProperty> = {
 
 export class IncompatibleCrawlIndexError extends Error {}
 
+// We write ISO timestamps, which a date field that only takes epoch formats rejects
+const getEpochOnlyFormat = (property: estypes.MappingProperty): string | undefined => {
+  if (property.type !== 'date' && property.type !== 'date_nanos') {
+    return undefined;
+  }
+  const { format } = property;
+  return format?.split('||').every((part) => part.trim().startsWith('epoch_')) ? format : undefined;
+};
+
 export const readCrawlIndexMappings = async (
   esClient: ElasticsearchClient,
   indexName: string
@@ -88,6 +97,13 @@ export const addCrawlFields = async (
             existing.type ?? 'object'
           }, and a crawl needs it to be ${property.type}`
         );
+      } else {
+        const epochOnlyFormat = getEpochOnlyFormat(existing);
+        if (epochOnlyFormat) {
+          throw new IncompatibleCrawlIndexError(
+            `Index ${concreteName} maps ${field} with the format ${epochOnlyFormat}, and a crawl writes ISO 8601 timestamps`
+          );
+        }
       }
     }
   }
