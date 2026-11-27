@@ -16,7 +16,7 @@ import { generateLogsData, generateMetricsData, generateRulesData } from '../fix
 
 const globalSetupHook = mergeTests(obltGlobalSetupHook, synthtraceFixture);
 
-// Keeps the plain Alerts navigation link and the Rules page heading tabs, which change when alerting v2 is on.
+// Keeps the v1 Alerting panel links and the Rules page heading tabs, which change when alerting v2 is on.
 globalSetupHook(
   'Disable alerting v2',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
