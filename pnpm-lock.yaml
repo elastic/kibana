@@ -3071,6 +3071,9 @@ importers:
       '@kbn/preboot-example-plugin':
         specifier: workspace:*
         version: link:examples/preboot_example
+      '@kbn/presentation-panel-message':
+        specifier: workspace:*
+        version: link:src/platform/packages/shared/presentation/presentation-panel-message
       '@kbn/presentation-publishing':
         specifier: workspace:*
         version: link:src/platform/packages/shared/presentation/presentation_publishing
@@ -8561,6 +8564,8 @@ importers:
   src/platform/packages/shared/kbn-zod-helpers: {}
 
   src/platform/packages/shared/navigation-customization-components: {}
+
+  src/platform/packages/shared/presentation/presentation-panel-message: {}
 
   src/platform/packages/shared/presentation/presentation_publishing: {}
 

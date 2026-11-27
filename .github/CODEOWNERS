@@ -799,6 +799,7 @@ src/platform/packages/shared/navigation-customization-components @elastic/appex-
 src/platform/packages/shared/presentation/presentation_publishing @elastic/kibana-dashboards
 src/platform/packages/shared/presentation/presentation_publishing_schemas @elastic/kibana-dashboards
 src/platform/packages/shared/presentation/presentation_util @elastic/kibana-dashboards
+src/platform/packages/shared/presentation/presentation-panel-message @elastic/kibana-dashboards
 src/platform/packages/shared/react/env @elastic/appex-sharedux
 src/platform/packages/shared/react/kibana_context/common @elastic/appex-sharedux
 src/platform/packages/shared/react/kibana_context/env @elastic/appex-sharedux
