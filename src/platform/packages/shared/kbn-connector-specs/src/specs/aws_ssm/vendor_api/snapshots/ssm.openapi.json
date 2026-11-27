@@ -609,6 +609,14 @@
         "properties": {},
         "type": "object"
       },
+      "CloudProvider": {
+        "enum": [
+          "AWS",
+          "Azure",
+          "GCP"
+        ],
+        "type": "string"
+      },
       "CloudWatchOutputConfig": {
         "properties": {
           "CloudWatchLogGroupName": {
@@ -935,6 +943,14 @@
         "properties": {
           "Author": {
             "type": "string"
+          },
+          "CloudProviders": {
+            "items": {
+              "$ref": "#/components/schemas/CloudProvider"
+            },
+            "maxItems": 10,
+            "minItems": 1,
+            "type": "array"
           },
           "CreatedDate": {
             "format": "double",

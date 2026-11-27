@@ -20,13 +20,15 @@ import {
   type ApplicationTabId,
 } from '../../../common/types/applications';
 import { useRouteBreadcrumb } from '../../breadcrumbs/use_route_breadcrumb';
+import { DIGITAL_EXPERIENCE_EBT_ACTIONS } from '../../ebt_constants';
 import { useApplicationLinks } from '../../hooks/use_application_links';
 import { useApplicationsHref } from '../../hooks/use_applications_href';
 import { useKibanaServices } from '../../hooks/use_kibana_services';
+import { useQueryParam } from '../../hooks/use_query_param';
 import { useShareAction } from '../../hooks/use_share_action';
 import { useEnvironment } from '../../hooks/use_environment';
 import { useTimeRange } from '../../hooks/use_time_range';
-import { APPLICATIONS_LABEL, APPLICATION_TAB_LABELS } from '../../labels';
+import { APPLICATIONS_LABEL, APPLICATION_TAB_LABELS, COMPARE_LABEL } from '../../labels';
 import { ErrorsTab } from '../errors/errors_tab';
 import { NetworkTab } from '../network/network_tab';
 import { ReportsTab } from '../reports/reports_tab';
@@ -173,6 +175,9 @@ function WebApplicationPage({
   const { overviewHref, overviewPath, errorsHref, networkHref, reportsHref, sessionsHref } =
     useApplicationLinks(serviceName, source);
   const shareAction = useShareAction({ serviceName, source, tab: selectedTab });
+  // In the URL, so a reload or Share keeps it; the EDOT Browser Overview's KPIs read it.
+  const { value: compare, setValue: setCompare } = useQueryParam('compare');
+  const isComparing = compare === 'true';
   // Classic RUM only has the Overview (and Sessions' unavailable prompt); any other tab's URL is
   // replaced by the Overview's.
   const isUnsupportedTab = selectedTab !== 'sessions' && !tabsOf(source).includes(selectedTab);
@@ -234,6 +239,24 @@ function WebApplicationPage({
         title={serviceName}
         back={{ href: applicationsHref, label: APPLICATIONS_LABEL }}
         share={shareAction}
+        menu={
+          source === APPLICATION_SOURCE.otel && selectedTab === 'overview'
+            ? {
+                items: [
+                  {
+                    id: 'compare',
+                    order: 1,
+                    label: COMPARE_LABEL,
+                    iconType: 'compare',
+                    isSelected: isComparing,
+                    run: () => setCompare(isComparing ? undefined : 'true'),
+                    testId: 'digitalExperienceOverviewCompareToggle',
+                    ebt: { action: DIGITAL_EXPERIENCE_EBT_ACTIONS.TOGGLE_COMPARE },
+                  },
+                ],
+              }
+            : undefined
+        }
         tabs={tabsOf(source).map((id) => ({
           id,
           label: APPLICATION_TAB_LABELS[id],

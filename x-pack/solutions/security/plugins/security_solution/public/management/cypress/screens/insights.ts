@@ -39,8 +39,6 @@ export const workflowInsightsSelectors = {
     cy.getByTestSubj('workflowInsightsEmptyResultsCallout').should('not.exist'),
   clickTrustedAppFormSubmissionButton: () =>
     cy.getByTestSubj('trustedAppsListPage-flyout-submitButton').click(),
-  insightsComponentDoesntExist: () =>
-    cy.getByTestSubj('endpointDetailsInsightsWrapper').should('not.exist'),
   validateErrorToastContent: (content: string) =>
     cy
       .getByTestSubj('globalToastList')

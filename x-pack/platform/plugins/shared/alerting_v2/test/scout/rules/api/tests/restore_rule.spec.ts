@@ -133,6 +133,47 @@ apiTest.describe('Restore rule API', { tag: testData.API_ENGINE_NON_MKI_TAG }, (
     }
   );
 
+  apiTest(
+    'restore: brings a builder rule back in builder mode',
+    async ({ apiClient, apiServices }) => {
+      const created = await apiServices.alertingV2.rules.create(
+        buildCreateRuleData({
+          metadata: { name: 'restore-builder-rule', builder: { type: 'threshold' } },
+        })
+      );
+
+      await apiServices.alertingV2.ruleChangesHistory.waitForAtLeast(1, {
+        ruleId: created.id,
+        action: RuleChangesHistoryAction.ruleCreate,
+      });
+
+      const cleared = await apiServices.alertingV2.rules.upsert(
+        created.id,
+        buildCreateRuleData({ metadata: { name: 'restore-builder-rule' } })
+      );
+      expect(cleared.metadata.builder).toBeUndefined();
+
+      const listResponse = await apiClient.get(
+        `${CHANGE_HISTORY_URL}?rule_id=${encodeURIComponent(created.id)}`,
+        { headers: readerHeaders }
+      );
+      expect(listResponse).toHaveStatusCode(200);
+
+      const list: ListRuleChangeHistoryResponse = listResponse.body;
+      const createItem = list.items.find(
+        ({ action }) => action === RuleChangesHistoryAction.ruleCreate
+      );
+      expect(createItem).toBeDefined();
+
+      const restoreResponse = await apiClient.post(
+        `${CHANGE_HISTORY_URL}/${encodeURIComponent(createItem?.id ?? '')}/_restore`,
+        { headers: writerHeaders }
+      );
+      expect(restoreResponse).toHaveStatusCode(200);
+      expect(restoreResponse.body.metadata.builder).toStrictEqual({ type: 'threshold' });
+    }
+  );
+
   apiTest('restore: rejects read-only callers and unknown changes', async ({ apiClient }) => {
     const restoreUrl = `${CHANGE_HISTORY_URL}/missing-change/_restore`;
 

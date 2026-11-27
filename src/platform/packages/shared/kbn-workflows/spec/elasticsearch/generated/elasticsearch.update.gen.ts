@@ -81,9 +81,9 @@ For usage examples such as partial updates, upserts, and scripted updates, see t
     ],
   },
   paramsSchema: z.object({
-    ...getShapeAt(update_request, 'body'),
-    ...getShapeAt(update_request, 'path'),
     ...getShapeAt(update_request, 'query'),
+    ...getShapeAt(update_request, 'path'),
+    ...getShapeAt(update_request, 'body'),
   }),
   outputSchema: update_response,
 };

@@ -64,7 +64,7 @@ const createDocGeneratorClass = async (kbnClient: KbnClient, isServerless: boole
   const capturedVersion = version;
 
   return class extends EndpointDocGenerator {
-    constructor(seedValue: string | seedrandom.prng) {
+    constructor(seedValue: string | seedrandom.PRNG) {
       const MetadataGenerator = class extends EndpointMetadataGenerator {
         protected randomVersion(): string {
           return capturedVersion;

@@ -10,6 +10,7 @@ import { fireEvent, render, screen, within } from '@testing-library/react';
 import { EuiProvider } from '@elastic/eui';
 import { SESSIONS_LIST_MAX_FRUSTRATION_FILTER_LENGTH } from '../../../../../common/sessions';
 import type { FrustratedElement, FrustratedPage } from '../../../../../common/types/usage';
+import { useFrustrationDashboardAvailable } from '../../../../hooks/use_frustration_dashboard_available';
 import { useKibanaServices } from '../../../../hooks/use_kibana_services';
 import { createUiSettingsMock } from '../../../../test_utils/ui_settings_mock';
 import type { SessionsListUrlQuery } from '../../../../utils/sessions_list_query';
@@ -17,6 +18,8 @@ import { EDOT_BROWSER_DOCS_URL } from '../../../../utils/doc_links';
 import { FrustrationPanel } from './frustration_panel';
 
 jest.mock('../../../../hooks/use_kibana_services');
+jest.mock('../../../../hooks/use_frustration_dashboard_available');
+
 const ELEMENTS: FrustratedElement[] = [
   {
     cssSelector: '#checkout',
@@ -78,6 +81,7 @@ const renderPanel = ({
       frustratedPages={pages}
       isLoading={isLoading}
       sessionsHref={sessionsHref}
+      dashboardHref="/frustration-dashboard"
     />,
     { wrapper: EuiProvider }
   );
@@ -87,6 +91,7 @@ beforeEach(() => {
   jest.mocked(useKibanaServices).mockReturnValue({
     uiSettings: createUiSettingsMock(),
   } as unknown as ReturnType<typeof useKibanaServices>);
+  jest.mocked(useFrustrationDashboardAvailable).mockReturnValue(true);
 });
 
 describe('FrustrationPanel', () => {
@@ -101,6 +106,51 @@ describe('FrustrationPanel', () => {
     renderPanel({ frustration: { ...FRUSTRATION, total: 1, sessions: 1 } });
 
     expect(screen.getByText('1 signal in 1 session')).toBeInTheDocument();
+  });
+
+  it('links the dashboard from the header', () => {
+    renderPanel();
+
+    expect(screen.getByTestId('digitalExperienceOverviewFrustrationDashboardLink')).toHaveAttribute(
+      'href',
+      '/frustration-dashboard'
+    );
+    expect(screen.getByRole('link', { name: 'View dashboard' })).toBeInTheDocument();
+  });
+
+  it('has no dashboard link without the plugins the dashboard needs', () => {
+    jest.mocked(useFrustrationDashboardAvailable).mockReturnValue(false);
+
+    renderPanel();
+
+    expect(
+      screen.queryByTestId('digitalExperienceOverviewFrustrationDashboardLink')
+    ).not.toBeInTheDocument();
+  });
+
+  it('has no dashboard link where the panel is not given one', () => {
+    render(
+      <FrustrationPanel
+        frustration={FRUSTRATION}
+        frustratedElements={[]}
+        frustratedPages={[]}
+        isLoading={false}
+        sessionsHref={sessionsHref}
+      />,
+      { wrapper: EuiProvider }
+    );
+
+    expect(
+      screen.queryByTestId('digitalExperienceOverviewFrustrationDashboardLink')
+    ).not.toBeInTheDocument();
+  });
+
+  it('has no dashboard link without signals', () => {
+    renderPanel({ frustration: NO_FRUSTRATION, elements: [], pages: [] });
+
+    expect(
+      screen.queryByTestId('digitalExperienceOverviewFrustrationDashboardLink')
+    ).not.toBeInTheDocument();
   });
 
   it('shows the share of a row as a whole percent', () => {

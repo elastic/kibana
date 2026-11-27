@@ -65,7 +65,7 @@ export class ServiceMapPage {
     this.zoomInBtnControl = this.zoomInBtn;
     this.zoomOutBtnControl = this.zoomOutBtn;
     this.fitViewBtn = this.centerServiceMapBtn;
-    this.noServicesPlaceholder = page.locator('.euiEmptyPrompt__content .euiTitle');
+    this.noServicesPlaceholder = page.getByRole('heading', { name: 'No services available' });
     this.serviceMapPopover = page.testSubj.locator('serviceMapPopover');
     this.serviceMapPopoverContent = page.testSubj.locator('serviceMapPopoverContent');
     this.serviceMapPopoverTitle = page.testSubj.locator('serviceMapPopoverTitle');

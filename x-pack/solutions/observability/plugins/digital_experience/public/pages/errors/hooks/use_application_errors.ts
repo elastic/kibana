@@ -6,7 +6,7 @@
  */
 
 import { useMemo } from 'react';
-import { PAGE_FILTER_NAMES } from '../../../../common/overview_filters';
+import { URL_FILTER_NAMES } from '../../../../common/overview_filters';
 import type { OverviewSearchParams } from '../../../../common/overview_filters';
 import { omitOverviewFilters } from '../../../../common/overview_filters_param';
 import type { ApplicationErrorsResponse } from '../../../../common/types/errors';
@@ -21,9 +21,9 @@ export type ApplicationErrors = ApplicationData<ApplicationErrorsResponse>;
 const errorsRequestOf = (
   searchParams: OverviewSearchParams
 ): ApplicationRequest<ApplicationErrorsResponse> => {
-  // The page does not apply to errors: they carry no page URL yet, and the route rejects it.
+  // The URL text does not apply to errors: they carry no URL, and the route rejects it.
   const { filters, ...rest } = searchParams;
-  const errorFilters = omitOverviewFilters(filters, PAGE_FILTER_NAMES);
+  const errorFilters = omitOverviewFilters(filters, URL_FILTER_NAMES);
   const errorsParams: OverviewSearchParams = errorFilters
     ? { ...rest, filters: errorFilters }
     : rest;

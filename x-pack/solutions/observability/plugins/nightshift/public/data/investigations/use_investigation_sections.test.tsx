@@ -77,16 +77,21 @@ const withInProgress =
     matchTotal,
     isPreviousData,
     refetchCritical,
+    refetchClosed = jest.fn(),
   }: {
     ids: string[];
     total?: number;
     matchTotal?: number;
     isPreviousData?: boolean;
     refetchCritical: jest.Mock;
+    refetchClosed?: jest.Mock;
   }) =>
   (params: FetchInvestigationsParams) => {
     if (params.inProgress) {
       return sectionResult({ ids, total, matchTotal, isPreviousData });
+    }
+    if (params.status === 'closed') {
+      return sectionResult({ refetch: refetchClosed });
     }
     if (isCritical(params)) {
       return sectionResult({ total: 3, refetch: refetchCritical });
@@ -160,6 +165,7 @@ describe('useInvestigationSections', () => {
       'medium',
       'low',
       'not-rated',
+      'closed',
     ]);
   });
 
@@ -311,6 +317,24 @@ describe('useInvestigationSections', () => {
     await waitFor(() => expect(result.current.totalCount).toBe(5));
   });
 
+  it('includes Closed in totalCount while keeping openTotalCount and loadedCount open-only', () => {
+    mockUseFetchInvestigations.mockImplementation((params) => {
+      if (params.inProgress) {
+        return sectionResult({ ids: ['running-a'] });
+      }
+      if (params.status === 'closed') {
+        return sectionResult({ ids: ['closed-a', 'closed-b'], total: 3 });
+      }
+      return sectionResult();
+    });
+
+    const { result } = renderSections();
+
+    expect(result.current.totalCount).toBe(4);
+    expect(result.current.openTotalCount).toBe(1);
+    expect(result.current.loadedCount).toBe(1);
+  });
+
   it('treats a non-empty in-progress section as active and polls only that section', () => {
     const { result } = renderSections();
 
@@ -320,21 +344,24 @@ describe('useInvestigationSections', () => {
     ).toEqual([5_000, undefined, undefined, undefined, undefined, undefined]);
   });
 
-  it('refetches the other sections when work leaves the in-progress section', () => {
+  it('refetches the other sections including Closed when work leaves the in-progress section', () => {
     const refetchCritical = jest.fn();
+    const refetchClosed = jest.fn();
     mockUseFetchInvestigations.mockImplementation(
-      withInProgress({ ids: ['running-a', 'running-b'], refetchCritical })
+      withInProgress({ ids: ['running-a', 'running-b'], refetchCritical, refetchClosed })
     );
     const { rerender } = renderSections();
     expect(refetchCritical).not.toHaveBeenCalled();
+    expect(refetchClosed).not.toHaveBeenCalled();
 
-    // One finished as another started: the total stays flat, but an id left.
+    // One left In progress (finished or closed while running): the total stays flat, but an id left.
     mockUseFetchInvestigations.mockImplementation(
-      withInProgress({ ids: ['running-b', 'running-c'], refetchCritical })
+      withInProgress({ ids: ['running-b', 'running-c'], refetchCritical, refetchClosed })
     );
     rerender({ query: undefined });
 
     expect(refetchCritical).toHaveBeenCalledTimes(1);
+    expect(refetchClosed).toHaveBeenCalledTimes(1);
   });
 
   it('refetches when the API total drops even if the capped loaded rows stay the same', () => {
@@ -384,7 +411,7 @@ describe('useInvestigationSections', () => {
     expect(refetchCritical).not.toHaveBeenCalled();
   });
 
-  it('refetches every open section and the severity counts when the status signal bumps', async () => {
+  it('refetches every section and the severity counts when the status signal bumps', async () => {
     const refetchBySeverity = {
       inProgress: jest.fn(),
       critical: jest.fn(),
@@ -392,11 +419,15 @@ describe('useInvestigationSections', () => {
       medium: jest.fn(),
       low: jest.fn(),
       none: jest.fn(),
+      closed: jest.fn(),
     };
 
     mockUseFetchInvestigations.mockImplementation((params) => {
       if (params.inProgress) {
         return sectionResult({ ids: ['running-a'], refetch: refetchBySeverity.inProgress });
+      }
+      if (params.status === 'closed') {
+        return sectionResult({ refetch: refetchBySeverity.closed });
       }
 
       const severity = params.severities?.[0];
@@ -433,6 +464,7 @@ describe('useInvestigationSections', () => {
     expect(refetchBySeverity.medium).toHaveBeenCalledTimes(1);
     expect(refetchBySeverity.low).toHaveBeenCalledTimes(1);
     expect(refetchBySeverity.none).toHaveBeenCalledTimes(1);
+    expect(refetchBySeverity.closed).toHaveBeenCalledTimes(1);
     await waitFor(() => expect(httpGet).toHaveBeenCalledTimes(1));
   });
 });

@@ -13,7 +13,7 @@ import { isNestedField } from '@kbn/data-views-plugin/common';
 import { MetricsEditor } from '../../../components/metrics_editor';
 import { getIndexPatternService } from '../../../kibana_services';
 import { GeoLineForm } from './geo_line_form';
-import type { AggDescriptor } from '../../../../common/descriptor_types';
+import type { AggDescriptor, ESGeoLineSourceDescriptor } from '../../../../common/descriptor_types';
 import type { OnSourceChangeArgs } from '../source';
 
 interface Props {
@@ -24,7 +24,7 @@ interface Props {
   splitField: string;
   sortField: string;
   metrics: AggDescriptor[];
-  onChange: (...args: OnSourceChangeArgs[]) => void;
+  onChange: (...args: OnSourceChangeArgs<ESGeoLineSourceDescriptor>[]) => void;
 }
 
 interface State {

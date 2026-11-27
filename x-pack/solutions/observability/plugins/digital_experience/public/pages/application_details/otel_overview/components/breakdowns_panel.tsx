@@ -172,30 +172,41 @@ export function BreakdownsPanel({
       showInstrumentationDocs
       data-test-subj="digitalExperienceOverviewBreakdowns"
     >
-      <Breakdown
-        label={BROWSER_LABEL}
-        items={toItems(
-          browsers,
-          'browser',
-          APPLICATION_OVERVIEW_EBT_ELEMENTS.BROWSER_SESSIONS_LINK
-        )}
-        total={totalPageLoads}
-        data-test-subj="digitalExperienceOverviewBrowsers"
-      />
-      <EuiSpacer size="m" />
-      <Breakdown
-        label={OPERATING_SYSTEM_LABEL}
-        items={toItems(operatingSystems, 'os', APPLICATION_OVERVIEW_EBT_ELEMENTS.OS_SESSIONS_LINK)}
-        total={totalPageLoads}
-        data-test-subj="digitalExperienceOverviewOperatingSystems"
-      />
-      <EuiSpacer size="m" />
-      <Breakdown
-        label={DEVICE_LABEL}
-        items={toItems(devices, 'device')}
-        total={totalPageLoads}
-        data-test-subj="digitalExperienceOverviewDevices"
-      />
+      {/* Side by side, stacked on small screens. */}
+      <EuiFlexGroup gutterSize="xl">
+        <EuiFlexItem>
+          <Breakdown
+            label={BROWSER_LABEL}
+            items={toItems(
+              browsers,
+              'browser',
+              APPLICATION_OVERVIEW_EBT_ELEMENTS.BROWSER_SESSIONS_LINK
+            )}
+            total={totalPageLoads}
+            data-test-subj="digitalExperienceOverviewBrowsers"
+          />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <Breakdown
+            label={OPERATING_SYSTEM_LABEL}
+            items={toItems(
+              operatingSystems,
+              'os',
+              APPLICATION_OVERVIEW_EBT_ELEMENTS.OS_SESSIONS_LINK
+            )}
+            total={totalPageLoads}
+            data-test-subj="digitalExperienceOverviewOperatingSystems"
+          />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <Breakdown
+            label={DEVICE_LABEL}
+            items={toItems(devices, 'device')}
+            total={totalPageLoads}
+            data-test-subj="digitalExperienceOverviewDevices"
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </DataPanel>
   );
 }

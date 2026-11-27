@@ -62,4 +62,23 @@ describe('getServiceMapViewTarget', () => {
       expect(target.y).toBe(0 + 80 / 2);
     }
   });
+
+  it('leaves out the members of an open group, whose positions are relative to their box', () => {
+    const visibleNodes = [
+      makeNode(0, 0),
+      makeNode(100, 0),
+      makeNode(200, 0),
+      makeNode(50_000, 30_000),
+      // Members sit near (0, 0) inside the box, which would drag the median there.
+      makeNode(24, 72, { id: 'm1', parentId: 'box' }),
+      makeNode(24, 200, { id: 'm2', parentId: 'box' }),
+      makeNode(24, 330, { id: 'm3', parentId: 'box' }),
+    ];
+    const bounds: Rect = { x: 0, y: 0, width: 50_200, height: 30_080 };
+
+    const target = getServiceMapViewTarget({ ...VIEWPORT, visibleNodes, bounds });
+
+    // Median of the four top-level nodes only: x centres 100, 200, 300, 50_100 → 250.
+    expect(target).toEqual({ kind: 'center', x: 250, y: 40 });
+  });
 });

@@ -10,6 +10,7 @@ import { schema } from '@kbn/config-schema';
 import { MAX_COMMENT_LENGTH } from '../../../../constants';
 import { SUPPORTED_HOST_OS_TYPE } from '../../../../endpoint/constants';
 import { RESPONSE_ACTION_AGENT_TYPE } from '../../../../endpoint/service/response_actions/constants';
+import { EXPORT_PROVIDER_ID_MAX_LENGTH } from '../../../../endpoint/service/response_actions/export_providers';
 
 export const AgentTypeSchemaLiteral = RESPONSE_ACTION_AGENT_TYPE.map((agentType) =>
   schema.literal(agentType)
@@ -80,3 +81,20 @@ export const NoParametersRequestSchema = {
   body: schema.object({ ...BaseActionRequestSchema }),
 };
 export type BaseActionRequestBody = TypeOf<typeof NoParametersRequestSchema.body>;
+
+/**
+ * `parameters.export` of the `get-file` and `memory-dump` response actions: the id of an export provider
+ * in the host's Elastic Defend policy. Endpoint uploads the output there instead of to Fleet.
+ */
+export const ExportParameterSchema = schema.maybe(
+  schema.string({
+    minLength: 1,
+    maxLength: EXPORT_PROVIDER_ID_MAX_LENGTH,
+    validate: (value) => {
+      // Endpoint uploads the file to Fleet when `export` is empty, so it must never be passed through
+      if (!value.trim().length) {
+        return 'export cannot be an empty string';
+      }
+    },
+  })
+);

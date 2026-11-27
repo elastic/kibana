@@ -382,22 +382,61 @@ export default function ({ getService }: FtrProviderContextWithSpaces) {
         expect(notes[2].eventId).to.be('1');
       });
 
-      // skipped https://github.com/elastic/kibana/issues/196896
+      // Runs in ESS only: serverless does not support interactive login to activate user profiles.
       describe('@skipInServerless', () => {
-        // TODO we need to figure out how to retrieve the uid of the current user in the test environment
-        it.skip('should retrieve all notes that have been created by a specific user', async () => {
-          await Promise.all([
-            createNote(supertest, { text: 'first note' }),
-            createNote(supertest, { text: 'second note' }),
-          ]);
+        it('should retrieve all notes that have been created by a specific user', async () => {
+          const noteAuthorUsername = 'notes_created_by_test_user';
+          const noteAuthorPassword = 'changeme';
+          const noteAuthorFullName = 'Notes Created By Test User';
+          await security.user.create(noteAuthorUsername, {
+            password: noteAuthorPassword,
+            roles: ['kibana_admin'],
+            full_name: noteAuthorFullName,
+          });
 
-          const response = await supertest
-            .get(`${NOTE_URL}?createdByFilter=elastic`)
-            .set('kbn-xsrf', 'true')
-            .set('elastic-api-version', '2023-10-31');
-          const { totalCount } = response.body as GetNotesResult;
+          try {
+            // Basic auth API requests do not activate user profiles; only cookie-based login does.
+            const loginResponse = await supertestWithoutAuth
+              .post('/internal/security/login')
+              .set('kbn-xsrf', 'xxx')
+              .send({
+                providerType: 'basic',
+                providerName: 'basic',
+                currentURL: '/',
+                params: { username: noteAuthorUsername, password: noteAuthorPassword },
+              })
+              .expect(200);
 
-          expect(totalCount).to.be(2);
+            const rawCookie = loginResponse.headers['set-cookie'][0].split(';')[0];
+
+            const profileResponse = await supertestWithoutAuth
+              .get('/internal/security/user_profile')
+              .set('Cookie', rawCookie)
+              .set('kbn-xsrf', 'true')
+              .expect(200);
+            const noteAuthorUid: string = profileResponse.body.uid;
+
+            const noteAuthorSupertest = await utils.createSuperTest(
+              noteAuthorUsername,
+              noteAuthorPassword
+            );
+            await Promise.all([
+              createNote(noteAuthorSupertest, { text: 'first note' }),
+              createNote(noteAuthorSupertest, { text: 'second note' }),
+              createNote(supertest, { text: 'note by another user' }),
+            ]);
+
+            const response = await supertest
+              .get(`${NOTE_URL}?createdByFilter=${noteAuthorUid}`)
+              .set('kbn-xsrf', 'true')
+              .set('elastic-api-version', '2023-10-31');
+            const { notes, totalCount } = response.body as GetNotesResult;
+
+            expect(totalCount).to.be(2);
+            notes.forEach((note: Note) => expect(note.createdBy).to.be(noteAuthorFullName));
+          } finally {
+            await security.user.delete(noteAuthorUsername);
+          }
         });
       });
 

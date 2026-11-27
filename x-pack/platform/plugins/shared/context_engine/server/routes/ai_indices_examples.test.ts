@@ -120,7 +120,7 @@ const codeSampleBody = ({ lang, source }: CodeSample) =>
 const codeSampleRequest = ({ lang, source }: CodeSample) => {
   const match =
     lang === 'curl'
-      ? /-X (\w+) "https:\/\/\$\{KIBANA_URL\}(\/[^"?]*)/.exec(source)
+      ? /-X (\w+) "\$\{KIBANA_URL\}(\/[^"?]*)/.exec(source)
       : /^(\w+) kbn:(\/[^\s?]*)/.exec(source);
   return match ? `${match[1]} ${match[2]}` : undefined;
 };

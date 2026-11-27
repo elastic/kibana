@@ -162,6 +162,37 @@ apiTest.describe('Create rule API', { tag: testData.API_ENGINE_TAG }, () => {
     }
   });
 
+  apiTest(
+    'builder: rejects an unregistered builder type and persists nothing',
+    async ({ apiClient, apiServices }) => {
+      const response = await apiClient.post(testData.RULE_API_PATH, {
+        headers: writerHeaders,
+        body: buildCreateRuleData({
+          metadata: { name: 'unknown-builder', builder: { type: 'not-a-builder' } },
+        }),
+      });
+      expect(response).toHaveStatusCode(400);
+      expect(response.body.code).toBe('BUILDER_TYPE_UNKNOWN');
+      expect(response.body.details).toStrictEqual({ builder_type: 'not-a-builder' });
+
+      const stored = await apiServices.alertingV2.rules.find({ per_page: 100 });
+      expect(stored.items).toHaveLength(0);
+    }
+  );
+
+  apiTest('builder: accepts the built-in builder types', async ({ apiClient }) => {
+    for (const type of ['threshold', 'sequence']) {
+      const response = await apiClient.post(testData.RULE_API_PATH, {
+        headers: writerHeaders,
+        body: buildCreateRuleData({
+          metadata: { name: `${type}-builder`, builder: { type } },
+        }),
+      });
+      expect(response).toHaveStatusCode(201);
+      expect(response.body.metadata.builder).toStrictEqual({ type });
+    }
+  });
+
   apiTest('validation: rejects body with missing metadata.name', async ({ apiClient }) => {
     const body = buildCreateRuleData();
     // Replace metadata with one that has no name.

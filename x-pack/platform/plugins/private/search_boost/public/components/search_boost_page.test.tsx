@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { createMemoryHistory } from 'history';
-import { render, screen, waitFor, within } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
 import { MockAppHeaderProvider } from '@kbn/app-header/mocks';
@@ -17,6 +17,8 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { Router } from '@kbn/shared-ux-router';
 import { PROFILES_API_PATH, RULES_API_PATH } from '../../common/constants';
+import type { DatastreamFlyoutProps } from '@kbn/index-management-shared-types';
+import type { IndexManagementServices } from '../types';
 import { mockProfiles, mockRules } from './test_utils/mock_boost_data';
 import { SearchBoostPage } from './search_boost_page';
 
@@ -32,20 +34,47 @@ const createHttp = () => {
 const createQueryClient = () =>
   new QueryClient({ logger: { log: () => {}, warn: () => {}, error: () => {} } });
 
-const renderPage = (http = createHttp(), initialPath = '/') => {
+const DataStreamFlyout = ({ datastreamName, onClose }: DatastreamFlyoutProps) => (
+  <div data-test-subj="dataStreamFlyout">
+    {datastreamName}
+    <button onClick={() => onClose()}>Close</button>
+    <button onClick={() => onClose(true)}>Delete</button>
+  </div>
+);
+
+const createIndexManagement = () => {
+  const locator = {
+    getRedirectUrl: jest.fn(
+      (params: Record<string, string>) => `/app/management?${new URLSearchParams(params)}`
+    ),
+    navigateSync: jest.fn(),
+  };
+  const services: IndexManagementServices = {
+    locator: locator as unknown as IndexManagementServices['locator'],
+    DataStreamFlyout,
+  };
+  return { services, locator };
+};
+
+const renderPage = (http = createHttp(), initialPath = '/', canOpenIndexManagement = true) => {
   const history = createMemoryHistory({ initialEntries: [initialPath] });
+  const indexManagement = createIndexManagement();
   const { unmount } = render(
     <MockAppHeaderProvider>
       <I18nProvider>
         <QueryClientProvider client={createQueryClient()}>
           <Router history={history}>
-            <SearchBoostPage http={http} canEdit={false} />
+            <SearchBoostPage
+              http={http}
+              canEdit={false}
+              indexManagement={canOpenIndexManagement ? indexManagement.services : undefined}
+            />
           </Router>
         </QueryClientProvider>
       </I18nProvider>
     </MockAppHeaderProvider>
   );
-  return { http, history, unmount };
+  return { http, history, unmount, locator: indexManagement.locator };
 };
 
 const fetchError = (body: object) => Object.assign(new Error('Request failed'), { body });
@@ -177,12 +206,84 @@ describe('SearchBoostPage', () => {
     expect(history.location.pathname).toBe(backPath);
   });
 
-  it('shows index and data stream names as text', async () => {
-    renderPage(createHttp(), '/rules/web-logs');
+  it('opens an index in Index Management, except on a modified click', async () => {
+    const { locator } = renderPage(createHttp(), '/rules/catalog');
+
+    const link = await screen.findByRole('link', { name: 'catalog-products' });
+    expect(link).toHaveAttribute(
+      'href',
+      '/app/management?page=index_details&indexName=catalog-products'
+    );
+
+    // Stands in for the browser opening a new tab, which jsdom can't do.
+    const stopNavigation = (event: Event) => event.preventDefault();
+    document.addEventListener('click', stopNavigation);
+    fireEvent.click(link, { ctrlKey: true });
+    document.removeEventListener('click', stopNavigation);
+    expect(locator.navigateSync).not.toHaveBeenCalled();
+
+    await userEvent.click(link);
+    expect(locator.navigateSync).toHaveBeenCalledWith({
+      page: 'index_details',
+      indexName: 'catalog-products',
+    });
+  });
+
+  it('shows index names as text to users who cannot open Index Management', async () => {
+    renderPage(createHttp(), '/rules/catalog', false);
+
+    const names = await screen.findAllByTestId('searchBoostMatchName');
+    expect(names.map(({ textContent }) => textContent)).toContain('catalog-products');
+    expect(screen.queryByRole('link', { name: 'catalog-products' })).not.toBeInTheDocument();
+  });
+
+  it('shows data stream names as text to users who cannot open Index Management', async () => {
+    renderPage(createHttp(), '/rules/web-logs', false);
 
     const names = await screen.findAllByTestId('searchBoostMatchName');
     expect(names.map(({ textContent }) => textContent)).toContain('logs-nginx-default');
     expect(screen.queryByRole('link', { name: 'logs-nginx-default' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'logs-nginx-default' })).not.toBeInTheDocument();
+  });
+
+  it('opens a data stream in the flyout and loads again once it changed', async () => {
+    const http = createHttp();
+    const { history } = renderPage(http, '/rules/web-logs');
+
+    const link = await screen.findByRole('link', { name: 'logs-nginx-default' });
+    expect(link).toHaveAttribute(
+      'href',
+      '/app/management?page=data_streams_details&dataStreamName=logs-nginx-default'
+    );
+    await userEvent.click(link);
+
+    expect(screen.getByTestId('dataStreamFlyout')).toHaveTextContent('logs-nginx-default');
+    expect(history.location.pathname).toBe('/rules/web-logs');
+
+    await userEvent.click(screen.getByRole('button', { name: 'Close' }));
+    expect(screen.queryByTestId('dataStreamFlyout')).not.toBeInTheDocument();
+    expect(http.get).toHaveBeenCalledTimes(2);
+
+    await userEvent.click(screen.getByRole('link', { name: 'logs-nginx-default' }));
+    await userEvent.click(screen.getByRole('button', { name: 'Delete' }));
+    await waitFor(() => expect(http.get).toHaveBeenCalledTimes(4));
+  });
+
+  it('hides the old matches once loading again after a data stream change fails', async () => {
+    const http = createHttp();
+    renderPage(http, '/rules/web-logs');
+    await userEvent.click(await screen.findByRole('link', { name: 'logs-nginx-default' }));
+    http.get.mockRejectedValue(fetchError({ statusCode: 500, message: 'Something broke' }));
+
+    await userEvent.click(screen.getByRole('button', { name: 'Delete' }));
+
+    expect(await screen.findByTestId('searchBoostLoadError')).toHaveTextContent('Something broke');
+
+    http.get.mockImplementation(() => new Promise(() => {}));
+    await userEvent.click(screen.getByTestId('searchBoostLoadRetry'));
+
+    expect(screen.getByTestId('searchBoostLoading')).toBeInTheDocument();
+    expect(screen.queryByText('logs-nginx-default')).not.toBeInTheDocument();
   });
 
   it('switches tabs through the URL', async () => {
