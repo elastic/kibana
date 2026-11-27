@@ -13,7 +13,8 @@ import { i18n } from '@kbn/i18n';
 interface ConfirmDeployAgentPolicyModalProps {
   onConfirm: () => void;
   onCancel: () => void;
-  agentCount: number;
+  /** `undefined` when the agent count could not be loaded. */
+  agentCount: number | undefined;
   agentPolicyCount: number;
 }
 
@@ -54,14 +55,21 @@ const ConfirmDeployAgentPolicyModalComponent: React.FC<ConfirmDeployAgentPolicyM
     >
       <EuiCallOut
         iconType="info"
-        title={i18n.translate('xpack.osquery.agentPolicy.confirmModalCalloutTitle', {
-          defaultMessage:
-            'This action will update {agentPolicyCount, plural, one {# agent policy} other {# agent policies}} affecting {agentCount, plural, one {# agent} other {# agents}}',
-          values: {
-            agentCount,
-            agentPolicyCount,
-          },
-        })}
+        title={
+          agentCount === undefined
+            ? i18n.translate('xpack.osquery.agentPolicy.confirmModalCalloutUnknownAgentsTitle', {
+                defaultMessage:
+                  'This action will update agent policies and may affect agents. The number of affected agents could not be loaded.',
+              })
+            : i18n.translate('xpack.osquery.agentPolicy.confirmModalCalloutTitle', {
+                defaultMessage:
+                  'This action will update {agentPolicyCount, plural, one {# agent policy} other {# agent policies}} affecting {agentCount, plural, one {# agent} other {# agents}}',
+                values: {
+                  agentCount,
+                  agentPolicyCount,
+                },
+              })
+        }
       >
         <div className="eui-textBreakWord">
           <FormattedMessage

@@ -162,6 +162,9 @@
           },
           "statefulHaConfig": {
             "$ref": "#/components/schemas/StatefulHAConfig"
+          },
+          "wizSensorConfig": {
+            "$ref": "#/components/schemas/WizSensorConfig"
           }
         },
         "type": "object"
@@ -208,6 +211,14 @@
         "type": "object"
       },
       "AgentSandboxConfig": {
+        "properties": {
+          "enabled": {
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
+      "AmbientNetworkingConfig": {
         "properties": {
           "enabled": {
             "type": "boolean"
@@ -337,6 +348,25 @@
           },
           "upgradeSettings": {
             "$ref": "#/components/schemas/UpgradeSettings"
+          }
+        },
+        "type": "object"
+      },
+      "AutoprovisioningRestrictionConfig": {
+        "properties": {
+          "authorizedServiceAccounts": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "serviceAccountPermissionCheck": {
+            "enum": [
+              "PERMISSION_CHECK_MODE_UNSPECIFIED",
+              "DISABLED",
+              "ENABLED"
+            ],
+            "type": "string"
           }
         },
         "type": "object"
@@ -901,6 +931,9 @@
           "autoprovisioningNodePoolDefaults": {
             "$ref": "#/components/schemas/AutoprovisioningNodePoolDefaults"
           },
+          "autoprovisioningRestrictionConfig": {
+            "$ref": "#/components/schemas/AutoprovisioningRestrictionConfig"
+          },
           "autoscalingProfile": {
             "enum": [
               "PROFILE_UNSPECIFIED",
@@ -964,6 +997,9 @@
           "desiredAddonsConfig": {
             "$ref": "#/components/schemas/AddonsConfig"
           },
+          "desiredAmbientNetworkingConfig": {
+            "$ref": "#/components/schemas/AmbientNetworkingConfig"
+          },
           "desiredAnonymousAuthenticationConfig": {
             "$ref": "#/components/schemas/AnonymousAuthenticationConfig"
           },
@@ -1007,7 +1043,9 @@
             "enum": [
               "DATAPATH_PROVIDER_UNSPECIFIED",
               "LEGACY_DATAPATH",
-              "ADVANCED_DATAPATH"
+              "ADVANCED_DATAPATH",
+              "MIGRATE_TO_ADVANCED_DATAPATH",
+              "MIGRATE_TO_LEGACY_DATAPATH"
             ],
             "type": "string"
           },
@@ -1695,9 +1733,24 @@
             "format": "int32",
             "type": "integer"
           },
+          "ephemeralCapacityGb": {
+            "format": "int64",
+            "type": "string"
+          },
           "localSsdCount": {
             "format": "int32",
             "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "EtcHostsEntry": {
+        "properties": {
+          "host": {
+            "type": "string"
+          },
+          "ip": {
+            "type": "string"
           }
         },
         "type": "object"
@@ -1865,8 +1918,12 @@
               "GPU_DRIVER_VERSION_UNSPECIFIED",
               "INSTALLATION_DISABLED",
               "DEFAULT",
-              "LATEST"
+              "LATEST",
+              "SPECIFIC"
             ],
+            "type": "string"
+          },
+          "specificVersion": {
             "type": "string"
           }
         },
@@ -2217,6 +2274,36 @@
         },
         "type": "object"
       },
+      "KernelCommandlineOverrides": {
+        "properties": {
+          "initOnAlloc": {
+            "enum": [
+              "INIT_ON_ALLOC_UNSPECIFIED",
+              "INIT_ON_ALLOC_OFF"
+            ],
+            "type": "string"
+          },
+          "specRstackOverflow": {
+            "enum": [
+              "SPEC_RSTACK_OVERFLOW_UNSPECIFIED",
+              "SPEC_RSTACK_OVERFLOW_OFF"
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "KernelOverrides": {
+        "properties": {
+          "kernelCommandlineOverrides": {
+            "$ref": "#/components/schemas/KernelCommandlineOverrides"
+          },
+          "lruGen": {
+            "$ref": "#/components/schemas/LRUGen"
+          }
+        },
+        "type": "object"
+      },
       "KubeletCertInfo": {
         "properties": {
           "nonTpmBootstrapCertExpireTime": {
@@ -2240,6 +2327,18 @@
         },
         "type": "object"
       },
+      "LRUGen": {
+        "properties": {
+          "enabled": {
+            "type": "boolean"
+          },
+          "minTtlMs": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
       "LegacyAbac": {
         "properties": {
           "enabled": {
@@ -2252,6 +2351,24 @@
         "properties": {
           "accurateTimeConfig": {
             "$ref": "#/components/schemas/AccurateTimeConfig"
+          },
+          "additionalEtcHosts": {
+            "items": {
+              "$ref": "#/components/schemas/EtcHostsEntry"
+            },
+            "type": "array"
+          },
+          "additionalEtcResolvConf": {
+            "items": {
+              "$ref": "#/components/schemas/ResolvedConfEntry"
+            },
+            "type": "array"
+          },
+          "additionalEtcSystemdResolvedConf": {
+            "items": {
+              "$ref": "#/components/schemas/ResolvedConfEntry"
+            },
+            "type": "array"
           },
           "cgroupMode": {
             "enum": [
@@ -2270,6 +2387,9 @@
           "hugepages": {
             "$ref": "#/components/schemas/HugepagesConfig"
           },
+          "kernelOverrides": {
+            "$ref": "#/components/schemas/KernelOverrides"
+          },
           "nodeKernelModuleLoading": {
             "$ref": "#/components/schemas/NodeKernelModuleLoading"
           },
@@ -2284,6 +2404,9 @@
               "type": "string"
             },
             "type": "object"
+          },
+          "timeZone": {
+            "type": "string"
           },
           "transparentHugepageDefrag": {
             "enum": [
@@ -2643,11 +2766,16 @@
       },
       "NetworkConfig": {
         "properties": {
+          "ambientNetworkingConfig": {
+            "$ref": "#/components/schemas/AmbientNetworkingConfig"
+          },
           "datapathProvider": {
             "enum": [
               "DATAPATH_PROVIDER_UNSPECIFIED",
               "LEGACY_DATAPATH",
-              "ADVANCED_DATAPATH"
+              "ADVANCED_DATAPATH",
+              "MIGRATE_TO_ADVANCED_DATAPATH",
+              "MIGRATE_TO_LEGACY_DATAPATH"
             ],
             "type": "string"
           },
@@ -3068,6 +3196,14 @@
           "containerLogMaxSize": {
             "type": "string"
           },
+          "containerLogMaxWorkers": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "containerLogMonitorInterval": {
+            "format": "google-duration",
+            "type": "string"
+          },
           "cpuCfsQuota": {
             "type": "boolean"
           },
@@ -3124,6 +3260,9 @@
           "reservedResourcesConfig": {
             "$ref": "#/components/schemas/ReservedResourcesConfig"
           },
+          "reservedSystemCpus": {
+            "type": "string"
+          },
           "shutdownGracePeriodCriticalPodsSeconds": {
             "format": "int32",
             "type": "integer"
@@ -3174,6 +3313,16 @@
           },
           "createPodRange": {
             "type": "boolean"
+          },
+          "datapathProvider": {
+            "enum": [
+              "DATAPATH_PROVIDER_UNSPECIFIED",
+              "LEGACY_DATAPATH",
+              "ADVANCED_DATAPATH",
+              "MIGRATE_TO_ADVANCED_DATAPATH",
+              "MIGRATE_TO_LEGACY_DATAPATH"
+            ],
+            "type": "string"
           },
           "enablePrivateNodes": {
             "type": "boolean"
@@ -3957,6 +4106,20 @@
         },
         "type": "object"
       },
+      "ResolvedConfEntry": {
+        "properties": {
+          "key": {
+            "type": "string"
+          },
+          "value": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
       "ResourceLimit": {
         "properties": {
           "maximum": {
@@ -4120,6 +4283,7 @@
             "type": "string"
           },
           "vulnerabilityMode": {
+            "deprecated": true,
             "enum": [
               "VULNERABILITY_MODE_UNSPECIFIED",
               "VULNERABILITY_DISABLED",
@@ -4615,6 +4779,23 @@
         },
         "type": "object"
       },
+      "WizSensorConfig": {
+        "properties": {
+          "apiKeySecretUri": {
+            "type": "string"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "proxySecretUri": {
+            "type": "string"
+          },
+          "registrySecretUri": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "WorkloadIdentityConfig": {
         "properties": {
           "workloadPool": {
@@ -4700,7 +4881,32 @@
           },
           {
             "in": "query",
-            "name": "callback",
+            "name": "$.xgafv",
+            "schema": {
+              "enum": [
+                "1",
+                "2"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "key",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "fields",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "quotaUser",
             "schema": {
               "type": "string"
             }
@@ -4722,38 +4928,6 @@
           },
           {
             "in": "query",
-            "name": "uploadType",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "key",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "fields",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "$.xgafv",
-            "schema": {
-              "enum": [
-                "1",
-                "2"
-              ],
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
             "name": "alt",
             "schema": {
               "default": "json",
@@ -4767,13 +4941,6 @@
           },
           {
             "in": "query",
-            "name": "quotaUser",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
             "name": "access_token",
             "schema": {
               "type": "string"
@@ -4781,7 +4948,21 @@
           },
           {
             "in": "query",
+            "name": "uploadType",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
             "name": "upload_protocol",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "callback",
             "schema": {
               "type": "string"
             }
@@ -4819,8 +5000,16 @@
         "security": [
           {
             "Oauth2": [
-              "https://www.googleapis.com/auth/cloud-platform",
-              "https://www.googleapis.com/auth/container",
+              "https://www.googleapis.com/auth/cloud-platform"
+            ]
+          },
+          {
+            "Oauth2": [
+              "https://www.googleapis.com/auth/container"
+            ]
+          },
+          {
+            "Oauth2": [
               "https://www.googleapis.com/auth/container.read-only"
             ]
           }
@@ -4847,7 +5036,32 @@
           },
           {
             "in": "query",
-            "name": "callback",
+            "name": "$.xgafv",
+            "schema": {
+              "enum": [
+                "1",
+                "2"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "key",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "fields",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "quotaUser",
             "schema": {
               "type": "string"
             }
@@ -4869,38 +5083,6 @@
           },
           {
             "in": "query",
-            "name": "uploadType",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "key",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "fields",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "$.xgafv",
-            "schema": {
-              "enum": [
-                "1",
-                "2"
-              ],
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
             "name": "alt",
             "schema": {
               "default": "json",
@@ -4914,13 +5096,6 @@
           },
           {
             "in": "query",
-            "name": "quotaUser",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
             "name": "access_token",
             "schema": {
               "type": "string"
@@ -4928,7 +5103,21 @@
           },
           {
             "in": "query",
+            "name": "uploadType",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
             "name": "upload_protocol",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "callback",
             "schema": {
               "type": "string"
             }
@@ -4957,7 +5146,11 @@
         "security": [
           {
             "Oauth2": [
-              "https://www.googleapis.com/auth/cloud-platform",
+              "https://www.googleapis.com/auth/cloud-platform"
+            ]
+          },
+          {
+            "Oauth2": [
               "https://www.googleapis.com/auth/container"
             ]
           }
@@ -4994,7 +5187,32 @@
           },
           {
             "in": "query",
-            "name": "callback",
+            "name": "$.xgafv",
+            "schema": {
+              "enum": [
+                "1",
+                "2"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "key",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "fields",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "quotaUser",
             "schema": {
               "type": "string"
             }
@@ -5016,38 +5234,6 @@
           },
           {
             "in": "query",
-            "name": "uploadType",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "key",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "fields",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "$.xgafv",
-            "schema": {
-              "enum": [
-                "1",
-                "2"
-              ],
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
             "name": "alt",
             "schema": {
               "default": "json",
@@ -5061,14 +5247,14 @@
           },
           {
             "in": "query",
-            "name": "quotaUser",
+            "name": "access_token",
             "schema": {
               "type": "string"
             }
           },
           {
             "in": "query",
-            "name": "access_token",
+            "name": "uploadType",
             "schema": {
               "type": "string"
             }
@@ -5077,6 +5263,22 @@
             "in": "query",
             "name": "upload_protocol",
             "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "callback",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "deprecated": true,
+            "in": "query",
+            "name": "zone",
+            "schema": {
+              "deprecated": true,
               "type": "string"
             }
           },
@@ -5097,15 +5299,6 @@
               "deprecated": true,
               "type": "string"
             }
-          },
-          {
-            "deprecated": true,
-            "in": "query",
-            "name": "zone",
-            "schema": {
-              "deprecated": true,
-              "type": "string"
-            }
           }
         ],
         "responses": {
@@ -5122,7 +5315,11 @@
         "security": [
           {
             "Oauth2": [
-              "https://www.googleapis.com/auth/cloud-platform",
+              "https://www.googleapis.com/auth/cloud-platform"
+            ]
+          },
+          {
+            "Oauth2": [
               "https://www.googleapis.com/auth/container"
             ]
           }
@@ -5157,7 +5354,32 @@
           },
           {
             "in": "query",
-            "name": "callback",
+            "name": "$.xgafv",
+            "schema": {
+              "enum": [
+                "1",
+                "2"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "key",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "fields",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "quotaUser",
             "schema": {
               "type": "string"
             }
@@ -5179,38 +5401,6 @@
           },
           {
             "in": "query",
-            "name": "uploadType",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "key",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "fields",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "$.xgafv",
-            "schema": {
-              "enum": [
-                "1",
-                "2"
-              ],
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
             "name": "alt",
             "schema": {
               "default": "json",
@@ -5224,13 +5414,6 @@
           },
           {
             "in": "query",
-            "name": "quotaUser",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
             "name": "access_token",
             "schema": {
               "type": "string"
@@ -5238,7 +5421,21 @@
           },
           {
             "in": "query",
+            "name": "uploadType",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
             "name": "upload_protocol",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "callback",
             "schema": {
               "type": "string"
             }
@@ -5255,7 +5452,7 @@
           {
             "deprecated": true,
             "in": "query",
-            "name": "zone",
+            "name": "clusterId",
             "schema": {
               "deprecated": true,
               "type": "string"
@@ -5264,7 +5461,7 @@
           {
             "deprecated": true,
             "in": "query",
-            "name": "clusterId",
+            "name": "zone",
             "schema": {
               "deprecated": true,
               "type": "string"
@@ -5285,8 +5482,16 @@
         "security": [
           {
             "Oauth2": [
-              "https://www.googleapis.com/auth/cloud-platform",
-              "https://www.googleapis.com/auth/container",
+              "https://www.googleapis.com/auth/cloud-platform"
+            ]
+          },
+          {
+            "Oauth2": [
+              "https://www.googleapis.com/auth/container"
+            ]
+          },
+          {
+            "Oauth2": [
               "https://www.googleapis.com/auth/container.read-only"
             ]
           }
@@ -5321,7 +5526,32 @@
           },
           {
             "in": "query",
-            "name": "callback",
+            "name": "$.xgafv",
+            "schema": {
+              "enum": [
+                "1",
+                "2"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "key",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "fields",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "quotaUser",
             "schema": {
               "type": "string"
             }
@@ -5343,38 +5573,6 @@
           },
           {
             "in": "query",
-            "name": "uploadType",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "key",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "fields",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "$.xgafv",
-            "schema": {
-              "enum": [
-                "1",
-                "2"
-              ],
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
             "name": "alt",
             "schema": {
               "default": "json",
@@ -5388,13 +5586,6 @@
           },
           {
             "in": "query",
-            "name": "quotaUser",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
             "name": "access_token",
             "schema": {
               "type": "string"
@@ -5402,7 +5593,21 @@
           },
           {
             "in": "query",
+            "name": "uploadType",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
             "name": "upload_protocol",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "callback",
             "schema": {
               "type": "string"
             }
@@ -5431,7 +5636,11 @@
         "security": [
           {
             "Oauth2": [
-              "https://www.googleapis.com/auth/cloud-platform",
+              "https://www.googleapis.com/auth/cloud-platform"
+            ]
+          },
+          {
+            "Oauth2": [
               "https://www.googleapis.com/auth/container"
             ]
           }
@@ -5468,7 +5677,32 @@
           },
           {
             "in": "query",
-            "name": "callback",
+            "name": "$.xgafv",
+            "schema": {
+              "enum": [
+                "1",
+                "2"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "key",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "fields",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "quotaUser",
             "schema": {
               "type": "string"
             }
@@ -5490,38 +5724,6 @@
           },
           {
             "in": "query",
-            "name": "uploadType",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "key",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "fields",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "$.xgafv",
-            "schema": {
-              "enum": [
-                "1",
-                "2"
-              ],
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
             "name": "alt",
             "schema": {
               "default": "json",
@@ -5535,13 +5737,6 @@
           },
           {
             "in": "query",
-            "name": "quotaUser",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
             "name": "access_token",
             "schema": {
               "type": "string"
@@ -5549,7 +5744,21 @@
           },
           {
             "in": "query",
+            "name": "uploadType",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
             "name": "upload_protocol",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "callback",
             "schema": {
               "type": "string"
             }
@@ -5596,8 +5805,16 @@
         "security": [
           {
             "Oauth2": [
-              "https://www.googleapis.com/auth/cloud-platform",
-              "https://www.googleapis.com/auth/container",
+              "https://www.googleapis.com/auth/cloud-platform"
+            ]
+          },
+          {
+            "Oauth2": [
+              "https://www.googleapis.com/auth/container"
+            ]
+          },
+          {
+            "Oauth2": [
               "https://www.googleapis.com/auth/container.read-only"
             ]
           }
@@ -5632,7 +5849,32 @@
           },
           {
             "in": "query",
-            "name": "callback",
+            "name": "$.xgafv",
+            "schema": {
+              "enum": [
+                "1",
+                "2"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "key",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "fields",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "quotaUser",
             "schema": {
               "type": "string"
             }
@@ -5654,38 +5896,6 @@
           },
           {
             "in": "query",
-            "name": "uploadType",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "key",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "fields",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "$.xgafv",
-            "schema": {
-              "enum": [
-                "1",
-                "2"
-              ],
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
             "name": "alt",
             "schema": {
               "default": "json",
@@ -5699,13 +5909,6 @@
           },
           {
             "in": "query",
-            "name": "quotaUser",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
             "name": "access_token",
             "schema": {
               "type": "string"
@@ -5713,7 +5916,21 @@
           },
           {
             "in": "query",
+            "name": "uploadType",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
             "name": "upload_protocol",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "callback",
             "schema": {
               "type": "string"
             }
@@ -5742,7 +5959,11 @@
         "security": [
           {
             "Oauth2": [
-              "https://www.googleapis.com/auth/cloud-platform",
+              "https://www.googleapis.com/auth/cloud-platform"
+            ]
+          },
+          {
+            "Oauth2": [
               "https://www.googleapis.com/auth/container"
             ]
           }
@@ -5787,7 +6008,32 @@
           },
           {
             "in": "query",
-            "name": "callback",
+            "name": "$.xgafv",
+            "schema": {
+              "enum": [
+                "1",
+                "2"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "key",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "fields",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "quotaUser",
             "schema": {
               "type": "string"
             }
@@ -5809,38 +6055,6 @@
           },
           {
             "in": "query",
-            "name": "uploadType",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "key",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "fields",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "$.xgafv",
-            "schema": {
-              "enum": [
-                "1",
-                "2"
-              ],
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
             "name": "alt",
             "schema": {
               "default": "json",
@@ -5854,13 +6068,6 @@
           },
           {
             "in": "query",
-            "name": "quotaUser",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
             "name": "access_token",
             "schema": {
               "type": "string"
@@ -5868,7 +6075,21 @@
           },
           {
             "in": "query",
+            "name": "uploadType",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
             "name": "upload_protocol",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "callback",
             "schema": {
               "type": "string"
             }
@@ -5924,7 +6145,11 @@
         "security": [
           {
             "Oauth2": [
-              "https://www.googleapis.com/auth/cloud-platform",
+              "https://www.googleapis.com/auth/cloud-platform"
+            ]
+          },
+          {
+            "Oauth2": [
               "https://www.googleapis.com/auth/container"
             ]
           }
@@ -5967,7 +6192,32 @@
           },
           {
             "in": "query",
-            "name": "callback",
+            "name": "$.xgafv",
+            "schema": {
+              "enum": [
+                "1",
+                "2"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "key",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "fields",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "quotaUser",
             "schema": {
               "type": "string"
             }
@@ -5989,38 +6239,6 @@
           },
           {
             "in": "query",
-            "name": "uploadType",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "key",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "fields",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "$.xgafv",
-            "schema": {
-              "enum": [
-                "1",
-                "2"
-              ],
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
             "name": "alt",
             "schema": {
               "default": "json",
@@ -6034,14 +6252,14 @@
           },
           {
             "in": "query",
-            "name": "quotaUser",
+            "name": "access_token",
             "schema": {
               "type": "string"
             }
           },
           {
             "in": "query",
-            "name": "access_token",
+            "name": "uploadType",
             "schema": {
               "type": "string"
             }
@@ -6050,6 +6268,31 @@
             "in": "query",
             "name": "upload_protocol",
             "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "callback",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "deprecated": true,
+            "in": "query",
+            "name": "nodePoolId",
+            "schema": {
+              "deprecated": true,
+              "type": "string"
+            }
+          },
+          {
+            "deprecated": true,
+            "in": "query",
+            "name": "zone",
+            "schema": {
+              "deprecated": true,
               "type": "string"
             }
           },
@@ -6070,24 +6313,6 @@
               "deprecated": true,
               "type": "string"
             }
-          },
-          {
-            "deprecated": true,
-            "in": "query",
-            "name": "zone",
-            "schema": {
-              "deprecated": true,
-              "type": "string"
-            }
-          },
-          {
-            "deprecated": true,
-            "in": "query",
-            "name": "nodePoolId",
-            "schema": {
-              "deprecated": true,
-              "type": "string"
-            }
           }
         ],
         "responses": {
@@ -6104,8 +6329,16 @@
         "security": [
           {
             "Oauth2": [
-              "https://www.googleapis.com/auth/cloud-platform",
-              "https://www.googleapis.com/auth/container",
+              "https://www.googleapis.com/auth/cloud-platform"
+            ]
+          },
+          {
+            "Oauth2": [
+              "https://www.googleapis.com/auth/container"
+            ]
+          },
+          {
+            "Oauth2": [
               "https://www.googleapis.com/auth/container.read-only"
             ]
           }
@@ -6150,7 +6383,32 @@
           },
           {
             "in": "query",
-            "name": "callback",
+            "name": "$.xgafv",
+            "schema": {
+              "enum": [
+                "1",
+                "2"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "key",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "fields",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "quotaUser",
             "schema": {
               "type": "string"
             }
@@ -6172,38 +6430,6 @@
           },
           {
             "in": "query",
-            "name": "uploadType",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "key",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "fields",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "$.xgafv",
-            "schema": {
-              "enum": [
-                "1",
-                "2"
-              ],
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
             "name": "alt",
             "schema": {
               "default": "json",
@@ -6217,13 +6443,6 @@
           },
           {
             "in": "query",
-            "name": "quotaUser",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
             "name": "access_token",
             "schema": {
               "type": "string"
@@ -6231,7 +6450,21 @@
           },
           {
             "in": "query",
+            "name": "uploadType",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
             "name": "upload_protocol",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "callback",
             "schema": {
               "type": "string"
             }
@@ -6260,7 +6493,11 @@
         "security": [
           {
             "Oauth2": [
-              "https://www.googleapis.com/auth/cloud-platform",
+              "https://www.googleapis.com/auth/cloud-platform"
+            ]
+          },
+          {
+            "Oauth2": [
               "https://www.googleapis.com/auth/container"
             ]
           }
@@ -6305,7 +6542,32 @@
           },
           {
             "in": "query",
-            "name": "callback",
+            "name": "$.xgafv",
+            "schema": {
+              "enum": [
+                "1",
+                "2"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "key",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "fields",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "quotaUser",
             "schema": {
               "type": "string"
             }
@@ -6327,38 +6589,6 @@
           },
           {
             "in": "query",
-            "name": "uploadType",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "key",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "fields",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "$.xgafv",
-            "schema": {
-              "enum": [
-                "1",
-                "2"
-              ],
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
             "name": "alt",
             "schema": {
               "default": "json",
@@ -6372,13 +6602,6 @@
           },
           {
             "in": "query",
-            "name": "quotaUser",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
             "name": "access_token",
             "schema": {
               "type": "string"
@@ -6386,7 +6609,21 @@
           },
           {
             "in": "query",
+            "name": "uploadType",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
             "name": "upload_protocol",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "callback",
             "schema": {
               "type": "string"
             }
@@ -6415,7 +6652,11 @@
         "security": [
           {
             "Oauth2": [
-              "https://www.googleapis.com/auth/cloud-platform",
+              "https://www.googleapis.com/auth/cloud-platform"
+            ]
+          },
+          {
+            "Oauth2": [
               "https://www.googleapis.com/auth/container"
             ]
           }
@@ -6460,7 +6701,32 @@
           },
           {
             "in": "query",
-            "name": "callback",
+            "name": "$.xgafv",
+            "schema": {
+              "enum": [
+                "1",
+                "2"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "key",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "fields",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "quotaUser",
             "schema": {
               "type": "string"
             }
@@ -6482,38 +6748,6 @@
           },
           {
             "in": "query",
-            "name": "uploadType",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "key",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "fields",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "$.xgafv",
-            "schema": {
-              "enum": [
-                "1",
-                "2"
-              ],
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
             "name": "alt",
             "schema": {
               "default": "json",
@@ -6527,13 +6761,6 @@
           },
           {
             "in": "query",
-            "name": "quotaUser",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
             "name": "access_token",
             "schema": {
               "type": "string"
@@ -6541,7 +6768,21 @@
           },
           {
             "in": "query",
+            "name": "uploadType",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
             "name": "upload_protocol",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "callback",
             "schema": {
               "type": "string"
             }
@@ -6570,7 +6811,11 @@
         "security": [
           {
             "Oauth2": [
-              "https://www.googleapis.com/auth/cloud-platform",
+              "https://www.googleapis.com/auth/cloud-platform"
+            ]
+          },
+          {
+            "Oauth2": [
               "https://www.googleapis.com/auth/container"
             ]
           }
@@ -6615,7 +6860,32 @@
           },
           {
             "in": "query",
-            "name": "callback",
+            "name": "$.xgafv",
+            "schema": {
+              "enum": [
+                "1",
+                "2"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "key",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "fields",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "quotaUser",
             "schema": {
               "type": "string"
             }
@@ -6637,38 +6907,6 @@
           },
           {
             "in": "query",
-            "name": "uploadType",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "key",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "fields",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "$.xgafv",
-            "schema": {
-              "enum": [
-                "1",
-                "2"
-              ],
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
             "name": "alt",
             "schema": {
               "default": "json",
@@ -6682,13 +6920,6 @@
           },
           {
             "in": "query",
-            "name": "quotaUser",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
             "name": "access_token",
             "schema": {
               "type": "string"
@@ -6696,7 +6927,21 @@
           },
           {
             "in": "query",
+            "name": "uploadType",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
             "name": "upload_protocol",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "callback",
             "schema": {
               "type": "string"
             }
@@ -6725,7 +6970,11 @@
         "security": [
           {
             "Oauth2": [
-              "https://www.googleapis.com/auth/cloud-platform",
+              "https://www.googleapis.com/auth/cloud-platform"
+            ]
+          },
+          {
+            "Oauth2": [
               "https://www.googleapis.com/auth/container"
             ]
           }
@@ -6754,7 +7003,32 @@
           },
           {
             "in": "query",
-            "name": "callback",
+            "name": "$.xgafv",
+            "schema": {
+              "enum": [
+                "1",
+                "2"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "key",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "fields",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "quotaUser",
             "schema": {
               "type": "string"
             }
@@ -6776,38 +7050,6 @@
           },
           {
             "in": "query",
-            "name": "uploadType",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "key",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "fields",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "$.xgafv",
-            "schema": {
-              "enum": [
-                "1",
-                "2"
-              ],
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
             "name": "alt",
             "schema": {
               "default": "json",
@@ -6821,14 +7063,14 @@
           },
           {
             "in": "query",
-            "name": "quotaUser",
+            "name": "access_token",
             "schema": {
               "type": "string"
             }
           },
           {
             "in": "query",
-            "name": "access_token",
+            "name": "uploadType",
             "schema": {
               "type": "string"
             }
@@ -6841,9 +7083,16 @@
             }
           },
           {
+            "in": "query",
+            "name": "callback",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
             "deprecated": true,
             "in": "query",
-            "name": "zone",
+            "name": "projectId",
             "schema": {
               "deprecated": true,
               "type": "string"
@@ -6852,7 +7101,7 @@
           {
             "deprecated": true,
             "in": "query",
-            "name": "projectId",
+            "name": "zone",
             "schema": {
               "deprecated": true,
               "type": "string"
@@ -6873,8 +7122,16 @@
         "security": [
           {
             "Oauth2": [
-              "https://www.googleapis.com/auth/cloud-platform",
-              "https://www.googleapis.com/auth/container",
+              "https://www.googleapis.com/auth/cloud-platform"
+            ]
+          },
+          {
+            "Oauth2": [
+              "https://www.googleapis.com/auth/container"
+            ]
+          },
+          {
+            "Oauth2": [
               "https://www.googleapis.com/auth/container.read-only"
             ]
           }
@@ -6911,7 +7168,32 @@
           },
           {
             "in": "query",
-            "name": "callback",
+            "name": "$.xgafv",
+            "schema": {
+              "enum": [
+                "1",
+                "2"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "key",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "fields",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "quotaUser",
             "schema": {
               "type": "string"
             }
@@ -6933,38 +7215,6 @@
           },
           {
             "in": "query",
-            "name": "uploadType",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "key",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "fields",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "$.xgafv",
-            "schema": {
-              "enum": [
-                "1",
-                "2"
-              ],
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
             "name": "alt",
             "schema": {
               "default": "json",
@@ -6978,14 +7228,14 @@
           },
           {
             "in": "query",
-            "name": "quotaUser",
+            "name": "access_token",
             "schema": {
               "type": "string"
             }
           },
           {
             "in": "query",
-            "name": "access_token",
+            "name": "uploadType",
             "schema": {
               "type": "string"
             }
@@ -6994,6 +7244,22 @@
             "in": "query",
             "name": "upload_protocol",
             "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "callback",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "deprecated": true,
+            "in": "query",
+            "name": "operationId",
+            "schema": {
+              "deprecated": true,
               "type": "string"
             }
           },
@@ -7014,15 +7280,6 @@
               "deprecated": true,
               "type": "string"
             }
-          },
-          {
-            "deprecated": true,
-            "in": "query",
-            "name": "operationId",
-            "schema": {
-              "deprecated": true,
-              "type": "string"
-            }
           }
         ],
         "responses": {
@@ -7039,8 +7296,16 @@
         "security": [
           {
             "Oauth2": [
-              "https://www.googleapis.com/auth/cloud-platform",
-              "https://www.googleapis.com/auth/container",
+              "https://www.googleapis.com/auth/cloud-platform"
+            ]
+          },
+          {
+            "Oauth2": [
+              "https://www.googleapis.com/auth/container"
+            ]
+          },
+          {
+            "Oauth2": [
               "https://www.googleapis.com/auth/container.read-only"
             ]
           }
@@ -7077,7 +7342,32 @@
           },
           {
             "in": "query",
-            "name": "callback",
+            "name": "$.xgafv",
+            "schema": {
+              "enum": [
+                "1",
+                "2"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "key",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "fields",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "quotaUser",
             "schema": {
               "type": "string"
             }
@@ -7099,38 +7389,6 @@
           },
           {
             "in": "query",
-            "name": "uploadType",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "key",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "fields",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "$.xgafv",
-            "schema": {
-              "enum": [
-                "1",
-                "2"
-              ],
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
             "name": "alt",
             "schema": {
               "default": "json",
@@ -7144,13 +7402,6 @@
           },
           {
             "in": "query",
-            "name": "quotaUser",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
             "name": "access_token",
             "schema": {
               "type": "string"
@@ -7158,7 +7409,21 @@
           },
           {
             "in": "query",
+            "name": "uploadType",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
             "name": "upload_protocol",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "callback",
             "schema": {
               "type": "string"
             }
@@ -7187,7 +7452,11 @@
         "security": [
           {
             "Oauth2": [
-              "https://www.googleapis.com/auth/cloud-platform",
+              "https://www.googleapis.com/auth/cloud-platform"
+            ]
+          },
+          {
+            "Oauth2": [
               "https://www.googleapis.com/auth/container"
             ]
           }
@@ -7216,7 +7485,32 @@
           },
           {
             "in": "query",
-            "name": "callback",
+            "name": "$.xgafv",
+            "schema": {
+              "enum": [
+                "1",
+                "2"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "key",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "fields",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "quotaUser",
             "schema": {
               "type": "string"
             }
@@ -7238,38 +7532,6 @@
           },
           {
             "in": "query",
-            "name": "uploadType",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "key",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "fields",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "$.xgafv",
-            "schema": {
-              "enum": [
-                "1",
-                "2"
-              ],
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
             "name": "alt",
             "schema": {
               "default": "json",
@@ -7283,13 +7545,6 @@
           },
           {
             "in": "query",
-            "name": "quotaUser",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
             "name": "access_token",
             "schema": {
               "type": "string"
@@ -7297,7 +7552,21 @@
           },
           {
             "in": "query",
+            "name": "uploadType",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
             "name": "upload_protocol",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "callback",
             "schema": {
               "type": "string"
             }
@@ -7335,8 +7604,16 @@
         "security": [
           {
             "Oauth2": [
-              "https://www.googleapis.com/auth/cloud-platform",
-              "https://www.googleapis.com/auth/container",
+              "https://www.googleapis.com/auth/cloud-platform"
+            ]
+          },
+          {
+            "Oauth2": [
+              "https://www.googleapis.com/auth/container"
+            ]
+          },
+          {
+            "Oauth2": [
               "https://www.googleapis.com/auth/container.read-only"
             ]
           }

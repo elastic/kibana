@@ -33,4 +33,7 @@ export const i18nTexts = {
     defaultMessage:
       'Changes will be applied to all users across all spaces. This includes both native Kibana users and single-sign on users.',
   }),
+  loadErrorTitle: i18n.translate('management.settings.loadErrorTitle', {
+    defaultMessage: 'Unable to load advanced settings',
+  }),
 };

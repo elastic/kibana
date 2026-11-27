@@ -188,7 +188,35 @@
           },
           {
             "in": "query",
+            "name": "fields",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "quotaUser",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
             "name": "upload_protocol",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "key",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "callback",
             "schema": {
               "type": "string"
             }
@@ -202,24 +230,10 @@
           },
           {
             "in": "query",
-            "name": "access_token",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
             "name": "prettyPrint",
             "schema": {
               "default": "true",
               "type": "boolean"
-            }
-          },
-          {
-            "in": "query",
-            "name": "callback",
-            "schema": {
-              "type": "string"
             }
           },
           {
@@ -237,20 +251,6 @@
           },
           {
             "in": "query",
-            "name": "quotaUser",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "fields",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
             "name": "$.xgafv",
             "schema": {
               "enum": [
@@ -262,7 +262,7 @@
           },
           {
             "in": "query",
-            "name": "key",
+            "name": "access_token",
             "schema": {
               "type": "string"
             }
@@ -291,7 +291,11 @@
         "security": [
           {
             "Oauth2": [
-              "https://www.googleapis.com/auth/cloud-platform",
+              "https://www.googleapis.com/auth/cloud-platform"
+            ]
+          },
+          {
+            "Oauth2": [
               "https://www.googleapis.com/auth/cloud-platform.read-only"
             ]
           }
@@ -319,7 +323,35 @@
           },
           {
             "in": "query",
+            "name": "fields",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "quotaUser",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
             "name": "upload_protocol",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "key",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "callback",
             "schema": {
               "type": "string"
             }
@@ -333,24 +365,10 @@
           },
           {
             "in": "query",
-            "name": "access_token",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
             "name": "prettyPrint",
             "schema": {
               "default": "true",
               "type": "boolean"
-            }
-          },
-          {
-            "in": "query",
-            "name": "callback",
-            "schema": {
-              "type": "string"
             }
           },
           {
@@ -368,20 +386,6 @@
           },
           {
             "in": "query",
-            "name": "quotaUser",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "fields",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
             "name": "$.xgafv",
             "schema": {
               "enum": [
@@ -393,7 +397,7 @@
           },
           {
             "in": "query",
-            "name": "key",
+            "name": "access_token",
             "schema": {
               "type": "string"
             }
@@ -449,7 +453,35 @@
           },
           {
             "in": "query",
+            "name": "fields",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "quotaUser",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
             "name": "upload_protocol",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "key",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "callback",
             "schema": {
               "type": "string"
             }
@@ -463,24 +495,10 @@
           },
           {
             "in": "query",
-            "name": "access_token",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
             "name": "prettyPrint",
             "schema": {
               "default": "true",
               "type": "boolean"
-            }
-          },
-          {
-            "in": "query",
-            "name": "callback",
-            "schema": {
-              "type": "string"
             }
           },
           {
@@ -498,20 +516,6 @@
           },
           {
             "in": "query",
-            "name": "quotaUser",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "fields",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
             "name": "$.xgafv",
             "schema": {
               "enum": [
@@ -523,7 +527,7 @@
           },
           {
             "in": "query",
-            "name": "key",
+            "name": "access_token",
             "schema": {
               "type": "string"
             }

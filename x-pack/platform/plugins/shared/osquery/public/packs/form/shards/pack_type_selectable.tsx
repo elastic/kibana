@@ -93,7 +93,7 @@ const PackTypeSelectableComponent = ({
               data-test-subj="osqueryPackTypePolicy"
             >
               {i18n.translate('xpack.osquery.pack.form.policyDescription', {
-                defaultMessage: 'Use pack for specific policies.',
+                defaultMessage: 'Use pack for specific agent policies.',
               })}
             </EuiCheckableCard>
           </EuiFlexItem>

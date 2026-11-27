@@ -53,6 +53,21 @@ export type MobilePlatform = keyof typeof MOBILE_OS_NAMES;
 export const CRASH_EVENTS = ['app.crash', 'crash'] as const;
 /** Taps, as EDOT React Native records them. */
 export const EVENT_WIDGET_CLICK = 'app.widget.click';
+/** Taps outside any widget, as EDOT Android records them. */
+export const EVENT_SCREEN_CLICK = 'app.screen.click';
+/** EDOT Android's span of a screen shown. */
+export const SCREEN_LOAD_SPAN = 'elastic.app.screen.load';
+export const APP_SCREEN_NAME = 'app.screen.name';
+export const APP_WIDGET_NAME = 'app.widget.name';
+export const APP_WIDGET_ID = 'app.widget.id';
+/** A log record's text and level, in the OTel logs indices. */
+export const OTEL_LOG_BODY = 'body.text';
+export const OTEL_SEVERITY_TEXT = 'severity_text';
+export const OTEL_SEVERITY_NUMBER = 'severity_number';
+/** The lowest OTel severity number of a warning: `WARN` is 13 to 16, then `ERROR` and `FATAL`. */
+export const OTEL_SEVERITY_WARN = 13;
+/** A span's duration in nanoseconds, in the OTel traces indices. */
+export const OTEL_SPAN_DURATION = 'duration';
 /** The instrumentation scope of EDOT iOS view controller spans: one per screen shown. */
 export const VIEW_CONTROLLER_SCOPE = 'UIViewController';
 export const OTEL_SCOPE_NAME = 'scope.name';
@@ -81,6 +96,7 @@ export const APP_INSTALLATION_ID = 'app.installation.id';
 /** Span name in the OTel traces indices; events are named in `event_name` instead. */
 export const OTEL_SPAN_NAME = 'name';
 export const OTEL_SPAN_ID = 'span_id';
+export const OTEL_TRACE_ID = 'trace_id';
 
 export const WEB_VITAL_NAME = 'browser.web_vital.name';
 export const WEB_VITAL_VALUE = 'browser.web_vital.value';
