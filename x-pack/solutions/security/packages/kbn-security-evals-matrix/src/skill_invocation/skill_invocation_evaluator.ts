@@ -11,7 +11,23 @@ import type { ToolingLog } from '@kbn/tooling-log';
 
 const VALID_SKILL_NAME = /^[a-zA-Z0-9_-]+$/;
 
-export function createSecuritySkillInvocationEvaluator({
+/**
+ * Security-owned counterpart of the platform `createSkillInvocationEvaluator` (same evaluator
+ * name and 1 / 0 / null score shape). A skill counts as invoked when the agent
+ *  - calls `load_skill` with any form it resolves: the skill name, a folder path ending in
+ *    `/<name>`, or either of those followed by `/SKILL.md`, or
+ *  - calls `filestore.read` on a `/<name>/SKILL.md` path.
+ * The name must be preceded by `"` or `/` and followed by `"` or `/SKILL.md`, so
+ * `alert-analysis-extra` and `pre-alert-analysis` do not satisfy `alert-analysis`.
+ * Whitespace around the name is tolerated because `resolveSkill` trims its input:
+ * `{"skill":" alert-analysis "}` is a successful activation, not a miss.
+ *
+ * The metric means "the agent selected the skill", not "the skill was loaded": it reads the
+ * span's raw `load_skill` arguments before validation and before the availability check in
+ * `load_skill.ts`, so a failed `load_skill` call for the right name still counts. Confirming the
+ * load succeeded would need the span's result or status, which this arguments-only query can't see.
+ */
+export function createSkillInvocationEvaluator({
   traceEsClient,
   log,
   skillName,
@@ -44,7 +60,7 @@ export function createSecuritySkillInvocationEvaluator({
       )
       OR (
         attributes.gen_ai.tool.name == "load_skill"
-          AND attributes.gen_ai.tool.call.arguments LIKE "*${skillName}*"
+          AND attributes.gen_ai.tool.call.arguments RLIKE ".*(\\"|/)[ \\\\t]*${skillName}([ \\\\t]*\\"|/SKILL.md[ \\\\t]*\\").*"
       ),
       1,
       NULL
@@ -67,6 +83,7 @@ export function createSecuritySkillInvocationEvaluator({
         const totalSpans = row?.[totalSpansIndex] as number | undefined;
         const skillInvoked = row?.[skillInvokedIndex] as number | undefined;
 
+        // Retry only while the trace is not yet indexed, same as the platform evaluator.
         if (!totalSpans) {
           return null;
         }

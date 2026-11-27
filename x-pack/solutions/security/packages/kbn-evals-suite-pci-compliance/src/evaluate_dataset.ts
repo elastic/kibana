@@ -14,7 +14,7 @@ import type {
   EvalsExecutorClient,
   Example,
 } from '@kbn/evals';
-import { createSkillInvocationEvaluator } from '@kbn/evals';
+import { createSkillInvocationEvaluator } from '@kbn/security-evals-matrix';
 import type { PciEvalChatClient } from './chat_client';
 
 export interface PciDatasetExample extends Example {

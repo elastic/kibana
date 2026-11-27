@@ -22,6 +22,7 @@ dependsOn:
   - '@kbn/evals'
   - '@kbn/security-evals-alerts-snapshot'
   - '@kbn/tooling-log'
+  - '@kbn/security-evals-matrix'
 tags:
   - functional-tests
   - package
