@@ -187,6 +187,58 @@ describe('CustomTimeRangePanel', () => {
     });
   });
 
+  describe('relative count editing', () => {
+    const getStartCount = () => within(getStartFieldset()).getByLabelText('Count');
+    const getStartUnitDirection = () =>
+      within(getStartFieldset()).getByLabelText(customTimeRangePanelTexts.unitDirectionAriaLabel);
+    const getText = () => screen.getByTestId('currentDateRangeText').textContent;
+
+    it('lets the count be cleared without applying it', () => {
+      renderCustomTimeRangePanel({ defaultValue: '-15m' });
+      openCustomPanel();
+      const textBefore = getText();
+
+      fireEvent.change(getStartCount(), { target: { value: '' } });
+
+      expect(getStartCount()).toHaveValue(null);
+      expect(getStartUnitDirection()).toHaveValue('m_past');
+      expect(getText()).toBe(textBefore);
+    });
+
+    it('applies a count typed after clearing the field, keeping the direction', () => {
+      renderCustomTimeRangePanel({ defaultValue: '-15m' });
+      openCustomPanel();
+
+      fireEvent.change(getStartCount(), { target: { value: '' } });
+      fireEvent.change(getStartCount(), { target: { value: '30' } });
+
+      expect(getStartCount()).toHaveValue(30);
+      expect(getStartUnitDirection()).toHaveValue('m_past');
+      expect(screen.getByTestId('currentDateRangeText')).toHaveTextContent('-30m to now');
+    });
+
+    it('does not apply a zero count or flip the direction', () => {
+      renderCustomTimeRangePanel({ defaultValue: '-15m' });
+      openCustomPanel();
+      const textBefore = getText();
+
+      fireEvent.change(getStartCount(), { target: { value: '0' } });
+
+      expect(getStartUnitDirection()).toHaveValue('m_past');
+      expect(getText()).toBe(textBefore);
+    });
+
+    it('restores the current count on blur when the typed count cannot be applied', () => {
+      renderCustomTimeRangePanel({ defaultValue: '-15m' });
+      openCustomPanel();
+
+      fireEvent.change(getStartCount(), { target: { value: '' } });
+      fireEvent.blur(getStartCount());
+
+      expect(getStartCount()).toHaveValue(15);
+    });
+  });
+
   describe('apply', () => {
     it('applies the typed absolute range as ISO bounds', () => {
       const onChange = jest.fn();

@@ -80,6 +80,9 @@ const UNIT_DIRECTION_OPTIONS = [
 /** Default date offset value to show on the relative selection part */
 const DEFAULT_RELATIVE: DateOffset = { count: -15, unit: 'm' };
 
+/** Whether `count` can be applied as a relative offset count: a whole number above zero. */
+const isApplicableCount = (count: number): boolean => Number.isInteger(count) && count > 0;
+
 interface DatePartState {
   type: DateType;
   relativeOffset: DateOffset;
@@ -94,10 +97,15 @@ interface DatePartPickerProps {
   error?: string;
 }
 
-/** Picker for one side of the range: tab group (Relative / Absolute / Now) plus conditional controls. */
+/**
+ * Picker for one side of the range: tab group (Relative / Absolute / Now) plus conditional controls.
+ * The relative count can be empty while typing; a count that can't be applied (empty, decimal or
+ * zero) goes back to the current count once the field loses focus.
+ */
 const DatePartPicker = ({ label, side, state, onChange, error }: DatePartPickerProps) => {
   const tabGroupId = useGeneratedHtmlId({ prefix: 'datePartTab' });
   const fonts = useEuiFontSize('xs');
+  const [countDraft, setCountDraft] = useState<string | null>(null);
 
   const sideLabel = side === 'start' ? 'Start' : 'End';
 
@@ -134,13 +142,20 @@ const DatePartPicker = ({ label, side, state, onChange, error }: DatePartPickerP
 
   const onCountChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
-      const raw = Math.max(0, parseInt(e.target.value, 10) || 0);
+      const { value } = e.target;
+      setCountDraft(value);
+
+      const raw = Number(value);
+      if (!isApplicableCount(raw)) return;
+
       const isFuture = state.relativeOffset.count >= 0;
       const count = isFuture ? raw : -raw;
       onChange({ ...state, relativeOffset: { ...state.relativeOffset, count } });
     },
     [state, onChange]
   );
+
+  const onCountBlur = useCallback(() => setCountDraft(null), []);
 
   const onUnitDirectionChange = useCallback(
     (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -186,9 +201,11 @@ const DatePartPicker = ({ label, side, state, onChange, error }: DatePartPickerP
               <EuiFlexItem grow={false} style={{ width: 80 }}>
                 <EuiFieldNumber
                   compressed
-                  value={Math.abs(state.relativeOffset.count)}
+                  value={countDraft ?? Math.abs(state.relativeOffset.count)}
                   onChange={onCountChange}
-                  min={0}
+                  onBlur={onCountBlur}
+                  min={1}
+                  step={1}
                   aria-label={customTimeRangePanelTexts.countAriaLabel}
                   data-test-subj={`dateRangePicker${sideLabel}RelativeCount`}
                 />
