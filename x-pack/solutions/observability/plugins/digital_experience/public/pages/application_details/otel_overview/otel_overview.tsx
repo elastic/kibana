@@ -68,6 +68,13 @@ const USAGE_FETCH_ERROR_TITLE = i18n.translate(
   { defaultMessage: 'Could not load the pages, browsers and clicks' }
 );
 
+/**
+ * The least width of the panels that share a row, which then stack: measured in the page, not in
+ * the window, so a flyout beside the page does not leave them overflowing.
+ */
+const SIDE_PANEL_CSS = { minInlineSize: 320 };
+const WIDE_PANEL_CSS = { minInlineSize: 400 };
+
 /** The most frequent error groups on the Overview; the Errors tab lists the rest. */
 const TOP_ERRORS_ROWS = 5;
 
@@ -131,11 +138,12 @@ function OverviewPanels({
 }) {
   return (
     <>
-      <EuiFlexGroup gutterSize="m" alignItems="stretch">
-        <EuiFlexItem grow={2}>
+      {/* Side by side while the page is wide enough, whatever the window: a flyout beside it narrows it. */}
+      <EuiFlexGroup gutterSize="m" alignItems="stretch" wrap>
+        <EuiFlexItem grow={2} css={SIDE_PANEL_CSS}>
           <CoreWebVitalsPanel webVitals={overview.webVitals} isLoading={isLoading} />
         </EuiFlexItem>
-        <EuiFlexItem grow={5}>
+        <EuiFlexItem grow={5} css={WIDE_PANEL_CSS}>
           <OverviewTrends
             points={overview.trend}
             histogram={trendHistogram}
@@ -215,8 +223,8 @@ function UsageAndErrorsPanels({
         </>
       )}
       <EuiSpacer size="m" />
-      <EuiFlexGroup gutterSize="m" alignItems="stretch">
-        <EuiFlexItem grow={3}>
+      <EuiFlexGroup gutterSize="m" alignItems="stretch" wrap>
+        <EuiFlexItem grow={3} css={WIDE_PANEL_CSS}>
           {topErrors.error ? (
             <LoadErrorPrompt
               data-test-subj="digitalExperienceOverviewTopErrorsError"
@@ -236,7 +244,7 @@ function UsageAndErrorsPanels({
           )}
         </EuiFlexItem>
         {!error && (
-          <EuiFlexItem grow={2}>
+          <EuiFlexItem grow={2} css={SIDE_PANEL_CSS}>
             <TopClicksPanel clicks={topClicks} totalClicks={totalClicks} isLoading={isLoading} />
           </EuiFlexItem>
         )}
@@ -245,7 +253,7 @@ function UsageAndErrorsPanels({
         <>
           <EuiSpacer size="m" />
           <EuiFlexGroup gutterSize="m" alignItems="stretch">
-            <EuiFlexItem>
+            <EuiFlexItem css={{ minInlineSize: 0 }}>
               <FrustrationPanel
                 frustration={frustration}
                 frustratedElements={frustratedElements}
@@ -317,8 +325,8 @@ export function OtelOverview({ serviceName }: { serviceName: string }) {
         onRefresh={refreshAll}
         formatters={formatters}
       />
-      {/* As tall as a row of pills even with none, so picking the first value moves nothing below. */}
-      <div css={{ marginBlockStart: euiTheme.size.s, minBlockSize: euiTheme.size.l }}>
+      {/* With no pills it leaves as much room below the toolbar as there is above it. */}
+      <div css={{ marginBlockStart: euiTheme.size.s, minBlockSize: euiTheme.size.s }}>
         <OverviewFilterPills filters={filters} setFilter={setFilter} onClear={clearFilters} />
       </div>
       {isFlyoutOpen && (
