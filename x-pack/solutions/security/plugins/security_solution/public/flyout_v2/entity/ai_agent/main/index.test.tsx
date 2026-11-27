@@ -10,16 +10,15 @@ import { act, fireEvent, render, screen } from '@testing-library/react';
 import { TestProviders } from '../../../../common/mock';
 import { useFlyoutApi } from '../../../use_flyout_api';
 import { createFlyoutApiMock } from '../../../use_flyout_api.mock';
-import {
-  useAiAgentActivity,
-  useAiAgentContext,
-} from '../../../../entity_analytics/components/ai_security/hooks/use_ai_agents';
+import { useAiAgentContext } from '../../../../entity_analytics/components/ai_security/hooks/use_ai_agents';
+import { useAiAgentSessions } from '../../../../entity_analytics/components/ai_security/hooks/use_ai_agent_sessions';
 import { mockAgentContext, mockAgentIdentity, mockAgentRow } from './mocks';
 import { AiAgent } from '.';
 import { AI_AGENT_TEST_IDS } from './test_ids';
 
 jest.mock('../../../use_flyout_api');
 jest.mock('../../../../entity_analytics/components/ai_security/hooks/use_ai_agents');
+jest.mock('../../../../entity_analytics/components/ai_security/hooks/use_ai_agent_sessions');
 jest.mock('../../../../entity_analytics/api/hooks/use_get_watchlists', () => ({
   useGetWatchlists: jest.fn().mockReturnValue({
     data: [{ id: 'agents-for-departing-employees', name: 'Agents acting for departing employees' }],
@@ -70,22 +69,31 @@ describe('AiAgent', () => {
       isLoading: false,
       isError: false,
     } as unknown as ReturnType<typeof useAiAgentContext>);
-    jest.mocked(useAiAgentActivity).mockReturnValue({
+    jest.mocked(useAiAgentSessions).mockReturnValue({
       data: undefined,
-    } as unknown as ReturnType<typeof useAiAgentActivity>);
+    } as unknown as ReturnType<typeof useAiAgentSessions>);
   });
 
-  it('shows Running now in the header when a run is running', () => {
-    jest.mocked(useAiAgentActivity).mockReturnValue({
-      data: { runs: [{ id: 'run-1', status: { kind: 'running' } }] },
-    } as unknown as ReturnType<typeof useAiAgentActivity>);
+  it('shows Running now and the session count in the header from the sessions read', () => {
+    jest.mocked(useAiAgentSessions).mockReturnValue({
+      data: {
+        sessions: [
+          { id: 'session-1', status: { kind: 'running' } },
+          { id: 'session-2', status: { kind: 'ended' } },
+        ],
+        truncated: false,
+      },
+    } as unknown as ReturnType<typeof useAiAgentSessions>);
     renderFlyout();
     expect(screen.getByTestId(AI_AGENT_TEST_IDS.headerRunning)).toBeInTheDocument();
+    expect(screen.getByTestId(AI_AGENT_TEST_IDS.headerSessionCount)).toHaveTextContent(
+      '2 sessions in 30 days'
+    );
   });
 
-  it('reads activity only once the agent row has loaded', () => {
+  it('reads sessions only once the agent row has loaded', () => {
     renderFlyout();
-    expect(useAiAgentActivity).toHaveBeenLastCalledWith(
+    expect(useAiAgentSessions).toHaveBeenLastCalledWith(
       expect.objectContaining({ entityId: mockAgentIdentity.entityId, dataSources: ['endpoint'] })
     );
   });

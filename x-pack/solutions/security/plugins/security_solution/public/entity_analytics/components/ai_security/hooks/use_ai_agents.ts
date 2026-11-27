@@ -19,12 +19,7 @@ import {
   EA_EXECUTION_CONTEXT_NAMES,
 } from '../../../../common/utils/execution_context';
 import { runEsqlQuery } from '../../home/queries/run_esql_query';
-import {
-  ACTIVITY_LOOKBACK_MARGIN_MS,
-  ACTIVITY_MAX_PROCESS_EVENTS,
-  AI_AGENTS_QUERY_KEYS,
-  getEndpointProcessIndex,
-} from '../constants';
+import { AI_AGENTS_QUERY_KEYS, getEndpointProcessIndex } from '../constants';
 import {
   buildAgentAlertCountsQuery,
   buildAgentAlertsQuery,
@@ -34,14 +29,6 @@ import {
   buildSignedInAsQuery,
 } from '../queries/agent_queries';
 import {
-  buildDescendantProcessesQuery,
-  buildOtelEventsQuery,
-  buildOwnProcessEndsQuery,
-  buildOwnProcessesQuery,
-  buildProcessSideEffectsQuery,
-  buildRunAlertsQuery,
-} from '../queries/activity_queries';
-import {
   isDefined,
   toAgentAlert,
   toAgentRow,
@@ -49,15 +36,6 @@ import {
   toRelatedEntity,
 } from '../queries/parse_rows';
 import { buildAgentContext } from '../queries/build_agent_context';
-import {
-  buildAgentActivity,
-  toEndedProcessIds,
-  toOtelRecord,
-  toProcessEvent,
-  toRunAlert,
-  toSideEffects,
-} from '../activity/build_agent_activity';
-import type { AgentActivity, OtelMatch, OtelRecord, SideEffects } from '../activity/types';
 import type {
   AgentAlert,
   AgentContext,
@@ -66,22 +44,15 @@ import type {
   AgentRow,
   InventoryPerson,
 } from '../types';
-import {
-  firstString,
-  getSignedInAccounts,
-  isClaudeCode,
-  parseAgentId,
-  toNumber,
-  toStringArray,
-} from '../utils';
+import { firstString, getSignedInAccounts, parseAgentId, toNumber, toStringArray } from '../utils';
 
-type SearchService = DataPublicPluginStart['search'];
-type EsqlRecord = Record<string, unknown>;
+export type SearchService = DataPublicPluginStart['search'];
+export type EsqlRecord = Record<string, unknown>;
 
 const context = (id: string) =>
   buildExecutionContext(EA_EXECUTION_CONTEXT_NAMES.ENTITY_DETAILS_FLYOUT, `ai_agents_${id}`);
 
-const esqlRecords = async (
+export const esqlRecords = async (
   search: SearchService,
   query: string,
   id: string,
@@ -103,7 +74,7 @@ const isMissingIndexError = (error: unknown): boolean => {
  * Runs a query whose source may be missing. A missing index reads as no data, any other failure
  * as "couldn't read" for that layer.
  */
-const optionalRecords = async (
+export const optionalRecords = async (
   search: SearchService,
   query: string,
   id: string,
@@ -118,7 +89,7 @@ const optionalRecords = async (
 };
 
 /** Reads a namespace's data stream, which may not exist yet. Any other failure still throws. */
-const recordsIfIndexExists = async (
+export const recordsIfIndexExists = async (
   search: SearchService,
   query: string,
   id: string,
@@ -285,7 +256,7 @@ type ArgsRequest = IKibanaSearchRequest<estypes.SearchRequest>;
 type ArgsResponse = IKibanaSearchResponse<estypes.SearchResponse<EsqlRecord>>;
 
 /** Ordered `process.args` from `_source`. ES|QL returns keyword arrays sorted, which loses the prompt. */
-const fetchOrderedArgs = async (
+export const fetchOrderedArgs = async (
   search: SearchService,
   namespace: string,
   documentIds: readonly string[],
@@ -312,122 +283,4 @@ const fetchOrderedArgs = async (
       return entityId ? [[entityId, toStringArray(get(hit._source, 'process.args'))] as const] : [];
     })
   );
-};
-
-export interface AgentActivityResult extends AgentActivity {
-  /** OTel couldn't be read (as opposed to: there is none). */
-  readonly otelFailed: boolean;
-}
-
-/** Agent activity from every source that exists, assembled by `buildAgentActivity`. */
-export const useAiAgentActivity = (agent: AgentRow | AgentIdentity | undefined) => {
-  const { data } = useKibana().services;
-  const spaceId = useSpaceId();
-  const firstSeen = agent && 'firstSeen' in agent ? agent.firstSeen : undefined;
-  const lastSeen = agent && 'lastSeen' in agent ? agent.lastSeen : undefined;
-  const accountEmails = agent && 'accountEmails' in agent ? agent.accountEmails : [];
-  return useQuery({
-    queryKey: [AI_AGENTS_QUERY_KEYS.activity, spaceId, agent?.entityId, firstSeen, lastSeen],
-    enabled: !!agent && !!spaceId,
-    queryFn: async ({ signal }): Promise<AgentActivityResult | undefined> => {
-      if (!agent) return undefined;
-      const space = spaceId ?? 'default';
-      const from = new Date(
-        (firstSeen ? new Date(firstSeen).getTime() : Date.now() - 30 * 86_400_000) -
-          ACTIVITY_LOOKBACK_MARGIN_MS
-      ).toISOString();
-
-      const [ownRecords, descendantRecords, sideEffectRecords, endRecords, alertRecords] =
-        await Promise.all([
-          recordsIfIndexExists(
-            data.search,
-            buildOwnProcessesQuery(space, agent, from),
-            'own',
-            signal
-          ),
-          recordsIfIndexExists(
-            data.search,
-            buildDescendantProcessesQuery(space, agent, from),
-            'descendants',
-            signal
-          ),
-          optionalRecords(
-            data.search,
-            buildProcessSideEffectsQuery(space, agent, from),
-            'effects',
-            signal
-          ),
-          optionalRecords(
-            data.search,
-            buildOwnProcessEndsQuery(space, agent, from),
-            'ends',
-            signal
-          ),
-          optionalRecords(
-            data.search,
-            buildRunAlertsQuery(space, agent.entityId, from),
-            'run_alerts',
-            signal
-          ),
-        ]);
-      const ownEvents = ownRecords.map(toProcessEvent).filter(isDefined);
-      const descendantEvents = descendantRecords.map(toProcessEvent).filter(isDefined);
-      const sideEffects: Map<string, SideEffects> = toSideEffects(sideEffectRecords.records);
-
-      const sessionIds = Array.from(
-        new Set(
-          [...ownEvents, ...descendantEvents].map((event) => event.sessionId).filter(isDefined)
-        )
-      );
-      let otelMatch: OtelMatch = 'none';
-      let otelQuery: string | undefined;
-      if (isClaudeCode(agent.agentName) && sessionIds.length > 0) {
-        otelMatch = 'session';
-        otelQuery = buildOtelEventsQuery(space, { sessionIds });
-      } else if (isClaudeCode(agent.agentName) && accountEmails.length > 0) {
-        otelMatch = 'account';
-        otelQuery = buildOtelEventsQuery(space, {
-          emails: accountEmails,
-          from,
-          to: new Date(
-            (lastSeen ? new Date(lastSeen).getTime() : Date.now()) +
-              ACTIVITY_LOOKBACK_MARGIN_MS * 60
-          ).toISOString(),
-        });
-      }
-
-      const rootDocumentIds = ownEvents
-        .filter((event) => event.hasExec)
-        .map((event) => event.documentId)
-        .filter(isDefined);
-      const [otel, rootArgs] = await Promise.all([
-        otelQuery
-          ? optionalRecords(data.search, otelQuery, 'otel', signal)
-          : Promise.resolve({ records: [], failed: false }),
-        fetchOrderedArgs(data.search, space, rootDocumentIds, signal).catch(
-          () => new Map<string, string[]>()
-        ),
-      ]);
-      const otelEvents: OtelRecord[] = otel.records.map(toOtelRecord).filter(isDefined);
-
-      return {
-        ...buildAgentActivity({
-          identity: agent,
-          ownEvents,
-          descendantEvents,
-          sideEffects,
-          otelEvents,
-          otelMatch,
-          rootArgs,
-          endedProcessIds: endRecords.failed ? undefined : toEndedProcessIds(endRecords.records),
-          alerts: alertRecords.records.map(toRunAlert).filter(isDefined),
-          now: Date.now(),
-          truncated:
-            ownRecords.length >= ACTIVITY_MAX_PROCESS_EVENTS ||
-            descendantRecords.length >= ACTIVITY_MAX_PROCESS_EVENTS,
-        }),
-        otelFailed: otel.failed,
-      };
-    },
-  });
 };

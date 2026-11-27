@@ -34,8 +34,8 @@ export const POC_MOCK_TAG = 'poc-mock';
 /** Agents read at most this many rows on the page. */
 export const AI_AGENTS_MAX_ROWS = 1000;
 
-/** Descendants of an agent can outlive it (Cursor's language server), so activity reads past its last seen. */
-export const ACTIVITY_LOOKBACK_MARGIN_MS = 60_000;
+/** The Agent activity tab and the header's session count cover this many days, ending now. */
+export const SESSIONS_WINDOW_DAYS = 30;
 
 export const ACTIVITY_MAX_PROCESS_EVENTS = 5000;
 export const ACTIVITY_MAX_OTEL_EVENTS = 2000;
@@ -45,5 +45,6 @@ export const AI_AGENTS_QUERY_KEYS = {
   inventory: 'ai-agents-inventory',
   context: 'ai-agent-context',
   alerts: 'ai-agent-alerts',
-  activity: 'ai-agent-activity',
+  sessions: 'ai-agent-sessions',
+  sessionDetail: 'ai-agent-session-detail',
 } as const;

@@ -18,10 +18,8 @@ import {
   EuiTabs,
 } from '@elastic/eui';
 import { KbnDangerCallout } from '@kbn/ui-callout';
-import {
-  useAiAgentActivity,
-  useAiAgentContext,
-} from '../../../../entity_analytics/components/ai_security/hooks/use_ai_agents';
+import { useAiAgentContext } from '../../../../entity_analytics/components/ai_security/hooks/use_ai_agents';
+import { useAiAgentSessions } from '../../../../entity_analytics/components/ai_security/hooks/use_ai_agent_sessions';
 import { parseAgentId } from '../../../../entity_analytics/components/ai_security/utils';
 import { useFlyoutApi } from '../../../use_flyout_api';
 import { FLYOUT_ORIGIN } from '../../../../common/lib/telemetry';
@@ -67,10 +65,10 @@ export const AiAgent: FC<AiAgentProps> = memo(function AiAgent({ entityId, entit
   const identity = data?.identity ?? parseAgentId(entityId);
   const agent = data?.agent;
   const agentName = entityName ?? agent?.entityName ?? entityId;
-  const { data: activity } = useAiAgentActivity(isLoading ? undefined : agent ?? identity);
-  const runningRuns = useMemo(
-    () => activity?.runs.filter((run) => run.status?.kind === 'running') ?? [],
-    [activity]
+  const { data: sessions } = useAiAgentSessions(isLoading ? undefined : agent ?? identity);
+  const runningSessions = useMemo(
+    () => sessions?.sessions.filter((session) => session.status?.kind === 'running') ?? [],
+    [sessions]
   );
 
   const onShowAgent = useCallback(
@@ -115,7 +113,10 @@ export const AiAgent: FC<AiAgentProps> = memo(function AiAgent({ entityId, entit
           agent={agent}
           isLoading={isLoading}
           isUnsanctioned={isUnsanctionedAgent(agent, spaceId)}
-          isRunning={runningRuns.length > 0}
+          isRunning={runningSessions.length > 0}
+          sessionCount={
+            sessions && { count: sessions.sessions.length, truncated: sessions.truncated }
+          }
         />
         <EuiSpacer size="s" />
         <EuiTabs size="s" bottomBorder={false} data-test-subj={AI_AGENT_TEST_IDS.tabs}>
@@ -181,7 +182,7 @@ export const AiAgent: FC<AiAgentProps> = memo(function AiAgent({ entityId, entit
         )}
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
-        <Footer identity={identity} agent={agent} runningRuns={runningRuns} />
+        <Footer identity={identity} agent={agent} runningSessions={runningSessions} />
       </EuiFlyoutFooter>
     </>
   );

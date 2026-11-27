@@ -86,6 +86,29 @@ describe('AiAgentHeader', () => {
     );
   });
 
+  it('shows sessions in 30 days next to last seen, as a minimum when the read hit its limit', () => {
+    const { rerender } = renderHeader({
+      agent: { ...agent, lastSeen: new Date().toISOString() },
+      sessionCount: { count: 31, truncated: false },
+    });
+    expect(screen.getByTestId(AI_AGENT_TEST_IDS.headerSessionCount)).toHaveTextContent(
+      '31 sessions in 30 days'
+    );
+    rerender(
+      <TestProviders>
+        <AiAgentHeader
+          identity={identity}
+          agent={agent}
+          isLoading={false}
+          sessionCount={{ count: 1, truncated: true }}
+        />
+      </TestProviders>
+    );
+    expect(screen.getByTestId(AI_AGENT_TEST_IDS.headerSessionCount)).toHaveTextContent(
+      'At least 1 session in 30 days'
+    );
+  });
+
   it('keeps version and lifecycle dates out of the header', () => {
     renderHeader({ agent: { ...agent, firstSeen: '2026-11-20T10:00:00.000Z' } });
     expect(screen.queryByText('2.1.332')).not.toBeInTheDocument();

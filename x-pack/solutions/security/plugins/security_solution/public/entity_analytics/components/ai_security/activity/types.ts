@@ -162,9 +162,74 @@ export interface AgentRun {
 export interface RunAlertRecord {
   readonly id: string;
   readonly timestamp: string;
+  /** When the source event happened (`kibana.alert.original_time`). */
+  readonly eventTime?: string;
   readonly processEntityId?: string;
   readonly parentEntityId?: string;
   readonly ancestry: readonly string[];
+  readonly entryLeaderEntityId?: string;
+}
+
+export interface TimeWindow {
+  readonly from: string;
+  readonly to: string;
+}
+
+/**
+ * One launch as the first read sees it: the agent's own processes (the root and its re-execs),
+ * without the commands they ran. The same unit as `AgentRun`, which the session's detail read builds.
+ */
+export interface AgentSession {
+  readonly id: string;
+  readonly root: ProcessRecord;
+  readonly start: string;
+  /** The last end event of the agent's own processes, when the root has ended. */
+  readonly end?: string;
+  readonly launchMode: LaunchMode;
+  readonly isHeadless: boolean;
+  readonly permissionPromptsOff: boolean;
+  /** Absent when end events couldn't be read. */
+  readonly status?: RunStatus;
+  /**
+   * Alerts tied to the session by the agent's own processes, or by terminal session and time for
+   * alerts on deeper descendants, newest first. The detail read adds any it ties by ancestry.
+   */
+  readonly alertIds: readonly string[];
+}
+
+/** The agent's sessions in a fixed window, newest first, plus what the detail read reuses. */
+export interface AgentSessions {
+  readonly sessions: readonly AgentSession[];
+  readonly window: TimeWindow;
+  /** Start events of the agent's own processes in the window. */
+  readonly ownEvents: readonly ProcessRecord[];
+  /** Agent processes with an end event. Absent when end events couldn't be read. */
+  readonly endedProcessIds?: ReadonlySet<string>;
+  readonly alerts: readonly RunAlertRecord[];
+  /** Read time, in milliseconds. */
+  readonly now: number;
+  /** The read hit its limit, so the oldest sessions in the window may be missing. */
+  readonly truncated: boolean;
+}
+
+/** Sessions on one calendar day, for the histogram. Days with none are kept as zero. */
+export interface SessionDay {
+  /** Start of the day, in milliseconds. */
+  readonly day: number;
+  readonly sessions: number;
+  readonly sessionsWithAlerts: number;
+}
+
+/** What one session did, from its detail read. */
+export interface AgentSessionDetail {
+  /** Absent when the session's root wasn't found again, which a newer read can cause. */
+  readonly run?: AgentRun;
+  /** Descendants in the session's window that couldn't be tied to a launch. */
+  readonly unplacedSteps: readonly ActivityStep[];
+  readonly otelMatch: OtelMatch;
+  /** OTel couldn't be read (as opposed to: there is none). */
+  readonly otelFailed: boolean;
+  readonly truncated: boolean;
 }
 
 export type OtelMatch = 'session' | 'account' | 'none';

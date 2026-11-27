@@ -40,12 +40,29 @@ export interface AiAgentHeaderProps {
   readonly agent?: AgentRow;
   readonly isLoading: boolean;
   readonly isUnsanctioned?: boolean;
-  /** A run's root process has a start event and no end event, within the running cap. */
+  /** A session's root process has a start event and no end event, within the running cap. */
   readonly isRunning?: boolean;
+  /** Sessions in the last 30 days. `truncated` when the read hit its limit, so it's a minimum. */
+  readonly sessionCount?: { readonly count: number; readonly truncated: boolean };
 }
 
+const SessionCount = ({ count, truncated }: { count: number; truncated: boolean }) =>
+  truncated ? (
+    <FormattedMessage
+      id="xpack.securitySolution.flyout.entityDetails.aiAgent.header.sessionCountAtLeast"
+      defaultMessage="At least {count, plural, one {# session} other {# sessions}} in 30 days"
+      values={{ count }}
+    />
+  ) : (
+    <FormattedMessage
+      id="xpack.securitySolution.flyout.entityDetails.aiAgent.header.sessionCount"
+      defaultMessage="{count, plural, one {# session} other {# sessions}} in 30 days"
+      values={{ count }}
+    />
+  );
+
 /**
- * Title, badges and last seen. Badges: entity type, "Unsanctioned" (which takes precedence over
+ * Title, badges, last seen and sessions in 30 days. Badges: entity type, "Unsanctioned" (which takes precedence over
  * the other watchlists, kept out of the header), risk level when scored and "Running now".
  */
 export const AiAgentHeader = memo(
@@ -55,6 +72,7 @@ export const AiAgentHeader = memo(
     isLoading,
     isUnsanctioned = false,
     isRunning = false,
+    sessionCount,
   }: AiAgentHeaderProps) => {
     return (
       <div data-test-subj={AI_AGENT_TEST_IDS.header}>
@@ -93,23 +111,40 @@ export const AiAgentHeader = memo(
             <EuiSkeletonText lines={1} size="xs" />
           </>
         ) : (
-          agent?.lastSeen && (
+          (agent?.lastSeen || sessionCount) && (
             <>
               <EuiSpacer size="s" />
-              <EuiText size="xs" color="subdued" data-test-subj={AI_AGENT_TEST_IDS.lastSeen}>
-                <FormattedMessage
-                  id="xpack.securitySolution.flyout.entityDetails.aiAgent.header.lastSeenAt"
-                  defaultMessage="Last seen {time}"
-                  values={{
-                    time: (
-                      <FormattedRelativePreferenceDate
-                        value={agent.lastSeen}
-                        relativeThresholdInHrs={ONE_WEEK_IN_HOURS}
+              <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} wrap>
+                {agent?.lastSeen && (
+                  <EuiFlexItem grow={false}>
+                    <EuiText size="xs" color="subdued" data-test-subj={AI_AGENT_TEST_IDS.lastSeen}>
+                      <FormattedMessage
+                        id="xpack.securitySolution.flyout.entityDetails.aiAgent.header.lastSeenAt"
+                        defaultMessage="Last seen {time}"
+                        values={{
+                          time: (
+                            <FormattedRelativePreferenceDate
+                              value={agent.lastSeen}
+                              relativeThresholdInHrs={ONE_WEEK_IN_HOURS}
+                            />
+                          ),
+                        }}
                       />
-                    ),
-                  }}
-                />
-              </EuiText>
+                    </EuiText>
+                  </EuiFlexItem>
+                )}
+                {sessionCount && (
+                  <EuiFlexItem grow={false}>
+                    <EuiText
+                      size="xs"
+                      color="subdued"
+                      data-test-subj={AI_AGENT_TEST_IDS.headerSessionCount}
+                    >
+                      <SessionCount {...sessionCount} />
+                    </EuiText>
+                  </EuiFlexItem>
+                )}
+              </EuiFlexGroup>
             </>
           )
         )}

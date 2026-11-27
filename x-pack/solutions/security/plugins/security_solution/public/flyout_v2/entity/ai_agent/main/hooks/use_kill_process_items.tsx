@@ -19,12 +19,12 @@ import {
   METADATA_API_ERROR_TOOLTIP,
   NOT_FROM_ENDPOINT_HOST_TOOLTIP,
 } from '../../../../../common/components/endpoint/responder/from_alerts/translations';
-import type { AgentRun } from '../../../../../entity_analytics/components/ai_security/activity/types';
+import type { AgentSession } from '../../../../../entity_analytics/components/ai_security/activity/types';
 import { AI_AGENT_TEST_IDS } from '../test_ids';
 
 const NO_ENDPOINT_AGENT_ID = i18n.translate(
   'xpack.securitySolution.flyout.entityDetails.aiAgent.killProcess.noEndpointAgentId',
-  { defaultMessage: 'The run has no Elastic Defend agent ID, so its host cannot be reached.' }
+  { defaultMessage: 'The session has no Elastic Defend agent ID, so its host cannot be reached.' }
 );
 
 const killProcessLabel = (pid: number | undefined) =>
@@ -41,16 +41,16 @@ const killProcessLabel = (pid: number | undefined) =>
 const consoleValue = (value: string): string => value.replace(/["\\]/g, '');
 
 /**
- * Take action items to kill the root process of each running run, through the Elastic Defend
+ * Take action items to kill the root process of each running session, through the Elastic Defend
  * response console. The console opens with `kill-process` filled in and the analyst sends it.
  * Shown only to users who may kill processes, and disabled while the host can't be reached.
  */
 export const useKillProcessItems = (
-  runs: readonly AgentRun[]
+  sessions: readonly AgentSession[]
 ): ((closePopover: () => void) => ReactElement[]) => {
   const { canKillProcess, canAccessResponseConsole } = useUserPrivileges().endpointPrivileges;
-  const canKill = canKillProcess && canAccessResponseConsole && runs.length > 0;
-  const agentId = runs.find((run) => run.root.endpointAgentId)?.root.endpointAgentId ?? '';
+  const canKill = canKillProcess && canAccessResponseConsole && sessions.length > 0;
+  const agentId = sessions.find(({ root }) => root.endpointAgentId)?.root.endpointAgentId ?? '';
   const { data, isFetching, error } = useGetEndpointDetails(agentId, {
     enabled: canKill && agentId !== '',
   });
@@ -73,9 +73,9 @@ export const useKillProcessItems = (
   return useCallback(
     (closePopover: () => void) => {
       if (!canKill) return [];
-      return runs.map((run) => (
+      return sessions.map((session) => (
         <EuiContextMenuItem
-          key={run.id}
+          key={session.id}
           icon="cross"
           disabled={disabledReason !== undefined}
           toolTipContent={disabledReason}
@@ -89,14 +89,14 @@ export const useKillProcessItems = (
               hostName: data.metadata.host.name,
               platform: data.metadata.host.os.name.toLowerCase(),
               capabilities: (data.metadata.Endpoint.capabilities ?? []) as EndpointCapabilities[],
-              inputCommand: `kill-process --entityId="${consoleValue(run.root.entityId)}"`,
+              inputCommand: `kill-process --entityId="${consoleValue(session.root.entityId)}"`,
             });
           }}
         >
-          {killProcessLabel(run.root.pid)}
+          {killProcessLabel(session.root.pid)}
         </EuiContextMenuItem>
       ));
     },
-    [agentId, canKill, data, disabledReason, runs, showResponder]
+    [agentId, canKill, data, disabledReason, sessions, showResponder]
   );
 };

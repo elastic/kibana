@@ -7,7 +7,9 @@
 
 import React, { memo, useCallback, useMemo, useState } from 'react';
 import {
+  EuiAccordion,
   EuiBadge,
+  EuiButtonEmpty,
   EuiButtonIcon,
   EuiCode,
   EuiFlexGroup,
@@ -23,6 +25,7 @@ import {
   EuiTitle,
   EuiToolTip,
   useEuiTheme,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { KbnDangerCallout } from '@kbn/ui-callout';
@@ -32,12 +35,16 @@ import { buildDataTableRecord } from '@kbn/discover-utils';
 import { PreferenceFormattedDate } from '../../../../../common/components/formatted_date';
 import { useFlyoutApi } from '../../../../use_flyout_api';
 import { FLYOUT_ORIGIN } from '../../../../../common/lib/telemetry';
-import { useAiAgentActivity } from '../../../../../entity_analytics/components/ai_security/hooks/use_ai_agents';
+import {
+  useAiAgentSessionDetail,
+  useAiAgentSessions,
+} from '../../../../../entity_analytics/components/ai_security/hooks/use_ai_agent_sessions';
 import type {
   ActivitySection,
   ActivityStep,
   AgentRun,
-  LaunchMode,
+  AgentSession,
+  AgentSessions,
   ModelUsage,
   ProcessStep,
   RunReach,
@@ -52,26 +59,9 @@ import type {
 import { getToolShellCommand } from '../../../../../entity_analytics/components/ai_security/utils';
 import { buildActivityRows, getRootCommandLabel, type ActivityRow } from './activity_rows';
 import { AskAiAboutRun } from './ask_ai_about_run';
+import { formatSessionDuration, getLaunchLabel } from './session_labels';
+import { SessionsSummary } from './sessions_summary';
 import { AI_AGENT_TEST_IDS } from '../test_ids';
-
-const LAUNCH_MODE_LABELS: Readonly<Record<LaunchMode, string>> = {
-  interactive: i18n.translate(
-    'xpack.securitySolution.flyout.entityDetails.aiAgent.activity.launch.interactive',
-    { defaultMessage: 'Interactive' }
-  ),
-  scripted: i18n.translate(
-    'xpack.securitySolution.flyout.entityDetails.aiAgent.activity.launch.scripted',
-    { defaultMessage: 'Scripted' }
-  ),
-  scheduled: i18n.translate(
-    'xpack.securitySolution.flyout.entityDetails.aiAgent.activity.launch.scheduled',
-    { defaultMessage: 'Scheduled' }
-  ),
-  unknown: i18n.translate(
-    'xpack.securitySolution.flyout.entityDetails.aiAgent.activity.launch.unknown',
-    { defaultMessage: 'Launch mode unknown' }
-  ),
-};
 
 const SESSION_VIEW_LINK = i18n.translate(
   'xpack.securitySolution.flyout.entityDetails.aiAgent.activity.openProcessTree',
@@ -97,17 +87,6 @@ const OTEL_BY_ACCOUNT = i18n.translate(
 const shortId = (id: string): string => (id.length > 12 ? `${id.slice(0, 8)}…` : id);
 
 const MAX_LABEL_LENGTH = 300;
-
-const getLaunchLabel = ({ launchMode, root }: AgentRun): string =>
-  root.entryLeaderName
-    ? i18n.translate(
-        'xpack.securitySolution.flyout.entityDetails.aiAgent.activity.launchWithLeader',
-        {
-          defaultMessage: '{mode} ({leader})',
-          values: { mode: LAUNCH_MODE_LABELS[launchMode], leader: root.entryLeaderName },
-        }
-      )
-    : LAUNCH_MODE_LABELS[launchMode];
 
 const getModelUsageLabel = ({ models, requests, inputTokens, outputTokens }: ModelUsage): string =>
   [
@@ -485,8 +464,8 @@ const SectionView = memo(
               <EuiText size="xs" tabIndex={0}>
                 <strong>
                   <FormattedMessage
-                    id="xpack.securitySolution.flyout.entityDetails.aiAgent.activity.agentSession"
-                    defaultMessage="Agent session {id}"
+                    id="xpack.securitySolution.flyout.entityDetails.aiAgent.activity.conversation"
+                    defaultMessage="Conversation {id}"
                     values={{ id: shortId(section.sessionId) }}
                   />
                 </strong>
@@ -605,6 +584,14 @@ const PERMISSION_PROMPTS_OFF = i18n.translate(
   'xpack.securitySolution.flyout.entityDetails.aiAgent.activity.reach.permissionPromptsOff',
   { defaultMessage: 'permission prompts off' }
 );
+const HEADLESS_BADGE = i18n.translate(
+  'xpack.securitySolution.flyout.entityDetails.aiAgent.activity.headlessBadge',
+  { defaultMessage: 'Headless' }
+);
+const PERMISSION_PROMPTS_OFF_BADGE = i18n.translate(
+  'xpack.securitySolution.flyout.entityDetails.aiAgent.activity.permissionPromptsOffBadge',
+  { defaultMessage: 'Permission prompts off' }
+);
 
 /**
  * One line under the run header: how it was launched, whether it was headless or ran with
@@ -655,7 +642,8 @@ const ReachLine = ({ run }: { run: AgentRun }) => {
   );
 };
 
-const RunView = memo(
+/** What a session did: Ask AI, the reach line, the headless prompt and the steps. */
+const RunBody = memo(
   ({
     run,
     identity,
@@ -680,28 +668,19 @@ const RunView = memo(
     };
     const headlessPrompt = run.isHeadless ? run.headlessPrompt : undefined;
     return (
-      <EuiPanel hasBorder paddingSize="s" data-test-subj={AI_AGENT_TEST_IDS.run}>
-        <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} wrap>
-          <EuiFlexItem grow={false}>
-            <EuiTitle size="xxs">
-              <h4>
-                <FormattedMessage
-                  id="xpack.securitySolution.flyout.entityDetails.aiAgent.activity.runTitle"
-                  defaultMessage="Run started {time}"
-                  values={{ time: <PreferenceFormattedDate value={new Date(run.start)} /> }}
-                />
-              </h4>
-            </EuiTitle>
+      <>
+        <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+          <EuiFlexItem
+            css={css`
+              min-width: 0;
+            `}
+          >
+            <ReachLine run={run} />
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <RunStatusBadge status={run.status} />
-          </EuiFlexItem>
-          <EuiFlexItem />
           <EuiFlexItem grow={false}>
             <AskAiAboutRun identity={identity} agent={agentRow} run={run} />
           </EuiFlexItem>
         </EuiFlexGroup>
-        <ReachLine run={run} />
         {headlessPrompt && (
           <>
             <EuiSpacer size="xs" />
@@ -742,24 +721,228 @@ const RunView = memo(
             onOpenProcessTree={onOpenProcessTree}
           />
         ))}
-      </EuiPanel>
+      </>
     );
   }
 );
-RunView.displayName = 'RunView';
+RunBody.displayName = 'RunBody';
+
+const isSetupStep = (step: ActivityStep): boolean => step.kind === 'process' && step.isSetup;
+
+interface SessionProps {
+  readonly agent: AgentRow | AgentIdentity;
+  readonly sessions: AgentSessions;
+  readonly session: AgentSession;
+  readonly onOpenProcessTree: OpenProcessTree;
+}
+
+/** The second read: what one session did, loaded when its row is expanded. */
+const SessionDetail = ({ agent, sessions, session, onOpenProcessTree }: SessionProps) => {
+  const { data, isLoading, isError } = useAiAgentSessionDetail({ agent, sessions, session });
+  const [showSetup, setShowSetup] = useState(false);
+  const setupCount = useMemo(
+    () =>
+      data
+        ? [
+            ...(data.run?.sections.flatMap((section) => section.steps) ?? []),
+            ...data.unplacedSteps,
+          ].filter(isSetupStep).length
+        : 0,
+    [data]
+  );
+
+  if (isLoading) return <EuiSkeletonText lines={3} size="s" />;
+  if (isError || !data) {
+    return (
+      <KbnDangerCallout
+        announceOnMount
+        size="s"
+        title={i18n.translate(
+          'xpack.securitySolution.flyout.entityDetails.aiAgent.activity.detailError',
+          { defaultMessage: 'What this session did could not be loaded' }
+        )}
+      />
+    );
+  }
+
+  const agentRow = 'watchlistIds' in agent ? agent : undefined;
+  return (
+    <div data-test-subj={AI_AGENT_TEST_IDS.sessionDetail}>
+      {data.truncated && (
+        <EuiText size="xs" color="warning">
+          <FormattedMessage
+            id="xpack.securitySolution.flyout.entityDetails.aiAgent.activity.detailTruncated"
+            defaultMessage="Only the newest steps are shown. This session has more activity than one read returns."
+          />
+        </EuiText>
+      )}
+      {setupCount > 0 && (
+        <>
+          <EuiSwitch
+            compressed
+            label={i18n.translate(
+              'xpack.securitySolution.flyout.entityDetails.aiAgent.activity.showSetup',
+              {
+                defaultMessage: 'Show setup commands ({count})',
+                values: { count: setupCount },
+              }
+            )}
+            checked={showSetup}
+            onChange={(event) => setShowSetup(event.target.checked)}
+            data-test-subj={AI_AGENT_TEST_IDS.setupToggle}
+          />
+          <EuiSpacer size="s" />
+        </>
+      )}
+      {data.run && (
+        <RunBody
+          run={data.run}
+          identity={agent}
+          agentRow={agentRow}
+          showSetup={showSetup}
+          isMatchedByAccount={data.otelMatch === 'account'}
+          onOpenProcessTree={onOpenProcessTree}
+        />
+      )}
+      {data.unplacedSteps.length > 0 && (
+        <EuiPanel
+          color="subdued"
+          hasShadow={false}
+          paddingSize="s"
+          data-test-subj={AI_AGENT_TEST_IDS.unplacedSteps}
+        >
+          <EuiTitle size="xxs">
+            <h4>
+              <FormattedMessage
+                id="xpack.securitySolution.flyout.entityDetails.aiAgent.activity.unplacedTitle"
+                defaultMessage="Steps not tied to a session"
+              />
+            </h4>
+          </EuiTitle>
+          <EuiText size="xs" color="subdued">
+            <FormattedMessage
+              id="xpack.securitySolution.flyout.entityDetails.aiAgent.activity.unplacedBody"
+              defaultMessage="Descendants of this install in this session's time range whose parent process was not recorded."
+            />
+          </EuiText>
+          <Rows
+            steps={data.unplacedSteps}
+            showSetup={showSetup}
+            onOpenProcessTree={onOpenProcessTree}
+          />
+        </EuiPanel>
+      )}
+    </div>
+  );
+};
+
+const SessionLength = ({ session }: { session: AgentSession }) => {
+  if (session.status?.kind === 'running' || session.status?.kind === 'stale') {
+    return <RunStatusBadge status={session.status} />;
+  }
+  if (!session.end) return null;
+  return (
+    <EuiText size="xs" color="subdued" data-test-subj={AI_AGENT_TEST_IDS.sessionDuration}>
+      {formatSessionDuration(new Date(session.end).getTime() - new Date(session.start).getTime())}
+    </EuiText>
+  );
+};
+
+/** The collapsed row: start, length or status, launch mode, flags and alert count. */
+const SessionRowHeader = ({ session }: { session: AgentSession }) => (
+  <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} wrap>
+    <EuiFlexItem grow={false}>
+      <EuiText size="s">
+        <strong>
+          <PreferenceFormattedDate value={new Date(session.start)} />
+        </strong>
+      </EuiText>
+    </EuiFlexItem>
+    <EuiFlexItem grow={false}>
+      <SessionLength session={session} />
+    </EuiFlexItem>
+    <EuiFlexItem grow={false}>
+      <EuiText size="xs" color="subdued">
+        {getLaunchLabel(session)}
+      </EuiText>
+    </EuiFlexItem>
+    {(session.isHeadless || session.permissionPromptsOff) && (
+      <EuiFlexItem grow={false} data-test-subj={AI_AGENT_TEST_IDS.sessionFlags}>
+        <EuiFlexGroup gutterSize="xs" responsive={false}>
+          {session.isHeadless && (
+            <EuiFlexItem grow={false}>
+              <EuiBadge color="hollow">{HEADLESS_BADGE}</EuiBadge>
+            </EuiFlexItem>
+          )}
+          {session.permissionPromptsOff && (
+            <EuiFlexItem grow={false}>
+              <EuiBadge color="warning">{PERMISSION_PROMPTS_OFF_BADGE}</EuiBadge>
+            </EuiFlexItem>
+          )}
+        </EuiFlexGroup>
+      </EuiFlexItem>
+    )}
+    {session.alertIds.length > 0 && (
+      <EuiFlexItem grow={false}>
+        <EuiBadge color="danger" data-test-subj={AI_AGENT_TEST_IDS.sessionAlerts}>
+          <FormattedMessage
+            id="xpack.securitySolution.flyout.entityDetails.aiAgent.activity.sessionAlerts"
+            defaultMessage="{count, plural, one {# alert} other {# alerts}}"
+            values={{ count: session.alertIds.length }}
+          />
+        </EuiBadge>
+      </EuiFlexItem>
+    )}
+  </EuiFlexGroup>
+);
+
+/** Sessions with alerts and sessions still running start expanded. */
+const SessionRow = memo(({ agent, sessions, session, onOpenProcessTree }: SessionProps) => {
+  const [isOpen, setIsOpen] = useState(
+    () => session.alertIds.length > 0 || session.status?.kind === 'running'
+  );
+  const accordionId = useGeneratedHtmlId({ prefix: 'aiAgentSession' });
+  return (
+    <EuiPanel hasBorder paddingSize="s" data-test-subj={AI_AGENT_TEST_IDS.session}>
+      <EuiAccordion
+        id={accordionId}
+        buttonContent={<SessionRowHeader session={session} />}
+        forceState={isOpen ? 'open' : 'closed'}
+        onToggle={setIsOpen}
+        buttonProps={{ 'data-test-subj': AI_AGENT_TEST_IDS.sessionToggle }}
+      >
+        {isOpen && (
+          <>
+            <EuiSpacer size="s" />
+            <SessionDetail
+              agent={agent}
+              sessions={sessions}
+              session={session}
+              onOpenProcessTree={onOpenProcessTree}
+            />
+          </>
+        )}
+      </EuiAccordion>
+    </EuiPanel>
+  );
+});
+SessionRow.displayName = 'SessionRow';
+
+export const SESSIONS_PAGE_SIZE = 20;
 
 export interface AgentActivityProps {
   readonly agent: AgentRow | AgentIdentity;
 }
 
 /**
- * Agent activity: one panel per run (launch), with the steps from every source that exists. Tool
- * calls carry the processes they ran. Process steps open Session View for their terminal session.
+ * Agent activity: the agent's sessions in the last 30 days. A summary and a sessions-per-day
+ * histogram sit above one collapsed row per session, newest first. Expanding a row reads what that
+ * session did. Process steps open Session View for their terminal session.
  */
 export const AgentActivity = memo(({ agent }: AgentActivityProps) => {
-  const { data, isLoading, isError } = useAiAgentActivity(agent);
+  const { data, isLoading, isError } = useAiAgentSessions(agent);
   const { openSessionView } = useFlyoutApi();
-  const [showSetup, setShowSetup] = useState(false);
+  const [visibleCount, setVisibleCount] = useState(SESSIONS_PAGE_SIZE);
 
   const onOpenProcessTree = useCallback(
     ({ process }: ProcessStep) => {
@@ -790,17 +973,6 @@ export const AgentActivity = memo(({ agent }: AgentActivityProps) => {
     [openSessionView]
   );
 
-  const setupCount = useMemo(
-    () =>
-      data
-        ? [
-            ...data.runs.flatMap((run) => run.sections.flatMap((s) => s.steps)),
-            ...data.unplacedSteps,
-          ].filter((step) => step.kind === 'process' && step.isSetup).length
-        : 0,
-    [data]
-  );
-
   if (isLoading) return <EuiSkeletonText lines={6} />;
   if (isError || !data) {
     return (
@@ -814,80 +986,60 @@ export const AgentActivity = memo(({ agent }: AgentActivityProps) => {
     );
   }
 
-  const isMatchedByAccount = data.otelMatch === 'account';
-  const agentRow = 'watchlistIds' in agent ? agent : undefined;
+  const { sessions } = data;
+  const shown = sessions.slice(0, visibleCount);
 
   return (
     <div data-test-subj={AI_AGENT_TEST_IDS.activity}>
-      {!data.layers.defendRuns && (
-        <EuiText size="s" color="subdued" data-test-subj={AI_AGENT_TEST_IDS.noProcessActivity}>
-          <FormattedMessage
-            id="xpack.securitySolution.flyout.entityDetails.aiAgent.activity.noProcessActivity"
-            defaultMessage="No process activity since first seen"
-          />
-        </EuiText>
-      )}
+      <SessionsSummary data={data} />
+      <EuiSpacer size="m" />
       {data.truncated && (
-        <EuiText size="xs" color="warning">
-          <FormattedMessage
-            id="xpack.securitySolution.flyout.entityDetails.aiAgent.activity.truncated"
-            defaultMessage="Only the first events are shown. This agent has more activity than one read returns."
-          />
-        </EuiText>
-      )}
-      {setupCount > 0 && (
         <>
-          <EuiSwitch
-            compressed
-            label={i18n.translate(
-              'xpack.securitySolution.flyout.entityDetails.aiAgent.activity.showSetup',
-              {
-                defaultMessage: 'Show setup commands ({count})',
-                values: { count: setupCount },
-              }
-            )}
-            checked={showSetup}
-            onChange={(event) => setShowSetup(event.target.checked)}
-            data-test-subj={AI_AGENT_TEST_IDS.setupToggle}
-          />
+          <EuiText size="xs" color="warning" data-test-subj={AI_AGENT_TEST_IDS.sessionsTruncated}>
+            <FormattedMessage
+              id="xpack.securitySolution.flyout.entityDetails.aiAgent.activity.truncated"
+              defaultMessage="Only the newest sessions are shown. This agent has more activity in 30 days than one read returns."
+            />
+          </EuiText>
           <EuiSpacer size="s" />
         </>
       )}
-      {data.runs.map((run) => (
-        <React.Fragment key={run.id}>
-          <RunView
-            run={run}
-            identity={agent}
-            agentRow={agentRow}
-            showSetup={showSetup}
-            isMatchedByAccount={isMatchedByAccount}
+      {shown.map((session) => (
+        <React.Fragment key={session.id}>
+          <SessionRow
+            agent={agent}
+            sessions={data}
+            session={session}
             onOpenProcessTree={onOpenProcessTree}
           />
           <EuiSpacer size="s" />
         </React.Fragment>
       ))}
-      {data.unplacedSteps.length > 0 && (
-        <EuiPanel hasBorder paddingSize="s" data-test-subj={AI_AGENT_TEST_IDS.unplacedSteps}>
-          <EuiTitle size="xxs">
-            <h4>
+      {sessions.length > shown.length && (
+        <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty
+              size="s"
+              flush="left"
+              onClick={() => setVisibleCount((count) => count + SESSIONS_PAGE_SIZE)}
+              data-test-subj={AI_AGENT_TEST_IDS.sessionsShowMore}
+            >
               <FormattedMessage
-                id="xpack.securitySolution.flyout.entityDetails.aiAgent.activity.unplacedTitle"
-                defaultMessage="Steps not tied to a run"
+                id="xpack.securitySolution.flyout.entityDetails.aiAgent.activity.showMore"
+                defaultMessage="Show more"
               />
-            </h4>
-          </EuiTitle>
-          <EuiText size="xs" color="subdued">
-            <FormattedMessage
-              id="xpack.securitySolution.flyout.entityDetails.aiAgent.activity.unplacedBody"
-              defaultMessage="Descendants of this install whose parent process was not recorded."
-            />
-          </EuiText>
-          <Rows
-            steps={data.unplacedSteps}
-            showSetup={showSetup}
-            onOpenProcessTree={onOpenProcessTree}
-          />
-        </EuiPanel>
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiText size="xs" color="subdued">
+              <FormattedMessage
+                id="xpack.securitySolution.flyout.entityDetails.aiAgent.activity.showingCount"
+                defaultMessage="Showing {shown} of {total}"
+                values={{ shown: shown.length, total: sessions.length }}
+              />
+            </EuiText>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       )}
     </div>
   );

@@ -9,11 +9,27 @@ import React, { memo, useCallback } from 'react';
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { noop } from 'lodash/fp';
 import { KibanaSectionErrorBoundary } from '@kbn/shared-ux-error-boundary';
+import {
+  GraphGroupedNodePreviewPanel,
+  type GraphGroupedNodePreviewPanelProps,
+} from '@kbn/cloud-security-posture-graph';
 import { GraphVisualization } from '../../../../document/tools/graph/components/graph_visualization';
 import { useFlyoutApi } from '../../../../use_flyout_api';
+import { useFlyoutSessionContext } from '../../../../session_context';
+import { useOpenFlyout } from '../../../../shared/hooks/use_open_flyout';
+import { useDefaultDocumentFlyoutProperties } from '../../../../shared/hooks/use_default_flyout_properties';
+import { useGraphTelemetry } from '../../../../shared/hooks/use_graph_telemetry';
+import { buildFlyoutNavTitle } from '../../../../shared/utils/build_flyout_nav_title';
+import { ENTITIES_TITLE, EVENT_TITLE } from '../../../../shared/constants/flyout_titles';
 import { cellActionRenderer } from '../../../../shared/components/cell_actions';
 import { FlowTargetSourceDest } from '../../../../../../common/search_strategy';
-import { FLYOUT_ORIGIN, FLYOUT_TYPE } from '../../../../../common/lib/telemetry';
+import {
+  FLYOUT_ORIGIN,
+  FLYOUT_SESSION_KIND,
+  FLYOUT_SURFACE,
+  FLYOUT_TOOL,
+  FLYOUT_TYPE,
+} from '../../../../../common/lib/telemetry';
 import { getGraphEntryPoint } from '../../../../shared/utils/get_graph_entry_point';
 import { AI_AGENT_TEST_IDS } from '../test_ids';
 import { GRAPH_OPEN_FULL, TAB_GRAPH } from '../translations';
@@ -28,7 +44,8 @@ export interface GraphTabProps {
 /**
  * The existing graph investigation, centred on the agent. In entity mode it draws the
  * relationships graph: the host (`depends_on`), the local user (`owns_inferred`) and the person
- * (`acts_on_behalf_of`), each opening its own flyout.
+ * (`acts_on_behalf_of`), each opening its own flyout. Expanding the person's relationships adds
+ * the person's other agents as a grouped node, which opens the grouped entities panel.
  */
 export const GraphTab = memo(({ entityId, entityName, scopeId, onShowAgent }: GraphTabProps) => {
   const {
@@ -37,7 +54,11 @@ export const GraphTab = memo(({ entityId, entityName, scopeId, onShowAgent }: Gr
     openNetworkFlyoutAsChild,
     openEntityGraphView,
   } = useFlyoutApi();
+  const open = useOpenFlyout();
+  const { historyKey } = useFlyoutSessionContext();
+  const defaultFlyoutProperties = useDefaultDocumentFlyoutProperties();
   const entryPoint = getGraphEntryPoint({ mode: 'entity' });
+  const { onTelemetryEvent } = useGraphTelemetry(entryPoint);
 
   const onShowEntity = useCallback(
     (params: {
@@ -66,6 +87,39 @@ export const GraphTab = memo(({ entityId, entityName, scopeId, onShowAgent }: Gr
         origin: FLYOUT_ORIGIN.GRAPH_NETWORK_NODE,
       }),
     [openNetworkFlyoutAsChild]
+  );
+  const onShowGrouped = useCallback(
+    (
+      params: Omit<
+        GraphGroupedNodePreviewPanelProps,
+        'showLoadingState' | 'onShowDocument' | 'onShowEntity' | 'onTelemetryEvent'
+      >
+    ) =>
+      open(
+        <GraphGroupedNodePreviewPanel
+          {...params}
+          onShowDocument={onShowDocument}
+          onShowEntity={onShowEntity}
+          onTelemetryEvent={onTelemetryEvent}
+        />,
+        {
+          ...defaultFlyoutProperties,
+          historyKey,
+          session: FLYOUT_SESSION_KIND.INHERIT,
+          title: buildFlyoutNavTitle(
+            params.docMode === 'grouped-entities' ? ENTITIES_TITLE : EVENT_TITLE
+          ),
+        },
+        {
+          surface: FLYOUT_SURFACE.TOOL,
+          tool: FLYOUT_TOOL.GRAPH,
+          flyoutType: FLYOUT_TYPE.GENERIC,
+          session: FLYOUT_SESSION_KIND.INHERIT,
+          origin: FLYOUT_ORIGIN.GRAPH_GROUPED_NODE,
+        },
+        FLYOUT_SESSION_KIND.INHERIT
+      ),
+    [open, onShowDocument, onShowEntity, onTelemetryEvent, defaultFlyoutProperties, historyKey]
   );
   const onOpenFullGraph = useCallback(
     () =>
@@ -101,7 +155,7 @@ export const GraphTab = memo(({ entityId, entityName, scopeId, onShowAgent }: Gr
           onShowDocument={onShowDocument}
           onShowEntity={onShowEntity}
           onShowNetwork={onShowNetwork}
-          onShowGrouped={noop}
+          onShowGrouped={onShowGrouped}
         />
       </KibanaSectionErrorBoundary>
     </div>

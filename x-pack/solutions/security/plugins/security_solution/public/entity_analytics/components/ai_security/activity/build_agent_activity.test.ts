@@ -478,6 +478,24 @@ describe('run reach', () => {
     );
   });
 
+  it('reads the permission mode from sorted arguments, which lose its pairing with the value', () => {
+    expect(
+      hasPermissionBypass(
+        'claude_code',
+        proc({
+          entityId: 'a',
+          unorderedArgs: ['--permission-mode', '-p', 'bypassPermissions', 'claude', 'fix it'],
+        })
+      )
+    ).toBe(true);
+    expect(
+      hasPermissionBypass(
+        'claude_code',
+        proc({ entityId: 'b', unorderedArgs: ['--permission-mode', 'claude', 'plan'] })
+      )
+    ).toBe(false);
+  });
+
   it('compares paths with the working directory, Windows paths without case', () => {
     expect(isInsideDirectory('/home/u/repo/src/a.ts', '/home/u/repo')).toBe(true);
     expect(isInsideDirectory('/home/u/repo-other/a.ts', '/home/u/repo')).toBe(false);

@@ -72,7 +72,7 @@ describe('AskAiAboutRun', () => {
     renderAskAi();
     fireEvent.click(screen.getByTestId(AI_AGENT_TEST_IDS.askAi));
     expect(
-      screen.getByText("What did this run do that the prompt didn't ask for?")
+      screen.getByText("What did this session do that the prompt didn't ask for?")
     ).toBeInTheDocument();
     expect(screen.getByText('Is there evidence of prompt injection?')).toBeInTheDocument();
     expect(

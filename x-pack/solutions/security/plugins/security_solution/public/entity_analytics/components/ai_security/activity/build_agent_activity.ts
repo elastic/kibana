@@ -25,7 +25,7 @@ import type {
 } from './types';
 
 /** A descendant can outlive the agent process, so a run's window reaches a little past its last step. */
-const RUN_END_MARGIN_MS = 5 * 60_000;
+export const RUN_END_MARGIN_MS = 5 * 60_000;
 const MAX_PARENT_DEPTH = 100;
 
 /**
@@ -146,6 +146,16 @@ export const toSideEffects = (rows: readonly EsqlRecord[]): Map<string, SideEffe
 export const toEndedProcessIds = (rows: readonly EsqlRecord[]): Set<string> =>
   new Set(rows.map((row) => firstString(row['process.entity_id'])).filter(isString));
 
+/** When each of the agent's processes ended, by entity ID. */
+export const toProcessEndTimes = (rows: readonly EsqlRecord[]): Map<string, string> =>
+  new Map(
+    rows.flatMap((row) => {
+      const entityId = firstString(row['process.entity_id']);
+      const endedAt = firstString(row.ended_at);
+      return entityId && endedAt ? [[entityId, endedAt] as const] : [];
+    })
+  );
+
 export const toRunAlert = (row: EsqlRecord): RunAlertRecord | undefined => {
   const id = firstString(row._id);
   const timestamp = firstString(row['@timestamp']);
@@ -153,9 +163,11 @@ export const toRunAlert = (row: EsqlRecord): RunAlertRecord | undefined => {
   return {
     id,
     timestamp,
+    eventTime: firstString(row['kibana.alert.original_time']),
     processEntityId: firstString(row['process.entity_id']),
     parentEntityId: firstString(row['process.parent.entity_id']),
     ancestry: toStringArray(row['process.Ext.ancestry']),
+    entryLeaderEntityId: firstString(row['process.entry_leader.entity_id']),
   };
 };
 
@@ -228,7 +240,7 @@ const mergeTwo = (first: ProcessRecord, second: ProcessRecord): ProcessRecord =>
   };
 };
 
-const getLaunchMode = ({ entryMetaType, interactive }: ProcessRecord): LaunchMode => {
+export const getLaunchMode = ({ entryMetaType, interactive }: ProcessRecord): LaunchMode => {
   if (entryMetaType === 'init') return 'scheduled';
   if (interactive === true) return 'interactive';
   if (entryMetaType) return 'scripted';
@@ -261,21 +273,25 @@ export const parseHeadlessPrompt = (
   return { isHeadless: true, prompt: prompt && !prompt.startsWith('-') ? prompt : undefined };
 };
 
-/** The root was launched with permission prompts off. */
+/**
+ * The root was launched with permission prompts off. Sorted arguments lose the pairing of
+ * `--permission-mode` with its value, so for those both arguments being present is enough.
+ */
 export const hasPermissionBypass = (agentName: string, root: ProcessRecord): boolean => {
   const flags = PERMISSION_BYPASS_FLAGS[agentName] ?? [];
+  const isOrdered = !!root.args && root.args.length > 0;
+  const isSorted = !isOrdered && root.unorderedArgs.length > 0;
   const tokens =
-    root.args && root.args.length > 0
-      ? root.args
-      : root.unorderedArgs.length > 0
-      ? root.unorderedArgs
-      : root.commandLine?.split(/\s+/) ?? [];
+    (isOrdered ? root.args : isSorted ? root.unorderedArgs : root.commandLine?.split(/\s+/)) ?? [];
+  const checksMode = flags.includes('--permission-mode=bypassPermissions');
   return tokens.some(
     (token, index) =>
       flags.includes(token) ||
-      (flags.includes('--permission-mode=bypassPermissions') &&
+      (checksMode &&
         token === '--permission-mode' &&
-        tokens[index + 1] === 'bypassPermissions')
+        (isSorted
+          ? tokens.includes('bypassPermissions')
+          : tokens[index + 1] === 'bypassPermissions'))
   );
 };
 
@@ -388,6 +404,21 @@ const addMs = (timestamp: string, ms: number): string =>
 const sortByTime = <T extends { readonly timestamp: string }>(items: readonly T[]): T[] =>
   [...items].sort((a, b) => a.timestamp.localeCompare(b.timestamp));
 
+/** Finds the launch an agent process belongs to: its oldest ancestor that is also the agent's own. */
+export const getOwnRootResolver = (
+  own: ReadonlyMap<string, ProcessRecord>
+): ((entityId: string) => string) => {
+  return (entityId: string): string => {
+    let current = entityId;
+    for (let depth = 0; depth < MAX_PARENT_DEPTH; depth++) {
+      const parent = own.get(current)?.parentEntityId;
+      if (!parent || !own.has(parent) || parent === current) return current;
+      current = parent;
+    }
+    return current;
+  };
+};
+
 interface RunDraft {
   readonly root: ProcessRecord;
   readonly members: ProcessRecord[];
@@ -434,16 +465,7 @@ export const buildAgentActivity = ({
   const own = mergeProcessEvents(ownEvents);
   const all = mergeProcessEvents([...ownEvents, ...descendantEvents]);
   const ownIds = new Set(own.keys());
-
-  const rootOfOwn = (entityId: string): string => {
-    let current = entityId;
-    for (let depth = 0; depth < MAX_PARENT_DEPTH; depth++) {
-      const parent = own.get(current)?.parentEntityId;
-      if (!parent || !ownIds.has(parent) || parent === current) return current;
-      current = parent;
-    }
-    return current;
-  };
+  const rootOfOwn = getOwnRootResolver(own);
 
   const runRootFor = (process: ProcessRecord): string | undefined => {
     let current: ProcessRecord | undefined = process;

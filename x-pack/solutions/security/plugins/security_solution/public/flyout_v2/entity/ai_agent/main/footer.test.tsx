@@ -94,8 +94,8 @@ describe('Footer', () => {
     });
   });
 
-  it('puts Kill process for the running runs in Take action', () => {
-    render(<Footer identity={mockAgentIdentity} runningRuns={[]} />);
+  it('puts Kill process for the running sessions in Take action', () => {
+    render(<Footer identity={mockAgentIdentity} runningSessions={[]} />);
     expect(useKillProcessItems).toHaveBeenCalledWith([]);
     expect(screen.getByTestId('mockKillProcess')).toBeInTheDocument();
   });

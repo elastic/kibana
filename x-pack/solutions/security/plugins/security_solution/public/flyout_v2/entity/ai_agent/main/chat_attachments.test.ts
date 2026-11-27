@@ -102,7 +102,7 @@ describe('buildRunChatAttachments', () => {
     expect(attachments[0]).toEqual(buildAgentEntityAttachment(mockAgentIdentity, mockAgentRow));
     expect(attachments[1].data).toEqual({
       alertIds: ['alert-1'],
-      attachmentLabel: 'Alerts on this run',
+      attachmentLabel: 'Alerts on this session',
     });
   });
 
@@ -152,7 +152,7 @@ describe('buildRunTimelineEvents', () => {
     expect(total).toBe(2);
     expect(events).toHaveLength(2);
     expect(events[0]).toMatchObject({ timestamp: '2026-11-26T10:00:00.000Z', host: 'ci-build-01' });
-    expect(events[0].description).toContain('Run started: Claude Code claude (pid 16884');
+    expect(events[0].description).toContain('Session started: Claude Code claude (pid 16884');
     expect(events[0].description).toContain('Working directory: /home/ec2-user/src/release-bot.');
     expect(events[0].description).toContain('Permission prompts off.');
     expect(events[1].description).toBe(
@@ -175,6 +175,8 @@ describe('buildRunTimelineEvents', () => {
     expect(total).toBe(71);
 
     const [, timeline] = buildRunChatAttachments(mockAgentIdentity, mockAgentRow, run);
-    expect(timeline.data).toMatchObject({ attachmentLabel: 'Agent run steps (first 50 of 71)' });
+    expect(timeline.data).toMatchObject({
+      attachmentLabel: 'Agent session steps (first 50 of 71)',
+    });
   });
 });

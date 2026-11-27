@@ -9,8 +9,11 @@ import React from 'react';
 import { fireEvent, render, renderHook, screen } from '@testing-library/react';
 import { useUserPrivileges } from '../../../../../common/components/user_privileges';
 import { useGetEndpointDetails, useWithShowResponder } from '../../../../../management/hooks';
-import { buildAgentActivity } from '../../../../../entity_analytics/components/ai_security/activity/build_agent_activity';
-import type { AgentRun } from '../../../../../entity_analytics/components/ai_security/activity/types';
+import {
+  buildAgentSessions,
+  getSessionsWindow,
+} from '../../../../../entity_analytics/components/ai_security/activity/build_agent_sessions';
+import type { AgentSession } from '../../../../../entity_analytics/components/ai_security/activity/types';
 import { mockAgentIdentity } from '../mocks';
 import { AI_AGENT_TEST_IDS } from '../test_ids';
 import { useKillProcessItems } from './use_kill_process_items';
@@ -23,9 +26,10 @@ jest.mock('../../../../../management/hooks', () => ({
 
 const mockShowResponder = jest.fn();
 
-const runningRun = (endpointAgentId?: string): AgentRun =>
-  buildAgentActivity({
+const runningRun = (endpointAgentId?: string): AgentSession =>
+  buildAgentSessions({
     identity: mockAgentIdentity,
+    window: getSessionsWindow(Date.now()),
     ownEvents: [
       {
         entityId: 'root/entity+id=',
@@ -38,12 +42,8 @@ const runningRun = (endpointAgentId?: string): AgentRun =>
         endpointAgentId,
       },
     ],
-    descendantEvents: [],
-    sideEffects: new Map(),
-    otelEvents: [],
-    otelMatch: 'none',
-    endedProcessIds: new Set(),
-  }).runs[0];
+    endTimes: new Map(),
+  }).sessions[0];
 
 const setPrivileges = (canKillProcess: boolean) =>
   jest.mocked(useUserPrivileges).mockReturnValue({
@@ -58,7 +58,7 @@ const setEndpoint = (result: Partial<ReturnType<typeof useGetEndpointDetails>>) 
     ...result,
   } as unknown as ReturnType<typeof useGetEndpointDetails>);
 
-const renderItems = (runs: AgentRun[]) => {
+const renderItems = (runs: AgentSession[]) => {
   const { result } = renderHook(() => useKillProcessItems(runs));
   const closePopover = jest.fn();
   render(<div>{result.current(closePopover)}</div>);

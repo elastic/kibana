@@ -38,7 +38,7 @@ const ASK_AI = i18n.translate('xpack.securitySolution.flyout.entityDetails.aiAge
 
 const ASK_AI_ABOUT_RUN = i18n.translate(
   'xpack.securitySolution.flyout.entityDetails.aiAgent.askAi.popoverLabel',
-  { defaultMessage: 'Ask AI about this run' }
+  { defaultMessage: 'Ask AI about this session' }
 );
 
 const QUESTIONS: ReadonlyArray<{ id: RunQuestionId; label: string }> = [
@@ -46,7 +46,7 @@ const QUESTIONS: ReadonlyArray<{ id: RunQuestionId; label: string }> = [
     id: 'unrequestedActions',
     label: i18n.translate(
       'xpack.securitySolution.flyout.entityDetails.aiAgent.askAi.unrequestedActions',
-      { defaultMessage: "What did this run do that the prompt didn't ask for?" }
+      { defaultMessage: "What did this session do that the prompt didn't ask for?" }
     ),
   },
   {

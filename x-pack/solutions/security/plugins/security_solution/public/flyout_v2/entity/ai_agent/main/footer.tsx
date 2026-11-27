@@ -12,7 +12,7 @@ import { useIsInSecurityApp } from '../../../../common/hooks/is_in_security_app'
 import { useKibana } from '../../../../common/lib/kibana';
 import { NewAgentBuilderAttachment } from '../../../../agent_builder/components/new_agent_builder_attachment';
 import { ENTITY_PROMPT } from '../../../../agent_builder/components/prompts';
-import type { AgentRun } from '../../../../entity_analytics/components/ai_security/activity/types';
+import type { AgentSession } from '../../../../entity_analytics/components/ai_security/activity/types';
 import type {
   AgentIdentity,
   AgentRow,
@@ -33,20 +33,20 @@ export const buildAgentTimelineQuery = ({ agentName, hostId, userName }: AgentId
 export interface FooterProps {
   readonly identity: AgentIdentity;
   readonly agent?: AgentRow;
-  /** Runs whose root process is running now, offered to Kill process. */
-  readonly runningRuns?: readonly AgentRun[];
+  /** Sessions whose root process is running now, offered to Kill process. */
+  readonly runningSessions?: readonly AgentSession[];
 }
 
-const NO_RUNS: readonly AgentRun[] = [];
+const NO_SESSIONS: readonly AgentSession[] = [];
 
 /**
  * Footer for the AI agent flyout, as on hosts and users: "Add to chat" with the agent attached, and
- * Take action with "Investigate in Timeline" and Kill process for a running run.
+ * Take action with "Investigate in Timeline" and Kill process for a running session.
  */
-export const Footer = memo(({ identity, agent, runningRuns = NO_RUNS }: FooterProps) => {
+export const Footer = memo(({ identity, agent, runningSessions = NO_SESSIONS }: FooterProps) => {
   const isInSecurityApp = useIsInSecurityApp();
   const { agentBuilder } = useKibana().services;
-  const killProcessItems = useKillProcessItems(runningRuns);
+  const killProcessItems = useKillProcessItems(runningSessions);
 
   const onAddToChat = useCallback(() => {
     agentBuilder?.openChat({

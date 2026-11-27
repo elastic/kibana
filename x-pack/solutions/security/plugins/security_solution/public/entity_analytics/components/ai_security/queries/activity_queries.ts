@@ -56,51 +56,65 @@ const ACTIVITY_MAX_RUN_ALERTS = 500;
 
 const PROCESS_START = '(MV_CONTAINS(event.action, "exec") OR MV_CONTAINS(event.action, "fork"))';
 
-const since = (from: string): string => `@timestamp >= ${escapeStringValue(from)}`;
+/** Events from `from`, up to `to` when given. */
+const inRange = (from: string, to?: string): string =>
+  [
+    `@timestamp >= ${escapeStringValue(from)}`,
+    ...(to ? [`@timestamp <= ${escapeStringValue(to)}`] : []),
+  ].join(' AND ');
 
-/** Start events of the agent's own processes: the launches and the agent's own re-execs. */
+/**
+ * Start events of the agent's own processes: the launches and the agent's own re-execs, newest
+ * first so a busy install loses its oldest sessions rather than its newest. This is the sessions
+ * read: it carries no commands, so it stays small.
+ */
 export const buildOwnProcessesQuery = (
   namespace: string,
   identity: AgentIdentity,
-  from: string
+  from: string,
+  to?: string
 ): string =>
   [
     SET_UNMAPPED_NULLIFY,
     `FROM ${getEndpointProcessIndex(namespace)} METADATA _id, _index`,
-    `| WHERE ${agentOwnEventsFilter(identity)} AND ${PROCESS_START} AND ${since(from)}`,
+    `| WHERE ${agentOwnEventsFilter(identity)} AND ${PROCESS_START} AND ${inRange(from, to)}`,
     `| KEEP ${PROCESS_COLUMNS.join(', ')}`,
-    '| SORT @timestamp ASC',
+    '| SORT @timestamp DESC',
     `| LIMIT ${ACTIVITY_MAX_PROCESS_EVENTS}`,
   ].join('\n');
 
 /**
- * The agent's own processes that have an end event. Defend can put fork, exec and end on one
- * event for a short-lived process, so any event carrying `end` counts.
+ * When each of the agent's own processes ended, newest first. Defend can put fork, exec and end on
+ * one event for a short-lived process, so any event carrying `end` counts.
  */
 export const buildOwnProcessEndsQuery = (
   namespace: string,
   identity: AgentIdentity,
-  from: string
+  from: string,
+  to?: string
 ): string =>
   [
     SET_UNMAPPED_NULLIFY,
     `FROM ${getEndpointProcessIndex(namespace)}`,
-    `| WHERE ${agentOwnEventsFilter(identity)} AND MV_CONTAINS(event.action, "end") AND ${since(
-      from
+    `| WHERE ${agentOwnEventsFilter(identity)} AND MV_CONTAINS(event.action, "end") AND ${inRange(
+      from,
+      to
     )}`,
     '| STATS ended_at = MAX(@timestamp) BY process.entity_id',
+    '| SORT ended_at DESC',
     `| LIMIT ${ACTIVITY_MAX_PROCESS_EVENTS}`,
   ].join('\n');
 
 /**
  * Start events of every tagged descendant of this agent product on the host, whatever OS user it
  * ran as. A `sudo` child runs as root, so filtering on `user.name` would drop it. The caller places
- * each process under a run by its ancestry.
+ * each process under a run by its ancestry. Read for one session's time range, newest first.
  */
 export const buildDescendantProcessesQuery = (
   namespace: string,
   { agentName, hostId }: AgentIdentity,
-  from: string
+  from: string,
+  to?: string
 ): string =>
   [
     SET_UNMAPPED_NULLIFY,
@@ -108,9 +122,9 @@ export const buildDescendantProcessesQuery = (
     `| WHERE process.ai_agent.name == ${escapeStringValue(agentName)}`,
     `  AND host.id == ${escapeStringValue(hostId)}`,
     '  AND process.ai_agent.is_descendant == true',
-    `  AND ${PROCESS_START} AND ${since(from)}`,
+    `  AND ${PROCESS_START} AND ${inRange(from, to)}`,
     `| KEEP ${PROCESS_COLUMNS.join(', ')}`,
-    '| SORT @timestamp ASC',
+    '| SORT @timestamp DESC',
     `| LIMIT ${ACTIVITY_MAX_PROCESS_EVENTS}`,
   ].join('\n');
 
@@ -118,13 +132,14 @@ export const buildDescendantProcessesQuery = (
 export const buildProcessSideEffectsQuery = (
   namespace: string,
   { agentName, hostId }: AgentIdentity,
-  from: string
+  from: string,
+  to?: string
 ): string =>
   [
     SET_UNMAPPED_NULLIFY,
     `FROM ${getEndpointFileIndex(namespace)}, ${getEndpointNetworkIndex(namespace)}`,
     `| WHERE process.ai_agent.name == ${escapeStringValue(agentName)}`,
-    `  AND host.id == ${escapeStringValue(hostId)} AND ${since(from)}`,
+    `  AND host.id == ${escapeStringValue(hostId)} AND ${inRange(from, to)}`,
     '| EVAL is_network = data_stream.dataset == "endpoint.events.network",',
     '    direct_ip = CASE(dns.question.name IS NULL, destination.ip, NULL)',
     '| STATS file_events = SUM(CASE(is_network, 0, 1)),',
@@ -136,15 +151,20 @@ export const buildProcessSideEffectsQuery = (
     `| LIMIT ${ACTIVITY_MAX_PROCESS_EVENTS}`,
   ].join('\n');
 
-/** Alerts on the agent with the process fields that tie each one to a run, newest first. */
+/**
+ * Alerts on the agent with the fields that tie each one to a session, newest first. Alerts don't
+ * carry `process.Ext.ancestry` today, so an alert on a deeper descendant is tied by its terminal
+ * session and event time.
+ */
 export const buildRunAlertsQuery = (namespace: string, entityId: string, from: string): string =>
   [
     SET_UNMAPPED_NULLIFY,
     `FROM ${getAlertsIndex(namespace)} METADATA _id`,
-    `| WHERE MV_CONTAINS(kibana.alert.entity.id, ${escapeStringValue(entityId)}) AND ${since(
+    `| WHERE MV_CONTAINS(kibana.alert.entity.id, ${escapeStringValue(entityId)}) AND ${inRange(
       from
     )}`,
-    '| KEEP @timestamp, _id, process.entity_id, process.parent.entity_id, process.Ext.ancestry',
+    '| KEEP @timestamp, _id, kibana.alert.original_time, process.entity_id,',
+    '    process.parent.entity_id, process.Ext.ancestry, process.entry_leader.entity_id',
     '| SORT @timestamp DESC',
     `| LIMIT ${ACTIVITY_MAX_RUN_ALERTS}`,
   ].join('\n');
@@ -152,20 +172,20 @@ export const buildRunAlertsQuery = (namespace: string, entityId: string, from: s
 /**
  * Claude Code OTel, read through ECS `gen_ai.*` with the Claude fields as a fallback. OTel has no
  * host, so it is tied to the install by Defend's session ID when there is one, and otherwise by
- * the install's accounts within its active window.
+ * the install's accounts within the session's time range. A resumed conversation keeps its ID
+ * across launches, so the time range applies to session IDs too when given.
  */
 export const buildOtelEventsQuery = (
   namespace: string,
   match:
-    | { readonly sessionIds: readonly string[] }
+    | { readonly sessionIds: readonly string[]; readonly from?: string; readonly to?: string }
     | { readonly emails: readonly string[]; readonly from: string; readonly to: string }
 ): string => {
+  const range = match.from ? ` AND ${inRange(match.from, match.to)}` : '';
   const where =
     'sessionIds' in match
-      ? `conversation_id IN (${toList(match.sessionIds)})`
-      : `user.email IN (${toList(match.emails)}) AND ${since(
-          match.from
-        )} AND @timestamp <= ${escapeStringValue(match.to)}`;
+      ? `conversation_id IN (${toList(match.sessionIds)})${range}`
+      : `user.email IN (${toList(match.emails)})${range}`;
   return [
     SET_UNMAPPED_NULLIFY,
     `FROM ${getClaudeCodeOtelIndex(namespace)}`,
@@ -177,7 +197,7 @@ export const buildOtelEventsQuery = (
     '| KEEP @timestamp, conversation_id, event_name, prompt, prompt_id, gen_ai.tool.name,',
     '    process.command_line, claude_code.events.mcp_server_name, claude_code.events.decision_type,',
     '    gen_ai.request.model, gen_ai.usage.input_tokens, gen_ai.usage.output_tokens, tags',
-    '| SORT @timestamp ASC',
+    '| SORT @timestamp DESC',
     `| LIMIT ${ACTIVITY_MAX_OTEL_EVENTS}`,
   ].join('\n');
 };
