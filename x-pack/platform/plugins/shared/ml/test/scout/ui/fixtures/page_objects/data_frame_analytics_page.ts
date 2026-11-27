@@ -529,11 +529,23 @@ export class DataFrameAnalyticsPage {
    *    header row and re-mount the virtualized body cells, detaching the target mid-click.
    * 4. Kibana's sticky appHeader overlays the top of the page, so aligning the grid with the
    *    viewport top parks row 0 underneath it and every click attempt is intercepted.
-   *    Centring the cell is what frees it; scrollIntoViewIfNeeded is a no-op here because
-   *    the occluded cell already counts as inside the viewport.
+   *    Centring the cell frees it, but Playwright repeats its own occlusion-blind
+   *    `scrolling into view if needed` before every click attempt, so centring once and
+   *    clicking afterwards is undone as soon as a re-mount moves the cell out of view.
+   *    Centre, hover and click within one bounded poll instead. Retrying is safe here: the
+   *    expand button only toggles a portaled popover, a click that times out on
+   *    actionability was never dispatched, and an open popover short-circuits the poll.
    */
   async openFeatureImportancePopover(): Promise<void> {
     const dataGrid = this.page.testSubj.locator('mlExplorationDataGrid loaded');
+    const popover = this.page.testSubj.locator('mlDFAFeatureImportancePopover');
+
+    // The popover is portaled and not tied to a cell, so close one left open by an earlier
+    // call; any popover seen below is then this cell's.
+    if (await popover.isVisible()) {
+      await this.page.keyboard.press('Escape');
+      await expect(popover).toBeHidden();
+    }
 
     // Scroll to the page bottom so the grid leaves the viewport, then bring it back.
     // scrollTo(bottom) works for any evaluate-panel height; scrollTo(0) can leave the
@@ -584,14 +596,18 @@ export class DataFrameAnalyticsPage {
       `[data-gridcell-row-index="${rowIndex}"][data-gridcell-column-id="${columnId}"][data-test-subj="dataGridRowCell"]`
     );
     await featureImportanceCell.waitFor({ state: 'visible' });
-    await featureImportanceCell.evaluate((element) => {
-      element.scrollIntoView({ block: 'center' });
-    });
-    await featureImportanceCell.hover();
-    const button = featureImportanceCell.locator('button');
-    await button.waitFor({ state: 'visible' });
-    await button.click();
-    await this.page.testSubj.locator('mlDFAFeatureImportancePopover').waitFor({ state: 'visible' });
+
+    await expect(async () => {
+      if (await popover.isVisible()) {
+        return;
+      }
+      await featureImportanceCell.evaluate((element) => {
+        element.scrollIntoView({ block: 'center' });
+      });
+      await featureImportanceCell.hover();
+      await featureImportanceCell.locator('button').click({ timeout: 2_000 });
+      await expect(popover).toBeVisible({ timeout: 2_000 });
+    }).toPass({ timeout: 20_000 });
   }
 
   /** Expands the Feature Importance Summary section if collapsed. */
