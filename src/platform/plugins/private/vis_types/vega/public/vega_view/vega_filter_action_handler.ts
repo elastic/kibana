@@ -13,18 +13,17 @@ import { i18n } from '@kbn/i18n';
 import type { Filter } from '@kbn/es-query';
 import { buildQueryFilter, compareFilters } from '@kbn/es-query';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { FilterableSource } from '@kbn/data-source';
 import { getDataViews } from '../services';
-import { extractDataSourcesFromSpec } from '../lib/extract_index_pattern';
 import { VEGA_EVENT_APPLY_FILTER } from '../constants';
-import type { VegaSpec } from '../data_model/types';
 import type { VegaEventHandler, VegaFilterActionHandler } from '../types';
 import { normalizeDate, normalizeObject, normalizeString } from './utils';
 
 type TimeValue = ReturnType<typeof normalizeDate>;
 
 interface VegaFilterActionHandlerDeps {
-  /** The spec as authored (Vega-Lite or Vega); its data sources pick the index when none is given. */
-  spec: VegaSpec;
+  /** The data sources of the spec; the first is the index of a filter that names none. */
+  getDataSources: () => Promise<FilterableSource[]>;
   filterManager: DataPublicPluginStart['query']['filterManager'];
   fireEvent: VegaEventHandler;
 }
@@ -91,7 +90,7 @@ const parseTimeRange = (start: TimeValue, end: TimeValue) => {
 
 /** Creates the parent-side handler that validates and applies a Vega view's filter actions. */
 export const createVegaFilterActionHandler = ({
-  spec,
+  getDataSources,
   filterManager,
   fireEvent,
 }: VegaFilterActionHandlerDeps): VegaFilterActionHandler => {
@@ -111,7 +110,7 @@ export const createVegaFilterActionHandler = ({
       return dataView.id;
     }
 
-    const [specDataSource] = await extractDataSourcesFromSpec(spec);
+    const [specDataSource] = await getDataSources();
     const source = specDataSource ?? (await dataViews.getDefault());
     if (!source) {
       throw new Error(

@@ -14,6 +14,7 @@ import { buildEsQuery } from '@kbn/es-query';
 import type { ESQLControlVariable } from '@kbn/esql-types';
 import { getESQLTimeField, getNamedParams } from '@kbn/esql-utils';
 import { getHttp } from '../services';
+import type { VegaEsqlSources } from '../lib/vega_data_sources';
 import type { TimeCache } from './time_cache';
 import type { SearchAPI } from './search_api';
 import type { Data, EsqlUrlObject, Bool } from './types';
@@ -85,6 +86,7 @@ export class EsqlQueryParser {
   readonly _filters: Bool;
   readonly _onWarning: (...args: string[]) => void;
   readonly _esqlVariables?: ESQLControlVariable[];
+  readonly _esqlSources?: VegaEsqlSources;
   approximationApplied: boolean | undefined = undefined;
 
   constructor(
@@ -92,13 +94,15 @@ export class EsqlQueryParser {
     searchAPI: SearchAPI,
     filters: Bool,
     onWarning: (...args: string[]) => void,
-    esqlVariables?: ESQLControlVariable[]
+    esqlVariables?: ESQLControlVariable[],
+    esqlSources?: VegaEsqlSources
   ) {
     this._timeCache = timeCache;
     this._searchAPI = searchAPI;
     this._filters = filters;
     this._onWarning = onWarning;
     this._esqlVariables = esqlVariables;
+    this._esqlSources = esqlSources;
   }
 
   /**
@@ -201,11 +205,17 @@ export class EsqlQueryParser {
   }
 
   /**
-   * Resolve time field: explicit `%timefield%` wins; otherwise ask for the default time field.
+   * Resolve time field: explicit `%timefield%` wins, then the time field of the source of the query;
+   * a query without a resolved source asks for its default time field.
    */
   private async _resolveTimeField(url: InternalEsqlUrlObject): Promise<string | undefined> {
     if (url._timeFieldDirective) {
       return url._timeFieldDirective;
+    }
+
+    const source = this._esqlSources?.getSource(url.query);
+    if (source) {
+      return source.timeFieldName;
     }
 
     try {

@@ -9,6 +9,7 @@
 
 import { i18n } from '@kbn/i18n';
 import type { View } from 'vega';
+import type { FilterableSource } from '@kbn/data-source';
 import type { VegaRenderDescriptor } from './data_model/types';
 import type { VegaVisualizationDependencies } from './plugin';
 import type { VegaEventHandler } from './types';
@@ -20,7 +21,11 @@ import { createVegaStateRestorer } from './lib/vega_state_restorer';
 import { createVegaFilterActionHandler } from './vega_view/vega_filter_action_handler';
 
 export type VegaVisType = new (el: HTMLDivElement, fireEvent: VegaEventHandler) => {
-  render(visData: VegaRenderDescriptor, inspectorAdapters?: VegaInspectorAdapters): Promise<void>;
+  render(
+    visData: VegaRenderDescriptor,
+    getDataSources: () => Promise<FilterableSource[]>,
+    inspectorAdapters?: VegaInspectorAdapters
+  ): Promise<void>;
   resize(dimensions?: { height: number; width: number }): Promise<void>;
   destroy(): void;
 };
@@ -38,7 +43,11 @@ export const createVegaVisualization = (
 
     constructor(private el: HTMLDivElement, private fireEvent: VegaEventHandler) {}
 
-    async render(visData: VegaRenderDescriptor, inspectorAdapters?: VegaInspectorAdapters) {
+    async render(
+      visData: VegaRenderDescriptor,
+      getDataSources: () => Promise<FilterableSource[]>,
+      inspectorAdapters?: VegaInspectorAdapters
+    ) {
       const { toasts } = getNotifications();
 
       if (!visData && !this.vegaView) {
@@ -51,7 +60,7 @@ export const createVegaVisualization = (
       }
 
       try {
-        await this._render(visData, inspectorAdapters);
+        await this._render(visData, getDataSources, inspectorAdapters);
       } catch (error) {
         if (this.vegaView) {
           this.vegaView.onError(error);
@@ -65,7 +74,11 @@ export const createVegaVisualization = (
       }
     }
 
-    async _render(descriptor: VegaRenderDescriptor, inspectorAdapters?: VegaInspectorAdapters) {
+    async _render(
+      descriptor: VegaRenderDescriptor,
+      getDataSources: () => Promise<FilterableSource[]>,
+      inspectorAdapters?: VegaInspectorAdapters
+    ) {
       if (descriptor) {
         inspectorAdapters?.vega.clearError();
         // New data received, rebuild the graph
@@ -88,7 +101,7 @@ export const createVegaVisualization = (
               spec: descriptor.vlspec || descriptor.spec,
             }),
           onFilterAction: createVegaFilterActionHandler({
-            spec: descriptor.isVegaLite && descriptor.vlspec ? descriptor.vlspec : descriptor.spec,
+            getDataSources,
             filterManager: this.dataPlugin.query.filterManager,
             fireEvent: this.fireEvent,
           }),

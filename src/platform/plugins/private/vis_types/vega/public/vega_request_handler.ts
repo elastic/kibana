@@ -20,7 +20,7 @@ import type { VegaVisualizationDependencies } from './plugin';
 import type { VisParams } from './vega_fn';
 import { getData, getDataViews } from './services';
 import type { VegaInspectorAdapters } from './vega_inspector';
-import { getFilterSourceOfSpec } from './lib/extract_index_pattern';
+import { resolveVegaEsqlSourcesOfText, type VegaEsqlSources } from './lib/vega_data_sources';
 
 interface VegaRequestHandlerParams {
   query: Query | Query[] | undefined;
@@ -33,6 +33,8 @@ interface VegaRequestHandlerParams {
   /** Only applies to ES|QL-backed vega data sources */
   isApproximate: boolean;
   esqlVariables?: ESQLControlVariable[];
+  /** The resolved ES|QL sources of the spec, when the caller holds them; otherwise resolved here. */
+  esqlSources?: VegaEsqlSources;
 }
 
 interface VegaRequestHandlerContext {
@@ -62,6 +64,7 @@ export function createVegaRequestHandler(
     projectRouting,
     isApproximate,
     esqlVariables,
+    esqlSources: heldEsqlSources,
   }: VegaRequestHandlerParams) {
     const { search } = getData();
     const dataViews = getDataViews();
@@ -84,9 +87,12 @@ export function createVegaRequestHandler(
 
     timeCache.setTimeRange(timeRange);
 
+    const esqlSources = heldEsqlSources ?? (await resolveVegaEsqlSourcesOfText(visParams.spec));
+    // An ES|QL filter names the dataset of a query of the spec, any other filter a data view.
     const firstFilterIndex = filters?.[0]?.meta.index;
     const filterSource: DataViewBase | undefined = firstFilterIndex
-      ? await getFilterSourceOfSpec(visParams.spec, firstFilterIndex)
+      ? esqlSources.filterableSources.find(({ id }) => id === firstFilterIndex) ??
+        (await dataViews.get(firstFilterIndex).catch((): undefined => undefined))
       : undefined;
 
     const esQueryConfigs = getEsQueryConfig(uiSettings);
@@ -100,7 +106,8 @@ export function createVegaRequestHandler(
       filtersDsl,
       getServiceSettings,
       theme.getTheme(),
-      esqlVariables
+      esqlVariables,
+      esqlSources
     );
     return (await vp.parseAsync()).toRenderDescriptor();
   };

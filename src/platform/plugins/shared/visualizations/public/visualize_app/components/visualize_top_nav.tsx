@@ -13,7 +13,7 @@ import type { AppMountParameters, OverlayRef } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import type { DataView } from '@kbn/data-views-plugin/public';
+import type { FilterableSource } from '@kbn/data-source';
 import { switchMap } from 'rxjs';
 import type { InjectedIntl } from '@kbn/i18n-react';
 import { injectI18n } from '@kbn/i18n-react';
@@ -180,7 +180,7 @@ const TopNav = ({
     eventEmitter,
     inspectorAvailable,
   ]);
-  const [indexPatterns, setIndexPatterns] = useState<DataView[]>([]);
+  const [indexPatterns, setIndexPatterns] = useState<FilterableSource[]>([]);
   const showDatePicker = () => {
     // tsvb loads without an indexPattern initially (TODO investigate).
     // hide timefilter only if timeFieldName is explicitly undefined.
@@ -237,7 +237,7 @@ const TopNav = ({
 
   useEffect(() => {
     const asyncSetIndexPattern = async () => {
-      let indexes: DataView[] | undefined;
+      let indexes: FilterableSource[] | undefined;
 
       if (vis.data.indexPattern) {
         indexes = [vis.data.indexPattern];

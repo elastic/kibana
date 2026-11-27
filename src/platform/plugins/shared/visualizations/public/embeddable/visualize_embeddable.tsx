@@ -9,7 +9,7 @@
 
 import { EuiEmptyPrompt, EuiFlexGroup, EuiLoadingChart, EuiText } from '@elastic/eui';
 import { isChartSizeEvent } from '@kbn/chart-expressions-common';
-import type { DataView } from '@kbn/data-views-plugin/public';
+import type { FilterableSource } from '@kbn/data-source';
 import type { EmbeddablePublicDefinition } from '@kbn/embeddable-plugin/public';
 import type { AggregateQuery } from '@kbn/es-query';
 import type { ExpressionRendererParams } from '@kbn/expressions-plugin/public';
@@ -119,7 +119,7 @@ export const visualizeEmbeddableFactory: EmbeddablePublicDefinition<
       }
       return visInstance.data.indexPattern ? [visInstance.data.indexPattern] : [];
     };
-    const dataSources$ = new BehaviorSubject<DataView[] | undefined>(
+    const dataSources$ = new BehaviorSubject<FilterableSource[] | undefined>(
       await getUsedDataViews(initialVisInstance)
     );
 

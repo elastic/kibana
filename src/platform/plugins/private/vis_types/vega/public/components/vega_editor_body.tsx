@@ -57,10 +57,10 @@ const bindDataViewId = (filter: Filter, dataViewId: string): Filter => ({
   },
 });
 
-/** Whether there are more filters than a panel or library item can store. */
 const isAdHocSource = (source: FilterableSource): boolean =>
   isEsqlFilterableSource(source) || (source instanceof DataView && !source.isPersisted());
 
+/** Whether there are more filters than a panel or library item can store. */
 export const hasTooManyFilters = (filters?: unknown[]) => (filters?.length ?? 0) > VEGA_MAX_FILTERS;
 
 export const tooManyFiltersMessage = i18n.translate('visTypeVega.editor.tooManyFiltersMessage', {

@@ -40,8 +40,7 @@ import {
   hasTooManyFilters,
   vegaEditorFlyoutBodyCss,
 } from '../components/vega_editor_body';
-import { parseSpec } from '../lib/editor_spec';
-import { extractDataSourcesFromSpec } from '../lib/extract_index_pattern';
+import { resolveVegaDataSourcesOfText } from '../lib/vega_data_sources';
 import { fromDraft, isSameDraft, toDraft } from '../lib/editable_state';
 import type { VegaDraft, VegaEditableState } from '../lib/editable_state';
 import type { VegaPluginStartDependencies } from '../plugin';
@@ -85,18 +84,6 @@ interface VegaLibraryEditorProps {
   ariaLabelledBy: string;
 }
 
-const getSpecDataSources = async (specText: string): Promise<FilterableSource[]> => {
-  // The editor text is HJSON or JSON, which HJSON also parses.
-  const spec = parseSpec({ format: 'hjson', value: specText });
-  // A spec that doesn't parse names no data sources.
-  if (!spec) return [];
-  try {
-    return await extractDataSourcesFromSpec(spec);
-  } catch {
-    return [];
-  }
-};
-
 export const VegaLibraryEditor = ({
   core,
   client,
@@ -132,7 +119,8 @@ export const VegaLibraryEditor = ({
   // The data sources follow the previewed spec, so they don't resolve on every keystroke.
   useEffect(() => {
     let isCurrent = true;
-    getSpecDataSources(previewedSpec.spec).then((resolved) => {
+    // The editor text is HJSON or JSON, which HJSON also parses.
+    resolveVegaDataSourcesOfText(previewedSpec.spec).then((resolved) => {
       if (isCurrent) setSpecDataSources(resolved);
     });
     return () => {

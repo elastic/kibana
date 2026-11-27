@@ -12,6 +12,7 @@ import { render, waitFor } from '@testing-library/react';
 import { coreMock } from '@kbn/core/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import type { DataView } from '@kbn/data-views-plugin/public';
+import type { FilterableSource } from '@kbn/data-source';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { initializeDrilldownsManager } from '@kbn/embeddable-plugin/public/drilldowns/drilldowns_manager';
 import { AbortReason, SavedObjectNotFound } from '@kbn/kibana-utils-plugin/common';
@@ -32,7 +33,11 @@ import type { VegaPluginStartDependencies, VegaVisualizationDependencies } from 
 import { VEGA_EMBEDDABLE_TYPE } from '../../common/constants';
 import { VEGA_EVENT_APPLY_FILTER } from '../constants';
 import type { VegaEvent, VegaEventHandler } from '../types';
-import { extractDataSourcesFromSpec } from '../lib/extract_index_pattern';
+import {
+  resolveVegaDataSources,
+  resolveVegaEsqlSources,
+  type VegaEsqlSources,
+} from '../lib/vega_data_sources';
 import { reportVegaRender } from '../lib/vega_render_telemetry';
 import { setDataViews } from '../services';
 import type {
@@ -51,12 +56,18 @@ jest.mock('../library/open_vega_library_editor', () => ({
   openVegaLibraryEditor: jest.fn(),
 }));
 jest.mock('../lib/vega_render_telemetry', () => ({ reportVegaRender: jest.fn() }));
-jest.mock('../lib/extract_index_pattern', () => ({
-  extractDataSourcesFromSpec: jest.fn(async (): Promise<never[]> => []),
-}));
+jest.mock('../lib/vega_data_sources', () => {
+  const noEsqlSources = { filterableSources: [] as never[], getSource: (): undefined => undefined };
+  return {
+    NO_ESQL_SOURCES: noEsqlSources,
+    resolveVegaEsqlSources: jest.fn(async () => noEsqlSources),
+    resolveVegaDataSources: jest.fn(async (): Promise<never[]> => []),
+  };
+});
 
 interface MockVegaVisComponentProps {
   fireEvent: VegaEventHandler;
+  getDataSources: () => Promise<FilterableSource[]>;
   renderComplete: () => void;
   showWarnings: boolean;
   visData: VegaRenderDescriptor;
@@ -80,7 +91,9 @@ jest.mock('../async_services', () => ({
 const mockOpenVegaEditor = jest.mocked(openVegaEditor);
 const mockOpenVegaLibraryEditor = jest.mocked(openVegaLibraryEditor);
 const mockReportVegaRender = jest.mocked(reportVegaRender);
-const mockExtractDataSources = jest.mocked(extractDataSourcesFromSpec);
+const mockResolveDataSources = jest.mocked(resolveVegaDataSources);
+const mockResolveEsqlSources = jest.mocked(resolveVegaEsqlSources);
+const noEsqlSources: VegaEsqlSources = { filterableSources: [], getSource: () => undefined };
 
 jest.mock('@kbn/embeddable-plugin/public/kibana_services', () => ({
   core: {
@@ -192,8 +205,10 @@ describe('vegaEmbeddableFactory', () => {
     const dataViews = dataViewPluginMocks.createStartContract();
     dataViews.getDefault = jest.fn(async (): Promise<DataView | null> => null);
     setDataViews(dataViews);
-    mockExtractDataSources.mockReset();
-    mockExtractDataSources.mockResolvedValue([]);
+    mockResolveDataSources.mockReset();
+    mockResolveDataSources.mockResolvedValue([]);
+    mockResolveEsqlSources.mockReset();
+    mockResolveEsqlSources.mockResolvedValue(noEsqlSources);
     executeTriggerActions.mockReset();
     mockOpenVegaEditor.mockReset();
     mockReportVegaRender.mockReset();
@@ -218,7 +233,7 @@ describe('vegaEmbeddableFactory', () => {
 
   it('keeps data views named by the spec', async () => {
     const fromSpec = [{ id: 'spec-view' }] as DataView[];
-    mockExtractDataSources.mockResolvedValue(fromSpec);
+    mockResolveDataSources.mockResolvedValue(fromSpec);
     const dataViews = dataViewPluginMocks.createStartContract();
     dataViews.getDefault = jest.fn(async () => ({ id: 'default-view' } as DataView));
     setDataViews(dataViews);
@@ -229,6 +244,40 @@ describe('vegaEmbeddableFactory', () => {
 
     await waitFor(() => expect(api.dataSources$.getValue()).toEqual(fromSpec));
     expect(dataViews.getDefault).not.toHaveBeenCalled();
+  });
+
+  it('fetches with the ES|QL sources of the spec once they are resolved, and hands its sources to the chart', async () => {
+    const esqlSources: VegaEsqlSources = {
+      filterableSources: [{ kind: 'esql', id: 'esql-dataset' } as FilterableSource],
+      getSource: () => undefined,
+    };
+    let resolveEsqlSources: (sources: VegaEsqlSources) => void = () => {};
+    mockResolveEsqlSources.mockReturnValue(
+      new Promise((resolve) => {
+        resolveEsqlSources = resolve;
+      })
+    );
+    mockResolveDataSources.mockResolvedValue([...esqlSources.filterableSources]);
+    const { Component: PanelComponent } = await buildEmbeddable({
+      spec: {
+        format: 'hjson',
+        value: '{ data: { url: { "%type%": "esql", query: "FROM logs-*" } } }',
+      },
+    });
+    render(<PanelComponent />);
+
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    expect(mockVegaRequestHandler).not.toHaveBeenCalled();
+
+    resolveEsqlSources(esqlSources);
+    await waitFor(() =>
+      expect(mockVegaRequestHandler).toHaveBeenCalledWith(expect.objectContaining({ esqlSources }))
+    );
+    expect(mockResolveEsqlSources).toHaveBeenCalledTimes(1);
+    await waitFor(() => expect(mockVegaVisComponentProps).toBeDefined());
+    await expect(mockVegaVisComponentProps?.getDataSources()).resolves.toEqual(
+      esqlSources.filterableSources
+    );
   });
 
   it('serializes and applies its state', async () => {
