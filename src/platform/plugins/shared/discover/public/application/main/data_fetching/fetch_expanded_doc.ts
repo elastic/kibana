@@ -107,7 +107,11 @@ export const fetchEsqlQueryDoc = async ({
   abortSignal,
 }: FetchEsqlQueryDocParams): Promise<DataTableRecord | undefined> => {
   const { rawResponse } = await data.search.esql(
-    { query: esqlQueryText, dropNullColumns: true, kibanaQueryContext },
+    {
+      query: esql(esqlQueryText).limit(1).print('basic'),
+      dropNullColumns: true,
+      kibanaQueryContext,
+    },
     {
       abortSignal,
       sessionId: searchSessionId,

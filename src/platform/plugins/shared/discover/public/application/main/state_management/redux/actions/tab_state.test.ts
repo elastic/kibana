@@ -334,7 +334,7 @@ describe('tab_state actions', () => {
 
   describe('setExpandedDocByQuery', () => {
     const span = { _id: 'span-1', _index: 'traces-a', 'span.name': 'GET /' };
-    const lookupQuery = 'FROM traces-* METADATA _id, _index | LIMIT 1';
+    const lookupQuery = 'FROM traces-* METADATA _id, _index';
 
     const setupLookup = async ({
       editorQuery,
@@ -350,10 +350,11 @@ describe('tab_state actions', () => {
           values: row ? [Object.values(row)] : [],
         },
       });
+      const isRefetch = (query: string) => query.includes('_id ==');
       const esql = jest
         .spyOn(toolkit.services.data.search, 'esql')
         .mockImplementation(async ({ query }) =>
-          toResponse(query === lookupQuery ? span : refetchedRow)
+          toResponse(isRefetch(query) ? refetchedRow : span)
         );
       toolkit.internalState.dispatch(
         internalStateActions.updateAppState({
@@ -361,9 +362,8 @@ describe('tab_state actions', () => {
           appState: { query: { esql: editorQuery } },
         })
       );
-      const refetchQueries = () =>
-        esql.mock.calls.map(([{ query }]) => query).filter((query) => query.includes('_id =='));
-      return { ...toolkit, esql, refetchQueries, toResponse };
+      const refetchQueries = () => esql.mock.calls.map(([{ query }]) => query).filter(isRefetch);
+      return { ...toolkit, esql, isRefetch, refetchQueries, toResponse };
     };
 
     it('links a document the current query finds again', async () => {
@@ -400,13 +400,14 @@ describe('tab_state actions', () => {
     });
 
     it('opens without a link when the current query changes during the refetch', async () => {
-      const { internalState, tabId, esql, refetchQueries, toResponse } = await setupLookup({
-        editorQuery: 'FROM traces-* METADATA _id, _index',
-        refetchedRow: span,
-      });
+      const { internalState, tabId, esql, isRefetch, refetchQueries, toResponse } =
+        await setupLookup({
+          editorQuery: 'FROM traces-* METADATA _id, _index',
+          refetchedRow: span,
+        });
       let resolveRefetch: (response: ReturnType<typeof toResponse>) => void = () => {};
       esql.mockImplementation(async ({ query }) => {
-        if (query === lookupQuery) {
+        if (!isRefetch(query)) {
           return toResponse(span);
         }
         return new Promise((resolve) => {
