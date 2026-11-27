@@ -17,6 +17,10 @@ const addDataLinkText = i18n.translate('home.breadcrumbs.addDataLinkText', {
   defaultMessage: 'Add data',
 });
 
+const homeLinkText = i18n.translate('home.breadcrumbs.homeTitle', {
+  defaultMessage: 'Home',
+});
+
 const previousPageLinkText = i18n.translate('home.breadcrumbs.previousPageLinkText', {
   defaultMessage: 'Previous page',
 });
@@ -70,6 +74,8 @@ type GetAppTitle = (appId: string) => string | undefined;
 
 function getReturnAppLinkText(returnAppId: string, getAppTitle?: GetAppTitle): string {
   if (returnAppId === 'observabilityOnboarding') return addDataLinkText;
+  // Home registers its title as a literal, so use the localized string instead.
+  if (returnAppId === 'home') return homeLinkText;
   return getAppTitle?.(returnAppId) ?? previousPageLinkText;
 }
 
