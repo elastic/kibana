@@ -14,6 +14,13 @@ describe('getInterval', () => {
   const day = 864e5;
   const from = Date.UTC(2024, 5, 9);
 
+  it('does not throw for an empty or reversed range', () => {
+    const time = Date.UTC(2024, 0, 1);
+
+    expect(getInterval(time, time, 'UTC')).toBe(1);
+    expect(getInterval(time + 1, time, 'UTC')).toBe(1);
+  });
+
   it('picks 3h for a 1 day range with 20 steps', () => {
     expect(getInterval(from, from + day, 'UTC')).toBe(3 * hour);
   });
@@ -45,6 +52,13 @@ describe('getInterval', () => {
 describe('getTicks', () => {
   const hour = 36e5;
   const from = Date.UTC(2024, 5, 9);
+
+  it('does not throw for an empty range', () => {
+    const time = Date.UTC(2024, 0, 1);
+
+    expect(getTicks(time, time, 'UTC')).toHaveLength(1);
+    expect(getTicks(time + 1, time, 'UTC')).toHaveLength(0);
+  });
 
   it('never exceeds 20 ticks', () => {
     const ranges: Array<[number, number]> = [

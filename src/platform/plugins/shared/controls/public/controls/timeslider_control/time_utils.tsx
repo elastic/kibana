@@ -55,6 +55,10 @@ function getScaledDateFormat(interval: number): string {
 }
 
 export function getInterval(min: number, max: number, timezone: string, steps = MAX_TICKS): number {
+  // The picker rejects an empty or reversed range, which an absolute time range can have.
+  if (!(max > min)) {
+    return 1;
+  }
   const { nominalMs } = pickDateRounding(steps, {
     from: min,
     to: max,
