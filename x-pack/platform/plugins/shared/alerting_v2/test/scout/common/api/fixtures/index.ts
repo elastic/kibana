@@ -43,6 +43,7 @@ export {
   ALERTING_V2_RULES_ALL_ROLE,
   ALERTING_V2_RULES_READ_ROLE,
   ALERTING_V2_ALERTS_ALL_ROLE,
+  ALERTING_V2_ALERTS_AND_CONNECTORS_ALL_ROLE,
   ALERTING_V2_ALERTS_READ_ROLE,
   ALERTING_V2_ACTION_POLICIES_ALL_ROLE,
   ALERTING_V2_ACTION_POLICIES_READ_ROLE,
@@ -60,6 +61,7 @@ export {
   buildSeriesId,
   buildCreateRuleData,
   buildCreateActionPolicyData,
+  buildCreateExternalSourceData,
   buildRuleTemplateData,
   buildV1RuleTemplateAttributes,
   buildWorkflowYaml,
@@ -108,6 +110,9 @@ export {
   getRuleTemplateTagsUrl,
   getRuleTemplateUrl,
   getInstallRuleTemplateUrl,
+  getConnectorUrl,
+  getExternalSourceUrl,
+  getListExternalSourcesUrl,
 } from '../../urls';
 export {
   ACTION_POLICY_PER_PAGE_MAX,

@@ -7,6 +7,7 @@
 
 import {
   createExternalSourceDataSchema,
+  putExternalSourceDataSchema,
   updateExternalSourceDataSchema,
 } from './external_source_data_schema';
 
@@ -14,7 +15,6 @@ const validCreateData = {
   type: 'datadog',
   kind: 'alert',
   metadata: { name: 'Datadog production', routing_tags: ['team-a'] },
-  connector_id: 'connector-1',
 };
 
 describe('createExternalSourceDataSchema', () => {
@@ -35,9 +35,9 @@ describe('createExternalSourceDataSchema', () => {
   it.each([
     ['routing tags on a signal import', { ...validCreateData, kind: 'signal' }],
     ['an unknown kind', { ...validCreateData, kind: 'rule' }],
+    ['a connector id', { ...validCreateData, connector_id: 'connector-1' }],
     ['a missing type', { ...validCreateData, type: undefined }],
     ['an unknown type', { ...validCreateData, type: 'pagerduty' }],
-    ['a missing connector id', { kind: 'alert', metadata: { name: 'Import' } }],
     ['an empty name', { ...validCreateData, metadata: { name: '' } }],
     ['an empty tags array', { ...validCreateData, metadata: { name: 'Import', tags: [] } }],
     ['an unknown field', { ...validCreateData, enabled: true }],
@@ -64,5 +64,20 @@ describe('updateExternalSourceDataSchema', () => {
 
   it('does not accept a type', () => {
     expect(updateExternalSourceDataSchema.safeParse({ type: 'datadog' }).success).toBe(false);
+  });
+});
+
+describe('putExternalSourceDataSchema', () => {
+  it('accepts a full import without an id', () => {
+    expect(putExternalSourceDataSchema.safeParse(validCreateData).success).toBe(true);
+  });
+
+  it.each([
+    ['an id in the body', { ...validCreateData, id: 'import-1' }],
+    ['a connector id', { ...validCreateData, connector_id: 'connector-1' }],
+    ['a missing type', { ...validCreateData, type: undefined }],
+    ['routing tags on a signal import', { ...validCreateData, kind: 'signal' }],
+  ])('rejects %s', (_, data) => {
+    expect(putExternalSourceDataSchema.safeParse(data).success).toBe(false);
   });
 });

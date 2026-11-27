@@ -6,8 +6,8 @@
  */
 
 import type {
-  CreateExternalSourceData,
   FindExternalSourcesSortField,
+  ExternalSourceData,
   ExternalSourceResponse,
 } from '@kbn/alerting-v2-schemas';
 import { ACTION_SAVED_OBJECT_TYPE } from '@kbn/actions-plugin/server';
@@ -17,9 +17,6 @@ import {
   type ExternalSourceSavedObjectAttributes,
 } from '../../saved_objects';
 import type { Actor } from '../services/user_service/user_service';
-
-/** The fields of an external source that callers can set, without its id. */
-export type ExternalSourceData = Omit<CreateExternalSourceData, 'id'>;
 
 /** Builds the saved object references of an external source: one reference to its connector. */
 export const buildExternalSourceReferences = (connectorId: string): SavedObjectReference[] => [
@@ -50,17 +47,19 @@ const toStoredMetadata = (
 
 export const buildCreateExternalSourceAttributes = ({
   data,
+  connectorId,
   actor,
   now,
 }: {
   data: ExternalSourceData;
+  connectorId: string;
   actor: Actor | null;
   now: string;
 }): ExternalSourceSavedObjectAttributes => ({
   type: data.type,
   kind: data.kind,
   metadata: toStoredMetadata(data.metadata),
-  connector_id: data.connector_id,
+  connector_id: connectorId,
   version: 1,
   createdBy: actor,
   updatedBy: actor,
@@ -71,18 +70,20 @@ export const buildCreateExternalSourceAttributes = ({
 export const buildUpdateExternalSourceAttributes = ({
   existing,
   data,
+  connectorId,
   actor,
   now,
 }: {
   existing: ExternalSourceSavedObjectAttributes;
   data: ExternalSourceData;
+  connectorId: string;
   actor: Actor | null;
   now: string;
 }): ExternalSourceSavedObjectAttributes => ({
   type: existing.type,
   kind: data.kind,
   metadata: toStoredMetadata(data.metadata),
-  connector_id: data.connector_id,
+  connector_id: connectorId,
   version: existing.version + 1,
   createdBy: existing.createdBy,
   updatedBy: actor,
@@ -95,13 +96,11 @@ export const buildUpdateExternalSourceAttributes = ({
  * string: the merged result is re-validated against the create schema before it is written.
  */
 export const toExternalSourceData = (
-  attributes: ExternalSourceSavedObjectAttributes,
-  connectorId: string
+  attributes: ExternalSourceSavedObjectAttributes
 ): Omit<ExternalSourceData, 'type'> & { type: string } => ({
   type: attributes.type,
   kind: attributes.kind,
   metadata: toStoredMetadata(attributes.metadata),
-  connector_id: connectorId,
 });
 
 export const transformExternalSourceToApiResponse = ({

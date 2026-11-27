@@ -5,13 +5,16 @@
  * 2.0.
  */
 
-export type ExternalSourceValidationContext = 'create' | 'update';
+export type ExternalSourceValidationContext = 'create' | 'update' | 'upsert';
 
 export const getExternalSourceNotFoundMessage = (id: string): string =>
   `External source with ID "${id}" not found`;
 
 export const getExternalSourceAlreadyExistsMessage = (id: string): string =>
   `External source with ID "${id}" already exists`;
+
+export const getExternalSourceTypeChangeMessage = (id: string, type: string): string =>
+  `External source with ID "${id}" has type "${type}", which cannot be changed`;
 
 export const getExternalSourceVersionConflictMessage = (id: string): string =>
   `External source with ID "${id}" has already been updated by another user`;

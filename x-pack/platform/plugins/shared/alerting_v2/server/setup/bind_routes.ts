@@ -70,6 +70,10 @@ import { MatcherRuleEventFieldsRoute } from '../routes/suggestions/matcher_rule_
 import { SuggestUserProfilesRoute } from '../routes/suggestions/suggest_user_profiles_route';
 import { UpsertRuleRoute } from '../routes/rules/upsert_rule_route';
 import { UpsertActionPolicyRoute } from '../routes/action_policies/upsert_action_policy_route';
+import { CreateExternalSourceRoute } from '../routes/external_sources/create_external_source_route';
+import { DeleteExternalSourceRoute } from '../routes/external_sources/delete_external_source_route';
+import { UpdateExternalSourceRoute } from '../routes/external_sources/update_external_source_route';
+import { UpsertExternalSourceRoute } from '../routes/external_sources/upsert_external_source_route';
 import { MatchActionPoliciesRoute } from '../routes/action_policies/match_action_policies_route';
 import { GetActionPolicyRoutingTagsRoute } from '../routes/action_policies/get_action_policy_routing_tags_route';
 import { PreviewActionPolicyTestRoute } from '../routes/action_policies/preview_action_policy_test_route';
@@ -144,6 +148,10 @@ export function bindRoutes({ bind }: ContainerModuleLoadOptions) {
   bind(Route).toConstantValue(SuggestUserProfilesRoute);
   bind(Route).toConstantValue(UpsertRuleRoute);
   bind(Route).toConstantValue(UpsertActionPolicyRoute);
+  bind(Route).toConstantValue(CreateExternalSourceRoute);
+  bind(Route).toConstantValue(UpdateExternalSourceRoute);
+  bind(Route).toConstantValue(UpsertExternalSourceRoute);
+  bind(Route).toConstantValue(DeleteExternalSourceRoute);
   bind(Route).toConstantValue(MatchActionPoliciesRoute);
   bind(Route).toConstantValue(GetActionPolicyRoutingTagsRoute);
   bind(Route).toConstantValue(PreviewActionPolicyTestRoute);

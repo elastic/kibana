@@ -18,6 +18,7 @@ import {
   EXECUTION_HISTORY_API_PATH,
   RULE_EXECUTIONS_API_PATH,
   RULE_TEMPLATE_API_PATH,
+  EXTERNAL_SOURCE_API_PATH,
 } from './constants';
 
 const toQueryString = (query: Record<string, string | number | string[] | undefined>): string => {
@@ -162,4 +163,17 @@ export const listRuleExecutionsUrl = (query?: ListRuleExecutionsQueryInput): str
     }
   }
   return `${RULE_EXECUTIONS_API_PATH}?${params.toString()}`;
+};
+
+export const getConnectorUrl = (id: string): string =>
+  `/api/actions/connector/${encodeURIComponent(id)}`;
+
+export const getExternalSourceUrl = (id: string): string =>
+  `${EXTERNAL_SOURCE_API_PATH}/${encodeURIComponent(id)}`;
+
+export const getListExternalSourcesUrl = (
+  query: Record<string, string | number | undefined> = {}
+): string => {
+  const qs = toQueryString(query);
+  return qs ? `${EXTERNAL_SOURCE_API_PATH}?${qs}` : EXTERNAL_SOURCE_API_PATH;
 };

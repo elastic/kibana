@@ -17,6 +17,7 @@
   "kbn_references": [
     "@kbn/actions-plugin",
     "@kbn/agent-builder-elastic-ai-index-ki-types",
+    "@kbn/connector-specs",
     "@kbn/core",
     "@kbn/task-manager-plugin",
     "@kbn/features-plugin",
@@ -31,7 +32,6 @@
     "@kbn/logging",
     "@kbn/core-di",
     "@kbn/core-di-browser",
-    "@kbn/connector-specs",
     "@kbn/core-di-server",
     "@kbn/esql",
     "@kbn/esql-utils",

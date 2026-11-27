@@ -136,6 +136,25 @@ export const ALERTING_V2_ALERTS_ALL_ROLE: KibanaRole = {
   ],
 };
 
+/**
+ * {@link ALERTING_V2_ALERTS_ALL_ROLE} plus `actions: ['all']`. Creating or deleting an import
+ * config also creates or deletes its connector as the same user.
+ */
+export const ALERTING_V2_ALERTS_AND_CONNECTORS_ALL_ROLE: KibanaRole = {
+  elasticsearch: NO_ACCESS_ES_PRIVILEGES,
+  kibana: [
+    {
+      base: [],
+      feature: {
+        alerting_v2_alerts: ['all'],
+        actions: ['all'],
+        discover: ['all'],
+      },
+      spaces: ['*'],
+    },
+  ],
+};
+
 export const ALERTING_V2_ALERTS_READ_ROLE: KibanaRole = {
   elasticsearch: NO_ACCESS_ES_PRIVILEGES,
   kibana: [

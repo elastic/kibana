@@ -10,6 +10,7 @@ import type {
   FindExternalSourcesSortField,
   ExternalSourceResponse,
   ExternalSourceType,
+  PutExternalSourceData,
   UpdateExternalSourceData,
 } from '@kbn/alerting-v2-schemas';
 
@@ -20,6 +21,11 @@ export interface CreateExternalSourceParams {
 export interface UpdateExternalSourceParams {
   id: string;
   data: UpdateExternalSourceData;
+}
+
+export interface UpsertExternalSourceParams {
+  id: string;
+  data: PutExternalSourceData;
 }
 
 export interface FindExternalSourcesParams {

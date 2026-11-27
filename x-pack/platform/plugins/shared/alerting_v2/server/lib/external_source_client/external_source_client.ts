@@ -6,9 +6,11 @@
  */
 
 import Boom from '@hapi/boom';
-import type { ExternalSourceResponse } from '@kbn/alerting-v2-schemas';
+import type { ExternalSourceData, ExternalSourceResponse } from '@kbn/alerting-v2-schemas';
 import {
   createExternalSourceDataSchema,
+  externalSourceDataSchema,
+  putExternalSourceDataSchema,
   updateExternalSourceDataSchema,
 } from '@kbn/alerting-v2-schemas';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
@@ -21,11 +23,16 @@ import { buildSoSearch } from '../build_so_search';
 import { ALERTING_ERROR_CODES, ALERTING_LOG_CODES } from '../errors/error_codes';
 import {
   getExternalSourceAlreadyExistsMessage,
+  getExternalSourceTypeChangeMessage,
   getExternalSourceNotFoundMessage,
   getExternalSourceVersionConflictMessage,
   getInvalidExternalSourceDataMessage,
   type ExternalSourceValidationContext,
 } from '../errors/external_source_error_messages';
+import {
+  ExternalSourceConnectorService,
+  type ExternalSourceConnectorServiceContract,
+} from '../services/external_source_connector_service/external_source_connector_service';
 import { ExternalSourceSavedObjectServiceScopedToken } from '../services/external_source_saved_object_service/tokens';
 import type {
   ExternalSourceSavedObjectDoc,
@@ -35,13 +42,14 @@ import {
   LoggerServiceToken,
   type LoggerServiceContract,
 } from '../services/logger_service/logger_service';
-import type { UserServiceContract } from '../services/user_service/user_service';
+import type { Actor, UserServiceContract } from '../services/user_service/user_service';
 import { UserService } from '../services/user_service/user_service';
 import type {
   CreateExternalSourceParams,
   FindExternalSourcesParams,
   FindExternalSourcesResponse,
   UpdateExternalSourceParams,
+  UpsertExternalSourceParams,
 } from './types';
 import {
   buildCreateExternalSourceAttributes,
@@ -62,6 +70,9 @@ const DEFAULT_PER_PAGE = 20;
  * CRUD for alert external sources: the configuration of one source of external alerts, such as a
  * Datadog connector that receives events.
  *
+ * Creating an import creates its connector, with no authentication, from the import `type`.
+ * Deleting an import deletes its connector. The connector never changes in between.
+ *
  * The connector is stored twice: as the `connector_id` attribute and as a `connector` saved object
  * reference. Every write sets both. Every read takes the connector id from the reference, and falls
  * back to the attribute only when the reference is missing. The reference lets Kibana know the
@@ -75,6 +86,8 @@ export class ExternalSourceClient {
     @inject(ExternalSourceSavedObjectServiceScopedToken)
     private readonly externalSourceSavedObjectService: ExternalSourceSavedObjectServiceContract,
     @inject(UserService) private readonly userService: UserServiceContract,
+    @inject(ExternalSourceConnectorService)
+    private readonly connectorService: ExternalSourceConnectorServiceContract,
     @inject(LoggerServiceToken) loggerService: LoggerServiceContract
   ) {
     this.logger = loggerService.forSubsystem('externalSourceClient');
@@ -90,8 +103,13 @@ export class ExternalSourceClient {
       'create'
     );
     const actor = await this.userService.getCurrentActor();
+    const connectorId = await this.connectorService.create({
+      type: data.type,
+      name: data.metadata.name,
+    });
     const attributes = buildCreateExternalSourceAttributes({
       data,
+      connectorId,
       actor,
       now: new Date().toISOString(),
     });
@@ -100,10 +118,11 @@ export class ExternalSourceClient {
     try {
       ({ id: createdId } = await this.externalSourceSavedObjectService.create({
         attrs: attributes,
-        references: buildExternalSourceReferences(data.connector_id),
+        references: buildExternalSourceReferences(connectorId),
         id,
       }));
     } catch (e) {
+      await this.deleteConnectorQuietly(connectorId, id);
       if (id && SavedObjectsErrorHelpers.isConflictError(e)) {
         throw Boom.conflict(getExternalSourceAlreadyExistsMessage(id), {
           code: ALERTING_ERROR_CODES.EXTERNAL_SOURCE_ALREADY_EXISTS,
@@ -116,7 +135,7 @@ export class ExternalSourceClient {
     return transformExternalSourceToApiResponse({
       id: createdId,
       attributes,
-      connectorId: data.connector_id,
+      connectorId,
     });
   }
 
@@ -141,59 +160,58 @@ export class ExternalSourceClient {
     );
     const actor = await this.userService.getCurrentActor();
     const existing = await this.getExistingExternalSource(params.id);
-    const connectorId = this.resolveConnectorId(existing);
 
     const merged = applyPatch(
-      createExternalSourceDataSchema,
-      toExternalSourceData(existing.attributes, connectorId),
+      externalSourceDataSchema,
+      toExternalSourceData(existing.attributes),
       patch
     );
-    const {
-      type,
-      kind,
-      metadata,
-      connector_id: mergedConnectorId,
-    } = this.parseExternalSourceData(createExternalSourceDataSchema, merged, 'update');
-    const data = { type, kind, metadata, connector_id: mergedConnectorId };
+    const data = this.parseExternalSourceData(externalSourceDataSchema, merged, 'update');
 
-    const attributes = buildUpdateExternalSourceAttributes({
-      existing: existing.attributes,
-      data,
-      actor,
-      now: new Date().toISOString(),
-    });
+    return this.replaceExternalSource({ existing, data, actor });
+  }
 
-    try {
-      await this.externalSourceSavedObjectService.update({
-        id: params.id,
-        attrs: attributes,
-        references: buildExternalSourceReferences(data.connector_id),
-        version: existing.version,
-      });
-    } catch (e) {
-      if (SavedObjectsErrorHelpers.isConflictError(e)) {
-        throw Boom.conflict(getExternalSourceVersionConflictMessage(params.id), {
-          code: ALERTING_ERROR_CODES.EXTERNAL_SOURCE_VERSION_CONFLICT,
-          details: { external_source_id: params.id },
-        });
-      }
-      throw this.mapNotFound(params.id, e);
+  /**
+   * Creates the external source at `id`, with its connector, when it does not exist. Otherwise
+   * replaces it with `data` and keeps its connector.
+   */
+  @withApm
+  public async upsertExternalSource(
+    params: UpsertExternalSourceParams
+  ): Promise<{ externalSource: ExternalSourceResponse; created: boolean }> {
+    const data = this.parseExternalSourceData(putExternalSourceDataSchema, params.data, 'upsert');
+    const existing = await this.findExternalSource(params.id);
+
+    if (!existing) {
+      const externalSource = await this.createExternalSource({ data: { ...data, id: params.id } });
+      return { externalSource, created: true };
     }
 
-    return transformExternalSourceToApiResponse({
-      id: params.id,
-      attributes,
-      connectorId: data.connector_id,
-    });
+    // The connector, and so the type, is fixed when the import is created.
+    if (data.type !== existing.attributes.type) {
+      throw Boom.badRequest(
+        getExternalSourceTypeChangeMessage(params.id, existing.attributes.type),
+        {
+          code: ALERTING_ERROR_CODES.INVALID_EXTERNAL_SOURCE_DATA,
+          details: { context: 'upsert', external_source_id: params.id },
+        }
+      );
+    }
+
+    const actor = await this.userService.getCurrentActor();
+    const externalSource = await this.replaceExternalSource({ existing, data, actor });
+    return { externalSource, created: false };
   }
 
   @withApm
   public async deleteExternalSource({ id }: { id: string }): Promise<void> {
+    const existing = await this.getExistingExternalSource(id);
     try {
       await this.externalSourceSavedObjectService.delete({ id });
     } catch (e) {
       throw this.mapNotFound(id, e);
     }
+    await this.deleteConnectorQuietly(this.resolveConnectorId(existing), id);
   }
 
   @withApm
@@ -255,6 +273,81 @@ export class ExternalSourceClient {
     } catch (e) {
       throw this.mapNotFound(id, e);
     }
+  }
+
+  /** Returns the external source, or `undefined` when it does not exist. */
+  private async findExternalSource(id: string): Promise<ExternalSourceSavedObjectDoc | undefined> {
+    try {
+      return await this.externalSourceSavedObjectService.get(id);
+    } catch (e) {
+      if (e instanceof Error && SavedObjectsErrorHelpers.isNotFoundError(e)) {
+        return undefined;
+      }
+      throw e;
+    }
+  }
+
+  /**
+   * Deletes an import's connector without failing the request: the import write it belongs to has
+   * already failed or succeeded, so a leftover connector is logged instead.
+   */
+  private async deleteConnectorQuietly(
+    connectorId: string,
+    externalSourceId?: string
+  ): Promise<void> {
+    try {
+      await this.connectorService.delete(connectorId);
+    } catch (e) {
+      this.logger.warn({
+        message: 'Failed to delete the connector of an external source',
+        code: ALERTING_LOG_CODES.EXTERNAL_SOURCE_CONNECTOR_DELETE_FAILED,
+        labels: { connector_id: connectorId, external_source_id: externalSourceId },
+        error: e,
+      });
+    }
+  }
+
+  /** Writes `data` over an existing external source, guarded by its saved object version. */
+  private async replaceExternalSource({
+    existing,
+    data,
+    actor,
+  }: {
+    existing: ExternalSourceSavedObjectDoc;
+    data: ExternalSourceData;
+    actor: Actor | null;
+  }): Promise<ExternalSourceResponse> {
+    const connectorId = this.resolveConnectorId(existing);
+    const attributes = buildUpdateExternalSourceAttributes({
+      existing: existing.attributes,
+      data,
+      connectorId,
+      actor,
+      now: new Date().toISOString(),
+    });
+
+    try {
+      await this.externalSourceSavedObjectService.update({
+        id: existing.id,
+        attrs: attributes,
+        references: buildExternalSourceReferences(connectorId),
+        version: existing.version,
+      });
+    } catch (e) {
+      if (SavedObjectsErrorHelpers.isConflictError(e)) {
+        throw Boom.conflict(getExternalSourceVersionConflictMessage(existing.id), {
+          code: ALERTING_ERROR_CODES.EXTERNAL_SOURCE_VERSION_CONFLICT,
+          details: { external_source_id: existing.id },
+        });
+      }
+      throw this.mapNotFound(existing.id, e);
+    }
+
+    return transformExternalSourceToApiResponse({
+      id: existing.id,
+      attributes,
+      connectorId,
+    });
   }
 
   private mapNotFound(id: string, e: unknown): unknown {
