@@ -299,6 +299,24 @@ describe('OTLP output authentication', () => {
         ).toThrow('secrets.auth.azure_client_secret is required for the service_principal method');
       });
 
+      it('rejects a blank tenant or client ID', () => {
+        expect(() =>
+          validateOtlpAuth({
+            auth: { ...servicePrincipal, tenant_id: '  ' },
+            hasCredential: false,
+            hasAzureClientSecret: true,
+            exporter,
+          })
+        ).toThrow('auth.tenant_id cannot be blank');
+        expect(() =>
+          validateOtlpAuth({
+            auth: { ...managedIdentity, client_id: ' ' },
+            hasCredential: false,
+            exporter,
+          })
+        ).toThrow('auth.client_id cannot be blank');
+      });
+
       it('rejects a tenant or a client secret for a managed identity', () => {
         expect(() =>
           validateOtlpAuth({
@@ -394,6 +412,25 @@ describe('OTLP output authentication', () => {
         ).toThrow(
           // the URL is left out of the error, it can carry credentials
           /^auth.type "azure" requires https endpoints, otlp_exporter.logs_endpoint is not one$/
+        );
+      });
+
+      it('rejects an https endpoint without a host', () => {
+        expect(() =>
+          validateOtlpAuth({
+            auth: managedIdentity,
+            hasCredential: false,
+            exporter: { endpoint: 'https://', protocol: 'http/protobuf' },
+          })
+        ).toThrow('auth.type "azure" requires https endpoints, otlp_exporter.endpoint is not one');
+        expect(() =>
+          validateOtlpAuth({
+            auth: managedIdentity,
+            hasCredential: false,
+            exporter: { ...exporter, traces_endpoint: 'https://:4318/v1/traces' },
+          })
+        ).toThrow(
+          'auth.type "azure" requires https endpoints, otlp_exporter.traces_endpoint is not one'
         );
       });
 

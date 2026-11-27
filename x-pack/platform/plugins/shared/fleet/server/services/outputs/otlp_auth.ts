@@ -177,6 +177,15 @@ const OTLP_HTTP_ENDPOINT_FIELDS = [
 ] as const;
 
 /** Throws if the Azure authentication of an output is not complete for its method. */
+const isHttpsUrlWithHost = (endpoint: string): boolean => {
+  try {
+    const url = new URL(endpoint);
+    return url.protocol === 'https:' && url.hostname !== '';
+  } catch {
+    return false;
+  }
+};
+
 function validateOtlpAzureAuth(
   auth: OtlpAzureAuth,
   exporter: Partial<OtlpExporterConfig> | null | undefined
@@ -197,7 +206,7 @@ function validateOtlpAzureAuth(
     if (field !== 'endpoint' && (endpoint === '' || endpoint === null || endpoint === undefined)) {
       return false;
     }
-    return typeof endpoint !== 'string' || !/^https:\/\//i.test(endpoint);
+    return typeof endpoint !== 'string' || !isHttpsUrlWithHost(endpoint);
   });
   if (insecureEndpointField) {
     throw new OutputInvalidError(
@@ -208,6 +217,14 @@ function validateOtlpAzureAuth(
     throw new OutputInvalidError(
       `auth.type "${otlpAuthType.Azure}" cannot be set together with otlp_exporter.tls.insecure_skip_verify`
     );
+  }
+
+  // the IDs are passed to the extension as they are: a blank ID cannot authenticate
+  const blankId = (['tenant_id', 'client_id'] as const).find(
+    (key) => typeof auth[key] === 'string' && !auth[key]!.trim()
+  );
+  if (blankId) {
+    throw new OutputInvalidError(`auth.${blankId} cannot be blank`);
   }
 
   if (auth.azure_auth_method === otlpAzureAuthMethod.ServicePrincipal) {
