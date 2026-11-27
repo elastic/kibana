@@ -64,6 +64,12 @@ describe('registerSkills', () => {
     expect(skill.content).toContain('at least one and at most two of those primary time-series XY');
   });
 
+  it('keeps the dashboard settings in both enhance modes unless the user asks', () => {
+    expect(enhanceGuidance()).toContain(
+      'Neither mode changes the dashboard settings (`options`) unless the user asks.'
+    );
+  });
+
   it('publishes a config reference per ML panel type and points the skill at each one', () => {
     const panelConfigs = skill.referencedContent?.filter(
       ({ relativePath }) => relativePath === './panel_configs'

@@ -12,6 +12,7 @@ import {
   getEffectiveRenderer,
   isCustomContentVisualization,
   readAttachmentQueries,
+  type VegaConfig,
   type VisualizationAttachmentData,
   type VisualizationRenderer,
 } from '@kbn/agent-builder-visualizations-common';
@@ -30,7 +31,8 @@ const PANEL_TYPE_BY_RENDERER: Readonly<Record<VisualizationRenderer, RequestPane
 
 /** Maps a stored visualization payload onto the embeddable that renders it. */
 const toPanelContent = (data: VisualizationAttachmentData): PanelContent => {
-  const type = getRequestPanelEmbeddableType(PANEL_TYPE_BY_RENDERER[getEffectiveRenderer(data)]);
+  const renderer = getEffectiveRenderer(data);
+  const type = getRequestPanelEmbeddableType(PANEL_TYPE_BY_RENDERER[renderer]);
 
   // Custom content stores markup rather than a chart config, so its panel config is rebuilt.
   if (isCustomContentVisualization(data)) {
@@ -42,6 +44,12 @@ const toPanelContent = (data: VisualizationAttachmentData): PanelContent => {
         esql_query: esqlQueries.length ? esqlQueries : undefined,
       },
     };
+  }
+
+  // Vega attachments store the spec as text; the native `vega` panel takes `{ format, value }`.
+  if (renderer === 'vega') {
+    const { spec, ...vegaConfig } = data.visualization as VegaConfig;
+    return { type, config: { ...vegaConfig, spec: { format: 'hjson', value: spec } } };
   }
 
   return { type, config: data.visualization };

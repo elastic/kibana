@@ -6,11 +6,15 @@
  */
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-import { Logger as CoreLogger } from '@kbn/core-di';
+import { Logger as CoreLogger, PluginSetup } from '@kbn/core-di';
+import type { CPSServerSetup } from '@kbn/cps/server';
+import type { KnowledgeIndicatorReader } from '@kbn/significant-events-plugin/server';
+import { memoize } from 'lodash';
 import type { NightshiftSource } from '@kbn/nightshift-shared';
-import { inject, injectable } from 'inversify';
+import { inject, injectable, optional } from 'inversify';
 import { getErrorMessage } from '../errors/get_error_message';
 import { AvailabilityService } from '../availability/availability_service';
+import { ManagedRuleReader } from '../rules/managed_rule_reader';
 import { DetectionSignalStore } from '../signals/signal_store';
 import { wrapReading } from '../signals/wrap_reading';
 import { DetectionStateClient } from '../state/detection_state_client';
@@ -20,7 +24,7 @@ import { planWindows } from './plan_windows';
 import type { PlannedWindow } from './plan_windows';
 import { SpaceRunLock } from './space_run_lock';
 import type { StrategyRunResult, TickResult } from '../../../common/tick';
-import { DetectionEngineDataClient, RunContext, Sources } from './tokens';
+import { DetectionEngineDataClient, KnowledgeIndicators, RunContext, Sources } from './tokens';
 
 /**
  * Deadline for the generators of one tick, counted from taking the space's run lock, so a slow
@@ -55,6 +59,18 @@ function rejectOnAbort(signal: AbortSignal): Promise<never> {
   });
 }
 
+function memoizeKnowledgeIndicators(knowledge: KnowledgeIndicatorReader): KnowledgeIndicatorReader {
+  // Read once per tick and set of sources, at the first window that asks: every strategy asks for
+  // the tick's enabled sources, so they share one read, and a tick with nothing due reads none.
+  return {
+    listQueries: memoize(
+      (params) => knowledge.listQueries(params),
+      ({ sourceIds }) => JSON.stringify(sourceIds)
+    ),
+    listFeatures: (params) => knowledge.listFeatures(params),
+  };
+}
+
 /**
  * One tick of the detection engine in one space: takes the space's run lock, runs every due
  * strategy over its window, stores the signals, and moves each strategy's generator state. It knows no
@@ -73,8 +89,17 @@ export class EngineRunner {
     @inject(DetectionSignalStore) private readonly signalStore: DetectionSignalStore,
     @inject(Sources) private readonly sources: Sources,
     @inject(DetectionEngineDataClient) private readonly dataClient: ElasticsearchClient,
-    @inject(CoreLogger) private readonly logger: Logger
-  ) {}
+    @inject(KnowledgeIndicators) knowledge: KnowledgeIndicatorReader,
+    @inject(ManagedRuleReader) private readonly rules: ManagedRuleReader,
+    @inject(CoreLogger) private readonly logger: Logger,
+    @inject(PluginSetup<CPSServerSetup>('cps'))
+    @optional()
+    private readonly cps: CPSServerSetup | undefined
+  ) {
+    this.knowledge = memoizeKnowledgeIndicators(knowledge);
+  }
+
+  private readonly knowledge: KnowledgeIndicatorReader;
 
   /**
    * Runs one tick:
@@ -224,6 +249,9 @@ export class EngineRunner {
                   : controller.signal,
               }),
           },
+          knowledge: this.knowledge,
+          rules: this.rules,
+          cpsEnabled: this.cps?.getCpsEnabled() ?? false,
           abortSignal: controller.signal,
           logger: this.logger,
         }),

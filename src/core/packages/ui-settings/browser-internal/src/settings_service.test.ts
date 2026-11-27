@@ -54,6 +54,15 @@ describe('#start', () => {
     const service = new SettingsService();
     expect(() => service.start()).toThrow('#setup must be called before start');
   });
+
+  it('returns the clients created in #setup, including the metadata client', () => {
+    const service = new SettingsService();
+    const setup = service.setup(defaultDeps);
+    const start = service.start();
+    expect(start.client).toBe(setup.client);
+    expect(start.globalClient).toBe(setup.globalClient);
+    expect(start.metadata).toBe(setup.metadata);
+  });
 });
 
 describe('#stop', () => {

@@ -31,9 +31,9 @@ const memory = (id: string, deleted = false): [string, DreamedKi] => [
 
 describe('citedMemoryKiIds', () => {
   it('lists the memory KIs, leaving out trace rounds', () => {
-    expect(citedMemoryKiIds(fact({ references: derivedFrom('ki://m-1', 'trace://abc') }))).toEqual([
-      'm-1',
-    ]);
+    expect(
+      citedMemoryKiIds(fact({ references: derivedFrom('ki://m-1', 'session://abc') }))
+    ).toEqual(['m-1']);
   });
 });
 
@@ -83,21 +83,21 @@ describe('sourceVerdictOf', () => {
   });
 
   it('never counts a trace round as lost, and leaves such an item for review', () => {
-    const fromTraces = fact({ references: derivedFrom('ki://m-1', 'trace://abc') });
+    const fromTraces = fact({ references: derivedFrom('ki://m-1', 'session://abc') });
 
     expect(sourceVerdictOf(fromTraces, new Map([memory('m-1', true)]))).toEqual({
       verdict: 'needs_review',
       reason: expect.stringContaining('agent conversations'),
     });
     expect(
-      sourceVerdictOf(fact({ references: derivedFrom('trace://abc') }), new Map()).verdict
+      sourceVerdictOf(fact({ references: derivedFrom('session://abc') }), new Map()).verdict
     ).toBe('intact');
   });
 
   it('summarizes again an entity that lost memories, even one that also came from traces', () => {
     const entity = fact({
       type: 'entity.person',
-      references: derivedFrom('ki://m-1', 'trace://abc'),
+      references: derivedFrom('ki://m-1', 'session://abc'),
     });
 
     expect(sourceVerdictOf(entity, new Map([memory('m-1', true)]))).toEqual({

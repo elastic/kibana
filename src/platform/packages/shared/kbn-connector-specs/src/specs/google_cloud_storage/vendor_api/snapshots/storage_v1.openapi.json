@@ -713,6 +713,17 @@
           "updated": {
             "format": "date-time",
             "type": "string"
+          },
+          "zonalAvailabilityInfo": {
+            "properties": {
+              "availableZones": {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              }
+            },
+            "type": "object"
           }
         },
         "type": "object"
@@ -984,10 +995,26 @@
         "security": [
           {
             "Oauth2": [
-              "https://www.googleapis.com/auth/cloud-platform",
-              "https://www.googleapis.com/auth/cloud-platform.read-only",
-              "https://www.googleapis.com/auth/devstorage.full_control",
-              "https://www.googleapis.com/auth/devstorage.read_only",
+              "https://www.googleapis.com/auth/cloud-platform"
+            ]
+          },
+          {
+            "Oauth2": [
+              "https://www.googleapis.com/auth/cloud-platform.read-only"
+            ]
+          },
+          {
+            "Oauth2": [
+              "https://www.googleapis.com/auth/devstorage.full_control"
+            ]
+          },
+          {
+            "Oauth2": [
+              "https://www.googleapis.com/auth/devstorage.read_only"
+            ]
+          },
+          {
+            "Oauth2": [
               "https://www.googleapis.com/auth/devstorage.read_write"
             ]
           }
@@ -1188,10 +1215,26 @@
         "security": [
           {
             "Oauth2": [
-              "https://www.googleapis.com/auth/cloud-platform",
-              "https://www.googleapis.com/auth/cloud-platform.read-only",
-              "https://www.googleapis.com/auth/devstorage.full_control",
-              "https://www.googleapis.com/auth/devstorage.read_only",
+              "https://www.googleapis.com/auth/cloud-platform"
+            ]
+          },
+          {
+            "Oauth2": [
+              "https://www.googleapis.com/auth/cloud-platform.read-only"
+            ]
+          },
+          {
+            "Oauth2": [
+              "https://www.googleapis.com/auth/devstorage.full_control"
+            ]
+          },
+          {
+            "Oauth2": [
+              "https://www.googleapis.com/auth/devstorage.read_only"
+            ]
+          },
+          {
+            "Oauth2": [
               "https://www.googleapis.com/auth/devstorage.read_write"
             ]
           }
@@ -1367,10 +1410,26 @@
         "security": [
           {
             "Oauth2": [
-              "https://www.googleapis.com/auth/cloud-platform",
-              "https://www.googleapis.com/auth/cloud-platform.read-only",
-              "https://www.googleapis.com/auth/devstorage.full_control",
-              "https://www.googleapis.com/auth/devstorage.read_only",
+              "https://www.googleapis.com/auth/cloud-platform"
+            ]
+          },
+          {
+            "Oauth2": [
+              "https://www.googleapis.com/auth/cloud-platform.read-only"
+            ]
+          },
+          {
+            "Oauth2": [
+              "https://www.googleapis.com/auth/devstorage.full_control"
+            ]
+          },
+          {
+            "Oauth2": [
+              "https://www.googleapis.com/auth/devstorage.read_only"
+            ]
+          },
+          {
+            "Oauth2": [
               "https://www.googleapis.com/auth/devstorage.read_write"
             ]
           }

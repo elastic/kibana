@@ -9,25 +9,31 @@ What it shows:
 - **Summary:** total time, planning against execution, and operator time by kind of work.
 - **Timeline:** one lane per driver on a shared clock, with the waits. Click a lane for its details
   and operators.
+- **By command:** the share of the time that belongs to each command of your query.
 
 ## Where things are
 
 ```
-index.ts, query_profile_view*.tsx   the inspector view
+index.ts, query_profile_view*.tsx   the inspector view and its tabs
 profile_summary.tsx                 the duration and operator-time bars
 esql_inspector_requests.ts          which inspector requests are ES|QL
 
 profile/       the ES profile turned into the view model (no UI)
-timeline/      the Timeline and its details panel
+timeline/      the Timeline tab and its details panel
+by_command/    the By command tab: which operator belongs to which command
 shared/        small helpers used by more than one of the above
 ```
 
 The flow is `load_esql_query_profile` (runs the request) → `aggregate_esql_profile` (builds the
-view model, typed in `profile/types.ts`) → the view. `profile/` and `shared/` never import from the
+view model, typed in `profile/types.ts`) → the tabs. `profile/` and `shared/` never import from the
 feature folders.
 
 ## Good to know
 
+- **By command needs Elasticsearch 9.7 or later.** Every operator names the plan node it was built
+  from (`plan_node_id`), and every plan node says where in the query it came from. That is the whole
+  attribution: there is no matching by operator name. An older Elasticsearch has no plan nodes, so
+  the tab is not shown.
 - **Operator time is not CPU time.** It is the time spent inside an operator, which can include
   waiting for reads. Only a driver's own `cpu_nanos` is CPU time.
 - **Lists come from the profile schema** that `@elastic/esql-definitions` publishes, not from code
