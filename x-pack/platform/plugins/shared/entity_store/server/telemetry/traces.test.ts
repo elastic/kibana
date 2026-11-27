@@ -52,4 +52,13 @@ describe('wrapTaskRun', () => {
     const [span] = exporter.getFinishedSpans();
     expect(span.status.code).toBe(SpanStatusCode.OK);
   });
+
+  it('rejects with the original error when the run throws', async () => {
+    const error = new Error('boom');
+
+    await expect(wrap(() => Promise.reject(error))).rejects.toBe(error);
+
+    const [span] = exporter.getFinishedSpans();
+    expect(span.status.code).toBe(SpanStatusCode.ERROR);
+  });
 });
