@@ -91,6 +91,7 @@
     "xpack.grokDebugger": "platform/plugins/private/grokdebugger",
     "xpack.idxMgmt": "platform/plugins/shared/index_management",
     "xpack.indexLifecycleMgmt": "platform/plugins/private/index_lifecycle_management",
+    "xpack.inferenceEndpoint": "platform/plugins/shared/inference_endpoint",
     "xpack.inferenceEndpointUICommon": "platform/packages/shared/kbn-inference-endpoint-ui-common",
     "xpack.infra": "solutions/observability/plugins/infra",
     "xpack.logsDataAccess": "platform/plugins/shared/logs_data_access",

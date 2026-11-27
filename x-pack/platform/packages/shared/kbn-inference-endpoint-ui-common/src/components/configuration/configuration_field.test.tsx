@@ -240,6 +240,22 @@ describe('ConfigInputListField', () => {
     expect(screen.queryByText('default-scope')).not.toBeInTheDocument();
   });
 
+  it('emits an empty list when cleared in edit mode', () => {
+    const validateAndSetConfigValue = jest.fn();
+    render(
+      <ConfigInputListField
+        {...defaultProps}
+        configEntry={createConfigEntry({ value: ['scope-a'] })}
+        validateAndSetConfigValue={validateAndSetConfigValue}
+        isEdit
+      />
+    );
+
+    fireEvent.click(screen.getByTestId('comboBoxClearButton'));
+
+    expect(validateAndSetConfigValue).toHaveBeenCalledWith([]);
+  });
+
   it('is disabled in edit mode when the field is not updatable', () => {
     render(
       <ConfigInputListField

@@ -459,7 +459,7 @@ export const ConfigInputListField: React.FC<ConfigInputFieldProps> = ({
 
   const emitValues = (items: string[]) => {
     setListValues(items);
-    validateAndSetConfigValue(items.length > 0 ? items : null);
+    validateAndSetConfigValue(items.length > 0 || isEdit ? items : null);
   };
 
   return (
