@@ -530,6 +530,7 @@ export default ({ getService }: FtrProviderContext): void => {
         afterEach(async () => {
           await deleteAllAlerts(supertest, log, es);
           await deleteAllRules(supertest, log);
+          await deleteAllRules(supertest, log, 'space1');
           await esArchiver.unload('x-pack/platform/test/fixtures/es_archives/auditbeat/hosts');
         });
 
@@ -605,7 +606,8 @@ export default ({ getService }: FtrProviderContext): void => {
             auth: caseAuth,
           });
 
-          const signals = await createSecuritySolutionAlerts(supertest, log);
+          const alertSpaceId = caseAuth?.space ?? undefined;
+          const signals = await createSecuritySolutionAlerts(supertest, log, 1, alertSpaceId);
 
           const alert = signals.hits.hits[0];
           expect(alert._source?.[ALERT_WORKFLOW_STATUS]).eql('open');
@@ -618,7 +620,11 @@ export default ({ getService }: FtrProviderContext): void => {
             auth: attachmentAuth,
           });
 
-          const updatedAlert = await getSecuritySolutionAlerts(supertest, [alert._id!]);
+          const updatedAlert = await getSecuritySolutionAlerts(
+            supertest,
+            [alert._id!],
+            alertSpaceId
+          );
 
           expect(updatedAlert.hits.hits[0]._source?.[ALERT_WORKFLOW_STATUS]).eql(
             expectedAlertStatus
@@ -764,7 +770,7 @@ export default ({ getService }: FtrProviderContext): void => {
             { user: superUser, space: 'space1' }
           );
 
-          const signals = await createSecuritySolutionAlerts(supertest, log);
+          const signals = await createSecuritySolutionAlerts(supertest, log, 1, 'space1');
           const alert = signals.hits.hits[0];
 
           await createCommentAndRefreshIndex({
@@ -787,7 +793,7 @@ export default ({ getService }: FtrProviderContext): void => {
             { user: superUser, space: 'space1' }
           );
 
-          const signals = await createSecuritySolutionAlerts(supertest, log);
+          const signals = await createSecuritySolutionAlerts(supertest, log, 1, 'space1');
           const alert = signals.hits.hits[0];
 
           await createCommentAndRefreshIndex({
@@ -810,7 +816,7 @@ export default ({ getService }: FtrProviderContext): void => {
             { user: superUser, space: 'space1' }
           );
 
-          const signals = await createSecuritySolutionAlerts(supertest, log);
+          const signals = await createSecuritySolutionAlerts(supertest, log, 1, 'space1');
           const alert = signals.hits.hits[0];
 
           await createCommentAndRefreshIndex({
@@ -820,6 +826,34 @@ export default ({ getService }: FtrProviderContext): void => {
             expectedHttpCode: 200,
             auth: { user: secSolutionOnlyReadNoIndexAlerts, space: 'space1' },
           });
+        });
+
+        it('400s when attaching an alert from a different space than the case', async () => {
+          const postedCase = await createCase(
+            supertest,
+            {
+              ...postCaseReq,
+              settings: { syncAlerts: false, extractObservables: false },
+            },
+            200,
+            { user: superUser, space: 'space1' }
+          );
+
+          const signals = await createSecuritySolutionAlerts(supertest, log);
+          const alert = signals.hits.hits[0];
+
+          await createCommentAndRefreshIndex({
+            caseId: postedCase.id,
+            alertId: alert._id!,
+            alertIndex: alert._index,
+            expectedHttpCode: 400,
+            auth: { user: superUser, space: 'space1' },
+          });
+
+          const unchangedAlert = await getSecuritySolutionAlerts(supertest, [alert._id!]);
+          expect(unchangedAlert.hits.hits[0]._source?.[ALERT_CASE_IDS] ?? []).not.contain(
+            postedCase.id
+          );
         });
       });
 
@@ -838,11 +872,16 @@ export default ({ getService }: FtrProviderContext): void => {
         const bulkCreateAlertsAndVerifyCaseIdsInAlertSchema = async (totalCases: number) => {
           const cases = await Promise.all(
             [...Array(totalCases).keys()].map((index) =>
-              createCase(supertest, {
-                ...postCaseReq,
-                owner: 'observabilityFixture',
-                settings: { syncAlerts: false, extractObservables: false },
-              })
+              createCase(
+                supertest,
+                {
+                  ...postCaseReq,
+                  owner: 'observabilityFixture',
+                  settings: { syncAlerts: false, extractObservables: false },
+                },
+                200,
+                superUserSpace1Auth
+              )
             )
           );
 
@@ -850,6 +889,7 @@ export default ({ getService }: FtrProviderContext): void => {
             await createComment({
               supertest,
               caseId: theCase.id,
+              auth: superUserSpace1Auth,
               params: {
                 alertId,
                 index: apmIndex,
@@ -892,6 +932,7 @@ export default ({ getService }: FtrProviderContext): void => {
           await createComment({
             supertest,
             caseId: postedCase.id,
+            auth: superUserSpace1Auth,
             params: {
               alertId,
               index: apmIndex,
@@ -917,14 +958,20 @@ export default ({ getService }: FtrProviderContext): void => {
         it('should not add more than 10 cases to an alert', async () => {
           await bulkCreateAlertsAndVerifyCaseIdsInAlertSchema(10);
 
-          const postedCase = await createCase(supertest, {
-            ...postCaseReq,
-            settings: { syncAlerts: false, extractObservables: false },
-          });
+          const postedCase = await createCase(
+            supertest,
+            {
+              ...postCaseReq,
+              settings: { syncAlerts: false, extractObservables: false },
+            },
+            200,
+            superUserSpace1Auth
+          );
 
           await createComment({
             supertest,
             caseId: postedCase.id,
+            auth: superUserSpace1Auth,
             params: {
               alertId,
               index: apmIndex,

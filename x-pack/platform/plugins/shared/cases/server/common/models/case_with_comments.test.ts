@@ -1317,6 +1317,10 @@ describe('CaseCommentModel', () => {
         })
       ).rejects.toThrow('not authorized');
 
+      expect(clientArgs.services.alertsService.ensureAlertsAuthorized).toHaveBeenCalledWith({
+        alerts: [{ id: 'alert-id-1', index: 'alert-index-1' }],
+        spaceId: 'default',
+      });
       expect(clientArgs.services.attachmentService.create).not.toHaveBeenCalled();
     });
 

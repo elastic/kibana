@@ -710,28 +710,207 @@ describe('updateAlertsStatus', () => {
       },
     ];
 
+    const spaceHits = (hits: Array<{ _id: string; _source?: Record<string, unknown> }>) =>
+      ({
+        hits: {
+          hits: hits.map((hit) => ({
+            _index: '.internal.alerts-security.alerts-default-000001',
+            ...hit,
+          })),
+        },
+      } as never);
+
     it('authorizes local alerts', async () => {
       alertsClient.ensureAllAlertsAuthorizedRead.mockResolvedValueOnce(undefined);
+      esClient.search.mockResolvedValueOnce(
+        spaceHits([{ _id: 'alert-1', _source: { 'kibana.space_ids': ['default'] } }])
+      );
 
-      await expect(alertService.ensureAlertsAuthorized({ alerts })).resolves.not.toThrow();
+      await expect(
+        alertService.ensureAlertsAuthorized({ alerts, spaceId: 'default' })
+      ).resolves.not.toThrow();
 
       expect(alertsClient.ensureAllAlertsAuthorizedRead).toHaveBeenCalledWith({ alerts });
+    });
+
+    it('reads the space ids of the alerts through the attached index', async () => {
+      esClient.search.mockResolvedValueOnce(spaceHits([]));
+
+      await alertService.ensureAlertsAuthorized({ alerts, spaceId: 'default' });
+
+      // Not `mget`: the attached index may be the alerts alias, and single-document operations
+      // against an alias fail once it spans more than one index.
+      expect(esClient.search).toHaveBeenCalledWith(
+        expect.objectContaining({
+          index: '.alerts-security.alerts-default',
+          query: { ids: { values: ['alert-1'] } },
+          _source: ['kibana.space_ids'],
+        })
+      );
+      expect(esClient.mget).not.toHaveBeenCalled();
+    });
+
+    it('rejects alerts that belong to another space', async () => {
+      esClient.search.mockResolvedValueOnce(
+        spaceHits([{ _id: 'alert-1', _source: { 'kibana.space_ids': ['default'] } }])
+      );
+
+      await expect(
+        alertService.ensureAlertsAuthorized({ alerts, spaceId: 'space1' })
+      ).rejects.toThrow(/Referenced alert\(s\) do not belong to space space1: alert-1/);
+    });
+
+    it('rejects with a 400', async () => {
+      esClient.search.mockResolvedValueOnce(
+        spaceHits([{ _id: 'alert-1', _source: { 'kibana.space_ids': ['default'] } }])
+      );
+
+      const error = await alertService
+        .ensureAlertsAuthorized({ alerts, spaceId: 'space1' })
+        .catch((e) => e);
+
+      expect(error.boomify().output.statusCode).toBe(400);
+    });
+
+    it('lists only the alerts outside the space', async () => {
+      esClient.search.mockResolvedValueOnce(
+        spaceHits([
+          { _id: 'alert-1', _source: { 'kibana.space_ids': ['space1'] } },
+          { _id: 'alert-2', _source: { 'kibana.space_ids': ['default'] } },
+        ])
+      );
+
+      await expect(
+        alertService.ensureAlertsAuthorized({
+          alerts: [
+            { id: 'alert-1', index: '.alerts-security.alerts-space1' },
+            { id: 'alert-2', index: '.alerts-security.alerts-space1' },
+          ],
+          spaceId: 'space1',
+        })
+      ).rejects.toThrow(/do not belong to space space1: alert-2$/);
+    });
+
+    it('accepts alerts that are visible in every space', async () => {
+      esClient.search.mockResolvedValueOnce(
+        spaceHits([{ _id: 'alert-1', _source: { 'kibana.space_ids': ['*'] } }])
+      );
+
+      await expect(
+        alertService.ensureAlertsAuthorized({ alerts, spaceId: 'space1' })
+      ).resolves.not.toThrow();
+    });
+
+    it('accepts alerts shared with the case space', async () => {
+      esClient.search.mockResolvedValueOnce(
+        spaceHits([{ _id: 'alert-1', _source: { 'kibana.space_ids': ['default', 'space1'] } }])
+      );
+
+      await expect(
+        alertService.ensureAlertsAuthorized({ alerts, spaceId: 'space1' })
+      ).resolves.not.toThrow();
+    });
+
+    it('accepts alerts without space ids', async () => {
+      esClient.search.mockResolvedValueOnce(spaceHits([{ _id: 'alert-1', _source: {} }]));
+
+      await expect(
+        alertService.ensureAlertsAuthorized({ alerts, spaceId: 'space1' })
+      ).resolves.not.toThrow();
+    });
+
+    it('accepts alerts that are not found', async () => {
+      esClient.search.mockResolvedValueOnce(spaceHits([]));
+
+      await expect(
+        alertService.ensureAlertsAuthorized({ alerts, spaceId: 'space1' })
+      ).resolves.not.toThrow();
+    });
+
+    it('skips the space check when the caller cannot read the attached index', async () => {
+      esClient.search.mockRejectedValueOnce({
+        statusCode: 403,
+        body: { error: { type: 'security_exception' } },
+      });
+
+      await expect(
+        alertService.ensureAlertsAuthorized({ alerts, spaceId: 'space1' })
+      ).resolves.not.toThrow();
+    });
+
+    it('skips the space check when Elasticsearch rejects the attached index name', async () => {
+      esClient.search.mockRejectedValueOnce({
+        statusCode: 400,
+        body: { error: { type: 'invalid_index_name_exception' } },
+      });
+
+      await expect(
+        alertService.ensureAlertsAuthorized({ alerts, spaceId: 'space1' })
+      ).resolves.not.toThrow();
+    });
+
+    it('wraps and rethrows other search errors', async () => {
+      esClient.search.mockRejectedValueOnce(new Error('search failed'));
+
+      await expect(
+        alertService.ensureAlertsAuthorized({ alerts, spaceId: 'default' })
+      ).rejects.toThrow(/Failed to authorize alerts: Error: search failed/);
+    });
+
+    it('searches each attached index once', async () => {
+      esClient.search.mockResolvedValue(spaceHits([]));
+
+      await alertService.ensureAlertsAuthorized({
+        alerts: [
+          { id: 'alert-1', index: 'index-a' },
+          { id: 'alert-2', index: 'index-a' },
+          { id: 'alert-3', index: 'index-b' },
+        ],
+        spaceId: 'default',
+      });
+
+      expect(esClient.search).toHaveBeenCalledTimes(2);
+      expect(esClient.search).toHaveBeenCalledWith(
+        expect.objectContaining({
+          index: 'index-a',
+          size: 2,
+          query: { ids: { values: ['alert-1', 'alert-2'] } },
+        })
+      );
+      expect(esClient.search).toHaveBeenCalledWith(
+        expect.objectContaining({ index: 'index-b', query: { ids: { values: ['alert-3'] } } })
+      );
+
+      esClient.search.mockReset();
+    });
+
+    it('does not check spaces when authorization fails', async () => {
+      alertsClient.ensureAllAlertsAuthorizedRead.mockRejectedValueOnce(new Error('boom'));
+
+      await expect(
+        alertService.ensureAlertsAuthorized({ alerts, spaceId: 'default' })
+      ).rejects.toThrow(/Failed to authorize alerts/);
+
+      expect(esClient.search).not.toHaveBeenCalled();
     });
 
     it('throws without calling ensureAllAlertsAuthorizedRead when the index belongs to a linked project (CPS)', async () => {
       await expect(
         alertService.ensureAlertsAuthorized({
           alerts: [{ id: 'alert-1', index: 'my-linked-project:.alerts-security.alerts-default' }],
+          spaceId: 'default',
         })
       ).rejects.toThrow(/linked project or remote cluster/);
 
       expect(alertsClient.ensureAllAlertsAuthorizedRead).not.toHaveBeenCalled();
+      expect(esClient.search).not.toHaveBeenCalled();
     });
 
     it('throws without calling ensureAllAlertsAuthorizedRead when the index is a remote-cluster (CCS) reference', async () => {
       await expect(
         alertService.ensureAlertsAuthorized({
           alerts: [{ id: 'alert-1', index: 'my-remote-cluster:.alerts-security.alerts-default' }],
+          spaceId: 'default',
         })
       ).rejects.toThrow(/linked project or remote cluster/);
 
@@ -740,18 +919,19 @@ describe('updateAlertsStatus', () => {
 
     it('does not call ensureAllAlertsAuthorizedRead when there are no non-empty alerts', async () => {
       await expect(
-        alertService.ensureAlertsAuthorized({ alerts: [{ id: '', index: '' }] })
+        alertService.ensureAlertsAuthorized({ alerts: [{ id: '', index: '' }], spaceId: 'default' })
       ).resolves.not.toThrow();
 
       expect(alertsClient.ensureAllAlertsAuthorizedRead).not.toHaveBeenCalled();
+      expect(esClient.search).not.toHaveBeenCalled();
     });
 
     it('wraps and rethrows authorization errors', async () => {
       alertsClient.ensureAllAlertsAuthorizedRead.mockRejectedValueOnce(new Error('boom'));
 
-      await expect(alertService.ensureAlertsAuthorized({ alerts })).rejects.toThrow(
-        /Failed to authorize alerts/
-      );
+      await expect(
+        alertService.ensureAlertsAuthorized({ alerts, spaceId: 'default' })
+      ).rejects.toThrow(/Failed to authorize alerts/);
     });
   });
 

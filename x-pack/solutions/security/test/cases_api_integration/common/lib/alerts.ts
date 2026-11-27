@@ -18,31 +18,38 @@ import {
   waitForAlertsToBePresent,
   getAlertsByIds,
   getQueryAlertIds,
+  routeWithNamespace,
 } from '@kbn/detections-response-ftr-services';
 
+/**
+ * Runs a detection rule in `spaceId` (the default space when omitted), so the alerts it creates
+ * carry that space in `kibana.space_ids` and can only be attached to cases of that space.
+ */
 export const createSecuritySolutionAlerts = async (
   supertest: SuperTest.Agent,
   log: ToolingLog,
-  numberOfSignals: number = 1
+  numberOfSignals: number = 1,
+  spaceId?: string
 ): Promise<estypes.SearchResponse<DetectionAlert & RiskEnrichmentFields>> => {
   const rule = {
     ...getRuleForAlertTesting(['auditbeat-*']),
     query: 'process.executable: "/usr/bin/sudo"',
   };
-  const { id } = await createRule(supertest, log, rule);
-  await waitForRuleSuccess({ supertest, log, id });
-  await waitForAlertsToBePresent(supertest, log, numberOfSignals, [id]);
-  const signals = await getAlertsByIds(supertest, log, [id]);
+  const { id } = await createRule(supertest, log, rule, spaceId);
+  await waitForRuleSuccess({ supertest, log, id, namespace: spaceId });
+  await waitForAlertsToBePresent(supertest, log, numberOfSignals, [id], spaceId);
+  const signals = await getAlertsByIds(supertest, log, [id], undefined, spaceId);
 
   return signals;
 };
 
 export const getSecuritySolutionAlerts = async (
   supertest: SuperTest.Agent,
-  alertIds: string[]
+  alertIds: string[],
+  spaceId?: string
 ): Promise<estypes.SearchResponse<DetectionAlert & RiskEnrichmentFields>> => {
   const { body: updatedAlert } = await supertest
-    .post(DETECTION_ENGINE_QUERY_SIGNALS_URL)
+    .post(routeWithNamespace(DETECTION_ENGINE_QUERY_SIGNALS_URL, spaceId))
     .set('kbn-xsrf', 'true')
     .send(getQueryAlertIds(alertIds))
     .expect(200);
