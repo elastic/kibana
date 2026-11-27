@@ -874,6 +874,9 @@ src/platform/packages/shared/shared-ux/router/types @elastic/appex-sharedux
 src/platform/packages/shared/shared-ux/storybook/mock @elastic/appex-sharedux
 src/platform/packages/shared/shared-ux/table_persist @elastic/appex-sharedux
 src/platform/packages/shared/shared-ux/toolbar_selector @elastic/obs-signals-metrics-team
+src/platform/packages/shared/vega/vega-constants @elastic/kibana-dashboards
+src/platform/packages/shared/vega/vega-schemas @elastic/kibana-dashboards
+src/platform/packages/shared/vega/vega-utils @elastic/kibana-dashboards
 src/platform/plugins/private/advanced_settings @elastic/kibana-management
 src/platform/plugins/private/dev_comments @elastic/appex-sharedux
 src/platform/plugins/private/developer_toolbar_profilers @elastic/response-ops

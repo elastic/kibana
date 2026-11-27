@@ -15,7 +15,7 @@ import type {
 import { isSection } from '@kbn/agent-builder-dashboards-common';
 import { CUSTOM_CONTENT_EMBEDDABLE_TYPE } from '@kbn/custom-content-common';
 import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
-import { VEGA_VIS_TYPE } from '@kbn/agent-builder-visualizations-common';
+import { VEGA_EMBEDDABLE_TYPE } from '@kbn/vega-constants';
 import { MARKDOWN_EMBEDDABLE_TYPE } from '@kbn/dashboard-markdown-schemas';
 import type { PanelResolutionRequest, ResolvePanelContent, UpsertPanelContent } from '../panels';
 import { upsertPanelContentSchema } from '../panels';
@@ -549,7 +549,7 @@ describe('executeDashboardUpsert', () => {
   });
 
   describe('rejected changes', () => {
-    const vegaPanel = createPanel('vega-1', VEGA_VIS_TYPE, { spec: '{}' });
+    const vegaPanel = createPanel('vega-1', VEGA_EMBEDDABLE_TYPE, { spec: '{}' });
 
     it.each<{
       name: string;
@@ -729,7 +729,7 @@ describe('executeDashboardUpsert', () => {
       {
         name: 'a request edit of a Vega panel that reads Query DSL',
         panels: [
-          createPanel('vega-dsl', VEGA_VIS_TYPE, {
+          createPanel('vega-dsl', VEGA_EMBEDDABLE_TYPE, {
             spec: `{
               // Kibana stores Vega specs as HJSON
               data: {
@@ -1922,7 +1922,7 @@ describe('executeDashboardUpsert', () => {
               type === 'custom_content'
                 ? CUSTOM_CONTENT_EMBEDDABLE_TYPE
                 : type === 'vega'
-                ? VEGA_VIS_TYPE
+                ? VEGA_EMBEDDABLE_TYPE
                 : LENS_EMBEDDABLE_TYPE,
             config: { updated: true },
           })
@@ -1936,7 +1936,7 @@ describe('executeDashboardUpsert', () => {
         return { result, resolvePanelContent };
       };
 
-      const vegaPanel = createPanel('vega-1', VEGA_VIS_TYPE, { spec: '{}' });
+      const vegaPanel = createPanel('vega-1', VEGA_EMBEDDABLE_TYPE, { spec: '{}' });
 
       it('edits a Vega panel with type "vega"', async () => {
         const { result, resolvePanelContent } = await editWith(vegaPanel, {
@@ -1951,7 +1951,7 @@ describe('executeDashboardUpsert', () => {
       });
 
       it('edits a vega panel that reads ES|QL', async () => {
-        const esqlVegaPanel = createPanel('vega-esql', VEGA_VIS_TYPE, {
+        const esqlVegaPanel = createPanel('vega-esql', VEGA_EMBEDDABLE_TYPE, {
           spec: JSON.stringify({
             data: { url: { '%type%': 'esql', query: 'FROM logs | STATS c = COUNT(*)' } },
             mark: 'bar',

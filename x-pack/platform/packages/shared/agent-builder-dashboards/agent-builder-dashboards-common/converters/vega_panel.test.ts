@@ -7,7 +7,8 @@
 
 import type { DashboardState } from '@kbn/as-code-dashboard-schema';
 import { VISUALIZE_EMBEDDABLE_TYPE } from '@kbn/visualizations-common';
-import { buildVegaSavedVis, VEGA_VIS_TYPE } from '@kbn/agent-builder-visualizations-common';
+import { buildVegaSavedVis } from '@kbn/agent-builder-visualizations-common';
+import { VEGA_EMBEDDABLE_TYPE } from '@kbn/vega-constants';
 import type { DashboardAttachmentData } from '../types';
 import { attachmentDataToDashboardState } from './from_attachment';
 import { dashboardStateToAttachmentData } from './to_attachment';
@@ -34,7 +35,7 @@ describe('Vega dashboard panel conversion', () => {
     ['hjson', { format: 'hjson', value: '{\n  // bars\n  mark: bar\n}' }],
   ])('round-trips a native `vega` panel with a %s spec unchanged', (_format, spec) => {
     const panel = {
-      type: VEGA_VIS_TYPE,
+      type: VEGA_EMBEDDABLE_TYPE,
       id: 'p1',
       grid,
       config: {
@@ -55,12 +56,14 @@ describe('Vega dashboard panel conversion', () => {
   it('from_attachment reads the string spec of a `vega` panel saved before native panels as HJSON', () => {
     const attachmentData = {
       title: 'Dash',
-      panels: [{ type: VEGA_VIS_TYPE, id: 'p1', grid, config: { spec: SPEC, title: 'Chart' } }],
+      panels: [
+        { type: VEGA_EMBEDDABLE_TYPE, id: 'p1', grid, config: { spec: SPEC, title: 'Chart' } },
+      ],
     } as unknown as DashboardAttachmentData;
 
     expect(attachmentDataToDashboardState(attachmentData).panels).toEqual([
       {
-        type: VEGA_VIS_TYPE,
+        type: VEGA_EMBEDDABLE_TYPE,
         id: 'p1',
         grid,
         config: { spec: { format: 'hjson', value: SPEC }, title: 'Chart' },
@@ -91,7 +94,7 @@ describe('Vega dashboard panel conversion', () => {
 
     expect(attachmentData.panels).toEqual([
       {
-        type: VEGA_VIS_TYPE,
+        type: VEGA_EMBEDDABLE_TYPE,
         id: expect.stringMatching(UUID),
         grid,
         config: { spec: { format: 'hjson', value: SPEC }, title: 'Chart', description: 'Desc' },
@@ -123,7 +126,7 @@ describe('Vega dashboard panel conversion', () => {
 
     expect(attachmentData.panels).toEqual([
       {
-        type: VEGA_VIS_TYPE,
+        type: VEGA_EMBEDDABLE_TYPE,
         id: expect.stringMatching(UUID),
         grid,
         config: { ...panelSettings, spec: { format: 'hjson', value: SPEC } },

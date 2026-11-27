@@ -29,6 +29,5 @@ export {
   buildVegaSavedVis,
   extractVegaSpecFromSavedVis,
   normalizeVegaConfig,
-  VEGA_VIS_TYPE,
   type VegaConfig,
 } from './vega_saved_vis';

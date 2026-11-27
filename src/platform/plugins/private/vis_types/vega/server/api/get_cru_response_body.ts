@@ -10,8 +10,8 @@
 import { getMeta } from '@kbn/as-code-shared-schemas';
 import type { SavedObject, SavedObjectsUpdateResponse } from '@kbn/core/server';
 import { prettifyError } from '@kbn/zod';
+import { vegaLibraryItemSchema } from '@kbn/vega-schemas';
 import type { StoredVegaLibraryItemState } from '../vega_saved_object';
-import { vegaLibraryItemSchema } from './schema';
 import { transformVegaOut } from './transforms/transform_vega_out';
 
 // CRU is Create, Read, Update

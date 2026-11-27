@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { VegaLibraryItemState } from '../schema';
+import type { VegaLibraryItemState } from '@kbn/vega-schemas';
 import { transformVegaIn } from './transform_vega_in';
 import { transformVegaOut } from './transform_vega_out';
 

@@ -9,6 +9,7 @@ import chroma from 'chroma-js';
 import { compact } from 'lodash';
 import type { AttachmentPanel } from '@kbn/agent-builder-dashboards-common';
 import { parseVegaSpec } from '@kbn/dashboard-agent-authoring';
+import { VEGA_EMBEDDABLE_TYPE } from '@kbn/vega-constants';
 import type { DashboardAttachmentData } from '@kbn/agent-builder-dashboards-common';
 import { matchConfig } from '../config_gold';
 import {
@@ -206,7 +207,7 @@ const collectVegaConfigColors = (spec: unknown): string[] => {
 };
 
 const getPanelColors = ({ type, config }: AttachmentPanel): string[] => {
-  if (type !== 'vega') {
+  if (type !== VEGA_EMBEDDABLE_TYPE) {
     return collectLensSeriesColors(config.layers);
   }
   const spec = parseVegaSpec(config.spec);
@@ -251,7 +252,9 @@ export const matchesColorName = (color: string, name: PanelColorName): boolean =
 };
 
 const getVegaMarkTypes = ({ type, config }: AttachmentPanel): string[] =>
-  type === 'vega' ? collectDrawnMarks(parseVegaSpec(config.spec)).map((mark) => mark.type) : [];
+  type === VEGA_EMBEDDABLE_TYPE
+    ? collectDrawnMarks(parseVegaSpec(config.spec)).map((mark) => mark.type)
+    : [];
 
 const BULLET_ITEM = /^\s*[-*+]\s+\S/;
 
@@ -261,7 +264,7 @@ const countBulletItems = (content: string): number =>
 /** The panel as config gold sees it: a Vega spec parsed into an object. */
 const toMatchedPanel = ({ type, config }: AttachmentPanel): Record<string, unknown> => ({
   type,
-  config: type === 'vega' ? { ...config, spec: parseVegaSpec(config.spec) } : config,
+  config: type === VEGA_EMBEDDABLE_TYPE ? { ...config, spec: parseVegaSpec(config.spec) } : config,
 });
 
 /** A seed panel by id, or the first panel of the kind, in reading order, that the seed lacks. */

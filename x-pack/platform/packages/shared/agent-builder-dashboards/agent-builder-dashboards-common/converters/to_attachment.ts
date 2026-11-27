@@ -14,10 +14,9 @@ import { v5 as uuidv5 } from 'uuid';
 import { LensConfigBuilder, type LensAttributes } from '@kbn/lens-embeddable-utils';
 import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
 import { VISUALIZE_EMBEDDABLE_TYPE } from '@kbn/visualizations-common';
-import {
-  extractVegaSpecFromSavedVis,
-  VEGA_VIS_TYPE,
-} from '@kbn/agent-builder-visualizations-common';
+import { extractVegaSpecFromSavedVis } from '@kbn/agent-builder-visualizations-common';
+import { VEGA_EMBEDDABLE_TYPE } from '@kbn/vega-constants';
+import { toHjsonSpec } from '@kbn/vega-utils';
 import type { AttachmentPanel, DashboardSection as DashboardAttachmentSection } from '../types';
 import type { DashboardAttachmentData } from '../types';
 
@@ -62,13 +61,13 @@ export const toAttachmentPanel = (panel: DashboardPanel): AttachmentPanel | unde
         ...restConfig
       } = panel.config as Record<string, unknown>;
       return {
-        type: VEGA_VIS_TYPE,
+        type: VEGA_EMBEDDABLE_TYPE,
         id: panel.id ? uuidv5(panel.id, LEGACY_VEGA_PANEL_ID_NAMESPACE) : '',
         config: {
           ...restConfig,
           title: typeof title === 'string' ? title : vega.title,
           description: typeof description === 'string' ? description : vega.description,
-          spec: { format: 'hjson', value: vega.spec },
+          spec: toHjsonSpec(vega.spec),
         },
         grid: panel.grid,
       };

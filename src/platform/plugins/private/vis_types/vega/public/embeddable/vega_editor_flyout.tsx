@@ -14,6 +14,7 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 import { isOfQueryType, type Filter, type Query } from '@kbn/es-query';
 import { ManagedEditorFooter } from '@kbn/presentation-util-plugin/public';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
+import { specFromEditor, specToEditorValue } from '@kbn/vega-utils';
 import type { VegaByValueState } from '../../server';
 import type { VegaPluginStartDependencies } from '../plugin';
 import {
@@ -21,7 +22,6 @@ import {
   hasTooManyFilters,
   vegaEditorFlyoutBodyCss,
 } from '../components/vega_editor_body';
-import { specFromEditor, specToEditorValue } from '../lib/editor_spec';
 import { isSameSearch } from '../lib/editable_state';
 import { vegaTitleInWizard } from '../vega_icon';
 import type { VegaEmbeddableApi } from './vega_embeddable';

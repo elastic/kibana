@@ -5,19 +5,7 @@
  * 2.0.
  */
 
-import { parse as parseHjson } from 'hjson';
-
-/** Read the ES|QL query from a Kibana Vega-Lite `data.url` object, if it is one. */
-const esqlQueryFromUrl = (url: unknown): string | undefined => {
-  if (!url || typeof url !== 'object') {
-    return undefined;
-  }
-  const { '%type%': type, query } = url as Record<string, unknown>;
-  if (type === 'esql' && typeof query === 'string' && query.trim()) {
-    return query;
-  }
-  return undefined;
-};
+import { getEsqlQueriesFromSpec, parseSpec } from '@kbn/vega-utils';
 
 /**
  * Recover the ES|QL query embedded in a Vega-Lite spec's data source so that
@@ -26,7 +14,9 @@ const esqlQueryFromUrl = (url: unknown): string | undefined => {
  * stored spec is the source of truth across save/import round-trips.
  *
  * Accepts a serialized spec (JSON or Kibana's HJSON) or a parsed object; returns undefined when no ES|QL
- * data binding is present or the input cannot be parsed.
+ * data binding is present or the input cannot be parsed. Only a single top-level `data` source is
+ * recovered: the Vega author writes one data source, so a query from a `data` array may not be the
+ * chart's.
  */
 export const extractEsqlFromSpec = (
   spec: string | Record<string, unknown> | null | undefined
@@ -35,12 +25,9 @@ export const extractEsqlFromSpec = (
     return undefined;
   }
 
-  let parsed: unknown;
-  try {
-    parsed = typeof spec === 'string' ? parseHjson(spec) : spec;
-  } catch {
+  const parsed = typeof spec === 'string' ? parseSpec({ format: 'hjson', value: spec }) : spec;
+  if (!parsed || Array.isArray(parsed.data)) {
     return undefined;
   }
-
-  return esqlQueryFromUrl((parsed as { data?: { url?: unknown } } | null)?.data?.url);
+  return getEsqlQueriesFromSpec(parsed).find((query) => query.trim());
 };

@@ -8,7 +8,8 @@
  */
 
 import type { EmbeddableSetup } from '@kbn/embeddable-plugin/public';
-import { VEGA_EMBEDDABLE_TYPE, VEGA_SAVED_OBJECT_TYPE } from '../../common/constants';
+import { VEGA_EMBEDDABLE_TYPE } from '@kbn/vega-constants';
+import { VEGA_SAVED_OBJECT_TYPE } from '../../common/constants';
 import type { VegaByReferenceState } from '../../server/embeddable/schema';
 import { VegaIcon, vegaTitleInWizard } from '../vega_icon';
 

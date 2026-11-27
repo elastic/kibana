@@ -5,6 +5,8 @@
   },
   "include": ["common/**/*", "public/**/*", "server/**/*", "test/scout/**/*"],
   "kbn_references": [
+    "@kbn/vega-utils",
+    "@kbn/vega-constants",
     "@kbn/data-source",
     "@kbn/agent-builder-elastic-ai-index-ki-types",
     "@kbn/core",

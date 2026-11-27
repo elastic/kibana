@@ -17,8 +17,8 @@ import {
   type Query,
 } from '@kbn/es-query';
 import { isEqual } from 'lodash';
+import { specFromEditor, specToEditorValue } from '@kbn/vega-utils';
 import type { VegaByValueState } from '../../server';
-import { specFromEditor, specToEditorValue } from './editor_spec';
 
 type VegaSpecFormat = VegaByValueState['spec']['format'];
 

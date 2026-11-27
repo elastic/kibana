@@ -7,9 +7,9 @@
 
 import { SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { AttachmentPanel } from '@kbn/agent-builder-dashboards-common';
-import { VEGA_VIS_TYPE } from '@kbn/agent-builder-visualizations-common';
+import { VEGA_EMBEDDABLE_TYPE } from '@kbn/vega-constants';
+import { parseSpec } from '@kbn/vega-utils';
 import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
-import { parse as parseHjson } from 'hjson';
 import { z, lazySchema } from '@kbn/zod/v4';
 import type { PanelResolutionRequestBase } from '../../resolve_panel';
 import { defineRequestPanelKind } from '../panel_kind';
@@ -134,17 +134,10 @@ const isRecord = (value: unknown): value is Record<string, unknown> =>
 const unwrapVegaSpec = (spec: unknown): unknown =>
   isRecord(spec) && (spec.format === 'hjson' || spec.format === 'json') ? spec.value : spec;
 
-/** Parses a Vega panel spec into its object form; `undefined` when an HJSON spec does not parse. */
+/** Parses a Vega panel spec into its object form; `undefined` when HJSON does not parse to an object. */
 export const parseVegaSpec = (spec: unknown): unknown => {
   const value = unwrapVegaSpec(spec);
-  if (typeof value !== 'string') {
-    return value;
-  }
-  try {
-    return parseHjson(value);
-  } catch {
-    return undefined;
-  }
+  return typeof value === 'string' ? parseSpec({ format: 'hjson', value }) : value;
 };
 
 /** Serializes a Vega panel spec to the text an author edits, keeping HJSON as written. */
@@ -186,7 +179,7 @@ const nestedViewDeclaresData = (view: Record<string, unknown>): boolean =>
  * does not parse is blocked too, since its data sources are unknown.
  */
 export const readsDataVegaEditsCannotKeep = ({ type, config }: AttachmentPanel): boolean => {
-  if (type !== VEGA_VIS_TYPE) {
+  if (type !== VEGA_EMBEDDABLE_TYPE) {
     return false;
   }
   const spec = parseVegaSpec(config?.spec);
@@ -211,7 +204,7 @@ export const lensPanelKind = defineRequestPanelKind({
 
 export const vegaPanelKind = defineRequestPanelKind({
   type: 'vega',
-  embeddableType: VEGA_VIS_TYPE,
+  embeddableType: VEGA_EMBEDDABLE_TYPE,
   label: 'Vega',
   selection: {
     priority: 2,

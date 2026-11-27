@@ -6,10 +6,8 @@
  */
 
 import type { AttachmentStateManager } from '@kbn/agent-builder-server/attachments';
-import {
-  VISUALIZATION_ATTACHMENT_TYPE,
-  VEGA_VIS_TYPE,
-} from '@kbn/agent-builder-visualizations-common';
+import { VISUALIZATION_ATTACHMENT_TYPE } from '@kbn/agent-builder-visualizations-common';
+import { VEGA_EMBEDDABLE_TYPE } from '@kbn/vega-constants';
 import { CUSTOM_CONTENT_EMBEDDABLE_TYPE } from '@kbn/custom-content-common';
 import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
 import { createAttachmentPanelResolver } from './attachment_panel_resolver';
@@ -77,7 +75,7 @@ describe('createAttachmentPanelResolver', () => {
     expect(resolve('att-1')).toEqual({
       type: 'success',
       panelContent: {
-        type: VEGA_VIS_TYPE,
+        type: VEGA_EMBEDDABLE_TYPE,
         config: { spec: { format: 'hjson', value: '{"$schema":"vega-lite"}' } },
       },
     });

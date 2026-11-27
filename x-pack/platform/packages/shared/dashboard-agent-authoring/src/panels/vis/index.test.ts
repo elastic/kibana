@@ -7,7 +7,7 @@
 
 import { SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { AttachmentPanel } from '@kbn/agent-builder-dashboards-common';
-import { VEGA_VIS_TYPE } from '@kbn/agent-builder-visualizations-common';
+import { VEGA_EMBEDDABLE_TYPE } from '@kbn/vega-constants';
 import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
 import { lensPanelContentSchema, readsDataVegaEditsCannotKeep, vegaPanelContentSchema } from '.';
 
@@ -47,7 +47,7 @@ describe('readsDataVegaEditsCannotKeep', () => {
   const grid = { x: 0, y: 0, w: 24, h: 15 };
   const vegaPanel = (spec: object | string): AttachmentPanel => ({
     id: 'vega-1',
-    type: VEGA_VIS_TYPE,
+    type: VEGA_EMBEDDABLE_TYPE,
     config: { spec },
     grid,
   });

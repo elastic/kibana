@@ -4142,12 +4142,21 @@ importers:
       '@kbn/vectordb-onboarding':
         specifier: workspace:*
         version: link:x-pack/solutions/vectordb/packages/kbn-vectordb-onboarding
+      '@kbn/vega-constants':
+        specifier: workspace:*
+        version: link:src/platform/packages/shared/vega/vega-constants
       '@kbn/vega-sandbox':
         specifier: workspace:*
         version: link:src/platform/packages/private/kbn-vega-sandbox
       '@kbn/vega-sandbox-example-plugin':
         specifier: workspace:*
         version: link:examples/vega_sandbox_example
+      '@kbn/vega-schemas':
+        specifier: workspace:*
+        version: link:src/platform/packages/shared/vega/vega-schemas
+      '@kbn/vega-utils':
+        specifier: workspace:*
+        version: link:src/platform/packages/shared/vega/vega-utils
       '@kbn/vis-default-editor-plugin':
         specifier: workspace:*
         version: link:src/platform/plugins/private/vis_default_editor
@@ -8729,6 +8738,12 @@ importers:
   src/platform/packages/shared/shared-ux/table_persist: {}
 
   src/platform/packages/shared/shared-ux/toolbar_selector: {}
+
+  src/platform/packages/shared/vega/vega-constants: {}
+
+  src/platform/packages/shared/vega/vega-schemas: {}
+
+  src/platform/packages/shared/vega/vega-utils: {}
 
   src/platform/plugins/private/advanced_settings: {}
 

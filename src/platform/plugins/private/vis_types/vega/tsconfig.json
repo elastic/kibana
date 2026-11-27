@@ -16,10 +16,12 @@
     "public/test_utils/vega_graph.json",
   ],
   "kbn_references": [
+    "@kbn/vega-constants",
+    "@kbn/vega-utils",
+    "@kbn/vega-schemas",
     "@kbn/core",
     "@kbn/core-http-browser",
     "@kbn/vega-sandbox",
-    "@kbn/as-code-filters-schema",
     "@kbn/as-code-filters-transforms",
     "@kbn/as-code-shared-schemas",
     "@kbn/as-code-shared-transforms",

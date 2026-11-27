@@ -27,6 +27,7 @@ import {
   ADD_CANVAS_ELEMENT_TRIGGER,
   ADD_PANEL_TRIGGER,
 } from '@kbn/ui-actions-plugin/common/trigger_ids';
+import { VEGA_EMBEDDABLE_TYPE } from '@kbn/vega-constants';
 import {
   setNotifications,
   setData,
@@ -45,7 +46,6 @@ import type { ConfigSchema } from '../server/config';
 
 import { getVegaInspectorView } from './vega_inspector/vega_inspector';
 import { getServiceSettingsLazy } from './vega_view/vega_map_view/service_settings/get_service_settings_lazy';
-import { VEGA_EMBEDDABLE_TYPE } from '../common/constants';
 import { ADD_VEGA_EMBEDDABLE_ACTION_ID } from './constants';
 
 /** @internal */

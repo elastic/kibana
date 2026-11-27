@@ -19,7 +19,8 @@ project:
 dependsOn:
   - '@kbn/agent-builder-common'
   - '@kbn/agent-builder-dashboards-common'
-  - '@kbn/agent-builder-visualizations-common'
+  - '@kbn/vega-constants'
+  - '@kbn/vega-utils'
   - '@kbn/as-code-dashboard-schema'
   - '@kbn/dashboard-constants'
   - '@kbn/ui-theme'
