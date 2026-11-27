@@ -154,3 +154,7 @@ export const crashFingerprint = (): ESQLAstExpression =>
       'exceptionType'
     )}, ""), "|", COALESCE(${crashFrames()}, "")))
   )`;
+
+/** Whether `fingerprint` can be a computed one, which ES|QL's SHA256 prints as lowercase hex. */
+export const canBeComputedFingerprint = (fingerprint: string): boolean =>
+  /^[0-9a-f]{64}$/.test(fingerprint);

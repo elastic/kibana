@@ -16,6 +16,7 @@ const DAY = 24 * 60 * 60 * 1000;
 const START = Date.parse('2021-01-18T12:00:00.000Z');
 const END = Date.parse('2021-01-18T13:00:00.000Z');
 const CRASH_TIME = '2021-01-18T12:30:00.000Z';
+const FINGERPRINT = 'a'.repeat(64);
 
 const LATEST = {
   happened_at: CRASH_TIME,
@@ -95,7 +96,7 @@ describe('getCrashGroup', () => {
     const detail = await getCrashGroup({
       esClient,
       filters: { serviceName: 'ride-ios', osName: 'iOS' },
-      fingerprint: 'abc',
+      fingerprint: FINGERPRINT,
       start: START,
       end: END,
     });
@@ -225,7 +226,7 @@ describe('getCrashGroup', () => {
     const detail = await getCrashGroup({
       esClient,
       filters: { serviceName: 'ride-ios' },
-      fingerprint: 'abc',
+      fingerprint: FINGERPRINT,
       start: START,
       end: END,
     });
@@ -256,7 +257,7 @@ describe('getCrashGroup', () => {
     const detail = await getCrashGroup({
       esClient,
       filters: { serviceName: 'ride-ios' },
-      fingerprint: 'abc',
+      fingerprint: FINGERPRINT,
       start: START,
       end: END,
     });
@@ -280,7 +281,7 @@ describe('getCrashGroup', () => {
     const detail = await getCrashGroup({
       esClient,
       filters: { serviceName: 'ride-ios' },
-      fingerprint: 'abc',
+      fingerprint: FINGERPRINT,
       start: START,
       end: END,
     });
@@ -311,7 +312,7 @@ describe('getCrashGroup', () => {
     const detail = await getCrashGroup({
       esClient,
       filters: { serviceName: 'ride-ios' },
-      fingerprint: 'abc',
+      fingerprint: FINGERPRINT,
       start: START,
       end: END,
     });
@@ -324,7 +325,7 @@ describe('getCrashGroup', () => {
     client.esql.query.mockImplementation(async ({ query }) =>
       esqlResponse(
         query.includes('LIMIT 1 |')
-          ? [{ ...LATEST, session_id: null, stored_fingerprint: 'abc' }]
+          ? [{ ...LATEST, session_id: null, stored_fingerprint: FINGERPRINT }]
           : []
       )
     );
@@ -332,7 +333,7 @@ describe('getCrashGroup', () => {
     await getCrashGroup({
       esClient,
       filters: { serviceName: 'ride-ios' },
-      fingerprint: 'abc',
+      fingerprint: FINGERPRINT,
       start: START,
       end: END,
     });
@@ -353,7 +354,7 @@ describe('getCrashGroup', () => {
     await getCrashGroup({
       esClient,
       filters: { serviceName: 'ride-ios' },
-      fingerprint: 'abc',
+      fingerprint: FINGERPRINT,
       crashType: 'SIGTRAP',
       start: START,
       end: END,
@@ -372,7 +373,7 @@ describe('getCrashGroup', () => {
     await getCrashGroup({
       esClient,
       filters: { serviceName: 'ride-ios' },
-      fingerprint: 'abc',
+      fingerprint: FINGERPRINT,
       crashType: null,
       start: START,
       end: END,
@@ -397,7 +398,7 @@ describe('getCrashGroup', () => {
     const detail = await getCrashGroup({
       esClient,
       filters: { serviceName: 'ride-ios' },
-      fingerprint: 'abc',
+      fingerprint: FINGERPRINT,
       crashType: 'SIGTRAP',
       start: START,
       end: END,
@@ -422,7 +423,7 @@ describe('getCrashGroup', () => {
       // computed crash of another type.
       return esqlResponse(
         query.includes('`attributes.exception.type` IN')
-          ? [{ ...LATEST, session_id: null, stored_fingerprint: 'abc' }]
+          ? [{ ...LATEST, session_id: null, stored_fingerprint: FINGERPRINT }]
           : [newerComputed]
       );
     });
@@ -430,7 +431,7 @@ describe('getCrashGroup', () => {
     const detail = await getCrashGroup({
       esClient,
       filters: { serviceName: 'ride-ios' },
-      fingerprint: 'abc',
+      fingerprint: FINGERPRINT,
       crashType: 'SIGTRAP',
       start: START,
       end: END,
@@ -452,7 +453,7 @@ describe('getCrashGroup', () => {
     await getCrashGroup({
       esClient,
       filters: { serviceName: 'ride-ios' },
-      fingerprint: 'abc',
+      fingerprint: FINGERPRINT,
       crashType: 'SIGTRAP',
       start: START,
       end: END,
@@ -464,4 +465,40 @@ describe('getCrashGroup', () => {
     expect(latestRequests).toHaveLength(1);
     expect(latestRequests[0].query).toContain('`attributes.exception.type` IN ("SIGTRAP")');
   });
+
+  it.each([
+    ['the type the app knows', 'SIGTRAP'],
+    ['no type from the app', undefined],
+  ])(
+    'fingerprints only stored crashes for a key no crash can compute, with %s',
+    async (_, crashType) => {
+      const { client, esClient } = createTracedEsClientMock();
+      client.esql.query.mockImplementation(async ({ query }) =>
+        esqlResponse(
+          query.includes('LIMIT 1 |')
+            ? [{ ...LATEST, session_id: null, stored_fingerprint: 'ingest-fingerprint' }]
+            : []
+        )
+      );
+
+      await getCrashGroup({
+        esClient,
+        filters: { serviceName: 'ride-ios' },
+        fingerprint: 'ingest-fingerprint',
+        crashType,
+        start: START,
+        end: END,
+      });
+
+      const requests = client.esql.query.mock.calls.map(([request]) => request);
+      expect(requests.filter(({ query }) => query.includes('LIMIT 1 |'))).toHaveLength(1);
+      // The latest crash and the three breakdowns.
+      expect(requests).toHaveLength(4);
+      requests.forEach(({ query }) =>
+        expect(query).toContain(
+          'WHERE `attributes.elastic.error.grouping_key` IS NOT NULL | EVAL fingerprint'
+        )
+      );
+    }
+  );
 });

@@ -9,6 +9,7 @@ import { esql } from '@elastic/esql';
 import {
   IOS_REPORT_OS_VERSION_RULE,
   IOS_REPORT_RELEASE_RULE,
+  canBeComputedFingerprint,
   crashFingerprint,
   crashFrameRuleFlags,
 } from './crash_fingerprint';
@@ -122,6 +123,21 @@ describe('crash fingerprint rules', () => {
 
   it('keeps the stored fingerprint over the computed one', () => {
     expect(fingerprintOf('stored')).toBe('ingest-fingerprint');
+  });
+});
+
+describe('canBeComputedFingerprint', () => {
+  it('accepts every fingerprint Elasticsearch computes', () => {
+    const { stored, ...computed } = EXPECTED_CRASH_FINGERPRINTS;
+    Object.values(computed).forEach((fingerprint) =>
+      expect(canBeComputedFingerprint(fingerprint)).toBe(true)
+    );
+    expect(canBeComputedFingerprint(stored)).toBe(false);
+  });
+
+  it('rejects a key SHA256 never prints', () => {
+    expect(canBeComputedFingerprint('A'.repeat(64))).toBe(false);
+    expect(canBeComputedFingerprint('a'.repeat(63))).toBe(false);
   });
 });
 

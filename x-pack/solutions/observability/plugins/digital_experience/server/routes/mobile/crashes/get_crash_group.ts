@@ -20,6 +20,7 @@ import {
   type CrashBreakdownRow,
   type LatestCrashRow,
 } from '../../../../common/mobile/crash_groups';
+import { canBeComputedFingerprint } from '../../../../common/mobile/crash_fingerprint';
 import { MOBILE_FIELDS, RESULT_COLUMNS } from '../../../../common/mobile/fields';
 import type { MobilePanelFilters } from '../../../../common/mobile/filters';
 import {
@@ -145,8 +146,13 @@ export const getCrashGroup = async ({
   // A known type only spares hashing the other crashes. The typed query keeps stored-fingerprint
   // crashes of any type, so only a computed latest crash proves the type is the group's: a computed
   // fingerprint hashes it. Otherwise a newer computed crash of another type could be missed.
-  const typed = crashType === undefined ? undefined : await latestOf([crashType]);
-  const latestRow = typed && !typed[RESULT_COLUMNS.storedFingerprint] ? typed : await latestOf();
+  const typedLatest = async () => {
+    const typed = crashType === undefined ? undefined : await latestOf([crashType]);
+    return typed && !typed[RESULT_COLUMNS.storedFingerprint] ? typed : latestOf();
+  };
+  // A key SHA256 can't print is only ever stored, so its group has no computed crash to look for.
+  const storedOnly = !canBeComputedFingerprint(fingerprint);
+  const latestRow = storedOnly ? await latestOf([]) : await typedLatest();
   if (!latestRow) {
     const none: CrashBreakdown = { top: [], other: 0 };
     return {
@@ -160,7 +166,13 @@ export const getCrashGroup = async ({
   const latestCrash = toCrash(latestRow);
   // The group's computed crashes have the latest one's type when its fingerprint was computed too,
   // so the breakdowns only fingerprint the crashes of that type, and the stored ones.
-  const types = latestRow[RESULT_COLUMNS.storedFingerprint] ? undefined : [latestCrash.type];
+  const breakdownTypes = (): Array<string | null> | undefined => {
+    if (storedOnly) {
+      return [];
+    }
+    return latestRow[RESULT_COLUMNS.storedFingerprint] ? undefined : [latestCrash.type];
+  };
+  const types = breakdownTypes();
   const breakdown = (name: CrashBreakdownName) =>
     runEsql<CrashBreakdownRow>(
       esClient,
