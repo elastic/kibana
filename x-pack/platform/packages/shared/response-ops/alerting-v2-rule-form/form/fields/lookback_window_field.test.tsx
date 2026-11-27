@@ -17,6 +17,18 @@ describe('LookbackWindowField', () => {
     expect(screen.getByText('Lookback Window')).toBeInTheDocument();
   });
 
+  it('renders lookback help text', () => {
+    render(<LookbackWindowField />, {
+      wrapper: createFormWrapper({
+        schedule: { every: '1m', lookback: '5m' },
+      }),
+    });
+
+    expect(
+      screen.getByText('How far back each run searches, using the time field.')
+    ).toBeInTheDocument();
+  });
+
   it('displays the initial lookback value', () => {
     render(<LookbackWindowField />, {
       wrapper: createFormWrapper({

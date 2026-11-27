@@ -27,16 +27,10 @@ describe('ScheduleField', () => {
     expect(screen.getByText('Schedule')).toBeInTheDocument();
   });
 
-  it('renders format help text', () => {
+  it('renders help text', () => {
     render(<ScheduleField />, { wrapper: createFormWrapper() });
 
-    expect(screen.getByText('Use units such as 1m or 5m.')).toBeInTheDocument();
-  });
-
-  it('renders a question tip next to the schedule label', () => {
-    render(<ScheduleField />, { wrapper: createFormWrapper() });
-
-    expect(screen.getByTestId('ruleScheduleHelpTip')).toBeInTheDocument();
+    expect(screen.getByText('How often the rule runs.')).toBeInTheDocument();
   });
 
   it('renders correctly in flyout layout', () => {

@@ -288,6 +288,34 @@ describe('AlertConditionStep', () => {
 
       expect(screen.getByTestId('composeDiscoverGroupFields')).toBeInTheDocument();
     });
+
+    it('renders an info popover on the group fields label', () => {
+      renderStep({ queryCommitted: true });
+
+      expect(screen.getByTestId('composeDiscoverGroupFieldsHelp')).toBeInTheDocument();
+    });
+  });
+
+  describe('field help', () => {
+    it('renders an info popover on the ES|QL query title for alert kind', () => {
+      renderStep({ queryCommitted: true });
+
+      expect(screen.getByTestId('composeDiscoverEsqlQueryHelp')).toBeInTheDocument();
+    });
+
+    it('does not render the ES|QL info popover for signal kind', () => {
+      renderStep(
+        { queryCommitted: true },
+        {
+          formValueOverrides: {
+            kind: 'signal',
+            query: { base: BASE_QUERY, breach: { segment: '' } },
+          },
+        }
+      );
+
+      expect(screen.queryByTestId('composeDiscoverEsqlQueryHelp')).not.toBeInTheDocument();
+    });
   });
 
   describe('query-dependent field gating', () => {

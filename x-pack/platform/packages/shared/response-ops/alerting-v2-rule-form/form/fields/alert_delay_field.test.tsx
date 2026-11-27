@@ -38,6 +38,14 @@ describe('AlertDelayField', () => {
     expect(screen.getByText('Alert delay')).toBeInTheDocument();
   });
 
+  it('renders an info tip on the label', () => {
+    render(<AlertDelayField />, {
+      wrapper: createFormWrapper({ kind: 'alert' }),
+    });
+
+    expect(screen.getByTestId('alertDelayHelpTip')).toBeInTheDocument();
+  });
+
   it('defaults to immediate mode', () => {
     render(<AlertDelayField />, {
       wrapper: createFormWrapper({ kind: 'alert' }),

@@ -17,7 +17,6 @@ import type {
 } from '../types';
 import type { FormValues, RecoveryStrategy } from '../../../form/types';
 import { RecoveryDelayField } from '../../../form/fields/recovery_delay_field';
-import { FormLabelWithQuestionTip } from '../../../form/fields/form_label_with_help';
 
 const defaultRecoveryLabel = i18n.translate(
   'xpack.alertingV2.composeDiscover.recoveryCondition.defaultRecoveryDropDownOptionLabel',
@@ -91,22 +90,9 @@ const RecoveryTypeSelector: React.FC<RecoveryTypeSelectorProps> = ({
   onRecoveryTypeChange,
 }) => (
   <EuiFormRow
-    label={
-      <FormLabelWithQuestionTip
-        label={i18n.translate(
-          'xpack.alertingV2.composeDiscover.recoveryCondition.recoveryTypeLabel',
-          { defaultMessage: 'Recovery' }
-        )}
-        tip={i18n.translate(
-          'xpack.alertingV2.composeDiscover.recoveryCondition.recoveryTypeTooltip',
-          {
-            defaultMessage:
-              'How the rule decides an alert has recovered. Default closes the alert when the group no longer matches the alert condition.',
-          }
-        )}
-        data-test-subj="recoveryTypeHelpTip"
-      />
-    }
+    label={i18n.translate('xpack.alertingV2.composeDiscover.recoveryCondition.recoveryTypeLabel', {
+      defaultMessage: 'Recovery',
+    })}
     isInvalid={Boolean(error)}
     error={error}
     fullWidth
@@ -164,7 +150,7 @@ export function RecoveryConditionStep({
 
       {isCustom && renderCustomRecovery && (
         <>
-          <EuiSpacer size="l" />
+          <EuiSpacer size="m" />
           <EuiHorizontalRule margin="none" />
           <EuiSpacer size="m" />
           {React.createElement(renderCustomRecovery, { state, dispatch })}
@@ -173,6 +159,8 @@ export function RecoveryConditionStep({
 
       {strategy !== recoveryStrategy.manual && (
         <>
+          <EuiSpacer size="m" />
+          <EuiHorizontalRule margin="none" />
           <EuiSpacer size="m" />
           <RecoveryDelayField />
         </>

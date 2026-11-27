@@ -18,22 +18,8 @@ import { Controller, useFormContext } from 'react-hook-form';
 import type { FormValues } from '../types';
 import { RuleSchedule } from './rule_schedule';
 import { useRuleFormMeta, useRuleFormServices } from '../contexts';
-import { FormLabelWithQuestionTip } from './form_label_with_help';
 
 const SCHEDULE_ROW_ID = 'ruleV2FormScheduleField';
-
-const SCHEDULE_LABEL = i18n.translate('xpack.alertingV2.ruleForm.scheduleLabel', {
-  defaultMessage: 'Schedule',
-});
-
-const SCHEDULE_TIP = i18n.translate('xpack.alertingV2.ruleForm.scheduleTooltip', {
-  defaultMessage:
-    "How often the rule runs. Checks can be delayed by Kibana's polling frequency.",
-});
-
-const SCHEDULE_HELP_TEXT = i18n.translate('xpack.alertingV2.ruleForm.scheduleHelpText', {
-  defaultMessage: 'Use units such as 1m or 5m.',
-});
 
 export const ScheduleField = () => {
   const { control } = useFormContext<FormValues>();
@@ -68,15 +54,13 @@ export const ScheduleField = () => {
       render={({ field, fieldState: { error } }) => (
         <EuiFormRow
           id={SCHEDULE_ROW_ID}
-          label={
-            <FormLabelWithQuestionTip
-              label={SCHEDULE_LABEL}
-              tip={SCHEDULE_TIP}
-              data-test-subj="ruleScheduleHelpTip"
-            />
-          }
+          label={i18n.translate('xpack.alertingV2.ruleForm.scheduleLabel', {
+            defaultMessage: 'Schedule',
+          })}
           fullWidth
-          helpText={SCHEDULE_HELP_TEXT}
+          helpText={i18n.translate('xpack.alertingV2.ruleForm.scheduleHelpText', {
+            defaultMessage: 'How often the rule runs.',
+          })}
           isInvalid={!!error}
         >
           <RuleSchedule

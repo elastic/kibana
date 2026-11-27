@@ -80,14 +80,11 @@ const renderRoutingTagsField = ({
 };
 
 describe('RoutingTagsField', () => {
-  it('renders the label, optional text and help text', () => {
+  it('renders the label and optional text', () => {
     renderRoutingTagsField();
 
     expect(screen.getByText('Routing tags')).toBeInTheDocument();
     expect(screen.getByText('optional')).toBeInTheDocument();
-    expect(
-      screen.getByText('Action policies apply when they share at least one of these routing tags.')
-    ).toBeInTheDocument();
     expect(screen.getByTestId('ruleRoutingTagsInput')).toBeInTheDocument();
   });
 

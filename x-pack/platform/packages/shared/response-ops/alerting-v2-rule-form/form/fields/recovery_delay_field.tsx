@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback } from 'react';
-import { EuiButtonGroup, EuiFormRow, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiButtonGroup, EuiFormRow, EuiIconTip, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useFormContext, useWatch } from 'react-hook-form';
 import { DELAY_MODE } from '../types';
@@ -15,7 +15,6 @@ import { deriveRecoveryDelayModeFromStateTransition } from '../utils/state_trans
 import { StateTransitionCountField } from './state_transition_count_field';
 import { StateTransitionTimeframeField } from './state_transition_timeframe_field';
 import { useRuleFormMeta } from '../contexts';
-import { FormLabelWithQuestionTip } from './form_label_with_help';
 
 type DelayMode =
   | typeof DELAY_MODE.immediate
@@ -129,16 +128,20 @@ export const RecoveryDelayField = () => {
   return (
     <EuiFormRow
       label={
-        <FormLabelWithQuestionTip
-          label={i18n.translate('xpack.alertingV2.ruleForm.recoveryDelay.label', {
+        <>
+          {i18n.translate('xpack.alertingV2.ruleForm.recoveryDelay.label', {
             defaultMessage: 'Recovery delay',
-          })}
-          tip={i18n.translate('xpack.alertingV2.ruleForm.recoveryDelay.tooltip', {
-            defaultMessage:
-              'How long recovery must persist before the alert closes. Use this to avoid flapping when a condition clears briefly.',
-          })}
-          data-test-subj="recoveryDelayHelpTip"
-        />
+          })}{' '}
+          <EuiIconTip
+            type="info"
+            color="text"
+            content={i18n.translate('xpack.alertingV2.ruleForm.recoveryDelay.tooltip', {
+              defaultMessage:
+                'How long recovery must hold before the alert closes. Use this to ignore brief clearances.',
+            })}
+            iconProps={{ 'data-test-subj': 'recoveryDelayHelpTip' }}
+          />
+        </>
       }
       fullWidth
       data-test-subj="recoveryDelayFormRow"

@@ -92,7 +92,7 @@ describe('LinkedActionPoliciesStep', () => {
     expect(screen.getByText('Action policies')).toBeInTheDocument();
     expect(
       screen.getByText(
-        'Routing tags determine which action policies apply. Catch-all action policies match all alerts.'
+        'Policies apply when they share a routing tag with this rule. Catch-all policies match all alerts.'
       )
     ).toBeInTheDocument();
     expect(screen.getByTestId('ruleRoutingTagsField')).toBeInTheDocument();
