@@ -189,14 +189,32 @@ describe('Security Solution plugin', () => {
       expect(getLoader(element)).toBeNull();
     });
 
-    it('neither renders nor redirects when the user leaves before the legacy app mount has resolved', async () => {
+    it('neither renders nor redirects when the user leaves while the legacy app mount is loading', async () => {
       const { legacySiemApp, license$ } = startPlugin();
       const params = createMountParams();
       const { element } = params;
+      const helpers = await import('./helpers');
+      let resolveHelpers: (loadedHelpers: typeof helpers) => void = () => {};
+      const lazyHelpersForRoutes = jest
+        .spyOn(
+          Plugin.prototype as unknown as { lazyHelpersForRoutes: () => Promise<typeof helpers> },
+          'lazyHelpersForRoutes'
+        )
+        .mockImplementationOnce(
+          () =>
+            new Promise((resolve) => {
+              resolveHelpers = resolve;
+            })
+        );
       const mounting = mountLegacySiemApp(legacySiemApp, params);
+      await jest.advanceTimersByTimeAsync(0);
+
+      expect(lazyHelpersForRoutes).toHaveBeenCalledTimes(1);
 
       element.remove();
+      resolveHelpers(helpers);
       await mounting;
+      lazyHelpersForRoutes.mockRestore();
       license$.next(licensingMock.createLicense({ license: { type: 'platinum' } }));
       await jest.advanceTimersByTimeAsync(1000);
 
