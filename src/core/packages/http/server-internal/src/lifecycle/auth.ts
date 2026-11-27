@@ -84,8 +84,7 @@ export function adoptToHapiAuthFormat(
     request: Request,
     responseToolkit: ResponseToolkit
   ): Promise<Lifecycle.ReturnValue> {
-    const hapiResponseAdapter = new HapiResponseAdapter(responseToolkit);
-    const kibanaRequest = CoreKibanaRequest.from(request, undefined, false);
+    const kibanaRequest = CoreKibanaRequest.fromForAuth(request);
 
     try {
       const result = await fn(kibanaRequest, lifecycleResponseFactory, toolkit);
@@ -95,7 +94,7 @@ export function adoptToHapiAuthFormat(
         if (challengeHeaders) {
           result.options.headers = { ...result.options.headers, ...challengeHeaders };
         }
-        return hapiResponseAdapter.handle(result);
+        return new HapiResponseAdapter(responseToolkit).handle(result);
       }
 
       if (authResult.isAuthenticated(result)) {
@@ -113,7 +112,7 @@ export function adoptToHapiAuthFormat(
           return responseToolkit.continue;
         }
 
-        return hapiResponseAdapter.handle(
+        return new HapiResponseAdapter(responseToolkit).handle(
           lifecycleResponseFactory.redirected({
             // hapi doesn't accept string[] as a valid header
             headers: result.headers as any,
@@ -125,7 +124,7 @@ export function adoptToHapiAuthFormat(
         if (kibanaRequest.route.options.authRequired === 'optional') {
           return responseToolkit.continue;
         }
-        return hapiResponseAdapter.handle(
+        return new HapiResponseAdapter(responseToolkit).handle(
           lifecycleResponseFactory.unauthorized({ headers: authChallengeHeaders(request) })
         );
       }
@@ -134,7 +133,7 @@ export function adoptToHapiAuthFormat(
       );
     } catch (error) {
       log.error(error);
-      return hapiResponseAdapter.toInternalError();
+      return new HapiResponseAdapter(responseToolkit).toInternalError();
     }
   };
 }

@@ -17,7 +17,13 @@ export {
 } from './src/versioned_router';
 export { Router } from './src/router';
 export type { RouterOptions } from './src/router';
-export { isKibanaRequest, isRealRequest, ensureRawRequest, CoreKibanaRequest } from './src/request';
+export {
+  isKibanaRequest,
+  isRealRequest,
+  ensureRawRequest,
+  CoreKibanaRequest,
+  type KibanaRequestSnapshotPhase,
+} from './src/request';
 export { isSafeMethod } from './src/route';
 export { HapiResponseAdapter } from './src/response_adapter';
 export { kibanaResponseFactory, lifecycleResponseFactory, KibanaResponse } from './src/response';

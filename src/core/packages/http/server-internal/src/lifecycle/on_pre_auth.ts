@@ -46,12 +46,14 @@ export function adoptToHapiOnPreAuth(fn: OnPreAuthHandler, log: Logger) {
     request: Request,
     responseToolkit: HapiResponseToolkit
   ): Promise<Lifecycle.ReturnValue> {
-    const hapiResponseAdapter = new HapiResponseAdapter(responseToolkit);
-
     try {
-      const result = await fn(CoreKibanaRequest.from(request), lifecycleResponseFactory, toolkit);
+      const result = await fn(
+        CoreKibanaRequest.fromForLifecycle(request, 'preAuth'),
+        lifecycleResponseFactory,
+        toolkit
+      );
       if (isKibanaResponse(result)) {
-        return hapiResponseAdapter.handle(result);
+        return new HapiResponseAdapter(responseToolkit).handle(result);
       }
 
       if (preAuthResult.isNext(result)) {
@@ -63,7 +65,7 @@ export function adoptToHapiOnPreAuth(fn: OnPreAuthHandler, log: Logger) {
       );
     } catch (error) {
       log.error(error);
-      return hapiResponseAdapter.toInternalError();
+      return new HapiResponseAdapter(responseToolkit).toInternalError();
     }
   };
 }
