@@ -46,6 +46,23 @@ describe('Index Management URL locator', () => {
     );
   });
 
+  test('locator returns the correct url for a legacy index_template', async () => {
+    const { path } = await locator.getLocation({
+      page: 'index_template',
+      indexTemplate: 'old-logs',
+      legacy: true,
+    });
+    expect(path).toBe('/data/index_management/templates/old-logs?legacy=true');
+  });
+
+  test('locator returns the correct url for an enrich policy', async () => {
+    const { path } = await locator.getLocation({
+      page: 'enrich_policy',
+      policyName: 'users@policy',
+    });
+    expect(path).toBe('/data/index_management/enrich_policies?policy=users%40policy');
+  });
+
   test('locator returns the correct url for create template', async () => {
     const { path } = await locator.getLocation({
       page: 'create_template',

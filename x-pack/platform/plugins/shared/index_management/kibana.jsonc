@@ -21,6 +21,7 @@
       "share"
     ],
     "optionalPlugins": [
+      "housekeeping",
       "security",
       "usageCollection",
       "fleet",

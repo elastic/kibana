@@ -180,6 +180,13 @@ export const PipelinesList: React.FunctionComponent<RouteComponentProps> = ({ hi
     }
   }
 
+  const housekeepingMenuItem = services.housekeeping?.getAppMenuItem({
+    resourceTypes: ['ingest_pipeline'],
+  });
+  if (housekeepingMenuItem) {
+    menu = { ...menu, items: [...(menu?.items ?? []), housekeepingMenuItem] };
+  }
+
   let body: React.ReactNode;
   if (error) {
     body = (

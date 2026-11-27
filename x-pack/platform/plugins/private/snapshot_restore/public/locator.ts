@@ -8,14 +8,17 @@
 import type { SerializableRecord } from '@kbn/utility-types';
 import type { ManagementAppLocator } from '@kbn/management-plugin/common';
 import type { LocatorDefinition } from '@kbn/share-plugin/public';
-import { linkToSnapshots } from './application/services/navigation';
-import { PLUGIN } from '../common/constants';
+import { linkToPolicy, linkToRepository, linkToSnapshots } from './application/services/navigation';
+import { PLUGIN, SNAPSHOT_RESTORE_LOCATOR_ID } from '../common/constants';
 
-export const SNAPSHOT_RESTORE_LOCATOR_ID = 'SNAPSHOT_RESTORE_LOCATOR';
+export { SNAPSHOT_RESTORE_LOCATOR_ID };
 
-export interface SnapshotRestoreLocatorParams extends SerializableRecord {
-  page: 'snapshots';
-}
+export type SnapshotRestoreLocatorParams = SerializableRecord &
+  (
+    | { page: 'snapshots' }
+    | { page: 'repository'; repositoryName: string }
+    | { page: 'policy'; policyName: string }
+  );
 
 export interface SnapshotRestoreLocatorDefinitionDependencies {
   managementAppLocator: ManagementAppLocator;
@@ -39,6 +42,18 @@ export class SnapshotRestoreLocatorDefinition
         return {
           ...location,
           path: location.path + linkToSnapshots(),
+        };
+      }
+      case 'repository': {
+        return {
+          ...location,
+          path: location.path + linkToRepository(params.repositoryName),
+        };
+      }
+      case 'policy': {
+        return {
+          ...location,
+          path: location.path + linkToPolicy(params.policyName),
         };
       }
     }

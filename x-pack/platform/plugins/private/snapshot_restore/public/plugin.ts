@@ -14,7 +14,7 @@ import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 
 import { PLUGIN } from '../common/constants';
 
-import type { ClientConfigType } from './types';
+import type { ClientConfigType, StartDependencies } from './types';
 
 import { httpService, setUiMetricService } from './application/services/http';
 import { textService } from './application/services/text';
@@ -37,7 +37,7 @@ export class SnapshotRestoreUIPlugin {
     setUiMetricService(this.uiMetricService);
   }
 
-  public setup(coreSetup: CoreSetup, plugins: PluginsDependencies): void {
+  public setup(coreSetup: CoreSetup<StartDependencies>, plugins: PluginsDependencies): void {
     const config = this.initializerContext.config.get<ClientConfigType>();
     const {
       ui: { enabled: isSnapshotRestoreUiEnabled },

@@ -21,6 +21,7 @@ import type { ConsolePluginStart } from '@kbn/console-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { SettingsStart } from '@kbn/core-ui-settings-browser';
 
+import type { HousekeepingPublicStart } from '@kbn/housekeeping-plugin/public';
 import { KibanaContextProvider, KibanaRenderContextProvider } from '../shared_imports';
 import type { Config, ILicense } from '../types';
 
@@ -47,6 +48,7 @@ export interface AppServices {
   application: ApplicationStart;
   license: ILicense | null;
   consolePlugin?: ConsolePluginStart;
+  housekeeping?: HousekeepingPublicStart;
   overlays: OverlayStart;
   http: HttpStart;
   config: Config;

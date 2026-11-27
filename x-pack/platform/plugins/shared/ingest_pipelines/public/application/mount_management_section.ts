@@ -49,6 +49,7 @@ export async function mountManagementSection(
     executionContext,
     license,
     consolePlugin: depsStart.console,
+    housekeeping: depsStart.housekeeping,
     overlays,
     http,
     config,

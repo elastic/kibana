@@ -25,6 +25,7 @@ import type {
   ReindexServicePublicSetup,
   ReindexServicePublicStart,
 } from '@kbn/reindex-service-plugin/public';
+import type { HousekeepingPublicStart } from '@kbn/housekeeping-plugin/public';
 
 export interface IndexManagementStartServices {
   analytics: Pick<AnalyticsServiceStart, 'reportEvent'>;
@@ -47,6 +48,7 @@ export interface StartDependencies {
   cloud?: CloudSetup;
   cloudConnect?: CloudConnectedPluginStart;
   console?: ConsolePluginStart;
+  housekeeping?: HousekeepingPublicStart;
   share: SharePluginStart;
   fleet?: unknown;
   usageCollection: UsageCollectionSetup;

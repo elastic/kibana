@@ -10,6 +10,7 @@ import type { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
 import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
+import type { HousekeepingServerSetup } from '@kbn/housekeeping-plugin/server';
 import type { License } from './services';
 import type { wrapEsError } from './lib';
 import type { handleEsError } from './shared_imports';
@@ -19,6 +20,7 @@ export interface Dependencies {
   features: FeaturesPluginSetup;
   security?: SecurityPluginSetup;
   cloud?: CloudSetup;
+  housekeeping?: HousekeepingServerSetup;
 }
 
 export interface RouteDependencies {
