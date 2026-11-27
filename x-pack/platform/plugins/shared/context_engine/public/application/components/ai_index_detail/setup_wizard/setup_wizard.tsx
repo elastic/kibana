@@ -24,6 +24,10 @@ const closedToast = i18n.translate('xpack.contextEngine.setupWizard.closedToast'
   defaultMessage: 'Setup closed. Everything is in Settings when you need it.',
 });
 
+const continueErrorTitle = i18n.translate('xpack.contextEngine.setupWizard.continueErrorTitle', {
+  defaultMessage: 'Unable to save this step',
+});
+
 const getSkippedStepLabel = (stepNumber: number, title: string): string =>
   i18n.translate('xpack.contextEngine.setupWizard.skippedStepAriaLabel', {
     defaultMessage: 'Step {stepNumber}: {title}, skipped',
@@ -119,19 +123,34 @@ export const SetupWizard = ({
     onStepChange(stepId);
   };
 
+  /** Never rejects, so a failed save can't leave the wizard stuck in its busy state. */
+  const saveAndReload = async (save: () => Promise<boolean>): Promise<boolean> => {
+    try {
+      if (!(await save())) {
+        return false;
+      }
+      await onSaved();
+      return true;
+    } catch (error) {
+      // A step's save shows its own errors, so this only catches what slipped past it.
+      notifications.toasts.addError(error instanceof Error ? error : new Error(String(error)), {
+        title: continueErrorTitle,
+      });
+      return false;
+    }
+  };
+
   const continueWith = async (save?: () => Promise<boolean>) => {
     if (save === undefined) {
       goToNextOpenStep();
       return;
     }
     setIsContinuing(true);
-    if (!(await save())) {
-      setIsContinuing(false);
-      return;
-    }
-    await onSaved();
+    const isSaved = await saveAndReload(save);
     setIsContinuing(false);
-    goToNextOpenStep();
+    if (isSaved) {
+      goToNextOpenStep();
+    }
   };
 
   /**

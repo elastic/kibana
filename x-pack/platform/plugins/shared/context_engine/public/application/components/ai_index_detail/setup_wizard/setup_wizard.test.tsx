@@ -96,6 +96,8 @@ const renderWizard = ({
   return { onStepChange, onClose, onSaved, services };
 };
 
+const boom = new Error('boom');
+
 const finishedToast = 'Setup finished. You can change any of it in Settings.';
 
 describe('SetupWizard', () => {
@@ -305,6 +307,29 @@ describe('SetupWizard', () => {
       await waitFor(() => expect(screen.getByTestId('contextSetupWizardContinue')).toBeEnabled());
       expect(mockSave).toHaveBeenCalled();
       expect(onSaved).not.toHaveBeenCalled();
+      expect(onStepChange).not.toHaveBeenCalled();
+      expect(onClose).not.toHaveBeenCalled();
+    });
+
+    it.each([
+      ['the save', { save: () => Promise.reject(boom), reload: () => Promise.resolve() }],
+      ['the reload', { save: () => Promise.resolve(true), reload: () => Promise.reject(boom) }],
+    ])('shows an error and frees the buttons when %s throws', async (_label, { save, reload }) => {
+      mockSave.mockImplementation(save);
+      const { onClose, onStepChange, services } = renderWizard({
+        steps: [savingStep, ...steps],
+        initialStepId: 'saving',
+        onSaved: jest.fn(reload),
+      });
+
+      fireEvent.click(screen.getByTestId('contextSetupWizardContinue'));
+
+      await waitFor(() =>
+        expect(services.notifications.toasts.addError).toHaveBeenCalledWith(boom, {
+          title: 'Unable to save this step',
+        })
+      );
+      expect(screen.getByTestId('contextSetupWizardContinue')).toBeEnabled();
       expect(onStepChange).not.toHaveBeenCalled();
       expect(onClose).not.toHaveBeenCalled();
     });
