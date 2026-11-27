@@ -64,7 +64,6 @@
     "@kbn/visualization-utils",
     "@kbn/zod",
     "@kbn/core-test-helpers-deprecations-getters",
-    "@kbn/core-elasticsearch-server-mocks"
   ],
   "exclude": ["target/**/*"]
 }
