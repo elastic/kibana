@@ -13,6 +13,7 @@ import {
   ACTION_SAVED_OBJECT_TYPE,
   ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
 } from '../constants/saved_objects';
+import { EXECUTE_CONNECTORS_PRIVILEGE_API_TAG } from '../feature';
 
 const request = {} as KibanaRequest;
 
@@ -27,6 +28,9 @@ function mockSecurity() {
       typeof authorization.actions.savedObject.get
     >
   ).mockImplementation(mockAuthorizationAction);
+  (
+    authorization.actions.api.get as jest.MockedFunction<typeof authorization.actions.api.get>
+  ).mockImplementation((tag: string) => `api:${tag}`);
   authorization.mode.useRbacForRequest.mockReturnValue(true);
   return { authorization };
 }
@@ -117,10 +121,14 @@ describe('ensureAuthorized', () => {
       ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
       'create'
     );
+    expect(authorization.actions.api.get).toHaveBeenCalledWith(
+      EXECUTE_CONNECTORS_PRIVILEGE_API_TAG
+    );
     expect(checkPrivileges).toHaveBeenCalledWith({
       kibana: [
         mockAuthorizationAction(ACTION_SAVED_OBJECT_TYPE, 'get'),
         mockAuthorizationAction(ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE, 'create'),
+        `api:${EXECUTE_CONNECTORS_PRIVILEGE_API_TAG}`,
       ],
     });
   });
@@ -195,12 +203,62 @@ describe('ensureAuthorized', () => {
       'create'
     );
 
+    expect(authorization.actions.api.get).toHaveBeenCalledWith(
+      EXECUTE_CONNECTORS_PRIVILEGE_API_TAG
+    );
     expect(checkPrivileges).toHaveBeenCalledWith({
       kibana: [
         mockAuthorizationAction(ACTION_SAVED_OBJECT_TYPE, 'get'),
         mockAuthorizationAction(ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE, 'create'),
+        `api:${EXECUTE_CONNECTORS_PRIVILEGE_API_TAG}`,
         'test/create',
       ],
+    });
+  });
+
+  test('throws a 403 when the execute api privilege is missing and still allows get and list', async () => {
+    const { authorization } = mockSecurity();
+    const checkPrivileges: jest.MockedFunction<
+      ReturnType<typeof authorization.checkPrivilegesDynamicallyWithRequest>
+    > = jest.fn();
+    authorization.checkPrivilegesDynamicallyWithRequest.mockReturnValue(checkPrivileges);
+    const actionsAuthorization = new ActionsAuthorization({
+      request,
+      authorization,
+    });
+
+    checkPrivileges.mockResolvedValueOnce({
+      username: 'some-user',
+      hasAllRequested: false,
+      privileges: [
+        {
+          privilege: `api:${EXECUTE_CONNECTORS_PRIVILEGE_API_TAG}`,
+          authorized: false,
+        },
+      ],
+    });
+
+    await expect(
+      actionsAuthorization.ensureAuthorized({ operation: 'execute', actionTypeId: 'myType' })
+    ).rejects.toMatchObject({
+      message: 'Unauthorized to execute a "myType" action',
+      output: { statusCode: 403 },
+    });
+
+    checkPrivileges.mockResolvedValue({
+      username: 'some-user',
+      hasAllRequested: true,
+      privileges: [],
+    });
+
+    await actionsAuthorization.ensureAuthorized({ operation: 'get' });
+    await actionsAuthorization.ensureAuthorized({ operation: 'list' });
+
+    expect(checkPrivileges).toHaveBeenNthCalledWith(2, {
+      kibana: [mockAuthorizationAction(ACTION_SAVED_OBJECT_TYPE, 'get')],
+    });
+    expect(checkPrivileges).toHaveBeenNthCalledWith(3, {
+      kibana: [mockAuthorizationAction(ACTION_SAVED_OBJECT_TYPE, 'find')],
     });
   });
 });

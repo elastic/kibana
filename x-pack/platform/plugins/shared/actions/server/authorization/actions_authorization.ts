@@ -14,6 +14,7 @@ import {
   ACTION_SAVED_OBJECT_TYPE,
   ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
 } from '../constants/saved_objects';
+import { EXECUTE_CONNECTORS_PRIVILEGE_API_TAG } from '../feature';
 
 export interface ConstructorOptions {
   request: KibanaRequest;
@@ -24,6 +25,7 @@ const operationAlias: Record<string, (authorization: SecurityPluginSetup['authz'
   execute: (authorization) => [
     authorization.actions.savedObject.get(ACTION_SAVED_OBJECT_TYPE, 'get'),
     authorization.actions.savedObject.get(ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE, 'create'),
+    authorization.actions.api.get(EXECUTE_CONNECTORS_PRIVILEGE_API_TAG),
   ],
   list: (authorization) => [
     authorization.actions.savedObject.get(ACTION_SAVED_OBJECT_TYPE, 'find'),
