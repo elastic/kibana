@@ -11,6 +11,7 @@
     "@kbn/es-query",
     "@kbn/utility-types",
     "@kbn/core",
+    "@kbn/oxfmt",
     "@kbn/repo-info",
     "@kbn/human-readable-id",
     "@kbn/std"
