@@ -43,6 +43,7 @@ describe('resolve-proposal workflow', () => {
         'proposalId',
         'status',
         'decision',
+        'executionError',
       ]);
     });
 
@@ -314,7 +315,12 @@ describe('resolve-proposal workflow', () => {
         'output_action_failed',
       ]);
       expect(step('output_non_retryable_failed')?.with).toEqual(
-        expect.objectContaining({ resolution: 'settled', status: 'failed', decision: 'approved' })
+        expect.objectContaining({
+          resolution: 'settled',
+          status: 'failed',
+          decision: 'approved',
+          executionError: '{{ variables.action_error_message }}',
+        })
       );
     });
 

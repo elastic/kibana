@@ -144,6 +144,10 @@ outputs:
     type: string
   - name: decision
     type: string
+  # The action's error message when a non-retryable failure settled the proposal
+  # as failed; empty otherwise.
+  - name: executionError
+    type: string
 
 steps:
   - name: create_proposal
@@ -172,6 +176,7 @@ steps:
       completed: false
       final_status: pending
       final_decision: ''
+      final_execution_error: ''
       current_proposal_id: '{{ steps.create_proposal.output.proposalId }}'
       # Captured once, so a failed attempt can never extend the deadline.
       #
@@ -356,6 +361,7 @@ steps:
               resolved_proposal_id: '{{ steps.resolve_as_approver.output.proposalId }}'
               resolved_status: '{{ steps.resolve_as_approver.output.status }}'
               resolved_decision: '{{ steps.resolve_as_approver.output.decision }}'
+              resolved_execution_error: '{{ steps.resolve_as_approver.output.executionError }}'
               resolution_error: '{{ steps.resolve_as_approver.error.message }}'
         else:
           # Inherits the caller's service account, which the child passes on to
@@ -383,6 +389,7 @@ steps:
               resolved_proposal_id: '{{ steps.resolve_as_worker.output.proposalId }}'
               resolved_status: '{{ steps.resolve_as_worker.output.status }}'
               resolved_decision: '{{ steps.resolve_as_worker.output.decision }}'
+              resolved_execution_error: '{{ steps.resolve_as_worker.output.executionError }}'
               resolution_error: '{{ steps.resolve_as_worker.error.message }}'
 
       # A failed child reports nothing, so how far it got is read off the live
@@ -454,6 +461,7 @@ steps:
               current_proposal_id: '{{ variables.resolved_proposal_id }}'
               final_status: '{{ variables.resolved_status }}'
               final_decision: '{{ variables.resolved_decision }}'
+              final_execution_error: '{{ variables.resolved_execution_error }}'
           - name: break_settled
             type: loop.break
 
@@ -533,3 +541,4 @@ steps:
       proposalId: '{{ variables.current_proposal_id }}'
       status: '{{ variables.final_status }}'
       decision: '{{ variables.final_decision }}'
+      executionError: '{{ variables.final_execution_error }}'

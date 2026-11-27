@@ -100,6 +100,7 @@ describe('create-investigation-proposal workflow', () => {
         'proposalId',
         'status',
         'decision',
+        'executionError',
       ]);
     });
 
@@ -127,6 +128,7 @@ describe('create-investigation-proposal workflow', () => {
         'proposalId',
         'status',
         'decision',
+        'executionError',
       ]);
     });
   });
@@ -498,6 +500,9 @@ describe('create-investigation-proposal workflow', () => {
       expect(String(complete.current_proposal_id)).toContain('variables.resolved_proposal_id');
       expect(String(complete.final_status)).toContain('variables.resolved_status');
       expect(String(complete.final_decision)).toContain('variables.resolved_decision');
+      expect(String(complete.final_execution_error)).toContain(
+        'variables.resolved_execution_error'
+      );
       expect(step('break_settled')?.type).toBe('loop.break');
     });
 
