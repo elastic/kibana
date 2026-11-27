@@ -111,7 +111,7 @@ describe('recordTaskRun', () => {
       ownerId: null,
       traceparent: '',
       cost,
-    } as ConcreteTaskInstance);
+    }) as ConcreteTaskInstance;
 
   const ranTask = (task: ConcreteTaskInstance) => ({
     task,
