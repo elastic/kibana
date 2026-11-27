@@ -89,7 +89,6 @@ export class RuleFormPage {
   }
 
   async clickFlyoutSave() {
-    await this.discoverAppMenu.dismissQuerySandboxIfOpen();
     // Details step validates the name field via Next, not Submit.
     if (await this.nameInput.isVisible()) {
       await this.waitForProceedButtonEnabled();
@@ -112,7 +111,6 @@ export class RuleFormPage {
   }
 
   private async waitForProceedButtonEnabled() {
-    await this.discoverAppMenu.dismissQuerySandboxIfOpen();
     await this.page.waitForFunction(() => {
       const next = document.querySelector(
         '[data-test-subj="composeDiscoverNext"]'
