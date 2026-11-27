@@ -355,10 +355,15 @@ describe('SetupWizard', () => {
       'complete'
     );
 
+    expect(screen.getByTestId('contextSetupWizardStep-a')).toHaveAttribute('aria-disabled', 'true');
     fireEvent.click(screen.getByTestId('contextSetupWizardStep-a'));
     expect(onStepChange).not.toHaveBeenCalled();
 
     act(() => reportBusy(false));
+    expect(screen.getByTestId('contextSetupWizardStep-a')).toHaveAttribute(
+      'aria-disabled',
+      'false'
+    );
     fireEvent.click(screen.getByTestId('contextSetupWizardStep-a'));
 
     expect(onStepChange).toHaveBeenCalledWith('a');

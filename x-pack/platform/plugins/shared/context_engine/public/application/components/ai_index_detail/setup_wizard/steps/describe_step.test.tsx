@@ -19,8 +19,8 @@ const { useSaveAiIndexDescription } = jest.requireMock(
 
 const mockSaveDescription = jest.fn();
 
-const renderStep = ({ aiIndex = testAiIndex, isDone = false } = {}) => {
-  const layout = createTestLayoutControls(describeStep, { isDone });
+const renderStep = ({ aiIndex = testAiIndex, isDone = false, isBusy = false } = {}) => {
+  const layout = createTestLayoutControls(describeStep, { isDone, isBusy });
   const { Content } = describeStep;
   renderWithServices(
     <Content aiIndex={aiIndex} onSaved={jest.fn()} onBusyChange={jest.fn()} layout={layout} />
@@ -106,6 +106,12 @@ describe('describeStep', () => {
 
     expect(screen.queryByText('Enter a description.')).not.toBeInTheDocument();
     expect(screen.getByTestId('contextSetupWizardContinue')).toBeEnabled();
+  });
+
+  it('locks the description while the wizard saves', () => {
+    renderStep({ isBusy: true });
+
+    expect(screen.getByTestId('contextSetupWizardDescription')).toBeDisabled();
   });
 
   it('Continue saves the trimmed description', async () => {

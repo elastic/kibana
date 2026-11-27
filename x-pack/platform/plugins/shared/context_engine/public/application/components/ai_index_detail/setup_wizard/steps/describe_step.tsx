@@ -43,6 +43,8 @@ const DescribeStepContent = ({ aiIndex, layout }: SetupWizardStepContentProps) =
         onChange={setDescription}
         error={isOnlySpaces ? blankDescriptionError : validation.error}
         warning={validation.warning}
+        // Text typed during the save would not be saved.
+        isDisabled={layout.isBusy}
         data-test-subj="contextSetupWizardDescription"
       />
     </SetupWizardStepLayout>

@@ -172,6 +172,8 @@ export const SetupWizard = ({
       ...(stepIndex < currentIndex &&
         !isDone && { 'aria-label': getSkippedStepLabel(stepIndex + 1, texts.stepTitle) }),
       onClick: () => goToStep(id),
+      // Not `disabled`: that would hide the step status while a save runs.
+      'aria-disabled': isBusy,
       'data-test-subj': `contextSetupWizardStep-${id}`,
       ...getEbtProps({
         element: CONTEXT_ENGINE_UI_EBT.element.aiIndexDetailPageSetupWizard,
