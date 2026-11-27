@@ -39,6 +39,7 @@ import {
 import { createSubjectsClient } from './subjects/services/subjects_client';
 import { createFindingsWriter } from './findings/findings_writer';
 import { createThreadConversationResolver } from './subjects/services/thread_conversation_resolver';
+import { createClaimedThreadAdmissionCheck } from './subjects/services/claimed_thread_admission';
 import { hypothesesAttachment, registerHypothesesAttachment } from './hypotheses/attachments';
 import { HypothesesService } from './hypotheses/services/hypotheses_service';
 import { createSetHypothesesTool } from './hypotheses/tools/set_hypotheses_tool';
@@ -144,6 +145,11 @@ export class AgenticInvestigationsPlugin
 
     agentBuilder.callbacks.registerConversationResolver(
       createThreadConversationResolver({
+        getSubjectsService: () => this.requireSubjectsService(),
+      })
+    );
+    agentBuilder.callbacks.registerOnBeforeNewConversation(
+      createClaimedThreadAdmissionCheck({
         getSubjectsService: () => this.requireSubjectsService(),
       })
     );

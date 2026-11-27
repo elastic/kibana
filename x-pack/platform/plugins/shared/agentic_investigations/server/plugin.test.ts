@@ -62,7 +62,10 @@ const setupPlugin = ({ escalationsEnabled }: { escalationsEnabled?: boolean } = 
   const workflowsExtensions = { registerStepDefinition: jest.fn() };
   const agentBuilder = {
     attachments: { registerType: jest.fn() },
-    callbacks: { registerConversationResolver: jest.fn() },
+    callbacks: {
+      registerConversationResolver: jest.fn(),
+      registerOnBeforeNewConversation: jest.fn(),
+    },
     conversationEvents: { register: jest.fn() },
     tools: { register: jest.fn() },
   };
@@ -243,6 +246,15 @@ describe('AgenticInvestigationsPlugin', () => {
 
       expect(agentBuilder.callbacks.registerConversationResolver).toHaveBeenCalledTimes(1);
       expect(agentBuilder.callbacks.registerConversationResolver).toHaveBeenCalledWith(
+        expect.any(Function)
+      );
+    });
+
+    it('registers the claimed Slack thread admission check during setup', () => {
+      const { agentBuilder } = setupPlugin();
+
+      expect(agentBuilder.callbacks.registerOnBeforeNewConversation).toHaveBeenCalledTimes(1);
+      expect(agentBuilder.callbacks.registerOnBeforeNewConversation).toHaveBeenCalledWith(
         expect.any(Function)
       );
     });
