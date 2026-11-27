@@ -17,7 +17,7 @@ spaceTest.describe(
     });
 
     spaceTest('unsaved changes guard', async ({ page, pageObjects, endpointPolicy }) => {
-      const { policySettings, policyDetailsUnsavedChangesModal } = pageObjects;
+      const { policySettings, policyDetailsUnsavedChangesModal, protectionUpdates } = pageObjects;
       let initialMalwareState = '';
 
       await spaceTest.step('a change to the form enables the save button', async () => {
@@ -49,6 +49,17 @@ spaceTest.describe(
         await expect(policyDetailsUnsavedChangesModal.modal).toBeVisible();
         await policyDetailsUnsavedChangesModal.continueWithoutSaving();
         await expect(page).toHaveURL(/\/protectionUpdates/);
+        await expect(protectionUpdates.title).toBeVisible();
+      });
+
+      await spaceTest.step('the discarded change is gone on the settings tab', async () => {
+        await protectionUpdates.openSettingsTab();
+        await expect(page).toHaveURL(/\/settings/);
+        await expect(policySettings.malwareProtectionSwitch).toHaveAttribute(
+          'aria-checked',
+          initialMalwareState
+        );
+        await expect(policySettings.saveButton).toBeDisabled();
       });
     });
   }
