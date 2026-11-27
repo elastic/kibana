@@ -94,6 +94,11 @@ export class HeadlessChromiumDriver {
   private interceptedCount = 0;
   private screenshottingErrorSubject = new Subject<Error>();
   readonly screenshottingError$ = this.screenshottingErrorSubject.asObservable();
+  private browserExitError?: Error;
+  private closedIntentionally = false;
+  private browserExitSubject = new Subject<Error>();
+  /** Emits once, when the browser closes or the page crashes while the page is in use. */
+  readonly browserExit$ = this.browserExitSubject.asObservable();
 
   constructor(
     private screenshotMode: ScreenshotModePluginSetup,
@@ -153,7 +158,29 @@ export class HeadlessChromiumDriver {
    * Let modules poll if Chrome is still running so they can short circuit if needed
    */
   isPageOpen() {
-    return !this.page.isClosed();
+    // Puppeteer only marks the page closed when its target is destroyed, which a crashed page or
+    // a dropped browser connection does not report.
+    return !this.browserExitError && !this.page.isClosed();
+  }
+
+  /** True once Kibana started closing the browser itself, which is not a browser failure. */
+  isClosedIntentionally() {
+    return this.closedIntentionally;
+  }
+
+  /** Records that Kibana is closing the browser itself, as it does when it is done or stopping. */
+  onIntentionalClose() {
+    this.closedIntentionally = true;
+  }
+
+  /** Records that the browser died, so work on the page fails as a closed browser. */
+  onBrowserExit(error: Error) {
+    // closing the browser ourselves also disconnects it
+    if (this.browserExitError || this.closedIntentionally) {
+      return;
+    }
+    this.browserExitError = error;
+    this.browserExitSubject.next(error);
   }
 
   /**

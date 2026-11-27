@@ -7,8 +7,9 @@
 
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { ConfigType } from '@kbn/screenshotting-server';
-import { interval, lastValueFrom, map, of, throwError } from 'rxjs';
+import { interval, lastValueFrom, map, of, Subject, throwError } from 'rxjs';
 import { createMockBrowserDriver } from '../browsers/mock';
+import * as errors from '../../common/errors';
 import { createMockLayout } from '../layouts/mock';
 import { EventLogger } from './event_logger';
 import type { ScreenshotObservableOptions } from './observable';
@@ -108,6 +109,18 @@ describe('ScreenshotObservableHandler', () => {
       );
     });
 
+    it('does not throw a closed browser error when Kibana closed the browser itself', () => {
+      browser.isPageOpen.mockReturnValue(false);
+      browser.isClosedIntentionally.mockReturnValue(true);
+
+      const check = () => screenshots.checkPageIsOpen();
+
+      expect(check).toThrowErrorMatchingInlineSnapshot(
+        `"Browser was closed by Kibana before the screenshots were captured."`
+      );
+      expect(check).not.toThrow(errors.BrowserClosedUnexpectedly);
+    });
+
     it('is a pass-through when the page is open', async () => {
       const test$ = of(234455).pipe(
         map((input) => {
@@ -117,6 +130,66 @@ describe('ScreenshotObservableHandler', () => {
       );
 
       await expect(lastValueFrom(test$)).resolves.toBe(234455);
+    });
+  });
+
+  describe('getScreenshots', () => {
+    const pageSetupResults = { elementsPositionAndAttributes: null, timeRange: null };
+    const getHandler = () =>
+      new ScreenshotObservableHandler(browser, config, eventLogger, layout, options);
+
+    it('returns the screenshots when the browser stays open', async () => {
+      const result = await lastValueFrom(of(pageSetupResults).pipe(getHandler().getScreenshots()));
+
+      expect(result.screenshots).toHaveLength(1);
+    });
+
+    it('fails with a capture error when the capture fails and the browser is still open', async () => {
+      browser.screenshot.mockRejectedValue(new Error('Protocol error: Internal error'));
+
+      const result = lastValueFrom(of(pageSetupResults).pipe(getHandler().getScreenshots()));
+
+      await expect(result).rejects.toBeInstanceOf(errors.FailedToCaptureScreenshot);
+    });
+
+    it('fails with a closed browser error when the capture fails because the browser closed', async () => {
+      browser.screenshot.mockImplementation(async () => {
+        browser.isPageOpen.mockReturnValue(false);
+        throw new Error('Protocol error (Page.captureScreenshot): Target closed');
+      });
+
+      const result = lastValueFrom(of(pageSetupResults).pipe(getHandler().getScreenshots()));
+
+      await expect(result).rejects.toBeInstanceOf(errors.BrowserClosedUnexpectedly);
+    });
+
+    it('does not fail with a closed browser error when the capture fails because Kibana closed the browser', async () => {
+      browser.screenshot.mockImplementation(async () => {
+        browser.isPageOpen.mockReturnValue(false);
+        browser.isClosedIntentionally.mockReturnValue(true);
+        throw new Error('Protocol error (Page.captureScreenshot): Target closed');
+      });
+
+      const result = lastValueFrom(of(pageSetupResults).pipe(getHandler().getScreenshots()));
+
+      await expect(result).rejects.not.toBeInstanceOf(errors.BrowserClosedUnexpectedly);
+      await expect(result).rejects.toMatchInlineSnapshot(
+        `[Error: Browser was closed by Kibana before the screenshots were captured.]`
+      );
+    });
+
+    it('fails with a closed browser error when the browser exits and the capture never settles', async () => {
+      const browserExit$ = new Subject<Error>();
+      browser = Object.assign(browser, { browserExit$ });
+      // a crashed page leaves the call pending
+      browser.screenshot.mockReturnValue(new Promise<Buffer>(() => {}));
+
+      const result = lastValueFrom(of(pageSetupResults).pipe(getHandler().getScreenshots()));
+      browserExit$.next(new errors.BrowserClosedUnexpectedly('Browser page crashed unexpectedly!'));
+
+      await expect(result).rejects.toMatchInlineSnapshot(
+        `[Error: Browser page crashed unexpectedly!]`
+      );
     });
   });
 });

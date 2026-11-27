@@ -7,6 +7,7 @@
 
 import type { Logger } from '@kbn/core/server';
 import { KibanaShuttingDownError } from '@kbn/reporting-common';
+import { isNonRetryableError } from './is_non_retryable_error';
 import type { SavedReport } from './store';
 
 export const MAX_DELAY_SECONDS = 30;
@@ -40,7 +41,7 @@ export const retryOnError = async ({
     return result;
   } catch (err) {
     // skip retry on certain errors
-    if (err instanceof KibanaShuttingDownError) {
+    if (err instanceof KibanaShuttingDownError || isNonRetryableError(err)) {
       throw err;
     }
 

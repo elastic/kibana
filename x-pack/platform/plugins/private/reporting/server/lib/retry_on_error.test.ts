@@ -8,7 +8,12 @@
 import { loggerMock } from '@kbn/logging-mocks';
 import { retryOnError } from './retry_on_error';
 import { SavedReport } from './store';
-import { KibanaShuttingDownError } from '@kbn/reporting-common';
+import {
+  BrowserUnexpectedlyClosedError,
+  KibanaShuttingDownError,
+  PdfWorkerOutOfMemoryError,
+} from '@kbn/reporting-common';
+import { errors } from '@kbn/screenshotting-plugin/common';
 
 const logger = loggerMock.create();
 const randomDelayMultiplier = 0.01;
@@ -107,6 +112,33 @@ describe('retryOnError', () => {
     expect(logger.info).not.toHaveBeenCalled();
     expect(logger.warn).not.toHaveBeenCalled();
     expect(logger.error).not.toHaveBeenCalled();
+    expect(setTimeout).not.toHaveBeenCalled();
+    expect(operationMock).toHaveBeenCalledTimes(1);
+  });
+
+  it.each([
+    ['the browser closed unexpectedly', new BrowserUnexpectedlyClosedError('browser closed')],
+    ['the PDF worker ran out of memory', new PdfWorkerOutOfMemoryError('out of memory')],
+  ])('does not retry if %s', async (_name, error) => {
+    const operationMock = jest.fn().mockRejectedValueOnce(error);
+
+    await expect(
+      retryOnError({ operation: operationMock, retries: 3, report, logger })
+    ).rejects.toBe(error);
+    expect(logger.info).not.toHaveBeenCalled();
+    expect(logger.warn).not.toHaveBeenCalled();
+    expect(logger.error).not.toHaveBeenCalled();
+    expect(setTimeout).not.toHaveBeenCalled();
+    expect(operationMock).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not retry if the browser closed unexpectedly in the screenshotting plugin', async () => {
+    const error = new errors.BrowserClosedUnexpectedly('browser closed');
+    const operationMock = jest.fn().mockRejectedValueOnce(error);
+
+    await expect(
+      retryOnError({ operation: operationMock, retries: 3, report, logger })
+    ).rejects.toBe(error);
     expect(setTimeout).not.toHaveBeenCalled();
     expect(operationMock).toHaveBeenCalledTimes(1);
   });

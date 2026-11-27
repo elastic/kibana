@@ -12,6 +12,14 @@ export const getChromiumDisconnectedError = () =>
     'Browser was closed unexpectedly! Check the server logs for more info.'
   );
 
+export const getChromiumClosedByKibanaError = () =>
+  new Error('Browser was closed by Kibana before the screenshots were captured.');
+
+export const getChromiumPageCrashedError = () =>
+  new errors.BrowserClosedUnexpectedly(
+    'Browser page crashed unexpectedly! Check the server logs for more info.'
+  );
+
 export const getDisallowedOutgoingUrlError = (interceptedUrl: string) =>
   new errors.DisallowedOutgoingUrl(
     `Received disallowed outgoing URL [${interceptedUrl}]! Check the server logs for more info.`

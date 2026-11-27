@@ -19,7 +19,7 @@ import type { Browser, ConsoleMessage, Page, PageEvents, Viewport } from 'puppet
 import { createInterface } from 'readline';
 import * as Rx from 'rxjs';
 import { catchError, concatMap, ignoreElements, map, mergeMap, reduce, takeUntil, tap } from 'rxjs';
-import { getChromiumDisconnectedError } from '..';
+import { getChromiumDisconnectedError, getChromiumPageCrashedError } from '..';
 import { errors } from '../../../../common';
 import type { PerformanceMetrics } from '../../../../common/types';
 import { safeChildProcess } from '../../safe_child_process';
@@ -190,17 +190,39 @@ export class HeadlessChromiumDriverFactory {
 
         logger.debug(`Browser page driver created`);
 
+        // HeadlessChromiumDriver: object to "drive" a browser page
+        const driver = new HeadlessChromiumDriver(
+          this.screenshotMode,
+          this.config,
+          this.basePath,
+          page
+        );
+
+        const pageExit$ = this.getPageExit(browser, page);
+
         const childProcess = {
           async kill(): Promise<ClosePageResult> {
             if (page.isClosed()) {
               return {};
             }
 
+            const isPageOpen = driver.isPageOpen();
+            // Set before anything is awaited. When Kibana is stopping, Puppeteer closes the browser
+            // on the same signal, so it can disconnect while the metrics are still being requested.
+            driver.onIntentionalClose();
+
             let metrics: PerformanceMetrics | undefined;
 
             try {
-              if (devTools && startMetrics) {
-                const endMetrics = await devTools.send('Performance.getMetrics');
+              // A crashed page never answers the metrics request, which would leave the browser
+              // open, whether it crashed before the request or while the request is pending.
+              if (devTools && startMetrics && isPageOpen) {
+                const endMetrics = await Rx.firstValueFrom(
+                  Rx.merge(
+                    Rx.from(devTools.send('Performance.getMetrics')),
+                    pageExit$.pipe(mergeMap((error) => Rx.throwError(() => error)))
+                  )
+                );
                 metrics = getMetrics(startMetrics, endMetrics);
                 const { cpuInPercentage, memoryInMegabytes } = metrics;
 
@@ -249,15 +271,11 @@ export class HeadlessChromiumDriverFactory {
         this.getBrowserLogger(page, logger).subscribe();
         this.getProcessLogger(browser, logger).subscribe();
 
-        // HeadlessChromiumDriver: object to "drive" a browser page
-        const driver = new HeadlessChromiumDriver(
-          this.screenshotMode,
-          this.config,
-          this.basePath,
-          page
-        );
+        // Watched for as long as the page is in use. `error$` is only watched while the page is
+        // set up, so on its own it misses a browser that dies while the screenshots are captured.
+        observer.add(pageExit$.subscribe((error) => driver.onBrowserExit(error)));
 
-        const error$ = Rx.concat(driver.screenshottingError$, this.getPageExit(browser, page)).pipe(
+        const error$ = Rx.merge(driver.screenshottingError$, driver.browserExit$).pipe(
           mergeMap((err) => Rx.throwError(err))
         );
 
@@ -374,9 +392,14 @@ export class HeadlessChromiumDriverFactory {
     }
 
     // just log closing of the process
-    const processClose$ = Rx.fromEvent<void>(childProcess, 'close').pipe(
-      tap(() => {
-        logger.get('headless-browser-process').debug('child process closed');
+    const processClose$ = Rx.fromEvent<[number | null, NodeJS.Signals | null]>(
+      childProcess,
+      'close'
+    ).pipe(
+      map(([code, signal]) => {
+        logger
+          .get('headless-browser-process')
+          .debug(`child process closed [code: ${code}] [signal: ${signal}]`);
       })
     );
 
@@ -384,8 +407,9 @@ export class HeadlessChromiumDriverFactory {
   }
 
   getPageExit(browser: Browser, page: Page): Rx.Observable<Error> {
+    // Puppeteer only emits a page `error` event when the page crashes
     const pageError$ = this.getPageEventAsObservable(page, 'error').pipe(
-      map((err) => new Error(`Reporting encountered an error: ${err.toString()}`))
+      map(() => getChromiumPageCrashedError())
     );
 
     const browserDisconnect$ = Rx.fromEvent(browser, 'disconnected').pipe(
