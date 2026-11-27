@@ -7,7 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-/**
- * Defines settings for the elasticsearch-js client used for the SO migrations
- */
-export const MIGRATION_CLIENT_OPTIONS = { maxRetries: 0, requestTimeout: 310_000 };
+export { MIGRATION_CLIENT_OPTIONS } from '@kbn/core-saved-objects-migration-server-internal';
