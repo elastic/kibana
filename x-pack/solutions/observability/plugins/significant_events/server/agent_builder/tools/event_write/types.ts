@@ -44,7 +44,7 @@ interface EventsWriteResultBase {
   status: SignificantEvent['status'];
   written: true;
   /** Set when the stored title and symptom_hypothesis were preserved because this continuation
-   *  introduced no new rule UUIDs — preventing identity hijack by an unrelated condition. */
+   *  introduced no new confirming rule UUIDs — preventing identity hijack by an unrelated condition. */
   narrative_preserved?: true;
   severity: Severity;
 }
@@ -127,7 +127,7 @@ export interface EventsWriteFailureResult {
   /** Absent: a rejected item never reached the lifecycle. */
   status?: SignificantEvent['status'];
   written: false;
-  reason: 'bulk_error' | 'duplicate_in_batch' | 'superseded' | 'unknown_event_id';
+  reason: 'bulk_error' | 'duplicate_in_batch' | 'superseded' | 'unknown_event_id' | 'rejected_item';
   error: CompactBulkError;
 }
 

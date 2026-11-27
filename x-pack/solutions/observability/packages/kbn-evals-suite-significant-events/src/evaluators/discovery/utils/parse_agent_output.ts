@@ -39,7 +39,8 @@ type EventsWriteItemResult =
         | 'duplicate_in_batch'
         | 'superseded'
         | 'unchanged_outcome'
-        | 'unknown_event_id';
+        | 'unknown_event_id'
+        | 'rejected_item';
       existing_event_id?: string;
       status?: SignificantEventStatus;
       severity?: Severity;

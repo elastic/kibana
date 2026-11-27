@@ -602,11 +602,16 @@ rules were written.
      and none states what a description or another field contradicts.
 4. **Call `platform_sig_events_events_write` once**, alone in its own tool-call group after every
    other call has returned. When Step 5 leaves no item to write, make no call.
-   If the call returns `tool_validation_error` (or `Pass items…`), retry exactly once:
+   If the call returns `tool_validation_error` (or `Pass items…`), the arguments never reached
+   the write. Retry exactly once:
    1. Read the field paths the error lists.
    2. Correct only those fields. An item the error says is not eligible is dropped, and its
       `rule_uuid`s go to `written_rule_uuids`.
    3. Call again with the complete object, never an empty one.
+
+   A result of `validation_error` is a different failure: the write ran and refused the call.
+   Do not retry it, and do not resend the items. An item result of `rejected_item` refuses that
+   item alone; the other items of the call were written. Do not resend any item.
 
    Any other rejection: do not retry.
 
@@ -621,6 +626,7 @@ rules were written.
    | `skipped`, `rule_held_by_event` (returns `existing_event_id`, `held_rules`) | only as **Rule held by another event** says | only when its re-send is `written: true` or `unchanged_outcome` |
    | `bulk_error` | once, unchanged | only if the retry succeeds |
    | `unknown_event_id` | no; do not rerun routing, pick another event, reuse the ID, or drop it into a new event | no |
+   | `rejected_item` — this item's detection metadata or topology was refused; the other items of the call stand | no | no |
    | `superseded` — another writer changed the event first | no | no |
    | `duplicate_in_batch` or any other failure | no | no |
 

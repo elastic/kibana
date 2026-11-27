@@ -38,8 +38,7 @@ import {
   eventsWriteResultEventId,
 } from '../alert_identity_telemetry';
 import {
-  BulkWriteError,
-  createBulkWriteValidationError,
+  createBulkWriteOutcomeUnknownError,
   getBulkWriteToolErrorCode,
   MAX_BULK_WRITE_ITEMS,
 } from '../bulk_write';
@@ -49,7 +48,12 @@ import { SIGNIFICANT_EVENTS_DISCOVERY_AGENT_ID } from '../../agents/discovery/di
 import { eventsWriteBulkHandler, type EventsWriteInput } from './handler';
 import { loadSourceCatalog, toSourceRef } from '../../utils/resolve_source_slugs';
 import { assignStoredSourceIds } from '../../utils/stored_source_fields';
-import { fillDetectionMetadata } from './detection_metadata';
+import {
+  fillDetectionMetadata,
+  type ItemPreparationRejection,
+  type PreparedWriteItem,
+} from './detection_metadata';
+import type { EventsWriteBulkResult } from './types';
 import { hasEventWorthySignal } from './event_facts';
 
 export const SIGNIFICANT_EVENTS_EVENTS_WRITE_TOOL_ID = platformSignificantEventsTools.eventsWrite;
@@ -217,15 +221,41 @@ export const eventsWriteSchema = lazySchema(() =>
 
 export type EventsWriteParams = z.infer<typeof eventsWriteSchema>;
 
+/** The item a caller named, kept beside its place in the request so a rejection can name it. */
+type IndexedWriteItem = PreparedWriteItem<EventsWriteInput>;
+
+const rejectedItemResult = (
+  rejection: ItemPreparationRejection,
+  eventId: string | undefined
+): EventsWriteBulkResult => ({
+  index: rejection.index,
+  event_id: eventId && eventId.length > 0 ? eventId : 'unknown',
+  written: false,
+  reason: 'rejected_item',
+  error: {
+    type: rejection.reason,
+    reason: rejection.message,
+    status: 400,
+  },
+});
+
+const unresolvedFeatureMessage = (featureIds: string[]): string =>
+  `feature_id ${featureIds
+    .map((id) => JSON.stringify(id))
+    .join(
+      ', '
+    )} is not a Knowledge Indicator id. Copy each feature_id exactly as ki_search returned it (no prefix, no change of case), or leave that node out.`;
+
 const enrichCausalFeatures = async (
-  items: EventsWriteInput[],
+  indexedItems: IndexedWriteItem[],
   getKnowledgeIndicatorClient: () => Promise<KnowledgeIndicatorClient>,
   logger: Logger
-): Promise<EventsWriteInput[]> => {
+): Promise<{ items: IndexedWriteItem[]; rejections: ItemPreparationRejection[] }> => {
+  const items = indexedItems.map(({ item }) => item);
   const causalFeatures = items.flatMap(({ causal_features: features = [] }) => features);
   const blastRadiusEntries = items.flatMap(({ blast_radius: entries = [] }) => entries);
   if (causalFeatures.length === 0 && blastRadiusEntries.length === 0) {
-    return items;
+    return { items: indexedItems, rejections: [] };
   }
 
   try {
@@ -282,37 +312,31 @@ const enrichCausalFeatures = async (
     };
 
     // A feature_id that names no Knowledge Indicator of a source that has some cannot be matched by
-    // a later topology search, so it is refused rather than written.
-    const unresolved = [
+    // a later topology search, so that item is refused. The other items are still written.
+    const unresolvedOf = (item: EventsWriteInput): string[] => [
       ...new Set(
-        items.flatMap((item) =>
-          [...(item.causal_features ?? []), ...(item.blast_radius ?? [])].flatMap((reference) =>
-            resolveFeature(reference.feature_id, reference.source_id, item.source_ids)
-              ? []
-              : [reference.feature_id]
-          )
+        [...(item.causal_features ?? []), ...(item.blast_radius ?? [])].flatMap((reference) =>
+          resolveFeature(reference.feature_id, reference.source_id, item.source_ids)
+            ? []
+            : [reference.feature_id]
         )
       ),
     ];
-    if (unresolved.length > 0) {
+    const unresolvedItems = indexedItems.flatMap((entry) => {
+      const unresolvedIds = unresolvedOf(entry.item);
+      return unresolvedIds.length > 0 ? [{ index: entry.index, unresolvedIds }] : [];
+    });
+    let sourcesHaveFeatures = false;
+    if (unresolvedItems.length > 0) {
       const { hits: anyFeature } = await kiClient.getFeatures(sourceIds, {
         limit: 1,
         includeExcluded: true,
         includeExpired: true,
       });
-      if (anyFeature.length > 0) {
-        throw createBulkWriteValidationError(
-          `feature_id ${unresolved
-            .map((id) => JSON.stringify(id))
-            .join(
-              ', '
-            )} is not a Knowledge Indicator id. Copy each feature_id exactly as ki_search returned it (no prefix, no change of case), or leave that node out.`,
-          { reason: 'unresolved_feature_reference', count: unresolved.length }
-        );
-      }
+      sourcesHaveFeatures = anyFeature.length > 0;
     }
-
-    return items.map((item) => ({
+    const refused = new Set(sourcesHaveFeatures ? unresolvedItems.map(({ index }) => index) : []);
+    const enrichItem = (item: EventsWriteInput): EventsWriteInput => ({
       ...item,
       causal_features: item.causal_features?.map((causalFeature) => {
         const feature = resolveFeature(
@@ -341,12 +365,24 @@ const enrichCausalFeatures = async (
             }
           : entry;
       }),
-    }));
+    });
+
+    return {
+      items: indexedItems.flatMap((entry) =>
+        refused.has(entry.index) ? [] : [{ index: entry.index, item: enrichItem(entry.item) }]
+      ),
+      rejections: sourcesHaveFeatures
+        ? unresolvedItems.map(({ index, unresolvedIds }) => ({
+            index,
+            reason: 'unresolved_feature_reference',
+            message: unresolvedFeatureMessage(unresolvedIds),
+          }))
+        : [],
+    };
   } catch (error) {
-    if (error instanceof BulkWriteError) throw error;
     const message = error instanceof Error ? error.message : 'Unknown error';
     logger.warn(`Failed to enrich causal features; writing them unenriched: ${message}`);
-    return items;
+    return { items: indexedItems, rejections: [] };
   }
 };
 
@@ -369,8 +405,11 @@ export function createEventsWriteTool({
       \`{ "items": [ ... ] }\` with at least one event item. Never pass \`{}\` or
       \`{ "items": [] }\`. If that missing-items argument error occurs, submit the
       already-completed object once. Retry a populated payload rejected with
-      \`tool_validation_error\` once, correcting only the listed fields; do not retry any other
-      rejection. If a completed item returns \`unknown_event_id\`,
+      \`tool_validation_error\` once, correcting only the listed fields. That name is the schema
+      check, before this tool runs. A \`validation_error\` from this tool is a different failure:
+      do not retry it. An item returned with reason \`rejected_item\` was refused on its own and
+      the other items were written; do not resend the batch, and leave that item's rules
+      unprocessed. Do not retry any other rejection. If a completed item returns \`unknown_event_id\`,
       do not retry that item in this run. Do not rerun routing, choose another event, reuse the
       rejected ID, or omit the ID to turn it into a new event. Discovery must leave its rules
       unprocessed so the next cycle routes them again from fresh search results.
@@ -383,8 +422,8 @@ export function createEventsWriteTool({
       Signals and topology are merged with prior versions. \`severity\` is your verdict under
       its field contract, decided from the merged evidence. The response reports the tier actually
       stored. No-op if the stored severity and status are unchanged (written: false, reason:
-      unchanged_outcome). When no new rule UUIDs are introduced and no rule moves from another
-      verdict to confirms, title and symptom_hypothesis are frozen to the stored values
+      unchanged_outcome). When no new confirming rule UUIDs are introduced and no rule moves from
+      another verdict to confirms, title and symptom_hypothesis are frozen to the stored values
       (narrative_preserved: true is returned).
 
       **Without event_id**: find-or-create. When the item has confirmed rules, scans all
@@ -448,7 +487,7 @@ export function createEventsWriteTool({
         await assertCanManageSignificantEvents({ request, server });
         const catalog = await loadSourceCatalog(sourcesClient);
         const detectionClient = await getDetectionClient();
-        const identifiedItems = await fillDetectionMetadata({
+        const identified = await fillDetectionMetadata({
           items: toolParams.items,
           findDetections: async (detectionIds) => {
             const found = await detectionClient.findByIds(detectionIds);
@@ -458,38 +497,79 @@ export function createEventsWriteTool({
             return found;
           },
         });
-        const resolvedItems = identifiedItems.map((item) => ({
-          ...assignStoredSourceIds(catalog, item),
-          workflow_execution_id: workflowExecutionId,
+        const resolvedItems = identified.items.map(({ index, item }) => ({
+          index,
+          item: {
+            ...assignStoredSourceIds(catalog, item),
+            workflow_execution_id: workflowExecutionId,
+          },
         }));
-        storedItems = resolvedItems;
-        const items = await enrichCausalFeatures(
+        storedItems = resolvedItems.map(({ item }) => item);
+        const enriched = await enrichCausalFeatures(
           resolvedItems,
           getKnowledgeIndicatorClient,
           logger
         );
-
-        const eventSearchClient = await getEventSearchClient();
-        const data = await eventsWriteBulkHandler({
-          eventSearchClient,
-          inputs: items,
-          rejectUnknownEventIds:
-            getAgentFromRunContext(context.runContext)?.agentId ===
-            SIGNIFICANT_EVENTS_DISCOVERY_AGENT_ID,
-          resolveSeverities: (events) =>
-            server.severitySync.resolveSeverities({
-              request,
-              eventClient: eventSearchClient,
-              events,
-            }),
-          logger,
+        const rejections = [...identified.rejections, ...enriched.rejections];
+        rejections.forEach((rejection) => {
+          logger.debug(`events_write refused an item: ${rejection.reason}`);
         });
 
+        const eventSearchClient = await getEventSearchClient();
+        const written =
+          enriched.items.length === 0
+            ? []
+            : await eventsWriteBulkHandler({
+                eventSearchClient,
+                inputs: enriched.items.map(({ item }) => item),
+                rejectUnknownEventIds:
+                  getAgentFromRunContext(context.runContext)?.agentId ===
+                  SIGNIFICANT_EVENTS_DISCOVERY_AGENT_ID,
+                resolveSeverities: (events) =>
+                  server.severitySync.resolveSeverities({
+                    request,
+                    eventClient: eventSearchClient,
+                    events,
+                  }),
+                logger,
+              });
+        const prepared = new Map(resolvedItems.map(({ index, item }) => [index, item]));
+        const slotted: Array<EventsWriteBulkResult | undefined> = Array.from({
+          length: toolParams.items.length,
+        });
+        written.forEach((result) => {
+          const original = enriched.items[result.index];
+          if (original === undefined) {
+            throw createBulkWriteOutcomeUnknownError(
+              'events_write results were not aligned with every input'
+            );
+          }
+          slotted[original.index] = { ...result, index: original.index };
+        });
+        rejections.forEach((rejection) => {
+          slotted[rejection.index] = rejectedItemResult(
+            rejection,
+            toolParams.items[rejection.index]?.event_id
+          );
+        });
+        const data = slotted.filter(
+          (result): result is EventsWriteBulkResult => result !== undefined
+        );
+        if (data.length !== toolParams.items.length) {
+          throw createBulkWriteOutcomeUnknownError(
+            'events_write results were not aligned with every input'
+          );
+        }
+
         data.forEach((result) => {
-          const input = resolvedItems[result.index];
-          if (input === undefined) return;
+          const input = prepared.get(result.index);
           const isSkipped = !result.written && 'skipped' in result;
-          const isBulkError = !result.written && 'error' in result;
+          const errorMessage =
+            !result.written && 'error' in result
+              ? result.reason === 'rejected_item'
+                ? result.error.type
+                : result.error.reason
+              : undefined;
           trackTelemetryBestEffort({
             logger,
             description: 'events_write telemetry',
@@ -499,16 +579,16 @@ export function createEventsWriteTool({
                   workflow_execution_id: workflowExecutionId,
                   ...alertCreationAttemptIdentity({
                     spaceId: request.spaceId,
-                    eventId: eventsWriteResultEventId(result, input.event_id),
+                    eventId: eventsWriteResultEventId(result, input?.event_id),
                     groupHash: result.written && result.created ? result.group_hash : undefined,
                   }),
                   success: result.written || isSkipped,
                   event_id: result.event_id ?? 'unknown',
                   status: result.status,
                   written: result.written,
-                  source_ids: input.source_ids,
-                  ...detectionRunsOf(input),
-                  error_message: isBulkError ? result.error.reason : undefined,
+                  source_ids: input?.source_ids ?? [],
+                  ...(input ? detectionRunsOf(input) : {}),
+                  error_message: errorMessage,
                   ...(result.written ? { severity: result.severity } : {}),
                 },
                 request
@@ -522,7 +602,7 @@ export function createEventsWriteTool({
               type: ToolResultType.other,
               data: {
                 results: data.map((result) => {
-                  const input = resolvedItems[result.index];
+                  const input = prepared.get(result.index);
                   if (!input) {
                     return result;
                   }
