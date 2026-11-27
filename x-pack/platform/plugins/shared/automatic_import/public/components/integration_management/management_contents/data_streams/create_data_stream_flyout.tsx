@@ -598,8 +598,8 @@ export const CreateDataStreamFlyout: React.FC<CreateDataStreamFlyoutProps> = ({ 
               const errors = fileError
                 ? [fileError]
                 : logsSourceOption === 'file'
-                ? getFieldErrorMessages(field)
-                : [];
+                  ? getFieldErrorMessages(field)
+                  : [];
               return (
                 <EuiFormRow fullWidth isInvalid={errors.length > 0} error={errors}>
                   <EuiFilePicker
@@ -635,8 +635,8 @@ export const CreateDataStreamFlyout: React.FC<CreateDataStreamFlyoutProps> = ({ 
               const errors = indexValidationError
                 ? [indexValidationError]
                 : logsSourceOption === 'index'
-                ? getFieldErrorMessages(field)
-                : [];
+                  ? getFieldErrorMessages(field)
+                  : [];
               return (
                 <EuiFormRow fullWidth isInvalid={errors.length > 0} error={errors}>
                   <EuiComboBox

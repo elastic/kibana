@@ -22,8 +22,8 @@ const setup = ({
   const createDirectly = jest.fn().mockResolvedValue(proposal);
   const { create, assertAvailable } = createProposalCreator({
     getProposalsService: () =>
-      ({ findByWorkflowExecutionId, create: createDirectly, assertActionProposable } as never),
-    getWorkflowsApi: () => ({ isWorkflowsAvailable, executeWorkflow } as never),
+      ({ findByWorkflowExecutionId, create: createDirectly, assertActionProposable }) as never,
+    getWorkflowsApi: () => ({ isWorkflowsAvailable, executeWorkflow }) as never,
     privileges: { assertCanManage } as never,
     wait: { timeoutMs: 20, intervalMs: 5 },
   });

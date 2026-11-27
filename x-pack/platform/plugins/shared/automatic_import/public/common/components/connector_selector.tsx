@@ -127,7 +127,7 @@ const ConnectorField: React.FC<ConnectorFieldProps> = ({
       return;
     }
     const isSelectedAvailable = connectors.some(({ id }) => id === selectedId);
-    const nextId = isSelectedAvailable ? selectedId : defaultConnectorId ?? '';
+    const nextId = isSelectedAvailable ? selectedId : (defaultConnectorId ?? '');
     if (nextId !== selectedId) {
       setFieldValue(nextId);
     }
@@ -232,7 +232,7 @@ const ConnectorField: React.FC<ConnectorFieldProps> = ({
       {isLoading ? (
         <EuiLoadingSpinner size="s" data-test-subj="connectorSelectorLoading" />
       ) : (
-        displayFancy?.(buttonLabel, selectedOrDefaultConnector) ?? buttonLabel
+        (displayFancy?.(buttonLabel, selectedOrDefaultConnector) ?? buttonLabel)
       )}
     </EuiButton>
   );

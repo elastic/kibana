@@ -542,22 +542,20 @@ describe('ConversationDetailsFlyoutContent', () => {
 
   it('keeps other open flyouts for the template mounted when one fails to render', async () => {
     const consoleError = jest.spyOn(console, 'error').mockImplementation(() => {});
-    const load = jest.fn(
-      async (): Promise<ConversationTemplateDetailsFlyoutModule> => ({
-        useDetailsFlyout: ({ conversation }) => {
-          const [clicks, setClicks] = useState(0);
-          if (conversation.id === 'broken') {
-            throw new Error('render failed');
-          }
-          return {
-            header: { title: conversation.title },
-            footer: {
-              primary: { label: `Clicked ${clicks}`, onClick: () => setClicks(clicks + 1) },
-            },
-          };
-        },
-      })
-    );
+    const load = jest.fn(async (): Promise<ConversationTemplateDetailsFlyoutModule> => ({
+      useDetailsFlyout: ({ conversation }) => {
+        const [clicks, setClicks] = useState(0);
+        if (conversation.id === 'broken') {
+          throw new Error('render failed');
+        }
+        return {
+          header: { title: conversation.title },
+          footer: {
+            primary: { label: `Clicked ${clicks}`, onClick: () => setClicks(clicks + 1) },
+          },
+        };
+      },
+    }));
     const service = createService({ detailsFlyout: { load } });
     const healthy = createConversation({ id: 'healthy', title: 'Healthy' });
 

@@ -31,7 +31,7 @@ const buildConversation = (attachments?: VersionedAttachment[]) =>
     title: 'Escalation',
     metadata: { linked_investigations: ['investigation-1'] },
     attachments,
-  } as unknown as Conversation);
+  }) as unknown as Conversation;
 
 const renderSlot = ({
   attachments,

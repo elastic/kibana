@@ -42,10 +42,10 @@ const toolCall = (
     tool_id: 'my_tool',
     params: {},
     results,
-  } as unknown as ConversationRoundStep);
+  }) as unknown as ConversationRoundStep;
 
 const reasoning = (text: string): ConversationRoundStep =>
-  ({ type: ConversationRoundStepType.reasoning, reasoning: text } as ConversationRoundStep);
+  ({ type: ConversationRoundStepType.reasoning, reasoning: text }) as ConversationRoundStep;
 
 const createRound = (overrides: Partial<ConversationRound> = {}): ConversationRound => ({
   id: 'round-1',

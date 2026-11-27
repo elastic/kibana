@@ -35,7 +35,7 @@ jest.mock('../../field_library/hooks/use_get_field_definitions', () => ({
 import { useRefFieldCompletion } from './use_ref_field_completion';
 
 const field = (name: string, isGlobal = false): FieldDefinition =>
-  ({ fieldDefinitionId: name, name, definition: '', owner: 'cases', isGlobal } as FieldDefinition);
+  ({ fieldDefinitionId: name, name, definition: '', owner: 'cases', isGlobal }) as FieldDefinition;
 
 const createEditor = (uri: string) =>
   ({
@@ -44,7 +44,7 @@ const createEditor = (uri: string) =>
       getValueInRange: () => '  - $ref: roo',
     }),
     // eslint-disable-next-line @typescript-eslint/no-explicit-any -- partial Monaco editor test double
-  } as any);
+  }) as any;
 
 const getRegisteredProvider = () => mockRegisterCompletionItemProvider.mock.calls[0][1];
 

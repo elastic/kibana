@@ -30,14 +30,14 @@ const mockFetchOk = (body: string) =>
     ok: true,
     status: 200,
     text: jest.fn().mockResolvedValue(body),
-  } as any);
+  }) as any;
 
 const mockFetchError = (status: number) =>
   ({
     ok: false,
     status,
     text: jest.fn().mockResolvedValue(''),
-  } as any);
+  }) as any;
 
 beforeEach(() => {
   loggerMock.clear(mockLogger);

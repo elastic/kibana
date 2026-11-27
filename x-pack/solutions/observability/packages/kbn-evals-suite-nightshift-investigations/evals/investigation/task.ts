@@ -151,8 +151,8 @@ const roundInterruptionError = (rounds: ConversationRound[]): string | undefined
 const isPersisted = (conversation: { rounds: ConversationRound[] } | undefined): boolean =>
   Boolean(
     conversation &&
-      conversation.rounds.length > 0 &&
-      conversation.rounds.every(({ status }) => status !== ConversationRoundStatus.inProgress)
+    conversation.rounds.length > 0 &&
+    conversation.rounds.every(({ status }) => status !== ConversationRoundStatus.inProgress)
   );
 
 /**
@@ -302,8 +302,8 @@ export const runInvestigation = async (
         const waited = !investigation
           ? `Investigation was not created within ${minutes} minutes`
           : agentStillWorking
-          ? `${STILL_IN_PROGRESS_ERROR_PREFIX}${minutes} minutes`
-          : `${MISSING_CONVERSATION_ERROR_PREFIX}${minutes} minutes`;
+            ? `${STILL_IN_PROGRESS_ERROR_PREFIX}${minutes} minutes`
+            : `${MISSING_CONVERSATION_ERROR_PREFIX}${minutes} minutes`;
         throw new Error(
           lastTransient ? `${waited}. Last read failed: ${errorMessage(lastTransient)}` : waited
         );
@@ -372,7 +372,9 @@ export const runInvestigation = async (
     output.usage = extractUsage(conversation.rounds);
     output.tool_call_count = countToolCalls(conversation.rounds);
     output.traceId = conversation.rounds
-      .flatMap(({ trace_id: traceId }) => (typeof traceId === 'string' ? [traceId] : traceId ?? []))
+      .flatMap(({ trace_id: traceId }) =>
+        typeof traceId === 'string' ? [traceId] : (traceId ?? [])
+      )
       .filter(Boolean)
       .at(-1);
     const accessedTrees = extractAccessedDecisionTrees(conversation.rounds);

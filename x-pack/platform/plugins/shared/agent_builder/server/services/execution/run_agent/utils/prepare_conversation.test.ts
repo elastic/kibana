@@ -1207,7 +1207,7 @@ describe('prepareConversation', () => {
         type: 'text_note',
         payloadSchema: {} as ConversationEventTypeDefinition['payloadSchema'],
         ...(format ? { format } : {}),
-      } as ConversationEventTypeDefinition);
+      }) as ConversationEventTypeDefinition;
 
     const timelineWithNote = () => [
       ...timelineFromRounds([

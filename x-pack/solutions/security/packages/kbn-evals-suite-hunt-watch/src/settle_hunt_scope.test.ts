@@ -19,7 +19,7 @@ const buildClient = (createDataStream: jest.Mock) =>
   ({
     indices: { createDataStream },
     cluster: { health: jest.fn().mockResolvedValue({ status: 'yellow' }) },
-  } as unknown as Client);
+  }) as unknown as Client;
 
 describe('settleHuntScope', () => {
   const log = new ToolingLog();

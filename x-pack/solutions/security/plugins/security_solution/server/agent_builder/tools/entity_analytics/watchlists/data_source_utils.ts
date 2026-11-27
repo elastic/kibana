@@ -18,7 +18,7 @@ import { RuleBasedSourceType } from '../../../../lib/entity_analytics/watchlists
 const STORE_PREVIEW_SAMPLE_SIZE = 5;
 
 const getTotalHits = (total: estypes.SearchHitsMetadata['total']): number =>
-  typeof total === 'number' ? total : total?.value ?? 0;
+  typeof total === 'number' ? total : (total?.value ?? 0);
 
 /**
  * Runs the `store`-type entity source's `queryRule` against the entity store, exactly as the

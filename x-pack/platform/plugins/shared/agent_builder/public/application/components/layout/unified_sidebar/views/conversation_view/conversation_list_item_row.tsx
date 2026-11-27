@@ -180,10 +180,12 @@ export const ConversationListItemRow: React.FC<ConversationListItemRowProps> = (
         background-color: ${bg};
       }
 
-      ${(isActive || isPopoverOpen) &&
-      css`
-        background-color: ${bg};
-      `}
+      ${
+        (isActive || isPopoverOpen) &&
+        css`
+          background-color: ${bg};
+        `
+      }
 
       .${ACTIONS_CLASS} {
         opacity: ${isPopoverOpen ? 1 : 0};

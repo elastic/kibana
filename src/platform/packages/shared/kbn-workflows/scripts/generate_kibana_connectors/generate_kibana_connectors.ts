@@ -27,8 +27,8 @@ import type { HttpMethod } from '../../types/latest';
 import {
   camelToSnake,
   type ContractMeta,
-  eslintFixGeneratedCode,
   formatDuration,
+  formatGeneratedCode,
   generateContractBlock,
   generateOutputSchemaString,
   generateParameterTypes,
@@ -49,8 +49,8 @@ export async function run() {
   validateIncludedOperations(contracts);
   await generateZodSchemas(contracts);
   saveKibanaConnectors(contracts);
-  eslintFixGeneratedCode({
-    paths: [
+  await formatGeneratedCode({
+    patterns: [
       KIBANA_CONTRACTS_OUTPUT_FILE_PATH,
       `${KIBANA_GENERATED_OUTPUT_FOLDER_PATH}/kibana*.gen.ts`,
     ],

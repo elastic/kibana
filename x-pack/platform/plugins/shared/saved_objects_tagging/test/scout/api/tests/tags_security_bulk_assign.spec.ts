@@ -29,9 +29,8 @@ apiTest.describe(
 
     apiTest.beforeAll(async ({ requestAuth }) => {
       privilegedUserCredentials = await requestAuth.getApiKeyForPrivilegedUser();
-      soManagementWriteCredentials = await requestAuth.getApiKeyForCustomRole(
-        SO_MANAGEMENT_WRITE_ROLE
-      );
+      soManagementWriteCredentials =
+        await requestAuth.getApiKeyForCustomRole(SO_MANAGEMENT_WRITE_ROLE);
       viewerCredentials = await requestAuth.getApiKeyForViewer();
       dashboardWriteCredentials = await requestAuth.getApiKeyForCustomRole(DASHBOARD_WRITE_ROLE);
       visualizeWriteCredentials = await requestAuth.getApiKeyForCustomRole(VISUALIZE_WRITE_ROLE);

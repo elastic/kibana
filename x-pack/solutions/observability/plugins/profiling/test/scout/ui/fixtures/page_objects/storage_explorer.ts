@@ -11,7 +11,10 @@ import { EXTENDED_TIMEOUT } from '..';
 
 export class ProfilingStorageExplorerPage {
   public otelNotSupportedCallout: Locator;
-  constructor(public readonly page: ScoutPage, private readonly kbnUrl: KibanaUrl) {
+  constructor(
+    public readonly page: ScoutPage,
+    private readonly kbnUrl: KibanaUrl
+  ) {
     this.otelNotSupportedCallout = this.page.getByTestId(
       'profilingStorageExplorerOtelNotSupportedCallout'
     );

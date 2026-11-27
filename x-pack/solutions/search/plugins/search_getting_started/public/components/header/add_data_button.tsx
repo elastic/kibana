@@ -8,6 +8,7 @@ import React, { useState } from 'react';
 import { EuiButton, EuiContextMenuPanel, EuiContextMenuItem, EuiPopover } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
+import { getAddDataPath } from '../../common/add_data_path';
 import { useKibana } from '../../hooks/use_kibana';
 
 export const AddDataButton: React.FC = () => {
@@ -33,7 +34,7 @@ export const AddDataButton: React.FC = () => {
       data-test-subj="gettingStartedUploadMenuItem"
       onClick={() => {
         closePopover();
-        application.navigateToApp('home', { path: '#/tutorial_directory/fileDataViz' });
+        application.navigateToApp('home', { path: getAddDataPath('fileDataViz') });
       }}
     >
       {i18n.translate('xpack.searchGettingStarted.addDataButton.uploadFile', {
@@ -46,7 +47,7 @@ export const AddDataButton: React.FC = () => {
       data-test-subj="gettingStartedSampleDataMenuItem"
       onClick={() => {
         closePopover();
-        application.navigateToApp('home', { path: '#/tutorial_directory/sampleData' });
+        application.navigateToApp('home', { path: getAddDataPath('sampleData') });
       }}
     >
       {i18n.translate('xpack.searchGettingStarted.addDataButton.browseSampleData', {

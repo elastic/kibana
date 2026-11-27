@@ -27,7 +27,7 @@ const event = (raw: SessionEventInput): StoredSessionEvent =>
     session_id: 'session-1',
     turn_id: raw.turn_id,
     raw,
-  } as unknown as StoredSessionEvent);
+  }) as unknown as StoredSessionEvent;
 
 const base = { turn_id: 'turn-1', event_at: '2026-11-16T08:59:00.000Z' };
 

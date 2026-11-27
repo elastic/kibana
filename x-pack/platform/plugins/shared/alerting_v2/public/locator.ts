@@ -24,9 +24,7 @@ export interface AlertingV2RuleLibraryLocatorDependencies {
   managementAppLocator: ManagementAppLocator;
 }
 
-export class AlertingV2RuleLibraryLocatorDefinition
-  implements LocatorDefinition<AlertingV2RuleLibraryLocatorParams>
-{
+export class AlertingV2RuleLibraryLocatorDefinition implements LocatorDefinition<AlertingV2RuleLibraryLocatorParams> {
   public readonly id = ALERTING_V2_RULE_LIBRARY_LOCATOR;
 
   constructor(protected readonly deps: AlertingV2RuleLibraryLocatorDependencies) {}

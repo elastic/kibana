@@ -17,7 +17,7 @@ const kafkaOutput = (fields: Record<string, unknown>) =>
     is_default: false,
     is_default_monitoring: false,
     ...fields,
-  } as any);
+  }) as any;
 
 describe('validateKafkaOAuth2', () => {
   const oauth2 = {

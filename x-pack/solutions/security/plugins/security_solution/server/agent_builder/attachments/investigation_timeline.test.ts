@@ -38,7 +38,7 @@ describe('createInvestigationTimelineAttachmentType', () => {
       id: 'att-1',
       type: SecurityAgentBuilderAttachments.investigationTimeline,
       data,
-    } as Attachment<string, unknown>);
+    }) as Attachment<string, unknown>;
 
   it('has the investigation timeline type id', () => {
     expect(attachmentType.id).toBe(SecurityAgentBuilderAttachments.investigationTimeline);

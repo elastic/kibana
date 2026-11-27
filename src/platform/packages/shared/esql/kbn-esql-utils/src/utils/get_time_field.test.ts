@@ -15,7 +15,7 @@ describe('getESQLTimeField', () => {
   const createHttp = (timeField = '@timestamp'): HttpStart =>
     ({
       post: jest.fn(async () => ({ timeField })),
-    } as unknown as HttpStart);
+    }) as unknown as HttpStart;
 
   it('does not reuse the cache across SET project_routing values for the same FROM', async () => {
     const http = createHttp();

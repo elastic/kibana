@@ -62,7 +62,7 @@ const services = {
 };
 
 const makeSource = (columns: Column[], timeFieldName?: string) =>
-  ({ title: 'logstash-*', timeFieldName, getColumns: () => columns } as unknown as EsqlSource);
+  ({ title: 'logstash-*', timeFieldName, getColumns: () => columns }) as unknown as EsqlSource;
 
 const logstashSource = makeSource(
   [

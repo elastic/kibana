@@ -341,14 +341,14 @@ export const createNightshiftWorkflowFixture = ({
       telemetry,
     }),
     resolveModelStepDefinition({
-      getInference: () => ({} as never),
-      getSavedObjects: () => ({} as never),
-      getUiSettings: () => ({} as never),
+      getInference: () => ({}) as never,
+      getSavedObjects: () => ({}) as never,
+      getUiSettings: () => ({}) as never,
       logger,
     }),
     ensureInvestigationAgentStepDefinition({
       getAgentBuilder: () => agentBuilder as unknown as AgentBuilderPluginStart,
-      getAgentAvailability: () => ({} as AgentAvailabilityConfig),
+      getAgentAvailability: () => ({}) as AgentAvailabilityConfig,
     }),
     decisionTreeReinforceStepDefinition({
       getAgentBuilder: () => agentBuilder as unknown as AgentBuilderPluginStart,

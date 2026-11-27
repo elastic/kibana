@@ -83,11 +83,10 @@ const chartContainerCss = css`
   }
 `;
 
-export interface ChangePointLensChartProps
-  extends Pick<
-    UnifiedChangePointGridProps,
-    'services' | 'fetchParams' | 'fetch$' | 'onBrushEnd' | 'onFilter' | 'actions'
-  > {
+export interface ChangePointLensChartProps extends Pick<
+  UnifiedChangePointGridProps,
+  'services' | 'fetchParams' | 'fetch$' | 'onBrushEnd' | 'onFilter' | 'actions'
+> {
   card: ChangePointCardModel;
   cardIndex: number;
   valueColumn: string;

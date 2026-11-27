@@ -126,7 +126,7 @@ export const recordToIndicator = (record: DataTableRecord): Indicator =>
     _id: record.raw._id ?? '',
     _index: record.raw._index,
     fields: (record.raw.fields ?? {}) as Indicator['fields'],
-  } as Indicator);
+  }) as Indicator;
 
 /**
  * Builds the tool-header "show entity" callback for a restored entity tool flyout.
@@ -474,8 +474,8 @@ export const openDescriptorAsStart = (
         entityId && entityDocId
           ? { entityId, entityDocId }
           : entityId
-          ? { entityId }
-          : { entityDocId: entityDocId as string };
+            ? { entityId }
+            : { entityDocId: entityDocId as string };
       api.openGenericEntityFlyout({ scopeId, ...idProps, ...originParams });
       break;
     }
@@ -772,8 +772,8 @@ export const openDescriptorAsChild = (
         entityId && entityDocId
           ? { entityId, entityDocId }
           : entityId
-          ? { entityId }
-          : { entityDocId: entityDocId as string };
+            ? { entityId }
+            : { entityDocId: entityDocId as string };
       api.openGenericEntityFlyoutAsChild({ scopeId, ...idProps, ...originParams });
       break;
     }

@@ -53,7 +53,7 @@ const makeSearchResult = (
     total: { relation: 'eq', value: hits.length },
     aggregations: undefined,
     _shards: { total: 1, successful: 1 - failedShards, failed: failedShards },
-  } as unknown as SearchResult<RuleAlertData>);
+  }) as unknown as SearchResult<RuleAlertData>;
 
 const makeBulkResponse = (errorTypes: Array<string | undefined>): BulkResponse =>
   ({
@@ -62,7 +62,7 @@ const makeBulkResponse = (errorTypes: Array<string | undefined>): BulkResponse =
     items: errorTypes.map((type) => ({
       index: type ? { status: 409, error: { type, reason: 'failed' } } : { status: 200 },
     })),
-  } as unknown as BulkResponse);
+  }) as unknown as BulkResponse;
 
 describe('untrackOrphanedAlerts', () => {
   let logger: ReturnType<(typeof loggingSystemMock)['createLogger']>;

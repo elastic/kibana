@@ -29,7 +29,7 @@ const getToastContent = (id: string, toast: Toast, getMountedText: GetMountedTex
   (['title', 'text'] as const)
     .map((part) => {
       const value = toast[part];
-      return typeof value === 'function' ? getMountedText(id, part) : value ?? '';
+      return typeof value === 'function' ? getMountedText(id, part) : (value ?? '');
     })
     .map((text) => text.replace(/\s+/g, ' ').trim())
     .filter(Boolean)

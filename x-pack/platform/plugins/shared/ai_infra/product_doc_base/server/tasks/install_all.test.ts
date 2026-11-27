@@ -58,7 +58,7 @@ describe('InstallAll task', () => {
           logger,
           taskManager: taskManagerStart,
           packageInstaller: { installProductIfNeeded, wasUninstalledSince, getRepositoryVersion },
-        } as unknown as InternalServices),
+        }) as unknown as InternalServices,
     });
     const definition = taskManager.registerTaskDefinitions.mock.calls[0][0][INSTALL_ALL_TASK_TYPE];
     runTaskWith = (params, state = {}) =>

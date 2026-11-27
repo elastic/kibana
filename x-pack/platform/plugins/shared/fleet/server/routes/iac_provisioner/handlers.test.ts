@@ -65,7 +65,7 @@ const mockedGetAvailability = jest.mocked(getProvisioningCallbackAvailability);
 const buildContext = () =>
   ({
     fleet: Promise.resolve({ internalSoClient: {} }),
-  } as any);
+  }) as any;
 
 const buildRequest = (body: Record<string, unknown>) =>
   httpServerMock.createKibanaRequest({ body });
@@ -488,7 +488,7 @@ const ITEM: CloudConnectorCallback = {
 };
 
 const realmUser = () =>
-  ({ username: 'elastic', authentication_type: 'realm' } as unknown as AuthenticatedUser);
+  ({ username: 'elastic', authentication_type: 'realm' }) as unknown as AuthenticatedUser;
 
 const buildCallbackContext = (spaceId = 'default') =>
   ({
@@ -496,7 +496,7 @@ const buildCallbackContext = (spaceId = 'default') =>
       spaceId,
       internalSoClient: {},
     }),
-  } as any);
+  }) as any;
 
 describe('Provisioning callback handlers', () => {
   let response: ReturnType<typeof httpServerMock.createResponseFactory>;

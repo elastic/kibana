@@ -287,7 +287,7 @@ class SyntheticsMonitor extends Serializable<SyntheticsMonitorDocument> {
     for (const [position, step] of steps.entries()) {
       const isSkipped = failure !== undefined;
       const isFailed = !isSkipped && step.error !== undefined;
-      const durationUs = isSkipped ? 0 : step.durationUs ?? DEFAULT_STEP_DURATION_US;
+      const durationUs = isSkipped ? 0 : (step.durationUs ?? DEFAULT_STEP_DURATION_US);
       elapsedUs += durationUs;
 
       docs.push(

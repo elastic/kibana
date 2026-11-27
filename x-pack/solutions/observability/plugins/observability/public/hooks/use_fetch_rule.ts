@@ -82,8 +82,8 @@ export function useFetchRule({
             queryError instanceof Error
               ? queryError.message
               : typeof queryError === 'string'
-              ? queryError
-              : '',
+                ? queryError
+                : '',
         });
       },
     });

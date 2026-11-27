@@ -72,7 +72,7 @@ const buildLog = (): ToolingLog =>
     warning: jest.fn(),
     error: jest.fn(),
     debug: jest.fn(),
-  } as unknown as ToolingLog);
+  }) as unknown as ToolingLog;
 
 describe('path contract classification', () => {
   it('keeps probes diagnostic and leaves candidate/rankable paths measurable', () => {
@@ -241,7 +241,9 @@ describe('createPersonaMatrixExpectedToolCalledEvaluator', () => {
         ],
       } as unknown as TaskOutput,
       metadata: baseExample.metadata,
-    } as unknown as Parameters<ReturnType<typeof createPersonaMatrixExpectedToolCalledEvaluator>['evaluate']>[0]);
+    } as unknown as Parameters<
+      ReturnType<typeof createPersonaMatrixExpectedToolCalledEvaluator>['evaluate']
+    >[0]);
     expect(result.score).toBe(1);
   });
 
@@ -256,7 +258,9 @@ describe('createPersonaMatrixExpectedToolCalledEvaluator', () => {
       expected: toDatasetExample(unannotated).output,
       output: { steps: [] } as unknown as TaskOutput,
       metadata: unannotated.metadata,
-    } as unknown as Parameters<ReturnType<typeof createPersonaMatrixExpectedToolCalledEvaluator>['evaluate']>[0]);
+    } as unknown as Parameters<
+      ReturnType<typeof createPersonaMatrixExpectedToolCalledEvaluator>['evaluate']
+    >[0]);
     expect(result.score).toBeNull();
     expect(result.label).toBe('N/A');
   });
@@ -279,7 +283,9 @@ describe('createPersonaMatrixExpectedToolCalledEvaluator', () => {
         steps: [{ type: 'tool_call', tool_id: 'platform.core.generate_esql' }],
       } as unknown as TaskOutput,
       metadata: multiTool.metadata,
-    } as unknown as Parameters<ReturnType<typeof createPersonaMatrixExpectedToolCalledEvaluator>['evaluate']>[0]);
+    } as unknown as Parameters<
+      ReturnType<typeof createPersonaMatrixExpectedToolCalledEvaluator>['evaluate']
+    >[0]);
     expect(result.score).toBe(0);
     expect((result.metadata as { missingToolIds: string[] }).missingToolIds).toEqual([
       'platform.core.execute_esql',
@@ -306,7 +312,9 @@ describe('createPersonaMatrixExpectedToolCalledEvaluator', () => {
         ],
       } as unknown as TaskOutput,
       metadata: multiTool.metadata,
-    } as unknown as Parameters<ReturnType<typeof createPersonaMatrixExpectedToolCalledEvaluator>['evaluate']>[0]);
+    } as unknown as Parameters<
+      ReturnType<typeof createPersonaMatrixExpectedToolCalledEvaluator>['evaluate']
+    >[0]);
     expect(result.score).toBe(1);
     expect((result.metadata as { missingToolIds: string[] }).missingToolIds).toEqual([]);
   });
@@ -319,7 +327,9 @@ describe('createPersonaMatrixFinalAnswerPresentEvaluator', () => {
       expected: undefined,
       output,
       metadata: {},
-    } as unknown as Parameters<ReturnType<typeof createPersonaMatrixFinalAnswerPresentEvaluator>['evaluate']>[0]);
+    } as unknown as Parameters<
+      ReturnType<typeof createPersonaMatrixFinalAnswerPresentEvaluator>['evaluate']
+    >[0]);
 
   it('scores 1 when the run produced a non-empty final message', async () => {
     const result = await evaluate({ messages: [{ message: 'Rule created: ...' }] });
@@ -508,7 +518,9 @@ describe('createPersonaMatrixMinExpectedStepsEvaluator', () => {
       expected: expectedTools ? { tool_sequence: expectedTools } : {},
       output,
       metadata: expectedTools ? { expectedTools } : {},
-    } as unknown as Parameters<ReturnType<typeof createPersonaMatrixMinExpectedStepsEvaluator>['evaluate']>[0]);
+    } as unknown as Parameters<
+      ReturnType<typeof createPersonaMatrixMinExpectedStepsEvaluator>['evaluate']
+    >[0]);
 
   it('scores 1 when tool calls meet the expected minimum', async () => {
     const result = await evaluate(
@@ -553,9 +565,9 @@ describe('createPersonaMatrixSkillInvokedEvaluator', () => {
       expected: {},
       output: { traceId } as unknown as TaskOutput,
       metadata,
-    } as unknown as Parameters<
+    }) as unknown as Parameters<
       ReturnType<typeof createPersonaMatrixSkillInvokedEvaluator>['evaluate']
-    >[0]);
+    >[0];
 
   it('returns N/A when the example has no expectedSkill/allowSkills annotation', async () => {
     // 4 of the 21 real examples (workflow-authoring-b/c, workflow-execution-a/b)
@@ -1282,7 +1294,7 @@ describe('reporting identity per agent profile', () => {
               examples: Array<{ metadata?: Record<string, unknown> }>;
             }>;
             metadata: Record<string, unknown>;
-          }
+          },
         ]
       >
     )[0][0];

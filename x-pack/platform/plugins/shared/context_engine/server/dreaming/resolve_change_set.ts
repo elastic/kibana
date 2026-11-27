@@ -24,9 +24,9 @@ const FACT_ID_PREFIX = 'fact-';
 const shownIdOf = (id: string, shown: ReadonlySet<string>): string =>
   shown.has(id)
     ? id
-    : EXTERNAL_MEMORY_ID_PREFIXES.map((prefix) => `${prefix}${id}`).find((prefixed) =>
+    : (EXTERNAL_MEMORY_ID_PREFIXES.map((prefix) => `${prefix}${id}`).find((prefixed) =>
         shown.has(prefixed)
-      ) ?? id;
+      ) ?? id);
 
 /** The fact and entity types the model may write. */
 export interface DreamingVocabulary {

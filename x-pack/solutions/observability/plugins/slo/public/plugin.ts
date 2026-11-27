@@ -37,9 +37,12 @@ import type {
 import { SloTelemetryService } from './services/telemetry';
 import { getLazyWithContextProviders } from './utils/get_lazy_with_context_providers';
 
-export class SLOPlugin
-  implements Plugin<SLOPublicSetup, SLOPublicStart, SLOPublicPluginsSetup, SLOPublicPluginsStart>
-{
+export class SLOPlugin implements Plugin<
+  SLOPublicSetup,
+  SLOPublicStart,
+  SLOPublicPluginsSetup,
+  SLOPublicPluginsStart
+> {
   private readonly appUpdater$ = new BehaviorSubject<AppUpdater>(() => ({}));
   private readonly telemetryService = new SloTelemetryService();
   private experimentalFeatures: ExperimentalFeatures = {

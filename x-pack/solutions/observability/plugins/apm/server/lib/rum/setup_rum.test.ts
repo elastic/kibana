@@ -83,10 +83,12 @@ describe('setupRum', () => {
 
     const runTask = (signal = new AbortController().signal) => {
       const [[definitions]] = taskSetup.registerTaskDefinitions.mock.calls;
-      return definitions[TASK_TYPE].createTaskRunner({
-        taskInstance: {},
-        signal,
-      } as unknown as RunContext).run();
+      return definitions[TASK_TYPE]
+        .createTaskRunner({
+          taskInstance: {},
+          signal,
+        } as unknown as RunContext)
+        .run();
     };
 
     const callRoute = async (handler: RequestHandler, params = {}, body = {}) => {

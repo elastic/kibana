@@ -162,9 +162,11 @@ export const ExecutionMetadataPopover: React.FC<ExecutionMetadataPopoverProps> =
           direction="column"
           gutterSize="none"
           css={css`
-            ${hasSeveralModels
-              ? `min-width: min(${POPOVER_MIN_WIDTH_WITH_TABLE}px, ${POPOVER_MAX_WIDTH});`
-              : `width: ${POPOVER_WIDTH_WITHOUT_TABLE}px;`}
+            ${
+              hasSeveralModels
+                ? `min-width: min(${POPOVER_MIN_WIDTH_WITH_TABLE}px, ${POPOVER_MAX_WIDTH});`
+                : `width: ${POPOVER_WIDTH_WITHOUT_TABLE}px;`
+            }
             max-width: ${POPOVER_MAX_WIDTH};
           `}
         >

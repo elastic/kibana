@@ -48,9 +48,9 @@ export type ItemDocument =
 export type OriginalItem<I> = I extends RuleMigrationRule
   ? RuleMigrationRule['original_rule']
   : I extends DashboardMigrationDashboard
-  ? DashboardMigrationDashboard['original_dashboard']
-  : I extends WorkflowMigrationWorkflow
-  ? WorkflowMigrationWorkflow['original_workflow']
-  : DashboardMigrationDashboard['original_dashboard'];
+    ? DashboardMigrationDashboard['original_dashboard']
+    : I extends WorkflowMigrationWorkflow
+      ? WorkflowMigrationWorkflow['original_workflow']
+      : DashboardMigrationDashboard['original_dashboard'];
 
 export type MigrationType = 'rule' | 'dashboard' | 'workflow';

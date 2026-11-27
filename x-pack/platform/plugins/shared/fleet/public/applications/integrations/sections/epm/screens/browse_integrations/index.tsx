@@ -72,7 +72,7 @@ export const BrowseIntegrationsPage: React.FC<{ prereleaseIntegrationsEnabled: b
   const canUploadPackages = useAuthz().integrations.uploadPackages;
 
   const useGetAllIntegrationsHook = canReadAutomaticImportIntegrations
-    ? automaticImport?.hooks.useGetAllIntegrations ?? useEmptyAllIntegrations
+    ? (automaticImport?.hooks.useGetAllIntegrations ?? useEmptyAllIntegrations)
     : useEmptyAllIntegrations;
   const {
     integrations,

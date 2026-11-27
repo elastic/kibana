@@ -17,7 +17,7 @@ jest.mock('../../../hooks/use_api_client');
 
 /** A status the tests tell apart by the point its summaries reached. */
 const statusOf = (marker: string) =>
-  ({ installed: true, summarizedUntil: marker } as SessionsStatus);
+  ({ installed: true, summarizedUntil: marker }) as SessionsStatus;
 
 /** A promise and the function that resolves it. */
 const deferred = <T>() => {
@@ -63,7 +63,7 @@ describe('useSessionsStatusState', () => {
   });
 
   describe('setting sessions up by itself', () => {
-    const notSetUp = (autoEnable: boolean) => ({ installed: false, autoEnable } as SessionsStatus);
+    const notSetUp = (autoEnable: boolean) => ({ installed: false, autoEnable }) as SessionsStatus;
 
     const respondWith = (status: SessionsStatus, enable: () => Promise<SessionsStatus>) =>
       fetch.mockImplementation((endpoint: string) =>

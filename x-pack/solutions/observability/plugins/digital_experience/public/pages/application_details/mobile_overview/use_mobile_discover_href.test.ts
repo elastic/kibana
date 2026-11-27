@@ -37,7 +37,7 @@ const mockUrl = ({
       ({
         value: { osName, release }[key as 'osName' | 'release'],
         setValue: jest.fn(),
-      } as ReturnType<typeof useQueryParam>)
+      }) as ReturnType<typeof useQueryParam>
   );
 };
 

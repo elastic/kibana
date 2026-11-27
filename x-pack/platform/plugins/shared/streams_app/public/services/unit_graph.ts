@@ -473,9 +473,10 @@ export const buildUnitGraph = (
     const destinationIds = readEntryIds(config, PIPELINE_ENTRY.destinations);
     if (isSynthetic) {
       const rule = { pipelineId: pipeline.id, ruleIndex: 0 };
-      const targets = destinationIds.map(
-        (id): UnitLineTarget => ({ kind: LINE_TARGET_KIND.destination, id })
-      );
+      const targets = destinationIds.map((id): UnitLineTarget => ({
+        kind: LINE_TARGET_KIND.destination,
+        id,
+      }));
       drawRule(pipeline, rule, undefined, targets, pipelineSlot(pipeline.id));
       routingNodes.push({
         pipelineId: pipeline.id,

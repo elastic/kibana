@@ -45,7 +45,7 @@ export const getTriggerMode = (
 ): ChatTriggerMode =>
   !isSelectable || state.conversationId !== conversationId
     ? ChatTriggerMode.Always
-    : state.auto ?? state.selected;
+    : (state.auto ?? state.selected);
 
 /**
  * How the agent toggle changes:

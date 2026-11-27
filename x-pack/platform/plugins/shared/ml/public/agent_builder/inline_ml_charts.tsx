@@ -172,7 +172,7 @@ const buildParentApi = <T extends object>(
 });
 
 function InlineMlChart<
-  TData extends { job_ids: string[]; time_range?: TimeRange; title?: string }
+  TData extends { job_ids: string[]; time_range?: TimeRange; title?: string },
 >({
   attachment,
   screenContext,

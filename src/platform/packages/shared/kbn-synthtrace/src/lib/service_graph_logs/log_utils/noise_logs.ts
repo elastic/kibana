@@ -137,9 +137,11 @@ export function generateNoiseDocs({
 
   const pool: Emitter[] = [
     ...serviceGraph.services.map((node): ServiceEmitter => ({ kind: 'service', node })),
-    ...[...infraEmitters.entries()].map(
-      ([dep, service]): InfraEmitter => ({ kind: 'infra', dep, service })
-    ),
+    ...[...infraEmitters.entries()].map(([dep, service]): InfraEmitter => ({
+      kind: 'infra',
+      dep,
+      service,
+    })),
   ];
 
   if (pool.length === 0) {

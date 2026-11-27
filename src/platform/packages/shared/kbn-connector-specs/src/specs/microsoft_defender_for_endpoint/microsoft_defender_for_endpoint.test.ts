@@ -26,7 +26,7 @@ const createContext = (error: unknown) =>
     config: { apiUrl: 'https://api.securitycenter.microsoft.com/api' },
     secrets: { authType: 'oauth_client_credentials' },
     log: { debug: jest.fn(), error: jest.fn(), warn: jest.fn() },
-  } as unknown as ActionContext);
+  }) as unknown as ActionContext;
 
 describe('MicrosoftDefenderForEndpoint', () => {
   it('should be defined', () => {

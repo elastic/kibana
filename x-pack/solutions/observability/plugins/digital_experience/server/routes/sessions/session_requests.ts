@@ -192,7 +192,7 @@ const toTimingRecord = (event: OtelEventFields): TimingRecord | null => {
     url,
     initiatorType: isNavigation
       ? 'navigation'
-      : attributeString(event, RESOURCE_TIMING_INITIATOR_TYPE) ?? 'other',
+      : (attributeString(event, RESOURCE_TIMING_INITIATOR_TYPE) ?? 'other'),
     timings: {
       fetchStart: timing(event, RESOURCE_TIMING_FETCH_START),
       domainLookupStart: timing(event, RESOURCE_TIMING_DOMAIN_LOOKUP_START),

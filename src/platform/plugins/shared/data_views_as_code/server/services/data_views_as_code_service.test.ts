@@ -62,7 +62,7 @@ const createMockDataViewLazy = ({
         )
       ),
     getAsSavedObjectBody: jest.fn().mockReturnValue(savedObjectBody ?? spec),
-  } as unknown as DataViewLazy);
+  }) as unknown as DataViewLazy;
 
 const createService = ({
   scriptedFieldsEnabled = true,

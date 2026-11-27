@@ -205,7 +205,8 @@ describe('defend insights route helpers', () => {
       });
 
       const updatedAt = new Date(
-        params.dataClient.updateDefendInsights.mock.calls[0][0].defendInsightsUpdateProps[0].lastViewedAt
+        params.dataClient.updateDefendInsights.mock.calls[0][0].defendInsightsUpdateProps[0]
+          .lastViewedAt
       ).getTime();
       expect(updatedAt).toBeGreaterThan(startTime);
 

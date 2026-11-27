@@ -21,8 +21,8 @@ export const getUserActivityOtelResourceAttributes = (
   'service.name': isServerless
     ? 'serverless-kibana'
     : isElasticCloud
-    ? 'hosted-kibana'
-    : 'self-managed-kibana',
+      ? 'hosted-kibana'
+      : 'self-managed-kibana',
   'service.type': 'kibana',
 });
 

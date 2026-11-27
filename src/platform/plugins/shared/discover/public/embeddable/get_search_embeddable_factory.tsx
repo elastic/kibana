@@ -279,7 +279,7 @@ export const getSearchEmbeddableFactory = ({
         canUnlinkFromLibrary: async () =>
           Boolean(
             savedObjectId$.getValue() &&
-              latestRuntimeState.tabs?.find(({ id }) => id === selectedTabId$.getValue())?.tab
+            latestRuntimeState.tabs?.find(({ id }) => id === selectedTabId$.getValue())?.tab
           ),
         saveToLibrary: async (title: string) => {
           const description = titleManager.api.description$.getValue();
@@ -443,7 +443,7 @@ export const getSearchEmbeddableFactory = ({
           }, []);
 
           const selectedTabIdForDisplay = isInlineEditing
-            ? draftSelectedTabId ?? selectedTabId
+            ? (draftSelectedTabId ?? selectedTabId)
             : selectedTabId;
           const isSelectedTabDeletedForDisplay = isTabDeleted(selectedTabIdForDisplay, tabs);
           const hasPendingInlineTabChanges = isInlineEditing && isInlineEditDirty;

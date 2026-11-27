@@ -34,9 +34,12 @@ interface ProductInterceptServerPluginStart {
 /**
  * @internal
  */
-export class ProductInterceptServerPlugin
-  implements Plugin<object, object, ProductInterceptServerPluginSetup, never>
-{
+export class ProductInterceptServerPlugin implements Plugin<
+  object,
+  object,
+  ProductInterceptServerPluginSetup,
+  never
+> {
   private readonly logger: Logger;
   private readonly config: ServerConfigSchema;
   private readonly buildVersion: string;

@@ -164,7 +164,7 @@ export class RemoteClustersFormField extends PureComponent<Props> {
         <EuiSelect
           fullWidth
           options={remoteClustersOptions}
-          value={hasClusters ? selected ?? '' : ''}
+          value={hasClusters ? (selected ?? '') : ''}
           onChange={(e) => {
             this.onRemoteClusterChange(e.target.value);
           }}

@@ -236,8 +236,8 @@ export async function loadIndices(
     const aliasList = Array.isArray(aliases)
       ? aliases
       : typeof aliases === 'string' && aliases !== 'none'
-      ? [aliases]
-      : [];
+        ? [aliases]
+        : [];
 
     aliasList.forEach((alias) => {
       if (!alias) return;

@@ -581,7 +581,7 @@ export class RuleEventsClient {
     const entityFilter =
       selectedEntities && unassignedEntities
         ? esql.exp`(${selectedEntities}) OR (${unassignedEntities})`
-        : selectedEntities ?? unassignedEntities;
+        : (selectedEntities ?? unassignedEntities);
     // An empty live-entity set makes every event unassigned, including selected slugs.
     if (entityFilter && options.unassignedEntityIds?.length !== 0) {
       query = query.where`${entityFilter}`;
@@ -1352,8 +1352,8 @@ export class RuleEventsClient {
       assessmentNote: assessmentNote?.trim()
         ? assessmentNote
         : change.kind === 'operator'
-        ? operatorFallbackAssessmentNote(change.status)
-        : undefined,
+          ? operatorFallbackAssessmentNote(change.status)
+          : undefined,
       timestamp: new Date().toISOString(),
     });
     if (!decision.write) {

@@ -96,8 +96,8 @@ const canonicalize = (xml: string): CanonicalElement | undefined => {
         children.length > 0
           ? children.map(toCanonical).sort((a, b) => a.name.localeCompare(b.name))
           : typeof node._ === 'string'
-          ? node._
-          : '',
+            ? node._
+            : '',
     };
   };
   new Parser({

@@ -37,9 +37,9 @@ const job = (id: string, groups = ['security'], displayName?: string) => ({
   customSettings: displayName ? { security_app_display_name: displayName } : undefined,
 });
 const jobServiceOf = (jobs: ReturnType<typeof job>[] = [job('high_sent_bytes')]) =>
-  ({ jobsSummary: jest.fn().mockResolvedValue(jobs) } as unknown as BriefJobService);
+  ({ jobsSummary: jest.fn().mockResolvedValue(jobs) }) as unknown as BriefJobService;
 const esClientOf = (search = jest.fn().mockResolvedValue({ aggregations: {} })) =>
-  ({ search } as unknown as ElasticsearchClient);
+  ({ search }) as unknown as ElasticsearchClient;
 
 describe('toAnomaliesByCandidateId', () => {
   const jobs = (buckets: Array<[string, number]>) => ({

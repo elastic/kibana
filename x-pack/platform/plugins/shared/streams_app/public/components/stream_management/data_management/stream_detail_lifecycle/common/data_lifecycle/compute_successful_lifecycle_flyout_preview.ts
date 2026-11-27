@@ -122,7 +122,7 @@ export const previewFromLifecycle = ({
   }
 
   const retentionPeriod = 'dsl' in baseline ? baseline.dsl.data_retention : undefined;
-  const downsampleSteps = 'dsl' in baseline ? baseline.dsl.downsample ?? null : null;
+  const downsampleSteps = 'dsl' in baseline ? (baseline.dsl.downsample ?? null) : null;
   const frozenAfter = 'dsl' in baseline ? baseline.dsl.frozen_after : undefined;
   const model = buildDlmPreviewModel({
     isServerless,

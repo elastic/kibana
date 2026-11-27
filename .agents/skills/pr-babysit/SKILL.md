@@ -166,7 +166,7 @@ Then read the round's full diff (`git diff`) the way Libra would, using the revi
 Run scoped checks on what changed, as described in `AGENTS.md`:
 
 - Jest for each affected package, including any test that failed in CI.
-- `node scripts/eslint --fix` on the changed files.
+- `node scripts/lint --fix` on the changed files, then `node scripts/oxfmt` on them.
 - A type check for each affected `tsconfig.json`.
 - If any `.md` docs changed, look for wording problems the Vale docs check would flag.
 

@@ -41,9 +41,10 @@ const isIndexAlreadyExists = (error: unknown): boolean =>
   error instanceof errors.ResponseError &&
   error.body?.error?.type === 'resource_already_exists_exception';
 
-export class PluginInitializeExampleServerPlugin
-  implements Plugin<void, PluginInitializeExampleStartContract>
-{
+export class PluginInitializeExampleServerPlugin implements Plugin<
+  void,
+  PluginInitializeExampleStartContract
+> {
   private readonly config: PluginInitializeExampleConfig;
   private readonly instanceUuid: string;
   private readonly initialization: PluginInitialization;

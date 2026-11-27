@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useState, type ReactNode } from 'react';
+import React, { useLayoutEffect, useRef, useState, type ReactNode } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
@@ -125,7 +125,18 @@ export const Navigation = ({
   const { isOverflowMeasured, overflowMenuItems, primaryMenuRef, visibleMenuItems } =
     useResponsiveMenu(isCollapsed, items.primaryItems, (items.overflowItems?.length ?? 0) > 0);
 
-  const allOverflowItems = [...overflowMenuItems, ...(items.overflowItems ?? [])];
+  const lastMeasuredOverflowRef = useRef<MenuItem[]>([]);
+  const measuredOverflowItems = isOverflowMeasured
+    ? overflowMenuItems
+    : lastMeasuredOverflowRef.current;
+
+  useLayoutEffect(() => {
+    if (isOverflowMeasured) {
+      lastMeasuredOverflowRef.current = overflowMenuItems;
+    }
+  }, [isOverflowMeasured, overflowMenuItems]);
+
+  const allOverflowItems = [...measuredOverflowItems, ...(items.overflowItems ?? [])];
   const hasMoreMenu = allOverflowItems.length > 0;
 
   const setSize = visibleMenuItems.length + (hasMoreMenu ? 1 : 0);

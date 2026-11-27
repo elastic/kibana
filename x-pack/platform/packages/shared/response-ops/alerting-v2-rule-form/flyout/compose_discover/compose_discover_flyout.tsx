@@ -1502,12 +1502,10 @@ export function ComposeDiscoverFlyout({
                 ) : (
                   <EuiFlexItem grow>
                     <HorizontalMinimalStepper
-                      steps={steps.map(
-                        (s, i): MinimalStep => ({
-                          title: s.title,
-                          status: getStepStatus(uiState.step, i),
-                        })
-                      )}
+                      steps={steps.map((s, i): MinimalStep => ({
+                        title: s.title,
+                        status: getStepStatus(uiState.step, i),
+                      }))}
                     />
                   </EuiFlexItem>
                 )}

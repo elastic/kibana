@@ -38,15 +38,12 @@ const ONBOARDING_DEEP_LINKS: AppDeepLink[] = [
   },
 ];
 
-export class ServerlessVectordbPlugin
-  implements
-    Plugin<
-      ServerlessVectordbPluginSetup,
-      ServerlessVectordbPluginStart,
-      ServerlessVectordbSetupDependencies,
-      ServerlessVectordbStartDependencies
-    >
-{
+export class ServerlessVectordbPlugin implements Plugin<
+  ServerlessVectordbPluginSetup,
+  ServerlessVectordbPluginStart,
+  ServerlessVectordbSetupDependencies,
+  ServerlessVectordbStartDependencies
+> {
   private readonly appUpdater$ = new BehaviorSubject<AppUpdater>(() => ({}));
   private hideChrome = false;
   private integratedOnboardingEnabled = false;

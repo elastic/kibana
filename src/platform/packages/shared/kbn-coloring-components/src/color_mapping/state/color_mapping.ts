@@ -177,8 +177,8 @@ export const colorMappingSlice = createSlice({
               ? 'asc'
               : 'desc'
             : action.payload === 0
-            ? 'desc'
-            : 'asc'
+              ? 'desc'
+              : 'asc'
           : state.colorMode.sort;
 
       state.colorMode = {

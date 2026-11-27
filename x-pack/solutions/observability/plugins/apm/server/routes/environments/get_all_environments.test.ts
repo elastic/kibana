@@ -27,7 +27,7 @@ function mockResponse({
         otelEnvironments: { buckets: otelEnvironments.map((key) => ({ key })) },
         ...(missingCount === undefined ? {} : { missingEnvironments: { doc_count: missingCount } }),
       },
-    } as unknown as ESSearchResponse<unknown, ESSearchRequest>);
+    }) as unknown as ESSearchResponse<unknown, ESSearchRequest>;
 }
 
 describe('getAllEnvironments', () => {
