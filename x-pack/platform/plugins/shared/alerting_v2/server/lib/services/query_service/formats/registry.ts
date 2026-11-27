@@ -7,9 +7,10 @@
 
 import { arrowFormat } from './arrow_format';
 import { jsonFormat } from './json_format';
+import { ndjsonFormat } from './ndjson_format';
 import type { EsqlResponseFormat } from './types';
 
-const ESQL_RESPONSE_FORMATS = [jsonFormat, arrowFormat] as const;
+const ESQL_RESPONSE_FORMATS = [jsonFormat, arrowFormat, ndjsonFormat] as const;
 
 export type EsqlResponseFormatName = (typeof ESQL_RESPONSE_FORMATS)[number]['name'];
 
@@ -22,7 +23,8 @@ export const ESQL_RESPONSE_FORMAT_NAMES: readonly EsqlResponseFormatName[] =
  * or an unknown variation. Must stay the safest transport, because every
  * deployment without an explicit rollout runs on it.
  */
-export const DEFAULT_ESQL_RESPONSE_FORMAT: EsqlResponseFormat = jsonFormat;
+// Temporary (rna-program#1312): ndjson for the format sweep. Do not merge; restore jsonFormat.
+export const DEFAULT_ESQL_RESPONSE_FORMAT: EsqlResponseFormat = ndjsonFormat;
 
 /**
  * Resolves a format by name, or `undefined` when the name is not registered.

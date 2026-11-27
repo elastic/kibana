@@ -8,6 +8,7 @@
 import type { EsqlQueryRequest, EsqlQueryResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { inject, injectable } from 'inversify';
+import { isResponseError } from '@kbn/es-errors';
 import type { LoggerServiceContract } from '../logger_service/logger_service';
 import { LoggerServiceToken } from '../logger_service/logger_service';
 import type { EsqlResponseFormatServiceContract } from '../esql_response_format_service/esql_response_format_service';
@@ -170,7 +171,7 @@ export class QueryService implements QueryServiceContract {
         yield batch as T[];
       }
     } catch (error) {
-      if (isRuleExecutionCancellationError(error)) {
+      if (isRuleExecutionCancellationError(error) || isResponseError(error)) {
         throw error;
       }
 

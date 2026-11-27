@@ -5,12 +5,14 @@
  * 2.0.
  */
 
+import { Readable } from 'stream';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { EsqlQueryResponse } from '@elastic/elasticsearch/lib/api/types';
 import { errors } from '@elastic/elasticsearch';
 import type { DeeplyMockedApi } from '@kbn/core-elasticsearch-client-server-mocks';
 import type { QueryService } from './query_service';
 import { JSON_STREAM_BATCH_SIZE } from './formats';
+import { NDJSON_BATCH_SIZE } from './formats/ndjson_format';
 import { RuleExecutionCancellationError } from '../../execution_context';
 import { createQueryService } from './query_service.mock';
 import {
@@ -703,6 +705,55 @@ describe('QueryService', () => {
       expect(batches).toEqual([
         [{ bucket: Date.parse(iso), label: '2026-08-24T14:01:32.000Z', count: 7 }],
       ]);
+    });
+  });
+
+  describe('executeQueryStream (ndjson)', () => {
+    const mockQuery = 'FROM .alerting-* | LIMIT 10';
+
+    beforeEach(() => {
+      const mocks = createQueryService('ndjson');
+      mockEsClient = mocks.mockEsClient;
+      mockLogger = mocks.mockLogger;
+      queryService = mocks.queryService;
+    });
+
+    it('propagates a footer error unchanged so it is classified like a JSON query failure', async () => {
+      const rows = Array.from({ length: NDJSON_BATCH_SIZE }, (_, index) => [`host-${index}`]);
+      const lines = [
+        { columns: [{ name: 'host', type: 'keyword' }] },
+        ...rows,
+        {
+          status: 400,
+          is_partial: false,
+          warnings: [],
+          complete: false,
+          next_offset: rows.length,
+          error: { type: 'x', reason: 'y' },
+        },
+      ];
+      (mockEsClient.transport.request as unknown as jest.Mock).mockResolvedValue({
+        statusCode: 200,
+        body: Readable.from(lines.map((line) => Buffer.from(`${JSON.stringify(line)}\n`))),
+        headers: {},
+        warnings: null,
+        meta: {},
+      });
+
+      const batches: Array<Record<string, unknown>[]> = [];
+      let thrown: unknown;
+      try {
+        for await (const batch of queryService.executeQueryStream({ query: mockQuery })) {
+          batches.push(batch);
+        }
+      } catch (error) {
+        thrown = error;
+      }
+
+      expect(batches).toEqual([rows.map(([host]) => ({ host }))]);
+      expect(thrown).toBeInstanceOf(errors.ResponseError);
+      expect((thrown as errors.ResponseError).statusCode).toBe(400);
+      expect(mockLogger.error).toHaveBeenCalled();
     });
   });
 
