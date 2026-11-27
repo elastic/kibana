@@ -9,7 +9,14 @@ import { createHash } from 'crypto';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { createBulkIndexer } from './bulk_indexer';
 import { extractPage, waitFor } from './document_extraction';
-import { MAX_LINKS_PER_PAGE, extractLinks, getPageKey, getSiteKey, getUrlFields } from './links';
+import {
+  MAX_LINKS_PER_PAGE,
+  extractLinks,
+  getPageKey,
+  getSiteKey,
+  getUrlFields,
+  normalizeUrl,
+} from './links';
 import type { PathRules } from './path_rules';
 import { NO_PATH_RULES, isPathAllowed } from './path_rules';
 import { purgeStaleDocuments } from './purge';
@@ -22,6 +29,8 @@ const MAX_CONTENT_LENGTH = 500_000;
 export const CRAWL_LIMITS = {
   /** The combined length of the pages a crawl remembers having seen, which a site could otherwise grow without end. */
   maxSeenUrlsLength: 10_000_000,
+  /** The origins, besides those of the start URLs, whose robots.txt a crawl reads. */
+  maxLinkedOrigins: 50,
 };
 // Pages are fetched by the inference endpoint, so this only selects which robots.txt group applies.
 export const ROBOTS_USER_AGENT = 'Elastic-Crawler';
@@ -88,7 +97,7 @@ const getCrawlScope = (seedUrls: string[], { includePaths, excludePaths }: PathR
   createHash('sha256')
     .update(
       JSON.stringify([
-        seedUrls.map(getPageKey).sort(),
+        [...new Set(seedUrls.map(getPageKey))].sort(),
         [...includePaths].sort(),
         [...excludePaths].sort(),
       ])
@@ -167,15 +176,17 @@ export const crawlSite = async ({
   // The depth each page was found at. Keyed by page, so a page is crawled once however many of its
   // URLs the crawl comes across, unless it is found again closer to a start URL.
   const depthByPage = new Map<string, number>();
-  const seedUrls = [url, ...additionalSeedUrls].filter((seedUrl) => {
-    const pageKey = getPageKey(seedUrl);
-    const isNew = !depthByPage.has(pageKey);
-    depthByPage.set(pageKey, 0);
-    return isNew;
-  });
-  const crawlScope = getCrawlScope(seedUrls, pathRules);
-  // Sitemaps a page links to are not pages to crawl.
-  sitemapUrls.forEach((sitemapUrl) => depthByPage.set(getPageKey(sitemapUrl), NOT_A_PAGE));
+  const givenSeedUrls = [url, ...additionalSeedUrls];
+  givenSeedUrls.forEach((seedUrl) => depthByPage.set(getPageKey(seedUrl), 0));
+  const crawlScope = getCrawlScope(givenSeedUrls, pathRules);
+  // A sitemap or robots.txt a page links to is not a page to crawl, unless it is a start URL.
+  const markNotAPage = (fileUrl: string) => {
+    const pageKey = getPageKey(fileUrl);
+    if (!depthByPage.has(pageKey)) {
+      depthByPage.set(pageKey, NOT_A_PAGE);
+    }
+  };
+  sitemapUrls.forEach(markNotAPage);
   // The links turned away by the path rules or robots.txt, by URL: another URL of the same page
   // may still be allowed.
   const skippedUrls = new Set<string>();
@@ -268,14 +279,27 @@ export const crawlSite = async ({
     const robotsByOrigin = new Map<string, RobotsRules | null>();
     const robotsRequests = new Map<string, Promise<RobotsRules | null>>();
     const robotsErrorByOrigin = new Map<string, Error>();
-    const readRobots = (pageUrl: string): Promise<RobotsRules | null> => {
+    let linkedOriginsCount = 0;
+    const readRobots = (
+      pageUrl: string,
+      { isLinked = false }: { isLinked?: boolean } = {}
+    ): Promise<RobotsRules | null> => {
       const { origin } = new URL(pageUrl);
       const pending = robotsRequests.get(origin);
       if (pending) {
         return pending;
       }
+      // A site can link to any number of its ports, each an origin with a robots.txt of its own.
+      if (isLinked && ++linkedOriginsCount > CRAWL_LIMITS.maxLinkedOrigins) {
+        if (linkedOriginsCount === CRAWL_LIMITS.maxLinkedOrigins + 1) {
+          logger.warn(
+            `Web crawl of ${url} leaves out the pages of ${origin} and of further origins: it reads the robots.txt of at most ${CRAWL_LIMITS.maxLinkedOrigins} origins that pages link to`
+          );
+        }
+        return Promise.resolve(null);
+      }
       const robotsUrl = `${origin}/robots.txt`;
-      depthByPage.set(getPageKey(robotsUrl), NOT_A_PAGE);
+      markNotAPage(robotsUrl);
       const request = extractPage(esClient, { inferenceId, url: robotsUrl, signal })
         .then((robots) => {
           const rules = robots
@@ -307,21 +331,40 @@ export const crawlSite = async ({
     const getRobots = (pageUrl: string): RobotsRules =>
       robotsByOrigin.get(new URL(pageUrl).origin) ?? ALLOW_ALL_ROBOTS;
 
-    await Promise.all(seedUrls.map(readRobots));
-    const readableSeedUrls = seedUrls.filter(
-      (seedUrl) => robotsByOrigin.get(new URL(seedUrl).origin) !== null
-    );
-    // The first start URL of each site, which is where that site's sitemaps are looked for.
+    await Promise.all(givenSeedUrls.map((seedUrl) => readRobots(seedUrl)));
+    const isReadable = (seedUrl: string): boolean =>
+      robotsByOrigin.get(new URL(seedUrl).origin) !== null;
+    const isAllowedSeed = (seedUrl: string): boolean =>
+      isReadable(seedUrl) && getRobots(seedUrl).isAllowed(seedUrl);
+    // Of the start URLs that lead to one page, the first that may be crawled stands for the page.
+    const seedByPage = new Map<string, string>();
+    for (const seedUrl of givenSeedUrls) {
+      const pageKey = getPageKey(seedUrl);
+      const chosen = seedByPage.get(pageKey);
+      if (chosen === undefined || (!isAllowedSeed(chosen) && isAllowedSeed(seedUrl))) {
+        seedByPage.set(pageKey, seedUrl);
+      }
+    }
+    const seedUrls = [...seedByPage.values()];
+    const readableSeedUrls = seedUrls.filter(isReadable);
+    // The first start URL of each site, which is where that site's sitemaps are looked for, and the
+    // sitemaps that the robots.txt of any of its start URLs declares.
     const siteSeeds = new Map<string, string>();
-    for (const seedUrl of readableSeedUrls) {
+    const declaredSitemapsBySite = new Map<string, Set<string>>();
+    for (const seedUrl of givenSeedUrls.filter(isReadable)) {
       const siteKey = getSiteKey(seedUrl);
       if (!siteSeeds.has(siteKey)) {
         siteSeeds.set(siteKey, seedUrl);
+        declaredSitemapsBySite.set(siteKey, new Set());
+      }
+      for (const sitemap of getRobots(seedUrl).sitemaps) {
+        const sitemapUrl = normalizeUrl(sitemap, seedUrl, { isDiscovered: false });
+        if (sitemapUrl) {
+          declaredSitemapsBySite.get(siteKey)?.add(sitemapUrl);
+        }
       }
     }
-    const allowedSeedUrls = readableSeedUrls.filter((seedUrl) =>
-      getRobots(seedUrl).isAllowed(seedUrl)
-    );
+    const allowedSeedUrls = readableSeedUrls.filter(isAllowedSeed);
     if (allowedSeedUrls.length === 0) {
       const [unreadableOrigin] = robotsErrorByOrigin;
       if (unreadableOrigin) {
@@ -354,22 +397,35 @@ export const crawlSite = async ({
       const queue = queues[depth];
       let checks = 0;
       for (const link of links) {
-        // Pages past the request budget would never be taken, so they are not worth remembering.
-        if (queue.length - queueCursors[depth] >= maxDocuments - requestedCount) {
-          break;
-        }
         const pageKey = getPageKey(link);
-        const knownDepth = depthByPage.get(pageKey);
-        if ((knownDepth !== undefined && knownDepth <= depth) || skippedUrls.has(link)) {
+        const isKnown = (): boolean =>
+          (depthByPage.get(pageKey) ?? Infinity) <= depth || skippedUrls.has(link);
+        if (isKnown()) {
           continue;
+        }
+        // Pages past the request budget would never be taken, so they are not worth remembering.
+        // Entries of this queue that were queued again at a shallower depth are not taken either,
+        // so the budget may not be spent after all.
+        if (queue.length - queueCursors[depth] >= maxDocuments - requestedCount) {
+          hasDroppedLinks = true;
+          break;
         }
         if (seenUrlsLength + link.length > CRAWL_LIMITS.maxSeenUrlsLength) {
           hasDroppedLinks = true;
           break;
         }
-        const robots = isPathAllowed(link, pathRules)
-          ? robotsByOrigin.get(new URL(link).origin) ?? (await readRobots(link))
-          : undefined;
+        let robots: RobotsRules | null | undefined;
+        if (isPathAllowed(link, pathRules)) {
+          robots = robotsByOrigin.get(new URL(link).origin);
+          if (robots === undefined) {
+            robots = await readRobots(link, { isLinked: true });
+            // Another worker may have queued or skipped the link while robots.txt was read.
+            if (isKnown()) {
+              continue;
+            }
+          }
+        }
+        const knownDepth = depthByPage.get(pageKey);
         if (robots === null) {
           hasDroppedLinks = true;
           continue;
@@ -456,6 +512,11 @@ export const crawlSite = async ({
       }
       if (!page) {
         extractionFailedCount++;
+        return;
+      }
+      // Found closer to a start URL in the meantime, the page is crawled again from there. Indexing
+      // it from here as well could leave it with the deeper of the two depths.
+      if (depthByPage.get(getPageKey(pageUrl)) !== depth) {
         return;
       }
 
@@ -548,7 +609,7 @@ export const crawlSite = async ({
               discoverSitemapPages({
                 ...discovery,
                 siteUrl: seedUrl,
-                declaredSitemaps: getRobots(seedUrl).sitemaps,
+                declaredSitemaps: [...(declaredSitemapsBySite.get(getSiteKey(seedUrl)) ?? [])],
               })
             ),
           ])

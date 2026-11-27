@@ -773,6 +773,7 @@ describe('crawlSite', () => {
       await crawling;
 
       expect(getPageRequests().filter((pageUrl) => pageUrl === `${ORIGIN}/target`)).toHaveLength(2);
+      await expect(crawling).resolves.toEqual(toResult({ documentsCount: 6 }));
       expect(getIndexedDepths()).toEqual({
         [SEED_URL]: 0,
         [`${ORIGIN}/fast`]: 1,
@@ -807,6 +808,150 @@ describe('crawlSite', () => {
       ).resolves.toEqual(toResult({ documentsCount: 2, skippedByRulesCount: 1 }));
 
       expect(getPageRequests()).toEqual([SEED_URL, `${ORIGIN}/docs/`]);
+    });
+  });
+
+  describe('a page found closer to a start URL while it is being crawled', () => {
+    it('is indexed from the shallower depth only', async () => {
+      const releaseSlow = hold(`${ORIGIN}/slow`);
+      const releaseTarget = hold(`${ORIGIN}/target`);
+      mockSite({
+        [SEED_URL]: pageLinkingTo(['/fast', '/slow']),
+        [`${ORIGIN}/fast`]: pageLinkingTo(['/deep']),
+        [`${ORIGIN}/deep`]: pageLinkingTo(['/target']),
+        [`${ORIGIN}/slow`]: pageLinkingTo(['/target']),
+        [`${ORIGIN}/target`]: pageLinkingTo([]),
+      });
+      const getTargetRequests = () =>
+        getPageRequests().filter((pageUrl) => pageUrl === `${ORIGIN}/target`);
+
+      const crawling = crawl({ maxDepth: 3 });
+      await waitUntil(() => getTargetRequests().length === 1);
+      releaseSlow();
+      await waitUntil(() => getTargetRequests().length === 2);
+      releaseTarget();
+
+      await expect(crawling).resolves.toEqual(toResult({ documentsCount: 5 }));
+      expect(
+        getIndexedDocuments()
+          .filter(({ url }) => url === `${ORIGIN}/target`)
+          .map(({ depth }) => depth)
+      ).toEqual([2]);
+    });
+
+    it('deletes nothing when a link was dropped for a page budget that its earlier queue entry held', async () => {
+      const held = range(10, (position) => `${ORIGIN}/b${position}`);
+      const releases = held.map((pageUrl) => hold(pageUrl));
+      const releaseSitemap = hold(SITEMAP_URL);
+      const releaseTargets = [hold(`${ORIGIN}/t`), hold(`${ORIGIN}/u`)];
+      siteFiles[SITEMAP_URL] = toSitemap([`${ORIGIN}/t`, `${ORIGIN}/u`]);
+      mockSite({
+        [SEED_URL]: pageLinkingTo(['/a', ...held]),
+        [`${ORIGIN}/a`]: pageLinkingTo(['/t', '/u']),
+        ...Object.fromEntries(held.map((pageUrl) => [pageUrl, pageLinkingTo([])])),
+        [held[0]]: pageLinkingTo(['/w']),
+        [`${ORIGIN}/t`]: pageLinkingTo([]),
+        [`${ORIGIN}/u`]: pageLinkingTo([]),
+        [`${ORIGIN}/w`]: pageLinkingTo([]),
+      });
+
+      const crawling = crawl({ maxDepth: 2, maxDocuments: 15 });
+      // Every worker is held, with /t and /u waiting at depth 2.
+      await waitUntil(() => getPageRequests().includes(held[9]));
+      releaseSitemap();
+      await letCrawlRun();
+      releases[1]();
+      releases[2]();
+      await waitUntil(() => getPageRequests().includes(`${ORIGIN}/u`));
+      releases[0]();
+      await letCrawlRun();
+      [...releases, ...releaseTargets].forEach((release) => release());
+
+      await expect(crawling).resolves.toEqual(toResult({ documentsCount: 14 }));
+      expect(getPageRequests()).not.toContain(`${ORIGIN}/w`);
+      expect(esClient.deleteByQuery).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('other origins of the site', () => {
+    const HTTP_ORIGIN = 'http://example.com';
+
+    it('requests a page once when two pages link to it while the robots.txt of its origin is read', async () => {
+      const releaseRobots = hold(`${HTTP_ORIGIN}/robots.txt`);
+      mockSite({
+        [SEED_URL]: pageLinkingTo(['/a', '/b']),
+        [`${ORIGIN}/a`]: pageLinkingTo([`${HTTP_ORIGIN}/x`]),
+        [`${ORIGIN}/b`]: pageLinkingTo([`${HTTP_ORIGIN}/x`]),
+        [`${HTTP_ORIGIN}/x`]: pageLinkingTo([]),
+      });
+
+      const crawling = crawl();
+      await waitUntil(() => getPageRequests().includes(`${ORIGIN}/b`));
+      await letCrawlRun();
+      releaseRobots();
+
+      await expect(crawling).resolves.toEqual(toResult({ documentsCount: 4 }));
+      expect(getPageRequests().filter((pageUrl) => pageUrl === `${HTTP_ORIGIN}/x`)).toHaveLength(1);
+    });
+
+    it('reads the robots.txt of a limited number of the origins that pages link to, and deletes nothing past it', async () => {
+      jest.replaceProperty(CRAWL_LIMITS, 'maxLinkedOrigins', 1);
+      mockSite({
+        [SEED_URL]: pageLinkingTo([
+          'https://example.com:8081/a',
+          'https://example.com:8082/b',
+          'https://example.com:8083/c',
+        ]),
+        'https://example.com:8081/a': pageLinkingTo([]),
+      });
+
+      await expect(crawl()).resolves.toEqual(toResult({ documentsCount: 2 }));
+
+      expect(getSiteFileRequests()).toEqual([
+        ROBOTS_URL,
+        SITEMAP_URL,
+        'https://example.com:8081/robots.txt',
+      ]);
+      expect(logger.warn).toHaveBeenCalledTimes(1);
+      expect(esClient.deleteByQuery).not.toHaveBeenCalled();
+    });
+
+    it('crawls the start URL that robots.txt allows when another URL of the same page is disallowed', async () => {
+      siteFiles[`${HTTP_ORIGIN}/robots.txt`] = disallow('/');
+      mockSite({ [SEED_URL]: pageLinkingTo([]) });
+
+      await expect(
+        crawl({ url: `${HTTP_ORIGIN}/`, additionalSeedUrls: [SEED_URL] })
+      ).resolves.toEqual(toResult({ documentsCount: 1 }));
+
+      expect(getPageRequests()).toEqual([SEED_URL]);
+    });
+
+    it('reads the sitemaps that the robots.txt of every start URL of a site declares', async () => {
+      siteFiles[ROBOTS_URL] = `Sitemap: ${ORIGIN}/one.xml`;
+      siteFiles[`${HTTP_ORIGIN}/robots.txt`] = `Sitemap: ${HTTP_ORIGIN}/two.xml`;
+      mockSite({
+        [SEED_URL]: pageLinkingTo([]),
+        [`${HTTP_ORIGIN}/other`]: pageLinkingTo([]),
+      });
+
+      await crawl({ additionalSeedUrls: [`${HTTP_ORIGIN}/other`] });
+
+      expect(getSiteFileRequests()).toEqual(
+        expect.arrayContaining([`${ORIGIN}/one.xml`, `${HTTP_ORIGIN}/two.xml`])
+      );
+    });
+  });
+
+  describe('a start URL that is also given as a sitemap', () => {
+    it('is crawled as a page, and the crawl completes', async () => {
+      mockSmallSite();
+
+      await expect(crawl({ sitemapUrls: [SEED_URL] })).resolves.toEqual(
+        toResult({ documentsCount: 3 })
+      );
+
+      expect(getPageRequests()).toEqual(expect.arrayContaining([SEED_URL]));
     });
   });
 

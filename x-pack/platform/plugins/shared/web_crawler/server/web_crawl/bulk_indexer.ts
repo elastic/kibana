@@ -85,7 +85,8 @@ export const createBulkIndexer = ({
   const buffer: BufferedDocument[] = [];
   let bufferedBytes = 0;
   const inFlight = new Set<Promise<void>>();
-  let documentsCount = 0;
+  // A page indexed again, when the crawl found it closer to a start URL, is still one document.
+  const indexedIds = new Set<string>();
   let failedCount = 0;
   let lastError: Error | undefined;
   let hasFailed = false;
@@ -121,7 +122,7 @@ export const createBulkIndexer = ({
               `Web crawl could not index a page into ${indexName}: ${result.error.reason}`
             );
           } else {
-            documentsCount++;
+            indexedIds.add(getDocumentId(pending[position].url));
           }
         });
         onIndexed();
@@ -213,6 +214,6 @@ export const createBulkIndexer = ({
       await settle();
     },
     settle,
-    getCounts: () => ({ documentsCount, failedCount, lastError }),
+    getCounts: () => ({ documentsCount: indexedIds.size, failedCount, lastError }),
   };
 };

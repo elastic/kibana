@@ -63,6 +63,10 @@ export const listDocumentExtractionEndpoints = async (
 
 export const waitFor = (delayMs: number, signal: AbortSignal): Promise<void> =>
   new Promise((resolve) => {
+    if (signal.aborted) {
+      resolve();
+      return;
+    }
     const finish = () => {
       clearTimeout(timer);
       signal.removeEventListener('abort', finish);
@@ -116,7 +120,9 @@ export const extractPage = async (
         throw error;
       }
       await waitFor(retryDelayMs, options.signal);
-      await options.beforeRetry?.();
+      if (!options.signal.aborted) {
+        await options.beforeRetry?.();
+      }
       if (options.signal.aborted) {
         throw error;
       }

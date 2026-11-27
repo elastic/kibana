@@ -11,6 +11,7 @@ import {
   RATE_LIMIT_RETRY_DELAYS_MS,
   extractPage,
   listDocumentExtractionEndpoints,
+  waitFor,
 } from './document_extraction';
 
 const createEsError = (statusCode: number) =>
@@ -248,6 +249,26 @@ describe('extractPage', () => {
       expect(jest.getTimerCount()).toBe(0);
     });
 
+    it('does not call beforeRetry when the signal is aborted while backing off', async () => {
+      const error = createEsError(429);
+      const beforeRetry = jest.fn().mockResolvedValue(undefined);
+      esClient.transport.request.mockRejectedValue(error);
+
+      const rejection = expect(
+        extractPage(esClient, {
+          inferenceId: '.jina-reader',
+          url: 'https://example.com/page',
+          signal,
+          beforeRetry,
+        })
+      ).rejects.toBe(error);
+      await jest.advanceTimersByTimeAsync(FIRST_DELAY_MS / 2);
+      abortController.abort();
+      await rejection;
+
+      expect(beforeRetry).not.toHaveBeenCalled();
+    });
+
     it('does not back off when the signal is already aborted', async () => {
       const error = createEsError(429);
       esClient.transport.request.mockRejectedValue(error);
@@ -258,5 +279,24 @@ describe('extractPage', () => {
       expect(esClient.transport.request).toHaveBeenCalledTimes(1);
       expect(jest.getTimerCount()).toBe(0);
     });
+  });
+});
+
+describe('waitFor', () => {
+  beforeEach(() => {
+    jest.useFakeTimers();
+  });
+
+  afterEach(() => {
+    jest.useRealTimers();
+  });
+
+  it('resolves at once, without a timer, when the signal is already aborted', async () => {
+    const abortController = new AbortController();
+    abortController.abort();
+
+    await waitFor(60_000, abortController.signal);
+
+    expect(jest.getTimerCount()).toBe(0);
   });
 });

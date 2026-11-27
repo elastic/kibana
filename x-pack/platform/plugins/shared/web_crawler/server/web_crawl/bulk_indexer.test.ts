@@ -170,6 +170,18 @@ describe('createBulkIndexer', () => {
       expect(getDocumentId('http://example.com/page-0/')).toBe(getDocumentId(document.url));
     });
 
+    it('counts a page that is indexed more than once as one document', async () => {
+      answerBulks();
+
+      await indexer.add(toDocument(0));
+      await indexer.add({ ...toDocument(0), depth: 0 });
+      await indexer.add(toDocument(1));
+      await indexer.drain();
+
+      expect(getSentUrls().flat()).toHaveLength(3);
+      expect(indexer.getCounts()).toMatchObject({ documentsCount: 2, failedCount: 0 });
+    });
+
     it('buffers documents while a request is in flight, until they fill a batch', async () => {
       await addAll(toDocuments(BULK_SIZE));
 
