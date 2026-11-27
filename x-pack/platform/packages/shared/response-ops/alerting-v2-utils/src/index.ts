@@ -34,3 +34,8 @@ export {
   type SeriesRef,
   type DecodedSeriesId,
 } from './series_id';
+export {
+  splitEsqlQuery,
+  type EsqlQuerySplit,
+  type EsqlQuerySplitConfidence,
+} from './split_esql_query';

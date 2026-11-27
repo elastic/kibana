@@ -24,6 +24,7 @@ import type { ExecutorOptions } from './types';
 import { ActionGroupId } from '../../../common/es_query';
 import { executor } from './executor';
 import { isSearchSourceRule, getSourceFields } from './util';
+import { toV2Draft } from './migration/to_v2_draft';
 import type { StackAlertType } from '../types';
 
 export function getRuleType(
@@ -231,5 +232,6 @@ export function getRuleType(
     solution: 'stack',
     doesSetRecoveryContext: true,
     alerts: STACK_ALERTS_AAD_CONFIG,
+    alertingV2Migration: { toV2Draft },
   };
 }
