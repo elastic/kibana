@@ -34,9 +34,8 @@ interface RouteDependencies {
 
 export const registerGetRoute = (
   router: InternalSavedObjectRouter,
-  { config, coreUsageData, logger, access, deprecationInfo }: RouteDependencies
+  { coreUsageData, logger, access, deprecationInfo }: RouteDependencies
 ) => {
-  const { allowHttpApiAccess } = config;
   router.get(
     {
       path: '/{type}/{id}',
@@ -85,9 +84,7 @@ For transferring or backing up saved objects, prefer the export API (\`POST /api
 
       const { savedObjects } = await context.core;
 
-      if (!allowHttpApiAccess) {
-        throwIfTypeNotVisibleByAPI(type, savedObjects.typeRegistry);
-      }
+      throwIfTypeNotVisibleByAPI(type, savedObjects.typeRegistry);
 
       const object = await savedObjects.client.get(type, id, {
         migrationVersionCompatibility: 'compatible',

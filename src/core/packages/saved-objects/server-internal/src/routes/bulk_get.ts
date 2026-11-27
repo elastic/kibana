@@ -38,9 +38,8 @@ interface RouteDependencies {
 
 export const registerBulkGetRoute = (
   router: InternalSavedObjectRouter,
-  { config, coreUsageData, logger, access, deprecationInfo }: RouteDependencies
+  { coreUsageData, logger, access, deprecationInfo }: RouteDependencies
 ) => {
-  const { allowHttpApiAccess } = config;
   router.post(
     {
       path: '/_bulk_get',
@@ -96,9 +95,7 @@ For transferring or backing up saved objects, prefer the export API (\`POST /api
 
       const { savedObjects } = await context.core;
 
-      if (!allowHttpApiAccess) {
-        throwIfAnyTypeNotVisibleByAPI(types, savedObjects.typeRegistry);
-      }
+      throwIfAnyTypeNotVisibleByAPI(types, savedObjects.typeRegistry);
       const result = await savedObjects.client.bulkGet(request.body, {
         migrationVersionCompatibility: 'compatible',
       });

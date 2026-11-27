@@ -38,9 +38,8 @@ interface RouteDependencies {
 
 export const registerUpdateRoute = (
   router: InternalSavedObjectRouter,
-  { config, coreUsageData, logger, access, deprecationInfo }: RouteDependencies
+  { coreUsageData, logger, access, deprecationInfo }: RouteDependencies
 ) => {
-  const { allowHttpApiAccess } = config;
   router.put(
     {
       path: '/{type}/{id}',
@@ -117,9 +116,7 @@ For transferring or backing up saved objects, prefer the import and export APIs 
       const usageStatsClient = coreUsageData.getClient();
       usageStatsClient.incrementSavedObjectsUpdate({ request, types: [type] }).catch(() => {});
       const { savedObjects } = await context.core;
-      if (!allowHttpApiAccess) {
-        throwIfTypeNotVisibleByAPI(type, savedObjects.typeRegistry);
-      }
+      throwIfTypeNotVisibleByAPI(type, savedObjects.typeRegistry);
       const result = await savedObjects.client.update(type, id, attributes, options);
       return response.ok({ body: result });
     })
