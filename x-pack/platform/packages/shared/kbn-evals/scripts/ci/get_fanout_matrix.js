@@ -8,8 +8,9 @@
 
 // Builds the fanout matrix for `run_suite.sh`: one JSON object per line (JSONL) on stdout, each
 // `{ connectorId, shardId, specFiles }` (`specFiles` is an array), plus `judge` when the shard pins
-// its evaluation connector. `run_suite.sh` reads the fields with `jq`, so there is no positional/tab
-// parsing that could mangle an empty shard id.
+// its evaluation connector and `concurrencyGroup` when it runs in one of the suite's named groups.
+// `run_suite.sh` reads the fields with `jq`, so there is no positional/tab parsing that could
+// mangle an empty shard id.
 //
 // Weekly (`KBN_EVALS_WEEKLY`) + `specModelGroups[]` with models: for each shard (or one virtual
 // batch of `specModelGroups[].files` when there are no shards), each connector matching
@@ -90,21 +91,48 @@ const assertListedModelsHaveConnectors = (connectors, groups) => {
   }
 };
 
+// The suite concurrency group with the lowest limit, or '' when the suite defines none.
+const tightestConcurrencyGroup = (concurrencyGroups) => {
+  const [tightest] = Object.entries(
+    concurrencyGroups && typeof concurrencyGroups === 'object' ? concurrencyGroups : {}
+  ).sort(([, left], [, right]) => left - right);
+  return tightest ? tightest[0] : '';
+};
+
 // A shard's `judge` pins the evaluation connector of its steps; otherwise the suite-wide judge applies.
-const shardJudge = (shard) => (typeof shard?.judge === 'string' ? shard.judge.trim() : '');
+// A shard's `concurrencyGroup` names the suite group its steps share a concurrency limit in.
+// A step that isn't one shard (a grep run, or a suite without shards) can run any spec, so it takes
+// the suite's tightest group rather than the suite-wide limit.
+const shardConcurrencyGroup = (shard, concurrencyGroups) => {
+  const named = typeof shard?.concurrencyGroup === 'string' ? shard.concurrencyGroup.trim() : '';
+  if (named) return named;
+  if (shard?.id) return '';
+  return tightestConcurrencyGroup(concurrencyGroups);
+};
+
+const shardFields = (shard, concurrencyGroups) => {
+  const judge = typeof shard?.judge === 'string' ? shard.judge.trim() : '';
+  const concurrencyGroup = shardConcurrencyGroup(shard, concurrencyGroups);
+  return { ...(judge ? { judge } : {}), ...(concurrencyGroup ? { concurrencyGroup } : {}) };
+};
 
 // Connector x shard: every requested connector runs every spec file in each shard, or the whole
 // suite (one step per connector, empty specFiles) when there are no shards.
-function buildConnectorShardMatrix({ connectors, shards, requestedModelGroups }) {
+function buildConnectorShardMatrix({
+  connectors,
+  shards,
+  requestedModelGroups,
+  concurrencyGroups,
+}) {
   const connectorIds = assertRequestedConnectors(connectors, requestedModelGroups);
   const effectiveShards = shards.length === 0 ? [{ id: '', specFiles: [] }] : shards;
   const rows = [];
   for (const shard of effectiveShards) {
     const shardId = shard.id || '';
     const specFiles = Array.isArray(shard.specFiles) ? shard.specFiles : [];
-    const judge = shardJudge(shard);
+    const fields = shardFields(shard, concurrencyGroups);
     for (const connectorId of connectorIds) {
-      rows.push({ connectorId, shardId, specFiles, ...(judge ? { judge } : {}) });
+      rows.push({ connectorId, shardId, specFiles, ...fields });
     }
   }
   return rows;
@@ -119,7 +147,7 @@ function buildConnectorShardMatrix({ connectors, shards, requestedModelGroups })
  * @param {string[]} params.requestedModelGroups  EVAL_MODEL_GROUPS (the provisioned universe)
  * @param {boolean} params.perSpec            weekly run (`KBN_EVALS_WEEKLY`); apply `specModelGroups` overrides
  * @param {boolean} params.grepOverride       whether EVAL_GREP / EVAL_GREP_INVERT is set
- * @returns {Array<{connectorId: string, shardId: string, specFiles: string[], judge?: string}>}
+ * @returns {Array<{connectorId: string, shardId: string, specFiles: string[], judge?: string, concurrencyGroup?: string}>}
  */
 function buildFanoutMatrix({
   connectors,
@@ -139,7 +167,12 @@ function buildFanoutMatrix({
 
   if (!perSpec) {
     const shards = grepOverride ? [] : configuredShards;
-    return buildConnectorShardMatrix({ connectors, shards, requestedModelGroups });
+    return buildConnectorShardMatrix({
+      connectors,
+      shards,
+      requestedModelGroups,
+      concurrencyGroups: suiteInfo.concurrencyGroups,
+    });
   }
 
   const connectorIds = assertRequestedConnectors(connectors, requestedModelGroups);
@@ -166,7 +199,7 @@ function buildFanoutMatrix({
   for (const batch of batches) {
     const shardId = batch.id || '';
     const batchFiles = Array.isArray(batch.specFiles) ? batch.specFiles : [];
-    const judge = shardJudge(batch);
+    const fields = shardFields(batch, suiteInfo.concurrencyGroups);
     for (const connectorId of connectorIds) {
       const connector = connectors[connectorId];
       const specFiles = batchFiles.filter((file) =>
@@ -175,7 +208,7 @@ function buildFanoutMatrix({
           .some((group) => connectorMatchesModelGroup(connectorId, connector, group))
       );
       if (specFiles.length > 0) {
-        rows.push({ connectorId, shardId, specFiles, ...(judge ? { judge } : {}) });
+        rows.push({ connectorId, shardId, specFiles, ...fields });
       }
     }
   }
@@ -195,12 +228,13 @@ function buildFanoutMatrix({
 // or specFiles array round-trips unambiguously (no tab collapsing).
 function formatFanoutMatrix(rows) {
   return rows
-    .map(({ connectorId, shardId, specFiles, judge }) =>
+    .map(({ connectorId, shardId, specFiles, judge, concurrencyGroup }) =>
       JSON.stringify({
         connectorId,
         shardId: shardId || '',
         specFiles,
         ...(judge ? { judge } : {}),
+        ...(concurrencyGroup ? { concurrencyGroup } : {}),
       })
     )
     .join('\n');

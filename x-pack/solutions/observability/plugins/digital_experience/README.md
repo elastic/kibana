@@ -115,7 +115,8 @@ on serverless and stateful.
   never moves the page. The filters are in the URL, so a reload or a shared link keeps them; the
   router drops a value longer than the KPI route accepts (`common/filter_lengths.ts`). Below, the
   **Health summary**: its title, a **Compare to the previous period** toggle (`compare=true` in the
-  URL, so a reload or Share keeps it) and the KPI row (sessions, users, error rate). The crash-free card and the sections of the sibling issues
+  URL, so a reload or Share keeps it) and the KPI row (sessions, users, error rate, average cold
+  start, average warm start; see **App start** below). The crash-free card and the sections of the sibling issues
   (health summary, release health, stability, users, performance, views) join the page as those
   issues fill them, rather than showing placeholders. Every KPI uses `ComparedKpiPanel`: the current
   value and a tooltip with the calculation and, with Compare on, its change against the previous
@@ -171,8 +172,36 @@ on serverless and stateful.
   the filter off. Each chart has a one-line header (an `h3` and an info tip with the
   calculation), so both plots line up, and a legend below it (hover a release to spotlight it,
   click to hide it); dragging over one narrows the time range. Session shares show one decimal at
-  most (`formatKpiPercent`). The crash rate (#64) and the cold start (#68) join the table's columns and
-  the charts later.
+  most (`formatKpiPercent`). The table also shows each release's average cold start (see **App
+  start**). The crash rate (#64) joins the table's columns and the charts later.
+- **App start** (`common/mobile/app_starts.ts`). Our definition: the duration the SDK reports in
+  the `elastic.app.start` log event (`attributes.elastic.app.start.duration`, in milliseconds), from
+  the launch to the first frame. A **cold** start (`start.type: cold`) starts the app's process; a
+  **warm** start (`warm`) brings back an app whose process was still running. The two differ by
+  about 10×, so they are never averaged together. `hot` is reserved by the SDKs and left out, and
+  so is a start without a type. Starts above **60 seconds** (`MAX_APP_START_MS`), or below 0, are
+  left out too: a process started in the background (by a push, a background fetch or iOS prewarm)
+  draws its first frame only when the user opens the app, and a few of those would pull an average
+  far up. EDOT iOS doesn't flag prewarmed starts yet, so one that finishes under 60 seconds still
+  counts; once it does, they are left out too. The duration is read with `TO_DOUBLE`, as dynamic
+  mapping makes it a `long` in a backing index whose first value was whole. `withAppStartDurations`
+  adds a `cold_start_ms` and a `warm_start_ms` column (null on any other document) and
+  `appStartStats()` their `AVG` and `COUNT`, in the same `STATS` as the KPIs and the release
+  stats, so the tiles and the release column need no query of their own; `kpiStats()` stays as it
+  is for the applications list. Every value comes with the starts it averages, shown in its
+  tooltip. The **Health summary** tiles show the averages against the previous period (a rise is
+  red, but a change under 2%, `NEGLIGIBLE_RELATIVE_CHANGE`, stays neutral, as on every compared
+  KPI) and read "No data" when no start of the type counts in the readable data (older SDKs, EDOT
+  React Native before its native SDKs send it, or logs the user can't read); while comparing, the
+  tooltip still names the previous period's starts. The release table's **Avg. cold start** holds back a release under 100
+  sessions, as its error rate, and shows a dash without cold starts. The **Performance** section
+  (`mobile_overview/performance/`), below the release health, draws each average over time from
+  `GET .../mobile_applications/{serviceName}/app_starts` (the releases route's params): every
+  bucket of the range (the empty ones from the same date histogram, `getBucketTimestamps`), with a
+  gap where a bucket had no starts and the count in its tooltip. It has its own error state with a
+  retry, and the toolbar's refresh reloads it. Start and end points differ between tools, so these
+  numbers won't match the Play Console's or Xcode Organizer's, and an SDK started late in the app's
+  launch shortens cold starts or turns them into warm ones.
 
 ## Pages
 
@@ -670,11 +699,20 @@ and drill-down find nothing until the index is deleted for the task to rebuild i
 For local data, the `digital_experience_browser` synthtrace scenario emits these events by default
 (`--scenarioOpts frustration=false` turns them off).
 
-`has_replay` is mapped but never written yet. Session replay records one `elastic.replay.start`
-per recorded segment to `logs-rum.replay.otel-*`, which the task already reads as part of
-`logs-*.otel-*`, so it can set the field without a `SESSIONS_VERSION` bump and the rebuild one
-would cost. It is absent rather than `false` until something sets it, and readers expose it as
-`hasReplay`.
+`has_replay` is true when the session has at least one `elastic.replay.start` record, which session
+replay writes once per recorded segment to `logs-rum.replay.otel-*`, a match of `logs-*.otel-*`.
+Those records carry the session and the application of the telemetry, so the summary queries
+(`browserSessionEvents`) leave out the replay events (`elastic.replay.event`, one per rrweb event,
+far more than the session has telemetry), which would otherwise count as its events and make up most
+of what the task reads. The start records stay for `has_replay`, and are not counted in the
+session's `event_count`, `start_time` or `end_time`. A session whose only events in the rebuilt window
+are start records therefore has no times, and gets no summary until an event of its own arrives
+(`toSessionDocuments` skips rows without times). The exclusion spells out `event_name IS NULL OR
+event_name != ...`: spans have no event name, which a bare `!=` would drop, and a `COALESCE` would
+keep Elasticsearch from applying it to the index.
+
+The field was mapped without a `SESSIONS_VERSION` bump, so a summary has it once its session gets
+new events. Until then the API exposes it as `hasReplay: null`, which is not the same as `false`.
 
 `load_time` was added without a bump too, as nothing reads it yet. An index built before it keeps
 it in `_source` only (`dynamic: false`), and the summaries it already holds lack it until their

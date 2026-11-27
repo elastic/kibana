@@ -1,5 +1,5 @@
 pageLoadAssetSize:
-  actions: 3928
+  actions: 4400
   advancedSettings: 1981
   agentBuilder: 745
   agentBuilderDashboards: 4468
@@ -54,7 +54,7 @@ pageLoadAssetSize:
   dataViews: 1697
   dataVisualizer: 7461
   devTools: 4281
-  digitalExperience: 8301
+  digitalExperience: 9252
   discover: 21958
   discoverEnhanced: 1359
   discoveries: 31528
@@ -62,7 +62,7 @@ pageLoadAssetSize:
   elasticAssistant: 136070
   elasticAssistantSharedState: 3369
   elasticConsole: 1119
-  elasticsearchHome: 2777
+  elasticsearchHome: 3770
   embeddable: 990
   embeddableAlertsTable: 1536
   enterpriseSearch: 28188
@@ -190,12 +190,12 @@ pageLoadAssetSize:
   serverless: 1571
   serverlessObservability: 14136
   serverlessSearch: 18103
-  serverlessVectordb: 8809
+  serverlessVectordb: 10433
   sessionView: 647
   share: 379
-  shared-core: 343009
+  shared-core: 343301
   shared-misc: 155260
-  shared-packages: 6065481
+  shared-packages: 6672186
   shared-plugins: 13536562
   shared-solution-packages: 386709
   significantEvents: 4439

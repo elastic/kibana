@@ -8,19 +8,15 @@
 import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
 import { z, lazySchema } from '@kbn/zod/v4';
 import type { EndpointAppContextService } from '../../../../endpoint/endpoint_app_context_services';
-import { policyIdentifierInputSchema } from '../domain/input_schemas';
-import type { PolicyRolloutStatus } from '../services/read_policy_rollout_status';
+import { policyIdentifierInputSchema } from '../../../../../common/workflows/step_types/endpoint/policies/input_schemas';
 import { createPolicyTool } from './create_policy_tool';
 import {
-  presentBoundedIdentityStrings,
-  presentWithinGuardedBudget,
-  type PresentedPolicyIdentity,
-} from './trim_policy_result';
+  GET_POLICY_ROLLOUT_STATUS_MAX_RESULT_TOKENS,
+  presentPolicyRolloutStatus,
+} from '../../../../endpoint/services/policy_management/presentation/present_get_policy_rollout_status';
 
 export const GET_POLICY_ROLLOUT_STATUS_TOOL_ID =
   'security.policy_management.get_policy_rollout_status';
-
-const GET_POLICY_ROLLOUT_STATUS_MAX_RESULT_TOKENS = 8_000;
 
 export const getPolicyRolloutStatusSchema = lazySchema(() =>
   z.object({
@@ -29,65 +25,6 @@ export const getPolicyRolloutStatusSchema = lazySchema(() =>
     ),
   })
 );
-
-export interface PolicyRolloutStatusResult extends Record<string, unknown> {
-  policy: PresentedPolicyIdentity<PolicyRolloutStatus['policy']>;
-  spaceId: string;
-  revision_coverage: {
-    out_of_date_hosts: number;
-    classified_hosts: number;
-    undetermined_hosts: number;
-    unclassified_overflow_hosts: number;
-    truncated: boolean;
-    source: string;
-    population: string;
-  };
-  current_revision_responses: {
-    needs_attention_hosts: number;
-    classified_hosts: number;
-    undetermined_hosts: number;
-    upstream_unclassified_hosts: number;
-    truncated: boolean;
-    source: string;
-    population: string;
-    response_coverage_incomplete: boolean;
-  };
-}
-
-const presentRolloutStatusPolicy = (policy: PolicyRolloutStatus['policy']) =>
-  presentBoundedIdentityStrings({
-    id: policy.id,
-    name: policy.name,
-    revision: policy.revision,
-  });
-
-const presentPolicyRolloutStatus = (status: PolicyRolloutStatus): PolicyRolloutStatusResult => {
-  const presented: PolicyRolloutStatusResult = {
-    policy: presentRolloutStatusPolicy(status.policy),
-    spaceId: status.spaceId,
-    revision_coverage: {
-      out_of_date_hosts: status.revisionCoverage.outOfDateHosts,
-      classified_hosts: status.revisionCoverage.classifiedHosts,
-      undetermined_hosts: status.revisionCoverage.undeterminedHosts,
-      unclassified_overflow_hosts: status.revisionCoverage.unclassifiedOverflowHosts,
-      truncated: status.revisionCoverage.truncated,
-      source: status.revisionCoverage.source,
-      population: status.revisionCoverage.population,
-    },
-    current_revision_responses: {
-      needs_attention_hosts: status.currentRevisionResponses.needsAttentionHosts,
-      classified_hosts: status.currentRevisionResponses.classifiedHosts,
-      undetermined_hosts: status.currentRevisionResponses.undeterminedHosts,
-      upstream_unclassified_hosts: status.currentRevisionResponses.upstreamUnclassifiedHosts,
-      truncated: status.currentRevisionResponses.truncated,
-      source: status.currentRevisionResponses.source,
-      population: status.currentRevisionResponses.population,
-      response_coverage_incomplete: status.currentRevisionResponses.responseCoverageIncomplete,
-    },
-  };
-
-  return presented;
-};
 
 export const createGetPolicyRolloutStatusTool = ({
   endpointAppContextService,
@@ -118,12 +55,6 @@ export const createGetPolicyRolloutStatusTool = ({
     maxResultTokens: GET_POLICY_ROLLOUT_STATUS_MAX_RESULT_TOKENS,
     run: async ({ idOrName }: z.infer<typeof getPolicyRolloutStatusSchema>, service) => {
       const status = await service.getPolicyRolloutStatus({ idOrName });
-      const presented = presentPolicyRolloutStatus(status);
-
-      return presentWithinGuardedBudget(
-        () => presented,
-        GET_POLICY_ROLLOUT_STATUS_MAX_RESULT_TOKENS,
-        () => presented
-      );
+      return presentPolicyRolloutStatus(status);
     },
   });

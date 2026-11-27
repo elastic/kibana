@@ -16,6 +16,7 @@ import {
   SLONotFound,
   SLOIdConflict,
   SLOOperationTimeout,
+  SLOResourcesNotInstalled,
   SecurityException,
   SLOTemplateNotFound,
 } from '../../errors';
@@ -37,7 +38,7 @@ export function handleSLOError(error: SLOError): Boom {
     return forbidden(error.message);
   }
 
-  if (error instanceof SLOOperationTimeout) {
+  if (error instanceof SLOOperationTimeout || error instanceof SLOResourcesNotInstalled) {
     return serverUnavailable(error.message);
   }
 

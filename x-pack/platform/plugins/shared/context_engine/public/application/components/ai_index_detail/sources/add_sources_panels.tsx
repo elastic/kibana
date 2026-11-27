@@ -7,7 +7,7 @@
 
 import { EuiButtonEmpty } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useCreateConnectorFlyout } from '../../../hooks/use_create_connector_flyout';
 import { createIndexEsqlQuery, hasSelectedEsqlQuery, toEsqlSource } from '../../../utils/sources';
 import { ConnectorSelect } from './connector_select';
@@ -24,7 +24,19 @@ interface AddPanelProps {
   onAdd: (sources: SelectedSource[]) => Promise<boolean>;
   onClose: () => void;
   isSaving: boolean;
+  /** Gets the sources picked but not added yet, and none once the panel closes. */
+  onPendingChange?: (sources: SelectedSource[]) => void;
 }
+
+const useReportPendingSources = (
+  pending: SelectedSource[],
+  onPendingChange: AddPanelProps['onPendingChange']
+): void => {
+  useEffect(() => {
+    onPendingChange?.(pending);
+  }, [pending, onPendingChange]);
+  useEffect(() => () => onPendingChange?.([]), [onPendingChange]);
+};
 
 const toggleChecked = <T,>(
   current: T[],
@@ -41,6 +53,7 @@ export const AddElasticsearchDataPanel = ({
   onAdd,
   onClose,
   isSaving,
+  onPendingChange,
 }: AddPanelProps) => {
   const [pendingIndexNames, setPendingIndexNames] = useState<string[]>([]);
   const [mode, setMode] = useState<ElasticsearchSourceMode>('index');
@@ -68,6 +81,7 @@ export const AddElasticsearchDataPanel = ({
   );
 
   const sourcesToAdd = mode === 'index' ? indexSources : esqlSources;
+  useReportPendingSources(sourcesToAdd, onPendingChange);
 
   const onToggleIndex = useCallback((indexName: string, checked: boolean) => {
     setPendingIndexNames((current) =>
@@ -123,8 +137,15 @@ export const AddElasticsearchDataPanel = ({
   );
 };
 
-export const AddConnectorsPanel = ({ savedSources, onAdd, onClose, isSaving }: AddPanelProps) => {
+export const AddConnectorsPanel = ({
+  savedSources,
+  onAdd,
+  onClose,
+  isSaving,
+  onPendingChange,
+}: AddPanelProps) => {
   const [pending, setPending] = useState<SelectedSource[]>([]);
+  useReportPendingSources(pending, onPendingChange);
 
   const savedConnectorIds = useMemo(
     () =>
