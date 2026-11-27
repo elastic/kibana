@@ -44,12 +44,10 @@ const NO_HISTORY_IMG_SIZE = 128;
 
 interface RuleChangesHistoryProps {
   ruleId: RuleObjectId;
-  header?: React.ReactNode;
 }
 
 export const RuleChangesHistory = memo(function RuleChangesHistory({
   ruleId,
-  header,
 }: RuleChangesHistoryProps): JSX.Element {
   const { euiTheme } = useEuiTheme();
   const {
@@ -162,7 +160,6 @@ export const RuleChangesHistory = memo(function RuleChangesHistory({
   if (hasNoHistory) {
     return (
       <div css={styles.mainCss}>
-        {header}
         <EuiEmptyPrompt
           icon={
             <EuiImage
@@ -241,7 +238,6 @@ export const RuleChangesHistory = memo(function RuleChangesHistory({
         </EuiFlyoutBody>
       </EuiFlyout>
       <div css={styles.mainCss}>
-        {header}
         <div css={styles.diffCss}>
           <RuleChangesDiff item={selectedItem} isLoading={isLoading} />
         </div>

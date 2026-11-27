@@ -208,6 +208,8 @@ describe('global header', () => {
     '/rules/add_rules',
     '/rules/create',
     '/rules/id/123/edit',
+    '/rules/health',
+    '/rules/id/123/health',
     '/rules_coverage_overview',
     '/exceptions',
     '/exceptions/details/list-1',
