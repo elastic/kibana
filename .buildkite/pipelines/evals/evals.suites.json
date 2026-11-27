@@ -50,7 +50,7 @@
     {
       "id": "memory-longmemeval-direct-index",
       "name": "Memory LongMemEval-S Direct Index",
-      "slackChannel": "#context-engine",
+      "slackChannel": "#context-engine-alerts-poc",
       "configPath": "x-pack/platform/packages/shared/context-engine/kbn-evals-suite-context-engine-memory/longmemeval_direct_index.playwright.config.ts",
       "serverConfigSet": "evals_agent_builder",
       "defaultJudge": "eis-zai-glm-5-2",
