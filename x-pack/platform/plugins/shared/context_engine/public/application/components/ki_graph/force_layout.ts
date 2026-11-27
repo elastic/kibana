@@ -5,9 +5,21 @@
  * 2.0.
  */
 
+import {
+  forceCollide,
+  forceLink,
+  forceManyBody,
+  forceRadial,
+  forceSimulation,
+  forceX,
+  forceY,
+} from 'd3-force';
+import type { SimulationLinkDatum, SimulationNodeDatum } from 'd3-force';
+
 export interface ForceLayoutNode {
   id: string;
   radius: number;
+  occurrences?: number;
 }
 
 export interface ForceLayoutEdge {
@@ -20,21 +32,55 @@ export interface ForcePosition {
   y: number;
 }
 
-const GOLDEN_ANGLE = Math.PI * (3 - Math.sqrt(5));
-const REPULSE_STRENGTH = 2400;
-const REPULSE_MAX_DIST = 220;
-const MIN_DIST = 4;
-const SPRING_STRENGTH = 0.08;
-const REST_BASE = 58;
-const REST_PER_DEGREE = 5;
-const GRAVITY = 0.012;
-const DAMPING = 0.85;
-const ALPHA_START = 1;
-const ALPHA_MIN = 0.002;
-const COLLISION_GAP = 6;
-const COLLISION_ITERATIONS = 50;
-const GRID_BUCKET_THRESHOLD = 400;
-const GRID_CELL_SIZE = REPULSE_MAX_DIST;
+export interface ForceLayoutParams {
+  manyBodyStrength: number;
+  manyBodyDistanceMax: number;
+  manyBodyTheta: number;
+  linkStrength: number;
+  linkRestBase: number;
+  linkRestPerDegree: number;
+  gravity: number;
+  collisionGap: number;
+  collisionStrength: number;
+  collisionIterations: number;
+  velocityDecay: number;
+  alphaDecay: number;
+  ticks: number | 'auto';
+}
+
+export type KiGraphCenterBy = 'connections' | 'occurrences' | 'none';
+
+export interface KiGraphCenterParams {
+  centerBy: KiGraphCenterBy;
+  pinCenterNode: boolean;
+  radialStrength: number;
+  radialSpacing: number;
+}
+
+const DEFAULT_ALPHA_DECAY = 1 - Math.pow(0.001, 1 / 300);
+
+export const DEFAULT_FORCE_LAYOUT_PARAMS: ForceLayoutParams = {
+  manyBodyStrength: -90,
+  manyBodyDistanceMax: 220,
+  manyBodyTheta: 0.9,
+  linkStrength: 0.08,
+  linkRestBase: 58,
+  linkRestPerDegree: 5,
+  gravity: 0.012,
+  collisionGap: 6,
+  collisionStrength: 1,
+  collisionIterations: 2,
+  velocityDecay: 0.4,
+  alphaDecay: DEFAULT_ALPHA_DECAY,
+  ticks: 'auto',
+};
+
+export const DEFAULT_KI_GRAPH_CENTER_PARAMS: KiGraphCenterParams = {
+  centerBy: 'connections',
+  pinCenterNode: false,
+  radialStrength: 0,
+  radialSpacing: 60,
+};
 
 const clamp = (value: number, min: number, max: number): number =>
   Math.min(max, Math.max(min, value));
@@ -42,396 +88,254 @@ const clamp = (value: number, min: number, max: number): number =>
 const simulationIterations = (nodeCount: number): number =>
   clamp(300 - Math.floor(nodeCount / 4), 80, 300);
 
+interface LayoutNode extends SimulationNodeDatum {
+  id: string;
+  radius: number;
+  occurrences?: number;
+}
+
+interface LayoutLink extends SimulationLinkDatum<LayoutNode> {
+  distance: number;
+}
+
 const edgeRestLength = (
   radiusA: number,
   radiusB: number,
   degreeA: number,
-  degreeB: number
+  degreeB: number,
+  params: ForceLayoutParams
 ): number => {
-  const degreeRest = REST_BASE + Math.min(degreeA, degreeB) * REST_PER_DEGREE;
-  const clearance = radiusA + radiusB + COLLISION_GAP;
+  const degreeRest = params.linkRestBase + Math.min(degreeA, degreeB) * params.linkRestPerDegree;
+  const clearance = radiusA + radiusB + params.collisionGap;
   return Math.max(degreeRest, clearance);
 };
 
-const cellKey = (cellX: number, cellY: number): string => `${cellX},${cellY}`;
+const compareCenterRank = (
+  a: LayoutNode,
+  b: LayoutNode,
+  centerBy: KiGraphCenterBy,
+  degreeById: ReadonlyMap<string, number>,
+  originalIndex: ReadonlyMap<string, number>
+): number => {
+  if (centerBy === 'occurrences') {
+    const occDelta = (b.occurrences ?? 0) - (a.occurrences ?? 0);
+    if (occDelta !== 0) {
+      return occDelta;
+    }
+    const degreeDelta = (degreeById.get(b.id) ?? 0) - (degreeById.get(a.id) ?? 0);
+    if (degreeDelta !== 0) {
+      return degreeDelta;
+    }
+    return (originalIndex.get(a.id) ?? 0) - (originalIndex.get(b.id) ?? 0);
+  }
+  if (centerBy === 'connections') {
+    const degreeDelta = (degreeById.get(b.id) ?? 0) - (degreeById.get(a.id) ?? 0);
+    if (degreeDelta !== 0) {
+      return degreeDelta;
+    }
+    return (originalIndex.get(a.id) ?? 0) - (originalIndex.get(b.id) ?? 0);
+  }
+  return (originalIndex.get(a.id) ?? 0) - (originalIndex.get(b.id) ?? 0);
+};
 
-interface IndexedGraph {
-  readonly ids: readonly string[];
-  readonly indexById: ReadonlyMap<string, number>;
-  readonly radii: Float64Array;
-  readonly edges: ReadonlyArray<{ readonly source: number; readonly target: number }>;
-  readonly degrees: Uint32Array;
-}
+const buildRankById = (
+  layoutNodes: LayoutNode[],
+  centerBy: KiGraphCenterBy,
+  degreeById: ReadonlyMap<string, number>,
+  originalIndex: ReadonlyMap<string, number>
+): ReadonlyMap<string, number> => {
+  if (centerBy === 'none') {
+    const rankById = new Map<string, number>();
+    for (const node of layoutNodes) {
+      rankById.set(node.id, 0);
+    }
+    return rankById;
+  }
+  const sorted = [...layoutNodes].sort((a, b) =>
+    compareCenterRank(a, b, centerBy, degreeById, originalIndex)
+  );
+  const rankById = new Map<string, number>();
+  for (let i = 0; i < sorted.length; i++) {
+    rankById.set(sorted[i].id, i);
+  }
+  return rankById;
+};
 
-const buildGraph = (
+const buildLayout = (
   nodes: readonly ForceLayoutNode[],
-  edges: readonly ForceLayoutEdge[]
-): IndexedGraph => {
-  const indexById = new Map<string, number>();
-  const ids: string[] = [];
-  const radii = new Float64Array(nodes.length);
+  edges: readonly ForceLayoutEdge[],
+  params: ForceLayoutParams,
+  centerParams: KiGraphCenterParams
+): {
+  layoutNodes: LayoutNode[];
+  layoutLinks: LayoutLink[];
+  rankById: ReadonlyMap<string, number>;
+} => {
+  const radiusById = new Map<string, number>();
+  const degreeById = new Map<string, number>();
+  const originalIndex = new Map<string, number>();
 
   for (let i = 0; i < nodes.length; i++) {
     const node = nodes[i];
-    indexById.set(node.id, i);
-    ids.push(node.id);
-    radii[i] = node.radius;
+    radiusById.set(node.id, node.radius);
+    degreeById.set(node.id, 0);
+    originalIndex.set(node.id, i);
   }
 
-  const degrees = new Uint32Array(nodes.length);
   const edgeKeys = new Set<string>();
-  const indexedEdges: Array<{ source: number; target: number }> = [];
+  const dedupedEdges: Array<{ source: string; target: string }> = [];
 
   for (const edge of edges) {
     if (edge.source === edge.target) {
       continue;
     }
-    const source = indexById.get(edge.source);
-    const target = indexById.get(edge.target);
-    if (source === undefined || target === undefined) {
+    if (!radiusById.has(edge.source) || !radiusById.has(edge.target)) {
       continue;
     }
-    const lo = source < target ? source : target;
-    const hi = source < target ? target : source;
+    const lo = edge.source < edge.target ? edge.source : edge.target;
+    const hi = edge.source < edge.target ? edge.target : edge.source;
     const key = `${lo}\0${hi}`;
     if (edgeKeys.has(key)) {
       continue;
     }
     edgeKeys.add(key);
-    indexedEdges.push({ source, target });
-    degrees[source] += 1;
-    degrees[target] += 1;
+    dedupedEdges.push({ source: edge.source, target: edge.target });
+    degreeById.set(edge.source, (degreeById.get(edge.source) ?? 0) + 1);
+    degreeById.set(edge.target, (degreeById.get(edge.target) ?? 0) + 1);
   }
 
-  return { ids, indexById, radii, edges: indexedEdges, degrees };
-};
-
-const seedPositions = (
-  count: number,
-  degrees: Uint32Array,
-  radii: Float64Array,
-  cx: Float64Array,
-  cy: Float64Array
-): void => {
-  const order: number[] = [];
-  for (let i = 0; i < count; i++) {
-    order.push(i);
-  }
-  order.sort((a, b) => {
-    const d = degrees[b] - degrees[a];
-    if (d !== 0) {
-      return d;
-    }
-    return a - b;
+  const layoutLinks: LayoutLink[] = dedupedEdges.map((edge) => {
+    const radiusSource = radiusById.get(edge.source) ?? 0;
+    const radiusTarget = radiusById.get(edge.target) ?? 0;
+    const degreeSource = degreeById.get(edge.source) ?? 0;
+    const degreeTarget = degreeById.get(edge.target) ?? 0;
+    return {
+      source: edge.source,
+      target: edge.target,
+      distance: edgeRestLength(radiusSource, radiusTarget, degreeSource, degreeTarget, params),
+    };
   });
 
-  let radiusSum = 0;
-  for (let i = 0; i < count; i++) {
-    radiusSum += radii[i];
-  }
-  const avgRadius = count > 0 ? radiusSum / count : 20;
-  const radialScale = Math.sqrt(count) * avgRadius * 0.22;
+  const mappedNodes: LayoutNode[] = nodes.map((node) => ({
+    id: node.id,
+    radius: node.radius,
+    ...(node.occurrences !== undefined ? { occurrences: node.occurrences } : {}),
+  }));
 
-  for (let rank = 0; rank < count; rank++) {
-    const idx = order[rank];
-    const radius = radialScale * Math.sqrt(rank + 1);
-    const theta = rank * GOLDEN_ANGLE;
-    cx[idx] = radius * Math.cos(theta);
-    cy[idx] = radius * Math.sin(theta);
+  let layoutNodes: LayoutNode[];
+  if (centerParams.centerBy === 'none') {
+    layoutNodes = mappedNodes;
+  } else {
+    layoutNodes = [...mappedNodes].sort((a, b) =>
+      compareCenterRank(a, b, centerParams.centerBy, degreeById, originalIndex)
+    );
   }
+
+  const rankById = buildRankById(layoutNodes, centerParams.centerBy, degreeById, originalIndex);
+
+  return { layoutNodes, layoutLinks, rankById };
 };
 
-const applyPairwiseRepulsion = (
-  count: number,
-  cx: Float64Array,
-  cy: Float64Array,
-  fx: Float64Array,
-  fy: Float64Array,
-  alpha: number
-): void => {
-  for (let i = 0; i < count; i++) {
-    const xi = cx[i];
-    const yi = cy[i];
-    for (let j = i + 1; j < count; j++) {
-      const dx = xi - cx[j];
-      const dy = yi - cy[j];
-      const dist = Math.max(MIN_DIST, Math.hypot(dx, dy));
-      if (dist > REPULSE_MAX_DIST) {
-        continue;
-      }
-      const capped = Math.min(dist, REPULSE_MAX_DIST);
-      const force = (REPULSE_STRENGTH * alpha) / (capped * capped);
-      const nx = dx / dist;
-      const ny = dy / dist;
-      const fxVal = nx * force;
-      const fyVal = ny * force;
-      fx[i] += fxVal;
-      fy[i] += fyVal;
-      fx[j] -= fxVal;
-      fy[j] -= fyVal;
-    }
+const resolveTickCount = (nodeCount: number, ticks: number | 'auto'): number => {
+  if (ticks === 'auto') {
+    return simulationIterations(nodeCount);
   }
+  return ticks;
 };
 
-const applyGridRepulsion = (
-  count: number,
-  cx: Float64Array,
-  cy: Float64Array,
-  fx: Float64Array,
-  fy: Float64Array,
-  alpha: number
-): void => {
-  const buckets = new Map<string, number[]>();
-  for (let i = 0; i < count; i++) {
-    const cellX = Math.floor(cx[i] / GRID_CELL_SIZE);
-    const cellY = Math.floor(cy[i] / GRID_CELL_SIZE);
-    const key = cellKey(cellX, cellY);
-    let bucket = buckets.get(key);
-    if (bucket === undefined) {
-      bucket = [];
-      buckets.set(key, bucket);
-    }
-    bucket.push(i);
-  }
-
-  for (let i = 0; i < count; i++) {
-    const xi = cx[i];
-    const yi = cy[i];
-    const baseX = Math.floor(xi / GRID_CELL_SIZE);
-    const baseY = Math.floor(yi / GRID_CELL_SIZE);
-
-    for (let ox = -1; ox <= 1; ox++) {
-      for (let oy = -1; oy <= 1; oy++) {
-        const bucket = buckets.get(cellKey(baseX + ox, baseY + oy));
-        if (bucket === undefined) {
-          continue;
-        }
-        for (const j of bucket) {
-          if (j <= i) {
-            continue;
-          }
-          const dx = xi - cx[j];
-          const dy = yi - cy[j];
-          const dist = Math.max(MIN_DIST, Math.hypot(dx, dy));
-          if (dist > REPULSE_MAX_DIST) {
-            continue;
-          }
-          const capped = Math.min(dist, REPULSE_MAX_DIST);
-          const force = (REPULSE_STRENGTH * alpha) / (capped * capped);
-          const nx = dx / dist;
-          const ny = dy / dist;
-          const fxVal = nx * force;
-          const fyVal = ny * force;
-          fx[i] += fxVal;
-          fy[i] += fyVal;
-          fx[j] -= fxVal;
-          fy[j] -= fyVal;
-        }
-      }
+const topRankedNodeId = (rankById: ReadonlyMap<string, number>): string | undefined => {
+  let bestId: string | undefined;
+  let bestRank = Number.POSITIVE_INFINITY;
+  for (const [id, rank] of rankById) {
+    if (rank < bestRank) {
+      bestRank = rank;
+      bestId = id;
     }
   }
+  return bestId;
 };
 
-const runSimulation = (graph: IndexedGraph): { cx: Float64Array; cy: Float64Array } => {
-  const count = graph.ids.length;
-  const cx = new Float64Array(count);
-  const cy = new Float64Array(count);
-  const vx = new Float64Array(count);
-  const vy = new Float64Array(count);
-  const fx = new Float64Array(count);
-  const fy = new Float64Array(count);
+const runSimulation = (
+  layoutNodes: LayoutNode[],
+  layoutLinks: LayoutLink[],
+  params: ForceLayoutParams,
+  centerParams: KiGraphCenterParams,
+  rankById: ReadonlyMap<string, number>
+): LayoutNode[] => {
+  const iterations = resolveTickCount(layoutNodes.length, params.ticks);
 
-  seedPositions(count, graph.degrees, graph.radii, cx, cy);
+  const linkForce = forceLink<LayoutNode, LayoutLink>(layoutLinks)
+    .id((node) => node.id)
+    .distance((link) => link.distance)
+    .strength(params.linkStrength);
 
-  const iterations = simulationIterations(count);
-  let alpha = ALPHA_START;
+  const simulation = forceSimulation(layoutNodes)
+    .velocityDecay(params.velocityDecay)
+    .alphaDecay(params.alphaDecay)
+    .force(
+      'charge',
+      forceManyBody<LayoutNode>()
+        .strength(params.manyBodyStrength)
+        .distanceMax(params.manyBodyDistanceMax)
+        .theta(params.manyBodyTheta)
+    )
+    .force('link', linkForce)
+    .force('x', forceX<LayoutNode>(0).strength(params.gravity))
+    .force('y', forceY<LayoutNode>(0).strength(params.gravity))
+    .force(
+      'collide',
+      forceCollide<LayoutNode>((node) => node.radius + params.collisionGap)
+        .strength(params.collisionStrength)
+        .iterations(params.collisionIterations)
+    );
 
-  for (let step = 0; step < iterations; step++) {
-    fx.fill(0);
-    fy.fill(0);
-
-    for (let i = 0; i < count; i++) {
-      fx[i] -= GRAVITY * cx[i];
-      fy[i] -= GRAVITY * cy[i];
-    }
-
-    for (const edge of graph.edges) {
-      const { source, target } = edge;
-      const dx = cx[target] - cx[source];
-      const dy = cy[target] - cy[source];
-      const dist = Math.max(MIN_DIST, Math.hypot(dx, dy));
-      const desired = edgeRestLength(
-        graph.radii[source],
-        graph.radii[target],
-        graph.degrees[source],
-        graph.degrees[target]
-      );
-      const displacement = dist - desired;
-      const force = (SPRING_STRENGTH * displacement * alpha) / dist;
-      const nx = dx / dist;
-      const ny = dy / dist;
-      const fxVal = nx * force;
-      const fyVal = ny * force;
-      fx[source] += fxVal;
-      fy[source] += fyVal;
-      fx[target] -= fxVal;
-      fy[target] -= fyVal;
-    }
-
-    if (count > GRID_BUCKET_THRESHOLD) {
-      applyGridRepulsion(count, cx, cy, fx, fy, alpha);
-    } else {
-      applyPairwiseRepulsion(count, cx, cy, fx, fy, alpha);
-    }
-
-    for (let i = 0; i < count; i++) {
-      vx[i] = (vx[i] + fx[i]) * DAMPING;
-      vy[i] = (vy[i] + fy[i]) * DAMPING;
-      cx[i] += vx[i];
-      cy[i] += vy[i];
-    }
-
-    alpha *= 1 - 1 / iterations;
-    if (alpha < ALPHA_MIN) {
-      alpha = ALPHA_MIN;
-    }
+  if (centerParams.radialStrength > 0) {
+    simulation.force(
+      'radial',
+      forceRadial<LayoutNode>(
+        (node) => centerParams.radialSpacing * Math.sqrt(rankById.get(node.id) ?? 0),
+        0,
+        0
+      ).strength(centerParams.radialStrength)
+    );
   }
 
-  return { cx, cy };
-};
-
-const separateCircularPair = (
-  i: number,
-  j: number,
-  cx: Float64Array,
-  cy: Float64Array,
-  radii: Float64Array
-): boolean => {
-  const dx = cx[j] - cx[i];
-  const dy = cy[j] - cy[i];
-  const dist = Math.hypot(dx, dy);
-  const minDist = radii[i] + radii[j] + COLLISION_GAP;
-
-  if (dist >= minDist) {
-    return false;
-  }
-
-  const effectiveDist = dist === 0 ? MIN_DIST : dist;
-  const push = (minDist - dist) / 2;
-
-  if (dist === 0) {
-    const nudge = (i % 2 === 0 ? 1 : -1) * push;
-    cx[i] -= nudge;
-    cx[j] += nudge;
-    return true;
-  }
-
-  const nx = dx / effectiveDist;
-  const ny = dy / effectiveDist;
-  cx[i] -= nx * push;
-  cy[i] -= ny * push;
-  cx[j] += nx * push;
-  cy[j] += ny * push;
-  return true;
-};
-
-const removeCircleOverlaps = (
-  count: number,
-  cx: Float64Array,
-  cy: Float64Array,
-  radii: Float64Array
-): void => {
-  if (count <= GRID_BUCKET_THRESHOLD) {
-    for (let pass = 0; pass < COLLISION_ITERATIONS; pass++) {
-      let moved = false;
-      for (let i = 0; i < count; i++) {
-        for (let j = i + 1; j < count; j++) {
-          if (separateCircularPair(i, j, cx, cy, radii)) {
-            moved = true;
-          }
-        }
-      }
-      if (!moved) {
-        break;
+  if (centerParams.pinCenterNode && centerParams.centerBy !== 'none') {
+    const centerId = topRankedNodeId(rankById);
+    if (centerId !== undefined) {
+      const pinned = layoutNodes.find((node) => node.id === centerId);
+      if (pinned !== undefined) {
+        pinned.fx = 0;
+        pinned.fy = 0;
       }
     }
-    return;
   }
 
-  for (let pass = 0; pass < COLLISION_ITERATIONS; pass++) {
-    let maxRadius = 1;
-    for (let k = 0; k < count; k++) {
-      if (radii[k] > maxRadius) {
-        maxRadius = radii[k];
-      }
-    }
-    const cell = 2 * maxRadius + COLLISION_GAP;
+  simulation.stop();
+  simulation.tick(iterations);
 
-    const buckets = new Map<string, number[]>();
-    for (let i = 0; i < count; i++) {
-      const cellX = Math.floor(cx[i] / cell);
-      const cellY = Math.floor(cy[i] / cell);
-      const key = cellKey(cellX, cellY);
-      let bucket = buckets.get(key);
-      if (bucket === undefined) {
-        bucket = [];
-        buckets.set(key, bucket);
-      }
-      bucket.push(i);
-    }
-
-    let moved = false;
-    for (let i = 0; i < count; i++) {
-      const baseX = Math.floor(cx[i] / cell);
-      const baseY = Math.floor(cy[i] / cell);
-      for (let ox = -1; ox <= 1; ox++) {
-        for (let oy = -1; oy <= 1; oy++) {
-          const bucket = buckets.get(cellKey(baseX + ox, baseY + oy));
-          if (bucket === undefined) {
-            continue;
-          }
-          for (const j of bucket) {
-            if (j <= i) {
-              continue;
-            }
-            if (separateCircularPair(i, j, cx, cy, radii)) {
-              moved = true;
-            }
-          }
-        }
-      }
-    }
-    if (!moved) {
-      break;
-    }
-  }
-};
-
-const toCenterPositions = (
-  graph: IndexedGraph,
-  cx: Float64Array,
-  cy: Float64Array
-): Map<string, ForcePosition> => {
-  const result = new Map<string, ForcePosition>();
-  for (let i = 0; i < graph.ids.length; i++) {
-    result.set(graph.ids[i], {
-      x: Math.round(cx[i]),
-      y: Math.round(cy[i]),
-    });
-  }
-  return result;
+  return layoutNodes;
 };
 
 export const forceLayout = (
   nodes: readonly ForceLayoutNode[],
-  edges: readonly ForceLayoutEdge[]
+  edges: readonly ForceLayoutEdge[],
+  params: ForceLayoutParams = DEFAULT_FORCE_LAYOUT_PARAMS,
+  centerParams: KiGraphCenterParams = DEFAULT_KI_GRAPH_CENTER_PARAMS
 ): ReadonlyMap<string, ForcePosition> => {
   if (nodes.length === 0) {
     return new Map();
   }
 
-  const graph = buildGraph(nodes, edges);
-  const { cx, cy } = runSimulation(graph);
-  removeCircleOverlaps(graph.ids.length, cx, cy, graph.radii);
-  return toCenterPositions(graph, cx, cy);
+  const { layoutNodes, layoutLinks, rankById } = buildLayout(nodes, edges, params, centerParams);
+  const settled = runSimulation(layoutNodes, layoutLinks, params, centerParams, rankById);
+
+  const result = new Map<string, ForcePosition>();
+  for (const node of settled) {
+    result.set(node.id, {
+      x: Math.round(node.x ?? 0),
+      y: Math.round(node.y ?? 0),
+    });
+  }
+  return result;
 };

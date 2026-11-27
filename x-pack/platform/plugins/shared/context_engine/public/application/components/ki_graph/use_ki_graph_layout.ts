@@ -9,8 +9,14 @@ import { useEuiTheme } from '@elastic/eui';
 import type { Edge, Node } from '@xyflow/react';
 import { MarkerType, Position } from '@xyflow/react';
 import { useMemo } from 'react';
-import { forceLayout } from './force_layout';
-import { getKiGraphNodeSize } from './ki_graph_node_size';
+import type { ForceLayoutParams, KiGraphCenterParams } from './force_layout';
+import {
+  DEFAULT_FORCE_LAYOUT_PARAMS,
+  DEFAULT_KI_GRAPH_CENTER_PARAMS,
+  forceLayout,
+} from './force_layout';
+import type { KiGraphNodeSizeParams } from './ki_graph_node_size';
+import { DEFAULT_KI_GRAPH_NODE_SIZE_PARAMS, getKiGraphNodeSize } from './ki_graph_node_size';
 import type { KiGraph, KiGraphEdge, KiGraphEdgeData, KiGraphNodeData } from './types';
 import type { KiGraphLabelPlacementNode } from './use_visible_label_ids';
 
@@ -35,6 +41,18 @@ export type KiGraphFlowNodeData = Plain<KiGraphNodeData> & {
 export type KiGraphFlowNode = Node<KiGraphFlowNodeData, 'kiNode'>;
 
 export type KiGraphFlowEdge = Edge<Plain<KiGraphEdgeData>>;
+
+export interface KiGraphLayoutTuningParams {
+  force: ForceLayoutParams;
+  nodeSize: KiGraphNodeSizeParams;
+  center: KiGraphCenterParams;
+}
+
+export const DEFAULT_KI_GRAPH_LAYOUT_TUNING_PARAMS: KiGraphLayoutTuningParams = {
+  force: DEFAULT_FORCE_LAYOUT_PARAMS,
+  nodeSize: DEFAULT_KI_GRAPH_NODE_SIZE_PARAMS,
+  center: DEFAULT_KI_GRAPH_CENTER_PARAMS,
+};
 
 interface KiGraphLayoutState {
   selectedId?: string;
@@ -70,6 +88,7 @@ interface KiGraphLayoutResult {
   edges: KiGraphFlowEdge[];
   /** Depends only on the graph, so hovering doesn't recompute label placement. */
   labelNodes: readonly KiGraphLabelPlacementNode[];
+  layoutDurationMs: number;
 }
 
 export const getNeighborIds = (
@@ -115,31 +134,47 @@ export const getDegreeById = (graph: KiGraph): ReadonlyMap<string, number> => {
 
 export const useKiGraphLayout = (
   graph: KiGraph,
-  state: KiGraphLayoutState
+  state: KiGraphLayoutState,
+  layoutParams: KiGraphLayoutTuningParams = DEFAULT_KI_GRAPH_LAYOUT_TUNING_PARAMS
 ): KiGraphLayoutResult => {
+  const { force: forceParams, nodeSize: nodeSizeParams, center: centerParams } = layoutParams;
   const { euiTheme } = useEuiTheme();
   const { selectedId, hoveredId } = state;
 
   const degreeById = useMemo(() => getDegreeById(graph), [graph]);
 
-  const centers = useMemo(() => {
+  const { centers, layoutDurationMs } = useMemo(() => {
     const layoutNodes = graph.nodes.map((node) => {
       const degree = degreeById.get(node.kiId) ?? 0;
-      const size = getKiGraphNodeSize(node, degree);
-      return { id: node.kiId, radius: size / 2 };
+      const size = getKiGraphNodeSize(node, degree, nodeSizeParams);
+      const layoutNode: { id: string; radius: number; occurrences?: number } = {
+        id: node.kiId,
+        radius: size / 2,
+      };
+      if (node.occurrences !== undefined) {
+        layoutNode.occurrences = node.occurrences;
+      }
+      return layoutNode;
     });
-    return forceLayout(
+    const layoutStart = performance.now();
+    const positions = forceLayout(
       layoutNodes,
-      graph.edges.map(({ source, target }) => ({ source, target }))
+      graph.edges.map(({ source, target }) => ({ source, target })),
+      forceParams,
+      centerParams
     );
-  }, [graph, degreeById]);
+    return {
+      centers: positions,
+      layoutDurationMs: performance.now() - layoutStart,
+    };
+  }, [graph, degreeById, forceParams, centerParams, nodeSizeParams]);
 
   const labelNodes = useMemo(
     () =>
       graph.nodes.map((node): KiGraphLabelPlacementNode => {
         const { kiId, title, occurrences } = node;
         const degree = degreeById.get(kiId) ?? 0;
-        const size = getKiGraphNodeSize(node, degree);
+        const size = getKiGraphNodeSize(node, degree, nodeSizeParams);
         const center = centers.get(kiId);
         return {
           id: kiId,
@@ -150,7 +185,7 @@ export const useKiGraphLayout = (
           position: { x: (center?.x ?? 0) - size / 2, y: (center?.y ?? 0) - size / 2 },
         };
       }),
-    [graph, degreeById, centers]
+    [graph, degreeById, centers, nodeSizeParams]
   );
 
   return useMemo(() => {
@@ -159,7 +194,7 @@ export const useKiGraphLayout = (
 
     const nodes: KiGraphFlowNode[] = graph.nodes.map((nodeData) => {
       const degree = degreeById.get(nodeData.kiId) ?? 0;
-      const size = getKiGraphNodeSize(nodeData, degree);
+      const size = getKiGraphNodeSize(nodeData, degree, nodeSizeParams);
       const center = centers.get(nodeData.kiId);
       const x = (center?.x ?? 0) - size / 2;
       const y = (center?.y ?? 0) - size / 2;
@@ -244,11 +279,13 @@ export const useKiGraphLayout = (
       };
     });
 
-    return { nodes, edges, labelNodes };
+    return { nodes, edges, labelNodes, layoutDurationMs };
   }, [
     centers,
     labelNodes,
+    layoutDurationMs,
     degreeById,
+    nodeSizeParams,
     euiTheme.colors.mediumShade,
     euiTheme.colors.primary,
     graph,

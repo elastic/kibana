@@ -4552,6 +4552,9 @@ importers:
       d3-brush:
         specifier: 3.0.0
         version: 3.0.0
+      d3-force:
+        specifier: 3.0.0
+        version: 3.0.0
       d3-interpolate:
         specifier: 3.0.1
         version: 3.0.1
@@ -6272,6 +6275,9 @@ importers:
       '@types/d3-color':
         specifier: 2.0.1
         version: 2.0.1
+      '@types/d3-force':
+        specifier: 3.0.10
+        version: 3.0.10
       '@types/d3-interpolate':
         specifier: 3.0.1
         version: 3.0.1
@@ -14592,6 +14598,9 @@ packages:
 
   '@types/d3-drag@3.0.7':
     resolution: {integrity: sha512-HE3jVKlzU9AaMazNufooRJ5ZpWmLIoc90A37WU2JMmeq28w1FQqCZswHZ3xR+SuxYftzHq6WU6KJHvqxKzTxxQ==}
+
+  '@types/d3-force@3.0.10':
+    resolution: {integrity: sha512-ZYeSaCF3p73RdOKcjj+swRlZfnYpK1EbaDiYICEEp5Q6sUiqFaFQ9qgoshp5CzIyyb/yD09kD9o2zEltCexlgw==}
 
   '@types/d3-interpolate@3.0.1':
     resolution: {integrity: sha512-jx5leotSeac3jr0RePOH1KdR9rISG91QIE4Q2PYTu4OymLTZfA3SrnURSLzKH48HmXVUru50b8nje4E79oQSQw==}
@@ -30624,6 +30633,8 @@ snapshots:
   '@types/d3-drag@3.0.7':
     dependencies:
       '@types/d3-selection': 3.0.2
+
+  '@types/d3-force@3.0.10': {}
 
   '@types/d3-interpolate@3.0.1':
     dependencies:

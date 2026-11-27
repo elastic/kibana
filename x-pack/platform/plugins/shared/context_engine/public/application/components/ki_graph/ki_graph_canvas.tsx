@@ -22,7 +22,8 @@ import {
   useReactFlow,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { KiGraphLayoutTuningPanel } from './ki_graph_layout_tuning_panel';
 import type { KiGraph, KiGraphNodeData } from './types';
 import { getSpotlightModel } from './get_spotlight_model';
 import { getKiGraphNodeMinimapColor } from './ki_graph_glyph_styles';
@@ -31,7 +32,12 @@ import { KiGraphLegend } from './ki_graph_legend';
 import { KiGraphNode } from './ki_graph_node';
 import { KiGraphSpotlight } from './ki_graph_spotlight';
 import type { KiGraphFlowEdge, KiGraphFlowNode, KiGraphFlowNodeData } from './use_ki_graph_layout';
-import { DEFAULT_EDGE_STROKE_WIDTH, useKiGraphLayout } from './use_ki_graph_layout';
+import {
+  DEFAULT_EDGE_STROKE_WIDTH,
+  DEFAULT_KI_GRAPH_LAYOUT_TUNING_PARAMS,
+  type KiGraphLayoutTuningParams,
+  useKiGraphLayout,
+} from './use_ki_graph_layout';
 import { useKiGraphSources } from './use_ki_graph_sources';
 import { useVisibleLabelIds } from './use_visible_label_ids';
 
@@ -83,11 +89,16 @@ const KiGraphCanvasInner = ({
   const { fitView, setCenter, getNode } = useReactFlow<KiGraphFlowNode, KiGraphFlowEdge>();
   const [hoveredId, setHoveredId] = useState<string | undefined>();
   const [isSpotlightReady, setIsSpotlightReady] = useState(false);
+  const [layoutParams, setLayoutParams] = useState<KiGraphLayoutTuningParams>(
+    DEFAULT_KI_GRAPH_LAYOUT_TUNING_PARAMS
+  );
+  const skipLayoutFitViewRef = useRef(true);
   const {
     nodes: layoutNodes,
     edges,
     labelNodes,
-  } = useKiGraphLayout(graph, { selectedId, hoveredId });
+    layoutDurationMs,
+  } = useKiGraphLayout(graph, { selectedId, hoveredId }, layoutParams);
   const visibleLabelIds = useVisibleLabelIds(labelNodes);
   const selectedNode = useMemo(
     () => (selectedId === undefined ? undefined : graph.nodes.find((n) => n.kiId === selectedId)),
@@ -110,6 +121,17 @@ const KiGraphCanvasInner = ({
       })),
     [layoutNodes, visibleLabelIds]
   );
+
+  useEffect(() => {
+    if (skipLayoutFitViewRef.current) {
+      skipLayoutFitViewRef.current = false;
+      return;
+    }
+    const frame = requestAnimationFrame(() => {
+      fitView({ padding: FIT_PADDING, duration: 300 });
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [layoutParams, fitView]);
 
   useEffect(() => {
     setIsSpotlightReady(false);
@@ -234,6 +256,13 @@ const KiGraphCanvasInner = ({
         <Background bgColor={euiTheme.colors.backgroundBaseSubdued} color={backgroundDotColor} />
         <Panel position="top-left">
           <KiGraphLegend />
+        </Panel>
+        <Panel position="top-right">
+          <KiGraphLayoutTuningPanel
+            value={layoutParams}
+            layoutDurationMs={layoutDurationMs}
+            onChange={setLayoutParams}
+          />
         </Panel>
         <Controls showInteractive={false} />
         <MiniMap<KiGraphFlowNode>
