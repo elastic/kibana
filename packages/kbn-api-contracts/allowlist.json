@@ -1166,6 +1166,14 @@
       "oasdiffId": "new-required-request-parameter",
       "prUrl": "https://github.com/elastic/kibana/pull/298431",
       "expiresAt": "2026-12-02"
+    },
+    {
+      "path": "/api/osquery/live_queries",
+      "method": "post",
+      "reason": "Intentional: reject empty-string alert_ids. An empty id is falsy in the route and skipped every alert lookup, so it bypassed the alert access check. Empty ids carry no meaning, so valid clients are unaffected.",
+      "approvedBy": "@elastic/security-defend-workflows",
+      "oasdiffId": "request-property-min-length-increased",
+      "prUrl": "https://github.com/elastic/kibana/pull/307027"
     }
   ]
 }
