@@ -10,7 +10,7 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 
 type CrawlFieldType = 'integer' | 'keyword' | 'date';
 
-// The fields purging relies on. A crawl adds them to an index it did not create.
+// Added to indices that don't have them to support purging pages
 const CRAWL_FIELDS: Record<string, { type: CrawlFieldType }> = {
   depth: { type: 'integer' },
   crawl_id: { type: 'keyword' },
@@ -40,7 +40,6 @@ const CRAWL_INDEX_PROPERTIES: Record<string, estypes.MappingProperty> = {
 
 export class IncompatibleCrawlIndexError extends Error {}
 
-/** The mappings of the indices behind a name, or `undefined` when there is none. */
 export const readCrawlIndexMappings = async (
   esClient: ElasticsearchClient,
   indexName: string
@@ -67,8 +66,7 @@ export const createCrawlIndex = async (
 };
 
 /**
- * Adds the fields purging relies on to an existing index, and leaves every other field to its
- * owner. Throws an `IncompatibleCrawlIndexError` when one of them is mapped as another type.
+ * Adds required fields to an existing index. Throws `IncompatibleCrawlIndexError` on mapping conflicts.
  */
 export const addCrawlFields = async (
   esClient: ElasticsearchClient,
@@ -95,7 +93,6 @@ export const addCrawlFields = async (
   }
 };
 
-/** Works for missing indices too. */
 export const getIndexPrivileges = async (
   esClient: ElasticsearchClient,
   indexNames: string[],
