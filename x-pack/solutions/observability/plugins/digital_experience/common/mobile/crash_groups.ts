@@ -8,7 +8,7 @@
 import { Builder, esql, type ComposerQuery } from '@elastic/esql';
 import type { ESQLAstExpression, ESQLColumn } from '@elastic/esql/types';
 import { CRASH_EVENTS, OTEL_LOGS_INDEX } from '../otel_data';
-import { MOBILE_MAX_CRASH_DELAY_HOURS, MOBILE_MAX_OBSERVED_CRASH_AGE_DAYS } from '../sessions';
+import { MOBILE_MAX_CRASH_DELAY_HOURS } from '../sessions';
 import { ERROR_GROUPS_ROWS } from '../top_rows';
 import { crashFingerprint, isIosReport, reportOsVersion, reportRelease } from './crash_fingerprint';
 import { mobileDocuments } from './documents';
@@ -35,16 +35,16 @@ export interface CrashEventsParams extends MobilePanelFilters {
 
 /**
  * When a crash happened: the earlier of `@timestamp` and its observed time, as EDOT iOS sends a
- * crash on the next launch with only its observed time set to the crash, however late that launch
- * is. An observed time more than `MOBILE_MAX_OBSERVED_CRASH_AGE_DAYS` before is unset, e.g. the
- * zero an exporter can leave. A crash sent more than `MOBILE_MAX_CRASH_DELAY_HOURS` after the range
- * is outside its `@timestamp` filter, so only a longer range finds a crash sent that late.
+ * crash on the next launch with only its observed time set to the crash. Only an observed time at
+ * most `MOBILE_MAX_CRASH_DELAY_HOURS` before counts, as far as the `@timestamp` filter reaches past
+ * the range: a crash sent later is dated when it was sent, so it is in the range that fetches it,
+ * as is one whose observed time is unset, e.g. the zero an exporter can leave.
  */
 const crashTimeOf = (): ESQLAstExpression => {
   const observed = esql.exp`TO_DATETIME(${mobileColumn('observedTimestamp')})`;
   // The arithmetic is on the observed time: `@timestamp` reads as `NULL` where no index maps it.
   return esql.exp`LEAST(@timestamp, CASE(
-    ${observed} + ${esql.exp(`${MOBILE_MAX_OBSERVED_CRASH_AGE_DAYS} days`)} >= @timestamp,
+    ${observed} + ${esql.exp(`${MOBILE_MAX_CRASH_DELAY_HOURS} hours`)} >= @timestamp,
     ${observed},
     @timestamp
   ))`;
@@ -96,7 +96,7 @@ export const crashEvents = ({ start, end, ...filters }: CrashEventsParams): Comp
  * the SDK observed the crash, which OTel sets on every log record and EDOT iOS sets to the crash's
  * time, while `@timestamp` can be the next launch's. The crashes are the Crashes tab's: they
  * happened in the range, and were sent up to `MOBILE_MAX_CRASH_DELAY_HOURS` after it, including
- * those whose crash time is `@timestamp` because their observed time is unset or later.
+ * those whose crash time is `@timestamp` because their observed time is unset, later, or too early.
  */
 export const crashEventsInDiscoverRange = (filters: MobilePanelFilters): ComposerQuery =>
   crashesInRange(

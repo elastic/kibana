@@ -133,14 +133,19 @@ export const getCrashGroup = async ({
     );
   };
   const filter = timeFilter(start, end + CRASH_DELAY_MS, environment);
-  // A group's crashes all have its type, unless its fingerprint was stored, which `withCrashTypes`
-  // keeps whatever the type, so a known type only spares hashing the other crashes.
-  const [latestRow] = await runEsql<LatestCrashRow>(
-    esClient,
-    'get_mobile_crash_group_latest',
-    withLatestCrash(groupCrashes(crashType === undefined ? undefined : [crashType])),
-    filter
-  );
+  const latestOf = async (types?: ReadonlyArray<string | null>) => {
+    const [row] = await runEsql<LatestCrashRow>(
+      esClient,
+      'get_mobile_crash_group_latest',
+      withLatestCrash(groupCrashes(types)),
+      filter
+    );
+    return row;
+  };
+  // A known type only spares hashing the other crashes: the list's type can be a stored-fingerprint
+  // crash's, whose group's computed crashes have another, so without a crash of it, all are read.
+  const latestRow =
+    (crashType === undefined ? undefined : await latestOf([crashType])) ?? (await latestOf());
   if (!latestRow) {
     const none: CrashBreakdown = { top: [], other: 0 };
     return {

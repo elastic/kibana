@@ -20,7 +20,9 @@ import {
   type CrashGroupRow,
   type CrashReleaseRow,
 } from '../../../../common/mobile/crash_groups';
-import { RESULT_COLUMNS } from '../../../../common/mobile/fields';
+import { isIosReport } from '../../../../common/mobile/crash_fingerprint';
+import { inValues, RESULT_COLUMNS } from '../../../../common/mobile/fields';
+import { CRASH_EVENTS } from '../../../../common/otel_data';
 import { mobilePanelQuery, type MobilePanelFilters } from '../../../../common/mobile/filters';
 import type { FacetBucket } from '../../../../common/sessions';
 import type { MobileCrashGroup, MobileCrashGroupsResponse } from '../../../../common/types/mobile';
@@ -141,13 +143,18 @@ export const getCrashGroups = async ({
       : null;
   };
 
-  // The newest release reads 30 days of every document, so only when a group can be new.
+  // The newest release reads 30 days of every document, so only when a group can be new. Past the
+  // range, only crashes: one sent after it can be on a release it first shows, while the next day's
+  // sessions are of a release that shipped after it. An iOS report has the next launch's release.
   const [latest] = rows.some((row) => onlyReleaseOf(row) !== null)
     ? await runEsql<LatestReleaseRow>(
         esClient,
         'get_mobile_latest_release',
-        withLatestReleases(mobilePanelQuery(allReleases)),
-        // As far as the crashes: a crash sent after the range can be on a release it first shows.
+        withLatestReleases(
+          mobilePanelQuery(allReleases).pipe`WHERE @timestamp < TO_DATETIME(${{
+            release_end: new Date(end).toISOString(),
+          }}) OR (${inValues('eventName', CRASH_EVENTS)} AND NOT ${isIosReport()})`
+        ),
         timeFilter(lookbackStart, end + CRASH_DELAY_MS, environment)
       )
     : [];

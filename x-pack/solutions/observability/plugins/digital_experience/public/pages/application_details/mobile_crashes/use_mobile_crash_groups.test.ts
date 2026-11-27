@@ -92,4 +92,38 @@ describe('useMobileCrashGroup', () => {
       })
     );
   });
+
+  const lastQuery = () => fetch.mock.calls.at(-1)?.[1].params.query;
+
+  it('sends the known type of the group', async () => {
+    const { result } = renderHook(() =>
+      useMobileCrashGroup('trailmap-android', 'npe', 'java.lang.NullPointerException')
+    );
+    await waitFor(() => expect(result.current.detail).toBe(DETAIL));
+
+    expect(lastQuery()).toEqual(
+      expect.objectContaining({ crashType: 'java.lang.NullPointerException' })
+    );
+  });
+
+  it('sends an empty type for a group known to have none, which the route reads as none', async () => {
+    const { result } = renderHook(() => useMobileCrashGroup('trailmap-android', 'npe', null));
+    await waitFor(() => expect(result.current.detail).toBe(DETAIL));
+
+    expect(lastQuery()).toEqual(expect.objectContaining({ crashType: '' }));
+  });
+
+  it("sends no type while the list hasn't loaded, nor fetches again when it has", async () => {
+    const { result, rerender } = renderHook(
+      ({ crashType }) => useMobileCrashGroup('trailmap-android', 'npe', crashType),
+      { initialProps: { crashType: undefined as string | undefined } }
+    );
+    await waitFor(() => expect(result.current.detail).toBe(DETAIL));
+    expect(lastQuery()).not.toHaveProperty('crashType');
+
+    rerender({ crashType: 'java.lang.NullPointerException' });
+
+    expect(result.current.detail).toBe(DETAIL);
+    expect(fetch).toHaveBeenCalledTimes(1);
+  });
 });

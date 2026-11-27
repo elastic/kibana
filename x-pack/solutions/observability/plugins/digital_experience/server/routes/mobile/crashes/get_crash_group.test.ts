@@ -345,4 +345,31 @@ describe('getCrashGroup', () => {
       '`attributes.exception.type` IS NULL OR `attributes.exception.type` == ""'
     );
   });
+
+  it("looks for the latest crash of every type when none has the app's type", async () => {
+    const { client, esClient } = createTracedEsClientMock();
+    client.esql.query.mockImplementation(async ({ query }) =>
+      esqlResponse(
+        query.includes('LIMIT 1 |') && !query.includes('`attributes.exception.type` IN')
+          ? [{ ...LATEST, session_id: null }]
+          : []
+      )
+    );
+
+    const detail = await getCrashGroup({
+      esClient,
+      filters: { serviceName: 'ride-ios' },
+      fingerprint: 'abc',
+      crashType: 'SIGTRAP',
+      start: START,
+      end: END,
+    });
+
+    // The list's type was a stored-fingerprint crash's; the group's latest crash has another.
+    expect(detail.latestCrash).not.toBeNull();
+    const [[typedRequest], [allTypesRequest]] = client.esql.query.mock.calls;
+    expect(typedRequest.query).toContain('`attributes.exception.type` IN ("SIGTRAP")');
+    expect(allTypesRequest.query).toContain('LIMIT 1 |');
+    expect(allTypesRequest.query).not.toContain('`attributes.exception.type` IN');
+  });
 });

@@ -67,6 +67,7 @@ interface Crash {
   storedFingerprint?: string;
   /** Unset for a crash whose resource has no device model. */
   deviceModel?: string;
+  environment?: string;
   osVersion: string;
 }
 
@@ -78,6 +79,8 @@ const android = {
 /** The release and OS the delayed iOS crash happened on, before the updates that sent it. */
 export const IOS_CRASHED_RELEASE = '8.4.0';
 export const IOS_CRASHED_OS_VERSION = '17.5';
+/** The environment of the iOS crash sent after the range. */
+export const IOS_LATE_CRASH_ENVIRONMENT = 'production';
 
 const ios = {
   serviceName: CRASH_APPS.ios,
@@ -153,11 +156,13 @@ const CRASHES: Crash[] = [
     stacktrace: CRASH_FINGERPRINT_CASES.iosLaunchA.stacktrace,
   },
   // Crashed on the older release and OS, and sent after both were updated: its resource has the
-  // new ones, its report the ones that crashed.
+  // new ones, its report the ones that crashed. The only crash of its environment, sent after the
+  // range: the pickers still offer it.
   {
     ...ios,
     installationId: 'crash-ios-device-2',
     sessionId: 'CRASH-IOS-SESSION-2',
+    environment: IOS_LATE_CRASH_ENVIRONMENT,
     timestamp: at('13:20:00'),
     observedTimestamp: at('12:55:00'),
     stacktrace: CRASH_FINGERPRINT_CASES.iosLaunchB.stacktrace
@@ -388,6 +393,7 @@ const documents = [
             'os.name': crash.osName,
             'os.version': crash.osVersion,
             ...(crash.deviceModel ? { 'device.model.identifier': crash.deviceModel } : {}),
+            ...(crash.environment ? { 'deployment.environment.name': crash.environment } : {}),
             'app.installation.id': crash.installationId,
           },
           crash.osName

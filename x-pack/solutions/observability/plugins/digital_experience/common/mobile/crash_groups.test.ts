@@ -36,9 +36,10 @@ describe('crashEvents', () => {
   });
 
   it('keeps the crashes that happened in the range, by the earlier of their two times', () => {
-    // An observed time is the crash's however late the next launch sends it, unless it's unset.
+    // An observed time is the crash's when it was sent at most as late as the range's crashes are
+    // fetched; a crash sent later, or without one, is dated when it was sent.
     expect(query).toContain(
-      'EVAL crash_time = LEAST(@timestamp, CASE(TO_DATETIME(observed_timestamp) + 30 days >= @timestamp, TO_DATETIME(observed_timestamp), @timestamp))'
+      'EVAL crash_time = LEAST(@timestamp, CASE(TO_DATETIME(observed_timestamp) + 24 hours >= @timestamp, TO_DATETIME(observed_timestamp), @timestamp))'
     );
     expect(query).toContain(
       'WHERE crash_time >= TO_DATETIME(?crash_start) AND crash_time < TO_DATETIME(?crash_end)'
