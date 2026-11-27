@@ -435,9 +435,9 @@ describe('RuleFlyout', () => {
       expect(screen.getByTestId('searchBoostRuleTargetsShowUnmatched')).toBeDisabled();
 
       await userEvent.hover(screen.getByTestId('searchBoostRuleTargetsShowUnmatchedTip'));
-      expect(
-        await screen.findByText("The list isn't filtered until you enter a pattern or name.")
-      ).toBeInTheDocument();
+      expect(await screen.findByRole('tooltip')).toHaveTextContent(
+        "The list isn't filtered until you enter a pattern or name."
+      );
     });
 
     it('shows why "Show unmatched" is off to keyboard users too', async () => {
@@ -446,14 +446,19 @@ describe('RuleFlyout', () => {
       await selectProfile('storefront-search');
       await userEvent.click(screen.getByTestId('searchBoostRuleTargetsOptions'));
       const trigger = screen.getByTestId('searchBoostRuleTargetsShowUnmatchedTrigger');
+      expect(screen.getByRole('switch', { name: 'Show unmatched' })).toBe(trigger);
+      expect(trigger).toHaveAttribute('aria-disabled', 'true');
+      expect(trigger).not.toBeChecked();
+      // Described before the tooltip shows, so screen readers announce the reason with the focus.
+      expect(trigger).toHaveAccessibleDescription(
+        "The list isn't filtered until you enter a pattern or name."
+      );
 
       act(() => trigger.focus());
 
-      const tooltip = await screen.findByRole('tooltip');
-      expect(tooltip).toHaveTextContent(
+      expect(await screen.findByRole('tooltip')).toHaveTextContent(
         "The list isn't filtered until you enter a pattern or name."
       );
-      expect(trigger).toHaveAttribute('aria-describedby', tooltip.id);
     });
 
     it.each([

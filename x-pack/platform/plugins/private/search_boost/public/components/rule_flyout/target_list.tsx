@@ -100,21 +100,42 @@ const ListOptionSwitch = ({
   onChange,
   'data-test-subj': dataTestSubj,
 }: ListOptionSwitchProps) => {
+  const reasonId = useGeneratedHtmlId({ prefix: 'searchBoostListOptionReason' });
+  const isDisabled = Boolean(disabledReason);
   const toggle = (
     <EuiSwitch
       compressed
       label={label}
       checked={checked}
-      disabled={Boolean(disabledReason)}
+      disabled={isDisabled}
+      aria-hidden={isDisabled || undefined}
       onChange={(event) => onChange(event.target.checked)}
       data-test-subj={dataTestSubj}
     />
   );
   return disabledReason ? (
-    <EuiToolTip content={disabledReason} anchorProps={{ 'data-test-subj': `${dataTestSubj}Tip` }}>
-      {/* The switch is disabled, so this wrapper takes focus to show the tooltip. */}
-      <div tabIndex={0} data-test-subj={`${dataTestSubj}Trigger`}>
+    <EuiToolTip
+      content={disabledReason}
+      // The tooltip only links its text while it's shown, which is too late for screen readers
+      // announcing the focused wrapper, so the wrapper links the hidden copy below instead.
+      disableScreenReaderOutput
+      anchorProps={{ 'data-test-subj': `${dataTestSubj}Tip` }}
+    >
+      {/* A disabled switch can't take focus, so this wrapper stands in for it, for keyboard and
+       screen reader users, while the switch inside only shows its disabled look. */}
+      <div
+        tabIndex={0}
+        role="switch"
+        aria-checked={checked}
+        aria-disabled={true}
+        aria-label={label}
+        aria-describedby={reasonId}
+        data-test-subj={`${dataTestSubj}Trigger`}
+      >
         {toggle}
+        <span id={reasonId} hidden>
+          {disabledReason}
+        </span>
       </div>
     </EuiToolTip>
   ) : (
