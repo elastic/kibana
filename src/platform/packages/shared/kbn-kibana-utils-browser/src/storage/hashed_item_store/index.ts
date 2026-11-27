@@ -9,4 +9,17 @@
 
 import { HashedItemStore } from './hashed_item_store';
 export { HashedItemStore };
-export const hashedItemStore = new HashedItemStore(window.sessionStorage);
+
+// Defer access to the browser global so the package can be imported in a non-browser environment.
+const lazySessionStorage: Storage = {
+  get length() {
+    return window.sessionStorage.length;
+  },
+  clear: () => window.sessionStorage.clear(),
+  getItem: (key) => window.sessionStorage.getItem(key),
+  key: (index) => window.sessionStorage.key(index),
+  removeItem: (key) => window.sessionStorage.removeItem(key),
+  setItem: (key, value) => window.sessionStorage.setItem(key, value),
+};
+
+export const hashedItemStore = new HashedItemStore(lazySessionStorage);
