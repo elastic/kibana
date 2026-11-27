@@ -26,7 +26,8 @@ import { auditServiceMock } from '../audit/mocks';
 import { getDetailedErrorMessage } from '../errors';
 import { securityMock } from '../mocks';
 
-jest.mock('./credentials');
+// Only the store is mocked. The binding check the exchange makes must stay the real one.
+jest.mock('./credentials/credential_store');
 
 const ACCOUNT_ID = 'kibana/worker';
 const credential = {

@@ -2177,6 +2177,18 @@ describe('UiamService', () => {
       expect(headers).not.toHaveProperty(ES_CLIENT_AUTHENTICATION_HEADER);
     });
 
+    it('passes the signal on to the request', async () => {
+      fetchSpy.mockResolvedValue({ ok: true, json: async () => mockResponse });
+      const signal = new AbortController().signal;
+
+      await uiamService.getServiceAccount('service-account-id', { signal });
+
+      expect(fetchSpy).toHaveBeenCalledWith(
+        'https://uiam.service/uiam/api/v1/service-accounts/service-account-id',
+        expect.objectContaining({ signal })
+      );
+    });
+
     it('URL-encodes the service account id', async () => {
       fetchSpy.mockResolvedValue({ ok: true, json: async () => mockResponse });
 
@@ -2207,6 +2219,20 @@ describe('UiamService', () => {
       expect(uiamServiceLogger.debug).toHaveBeenCalledWith(
         'Service account [missing] was not found.'
       );
+    });
+
+    it('rejects a 404 that carries no UIAM error code, which may come from a gateway', async () => {
+      fetchSpy.mockResolvedValue({
+        ok: false,
+        status: 404,
+        headers: new Headers(),
+        json: async () => ({ ok: false, message: 'Unknown resource.' }),
+      });
+
+      await expect(uiamService.getServiceAccount('service-account-id')).rejects.toMatchObject({
+        output: { statusCode: 404 },
+      });
+      expect(uiamServiceLogger.error).toHaveBeenCalled();
     });
 
     it('resolves `null` for the 403 UIAM sends for an unknown account, logging it at debug only', async () => {
