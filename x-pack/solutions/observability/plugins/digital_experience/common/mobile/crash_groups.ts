@@ -8,7 +8,7 @@
 import { Builder, esql, type ComposerQuery } from '@elastic/esql';
 import type { ESQLAstExpression, ESQLColumn } from '@elastic/esql/types';
 import { CRASH_EVENTS, OTEL_LOGS_INDEX } from '../otel_data';
-import { MOBILE_MAX_CRASH_DELAY_HOURS } from '../sessions';
+import { MOBILE_MAX_CRASH_DELAY_HOURS, MOBILE_MAX_OBSERVED_CRASH_AGE_DAYS } from '../sessions';
 import { ERROR_GROUPS_ROWS } from '../top_rows';
 import { crashFingerprint, isIosReport, reportOsVersion, reportRelease } from './crash_fingerprint';
 import { mobileDocuments } from './documents';
@@ -34,21 +34,34 @@ export interface CrashEventsParams extends MobilePanelFilters {
 }
 
 /**
- * When a crash happened: the earlier of `@timestamp` and its observed time, as EDOT iOS sends a
- * crash on the next launch with only its observed time set to the crash. Only an observed time at
- * most `MOBILE_MAX_CRASH_DELAY_HOURS` before counts, as far as the `@timestamp` filter reaches past
- * the range: a crash sent later is dated when it was sent, so it is in the range that fetches it,
- * as is one whose observed time is unset, e.g. the zero an exporter can leave.
+ * The earlier of `@timestamp` and a crash's observed time, as EDOT iOS sends a crash on the next
+ * launch with only its observed time set to the crash. An observed time more than `maxDelay`
+ * before `@timestamp` is not the crash's: `@timestamp` is.
  */
-const crashTimeOf = (): ESQLAstExpression => {
+const observedCrashTimeOf = (maxDelay: string): ESQLAstExpression => {
   const observed = esql.exp`TO_DATETIME(${mobileColumn('observedTimestamp')})`;
   // The arithmetic is on the observed time: `@timestamp` reads as `NULL` where no index maps it.
   return esql.exp`LEAST(@timestamp, CASE(
-    ${observed} + ${esql.exp(`${MOBILE_MAX_CRASH_DELAY_HOURS} hours`)} >= @timestamp,
+    ${observed} + ${esql.exp(maxDelay)} >= @timestamp,
     ${observed},
     @timestamp
   ))`;
 };
+
+/**
+ * When a crash counts in a range: its observed time only when sent at most
+ * `MOBILE_MAX_CRASH_DELAY_HOURS` later, as far as the `@timestamp` filter reaches past the range,
+ * so a crash sent later, or whose observed time is unset, is in the range that fetches it.
+ */
+const crashTimeOf = (): ESQLAstExpression =>
+  observedCrashTimeOf(`${MOBILE_MAX_CRASH_DELAY_HOURS} hours`);
+
+/**
+ * When a crash happened, however late the next launch sent it: its observed time unless more than
+ * `MOBILE_MAX_OBSERVED_CRASH_AGE_DAYS` before, e.g. the zero an exporter can leave.
+ */
+const crashHappenedAtOf = (): ESQLAstExpression =>
+  observedCrashTimeOf(`${MOBILE_MAX_OBSERVED_CRASH_AGE_DAYS} days`);
 
 /** A keyword that is `NULL` when empty, as some SDKs send an empty value for none. */
 const nonEmpty = (column: ESQLAstExpression): ESQLAstExpression =>
@@ -118,6 +131,29 @@ export const withCrashReleaseCounts = (query: ComposerQuery): ComposerQuery =>
       BY ${resultColumn('release')} = ${resultColumn('crashRelease')}`.pipe`SORT ${resultColumn(
     'events'
   )} DESC, ${resultColumn('release')} DESC`.pipe`LIMIT ${CRASH_RELEASE_ROWS}`;
+
+/**
+ * The documents that show which releases ran by `end`, for `withLatestReleases` by their
+ * `release_seen_at`: every document sent before `end`, and the crashes sent after it that happened
+ * before it, dated when they happened. Such an EDOT iOS report counts on the release in its report,
+ * or none, as its resource is the next launch's, which may run an update.
+ */
+export const withReleaseSightings = (query: ComposerQuery, end: number): ComposerQuery => {
+  const releaseEnd = resultColumn('releaseEnd');
+  const crashTime = resultColumn('crashTime');
+  const serviceVersion = mobileColumn('serviceVersion');
+  const sentAfter = esql.exp`@timestamp >= ${releaseEnd}`;
+  return query.pipe`EVAL ${releaseEnd} = TO_DATETIME(${{
+    release_end: new Date(end).toISOString(),
+  }}), ${crashTime} = ${crashTimeOf()}`.pipe`WHERE @timestamp < ${releaseEnd}
+      OR (${inValues('eventName', CRASH_EVENTS)} AND ${crashTime} < ${releaseEnd})`.pipe`EVAL
+      ${serviceVersion} = CASE(
+        ${sentAfter} AND COALESCE(${isIosReport()}, false),
+        ${nonEmpty(reportRelease())},
+        ${serviceVersion}
+      ),
+      ${resultColumn('releaseSeenAt')} = CASE(${sentAfter}, ${crashTime}, @timestamp)`;
+};
 
 /** The row of `withCrashReleaseCounts`. */
 export interface CrashReleaseRow {
@@ -236,9 +272,14 @@ export interface CrashGroupHistoryRow {
 export const withCrashGroup = (query: ComposerQuery, fingerprint: string): ComposerQuery =>
   query.pipe`WHERE ${resultColumn('fingerprint')} == ${{ fingerprint }}`;
 
-/** A group's latest crash, with its stack trace and session. */
+/**
+ * A group's latest crash, with its stack trace and session: the one that happened last, which a
+ * crash sent days later need not be.
+ */
 export const withLatestCrash = (query: ComposerQuery): ComposerQuery =>
-  query.pipe`SORT ${resultColumn('crashTime')} DESC`.pipe`LIMIT 1`.pipe`EVAL
+  query.pipe`EVAL ${resultColumn('happenedAt')} = ${crashHappenedAtOf()}`.pipe`SORT ${resultColumn(
+    'happenedAt'
+  )} DESC`.pipe`LIMIT 1`.pipe`EVAL
       ${resultColumn('exceptionType')} = ${mobileColumn('exceptionType')},
       ${resultColumn('message')} = ${mobileColumn('exceptionMessage')},
       ${resultColumn('stacktrace')} = ${mobileColumn('exceptionStacktrace')},
@@ -248,7 +289,7 @@ export const withLatestCrash = (query: ComposerQuery): ComposerQuery =>
       ${resultColumn('sessionId')} = ${nonEmpty(mobileColumn('sessionId'))},
       ${resultColumn('storedFingerprint')} = ${mobileColumn('exceptionFingerprint')},
       ${resultColumn('reportedAt')} = @timestamp`.pipe`KEEP ${[
-    resultColumn('crashTime'),
+    resultColumn('happenedAt'),
     resultColumn('reportedAt'),
     resultColumn('exceptionType'),
     resultColumn('message'),
@@ -298,7 +339,8 @@ export const withCrashBreakdown = (
 
 /** The row of `withLatestCrash`. */
 export interface LatestCrashRow {
-  [RESULT_COLUMNS.crashTime]: string;
+  /** When it happened, which can be before the range for a crash sent days later. */
+  [RESULT_COLUMNS.happenedAt]: string;
   [RESULT_COLUMNS.reportedAt]: string;
   [RESULT_COLUMNS.exceptionType]?: string | null;
   [RESULT_COLUMNS.message]?: string | null;

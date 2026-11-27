@@ -122,7 +122,10 @@ export interface CrashBreakdown {
 }
 
 export interface MobileCrash {
-  /** ISO 8601, when it happened rather than when the next launch sent it. */
+  /**
+   * ISO 8601, when it happened rather than when the next launch sent it. A crash sent more than a
+   * day later is counted when it was sent, so this can be before the range and its group's last seen.
+   */
   time: string;
   /** ISO 8601, when the SDK sent it: EDOT iOS sends a crash on the next launch. */
   reportedAt: string;

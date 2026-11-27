@@ -18,7 +18,7 @@ const END = Date.parse('2021-01-18T13:00:00.000Z');
 const CRASH_TIME = '2021-01-18T12:30:00.000Z';
 
 const LATEST = {
-  crash_time: CRASH_TIME,
+  happened_at: CRASH_TIME,
   reported_at: '2021-01-18T12:45:00.000Z',
   exception_type: 'SIGTRAP',
   message: 'TRAP_BRKPT at 4385823488',
@@ -211,6 +211,44 @@ describe('getCrashGroup', () => {
     );
   });
 
+  it('reads the session before when a crash sent days later happened, not when it was sent', async () => {
+    const { client, esClient } = createTracedEsClientMock();
+    const happenedAt = '2021-01-16T12:30:00.000Z';
+    client.esql.query.mockImplementation(async ({ query }) =>
+      esqlResponse(
+        query.includes('LIMIT 1 |')
+          ? [{ ...LATEST, happened_at: happenedAt, reported_at: CRASH_TIME }]
+          : []
+      )
+    );
+
+    const detail = await getCrashGroup({
+      esClient,
+      filters: { serviceName: 'ride-ios' },
+      fingerprint: 'abc',
+      start: START,
+      end: END,
+    });
+
+    expect(detail.latestCrash).toMatchObject({ time: happenedAt, reportedAt: CRASH_TIME });
+    const requests = client.esql.query.mock.calls.map(([request]) => request);
+    const eventsRequest = requests[requests.length - 1];
+    const happenedMs = Date.parse(happenedAt);
+    expect(eventsRequest.filter).toEqual({
+      bool: {
+        filter: [
+          {
+            range: {
+              '@timestamp': { gte: happenedMs - DAY, lt: happenedMs, format: 'epoch_millis' },
+            },
+          },
+          expect.anything(),
+        ],
+      },
+    });
+    expect(eventsRequest.params).toEqual(expect.arrayContaining([{ before: happenedAt }]));
+  });
+
   it('runs nothing after the latest crash query when the group has no crash', async () => {
     const { client, esClient } = createTracedEsClientMock();
     client.esql.query.mockResolvedValue(esqlResponse([]));
@@ -371,5 +409,59 @@ describe('getCrashGroup', () => {
     expect(typedRequest.query).toContain('`attributes.exception.type` IN ("SIGTRAP")');
     expect(allTypesRequest.query).toContain('LIMIT 1 |');
     expect(allTypesRequest.query).not.toContain('`attributes.exception.type` IN');
+  });
+
+  it("looks for the latest crash of every type when the app's type only found a stored-fingerprint crash", async () => {
+    const { client, esClient } = createTracedEsClientMock();
+    const newerComputed = { ...LATEST, happened_at: '2021-01-18T12:50:00.000Z', session_id: null };
+    client.esql.query.mockImplementation(async ({ query }) => {
+      if (!query.includes('LIMIT 1 |')) {
+        return esqlResponse([]);
+      }
+      // The typed query keeps stored-fingerprint crashes of any type, so it can miss a newer
+      // computed crash of another type.
+      return esqlResponse(
+        query.includes('`attributes.exception.type` IN')
+          ? [{ ...LATEST, session_id: null, stored_fingerprint: 'abc' }]
+          : [newerComputed]
+      );
+    });
+
+    const detail = await getCrashGroup({
+      esClient,
+      filters: { serviceName: 'ride-ios' },
+      fingerprint: 'abc',
+      crashType: 'SIGTRAP',
+      start: START,
+      end: END,
+    });
+
+    expect(detail.latestCrash?.time).toBe(newerComputed.happened_at);
+    const latestRequests = client.esql.query.mock.calls
+      .map(([request]) => request)
+      .filter(({ query }) => query.includes('LIMIT 1 |'));
+    expect(latestRequests).toHaveLength(2);
+  });
+
+  it("trusts the app's type when it finds a computed crash, whose fingerprint hashes the type", async () => {
+    const { client, esClient } = createTracedEsClientMock();
+    client.esql.query.mockImplementation(async ({ query }) =>
+      esqlResponse(query.includes('LIMIT 1 |') ? [{ ...LATEST, session_id: null }] : [])
+    );
+
+    await getCrashGroup({
+      esClient,
+      filters: { serviceName: 'ride-ios' },
+      fingerprint: 'abc',
+      crashType: 'SIGTRAP',
+      start: START,
+      end: END,
+    });
+
+    const latestRequests = client.esql.query.mock.calls
+      .map(([request]) => request)
+      .filter(({ query }) => query.includes('LIMIT 1 |'));
+    expect(latestRequests).toHaveLength(1);
+    expect(latestRequests[0].query).toContain('`attributes.exception.type` IN ("SIGTRAP")');
   });
 });

@@ -57,7 +57,7 @@ const toBreakdown = (rows: CrashBreakdownRow[]): CrashBreakdown => {
 };
 
 const toCrash = (row: LatestCrashRow): MobileCrash => ({
-  time: row[RESULT_COLUMNS.crashTime],
+  time: row[RESULT_COLUMNS.happenedAt],
   reportedAt: row[RESULT_COLUMNS.reportedAt],
   type: row[RESULT_COLUMNS.exceptionType] ?? null,
   message: row[RESULT_COLUMNS.message] ?? null,
@@ -142,10 +142,11 @@ export const getCrashGroup = async ({
     );
     return row;
   };
-  // A known type only spares hashing the other crashes: the list's type can be a stored-fingerprint
-  // crash's, whose group's computed crashes have another, so without a crash of it, all are read.
-  const latestRow =
-    (crashType === undefined ? undefined : await latestOf([crashType])) ?? (await latestOf());
+  // A known type only spares hashing the other crashes. The typed query keeps stored-fingerprint
+  // crashes of any type, so only a computed latest crash proves the type is the group's: a computed
+  // fingerprint hashes it. Otherwise a newer computed crash of another type could be missed.
+  const typed = crashType === undefined ? undefined : await latestOf([crashType]);
+  const latestRow = typed && !typed[RESULT_COLUMNS.storedFingerprint] ? typed : await latestOf();
   if (!latestRow) {
     const none: CrashBreakdown = { top: [], other: 0 };
     return {

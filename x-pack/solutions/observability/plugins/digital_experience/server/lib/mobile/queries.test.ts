@@ -57,6 +57,12 @@ describe('withLatestReleases', () => {
     );
   });
 
+  it('dates the documents by the column a query gives', () => {
+    expect(
+      withLatestReleases(esql.from('logs-*'), esql.exp`release_seen_at`).toRequest().query
+    ).toContain('STATS first_seen = MIN(release_seen_at) BY `service.name`, `service.version`');
+  });
+
   it('compares as versions only the releases that match the pattern', () => {
     expect(query).toContain(
       `CASE(\`service.version\` RLIKE "${RELEASE_VERSION_PATTERN}", TO_VERSION(\`service.version\`), NULL)`

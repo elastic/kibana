@@ -144,10 +144,11 @@ describe('getCrashGroups', () => {
       { release_end: new Date(END).toISOString() },
     ]);
     // As far as the crashes, so a release a late crash first shows can be the newest, but past the
-    // range only from crashes that aren't iOS reports, never the next day's sessions.
+    // range only from crashes that happened in it, dated when they happened.
     expect(latestRequest.query).toContain(
-      'WHERE @timestamp < TO_DATETIME(?release_end) OR (event_name IN ("app.crash", "crash")) AND NOT `attributes.exception.stacktrace` LIKE "Incident Identifier:*" |'
+      'WHERE @timestamp < release_end OR (event_name IN ("app.crash", "crash")) AND crash_time < release_end'
     );
+    expect(latestRequest.query).toContain('STATS first_seen = MIN(release_seen_at)');
     expect(latestRequest.filter).toEqual({
       bool: {
         filter: [
