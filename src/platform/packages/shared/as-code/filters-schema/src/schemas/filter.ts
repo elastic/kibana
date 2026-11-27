@@ -228,6 +228,16 @@ export const asCodeConditionFilterSchema = lazySchema(() =>
           'A filter on a column created by an ES|QL query supports the `is`, `is_one_of` and `exists` operators, not `range`.',
       }
     )
+    .refine(
+      ({ kind, condition }) =>
+        kind !== 'esql' ||
+        condition.operator !== ASCODE_FILTER_OPERATOR.IS_ONE_OF ||
+        condition.value.length > 0,
+      {
+        path: ['condition', 'value'],
+        message: 'A filter on a column created by an ES|QL query needs at least one value.',
+      }
+    )
     .meta({
       description:
         'A filter that evaluates a single field condition such as equality, range, or existence.',

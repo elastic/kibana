@@ -302,6 +302,11 @@ describe('getComputedColumnsInOutput', () => {
     expect(await getColumns('FROM logs | EVAL a = bytes * 2, b = "x"')).toEqual(['a', 'b']);
   });
 
+  it('returns no columns when the query projects with a wildcard, as its output is unknown', async () => {
+    expect(await getColumns('FROM logs | EVAL size_class = 1 | KEEP size*')).toEqual([]);
+    expect(await getColumns('FROM logs | EVAL size_class = 1 | DROP size*')).toEqual([]);
+  });
+
   it('returns no columns for a query that does not create any', async () => {
     expect(await getColumns('FROM logs | WHERE bytes > 1 | LIMIT 10')).toEqual([]);
   });

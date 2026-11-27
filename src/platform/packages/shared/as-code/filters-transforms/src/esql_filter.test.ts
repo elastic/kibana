@@ -103,6 +103,13 @@ describe('ES|QL filters', () => {
       expect(asCodeFilterSchema.safeParse(getCondition(range)).success).toBe(true);
     });
 
+    it('rejects the ES|QL kind with no values to match, as it would filter nothing', () => {
+      const empty = { field: 'size', operator: 'is_one_of', value: [] };
+
+      expect(asCodeFilterSchema.safeParse(getCondition(empty, 'esql')).success).toBe(false);
+      expect(asCodeFilterSchema.safeParse(getCondition(empty)).success).toBe(true);
+    });
+
     it('does not accept the ES|QL kind in the filters that are not conditions', () => {
       expect(
         asCodeFilterSchema.safeParse({ type: 'dsl', dsl: { match_all: {} }, kind: 'esql' }).success

@@ -772,6 +772,28 @@ describe('SearchMethodsService', () => {
           expect(JSON.stringify(filter)).not.toContain('size');
         });
 
+        it('does not take named params from the values of the filters', async () => {
+          await service.esql({
+            query: esqlQuery,
+            kibanaQueryContext: {
+              kibanaFilters: [
+                {
+                  meta: {
+                    kind: 'esql',
+                    key: 'size',
+                    type: 'phrase',
+                    params: { query: '?_tstart' },
+                  },
+                  query: { match_phrase: { size: '?_tstart' } },
+                },
+              ],
+              timeRange: { from: 'now-15m', to: 'now' },
+            },
+          });
+
+          expect(getRequestParams().params).toBeUndefined();
+        });
+
         it('does not add disabled ones', async () => {
           await service.esql({
             query: esqlQuery,

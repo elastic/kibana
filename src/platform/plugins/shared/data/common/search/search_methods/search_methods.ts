@@ -575,10 +575,7 @@ export class SearchMethodsService implements ISearchMethods {
     // and the query is not set with ?? in the query, we should set it
     // https://github.com/elastic/elasticsearch/pull/122459
     // TODO: remove with fixESQLQueryWithVariables in the next major release
-    const esqlQuery = await appendEsqlFiltersToESQLQuery(
-      fixESQLQueryWithVariables(params.query, esqlVariables),
-      kibanaFilters
-    );
+    const esqlQuery = fixESQLQueryWithVariables(params.query, esqlVariables);
 
     const timeFilter = timeRange && getTime(undefined, timeRange, { fieldName: timeField });
     const contextFilters = [...kibanaFilters, ...(timeFilter ? [timeFilter] : [])];
@@ -597,7 +594,8 @@ export class SearchMethodsService implements ISearchMethods {
 
     return {
       ...params,
-      query: esqlQuery,
+      // Named params come from the query as written, as a pill value could contain a `?param` text
+      query: await appendEsqlFiltersToESQLQuery(esqlQuery, kibanaFilters),
       params: namedParams.length ? namedParams : undefined,
       filter: this.mergeEsqlFilters(contextFilter, params.filter),
     };

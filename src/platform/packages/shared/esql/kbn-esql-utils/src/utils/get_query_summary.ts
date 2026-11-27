@@ -8,7 +8,7 @@
  */
 
 import type { ESQLAstCommand, ESQLAstQueryExpression } from '@elastic/esql/types';
-import { Parser } from '@elastic/esql';
+import { Parser, isColumn } from '@elastic/esql';
 import {
   esqlCommandRegistry,
   getNamedSubqueries,
@@ -259,6 +259,12 @@ const computedColumnsCache = new LRUCache<string, ReadonlySet<string>>({
  * @param query The ES|QL query.
  * @returns The names of the columns.
  */
+// The registry does not apply a wildcard to the columns the query creates, so the output of a
+// query that projects with one is unknown.
+const hasWildcardProjection = (command: ESQLAstCommand): boolean =>
+  (command.name === 'keep' || command.name === 'drop') &&
+  command.args.some((arg) => isColumn(arg) && arg.name.includes('*'));
+
 export async function getComputedColumnsInOutput(query: string): Promise<ReadonlySet<string>> {
   const cached = computedColumnsCache.get(query);
   if (cached) {
@@ -266,7 +272,7 @@ export async function getComputedColumnsInOutput(query: string): Promise<Readonl
   }
 
   const { root, errors } = parseEsqlCached(query);
-  if (errors.length > 0) {
+  if (errors.length > 0 || root.commands.some(hasWildcardProjection)) {
     return new Set();
   }
 
