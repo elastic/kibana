@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import moment from 'moment';
 import { i18n } from '@kbn/i18n';
 import type {
   AgentSession,
@@ -67,4 +68,33 @@ export const formatSessionDuration = (ms: number): string => {
     'xpack.securitySolution.flyout.entityDetails.aiAgent.activity.durationSeconds',
     { defaultMessage: '{seconds}s', values: { seconds } }
   );
+};
+
+/**
+ * A session's start for its row: "Today 16:47", "Yesterday 02:15" or "Tue, Nov 25 02:15", in
+ * Kibana's time zone. The row shows the full timestamp on hover.
+ */
+export const formatSessionStart = (start: string, now: number): string => {
+  const startAt = moment(start);
+  const time = startAt.format('HH:mm');
+  const today = moment(now).startOf('day');
+  if (!startAt.isBefore(today)) {
+    return i18n.translate(
+      'xpack.securitySolution.flyout.entityDetails.aiAgent.activity.startToday',
+      {
+        defaultMessage: 'Today {time}',
+        values: { time },
+      }
+    );
+  }
+  if (!startAt.isBefore(today.clone().subtract(1, 'day'))) {
+    return i18n.translate(
+      'xpack.securitySolution.flyout.entityDetails.aiAgent.activity.startYesterday',
+      { defaultMessage: 'Yesterday {time}', values: { time } }
+    );
+  }
+  return i18n.translate('xpack.securitySolution.flyout.entityDetails.aiAgent.activity.startDate', {
+    defaultMessage: '{date} {time}',
+    values: { date: startAt.format('ddd, MMM D'), time },
+  });
 };

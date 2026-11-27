@@ -36,6 +36,7 @@ import { PreferenceFormattedDate } from '../../../../../common/components/format
 import { useFlyoutApi } from '../../../../use_flyout_api';
 import { FLYOUT_ORIGIN } from '../../../../../common/lib/telemetry';
 import {
+  useAiAgentSessionCommands,
   useAiAgentSessionDetail,
   useAiAgentSessions,
 } from '../../../../../entity_analytics/components/ai_security/hooks/use_ai_agent_sessions';
@@ -59,7 +60,9 @@ import type {
 import { getToolShellCommand } from '../../../../../entity_analytics/components/ai_security/utils';
 import { buildActivityRows, getRootCommandLabel, type ActivityRow } from './activity_rows';
 import { AskAiAboutRun } from './ask_ai_about_run';
-import { formatSessionDuration, getLaunchLabel } from './session_labels';
+import { formatSessionDuration, formatSessionStart, getLaunchLabel } from './session_labels';
+import type { SessionCommands } from '../../../../../entity_analytics/components/ai_security/activity/session_commands';
+import { parseHeadlessPrompt } from '../../../../../../common/entity_analytics/ai_security/activity/session_rules';
 import { SessionsSummary } from './sessions_summary';
 import { AI_AGENT_TEST_IDS } from '../test_ids';
 
@@ -736,6 +739,10 @@ interface SessionProps {
   readonly onOpenProcessTree: OpenProcessTree;
 }
 
+interface SessionRowProps extends SessionProps {
+  readonly commands?: SessionCommands;
+}
+
 /** The second read: what one session did, loaded when its row is expanded. */
 const SessionDetail = ({ agent, sessions, session, onOpenProcessTree }: SessionProps) => {
   const { data, isLoading, isError } = useAiAgentSessionDetail({ agent, sessions, session });
@@ -848,84 +855,183 @@ const SessionLength = ({ session }: { session: AgentSession }) => {
   );
 };
 
-/** The collapsed row: start, length or status, launch mode, flags and alert count. */
-const SessionRowHeader = ({ session }: { session: AgentSession }) => (
-  <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} wrap>
-    <EuiFlexItem grow={false}>
-      <EuiText size="s">
-        <strong>
-          <PreferenceFormattedDate value={new Date(session.start)} />
-        </strong>
+const MAX_COMMAND_NAMES = 5;
+
+const clampTwoLines = css`
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  word-break: break-word;
+`;
+
+/** What the session was asked (a headless prompt) or, when there's none, where it ran. */
+const SessionSubject = ({ session }: { session: AgentSession }) => {
+  const prompt = useMemo(
+    () => parseHeadlessPrompt(undefined, session.root.commandLine).prompt,
+    [session.root.commandLine]
+  );
+  if (prompt) {
+    return (
+      <EuiText size="xs" data-test-subj={AI_AGENT_TEST_IDS.sessionSubject}>
+        <div css={clampTwoLines}>
+          <EuiTextColor color="subdued">{'\u201C'}</EuiTextColor>
+          {prompt}
+          <EuiTextColor color="subdued">{'\u201D'}</EuiTextColor>
+        </div>
       </EuiText>
-    </EuiFlexItem>
-    <EuiFlexItem grow={false}>
-      <SessionLength session={session} />
-    </EuiFlexItem>
-    <EuiFlexItem grow={false}>
-      <EuiText size="xs" color="subdued">
-        {getLaunchLabel(session)}
-      </EuiText>
-    </EuiFlexItem>
-    {(session.isHeadless || session.permissionPromptsOff) && (
-      <EuiFlexItem grow={false} data-test-subj={AI_AGENT_TEST_IDS.sessionFlags}>
-        <EuiFlexGroup gutterSize="xs" responsive={false}>
-          {session.isHeadless && (
+    );
+  }
+  if (!session.root.workingDirectory) return null;
+  return (
+    <EuiText size="xs" color="subdued" data-test-subj={AI_AGENT_TEST_IDS.sessionSubject}>
+      <div css={clampTwoLines}>
+        <EuiIcon type="folderOpen" size="s" aria-hidden={true} /> {session.root.workingDirectory}
+      </div>
+    </EuiText>
+  );
+};
+
+/** The commands the session ran, by name, once the commands read is back. */
+const SessionCommandsLine = ({ commands }: { commands?: SessionCommands }) => {
+  if (!commands || commands.count === 0) return null;
+  const shown = commands.names.slice(0, MAX_COMMAND_NAMES);
+  const more = commands.names.length - shown.length;
+  return (
+    <EuiText size="xs" color="subdued" data-test-subj={AI_AGENT_TEST_IDS.sessionCommands}>
+      <FormattedMessage
+        id="xpack.securitySolution.flyout.entityDetails.aiAgent.activity.sessionCommands"
+        defaultMessage="{count, plural, one {# command} other {# commands}}:"
+        values={{ count: commands.count }}
+      />{' '}
+      {shown.map((name, index) => (
+        <React.Fragment key={name}>
+          {index > 0 && ' '}
+          <EuiCode transparentBackground>{name}</EuiCode>
+        </React.Fragment>
+      ))}
+      {more > 0 && (
+        <>
+          {' '}
+          <FormattedMessage
+            id="xpack.securitySolution.flyout.entityDetails.aiAgent.activity.sessionMoreCommands"
+            defaultMessage="+{more} more"
+            values={{ more }}
+          />
+        </>
+      )}
+    </EuiText>
+  );
+};
+
+/**
+ * The collapsed row. First line: when, how long, how it was launched, and the flags worth
+ * stopping for. Then what it was asked or where it ran, and the commands it ran.
+ */
+const SessionRowHeader = ({
+  session,
+  now,
+  commands,
+}: {
+  session: AgentSession;
+  now: number;
+  commands?: SessionCommands;
+}) => {
+  const hasPrompt = !!parseHeadlessPrompt(undefined, session.root.commandLine).prompt;
+  return (
+    <EuiFlexGroup direction="column" gutterSize="xs" responsive={false}>
+      <EuiFlexItem>
+        <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} wrap>
+          <EuiFlexItem grow={false}>
+            <EuiToolTip content={<PreferenceFormattedDate value={new Date(session.start)} />}>
+              <EuiText size="s" tabIndex={0} data-test-subj={AI_AGENT_TEST_IDS.sessionStart}>
+                <strong>{formatSessionStart(session.start, now)}</strong>
+              </EuiText>
+            </EuiToolTip>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <SessionLength session={session} />
+          </EuiFlexItem>
+          {session.launchMode !== 'unknown' && (
             <EuiFlexItem grow={false}>
-              <EuiBadge color="hollow">{HEADLESS_BADGE}</EuiBadge>
+              <EuiText size="xs" color="subdued">
+                {getLaunchLabel(session)}
+              </EuiText>
             </EuiFlexItem>
           )}
-          {session.permissionPromptsOff && (
+          {((session.isHeadless && !hasPrompt) || session.permissionPromptsOff) && (
+            <EuiFlexItem grow={false} data-test-subj={AI_AGENT_TEST_IDS.sessionFlags}>
+              <EuiFlexGroup gutterSize="xs" responsive={false}>
+                {session.isHeadless && !hasPrompt && (
+                  <EuiFlexItem grow={false}>
+                    <EuiBadge color="hollow">{HEADLESS_BADGE}</EuiBadge>
+                  </EuiFlexItem>
+                )}
+                {session.permissionPromptsOff && (
+                  <EuiFlexItem grow={false}>
+                    <EuiBadge color="warning">{PERMISSION_PROMPTS_OFF_BADGE}</EuiBadge>
+                  </EuiFlexItem>
+                )}
+              </EuiFlexGroup>
+            </EuiFlexItem>
+          )}
+          {session.alertIds.length > 0 && (
             <EuiFlexItem grow={false}>
-              <EuiBadge color="warning">{PERMISSION_PROMPTS_OFF_BADGE}</EuiBadge>
+              <EuiBadge color="danger" data-test-subj={AI_AGENT_TEST_IDS.sessionAlerts}>
+                <FormattedMessage
+                  id="xpack.securitySolution.flyout.entityDetails.aiAgent.activity.sessionAlerts"
+                  defaultMessage="{count, plural, one {# alert} other {# alerts}}"
+                  values={{ count: session.alertIds.length }}
+                />
+              </EuiBadge>
             </EuiFlexItem>
           )}
         </EuiFlexGroup>
       </EuiFlexItem>
-    )}
-    {session.alertIds.length > 0 && (
-      <EuiFlexItem grow={false}>
-        <EuiBadge color="danger" data-test-subj={AI_AGENT_TEST_IDS.sessionAlerts}>
-          <FormattedMessage
-            id="xpack.securitySolution.flyout.entityDetails.aiAgent.activity.sessionAlerts"
-            defaultMessage="{count, plural, one {# alert} other {# alerts}}"
-            values={{ count: session.alertIds.length }}
-          />
-        </EuiBadge>
+      <EuiFlexItem>
+        <SessionSubject session={session} />
       </EuiFlexItem>
-    )}
-  </EuiFlexGroup>
-);
+      <EuiFlexItem>
+        <SessionCommandsLine commands={commands} />
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+};
 
 /** Sessions with alerts and sessions still running start expanded. */
-const SessionRow = memo(({ agent, sessions, session, onOpenProcessTree }: SessionProps) => {
-  const [isOpen, setIsOpen] = useState(
-    () => session.alertIds.length > 0 || session.status?.kind === 'running'
-  );
-  const accordionId = useGeneratedHtmlId({ prefix: 'aiAgentSession' });
-  return (
-    <EuiPanel hasBorder paddingSize="s" data-test-subj={AI_AGENT_TEST_IDS.session}>
-      <EuiAccordion
-        id={accordionId}
-        buttonContent={<SessionRowHeader session={session} />}
-        forceState={isOpen ? 'open' : 'closed'}
-        onToggle={setIsOpen}
-        buttonProps={{ 'data-test-subj': AI_AGENT_TEST_IDS.sessionToggle }}
-      >
-        {isOpen && (
-          <>
-            <EuiSpacer size="s" />
-            <SessionDetail
-              agent={agent}
-              sessions={sessions}
-              session={session}
-              onOpenProcessTree={onOpenProcessTree}
-            />
-          </>
-        )}
-      </EuiAccordion>
-    </EuiPanel>
-  );
-});
+const SessionRow = memo(
+  ({ agent, sessions, session, commands, onOpenProcessTree }: SessionRowProps) => {
+    const [isOpen, setIsOpen] = useState(
+      () => session.alertIds.length > 0 || session.status?.kind === 'running'
+    );
+    const accordionId = useGeneratedHtmlId({ prefix: 'aiAgentSession' });
+    return (
+      <EuiPanel hasBorder paddingSize="s" data-test-subj={AI_AGENT_TEST_IDS.session}>
+        <EuiAccordion
+          id={accordionId}
+          buttonContent={
+            <SessionRowHeader session={session} now={sessions.now} commands={commands} />
+          }
+          forceState={isOpen ? 'open' : 'closed'}
+          onToggle={setIsOpen}
+          buttonProps={{ 'data-test-subj': AI_AGENT_TEST_IDS.sessionToggle }}
+        >
+          {isOpen && (
+            <>
+              <EuiSpacer size="s" />
+              <SessionDetail
+                agent={agent}
+                sessions={sessions}
+                session={session}
+                onOpenProcessTree={onOpenProcessTree}
+              />
+            </>
+          )}
+        </EuiAccordion>
+      </EuiPanel>
+    );
+  }
+);
 SessionRow.displayName = 'SessionRow';
 
 export const SESSIONS_PAGE_SIZE = 20;
@@ -941,6 +1047,7 @@ export interface AgentActivityProps {
  */
 export const AgentActivity = memo(({ agent }: AgentActivityProps) => {
   const { data, isLoading, isError } = useAiAgentSessions(agent);
+  const { data: commands } = useAiAgentSessionCommands(agent, data);
   const { openSessionView } = useFlyoutApi();
   const [visibleCount, setVisibleCount] = useState(SESSIONS_PAGE_SIZE);
 
@@ -1010,6 +1117,7 @@ export const AgentActivity = memo(({ agent }: AgentActivityProps) => {
             agent={agent}
             sessions={data}
             session={session}
+            commands={commands?.get(session.id)}
             onOpenProcessTree={onOpenProcessTree}
           />
           <EuiSpacer size="s" />

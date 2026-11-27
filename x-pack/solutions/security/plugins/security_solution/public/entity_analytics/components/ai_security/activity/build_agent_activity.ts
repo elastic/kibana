@@ -56,7 +56,7 @@ export {
  * Markers only match start-up scripts, never the `eval '<command>'` wrapper a Bash tool call runs
  * in, because a setup process hides its whole subtree.
  */
-const SETUP_PROCESS_NAMES: ReadonlySet<string> = new Set([
+export const SETUP_PROCESS_NAMES: ReadonlySet<string> = new Set([
   'env',
   'uname',
   'awk',
@@ -67,8 +67,10 @@ const SETUP_PROCESS_NAMES: ReadonlySet<string> = new Set([
   'which',
   'tr',
 ]);
-const SETUP_COMMAND_MARKERS: readonly string[] = [
-  'core.hooksPath=/dev/null',
+/** The agent's own git calls pass this as one argument. */
+export const SETUP_ARG_MARKER = 'core.hooksPath=/dev/null';
+export const SETUP_COMMAND_MARKERS: readonly string[] = [
+  SETUP_ARG_MARKER,
   'SNAPSHOT_FILE=',
   '/usr/libexec/grepconf.sh',
   'GREP_COLORS',

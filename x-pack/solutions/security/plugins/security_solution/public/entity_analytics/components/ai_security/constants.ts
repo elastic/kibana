@@ -47,4 +47,5 @@ export const AI_AGENTS_QUERY_KEYS = {
   alerts: 'ai-agent-alerts',
   sessions: 'ai-agent-sessions',
   sessionDetail: 'ai-agent-session-detail',
+  sessionCommands: 'ai-agent-session-commands',
 } as const;

@@ -16,6 +16,7 @@ import {
   buildOwnProcessesQuery,
   buildProcessSideEffectsQuery,
   buildRunAlertsQuery,
+  buildSessionCommandsQuery,
 } from '../queries/activity_queries';
 import { isDefined } from '../queries/parse_rows';
 import {
@@ -32,6 +33,7 @@ import {
   getSessionWindow,
 } from '../activity/build_agent_sessions';
 import type { AgentSession, AgentSessionDetail, AgentSessions, OtelMatch } from '../activity/types';
+import { summariseSessionCommands, type SessionCommands } from '../activity/session_commands';
 import type { AgentIdentity, AgentRow } from '../types';
 import { isClaudeCode } from '../utils';
 import { fetchOrderedArgs, optionalRecords, recordsIfIndexExists } from './use_ai_agents';
@@ -81,6 +83,33 @@ export const useAiAgentSessions = (agent: AgentRow | AgentIdentity | undefined) 
         now,
         truncated: ownRecords.length >= ACTIVITY_MAX_PROCESS_EVENTS,
       });
+    },
+  });
+};
+
+/**
+ * The commands each session ran, for the session rows. Read after the sessions, so the list draws
+ * first and the commands fill in. A failed read leaves the rows without them.
+ */
+export const useAiAgentSessionCommands = (
+  agent: AgentRow | AgentIdentity,
+  sessions: AgentSessions | undefined
+) => {
+  const { data } = useKibana().services;
+  const spaceId = useSpaceId();
+  return useQuery({
+    queryKey: [AI_AGENTS_QUERY_KEYS.sessionCommands, spaceId, agent.entityId, sessions?.now],
+    enabled: !!spaceId && !!sessions && sessions.sessions.length > 0,
+    queryFn: async ({ signal }): Promise<Map<string, SessionCommands>> => {
+      if (!sessions) return new Map();
+      const { from, to } = sessions.window;
+      const { records } = await optionalRecords(
+        data.search,
+        buildSessionCommandsQuery(spaceId ?? 'default', agent, from, to),
+        'session_commands',
+        signal
+      );
+      return summariseSessionCommands(sessions, records.map(toProcessEvent).filter(isDefined));
     },
   });
 };

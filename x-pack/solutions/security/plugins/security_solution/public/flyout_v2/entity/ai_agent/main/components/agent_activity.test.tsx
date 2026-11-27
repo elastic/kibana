@@ -11,9 +11,11 @@ import { TestProviders } from '../../../../../common/mock';
 import { useFlyoutApi } from '../../../../use_flyout_api';
 import { createFlyoutApiMock } from '../../../../use_flyout_api.mock';
 import {
+  useAiAgentSessionCommands,
   useAiAgentSessionDetail,
   useAiAgentSessions,
 } from '../../../../../entity_analytics/components/ai_security/hooks/use_ai_agent_sessions';
+import { summariseSessionCommands } from '../../../../../entity_analytics/components/ai_security/activity/session_commands';
 import {
   buildAgentSessions,
   buildSessionDetail,
@@ -96,6 +98,9 @@ const mockActivity = ({
     isLoading: false,
     isError: false,
   } as unknown as ReturnType<typeof useAiAgentSessions>);
+  jest.mocked(useAiAgentSessionCommands).mockReturnValue({
+    data: summariseSessionCommands(sessions, descendantEvents),
+  } as unknown as ReturnType<typeof useAiAgentSessionCommands>);
   jest.mocked(useAiAgentSessionDetail).mockImplementation(
     ({ session }) =>
       ({
@@ -168,6 +173,44 @@ describe('AgentActivity', () => {
     expandAll();
 
     expect(screen.getByText('Process with no name or command line recorded')).toBeInTheDocument();
+  });
+
+  it('shows a collapsed row with a short start time, the prompt and the commands run', () => {
+    mockActivity({
+      ownEvents: [
+        proc({
+          entityId: 'agent',
+          isDescendant: false,
+          timestamp: '2026-11-27T09:15:00.000Z',
+          commandLine: 'claude -p Restart nginx --output-format json',
+        }),
+      ],
+      endTimes: new Map([['agent', '2026-11-27T09:15:10.000Z']]),
+      descendantEvents: [
+        proc({ entityId: 'shell', parentEntityId: 'agent', ancestry: ['agent'], name: 'bash' }),
+        proc({
+          entityId: 'sudo',
+          parentEntityId: 'shell',
+          ancestry: ['shell', 'agent'],
+          name: 'sudo',
+        }),
+        proc({
+          entityId: 'ctl',
+          parentEntityId: 'sudo',
+          ancestry: ['sudo', 'shell', 'agent'],
+          name: 'systemctl',
+        }),
+      ],
+    });
+    renderActivity();
+    expect(screen.getByTestId(AI_AGENT_TEST_IDS.sessionStart)).toHaveTextContent(
+      /^Today \d{2}:\d{2}$/
+    );
+    expect(screen.getByTestId(AI_AGENT_TEST_IDS.sessionSubject)).toHaveTextContent('Restart nginx');
+    expect(screen.getByTestId(AI_AGENT_TEST_IDS.sessionCommands)).toHaveTextContent(
+      '2 commands: sudo systemctl'
+    );
+    expect(screen.queryByText('Headless')).not.toBeInTheDocument();
   });
 
   it('shows the headless prompt, sessions and OTel steps', () => {
@@ -523,8 +566,8 @@ describe('AgentActivity', () => {
     const rows = screen.getAllByTestId(AI_AGENT_TEST_IDS.session);
     expect(rows).toHaveLength(2);
     expect(rows[0]).toHaveTextContent('Scheduled (crond)');
-    expect(within(rows[0]).getByTestId(AI_AGENT_TEST_IDS.sessionFlags)).toHaveTextContent(
-      'Headless'
+    expect(within(rows[0]).getByTestId(AI_AGENT_TEST_IDS.sessionSubject)).toHaveTextContent(
+      'nightly'
     );
     expect(useAiAgentSessionDetail).not.toHaveBeenCalled();
     expect(screen.queryByText('npm test')).not.toBeInTheDocument();

@@ -21,6 +21,11 @@ import {
 } from '../constants';
 import type { AgentIdentity } from '../types';
 import {
+  SETUP_ARG_MARKER,
+  SETUP_COMMAND_MARKERS,
+  SETUP_PROCESS_NAMES,
+} from '../activity/build_agent_activity';
+import {
   agentOwnEventsFilter,
   inRange,
   PROCESS_COLUMNS,
@@ -75,6 +80,35 @@ export const buildDescendantProcessesQuery = (
     '  AND process.ai_agent.is_descendant == true',
     `  AND ${PROCESS_START_FILTER} AND ${inRange(from, to)}`,
     `| KEEP ${PROCESS_COLUMNS.join(', ')}`,
+    '| SORT @timestamp DESC',
+    `| LIMIT ${ACTIVITY_MAX_PROCESS_EVENTS}`,
+  ].join('\n');
+
+/**
+ * Every command a descendant ran in the window, for the session list: exec events only (a fork
+ * without an exec is a subshell), with the agent's setup left out in the query, and no command
+ * lines returned. The caller drops the children of setup by their missing parent. Newest first.
+ */
+export const buildSessionCommandsQuery = (
+  namespace: string,
+  { agentName, hostId }: AgentIdentity,
+  from: string,
+  to?: string
+): string =>
+  [
+    SET_UNMAPPED_NULLIFY,
+    `FROM ${getEndpointProcessIndex(namespace)}`,
+    `| WHERE process.ai_agent.name == ${escapeStringValue(agentName)}`,
+    `  AND host.id == ${escapeStringValue(hostId)}`,
+    '  AND process.ai_agent.is_descendant == true',
+    `  AND MV_CONTAINS(event.action, "exec") AND ${inRange(from, to)}`,
+    `  AND (process.name IS NULL OR process.name NOT IN (${toList([...SETUP_PROCESS_NAMES])}))`,
+    `  AND (process.command_line IS NULL OR NOT (${SETUP_COMMAND_MARKERS.map(
+      (marker) => `process.command_line LIKE ${escapeStringValue(`*${marker}*`)}`
+    ).join(' OR ')}))`,
+    // The agent's own git calls often carry no command line, only the marker as an argument.
+    `  AND NOT COALESCE(MV_CONTAINS(process.args, ${escapeStringValue(SETUP_ARG_MARKER)}), false)`,
+    '| KEEP @timestamp, event.action, process.entity_id, process.parent.entity_id, process.Ext.ancestry, process.name, process.ai_agent.is_descendant',
     '| SORT @timestamp DESC',
     `| LIMIT ${ACTIVITY_MAX_PROCESS_EVENTS}`,
   ].join('\n');
