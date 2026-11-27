@@ -20,7 +20,8 @@ import { buildMonitorPayload } from './monitor_payloads';
 import type { AgentStack } from './agent_stack';
 
 export const HTTP_SCHEDULE = { number: '1', unit: 'm' } as const;
-export const ASSIGNMENT_TIMEOUT_MS = 90_000;
+/** Spans the recipient agent's RECOVERY_STABILITY_MS gate plus two 1m task ticks. */
+export const ASSIGNMENT_TIMEOUT_MS = 5 * 60_000;
 export const FAILOVER_TIMEOUT_MS = 5 * 60_000;
 export const CHECK_TIMEOUT_MS = 3 * 60_000;
 /** Two 1m task ticks; stays under RECOVERY_STABILITY_MS / STALE_DATA_MS. */
@@ -36,7 +37,12 @@ export const assignedAgentId = async (
   return agentIdFromCondition(policy?.condition);
 };
 
-export const waitUntilAssigned = async (
+/**
+ * Waits for the assignment the rebalance task converges to — every monitor pinned
+ * and spread evenly across the enrolled agents — not the lopsided create-time pin
+ * that monitor CRUD draws per monitor and the next task tick then splits.
+ */
+export const waitUntilBalanced = async (
   apiClient: ApiClientFixture,
   adminHeaders: Record<string, string>,
   monitorIds: string[],
@@ -45,6 +51,8 @@ export const waitUntilAssigned = async (
   timeoutMs = ASSIGNMENT_TIMEOUT_MS
 ): Promise<Map<string, string>> => {
   const assignment = new Map<string, string>();
+  const minPerAgent = Math.floor(monitorIds.length / enrolledIds.length);
+  const maxPerAgent = Math.ceil(monitorIds.length / enrolledIds.length);
   await tryForTime(timeoutMs, async () => {
     assignment.clear();
     for (const monitorId of monitorIds) {
@@ -52,6 +60,11 @@ export const waitUntilAssigned = async (
       expect(agentId, `monitor ${monitorId} has an assigned agent`).toBeDefined();
       expect(enrolledIds).toContain(agentId);
       assignment.set(monitorId, agentId as string);
+    }
+    for (const enrolledId of enrolledIds) {
+      const held = [...assignment.values()].filter((agentId) => agentId === enrolledId).length;
+      expect(held, `agent ${enrolledId} monitor count`).toBeGreaterThanOrEqual(minPerAgent);
+      expect(held, `agent ${enrolledId} monitor count`).toBeLessThanOrEqual(maxPerAgent);
     }
   });
   return assignment;

@@ -14,7 +14,7 @@ import { getAgentPolicyRevision } from '../../../scout/common/fixtures/fleet';
 import { delay } from '../../../scout/common/fixtures/retry';
 import { apiTest } from '../fixtures/sharding';
 import { buildMonitorPayload } from '../fixtures/monitor_payloads';
-import { assignedAgentId, waitUntilAssigned } from '../fixtures/rebalance';
+import { assignedAgentId, waitUntilBalanced } from '../fixtures/rebalance';
 import { findSyntheticsCheck, waitForSyntheticsCheck } from '../fixtures/wait_for_check';
 
 const TEST_TIMEOUT_MS = 15 * 60 * 1000;
@@ -105,7 +105,7 @@ apiTest.describe(
         }
 
         await setShardRebalance(apiClient, adminHeaders, true);
-        const assignment = await waitUntilAssigned(
+        const assignment = await waitUntilBalanced(
           apiClient,
           adminHeaders,
           createdMonitorIds,
