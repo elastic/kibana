@@ -94,7 +94,13 @@ const startPlugin = ({ accessible = true }: { accessible?: boolean } = {}) => {
   return { legacySiemApp, license$, registeredDeepLinks };
 };
 
-const mountLegacySiemApp = (legacySiemApp: App, params = coreMock.createAppMountParameters()) =>
+const createMountParams = () => {
+  const params = coreMock.createAppMountParameters();
+  document.body.appendChild(params.element);
+  return params;
+};
+
+const mountLegacySiemApp = (legacySiemApp: App, params = createMountParams()) =>
   legacySiemApp.mount(params);
 
 const getLoader = (element: HTMLElement) => element.querySelector('[role="progressbar"]');
@@ -108,6 +114,7 @@ describe('Security Solution plugin', () => {
 
   afterEach(() => {
     jest.useRealTimers();
+    document.body.replaceChildren();
   });
 
   describe('legacy `siem` app', () => {
@@ -170,7 +177,7 @@ describe('Security Solution plugin', () => {
 
     it('shows a loader once the legacy app mount has resolved, until it is unmounted', async () => {
       const { legacySiemApp } = startPlugin();
-      const params = coreMock.createAppMountParameters();
+      const params = createMountParams();
       const { element } = params;
       const unmount = await mountLegacySiemApp(legacySiemApp, params);
 
@@ -180,6 +187,21 @@ describe('Security Solution plugin', () => {
       unmount();
 
       expect(getLoader(element)).toBeNull();
+    });
+
+    it('neither renders nor redirects when the user leaves before the legacy app mount has resolved', async () => {
+      const { legacySiemApp, license$ } = startPlugin();
+      const params = createMountParams();
+      const { element } = params;
+      const mounting = mountLegacySiemApp(legacySiemApp, params);
+
+      element.remove();
+      await mounting;
+      license$.next(licensingMock.createLicense({ license: { type: 'platinum' } }));
+      await jest.advanceTimersByTimeAsync(1000);
+
+      expect(getLoader(element)).toBeNull();
+      expect(manageOldSiemRoutes).not.toHaveBeenCalled();
     });
   });
 });

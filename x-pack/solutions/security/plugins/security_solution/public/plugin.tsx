@@ -219,6 +219,10 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
 
         const { manageOldSiemRoutes, renderLegacySiemRoutesLoader } =
           await this.lazyHelpersForRoutes();
+        // Core does not call the unmount of a mount that resolves after the user has left the app.
+        if (!element.isConnected) {
+          return () => {};
+        }
         // Core removes its own loading placeholder once this mount resolves, before the redirect.
         const unmountLoader = renderLegacySiemRoutesLoader(coreStart, element);
         // The legacy routes are resolved through the Security Solution app deepLinks, so the
