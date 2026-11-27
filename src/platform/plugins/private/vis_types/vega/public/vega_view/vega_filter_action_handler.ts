@@ -14,7 +14,7 @@ import type { Filter } from '@kbn/es-query';
 import { buildQueryFilter, compareFilters } from '@kbn/es-query';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { getDataViews } from '../services';
-import { extractIndexPatternsFromSpec } from '../lib/extract_index_pattern';
+import { extractDataSourcesFromSpec } from '../lib/extract_index_pattern';
 import { VEGA_EVENT_APPLY_FILTER } from '../constants';
 import type { VegaSpec } from '../data_model/types';
 import type { VegaEventHandler, VegaFilterActionHandler } from '../types';
@@ -111,16 +111,16 @@ export const createVegaFilterActionHandler = ({
       return dataView.id;
     }
 
-    const [specDataView] = await extractIndexPatternsFromSpec(spec);
-    const dataView = specDataView ?? (await dataViews.getDefault());
-    if (!dataView) {
+    const [specDataSource] = await extractDataSourcesFromSpec(spec);
+    const source = specDataSource ?? (await dataViews.getDefault());
+    if (!source) {
       throw new Error(
         i18n.translate('visTypeVega.vegaParser.baseView.unableToFindDefaultIndexErrorMessage', {
           defaultMessage: 'Unable to find default index',
         })
       );
     }
-    return dataView.id;
+    return source.id;
   };
 
   const buildFilter = async (query: unknown, index: unknown, alias?: unknown) => {

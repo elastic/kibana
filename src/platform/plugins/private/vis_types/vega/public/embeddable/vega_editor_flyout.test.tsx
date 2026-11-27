@@ -12,6 +12,8 @@ import { BehaviorSubject } from 'rxjs';
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import type { DataView } from '@kbn/data-views-plugin/public';
+import { createStubDataView } from '@kbn/data-views-plugin/common/data_view.stub';
+import type { FilterableSource } from '@kbn/data-source';
 import {
   BooleanRelation,
   FILTERS,
@@ -47,7 +49,7 @@ jest.mock('../components/vega_vis_editor', () => ({
 }));
 
 const createDataView = (id: string, persisted = true): DataView =>
-  ({ id, isPersisted: () => persisted } as DataView);
+  createStubDataView({ spec: { id, title: id, version: persisted ? '1' : undefined } });
 
 const renderFlyout = ({
   initialQuery,
@@ -58,13 +60,13 @@ const renderFlyout = ({
 }: {
   initialQuery?: Query;
   initialFilters?: Filter[];
-  initialDataViews?: DataView[];
+  initialDataViews?: FilterableSource[];
   defaultDataView?: DataView;
   isNewPanel?: boolean;
 } = {}) => {
   const query$ = new BehaviorSubject<Query | undefined>(initialQuery);
   const filters$ = new BehaviorSubject<Filter[] | undefined>(initialFilters);
-  const dataSources$ = new BehaviorSubject<DataView[] | undefined>(initialDataViews);
+  const dataSources$ = new BehaviorSubject<FilterableSource[] | undefined>(initialDataViews);
   const api = {
     query$,
     filters$,
@@ -309,6 +311,49 @@ describe('VegaEditorFlyout', () => {
       expect(combined.meta.params).toEqual([
         { meta: { index: 'ad-hoc-view' }, query: { match: { status: 500 } } },
       ]);
+    });
+  });
+
+  describe('with the ES|QL source of the spec and a saved data view', () => {
+    const esqlSource: FilterableSource = {
+      kind: 'esql',
+      id: 'esql-dataset',
+      title: 'logs-*',
+      fields: [],
+      getFieldByName: () => undefined,
+      isTimeBased: () => true,
+    };
+    const initialDataViews = [esqlSource, createDataView('saved-view')];
+
+    it('passes both to the search bar', () => {
+      const { getSearchBarProps } = renderFlyout({ initialDataViews });
+
+      expect(getSearchBarProps().indexPatterns).toEqual(initialDataViews);
+    });
+
+    it('stores filters on the ES|QL source without its id, like on an ad-hoc data view', () => {
+      const { api, getSearchBarProps } = renderFlyout({ initialDataViews });
+
+      act(() => {
+        getSearchBarProps().onFiltersUpdated?.([
+          { meta: { index: 'esql-dataset' }, query: { match: { status: 200 } } },
+          { meta: { index: 'saved-view' }, query: { match: { status: 404 } } },
+        ]);
+      });
+
+      expect(api.setFilters).toHaveBeenCalledWith([
+        { meta: {}, query: { match: { status: 200 } } },
+        { meta: { index: 'saved-view' }, query: { match: { status: 404 } } },
+      ]);
+    });
+
+    it('binds filters without a data view to the ES|QL source for the search bar', () => {
+      const { getSearchBarProps } = renderFlyout({
+        initialDataViews,
+        initialFilters: [{ meta: {}, query: { match: { status: 200 } } }],
+      });
+
+      expect(getSearchBarProps().filters?.[0].meta.index).toBe('esql-dataset');
     });
   });
 

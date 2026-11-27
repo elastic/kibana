@@ -21,6 +21,7 @@ import {
 import type { CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import type { DataView } from '@kbn/data-views-plugin/public';
+import type { FilterableSource } from '@kbn/data-source';
 import type { TimeRange } from '@kbn/es-query';
 import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
 import type {
@@ -40,7 +41,7 @@ import {
   vegaEditorFlyoutBodyCss,
 } from '../components/vega_editor_body';
 import { parseSpec } from '../lib/editor_spec';
-import { extractIndexPatternsFromSpec } from '../lib/extract_index_pattern';
+import { extractDataSourcesFromSpec } from '../lib/extract_index_pattern';
 import { fromDraft, isSameDraft, toDraft } from '../lib/editable_state';
 import type { VegaDraft, VegaEditableState } from '../lib/editable_state';
 import type { VegaPluginStartDependencies } from '../plugin';
@@ -84,13 +85,13 @@ interface VegaLibraryEditorProps {
   ariaLabelledBy: string;
 }
 
-const getSpecDataViews = async (specText: string): Promise<DataView[]> => {
+const getSpecDataSources = async (specText: string): Promise<FilterableSource[]> => {
   // The editor text is HJSON or JSON, which HJSON also parses.
   const spec = parseSpec({ format: 'hjson', value: specText });
-  // A spec that doesn't parse names no data views.
+  // A spec that doesn't parse names no data sources.
   if (!spec) return [];
   try {
-    return await extractIndexPatternsFromSpec(spec);
+    return await extractDataSourcesFromSpec(spec);
   } catch {
     return [];
   }
@@ -121,18 +122,18 @@ export const VegaLibraryEditor = ({
   });
   // The preview can only be closed while it is stacked over the editor on narrow screens.
   const [isPreviewOpen, setIsPreviewOpen] = useState(!onPreview);
-  const [specDataViews, setSpecDataViews] = useState<DataView[]>([]);
+  const [specDataSources, setSpecDataSources] = useState<FilterableSource[]>([]);
   const [isSaving, setIsSaving] = useState(false);
   const [isDiscardConfirmOpen, setIsDiscardConfirmOpen] = useState(false);
 
   const isDirty = !isSameDraft(draft, savedDraft);
   const canPreview = draft.spec !== previewedSpec.spec;
 
-  // The data views follow the previewed spec, so they don't resolve on every keystroke.
+  // The data sources follow the previewed spec, so they don't resolve on every keystroke.
   useEffect(() => {
     let isCurrent = true;
-    getSpecDataViews(previewedSpec.spec).then((resolved) => {
-      if (isCurrent) setSpecDataViews(resolved);
+    getSpecDataSources(previewedSpec.spec).then((resolved) => {
+      if (isCurrent) setSpecDataSources(resolved);
     });
     return () => {
       isCurrent = false;
@@ -266,7 +267,7 @@ export const VegaLibraryEditor = ({
       <EuiFlyoutBody data-test-subj="vegaLibraryEditorBody" css={vegaEditorFlyoutBodyCss}>
         <VegaEditorBody
           SearchBar={SearchBar}
-          specDataViews={specDataViews}
+          specDataSources={specDataSources}
           defaultDataView={defaultDataView}
           query={draft.query}
           filters={draft.filters}

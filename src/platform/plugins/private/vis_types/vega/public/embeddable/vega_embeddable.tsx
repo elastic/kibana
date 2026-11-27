@@ -12,7 +12,7 @@ import { EuiLoadingChart } from '@elastic/eui';
 import type { CoreStart } from '@kbn/core/public';
 import { fromStoredFilters } from '@kbn/as-code-filters-transforms';
 import { toAsCodeQuery, toStoredQuery } from '@kbn/as-code-shared-transforms';
-import type { DataView } from '@kbn/data-views-plugin/public';
+import type { FilterableSource } from '@kbn/data-source';
 import { AbortReason } from '@kbn/kibana-utils-plugin/common';
 import { dispatchRenderComplete } from '@kbn/kibana-utils-plugin/public';
 import type { HasInspectorAdapters } from '@kbn/inspector-plugin/public';
@@ -71,7 +71,7 @@ import type { VegaEvent } from '../types';
 import type { VegaPluginStartDependencies, VegaVisualizationDependencies } from '../plugin';
 import type { VegaRenderDescriptor } from '../data_model/types';
 import { parseSpec } from '../lib/editor_spec';
-import { extractIndexPatternsFromSpec } from '../lib/extract_index_pattern';
+import { extractDataSourcesFromSpec } from '../lib/extract_index_pattern';
 import { getDefaultDataView } from '../lib/get_default_data_view';
 import { isVegaByReferenceState } from '../../common/utils';
 import { toPanelFilters, type VegaEditableState } from '../lib/editable_state';
@@ -127,7 +127,7 @@ export type VegaEmbeddableApi = DefaultEmbeddableApi<VegaEmbeddableState> &
   PublishesEsql &
   PublishesWritableUnifiedSearch &
   PublishesProjectRoutingOverrides &
-  PublishesDataSources<DataView> &
+  PublishesDataSources &
   PublishesRendered & {
     /** Returns the editor panel content for an already-open flyout. */
     getEditPanel?: (options: {
@@ -212,10 +212,10 @@ export const vegaEmbeddableFactory = (
     const esql$ = new BehaviorSubject<AggregateQuery[]>([]);
     const approximationApplied$ = new BehaviorSubject<boolean | undefined>(undefined);
     const projectRoutingOverrides$ = new BehaviorSubject<ProjectRoutingOverrides>(undefined);
-    const dataSources$ = new BehaviorSubject<DataView[] | undefined>(undefined);
+    const dataSources$ = new BehaviorSubject<FilterableSource[] | undefined>(undefined);
 
     // A spec change is parsed once for all derived subjects. `switchMap` is used instead
-    // of `tap` for dataSources$ because `extractIndexPatternsFromSpec` is async.
+    // of `tap` for dataSources$ because `extractDataSourcesFromSpec` is async.
     const specSubscription = content$
       .pipe(
         map(({ spec }) => spec),
@@ -226,9 +226,9 @@ export const vegaEmbeddableFactory = (
           esql$.next(spec ? getEsqlQueriesFromSpec(spec).map((esql) => ({ esql })) : []);
           projectRoutingOverrides$.next(spec ? extractProjectRoutingOverrides(spec) : undefined);
         }),
-        switchMap((spec) => (spec ? extractIndexPatternsFromSpec(spec) : EMPTY))
+        switchMap((spec) => (spec ? extractDataSourcesFromSpec(spec) : EMPTY))
       )
-      .subscribe((dataViews) => dataSources$.next(dataViews));
+      .subscribe((sources) => dataSources$.next(sources));
 
     const renderInput$ = new BehaviorSubject<VegaRenderInput | undefined>(undefined);
     const blockingError$ = new BehaviorSubject<Error | undefined>(undefined);

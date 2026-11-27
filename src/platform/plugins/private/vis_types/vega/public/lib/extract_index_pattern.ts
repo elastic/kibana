@@ -7,9 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { flatten, isPlainObject, uniqBy } from 'lodash';
+import { parse } from 'hjson';
+import { compact, flatten, isPlainObject, uniqBy } from 'lodash';
+import type { DataViewBase } from '@kbn/es-query';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { getESQLAdHocDataview, getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
+import { EsqlSource, type FilterableSource } from '@kbn/data-source';
+import {
+  getESQLAdHocDataview,
+  getIndexPatternFromESQLQuery,
+  getSourceCommandQueryFromESQLQuery,
+} from '@kbn/esql-utils';
 import { getDataViews, getHttp } from '../services';
 
 import { CONSTANTS } from '../data_model/types';
@@ -41,24 +48,81 @@ const collectDataUrls = (node: unknown, parentKey?: string, accumulator: UrlObje
   return accumulator;
 };
 
-export const extractIndexPatternsFromSpec = async (spec: VegaSpec) => {
+const findIndexDataViews = (urls: UrlObject[]): Array<Promise<DataView[]>> => {
   const dataViews = getDataViews();
-  const urls = collectDataUrls(spec);
-
-  const indexPatternPromises = urls.reduce<Array<Promise<DataView[]>>>((accumulator, url) => {
+  return urls.reduce<Array<Promise<DataView[]>>>((accumulator, url) => {
     if (url.index) {
       accumulator.push(dataViews.find(url.index, 1));
     }
 
     return accumulator;
   }, []);
+};
 
-  const esqlUrls = urls.filter(isEsqlDataUrl);
-  const esqlQueries = uniqBy(esqlUrls, (url) => getIndexPatternFromESQLQuery(url.query));
+const getEsqlQueries = (urls: UrlObject[]): string[] =>
+  uniqBy(urls.filter(isEsqlDataUrl), (url) => getIndexPatternFromESQLQuery(url.query)).map(
+    ({ query }) => query
+  );
 
-  const esqlDataViewPromises = esqlQueries.map(async ({ query }) => {
+/** The sources of the ES|QL data urls of a spec, one per dataset. A query that fails to resolve is left out. */
+export const extractEsqlSourcesFromSpec = async (spec: VegaSpec): Promise<FilterableSource[]> => {
+  const sources = await Promise.all(
+    getEsqlQueries(collectDataUrls(spec)).map(async (query) => {
+      // A query without a source command (e.g. `ROW`) reads no dataset.
+      if (!getSourceCommandQueryFromESQLQuery(query)) return undefined;
+      try {
+        const http = getHttp();
+        const source = await EsqlSource.forDataset({ query, http });
+        return await source.toFilterableSource(http);
+      } catch {
+        return undefined;
+      }
+    })
+  );
+  return uniqBy(compact(sources), 'id');
+};
+
+/** The data views of the `index` data urls of a spec, followed by the sources of its ES|QL data urls. */
+export const extractDataSourcesFromSpec = async (spec: VegaSpec): Promise<FilterableSource[]> => {
+  const [indexDataViews, esqlSources] = await Promise.all([
+    Promise.all(findIndexDataViews(collectDataUrls(spec))),
+    extractEsqlSourcesFromSpec(spec),
+  ]);
+  return uniqBy([...flatten(indexDataViews), ...esqlSources], 'id');
+};
+
+const getEsqlSourcesOfSpecText = async (specText: string): Promise<FilterableSource[]> => {
+  try {
+    return await extractEsqlSourcesFromSpec(parse(specText, { legacyRoot: false, keepWsc: true }));
+  } catch {
+    // A spec that doesn't parse names no sources; the parser reports it when it renders.
+    return [];
+  }
+};
+
+/** The source a filter id names: the dataset of an ES|QL query of the spec, otherwise the data view with that id. */
+export const getFilterSourceOfSpec = async (
+  specText: string,
+  id: string
+): Promise<DataViewBase | undefined> => {
+  const esqlSources = await getEsqlSourcesOfSpecText(specText);
+  const esqlSource = esqlSources.find((source) => source.id === id);
+  return (
+    esqlSource ??
+    (await getDataViews()
+      .get(id)
+      .catch(() => undefined))
+  );
+};
+
+/** The data views of a spec, with an ad hoc data view for each ES|QL dataset, for the legacy visualization type. */
+export const extractIndexPatternsFromSpec = async (spec: VegaSpec) => {
+  const urls = collectDataUrls(spec);
+  const indexPatternPromises = findIndexDataViews(urls);
+
+  const esqlDataViewPromises = getEsqlQueries(urls).map(async (query) => {
     const dataView = await getESQLAdHocDataview({
-      dataViewsService: dataViews,
+      dataViewsService: getDataViews(),
       query,
       http: getHttp(),
     });

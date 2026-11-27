@@ -32,7 +32,7 @@ import type { VegaPluginStartDependencies, VegaVisualizationDependencies } from 
 import { VEGA_EMBEDDABLE_TYPE } from '../../common/constants';
 import { VEGA_EVENT_APPLY_FILTER } from '../constants';
 import type { VegaEvent, VegaEventHandler } from '../types';
-import { extractIndexPatternsFromSpec } from '../lib/extract_index_pattern';
+import { extractDataSourcesFromSpec } from '../lib/extract_index_pattern';
 import { reportVegaRender } from '../lib/vega_render_telemetry';
 import { setDataViews } from '../services';
 import type {
@@ -52,7 +52,7 @@ jest.mock('../library/open_vega_library_editor', () => ({
 }));
 jest.mock('../lib/vega_render_telemetry', () => ({ reportVegaRender: jest.fn() }));
 jest.mock('../lib/extract_index_pattern', () => ({
-  extractIndexPatternsFromSpec: jest.fn(async (): Promise<never[]> => []),
+  extractDataSourcesFromSpec: jest.fn(async (): Promise<never[]> => []),
 }));
 
 interface MockVegaVisComponentProps {
@@ -80,7 +80,7 @@ jest.mock('../async_services', () => ({
 const mockOpenVegaEditor = jest.mocked(openVegaEditor);
 const mockOpenVegaLibraryEditor = jest.mocked(openVegaLibraryEditor);
 const mockReportVegaRender = jest.mocked(reportVegaRender);
-const mockExtractIndexPatterns = jest.mocked(extractIndexPatternsFromSpec);
+const mockExtractDataSources = jest.mocked(extractDataSourcesFromSpec);
 
 jest.mock('@kbn/embeddable-plugin/public/kibana_services', () => ({
   core: {
@@ -192,8 +192,8 @@ describe('vegaEmbeddableFactory', () => {
     const dataViews = dataViewPluginMocks.createStartContract();
     dataViews.getDefault = jest.fn(async (): Promise<DataView | null> => null);
     setDataViews(dataViews);
-    mockExtractIndexPatterns.mockReset();
-    mockExtractIndexPatterns.mockResolvedValue([]);
+    mockExtractDataSources.mockReset();
+    mockExtractDataSources.mockResolvedValue([]);
     executeTriggerActions.mockReset();
     mockOpenVegaEditor.mockReset();
     mockReportVegaRender.mockReset();
@@ -218,7 +218,7 @@ describe('vegaEmbeddableFactory', () => {
 
   it('keeps data views named by the spec', async () => {
     const fromSpec = [{ id: 'spec-view' }] as DataView[];
-    mockExtractIndexPatterns.mockResolvedValue(fromSpec);
+    mockExtractDataSources.mockResolvedValue(fromSpec);
     const dataViews = dataViewPluginMocks.createStartContract();
     dataViews.getDefault = jest.fn(async () => ({ id: 'default-view' } as DataView));
     setDataViews(dataViews);

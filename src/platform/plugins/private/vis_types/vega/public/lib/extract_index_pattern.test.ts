@@ -10,7 +10,13 @@
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { httpServiceMock } from '@kbn/core/public/mocks';
 import { getESQLAdHocDataview, getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
-import { extractIndexPatternsFromSpec } from './extract_index_pattern';
+import { EsqlSource } from '@kbn/data-source';
+import type { DataView } from '@kbn/data-views-plugin/public';
+import {
+  extractDataSourcesFromSpec,
+  extractIndexPatternsFromSpec,
+  getFilterSourceOfSpec,
+} from './extract_index_pattern';
 import { setDataViews, setHttp } from '../services';
 
 import type { VegaSpec } from '../data_model/types';
@@ -19,6 +25,11 @@ import { vegaVisType } from '../vega_type';
 jest.mock('@kbn/esql-utils', () => ({
   getIndexPatternFromESQLQuery: jest.fn(),
   getESQLAdHocDataview: jest.fn(),
+  getSourceCommandQueryFromESQLQuery:
+    jest.requireActual('@kbn/esql-utils').getSourceCommandQueryFromESQLQuery,
+}));
+jest.mock('@kbn/data-source', () => ({
+  EsqlSource: { forDataset: jest.fn() },
 }));
 jest.mock('../default_spec', () => ({
   getDefaultSpec: jest.fn(() => ''),
@@ -286,5 +297,138 @@ describe('extractIndexPatternsFromSpec', () => {
         }),
       })
     ).resolves.toEqual([]);
+  });
+});
+
+describe('extractDataSourcesFromSpec', () => {
+  const dataViewsStart = dataViewPluginMocks.createStartContract();
+  const forDataset = jest.mocked(EsqlSource.forDataset);
+
+  beforeAll(() => {
+    setDataViews(dataViewsStart);
+    setHttp(httpServiceMock.createStartContract());
+  });
+
+  beforeEach(() => {
+    (getIndexPatternFromESQLQuery as jest.Mock).mockImplementation((query: string) =>
+      query.replace(/^(?:FROM|TS)\s+([^\s|]+).*$/is, '$1')
+    );
+    forDataset.mockImplementation(async ({ query }) => {
+      const indexPattern = (getIndexPatternFromESQLQuery as jest.Mock)(query);
+      return {
+        toFilterableSource: async () => ({ kind: 'esql', id: `esql-${indexPattern}` }),
+      } as unknown as EsqlSource;
+    });
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
+  test('resolves index urls to the same data views, without looking up ES|QL sources', async () => {
+    const spec = getMockedSpec({
+      data: [{ url: { index: 'test1' } }, { url: { index: 'test2' } }],
+    });
+
+    const sources = await extractDataSourcesFromSpec(spec);
+
+    expect(sources).toEqual(await extractIndexPatternsFromSpec(spec));
+    expect(forDataset).not.toHaveBeenCalled();
+  });
+
+  test('resolves ES|QL urls to the sources of their datasets, after the data views of index urls', async () => {
+    const spec = getMockedSpec({
+      data: [
+        { url: { '%type%': 'esql', query: 'FROM logs-* | LIMIT 10' } },
+        { url: { index: 'test' } },
+      ],
+    });
+
+    const sources = await extractDataSourcesFromSpec(spec);
+
+    expect(forDataset).toHaveBeenCalledWith(
+      expect.objectContaining({ query: 'FROM logs-* | LIMIT 10' })
+    );
+    expect(getESQLAdHocDataview).not.toHaveBeenCalled();
+    expect(sources).toEqual([
+      { id: 'test', title: 'test' },
+      { kind: 'esql', id: 'esql-logs-*' },
+    ]);
+  });
+
+  test('resolves one source per dataset', async () => {
+    const spec = getMockedSpec({
+      data: [
+        { url: { '%type%': 'esql', query: 'FROM logs-* | LIMIT 10' } },
+        { url: { '%type%': 'esql', query: 'FROM logs-* | WHERE foo == "bar"' } },
+      ],
+    });
+
+    expect(await extractDataSourcesFromSpec(spec)).toEqual([{ kind: 'esql', id: 'esql-logs-*' }]);
+  });
+
+  test('leaves out a query without a dataset and a query that fails, and keeps the others', async () => {
+    forDataset.mockRejectedValueOnce(new Error('resolution failed'));
+    const spec = getMockedSpec({
+      data: [
+        { url: { '%type%': 'esql', query: 'FROM broken-*' } },
+        { url: { '%type%': 'esql', query: 'ROW a = 1' } },
+        { url: { '%type%': 'esql', query: 'FROM logs-*' } },
+      ],
+    });
+
+    expect(await extractDataSourcesFromSpec(spec)).toEqual([{ kind: 'esql', id: 'esql-logs-*' }]);
+    expect(forDataset).toHaveBeenCalledTimes(2);
+  });
+});
+
+describe('getFilterSourceOfSpec', () => {
+  const dataViewsStart = dataViewPluginMocks.createStartContract();
+  const forDataset = jest.mocked(EsqlSource.forDataset);
+  const savedDataView = { id: 'saved-view' } as DataView;
+  const esqlSpec = JSON.stringify({ data: { url: { '%type%': 'esql', query: 'FROM logs-*' } } });
+
+  beforeAll(() => {
+    setDataViews(dataViewsStart);
+    setHttp(httpServiceMock.createStartContract());
+  });
+
+  beforeEach(() => {
+    dataViewsStart.get = jest.fn(async (id: string) => {
+      if (id === savedDataView.id) return savedDataView;
+      throw new Error(`Saved object [index-pattern/${id}] not found`);
+    });
+    forDataset.mockResolvedValue({
+      toFilterableSource: async () => ({ kind: 'esql', id: 'esql-logs' }),
+    } as unknown as EsqlSource);
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
+  test('gets the data view of a spec without ES|QL urls, like before', async () => {
+    const spec = JSON.stringify({ data: { url: { index: 'logs-*' } } });
+
+    expect(await getFilterSourceOfSpec(spec, 'saved-view')).toBe(savedDataView);
+    expect(forDataset).not.toHaveBeenCalled();
+    expect(dataViewsStart.find).not.toHaveBeenCalled();
+  });
+
+  test('gets the source of the dataset that an ES|QL filter names, without a data view request', async () => {
+    expect(await getFilterSourceOfSpec(esqlSpec, 'esql-logs')).toEqual({
+      kind: 'esql',
+      id: 'esql-logs',
+    });
+    expect(dataViewsStart.get).not.toHaveBeenCalled();
+  });
+
+  test('gets the data view when the id is not one of the ES|QL datasets of the spec', async () => {
+    expect(await getFilterSourceOfSpec(esqlSpec, 'saved-view')).toBe(savedDataView);
+  });
+
+  test('gets nothing for an id that names neither, and for a spec that does not parse', async () => {
+    expect(await getFilterSourceOfSpec(esqlSpec, 'unknown')).toBeUndefined();
+    expect(await getFilterSourceOfSpec('{ data: ', 'saved-view')).toBe(savedDataView);
   });
 });
