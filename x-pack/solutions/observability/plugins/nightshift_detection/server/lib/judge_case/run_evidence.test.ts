@@ -361,14 +361,14 @@ describe('runEvidence', () => {
   });
 
   describe('the call', () => {
-    it('sends the query unchanged, refuses partial results and passes a signal', async () => {
+    it('sends the query unchanged, refuses partial results, drops null columns and passes a signal', async () => {
       const esClient = createClient();
       respondWith(esClient, table(['message'], []));
 
       await runEvidence({ esClient, query: QUERY });
 
       expect(esClient.esql.query).toHaveBeenCalledWith(
-        { query: QUERY, allow_partial_results: false },
+        { query: QUERY, allow_partial_results: false, drop_null_columns: true },
         { signal: expect.any(AbortSignal) }
       );
     });

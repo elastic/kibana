@@ -162,8 +162,10 @@ export const runEvidence = async ({
   try {
     abortSignal?.addEventListener('abort', abortQuery, { once: true });
     timeout.addEventListener('abort', abortQuery, { once: true });
+    // Elasticsearch drops the columns that are null in every row before it responds: without a
+    // `KEEP`, a log source returns every mapped field, and most are null in any given minute.
     const response: EsqlTable = await esClient.esql.query(
-      { query, allow_partial_results: false },
+      { query, allow_partial_results: false, drop_null_columns: true },
       { signal: controller.signal }
     );
     return toResult(response);
