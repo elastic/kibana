@@ -192,9 +192,13 @@ const namesTest = (testName: string, suite: MatchableSuite): boolean =>
   suite.tests.some(({ title }) => {
     const full = suite.suiteTitle ? `${suite.suiteTitle} ${title}` : title;
     // Cypress JUnit names end in the test title twice
-    const names = suite.framework === 'cypress' ? [full, `${full} ${title}`] : [full];
+    const repeated = `${full} ${title}`;
     return (
-      names.some((name) => testName === name || testName.endsWith(` ${name}`)) || testName === title
+      testName === full ||
+      testName.endsWith(` ${full}`) ||
+      testName === title ||
+      testName === repeated ||
+      testName.endsWith(` ${repeated}`)
     );
   });
 

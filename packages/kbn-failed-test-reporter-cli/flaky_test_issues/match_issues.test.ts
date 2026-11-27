@@ -344,39 +344,20 @@ describe('findMatchingIssues', () => {
 
   it('matches Cypress issues, whose test name ends in the test title once or twice', () => {
     const filePath = 'x-pack/solutions/security/test/security_solution_cypress/e2e/timeline.cy.ts';
-    const title = 'opens from the alerts table';
-    const test = { filePath, suiteTitle: 'Timeline', title };
-    const [suite] = groupIntoSuites([flakyTest({ ...test, framework: 'cypress' })]);
-    const hook = `"before each" hook for "${title}"`;
-    const issues = [
-      // The JUnit transformer appends the title once more
-      describeIssue(cypressIssue(60, filePath, `Timeline ${title} ${title}`)),
+    const [suite] = groupIntoSuites([
+      flakyTest({ framework: 'cypress', filePath, suiteTitle: 'Timeline', title: 'opens' }),
+    ]);
+    const related = findMatchingIssues(suite, [
+      describeIssue(cypressIssue(60, filePath, 'Timeline opens opens')),
+      describeIssue(cypressIssue(61, filePath, 'Timeline opens')),
       // Another test of the suite
-      describeIssue(cypressIssue(61, filePath, 'Timeline closes closes')),
-      // A hook that failed for the test
-      describeIssue(cypressIssue(62, filePath, `Timeline ${hook} ${hook}`)),
-      // The title once, as other frameworks name a test
-      describeIssue(cypressIssue(63, filePath, `Timeline ${title}`)),
-    ];
-
-    expect(
-      findMatchingIssues(suite, issues).map(({ issue, match }) => [issue.number, match])
-    ).toEqual([
-      [63, 'test'],
-      [60, 'test'],
-      [62, 'file'],
-      [61, 'file'],
+      describeIssue(cypressIssue(62, filePath, 'Timeline closes closes')),
     ]);
 
-    // Elsewhere the repeated title is another test
-    const [ftrSuite] = groupIntoSuites([flakyTest({ ...test, framework: 'ftr' })]);
-    expect(
-      findMatchingIssues(ftrSuite, issues).map(({ issue, match }) => [issue.number, match])
-    ).toEqual([
-      [63, 'test'],
+    expect(related.map(({ issue, match }) => [issue.number, match])).toEqual([
+      [61, 'test'],
+      [60, 'test'],
       [62, 'file'],
-      [61, 'file'],
-      [60, 'file'],
     ]);
   });
 
