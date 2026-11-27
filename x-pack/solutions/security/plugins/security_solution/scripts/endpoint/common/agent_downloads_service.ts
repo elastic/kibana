@@ -35,6 +35,17 @@ interface DownloadLockOptions {
   staleMs?: number;
 }
 
+/** Handed to the code running under the lock so it can stop once the lock is taken over. */
+export interface DownloadLockHandle {
+  /** Aborted as soon as the lock is found to be owned by someone else. */
+  signal: AbortSignal;
+  /** Synchronously re-checks ownership and throws when the lock was lost. */
+  assertHeld: () => void;
+}
+
+const lockLostError = (lockPath: string): Error =>
+  new Error(`Lost ownership of agent download lock [${lockPath}]`);
+
 /** Positive integer pid. Empty or non-numeric text means the owner is still writing the file. */
 const readLockPid = (ownerText: string): number | undefined => {
   const trimmed = ownerText.trim();
@@ -76,19 +87,33 @@ const isDownloadLockStale = (lockPath: string, staleMs: number): boolean => {
   }
 };
 
-/** Keeps the lock's mtime advancing while the holder works. Returns the stop function. */
+const isLockHeldByUs = (lockPath: string): boolean =>
+  readDownloadLock(lockPath)?.trim() === String(process.pid);
+
+/**
+ * Keeps the lock's mtime advancing while the holder works. The heartbeat only touches a lock that
+ * still names this process: after a stall long enough for a waiter to reclaim the lock it would
+ * otherwise keep the replacement fresh. When ownership is gone it aborts `controller` instead.
+ * Returns the stop function.
+ */
 const startDownloadLockHeartbeat = (
   log: ToolingLog,
   lockPath: string,
-  heartbeatMs: number
+  heartbeatMs: number,
+  controller: AbortController
 ): (() => void) => {
   const timer = setInterval(() => {
-    const now = new Date();
     try {
+      if (!isLockHeldByUs(lockPath)) {
+        clearInterval(timer);
+        controller.abort(lockLostError(lockPath));
+        return;
+      }
+      const now = new Date();
       fs.utimesSync(lockPath, now, now);
     } catch (error) {
       if (!isEnoent(error)) {
-        // A missed refresh only risks another worker reclaiming the lock, which the release path already tolerates.
+        // A missed refresh only risks another worker reclaiming the lock, which the ownership check detects.
         log.warning(
           `Could not refresh agent download lock [${lockPath}]: ${(error as Error).message}`
         );
@@ -159,7 +184,7 @@ const releaseDownloadLock = (lockPath: string): void => {
 export const withDownloadLock = async <T>(
   log: ToolingLog,
   lockPath: string,
-  run: () => Promise<T>,
+  run: (lock: DownloadLockHandle) => Promise<T>,
   options?: DownloadLockOptions
 ): Promise<T> => {
   const started = Date.now();
@@ -211,10 +236,22 @@ export const withDownloadLock = async <T>(
     }
   }
 
-  const stopHeartbeat = startDownloadLockHeartbeat(log, lockPath, heartbeatMs);
+  const controller = new AbortController();
+  const stopHeartbeat = startDownloadLockHeartbeat(log, lockPath, heartbeatMs, controller);
+  const assertHeld = () => {
+    if (!controller.signal.aborted && !isLockHeldByUs(lockPath)) {
+      controller.abort(lockLostError(lockPath));
+    }
+    if (controller.signal.aborted) {
+      throw lockLostError(lockPath);
+    }
+  };
 
   try {
-    return await run();
+    const result = await run({ signal: controller.signal, assertHeld });
+    // A holder that outlived its lock must not report success for work done outside it.
+    assertHeld();
+    return result;
   } finally {
     stopHeartbeat();
     releaseDownloadLock(lockPath);
@@ -330,12 +367,13 @@ class AgentDownloadStorage extends SettingsStorage<AgentDownloadStorageSettings>
   ): Promise<DownloadedAgentInfo> {
     await this.ensureExists();
     const downloadInfo = this.getPathsForUrl(agentDownloadUrl, agentFileName);
-    return withDownloadLock(this.log, `${downloadInfo.fullFilePath}.lock`, () =>
-      this.downloadAndStoreUnlocked(agentDownloadUrl, agentFileName, shaUrl)
+    return withDownloadLock(this.log, `${downloadInfo.fullFilePath}.lock`, (lock) =>
+      this.downloadAndStoreUnlocked(lock, agentDownloadUrl, agentFileName, shaUrl)
     );
   }
 
   private async downloadAndStoreUnlocked(
+    lock: DownloadLockHandle,
     agentDownloadUrl: string,
     agentFileName?: string,
     shaUrl?: string
@@ -372,6 +410,7 @@ class AgentDownloadStorage extends SettingsStorage<AgentDownloadStorageSettings>
         );
       }
       // Delete corrupt/unverifiable cached file and sidecar
+      lock.assertHeld();
       await this.deleteCachedFileAndSidecar(newDownloadInfo.fullFilePath, sidecarPath);
     }
 
@@ -397,12 +436,14 @@ class AgentDownloadStorage extends SettingsStorage<AgentDownloadStorageSettings>
           this.log.info(
             `Attempt ${attempt} - Downloading agent from [${agentDownloadUrl}] to [${newDownloadInfo.fullFilePath}]`
           );
+          // Never open the shared file for writing unless the lock is still ours.
+          lock.assertHeld();
           const outputStream = fs.createWriteStream(newDownloadInfo.fullFilePath);
 
           await handleProcessInterruptions(
             async () => {
               try {
-                const response = await fetch(agentDownloadUrl);
+                const response = await fetch(agentDownloadUrl, { signal: lock.signal });
                 if (!response.ok || !response.body) {
                   throw new Error(`Failed to download: ${response.status} ${response.statusText}`);
                 }
@@ -421,6 +462,8 @@ class AgentDownloadStorage extends SettingsStorage<AgentDownloadStorageSettings>
               fs.rmSync(newDownloadInfo.fullFilePath, { force: true });
             }
           );
+
+          lock.assertHeld();
 
           // Validate hash after download
           const actualHash = await computeFileHash(newDownloadInfo.fullFilePath);
@@ -442,6 +485,8 @@ class AgentDownloadStorage extends SettingsStorage<AgentDownloadStorageSettings>
           retries: 2, // 2 retries = 3 total attempts (1 initial + 2 retries)
           onFailedAttempt: async (error) => {
             this.log.error(`Download attempt ${error.attemptNumber} failed: ${error.message}`);
+            // The file now belongs to the new holder.
+            lock.assertHeld();
             await unlink(newDownloadInfo.fullFilePath).catch(() => undefined);
           },
         }
@@ -451,10 +496,12 @@ class AgentDownloadStorage extends SettingsStorage<AgentDownloadStorageSettings>
     }
 
     // Write sidecar hash file (always write — use remote hash if available, otherwise local)
+    lock.assertHeld();
     if (downloadedFileHash) {
       await writeFile(sidecarPath, downloadedFileHash, 'utf-8');
     }
 
+    lock.assertHeld();
     await this.cleanupDownloads();
     return newDownloadInfo;
   }

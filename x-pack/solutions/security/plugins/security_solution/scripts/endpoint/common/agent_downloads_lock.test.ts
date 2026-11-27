@@ -10,6 +10,7 @@ import {
   mkdtempSync,
   readFileSync,
   rmSync,
+  statSync,
   unlinkSync,
   utimesSync,
   writeFileSync,
@@ -166,17 +167,64 @@ describe('withDownloadLock', () => {
     expect(existsSync(lockPath)).toBe(false);
   });
 
+  it('aborts the previous holder and leaves the replacement lock alone once its lock is reclaimed', async () => {
+    const replacement = '999999';
+    let observedSignal: AbortSignal | undefined;
+    let assertHeld = () => {};
+
+    const holder = withDownloadLock(
+      log,
+      lockPath,
+      async (lock) => {
+        observedSignal = lock.signal;
+        assertHeld = lock.assertHeld;
+        // Another worker reclaims the lock while this holder is stalled.
+        unlinkSync(lockPath);
+        writeFileSync(lockPath, replacement);
+        const past = new Date(Date.now() - 60_000);
+        utimesSync(lockPath, past, past);
+        await wait(100);
+        assertHeld();
+      },
+      { waitMs: 1_000, pollMs: 10, heartbeatMs: 10, staleMs: 5_000 }
+    );
+
+    await expect(holder).rejects.toThrow(/Lost ownership of agent download lock/);
+
+    expect(observedSignal?.aborted).toBe(true);
+    expect(() => assertHeld()).toThrow(/Lost ownership/);
+    // Neither the heartbeat nor the release path touched the replacement lock.
+    expect(readFileSync(lockPath, 'utf8')).toBe(replacement);
+    expect(Date.now() - statSync(lockPath).mtimeMs).toBeGreaterThan(30_000);
+  });
+
+  it('does not report success when the lock was lost during run()', async () => {
+    await expect(
+      withDownloadLock(
+        log,
+        lockPath,
+        async () => {
+          unlinkSync(lockPath);
+          writeFileSync(lockPath, '999999');
+        },
+        { waitMs: 1_000, pollMs: 10 }
+      )
+    ).rejects.toThrow(/Lost ownership/);
+  });
+
   it('does not remove the lock in finally when another pid replaced it', async () => {
     const replacement = '999999';
 
-    await withDownloadLock(
-      log,
-      lockPath,
-      async () => {
-        writeFileSync(lockPath, replacement);
-      },
-      { waitMs: 1_000, pollMs: 10 }
-    );
+    await expect(
+      withDownloadLock(
+        log,
+        lockPath,
+        async () => {
+          writeFileSync(lockPath, replacement);
+        },
+        { waitMs: 1_000, pollMs: 10 }
+      )
+    ).rejects.toThrow(/Lost ownership/);
 
     expect(readFileSync(lockPath, 'utf8')).toBe(replacement);
   });

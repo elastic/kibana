@@ -113,6 +113,8 @@ describe('AgentDownloadStorage', () => {
       },
     };
     (fs.createReadStream as unknown as jest.Mock).mockReturnValue(mockReadStream);
+    // `fs` is auto-mocked, so the lock this process just took must read back as its own.
+    (fs.readFileSync as unknown as jest.Mock).mockReturnValue(String(process.pid));
   });
 
   describe('downloadAndStoreAgent', () => {
@@ -218,7 +220,7 @@ describe('AgentDownloadStorage', () => {
         directory: expect.any(String),
         fullFilePath: expect.stringContaining(fileName),
       });
-      expect(mockedFetch).toHaveBeenCalledWith(url);
+      expect(mockedFetch).toHaveBeenCalledWith(url, expect.anything());
     });
 
     it('validates hash after fresh download with shaUrl', async () => {
