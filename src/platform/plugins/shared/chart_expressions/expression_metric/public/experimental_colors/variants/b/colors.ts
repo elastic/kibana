@@ -50,14 +50,14 @@ export type BTargets = Readonly<{
 
 export const DEFAULT_B_TARGETS: BTargets = {
   fill: 6,
-  ink: DEFAULT_PARAMS.lc.ink,
-  fillInk: 75,
+  ink: 60,
+  fillInk: 65,
   neutralInk: false,
-  trend: 24,
-  trendLine: 30,
+  trend: 25,
+  trendLine: 25,
   dynamicFillMax: 15,
   valueRampMin: 50,
-  noTrendExtraFill: 0,
+  noTrendExtraFill: 5,
   showTrendLine: true,
   trendGradient: true,
 };
@@ -77,11 +77,10 @@ const tapered = (percent: number): Params => ({
 const FILL_PARAMS = tapered(FILL_TAPER);
 const TREND_PARAMS = tapered(TREND_TAPER);
 
-/** The trend's area: Lens's gradient area fill at 2/3 of its opacity, so it costs the value less contrast. */
-export const TREND_OPACITY = 2 / 3;
+
 export const TREND_GRADIENT_STOPS = [
-  { offset: 0, opacity: 0.1 * TREND_OPACITY },
-  { offset: 1, opacity: 0.7 * TREND_OPACITY },
+  { offset: 0, opacity: 0.15 },
+  { offset: 1, opacity: 0.6 },
 ];
 // Slack for the solver's rounding.
 const TARGET_TOLERANCE = 0.5;

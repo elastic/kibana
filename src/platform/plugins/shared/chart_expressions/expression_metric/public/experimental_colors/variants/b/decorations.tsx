@@ -59,6 +59,8 @@ const trendStyles = (
         : { stroke: 'none' };
       return {
         // The line bleeds past the tile's edges, so it isn't cut in half there.
+        // again, this is super hacky and should be done in elastic-charts if we 
+        // actually want to keep this.
         ...(showLine && {
           [`${tile} .echSingleMetricSparkline__svg`]: {
             inset: `0 -${TREND_LINE_BLEED} -${TREND_LINE_BLEED}`,

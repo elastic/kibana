@@ -70,7 +70,7 @@ describe('metricTileColors', () => {
       metricTileColors('#F6726A', mode, {
         ramp: false,
         hasTrend,
-        targets: { ...DEFAULT_B_TARGETS, fill, fillInk: 0 },
+        targets: { ...DEFAULT_B_TARGETS, fill, fillInk: 0, noTrendExtraFill: 0 },
       })!;
     it('goes toward the far end and just reaches 3:1 against the fill and the trend behind it', () => {
       const tile = tileAt(15, true);
@@ -95,9 +95,9 @@ describe('metricTileColors', () => {
         targets: { ...DEFAULT_B_TARGETS, fill: 35, fillInk },
       })!;
     const plain = inkAt(0);
-    const pushed = inkAt(45);
+    const pushed = inkAt(55);
     expect(contrast(pushed.ink, pushed.fill)).toBeGreaterThan(contrast(plain.ink, plain.fill));
-    expect(Math.abs(apcaLc(pushed.ink, pushed.fill))).toBeGreaterThanOrEqual(44.5);
+    expect(Math.abs(apcaLc(pushed.ink, pushed.fill))).toBeGreaterThanOrEqual(54.5);
   });
 
   it("uses Borealis' heading text colors for the value when neutral", () => {
