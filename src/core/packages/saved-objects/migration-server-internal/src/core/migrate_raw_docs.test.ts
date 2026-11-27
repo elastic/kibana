@@ -17,6 +17,9 @@ import {
 import type { DocumentsTransformFailed, DocumentsTransformSuccess } from './migrate_raw_docs';
 import { migrateRawDocs, migrateRawDocsSafely } from './migrate_raw_docs';
 import { TransformSavedObjectDocumentError } from './transform_saved_object_document_error';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import { DocumentMigrator } from '../document_migrator';
+import type { SavedObjectsRawDocSource } from '@kbn/core-saved-objects-server';
 
 describe('migrateRawDocs', () => {
   test('converts raw docs to saved objects', async () => {
@@ -94,6 +97,51 @@ describe('migrateRawDocs', () => {
     expect(transform).toHaveBeenNthCalledWith(2, obj2);
     expect(transform).toHaveBeenNthCalledWith(3, obj3);
     expect(transform).toHaveBeenNthCalledWith(4, obj4);
+  });
+
+  test('keeps the stored ACL through a migration that rebuilds the document', async () => {
+    const registry = new SavedObjectTypeRegistry();
+    registry.registerType({
+      name: 'a',
+      hidden: false,
+      namespaceType: 'agnostic',
+      mappings: { properties: {} },
+      migrations: {
+        // Rebuilds the document without knowing about the ACL.
+        '1.0.0': ({ id, type, attributes, references }) => ({
+          id,
+          type,
+          attributes: { ...(attributes as object), name: 'HOI!' },
+          references,
+        }),
+      },
+    });
+    const documentMigrator = new DocumentMigrator({
+      kibanaVersion: '8.0.0',
+      typeRegistry: registry,
+      log: loggingSystemMock.create().get(),
+    });
+    documentMigrator.prepareMigrations();
+
+    const [result] = await migrateRawDocs(
+      new SavedObjectsSerializer(registry),
+      documentMigrator.migrateAndConvert,
+      [
+        {
+          _id: 'a:b',
+          _source: {
+            type: 'a',
+            a: { name: 'AAA' },
+            acl: { version: 1, owner: { type: 'user' } },
+            'acl.owner.id': 'u_owner',
+          } as SavedObjectsRawDocSource,
+        },
+      ]
+    );
+
+    expect(result._source.a).toEqual({ name: 'HOI!' });
+    expect(result._source.acl).toEqual({ version: 1, owner: { type: 'user', id: 'u_owner' } });
+    expect(Object.keys(result._source).filter((key) => key.startsWith('acl.'))).toEqual([]);
   });
 
   test('throws when encountering a corrupt saved object document', async () => {

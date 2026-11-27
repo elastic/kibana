@@ -394,6 +394,21 @@ describe('internalBulkResolve', () => {
         typeMap: undefined,
       });
     });
+
+    it('does not ask for the stored ACL', async () => {
+      const params = setup([{ type: OBJ_TYPE, id: '1' }], { namespace });
+      mockBulkResults({ found: false });
+      mockMgetResults({
+        found: true,
+        _source: { acl: { owner: { type: 'user', id: 'u_owner' } } },
+      });
+
+      await internalBulkResolve(params, apiContext);
+
+      expect(mockGetSavedObjectFromSource).toHaveBeenCalledTimes(1);
+      const [, , , , options] = mockGetSavedObjectFromSource.mock.calls[0];
+      expect(options).not.toHaveProperty('includeAcl', true);
+    });
   });
 
   describe('with security extension', () => {

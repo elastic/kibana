@@ -37,6 +37,10 @@ export class SerializerHelper {
     this.serializer = serializer;
   }
 
+  /**
+   * Converts a raw document to a saved object for a repository result. The result has no `acl`
+   * unless the caller sets `includeAcl` in `options`.
+   */
   public rawToSavedObject<T = unknown>(
     raw: SavedObjectsRawDoc,
     options?: SavedObjectsRawDocParseOptions

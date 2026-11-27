@@ -130,6 +130,25 @@ describe('preflightCheckForCreate', () => {
     );
   });
 
+  it(`reads the stored ACL of each object, so an overwrite can keep it`, async () => {
+    const obj = { type: 'obj-type', id: 'id-1', overwrite: true, namespaces: ['a'] };
+    const params = setup(obj);
+    mockMgetResults({ found: false }, { found: false });
+    await preflightCheckForCreate(params);
+
+    expect(client.mget).toHaveBeenCalledWith(
+      {
+        docs: expect.arrayContaining([
+          expect.objectContaining({
+            _id: `${obj.type}:${obj.id}`,
+            _source: expect.arrayContaining(['acl']),
+          }),
+        ]),
+      },
+      expect.anything()
+    );
+  });
+
   it(`returns mix of success and error results`, async () => {
     const fourSpaces = ['a', 'b', 'c', 'd'];
     const obj1 = { type: 'obj-type', id: 'id-1', overwrite: false, namespaces: ['*'] }; // success: find aliases, object not found

@@ -81,6 +81,12 @@ describe('Saved Objects type validation schema', () => {
           accessMode: 'default',
           owner: 'user1',
         },
+        acl: {
+          version: [1],
+          owner: { type: ['user'], id: ['user1'] },
+          general: { access: ['none'] },
+          entries: [],
+        },
       })
     ).not.toThrow();
   });

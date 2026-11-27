@@ -532,7 +532,80 @@ describe('#getQueryParams', () => {
             rootSearchFields: undefined,
             mappings,
           });
-          expectResult(result, expect.objectContaining({ lenient: true, fields: ['*'] }));
+          const fields = ALL_TYPES.flatMap((name) => [name, `${name}.*`]);
+          expectResult(result, expect.objectContaining({ lenient: true, fields }));
+        });
+
+        describe('when no fields are specified', () => {
+          const mappingsWithRootFields = () =>
+            ({
+              properties: {
+                ...mappings.properties,
+                type: { type: 'keyword' },
+                updated_at: { type: 'date' },
+                references: { type: 'nested', properties: { id: { type: 'keyword' } } },
+                accessControl: { dynamic: false, properties: { owner: { type: 'keyword' } } },
+                acl: {
+                  dynamic: false,
+                  properties: { owner: { properties: { id: { type: 'keyword' } } } },
+                },
+              },
+            } as IndexMapping);
+          const rootFields = [
+            'type',
+            'updated_at',
+            'references',
+            'references.*',
+            'accessControl',
+            'accessControl.*',
+          ];
+          const getFields = (type: string | string[]) =>
+            getQueryParams({ registry, search, type, mappings: mappingsWithRootFields() }).query
+              .bool.must[0].simple_query_string.fields;
+
+          it('searches the requested type and the core root fields, without the stored ACL', () => {
+            expect(getFields('saved')).toEqual(['saved', 'saved.*', ...rootFields]);
+          });
+
+          it('searches each requested type', () => {
+            expect(getFields(['saved', 'pending'])).toEqual([
+              'saved',
+              'saved.*',
+              'pending',
+              'pending.*',
+              ...rootFields,
+            ]);
+          });
+
+          it('never searches the stored ACL or the wildcard', () => {
+            const fields: string[] = getFields(ALL_TYPES);
+            expect(fields).not.toContain('*');
+            expect(fields.filter((field) => field === 'acl' || field.startsWith('acl.'))).toEqual(
+              []
+            );
+          });
+        });
+
+        it.each(['acl', '*', 'a*', 'acl^3', 'a*^2', '*^2'])(
+          'throws an error if a raw search field reaches the stored ACL: %s',
+          (rootSearchField) => {
+            expect(() =>
+              getQueryParams({
+                registry,
+                search,
+                rootSearchFields: [rootSearchField],
+                mappings,
+              })
+            ).toThrow(
+              `rootSearchFields entry "${rootSearchField}" is invalid: cannot search the ACL`
+            );
+          }
+        );
+
+        it('accepts a boosted raw search field that does not reach the stored ACL', () => {
+          expect(() =>
+            getQueryParams({ registry, search, rootSearchFields: ['_id^2'], mappings })
+          ).not.toThrow();
         });
 
         it('includes specified search fields for appropriate type/s', () => {
@@ -836,7 +909,7 @@ describe('#getQueryParams', () => {
         expect(mustClause.length).toBe(1);
         expect(mustClause[0].simple_query_string).toEqual(
           expect.objectContaining({
-            fields: ['*'],
+            fields: ['nestedtype', 'nestedtype.*'],
             query: 'foo',
             lenient: true,
           })

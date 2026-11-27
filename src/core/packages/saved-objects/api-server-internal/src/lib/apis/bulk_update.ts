@@ -296,12 +296,13 @@ export const performBulkUpdate = async <T>(
           savedObjectNamespace = getNamespaceId(objectNamespace);
         }
 
+        // The update rewrites the whole document, so it keeps the stored ACL.
         const document = getSavedObjectFromSource<T>(
           registry,
           type,
           id,
           actualResult as SavedObjectsRawDoc,
-          { migrationVersionCompatibility }
+          { migrationVersionCompatibility, includeAcl: true }
         );
 
         let migrated: SavedObject<T>;

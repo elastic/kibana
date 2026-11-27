@@ -184,6 +184,47 @@ describe('#getSavedObjectFromSource', () => {
     expect(result2).toEqual(expect.objectContaining({ namespaces: ['foo-ns'] }));
   });
 
+  describe('the stored ACL', () => {
+    const createRawDocWithAcl = (type: string) => {
+      const doc = createRawDoc(type);
+      return {
+        ...doc,
+        _source: {
+          ...doc._source,
+          acl: { version: 1, owner: { type: 'user' } },
+          'acl.owner.id': 'u_owner',
+        },
+      };
+    };
+
+    it('leaves the ACL out by default', () => {
+      const type = NON_NAMESPACE_AGNOSTIC_TYPE;
+      const result = getSavedObjectFromSource(registry, type, id, createRawDocWithAcl(type));
+      expect(result).not.toHaveProperty('acl');
+    });
+
+    it('returns the stored ACL, dotted keys included, when the caller asks for it', () => {
+      const type = NON_NAMESPACE_AGNOSTIC_TYPE;
+      const result = getSavedObjectFromSource(registry, type, id, createRawDocWithAcl(type), {
+        includeAcl: true,
+      });
+      expect(result).toHaveProperty('acl', {
+        version: [1],
+        owner: { type: ['user'], id: ['u_owner'] },
+        general: { access: [] },
+        entries: [],
+      });
+    });
+
+    it('returns no ACL for a document without one', () => {
+      const type = NON_NAMESPACE_AGNOSTIC_TYPE;
+      const result = getSavedObjectFromSource(registry, type, id, createRawDoc(type), {
+        includeAcl: true,
+      });
+      expect(result).not.toHaveProperty('acl');
+    });
+  });
+
   it('keeps original `migrationVersion` in compatibility mode', () => {
     const type = NAMESPACE_AGNOSTIC_TYPE;
     const doc = createRawDoc(type);

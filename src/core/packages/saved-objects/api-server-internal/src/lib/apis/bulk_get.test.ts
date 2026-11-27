@@ -408,13 +408,14 @@ describe('#bulkGet', () => {
         client.mget.mockResolvedValueOnce(
           elasticsearchClientMock.createSuccessTransportRequestPromise(response)
         );
-        migrator.migrateDocument.mockReturnValue(
-          'migrated' as unknown as ReturnType<typeof migrator.migrateDocument>
-        );
+        const migrated = { id: 'migrated' } as unknown as ReturnType<
+          typeof migrator.migrateDocument
+        >;
+        migrator.migrateDocument.mockReturnValue(migrated);
 
         await expect(bulkGet(repository, [obj1, obj2])).resolves.toHaveProperty('saved_objects', [
-          'migrated',
-          'migrated',
+          migrated,
+          migrated,
         ]);
         expect(migrator.migrateDocument).toHaveBeenCalledTimes(2);
         expectMigrationArgs({ id: obj1.id }, true, 1);

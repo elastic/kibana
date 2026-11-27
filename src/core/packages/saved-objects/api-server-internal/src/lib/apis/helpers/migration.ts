@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { omit } from 'lodash';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import {
   SavedObjectsErrorHelpers,
@@ -56,14 +57,20 @@ export class MigrationHelper {
     return this.migrator.migrateDocument(document, { allowDowngrade: true, allowSkipClone: true });
   }
 
+  /**
+   * Migrate and decrypt the given SO document fetched from the index. A model version can set an
+   * ACL, so the result leaves it out again unless `includeAcl` is set.
+   */
   async migrateAndDecryptStorageDocument<T, A extends string>({
     document,
     typeMap,
     originalAttributes,
+    includeAcl = false,
   }: {
     document: SavedObjectUnsanitizedDoc<T> | SavedObject<T>;
     typeMap: AuthorizationTypeMap<A> | undefined;
     originalAttributes?: T;
+    includeAcl?: boolean;
   }): Promise<SavedObject<T>> {
     const downgrade = this.migrator.getDocumentMigrator().isDowngradeRequired(document);
 
@@ -90,10 +97,7 @@ export class MigrationHelper {
       );
     };
 
-    if (downgrade) {
-      return migrate(await decrypt(document));
-    } else {
-      return await decrypt(migrate(document));
-    }
+    const result = downgrade ? migrate(await decrypt(document)) : await decrypt(migrate(document));
+    return includeAcl || !('acl' in result) ? result : (omit(result, 'acl') as SavedObject<T>);
   }
 }

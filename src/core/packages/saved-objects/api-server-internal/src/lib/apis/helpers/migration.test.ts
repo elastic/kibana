@@ -161,5 +161,48 @@ describe('MigrationHelper', () => {
         allowSkipClone: true,
       });
     });
+
+    describe('when a migration sets an ACL', () => {
+      const acl = {
+        version: [1],
+        owner: { type: ['user'], id: ['u1'] },
+        general: { access: ['none'] },
+        entries: [],
+      };
+
+      beforeEach(() => {
+        migrator.migrateDocument.mockImplementation((doc: any) => ({ ...doc, acl }));
+      });
+
+      it('leaves the ACL out of the result by default', async () => {
+        const result = await migrationHelper.migrateAndDecryptStorageDocument({
+          document: createSavedObject(),
+          typeMap: undefined,
+        });
+
+        expect(result).not.toHaveProperty('acl');
+      });
+
+      it('leaves the ACL out of the result when it downgrades', async () => {
+        documentMigrator.isDowngradeRequired.mockReturnValue(true);
+
+        const result = await migrationHelper.migrateAndDecryptStorageDocument({
+          document: createSavedObject(),
+          typeMap: undefined,
+        });
+
+        expect(result).not.toHaveProperty('acl');
+      });
+
+      it('keeps the ACL when the caller sets includeAcl', async () => {
+        const result = await migrationHelper.migrateAndDecryptStorageDocument({
+          document: createSavedObject(),
+          typeMap: undefined,
+          includeAcl: true,
+        });
+
+        expect(result).toHaveProperty('acl', acl);
+      });
+    });
   });
 });

@@ -52,6 +52,9 @@ import type {
   SavedObjectsBulkDeleteOptions,
   SavedObjectsBulkDeleteResponse,
   SavedObjectsFindInternalOptions,
+  SavedObjectsGetInternalOptions,
+  SavedObjectsFindResponseWithAcl,
+  SavedObjectWithAcl,
   SavedObjectsRawDocSource,
   SavedObjectsSearchOptions,
   SavedObjectsSearchResponse,
@@ -368,6 +371,14 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
   /**
    * {@inheritDoc ISavedObjectsRepository.find}
    */
+  find<T = unknown, A = unknown>(
+    options: SavedObjectsFindOptions,
+    internalOptions: SavedObjectsFindInternalOptions & { includeAcl: true }
+  ): Promise<SavedObjectsFindResponseWithAcl<T, A>>;
+  find<T = unknown, A = unknown>(
+    options: SavedObjectsFindOptions,
+    internalOptions?: SavedObjectsFindInternalOptions
+  ): Promise<SavedObjectsFindResponse<T, A>>;
   async find<T = unknown, A = unknown>(
     options: SavedObjectsFindOptions,
     internalOptions: SavedObjectsFindInternalOptions = {}
@@ -452,10 +463,23 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
   /**
    * {@inheritDoc ISavedObjectsRepository.get}
    */
+  get<T = unknown>(
+    type: string,
+    id: string,
+    options: SavedObjectsGetOptions | undefined,
+    internalOptions: SavedObjectsGetInternalOptions & { includeAcl: true }
+  ): Promise<SavedObjectWithAcl<T>>;
+  get<T = unknown>(
+    type: string,
+    id: string,
+    options?: SavedObjectsGetOptions,
+    internalOptions?: SavedObjectsGetInternalOptions
+  ): Promise<SavedObject<T>>;
   async get<T = unknown>(
     type: string,
     id: string,
-    options: SavedObjectsGetOptions = {}
+    options: SavedObjectsGetOptions = {},
+    internalOptions: SavedObjectsGetInternalOptions = {}
   ): Promise<SavedObject<T>> {
     const timer = this.serverTiming?.start('so-get', type);
     try {
@@ -464,6 +488,7 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
           type,
           id,
           options,
+          internalOptions,
         },
         this.apiExecutionContext
       );

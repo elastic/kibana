@@ -23,7 +23,7 @@ import type {
 import type { ApiExecutionContext } from './types';
 import { getNamespacesBoolFilter } from '../search';
 import type { NamespacesBoolFilter } from '../search/search_dsl/query_params';
-import { getRootFields } from '../utils';
+import { getRootFields, matchesAclField } from '../utils';
 
 export interface PerformSearchParams {
   options: SavedObjectsSearchOptions;
@@ -66,8 +66,9 @@ export async function performSearch<T extends SavedObjectsRawDocSource, A = unkn
 
   const rootFields = getRootFields();
 
-  const forbiddenRuntimeMappings = Object.keys(esOptions.runtime_mappings ?? {}).filter((key) =>
-    rootFields.includes(key)
+  // A runtime field named after a root field, or after the stored ACL, would replace it in queries.
+  const forbiddenRuntimeMappings = Object.keys(esOptions.runtime_mappings ?? {}).filter(
+    (key) => rootFields.includes(key) || matchesAclField(key)
   );
   if (forbiddenRuntimeMappings.length > 0) {
     throw SavedObjectsErrorHelpers.createBadRequestError(

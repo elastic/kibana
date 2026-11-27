@@ -17,6 +17,21 @@
  * `ignore_malformed`, and `version` doesn't coerce. Keys that the mapping doesn't define are
  * ignored (`dynamic: 'false'`), and `entries` is `nested`, so that the kind, ID, and access of one
  * entry are matched together.
+ *
+ * Changing this mapping: every Saved Objects index uses it as the root `acl` mapping, and Core
+ * applies a change at startup without reindexing. v2 updates the mapping in place, and ZDT picks up
+ * no documents for it. So:
+ *
+ * - Every change needs Core review and a restart and rollback plan. Once released, older Kibana
+ *   versions compare this root mapping for exact equality, so even an additive change can cause a
+ *   migration conflict on restart or rollback when the index also has newer model versions.
+ * - Only additive changes are possible at all. An incompatible change stops Kibana from starting.
+ * - Existing documents are not reindexed. A new field holds values only from writes made after it
+ *   ships, and rewriting existing ACLs needs its own migration.
+ * - Never write a field before a release maps it: readers ship one release before writers. An
+ *   unmapped value is stored but not indexed, so `normalizeAclSource` would apply it while the
+ *   read filter would not. `acl_mapping.test.ts` keeps the fields that `normalizeAclSource` reads in
+ *   step with this mapping.
  */
 export const ACL_MAPPING = {
   dynamic: 'false',

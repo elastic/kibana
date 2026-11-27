@@ -8,5 +8,5 @@
  */
 
 export { getNamespacesBoolFilter, getSearchDsl } from './search_dsl';
-export { validateAndConvertAggregations } from './aggregations';
+export { validateAndConvertAggregations, hasTopHits, removeAclFromTopHits } from './aggregations';
 export { validateConvertFilterToKueryNode } from './utils';

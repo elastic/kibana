@@ -2541,6 +2541,7 @@ packages/kbn-eslint-plugin-eslint/rules/no_unsafe_hash.js @elastic/kibana-securi
 /src/platform/packages/shared/kbn-std/src/is_internal_url.ts @elastic/kibana-core @elastic/kibana-security
 /src/platform/packages/shared/kbn-std/src/parse_next_url.test.ts @elastic/kibana-core @elastic/kibana-security
 /src/platform/packages/shared/kbn-std/src/parse_next_url.ts @elastic/kibana-core @elastic/kibana-security
+/src/platform/packages/shared/kbn-ols/src/acl/acl_mapping.ts @elastic/kibana-security @elastic/kibana-core
 /src/platform/test/plugin_functional/plugins/hardening @elastic/kibana-security
 /src/platform/test/plugin_functional/test_suites/hardening @elastic/kibana-security
 /x-pack/platform/test/accessibility/apps/group1/login_page.ts @elastic/kibana-security

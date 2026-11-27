@@ -9,6 +9,7 @@
 
 import { cloneDeep } from 'lodash';
 import * as esKuery from '@kbn/es-query';
+import { ACL_MAPPING } from '@kbn/ols';
 
 import {
   validateFilterKueryNode,
@@ -634,6 +635,16 @@ describe('Filter Utils', () => {
   });
 
   describe('#hasFilterKeyError', () => {
+    test.each(['bean.acl', 'bean.acl.owner.id', 'bean.acl.general.access'])(
+      'Return error if key reaches the stored ACL: %s',
+      (key) => {
+        const mappings = { properties: { ...mockMappings.properties, acl: ACL_MAPPING } };
+        expect(
+          hasFilterKeyError(key, ['bean'], mappings as unknown as typeof mockMappings)
+        ).toEqual(`This key '${key}' cannot be used in a filter`);
+      }
+    );
+
     test('Return no error if filter key is valid', () => {
       const hasError = hasFilterKeyError('bean.attributes.canned.text', ['bean'], mockMappings);
 

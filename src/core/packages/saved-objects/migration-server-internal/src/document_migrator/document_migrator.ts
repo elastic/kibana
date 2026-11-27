@@ -19,13 +19,31 @@ import type {
   DocumentMigrateOptions,
   IsDowngradeRequiredOptions,
 } from '@kbn/core-saved-objects-base-server-internal';
-import { modelVersionToVirtualVersion } from '@kbn/core-saved-objects-base-server-internal';
+import {
+  modelVersionToVirtualVersion,
+  readAclFromRawSource,
+} from '@kbn/core-saved-objects-base-server-internal';
 import type { ActiveMigrations } from './types';
 import { maxVersion } from './pipelines/utils';
 import { buildActiveMigrations } from './build_active_migrations';
 import { DocumentUpgradePipeline, DocumentDowngradePipeline } from './pipelines';
 import { downgradeRequired } from './utils';
 import { TransformType } from './types';
+
+/**
+ * Puts the stored ACL back when a transform dropped it, set it to `null`, or set one with no values.
+ * Transforms, such as migrations and encrypted saved object wrappers, often rebuild a document
+ * without knowing about the ACL, so a rewrite would otherwise remove it. A model version can still
+ * set a new ACL, but it cannot clear one. The check uses the serializer's reader, so an ACL counts as
+ * removed when a reread of the written document would find none.
+ */
+const keepAcl = <R extends { document: SavedObjectUnsanitizedDoc }>(
+  storedAcl: SavedObjectUnsanitizedDoc['acl'],
+  result: R
+): R =>
+  storedAcl != null && readAclFromRawSource({ acl: result.document.acl }) === undefined
+    ? { ...result, document: { ...result.document, acl: storedAcl } }
+    : result;
 
 interface TransformOptions {
   convertNamespaceTypes?: boolean;
@@ -177,6 +195,8 @@ export class DocumentMigrator implements IDocumentMigrator {
       throw new Error('Migrations are not ready. Make sure prepareMigrations is called first.');
     }
     const typeMigrations = this.migrations[doc.type];
+    // Read before the pipeline runs, because a pipeline that skips cloning can change `doc`.
+    const storedAcl = doc.acl;
 
     // When the document has no typeMigrationVersion (e.g. created via the deprecated SO HTTP API),
     // use the type's version guesser—if one was registered—to synthesize a starting version so
@@ -204,16 +224,22 @@ export class DocumentMigrator implements IDocumentMigrator {
           `Document "${effectiveDoc.id}" belongs to a more recent version of Kibana [${currentVersion}] when the last known version is [${latestVersion}].`
         );
       }
-      return this.transformDown(effectiveDoc, {
-        targetTypeVersion: latestVersion!,
-        allowSkipClone,
-      });
+      return keepAcl(
+        storedAcl,
+        this.transformDown(effectiveDoc, {
+          targetTypeVersion: latestVersion!,
+          allowSkipClone,
+        })
+      );
     } else {
-      return this.transformUp(effectiveDoc, {
-        convertNamespaceTypes,
-        targetTypeVersion,
-        allowSkipClone,
-      });
+      return keepAcl(
+        storedAcl,
+        this.transformUp(effectiveDoc, {
+          convertNamespaceTypes,
+          targetTypeVersion,
+          allowSkipClone,
+        })
+      );
     }
   }
 

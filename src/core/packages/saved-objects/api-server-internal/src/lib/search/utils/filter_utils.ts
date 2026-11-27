@@ -12,6 +12,7 @@ import { get, cloneDeep } from 'lodash';
 import * as esKuery from '@kbn/es-query';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import type { IndexMapping } from '@kbn/core-saved-objects-base-server-internal';
+import { matchesAclField } from '../../utils/acl_field';
 
 type KueryNode = any;
 
@@ -198,6 +199,9 @@ export const hasFilterKeyError = (
     const keySplit = key.split('.');
     if (keySplit.length <= 1 || !types.includes(keySplit[0])) {
       return `This type ${keySplit[0]} is not allowed`;
+    }
+    if (matchesAclField(keySplit.slice(1).join('.'))) {
+      return `This key '${key}' cannot be used in a filter`;
     }
     if (
       (keySplit.length === 2 && fieldDefined(indexMapping, key)) ||

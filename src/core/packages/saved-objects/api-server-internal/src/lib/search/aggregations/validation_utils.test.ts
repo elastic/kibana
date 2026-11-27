@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { ACL_MAPPING } from '@kbn/ols';
+import type { IndexMapping } from '@kbn/core-saved-objects-base-server-internal';
 import {
   isRootLevelAttribute,
   rewriteRootLevelAttribute,
@@ -91,6 +93,13 @@ describe('isRootLevelAttribute', () => {
   it('returns false when referring to a path to a valid root level type field', () => {
     expect(isRootLevelAttribute('foo.foo', mockMappings, ['foo'])).toBe(false);
   });
+  it.each(['foo.acl', 'foo.acl.owner.id', 'foo.acl.entries.access'])(
+    'returns false for the stored ACL field %s',
+    (path) => {
+      const mappings = { properties: { ...mockMappings.properties, acl: ACL_MAPPING } };
+      expect(isRootLevelAttribute(path, mappings as unknown as IndexMapping, ['foo'])).toBe(false);
+    }
+  );
 });
 
 describe('rewriteRootLevelAttribute', () => {

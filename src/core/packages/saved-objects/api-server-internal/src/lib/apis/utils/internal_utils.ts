@@ -22,6 +22,7 @@ import { SavedObjectsUtils, ALL_NAMESPACES_STRING } from '@kbn/core-saved-object
 import {
   decodeRequestVersion,
   encodeHitVersion,
+  readAclFromRawSource,
 } from '@kbn/core-saved-objects-base-server-internal';
 
 export interface GetBulkOperationErrorRawResponse {
@@ -91,15 +92,19 @@ export function getExpectedVersionProperties(version?: string, document?: SavedO
 export interface GetSavedObjectFromSourceOptions {
   /** {@link SavedObjectsRawDocParseOptions.migrationVersionCompatibility} */
   migrationVersionCompatibility?: SavedObjectsRawDocParseOptions['migrationVersionCompatibility'];
+  /** Whether the result includes the object's stored ACL. Off by default. */
+  includeAcl?: boolean;
 }
 
 /**
  * Gets a saved object from a raw ES document.
  *
- * @param registry
- * @param type
- * @param id
- * @param doc
+ * @param registry The saved object type registry.
+ * @param type The saved object type.
+ * @param id The saved object ID.
+ * @param doc The raw document, with its sequence number and primary term if Elasticsearch returned them.
+ * @param options `migrationVersionCompatibility`, and `includeAcl`, which reads the stored ACL into
+ *   the result. Without it, the result has no `acl`.
  *
  * @internal
  */
@@ -108,7 +113,10 @@ export function getSavedObjectFromSource<T>(
   type: string,
   id: string,
   doc: { _seq_no?: number; _primary_term?: number; _source: SavedObjectsRawDocSource },
-  { migrationVersionCompatibility = 'raw' }: GetSavedObjectFromSourceOptions = {}
+  {
+    migrationVersionCompatibility = 'raw',
+    includeAcl = false,
+  }: GetSavedObjectFromSourceOptions = {}
 ): SavedObject<T> {
   const {
     originId,
@@ -132,6 +140,7 @@ export function getSavedObjectFromSource<T>(
     ];
   }
 
+  const acl = includeAcl ? readAclFromRawSource(doc._source) : undefined;
   return {
     id,
     type,
@@ -149,6 +158,7 @@ export function getSavedObjectFromSource<T>(
     references: doc._source.references || [],
     managed,
     accessControl,
+    ...(acl && { acl }),
   };
 }
 
