@@ -42,6 +42,7 @@ export interface TabbedContentProps
   extends Pick<
     TabsBarProps,
     | 'unsavedItemIds'
+    | 'groupedItemIds'
     | 'maxItemsCount'
     | 'onClearRecentlyClosed'
     | 'disableCloseButton'
@@ -101,6 +102,7 @@ export const TabbedContent: React.FC<TabbedContentProps> = ({
   selectedItemId: managedSelectedItemId,
   recentlyClosedItems,
   unsavedItemIds,
+  groupedItemIds,
   maxItemsCount = MAX_ITEMS_COUNT,
   services,
   hideTabsBar = false,
@@ -458,6 +460,7 @@ export const TabbedContent: React.FC<TabbedContentProps> = ({
           selectedItem={selectedItem}
           recentlyClosedItems={recentlyClosedItems}
           unsavedItemIds={unsavedItemIds}
+          groupedItemIds={groupedItemIds}
           maxItemsCount={maxItemsCount}
           tabContentId={tabContentId}
           getTabMenuItems={getTabMenuItems}

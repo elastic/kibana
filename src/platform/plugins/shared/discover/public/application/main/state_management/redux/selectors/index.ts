@@ -16,6 +16,7 @@ export {
   selectTabAppState,
   selectTabCombinedFilters,
   selectIsTabsBarHidden,
+  selectSplitGroup,
 } from './tabs';
 export {
   type HasUnsavedChangesResult,

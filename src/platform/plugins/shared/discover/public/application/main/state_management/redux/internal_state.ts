@@ -47,6 +47,7 @@ import {
   type ProfileAppStateSnapshot,
   type TabState,
   type RecentlyClosedTabState,
+  type SplitGroup,
   TabInitializationStatus,
   HEAVY_STATE_KEYS,
 } from './types';
@@ -91,6 +92,7 @@ const initialState: DiscoverInternalState = {
     recentlyClosedTabsById: {},
     recentlyClosedTabIds: [],
     unsafeCurrentId: '',
+    splitGroup: undefined,
   },
 };
 
@@ -191,6 +193,17 @@ const internalStateSliceDef = createSlice({
       state.tabs.unsafeCurrentId = action.payload.selectedTabId;
       state.persistedDiscoverSession =
         action.payload.updatedDiscoverSession ?? state.persistedDiscoverSession;
+
+      // Drop closed tabs from the split group, which is dissolved when fewer than 2 tabs remain
+      if (state.tabs.splitGroup) {
+        const remainingTabIds = state.tabs.splitGroup.tabIds.filter((id) => state.tabs.byId[id]);
+        state.tabs.splitGroup =
+          remainingTabIds.length > 1 ? { tabIds: remainingTabIds } : undefined;
+      }
+    },
+
+    setSplitGroup: (state, action: PayloadAction<SplitGroup | undefined>) => {
+      state.tabs.splitGroup = action.payload;
     },
 
     setPersistedDiscoverSession: (state, action: PayloadAction<DiscoverSession>) => {

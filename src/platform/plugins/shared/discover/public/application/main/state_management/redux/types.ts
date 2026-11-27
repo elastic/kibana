@@ -292,6 +292,11 @@ export interface SaveSessionModalState {
   initialCopyOnSave: boolean;
 }
 
+/** Tabs that are rendered side by side. Which one is focused is tracked by `tabs.unsafeCurrentId`. */
+export interface SplitGroup {
+  tabIds: string[];
+}
+
 export interface DiscoverInternalState {
   initializationState: { hasESData: boolean; hasDataView: boolean };
   userId: string | undefined;
@@ -318,6 +323,11 @@ export interface DiscoverInternalState {
      * Actions and selectors should use a tab ID parameter instead.
      */
     unsafeCurrentId: string;
+    /**
+     * Tabs displayed side by side in split view. The focused tab of the group is
+     * `unsafeCurrentId`, which still owns the global state (URL, time range, search session).
+     */
+    splitGroup: SplitGroup | undefined;
   };
 }
 

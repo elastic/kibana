@@ -60,3 +60,5 @@ export const selectPersistedDiscoverSession = (state: DiscoverInternalState) =>
   state.persistedDiscoverSession;
 
 export const selectSavedDataViews = (state: DiscoverInternalState) => state.savedDataViews;
+
+export const selectSplitGroup = (state: DiscoverInternalState) => state.tabs.splitGroup;

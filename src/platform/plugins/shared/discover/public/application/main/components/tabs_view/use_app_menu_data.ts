@@ -12,7 +12,13 @@ import type { UnifiedTabsProps } from '@kbn/unified-tabs';
 import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
 import { i18n } from '@kbn/i18n';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import { useInternalStateSelector, selectAllTabs } from '../../state_management/redux';
+import {
+  internalStateActions,
+  selectAllTabs,
+  selectSplitGroup,
+  useInternalStateDispatch,
+  useInternalStateSelector,
+} from '../../state_management/redux';
 import { useTopNavMenuItems } from '../top_nav/use_top_nav_menu_items';
 import { useCurrentTabMenuActions } from '../../hooks/use_current_tab_menu_actions';
 
@@ -56,7 +62,10 @@ export const useAppMenuData = ({ currentDataView }: UseAppMenuDataParams): UseAp
     [allTabs, currentTabId, openInspector]
   );
 
-  // Provide "Switch to ES|QL" and "Switch to Classic" menu items for the selected tab
+  const splitGroup = useInternalStateSelector(selectSplitGroup);
+  const dispatch = useInternalStateDispatch();
+
+  // Provide "Switch to ES|QL", "Switch to Classic" and split view menu items for the selected tab
   const getAdditionalTabMenuItems = useCallback<
     NonNullable<UnifiedTabsProps['getAdditionalTabMenuItems']>
   >(
@@ -64,35 +73,62 @@ export const useAppMenuData = ({ currentDataView }: UseAppMenuDataParams): UseAp
       const tab = allTabs.find((t) => t.id === item.id);
       const isCurrentTab = tab?.id === currentTabId;
 
-      if (!isCurrentTab || !canSwitchLanguageMode) {
+      if (!isCurrentTab) {
         return [];
       }
 
-      if (isDataViewMode) {
-        return [
-          {
-            'data-test-subj': 'unifiedTabs_tabMenuItem_switchToESQL',
-            name: 'switchToESQL',
-            label: i18n.translate('discover.tabsView.tabMenu.switchToESQLTitle', {
-              defaultMessage: 'Switch to ES|QL',
-            }),
-            onClick: switchLanguageMode,
-          },
-        ];
+      const menuItems: ReturnType<NonNullable<UnifiedTabsProps['getAdditionalTabMenuItems']>> = [];
+
+      if (canSwitchLanguageMode) {
+        menuItems.push({
+          'data-test-subj': isDataViewMode
+            ? 'unifiedTabs_tabMenuItem_switchToESQL'
+            : 'unifiedTabs_tabMenuItem_switchToClassic',
+          name: isDataViewMode ? 'switchToESQL' : 'switchToClassic',
+          label: isDataViewMode
+            ? i18n.translate('discover.tabsView.tabMenu.switchToESQLTitle', {
+                defaultMessage: 'Switch to ES|QL',
+              })
+            : i18n.translate('discover.tabsView.tabMenu.switchToClassicTitle', {
+                defaultMessage: 'Switch to classic',
+              }),
+          onClick: switchLanguageMode,
+        });
       }
 
-      return [
-        {
-          'data-test-subj': 'unifiedTabs_tabMenuItem_switchToClassic',
-          name: 'switchToClassic',
-          label: i18n.translate('discover.tabsView.tabMenu.switchToClassicTitle', {
-            defaultMessage: 'Switch to classic',
+      if (splitGroup?.tabIds.includes(item.id)) {
+        menuItems.push({
+          'data-test-subj': 'unifiedTabs_tabMenuItem_exitSplitView',
+          name: 'exitSplitView',
+          label: i18n.translate('discover.tabsView.tabMenu.exitSplitViewTitle', {
+            defaultMessage: 'Exit split view',
           }),
-          onClick: switchLanguageMode,
-        },
-      ];
+          onClick: () => dispatch(internalStateActions.setSplitGroup(undefined)),
+        });
+      } else {
+        menuItems.push({
+          'data-test-subj': 'unifiedTabs_tabMenuItem_addToSplitView',
+          name: 'addToSplitView',
+          label: i18n.translate('discover.tabsView.tabMenu.addToSplitViewTitle', {
+            defaultMessage: 'Add new tab to split view',
+          }),
+          onClick: () => {
+            void dispatch(internalStateActions.addTabToSplitView({ tabId: item.id }));
+          },
+        });
+      }
+
+      return menuItems;
     },
-    [allTabs, canSwitchLanguageMode, currentTabId, isDataViewMode, switchLanguageMode]
+    [
+      allTabs,
+      canSwitchLanguageMode,
+      currentTabId,
+      dispatch,
+      isDataViewMode,
+      splitGroup,
+      switchLanguageMode,
+    ]
   );
 
   const topNavMenuItems = useTopNavMenuItems();

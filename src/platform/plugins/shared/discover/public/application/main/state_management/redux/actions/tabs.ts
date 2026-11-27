@@ -390,6 +390,24 @@ export const updateTabs: InternalStateThunkActionCreator<
     );
   };
 
+/**
+ * Opens a new tab and displays it side by side with the given tab.
+ * The new tab becomes the focused one, the same way it does when created through the "+" button.
+ */
+export const addTabToSplitView: InternalStateThunkActionCreator<
+  [{ tabId: string }],
+  Promise<void>
+> = ({ tabId }) =>
+  async function addTabToSplitViewThunkFn(dispatch, getState) {
+    const allTabs = selectAllTabs(getState());
+    const newTabItem = createTabItem(allTabs);
+
+    await dispatch(updateTabs({ items: [...allTabs, newTabItem], selectedItem: newTabItem }));
+
+    // Must run after the tab exists, since closed tabs are pruned from the group when tabs are set
+    dispatch(internalStateSlice.actions.setSplitGroup({ tabIds: [tabId, newTabItem.id] }));
+  };
+
 export const initializeTabs = createInternalStateAsyncThunk(
   'internalState/initializeTabs',
   async function initializeTabsThunkFn(
