@@ -22,6 +22,11 @@ export interface EscalationModalRenderProps {
   mode: EscalationModalMode;
   investigation: Investigation;
   onClose: () => void;
+  /**
+   * Calls the flyout's internal refetch after a successful escalation, so the header reflects an
+   * assignment the escalation made without waiting for the 5 s poll. Absent outside the flyout.
+   */
+  refetchConversation?: () => Promise<void>;
 }
 
 /**

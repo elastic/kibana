@@ -27,6 +27,8 @@ import {
   MAX_ESCALATIONS_PAGE_SIZE,
 } from '../../../common/escalations/constants';
 import { MAX_ESCALATIONS_SCAN } from '../constants';
+import type { AssignmentsService } from '../../assignments/assignments_service';
+import { InvestigationsForbiddenError } from '../../investigations/services/investigations_forbidden_error';
 
 const logger = loggingSystemMock.createLogger();
 const request = httpServerMock.createKibanaRequest();
@@ -148,6 +150,9 @@ const makeService = (
   };
   const getImpactClient = jest.fn().mockReturnValue(impactClient);
 
+  const assignmentsService = { addAssignee: jest.fn().mockResolvedValue('assigned') };
+  const investigationsPrivileges = { assertCanManage: jest.fn().mockResolvedValue(undefined) };
+
   const service = new EscalationsService({
     logger,
     getImpactClient,
@@ -157,6 +162,8 @@ const makeService = (
     getInvestigationStatusService: () => investigationStatusService as never,
     countPendingProposals,
     getLinkActor: resolveUser,
+    getAssignmentsService: () => assignmentsService as unknown as AssignmentsService,
+    investigationsPrivileges,
   });
 
   return {
@@ -169,6 +176,8 @@ const makeService = (
     investigationStatusService,
     getImpactClient,
     impactClient,
+    assignmentsService,
+    investigationsPrivileges,
   };
 };
 
@@ -442,6 +451,101 @@ describe('EscalationsService.create — timeline event', () => {
   });
 });
 
+describe('EscalationsService.create — investigation assignees', () => {
+  const createBody = {
+    linked_investigation_id: 'inv-1',
+    visibility: 'public' as const,
+    assignees: ['user-a'],
+  };
+  const ownedEscalation = { ...MOCK_ESCALATION, user: escalationOwner };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('adds the escalation owner to the investigation, keeping its assignees', async () => {
+    const { service, assignmentsService, investigationsPrivileges } = makeService({
+      create: jest.fn().mockResolvedValue(ownedEscalation),
+    });
+
+    await service.create(request, createBody);
+
+    expect(investigationsPrivileges.assertCanManage).toHaveBeenCalledWith(request);
+    expect(assignmentsService.addAssignee).toHaveBeenCalledTimes(1);
+    expect(assignmentsService.addAssignee).toHaveBeenCalledWith({
+      request,
+      conversationId: 'inv-1',
+      assignee: 'owner-uid',
+      expectedTemplate: INVESTIGATION_TEMPLATE_ID,
+      onlyIfUnassigned: false,
+    });
+  });
+
+  it('logs at debug level when the investigation is left unchanged', async () => {
+    const { service, assignmentsService } = makeService({
+      create: jest.fn().mockResolvedValue(ownedEscalation),
+    });
+    assignmentsService.addAssignee.mockResolvedValue('limit_reached');
+
+    await expect(service.create(request, createBody)).resolves.toEqual(ownedEscalation);
+    expect(logger.debug).toHaveBeenCalledWith(
+      expect.stringMatching(/investigation inv-1.*limit_reached/)
+    );
+    expect(logger.warn).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    ['has no id', { username: 'owner' }],
+    ['has a realm id instead of a profile uid', { id: 'realm:["native","native1","owner"]' }],
+  ])('does nothing when the owner %s', async (_label, user) => {
+    const { service, assignmentsService } = makeService({
+      create: jest.fn().mockResolvedValue({ ...MOCK_ESCALATION, user }),
+    });
+
+    await expect(service.create(request, createBody)).resolves.toEqual({
+      ...MOCK_ESCALATION,
+      user,
+    });
+    expect(assignmentsService.addAssignee).not.toHaveBeenCalled();
+  });
+
+  it('skips the assignment when the caller may not manage investigations', async () => {
+    const { service, assignmentsService, investigationsPrivileges } = makeService({
+      create: jest.fn().mockResolvedValue(ownedEscalation),
+    });
+    investigationsPrivileges.assertCanManage.mockRejectedValue(
+      new InvestigationsForbiddenError('Missing privilege')
+    );
+
+    await expect(service.create(request, createBody)).resolves.toEqual(ownedEscalation);
+    expect(investigationsPrivileges.assertCanManage).toHaveBeenCalledWith(request);
+    expect(assignmentsService.addAssignee).not.toHaveBeenCalled();
+    expect(logger.debug).toHaveBeenCalledWith(expect.stringContaining('inv-1'));
+    expect(logger.warn).not.toHaveBeenCalled();
+  });
+
+  it('still returns the escalation when the privilege check fails unexpectedly', async () => {
+    const { service, assignmentsService, investigationsPrivileges } = makeService({
+      create: jest.fn().mockResolvedValue(ownedEscalation),
+    });
+    investigationsPrivileges.assertCanManage.mockRejectedValue(new Error('es down'));
+
+    await expect(service.create(request, createBody)).resolves.toEqual(ownedEscalation);
+    expect(assignmentsService.addAssignee).not.toHaveBeenCalled();
+    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('es down'));
+  });
+
+  it('still returns the escalation and logs when the assignment fails', async () => {
+    const { service, assignmentsService } = makeService({
+      create: jest.fn().mockResolvedValue(ownedEscalation),
+    });
+    assignmentsService.addAssignee.mockRejectedValue(new Error('boom'));
+
+    await expect(service.create(request, createBody)).resolves.toEqual(ownedEscalation);
+    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('investigation inv-1'));
+  });
+});
+
 describe('EscalationsService.link — timeline events', () => {
   const escalationWith = (linked: string[]) =>
     jest.fn().mockResolvedValue({
@@ -624,6 +728,139 @@ describe('EscalationsService.link', () => {
       service.link(request, 'escalation-1', { linked_investigations: ['inv-1'] })
     ).rejects.toBeInstanceOf(EscalationLinkForbiddenError);
     expect(client.patchMetadata).not.toHaveBeenCalled();
+  });
+});
+
+describe('EscalationsService.link — investigation assignees', () => {
+  const LINKER_UID = 'linker-uid';
+  const escalationWith = (linked: string[], user: { id?: string; username: string }) =>
+    jest.fn().mockResolvedValue({
+      id: 'escalation-1',
+      template_id: ESCALATION_TEMPLATE_ID,
+      user,
+      access_control: {
+        access_mode: 'private',
+        entries: [{ type: 'user', id: LINKER_UID }],
+      },
+      metadata: { [ESCALATION_LINKED_INVESTIGATIONS_FIELD]: linked },
+    });
+  const makeLinkService = (linked: string[] = []) =>
+    makeService(
+      { get: escalationWith(linked, escalationOwner) },
+      jest.fn().mockResolvedValue(undefined),
+      jest.fn().mockResolvedValue({ username: 'linker', profileUid: LINKER_UID })
+    );
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('adds the linker, not the escalation owner, to newly linked unassigned investigations', async () => {
+    const { service, assignmentsService, investigationsPrivileges } = makeLinkService(['inv-1']);
+
+    await service.link(request, 'escalation-1', {
+      linked_investigations: ['inv-1', 'inv-2', 'inv-3', 'inv-2'],
+    });
+
+    expect(investigationsPrivileges.assertCanManage).toHaveBeenCalledTimes(1);
+    expect(assignmentsService.addAssignee.mock.calls.map(([args]) => args)).toEqual([
+      {
+        request,
+        conversationId: 'inv-2',
+        assignee: LINKER_UID,
+        expectedTemplate: INVESTIGATION_TEMPLATE_ID,
+        onlyIfUnassigned: true,
+      },
+      {
+        request,
+        conversationId: 'inv-3',
+        assignee: LINKER_UID,
+        expectedTemplate: INVESTIGATION_TEMPLATE_ID,
+        onlyIfUnassigned: true,
+      },
+    ]);
+  });
+
+  it('does nothing when nothing new was linked', async () => {
+    const { service, assignmentsService, investigationsPrivileges } = makeLinkService(['inv-1']);
+
+    await service.link(request, 'escalation-1', { linked_investigations: ['inv-1'] });
+
+    expect(investigationsPrivileges.assertCanManage).not.toHaveBeenCalled();
+    expect(assignmentsService.addAssignee).not.toHaveBeenCalled();
+  });
+
+  it('logs at debug level when an investigation already has assignees', async () => {
+    const { service, assignmentsService } = makeLinkService();
+    assignmentsService.addAssignee.mockResolvedValue('has_assignees');
+
+    await service.link(request, 'escalation-1', { linked_investigations: ['inv-2'] });
+
+    expect(logger.debug).toHaveBeenCalledWith(
+      expect.stringMatching(/investigation inv-2.*has_assignees/)
+    );
+    expect(logger.warn).not.toHaveBeenCalled();
+  });
+
+  it('does nothing when the linker has no profile uid', async () => {
+    const { service, client, assignmentsService } = makeService(
+      { get: escalationWith([], { username: 'owner' }) },
+      jest.fn().mockResolvedValue(undefined),
+      jest.fn().mockResolvedValue({ username: 'owner' })
+    );
+
+    await service.link(request, 'escalation-1', { linked_investigations: ['inv-2'] });
+
+    expect(client.patchMetadata).toHaveBeenCalled();
+    expect(assignmentsService.addAssignee).not.toHaveBeenCalled();
+  });
+
+  it('skips the assignment when the linker may not manage investigations', async () => {
+    const { service, assignmentsService, investigationsPrivileges } = makeLinkService();
+    investigationsPrivileges.assertCanManage.mockRejectedValue(
+      new InvestigationsForbiddenError('Missing privilege')
+    );
+
+    await expect(
+      service.link(request, 'escalation-1', { linked_investigations: ['inv-2'] })
+    ).resolves.toEqual(MOCK_ESCALATION);
+    expect(assignmentsService.addAssignee).not.toHaveBeenCalled();
+    expect(logger.debug).toHaveBeenCalledWith(expect.stringContaining('inv-2'));
+  });
+
+  it('keeps assigning the remaining investigations when one assignment fails', async () => {
+    const { service, assignmentsService } = makeLinkService();
+    assignmentsService.addAssignee
+      .mockRejectedValueOnce(new Error('boom'))
+      .mockResolvedValueOnce('assigned');
+
+    await expect(
+      service.link(request, 'escalation-1', { linked_investigations: ['inv-2', 'inv-3'] })
+    ).resolves.toEqual(MOCK_ESCALATION);
+    expect(assignmentsService.addAssignee).toHaveBeenCalledTimes(2);
+    expect(assignmentsService.addAssignee).toHaveBeenLastCalledWith(
+      expect.objectContaining({ conversationId: 'inv-3' })
+    );
+    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('investigation inv-2'));
+  });
+
+  it('runs at most 10 assignments at once', async () => {
+    const { service, assignmentsService } = makeLinkService();
+    let inFlight = 0;
+    let maxInFlight = 0;
+    assignmentsService.addAssignee.mockImplementation(async () => {
+      inFlight++;
+      maxInFlight = Math.max(maxInFlight, inFlight);
+      await new Promise((resolve) => setImmediate(resolve));
+      inFlight--;
+      return 'assigned';
+    });
+    const ids = Array.from({ length: 25 }, (_, i) => `inv-${i}`);
+
+    await service.link(request, 'escalation-1', { linked_investigations: ids });
+
+    expect(assignmentsService.addAssignee).toHaveBeenCalledTimes(25);
+    expect(maxInFlight).toBe(10);
   });
 });
 

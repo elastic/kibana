@@ -101,9 +101,14 @@ const useConversationTitle = ({ title }: TitleSlotRenderProps) => title;
 
 const useNoEscalationGate = () => true;
 
+interface ShownInvestigation {
+  investigation: Investigation;
+  refetchConversation?: () => Promise<void>;
+}
+
 interface EscalationModalControls {
   open: (mode: EscalationModalMode) => void;
-  showInvestigation: (investigation: Investigation) => void;
+  showInvestigation: (shown: ShownInvestigation) => void;
 }
 
 const EscalationModalContext = createContext<EscalationModalControls | undefined>(undefined);
@@ -122,16 +127,23 @@ const EscalationModalHost = ({
   children: React.ReactNode;
 }) => {
   const [mode, setMode] = useState<EscalationModalMode>();
-  const [investigation, setInvestigation] = useState<Investigation>();
+  const [shown, setShown] = useState<ShownInvestigation>();
   const controls = useMemo<EscalationModalControls>(
-    () => ({ open: setMode, showInvestigation: setInvestigation }),
+    () => ({ open: setMode, showInvestigation: setShown }),
     []
   );
   const closeModal = useCallback(() => setMode(undefined), []);
   return (
     <EscalationModalContext.Provider value={controls}>
       {children}
-      {mode && investigation && renderEscalationModal({ mode, investigation, onClose: closeModal })}
+      {mode &&
+        shown &&
+        renderEscalationModal({
+          mode,
+          investigation: shown.investigation,
+          onClose: closeModal,
+          refetchConversation: shown.refetchConversation,
+        })}
     </EscalationModalContext.Provider>
   );
 };
@@ -172,8 +184,8 @@ export const useInvestigationDetailsFlyout = (
 
   const investigation = useMemo(() => conversationToInvestigation(conversation), [conversation]);
   useEffect(() => {
-    escalationModal?.showInvestigation(investigation);
-  }, [escalationModal, investigation]);
+    escalationModal?.showInvestigation({ investigation, refetchConversation });
+  }, [escalationModal, investigation, refetchConversation]);
   const conversationId = conversation.id;
   const statusNode = renderStatus?.({
     conversationId,
