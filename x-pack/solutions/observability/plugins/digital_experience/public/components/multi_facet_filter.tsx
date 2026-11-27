@@ -82,6 +82,7 @@ export function MultiFacetFilter({
   formatters: { formatNumber },
   isLoading,
   ebtElement,
+  note,
   'data-test-subj': dataTestSubj,
 }: {
   label: string;
@@ -92,6 +93,8 @@ export function MultiFacetFilter({
   isLoading: boolean;
   /** Names the filter in click telemetry. */
   ebtElement: string;
+  /** What the filter leaves out, e.g. the data it does not narrow, shown below the values. */
+  note?: string;
   'data-test-subj': string;
 }) {
   const { euiTheme } = useEuiTheme();
@@ -178,24 +181,31 @@ export function MultiFacetFilter({
             })
           )}
         </div>
-        {values.length > 0 && (
+        {(note !== undefined || values.length > 0) && (
           <EuiPopoverFooter paddingSize="s">
+            {note !== undefined && (
+              <EuiText size="xs" color="subdued" data-test-subj={`${dataTestSubj}Note`}>
+                {note}
+              </EuiText>
+            )}
             {isFull && <FilterLimitNote data-test-subj={`${dataTestSubj}LimitNote`} />}
-            <EuiButtonEmpty
-              size="xs"
-              flush="left"
-              iconType="cross"
-              onClick={() => onChange([])}
-              data-test-subj={`${dataTestSubj}Clear`}
-              {...getEbtProps({
-                action: DIGITAL_EXPERIENCE_EBT_ACTIONS.CLEAR_FILTERS,
-                element: ebtElement,
-              })}
-            >
-              {i18n.translate('xpack.digitalExperience.multiFacetFilter.clear', {
-                defaultMessage: 'Clear selection',
-              })}
-            </EuiButtonEmpty>
+            {values.length > 0 && (
+              <EuiButtonEmpty
+                size="xs"
+                flush="left"
+                iconType="cross"
+                onClick={() => onChange([])}
+                data-test-subj={`${dataTestSubj}Clear`}
+                {...getEbtProps({
+                  action: DIGITAL_EXPERIENCE_EBT_ACTIONS.CLEAR_FILTERS,
+                  element: ebtElement,
+                })}
+              >
+                {i18n.translate('xpack.digitalExperience.multiFacetFilter.clear', {
+                  defaultMessage: 'Clear selection',
+                })}
+              </EuiButtonEmpty>
+            )}
           </EuiPopoverFooter>
         )}
       </div>

@@ -42,3 +42,15 @@ export const FILTER_EBT_ELEMENTS: Record<OverviewFilterName, string> = {
   pageUrl: APPLICATION_OVERVIEW_EBT_ELEMENTS.PAGE_FILTER,
   pageContains: APPLICATION_OVERVIEW_EBT_ELEMENTS.PAGE_CONTAINS_FILTER,
 };
+
+/** What a filter leaves out, shown where its values are picked; a filter that narrows all has none. */
+export const FILTER_NOTES: Partial<Record<OverviewFilterName, string>> = {
+  pageUrl: i18n.translate('xpack.digitalExperience.overview.filters.pageNote', {
+    defaultMessage:
+      'Applies to every browser event but HTTP requests, which carry the URL they request.',
+  }),
+  pageContains: i18n.translate('xpack.digitalExperience.overview.filters.pageContainsNote', {
+    defaultMessage:
+      'Applies to page loads and frustration signals only: web vitals, JS errors and other clicks carry no URL.',
+  }),
+};

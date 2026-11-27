@@ -43,7 +43,7 @@ import {
   DIGITAL_EXPERIENCE_EBT_ACTIONS,
 } from '../../../../ebt_constants';
 import type { Formatters } from '../../../../hooks/use_formatters';
-import { FILTER_EBT_ELEMENTS, FILTER_LABELS } from './overview_filter_labels';
+import { FILTER_EBT_ELEMENTS, FILTER_LABELS, FILTER_NOTES } from './overview_filter_labels';
 
 /** Half the window on a narrow screen, never wider than this: the rows are short. */
 const FLYOUT_MAX_WIDTH = 640;
@@ -183,6 +183,18 @@ export function AllFiltersFlyout({
                       ebtElement={FILTER_EBT_ELEMENTS[name]}
                       data-test-subj={`digitalExperienceOverviewFiltersFlyout-${name}Text`}
                     />
+                  </>
+                )}
+                {FILTER_NOTES[name] !== undefined && (
+                  <>
+                    <EuiSpacer size="xs" />
+                    <EuiText
+                      size="xs"
+                      color="subdued"
+                      data-test-subj={`digitalExperienceOverviewFiltersFlyout-${name}Note`}
+                    >
+                      {FILTER_NOTES[name]}
+                    </EuiText>
                   </>
                 )}
                 {isFull && (

@@ -6,7 +6,7 @@
  */
 
 import React, { useMemo, useState } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText, useEuiTheme } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { APPLICATION_SOURCE } from '../../../../common/application_source';
 import { NO_WEB_VITALS } from '../../../../common/core_web_vitals';
@@ -18,7 +18,6 @@ import type {
   OverviewPercentileParam,
   OverviewSearchParams,
 } from '../../../../common/overview_filters';
-import { PAGE_FILTER_NOTE_NAMES } from '../../../../common/overview_filters';
 import type {
   ApplicationOverview,
   ApplicationOverviewKpisResponse,
@@ -54,11 +53,6 @@ import { TopClicksPanel } from './components/top_clicks_panel';
 import { TopPagesPanel } from './components/top_pages_panel';
 import { usePickerOptions } from './hooks/use_picker_options';
 import { EMPTY_USAGE, usageRequestOf } from './utils/usage_request';
-
-const PAGE_FILTER_NOTE = i18n.translate('xpack.digitalExperience.overview.filters.pageNote', {
-  defaultMessage:
-    'Page applies to every browser event but HTTP requests, which carry the URL they request. URL contains applies to page loads and frustration signals only: web vitals, JS errors and other clicks carry no URL.',
-});
 
 const FETCH_ERROR_TITLE = i18n.translate('xpack.digitalExperience.overview.fetchErrorTitle', {
   defaultMessage: 'Could not load the Overview',
@@ -335,18 +329,6 @@ export function OtelOverview({ serviceName }: { serviceName: string }) {
           onApply={setFilters}
           onClose={() => setIsFlyoutOpen(false)}
         />
-      )}
-      {PAGE_FILTER_NOTE_NAMES.some((name) => (filters[name] ?? []).length > 0) && (
-        <>
-          <EuiSpacer size="s" />
-          <EuiText
-            size="xs"
-            color="subdued"
-            data-test-subj="digitalExperienceOverviewPageFilterNote"
-          >
-            {PAGE_FILTER_NOTE}
-          </EuiText>
-        </>
       )}
       <EuiSpacer size="m" />
       {/* Its own request, so a failure replaces only the row and the panels below keep loading. */}

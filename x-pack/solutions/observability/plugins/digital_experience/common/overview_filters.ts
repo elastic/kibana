@@ -29,12 +29,6 @@ export type OverviewFilterName = (typeof OVERVIEW_FILTER_NAMES)[number];
  */
 export const URL_FILTER_NAMES = ['pageContains'] as const satisfies readonly OverviewFilterName[];
 
-/** The filters that leave some data whole (the HTTP requests, or more), which the Overview notes. */
-export const PAGE_FILTER_NOTE_NAMES = [
-  'pageUrl',
-  'pageContains',
-] as const satisfies readonly OverviewFilterName[];
-
 /**
  * The filters whose values the user writes, as there is no list to pick them from: text that the
  * page URL contains.

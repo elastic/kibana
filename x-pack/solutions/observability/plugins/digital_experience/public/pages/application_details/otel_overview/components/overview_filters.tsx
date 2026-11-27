@@ -23,7 +23,7 @@ import {
   DIGITAL_EXPERIENCE_EBT_ACTIONS,
 } from '../../../../ebt_constants';
 import type { Formatters } from '../../../../hooks/use_formatters';
-import { FILTER_EBT_ELEMENTS, FILTER_LABELS } from './overview_filter_labels';
+import { FILTER_EBT_ELEMENTS, FILTER_LABELS, FILTER_NOTES } from './overview_filter_labels';
 import { SavedViewsMenu } from './saved_views_menu';
 
 /** The filters that have a button of their own; the others are in the "All filters" flyout. */
@@ -105,6 +105,7 @@ export function OverviewFilterButtons({
           data-test-subj={`digitalExperienceOverviewFilter-${name}`}
           ebtElement={FILTER_EBT_ELEMENTS[name]}
           label={FILTER_LABELS[name]}
+          note={FILTER_NOTES[name]}
           buckets={options?.[name] ?? []}
           values={filters[name] ?? []}
           onChange={(values) => setFilter(name, values)}

@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiText, EuiToolTip } from '@elastic/eui';
+import { EuiBadge, EuiText, EuiToolTip } from '@elastic/eui';
 import type { EuiBadgeProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -91,49 +91,45 @@ export function ComparedKpiPanel({
           {!value || value.value === null ? NOT_ENOUGH_DATA_LABEL : formatValue(value.value)}
         </span>
       }
-      footer={
-        <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} wrap>
-          {isComparing && change !== null && (
-            <EuiFlexItem grow={false}>
-              <EuiBadge
-                color={changeColor(change, higherIsBetter)}
-                iconType={changeIcon(change)}
-                data-test-subj={`${dataTestSubj}Change`}
+      change={
+        isComparing && change !== null ? (
+          <EuiBadge
+            color={changeColor(change, higherIsBetter)}
+            iconType={changeIcon(change)}
+            data-test-subj={`${dataTestSubj}Change`}
+          >
+            {change.label}
+          </EuiBadge>
+        ) : undefined
+      }
+      previous={
+        isComparing && value ? (
+          // Short, so the panel keeps its height; the tooltip spells it out.
+          value.previous === null ? (
+            <EuiText size="xs" color="subdued" data-test-subj={`${dataTestSubj}Previous`}>
+              <FormattedMessage
+                id="xpack.digitalExperience.comparedKpiPanel.noPrevious"
+                defaultMessage="vs {previous}"
+                values={{ previous: <EmptyCellValue /> }}
+              />
+            </EuiText>
+          ) : (
+            <EuiToolTip content={previousPeriodLabel(formatValue(value.previous))}>
+              <EuiText
+                size="xs"
+                color="subdued"
+                tabIndex={0}
+                data-test-subj={`${dataTestSubj}Previous`}
               >
-                {change.label}
-              </EuiBadge>
-            </EuiFlexItem>
-          )}
-          {isComparing && value && (
-            <EuiFlexItem grow={false}>
-              {/* Short beside the badge, so the tile keeps its height; the tooltip spells it out. */}
-              {value.previous === null ? (
-                <EuiText size="xs" color="subdued" data-test-subj={`${dataTestSubj}Previous`}>
-                  <FormattedMessage
-                    id="xpack.digitalExperience.comparedKpiPanel.noPrevious"
-                    defaultMessage="vs {previous}"
-                    values={{ previous: <EmptyCellValue /> }}
-                  />
-                </EuiText>
-              ) : (
-                <EuiToolTip content={previousPeriodLabel(formatValue(value.previous))}>
-                  <EuiText
-                    size="xs"
-                    color="subdued"
-                    tabIndex={0}
-                    data-test-subj={`${dataTestSubj}Previous`}
-                  >
-                    <FormattedMessage
-                      id="xpack.digitalExperience.comparedKpiPanel.versus"
-                      defaultMessage="vs {previous}"
-                      values={{ previous: formatValue(value.previous) }}
-                    />
-                  </EuiText>
-                </EuiToolTip>
-              )}
-            </EuiFlexItem>
-          )}
-        </EuiFlexGroup>
+                <FormattedMessage
+                  id="xpack.digitalExperience.comparedKpiPanel.versus"
+                  defaultMessage="vs {previous}"
+                  values={{ previous: formatValue(value.previous) }}
+                />
+              </EuiText>
+            </EuiToolTip>
+          )
+        ) : undefined
       }
     />
   );

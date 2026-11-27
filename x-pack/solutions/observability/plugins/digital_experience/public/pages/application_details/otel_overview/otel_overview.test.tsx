@@ -603,21 +603,20 @@ describe('OtelOverview', () => {
     expect(clearFilters).toHaveBeenCalledTimes(1);
   });
 
-  it('says which panels the page filters narrow, for a page and for text its URL contains', async () => {
+  it('says what the Page filter leaves out in its popover, and not on the page', async () => {
     mockFilters({ pageUrl: include('https://shop.example.com/cart') });
-    const { unmount } = renderOverview();
-    await findPageLoads('1,533');
-
-    expect(screen.getByTestId('digitalExperienceOverviewPageFilterNote')).toHaveTextContent(
-      'Page applies to every browser event but HTTP requests'
-    );
-    unmount();
-
-    mockFilters({ pageContains: include('/cart') });
     renderOverview();
     await findPageLoads('1,533');
+    expect(screen.queryByTestId('digitalExperienceOverviewPageFilterNote')).not.toBeInTheDocument();
 
-    expect(screen.getByTestId('digitalExperienceOverviewPageFilterNote')).toBeInTheDocument();
+    fireEvent.click(screen.getByTestId('digitalExperienceOverviewFilter-pageUrl'));
+
+    expect(
+      await screen.findByTestId('digitalExperienceOverviewFilter-pageUrlNote')
+    ).toHaveTextContent('Applies to every browser event but HTTP requests');
+    expect(
+      screen.queryByTestId('digitalExperienceOverviewFilter-browserNote')
+    ).not.toBeInTheDocument();
   });
 
   describe('All filters', () => {
@@ -627,6 +626,20 @@ describe('OtelOverview', () => {
       fireEvent.click(screen.getByTestId('digitalExperienceOverviewAllFilters'));
       return screen.findByTestId('digitalExperienceOverviewFiltersFlyout');
     };
+
+    it('says what the Page and URL contains filters leave out, beside their values', async () => {
+      await openFlyout();
+
+      expect(
+        screen.getByTestId('digitalExperienceOverviewFiltersFlyout-pageUrlNote')
+      ).toHaveTextContent('Applies to every browser event but HTTP requests');
+      expect(
+        screen.getByTestId('digitalExperienceOverviewFiltersFlyout-pageContainsNote')
+      ).toHaveTextContent('Applies to page loads and frustration signals only');
+      expect(
+        screen.queryByTestId('digitalExperienceOverviewFiltersFlyout-browserNote')
+      ).not.toBeInTheDocument();
+    });
 
     const flyoutOption = (name: string, value: string) =>
       screen.getByTestId(`digitalExperienceOverviewFiltersFlyout-${name}Option-${value}`);
