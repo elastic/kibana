@@ -42,7 +42,6 @@ const COMMAND_DEFINITIONS: readonly CommandDefinition[] = [
     sequence: '@',
     name: mentionCommandName,
     menuComponent: Mentions,
-    experimental: true,
   },
 ];
 
@@ -65,7 +64,7 @@ export const getCommandDefinitionByScheme = (scheme: string) => {
  * Returns the list of command definitions available based on feature flags.
  * The `/` skill command is always available (GA).
  * The `#` command is currently available without the experimental flag. The `@` mention
- * command also needs a shared chat.
+ * command is available in a shared chat, whatever the experimental flag says.
  */
 export const useAvailableCommandDefinitions = (): readonly CommandDefinition[] => {
   const isExperimentalEnabled = useExperimentalFeatures();
