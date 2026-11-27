@@ -87,7 +87,9 @@ describe('useProvisioningCallback', () => {
   });
 
   it('is available when enabled and the server can be called back at its public URL', () => {
-    const { result } = renderHook(() => useProvisioningCallback({ enabled: true }));
+    const { result } = renderHook(() =>
+      useProvisioningCallback({ enabled: true, provider: 'aws' })
+    );
 
     expect(result.current.available).toBe(true);
     expect(result.current.isChecking).toBe(false);
@@ -95,7 +97,9 @@ describe('useProvisioningCallback', () => {
   });
 
   it('is not available when disabled, and does not ask the server', () => {
-    const { result } = renderHook(() => useProvisioningCallback({ enabled: false }));
+    const { result } = renderHook(() =>
+      useProvisioningCallback({ enabled: false, provider: 'aws' })
+    );
 
     expect(result.current.available).toBe(false);
     expect(result.current.isChecking).toBe(false);
@@ -104,7 +108,9 @@ describe('useProvisioningCallback', () => {
 
   it('is checking, not available, until the server has answered', () => {
     setAvailability(undefined);
-    const { result } = renderHook(() => useProvisioningCallback({ enabled: true }));
+    const { result } = renderHook(() =>
+      useProvisioningCallback({ enabled: true, provider: 'aws' })
+    );
 
     expect(result.current.available).toBe(false);
     expect(result.current.isChecking).toBe(true);
@@ -117,14 +123,30 @@ describe('useProvisioningCallback', () => {
       kibana_url: 'https://kb.example.com',
       reason: NOT_HTTPS_REASON,
     });
-    const { result } = renderHook(() => useProvisioningCallback({ enabled: true }));
+    const { result } = renderHook(() =>
+      useProvisioningCallback({ enabled: true, provider: 'aws' })
+    );
 
     expect(result.current.available).toBe(false);
     expect(result.current.unavailableReason).toBe(NOT_HTTPS_REASON);
   });
 
+  it('start() creates the record for the provider the hook was given, not always AWS', async () => {
+    const { result } = renderHook(() =>
+      useProvisioningCallback({ enabled: true, provider: 'azure' })
+    );
+
+    await act(async () => {
+      await result.current.start({});
+    });
+
+    expect(mockedCreate).toHaveBeenCalledWith(expect.objectContaining({ provider: 'azure' }));
+  });
+
   it('start() creates a record with the identity details and returns the stack params', async () => {
-    const { result } = renderHook(() => useProvisioningCallback({ enabled: true }));
+    const { result } = renderHook(() =>
+      useProvisioningCallback({ enabled: true, provider: 'aws' })
+    );
 
     let params: Record<string, string> | undefined;
     await act(async () => {
@@ -153,7 +175,9 @@ describe('useProvisioningCallback', () => {
   });
 
   it('leaves out a blank name and unset details', async () => {
-    const { result } = renderHook(() => useProvisioningCallback({ enabled: true }));
+    const { result } = renderHook(() =>
+      useProvisioningCallback({ enabled: true, provider: 'aws' })
+    );
     await act(async () => {
       await result.current.start({ connectorName: '   ' });
     });
@@ -162,7 +186,9 @@ describe('useProvisioningCallback', () => {
   });
 
   it('reports receiving while the server applies the report, then received', async () => {
-    const { result } = renderHook(() => useProvisioningCallback({ enabled: true }));
+    const { result } = renderHook(() =>
+      useProvisioningCallback({ enabled: true, provider: 'aws' })
+    );
     await act(async () => {
       await result.current.start({});
     });
@@ -196,7 +222,9 @@ describe('useProvisioningCallback', () => {
   });
 
   it('polls while pending and exposes the created connector once received', async () => {
-    const { result } = renderHook(() => useProvisioningCallback({ enabled: true }));
+    const { result } = renderHook(() =>
+      useProvisioningCallback({ enabled: true, provider: 'aws' })
+    );
     await act(async () => {
       await result.current.start({});
     });
@@ -233,7 +261,9 @@ describe('useProvisioningCallback', () => {
   });
 
   it('stops polling as error when the record is gone', async () => {
-    const { result } = renderHook(() => useProvisioningCallback({ enabled: true }));
+    const { result } = renderHook(() =>
+      useProvisioningCallback({ enabled: true, provider: 'aws' })
+    );
     await act(async () => {
       await result.current.start({});
     });
@@ -246,7 +276,9 @@ describe('useProvisioningCallback', () => {
   });
 
   it('keeps polling through a transient error', async () => {
-    const { result } = renderHook(() => useProvisioningCallback({ enabled: true }));
+    const { result } = renderHook(() =>
+      useProvisioningCallback({ enabled: true, provider: 'aws' })
+    );
     await act(async () => {
       await result.current.start({});
     });
@@ -260,7 +292,9 @@ describe('useProvisioningCallback', () => {
 
   describe('at the deadline', () => {
     const startAndPassDeadline = async () => {
-      const { result } = renderHook(() => useProvisioningCallback({ enabled: true }));
+      const { result } = renderHook(() =>
+        useProvisioningCallback({ enabled: true, provider: 'aws' })
+      );
       await act(async () => {
         await result.current.start({});
       });
@@ -448,7 +482,9 @@ describe('useProvisioningCallback', () => {
         error: null,
       } as any);
     mockedGet.mockResolvedValue({ data: { item: pendingItem('cb-2') }, error: null } as any);
-    const { result } = renderHook(() => useProvisioningCallback({ enabled: true }));
+    const { result } = renderHook(() =>
+      useProvisioningCallback({ enabled: true, provider: 'aws' })
+    );
 
     await act(async () => {
       await result.current.start({});
@@ -473,7 +509,9 @@ describe('useProvisioningCallback', () => {
       available: false,
       reason: 'Kibana has no public URL: server.publicBaseUrl is not set.',
     });
-    const { result } = renderHook(() => useProvisioningCallback({ enabled: true }));
+    const { result } = renderHook(() =>
+      useProvisioningCallback({ enabled: true, provider: 'aws' })
+    );
 
     let params: Record<string, string> | undefined;
     await act(async () => {
@@ -490,7 +528,9 @@ describe('useProvisioningCallback', () => {
       data: null,
       error: { statusCode: 412, message: NOT_HTTPS_REASON },
     } as any);
-    const { result } = renderHook(() => useProvisioningCallback({ enabled: true }));
+    const { result } = renderHook(() =>
+      useProvisioningCallback({ enabled: true, provider: 'aws' })
+    );
 
     await act(async () => {
       await expect(result.current.start({})).rejects.toThrow(NOT_HTTPS_REASON);
@@ -501,7 +541,9 @@ describe('useProvisioningCallback', () => {
   });
 
   it('returns undefined when disabled', async () => {
-    const { result } = renderHook(() => useProvisioningCallback({ enabled: false }));
+    const { result } = renderHook(() =>
+      useProvisioningCallback({ enabled: false, provider: 'aws' })
+    );
     let params: Record<string, string> | undefined;
     await act(async () => {
       params = await result.current.start({});
@@ -512,7 +554,9 @@ describe('useProvisioningCallback', () => {
 
   it('rejects and stays idle when the record cannot be created, so no console opens', async () => {
     mockedCreate.mockResolvedValue({ data: null, error: { message: 'boom' } } as any);
-    const { result } = renderHook(() => useProvisioningCallback({ enabled: true }));
+    const { result } = renderHook(() =>
+      useProvisioningCallback({ enabled: true, provider: 'aws' })
+    );
     await act(async () => {
       await expect(result.current.start({})).rejects.toThrow('boom');
     });
@@ -521,7 +565,9 @@ describe('useProvisioningCallback', () => {
   });
 
   it('a new start() leaves a previous received status behind even when no record is created', async () => {
-    const { result } = renderHook(() => useProvisioningCallback({ enabled: true }));
+    const { result } = renderHook(() =>
+      useProvisioningCallback({ enabled: true, provider: 'aws' })
+    );
     await act(async () => {
       await result.current.start({});
     });
@@ -548,7 +594,9 @@ describe('useProvisioningCallback', () => {
 
   describe('cancel()', () => {
     const startAndCancel = async () => {
-      const { result } = renderHook(() => useProvisioningCallback({ enabled: true }));
+      const { result } = renderHook(() =>
+        useProvisioningCallback({ enabled: true, provider: 'aws' })
+      );
       await act(async () => {
         await result.current.start({});
       });
@@ -626,7 +674,9 @@ describe('useProvisioningCallback', () => {
         },
         error: null,
       } as any);
-      const { result } = renderHook(() => useProvisioningCallback({ enabled: true }));
+      const { result } = renderHook(() =>
+        useProvisioningCallback({ enabled: true, provider: 'aws' })
+      );
       await act(async () => {
         await result.current.start({});
       });
@@ -658,7 +708,9 @@ describe('useProvisioningCallback', () => {
         },
         error: null,
       } as any);
-      const { result } = renderHook(() => useProvisioningCallback({ enabled: true }));
+      const { result } = renderHook(() =>
+        useProvisioningCallback({ enabled: true, provider: 'aws' })
+      );
       await act(async () => {
         await result.current.start({});
       });
@@ -698,7 +750,9 @@ describe('useProvisioningCallback', () => {
     });
 
     it('does nothing without a record to wait on', async () => {
-      const { result } = renderHook(() => useProvisioningCallback({ enabled: true }));
+      const { result } = renderHook(() =>
+        useProvisioningCallback({ enabled: true, provider: 'aws' })
+      );
 
       let outcome: string | undefined;
       await act(async () => {
@@ -713,7 +767,9 @@ describe('useProvisioningCallback', () => {
   it('does not poll for a record whose creation finished after unmount', async () => {
     let resolveCreate: (value: unknown) => void = () => {};
     mockedCreate.mockReturnValue(new Promise((resolve) => (resolveCreate = resolve)) as any);
-    const { result, unmount } = renderHook(() => useProvisioningCallback({ enabled: true }));
+    const { result, unmount } = renderHook(() =>
+      useProvisioningCallback({ enabled: true, provider: 'aws' })
+    );
 
     let params: Record<string, string> | undefined;
     const started = act(async () => {
@@ -732,7 +788,9 @@ describe('useProvisioningCallback', () => {
   });
 
   it('stops polling on unmount', async () => {
-    const { result, unmount } = renderHook(() => useProvisioningCallback({ enabled: true }));
+    const { result, unmount } = renderHook(() =>
+      useProvisioningCallback({ enabled: true, provider: 'aws' })
+    );
     await act(async () => {
       await result.current.start({});
     });

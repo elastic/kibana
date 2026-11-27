@@ -133,7 +133,7 @@ describe('SelectableFilterPopover', () => {
     fireEvent.click(screen.getByText('Sort by'));
 
     await waitFor(() => {
-      expect(screen.queryByText(/\+ click exclude/)).not.toBeInTheDocument();
+      expect(screen.queryByText(/\+ click to exclude/)).not.toBeInTheDocument();
     });
     expect(screen.queryByText('1')).not.toBeInTheDocument();
   });

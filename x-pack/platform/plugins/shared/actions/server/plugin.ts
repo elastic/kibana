@@ -143,6 +143,7 @@ import { getAxiosInstanceWithAuth, getCredentialWithAuth } from './lib/get_axios
 import { RelayClient, type RelayClientContract } from './lib/relay';
 import {
   buildTypeFromStoredSpec,
+  CATALOG_REQUEST_WAIT_MS,
   createConnectorCatalogStorage,
   startConnectorCatalog,
   type ConnectorCatalogHandle,
@@ -350,6 +351,9 @@ export class ActionsPlugin
   private connectorCatalogFeatureFlagSubscription?: Subscription;
   private connectorCatalog?: ConnectorCatalogHandle;
   private catalogReady: Promise<void> = Promise.resolve();
+  // Request paths wait on this instead of catalogReady. It resolves at ready or after CATALOG_REQUEST_WAIT_MS.
+  private catalogRequestWait: Promise<void> = Promise.resolve();
+  private catalogRequestWaitTimer?: ReturnType<typeof setTimeout>;
   private isStopping = false;
 
   constructor(initContext: PluginInitializerContext) {
@@ -720,6 +724,7 @@ export class ActionsPlugin
       unsecuredSavedObjectsClient: SavedObjectsClientContract;
       spaceId?: SpaceId;
     }) => {
+      await this.catalogRequestWait;
       return new ActionsClient({
         publicBaseUrl: core.http.basePath.publicBaseUrl,
         connectorSigningKeysEnabled: this.actionsConfig.connectorSigningKeys.enabled,
@@ -815,6 +820,7 @@ export class ActionsPlugin
         kibanaIndices: core.savedObjects.getAllIndices(),
         logger: this.logger,
         connectorTypeRegistry: actionTypeRegistry!,
+        waitForCatalog: () => this.catalogRequestWait,
       });
     };
 
@@ -1163,9 +1169,12 @@ export class ActionsPlugin
     const evictClientPool = async (connectorId: string): Promise<void> => {
       await this.clientLeasePool.evict(connectorId);
     };
+    const waitForCatalog = () => this.catalogRequestWait;
 
     return async function actionsRouteHandlerContext(context, request) {
       const [coreStart, pluginsStart] = await core.getStartServices();
+      // Requests that arrive before the first catalog load ends wait for it, up to a cap.
+      await waitForCatalog();
       const { taskManager, encryptedSavedObjects, eventLog } = pluginsStart;
       const { savedObjects } = coreStart;
 
@@ -1259,7 +1268,26 @@ export class ActionsPlugin
     });
     this.connectorCatalog = handle;
     this.catalogReady = handle.ready;
+    this.catalogRequestWait = this.createCatalogRequestWait(isEnabled, handle.ready);
     return handle;
+  }
+
+  private createCatalogRequestWait(isEnabled: boolean, ready: Promise<void>): Promise<void> {
+    if (!isEnabled) {
+      return Promise.resolve();
+    }
+    return new Promise<void>((resolve) => {
+      this.catalogRequestWaitTimer = setTimeout(resolve, CATALOG_REQUEST_WAIT_MS);
+      void ready.then(() => {
+        this.clearCatalogRequestWaitTimer();
+        resolve();
+      });
+    });
+  }
+
+  private clearCatalogRequestWaitTimer(): void {
+    clearTimeout(this.catalogRequestWaitTimer);
+    this.catalogRequestWaitTimer = undefined;
   }
 
   /** Checks the serverless connector type allowlist; catalog types are checked again after the catalog load. */
@@ -1378,6 +1406,7 @@ export class ActionsPlugin
     this.isCatalogFeatureFlagEnabled = false;
     this.isStopping = true;
     this.connectorCatalog?.stop();
+    this.clearCatalogRequestWaitTimer();
     if (this.licenseState) {
       this.licenseState.clean();
     }

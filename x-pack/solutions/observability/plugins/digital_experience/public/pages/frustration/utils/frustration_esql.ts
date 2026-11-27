@@ -5,12 +5,7 @@
  * 2.0.
  */
 
-import {
-  ENVIRONMENT_ALL_VALUE,
-  ENVIRONMENT_NOT_DEFINED_VALUE,
-  SERVICE_ENVIRONMENT,
-  TELEMETRY_SDK_LANGUAGE,
-} from '@kbn/apm-types';
+import { SERVICE_ENVIRONMENT, TELEMETRY_SDK_LANGUAGE } from '@kbn/apm-types';
 import { escapeStringValue } from '@kbn/esql-utils';
 import { i18n } from '@kbn/i18n';
 import {
@@ -36,6 +31,7 @@ import {
   SOURCE_SESSION_ID_FIELD,
   SOURCE_URL_FIELD,
 } from '../../../../common/otel_source_fields';
+import { esqlEnvironmentCondition, TIME_BUCKETS } from '../../../../common/esql_values';
 import { SESSION_ATTRIBUTE_FIELDS } from '../../../../common/session_attribute_fields';
 import { SESSIONS_INDEX_PATTERN } from '../../../../common/sessions';
 
@@ -73,7 +69,6 @@ const TOP_BROWSERS = 5;
 const TOP_DEVICES = 5;
 const ERROR_CLICK_ROWS = 20;
 const TOP_ACTIONS = 20;
-const TIME_BUCKETS = 50;
 /** Sessions with at least this many signals share the last bucket of the distribution. */
 export const MAX_SIGNALS_BUCKET = 10;
 
@@ -105,17 +100,8 @@ const environmentClause = (
   fields: readonly string[] = SESSION_ATTRIBUTE_FIELDS.environment,
   notDefinedField: string = SERVICE_ENVIRONMENT
 ): string => {
-  if (!environment || environment === ENVIRONMENT_ALL_VALUE) {
-    return '';
-  }
-  if (environment === ENVIRONMENT_NOT_DEFINED_VALUE) {
-    return `\n  AND (${notDefinedField} == ${escapeStringValue(
-      ENVIRONMENT_NOT_DEFINED_VALUE
-    )} OR (${fields.map((field) => `${field} IS NULL`).join(' AND ')}))`;
-  }
-  return `\n  AND (${fields
-    .map((field) => `${field} == ${escapeStringValue(environment)}`)
-    .join(' OR ')})`;
+  const condition = esqlEnvironmentCondition(environment, fields, notDefinedField);
+  return condition ? `\n  AND ${condition}` : '';
 };
 
 // The fields of the session summaries the per-session panels read.

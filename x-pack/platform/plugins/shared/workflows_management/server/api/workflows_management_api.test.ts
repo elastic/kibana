@@ -735,7 +735,7 @@ describe('WorkflowsManagementApi', () => {
       const originalWorkflow = createMockWorkflow({
         templateSlug: 'triage-alerts',
         templateVersion: '1.2.0',
-        templateOrigin: 'install',
+        templateOrigin: 'catalog',
       });
       mockWorkflowsService.createWorkflow.mockResolvedValue({
         ...createMockWorkflow(),

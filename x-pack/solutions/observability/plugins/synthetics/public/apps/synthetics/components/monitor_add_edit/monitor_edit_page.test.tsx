@@ -39,6 +39,7 @@ describe('MonitorEditPage', () => {
 
   afterEach(() => {
     jest.useRealTimers();
+    jest.restoreAllMocks();
   });
 
   it('renders correctly', async () => {
@@ -197,5 +198,28 @@ describe('MonitorEditPage', () => {
 
     // error
     expect(getByText('Unable to load monitor configuration')).toBeInTheDocument();
+  });
+
+  it('renders monitor not found prompt on 404 even when legacy packagePolicyId is in the URL', async () => {
+    const { getByText, queryByText, queryByRole } = render(<MonitorEditPage />, {
+      url: '/monitors/test-id/edit?packagePolicyId=leftover-policy-id',
+      state: {
+        serviceLocations: {
+          locations: [{ id: 'us_central', label: 'Us Central' }],
+          locationsLoaded: true,
+          loading: false,
+        },
+        monitorDetails: {
+          syntheticsMonitorLoading: false,
+          syntheticsMonitorError: {
+            body: { statusCode: 404, error: 'Not Found', message: 'Not Found' },
+          },
+        },
+      },
+    });
+
+    expect(getByText('Monitor not found')).toBeInTheDocument();
+    expect(queryByText('Leftover integration found')).not.toBeInTheDocument();
+    expect(queryByRole('button', { name: /Delete integration/i })).not.toBeInTheDocument();
   });
 });
