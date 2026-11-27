@@ -162,7 +162,7 @@ export const IndexPattern = ({
             })
           : {
               ...fetchedIndexPattern,
-              defaultIndex: await dataViews.getDefault(),
+              defaultIndex: await dataViews.getDefaultDataView(),
             };
       } catch {
         if (isDataViewTypeIndexPattern(index)) {

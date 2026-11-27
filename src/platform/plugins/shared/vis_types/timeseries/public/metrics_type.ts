@@ -52,10 +52,11 @@ export const withReplacedIds = (
 async function withDefaultIndexPattern(
   vis: Vis<TimeseriesVisParams | TimeseriesVisDefaultParams>
 ): Promise<Vis<TimeseriesVisParams>> {
+  if (vis.params.index_pattern) return vis;
   const dataViews = getDataViewsStart();
 
-  const defaultIndex = await dataViews.getDefault();
-  if (!defaultIndex || !defaultIndex.id || vis.params.index_pattern) return vis;
+  const defaultIndex = await dataViews.getDefaultDataView();
+  if (!defaultIndex || !defaultIndex.id) return vis;
   vis.params.index_pattern = {
     id: defaultIndex.id,
   };
@@ -79,7 +80,7 @@ async function resolveIndexPattern(
 async function getUsedIndexPatterns(params: VisParams): Promise<DataView[]> {
   const dataViews = getDataViewsStart();
 
-  const defaultIndex = await dataViews.getDefault();
+  const defaultIndex = await dataViews.getDefaultDataView();
   const resolvedIndexPatterns: DataView[] = [];
   const indexPatternValues = extractIndexPatternValues(params as Panel, defaultIndex?.id);
   (

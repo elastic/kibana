@@ -51,17 +51,20 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       log.info(`loading ${logsdbIndex} index...`);
       await esArchiver.loadIfNeeded(logsdbEsArchive);
       log.info(`creating a data view for "${logsdbDataView}"...`);
-      await indexPatterns.create(
+      const { id: logsdbDataViewId } = await indexPatterns.create(
         {
           title: logsdbDataView,
           timeFieldName: '@timestamp',
         },
         { override: true }
       );
+      if (!logsdbDataViewId) {
+        throw new Error(`Failed to create data view for "${logsdbDataView}"`);
+      }
       log.info(`updating settings to use the "${logsdbDataView}" dataView...`);
       await kibanaServer.uiSettings.update({
         'dateFormat:tz': 'UTC',
-        defaultIndex: '0ae0bc7a-e4ca-405c-ab67-f2b5913f2a51',
+        defaultIndex: logsdbDataViewId,
         'timepicker:timeDefaults': `{ "from": "${fromTime}", "to": "${toTime}" }`,
       });
     });

@@ -159,7 +159,7 @@ export const renderApp = async (
   { data, dataViewFieldEditor }: RenderAppDependencies,
   { element }: AppMountParameters
 ) => {
-  const dataView = (await data.dataViews.getDefault()) || undefined;
+  const dataView = (await data.dataViews.getDefaultDataView()) || undefined;
   ReactDOM.render(
     <DataViewFieldEditorExample dataView={dataView} dataViewFieldEditor={dataViewFieldEditor} />,
     element

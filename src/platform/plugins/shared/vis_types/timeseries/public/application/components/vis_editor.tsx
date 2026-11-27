@@ -250,7 +250,8 @@ export class VisEditor extends Component<TimeseriesEditorProps, TimeseriesEditor
   }
 
   private getDefaultIndex() {
-    return this.props.config.get<string>('defaultIndex') ?? '';
+    // The resolved default data view, which no longer requires the defaultIndex setting
+    return this.props.defaultIndexPattern?.id ?? '';
   }
 }
 

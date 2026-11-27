@@ -78,7 +78,7 @@ describe('fetchIndexPattern', () => {
     mockedIndices = [];
 
     indexPatternsService = {
-      getDefault: jest.fn(() => Promise.resolve({ id: 'default', title: 'index' })),
+      getDefaultDataView: jest.fn(() => Promise.resolve({ id: 'default', title: 'index' })),
       get: jest.fn(() => Promise.resolve(mockedIndices[0])),
       find: jest.fn((search: string, size: number) => {
         if (size !== 1) {

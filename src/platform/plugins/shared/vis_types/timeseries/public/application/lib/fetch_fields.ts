@@ -22,7 +22,12 @@ export async function fetchFields(
 ): Promise<VisFields> {
   const patterns = Array.isArray(indexes) ? indexes : [indexes];
   const coreStart = getCoreStart();
-  const defaultIndex = coreStart.uiSettings.get('defaultIndex');
+  // a failed default lookup must only skip the '' alias, not block requested patterns
+  const defaultIndex = (
+    await getDataViewsStart()
+      .getDefaultDataView()
+      .catch(() => null)
+  )?.id;
 
   try {
     const indexFields = await Promise.all(

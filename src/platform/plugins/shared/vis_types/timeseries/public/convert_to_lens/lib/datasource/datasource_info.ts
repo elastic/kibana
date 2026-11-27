@@ -65,7 +65,7 @@ const getSelectedIndexPattern = async (
     const indexPatternId = indexPattern.id ?? '';
     return { indexPattern, indexPatternId, timeField: indexPattern.timeFieldName };
   }
-  const indexPattern = await dataViews.getDefault();
+  const indexPattern = await dataViews.getDefaultDataView();
   const indexPatternId = indexPattern?.id ?? '';
   const timeField = indexPattern?.timeFieldName;
   return { indexPattern, indexPatternId, timeField };

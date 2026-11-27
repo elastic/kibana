@@ -48,7 +48,7 @@ export async function fetchIndexPatterns(
   const allMatches =
     exactMatches.length === indexPatternStrings.length
       ? exactMatches
-      : [...exactMatches, await indexPatternsService.getDefault()];
+      : [...exactMatches, await indexPatternsService.getDefaultDataView()];
 
   return allMatches.filter((d: DataView | null): d is DataView => d != null);
 }

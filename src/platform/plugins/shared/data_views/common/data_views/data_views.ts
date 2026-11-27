@@ -13,6 +13,7 @@ import { castEsToKbnFieldTypeName } from '@kbn/field-types';
 import type { FieldFormatsStartCommon } from '@kbn/field-formats-plugin/common';
 import { FORMATS_UI_SETTINGS } from '@kbn/field-formats-plugin/common';
 import { v4 as uuidv4 } from 'uuid';
+import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/common';
 import type { PersistenceAPI } from '../types';
 import { DataViewLazy } from './data_view_lazy';
 import { DEFAULT_DATA_VIEW_ID } from '../constants';
@@ -99,6 +100,20 @@ export interface DataViewListItem {
 /**
  * Data views API service dependencies
  */
+interface NotFoundLike {
+  name?: string;
+  statusCode?: number;
+  output?: { statusCode?: number };
+  body?: { statusCode?: number };
+}
+
+// Saved object "not found" surfaces differently on server (Boom output) and browser (SavedObjectNotFound, no status)
+const isNotFoundError = (e: unknown): boolean => {
+  if (e instanceof SavedObjectNotFound) return true;
+  const err = e as NotFoundLike | null;
+  return [err?.statusCode, err?.output?.statusCode, err?.body?.statusCode].includes(404);
+};
+
 export interface DataViewsServiceDeps {
   /**
    * UiSettings service instance wrapped in a common interface
@@ -132,10 +147,6 @@ export interface DataViewsServiceDeps {
    * Determines whether the user can save data views
    */
   getCanSave: () => Promise<boolean>;
-  /**
-   * Determines whether the user can save advancedSettings (used for defaultIndex)
-   */
-  getCanSaveAdvancedSettings: () => Promise<boolean>;
 
   scriptedFieldsEnabled: boolean;
 }
@@ -238,7 +249,8 @@ export interface DataViewsServicePublicMethods {
    */
   getDefaultId: () => Promise<string | null>;
   /**
-   * Get default data view, if it doesn't exist, choose and save new default data view and return it.
+   * Get the configured default data view; if none is configured (or it no longer exists), fall back to
+   * the oldest data view. The fallback is NOT persisted, and creating a data view no longer sets the default.
    * @param {Object} options
    * @param {boolean} options.refreshFields - If true, will refresh the fields of the default data view
    * @param {boolean} [options.displayErrors=true] - If set false, API consumer is responsible for displaying and handling errors.
@@ -363,10 +375,6 @@ export class DataViewsService {
   private dataViewLazyCache: Map<string, Promise<DataViewLazy>>;
 
   /**
-   * Can the user save advanced settings?
-   */
-  private getCanSaveAdvancedSettings: () => Promise<boolean>;
-  /**
    * Can the user save data views?
    */
   public getCanSave: () => Promise<boolean>;
@@ -385,7 +393,6 @@ export class DataViewsService {
       onNotification,
       onError,
       getCanSave = () => Promise.resolve(false),
-      getCanSaveAdvancedSettings,
       scriptedFieldsEnabled,
     } = deps;
     this.apiClient = apiClient;
@@ -395,7 +402,6 @@ export class DataViewsService {
     this.onNotification = onNotification;
     this.onError = onError;
     this.getCanSave = getCanSave;
-    this.getCanSaveAdvancedSettings = getCanSaveAdvancedSettings;
 
     this.dataViewCache = new Map();
     this.dataViewLazyCache = new Map();
@@ -554,15 +560,23 @@ export class DataViewsService {
   };
 
   /**
-   * Get default index pattern
+   * Get the configured default index pattern, or null when it's unset
+   * or points to a data view which no longer exists.
    * @param displayErrors - If set false, API consumer is responsible for displaying and handling errors.
    */
   getDefault = async (displayErrors: boolean = true) => {
     const defaultIndexPatternId = await this.getDefaultId();
     if (defaultIndexPatternId) {
-      return await this.get(defaultIndexPatternId, displayErrors);
+      try {
+        return await this.get(defaultIndexPatternId, displayErrors);
+      } catch (e) {
+        // The setting may point to a data view which no longer exists,
+        // which is not repaired automatically anymore, so a stale default
+        // is treated like no default being configured. Other errors propagate.
+        if (isNotFoundError(e)) return null;
+        throw e;
+      }
     }
-
     return null;
   };
 
@@ -570,8 +584,8 @@ export class DataViewsService {
    * Get default index pattern id
    */
   getDefaultId = async (): Promise<string | null> => {
-    const defaultIndexPatternId = await this.config.get<string | null>(DEFAULT_DATA_VIEW_ID);
-    return defaultIndexPatternId ?? null;
+    const defaultId = await this.config.get<string | null>(DEFAULT_DATA_VIEW_ID);
+    return defaultId ?? null;
   };
 
   /**
@@ -1241,7 +1255,6 @@ export class DataViewsService {
   async createAndSaveDataViewLazy(spec: DataViewSpec, overwrite = false) {
     const dataViewLazy = await this.createFromSpecLazy(spec);
     await this.createSavedObject(dataViewLazy, overwrite);
-    await this.setDefault(dataViewLazy.id!);
     return dataViewLazy;
   }
 
@@ -1261,7 +1274,6 @@ export class DataViewsService {
   ) {
     const dataView = await this.createFromSpec(spec, skipFetchFields, displayErrors);
     await this.createSavedObject(dataView, overwrite);
-    await this.setDefault(dataView.id!);
     return dataView;
   }
 
@@ -1419,33 +1431,40 @@ export class DataViewsService {
   }
 
   private async getDefaultDataViewId() {
-    const patterns = await this.getIdsWithTitle();
-    let defaultId: string | null = await this.getDefaultId();
-    const exists = defaultId ? patterns.some((pattern) => pattern.id === defaultId) : false;
-
-    if (defaultId && !exists) {
-      if (await this.getCanSaveAdvancedSettings()) {
-        await this.config.remove(DEFAULT_DATA_VIEW_ID);
-      }
-
-      defaultId = null;
+    if (!this.savedObjectsCache) {
+      await this.refreshSavedObjectsCache();
     }
-
-    if (!defaultId && patterns.length >= 1) {
-      defaultId = patterns[0].id;
-      if (await this.getCanSaveAdvancedSettings()) {
-        await this.config.set(DEFAULT_DATA_VIEW_ID, defaultId);
-      }
+    // local snapshot: clearCache() may null the field while awaiting below
+    const savedObjects = this.savedObjectsCache;
+    if (!savedObjects || savedObjects.length === 0) {
+      return null;
     }
-
-    return defaultId;
+    const configuredDefaultId = await this.getDefaultId();
+    if (configuredDefaultId) {
+      const exists = savedObjects.some((obj) => obj.id === configuredDefaultId);
+      if (exists) return configuredDefaultId;
+    }
+    // On the server the saved objects client returns `created_at`, while in the browser
+    // the content management client renames it to `createdAt`, so support both shapes
+    // to keep the fallback consistent across environments
+    const getCreatedAt = (savedObject: SavedObject<DataViewSavedObjectAttrs>) =>
+      savedObject.created_at ?? (savedObject as { createdAt?: string }).createdAt;
+    const sorted = [...savedObjects].sort((a, b) => {
+      const createdAtDiff =
+        new Date(getCreatedAt(a) || 0).getTime() - new Date(getCreatedAt(b) || 0).getTime();
+      // break ties deterministically (e.g. objects imported in the same bulk request
+      // can share an identical created_at timestamp)
+      return createdAtDiff !== 0 ? createdAtDiff : a.id.localeCompare(b.id);
+    });
+    return sorted[0]?.id ?? null;
   }
 
   /**
    * Returns whether a default data view exists.
    */
   async defaultDataViewExists() {
-    return !!(await this.getDefaultDataViewId());
+    const defaultId = await this.getDefaultDataViewId();
+    return Boolean(defaultId);
   }
 
   /**
