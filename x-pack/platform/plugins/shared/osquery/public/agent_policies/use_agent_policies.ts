@@ -9,29 +9,71 @@ import { mapKeys } from 'lodash';
 import { useQuery } from '@kbn/react-query';
 
 import { i18n } from '@kbn/i18n';
-import type { GetAgentPoliciesResponseItem } from '@kbn/fleet-plugin/common';
 import { API_VERSIONS } from '../../common/constants';
 import { useKibana } from '../common/lib/kibana';
 import { useErrorToast } from '../common/hooks/use_error_toast';
+import type { OsqueryAgentPolicy } from './types';
+
+interface IntegrationGroup {
+  id: string;
+  name: string;
+  policyIds: string[];
+}
 
 interface AgentPoliciesSelection {
-  agentPoliciesById: Record<string, GetAgentPoliciesResponseItem>;
-  agentPolicies: GetAgentPoliciesResponseItem[];
+  agentPoliciesById: Record<string, OsqueryAgentPolicy>;
+  agentPolicies: OsqueryAgentPolicy[];
+  groupsByPackagePolicyId: Record<string, IntegrationGroup>;
+  groupIdByPolicyId: Record<string, string>;
 }
 
 // Module-level so the reference stays stable: react-query only reuses the
 // memoized selection while `options.select` is identity-equal, and an inline
 // arrow would hand every consumer a fresh `agentPoliciesById` on each render.
-const selectAgentPolicies = (response: GetAgentPoliciesResponseItem[]): AgentPoliciesSelection => ({
-  agentPoliciesById: mapKeys(response, 'id'),
-  agentPolicies: response,
-});
+export const selectAgentPolicies = (response: OsqueryAgentPolicy[]): AgentPoliciesSelection => {
+  // Group by the single Osquery integration the server reports per agent policy
+  // (`package_policy_id` is set only when there is exactly one). An agent policy
+  // misconfigured with several Osquery integrations stays ungrouped, instead of
+  // transitively merging every integration it touches into one selection.
+  const membersByIntegration = new Map<string, { name: string; policyIds: string[] }>();
+  for (const {
+    id: policyId,
+    package_policy_id: integrationId,
+    package_policy_name: integrationName,
+  } of response) {
+    if (!integrationId) continue;
+    const integration = membersByIntegration.get(integrationId) ?? {
+      name: integrationName ?? integrationId,
+      policyIds: [],
+    };
+    integration.policyIds.push(policyId);
+    membersByIntegration.set(integrationId, integration);
+  }
+
+  const groupsByPackagePolicyId: Record<string, IntegrationGroup> = {};
+  const groupIdByPolicyId: Record<string, string> = {};
+  for (const [id, { name, policyIds }] of membersByIntegration) {
+    if (policyIds.length < 2) continue;
+
+    groupsByPackagePolicyId[id] = { id, name, policyIds: [...policyIds].sort() };
+    for (const policyId of policyIds) {
+      groupIdByPolicyId[policyId] = id;
+    }
+  }
+
+  return {
+    agentPoliciesById: mapKeys(response, 'id'),
+    agentPolicies: response,
+    groupsByPackagePolicyId,
+    groupIdByPolicyId,
+  };
+};
 
 export const useAgentPolicies = () => {
   const { http } = useKibana().services;
   const setErrorToast = useErrorToast();
 
-  return useQuery<GetAgentPoliciesResponseItem[], unknown, AgentPoliciesSelection>(
+  return useQuery<OsqueryAgentPolicy[], unknown, AgentPoliciesSelection>(
     ['agentPolicies'],
     () =>
       http.get('/internal/osquery/fleet_wrapper/agent_policies', {

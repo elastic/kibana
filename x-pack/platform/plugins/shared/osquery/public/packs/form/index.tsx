@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { filter, isEmpty, map, omit, reduce } from 'lodash';
+import { filter, isEmpty, map, omit, pickBy, reduce } from 'lodash';
 import type { EuiAccordionProps, EuiStepsProps } from '@elastic/eui';
 import type { UseEuiTheme } from '@elastic/eui';
 import {
@@ -17,7 +17,6 @@ import {
   EuiBottomBar,
   EuiAccordion,
   EuiSteps,
-  EuiText,
 } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
@@ -32,6 +31,7 @@ import { PolicyAssignmentList } from './policy_assignment_list';
 import { QueriesField } from './queries_field';
 import { ConfirmDeployAgentPolicyModal } from './confirmation_modal';
 import { useAgentPolicies } from '../../agent_policies';
+import { expandToSharedIntegrations } from '../../agent_policies/expand_to_shared_integrations';
 import { useCreatePack } from '../use_create_pack';
 import { useUpdatePack } from '../use_update_pack';
 import { convertPackQueriesToSO, convertSOQueriesToPack, storedQueryVersion } from './utils';
@@ -72,10 +72,14 @@ const euiAccordionCss = ({ euiTheme }: UseEuiTheme) => ({
 });
 
 // Tighter step padding, following Fleet's single-page package policy layout.
+// Non-final steps get 40px below the content so the next step title has room.
 const packFormStepsCss = ({ euiTheme }: UseEuiTheme) => ({
   '.euiStep__content': {
     paddingBlockStart: euiTheme.size.xs,
     paddingBlockEnd: euiTheme.size.m,
+  },
+  '.euiStep:not(:last-child) .euiStep__content': {
+    paddingBlockEnd: euiTheme.size.xxl,
   },
 });
 
@@ -104,6 +108,33 @@ interface PackFormProps {
   onDirtyStateChange?: (isDirty: boolean) => void;
 }
 
+/**
+ * The agent policies a save stores as the pack's targets: the ones the user selected and
+ * the ones with a shard. Agent policies that only share an integration with them are not
+ * added: Fleet delivers to them anyway, and storing them would make the pack follow them
+ * to any integration they move to later. This matches the API, which keeps `policy_ids`
+ * as sent and returns a warning.
+ */
+export const getSubmittedPolicyIds = (
+  selectedPolicyIds: readonly string[],
+  shards: Record<string, number> | undefined
+): string[] => [...new Set([...selectedPolicyIds, ...Object.keys(shards ?? {}).filter(Boolean)])];
+
+/**
+ * The agent policies a save deploys to: the submitted targets plus every other agent
+ * policy of a shared integration they use. The deploy confirmation counts these.
+ */
+export const getDeliveredPolicyIds = (
+  selectedPolicyIds: readonly string[],
+  shards: Record<string, number> | undefined,
+  groupsByPackagePolicyId: Record<string, { policyIds: string[] }> | undefined
+): string[] => [
+  ...expandToSharedIntegrations(
+    getSubmittedPolicyIds(selectedPolicyIds, shards),
+    groupsByPackagePolicyId
+  ),
+];
+
 const PackFormComponent: React.FC<PackFormProps> = ({
   defaultValue,
   editMode = false,
@@ -124,7 +155,15 @@ const PackFormComponent: React.FC<PackFormProps> = ({
     notifications: { toasts },
   } = useKibana().services;
 
-  const { data: { agentPoliciesById } = {} } = useAgentPolicies();
+  const {
+    data: { agentPoliciesById, groupsByPackagePolicyId } = {},
+    isFetching: isFetchingAgentPolicies,
+    isError: isAgentPoliciesError,
+  } = useAgentPolicies();
+  // `useAgentPolicies` starts from `initialData: []`, so "no policies yet" alone is not an
+  // answer. Until Fleet answers, the shared-integration groups and agent counts are unknown.
+  const isAgentPoliciesLoading =
+    isFetchingAgentPolicies && isEmpty(agentPoliciesById) && !isAgentPoliciesError;
 
   // Cancel returns to the Packs list. The read-only Pack details page was
   // removed, so edit mode no longer navigates back to `packs/:packId`.
@@ -199,13 +238,28 @@ const PackFormComponent: React.FC<PackFormProps> = ({
         : legacyPayload),
       policy_ids: defaultPolicyIds ?? [],
       queries: convertPackQueriesToSO(payload.queries),
-      shards: omit(payload.shards, '*') ?? {},
+      // The server only targets `policy_ids`; a shard keyed by any other agent policy is
+      // never applied. Drop it, or the form would treat it as a target and save it as one.
+      // Keep a shard Fleet still delivers (a legacy pack whose saved references drifted),
+      // or an untouched save would send empty targets and detach the live schedule.
+      shards: pickBy(
+        omit(payload.shards, '*') ?? {},
+        (_, policyId) =>
+          !payload.policy_ids ||
+          payload.policy_ids.includes(policyId) ||
+          Boolean(payload.effective_policy_ids?.includes(policyId))
+      ),
       schedule: deserializedSchedule,
       min_osquery_version: payloadMinOsqueryVersion ? [payloadMinOsqueryVersion] : [],
       result_type: payloadResultType ?? '',
       platform: payload.platform ?? '',
     };
   };
+
+  const receivingPolicyIds = useMemo(
+    () => defaultValue?.effective_policy_ids?.filter((id) => !defaultValue.policy_ids.includes(id)),
+    [defaultValue?.effective_policy_ids, defaultValue?.policy_ids]
+  );
 
   const defaultPackType = defaultValue?.shards?.['*'] ? 'global' : 'policy';
 
@@ -372,16 +426,7 @@ const PackFormComponent: React.FC<PackFormProps> = ({
         platform: platformValue,
         ...restPayload
       }: PackFormData) => {
-        const mappedShards = !isEmpty(shards)
-          ? (filter(
-              map(shards, (shard, key) => {
-                if (!isEmpty(key)) {
-                  return key;
-                }
-              })
-            ) as string[])
-          : [];
-        const policies = [...payloadAgentPolicyIds, ...mappedShards];
+        const policies = getSubmittedPolicyIds(payloadAgentPolicyIds, shards);
 
         // Emit schedule fields only when the user touched the schedule or the pack
         // already has one — otherwise an untouched legacy pack triggers a spurious
@@ -414,7 +459,7 @@ const PackFormComponent: React.FC<PackFormProps> = ({
 
         return {
           ...restPayload,
-          policy_ids: policies ?? [],
+          policy_ids: [...policies],
           // On edit, round-trip each query's id so the server preserves schedule_id.
           queries: convertSOQueriesToPack(payloadQueries, { includeId: editMode }),
           shards: getShards() ?? {},
@@ -458,10 +503,15 @@ const PackFormComponent: React.FC<PackFormProps> = ({
 
   const handleSubmitForm = useMemo(() => handleSubmit(onSubmit), [handleSubmit, onSubmit]);
 
+  const deliveredPolicyIds = useMemo(
+    () => getDeliveredPolicyIds(policyIds ?? [], shards, groupsByPackagePolicyId),
+    [policyIds, shards, groupsByPackagePolicyId]
+  );
+
   const agentCount = useMemo(
     () =>
       reduce(
-        policyIds,
+        deliveredPolicyIds,
         (acc, policyId) => {
           const agentPolicy = agentPoliciesById && agentPoliciesById[policyId];
 
@@ -469,7 +519,7 @@ const PackFormComponent: React.FC<PackFormProps> = ({
         },
         0
       ),
-    [policyIds, agentPoliciesById]
+    [deliveredPolicyIds, agentPoliciesById]
   );
 
   const handleSaveClick = useCallback(async () => {
@@ -484,14 +534,27 @@ const PackFormComponent: React.FC<PackFormProps> = ({
       return;
     }
 
-    if (agentCount) {
+    // A failed policy lookup leaves the agent count unknown: ask rather than deploy blind.
+    if (
+      agentCount ||
+      (isAgentPoliciesError && getSubmittedPolicyIds(policyIds ?? [], shards).length > 0)
+    ) {
       setShowConfirmationModal(true);
 
       return;
     }
 
     handleSubmitForm();
-  }, [agentCount, handleSubmitForm, scheduleErrors, showScheduleErrorsToast, trigger]);
+  }, [
+    agentCount,
+    handleSubmitForm,
+    isAgentPoliciesError,
+    policyIds,
+    scheduleErrors,
+    shards,
+    showScheduleErrorsToast,
+    trigger,
+  ]);
 
   const handleConfirmConfirmationClick = useCallback(async () => {
     setShowConfirmationModal(false);
@@ -635,21 +698,10 @@ const PackFormComponent: React.FC<PackFormProps> = ({
         title: QUERIES_STEP_TITLE,
         'data-test-subj': 'osqueryPackFormStep-queries',
         children: (
-          <>
-            <EuiText size="s" color="subdued">
-              <p>
-                <FormattedMessage
-                  id="xpack.osquery.pack.form.queriesStepDescription"
-                  defaultMessage="These queries inherit the pack's settings, but you can customize the defaults by editing them individually."
-                />
-              </p>
-            </EuiText>
-            <EuiSpacer size="m" />
-            <QueriesField
-              euiFieldProps={euiFieldProps}
-              packHasExplicitSchedule={packHasExplicitSchedule}
-            />
-          </>
+          <QueriesField
+            euiFieldProps={euiFieldProps}
+            packHasExplicitSchedule={packHasExplicitSchedule}
+          />
         ),
       },
       {
@@ -673,7 +725,10 @@ const PackFormComponent: React.FC<PackFormProps> = ({
                     {/* Scheduled agent policies / shards / Type stay editable for prebuilt
                         packs (a writePacks user may re-target them) — only a fully read-only
                         user is blocked. Matches the prebuiltPackModeDescription callout. */}
-                    <PolicyAssignmentList isReadOnly={isReadOnly} />
+                    <PolicyAssignmentList
+                      isReadOnly={isReadOnly}
+                      receivingPolicyIds={receivingPolicyIds}
+                    />
                   </EuiFlexItem>
                 </EuiFlexGroup>
                 <EuiSpacer size="m" />
@@ -700,6 +755,7 @@ const PackFormComponent: React.FC<PackFormProps> = ({
     ],
     [
       availableOptions,
+      receivingPolicyIds,
       changePackType,
       defaultValue?.saved_object_id,
       euiFieldProps,
@@ -744,7 +800,7 @@ const PackFormComponent: React.FC<PackFormProps> = ({
                   // Prebuilt packs keep an enabled save so writePacks users can
                   // persist scheduled-policy/shards changes; only a read-only
                   // (readPacks-only) user has saving disabled.
-                  isDisabled={isReadOnly}
+                  isDisabled={isReadOnly || isAgentPoliciesLoading}
                   color="primary"
                   fill
                   size="m"
@@ -773,8 +829,8 @@ const PackFormComponent: React.FC<PackFormProps> = ({
         <ConfirmDeployAgentPolicyModal
           onCancel={handleHideConfirmationModal}
           onConfirm={handleConfirmConfirmationClick}
-          agentCount={agentCount}
-          agentPolicyCount={policyIds.length}
+          agentCount={isAgentPoliciesError ? undefined : agentCount}
+          agentPolicyCount={deliveredPolicyIds.length}
         />
       )}
     </>

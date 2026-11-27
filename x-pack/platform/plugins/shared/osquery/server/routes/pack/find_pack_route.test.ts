@@ -7,6 +7,7 @@
 
 import { httpServerMock, httpServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import type { RequestHandler } from '@kbn/core/server';
+import { LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
 import { API_VERSIONS } from '../../../common/constants';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 import { findPackRoute } from './find_pack_route';
@@ -18,6 +19,14 @@ jest.mock('../../utils/get_internal_saved_object_client', () => ({
 
 describe('findPackRoute', () => {
   let routeHandler: RequestHandler;
+  const fetchAllItems = jest.fn();
+  const getByIds = jest.fn();
+  const logger = loggingSystemMock.createLogger();
+  const integration = (owners = ['A', 'B', 'C']) => ({
+    id: 'shared',
+    policy_ids: owners,
+    inputs: [{ config: { osquery: { value: { packs: { 'custom--test-pack': {} } } } } }],
+  });
   let mockOsqueryContext: OsqueryAppContext;
   let mockSavedObjectsClient: { find: jest.Mock };
 
@@ -48,9 +57,24 @@ describe('findPackRoute', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    fetchAllItems.mockImplementation(async function* () {
+      yield [integration()];
+    });
+    getByIds.mockImplementation(async (_client, ids: string[], options) => {
+      if (ids.includes('missing') && !options?.ignoreMissing) {
+        throw new Error('AgentPolicyNotFoundError');
+      }
+
+      return ids.filter((id) => id !== 'missing').map((id) => ({ id }));
+    });
     mockOsqueryContext = {
       logFactory: {
-        get: jest.fn().mockReturnValue(loggingSystemMock.createLogger()),
+        get: jest.fn().mockReturnValue(logger),
+      },
+      service: {
+        getActiveSpace: jest.fn().mockResolvedValue({ id: 'custom' }),
+        getPackagePolicyService: () => ({ fetchAllItems }),
+        getAgentPolicyService: () => ({ getByIds }),
       },
       experimentalFeatures: { rruleScheduling: false },
     } as unknown as OsqueryAppContext;
@@ -447,6 +471,108 @@ describe('findPackRoute', () => {
       expect(body.data[0]).not.toHaveProperty('min_osquery_version');
       expect(body.data[0]).not.toHaveProperty('result_type');
       expect(body.data[0]).not.toHaveProperty('platform');
+    });
+  });
+
+  describe('effective policy ids', () => {
+    const readEffective = async (overrides: Record<string, boolean> = {}) => {
+      mockSavedObjectsClient.find.mockResolvedValue({
+        saved_objects: [
+          {
+            ...makePack(overrides),
+            references: [{ type: LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE, id: 'A', name: 'A' }],
+          },
+          { ...makePack({ name: 'second' }), id: 'pack-2' },
+          { ...makePack({ name: 'third' }), id: 'pack-3' },
+        ],
+        total: 3,
+        page: 1,
+        per_page: 20,
+      });
+      setupRoute();
+      const response = httpServerMock.createResponseFactory();
+      await routeHandler(
+        {} as Parameters<RequestHandler>[0],
+        httpServerMock.createKibanaRequest({ query: { withEffectivePolicyIds: 'true' } }),
+        response
+      );
+      expect(response.ok).toHaveBeenCalledTimes(1);
+      const body = response.ok.mock.calls[0][0]?.body as {
+        data: Array<Record<string, unknown>>;
+      };
+
+      for (const pack of body.data.slice(1)) {
+        if ('effective_policy_ids' in body.data[0]) {
+          expect(pack).toHaveProperty('effective_policy_ids', []);
+        } else {
+          expect(pack).not.toHaveProperty('effective_policy_ids');
+        }
+      }
+
+      return body.data[0];
+    };
+
+    it('returns all shared integration owners from the active space', async () => {
+      const pack = await readEffective();
+      expect(pack).toHaveProperty('policy_ids', ['A']);
+      expect(pack).toHaveProperty('effective_policy_ids', ['A', 'B', 'C']);
+      expect(fetchAllItems).toHaveBeenCalledTimes(1);
+      expect(fetchAllItems).toHaveBeenCalledWith(mockSavedObjectsClient, {
+        kuery: expect.any(String),
+        fields: ['name', 'enabled', 'policy_ids', 'inputs'],
+      });
+      expect(getByIds).toHaveBeenCalledWith(mockSavedObjectsClient, ['A', 'B', 'C'], {
+        ignoreMissing: true,
+        fields: ['name'],
+      });
+    });
+
+    it('includes drift owner E and omits owners missing from the space', async () => {
+      fetchAllItems.mockImplementation(async function* () {
+        yield [integration(['A', 'B', 'C', 'E', 'missing'])];
+      });
+      expect(await readEffective()).toHaveProperty('effective_policy_ids', ['A', 'B', 'C', 'E']);
+    });
+
+    it('returns an empty array for a disabled pack without a wire block', async () => {
+      fetchAllItems.mockImplementation(async function* () {
+        yield [];
+      });
+      expect(await readEffective({ enabled: false })).toHaveProperty('effective_policy_ids', []);
+    });
+
+    it('omits effective targets and warns when the package-policy drain rejects', async () => {
+      fetchAllItems.mockRejectedValue(new Error('Fleet unavailable'));
+      expect(await readEffective()).not.toHaveProperty('effective_policy_ids');
+      expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('effective'));
+    });
+
+    it('omits effective targets and warns when the scoped owner lookup rejects', async () => {
+      getByIds.mockRejectedValueOnce(new Error('Fleet unavailable'));
+      expect(await readEffective()).not.toHaveProperty('effective_policy_ids');
+      expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('effective'));
+    });
+
+    it('skips the Fleet scan and omits the field unless the request opts in', async () => {
+      mockSavedObjectsClient.find.mockResolvedValue({
+        saved_objects: [makePack()],
+        total: 1,
+        page: 1,
+        per_page: 20,
+      });
+      setupRoute();
+      const response = httpServerMock.createResponseFactory();
+      await routeHandler(
+        {} as Parameters<RequestHandler>[0],
+        httpServerMock.createKibanaRequest({ query: {} }),
+        response
+      );
+      expect(response.ok).toHaveBeenCalledTimes(1);
+      expect(JSON.stringify(response.ok.mock.calls[0][0]?.body)).not.toContain(
+        'effective_policy_ids'
+      );
+      expect(fetchAllItems).not.toHaveBeenCalled();
+      expect(getByIds).not.toHaveBeenCalled();
     });
   });
 });

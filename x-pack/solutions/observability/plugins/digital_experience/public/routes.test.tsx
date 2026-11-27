@@ -162,6 +162,30 @@ describe('digitalExperienceRouter', () => {
     });
   });
 
+  it('matches the Crashes tab, with the open crash group, and drops a too long one', () => {
+    const location = { ...locationOf('/my-app/crashes'), search: '?source=otel&crashGroup=abc' };
+
+    expect(digitalExperienceRouter.matchRoutes(location).map(({ route }) => route.path)).toEqual([
+      '/',
+      '/{serviceName}',
+      '/{serviceName}/crashes',
+    ]);
+    expect(digitalExperienceRouter.getParams('/{serviceName}/crashes', location)).toEqual({
+      path: { serviceName: 'my-app' },
+      query: { source: 'otel', crashGroup: 'abc' },
+    });
+    expect(() =>
+      digitalExperienceRouter.matchRoutes({
+        ...locationOf('/my-app/crashes'),
+        search: `?source=otel&crashGroup=${'a'.repeat(257)}`,
+      })
+    ).toThrow(
+      expect.objectContaining({
+        patched: expect.objectContaining({ query: { source: 'otel' } }),
+      })
+    );
+  });
+
   it('removes invalid sessions list params', () => {
     const location = {
       ...locationOf('/my-app/sessions'),

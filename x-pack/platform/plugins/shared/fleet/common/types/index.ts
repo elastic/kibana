@@ -37,6 +37,7 @@ export interface FleetConfigType {
     isDefault?: boolean;
     api?: {
       url?: string;
+      rumUrl?: string;
       tls?: {
         certificate?: string;
         key?: string;
