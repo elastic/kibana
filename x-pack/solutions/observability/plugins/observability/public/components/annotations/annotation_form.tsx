@@ -61,15 +61,20 @@ export function AnnotationForm({ editAnnotation }: { editAnnotation?: Annotation
         })}
         display="columnCompressed"
         fullWidth
-        error={formState.errors.message?.message}
-        isInvalid={Boolean(formState.errors.message?.message)}
+        error={formState.errors.annotation?.title?.message}
+        isInvalid={Boolean(formState.errors.annotation?.title?.message)}
       >
         <Controller
           defaultValue=""
           name="annotation.title"
           control={control}
           rules={{
-            required: 'title is required',
+            required: i18n.translate(
+              'xpack.observability.annotationForm.titleRequiredErrorMessage',
+              {
+                defaultMessage: 'Title is required.',
+              }
+            ),
           }}
           render={({ field, fieldState }) => (
             <FieldText
