@@ -201,6 +201,7 @@ describe('secrets on Elasticsearch', () => {
     await getClient(spaceId).create({ name: 'second_secret', value: VALUE });
     const storage = createStorage(spaceId);
     expect(await storage.count()).toBe(2);
+    expect(await createStorage('empty').count()).toBe(0);
 
     // Storing the maximum for real would take too long, so only the count is replaced.
     jest.spyOn(storage, 'count').mockResolvedValueOnce(SECRETS_MAX_PER_SPACE);
