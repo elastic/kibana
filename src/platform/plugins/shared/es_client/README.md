@@ -1,0 +1,90 @@
+# ES Client
+
+Generic Elasticsearch proxy exposed as the internal Kibana API `/internal/es_client/{path*}`.
+
+A request to `/internal/es_client/<es path>?<query>` is sent to `/<es path>?<query>` on Elasticsearch as the current user, if the path is allowed (see [Allowed paths](#allowed-paths)). The response status, body, `content-type`, `content-encoding`, `content-length`, `warning`, `retry-after`, `x-elasticsearch-async-id` and `x-elasticsearch-async-is-running` headers come back unchanged. A `location` header is rewritten to point back through the proxy.
+
+```
+PUT kbn:/internal/es_client/my-index-000001
+{ "mappings": { "properties": { "message": { "type": "text" } } } }
+
+GET kbn:/internal/es_client/my-index-000001/_stats/docs,store
+```
+
+Requests use API version `1` (`elastic-api-version` header). Internal APIs carry no stability guarantee and are intended for Kibana plugins and UI.
+
+## Behavior
+
+- **Bodies.** Request bodies are read into memory (up to Kibana's `server.maxPayload`) and forwarded unparsed. Response bodies are streamed back without being parsed or buffered.
+- **Cancellation.** If the client disconnects, the Elasticsearch request is aborted.
+- **Retries for reads only.** GET and HEAD requests use the Elasticsearch client's retry settings, so a connection failure or a 502/503/504 is retried on another node. POST, PUT and DELETE requests are never replayed, so writes are not duplicated. Timeouts are not retried.
+- **Timeouts.** Elasticsearch requests time out after 120 seconds and return `504`. A connection failure returns `502`.
+- **Path encoding.** The Elasticsearch path is taken from the raw URL, so percent-encoded characters (for example `%2C` in an index list) are preserved.
+- **GET and HEAD have no body.** Kibana does not accept request bodies on GET or HEAD. Use POST for APIs that take a body, such as `_refresh` and `_flush`.
+- **Compressed bodies.** Request bodies are forwarded still compressed together with their `content-encoding`, so gzip-compressed requests (for example from Elasticsearch clients with compression enabled) work.
+- **Headers.** Only `content-type`, `content-encoding` (for requests with a body), `accept`, `x-elastic-product-origin` and `x-forwarded-*` headers are sent to Elasticsearch. Cookies and other client headers are not forwarded; credentials come from the scoped Elasticsearch client. Elasticsearch receives Kibana's request id as `x-opaque-id`; Kibana adopts a client's `x-opaque-id` as that id only when `server.requestId.allowFromAnyIp` or `server.requestId.ipAllowlist` permits it.
+- **Product origin.** A client's `x-elastic-product-origin` header is passed to Elasticsearch. Without one, Elasticsearch receives no product origin rather than the scoped client's default `kibana`, so system index access produces deprecation warnings that Kibana attributes to the user.
+
+## Authorization
+
+Kibana authorization is disabled on this route. Requests run as the current user through the scoped Elasticsearch client, so Elasticsearch enforces index and cluster privileges.
+
+This means **any authenticated Kibana user can call any allowed Elasticsearch API their Elasticsearch role permits**, without needing a Kibana feature privilege such as Console's. Grant Elasticsearch roles with that in mind.
+
+### Allowed paths
+
+Paths are checked in `server/route/es_path_access.ts` before Elasticsearch is called; a rejected path returns `403`. The checks apply to every method and ignore the query string.
+
+1. **Blocked.** Paths whose first segment starts with `_security`, `_encryption` or `_ssl` (case-insensitive, after percent-decoding) are always rejected.
+2. **Allowed.** Otherwise the path must match one of:
+   - `/_count`
+   - `/{index}`
+   - `/{index}/_cache/clear`
+   - `/{index}/_close`
+   - `/{index}/_count`
+   - `/{index}/_doc/{id}`
+   - `/{index}/_flush`
+   - `/{index}/_forcemerge`
+   - `/{index}/_mapping`
+   - `/{index}/_open`
+   - `/{index}/_refresh`
+   - `/{index}/_settings`
+   - `/{index}/_stats`
+   - `/{index}/_stats/{metric}`
+
+`{index}` is a comma-separated list of index names or patterns, none of which starts with `_` (so `_all` is rejected; use `*`). `{metric}` and `{id}` are any non-empty segment. The Elasticsearch root and all other APIs are rejected. To proxy another API, add its path to `ALLOWED_PATHS`.
+
+## Browser usage
+
+The plugin contract has one method, `getClient()`. It resolves with a subset of the [elasticsearch-js](https://github.com/elastic/elasticsearch-js) API surface, sending every call through the proxy, so browser code calls Elasticsearch the same way server code uses core's Elasticsearch client. The client code is loaded on first use and the same instance is returned afterwards.
+
+The enabled APIs are `count`, `delete`, `get` and `indices`. Use `transport.request` for any other Elasticsearch API. Calls only succeed for [allowed paths](#allowed-paths); others reject with a `403`. The other generated API modules are commented out in `public/es_client/create_es_client.ts`; to enable one, uncomment it there and add its name to `EnabledApiName` in `public/es_client/types.ts`.
+
+```ts
+const client = await plugins.esClient.getClient();
+const exists = await client.indices.exists({ index: 'my-index' });
+// Status, headers and warnings
+const { body, statusCode, warnings } = await client.indices.stats({ index: 'my-index' }, { meta: true });
+
+// Raw requests
+await client.transport.request({ method: 'POST', path: '/my-index/_forcemerge' });
+
+// Streamed responses resolve with the unread body
+const stream = await client.transport.request(
+  { method: 'GET', path: '/my-index/_mapping' },
+  { asStream: true }
+);
+const reader = stream?.getReader();
+```
+
+It is built from the client's generated API modules, not its `Client` class, which depends on Node. Compared with the Node client:
+
+- Errors reject with Kibana's `HttpFetchError` (status on `error.response.status`, Elasticsearch body on `error.body`) instead of `ResponseError`. `exists`-style APIs resolve `false` for `404`, and the `ignore` option resolves with the error body.
+- With `meta: true`, calls resolve with `EsClientResult`: the `body`, `statusCode`, `headers`, `warnings` and `meta.request` / `meta.aborted` of the Node client's `TransportResult`. Connection details, attempts and the request context are not available in the browser.
+- With `asStream: true`, calls resolve with the response body as a `ReadableStream`, or with an `EsClientResult` holding it when `meta: true` is also set.
+- Requests send `x-elastic-product-origin: kibana`, as core's server client does. Pass the header in `headers` to replace it.
+- Supported request options are `headers`, `signal`, `querystring`, `ignore`, `meta` and `asStream`.
+- `helpers`, `child()`, `close()` and diagnostics are not available, and `transport` only implements `request`.
+- `bulk` is reimplemented in this plugin (`public/es_client/bulk.ts`) because the generated module loads the Node transport. It is disabled like the other APIs; to enable it, uncomment it in `create_es_client.ts` and the `bulk` member of `EsClient` in `types.ts`.
+
+When Elasticsearch answers `401`, for example because the user's access token expired, Kibana refreshes the credentials and retries the request once, for every method. If the retry still fails, the `401` is returned; in the browser, Kibana's session handling treats it as an expired session and logs the user out.

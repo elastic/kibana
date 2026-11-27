@@ -5,14 +5,19 @@
  * 2.0.
  */
 
-import type { RoleApiCredentials } from '@kbn/scout';
+import type { ElasticsearchRoleDescriptor, RoleApiCredentials } from '@kbn/scout';
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import { apiTest, forDeployment, testData } from '../../fixtures';
 
-const { API_BASE_PATH, COMMON_HEADERS } = testData;
+const { API_BASE_PATH, COMMON_HEADERS, ES_CLIENT_PROXY_HEADERS, ES_CLIENT_PROXY_PATH } = testData;
 
 const INDEX_NAME = 'index-management-api-settings';
+
+const INDEX_METADATA_ROLE: ElasticsearchRoleDescriptor = {
+  cluster: [],
+  indices: [{ names: [INDEX_NAME], privileges: ['view_index_metadata'] }],
+};
 
 // Serverless exposes a subset, kept as its own list so it cannot silently shrink.
 const EXPECTED_DEFAULTS = [
@@ -83,6 +88,7 @@ const EXPECTED_DEFAULTS_SERVERLESS = [
 
 apiTest.describe('Index settings API', { tag: tags.deploymentAgnostic }, () => {
   let credentials: RoleApiCredentials;
+  let proxyHeaders: Record<string, string>;
   let expectedDefaults: string[];
   // Serverless reports no index-level settings for a fresh index.
   let expectedProvidedName: string | undefined;
@@ -91,6 +97,11 @@ apiTest.describe('Index settings API', { tag: tags.deploymentAgnostic }, () => {
 
   apiTest.beforeAll(async ({ requestAuth, config }) => {
     credentials = await requestAuth.getApiKey('admin');
+    // The settings editor calls the proxy as the current user, who may only read index metadata.
+    // An API key rather than a custom-role session, because ECH can only log in as custom roles
+    // through a custom SAML realm.
+    const { apiKeyHeader } = await requestAuth.getApiKeyForCustomRole(INDEX_METADATA_ROLE);
+    proxyHeaders = { ...COMMON_HEADERS, ...ES_CLIENT_PROXY_HEADERS, ...apiKeyHeader };
     expectedDefaults = forDeployment(config, {
       stateful: EXPECTED_DEFAULTS,
       serverless: EXPECTED_DEFAULTS_SERVERLESS,
@@ -114,22 +125,25 @@ apiTest.describe('Index settings API', { tag: tags.deploymentAgnostic }, () => {
     await esClient.indices.delete({ index: INDEX_NAME }, { ignore: [404] });
   });
 
-  apiTest('fetches an index settings', async ({ apiClient }) => {
-    const response = await apiClient.get(`${API_BASE_PATH}/settings/${INDEX_NAME}`, {
-      headers: { ...COMMON_HEADERS, ...credentials.apiKeyHeader },
-      responseType: 'json',
-    });
+  apiTest('fetches an index settings with defaults through the proxy', async ({ apiClient }) => {
+    // Matches the request the settings editor sends through the Elasticsearch proxy.
+    const response = await apiClient.get(
+      `${ES_CLIENT_PROXY_PATH}/${INDEX_NAME}/_settings?expand_wildcards=none&flat_settings=false&include_defaults=true`,
+      {
+        headers: proxyHeaders,
+        responseType: 'json',
+      }
+    );
 
     expect(response).toHaveStatusCode(200);
-    expect(response.body.settings.index?.provided_name).toBe(expectedProvidedName);
+    const { settings, defaults } = response.body[INDEX_NAME];
+    expect(settings.index?.provided_name).toBe(expectedProvidedName);
 
-    const missing = expectedDefaults.filter(
-      (setting) => !Object.hasOwn(response.body.defaults.index, setting)
-    );
+    const missing = expectedDefaults.filter((setting) => !Object.hasOwn(defaults.index, setting));
     expect(missing).toStrictEqual([]);
   });
 
-  apiTest('updates an index settings', async ({ apiClient }) => {
+  apiTest('updates an index settings', async ({ apiClient, esClient }) => {
     const [setting, value] = editableSetting;
 
     const updateResponse = await apiClient.put(`${API_BASE_PATH}/settings/${INDEX_NAME}`, {
@@ -139,11 +153,7 @@ apiTest.describe('Index settings API', { tag: tags.deploymentAgnostic }, () => {
     });
     expect(updateResponse).toHaveStatusCode(200);
 
-    const response = await apiClient.get(`${API_BASE_PATH}/settings/${INDEX_NAME}`, {
-      headers: { ...COMMON_HEADERS, ...credentials.apiKeyHeader },
-      responseType: 'json',
-    });
-    expect(response).toHaveStatusCode(200);
-    expect(response.body.settings.index[setting]).toBe(value);
+    const response = await esClient.indices.getSettings({ index: INDEX_NAME });
+    expect(response[INDEX_NAME].settings?.index).toMatchObject({ [setting]: value });
   });
 });

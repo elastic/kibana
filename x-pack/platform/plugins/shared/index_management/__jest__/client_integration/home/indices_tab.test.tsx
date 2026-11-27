@@ -16,6 +16,7 @@ import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
 import type { Index } from '../../../common';
 import { API_BASE_PATH, INTERNAL_API_BASE_PATH } from '../../../common';
 import { setupEnvironment } from '../helpers/setup_environment';
+import { esClientPath } from '../helpers/http_requests';
 import { renderHome } from '../helpers/render_home';
 import { httpService } from '../../../public/application/services/http';
 import { indexDataEnricher } from '../../../public/services';
@@ -216,10 +217,12 @@ describe('<IndexManagementHome />', () => {
       await actions.clickManageContextMenuButton();
       await actions.clickContextMenuOption('refreshIndexMenuButton');
 
-      expect(httpSetup.post).toHaveBeenCalledWith(
-        `${API_BASE_PATH}/indices/refresh`,
-        expect.anything()
-      );
+      await waitFor(() => {
+        expect(httpSetup.fetch).toHaveBeenCalledWith(
+          esClientPath('testIndexA/_refresh'),
+          expect.objectContaining({ method: 'GET' })
+        );
+      });
       await waitFor(() => {
         expect(httpSetup.post).toHaveBeenCalledWith(
           `${API_BASE_PATH}/indices/reload`,
@@ -236,10 +239,12 @@ describe('<IndexManagementHome />', () => {
 
       // After the index is closed, we immediately do a reload. So we need to expect to see
       // a reload server call also.
-      expect(httpSetup.post).toHaveBeenCalledWith(
-        `${API_BASE_PATH}/indices/close`,
-        expect.anything()
-      );
+      await waitFor(() => {
+        expect(httpSetup.fetch).toHaveBeenCalledWith(
+          esClientPath('testIndexA/_close'),
+          expect.objectContaining({ method: 'POST' })
+        );
+      });
       await waitFor(() => {
         expect(httpSetup.post).toHaveBeenCalledWith(
           `${API_BASE_PATH}/indices/reload`,
@@ -258,10 +263,12 @@ describe('<IndexManagementHome />', () => {
 
       // After the index is opened, we immediately do a reload. So we need to expect to see
       // a reload server call also.
-      expect(httpSetup.post).toHaveBeenCalledWith(
-        `${API_BASE_PATH}/indices/open`,
-        expect.anything()
-      );
+      await waitFor(() => {
+        expect(httpSetup.fetch).toHaveBeenCalledWith(
+          expect.stringMatching(/\/_open$/),
+          expect.objectContaining({ method: 'POST' })
+        );
+      });
       await waitFor(() => {
         expect(httpSetup.post).toHaveBeenCalledWith(
           `${API_BASE_PATH}/indices/reload`,
@@ -278,10 +285,12 @@ describe('<IndexManagementHome />', () => {
 
       // After the index is flushed, we immediately do a reload. So we need to expect to see
       // a reload server call also.
-      expect(httpSetup.post).toHaveBeenCalledWith(
-        `${API_BASE_PATH}/indices/flush`,
-        expect.anything()
-      );
+      await waitFor(() => {
+        expect(httpSetup.fetch).toHaveBeenCalledWith(
+          esClientPath('testIndexA/_flush'),
+          expect.objectContaining({ method: 'GET' })
+        );
+      });
       await waitFor(() => {
         expect(httpSetup.post).toHaveBeenCalledWith(
           `${API_BASE_PATH}/indices/reload`,
@@ -298,10 +307,12 @@ describe('<IndexManagementHome />', () => {
 
       // After the index cache is cleared, we immediately do a reload. So we need to expect to see
       // a reload server call also.
-      expect(httpSetup.post).toHaveBeenCalledWith(
-        `${API_BASE_PATH}/indices/clear_cache`,
-        expect.anything()
-      );
+      await waitFor(() => {
+        expect(httpSetup.fetch).toHaveBeenCalledWith(
+          esClientPath('testIndexA/_cache/clear'),
+          expect.objectContaining({ method: 'POST' })
+        );
+      });
       await waitFor(() => {
         expect(httpSetup.post).toHaveBeenCalledWith(
           `${API_BASE_PATH}/indices/reload`,
@@ -325,10 +336,12 @@ describe('<IndexManagementHome />', () => {
 
       // After the index force merged, we immediately do a reload. So we need to expect to see
       // a reload server call also.
-      expect(httpSetup.post).toHaveBeenCalledWith(
-        `${API_BASE_PATH}/indices/forcemerge`,
-        expect.anything()
-      );
+      await waitFor(() => {
+        expect(httpSetup.fetch).toHaveBeenCalledWith(
+          esClientPath('testIndexA/_forcemerge'),
+          expect.objectContaining({ method: 'POST' })
+        );
+      });
       await waitFor(() => {
         expect(httpSetup.post).toHaveBeenCalledWith(
           `${API_BASE_PATH}/indices/reload`,
@@ -494,9 +507,13 @@ describe('<IndexManagementHome />', () => {
 
       // Saves the index with expected name
       await waitFor(() => {
-        expect(httpSetup.put).toHaveBeenCalledWith(`${INTERNAL_API_BASE_PATH}/indices/create`, {
-          body: '{"indexName":"test-index-b","indexMode":"lookup"}',
-        });
+        expect(httpSetup.fetch).toHaveBeenCalledWith(
+          esClientPath('test-index-b'),
+          expect.objectContaining({
+            method: 'PUT',
+            body: '{"settings":{"mode":"lookup"}}',
+          })
+        );
       });
       // It refreshes indices after saving; wait so the table's async state update settles (avoids act warnings).
       await waitFor(() => {
