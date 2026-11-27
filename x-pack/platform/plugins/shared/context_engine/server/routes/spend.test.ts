@@ -42,7 +42,7 @@ describe('spend routes', () => {
           client: { get: jest.fn().mockImplementation(async () => featureFlagEnabled) },
         },
       }),
-    } as unknown as Parameters<RequestHandler>[0]);
+    }) as unknown as Parameters<RequestHandler>[0];
 
   const getRoute = (path: string): RegisteredRoute => {
     const route = routes[path];

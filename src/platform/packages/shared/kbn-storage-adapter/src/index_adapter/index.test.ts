@@ -879,7 +879,7 @@ describe('StorageIndexAdapter - clean', () => {
       (params: { expand_wildcards?: string | string[] }) => {
         const wildcards = Array.isArray(params.expand_wildcards)
           ? params.expand_wildcards
-          : params.expand_wildcards?.split(',') ?? [];
+          : (params.expand_wildcards?.split(',') ?? []);
         const includesHidden = wildcards.includes('hidden') || wildcards.includes('all');
         if (!includesHidden) {
           return Promise.resolve({});

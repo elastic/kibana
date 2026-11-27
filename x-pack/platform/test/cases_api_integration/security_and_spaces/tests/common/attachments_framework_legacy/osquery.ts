@@ -42,7 +42,7 @@ const legacyOsqueryPayload = (overrides: Record<string, unknown> = {}): Attachme
     },
     owner: 'securitySolutionFixture',
     ...overrides,
-  } as AttachmentRequestV2);
+  }) as AttachmentRequestV2;
 
 /** Unified shape that the new osquery writer posts. */
 const unifiedOsqueryPayload = (overrides: Record<string, unknown> = {}): AttachmentRequestV2 =>
@@ -55,7 +55,7 @@ const unifiedOsqueryPayload = (overrides: Record<string, unknown> = {}): Attachm
     },
     owner: 'securitySolutionFixture',
     ...overrides,
-  } as AttachmentRequestV2);
+  }) as AttachmentRequestV2;
 
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');

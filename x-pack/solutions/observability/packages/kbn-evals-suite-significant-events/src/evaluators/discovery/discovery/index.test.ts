@@ -24,7 +24,7 @@ describe('createDiscoveryEvaluators', () => {
       const judge = jest.fn(async () => ({ score: 0, explanation: 'judged' }));
       const criteriaFn = jest.fn(
         () =>
-          ({ name: 'criteria', kind: 'LLM', direction: 'maximize', evaluate: judge } as Evaluator)
+          ({ name: 'criteria', kind: 'LLM', direction: 'maximize', evaluate: judge }) as Evaluator
       );
       const evaluator = createDiscoveryEvaluators({
         criteriaFn: criteriaFn as never,

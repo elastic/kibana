@@ -44,7 +44,7 @@ export const shallowObjectView = (obj: unknown, maxDepth = 1): object | string |
         key,
         typeof value === 'object'
           ? shallowObjectView(value, maxDepth - 1)
-          : value?.toString() ?? undefined,
+          : (value?.toString() ?? undefined),
       ])
     );
   }

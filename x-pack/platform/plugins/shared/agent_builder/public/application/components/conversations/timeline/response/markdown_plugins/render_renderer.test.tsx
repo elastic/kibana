@@ -17,7 +17,7 @@ const okRenderer = (renderImpl: (payload: any) => React.ReactNode): RendererUIDe
     type: 'table',
     payloadSchema: z.object({ ok: z.boolean() }),
     render: renderImpl,
-  } as unknown as RendererUIDefinition);
+  }) as unknown as RendererUIDefinition;
 
 const makeServices = ({
   content,
@@ -44,7 +44,7 @@ const renderDirective = (
 ) => {
   const { isStreaming = false } = opts;
   // `null` means "tag had no type attribute"; absent means the default 'table'.
-  const renderType = 'renderType' in opts ? opts.renderType ?? undefined : 'table';
+  const renderType = 'renderType' in opts ? (opts.renderType ?? undefined) : 'table';
   const Renderer = createRenderRenderer({
     renderersService: services.renderersService,
     conversationsService: services.conversationsService,

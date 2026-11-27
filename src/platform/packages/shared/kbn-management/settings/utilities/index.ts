@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { isSettingDefaultValue, normalizeSettings } from './setting';
+export { isSettingDefaultValue, mergeSettingDefinitions, normalizeSettings } from './setting';
 
 export {
   getFieldInputValue,

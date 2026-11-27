@@ -44,15 +44,15 @@ import { registerTelemetryEvents } from '../lib/telemetry/register_ebt_events';
 export function bindOnSetup({ bind }: ContainerModuleLoadOptions) {
   bind(OnSetup).toResolvedValue(
     (
-        features,
-        savedObjects,
-        encryptedSavedObjects,
-        loggerService,
-        uiSettings,
-        analytics,
-        eventLog,
-        workflowsExtensions
-      ) =>
+      features,
+      savedObjects,
+      encryptedSavedObjects,
+      loggerService,
+      uiSettings,
+      analytics,
+      eventLog,
+      workflowsExtensions
+    ) =>
       (container) => {
         registerFeaturePrivileges(features);
 

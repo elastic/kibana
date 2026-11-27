@@ -42,7 +42,7 @@ export const onDrop = (props: DatasourceDimensionDropHandlerProps<TextBasedPriva
     // Moving or duplicating a dimension keeps its labels and formatting.
     ...(isOperation(source) ? sourceField : {}),
     columnId: target.columnId,
-    fieldName: sourceField?.variable ? `??${sourceField.variable}` : sourceField?.fieldName ?? '',
+    fieldName: sourceField?.variable ? `??${sourceField.variable}` : (sourceField?.fieldName ?? ''),
     meta: sourceField?.meta,
     variable: sourceField?.variable,
     inMetricDimension: target.isMetricDimension ? true : undefined,
@@ -67,13 +67,13 @@ export const onDrop = (props: DatasourceDimensionDropHandlerProps<TextBasedPriva
         c.columnId === target.columnId
           ? newColumn
           : c.columnId === source.columnId
-          ? {
-              ...targetField,
-              columnId: source.columnId,
-              fieldName: targetField?.fieldName ?? '',
-              meta: targetField?.meta,
-            }
-          : c;
+            ? {
+                ...targetField,
+                columnId: source.columnId,
+                fieldName: targetField?.fieldName ?? '',
+                meta: targetField?.meta,
+              }
+            : c;
       columns = layer.columns.map(swapTwoColumns);
       break;
     case 'reorder':

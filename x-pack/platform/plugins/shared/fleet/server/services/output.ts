@@ -2105,8 +2105,8 @@ class OutputService {
       data.secrets?.auth && 'credential' in data.secrets.auth
         ? data.secrets.auth.credential
         : auth
-        ? original?.secrets?.auth?.credential
-        : undefined;
+          ? original?.secrets?.auth?.credential
+          : undefined;
 
     validateOtlpAuth({
       auth,

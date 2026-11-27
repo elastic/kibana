@@ -31,9 +31,10 @@ export type ResumeAnchors = ReadonlyMap<string, PausedItem[]>;
 /** The items a pause waits on: its resume state's tool calls, then its `ask_user_question` prompts. */
 export const pausedItems = (terminated: ExecutionTerminatedEvent): PausedItem[] => {
   const { state, outcome } = terminated.data;
-  const toolCalls = (state?.agent.nodes ?? []).map(
-    (node): PausedItem => ({ type: 'tool_call', tool_call_id: node.tool_call_id })
-  );
+  const toolCalls = (state?.agent.nodes ?? []).map((node): PausedItem => ({
+    type: 'tool_call',
+    tool_call_id: node.tool_call_id,
+  }));
   const questions =
     outcome.type === 'prompt_requested'
       ? outcome.prompts

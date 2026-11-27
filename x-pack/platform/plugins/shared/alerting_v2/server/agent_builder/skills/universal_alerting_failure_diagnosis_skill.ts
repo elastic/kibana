@@ -122,13 +122,13 @@ Elasticsearch reports an index the caller cannot read exactly like an index that
 Possible root causes:
 1. **Typo or renamed field** in the query.
    - Confirm: ${platformCoreTools.listIndices} finds matching indices, and ${
-      platformCoreTools.getIndexMapping
-    } shows a similarly named field (for example a different spelling or casing) but not the exact name in the query.
+     platformCoreTools.getIndexMapping
+   } shows a similarly named field (for example a different spelling or casing) but not the exact name in the query.
    - Possible fix (rule change): correct the field name in the query.
 2. **Mapping issue: the field is not mapped in any matched index.** For example the field exists only in \`_source\` (dynamic mapping disabled or \`dynamic: false\`), it only appears after the first document that contains it is indexed, it lives under a different path (\`host.name\` versus \`host.hostname\`), or a \`text\` field needs its \`.keyword\` sub-field for grouping or sorting.
    - Confirm: ${platformCoreTools.listIndices} finds matching indices, but ${
-      platformCoreTools.getIndexMapping
-    } shows no mapping for the field under any similar name, shows \`dynamic: false\` on the parent object, or shows the value under a different path.
+     platformCoreTools.getIndexMapping
+   } shows no mapping for the field under any similar name, shows \`dynamic: false\` on the parent object, or shows the value under a different path.
    - Possible fix (rule change): if the value is mapped under a different path or a \`.keyword\` sub-field, use that field in the query.
    - Possible fix (not a rule change): otherwise have the index owner correct the mapping or ingest pipeline.
 3. **The index pattern matches no index**: wrong or misspelled pattern, data not ingested yet, an ILM-deleted or rolled-over index, a concrete backing index name that no longer exists, or a missing cross-cluster alias.
@@ -141,8 +141,8 @@ Possible root causes:
    - Confirm: the index and the field are visible to the user in ${
      platformCoreTools.listIndices
    } and ${
-      platformCoreTools.getIndexMapping
-    }, yet the rule still fails, and cause 5 does not apply. Check the role of the user who last updated the rule's API key for \`read\` and \`view_index_metadata\` on the pattern.
+     platformCoreTools.getIndexMapping
+   }, yet the rule still fails, and cause 5 does not apply. Check the role of the user who last updated the rule's API key for \`read\` and \`view_index_metadata\` on the pattern.
    - Possible fix (not a rule change): grant the missing privileges, then have a user with access refresh the rule's API key with the **Update API key** action (the bulk update API key endpoint); re-saving the rule does not refresh it, and you have no tool for it. Do not rewrite the query for a privileges problem.
 5. **The column was removed earlier in the query.** ES|QL resolves each command against the columns produced by the previous one, so after \`STATS\`, \`KEEP\`, \`DROP\`, or \`RENAME\`, a source field that is still mapped no longer exists. This often happens when \`query.breach.segment\`, a \`condition\` recovery segment, or a later command in \`query.base\` uses a field the base query already aggregated away (for example \`STATS c = COUNT(*) BY host.name | WHERE http.response.status_code >= 500\`).
    - Confirm: the field is mapped (so causes 1 to 4 do not fit), and an earlier command in the composed query does not output it: a \`STATS\` that neither groups by nor computes it, a \`KEEP\` that omits it, a \`DROP\` that removes it, or a \`RENAME\` that changes its name. The position in the error (\`line:column\`) points at the reference after that command.

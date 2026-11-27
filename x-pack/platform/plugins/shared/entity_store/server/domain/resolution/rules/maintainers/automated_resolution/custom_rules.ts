@@ -243,7 +243,7 @@ async function runEnabledRulesUntilAborted(
     const ruleState = priorStateIfDefinitionUnchanged(ruleStates[stateKey], definitionFingerprint);
     const lastAttemptAt = new Date().toISOString();
     const lastStartedFirstAt = anyRuleStartedThisRun
-      ? asCustomState(ruleStates[stateKey]).lastStartedFirstAt ?? null
+      ? (asCustomState(ruleStates[stateKey]).lastStartedFirstAt ?? null)
       : lastAttemptAt;
     anyRuleStartedThisRun = true;
     let matcherResultState: PerRuleState = ruleState;

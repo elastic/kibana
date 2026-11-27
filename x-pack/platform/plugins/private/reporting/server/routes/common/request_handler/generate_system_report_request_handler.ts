@@ -41,7 +41,7 @@ export interface InternalReportParams {
 export interface GenerateSystemReportRequestParams<
   P extends typeof ParamsValidation = typeof ParamsValidation,
   Q extends typeof QueryValidation = typeof QueryValidation,
-  B extends typeof BodyValidation = typeof BodyValidation
+  B extends typeof BodyValidation = typeof BodyValidation,
 > {
   reportParams: InternalReportParams;
   request: KibanaRequest<TypeOf<P>, TypeOf<Q>, TypeOf<B>>;
@@ -68,7 +68,7 @@ const SUPPORTED_INDICES = ['.fleet-agents'];
 export class GenerateSystemReportRequestHandler<
   P extends typeof ParamsValidation,
   Q extends typeof QueryValidation,
-  B extends typeof BodyValidation
+  B extends typeof BodyValidation,
 > extends RequestHandler<P, Q, B, SavedReport> {
   private handleResponse: HandleResponseFunc;
 
@@ -203,7 +203,7 @@ export type HandleGenerateSystemReportRequestFunc = ReturnType<
 export async function handleGenerateSystemReportRequest<
   P extends typeof ParamsValidation = typeof ParamsValidation,
   Q extends typeof QueryValidation = typeof QueryValidation,
-  B extends typeof BodyValidation = typeof BodyValidation
+  B extends typeof BodyValidation = typeof BodyValidation,
 >(
   reporting: ReportingCore,
   logger: Logger,

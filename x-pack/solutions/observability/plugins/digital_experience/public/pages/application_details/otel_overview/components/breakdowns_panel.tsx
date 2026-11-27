@@ -29,6 +29,9 @@ import { DataPanel } from '../../../../components/data_panel';
 import { BROWSER_LABEL, DEVICE_LABEL, OPERATING_SYSTEM_LABEL } from '../../../../labels';
 import { FILTER_EBT_ELEMENTS } from './overview_filter_labels';
 
+/** The least width of a breakdown beside the others. */
+const BREAKDOWN_CSS = { minInlineSize: 220 };
+
 const TITLE = i18n.translate('xpack.digitalExperience.overview.breakdowns.title', {
   defaultMessage: 'Browsers, operating systems and devices',
 });
@@ -172,9 +175,9 @@ export function BreakdownsPanel({
       showInstrumentationDocs
       data-test-subj="digitalExperienceOverviewBreakdowns"
     >
-      {/* Side by side, stacked on small screens. */}
-      <EuiFlexGroup gutterSize="xl">
-        <EuiFlexItem>
+      {/* Side by side while the panel is wide enough, stacked otherwise, whatever the window. */}
+      <EuiFlexGroup gutterSize="xl" wrap>
+        <EuiFlexItem css={BREAKDOWN_CSS}>
           <Breakdown
             label={BROWSER_LABEL}
             items={toItems(
@@ -186,7 +189,7 @@ export function BreakdownsPanel({
             data-test-subj="digitalExperienceOverviewBrowsers"
           />
         </EuiFlexItem>
-        <EuiFlexItem>
+        <EuiFlexItem css={BREAKDOWN_CSS}>
           <Breakdown
             label={OPERATING_SYSTEM_LABEL}
             items={toItems(
@@ -198,7 +201,7 @@ export function BreakdownsPanel({
             data-test-subj="digitalExperienceOverviewOperatingSystems"
           />
         </EuiFlexItem>
-        <EuiFlexItem>
+        <EuiFlexItem css={BREAKDOWN_CSS}>
           <Breakdown
             label={DEVICE_LABEL}
             items={toItems(devices, 'device')}

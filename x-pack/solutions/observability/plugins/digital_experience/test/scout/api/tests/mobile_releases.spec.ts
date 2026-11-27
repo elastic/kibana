@@ -9,6 +9,7 @@ import { apiTest } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/api';
 import type { MobileReleasesResponse } from '../../../../common/types/mobile';
 import {
+  BUSY_COLD_START,
   BUSY_RELEASE,
   BUSY_SESSIONS,
   EARLIER_TIMESTAMP,
@@ -46,7 +47,15 @@ apiTest.describe('Digital Experience mobile releases API', { tag: DIGITAL_EXPERI
       const { releases, series, markers, histogram } = response.body as MobileReleasesResponse;
       // Four sessions, below the floor of 100 for an error rate.
       expect(releases).toStrictEqual([
-        { release: '1.0.0', isOther: false, sessions: 4, users: 3, errorRate: null },
+        {
+          release: '1.0.0',
+          isOther: false,
+          sessions: 4,
+          users: 3,
+          errorRate: null,
+          coldStart: null,
+          coldStarts: 0,
+        },
       ]);
       expect(series.map(({ release }) => release)).toStrictEqual(['1.0.0']);
       expect(series[0].points.reduce((sum, { sessions }) => sum + sessions, 0)).toBeGreaterThan(0);
@@ -115,6 +124,8 @@ apiTest.describe('Digital Experience mobile releases API', { tag: DIGITAL_EXPERI
         sessions: 2,
         users: 2,
         errorRate: null,
+        coldStart: null,
+        coldStarts: 0,
       });
       expect(new Set(named.map(({ release }) => release))).toStrictEqual(
         new Set(['2.9.0', 'v3.0.0', 'debug', '3.0.0-beta', '3.0.0+45'])
@@ -127,6 +138,8 @@ apiTest.describe('Digital Experience mobile releases API', { tag: DIGITAL_EXPERI
         sessions: 1,
         users: 1,
         errorRate: null,
+        coldStart: null,
+        coldStarts: 0,
       });
       expect(series.map(({ isOther }) => isOther)).toStrictEqual([
         false,
@@ -147,7 +160,7 @@ apiTest.describe('Digital Experience mobile releases API', { tag: DIGITAL_EXPERI
   );
 
   apiTest(
-    'computes the error rate of a release and of its time bucket alike, above both floors',
+    'computes the error rate and cold start of a release, and the error rate of its time bucket, above the floors',
     async ({ apiClient, samlAuth }) => {
       const { cookieHeader } = await samlAuth.asInteractiveUser('viewer');
 
@@ -166,6 +179,9 @@ apiTest.describe('Digital Experience mobile releases API', { tag: DIGITAL_EXPERI
           sessions: BUSY_SESSIONS,
           users: BUSY_SESSIONS,
           errorRate: 0.1,
+          // The guard leaves out the background launch, and `hot` counts in no average
+          coldStart: BUSY_COLD_START.avg,
+          coldStarts: BUSY_COLD_START.count,
         },
       ]);
       expect(series[0].points.filter(({ sessions }) => sessions > 0)).toStrictEqual([

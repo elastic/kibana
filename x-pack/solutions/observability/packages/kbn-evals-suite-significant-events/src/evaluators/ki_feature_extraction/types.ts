@@ -74,5 +74,5 @@ export const getFeaturesFromOutput = (
   if (!output) {
     return [];
   }
-  return Array.isArray(output) ? output : output.features ?? [];
+  return Array.isArray(output) ? output : (output.features ?? []);
 };

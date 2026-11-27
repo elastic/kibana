@@ -28,9 +28,8 @@ describe('getSharedInvestigationsQueryClient', () => {
         }
         return jest.requireActual('@kbn/react-query');
       });
-      const { getSharedInvestigationsQueryClient: getClient } = await import(
-        './shared_query_client'
-      );
+      const { getSharedInvestigationsQueryClient: getClient } =
+        await import('./shared_query_client');
 
       await expect(getClient()).rejects.toBe(loadError);
       const client = await getClient();

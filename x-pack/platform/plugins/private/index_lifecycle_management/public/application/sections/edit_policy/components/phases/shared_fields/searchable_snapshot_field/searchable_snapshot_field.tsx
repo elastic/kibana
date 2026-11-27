@@ -122,7 +122,7 @@ export const SearchableSnapshotField: FunctionComponent<Props> = ({
     Boolean(
       // New policy on cloud should have searchable snapshot on in cold and frozen phase
       (isColdOrFrozenPhase && isNewPolicy && cloud?.isCloudEnabled) ||
-        policy.phases[phase]?.actions?.searchable_snapshot?.snapshot_repository
+      policy.phases[phase]?.actions?.searchable_snapshot?.snapshot_repository
     )
   );
   const fullyMountedSearchableSnapshotLink = docLinks.links.elasticsearch.ilmSearchableSnapshot;

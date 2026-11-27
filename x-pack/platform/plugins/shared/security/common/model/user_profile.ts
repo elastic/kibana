@@ -14,8 +14,9 @@ import type {
 /**
  * User profile enriched with session information.
  */
-export interface GetUserProfileResponse<D extends UserProfileData = UserProfileData>
-  extends UserProfileWithSecurity<D> {
+export interface GetUserProfileResponse<
+  D extends UserProfileData = UserProfileData,
+> extends UserProfileWithSecurity<D> {
   /**
    * Information about the currently authenticated user that owns the profile.
    */

@@ -20,7 +20,7 @@ describe('wake-parent task definition', () => {
         definitions = defs;
       },
     } as unknown as TaskManagerSetupContract,
-    getTaskHandler: () => ({ wakeParent } as unknown as TaskHandler),
+    getTaskHandler: () => ({ wakeParent }) as unknown as TaskHandler,
     getStartServices: jest.fn(),
   });
 

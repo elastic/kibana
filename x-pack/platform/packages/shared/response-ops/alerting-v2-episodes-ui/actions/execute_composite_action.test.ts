@@ -21,14 +21,14 @@ const makeEpisode = (id: string): AlertEpisode =>
     first_timestamp: '2026-04-23T00:00:00Z',
     last_timestamp: '2026-04-23T00:00:00Z',
     duration: 0,
-  } as AlertEpisode);
+  }) as AlertEpisode;
 
 const makeSourceEpisode = (id: string): AlertEpisode =>
   ({
     ...makeEpisode(id),
     source_id: 'classic-alerts',
     source_action_context: { index: '.alerts-test', alertUuid: id },
-  } as AlertEpisode);
+  }) as AlertEpisode;
 
 const makeDeps = () => ({
   http: httpServiceMock.createStartContract(),

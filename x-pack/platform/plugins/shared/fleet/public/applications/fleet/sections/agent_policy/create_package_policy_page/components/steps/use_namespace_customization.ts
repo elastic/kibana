@@ -47,7 +47,7 @@ export function useNamespaceCustomization({
   const installedEnabledFor = useMemo(
     () =>
       packageInfo && 'installationInfo' in packageInfo
-        ? packageInfo.installationInfo?.namespace_customization_enabled_for ?? []
+        ? (packageInfo.installationInfo?.namespace_customization_enabled_for ?? [])
         : [],
     [packageInfo]
   );

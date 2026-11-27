@@ -101,9 +101,9 @@ export const isCancellableNode = (
   return typeof (node as unknown as CancellableNode).onCancel === 'function';
 };
 
-export abstract class BaseAtomicNodeImplementation<TStep extends BaseStep>
-  implements NodeImplementation
-{
+export abstract class BaseAtomicNodeImplementation<
+  TStep extends BaseStep,
+> implements NodeImplementation {
   protected step: TStep;
   protected stepExecutionRuntime: StepExecutionRuntime;
   protected connectorExecutor: ConnectorExecutor | undefined;

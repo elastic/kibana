@@ -36,7 +36,7 @@ const attachment = (
         content_hash: 'hash-1',
       },
     ],
-  } as VersionedAttachment);
+  }) as VersionedAttachment;
 
 const conversation = (
   assistantMessage: string,
@@ -54,7 +54,7 @@ const conversation = (
       { role: 'assistant', message: assistantMessage },
     ],
     attachments,
-  } as unknown as TaskOutput);
+  }) as unknown as TaskOutput;
 
 const runRender = (output: TaskOutput, expected: Record<string, unknown> | null) =>
   createExpectedRenderAttachmentEvaluator().evaluate({

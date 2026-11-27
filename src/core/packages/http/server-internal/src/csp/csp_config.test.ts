@@ -192,9 +192,7 @@ describe('CspConfig', () => {
     });
 
     test('Empty additional config does not affect existing config', () => {
-      const config = new CspConfig(defaultConfig, {
-        /* empty */
-      });
+      const config = new CspConfig(defaultConfig, {/* empty */});
       expect(config.header).toEqual(
         "script-src 'report-sample' 'self'; worker-src 'report-sample' 'self' blob:; style-src 'report-sample' 'self' 'unsafe-inline'; object-src 'report-sample' 'none'; form-action 'report-sample' 'self'; frame-src 'report-sample' 'self' kibana.estccdn.com play.vidyard.com videos.elastic.co ela.st"
       );

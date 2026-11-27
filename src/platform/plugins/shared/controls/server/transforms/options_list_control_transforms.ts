@@ -48,7 +48,7 @@ export const registerOptionsListControlTransforms = (embeddable: EmbeddableSetup
       transformOut: <
         StoredStateType extends Partial<
           LegacyStoredOptionsListExplicitInput & OptionsListDSLControlState
-        >
+        >,
       >(
         state: StoredStateType,
         panelReferences: Reference[] | undefined,

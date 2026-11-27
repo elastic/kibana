@@ -42,7 +42,7 @@ export const OptionsListPopoverSuggestions = ({
   const conditionalApiSubjects: [
     PublishingSubject<boolean | undefined>,
     DSLOptionsListComponentApi['sort$'] | PublishingSubject<undefined>,
-    DSLOptionsListComponentApi['fieldFormatter'] | PublishingSubject<undefined>
+    DSLOptionsListComponentApi['fieldFormatter'] | PublishingSubject<undefined>,
   ] = useMemo(() => {
     const isDSLControl = isDSLOptionsListApi(componentApi);
     return [
@@ -191,7 +191,7 @@ export const OptionsListPopoverSuggestions = ({
       if (searchTechnique === 'exact') return option.label;
 
       return (
-        <EuiHighlight search={option.key === 'exists-option' ? '' : searchStringValue ?? ''}>
+        <EuiHighlight search={option.key === 'exists-option' ? '' : (searchStringValue ?? '')}>
           {option.label}
         </EuiHighlight>
       );

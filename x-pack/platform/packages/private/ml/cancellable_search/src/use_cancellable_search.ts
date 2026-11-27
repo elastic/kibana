@@ -19,7 +19,7 @@ import type { RequestCancellationManager } from './request_cancellation_manager'
 export interface UseCancellableSearch {
   runRequest: <
     RequestBody extends IKibanaSearchRequest,
-    ResponseType extends IKibanaSearchResponse
+    ResponseType extends IKibanaSearchResponse,
   >(
     requestBody: RequestBody,
     options?: ISearchOptions

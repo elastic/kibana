@@ -46,16 +46,13 @@ export const startNightshiftServices = ({
           return of(false);
         }),
         tap(onAvailabilityChange),
-        map(
-          (isAvailable): AppUpdater =>
-            (app) => ({
-              visibleIn: isAvailable ? ['globalSearch', 'projectSideNav'] : [],
-              deepLinks: (app.deepLinks ?? []).map((link) => ({
-                ...link,
-                visibleIn: isAvailable ? ['globalSearch'] : [],
-              })),
-            })
-        )
+        map((isAvailable): AppUpdater => (app) => ({
+          visibleIn: isAvailable ? ['globalSearch', 'projectSideNav'] : [],
+          deepLinks: (app.deepLinks ?? []).map((link) => ({
+            ...link,
+            visibleIn: isAvailable ? ['globalSearch'] : [],
+          })),
+        }))
       )
       .subscribe(appUpdater$)
   );

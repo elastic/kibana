@@ -122,7 +122,7 @@ export function extractPinnedPanelsState(state: { [key: string]: unknown }): {
       const ignoreParentSettings = controlState.ignoreParentSettings ?? {};
       const legacyIgnoreFilters = Boolean(
         ('ignoreFilters' in ignoreParentSettings && ignoreParentSettings.ignoreFilters) ||
-          ('ignoreQuery' in ignoreParentSettings && ignoreParentSettings.ignoreQuery)
+        ('ignoreQuery' in ignoreParentSettings && ignoreParentSettings.ignoreQuery)
       );
       useGlobalFilters = !legacyIgnoreFilters;
       ignoreValidations = Boolean(

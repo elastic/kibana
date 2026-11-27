@@ -13,6 +13,7 @@ export enum GenAISemanticConventions {
   GenAIUsageCacheReadInputTokens = 'gen_ai.usage.cache_read.input_tokens',
   GenAIUsageCacheWriteInputTokens = 'gen_ai.usage.cache_write.input_tokens',
   GenAIUsageOutputTokens = 'gen_ai.usage.output_tokens',
+  GenAIUsageReasoningOutputTokens = 'gen_ai.usage.reasoning.output_tokens',
   GenAIOperationName = 'gen_ai.operation.name',
   GenAIResponseModel = 'gen_ai.response.model',
   GenAIRequestModel = 'gen_ai.request.model',
@@ -59,6 +60,7 @@ export interface GenAISemConvAttributes {
   [GenAISemanticConventions.GenAIUsageCacheReadInputTokens]?: number;
   [GenAISemanticConventions.GenAIUsageCacheWriteInputTokens]?: number;
   [GenAISemanticConventions.GenAIUsageOutputTokens]?: number;
+  [GenAISemanticConventions.GenAIUsageReasoningOutputTokens]?: number;
   [GenAISemanticConventions.GenAIOperationName]?:
     | 'chat'
     | 'execute_tool'

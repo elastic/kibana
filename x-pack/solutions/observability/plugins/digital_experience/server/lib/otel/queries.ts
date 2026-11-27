@@ -100,7 +100,7 @@ export const inEnvironmentFilter = (
  * the documents of `filters` too.
  */
 export const byEnvironment = <
-  TAggs extends Record<string, estypes.AggregationsAggregationContainer>
+  TAggs extends Record<string, estypes.AggregationsAggregationContainer>,
 >(
   environment: string | undefined,
   aggs: TAggs,

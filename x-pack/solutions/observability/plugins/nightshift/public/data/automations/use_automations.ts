@@ -224,6 +224,25 @@ export const useAutomationsRunCounts = (
   }).data;
 };
 
+export const useAutomationsLastRuns = (enabled: boolean) => {
+  const investigationsClient = useKibana().services.nightshiftInvestigations?.investigationsClient;
+  return useQuery({
+    queryKey: [...AUTOMATIONS_QUERY_KEY, 'lastRuns'],
+    enabled: investigationsClient != null && enabled,
+    queryFn: async ({ signal }) => {
+      if (!investigationsClient) {
+        throw new Error('Nightshift investigations plugin is unavailable');
+      }
+      const { lastRuns } = await investigationsClient.fetch(
+        'GET /internal/nightshift/automations/last_runs',
+        { signal: signal ?? null }
+      );
+      return lastRuns;
+    },
+    retry: false,
+  });
+};
+
 type AutomationRunActivity =
   NightshiftInvestigationsAPIReturnType<'GET /internal/nightshift/automations/{id}/run_activity'>;
 const RUN_ACTIVITY_POLL_INTERVAL_MS = 5_000;

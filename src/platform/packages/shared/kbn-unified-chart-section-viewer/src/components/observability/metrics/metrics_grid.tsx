@@ -304,11 +304,10 @@ export const MetricsGrid = ({
   );
 };
 
-interface ChartItemProps
-  extends Pick<
-    UnifiedMetricsGridProps,
-    'services' | 'onBrushEnd' | 'onFilter' | 'fetchParams' | 'actions'
-  > {
+interface ChartItemProps extends Pick<
+  UnifiedMetricsGridProps,
+  'services' | 'onBrushEnd' | 'onFilter' | 'fetchParams' | 'actions'
+> {
   id: string;
   metricItem: ParsedMetricItem;
   index: number;
@@ -618,10 +617,12 @@ const A11yGridCell = React.forwardRef(
         css={css`
           outline: none;
           cursor: pointer;
-          ${isFocused && {
-            boxShadow: `0 0 ${euiTheme.focus.width} ${euiTheme.colors.primary}`,
-            borderRadius: euiTheme.border.radius.medium,
-          }}
+          ${
+            isFocused && {
+              boxShadow: `0 0 ${euiTheme.focus.width} ${euiTheme.colors.primary}`,
+              borderRadius: euiTheme.border.radius.medium,
+            }
+          }
         `}
       >
         {children}

@@ -46,8 +46,10 @@ import { styles } from './editor.styles';
 
 export type { CodeEditorScope };
 
-export interface CodeEditorProps
-  extends Pick<ReactMonacoEditorProps, 'overflowWidgetsContainerZIndexOverride'> {
+export interface CodeEditorProps extends Pick<
+  ReactMonacoEditorProps,
+  'overflowWidgetsContainerZIndexOverride'
+> {
   /** Width of editor. Defaults to 100%. */
   width?: string | number;
 

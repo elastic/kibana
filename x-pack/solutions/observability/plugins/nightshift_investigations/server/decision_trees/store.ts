@@ -49,7 +49,10 @@ const RETRY_DELAY_MS = 50;
  * counts again.
  */
 export class DecisionTreeVersionWriteError extends Error {
-  constructor(public readonly pending: PendingVersionWrite, options?: { cause?: unknown }) {
+  constructor(
+    public readonly pending: PendingVersionWrite,
+    options?: { cause?: unknown }
+  ) {
     const reason = options?.cause instanceof Error ? `: ${options.cause.message}` : '';
     super(`Saved ${pending.treeId} but its version history write failed${reason}`, options);
     this.name = 'DecisionTreeVersionWriteError';

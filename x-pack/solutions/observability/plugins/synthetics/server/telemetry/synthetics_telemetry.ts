@@ -40,7 +40,10 @@ export class SyntheticsTelemetry {
   private issuedTo?: string;
   private readonly errorReportedAt = new Map<string, number>();
 
-  constructor(private readonly analytics: AnalyticsServiceSetup, private readonly logger: Logger) {}
+  constructor(
+    private readonly analytics: AnalyticsServiceSetup,
+    private readonly logger: Logger
+  ) {}
 
   public async loadLicenseInfo(esClient: ElasticsearchClient): Promise<void> {
     try {

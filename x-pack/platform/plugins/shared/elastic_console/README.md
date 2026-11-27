@@ -308,5 +308,6 @@ pnpm test:type_check --project x-pack/platform/plugins/shared/elastic_console/ts
 
 ### Lint
 ```
-node scripts/eslint --fix x-pack/platform/plugins/shared/elastic_console/
+node scripts/lint --fix x-pack/platform/plugins/shared/elastic_console/
+node scripts/oxfmt x-pack/platform/plugins/shared/elastic_console/
 ```

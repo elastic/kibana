@@ -19,8 +19,10 @@ export const DATA_TEST_SUBJ_MANAGE_SUBSCRIPTION_BUTTON = 'aiCTAManageSubscriptio
 /**
  * Props for the `NeedTierUpgrade` call to action.
  */
-export interface NeedTierUpgradeProps
-  extends Pick<AssistantCallToActionProps, 'data-test-subj' | 'centered'> {
+export interface NeedTierUpgradeProps extends Pick<
+  AssistantCallToActionProps,
+  'data-test-subj' | 'centered'
+> {
   /** Callback to handle managing the subscription. */
   onManageSubscription: () => void;
 }

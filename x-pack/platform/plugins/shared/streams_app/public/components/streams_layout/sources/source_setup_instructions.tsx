@@ -40,7 +40,7 @@ export const SourceSetupInstructions = ({
   );
   const canShowSnippet = Boolean(source.endpoint && apiKey);
   const snippet =
-    source.endpoint && apiKey ? selectedTab?.getSnippet(source.endpoint, apiKey) ?? '' : '';
+    source.endpoint && apiKey ? (selectedTab?.getSnippet(source.endpoint, apiKey) ?? '') : '';
 
   return (
     <>

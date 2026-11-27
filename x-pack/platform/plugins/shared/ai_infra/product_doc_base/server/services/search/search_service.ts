@@ -41,9 +41,9 @@ const isOpenapiSpecHit = (
 ): hit is SearchHit<OpenapiSpecAttributes> & { _source: OpenapiSpecAttributes } => {
   return Boolean(
     hit._source &&
-      typeof hit._source === 'object' &&
-      'operationId' in hit._source &&
-      'endpoint' in hit._source
+    typeof hit._source === 'object' &&
+    'operationId' in hit._source &&
+    'endpoint' in hit._source
   );
 };
 
@@ -52,7 +52,7 @@ const mapSecurityLabsResult = (docHit: SearchHit<SecurityLabsAttributes>) => {
   const content = source.content;
   return {
     title: source.title,
-    content: typeof content === 'string' ? content : content?.text ?? '',
+    content: typeof content === 'string' ? content : (content?.text ?? ''),
     url: `${SECURITY_LABS_BASE_URL}${source.slug}`,
     productName: 'security' as const,
     highlights:

@@ -7,7 +7,9 @@
 
 import type { FormHook, FormData, ValidationError } from '../../../shared_imports';
 
-export interface FormHookWithWarnings<T extends FormData = FormData, I extends FormData = T>
-  extends FormHook<T, I> {
+export interface FormHookWithWarnings<
+  T extends FormData = FormData,
+  I extends FormData = T,
+> extends FormHook<T, I> {
   getValidationWarnings(): ValidationError[];
 }

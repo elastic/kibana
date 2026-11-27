@@ -58,12 +58,13 @@ describe('CsvESQLGenerator', () => {
     }
   ): ESQLSearchResponse => esqlResponse;
 
-  const mockDataClientSearchDefault = jest.fn().mockImplementation(
-    (): Rx.Observable<IKibanaSearchResponse<ESQLSearchResponse>> =>
+  const mockDataClientSearchDefault = jest
+    .fn()
+    .mockImplementation((): Rx.Observable<IKibanaSearchResponse<ESQLSearchResponse>> =>
       Rx.of({
         rawResponse: getMockRawResponse(),
       })
-  );
+    );
 
   const mockSearchResponse = (response: ESQLSearchResponse) => {
     mockDataClient.search = jest.fn().mockImplementation(() =>

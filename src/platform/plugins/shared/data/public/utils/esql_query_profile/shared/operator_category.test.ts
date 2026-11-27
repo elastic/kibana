@@ -11,7 +11,7 @@ import type { AggregatedOperator } from '../profile/types';
 import { operatorCategory, summarizeCpuByCategory } from './operator_category';
 
 const operator = (title: string, processNanos: number, timeReported = true) =>
-  ({ title, processNanos, timeReported } as AggregatedOperator);
+  ({ title, processNanos, timeReported }) as AggregatedOperator;
 
 describe('operatorCategory', () => {
   it('groups operators by the kind of work they do', () => {

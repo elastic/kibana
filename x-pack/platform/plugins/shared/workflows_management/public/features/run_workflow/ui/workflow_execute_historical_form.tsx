@@ -62,9 +62,8 @@ export const WorkflowExecuteHistoricalForm = React.memo<WorkflowExecuteHistorica
     const [selectedExecutionId, setSelectedExecutionId] = useState<string | null>(
       initialExecutionId ?? null
     );
-    const [needsInitialExecutionDate, setNeedsInitialExecutionDate] = useState(
-      !!initialExecutionId
-    );
+    const [needsInitialExecutionDate, setNeedsInitialExecutionDate] =
+      useState(!!initialExecutionId);
 
     const [startedAfter, setStartedAfter] = useState('now-1w'); // default to 1 week ago
     const [startedBefore, setStartedBefore] = useState('now');

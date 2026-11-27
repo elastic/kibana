@@ -20,9 +20,12 @@ const LIST_BREADCRUMB = [
   },
 ];
 
-export class DataFederationPlugin
-  implements Plugin<void, DataFederationPluginStart, SetupDependencies, StartDependencies>
-{
+export class DataFederationPlugin implements Plugin<
+  void,
+  DataFederationPluginStart,
+  SetupDependencies,
+  StartDependencies
+> {
   private readonly enabled: boolean;
   private readonly enableGoogleCloudStorageDataSourceType: boolean;
   private readonly enableAzureDataSourceType: boolean;

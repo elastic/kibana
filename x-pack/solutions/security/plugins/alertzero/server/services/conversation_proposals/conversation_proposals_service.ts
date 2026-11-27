@@ -140,9 +140,8 @@ export class ConversationProposalsService {
   ): Promise<{ matchesNothing: boolean; filter: { conversationIds?: string[] } }> {
     if (entity === undefined) return { matchesNothing: false, filter: {} };
 
-    const conversationIds = await this.getImpactClient(request).searchConversationIdsByEntityId(
-      entity
-    );
+    const conversationIds =
+      await this.getImpactClient(request).searchConversationIdsByEntityId(entity);
     return { matchesNothing: conversationIds.length === 0, filter: { conversationIds } };
   }
 

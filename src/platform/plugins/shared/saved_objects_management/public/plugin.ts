@@ -66,15 +66,12 @@ export interface StartDependencies {
   spaces?: SpacesPluginStart;
 }
 
-export class SavedObjectsManagementPlugin
-  implements
-    Plugin<
-      SavedObjectsManagementPluginSetup,
-      SavedObjectsManagementPluginStart,
-      SetupDependencies,
-      StartDependencies
-    >
-{
+export class SavedObjectsManagementPlugin implements Plugin<
+  SavedObjectsManagementPluginSetup,
+  SavedObjectsManagementPluginStart,
+  SetupDependencies,
+  StartDependencies
+> {
   private actionService = new SavedObjectsManagementActionService();
   private columnService = new SavedObjectsManagementColumnService();
 

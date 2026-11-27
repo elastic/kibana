@@ -58,19 +58,19 @@ export const CasesTimelineIntegrationContext = React.createContext<CasesTimeline
   null
 );
 
+// TODO: Fix this manually. Issue #123375
+/* eslint-disable @kbn/compat/react-display-name */
 export const CasesTimelineIntegrationProvider: FC<
   PropsWithChildren<{
     timelineIntegration?: CasesTimelineIntegration;
   }>
-> =
-  // TODO: Fix this manually. Issue #123375
-  // eslint-disable-next-line @kbn/compat/react-display-name
-  ({ children, timelineIntegration }) => {
-    const [activeTimelineIntegration] = useState(timelineIntegration ?? null);
+> = ({ children, timelineIntegration }) => {
+  const [activeTimelineIntegration] = useState(timelineIntegration ?? null);
 
-    return (
-      <CasesTimelineIntegrationContext.Provider value={activeTimelineIntegration}>
-        {children}
-      </CasesTimelineIntegrationContext.Provider>
-    );
-  };
+  return (
+    <CasesTimelineIntegrationContext.Provider value={activeTimelineIntegration}>
+      {children}
+    </CasesTimelineIntegrationContext.Provider>
+  );
+};
+/* eslint-enable @kbn/compat/react-display-name */

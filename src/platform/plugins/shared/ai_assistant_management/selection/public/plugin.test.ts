@@ -93,7 +93,7 @@ describe('AI Assistant Management Selection Plugin', () => {
     const createCoreSetupMock = (): CoreSetup<any, any> =>
       ({
         getStartServices: jest.fn().mockResolvedValue([{} as any, {} as any, {} as any]),
-      } as any);
+      }) as any;
 
     const rank: Record<string, number> = {
       basic: 10,

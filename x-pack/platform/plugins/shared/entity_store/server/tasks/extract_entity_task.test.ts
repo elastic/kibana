@@ -43,7 +43,7 @@ const createTaskInstance = (schedule?: ConcreteTaskInstance['schedule']): Concre
     id: 'entity_store:v2:extract_entity_task:host:default',
     taskType: 'entity_store:v2:extract_entity_task:host',
     schedule,
-  } as ConcreteTaskInstance);
+  }) as ConcreteTaskInstance;
 
 describe('getNewSchedule', () => {
   it('returns a schedule when frequency differs from the current interval', () => {

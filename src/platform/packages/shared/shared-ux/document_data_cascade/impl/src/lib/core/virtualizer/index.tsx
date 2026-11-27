@@ -102,7 +102,7 @@ export const useCascadeVirtualizer = <G extends GroupNode>({
       const index = virtualizer.indexFromElement(element);
       // A detached child is not in normal flow; retain its row's bounds so scrolling cannot unmount it.
       return childController.isRowDetached(index)
-        ? virtualizer.measurementsCache[index]?.size ?? estimatedRowHeight
+        ? (virtualizer.measurementsCache[index]?.size ?? estimatedRowHeight)
         : measureElement(element, entry, virtualizer);
     },
     onChange(virtualizer) {

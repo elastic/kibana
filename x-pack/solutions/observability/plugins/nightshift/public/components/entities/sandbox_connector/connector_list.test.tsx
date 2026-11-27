@@ -73,7 +73,7 @@ describe('ConnectorList', () => {
       })
     );
     await waitFor(() => expect(toggle('b')).toBeChecked());
-    expect(toasts.addSuccess).toHaveBeenCalledWith({ title: 'Connector b added' });
+    expect(toasts.addSuccess).not.toHaveBeenCalled();
 
     fireEvent.click(toggle('a'));
     await waitFor(() =>

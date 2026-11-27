@@ -31,9 +31,12 @@ const LazyHomeRoutes = dynamic(
   { fallback: <HomePageLoading /> }
 );
 
-export class ElasticsearchHomePlugin
-  implements Plugin<void, ElasticsearchHomePublicStart, {}, ElasticsearchHomeStartDependencies>
-{
+export class ElasticsearchHomePlugin implements Plugin<
+  void,
+  ElasticsearchHomePublicStart,
+  {},
+  ElasticsearchHomeStartDependencies
+> {
   public setup() {}
 
   public start(

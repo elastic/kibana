@@ -171,7 +171,7 @@ export const pickDeviceProfile = (
 ): DeviceProfile | undefined => {
   const profiles = Object.values(DEVICE_PROFILES);
   const weights = profiles.map(({ id, weight, platform }) =>
-    platforms.includes(platform) ? weightOverrides[id] ?? weight : 0
+    platforms.includes(platform) ? (weightOverrides[id] ?? weight) : 0
   );
   const total = weights.reduce((sum, weight) => sum + weight, 0);
   // Drawn even when nothing can be picked, so that filters don't change the later draws

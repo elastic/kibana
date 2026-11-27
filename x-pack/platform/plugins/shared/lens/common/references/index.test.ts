@@ -30,7 +30,7 @@ const getMockLensState = (
       references,
     },
     ...overrides,
-  } as LensSerializedState);
+  }) as LensSerializedState;
 
 describe('references', () => {
   describe('injectLensReferences', () => {

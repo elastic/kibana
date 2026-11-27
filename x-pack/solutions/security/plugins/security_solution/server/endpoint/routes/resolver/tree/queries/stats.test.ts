@@ -95,14 +95,14 @@ describe('StatsQuery', () => {
         asInternalUser: {
           search: jest.fn().mockResolvedValue({ aggregations: { ids: { buckets: [] } } }),
         },
-      } as unknown as IScopedClusterClient);
+      }) as unknown as IScopedClusterClient;
 
     const buildAlertsClient = () =>
       ({
         find: jest
           .fn()
           .mockResolvedValue({ aggregations: { ids: { buckets: [] } }, hits: { hits: [] } }),
-      } as unknown as jest.Mocked<AlertsClient>);
+      }) as unknown as jest.Mocked<AlertsClient>;
 
     it('requests alerts without `_source` so large hit responses are not buffered', async () => {
       const query = new StatsQuery({

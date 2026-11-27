@@ -114,9 +114,6 @@
           "**/.storybook/main.{js,ts}"
         ]
       },
-      "eslint": {
-        "config": [".eslintrc.js", "**/.eslintrc.{js,json}"]
-      },
       "babel": {
         "config": [
           "packages/kbn-babel-preset/common_preset.js",

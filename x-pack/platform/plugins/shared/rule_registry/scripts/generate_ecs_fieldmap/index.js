@@ -70,7 +70,8 @@ do not manually edit
     { encoding: 'utf-8' }
   );
 
-  await exec(`node scripts/eslint --fix ${outputFieldMapFilename}`);
+  await exec(`node scripts/lint --fix ${outputFieldMapFilename}`);
+  await exec(`node scripts/oxfmt ${outputFieldMapFilename}`);
 }
 
 generate().catch((err) => {

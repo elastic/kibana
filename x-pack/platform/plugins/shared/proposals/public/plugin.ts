@@ -14,9 +14,10 @@ import type {
   ProposalsPublicStartDependencies,
 } from './types';
 
-export class ProposalsPublicPlugin
-  implements Plugin<ProposalsPublicPluginSetup, ProposalsPublicPluginStart>
-{
+export class ProposalsPublicPlugin implements Plugin<
+  ProposalsPublicPluginSetup,
+  ProposalsPublicPluginStart
+> {
   setup(
     _core: CoreSetup,
     { workflowsExtensions }: ProposalsPublicSetupDependencies

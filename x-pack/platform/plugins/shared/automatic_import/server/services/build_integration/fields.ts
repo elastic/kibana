@@ -148,7 +148,7 @@ export const generateFieldMappings = async (
     const agentType = agentTypeMap.get(f.name);
     return {
       ...f,
-      type: isEcs && ecsEntry.type ? ecsEntry.type : agentType ?? f.type,
+      type: isEcs && ecsEntry.type ? ecsEntry.type : (agentType ?? f.type),
       is_ecs: isEcs,
     };
   });

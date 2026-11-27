@@ -51,7 +51,7 @@ describe('SlackChannelSelector', () => {
                 ]
               : [],
           isFetching: false,
-        } as UseQueryResult<SlackChannel[], Error>)
+        }) as UseQueryResult<SlackChannel[], Error>
     );
   });
 

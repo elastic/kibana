@@ -18,7 +18,7 @@ export const createProposalManagementSkill = (
     name: 'proposal-management',
     basePath: 'skills/platform/proposals',
     availability: {
-      cacheMode: 'none',
+      cacheMode: 'space-user',
       handler: async ({ request }) =>
         (await canManage(request))
           ? { status: 'available' }

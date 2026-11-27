@@ -13,7 +13,6 @@ import Path from 'path';
 import inquirer from 'inquirer';
 import normalizePath from 'normalize-path';
 import { globby } from 'globby';
-import { ESLint } from 'eslint';
 
 import { REPO_ROOT } from '@kbn/repo-info';
 import { createFailError, createFlagError, isFailError } from '@kbn/dev-cli-errors';
@@ -28,6 +27,7 @@ import { validateElasticTeam } from '../lib/validate_elastic_team';
 import { PKG_TEMPLATE_DIR, determineDevPackageDir, determinePackageDir } from '../paths';
 import type { GenerateCommand } from '../generate_command';
 import { ask } from '../lib/ask';
+import { lintAndFormat } from '../lib/lint_and_format';
 
 const validPkgId = (id: unknown): id is string =>
   typeof id === 'string' && id.startsWith('@kbn/') && !id.includes(' ');
@@ -266,14 +266,8 @@ export const PackageCommand: GenerateCommand = {
 
     log.info('Wrote plugin files to', packageDir);
 
-    log.info('Linting files');
-    const eslint = new ESLint({
-      cache: false,
-      cwd: REPO_ROOT,
-      fix: true,
-      extensions: ['.js', '.mjs', '.ts', '.tsx'],
-    });
-    await ESLint.outputFixes(await eslint.lintFiles([packageDir]));
+    log.info('Linting and formatting files');
+    await lintAndFormat(log, [packageDir]);
 
     const packageJsonPath = Path.resolve(REPO_ROOT, 'package.json');
     const packageJson = JSON.parse(await Fsp.readFile(packageJsonPath, 'utf8'));

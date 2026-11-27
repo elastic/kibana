@@ -45,7 +45,7 @@ const createEsClientForUser = ({ cluster = [], index = [], application = [] }: G
           (request.application ?? []).every((privileges) => application.includes(privileges)),
       })),
     },
-  } as unknown as ElasticsearchClient);
+  }) as unknown as ElasticsearchClient;
 
 describe('hasIngestPrivileges', () => {
   it.each<[string, GrantedPrivileges]>([

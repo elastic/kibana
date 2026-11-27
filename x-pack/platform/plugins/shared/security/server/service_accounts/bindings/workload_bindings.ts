@@ -488,14 +488,12 @@ export class ServiceAccountWorkloadBindings implements ServiceAccountWorkloadBin
 
     const spaceId = this.getSpaceId(request);
     // Picks the coordinates out explicitly, so a caller's extra fields never reach the store.
-    const coordinates = changes.map(
-      ({ workloadType, workloadId }): WorkloadBindingCoordinates => ({
-        pluginId,
-        workloadType,
-        workloadId,
-        spaceId,
-      })
-    );
+    const coordinates = changes.map(({ workloadType, workloadId }): WorkloadBindingCoordinates => ({
+      pluginId,
+      workloadType,
+      workloadId,
+      spaceId,
+    }));
 
     // The bindings a change replaces or removes, read first, verified, for the events. A change
     // whose prior binding cannot be read is not applied: its write would share the failure.

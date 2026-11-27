@@ -24,10 +24,42 @@ jest.mock('../../../../hooks/use_formatters', () => ({
 }));
 
 const RELEASES: MobileReleaseRow[] = [
-  { release: '2.0.0', isOther: false, sessions: 600, users: 150, errorRate: 0.256 },
-  { release: '1.5.0', isOther: false, sessions: 300, users: 200, errorRate: 0.1 },
-  { release: '1.0.0', isOther: false, sessions: 60, users: 40, errorRate: null },
-  { release: OTHER_RELEASE_KEY, isOther: true, sessions: 40, users: 500, errorRate: null },
+  {
+    release: '2.0.0',
+    isOther: false,
+    sessions: 600,
+    users: 150,
+    errorRate: 0.256,
+    coldStart: 2600,
+    coldStarts: 120,
+  },
+  {
+    release: '1.5.0',
+    isOther: false,
+    sessions: 300,
+    users: 200,
+    errorRate: 0.1,
+    coldStart: null,
+    coldStarts: 0,
+  },
+  {
+    release: '1.0.0',
+    isOther: false,
+    sessions: 60,
+    users: 40,
+    errorRate: null,
+    coldStart: null,
+    coldStarts: 0,
+  },
+  {
+    release: OTHER_RELEASE_KEY,
+    isOther: true,
+    sessions: 40,
+    users: 500,
+    errorRate: null,
+    coldStart: null,
+    coldStarts: 0,
+  },
 ];
 
 const onSelectRelease = jest.fn();
@@ -71,10 +103,10 @@ beforeEach(() => {
 });
 
 describe('ReleaseTable', () => {
-  it('has a column for the release, sessions, users and error rate', () => {
+  it('has a column for the release, sessions, users, error rate and cold start', () => {
     renderTable();
 
-    ['Release', 'Sessions', 'Users', 'Error rate'].forEach((name) => {
+    ['Release', 'Sessions', 'Users', 'Error rate', 'Avg. cold start'].forEach((name) => {
       expect(screen.getByRole('columnheader', { name: new RegExp(name) })).toBeInTheDocument();
     });
   });
@@ -89,8 +121,24 @@ describe('ReleaseTable', () => {
     render(
       <SortedTable
         releases={[
-          { release: '2.0.0', isOther: false, sessions: 11, users: 1, errorRate: null },
-          { release: '1.0.0', isOther: false, sessions: 1, users: 1, errorRate: null },
+          {
+            release: '2.0.0',
+            isOther: false,
+            sessions: 11,
+            users: 1,
+            errorRate: null,
+            coldStart: null,
+            coldStarts: 0,
+          },
+          {
+            release: '1.0.0',
+            isOther: false,
+            sessions: 1,
+            users: 1,
+            errorRate: null,
+            coldStart: null,
+            coldStarts: 0,
+          },
         ]}
         colors={new Map()}
         selectedRelease={undefined}
@@ -120,7 +168,24 @@ describe('ReleaseTable', () => {
 
     expect(row('2.0.0')).toHaveTextContent('0.26');
     expect(within(row('2.0.0')).queryByText('Not enough data')).toBeNull();
-    expect(within(row('1.0.0')).getByText('Not enough data')).toBeInTheDocument();
+    expect(
+      within(row('1.0.0')).getByTestId('digitalExperienceMobileReleaseErrorRate')
+    ).toHaveTextContent('Not enough data');
+  });
+
+  it('shows the average cold start with its count, a dash without cold starts, and holds it back below the floor', async () => {
+    renderTable();
+
+    const coldStart = (release: string) =>
+      within(row(release)).getByTestId('digitalExperienceMobileReleaseColdStart');
+    expect(coldStart('2.0.0')).toHaveTextContent('2.60 s');
+    fireEvent.mouseOver(within(coldStart('2.0.0')).getByText('2.60 s'));
+    expect(await screen.findByText('120 cold starts')).toBeInTheDocument();
+    // Enough sessions, but no cold start
+    expect(coldStart('1.5.0')).toHaveTextContent('—');
+    // Below 100 sessions, as the error rate
+    expect(coldStart('1.0.0')).toHaveTextContent('Not enough data');
+    expect(coldStart('')).toHaveTextContent('Not enough data');
   });
 
   it('filters by a release, and takes the filter off when it is selected', () => {
@@ -156,7 +221,15 @@ describe('ReleaseTable', () => {
     render(
       <SortedTable
         releases={[
-          { release: longRelease, isOther: false, sessions: 1, users: 1, errorRate: null },
+          {
+            release: longRelease,
+            isOther: false,
+            sessions: 1,
+            users: 1,
+            errorRate: null,
+            coldStart: null,
+            coldStarts: 0,
+          },
         ]}
         colors={new Map()}
         selectedRelease={undefined}
@@ -194,6 +267,8 @@ describe('sortReleases', () => {
       sessions: 10,
       users: 1,
       errorRate: null,
+      coldStart: null,
+      coldStarts: 0,
     }));
     const order = (direction: 'asc' | 'desc') =>
       sortReleases(equal, { field: 'sessions', direction }).map(({ release }) => release);

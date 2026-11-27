@@ -42,7 +42,7 @@ jest.mock('./routes/register_routes', () => ({
 const createContext = () =>
   ({
     logger: { get: () => loggerMock.create() },
-  } as unknown as ConstructorParameters<typeof ProposalsPlugin>[0]);
+  }) as unknown as ConstructorParameters<typeof ProposalsPlugin>[0];
 
 const setupPlugin = () => {
   const plugin = new ProposalsPlugin(createContext());
@@ -152,7 +152,7 @@ describe('ProposalsPlugin', () => {
       expect(agentBuilder.skills.register).toHaveBeenCalledWith(
         expect.objectContaining({
           id: 'proposal-management',
-          availability: expect.objectContaining({ cacheMode: 'none' }),
+          availability: expect.objectContaining({ cacheMode: 'space-user' }),
         })
       );
       const [[skill]] = agentBuilder.skills.register.mock.calls;

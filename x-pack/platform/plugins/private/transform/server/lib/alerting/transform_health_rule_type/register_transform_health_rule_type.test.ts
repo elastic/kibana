@@ -18,7 +18,7 @@ describe('Transform Health Rule Type', () => {
       fieldFormatServiceFactory: jest.fn(() => ({
         deserialize: jest.fn(),
       })),
-    } as any);
+    }) as any;
 
   const createExecutorOptions = ({
     withAlertsClient = true,
@@ -41,7 +41,7 @@ describe('Transform Health Rule Type', () => {
         testsConfig: null,
       },
       state: {},
-    } as any);
+    }) as any;
 
   describe('Error Handling', () => {
     it('throws an error when alertsClient is missing', async () => {

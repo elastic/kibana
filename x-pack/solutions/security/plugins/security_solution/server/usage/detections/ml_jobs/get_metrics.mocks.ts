@@ -398,7 +398,7 @@ export const getMockRuleSearchResponse = (
       },
     ],
     // NOTE: We have to cast as "unknown" and then back to "RuleSearchResult" because "RuleSearchResult" isn't an exact type. See notes in the JSDocs fo that type.
-  } as unknown as SavedObjectsFindResponse<RuleSearchResult, never>);
+  }) as unknown as SavedObjectsFindResponse<RuleSearchResult, never>;
 
 export const getMockThreatMatchRuleSO = ({
   ruleId = 'a6261241-b236-4f5b-ac09-deab86330b3a',
@@ -518,7 +518,7 @@ export const getMockThreatMatchRuleSO = ({
     version: 'Wzk4NTQwLDNd',
     score: 0,
     sort: ['1644865254209', '19548'],
-  } as unknown as RuleSearchResult);
+  }) as unknown as RuleSearchResult;
 
 export const getMockThreatMatchRuleSearchResponse = (
   rulesSO: RuleSearchResult[]
@@ -528,7 +528,7 @@ export const getMockThreatMatchRuleSearchResponse = (
     per_page: 1_000,
     total: 1,
     saved_objects: rulesSO,
-  } as unknown as SavedObjectsFindResponse<RuleSearchResult, never>);
+  }) as unknown as SavedObjectsFindResponse<RuleSearchResult, never>;
 
 type PrebuiltRuleAssetSearchResponse = Awaited<ReturnType<SavedObjectsClientContract['search']>>;
 
@@ -548,7 +548,7 @@ export const getMockPrebuiltRuleAssetSearchResponse = (
         _source: { type: 'security-rule', 'security-rule': version },
       })),
     },
-  } as unknown as PrebuiltRuleAssetSearchResponse);
+  }) as unknown as PrebuiltRuleAssetSearchResponse;
 
 const getRuleSource = ({
   isElastic,

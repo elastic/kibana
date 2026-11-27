@@ -278,7 +278,7 @@ describe('queryMatrixScores', () => {
     const listExperiments = jest
       .fn()
       .mockImplementation(async ({ taskModelId }: { taskModelId?: string }) =>
-        taskModelId ? experimentsByModel[taskModelId] ?? [] : []
+        taskModelId ? (experimentsByModel[taskModelId] ?? []) : []
       );
     const getExperimentStats = jest.fn().mockResolvedValue(stats);
     const client = { listExperiments, getExperimentStats } as unknown as MatrixEvalsClient;
@@ -451,7 +451,7 @@ describe('queryMatrixScores', () => {
         task: { model: { id: 'm1' } },
         evaluator: { model: { id: 'm1' }, name: 'Factuality', score: 1 },
         example: { id: `entity-analytics-${index}` },
-      } as unknown as EvaluationScoreDocument);
+      }) as unknown as EvaluationScoreDocument;
 
     const { client } = createClient({
       m1: [experiment({ experiment_id: 'exp-m1', modelId: 'm1' })],
@@ -489,7 +489,7 @@ describe('queryMatrixScores', () => {
         task: { model: { id: 'm1' } },
         evaluator: { model: { id: 'm1' }, name: 'Factuality', score: 1 },
         example: { id: 'alert-analysis-a' },
-      } as unknown as EvaluationScoreDocument);
+      }) as unknown as EvaluationScoreDocument;
 
     const { client } = createClient({
       m1: [experiment({ experiment_id: 'exp-m1', modelId: 'm1' })],
@@ -520,7 +520,7 @@ describe('queryMatrixScores', () => {
         task: { model: { id: modelId }, repetition_index: 0 },
         evaluator: { model: { id: 'judge' }, name: 'Factuality', score: 1 },
         example: { id: `ex-${exampleIndex}` },
-      } as unknown as EvaluationScoreDocument);
+      }) as unknown as EvaluationScoreDocument;
 
     const { client } = createClient({
       complete: [experiment({ experiment_id: 'exp-complete', modelId: 'complete' })],
@@ -553,7 +553,7 @@ describe('queryMatrixScores', () => {
         task: { model: { id: modelId }, repetition_index: repetitionIndex },
         evaluator: { model: { id: 'judge' }, name: 'Factuality', score: 1 },
         example: { id: `ex-${exampleIndex}` },
-      } as unknown as EvaluationScoreDocument);
+      }) as unknown as EvaluationScoreDocument;
 
     const { client } = createClient({
       once: [experiment({ experiment_id: 'exp-once', modelId: 'once' })],
@@ -886,7 +886,7 @@ describe('scoresByPrefixToDatasets', () => {
       task: { model: { id: 'm1' }, trace_id: 't' },
       evaluator: { name: evaluatorName, score: s },
       metadata: {},
-    } as unknown as EvaluationScoreDocument);
+    }) as unknown as EvaluationScoreDocument;
 
   it('buckets docs by example.id prefix and computes per-evaluator means', () => {
     const datasets = scoresByPrefixToDatasets(
@@ -936,7 +936,7 @@ describe('scoresByPrefixToDatasets', () => {
         task: { model: { id: 'm1' }, trace_id: 't' },
         evaluator: { name, score: s, direction },
         metadata: {},
-      } as unknown as EvaluationScoreDocument);
+      }) as unknown as EvaluationScoreDocument;
 
     const datasets = scoresByPrefixToDatasets(
       [
@@ -1237,7 +1237,7 @@ describe('scoresByPrefixToDatasets errored-out tracking', () => {
         ...(label ? { label } : {}),
       },
       metadata: {},
-    } as unknown as EvaluationScoreDocument);
+    }) as unknown as EvaluationScoreDocument;
 
   it('names evaluators that errored on every example and never scored', () => {
     // Trajectory and SkillInvoked wrote label=error docs for all examples.
@@ -1331,7 +1331,7 @@ describe('round 6 regression: admission and accumulation fixes', () => {
         ...(judgeModel === undefined ? {} : { model: judgeModel }),
       },
       metadata: {},
-    } as unknown as EvaluationScoreDocument);
+    }) as unknown as EvaluationScoreDocument;
 
   it('requireEisJudge drops score documents with no judge id at all', () => {
     // Regression: the guard only ran when judgeId was truthy, so a doc whose evaluator
@@ -1448,7 +1448,7 @@ describe('round 8 review findings', () => {
       timestamp,
       task_model: { id: 'm1' },
       evaluator_models: judgeIds.map((judge) => ({ id: judge })),
-    } as unknown as EvaluationExperimentSummary);
+    }) as unknown as EvaluationExperimentSummary;
 
   const scoreDoc = (exampleId: string, judgeId: string, executionId: string, score = 0.9) =>
     ({
@@ -1456,7 +1456,7 @@ describe('round 8 review findings', () => {
       task: { model: { id: 'm1' }, trace_id: 't', repetition_index: 0 },
       evaluator: { name: 'correctness', score, model: { id: judgeId } },
       metadata: { execution_id: executionId },
-    } as unknown as EvaluationScoreDocument);
+    }) as unknown as EvaluationScoreDocument;
 
   it('keeps a mixed/self-judged older shard when reconstructing prefix-suite shards (high)', async () => {
     // Regression: `admitsJudgedPolicy` rejected every shard whose summary listed a

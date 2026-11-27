@@ -282,7 +282,7 @@ describe('Actions Plugin', () => {
         expect(coreSetup.http.registerRouteHandlerContext).toHaveBeenCalledTimes(1);
         const handler = coreSetup.http.registerRouteHandlerContext.mock.calls[0] as [
           string,
-          Function
+          Function,
         ];
         expect(handler[0]).toEqual('actions');
 
@@ -309,7 +309,7 @@ describe('Actions Plugin', () => {
         expect(coreSetup.http.registerRouteHandlerContext).toHaveBeenCalledTimes(1);
         const handler = coreSetup.http.registerRouteHandlerContext.mock.calls[0] as [
           string,
-          Function
+          Function,
         ];
         expect(handler[0]).toEqual('actions');
 

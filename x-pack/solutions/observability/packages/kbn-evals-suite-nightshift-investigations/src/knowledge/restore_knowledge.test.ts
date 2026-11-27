@@ -47,14 +47,14 @@ const createSource = (hitsByIndex: Record<string, unknown[]>, missingIndices: st
       },
     },
     close: jest.fn(),
-  } as unknown as Client);
+  }) as unknown as Client;
 
 const createTarget = () =>
   ({
     deleteByQuery: jest.fn().mockResolvedValue({}),
     bulk: jest.fn().mockResolvedValue({ items: [{ index: { _id: 'x' } }] }),
     indices: { refresh: jest.fn().mockResolvedValue({}) },
-  } as unknown as jest.Mocked<Client> & { indices: { refresh: jest.Mock } });
+  }) as unknown as jest.Mocked<Client> & { indices: { refresh: jest.Mock } };
 
 const log = new ToolingLog();
 

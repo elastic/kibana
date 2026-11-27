@@ -140,7 +140,7 @@ jest.mock('../../../flyout_v2/shared/hooks/use_open_flyout', () => ({
 const makeAlerts = (prefix: string, count: number): Alert[] =>
   Array.from(
     { length: count },
-    (_, i) => ({ _id: `${prefix}-${i}`, _index: 'alerts-index' } as Alert)
+    (_, i) => ({ _id: `${prefix}-${i}`, _index: 'alerts-index' }) as Alert
   );
 
 const makeRenderContext = (
@@ -151,7 +151,7 @@ const makeRenderContext = (
     alertsCount: 0,
     refresh: jest.fn(),
     ...overrides,
-  } as unknown as RenderContext<SecurityAlertsTableContext>);
+  }) as unknown as RenderContext<SecurityAlertsTableContext>;
 
 describe('AlertsTable flyout pagination', () => {
   beforeEach(() => {

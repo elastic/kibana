@@ -25,7 +25,7 @@ const createContext = (mlMock = createMlMock(), search = jest.fn()) =>
   ({
     esClient: { asCurrentUser: { ml: mlMock, search } },
     request: {},
-  } as any);
+  }) as any;
 
 describe('adCreateJobTool', () => {
   it('has the correct ID and type', () => {
@@ -298,7 +298,7 @@ describe('adCreateJobTool', () => {
         undefined,
         undefined,
         undefined,
-        () => ({ previewDatafeed } as any)
+        () => ({ previewDatafeed }) as any
       );
 
       const result = await tool.handler(
