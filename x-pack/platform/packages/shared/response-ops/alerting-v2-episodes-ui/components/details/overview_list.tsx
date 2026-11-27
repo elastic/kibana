@@ -26,6 +26,7 @@ import { UserProfileDisplay } from '../user_profile_display';
 import { EMPTY_VALUE } from '../../constants';
 import { formatDateTime } from '../../utils/format_date_time';
 import { isEpisodeSnoozed } from '../../utils/is_episode_snoozed';
+import { EpisodeReasonText } from './reason_text';
 import * as i18n from './translations';
 
 /**
@@ -126,9 +127,10 @@ export const AlertEpisodeOverviewList = ({
               {
                 title: i18n.METADATA_LIST_REASON_LABEL,
                 description: (
-                  <EuiText size="s" data-test-subj="alertingV2EpisodeDetailsOverviewListReason">
-                    {reason}
-                  </EuiText>
+                  <EpisodeReasonText
+                    reason={reason}
+                    data-test-subj="alertingV2EpisodeDetailsOverviewListReason"
+                  />
                 ),
               },
             ]
