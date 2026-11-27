@@ -25,6 +25,7 @@ import { conditionSchema, isConditionComplete, type Condition } from '@kbn/strea
 import type { AnalysisTarget } from '../../shared/analysis_target';
 import { createIdentifyFeaturesPrompt } from './prompt';
 import type { InferenceDocument } from './utils/format_raw_document';
+import { serializeInferenceDocuments } from './serialize_inference_documents';
 import { sumTokens } from '../../shared/tokens/sum_tokens';
 
 /**
@@ -120,7 +121,7 @@ export async function identifyFeatures({
   const response = await withSpan('invoke_prompt', () =>
     executeAsReasoningAgent({
       input: {
-        sample_documents: JSON.stringify(sampleDocuments),
+        sample_documents: serializeInferenceDocuments(sampleDocuments),
         previously_identified_features: previousFeaturesContext,
         known_feature_ids: knownFeatureIds,
         excluded_features: excludedFeatures?.length ? JSON.stringify(excludedFeatures) : '',
