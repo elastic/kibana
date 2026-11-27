@@ -936,7 +936,11 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOutp
         (output && isOtlpExporterDisabled) || validateOtlpInputs(otlpInputs),
         // an authentication that is kept for the managed OTLP endpoint has to be removed explicitly
         isOtlpAuthEnabled
-          ? validateOtlpAuthInputs(otlpAuthInputs, otlpInputs.otlpProtocolInput.value)
+          ? validateOtlpAuthInputs(
+              otlpAuthInputs,
+              otlpInputs.otlpProtocolInput.value,
+              getOtlpInputEndpoints(otlpInputs)
+            )
           : !isOtlpAuthSelected(otlpAuthInputs),
       ].every(Boolean);
     }

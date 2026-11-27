@@ -1126,3 +1126,82 @@ export function validateOtlpAuthCredential(value: string) {
 }
 
 export const validateOtlpAuthCredentialSecret = toSecretValidator(validateOtlpAuthCredential);
+
+export function validateOtlpAzureClientSecret(value: string) {
+  // the client secret is sent trimmed
+  const clientSecret = value?.trim() ?? '';
+  if (!clientSecret) {
+    return [
+      i18n.translate('xpack.fleet.settings.outputForm.otlpAzureClientSecretRequired', {
+        defaultMessage: 'Client secret is required',
+      }),
+    ];
+  }
+  if (clientSecret.length > OTLP_AUTH_CREDENTIAL_MAX_LENGTH) {
+    return [
+      i18n.translate('xpack.fleet.settings.outputForm.otlpAzureClientSecretTooLong', {
+        defaultMessage: 'Client secret must be at most {max} characters',
+        values: { max: OTLP_AUTH_CREDENTIAL_MAX_LENGTH },
+      }),
+    ];
+  }
+  if (!isValidOtlpAuthCredential(clientSecret)) {
+    return [
+      i18n.translate('xpack.fleet.settings.outputForm.otlpAzureClientSecretInvalid', {
+        defaultMessage: 'Client secret cannot contain line breaks or other control characters',
+      }),
+    ];
+  }
+}
+
+export const validateOtlpAzureClientSecretSecret = toSecretValidator(validateOtlpAzureClientSecret);
+
+const OTLP_AZURE_ID_MAX_LENGTH = 256;
+const OTLP_AZURE_SCOPE_MAX_LENGTH = 2048;
+
+const validateOtlpAzureIdLength = (value: string) => {
+  if (value.trim().length > OTLP_AZURE_ID_MAX_LENGTH) {
+    return [
+      i18n.translate('xpack.fleet.settings.outputForm.otlpAzureIdTooLong', {
+        defaultMessage: 'Must be at most {max} characters',
+        values: { max: OTLP_AZURE_ID_MAX_LENGTH },
+      }),
+    ];
+  }
+};
+
+/** The client ID of a user-assigned managed identity, which is optional. */
+export const validateOtlpAzureOptionalClientId = validateOtlpAzureIdLength;
+
+export function validateOtlpAzureClientId(value: string) {
+  if (!value?.trim()) {
+    return [
+      i18n.translate('xpack.fleet.settings.outputForm.otlpAzureClientIdRequired', {
+        defaultMessage: 'Client ID is required',
+      }),
+    ];
+  }
+  return validateOtlpAzureIdLength(value);
+}
+
+export function validateOtlpAzureTenantId(value: string) {
+  if (!value?.trim()) {
+    return [
+      i18n.translate('xpack.fleet.settings.outputForm.otlpAzureTenantIdRequired', {
+        defaultMessage: 'Tenant ID is required',
+      }),
+    ];
+  }
+  return validateOtlpAzureIdLength(value);
+}
+
+export function validateOtlpAzureScope(value: string) {
+  if (value.trim().length > OTLP_AZURE_SCOPE_MAX_LENGTH) {
+    return [
+      i18n.translate('xpack.fleet.settings.outputForm.otlpAzureScopeTooLong', {
+        defaultMessage: 'Scope must be at most {max} characters',
+        values: { max: OTLP_AZURE_SCOPE_MAX_LENGTH },
+      }),
+    ];
+  }
+}

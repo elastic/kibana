@@ -62,7 +62,7 @@ export const OtlpSelectSetting: React.FunctionComponent<{
   helpText: React.ReactNode;
   input: ReturnType<typeof useInput>;
   testSubj: string;
-  options: Array<{ value: string; text: string }>;
+  options: Array<{ value: string; text: string; disabled?: boolean }>;
   error?: string;
 }> = ({ label, helpText, input, testSubj, options, error }) => (
   <EuiFormRow fullWidth label={label} helpText={helpText} isInvalid={!!error} error={error}>

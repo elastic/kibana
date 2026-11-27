@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { fireEvent, waitFor, within } from '@testing-library/react';
+import { act, fireEvent, waitFor, within } from '@testing-library/react';
 
 import type { Output } from '../../../../types';
 import { createFleetTestRendererMock } from '../../../../../../mock';
@@ -2604,6 +2604,236 @@ describe('EditOutputFlyout', () => {
         const payload = mockSendPutOutput.mock.calls[0][1] as any;
         expect(payload.auth).toBeNull();
         expect(payload.secrets).toBeUndefined();
+      });
+
+      describe('Azure', () => {
+        const httpExporter = {
+          protocol: 'http/protobuf',
+          endpoint: 'https://collector.example.com:4318',
+        };
+        const otlpOutputWithAzureAuth: Output = {
+          ...otlpOutput,
+          otlp_exporter: httpExporter,
+          auth: {
+            type: 'azure',
+            azure_auth_method: 'service_principal',
+            tenant_id: 'my-tenant',
+            client_id: 'my-client',
+            scopes: ['https://monitor.azure.com/.default'],
+          },
+          secrets: { auth: { azure_client_secret: { id: 'client-secret-id' } } },
+        } as Output;
+
+        const fillHttpOutput = (utils: ReturnType<typeof renderFlyout>['utils']) => {
+          selectOtlpType(utils);
+          fireEvent.change(utils.getByTestId('settingsOutputsFlyout.nameInput'), {
+            target: { value: 'my otlp' },
+          });
+          fireEvent.click(utils.getByLabelText('HTTP/Protobuf'));
+          fireEvent.change(utils.getByTestId('settingsOutputsFlyout.otlpEndpointInput'), {
+            target: { value: 'https://collector.example.com:4318' },
+          });
+          fireEvent.change(utils.getByTestId('settingsOutputsFlyout.otlpAuthTypeInput'), {
+            target: { value: 'azure' },
+          });
+        };
+
+        it('should create an OTLP output with a managed identity', async () => {
+          const { utils } = renderFlyout();
+          fillHttpOutput(utils);
+          expect(
+            utils.queryByTestId('settingsOutputsFlyout.otlpAzureTenantIdInput')
+          ).not.toBeInTheDocument();
+          expect(
+            utils.queryByTestId('settingsOutputsFlyout.otlpAzureClientSecretInput')
+          ).not.toBeInTheDocument();
+          fireEvent.change(utils.getByTestId('settingsOutputsFlyout.otlpAzureClientIdInput'), {
+            target: { value: ' my-identity ' },
+          });
+          fireEvent.click(utils.getByText('Save and apply settings'));
+
+          await waitFor(() => {
+            expect(mockSendPostOutput).toHaveBeenCalled();
+          });
+          const payload = mockSendPostOutput.mock.calls[0][0] as any;
+          expect(payload.auth).toEqual({
+            type: 'azure',
+            azure_auth_method: 'managed_identity',
+            client_id: 'my-identity',
+          });
+          expect(payload.secrets).toBeUndefined();
+        });
+
+        it('should create an OTLP output with a service principal', async () => {
+          const { utils } = renderFlyout();
+          fillHttpOutput(utils);
+          fireEvent.change(utils.getByTestId('settingsOutputsFlyout.otlpAzureAuthMethodInput'), {
+            target: { value: 'service_principal' },
+          });
+          fireEvent.change(utils.getByTestId('settingsOutputsFlyout.otlpAzureTenantIdInput'), {
+            target: { value: 'my-tenant' },
+          });
+          fireEvent.change(utils.getByTestId('settingsOutputsFlyout.otlpAzureClientIdInput'), {
+            target: { value: 'my-client' },
+          });
+          fireEvent.change(utils.getByTestId('settingsOutputsFlyout.otlpAzureClientSecretInput'), {
+            target: { value: ' my-secret\n' },
+          });
+          fireEvent.change(utils.getByTestId('settingsOutputsFlyout.otlpAzureScopeInput'), {
+            target: { value: 'https://monitor.azure.com/.default' },
+          });
+          fireEvent.click(utils.getByText('Save and apply settings'));
+
+          await waitFor(() => {
+            expect(mockSendPostOutput).toHaveBeenCalledWith(
+              expect.objectContaining({
+                auth: {
+                  type: 'azure',
+                  azure_auth_method: 'service_principal',
+                  tenant_id: 'my-tenant',
+                  client_id: 'my-client',
+                  scopes: ['https://monitor.azure.com/.default'],
+                },
+                secrets: { auth: { azure_client_secret: 'my-secret' } },
+              })
+            );
+          });
+        });
+
+        it('should require the settings of a service principal', async () => {
+          const { utils } = renderFlyout();
+          fillHttpOutput(utils);
+          fireEvent.change(utils.getByTestId('settingsOutputsFlyout.otlpAzureAuthMethodInput'), {
+            target: { value: 'service_principal' },
+          });
+          fireEvent.click(utils.getByText('Save and apply settings'));
+
+          await waitFor(() => {
+            expect(utils.getByText('Tenant ID is required')).toBeInTheDocument();
+          });
+          expect(utils.getByText('Client ID is required')).toBeInTheDocument();
+          expect(utils.getByText('Client secret is required')).toBeInTheDocument();
+          expect(mockSendPostOutput).not.toHaveBeenCalled();
+        });
+
+        it('should clear the settings when the method is changed', () => {
+          const { utils } = renderFlyout(otlpOutputWithAzureAuth);
+          fireEvent.change(utils.getByTestId('settingsOutputsFlyout.otlpAzureAuthMethodInput'), {
+            target: { value: 'managed_identity' },
+          });
+          fireEvent.change(utils.getByTestId('settingsOutputsFlyout.otlpAzureAuthMethodInput'), {
+            target: { value: 'service_principal' },
+          });
+          expect(utils.getByTestId('settingsOutputsFlyout.otlpAzureTenantIdInput')).toHaveValue('');
+          expect(utils.getByTestId('settingsOutputsFlyout.otlpAzureClientIdInput')).toHaveValue('');
+        });
+
+        it('should not allow selecting Azure with gRPC', () => {
+          const { utils } = renderFlyout();
+          selectOtlpType(utils);
+          expect(
+            utils.getByRole('option', { name: 'Azure (requires HTTP/Protobuf)' })
+          ).toBeDisabled();
+        });
+
+        it('should show an error when gRPC is selected with Azure', async () => {
+          const { utils } = renderFlyout(otlpOutputWithAzureAuth);
+          fireEvent.click(utils.getByLabelText('gRPC'));
+          fireEvent.change(utils.getByTestId('settingsOutputsFlyout.otlpEndpointInput'), {
+            target: { value: 'collector.example.com:4317' },
+          });
+
+          expect(
+            utils.getByText(/Azure authentication requires the HTTP\/Protobuf protocol/)
+          ).toBeInTheDocument();
+          fireEvent.click(utils.getByText('Save and apply settings'));
+          // let the submit handler run before checking that it did not save
+          await act(async () => {});
+          expect(mockSendPutOutput).not.toHaveBeenCalled();
+
+          // the same output saves once the protocol is HTTP/Protobuf again
+          fireEvent.click(utils.getByLabelText('HTTP/Protobuf'));
+          fireEvent.change(utils.getByTestId('settingsOutputsFlyout.otlpEndpointInput'), {
+            target: { value: 'https://collector.example.com:4318' },
+          });
+          fireEvent.click(utils.getByText('Save and apply settings'));
+          await waitFor(() => {
+            expect(mockSendPutOutput).toHaveBeenCalled();
+          });
+        });
+
+        it('should drop a replacement client secret when another output type is selected', async () => {
+          const { utils } = renderFlyout(otlpOutputWithAzureAuth);
+          fireEvent.click(utils.getByText('Replace Client secret'));
+          fireEvent.change(utils.getByTestId('settingsOutputsFlyout.otlpAzureClientSecretInput'), {
+            target: { value: 'unseen-secret' },
+          });
+          fireEvent.change(utils.getByTestId('settingsOutputsFlyout.typeInput'), {
+            target: { value: 'elasticsearch' },
+          });
+          fireEvent.change(utils.getByTestId('settingsOutputsFlyout.typeInput'), {
+            target: { value: 'otlp' },
+          });
+          fireEvent.change(utils.getByTestId('settingsOutputsFlyout.nameInput'), {
+            target: { value: 'otlp output updated' },
+          });
+          fireEvent.click(utils.getByText('Save and apply settings'));
+
+          await waitFor(() => {
+            expect(mockSendPutOutput).toHaveBeenCalled();
+          });
+          expect((mockSendPutOutput.mock.calls[0][1] as any).secrets).toBeUndefined();
+        });
+
+        it.each(['http://collector.example.com:4318', 'https://', 'https:/collector.example.com'])(
+          'should show an error for the endpoint %s',
+          (endpoint) => {
+            const { utils } = renderFlyout(otlpOutputWithAzureAuth);
+            fireEvent.change(utils.getByTestId('settingsOutputsFlyout.otlpEndpointInput'), {
+              target: { value: endpoint },
+            });
+
+            expect(
+              utils.getByText('Azure authentication requires https:// endpoints.')
+            ).toBeInTheDocument();
+          }
+        );
+
+        it('should keep the stored client secret when it is not edited', async () => {
+          const { utils } = renderFlyout(otlpOutputWithAzureAuth);
+          expect(utils.getByTestId('settingsOutputsFlyout.otlpAzureTenantIdInput')).toHaveValue(
+            'my-tenant'
+          );
+          fireEvent.change(utils.getByTestId('settingsOutputsFlyout.nameInput'), {
+            target: { value: 'otlp output updated' },
+          });
+          fireEvent.click(utils.getByText('Save and apply settings'));
+
+          await waitFor(() => {
+            expect(mockSendPutOutput).toHaveBeenCalled();
+          });
+          const payload = mockSendPutOutput.mock.calls[0][1] as any;
+          expect(payload.auth).toEqual((otlpOutputWithAzureAuth as any).auth);
+          expect(payload.secrets).toBeUndefined();
+        });
+
+        it('should send the credential when switching from Azure to a header', async () => {
+          const { utils } = renderFlyout(otlpOutputWithAzureAuth);
+          fireEvent.change(utils.getByTestId('settingsOutputsFlyout.otlpAuthTypeInput'), {
+            target: { value: 'auth_header' },
+          });
+          fireEvent.change(utils.getByTestId('settingsOutputsFlyout.otlpAuthCredentialInput'), {
+            target: { value: 'my-key' },
+          });
+          fireEvent.click(utils.getByText('Save and apply settings'));
+
+          await waitFor(() => {
+            expect(mockSendPutOutput).toHaveBeenCalled();
+          });
+          const payload = mockSendPutOutput.mock.calls[0][1] as any;
+          expect(payload.auth).toEqual({ type: 'auth_header', scheme: 'api_key' });
+          expect(payload.secrets).toEqual({ auth: { credential: 'my-key' } });
+        });
       });
     });
 

@@ -44,6 +44,51 @@ describe('getOutputSecretFields', () => {
       const update = { auth: null };
       expect(withSavedSecrets({ fields, original, update })).toEqual(update);
     });
+
+    it('removes the credential when the update switches to Azure', () => {
+      const update = { auth: { type: 'azure', azure_auth_method: 'managed_identity' } };
+      expect(withSavedSecrets({ fields, original, update })).toEqual(update);
+    });
+  });
+
+  describe('OTLP Azure client secret', () => {
+    const servicePrincipal = {
+      type: 'azure',
+      azure_auth_method: 'service_principal',
+      tenant_id: 'tenant',
+      client_id: 'client',
+    };
+    const original = {
+      otlp_exporter: { endpoint: 'https://otel.example.com:4318', protocol: 'http/protobuf' },
+      auth: servicePrincipal,
+      secrets: { auth: { azure_client_secret: { id: 'client-secret-id' } } },
+    };
+    const fields = getOutputSecretFields(outputType.Otlp);
+
+    it('keeps the client secret when the update does not touch it', () => {
+      const update = { name: 'renamed' };
+      expect(withSavedSecrets({ fields, original, update })).toEqual({
+        name: 'renamed',
+        secrets: { auth: { azure_client_secret: { id: 'client-secret-id' } } },
+      });
+    });
+
+    it('keeps the client secret when the update keeps the service principal', () => {
+      const update = { auth: { ...servicePrincipal, client_id: 'other-client' } };
+      expect(withSavedSecrets({ fields, original, update })).toEqual({
+        ...update,
+        secrets: { auth: { azure_client_secret: { id: 'client-secret-id' } } },
+      });
+    });
+
+    it.each([
+      ['a managed identity', { type: 'azure', azure_auth_method: 'managed_identity' }],
+      ['a header', { type: 'auth_header', scheme: 'api_key' }],
+      ['no authentication', null],
+    ])('removes the client secret when the update switches to %s', (_, auth) => {
+      const update = { auth };
+      expect(withSavedSecrets({ fields, original, update })).toEqual(update);
+    });
   });
 
   describe('OTLP TLS credentials', () => {

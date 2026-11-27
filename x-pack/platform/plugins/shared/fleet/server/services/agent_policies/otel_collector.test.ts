@@ -3928,6 +3928,73 @@ describe('generateOtelcolConfig', () => {
         expect(exporter).not.toHaveProperty('headers');
         expect(exporter).not.toHaveProperty('auth');
       });
+
+      describe('Azure', () => {
+        const extensionId = `azure_auth/${otlpOutputId}`;
+        const generateAzureConfig = (output: Partial<Output>) =>
+          generateOtelcolConfig({
+            inputs: [otelInput1],
+            dataOutput: {
+              ...baseOtlpOutput,
+              otlp_exporter: { endpoint: otlpEndpoint, protocol: otlpProtocol.HttpProtobuf },
+              ...output,
+            } as Output,
+          });
+
+        it('wires the service principal extension into the exporter and the service', () => {
+          const result = generateAzureConfig({
+            auth: {
+              type: 'azure',
+              azure_auth_method: 'service_principal',
+              tenant_id: 'tenant',
+              client_id: 'client',
+              scopes: ['https://monitor.azure.com/.default'],
+            },
+            secrets: { auth: { azure_client_secret: { id: 'secret-id' } } },
+          } as Partial<Output>);
+
+          expect(result.extensions).toEqual({
+            [extensionId]: {
+              service_principal: {
+                tenant_id: 'tenant',
+                client_id: 'client',
+                client_secret: '$co.elastic.secret{secret-id}',
+              },
+              scopes: ['https://monitor.azure.com/.default'],
+            },
+          });
+          expect(result.service?.extensions).toEqual([extensionId]);
+          const exporter = result.exporters?.[`otlphttp/${otlpOutputId}`] as Record<string, any>;
+          expect(exporter.auth).toEqual({ authenticator: extensionId });
+          expect(exporter).not.toHaveProperty('headers');
+        });
+
+        it('wires the system-assigned managed identity extension', () => {
+          const result = generateAzureConfig({
+            auth: { type: 'azure', azure_auth_method: 'managed_identity' },
+          } as Partial<Output>);
+
+          expect(result.extensions).toEqual({ [extensionId]: { managed_identity: {} } });
+          expect(result.service?.extensions).toEqual([extensionId]);
+          expect(
+            (result.exporters?.[`otlphttp/${otlpOutputId}`] as Record<string, any>).auth
+          ).toEqual({ authenticator: extensionId });
+        });
+
+        it('does not wire a service principal without a stored client secret', () => {
+          const result = generateAzureConfig({
+            auth: {
+              type: 'azure',
+              azure_auth_method: 'service_principal',
+              tenant_id: 'tenant',
+              client_id: 'client',
+            },
+          } as Partial<Output>);
+
+          expect(result.extensions).toBeUndefined();
+          expect(result.exporters?.[`otlphttp/${otlpOutputId}`]).not.toHaveProperty('auth');
+        });
+      });
     });
 
     it('generates otlp/<id> exporter for gRPC protocol', () => {

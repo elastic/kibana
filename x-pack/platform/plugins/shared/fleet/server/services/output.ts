@@ -81,6 +81,8 @@ import {
 
 import type { ValueOf } from '../../common/types';
 import { normalizeHostsForAgents, validateFleetSavedObjectId } from '../../common/services';
+import { getOtlpAuthSecretKey } from '../../common/services/otlp_auth';
+import type { OtlpAuthSecretKey } from '../../common/services/otlp_auth';
 import { omitRemovedOtlpQueueSettings } from '../../common/services/otlp_sending_queue';
 import {
   FleetEncryptedSavedObjectEncryptionKeyRequired,
@@ -112,7 +114,7 @@ import { getOutputSecretFields } from './outputs/secret_fields';
 import {
   omitRemovedOtlpAuthSettings,
   validateOtlpAuth,
-  validateOtlpAuthCredential,
+  validateOtlpAuthSecrets,
   withRemovedOtlpAuthSettings,
   withTrimmedOtlpAuthCredential,
 } from './outputs/otlp_auth';
@@ -198,7 +200,7 @@ export function withRemovedOtlpHeaders(
 /**
  * The exporter an output has once an update is saved. The update is merged into the saved
  * exporter, unless it changes the protocol: the settings of the previous protocol are removed,
- * the shared headers are kept.
+ * the headers and TLS settings, shared by both protocols, are kept.
  */
 function getMergedOtlpExporter(
   update: OtlpExporterConfig | undefined,
@@ -210,10 +212,18 @@ function getMergedOtlpExporter(
   // headers replace the stored ones, which are kept when they are left out, also by an update
   // that changes the protocol: they are shared by both protocols
   const headers = update.headers !== undefined ? update.headers : stored?.headers;
+  // the TLS settings are shared by both protocols too, and the saved object merges them key by
+  // key: `null` clears them
+  const tls =
+    update.tls === undefined
+      ? stored?.tls
+      : update.tls === null
+      ? undefined
+      : { ...stored?.tls, ...update.tls };
   if (!stored || update.protocol !== stored.protocol) {
-    return { ...update, headers } as Partial<OtlpExporterConfig>;
+    return { ...update, headers, tls } as Partial<OtlpExporterConfig>;
   }
-  return { ...stored, ...update, headers } as Partial<OtlpExporterConfig>;
+  return { ...stored, ...update, headers, tls } as Partial<OtlpExporterConfig>;
 }
 
 /** Drops the headers that an update removed, which the saved object keeps as `null`. */
@@ -846,7 +856,7 @@ class OutputService {
     if (isOtlpOutput(output)) {
       const otlpOutput = withTrimmedOtlpAuthCredential(output);
       // a new output has no credential yet: it can only be sent as a value
-      validateOtlpAuthCredential(otlpOutput.secrets?.auth?.credential);
+      validateOtlpAuthSecrets(otlpOutput.secrets);
       output = otlpOutput;
     }
 
@@ -869,6 +879,7 @@ class OutputService {
       validateOtlpAuth({
         auth: output.auth,
         hasCredential: !!output.secrets?.auth?.credential,
+        hasAzureClientSecret: !!output.secrets?.auth?.azure_client_secret,
         exporter: output.otlp_exporter,
       });
     }
@@ -1386,10 +1397,10 @@ class OutputService {
 
     if (mergedType === outputType.Otlp) {
       data = withTrimmedOtlpAuthCredential(data);
-      // checked before the saved credential is added to the update
-      validateOtlpAuthCredential(
-        (data as Partial<NewOtlpOutput>).secrets?.auth?.credential,
-        isOtlpOutput(originalOutput) ? originalOutput.secrets?.auth?.credential : undefined
+      // checked before the saved credentials are added to the update
+      validateOtlpAuthSecrets(
+        (data as Partial<NewOtlpOutput>).secrets,
+        isOtlpOutput(originalOutput) ? originalOutput.secrets : undefined
       );
     }
 
@@ -2100,17 +2111,20 @@ class OutputService {
       throw new OutputInvalidError(OTLP_AUTH_REQUIRES_SECRET_STORAGE_MESSAGE);
     }
 
-    // `auth: null` removes the credential with the authentication
-    const credential =
-      data.secrets?.auth && 'credential' in data.secrets.auth
-        ? data.secrets.auth.credential
-        : auth
-        ? original?.secrets?.auth?.credential
+    // `auth: null` removes the credentials with the authentication, and an authentication that
+    // does not use a saved credential removes it too
+    const secretKey = getOtlpAuthSecretKey(auth);
+    const getSecret = (key: OtlpAuthSecretKey) =>
+      data.secrets?.auth && key in data.secrets.auth
+        ? data.secrets.auth[key]
+        : secretKey === key
+        ? original?.secrets?.auth?.[key]
         : undefined;
 
     validateOtlpAuth({
       auth,
-      hasCredential: !!credential,
+      hasCredential: !!getSecret('credential'),
+      hasAzureClientSecret: !!getSecret('azure_client_secret'),
       exporter: getMergedOtlpExporter(data.otlp_exporter, original?.otlp_exporter),
     });
   }
