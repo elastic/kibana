@@ -643,7 +643,9 @@ Those records carry the session and the application of the telemetry, so the sum
 (`browserSessionEvents`) leave out the replay events (`elastic.replay.event`, one per rrweb event,
 far more than the session has telemetry), which would otherwise count as its events and make up most
 of what the task reads. The start records stay for `has_replay`, and are not counted in the
-session's `event_count`, `start_time` or `end_time`. The exclusion spells out `event_name IS NULL OR
+session's `event_count`, `start_time` or `end_time`. A session whose only events in the rebuilt window
+are start records therefore has no times, and gets no summary until an event of its own arrives
+(`toSessionDocuments` skips rows without times). The exclusion spells out `event_name IS NULL OR
 event_name != ...`: spans have no event name, which a bare `!=` would drop, and a `COALESCE` would
 keep Elasticsearch from applying it to the index.
 

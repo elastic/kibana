@@ -218,6 +218,42 @@ sorted by service, session and time, medians of 7 alternating runs, identical ro
   in time.
 - **Reconciling** rebuilds the last 24 hours every hour, about one 24 hour rebuild an hour.
 
+### Replay events (November 26 to 27, 2026)
+
+[#307797](https://github.com/elastic/kibana/pull/307797). Session replay writes its records (one
+`elastic.replay.event` per rrweb event) to `logs-rum.replay.otel-*`, which matches `logs-*.otel-*`
+and carries the session and the application of the telemetry, so the summary queries read them as
+events of the session. `browserSessionEvents` now leaves them out, and keeps the one
+`elastic.replay.start` record per recorded segment for `has_replay`. With synthtrace data with
+replay, 86% of the events the task matched over three hours were replay events.
+
+How to leave them out, on 24 hours of synthtrace data (1,795,781 events matched by the query's
+other filters, 107,417 of them spans):
+
+| Condition on `event_name` | Rows | Spans kept | Documents Lucene finds |
+| --- | --- | --- | --- |
+| None | 1,795,781 | 107,417 | 1,795,781 |
+| `COALESCE(event_name, "") != ...` | 1,123,822 | 107,417 | 1,795,781 (not pushed down) |
+| `event_name != ...` or `NOT LIKE` | 1,016,405 | 0 | 1,016,405 |
+| `event_name IS NULL OR event_name != ...` | 1,123,822 | 107,417 | 1,123,822 |
+
+A bare `!=` drops every span, which has no event name; `COALESCE` is right but reads every replay
+document. The last one is the condition in use.
+
+The summary query on the same ids, 20 alternating runs on 1,287 sessions, 754 of them with replay,
+identical rows:
+
+| Data | Time | CPU |
+| --- | --- | --- |
+| With replay | −39% | −63% to −65% |
+| Without replay | +2% | +4% |
+
+Without replay there is nothing to skip, so the condition is only overhead.
+
+Not covered: the Overview queries. `overviewKpisQuery` filters on `event_name` only when a page
+filter is set, so without one it reads every replay event: 383,000 rows against 57,000 for one
+application over 3 hours, with the same results.
+
 ## Tried and dropped
 
 On the 5 minute window of the Elastic Cloud node, against the `FORK` query, identical rows unless

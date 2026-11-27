@@ -293,6 +293,15 @@ describe('toSessionDocuments', () => {
       ])
     ).toEqual([]);
   });
+
+  it('skips a session whose only events in the window are replay start records', () => {
+    // The start records are not counted in a session's times, so the query returns none for it.
+    expect(
+      toSessionDocuments([
+        summaryRow({ start_time: null, end_time: null, event_count: 0, replay_start_count: 2 }),
+      ])
+    ).toEqual([]);
+  });
 });
 
 describe('sessionDocumentId', () => {
