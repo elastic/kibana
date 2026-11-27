@@ -12,6 +12,7 @@ import type { EntityRiskScoresState } from '../../../../entity_analytics/api/hoo
 import type {
   HostItem,
   HostRiskScore,
+  EntityRiskScore,
   EntityType,
   UserRiskScore,
   ServiceRiskScore,
@@ -158,6 +159,65 @@ const serviceRiskScore: ServiceRiskScore = {
   },
   alertsCount: 0,
   oldestAlertTimestamp: '1989-11-08T23:00:00.000Z',
+};
+
+export const mockAiAgentId = 'ai_agent:claude_code@host-1@ec2-user';
+
+const aiAgentRiskScore: EntityRiskScore<EntityType.ai_agent> = {
+  '@timestamp': '1989-11-08T23:00:00.000Z',
+  ai_agent: {
+    name: mockAiAgentId,
+    risk: {
+      rule_risks: [],
+      calculated_score_norm: 73.38,
+      multipliers: [],
+      calculated_level: RiskSeverity.High,
+      '@timestamp': '',
+      id_field: 'entity.id',
+      id_value: mockAiAgentId,
+      calculated_score: 163.4,
+      category_1_count: 13,
+      category_1_score: 64.76,
+      category_2_count: 0,
+      category_2_score: 0,
+      notes: [],
+      inputs: [],
+      modifiers: [
+        {
+          type: 'watchlist',
+          subtype: 'Agents acting for departing employees',
+          modifier_value: 1.5,
+          contribution: 8.62,
+          metadata: { watchlist_id: 'departing-employees-agents' },
+        },
+      ],
+    },
+  },
+};
+
+export const mockAiAgentRiskScoreState: RiskScoreState<EntityType.ai_agent> = {
+  data: [aiAgentRiskScore],
+  inspect: {
+    dsl: [],
+    response: [],
+  },
+  isInspected: false,
+  refetch: () => {},
+  totalCount: 1,
+  isAuthorized: true,
+  hasEngineBeenInstalled: true,
+  loading: false,
+  error: undefined,
+};
+
+export const mockAiAgentEntityRiskScores: EntityRiskScoresState<EntityType.ai_agent> = {
+  base: { ...mockAiAgentRiskScoreState },
+  resolution: {
+    state: { ...mockAiAgentRiskScoreState, data: undefined },
+    hasResolutionGroup: false,
+    resolutionTargetEntityId: undefined,
+  },
+  refetch: () => {},
 };
 
 export const mockUserRiskScoreState: RiskScoreState<EntityType.user> = {

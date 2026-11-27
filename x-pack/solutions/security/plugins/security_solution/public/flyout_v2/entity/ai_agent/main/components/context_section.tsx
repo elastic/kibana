@@ -394,6 +394,8 @@ const AgentList = ({ rows, onOpen }: { rows: readonly RelatedEntity[]; onOpen: O
 export interface ContextSectionProps {
   readonly context: AgentContext;
   readonly scopeId: string;
+  /** Rendered below the "From the Entity Store" panel. */
+  readonly riskSummary?: React.ReactNode;
 }
 
 /**
@@ -402,7 +404,7 @@ export interface ContextSectionProps {
  * local user it runs as, and other installs on the same account. Each card opens that entity's
  * flyout.
  */
-export const ContextSection = memo(({ context, scopeId }: ContextSectionProps) => {
+export const ContextSection = memo(({ context, scopeId, riskSummary }: ContextSectionProps) => {
   const { openEntityDetailsAsChild } = useFlyoutApi();
   const watchlistLookup = useWatchlistLookup();
   const {
@@ -451,6 +453,7 @@ export const ContextSection = memo(({ context, scopeId }: ContextSectionProps) =
         mfaIsMock={people.some(hasMockMfa)}
       />
       <EuiSpacer size="m" />
+      {riskSummary}
 
       <SectionTitle>{ACTS_FOR_TITLE}</SectionTitle>
       {sortedPeople.length === 0 ? (

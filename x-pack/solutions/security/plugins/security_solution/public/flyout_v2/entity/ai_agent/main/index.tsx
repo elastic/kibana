@@ -23,6 +23,7 @@ import { useFlyoutApi } from '../../../use_flyout_api';
 import { FLYOUT_ORIGIN } from '../../../../common/lib/telemetry';
 import { AiAgentHeader } from './header';
 import { ContextSection } from './components/context_section';
+import { RiskSummarySection } from './components/risk_summary_section';
 import { AlertsSection } from './components/alerts_section';
 import { AgentActivity } from './components/agent_activity';
 import { GraphTab } from './components/graph_tab';
@@ -42,7 +43,8 @@ type TabId = 'overview' | 'activity' | 'graph';
 
 /**
  * AI agent flyout (proof of concept). The overview leads with identity and context (who the agent
- * acts for, its host, the local user it runs as, other installs on the account), then its alerts.
+ * acts for, its host, the local user it runs as, other installs on the account) with the shared risk
+ * summary below the store context, then its alerts.
  * Agent activity and the relationships graph have their own tabs.
  */
 export const AiAgent: FC<AiAgentProps> = memo(function AiAgent({ entityId, entityName, scopeId }) {
@@ -51,6 +53,7 @@ export const AiAgent: FC<AiAgentProps> = memo(function AiAgent({ entityId, entit
   const { openAiAgentFlyoutAsChild } = useFlyoutApi();
   const identity = data?.identity ?? parseAgentId(entityId);
   const agent = data?.agent;
+  const agentName = entityName ?? agent?.entityName ?? entityId;
 
   const onShowAgent = useCallback(
     () =>
@@ -113,7 +116,18 @@ export const AiAgent: FC<AiAgentProps> = memo(function AiAgent({ entityId, entit
             <EuiSkeletonText lines={8} />
           ) : (
             <>
-              <ContextSection context={data} scopeId={scopeId} />
+              <ContextSection
+                context={data}
+                scopeId={scopeId}
+                riskSummary={
+                  <RiskSummarySection
+                    entityId={entityId}
+                    entityName={agentName}
+                    scopeId={scopeId}
+                    onShowAgent={onShowAgent}
+                  />
+                }
+              />
               <EuiHorizontalRule margin="m" />
               <AlertsSection entityId={entityId} />
             </>
@@ -122,7 +136,7 @@ export const AiAgent: FC<AiAgentProps> = memo(function AiAgent({ entityId, entit
         {selectedTab === 'graph' && (
           <GraphTab
             entityId={entityId}
-            entityName={entityName ?? agent?.entityName ?? entityId}
+            entityName={agentName}
             scopeId={scopeId}
             onShowAgent={onShowAgent}
           />

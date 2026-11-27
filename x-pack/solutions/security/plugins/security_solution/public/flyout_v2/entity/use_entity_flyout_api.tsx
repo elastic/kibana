@@ -62,6 +62,7 @@ import {
   urlParamKeyForHistoryKey,
 } from '../shared/url_state/flyout_v2_url_param';
 import type { EntityViewMode } from '../../../common/entity_analytics/entity_store/resolution_group';
+import { EntityType } from '../../../common/entity_analytics/types';
 import { ExperimentalFeaturesService } from '../../common/experimental_features_service';
 import { AI_AGENT_ENGINE_TYPE } from '../../entity_analytics/components/ai_agents/constants';
 
@@ -776,7 +777,7 @@ export const useEntityFlyoutApi = (): EntityFlyoutApi => {
         {
           surface: FLYOUT_SURFACE.TOOL,
           tool: FLYOUT_TOOL.RISK_INPUTS,
-          flyoutType: entityType,
+          flyoutType: entityType === EntityType.ai_agent ? FLYOUT_TYPE.GENERIC : entityType,
           session: FLYOUT_SESSION_KIND.START,
           origin,
         },

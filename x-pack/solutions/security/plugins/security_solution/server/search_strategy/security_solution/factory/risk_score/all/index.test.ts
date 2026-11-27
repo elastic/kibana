@@ -107,6 +107,16 @@ describe('buildRiskScoreQuery search strategy', () => {
       riskScore.buildDsl(mockOptions);
       expect(buildKpiRiskScoreQuery).toHaveBeenCalledWith(mockOptions);
     });
+
+    test.each([
+      [EntityType.host, 'host.name'],
+      [EntityType.user, 'user.name'],
+      [EntityType.service, 'service.name'],
+      [EntityType.ai_agent, 'ai_agent.name'],
+    ])('requires the %s name field on the risk score document', (riskScoreEntity, field) => {
+      const dsl = buildQuery.buildRiskScoreQuery({ ...mockOptions, riskScoreEntity });
+      expect(dsl.query.bool.filter).toContainEqual({ exists: { field } });
+    });
   });
 
   test('should not enhance data when includeAlertsCount is false', async () => {

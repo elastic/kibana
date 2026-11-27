@@ -26,7 +26,7 @@ const ICON_TYPE = EntityIconByType;
 
 export interface RiskInputsProps {
   /** Which entity type this tool is scoped to. Controls the icon and entity type passed to the tab. */
-  entityType: EntityType.host | EntityType.user | EntityType.service;
+  entityType: EntityType.host | EntityType.user | EntityType.service | EntityType.ai_agent;
   /** Display name of the entity (typically `host.name` or `user.name`). */
   entityName: string;
   /** Canonical Entity Store v2 id (`entity.id`) when already resolved. */

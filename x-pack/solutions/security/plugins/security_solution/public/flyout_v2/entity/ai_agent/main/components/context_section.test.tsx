@@ -376,4 +376,23 @@ describe('ContextSection', () => {
       );
     });
   });
+
+  it('places the risk summary between the store context and the people the agent acts for', () => {
+    render(
+      <TestProviders>
+        <ContextSection
+          context={fullContext}
+          scopeId="scope"
+          riskSummary={<div data-test-subj="riskSummarySlot" />}
+        />
+      </TestProviders>
+    );
+    const storeContextPanel = screen.getByTestId(AI_AGENT_TEST_IDS.storeContext);
+    const riskSummary = screen.getByTestId('riskSummarySlot');
+    const person = screen.getByTestId(AI_AGENT_TEST_IDS.person);
+    expect(storeContextPanel.compareDocumentPosition(riskSummary)).toBe(
+      Node.DOCUMENT_POSITION_FOLLOWING
+    );
+    expect(riskSummary.compareDocumentPosition(person)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
+  });
 });

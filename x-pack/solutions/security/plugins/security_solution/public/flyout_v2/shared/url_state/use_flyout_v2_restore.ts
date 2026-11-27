@@ -183,6 +183,16 @@ const buildShowEntityCallback = (
           title: entityName,
         });
         break;
+      case 'ai_agent':
+        if (entityId) {
+          api.openAiAgentFlyoutAsChild({
+            entityId,
+            entityName,
+            scopeId: scopeId ?? '',
+            title: entityName,
+          });
+        }
+        break;
       default:
         // Generic / unknown entity type: only openable when we have the canonical entity id.
         if (entityId) {
@@ -487,7 +497,8 @@ export const openDescriptorAsStart = (
         entityType: d.entityType as unknown as
           | EntityType.host
           | EntityType.user
-          | EntityType.service,
+          | EntityType.service
+          | EntityType.ai_agent,
         entityName: d.entityName,
         entityId: d.entityId,
         ...(d.subTab ? { subTab: d.subTab as RiskScoreLeftPanelSubTab } : {}),

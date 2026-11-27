@@ -222,3 +222,17 @@ describe('<RiskInputs /> user', () => {
     expect(onShowEntity).toHaveBeenCalledTimes(1);
   });
 });
+
+describe('<RiskInputs /> ai_agent', () => {
+  const agentId = 'ai_agent:claude_code@host-1@ec2-user';
+
+  it('renders with the sparkles icon and passes the agent context to RiskInputsTab', () => {
+    const { getByTestId } = render(
+      <RiskInputs entityType={EntityType.ai_agent} entityName={agentId} entityId={agentId} />
+    );
+    expect(getByTestId('mockToolsFlyoutHeader')).toHaveAttribute('data-icon-type', 'sparkles');
+    const tab = getByTestId('mockRiskInputsTab');
+    expect(tab).toHaveAttribute('data-entity-type', 'ai_agent');
+    expect(tab).toHaveAttribute('data-entity-id', agentId);
+  });
+});

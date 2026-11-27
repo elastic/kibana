@@ -6,12 +6,21 @@
  */
 
 import type { Sort } from '@elastic/elasticsearch/lib/api/types';
-import { EntityTypeToIdentifierField } from '../../../../../../common/entity_analytics/types';
+import {
+  EntityType,
+  EntityTypeToIdentifierField,
+} from '../../../../../../common/entity_analytics/types';
 import type { RiskScoreRequestOptions } from '../../../../../../common/api/search_strategy';
 import { Direction, RiskScoreFields } from '../../../../../../common/search_strategy';
 import { createQueryFilterClauses } from '../../../../../utils/build_query';
 
 export const QUERY_SIZE = 10;
+
+// Agent scores carry `ai_agent.name`, not the agent identifier field (`entity.id`).
+const getRiskScoreNameField = (riskScoreEntity: EntityType): string =>
+  riskScoreEntity === EntityType.ai_agent
+    ? 'ai_agent.name'
+    : EntityTypeToIdentifierField[riskScoreEntity];
 
 export const buildRiskScoreQuery = ({
   timerange,
@@ -25,7 +34,7 @@ export const buildRiskScoreQuery = ({
   riskScoreEntity,
 }: Omit<RiskScoreRequestOptions, 'factoryQueryType'>) => {
   const filter = createQueryFilterClauses(filterQuery);
-  const nameField = EntityTypeToIdentifierField[riskScoreEntity];
+  const nameField = getRiskScoreNameField(riskScoreEntity);
 
   if (timerange) {
     filter.push({
