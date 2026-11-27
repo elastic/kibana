@@ -11,4 +11,5 @@ export const alertDeleteCategoryIds = {
   MANAGEMENT: 'management',
 } as const;
 
-export type AlertDeleteCategoryIds = (typeof alertDeleteCategoryIds)[keyof typeof alertDeleteCategoryIds];
+export type AlertDeleteCategoryIds =
+  (typeof alertDeleteCategoryIds)[keyof typeof alertDeleteCategoryIds];
