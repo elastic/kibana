@@ -22,6 +22,7 @@ import type {
   WorkflowExecutionsDataClient,
   WorkflowsExecutionEnginePluginStart,
 } from '@kbn/workflows-execution-engine/server';
+import type { ExecutionsIoClient } from '@kbn/workflows-execution-engine/server/repositories/data_access_layer/implementations/executions_io/executions_io_data_client';
 import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
 
 import type { IWorkflowChangeHistoryService } from './workflow_change_history_types';
@@ -67,6 +68,7 @@ export interface WorkflowExecutionQueryDeps {
   esClient: ElasticsearchClient;
   workflowExecutionsDataClient: WorkflowExecutionsDataClient;
   stepExecutionsDataClient: StepExecutionsDataClient;
+  executionsIoDataClient: ExecutionsIoClient;
   workflowEventLoggerService: IWorkflowLogsQueryService;
 }
 

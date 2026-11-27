@@ -8,6 +8,7 @@
 import { withSpan } from '@kbn/apm-utils';
 import type { CoreSetup, CoreStart, Logger } from '@kbn/core/server';
 import { DataStreamDataClientBundle } from './data_stream/data_stream_data_client_bundle';
+import type { ExecutionsIoClient } from './executions_io/executions_io_data_client';
 import { PlainIndexDataClientBundle } from './plain_index/plain_index_data_client_bundle';
 import type {
   DataClient,
@@ -108,6 +109,41 @@ export class DeferredDataClientBundle implements DataClientBundle {
 
   createStepDataClient(): StepExecutionsDataClient {
     return this.deferClient(() => this.dataClientBundle.createStepDataClient());
+  }
+
+  createIoDataClient(): ExecutionsIoClient {
+    if (!this.initialStart) {
+      throw new Error('initStart must be called before creating data clients');
+    }
+
+    let resolved: ExecutionsIoClient | undefined;
+    let resolvedGeneration = -1;
+    const get = (): Promise<{ client: ExecutionsIoClient; source: ExecutionStorageSource }> =>
+      this.ready.then(() => {
+        if (this.stopped) {
+          throw new Error('Workflow execution storage has stopped');
+        }
+        const source = this.source;
+        const client =
+          resolved !== undefined && resolvedGeneration === this.generation
+            ? resolved
+            : this.dataClientBundle.createIoDataClient();
+        resolved = client;
+        resolvedGeneration = this.generation;
+        return { client, source };
+      });
+    const call = <T>(
+      method: string,
+      operation: (client: ExecutionsIoClient) => Promise<T>
+    ): Promise<T> =>
+      get().then(({ client, source }) =>
+        withSpan(`DataClientBundle(${source}).${method}`, () => operation(client))
+      );
+
+    return {
+      getByIds: (ids, options) => call('getByIds', (client) => client.getByIds(ids, options)),
+      bulkCreate: (request) => call('bulkCreate', (client) => client.bulkCreate(request)),
+    };
   }
 
   private enqueue(task: () => Promise<void>): Promise<void> {

@@ -465,10 +465,8 @@ export class WorkflowExecutionRuntimeManager {
     };
     this.workflowExecutionState.updateWorkflowExecution(updatedWorkflowExecution);
     this.logWorkflowStart();
-    await Promise.all([
-      this.workflowExecutionState.flushWorkflowDoc(),
-      this.workflowExecutionState.flushStepChanges(),
-    ]);
+    await this.stepIoService.flush();
+    await this.workflowExecutionState.flushWorkflowAndSteps();
   }
 
   public async resume(): Promise<void> {

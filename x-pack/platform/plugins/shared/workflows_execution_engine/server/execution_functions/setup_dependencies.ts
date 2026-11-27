@@ -165,6 +165,11 @@ export async function setupDependencies(
     spaceId: workflowExecution.spaceId,
   });
 
+  const executionsIoDataClient = workflowsExecutionEngine?.__internalStorage.executionsIoDataClient;
+  if (!executionsIoDataClient) {
+    throw new Error('Executions IO data client is not available');
+  }
+
   const workflowExecutionState = new WorkflowExecutionState(
     workflowExecution as EsWorkflowExecution,
     workflowExecutionRepository,
@@ -174,6 +179,7 @@ export async function setupDependencies(
 
   const stepIoService = new StepIoService({
     stepRepository: stepExecutionRepository,
+    ioClient: executionsIoDataClient,
     state: workflowExecutionState,
     maxBytes: config.eviction.maxCacheSize.getValueInBytes(),
     maxEntryBytes: config.eviction.minPayloadSize.getValueInBytes(),

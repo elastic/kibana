@@ -7,8 +7,17 @@
 
 import { ByteSizeValue } from '@kbn/config-schema';
 import { ExecutionStatus } from '@kbn/workflows';
+import { executionIoId } from '@kbn/workflows/server';
 import { FakeConnectors } from '../mocks/actions_plugin_mock';
 import { WorkflowRunFixture } from '../workflow_run_fixture';
+
+const callsReadingOutput = (spy: jest.SpyInstance, stepExecutionId: string | undefined) => {
+  if (!stepExecutionId) {
+    return [];
+  }
+  const outputId = executionIoId('output', stepExecutionId);
+  return spy.mock.calls.filter((call) => Array.isArray(call[0]) && call[0].includes(outputId));
+};
 
 /**
  * Advanced integration tests for output retention.
@@ -106,7 +115,7 @@ steps:
     let getByIdsSpy: jest.SpyInstance;
 
     beforeAll(async () => {
-      getByIdsSpy = jest.spyOn(fixture.stepExecutionRepositoryMock, 'getStepExecutionsByIds');
+      getByIdsSpy = jest.spyOn(fixture.executionsIoClient, 'getByIds');
       await fixture.resumeWorkflowAtScheduledTime();
     });
 
@@ -132,12 +141,8 @@ steps:
         fixture.stepExecutionRepositoryMock.stepExecutions.values()
       ).find((s) => s.stepId === 'step_large');
 
-      const rehydrationCalls = getByIdsSpy.mock.calls.filter(
-        (call) => Array.isArray(call[1]) && call[1].includes('output')
-      );
+      const rehydrationCalls = callsReadingOutput(getByIdsSpy, stepLargeExec?.id);
       expect(rehydrationCalls.length).toBeGreaterThan(0);
-      const rehydratedIds = rehydrationCalls.flatMap((call) => call[0] as string[]);
-      expect(rehydratedIds).toContain(stepLargeExec?.id);
     });
 
     it('step_fail output remains null after resume', () => {
@@ -239,9 +244,11 @@ steps:
 
   describe('phase 2: resume — targeted rehydration for final_step', () => {
     let getByIdsSpy: jest.SpyInstance;
+    let ioGetByIdsSpy: jest.SpyInstance;
 
     beforeAll(async () => {
       getByIdsSpy = jest.spyOn(fixture.stepExecutionRepositoryMock, 'getStepExecutionsByIds');
+      ioGetByIdsSpy = jest.spyOn(fixture.executionsIoClient, 'getByIds');
       await fixture.resumeWorkflowAtScheduledTime();
     });
 
@@ -261,8 +268,8 @@ steps:
     });
 
     it('resume load() fetched steps with output excluded', () => {
-      // The first call to getStepExecutionsByIds is from load(), which uses
-      // sourceExcludes: ['output']. Inputs come back so a running foreach keeps its items.
+      // load() keeps inputs so a running foreach still has its items. Outputs
+      // are fetched from the executions IO stream when a later step reads them.
       const loadCall = getByIdsSpy.mock.calls[0];
       expect(loadCall[1]).toBeUndefined(); // sourceIncludes: undefined
       expect(loadCall[2]).toEqual(['output']);
@@ -273,29 +280,15 @@ steps:
       const setupStepExec = steps.find((s) => s.stepId === 'setup_step');
       const thenStepExec = steps.find((s) => s.stepId === 'then_step');
 
-      const rehydrationCalls = getByIdsSpy.mock.calls.filter(
-        (call) => Array.isArray(call[1]) && call[1].includes('output')
-      );
-      expect(rehydrationCalls.length).toBeGreaterThan(0);
-
-      const rehydratedIds = rehydrationCalls.flatMap((call) => call[0] as string[]);
-      expect(rehydratedIds).toContain(setupStepExec?.id);
-      expect(rehydratedIds).toContain(thenStepExec?.id);
+      expect(callsReadingOutput(ioGetByIdsSpy, setupStepExec?.id).length).toBeGreaterThan(0);
+      expect(callsReadingOutput(ioGetByIdsSpy, thenStepExec?.id).length).toBeGreaterThan(0);
     });
 
-    it('else_step execution ID does not appear in any rehydration call (it was never created)', () => {
-      // else_step was never executed → no execution record exists → cannot be in rehydration list
+    it('else_step was never executed, so it has no output to rehydrate', () => {
       const elseStepExec = Array.from(
         fixture.stepExecutionRepositoryMock.stepExecutions.values()
       ).find((s) => s.stepId === 'else_step');
       expect(elseStepExec).toBeUndefined();
-
-      // No rehydration call can reference a non-existent step — engine should not crash
-      const rehydrationCalls = getByIdsSpy.mock.calls.filter(
-        (call) => Array.isArray(call[1]) && call[1].includes('output')
-      );
-      // Verify the workflow completed without referencing the non-existent else_step
-      expect(rehydrationCalls.length).toBeGreaterThan(0);
     });
 
     it('final_step output proves setup_step payload was successfully rehydrated (non-zero size)', () => {
@@ -399,7 +392,7 @@ steps:
     let getByIdsSpy: jest.SpyInstance;
 
     beforeAll(async () => {
-      getByIdsSpy = jest.spyOn(fixture.stepExecutionRepositoryMock, 'getStepExecutionsByIds');
+      getByIdsSpy = jest.spyOn(fixture.executionsIoClient, 'getByIds');
       await fixture.resumeWorkflowAtScheduledTime();
     });
 
@@ -427,13 +420,8 @@ steps:
       const stepLargeExec = steps.find((s) => s.stepId === 'step_large');
       const stepSmallExec = steps.find((s) => s.stepId === 'step_small');
 
-      const rehydrationCalls = getByIdsSpy.mock.calls.filter(
-        (call) => Array.isArray(call[1]) && call[1].includes('output')
-      );
-      expect(rehydrationCalls.length).toBeGreaterThan(0);
-      const rehydratedIds = rehydrationCalls.flatMap((call) => call[0] as string[]);
-      expect(rehydratedIds).toContain(stepLargeExec?.id);
-      expect(rehydratedIds).toContain(stepSmallExec?.id);
+      expect(callsReadingOutput(getByIdsSpy, stepLargeExec?.id).length).toBeGreaterThan(0);
+      expect(callsReadingOutput(getByIdsSpy, stepSmallExec?.id).length).toBeGreaterThan(0);
     });
   });
 });

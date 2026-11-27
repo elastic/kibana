@@ -21,5 +21,9 @@ export const createDataClientJestMock = () => {
     switchSource: jest.fn().mockResolvedValue(undefined),
     createWorkflowDataClient: jest.fn(() => createMockWorkflowDataClient()),
     createStepDataClient: jest.fn(() => createMockStepDataClient()),
+    createIoDataClient: jest.fn(() => ({
+      getByIds: jest.fn().mockResolvedValue({ items: [], missing: [] }),
+      bulkCreate: jest.fn().mockResolvedValue({ items: [], errors: false }),
+    })),
   };
 };

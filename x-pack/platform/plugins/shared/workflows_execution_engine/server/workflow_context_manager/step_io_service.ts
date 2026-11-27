@@ -8,9 +8,11 @@
 import type { Logger } from '@kbn/core/server';
 import type { JsonValue } from '@kbn/utility-types';
 import type { SerializedError } from '@kbn/workflows';
+import { executionIoId } from '@kbn/workflows/server';
 import { StepIoCache } from './step_io_cache';
 import type { WorkflowExecutionState } from './workflow_execution_state';
 import type { OutputSizeStats } from '../lib/telemetry/events/workflows_execution/types';
+import type { ExecutionsIoClient } from '../repositories/data_access_layer/implementations/executions_io/executions_io_data_client';
 import type { StepExecutionRepository } from '../repositories/step_execution_repository';
 import { safeOutputSize } from '../step/errors';
 
@@ -41,6 +43,8 @@ export interface StepIoReadBatchArgs {
 
 export interface StepIoServiceInit {
   stepRepository: StepExecutionRepository;
+  /** When set, payloads are stored on the executions IO stream as well as the step record. */
+  ioClient?: ExecutionsIoClient;
   state: WorkflowExecutionState;
   /** Maximum total byte size for the output LRU cache. `Infinity` disables eviction entirely. */
   maxBytes?: number;
@@ -71,6 +75,9 @@ export interface StepIoWriter extends StepIoReader {
  */
 export interface StepIoLifecycle {
   getOutputSizeStats(): OutputSizeStats;
+  /** Writes queued payloads to the executions IO stream. Returns true when a create failed. */
+  flush(): Promise<boolean>;
+  hasPendingIo(): boolean;
 }
 
 /** Composes the opaque LRU key from IO type and accessibility context id. */
@@ -87,29 +94,37 @@ export const composeStepIoCacheKey = (
  * The service composes the LRU key as `type` + `contextId` and does not
  * derive `contextId` from metadata. This PR admits outputs only.
  *
- * `readBatch` is the only fetch. Flush is `WorkflowExecutionState`'s responsibility.
+ * `readBatch` is the only fetch. `flush` writes queued payloads to the
+ * executions IO stream; `WorkflowExecutionState` writes the step record.
  */
 export class StepIoService implements StepIoWriter, StepIoLifecycle {
   private readonly stepRepository: StepExecutionRepository;
+  private readonly ioClient?: ExecutionsIoClient;
   private readonly state: WorkflowExecutionState;
   private readonly cache: StepIoCache;
+  /** Payloads waiting for the executions IO stream. The step record is flushed separately. */
+  private pendingIo = new Map<string, { input?: JsonValue; output?: JsonValue | null }>();
   private readonly maxBytes: number;
   private readonly maxEntryBytes: number;
+  private readonly logger?: Logger;
   /** Execution-wide sizes of outputs written with a measured byte count, for telemetry. */
   private readonly measuredSizes = new Map<string, number>();
   private measuredTotalBytes = 0;
 
   constructor({
     stepRepository,
+    ioClient,
     state,
     maxBytes = Infinity,
     maxEntryBytes = Infinity,
     logger,
   }: StepIoServiceInit) {
     this.stepRepository = stepRepository;
+    this.ioClient = ioClient;
     this.state = state;
     this.maxBytes = maxBytes;
     this.maxEntryBytes = maxEntryBytes;
+    this.logger = logger;
     this.cache = new StepIoCache(maxBytes, logger);
   }
 
@@ -141,7 +156,70 @@ export class StepIoService implements StepIoWriter, StepIoLifecycle {
    * - Both types are written to `WorkflowExecutionState` for persistence.
    * - Only `output` is admitted to the LRU (key = `type` + `contextId`).
    */
+  public hasPendingIo(): boolean {
+    return this.pendingIo.size > 0;
+  }
+
+  /**
+   * Creates queued input and output documents on the executions IO stream.
+   * A failed create stays queued. Step metadata, including the compatibility
+   * copy of the payload, is flushed by `WorkflowExecutionState`.
+   */
+  public async flush(): Promise<boolean> {
+    const ioClient = this.ioClient;
+    if (!ioClient || this.pendingIo.size === 0) {
+      return false;
+    }
+
+    const batch = this.pendingIo;
+    this.pendingIo = new Map();
+    const documents: Array<{
+      executionId: string;
+      type: 'input' | 'output';
+      value: JsonValue | null;
+      size: number;
+    }> = [];
+
+    for (const [executionId, part] of batch) {
+      if (part.input !== undefined) {
+        const size = safeOutputSize(part.input) ?? 0;
+        documents.push({ executionId, type: 'input', value: part.input, size });
+        this.recordSize(executionId, 'inputSize', size);
+      }
+      if ('output' in part) {
+        const size = this.measuredSizes.get(executionId) ?? safeOutputSize(part.output) ?? 0;
+        documents.push({ executionId, type: 'output', value: part.output ?? null, size });
+        this.recordSize(executionId, 'outputSize', size);
+      }
+    }
+
+    if (documents.length === 0) {
+      return false;
+    }
+
+    try {
+      const response = await ioClient.bulkCreate({ documents });
+      if (response.errors) {
+        this.restorePending(batch);
+        this.recordIoFailure(
+          `Failed to create execution IO document(s): ${JSON.stringify(
+            response.items.filter((item) => item.error)
+          )}`
+        );
+        return true;
+      }
+      this.clearIoFailure();
+      return false;
+    } catch (error) {
+      this.restorePending(batch);
+      this.recordIoFailure(error instanceof Error ? error.message : String(error));
+      return true;
+    }
+  }
+
   public write({ executionId, contextId, type, value, sizeBytes }: StepIoWriteArgs): void {
+    const current = this.pendingIo.get(executionId) ?? {};
+    this.pendingIo.set(executionId, { ...current, [type]: value });
     this.state.setStepIo(executionId, { [type]: value });
     if (type === 'input') {
       return;
@@ -252,9 +330,9 @@ export class StepIoService implements StepIoWriter, StepIoLifecycle {
     // Values already in the map stay there even if this fetch evicts them.
     const captured = new Map(result);
     const contextByExecutionId = new Map(missing.map((ref) => [ref.executionId, ref.contextId]));
-    const docs = await this.stepRepository.getStepExecutionsByIds(
-      missing.map((ref) => ref.executionId),
-      ['id', 'output']
+    const docs = await this.fetchStoredValues(
+      'output',
+      missing.map((ref) => ref.executionId)
     );
     const fetched = this.retainFetchedOutputs(docs, contextByExecutionId);
 
@@ -342,13 +420,74 @@ export class StepIoService implements StepIoWriter, StepIoLifecycle {
       return result;
     }
 
-    const docs = await this.stepRepository.getStepExecutionsByIds(missing, ['id', 'input']);
+    const docs = await this.fetchStoredValues('input', missing);
     const found = new Map(docs.map((doc) => [doc.id, doc.input ?? null]));
     for (const id of missing) {
       const live = this.state.getStepIo(id, 'input');
       result.set(id, live !== undefined ? live : found.get(id) ?? null);
     }
     return result;
+  }
+
+  /**
+   * Reads a stored payload. The executions IO stream is the source when a client
+   * is configured; a missing document falls back to the step record.
+   */
+  private async fetchStoredValues(
+    type: 'input' | 'output',
+    ids: string[]
+  ): Promise<Array<{ id: string; input?: JsonValue | null; output?: JsonValue | null }>> {
+    if (!this.ioClient) {
+      return this.stepRepository.getStepExecutionsByIds(ids, ['id', type]);
+    }
+
+    const { items } = await this.ioClient.getByIds(ids.map((id) => executionIoId(type, id)));
+    const found = new Map<string, JsonValue | null>();
+    for (const item of items) {
+      found.set(item.document.executionId, item.document.value ?? null);
+    }
+    const missing = ids.filter((id) => !found.has(id));
+    if (missing.length > 0) {
+      const docs = await this.stepRepository.getStepExecutionsByIds(missing, ['id', type]);
+      for (const doc of docs) {
+        const value = type === 'input' ? doc.input : doc.output;
+        if (!found.has(doc.id)) {
+          found.set(doc.id, value ?? null);
+        }
+      }
+    }
+    return ids.filter((id) => found.has(id)).map((id) => ({ id, [type]: found.get(id) ?? null }));
+  }
+
+  private recordSize(executionId: string, field: 'inputSize' | 'outputSize', size: number): void {
+    if (!this.state.getStepExecution(executionId)) {
+      return;
+    }
+    this.state.updateStep(executionId, { id: executionId, [field]: size });
+  }
+
+  private restorePending(
+    batch: ReadonlyMap<string, { input?: JsonValue; output?: JsonValue | null }>
+  ): void {
+    for (const [executionId, part] of batch) {
+      const newer = this.pendingIo.get(executionId);
+      this.pendingIo.set(executionId, newer ? { ...part, ...newer } : { ...part });
+    }
+  }
+
+  private recordIoFailure(message: string): void {
+    this.logger?.error(message);
+    if (!this.state.getWorkflowExecution().error) {
+      this.state.updateWorkflowExecution({
+        error: { type: 'ExecutionIoPersistError', message },
+      });
+    }
+  }
+
+  private clearIoFailure(): void {
+    if (this.state.getWorkflowExecution().error?.type === 'ExecutionIoPersistError') {
+      this.state.updateWorkflowExecution({ error: null });
+    }
   }
 
   /**

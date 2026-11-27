@@ -13,6 +13,7 @@ import {
   toWorkflowExecutionEngineModel,
   WORKFLOW_STEP_TRIGGER_SOURCE,
 } from '@kbn/workflows';
+import type { ExecutionsIoClient } from '../../../repositories/data_access_layer/implementations/executions_io/executions_io_data_client';
 import type { StepExecutionRepository } from '../../../repositories/step_execution_repository';
 import type { WorkflowExecutionRepository } from '../../../repositories/workflow_execution_repository';
 import type { WorkflowsExecutionEnginePluginStart } from '../../../types';
@@ -36,6 +37,7 @@ export class WorkflowExecuteSyncStrategy {
     private workflowsExecutionEngine: WorkflowsExecutionEnginePluginStart,
     private workflowExecutionRepository: WorkflowExecutionRepository,
     private stepExecutionRepository: StepExecutionRepository,
+    private executionsIoDataClient: ExecutionsIoClient,
     private stepExecutionRuntime: StepExecutionRuntime,
     private workflowLogger: IWorkflowEventLogger
   ) {}
@@ -218,7 +220,11 @@ export class WorkflowExecuteSyncStrategy {
 
       return {
         status: 'completed',
-        output: await readChildExecutionOutput(execution, this.stepExecutionRepository),
+        output: await readChildExecutionOutput(
+          execution,
+          this.stepExecutionRepository,
+          this.executionsIoDataClient
+        ),
       };
     } catch (error) {
       return { status: 'failed', error: error as Error };

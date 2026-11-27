@@ -10,6 +10,7 @@ import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 
 import { sharedBulk } from '../../lib/bulk/shared_bulk';
 import { getExecutionsByIds } from '../../lib/get_executions_by_ids';
+import { attachExecutionIoIdsToHits } from '../../lib/with_execution_io_ids';
 import type {
   BulkRequestOptions,
   BulkResponse,
@@ -26,6 +27,8 @@ export interface PlainIndexDataClientDeps {
   esClient: ElasticsearchClient;
   indexName: string;
   logger: Logger;
+  /** Step documents derive inputId and outputId from their id. Workflow documents do not. */
+  stampExecutionIoIds?: boolean;
 }
 
 export class PlainIndexDataClient<TExecution extends { id: string }>
@@ -36,10 +39,11 @@ export class PlainIndexDataClient<TExecution extends { id: string }>
   public async search(
     request: ExecutionsSearchRequest
   ): Promise<estypes.SearchResponse<TExecution>> {
-    return this.deps.esClient.search<TExecution>({
+    const response = await this.deps.esClient.search<TExecution>({
       ...request,
       index: this.deps.indexName,
     });
+    return this.deps.stampExecutionIoIds ? attachExecutionIoIdsToHits(response) : response;
   }
 
   public async count(request: ExecutionsCountRequest): Promise<estypes.CountResponse> {
@@ -59,6 +63,7 @@ export class PlainIndexDataClient<TExecution extends { id: string }>
       defaultIndex: this.deps.indexName,
       options,
       logger: this.deps.logger,
+      stampExecutionIoIds: this.deps.stampExecutionIoIds,
     });
   }
 

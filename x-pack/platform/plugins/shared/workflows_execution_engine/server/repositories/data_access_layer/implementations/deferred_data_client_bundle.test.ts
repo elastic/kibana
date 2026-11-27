@@ -35,6 +35,7 @@ describe('DeferredDataClientBundle', () => {
     stop: jest.Mock;
     createWorkflowDataClient: jest.Mock;
     createStepDataClient: jest.Mock;
+    createIoDataClient: jest.Mock;
   };
   let registeredDataStreamBundle: {
     initSetup: jest.Mock;
@@ -54,6 +55,10 @@ describe('DeferredDataClientBundle', () => {
       stop: jest.fn().mockResolvedValue(undefined),
       createWorkflowDataClient: jest.fn().mockReturnValue(createMockWorkflowDataClient()),
       createStepDataClient: jest.fn().mockReturnValue(createMockStepDataClient()),
+      createIoDataClient: jest.fn().mockReturnValue({
+        getByIds: jest.fn().mockResolvedValue({ items: [], missing: [] }),
+        bulkCreate: jest.fn().mockResolvedValue({ items: [], errors: false }),
+      }),
     };
     registeredDataStreamBundle = {
       initSetup: jest.fn().mockResolvedValue(undefined),

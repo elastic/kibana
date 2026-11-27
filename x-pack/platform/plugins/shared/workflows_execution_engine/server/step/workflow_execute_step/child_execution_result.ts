@@ -14,6 +14,7 @@ import type {
   EsWorkflowStepExecution,
   WorkflowStepExecutionDto,
 } from '@kbn/workflows/types/v1';
+import type { ExecutionsIoClient } from '../../repositories/data_access_layer/implementations/executions_io/executions_io_data_client';
 import type { StepExecutionRepository } from '../../repositories/step_execution_repository';
 import type { IWorkflowEventLogger } from '../../workflow_event_logger';
 
@@ -23,7 +24,8 @@ import type { IWorkflowEventLogger } from '../../workflow_event_logger';
  */
 export const readChildExecutionOutput = async (
   execution: EsWorkflowExecution,
-  stepExecutionRepository: StepExecutionRepository
+  stepExecutionRepository: StepExecutionRepository,
+  executionsIoDataClient?: ExecutionsIoClient
 ): Promise<JsonValue | undefined> => {
   if (execution.context?.output) {
     return execution.context.output as JsonValue;
@@ -33,12 +35,33 @@ export const readChildExecutionOutput = async (
     execution.id,
     execution.stepExecutionIds
   );
+  if (executionsIoDataClient) {
+    await fillStepOutputs(stepExecutions, executionsIoDataClient);
+  }
   const stepExecutionDtos: WorkflowStepExecutionDto[] = stepExecutions.map((exec) =>
     omit(exec, ['spaceId'])
   );
   const output = getWorkflowOutput(stepExecutionDtos);
   return output === null ? undefined : output;
 };
+
+/** Copies stored outputs onto step documents that only carry an output id. */
+async function fillStepOutputs(
+  steps: EsWorkflowStepExecution[],
+  executionsIoDataClient: ExecutionsIoClient
+): Promise<void> {
+  const ids = steps.flatMap((step) => (step.outputId ? [step.outputId] : []));
+  if (ids.length === 0) {
+    return;
+  }
+  const { items } = await executionsIoDataClient.getByIds(ids);
+  const values = new Map(items.map((item) => [item.document.id, item.document.value]));
+  for (const step of steps) {
+    if (step.outputId && values.has(step.outputId)) {
+      step.output = values.get(step.outputId) as EsWorkflowStepExecution['output'];
+    }
+  }
+}
 
 /**
  * Builds the error a parent step reports when a child execution did not complete,

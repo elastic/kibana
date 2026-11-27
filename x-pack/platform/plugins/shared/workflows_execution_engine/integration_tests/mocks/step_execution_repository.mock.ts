@@ -14,6 +14,11 @@ import type {
 
 export class StepExecutionRepositoryMock implements Required<StepExecutionRepository> {
   public stepExecutions = new Map<string, EsWorkflowStepExecution>();
+  /**
+   * Copies stored IO onto a step document after each upsert. The engine no
+   * longer persists `input` / `output` on the step record; tests still read them there.
+   */
+  private projectStoredIo: ((step: EsWorkflowStepExecution) => void) | undefined;
 
   /**
    * When true, drop `output` (and `input`) from stored docs after each upsert.
@@ -22,6 +27,9 @@ export class StepExecutionRepositoryMock implements Required<StepExecutionReposi
    */
   public discardOutputsAfterUpsert = false;
 
+  public setIoProjection(project: (step: EsWorkflowStepExecution) => void): void {
+    this.projectStoredIo = project;
+  }
   public searchStepExecutionsByExecutionId(
     executionId: string
   ): Promise<EsWorkflowStepExecution[]> {
@@ -98,11 +106,11 @@ export class StepExecutionRepositoryMock implements Required<StepExecutionReposi
         ...(stepExecution as EsWorkflowStepExecution),
       };
 
+      this.projectStoredIo?.(merged);
       if (this.discardOutputsAfterUpsert) {
         delete (merged as { output?: unknown }).output;
         delete (merged as { input?: unknown }).input;
       }
-
       this.stepExecutions.set(stepExecution.id, merged);
     }
     return Promise.resolve();

@@ -104,10 +104,7 @@ describe('WorkflowExecutionState', () => {
     // Reset mock and set a specific uuid for this test
 
     underTest.upsertStep(stepExecution);
-    // `as Partial<EsWorkflowStepExecution>` keeps the assertion focused on
-    // the fields that createStep actually fills in; spaceId/topologicalIndex
-    // come from upstream callers (workflow context / runtime) and are not
-    // injected by createStep itself.
+    // createStep stamps the IO document ids and copies spaceId from the run.
     expect(underTest.getLatestStepExecution('test-step-execution-id')).toEqual({
       id: 'fake-id',
       workflowRunId: 'test-workflow-execution-id',
@@ -123,6 +120,9 @@ describe('WorkflowExecutionState', () => {
       globalExecutionIndex: 0,
       isTestRun: false,
       managed: false,
+      spaceId: undefined,
+      inputId: 'input:fake-id',
+      outputId: 'output:fake-id',
     } as Partial<EsWorkflowStepExecution>);
     expect(stepExecutionRepository.bulkUpsert).not.toHaveBeenCalled();
   });

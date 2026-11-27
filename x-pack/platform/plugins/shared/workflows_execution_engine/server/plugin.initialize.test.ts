@@ -47,7 +47,9 @@ describe('WorkflowsExecutionEnginePlugin — executions DAL lifecycle', () => {
 
   it('calls initSetup during setup', () => {
     const plugin = createPlugin();
-    plugin.setup(coreMock.createSetup() as any, {
+    const setup = coreMock.createSetup() as any;
+    setup.dataStreams = { registerDataStream: jest.fn() };
+    plugin.setup(setup, {
       taskManager: taskManagerMock.createSetup(),
       cloud: {} as any,
       workflowsExtensions: { registerConnectorAdapter: jest.fn() } as any,
@@ -73,13 +75,17 @@ describe('WorkflowsExecutionEnginePlugin — executions DAL lifecycle', () => {
 
   it('calls initStart and exposes the execution data access during start', () => {
     const plugin = createPlugin();
-    plugin.setup(coreMock.createSetup() as any, {
+    const setup = coreMock.createSetup() as any;
+    setup.dataStreams = { registerDataStream: jest.fn() };
+    plugin.setup(setup, {
       taskManager: taskManagerMock.createSetup(),
       cloud: {} as any,
       workflowsExtensions: { registerConnectorAdapter: jest.fn() } as any,
     });
 
-    const startContract = plugin.start(coreMock.createStart(), {
+    const start = coreMock.createStart() as any;
+    start.dataStreams = { initializeClient: jest.fn().mockResolvedValue(undefined) };
+    const startContract = plugin.start(start, {
       taskManager: taskManagerMock.createStart(),
       actions: {} as any,
       cloud: {} as any,
@@ -90,6 +96,8 @@ describe('WorkflowsExecutionEnginePlugin — executions DAL lifecycle', () => {
     expect(mockDataClientBundleInitStart).toHaveBeenCalledTimes(1);
     expect(startContract.__internalStorage.workflowExecutionsDataClient).toBeDefined();
     expect(startContract.__internalStorage.stepExecutionsDataClient).toBeDefined();
+    expect(startContract.__internalStorage.executionsIoDataClient).toBeDefined();
+    plugin.stop();
   });
 
   it('switches the data client when the storage source feature flag changes', () => {

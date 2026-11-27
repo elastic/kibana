@@ -27,6 +27,10 @@ describe('getWorkflowExecution', () => {
   let mockWorkflowDataClient: jest.Mocked<WorkflowExecutionsDataClient>;
   let mockStepDataClient: jest.Mocked<StepExecutionsDataClient>;
   let mockLogger: ReturnType<typeof loggerMock.create>;
+  const mockExecutionsIoDataClient = {
+    getByIds: jest.fn().mockResolvedValue({ items: [], missing: [] }),
+    bulkCreate: jest.fn().mockResolvedValue({ items: [], errors: false }),
+  };
 
   const baseParams = {
     workflowExecutionId: 'exec-1',
@@ -74,13 +78,14 @@ describe('getWorkflowExecution', () => {
         ...baseParams,
         workflowExecutionsDataClient: mockWorkflowDataClient,
         stepExecutionsDataClient: mockStepDataClient,
+        executionsIoDataClient: mockExecutionsIoDataClient,
         logger: mockLogger,
         includeInput: true,
         includeOutput: true,
       });
 
       expect(mockStepDataClient.getByIds).toHaveBeenCalledWith(baseExecutionDoc.stepExecutionIds, {
-        sourceExcludes: [],
+        sourceExcludes: ['input', 'output'],
       });
     });
 
@@ -89,6 +94,7 @@ describe('getWorkflowExecution', () => {
         ...baseParams,
         workflowExecutionsDataClient: mockWorkflowDataClient,
         stepExecutionsDataClient: mockStepDataClient,
+        executionsIoDataClient: mockExecutionsIoDataClient,
         logger: mockLogger,
         includeInput: false,
         includeOutput: false,
@@ -104,13 +110,14 @@ describe('getWorkflowExecution', () => {
         ...baseParams,
         workflowExecutionsDataClient: mockWorkflowDataClient,
         stepExecutionsDataClient: mockStepDataClient,
+        executionsIoDataClient: mockExecutionsIoDataClient,
         logger: mockLogger,
         includeInput: false,
         includeOutput: true,
       });
 
       expect(mockStepDataClient.getByIds).toHaveBeenCalledWith(baseExecutionDoc.stepExecutionIds, {
-        sourceExcludes: ['input'],
+        sourceExcludes: ['input', 'output'],
       });
     });
 
@@ -119,13 +126,14 @@ describe('getWorkflowExecution', () => {
         ...baseParams,
         workflowExecutionsDataClient: mockWorkflowDataClient,
         stepExecutionsDataClient: mockStepDataClient,
+        executionsIoDataClient: mockExecutionsIoDataClient,
         logger: mockLogger,
         includeInput: true,
         includeOutput: false,
       });
 
       expect(mockStepDataClient.getByIds).toHaveBeenCalledWith(baseExecutionDoc.stepExecutionIds, {
-        sourceExcludes: ['output'],
+        sourceExcludes: ['input', 'output'],
       });
     });
 
@@ -134,6 +142,7 @@ describe('getWorkflowExecution', () => {
         ...baseParams,
         workflowExecutionsDataClient: mockWorkflowDataClient,
         stepExecutionsDataClient: mockStepDataClient,
+        executionsIoDataClient: mockExecutionsIoDataClient,
         logger: mockLogger,
       });
 
@@ -158,6 +167,7 @@ describe('getWorkflowExecution', () => {
         ...baseParams,
         workflowExecutionsDataClient: mockWorkflowDataClient,
         stepExecutionsDataClient: mockStepDataClient,
+        executionsIoDataClient: mockExecutionsIoDataClient,
         logger: mockLogger,
         includeInput: false,
         includeOutput: false,
@@ -175,14 +185,15 @@ describe('getWorkflowExecution', () => {
         ...baseParams,
         workflowExecutionsDataClient: mockWorkflowDataClient,
         stepExecutionsDataClient: mockStepDataClient,
+        executionsIoDataClient: mockExecutionsIoDataClient,
         logger: mockLogger,
         includeInput: true,
         includeOutput: true,
       });
 
       expect(mockStepDataClient.search).toHaveBeenCalledWith(
-        expect.not.objectContaining({
-          _source: expect.anything(),
+        expect.objectContaining({
+          _source: { excludes: ['input', 'output'] },
         })
       );
     });
@@ -196,6 +207,7 @@ describe('getWorkflowExecution', () => {
         ...baseParams,
         workflowExecutionsDataClient: mockWorkflowDataClient,
         stepExecutionsDataClient: mockStepDataClient,
+        executionsIoDataClient: mockExecutionsIoDataClient,
         logger: mockLogger,
       });
 
@@ -213,6 +225,7 @@ describe('getWorkflowExecution', () => {
         ...baseParams,
         workflowExecutionsDataClient: mockWorkflowDataClient,
         stepExecutionsDataClient: mockStepDataClient,
+        executionsIoDataClient: mockExecutionsIoDataClient,
         logger: mockLogger,
       });
 
@@ -244,6 +257,7 @@ describe('getWorkflowExecution', () => {
         ...baseParams,
         workflowExecutionsDataClient: mockWorkflowDataClient,
         stepExecutionsDataClient: mockStepDataClient,
+        executionsIoDataClient: mockExecutionsIoDataClient,
         logger: mockLogger,
       });
 
@@ -266,6 +280,7 @@ describe('getWorkflowExecution', () => {
         ...baseParams,
         workflowExecutionsDataClient: mockWorkflowDataClient,
         stepExecutionsDataClient: mockStepDataClient,
+        executionsIoDataClient: mockExecutionsIoDataClient,
         logger: mockLogger,
       });
 
@@ -282,6 +297,7 @@ describe('getWorkflowExecution', () => {
         ...baseParams,
         workflowExecutionsDataClient: mockWorkflowDataClient,
         stepExecutionsDataClient: mockStepDataClient,
+        executionsIoDataClient: mockExecutionsIoDataClient,
         logger: mockLogger,
       });
 
@@ -300,6 +316,7 @@ describe('getWorkflowExecution', () => {
         ...baseParams,
         workflowExecutionsDataClient: mockWorkflowDataClient,
         stepExecutionsDataClient: mockStepDataClient,
+        executionsIoDataClient: mockExecutionsIoDataClient,
         logger: mockLogger,
       });
 
@@ -328,6 +345,7 @@ describe('getWorkflowExecution', () => {
         ...baseParams,
         workflowExecutionsDataClient: mockWorkflowDataClient,
         stepExecutionsDataClient: mockStepDataClient,
+        executionsIoDataClient: mockExecutionsIoDataClient,
         logger: mockLogger,
       });
 
@@ -354,6 +372,7 @@ describe('getWorkflowExecution', () => {
         ...baseParams,
         workflowExecutionsDataClient: mockWorkflowDataClient,
         stepExecutionsDataClient: mockStepDataClient,
+        executionsIoDataClient: mockExecutionsIoDataClient,
         logger: mockLogger,
       });
 
@@ -375,6 +394,7 @@ describe('getWorkflowExecution', () => {
         ...baseParams,
         workflowExecutionsDataClient: mockWorkflowDataClient,
         stepExecutionsDataClient: mockStepDataClient,
+        executionsIoDataClient: mockExecutionsIoDataClient,
         logger: mockLogger,
       });
 
@@ -395,6 +415,7 @@ describe('getWorkflowExecution', () => {
         ...baseParams,
         workflowExecutionsDataClient: mockWorkflowDataClient,
         stepExecutionsDataClient: mockStepDataClient,
+        executionsIoDataClient: mockExecutionsIoDataClient,
         logger: mockLogger,
         omitStepExecutions: true,
       });
@@ -415,6 +436,7 @@ describe('getWorkflowExecution', () => {
           ...baseParams,
           workflowExecutionsDataClient: mockWorkflowDataClient,
           stepExecutionsDataClient: mockStepDataClient,
+          executionsIoDataClient: mockExecutionsIoDataClient,
           logger: mockLogger,
         })
       ).rejects.toBe(sizeError);
@@ -433,6 +455,7 @@ describe('getWorkflowExecution', () => {
           ...baseParams,
           workflowExecutionsDataClient: mockWorkflowDataClient,
           stepExecutionsDataClient: mockStepDataClient,
+          executionsIoDataClient: mockExecutionsIoDataClient,
           logger: mockLogger,
         })
       ).rejects.toThrow('es down');
@@ -440,6 +463,109 @@ describe('getWorkflowExecution', () => {
       expect(mockLogger.error).toHaveBeenCalledWith(
         'Failed to get workflow execution exec-1: Error: es down'
       );
+    });
+  });
+
+  describe('execution IO hydration', () => {
+    const executionWithContext = {
+      ...baseExecutionDoc,
+      id: 'exec-1',
+      context: { inputs: { name: 'ada' }, output: { ok: true } },
+    };
+
+    beforeEach(() => {
+      mockWorkflowDataClient.getByIds.mockResolvedValue(
+        createMockGetExecutionsByIdsResponse([
+          executionWithContext,
+        ] as unknown as EsWorkflowExecution[])
+      );
+      mockStepDataClient.getByIds.mockResolvedValue(
+        mockStepGetByIds([
+          {
+            id: 'step-doc-1',
+            stepId: 's1',
+            status: 'completed',
+            inputId: 'input:step-doc-1',
+            outputId: 'output:step-doc-1',
+          },
+        ])
+      );
+    });
+
+    it('attaches step output from the IO client when includeOutput is true', async () => {
+      mockExecutionsIoDataClient.getByIds.mockResolvedValue({
+        items: [
+          {
+            document: {
+              id: 'output:step-doc-1',
+              executionId: 'step-doc-1',
+              type: 'output',
+              value: { step: true },
+              size: 1,
+            },
+          },
+        ],
+        missing: [],
+      });
+
+      const result = await getWorkflowExecution({
+        ...baseParams,
+        workflowExecutionsDataClient: mockWorkflowDataClient,
+        stepExecutionsDataClient: mockStepDataClient,
+        executionsIoDataClient: mockExecutionsIoDataClient,
+        logger: mockLogger,
+        includeOutput: true,
+      });
+
+      expect(mockExecutionsIoDataClient.getByIds).toHaveBeenCalledWith(['output:step-doc-1']);
+      expect(result?.context).toEqual(
+        expect.objectContaining({ inputs: { name: 'ada' }, output: { ok: true } })
+      );
+      expect(result?.stepExecutions?.[0].output).toEqual({ step: true });
+      expect(result?.stepExecutions?.[0].input).toBeUndefined();
+    });
+
+    it('does not call the IO client for step output when includeOutput is false', async () => {
+      const result = await getWorkflowExecution({
+        ...baseParams,
+        workflowExecutionsDataClient: mockWorkflowDataClient,
+        stepExecutionsDataClient: mockStepDataClient,
+        executionsIoDataClient: mockExecutionsIoDataClient,
+        logger: mockLogger,
+        includeOutput: false,
+      });
+
+      expect(mockExecutionsIoDataClient.getByIds).not.toHaveBeenCalled();
+      expect(result?.context).toEqual(
+        expect.objectContaining({ inputs: { name: 'ada' }, output: { ok: true } })
+      );
+      expect(result?.stepExecutions?.[0].output).toBeUndefined();
+    });
+
+    it('returns step metadata when the IO lookup exceeds the response size', async () => {
+      mockExecutionsIoDataClient.getByIds.mockRejectedValue(
+        new errors.RequestAbortedError(
+          'The content length (9000) is bigger than the maximum allowed buffer (42)'
+        )
+      );
+
+      const result = await getWorkflowExecution({
+        ...baseParams,
+        workflowExecutionsDataClient: mockWorkflowDataClient,
+        stepExecutionsDataClient: mockStepDataClient,
+        executionsIoDataClient: mockExecutionsIoDataClient,
+        logger: mockLogger,
+        includeOutput: true,
+      });
+
+      expect(result).not.toBeNull();
+      expect(result?.id).toBe('exec-1');
+      expect(result?.stepExecutions).toHaveLength(1);
+      expect(result?.stepExecutions?.[0].output).toBeUndefined();
+      expect(mockLogger.warn).toHaveBeenCalledWith(
+        'Failed to load step IO for workflow execution exec-1: Elasticsearch response exceeded the maximum size Kibana can process'
+      );
+      expect(mockLogger.error).not.toHaveBeenCalled();
     });
   });
 });

@@ -15,6 +15,7 @@ import type {
   WorkflowTokenUsage,
 } from '@kbn/workflows';
 import { isTerminalStatus } from '@kbn/workflows';
+import { executionIoId } from '@kbn/workflows/server';
 import { areParallelBranchesCompatible, getParallelBranchScopes } from './parallel_branch_scope';
 import type { StepExecutionRepository } from '../repositories/step_execution_repository';
 import type { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
@@ -355,6 +356,25 @@ export class WorkflowExecutionState {
     this.buildStepIdExecutionIdIndex();
   }
 
+  /** Writes pending workflow document changes and step metadata. Step payloads stay on the IO stream. */
+  public async flush(): Promise<void> {
+    const stepChanges = this.drainPendingStepChanges();
+    const flushSteps =
+      stepChanges.size > 0
+        ? this.stepExecutionRepository.bulkUpsert(Array.from(stepChanges.values()))
+        : Promise.resolve();
+
+    // A reader that stops on a terminal status loads steps from this document.
+    // Those rows have to exist before the document is visible.
+    if (isTerminalStatus(this.workflowExecution.status)) {
+      await flushSteps;
+      await this.flushWorkflowDoc();
+      return;
+    }
+
+    await Promise.all([this.flushWorkflowDoc(), flushSteps]);
+  }
+
   public async flushWorkflowDoc(): Promise<void> {
     const changes = this.workflowDocumentChanges;
     this.workflowDocumentChanges = undefined;
@@ -535,6 +555,8 @@ export class WorkflowExecutionState {
     const newStep = {
       ...step,
       id,
+      inputId: executionIoId('input', id),
+      outputId: executionIoId('output', id),
       scopeStack: step.scopeStack ?? [],
       globalExecutionIndex: this.stepExecutions.size,
       stepExecutionIndex: previousExecutionCount,
@@ -555,7 +577,7 @@ export class WorkflowExecutionState {
     });
   }
 
-  private updateStep(stepId: string, step: Partial<StepExecutionMetadata>) {
+  public updateStep(stepId: string, step: Partial<StepExecutionMetadata>) {
     const existingStep = this.stepExecutions.get(stepId);
     if (!existingStep) {
       throw new Error(`WorkflowExecutionState: updateStep called for ${stepId} but no step exists`);

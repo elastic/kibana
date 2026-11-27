@@ -49,6 +49,8 @@ describe('workflowExecutionLoop', () => {
     },
     stepIoService: {
       getOutputSizeStats: jest.fn().mockReturnValue({ totalBytes: 0, stepCount: 0 }),
+      flush: jest.fn().mockResolvedValue(false),
+      hasPendingIo: jest.fn().mockReturnValue(false),
     },
     workflowLogger: {
       logWarn: jest.fn(),
@@ -65,6 +67,16 @@ describe('workflowExecutionLoop', () => {
 
   it('runs execution and persistence loops and flushes state', async () => {
     const params = createParams();
+    const flushOrder: string[] = [];
+    params.stepIoService.flush.mockImplementation(() =>
+      Promise.resolve(false).then(() => {
+        flushOrder.push('io');
+        return false;
+      })
+    );
+    params.workflowExecutionState.flushWorkflowAndSteps.mockImplementation(async () => {
+      flushOrder.push('state');
+    });
     await workflowExecutionLoop(params as any);
 
     // eslint-disable-next-line @kbn/compat/typescript-no-var-requires
@@ -77,7 +89,9 @@ describe('workflowExecutionLoop', () => {
     expect(flushState).toHaveBeenCalled();
     expect(params.workflowExecutionCursor.start).toHaveBeenCalled();
     expect(params.workflowRuntime.saveState).toHaveBeenCalled();
+    expect(params.stepIoService.flush).toHaveBeenCalled();
     expect(params.workflowExecutionState.flushWorkflowAndSteps).toHaveBeenCalled();
+    expect(flushOrder).toEqual(['io', 'state']);
     expect(params.eventQueue.flush).toHaveBeenCalled();
     expect(publishWorkflowExecutionFinished).not.toHaveBeenCalled();
   });
