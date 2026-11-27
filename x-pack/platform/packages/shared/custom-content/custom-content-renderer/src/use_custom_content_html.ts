@@ -38,10 +38,7 @@ export interface UseCustomContentHtmlParams {
   query: Query | AggregateQuery | undefined;
   filters: Filter[] | undefined;
   esqlVariables: ESQLControlVariable[] | undefined;
-  /**
-   * False until the host has the context to fetch with (time range, filters, control variables).
-   * A panel with queries stays loading meanwhile instead of fetching without them.
-   */
+  /** False until the host has the filters and control values to fetch with; a panel with queries waits. */
   isFetchContextReady?: boolean;
   isInteractive: boolean;
   /** Records the panel's ES|QL request for the Inspect action. */
