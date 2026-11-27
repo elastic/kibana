@@ -15080,7 +15080,6 @@
     "workflowsExtensions.triggers.workflowExecutionFailed.schema.workflow.spaceId": "工作流运行所在的空间。",
     "workflowsExtensions.triggers.workflowExecutionFailed.schema.workflowGroup": "失败的工作流的详细信息。",
     "workflowsExtensions.triggers.workflowExecutionFailed.title": "工作流程失败",
-    "workflowsUi.bottomBar.editorViewGraph": "图表",
     "workflowsUi.bottomBar.editorViewLegend": "编辑器视图",
     "workflowsUi.bottomBar.editorViewYaml": "YAML",
     "workflowsUi.bottomBar.expandControls": "显示工具栏",

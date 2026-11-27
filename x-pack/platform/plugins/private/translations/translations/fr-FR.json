@@ -15052,7 +15052,6 @@
     "workflowsExtensions.triggers.workflowExecutionFailed.schema.workflow.spaceId": "L'espace dans lequel le workflow a été exécuté.",
     "workflowsExtensions.triggers.workflowExecutionFailed.schema.workflowGroup": "Détails du workflow ayant échoué.",
     "workflowsExtensions.triggers.workflowExecutionFailed.title": "Le workflow a échoué",
-    "workflowsUi.bottomBar.editorViewGraph": "Graphe",
     "workflowsUi.bottomBar.editorViewLegend": "Vue de l’éditeur",
     "workflowsUi.bottomBar.editorViewYaml": "YAML",
     "workflowsUi.bottomBar.expandControls": "Afficher la barre d'outils",

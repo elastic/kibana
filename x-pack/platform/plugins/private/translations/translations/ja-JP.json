@@ -15085,7 +15085,6 @@
     "workflowsExtensions.triggers.workflowExecutionFailed.schema.workflow.spaceId": "ワークフローが実行されたスペース。",
     "workflowsExtensions.triggers.workflowExecutionFailed.schema.workflowGroup": "失敗したワークフローの詳細。",
     "workflowsExtensions.triggers.workflowExecutionFailed.title": "ワークフローが失敗しました",
-    "workflowsUi.bottomBar.editorViewGraph": "グラフ",
     "workflowsUi.bottomBar.editorViewLegend": "エディタビュー",
     "workflowsUi.bottomBar.editorViewYaml": "YAML",
     "workflowsUi.bottomBar.expandControls": "ツールバーを表示",
