@@ -404,6 +404,12 @@ export const useAgentBuilderIntegration = ({
     const publishStaleConfig = () => {
       staleConfigTimer = undefined;
       if (!isSavedConfigStale) return;
+      // The attachment waits for the conversation the sidebar restores, but the reopen still
+      // needs this chat's session tag, agent and new-chat intent.
+      if (!attachmentTargetResolvedRef.current) {
+        publishChatConfig();
+        return;
+      }
       const yaml = editor.getModel()?.getValue();
       if (yaml !== undefined) syncAttachment(yaml);
     };
@@ -457,6 +463,7 @@ export const useAgentBuilderIntegration = ({
     // conversation is created before its id is bound, so this covers new and resumed
     // conversations alike.
     let isChatJustMounted = true;
+    let isChatBound = false;
     // Whether the editor chat that binds now may not have used its open options yet. A chat that
     // has just mounted has not, nor has one that `openAgentChat` re-propped without a remount.
     const takeOpenOptionsPending = (sessionTag: string | undefined): boolean => {
@@ -470,6 +477,7 @@ export const useAgentBuilderIntegration = ({
       (activeConversation) => {
         // `null` means no chat surface is bound, which says nothing about the
         // conversation the sidebar will restore. Whatever binds next is mounted anew.
+        isChatBound = activeConversation !== null;
         if (!activeConversation) {
           isChatJustMounted = true;
           isOtherChatBound = false;
@@ -542,7 +550,14 @@ export const useAgentBuilderIntegration = ({
     let modelListener: monaco.IDisposable | null = null;
     const model = editor.getModel();
     if (model) {
-      syncAttachment(model.getValue());
+      if (attachmentTargetResolvedRef.current) {
+        syncAttachment(model.getValue());
+      } else {
+        // The sync waits for the restored conversation, but a reopen from the top bar needs
+        // the config before that.
+        isSavedConfigStale = true;
+        if (!isChatBound) publishStaleConfig();
+      }
 
       modelListener = model.onDidChangeContent(() => {
         if (debounceTimer) clearTimeout(debounceTimer);

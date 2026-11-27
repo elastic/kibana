@@ -724,12 +724,12 @@ describe('useAgentBuilderIntegration', () => {
       });
 
       it('adopts a chat that carries no session tag', async () => {
-        // With a conversation to restore the editor publishes no config until it knows
-        // that conversation's attachment, so a sidebar opened meanwhile has no tag.
+        // A sidebar opened before the editor published its config, for example from the top
+        // bar while another app had cleared it, has no tag.
         mockHasPersistedConversation.mockReturnValue(true);
         const agentBuilder = createMockAgentBuilder();
         await renderEditor(agentBuilder);
-        expect(agentBuilder.setChatConfig).not.toHaveBeenCalled();
+        clearCalls(agentBuilder);
 
         publish(agentBuilder, { id: undefined });
 
@@ -933,6 +933,29 @@ describe('useAgentBuilderIntegration', () => {
         expect(agentBuilder.setChatConfig).toHaveBeenCalledTimes(1);
       });
 
+      it('publishes the config of a chat whose conversation is restored once no chat is bound', async () => {
+        mockHasPersistedConversation.mockReturnValue(true);
+        const agentBuilder = createMockAgentBuilder();
+        publishOwn(agentBuilder, { id: undefined, agentId: undefined }, DIAGNOSE_TAG);
+        await renderEditor(agentBuilder, 'saved-workflow');
+        expect(agentBuilder.setChatConfig).not.toHaveBeenCalled();
+
+        publish(agentBuilder, null);
+        act(() => {
+          jest.advanceTimersByTime(STALE_CONFIG_TICK);
+        });
+
+        expect(agentBuilder.setChatConfig).toHaveBeenCalledTimes(1);
+        expect(agentBuilder.setChatConfig).toHaveBeenLastCalledWith({
+          agentId: undefined,
+          newConversation: undefined,
+          sessionTag: 'workflow-editor:saved-workflow',
+          greetingMessage: WORKFLOW_EDITOR_GREETING,
+          attachments: undefined,
+        });
+        expect(agentBuilder.addAttachment).not.toHaveBeenCalled();
+      });
+
       it('publishes nothing when the config is current', async () => {
         const agentBuilder = createMockAgentBuilder();
         await renderEditor(agentBuilder);
@@ -1035,6 +1058,48 @@ describe('useAgentBuilderIntegration', () => {
         });
         expect(agentBuilder.setChatConfig).toHaveBeenLastCalledWith(
           expect.objectContaining({ agentId: 'custom-workflow-agent', newConversation: true })
+        );
+      });
+
+      it('publishes a carried new chat for a reopen while the sidebar is closed', async () => {
+        // A fresh chat was closed before the first save, and an older conversation moved over.
+        mockHasPersistedConversation.mockReturnValue(true);
+        mockTakeCarriedChatFor.mockReturnValue({
+          agentId: 'custom-workflow-agent',
+          newConversation: true,
+        });
+        const agentBuilder = createMockAgentBuilder();
+        await renderEditor(agentBuilder, 'saved-workflow');
+        const savedTag = 'workflow-editor:saved-workflow';
+
+        // The top bar reopens with this config, so it gets the fresh chat, not the older one.
+        expect(agentBuilder.setChatConfig).toHaveBeenCalledTimes(1);
+        expect(agentBuilder.setChatConfig).toHaveBeenLastCalledWith({
+          agentId: 'custom-workflow-agent',
+          newConversation: true,
+          sessionTag: savedTag,
+          greetingMessage: WORKFLOW_EDITOR_GREETING,
+          attachments: undefined,
+        });
+        // Whether the older conversation holds the attachment is not known yet.
+        expect(agentBuilder.addAttachment).not.toHaveBeenCalled();
+        clearCalls(agentBuilder);
+
+        // The reopened chat is new, so the editor attaches the YAML and keeps the intent.
+        publishOwn(agentBuilder, { id: undefined, agentId: 'custom-workflow-agent' }, savedTag);
+        expect(agentBuilder.addAttachment).toHaveBeenLastCalledWith(
+          expectedAttachment(INITIAL_YAML, { workflowId: 'saved-workflow' })
+        );
+        publish(agentBuilder, null);
+        act(() => {
+          jest.advanceTimersByTime(0);
+        });
+        expect(agentBuilder.setChatConfig).toHaveBeenLastCalledWith(
+          expect.objectContaining({
+            agentId: 'custom-workflow-agent',
+            newConversation: true,
+            attachments: [expectedAttachment(INITIAL_YAML, { workflowId: 'saved-workflow' })],
+          })
         );
       });
 
