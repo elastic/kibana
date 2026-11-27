@@ -42,6 +42,13 @@ const OTEL_TRACES_ONLY_ROLE = {
   },
 };
 
+/** The seeded NullPointerException's group, whatever else the list has or its order. */
+const npeFingerprint = ({ crashGroups }: MobileCrashGroupsResponse): string => {
+  const npe = crashGroups.find(({ type }) => type === 'java.lang.NullPointerException');
+  expect(npe).toBeDefined();
+  return npe?.fingerprint ?? '';
+};
+
 apiTest.describe(
   'Digital Experience mobile crashes API authorization',
   { tag: DIGITAL_EXPERIENCE_TAGS },
@@ -116,10 +123,11 @@ apiTest.describe(
           headers,
           responseType: 'json',
         });
-        const [npe] = (list.body as MobileCrashGroupsResponse).crashGroups;
+        expect(list).toHaveStatusCode(200);
+        const fingerprint = npeFingerprint(list.body as MobileCrashGroupsResponse);
 
         const response = await apiClient.get(
-          mobileCrashGroupsPath(CRASH_APPS.android, { fingerprint: npe.fingerprint }),
+          mobileCrashGroupsPath(CRASH_APPS.android, { fingerprint }),
           { headers, responseType: 'json' }
         );
 
@@ -144,7 +152,8 @@ apiTest.describe(
           headers: { ...COMMON_HEADERS, ...viewer.cookieHeader },
           responseType: 'json',
         });
-        const [npe] = (viewerList.body as MobileCrashGroupsResponse).crashGroups;
+        expect(viewerList).toHaveStatusCode(200);
+        const fingerprint = npeFingerprint(viewerList.body as MobileCrashGroupsResponse);
         const { cookieHeader } = await samlAuth.asInteractiveUser(OTEL_TRACES_ONLY_ROLE);
         const headers = { ...COMMON_HEADERS, ...cookieHeader };
 
@@ -153,7 +162,7 @@ apiTest.describe(
           responseType: 'json',
         });
         const detail = await apiClient.get(
-          mobileCrashGroupsPath(CRASH_APPS.android, { fingerprint: npe.fingerprint }),
+          mobileCrashGroupsPath(CRASH_APPS.android, { fingerprint }),
           { headers, responseType: 'json' }
         );
 
