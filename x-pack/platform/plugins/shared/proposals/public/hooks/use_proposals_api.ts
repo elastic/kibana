@@ -8,6 +8,7 @@
 import { useCallback, useEffect } from 'react';
 import type { MutationKey, QueryClient, UseInfiniteQueryResult } from '@kbn/react-query';
 import {
+  focusManager,
   useInfiniteQuery,
   useIsMutating,
   useMutation,
@@ -23,6 +24,7 @@ import {
   PROPOSALS_INTERNAL_URL,
   PROPOSAL_REOPEN_URL,
   PROPOSAL_SETTLING_POLL_INTERVAL_MS,
+  isAwaitingDecision,
   isAwaitingRetry,
   isProposalSettling,
   isTerminal,
@@ -89,6 +91,19 @@ const isReplacedProposal = (
 ): boolean => Boolean(proposal?.supersededBy) || proposal?.status === 'superseded';
 
 /**
+ * A single call scans the cache once. `cancelRefetch: false` joins a request already in flight, so a
+ * decision that waits for its own refresh is not interrupted.
+ */
+const refreshDetails = (queryClient: QueryClient, hashes: Set<string>): Promise<void> =>
+  queryClient.invalidateQueries(
+    {
+      queryKey: queryKeys.proposals.details,
+      predicate: ({ queryHash }) => hashes.has(queryHash),
+    },
+    { cancelRefetch: false }
+  );
+
+/**
  * A revision supersedes its predecessors without any event reaching their cards, and a pending
  * card does not poll. When a later revision shows up, refetch the earlier ones so they read as
  * replaced (with buttons disabled).
@@ -124,17 +139,6 @@ const useRefreshEarlierRevisions = (proposal: ProposalWithMetadata | undefined):
     const hashesOf = (queries: ReturnType<typeof findStaleQueries>): Set<string> =>
       new Set(queries.map(({ queryHash }) => queryHash));
 
-    // One call scans the cache once. `cancelRefetch: false` joins a request already in flight,
-    // so a decision that waits for its own refresh is not cut short.
-    const refresh = (hashes: Set<string>): Promise<void> =>
-      queryClient.invalidateQueries(
-        {
-          queryKey: queryKeys.proposals.details,
-          predicate: ({ queryHash }) => hashes.has(queryHash),
-        },
-        { cancelRefetch: false }
-      );
-
     const stale = findStaleQueries();
     if (stale.length === 0) {
       return;
@@ -143,11 +147,11 @@ const useRefreshEarlierRevisions = (proposal: ProposalWithMetadata | undefined):
     // Check those cards once more after the refresh. Do not repeat, so the number of requests
     // stays bounded. A card that got a new request already shows the current server state.
     const joined = hashesOf(stale.filter(({ state }) => state.fetchStatus === 'fetching'));
-    void refresh(hashesOf(stale)).then(() => {
+    void refreshDetails(queryClient, hashesOf(stale)).then(() => {
       const stillOpen = hashesOf(
         findStaleQueries().filter(({ queryHash }) => joined.has(queryHash))
       );
-      return stillOpen.size > 0 ? refresh(stillOpen) : undefined;
+      return stillOpen.size > 0 ? refreshDetails(queryClient, stillOpen) : undefined;
     });
   }, [queryClient, id, rootProposalId, revision, isRevision]);
 };
@@ -164,7 +168,7 @@ const useRefreshWhenSuperseded = (proposal: ProposalWithMetadata | undefined): v
   const id = proposal?.id;
   const rootProposalId = proposal?.rootProposalId;
   const revision = proposal?.revision ?? 1;
-  const isOpen = proposal !== undefined && !isReplacedProposal(proposal);
+  const isOpen = proposal && !isReplacedProposal(proposal);
 
   useEffect(() => {
     if (!id || !isOpen) {
@@ -175,7 +179,7 @@ const useRefreshWhenSuperseded = (proposal: ProposalWithMetadata | undefined): v
       .some(
         ([, cached]) =>
           cached?.supersedes === id ||
-          (rootProposalId !== undefined &&
+          (rootProposalId &&
             cached?.rootProposalId === rootProposalId &&
             (cached?.revision ?? 1) > revision)
       );
@@ -186,6 +190,91 @@ const useRefreshWhenSuperseded = (proposal: ProposalWithMetadata | undefined): v
       );
     }
   }, [queryClient, id, rootProposalId, revision, isOpen]);
+};
+
+/** How often the proposals of a conversation are read while one of its cards is open. */
+export const CONVERSATION_POLL_INTERVAL_MS = 15_000;
+
+const hasChangedState = (cached: ProposalWithMetadata, listed: ProposalWithMetadata): boolean =>
+  cached.status !== listed.status ||
+  (cached.decision ?? null) !== (listed.decision ?? null) ||
+  (cached.supersededBy ?? null) !== (listed.supersededBy ?? null);
+
+/**
+ * Refreshes the cached details that differ from the list. A detail read at or after the start of
+ * the list request can be newer than the list, so the list cannot correct it.
+ */
+const refreshChangedDetails = (
+  queryClient: QueryClient,
+  list: ListProposalsResponse,
+  requestedAt: number
+): void => {
+  const cache = queryClient.getQueryCache();
+  const changed = new Set<string>();
+  for (const listed of list.proposals) {
+    const query = cache.find<ProposalWithMetadata>(queryKeys.proposals.detail(listed.id), {
+      exact: true,
+    });
+    const cached = query?.state.data;
+    if (
+      query &&
+      cached &&
+      query.state.dataUpdatedAt < requestedAt &&
+      hasChangedState(cached, listed)
+    ) {
+      changed.add(query.queryHash);
+    }
+  }
+  if (changed.size > 0) {
+    void refreshDetails(queryClient, changed);
+  }
+};
+
+/**
+ * An open card does not poll its own proposal, so a decision made elsewhere never reaches it.
+ * Instead, the conversation of the card is polled. One list reads all proposals of the
+ * conversation. Polling runs while a card of the conversation is open and the tab is visible.
+ * The cards of one conversation share the list read, because `staleTime` limits them to about one
+ * request per interval. The read compares the list with the cached details once, however many
+ * cards share it. A failed read changes nothing, and the next interval tries again.
+ */
+const usePollConversationDecisions = (proposal: ProposalWithMetadata | undefined): void => {
+  const { services } = useKibana();
+  const queryClient = useQueryClient();
+  const { http } = services;
+  const conversationId = proposal?.conversationId;
+  const isOpen = proposal && isAwaitingDecision(proposal) && !proposal.decision;
+
+  useEffect(() => {
+    if (!http || !conversationId || !isOpen) {
+      return;
+    }
+    const readConversation = async (): Promise<ListProposalsResponse> => {
+      const requestedAt = Date.now();
+      const list = await http.get<ListProposalsResponse>(PROPOSALS_INTERNAL_URL, {
+        version: PROPOSALS_API_VERSION,
+        query: { conversationId, size: MAX_PROPOSALS_PAGE_SIZE, order: 'newest' },
+      });
+      refreshChangedDetails(queryClient, list, requestedAt);
+      return list;
+    };
+    const poll = async (): Promise<void> => {
+      if (!focusManager.isFocused()) {
+        return;
+      }
+      await queryClient
+        .fetchQuery({
+          queryKey: queryKeys.proposals.conversationPoll(conversationId),
+          queryFn: readConversation,
+          staleTime: CONVERSATION_POLL_INTERVAL_MS - 1000,
+          // The list read must outlive one interval, so that the cards can share it.
+          cacheTime: CONVERSATION_POLL_INTERVAL_MS * 2,
+        })
+        .catch(() => undefined);
+    };
+    const timer = setInterval(() => void poll(), CONVERSATION_POLL_INTERVAL_MS);
+    return () => clearInterval(timer);
+  }, [queryClient, http, conversationId, isOpen]);
 };
 
 /**
@@ -325,6 +414,7 @@ export const useProposal = (id: string | undefined) => {
 
   useRefreshEarlierRevisions(query.data);
   useRefreshWhenSuperseded(query.data);
+  usePollConversationDecisions(query.data);
 
   return query;
 };

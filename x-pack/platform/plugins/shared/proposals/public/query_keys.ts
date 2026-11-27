@@ -13,6 +13,9 @@ export const queryKeys = {
     /** Distinct from `list`: that one is always `status: 'pending'`, this one is every status. */
     forConversation: (conversationId: string) =>
       [...queryKeys.proposals.all, 'conversation', conversationId] as const,
+    /** The list of all proposals of one conversation, polled to verify if decisions were made elsewhere. */
+    conversationPoll: (conversationId: string) =>
+      [...queryKeys.proposals.all, 'conversation-poll', conversationId] as const,
     details: ['proposals', 'detail'] as const,
     detail: (id: string | undefined) => [...queryKeys.proposals.details, id] as const,
   },
