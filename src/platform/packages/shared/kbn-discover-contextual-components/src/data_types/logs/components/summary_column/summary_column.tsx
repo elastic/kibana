@@ -35,7 +35,10 @@ import {
   createResourceFieldsWithOtelFallback,
   formatJsonDocumentForContent,
   isTraceDocument,
+  type RenderResourceBadge,
 } from './utils';
+
+export type { RenderResourceBadge };
 import {
   closeCellActionPopoverText,
   contentLabel,
@@ -51,6 +54,7 @@ export interface SummaryColumnFactoryDeps {
   onFilter?: DocViewFilterFn;
   core: CoreStart;
   share?: SharePluginStart;
+  renderResourceBadge?: RenderResourceBadge;
 }
 
 export type SummaryColumnProps = DataGridCellValueElementProps & { isTracesSummary?: boolean };
@@ -77,7 +81,16 @@ const SummaryCell = ({
   rowHeight: maybeNullishRowHeight,
   ...props
 }: AllSummaryColumnProps) => {
-  const { dataView, onFilter, row, share, core, isTracesSummary, fieldFormats } = props;
+  const {
+    dataView,
+    onFilter,
+    row,
+    share,
+    core,
+    isTracesSummary,
+    fieldFormats,
+    renderResourceBadge,
+  } = props;
 
   const density = maybeNullishDensity ?? DataGridDensity.COMPACT;
   const isCompressed = density === DataGridDensity.COMPACT;
@@ -114,6 +127,8 @@ const SummaryCell = ({
           fields={resourceFields}
           limited={isSingleLine}
           onFilter={onFilter}
+          row={row}
+          renderResourceBadge={renderResourceBadge}
           css={singleLineResourceCss}
         />
       )}
@@ -126,6 +141,8 @@ const SummaryCell = ({
           fields={resourceFields}
           limited={isSingleLine}
           onFilter={onFilter}
+          row={row}
+          renderResourceBadge={renderResourceBadge}
           css={multiLineResourceCss}
         />
       )}

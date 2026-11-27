@@ -36,7 +36,12 @@ export interface SparklineProps {
   type?: 'line' | 'bar';
   compact?: boolean;
   isLoading?: boolean;
+  /** Render a translucent area fill beneath the line, instead of a bare line. */
+  fill?: boolean;
 }
+
+const AREA_FILL_OPACITY = 0.2;
+const FILLED_LINE_WIDTH = 2;
 
 function hasValidTimeseries(series?: SparklinePoint[] | null): series is SparklinePoint[] {
   return !!series?.some((point) => point.y !== null);
@@ -50,15 +55,24 @@ export function Sparkline({
   type = 'line',
   compact = false,
   isLoading = false,
+  fill = false,
 }: SparklineProps) {
   const { euiTheme } = useEuiTheme();
   const { theme: defaultTheme, baseTheme } = useChartThemes();
   const hasComparisonSeries = !!comparisonSeries?.length;
 
+  const lineStyle = fill ? { strokeWidth: FILLED_LINE_WIDTH } : {};
+  // A flat series sits on the plot edge; reserve half the stroke so it isn't clipped (and so a
+  // constant line doesn't look thinner than a varying one). Only needed for the thicker filled line.
+  const edgeInset = fill ? FILLED_LINE_WIDTH / 2 : 0;
   const sparklineTheme = {
-    chartMargins: { left: 0, right: 0, top: 0, bottom: 0 },
-    lineSeriesStyle: { point: { opacity: 0 } },
-    areaSeriesStyle: { point: { opacity: 0 } },
+    chartMargins: { left: 0, right: 0, top: edgeInset, bottom: edgeInset },
+    lineSeriesStyle: { point: { opacity: 0 }, line: lineStyle },
+    areaSeriesStyle: {
+      point: { opacity: 0 },
+      area: { opacity: fill ? AREA_FILL_OPACITY : 0 },
+      line: lineStyle,
+    },
     ...(hasComparisonSeries ? COMPARISON_CHART_THEME : {}),
   };
 
@@ -157,19 +171,22 @@ export function Sparkline({
                 lineSeriesStyle={DOTTED_LINE_STYLE}
               />
             ))}
-            {mainSegments.map((segment, i) => (
-              <LineSeries
-                key={`seg_${i}`}
-                id={`seg_${i}`}
-                xScaleType={ScaleType.Time}
-                yScaleType={ScaleType.Linear}
-                xAccessor="x"
-                yAccessors={['y']}
-                data={segment}
-                color={color}
-                curve={CurveType.CURVE_MONOTONE_X}
-              />
-            ))}
+            {mainSegments.map((segment, i) => {
+              const MainSeries = fill ? AreaSeries : LineSeries;
+              return (
+                <MainSeries
+                  key={`seg_${i}`}
+                  id={`seg_${i}`}
+                  xScaleType={ScaleType.Time}
+                  yScaleType={ScaleType.Linear}
+                  xAccessor="x"
+                  yAccessors={['y']}
+                  data={segment}
+                  color={color}
+                  curve={CurveType.CURVE_MONOTONE_X}
+                />
+              );
+            })}
             {comparisonSplit && (
               <>
                 {comparisonSplit.leadingEdge && (

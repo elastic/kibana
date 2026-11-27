@@ -8,11 +8,12 @@
  */
 
 import React from 'react';
-import { getShouldShowFieldHandler } from '@kbn/discover-utils';
+import { getShouldShowFieldHandler, SERVICE_NAME_FIELD } from '@kbn/discover-utils';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import type { SummaryColumnProps } from '@kbn/discover-contextual-components';
+import type { RenderResourceBadge, SummaryColumnProps } from '@kbn/discover-contextual-components';
 import type { CellRenderersExtensionParams } from '../../../../context_awareness';
 import type { ContextAwarenessToolkit } from '../../../../context_awareness';
+import { ServiceSummaryBadge } from '../../../../context_awareness/profile_providers/observability/traces_data_source_profile/accessors/service_summary_cell';
 import { SummaryColumn } from './summary_column';
 
 export type SummaryColumnGetterDeps = CellRenderersExtensionParams;
@@ -24,6 +25,13 @@ export const getSummaryColumn = (
   const { dataView, density, rowHeight } = params;
   const shouldShowFieldHandler = createGetShouldShowFieldHandler(dataView);
 
+  // Render the service chip as the service-summary popover (same as the traces profile), instead
+  // of the generic filter/copy cell-actions badge.
+  const renderResourceBadge: RenderResourceBadge = ({ field, row }) =>
+    field.name === SERVICE_NAME_FIELD ? (
+      <ServiceSummaryBadge row={row} serviceNameField={field.name} toolkit={toolkit} />
+    ) : undefined;
+
   return (props: Omit<SummaryColumnProps, 'core' | 'share'>) => (
     <SummaryColumn
       {...props}
@@ -31,6 +39,7 @@ export const getSummaryColumn = (
       onFilter={toolkit.actions.addFilter}
       rowHeight={rowHeight}
       shouldShowFieldHandler={shouldShowFieldHandler}
+      renderResourceBadge={renderResourceBadge}
     />
   );
 };

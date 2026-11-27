@@ -10,8 +10,9 @@
 import React from 'react';
 import type { CommonProps } from '@elastic/eui';
 import { EuiBadge, EuiFlexGroup } from '@elastic/eui';
+import type { DataTableRecord } from '@kbn/discover-utils';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
-import type { ResourceFieldDescriptor } from './utils';
+import type { ResourceFieldDescriptor, RenderResourceBadge } from './utils';
 
 const MAX_LIMITED_FIELDS_VISIBLE = 3;
 
@@ -20,30 +21,45 @@ interface ResourceProps {
   /* When true, the column will render a predefined number of resources and indicates with a badge how many more we have */
   limited?: boolean;
   onFilter?: DocViewFilterFn;
+  row?: DataTableRecord;
+  renderResourceBadge?: RenderResourceBadge;
   css?: CommonProps['css'];
 }
 
-export const Resource = ({ fields, limited = false, onFilter, ...props }: ResourceProps) => {
+export const Resource = ({
+  fields,
+  limited = false,
+  onFilter,
+  row,
+  renderResourceBadge,
+  ...props
+}: ResourceProps) => {
   const displayedFields = limited ? fields.slice(0, MAX_LIMITED_FIELDS_VISIBLE) : fields;
   const extraFieldsCount = limited ? fields.length - MAX_LIMITED_FIELDS_VISIBLE : 0;
 
   return (
     <EuiFlexGroup gutterSize="s" {...props}>
-      {displayedFields.map(
-        ({ name, rawValue, formattedValue, textValue, ResourceBadge, Icon, property }) => (
-          <ResourceBadge
-            key={name}
-            name={name}
-            property={property}
-            rawValue={rawValue}
-            formattedValue={formattedValue}
-            textValue={textValue}
-            icon={Icon}
-            onFilter={onFilter}
-            truncateTitle={true}
-          />
-        )
-      )}
+      {displayedFields.map((field) => {
+        const { name, rawValue, formattedValue, textValue, ResourceBadge, Icon, property } = field;
+        const customBadge = row ? renderResourceBadge?.({ field, row }) : undefined;
+
+        return (
+          <React.Fragment key={name}>
+            {customBadge ?? (
+              <ResourceBadge
+                name={name}
+                property={property}
+                rawValue={rawValue}
+                formattedValue={formattedValue}
+                textValue={textValue}
+                icon={Icon}
+                onFilter={onFilter}
+                truncateTitle={true}
+              />
+            )}
+          </React.Fragment>
+        );
+      })}
       {extraFieldsCount > 0 && (
         <div>
           <EuiBadge>+{extraFieldsCount}</EuiBadge>
