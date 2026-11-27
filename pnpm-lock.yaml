@@ -4743,8 +4743,8 @@ importers:
         specifier: 2.6.0
         version: 2.6.0(react-redux@9.2.0(@types/react@18.2.79)(react@18.2.0)(redux@5.0.1))(react@18.2.0)(redux@5.0.1)(reselect@5.1.0)
       langsmith:
-        specifier: 0.11.1
-        version: 0.11.1(@opentelemetry/api@1.10.0)(@opentelemetry/exporter-trace-otlp-proto@0.301.1(@opentelemetry/api@1.10.0))(openai@4.104.0(ws@8.23.0)(zod@4.6.5))(ws@8.23.0)
+        specifier: 0.12.0
+        version: 0.12.0(@opentelemetry/api@1.10.0)(@opentelemetry/exporter-trace-otlp-proto@0.301.1(@opentelemetry/api@1.10.0))(openai@4.104.0(ws@8.23.0)(zod@4.6.5))(ws@8.23.0)
       liquidjs:
         specifier: 10.28.0
         version: 10.28.0
@@ -20334,8 +20334,8 @@ packages:
   kuler@2.0.0:
     resolution: {integrity: sha512-Xq9nH7KlWZmXAtodXDDRE7vs6DU1gTU8zYDHDiWLSip45Egwq3plLHzPn27NgvzL2r1LMPC1vdqh98sQxtqj4A==}
 
-  langsmith@0.11.1:
-    resolution: {integrity: sha512-wcJKmXnJK6sKRTDm/eJ4ZAtsdSyjaQBu2VM9Hw6UZXBFzbICldlpNOcdDFbSIGzWr/kE7deV9kAVuxcE6V5vtg==}
+  langsmith@0.12.0:
+    resolution: {integrity: sha512-fbV0Dya+HOTyCEfH0+jbBuSXBgIj6sfm3VYxD9UmJ5H2W303UEEizxjEWu880P5qS7zRnnsYO5MVLE6pLPQKKQ==}
     peerDependencies:
       '@opentelemetry/api': '*'
       '@opentelemetry/exporter-trace-otlp-proto': '*'
@@ -28552,7 +28552,7 @@ snapshots:
       zod: 4.6.5
     optionalDependencies:
       cheerio: 1.0.0-rc.12
-      langsmith: 0.11.1(@opentelemetry/api@1.10.0)(@opentelemetry/exporter-trace-otlp-proto@0.301.1(@opentelemetry/api@1.10.0))(openai@4.104.0(ws@8.23.0)(zod@4.6.5))(ws@8.23.0)
+      langsmith: 0.12.0(@opentelemetry/api@1.10.0)(@opentelemetry/exporter-trace-otlp-proto@0.301.1(@opentelemetry/api@1.10.0))(openai@4.104.0(ws@8.23.0)(zod@4.6.5))(ws@8.23.0)
       peggy: 5.1.1
     transitivePeerDependencies:
       - '@aws-sdk/credential-provider-node'
@@ -28571,7 +28571,7 @@ snapshots:
       '@cfworker/json-schema': 4.1.6
       '@standard-schema/spec': 1.1.0
       js-tiktoken: 1.0.21
-      langsmith: 0.11.1(@opentelemetry/api@1.10.0)(@opentelemetry/exporter-trace-otlp-proto@0.301.1(@opentelemetry/api@1.10.0))(openai@4.104.0(ws@8.23.0)(zod@4.6.5))(ws@8.23.0)
+      langsmith: 0.12.0(@opentelemetry/api@1.10.0)(@opentelemetry/exporter-trace-otlp-proto@0.301.1(@opentelemetry/api@1.10.0))(openai@4.104.0(ws@8.23.0)(zod@4.6.5))(ws@8.23.0)
       mustache: 4.2.0
       p-queue: 6.6.2
       zod: 4.6.5
@@ -37478,7 +37478,7 @@ snapshots:
 
   kuler@2.0.0: {}
 
-  langsmith@0.11.1(@opentelemetry/api@1.10.0)(@opentelemetry/exporter-trace-otlp-proto@0.301.1(@opentelemetry/api@1.10.0))(openai@4.104.0(ws@8.23.0)(zod@4.6.5))(ws@8.23.0):
+  langsmith@0.12.0(@opentelemetry/api@1.10.0)(@opentelemetry/exporter-trace-otlp-proto@0.301.1(@opentelemetry/api@1.10.0))(openai@4.104.0(ws@8.23.0)(zod@4.6.5))(ws@8.23.0):
     dependencies:
       p-queue: 6.6.2
     optionalDependencies:
