@@ -1,5 +1,5 @@
 {
-  "sha1": "c820a2cb7ca978f4a6c71723e5d8b40a135c62e0",
+  "sha1": "97e40fd5e2907a06d3aacdce4a3bafe2d66ad652",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -13,6 +13,22 @@
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_policy/ui/parallel_tests/global.setup.ts",
         "line": 5,
         "column": 1
+      }
+    },
+    {
+      "id": "e37bb1f0da89caf-d841ae4002c7e33",
+      "title": "Policy details - policy settings unsaved changes unsaved changes guard",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_policy/ui/parallel_tests/policy_settings_unsaved_changes.spec.ts",
+        "line": 16,
+        "column": 25
       }
     },
     {
