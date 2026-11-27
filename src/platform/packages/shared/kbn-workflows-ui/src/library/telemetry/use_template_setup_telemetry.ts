@@ -75,6 +75,14 @@ export const useTemplateSetupTelemetry = ({
     [connectorTypes, fields.length, telemetry, templateTelemetry]
   );
 
+  // A setup still waiting for the connector list is reported without the existing connector
+  // types when the user ends it, so the events keep the order of the user's actions.
+  const flushSetupOpened = useCallback(() => {
+    if (hasOpenedSetup.current && !isSetupReported.current) {
+      reportSetupOpened();
+    }
+  }, [reportSetupOpened]);
+
   // Once per template view. The connector pickers on the setup step load the connector list,
   // with their own retries; the report waits for their result instead of requesting it.
   useEffect(() => {
@@ -114,10 +122,7 @@ export const useTemplateSetupTelemetry = ({
     if (!hasOpenedSetup.current) {
       return;
     }
-    // Left before the connector list loaded: the setup still counts, in order.
-    if (!isSetupReported.current) {
-      reportSetupOpened();
-    }
+    flushSetupOpened();
     // An install that is running or done, or a remix, continues the setup.
     if (hasRemixed.current || installStatus === 'loading' || installStatus === 'success') {
       return;
@@ -127,8 +132,9 @@ export const useTemplateSetupTelemetry = ({
 
   const reportRemixClicked = useCallback(() => {
     hasRemixed.current = true;
+    flushSetupOpened();
     telemetry.reportTemplateRemixClicked(templateTelemetry, step);
-  }, [step, telemetry, templateTelemetry]);
+  }, [flushSetupOpened, step, telemetry, templateTelemetry]);
 
   return { reportRemixClicked };
 };

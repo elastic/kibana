@@ -110,7 +110,9 @@ export const TemplateDetail = React.memo<TemplateDetailProps>(function TemplateD
   const query = useTemplate(template ? undefined : slug);
   const data = template ?? query.data;
   const isLoading = template ? false : query.isLoading;
-  const isError = template ? false : query.isError;
+  // Only a template that never loaded is an error: a failed background refetch keeps the
+  // loaded template on screen, and the user's install form with it.
+  const isLoadingError = template ? false : query.isLoadingError;
   const { euiTheme } = useEuiTheme();
   const previewShadow = useEuiShadow('xl');
   const [previewView, setPreviewView] = useState<WorkflowDetailBottomBarView>('graph');
@@ -284,7 +286,7 @@ export const TemplateDetail = React.memo<TemplateDetailProps>(function TemplateD
     return <EuiLoadingSpinner size="xl" data-test-subj="workflowLibraryTemplateDetail-loading" />;
   }
 
-  if (isError || !data) {
+  if (isLoadingError || !data) {
     return (
       <KbnDangerCallout
         data-test-subj="workflowLibraryTemplateDetail-error"

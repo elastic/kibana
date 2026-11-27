@@ -487,6 +487,24 @@ describe('TemplateInstallSection', () => {
       expect(reportedEvents('workflows_template_setup_abandoned')).toEqual([]);
     });
 
+    it('reports setup opened before Remix with AI when the user remixes before the connector list loads', () => {
+      mockFetchConnectors.mockReturnValue(new Promise(() => {}));
+      const { unmount } = renderSection({ step: 'setup' });
+
+      fireEvent.click(screen.getByTestId('workflowLibraryTemplateRemixButton'));
+      unmount();
+
+      expect(
+        reportEvent.mock.calls.filter(([type]) => type.startsWith('workflows_template_'))
+      ).toEqual([
+        [
+          'workflows_template_setup_opened',
+          { ...TEMPLATE_FIELDS, formFieldCount: 2, connectorTypes: ['.demo'] },
+        ],
+        ['workflows_template_remix_clicked', { ...TEMPLATE_FIELDS, step: 'setup' }],
+      ]);
+    });
+
     it('reports Remix with AI with the step it was clicked from', () => {
       renderSection({ step: 'details' });
 

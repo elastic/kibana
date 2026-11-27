@@ -406,14 +406,45 @@ describe('TemplateDetail', () => {
   });
 
   it('should render an error callout on failure', () => {
-    mockUseTemplate.mockReturnValue({ data: undefined, isLoading: false, isError: true });
+    mockUseTemplate.mockReturnValue({
+      data: undefined,
+      isLoading: false,
+      isError: true,
+      isLoadingError: true,
+    });
     renderDetail();
     expect(screen.getByTestId('workflowLibraryTemplateDetail-error')).toBeInTheDocument();
   });
 
+  it('should keep the loaded template and its install section when a background refetch fails', () => {
+    const { rerender } = renderDetail();
+    fireEvent.click(screen.getByTestId('mockInstallSectionSetup'));
+    const installSection = screen.getByTestId('mockInstallSection');
+
+    // React Query keeps the data of a failed refetch.
+    mockUseTemplate.mockReturnValue({
+      data: TEMPLATE_BODY,
+      isLoading: false,
+      isError: true,
+      isLoadingError: false,
+      isRefetchError: true,
+    });
+    rerender(withProviders(<TemplateDetail slug="my-template" />));
+
+    expect(screen.queryByTestId('workflowLibraryTemplateDetail-error')).toBeNull();
+    // The same element: the install form and its values were not unmounted.
+    expect(screen.getByTestId('mockInstallSection')).toBe(installSection);
+    expect(screen.getByTestId('mockInstallSectionStep')).toHaveTextContent('setup');
+  });
+
   it('should render an in-memory template without fetching by slug', () => {
     // No slug and no fetch result — the query must not be consulted.
-    mockUseTemplate.mockReturnValue({ data: undefined, isLoading: true, isError: true });
+    mockUseTemplate.mockReturnValue({
+      data: undefined,
+      isLoading: true,
+      isError: true,
+      isLoadingError: true,
+    });
 
     renderWithProviders(<TemplateDetail template={TEMPLATE_BODY} installMode="custom" />);
     expect(
