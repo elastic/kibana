@@ -49,12 +49,10 @@ const getAccessibleSpaceIds = async (http?: HttpStart): Promise<string[] | undef
 export function useEditMonitorLocator({
   configId,
   monitorSpaces,
-  packagePolicyId,
   locators,
 }: {
   configId: string;
   monitorSpaces?: string[];
-  packagePolicyId?: string;
   locators?: LocatorClient;
 }) {
   const [editUrl, setEditUrl] = useState<string | undefined>(undefined);
@@ -76,13 +74,12 @@ export function useEditMonitorLocator({
           : undefined;
       const url = await locator?.getUrl({
         configId,
-        packagePolicyId,
         ...getMonitorSpaceToAppend(activeSpace?.id, monitorSpaces, accessibleSpaceIds),
       });
       setEditUrl(url);
     }
     generateUrl();
-  }, [locator, configId, packagePolicyId, monitorSpaces, spaces, http]);
+  }, [locator, configId, monitorSpaces, spaces, http]);
 
   return editUrl;
 }

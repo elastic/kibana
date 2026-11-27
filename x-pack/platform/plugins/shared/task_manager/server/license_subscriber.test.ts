@@ -49,4 +49,63 @@ describe('LicenseSubscriber', () => {
       expect(licenseSubscriber.getIsSecurityEnabled()).toEqual(false);
     });
   });
+
+  describe('getIsSecurityDisabled', () => {
+    test('should return false if security is enabled', () => {
+      const license: Subject<ILicense> = new Subject();
+      const licenseSubscriber = new LicenseSubscriber(license);
+
+      license.next(
+        licensingMock.createLicense({
+          license: { status: 'active', type: 'basic' },
+          features: { security: { isEnabled: true, isAvailable: true } },
+        })
+      );
+      expect(licenseSubscriber.getIsSecurityDisabled()).toEqual(false);
+    });
+
+    test('should return true if security is disabled', () => {
+      const license: Subject<ILicense> = new Subject();
+      const licenseSubscriber = new LicenseSubscriber(license);
+
+      license.next(
+        licensingMock.createLicense({
+          license: { status: 'active', type: 'basic' },
+          features: { security: { isEnabled: false, isAvailable: true } },
+        })
+      );
+      expect(licenseSubscriber.getIsSecurityDisabled()).toEqual(true);
+    });
+
+    test('should return false if the license has no security feature', () => {
+      const license: Subject<ILicense> = new Subject();
+      const licenseSubscriber = new LicenseSubscriber(license);
+
+      license.next(
+        licensingMock.createLicense({
+          license: { status: 'active', type: 'basic' },
+        })
+      );
+      expect(licenseSubscriber.getIsSecurityDisabled()).toEqual(false);
+    });
+
+    test('should return false if no license has been received', () => {
+      const license: Subject<ILicense> = new Subject();
+      const licenseSubscriber = new LicenseSubscriber(license);
+
+      expect(licenseSubscriber.getIsSecurityDisabled()).toEqual(false);
+    });
+
+    test('should return false if the license is unavailable', () => {
+      const license: Subject<ILicense> = new Subject();
+      const licenseSubscriber = new LicenseSubscriber(license);
+
+      const unavailableLicense = licensingMock.createLicenseMock();
+      unavailableLicense.isAvailable = false;
+      unavailableLicense.getFeature.mockReturnValue({ isAvailable: false, isEnabled: false });
+
+      license.next(unavailableLicense);
+      expect(licenseSubscriber.getIsSecurityDisabled()).toEqual(false);
+    });
+  });
 });
