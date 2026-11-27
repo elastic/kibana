@@ -15,6 +15,7 @@ const gridSettings: MetricsGridSettings = {
   counterAggregation: 'sum',
   gaugeAggregation: 'avg',
   histogramPercentile: 'p95',
+  histogramVisualization: 'lnsXY',
 };
 
 describe('getAggregationConfigChanges', () => {

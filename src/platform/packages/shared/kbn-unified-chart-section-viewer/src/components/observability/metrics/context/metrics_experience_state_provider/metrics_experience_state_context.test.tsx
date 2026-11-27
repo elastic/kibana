@@ -268,7 +268,7 @@ describe('MetricsExperienceStateProvider', () => {
         counterAggregation: 'sum',
         gaugeAggregation: 'avg',
         histogramPercentile: 'p95',
-        histogramVisualization: 'lnsXY',
+        histogramVisualization: 'lnsHeatmap',
         dimensions: [],
         searchTerm: '',
       });

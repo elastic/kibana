@@ -139,6 +139,77 @@ spaceTest.describe(
             await gridSettings.open();
             await gridSettings.selectCounterAggregation('max');
             await gridSettings.selectGaugeAggregation('min');
+            await gridSettings.selectHistogramDisplay('distribution');
+            await gridSettings.selectHistogramPercentile('p50');
+            await gridSettings.apply();
+            await expect(gridSettings.flyout).toBeHidden();
+          }
+        );
+
+        await spaceTest.step('verify the counter aggregation is applied in the chart', async () => {
+          await metricsExperience.searchMetric('counter_0');
+          await metricsExperience.waitForFirstCard('counter_0-0');
+          await metricsExperience.openInsightsFlyout(0);
+          await flyout.esqlQuery.tabButton.click();
+          await expect(flyout.esqlQuery.codeBlock).toContainText('MAX(RATE(counter_0))');
+          await flyout.closeButton.click();
+          await metricsExperience.clearSearch();
+        });
+
+        await spaceTest.step('verify the gauge aggregation is applied in the chart', async () => {
+          await metricsExperience.searchMetric('gauge_0');
+          await metricsExperience.waitForFirstCard('gauge_0-0');
+          await metricsExperience.openInsightsFlyout(0);
+          await flyout.esqlQuery.tabButton.click();
+          await expect(flyout.esqlQuery.codeBlock).toContainText('MIN(MIN_OVER_TIME(gauge_0))');
+          await flyout.closeButton.click();
+          await metricsExperience.clearSearch();
+        });
+
+        await spaceTest.step('verify the histogram is drawn as a distribution', async () => {
+          await metricsExperience.searchMetric('histogram_0');
+          await metricsExperience.waitForFirstCard('histogram_0-0');
+          await metricsExperience.openInsightsFlyout(0);
+          await flyout.esqlQuery.tabButton.click();
+          // Distribution is the default chart. The selected percentile is the fallback
+          // when the metric is sliced by dimensions, so it does not appear in this query.
+          await expect(flyout.esqlQuery.codeBlock).toContainText(
+            'COUNT(TO_TDIGEST(histogram_0), bucket)'
+          );
+          await flyout.closeButton.click();
+          await metricsExperience.clearSearch();
+        });
+
+        await spaceTest.step('reload the page and verify the settings persisted', async () => {
+          await page.reload();
+          // The grid only mounts once the post-reload metrics fetch resolves, and a cold
+          // Discover re-init plus that fetch regularly exceeds the default 10s on serverless CI
+          // (matching `waitForDiscoverPage`'s own 30s allowance for the same reason).
+          await expect(metricsExperience.grid).toBeVisible({ timeout: 30_000 });
+
+          await gridSettings.open();
+          await expect(gridSettings.counterSelect).toContainText('Maximum');
+          await expect(gridSettings.gaugeSelect).toContainText('Minimum');
+          await expect(gridSettings.distributionChoice).toHaveAttribute('aria-pressed', 'true');
+          await expect(gridSettings.histogramSelect).toContainText('50th percentile');
+          await gridSettings.cancel();
+        });
+      }
+    );
+
+    spaceTest(
+      'applies a percentile histogram chart end to end and persists it',
+      async ({ pageObjects, page }) => {
+        const { metricsExperience } = pageObjects;
+        const { gridSettings, flyout } = metricsExperience;
+
+        await spaceTest.step(
+          'set counter, gauge, percentile display and histogram percentile and apply',
+          async () => {
+            await gridSettings.open();
+            await gridSettings.selectCounterAggregation('max');
+            await gridSettings.selectGaugeAggregation('min');
+            await gridSettings.selectHistogramDisplay('percentile');
             await gridSettings.selectHistogramPercentile('p50');
             await gridSettings.apply();
             await expect(gridSettings.flyout).toBeHidden();
@@ -166,7 +237,7 @@ spaceTest.describe(
         });
 
         await spaceTest.step(
-          'verify the histogram aggregation is applied in the chart',
+          'verify the percentile aggregation is applied in the chart',
           async () => {
             await metricsExperience.searchMetric('histogram_0');
             await metricsExperience.waitForFirstCard('histogram_0-0');
@@ -190,6 +261,7 @@ spaceTest.describe(
           await gridSettings.open();
           await expect(gridSettings.counterSelect).toContainText('Maximum');
           await expect(gridSettings.gaugeSelect).toContainText('Minimum');
+          await expect(gridSettings.percentileChoice).toHaveAttribute('aria-pressed', 'true');
           await expect(gridSettings.histogramSelect).toContainText('50th percentile');
           await gridSettings.cancel();
         });

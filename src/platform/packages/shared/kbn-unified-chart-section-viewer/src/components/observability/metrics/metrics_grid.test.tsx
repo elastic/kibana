@@ -1356,6 +1356,11 @@ describe('MetricsGrid', () => {
     });
 
     it('keeps the percentile chart when the heatmaps flag is off', () => {
+      jest
+        .mocked(useFeatureFlag)
+        .mockImplementation((flag, fallback) =>
+          flag === FEATURE_FLAGS.IS_HEATMAPS_ENABLED ? false : fallback
+        );
       renderMetricsGridWithHistDistributions({
         metricItems: [histogramItem],
         histogramBounds: bounds,
