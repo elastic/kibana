@@ -83,8 +83,8 @@ const MAX_HELD_NOTE_LENGTH = 1000;
  *    status, avoiding pure-churn duplicates.
  *  - Otherwise write a new version of the identified event, persisting the caller-supplied status.
  *    Merges signals and topology with prior versions when history is found.
- *    When no new rule UUIDs are introduced, the stored `title` and `symptom_hypothesis` are
- *    preserved (`narrative_preserved: true` on the result) to prevent identity hijack.
+ *    When no new confirming rule UUIDs are introduced, the stored `title` and `symptom_hypothesis`
+ *    are preserved (`narrative_preserved: true` on the result) to prevent identity hijack.
  */
 export async function eventsWriteBulkHandler({
   eventSearchClient,

@@ -753,8 +753,87 @@ describe('events_write tool', () => {
     );
 
     expect(eventsWriteBulkHandler).not.toHaveBeenCalled();
+    expect(result).toEqual(
+      expect.objectContaining({
+        results: [
+          expect.objectContaining({
+            type: 'other',
+            data: {
+              results: [
+                expect.objectContaining({
+                  index: 0,
+                  written: false,
+                  reason: 'rejected_item',
+                  error: expect.objectContaining({ type: 'unresolved_feature_reference' }),
+                }),
+              ],
+            },
+          }),
+        ],
+      })
+    );
     expect(JSON.stringify(result)).toContain('feature:checkout-api');
     expect(JSON.stringify(result)).toContain('not a Knowledge Indicator id');
+  });
+
+  it('writes the other items when one item names an unresolved feature_id', async () => {
+    getFeatures.mockImplementation((_sourceIds, options) => {
+      const known = {
+        id: 'checkout-api',
+        uuid: 'uuid-checkout',
+        source_id: 'logs.test',
+        type: 'entity',
+        subtype: 'service',
+      };
+      const lookedUp = Boolean(options && ('featureIds' in options || 'id' in options));
+      return Promise.resolve({ hits: lookedUp ? [] : [known] });
+    });
+    (eventsWriteBulkHandler as jest.Mock).mockResolvedValue([
+      { index: 0, event_id: 'event-2', status: 'active', written: true, severity: 'medium' },
+    ]);
+    const goodSignal: SignalEntry = {
+      ...confirmingSignal,
+      metadata: {
+        ...confirmingSignal.metadata,
+        rule_uuid: 'rule-good',
+        detection_id: 'detection-good',
+      },
+    };
+
+    const result = await invokeHandler(
+      createTool({ trackAgentToolEventsWrite: jest.fn() }) as never,
+      {
+        items: [
+          {
+            ...input,
+            causal_features: [
+              { feature_id: 'feature:checkout-api', name: 'Checkout API', source_id: 'logs.test' },
+            ],
+          },
+          { ...input, event_id: 'event-2', signals: [goodSignal] },
+        ],
+      },
+      createMockToolContext()
+    );
+
+    expect(eventsWriteBulkHandler).toHaveBeenCalledTimes(1);
+    const [{ inputs }] = (eventsWriteBulkHandler as jest.Mock).mock.calls[0];
+    expect(inputs).toEqual([expect.objectContaining({ event_id: 'event-2' })]);
+    expect(result).toEqual(
+      expect.objectContaining({
+        results: [
+          expect.objectContaining({
+            type: 'other',
+            data: {
+              results: [
+                expect.objectContaining({ index: 0, written: false, reason: 'rejected_item' }),
+                expect.objectContaining({ index: 1, written: true, event_id: 'event-2' }),
+              ],
+            },
+          }),
+        ],
+      })
+    );
   });
 
   it('returns aligned results and tracks each item', async () => {
@@ -980,7 +1059,7 @@ describe('events_write tool failure reporting', () => {
     (assertCanManageSignificantEvents as jest.Mock).mockResolvedValue(undefined);
   });
 
-  it('reports an unresolved feature_id as a refused batch and keeps the id out of the log and telemetry', async () => {
+  it('reports an unresolved feature_id on that item and keeps the id out of the log and telemetry', async () => {
     getFeatures.mockImplementation((_sourceIds, options) =>
       Promise.resolve({
         hits:
@@ -1012,25 +1091,23 @@ describe('events_write tool failure reporting', () => {
 
     expect(JSON.stringify(result)).toContain('topolvm-lvmvg-storage');
     expect(logger.error).not.toHaveBeenCalled();
-    expect(telemetry.trackAgentToolFailed).toHaveBeenCalledTimes(1);
-    expect(telemetry.trackAgentToolFailed).toHaveBeenCalledWith(
-      expect.objectContaining({
-        tool_id: 'platform.sig_events.events_write',
-        error_code: 'unresolved_feature_reference',
-        input_rejected: true,
-        item_count: 2,
-        unresolved_count: 1,
-      }),
-      expect.anything()
+    expect(logger.debug).toHaveBeenCalledWith(
+      'events_write refused an item: unresolved_feature_reference'
     );
+    expect(telemetry.trackAgentToolFailed).not.toHaveBeenCalled();
     expect(telemetry.trackAgentToolEventsWrite).toHaveBeenCalledTimes(2);
     expect(telemetry.trackAgentToolEventsWrite).toHaveBeenCalledWith(
-      expect.objectContaining({ success: false, error_message: 'unresolved_feature_reference' }),
+      expect.objectContaining({
+        success: false,
+        written: false,
+        error_message: 'unresolved_feature_reference',
+      }),
       expect.anything()
     );
     expect(JSON.stringify(telemetry.trackAgentToolEventsWrite.mock.calls)).not.toContain(
       'topolvm-lvmvg-storage'
     );
+    expect(JSON.stringify(logger.debug.mock.calls)).not.toContain('topolvm-lvmvg-storage');
   });
 });
 

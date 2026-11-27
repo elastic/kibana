@@ -38,9 +38,11 @@ const fill = (signals: SignalInputEntry[], hits: Detection[] = [stored]) =>
 
 describe('fillDetectionMetadata', () => {
   it('fills the metadata from the stored detection when the agent names only its ids', async () => {
-    const [item] = await fill([signal({ detection_id: 'det-1', rule_uuid: 'rule-1' })]);
+    const {
+      items: [entry],
+    } = await fill([signal({ detection_id: 'det-1', rule_uuid: 'rule-1' })]);
 
-    expect(item.signals?.[0].metadata).toEqual({
+    expect(entry.item.signals?.[0].metadata).toEqual({
       detection_id: 'det-1',
       rule_uuid: 'rule-1',
       rule_name: 'Checkout errors',
@@ -51,7 +53,9 @@ describe('fillDetectionMetadata', () => {
   });
 
   it('prefers the stored values to ones the agent sent', async () => {
-    const [item] = await fill([
+    const {
+      items: [entry],
+    } = await fill([
       signal({
         detection_id: 'det-1',
         rule_uuid: 'rule-1',
@@ -60,16 +64,25 @@ describe('fillDetectionMetadata', () => {
       }),
     ]);
 
-    expect(item.signals?.[0].metadata).toMatchObject({
+    expect(entry.item.signals?.[0].metadata).toMatchObject({
       p_value: 0.0003,
       change_point_type: 'spike',
     });
   });
 
   it('refuses a signal that pairs a stored detection with another rule', async () => {
-    await expect(fill([signal({ detection_id: 'det-1', rule_uuid: 'rule-2' })])).rejects.toThrow(
-      /belongs to rule rule-1, not rule-2/
-    );
+    const { items, rejections } = await fill([
+      signal({ detection_id: 'det-1', rule_uuid: 'rule-2' }),
+    ]);
+
+    expect(items).toEqual([]);
+    expect(rejections).toEqual([
+      expect.objectContaining({
+        index: 0,
+        reason: 'detection_rule_mismatch',
+        message: expect.stringMatching(/belongs to rule rule-1, not rule-2/),
+      }),
+    ]);
   });
 
   it('keeps complete metadata for a detection that is not stored', async () => {
@@ -80,14 +93,37 @@ describe('fillDetectionMetadata', () => {
       p_value: 0.01,
     };
 
-    const [item] = await fill([signal(metadata)], []);
+    const {
+      items: [entry],
+    } = await fill([signal(metadata)], []);
 
-    expect(item.signals?.[0].metadata).toMatchObject(metadata);
+    expect(entry.item.signals?.[0].metadata).toMatchObject(metadata);
   });
 
   it('names the missing fields for a detection that is not stored and metadata that is incomplete', async () => {
-    await expect(
-      fill([signal({ detection_id: 'det-9', rule_uuid: 'rule-9' })], [])
-    ).rejects.toThrow(/det-9 is not stored.*p_value/);
+    const { rejections } = await fill([signal({ detection_id: 'det-9', rule_uuid: 'rule-9' })], []);
+
+    expect(rejections).toEqual([
+      expect.objectContaining({
+        index: 0,
+        reason: 'detection_not_stored',
+        message: expect.stringMatching(/det-9 is not stored.*p_value/),
+      }),
+    ]);
+  });
+
+  it('rejects only the item whose detection belongs to another rule', async () => {
+    const { items, rejections } = await fillDetectionMetadata({
+      items: [
+        { signals: [signal({ detection_id: 'det-1', rule_uuid: 'rule-2' })] },
+        { signals: [signal({ detection_id: 'det-1', rule_uuid: 'rule-1' })] },
+      ],
+      findDetections: jest.fn().mockResolvedValue({ hits: [stored] }),
+    });
+
+    expect(rejections).toEqual([
+      expect.objectContaining({ index: 0, reason: 'detection_rule_mismatch' }),
+    ]);
+    expect(items.map(({ index }) => index)).toEqual([1]);
   });
 });

@@ -1373,6 +1373,43 @@ describe('eventsWriteBulkHandler — narrative hijack guard', () => {
       symptom_hypothesis: 'EIS auth route returns >=400 for all clients.',
     });
   });
+
+  it('narrative guard: keeps the title and hypothesis when a new rule only refutes', async () => {
+    const eventId = 'event-narrative-refute';
+    const stored = makeStoredEventWithRules(eventId, ['rule-a'], {
+      causal_features: [makeCausal('svc-notifier')],
+    });
+    stored.title = 'Notifier — max-retry notification cancellations';
+    stored.symptom_hypothesis = 'Notifier cancels deliveries after the configured maximum retries.';
+
+    const eventClient = makeEventSearchClient({
+      findByEventId: jest.fn().mockResolvedValue({ hits: [stored] }),
+    });
+
+    const [result] = await eventsWriteBulkHandler({
+      eventSearchClient: eventClient,
+      inputs: [
+        makeSnapshotInput(eventId, {
+          signals: [
+            makeDetectionSignal({ ruleUuid: 'rule-a', sourceId: 'logs.app' }),
+            makeDetectionSignal({
+              ruleUuid: 'rule-b',
+              sourceId: 'logs.app',
+              verdict: 'refutes',
+            }),
+          ],
+          title: 'Monitoring — query execution and shard-ratio warnings',
+          symptom_hypothesis: 'Monitoring high-shards replication query is failing to execute.',
+        }),
+      ],
+    });
+
+    expect(result).toMatchObject({ written: true, narrative_preserved: true });
+    expect(writtenDocs()[0]).toMatchObject({
+      title: 'Notifier — max-retry notification cancellations',
+      symptom_hypothesis: 'Notifier cancels deliveries after the configured maximum retries.',
+    });
+  });
 });
 
 describe('eventsWriteBulkHandler — .rule-events writes', () => {

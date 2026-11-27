@@ -17,6 +17,7 @@ import { getSignalCollectedAt } from '../../../lib/significant_events/events/sig
 import { createBulkWriteValidationError } from '../bulk_write';
 import {
   addsNewDetectionRules,
+  confirmedSignals,
   extractRuleUuids,
   extractRuleUuidsFromEvents,
   mergeEpisodeContext,
@@ -231,15 +232,15 @@ export const computeEventFacts = ({
       signals,
     });
 
-  // For continuations: if no new rule UUIDs are introduced, freeze title and symptom_hypothesis to prevent identity hijack
-  // A rule that now confirms what the event stored as unconfirmed changes what the event is about:
-  // its title and hypothesis must be free to say so.
+  // A continuation keeps its title and hypothesis unless this write confirms a rule the episode
+  // has not already stored. A new refuting rule does not count, so its narrative cannot replace them.
+  // A rule that now confirms what the event stored as unconfirmed leaves the submitted narrative free to say so.
   const frozenNarrative =
     isContinuation &&
     !reopens &&
     !escalatesStoredVerdict({ submitted: candidate.input.signals, latest })
       ? preserveStableNarrative(
-          extractRuleUuids(candidate.input.signals),
+          extractRuleUuids(confirmedSignals(candidate.input.signals)),
           latest,
           extractRuleUuidsFromEvents(currentEpisode)
         )
