@@ -320,8 +320,6 @@ overrides:
   vega-util: 2.1.0
   vscode-languageserver-types: 3.17.5
 
-pnpmfileChecksum: sha256-JL9Z/8IecLxwanP1rhrhbsvFTvupuyak+iLixXT5Rmk=
-
 importers:
 
   .:
@@ -4960,13 +4958,13 @@ importers:
         version: 2.6.5
       redux-devtools-extension:
         specifier: 2.13.8
-        version: 2.13.8
+        version: 2.13.8(redux@5.0.1)
       redux-saga:
         specifier: 1.3.0
         version: 1.3.0
       redux-thunk-v2:
         specifier: npm:redux-thunk@2.4.2
-        version: redux-thunk@2.4.2
+        version: redux-thunk@2.4.2(redux@5.0.1)
       redux-toolkit-v1:
         specifier: npm:@reduxjs/toolkit@1.9.7
         version: '@reduxjs/toolkit@1.9.7(react-redux@9.2.0(@types/react@18.2.79)(react@18.2.0)(redux@5.0.1))(react@18.2.0)'
@@ -6592,8 +6590,8 @@ importers:
         specifier: 1.1.13
         version: 1.1.13
       chromedriver:
-        specifier: 157.0.1
-        version: 157.0.1(debug@4.4.3(supports-color@10.2.2))(supports-color@10.2.2)
+        specifier: 157.0.2
+        version: 157.0.2(debug@4.4.3(supports-color@10.2.2))(supports-color@10.2.2)
       clean-webpack-plugin:
         specifier: 4.0.0
         version: 4.0.0(webpack@5.96.1)
@@ -16690,8 +16688,8 @@ packages:
     resolution: {integrity: sha512-rNjApaLzuwaOTjCiT8lSDdGN1APCiqkChLMJxJPWLunPAt5fy8xgU9/jNOchV84wfIxrA0lRQB7oCT8jrn/wrQ==}
     engines: {node: '>=6.0'}
 
-  chromedriver@157.0.1:
-    resolution: {integrity: sha512-KZWZnk67gV7uB7Ub2QKCml1jqIXZA0h4VotpNH+vCx/N1ZGO9WDQ8X+wBga35SGR/in32lc0Znw3zjm+wndEIQ==}
+  chromedriver@157.0.2:
+    resolution: {integrity: sha512-w1/qVd8RZ8+RpGhF2YXhGRXtZwE+rNPErYx6mHzchVQLNXRZwCjIp0dANefuNF8JwmV43Ma2MGUKA9spASCzng==}
     engines: {node: '>=22'}
     hasBin: true
 
@@ -22710,12 +22708,16 @@ packages:
   redux-devtools-extension@2.13.8:
     resolution: {integrity: sha512-8qlpooP2QqPtZHQZRhx3x3OP5skEV1py/zUdMY28WNAocbafxdG2tRD1MWE7sp8obGMNYuLWanhhQ7EQvT1FBg==}
     deprecated: Package moved to @redux-devtools/extension.
+    peerDependencies:
+      redux: ^3.1.0 || ^4.0.0
 
   redux-saga@1.3.0:
     resolution: {integrity: sha512-J9RvCeAZXSTAibFY0kGw6Iy4EdyDNW7k6Q+liwX+bsck7QVsU78zz8vpBRweEfANxnnlG/xGGeOvf6r8UXzNJQ==}
 
   redux-thunk@2.4.2:
     resolution: {integrity: sha512-+P3TjtnP0k/FEjcBL5FZpoovtvrTNT/UXd4/sluaSyrURlSlhLSzEdfsTBW7WsKB6yPvgd7q/iZPICFjW4o57Q==}
+    peerDependencies:
+      redux: ^4
 
   redux-thunk@3.1.0:
     resolution: {integrity: sha512-NW2r5T6ksUKXCabzhL9z+h206HQw/NJkcLm1GPImRQ8IzfXwRGqjVhKJGauHirT0DAuyy6hjdnMZaRoAcy0Klw==}
@@ -29834,7 +29836,7 @@ snapshots:
     dependencies:
       immer: 9.0.21
       redux: 4.2.1
-      redux-thunk: 2.4.2
+      redux-thunk: 2.4.2(redux@4.2.1)
       reselect: 4.1.8
     optionalDependencies:
       react: 18.2.0
@@ -33023,7 +33025,7 @@ snapshots:
 
   chrome-trace-event@1.0.4: {}
 
-  chromedriver@157.0.1(debug@4.4.3(supports-color@10.2.2))(supports-color@10.2.2):
+  chromedriver@157.0.2(debug@4.4.3(supports-color@10.2.2))(supports-color@10.2.2):
     dependencies:
       '@testim/chrome-version': 1.1.4
       adm-zip: 0.6.1
@@ -40397,17 +40399,21 @@ snapshots:
       reduce-reducers: 0.4.3
       to-camel-case: 1.0.0
 
-  redux-devtools-extension@2.13.8:
+  redux-devtools-extension@2.13.8(redux@5.0.1):
     dependencies:
-      redux: 4.2.1
+      redux: 5.0.1
 
   redux-saga@1.3.0:
     dependencies:
       '@redux-saga/core': 1.3.0
 
-  redux-thunk@2.4.2:
+  redux-thunk@2.4.2(redux@4.2.1):
     dependencies:
       redux: 4.2.1
+
+  redux-thunk@2.4.2(redux@5.0.1):
+    dependencies:
+      redux: 5.0.1
 
   redux-thunk@3.1.0(redux@5.0.1):
     dependencies:
