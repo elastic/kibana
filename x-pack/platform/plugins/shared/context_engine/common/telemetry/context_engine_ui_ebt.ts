@@ -24,6 +24,7 @@ const ebtElement = {
   aiIndexDetailPage: 'contextEngine.aiIndexDetailPage',
   aiIndexDetailPageOnboardingPanel: 'contextEngine.aiIndexDetailPage.onboardingPanel',
   aiIndexDetailPageOverview: 'contextEngine.aiIndexDetailPage.overview',
+  aiIndexDetailPageSetupWizard: 'contextEngine.aiIndexDetailPage.setupWizard',
   aiIndexDetailPageDescriptionPanel: 'contextEngine.aiIndexDetailPage.descriptionPanel',
   aiIndexDetailPageTracesPanel: 'contextEngine.aiIndexDetailPage.tracesPanel',
   aiIndexDetailPageSourcesPanel: 'contextEngine.aiIndexDetailPage.sourcesPanel',
@@ -64,6 +65,15 @@ const ebtAction = {
   },
   onboarding: {
     COPY_PROMPT: 'copy_prompt',
+  },
+  setupWizard: {
+    CONTINUE: 'setup_wizard_continue',
+    BACK: 'setup_wizard_back',
+    SKIP: 'setup_wizard_skip',
+    SKIP_AND_FINISH: 'setup_wizard_skip_and_finish',
+    FINISH: 'setup_wizard_finish',
+    EXIT: 'setup_wizard_exit',
+    GO_TO_STEP: 'setup_wizard_go_to_step',
   },
   overview: {
     OPEN_STAT_CARD: 'open_stat_card',

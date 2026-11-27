@@ -29,6 +29,61 @@ describe('getMobileKpis', () => {
 
     expect(kpis.hasData).toBe(false);
     expect(kpis.errorRate.value).toBeNull();
+    expect(kpis.coldStart).toEqual({
+      value: null,
+      previous: null,
+      delta: null,
+      count: 0,
+      previousCount: 0,
+    });
+  });
+
+  it('compares the average cold and warm start with the previous period, with their counts', async () => {
+    const { client, esClient } = createTracedEsClientMock();
+    client.esql.query
+      .mockResolvedValueOnce(
+        esqlResponse([
+          {
+            docs: 20,
+            sessions: 4,
+            users: 2,
+            exceptions: 0,
+            cold_start: 2000,
+            cold_starts: 3,
+            warm_start: 400,
+            warm_starts: 2,
+          },
+        ])
+      )
+      // No warm start in the previous period: ES|QL drops the columns that are null in every row
+      .mockResolvedValueOnce(
+        esqlResponse([
+          { docs: 10, sessions: 2, users: 2, exceptions: 0, cold_start: 1500, cold_starts: 2 },
+        ])
+      )
+      .mockResolvedValue(esqlResponse([]));
+
+    const kpis = await getMobileKpis({
+      esClient,
+      filters: { serviceName: 'shop-mobile' },
+      start: HOUR,
+      end: 2 * HOUR,
+    });
+
+    expect(kpis.coldStart).toEqual({
+      value: 2000,
+      previous: 1500,
+      delta: 500,
+      count: 3,
+      previousCount: 2,
+    });
+    expect(kpis.warmStart).toEqual({
+      value: 400,
+      previous: null,
+      delta: null,
+      count: 2,
+      previousCount: 0,
+    });
   });
 
   it('compares the period with the previous one on the OS, and lists the picker options', async () => {

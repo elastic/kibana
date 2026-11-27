@@ -347,7 +347,7 @@ describe('AlertZeroPlugin feature-flag gating', () => {
       expect(skills.register).toHaveBeenCalledWith(
         expect.objectContaining({
           id: 'alertzero-action-discovery',
-          availability: expect.objectContaining({ cacheMode: 'none' }),
+          availability: expect.objectContaining({ cacheMode: 'space-user' }),
         })
       );
       expect(tools.register.mock.calls.map(([tool]) => tool.id)).toEqual([

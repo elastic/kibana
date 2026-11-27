@@ -335,19 +335,17 @@ describe('Expanded mode', () => {
 
       /**
        * GIVEN not all primary menu items fit the menu height
-       * WHEN the navigation renders every item before measuring which ones fit
-       * THEN the primary menu only reports a measured overflow split once the items moved to "More"
+       * WHEN the navigation renders
+       * THEN the primary menu reports a measured overflow split with the items already in "More"
        */
-      it('should only report a measured overflow split once items moved to "More"', async () => {
+      it('should only report a measured overflow split once items moved to "More"', () => {
         render(<TestComponent isCollapsed={false} items={securityMock.navItems} />);
 
-        const primaryMenu = screen.getByTestId(primaryNavigationId);
-
-        expect(primaryMenu).toHaveAttribute('data-overflow-measured', 'false');
-
-        await screen.findByTestId(moreMenuId);
-
-        expect(primaryMenu).toHaveAttribute('data-overflow-measured', 'true');
+        expect(screen.getByTestId(moreMenuId)).toBeInTheDocument();
+        expect(screen.getByTestId(primaryNavigationId)).toHaveAttribute(
+          'data-overflow-measured',
+          'true'
+        );
       });
 
       /**

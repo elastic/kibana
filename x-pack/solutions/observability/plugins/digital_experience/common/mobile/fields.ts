@@ -83,6 +83,10 @@ export const MOBILE_FIELDS = {
   logBody: OTEL_LOG_BODY,
   severity: OTEL_SEVERITY_TEXT,
   severityNumber: OTEL_SEVERITY_NUMBER,
+  /** `cold` or `warm` on an `elastic.app.start` event; `hot` is reserved. */
+  startType: attributeField('start.type'),
+  /** Of an `elastic.app.start` event, in milliseconds: until the first frame. */
+  appStartDuration: attributeField('elastic.app.start.duration'),
   environment: SERVICE_ENVIRONMENT,
   environmentName: RESOURCE_ATTRIBUTES_DEPLOYMENT_ENVIRONMENT_NAME,
 } as const;
@@ -144,6 +148,12 @@ export const RESULT_COLUMNS = {
   page: 'page',
   documentKey: 'document_key',
   keptKey: 'kept_key',
+  coldStartMs: 'cold_start_ms',
+  warmStartMs: 'warm_start_ms',
+  coldStart: 'cold_start',
+  coldStarts: 'cold_starts',
+  warmStart: 'warm_start',
+  warmStarts: 'warm_starts',
 } as const;
 
 /** A column the mobile queries compute, as an ES|QL column. */

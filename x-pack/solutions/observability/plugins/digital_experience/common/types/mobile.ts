@@ -16,6 +16,9 @@ export interface MobileReleaseRow {
   users: number;
   /** Exceptions per session; `null` below the session floor. */
   errorRate: number | null;
+  /** Average cold start in milliseconds; `null` without cold starts. */
+  coldStart: number | null;
+  coldStarts: number;
 }
 
 export interface MobileReleasePoint {
@@ -48,6 +51,33 @@ export interface MobileReleasesResponse {
   markers: MobileReleaseMarker[];
 }
 
+/** The average duration of one start type and the starts it averages. */
+export interface AppStartValue {
+  /** Milliseconds; `null` without starts. */
+  avg: number | null;
+  count: number;
+}
+
+/** An average app start in milliseconds against the previous period, with the starts of each. */
+export interface ComparedAppStart extends ComparedValue {
+  count: number;
+  previousCount: number;
+}
+
+export interface MobileAppStartPoint {
+  /** Start of the bucket, in epoch milliseconds. */
+  timestamp: number;
+  cold: AppStartValue;
+  warm: AppStartValue;
+}
+
+/** The cold and warm starts of a mobile application over the time range. */
+export interface MobileAppStartsResponse {
+  histogram: HistogramBuckets;
+  /** One per bucket, with a `null` average where the bucket has no starts of that type. */
+  points: MobileAppStartPoint[];
+}
+
 /** The KPI row of a mobile application's page, each value against the previous period. */
 export interface MobileKpisResponse {
   /** Whether the application has mobile data in the time range and filters. */
@@ -58,6 +88,8 @@ export interface MobileKpisResponse {
   users: ComparedValue;
   /** Exceptions per session. */
   errorRate: ComparedValue;
+  coldStart: ComparedAppStart;
+  warmStart: ComparedAppStart;
   /** Releases in the time range and OS, whatever the release filter, most sessions first. */
   releases: FacetBucket[];
   /**
