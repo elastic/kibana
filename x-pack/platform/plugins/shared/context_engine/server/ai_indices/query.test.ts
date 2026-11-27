@@ -224,7 +224,7 @@ describe('queryAiIndices', () => {
     ).rejects.toThrow('boom');
   });
 
-  it('executeAiIndexQuery skips public _query length bounds', async () => {
+  it('executeAiIndexQuery skips public _query length bounds and forwards allowPartialResults', async () => {
     const longQuery = `FROM "${'a'.repeat(MAX_AI_INDEX_QUERY_LENGTH)}"`;
     const longUserId = 'u'.repeat(MAX_AI_INDEX_USER_ID_LENGTH + 1);
 
@@ -234,11 +234,13 @@ describe('queryAiIndices', () => {
       query: longQuery,
       user_id: longUserId,
       limit: 5,
+      allowPartialResults: false,
     });
 
     expect(lastRequest().query.replace(/\s+/g, ' ')).toBe(`${longQuery} | LIMIT 5`);
     expect(lastRequest().filter).toEqual(
       buildAiIndexReadFilter({ spaceId: 'default', userId: longUserId })
     );
+    expect(lastRequest().allow_partial_results).toBe(false);
   });
 });

@@ -173,6 +173,7 @@ export const searchAiIndices = async ({
       limit: size,
       user_id: userId,
       aiIndexDests: targets.map(({ dest }) => dest),
+      allowPartialResults: false,
     });
   } catch (error) {
     if (isEsqlUnknownIndexError(error)) {

@@ -369,7 +369,7 @@ describe('searchAiIndices', () => {
           ),
           filter: buildAiIndexReadFilter({ spaceId: 'default', userId: 'jdoe' }),
           drop_null_columns: true,
-          allow_partial_results: true,
+          allow_partial_results: false,
           params: [{ query: 'checkout latency' }],
         },
         expect.any(Object)

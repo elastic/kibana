@@ -30,6 +30,10 @@ export interface QueryAiIndicesParams extends QueryAiIndicesRequest {
   aiIndexDests?: AiIndexDest[];
 }
 
+export interface ExecuteAiIndexQueryParams extends QueryAiIndicesParams {
+  allowPartialResults?: boolean;
+}
+
 /**
  * Runs server-constructed ES|QL with server-owned lifecycle filters, space and user filters, and
  * row cap without enforcing public `_query` request-size bounds. Callers must validate inputs.
@@ -42,7 +46,8 @@ export const executeAiIndexQuery = async ({
   limit,
   user_id: userId,
   aiIndexDests = [],
-}: QueryAiIndicesParams): Promise<QueryAiIndicesResponse> => {
+  allowPartialResults = true,
+}: ExecuteAiIndexQueryParams): Promise<QueryAiIndicesResponse> => {
   const namedParams: EsqlNamedValue[] = Object.entries(params ?? {}).map(([name, value]) => ({
     [name]: value,
   }));
@@ -56,7 +61,7 @@ export const executeAiIndexQuery = async ({
         ),
         filter: buildAiIndexReadFilter({ spaceId, userId }),
         drop_null_columns: true,
-        allow_partial_results: true,
+        allow_partial_results: allowPartialResults,
         ...(namedParams.length > 0 ? { params: namedParams } : {}),
       },
       { maxResponseSize: MAX_AI_INDEX_QUERY_RESPONSE_BYTES }
