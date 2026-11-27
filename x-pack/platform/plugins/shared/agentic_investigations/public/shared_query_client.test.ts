@@ -15,4 +15,26 @@ describe('getSharedInvestigationsQueryClient', () => {
     ]);
     expect(first).toBe(second);
   });
+
+  it('loads again after a failed load, and keeps the client the retry creates', async () => {
+    // A fresh module graph, so the memoized client from the test above is not reused.
+    await jest.isolateModulesAsync(async () => {
+      const loadError = new Error('Loading chunk failed');
+      let failNextLoad = true;
+      jest.doMock('@kbn/react-query', () => {
+        if (failNextLoad) {
+          failNextLoad = false;
+          throw loadError;
+        }
+        return jest.requireActual('@kbn/react-query');
+      });
+      const { getSharedInvestigationsQueryClient: getClient } = await import(
+        './shared_query_client'
+      );
+
+      await expect(getClient()).rejects.toBe(loadError);
+      const client = await getClient();
+      expect(await getClient()).toBe(client);
+    });
+  });
 });

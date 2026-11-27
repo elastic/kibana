@@ -5,14 +5,13 @@
  * 2.0.
  */
 
-import type { AtomicGraphNode } from '@kbn/workflows/graph';
 import type { ServerHandlerStepDefinition } from '@kbn/workflows-extensions/server';
 import { createBaseHandlerContext } from './create_base_handler_context';
 import type { StepExecutionRuntime } from '../../../workflow_context_manager/step_execution_runtime';
 import type { IWorkflowEventLogger } from '../../../workflow_event_logger';
 import { toExecutionError } from '../../errors';
 import type { RunStepResult } from '../../node_implementation';
-import type { CustomStepDefinitionHandler } from '../types';
+import type { CustomStepDefinitionHandler, CustomStepGraphNode } from '../types';
 
 /**
  * Executes a single-shot custom step (`ServerHandlerStepDefinition` with `handler`).
@@ -20,7 +19,7 @@ import type { CustomStepDefinitionHandler } from '../types';
 export class OneShotStepDefinitionHandler implements CustomStepDefinitionHandler {
   constructor(
     private readonly stepDefinition: ServerHandlerStepDefinition,
-    private readonly node: AtomicGraphNode,
+    private readonly node: CustomStepGraphNode,
     private readonly stepExecutionRuntime: StepExecutionRuntime,
     private readonly workflowLogger: IWorkflowEventLogger
   ) {}

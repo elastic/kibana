@@ -19,6 +19,7 @@ import {
   PackageFipsIncompatibleError,
   PackageNotFoundError,
   PackageUnsupportedMediaTypeError,
+  PackagePolicyAgentVersionIncompatibleError,
   defaultFleetErrorHandler,
 } from '.';
 
@@ -53,6 +54,23 @@ describe('defaultFleetErrorHandler', () => {
       // logging
       expect(mockContract.logger?.error).toHaveBeenCalledTimes(1);
       expect(mockContract.logger?.error).toHaveBeenCalledWith(error.message);
+    });
+
+    it('400: PackagePolicyAgentVersionIncompatibleError is not logged as an error', async () => {
+      const error = new PackagePolicyAgentVersionIncompatibleError(
+        'Cannot upgrade',
+        { package_name: 'test', package_version: '1.0.0', version_condition: '^9.4.0' },
+        'upgrade'
+      );
+      const response = httpServerMock.createResponseFactory();
+
+      await defaultFleetErrorHandler({ error, response });
+
+      expect(response.customError).toHaveBeenCalledWith(
+        expect.objectContaining({ statusCode: 400 })
+      );
+      expect(mockContract.logger?.error).not.toHaveBeenCalled();
+      expect(mockContract.logger?.debug).toHaveBeenCalledWith(error.message);
     });
 
     it('502: RegistryConnectionError surfaces categorized attributes', async () => {

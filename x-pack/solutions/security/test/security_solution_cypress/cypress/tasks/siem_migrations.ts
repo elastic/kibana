@@ -68,6 +68,16 @@ export const toggleMigrateDashboardsCard = () => {
   cy.get(SELECTORS.ONBOARDING_SIEM_MIGRATION_CARDS.MIGRATE_DASHBOARDS).click();
 };
 
+export const toggleMigrateWorkflowsCard = () => {
+  cy.get(SELECTORS.ONBOARDING_SIEM_MIGRATION_CARDS.MIGRATE_WORKFLOWS).click();
+};
+
+export const openUploadWorkflowsFlyout = () => {
+  toggleMigrateWorkflowsCard();
+  cy.get(SELECTORS.UPLOAD_WORKFLOWS_BTN).click();
+  cy.get(SELECTORS.UPLOAD_WORKFLOWS_FLYOUT).should('exist');
+};
+
 export const openUploadRulesFlyout = () => {
   toggleMigrateRulesCard();
   cy.get(SELECTORS.UPLOAD_RULES_BTN).click();
@@ -108,6 +118,15 @@ export const uploadDashboards = (splunkDashboardsJSON: object) => {
     mimeType: 'text/plain',
   });
   cy.get(SELECTORS.UPLOAD_FILE_BTN).should('not.be.disabled').click();
+};
+
+export const uploadTinesStories = (tinesStoriesJSON: object) => {
+  cy.get(SELECTORS.UPLOAD_WORKFLOWS_FILE_PICKER).selectFile({
+    contents: Cypress.Buffer.from(JSON.stringify(tinesStoriesJSON)),
+    fileName: 'stories.json',
+    mimeType: 'application/json',
+  });
+  cy.get(SELECTORS.UPLOAD_WORKFLOWS_SUBMIT_BTN).should('not.be.disabled').click();
 };
 
 export const startMigrationFromFlyout = () => {

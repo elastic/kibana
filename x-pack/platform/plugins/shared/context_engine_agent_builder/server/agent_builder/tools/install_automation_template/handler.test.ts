@@ -11,7 +11,7 @@ import { AI_INDEX_ATTACHMENT_TYPE } from '../../../../common/agent_builder_attac
 import { installAutomationTemplate } from '../../../automation_templates/install_automation_template';
 import { syncAttachmentsToSavedWorkflow } from '../save_automation/handler';
 import { installAutomationTemplateHandler } from './handler';
-import { AUTOMATION_TEMPLATE_TAGS } from './render';
+import { AUTOMATION_TEMPLATE_TAGS } from '@kbn/context-engine-plugin/server/automation_templates/render';
 
 jest.mock('../../../automation_templates/install_automation_template', () => {
   const actual = jest.requireActual('../../../automation_templates/install_automation_template');

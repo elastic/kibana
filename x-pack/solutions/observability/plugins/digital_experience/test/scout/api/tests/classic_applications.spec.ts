@@ -9,6 +9,12 @@ import moment from 'moment-timezone';
 import { apiTest } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/api';
 import type { ApplicationsResponse } from '../../../../common/types/applications';
+import {
+  deleteOwnedSessions,
+  setUpOwnedSessions,
+  type OwnedSessions,
+  type OwnedSessionsSetup,
+} from '../../common/fixtures/sessions_data';
 import { findApplication, testData } from '../fixtures';
 import { DIGITAL_EXPERIENCE_WITH_UX_TAGS } from '../../tags';
 import { FLAG_ON_OVERRIDE, FLAG_RESET_OVERRIDE } from '../../feature_flag';
@@ -23,15 +29,26 @@ const {
   withQuery,
 } = testData;
 
+// The EDOT Browser chart is bucketed only once the sessions index exists; it needs no sessions.
+const NO_SESSIONS: OwnedSessions = {
+  idPrefix: 'dx-classic-buckets',
+  environment: 'classic-buckets-test',
+  count: 0,
+};
+
 apiTest.describe(
   'Digital Experience applications API with Classic RUM data',
   { tag: DIGITAL_EXPERIENCE_WITH_UX_TAGS },
   () => {
-    apiTest.beforeAll(async ({ apiServices }) => {
+    let setup: OwnedSessionsSetup | undefined;
+
+    apiTest.beforeAll(async ({ apiServices, esClient, kbnClient }) => {
       await apiServices.core.settings(FLAG_ON_OVERRIDE);
+      setup = await setUpOwnedSessions(esClient, kbnClient);
     });
 
-    apiTest.afterAll(async ({ apiServices }) => {
+    apiTest.afterAll(async ({ apiServices, esClient, kbnClient }) => {
+      await deleteOwnedSessions(esClient, kbnClient, NO_SESSIONS, setup);
       await apiServices.core.settings(FLAG_RESET_OVERRIDE);
     });
 

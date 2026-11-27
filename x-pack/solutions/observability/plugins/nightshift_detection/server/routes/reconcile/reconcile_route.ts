@@ -13,7 +13,7 @@ import { NIGHTSHIFT_API_PRIVILEGES } from '@kbn/nightshift-shared';
 import { ScopedReconcileRunner } from '../../lib/reconcile/scoped_reconcile_runner';
 import { DetectionAccountService } from '../../lib/service_account/detection_account';
 import { BaseEngineRoute } from '../base_engine_route';
-import { DETECTION_ENGINE_API_PATH } from '../constants';
+import { DETECTION_ENGINE_API_PATH } from '../../../common/constants';
 import { EngineRouteContext } from '../engine_route_context';
 
 /**

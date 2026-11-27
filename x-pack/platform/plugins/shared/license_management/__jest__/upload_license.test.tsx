@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { Provider } from 'react-redux-v7';
+import { Provider } from 'react-redux';
 import type { LocationDescriptorObject } from 'history';
 import { MockAppHeaderProvider } from '@kbn/app-header/mocks';
 import { coreMock, httpServiceMock, scopedHistoryMock } from '@kbn/core/public/mocks';
@@ -173,6 +173,12 @@ describe('UploadLicense', () => {
     await store.dispatch(uploadLicense(validLicense, 'trial'));
     expect(appDependencies.plugins.licensing.refresh).toHaveBeenCalled();
     expect(thunkServices.history.replace).toHaveBeenCalled();
+    // toStrictEqual also rejects a License class instance, which is not serializable.
+    expect(store.getState().license).toStrictEqual({
+      type: 'basic',
+      expiryDateInMillis: 5000,
+      isActive: true,
+    });
   });
 
   it('should display error when ES returns error', async () => {

@@ -153,6 +153,18 @@ describe('mssqlClientType', () => {
       });
     });
 
+    it.each([
+      ['disabled', false],
+      ['required', true],
+      [undefined, true],
+    ])('maps config.ssl %p to encrypt %p', async (ssl, encrypt) => {
+      await mssqlClientType.build(
+        makeCtx({ config: { host: 'sql.internal', port: 1433, database: 'prod', ssl } })
+      );
+
+      expect(lastPoolOptions().options).toMatchObject({ encrypt });
+    });
+
     it('resolves TLS per host and port so customHostSettings overrides apply', async () => {
       const buildTlsOptions = jest.fn().mockReturnValue({ rejectUnauthorized: true });
       const ctx = makeCtx({ platform: { resolveSrvHosts: jest.fn(), buildTlsOptions } });
@@ -161,6 +173,72 @@ describe('mssqlClientType', () => {
 
       expect(buildTlsOptions).toHaveBeenCalledWith(
         [{ hostname: 'myserver.database.windows.net', port: 1433 }],
+        ctx.logger
+      );
+    });
+
+    it('brackets an IPv6 literal for the TLS lookup but passes the bare address to the driver', async () => {
+      const buildTlsOptions = jest.fn().mockReturnValue({ rejectUnauthorized: true });
+      const ctx = makeCtx({
+        config: { host: '2001:db8::1', port: 1433, database: 'db' },
+        platform: { resolveSrvHosts: jest.fn(), buildTlsOptions },
+      });
+
+      await mssqlClientType.build(ctx);
+
+      expect(buildTlsOptions).toHaveBeenCalledWith(
+        [{ hostname: '[2001:db8::1]', port: 1433 }],
+        ctx.logger
+      );
+      expect(lastPoolOptions()).toMatchObject({ server: '2001:db8::1' });
+    });
+
+    describe('connection reset on acquire', () => {
+      const getValidate = async (): Promise<(connection: unknown) => Promise<boolean>> => {
+        await mssqlClientType.build(makeCtx());
+        const pool = lastPoolOptions().pool as { validate: (c: unknown) => Promise<boolean> };
+        return pool.validate;
+      };
+
+      it('resets the pooled connection so session state cannot leak into the next request', async () => {
+        const validate = await getValidate();
+        const reset = jest.fn((callback: (err?: Error | null) => void) => callback(null));
+
+        await expect(validate({ closed: false, hasError: false, reset })).resolves.toBe(true);
+        expect(reset).toHaveBeenCalledTimes(1);
+      });
+
+      it('rejects a connection whose reset fails so the pool replaces it', async () => {
+        const validate = await getValidate();
+        const reset = (callback: (err?: Error | null) => void) =>
+          callback(new Error('socket closed'));
+
+        await expect(validate({ closed: false, hasError: false, reset })).resolves.toBe(false);
+      });
+
+      it.each([
+        ['closed', { closed: true, hasError: false }],
+        ['errored', { closed: false, hasError: true }],
+      ])('rejects a %s connection without resetting it', async (_label, state) => {
+        const validate = await getValidate();
+        const reset = jest.fn();
+
+        await expect(validate({ ...state, reset })).resolves.toBe(false);
+        expect(reset).not.toHaveBeenCalled();
+      });
+    });
+
+    it('leaves a colon-containing hostname that is not an IPv6 literal unbracketed', async () => {
+      const buildTlsOptions = jest.fn().mockReturnValue({ rejectUnauthorized: true });
+      const ctx = makeCtx({
+        config: { host: 'sql.example.com:1433', port: 1433, database: 'db' },
+        platform: { resolveSrvHosts: jest.fn(), buildTlsOptions },
+      });
+
+      await mssqlClientType.build(ctx);
+
+      expect(buildTlsOptions).toHaveBeenCalledWith(
+        [{ hostname: 'sql.example.com:1433', port: 1433 }],
         ctx.logger
       );
     });

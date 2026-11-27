@@ -16,7 +16,7 @@ import type { RiskEngineConfiguration } from '../../types';
 import type { Range } from '../../../../../common/entity_analytics/risk_engine';
 import { RISK_SCORE_MAINTAINER_ID } from '../../../../../common/entity_analytics/risk_score/constants';
 import { getAlertsIndex } from '../../../../../common/entity_analytics/utils';
-import { riskEngineConfigurationTypeName } from '../../risk_engine/saved_object';
+import { riskEngineConfigurationTypeName } from '../../risk_score/saved_object';
 import { buildEaExecutionContext, EA_EXECUTION_CONTEXT_NAMES } from '../../execution_context';
 import { ALERT_ENTITY_ID_BACKFILL_COMPLETED_EVENT } from '../../../telemetry/event_based/events/entity_analytics';
 import {

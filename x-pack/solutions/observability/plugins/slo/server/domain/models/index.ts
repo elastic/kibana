@@ -13,3 +13,4 @@ export type * from './slo';
 export type * from './composite_slo';
 export * from './time_window';
 export type * from './slo_template';
+export type * from './global_settings';

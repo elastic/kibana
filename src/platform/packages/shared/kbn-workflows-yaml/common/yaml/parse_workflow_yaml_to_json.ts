@@ -17,6 +17,40 @@ import { isDynamicValue, isLiquidTagValue, isVariableValue } from '../regex';
 import type { ConnectorParamsSchemaResolver } from '../zod/enrich_error_message';
 import { formatZodError } from '../zod/format_zod_error';
 
+const getValueAtPath = (root: unknown, path: PropertyKey[]): { found: boolean; value: unknown } => {
+  let value = root;
+  for (const segment of path) {
+    if (value == null || typeof value !== 'object') {
+      return { found: false, value: undefined };
+    }
+    value = (value as Record<PropertyKey, unknown>)[segment];
+  }
+  return { found: true, value };
+};
+
+/**
+ * True when the issue is at a template value (`${{ }}`, `{{ }}`, `{% %}`), which resolves at run time.
+ * A failed union reports one issue on the parent, so it counts when one branch fails only at template values.
+ */
+const isTemplateValueIssue = (issue: ZodError['issues'][number], root: unknown): boolean => {
+  // An empty path is the value itself, for example a union nested in a union branch.
+  const { found, value } = getValueAtPath(root, issue.path ?? []);
+  if (!found) {
+    return false;
+  }
+  if (isDynamicValue(value) || isVariableValue(value) || isLiquidTagValue(value)) {
+    return true;
+  }
+  return (
+    issue.code === 'invalid_union' &&
+    issue.errors.some(
+      (branchIssues) =>
+        branchIssues.length > 0 &&
+        branchIssues.every((branchIssue) => isTemplateValueIssue(branchIssue, value))
+    )
+  );
+};
+
 export type ParseWorkflowYamlToJSONResult<T extends ZodType> = (
   | ZodSafeParseResult<T>
   | { success: false; error: Error }
@@ -53,26 +87,10 @@ export function parseWorkflowYamlToJSON<T extends ZodType>(
   const result = schema.safeParse(parseResult.json);
   if (!result.success) {
     // Filter out validation errors for dynamic values (${{ }}), variable values ({{ }}), and Liquid tags ({% ... %})
-    const filteredIssues = result.error.issues.filter((issue) => {
-      if (!issue.path || issue.path.length === 0) {
-        return true;
-      }
-
-      // Get value from parsed JSON at the error path
-      let value: unknown = parseResult.json;
-      for (const segment of issue.path) {
-        if (value == null || typeof value !== 'object') {
-          return true; // Keep error if path is invalid
-        }
-        value = (value as Record<string, unknown>)[segment as string];
-      }
-
-      const shouldSuppressError =
-        isDynamicValue(value) || isVariableValue(value) || isLiquidTagValue(value);
-
-      // Suppress error if value is a dynamic template, variable value, or Liquid tag
-      return !shouldSuppressError;
-    });
+    // An empty path here is the whole document, which a template value must not replace.
+    const filteredIssues = result.error.issues.filter(
+      (issue) => issue.path.length === 0 || !isTemplateValueIssue(issue, parseResult.json)
+    );
 
     if (filteredIssues.length === 0) {
       return {

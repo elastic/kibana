@@ -142,6 +142,20 @@ describe('shouldSkipAsNoOp', () => {
     ).toBe(false);
   });
 
+  it('does not skip when the summary changes at the same severity', () => {
+    const signal = makeSignal();
+    expect(
+      shouldSkipAsNoOp({
+        candidate: makeCandidate(
+          [signal],
+          { summary: 'P99 latency breached SLO and checkout requests now fail.' },
+          makeStored([signal])
+        ),
+        severity: 'high',
+      })
+    ).toBe(false);
+  });
+
   it('never skips when there is no stored version', () => {
     expect(shouldSkipAsNoOp({ candidate: makeCandidate([makeSignal()]), severity: 'high' })).toBe(
       false

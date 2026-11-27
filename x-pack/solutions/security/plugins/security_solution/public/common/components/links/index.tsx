@@ -21,7 +21,9 @@ import {
   getNetworkDetailsUrl,
   getCreateCaseUrl,
   useFormatUrl,
+  useGetSecuritySolutionUrl,
 } from '../link_to';
+import { useGetUrlStateQueryParams } from '../navigation/use_url_state_query_params';
 import type { FlowTargetSourceDest } from '../../../../common/search_strategy/security_solution/network';
 import { FlowTarget } from '../../../../common/search_strategy/security_solution/network';
 import { useUiSetting$, useKibana } from '../../lib/kibana';
@@ -459,6 +461,10 @@ export interface CaseDetailsLinkComponentProps {
    * If true, will open the app in new tab, will share session information via window.open if base
    */
   openInNewTab?: NavigateToAppOptions['openInNewTab'];
+  /**
+   * Global url params to replace in the case url, e.g. `{ timeline: { isOpen: false } }`
+   */
+  override?: Record<string, unknown>;
 }
 
 const CaseDetailsLinkComponent: React.FC<CaseDetailsLinkComponentProps> = ({
@@ -466,8 +472,10 @@ const CaseDetailsLinkComponent: React.FC<CaseDetailsLinkComponentProps> = ({
   detailName,
   title,
   openInNewTab = false,
+  override,
 }) => {
-  const { formatUrl, search } = useFormatUrl(SecurityPageName.case);
+  const getSecuritySolutionUrl = useGetSecuritySolutionUrl(override);
+  const getUrlStateQueryParams = useGetUrlStateQueryParams(override);
   const { navigateToApp } = useKibana().services.application;
 
   const goToCaseDetails = useCallback(
@@ -475,17 +483,23 @@ const CaseDetailsLinkComponent: React.FC<CaseDetailsLinkComponentProps> = ({
       if (ev) ev.preventDefault();
       return navigateToApp(APP_UI_ID, {
         deepLinkId: SecurityPageName.case,
-        path: getCaseDetailsUrl({ id: detailName, search }),
+        path: getCaseDetailsUrl({
+          id: detailName,
+          search: getUrlStateQueryParams(SecurityPageName.case),
+        }),
         openInNewTab,
       });
     },
-    [detailName, navigateToApp, openInNewTab, search]
+    [detailName, getUrlStateQueryParams, navigateToApp, openInNewTab]
   );
 
   return (
     <LinkAnchor
       onClick={goToCaseDetails}
-      href={formatUrl(getCaseDetailsUrl({ id: detailName }))}
+      href={getSecuritySolutionUrl({
+        deepLinkId: SecurityPageName.case,
+        path: getCaseDetailsUrl({ id: detailName }),
+      })}
       data-test-subj="case-details-link"
       aria-label={i18n.CASE_DETAILS_LINK_ARIA(title ?? detailName)}
     >

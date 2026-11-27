@@ -7,16 +7,14 @@
 
 import { alertEventSchema } from '@kbn/alerting-v2-schemas';
 import { z, lazySchema } from '@kbn/zod/v4';
-
-/** `source` of every signal the engine writes. */
-export const DETECTION_SIGNAL_SOURCE = 'elastic.nightshift_detection_engine';
+import { DETECTION_SIGNAL_SOURCE } from './constants';
 
 /**
  * Longest free-text value in `data`. `data` is `flattened`, so each string is indexed as one
  * keyword, and Lucene rejects the whole document when a term is over 32,766 bytes. At most 3 UTF-8
  * bytes per UTF-16 unit keeps 10,000 units under that.
  */
-const MAX_TEXT_LENGTH = 10_000;
+export const MAX_TEXT_LENGTH = 10_000;
 /**
  * Deepest nesting inside `details`. `flattened` rejects a document nested deeper than 20 levels
  * from `data`, and `details` itself is one of them.
@@ -99,6 +97,11 @@ export const detectionSignalReadingSchema = lazySchema(() =>
     role: z.enum(['primary', 'supporting']),
     /** Whether the judge should compare the reading with what is normal for the series. */
     compare_with_normal: z.boolean(),
+    /**
+     * Minutes without a breached reading after which the series counts as recovered. Set by a
+     * strategy that reports breaches only, so its events can close without a `recovered` reading.
+     */
+    quiet_period_minutes: z.number().int().min(1).optional(),
     /**
      * Strategy-specific detail for the judge, kept as reported. Engine code never reads it. At most
      * {@link MAX_TEXT_LENGTH} characters serialized and {@link MAX_DETAILS_DEPTH} levels deep.

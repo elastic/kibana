@@ -48,6 +48,9 @@ describe('DigitalExperienceLocatorDefinition', () => {
     expect(await pathOf({ serviceName: 'storefront-web', tab: 'reports' })).toBe(
       '/storefront-web/reports'
     );
+    expect(await pathOf({ serviceName: 'shop-mobile', tab: 'crashes' })).toBe(
+      '/shop-mobile/crashes'
+    );
   });
 
   it('opens the Overview for a tab it does not know', async () => {
@@ -110,6 +113,19 @@ describe('DigitalExperienceLocatorDefinition', () => {
     });
   });
 
+  it('keeps the crash group whose detail the Crashes tab has open', async () => {
+    const path = await pathOf({
+      serviceName: 'shop-mobile',
+      tab: 'crashes',
+      source: 'otel',
+      applicationType: 'mobile',
+      crashGroup: 'abc123',
+    });
+
+    expect(path.split('?')[0]).toBe('/shop-mobile/crashes');
+    expect(new URLSearchParams(path.split('?')[1]).get('crashGroup')).toBe('abc123');
+  });
+
   it('keeps the state of the Sessions list, with its numbers and booleans', async () => {
     const path = await pathOf({
       serviceName: 'storefront-web',
@@ -117,6 +133,9 @@ describe('DigitalExperienceLocatorDefinition', () => {
       source: 'otel',
       withJsErrors: true,
       withFailedRequests: true,
+      withFrustration: true,
+      frustrationTarget: '#pay',
+      frustrationPage: '/checkout',
       page: 2,
       perPage: 50,
       sortField: 'duration',
@@ -124,7 +143,7 @@ describe('DigitalExperienceLocatorDefinition', () => {
     });
 
     expect(path).toBe(
-      '/storefront-web/sessions?page=2&perPage=50&sortDirection=desc&sortField=duration&source=otel&withFailedRequests=true&withJsErrors=true'
+      '/storefront-web/sessions?frustrationPage=%2Fcheckout&frustrationTarget=%23pay&page=2&perPage=50&sortDirection=desc&sortField=duration&source=otel&withFailedRequests=true&withFrustration=true&withJsErrors=true'
     );
   });
 

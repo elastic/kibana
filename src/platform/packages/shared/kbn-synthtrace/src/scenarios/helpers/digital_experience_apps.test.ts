@@ -46,6 +46,7 @@ const collect = (
     environment: 'test',
     from: timeRange.from.getTime(),
     withSessionId,
+    withPageRoute: true,
     includeRawAttribution,
     environments: false,
     edgeCases: false,
@@ -67,6 +68,7 @@ describe('digital experience apps', () => {
     it('defaults to session.id, no raw attribution, one environment, no edge cases and scale 1', () => {
       expect(parseDigitalExperienceScenarioOpts(undefined, FROM)).toEqual({
         withSessionId: true,
+        withPageRoute: true,
         includeRawAttribution: false,
         environments: false,
         edgeCases: false,
@@ -86,6 +88,7 @@ describe('digital experience apps', () => {
         parseDigitalExperienceScenarioOpts(
           {
             withSessionId: false,
+            withPageRoute: false,
             includeRawAttribution: true,
             environments: true,
             edgeCases: true,
@@ -101,6 +104,7 @@ describe('digital experience apps', () => {
         )
       ).toEqual({
         withSessionId: false,
+        withPageRoute: false,
         includeRawAttribution: true,
         environments: true,
         edgeCases: true,
@@ -120,6 +124,7 @@ describe('digital experience apps', () => {
         parseDigitalExperienceScenarioOpts(
           {
             withSessionId: 'true',
+            withPageRoute: 'true',
             includeRawAttribution: 'true',
             environments: 'true',
             edgeCases: 'true',
@@ -130,6 +135,7 @@ describe('digital experience apps', () => {
         )
       ).toEqual({
         withSessionId: true,
+        withPageRoute: true,
         includeRawAttribution: true,
         environments: true,
         edgeCases: true,
@@ -389,11 +395,11 @@ describe('digital experience apps', () => {
       const eventNameOf = (doc: EdotBrowserDocument) =>
         'event_name' in doc ? doc.event_name : undefined;
       const isFrustration = (doc: EdotBrowserDocument) =>
-        String(eventNameOf(doc)).startsWith('browser.frustration.');
+        String(eventNameOf(doc)).startsWith('elastic.frustration.');
       const docs = generate();
       const signals = docs.filter(isFrustration);
       const ofKind = (kind: string) =>
-        signals.filter((doc) => eventNameOf(doc) === `browser.frustration.${kind}`);
+        signals.filter((doc) => eventNameOf(doc) === `elastic.frustration.${kind}`);
 
       it('reports rage, dead and error clicks on the clicked element', () => {
         ['rage_click', 'dead_click', 'error_click'].forEach((kind) =>
@@ -423,7 +429,7 @@ describe('digital experience apps', () => {
 
       it('repeats the click of a rage click, and counts the clicks', () => {
         ofKind('rage_click').forEach(({ attributes = {}, ...doc }) => {
-          const count = attributes['browser.frustration.click_count'] as number;
+          const count = attributes['elastic.frustration.click_count'] as number;
           const burst = docs.filter(
             (other) =>
               eventNameOf(other) === 'browser.user_action.click' &&
@@ -605,6 +611,7 @@ describe('digital experience apps', () => {
           environment: 'test',
           from,
           withSessionId,
+          withPageRoute: true,
           includeRawAttribution: false,
           environments: false,
           edgeCases: false,
@@ -919,11 +926,16 @@ describe('digital experience apps', () => {
   describe('catalogue', () => {
     // Half an hour of every app, with the traffic of two, to see rare cases too
     const halfHour = timerange(at(0), at(1800));
-    const generate = (environments: boolean, edgeCases: boolean = false) =>
+    const generate = (
+      environments: boolean,
+      edgeCases: boolean = false,
+      withPageRoute: boolean = true
+    ) =>
       generateEdotBrowserSessions(halfHour, {
         environment: 'test',
         from: halfHour.from.getTime(),
         withSessionId: true,
+        withPageRoute,
         includeRawAttribution: false,
         environments,
         edgeCases,
@@ -1092,6 +1104,79 @@ describe('digital experience apps', () => {
       });
     });
 
+    describe('page routes', () => {
+      const templateOf = (doc: EdotBrowserDocument) => attribute(doc, 'url.template');
+      const pageLoads = (all: EdotBrowserDocument[], serviceName: string) =>
+        eventsOf(appDocs(all, serviceName), 'browser.navigation_timing');
+      const templatesByPath = (all: EdotBrowserDocument[], serviceName: string) => {
+        const byPath = new Map<string, Set<unknown>>();
+        pageLoads(all, serviceName).forEach((doc) => {
+          const { pathname } = new URL(String(attribute(doc, 'url.full')));
+          byPath.set(pathname, (byPath.get(pathname) ?? new Set()).add(templateOf(doc)));
+        });
+        return byPath;
+      };
+
+      it('puts the products of the storefront, which tells its route, under one page', () => {
+        const byPath = templatesByPath(docs, 'storefront-web');
+        const products = [...byPath].filter(([pathname]) => pathname.startsWith('/products/'));
+
+        expect(products.length).toBeGreaterThan(1);
+        products.forEach(([, templates]) =>
+          expect(templates).toEqual(new Set(['/products/{slug}']))
+        );
+      });
+
+      it('leaves the SDK to turn IDs into {id}, and the slugs it cannot tell stay in the route', () => {
+        const orders = [...templatesByPath(docs, 'storefront-web')].filter(([pathname]) =>
+          pathname.startsWith('/account/orders/')
+        );
+        expect(orders.length).toBeGreaterThan(0);
+        orders.forEach(([, templates]) =>
+          expect(templates).toEqual(new Set(['/account/orders/{id}']))
+        );
+
+        const guides = templatesByPath(docs, 'docs-web').get('/guides/getting-started');
+        expect(guides).toEqual(new Set(['/guides/getting-started']));
+      });
+
+      it('drops the query of the pages', () => {
+        const search = templatesByPath(docs, 'docs-web').get('/search');
+        expect(search).toEqual(new Set(['/search']));
+      });
+
+      it('writes it on logs of every kind but the resource timings, and on no span', () => {
+        const storefront = appDocs(docs, 'storefront-web');
+        const logs = storefront.filter((doc) => 'event_name' in doc);
+
+        ['browser.web_vital', 'browser.user_action.click', 'exception', 'session.start'].forEach(
+          (eventName) => {
+            const events = eventsOf(storefront, eventName);
+            expect(events.length).toBeGreaterThan(0);
+            events.forEach((doc) => expect(templateOf(doc)).toBeDefined());
+          }
+        );
+        eventsOf(logs, 'browser.resource_timing').forEach((doc) =>
+          expect(templateOf(doc)).toBeUndefined()
+        );
+        requests(storefront).forEach((doc) => expect(templateOf(doc)).toBeUndefined());
+      });
+
+      it('is left out of the app that turns page routes off, whose pages are their URLs', () => {
+        const supportLoads = pageLoads(docs, 'support-center-web');
+
+        expect(supportLoads.length).toBeGreaterThan(0);
+        supportLoads.forEach((doc) => expect(templateOf(doc)).toBeUndefined());
+      });
+
+      it('is left out everywhere with withPageRoute off', () => {
+        const withoutRoutes = generate(false, false, false);
+
+        expect(withoutRoutes.length).toBeGreaterThan(0);
+        withoutRoutes.forEach((doc) => expect(templateOf(doc)).toBeUndefined());
+      });
+    });
+
     describe('edge cases', () => {
       const lengths = (all: EdotBrowserDocument[]) =>
         all.map((doc) => String(attribute(doc, 'url.full')).length);
@@ -1162,6 +1247,7 @@ describe('digital experience apps', () => {
           environment: 'test',
           from: threeHours.from.getTime(),
           withSessionId: true,
+          withPageRoute: true,
           includeRawAttribution: false,
           environments: false,
           edgeCases: true,
@@ -1259,7 +1345,7 @@ describe('digital experience apps', () => {
 
     describe('frustration signals', () => {
       const signals = docs.filter((doc) =>
-        String('event_name' in doc ? doc.event_name : '').startsWith('browser.frustration.')
+        String('event_name' in doc ? doc.event_name : '').startsWith('elastic.frustration.')
       );
       const sessionIdOf = (doc: EdotBrowserDocument) => attribute(doc, 'session.id');
       const signalsPerSession = (all: EdotBrowserDocument[], ofSignals = signals) => {
@@ -1274,7 +1360,7 @@ describe('digital experience apps', () => {
       const ofVersion = (all: EdotBrowserDocument[], version: string) =>
         all.filter((doc) => doc.resource?.attributes?.['service.version'] === version);
       const errorClicksOn = (all: EdotBrowserDocument[], selector: string) =>
-        eventsOf(all, 'browser.frustration.error_click').filter(
+        eventsOf(all, 'elastic.frustration.error_click').filter(
           (doc) => attribute(doc, 'browser.css_selector') === selector
         );
 

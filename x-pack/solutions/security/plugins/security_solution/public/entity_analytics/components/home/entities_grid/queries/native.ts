@@ -27,6 +27,7 @@ import {
 } from './entities_in_view';
 import {
   ENTITY_TYPE_FILTER,
+  SET_UNMAPPED_NULLIFY,
   buildFilterClause,
   buildRowFieldsSteps,
   buildSortSuffix,
@@ -73,6 +74,7 @@ const buildSortedByFieldQuery = (
   sortField: string = args.sort.field,
   condition?: string
 ): string[] => [
+  SET_UNMAPPED_NULLIFY,
   ...buildEntitiesInViewSteps(args),
   ...buildFilterClause(condition),
   ...buildSortSuffix(sortField, args.sort.direction, args.pageSize + 1),
@@ -117,6 +119,7 @@ const buildCriticalityLevelQuery = (
   level: string | null,
   limit: number
 ): string[] => [
+  SET_UNMAPPED_NULLIFY,
   ...buildEntitiesInViewSteps(args),
   level == null
     ? `| WHERE ${CRITICALITY_FIELD} IS NULL OR NOT ${CRITICALITY_FIELD} IN (${toList(
@@ -133,6 +136,7 @@ const buildResolvedEntitiesWithAliasesQuery = (
   args: QueryArgs,
   targetIds?: readonly string[]
 ): string[] => [
+  SET_UNMAPPED_NULLIFY,
   `FROM ${getEntityAlias(args.namespace)}`,
   `| WHERE ${ENTITY_TYPE_FILTER} AND ${RESOLVED_TO_FIELD} IS NOT NULL`,
   ...buildFilterClause(targetIds && `${RESOLVED_TO_FIELD} IN (${toList(targetIds)})`),

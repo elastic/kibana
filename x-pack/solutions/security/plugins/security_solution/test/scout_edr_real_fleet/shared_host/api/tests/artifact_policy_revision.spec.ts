@@ -11,9 +11,8 @@ import { getEndpointArtifactsApiService, PUBLIC_API_HEADERS } from '@kbn/scout-s
 import { expect } from '@kbn/scout-security/api';
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
-import { HOST_METADATA_GET_ROUTE } from '../../../../../common/endpoint/constants';
 import { GLOBAL_ARTIFACT_TAG } from '../../../../../common/endpoint/service/artifacts';
-import type { HostInfo } from '../../../../../common/endpoint/types';
+import { waitForAppliedEndpointPolicy } from '../../../fixtures/applied_endpoint_policy';
 import { apiTest } from '../fixtures';
 
 const TRUSTED_APPS_LIST_ID = ENDPOINT_ARTIFACT_LISTS.trustedApps.id;
@@ -26,7 +25,6 @@ const PACKAGER_INTERVAL_MS = 5_000;
 const STABLE_REVISION_MS = 15_000;
 const SETTLE_TIMEOUT_MS = 60_000;
 const PACKAGE_POLICY_REVISION_TIMEOUT_MS = 60_000;
-const APPLIED_REVISION_TIMEOUT_MS = 180_000;
 const TEST_TIMEOUT_MS = 12 * 60 * 1000;
 
 const TRUSTED_APP_ENTRIES = [
@@ -93,28 +91,6 @@ const waitForPackagePolicyRevisionAbove = async (
   return observed;
 };
 
-const waitForAppliedRevisionAtLeast = async (
-  read: () => Promise<number>,
-  minimum: number
-): Promise<number> => {
-  let observed = 0;
-  await expect
-    .poll(
-      async () => {
-        observed = await read();
-        return observed;
-      },
-      {
-        timeout: APPLIED_REVISION_TIMEOUT_MS,
-        intervals: [PACKAGER_INTERVAL_MS],
-        message: `enrolled host applied revision did not reach ${minimum}`,
-      }
-    )
-    .toBeGreaterThanOrEqual(minimum);
-
-  return observed;
-};
-
 apiTest.describe(
   'Endpoint artifact changes on a live host',
   { tag: ['@local-stateful-classic', '@local-serverless-security_complete'] },
@@ -143,15 +119,6 @@ apiTest.describe(
           );
           expect(response).toHaveStatusCode(200);
           return (response.body as GetOnePackagePolicyResponse).item.revision;
-        };
-        const readAppliedRevision = async () => {
-          const response = await apiClient.get(
-            HOST_METADATA_GET_ROUTE.replace('{id}', enrolledEndpoint.agentId),
-            { headers, responseType: 'json' }
-          );
-          expect(response).toHaveStatusCode(200);
-          const body = response.body as HostInfo;
-          return Number(body.metadata.Endpoint.policy.applied.endpoint_policy_version);
         };
 
         const baseline = await waitForStablePackagePolicyRevision(readPackagePolicyRevision);
@@ -192,9 +159,11 @@ apiTest.describe(
           readPackagePolicyRevision,
           baseline
         );
-        const appliedAfterCreate = await waitForAppliedRevisionAtLeast(
-          readAppliedRevision,
-          revisionAfterCreate
+        const appliedAfterCreate = await waitForAppliedEndpointPolicy(
+          apiClient,
+          headers,
+          enrolledEndpoint.agentId,
+          { minimumRevision: revisionAfterCreate }
         );
         expect(appliedAfterCreate).toBeGreaterThanOrEqual(revisionAfterCreate);
 
@@ -210,9 +179,11 @@ apiTest.describe(
           readPackagePolicyRevision,
           revisionAfterCreate
         );
-        const appliedAfterDelete = await waitForAppliedRevisionAtLeast(
-          readAppliedRevision,
-          revisionAfterDelete
+        const appliedAfterDelete = await waitForAppliedEndpointPolicy(
+          apiClient,
+          headers,
+          enrolledEndpoint.agentId,
+          { minimumRevision: revisionAfterDelete }
         );
         expect(appliedAfterDelete).toBeGreaterThanOrEqual(revisionAfterDelete);
       }

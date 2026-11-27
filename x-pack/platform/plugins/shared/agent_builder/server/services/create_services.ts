@@ -39,6 +39,7 @@ import {
 import { type PluginsService, createPluginsService } from './plugins';
 import { CallbackDeliveryService } from './execution/callback';
 import { createSpaceSettingsService } from './space_settings';
+import { PinnedBaselineService } from './eval_baselines/pinned_baseline_service';
 import { SurfacesServiceImpl } from './surfaces';
 import { ConversationTemplatesService } from './conversation/templates';
 import { createPrincipalKeyResolver } from './common/principal_key';
@@ -130,6 +131,7 @@ export class ServiceManager {
     uiSettings,
     savedObjects,
     featureFlags,
+    dataStreams,
     actions,
     taskManager,
     securityPlugin,
@@ -332,6 +334,8 @@ export class ServiceManager {
 
     const spaceSettings = createSpaceSettingsService({ savedObjects });
 
+    const evalBaselines = new PinnedBaselineService(logger.get('evalBaselines'), dataStreams);
+
     this.internalStart = {
       tools,
       agents,
@@ -357,6 +361,7 @@ export class ServiceManager {
       callbackDeliveryService: this.services.callbackDelivery,
       spaceSettings,
       conversationTemplates: conversationTemplatesStart,
+      evalBaselines,
     };
 
     return this.internalStart;

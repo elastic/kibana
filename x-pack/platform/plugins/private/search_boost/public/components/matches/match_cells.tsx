@@ -16,7 +16,7 @@ import {
 } from '@elastic/eui';
 import type { DataRetention } from '../../../common/types';
 import type { LinkProps } from '../../types';
-import { formatStorageSize } from '../format';
+import { formatDuration, formatStorageSize } from '../format';
 import {
   KEEP_INDEFINITELY,
   OUTRANKED_BY_COLUMN,
@@ -57,7 +57,7 @@ export const OutrankedBy = ({ ruleName, getRuleLinkProps }: OutrankedByProps) =>
 export const RetentionValue = ({ retention }: { retention?: DataRetention }) => {
   switch (retention?.type) {
     case 'value':
-      return <>{retention.value}</>;
+      return <>{formatDuration(retention.value)}</>;
     case 'disabled':
       return <>{RETENTION_DISABLED}</>;
     case 'infinite':
@@ -70,7 +70,7 @@ export const RetentionValue = ({ retention }: { retention?: DataRetention }) => 
 };
 
 interface StorageSizeProps {
-  bytes: number;
+  bytes?: number;
   largestBytes: number;
   showsBar: boolean;
   isOutranked: boolean;
@@ -78,7 +78,7 @@ interface StorageSizeProps {
 
 export const StorageSize = ({ bytes, largestBytes, showsBar, isOutranked }: StorageSizeProps) => {
   const { euiTheme } = useEuiTheme();
-  return showsBar ? (
+  return showsBar && bytes !== undefined ? (
     <EuiFlexGroup gutterSize="m" alignItems="center" responsive={false}>
       <EuiFlexItem grow={false} css={{ minWidth: '5em' }}>
         {formatStorageSize(bytes)}

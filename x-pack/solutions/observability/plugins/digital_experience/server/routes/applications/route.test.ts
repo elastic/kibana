@@ -7,26 +7,29 @@
 
 import { NEVER } from 'rxjs';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
-import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
+import type { TracedElasticsearchClient } from '@kbn/traced-es-client';
+import { createDigitalExperienceTracedEsClient } from '../../lib/create_digital_experience_traced_es_client';
 import { getClassicApplications } from './classic/get_classic_applications';
 import { hasPartialReadAccess } from './get_partial_access';
 import { getMobileApplications } from './mobile/get_mobile_applications';
-import { getOtelApplicationsFromBestSource } from './otel/get_otel_applications_source';
+import { getSessionsApplications } from './otel/get_sessions_applications';
 import { APPLICATIONS_ENDPOINT, applicationsRouteRepository } from './route';
 
 jest.mock('./classic/get_classic_applications');
-jest.mock('./otel/get_otel_applications_source');
+jest.mock('./otel/get_sessions_applications');
 jest.mock('./get_partial_access');
 jest.mock('./mobile/get_mobile_applications');
 jest.mock('./classic/create_apm_event_client');
+jest.mock('../../lib/create_digital_experience_traced_es_client');
 
 const mockedPartialAccess = jest.mocked(hasPartialReadAccess);
 const mockedClassic = jest.mocked(getClassicApplications);
+const mockedTracedEsClient = jest.mocked(createDigitalExperienceTracedEsClient);
+const tracedEsClient = {} as TracedElasticsearchClient;
 
 const START = '2021-01-18T12:00:00.000Z';
 const END = '2021-01-18T13:00:00.000Z';
-const SESSIONS_SETTINGS = { frequency: '1m' };
-const mockedOtel = jest.mocked(getOtelApplicationsFromBestSource);
+const mockedOtel = jest.mocked(getSessionsApplications);
 
 const runHandler = ({
   isServerless,
@@ -52,7 +55,6 @@ const runHandler = ({
     error: 'logs-apm.error-*',
     span: 'traces-apm*',
   });
-  const taskManager = taskManagerMock.createStart();
   const handler = applicationsRouteRepository[APPLICATIONS_ENDPOINT].handler as unknown as (
     resources: unknown
   ) => Promise<{
@@ -68,22 +70,21 @@ const runHandler = ({
     plugins: { apmDataAccess: withApmDataAccess ? { getApmIndices } : undefined },
     isServerless,
     isUxEnabled,
-    sessionsSettings: SESSIONS_SETTINGS,
-    getSessionsServices: async () => ({ taskManager, canEncrypt: true }),
     logger: loggingSystemMock.createLogger(),
   });
-  return { result, getApmIndices, taskManager };
+  return { result, getApmIndices };
 };
 
 describe('GET /internal/digital_experience/applications', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockedPartialAccess.mockResolvedValue(false);
+    mockedTracedEsClient.mockReturnValue(tracedEsClient);
     mockedOtel.mockResolvedValue({
       applications: [],
       environments: ['production'],
       pageLoadsOverTime: [],
-      sessionsOverTime: null,
+      sessionsOverTime: [],
     });
     mockedClassic.mockResolvedValue({
       applications: [],
@@ -142,35 +143,24 @@ describe('GET /internal/digital_experience/applications', () => {
     expect(response.environments).toEqual(['production', 'staging']);
   });
 
-  it('converts the ISO range to epoch milliseconds and passes an abort signal to OTel', async () => {
+  it('converts the ISO range to epoch milliseconds for both sources', async () => {
     await runHandler({ isServerless: false }).result;
 
     expect(mockedOtel).toHaveBeenCalledWith(
-      expect.objectContaining({
-        start: Date.parse(START),
-        end: Date.parse(END),
-        signal: expect.any(AbortSignal),
-      })
+      expect.objectContaining({ start: Date.parse(START), end: Date.parse(END) })
     );
     expect(mockedClassic).toHaveBeenCalledWith(
       expect.objectContaining({ start: Date.parse(START), end: Date.parse(END) })
     );
   });
 
-  it('lets the OTel source read the sessions status from Task Manager with the configured settings', async () => {
-    const { result, taskManager } = runHandler({ isServerless: false });
-    await result;
+  it('searches the sessions index as the current user, cancelled with the request', async () => {
+    await runHandler({ isServerless: false }).result;
 
-    expect(mockedOtel).toHaveBeenCalledWith(
-      expect.objectContaining({
-        esClient: {},
-        taskManager,
-        sessionsSettings: SESSIONS_SETTINGS,
-      })
+    expect(mockedTracedEsClient).toHaveBeenCalledWith(
+      expect.objectContaining({ client: {}, abortSignal: expect.any(AbortSignal) })
     );
-    expect(mockedOtel).toHaveBeenCalledWith(
-      expect.not.objectContaining({ internalEsClient: expect.anything() })
-    );
+    expect(mockedOtel).toHaveBeenCalledWith(expect.objectContaining({ tracedEsClient }));
   });
 
   it('passes the time zone to both sources', async () => {
@@ -221,10 +211,11 @@ describe('GET /internal/digital_experience/applications', () => {
     const { result, getApmIndices } = runHandler({ isServerless: false });
     const response = await result;
 
-    // Mobile reads the OTel indices, so it shares their check.
-    expect(mockedPartialAccess).toHaveBeenCalledTimes(2);
-    const [[otelCheck], [classicCheck]] = mockedPartialAccess.mock.calls;
-    await expect(otelCheck.getIndices()).resolves.toEqual(['logs-*.otel-*', 'traces-*.otel-*']);
+    expect(mockedPartialAccess).toHaveBeenCalledTimes(3);
+    const [[otelCheck], [classicCheck], [mobileCheck]] = mockedPartialAccess.mock.calls;
+    await expect(otelCheck.getIndices()).resolves.toEqual([
+      'digital-experience-sessions-browser-*',
+    ]);
     expect(otelCheck.ignoredPatterns).toBeUndefined();
     await expect(classicCheck.getIndices()).resolves.toEqual([
       'traces-apm*',
@@ -232,18 +223,19 @@ describe('GET /internal/digital_experience/applications', () => {
       'traces-apm*',
     ]);
     expect(classicCheck.ignoredPatterns).toEqual(['logs-*.otel-*', 'traces-*.otel-*']);
+    await expect(mobileCheck.getIndices()).resolves.toEqual(['logs-*.otel-*', 'traces-*.otel-*']);
     expect(getApmIndices).toHaveBeenCalledTimes(1);
     expect(response.partiallyAvailableSources).toEqual(['otel', 'classic']);
-    // Mobile applications read the same OTel indices, but aren't a source.
+    // Mobile applications read the raw OTel indices, but aren't a source.
     expect(response.mobileAvailability).toBe('partial');
   });
 
-  it('only checks the OTel access, which mobile shares, on serverless', async () => {
+  it('checks only the sessions and mobile access on serverless', async () => {
     mockedPartialAccess.mockResolvedValue(false);
 
     const response = await runHandler({ isServerless: true }).result;
 
-    expect(mockedPartialAccess).toHaveBeenCalledTimes(1);
+    expect(mockedPartialAccess).toHaveBeenCalledTimes(2);
     expect(response.partiallyAvailableSources).toEqual([]);
   });
 
