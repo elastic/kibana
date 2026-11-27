@@ -32,13 +32,15 @@ const START_COLUMNS = {
 
 /**
  * The duration of a start of `type`, or null for any other document. A duration can be mapped as a
- * `long` in one backing index and a `float` in another, so it's read as a double.
+ * `long` in one backing index and a `float` in another, so it's read as a double; `start.type` is
+ * read as a string, as any other stream can map it as a number. ES|QL rejects the whole query on a
+ * field mapped as two types unless it's converted, which would take the KPIs down with it.
  */
 const startDurationOf = (type: StartType) => {
   const duration = esql.exp`TO_DOUBLE(${mobileColumn('appStartDuration')})`;
   return esql.exp`${resultColumn(START_COLUMNS[type].ms)} = CASE(
     ${mobileColumn('eventName')} == ${APP_START_EVENT}
-      AND ${mobileColumn('startType')} == ${type}
+      AND TO_STRING(${mobileColumn('startType')}) == ${type}
       AND ${duration} >= 0
       AND ${duration} <= ${MAX_APP_START_MS},
     ${duration},

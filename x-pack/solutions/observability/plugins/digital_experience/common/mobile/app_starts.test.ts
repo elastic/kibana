@@ -22,11 +22,12 @@ describe('app start queries', () => {
   it('keeps a cold start, and only a cold one, in the cold column, read as a double', () => {
     const printed = normalized(withAppStartDurations(query()).print('basic'));
 
+    // The type as a string, so a stream that maps it as a number doesn't fail the whole query
     expect(printed).toContain(
-      'cold_start_ms = CASE(event_name == "elastic.app.start" AND `attributes.start.type` == "cold" AND TO_DOUBLE(`attributes.elastic.app.start.duration`) >= 0 AND TO_DOUBLE(`attributes.elastic.app.start.duration`) <= 60000, TO_DOUBLE(`attributes.elastic.app.start.duration`), NULL)'
+      'cold_start_ms = CASE(event_name == "elastic.app.start" AND TO_STRING(`attributes.start.type`) == "cold" AND TO_DOUBLE(`attributes.elastic.app.start.duration`) >= 0 AND TO_DOUBLE(`attributes.elastic.app.start.duration`) <= 60000, TO_DOUBLE(`attributes.elastic.app.start.duration`), NULL)'
     );
     expect(printed).toContain(
-      'warm_start_ms = CASE(event_name == "elastic.app.start" AND `attributes.start.type` == "warm"'
+      'warm_start_ms = CASE(event_name == "elastic.app.start" AND TO_STRING(`attributes.start.type`) == "warm"'
     );
     // `hot` and starts without a type fall in neither column
     expect(printed).not.toContain('"hot"');
