@@ -10,17 +10,11 @@ import React, { useCallback, useMemo, useState } from 'react';
 import {
   copyToClipboard,
   EuiButtonIcon,
-  EuiButton,
-  EuiButtonEmpty,
+  EuiConfirmModal,
   EuiContextMenuItem,
   EuiContextMenuPanel,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiModal,
-  EuiModalBody,
-  EuiModalFooter,
-  EuiModalHeader,
-  EuiModalHeaderTitle,
   EuiPopover,
   EuiText,
   EuiToolTip,
@@ -240,54 +234,36 @@ export const InvestigationCardActions = ({
           <EuiContextMenuPanel items={menuItems} />
         </EuiPopover>
         {isDeleteConfirmOpen && (
-          <EuiModal
-            role="alertdialog"
+          <EuiConfirmModal
             aria-labelledby={deleteConfirmTitleId}
-            onClose={() => setIsDeleteConfirmOpen(false)}
+            titleProps={{ id: deleteConfirmTitleId }}
+            title={i18n.translate('xpack.nightshift.investigations.cardDeleteConfirmTitle', {
+              defaultMessage: 'Delete investigation?',
+            })}
+            onCancel={() => setIsDeleteConfirmOpen(false)}
+            onConfirm={handleDelete}
+            cancelButtonText={i18n.translate('xpack.nightshift.investigations.cardDeleteCancel', {
+              defaultMessage: 'Cancel',
+            })}
+            confirmButtonText={deleteLabel}
+            confirmButtonProps={getEbtProps({
+              action: NIGHTSHIFT_EBT_ACTIONS.CONFIRM_DELETE_INVESTIGATION,
+              element: ebtElement,
+            })}
+            buttonColor="danger"
+            defaultFocusedButton="cancel"
             data-test-subj="nightshiftInvestigationCardDeleteConfirm"
           >
-            <EuiModalHeader>
-              <EuiModalHeaderTitle id={deleteConfirmTitleId}>
-                {i18n.translate('xpack.nightshift.investigations.cardDeleteConfirmTitle', {
-                  defaultMessage: 'Delete investigation?',
+            <EuiText size="s">
+              <p>
+                {i18n.translate('xpack.nightshift.investigations.cardDeleteConfirmBody', {
+                  defaultMessage:
+                    '"{title}" and its conversation will be permanently deleted. This cannot be undone.',
+                  values: { title: investigation.title },
                 })}
-              </EuiModalHeaderTitle>
-            </EuiModalHeader>
-            <EuiModalBody>
-              <EuiText size="s">
-                <p>
-                  {i18n.translate('xpack.nightshift.investigations.cardDeleteConfirmBody', {
-                    defaultMessage:
-                      '"{title}" and its conversation will be permanently deleted. This cannot be undone.',
-                    values: { title: investigation.title },
-                  })}
-                </p>
-              </EuiText>
-            </EuiModalBody>
-            <EuiModalFooter>
-              <EuiButtonEmpty
-                autoFocus
-                onClick={() => setIsDeleteConfirmOpen(false)}
-                data-test-subj="confirmModalCancelButton"
-              >
-                {i18n.translate('xpack.nightshift.investigations.cardDeleteCancel', {
-                  defaultMessage: 'Cancel',
-                })}
-              </EuiButtonEmpty>
-              <EuiButton
-                fill
-                color="danger"
-                onClick={handleDelete}
-                data-test-subj="confirmModalConfirmButton"
-                {...getEbtProps({
-                  action: NIGHTSHIFT_EBT_ACTIONS.CONFIRM_DELETE_INVESTIGATION,
-                  element: ebtElement,
-                })}
-              >
-                {deleteLabel}
-              </EuiButton>
-            </EuiModalFooter>
-          </EuiModal>
+              </p>
+            </EuiText>
+          </EuiConfirmModal>
         )}
       </EuiFlexItem>
     </EuiFlexGroup>
