@@ -24,3 +24,6 @@ export const DETECTION_ENGINE_API_PATH = '/internal/nightshift/detection';
  * link and is deleted before the plugin is turned on anywhere.
  */
 export const DETECTION_INSPECTOR_APP_ID = 'nightshiftDetectionDebug';
+
+/** `source` of every signal the engine writes. */
+export const DETECTION_SIGNAL_SOURCE = 'elastic.nightshift_detection_engine';
