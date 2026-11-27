@@ -1,0 +1,76 @@
+name: Rebuild scheduled triggers
+description: |
+  One of each schedule the scheduled trigger's form can hold: an interval, and a date and time pattern that
+  repeats daily, weekly and monthly. The last one has a start date, which the form leaves to the YAML tab.
+tags:
+  - scout
+  - graph-rebuild
+triggers:
+  - type: scheduled
+    with:
+      every: 90s
+  - type: scheduled
+    with:
+      rrule:
+        freq: WEEKLY
+        interval: 1
+        tzid: Europe/Madrid
+        byweekday:
+          - MO
+          - WE
+        byhour:
+          - 7
+        byminute:
+          - 30
+  - type: scheduled
+    with:
+      rrule:
+        freq: DAILY
+        interval: 1
+        tzid: UTC
+        byweekday:
+          - MO
+          - TU
+          - WE
+          - TH
+          - FR
+        byhour:
+          - 6
+        byminute:
+          - 0
+  - type: scheduled
+    with:
+      rrule:
+        freq: DAILY
+        interval: 2
+        tzid: UTC
+        byhour:
+          - 23
+        byminute:
+          - 5
+  - type: scheduled
+    with:
+      rrule:
+        freq: MONTHLY
+        interval: 3
+        tzid: America/New_York
+        bymonthday:
+          - 1
+          - 15
+          - 31
+        byhour:
+          - 9
+        byminute:
+          - 45
+  - type: scheduled
+    with:
+      rrule:
+        freq: DAILY
+        interval: 1
+        tzid: Etc/GMT+2
+        dtstart: 2025-01-01T09:00:00.000Z
+steps:
+  - name: log_schedule
+    type: console
+    with:
+      message: "Scheduled run"
