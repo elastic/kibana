@@ -94,6 +94,16 @@ describe('Nightshift investigation agent type', () => {
     expect(base.instructions).toContain('at least 8 buckets across the window');
   });
 
+  it('tells the investigator what the investigation context attachment holds and when to read it', async () => {
+    const base = await baseFor(
+      getInvestigationAgentType({ sandboxEnabled: true, wikiEnabled: false })
+    );
+
+    expect(base.instructions).toContain('`investigation_context`');
+    expect(base.instructions).toContain('do not read the attachment by default');
+    expect(base.instructions).toContain('Read it with `attachments.read` when');
+  });
+
   it('adds Semantic Memory context and workflows when memory is enabled', async () => {
     const base = await baseFor(
       getInvestigationAgentType({
