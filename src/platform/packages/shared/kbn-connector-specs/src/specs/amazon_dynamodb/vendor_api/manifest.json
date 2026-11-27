@@ -1,0 +1,101 @@
+{
+  "operations": {
+    "deleteItem": [
+      {
+        "method": "post",
+        "path": "/DeleteItem",
+        "source": "dynamodb"
+      }
+    ],
+    "describeTable": [
+      {
+        "method": "post",
+        "path": "/DescribeTable",
+        "source": "dynamodb"
+      }
+    ],
+    "getItem": [
+      {
+        "method": "post",
+        "path": "/GetItem",
+        "source": "dynamodb"
+      }
+    ],
+    "listTables": [
+      {
+        "method": "post",
+        "pagination": {
+          "defaultSize": 100,
+          "end": "missing",
+          "request": {
+            "cursorParam": "ExclusiveStartTableName",
+            "in": "body",
+            "sizeParam": "Limit"
+          },
+          "response": {
+            "itemsPath": "TableNames",
+            "nextPath": "LastEvaluatedTableName"
+          },
+          "style": "cursor"
+        },
+        "path": "/ListTables",
+        "source": "dynamodb"
+      }
+    ],
+    "putItem": [
+      {
+        "method": "post",
+        "path": "/PutItem",
+        "source": "dynamodb"
+      }
+    ],
+    "query": [
+      {
+        "method": "post",
+        "pagination": {
+          "end": "missing",
+          "request": {
+            "cursorParam": "ExclusiveStartKey",
+            "in": "body",
+            "sizeParam": "Limit"
+          },
+          "response": {
+            "itemsPath": "Items",
+            "nextPath": "LastEvaluatedKey"
+          },
+          "style": "cursor"
+        },
+        "path": "/Query",
+        "source": "dynamodb"
+      }
+    ],
+    "scan": [
+      {
+        "method": "post",
+        "pagination": {
+          "end": "missing",
+          "request": {
+            "cursorParam": "ExclusiveStartKey",
+            "in": "body",
+            "sizeParam": "Limit"
+          },
+          "response": {
+            "itemsPath": "Items",
+            "nextPath": "LastEvaluatedKey"
+          },
+          "style": "cursor"
+        },
+        "path": "/Scan",
+        "source": "dynamodb"
+      }
+    ]
+  },
+  "sources": {
+    "dynamodb": {
+      "apiVersion": "2012-08-10",
+      "fetchedAt": "2026-11-23T20:55:17.016Z",
+      "format": "smithy",
+      "url": "https://raw.githubusercontent.com/aws/api-models-aws/1b9ff13fe6c28ea9774a527e53cda6a3b91369dc/models/dynamodb/service/2012-08-10/dynamodb-2012-08-10.json"
+    }
+  }
+}

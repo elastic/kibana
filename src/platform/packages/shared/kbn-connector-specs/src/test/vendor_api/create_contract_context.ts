@@ -117,6 +117,7 @@ const toMultipart = async (form: FormData): Promise<Buffer> => {
 const DECODED_PLACEHOLDERS: Readonly<Record<string, () => string>> = {
   serviceAccountJson: sampleServiceAccountJson,
   accountKey: () => Buffer.from('contract-mock-accountKey').toString('base64'),
+  roleArn: () => 'arn:aws:iam::123456789012:role/contract-mock',
 };
 
 const placeholdersFor = (key: string): readonly string[] => [
@@ -218,6 +219,39 @@ const holdWeakly = (target: Emulator): typeof fetch => {
   };
 };
 
+// AWS STS speaks the awsQuery protocol, which the mock has no spec model for. AssumeRole only
+// authenticates the run, like a token request, so it is answered here rather than recorded.
+const STS_HOST_PATTERN = /^sts(\.[a-z0-9-]+)?\.amazonaws\.com$/;
+const STS_ASSUME_ROLE_RESPONSE = `<AssumeRoleResponse><AssumeRoleResult><Credentials>
+  <AccessKeyId>ASIACONTRACTMOCK</AccessKeyId>
+  <SecretAccessKey>contract-mock-temporary-secret</SecretAccessKey>
+  <SessionToken>contract-mock-session-token</SessionToken>
+  <Expiration>2999-01-01T00:00:00Z</Expiration>
+</Credentials></AssumeRoleResult></AssumeRoleResponse>`;
+
+// STS takes its action in the form body, so only an AssumeRole request gets the canned answer; any other
+// STS call goes on to the mock like every other request.
+const isAssumeRole = async (
+  input: Request | string | URL,
+  init?: RequestInit
+): Promise<boolean> => {
+  const body = input instanceof Request ? await input.clone().text() : init?.body;
+  return typeof body === 'string' && new URLSearchParams(body).get('Action') === 'AssumeRole';
+};
+
+const withStsAssumeRole =
+  (next: typeof fetch): typeof fetch =>
+  async (input, init) => {
+    const url = input instanceof Request ? input.url : String(input);
+    if (STS_HOST_PATTERN.test(new URL(url).hostname) && (await isAssumeRole(input, init))) {
+      return new Response(STS_ASSUME_ROLE_RESPONSE, {
+        status: 200,
+        headers: { 'content-type': 'text/xml' },
+      });
+    }
+    return next(input, init);
+  };
+
 let guards = 0;
 let globalFetch: typeof fetch | undefined;
 
@@ -286,7 +320,7 @@ export const createContractContext = async ({
   const streamed = new WeakSet<object>();
   const client = axios.create({
     adapter: 'fetch',
-    env: { fetch: holdWeakly(mock) },
+    env: { fetch: withStsAssumeRole(holdWeakly(mock)) },
   });
   // Registered first, so it runs after the interceptors that connectors add.
   client.interceptors.request.use(async (requestConfig) => {

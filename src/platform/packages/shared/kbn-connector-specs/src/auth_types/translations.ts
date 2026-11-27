@@ -336,6 +336,59 @@ export const AWS_SECRET_ACCESS_KEY_REQUIRED_MESSAGE = i18n.translate(
   }
 );
 
+export const AWS_IAM_ROLE_LABEL = i18n.translate('connectorSpecs.awsIamRole.label', {
+  defaultMessage: 'AWS IAM Role',
+});
+
+export const AWS_IAM_ROLE_ARN_LABEL = i18n.translate('connectorSpecs.awsIamRole.roleArn.label', {
+  defaultMessage: 'Role ARN',
+});
+
+export const AWS_IAM_ROLE_ARN_REQUIRED_MESSAGE = i18n.translate(
+  'connectorSpecs.awsIamRole.roleArn.requiredMessage',
+  {
+    defaultMessage: 'Role ARN is required',
+  }
+);
+
+export const AWS_IAM_ROLE_ARN_INVALID_MESSAGE = i18n.translate(
+  'connectorSpecs.awsIamRole.roleArn.invalidMessage',
+  {
+    defaultMessage:
+      'Role ARN must look like arn:aws:iam::123456789012:role/RoleName (12-digit account ID). Roles in the AWS China partition are not supported.',
+  }
+);
+
+export const AWS_IAM_ROLE_EXTERNAL_ID_INVALID_MESSAGE = i18n.translate(
+  'connectorSpecs.awsIamRole.externalId.invalidMessage',
+  {
+    defaultMessage:
+      'External ID can contain letters, numbers, and the characters + = , . @ : / _ - (up to 1224 characters)',
+  }
+);
+
+export const AWS_IAM_ROLE_SESSION_NAME_INVALID_MESSAGE = i18n.translate(
+  'connectorSpecs.awsIamRole.sessionName.invalidMessage',
+  {
+    defaultMessage:
+      'Session name can contain letters, numbers, and the characters + = , . @ _ - (up to 64 characters)',
+  }
+);
+
+export const AWS_IAM_ROLE_EXTERNAL_ID_LABEL = i18n.translate(
+  'connectorSpecs.awsIamRole.externalId.label',
+  {
+    defaultMessage: 'External ID',
+  }
+);
+
+export const AWS_IAM_ROLE_SESSION_NAME_LABEL = i18n.translate(
+  'connectorSpecs.awsIamRole.sessionName.label',
+  {
+    defaultMessage: 'Session name',
+  }
+);
+
 export const EARS_LABEL = i18n.translate('connectorSpecs.ears.label', {
   defaultMessage: 'Quick Connect OAuth 2.0',
 });

@@ -216,6 +216,51 @@ describe('signRequest()', () => {
     expect(result['x-amz-content-sha256']).toMatch(/^[a-f0-9]{64}$/);
   });
 
+  describe('session token', () => {
+    const sign = (existingHeaders: Record<string, string>, sessionToken?: string) =>
+      signRequest(
+        'POST',
+        'dynamodb.us-east-1.amazonaws.com',
+        '/',
+        {},
+        'ASIA_TEST',
+        'SECRET_TEST',
+        'us-east-1',
+        'dynamodb',
+        existingHeaders,
+        '{}',
+        sessionToken
+      );
+
+    it('signs and returns the session token passed as a parameter', async () => {
+      const result = await sign({}, 'temporary-token');
+
+      expect(result['X-Amz-Security-Token']).toBe('temporary-token');
+      expect(result.Authorization).toContain(
+        'SignedHeaders=content-type;host;x-amz-date;x-amz-security-token'
+      );
+    });
+
+    it('prefers the parameter over a token already present in the headers', async () => {
+      const result = await sign({ 'x-amz-security-token': 'stale-token' }, 'temporary-token');
+
+      expect(result['X-Amz-Security-Token']).toBe('temporary-token');
+    });
+
+    it('still returns a token that arrives through the headers', async () => {
+      const result = await sign({ 'X-Amz-Security-Token': 'header-token' });
+
+      expect(result['X-Amz-Security-Token']).toBe('header-token');
+    });
+
+    it('sends no token when there is none', async () => {
+      const result = await sign({});
+
+      expect(result['X-Amz-Security-Token']).toBeUndefined();
+      expect(result.Authorization).not.toContain('x-amz-security-token');
+    });
+  });
+
   it('signs and returns the caller content type when one is set', async () => {
     const contentType = 'application/x-www-form-urlencoded; charset=utf-8';
     const result = await signRequest(

@@ -1,0 +1,162 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import type { InternalAxiosRequestConfig } from 'axios';
+import {
+  buildCanonicalQueryString,
+  escapeSigV4ReservedChars,
+  parseAwsHost,
+  signRequest,
+} from './aws_credential_helpers';
+
+/** Request config accepted by the SigV4 interceptor. */
+export interface AwsSigningRequestConfig {
+  /** Overrides the signing name parsed from the hostname (e.g. bedrock-runtime signs as bedrock). */
+  awsSigningName?: string;
+}
+
+/** What the interceptor knows about the request being signed. */
+export interface AwsSigningRequest {
+  /** The AWS Region parsed from the request hostname. */
+  region: string;
+}
+
+export interface AwsSigningCredentials {
+  accessKeyId: string;
+  secretAccessKey: string;
+  /** Present for temporary credentials; sent as X-Amz-Security-Token. */
+  sessionToken?: string;
+}
+
+/**
+ * Builds the request interceptor that signs every outgoing request to *.amazonaws.com with AWS
+ * Signature V4. Non-AWS URLs pass through unsigned and never ask for credentials.
+ *
+ * Service and region are extracted from the URL hostname pattern: {service}.{region}.amazonaws.com
+ * The region is also handed to `getCredentials`, for credentials that are issued per Region.
+ */
+export const createAwsSigV4Interceptor =
+  (
+    getCredentials: (
+      request: AwsSigningRequest
+    ) => Promise<AwsSigningCredentials> | AwsSigningCredentials
+  ) =>
+  async (
+    config: InternalAxiosRequestConfig & AwsSigningRequestConfig
+  ): Promise<InternalAxiosRequestConfig> => {
+    const requestUrl = config.url;
+    if (!requestUrl) {
+      return config;
+    }
+
+    // Resolve full URL (handles relative URLs with baseURL)
+    const fullUrl =
+      config.baseURL && !requestUrl.startsWith('http')
+        ? new URL(requestUrl, config.baseURL)
+        : new URL(requestUrl);
+
+    const awsInfo = parseAwsHost(fullUrl.hostname);
+    if (!awsInfo) {
+      return config;
+    }
+
+    const { accessKeyId, secretAccessKey, sessionToken } = await getCredentials({
+      region: awsInfo.region,
+    });
+
+    const method = (config.method || 'GET').toUpperCase();
+    // `fullUrl.pathname` may already contain `%XX` escapes from the
+    // action's own `encodeURIComponent` calls, but never escapes
+    // `! ' ( ) *` (e.g. a "logs-*" index pattern) — fix those up here so
+    // the same rule applies to the path as to the query string below.
+    const path = escapeSigV4ReservedChars(fullUrl.pathname);
+    const queryParams: Record<string, string> = {};
+    fullUrl.searchParams.forEach((value, key) => {
+      queryParams[key] = value;
+    });
+
+    // `config.params` is merged into `config.url` by axios's own
+    // dispatchRequest/buildURL step, which runs *after* request
+    // interceptors — so at this point it's still a separate, unserialized
+    // object rather than part of `fullUrl.searchParams` above. Fold it in
+    // here (dropping null/undefined the same way axios's own params
+    // serializer does) so it gets included in the signature.
+    if (config.params && typeof config.params === 'object') {
+      for (const [key, value] of Object.entries(config.params as Record<string, unknown>)) {
+        if (value === undefined || value === null) {
+          continue;
+        }
+        queryParams[key] = String(value);
+      }
+    }
+
+    const body =
+      typeof config.data === 'string'
+        ? config.data
+        : config.data != null
+        ? JSON.stringify(config.data)
+        : undefined;
+
+    // Collect existing headers for signing
+    const existingHeaders: Record<string, string> = {};
+    if (config.headers) {
+      for (const [key, value] of Object.entries(config.headers.toJSON())) {
+        if (typeof value === 'string') {
+          existingHeaders[key] = value;
+        }
+      }
+    }
+
+    const sigV4Headers = await signRequest(
+      method,
+      fullUrl.hostname,
+      path,
+      queryParams,
+      accessKeyId,
+      secretAccessKey,
+      awsInfo.region,
+      config.awsSigningName ?? awsInfo.service,
+      existingHeaders,
+      body,
+      sessionToken
+    );
+
+    // Apply signed headers to the request
+    for (const [key, value] of Object.entries(sigV4Headers)) {
+      config.headers.set(key, value);
+    }
+
+    // Bake the exact query string we just signed into `config.url` (by
+    // plain string concatenation, not the `URL.search` setter, which
+    // would re-run its own percent-encoding pass) and drop
+    // `config.params`. Axios's default params serializer un-escapes
+    // `:`, `$`, `,`, and turns spaces into `+` after encodeURIComponent —
+    // if left in place, it would send a *differently*-encoded query
+    // string than the one covered by the signature above, and AWS
+    // rejects any mismatch with a generic access-denied error.
+    const canonicalQuerystring = buildCanonicalQueryString(queryParams);
+    config.url = `${fullUrl.origin}${path}${
+      canonicalQuerystring ? `?${canonicalQuerystring}` : ''
+    }`;
+    config.params = undefined;
+
+    // Send the exact body we just signed. Axios's default
+    // transformRequest also runs after interceptors and, under a JSON
+    // Content-Type, trims a JSON string and JSON-quotes any other string.
+    config.data = body;
+    config.transformRequest = [];
+
+    // X-Amz-Security-Token is a credential in a non-standard header, which Axios does not strip
+    // when it follows a redirect to another host. Hand any redirect back to the caller instead.
+    if (sessionToken) {
+      config.maxRedirects = 0;
+    }
+
+    return config;
+  };

@@ -1,0 +1,17 @@
+{
+  "describeTable": {
+    "queries": [{ "source": "dynamodb", "method": "POST", "path": "/DescribeTable" }]
+  },
+  "getItem": {
+    "queries": [{ "source": "dynamodb", "method": "POST", "path": "/GetItem" }]
+  },
+  "listTables": {
+    "queries": [{ "source": "dynamodb", "method": "POST", "path": "/ListTables" }]
+  },
+  "query": {
+    "queries": [{ "source": "dynamodb", "method": "POST", "path": "/Query" }]
+  },
+  "scan": {
+    "queries": [{ "source": "dynamodb", "method": "POST", "path": "/Scan" }]
+  }
+}

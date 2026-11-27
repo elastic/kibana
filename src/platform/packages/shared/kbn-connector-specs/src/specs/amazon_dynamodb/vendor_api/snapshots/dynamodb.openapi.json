@@ -1,0 +1,2587 @@
+{
+  "components": {
+    "schemas": {
+      "ArchivalSummary": {
+        "properties": {
+          "ArchivalBackupArn": {
+            "maxLength": 1024,
+            "minLength": 37,
+            "type": "string"
+          },
+          "ArchivalDateTime": {
+            "format": "double",
+            "type": "number"
+          },
+          "ArchivalReason": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AttributeDefinition": {
+        "properties": {
+          "AttributeName": {
+            "maxLength": 255,
+            "minLength": 1,
+            "type": "string"
+          },
+          "AttributeType": {
+            "$ref": "#/components/schemas/ScalarAttributeType"
+          }
+        },
+        "required": [
+          "AttributeName",
+          "AttributeType"
+        ],
+        "type": "object"
+      },
+      "AttributeValue": {
+        "oneOf": [
+          {
+            "properties": {
+              "S": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "S"
+            ],
+            "type": "object"
+          },
+          {
+            "properties": {
+              "N": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "N"
+            ],
+            "type": "object"
+          },
+          {
+            "properties": {
+              "B": {
+                "format": "byte",
+                "type": "string"
+              }
+            },
+            "required": [
+              "B"
+            ],
+            "type": "object"
+          },
+          {
+            "properties": {
+              "SS": {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              }
+            },
+            "required": [
+              "SS"
+            ],
+            "type": "object"
+          },
+          {
+            "properties": {
+              "NS": {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              }
+            },
+            "required": [
+              "NS"
+            ],
+            "type": "object"
+          },
+          {
+            "properties": {
+              "BS": {
+                "items": {
+                  "format": "byte",
+                  "type": "string"
+                },
+                "type": "array"
+              }
+            },
+            "required": [
+              "BS"
+            ],
+            "type": "object"
+          },
+          {
+            "properties": {
+              "M": {
+                "additionalProperties": {
+                  "$ref": "#/components/schemas/AttributeValue"
+                },
+                "type": "object"
+              }
+            },
+            "required": [
+              "M"
+            ],
+            "type": "object"
+          },
+          {
+            "properties": {
+              "L": {
+                "items": {
+                  "$ref": "#/components/schemas/AttributeValue"
+                },
+                "type": "array"
+              }
+            },
+            "required": [
+              "L"
+            ],
+            "type": "object"
+          },
+          {
+            "properties": {
+              "NULL": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "NULL"
+            ],
+            "type": "object"
+          },
+          {
+            "properties": {
+              "BOOL": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "BOOL"
+            ],
+            "type": "object"
+          }
+        ]
+      },
+      "BillingMode": {
+        "enum": [
+          "PROVISIONED",
+          "PAY_PER_REQUEST"
+        ],
+        "type": "string"
+      },
+      "BillingModeSummary": {
+        "properties": {
+          "BillingMode": {
+            "$ref": "#/components/schemas/BillingMode"
+          },
+          "LastUpdateToPayPerRequestDateTime": {
+            "format": "double",
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
+      "Capacity": {
+        "properties": {
+          "CapacityUnits": {
+            "anyOf": [
+              {
+                "format": "double",
+                "type": "number"
+              },
+              {
+                "enum": [
+                  "NaN",
+                  "Infinity",
+                  "-Infinity"
+                ],
+                "type": "string"
+              }
+            ]
+          },
+          "ReadCapacityUnits": {
+            "anyOf": [
+              {
+                "format": "double",
+                "type": "number"
+              },
+              {
+                "enum": [
+                  "NaN",
+                  "Infinity",
+                  "-Infinity"
+                ],
+                "type": "string"
+              }
+            ]
+          },
+          "WriteCapacityUnits": {
+            "anyOf": [
+              {
+                "format": "double",
+                "type": "number"
+              },
+              {
+                "enum": [
+                  "NaN",
+                  "Infinity",
+                  "-Infinity"
+                ],
+                "type": "string"
+              }
+            ]
+          }
+        },
+        "type": "object"
+      },
+      "ComparisonOperator": {
+        "enum": [
+          "EQ",
+          "NE",
+          "IN",
+          "LE",
+          "LT",
+          "GE",
+          "GT",
+          "BETWEEN",
+          "NOT_NULL",
+          "NULL",
+          "CONTAINS",
+          "NOT_CONTAINS",
+          "BEGINS_WITH"
+        ],
+        "type": "string"
+      },
+      "Condition": {
+        "properties": {
+          "AttributeValueList": {
+            "items": {
+              "$ref": "#/components/schemas/AttributeValue"
+            },
+            "type": "array"
+          },
+          "ComparisonOperator": {
+            "$ref": "#/components/schemas/ComparisonOperator"
+          }
+        },
+        "required": [
+          "ComparisonOperator"
+        ],
+        "type": "object"
+      },
+      "ConditionalCheckFailedExceptionResponseContent": {
+        "properties": {
+          "Item": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/AttributeValue"
+            },
+            "type": "object"
+          },
+          "__type": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ConditionalOperator": {
+        "enum": [
+          "AND",
+          "OR"
+        ],
+        "type": "string"
+      },
+      "ConsumedCapacity": {
+        "properties": {
+          "CapacityUnits": {
+            "anyOf": [
+              {
+                "format": "double",
+                "type": "number"
+              },
+              {
+                "enum": [
+                  "NaN",
+                  "Infinity",
+                  "-Infinity"
+                ],
+                "type": "string"
+              }
+            ]
+          },
+          "GlobalSecondaryIndexes": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/Capacity"
+            },
+            "type": "object"
+          },
+          "LocalSecondaryIndexes": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/Capacity"
+            },
+            "type": "object"
+          },
+          "ReadCapacityUnits": {
+            "anyOf": [
+              {
+                "format": "double",
+                "type": "number"
+              },
+              {
+                "enum": [
+                  "NaN",
+                  "Infinity",
+                  "-Infinity"
+                ],
+                "type": "string"
+              }
+            ]
+          },
+          "Table": {
+            "$ref": "#/components/schemas/Capacity"
+          },
+          "TableName": {
+            "maxLength": 1024,
+            "minLength": 1,
+            "type": "string"
+          },
+          "VectorIndexes": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/VectorCapacity"
+            },
+            "type": "object"
+          },
+          "WriteCapacityUnits": {
+            "anyOf": [
+              {
+                "format": "double",
+                "type": "number"
+              },
+              {
+                "enum": [
+                  "NaN",
+                  "Infinity",
+                  "-Infinity"
+                ],
+                "type": "string"
+              }
+            ]
+          }
+        },
+        "type": "object"
+      },
+      "DeleteItemRequestContent": {
+        "properties": {
+          "ConditionExpression": {
+            "type": "string"
+          },
+          "ConditionalOperator": {
+            "$ref": "#/components/schemas/ConditionalOperator"
+          },
+          "Expected": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/ExpectedAttributeValue"
+            },
+            "type": "object"
+          },
+          "ExpressionAttributeNames": {
+            "additionalProperties": {
+              "maxLength": 65535,
+              "minLength": 0,
+              "type": "string"
+            },
+            "type": "object"
+          },
+          "ExpressionAttributeValues": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/AttributeValue"
+            },
+            "type": "object"
+          },
+          "Key": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/AttributeValue"
+            },
+            "type": "object"
+          },
+          "ReturnConsumedCapacity": {
+            "$ref": "#/components/schemas/ReturnConsumedCapacity"
+          },
+          "ReturnItemCollectionMetrics": {
+            "$ref": "#/components/schemas/ReturnItemCollectionMetrics"
+          },
+          "ReturnValues": {
+            "$ref": "#/components/schemas/ReturnValue"
+          },
+          "ReturnValuesOnConditionCheckFailure": {
+            "$ref": "#/components/schemas/ReturnValuesOnConditionCheckFailure"
+          },
+          "TableName": {
+            "maxLength": 1024,
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "TableName",
+          "Key"
+        ],
+        "type": "object"
+      },
+      "DeleteItemResponseContent": {
+        "properties": {
+          "Attributes": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/AttributeValue"
+            },
+            "type": "object"
+          },
+          "ConsumedCapacity": {
+            "$ref": "#/components/schemas/ConsumedCapacity"
+          },
+          "ItemCollectionMetrics": {
+            "$ref": "#/components/schemas/ItemCollectionMetrics"
+          }
+        },
+        "type": "object"
+      },
+      "DescribeTableRequestContent": {
+        "properties": {
+          "TableName": {
+            "maxLength": 1024,
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "TableName"
+        ],
+        "type": "object"
+      },
+      "DescribeTableResponseContent": {
+        "properties": {
+          "Table": {
+            "$ref": "#/components/schemas/TableDescription"
+          }
+        },
+        "type": "object"
+      },
+      "ExpectedAttributeValue": {
+        "properties": {
+          "AttributeValueList": {
+            "items": {
+              "$ref": "#/components/schemas/AttributeValue"
+            },
+            "type": "array"
+          },
+          "ComparisonOperator": {
+            "$ref": "#/components/schemas/ComparisonOperator"
+          },
+          "Exists": {
+            "type": "boolean"
+          },
+          "Value": {
+            "$ref": "#/components/schemas/AttributeValue"
+          }
+        },
+        "type": "object"
+      },
+      "GetItemRequestContent": {
+        "properties": {
+          "AttributesToGet": {
+            "items": {
+              "maxLength": 65535,
+              "minLength": 0,
+              "type": "string"
+            },
+            "minItems": 1,
+            "type": "array"
+          },
+          "ConsistentRead": {
+            "type": "boolean"
+          },
+          "ExpressionAttributeNames": {
+            "additionalProperties": {
+              "maxLength": 65535,
+              "minLength": 0,
+              "type": "string"
+            },
+            "type": "object"
+          },
+          "Key": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/AttributeValue"
+            },
+            "type": "object"
+          },
+          "ProjectionExpression": {
+            "type": "string"
+          },
+          "ReturnConsumedCapacity": {
+            "$ref": "#/components/schemas/ReturnConsumedCapacity"
+          },
+          "TableName": {
+            "maxLength": 1024,
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "TableName",
+          "Key"
+        ],
+        "type": "object"
+      },
+      "GetItemResponseContent": {
+        "properties": {
+          "ConsumedCapacity": {
+            "$ref": "#/components/schemas/ConsumedCapacity"
+          },
+          "Item": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/AttributeValue"
+            },
+            "type": "object"
+          }
+        },
+        "type": "object"
+      },
+      "GlobalSecondaryIndexDescription": {
+        "properties": {
+          "Backfilling": {
+            "type": "boolean"
+          },
+          "IndexArn": {
+            "type": "string"
+          },
+          "IndexName": {
+            "maxLength": 255,
+            "minLength": 3,
+            "pattern": "^[a-zA-Z0-9_.-]+$",
+            "type": "string"
+          },
+          "IndexSizeBytes": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "IndexStatus": {
+            "$ref": "#/components/schemas/IndexStatus"
+          },
+          "ItemCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "KeySchema": {
+            "items": {
+              "$ref": "#/components/schemas/KeySchemaElement"
+            },
+            "minItems": 1,
+            "type": "array"
+          },
+          "OnDemandThroughput": {
+            "$ref": "#/components/schemas/OnDemandThroughput"
+          },
+          "Projection": {
+            "$ref": "#/components/schemas/Projection"
+          },
+          "ProvisionedThroughput": {
+            "$ref": "#/components/schemas/ProvisionedThroughputDescription"
+          },
+          "WarmThroughput": {
+            "$ref": "#/components/schemas/GlobalSecondaryIndexWarmThroughputDescription"
+          }
+        },
+        "type": "object"
+      },
+      "GlobalSecondaryIndexWarmThroughputDescription": {
+        "properties": {
+          "ReadUnitsPerSecond": {
+            "format": "int64",
+            "minimum": 1,
+            "type": "integer"
+          },
+          "Status": {
+            "$ref": "#/components/schemas/IndexStatus"
+          },
+          "WriteUnitsPerSecond": {
+            "format": "int64",
+            "minimum": 1,
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "GlobalTableSettingsReplicationMode": {
+        "enum": [
+          "ENABLED",
+          "DISABLED",
+          "ENABLED_WITH_OVERRIDES"
+        ],
+        "type": "string"
+      },
+      "GlobalTableWitnessDescription": {
+        "properties": {
+          "RegionName": {
+            "type": "string"
+          },
+          "WitnessStatus": {
+            "$ref": "#/components/schemas/WitnessStatus"
+          }
+        },
+        "type": "object"
+      },
+      "IndexStatus": {
+        "enum": [
+          "CREATING",
+          "UPDATING",
+          "DELETING",
+          "ACTIVE"
+        ],
+        "type": "string"
+      },
+      "InternalServerErrorResponseContent": {
+        "properties": {
+          "__type": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "InvalidEndpointExceptionResponseContent": {
+        "properties": {
+          "Message": {
+            "type": "string"
+          },
+          "__type": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ItemCollectionMetrics": {
+        "properties": {
+          "ItemCollectionKey": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/AttributeValue"
+            },
+            "type": "object"
+          },
+          "SizeEstimateRangeGB": {
+            "items": {
+              "anyOf": [
+                {
+                  "format": "double",
+                  "type": "number"
+                },
+                {
+                  "enum": [
+                    "NaN",
+                    "Infinity",
+                    "-Infinity"
+                  ],
+                  "type": "string"
+                }
+              ]
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "ItemCollectionSizeLimitExceededExceptionResponseContent": {
+        "properties": {
+          "__type": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "KeySchemaElement": {
+        "properties": {
+          "AttributeName": {
+            "maxLength": 255,
+            "minLength": 1,
+            "type": "string"
+          },
+          "KeyType": {
+            "$ref": "#/components/schemas/KeyType"
+          }
+        },
+        "required": [
+          "AttributeName",
+          "KeyType"
+        ],
+        "type": "object"
+      },
+      "KeyType": {
+        "enum": [
+          "HASH",
+          "RANGE"
+        ],
+        "type": "string"
+      },
+      "ListTablesRequestContent": {
+        "properties": {
+          "ExclusiveStartTableName": {
+            "maxLength": 255,
+            "minLength": 3,
+            "pattern": "^[a-zA-Z0-9_.-]+$",
+            "type": "string"
+          },
+          "Limit": {
+            "format": "int32",
+            "maximum": 100,
+            "minimum": 1,
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "ListTablesResponseContent": {
+        "properties": {
+          "LastEvaluatedTableName": {
+            "maxLength": 255,
+            "minLength": 3,
+            "pattern": "^[a-zA-Z0-9_.-]+$",
+            "type": "string"
+          },
+          "TableNames": {
+            "items": {
+              "maxLength": 255,
+              "minLength": 3,
+              "pattern": "^[a-zA-Z0-9_.-]+$",
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "LocalSecondaryIndexDescription": {
+        "properties": {
+          "IndexArn": {
+            "type": "string"
+          },
+          "IndexName": {
+            "maxLength": 255,
+            "minLength": 3,
+            "pattern": "^[a-zA-Z0-9_.-]+$",
+            "type": "string"
+          },
+          "IndexSizeBytes": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "ItemCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "KeySchema": {
+            "items": {
+              "$ref": "#/components/schemas/KeySchemaElement"
+            },
+            "minItems": 1,
+            "type": "array"
+          },
+          "Projection": {
+            "$ref": "#/components/schemas/Projection"
+          }
+        },
+        "type": "object"
+      },
+      "MultiRegionConsistency": {
+        "enum": [
+          "EVENTUAL",
+          "STRONG"
+        ],
+        "type": "string"
+      },
+      "OnDemandThroughput": {
+        "properties": {
+          "MaxReadRequestUnits": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "MaxWriteRequestUnits": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "OnDemandThroughputOverride": {
+        "properties": {
+          "MaxReadRequestUnits": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "Projection": {
+        "properties": {
+          "NonKeyAttributes": {
+            "items": {
+              "maxLength": 255,
+              "minLength": 1,
+              "type": "string"
+            },
+            "maxItems": 20,
+            "minItems": 1,
+            "type": "array"
+          },
+          "ProjectionType": {
+            "$ref": "#/components/schemas/ProjectionType"
+          }
+        },
+        "type": "object"
+      },
+      "ProjectionType": {
+        "enum": [
+          "ALL",
+          "KEYS_ONLY",
+          "INCLUDE"
+        ],
+        "type": "string"
+      },
+      "ProvisionedThroughputDescription": {
+        "properties": {
+          "LastDecreaseDateTime": {
+            "format": "double",
+            "type": "number"
+          },
+          "LastIncreaseDateTime": {
+            "format": "double",
+            "type": "number"
+          },
+          "NumberOfDecreasesToday": {
+            "format": "int64",
+            "minimum": 1,
+            "type": "integer"
+          },
+          "ReadCapacityUnits": {
+            "format": "int64",
+            "minimum": 0,
+            "type": "integer"
+          },
+          "WriteCapacityUnits": {
+            "format": "int64",
+            "minimum": 0,
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "ProvisionedThroughputExceededExceptionResponseContent": {
+        "properties": {
+          "ThrottlingReasons": {
+            "items": {
+              "$ref": "#/components/schemas/ThrottlingReason"
+            },
+            "type": "array"
+          },
+          "__type": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ProvisionedThroughputOverride": {
+        "properties": {
+          "ReadCapacityUnits": {
+            "format": "int64",
+            "minimum": 1,
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "PutItemRequestContent": {
+        "properties": {
+          "ConditionExpression": {
+            "type": "string"
+          },
+          "ConditionalOperator": {
+            "$ref": "#/components/schemas/ConditionalOperator"
+          },
+          "Expected": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/ExpectedAttributeValue"
+            },
+            "type": "object"
+          },
+          "ExpressionAttributeNames": {
+            "additionalProperties": {
+              "maxLength": 65535,
+              "minLength": 0,
+              "type": "string"
+            },
+            "type": "object"
+          },
+          "ExpressionAttributeValues": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/AttributeValue"
+            },
+            "type": "object"
+          },
+          "Item": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/AttributeValue"
+            },
+            "type": "object"
+          },
+          "ReturnConsumedCapacity": {
+            "$ref": "#/components/schemas/ReturnConsumedCapacity"
+          },
+          "ReturnItemCollectionMetrics": {
+            "$ref": "#/components/schemas/ReturnItemCollectionMetrics"
+          },
+          "ReturnValues": {
+            "$ref": "#/components/schemas/ReturnValue"
+          },
+          "ReturnValuesOnConditionCheckFailure": {
+            "$ref": "#/components/schemas/ReturnValuesOnConditionCheckFailure"
+          },
+          "TableName": {
+            "maxLength": 1024,
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "TableName",
+          "Item"
+        ],
+        "type": "object"
+      },
+      "PutItemResponseContent": {
+        "properties": {
+          "Attributes": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/AttributeValue"
+            },
+            "type": "object"
+          },
+          "ConsumedCapacity": {
+            "$ref": "#/components/schemas/ConsumedCapacity"
+          },
+          "ItemCollectionMetrics": {
+            "$ref": "#/components/schemas/ItemCollectionMetrics"
+          }
+        },
+        "type": "object"
+      },
+      "QueryRequestContent": {
+        "properties": {
+          "AttributesToGet": {
+            "items": {
+              "maxLength": 65535,
+              "minLength": 0,
+              "type": "string"
+            },
+            "minItems": 1,
+            "type": "array"
+          },
+          "ConditionalOperator": {
+            "$ref": "#/components/schemas/ConditionalOperator"
+          },
+          "ConsistentRead": {
+            "type": "boolean"
+          },
+          "ExclusiveStartKey": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/AttributeValue"
+            },
+            "type": "object"
+          },
+          "ExpressionAttributeNames": {
+            "additionalProperties": {
+              "maxLength": 65535,
+              "minLength": 0,
+              "type": "string"
+            },
+            "type": "object"
+          },
+          "ExpressionAttributeValues": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/AttributeValue"
+            },
+            "type": "object"
+          },
+          "FilterExpression": {
+            "type": "string"
+          },
+          "IndexName": {
+            "maxLength": 255,
+            "minLength": 3,
+            "pattern": "^[a-zA-Z0-9_.-]+$",
+            "type": "string"
+          },
+          "KeyConditionExpression": {
+            "type": "string"
+          },
+          "KeyConditions": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/Condition"
+            },
+            "type": "object"
+          },
+          "Limit": {
+            "format": "int32",
+            "minimum": 1,
+            "type": "integer"
+          },
+          "ProjectionExpression": {
+            "type": "string"
+          },
+          "QueryFilter": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/Condition"
+            },
+            "type": "object"
+          },
+          "ReturnConsumedCapacity": {
+            "$ref": "#/components/schemas/ReturnConsumedCapacity"
+          },
+          "ScanIndexForward": {
+            "type": "boolean"
+          },
+          "Select": {
+            "$ref": "#/components/schemas/Select"
+          },
+          "TableName": {
+            "maxLength": 1024,
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "TableName"
+        ],
+        "type": "object"
+      },
+      "QueryResponseContent": {
+        "properties": {
+          "ConsumedCapacity": {
+            "$ref": "#/components/schemas/ConsumedCapacity"
+          },
+          "Count": {
+            "default": 0,
+            "format": "int32",
+            "type": "integer"
+          },
+          "Items": {
+            "items": {
+              "additionalProperties": {
+                "$ref": "#/components/schemas/AttributeValue"
+              },
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "LastEvaluatedKey": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/AttributeValue"
+            },
+            "type": "object"
+          },
+          "ScannedCount": {
+            "default": 0,
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "ReplicaDescription": {
+        "properties": {
+          "GlobalSecondaryIndexes": {
+            "items": {
+              "$ref": "#/components/schemas/ReplicaGlobalSecondaryIndexDescription"
+            },
+            "type": "array"
+          },
+          "GlobalTableSettingsReplicationMode": {
+            "$ref": "#/components/schemas/GlobalTableSettingsReplicationMode"
+          },
+          "KMSMasterKeyId": {
+            "type": "string"
+          },
+          "OnDemandThroughputOverride": {
+            "$ref": "#/components/schemas/OnDemandThroughputOverride"
+          },
+          "ProvisionedThroughputOverride": {
+            "$ref": "#/components/schemas/ProvisionedThroughputOverride"
+          },
+          "RegionName": {
+            "type": "string"
+          },
+          "ReplicaArn": {
+            "type": "string"
+          },
+          "ReplicaInaccessibleDateTime": {
+            "format": "double",
+            "type": "number"
+          },
+          "ReplicaStatus": {
+            "$ref": "#/components/schemas/ReplicaStatus"
+          },
+          "ReplicaStatusDescription": {
+            "type": "string"
+          },
+          "ReplicaStatusPercentProgress": {
+            "type": "string"
+          },
+          "ReplicaTableClassSummary": {
+            "$ref": "#/components/schemas/TableClassSummary"
+          },
+          "WarmThroughput": {
+            "$ref": "#/components/schemas/TableWarmThroughputDescription"
+          }
+        },
+        "type": "object"
+      },
+      "ReplicaGlobalSecondaryIndexDescription": {
+        "properties": {
+          "IndexName": {
+            "maxLength": 255,
+            "minLength": 3,
+            "pattern": "^[a-zA-Z0-9_.-]+$",
+            "type": "string"
+          },
+          "OnDemandThroughputOverride": {
+            "$ref": "#/components/schemas/OnDemandThroughputOverride"
+          },
+          "ProvisionedThroughputOverride": {
+            "$ref": "#/components/schemas/ProvisionedThroughputOverride"
+          },
+          "WarmThroughput": {
+            "$ref": "#/components/schemas/GlobalSecondaryIndexWarmThroughputDescription"
+          }
+        },
+        "type": "object"
+      },
+      "ReplicaStatus": {
+        "enum": [
+          "CREATING",
+          "CREATION_FAILED",
+          "UPDATING",
+          "DELETING",
+          "ACTIVE",
+          "REGION_DISABLED",
+          "INACCESSIBLE_ENCRYPTION_CREDENTIALS",
+          "ARCHIVING",
+          "ARCHIVED",
+          "REPLICATION_NOT_AUTHORIZED"
+        ],
+        "type": "string"
+      },
+      "ReplicatedWriteConflictExceptionResponseContent": {
+        "properties": {
+          "__type": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "RequestLimitExceededResponseContent": {
+        "properties": {
+          "ThrottlingReasons": {
+            "items": {
+              "$ref": "#/components/schemas/ThrottlingReason"
+            },
+            "type": "array"
+          },
+          "__type": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ResourceNotFoundExceptionResponseContent": {
+        "properties": {
+          "__type": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "RestoreSummary": {
+        "properties": {
+          "RestoreDateTime": {
+            "format": "double",
+            "type": "number"
+          },
+          "RestoreInProgress": {
+            "type": "boolean"
+          },
+          "SourceBackupArn": {
+            "maxLength": 1024,
+            "minLength": 37,
+            "type": "string"
+          },
+          "SourceTableArn": {
+            "maxLength": 1024,
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "RestoreDateTime",
+          "RestoreInProgress"
+        ],
+        "type": "object"
+      },
+      "ReturnConsumedCapacity": {
+        "enum": [
+          "INDEXES",
+          "TOTAL",
+          "NONE"
+        ],
+        "type": "string"
+      },
+      "ReturnItemCollectionMetrics": {
+        "enum": [
+          "SIZE",
+          "NONE"
+        ],
+        "type": "string"
+      },
+      "ReturnValue": {
+        "enum": [
+          "NONE",
+          "ALL_OLD",
+          "UPDATED_OLD",
+          "ALL_NEW",
+          "UPDATED_NEW"
+        ],
+        "type": "string"
+      },
+      "ReturnValuesOnConditionCheckFailure": {
+        "enum": [
+          "ALL_OLD",
+          "NONE"
+        ],
+        "type": "string"
+      },
+      "SSEDescription": {
+        "properties": {
+          "InaccessibleEncryptionDateTime": {
+            "format": "double",
+            "type": "number"
+          },
+          "KMSMasterKeyArn": {
+            "type": "string"
+          },
+          "SSEType": {
+            "$ref": "#/components/schemas/SSEType"
+          },
+          "Status": {
+            "$ref": "#/components/schemas/SSEStatus"
+          }
+        },
+        "type": "object"
+      },
+      "SSEStatus": {
+        "enum": [
+          "ENABLING",
+          "ENABLED",
+          "DISABLING",
+          "DISABLED",
+          "UPDATING"
+        ],
+        "type": "string"
+      },
+      "SSEType": {
+        "enum": [
+          "AES256",
+          "KMS"
+        ],
+        "type": "string"
+      },
+      "ScalarAttributeType": {
+        "enum": [
+          "S",
+          "N",
+          "B"
+        ],
+        "type": "string"
+      },
+      "ScanRequestContent": {
+        "properties": {
+          "AttributesToGet": {
+            "items": {
+              "maxLength": 65535,
+              "minLength": 0,
+              "type": "string"
+            },
+            "minItems": 1,
+            "type": "array"
+          },
+          "ConditionalOperator": {
+            "$ref": "#/components/schemas/ConditionalOperator"
+          },
+          "ConsistentRead": {
+            "type": "boolean"
+          },
+          "ExclusiveStartKey": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/AttributeValue"
+            },
+            "type": "object"
+          },
+          "ExpressionAttributeNames": {
+            "additionalProperties": {
+              "maxLength": 65535,
+              "minLength": 0,
+              "type": "string"
+            },
+            "type": "object"
+          },
+          "ExpressionAttributeValues": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/AttributeValue"
+            },
+            "type": "object"
+          },
+          "FilterExpression": {
+            "type": "string"
+          },
+          "IndexName": {
+            "maxLength": 255,
+            "minLength": 3,
+            "pattern": "^[a-zA-Z0-9_.-]+$",
+            "type": "string"
+          },
+          "Limit": {
+            "format": "int32",
+            "minimum": 1,
+            "type": "integer"
+          },
+          "ProjectionExpression": {
+            "type": "string"
+          },
+          "ReturnConsumedCapacity": {
+            "$ref": "#/components/schemas/ReturnConsumedCapacity"
+          },
+          "ScanFilter": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/Condition"
+            },
+            "type": "object"
+          },
+          "Segment": {
+            "format": "int32",
+            "maximum": 999999,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "Select": {
+            "$ref": "#/components/schemas/Select"
+          },
+          "TableName": {
+            "maxLength": 1024,
+            "minLength": 1,
+            "type": "string"
+          },
+          "TotalSegments": {
+            "format": "int32",
+            "maximum": 1000000,
+            "minimum": 1,
+            "type": "integer"
+          }
+        },
+        "required": [
+          "TableName"
+        ],
+        "type": "object"
+      },
+      "ScanResponseContent": {
+        "properties": {
+          "ConsumedCapacity": {
+            "$ref": "#/components/schemas/ConsumedCapacity"
+          },
+          "Count": {
+            "default": 0,
+            "format": "int32",
+            "type": "integer"
+          },
+          "Items": {
+            "items": {
+              "additionalProperties": {
+                "$ref": "#/components/schemas/AttributeValue"
+              },
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "LastEvaluatedKey": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/AttributeValue"
+            },
+            "type": "object"
+          },
+          "ScannedCount": {
+            "default": 0,
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "SearchSchemaElement": {
+        "properties": {
+          "AttributeName": {
+            "maxLength": 65535,
+            "minLength": 0,
+            "type": "string"
+          },
+          "SearchSchemaElementType": {
+            "$ref": "#/components/schemas/SearchSchemaElementType"
+          }
+        },
+        "required": [
+          "AttributeName",
+          "SearchSchemaElementType"
+        ],
+        "type": "object"
+      },
+      "SearchSchemaElementType": {
+        "enum": [
+          "HASH",
+          "INLINE_FILTER"
+        ],
+        "type": "string"
+      },
+      "Select": {
+        "enum": [
+          "ALL_ATTRIBUTES",
+          "ALL_PROJECTED_ATTRIBUTES",
+          "SPECIFIC_ATTRIBUTES",
+          "COUNT"
+        ],
+        "type": "string"
+      },
+      "StreamSpecification": {
+        "properties": {
+          "StreamEnabled": {
+            "type": "boolean"
+          },
+          "StreamViewType": {
+            "$ref": "#/components/schemas/StreamViewType"
+          }
+        },
+        "required": [
+          "StreamEnabled"
+        ],
+        "type": "object"
+      },
+      "StreamViewType": {
+        "enum": [
+          "NEW_IMAGE",
+          "OLD_IMAGE",
+          "NEW_AND_OLD_IMAGES",
+          "KEYS_ONLY"
+        ],
+        "type": "string"
+      },
+      "TableClass": {
+        "enum": [
+          "STANDARD",
+          "STANDARD_INFREQUENT_ACCESS"
+        ],
+        "type": "string"
+      },
+      "TableClassSummary": {
+        "properties": {
+          "LastUpdateDateTime": {
+            "format": "double",
+            "type": "number"
+          },
+          "TableClass": {
+            "$ref": "#/components/schemas/TableClass"
+          }
+        },
+        "type": "object"
+      },
+      "TableDescription": {
+        "properties": {
+          "ArchivalSummary": {
+            "$ref": "#/components/schemas/ArchivalSummary"
+          },
+          "AttributeDefinitions": {
+            "items": {
+              "$ref": "#/components/schemas/AttributeDefinition"
+            },
+            "type": "array"
+          },
+          "BillingModeSummary": {
+            "$ref": "#/components/schemas/BillingModeSummary"
+          },
+          "CreationDateTime": {
+            "format": "double",
+            "type": "number"
+          },
+          "DeletionProtectionEnabled": {
+            "type": "boolean"
+          },
+          "DisassociationProtectionEnabled": {
+            "type": "boolean"
+          },
+          "GlobalSecondaryIndexes": {
+            "items": {
+              "$ref": "#/components/schemas/GlobalSecondaryIndexDescription"
+            },
+            "type": "array"
+          },
+          "GlobalTableSettingsReplicationMode": {
+            "$ref": "#/components/schemas/GlobalTableSettingsReplicationMode"
+          },
+          "GlobalTableVersion": {
+            "type": "string"
+          },
+          "GlobalTableWitnesses": {
+            "items": {
+              "$ref": "#/components/schemas/GlobalTableWitnessDescription"
+            },
+            "type": "array"
+          },
+          "ItemCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "KeySchema": {
+            "items": {
+              "$ref": "#/components/schemas/KeySchemaElement"
+            },
+            "minItems": 1,
+            "type": "array"
+          },
+          "LatestStreamArn": {
+            "maxLength": 1024,
+            "minLength": 37,
+            "type": "string"
+          },
+          "LatestStreamLabel": {
+            "type": "string"
+          },
+          "LocalSecondaryIndexes": {
+            "items": {
+              "$ref": "#/components/schemas/LocalSecondaryIndexDescription"
+            },
+            "type": "array"
+          },
+          "MultiRegionConsistency": {
+            "$ref": "#/components/schemas/MultiRegionConsistency"
+          },
+          "OnDemandThroughput": {
+            "$ref": "#/components/schemas/OnDemandThroughput"
+          },
+          "ProvisionedThroughput": {
+            "$ref": "#/components/schemas/ProvisionedThroughputDescription"
+          },
+          "Replicas": {
+            "items": {
+              "$ref": "#/components/schemas/ReplicaDescription"
+            },
+            "type": "array"
+          },
+          "RestoreSummary": {
+            "$ref": "#/components/schemas/RestoreSummary"
+          },
+          "SSEDescription": {
+            "$ref": "#/components/schemas/SSEDescription"
+          },
+          "StreamSpecification": {
+            "$ref": "#/components/schemas/StreamSpecification"
+          },
+          "TableArn": {
+            "type": "string"
+          },
+          "TableClassSummary": {
+            "$ref": "#/components/schemas/TableClassSummary"
+          },
+          "TableId": {
+            "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+            "type": "string"
+          },
+          "TableName": {
+            "maxLength": 255,
+            "minLength": 3,
+            "pattern": "^[a-zA-Z0-9_.-]+$",
+            "type": "string"
+          },
+          "TableSizeBytes": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "TableStatus": {
+            "$ref": "#/components/schemas/TableStatus"
+          },
+          "VectorIndexes": {
+            "items": {
+              "$ref": "#/components/schemas/VectorIndexDescription"
+            },
+            "type": "array"
+          },
+          "WarmThroughput": {
+            "$ref": "#/components/schemas/TableWarmThroughputDescription"
+          }
+        },
+        "type": "object"
+      },
+      "TableStatus": {
+        "enum": [
+          "CREATING",
+          "UPDATING",
+          "DELETING",
+          "ACTIVE",
+          "INACCESSIBLE_ENCRYPTION_CREDENTIALS",
+          "ARCHIVING",
+          "ARCHIVED",
+          "REPLICATION_NOT_AUTHORIZED"
+        ],
+        "type": "string"
+      },
+      "TableWarmThroughputDescription": {
+        "properties": {
+          "ReadUnitsPerSecond": {
+            "format": "int64",
+            "minimum": 1,
+            "type": "integer"
+          },
+          "Status": {
+            "$ref": "#/components/schemas/TableStatus"
+          },
+          "WriteUnitsPerSecond": {
+            "format": "int64",
+            "minimum": 1,
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "ThrottlingExceptionResponseContent": {
+        "properties": {
+          "__type": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "throttlingReasons": {
+            "items": {
+              "$ref": "#/components/schemas/ThrottlingReason"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "ThrottlingReason": {
+        "properties": {
+          "reason": {
+            "type": "string"
+          },
+          "resource": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "TransactionConflictExceptionResponseContent": {
+        "properties": {
+          "__type": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "VectorAttributeDefinition": {
+        "properties": {
+          "AttributeName": {
+            "maxLength": 255,
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "AttributeName"
+        ],
+        "type": "object"
+      },
+      "VectorCapacity": {
+        "properties": {
+          "VectorSearchRequestBytes": {
+            "anyOf": [
+              {
+                "format": "double",
+                "type": "number"
+              },
+              {
+                "enum": [
+                  "NaN",
+                  "Infinity",
+                  "-Infinity"
+                ],
+                "type": "string"
+              }
+            ]
+          },
+          "VectorWriteRequestBytes": {
+            "anyOf": [
+              {
+                "format": "double",
+                "type": "number"
+              },
+              {
+                "enum": [
+                  "NaN",
+                  "Infinity",
+                  "-Infinity"
+                ],
+                "type": "string"
+              }
+            ]
+          }
+        },
+        "type": "object"
+      },
+      "VectorDistanceFunction": {
+        "enum": [
+          "COSINE",
+          "DOT_PRODUCT",
+          "EUCLIDEAN"
+        ],
+        "type": "string"
+      },
+      "VectorIndexDescription": {
+        "properties": {
+          "Backfilling": {
+            "type": "boolean"
+          },
+          "Dimensions": {
+            "format": "int64",
+            "minimum": 1,
+            "type": "integer"
+          },
+          "DistanceFunction": {
+            "$ref": "#/components/schemas/VectorDistanceFunction"
+          },
+          "IndexArn": {
+            "type": "string"
+          },
+          "IndexName": {
+            "maxLength": 255,
+            "minLength": 3,
+            "pattern": "^[a-zA-Z0-9_.-]+$",
+            "type": "string"
+          },
+          "IndexSizeBytes": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "IndexStatus": {
+            "$ref": "#/components/schemas/IndexStatus"
+          },
+          "ItemCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "Projection": {
+            "$ref": "#/components/schemas/Projection"
+          },
+          "SearchSchema": {
+            "items": {
+              "$ref": "#/components/schemas/SearchSchemaElement"
+            },
+            "minItems": 1,
+            "type": "array"
+          },
+          "VectorAttribute": {
+            "$ref": "#/components/schemas/VectorAttributeDefinition"
+          }
+        },
+        "type": "object"
+      },
+      "WitnessStatus": {
+        "enum": [
+          "CREATING",
+          "DELETING",
+          "ACTIVE"
+        ],
+        "type": "string"
+      }
+    },
+    "securitySchemes": {
+      "aws.auth.sigv4": {
+        "in": "header",
+        "name": "Authorization",
+        "type": "apiKey"
+      }
+    }
+  },
+  "info": {
+    "title": "Amazon DynamoDB"
+  },
+  "openapi": "3.0.3",
+  "paths": {
+    "/DeleteItem": {
+      "post": {
+        "operationId": "DeleteItem",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DeleteItemRequestContent"
+              }
+            },
+            "application/x-amz-json-1.0": {
+              "schema": {
+                "$ref": "#/components/schemas/DeleteItemRequestContent"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeleteItemResponseContent"
+                }
+              },
+              "application/x-amz-json-1.0": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeleteItemResponseContent"
+                }
+              }
+            }
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/ConditionalCheckFailedExceptionResponseContent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/ItemCollectionSizeLimitExceededExceptionResponseContent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/ProvisionedThroughputExceededExceptionResponseContent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/ReplicatedWriteConflictExceptionResponseContent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/RequestLimitExceededResponseContent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/ResourceNotFoundExceptionResponseContent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/ThrottlingExceptionResponseContent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/TransactionConflictExceptionResponseContent"
+                    }
+                  ]
+                }
+              },
+              "application/x-amz-json-1.0": {
+                "schema": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/ConditionalCheckFailedExceptionResponseContent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/ItemCollectionSizeLimitExceededExceptionResponseContent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/ProvisionedThroughputExceededExceptionResponseContent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/ReplicatedWriteConflictExceptionResponseContent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/RequestLimitExceededResponseContent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/ResourceNotFoundExceptionResponseContent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/ThrottlingExceptionResponseContent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/TransactionConflictExceptionResponseContent"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "421": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InvalidEndpointExceptionResponseContent"
+                }
+              },
+              "application/x-amz-json-1.0": {
+                "schema": {
+                  "$ref": "#/components/schemas/InvalidEndpointExceptionResponseContent"
+                }
+              }
+            }
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InternalServerErrorResponseContent"
+                }
+              },
+              "application/x-amz-json-1.0": {
+                "schema": {
+                  "$ref": "#/components/schemas/InternalServerErrorResponseContent"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/DescribeTable": {
+      "post": {
+        "operationId": "DescribeTable",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DescribeTableRequestContent"
+              }
+            },
+            "application/x-amz-json-1.0": {
+              "schema": {
+                "$ref": "#/components/schemas/DescribeTableRequestContent"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DescribeTableResponseContent"
+                }
+              },
+              "application/x-amz-json-1.0": {
+                "schema": {
+                  "$ref": "#/components/schemas/DescribeTableResponseContent"
+                }
+              }
+            }
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResourceNotFoundExceptionResponseContent"
+                }
+              },
+              "application/x-amz-json-1.0": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResourceNotFoundExceptionResponseContent"
+                }
+              }
+            }
+          },
+          "421": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InvalidEndpointExceptionResponseContent"
+                }
+              },
+              "application/x-amz-json-1.0": {
+                "schema": {
+                  "$ref": "#/components/schemas/InvalidEndpointExceptionResponseContent"
+                }
+              }
+            }
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InternalServerErrorResponseContent"
+                }
+              },
+              "application/x-amz-json-1.0": {
+                "schema": {
+                  "$ref": "#/components/schemas/InternalServerErrorResponseContent"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/GetItem": {
+      "post": {
+        "operationId": "GetItem",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GetItemRequestContent"
+              }
+            },
+            "application/x-amz-json-1.0": {
+              "schema": {
+                "$ref": "#/components/schemas/GetItemRequestContent"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetItemResponseContent"
+                }
+              },
+              "application/x-amz-json-1.0": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetItemResponseContent"
+                }
+              }
+            }
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/ProvisionedThroughputExceededExceptionResponseContent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/RequestLimitExceededResponseContent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/ResourceNotFoundExceptionResponseContent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/ThrottlingExceptionResponseContent"
+                    }
+                  ]
+                }
+              },
+              "application/x-amz-json-1.0": {
+                "schema": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/ProvisionedThroughputExceededExceptionResponseContent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/RequestLimitExceededResponseContent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/ResourceNotFoundExceptionResponseContent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/ThrottlingExceptionResponseContent"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "421": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InvalidEndpointExceptionResponseContent"
+                }
+              },
+              "application/x-amz-json-1.0": {
+                "schema": {
+                  "$ref": "#/components/schemas/InvalidEndpointExceptionResponseContent"
+                }
+              }
+            }
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InternalServerErrorResponseContent"
+                }
+              },
+              "application/x-amz-json-1.0": {
+                "schema": {
+                  "$ref": "#/components/schemas/InternalServerErrorResponseContent"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/ListTables": {
+      "post": {
+        "operationId": "ListTables",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ListTablesRequestContent"
+              }
+            },
+            "application/x-amz-json-1.0": {
+              "schema": {
+                "$ref": "#/components/schemas/ListTablesRequestContent"
+              }
+            }
+          },
+          "required": false
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListTablesResponseContent"
+                }
+              },
+              "application/x-amz-json-1.0": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListTablesResponseContent"
+                }
+              }
+            }
+          },
+          "421": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InvalidEndpointExceptionResponseContent"
+                }
+              },
+              "application/x-amz-json-1.0": {
+                "schema": {
+                  "$ref": "#/components/schemas/InvalidEndpointExceptionResponseContent"
+                }
+              }
+            }
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InternalServerErrorResponseContent"
+                }
+              },
+              "application/x-amz-json-1.0": {
+                "schema": {
+                  "$ref": "#/components/schemas/InternalServerErrorResponseContent"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/PutItem": {
+      "post": {
+        "operationId": "PutItem",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PutItemRequestContent"
+              }
+            },
+            "application/x-amz-json-1.0": {
+              "schema": {
+                "$ref": "#/components/schemas/PutItemRequestContent"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PutItemResponseContent"
+                }
+              },
+              "application/x-amz-json-1.0": {
+                "schema": {
+                  "$ref": "#/components/schemas/PutItemResponseContent"
+                }
+              }
+            }
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/ConditionalCheckFailedExceptionResponseContent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/ItemCollectionSizeLimitExceededExceptionResponseContent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/ProvisionedThroughputExceededExceptionResponseContent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/ReplicatedWriteConflictExceptionResponseContent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/RequestLimitExceededResponseContent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/ResourceNotFoundExceptionResponseContent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/ThrottlingExceptionResponseContent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/TransactionConflictExceptionResponseContent"
+                    }
+                  ]
+                }
+              },
+              "application/x-amz-json-1.0": {
+                "schema": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/ConditionalCheckFailedExceptionResponseContent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/ItemCollectionSizeLimitExceededExceptionResponseContent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/ProvisionedThroughputExceededExceptionResponseContent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/ReplicatedWriteConflictExceptionResponseContent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/RequestLimitExceededResponseContent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/ResourceNotFoundExceptionResponseContent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/ThrottlingExceptionResponseContent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/TransactionConflictExceptionResponseContent"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "421": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InvalidEndpointExceptionResponseContent"
+                }
+              },
+              "application/x-amz-json-1.0": {
+                "schema": {
+                  "$ref": "#/components/schemas/InvalidEndpointExceptionResponseContent"
+                }
+              }
+            }
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InternalServerErrorResponseContent"
+                }
+              },
+              "application/x-amz-json-1.0": {
+                "schema": {
+                  "$ref": "#/components/schemas/InternalServerErrorResponseContent"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/Query": {
+      "post": {
+        "operationId": "Query",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/QueryRequestContent"
+              }
+            },
+            "application/x-amz-json-1.0": {
+              "schema": {
+                "$ref": "#/components/schemas/QueryRequestContent"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QueryResponseContent"
+                }
+              },
+              "application/x-amz-json-1.0": {
+                "schema": {
+                  "$ref": "#/components/schemas/QueryResponseContent"
+                }
+              }
+            }
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/ProvisionedThroughputExceededExceptionResponseContent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/RequestLimitExceededResponseContent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/ResourceNotFoundExceptionResponseContent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/ThrottlingExceptionResponseContent"
+                    }
+                  ]
+                }
+              },
+              "application/x-amz-json-1.0": {
+                "schema": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/ProvisionedThroughputExceededExceptionResponseContent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/RequestLimitExceededResponseContent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/ResourceNotFoundExceptionResponseContent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/ThrottlingExceptionResponseContent"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "421": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InvalidEndpointExceptionResponseContent"
+                }
+              },
+              "application/x-amz-json-1.0": {
+                "schema": {
+                  "$ref": "#/components/schemas/InvalidEndpointExceptionResponseContent"
+                }
+              }
+            }
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InternalServerErrorResponseContent"
+                }
+              },
+              "application/x-amz-json-1.0": {
+                "schema": {
+                  "$ref": "#/components/schemas/InternalServerErrorResponseContent"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/Scan": {
+      "post": {
+        "operationId": "Scan",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ScanRequestContent"
+              }
+            },
+            "application/x-amz-json-1.0": {
+              "schema": {
+                "$ref": "#/components/schemas/ScanRequestContent"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ScanResponseContent"
+                }
+              },
+              "application/x-amz-json-1.0": {
+                "schema": {
+                  "$ref": "#/components/schemas/ScanResponseContent"
+                }
+              }
+            }
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/ProvisionedThroughputExceededExceptionResponseContent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/RequestLimitExceededResponseContent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/ResourceNotFoundExceptionResponseContent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/ThrottlingExceptionResponseContent"
+                    }
+                  ]
+                }
+              },
+              "application/x-amz-json-1.0": {
+                "schema": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/ProvisionedThroughputExceededExceptionResponseContent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/RequestLimitExceededResponseContent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/ResourceNotFoundExceptionResponseContent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/ThrottlingExceptionResponseContent"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "421": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InvalidEndpointExceptionResponseContent"
+                }
+              },
+              "application/x-amz-json-1.0": {
+                "schema": {
+                  "$ref": "#/components/schemas/InvalidEndpointExceptionResponseContent"
+                }
+              }
+            }
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InternalServerErrorResponseContent"
+                }
+              },
+              "application/x-amz-json-1.0": {
+                "schema": {
+                  "$ref": "#/components/schemas/InternalServerErrorResponseContent"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "security": [
+    {
+      "aws.auth.sigv4": []
+    }
+  ],
+  "servers": [
+    {
+      "url": "https://dynamodb.{region}.amazonaws.com",
+      "variables": {
+        "region": {
+          "default": "us-east-1"
+        }
+      }
+    }
+  ],
+  "x-amz-json": {
+    "endpointPrefix": "dynamodb",
+    "targetPrefix": "DynamoDB_20120810",
+    "version": "1.0"
+  }
+}
