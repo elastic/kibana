@@ -10,6 +10,7 @@ import type { ESQLAstExpression } from '@elastic/esql/types';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { ESQLSearchResponse } from '@kbn/es-types';
+import { withTimeRange } from '@kbn/nightshift-shared';
 import {
   PROBE_STATUSES,
   baselineObservationSchema,
@@ -211,18 +212,11 @@ export const applyTimeRange = ({
   query: ComposerQuery;
   from?: string;
   to?: string;
-}): ComposerQuery => {
-  let timeRangeQuery = query;
-  if (from !== undefined) {
-    const fromIso = resolveTimeBound(from);
-    timeRangeQuery = timeRangeQuery.where`@timestamp >= TO_DATETIME(${{ fromIso }})`;
-  }
-  if (to !== undefined) {
-    const toIso = resolveTimeBound(to, { roundUp: true });
-    timeRangeQuery = timeRangeQuery.where`@timestamp <= TO_DATETIME(${{ toIso }})`;
-  }
-  return timeRangeQuery;
-};
+}): ComposerQuery =>
+  withTimeRange(query, {
+    from: from ? resolveTimeBound(from) : undefined,
+    to: to ? resolveTimeBound(to, { roundUp: true }) : undefined,
+  });
 
 /**
  * Keeps entities whose lifetime overlaps `[from, to]`: created on or before `to`, and either still
@@ -565,20 +559,6 @@ export const runFindSkippedDetectionIds = async ({
  */
 export const latestSourceFrom = (index: string, space: string): ComposerQuery =>
   esql.from([index], ['_id', '_source']).where`\`kibana.space_ids\` == ${space}`;
-
-export const withTimeRange = (
-  query: ComposerQuery,
-  options: CommonSearchOptions
-): ComposerQuery => {
-  let next = query;
-  if (options.from !== undefined) {
-    next = next.where`@timestamp >= TO_DATETIME(${esql.str(options.from)})`;
-  }
-  if (options.to !== undefined) {
-    next = next.where`@timestamp <= TO_DATETIME(${esql.str(options.to)})`;
-  }
-  return next;
-};
 
 export const withWhere = (
   query: ComposerQuery,

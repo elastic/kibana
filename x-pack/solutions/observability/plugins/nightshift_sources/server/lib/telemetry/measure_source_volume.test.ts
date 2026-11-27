@@ -11,10 +11,17 @@ import { createEsResponseError } from '../es_errors.mock';
 import { measureSourceVolume } from './measure_source_volume';
 
 const window = { start: '2026-11-03T00:00:00.000Z', end: '2026-11-04T00:00:00.000Z' };
+const inWindow = `WHERE @timestamp >= TO_DATETIME("${window.start}") | WHERE @timestamp <= TO_DATETIME("${window.end}")`;
+const averageJsonBytes = 'STATS average_json_bytes = AVG(BYTE_LENGTH(JSON_EXTRACT(_source, "$")))';
 
 const countOf = (docCount: number) => ({
   columns: [{ name: 'doc_count', type: 'long' }],
   values: [[docCount]],
+});
+
+const jsonAverageOf = (bytes: number) => ({
+  columns: [{ name: 'average_json_bytes', type: 'double' }],
+  values: [[bytes]],
 });
 
 const crossCluster = (
@@ -66,23 +73,31 @@ const setup = ({ esql = 'FROM logs-nginx-* | WHERE status >= 500', isServerless 
 describe('measureSourceVolume', () => {
   it('counts the window and sizes the local indices on stateful', async () => {
     const { esClient, measure } = setup();
-    esClient.esql.query.mockResolvedValue(countOf(42));
+    esClient.esql.query.mockResolvedValueOnce(countOf(42)).mockResolvedValue(jsonAverageOf(2000));
     esClient.indices.stats.mockResolvedValue(statefulStats(1000, 500_000));
 
     await expect(measure()).resolves.toEqual({
       status: 'ok',
       has_remote: false,
+      has_filter: true,
       doc_count: 42,
-      bytes_estimated: 21_000,
+      json_bytes_estimated: 84_000,
+      disk_bytes_estimated: 21_000,
     });
-    expect(esClient.esql.query).toHaveBeenCalledWith(
+    expect(esClient.esql.query).toHaveBeenNthCalledWith(
+      1,
       {
-        query:
-          'FROM logs-nginx-* | WHERE status >= 500\n' +
-          `| WHERE @timestamp >= "${window.start}" AND @timestamp <= "${window.end}"\n` +
-          '| STATS doc_count = COUNT(*)',
+        query: `FROM logs-nginx-* | WHERE status >= 500 | ${inWindow} | STATS doc_count = COUNT(*)`,
         format: 'json',
         include_ccs_metadata: true,
+      },
+      expect.objectContaining({ requestTimeout: expect.any(Number) })
+    );
+    expect(esClient.esql.query).toHaveBeenNthCalledWith(
+      2,
+      {
+        query: `FROM logs-nginx-* METADATA _source | WHERE status >= 500 | ${inWindow} | ${averageJsonBytes}`,
+        format: 'json',
       },
       expect.objectContaining({ requestTimeout: expect.any(Number) })
     );
@@ -94,22 +109,83 @@ describe('measureSourceVolume', () => {
     );
   });
 
+  it('samples the JSON size of a remote-only source, which has no on-disk estimate', async () => {
+    const { esClient, measure } = setup({ esql: 'FROM remote:logs-* METADATA _id, _source' });
+    esClient.esql.query
+      .mockResolvedValueOnce(countOf(40_000_000))
+      .mockResolvedValue(jsonAverageOf(1500.4));
+
+    await expect(measure()).resolves.toEqual({
+      status: 'ok',
+      has_remote: true,
+      has_filter: false,
+      doc_count: 40_000_000,
+      json_bytes_estimated: 60_016_000_000,
+    });
+    expect(esClient.esql.query).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        query: `FROM remote:logs-* METADATA _id, _source | ${inWindow} | SAMPLE 0.00025 | ${averageJsonBytes}`,
+      }),
+      expect.anything()
+    );
+    expect(esClient.indices.stats).not.toHaveBeenCalled();
+  });
+
+  it('drops the JSON estimate when the JSON size query fails', async () => {
+    const { esClient, logger, measure } = setup();
+    esClient.esql.query
+      .mockResolvedValueOnce(countOf(42))
+      .mockRejectedValue(createEsResponseError(400, 'verification_exception', ''));
+    esClient.indices.stats.mockResolvedValue(statefulStats(1000, 500_000));
+
+    await expect(measure()).resolves.toEqual({
+      status: 'ok',
+      has_remote: false,
+      has_filter: true,
+      doc_count: 42,
+      disk_bytes_estimated: 21_000,
+    });
+    expect(esClient.esql.query).toHaveBeenCalledTimes(2);
+    expect(logger.warn).toHaveBeenCalledTimes(1);
+  });
+
+  it('keeps the commands it appends out of a trailing comment of the source', async () => {
+    const { esClient, measure } = setup({ esql: 'FROM logs-nginx-* // every nginx log' });
+    esClient.esql.query.mockResolvedValueOnce(countOf(42)).mockResolvedValue(jsonAverageOf(2000));
+
+    await measure();
+
+    expect(esClient.esql.query).toHaveBeenNthCalledWith(
+      1,
+      expect.objectContaining({
+        query: `FROM logs-nginx-* | ${inWindow} | STATS doc_count = COUNT(*)`,
+      }),
+      expect.anything()
+    );
+  });
+
   it('counts TS sources through FROM without including standard indices', async () => {
     const { esClient, measure } = setup({
       esql: 'TS metrics-_index_mode-* METADATA _id | WHERE host.name == "a"',
     });
-    esClient.esql.query.mockResolvedValue(countOf(42));
+    esClient.esql.query.mockResolvedValueOnce(countOf(42)).mockResolvedValue(jsonAverageOf(2000));
     esClient.indices.stats.mockResolvedValue(statefulStats(1000, 500_000));
 
     await expect(measure()).resolves.toMatchObject({ doc_count: 42 });
     expect(esClient.esql.query).toHaveBeenCalledWith(
       expect.objectContaining({
         query:
-          'FROM metrics-_index_mode-* METADATA _id, _index_mode\n' +
-          '| WHERE `_index_mode` == "time_series"\n' +
-          '| WHERE host.name == "a"\n' +
-          `| WHERE @timestamp >= "${window.start}" AND @timestamp <= "${window.end}"\n` +
-          '| STATS doc_count = COUNT(*)',
+          'FROM metrics-_index_mode-* METADATA _id, _index_mode | WHERE host.name == "a" ' +
+          `| WHERE _index_mode == "time_series" | ${inWindow} | STATS doc_count = COUNT(*)`,
+      }),
+      expect.anything()
+    );
+    expect(esClient.esql.query).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        query: expect.stringContaining(
+          'FROM metrics-_index_mode-* METADATA _id, _source, _index_mode | WHERE host.name == "a" ' +
+            '| WHERE _index_mode == "time_series" |'
+        ),
       }),
       expect.anything()
     );
@@ -120,7 +196,7 @@ describe('measureSourceVolume', () => {
       esql: 'FROM <logs-{now/d}>,-logs-archive-*',
       isServerless: true,
     });
-    esClient.esql.query.mockResolvedValue(countOf(42));
+    esClient.esql.query.mockResolvedValueOnce(countOf(42)).mockResolvedValue(jsonAverageOf(2000));
     meteringEsClient.transport.request.mockResolvedValue({
       indices: [
         { num_docs: 10, size_in_bytes: 1000 },
@@ -128,7 +204,14 @@ describe('measureSourceVolume', () => {
       ],
     });
 
-    await expect(measure()).resolves.toMatchObject({ doc_count: 42, bytes_estimated: 8400 });
+    await expect(measure()).resolves.toEqual({
+      status: 'ok',
+      has_remote: false,
+      has_filter: false,
+      doc_count: 42,
+      json_bytes_estimated: 84_000,
+      metered_bytes_estimated: 8400,
+    });
     expect(meteringEsClient.transport.request).toHaveBeenCalledWith(
       {
         method: 'GET',
@@ -142,7 +225,7 @@ describe('measureSourceVolume', () => {
 
   it('drops the stateful estimate when any index stats shard fails', async () => {
     const { esClient, measure } = setup();
-    esClient.esql.query.mockResolvedValue(countOf(42));
+    esClient.esql.query.mockResolvedValueOnce(countOf(42)).mockResolvedValue(jsonAverageOf(2000));
     esClient.indices.stats.mockResolvedValue({
       ...statefulStats(1000, 500_000),
       _shards: { total: 2, successful: 1, failed: 1 },
@@ -151,7 +234,9 @@ describe('measureSourceVolume', () => {
     await expect(measure()).resolves.toEqual({
       status: 'ok',
       has_remote: false,
+      has_filter: true,
       doc_count: 42,
+      json_bytes_estimated: 84_000,
     });
     expect(esClient.indices.stats).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -170,6 +255,7 @@ describe('measureSourceVolume', () => {
     await expect(measure()).resolves.toEqual({
       status: 'error',
       has_remote: false,
+      has_filter: true,
       error: 'verification_exception',
     });
     expect(esClient.indices.stats).not.toHaveBeenCalled();
@@ -182,46 +268,81 @@ describe('measureSourceVolume', () => {
     await expect(measure()).resolves.toMatchObject({ status: 'timeout', error: 'timeout' });
   });
 
-  it('keeps the count and drops the estimate when the size cannot be read', async () => {
+  it('keeps the count and drops the on-disk estimate when the size cannot be read', async () => {
+    const withoutDisk = {
+      status: 'ok',
+      has_remote: false,
+      has_filter: true,
+      doc_count: 42,
+      json_bytes_estimated: 84_000,
+    };
     const { esClient, logger, measure } = setup();
-    esClient.esql.query.mockResolvedValue(countOf(42));
+    esClient.esql.query.mockResolvedValueOnce(countOf(42)).mockResolvedValue(jsonAverageOf(2000));
     esClient.indices.stats.mockRejectedValue(
       createEsResponseError(404, 'index_not_found_exception', 'no such index')
     );
-    await expect(measure()).resolves.toEqual({ status: 'ok', has_remote: false, doc_count: 42 });
+    await expect(measure()).resolves.toEqual(withoutDisk);
     expect(logger.warn).not.toHaveBeenCalled();
 
+    esClient.esql.query.mockResolvedValueOnce(countOf(42));
     esClient.indices.stats.mockRejectedValue(createEsResponseError(403, 'security_exception', ''));
-    await expect(measure()).resolves.toEqual({ status: 'ok', has_remote: false, doc_count: 42 });
+    await expect(measure()).resolves.toEqual(withoutDisk);
     expect(logger.warn).toHaveBeenCalledTimes(1);
   });
 
-  it('skips the size read for an empty window and for remote-only sources', async () => {
-    const empty = setup();
-    empty.esClient.esql.query.mockResolvedValue(countOf(0));
-    await expect(empty.measure()).resolves.toMatchObject({ doc_count: 0, bytes_estimated: 0 });
-    expect(empty.esClient.indices.stats).not.toHaveBeenCalled();
+  it('skips the size reads for an empty window', async () => {
+    const local = setup();
+    local.esClient.esql.query.mockResolvedValue(countOf(0));
+    await expect(local.measure()).resolves.toMatchObject({
+      doc_count: 0,
+      json_bytes_estimated: 0,
+      disk_bytes_estimated: 0,
+    });
+    expect(local.esClient.esql.query).toHaveBeenCalledTimes(1);
+    expect(local.esClient.indices.stats).not.toHaveBeenCalled();
 
     const remote = setup({ esql: 'FROM remote:logs-*' });
-    remote.esClient.esql.query.mockResolvedValue(countOf(7));
+    remote.esClient.esql.query.mockResolvedValue(countOf(0));
     await expect(remote.measure()).resolves.toEqual({
       status: 'ok',
       has_remote: true,
-      doc_count: 7,
+      has_filter: false,
+      doc_count: 0,
+      json_bytes_estimated: 0,
     });
-    expect(remote.esClient.indices.stats).not.toHaveBeenCalled();
   });
 
-  it('reports a partial result with the count as a lower bound and no size estimate', async () => {
-    const { esClient, measure } = setup({ esql: 'FROM remote:logs-*' });
-    esClient.esql.query.mockResolvedValue(crossCluster(100, { total: 62, skipped: 1 }, true));
+  it('sizes a partial result from its lower-bound count', async () => {
+    const { esClient, measure } = setup({ esql: 'FROM logs-*,remote:logs-*' });
+    esClient.esql.query
+      .mockResolvedValueOnce(crossCluster(100, { total: 62, skipped: 1 }, true))
+      .mockResolvedValue(jsonAverageOf(2000));
+    esClient.indices.stats.mockResolvedValue(statefulStats(1000, 500_000));
 
     await expect(measure()).resolves.toEqual({
       status: 'partial',
       has_remote: true,
+      has_filter: false,
       doc_count: 100,
+      json_bytes_estimated: 200_000,
+      disk_bytes_estimated: 50_000,
       clusters_total: 62,
       clusters_unsuccessful: 1,
     });
+  });
+
+  it('omits the sizes when an incomplete query returns no rows', async () => {
+    const { esClient, measure } = setup({ esql: 'FROM remote:logs-*' });
+    esClient.esql.query.mockResolvedValue(crossCluster(undefined, { total: 1, skipped: 1 }, true));
+
+    await expect(measure()).resolves.toEqual({
+      status: 'partial',
+      has_remote: true,
+      has_filter: false,
+      doc_count: 0,
+      clusters_total: 1,
+      clusters_unsuccessful: 1,
+    });
+    expect(esClient.esql.query).toHaveBeenCalledTimes(1);
   });
 });

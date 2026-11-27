@@ -6,15 +6,25 @@
  */
 
 import { errors } from '@elastic/elasticsearch';
-import { BasicPrettyPrinter, Parser } from '@elastic/esql';
-import type { ESQLAstItem, ESQLCommandOption } from '@elastic/esql/types';
+import { esql, mutate, type ComposerQuery } from '@elastic/esql';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-import { isResponseError, type ElasticsearchErrorDetails } from '@kbn/es-errors';
-import { getSourceLocalIndexExpressions, getSourceReadTargets } from '@kbn/nightshift-shared';
+import {
+  isRequestAbortedError,
+  isResponseError,
+  type ElasticsearchErrorDetails,
+} from '@kbn/es-errors';
+import {
+  getSourceLocalIndexExpressions,
+  getSourceReadTargets,
+  toFromSourceQuery,
+  withTimeRange,
+} from '@kbn/nightshift-shared';
 import type { SourceVolume } from './source_volume_event';
 
-const COUNT_TIMEOUT_MS = 60_000;
+const QUERY_TIMEOUT_MS = 60_000;
 const INDEX_MODE_FIELD = '_index_mode';
+const SOURCE_FIELD = '_source';
+const JSON_SAMPLE_SIZE = 10_000;
 
 export interface MeasurementWindow {
   start: string;
@@ -25,37 +35,50 @@ interface MeteringStatsResponse {
   indices?: Array<{ num_docs: number; size_in_bytes: number }>;
 }
 
-const isMetadataOption = (argument: ESQLAstItem): argument is ESQLCommandOption =>
-  !Array.isArray(argument) && argument.type === 'option' && argument.name === 'metadata';
-
-const buildCountSourceQuery = (esql: string): string => {
-  const { root } = Parser.parse(esql);
-  const [sourceCommand, ...processingCommands] = root.commands;
-  if (sourceCommand?.name !== 'ts') {
-    return esql;
+const buildSourceQuery = (
+  sourceEsql: string,
+  metadataFields: readonly string[] = []
+): ComposerQuery => {
+  const source = esql(sourceEsql);
+  const isTimeSeries = source.ast.commands[0]?.name === 'ts';
+  // STATS COUNT(*) and METADATA _source need FROM, which also reads the indices TS leaves out.
+  const query = isTimeSeries ? esql(toFromSourceQuery(sourceEsql)) : source;
+  for (const field of [...metadataFields, ...(isTimeSeries ? [INDEX_MODE_FIELD] : [])]) {
+    mutate.commands.from.metadata.upsert(query.ast, field);
   }
-
-  const source = BasicPrettyPrinter.command(sourceCommand).replace(/^TS(?=\s)/, 'FROM');
-  const metadata = sourceCommand.args.find(isMetadataOption);
-  const hasIndexModeMetadata =
-    metadata?.args.some(
-      (argument) =>
-        !Array.isArray(argument) && argument.type === 'column' && argument.name === INDEX_MODE_FIELD
-    ) ?? false;
-  const metadataSeparator = metadata ? ', ' : ' METADATA ';
-  const from = hasIndexModeMetadata ? source : `${source}${metadataSeparator}${INDEX_MODE_FIELD}`;
-  return [
-    from,
-    `| WHERE \`${INDEX_MODE_FIELD}\` == "time_series"`,
-    ...processingCommands.map((command) => `| ${BasicPrettyPrinter.command(command)}`),
-  ].join('\n');
+  return isTimeSeries
+    ? query.where`${esql.col(INDEX_MODE_FIELD)} == ${esql.str('time_series')}`
+    : query;
 };
 
-// Inline for pushdown; newlines prevent trailing comments from swallowing appended commands.
-const buildCountQuery = (esql: string, { start, end }: MeasurementWindow): string =>
-  `${buildCountSourceQuery(
-    esql
-  )}\n| WHERE @timestamp >= "${start}" AND @timestamp <= "${end}"\n| STATS doc_count = COUNT(*)`;
+const withinWindow = (query: ComposerQuery, { start, end }: MeasurementWindow): ComposerQuery =>
+  withTimeRange(query, { from: start, to: end });
+
+const print = (query: ComposerQuery): string => query.inlineParams().print('basic');
+
+const buildCountQuery = (sourceEsql: string, window: MeasurementWindow): string =>
+  print(withinWindow(buildSourceQuery(sourceEsql), window).pipe`STATS doc_count = COUNT(*)`);
+
+// A random sample: LIMIT alone reads in storage order, which skews towards a few indices.
+const buildJsonSizeQuery = ({
+  sourceEsql,
+  window,
+  docCount,
+}: {
+  sourceEsql: string;
+  window: MeasurementWindow;
+  docCount: number;
+}): string => {
+  const probability = JSON_SAMPLE_SIZE / docCount;
+  const matched = withinWindow(buildSourceQuery(sourceEsql, [SOURCE_FIELD]), window);
+  // SAMPLE rejects a probability of 1.
+  const sampled = probability < 1 ? matched.sample(probability) : matched;
+  return print(
+    sampled.pipe`STATS average_json_bytes = AVG(BYTE_LENGTH(JSON_EXTRACT(${esql.col(
+      SOURCE_FIELD
+    )}, "$")))`
+  );
+};
 
 const esErrorType = (error: errors.ResponseError): string | undefined =>
   (error.body as ElasticsearchErrorDetails | undefined)?.error?.type;
@@ -63,18 +86,23 @@ const esErrorType = (error: errors.ResponseError): string | undefined =>
 const isIndexNotFound = (error: unknown): boolean =>
   isResponseError(error) && esErrorType(error) === 'index_not_found_exception';
 
-const toFailure = (error: unknown, hasRemote: boolean): SourceVolume => {
-  if (error instanceof errors.TimeoutError || error instanceof errors.RequestAbortedError) {
-    return { status: 'timeout', has_remote: hasRemote, error: 'timeout' };
+const isTimeout = (error: unknown): boolean =>
+  error instanceof errors.TimeoutError || isRequestAbortedError(error);
+
+type SourceTraits = Pick<SourceVolume, 'has_remote' | 'has_filter'>;
+
+const toFailure = (error: unknown, traits: SourceTraits): SourceVolume => {
+  if (isTimeout(error)) {
+    return { status: 'timeout', ...traits, error: 'timeout' };
   }
   if (isResponseError(error)) {
     return {
       status: 'error',
-      has_remote: hasRemote,
+      ...traits,
       error: esErrorType(error) ?? `http_${error.statusCode}`,
     };
   }
-  return { status: 'error', has_remote: hasRemote, error: 'unknown' };
+  return { status: 'error', ...traits, error: 'unknown' };
 };
 
 interface DocumentCount {
@@ -85,12 +113,12 @@ interface DocumentCount {
 
 const countDocuments = async ({
   esClient,
-  esql,
+  sourceEsql,
   window,
   signal,
 }: {
   esClient: ElasticsearchClient;
-  esql: string;
+  sourceEsql: string;
   window: MeasurementWindow;
   signal: AbortSignal;
 }): Promise<DocumentCount> => {
@@ -100,11 +128,11 @@ const countDocuments = async ({
     _clusters: clusterInfo,
   } = await esClient.esql.query(
     {
-      query: buildCountQuery(esql, window),
+      query: buildCountQuery(sourceEsql, window),
       format: 'json',
       include_ccs_metadata: true,
     },
-    { signal, requestTimeout: COUNT_TIMEOUT_MS }
+    { signal, requestTimeout: QUERY_TIMEOUT_MS }
   );
   // Every cluster skipped yields no rows, which must not read as an empty window.
   const clusters = clusterInfo && {
@@ -114,7 +142,29 @@ const countDocuments = async ({
   return { docCount: Number(values[0]?.[0] ?? 0), isPartial, clusters };
 };
 
-const averageDocumentBytes = async ({
+const averageJsonDocumentBytes = async ({
+  esClient,
+  sourceEsql,
+  window,
+  docCount,
+  signal,
+}: {
+  esClient: ElasticsearchClient;
+  sourceEsql: string;
+  window: MeasurementWindow;
+  docCount: number;
+  signal: AbortSignal;
+}): Promise<number | undefined> => {
+  const { values } = await esClient.esql.query(
+    { query: buildJsonSizeQuery({ sourceEsql, window, docCount }), format: 'json' },
+    { signal, requestTimeout: QUERY_TIMEOUT_MS }
+  );
+  const average = values[0]?.[0];
+  return typeof average === 'number' ? average : undefined;
+};
+
+// The size APIs take no filter or time range: the average covers every document of the indices.
+const averageStoredDocumentBytes = async ({
   esClient,
   indexPatterns,
   isServerless,
@@ -127,6 +177,7 @@ const averageDocumentBytes = async ({
 }): Promise<number | undefined> => {
   try {
     if (isServerless) {
+      // Not a disk size: on Observability projects this is the metered size of the field values.
       const { indices = [] } = await esClient.transport.request<MeteringStatsResponse>(
         {
           method: 'GET',
@@ -165,11 +216,11 @@ const averageDocumentBytes = async ({
   }
 };
 
-/** Never throws: a failed count is reported in `status`; a failed size read drops `bytes_estimated`. */
+/** Never throws: a failed count is reported in `status`; a failed size read drops its estimate. */
 export const measureSourceVolume = async ({
   esClient,
   meteringEsClient,
-  esql,
+  esql: sourceEsql,
   isServerless,
   window,
   signal,
@@ -184,52 +235,72 @@ export const measureSourceVolume = async ({
   logger: Logger;
 }): Promise<SourceVolume> => {
   let indexPatterns: string[];
-  let hasRemote: boolean;
+  let traits: SourceTraits;
   try {
-    indexPatterns = getSourceLocalIndexExpressions(esql);
-    ({ hasRemote } = getSourceReadTargets(esql));
+    indexPatterns = getSourceLocalIndexExpressions(sourceEsql);
+    traits = {
+      has_remote: getSourceReadTargets(sourceEsql).hasRemote,
+      has_filter: esql(sourceEsql)
+        .ast.commands.slice(1)
+        .some(({ name }) => name === 'where'),
+    };
   } catch {
-    return { status: 'error', has_remote: false, error: 'invalid_query' };
+    return { status: 'error', has_remote: false, has_filter: false, error: 'invalid_query' };
   }
 
   let count: DocumentCount;
   try {
-    count = await countDocuments({ esClient, esql, window, signal });
+    count = await countDocuments({ esClient, sourceEsql, window, signal });
   } catch (error) {
-    return toFailure(error, hasRemote);
+    return toFailure(error, traits);
   }
 
   const { docCount, isPartial, clusters } = count;
   const isIncomplete = isPartial || (clusters?.unsuccessful ?? 0) > 0;
   const volume: SourceVolume = {
     status: isIncomplete ? 'partial' : 'ok',
-    has_remote: hasRemote,
+    ...traits,
     doc_count: docCount,
     ...(clusters && {
       clusters_total: clusters.total,
       clusters_unsuccessful: clusters.unsuccessful,
     }),
   };
-  // A lower-bound count would make the extrapolated size misleading.
-  if (isIncomplete || indexPatterns.length === 0) {
+  const hasLocalIndex = indexPatterns.length > 0;
+  const storedBytesField = isServerless ? 'metered_bytes_estimated' : 'disk_bytes_estimated';
+  if (docCount === 0) {
+    if (isIncomplete) {
+      return volume;
+    }
+    volume.json_bytes_estimated = 0;
+    if (hasLocalIndex) {
+      volume[storedBytesField] = 0;
+    }
     return volume;
   }
-  if (docCount === 0) {
-    return { ...volume, bytes_estimated: 0 };
-  }
 
-  try {
-    const averageBytes = await averageDocumentBytes({
-      esClient: isServerless ? meteringEsClient : esClient,
-      indexPatterns,
-      isServerless,
-      signal,
-    });
-    if (averageBytes !== undefined) {
-      volume.bytes_estimated = Math.round(averageBytes * docCount);
-    }
-  } catch (error) {
-    logger.warn(`Could not read the index size behind a source: ${error.message}`);
+  const [averageJsonBytes, averageStoredBytes] = await Promise.all([
+    averageJsonDocumentBytes({ esClient, sourceEsql, window, docCount, signal }).catch((error) => {
+      logger.warn(`Could not sample the document size of a source: ${error.message}`);
+      return undefined;
+    }),
+    hasLocalIndex
+      ? averageStoredDocumentBytes({
+          esClient: isServerless ? meteringEsClient : esClient,
+          indexPatterns,
+          isServerless,
+          signal,
+        }).catch((error) => {
+          logger.warn(`Could not read the index size behind a source: ${error.message}`);
+          return undefined;
+        })
+      : undefined,
+  ]);
+  if (averageJsonBytes) {
+    volume.json_bytes_estimated = Math.round(averageJsonBytes * docCount);
+  }
+  if (averageStoredBytes) {
+    volume[storedBytesField] = Math.round(averageStoredBytes * docCount);
   }
   return volume;
 };

@@ -68,7 +68,14 @@ const setup = (sources: Array<SavedObjectsFindResult<NightshiftSourceAttributes>
   };
 };
 
-const ok = { status: 'ok' as const, has_remote: false, doc_count: 1, bytes_estimated: 10 };
+const ok = {
+  status: 'ok' as const,
+  has_remote: false,
+  has_filter: false,
+  doc_count: 1,
+  json_bytes_estimated: 40,
+  disk_bytes_estimated: 10,
+};
 
 describe('reportSourceVolumes', () => {
   beforeEach(() => {
@@ -83,7 +90,12 @@ describe('reportSourceVolumes', () => {
     ]);
     measure.mockImplementation(async ({ esql }) =>
       esql === 'FROM logs-b-*'
-        ? { status: 'error', has_remote: false, error: 'verification_exception' }
+        ? {
+            status: 'error',
+            has_remote: false,
+            has_filter: false,
+            error: 'verification_exception',
+          }
         : ok
     );
 
@@ -115,6 +127,7 @@ describe('reportSourceVolumes', () => {
           enabled: true,
           status: 'error',
           has_remote: false,
+          has_filter: false,
           error: 'verification_exception',
         },
         {
