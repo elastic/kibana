@@ -73,12 +73,16 @@ describe('RuleCreateSearch', () => {
     expect(screen.getByTestId('ruleCreateSearchItem-classic-es-query')).toBeInTheDocument();
   });
 
-  it('reports the trimmed query after the debounce', async () => {
-    renderSearch();
+  it('reports the trimmed query immediately as the user types and resets on unmount', async () => {
+    const { unmount } = renderSearch();
 
     await typeQuery('  cpu  ');
 
-    await waitFor(() => expect(onQueryChange).toHaveBeenLastCalledWith('cpu'));
+    expect(onQueryChange).toHaveBeenLastCalledWith('cpu');
+
+    unmount();
+
+    expect(onQueryChange).toHaveBeenLastCalledWith('');
   });
 
   it('calls the item onSelect and closes the dropdown when an item is clicked', async () => {

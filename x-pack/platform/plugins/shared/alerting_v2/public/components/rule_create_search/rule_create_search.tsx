@@ -24,13 +24,10 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import { useDebouncedValue } from '@kbn/react-hooks';
 import { AiButtonEmpty } from '@kbn/ui-ai-components';
 import { getSearchOptions } from './get_search_options';
 import type { RuleCreateSearchOption, RuleCreateSearchOptionData } from './get_search_options';
 import type { RuleCreateSearchSections } from './types';
-
-const SEARCH_DEBOUNCE_MS = 300;
 
 const SEARCH_LABEL = i18n.translate('xpack.alertingV2.ruleCreateSearch.searchLabel', {
   defaultMessage: 'What do you want to measure?',
@@ -57,9 +54,9 @@ const LOADING_LABEL = i18n.translate('xpack.alertingV2.ruleCreateSearch.sectionL
 });
 
 export interface RuleCreateSearchProps {
-  /** Section results for the current debounced query. */
+  /** Section results for the current query. */
   sections: RuleCreateSearchSections;
-  /** Called with the debounced, trimmed query. */
+  /** Called with the trimmed query as the user types (and with `''` on unmount). */
   onQueryChange: (query: string) => void;
   /** Sends the typed text to the agent. Omit to make the input search only. */
   onSendToAgent?: (text: string) => void;
@@ -79,12 +76,9 @@ export const RuleCreateSearch = ({
   const agentHintId = useGeneratedHtmlId({ prefix: 'ruleCreateSearchAgentHint' });
 
   const trimmedValue = value.trim();
-  const debouncedQuery = useDebouncedValue(trimmedValue, SEARCH_DEBOUNCE_MS);
   const isOpen = trimmedValue !== '' && !isDismissed;
 
-  useEffect(() => {
-    onQueryChange(debouncedQuery);
-  }, [debouncedQuery, onQueryChange]);
+  useEffect(() => () => onQueryChange(''), [onQueryChange]);
 
   const groupLabelCss = css`
     display: flex;
@@ -131,6 +125,7 @@ export const RuleCreateSearch = ({
   const handleSearchChange = (searchValue: string) => {
     setValue(searchValue);
     setIsDismissed(false);
+    onQueryChange(searchValue.trim());
   };
 
   const handleSearchKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
