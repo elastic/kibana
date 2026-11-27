@@ -34,6 +34,8 @@ import type {
 } from '../saved_objects/secret_saved_object';
 
 const LIST_PER_PAGE = 100;
+/** Bounds the work of a list, as connectors do. A space is not expected to come close. */
+const MAX_LISTED_SECRETS = 10_000;
 
 export interface CreateSavedObjectsSecretsStorageParams {
   readonly spaceId: string;
@@ -114,11 +116,14 @@ export const createSavedObjectsSecretsStorage = ({
         for await (const { saved_objects: page } of finder.find()) {
           // A read that does not decrypt never returns the encrypted `value`.
           secrets.push(...page.map(({ attributes }) => attributes));
+          if (secrets.length >= MAX_LISTED_SECRETS) {
+            break;
+          }
         }
       } finally {
         await finder.close();
       }
-      return secrets;
+      return secrets.slice(0, MAX_LISTED_SECRETS);
     },
 
     get: async ({ name }) => {

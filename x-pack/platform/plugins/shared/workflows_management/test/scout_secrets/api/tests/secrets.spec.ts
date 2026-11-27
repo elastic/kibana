@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ApiClientFixture } from '@kbn/scout';
+import type { ApiClientFixture, ApiServicesFixture } from '@kbn/scout';
 import { apiTest, getPlaywrightTagsFor } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 
@@ -17,8 +17,7 @@ const NEW_VALUE = 'another-long-secret-value';
 const DEFAULT_SPACE = 'default';
 // Unique to this run, so that leftovers of an interrupted run never collide with it.
 const RUN_ID = Math.random().toString(36).slice(2, 8);
-const OTHER_SPACE = `secrets_other_space_${RUN_ID}`;
-/** A secret name unique to this run. */
+/** A secret name or space id unique to this run. */
 const unique = (name: string) => `${name}_${RUN_ID}`;
 const MANAGE_SECRETS_ACTION = 'api:workflowsManagement:secrets:manage';
 
@@ -28,8 +27,28 @@ const workflowsRole = (privileges: readonly string[], spaces: readonly string[] 
   kibana: [{ base: [], feature: { workflowsManagement: [...privileges] }, spaces: [...spaces] }],
 });
 
-/** The secrets this suite created, so that teardown deletes only those. */
-const createdSecrets: Array<{ spaceId: string; name: string }> = [];
+/** The secrets this suite may have created, so that teardown deletes only those. */
+const createdSecrets = new Set<{ spaceId: string; name: string }>();
+
+/** The spaces this suite may have created, so that teardown deletes only those. */
+const createdSpaces = new Set<string>();
+
+/**
+ * Creates a space unique to this run. Only the tests that need a second space create one, so
+ * that a failure here does not stop the others.
+ */
+const createSpace = async ({
+  apiServices,
+  name,
+}: {
+  apiServices: ApiServicesFixture;
+  name: string;
+}): Promise<string> => {
+  const id = unique(name);
+  createdSpaces.add(id);
+  await apiServices.spaces.create({ id });
+  return id;
+};
 
 /** Calls the secrets routes of one space with the cookie of one user. */
 const secretsRoutes = (
@@ -44,9 +63,13 @@ const secretsRoutes = (
   return {
     list: () => apiClient.get(path, { headers, responseType: 'json' }),
     create: async (body: Record<string, string>) => {
+      // Tracked before sending, so that teardown deletes the secret even if the response is lost.
+      const secret = { spaceId, name: body.name };
+      createdSecrets.add(secret);
       const response = await apiClient.post(path, { headers, body, responseType: 'json' });
-      if (response.statusCode === 201) {
-        createdSecrets.push({ spaceId, name: body.name });
+      // A refused request stores nothing.
+      if (response.statusCode >= 400 && response.statusCode < 500) {
+        createdSecrets.delete(secret);
       }
       return response;
     },
@@ -61,6 +84,24 @@ const secretsRoutes = (
 const namesIn = (response: { statusCode: number; body: { secrets: Array<{ name: string }> } }) => {
   expect(response).toHaveStatusCode(200);
   return response.body.secrets.map(({ name }) => name);
+};
+
+/** The user profile id of the user signed in with this cookie. */
+const profileIdOf = async ({
+  apiClient,
+  cookieHeader,
+}: {
+  apiClient: ApiClientFixture;
+  cookieHeader: Record<string, string>;
+}): Promise<string> => {
+  const me = await apiClient.get('internal/security/me', {
+    headers: { ...INTERNAL_HEADERS, ...cookieHeader },
+    responseType: 'json',
+  });
+  expect(me).toHaveStatusCode(200);
+  const { profile_uid: profileId } = me.body;
+  expect(typeof profileId).toBe('string');
+  return profileId;
 };
 
 /** The names of the secrets a list response shows, none when the list was refused. */
@@ -105,10 +146,6 @@ const USERS = [
 const LOCAL_STATEFUL_CLASSIC = getPlaywrightTagsFor('stateful', 'classic', 'local');
 
 apiTest.describe('Workflow secrets routes', { tag: LOCAL_STATEFUL_CLASSIC }, () => {
-  apiTest.beforeAll(async ({ apiServices }) => {
-    await apiServices.spaces.create({ id: OTHER_SPACE });
-  });
-
   apiTest.afterAll(async ({ apiClient, apiServices, samlAuth }) => {
     const { cookieHeader } = await samlAuth.asInteractiveUser('admin');
     const failures: string[] = [];
@@ -124,7 +161,13 @@ apiTest.describe('Workflow secrets routes', { tag: LOCAL_STATEFUL_CLASSIC }, () 
         failures.push(`${spaceId}/${name}: ${String(error)}`);
       }
     }
-    await apiServices.spaces.delete(OTHER_SPACE);
+    for (const id of createdSpaces) {
+      try {
+        await apiServices.spaces.delete(id);
+      } catch (error) {
+        failures.push(`space ${id}: ${String(error)}`);
+      }
+    }
     // Checked last, so that one failed deletion does not keep the others from running.
     expect(failures).toStrictEqual([]);
   });
@@ -171,42 +214,56 @@ apiTest.describe('Workflow secrets routes', { tag: LOCAL_STATEFUL_CLASSIC }, () 
 
   apiTest(
     'a user who manages secrets in one space cannot list or change them in another',
-    async ({ apiClient, samlAuth }) => {
+    async ({ apiClient, apiServices, samlAuth }) => {
+      const spaceId = await createSpace({ apiServices, name: 'secrets_role_space' });
       const existing = unique('other_space_existing');
-      const admin = await samlAuth.asInteractiveUser('admin');
+      const description = 'Seeded by an admin';
+      const adminRoutes = secretsRoutes(apiClient, await samlAuth.asInteractiveUser('admin'));
       expect(
-        await secretsRoutes(apiClient, admin).create({ name: existing, value: VALUE })
+        await adminRoutes.create({ name: existing, description, value: VALUE })
       ).toHaveStatusCode(201);
       const { cookieHeader } = await samlAuth.asInteractiveUser(
-        workflowsRole(['minimal_read', 'workflow_secret_manage'], [OTHER_SPACE])
+        workflowsRole(['minimal_read', 'workflow_secret_manage'], [spaceId])
       );
-      const ownSpace = secretsRoutes(apiClient, { cookieHeader, spaceId: OTHER_SPACE });
+      const ownSpace = secretsRoutes(apiClient, { cookieHeader, spaceId });
       const otherSpace = secretsRoutes(apiClient, { cookieHeader });
       const name = unique('one_space_secret');
 
       expect(await ownSpace.create({ name, value: VALUE })).toHaveStatusCode(201);
       expect(await otherSpace.list()).toHaveStatusCode(403);
       expect(await otherSpace.create({ name, value: VALUE })).toHaveStatusCode(403);
-      expect(await otherSpace.update(existing, { value: NEW_VALUE })).toHaveStatusCode(403);
+      expect(await otherSpace.update(existing, { description: 'Changed' })).toHaveStatusCode(403);
       expect(await otherSpace.remove(existing)).toHaveStatusCode(403);
+
+      // The refused writes changed nothing.
+      const listed = await adminRoutes.list();
+      expect(namesIn(listed)).not.toContain(name);
+      const seeded = listed.body.secrets.find(
+        (secret: { name: string }) => secret.name === existing
+      );
+      expect(seeded).toMatchObject({ name: existing, description });
     }
   );
 
-  apiTest('keeps a secret in the space it was created in', async ({ apiClient, samlAuth }) => {
-    const { cookieHeader } = await samlAuth.asInteractiveUser(workflowsRole(['all']));
-    const ownSpace = secretsRoutes(apiClient, { cookieHeader, spaceId: OTHER_SPACE });
-    const otherSpace = secretsRoutes(apiClient, { cookieHeader });
-    const name = unique('space_bound_secret');
+  apiTest(
+    'keeps a secret in the space it was created in',
+    async ({ apiClient, apiServices, samlAuth }) => {
+      const spaceId = await createSpace({ apiServices, name: 'secrets_bound_space' });
+      const { cookieHeader } = await samlAuth.asInteractiveUser(workflowsRole(['all']));
+      const ownSpace = secretsRoutes(apiClient, { cookieHeader, spaceId });
+      const otherSpace = secretsRoutes(apiClient, { cookieHeader });
+      const name = unique('space_bound_secret');
 
-    expect(await ownSpace.create({ name, value: VALUE })).toHaveStatusCode(201);
+      expect(await ownSpace.create({ name, value: VALUE })).toHaveStatusCode(201);
 
-    expect(namesIn(await ownSpace.list())).toContain(name);
-    expect(namesIn(await otherSpace.list())).not.toContain(name);
-    expect(await otherSpace.update(name, { value: NEW_VALUE })).toHaveStatusCode(404);
-    expect(await otherSpace.remove(name)).toHaveStatusCode(404);
-    expect(await ownSpace.update(name, { value: NEW_VALUE })).toHaveStatusCode(200);
-    expect(await ownSpace.remove(name)).toHaveStatusCode(204);
-  });
+      expect(namesIn(await ownSpace.list())).toContain(name);
+      expect(namesIn(await otherSpace.list())).not.toContain(name);
+      expect(await otherSpace.update(name, { value: NEW_VALUE })).toHaveStatusCode(404);
+      expect(await otherSpace.remove(name)).toHaveStatusCode(404);
+      expect(await ownSpace.update(name, { value: NEW_VALUE })).toHaveStatusCode(200);
+      expect(await ownSpace.remove(name)).toHaveStatusCode(204);
+    }
+  );
 
   apiTest(
     'refuses to list or create secrets in a space that does not exist',
@@ -227,23 +284,23 @@ apiTest.describe('Workflow secrets routes', { tag: LOCAL_STATEFUL_CLASSIC }, () 
   apiTest(
     'never returns a value, records the profile of who created and updated a secret, saves an update and deletes it',
     async ({ apiClient, samlAuth }) => {
-      const { cookieHeader } = await samlAuth.asInteractiveUser(workflowsRole(['all']));
-      const secrets = secretsRoutes(apiClient, { cookieHeader });
-      const me = await apiClient.get('internal/security/me', {
-        headers: { ...INTERNAL_HEADERS, ...cookieHeader },
-        responseType: 'json',
-      });
-      expect(me).toHaveStatusCode(200);
-      const { profile_uid: profileId } = me.body;
-      expect(typeof profileId).toBe('string');
+      // A worker has one custom role, so the second user has a built-in one.
+      const creator = await samlAuth.asInteractiveUser(workflowsRole(['all']));
+      const updater = await samlAuth.asInteractiveUser('admin');
+      const creatorId = await profileIdOf({ apiClient, cookieHeader: creator.cookieHeader });
+      const updaterId = await profileIdOf({ apiClient, cookieHeader: updater.cookieHeader });
+      expect(creatorId).not.toBe(updaterId);
+      const secrets = secretsRoutes(apiClient, creator);
       const name = unique('lifecycle_secret');
       const description = 'Token of the release bot';
       const newDescription = 'Token of the deploy bot';
-      const profiles = { createdBy: profileId, updatedBy: profileId };
 
       const created = await secrets.create({ name, description, value: VALUE });
       expect(created).toHaveStatusCode(201);
-      const updated = await secrets.update(name, { value: NEW_VALUE, description: newDescription });
+      const updated = await secretsRoutes(apiClient, updater).update(name, {
+        value: NEW_VALUE,
+        description: newDescription,
+      });
       expect(updated).toHaveStatusCode(200);
       const listed = await secrets.list();
       expect(listed).toHaveStatusCode(200);
@@ -251,13 +308,26 @@ apiTest.describe('Workflow secrets routes', { tag: LOCAL_STATEFUL_CLASSIC }, () 
         (secret: { name: string }) => secret.name === name
       );
 
-      expect(created.body).toMatchObject({ name, description, ...profiles });
+      expect(created.body).toMatchObject({
+        name,
+        description,
+        createdBy: creatorId,
+        updatedBy: creatorId,
+      });
       // The list reads the stored secret, so it shows that the update was saved.
       for (const secret of [updated.body, listedSecret]) {
-        expect(secret).toMatchObject({ name, description: newDescription, ...profiles });
+        expect(secret).toMatchObject({
+          name,
+          description: newDescription,
+          createdBy: creatorId,
+          updatedBy: updaterId,
+        });
       }
-      for (const secret of [created.body, updated.body, listedSecret]) {
-        expect(secret.value).toBeUndefined();
+      // No response contains a value, under any field.
+      for (const body of [created.body, updated.body, listed.body]) {
+        const text = JSON.stringify(body);
+        expect(text).not.toContain(VALUE);
+        expect(text).not.toContain(NEW_VALUE);
       }
 
       expect(await secrets.remove(name)).toHaveStatusCode(204);

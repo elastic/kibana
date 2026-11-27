@@ -24,7 +24,7 @@ export interface StoredSecretMetadata {
 
 /** Persistence for the secrets of one space. */
 export interface SecretsStorage {
-  /** Lists the secrets without their values. */
+  /** Lists the secrets without their values, at most 10,000. */
   list(): Promise<SecretMetadata[]>;
   /**
    * Returns the secret with its value, or `undefined` when no secret has this name. Throws

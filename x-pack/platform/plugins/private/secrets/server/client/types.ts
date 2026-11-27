@@ -22,6 +22,7 @@ export interface SecretEntry extends SecretMetadata {
  * Every operation throws `SecretsUnavailableError` when secrets cannot be used in this Kibana.
  */
 export interface SecretsClient {
+  /** Lists the secrets of the space without their values, at most 10,000. */
   list(): Promise<SecretMetadata[]>;
   /**
    * Throws `SecretValidationError` when the secret breaks a rule, and
