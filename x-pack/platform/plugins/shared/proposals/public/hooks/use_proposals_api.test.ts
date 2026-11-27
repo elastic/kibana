@@ -1088,6 +1088,28 @@ describe('when a proposal of a polled conversation is decided elsewhere', () => 
     expect(fetchesOfList()).toHaveLength(2);
   });
 
+  it('sends one list request per interval for 120 open cards, and no detail request', async () => {
+    const ids = Array.from({ length: 120 }, (_, index) => `p-${index + 1}`);
+    const server = Object.fromEntries(ids.map((id) => [id, { id, ...open }]));
+    const { http, fetchesOfList, Wrapper } = setup(server);
+
+    // The cards mount 100 ms apart, so their timers fire at different times within 12 s.
+    const cards = [];
+    for (const id of ids) {
+      cards.push(renderHook(() => useProposal(id), { wrapper: Wrapper }));
+      await advance(100);
+    }
+    await waitFor(() => expect(cards.every((card) => card.result.current.isSuccess)).toBe(true));
+
+    // The first card reads the list at about 15 s and 30 s. The timers of the other cards find it
+    // fresh. The extra second covers the time that each timer starts after its card mounts.
+    await advance(PENDING_CARD_POLL_INTERVAL_MS * 2 - ids.length * 100 + 1000);
+
+    expect(fetchesOfList()).toHaveLength(2);
+    const detailReads = http.get.mock.calls.filter(([url]) => url !== PROPOSALS_INTERNAL_URL);
+    expect(detailReads).toHaveLength(ids.length);
+  });
+
   it('stops polling the conversation when its only open card is decided', async () => {
     const server = { 'p-1': { id: 'p-1', ...open } };
     const { fetchesOfList, Wrapper } = setup(server);
