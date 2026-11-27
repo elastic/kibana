@@ -18,12 +18,27 @@ import {
 
 const logger = loggingSystemMock.createLogger();
 
+// The schema defaults core applies on traditional builds. The "treats the build flavor defaults
+// as unchanged" test fails if this drifts from core.
+const TRADITIONAL_DEFAULTS = {
+  font_src: [`'self'`, 'data:'],
+  img_src: ['data:', 'blob:', 'https:', 'http:'],
+  media_src: [`'self'`, 'kibana.estccdn.com'],
+};
+
+// Serverless has no default for these directives
+const SERVERLESS_DEFAULTS = { font_src: [], img_src: [], media_src: [] };
+
+type DirectiveOverrides = Partial<typeof TRADITIONAL_DEFAULTS>;
+
 describe('csp collector', () => {
   let httpMock: ReturnType<typeof httpServiceMock.createSetupContract>;
   // changed for consistency with expected implementation
   const mockedFetchContext = createCollectorFetchContextMock();
 
-  function updateCsp(config: Partial<ICspConfig>) {
+  // Builds the validated `csp.*` config the way core does on a traditional build, unless the
+  // directive defaults are overridden
+  function updateCsp(config: Partial<ICspConfig> & DirectiveOverrides) {
     httpMock.csp = new CspConfig({
       ...CspConfig.DEFAULT,
       form_action: [],
@@ -32,24 +47,23 @@ describe('csp collector', () => {
       style_src: [],
       connect_src: [],
       default_src: [],
-      font_src: [],
       frame_src: [],
-      img_src: [],
       object_src: [],
-      media_src: [],
       frame_ancestors: [],
       report_uri: [],
       report_to: [],
+      ...TRADITIONAL_DEFAULTS,
       ...config,
     });
   }
 
   beforeEach(() => {
     httpMock = httpServiceMock.createSetupContract();
+    httpMock.csp = CspConfig.forBuildFlavor('traditional');
   });
 
   test('fetches whether strict mode is enabled', async () => {
-    const collector = new Collector(logger, createCspCollector(httpMock));
+    const collector = new Collector(logger, createCspCollector(httpMock, 'traditional'));
 
     expect((await collector.fetch(mockedFetchContext)).strict).toEqual(true);
 
@@ -58,7 +72,7 @@ describe('csp collector', () => {
   });
 
   test('fetches whether the legacy browser warning is enabled', async () => {
-    const collector = new Collector(logger, createCspCollector(httpMock));
+    const collector = new Collector(logger, createCspCollector(httpMock, 'traditional'));
 
     expect((await collector.fetch(mockedFetchContext)).warnLegacyBrowsers).toEqual(true);
 
@@ -67,7 +81,7 @@ describe('csp collector', () => {
   });
 
   test("fetches whether the csp directives's rules have been changed or not", async () => {
-    const collector = new Collector(logger, createCspCollector(httpMock));
+    const collector = new Collector(logger, createCspCollector(httpMock, 'traditional'));
 
     expect((await collector.fetch(mockedFetchContext)).rulesChangedFromDefault).toEqual(false);
 
@@ -75,8 +89,26 @@ describe('csp collector', () => {
     expect((await collector.fetch(mockedFetchContext)).rulesChangedFromDefault).toEqual(true);
   });
 
+  test('treats the build flavor defaults as unchanged', async () => {
+    const traditional = new Collector(logger, createCspCollector(httpMock, 'traditional'));
+    updateCsp({});
+    expect((await traditional.fetch(mockedFetchContext)).rulesChangedFromDefault).toEqual(false);
+
+    const serverless = new Collector(logger, createCspCollector(httpMock, 'serverless'));
+    updateCsp(SERVERLESS_DEFAULTS);
+    expect((await serverless.fetch(mockedFetchContext)).rulesChangedFromDefault).toEqual(false);
+    expect((await traditional.fetch(mockedFetchContext)).rulesChangedFromDefault).toEqual(true);
+  });
+
+  test('flags a configured csp.img_src as changed from the default', async () => {
+    const collector = new Collector(logger, createCspCollector(httpMock, 'traditional'));
+
+    updateCsp({ img_src: ['logos.example.test'] });
+    expect((await collector.fetch(mockedFetchContext)).rulesChangedFromDefault).toEqual(true);
+  });
+
   test('does not include raw csp rules under any property names', async () => {
-    const collector = new Collector(logger, createCspCollector(httpMock));
+    const collector = new Collector(logger, createCspCollector(httpMock, 'traditional'));
 
     // It's important that we do not send the raw values of csp cirectives here as they
     // can be customized with values that can be identifiable to given

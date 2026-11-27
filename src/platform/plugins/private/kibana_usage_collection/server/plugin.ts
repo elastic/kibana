@@ -20,6 +20,7 @@ import type {
   OpsMetrics,
   Logger,
   CoreUsageDataStart,
+  PackageInfo,
 } from '@kbn/core/server';
 import { SavedObjectsClient, EventLoopDelaysMonitor } from '@kbn/core/server';
 import { registerEbtCounters } from './ebt_counters';
@@ -55,6 +56,7 @@ type SavedObjectsRegisterType = SavedObjectsServiceSetup['registerType'];
 export class KibanaUsageCollectionPlugin implements Plugin {
   private readonly logger: Logger;
   private readonly instanceUuid: string;
+  private readonly buildFlavor: PackageInfo['buildFlavor'];
   private savedObjectsClient?: ISavedObjectsRepository;
   private uiSettingsClient?: IUiSettingsClient;
   private metric$: Subject<OpsMetrics>;
@@ -68,6 +70,7 @@ export class KibanaUsageCollectionPlugin implements Plugin {
     this.metric$ = new Subject<OpsMetrics>();
     this.pluginStop$ = new ReplaySubject(1);
     this.instanceUuid = initializerContext.env.instanceUuid;
+    this.buildFlavor = initializerContext.env.packageInfo.buildFlavor;
     this.subscriptions = [];
   }
 
@@ -174,7 +177,7 @@ export class KibanaUsageCollectionPlugin implements Plugin {
       pluginStop$
     );
     registerCloudProviderUsageCollector(usageCollection, pluginStop$);
-    registerCspCollector(usageCollection, coreSetup.http);
+    registerCspCollector(usageCollection, coreSetup.http, this.buildFlavor);
     registerCoreUsageCollector(usageCollection, getCoreUsageDataService);
     registerConfigUsageCollector(usageCollection, getCoreUsageDataService);
     registerLocalizationUsageCollector(usageCollection, coreSetup.i18n);

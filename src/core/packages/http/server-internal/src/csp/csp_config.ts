@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { BuildFlavor } from '@kbn/config';
 import type { ICspConfig } from '@kbn/core-http-server';
 import type { CspAdditionalConfig, CspConfigType } from './config';
 import { cspConfig } from './config';
@@ -20,6 +21,16 @@ const DEFAULT_CONFIG = Object.freeze(cspConfig.schema.validate({}));
  */
 export class CspConfig implements ICspConfig {
   static readonly DEFAULT = new CspConfig(DEFAULT_CONFIG);
+
+  /**
+   * Returns the default CSP configuration for a build flavor, without any `csp.*` settings applied
+   * @internal
+   */
+  static forBuildFlavor(buildFlavor: BuildFlavor): CspConfig {
+    return new CspConfig(
+      cspConfig.schema.validate({}, { serverless: buildFlavor === 'serverless' })
+    );
+  }
 
   readonly #directives: CspDirectives;
   public readonly strict: boolean;
