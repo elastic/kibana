@@ -33,4 +33,41 @@ describe('detection-rule-edit', () => {
       expect(skill.content).toMatch(/States a gap and wants it closed.*detection-coverage/s);
     });
   });
+
+  // Unsupported rule types and missing telemetry must end in a bare refusal, not an offer.
+  describe('hard stops', () => {
+    describe.each([true, false])('with rulePreviewEnabled=%s', (rulePreviewEnabled) => {
+      const skill = getDetectionRuleEditSkill({ rulePreviewEnabled });
+
+      it('includes the hard stops section before rule authoring guidance', () => {
+        expect(
+          skill.content.indexOf('## Hard Stops — check these before starting rule authoring')
+        ).toBeGreaterThan(-1);
+        expect(skill.content.indexOf('## Hard Stops')).toBeLessThan(
+          skill.content.indexOf('## When NOT to Create a Rule')
+        );
+      });
+
+      it('defines the exact refusal sentence for unsupported rule types', () => {
+        expect(skill.content).toMatch(
+          /"I can only create ES\|QL detection rules here, so I can't create a \[type\] rule\."/
+        );
+      });
+
+      it('bans alternative offers, including confirm-gated ones', () => {
+        expect(skill.content).toMatch(
+          /An offer gated behind user confirmation is still an offer\./
+        );
+      });
+
+      it('requires verifying telemetry absence before refusing', () => {
+        expect(skill.content).toMatch(/never assume absence/);
+      });
+    });
+
+    it('points checklist rule 11 at hard stop 1', () => {
+      const skill = getDetectionRuleEditSkill({ rulePreviewEnabled: false });
+      expect(skill.content).toMatch(/that is Hard stop 1: the reply is the 2-3 sentence refusal/);
+    });
+  });
 });
