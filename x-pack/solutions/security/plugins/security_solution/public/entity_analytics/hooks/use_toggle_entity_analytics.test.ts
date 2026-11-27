@@ -281,6 +281,16 @@ describe('useToggleEntityAnalytics', () => {
         await firstToggle!;
       });
     });
+
+    it('blocks a second toggle fired before React re-renders (double click)', async () => {
+      const { result } = renderHook(() => useToggleEntityAnalytics(defaultOptions));
+
+      await act(async () => {
+        await Promise.all([result.current.toggle(), result.current.toggle()]);
+      });
+
+      expect(mockInstallEntityStore).toHaveBeenCalledTimes(1);
+    });
   });
 
   describe('onSaveSettings failure', () => {

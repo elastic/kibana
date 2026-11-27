@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useMemo, useRef, useState } from 'react';
 
 import { StoreStatusEnum } from '../../../common/entity_analytics/entity_store/types';
 import {
@@ -77,6 +77,10 @@ export const useToggleEntityAnalytics = ({
   const stopEntityStoreMutation = useStopEntityStoreMutation();
 
   const [isToggling, setIsToggling] = useState(false);
+  // Synchronous reentrancy guard: rapid clicks (e.g. a double click) call
+  // `toggle` again before React re-renders, so the `isLoading` state alone
+  // does not block the second call.
+  const isTogglingRef = useRef(false);
   const [requestedAction, setRequestedAction] = useState<EntityAnalyticsPendingAction | null>(null);
 
   const entityStoreMutations: OperationStatus[] = [
@@ -121,31 +125,38 @@ export const useToggleEntityAnalytics = ({
     }
   }, [entityStoreStatus, installEntityStoreMutation, startEntityStoreMutation]);
 
-  const toggle = useCallback(async () => {
-    if (isLoading || isStatusLoading) {
-      return;
+  const toggle = useCallback(() => {
+    if (isTogglingRef.current || isLoading || isStatusLoading) {
+      return Promise.resolve();
     }
+    isTogglingRef.current = true;
 
     const storeOn = entityStoreStatus === StoreStatusEnum.running;
     setRequestedAction(storeOn ? 'disable' : 'enable');
     setIsToggling(true);
-    try {
-      if (storeOn) {
-        await stopEntityStore();
-        addSuccess(i18n.ENTITY_ANALYTICS_TURNED_OFF, TOAST_OPTIONS);
-      } else {
-        if (!selectedSettingsMatchSavedSettings) {
-          await onSaveSettings();
-        }
-        await enableEntityStore();
 
-        addSuccess(i18n.ENTITY_ANALYTICS_TURNED_ON, TOAST_OPTIONS);
+    const run = async () => {
+      try {
+        if (storeOn) {
+          await stopEntityStore();
+          addSuccess(i18n.ENTITY_ANALYTICS_TURNED_OFF, TOAST_OPTIONS);
+        } else {
+          if (!selectedSettingsMatchSavedSettings) {
+            await onSaveSettings();
+          }
+          await enableEntityStore();
+
+          addSuccess(i18n.ENTITY_ANALYTICS_TURNED_ON, TOAST_OPTIONS);
+        }
+      } catch (e) {
+        addError(e, { title: i18n.ENTITY_ANALYTICS_TOGGLE_ERROR, ...TOAST_OPTIONS });
+      } finally {
+        isTogglingRef.current = false;
+        setIsToggling(false);
       }
-    } catch (e) {
-      addError(e, { title: i18n.ENTITY_ANALYTICS_TOGGLE_ERROR, ...TOAST_OPTIONS });
-    } finally {
-      setIsToggling(false);
-    }
+    };
+
+    return run();
   }, [
     isLoading,
     isStatusLoading,
