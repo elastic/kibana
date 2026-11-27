@@ -47,4 +47,38 @@ describe('queryMonitorHeatmap', () => {
       term: { 'observer.geo.name': HEARTBEAT_UNMAPPED_LOCATION_LABEL },
     });
   });
+
+  it('requests the latest down ping state id per heatmap bucket', async () => {
+    const search = jest
+      .fn()
+      .mockResolvedValue({ body: { aggregations: { heatmap: { buckets: [] } } } });
+    await queryMonitorHeatmap({
+      // @ts-expect-error partial client for testing
+      syntheticsEsClient: { search, heartbeatIndices: 'synthetics-*' },
+      from: 'now-24h',
+      to: 'now',
+      monitorId: 'my-monitor',
+      location: 'North America - US East',
+      intervalInMinutes: 60,
+    });
+
+    expect(search.mock.calls[0][0].aggs.heatmap.aggs.last_down).toEqual({
+      filter: {
+        range: {
+          'summary.down': {
+            gt: 0,
+          },
+        },
+      },
+      aggs: {
+        latest: {
+          top_hits: {
+            size: 1,
+            _source: ['state.id'],
+            sort: [{ '@timestamp': { order: 'desc' } }],
+          },
+        },
+      },
+    });
+  });
 });
