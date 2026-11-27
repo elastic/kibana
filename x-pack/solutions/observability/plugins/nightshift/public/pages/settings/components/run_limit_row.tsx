@@ -151,10 +151,13 @@ export const RunLimitRow = ({
                 action: NIGHTSHIFT_EBT_ACTIONS.TOGGLE_RUN_LIMIT,
                 element: NIGHTSHIFT_EBT_ELEMENTS.SETTINGS,
               })}
-              labelProps={getEbtLabelProps({
-                action: NIGHTSHIFT_EBT_ACTIONS.TOGGLE_RUN_LIMIT,
-                element: NIGHTSHIFT_EBT_ELEMENTS.SETTINGS,
-              })}
+              labelProps={getEbtLabelProps(
+                {
+                  action: NIGHTSHIFT_EBT_ACTIONS.TOGGLE_RUN_LIMIT,
+                  element: NIGHTSHIFT_EBT_ELEMENTS.SETTINGS,
+                },
+                disabled
+              )}
             />
           </EuiFormRow>
 

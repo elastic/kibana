@@ -15,7 +15,9 @@ import {
   useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
+import { getEbtProps } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
+import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_ELEMENTS } from '../../../../common/ebt_constants';
 import { useCreateAutomation } from '../../../../data/automations/use_automations';
 import { useRuleCatalog } from '../../../../data/rules/use_rule_catalog';
 import {
@@ -70,6 +72,17 @@ const getDiscardBody = (name: string) =>
     defaultMessage: '{name} has not been saved. If you leave now, this draft will be discarded.',
     values: { name },
   });
+
+const discardModalButtonProps = {
+  cancelButtonProps: getEbtProps({
+    action: NIGHTSHIFT_EBT_ACTIONS.KEEP_EDITING_AUTOMATION_DRAFT,
+    element: NIGHTSHIFT_EBT_ELEMENTS.AUTOMATIONS_CREATE_FLYOUT,
+  }),
+  confirmButtonProps: getEbtProps({
+    action: NIGHTSHIFT_EBT_ACTIONS.DISCARD_AUTOMATION_DRAFT,
+    element: NIGHTSHIFT_EBT_ELEMENTS.AUTOMATIONS_CREATE_FLYOUT,
+  }),
+};
 
 export const CreateAutomationFlyout = ({
   onClose,
@@ -155,6 +168,7 @@ export const CreateAutomationFlyout = ({
           confirmButtonText={labels.discard}
           buttonColor="danger"
           data-test-subj="automationDiscardModal"
+          {...discardModalButtonProps}
         >
           <p>{getDiscardBody(values.name || labels.untitled)}</p>
         </EuiConfirmModal>

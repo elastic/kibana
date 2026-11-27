@@ -186,10 +186,13 @@ export const TokenTrackingSwitch = ({
           action: NIGHTSHIFT_EBT_ACTIONS.TOGGLE_TOKEN_TRACKING,
           element: NIGHTSHIFT_EBT_ELEMENTS.SETTINGS,
         })}
-        labelProps={getEbtLabelProps({
-          action: NIGHTSHIFT_EBT_ACTIONS.TOGGLE_TOKEN_TRACKING,
-          element: NIGHTSHIFT_EBT_ELEMENTS.SETTINGS,
-        })}
+        labelProps={getEbtLabelProps(
+          {
+            action: NIGHTSHIFT_EBT_ACTIONS.TOGGLE_TOKEN_TRACKING,
+            element: NIGHTSHIFT_EBT_ELEMENTS.SETTINGS,
+          },
+          !canSaveAdvancedSettings || isUpdatingTracking
+        )}
       />
     </span>
   </EuiToolTip>

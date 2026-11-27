@@ -79,10 +79,13 @@ export const ScheduledDiscoverySection = ({
               action: NIGHTSHIFT_EBT_ACTIONS.TOGGLE_SCHEDULED_DISCOVERY,
               element: NIGHTSHIFT_EBT_ELEMENTS.SETTINGS,
             })}
-            labelProps={getEbtLabelProps({
-              action: NIGHTSHIFT_EBT_ACTIONS.TOGGLE_SCHEDULED_DISCOVERY,
-              element: NIGHTSHIFT_EBT_ELEMENTS.SETTINGS,
-            })}
+            labelProps={getEbtLabelProps(
+              {
+                action: NIGHTSHIFT_EBT_ACTIONS.TOGGLE_SCHEDULED_DISCOVERY,
+                element: NIGHTSHIFT_EBT_ELEMENTS.SETTINGS,
+              },
+              isActivityToggleDisabled
+            )}
             label={i18n.translate('xpack.nightshift.settings.enableScheduledDiscovery', {
               defaultMessage: 'Enable scheduled discovery',
             })}

@@ -51,10 +51,13 @@ export const DeveloperModeSection = ({
               action: NIGHTSHIFT_EBT_ACTIONS.TOGGLE_DEVELOPER_MODE,
               element: NIGHTSHIFT_EBT_ELEMENTS.SETTINGS,
             })}
-            labelProps={getEbtLabelProps({
-              action: NIGHTSHIFT_EBT_ACTIONS.TOGGLE_DEVELOPER_MODE,
-              element: NIGHTSHIFT_EBT_ELEMENTS.SETTINGS,
-            })}
+            labelProps={getEbtLabelProps(
+              {
+                action: NIGHTSHIFT_EBT_ACTIONS.TOGGLE_DEVELOPER_MODE,
+                element: NIGHTSHIFT_EBT_ELEMENTS.SETTINGS,
+              },
+              !canSaveAdvancedSettings || isDeveloperModeSaving
+            )}
             label={i18n.translate('xpack.nightshift.settings.developerModeToggleSwitch', {
               defaultMessage: 'Enable nightshift developer mode',
             })}

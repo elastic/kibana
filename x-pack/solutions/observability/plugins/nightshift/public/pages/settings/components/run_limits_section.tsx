@@ -123,10 +123,13 @@ export const RunLimitsSection = ({
                         action: NIGHTSHIFT_EBT_ACTIONS.TOGGLE_INVESTIGATION_LIMITS,
                         element: NIGHTSHIFT_EBT_ELEMENTS.SETTINGS,
                       })}
-                      labelProps={getEbtLabelProps({
-                        action: NIGHTSHIFT_EBT_ACTIONS.TOGGLE_INVESTIGATION_LIMITS,
-                        element: NIGHTSHIFT_EBT_ELEMENTS.SETTINGS,
-                      })}
+                      labelProps={getEbtLabelProps(
+                        {
+                          action: NIGHTSHIFT_EBT_ACTIONS.TOGGLE_INVESTIGATION_LIMITS,
+                          element: NIGHTSHIFT_EBT_ELEMENTS.SETTINGS,
+                        },
+                        !canManage || isSaving
+                      )}
                     />
                   </EuiFormRow>
                   <EuiSpacer size="m" />

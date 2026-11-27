@@ -62,10 +62,13 @@ export const ContinuousOnboardingSection = ({
                 action: NIGHTSHIFT_EBT_ACTIONS.TOGGLE_CONTINUOUS_ONBOARDING,
                 element: NIGHTSHIFT_EBT_ELEMENTS.SETTINGS,
               })}
-              labelProps={getEbtLabelProps({
-                action: NIGHTSHIFT_EBT_ACTIONS.TOGGLE_CONTINUOUS_ONBOARDING,
-                element: NIGHTSHIFT_EBT_ELEMENTS.SETTINGS,
-              })}
+              labelProps={getEbtLabelProps(
+                {
+                  action: NIGHTSHIFT_EBT_ACTIONS.TOGGLE_CONTINUOUS_ONBOARDING,
+                  element: NIGHTSHIFT_EBT_ELEMENTS.SETTINGS,
+                },
+                isActivityToggleDisabled
+              )}
               label={i18n.translate('xpack.nightshift.settings.enableContinuousKiOnboarding', {
                 defaultMessage: 'Enable continuous KI onboarding',
               })}

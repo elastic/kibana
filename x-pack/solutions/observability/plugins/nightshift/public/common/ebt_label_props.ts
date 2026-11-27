@@ -9,5 +9,7 @@ import type { EuiSwitchProps } from '@elastic/eui';
 import { getEbtProps } from '@kbn/ebt-click';
 
 export const getEbtLabelProps = (
-  ebt: Parameters<typeof getEbtProps>[0]
-): EuiSwitchProps['labelProps'] => ({ 'data-test-subj': undefined, ...getEbtProps(ebt) });
+  ebt: Parameters<typeof getEbtProps>[0],
+  disabled = false
+): EuiSwitchProps['labelProps'] =>
+  disabled ? undefined : { 'data-test-subj': undefined, ...getEbtProps(ebt) };

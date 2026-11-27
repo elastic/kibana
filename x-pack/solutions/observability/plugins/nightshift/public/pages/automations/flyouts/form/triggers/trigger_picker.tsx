@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { getEbtProps } from '@kbn/ebt-click';
 import {
   EuiIcon,
@@ -34,6 +34,8 @@ export const TriggerPicker = ({
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const { euiTheme } = useEuiTheme();
+  const listRef = useRef<HTMLDivElement>(null);
+  const skipBridgedClick = useRef(false);
   const groupLabelCss = { paddingInline: euiTheme.size.s };
   const options: Array<EuiSelectableOption<{ kind?: TriggerFormValues['kind'] }>> = [
     { label: triggerLabels.elastic, isGroupLabel: true, css: groupLabelCss },
@@ -72,7 +74,10 @@ export const TriggerPicker = ({
       isOpen={isOpen}
       closePopover={() => setIsOpen(false)}
       panelPaddingSize="none"
-      button={button(() => setIsOpen((open) => !open))}
+      button={button(() => {
+        skipBridgedClick.current = false;
+        setIsOpen((open) => !open);
+      })}
     >
       <EuiSelectable
         aria-label={triggerLabels.addTrigger}
@@ -81,14 +86,24 @@ export const TriggerPicker = ({
         searchProps={{ placeholder: triggerLabels.searchTriggers, compressed: true }}
         noMatchesMessage={triggerLabels.noTriggers}
         options={options}
-        onChange={(_options, _event, changed) => {
+        onChange={(_options, event, changed) => {
+          if (event.type === 'click' && skipBridgedClick.current) {
+            skipBridgedClick.current = false;
+            return;
+          }
+          if (event.type === 'keydown') {
+            skipBridgedClick.current = true;
+            listRef.current
+              ?.querySelector<HTMLElement>(`[data-ebt-detail="${changed.kind}"]`)
+              ?.click();
+          }
           if (changed.kind) onSelect(changed.kind);
           setIsOpen(false);
         }}
         listProps={{ bordered: false, showIcons: false, paddingSize: 's', isVirtualized: false }}
       >
         {(list, search) => (
-          <div css={{ width: 280 }}>
+          <div ref={listRef} css={{ width: 280 }}>
             <EuiPopoverTitle paddingSize="s">{search}</EuiPopoverTitle>
             {list}
           </div>
