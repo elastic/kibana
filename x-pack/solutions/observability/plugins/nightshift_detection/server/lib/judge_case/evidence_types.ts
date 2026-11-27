@@ -80,3 +80,19 @@ export interface ErroredEvidence {
 
 /** What running one evidence query gave. */
 export type EvidenceResult = FoundEvidence | EmptyEvidence | ErroredEvidence;
+
+/**
+ * The query was not run, so there is nothing to read, and it is no evidence either way.
+ * - `query_cap`: the run had already started its maximum number of evidence queries.
+ * - `case_budget`: the item was dropped from the judge's case to fit its size budget.
+ */
+export interface SkippedEvidence {
+  result: 'skipped';
+  reason: 'query_cap' | 'case_budget';
+}
+
+/**
+ * What reading one evidence query for a run gave: a result of {@link runEvidence}, or a skip. The
+ * reader only skips for `query_cap`; `case_budget` is set when the case drops an item to fit.
+ */
+export type ReadEvidenceResult = EvidenceResult | SkippedEvidence;

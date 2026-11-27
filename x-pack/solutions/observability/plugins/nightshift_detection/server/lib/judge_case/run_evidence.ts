@@ -10,6 +10,7 @@ import { esql, Parser } from '@elastic/esql';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { timeoutSignal } from '@kbn/std';
 import { getErrorMessage } from '../errors/get_error_message';
+import { cutText } from './cut_text';
 import {
   EVIDENCE_MAX_CELL_LENGTH,
   EVIDENCE_MAX_MESSAGE_LENGTH,
@@ -54,20 +55,6 @@ export interface RunEvidenceParams {
   /** Overrides {@link EVIDENCE_TIMEOUT_MS}; a value that is not a usable delay is ignored. */
   timeoutMs?: number;
 }
-
-/**
- * Cuts the text to `maxLength` UTF-16 code units. A cut that would leave half of a surrogate pair
- * drops that half, so the kept text is always valid when it is encoded.
- */
-const cutText = (text: string, maxLength: number): { text: string; cut: boolean } => {
-  if (text.length <= maxLength) {
-    return { text, cut: false };
-  }
-  const kept = text.slice(0, maxLength);
-  const lastUnit = kept.charCodeAt(kept.length - 1);
-  const splitsPair = lastUnit >= 0xd800 && lastUnit <= 0xdbff;
-  return { text: splitsPair ? kept.slice(0, -1) : kept, cut: true };
-};
 
 const queryFailed = (message: string): EvidenceResult => ({
   result: 'error',
