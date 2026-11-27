@@ -81,10 +81,31 @@ describe('TimeBuckets', () => {
 
     const interval = timeBuckets.getInterval();
 
-    expect(interval.description).toEqual('day');
+    expect(interval.description).toEqual('7 days');
     expect(interval.esValue).toEqual(1);
-    expect(interval.esUnit).toEqual('d');
-    expect(interval.expression).toEqual('1d');
+    expect(interval.esUnit).toEqual('w');
+    expect(interval.expression).toEqual('1w');
+  });
+
+  test('setInterval/getInterval - spaced interval strings still fit-check with bounds', () => {
+    const timeBuckets = new TimeBuckets({
+      ...timeBucketConfig,
+      'histogram:maxBars': 1000,
+    });
+    timeBuckets.setBounds({
+      min: moment.utc('2024-01-01T00:00:00.000Z'),
+      max: moment.utc('2024-01-01T03:00:00.000Z'),
+    });
+    timeBuckets.setInterval('1 h');
+
+    const spacedHour = timeBuckets.getInterval();
+    expect(spacedHour.expression).toEqual('1h');
+    expect(spacedHour.scaled).toBeFalsy();
+
+    timeBuckets.setInterval(' 20m ');
+    const spacedMinutes = timeBuckets.getInterval();
+    expect(spacedMinutes.expression).toEqual('20m');
+    expect(spacedMinutes.scaled).toBeFalsy();
   });
 
   test('setInterval/getInterval - intreval is a string and bounds is defined', () => {
@@ -97,12 +118,14 @@ describe('TimeBuckets', () => {
     timeBuckets.setInterval('20m');
     const interval = timeBuckets.getInterval();
 
-    expect(interval.description).toEqual('day');
+    expect(interval.description).toEqual('7 days');
     expect(interval.esValue).toEqual(1);
-    expect(interval.esUnit).toEqual('d');
-    expect(interval.expression).toEqual('1d');
+    expect(interval.esUnit).toEqual('w');
+    expect(interval.expression).toEqual('1w');
     expect(interval.scaled).toBeTruthy();
-    expect(interval.scale).toEqual(0.013888888888888888);
+    expect(interval.scale).toEqual(
+      Number(moment.duration(20, 'minutes')) / Number(moment.duration(1, 'week'))
+    );
 
     if (interval.preScaled) {
       expect(interval.preScaled.description).toEqual('20 minutes');
@@ -121,6 +144,22 @@ describe('TimeBuckets', () => {
     expect(interval.esValue).toEqual(0);
     expect(interval.esUnit).toEqual('ms');
     expect(interval.expression).toEqual('0ms');
+  });
+
+  test('setInterval/getInterval - auto with equal bounds is 0ms, not a picker throw', () => {
+    const timeBuckets = new TimeBuckets(timeBucketConfig);
+    const instant = moment.utc('2024-01-01T00:00:00.000Z');
+    timeBuckets.setBounds({ min: instant, max: instant.clone() });
+    timeBuckets.setInterval(autoInterval);
+
+    const interval = timeBuckets.getInterval();
+
+    expect(interval.expression).toEqual('0ms');
+    expect(interval.esValue).toEqual(0);
+    expect(interval.esUnit).toEqual('ms');
+
+    timeBuckets.setInterval('20m');
+    expect(timeBuckets.getInterval().expression).toEqual('20m');
   });
 
   test('setInterval/getInterval - interval is a "auto" (useNormalizedEsInterval is false)', () => {
@@ -149,5 +188,146 @@ describe('TimeBuckets', () => {
 
     timeBuckets.setInterval('2w');
     expect(() => timeBuckets.getInterval(false)).toThrow(InvalidEsCalendarIntervalError);
+  });
+
+  test('auto, 1h UTC range, barTarget 100 → 1m, forceFixed, not scaled', () => {
+    const timeBuckets = new TimeBuckets({
+      ...timeBucketConfig,
+      'histogram:barTarget': 100,
+      'histogram:maxBars': 1000,
+    });
+    timeBuckets.setBounds({
+      min: moment.utc('2024-01-01T00:00:00.000Z'),
+      max: moment.utc('2024-01-01T01:00:00.000Z'),
+    });
+    timeBuckets.setInterval(autoInterval);
+
+    const interval = timeBuckets.getInterval();
+
+    expect(interval.expression).toEqual('1m');
+    expect(interval.forceFixed).toBe(true);
+    expect(interval.scaled).toBeFalsy();
+  });
+
+  test('auto, 4d UTC range, barTarget 100 → 1h, forceFixed', () => {
+    const timeBuckets = new TimeBuckets({
+      ...timeBucketConfig,
+      'histogram:barTarget': 100,
+      'histogram:maxBars': 1000,
+    });
+    timeBuckets.setBounds({
+      min: moment.utc('2024-01-01T00:00:00.000Z'),
+      max: moment.utc('2024-01-05T00:00:00.000Z'),
+    });
+    timeBuckets.setInterval(autoInterval);
+
+    const interval = timeBuckets.getInterval();
+
+    expect(interval.expression).toEqual('1h');
+    expect(interval.forceFixed).toBe(true);
+  });
+
+  test('auto, 4d UTC range, barTarget 75 → 3h, forceFixed', () => {
+    const timeBuckets = new TimeBuckets({
+      ...timeBucketConfig,
+      'histogram:barTarget': 75,
+      'histogram:maxBars': 1000,
+    });
+    timeBuckets.setBounds({
+      min: moment.utc('2024-01-01T00:00:00.000Z'),
+      max: moment.utc('2024-01-05T00:00:00.000Z'),
+    });
+    timeBuckets.setInterval(autoInterval);
+
+    const interval = timeBuckets.getInterval();
+
+    expect(interval.expression).toEqual('3h');
+    expect(interval.forceFixed).toBe(true);
+  });
+
+  test('auto uses the configured dateFormat:tz, not the bound Moment zone', () => {
+    const bounds = {
+      min: moment.utc('2024-01-01T00:00:00.000Z'),
+      max: moment.utc('2024-04-10T00:00:00.000Z'),
+    };
+    const config = {
+      ...timeBucketConfig,
+      'histogram:barTarget': 100,
+      'histogram:maxBars': 1000,
+    };
+
+    const utcBuckets = new TimeBuckets({ ...config, 'dateFormat:tz': 'UTC' });
+    utcBuckets.setBounds(bounds);
+    utcBuckets.setInterval(autoInterval);
+
+    const nyBuckets = new TimeBuckets({ ...config, 'dateFormat:tz': 'America/New_York' });
+    nyBuckets.setBounds(bounds);
+    nyBuckets.setInterval(autoInterval);
+
+    // 100 UTC calendar days fit 1d. The same instants are 101 days in New York, so 1d is rejected.
+    expect(utcBuckets.getInterval().expression).toEqual('1d');
+    expect(nyBuckets.getInterval().expression).toEqual('1w');
+  });
+
+  test('manual interval with a fractional or invalid maxBars does not throw', () => {
+    const bounds = {
+      min: moment.utc('2024-01-01T00:00:00.000Z'),
+      max: moment.utc('2024-01-02T00:00:00.000Z'),
+    };
+    const intervalFor = (maxBars: number) => {
+      const timeBuckets = new TimeBuckets({ ...timeBucketConfig, 'histogram:maxBars': maxBars });
+      timeBuckets.setBounds(bounds);
+      timeBuckets.setInterval('1m');
+      return timeBuckets.getInterval();
+    };
+
+    // 50.5 behaves like 50: 1m over one day is 1440 buckets, so it is scaled up.
+    expect(intervalFor(50.5).expression).toEqual(intervalFor(50).expression);
+    expect(intervalFor(50.5).scaled).toBe(true);
+    // Without a usable cap, the manual interval is kept as is.
+    expect(intervalFor(0).expression).toEqual('1m');
+    expect(intervalFor(0.5).scaled).toBeFalsy();
+    expect(intervalFor(NaN).scaled).toBeFalsy();
+  });
+
+  test('auto keeps a calendar pick as a calendar duration', () => {
+    const timeBuckets = new TimeBuckets({
+      ...timeBucketConfig,
+      'histogram:barTarget': 100,
+      'histogram:maxBars': 1000,
+      'dateFormat:tz': 'UTC',
+    });
+    timeBuckets.setBounds({
+      min: moment.utc('2020-01-01T00:00:00.000Z'),
+      max: moment.utc('2024-01-01T00:00:00.000Z'),
+    });
+    timeBuckets.setInterval(autoInterval);
+
+    const interval = timeBuckets.getInterval();
+
+    expect(interval.expression).toEqual('1M');
+    expect(interval.months()).toBe(1);
+    // A fixed 30 days would land on March 2, past the March 1 bucket.
+    expect(moment.utc('2023-02-01').add(interval).toISOString()).toEqual(
+      '2023-03-01T00:00:00.000Z'
+    );
+  });
+
+  test('auto is not scaled when maxBars is smaller than the auto bucket count', () => {
+    const timeBuckets = new TimeBuckets({
+      ...timeBucketConfig,
+      'histogram:barTarget': 100,
+      'histogram:maxBars': 10,
+    });
+    timeBuckets.setBounds({
+      min: moment.utc('2024-01-01T00:00:00.000Z'),
+      max: moment.utc('2024-01-05T00:00:00.000Z'),
+    });
+    timeBuckets.setInterval(autoInterval);
+
+    const interval = timeBuckets.getInterval();
+
+    expect(interval.expression).toEqual('1h');
+    expect(interval.scaled).toBeFalsy();
   });
 });

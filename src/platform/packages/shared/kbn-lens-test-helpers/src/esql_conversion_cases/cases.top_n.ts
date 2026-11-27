@@ -702,7 +702,7 @@ export const buildTopNCases = (): EsqlConversionCase[] => {
       columnOrder: ['col1', 'col2', 'col3'],
       expected: {
         success: true,
-        esql: `${logsFrom} | ${logsWhere} | WHERE host.keyword IS NOT NULL | EVAL key_host_keyword = CASE(host.keyword IN (${logsFrom} | ${logsWhere} | WHERE host.keyword IS NOT NULL | STATS rank_host_keyword = AVG(bytes) BY host.keyword | SORT rank_host_keyword DESC, host.keyword ASC | LIMIT 2 | KEEP host.keyword), host.keyword, NULL) | INLINE STATS rank_host_keyword = AVG(bytes) BY key_host_keyword | STATS AVG(bytes) BY rank_host_keyword, key_host_keyword, timestamp = BUCKET(timestamp, 75, ?_tstart, ?_tend) | EVAL named_host_keyword = CASE(key_host_keyword IS NULL, 0::LONG, 1::LONG) | SORT named_host_keyword DESC, rank_host_keyword DESC, key_host_keyword ASC, timestamp ASC | EVAL host.keyword = COALESCE(TO_STRING(key_host_keyword), "Other"::KEYWORD) | DROP named_host_keyword, key_host_keyword, rank_host_keyword`,
+        esql: `${logsFrom} | ${logsWhere} | WHERE host.keyword IS NOT NULL | EVAL key_host_keyword = CASE(host.keyword IN (${logsFrom} | ${logsWhere} | WHERE host.keyword IS NOT NULL | STATS rank_host_keyword = AVG(bytes) BY host.keyword | SORT rank_host_keyword DESC, host.keyword ASC | LIMIT 2 | KEEP host.keyword), host.keyword, NULL) | INLINE STATS rank_host_keyword = AVG(bytes) BY key_host_keyword | STATS AVG(bytes) BY rank_host_keyword, key_host_keyword, timestamp = BUCKET(timestamp, 100, ?_tstart, ?_tend) | EVAL named_host_keyword = CASE(key_host_keyword IS NULL, 0::LONG, 1::LONG) | SORT named_host_keyword DESC, rank_host_keyword DESC, key_host_keyword ASC, timestamp ASC | EVAL host.keyword = COALESCE(TO_STRING(key_host_keyword), "Other"::KEYWORD) | DROP named_host_keyword, key_host_keyword, rank_host_keyword`,
         columnNames: ['AVG(bytes)', 'timestamp', 'host.keyword'],
         expectedSourceIds: {
           'AVG(bytes)': ['col3'],
@@ -824,7 +824,7 @@ export const buildTopNCases = (): EsqlConversionCase[] => {
           score: 'rank_host_keyword = AVG(bytes)',
           sort: 'rank_host_keyword DESC',
           size: 4,
-        })} | INLINE STATS rank_host_keyword = AVG(bytes) BY host.keyword | STATS AVG(bytes) BY rank_host_keyword, host.keyword, timestamp = BUCKET(timestamp, 75, ?_tstart, ?_tend) | SORT rank_host_keyword DESC, timestamp ASC | DROP rank_host_keyword`,
+        })} | INLINE STATS rank_host_keyword = AVG(bytes) BY host.keyword | STATS AVG(bytes) BY rank_host_keyword, host.keyword, timestamp = BUCKET(timestamp, 100, ?_tstart, ?_tend) | SORT rank_host_keyword DESC, timestamp ASC | DROP rank_host_keyword`,
         columnNames: ['AVG(bytes)', 'host.keyword', 'timestamp'],
         expectedSourceIds: {
           'AVG(bytes)': ['col3'],
@@ -1036,7 +1036,7 @@ export const buildTopNCases = (): EsqlConversionCase[] => {
       expected: {
         success: true,
         // The auto-interval bucket is aliased to its source field, so it needs no quoting.
-        esql: `${logsFrom} | ${logsWhere} | STATS COUNT(*) BY timestamp = BUCKET(timestamp, 75, ?_tstart, ?_tend), host.keyword | SORT host.keyword DESC | LIMIT 4 BY timestamp | SORT timestamp ASC, host.keyword DESC`,
+        esql: `${logsFrom} | ${logsWhere} | STATS COUNT(*) BY timestamp = BUCKET(timestamp, 100, ?_tstart, ?_tend), host.keyword | SORT host.keyword DESC | LIMIT 4 BY timestamp | SORT timestamp ASC, host.keyword DESC`,
         columnNames: ['COUNT(*)', 'timestamp', 'host.keyword'],
         expectedSourceIds: {
           'COUNT(*)': ['col3'],

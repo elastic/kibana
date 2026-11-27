@@ -89,6 +89,11 @@ export const toDateRounding = (expression: string): DateRounding | undefined => 
 /**
  * Start of the date bucket containing `timestamp` in `timeZone`, in UTC epoch milliseconds. This is
  * the value Elasticsearch returns as the bucket `key` for the same interval and time zone.
+ *
+ * It follows Elasticsearch's `Rounding`: calendar days, weeks, months and years use
+ * `TimeUnitRounding`, where local midnight that a forward jump skips starts at the jump and
+ * midnight that repeats starts at its first occurrence. Fixed widths use `TimeIntervalRounding`.
+ * Time zone offsets come from moment-timezone instead of the JDK, so tzdata versions can differ.
  */
 export const roundToBucketKey = (
   timestamp: number,
@@ -112,12 +117,77 @@ export const nextBucketKey = (
   timestamp: number,
   rounding: DateRounding,
   timeZone: IanaTimeZone
+): number => roundToBucketKey(bucketEnd(timestamp, rounding, timeZone), rounding, timeZone);
+
+/**
+ * Number of Elasticsearch date buckets that cover `[from, to)`. Stops counting as soon as it
+ * exceeds `limit`. Aligned fixed buckets inside a constant-offset period are counted
+ * arithmetically, so only the buckets around offset changes are walked one by one.
+ *
+ * It mirrors `DateRoundingPicker` in Elasticsearch's `Bucket.java`: calendar buckets are walked
+ * with the next rounding value of the previous bucket (`roundingIsOkCalendarBasedUnit`), and fixed
+ * widths are counted per constant-offset period (`roundingIsOkFixedWidthUnit`). Across a rollback
+ * that repeats a local date, such as America/St_Johns on 2009-11-01 (00:01 back to 23:01), a range
+ * inside the repeated stretch counts one daily bucket in Elasticsearch too, even though two keys
+ * exist, so the count matches Elasticsearch and not the number of distinct keys.
+ */
+export const countBuckets = (
+  from: number,
+  to: number,
+  rounding: DateRounding,
+  timeZone: IanaTimeZone,
+  limit: number
 ): number => {
+  const periods = offsetPeriods(timeZone);
+  let cursor = from;
+  let count = 0;
+  for (;;) {
+    count += 1;
+    if (count > limit) {
+      return count;
+    }
+    const end = bucketEnd(cursor, rounding, timeZone);
+    if (end >= to) {
+      return count;
+    }
+    if (rounding.kind === 'fixed') {
+      cursor = skipAlignedBuckets(periods, end, to, rounding);
+      count += (cursor - end) / rounding.widthMs;
+    } else {
+      cursor = end;
+    }
+  }
+};
+
+/**
+ * Start of the last bucket before `to` in the run of aligned buckets starting at `start`,
+ * or `start` itself when it is not an aligned key of a constant-offset period.
+ */
+const skipAlignedBuckets = (
+  periods: readonly OffsetPeriod[],
+  start: number,
+  to: number,
+  { widthMs }: FixedDateRounding
+): number => {
+  const index = periodIndexAt(periods, start);
+  const { end, offsetMs } = periods[index];
+  const isAlignedKey =
+    roundFixed(periods, index, start, widthMs) === start &&
+    localFloor(start, offsetMs, widthMs) === start + offsetMs;
+  if (!isAlignedKey) {
+    return start;
+  }
+  const buckets = Math.ceil((Math.min(end, to) - start) / widthMs);
+  return start + Math.max(buckets - 1, 0) * widthMs;
+};
+
+/** First instant after the Elasticsearch date bucket that contains `timestamp`. */
+const bucketEnd = (timestamp: number, rounding: DateRounding, timeZone: IanaTimeZone): number => {
   const periods = offsetPeriods(timeZone);
   if (rounding.kind === 'fixed') {
     const width = rounding.widthMs;
     const key = roundFixedAt(periods, timestamp, width);
-    return roundFixedAt(periods, fixedBucketEnd(periods, key, width), width);
+    return fixedBucketEnd(periods, key, width);
   }
   const start = calendarStart(localDate(periods, timestamp), rounding);
   const unit = rounding.unit === 'isoWeek' ? 'week' : rounding.unit;

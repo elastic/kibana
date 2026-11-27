@@ -405,9 +405,9 @@ groups:
       - setting: "histogram:barTarget"
         id: histogram-bartarget
         description: |
-          When date histograms use the `auto` interval, {{product.kibana}} attempts to generate this number of bars.
+          When date histograms use the `auto` interval, {{product.kibana}} generates at most this number of bars, matching the `N` of ES|QL `BUCKET`. Number histograms still aim for around this number of bars.
         datatype: int
-        default: 50
+        default: 100
         applies_to:
           stack: ga
           ech: ga
@@ -419,7 +419,7 @@ groups:
       - setting: "histogram:maxBars"
         id: histogram-maxbars
         description: |
-          Limits the density of date and number histograms across {{product.kibana}} using a test query to improve performance. When the test query contains too many buckets, the interval between buckets increases. Applies separately to each histogram aggregation, and does not apply to other types of aggregations. To find the maximum value, divide the {{product.elasticsearch}} `search.max_buckets` value by the maximum number of aggregations in each visualization.
+          Limits the density of manual date intervals and number histograms across {{product.kibana}} using a test query to improve performance. When the test query contains too many buckets, the interval between buckets increases. Auto date intervals are not limited by this setting, they follow `histogram:barTarget`. Applies separately to each histogram aggregation, and does not apply to other types of aggregations. To find the maximum value, divide the {{product.elasticsearch}} `search.max_buckets` value by the maximum number of aggregations in each visualization.
         datatype: int
         default: 1000
         applies_to:

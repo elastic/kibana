@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { getAbsoluteTimeRange, calcAutoIntervalNear } from '@kbn/data-plugin/common';
+import { DEFAULT_HISTOGRAM_BAR_TARGET, getAbsoluteTimeRange } from '@kbn/data-plugin/common';
+import { ianaTimeZoneOrUtc, pickDateRounding } from '@kbn/es-date-rounding';
 import type { TimeRange } from '@kbn/es-query';
 import type { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
 import moment from 'moment';
@@ -47,6 +48,7 @@ export type ExpressionFunctionFormulaInterval = ExpressionFunctionDefinition<
   undefined,
   {
     targetBars?: number;
+    timeZone?: string;
   },
   number
 >;
@@ -65,13 +67,41 @@ export const formulaIntervalFn: ExpressionFunctionFormulaInterval = {
         defaultMessage: 'The target number of bars for the date histogram.',
       }),
     },
+    timeZone: {
+      types: ['string'],
+      help: i18n.translate('xpack.lens.formula.interval.timeZone.help', {
+        defaultMessage:
+          'The time zone of the date histogram. Uses UTC when it is missing or not valid.',
+      }),
+    },
   },
 
   fn(_input, args, { getSearchContext }) {
     const { timeRange, now } = getSearchContext();
-    return timeRange && args.targetBars
-      ? calcAutoIntervalNear(args.targetBars, getTimeRangeAsNumber(timeRange, now)).asMilliseconds()
-      : 0;
+    if (!timeRange || !args.targetBars) {
+      return 0;
+    }
+    const absoluteTimeRange = getAbsoluteTimeRange(
+      timeRange,
+      now != null ? { forceNow: new Date(now) } : {}
+    );
+    const from = moment(absoluteTimeRange.from).valueOf();
+    const to = moment(absoluteTimeRange.to).valueOf();
+    if (!Number.isFinite(from) || !Number.isFinite(to) || from >= to) {
+      return 0;
+    }
+    // Same normalization as the date histogram (`getAutoDateBucketTarget`), so a decimal or invalid
+    // setting cannot make the picker throw.
+    const { targetBars: requestedBars } = args;
+    const targetBars =
+      Number.isInteger(requestedBars) && requestedBars > 0
+        ? requestedBars
+        : DEFAULT_HISTOGRAM_BAR_TARGET;
+    return pickDateRounding(targetBars, {
+      from,
+      to,
+      timeZone: ianaTimeZoneOrUtc(args.timeZone),
+    }).nominalMs;
   },
 };
 

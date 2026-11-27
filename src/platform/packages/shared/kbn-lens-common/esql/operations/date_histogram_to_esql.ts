@@ -11,8 +11,8 @@ import { esql } from '@elastic/esql';
 import moment from 'moment';
 import { TIME_SYSTEM_PARAMS } from '@kbn/esql-language';
 import { getCalculateAutoTimeExpression } from '@kbn/data-plugin/common';
+import { getAutoDateBucketTarget } from '@kbn/data-service';
 import type { DateHistogramIndexPatternColumn } from '../../datasources/operations';
-import { AUTO_TARGET_NUMBER_OF_BUCKETS } from '../constants';
 import {
   AUTO_INTERVAL,
   DEFAULT_DATE_HISTOGRAM_INTERVAL,
@@ -53,7 +53,7 @@ export const dateHistogramToESQL: ToEsqlFn<DateHistogramIndexPatternColumn> = (
   _columnId,
   indexPattern,
   _layer,
-  _uiSettings,
+  uiSettings,
   dateRange
 ) => {
   if (column.params?.includeEmptyRows) return;
@@ -63,8 +63,9 @@ export const dateHistogramToESQL: ToEsqlFn<DateHistogramIndexPatternColumn> = (
   if (interval === AUTO_INTERVAL) {
     if (hasDateRange(dateRange)) {
       const [ESQL_TIME_RANGE_START, ESQL_TIME_RANGE_END] = TIME_SYSTEM_PARAMS;
+      const targetBars = getAutoDateBucketTarget((key) => uiSettings.get(key));
       return {
-        template: `BUCKET(${esqlColumnNode}, ${AUTO_TARGET_NUMBER_OF_BUCKETS}, ${ESQL_TIME_RANGE_START}, ${ESQL_TIME_RANGE_END})`,
+        template: `BUCKET(${esqlColumnNode}, ${targetBars}, ${ESQL_TIME_RANGE_START}, ${ESQL_TIME_RANGE_END})`,
       };
     }
     // Fall back to default 1h when date range is missing

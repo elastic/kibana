@@ -22,9 +22,9 @@ const CONTROL_LABEL = 'os';
 const FIELD_CONTROL_LABEL = 'metric_field';
 const VARIABLE_LAYER_ID = 'variable_layer';
 const VALUE_VARIABLE_QUERY =
-  'FROM logstash-* | WHERE machine.os.raw == ?os | STATS MAX(bytes) BY @timestamp = BUCKET(@timestamp, 75, ?_tstart, ?_tend)';
+  'FROM logstash-* | WHERE machine.os.raw == ?os | STATS MAX(bytes) BY @timestamp = BUCKET(@timestamp, 100, ?_tstart, ?_tend)';
 const FIELD_VARIABLE_QUERY =
-  'FROM logstash-* | STATS AVG(??metric_field) BY @timestamp = BUCKET(@timestamp, 75, ?_tstart, ?_tend)';
+  'FROM logstash-* | STATS AVG(??metric_field) BY @timestamp = BUCKET(@timestamp, 100, ?_tstart, ?_tend)';
 
 /**
  * Reuses the multi-layer fixture dashboard and patches the imported saved object:
@@ -55,7 +55,7 @@ const addVariableControlAndLayer = async (
       esql:
         controlType === 'values'
           ? VALUE_VARIABLE_QUERY
-          : 'FROM logstash-* | STATS MAX(bytes) BY @timestamp = BUCKET(@timestamp, 75, ?_tstart, ?_tend)',
+          : 'FROM logstash-* | STATS MAX(bytes) BY @timestamp = BUCKET(@timestamp, 100, ?_tstart, ?_tend)',
     },
     timeField: '@timestamp',
     columns: [

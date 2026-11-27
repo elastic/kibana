@@ -16,6 +16,7 @@ export {
   SAVED_QUERY_BASE_URL,
   SCRIPT_LANGUAGES_ROUTE_LATEST_VERSION,
   UI_SETTINGS,
+  getAutoDateBucketTarget,
 } from './constants';
 export type { RawValue } from './serializable_field';
 export { SerializableField } from './serializable_field';

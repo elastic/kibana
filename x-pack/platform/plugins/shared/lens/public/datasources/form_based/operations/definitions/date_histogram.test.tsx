@@ -33,6 +33,10 @@ dataStart.search.aggs.calculateAutoTimeExpression = getCalculateAutoTimeExpressi
     if (path === UI_SETTINGS.HISTOGRAM_MAX_BARS) {
       return 10;
     }
+    // Auto intervals follow the bar target, not the max bars. Pin it so the expected interval is explicit.
+    if (path === UI_SETTINGS.HISTOGRAM_BAR_TARGET) {
+      return 100;
+    }
   }
 );
 
@@ -465,7 +469,7 @@ describe('date_histogram', () => {
         });
       expect(updateLayerSpy).toHaveBeenCalled();
       const newLayer = updateLayerSpy.mock.calls[0][0](thirdLayer);
-      expect(newLayer).toHaveProperty('columns.col1.params.interval', '30d');
+      expect(newLayer).toHaveProperty('columns.col1.params.interval', '1w');
     });
 
     it('should allow turning off time range sync', () => {
