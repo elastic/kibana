@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 
 export const PAGE_TITLE = i18n.translate(
   'xpack.securitySolution.entityAnalytics.aiAgents.pageTitle',
-  { defaultMessage: 'AI agents' }
+  { defaultMessage: 'AI security' }
 );
 
 export const PAGE_DESCRIPTION = i18n.translate(
@@ -30,7 +30,7 @@ export const POC_BADGE = i18n.translate(
 export const NAV_LINK_LABEL = i18n.translate(
   'xpack.securitySolution.entityAnalytics.aiAgents.navLinkLabel',
   {
-    defaultMessage: 'AI agents',
+    defaultMessage: 'AI security',
   }
 );
 
