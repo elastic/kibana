@@ -14,6 +14,7 @@ import { filter, take, map } from 'rxjs';
 import type { ToolingLog } from '@kbn/tooling-log';
 
 import type { DockerServer, DockerServerSpec } from '@kbn/test-docker-servers';
+import { ignoreGoneContainer } from '@kbn/test-docker-servers';
 import type { Lifecycle } from '../lifecycle';
 import { observeContainerRunning } from './container_running';
 import { observeContainerLogs } from './container_logs';
@@ -125,14 +126,7 @@ export class DockerServersService {
           execa.sync('docker', ['rm', containerId]);
         }
       } catch (error) {
-        if (
-          error.message.includes(`Container ${containerId} is not running`) ||
-          error.message.includes(`No such container: ${containerId}`)
-        ) {
-          return;
-        }
-
-        throw error;
+        ignoreGoneContainer(containerId, error);
       }
     });
 
@@ -145,6 +139,15 @@ export class DockerServersService {
     // ensure container stays running, error if it exits
     lifecycle.cleanup.addSub(
       observeContainerRunning(name, containerId, log).subscribe({
+        complete: () => {
+          // the `docker wait` monitor was ended by a signal (shared implementation); with the
+          // tests still running, a later exit of this container would go unnoticed
+          if (!lifecycle.cleanup.triggered) {
+            log.warning(
+              `[docker:${name}] the container monitor ended; exits are no longer reported`
+            );
+          }
+        },
         error: (error) => {
           lifecycle.cleanup.after$.subscribe(() => {
             log.error(`[docker:${name}] Error ensuring that the container is running`);

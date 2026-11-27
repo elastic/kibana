@@ -85,6 +85,7 @@ export async function runElasticsearch(
     logsDir,
     config,
     preserveEsData: options.preserveEsData,
+    onEarlyExit: options.onEarlyExit,
   });
 
   // Start linked cluster for Cross Project Search after origin is ready
@@ -103,7 +104,15 @@ export async function runElasticsearch(
       waitForReady: true,
     };
 
-    await runLinkedServerlessCluster(log, serverlessOptions);
+    try {
+      await runLinkedServerlessCluster(log, serverlessOptions);
+    } catch (error) {
+      // the origin node is up and nobody else holds its handle yet
+      await cleanupElasticsearch(node, config.serverless, logsDir, log).catch((cleanupError) =>
+        log.error(cleanupError)
+      );
+      throw error;
+    }
   }
 
   return async () => {
@@ -153,7 +162,13 @@ async function startEsNode({
     secureFiles: config.secureFiles,
   });
 
-  await cluster.start();
+  try {
+    await cluster.start();
+  } catch (error) {
+    // the process may be up without having become ready: nobody else holds its handle yet
+    await cluster.stop().catch((stopError) => log.error(stopError));
+    throw error;
+  }
 
   return cluster;
 }

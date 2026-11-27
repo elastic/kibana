@@ -9,6 +9,7 @@
 
 import type { Client } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
+import { withExitOnSigint } from './with_exit_on_sigint';
 const DEFAULT_READY_TIMEOUT = 10 * 1000; // 10 seconds
 
 export interface WaitOptions {
@@ -25,11 +26,12 @@ export async function waitForSecurityIndex({
   log,
   readyTimeout = DEFAULT_READY_TIMEOUT,
 }: WaitOptions) {
+  await withExitOnSigint(() => pollUntilReady({ client, log, readyTimeout }));
+}
+
+async function pollUntilReady({ client, log, readyTimeout }: Required<WaitOptions>) {
   let attempt = 0;
   const start = Date.now();
-
-  // The loop will continue until timeout even if SIGINT is signaled, so force exit
-  process.on('SIGINT', () => process.exit());
 
   log.info(`waiting for ES cluster to bootstrap the security index`);
 

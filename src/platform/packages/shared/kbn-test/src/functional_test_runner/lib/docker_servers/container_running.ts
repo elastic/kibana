@@ -7,49 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import execa from 'execa';
-import * as Rx from 'rxjs';
-import type { ToolingLog } from '@kbn/tooling-log';
-
-/**
- * Create an observable that errors if a docker
- * container exits before being unsubscribed
- */
-export function observeContainerRunning(name: string, containerId: string, log: ToolingLog) {
-  return new Rx.Observable((subscriber) => {
-    log.debug(`[docker:${name}] watching container for exit status [${containerId}]`);
-
-    const exitCodeProc = execa('docker', ['wait', containerId]);
-
-    let exitCode: Error | number | null = null;
-    exitCodeProc
-      .then(({ stdout }) => {
-        exitCode = Number.parseInt(stdout.trim(), 10);
-
-        if (Number.isFinite(exitCode)) {
-          subscriber.error(
-            new Error(`container [id=${containerId}] unexpectedly exitted with code ${exitCode}`)
-          );
-        } else {
-          subscriber.error(
-            new Error(`unable to parse exit code from output of "docker wait": ${stdout}`)
-          );
-        }
-      })
-      .catch((error) => {
-        if (error?.killed) {
-          // ignore errors thrown because the process was killed
-          subscriber.complete();
-          return;
-        }
-
-        subscriber.error(
-          new Error(`failed to monitor process with "docker wait": ${error.message}`)
-        );
-      });
-
-    return () => {
-      exitCodeProc.kill('SIGKILL');
-    };
-  });
-}
+// Implemented in @kbn/test-docker-servers so test runners without the FTR lifecycle (Scout) can
+// share it. Re-exported here for backwards compatibility.
+export { observeContainerRunning } from '@kbn/test-docker-servers';

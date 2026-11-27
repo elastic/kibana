@@ -11,7 +11,7 @@ import { spawn } from 'node:child_process';
 import { mkdtempSync, readFileSync, rmSync, existsSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { shutdownServers } from './server_shutdown';
+import { registerServerShutdown, shutdownServers } from './server_shutdown';
 
 it('attempts Elasticsearch shutdown after process teardown fails', async () => {
   const error = new Error('process stop failed');
@@ -75,3 +75,35 @@ it('waits for managed process and Elasticsearch shutdown after SIGTERM', async (
     rmSync(markerDir, { recursive: true, force: true });
   }
 }, 20_000);
+
+describe('registerServerShutdown', () => {
+  it('lets the first signal run the shutdown and exits right away on the second one', () => {
+    const exitSpy = jest.spyOn(process, 'exit').mockImplementation(() => undefined as never);
+    const stderrSpy = jest.spyOn(process.stderr, 'write').mockImplementation(() => true);
+    const before = process.listeners('SIGINT');
+
+    const onSignal = jest.fn();
+    const remove = registerServerShutdown({ teardown: jest.fn() }, jest.fn(), onSignal);
+    const added = process.listeners('SIGINT').filter((l) => !before.includes(l));
+    // exit-hook's own listener may be added too; ours is the one that counts signals
+    expect(added.length).toBeGreaterThanOrEqual(1);
+    const ours = added[added.length - 1] as (signal: NodeJS.Signals) => void;
+
+    ours('SIGINT');
+    expect(exitSpy).not.toHaveBeenCalled();
+    expect(stderrSpy).toHaveBeenCalledWith(expect.stringContaining('send SIGINT again'));
+
+    // a different signal is not a request to skip the shutdown
+    ours('SIGTERM');
+    expect(exitSpy).not.toHaveBeenCalled();
+
+    ours('SIGINT');
+    expect(exitSpy).toHaveBeenCalledWith(130);
+    expect(stderrSpy).toHaveBeenCalledWith(expect.stringContaining('Received SIGINT again'));
+
+    remove();
+    expect(process.listeners('SIGINT')).not.toContain(ours);
+    exitSpy.mockRestore();
+    stderrSpy.mockRestore();
+  });
+});
