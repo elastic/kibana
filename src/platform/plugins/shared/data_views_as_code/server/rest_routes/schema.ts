@@ -15,13 +15,12 @@ import {
 import {
   asCodeMetaSchema,
   asCodePaginationResponseMetaSchema,
+  asCodeSpacesSchema,
   PAGINATION_MAX_SIZE,
 } from '@kbn/as-code-shared-schemas';
 
 const dataViewsMetaSchema = asCodeMetaSchema.extend({
-  spaces: z
-    .array(z.string().max(1000))
-    .max(100)
+  spaces: asCodeSpacesSchema
     .optional()
     .meta({ description: 'The IDs of the spaces where the data view is available.' }),
 });

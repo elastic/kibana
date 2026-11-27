@@ -16,6 +16,7 @@ export {
   asCodeQuerySchema,
   asCodeRelatedItemSchema,
   asCodeSearchRequestSchema,
+  asCodeSpacesSchema,
   getAsCodeSearchRequestSchema,
   getAsCodeTagsSchema,
   getMeta,
