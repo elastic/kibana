@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { MIN_BREAKAGE_BUILDS } from '../flaky_tests/breakages';
+
 /** What one build's runs of a test in one setup add up to, across the job's attempts. */
 export interface BuildRun {
   build: number;
@@ -50,23 +52,31 @@ export const verdictOf = (run: BuildRun): BuildVerdict => {
 export interface ConsistentFailureRule {
   /** Builds in a row, at least one, in which the test failed every attempt. */
   consecutiveBuilds: number;
-  /** Runs before those that must all have passed; fewer when the test has not run that often. */
+  /**
+   * Runs before those, none of which may have failed every attempt, and all of which must have
+   * passed for `consecutiveBuilds` to do; fewer when the test has not run that often.
+   */
   cleanRunsBefore: number;
+  /** Builds in a row needed instead when some of those runs only passed on a retry. */
+  consecutiveBuildsAfterRecoveries: number;
 }
 
 /**
  * Two builds tell a break from a flaky test, which rarely fails every attempt twice in a row,
- * and a clean history tells it from a test that was already failing now and then.
+ * and a clean history tells it from a test that was already failing every attempt now and then.
+ * A test that only recovered on retries before is flaky, so its break needs as many builds as the
+ * daily flaky report takes for a breakage: that report leaves the test to this check from then on.
  */
 export const DEFAULT_CONSISTENT_FAILURE_RULE: ConsistentFailureRule = {
   consecutiveBuilds: 2,
   cleanRunsBefore: 20,
+  consecutiveBuildsAfterRecoveries: MIN_BREAKAGE_BUILDS,
 };
 
 export interface ConsistentFailure {
   /** The builds of the streak, oldest first. */
   failingBuilds: BuildRun[];
-  /** The last build in which the test passed, when it did within the runs given. */
+  /** The last build the test passed in, on a retry included, when it did within the runs given. */
   lastPassingBuild?: BuildRun;
 }
 
@@ -77,8 +87,10 @@ export interface ConsistentFailure {
  * Builds are sorted oldest first and each gets a verdict. Pending builds, a failure no retry has
  * reported on, are left out: they neither count as failures nor break the clean history. The
  * latest builds that are `failed`, back to the first one that is not, form the streak; it must
- * be at least `consecutiveBuilds` long. The `cleanRunsBefore` builds before the streak, skipped
- * builds left out, must all be `passed`; fewer builds are fine, so a new test can break too.
+ * be at least `consecutiveBuilds` long. None of the `cleanRunsBefore` builds before the streak,
+ * skipped builds left out, may be `failed`, and when some are `recovered` the streak must be
+ * `consecutiveBuildsAfterRecoveries` long instead; fewer builds are fine, so a new test can break
+ * too.
  *
  * The same break is found again on every later build while it lasts; callers tell a new break
  * from a known one by the issue they filed.
@@ -103,15 +115,22 @@ export const findConsistentFailure = (
     return undefined;
   }
 
-  // the builds before the streak must all have passed
+  // the builds before the streak must not have failed every attempt, and a test that only
+  // recovered on a retry in some of them needs a longer streak
   const history = verdicts.slice(0, start).filter(({ verdict }) => verdict !== 'skipped');
   const before = history.slice(Math.max(0, history.length - rule.cleanRunsBefore));
-  if (before.some(({ verdict }) => verdict !== 'passed')) {
+  if (before.some(({ verdict }) => verdict === 'failed')) {
+    return undefined;
+  }
+  const recovered = before.some(({ verdict }) => verdict === 'recovered');
+  if (recovered && streak.length < rule.consecutiveBuildsAfterRecoveries) {
     return undefined;
   }
 
   return {
     failingBuilds: streak.map(({ run }) => run),
-    lastPassingBuild: history.findLast(({ verdict }) => verdict === 'passed')?.run,
+    lastPassingBuild: history.findLast(
+      ({ verdict }) => verdict === 'passed' || verdict === 'recovered'
+    )?.run,
   };
 };
