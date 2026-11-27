@@ -6,7 +6,12 @@
  */
 
 import { getToolCallSteps, type TaskOutput } from '@kbn/evals';
-import { attachmentTools, internalTools, ToolResultType } from '@kbn/agent-builder-common';
+import {
+  attachmentTools,
+  internalTools,
+  platformCoreTools,
+  ToolResultType,
+} from '@kbn/agent-builder-common';
 import type { ToolingLog } from '@kbn/tooling-log';
 
 /**
@@ -58,6 +63,17 @@ export const createToolUsageEvaluators = (log: ToolingLog) => [
   createToolCallCountEvaluator('security.alerts calls', SECURITY_ALERTS_TOOL_ID),
   createToolCallCountEvaluator('search_relevant_skills calls', internalTools.searchRelevantSkills),
   createToolCallCountEvaluator('load_skill calls', internalTools.loadSkill),
+  // security-team#21037 — queue questions must not spend tokens on these triage tools
+  createToolCallCountEvaluator(
+    'security.alert-analysis.get-related-alerts calls',
+    'security.alert-analysis.get-related-alerts'
+  ),
+  createToolCallCountEvaluator(
+    'security.security_labs_search calls',
+    'security.security_labs_search'
+  ),
+  createToolCallCountEvaluator('security.get_entity calls', 'security.get_entity'),
+  createToolCallCountEvaluator('platform.core.execute_esql calls', platformCoreTools.executeEsql),
   {
     name: 'Tool sequence (steps)',
     kind: 'CODE' as const,
@@ -102,6 +118,71 @@ export const createSkillLoadedEvaluator = (skillName: string) => ({
         })
     );
     return { score: loaded ? 1 : 0 };
+  },
+});
+
+const MAX_EVIDENCE_ESQL_CALLS = 3;
+
+// An ES|QL aggregate without BY returns one row even over zero matches (COUNT is 0, the others are
+// null). A grouped aggregate returns no rows over zero matches, and a projected event row is a match
+// whatever its values are, so `false` or `0` in an event field must still count.
+// Quoted strings and backticked names are removed first, so a `|` or the word "by" inside them does
+// not change how the commands are read.
+const QUOTED_TEXT = /"(?:\\.|[^"\\])*"|`[^`]*`/g;
+
+const isUngroupedAggregate = (query: string | undefined): boolean =>
+  (query ?? '')
+    .replace(QUOTED_TEXT, '""')
+    .split('|')
+    .map((command) => command.trim())
+    .some((command) => /^STATS\b/i.test(command) && !/\bBY\b/i.test(command));
+
+// In an ungrouped aggregate, a flag such as `hits > 0` is false over zero matches, so only a count
+// above zero, a non-empty string or `true` shows that events matched.
+const isAggregateEvidence = (cell: unknown): boolean => {
+  if (Array.isArray(cell)) {
+    return cell.some(isAggregateEvidence);
+  }
+  if (typeof cell === 'number') {
+    return cell > 0;
+  }
+  if (typeof cell === 'string') {
+    return cell !== '';
+  }
+  return cell === true;
+};
+
+const hasMatchingRow = (data: unknown): boolean => {
+  const { query, values = [] } = (data ?? {}) as { query?: string; values?: unknown[][] };
+  if (!isUngroupedAggregate(query)) {
+    return values.length > 0;
+  }
+  return values.some((row) => row.some(isAggregateEvidence));
+};
+
+/**
+ * CODE evaluator: 1 when the agent ran at least one ES|QL query that found at least one event, and ran
+ * at most three ES|QL queries. Checks the evidence step from the tool steps, not from the answer. The
+ * tool returns an `esql_results` entry even when `values` is empty, and an ungrouped aggregate over
+ * zero matches returns a row of zeros, so a search over the wrong time window must not count as
+ * finding the events.
+ */
+export const createEvidenceLookupEvaluator = (log: ToolingLog) => ({
+  name: 'ES|QL evidence lookup (one query with data, at most three calls)',
+  kind: 'CODE' as const,
+  direction: 'maximize' as const,
+  evaluate: async ({ output }: { output: unknown }) => {
+    const esqlCalls = getRawToolSteps(output).filter(
+      ({ tool_id: toolId }) => toolId === platformCoreTools.executeEsql
+    );
+    const succeeded = esqlCalls.filter(({ results = [] }) =>
+      results.some(({ type, data }) => type === ToolResultType.esqlResults && hasMatchingRow(data))
+    ).length;
+    log.info(`ES|QL evidence calls: ${esqlCalls.length}, with data: ${succeeded}`);
+    return {
+      score: succeeded > 0 && esqlCalls.length <= MAX_EVIDENCE_ESQL_CALLS ? 1 : 0,
+      metadata: { calls: esqlCalls.length, succeeded },
+    };
   },
 });
 

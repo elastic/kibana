@@ -27,6 +27,15 @@ jest.mock('@kbn/agent-builder-genai-utils/tools', () => ({
   runSearchTool: jest.fn(),
 }));
 
+/** Returns the text between two headings. Fails the test when a heading was renamed, so that the checks on the slice cannot pass on an empty string. */
+const sliceBetween = (content: string, startHeading: string, endHeading?: string): string => {
+  const start = content.indexOf(startHeading);
+  const end = endHeading === undefined ? content.length : content.indexOf(endHeading);
+  expect(start).toBeGreaterThanOrEqual(0);
+  expect(end).toBeGreaterThan(start);
+  return content.slice(start, end);
+};
+
 /**
  * Reproduction for https://github.com/elastic/security-team/issues/20696
  *
@@ -45,7 +54,7 @@ describe('alertAnalysisSkill guidance for literal-following models (security-tea
 
   it('does not tell the model to refetch an alert that is already attached', () => {
     const { content } = alertAnalysisSkill;
-    const step1 = content.slice(content.indexOf('### 1.'), content.indexOf('### 2.'));
+    const step1 = sliceBetween(content, '### 1.', '### 2.');
 
     // Why: an unconditional "fetch the alert using security.alerts" makes GPT turn an attached
     // alert into an NL -> ES|QL `_id` lookup, a full scan that timed out for ~260s in the thread.
@@ -57,12 +66,143 @@ describe('alertAnalysisSkill guidance for literal-following models (security-tea
     expect(fetchesUnconditionally && !isConditionalOnAttachment).toBe(false);
   });
 
+  // Why: security-team#21037 — queue/list questions with the skill cost ~2.8x tokens vs no-skill when
+  // the model still runs related-alerts, Security Labs, and get_entity. The queue path must stop after
+  // security.alerts.
+  it('tells the model to stop after security.alerts on list/count questions', () => {
+    const { content } = alertAnalysisSkill;
+    const queuePath = sliceBetween(content, '### Queue path', '### Judgment questions');
+
+    expect(queuePath).toMatch(/call only 'security\.alerts'/i);
+    expect(queuePath).toMatch(/\bStop\./);
+    expect(queuePath).toMatch(
+      /do NOT call 'security\.alert-analysis\.get-related-alerts', 'security\.security_labs_search', or 'security\.get_entity'/i
+    );
+  });
+
+  // Why: the shipped step 1 reused an attached alert. A set of attached alerts must not be replaced by
+  // live queue results.
+  it('keeps attached alerts, one or a set, out of the queue lookup', () => {
+    const { content } = alertAnalysisSkill;
+    const chooser = sliceBetween(content, '## Choose a Path First', '### Queue path');
+
+    expect(chooser).toMatch(
+      /attached alerts[^\n]*\(one alert or a set\)[^\n]*do not fetch them again/i
+    );
+    expect(content).toMatch(/### Triage path \(specific alerts, attached or named by id\)/i);
+  });
+
+  // Why: "prioritize" sat under the stop-after-security.alerts path and under the evidence step at the
+  // same time, so the model had two opposite instructions for "which alert do I handle first".
+  it('sends judgment questions out of the queue path instead of stopping', () => {
+    const { content } = alertAnalysisSkill;
+    const queuePath = sliceBetween(content, '### Queue path', '### Judgment questions');
+
+    expect(content).toMatch(/### Queue path \(plain list, count, or summary/i);
+    expect(queuePath).not.toMatch(/prioritize/i);
+    expect(queuePath).toMatch(/which alert to handle first[^\n]*use the next two sections/i);
+    // The redirect must come before the queue-only instructions, or the model stops before it reads it.
+    const redirectAt = queuePath.search(/use the next two sections/i);
+    expect(redirectAt).toBeGreaterThanOrEqual(0);
+    expect(redirectAt).toBeLessThan(queuePath.search(/call only 'security\.alerts'/i));
+    expect(redirectAt).toBeLessThan(queuePath.search(/\bStop\./));
+  });
+
+  // Why: the shipped guardrail said prioritization questions use only security.alerts, which contradicts
+  // the evidence step for "which alert do I handle first".
+  it('does not tell the guardrails to answer prioritization from security.alerts alone', () => {
+    const { content } = alertAnalysisSkill;
+    const guardrails = sliceBetween(content, '## Tool Selection Guardrails');
+
+    expect(guardrails).not.toMatch(/prioritization/i);
+    expect(guardrails).toMatch(/judgment questions[^\n]*check the evidence before you answer/i);
+  });
+
+  // Why: each security.alerts call runs an NL -> ES|QL generator on a second model. In the 21037 lab it
+  // was ~70% of the extra input tokens, and the model called the tool ~2.8 times per run.
+  it('tells the model to call security.alerts once and ask for grouped breakdowns', () => {
+    const { content } = alertAnalysisSkill;
+    const queuePath = sliceBetween(content, '### Queue path', '### Judgment questions');
+
+    expect(queuePath).toMatch(/call 'security\.alerts' once/i);
+    expect(queuePath).toMatch(/ask for all of it in one question so that the result is grouped/i);
+    expect(queuePath).toMatch(
+      /tally rows yourself only when the result says that they were not cut/i
+    );
+  });
+
+  // Why: with a hard stop after security.alerts, every skill arm answered "nothing is on fire" from
+  // alert severity alone (security-team#21037, question 14). Threshold alerts also carry no host or IP.
+  it('tells the model to check the events behind the alerts on judgment questions', () => {
+    const { content } = alertAnalysisSkill;
+    const evidence = sliceBetween(
+      content,
+      '### Check the evidence before you answer',
+      '### Triage path'
+    );
+
+    expect(evidence).toMatch(/"on fire"/i);
+    expect(evidence).toMatch(/share hosts or IPs/i);
+    expect(evidence).toMatch(/ES\|QL tool if it is available/i);
+    expect(evidence).toMatch(/in one query/i);
+  });
+
+  // Why: in the 21037 lab the model ran 8-9 ES|QL calls on some questions, and sometimes queried the
+  // alerts index, which is not scoped to the current space. It also searched events only inside the
+  // alerts' 24h window, found nothing (the events were older than the alerts), and answered "nothing is
+  // on fire" (question 14).
+  it('bounds the ES|QL evidence step and keeps it off the alerts index', () => {
+    const { content } = alertAnalysisSkill;
+    const evidence = sliceBetween(
+      content,
+      '### Check the evidence before you answer',
+      '### Triage path'
+    );
+
+    expect(evidence).toMatch(/never the alerts index/i);
+    expect(evidence).toMatch(/at most three ES\|QL calls/i);
+    expect(evidence).toMatch(/not when the events happened/i);
+    expect(evidence).toMatch(/at least the last 30 days/i);
+    expect(evidence).not.toMatch(/original_time/i);
+    expect(evidence).toMatch(/never answer that nothing is wrong from an empty result/i);
+    expect(evidence).toMatch(
+      /if the ES\|QL tool is not available, say that the events were not checked/i
+    );
+    expect(content).toMatch(
+      /never query the alerts index \('\.alerts-security\.alerts-\*'\) with ES\|QL/i
+    );
+  });
+
+  it('limits entity and related-alert lookups on judgment questions', () => {
+    const { content } = alertAnalysisSkill;
+    const judgment = sliceBetween(content, '### Judgment questions', '### Check the evidence');
+
+    expect(judgment).toMatch(/at most one call to each tool/i);
+    expect(judgment).toMatch(/exception is 'security\.get_entity'[^\n]*one call per entity/i);
+    expect(judgment).toMatch(/'security\.get_entity'[^\n]*at most two entities/i);
+    expect(judgment).toMatch(/get-related-alerts'[^\n]*carry host or IP values/i);
+    expect(judgment).toMatch(/security_labs_search'[^\n]*threat intelligence/i);
+  });
+
+  // Why: security.get_entity takes one entityId per call, so a one-call cap per tool would stop triage
+  // from checking both the user and the host.
+  it('allows one get_entity call per entity on the triage path', () => {
+    const { content } = alertAnalysisSkill;
+    const triage = sliceBetween(content, '### Triage path', '## Triage Steps');
+
+    expect(triage).toMatch(
+      /exception is 'security\.get_entity'[^\n]*one call for each involved user or host/i
+    );
+  });
+
   // Why: security.get_entity exists only when the Entity Store V2 index exists. Where it is missing,
   // a skill that names it without a fallback sends the model looking for it (extra load_skill calls).
+  // PR #304299 made Claude call it on every triage run (0.07 → 2.0); keep it triage-only.
   it('says what to do when security.get_entity is not available', () => {
     const { content } = alertAnalysisSkill;
-    const step4 = content.slice(content.indexOf('### 4.'), content.indexOf('### 5.'));
+    const step4 = sliceBetween(content, '### 4.', '### 5.');
 
+    expect(step4).toMatch(/on the triage path\. skip it for list, count/i);
     expect(step4).toMatch(/if 'security\.get_entity' is available/i);
     expect(step4).toMatch(/if it is not available, skip this step/i);
     expect(step4).not.toMatch(/entity-analytics skill/i);
@@ -73,7 +213,7 @@ describe('alertAnalysisSkill guidance for literal-following models (security-tea
   // Why: a plain list needs a few fields per alert. Without this line, the model asks for full rows,
   // which the tool cuts to about 25.
   it('tells the model to ask for summary detail on plain list requests', () => {
-    expect(alertAnalysisSkill.content).toMatch(/detail[^.\n]*'summary'[^.\n]*list/i);
+    expect(alertAnalysisSkill.content).toMatch(/detail[^.\n]*'summary'/i);
   });
 
   it('only names registry tools that are loadable when skills are enabled', async () => {
