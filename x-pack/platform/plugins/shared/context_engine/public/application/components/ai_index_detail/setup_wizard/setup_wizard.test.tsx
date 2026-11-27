@@ -213,15 +213,16 @@ describe('SetupWizard', () => {
     expect(screen.queryByTestId('contextSetupWizardBack')).not.toBeInTheDocument();
   });
 
-  it('Exit setup closes the wizard with a toast', () => {
+  it('Exit setup closes the wizard with an info toast', () => {
     const { onClose, services } = renderWizard();
 
     fireEvent.click(screen.getByTestId('contextSetupWizardExit'));
 
     expect(onClose).toHaveBeenCalled();
-    expect(services.notifications.toasts.addSuccess).toHaveBeenCalledWith(
+    expect(services.notifications.toasts.addInfo).toHaveBeenCalledWith(
       'Setup closed. Everything is in Settings when you need it.'
     );
+    expect(services.notifications.toasts.addSuccess).not.toHaveBeenCalled();
   });
 
   it('a step starts with a fresh draft after a step change', () => {

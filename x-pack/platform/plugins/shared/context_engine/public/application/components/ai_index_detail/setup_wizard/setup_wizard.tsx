@@ -103,14 +103,20 @@ export const SetupWizard = ({
   const nextOpenStep = steps.slice(currentIndex + 1).find(({ id }) => !doneStepIds.has(id));
   const isBusy = isContinuing || isStepBusy;
 
-  const close = (toast: string) => {
+  const finish = () => {
     onClose();
-    notifications.toasts.addSuccess(toast);
+    notifications.toasts.addSuccess(finishedToast);
+  };
+
+  // Leaving setup early is not a success, so it only informs.
+  const exit = () => {
+    onClose();
+    notifications.toasts.addInfo(closedToast);
   };
 
   const goToNextOpenStep = () => {
     if (nextOpenStep === undefined) {
-      close(finishedToast);
+      finish();
       return;
     }
     onStepChange(nextOpenStep.id);
@@ -200,7 +206,7 @@ export const SetupWizard = ({
             }
           },
           onSkip: goToNextOpenStep,
-          onExit: () => close(closedToast),
+          onExit: exit,
           onContinue: continueWith,
         }}
       />
