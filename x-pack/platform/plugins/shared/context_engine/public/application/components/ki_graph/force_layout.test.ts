@@ -5,8 +5,13 @@
  * 2.0.
  */
 
-import type { ForceLayoutEdge, ForceLayoutNode } from './force_layout';
-import { forceLayout } from './force_layout';
+import type { ForceLayoutEdge, ForceLayoutNode, KiGraphCenterParams } from './force_layout';
+import {
+  DEFAULT_FORCE_LAYOUT_PARAMS,
+  DEFAULT_KI_GRAPH_CENTER_PARAMS,
+  createForceLayoutRunner,
+  forceLayout,
+} from './force_layout';
 
 const GLYPH_R = 14;
 const HUB_R = 22;
@@ -114,6 +119,58 @@ const buildRandomGraph = (
 
   return { nodes, edges };
 };
+
+const runRunnerToCompletion = (
+  nodes: readonly ForceLayoutNode[],
+  edges: readonly ForceLayoutEdge[],
+  centerParams: KiGraphCenterParams = DEFAULT_KI_GRAPH_CENTER_PARAMS
+) => {
+  const runner = createForceLayoutRunner(nodes, edges, DEFAULT_FORCE_LAYOUT_PARAMS, centerParams);
+  while (!runner.step(0)) {
+    // chunk until finished
+  }
+  return runner.getPositions();
+};
+
+describe('createForceLayoutRunner', () => {
+  it('finishes immediately with an empty map for no nodes', () => {
+    const runner = createForceLayoutRunner([], []);
+    expect(runner.totalTicks).toBe(0);
+    expect(runner.step(8)).toBe(true);
+    expect(runner.getPositions()).toEqual(new Map());
+  });
+
+  it('chunked steps match forceLayout for the multi-hub star graph', () => {
+    const { nodes, edges } = buildMultiHubStarGraph();
+    const expected = forceLayout(nodes, edges);
+    const chunked = runRunnerToCompletion(nodes, edges);
+    expect(chunked).toEqual(expected);
+  });
+
+  it('chunked steps match forceLayout with pinCenterNode', () => {
+    const { nodes, edges } = buildSingleStar(12);
+    const centerParams: KiGraphCenterParams = {
+      ...DEFAULT_KI_GRAPH_CENTER_PARAMS,
+      pinCenterNode: true,
+    };
+    const expected = forceLayout(nodes, edges, undefined, centerParams);
+    const chunked = runRunnerToCompletion(nodes, edges, centerParams);
+    expect(chunked).toEqual(expected);
+  });
+
+  it('step always advances and eventually completes', () => {
+    const { nodes, edges } = buildSingleStar(8);
+    const runner = createForceLayoutRunner(nodes, edges);
+    let steps = 0;
+    const maxSteps = runner.totalTicks + 5;
+    while (!runner.step(0)) {
+      steps += 1;
+      expect(steps).toBeLessThanOrEqual(maxSteps);
+    }
+    expect(steps).toBeGreaterThan(0);
+    expect(runner.getPositions().size).toBe(nodes.length);
+  });
+});
 
 describe('forceLayout', () => {
   it('returns empty for no nodes and places a single node finitely', () => {

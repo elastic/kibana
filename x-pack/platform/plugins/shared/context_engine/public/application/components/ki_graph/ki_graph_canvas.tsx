@@ -8,6 +8,7 @@
 import {
   COLOR_MODES_STANDARD,
   EuiEmptyPrompt,
+  EuiLoadingSpinner,
   EuiText,
   keys,
   transparentize,
@@ -29,6 +30,7 @@ import {
   ReactFlow,
   ReactFlowProvider,
   useReactFlow,
+  useStore,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
@@ -38,6 +40,11 @@ import { getSpotlightModel } from './get_spotlight_model';
 import { getKiGraphNodeMinimapColor } from './ki_graph_glyph_styles';
 import { KiGraphEdge } from './ki_graph_edge';
 import { kiGraphFocusDimmingCss } from './ki_graph_focus_styles';
+import {
+  getKiGraphDetailTier,
+  getKiGraphLabelTier,
+  kiGraphZoomDetailCss,
+} from './ki_graph_zoom_styles';
 import {
   applyKiGraphEdgeFocusStyles,
   applyKiGraphEdgeZIndex,
@@ -87,6 +94,10 @@ const allNodesHiddenBody = i18n.translate('xpack.contextEngine.kiGraph.canvas.al
   defaultMessage: 'Turn on a legend filter to show nodes on the graph.',
 });
 
+const layoutLoadingLabel = i18n.translate('xpack.contextEngine.kiGraph.canvas.layoutLoadingLabel', {
+  defaultMessage: 'Laying out graph',
+});
+
 const NODE_TYPES: NodeTypes = {
   kiNode: KiGraphNode,
 };
@@ -134,8 +145,10 @@ const KiGraphCanvasFlow = ({
   const [layoutParams, setLayoutParams] = useState<KiGraphLayoutTuningParams>(
     DEFAULT_KI_GRAPH_LAYOUT_TUNING_PARAMS
   );
-  const skipLayoutFitViewRef = useRef(true);
-  const skipGraphFitViewRef = useRef(true);
+  const layoutRunWasInProgressRef = useRef(false);
+  const isViewportMovingRef = useRef(false);
+  const labelTier = useStore((state) => getKiGraphLabelTier(state.transform[2]));
+  const detailTier = useStore((state) => getKiGraphDetailTier(state.transform[2]));
   const wasSpotlightOpenRef = useRef(false);
   const prevSelectedIdRef = useRef<string | undefined>(undefined);
   const readyTimeoutRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
@@ -174,6 +187,7 @@ const KiGraphCanvasFlow = ({
     edges: layoutEdges,
     labelNodes,
     layoutDurationMs,
+    isLayoutRunning,
   } = useKiGraphLayout(graph, layoutParams);
   const labelNodesForPlacement = useMemo(
     () => labelNodes.filter((node) => !hiddenNodeIds.has(node.id)),
@@ -263,26 +277,19 @@ const KiGraphCanvasFlow = ({
   );
 
   useEffect(() => {
-    if (skipLayoutFitViewRef.current) {
-      skipLayoutFitViewRef.current = false;
+    if (isLayoutRunning) {
+      layoutRunWasInProgressRef.current = true;
       return;
     }
+    if (!layoutRunWasInProgressRef.current) {
+      return;
+    }
+    layoutRunWasInProgressRef.current = false;
     const frame = requestAnimationFrame(() => {
       fitView({ padding: FIT_PADDING, duration: 300 });
     });
     return () => cancelAnimationFrame(frame);
-  }, [layoutParams, fitView]);
-
-  useEffect(() => {
-    if (skipGraphFitViewRef.current) {
-      skipGraphFitViewRef.current = false;
-      return;
-    }
-    const frame = requestAnimationFrame(() => {
-      fitView({ padding: FIT_PADDING, duration: 300 });
-    });
-    return () => cancelAnimationFrame(frame);
-  }, [graph, fitView]);
+  }, [isLayoutRunning, fitView]);
 
   useEffect(() => {
     const spotlightWasOpen = wasSpotlightOpenRef.current;
@@ -356,7 +363,7 @@ const KiGraphCanvasFlow = ({
 
   const handleNodeMouseEnter: NodeMouseHandler<KiGraphRenderableFlowNode> = useCallback(
     (_event, node) => {
-      if (!isSpotlightOpen && !node.hidden) {
+      if (!isSpotlightOpen && !node.hidden && !isViewportMovingRef.current) {
         setHoveredId(node.id);
       }
     },
@@ -366,6 +373,22 @@ const KiGraphCanvasFlow = ({
   const handleNodeMouseLeave = useCallback(() => {
     setHoveredId(undefined);
   }, [setHoveredId]);
+
+  // Zooming slides nodes under a still cursor; hovering them would re-dim the whole graph every frame.
+  const handleMoveStart: OnMove = useCallback(
+    (event) => {
+      if (event === null) {
+        return;
+      }
+      isViewportMovingRef.current = true;
+      setHoveredId(undefined);
+    },
+    [setHoveredId]
+  );
+
+  const handleMoveEnd: OnMove = useCallback(() => {
+    isViewportMovingRef.current = false;
+  }, []);
 
   const handleMove: OnMove = useCallback(
     (event, viewport) => {
@@ -411,8 +434,14 @@ const KiGraphCanvasFlow = ({
 
   return (
     <div
-      css={css({ position: 'relative', width: '100%', height: '100%' }, kiGraphFocusDimmingCss)}
+      css={css(
+        { position: 'relative', width: '100%', height: '100%' },
+        kiGraphFocusDimmingCss,
+        kiGraphZoomDetailCss
+      )}
       data-ki-graph-focus={focusActive ? 'true' : 'false'}
+      data-ki-graph-labels={labelTier}
+      data-ki-graph-detail={detailTier}
       data-test-subj="contextKiGraphCanvas"
     >
       <ReactFlow<KiGraphRenderableFlowNode, KiGraphFlowEdge>
@@ -427,6 +456,8 @@ const KiGraphCanvasFlow = ({
         onNodeMouseLeave={handleNodeMouseLeave}
         onPaneClick={handlePaneClick}
         onMove={handleMove}
+        onMoveStart={handleMoveStart}
+        onMoveEnd={handleMoveEnd}
         nodesDraggable={false}
         nodesConnectable={false}
         elementsSelectable
@@ -434,7 +465,6 @@ const KiGraphCanvasFlow = ({
         elevateEdgesOnSelect={false}
         fitView
         fitViewOptions={{ padding: FIT_PADDING }}
-        onlyRenderVisibleElements
         minZoom={0.05}
         maxZoom={8}
         proOptions={{ hideAttribution: true }}
@@ -453,6 +483,7 @@ const KiGraphCanvasFlow = ({
           <KiGraphLayoutTuningPanel
             value={layoutParams}
             layoutDurationMs={layoutDurationMs}
+            isLayoutRunning={isLayoutRunning}
             onChange={setLayoutParams}
           />
         </Panel>
@@ -480,6 +511,21 @@ const KiGraphCanvasFlow = ({
           />
         ) : null}
       </ReactFlow>
+      {isLayoutRunning ? (
+        <div
+          css={css({
+            position: 'absolute',
+            inset: 0,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            pointerEvents: 'none',
+          })}
+          data-test-subj="contextKiGraphCanvasLayoutLoading"
+        >
+          <EuiLoadingSpinner size="xl" aria-label={layoutLoadingLabel} />
+        </div>
+      ) : null}
       {showAllHiddenEmptyState ? (
         <div
           css={css({

@@ -14,7 +14,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { Handle, type NodeProps, Position, useStore } from '@xyflow/react';
+import { Handle, type NodeProps, Position } from '@xyflow/react';
 import React, { memo, useMemo } from 'react';
 import { useKiGraphUiStore } from './ki_graph_ui_store';
 import { getKiGraphGlyphIconScale, getKiGraphNodeGlyphColors } from './ki_graph_glyph_styles';
@@ -30,11 +30,7 @@ import {
   KI_GRAPH_NODE_TINT_MIN_DEGREE,
   KI_GRAPH_NODE_TINT_MIN_OCCURRENCES,
 } from './ki_graph_node_size';
-import {
-  KI_GRAPH_LABEL_MAX_WIDTH,
-  KI_GRAPH_LABEL_MIN_ZOOM,
-  KI_GRAPH_LOW_DETAIL_ZOOM,
-} from './use_visible_label_ids';
+import { KI_GRAPH_LABEL_MAX_WIDTH } from './use_visible_label_ids';
 import type { KiGraphFlowNode, KiGraphFlowNodeData } from './use_ki_graph_layout';
 
 const HOVER_SCALE = 1.15;
@@ -65,10 +61,6 @@ const shellStaticCss = css({
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
-});
-
-const lowDetailDotCss = css({
-  borderRadius: '50%',
 });
 
 const iconStaticCss = css({
@@ -109,20 +101,10 @@ export const KiGraphNode = memo(({ id, data }: NodeProps<KiGraphRenderableFlowNo
   const isSelected = useKiGraphUiStore((state) => state.selectedId === id);
   const isHovered = useKiGraphUiStore((state) => state.hoveredId === id);
   const isHighlighted = useKiGraphUiStore((state) => state.highlightIds?.has(id) ?? false);
-  const labelsAboveMinZoom = useStore((state) => state.transform[2] >= KI_GRAPH_LABEL_MIN_ZOOM);
-  const isLowDetail = useStore((state) => state.transform[2] < KI_GRAPH_LOW_DETAIL_ZOOM);
 
   const { size } = data;
   const labelHalo = euiTheme.colors.backgroundBaseSubdued;
-  const isForcedLabel = isHighlighted;
-  let showLabel = false;
-  if (isForcedLabel) {
-    showLabel = true;
-  } else if (labelsAboveMinZoom) {
-    showLabel = data.hasNormalLabel;
-  } else {
-    showLabel = data.hasHubLabel;
-  }
+  const renderLabel = isHighlighted || data.hasNormalLabel || data.hasHubLabel;
 
   const isEntity = data.kind === 'entity';
 
@@ -146,10 +128,9 @@ export const KiGraphNode = memo(({ id, data }: NodeProps<KiGraphRenderableFlowNo
     data.kind === 'workflow' ||
     data.kind === 'crawler';
   const showIcon =
-    !isLowDetail &&
-    (size >= KI_GRAPH_NODE_ICON_HIDE_BELOW ||
-      (isEntity && isPersonLikeEntitySubtype(data.subtype)) ||
-      isDistinctKindGlyph);
+    size >= KI_GRAPH_NODE_ICON_HIDE_BELOW ||
+    (isEntity && isPersonLikeEntitySubtype(data.subtype)) ||
+    isDistinctKindGlyph;
   const iconScale = getKiGraphGlyphIconScale(size);
 
   const shellScale = isHovered ? HOVER_SCALE : 1;
@@ -161,7 +142,7 @@ export const KiGraphNode = memo(({ id, data }: NodeProps<KiGraphRenderableFlowNo
         fontWeight: euiTheme.font.weight.regular,
         lineHeight: euiTheme.font.lineHeightMultiplier,
         color: euiTheme.colors.textParagraph,
-        textShadow: `0 0 3px ${labelHalo}, 0 0 3px ${labelHalo}, 1px 0 2px ${labelHalo}, -1px 0 2px ${labelHalo}`,
+        textShadow: `0 0 2px ${labelHalo}`,
       }),
     [
       euiTheme.colors.textParagraph,
@@ -193,16 +174,6 @@ export const KiGraphNode = memo(({ id, data }: NodeProps<KiGraphRenderableFlowNo
     [iconScale, size]
   );
 
-  const lowDetailStyle = useMemo(
-    () => ({
-      width: size,
-      height: size,
-      backgroundColor: fill,
-      border: `${borderWidth}px solid ${borderColor}`,
-    }),
-    [borderColor, borderWidth, fill, size]
-  );
-
   return (
     <>
       <Handle type="target" position={Position.Top} isConnectable={false} css={centeredHandleCss} />
@@ -215,23 +186,19 @@ export const KiGraphNode = memo(({ id, data }: NodeProps<KiGraphRenderableFlowNo
         aria-label={data.title}
         title={data.title}
       >
-        {isLowDetail ? (
-          <div css={lowDetailDotCss} style={lowDetailStyle} />
-        ) : (
-          <KiGraphNodeShape
-            size={size}
-            kind={data.kind}
-            fill={fill}
-            backdropFill={labelHalo}
-            stroke={borderColor}
-            strokeWidth={borderWidth}
-            isSelected={isSelected}
-            isHovered={isHovered}
-            hoverRingStroke={hoverRingStroke}
-          />
-        )}
+        <KiGraphNodeShape
+          size={size}
+          kind={data.kind}
+          fill={fill}
+          backdropFill={labelHalo}
+          stroke={borderColor}
+          strokeWidth={borderWidth}
+          isSelected={isSelected}
+          isHovered={isHovered}
+          hoverRingStroke={hoverRingStroke}
+        />
         {showIcon ? (
-          <span css={iconStaticCss} style={iconStyle}>
+          <span css={iconStaticCss} style={iconStyle} data-ki-graph-node-icon="true">
             <EuiIcon
               type={getKiGraphNodeIcon(data.kind, data.subtype)}
               color={iconColor}
@@ -240,8 +207,15 @@ export const KiGraphNode = memo(({ id, data }: NodeProps<KiGraphRenderableFlowNo
             />
           </span>
         ) : null}
-        {showLabel ? (
-          <span css={labelCss} data-test-subj="contextKiGraphNodeLabel">
+        {renderLabel ? (
+          <span
+            css={labelCss}
+            data-ki-graph-label="true"
+            data-ki-graph-label-normal={data.hasNormalLabel ? 'true' : 'false'}
+            data-ki-graph-label-hub={data.hasHubLabel ? 'true' : 'false'}
+            data-ki-graph-label-forced={isHighlighted ? 'true' : 'false'}
+            data-test-subj="contextKiGraphNodeLabel"
+          >
             {data.title}
           </span>
         ) : null}

@@ -255,15 +255,24 @@ const topRankedNodeId = (rankById: ReadonlyMap<string, number>): string | undefi
   return bestId;
 };
 
-const runSimulation = (
+const roundedPositions = (layoutNodes: readonly LayoutNode[]): Map<string, ForcePosition> => {
+  const result = new Map<string, ForcePosition>();
+  for (const node of layoutNodes) {
+    result.set(node.id, {
+      x: Math.round(node.x ?? 0),
+      y: Math.round(node.y ?? 0),
+    });
+  }
+  return result;
+};
+
+const createSimulation = (
   layoutNodes: LayoutNode[],
   layoutLinks: LayoutLink[],
   params: ForceLayoutParams,
   centerParams: KiGraphCenterParams,
   rankById: ReadonlyMap<string, number>
-): LayoutNode[] => {
-  const iterations = resolveTickCount(layoutNodes.length, params.ticks);
-
+) => {
   const linkForce = forceLink<LayoutNode, LayoutLink>(layoutLinks)
     .id((node) => node.id)
     .distance((link) => link.distance)
@@ -312,9 +321,55 @@ const runSimulation = (
   }
 
   simulation.stop();
-  simulation.tick(iterations);
+  return simulation;
+};
 
-  return layoutNodes;
+export interface ForceLayoutRunner {
+  step: (budgetMs: number) => boolean;
+  getPositions: () => ReadonlyMap<string, ForcePosition>;
+  readonly totalTicks: number;
+}
+
+const emptyForceLayoutRunner = (): ForceLayoutRunner => ({
+  totalTicks: 0,
+  step: () => true,
+  getPositions: () => new Map(),
+});
+
+export const createForceLayoutRunner = (
+  nodes: readonly ForceLayoutNode[],
+  edges: readonly ForceLayoutEdge[],
+  params: ForceLayoutParams = DEFAULT_FORCE_LAYOUT_PARAMS,
+  centerParams: KiGraphCenterParams = DEFAULT_KI_GRAPH_CENTER_PARAMS
+): ForceLayoutRunner => {
+  if (nodes.length === 0) {
+    return emptyForceLayoutRunner();
+  }
+
+  const { layoutNodes, layoutLinks, rankById } = buildLayout(nodes, edges, params, centerParams);
+  const totalTicks = resolveTickCount(layoutNodes.length, params.ticks);
+  const simulation = createSimulation(layoutNodes, layoutLinks, params, centerParams, rankById);
+
+  let ticksDone = 0;
+
+  return {
+    totalTicks,
+    step: (budgetMs: number): boolean => {
+      if (ticksDone >= totalTicks) {
+        return true;
+      }
+      const deadline = performance.now() + budgetMs;
+      do {
+        simulation.tick();
+        ticksDone += 1;
+        if (ticksDone >= totalTicks) {
+          return true;
+        }
+      } while (performance.now() < deadline);
+      return false;
+    },
+    getPositions: () => roundedPositions(layoutNodes),
+  };
 };
 
 export const forceLayout = (
@@ -323,19 +378,7 @@ export const forceLayout = (
   params: ForceLayoutParams = DEFAULT_FORCE_LAYOUT_PARAMS,
   centerParams: KiGraphCenterParams = DEFAULT_KI_GRAPH_CENTER_PARAMS
 ): ReadonlyMap<string, ForcePosition> => {
-  if (nodes.length === 0) {
-    return new Map();
-  }
-
-  const { layoutNodes, layoutLinks, rankById } = buildLayout(nodes, edges, params, centerParams);
-  const settled = runSimulation(layoutNodes, layoutLinks, params, centerParams, rankById);
-
-  const result = new Map<string, ForcePosition>();
-  for (const node of settled) {
-    result.set(node.id, {
-      x: Math.round(node.x ?? 0),
-      y: Math.round(node.y ?? 0),
-    });
-  }
-  return result;
+  const runner = createForceLayoutRunner(nodes, edges, params, centerParams);
+  runner.step(Number.POSITIVE_INFINITY);
+  return runner.getPositions();
 };

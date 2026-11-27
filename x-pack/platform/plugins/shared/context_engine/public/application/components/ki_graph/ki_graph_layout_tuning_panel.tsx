@@ -14,6 +14,7 @@ import {
   EuiForm,
   EuiFormRow,
   EuiHorizontalRule,
+  EuiLoadingSpinner,
   EuiPanel,
   EuiRange,
   EuiSelect,
@@ -34,6 +35,7 @@ import { DEFAULT_KI_GRAPH_LAYOUT_TUNING_PARAMS } from './use_ki_graph_layout';
 interface KiGraphLayoutTuningPanelProps {
   value: KiGraphLayoutTuningParams;
   layoutDurationMs: number;
+  isLayoutRunning?: boolean;
   onChange: (next: KiGraphLayoutTuningParams) => void;
 }
 
@@ -207,6 +209,7 @@ const NODE_SIZE_MODE_OPTIONS: Array<{ value: KiGraphNodeSizeMode; text: string }
 export const KiGraphLayoutTuningPanel = ({
   value,
   layoutDurationMs,
+  isLayoutRunning = false,
   onChange,
 }: KiGraphLayoutTuningPanelProps) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -271,9 +274,18 @@ export const KiGraphLayoutTuningPanel = ({
       {isOpen ? (
         <EuiPanel paddingSize="s" hasShadow css={panelShellCss}>
           <div css={panelScrollCss}>
-            <EuiText size="xs" color="subdued">
-              Last layout: {durationLabel}
-            </EuiText>
+            <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+              <EuiFlexItem grow={false}>
+                <EuiText size="xs" color="subdued">
+                  Last layout: {durationLabel}
+                </EuiText>
+              </EuiFlexItem>
+              {isLayoutRunning ? (
+                <EuiFlexItem grow={false}>
+                  <EuiLoadingSpinner size="s" />
+                </EuiFlexItem>
+              ) : null}
+            </EuiFlexGroup>
             <EuiSpacer size="s" />
             <EuiForm component="div">
               <TuningSection

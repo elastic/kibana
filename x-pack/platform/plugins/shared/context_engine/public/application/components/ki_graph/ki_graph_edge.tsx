@@ -10,11 +10,9 @@ import {
   type EdgeProps,
   type InternalNode,
   useInternalNode,
-  useStore,
 } from '@xyflow/react';
 import React, { memo, useMemo } from 'react';
 import { useKiGraphUiStore } from './ki_graph_ui_store';
-import { KI_GRAPH_LOW_DETAIL_ZOOM } from './use_visible_label_ids';
 import type { KiGraphFlowEdge, KiGraphFlowNode } from './use_ki_graph_layout';
 
 const NODE_EDGE_GAP = 2;
@@ -39,8 +37,6 @@ export const KiGraphEdge = memo(
     const isHighlighted = useKiGraphUiStore((state) =>
       edgeIsFocusHighlighted(state.focusId, source, target)
     );
-    const isLowDetail = useStore((state) => state.transform[2] < KI_GRAPH_LOW_DETAIL_ZOOM);
-
     const path = useMemo(() => {
       if (sourceNode === undefined || targetNode === undefined) {
         return '';
@@ -68,14 +64,19 @@ export const KiGraphEdge = memo(
       return null;
     }
 
-    const resolvedMarkerEnd = isLowDetail ? undefined : markerEnd;
-
     return (
       <g
         data-ki-graph-edge="true"
         {...(isHighlighted ? { 'data-ki-graph-highlighted': 'true' } : {})}
       >
-        <BaseEdge id={id} path={path} style={style} markerEnd={resolvedMarkerEnd} />
+        <BaseEdge
+          id={id}
+          path={path}
+          style={style}
+          markerEnd={markerEnd}
+          interactionWidth={0}
+          data-ki-graph-edge-path="true"
+        />
       </g>
     );
   }

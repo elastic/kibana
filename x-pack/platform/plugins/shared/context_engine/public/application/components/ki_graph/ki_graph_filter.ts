@@ -44,7 +44,7 @@ export interface KiGraphFilterState {
 
 export const createDefaultKiGraphFilterState = (): KiGraphFilterState => ({
   hiddenKeys: new Set(),
-  hideUnconnected: true,
+  hideUnconnected: false,
 });
 
 export const buildKiGraphConnectedNodeIds = (graph: KiGraph): ReadonlySet<string> => {
