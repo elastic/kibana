@@ -59,6 +59,16 @@ type OAuthBodyRequest =
   | JWTOAuthRequestParams
   | RefreshTokenOAuthRequestParams;
 
+// Token URLs can carry credentials in the userinfo or query string; keep only the origin and path.
+const getUrlWithoutCredentials = (url: string): string => {
+  try {
+    const { origin, pathname } = new URL(url);
+    return `${origin}${pathname}`;
+  } catch {
+    return '[unparsable URL]';
+  }
+};
+
 export async function requestOAuthToken<T>(
   tokenUrl: string,
   grantType: string,
@@ -109,8 +119,8 @@ export async function requestOAuthToken<T>(
   });
 
   if (res.status >= 300 && res.status < 400) {
-    const message = `OAuth token endpoint ${tokenUrl} returned a redirect (HTTP ${res.status}). Configure the token URL it redirects to.`;
-    logger.warn(message);
+    const message = `OAuth token endpoint returned a redirect (HTTP ${res.status}). Configure the token URL it redirects to.`;
+    logger.warn(`${message} Token URL: ${getUrlWithoutCredentials(tokenUrl)}`);
     throw new Error(message);
   }
 

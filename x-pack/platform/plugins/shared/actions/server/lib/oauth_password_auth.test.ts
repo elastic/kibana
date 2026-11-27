@@ -146,7 +146,7 @@ describe('OAuth password authentication', () => {
       .post('/api/token', tokenBody)
       .reply(307, '', { Location: 'https://other.example.com/token' });
     await expect(configure()).rejects.toThrow(
-      'OAuth token endpoint https://threatq.example.com/api/token returned a redirect (HTTP 307).'
+      'OAuth token endpoint returned a redirect (HTTP 307).'
     );
     expect(connectorTokenClient.updateOrReplace).not.toHaveBeenCalled();
   });
