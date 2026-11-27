@@ -492,4 +492,14 @@ export const ConnectorIconsMap: Map<
         )
     ),
   ],
+
+  [
+    '.microsoft_entra_id',
+    lazy(
+      () =>
+        import(
+          /* webpackChunkName: "connectorIconMicrosoftEntraId" */ './specs/microsoft_entra_id/icon'
+        )
+    ),
+  ],
 ]);

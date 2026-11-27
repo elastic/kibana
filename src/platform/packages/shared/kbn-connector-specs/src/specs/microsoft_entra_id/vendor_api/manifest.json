@@ -1,0 +1,384 @@
+{
+  "operations": {
+    "addUserToGroup": [
+      {
+        "method": "post",
+        "path": "/groups/{group-id}/members/$ref",
+        "source": "v1"
+      }
+    ],
+    "confirmCompromisedUser": [
+      {
+        "method": "post",
+        "path": "/identityProtection/riskyUsers/confirmCompromised",
+        "source": "v1"
+      },
+      {
+        "method": "get",
+        "path": "/users/{user-id}",
+        "source": "v1"
+      }
+    ],
+    "createUser": [
+      {
+        "method": "post",
+        "path": "/users",
+        "source": "v1"
+      }
+    ],
+    "deleteAuthMethod": [
+      {
+        "method": "delete",
+        "path": "/users/{user-id}/authentication/emailMethods/{emailAuthenticationMethod-id}",
+        "source": "v1"
+      },
+      {
+        "method": "delete",
+        "path": "/users/{user-id}/authentication/fido2Methods/{fido2AuthenticationMethod-id}",
+        "source": "v1"
+      },
+      {
+        "method": "delete",
+        "path": "/users/{user-id}/authentication/microsoftAuthenticatorMethods/{microsoftAuthenticatorAuthenticationMethod-id}",
+        "source": "v1"
+      },
+      {
+        "method": "delete",
+        "path": "/users/{user-id}/authentication/phoneMethods/{phoneAuthenticationMethod-id}",
+        "source": "v1"
+      },
+      {
+        "method": "delete",
+        "path": "/users/{user-id}/authentication/softwareOathMethods/{softwareOathAuthenticationMethod-id}",
+        "source": "v1"
+      },
+      {
+        "method": "delete",
+        "path": "/users/{user-id}/authentication/temporaryAccessPassMethods/{temporaryAccessPassAuthenticationMethod-id}",
+        "source": "v1"
+      },
+      {
+        "method": "delete",
+        "path": "/users/{user-id}/authentication/windowsHelloForBusinessMethods/{windowsHelloForBusinessAuthenticationMethod-id}",
+        "source": "v1"
+      }
+    ],
+    "deleteUser": [
+      {
+        "method": "delete",
+        "path": "/users/{user-id}",
+        "source": "v1"
+      }
+    ],
+    "disableUser": [
+      {
+        "method": "patch",
+        "path": "/users/{user-id}",
+        "source": "v1"
+      }
+    ],
+    "dismissRiskyUser": [
+      {
+        "method": "post",
+        "path": "/identityProtection/riskyUsers/dismiss",
+        "source": "v1"
+      },
+      {
+        "method": "get",
+        "path": "/users/{user-id}",
+        "source": "v1"
+      }
+    ],
+    "enableUser": [
+      {
+        "method": "patch",
+        "path": "/users/{user-id}",
+        "source": "v1"
+      }
+    ],
+    "getUser": [
+      {
+        "method": "get",
+        "pagination": {
+          "defaultSize": 100,
+          "request": {
+            "cursorParam": "$skiptoken",
+            "sizeParam": "$top"
+          },
+          "response": {
+            "itemsPath": "value",
+            "nextPath": "[\"@odata.nextLink\"]"
+          },
+          "style": "next_url"
+        },
+        "path": "/users",
+        "source": "v1"
+      },
+      {
+        "method": "get",
+        "path": "/users/{user-id}",
+        "source": "v1"
+      }
+    ],
+    "getUserAuthMethods": [
+      {
+        "method": "get",
+        "pagination": "none",
+        "path": "/users/{user-id}/authentication/methods",
+        "source": "v1"
+      }
+    ],
+    "getUserGroups": [
+      {
+        "method": "get",
+        "pagination": {
+          "defaultSize": 100,
+          "request": {
+            "cursorParam": "$skiptoken",
+            "sizeParam": "$top"
+          },
+          "response": {
+            "itemsPath": "value",
+            "nextPath": "[\"@odata.nextLink\"]"
+          },
+          "style": "next_url"
+        },
+        "path": "/users/{user-id}/memberOf",
+        "source": "v1"
+      },
+      {
+        "method": "get",
+        "pagination": {
+          "defaultSize": 100,
+          "request": {
+            "cursorParam": "$skiptoken",
+            "sizeParam": "$top"
+          },
+          "response": {
+            "itemsPath": "value",
+            "nextPath": "[\"@odata.nextLink\"]"
+          },
+          "style": "next_url"
+        },
+        "path": "/users/{user-id}/transitiveMemberOf",
+        "source": "v1"
+      }
+    ],
+    "listGroupMembers": [
+      {
+        "method": "get",
+        "pagination": {
+          "defaultSize": 100,
+          "request": {
+            "cursorParam": "$skiptoken",
+            "sizeParam": "$top"
+          },
+          "response": {
+            "itemsPath": "value",
+            "nextPath": "[\"@odata.nextLink\"]"
+          },
+          "style": "next_url"
+        },
+        "path": "/groups/{group-id}/members",
+        "source": "v1"
+      }
+    ],
+    "listGroups": [
+      {
+        "method": "get",
+        "pagination": {
+          "defaultSize": 100,
+          "request": {
+            "cursorParam": "$skiptoken",
+            "sizeParam": "$top"
+          },
+          "response": {
+            "itemsPath": "value",
+            "nextPath": "[\"@odata.nextLink\"]"
+          },
+          "style": "next_url"
+        },
+        "path": "/groups",
+        "source": "v1"
+      }
+    ],
+    "listRiskyUsers": [
+      {
+        "method": "get",
+        "pagination": {
+          "request": {
+            "cursorParam": "$skiptoken",
+            "sizeParam": "$top"
+          },
+          "response": {
+            "itemsPath": "value",
+            "nextPath": "[\"@odata.nextLink\"]"
+          },
+          "style": "next_url"
+        },
+        "path": "/identityProtection/riskyUsers",
+        "source": "v1"
+      }
+    ],
+    "listUserAppRoleAssignments": [
+      {
+        "method": "get",
+        "pagination": {
+          "defaultSize": 100,
+          "request": {
+            "cursorParam": "$skiptoken",
+            "sizeParam": "$top"
+          },
+          "response": {
+            "itemsPath": "value",
+            "nextPath": "[\"@odata.nextLink\"]"
+          },
+          "style": "next_url"
+        },
+        "path": "/users/{user-id}/appRoleAssignments",
+        "source": "v1"
+      }
+    ],
+    "listUsers": [
+      {
+        "method": "get",
+        "pagination": {
+          "defaultSize": 100,
+          "request": {
+            "cursorParam": "$skiptoken",
+            "sizeParam": "$top"
+          },
+          "response": {
+            "itemsPath": "value",
+            "nextPath": "[\"@odata.nextLink\"]"
+          },
+          "style": "next_url"
+        },
+        "path": "/users",
+        "source": "v1"
+      }
+    ],
+    "removeUserFromGroup": [
+      {
+        "method": "delete",
+        "path": "/groups/{group-id}/members/{directoryObject-id}/$ref",
+        "source": "v1"
+      }
+    ],
+    "request": [
+      {
+        "method": "get",
+        "pagination": {
+          "defaultSize": 100,
+          "request": {
+            "cursorParam": "$skiptoken",
+            "sizeParam": "$top"
+          },
+          "response": {
+            "itemsPath": "value",
+            "nextPath": "[\"@odata.nextLink\"]"
+          },
+          "style": "next_url"
+        },
+        "path": "/users",
+        "source": "v1"
+      }
+    ],
+    "resetUserMfa": [
+      {
+        "method": "delete",
+        "path": "/users/{user-id}/authentication/emailMethods/{emailAuthenticationMethod-id}",
+        "source": "v1"
+      },
+      {
+        "method": "delete",
+        "path": "/users/{user-id}/authentication/fido2Methods/{fido2AuthenticationMethod-id}",
+        "source": "v1"
+      },
+      {
+        "method": "get",
+        "pagination": "none",
+        "path": "/users/{user-id}/authentication/methods",
+        "source": "v1"
+      },
+      {
+        "method": "delete",
+        "path": "/users/{user-id}/authentication/microsoftAuthenticatorMethods/{microsoftAuthenticatorAuthenticationMethod-id}",
+        "source": "v1"
+      },
+      {
+        "method": "delete",
+        "path": "/users/{user-id}/authentication/phoneMethods/{phoneAuthenticationMethod-id}",
+        "source": "v1"
+      },
+      {
+        "method": "delete",
+        "path": "/users/{user-id}/authentication/softwareOathMethods/{softwareOathAuthenticationMethod-id}",
+        "source": "v1"
+      },
+      {
+        "method": "delete",
+        "path": "/users/{user-id}/authentication/temporaryAccessPassMethods/{temporaryAccessPassAuthenticationMethod-id}",
+        "source": "v1"
+      },
+      {
+        "method": "delete",
+        "path": "/users/{user-id}/authentication/windowsHelloForBusinessMethods/{windowsHelloForBusinessAuthenticationMethod-id}",
+        "source": "v1"
+      }
+    ],
+    "resetUserPassword": [
+      {
+        "method": "patch",
+        "path": "/users/{user-id}",
+        "source": "v1"
+      }
+    ],
+    "revokeSignInSessions": [
+      {
+        "method": "post",
+        "path": "/users/{user-id}/revokeSignInSessions",
+        "source": "v1"
+      }
+    ],
+    "revokeUserAppAssignment": [
+      {
+        "method": "get",
+        "pagination": {
+          "defaultSize": 100,
+          "request": {
+            "cursorParam": "$skiptoken",
+            "sizeParam": "$top"
+          },
+          "response": {
+            "itemsPath": "value",
+            "nextPath": "[\"@odata.nextLink\"]"
+          },
+          "style": "next_url"
+        },
+        "path": "/users/{user-id}/appRoleAssignments",
+        "source": "v1"
+      },
+      {
+        "method": "delete",
+        "path": "/users/{user-id}/appRoleAssignments/{appRoleAssignment-id}",
+        "source": "v1"
+      }
+    ],
+    "updateUser": [
+      {
+        "method": "patch",
+        "path": "/users/{user-id}",
+        "source": "v1"
+      }
+    ]
+  },
+  "sources": {
+    "v1": {
+      "apiVersion": "v1.0",
+      "fetchedAt": "2026-11-25T09:12:34.003Z",
+      "format": "openapi",
+      "url": "https://raw.githubusercontent.com/microsoftgraph/msgraph-metadata/master/openapi/v1.0/openapi.yaml"
+    }
+  }
+}
