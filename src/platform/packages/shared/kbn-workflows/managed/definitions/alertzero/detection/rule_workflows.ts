@@ -37,7 +37,7 @@ export const ALERTZERO_COVERAGE_WORKER_WORKFLOW = {
   id: ALERTZERO_COVERAGE_WORKER_WORKFLOW_ID,
   management: ALERTZERO_RULE_WORKFLOW_MANAGEMENT,
   pluginId: ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID,
-  version: 6,
+  version: 7,
   get yaml() {
     return readManagedWorkflowYaml(__dirname, 'coverage_sweep.yaml');
   },
