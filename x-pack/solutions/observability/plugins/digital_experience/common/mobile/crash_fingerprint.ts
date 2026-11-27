@@ -44,7 +44,7 @@ export const CRASH_FRAME_RULES = {
     { pattern: '0x[0-9a-f]+ ', replacement: '' },
     { pattern: ' +', replacement: ' ' },
     // A report without frames must not share a group with a crash of its type without a stack trace
-    { pattern: '^', replacement: 'ios|' },
+    { pattern: '^$', replacement: 'ios|' },
   ],
   // JVM traces: the first line repeats the message, a cause's message and how many frames it shares
   // vary per crash (ids, object hashes), and line numbers change with every build

@@ -64,14 +64,14 @@ describe('crash fingerprint rules', () => {
   it('ignores the header and load addresses of an iOS report, which change per launch', () => {
     expect(fingerprintOf('iosLaunchA')).toBe(fingerprintOf('iosLaunchB'));
     expect(crashFramesOf(CRASH_FINGERPRINT_CASES.iosLaunchA)).toBe(
-      'ios|0 libsystem_kernel.dylib + 198940\n1 RideIos + 14587904'
+      '0 libsystem_kernel.dylib + 198940\n1 RideIos + 14587904'
     );
   });
 
   it('reads the last exception backtrace of an iOS report when it has one', () => {
     expect(fingerprintOf('iosExceptionA')).toBe(fingerprintOf('iosExceptionB'));
     expect(crashFramesOf(CRASH_FINGERPRINT_CASES.iosExceptionA)).toBe(
-      'ios|0 CoreFoundation + 233480\n1 RideIos + 40081848'
+      '0 CoreFoundation + 233480\n1 RideIos + 40081848'
     );
   });
 
@@ -91,7 +91,7 @@ describe('crash fingerprint rules', () => {
   it('ignores the address of a symbolicated iOS frame, which changes per launch', () => {
     expect(fingerprintOf('iosSymbolicatedA')).toBe(fingerprintOf('iosSymbolicatedB'));
     expect(crashFramesOf(CRASH_FINGERPRINT_CASES.iosSymbolicatedA)).toBe(
-      'ios|0 CoreFoundation __exceptionPreprocess + 164\n1 RideIos RideViewController.start() + 88'
+      '0 CoreFoundation __exceptionPreprocess + 164\n1 RideIos RideViewController.start() + 88'
     );
   });
 
