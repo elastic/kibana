@@ -148,16 +148,16 @@ export const createOnboardingClient = ({
       if (!agentExecution) return undefined;
       const withEvents = await executionService.getExecution(agentExecution.executionId);
       // Only ids and the intent leave the server: params and results can hold queries and secrets.
-      const steps = (withEvents?.events ?? []).filter(isToolCallEvent).map(
-        ({ data }): OnboardingProgressStep => {
+      const steps = (withEvents?.events ?? [])
+        .filter(isToolCallEvent)
+        .map(({ data }): OnboardingProgressStep => {
           const intent = data.intent?.trim().slice(0, MAX_ONBOARDING_PROGRESS_INTENT_LENGTH);
           return {
             tool_call_id: data.tool_call_id,
             tool_id: data.tool_id,
             ...(intent ? { intent } : {}),
           };
-        }
-      );
+        });
       return steps.length > 0 ? steps.slice(-MAX_ONBOARDING_PROGRESS_STEPS) : undefined;
     } catch (error) {
       logger.warn(
