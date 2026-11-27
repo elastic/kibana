@@ -1,5 +1,5 @@
 pageLoadAssetSize:
-  actions: 3928
+  actions: 4400
   advancedSettings: 1981
   agentBuilder: 745
   agentBuilderDashboards: 4468
@@ -193,9 +193,9 @@ pageLoadAssetSize:
   serverlessVectordb: 10433
   sessionView: 647
   share: 379
-  shared-core: 343009
+  shared-core: 343301
   shared-misc: 155260
-  shared-packages: 6065481
+  shared-packages: 6672186
   shared-plugins: 13536562
   shared-solution-packages: 386709
   significantEvents: 4439

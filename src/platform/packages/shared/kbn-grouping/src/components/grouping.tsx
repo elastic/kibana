@@ -87,6 +87,11 @@ export interface GroupingProps<T> {
   emptyGroupingComponent?: React.ReactElement;
   /** Optional function to get additional action buttons to display in group stats before the Take actions button */
   getAdditionalActionButtons?: GetAdditionalActionButtons<T>;
+  /** Optional accessible name for each group's expand/collapse toggle, overriding the name computed from the group panel content */
+  getGroupToggleAriaLabel?: (
+    selectedGroup: string,
+    groupBucket: GroupingBucket<T>
+  ) => string | undefined;
 }
 
 const GroupingComponent = <T,>({
@@ -113,6 +118,7 @@ const GroupingComponent = <T,>({
   multiValueFields,
   emptyGroupingComponent,
   getAdditionalActionButtons,
+  getGroupToggleAriaLabel,
 }: GroupingProps<T>) => {
   const { euiTheme } = useEuiTheme();
   const xsFontSize = useEuiFontSize('xs').fontSize;
@@ -198,6 +204,7 @@ const GroupingComponent = <T,>({
                 groupPanelRenderer(selectedGroup, groupBucket, nullGroupMessage, isLoading)
               }
               isLoading={isLoading}
+              toggleAriaLabel={getGroupToggleAriaLabel?.(selectedGroup, groupBucket)}
               onToggleGroup={(isOpen) => {
                 // built-in telemetry: UI-counter
                 tracker?.(
@@ -242,6 +249,7 @@ const GroupingComponent = <T,>({
       unit,
       multiValueFields,
       getAdditionalActionButtons,
+      getGroupToggleAriaLabel,
     ]
   );
 
