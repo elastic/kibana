@@ -26,10 +26,10 @@ describe('signal event statuses', () => {
 });
 
 describe('getAlertEventsResourceDefinition', () => {
-  it('maps routing.tags beside the existing routing_tags keyword', () => {
+  it('maps routing.tags and does not map top-level routing_tags', () => {
     const { mappings } = getAlertEventsResourceDefinition();
 
-    expect(mappings.properties?.routing_tags).toEqual({ type: 'keyword', ignore_above: 128 });
+    expect(mappings.properties).not.toHaveProperty('routing_tags');
     expect(mappings.properties?.routing).toEqual({
       type: 'object',
       properties: {
