@@ -8,6 +8,7 @@
  */
 
 import React from 'react';
+import type { CoreStart } from '@kbn/core/public';
 import { BehaviorSubject } from 'rxjs';
 import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -35,15 +36,18 @@ const setup = async ({
   sourceEsql = esql,
   resultColumns = [MESSAGE_COLUMN],
   fetchStatus = FetchStatus.COMPLETE,
+  activeProduct,
   licenseType = 'platinum',
 }: {
   esql?: string;
   sourceEsql?: string;
   resultColumns?: DatatableColumn[];
   fetchStatus?: FetchStatus;
+  activeProduct?: ReturnType<CoreStart['pricing']['getActiveProduct']>;
   licenseType?: 'platinum' | 'basic';
 } = {}) => {
   const services = createDiscoverServicesMock();
+  jest.spyOn(services.core.pricing, 'getActiveProduct').mockReturnValue(activeProduct);
   const licensing = licensingMock.createStart();
   licensing.license$ = new BehaviorSubject(
     licensingMock.createLicense({ license: { type: licenseType } })
@@ -108,6 +112,21 @@ describe('FindPatternsButton', () => {
     expect(toolkit.getCurrentTab().appState.query).toEqual({
       esql: expect.stringContaining(`CATEGORIZE(${field})`),
     });
+  });
+
+  it('hides the action on Observability Logs Essentials even with a platinum license', async () => {
+    await setup({ activeProduct: { type: 'observability', tier: 'logs_essentials' } });
+    expect(screen.queryByTestId('dscFindPatternsButton')).not.toBeInTheDocument();
+  });
+
+  it('offers the action on Observability Complete', async () => {
+    await setup({ activeProduct: { type: 'observability', tier: 'complete' } });
+    expect(screen.getByTestId('dscFindPatternsButton')).toBeVisible();
+  });
+
+  it('offers the action on Security Essentials with a platinum license', async () => {
+    await setup({ activeProduct: { type: 'security', tier: 'essentials', product_lines: [] } });
+    expect(screen.getByTestId('dscFindPatternsButton')).toBeVisible();
   });
 
   it('hides the action below the CATEGORIZE license level', async () => {

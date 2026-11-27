@@ -38,6 +38,7 @@ export {
 export { withAutoSuggest } from './definitions/utils/autocomplete/helpers';
 export { getIndexSourcesFromQuery, shouldBeQuotedSource } from './definitions/utils/sources';
 export { getPromqlBracketsToClose } from './definitions/utils/ast';
+export { isFunctionAvailableAtLocation } from './definitions/utils/functions';
 export { escapeEsqlColumnName } from './definitions/utils/columns';
 export { deriveQueryFieldNames } from './registry/highlight/utils';
 export {

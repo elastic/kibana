@@ -12,6 +12,7 @@ import { EuiBadge, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { getCategorizationField } from '@kbn/aiops-utils';
 import { isOfAggregateQueryType } from '@kbn/es-query';
+import { isFunctionAvailableAtLocation, Location } from '@kbn/esql-language';
 import { hasAggregatingCommand } from '@kbn/esql-utils';
 import useObservable from 'react-use/lib/useObservable';
 import { EMPTY } from 'rxjs';
@@ -32,7 +33,7 @@ export const FindPatternsButton = () => {
   const dispatch = useInternalStateDispatch();
   const updateESQLQuery = useCurrentTabAction(internalStateActions.updateESQLQuery);
   const { scopedEBTManager } = useScopedServices();
-  const { licensing } = useDiscoverServices();
+  const { core, licensing } = useDiscoverServices();
   const license = useObservable(licensing?.license$ ?? EMPTY);
   const query = useAppStateSelector((state) => state.query);
   const { data$ } = useCurrentTabDataStateContainer();
@@ -40,7 +41,6 @@ export const FindPatternsButton = () => {
 
   if (
     !license?.isActive ||
-    !license.hasAtLeast('platinum') ||
     fetchStatus !== FetchStatus.COMPLETE ||
     !isOfAggregateQueryType(query) ||
     dataSource?.kind !== 'esql' ||
@@ -55,7 +55,15 @@ export const FindPatternsButton = () => {
       .filter(({ meta }) => meta.esType === 'text' || meta.esType === 'match_only_text')
       .map(({ name }) => name)
   );
-  if (!field) {
+  if (
+    !field ||
+    !isFunctionAvailableAtLocation(
+      'categorize',
+      Location.STATS_BY,
+      (minimum) => license.hasAtLeast(minimum),
+      core.pricing.getActiveProduct()
+    )
+  ) {
     return null;
   }
 
