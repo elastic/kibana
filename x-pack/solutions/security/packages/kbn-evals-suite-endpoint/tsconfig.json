@@ -21,6 +21,9 @@
     "@kbn/test",
     "@kbn/security-solution-plugin",
     "@kbn/fleet-plugin",
-    "@kbn/securitysolution-list-constants"
+    "@kbn/securitysolution-list-constants",
+    "@kbn/elastic-assistant-common",
+    "@kbn/core",
+    "@kbn/kbn-client"
   ]
 }

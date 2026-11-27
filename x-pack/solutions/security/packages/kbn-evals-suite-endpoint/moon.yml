@@ -25,6 +25,9 @@ dependsOn:
   - '@kbn/security-solution-plugin'
   - '@kbn/fleet-plugin'
   - '@kbn/securitysolution-list-constants'
+  - '@kbn/elastic-assistant-common'
+  - '@kbn/core'
+  - '@kbn/kbn-client'
 tags:
   - functional-tests
   - package
