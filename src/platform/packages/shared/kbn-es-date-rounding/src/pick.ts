@@ -86,6 +86,13 @@ export const durationAsRange = (durationMs: number): { from: 0; to: number } => 
 /**
  * Finest ES DateRoundingPicker interval that produces at most `maxBuckets` in `range`.
  * Searches the day→1ms primary ladder, then falls back through week, month, and year.
+ *
+ * It follows `DateRoundingPicker` in Elasticsearch's ES|QL `Bucket.java`:
+ * - The range is half-open, `[from, to)`: a bucket that starts exactly at `to` is not counted.
+ * - If no interval fits, it returns `1y` without checking the count, so a very small `maxBuckets`
+ *   can be exceeded, as in Elasticsearch.
+ * - Buckets are counted as Elasticsearch counts them. Across a clock rollback that repeats a local
+ *   date, the count can be lower than the number of distinct bucket keys.
  * @throws {Error} If `maxBuckets` is not a positive integer, or `range.from` is not finite and less than `range.to`.
  */
 export const pickDateRounding = (maxBuckets: number, range: ZonedDateRange): DateInterval => {
@@ -112,7 +119,8 @@ export const pickDateRounding = (maxBuckets: number, range: ZonedDateRange): Dat
 };
 
 /**
- * Whether `interval` stays within `maxBuckets` over `range`, using the picker's zoned count.
+ * Whether `interval` stays within `maxBuckets` over `range`, using the picker's zoned count
+ * (half-open `[from, to)`, counted like `DateRoundingPicker` in Elasticsearch).
  * @throws {Error} If `maxBuckets` is not a positive integer, `range` is invalid, or `interval.expression` is unknown.
  */
 export const fitsInBuckets = (

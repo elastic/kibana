@@ -141,6 +141,38 @@ describe('pickDateRounding', () => {
     expect(fitsInBuckets(oneDay, range, 1)).toBe(false);
   });
 
+  it('falls back to 1y even when it exceeds the bucket cap, like Elasticsearch', () => {
+    const range: ZonedDateRange = {
+      from: Date.UTC(2023, 11, 31),
+      to: Date.UTC(2024, 0, 2),
+      timeZone,
+    };
+    const interval = pickDateRounding(1, range);
+
+    expect(interval.expression).toBe('1y');
+    expect(fitsInBuckets(interval, range, 1)).toBe(false);
+  });
+
+  it('counts the range end as exclusive, like Elasticsearch', () => {
+    // 24 hourly buckets in [00:00, 24:00), and a bucket that starts exactly at `to` is not counted.
+    expectPick(day, 24, '1h');
+  });
+
+  it('counts one daily bucket inside a repeated local date, like Elasticsearch', () => {
+    // America/St_Johns, 2009-11-01: at 00:01 NDT clocks go back to 23:01 NST on 2009-10-31, so
+    // [02:30Z, 02:40Z) touches both November 1 and October 31. Elasticsearch counts one bucket.
+    const stJohns = ianaTimeZone('America/St_Johns');
+    const rollback: ZonedDateRange = {
+      from: Date.UTC(2009, 10, 1, 2, 30),
+      to: Date.UTC(2009, 10, 1, 2, 40),
+      timeZone: stJohns,
+    };
+
+    expect(fitsInBuckets({ expression: '1d', kind: 'calendar', nominalMs: day }, rollback, 1)).toBe(
+      true
+    );
+  });
+
   it('handles targets far above any real bar count without walking every bucket', () => {
     const range = rangeFor(365 * day);
     expect(pickDateRounding(1e8, range).expression).toBe('1s');

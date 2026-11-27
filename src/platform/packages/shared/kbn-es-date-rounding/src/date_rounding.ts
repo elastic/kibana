@@ -89,6 +89,11 @@ export const toDateRounding = (expression: string): DateRounding | undefined => 
 /**
  * Start of the date bucket containing `timestamp` in `timeZone`, in UTC epoch milliseconds. This is
  * the value Elasticsearch returns as the bucket `key` for the same interval and time zone.
+ *
+ * It follows Elasticsearch's `Rounding`: calendar days, weeks, months and years use
+ * `TimeUnitRounding`, where local midnight that a forward jump skips starts at the jump and
+ * midnight that repeats starts at its first occurrence. Fixed widths use `TimeIntervalRounding`.
+ * Time zone offsets come from moment-timezone instead of the JDK, so tzdata versions can differ.
  */
 export const roundToBucketKey = (
   timestamp: number,
@@ -118,6 +123,13 @@ export const nextBucketKey = (
  * Number of Elasticsearch date buckets that cover `[from, to)`. Stops counting as soon as it
  * exceeds `limit`. Aligned fixed buckets inside a constant-offset period are counted
  * arithmetically, so only the buckets around offset changes are walked one by one.
+ *
+ * It mirrors `DateRoundingPicker` in Elasticsearch's `Bucket.java`: calendar buckets are walked
+ * with the next rounding value of the previous bucket (`roundingIsOkCalendarBasedUnit`), and fixed
+ * widths are counted per constant-offset period (`roundingIsOkFixedWidthUnit`). Across a rollback
+ * that repeats a local date, such as America/St_Johns on 2009-11-01 (00:01 back to 23:01), a range
+ * inside the repeated stretch counts one daily bucket in Elasticsearch too, even though two keys
+ * exist, so the count matches Elasticsearch and not the number of distinct keys.
  */
 export const countBuckets = (
   from: number,
