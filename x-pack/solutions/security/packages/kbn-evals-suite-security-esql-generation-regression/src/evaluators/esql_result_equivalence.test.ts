@@ -10,7 +10,7 @@ import {
   createEsqlResultEquivalenceEvaluator,
   ESQL_RESULT_EQUIVALENCE_EVALUATOR_NAME,
 } from './esql_result_equivalence';
-import { DEFAULT_TEND, DEFAULT_TSTART } from './esql_bind_params';
+import { DEFAULT_TEND, DEFAULT_TSTART, substituteEsqlBindParams } from './esql_bind_params';
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -598,6 +598,157 @@ describe('createEsqlResultEquivalenceEvaluator', () => {
 
       expect(result.score).toBe(1);
       expect(result.label).toBe('exact-match');
+    });
+  });
+
+  // -------------------------------------------------------------------------
+  // Golden build 01a12766-c0d4-4880-9167-b48d428f6664, example 8. The gold and
+  // the candidates differ only in the order of the `STATS ... BY` keys, and the
+  // judge rubric the suite pairs with this evaluator lists output column
+  // ordering as a non-penalised difference ("Output column ordering or extra
+  // cosmetic KEEP/DROP clauses that don't change the answer").
+  describe('normalization — result-column order', () => {
+    const GOLD_BY_ORDER_QUERY =
+      'FROM logs-* | WHERE @timestamp >= NOW() - 15 minutes | EVAL bucket = DATE_TRUNC(1 minute, @timestamp) | STATS avg_cpu = AVG(system.cpu.total.norm.pct) BY bucket, host.name | LIMIT 10';
+    const CANDIDATE_BY_ORDER_QUERY =
+      'FROM logs-* | WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend | STATS avg_cpu = AVG(system.cpu.total.norm.pct) BY host.name, bucket = BUCKET(@timestamp, 1 minute) | SORT avg_cpu DESC | LIMIT 10';
+
+    const goldColumns = [
+      { name: 'avg_cpu', type: 'double' },
+      { name: 'bucket', type: 'date' },
+      { name: 'host.name', type: 'keyword' },
+    ];
+    // Same columns, BY keys the other way round.
+    const candidateColumns = [
+      { name: 'avg_cpu', type: 'double' },
+      { name: 'host.name', type: 'keyword' },
+      { name: 'bucket', type: 'date' },
+    ];
+
+    it('scores 1.0 when the same row comes back with the BY keys in a different order', async () => {
+      const esClient = createEsClient({
+        [GOLD_BY_ORDER_QUERY]: {
+          columns: goldColumns,
+          values: [[42.5, '2026-10-18T10:00:00.000Z', 'web-01']],
+        },
+        [substituteEsqlBindParams(CANDIDATE_BY_ORDER_QUERY)]: {
+          columns: candidateColumns,
+          values: [[42.5, 'web-01', '2026-10-18T10:00:00.000Z']],
+        },
+      });
+      const evaluator = createEsqlResultEquivalenceEvaluator({
+        esClient,
+        ...defaultExtractors,
+      });
+
+      const result = await evaluator.evaluate(
+        params(CANDIDATE_BY_ORDER_QUERY, GOLD_BY_ORDER_QUERY)
+      );
+
+      expect(result.score).toBe(1);
+      expect(result.label).toBe('exact-match');
+      const meta = result.metadata as Record<string, unknown>;
+      // A missing mock key would resolve to an empty result set and a vacuous
+      // 1.0, so pin the row counts as well as the score.
+      expect(meta.goldRowCount).toBe(1);
+      expect(meta.candidateRowCount).toBe(1);
+      expect(meta.intersectionRowCount).toBe(1);
+    });
+
+    it('scores 1.0 when several rows differ in column order and in row order', async () => {
+      const esClient = createEsClient({
+        [GOLD_BY_ORDER_QUERY]: {
+          columns: goldColumns,
+          values: [
+            [10.5, '2026-10-18T10:00:00.000Z', 'web-01'],
+            [42.5, '2026-10-18T10:01:00.000Z', 'web-01'],
+            [7.25, '2026-10-18T10:01:00.000Z', 'web-02'],
+          ],
+        },
+        [substituteEsqlBindParams(CANDIDATE_BY_ORDER_QUERY)]: {
+          columns: candidateColumns,
+          values: [
+            [7.25, 'web-02', '2026-10-18T10:01:00.000Z'],
+            [42.5, 'web-01', '2026-10-18T10:01:00.000Z'],
+            [10.5, 'web-01', '2026-10-18T10:00:00.000Z'],
+          ],
+        },
+      });
+      const evaluator = createEsqlResultEquivalenceEvaluator({
+        esClient,
+        ...defaultExtractors,
+      });
+
+      const result = await evaluator.evaluate(
+        params(CANDIDATE_BY_ORDER_QUERY, GOLD_BY_ORDER_QUERY)
+      );
+
+      expect(result.score).toBe(1);
+      expect(result.label).toBe('exact-match');
+      const meta = result.metadata as Record<string, unknown>;
+      expect(meta.goldRowCount).toBe(3);
+      expect(meta.candidateRowCount).toBe(3);
+      expect(meta.intersectionRowCount).toBe(3);
+    });
+
+    it('still scores 1.0 when the column NAMES differ but the values line up', async () => {
+      // Boundary of the change: keying rows by column name only applies while
+      // both result sets expose the same columns. The alias case below
+      // (google-gemini-3.0-flash on the same golden example 8) scored 1.0
+      // before this change, and must keep scoring 1.0: the fix removes false
+      // zeros, it must not introduce any.
+      const candidateAliasedColumns = [
+        { name: 'avg_cpu', type: 'double' },
+        { name: 'host_bucket', type: 'date' },
+        { name: 'host.name', type: 'keyword' },
+      ];
+      const candidateAliasedQuery =
+        'FROM logs-* | WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend | STATS avg_cpu = AVG(system.cpu.total.norm.pct) BY host_bucket = BUCKET(@timestamp, 1 minute), host.name | SORT avg_cpu DESC | LIMIT 10';
+
+      const esClient = createEsClient({
+        [GOLD_BY_ORDER_QUERY]: {
+          columns: goldColumns,
+          values: [[42.5, '2026-10-18T10:00:00.000Z', 'web-01']],
+        },
+        [substituteEsqlBindParams(candidateAliasedQuery)]: {
+          columns: candidateAliasedColumns,
+          values: [[42.5, '2026-10-18T10:00:00.000Z', 'web-01']],
+        },
+      });
+      const evaluator = createEsqlResultEquivalenceEvaluator({
+        esClient,
+        ...defaultExtractors,
+      });
+
+      const result = await evaluator.evaluate(params(candidateAliasedQuery, GOLD_BY_ORDER_QUERY));
+
+      expect(result.score).toBe(1);
+      const meta = result.metadata as Record<string, unknown>;
+      expect(meta.intersectionRowCount).toBe(1);
+    });
+
+    it('scores 0 when the rows really do differ', async () => {
+      const esClient = createEsClient({
+        [GOLD_BY_ORDER_QUERY]: {
+          columns: goldColumns,
+          values: [[42.5, '2026-10-18T10:00:00.000Z', 'web-01']],
+        },
+        [substituteEsqlBindParams(CANDIDATE_BY_ORDER_QUERY)]: {
+          columns: candidateColumns,
+          values: [[7.25, 'web-02', '2026-10-18T10:00:00.000Z']],
+        },
+      });
+      const evaluator = createEsqlResultEquivalenceEvaluator({
+        esClient,
+        ...defaultExtractors,
+      });
+
+      const result = await evaluator.evaluate(
+        params(CANDIDATE_BY_ORDER_QUERY, GOLD_BY_ORDER_QUERY)
+      );
+
+      expect(result.score).toBe(0);
+      expect(result.label).toBe('no-overlap');
     });
   });
 
