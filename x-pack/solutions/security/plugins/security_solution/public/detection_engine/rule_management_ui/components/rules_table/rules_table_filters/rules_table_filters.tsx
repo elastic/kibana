@@ -14,7 +14,6 @@ import { RULES_TABLE_ACTIONS } from '../../../../../common/lib/apm/user_actions'
 import { useStartTransaction } from '../../../../../common/lib/apm/use_start_transaction';
 import { useRulesTableContext } from '../rules_table/rules_table_context';
 import { AllRulesTabs } from '../constants';
-import { RuleSearchField } from './rule_search_field';
 import { GapFillStatusSelector } from './gap_fill_status_selector';
 import { RulesGroupByButton } from '../../../../rule_sets/components/rules_group_by_control';
 import { ShowFacetPanelButton } from '../../../../rule_sets/facets/facet_panel_visibility';
@@ -24,6 +23,7 @@ import {
   useRuleSearchStatus,
 } from '../../../../rule_sets/search/use_rule_search_status';
 import { AI_PLACEHOLDER } from '../../../../rule_sets/search/translations';
+import { RuleSearchWithFilters } from '../../../../rule_sets/search/rule_search_with_filters';
 import {
   SearchSuggestions,
   useRecentAiSearches,
@@ -62,6 +62,9 @@ const RulesTableFiltersComponent = ({ selectedTab }: RulesTableFiltersProps) => 
     },
     [boxMode, remember, setFilterOptions, startTransaction]
   );
+  const handleApplyFilter = useCallback(() => {
+    startTransaction({ name: RULES_TABLE_ACTIONS.FILTER });
+  }, [startTransaction]);
   const handleSearchModeChange = useCallback(
     (searchMode: RuleSearchBoxMode) => {
       startTransaction({ name: RULES_TABLE_ACTIONS.FILTER });
@@ -84,11 +87,11 @@ const RulesTableFiltersComponent = ({ selectedTab }: RulesTableFiltersProps) => 
   return (
     <FilterWrapper gutterSize="m" justifyContent="flexEnd" alignItems="center" wrap>
       <ShowFacetPanelButton conditions={filterOptions.conditions ?? {}} />
-      <RuleSearchField
-        initialValue={filterOptions.filter}
+      <RuleSearchWithFilters
         onSearch={handleOnSearch}
+        onApplyFilter={handleApplyFilter}
         placeholder={boxMode === 'ai' ? AI_PLACEHOLDER : undefined}
-        suggestions={
+        recentSearches={
           boxMode === 'ai' ? (
             <SearchSuggestions recent={recent} onPick={handleOnSearch} />
           ) : undefined

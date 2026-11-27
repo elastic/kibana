@@ -51,9 +51,6 @@ export const PRIVATE_BADGE = i18n.translate('xpack.securitySolution.ruleSets.hea
 export const SHARED_BADGE = i18n.translate('xpack.securitySolution.ruleSets.header.shared', {
   defaultMessage: 'Shared',
 });
-export const STAT_RULES = i18n.translate('xpack.securitySolution.ruleSets.header.statRules', {
-  defaultMessage: 'Rules',
-});
 export const STAT_FAILED = i18n.translate('xpack.securitySolution.ruleSets.header.statFailed', {
   defaultMessage: 'Failed',
 });
@@ -645,21 +642,10 @@ export const RESET_FILTERS = i18n.translate('xpack.securitySolution.ruleSets.fil
   defaultMessage: 'Reset',
 });
 
-export const FILTERS_CHANGED = (
-  shown: number | undefined,
-  total: number | undefined,
-  name: string
-) =>
-  i18n.translate('xpack.securitySolution.ruleSets.filterBar.changed', {
-    values: { shown: shown ?? '…', total: total ?? '…', name },
-    defaultMessage:
-      'Filters changed: {shown} of {total} rules. "{name}" does not change until you save.',
-  });
-
-export const FILTERS_MATCH = (shown: number | undefined, total: number | undefined) =>
-  i18n.translate('xpack.securitySolution.ruleSets.filterBar.match', {
-    values: { shown: shown ?? '…', total: total ?? '…' },
-    defaultMessage: 'Filters: {shown} of {total} rules.',
+export const UNSAVED_FILTER_CHANGES = (name: string) =>
+  i18n.translate('xpack.securitySolution.ruleSets.filterBar.unsavedChanges', {
+    values: { name },
+    defaultMessage: 'Filters changed. Save to update "{name}".',
   });
 
 export const SAVE_TO_SET_HELP = (name: string) =>

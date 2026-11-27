@@ -6,7 +6,11 @@
  */
 
 import { isEqual } from 'lodash';
-import type { RuleScope, RuleSetConditions } from '../../../common/api/detection_engine/rule_sets';
+import type {
+  RuleScope,
+  RuleSetConditions,
+  RuleSetSummary,
+} from '../../../common/api/detection_engine/rule_sets';
 import {
   hasRuleSetConditions,
   liftTagCategories,
@@ -33,6 +37,30 @@ export const ruleSetFilterState = (set: SavedSet): Partial<FilterOptions> => ({
   filter: '',
   draftOf: set.id,
 });
+
+/** Clearing the last condition of a filter-only set returns to All rules. */
+export const facetFilterState = (
+  filterOptions: FilterOptions,
+  conditions: RuleSetConditions,
+  set: RuleSetSummary | undefined
+): Partial<FilterOptions> => {
+  if (
+    set &&
+    set.included_rules_count === 0 &&
+    set.excluded_rules_count === 0 &&
+    hasRuleSetConditions(set.conditions) &&
+    !hasRuleSetConditions(conditions)
+  ) {
+    return {
+      ...filterOptions,
+      conditions,
+      ruleSetId: undefined,
+      draftOf: undefined,
+      members: undefined,
+    };
+  }
+  return { conditions, members: undefined };
+};
 
 /** The facets or the search differ from the saved conditions of the selected set. */
 export const isRuleSetChanged = (filterOptions: FilterOptions, set: SavedSet | undefined) =>

@@ -28,12 +28,16 @@ import type {
 } from '../../../../common/api/detection_engine/rule_sets';
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
 import { useUserPrivileges } from '../../../common/components/user_privileges';
-import { useRuleManagementFilters } from '../../rule_management/logic/use_rule_management_filters';
 import { useRulesTableContext } from '../../rule_management_ui/components/rules_table/rules_table/rules_table_context';
 import { fetchRuleSet, useRuleSetsWithCountsQuery, useSaveRuleSetMutation } from '../api';
 import { describeConditionParts } from './condition_labels';
 import { RuleSetNameForm, useCreateRuleSet } from './rule_set_name_form';
-import { draftConditions, isRuleSetChanged, ruleSetFilterState } from '../table_query';
+import {
+  draftConditions,
+  facetFilterState,
+  isRuleSetChanged,
+  ruleSetFilterState,
+} from '../table_query';
 import {
   GROUP_BY_FIELDS,
   filtersToGroupConditions,
@@ -163,13 +167,11 @@ export const RulesGroupByButton = () => {
 /** A button that asks for a name in a popover, then creates a set. */
 const SaveAsRuleSetButton = ({
   label,
-  fill,
   hint,
   getRules,
   dataTestSubj,
 }: {
   label: string;
-  fill?: boolean;
   hint: string;
   getRules: () => Promise<RuleSetRules>;
   dataTestSubj: string;
@@ -186,8 +188,8 @@ const SaveAsRuleSetButton = ({
       button={
         <EuiButton
           size="s"
-          fill={fill}
-          iconType={fill ? 'folderOpen' : undefined}
+          color="text"
+          iconType="folderOpen"
           onClick={() => setIsOpen(!isOpen)}
           data-test-subj={dataTestSubj}
         >
@@ -227,18 +229,16 @@ const SaveActions = ({ group }: { group?: RuleSetSummary }) => {
   } = useRulesTableContext();
   const { mutateAsync: save, isLoading: isSaving } = useSaveRuleSetMutation();
   const { addSuccess, addError } = useAppToasts();
+  const hint = filterOptions.filter.trim()
+    ? i18n.HINT_SEARCH_NOT_SAVED
+    : i18n.HINT_FILTERS(pagination.total);
 
   if (!group) {
     return (
       <EuiFlexItem grow={false}>
         <SaveAsRuleSetButton
           label={i18n.SAVE_FILTERS_AS_GROUP}
-          fill
-          hint={
-            filterOptions.filter.trim()
-              ? i18n.HINT_SEARCH_NOT_SAVED
-              : i18n.HINT_FILTERS(pagination.total)
-          }
+          hint={hint}
           getRules={async () => ({
             conditions: filtersToGroupConditions(filterOptions),
             included_rule_ids: [],
@@ -287,7 +287,7 @@ const SaveActions = ({ group }: { group?: RuleSetSummary }) => {
       <EuiFlexItem grow={false}>
         <SaveAsRuleSetButton
           label={i18n.SAVE_AS_NEW_SET}
-          hint={i18n.HINT_FILTERS(pagination.total)}
+          hint={hint}
           getRules={async () => {
             const full = await fetchRuleSet(group.id);
             return {
@@ -319,18 +319,16 @@ const SaveActions = ({ group }: { group?: RuleSetSummary }) => {
 };
 
 /**
- * The current filters above the table: how many rules they leave, the filter chips, and the
- * explicit save actions. Shown only with a filter. The selected set does not change until
+ * The current filters above the table and the explicit save actions. Shown only with a filter. The selected set does not change until
  * "Save to set".
  */
 export const RulesFilterBar = () => {
   const {
-    state: { filterOptions, pagination, isFetching },
+    state: { filterOptions, pagination },
     actions: { setFilterOptions },
   } = useRulesTableContext();
   const { browse, ruleSetId } = filterOptions;
   const { data: sets } = useRuleSetsWithCountsQuery();
-  const { data: ruleManagementFilters } = useRuleManagementFilters();
   const { members } = filterOptions;
   const integrationTitles = useIntegrationTitles();
   const canEditRules = useUserPrivileges().rulesPrivileges.rules.edit;
@@ -379,58 +377,60 @@ export const RulesFilterBar = () => {
     return null;
   }
 
-  // While the table loads, its total is the one of the previous filters.
-  const shown = isFetching ? undefined : pagination.total;
-  const summary = ruleSetId
-    ? i18n.FILTERS_CHANGED(shown, group?.rules_count, group?.name ?? '')
-    : i18n.FILTERS_MATCH(
-        shown,
-        ruleManagementFilters &&
-          ruleManagementFilters.rules_summary.custom_count +
-            ruleManagementFilters.rules_summary.prebuilt_installed_count
-      );
+  const chips = (
+    <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false} wrap>
+      <ActiveFacetChips
+        conditions={filterOptions.conditions ?? {}}
+        onChange={(next) => setFilterOptions(facetFilterState(filterOptions, next, group))}
+      />
+      {browse && (
+        <EuiFlexItem grow={false}>
+          <EuiBadge
+            color="primary"
+            iconType="cross"
+            iconSide="right"
+            iconOnClick={() => setFilterOptions({ browse: undefined })}
+            iconOnClickAriaLabel={i18n.BROWSE_FILTER_CLEAR}
+            data-test-subj="ruleSetsSectionFilter"
+          >
+            {`${browseField?.text ?? browse.category}: ${groupByValueLabel(
+              browse.category,
+              browse.value,
+              integrationTitles
+            )}`}
+          </EuiBadge>
+        </EuiFlexItem>
+      )}
+    </EuiFlexGroup>
+  );
+  const unsavedChanges = group && hasFilters ? i18n.UNSAVED_FILTER_CHANGES(group.name) : undefined;
 
   return (
     <>
       <EuiPanel
-        color={ruleSetId ? 'warning' : 'subdued'}
+        color={unsavedChanges ? 'warning' : 'subdued'}
         paddingSize="s"
         hasShadow={false}
         data-test-subj="ruleSetsFilterBar"
       >
         <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} wrap>
-          <EuiFlexItem css={{ minWidth: 240 }}>
-            <EuiText size="s" data-test-subj="ruleSetsFilterBarSummary">
-              {summary}
-            </EuiText>
+          <EuiFlexItem css={{ minWidth: 0 }}>
+            {unsavedChanges ? (
+              <EuiText size="s" data-test-subj="ruleSetsFilterBarSummary">
+                {unsavedChanges}
+              </EuiText>
+            ) : (
+              chips
+            )}
           </EuiFlexItem>
-          {canEditRules && hasFilters && <SaveActions group={ruleSetId ? group : undefined} />}
+          {canEditRules && hasFilters && <SaveActions group={group} />}
         </EuiFlexGroup>
-        <EuiSpacer size="xs" />
-        <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false} wrap>
-          <ActiveFacetChips
-            conditions={filterOptions.conditions ?? {}}
-            onChange={(next) => setFilterOptions({ conditions: next })}
-          />
-          {browse && (
-            <EuiFlexItem grow={false}>
-              <EuiBadge
-                color="primary"
-                iconType="cross"
-                iconSide="right"
-                iconOnClick={() => setFilterOptions({ browse: undefined })}
-                iconOnClickAriaLabel={i18n.BROWSE_FILTER_CLEAR}
-                data-test-subj="ruleSetsSectionFilter"
-              >
-                {`${browseField?.text ?? browse.category}: ${groupByValueLabel(
-                  browse.category,
-                  browse.value,
-                  integrationTitles
-                )}`}
-              </EuiBadge>
-            </EuiFlexItem>
-          )}
-        </EuiFlexGroup>
+        {unsavedChanges && (
+          <>
+            <EuiSpacer size="xs" />
+            {chips}
+          </>
+        )}
       </EuiPanel>
       <EuiSpacer size="s" />
     </>

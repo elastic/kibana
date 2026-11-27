@@ -52,6 +52,8 @@ export interface FacetField {
   canExclude: boolean;
   /** A rule has one value of this field: selecting a value replaces the previous one. */
   single?: boolean;
+  /** The facet has a search field whenever it is open. */
+  searchable?: boolean;
   get: (conditions: RuleSetConditions) => FacetSelection;
   set: (conditions: RuleSetConditions, next: FacetSelection) => RuleSetConditions;
   /** The values with counts, from the `_search` facet counts. */
@@ -76,6 +78,7 @@ export interface FacetCountsResult {
 
 export interface FacetLabels {
   integrationTitles: Map<string, string>;
+  techniqueTitles?: ReadonlyMap<string, string>;
 }
 
 /**
@@ -94,7 +97,7 @@ const selectionOf = (field?: { include?: string[]; exclude?: string[] }): FacetS
 
 const withValues = (
   conditions: RuleSetConditions,
-  key: 'related_integrations' | 'mitre_tactic' | 'tags',
+  key: 'related_integrations' | 'mitre_tactic' | 'mitre_technique' | 'tags',
   next: FacetSelection
 ): RuleSetConditions =>
   normalizeRuleSetConditions({
@@ -129,6 +132,19 @@ const TACTIC_FIELD: FacetField = {
   set: (c, next) => withValues(c, 'mitre_tactic', next),
   values: ({ counts }) => bucketValues(counts.tactic),
   valueLabel: (value) => value,
+};
+
+const TECHNIQUE_FIELD: FacetField = {
+  id: 'technique',
+  section: 'rule',
+  label: i18n.MITRE_TECHNIQUE,
+  canExclude: true,
+  searchable: true,
+  get: (c) => selectionOf(c.mitre_technique),
+  set: (c, next) => withValues(c, 'mitre_technique', next),
+  values: ({ counts }, { techniqueTitles }) =>
+    bucketValues(counts.technique, (id) => techniqueTitles?.get(id) ?? id),
+  valueLabel: (id, { techniqueTitles }) => techniqueTitles?.get(id) ?? id,
 };
 
 const TYPE_FIELD: FacetField = {
@@ -203,6 +219,7 @@ const SOURCE_FIELD: FacetField = {
 export const RULE_FIELD_FACETS: FacetField[] = [
   INTEGRATION_FIELD,
   TACTIC_FIELD,
+  TECHNIQUE_FIELD,
   TYPE_FIELD,
   SEVERITY_FIELD,
   SOURCE_FIELD,
@@ -274,6 +291,7 @@ export const STATE_FACETS: FacetField[] = [STATUS_FIELD, LAST_RESPONSE_FIELD];
 export const FACET_COUNT_CATEGORIES: GranularRulesFacetCategory[] = [
   'integration',
   'tactic',
+  'technique',
   'type',
   'severity',
   'source',

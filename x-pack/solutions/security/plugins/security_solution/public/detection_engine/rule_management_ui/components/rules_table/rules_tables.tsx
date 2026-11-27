@@ -351,9 +351,7 @@ export const RulesTables = React.memo<RulesTableProps>(({ selectedTab }) => {
   const aiSearchColumns = useMemo(
     () =>
       tableProps.columns.map((column) =>
-        'field' in column && column.field === 'name'
-          ? { ...column, width: '38%', maxWidth: undefined }
-          : column
+        'field' in column && column.field === 'name' ? { ...column, width: '38%' } : column
       ),
     [tableProps.columns]
   );
@@ -362,6 +360,8 @@ export const RulesTables = React.memo<RulesTableProps>(({ selectedTab }) => {
   // they are hovered together.
   const whyMatchedRowsCss = useMemo(
     () => css`
+      container-type: inline-size;
+
       .euiTableRow-isExpandedRow {
         background-color: transparent;
       }
@@ -526,6 +526,9 @@ export const RulesTables = React.memo<RulesTableProps>(({ selectedTab }) => {
                 itemId="id"
                 items={rules}
                 itemIdToExpandedRowMap={whyMatchedRows}
+                cellProps={(rule) =>
+                  whyMatchedRows?.[rule.id] ? { style: { borderBlockEnd: 'none' } } : {}
+                }
                 css={whyMatchedRows ? whyMatchedRowsCss : undefined}
                 tableCaption={i18n.RULES_TABLE_CAPTION}
                 noItemsMessage={NO_ITEMS_MESSAGE}

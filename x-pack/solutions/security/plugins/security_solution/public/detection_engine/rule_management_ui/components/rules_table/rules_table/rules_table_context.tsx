@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { isEqual } from 'lodash';
+import { isEqual, isUndefined, omit, omitBy } from 'lodash';
 import React, {
   createContext,
   useCallback,
@@ -24,6 +24,7 @@ import {
 import { useGapAutoFillSchedulerContext } from '../../../../rule_gaps/context/gap_auto_fill_scheduler_context';
 import { convertRulesFilterToKQL } from '../../../../../../common/detection_engine/rule_management/rule_filtering';
 import {
+  hasRuleSetConditions,
   liftTagCategories,
   normalizeRuleSetConditions,
 } from '../../../../../../common/detection_engine/rule_sets/rule_set_conditions';
@@ -125,6 +126,8 @@ export interface RulesTableState {
    * Is true whenever a background refetch is in-flight, which does not include initial loading
    */
   isRefetching: boolean;
+  /** The visible rules came from the previous query while the current query loads. */
+  isPreviousData: boolean;
   /**
    * Indicates whether we should refetch table data in the background
    */
@@ -404,6 +407,7 @@ export const RulesTableContextProvider = ({ children }: RulesTableContextProvide
     isFetching,
     isLoading,
     isRefetching,
+    isPreviousData,
   } = useFindRules(findRulesQueryArgs, {
     // We don't need refreshes on windows focus and reconnects if auto-refresh if off
     refetchOnWindowFocus: isRefreshOn && !isActionInProgress,
@@ -506,6 +510,7 @@ export const RulesTableContextProvider = ({ children }: RulesTableContextProvide
         isFetching,
         isLoading,
         isRefetching,
+        isPreviousData,
         isRefreshOn,
         lastUpdated: dataUpdatedAt,
         loadingRuleIds: loadingRules.ids,
@@ -541,6 +546,7 @@ export const RulesTableContextProvider = ({ children }: RulesTableContextProvide
     isFetching,
     isLoading,
     isRefetching,
+    isPreviousData,
     isRefreshOn,
     dataUpdatedAt,
     loadingRules.ids,
@@ -575,8 +581,10 @@ function isDefaultState(
   sorting: SortingOptions,
   pagination: PaginationOptions
 ): boolean {
+  const activeFilters = omit(filter, ['conditions', 'groupBy', 'searchMode']);
   return (
-    isEqual(filter, DEFAULT_FILTER_OPTIONS) &&
+    !hasRuleSetConditions(filter.conditions ?? {}) &&
+    isEqual(omitBy(activeFilters, isUndefined), omitBy(DEFAULT_FILTER_OPTIONS, isUndefined)) &&
     isEqual(sorting, DEFAULT_SORTING_OPTIONS) &&
     pagination.page === DEFAULT_PAGE &&
     pagination.perPage === DEFAULT_RULES_PER_PAGE

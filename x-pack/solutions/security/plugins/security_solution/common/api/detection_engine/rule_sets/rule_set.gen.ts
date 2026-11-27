@@ -181,6 +181,7 @@ export const RuleSetConditions = lazySchema(() =>
       severity: RuleSetSeverities.optional(),
       rule_source: RuleSetRuleSource.optional(),
       mitre_tactic: RuleSetValues.optional(),
+      mitre_technique: RuleSetValues.optional(),
       tag_categories: RuleSetTagCategories.optional(),
       /**
        * Only enabled (`true`) or only disabled (`false`) rules. Enabling or disabling a rule changes its membership.

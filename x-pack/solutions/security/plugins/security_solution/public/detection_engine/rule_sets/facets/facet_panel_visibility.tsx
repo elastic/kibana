@@ -74,7 +74,7 @@ export const ShowFacetPanelButton = ({ conditions }: { conditions: RuleSetCondit
   ).length;
   return (
     <EuiFlexItem grow={false}>
-      <EuiFilterGroup>
+      <EuiFilterGroup compressed>
         <EuiFilterButton
           iconType="transitionLeftIn"
           iconSide="left"

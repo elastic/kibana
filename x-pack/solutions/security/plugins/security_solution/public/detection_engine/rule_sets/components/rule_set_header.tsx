@@ -45,7 +45,7 @@ const Stat = ({ label, value, color }: { label: string; value?: number; color?: 
   </EuiFlexItem>
 );
 
-/** Health of the selected set: run outcomes on the monitoring tab, size elsewhere. */
+/** Health of the selected set on the rules tabs. */
 const RuleSetStats = ({ group }: { group: RuleSetSummary }) => {
   const { euiTheme } = useEuiTheme();
   const { data: outcomes } = useRuleSetOutcomesQuery(group.id);
@@ -77,7 +77,6 @@ const RuleSetStats = ({ group }: { group: RuleSetSummary }) => {
 
   return (
     <EuiFlexGroup gutterSize="l" responsive={false}>
-      <Stat label={i18n.STAT_RULES} value={group.rules_count} />
       <Stat label={i18n.STAT_ENABLED} value={outcomes?.enabled.total} />
       <Stat
         label={i18n.STAT_FAILED}

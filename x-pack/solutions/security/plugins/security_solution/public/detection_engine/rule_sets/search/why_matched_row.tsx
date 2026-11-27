@@ -6,7 +6,8 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import { EuiText, useEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { escapeRegExp } from 'lodash';
 import type { SearchHighlight } from '../../rule_management/api/hooks/use_find_rules_query';
 import * as i18n from './translations';
@@ -50,15 +51,31 @@ export const WhyMatchedRow = ({
 }: {
   highlight: SearchHighlight;
   search: string;
-}) => (
-  <EuiFlexGroup gutterSize="m" responsive={false} data-test-subj="ruleSearchSnippet">
-    <EuiFlexItem grow={false} style={{ width: 110 }}>
-      <EuiText size="xs" color="subdued">
+}) => {
+  const { euiTheme } = useEuiTheme();
+
+  return (
+    <EuiText
+      size="xs"
+      data-test-subj="ruleSearchSnippet"
+      css={css`
+        min-inline-size: 0;
+        /* Leave room for the expanded row's checkbox offset and cell padding. */
+        max-inline-size: calc(100cqi - ${euiTheme.size.xl} - 2 * ${euiTheme.size.s});
+        white-space: normal;
+        overflow-wrap: anywhere;
+      `}
+    >
+      {withSearchWords(highlight.text, search)}{' '}
+      <span
+        css={css`
+          color: ${euiTheme.colors.textSubdued};
+          white-space: nowrap;
+        `}
+      >
+        {'· '}
         {i18n.SNIPPET_SOURCE[highlight.source] ?? highlight.source}
-      </EuiText>
-    </EuiFlexItem>
-    <EuiFlexItem>
-      <EuiText size="xs">{withSearchWords(highlight.text, search)}</EuiText>
-    </EuiFlexItem>
-  </EuiFlexGroup>
-);
+      </span>
+    </EuiText>
+  );
+};

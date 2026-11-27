@@ -130,7 +130,7 @@ interface RuleDetailsFlyoutProps {
   id?: string;
   /** The width can be dragged. */
   resizable?: boolean;
-  /** Above the title, e.g. navigation and actions; with it, `hideFooter` drops the footer. */
+  /** Actions displayed beside the title. */
   headerActions?: ReactNode;
   hideFooter?: boolean;
   /** Passed to the Overview tab. */
@@ -257,18 +257,41 @@ function RuleDetailsFlyoutContent({
     setSelectedTabId(tab.id);
   };
 
+  const { euiTheme } = useEuiTheme();
+  const heading = (
+    <EuiTitle size={headerActions ? 's' : 'm'}>
+      <h2 id={titleId}>{title ?? rule.name}</h2>
+    </EuiTitle>
+  );
+
   return (
     <>
       <EuiFlyoutHeader>
-        {headerActions && (
-          <>
-            {headerActions}
-            <EuiSpacer size="m" />
-          </>
+        {headerActions ? (
+          <EuiFlexGroup
+            alignItems="center"
+            gutterSize="s"
+            justifyContent="spaceBetween"
+            responsive={false}
+            wrap
+            css={css`
+              padding-inline-end: ${euiTheme.size.xl};
+            `}
+          >
+            <EuiFlexItem
+              css={css`
+                flex-basis: min(100%, 20rem);
+                min-inline-size: 0;
+                overflow-wrap: anywhere;
+              `}
+            >
+              {heading}
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>{headerActions}</EuiFlexItem>
+          </EuiFlexGroup>
+        ) : (
+          heading
         )}
-        <EuiTitle size={headerActions ? 's' : 'm'}>
-          <h2 id={titleId}>{title ?? rule.name}</h2>
-        </EuiTitle>
         <EuiSpacer size="s" />
         {subHeader && (
           <>

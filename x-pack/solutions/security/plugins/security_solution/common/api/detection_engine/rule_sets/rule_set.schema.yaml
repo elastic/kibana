@@ -168,6 +168,8 @@ components:
           $ref: '#/components/schemas/RuleSetRuleSource'
         mitre_tactic:
           $ref: '#/components/schemas/RuleSetValues'
+        mitre_technique:
+          $ref: '#/components/schemas/RuleSetValues'
         tag_categories:
           $ref: '#/components/schemas/RuleSetTagCategories'
         enabled:

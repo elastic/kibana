@@ -13,12 +13,14 @@ import type {
   FacetCounts,
   GranularRulesFacetCategory,
 } from '../../../../../../common/api/detection_engine/rule_management/granular_rules/granular_rules_contract.gen';
+import { RULE_PARAMS_FIELDS } from '../../../../../../common/detection_engine/rule_management/rule_fields';
 import { findRules } from './find_rules';
 
 // Group by in the rules table shows one section per value; tags alone can have hundreds.
 const DEFAULT_AGGREGATION_MAX_SIZE = 1000;
 
 const FACET_AGG_ID_CHUNK_SIZE = 1024;
+const SUBTECHNIQUE_AGGREGATION = 'facet_technique_subtechniques';
 export interface TermsAggBuckets {
   buckets: Array<{
     key: string | number | boolean;
@@ -56,6 +58,12 @@ export const buildAggregations = ({
     };
   }
 
+  if (categories.includes('technique')) {
+    aggregations[SUBTECHNIQUE_AGGREGATION] = {
+      terms: { field: RULE_PARAMS_FIELDS.SUBTECHNIQUE_ID, size: DEFAULT_AGGREGATION_MAX_SIZE },
+    };
+  }
+
   return aggregations;
 };
 
@@ -69,6 +77,10 @@ export const expandRawAggregationResult = (
     if (aggResult?.buckets) {
       counts[category] = bucketsToFacetMap(aggResult.buckets);
     }
+  }
+  const subtechniques = raw[SUBTECHNIQUE_AGGREGATION] as TermsAggBuckets | undefined;
+  if (categories.includes('technique') && subtechniques?.buckets) {
+    counts.technique = { ...counts.technique, ...bucketsToFacetMap(subtechniques.buckets) };
   }
   return counts;
 };

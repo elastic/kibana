@@ -16,6 +16,7 @@ import {
   LAST_RUN_OUTCOME_FIELD,
   PARAMS_IMMUTABLE_FIELD,
   PARAMS_TYPE_FIELD,
+  RULE_PARAMS_FIELDS,
   TAGS_FIELD,
 } from '../../../../../common/detection_engine/rule_management/rule_fields';
 import { convertRuleSearchTermToKQL } from '../../../../../common/detection_engine/rule_management/rule_filtering';
@@ -50,16 +51,23 @@ const matchNothing = (): KueryNode => terms(RULE_ID_FIELD, []);
 
 /** `include` with `match: all` is one clause per value; `match: any` and `exclude` are one clause. */
 const includeExclude = (
-  field: string,
+  field: string | readonly string[],
   { include = [], exclude = [], match = 'any' }: Partial<RuleSetValues>
-): KueryNode[] => [
-  ...(include.length
-    ? match === 'all'
-      ? include.map((value) => terms(field, [value]))
-      : [terms(field, include)]
-    : []),
-  ...(exclude.length ? [not(terms(field, exclude))] : []),
-];
+): KueryNode[] => {
+  const matchesValues = (values: string[]) =>
+    typeof field === 'string'
+      ? terms(field, values)
+      : nodeBuilder.or(field.map((name) => terms(name, values)));
+
+  return [
+    ...(include.length
+      ? match === 'all'
+        ? include.map((value) => matchesValues([value]))
+        : [matchesValues(include)]
+      : []),
+    ...(exclude.length ? [not(matchesValues(exclude))] : []),
+  ];
+};
 
 /**
  * The set conditions as one KQL node, or `undefined` when no condition is filled.
@@ -73,6 +81,7 @@ export const buildConditionsFilter = (conditions: RuleSetConditions): KueryNode 
     severity,
     rule_source: ruleSource,
     mitre_tactic: tactic,
+    mitre_technique: technique,
     tag_categories: tagCategories,
     enabled,
     last_run_outcome: lastRunOutcome,
@@ -84,6 +93,12 @@ export const buildConditionsFilter = (conditions: RuleSetConditions): KueryNode 
     ...(type ? includeExclude(PARAMS_TYPE_FIELD, type) : []),
     ...(severity ? includeExclude(SEVERITY_FIELD, severity) : []),
     ...(tactic ? includeExclude(TACTIC_FIELD, tactic) : []),
+    ...(technique
+      ? includeExclude(
+          [RULE_PARAMS_FIELDS.TECHNIQUE_ID, RULE_PARAMS_FIELDS.SUBTECHNIQUE_ID],
+          technique
+        )
+      : []),
     // One group of clauses per tag category: OR inside a category, AND across categories.
     ...Object.values(tagCategories ?? {}).flatMap((values) => includeExclude(TAGS_FIELD, values)),
     // Same field as the Elastic / Custom filter of the rules table.

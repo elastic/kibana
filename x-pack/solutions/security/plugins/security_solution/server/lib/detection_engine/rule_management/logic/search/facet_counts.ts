@@ -25,6 +25,7 @@ const CATEGORY_CONDITION: Partial<Record<GranularRulesFacetCategory, keyof RuleS
   tags: 'tags',
   integration: 'related_integrations',
   tactic: 'mitre_tactic',
+  technique: 'mitre_technique',
   type: 'type',
   severity: 'severity',
   source: 'rule_source',

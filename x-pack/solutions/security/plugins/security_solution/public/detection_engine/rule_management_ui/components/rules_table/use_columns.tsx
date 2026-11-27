@@ -165,12 +165,8 @@ export const RULE_NAME_COLUMN: TableColumn = {
   name: i18n.COLUMN_RULE,
   render: (_: Rule['name'], item: Rule) => <RuleNameCell rule={item} />,
   sortable: true,
-  truncateText: true,
   minWidth: '12em',
   width: '18em',
-  // Keep max width at 20em unless the table container width is large enough that we have
-  // enough space for other columns
-  maxWidth: 'max(20em, 25cqi)',
 };
 
 export const useRuleExecutionStatusColumn = ({

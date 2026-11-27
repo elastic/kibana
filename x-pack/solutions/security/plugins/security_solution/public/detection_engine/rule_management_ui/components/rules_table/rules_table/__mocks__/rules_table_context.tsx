@@ -41,6 +41,7 @@ export const useRulesTableContextMock = {
       isFetching: false,
       isLoading: false,
       isRefetching: false,
+      isPreviousData: false,
       isRefreshOn: true,
       lastUpdated: Date.now(),
       loadingRuleIds: [],

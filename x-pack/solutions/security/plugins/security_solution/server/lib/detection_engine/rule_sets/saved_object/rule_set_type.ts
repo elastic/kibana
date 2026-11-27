@@ -56,37 +56,39 @@ const enumValuesSchema = <T extends string>(values: readonly T[]) =>
     exclude: schema.maybe(schema.arrayOf(literals(values), { maxSize: values.length })),
   });
 
+const ruleSetConditionsSchemaV1 = schema.object({
+  // The stored form always has `match`: see normalizeRuleSetConditions.
+  tags: schema.maybe(valuesSchema),
+  related_integrations: schema.maybe(valuesSchema),
+  type: schema.maybe(enumValuesSchema(ruleTypes)),
+  severity: schema.maybe(enumValuesSchema(severities)),
+  rule_source: schema.maybe(
+    schema.object({
+      include: schema.arrayOf(literals(['external', 'internal'] as const), {
+        minSize: 1,
+        maxSize: 1,
+      }),
+    })
+  ),
+  mitre_tactic: schema.maybe(valuesSchema),
+  tag_categories: schema.maybe(
+    schema.recordOf(schema.string({ minLength: 1, maxLength: 256 }), valuesSchema)
+  ),
+  enabled: schema.maybe(schema.boolean()),
+  last_run_outcome: schema.maybe(enumValuesSchema(lastRunOutcomes)),
+  search: schema.maybe(
+    schema.object({
+      term: schema.string({ minLength: 1, maxLength: 256 }),
+      mode: schema.literal('legacy'),
+    })
+  ),
+});
+
 const ruleSetSchemaV1 = schema.object({
   name: schema.string({ minLength: 1, maxLength: 256 }),
   description: schema.maybe(schema.string({ maxLength: 2048 })),
   visibility: schema.oneOf([schema.literal('space'), schema.literal('private')]),
-  // The stored form always has `match`: see normalizeRuleSetConditions.
-  conditions: schema.object({
-    tags: schema.maybe(valuesSchema),
-    related_integrations: schema.maybe(valuesSchema),
-    type: schema.maybe(enumValuesSchema(ruleTypes)),
-    severity: schema.maybe(enumValuesSchema(severities)),
-    rule_source: schema.maybe(
-      schema.object({
-        include: schema.arrayOf(literals(['external', 'internal'] as const), {
-          minSize: 1,
-          maxSize: 1,
-        }),
-      })
-    ),
-    mitre_tactic: schema.maybe(valuesSchema),
-    tag_categories: schema.maybe(
-      schema.recordOf(schema.string({ minLength: 1, maxLength: 256 }), valuesSchema)
-    ),
-    enabled: schema.maybe(schema.boolean()),
-    last_run_outcome: schema.maybe(enumValuesSchema(lastRunOutcomes)),
-    search: schema.maybe(
-      schema.object({
-        term: schema.string({ minLength: 1, maxLength: 256 }),
-        mode: schema.literal('legacy'),
-      })
-    ),
-  }),
+  conditions: ruleSetConditionsSchemaV1,
   included_rule_ids: schema.arrayOf(ruleId, { maxSize: MAX_RULE_IDS }),
   excluded_rule_ids: schema.arrayOf(ruleId, { maxSize: MAX_RULE_IDS }),
 });
@@ -94,8 +96,25 @@ const ruleSetSchemaV1 = schema.object({
 const ruleSetModelVersion1: SavedObjectsFullModelVersion = {
   changes: [],
   schemas: {
-    forwardCompatibility: ruleSetSchemaV1.extends({}, { unknowns: 'ignore' }),
+    forwardCompatibility: ruleSetSchemaV1.extends(
+      { conditions: ruleSetConditionsSchemaV1.extends({}, { unknowns: 'ignore' }) },
+      { unknowns: 'ignore' }
+    ),
     create: ruleSetSchemaV1,
+  },
+};
+
+const ruleSetSchemaV2 = ruleSetSchemaV1.extends({
+  conditions: ruleSetConditionsSchemaV1.extends({
+    mitre_technique: schema.maybe(valuesSchema),
+  }),
+});
+
+const ruleSetModelVersion2: SavedObjectsFullModelVersion = {
+  changes: [],
+  schemas: {
+    forwardCompatibility: ruleSetSchemaV2.extends({}, { unknowns: 'ignore' }),
+    create: ruleSetSchemaV2,
   },
 };
 
@@ -116,5 +135,6 @@ export const ruleSetType: SavedObjectsType = {
   },
   modelVersions: {
     1: ruleSetModelVersion1,
+    2: ruleSetModelVersion2,
   },
 };

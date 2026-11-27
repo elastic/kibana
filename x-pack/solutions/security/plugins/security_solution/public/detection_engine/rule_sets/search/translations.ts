@@ -37,22 +37,18 @@ export const AI_PLACEHOLDER = i18n.translate('xpack.securitySolution.ruleSearch.
   defaultMessage: 'Describe what the rule detects, in any language',
 });
 
-export const AI_RESULTS = (count: number) =>
-  i18n.translate('xpack.securitySolution.ruleSearch.aiResults', {
-    values: { count },
-    defaultMessage:
-      'AI search: {count, plural, one {# most relevant rule} other {# most relevant rules}}, best first.',
-  });
+export const AI_SEARCH_ORDER = i18n.translate('xpack.securitySolution.ruleSearch.aiSearchOrder', {
+  defaultMessage: 'AI search · Most relevant rules first',
+});
 
 export const NEED_EVERY_MATCH = i18n.translate('xpack.securitySolution.ruleSearch.needEveryMatch', {
   defaultMessage: 'Need every match? Turn off AI search',
 });
 
-export const KEYWORD_RESULTS = (count: number, text: string) =>
-  i18n.translate('xpack.securitySolution.ruleSearch.keywordResults', {
-    values: { count, text },
-    defaultMessage: '{count, plural, one {# rule contains} other {# rules contain}} "{text}".',
-  });
+export const KEYWORD_SEARCH_MODE = i18n.translate(
+  'xpack.securitySolution.ruleSearch.keywordSearchMode',
+  { defaultMessage: 'Keyword search' }
+);
 
 export const AI_UNAVAILABLE = i18n.translate('xpack.securitySolution.ruleSearch.aiUnavailable', {
   defaultMessage: 'AI search is unavailable right now. Showing the rules that contain the text.',
@@ -110,20 +106,6 @@ export const RULE_TYPE = i18n.translate('xpack.securitySolution.ruleFlyout.ruleT
   defaultMessage: 'Rule type',
 });
 
-export const POSITION = (position: number, total: number) =>
-  i18n.translate('xpack.securitySolution.ruleFlyout.position', {
-    values: { position, total },
-    defaultMessage: '{position} of {total}',
-  });
-
-export const PREVIOUS_RULE = i18n.translate('xpack.securitySolution.ruleFlyout.previousRule', {
-  defaultMessage: 'Previous rule',
-});
-
-export const NEXT_RULE = i18n.translate('xpack.securitySolution.ruleFlyout.nextRule', {
-  defaultMessage: 'Next rule',
-});
-
 export const ALERTS_LAST_7_DAYS = (count: number) =>
   i18n.translate('xpack.securitySolution.ruleFlyout.alertsLast7Days', {
     values: { count },
@@ -179,3 +161,49 @@ export const RISK = (score: number) =>
 export const ENABLED = i18n.translate('xpack.securitySolution.ruleFlyout.enabled', {
   defaultMessage: 'Enabled',
 });
+
+export const FILTER_SUGGESTIONS = i18n.translate(
+  'xpack.securitySolution.ruleSearch.filterSuggestions',
+  {
+    defaultMessage: 'Filter suggestions',
+  }
+);
+
+export const RUN_TEXT_SEARCH = (text: string) =>
+  i18n.translate('xpack.securitySolution.ruleSearch.runTextSearch', {
+    values: { text },
+    defaultMessage: 'Search for “{text}”',
+  });
+
+export const FIND_FILTER_VALUES = i18n.translate(
+  'xpack.securitySolution.ruleSearch.findFilterValues',
+  {
+    defaultMessage: 'Search values',
+  }
+);
+
+export const FIND_TAGS = i18n.translate('xpack.securitySolution.ruleSearch.findTags', {
+  defaultMessage: 'Search tags',
+});
+
+export const FIND_TACTICS = i18n.translate('xpack.securitySolution.ruleSearch.findTactics', {
+  defaultMessage: 'Search tactics',
+});
+
+export const FIND_TECHNIQUES = i18n.translate('xpack.securitySolution.ruleSearch.findTechniques', {
+  defaultMessage: 'Search techniques',
+});
+
+export const NO_FILTER_MATCHES = i18n.translate(
+  'xpack.securitySolution.ruleSearch.noFilterMatches',
+  {
+    defaultMessage: 'No matching filters',
+  }
+);
+
+export const BACK_TO_FILTER_FIELDS = i18n.translate(
+  'xpack.securitySolution.ruleSearch.backToFilterFields',
+  {
+    defaultMessage: 'Back',
+  }
+);

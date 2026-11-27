@@ -7,7 +7,7 @@
 
 import type { Type } from '@kbn/securitysolution-io-ts-alerting-types';
 import type { GranularRulesFacetCategory } from '../../api/detection_engine/rule_management/granular_rules/granular_rules_contract.gen';
-import { RULES_FACET_CATEGORY_TO_ATTRIBUTE } from '../../api/detection_engine/rule_management/granular_rules/granular_rules_facet_dimensions';
+import { getRulesFacetAttribute } from '../../api/detection_engine/rule_management/granular_rules/granular_rules_facet_dimensions';
 import type { RuleExecutionStatus } from '../../api/detection_engine';
 import { RuleCustomizationStatus, RuleExecutionStatusEnum } from '../../api/detection_engine';
 import { fullyEscapeKQLStringParam, prepareKQLStringParam } from '../../utils/kql';
@@ -111,7 +111,7 @@ export function convertRulesFilterToKQL({
   }
 
   if (browse) {
-    const field = RULES_FACET_CATEGORY_TO_ATTRIBUTE[browse.category];
+    const field = getRulesFacetAttribute(browse.category, browse.value);
     kql.push(
       browse.value === FACET_MISSING_VALUE
         ? `NOT ${field}: *`

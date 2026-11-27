@@ -6,7 +6,16 @@
  */
 
 import type { MouseEvent, PropsWithChildren, ReactNode } from 'react';
-import React, { createContext, useCallback, useContext, useMemo, useState } from 'react';
+import React, {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
+import { useHistory } from 'react-router-dom';
 import type { DefaultItemAction, EuiBasicTableColumn } from '@elastic/eui';
 import {
   EuiBadge,
@@ -23,8 +32,10 @@ import {
   EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { get } from 'lodash';
 import { useQuery } from '@kbn/react-query';
+import { APP_MAIN_SCROLL_CONTAINER_ID } from '@kbn/core-chrome-layout-constants';
 import { SecurityPageName } from '../../../../../common/constants';
 import {
   getEditRuleUrl,
@@ -50,8 +61,17 @@ import * as i18n from '../../../rule_sets/search/translations';
 
 /** The open rule, by id, so that a link opens the same flyout. */
 const URL_PARAM = 'ruleFlyout';
-/** Room for the close button of the flyout at the right end of the top bar. */
-const CLOSE_BUTTON_SPACE = 32;
+
+interface RulesTableLocationState {
+  ruleListScrollTop?: number;
+}
+
+const getScrollContainer = () =>
+  document.getElementById(APP_MAIN_SCROLL_CONTAINER_ID) ?? document.documentElement;
+
+const ruleNameCss = css`
+  white-space: nowrap;
+`;
 
 type Columns = Array<EuiBasicTableColumn<Rule>>;
 
@@ -182,29 +202,28 @@ const WhyItMatched = ({ snippet }: { snippet: SearchHighlight }) => {
   );
 };
 
-/**
- * The bar above the title: the position in the results with previous and next on the left; the
- * actions on the right, with "Open rule details" the only filled button.
- */
-const RuleFlyoutTopBar = ({
+const RuleFlyoutActions = ({
   rule,
   actions,
-  position,
-  onPrevious,
-  onNext,
   onDone,
 }: {
   rule: Rule;
   actions: Array<DefaultItemAction<Rule>>;
-  position?: { index: number; total: number };
-  onPrevious?: () => void;
-  onNext?: () => void;
   onDone: () => void;
 }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const { href: editHref } = useSecuritySolutionLinkProps({
+  const history = useHistory<RulesTableLocationState>();
+  const rememberListScroll = useCallback(() => {
+    const location = history.location;
+    history.replace({
+      ...location,
+      state: { ...location.state, ruleListScrollTop: getScrollContainer().scrollTop },
+    });
+  }, [history]);
+  const editLink = useSecuritySolutionLinkProps({
     deepLinkId: SecurityPageName.rules,
     path: getEditRuleUrl(rule.id),
+    onClick: rememberListScroll,
   });
   const menuItems = actions.map((action, index) => (
     <EuiContextMenuItem
@@ -222,43 +241,12 @@ const RuleFlyoutTopBar = ({
   ));
 
   return (
-    <EuiFlexGroup
-      gutterSize="s"
-      alignItems="center"
-      responsive={false}
-      style={{ paddingRight: CLOSE_BUTTON_SPACE }}
-    >
-      {position && (
-        <>
-          <EuiToolTip content={i18n.PREVIOUS_RULE} disableScreenReaderOutput>
-            <EuiButtonIcon
-              iconType="chevronSingleUp"
-              aria-label={i18n.PREVIOUS_RULE}
-              isDisabled={!onPrevious}
-              onClick={onPrevious}
-              data-test-subj="ruleFlyoutPrevious"
-            />
-          </EuiToolTip>
-          <EuiToolTip content={i18n.NEXT_RULE} disableScreenReaderOutput>
-            <EuiButtonIcon
-              iconType="chevronSingleDown"
-              aria-label={i18n.NEXT_RULE}
-              isDisabled={!onNext}
-              onClick={onNext}
-              data-test-subj="ruleFlyoutNext"
-            />
-          </EuiToolTip>
-          <EuiText size="xs" color="subdued">
-            {i18n.POSITION(position.index + 1, position.total)}
-          </EuiText>
-        </>
-      )}
-      <EuiFlexItem />
+    <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
       <EuiFlexItem grow={false}>
         <EuiToolTip content={i18n.EDIT_RULE} disableScreenReaderOutput>
           <EuiButtonIcon
             iconType="pencil"
-            href={editHref}
+            {...editLink}
             aria-label={i18n.EDIT_RULE}
             data-test-subj="ruleFlyoutEdit"
           />
@@ -292,6 +280,7 @@ const RuleFlyoutTopBar = ({
           iconType="external"
           deepLinkId={SecurityPageName.rules}
           path={getRuleDetailsTabUrl(rule.id, RuleDetailTabs.overview)}
+          onClick={rememberListScroll}
           data-test-subj="rulesTableRuleFlyoutOpenDetails"
         >
           {i18n.OPEN_RULE_DETAILS}
@@ -303,8 +292,7 @@ const RuleFlyoutTopBar = ({
 
 /**
  * The rules table opens a rule in a flyout to read it without leaving the list (a "peek"): the
- * state of the rule in one line, why it matched a search, the next or previous rule of the page
- * and its actions. The full page is one click away; the open rule is in the URL.
+ * state of the rule, why it matched a search, and its actions. The open rule is in the URL.
  */
 export const RuleFlyoutProvider = ({
   snippets,
@@ -314,7 +302,7 @@ export const RuleFlyoutProvider = ({
   children,
 }: PropsWithChildren<{
   snippets: Record<string, SearchHighlight>;
-  /** The rules of the page, for the next and the previous rule and fresh state. */
+  /** The rules of the page, used to keep the open rule up to date. */
   rules: Rule[];
   /** The table columns: the flyout shows the same cells (severity, last response, enabled…). */
   columns: Columns;
@@ -322,6 +310,19 @@ export const RuleFlyoutProvider = ({
   actions: Array<DefaultItemAction<Rule>>;
 }>) => {
   const replaceUrlParams = useReplaceUrlParams();
+  const history = useHistory<RulesTableLocationState>();
+  const scrollTopOnReturn = useRef(history.location.state?.ruleListScrollTop);
+  useEffect(() => {
+    const top = scrollTopOnReturn.current;
+    if (top === undefined) return;
+
+    const frame = requestAnimationFrame(() => {
+      getScrollContainer().scrollTop = top;
+      scrollTopOnReturn.current = undefined;
+    });
+    return () => cancelAnimationFrame(frame);
+  }, []);
+
   const getInitialUrlParam = useGetInitialUrlParamValue<string>(URL_PARAM);
   const [openedId, setOpenedId] = useState<string | undefined>(
     () => getInitialUrlParam() ?? undefined
@@ -335,10 +336,10 @@ export const RuleFlyoutProvider = ({
   const rule = inTable ?? (opened?.id === openedId ? opened : undefined) ?? fetched;
 
   const open = useCallback(
-    (next: Rule) => {
-      setOpened(next);
-      setOpenedId(next.id);
-      replaceUrlParams({ [URL_PARAM]: next.id });
+    (selectedRule: Rule) => {
+      setOpened(selectedRule);
+      setOpenedId(selectedRule.id);
+      replaceUrlParams({ [URL_PARAM]: selectedRule.id });
     },
     [replaceUrlParams]
   );
@@ -348,10 +349,6 @@ export const RuleFlyoutProvider = ({
     replaceUrlParams({ [URL_PARAM]: null });
   }, [replaceUrlParams]);
 
-  const index = rule ? rules.findIndex(({ id }) => id === rule.id) : -1;
-  const previous = index > 0 ? () => open(rules[index - 1]) : undefined;
-  const next = index >= 0 && index < rules.length - 1 ? () => open(rules[index + 1]) : undefined;
-
   const api = useMemo(() => ({ openRule: open, snippets }), [open, snippets]);
   const snippet = rule ? snippets[rule.id] : undefined;
   return (
@@ -360,7 +357,7 @@ export const RuleFlyoutProvider = ({
       {rule && (
         <RuleDetailsFlyout
           rule={rule}
-          size="m"
+          size="l"
           resizable
           id="rulesTableRuleFlyout"
           dataTestSubj="rulesTableRuleFlyout"
@@ -368,16 +365,7 @@ export const RuleFlyoutProvider = ({
           hideFooter
           hideOverviewSeverityAndRisk
           overviewHighlight={snippet?.source === 'description' ? snippet.text : undefined}
-          headerActions={
-            <RuleFlyoutTopBar
-              rule={rule}
-              actions={actions}
-              position={index >= 0 ? { index, total: rules.length } : undefined}
-              onPrevious={previous}
-              onNext={next}
-              onDone={close}
-            />
-          }
+          headerActions={<RuleFlyoutActions rule={rule} actions={actions} onDone={close} />}
           subHeader={
             <>
               <RuleFacts rule={rule} columns={columns} />
@@ -414,21 +402,18 @@ export const RuleNameCell = ({ rule }: { rule: Rule }) => {
     },
     [openRule, rule]
   );
-  return (
-    <EuiToolTip content={rule.name} anchorClassName="eui-textTruncate">
-      {flyout ? (
-        <EuiLink href={href} onClick={onClick} data-test-subj="ruleName">
-          {rule.name}
-        </EuiLink>
-      ) : (
-        <SecuritySolutionLinkAnchor
-          data-test-subj="ruleName"
-          deepLinkId={SecurityPageName.rules}
-          path={getRuleDetailsTabUrl(rule.id, RuleDetailTabs.overview)}
-        >
-          {rule.name}
-        </SecuritySolutionLinkAnchor>
-      )}
-    </EuiToolTip>
+  return flyout ? (
+    <EuiLink href={href} onClick={onClick} data-test-subj="ruleName" css={ruleNameCss}>
+      {rule.name}
+    </EuiLink>
+  ) : (
+    <SecuritySolutionLinkAnchor
+      data-test-subj="ruleName"
+      css={ruleNameCss}
+      deepLinkId={SecurityPageName.rules}
+      path={getRuleDetailsTabUrl(rule.id, RuleDetailTabs.overview)}
+    >
+      {rule.name}
+    </SecuritySolutionLinkAnchor>
   );
 };

@@ -11,9 +11,8 @@ import { useRuleSetsQuery } from '../api';
 import { ruleSetFilterState } from '../table_query';
 
 /**
- * Puts the saved conditions of the selected set into the facets and the search, whenever a set
- * is selected without them: from the switcher, a link (an AI card), or a page reload. A reload
- * drops an unsaved change, like leaving the set.
+ * Applies the saved facets when opening a set from the switcher, a link, or a reload.
+ * A reload restores the saved facets and keeps the current text search.
  */
 export const useRuleSetDraft = () => {
   const {
@@ -25,7 +24,8 @@ export const useRuleSetDraft = () => {
 
   useEffect(() => {
     if (set && filterOptions.draftOf !== set.id) {
-      setFilterOptions(ruleSetFilterState(set));
+      const { conditions, draftOf } = ruleSetFilterState(set);
+      setFilterOptions({ conditions, draftOf });
     }
   }, [set, filterOptions.draftOf, setFilterOptions]);
 };

@@ -90,11 +90,11 @@ export const RulesTableUtilityBar = React.memo<RulesTableUtilityBarProps>(
                 <UtilityBarAction
                   disabled={hasDisabledActions}
                   dataTestSubj="selectAllRules"
-                  iconType={isAllSelected ? 'cross' : 'pagesSelect'}
+                  iconType={isAllSelected ? 'cross' : 'documentsCheck'}
                   iconSide="left"
                   onClick={onToggleSelectAll}
                 >
-                  {isAllSelected ? i18n.CLEAR_SELECTION : i18n.SELECT_ALL_RULES(pagination.total)}
+                  {isAllSelected ? i18n.CLEAR_SELECTION : i18n.SELECT_ALL_MATCHING_RULES}
                 </UtilityBarAction>
               )}
 

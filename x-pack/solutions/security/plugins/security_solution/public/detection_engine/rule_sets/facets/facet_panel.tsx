@@ -34,6 +34,7 @@ import type {
   FacetValue,
 } from './facet_fields';
 import { allFacetFields, hasSelection, tagFieldOf } from './facet_fields';
+import { useMitreConfiguration } from '../../../common/hooks/mitre/use_mitre_configuration';
 import { useIntegrationTitles } from '../components/group_by_fields';
 import * as i18n from './translations';
 
@@ -92,6 +93,11 @@ const usePanelStyles = () => {
         white-space: nowrap;
         text-decoration: line-through;
         color: ${euiTheme.colors.textDanger};
+      `,
+      wrapLabel: css`
+        display: block;
+        white-space: normal;
+        overflow-wrap: anywhere;
       `,
       empty: css`
         color: ${euiTheme.colors.textDisabled};
@@ -204,7 +210,10 @@ const FacetValueRow = ({
               data-test-subj={`ruleFacetExcluded-${field.id}-${value.value}`}
             />
           </EuiToolTip>
-          <span css={styles.excludedLabel} title={value.label}>
+          <span
+            css={[styles.excludedLabel, field.searchable && styles.wrapLabel]}
+            title={value.label}
+          >
             {text}
           </span>
         </>
@@ -216,7 +225,12 @@ const FacetValueRow = ({
           onChange={toggleInclude}
           title={value.label}
           label={
-            <span css={value.count === 0 && !isIncluded && !noCount ? styles.empty : undefined}>
+            <span
+              css={[
+                field.searchable && styles.wrapLabel,
+                value.count === 0 && !isIncluded && !noCount && styles.empty,
+              ]}
+            >
               {text}
             </span>
           }
@@ -375,12 +389,13 @@ const FacetGroupComponent = ({
       {/* Closed groups render nothing: the panel has many tag groups. */}
       {isOpen && (
         <div css={{ padding: '2px 0 6px' }}>
-          {(showAll || term) && stable.length >= SEARCH_FROM && (
+          {(field.searchable || ((showAll || term) && stable.length >= SEARCH_FROM)) && (
             <>
               <EuiFieldSearch
                 compressed
                 fullWidth
                 placeholder={i18n.FIND_VALUE(field.label)}
+                aria-label={i18n.FIND_VALUE(field.label)}
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
               />
@@ -460,6 +475,13 @@ export const FacetPanel = ({
 }: FacetPanelProps) => {
   const styles = usePanelStyles();
   const integrationTitles = useIntegrationTitles();
+  const { techniques, subtechniques } = useMitreConfiguration({
+    types: ['technique', 'subtechnique'],
+  });
+  const techniqueTitles = useMemo(
+    () => new Map([...techniques, ...subtechniques].map(({ id, name }) => [id, `${id} · ${name}`])),
+    [techniques, subtechniques]
+  );
   const [showAllTagGroups, setShowAllTagGroups] = useState(false);
   const [tagSearch, setTagSearch] = useState('');
   const fields = allFacetFields(counts, conditions);
@@ -478,11 +500,11 @@ export const FacetPanel = ({
     const byId = new Map<string, FacetValue[]>();
     if (counts) {
       allFacetFields(counts, {}).forEach((field) =>
-        byId.set(field.id, field.values(counts, { integrationTitles }))
+        byId.set(field.id, field.values(counts, { integrationTitles, techniqueTitles }))
       );
     }
     return byId;
-  }, [counts, integrationTitles]);
+  }, [counts, integrationTitles, techniqueTitles]);
   const valuesOf = (field: FacetField) => valuesById.get(field.id) ?? NO_VALUES;
 
   // One search over the tags of all groups, like the tags filter of the table had.
@@ -515,7 +537,7 @@ export const FacetPanel = ({
         values={valuesOf(field)}
         selection={selection}
         onFieldChange={onFieldChange}
-        initialIsOpen={field.section !== 'tags' || hasSelection(selection)}
+        initialIsOpen={(field.section !== 'tags' && !field.searchable) || hasSelection(selection)}
         resetKey={scopeKey}
         countsByMeaning={counts?.byMeaning}
       />

@@ -31,6 +31,10 @@ export const MITRE_TACTIC = i18n.translate('xpack.securitySolution.ruleSets.face
   defaultMessage: 'MITRE ATT&CK tactic',
 });
 
+export const MITRE_TECHNIQUE = i18n.translate('xpack.securitySolution.ruleSets.facets.technique', {
+  defaultMessage: 'MITRE ATT&CK technique',
+});
+
 export const RULE_TYPE = i18n.translate('xpack.securitySolution.ruleSets.facets.ruleType', {
   defaultMessage: 'Rule type',
 });

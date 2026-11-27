@@ -61,6 +61,7 @@ function renderUseRulesTableContext({
     isFetching: !rules,
     isLoading: !rules,
     isRefetching: false,
+    isPreviousData: false,
     isError: rules instanceof Error,
   });
   (useFetchRulesSnoozeSettingsQuery as jest.Mock).mockReturnValue({
@@ -127,11 +128,13 @@ describe('RulesTableContextProvider', () => {
       });
 
       expect(state.filterOptions).toEqual({
+        ...DEFAULT_FILTER_OPTIONS,
         filter: 'test',
-        tags: ['test'],
-        showCustomRules: true,
-        showElasticRules: false,
-        enabled: true,
+        conditions: {
+          enabled: true,
+          rule_source: { include: ['internal'] },
+          tags: { include: ['test'], match: 'all' },
+        },
       });
       expect(state.sortingOptions).toEqual({
         field: 'name',
@@ -148,12 +151,7 @@ describe('RulesTableContextProvider', () => {
     it('restores default rules table state', () => {
       const state = renderUseRulesTableContext({});
 
-      expect(state.filterOptions).toEqual({
-        filter: DEFAULT_FILTER_OPTIONS.filter,
-        tags: DEFAULT_FILTER_OPTIONS.tags,
-        showCustomRules: DEFAULT_FILTER_OPTIONS.showCustomRules,
-        showElasticRules: DEFAULT_FILTER_OPTIONS.showElasticRules,
-      });
+      expect(state.filterOptions).toEqual({ ...DEFAULT_FILTER_OPTIONS, conditions: {} });
       expect(state.sortingOptions).toEqual({
         field: DEFAULT_SORTING_OPTIONS.field,
         order: DEFAULT_SORTING_OPTIONS.order,

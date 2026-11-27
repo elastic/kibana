@@ -75,6 +75,7 @@ export const GranularRulesFacetCategory = lazySchema(() =>
     'type',
     'integration',
     'tactic',
+    'technique',
     'source',
     'severity',
   ])

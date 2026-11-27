@@ -20,7 +20,12 @@ import { hasRuleSetConditions } from '../../../../common/detection_engine/rule_s
 import { convertRulesFilterToKQL } from '../../../../common/detection_engine/rule_management/rule_filtering';
 import { useRulesTableContext } from '../../rule_management_ui/components/rules_table/rules_table/rules_table_context';
 import { useRuleSetsQuery } from '../api';
-import { isRuleSetChanged, ruleQueryParams, ruleSetFilterState } from '../table_query';
+import {
+  facetFilterState,
+  isRuleSetChanged,
+  ruleQueryParams,
+  ruleSetFilterState,
+} from '../table_query';
 import { FacetPanel } from './facet_panel';
 import { HideFacetPanelButton } from './facet_panel_visibility';
 import { useFacetCounts } from './use_facet_counts';
@@ -50,7 +55,7 @@ export const RulesFacetPanel = () => {
     requestAnimationFrame(() => {
       window.clearTimeout(scheduled.current);
       scheduled.current = window.setTimeout(
-        () => setFilterOptions({ conditions: next, members: undefined }),
+        () => setFilterOptions(facetFilterState(filterOptions, next, set)),
         0
       );
     });
@@ -72,7 +77,6 @@ export const RulesFacetPanel = () => {
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
-            {/* Inside a set the facets are its conditions: clearing them would empty the set. */}
             {!set && hasRuleSetConditions(shown) && (
               <EuiFlexItem grow={false}>
                 <EuiButtonEmpty

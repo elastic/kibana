@@ -13,6 +13,7 @@ import {
   EuiIcon,
   EuiSpacer,
   EuiText,
+  useEuiTheme,
 } from '@elastic/eui';
 import { KbnWarningCallout } from '@kbn/ui-callout';
 import { useRulesTableContext } from '../../rule_management_ui/components/rules_table/rules_table/rules_table_context';
@@ -25,12 +26,24 @@ import * as i18n from './translations';
  */
 export const SearchModeLine = () => {
   const {
-    state: { filterOptions, searchMode, searchFallbackReason, pagination, isFetching },
+    state: { filterOptions, searchMode, searchFallbackReason, isPreviousData, isFetching },
     actions: { setFilterOptions },
   } = useRulesTableContext();
   const status = useRuleSearchStatus();
+  const { euiTheme } = useEuiTheme();
   const text = filterOptions.filter.trim();
-  if (!text || !searchMode || isFetching) {
+  if (!text) {
+    return null;
+  }
+  if (isPreviousData || (!searchMode && isFetching)) {
+    return (
+      <>
+        <EuiSpacer size="l" />
+        <EuiSpacer size="xs" />
+      </>
+    );
+  }
+  if (!searchMode) {
     return null;
   }
   const failed =
@@ -54,6 +67,7 @@ export const SearchModeLine = () => {
         gutterSize="xs"
         alignItems="center"
         responsive={false}
+        css={{ minBlockSize: euiTheme.size.l }}
         data-test-subj="ruleSearchModeLine"
       >
         <EuiFlexItem grow={false}>
@@ -66,9 +80,7 @@ export const SearchModeLine = () => {
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiText size="xs" color="subdued">
-            {searchMode === 'semantic'
-              ? i18n.AI_RESULTS(pagination.total)
-              : i18n.KEYWORD_RESULTS(pagination.total, text)}
+            {searchMode === 'semantic' ? i18n.AI_SEARCH_ORDER : i18n.KEYWORD_SEARCH_MODE}
           </EuiText>
         </EuiFlexItem>
         {searchMode === 'semantic' && (
