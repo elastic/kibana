@@ -329,21 +329,10 @@ describe('EQL Tab', () => {
 
   describe('rendering', () => {
     const fetchNotesMock = jest.spyOn(notesApi, 'fetchNotesByDocumentIds');
-    test(
-      'should render the timeline table',
-      async () => {
-        fetchNotesMock.mockImplementation(jest.fn());
-        render(
-          <TestProviders store={createMockStore(mockState)}>
-            <TestComponent />
-          </TestProviders>
-        );
 
-        expect(await screen.findByTestId('timelineHeader')).toBeVisible();
-        expect(getUnifiedTimelineBodyProps().events).toEqual(mockTimelineData.slice(0, 1));
-      },
-      SPECIAL_TEST_TIMEOUT
-    );
+    beforeEach(() => {
+      fetchNotesMock.mockImplementation(jest.fn());
+    });
 
     test(
       'it renders the timeline column headers',
@@ -367,33 +356,43 @@ describe('EQL Tab', () => {
     );
 
     test(
-      'should render correct placeholder when there are not results',
+      'should send a total count of 0 to the body once the EQL query is blank',
       async () => {
         (useTimelineEvents as jest.Mock).mockReturnValue([
           false,
           {
-            events: [],
+            events: mockTimelineData.slice(0, 1),
             rawEvents: [],
             pageInfo: {
               activePage: 0,
               totalPages: 10,
             },
-            totalCount: 0,
+            totalCount: 5,
             isPartial: false,
             shardFailures: [],
             timedOut: false,
           },
         ]);
 
+        const store = createMockStore(mockState);
         render(
-          <TestProviders store={createMockStore(mockState)}>
+          <TestProviders store={store}>
             <TestComponent />
           </TestProviders>
         );
 
         await screen.findByTestId('timelineHeader');
-        expect(getUnifiedTimelineBodyProps().events).toEqual([]);
-        expect(getUnifiedTimelineBodyProps().totalCount).toBe(0);
+        expect(getUnifiedTimelineBodyProps().totalCount).toBe(5);
+
+        act(() => {
+          store.dispatch(
+            timelineActions.updateEqlOptions({ id: TimelineId.test, field: 'query', value: '' })
+          );
+        });
+
+        await waitFor(() => {
+          expect(getUnifiedTimelineBodyProps().totalCount).toBe(0);
+        });
       },
       SPECIAL_TEST_TIMEOUT
     );
