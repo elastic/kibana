@@ -28,8 +28,8 @@ const DescribeStepContent = ({ aiIndex, layout }: SetupWizardStepContentProps) =
     value: trimmedDescription,
     maxLength: MAX_AI_INDEX_DESCRIPTION_LENGTH,
   });
-  // Only spaces: Continue stays off, so say why. An untouched (empty) field shows nothing.
-  const isBlank = description.length > 0 && trimmedDescription.length === 0;
+  // An empty field shows no error, because the button says Skip there.
+  const isOnlySpaces = description.length > 0 && trimmedDescription.length === 0;
 
   return (
     <SetupWizardStepLayout
@@ -41,7 +41,7 @@ const DescribeStepContent = ({ aiIndex, layout }: SetupWizardStepContentProps) =
       <AiIndexDescriptionField
         value={description}
         onChange={setDescription}
-        error={isBlank ? blankDescriptionError : validation.error}
+        error={isOnlySpaces ? blankDescriptionError : validation.error}
         warning={validation.warning}
         data-test-subj="contextSetupWizardDescription"
       />
