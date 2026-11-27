@@ -73,12 +73,11 @@ export function getLocatorParams(
 ) {
   const references = extractReferencesFromState({
     activeDatasourceId,
-    activeDatasources: Object.keys(datasourceStates).reduce(
-      (acc, datasourceId) => ({
-        ...acc,
-        [datasourceId]: datasourceMap[datasourceId],
-      }),
-      {}
+    activeDatasources: Object.fromEntries(
+      Object.keys(datasourceStates).map((datasourceId) => [
+        datasourceId,
+        datasourceMap[datasourceId],
+      ])
     ),
     datasourceStates,
     visualizationState: visualization.state,

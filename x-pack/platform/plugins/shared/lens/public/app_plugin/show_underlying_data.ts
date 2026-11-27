@@ -83,15 +83,19 @@ const sortByDateFieldsFirst = (
 
   // for usability reasons we want to order the date fields first
   // the fields order responds to the columns order in Discover
-  const dateFieldsFirst = fields.reduce((acc: string[], fieldName) => {
+  const dateFields: string[] = [];
+  const otherFields: string[] = [];
+  fields.forEach((fieldName) => {
     const field = indexPatterns[dataViewId]?.getFieldByName(fieldName);
     if (field?.type === 'date') {
-      return [fieldName, ...acc];
+      // later date fields end up before earlier ones
+      dateFields.unshift(fieldName);
+    } else {
+      otherFields.push(fieldName);
     }
-    return [...acc, fieldName];
-  }, []);
+  });
 
-  return dateFieldsFirst;
+  return [...dateFields, ...otherFields];
 };
 
 /**
