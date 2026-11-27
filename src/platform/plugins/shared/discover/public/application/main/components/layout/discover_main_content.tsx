@@ -9,7 +9,7 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule } from '@elastic/eui';
 import { type DropType, DropOverlayWrapper, Droppable } from '@kbn/dom-drag-drop';
-import React, { useCallback, useRef, useState } from 'react';
+import React, { useCallback, useRef, useState, type MutableRefObject } from 'react';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { i18n } from '@kbn/i18n';
@@ -61,6 +61,7 @@ export interface DiscoverMainContentProps {
   onDropFieldToTable?: () => void;
   columns: string[];
   isChartAvailable?: boolean; // it will be injected by UnifiedHistogram
+  panelsToggleChartButtonFocusOnMountRef?: MutableRefObject<boolean>;
 }
 
 export const DiscoverMainContent = ({
@@ -71,6 +72,7 @@ export const DiscoverMainContent = ({
   columns,
   onDropFieldToTable,
   isChartAvailable,
+  panelsToggleChartButtonFocusOnMountRef,
 }: DiscoverMainContentProps) => {
   const { trackUiMetric } = useDiscoverServices();
   const dispatch = useInternalStateDispatch();
@@ -139,6 +141,7 @@ export const DiscoverMainContent = ({
                 omitChartButton={!isChartAvailable}
                 omitTableButton={!isChartAvailable}
                 dataTestSubjSuffix="InPage"
+                chartButtonFocusOnMountRef={panelsToggleChartButtonFocusOnMountRef}
               />
             ) : undefined
           }
@@ -153,6 +156,7 @@ export const DiscoverMainContent = ({
       dataView,
       showPanelsToggle,
       isChartAvailable,
+      panelsToggleChartButtonFocusOnMountRef,
     ]
   );
 

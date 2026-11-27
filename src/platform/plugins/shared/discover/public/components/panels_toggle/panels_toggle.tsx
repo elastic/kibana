@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useRef, type MutableRefObject, type Ref } from 'react';
+import useMount from 'react-use/lib/useMount';
 import { i18n } from '@kbn/i18n';
 import { useIsWithinBreakpoints } from '@elastic/eui';
 import { IconButtonGroup } from '@kbn/shared-ux-button-toolbar';
@@ -31,6 +32,11 @@ export interface PanelsToggleProps {
   omitChartButton?: boolean;
   omitTableButton?: boolean;
   dataTestSubjSuffix?: string;
+  /**
+   * Shared between the toggles rendered in the chart toolbar and in the table toolbar.
+   * Toggling the chart unmounts one of them, so the one that mounts next takes over focus.
+   */
+  chartButtonFocusOnMountRef?: MutableRefObject<boolean>;
 }
 
 const getSidebarButton = ({
@@ -63,10 +69,12 @@ const getChartButton = ({
   isHidden,
   toggleChart,
   isDisabled,
+  buttonRef,
 }: {
   isHidden: boolean;
   toggleChart: () => void;
   isDisabled?: boolean;
+  buttonRef: Ref<HTMLButtonElement>;
 }) => {
   const label = isHidden
     ? i18n.translate('discover.panelsToggle.showChartButton', {
@@ -85,6 +93,7 @@ const getChartButton = ({
     isDisabled,
     toolTipContent: isDisabled ? disabledCollapsingTooltip : label,
     onClick: toggleChart,
+    buttonRef,
   };
 };
 
@@ -120,12 +129,14 @@ const getTableButton = ({
  * @param omitChartButton
  * @param omitTableButton
  * @param dataTestSubjSuffix
+ * @param chartButtonFocusOnMountRef
  * @constructor
  */
 export const PanelsToggle: React.FC<PanelsToggleProps> = ({
   omitChartButton = false,
   omitTableButton = false,
   dataTestSubjSuffix,
+  chartButtonFocusOnMountRef,
 }) => {
   const { storage } = useDiscoverServices();
   const dispatch = useInternalStateDispatch();
@@ -134,12 +145,24 @@ export const PanelsToggle: React.FC<PanelsToggleProps> = ({
   const isTableHidden = useAppStateSelector((state) => Boolean(state.hideTable));
   const isSidebarHidden = useAppStateSelector((state) => Boolean(state.hideSidebar));
   const isMobile = useIsWithinBreakpoints(['xs', 's']);
+  const chartButtonRef = useRef<HTMLButtonElement>(null);
 
   const onToggleChart = useCallback(() => {
     const hideChart = !isChartHidden;
+    if (chartButtonFocusOnMountRef) {
+      // toggling the chart moves the chart button to the other toolbar; flag it to take over focus
+      chartButtonFocusOnMountRef.current = true;
+    }
     setChartHidden(storage, 'discover', hideChart);
     dispatch(updateAppState({ appState: { hideChart } }));
-  }, [dispatch, isChartHidden, storage, updateAppState]);
+  }, [chartButtonFocusOnMountRef, dispatch, isChartHidden, storage, updateAppState]);
+
+  useMount(() => {
+    if (chartButtonFocusOnMountRef?.current && chartButtonRef.current) {
+      chartButtonFocusOnMountRef.current = false;
+      chartButtonRef.current.focus();
+    }
+  });
 
   const onToggleTable = useCallback(() => {
     const hideTable = !isTableHidden;
@@ -173,6 +196,7 @@ export const PanelsToggle: React.FC<PanelsToggleProps> = ({
         isHidden: isChartHidden,
         toggleChart: onToggleChart,
         isDisabled: disableHideChart,
+        buttonRef: chartButtonRef,
       })
     );
   }

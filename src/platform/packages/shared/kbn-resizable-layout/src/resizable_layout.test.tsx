@@ -10,6 +10,7 @@
 import type { ReactElement } from 'react';
 import React from 'react';
 import { render, screen } from '@testing-library/react';
+import { createHtmlPortalNode, InPortal, OutPortal } from 'react-reverse-portal';
 import { ResizableLayout } from './resizable_layout';
 import { ResizableLayoutDirection, ResizableLayoutMode } from '../types';
 
@@ -65,5 +66,67 @@ describe('ResizableLayout component', () => {
     expect(screen.getByText('Fixed panel')).toBeVisible();
     expect(screen.getByText('Flex panel')).toBeVisible();
     expect(screen.getByTestId('resizableLayoutResizableButton')).toBeVisible();
+  });
+
+  describe('focus restoration when the mode changes', () => {
+    const PortalLayout = ({ mode }: { mode: ResizableLayoutMode }) => {
+      const [flexPanelNode] = React.useState(() => createHtmlPortalNode());
+
+      return (
+        <>
+          <InPortal node={flexPanelNode}>
+            <button type="button">Toggle</button>
+          </InPortal>
+          <ResizableLayout
+            direction={ResizableLayoutDirection.Horizontal}
+            fixedPanel={<div>Fixed panel</div>}
+            fixedPanelSize={200}
+            flexPanel={<OutPortal node={flexPanelNode} />}
+            minFixedPanelSize={100}
+            minFlexPanelSize={100}
+            mode={mode}
+          />
+        </>
+      );
+    };
+
+    it.each([
+      [ResizableLayoutMode.Resizable, ResizableLayoutMode.Single],
+      [ResizableLayoutMode.Single, ResizableLayoutMode.Resizable],
+      [ResizableLayoutMode.Resizable, ResizableLayoutMode.Static],
+      [ResizableLayoutMode.Static, ResizableLayoutMode.Single],
+    ])(
+      'should keep focus on an element moved between panels when switching from %s to %s',
+      (fromMode, toMode) => {
+        const { rerender } = render(<PortalLayout mode={fromMode} />);
+        const button = screen.getByRole('button', { name: 'Toggle' });
+        button.focus();
+
+        rerender(<PortalLayout mode={toMode} />);
+
+        expect(screen.getByRole('button', { name: 'Toggle' })).toBe(button);
+        expect(button).toHaveFocus();
+      }
+    );
+
+    it('should not move focus when the focused element is outside the layout', () => {
+      const { rerender } = render(
+        <>
+          <input aria-label="Outside" />
+          <PortalLayout mode={ResizableLayoutMode.Resizable} />
+        </>
+      );
+      const outside = screen.getByRole('textbox', { name: 'Outside' });
+      outside.focus();
+
+      rerender(
+        <>
+          <input aria-label="Outside" />
+          <PortalLayout mode={ResizableLayoutMode.Single} />
+        </>
+      );
+
+      expect(outside).toHaveFocus();
+    });
   });
 });

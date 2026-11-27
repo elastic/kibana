@@ -11,6 +11,7 @@ import type { ReactNode } from 'react';
 import React from 'react';
 import { PanelsResizable } from './panels_resizable';
 import { PanelsStatic } from './panels_static';
+import { useRestoreFocusOnModeChange } from './use_restore_focus_on_mode_change';
 import type { ResizableLayoutDirection, ResizableLayoutOrder } from '../types';
 import { ResizableLayoutMode } from '../types';
 
@@ -81,6 +82,8 @@ export const ResizableLayout = ({
   ['data-test-subj']: dataTestSubj,
   onFixedPanelSizeChange,
 }: ResizableLayoutProps) => {
+  useRestoreFocusOnModeChange(mode);
+
   const panelsProps = { className, fixedPanel, flexPanel };
 
   return staticModes.includes(mode) ? (

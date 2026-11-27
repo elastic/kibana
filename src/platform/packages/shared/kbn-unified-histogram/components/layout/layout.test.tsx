@@ -18,14 +18,15 @@ import { DataViewSource } from '@kbn/data-source';
 import { of } from 'rxjs';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
-import { screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
+import { createHtmlPortalNode, InPortal, OutPortal } from 'react-reverse-portal';
 import { searchSourceInstanceMock } from '@kbn/data-plugin/common/search/search_source/mocks';
 import { UnifiedHistogramChart } from '../chart';
 import { UnifiedHistogramFetchStatus } from '../../types';
 import { UnifiedHistogramLayout } from './layout';
 import { unifiedHistogramServicesMock } from '../../__mocks__/services';
 import { useUnifiedHistogram } from '../../hooks/use_unified_histogram';
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 
 let mockBreakpoint = 'l';
 
@@ -255,6 +256,44 @@ describe('Layout', () => {
 
       expect(screen.getByTestId('unifiedHistogramChartPanelHidden')).toBeVisible();
       expect(screen.queryByTestId('unifiedHistogramChartContainer')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('focus', () => {
+    // mirrors Discover, which renders the chart (and its panels toggle) through a reverse portal
+    const PortalChartLayout = ({ isMainPanelHidden }: { isMainPanelHidden: boolean }) => {
+      const [chartNode] = useState(() => createHtmlPortalNode());
+
+      return (
+        <>
+          <InPortal node={chartNode}>
+            <button type="button">Toggle results table</button>
+          </InPortal>
+          <UnifiedHistogramLayout
+            unifiedHistogramChart={<OutPortal node={chartNode} />}
+            chart={{ hidden: false }}
+            isMainPanelHidden={isMainPanelHidden}
+          >
+            <div>Results table</div>
+          </UnifiedHistogramLayout>
+        </>
+      );
+    };
+
+    it('should keep focus in the chart when the results table is hidden and shown again', () => {
+      const { rerender } = render(<PortalChartLayout isMainPanelHidden={false} />);
+      const toggleButton = screen.getByRole('button', { name: 'Toggle results table' });
+      toggleButton.focus();
+
+      rerender(<PortalChartLayout isMainPanelHidden={true} />);
+
+      expect(screen.queryByText('Results table')).not.toBeInTheDocument();
+      expect(toggleButton).toHaveFocus();
+
+      rerender(<PortalChartLayout isMainPanelHidden={false} />);
+
+      expect(screen.getByText('Results table')).toBeInTheDocument();
+      expect(toggleButton).toHaveFocus();
     });
   });
 });

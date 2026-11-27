@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useRef } from 'react';
 import { UnifiedHistogramLayout } from '@kbn/unified-histogram';
 import { type DropType, DropOverlayWrapper, Droppable } from '@kbn/dom-drag-drop';
 import { i18n } from '@kbn/i18n';
@@ -51,7 +51,17 @@ export const DiscoverHistogramLayout = ({
   );
   const layoutProps = layoutPropsMap[localStorageKeyPrefix ?? DEFAULT_HISTOGRAM_KEY_PREFIX];
   const isMainPanelHidden = useAppStateSelector((state) => Boolean(state.hideTable));
-  const panelsToggle = useMemo(() => <PanelsToggle dataTestSubjSuffix="InHistogram" />, []);
+  // shared by the chart and table toolbar toggles so focus follows the chart button between them
+  const chartButtonFocusOnMountRef = useRef(false);
+  const panelsToggle = useMemo(
+    () => (
+      <PanelsToggle
+        dataTestSubjSuffix="InHistogram"
+        chartButtonFocusOnMountRef={chartButtonFocusOnMountRef}
+      />
+    ),
+    []
+  );
 
   if (!layoutProps) {
     return null;
@@ -83,7 +93,10 @@ export const DiscoverHistogramLayout = ({
       isMainPanelHidden={isMainPanelHidden}
       {...layoutProps}
     >
-      <DiscoverMainContent {...mainContentProps} />
+      <DiscoverMainContent
+        {...mainContentProps}
+        panelsToggleChartButtonFocusOnMountRef={chartButtonFocusOnMountRef}
+      />
     </UnifiedHistogramLayout>
   );
 };
