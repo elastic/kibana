@@ -147,10 +147,33 @@ should be included.
 
 ### Partial Updates
 
-Partial updates on ESOs are only possible if the changes are limited to unencrypted and non-AAD attributes. Any changes to an ESO's encrypted values or AAD-
-included values requires re-encryption, which means the entire object must be provided when updating to avoid corrupting the object. If an ESO is corrupted by
-a partial update, it will be effectively undecryptable. Currently, there is nothing preventing or limiting partial updates of ESOs (see open GitHub issue
-[50256](https://github.com/elastic/kibana/issues/50256)), so this requires consistent diligence from developers utilizing ESOs.
+Any change to the encrypted or AAD-included values of an ESO requires re-encryption against the complete object.
+
+The `update` and `bulkUpdate` APIs of the Saved Objects client and repository support partial updates of ESOs, including changes to encrypted and AAD-included
+attributes. They merge the provided attributes into the stored object and then encrypt the result:
+
+- If the update provides neither encrypted nor AAD-included attributes, nothing is decrypted or re-encrypted.
+- If the update provides every encrypted attribute of the type, the merged object is encrypted. The stored object is not decrypted.
+- Otherwise the stored object is decrypted first, so that the encrypted attributes that are not part of the update can be re-encrypted.
+
+This means that any caller that is allowed to update an object can change an AAD-included attribute: the stored encrypted attributes are re-encrypted against
+the new value and stay decryptable. AAD only detects changes that are written outside the Saved Objects API, for example directly to Elasticsearch. Do not rely on
+AAD to stop an authorized update from changing an attribute. If an attribute must not change after the object is created, enforce that in the code that owns the
+type.
+
+An update never fails because the stored object cannot be decrypted, for example because the encryption key is not available. In that case a warning is logged,
+the update is written, and the encrypted attributes that are not part of the update are kept exactly as they are stored. Each of them remains undecryptable until
+an update provides it again. An update that provides an encrypted attribute always replaces its stored value without decrypting it, so providing only the
+attributes that cannot be decrypted is enough to repair the object.
+
+The same applies when Kibana has no encryption key and the update provides no encrypted attribute: nothing can be re-encrypted, so the update is written and the
+stored encrypted attributes are kept exactly as they are stored. An update that provides an encrypted attribute fails when Kibana has no encryption key.
+
+This protection applies only when attributes are merged, which is the default. With `mergeAttributes: false` the provided attributes replace the stored ones, so
+the entire object must be provided.
+
+An update that writes to Elasticsearch directly does not have this protection. Such an update is only safe if the changes are limited to unencrypted and non-AAD
+attributes, otherwise the ESO will be effectively undecryptable.
 
 ### Migrations, Backward compatibility, and Serverless
 
@@ -368,7 +391,9 @@ included in AAD as a whole. `attributesToIncludeInAAD` accepts top-level attribu
 registering it would throw. If only part of an attribute belongs in AAD, the attribute must be restructured so that part of it is top-level. For more information, see
 the [Nested attributes](./encrypted-saved-objects.md#nested-attributes) section of this document.
 
-Additionally, the owning team implemented a type to help manage partial updates. This is a great addition to ensure changes to the ESOs do not render them undecryptable.
+Additionally, the owning team implemented a type to help manage partial updates. This keeps partial updates limited to attributes that do not require re-encryption.
+It is required for partial updates that write to Elasticsearch directly (see [Partial Updates](./encrypted-saved-objects.md#partial-updates)), and for the `update`
+and `bulkUpdate` APIs it avoids the cost of decrypting and re-encrypting the object.
 
 ```ts
 export type AdHocRunAttributesNotPartiallyUpdatable = 'rule' | 'spaceId' | 'apiKeyToUse';

@@ -28,6 +28,7 @@ import {
   type ISavedObjectsEncryptionExtension,
   type SavedObjectsRawDocSource,
   type SavedObjectBulkResult,
+  type SavedObjectsUpdateEncryptionRequirements,
 } from '@kbn/core-saved-objects-server';
 import {
   bulkCreateSuccess,
@@ -377,9 +378,11 @@ describe('SavedObjectsRepository Encryption Extension', () => {
         }
       );
       expect(client.index).toHaveBeenCalledTimes(1);
-      expect(mockEncryptionExt.isEncryptableType).toHaveBeenCalledTimes(2); // (no upsert) optionallyEncryptAttributes, optionallyDecryptAndRedactSingleResult
+      expect(mockEncryptionExt.isEncryptableType).toHaveBeenCalledTimes(2); // (no upsert) getUpdateEncryptionRequirements, optionallyDecryptAndRedactSingleResult
       expect(mockEncryptionExt.isEncryptableType).toHaveBeenCalledWith(nonEncryptedSO.type);
+      expect(mockEncryptionExt.getUpdateEncryptionRequirements).not.toHaveBeenCalled();
       expect(mockEncryptionExt.encryptAttributes).not.toHaveBeenCalled();
+      expect(mockEncryptionExt.decryptAttributes).not.toHaveBeenCalled();
       expect(mockEncryptionExt.decryptOrStripResponseAttributes).not.toHaveBeenCalled();
       expect(result).toEqual(
         expect.objectContaining({
@@ -390,8 +393,313 @@ describe('SavedObjectsRepository Encryption Extension', () => {
       );
     });
 
+    const descriptor = { id: encryptedSO.id, namespace, type: ENCRYPTED_TYPE };
+    const getIndexedAttributes = () =>
+      (client.index.mock.calls[0][0] as { document: Record<string, unknown> }).document[
+        ENCRYPTED_TYPE
+      ];
+
+    describe('partial updates of an encryptable type', () => {
+      beforeEach(() => {
+        mockEncryptionExt.isEncryptableType.mockReturnValue(true);
+        mockEncryptionExt.getEncryptedAttributes.mockReturnValue(
+          new Set(['attrSecret', 'attrNotSoSecret'])
+        );
+        mockEncryptionExt.encryptAttributes.mockImplementation(async (desc, attrs) => ({
+          ...attrs,
+          encrypted: true,
+        }));
+        mockEncryptionExt.decryptOrStripResponseAttributes.mockImplementation(async (so) => so);
+      });
+
+      it('merges without encrypting or decrypting if no encryption is required', async () => {
+        mockEncryptionExt.getUpdateEncryptionRequirements.mockReturnValue({
+          decryptCurrent: false,
+          encryptRequirement: 'none',
+        });
+        const partialAttributes = { attrThree: 'updated' };
+        await updateSuccess(
+          client,
+          repository,
+          registry,
+          encryptedSO.type,
+          encryptedSO.id,
+          partialAttributes,
+          { namespace }
+        );
+
+        expect(mockEncryptionExt.getUpdateEncryptionRequirements).toHaveBeenCalledWith(
+          ENCRYPTED_TYPE,
+          partialAttributes
+        );
+        expect(mockEncryptionExt.decryptAttributes).not.toHaveBeenCalled();
+        expect(mockEncryptionExt.encryptAttributes).not.toHaveBeenCalled();
+        expect(getIndexedAttributes()).toEqual({ ...encryptedSO.attributes, attrThree: 'updated' });
+      });
+
+      it('never decrypts the stored attributes if the merged attributes are not encrypted', async () => {
+        // the type does not allow these requirements, they would store the decrypted attributes
+        mockEncryptionExt.getUpdateEncryptionRequirements.mockReturnValue({
+          decryptCurrent: true,
+          encryptRequirement: 'none',
+        } as unknown as SavedObjectsUpdateEncryptionRequirements);
+        await updateSuccess(
+          client,
+          repository,
+          registry,
+          encryptedSO.type,
+          encryptedSO.id,
+          { attrThree: 'updated' },
+          { namespace }
+        );
+
+        expect(mockEncryptionExt.decryptAttributes).not.toHaveBeenCalled();
+        expect(mockEncryptionExt.encryptAttributes).not.toHaveBeenCalled();
+        expect(getIndexedAttributes()).toEqual({ ...encryptedSO.attributes, attrThree: 'updated' });
+      });
+
+      it('encrypts the merged attributes without decrypting if all encrypted attributes are replaced', async () => {
+        mockEncryptionExt.getUpdateEncryptionRequirements.mockReturnValue({
+          decryptCurrent: false,
+          encryptRequirement: 'post-merge',
+        });
+        // the stored values of the replaced attributes must not survive the merge
+        const partialAttributes = { attrSecret: 'new-secret', attrNotSoSecret: null };
+        await updateSuccess(
+          client,
+          repository,
+          registry,
+          encryptedSO.type,
+          encryptedSO.id,
+          partialAttributes,
+          { namespace }
+        );
+
+        const expectedMergedAttributes = {
+          title: 'Testing',
+          attrOne: 'one',
+          attrThree: 'three',
+          attrSecret: 'new-secret',
+          attrNotSoSecret: null,
+        };
+        expect(mockEncryptionExt.decryptAttributes).not.toHaveBeenCalled();
+        expect(mockEncryptionExt.encryptAttributes).toHaveBeenCalledTimes(1);
+        expect(mockEncryptionExt.encryptAttributes).toHaveBeenCalledWith(
+          descriptor,
+          expectedMergedAttributes
+        );
+        expect(getIndexedAttributes()).toEqual({ ...expectedMergedAttributes, encrypted: true });
+      });
+
+      it('decrypts the stored attributes and encrypts the merged attributes if required', async () => {
+        mockEncryptionExt.getUpdateEncryptionRequirements.mockReturnValue({
+          decryptCurrent: true,
+          encryptRequirement: 'post-merge',
+        });
+        mockEncryptionExt.decryptAttributes.mockImplementation(async (desc, attrs) => ({
+          ...attrs,
+          attrSecret: 'secret',
+          attrNotSoSecret: 'not-so-secret',
+        }));
+        const partialAttributes = { attrOne: 'updated' };
+        await updateSuccess(
+          client,
+          repository,
+          registry,
+          encryptedSO.type,
+          encryptedSO.id,
+          partialAttributes,
+          { namespace }
+        );
+
+        const expectedMergedAttributes = {
+          ...encryptedSO.attributes,
+          attrSecret: 'secret',
+          attrNotSoSecret: 'not-so-secret',
+          attrOne: 'updated',
+        };
+        expect(mockEncryptionExt.decryptAttributes).toHaveBeenCalledTimes(1);
+        expect(mockEncryptionExt.decryptAttributes).toHaveBeenCalledWith(
+          descriptor,
+          encryptedSO.attributes
+        );
+        expect(mockEncryptionExt.encryptAttributes).toHaveBeenCalledTimes(1);
+        expect(mockEncryptionExt.encryptAttributes).toHaveBeenCalledWith(
+          descriptor,
+          expectedMergedAttributes
+        );
+        expect(getIndexedAttributes()).toEqual({ ...expectedMergedAttributes, encrypted: true });
+      });
+
+      it('does not decrypt the stored value of an encrypted attribute that is replaced', async () => {
+        mockEncryptionExt.getUpdateEncryptionRequirements.mockReturnValue({
+          decryptCurrent: true,
+          encryptRequirement: 'post-merge',
+        });
+        mockEncryptionExt.decryptAttributes.mockImplementation(async (desc, attrs) => ({
+          ...attrs,
+          attrNotSoSecret: 'not-so-secret',
+        }));
+        await updateSuccess(
+          client,
+          repository,
+          registry,
+          encryptedSO.type,
+          encryptedSO.id,
+          { attrSecret: 'new-secret' },
+          { namespace }
+        );
+
+        const { attrSecret, ...storedAttributesWithoutReplacedSecret } = encryptedSO.attributes;
+        expect(mockEncryptionExt.decryptAttributes).toHaveBeenCalledWith(
+          descriptor,
+          storedAttributesWithoutReplacedSecret
+        );
+        const expectedMergedAttributes = {
+          ...encryptedSO.attributes,
+          attrSecret: 'new-secret',
+          attrNotSoSecret: 'not-so-secret',
+        };
+        expect(mockEncryptionExt.encryptAttributes).toHaveBeenCalledWith(
+          descriptor,
+          expectedMergedAttributes
+        );
+        expect(getIndexedAttributes()).toEqual({ ...expectedMergedAttributes, encrypted: true });
+      });
+
+      it('does not change the structure of a supplied encrypted attribute', async () => {
+        mockEncryptionExt.getUpdateEncryptionRequirements.mockReturnValue({
+          decryptCurrent: true,
+          encryptRequirement: 'post-merge',
+        });
+        mockEncryptionExt.decryptAttributes.mockImplementation(async (desc, attrs) => ({
+          ...attrs,
+          attrNotSoSecret: 'not-so-secret',
+        }));
+        // a merge would turn an object with numeric keys into an array
+        const suppliedSecret = { 0: 'first-secret', label: 'second-secret', nested: { 0: 'x' } };
+        await updateSuccess(
+          client,
+          repository,
+          registry,
+          encryptedSO.type,
+          encryptedSO.id,
+          { attrSecret: suppliedSecret },
+          { namespace }
+        );
+
+        const expectedMergedAttributes = {
+          ...encryptedSO.attributes,
+          attrSecret: suppliedSecret,
+          attrNotSoSecret: 'not-so-secret',
+        };
+        expect(mockEncryptionExt.encryptAttributes).toHaveBeenCalledWith(
+          descriptor,
+          expectedMergedAttributes
+        );
+        expect(getIndexedAttributes()).toEqual({ ...expectedMergedAttributes, encrypted: true });
+      });
+
+      it('writes the update and keeps the stored encrypted attributes if they cannot be decrypted', async () => {
+        mockEncryptionExt.getUpdateEncryptionRequirements.mockReturnValue({
+          decryptCurrent: true,
+          encryptRequirement: 'post-merge',
+        });
+        mockEncryptionExt.decryptAttributes.mockRejectedValue(
+          new Error('Failed to decrypt attributes')
+        );
+
+        await updateSuccess(
+          client,
+          repository,
+          registry,
+          encryptedSO.type,
+          encryptedSO.id,
+          { attrOne: 'updated' },
+          { namespace }
+        );
+
+        // the stored ciphertext is not passed to encryption again
+        const { attrSecret, attrNotSoSecret, ...storedPublicAttributes } = encryptedSO.attributes;
+        expect(mockEncryptionExt.encryptAttributes).toHaveBeenCalledTimes(1);
+        expect(mockEncryptionExt.encryptAttributes).toHaveBeenCalledWith(descriptor, {
+          ...storedPublicAttributes,
+          attrOne: 'updated',
+        });
+        expect(getIndexedAttributes()).toEqual({
+          ...encryptedSO.attributes,
+          attrOne: 'updated',
+          encrypted: true,
+        });
+        expect(logger.warn).toHaveBeenCalledWith(
+          expect.stringContaining('Unable to decrypt the stored attributes of saved object')
+        );
+      });
+
+      it('encrypts the supplied attributes and keeps the other stored encrypted attributes if they cannot be decrypted', async () => {
+        mockEncryptionExt.getUpdateEncryptionRequirements.mockReturnValue({
+          decryptCurrent: true,
+          encryptRequirement: 'post-merge',
+        });
+        mockEncryptionExt.decryptAttributes.mockRejectedValue(
+          new Error('Failed to decrypt attributes')
+        );
+
+        await updateSuccess(
+          client,
+          repository,
+          registry,
+          encryptedSO.type,
+          encryptedSO.id,
+          { attrSecret: 'new-secret' },
+          { namespace }
+        );
+
+        const { attrSecret, attrNotSoSecret, ...storedPublicAttributes } = encryptedSO.attributes;
+        expect(mockEncryptionExt.encryptAttributes).toHaveBeenCalledWith(descriptor, {
+          ...storedPublicAttributes,
+          attrSecret: 'new-secret',
+        });
+        expect(getIndexedAttributes()).toEqual({
+          ...storedPublicAttributes,
+          attrSecret: 'new-secret',
+          attrNotSoSecret: encryptedSO.attributes.attrNotSoSecret,
+          encrypted: true,
+        });
+      });
+
+      it('encrypts only the supplied attributes if `mergeAttributes` is false', async () => {
+        const fullAttributes = { title: 'New title', attrSecret: 'new-secret' };
+        await updateSuccess(
+          client,
+          repository,
+          registry,
+          encryptedSO.type,
+          encryptedSO.id,
+          fullAttributes,
+          { namespace, mergeAttributes: false }
+        );
+
+        expect(mockEncryptionExt.getUpdateEncryptionRequirements).not.toHaveBeenCalled();
+        expect(mockEncryptionExt.decryptAttributes).not.toHaveBeenCalled();
+        expect(mockEncryptionExt.encryptAttributes).toHaveBeenCalledTimes(1);
+        expect(mockEncryptionExt.encryptAttributes).toHaveBeenCalledWith(
+          descriptor,
+          fullAttributes
+        );
+        expect(getIndexedAttributes()).toEqual({ ...fullAttributes, encrypted: true });
+      });
+    });
+
     it('encrypts attributes and strips them from response if type is encryptable', async () => {
       mockEncryptionExt.isEncryptableType.mockReturnValue(true);
+      mockEncryptionExt.getEncryptedAttributes.mockReturnValue(
+        new Set(['attrSecret', 'attrNotSoSecret'])
+      );
+      mockEncryptionExt.getUpdateEncryptionRequirements.mockReturnValue({
+        decryptCurrent: false,
+        encryptRequirement: 'post-merge',
+      });
       mockEncryptionExt.decryptOrStripResponseAttributes.mockResolvedValue({
         ...encryptedSO,
         ...decryptedStrippedAttributes,
@@ -409,7 +717,7 @@ describe('SavedObjectsRepository Encryption Extension', () => {
         }
       );
       expect(client.index).toHaveBeenCalledTimes(1);
-      expect(mockEncryptionExt.isEncryptableType).toHaveBeenCalledTimes(2); // (no upsert) optionallyEncryptAttributes, optionallyDecryptAndRedactSingleResult
+      expect(mockEncryptionExt.isEncryptableType).toHaveBeenCalledTimes(3); // (no upsert) getUpdateEncryptionRequirements, optionallyEncryptAttributes, optionallyDecryptAndRedactSingleResult
       expect(mockEncryptionExt.isEncryptableType).toHaveBeenCalledWith(encryptedSO.type);
       expect(mockEncryptionExt.encryptAttributes).toHaveBeenCalledTimes(1);
       expect(mockEncryptionExt.encryptAttributes).toHaveBeenCalledWith(
@@ -575,16 +883,23 @@ describe('SavedObjectsRepository Encryption Extension', () => {
   });
 
   describe('#bulkUpdate', () => {
+    beforeEach(() => {
+      mockEncryptionExt.getEncryptedAttributes.mockReturnValue(
+        new Set(['attrSecret', 'attrNotSoSecret'])
+      );
+      mockEncryptionExt.getUpdateEncryptionRequirements.mockReturnValue({
+        decryptCurrent: false,
+        encryptRequirement: 'post-merge',
+      });
+    });
+
     it(`only attempts to encrypt and decrypt attributes for types that are encryptable`, async () => {
-      mockEncryptionExt.isEncryptableType.mockReturnValueOnce(false); // optionallyEncryptAttributes
-      mockEncryptionExt.isEncryptableType.mockReturnValueOnce(true);
-      mockEncryptionExt.isEncryptableType.mockReturnValueOnce(false); // optionallyDecryptAndRedactSingleResult
-      mockEncryptionExt.isEncryptableType.mockReturnValueOnce(true);
+      mockEncryptionExt.isEncryptableType.mockImplementation((type) => type === ENCRYPTED_TYPE);
 
       await bulkUpdateSuccess(client, repository, registry, [nonEncryptedSO, encryptedSO]);
       expect(client.bulk).toHaveBeenCalledTimes(1);
 
-      expect(mockEncryptionExt.isEncryptableType).toHaveBeenCalledTimes(4); // 2x optionallyEncryptAttributes, optionallyDecryptAndRedactSingleResult
+      expect(mockEncryptionExt.isEncryptableType).toHaveBeenCalledTimes(5); // 2x getUpdateEncryptionRequirements, optionallyEncryptAttributes, 2x optionallyDecryptAndRedactSingleResult
       expect(mockEncryptionExt.isEncryptableType).toHaveBeenCalledWith(nonEncryptedSO.type);
       expect(mockEncryptionExt.isEncryptableType).toHaveBeenCalledWith(encryptedSO.type);
       expect(mockEncryptionExt.encryptAttributes).toHaveBeenCalledTimes(1);
@@ -611,7 +926,7 @@ describe('SavedObjectsRepository Encryption Extension', () => {
       );
       expect(client.bulk).toHaveBeenCalledTimes(1);
 
-      expect(mockEncryptionExt.isEncryptableType).toHaveBeenCalledTimes(2); // 2x optionallyEncryptAttributes, optionallyDecryptAndRedactSingleResult
+      expect(mockEncryptionExt.isEncryptableType).toHaveBeenCalledTimes(3); // getUpdateEncryptionRequirements, optionallyEncryptAttributes, optionallyDecryptAndRedactSingleResult
       expect(mockEncryptionExt.isEncryptableType).toHaveBeenCalledWith(encryptedSO.type);
       expect(mockEncryptionExt.encryptAttributes).toHaveBeenCalledTimes(1);
       expect(mockEncryptionExt.encryptAttributes).toHaveBeenCalledWith(
@@ -633,7 +948,7 @@ describe('SavedObjectsRepository Encryption Extension', () => {
       );
       expect(client.bulk).toHaveBeenCalledTimes(1);
 
-      expect(mockEncryptionExt.isEncryptableType).toHaveBeenCalledTimes(2); // 2x optionallyEncryptAttributes, optionallyDecryptAndRedactSingleResult
+      expect(mockEncryptionExt.isEncryptableType).toHaveBeenCalledTimes(3); // getUpdateEncryptionRequirements, optionallyEncryptAttributes, optionallyDecryptAndRedactSingleResult
       expect(mockEncryptionExt.isEncryptableType).toHaveBeenCalledWith(encryptedSO.type);
       expect(mockEncryptionExt.encryptAttributes).toHaveBeenCalledTimes(1);
       expect(mockEncryptionExt.encryptAttributes).toHaveBeenCalledWith(
@@ -655,13 +970,117 @@ describe('SavedObjectsRepository Encryption Extension', () => {
       );
       expect(client.bulk).toHaveBeenCalledTimes(1);
 
-      expect(mockEncryptionExt.isEncryptableType).toHaveBeenCalledTimes(2); // 2x optionallyEncryptAttributes, optionallyDecryptAndRedactSingleResult
+      expect(mockEncryptionExt.isEncryptableType).toHaveBeenCalledTimes(3); // getUpdateEncryptionRequirements, optionallyEncryptAttributes, optionallyDecryptAndRedactSingleResult
       expect(mockEncryptionExt.isEncryptableType).toHaveBeenCalledWith(encryptedSO.type);
       expect(mockEncryptionExt.encryptAttributes).toHaveBeenCalledTimes(1);
       expect(mockEncryptionExt.encryptAttributes).toHaveBeenCalledWith(
         { id: encryptedSO.id, type: encryptedSO.type, namespace: usedNamespace },
         encryptedSO.attributes
       );
+    });
+
+    describe('partial updates of an encryptable type', () => {
+      const getBulkIndexedAttributes = () => {
+        const [, document] = client.bulk.mock.calls[0][0].operations as Array<Record<string, any>>;
+        return document[ENCRYPTED_TYPE];
+      };
+
+      beforeEach(() => {
+        mockEncryptionExt.isEncryptableType.mockReturnValue(true);
+        mockEncryptionExt.getUpdateEncryptionRequirements.mockReturnValue({
+          decryptCurrent: true,
+          encryptRequirement: 'post-merge',
+        });
+        mockEncryptionExt.encryptAttributes.mockImplementation(async (desc, attrs) => ({
+          ...attrs,
+          encrypted: true,
+        }));
+        mockEncryptionExt.decryptOrStripResponseAttributes.mockImplementation(async (so) => so);
+      });
+
+      it('decrypts the stored attributes and encrypts the merged attributes if required', async () => {
+        mockEncryptionExt.decryptAttributes.mockImplementation(async (desc, attrs) => ({
+          ...attrs,
+          attrSecret: 'secret',
+          attrNotSoSecret: 'not-so-secret',
+        }));
+
+        await bulkUpdateSuccess(client, repository, registry, [
+          { type: encryptedSO.type, id: encryptedSO.id, attributes: { attrOne: 'updated' } },
+        ]);
+
+        expect(mockEncryptionExt.getUpdateEncryptionRequirements).toHaveBeenCalledWith(
+          ENCRYPTED_TYPE,
+          { attrOne: 'updated' }
+        );
+        expect(mockEncryptionExt.decryptAttributes).toHaveBeenCalledTimes(1);
+        const expectedMergedAttributes = {
+          attrOne: 'updated',
+          attrSecret: 'secret',
+          attrNotSoSecret: 'not-so-secret',
+        };
+        expect(mockEncryptionExt.encryptAttributes).toHaveBeenCalledTimes(1);
+        expect(mockEncryptionExt.encryptAttributes).toHaveBeenCalledWith(
+          expect.objectContaining({ type: encryptedSO.type, id: encryptedSO.id }),
+          expect.objectContaining(expectedMergedAttributes)
+        );
+        expect(getBulkIndexedAttributes()).toEqual(
+          expect.objectContaining({ ...expectedMergedAttributes, encrypted: true })
+        );
+      });
+
+      it('does not change the structure of a supplied encrypted attribute', async () => {
+        mockEncryptionExt.getEncryptedAttributes.mockReturnValue(
+          new Set(['attrSecret', 'attrNotSoSecret'])
+        );
+        mockEncryptionExt.decryptAttributes.mockImplementation(async (desc, attrs) => ({
+          ...attrs,
+          attrNotSoSecret: 'not-so-secret',
+        }));
+        // a merge would turn an object with numeric keys into an array
+        const suppliedSecret = { 0: 'first-secret', label: 'second-secret', nested: { 0: 'x' } };
+
+        await bulkUpdateSuccess(client, repository, registry, [
+          {
+            type: encryptedSO.type,
+            id: encryptedSO.id,
+            attributes: { attrSecret: suppliedSecret },
+          },
+        ]);
+
+        expect(mockEncryptionExt.encryptAttributes).toHaveBeenCalledWith(
+          expect.objectContaining({ type: encryptedSO.type, id: encryptedSO.id }),
+          expect.objectContaining({ attrSecret: suppliedSecret, attrNotSoSecret: 'not-so-secret' })
+        );
+        expect(getBulkIndexedAttributes().attrSecret).toEqual(suppliedSecret);
+      });
+
+      it('writes the update and keeps the stored encrypted attributes if they cannot be decrypted', async () => {
+        mockEncryptionExt.decryptAttributes.mockRejectedValue(
+          new Error('Failed to decrypt attributes')
+        );
+
+        const result = await bulkUpdateSuccess(client, repository, registry, [
+          {
+            type: encryptedSO.type,
+            id: encryptedSO.id,
+            attributes: { ...encryptedSO.attributes, attrSecret: undefined, attrOne: 'updated' },
+          },
+        ]);
+
+        expect(result.saved_objects[0]).not.toHaveProperty('error');
+        const [, attributesToEncrypt] = mockEncryptionExt.encryptAttributes.mock.calls[0];
+        expect(attributesToEncrypt).not.toHaveProperty('attrSecret');
+        const indexedAttributes = getBulkIndexedAttributes();
+        expect(indexedAttributes).toEqual(
+          expect.objectContaining({ attrOne: 'updated', encrypted: true })
+        );
+        // whatever is stored for the encrypted attribute that is not updated is written back as is
+        expect(indexedAttributes).toHaveProperty('attrSecret');
+        expect(logger.warn).toHaveBeenCalledWith(
+          expect.stringContaining('Unable to decrypt the stored attributes of saved object')
+        );
+      });
     });
   });
 

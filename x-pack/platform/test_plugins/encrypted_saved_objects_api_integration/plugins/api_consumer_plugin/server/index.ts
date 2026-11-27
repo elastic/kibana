@@ -28,6 +28,7 @@ const HIDDEN_SAVED_OBJECT_WITH_SECRET_TYPE = 'hidden-saved-object-with-secret';
 const SAVED_OBJECT_WITH_SECRET_AND_MULTIPLE_SPACES_TYPE =
   'saved-object-with-secret-and-multiple-spaces';
 const SAVED_OBJECT_WITHOUT_SECRET_TYPE = 'saved-object-without-secret';
+const SAVED_OBJECT_WITH_OBJECT_ATTRIBUTES_TYPE = 'saved-object-with-object-attributes';
 
 const SAVED_OBJECT_WITH_MIGRATION_TYPE = 'saved-object-with-migration';
 
@@ -116,6 +117,27 @@ export const plugin: PluginInitializer<void, void, PluginsSetup, PluginsStart> =
       hidden: false,
       namespaceType: 'single',
       mappings: deepFreeze({ properties: { publicProperty: { type: 'keyword' } } }),
+    });
+
+    // A type whose AAD attribute and one of whose encrypted attributes hold objects, to cover
+    // partial updates that are merged into nested attributes.
+    core.savedObjects.registerType({
+      name: SAVED_OBJECT_WITH_OBJECT_ATTRIBUTES_TYPE,
+      hidden: false,
+      namespaceType: 'single',
+      mappings: deepFreeze({
+        properties: {
+          publicObject: { dynamic: false, properties: {} },
+          privateObject: { type: 'binary' },
+          privateProperty: { type: 'binary' },
+        },
+      }),
+    });
+
+    deps.encryptedSavedObjects.registerType({
+      type: SAVED_OBJECT_WITH_OBJECT_ATTRIBUTES_TYPE,
+      attributesToEncrypt: new Set(['privateObject', 'privateProperty']),
+      attributesToIncludeInAAD: new Set(['publicObject']),
     });
 
     defineTypeWithMigration(core, deps);

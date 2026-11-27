@@ -1333,6 +1333,10 @@ describe('SavedObjectsRepository Spaces Extension', () => {
     describe(`#update`, () => {
       it('calls encryptAttributes with the current namespace', async () => {
         mockEncryptionExt.isEncryptableType.mockReturnValue(true);
+        mockEncryptionExt.getUpdateEncryptionRequirements.mockReturnValue({
+          decryptCurrent: false,
+          encryptRequirement: 'post-merge',
+        });
         mockEncryptionExt.decryptOrStripResponseAttributes.mockResolvedValue({
           ...encryptedSO,
           ...decryptedStrippedAttributes,
@@ -1353,7 +1357,7 @@ describe('SavedObjectsRepository Spaces Extension', () => {
         expect(mockSpacesExt.getCurrentNamespace).toHaveBeenCalledTimes(1);
         expect(mockSpacesExt.getCurrentNamespace).toHaveBeenCalledWith(undefined);
         expect(client.index).toHaveBeenCalledTimes(1);
-        expect(mockEncryptionExt.isEncryptableType).toHaveBeenCalledTimes(2); // (no upsert) optionallyEncryptAttributes, optionallyDecryptAndRedactSingleResult
+        expect(mockEncryptionExt.isEncryptableType).toHaveBeenCalledTimes(3); // (no upsert) getUpdateEncryptionRequirements, optionallyEncryptAttributes, optionallyDecryptAndRedactSingleResult
         expect(mockEncryptionExt.isEncryptableType).toHaveBeenCalledWith(encryptedSO.type);
         expect(mockEncryptionExt.encryptAttributes).toHaveBeenCalledTimes(1);
         expect(mockEncryptionExt.encryptAttributes).toHaveBeenCalledWith(
@@ -1380,12 +1384,11 @@ describe('SavedObjectsRepository Spaces Extension', () => {
       };
 
       it(`calls encryptAttributes with the current namespace`, async () => {
-        mockEncryptionExt.isEncryptableType.mockReturnValueOnce(false);
-        mockEncryptionExt.isEncryptableType.mockReturnValueOnce(true);
-        mockEncryptionExt.isEncryptableType.mockReturnValueOnce(false);
-        mockEncryptionExt.isEncryptableType.mockReturnValueOnce(false);
-        mockEncryptionExt.isEncryptableType.mockReturnValueOnce(true);
-        mockEncryptionExt.isEncryptableType.mockReturnValueOnce(false);
+        mockEncryptionExt.isEncryptableType.mockImplementation((type) => type === encryptedSO.type);
+        mockEncryptionExt.getUpdateEncryptionRequirements.mockReturnValue({
+          decryptCurrent: false,
+          encryptRequirement: 'post-merge',
+        });
         await bulkUpdateSuccess(
           client,
           repository,
@@ -1398,13 +1401,11 @@ describe('SavedObjectsRepository Spaces Extension', () => {
         expect(mockSpacesExt.getCurrentNamespace).toHaveBeenCalledTimes(1);
         expect(mockSpacesExt.getCurrentNamespace).toHaveBeenCalledWith(undefined);
         expect(mockSpacesExt.getSearchableNamespaces).not.toHaveBeenCalled();
-        expect(mockEncryptionExt.isEncryptableType).toHaveBeenCalledTimes(6); // (no upsert) optionallyEncryptAttributes, optionallyDecryptAndRedactSingleResult
-        expect(mockEncryptionExt.isEncryptableType).toHaveBeenNthCalledWith(1, obj1.type);
-        expect(mockEncryptionExt.isEncryptableType).toHaveBeenNthCalledWith(2, encryptedSO.type);
-        expect(mockEncryptionExt.isEncryptableType).toHaveBeenNthCalledWith(3, obj2.type);
-        expect(mockEncryptionExt.isEncryptableType).toHaveBeenNthCalledWith(4, obj1.type);
-        expect(mockEncryptionExt.isEncryptableType).toHaveBeenNthCalledWith(5, encryptedSO.type);
-        expect(mockEncryptionExt.isEncryptableType).toHaveBeenNthCalledWith(6, obj2.type);
+        // 3x getUpdateEncryptionRequirements, 1x optionallyEncryptAttributes, 3x optionallyDecryptAndRedactSingleResult
+        expect(mockEncryptionExt.isEncryptableType).toHaveBeenCalledTimes(7);
+        expect(mockEncryptionExt.isEncryptableType).toHaveBeenCalledWith(obj1.type);
+        expect(mockEncryptionExt.isEncryptableType).toHaveBeenCalledWith(encryptedSO.type);
+        expect(mockEncryptionExt.isEncryptableType).toHaveBeenCalledWith(obj2.type);
         expect(mockEncryptionExt.encryptAttributes).toHaveBeenCalledTimes(1);
         expect(mockEncryptionExt.encryptAttributes).toHaveBeenCalledWith(
           {
