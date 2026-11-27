@@ -29,6 +29,35 @@ const resolveAppReadyTimeout = (): number => {
   );
 };
 
+export const SLOW_KIBANA_BOOT_ANNOTATION = 'slow-kibana-boot';
+
+/** Keeps only the path, so reports never store credentials, query params or app state. */
+const toPath = (url: string): string => {
+  try {
+    return new URL(url).pathname;
+  } catch {
+    return url.split(/[?#]/)[0];
+  }
+};
+
+/**
+ * Records a Kibana boot that outlasted the action timeout. The test keeps running, but the
+ * annotation reaches the Playwright report and the Scout reporting events, so slow boots stay
+ * visible and countable now that they no longer fail the first action.
+ */
+const reportSlowKibanaBoot = (url: string, bootMs: number): void => {
+  const testInfo = test.info();
+  // An `actionTimeout` of 0 disables the deadline in Playwright, so fall back for it too.
+  const slowBootMs = testInfo.project.use.actionTimeout || FALLBACK_ACTION_TIMEOUT_MS;
+  if (bootMs <= slowBootMs) {
+    return;
+  }
+  testInfo.annotations.push({
+    type: SLOW_KIBANA_BOOT_ANNOTATION,
+    description: `Kibana took ${Math.round(bootMs)}ms to boot after loading ${toPath(url)}`,
+  });
+};
+
 export type GotoAppOptions = PathOptions &
   NonNullable<Parameters<Page['goto']>[1]> & {
     /**
@@ -37,13 +66,21 @@ export type GotoAppOptions = PathOptions &
      */
     readyWhen?: Locator;
     /**
-     * Time to wait for `readyWhen` to become visible. Defaults to the running project's
-     * `navigationTimeout` + `actionTimeout`: 30s locally, 55s on the Cloud projects.
+     * Time to wait for `readyWhen` to become visible, or for Kibana to finish bootstrapping when
+     * `readyWhen` is not set. Defaults to the running project's `navigationTimeout` +
+     * `actionTimeout`: 30s locally, 55s on the Cloud projects.
      */
     readyTimeout?: number;
   };
 
-/** Navigates to a Kibana app URL, optionally gating on an app-specific readiness locator. */
+// Server-rendered "Loading Elastic" screen. Core removes it once every plugin has started, right
+// before it renders the chrome and mounts the app.
+const KIBANA_LOADING_SCREEN_SELECTOR = '[data-test-subj="kbnLoadingMessage"]';
+
+/**
+ * Navigates to a Kibana app URL. Gates on `readyWhen` when set. Otherwise waits for Kibana to
+ * finish bootstrapping, unless the caller picked its own `waitUntil`.
+ */
 export const navigateToApp = async (
   page: Page,
   buildAppUrl: (pathOptions: PathOptions) => string,
@@ -53,7 +90,18 @@ export const navigateToApp = async (
   const url = buildAppUrl({ params, hash });
 
   if (!readyWhen) {
-    return page.goto(url, gotoOptions);
+    const response = await page.goto(url, gotoOptions);
+    if (gotoOptions.waitUntil === undefined) {
+      // The `load` event fires before Kibana is usable. Without this gate plugin setup and start
+      // are charged to the caller's first 10s action or assertion.
+      const bootStart = performance.now();
+      await page.locator(KIBANA_LOADING_SCREEN_SELECTOR).waitFor({
+        state: 'hidden',
+        timeout: readyTimeout ?? resolveAppReadyTimeout(),
+      });
+      reportSlowKibanaBoot(url, performance.now() - bootStart);
+    }
+    return response;
   }
 
   const response = await page.goto(url, { waitUntil: 'commit', ...gotoOptions });

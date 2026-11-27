@@ -9,27 +9,44 @@
 
 import type { Locator, Page } from '@playwright/test';
 import { test as playwrightTest } from '@playwright/test';
-import { navigateToApp } from './goto_app';
+import { navigateToApp, SLOW_KIBANA_BOOT_ANNOTATION } from './goto_app';
 
 jest.mock('@playwright/test', () => ({ test: { info: jest.fn() } }));
 
 const infoMock = playwrightTest.info as unknown as jest.Mock;
 
-const setProjectTimeouts = (use: { navigationTimeout?: number; actionTimeout?: number }) =>
-  infoMock.mockReturnValue({ project: { use } });
+const setProjectTimeouts = (use: { navigationTimeout?: number; actionTimeout?: number }) => {
+  const annotations: Array<{ type: string; description?: string }> = [];
+  infoMock.mockReturnValue({ project: { use }, annotations });
+  return annotations;
+};
 
-const createPage = () => ({ goto: jest.fn().mockResolvedValue(null) } as unknown as Page);
+const mockBootDuration = (bootMs: number) =>
+  jest
+    .spyOn(performance, 'now')
+    .mockReturnValueOnce(1_000)
+    .mockReturnValueOnce(1_000 + bootMs);
+
+const createPage = () => {
+  const loadingScreen = createLocator();
+  const page = {
+    goto: jest.fn().mockResolvedValue(null),
+    locator: jest.fn().mockReturnValue(loadingScreen),
+  } as unknown as Page;
+  return { page, loadingScreen };
+};
 const createLocator = () =>
   ({ waitFor: jest.fn().mockResolvedValue(undefined) } as unknown as Locator);
 
 describe('navigateToApp', () => {
   beforeEach(() => jest.clearAllMocks());
+  afterEach(() => jest.restoreAllMocks());
 
   it('gates on the local navigation budget', async () => {
     setProjectTimeouts({ navigationTimeout: 20_000, actionTimeout: 10_000 });
     const readyWhen = createLocator();
 
-    await navigateToApp(createPage(), () => '/app/console', { readyWhen });
+    await navigateToApp(createPage().page, () => '/app/console', { readyWhen });
 
     expect(readyWhen.waitFor).toHaveBeenCalledWith({ state: 'visible', timeout: 30_000 });
   });
@@ -38,7 +55,7 @@ describe('navigateToApp', () => {
     setProjectTimeouts({ navigationTimeout: 45_000, actionTimeout: 10_000 });
     const readyWhen = createLocator();
 
-    await navigateToApp(createPage(), () => '/app/console', { readyWhen });
+    await navigateToApp(createPage().page, () => '/app/console', { readyWhen });
 
     expect(readyWhen.waitFor).toHaveBeenCalledWith({ state: 'visible', timeout: 55_000 });
   });
@@ -47,7 +64,10 @@ describe('navigateToApp', () => {
     setProjectTimeouts({ navigationTimeout: 45_000, actionTimeout: 10_000 });
     const readyWhen = createLocator();
 
-    await navigateToApp(createPage(), () => '/app/console', { readyWhen, readyTimeout: 90_000 });
+    await navigateToApp(createPage().page, () => '/app/console', {
+      readyWhen,
+      readyTimeout: 90_000,
+    });
 
     expect(readyWhen.waitFor).toHaveBeenCalledWith({ state: 'visible', timeout: 90_000 });
   });
@@ -56,18 +76,93 @@ describe('navigateToApp', () => {
     setProjectTimeouts({});
     const readyWhen = createLocator();
 
-    await navigateToApp(createPage(), () => '/app/console', { readyWhen });
+    await navigateToApp(createPage().page, () => '/app/console', { readyWhen });
 
     expect(readyWhen.waitFor).toHaveBeenCalledWith({ state: 'visible', timeout: 30_000 });
   });
 
-  it('resolves on the browser load event and reads no project budget without readyWhen', async () => {
+  it('does not wait for the Kibana loading screen when readyWhen is set', async () => {
+    setProjectTimeouts({ navigationTimeout: 20_000, actionTimeout: 10_000 });
+    const { page, loadingScreen } = createPage();
+
+    await navigateToApp(page, () => '/app/console', { readyWhen: createLocator() });
+
+    expect(page.goto).toHaveBeenCalledWith('/app/console', { waitUntil: 'commit' });
+    expect(loadingScreen.waitFor).not.toHaveBeenCalled();
+  });
+
+  it('waits for the Kibana loading screen to go away without readyWhen', async () => {
     setProjectTimeouts({ navigationTimeout: 45_000, actionTimeout: 10_000 });
-    const page = createPage();
+    const { page, loadingScreen } = createPage();
 
     await navigateToApp(page, () => '/app/console');
 
     expect(page.goto).toHaveBeenCalledWith('/app/console', {});
+    expect(page.locator).toHaveBeenCalledWith('[data-test-subj="kbnLoadingMessage"]');
+    expect(loadingScreen.waitFor).toHaveBeenCalledWith({ state: 'hidden', timeout: 55_000 });
+  });
+
+  it('prefers an explicit readyTimeout for the Kibana loading screen', async () => {
+    setProjectTimeouts({ navigationTimeout: 20_000, actionTimeout: 10_000 });
+    const { page, loadingScreen } = createPage();
+
+    await navigateToApp(page, () => '/app/console', { readyTimeout: 5_000 });
+
+    expect(loadingScreen.waitFor).toHaveBeenCalledWith({ state: 'hidden', timeout: 5_000 });
+  });
+
+  it('leaves navigation alone when the caller picks its own waitUntil', async () => {
+    setProjectTimeouts({ navigationTimeout: 20_000, actionTimeout: 10_000 });
+    const { page, loadingScreen } = createPage();
+
+    await navigateToApp(page, () => '/app/console', { waitUntil: 'domcontentloaded' });
+
+    expect(page.goto).toHaveBeenCalledWith('/app/console', { waitUntil: 'domcontentloaded' });
+    expect(loadingScreen.waitFor).not.toHaveBeenCalled();
     expect(infoMock).not.toHaveBeenCalled();
+  });
+
+  it('annotates the test when Kibana boots slower than the action timeout', async () => {
+    const annotations = setProjectTimeouts({ navigationTimeout: 20_000, actionTimeout: 10_000 });
+    mockBootDuration(12_400);
+
+    await navigateToApp(createPage().page, () => '/app/console');
+
+    expect(annotations).toEqual([
+      {
+        type: SLOW_KIBANA_BOOT_ANNOTATION,
+        description: 'Kibana took 12400ms to boot after loading /app/console',
+      },
+    ]);
+  });
+
+  it('keeps only the URL path in the annotation', async () => {
+    const annotations = setProjectTimeouts({ navigationTimeout: 20_000, actionTimeout: 10_000 });
+    mockBootDuration(12_400);
+    const url = 'http://elastic:changeme@localhost:5620/s/my-space/app/discover?foo=bar#/view/1';
+
+    await navigateToApp(createPage().page, () => url);
+
+    expect(annotations[0].description).toBe(
+      'Kibana took 12400ms to boot after loading /s/my-space/app/discover'
+    );
+  });
+
+  it('uses the default threshold when the action timeout is disabled', async () => {
+    const annotations = setProjectTimeouts({ navigationTimeout: 20_000, actionTimeout: 0 });
+    mockBootDuration(3_000);
+
+    await navigateToApp(createPage().page, () => '/app/console');
+
+    expect(annotations).toEqual([]);
+  });
+
+  it('does not annotate the test when Kibana boots within the action timeout', async () => {
+    const annotations = setProjectTimeouts({ navigationTimeout: 20_000, actionTimeout: 10_000 });
+    mockBootDuration(3_000);
+
+    await navigateToApp(createPage().page, () => '/app/console');
+
+    expect(annotations).toEqual([]);
   });
 });
