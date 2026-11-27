@@ -43,6 +43,14 @@ beforeEach(() => {
 describe('getShareParams', () => {
   const base = { serviceName: 'storefront-web', source: 'otel', tab: 'overview' } as const;
 
+  it('names the open report', () => {
+    expect(getShareParams({ ...base, tab: 'reports', report: 'scorecard', search: '' })).toEqual({
+      ...base,
+      tab: 'reports',
+      report: 'scorecard',
+    });
+  });
+
   it('keeps the params the locator lists, as the URL has them, with the page it names', () => {
     expect(
       getShareParams({

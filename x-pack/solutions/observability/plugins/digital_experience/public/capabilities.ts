@@ -24,3 +24,7 @@ export const canCreateShortUrl = (capabilities: Capabilities): boolean =>
 /** Whether the user can save, update and delete the views of the space, granted with `all`. */
 export const canSaveViews = (capabilities: Capabilities): boolean =>
   Boolean(capabilities[DIGITAL_EXPERIENCE_FEATURE_ID]?.[DIGITAL_EXPERIENCE_UI_PRIVILEGES.save]);
+
+/** Whether the user can create, edit, run, toggle and delete scheduled reports, granted with `all`. */
+export const canManageReports = (capabilities: Capabilities): boolean =>
+  Boolean(capabilities[DIGITAL_EXPERIENCE_FEATURE_ID]?.[DIGITAL_EXPERIENCE_UI_PRIVILEGES.save]);

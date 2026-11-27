@@ -26,6 +26,8 @@ export interface Formatters {
   formatPercent: (share: number) => string;
   /** An error rate, always with two decimals in the user's number locale, e.g. "0.10". */
   formatErrorRate: (rate: number) => string;
+  /** A number with exactly `decimals` decimals in the user's number locale, e.g. "2,50" in German. */
+  formatDecimal: (value: number, decimals: number) => string;
   /** A share on a KPI tile, to one decimal at most, e.g. "42.4%": more reads as noise there. */
   formatKpiPercent: (share: number) => string;
   /** A change, to one decimal at most, with a sign unless it rounds to 0, e.g. "+1.5" or "0". */
@@ -51,6 +53,19 @@ export const createFormatters = (uiSettings: IUiSettingsClient): Formatters => {
   // as noise on a tile.
   const kpiPercent = new PercentFormat({ pattern: COMPACT_PERCENT_PATTERN }, getConfig);
   const errorRate = new NumberFormat({ pattern: ERROR_RATE_PATTERN }, getConfig);
+  const decimalFormats = new Map<number, NumberFormat>();
+  const decimal = (decimals: number): NumberFormat => {
+    const known = decimalFormats.get(decimals);
+    if (known) {
+      return known;
+    }
+    const format = new NumberFormat(
+      { pattern: decimals > 0 ? `0,0.${'0'.repeat(decimals)}` : '0,0' },
+      getConfig
+    );
+    decimalFormats.set(decimals, format);
+    return format;
+  };
   const signedNumber = new NumberFormat(
     { alwaysShowSign: true, pattern: COMPACT_NUMBER_PATTERN },
     getConfig
@@ -68,6 +83,7 @@ export const createFormatters = (uiSettings: IUiSettingsClient): Formatters => {
     formatNumber: (value) => number.convertToText(value),
     formatPercent: (share) => percent.convertToText(share),
     formatErrorRate: (rate) => errorRate.convertToText(rate),
+    formatDecimal: (value, decimals) => decimal(decimals).convertToText(value),
     formatKpiPercent: (share) => kpiPercent.convertToText(share),
     formatSignedNumber: (value) => signedNumber.convertToText(value),
     formatSignedPercent: (share) => signedPercent.convertToText(share),

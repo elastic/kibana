@@ -10,20 +10,29 @@ import { render, screen } from '@testing-library/react';
 import { ReportsTab } from './reports_tab';
 import { REPORT_TEMPLATES } from './report_templates';
 
+jest.mock('./scheduled/scheduled_reports_table', () => ({
+  ScheduledReports: ({ serviceName }: { serviceName: string }) => (
+    <div data-test-subj="scheduledReports">{serviceName}</div>
+  ),
+}));
+
 describe('ReportsTab', () => {
-  it('lists a card for every report template', () => {
-    render(<ReportsTab />);
+  it('lists a card for every report template, linking to its report', () => {
+    render(<ReportsTab serviceName="shop" hrefs={{ scorecard: '/scorecard-href' }} />);
 
     REPORT_TEMPLATES.forEach(({ id, title }) => {
-      expect(screen.getByTestId(`digitalExperienceReportCard-${id}`)).toHaveTextContent(title);
+      const card = screen.getByTestId(`digitalExperienceReportCard-${id}`);
+      expect(card).toHaveTextContent(title);
     });
+    expect(screen.getByRole('link', { name: /Weekly scorecard/ })).toHaveAttribute(
+      'href',
+      '/scorecard-href'
+    );
   });
 
-  it('marks a template that is not available yet', () => {
-    render(<ReportsTab />);
+  it('lists the scheduled reports of the application', () => {
+    render(<ReportsTab serviceName="shop" hrefs={{ scorecard: '/scorecard-href' }} />);
 
-    expect(screen.getByTestId('digitalExperienceReportCard-scorecard')).toHaveTextContent(
-      'Coming soon'
-    );
+    expect(screen.getByTestId('scheduledReports')).toHaveTextContent('shop');
   });
 });
