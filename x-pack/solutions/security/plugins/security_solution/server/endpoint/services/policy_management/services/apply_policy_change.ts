@@ -45,8 +45,6 @@ import type { PolicyWriteIdentity } from './policy_errors';
 import { getPackagePolicyById, uniqueAgentPolicyIds } from './policy_lookup';
 import { ensureResolvedInCurrentSpace, getNormalizedEndpointPolicy } from './read_policy';
 
-export type ApplyPolicyCallSource = 'agent' | 'user' | 'mcp' | 'unknown';
-
 export interface ApplyPolicyChangeDependencies {
   readonly endpointAppContextService: EndpointAppContextService;
   readonly request: KibanaRequest;
@@ -180,16 +178,11 @@ const throwWriteUnverified = async (
 
 export const prepareApplyPolicyChange = async (
   deps: ApplyPolicyChangeDependencies,
-  rawParams: unknown,
-  options?: Readonly<{ callSource?: ApplyPolicyCallSource }>
+  rawParams: unknown
 ): Promise<PreparedApplyPolicyChange> => {
   const { endpointAppContextService, request, spaceId } = deps;
   assertParameterBounds(rawParams);
   const params = parseApplyPolicyChangeParams(rawParams);
-
-  if (options?.callSource !== undefined && options.callSource !== 'agent') {
-    throw new PolicyWriteRejectedError();
-  }
 
   const access = await createPolicyAccessContext(
     endpointAppContextService,
@@ -287,11 +280,8 @@ const persistPreparedApply = async (
 
 export const applyPolicyChange = async (
   deps: ApplyPolicyChangeDependencies,
-  rawParams: unknown,
-  input: Readonly<{ callSource: ApplyPolicyCallSource }>
+  rawParams: unknown
 ): Promise<ApplyPolicyChangeResult> => {
-  const prepared = await prepareApplyPolicyChange(deps, rawParams, {
-    callSource: input.callSource,
-  });
+  const prepared = await prepareApplyPolicyChange(deps, rawParams);
   return persistPreparedApply(prepared);
 };

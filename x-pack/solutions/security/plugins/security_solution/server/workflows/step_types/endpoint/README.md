@@ -66,7 +66,7 @@ endpoint/
 │   ├── find/               # security.findEndpointArtifacts handler
 │   └── steps/              # find step common definition
 ├── integration_knowledge/  # security.searchIntegrationKnowledge: .integration_knowledge grounding
-├── policies/               # seven typed policy reads and change assessment
+├── policies/               # typed policy reads, change assessment and apply
 └── register_workflow_steps.ts
 ```
 

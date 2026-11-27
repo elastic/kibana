@@ -22,7 +22,7 @@ export const POLICY_ERROR_MESSAGES = {
   blocked_change:
     'Requested change is blocked by the current policy state, license, or product features',
   no_change: 'Requested change would not modify the policy',
-  write_rejected: 'Write not attempted: an authenticated agent-sourced request is required',
+  write_rejected: 'Write not attempted: this request is not eligible to apply policy changes.',
   write_unverified:
     'The update may have persisted; its outcome is unknown. Do not retry automatically. Read and reassess current state before requesting a newly confirmed write',
 } as const;

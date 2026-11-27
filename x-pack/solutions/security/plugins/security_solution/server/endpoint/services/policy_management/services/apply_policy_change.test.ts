@@ -151,17 +151,6 @@ describe('apply policy change', () => {
     expect(update).not.toHaveBeenCalled();
   });
 
-  it('rejects a non-agent apply source before authorization', async () => {
-    const { deps, endpointAppContextService, getById, update } = createWriteDeps();
-
-    await expect(
-      applyPolicyChange(deps, rawParams(), { callSource: 'user' })
-    ).rejects.toBeInstanceOf(PolicyWriteRejectedError);
-    expect(endpointAppContextService.getEndpointAuthz).not.toHaveBeenCalled();
-    expect(getById).not.toHaveBeenCalled();
-    expect(update).not.toHaveBeenCalled();
-  });
-
   it('rejects a null user after write authz and before policy reads', async () => {
     const { deps, endpointAppContextService, getById, update } = createWriteDeps();
     (
@@ -184,9 +173,7 @@ describe('apply policy change', () => {
     const countSpy = jest.spyOn(countEndpointsModule, 'countEndpoints');
 
     await expect(
-      applyPolicyChange(deps, rawParams({ expectedVersion: `  ${EXPECTED_VERSION}  ` }), {
-        callSource: 'agent',
-      })
+      applyPolicyChange(deps, rawParams({ expectedVersion: `  ${EXPECTED_VERSION}  ` }))
     ).rejects.toBeInstanceOf(PolicyVersionConflictError);
     expect(update).not.toHaveBeenCalled();
     expect(countSpy).not.toHaveBeenCalled();
@@ -207,8 +194,7 @@ describe('apply policy change', () => {
             malwareChange(ProtectionModes.detect),
             { op: 'set_field', path: 'global_manifest_version', value: '2020-01-01' },
           ],
-        }),
-        { callSource: 'agent' }
+        })
       )
     ).rejects.toBeInstanceOf(PolicyBlockedChangeError);
     expect(update).not.toHaveBeenCalled();
@@ -222,9 +208,7 @@ describe('apply policy change', () => {
     getById.mockResolvedValue(policy);
     const countSpy = jest.spyOn(countEndpointsModule, 'countEndpoints');
 
-    await expect(
-      applyPolicyChange(deps, rawParams(), { callSource: 'agent' })
-    ).rejects.toBeInstanceOf(PolicyNoChangeError);
+    await expect(applyPolicyChange(deps, rawParams())).rejects.toBeInstanceOf(PolicyNoChangeError);
     expect(update).not.toHaveBeenCalled();
     expect(countSpy).not.toHaveBeenCalled();
   });
@@ -236,9 +220,9 @@ describe('apply policy change', () => {
     getById.mockResolvedValue(policy);
     const countSpy = jest.spyOn(countEndpointsModule, 'countEndpoints');
 
-    await expect(
-      applyPolicyChange(deps, rawParams(), { callSource: 'agent' })
-    ).rejects.toBeInstanceOf(PolicyBlockedChangeError);
+    await expect(applyPolicyChange(deps, rawParams())).rejects.toBeInstanceOf(
+      PolicyBlockedChangeError
+    );
     expect(update).not.toHaveBeenCalled();
     expect(countSpy).not.toHaveBeenCalled();
   });
@@ -261,7 +245,7 @@ describe('apply policy change', () => {
     });
 
     const preview = await previewApplyPolicyChange(deps, rawParams());
-    const result = await applyPolicyChange(deps, rawParams(), { callSource: 'agent' });
+    const result = await applyPolicyChange(deps, rawParams());
     const payload = update.mock.calls[0][3];
 
     expect(preview.assessment.proposedConfig).toBeDefined();
@@ -304,7 +288,7 @@ describe('apply policy change', () => {
     update.mockResolvedValue(returned);
     jest.spyOn(countEndpointsModule, 'countEndpoints').mockResolvedValue(emptyEnrollment);
 
-    const result = await applyPolicyChange(deps, rawParams(), { callSource: 'agent' });
+    const result = await applyPolicyChange(deps, rawParams());
 
     expect(result.residual).toEqual(
       expect.arrayContaining([
@@ -328,9 +312,7 @@ describe('apply policy change', () => {
     jest.spyOn(countEndpointsModule, 'countEndpoints').mockResolvedValue(emptyEnrollment);
     const getByIdHelper = jest.spyOn(policyLookup, 'getPackagePolicyById');
 
-    await expect(
-      applyPolicyChange(deps, rawParams(), { callSource: 'agent' })
-    ).rejects.toMatchObject({
+    await expect(applyPolicyChange(deps, rawParams())).rejects.toMatchObject({
       name: 'PolicyWriteUnverifiedError',
       message: POLICY_ERROR_MESSAGES.write_unverified,
       before: expect.objectContaining({ id: POLICY_ID, version: EXPECTED_VERSION }),
@@ -353,9 +335,7 @@ describe('apply policy change', () => {
     update.mockResolvedValue({ ...createEndpointPolicy(), package: undefined });
     jest.spyOn(countEndpointsModule, 'countEndpoints').mockResolvedValue(emptyEnrollment);
 
-    const error = await applyPolicyChange(deps, rawParams(), { callSource: 'agent' }).catch(
-      (caught) => caught
-    );
+    const error = await applyPolicyChange(deps, rawParams()).catch((caught) => caught);
 
     expect(error).toBeInstanceOf(PolicyWriteUnverifiedError);
     expect((error as PolicyWriteUnverifiedError).before.id).toBe(POLICY_ID);
@@ -381,7 +361,7 @@ describe('apply policy change', () => {
     });
     jest.spyOn(countEndpointsModule, 'countEndpoints').mockResolvedValue(emptyEnrollment);
 
-    const result = await applyPolicyChange(deps, rawParams(), { callSource: 'agent' });
+    const result = await applyPolicyChange(deps, rawParams());
 
     expect(update).toHaveBeenCalledTimes(1);
     expect(result.residual).toEqual(
@@ -403,9 +383,9 @@ describe('apply policy change', () => {
       .mockResolvedValue(emptyEnrollment);
     const getByIdHelper = jest.spyOn(policyLookup, 'getPackagePolicyById');
 
-    await expect(
-      applyPolicyChange(deps, rawParams(), { callSource: 'agent' })
-    ).rejects.toBeInstanceOf(InvalidEndpointPolicyError);
+    await expect(applyPolicyChange(deps, rawParams())).rejects.toBeInstanceOf(
+      InvalidEndpointPolicyError
+    );
 
     expect(countSpy).toHaveBeenCalledTimes(1);
     expect(update).not.toHaveBeenCalled();

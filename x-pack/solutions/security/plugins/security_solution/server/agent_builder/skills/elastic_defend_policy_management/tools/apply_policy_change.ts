@@ -90,9 +90,7 @@ export const createApplyPolicyChangeTool = ({
         throw new PolicyWriteRejectedError();
       }
 
-      const result: ApplyPolicyChangeResult = await service.applyPolicyChange(params, {
-        callSource,
-      });
+      const result: ApplyPolicyChangeResult = await service.applyPolicyChange(params);
       return presentApplyPolicyChangeResult(result);
     },
   });

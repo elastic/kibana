@@ -48,6 +48,9 @@ export const registerEndpointWorkflowSteps = (
     workflowsExtensions.registerStepDefinition(() =>
       import('./steps').then((m) => m.assessEndpointPolicyChangePublicStepDefinition)
     );
+    workflowsExtensions.registerStepDefinition(() =>
+      import('./steps').then((m) => m.applyEndpointPolicyChangePublicStepDefinition)
+    );
   }
   if (automaticTroubleshootingUniversalSkill) {
     workflowsExtensions.registerStepDefinition(() =>

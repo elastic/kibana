@@ -26,6 +26,7 @@ const pmIds = [
   'security.compareEndpointPolicies',
   'security.getEndpointPolicyRolloutStatus',
   'security.assessEndpointPolicyChange',
+  'security.applyEndpointPolicyChange',
 ];
 
 describe('registerEndpointWorkflowSteps (public)', () => {

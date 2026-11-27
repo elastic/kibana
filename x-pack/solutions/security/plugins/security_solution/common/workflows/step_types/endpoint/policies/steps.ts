@@ -9,7 +9,7 @@ import { z, lazySchema } from '@kbn/zod/v4';
 import { i18n } from '@kbn/i18n';
 import { StepCategory } from '@kbn/workflows';
 import type { CommonStepDefinition } from '@kbn/workflows-extensions/common';
-import { policyIdentifierInputSchema } from './input_schemas';
+import { expectedVersionInputSchema, policyIdentifierInputSchema } from './input_schemas';
 import {
   createPolicyFieldReferenceSelectorSchema,
   policyFieldKeywordsInputSchema,
@@ -29,6 +29,7 @@ import {
   comparePoliciesOutputSchema,
   policyRolloutStatusOutputSchema,
   assessPolicyChangeOutputSchema,
+  applyPolicyChangeOutputSchema,
 } from './output_schemas';
 
 const stepPolicyIdentifierInputSchema = lazySchema(() =>
@@ -81,6 +82,20 @@ const assessEndpointPolicyChangeInputSchema = lazySchema(() => {
     ),
   });
 });
+
+const applyEndpointPolicyChangeInputSchema = lazySchema(() =>
+  assessEndpointPolicyChangeInputSchema.extend({
+    idOrName: policyIdentifierInputSchema.describe(
+      'Policy ID or exact stored name in the execution space. Use an untruncated ID from the assessment.'
+    ),
+    changes: assessEndpointPolicyChangeInputSchema.shape.changes.describe(
+      'The setting operations assessed for this policy.'
+    ),
+    expectedVersion: expectedVersionInputSchema.describe(
+      'Opaque policy version from the matching assessment, not a revision or a later read.'
+    ),
+  })
+);
 
 const definePolicyStep = <Input extends z.ZodObject, Result extends z.ZodType>(
   id: string,
@@ -188,4 +203,16 @@ export const assessEndpointPolicyChangeStepCommonDefinition = definePolicyStep(
   }),
   assessEndpointPolicyChangeInputSchema,
   assessPolicyChangeOutputSchema
+);
+export const applyEndpointPolicyChangeStepCommonDefinition = definePolicyStep(
+  'security.applyEndpointPolicyChange',
+  i18n.translate('xpack.securitySolution.workflows.steps.applyEndpointPolicyChange.label', {
+    defaultMessage: 'Apply endpoint policy change',
+  }),
+  i18n.translate('xpack.securitySolution.workflows.steps.applyEndpointPolicyChange.description', {
+    defaultMessage:
+      'Applies assessed setting changes to one Elastic Defend policy after caller confirmation. Do not retry automatically. Tech preview; contract can change.',
+  }),
+  applyEndpointPolicyChangeInputSchema,
+  applyPolicyChangeOutputSchema
 );
