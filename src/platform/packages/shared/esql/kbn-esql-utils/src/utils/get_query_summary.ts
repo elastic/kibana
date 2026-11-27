@@ -20,6 +20,7 @@ import {
   type IAdditionalFields,
   type NamedSubquery,
 } from '@kbn/esql-language';
+import { escapeRegExp } from 'lodash';
 import { LRUCache } from 'lru-cache';
 import { parseEsqlCached } from './parse_esql_cached';
 
@@ -250,6 +251,27 @@ const computedColumnsCache = new LRUCache<string, ReadonlySet<string>>({
   sizeCalculation: (_columns, query) => Math.max(1, query.length),
 });
 
+// The registry does not apply a wildcard in KEEP or DROP to the columns that the query creates.
+// As the fields of the sources are not known here, the columns are only the created ones, so the
+// wildcard is applied to them directly.
+const applyWildcardProjection = (
+  command: ESQLAstCommand,
+  columns: ESQLColumnData[]
+): ESQLColumnData[] | undefined => {
+  if (command.name !== 'keep' && command.name !== 'drop') {
+    return undefined;
+  }
+  const patterns = command.args.filter(isColumn).map(({ name }) => name);
+  if (!patterns.some((name) => name.includes('*'))) {
+    return undefined;
+  }
+  const matchers = patterns.map(
+    (name) => new RegExp(`^${name.split('*').map(escapeRegExp).join('.*')}$`)
+  );
+  const isMatch = ({ name }: ESQLColumnData) => matchers.some((matcher) => matcher.test(name));
+  return columns.filter((column) => isMatch(column) === (command.name === 'keep'));
+};
+
 /**
  * Returns the columns that the query creates (EVAL, STATS, DISSECT, ...) and that are part of its output.
  * Each command knows the columns that it leaves (`columnsAfter`), so STATS, KEEP, DROP or RENAME are considered.
@@ -259,12 +281,6 @@ const computedColumnsCache = new LRUCache<string, ReadonlySet<string>>({
  * @param query The ES|QL query.
  * @returns The names of the columns.
  */
-// The registry does not apply a wildcard to the columns the query creates, so the output of a
-// query that projects with one is unknown.
-const hasWildcardProjection = (command: ESQLAstCommand): boolean =>
-  (command.name === 'keep' || command.name === 'drop') &&
-  command.args.some((arg) => isColumn(arg) && arg.name.includes('*'));
-
 export async function getComputedColumnsInOutput(query: string): Promise<ReadonlySet<string>> {
   const cached = computedColumnsCache.get(query);
   if (cached) {
@@ -272,7 +288,7 @@ export async function getComputedColumnsInOutput(query: string): Promise<Readonl
   }
 
   const { root, errors } = parseEsqlCached(query);
-  if (errors.length > 0 || root.commands.some(hasWildcardProjection)) {
+  if (errors.length > 0) {
     return new Set();
   }
 
@@ -288,6 +304,11 @@ export async function getComputedColumnsInOutput(query: string): Promise<Readonl
   const unmappedFieldsStrategy = getUnmappedFieldsStrategy(root.header);
   let columns: ESQLColumnData[] = [];
   for (const command of root.commands) {
+    const projected = applyWildcardProjection(command, columns);
+    if (projected) {
+      columns = projected;
+      continue;
+    }
     const columnsAfter = esqlCommandRegistry.getCommandByName(command.name)?.methods.columnsAfter;
     if (columnsAfter) {
       columns = await columnsAfter(

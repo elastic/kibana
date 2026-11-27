@@ -302,9 +302,12 @@ describe('getComputedColumnsInOutput', () => {
     expect(await getColumns('FROM logs | EVAL a = bytes * 2, b = "x"')).toEqual(['a', 'b']);
   });
 
-  it('returns no columns when the query projects with a wildcard, as its output is unknown', async () => {
-    expect(await getColumns('FROM logs | EVAL size_class = 1 | KEEP size*')).toEqual([]);
-    expect(await getColumns('FROM logs | EVAL size_class = 1 | DROP size*')).toEqual([]);
+  it('applies a wildcard of KEEP and DROP to the columns that the query creates', async () => {
+    const eval_ = 'FROM logs | EVAL size_class = 1, tag = 2';
+    expect(await getColumns(`${eval_} | KEEP size*`)).toEqual(['size_class']);
+    expect(await getColumns(`${eval_} | KEEP tag, size*, bytes`)).toEqual(['size_class', 'tag']);
+    expect(await getColumns(`${eval_} | DROP size*`)).toEqual(['tag']);
+    expect(await getColumns(`${eval_} | DROP raw_*`)).toEqual(['size_class', 'tag']);
   });
 
   it('returns no columns for a query that does not create any', async () => {
