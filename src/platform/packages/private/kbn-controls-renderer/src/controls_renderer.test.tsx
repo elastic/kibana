@@ -41,7 +41,7 @@ const getControl = (
     width: CONTROL_WIDTH_MEDIUM,
     grow: false,
     ...overrides,
-  } as PinnedControlLayoutState);
+  }) as PinnedControlLayoutState;
 
 const getControls = (
   overrides: { [id: string]: Partial<PinnedControlLayoutState> } = {}
@@ -58,7 +58,7 @@ const getParentApi = (viewMode: 'edit' | 'view' = 'edit') =>
     children$: new BehaviorSubject({}),
     registerChildApi: jest.fn(),
     getSerializedStateForChild: jest.fn(),
-  } as unknown as ControlsRendererParentApi & { viewMode$: BehaviorSubject<string> });
+  }) as unknown as ControlsRendererParentApi & { viewMode$: BehaviorSubject<string> };
 
 const onControlsChanged = jest.fn();
 
