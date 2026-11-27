@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import {
+  EuiEmptyPrompt,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLoadingSpinner,
+  EuiSpacer,
+} from '@elastic/eui';
 import type { AppHeaderBadge, AppHeaderMenu, AppHeaderTab } from '@kbn/app-header';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -30,6 +36,7 @@ import {
 } from '../components/ai_index_detail';
 import { buildAiIndexOnboardingPrompt } from '../components/ai_index_detail/onboarding_prompt';
 import { SettingsTab } from '../components/ai_index_detail/settings';
+import { SETUP_WIZARD_STEPS, SetupWizard } from '../components/ai_index_detail/setup_wizard';
 import { ListKiPanel } from '../components/ki';
 import { useAiIndex } from '../hooks/use_ai_index';
 import { useAiIndexDestLinks } from '../hooks/use_ai_index_dest_links';
@@ -39,6 +46,9 @@ import { useKibanaUrl } from '../hooks/use_kibana_url';
 import { useListKi } from '../hooks/use_list_ki';
 import { useMemoryEnabled } from '../hooks/use_memory_enabled';
 import { useNavigation } from '../hooks/use_navigation';
+import { useSetupWizard } from '../hooks/use_setup_wizard';
+import { useSetupWizardEnabled } from '../hooks/use_setup_wizard_enabled';
+import { useSetupWizardProgress } from '../hooks/use_setup_wizard_progress';
 import { getVisibleAutomations, getVisibleWorkflowIds } from '../utils/visible_automations';
 import {
   ContextEngineSubPageHeader,
@@ -169,6 +179,28 @@ export const AiIndexDetailPage = () => {
     [automations, isMemoryEnabled]
   );
   const isManaged = aiIndex?.managed === true;
+  const isSetupWizardEnabled = useSetupWizardEnabled();
+  const setupWizardProgress = useSetupWizardProgress({
+    aiIndex,
+    isMemoryEnabled,
+    isSetupWizardEnabled,
+  });
+  const setupWizard = useSetupWizard({
+    aiIndexId: id,
+    steps: SETUP_WIZARD_STEPS,
+    progress: setupWizardProgress.progress,
+    isProgressLoading: setupWizardProgress.isLoading,
+    isProgressError: setupWizardProgress.isError,
+    isActive: !isSourcesTab && !isKnowledgeIndicatorsTab && !isSettingsTab,
+    isEnabled: isSetupWizardEnabled,
+  });
+  // The setup wizard replaces the "AI index created" callout.
+  const isSetupWizardShown = setupWizard.status === 'shown';
+  useEffect(() => {
+    if (isSetupWizardShown) {
+      setShowCreatedCallout(false);
+    }
+  }, [isSetupWizardShown]);
 
   const { kibanaUrl } = useKibanaUrl();
   const onboardingPrompt = useMemo(() => {
@@ -358,6 +390,35 @@ export const AiIndexDetailPage = () => {
     </>
   );
 
+  const overviewRouteContent = (() => {
+    if (setupWizard.status === 'loading') {
+      // Wait for the wizard decision, so the normal Overview doesn't flash first. A closed wizard
+      // is known from the URL id, so it skips this and shows the Overview skeleton right away.
+      return (
+        <EuiFlexGroup justifyContent="center" data-test-subj="contextAiIndexOverviewLoading">
+          <EuiFlexItem grow={false}>
+            <EuiLoadingSpinner size="xl" />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      );
+    }
+    if (aiIndex && setupWizard.status === 'shown') {
+      return (
+        <SetupWizard
+          key={aiIndex.id}
+          aiIndex={aiIndex}
+          steps={setupWizard.steps}
+          currentStepId={setupWizard.currentStepId}
+          doneStepIds={setupWizard.doneStepIds}
+          onStepChange={setupWizard.goToStep}
+          onClose={setupWizard.close}
+          onSaved={refetch}
+        />
+      );
+    }
+    return overviewTabContent;
+  })();
+
   const pageContent = error ? (
     <EuiEmptyPrompt
       iconType="error"
@@ -398,7 +459,7 @@ export const AiIndexDetailPage = () => {
         />
       </Route>
       <Route path={CONTEXT_ENGINE_PATHS.detail} exact>
-        {overviewTabContent}
+        {overviewRouteContent}
       </Route>
     </Routes>
   );
