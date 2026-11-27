@@ -63420,8 +63420,6 @@
     "xpack.serverlessObservability.navigation.flameGraphsLinkLabel": "Flamegraph",
     "xpack.serverlessObservability.navigation.functionsLinkLabel": "関数",
     "xpack.serverlessObservability.navigation.stacktracesLinkLabel": "スタックトレース",
-    "xpack.serverlessSearch.aiAssistantManagementDescription": "対応言語をはじめ、ナレッジベースを管理し、アシスタント動作を制御します。",
-    "xpack.serverlessSearch.aiAssistantManagementTitle": "AI Assistant",
     "xpack.serverlessSearch.app.home.title": "ホーム",
     "xpack.serverlessSearch.back": "戻る",
     "xpack.serverlessSearch.comingSoon": "まもなくリリース",

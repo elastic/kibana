@@ -63023,8 +63023,6 @@
     "xpack.serverlessObservability.navigation.flameGraphsLinkLabel": "Flame-graphs",
     "xpack.serverlessObservability.navigation.functionsLinkLabel": "Fonctions",
     "xpack.serverlessObservability.navigation.stacktracesLinkLabel": "Traces d'appel",
-    "xpack.serverlessSearch.aiAssistantManagementDescription": "Gérez la base de connaissances et contrôlez le comportement de l'assistant, y compris le langage de réponse.",
-    "xpack.serverlessSearch.aiAssistantManagementTitle": "Assistant d'IA",
     "xpack.serverlessSearch.app.home.title": "Accueil",
     "xpack.serverlessSearch.back": "Retour",
     "xpack.serverlessSearch.comingSoon": "Bientôt disponible",

@@ -63428,8 +63428,6 @@
     "xpack.serverlessObservability.navigation.flameGraphsLinkLabel": "Flamegraphs",
     "xpack.serverlessObservability.navigation.functionsLinkLabel": "Funções",
     "xpack.serverlessObservability.navigation.stacktracesLinkLabel": "Stacktraces",
-    "xpack.serverlessSearch.aiAssistantManagementDescription": "Gerenciar a base de conhecimento e controlar o comportamento do assistente, incluindo a linguagem de resposta.",
-    "xpack.serverlessSearch.aiAssistantManagementTitle": "Assistente de IA",
     "xpack.serverlessSearch.app.home.title": "Início",
     "xpack.serverlessSearch.back": "Voltar",
     "xpack.serverlessSearch.comingSoon": "Em breve",

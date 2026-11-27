@@ -49,8 +49,6 @@ dependsOn:
   - '@kbn/search-shared-ui'
   - '@kbn/deeplinks-management'
   - '@kbn/react-query'
-  - '@kbn/ai-assistant-common'
-  - '@kbn/management-settings-ids'
   - '@kbn/deeplinks-workflows'
   - '@kbn/features-plugin'
   - '@kbn/navigation-plugin'

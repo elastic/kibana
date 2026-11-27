@@ -9,7 +9,7 @@ import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { MappingSemanticTextProperty } from '@elastic/elasticsearch/lib/api/types';
 import { first } from 'lodash';
 import type { Logger } from '@kbn/logging';
-import { resourceNames } from '..';
+import { resourceNames } from '../resource_names';
 
 export async function getConcreteWriteIndex(
   esClient: { asInternalUser: ElasticsearchClient },

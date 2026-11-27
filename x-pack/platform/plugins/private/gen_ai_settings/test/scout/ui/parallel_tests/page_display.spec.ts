@@ -16,7 +16,6 @@ spaceTest.describe(
       '@local-stateful-classic',
       ...tags.serverless.security.complete,
       ...tags.serverless.observability.complete,
-      ...tags.serverless.search,
     ],
   },
   () => {

@@ -58,10 +58,6 @@ xpack.features.overrides:
   ml.category: "management"
   ### Stack Rules feature is moved from Analytics category to the Search one.
   stackAlerts.category: "enterpriseSearch"
-  ### Observability AI Assistant feature is moved to Search and renamed
-  observabilityAIAssistant:
-    name: "AI Assistant"
-    category: "enterpriseSearch"
 
 ## Cloud settings
 xpack.cloud.serverless.project_type: search
@@ -96,13 +92,11 @@ data_visualizer.resultLinks.fileBeat.enabled: false
 # Semantic text UI
 xpack.index_management.dev.enableSemanticText: true
 
-# AI Assistant config
-xpack.observabilityAIAssistant.enabled: true
-xpack.searchAssistant.enabled: true
-xpack.searchAssistant.ui.enabled: true
-xpack.observabilityAIAssistant.scope: "search"
-aiAssistantManagementSelection.preferredAIAssistantType: "observability"
+# The classic AI Assistant is disabled, Agent Builder is the only chat experience
+xpack.observabilityAIAssistant.enabled: false
+xpack.searchAssistant.enabled: false
 aiAssistantManagementSelection.preferredChatExperience: "agent"
+uiSettings.overrides.aiAssistant:preferredChatExperience: "agent"
 
 # Query Rules UI
 xpack.searchQueryRules.enabled: true

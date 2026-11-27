@@ -8,12 +8,10 @@
 import type { AppMountParameters, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import { appCategories, appIds } from '@kbn/management-cards-navigation';
+import { appIds } from '@kbn/management-cards-navigation';
 import { QueryClient, MutationCache, QueryCache } from '@kbn/react-query';
 import type { Subscription } from 'rxjs';
-import { combineLatest, map, of } from 'rxjs';
-import { AIChatExperience } from '@kbn/ai-assistant-common';
-import { AI_CHAT_EXPERIENCE_TYPE } from '@kbn/management-settings-ids';
+import { of } from 'rxjs';
 import type {
   ServerlessSearchPluginSetup,
   ServerlessSearchPluginSetupDependencies,
@@ -110,45 +108,18 @@ export class ServerlessSearchPlugin
     services: ServerlessSearchPluginStartDependencies
   ): ServerlessSearchPluginStart {
     const { serverless, navigation, management, security } = services;
-    const aiAssistantIsEnabled = core.application.capabilities.observabilityAIAssistant?.show;
 
-    const chatExperience$ = core.settings.client.get$<AIChatExperience>(AI_CHAT_EXPERIENCE_TYPE);
-
-    const navigationTree$ = combineLatest([of(core.application), chatExperience$]).pipe(
-      map(([application, chatExperience]) => {
-        const showAiAssistant = chatExperience !== AIChatExperience.Agent;
-        return createNavigationTree({
-          ...application,
-          core,
-          showAiAssistant,
-          showPerformanceLink: Boolean(application.capabilities.serverlessSearch?.manageCluster),
-        });
+    const navigationTree$ = of(
+      createNavigationTree({
+        ...core.application,
+        core,
+        showPerformanceLink: Boolean(core.application.capabilities.serverlessSearch?.manageCluster),
       })
     );
     navigation.initNavigation('es', navigationTree$, 'serverlessSearch');
 
     this.managementCardsSubscription = serverless
-      .getNavigationCards$(
-        security.authz.isRoleManagementEnabled(),
-        aiAssistantIsEnabled
-          ? {
-              observabilityAiAssistantManagement: {
-                category: appCategories.OTHER,
-                title: i18n.translate('xpack.serverlessSearch.aiAssistantManagementTitle', {
-                  defaultMessage: 'AI Assistant',
-                }),
-                description: i18n.translate(
-                  'xpack.serverlessSearch.aiAssistantManagementDescription',
-                  {
-                    defaultMessage:
-                      'Manage knowledge base and control assistant behavior, including response language.',
-                  }
-                ),
-                icon: 'sparkles',
-              },
-            }
-          : undefined
-      )
+      .getNavigationCards$(security.authz.isRoleManagementEnabled())
       .subscribe((extendCardNavDefinitions) => {
         management.setupCardsNavigation({
           enabled: true,
