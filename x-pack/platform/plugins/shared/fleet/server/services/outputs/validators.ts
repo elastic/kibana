@@ -139,6 +139,30 @@ export const ensureNoDuplicateSecrets = (output: UpdateTypedOutput | NewOutput):
   }
 };
 
+// the label of a PEM private key block: PRIVATE KEY, or a type of private key such as RSA PRIVATE KEY
+const PEM_PRIVATE_KEY_REGEX = /-----BEGIN (?:[A-Z0-9]+ )*PRIVATE KEY-----/;
+
+/**
+ * Rejects a private key in the certificate settings of the OTLP exporter, which are saved and
+ * returned in plain text: the client key is only accepted under `secrets.otlp_exporter.tls`.
+ */
+export const validateOtlpTlsCertificatesHaveNoPrivateKey = (
+  output: UpdateTypedOutput | NewOutput
+): void => {
+  if (output.type !== outputType.Otlp) {
+    return;
+  }
+  const tls = output.otlp_exporter?.tls;
+  (['ca_pem', 'cert_pem'] as const).forEach((field) => {
+    const value = tls?.[field];
+    if (typeof value === 'string' && PEM_PRIVATE_KEY_REGEX.test(value)) {
+      throw new OutputInvalidError(
+        `otlp_exporter.tls.${field} cannot contain a private key, which would be stored in plain text: set the client key in secrets.otlp_exporter.tls.key_pem`
+      );
+    }
+  });
+};
+
 export const validateOutputServerless = async (
   outputSvc: { get(id: string): Promise<Output> },
   output: UpdateTypedOutput | NewOutput,

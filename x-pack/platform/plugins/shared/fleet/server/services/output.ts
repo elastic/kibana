@@ -135,6 +135,7 @@ import {
   validateOutputSslPaths,
   ensureNoDuplicateSecrets,
   validateKafkaAuthMethods,
+  validateOtlpTlsCertificatesHaveNoPrivateKey,
   validateOutputServerless,
 } from './outputs/validators';
 
@@ -602,6 +603,20 @@ async function remoteSyncIntegrationsCheck(
 const OTLP_AUTH_REQUIRES_SECRET_STORAGE_MESSAGE =
   'auth of an OTLP output requires secret storage to be enabled, its credential is only stored as a secret';
 
+const OTLP_TLS_SECRETS_REQUIRE_SECRET_STORAGE_MESSAGE =
+  'secrets.otlp_exporter.tls of an OTLP output requires secret storage to be enabled, the TLS credentials are only stored as secrets';
+
+/**
+ * Whether the output sets a TLS credential of the OTLP exporter. A `null` credential removes a
+ * stored one, which does not need secret storage.
+ */
+const hasOtlpTlsSecretValue = (secrets: NewOtlpOutput['secrets']): boolean => {
+  const tls = secrets?.otlp_exporter?.tls;
+  return [tls?.key_pem, tls?.tpm?.owner_auth, tls?.tpm?.auth].some(
+    (secret) => secret !== undefined && secret !== null
+  );
+};
+
 class OutputService {
   private get soClient() {
     return appContextService.getInternalUserSOClient();
@@ -864,6 +879,9 @@ class OutputService {
         ('is_preconfigured' in output && output.is_preconfigured)) ??
       false;
     this._runOutputValidators(output, isPreconfigured);
+    // not only a warning for preconfigured outputs: the key would be stored and returned in plain
+    // text (preconfiguration skips such an output before it gets here)
+    validateOtlpTlsCertificatesHaveNoPrivateKey(output);
 
     if (isOtlpOutput(output)) {
       validateOtlpAuth({
@@ -1035,6 +1053,10 @@ class OutputService {
     const secretStorageEnabled = await isOutputSecretStorageEnabled(esClient, soClient);
     if (isOtlpOutput(output) && output.auth && !secretStorageEnabled) {
       throw new OutputInvalidError(OTLP_AUTH_REQUIRES_SECRET_STORAGE_MESSAGE);
+    }
+    // without secret storage the TLS credentials would be dropped: they have no plain text field
+    if (isOtlpOutput(output) && hasOtlpTlsSecretValue(output.secrets) && !secretStorageEnabled) {
+      throw new OutputInvalidError(OTLP_TLS_SECRETS_REQUIRE_SECRET_STORAGE_MESSAGE);
     }
     if (secretStorageEnabled) {
       const { output: outputWithSecrets } = await extractAndWriteOutputSecrets({
@@ -1453,11 +1475,20 @@ class OutputService {
           } as UpdateTypedOutput)
         : typedFullUpdateData;
     this._runOutputValidators(validatedData, isPreconfigured, keptAuthMethods);
+    validateOtlpTlsCertificatesHaveNoPrivateKey(validatedData);
 
     if (mergedType === outputType.Otlp) {
       this._validateOtlpAuthUpdate(data as Partial<NewOtlpOutput>, originalOutput, {
         secretStorageEnabled,
       });
+      // secret storage cannot be turned off once on, so a saved output has no TLS credential to
+      // keep without it: only the credentials of the update need checking
+      if (
+        !secretStorageEnabled &&
+        hasOtlpTlsSecretValue((data as Partial<NewOtlpOutput>).secrets)
+      ) {
+        throw new OutputInvalidError(OTLP_TLS_SECRETS_REQUIRE_SECRET_STORAGE_MESSAGE);
+      }
     }
 
     // type is always defined here after merging; ssl/secrets/id omitted at runtime but allowed on the type.

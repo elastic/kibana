@@ -1126,3 +1126,384 @@ export function validateOtlpAuthCredential(value: string) {
 }
 
 export const validateOtlpAuthCredentialSecret = toSecretValidator(validateOtlpAuthCredential);
+
+// the limits of the OTLP exporter TLS settings in the API
+const OTLP_TLS_PEM_MAX_LENGTH = 65536;
+const OTLP_TLS_FILE_MAX_LENGTH = 4096;
+const OTLP_TLS_CIPHER_SUITES_MAX_SIZE = 100;
+export const OTLP_TLS_DEFAULT_MIN_VERSION = '1.2';
+
+/** The TLS versions that the collector accepts (configtls), from the lowest to the highest. */
+export const OTLP_TLS_VERSIONS = ['1.0', '1.1', '1.2', '1.3'] as const;
+
+/**
+ * The cipher suites that the collector accepts by name (configtls), as listed by the Go version
+ * that EDOT is built with (crypto/tls `CipherSuites`, without the TLS 1.3 ones, which cannot be
+ * configured).
+ *
+ * These lists are copied from Go 1.26 (src/crypto/tls/cipher_suites.go). Update them, and the
+ * insecure ones below, when EDOT moves to a Go version that adds a cipher suite or moves one to
+ * `InsecureCipherSuites`: otherwise the form rejects a name that the collector accepts, or the
+ * reverse.
+ */
+export const OTLP_TLS_CIPHER_SUITES = [
+  'TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA',
+  'TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA',
+  'TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA',
+  'TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA',
+  'TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256',
+  'TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384',
+  'TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256',
+  'TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384',
+  'TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256',
+  'TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256',
+] as const;
+
+/** The TLS 1.3 cipher suites: the collector accepts their names, but they have no effect. */
+const OTLP_TLS13_CIPHER_SUITES = [
+  'TLS_AES_128_GCM_SHA256',
+  'TLS_AES_256_GCM_SHA384',
+  'TLS_CHACHA20_POLY1305_SHA256',
+];
+
+/**
+ * The insecure cipher suites (crypto/tls `InsecureCipherSuites`), which the collector only accepts
+ * with `include_insecure_cipher_suites`.
+ */
+export const OTLP_TLS_INSECURE_CIPHER_SUITES = [
+  'TLS_RSA_WITH_RC4_128_SHA',
+  'TLS_RSA_WITH_3DES_EDE_CBC_SHA',
+  'TLS_RSA_WITH_AES_128_CBC_SHA',
+  'TLS_RSA_WITH_AES_256_CBC_SHA',
+  'TLS_RSA_WITH_AES_128_CBC_SHA256',
+  'TLS_RSA_WITH_AES_128_GCM_SHA256',
+  'TLS_RSA_WITH_AES_256_GCM_SHA384',
+  'TLS_ECDHE_ECDSA_WITH_RC4_128_SHA',
+  'TLS_ECDHE_RSA_WITH_RC4_128_SHA',
+  'TLS_ECDHE_RSA_WITH_3DES_EDE_CBC_SHA',
+  'TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256',
+  'TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256',
+] as const;
+
+const KNOWN_OTLP_TLS_CIPHER_SUITES: readonly string[] = [
+  ...OTLP_TLS_CIPHER_SUITES,
+  ...OTLP_TLS13_CIPHER_SUITES,
+  ...OTLP_TLS_INSECURE_CIPHER_SUITES,
+];
+
+const otlpTooLongError = (max: number) => [
+  i18n.translate('xpack.fleet.settings.outputForm.otlpTlsValueTooLong', {
+    defaultMessage: 'Must be at most {max} characters',
+    values: { max },
+  }),
+];
+
+interface PemBlock {
+  label: string;
+  body: string;
+}
+
+const PEM_BEGIN = '-----BEGIN ';
+const PEM_END = '-----END ';
+const PEM_DASHES = '-----';
+const PEM_LABEL_REGEX = /^[A-Z0-9 ]+$/;
+// the body of a block is base64, possibly over several lines
+const PEM_BODY_REGEX = /^[A-Za-z0-9+/=\s]+$/;
+
+/**
+ * The PEM blocks of the value, or `undefined` if a block is malformed: a BEGIN line without the END
+ * line of the same label, or a body that is not base64. Text outside the blocks, such as the
+ * subject lines of a certificate bundle, is ignored, as the collector does. The value is read once
+ * from start to end, so a large malformed value is checked in linear time.
+ */
+const parsePemBlocks = (value: string): PemBlock[] | undefined => {
+  const blocks: PemBlock[] = [];
+  let position = 0;
+  while (true) {
+    const begin = value.indexOf(PEM_BEGIN, position);
+    if (begin < 0) {
+      return blocks;
+    }
+    const labelStart = begin + PEM_BEGIN.length;
+    const labelEnd = value.indexOf(PEM_DASHES, labelStart);
+    if (labelEnd < 0) {
+      return undefined;
+    }
+    const label = value.slice(labelStart, labelEnd);
+    const bodyStart = labelEnd + PEM_DASHES.length;
+    const end = value.indexOf(PEM_END, bodyStart);
+    if (end < 0) {
+      return undefined;
+    }
+    const endLabelStart = end + PEM_END.length;
+    const endLabelEnd = value.indexOf(PEM_DASHES, endLabelStart);
+    const body = value.slice(bodyStart, end);
+    if (
+      !PEM_LABEL_REGEX.test(label) ||
+      endLabelEnd < 0 ||
+      value.slice(endLabelStart, endLabelEnd) !== label ||
+      !PEM_BODY_REGEX.test(body)
+    ) {
+      return undefined;
+    }
+    blocks.push({ label, body });
+    position = endLabelEnd + PEM_DASHES.length;
+  }
+};
+
+const isPrivateKeyLabel = (label: string) =>
+  label === 'PRIVATE KEY' || label.endsWith(' PRIVATE KEY');
+
+const pemInvalidError = () => [
+  i18n.translate('xpack.fleet.settings.outputForm.otlpTlsPemInvalid', {
+    defaultMessage:
+      'Paste the PEM content, from "-----BEGIN" to "-----END". Use the file setting for a path to a file.',
+  }),
+];
+
+/** The blocks of an optional PEM value, or the errors of a value that is too long or malformed. */
+const getPemBlocks = (value: string): { blocks?: PemBlock[]; errors?: string[] } => {
+  const pem = value?.trim() ?? '';
+  if (!pem) {
+    return {};
+  }
+  if (pem.length > OTLP_TLS_PEM_MAX_LENGTH) {
+    return { errors: otlpTooLongError(OTLP_TLS_PEM_MAX_LENGTH) };
+  }
+  const blocks = parsePemBlocks(pem);
+  return blocks?.length ? { blocks } : { errors: pemInvalidError() };
+};
+
+/**
+ * An optional PEM-encoded certificate authority or client certificate: at least one CERTIFICATE
+ * block. Other blocks, such as a CRL in a CA bundle, are ignored, as the collector does. A private
+ * key is rejected: these settings are saved in plain text, unlike the client key, which is saved
+ * as a secret.
+ */
+export function validateOtlpTlsCertificatePem(value: string) {
+  const { blocks, errors } = getPemBlocks(value);
+  if (!blocks) {
+    return errors;
+  }
+  if (blocks.some(({ label }) => isPrivateKeyLabel(label))) {
+    return [
+      i18n.translate('xpack.fleet.settings.outputForm.otlpTlsCertificatePemPrivateKey', {
+        defaultMessage:
+          'Remove the private key: this setting is saved in plain text. Put the client key in "Client key, PEM", which is saved as a secret.',
+      }),
+    ];
+  }
+  if (!blocks.some(({ label }) => label === 'CERTIFICATE')) {
+    return [
+      i18n.translate('xpack.fleet.settings.outputForm.otlpTlsCertificatePemNoCertificate', {
+        defaultMessage:
+          'Paste at least one certificate, from "-----BEGIN CERTIFICATE-----" to its END line',
+      }),
+    ];
+  }
+}
+
+/**
+ * An optional PEM-encoded client key: a PRIVATE KEY block, which can be PKCS #8, PKCS #1 (RSA) or
+ * SEC 1 (EC). Other blocks, such as EC PARAMETERS, are ignored, as the collector does. Encrypted
+ * keys are rejected: the collector cannot decrypt them.
+ */
+export function validateOtlpTlsPrivateKeyPem(value: string) {
+  const { blocks, errors } = getPemBlocks(value);
+  if (!blocks) {
+    return errors;
+  }
+  const keyBlock = blocks.find(({ label }) => isPrivateKeyLabel(label));
+  if (!keyBlock) {
+    return [
+      i18n.translate('xpack.fleet.settings.outputForm.otlpTlsKeyPemNoKey', {
+        defaultMessage: 'Paste a private key, from "-----BEGIN PRIVATE KEY-----" to its END line',
+      }),
+    ];
+  }
+  if (keyBlock.label === 'ENCRYPTED PRIVATE KEY') {
+    return [
+      i18n.translate('xpack.fleet.settings.outputForm.otlpTlsKeyPemEncrypted', {
+        defaultMessage: 'Encrypted private keys are not supported. Paste the decrypted key.',
+      }),
+    ];
+  }
+}
+
+export const validateOtlpTlsPrivateKeyPemSecret = toSecretValidator(validateOtlpTlsPrivateKeyPem);
+
+/**
+ * The client key of the OTLP exporter. A saved key that is being replaced needs a new value: the
+ * saved key is removed with its own action, not by leaving the replacement empty.
+ */
+export function validateOtlpTlsKeyPemSecret(
+  value: string | { id: string } | undefined,
+  hasSavedKey: boolean
+) {
+  // the key is sent trimmed: a blank replacement would leave the saved key in place
+  if (hasSavedKey && typeof value === 'string' && !value.trim()) {
+    return [
+      i18n.translate('xpack.fleet.settings.outputForm.otlpTlsKeyPemReplacementRequired', {
+        defaultMessage: 'Enter the new client key, or cancel the change',
+      }),
+    ];
+  }
+  return validateOtlpTlsPrivateKeyPemSecret(value);
+}
+
+/** An optional path to a file on the host of the agent. */
+export function validateOtlpTlsFilePath(value: string) {
+  if ((value?.trim() ?? '').length > OTLP_TLS_FILE_MAX_LENGTH) {
+    return otlpTooLongError(OTLP_TLS_FILE_MAX_LENGTH);
+  }
+}
+
+/** An optional TLS version: one of the versions that the collector accepts. */
+export function validateOtlpTlsVersion(value: string) {
+  if (value && !(OTLP_TLS_VERSIONS as readonly string[]).includes(value)) {
+    return [
+      i18n.translate('xpack.fleet.settings.outputForm.otlpTlsVersionInvalid', {
+        defaultMessage: '"{version}" is not a TLS version that the collector supports. Select one.',
+        values: { version: value },
+      }),
+    ];
+  }
+}
+
+/** The cipher suites: names that the collector knows. Each error names the cipher suite. */
+export function validateOtlpTlsCipherSuites(value: string[]) {
+  const errors: Array<{ message: string; index?: number }> = [];
+  if (value.length > OTLP_TLS_CIPHER_SUITES_MAX_SIZE) {
+    errors.push({
+      message: i18n.translate('xpack.fleet.settings.outputForm.otlpTlsCipherSuitesTooMany', {
+        defaultMessage: 'Specify at most {max} cipher suites',
+        values: { max: OTLP_TLS_CIPHER_SUITES_MAX_SIZE },
+      }),
+    });
+  }
+  value.forEach((suite, index) => {
+    if (!KNOWN_OTLP_TLS_CIPHER_SUITES.includes(suite)) {
+      errors.push({
+        message: i18n.translate('xpack.fleet.settings.outputForm.otlpTlsCipherSuiteUnknown', {
+          defaultMessage: '"{suite}" is not a cipher suite that the collector supports',
+          // a long value is cut, the message only has to identify it
+          values: { suite: suite.length > 64 ? `${suite.slice(0, 64)}…` : suite },
+        }),
+        index,
+      });
+    }
+  });
+  return errors.length ? errors : undefined;
+}
+
+/** The values of the OTLP exporter TLS settings that depend on each other. */
+export interface OtlpTlsPairedValues {
+  caPem: string;
+  caFile: string;
+  certPem: string;
+  certFile: string;
+  /** Whether a client key is set as a PEM key: a new value, or a stored secret. */
+  hasKeyPem: boolean;
+  keyFile: string;
+  minVersion: string;
+  maxVersion: string;
+  cipherSuites: string[];
+  includeInsecureCipherSuites: boolean;
+}
+
+export type OtlpTlsPairedErrors = Partial<
+  Record<
+    'caFile' | 'certPem' | 'certFile' | 'keyPem' | 'keyFile' | 'maxVersion' | 'cipherSuites',
+    string[]
+  >
+>;
+
+const pemAndFileError = (setting: string) => [
+  i18n.translate('xpack.fleet.settings.outputForm.otlpTlsPemAndFile', {
+    defaultMessage: 'Specify the {setting} either as PEM or as a file, not both',
+    values: { setting },
+  }),
+];
+
+const isSet = (value: string) => !!value.trim();
+
+/**
+ * Validates the TLS settings that depend on each other, as the collector does (configtls): a
+ * certificate authority, a client certificate and a client key are each set either as PEM or as a
+ * file, the client certificate and key are set together, the minimum TLS version is not above the
+ * maximum, and insecure cipher suites are allowed explicitly. Each error is set on the setting to
+ * change.
+ */
+export function validateOtlpTlsPairedSettings(values: OtlpTlsPairedValues): OtlpTlsPairedErrors {
+  const errors: OtlpTlsPairedErrors = {};
+  const hasCert = isSet(values.certPem) || isSet(values.certFile);
+  const hasKey = values.hasKeyPem || isSet(values.keyFile);
+
+  if (isSet(values.caPem) && isSet(values.caFile)) {
+    errors.caFile = pemAndFileError(
+      i18n.translate('xpack.fleet.settings.outputForm.otlpTlsCaSetting', {
+        defaultMessage: 'certificate authority',
+      })
+    );
+  }
+  if (isSet(values.certPem) && isSet(values.certFile)) {
+    errors.certFile = pemAndFileError(
+      i18n.translate('xpack.fleet.settings.outputForm.otlpTlsCertSetting', {
+        defaultMessage: 'client certificate',
+      })
+    );
+  }
+  if (values.hasKeyPem && isSet(values.keyFile)) {
+    errors.keyFile = pemAndFileError(
+      i18n.translate('xpack.fleet.settings.outputForm.otlpTlsKeySetting', {
+        defaultMessage: 'client key',
+      })
+    );
+  }
+  if (hasCert && !hasKey) {
+    errors.keyPem = [
+      i18n.translate('xpack.fleet.settings.outputForm.otlpTlsKeyRequired', {
+        defaultMessage: 'Specify the client key of the client certificate, as PEM or as a file',
+      }),
+    ];
+  }
+  if (hasKey && !hasCert) {
+    errors.certPem = [
+      i18n.translate('xpack.fleet.settings.outputForm.otlpTlsCertRequired', {
+        defaultMessage: 'Specify the client certificate of the client key, as PEM or as a file',
+      }),
+    ];
+  }
+
+  // the versions are compared by their position, and an unknown version has its own error; the
+  // collector uses TLS 1.2 as the minimum version when it is not set
+  const versionIndex = (version: string) =>
+    (OTLP_TLS_VERSIONS as readonly string[]).indexOf(version);
+  const minIndex = versionIndex(values.minVersion || OTLP_TLS_DEFAULT_MIN_VERSION);
+  const maxIndex = versionIndex(values.maxVersion);
+  if (minIndex >= 0 && maxIndex >= 0 && minIndex > maxIndex) {
+    errors.maxVersion = [
+      i18n.translate('xpack.fleet.settings.outputForm.otlpTlsVersionRange', {
+        defaultMessage:
+          'The maximum TLS version cannot be lower than the minimum TLS version ({defaultMinVersion} when not set)',
+        values: { defaultMinVersion: OTLP_TLS_DEFAULT_MIN_VERSION },
+      }),
+    ];
+  }
+
+  const insecureSuites = values.includeInsecureCipherSuites
+    ? []
+    : values.cipherSuites.filter((suite) =>
+        (OTLP_TLS_INSECURE_CIPHER_SUITES as readonly string[]).includes(suite)
+      );
+  if (insecureSuites.length) {
+    errors.cipherSuites = [
+      i18n.translate('xpack.fleet.settings.outputForm.otlpTlsInsecureCipherSuites', {
+        defaultMessage:
+          'Turn on "Allow insecure cipher suites" to use {count, plural, one {the insecure cipher suite} other {the insecure cipher suites}} {suites}',
+        values: { count: insecureSuites.length, suites: insecureSuites.join(', ') },
+      }),
+    ];
+  }
+  return errors;
+}

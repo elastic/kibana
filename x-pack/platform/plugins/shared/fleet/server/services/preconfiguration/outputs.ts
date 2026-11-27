@@ -48,6 +48,7 @@ import { appContextService } from '../app_context';
 import { checkOtlpOutputAllowed } from '../outputs/helpers';
 import { checkKafkaAuthMethodAllowed } from '../outputs/kafka_auth_gate';
 import { KAFKA_AUTH_METHODS, usesKafkaAuth } from '../outputs/kafka_auth';
+import { validateOtlpTlsCertificatesHaveNoPrivateKey } from '../outputs/validators';
 import type { KafkaAuthMethod } from '../outputs/kafka_auth';
 import { getKafkaSecretLeaves } from '../secrets/outputs';
 import {
@@ -296,6 +297,17 @@ export async function createOrUpdatePreconfiguredOutputs(
         existingOutput as unknown as Record<string, unknown>,
         output.allow_edit
       );
+    }
+
+    // the output as it is saved, with the settings that `allow_edit` keeps: a private key in a
+    // certificate setting would be stored and returned in plain text, and the service rejects it
+    if (isOtlpOutput(data)) {
+      try {
+        validateOtlpTlsCertificatesHaveNoPrivateKey(data);
+      } catch (error) {
+        logger.warn(`Skipping preconfigured OTLP output ${output.id}: ${error.message}`);
+        return;
+      }
     }
 
     const isUpdateWithNewData =

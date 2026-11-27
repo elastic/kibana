@@ -122,6 +122,14 @@ import {
   useOtlpAuthInputs,
   validateOtlpAuthInputs,
 } from './use_otlp_auth_inputs';
+import type { OtlpTlsInputs } from './use_otlp_tls_inputs';
+import {
+  buildOtlpTls,
+  buildOtlpTlsSecrets,
+  hasOtlpTlsPairedErrors,
+  useOtlpTlsInputs,
+  validateOtlpTlsInputs,
+} from './use_otlp_tls_inputs';
 
 const DEFAULT_QUEUE_MAX_SIZE = 4096;
 
@@ -129,7 +137,8 @@ export interface OutputFormInputsType
   extends KafkaOAuth2Inputs,
     KafkaKerberosInputs,
     OtlpInputs,
-    OtlpAuthInputs {
+    OtlpAuthInputs,
+    OtlpTlsInputs {
   nameInput: ReturnType<typeof useInput>;
   typeInput: ReturnType<typeof useInput>;
   elasticsearchUrlInput: ReturnType<typeof useComboInput>;
@@ -808,6 +817,23 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOutp
       managedOtlpUrl: cloud?.managedOtlp?.url,
     }
   );
+  // the client key is saved under `secrets` only, which a preconfigured output allows editing
+  // separately from the exporter. While the other TLS settings are read-only, a saved key can be
+  // replaced, and a key can only be added when those settings need one: a client certificate, set
+  // either as PEM or as a file (not both), without a key file.
+  const savedOtlpOutput = output && isOtlpOutput(output) ? output : undefined;
+  const savedOtlpTls = savedOtlpOutput?.otlp_exporter?.tls;
+  const canSetOtlpTlsKeyPemWithReadOnlyTls =
+    !!savedOtlpOutput?.secrets?.otlp_exporter?.tls?.key_pem ||
+    (!!savedOtlpTls?.cert_pem !== !!savedOtlpTls?.cert_file && !savedOtlpTls?.key_file);
+  const isOtlpTlsKeyPemDisabled =
+    isDisabled('secrets') || (isOtlpExporterDisabled && !canSetOtlpTlsKeyPemWithReadOnlyTls);
+  const otlpTlsInputs = useOtlpTlsInputs(
+    output && isOtlpOutput(output) ? output : undefined,
+    isOtlp,
+    isOtlpExporterDisabled,
+    isOtlpTlsKeyPemDisabled
+  );
   const isOtlpAuthEnabled = isOtlpAuthAvailable(
     getOtlpInputEndpoints(otlpInputs),
     cloud?.managedOtlp?.url
@@ -860,6 +886,7 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOutp
     ...kafkaKerberosInputs,
     ...otlpInputs,
     ...otlpAuthInputs,
+    ...otlpTlsInputs,
     kafkaSaslMechanismInput,
     kafkaPartitionTypeInput,
     kafkaPartitionTypeRandomInput,
@@ -934,6 +961,8 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOutp
         nameInputValid,
         // an exporter that can not be edited is not sent, so its settings are not checked
         (output && isOtlpExporterDisabled) || validateOtlpInputs(otlpInputs),
+        // the TLS inputs are not validated when they are read-only
+        validateOtlpTlsInputs(otlpTlsInputs),
         // an authentication that is kept for the managed OTLP endpoint has to be removed explicitly
         isOtlpAuthEnabled
           ? validateOtlpAuthInputs(otlpAuthInputs, otlpInputs.otlpProtocolInput.value)
@@ -1040,6 +1069,7 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOutp
     kafkaDynamicTopicInput,
     otlpInputs,
     otlpAuthInputs,
+    otlpTlsInputs,
     isOtlpAuthEnabled,
     isOtlpExporterDisabled,
     output,
@@ -1123,6 +1153,21 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOutp
 
         switch (typeInput.value) {
           case outputType.Otlp:
+            const storedOtlpOutput = output && isOtlpOutput(output) ? output : undefined;
+            const storedOtlpTls = storedOtlpOutput?.otlp_exporter?.tls;
+            const storedOtlpTlsSecrets = storedOtlpOutput?.secrets?.otlp_exporter?.tls;
+            const { secrets: otlpAuthSecrets, ...otlpAuthPayload } =
+              output && isOtlpAuthDisabled
+                ? {}
+                : buildOtlpAuth(otlpAuthInputs, { hasStoredAuth: !!storedOtlpOutput?.auth });
+            // a preconfigured output that does not allow editing the exporter and its secrets must
+            // not send the TLS secrets, or the server rejects the update
+            const otlpTlsSecrets =
+              output && isOtlpTlsKeyPemDisabled
+                ? undefined
+                : buildOtlpTlsSecrets(otlpTlsInputs, {
+                    hasStoredKeyPem: !!storedOtlpTlsSecrets?.key_pem,
+                  });
             // an OTLP output can be the default neither for data nor for monitoring
             return {
               name: nameInput.value,
@@ -1133,12 +1178,24 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOutp
               // does not allow editing it must not send it, or the server rejects the update
               ...(output && isOtlpExporterDisabled
                 ? {}
-                : { otlp_exporter: buildOtlpExporterConfig(otlpInputs) }),
-              ...(output && isOtlpAuthDisabled
-                ? {}
-                : buildOtlpAuth(otlpAuthInputs, {
-                    hasStoredAuth: !!(output && isOtlpOutput(output) && output.auth),
-                  })),
+                : {
+                    otlp_exporter: buildOtlpExporterConfig(
+                      otlpInputs,
+                      buildOtlpTls(otlpTlsInputs, {
+                        storedTls: storedOtlpTls,
+                        hasStoredKeyPem: !!storedOtlpTlsSecrets?.key_pem,
+                        // a removed secret can be kept as a `null` reference
+                        hasStoredTpmSecrets: !!(
+                          storedOtlpTlsSecrets?.tpm?.owner_auth || storedOtlpTlsSecrets?.tpm?.auth
+                        ),
+                      })
+                    ),
+                  }),
+              ...otlpAuthPayload,
+              // the authentication and the TLS secrets are separate keys of the same `secrets`
+              ...(otlpAuthSecrets || otlpTlsSecrets
+                ? { secrets: { ...otlpAuthSecrets, ...otlpTlsSecrets } }
+                : {}),
             } as NewOtlpOutput;
           case outputType.Kafka:
             const definedCA = kafkaSslCertificateAuthoritiesInput.value.filter(
@@ -1432,6 +1489,8 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOutp
     isOtlpExporterDisabled,
     otlpAuthInputs,
     isOtlpAuthDisabled,
+    otlpTlsInputs,
+    isOtlpTlsKeyPemDisabled,
     nameInput.value,
     kafkaHostsInput.value,
     defaultOutputInput.value,
@@ -1507,9 +1566,10 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOutp
       !nameInput.value ||
       isHostsMissing ||
       (isOtlp &&
-        Object.values(otlpInputs).some(
+        ([...Object.values(otlpInputs), ...Object.values(otlpTlsInputs)].some(
           (input) => (input.formRowProps as { isInvalid?: boolean }).isInvalid
-        )) ||
+        ) ||
+          hasOtlpTlsPairedErrors(otlpTlsInputs))) ||
       (isLogstash && !hasEncryptedSavedObjectConfigured) ||
       (!isKafka &&
         (sslCertificateAuthoritiesInput.props.isInvalid ||

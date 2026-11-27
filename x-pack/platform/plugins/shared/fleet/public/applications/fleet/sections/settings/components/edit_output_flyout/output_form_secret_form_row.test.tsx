@@ -163,4 +163,60 @@ describe('SecretFormRow', () => {
       getByText('Saving this field stores it as a secret instead of plain text.', { exact: false })
     ).toBeInTheDocument();
   });
+
+  describe('removable secret', () => {
+    const onRemove = jest.fn();
+
+    it('should not offer to remove a secret without onRemove', () => {
+      const { queryByText } = renderWithI18n(
+        <SecretFormRow title={title} initialValue={initialValue} useSecretsStorage={true}>
+          <input type="text" />
+        </SecretFormRow>
+      );
+
+      expect(queryByText('Remove Test Secret')).not.toBeInTheDocument();
+    });
+
+    it('should call onRemove when the remove button is clicked', () => {
+      const { getByText } = renderWithI18n(
+        <SecretFormRow
+          title={title}
+          initialValue={initialValue}
+          useSecretsStorage={true}
+          onRemove={onRemove}
+        >
+          <input type="text" />
+        </SecretFormRow>
+      );
+
+      expect(
+        getByText('The saved Test Secret is hidden. You can replace or remove the Test Secret.')
+      ).toBeInTheDocument();
+      fireEvent.click(getByText('Remove Test Secret'));
+
+      expect(onRemove).toHaveBeenCalled();
+    });
+
+    it('should show that a removed secret is removed when saving, and cancel the removal', () => {
+      const { getByText, queryByText } = renderWithI18n(
+        <SecretFormRow
+          title={title}
+          initialValue={initialValue}
+          useSecretsStorage={true}
+          onRemove={onRemove}
+          isRemoved={true}
+          cancelEdit={cancelEdit}
+        >
+          <input type="text" />
+        </SecretFormRow>
+      );
+
+      expect(getByText('The saved Test Secret is removed when you save.')).toBeInTheDocument();
+      expect(queryByText('Replace Test Secret')).not.toBeInTheDocument();
+
+      fireEvent.click(getByText('Cancel Test Secret removal'));
+
+      expect(cancelEdit).toHaveBeenCalled();
+    });
+  });
 });

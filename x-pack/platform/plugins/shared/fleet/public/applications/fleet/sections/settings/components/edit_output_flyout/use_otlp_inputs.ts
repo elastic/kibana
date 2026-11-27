@@ -907,14 +907,18 @@ function buildOtlpQueueAndRetry(inputs: OtlpInputs) {
 }
 
 /**
- * Builds the `otlp_exporter` of the payload from the settings this form edits. The settings it
- * does not edit yet (TLS) are left out, so an update keeps them.
+ * Builds the `otlp_exporter` of the payload from the settings this form edits; the others are left
+ * out, so an update keeps them. The TLS settings are built by `buildOtlpTls`, and left out when
+ * `tls` is `undefined`.
  *
  * Only the settings of the selected protocol are sent: the schema of a protocol rejects the
  * settings of the other one. When an update changes the protocol, the server removes the stored
  * settings that only the previous protocol has.
  */
-export function buildOtlpExporterConfig(inputs: OtlpInputs): OtlpExporterConfig {
+export function buildOtlpExporterConfig(
+  inputs: OtlpInputs,
+  tls?: OtlpExporterConfig['tls']
+): OtlpExporterConfig {
   const headers = new Map<string, string>();
   inputs.otlpHeadersInput.value.forEach(({ key, value }) => {
     if (key && value) {
@@ -927,6 +931,7 @@ export function buildOtlpExporterConfig(inputs: OtlpInputs): OtlpExporterConfig 
     timeout: text(inputs.otlpTimeoutInput),
     headers: headers.size ? Object.fromEntries(headers) : null,
     ...buildOtlpQueueAndRetry(inputs),
+    ...(tls !== undefined ? { tls } : {}),
   };
 
   if (!isOtlpGrpc(inputs)) {
