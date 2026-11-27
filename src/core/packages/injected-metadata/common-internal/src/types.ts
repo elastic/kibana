@@ -112,11 +112,11 @@ export interface InjectedMetadata {
   uiPlugins: InjectedMetadataPlugin[];
   legacyMetadata: {
     uiSettings: {
-      defaults: Record<string, any>; // unreferencing UiSettingsParams here
+      defaults: Record<string, any>; // unreferencing UiSettingsRuntimeEntry here
       user: Record<string, any>; // unreferencing UserProvidedValues here
     };
     globalUiSettings: {
-      defaults: Record<string, any>; // unreferencing UiSettingsParams here
+      defaults: Record<string, any>; // unreferencing UiSettingsRuntimeEntry here
       user: Record<string, any>; // unreferencing UserProvidedValues here
     };
   };

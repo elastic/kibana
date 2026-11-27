@@ -35,6 +35,12 @@ paths:
           description: 'The sort order.'
           schema:
             $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/SortOrderOrUndefined'
+        - name: withEffectivePolicyIds
+          in: query
+          required: false
+          description: 'Set to `true` to include `effective_policy_ids` for each pack. Reads Fleet integrations, so leave it unset when you do not need it.'
+          schema:
+            type: boolean
       responses:
         '200':
           description: Indicates a successful call.
@@ -51,6 +57,7 @@ paths:
                     total: 1
                     data:
                       - saved_object_id: '1c266590-381f-428c-878f-c80c1334f856'
+                        effective_policy_ids: ['my_policy_id']
                         name: 'my_pack'
                         description: 'My pack'
                         enabled: true
@@ -140,6 +147,12 @@ paths:
           description: 'The pack ID.'
           schema:
             $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/PackId'
+        - name: withEffectivePolicyIds
+          in: query
+          required: false
+          description: 'Set to `true` to include `effective_policy_ids`. Reads Fleet integrations, so leave it unset when you do not need it.'
+          schema:
+            type: boolean
       responses:
         '200':
           description: Indicates a successful call.
@@ -168,6 +181,7 @@ paths:
                       created_by: 'elastic'
                       updated_at: '2025-02-26T13:37:30.452Z'
                       updated_by: 'elastic'
+                      effective_policy_ids: ['my_policy_id']
                       policy_ids:
                         - 'my_policy_id'
                       shards: {}

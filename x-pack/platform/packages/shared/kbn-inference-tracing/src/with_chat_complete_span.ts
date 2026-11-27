@@ -10,6 +10,7 @@ import type {
   ChatCompleteCacheControl,
   ChatCompleteCompositeResponse,
   ChatCompletionReasoning,
+  ChatCompletionTokenCount,
   Message,
   Model,
   ToolCall,
@@ -144,20 +145,21 @@ function setOutputMessages(
 
 function setTokens(
   span: Span,
-  {
-    prompt,
-    completion,
-    cached,
-    cacheWrite,
-  }: { prompt: number; completion: number; cached?: number; cacheWrite?: number }
+  { prompt, completion, thinking, cached, cacheWrite }: ChatCompletionTokenCount
 ) {
   if (!span.isRecording()) {
     return;
   }
   const attributes: Record<string, number> = {
     [GenAISemanticConventions.GenAIUsageInputTokens]: prompt,
-    [GenAISemanticConventions.GenAIUsageOutputTokens]: completion,
   };
+  if (completion != null || thinking != null) {
+    attributes[GenAISemanticConventions.GenAIUsageOutputTokens] =
+      (completion ?? 0) + (thinking ?? 0);
+  }
+  if (thinking != null) {
+    attributes[GenAISemanticConventions.GenAIUsageReasoningOutputTokens] = thinking;
+  }
   if (cached != null) {
     attributes[GenAISemanticConventions.GenAIUsageCacheReadInputTokens] = cached;
   }

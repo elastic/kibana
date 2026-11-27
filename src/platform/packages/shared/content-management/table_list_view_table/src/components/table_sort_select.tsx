@@ -7,7 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useState, useEffect } from 'react';
+import React, {
+  createContext,
+  useState,
+  useMemo,
+  useContext,
+  type ReactElement,
+  type ReactNode,
+} from 'react';
 import { i18n } from '@kbn/i18n';
 import type { EuiSelectableOption, Direction } from '@elastic/eui';
 import {
@@ -91,7 +98,7 @@ export function TableSortSelect({
   const { euiTheme } = useEuiTheme();
 
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-  const [options, setOptions] = useState<SortItem[]>(() => {
+  const baseOptions = useMemo((): SortItem[] => {
     let opts: SortItem[] = [
       {
         label: i18nText.nameAscSort,
@@ -177,7 +184,19 @@ export function TableSortSelect({
     }
 
     return opts;
-  });
+  }, [customSortingOptions, hasUpdatedAtMetadata, hasRecentlyAccessedMetadata]);
+
+  const options = useMemo(
+    () =>
+      baseOptions.map((option) => ({
+        ...option,
+        checked:
+          option.column === tableSort.field && option.direction === tableSort.direction
+            ? ('on' as const)
+            : undefined,
+      })),
+    [baseOptions, tableSort]
+  );
 
   const selectedOptionLabel =
     options.find(({ checked }) => checked === 'on')?.label ?? i18nText.nameAscSort;
@@ -210,29 +229,14 @@ export function TableSortSelect({
   );
 
   const onSelectChange = (updatedOptions: SortItem[]) => {
-    setOptions(updatedOptions);
-
     const selectedOption = updatedOptions.find(({ checked }) => checked === 'on');
-    if (selectedOption && onChange) {
-      onChange(selectedOption.column, selectedOption.direction);
+    if (!selectedOption) {
+      return;
     }
+
+    onChange?.(selectedOption.column, selectedOption.direction);
+    closePopover();
   };
-
-  useEffect(() => {
-    setOptions((prev) => {
-      return prev.map((option) => {
-        const checked =
-          option.column === tableSort.field && option.direction === tableSort.direction
-            ? 'on'
-            : undefined;
-
-        return {
-          ...option,
-          checked,
-        };
-      });
-    });
-  }, [customSortingOptions, tableSort]);
 
   return (
     <EuiPopover
@@ -268,6 +272,25 @@ export function TableSortSelect({
     </EuiPopover>
   );
 }
+
+const SortSelectContext = createContext<Props | null>(null);
+
+/** Provides the sort select props so `SortSelectFilter` can keep a stable component identity. */
+export const SortSelectContextProvider = ({
+  children,
+  ...props
+}: Props & { children: ReactNode }): ReactElement => {
+  return <SortSelectContext.Provider value={props}>{children}</SortSelectContext.Provider>;
+};
+
+/** `EuiSearchBar` custom filter that renders `TableSortSelect` from `SortSelectContext`. */
+export const SortSelectFilter = (): ReactElement => {
+  const props = useContext(SortSelectContext);
+  if (!props) {
+    throw new Error('SortSelectFilter must be used within a SortSelectContextProvider');
+  }
+  return <TableSortSelect {...props} />;
+};
 
 const sortStorageKey = (tableId: string) => `tableSort:${tableId}`;
 export function getInitialSorting(tableId: string): {

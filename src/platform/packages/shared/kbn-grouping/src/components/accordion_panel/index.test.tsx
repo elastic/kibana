@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { fireEvent, render } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import { GroupPanel } from '.';
 import { createGroupFilter, getNullGroupFilter } from '../../containers/query/helpers';
 import React from 'react';
@@ -81,5 +81,19 @@ describe('grouping accordion panel', () => {
     const { container } = render(<GroupPanel {...testProps} onToggleGroup={onToggleGroup} />);
     fireEvent.click(container.querySelector('[data-test-subj="grouping-accordion"] button')!);
     expect(onToggleGroup).toHaveBeenCalledWith(true, testProps.groupBucket);
+  });
+
+  it('names the focusable arrow toggle with toggleAriaLabel, distinct from buttons in the panel content', () => {
+    render(
+      <GroupPanel
+        {...testProps}
+        toggleAriaLabel="Expand entity row for alpha"
+        groupPanel={<button type="button">View details for alpha</button>}
+      />
+    );
+
+    expect(screen.getByRole('button', { name: 'Expand entity row for alpha' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'View details for alpha' })).toBeInTheDocument();
+    expect(screen.getAllByRole('button')).toHaveLength(2);
   });
 });
