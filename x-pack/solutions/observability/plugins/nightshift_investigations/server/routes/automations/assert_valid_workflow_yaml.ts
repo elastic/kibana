@@ -25,7 +25,10 @@ export const assertValidWorkflowYaml = async ({
   spaceId: string;
   request: KibanaRequest;
 }): Promise<void> => {
-  const { valid, diagnostics } = await management.validateWorkflow(yaml, spaceId, request);
+  const { valid, diagnostics } = await management.validateWorkflow(yaml, spaceId, request, {
+    includeVariableRules: false,
+    includeEsqlRules: false,
+  });
   if (valid) return;
   throw badRequest(
     invalidWorkflowMessage(diagnostics.filter((d) => d.severity === 'error').map((d) => d.message))

@@ -137,7 +137,11 @@ export const createAutomationRoute = createNightshiftInvestigationsServerRoute({
       });
       workflow = await workflowsManagement.management.createWorkflow({ yaml }, spaceId, request);
     } catch (err) {
-      await soClient.delete(NIGHTSHIFT_AUTOMATION_SO_TYPE, created.id);
+      await soClient
+        .delete(NIGHTSHIFT_AUTOMATION_SO_TYPE, created.id)
+        .catch(() =>
+          logger.warn(`Could not remove automation ${created.id} after a failed create`)
+        );
       throw isBoom(err) ? err : badRequest(`Failed to create backing workflow: ${err.message}`);
     }
     const workflowId = workflow.id;

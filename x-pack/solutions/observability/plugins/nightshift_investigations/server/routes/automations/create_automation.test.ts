@@ -55,6 +55,7 @@ beforeEach(() => {
   registeredChecker = checkChannelBound;
   serviceAccountService = createServiceAccountService();
   soClient.create.mockResolvedValue({ id: 'automation-1' });
+  soClient.delete.mockResolvedValue(undefined);
   createWorkflow.mockResolvedValue({ id: 'workflow-1', valid: true });
   deleteWorkflows.mockResolvedValue({ failures: [] });
   validateWorkflow.mockResolvedValue({ valid: true, diagnostics: [] });
@@ -136,6 +137,16 @@ it('rejects an invalid workflow before creating it and removes the automation', 
   });
   expect(createWorkflow).not.toHaveBeenCalled();
   expect(soClient.delete).toHaveBeenCalledWith('nightshift-automation', 'automation-1');
+});
+
+it('keeps the validation 400 when removing the automation fails', async () => {
+  validateWorkflow.mockResolvedValue({
+    valid: false,
+    diagnostics: [{ severity: 'error', message: 'bad liquid' }],
+  });
+  soClient.delete.mockRejectedValue(new Error('so down'));
+
+  await expect(call()).rejects.toMatchObject({ output: { statusCode: 400 } });
 });
 
 it('removes the automation and the stored workflow when the workflow is invalid', async () => {

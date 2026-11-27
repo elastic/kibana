@@ -71,18 +71,19 @@ apiTest.describe(
 
     apiTest.afterAll(async ({ apiClient, apiServices, samlAuth }) => {
       ({ cookieHeader } = await samlAuth.asInteractiveUser(ROLE));
-      if (automation)
-        expect(
-          await createRequest(apiClient, () => cookieHeader)('delete', `${PATH}/${automation.id}`)
-        ).toHaveStatusCode(200);
-      for (const id of strays) {
-        expect(
-          await createRequest(apiClient, () => cookieHeader)('delete', `${PATH}/${id}`)
-        ).toHaveStatusCode(200);
-      }
+      const request = createRequest(apiClient, () => cookieHeader);
+      const ids = [...strays, ...(automation ? [automation.id] : [])];
+      const deletions = await Promise.allSettled(
+        ids.map((id) => request('delete', `${PATH}/${id}`))
+      );
       await apiServices.core.settings({
         'feature_flags.overrides': { [NIGHTSHIFT_ENABLED_FLAG]: null },
       });
+      expect(
+        deletions.map((deletion) =>
+          deletion.status === 'fulfilled' ? deletion.value.statusCode : deletion.reason
+        )
+      ).toStrictEqual(ids.map(() => 200));
     });
 
     apiTest(
@@ -111,10 +112,20 @@ apiTest.describe(
       'keeps an enabled automation and its workflow when an edit makes it invalid',
       async ({ apiClient }) => {
         const request = createRequest(apiClient, () => cookieHeader);
+        const later = new Date(Date.now() + 12 * 60 * 60 * 1000);
         const created = await request('post', PATH, {
           name: uniqueId('scout-invalid-edit'),
           isEnabled: true,
-          trigger: dailyTrigger,
+          trigger: {
+            rows: [
+              {
+                kind: 'schedule',
+                schedulePreset: 'daily',
+                time: later.toISOString().slice(11, 16),
+                timezone: 'UTC',
+              },
+            ],
+          },
           execution: { promptTemplate: 'Review health.' },
           completions: [],
           runtime: { dailyDispatchLimit: 3 },
@@ -139,6 +150,7 @@ apiTest.describe(
         });
         const current = await request('get', `${PATH}/${id}`);
         expect(current.body).toMatchObject({
+          workflowId,
           isEnabled: true,
           execution: { promptTemplate: 'Review health.' },
         });

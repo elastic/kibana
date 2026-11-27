@@ -337,9 +337,11 @@ it('rejects an invalid workflow before writing it and keeps the automation', asy
   expect(soClient.update).not.toHaveBeenCalled();
 });
 
-it('does not validate a pause-only update', async () => {
+it('pauses an automation whose backing workflow is already invalid', async () => {
+  updateWorkflow.mockResolvedValue({ valid: false, validationErrors: ['already invalid'] });
   await call({ isEnabled: false });
   expect(validateWorkflow).not.toHaveBeenCalled();
+  expect(soClient.update).toHaveBeenCalled();
 });
 
 it('disables a scheduled automation through the normal workflow update', async () => {
