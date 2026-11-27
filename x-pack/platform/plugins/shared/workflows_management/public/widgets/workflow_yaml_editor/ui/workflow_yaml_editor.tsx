@@ -65,6 +65,7 @@ import {
   selectHighlightedStepId,
   selectIsExecutionsTab,
   selectIsSaveInProgress,
+  selectIsYamlComputationSettled,
   selectStepExecutions,
   selectWorkflow,
   selectWorkflowDefinition,
@@ -264,6 +265,7 @@ export const WorkflowYAMLEditor = ({
 
   const workflowYaml = useSelector(selectEditorYaml) ?? '';
   const hasChanges = useSelector(selectHasChanges);
+  const isYamlComputationSettled = useSelector(selectIsYamlComputationSettled);
 
   const originalValue = workflow?.yaml ?? '';
 
@@ -954,6 +956,9 @@ export const WorkflowYAMLEditor = ({
       responsive={false}
       css={editorWrapperCss}
       ref={containerRef}
+      // Readiness signal: `false` while the language features (trigger-aware autocomplete,
+      // graph, step lookup) still answer from the previous document's derived state.
+      data-yaml-computation-settled={isYamlComputationSettled}
     >
       <GlobalWorkflowEditorStyles />
       {isActive && <ServiceAccountEditorWidgets editor={mountedEditor} />}
