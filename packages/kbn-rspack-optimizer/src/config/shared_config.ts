@@ -142,8 +142,8 @@ export function getSwcOptions(dist: boolean, hmr: boolean = false) {
       //
       // NOTE: `@swc/plugin-emotion` is a WebAssembly plugin whose ABI is locked
       // to the `swc_core` version that RSPack's bundled SWC was built against.
-      // RSPack 2.1.8 reports `swc_core` 72.0.0; `@swc/plugin-emotion@14.15.0` is
-      // built against `swc_core` 72.0.0 (exact match). The pinned version must
+      // RSPack 2.3.4 reports `swc_core` 85.1.0; `@swc/plugin-emotion@20.0.3` is
+      // built against `swc_core` 85.0.0 (same major, ABI-compatible). The pinned version must
       // be re-checked whenever `@rspack/core` is bumped, or the build will panic
       // on a plugin ABI mismatch.
       experimental: {
