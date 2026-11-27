@@ -26,6 +26,7 @@ import type {
 } from '../monitoring/background_task_utilization_statistics';
 import { summarizeUtilizationStats } from '../monitoring/background_task_utilization_statistics';
 import type { MonitoredStat } from '../monitoring/monitoring_stats_stream';
+import { MANAGE_TASK_MANAGER_API_PRIVILEGE } from '../lib/check_monitoring_privileges';
 
 export interface MonitoredUtilization {
   process_uuid: string;
@@ -43,7 +44,6 @@ export interface BackgroundTaskUtilRouteParams {
   logger: Logger;
   taskManagerId: string;
   config: TaskManagerConfig;
-  kibanaVersion: string;
   kibanaIndexName: string;
   getClusterClient: () => Promise<IClusterClient>;
   usageCounter?: UsageCounter;
@@ -58,7 +58,6 @@ export function backgroundTaskUtilizationRoute(
     logger,
     taskManagerId,
     config,
-    kibanaVersion,
     kibanaIndexName,
     getClusterClient,
     usageCounter,
@@ -158,7 +157,7 @@ export function backgroundTaskUtilizationRoute(
                 {
                   application: `kibana-${kibanaIndexName}`,
                   resources: ['*'],
-                  privileges: [`api:${kibanaVersion}:taskManager`],
+                  privileges: [MANAGE_TASK_MANAGER_API_PRIVILEGE],
                 },
               ],
             });

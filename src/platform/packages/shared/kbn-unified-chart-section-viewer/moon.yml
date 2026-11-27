@@ -57,6 +57,9 @@ dependsOn:
   - '@kbn/core-feature-flags-browser-mocks'
   - '@kbn/ebt-click'
   - '@kbn/data-source'
+  - '@kbn/trace-latency-map'
+  - '@kbn/search-errors'
+  - '@kbn/datemath'
 tags:
   - shared-browser
   - package

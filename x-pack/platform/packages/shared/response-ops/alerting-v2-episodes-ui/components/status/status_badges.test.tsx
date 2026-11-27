@@ -49,7 +49,7 @@ describe('AlertEpisodeStatusBadges', () => {
     expect(screen.queryByTestId('alertEpisodeStatusCellSnoozeIndicator')).not.toBeInTheDocument();
   });
 
-  it('shows snoozed_until in tooltip on hover when snoozedUntil is set', async () => {
+  it('shows the snooze expiry in the tooltip on hover when snoozedUntil is set', async () => {
     const user = userEvent.setup();
     renderWithI18n(
       <AlertEpisodeStatusBadges
@@ -62,11 +62,11 @@ describe('AlertEpisodeStatusBadges', () => {
     );
     await user.hover(screen.getByTestId('alertEpisodeStatusCellSnoozeIndicator'));
     const tooltip = await screen.findByRole('tooltip');
-    expect(tooltip).toHaveTextContent(/snoozed until/i);
+    expect(tooltip).toHaveTextContent(/will unsnooze on/i);
     expect(tooltip).toHaveTextContent(/2035/);
   });
 
-  it('shows generic snooze tooltip when snoozedUntil is missing', async () => {
+  it('reports an indefinite snooze in the tooltip when snoozedUntil is missing', async () => {
     const user = userEvent.setup();
     renderWithI18n(
       <AlertEpisodeStatusBadges
@@ -78,7 +78,67 @@ describe('AlertEpisodeStatusBadges', () => {
       />
     );
     await user.hover(screen.getByTestId('alertEpisodeStatusCellSnoozeIndicator'));
-    expect(await screen.findByRole('tooltip')).toHaveTextContent(/snoozed/i);
+    expect(await screen.findByRole('tooltip')).toHaveTextContent(/indefinitely/i);
+  });
+
+  it('summarizes the snooze conditions in the tooltip when the snooze has any', async () => {
+    const user = userEvent.setup();
+    renderWithI18n(
+      <AlertEpisodeStatusBadges
+        status={ALERT_EPISODE_STATUS.ACTIVE}
+        groupAction={{
+          lastSnoozeAction: ALERT_EPISODE_ACTION_TYPE.SNOOZE,
+          snoozedUntil: null,
+          snoozeConditions: [
+            { type: 'severity_change' },
+            { type: 'field_change', field: 'host.name' },
+          ],
+          snoozeConditionOperator: 'all',
+        }}
+      />
+    );
+    await user.hover(screen.getByTestId('alertEpisodeStatusCellSnoozeIndicator'));
+    const tooltip = await screen.findByRole('tooltip');
+    expect(tooltip).toHaveTextContent('severity is changed');
+    expect(tooltip).toHaveTextContent('and');
+    expect(tooltip).toHaveTextContent('field "host.name" is changed');
+  });
+
+  it('reports a muted alert as indefinite even when the snooze has conditions', async () => {
+    const user = userEvent.setup();
+    renderWithI18n(
+      <AlertEpisodeStatusBadges
+        status={ALERT_EPISODE_STATUS.ACTIVE}
+        groupAction={{
+          lastSnoozeAction: ALERT_EPISODE_ACTION_TYPE.SNOOZE,
+          snoozedUntil: null,
+          snoozeConditions: [{ type: 'severity_change' }],
+          isMuted: true,
+        }}
+      />
+    );
+    await user.hover(screen.getByTestId('alertEpisodeStatusCellSnoozeIndicator'));
+    const tooltip = await screen.findByRole('tooltip');
+    expect(tooltip).toHaveTextContent('indefinitely');
+    expect(tooltip).not.toHaveTextContent('severity is changed');
+  });
+
+  it('reports a muted alert as indefinite rather than reporting the expiry it replaces', async () => {
+    const user = userEvent.setup();
+    renderWithI18n(
+      <AlertEpisodeStatusBadges
+        status={ALERT_EPISODE_STATUS.ACTIVE}
+        groupAction={{
+          lastSnoozeAction: ALERT_EPISODE_ACTION_TYPE.SNOOZE,
+          snoozedUntil: '2099-01-01T00:00:00.000Z',
+          isMuted: true,
+        }}
+      />
+    );
+    await user.hover(screen.getByTestId('alertEpisodeStatusCellSnoozeIndicator'));
+    const tooltip = await screen.findByRole('tooltip');
+    expect(tooltip).toHaveTextContent('indefinitely');
+    expect(tooltip).not.toHaveTextContent('2099');
   });
 
   it('renders checkCircle badge when acknowledged via episodeAction', () => {

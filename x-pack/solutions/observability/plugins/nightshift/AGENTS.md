@@ -71,3 +71,33 @@ These rules apply to every new file and to any file you move.
 - A new page or tab is a module-scope `React.lazy` import. A heavy flyout or editor loads on open, like `SourceFlyout` in `sources/sources_view.tsx`.
 - Import individual files. Don't add barrel files that re-export a folder.
 - The plugin entry (`index.ts`) exports the initializer and types only. Never export page UI from it.
+
+# Telemetry
+
+Every user action in `public/` must send an EBT click event. Use click tags first. Add a custom event only when a click tag cannot carry the fact.
+
+## Click tags
+
+- Spread `getEbtProps({ action, element, detail })` from `@kbn/ebt-click` on each control a user can act on: button, link, menu item, switch, tab, and confirm or cancel button in a modal.
+- Add new action and element names to `public/common/ebt_constants.ts`. Do not inline strings.
+- Before you add or change a tag, fetch the EBT click tracking guidelines and follow them:
+  `gh api repos/elastic/observability-dev/contents/docs/telemetry/ebt-click-tracking-guidelines.md -H "Accept: application/vnd.github.raw"`
+- Use EUI controls (`EuiButton`, `EuiButtonIcon`, `EuiLink`) for every tagged control. A control that renders a `<button>` fires `click` on Enter and Space. A control that renders an `<a href>` fires `click` on Enter only. A custom control that acts on a key handler without a `click` event is not tracked. Route its keyboard activation through the same `click` path.
+- Do not track typing in fields. Click tracking records click intents only.
+- Do not leave `@kbn/telemetry(ebt_props_should_be_present)` warnings on code you add or change.
+- A tag on an ancestor counts: `track_clicks.ts` reads the whole ancestor chain. Do not tag a container that holds other controls. A click on an untagged child then sends the container's action, and a click on a tagged child sends both.
+- `track_clicks.ts` listens on `window` in the bubble phase. Never call `stopPropagation()` on or above a tagged control. To stop a clickable parent (row, card) from reacting, mark the inner control with `data-prevent-row-click` and make the parent handler return early when `event.target.closest('[data-prevent-row-click]')`. Also return early when `!event.currentTarget.contains(event.target)`: a click from a portaled menu bubbles through React but is outside the row in the DOM, so `closest()` cannot see its marker. This stops the parent handler only, not the parent's tag. Do not tag a clickable row or card. Tag its primary open control, such as the title button or link, and tag each secondary control separately. If the row body keeps its own click handler, that handler is another open path. Make the tagged control the only way to open the row, or tag the body region that handles the click.
+- Tag a control with `getEbtProps`. Do not rely on `data-test-subj`: a reused DOM node can change it before the listener runs.
+
+## Custom events
+
+Add a custom event type only for these cases, and give the reason in the PR description:
+
+- The fact is not a click: daily state counts, or a server-side change with no UI path (API, workflow).
+- The click does not carry the outcome you need, for example success or failure of the request.
+
+These are not valid reasons: "it is a state change", "it is important". A click on Save, Delete or a switch already records that the user did it. Extend the daily snapshot with new fields before you register a new event type.
+
+## Verify
+
+Run Kibana with `telemetry.localShipper: true`. Click each tagged control with real mouse and keyboard input. Read click events in the `ebt-kibana-browser` index. Check that `properties.target` holds the expected `data-ebt-action=...` entry and no unexpected ancestor tag. Check that each click sends one event.

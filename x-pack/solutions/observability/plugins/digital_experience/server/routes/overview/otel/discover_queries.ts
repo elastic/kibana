@@ -31,7 +31,7 @@ import {
   esqlFilterEvals,
   esqlLogConditions,
   esqlPageLoadConditions,
-} from '../../../lib/otel/overview_filters_esql';
+} from '../../../../common/overview_filters_esql';
 import {
   HTTP_REQUEST_CONDITIONS,
   HTTP_REQUEST_EVALS,

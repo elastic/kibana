@@ -267,6 +267,7 @@ exports[`NetworkTopCountries Table Component rendering it renders the IP Details
                         Bytes in
                       </span>
                       <span
+                        aria-hidden="true"
                         class="euiTableSortIcon euiTableSortIcon--sortable"
                         color="subdued"
                         data-euiicon-type="sortable"
@@ -301,6 +302,7 @@ exports[`NetworkTopCountries Table Component rendering it renders the IP Details
                         Bytes out
                       </span>
                       <span
+                        aria-hidden="true"
                         class="euiTableSortIcon"
                         data-euiicon-type="sortDown"
                       />
@@ -334,6 +336,7 @@ exports[`NetworkTopCountries Table Component rendering it renders the IP Details
                         Flows
                       </span>
                       <span
+                        aria-hidden="true"
                         class="euiTableSortIcon euiTableSortIcon--sortable"
                         color="subdued"
                         data-euiicon-type="sortable"
@@ -368,6 +371,7 @@ exports[`NetworkTopCountries Table Component rendering it renders the IP Details
                         Source IPs
                       </span>
                       <span
+                        aria-hidden="true"
                         class="euiTableSortIcon euiTableSortIcon--sortable"
                         color="subdued"
                         data-euiicon-type="sortable"
@@ -521,6 +525,7 @@ exports[`NetworkTopCountries Table Component rendering it renders the IP Details
                 Rows per page: 10
               </span>
               <span
+                aria-hidden="true"
                 color="inherit"
                 data-euiicon-type="chevronSingleDown"
               />
@@ -956,6 +961,7 @@ exports[`NetworkTopCountries Table Component rendering it renders the default Ne
                         Bytes in
                       </span>
                       <span
+                        aria-hidden="true"
                         class="euiTableSortIcon euiTableSortIcon--sortable"
                         color="subdued"
                         data-euiicon-type="sortable"
@@ -990,6 +996,7 @@ exports[`NetworkTopCountries Table Component rendering it renders the default Ne
                         Bytes out
                       </span>
                       <span
+                        aria-hidden="true"
                         class="euiTableSortIcon"
                         data-euiicon-type="sortDown"
                       />
@@ -1023,6 +1030,7 @@ exports[`NetworkTopCountries Table Component rendering it renders the default Ne
                         Flows
                       </span>
                       <span
+                        aria-hidden="true"
                         class="euiTableSortIcon euiTableSortIcon--sortable"
                         color="subdued"
                         data-euiicon-type="sortable"
@@ -1057,6 +1065,7 @@ exports[`NetworkTopCountries Table Component rendering it renders the default Ne
                         Source IPs
                       </span>
                       <span
+                        aria-hidden="true"
                         class="euiTableSortIcon euiTableSortIcon--sortable"
                         color="subdued"
                         data-euiicon-type="sortable"
@@ -1091,6 +1100,7 @@ exports[`NetworkTopCountries Table Component rendering it renders the default Ne
                         Destination IPs
                       </span>
                       <span
+                        aria-hidden="true"
                         class="euiTableSortIcon euiTableSortIcon--sortable"
                         color="subdued"
                         data-euiicon-type="sortable"
@@ -1262,6 +1272,7 @@ exports[`NetworkTopCountries Table Component rendering it renders the default Ne
                 Rows per page: 10
               </span>
               <span
+                aria-hidden="true"
                 color="inherit"
                 data-euiicon-type="chevronSingleDown"
               />

@@ -60,6 +60,7 @@ export interface UsageStats {
   'agentBuilder:experimentalFeatures': boolean;
   'agentBuilder:bashSupport': boolean;
   'agentBuilder:apiDiscovery': boolean;
+  'agentBuilder:threads': boolean;
   'agentBuilder:includeFrozenByDefault': boolean;
   'agentBuilder:deductiveEnabled': boolean;
   'agentBuilder:deductiveEndpoint': string;

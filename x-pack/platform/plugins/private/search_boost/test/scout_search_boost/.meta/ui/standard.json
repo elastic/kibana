@@ -1,5 +1,5 @@
 {
-  "sha1": "78bc2dca3aff7832995bfe80207d423e5bb29ad8",
+  "sha1": "e5a837f58cfa596d10db1855c27f0920c54c55a6",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -13,7 +13,46 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/search_boost/test/scout_search_boost/ui/tests/boost_details.spec.ts",
-        "line": 22,
+        "line": 26,
+        "column": 23
+      }
+    },
+    {
+      "id": "984a8589f1e743a-3987c401b7ad60b",
+      "title": "Search boost details pages opens an index in Index Management for users who can open it",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-vectordb"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/search_boost/test/scout_search_boost/ui/tests/boost_details.spec.ts",
+        "line": 64,
+        "column": 13
+      }
+    },
+    {
+      "id": "984a8589f1e743a-db6ccfa7307b9b8",
+      "title": "Search boost details pages opens a data stream in a flyout over the rule",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-vectordb"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/search_boost/test/scout_search_boost/ui/tests/boost_details.spec.ts",
+        "line": 71,
+        "column": 5
+      }
+    },
+    {
+      "id": "984a8589f1e743a-538b504488aa169",
+      "title": "Search boost details pages loads again once the data stream is deleted from the flyout",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-vectordb"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/search_boost/test/scout_search_boost/ui/tests/boost_details.spec.ts",
+        "line": 82,
         "column": 23
       }
     },
@@ -26,8 +65,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/search_boost/test/scout_search_boost/ui/tests/boost_details.spec.ts",
-        "line": 52,
-        "column": 55
+        "line": 107,
+        "column": 5
       }
     },
     {

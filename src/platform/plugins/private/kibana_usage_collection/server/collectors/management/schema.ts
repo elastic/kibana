@@ -583,6 +583,10 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
         'Whether the agent can browse the full Elasticsearch and Kibana API surface to discover operations.',
     },
   },
+  'agentBuilder:threads': {
+    type: 'boolean',
+    _meta: { description: 'Whether Agent Builder threads are enabled.' },
+  },
   'agentBuilder:includeFrozenByDefault': {
     type: 'boolean',
     _meta: {

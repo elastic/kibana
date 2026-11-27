@@ -415,7 +415,7 @@ describe('edotBrowser', () => {
 
       expect(rage).toMatchObject({
         _index: LOGS_INDEX,
-        event_name: 'browser.frustration.rage_click',
+        event_name: 'elastic.frustration.rage_click',
         scope: { name: '@elastic/opentelemetry-browser' },
       });
       expect(rage).not.toHaveProperty('severity_number');
@@ -425,14 +425,14 @@ describe('edotBrowser', () => {
         'browser.page.x': 120,
         'browser.page.y': 480,
         'url.full': url,
-        'browser.frustration.click_count': 5,
+        'elastic.frustration.click_count': 5,
       });
       expect(error.attributes).toMatchObject({
         'exception.type': 'TypeError',
         'exception.message': 'x is undefined',
       });
-      expect(error.attributes).not.toHaveProperty(['browser.frustration.click_count']);
-      expect(dead.event_name).toBe('browser.frustration.dead_click');
+      expect(error.attributes).not.toHaveProperty(['elastic.frustration.click_count']);
+      expect(dead.event_name).toBe('elastic.frustration.dead_click');
       expect(dead.attributes).not.toHaveProperty(['browser.css_selector']);
     });
 
@@ -1081,7 +1081,7 @@ describe('edotBrowser', () => {
     it('reports frustration signals only with a source of its own, leaving the rest as it is', () => {
       const frustrationOf = (docs: EdotBrowserDocument[]) =>
         docs.filter(
-          (doc) => 'event_name' in doc && String(doc.event_name).startsWith('browser.frustration.')
+          (doc) => 'event_name' in doc && String(doc.event_name).startsWith('elastic.frustration.')
         );
       const sessions = Array.from({ length: 50 }, (_, seed) => ({
         without: createSession({ seed, health: HEALTH_PROFILES.critical }),
@@ -1098,9 +1098,9 @@ describe('edotBrowser', () => {
       );
 
       expect([...kinds].sort()).toEqual([
-        'browser.frustration.dead_click',
-        'browser.frustration.error_click',
-        'browser.frustration.rage_click',
+        'elastic.frustration.dead_click',
+        'elastic.frustration.error_click',
+        'elastic.frustration.rage_click',
       ]);
       sessions.forEach((session) => {
         expect(frustrationOf(session.without)).toEqual([]);
@@ -1138,7 +1138,7 @@ describe('edotBrowser', () => {
         docs.filter(
           (doc) =>
             'event_name' in doc &&
-            doc.event_name === `browser.frustration.${kind}` &&
+            doc.event_name === `elastic.frustration.${kind}` &&
             (selector === undefined || doc.attributes?.['browser.css_selector'] === selector)
         );
       const clicksOn = (docs: EdotBrowserDocument[], selector: string) =>

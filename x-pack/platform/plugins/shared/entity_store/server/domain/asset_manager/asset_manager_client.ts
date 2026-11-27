@@ -467,6 +467,7 @@ export class AssetManagerClient {
     await Promise.all([
       stopHistorySnapshotTask({
         taskManager: this.taskManager,
+        esClient: this.internalEsClient,
         logger: this.logger,
         namespace: this.namespace,
       }),

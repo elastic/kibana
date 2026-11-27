@@ -152,7 +152,7 @@ describe('ProposalsPlugin', () => {
       expect(agentBuilder.skills.register).toHaveBeenCalledWith(
         expect.objectContaining({
           id: 'proposal-management',
-          availability: expect.objectContaining({ cacheMode: 'none' }),
+          availability: expect.objectContaining({ cacheMode: 'space-user' }),
         })
       );
       const [[skill]] = agentBuilder.skills.register.mock.calls;

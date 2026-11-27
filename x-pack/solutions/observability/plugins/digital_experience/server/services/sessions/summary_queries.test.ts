@@ -24,6 +24,31 @@ import {
 const WINDOW = { changedFrom: '2026-11-10T10:00:00.000Z', changedTo: '2026-11-10T10:01:00.000Z' };
 const REBUILD = { changedTo: WINDOW.changedTo, rebuildFrom: '2026-11-09T10:00:00.000Z' };
 
+describe('browserSessionEvents', () => {
+  const REPLAY_EVENTS = '(event_name IS NULL OR event_name != "elastic.replay.event")';
+
+  it('leaves out the replay events, of which a recording has far more than its session has telemetry', () => {
+    expect(browserSessionEvents('from', 'to')).toContain(REPLAY_EVENTS);
+  });
+
+  it('keeps the spans, which have no event name, and the replay start records', () => {
+    const events = browserSessionEvents('from', 'to');
+
+    // A bare `!=` would drop the events without a name, and a COALESCE couldn't be pushed down.
+    expect(events).toContain('event_name IS NULL OR');
+    expect(events).not.toContain('COALESCE');
+    expect(events).not.toContain('elastic.replay.start');
+  });
+
+  it('is what the changed sessions and the summaries are read from', () => {
+    expect(changedSessionsCountQuery(WINDOW, browserSessionEvents).query).toContain(REPLAY_EVENTS);
+    expect(changedSessionIdsQuery(WINDOW, FULL_HASH_RANGE, browserSessionEvents).query).toContain(
+      REPLAY_EVENTS
+    );
+    expect(sessionSummaryQuery(REBUILD, ['a']).query).toContain(REPLAY_EVENTS);
+  });
+});
+
 describe('changedSessionsCountQuery', () => {
   it('counts the browser sessions with an event in the window', () => {
     const { query, params } = changedSessionsCountQuery(WINDOW, browserSessionEvents);
@@ -141,6 +166,17 @@ describe('sessionSummaryQuery', () => {
     );
   });
 
+  it('counts the replay start records apart, and leaves them out of the counts and times of the session', () => {
+    const { query } = sessionSummaryQuery(REBUILD, ['a']);
+
+    expect(query).toContain('is_replay_start = event == "elastic.replay.start"');
+    expect(query).toContain('start_time = MIN(@timestamp) WHERE NOT is_replay_start');
+    expect(query).toContain('end_time = MAX(@timestamp) WHERE NOT is_replay_start');
+    expect(query).toContain('event_count = COUNT(*) WHERE NOT is_replay_start');
+    expect(query).toContain('replay_start_count = COUNT(*) WHERE is_replay_start');
+    expect(query).toContain('replay_start_count = MAX(replay_start_count)');
+  });
+
   it('takes the load time in a branch of its own, from the page loads that have a load event', () => {
     const { query } = sessionSummaryQuery(REBUILD, ['a']);
     const loadTimeBranch = query.indexOf('(WHERE event_name == "browser.navigation_timing"');
@@ -163,17 +199,17 @@ describe('sessionSummaryQuery', () => {
     const { query } = sessionSummaryQuery(REBUILD, ['a']);
 
     expect(query).toContain(
-      'rage_click_count = COUNT(*) WHERE event == "browser.frustration.rage_click"'
+      'rage_click_count = COUNT(*) WHERE event == "elastic.frustration.rage_click"'
     );
     expect(query).toContain(
-      'dead_click_count = COUNT(*) WHERE event == "browser.frustration.dead_click"'
+      'dead_click_count = COUNT(*) WHERE event == "elastic.frustration.dead_click"'
     );
     expect(query).toContain(
-      'error_click_count = COUNT(*) WHERE event == "browser.frustration.error_click"'
+      'error_click_count = COUNT(*) WHERE event == "elastic.frustration.error_click"'
     );
     expect(query).toContain('frustration_count = COUNT(*) WHERE is_frustration');
     expect(query).toContain(
-      'is_frustration = event IN ("browser.frustration.rage_click", "browser.frustration.dead_click", "browser.frustration.error_click")'
+      'is_frustration = event IN ("elastic.frustration.rage_click", "elastic.frustration.dead_click", "elastic.frustration.error_click")'
     );
     expect(query).toContain('frustration_count = MAX(frustration_count)');
   });

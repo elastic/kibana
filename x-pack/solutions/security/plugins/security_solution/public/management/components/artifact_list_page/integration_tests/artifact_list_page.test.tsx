@@ -1015,6 +1015,38 @@ describe('When using the ArtifactListPage component', () => {
         });
       });
 
+      it('should keep an open card actions menu open and re-mount the card dates when Refresh is clicked', async () => {
+        const firstCard = await getFirstCard({ showActions: true });
+        const getCardDates = () => [
+          renderResult.getAllByTestId('testPage-card-header-updated')[0],
+          renderResult.getAllByTestId('testPage-card-header-created')[0],
+        ];
+        const [updatedDateBefore, createdDateBefore] = getCardDates();
+        const currentApiCount = mockedApi.responseProvider.trustedAppsList.mock.calls.length;
+
+        clickSearchButton();
+
+        await waitFor(() => {
+          expect(mockedApi.responseProvider.trustedAppsList).toHaveBeenCalledTimes(
+            currentApiCount + 1
+          );
+        });
+
+        // Dates are re-mounted so their relative labels are recomputed (#246345)
+        await waitFor(() => {
+          const [updatedDateAfter, createdDateAfter] = getCardDates();
+          expect(updatedDateAfter).not.toBe(updatedDateBefore);
+          expect(createdDateAfter).not.toBe(createdDateBefore);
+        });
+
+        // ...but the card itself is not, so its open actions menu survives the refresh (#304221)
+        expect(renderResult.getAllByTestId('testPage-card')[0]).toBe(firstCard);
+        expect(
+          renderResult.getByTestId('testPage-card-header-actions-contextMenuPanel')
+        ).toBeInTheDocument();
+        expect(renderResult.getByTestId('testPage-card-cardEditAction')).toBeInTheDocument();
+      });
+
       it('should show a no results found message if filter did not return` any results', async () => {
         let apiNoResultsDone = false;
         mockedApi.responseProvider.trustedAppsList.mockImplementationOnce(() => {

@@ -22,8 +22,8 @@ export const APPLICATION_TYPES = ['web', 'mobile'] as const;
 export type ApplicationType = (typeof APPLICATION_TYPES)[number];
 
 /**
- * The tabs of an application's page, in display order. The Overview is the page at the
- * application's own path; the others are below it, named after the tab.
+ * Every tab an application's page can have. The Overview is the page at the application's own
+ * path; the others are below it, named after the tab.
  */
 export const APPLICATION_TAB_IDS = [
   'overview',
@@ -31,9 +31,29 @@ export const APPLICATION_TAB_IDS = [
   'errors',
   'network',
   'reports',
+  'crashes',
 ] as const;
 
 export type ApplicationTabId = (typeof APPLICATION_TAB_IDS)[number];
+
+/** The tabs of an EDOT Browser application's page, in display order. */
+export const WEB_APPLICATION_TAB_IDS = [
+  'overview',
+  'sessions',
+  'errors',
+  'network',
+  'reports',
+] as const satisfies readonly ApplicationTabId[];
+
+export type WebApplicationTabId = (typeof WEB_APPLICATION_TAB_IDS)[number];
+
+/** The tabs of a mobile application's page, in display order. */
+export const MOBILE_APPLICATION_TAB_IDS = [
+  'overview',
+  'crashes',
+] as const satisfies readonly ApplicationTabId[];
+
+export type MobileApplicationTabId = (typeof MOBILE_APPLICATION_TAB_IDS)[number];
 
 /** Share of samples per rating, each between 0 and 1; the three add up to 1. */
 export interface VitalRatings {

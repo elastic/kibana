@@ -443,6 +443,7 @@ export interface ConnectorServices {
   isWebhookSslWithPfxEnabled?: ActionsPublicPluginSetup['isWebhookSslWithPfxEnabled'];
   /** Cluster switch from the actions setup contract. Embedded hosts often have no actions start contract. */
   isInboundEventsEnabled?: ActionsPublicPluginSetup['isInboundEventsEnabled'];
+  isCatalogEnabled?: ActionsPublicPluginSetup['isCatalogEnabled'];
 }
 
 export interface RulesListFilters {
