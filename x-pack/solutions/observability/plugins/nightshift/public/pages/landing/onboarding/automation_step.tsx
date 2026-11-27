@@ -11,24 +11,18 @@ import {
   EuiBadge,
   EuiBanner,
   EuiButton,
-  EuiButtonEmpty,
   EuiCallOut,
+  EuiConfirmModal,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
   EuiIllustration,
   EuiLoadingSpinner,
-  EuiModal,
-  EuiModalBody,
-  EuiModalFooter,
-  EuiModalHeader,
-  EuiModalHeaderTitle,
   EuiSpacer,
   EuiText,
   EuiTitle,
   EuiToolTip,
   useEuiTheme,
-  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { connectedPowerPlug } from '@elastic/eui-illustrations';
 import { getEbtProps } from '@kbn/ebt-click';
@@ -582,7 +576,6 @@ function EditAutomationFlyout({
   const cloneAutomation = useCreateAutomation(true);
   const runAutomation = useRunAutomation();
   const [automationToDelete, setAutomationToDelete] = useState<Automation>();
-  const deleteBodyId = useGeneratedHtmlId({ prefix: 'nightshiftOnboardingDeleteAutomationBody' });
   const [refreshedAt, setRefreshedAt] = useState(() => Date.now());
   const { runRange, usedToday } = useAutomationUsage(
     automations,
@@ -624,55 +617,36 @@ function EditAutomationFlyout({
         onDelete={setAutomationToDelete}
       />
       {automationToDelete && (
-        <EuiModal
-          onClose={() => setAutomationToDelete(undefined)}
+        <EuiConfirmModal
+          title={getDeleteConfirmTitle(automationToDelete.name)}
+          onCancel={() => setAutomationToDelete(undefined)}
+          onConfirm={() => {
+            deleteAutomation.mutate(
+              { id: automationToDelete.id, name: automationToDelete.name },
+              {
+                onSuccess: () => {
+                  setAutomationToDelete(undefined);
+                  onClose();
+                },
+              }
+            );
+          }}
+          cancelButtonText={listLabels.cancel}
+          confirmButtonText={listLabels.delete}
+          cancelButtonProps={getEbtProps({
+            action: NIGHTSHIFT_EBT_ACTIONS.CANCEL_AUTOMATION_DELETE,
+            element: NIGHTSHIFT_EBT_ELEMENTS.ONBOARDING_DELETE_AUTOMATION_MODAL,
+          })}
+          confirmButtonProps={getEbtProps({
+            action: NIGHTSHIFT_EBT_ACTIONS.CONFIRM_AUTOMATION_DELETE,
+            element: NIGHTSHIFT_EBT_ELEMENTS.ONBOARDING_DELETE_AUTOMATION_MODAL,
+          })}
+          buttonColor="danger"
+          isLoading={deleteAutomation.isLoading}
           aria-label={getDeleteConfirmTitle(automationToDelete.name)}
-          aria-describedby={deleteBodyId}
         >
-          <EuiModalHeader>
-            <EuiModalHeaderTitle>
-              {getDeleteConfirmTitle(automationToDelete.name)}
-            </EuiModalHeaderTitle>
-          </EuiModalHeader>
-          <EuiModalBody>
-            <p id={deleteBodyId}>{listLabels.deleteBody}</p>
-          </EuiModalBody>
-          <EuiModalFooter>
-            <EuiButtonEmpty
-              onClick={() => setAutomationToDelete(undefined)}
-              data-test-subj="nightshiftOnboardingDeleteAutomationCancel"
-              {...getEbtProps({
-                action: NIGHTSHIFT_EBT_ACTIONS.CANCEL_AUTOMATION_DELETE,
-                element: NIGHTSHIFT_EBT_ELEMENTS.ONBOARDING_DELETE_AUTOMATION_MODAL,
-              })}
-            >
-              {listLabels.cancel}
-            </EuiButtonEmpty>
-            <EuiButton
-              fill
-              color="danger"
-              isLoading={deleteAutomation.isLoading}
-              onClick={() => {
-                deleteAutomation.mutate(
-                  { id: automationToDelete.id, name: automationToDelete.name },
-                  {
-                    onSuccess: () => {
-                      setAutomationToDelete(undefined);
-                      onClose();
-                    },
-                  }
-                );
-              }}
-              data-test-subj="nightshiftOnboardingDeleteAutomationConfirm"
-              {...getEbtProps({
-                action: NIGHTSHIFT_EBT_ACTIONS.CONFIRM_AUTOMATION_DELETE,
-                element: NIGHTSHIFT_EBT_ELEMENTS.ONBOARDING_DELETE_AUTOMATION_MODAL,
-              })}
-            >
-              {listLabels.delete}
-            </EuiButton>
-          </EuiModalFooter>
-        </EuiModal>
+          <p>{listLabels.deleteBody}</p>
+        </EuiConfirmModal>
       )}
     </>
   );

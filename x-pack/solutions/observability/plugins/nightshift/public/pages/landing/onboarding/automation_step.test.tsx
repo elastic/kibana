@@ -204,7 +204,7 @@ describe('OnboardingAutomationStep', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Delete' }));
     expect(screen.getByText('Delete "adasd"?')).toBeInTheDocument();
 
-    fireEvent.click(screen.getByTestId('nightshiftOnboardingDeleteAutomationConfirm'));
+    fireEvent.click(screen.getByTestId('confirmModalConfirmButton'));
 
     expect(mutate).toHaveBeenCalledWith(
       { id: 'automation-1', name: 'adasd' },
