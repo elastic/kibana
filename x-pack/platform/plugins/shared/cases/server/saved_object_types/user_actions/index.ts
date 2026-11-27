@@ -9,7 +9,7 @@ import type { SavedObjectsType } from '@kbn/core/server';
 import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import { CASE_USER_ACTION_SAVED_OBJECT } from '../../../common/constants';
 import { createUserActionsMigrations } from '../migrations/user_actions';
-import { modelVersion1, modelVersion2, modelVersion3 } from './model_versions';
+import { modelVersion1, modelVersion2, modelVersion3, modelVersion4 } from './model_versions';
 
 /**
  * The comments in the mapping indicate the additional properties that are stored in Elasticsearch but are not indexed.
@@ -66,6 +66,8 @@ export const createCaseUserActionSavedObjectType = (): SavedObjectsType => ({
               externalReferenceAttachmentTypeId: { type: 'keyword' },
               // comment.persistableStateAttachmentTypeId
               persistableStateAttachmentTypeId: { type: 'keyword' },
+              // comment.parent_id
+              parent_id: { type: 'keyword', ignore_above: 1024 },
             },
           },
           assignees: {
@@ -115,6 +117,7 @@ export const createCaseUserActionSavedObjectType = (): SavedObjectsType => ({
     1: modelVersion1,
     2: modelVersion2,
     3: modelVersion3,
+    4: modelVersion4,
   },
   management: {
     importableAndExportable: true,

@@ -19,9 +19,16 @@ import {
 } from '../../../../common/constants/mime_types';
 import type { AttachmentUIV2, CaseUI } from '../../../../common/ui/types';
 import { resolveUnifiedAttachmentType } from '../../../../common/utils/attachments/migration_utils';
+import type { ReferenceData } from '../../../client/attachment_framework/types';
 import * as i18n from './translations';
 
 export const isImage = (file: { mimeType?: string }) => file.mimeType?.startsWith('image/');
+
+/** Returns the message text sent with a file, or null when there is none. */
+export const getFileMessageContent = (data: ReferenceData): string | null => {
+  const content = data?.content;
+  return typeof content === 'string' && content.trim().length > 0 ? content : null;
+};
 
 export const getFileDisplayName = (file: { name: string; extension?: string }) =>
   file.extension !== undefined ? `${file.name}.${file.extension}` : file.name;

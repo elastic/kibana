@@ -7,6 +7,7 @@
 
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import { isEmpty } from 'lodash';
+import type { User } from '../../../common/types/domain';
 import type { CaseUser } from '../../containers/types';
 import type { CaseUserWithProfileInfo, UserInfoWithAvatar } from './types';
 
@@ -43,6 +44,13 @@ const createWithUsername = (username: string, user: CaseUser) => {
     },
   };
 };
+
+export const convertToCaseUser = (user: User): CaseUser => ({
+  username: user.username,
+  fullName: user.full_name,
+  email: user.email,
+  profileUid: user.profile_uid,
+});
 
 export const convertToCaseUserWithProfileInfo = (user: CaseUser): CaseUserWithProfileInfo => ({
   uid: user.profileUid,

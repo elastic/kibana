@@ -33,11 +33,14 @@ export class CommentUserActionBuilder extends UserActionBuilder {
         data: legacyPayload,
       });
 
+    // The legacy projection drops unknown keys, so the reply's parent is added back.
+    const { parent_id: parentId } = args.payload.attachment;
+
     const commentUserAction = this.buildCommonUserAction({
       ...args,
       action,
       valueKey: 'comment',
-      value: legacyValue,
+      value: parentId != null ? { ...legacyValue, parent_id: parentId } : legacyValue,
       type: UserActionTypes.comment,
     });
     // No-op for hybrid types; only unified-only attachments need this.

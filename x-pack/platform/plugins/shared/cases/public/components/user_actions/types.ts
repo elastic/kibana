@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { ReactNode } from 'react';
 import type { EuiCommentProps, EuiThemeComputed } from '@elastic/eui';
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import type { CasesPermissions } from '../../../common/ui/types';
@@ -67,8 +68,13 @@ export interface UserActionBuilderArgs {
   euiTheme: EuiThemeComputed<{}>;
 }
 
+export type UserActionComment = EuiCommentProps & {
+  /** Rendered in the header before the activity controls; not passed to EUI. */
+  actionsPrefix?: ReactNode;
+};
+
 export type UserActionBuilder = (args: UserActionBuilderArgs) => {
-  build: () => EuiCommentProps[];
+  build: () => UserActionComment[];
 };
 
 export type UserActionBuilderMap = Record<SupportedUserActionTypes, UserActionBuilder>;

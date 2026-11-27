@@ -6,6 +6,7 @@
  */
 
 import type {
+  AttachmentHistoryResponse,
   CaseUserActionsDeprecatedResponse,
   CaseUserActionStatsResponse,
   GetCaseConnectorsResponse,
@@ -17,8 +18,15 @@ import { get } from './get';
 import { getConnectors } from './connectors';
 import { getStats } from './stats';
 import { getUsers } from './users';
-import type { GetConnectorsRequest, UserActionFind, UserActionGet, GetUsersRequest } from './types';
+import type {
+  AttachmentHistoryRequest,
+  GetConnectorsRequest,
+  UserActionFind,
+  UserActionGet,
+  GetUsersRequest,
+} from './types';
 import { find } from './find';
+import { getAttachmentHistory } from './attachment_history';
 import type { CasesClient } from '../client';
 /**
  * API for interacting the actions performed by a user when interacting with the cases entities.
@@ -41,6 +49,10 @@ export interface UserActionsSubClient {
    * Retrieves all users participating in a case
    */
   getUsers(params: GetUsersRequest): Promise<GetCaseUsersResponse>;
+  /**
+   * Retrieves the create and edit user actions of a single attachment
+   */
+  getAttachmentHistory(params: AttachmentHistoryRequest): Promise<AttachmentHistoryResponse>;
 }
 
 /**
@@ -56,6 +68,7 @@ export const createUserActionsSubClient = (
     getConnectors: (params) => getConnectors(params, clientArgs),
     stats: (params) => getStats(params, casesClient, clientArgs),
     getUsers: (params) => getUsers(params, casesClient, clientArgs),
+    getAttachmentHistory: (params) => getAttachmentHistory(params, casesClient, clientArgs),
   };
 
   return Object.freeze(attachmentSubClient);

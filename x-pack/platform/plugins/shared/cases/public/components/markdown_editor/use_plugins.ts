@@ -14,6 +14,7 @@ import { useMemo } from 'react';
 import { useTimelineContext } from '../timeline_context/use_timeline_context';
 import { KibanaServices, useApplicationCapabilities } from '../../common/lib/kibana';
 import * as lensMarkdownPlugin from './plugins/lens';
+import * as mentionMarkdownPlugin from './plugins/mention';
 import { ID as LensPluginId } from './plugins/lens/constants';
 
 export const usePlugins = (
@@ -52,6 +53,9 @@ export const usePlugins = (
     parsingPlugins.push(lensMarkdownPlugin.parser);
     // This line of code is TS-compatible and it will break if [1][1] change in the future.
     processingPlugins[1][1].components.lens = lensMarkdownPlugin.renderer;
+
+    parsingPlugins.push(mentionMarkdownPlugin.parser);
+    processingPlugins[1][1].components[mentionMarkdownPlugin.ID] = mentionMarkdownPlugin.renderer;
 
     return {
       uiPlugins,

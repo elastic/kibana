@@ -203,6 +203,26 @@ describe('getFileType', () => {
       );
     });
 
+    it('renders the message body when the file was sent with text', () => {
+      const { children: messageBody } = fileType.getCreationActivity({
+        ...attachmentViewProps,
+        data: { content: 'see attached' },
+      });
+      const { children: thumbnailBody } = fileType.getCreationActivity(attachmentViewProps);
+
+      expect(messageBody).toBeDefined();
+      expect(messageBody).not.toBe(thumbnailBody);
+    });
+
+    it('has no body for a non-image file sent without text', () => {
+      const creationActivity = fileType.getCreationActivity({
+        ...attachmentViewProps,
+        metadata: { files: [{ ...validFileEntry, mimeType: 'text/csv' }], soType: FILE_SO_TYPE },
+      });
+
+      expect(creationActivity).not.toHaveProperty('children', expect.anything());
+    });
+
     it('getIcon is document if file is not an image', () => {
       expect(
         fileType.getIcon({

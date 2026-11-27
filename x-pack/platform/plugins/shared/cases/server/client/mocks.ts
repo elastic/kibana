@@ -132,6 +132,10 @@ const createAttachmentsSubClientMock = (): AttachmentsSubClientMock => {
     addAndGetCase: jest.fn(),
     addFile: jest.fn(),
     addFileAndGetCase: jest.fn(),
+    addReply: jest.fn(),
+    getReplies: jest.fn(),
+    getReplyCounts: jest.fn(),
+    findInbox: jest.fn(),
     bulkCreate: jest.fn(),
     bulkCreateAndGetCase: jest.fn(),
     delete: jest.fn(),
@@ -156,6 +160,7 @@ const createUserActionsSubClientMock = (): UserActionsSubClientMock => {
     getConnectors: jest.fn(),
     stats: jest.fn(),
     getUsers: jest.fn(),
+    getAttachmentHistory: jest.fn(),
   });
 };
 

@@ -66,6 +66,10 @@ export interface UserSettingsData {
    * `agentBuilderAnnouncementModalSeen`; read for backward compatibility.
    */
   agentBuilderAnnouncementModalSeenBySpaceJson?: string;
+  /**
+   * ISO date of the newest Cases inbox item the user marked as read; newer items are unread.
+   */
+  casesInboxLastReadAt?: string;
 }
 
 // Register the known Kibana user settings fields with the core user-profile common package.

@@ -37,6 +37,9 @@ type MarkdownEditorFormProps = EuiMarkdownEditorProps & {
   draftStorageKey?: string;
   disabledUiPlugins?: string[];
   initialValue?: string;
+  disablePasteUpload?: boolean;
+  /** Rendered between the editor and `bottomRightContent`. */
+  belowEditorContent?: React.ReactNode;
 };
 
 export const MarkdownEditorForm = React.memo(
@@ -54,6 +57,8 @@ export const MarkdownEditorForm = React.memo(
         draftStorageKey,
         disabledUiPlugins,
         initialValue,
+        disablePasteUpload,
+        belowEditorContent,
       },
       ref
     ) => {
@@ -96,6 +101,7 @@ export const MarkdownEditorForm = React.memo(
               data-test-subj={`${dataTestSubj}-markdown-editor`}
               editorId={id}
               disabledUiPlugins={disabledUiPlugins}
+              disablePasteUpload={disablePasteUpload}
               field={field}
               caseId={caseId}
               ref={ref}
@@ -103,6 +109,12 @@ export const MarkdownEditorForm = React.memo(
               value={field.value}
             />
           </EuiFormRow>
+          {belowEditorContent && (
+            <>
+              <EuiSpacer size="s" />
+              {belowEditorContent}
+            </>
+          )}
           {bottomRightContent && (
             <EuiFlexGroup
               css={css`

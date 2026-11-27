@@ -125,6 +125,8 @@ const createUserActionFinderServiceMock = (): CaseUserActionFinderServiceMock =>
     find: jest.fn(),
     findAll: jest.fn(),
     findStatusChanges: jest.fn(),
+    findAttachmentHistory: jest.fn(),
+    findAssignments: jest.fn(),
     decodeUserActions: jest.fn((userActions) => userActions),
   };
 

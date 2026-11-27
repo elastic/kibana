@@ -21,6 +21,7 @@ import * as i18n from './translations';
 import {
   getFileDisplayName,
   getFileFromReferenceMetadata,
+  getFileMessageContent,
   isImage,
   isValidFileMetadata,
 } from './utils';
@@ -38,6 +39,9 @@ const FileDownloadButton = lazy(() =>
 );
 const FileThumbnail = lazy(() =>
   import('./file_thumbnail').then((module) => ({ default: module.FileThumbnail }))
+);
+const FileMessage = lazy(() =>
+  import('./file_message').then((module) => ({ default: module.FileMessage }))
 );
 const CaseViewFiles = lazy(() =>
   import('./case_view_files').then((module) => ({ default: module.CaseViewFiles }))
@@ -131,7 +135,11 @@ const getFileCreationActivity = (props: FileViewProps) => {
     ),
     getActions: () => getFileAttachmentActions({ caseId, fileId, canDelete }),
     hideDefaultActions: true,
-    children: isImage(file) ? FileThumbnail : undefined,
+    children: getFileMessageContent(props.data)
+      ? FileMessage
+      : isImage(file)
+      ? FileThumbnail
+      : undefined,
   };
 };
 

@@ -18,6 +18,7 @@ import {
 } from '../test_utils';
 import { createSOFindResponse, mockPointInTimeFinder } from '../../test_utils';
 import { omit } from 'lodash';
+import { toKqlExpression } from '@kbn/es-query';
 import type { SavedObjectsFindResponse } from '@kbn/core/server';
 
 describe('UserActionsService: Finder', () => {
@@ -433,6 +434,56 @@ describe('UserActionsService: Finder', () => {
           }),
         })
       );
+    });
+  });
+
+  describe('buildHideCommentEditsFilter', () => {
+    it('excludes legacy and unified user-comment updates', () => {
+      expect(toKqlExpression(UserActionFinder.buildHideCommentEditsFilter())).toBe(
+        'NOT (cases-user-actions.attributes.type: comment AND cases-user-actions.attributes.action: update AND (cases-user-actions.attributes.payload.comment.type: user OR cases-user-actions.attributes.payload.comment.type: comment))'
+      );
+    });
+  });
+
+  describe('findAttachmentHistory', () => {
+    it('queries both attachment saved object types for the attachment id', async () => {
+      mockFinder(createSOFindResponse([]));
+
+      await finder.findAttachmentHistory({ caseId: '1', attachmentId: 'comment-1' });
+
+      expect(unsecuredSavedObjectsClient.createPointInTimeFinder).toHaveBeenCalledWith(
+        expect.objectContaining({
+          hasReference: [
+            { type: 'cases-comments', id: 'comment-1' },
+            { type: 'cases-attachments', id: 'comment-1' },
+          ],
+          hasReferenceOperator: 'OR',
+          sortOrder: 'asc',
+        })
+      );
+    });
+
+    it('drops user actions that belong to another case', async () => {
+      const inCase = createUserActionSO({
+        type: 'comment',
+        action: 'update',
+        commentId: 'comment-1',
+        payload: { comment: { type: 'user', comment: 'edited', owner: 'securitySolution' } },
+      });
+      const otherCase = {
+        ...inCase,
+        id: '200',
+        references: inCase.references.map((reference) =>
+          reference.type === 'cases' ? { ...reference, id: 'other-case' } : reference
+        ),
+      };
+      mockFinder(
+        createSOFindResponse([createUserActionFindSO(inCase), createUserActionFindSO(otherCase)])
+      );
+
+      const res = await finder.findAttachmentHistory({ caseId: '1', attachmentId: 'comment-1' });
+
+      expect(res.map(({ id }) => id)).toEqual(['100']);
     });
   });
 
