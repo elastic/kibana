@@ -8,7 +8,7 @@
 import React, { memo, useCallback, useMemo, useState } from 'react';
 import {
   EuiBadge,
-  EuiButtonEmpty,
+  EuiButtonIcon,
   EuiCode,
   EuiFlexGroup,
   EuiFlexItem,
@@ -24,7 +24,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { KbnDangerCallout, KbnWarningCallout } from '@kbn/ui-callout';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { buildDataTableRecord } from '@kbn/discover-utils';
@@ -37,49 +37,41 @@ import type {
   ActivityStep,
   AgentRun,
   LaunchMode,
+  ModelUsage,
   ProcessStep,
+  SideEffects,
+  ToolCallStep,
 } from '../../../../../entity_analytics/components/ai_security/activity/types';
 import type {
   AgentIdentity,
   AgentRow,
 } from '../../../../../entity_analytics/components/ai_security/types';
 import { getToolShellCommand } from '../../../../../entity_analytics/components/ai_security/utils';
+import { buildActivityRows, getRootCommandLabel, type ActivityRow } from './activity_rows';
 import { AI_AGENT_TEST_IDS } from '../test_ids';
 
 const LAUNCH_MODE_LABELS: Readonly<Record<LaunchMode, string>> = {
   interactive: i18n.translate(
     'xpack.securitySolution.flyout.entityDetails.aiAgent.activity.launch.interactive',
-    {
-      defaultMessage: 'Interactive',
-    }
+    { defaultMessage: 'Interactive' }
   ),
   scripted: i18n.translate(
     'xpack.securitySolution.flyout.entityDetails.aiAgent.activity.launch.scripted',
-    {
-      defaultMessage: 'Scripted',
-    }
+    { defaultMessage: 'Scripted' }
   ),
   scheduled: i18n.translate(
     'xpack.securitySolution.flyout.entityDetails.aiAgent.activity.launch.scheduled',
-    {
-      defaultMessage: 'Scheduled',
-    }
+    { defaultMessage: 'Scheduled' }
   ),
   unknown: i18n.translate(
     'xpack.securitySolution.flyout.entityDetails.aiAgent.activity.launch.unknown',
-    {
-      defaultMessage: 'Launch mode unknown',
-    }
+    { defaultMessage: 'Launch mode unknown' }
   ),
 };
 
 const SESSION_VIEW_LINK = i18n.translate(
   'xpack.securitySolution.flyout.entityDetails.aiAgent.activity.openProcessTree',
   { defaultMessage: 'Open in Session View' }
-);
-const SESSION_VIEW_UNAVAILABLE = i18n.translate(
-  'xpack.securitySolution.flyout.entityDetails.aiAgent.activity.processTreeUnavailable',
-  { defaultMessage: 'No terminal session data on this event, so Session View is not available.' }
 );
 const UNNAMED_PROCESS = i18n.translate(
   'xpack.securitySolution.flyout.entityDetails.aiAgent.activity.unnamedProcess',
@@ -89,21 +81,138 @@ const PROMPT_TEXT_NOT_LOGGED = i18n.translate(
   'xpack.securitySolution.flyout.entityDetails.aiAgent.activity.promptNotLogged',
   { defaultMessage: 'Prompt submitted, text not logged' }
 );
+const OTEL_BY_ACCOUNT = i18n.translate(
+  'xpack.securitySolution.flyout.entityDetails.aiAgent.activity.otelByAccountTip',
+  {
+    defaultMessage:
+      'Matched to this install by account and time. Steps from another install on the same account can show here.',
+  }
+);
 
 /** Shortens a session ID for display; the full value is in the tooltip. */
 const shortId = (id: string): string => (id.length > 12 ? `${id.slice(0, 8)}…` : id);
 
+const MAX_LABEL_LENGTH = 300;
+
+const getLaunchLabel = ({ launchMode, root }: AgentRun): string =>
+  root.entryLeaderName
+    ? i18n.translate(
+        'xpack.securitySolution.flyout.entityDetails.aiAgent.activity.launchWithLeader',
+        {
+          defaultMessage: '{mode} ({leader})',
+          values: { mode: LAUNCH_MODE_LABELS[launchMode], leader: root.entryLeaderName },
+        }
+      )
+    : LAUNCH_MODE_LABELS[launchMode];
+
+const getModelUsageLabel = ({ models, requests, inputTokens, outputTokens }: ModelUsage): string =>
+  [
+    models.join(', '),
+    i18n.translate('xpack.securitySolution.flyout.entityDetails.aiAgent.activity.modelRequests', {
+      defaultMessage: '{requests, plural, one {# request} other {# requests}}',
+      values: { requests },
+    }),
+    i18n.translate('xpack.securitySolution.flyout.entityDetails.aiAgent.activity.modelTokens', {
+      defaultMessage: '{tokens, plural, one {# token} other {# tokens}}',
+      values: { tokens: inputTokens + outputTokens },
+    }),
+  ]
+    .filter(Boolean)
+    .join(' · ');
+
+type OpenProcessTree = (step: ProcessStep) => void;
+
+const CommandLabel = ({ label, fullText }: { label?: string; fullText?: string }) => {
+  if (!label) {
+    return (
+      <EuiText size="xs" color="subdued">
+        {UNNAMED_PROCESS}
+      </EuiText>
+    );
+  }
+  const code = (
+    <EuiCode
+      transparentBackground
+      tabIndex={fullText ? 0 : undefined}
+      css={css`
+        word-break: break-all;
+      `}
+    >
+      {label.length > MAX_LABEL_LENGTH ? `${label.slice(0, MAX_LABEL_LENGTH)}…` : label}
+    </EuiCode>
+  );
+  return fullText ? <EuiToolTip content={fullText}>{code}</EuiToolTip> : code;
+};
+
+const StepBadges = ({
+  isToolShell,
+  ranAsOtherUser,
+  sideEffects,
+}: {
+  isToolShell: boolean;
+  ranAsOtherUser?: string;
+  sideEffects?: SideEffects;
+}) => {
+  const hasSideEffects =
+    !!sideEffects && (sideEffects.fileEvents > 0 || sideEffects.networkEvents > 0);
+  if (!isToolShell && !ranAsOtherUser && !hasSideEffects) return null;
+  return (
+    <EuiFlexGroup gutterSize="xs" wrap responsive={false} alignItems="center">
+      {isToolShell && (
+        <EuiFlexItem grow={false}>
+          <EuiBadge color="hollow">
+            <FormattedMessage
+              id="xpack.securitySolution.flyout.entityDetails.aiAgent.activity.toolShell"
+              defaultMessage="Tool shell"
+            />
+          </EuiBadge>
+        </EuiFlexItem>
+      )}
+      {ranAsOtherUser && (
+        <EuiFlexItem grow={false}>
+          <EuiBadge color={ranAsOtherUser === 'root' ? 'danger' : 'warning'}>
+            <FormattedMessage
+              id="xpack.securitySolution.flyout.entityDetails.aiAgent.activity.ranAs"
+              defaultMessage="Ran as {user}"
+              values={{ user: ranAsOtherUser }}
+            />
+          </EuiBadge>
+        </EuiFlexItem>
+      )}
+      {sideEffects && hasSideEffects && (
+        <EuiFlexItem grow={false}>
+          <EuiToolTip content={[...sideEffects.files, ...sideEffects.destinations].join('\n')}>
+            <EuiText size="xs" color="subdued" tabIndex={0}>
+              <FormattedMessage
+                id="xpack.securitySolution.flyout.entityDetails.aiAgent.activity.sideEffects"
+                defaultMessage="{files, plural, one {# file event} other {# file events}}, {connections, plural, one {# connection} other {# connections}}"
+                values={{
+                  files: sideEffects.fileEvents,
+                  connections: sideEffects.networkEvents,
+                }}
+              />
+            </EuiText>
+          </EuiToolTip>
+        </EuiFlexItem>
+      )}
+    </EuiFlexGroup>
+  );
+};
+
 const ProcessStepRow = memo(
   ({
     step,
+    label: labelOverride,
     onOpenProcessTree,
   }: {
     step: ProcessStep;
-    onOpenProcessTree: (step: ProcessStep) => void;
+    /** Shown instead of the command line, which then moves to a tooltip. */
+    label?: string;
+    onOpenProcessTree: OpenProcessTree;
   }) => {
-    const { process, sideEffects, ranAsOtherUser, isAgentProcess } = step;
+    const { process, sideEffects, ranAsOtherUser } = step;
     const toolCommand = getToolShellCommand(process.commandLine);
-    const label = toolCommand ?? process.commandLine ?? process.name;
+    const label = labelOverride ?? toolCommand ?? process.commandLine ?? process.name;
     const canOpenTree = !!process.documentId && !!process.index && !!process.entryLeaderEntityId;
     return (
       <EuiFlexGroup gutterSize="s" alignItems="flexStart" responsive={false}>
@@ -115,197 +224,168 @@ const ProcessStepRow = memo(
             min-width: 0;
           `}
         >
-          {label ? (
-            <EuiCode
-              transparentBackground
-              title={toolCommand ? process.commandLine : undefined}
-              css={css`
-                word-break: break-all;
-              `}
-            >
-              {label.length > 300 ? `${label.slice(0, 300)}…` : label}
-            </EuiCode>
-          ) : (
-            <EuiText size="xs" color="subdued">
-              {UNNAMED_PROCESS}
-            </EuiText>
-          )}
-          <EuiFlexGroup gutterSize="xs" wrap responsive={false} alignItems="center">
-            {toolCommand !== undefined && (
-              <EuiFlexItem grow={false}>
-                <EuiBadge color="hollow">
-                  <FormattedMessage
-                    id="xpack.securitySolution.flyout.entityDetails.aiAgent.activity.toolShell"
-                    defaultMessage="Tool shell"
-                  />
-                </EuiBadge>
-              </EuiFlexItem>
-            )}
-            {isAgentProcess && (
-              <EuiFlexItem grow={false}>
-                <EuiBadge color="hollow">
-                  <FormattedMessage
-                    id="xpack.securitySolution.flyout.entityDetails.aiAgent.activity.agentProcess"
-                    defaultMessage="Agent process"
-                  />
-                </EuiBadge>
-              </EuiFlexItem>
-            )}
-            {ranAsOtherUser && (
-              <EuiFlexItem grow={false}>
-                <EuiBadge color={ranAsOtherUser === 'root' ? 'danger' : 'warning'}>
-                  <FormattedMessage
-                    id="xpack.securitySolution.flyout.entityDetails.aiAgent.activity.ranAs"
-                    defaultMessage="Ran as {user}"
-                    values={{ user: ranAsOtherUser }}
-                  />
-                </EuiBadge>
-              </EuiFlexItem>
-            )}
-            {sideEffects && (sideEffects.fileEvents > 0 || sideEffects.networkEvents > 0) && (
-              <EuiFlexItem grow={false}>
-                <EuiToolTip
-                  content={[...sideEffects.files, ...sideEffects.destinations].join('\n')}
-                >
-                  <EuiText size="xs" color="subdued" tabIndex={0}>
-                    <FormattedMessage
-                      id="xpack.securitySolution.flyout.entityDetails.aiAgent.activity.sideEffects"
-                      defaultMessage="{files, plural, one {# file event} other {# file events}}, {connections, plural, one {# connection} other {# connections}}"
-                      values={{
-                        files: sideEffects.fileEvents,
-                        connections: sideEffects.networkEvents,
-                      }}
-                    />
-                  </EuiText>
-                </EuiToolTip>
-              </EuiFlexItem>
-            )}
-            <EuiFlexItem grow={false}>
-              {canOpenTree ? (
-                <EuiButtonEmpty
-                  size="xs"
-                  flush="left"
-                  iconType="commandLine"
-                  onClick={() => onOpenProcessTree(step)}
-                  data-test-subj={AI_AGENT_TEST_IDS.sessionViewLink}
-                >
-                  {SESSION_VIEW_LINK}
-                </EuiButtonEmpty>
-              ) : (
-                <EuiIconTip
-                  type="commandLine"
-                  color="subdued"
-                  content={SESSION_VIEW_UNAVAILABLE}
-                  aria-label={SESSION_VIEW_UNAVAILABLE}
-                />
-              )}
-            </EuiFlexItem>
-          </EuiFlexGroup>
+          <CommandLabel
+            label={label}
+            fullText={label !== process.commandLine ? process.commandLine : undefined}
+          />
+          <StepBadges
+            isToolShell={toolCommand !== undefined}
+            ranAsOtherUser={ranAsOtherUser}
+            sideEffects={sideEffects}
+          />
         </EuiFlexItem>
+        {canOpenTree && (
+          <EuiFlexItem grow={false}>
+            <EuiToolTip content={SESSION_VIEW_LINK} disableScreenReaderOutput>
+              <EuiButtonIcon
+                iconType="commandLine"
+                size="xs"
+                aria-label={SESSION_VIEW_LINK}
+                onClick={() => onOpenProcessTree(step)}
+                data-test-subj={AI_AGENT_TEST_IDS.sessionViewLink}
+              />
+            </EuiToolTip>
+          </EuiFlexItem>
+        )}
       </EuiFlexGroup>
     );
   }
 );
 ProcessStepRow.displayName = 'ProcessStepRow';
 
-const StepRow = memo(
+const ToolCallContent = memo(
   ({
     step,
+    nested,
     onOpenProcessTree,
   }: {
-    step: ActivityStep;
-    onOpenProcessTree: (step: ProcessStep) => void;
+    step: ToolCallStep;
+    nested: readonly ProcessStep[];
+    onOpenProcessTree: OpenProcessTree;
   }) => {
     const { euiTheme } = useEuiTheme();
-    let content: React.ReactNode;
-    switch (step.kind) {
-      case 'process':
-        content = <ProcessStepRow step={step} onOpenProcessTree={onOpenProcessTree} />;
-        break;
-      case 'prompt':
-        content = (
-          <EuiFlexGroup gutterSize="s" alignItems="flexStart" responsive={false}>
+    return (
+      <>
+        <EuiFlexGroup gutterSize="s" alignItems="flexStart" responsive={false}>
+          <EuiFlexItem grow={false}>
+            <EuiIcon type="wrench" size="s" aria-hidden={true} />
+          </EuiFlexItem>
+          <EuiFlexItem
+            css={css`
+              min-width: 0;
+            `}
+          >
+            <EuiText size="xs">
+              <strong>
+                <FormattedMessage
+                  id="xpack.securitySolution.flyout.entityDetails.aiAgent.activity.toolCall"
+                  defaultMessage="Tool call: {tool}"
+                  values={{ tool: step.toolName ?? '?' }}
+                />
+              </strong>{' '}
+              {step.mcpServer && (
+                <FormattedMessage
+                  id="xpack.securitySolution.flyout.entityDetails.aiAgent.activity.mcpServer"
+                  defaultMessage="(MCP server {server})"
+                  values={{ server: step.mcpServer }}
+                />
+              )}
+            </EuiText>
+            {step.commandLine && <EuiCode transparentBackground>{step.commandLine}</EuiCode>}
+          </EuiFlexItem>
+          {step.decision === 'reject' && (
             <EuiFlexItem grow={false}>
-              <EuiIcon type="comment" size="s" aria-hidden={true} />
+              <EuiBadge color="danger">
+                <FormattedMessage
+                  id="xpack.securitySolution.flyout.entityDetails.aiAgent.activity.rejected"
+                  defaultMessage="Rejected"
+                />
+              </EuiBadge>
             </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiText size="xs">
-                <strong>
-                  <FormattedMessage
-                    id="xpack.securitySolution.flyout.entityDetails.aiAgent.activity.prompt"
-                    defaultMessage="Prompt"
-                  />
-                </strong>{' '}
-                {step.text ?? <em>{PROMPT_TEXT_NOT_LOGGED}</em>}
-              </EuiText>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        );
-        break;
-      case 'tool_call':
-        content = (
-          <EuiFlexGroup gutterSize="s" alignItems="flexStart" responsive={false}>
-            <EuiFlexItem grow={false}>
-              <EuiIcon type="wrench" size="s" aria-hidden={true} />
-            </EuiFlexItem>
-            <EuiFlexItem
-              css={css`
-                min-width: 0;
-              `}
-            >
-              <EuiText size="xs">
-                <strong>
-                  <FormattedMessage
-                    id="xpack.securitySolution.flyout.entityDetails.aiAgent.activity.toolCall"
-                    defaultMessage="Tool call: {tool}"
-                    values={{ tool: step.toolName ?? '?' }}
-                  />
-                </strong>{' '}
-                {step.mcpServer && (
-                  <FormattedMessage
-                    id="xpack.securitySolution.flyout.entityDetails.aiAgent.activity.mcpServer"
-                    defaultMessage="(MCP server {server})"
-                    values={{ server: step.mcpServer }}
-                  />
-                )}
-              </EuiText>
-              {step.commandLine && <EuiCode transparentBackground>{step.commandLine}</EuiCode>}
-            </EuiFlexItem>
-            {step.decision === 'reject' && (
-              <EuiFlexItem grow={false}>
-                <EuiBadge color="danger">
-                  <FormattedMessage
-                    id="xpack.securitySolution.flyout.entityDetails.aiAgent.activity.rejected"
-                    defaultMessage="Rejected"
-                  />
-                </EuiBadge>
+          )}
+        </EuiFlexGroup>
+        {nested.length > 0 && (
+          <EuiFlexGroup
+            direction="column"
+            gutterSize="xs"
+            data-test-subj={AI_AGENT_TEST_IDS.toolCallProcesses}
+            css={css`
+              margin-top: ${euiTheme.size.xs};
+              margin-left: ${euiTheme.size.s};
+              padding-left: ${euiTheme.size.m};
+              border-left: ${euiTheme.border.thin};
+            `}
+          >
+            {nested.map((child) => (
+              <EuiFlexItem key={child.process.entityId}>
+                <ProcessStepRow step={child} onOpenProcessTree={onOpenProcessTree} />
               </EuiFlexItem>
-            )}
+            ))}
           </EuiFlexGroup>
-        );
-        break;
-      case 'otel_event':
-        content = (
-          <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-            <EuiFlexItem grow={false}>
-              <EuiIcon type="dot" size="s" aria-hidden={true} />
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiText size="xs">
-                {step.eventName}
-                {step.mcpServer ? ` (${step.mcpServer})` : ''}
-              </EuiText>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        );
-        break;
-    }
+        )}
+      </>
+    );
+  }
+);
+ToolCallContent.displayName = 'ToolCallContent';
+
+const StepContent = ({
+  step,
+  onOpenProcessTree,
+}: {
+  step: ActivityStep;
+  onOpenProcessTree: OpenProcessTree;
+}) => {
+  switch (step.kind) {
+    case 'process':
+      return <ProcessStepRow step={step} onOpenProcessTree={onOpenProcessTree} />;
+    case 'prompt':
+      return (
+        <EuiFlexGroup gutterSize="s" alignItems="flexStart" responsive={false}>
+          <EuiFlexItem grow={false}>
+            <EuiIcon type="comment" size="s" aria-hidden={true} />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiText size="xs">
+              <strong>
+                <FormattedMessage
+                  id="xpack.securitySolution.flyout.entityDetails.aiAgent.activity.prompt"
+                  defaultMessage="Prompt"
+                />
+              </strong>{' '}
+              {step.text ?? <em>{PROMPT_TEXT_NOT_LOGGED}</em>}
+            </EuiText>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      );
+    case 'tool_call':
+      return <ToolCallContent step={step} nested={[]} onOpenProcessTree={onOpenProcessTree} />;
+    case 'otel_event':
+      return (
+        <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+          <EuiFlexItem grow={false}>
+            <EuiIcon type="dot" size="s" aria-hidden={true} />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiText size="xs">
+              {step.eventName}
+              {step.mcpServer ? ` (${step.mcpServer})` : ''}
+            </EuiText>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      );
+  }
+};
+
+const RowView = memo(
+  ({ row, onOpenProcessTree }: { row: ActivityRow; onOpenProcessTree: OpenProcessTree }) => {
+    const { euiTheme } = useEuiTheme();
     return (
       <EuiFlexGroup
         gutterSize="s"
         responsive={false}
         alignItems="flexStart"
-        data-test-subj={`${AI_AGENT_TEST_IDS.step}-${step.kind}`}
+        data-test-subj={`${AI_AGENT_TEST_IDS.step}-${row.step.kind}`}
         css={css`
           padding: ${euiTheme.size.xs} 0;
           border-bottom: ${euiTheme.border.thin};
@@ -318,7 +398,7 @@ const StepRow = memo(
           `}
         >
           <EuiText size="xs" color="subdued">
-            <PreferenceFormattedDate value={new Date(step.timestamp)} dateFormat="HH:mm:ss" />
+            <PreferenceFormattedDate value={new Date(row.step.timestamp)} dateFormat="HH:mm:ss" />
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem
@@ -326,84 +406,112 @@ const StepRow = memo(
             min-width: 0;
           `}
         >
-          {content}
+          {row.kind === 'tool_call' ? (
+            <ToolCallContent
+              step={row.step}
+              nested={row.children}
+              onOpenProcessTree={onOpenProcessTree}
+            />
+          ) : (
+            <StepContent step={row.step} onOpenProcessTree={onOpenProcessTree} />
+          )}
         </EuiFlexItem>
       </EuiFlexGroup>
     );
   }
 );
-StepRow.displayName = 'StepRow';
+RowView.displayName = 'RowView';
 
 const visibleSteps = (steps: readonly ActivityStep[], showSetup: boolean): ActivityStep[] =>
   showSetup ? [...steps] : steps.filter((step) => step.kind !== 'process' || !step.isSetup);
+
+const Rows = ({
+  steps,
+  showSetup,
+  headlessPrompt,
+  onOpenProcessTree,
+}: {
+  steps: readonly ActivityStep[];
+  showSetup: boolean;
+  headlessPrompt?: string;
+  onOpenProcessTree: OpenProcessTree;
+}) => {
+  const rows = useMemo(
+    () => buildActivityRows(visibleSteps(steps, showSetup), headlessPrompt),
+    [steps, showSetup, headlessPrompt]
+  );
+  return (
+    <>
+      {rows.map((row, index) => (
+        <RowView
+          key={`${row.step.kind}-${row.step.timestamp}-${index}`}
+          row={row}
+          onOpenProcessTree={onOpenProcessTree}
+        />
+      ))}
+    </>
+  );
+};
 
 const SectionView = memo(
   ({
     section,
     showSetup,
+    headlessPrompt,
+    isMatchedByAccount,
     onOpenProcessTree,
   }: {
     section: ActivitySection;
     showSetup: boolean;
-    onOpenProcessTree: (step: ProcessStep) => void;
-  }) => {
-    const steps = visibleSteps(section.steps, showSetup);
-    const hidden = section.steps.length - steps.length;
-    return (
-      <>
-        {section.sessionId && (
-          <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} wrap>
-            <EuiFlexItem grow={false}>
-              <EuiToolTip content={section.sessionId}>
-                <EuiText size="xs" tabIndex={0}>
-                  <strong>
-                    <FormattedMessage
-                      id="xpack.securitySolution.flyout.entityDetails.aiAgent.activity.agentSession"
-                      defaultMessage="Agent session {id}"
-                      values={{ id: shortId(section.sessionId) }}
-                    />
-                  </strong>
-                </EuiText>
-              </EuiToolTip>
-            </EuiFlexItem>
-            {section.modelUsage && (
-              <EuiFlexItem grow={false}>
-                <EuiText size="xs" color="subdued">
+    headlessPrompt?: string;
+    isMatchedByAccount: boolean;
+    onOpenProcessTree: OpenProcessTree;
+  }) => (
+    <>
+      {section.sessionId && (
+        <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} wrap>
+          <EuiFlexItem grow={false}>
+            <EuiToolTip content={section.sessionId}>
+              <EuiText size="xs" tabIndex={0}>
+                <strong>
                   <FormattedMessage
-                    id="xpack.securitySolution.flyout.entityDetails.aiAgent.activity.modelUsage"
-                    defaultMessage="{requests, plural, one {# model request} other {# model requests}} ({models}), {input} input and {output} output tokens"
-                    values={{
-                      requests: section.modelUsage.requests,
-                      models: section.modelUsage.models.join(', '),
-                      input: section.modelUsage.inputTokens,
-                      output: section.modelUsage.outputTokens,
-                    }}
+                    id="xpack.securitySolution.flyout.entityDetails.aiAgent.activity.agentSession"
+                    defaultMessage="Agent session {id}"
+                    values={{ id: shortId(section.sessionId) }}
                   />
-                </EuiText>
-              </EuiFlexItem>
-            )}
-          </EuiFlexGroup>
-        )}
-        {steps.map((step, index) => (
-          <StepRow
-            key={`${step.kind}-${step.timestamp}-${index}`}
-            step={step}
-            onOpenProcessTree={onOpenProcessTree}
-          />
-        ))}
-        {hidden > 0 && (
-          <EuiText size="xs" color="subdued">
-            <FormattedMessage
-              id="xpack.securitySolution.flyout.entityDetails.aiAgent.activity.hiddenSetup"
-              defaultMessage="{count, plural, one {# setup command hidden} other {# setup commands hidden}}"
-              values={{ count: hidden }}
-            />
-          </EuiText>
-        )}
-        <EuiSpacer size="s" />
-      </>
-    );
-  }
+                </strong>
+              </EuiText>
+            </EuiToolTip>
+          </EuiFlexItem>
+          {isMatchedByAccount && (
+            <EuiFlexItem grow={false}>
+              <EuiIconTip
+                type="info"
+                color="subdued"
+                content={OTEL_BY_ACCOUNT}
+                aria-label={OTEL_BY_ACCOUNT}
+                iconProps={{ 'data-test-subj': AI_AGENT_TEST_IDS.otelByAccount }}
+              />
+            </EuiFlexItem>
+          )}
+          {section.modelUsage && (
+            <EuiFlexItem grow={false}>
+              <EuiText size="xs" color="subdued">
+                {getModelUsageLabel(section.modelUsage)}
+              </EuiText>
+            </EuiFlexItem>
+          )}
+        </EuiFlexGroup>
+      )}
+      <Rows
+        steps={section.steps}
+        showSetup={showSetup}
+        headlessPrompt={headlessPrompt}
+        onOpenProcessTree={onOpenProcessTree}
+      />
+      <EuiSpacer size="s" />
+    </>
+  )
 );
 SectionView.displayName = 'SectionView';
 
@@ -411,11 +519,13 @@ const RunView = memo(
   ({
     run,
     showSetup,
+    isMatchedByAccount,
     onOpenProcessTree,
   }: {
     run: AgentRun;
     showSetup: boolean;
-    onOpenProcessTree: (step: ProcessStep) => void;
+    isMatchedByAccount: boolean;
+    onOpenProcessTree: OpenProcessTree;
   }) => {
     const rootStep: ProcessStep = {
       kind: 'process',
@@ -424,6 +534,7 @@ const RunView = memo(
       isAgentProcess: true,
       isSetup: false,
     };
+    const headlessPrompt = run.isHeadless ? run.headlessPrompt : undefined;
     return (
       <EuiPanel hasBorder paddingSize="s" data-test-subj={AI_AGENT_TEST_IDS.run}>
         <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} wrap>
@@ -439,47 +550,48 @@ const RunView = memo(
             </EuiTitle>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiBadge color="hollow">{LAUNCH_MODE_LABELS[run.launchMode]}</EuiBadge>
+            <EuiBadge color="hollow" data-test-subj={AI_AGENT_TEST_IDS.launchBadge}>
+              {getLaunchLabel(run)}
+            </EuiBadge>
           </EuiFlexItem>
-          {run.root.entryLeaderName && (
-            <EuiFlexItem grow={false}>
-              <EuiText size="xs" color="subdued">
-                <FormattedMessage
-                  id="xpack.securitySolution.flyout.entityDetails.aiAgent.activity.terminalSession"
-                  defaultMessage="Terminal session from {leader}"
-                  values={{ leader: run.root.entryLeaderName }}
-                />
-              </EuiText>
-            </EuiFlexItem>
-          )}
         </EuiFlexGroup>
-        <EuiSpacer size="xs" />
-        <ProcessStepRow step={rootStep} onOpenProcessTree={onOpenProcessTree} />
-        <EuiSpacer size="xs" />
-        {run.isHeadless && (
-          <EuiText size="xs" data-test-subj={AI_AGENT_TEST_IDS.headlessPrompt}>
-            <strong>
-              <FormattedMessage
-                id="xpack.securitySolution.flyout.entityDetails.aiAgent.activity.headlessPrompt"
-                defaultMessage="Prompt from the command line:"
-              />
-            </strong>{' '}
-            {run.headlessPrompt ?? (
-              <em>
-                <FormattedMessage
-                  id="xpack.securitySolution.flyout.entityDetails.aiAgent.activity.headlessPromptUnreadable"
-                  defaultMessage="headless run, but the prompt could not be read from the arguments"
-                />
-              </em>
-            )}
-          </EuiText>
+        {headlessPrompt && (
+          <>
+            <EuiSpacer size="xs" />
+            <EuiPanel
+              color="subdued"
+              paddingSize="s"
+              hasShadow={false}
+              data-test-subj={AI_AGENT_TEST_IDS.headlessPrompt}
+            >
+              <EuiText size="xs">
+                <strong>
+                  <FormattedMessage
+                    id="xpack.securitySolution.flyout.entityDetails.aiAgent.activity.headlessPromptLabel"
+                    defaultMessage="Prompt"
+                  />
+                </strong>
+                <p>{headlessPrompt}</p>
+              </EuiText>
+            </EuiPanel>
+          </>
         )}
+        <EuiSpacer size="xs" />
+        <ProcessStepRow
+          step={rootStep}
+          label={
+            run.isHeadless ? getRootCommandLabel(run.root.commandLine, headlessPrompt) : undefined
+          }
+          onOpenProcessTree={onOpenProcessTree}
+        />
         <EuiSpacer size="s" />
         {run.sections.map((section, index) => (
           <SectionView
             key={section.sessionId ?? `no-session-${index}`}
             section={section}
             showSetup={showSetup}
+            headlessPrompt={headlessPrompt}
+            isMatchedByAccount={isMatchedByAccount}
             onOpenProcessTree={onOpenProcessTree}
           />
         ))}
@@ -494,9 +606,8 @@ export interface AgentActivityProps {
 }
 
 /**
- * Agent activity: one panel per run (launch), with the steps from every source that exists. No
- * step is hidden because a field is missing. Process steps open Session View for their terminal
- * session.
+ * Agent activity: one panel per run (launch), with the steps from every source that exists. Tool
+ * calls carry the processes they ran. Process steps open Session View for their terminal session.
  */
 export const AgentActivity = memo(({ agent }: AgentActivityProps) => {
   const { data, isLoading, isError } = useAiAgentActivity(agent);
@@ -550,34 +661,23 @@ export const AgentActivity = memo(({ agent }: AgentActivityProps) => {
         announceOnMount
         title={i18n.translate(
           'xpack.securitySolution.flyout.entityDetails.aiAgent.activity.error',
-          {
-            defaultMessage: 'Agent activity could not be loaded',
-          }
+          { defaultMessage: 'Agent activity could not be loaded' }
         )}
       />
     );
   }
 
-  const { layers } = data;
+  const isMatchedByAccount = data.otelMatch === 'account';
 
   return (
     <div data-test-subj={AI_AGENT_TEST_IDS.activity}>
-      {!layers.defendRuns && (
-        <>
-          <KbnWarningCallout
-            announceOnMount
-            size="s"
-            data-test-subj={AI_AGENT_TEST_IDS.missingDefend}
-            title={i18n.translate(
-              'xpack.securitySolution.flyout.entityDetails.aiAgent.activity.noDefendRuns',
-              {
-                defaultMessage:
-                  'Elastic Defend has no process events for this agent since it was first seen.',
-              }
-            )}
+      {!data.layers.defendRuns && (
+        <EuiText size="s" color="subdued" data-test-subj={AI_AGENT_TEST_IDS.noProcessActivity}>
+          <FormattedMessage
+            id="xpack.securitySolution.flyout.entityDetails.aiAgent.activity.noProcessActivity"
+            defaultMessage="No process activity since first seen"
           />
-          <EuiSpacer size="s" />
-        </>
+        </EuiText>
       )}
       {data.truncated && (
         <EuiText size="xs" color="warning">
@@ -587,7 +687,6 @@ export const AgentActivity = memo(({ agent }: AgentActivityProps) => {
           />
         </EuiText>
       )}
-      <EuiSpacer size="s" />
       {setupCount > 0 && (
         <>
           <EuiSwitch
@@ -608,7 +707,12 @@ export const AgentActivity = memo(({ agent }: AgentActivityProps) => {
       )}
       {data.runs.map((run) => (
         <React.Fragment key={run.id}>
-          <RunView run={run} showSetup={showSetup} onOpenProcessTree={onOpenProcessTree} />
+          <RunView
+            run={run}
+            showSetup={showSetup}
+            isMatchedByAccount={isMatchedByAccount}
+            onOpenProcessTree={onOpenProcessTree}
+          />
           <EuiSpacer size="s" />
         </React.Fragment>
       ))}
@@ -628,13 +732,11 @@ export const AgentActivity = memo(({ agent }: AgentActivityProps) => {
               defaultMessage="Descendants of this install whose parent process was not recorded."
             />
           </EuiText>
-          {visibleSteps(data.unplacedSteps, showSetup).map((step, index) => (
-            <StepRow
-              key={`unplaced-${step.timestamp}-${index}`}
-              step={step}
-              onOpenProcessTree={onOpenProcessTree}
-            />
-          ))}
+          <Rows
+            steps={data.unplacedSteps}
+            showSetup={showSetup}
+            onOpenProcessTree={onOpenProcessTree}
+          />
         </EuiPanel>
       )}
     </div>

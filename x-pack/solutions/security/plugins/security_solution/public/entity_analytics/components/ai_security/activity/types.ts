@@ -129,7 +129,7 @@ export interface AgentRun {
 
 export type OtelMatch = 'session' | 'account' | 'none';
 
-/** Which data layers exist for this agent. Each missing one shows a note in the UI. */
+/** Which data layers exist for this agent. */
 export interface ActivityLayers {
   readonly defendRuns: boolean;
   readonly sessionIds: boolean;

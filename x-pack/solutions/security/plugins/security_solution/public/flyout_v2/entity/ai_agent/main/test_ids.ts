@@ -39,7 +39,9 @@ export const AI_AGENT_TEST_IDS = {
   setupToggle: `${PREFIX}SetupToggle`,
   sessionViewLink: `${PREFIX}SessionViewLink`,
   headlessPrompt: `${PREFIX}HeadlessPrompt`,
-  missingDefend: `${PREFIX}MissingDefend`,
+  launchBadge: `${PREFIX}LaunchBadge`,
+  toolCallProcesses: `${PREFIX}ToolCallProcesses`,
+  noProcessActivity: `${PREFIX}NoProcessActivity`,
   otelByAccount: `${PREFIX}OtelByAccount`,
   graph: `${PREFIX}Graph`,
 } as const;

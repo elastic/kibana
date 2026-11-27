@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, within } from '@testing-library/react';
 import { TestProviders } from '../../../../../common/mock';
 import { useFlyoutApi } from '../../../../use_flyout_api';
 import { createFlyoutApiMock } from '../../../../use_flyout_api.mock';
@@ -137,11 +137,110 @@ describe('AgentActivity', () => {
     );
     renderActivity();
 
-    expect(screen.getByTestId(AI_AGENT_TEST_IDS.headlessPrompt)).toHaveTextContent('Restart nginx');
-    expect(screen.getByText('Ran as root')).toBeInTheDocument();
+    expect(screen.getByTestId(AI_AGENT_TEST_IDS.headlessPrompt)).toHaveTextContent(
+      'PromptRestart nginx'
+    );
+    expect(screen.getByText('claude -p … --output-format json')).toBeInTheDocument();
+    expect(screen.queryByTestId(`${AI_AGENT_TEST_IDS.step}-prompt`)).not.toBeInTheDocument();
     expect(screen.getByText('Agent session session-1')).toBeInTheDocument();
     expect(screen.getByText('Tool call: Bash')).toBeInTheDocument();
+    const processes = screen.getByTestId(AI_AGENT_TEST_IDS.toolCallProcesses);
+    expect(within(processes).getByText('sudo systemctl restart nginx')).toBeInTheDocument();
+    expect(within(processes).getByText('Ran as root')).toBeInTheDocument();
+    expect(screen.queryAllByTestId(`${AI_AGENT_TEST_IDS.step}-process`)).toHaveLength(0);
     expect(screen.queryByText('Mock data')).not.toBeInTheDocument();
+  });
+
+  it('nests the processes a tool call ran and drops the tool shell around them', () => {
+    mockActivity(
+      buildAgentActivity({
+        identity: claude,
+        ownEvents: [proc({ entityId: 'agent', isDescendant: false, sessionId: 'session-1' })],
+        descendantEvents: [
+          proc({
+            entityId: 'shell',
+            parentEntityId: 'agent',
+            commandLine:
+              "bash -c source /home/ec2-user/.claude/shell-snapshots/snapshot.sh && eval 'npm test' < /dev/null && pwd -P >| /tmp/cwd",
+          }),
+          proc({ entityId: 'npm', parentEntityId: 'shell', commandLine: 'npm test' }),
+        ],
+        sideEffects: new Map([
+          ['npm', { fileEvents: 3, networkEvents: 1, files: [], destinations: [] }],
+        ]),
+        otelEvents: [
+          {
+            timestamp: '2026-11-26T10:00:05.000Z',
+            conversationId: 'session-1',
+            eventName: 'tool_result',
+            toolName: 'Bash',
+            commandLine: 'npm test',
+            isMock: false,
+          },
+        ],
+        otelMatch: 'session',
+      })
+    );
+    renderActivity();
+
+    expect(screen.queryByText('Tool shell')).not.toBeInTheDocument();
+    expect(screen.getByTestId(AI_AGENT_TEST_IDS.toolCallProcesses)).toHaveTextContent(
+      'npm test3 file events, 1 connection'
+    );
+  });
+
+  it('merges the launch mode and the terminal session into one badge', () => {
+    mockActivity(
+      buildAgentActivity({
+        identity: claude,
+        ownEvents: [
+          proc({
+            entityId: 'agent',
+            isDescendant: false,
+            entryMetaType: 'init',
+            entryLeaderName: 'crond',
+          }),
+        ],
+        descendantEvents: [],
+        sideEffects: new Map(),
+        otelEvents: [],
+        otelMatch: 'none',
+      })
+    );
+    renderActivity();
+
+    expect(screen.getByTestId(AI_AGENT_TEST_IDS.launchBadge)).toHaveTextContent(
+      'Scheduled (crond)'
+    );
+    expect(screen.queryByText(/Terminal session/)).not.toBeInTheDocument();
+  });
+
+  it('summarises model use and marks sessions matched by account', () => {
+    const request = {
+      conversationId: 'session-1',
+      eventName: 'api_request',
+      model: 'claude-sonnet-5-5',
+      inputTokens: 1000,
+      outputTokens: 467,
+      isMock: false,
+    };
+    mockActivity(
+      buildAgentActivity({
+        identity: claude,
+        ownEvents: [proc({ entityId: 'agent', isDescendant: false })],
+        descendantEvents: [],
+        sideEffects: new Map(),
+        otelEvents: [
+          { ...request, timestamp: '2026-11-26T10:00:01.000Z' },
+          { ...request, timestamp: '2026-11-26T10:00:02.000Z' },
+        ],
+        otelMatch: 'account',
+      })
+    );
+    renderActivity();
+
+    expect(screen.getByText('claude-sonnet-5-5 · 2 requests · 2,934 tokens')).toBeInTheDocument();
+    expect(screen.getByTestId(AI_AGENT_TEST_IDS.otelByAccount)).toBeInTheDocument();
   });
 
   it('hides setup commands behind a toggle and counts them', () => {
@@ -162,7 +261,9 @@ describe('AgentActivity', () => {
 
     expect(screen.getByText('npm test')).toBeInTheDocument();
     expect(screen.queryByText('env')).not.toBeInTheDocument();
-    expect(screen.getByText('1 setup command hidden')).toBeInTheDocument();
+    expect(screen.getByTestId(AI_AGENT_TEST_IDS.setupToggle)).toBeInTheDocument();
+    expect(screen.getByText('Show setup commands (1)')).toBeInTheDocument();
+    expect(screen.queryByText(/hidden/)).not.toBeInTheDocument();
 
     fireEvent.click(screen.getByTestId(AI_AGENT_TEST_IDS.setupToggle));
     expect(screen.getByText('env')).toBeInTheDocument();
@@ -191,6 +292,10 @@ describe('AgentActivity', () => {
     );
     renderActivity();
 
+    expect(screen.getByTestId(AI_AGENT_TEST_IDS.sessionViewLink)).toHaveAttribute(
+      'aria-label',
+      'Open in Session View'
+    );
     fireEvent.click(screen.getByTestId(AI_AGENT_TEST_IDS.sessionViewLink));
     expect(flyoutApi.openSessionView).toHaveBeenCalledWith(
       expect.objectContaining({ jumpToEntityId: 'npm' })
@@ -199,7 +304,7 @@ describe('AgentActivity', () => {
     expect(hit.flattened['process.entry_leader.entity_id']).toEqual(['leader-1']);
   });
 
-  it('warns when Defend has no process events for the agent', () => {
+  it('says plainly when there is no process activity', () => {
     mockActivity(
       buildAgentActivity({
         identity: claude,
@@ -212,7 +317,9 @@ describe('AgentActivity', () => {
     );
     renderActivity();
 
-    expect(screen.getByTestId(AI_AGENT_TEST_IDS.missingDefend)).toBeInTheDocument();
+    expect(screen.getByTestId(AI_AGENT_TEST_IDS.noProcessActivity)).toHaveTextContent(
+      'No process activity since first seen'
+    );
   });
 
   it('lists steps that could not be tied to a run', () => {
