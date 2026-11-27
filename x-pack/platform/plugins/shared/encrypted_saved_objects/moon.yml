@@ -44,4 +44,14 @@ fileGroups:
     - server/**/*
     - integration_tests/**/*
     - '!target/**/*'
-tasks: {}
+tasks:
+  jest:
+    inputs:
+      - /**/server/saved_objects/index.{ts,tsx}
+      - /**/server/saved_objects/model_versions/**/*.{ts,tsx}
+      - /**/server/saved_objects/schemas/**/*.{ts,tsx}
+  jestIntegrationConfigs:
+    inputs:
+      - /**/server/saved_objects/index.{ts,tsx}
+      - /**/server/saved_objects/model_versions/**/*.{ts,tsx}
+      - /**/server/saved_objects/schemas/**/*.{ts,tsx}

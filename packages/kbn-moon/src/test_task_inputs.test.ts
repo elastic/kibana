@@ -96,6 +96,8 @@ tags: [jest-unit-tests, jest-integration-tests, scout-tests]
       write(`${id}/index.test.ts`, `it('${id}', () => {});\n`);
     }
     write('leaf/__fixtures__/data.json', '{}\n');
+    write('leaf/docs/README.md', '# leaf\n');
+    write('leaf/server/notes.md', '# notes\n');
     write('leaf/test/scout/ui/fixtures/shared.ts', 'export const helper = 1;\n');
     write('leaf/test/scout/ui/tests/local.spec.ts', "test('local', () => {});\n");
     write(
@@ -169,6 +171,14 @@ if (process.env.MOON_FIXTURE_ARGS_OUTPUT) fs.appendFileSync(process.env.MOON_FIX
     expect(
       affectedProjects('jest-integration-tests', 'leaf/__fixtures__/data.json', 'deep')
     ).toEqual(['app', 'leaf', 'middle']);
+  });
+
+  it('keeps nested docs in the owning project unit tests only', () => {
+    for (const doc of ['leaf/docs/README.md', 'leaf/server/notes.md']) {
+      expect(affectedProjects('jest-unit-tests', doc, 'deep')).toEqual(['leaf']);
+      expect(affectedProjects('jest-integration-tests', doc, 'deep')).toEqual([]);
+      expect(affectedProjects('scout-tests', doc, 'deep')).toEqual([]);
+    }
   });
 
   it('keeps a test-only change in its owning project', () => {

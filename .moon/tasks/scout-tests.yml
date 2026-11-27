@@ -22,7 +22,9 @@ tasks:
         cacheStrategy: hash
     inputs:
       - '@group(default)'
-      - '!README*'
+      - '!**/README*'
+      - '!**/CHANGELOG*'
+      - '!**/*.md'
       - '!**/*.test.{js,mjs,ts,tsx}'
       - '!test/{functional,ftr}/**/*'
       - '@group(scoutConfigs)'
