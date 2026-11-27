@@ -9,107 +9,101 @@
 
 import { KibanaUtilsPublicPlugin } from './plugin';
 
-export type { Get, Set } from '../common';
-export {
-  AbortError,
-  abortSignalToPromise,
-  calculateObjectHash,
-  defer,
-  Defer,
-  fieldWildcardFilter,
-  fieldWildcardMatcher,
-  of,
-  url,
-  createGetterSetter,
-} from '../common';
-export type { StartServicesGetter } from './core';
-export { createStartServicesGetter } from './core';
-export type { KibanaServerError } from '../common/errors';
-export {
-  KbnError,
-  CharacterNotAllowedInField,
-  SavedFieldNotFound,
-  SavedObjectNotFound,
-  SavedFieldTypeInvalidForAgg,
-  InvalidJSONProperty,
-  DuplicateField,
-} from '../common/errors';
-export {
-  RenderCompleteDispatcher,
-  dispatchRenderComplete,
-  dispatchRenderStart,
-} from './render_complete';
-export { ResizeChecker } from './resize_checker';
+/**
+ * @deprecated Import browser utilities from `@kbn/kibana-utils-browser`.
+ */
 export type {
   BaseState,
   BaseStateContainer,
-  StateContainer,
-  ReduxLikeStateContainer,
-  Dispatch,
-  Middleware,
-  Selector,
+  CollectConfigProps,
   Comparator,
-  MapStateToProps,
+  Configurable,
   Connect,
-  Reducer,
-  UnboxState,
-  PureSelectorToSelector,
-  PureSelectorsToSelectors,
+  CreateStateContainerOptions,
+  Dispatch,
   EnsurePureSelector,
   EnsurePureTransition,
-  PureSelector,
-  PureTransition,
-  CreateStateContainerOptions,
-} from '../common/state_containers';
-export { createStateContainer } from '../common/state_containers';
-export {
-  createStateContainerReactHelpers,
-  useContainerSelector,
-  useContainerState,
-} from '../common/state_containers/create_state_container_react_helpers';
-export type { IStorageWrapper, IStorage } from './storage';
-export { Storage } from './storage';
-export { hashedItemStore, HashedItemStore } from './storage/hashed_item_store';
-export { persistState, retrieveState } from './state_management/state_hash';
-export {
-  hashQuery,
-  hashUrl,
-  unhashUrl,
-  unhashQuery,
-  createUrlTracker,
-  createKbnUrlTracker,
-  createKbnUrlControls,
-  getStateFromKbnUrl,
-  getStatesFromKbnUrl,
-  setStateToKbnUrl,
-  withNotifyOnErrors,
-} from './state_management/url';
-export type {
-  IStateStorage,
-  IStateSyncConfig,
-  ISyncStateRef,
+  Get,
   IKbnUrlStateStorage,
   INullableBaseStateContainer,
   ISessionStorageStateStorage,
+  IStateStorage,
+  IStateSyncConfig,
+  IStorage,
+  IStorageWrapper,
+  ISyncStateRef,
+  KibanaServerError,
+  MapStateToProps,
+  Middleware,
+  PureSelector,
+  PureSelectorToSelector,
+  PureSelectorsToSelectors,
+  PureTransition,
+  Reducer,
+  ReduxLikeStateContainer,
+  Selector,
+  Set,
+  StartServicesGetter,
   StartSyncStateFnType,
+  StateContainer,
   StopSyncStateFnType,
-} from './state_sync';
+  UnboxState,
+} from '@kbn/kibana-utils-browser';
 export {
+  AbortError,
+  CharacterNotAllowedInField,
+  Defer,
+  DuplicateField,
+  HashedItemStore,
+  InvalidJSONProperty,
+  KbnError,
+  RenderCompleteDispatcher,
+  ResizeChecker,
+  SavedFieldNotFound,
+  SavedFieldTypeInvalidForAgg,
+  SavedObjectNotFound,
+  Storage,
+  abortSignalToPromise,
+  applyDiff,
+  calculateObjectHash,
+  createGetterSetter,
+  createHistoryObservable,
+  createKbnUrlControls,
+  createKbnUrlStateStorage,
+  createKbnUrlTracker,
+  createQueryParamObservable,
+  createQueryParamsObservable,
+  createSessionStorageStateStorage,
+  createStartServicesGetter,
+  createStateContainer,
+  createStateContainerReactHelpers,
+  createUrlTracker,
+  defer,
+  dispatchRenderComplete,
+  dispatchRenderStart,
+  fieldWildcardFilter,
+  fieldWildcardMatcher,
+  getQueryParams,
+  getStateFromKbnUrl,
+  getStatesFromKbnUrl,
+  hashQuery,
+  hashUrl,
+  hashedItemStore,
+  of,
+  persistState,
+  redirectWhenMissing,
+  removeQueryParam,
+  retrieveState,
+  setStateToKbnUrl,
   syncState,
   syncStates,
-  createKbnUrlStateStorage,
-  createSessionStorageStateStorage,
-} from './state_sync';
-export type { Configurable, CollectConfigProps } from './ui';
-export {
-  removeQueryParam,
-  redirectWhenMissing,
-  getQueryParams,
-  createQueryParamsObservable,
-  createHistoryObservable,
-  createQueryParamObservable,
-} from './history';
-export { applyDiff } from './state_management/utils/diff_object';
+  unhashQuery,
+  unhashUrl,
+  url,
+  useContainerSelector,
+  useContainerState,
+  withNotifyOnErrors,
+} from '@kbn/kibana-utils-browser';
 
 export type { KibanaUtilsPublicSetup as KibanaUtilsSetup, KibanaUtilsPublicStart } from './plugin';
 

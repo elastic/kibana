@@ -7,58 +7,67 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { Defer, defer } from './defer';
-export { fieldWildcardMatcher, fieldWildcardFilter, makeRegEx } from './field_wildcard';
-export { of } from './of';
+/**
+ * @deprecated Import common utilities from `@kbn/kibana-utils-common`.
+ */
 export type {
   BaseState,
   BaseStateContainer,
-  StateContainer,
-  ReduxLikeStateContainer,
-  Dispatch,
-  Middleware,
-  Selector,
   Comparator,
-  MapStateToProps,
   Connect,
-  Reducer,
-  UnboxState,
-  PureSelectorToSelector,
-  PureSelectorsToSelectors,
+  CreateStateContainerOptions,
+  Dispatch,
   EnsurePureSelector,
   EnsurePureTransition,
-  PureSelector,
-  PureTransition,
-  CreateStateContainerOptions,
-} from './state_containers';
-export { setStateToKbnUrl } from './state_management/set_state_to_kbn_url';
-export { replaceUrlHashQuery } from './state_management/format';
-export { createStateContainer, defaultFreeze } from './state_containers';
-export type { KibanaServerError } from './errors';
-export {
-  KbnError,
-  CharacterNotAllowedInField,
-  SavedFieldNotFound,
-  SavedObjectNotFound,
-  SavedFieldTypeInvalidForAgg,
-  InvalidJSONProperty,
-  DuplicateField,
-} from './errors';
-export { AbortError, AbortReason, abortSignalToPromise } from './abort_utils';
-export type { Get, Set } from './create_getter_setter';
-export { createGetterSetter } from './create_getter_setter';
-export { distinctUntilChangedWithInitialValue } from './distinct_until_changed_with_initial_value';
-export { url } from './url';
-export { now } from './now';
-export { calculateObjectHash } from './calculate_object_hash';
-export type {
-  VersionedState,
-  PersistableStateService,
-  PersistableStateMigrateFn,
+  Get,
+  GetMigrationFunctionObjectFn,
+  KibanaServerError,
+  MapStateToProps,
+  Middleware,
   MigrateFunction,
   MigrateFunctionsObject,
-  GetMigrationFunctionObjectFn,
   PersistableState,
   PersistableStateDefinition,
-} from './persistable_state';
-export { migrateToLatest, mergeMigrationFunctionMaps } from './persistable_state';
+  PersistableStateMigrateFn,
+  PersistableStateService,
+  PureSelector,
+  PureSelectorToSelector,
+  PureSelectorsToSelectors,
+  PureTransition,
+  Reducer,
+  ReduxLikeStateContainer,
+  Selector,
+  Set,
+  StateContainer,
+  UnboxState,
+  VersionedState,
+} from '@kbn/kibana-utils-common';
+export {
+  AbortError,
+  AbortReason,
+  CharacterNotAllowedInField,
+  Defer,
+  DuplicateField,
+  InvalidJSONProperty,
+  KbnError,
+  SavedFieldNotFound,
+  SavedFieldTypeInvalidForAgg,
+  SavedObjectNotFound,
+  abortSignalToPromise,
+  calculateObjectHash,
+  createGetterSetter,
+  createStateContainer,
+  defaultFreeze,
+  defer,
+  distinctUntilChangedWithInitialValue,
+  fieldWildcardFilter,
+  fieldWildcardMatcher,
+  makeRegEx,
+  mergeMigrationFunctionMaps,
+  migrateToLatest,
+  now,
+  of,
+  replaceUrlHashQuery,
+  setStateToKbnUrl,
+  url,
+} from '@kbn/kibana-utils-common';

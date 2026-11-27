@@ -28,7 +28,10 @@ export const teamOverrides: OxlintOverride[] = [
     },
   },
   {
-    files: ['src/platform/plugins/shared/kibana_utils/**/*.{js,mjs,ts,tsx}'],
+    files: [
+      'src/platform/packages/shared/kbn-kibana-utils-browser/**/*.{js,mjs,ts,tsx}',
+      'src/platform/plugins/shared/kibana_utils/**/*.{js,mjs,ts,tsx}',
+    ],
     rules: { 'react-hooks/exhaustive-deps': 'off' },
   },
   /**
@@ -1118,6 +1121,9 @@ export const teamOverrides: OxlintOverride[] = [
 export const nestedConfigOverrides: OxlintOverride[] = [
   {
     files: [
+      'src/platform/packages/shared/kbn-kibana-utils-browser/**/*',
+      'src/platform/packages/shared/kbn-kibana-utils-common/**/*',
+      'src/platform/packages/shared/kbn-kibana-utils-server/**/*',
       'src/platform/plugins/shared/embeddable/**/*',
       'src/platform/plugins/shared/expressions/**/*',
       'src/platform/plugins/shared/kibana_utils/**/*',

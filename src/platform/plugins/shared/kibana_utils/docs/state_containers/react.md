@@ -7,7 +7,10 @@
 
 
 ```ts
-import { createStateContainer, createStateContainerReactHelpers } from 'src/platform/plugins/shared/kibana_utils';
+import {
+  createStateContainer,
+  createStateContainerReactHelpers,
+} from '@kbn/kibana-utils-browser';
 
 const container = createStateContainer({});
 export const {

@@ -4,6 +4,7 @@
   "owner": [
     "@elastic/appex-sharedux"
   ],
+  "description": "Deprecated compatibility shim for the @kbn/kibana-utils-* packages.",
   "group": "platform",
   "visibility": "shared",
   "plugin": {

@@ -1,0 +1,10 @@
+{
+  "type": "shared-browser",
+  "id": "@kbn/kibana-utils-browser",
+  "owner": [
+    "@elastic/appex-sharedux"
+  ],
+  "description": "Browser utilities for Kibana applications and plugins.",
+  "group": "platform",
+  "visibility": "shared"
+}
