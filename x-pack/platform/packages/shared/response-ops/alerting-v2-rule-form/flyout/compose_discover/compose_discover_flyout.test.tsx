@@ -696,6 +696,26 @@ describe('ComposeDiscoverFlyout', () => {
       );
     });
 
+    it('keeps the reason of the cloned rule', () => {
+      renderFlyout({
+        mode: 'clone',
+        rule: {
+          id: 'rule-1',
+          kind: 'alert',
+          enabled: true,
+          metadata: { name: 'Source rule' },
+          time_field: '@timestamp',
+          schedule: { every: '5m', lookback: '1m' },
+          query: { base: 'FROM logs-*', breach: { segment: 'WHERE count > 100' } },
+          recovery: { strategy: 'no_breach' },
+          no_data: { strategy: 'ignore' },
+          reason: { template: 'CPU {{ data.cpu }}' },
+        } as any,
+      });
+
+      expect(readReason?.()).toEqual({ template: 'CPU {{ data.cpu }}' });
+    });
+
     it('treats the cloned query as committed', () => {
       renderFlyout({
         mode: 'clone',

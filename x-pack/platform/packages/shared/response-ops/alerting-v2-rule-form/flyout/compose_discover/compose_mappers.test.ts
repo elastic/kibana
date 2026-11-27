@@ -517,7 +517,10 @@ describe('mapRuleToComposeFormValues', () => {
   });
 
   it('loads the reason from the rule', () => {
-    const rule = { ...baseRuleResponse, reason: { template: 'CPU {{ data.cpu }}' } } as RuleResponse;
+    const rule = {
+      ...baseRuleResponse,
+      reason: { template: 'CPU {{ data.cpu }}' },
+    } as RuleResponse;
     expect(mapRuleToComposeFormValues(rule).reason).toEqual({ template: 'CPU {{ data.cpu }}' });
   });
 
@@ -683,6 +686,25 @@ describe('mapRuleToComposeFormValues', () => {
       strategy: 'keep_last',
       query: 'FROM logs-* | STATS c = COUNT(*)',
     });
+  });
+});
+
+describe('round-trip: reason survives load → save', () => {
+  const rule: RuleResponse = {
+    ...baseRuleResponse,
+    reason: { template: 'CPU on {{ data.host.name }}' },
+  };
+
+  it('is sent when a loaded rule is saved as a new one (clone, rule template)', () => {
+    const request = composeFormToCreateRequest(mapRuleToComposeFormValues(rule));
+
+    expect(request.reason).toEqual({ template: 'CPU on {{ data.host.name }}' });
+  });
+
+  it('is sent when a loaded rule is updated', () => {
+    const request = composeFormToUpdateRequest(mapRuleToComposeFormValues(rule));
+
+    expect(request.reason).toEqual({ template: 'CPU on {{ data.host.name }}' });
   });
 });
 

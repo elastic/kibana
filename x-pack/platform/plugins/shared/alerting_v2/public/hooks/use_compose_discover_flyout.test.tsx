@@ -198,6 +198,24 @@ describe('useComposeDiscoverFlyout — create from template wiring', () => {
     mockCreateMutate.mockImplementation((_vars, opts) => opts?.onSuccess?.());
   });
 
+  it('opens the flyout with the reason of the template', async () => {
+    const templateWithReason = {
+      ...template,
+      rule: { ...template.rule, kind: 'alert', reason: { template: 'CPU {{ data.cpu }}' } },
+    } as unknown as RuleTemplateResponse;
+    render(<Harness />);
+    act(() => {
+      hookApi!.openCreateFromTemplateFlyout(templateWithReason);
+    });
+    await waitFor(() => {
+      expect(screen.getByTestId('mockComposeDiscoverFlyout')).toBeInTheDocument();
+    });
+
+    expect(capturedFlyoutProps.rule).toEqual(
+      expect.objectContaining({ reason: { template: 'CPU {{ data.cpu }}' } })
+    );
+  });
+
   it('saves the edited rule through the install API for the opened template', async () => {
     await openFromTemplate();
     callOnCreateRule();
