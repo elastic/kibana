@@ -46,6 +46,7 @@ export {
   resolveEvalSuite,
   resolveEvaluationConnectorId,
   resolveProfileEnvOverrides,
+  readSpaceIdsFlag,
   resolveEvalRunContext,
   buildEvalRunEnv,
   buildEvalRunArgs,
@@ -139,8 +140,10 @@ export type {
   EvaluatorDisplayGroup,
 } from './src/utils/reporting/report_table';
 export { createTable } from './src/utils/reporting/report_table';
+export { getSpaceIdsFromEnv } from './src/utils/space_ids';
 export {
   EvalsClient,
+  type BaselineExperiment,
   type EvaluatorStats,
   type ExperimentStats,
   type UpsertDatasetInput,
