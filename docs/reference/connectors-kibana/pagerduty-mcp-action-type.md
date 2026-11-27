@@ -116,7 +116,7 @@ The PagerDuty connector exposes the following actions. The `browse*` and `manage
 `callTool`
 :   Call any tool on the PagerDuty MCP server directly by name. Use this as an escape hatch when a specific tool is not yet exposed as a named action.
 
-## Look up on-call schedules and incidents in Agent Builder [pagerduty-mcp-agent-builder-skill]
+## Built-in Agent Builder skill for PagerDuty [pagerduty-mcp-agent-builder-skill]
 
 ```{applies_to}
 serverless: preview
