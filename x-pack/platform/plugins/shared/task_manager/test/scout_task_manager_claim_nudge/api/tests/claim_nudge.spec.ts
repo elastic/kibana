@@ -162,35 +162,34 @@ apiTest.describe.skip('Task Manager claim nudge', { tag: ['@local-stateful-class
         cookieHeader
       );
 
-      // A priming task observed now may have been claimed long ago during slow index creation.
-      // Wait for a recent cycle after priming settles, using the server's poll timestamp.
+      // Anchor on a cycle an interval after priming settled, so the watcher is past the baseline
+      // checkpoint that drops the first nudge, and recent enough to leave the nudge under test
+      // room. `_health` can't serve this clock: its snapshot is throttled to the poll interval.
       let cycleStartedAt = 0;
       await expect
         .poll(
           async () => {
-            const response = await apiClient.get('api/task_manager/_health', {
+            const response = await apiClient.get('api/task_manager/metrics?reset=false', {
               headers: { ...COMMON_HEADERS, ...cookieHeader },
               responseType: 'json',
             });
             expect(response).toHaveStatusCode(200);
-            const { stats } = response.body as {
-              stats?: {
-                runtime?: {
-                  value: {
-                    polling: {
-                      last_successful_poll?: string;
-                      duration: { p99: number };
-                    };
-                  };
+            const { metrics } = response.body as {
+              metrics?: {
+                task_claim?: {
+                  timestamp: string;
+                  value: { duration_values?: number[] };
                 };
               };
             };
-            const polling = stats?.runtime?.value.polling;
-            // The config caps the sample window at 10, making p99 the maximum duration.
-            // Subtract it from the completion timestamp to conservatively bound the start.
-            cycleStartedAt =
-              new Date(polling?.last_successful_poll ?? 0).getTime() -
-              Math.ceil(polling?.duration.p99 ?? NaN);
+            const taskClaim = metrics?.task_claim;
+            // Durations are recorded in cycle order, so the last one belongs to this timestamp.
+            const cycleDuration = taskClaim?.value.duration_values?.at(-1);
+            if (!taskClaim || cycleDuration === undefined) {
+              return false;
+            }
+            // The metric is recorded once the cycle completes, so subtract its own duration.
+            cycleStartedAt = new Date(taskClaim.timestamp).getTime() - cycleDuration;
             const cycleAge = Date.now() - cycleStartedAt;
             return (
               cycleStartedAt >= primedAt + POLL_INTERVAL_MS &&
