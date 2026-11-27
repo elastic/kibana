@@ -8,6 +8,10 @@
  */
 
 import type { EventTypeOpts } from '@elastic/ebt/client';
+import {
+  type ESQLStatsQueryMetaExclusionReason,
+  ESQL_STATS_QUERY_META_EXCLUSION_REASON,
+} from '@kbn/esql-utils';
 
 export const CASCADE_EVENT_TYPE = 'discover_cascade';
 
@@ -16,18 +20,30 @@ export enum CascadeEventName {
   COLLAPSED = 'cascaded_documents_collapsed',
   OPT_OUT = 'cascaded_documents_opt_out',
   OPEN_IN_NEW_TAB_CLICKED = 'cascaded_documents_open_in_new_tab_clicked',
+  /**
+   * The query describes a cascade we deliberately don't support,
+   * so the experience was withheld from the user.
+   */
+  UNSUPPORTED_QUERY = 'cascaded_documents_unsupported_query',
 }
+
+export const TRACKED_CASCADE_EXCLUSION_REASONS = new Set<ESQLStatsQueryMetaExclusionReason>([
+  ESQL_STATS_QUERY_META_EXCLUSION_REASON.TIMESERIES_MULTIPLE_STATS,
+  ESQL_STATS_QUERY_META_EXCLUSION_REASON.FORK_COMMAND,
+]);
 
 export enum CascadeEventDataKeys {
   CASCADE_EVENT_NAME = 'eventName',
   TAB_ID = 'tabId',
   NODE_ID = 'nodeId',
+  EXCLUSION_REASON = 'exclusionReason',
 }
 
 export interface CascadeEBTEvent {
   [CascadeEventDataKeys.CASCADE_EVENT_NAME]: CascadeEventName;
   [CascadeEventDataKeys.TAB_ID]: string;
   [CascadeEventDataKeys.NODE_ID]?: string;
+  [CascadeEventDataKeys.EXCLUSION_REASON]?: ESQLStatsQueryMetaExclusionReason;
 }
 
 export const cascadeEventType: EventTypeOpts<Record<string, unknown>> = {
@@ -51,6 +67,14 @@ export const cascadeEventType: EventTypeOpts<Record<string, unknown>> = {
       type: 'keyword',
       _meta: {
         description: 'The ID of the node that was expanded',
+        optional: true,
+      },
+    },
+    [CascadeEventDataKeys.EXCLUSION_REASON]: {
+      type: 'keyword',
+      _meta: {
+        description:
+          'Why the cascade experience was withheld for the query, reported with the "cascaded_documents_unsupported_query" event',
         optional: true,
       },
     },

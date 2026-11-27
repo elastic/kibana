@@ -114,6 +114,7 @@ const ESQLDataCascade = React.memo(
         cellId,
         virtualizerController,
         rowIndex,
+        row,
         nodePath,
         nodePathMap,
         stickyHeaderExtensionPoint,
@@ -125,6 +126,7 @@ const ESQLDataCascade = React.memo(
           cellId={cellId}
           virtualizerController={virtualizerController}
           rowIndex={rowIndex}
+          row={row}
           nodePath={nodePath}
           nodePathMap={nodePathMap}
           stickyHeaderExtensionPoint={stickyHeaderExtensionPoint}

@@ -59,6 +59,11 @@ import { PROFILE_STATE_URL_KEY } from '../../../../common/constants';
 import type { ProfileStateMap } from '../../../../common/context_awareness';
 import { getReplayCacheContextKey } from './utils/get_replay_cache_context_key';
 import { isReplayedLoad } from './utils/is_replayed_load';
+import {
+  CascadeEventDataKeys,
+  CascadeEventName,
+  TRACKED_CASCADE_EXCLUSION_REASONS,
+} from '../components/layout/cascaded_documents/telemetry/event_definition';
 
 export interface SavedSearchData {
   main$: DataMain$;
@@ -295,6 +300,9 @@ export function getDataStateContainer({
   );
   let abortController: AbortController;
   let abortControllerFetchMore: AbortController;
+  // the ES|QL query the cascade exclusion event was last reported for, so repeated fetches of the
+  // same query (auto refresh, time range changes) don't re-report it
+  let lastReportedCascadeExclusionQuery: string | undefined;
 
   function subscribe() {
     const subscription = fetch$
@@ -542,9 +550,24 @@ export function getDataStateContainer({
           if (isEsqlQuery && services.discoverFeatureFlags.getCascadeLayoutEnabled()) {
             const { availableCascadeGroups, selectedCascadeGroups } =
               getCurrentTab().cascadedDocumentsState;
-            const newAvailableGroups = getESQLStatsQueryMeta(query.esql).groupByFields.map(
-              (group) => group.field
-            );
+            const { groupByFields, exclusionReason } = getESQLStatsQueryMeta(query.esql);
+            const newAvailableGroups = groupByFields.map((group) => group.field);
+
+            // the query asked for a cascade we cannot serve yet, report it once per query so the
+            // shapes users reach for can be weighed against what the experience supports
+            if (
+              exclusionReason &&
+              TRACKED_CASCADE_EXCLUSION_REASONS.has(exclusionReason) &&
+              lastReportedCascadeExclusionQuery !== query.esql
+            ) {
+              lastReportedCascadeExclusionQuery = query.esql;
+              scopedEbtManager.trackCascadeEvent({
+                [CascadeEventDataKeys.CASCADE_EVENT_NAME]: CascadeEventName.UNSUPPORTED_QUERY,
+                [CascadeEventDataKeys.TAB_ID]: currentTabId,
+                [CascadeEventDataKeys.EXCLUSION_REASON]: exclusionReason,
+              });
+            }
+
             const haveAvailableGroupsChanged = !isEqual(
               sortBy(availableCascadeGroups),
               sortBy(newAvailableGroups)
