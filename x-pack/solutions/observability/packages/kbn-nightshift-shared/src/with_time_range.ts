@@ -16,10 +16,10 @@ export const withTimeRange = (
   { from, to }: { from?: string; to?: string }
 ): ComposerQuery => {
   let next = query;
-  if (from !== undefined) {
+  if (from) {
     next = next.where`@timestamp >= TO_DATETIME(${{ fromIso: from }})`;
   }
-  if (to !== undefined) {
+  if (to) {
     next = next.where`@timestamp <= TO_DATETIME(${{ toIso: to }})`;
   }
   return next;

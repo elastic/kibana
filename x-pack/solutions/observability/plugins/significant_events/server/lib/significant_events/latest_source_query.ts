@@ -214,8 +214,8 @@ export const applyTimeRange = ({
   to?: string;
 }): ComposerQuery =>
   withTimeRange(query, {
-    from: from === undefined ? undefined : resolveTimeBound(from),
-    to: to === undefined ? undefined : resolveTimeBound(to, { roundUp: true }),
+    from: from ? resolveTimeBound(from) : undefined,
+    to: to ? resolveTimeBound(to, { roundUp: true }) : undefined,
   });
 
 /**

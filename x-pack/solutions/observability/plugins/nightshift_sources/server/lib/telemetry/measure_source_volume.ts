@@ -8,7 +8,11 @@
 import { errors } from '@elastic/elasticsearch';
 import { esql, mutate, type ComposerQuery } from '@elastic/esql';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-import { isResponseError, type ElasticsearchErrorDetails } from '@kbn/es-errors';
+import {
+  isRequestAbortedError,
+  isResponseError,
+  type ElasticsearchErrorDetails,
+} from '@kbn/es-errors';
 import {
   getSourceLocalIndexExpressions,
   getSourceReadTargets,
@@ -70,8 +74,9 @@ const buildJsonSizeQuery = ({
   // SAMPLE rejects a probability of 1.
   const sampled = probability < 1 ? matched.sample(probability) : matched;
   return print(
-    sampled.pipe`EVAL json_bytes = BYTE_LENGTH(JSON_EXTRACT(${esql.col(SOURCE_FIELD)}, "$"))`
-      .pipe`STATS average_json_bytes = AVG(json_bytes)`
+    sampled.pipe`STATS average_json_bytes = AVG(BYTE_LENGTH(JSON_EXTRACT(${esql.col(
+      SOURCE_FIELD
+    )}, "$")))`
   );
 };
 
@@ -82,7 +87,7 @@ const isIndexNotFound = (error: unknown): boolean =>
   isResponseError(error) && esErrorType(error) === 'index_not_found_exception';
 
 const isTimeout = (error: unknown): boolean =>
-  error instanceof errors.TimeoutError || error instanceof errors.RequestAbortedError;
+  error instanceof errors.TimeoutError || isRequestAbortedError(error);
 
 type SourceTraits = Pick<SourceVolume, 'has_remote' | 'has_filter'>;
 
@@ -235,8 +240,9 @@ export const measureSourceVolume = async ({
     indexPatterns = getSourceLocalIndexExpressions(sourceEsql);
     traits = {
       has_remote: getSourceReadTargets(sourceEsql).hasRemote,
-      // Only WHERE may follow the source command.
-      has_filter: esql(sourceEsql).ast.commands.length > 1,
+      has_filter: esql(sourceEsql)
+        .ast.commands.slice(1)
+        .some(({ name }) => name === 'where'),
     };
   } catch {
     return { status: 'error', has_remote: false, has_filter: false, error: 'invalid_query' };
@@ -290,10 +296,10 @@ export const measureSourceVolume = async ({
         })
       : undefined,
   ]);
-  if (averageJsonBytes !== undefined) {
+  if (averageJsonBytes) {
     volume.json_bytes_estimated = Math.round(averageJsonBytes * docCount);
   }
-  if (averageStoredBytes !== undefined) {
+  if (averageStoredBytes) {
     volume[storedBytesField] = Math.round(averageStoredBytes * docCount);
   }
   return volume;

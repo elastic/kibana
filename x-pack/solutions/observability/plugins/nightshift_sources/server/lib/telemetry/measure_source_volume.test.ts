@@ -12,8 +12,7 @@ import { measureSourceVolume } from './measure_source_volume';
 
 const window = { start: '2026-11-03T00:00:00.000Z', end: '2026-11-04T00:00:00.000Z' };
 const inWindow = `WHERE @timestamp >= TO_DATETIME("${window.start}") | WHERE @timestamp <= TO_DATETIME("${window.end}")`;
-const averageJsonBytes =
-  'EVAL json_bytes = BYTE_LENGTH(JSON_EXTRACT(_source, "$")) | STATS average_json_bytes = AVG(json_bytes)';
+const averageJsonBytes = 'STATS average_json_bytes = AVG(BYTE_LENGTH(JSON_EXTRACT(_source, "$")))';
 
 const countOf = (docCount: number) => ({
   columns: [{ name: 'doc_count', type: 'long' }],
