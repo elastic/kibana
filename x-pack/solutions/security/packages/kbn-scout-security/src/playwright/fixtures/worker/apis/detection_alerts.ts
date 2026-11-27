@@ -5,11 +5,20 @@
  * 2.0.
  */
 
+import { errors } from '@elastic/elasticsearch';
 import type { EsClient, ScoutLogger, ScoutParallelWorkerFixtures } from '@kbn/scout';
 import { measurePerformanceAsync } from '@kbn/scout';
 
 const DEFAULT_ALERTS_INDEX_PATTERN = '.alerts-security.alerts-';
 const WAIT_FOR_ALERTS_POLL_INTERVAL_MS = 1_000;
+const RETRYABLE_ES_STATUS_CODES: readonly number[] = [408, 410, 429, 502, 503, 504];
+
+const isTransientEsError = (error: unknown): error is errors.ElasticsearchClientError =>
+  error instanceof errors.NoLivingConnectionsError ||
+  error instanceof errors.ConnectionError ||
+  error instanceof errors.TimeoutError ||
+  (error instanceof errors.ResponseError &&
+    RETRYABLE_ES_STATUS_CODES.includes(error.statusCode ?? 0));
 
 export interface DetectionAlertsApiService {
   deleteAll: () => Promise<void>;
@@ -57,18 +66,29 @@ export const getDetectionAlertsApiService = ({
         const index = `${DEFAULT_ALERTS_INDEX_PATTERN}${space}`;
 
         while (Date.now() < deadline) {
-          // The alerts index is created lazily by the detection engine: `ignore_unavailable` makes a
-          // missing index count as zero alerts, so any error thrown here is unexpected and surfaces.
-          await esClient.indices.refresh({ index, ignore_unavailable: true });
-          const result = await esClient.count({
-            index,
-            ignore_unavailable: true,
-            query: {
-              term: { 'kibana.alert.rule.name': ruleName },
-            },
-          });
-          if (result.count >= minCount) {
-            return result.count;
+          try {
+            // The alerts index is created lazily by the detection engine: `ignore_unavailable` makes
+            // a missing index count as zero alerts.
+            await esClient.indices.refresh({ index, ignore_unavailable: true });
+            const result = await esClient.count({
+              index,
+              ignore_unavailable: true,
+              query: {
+                term: { 'kibana.alert.rule.name': ruleName },
+              },
+            });
+            if (result.count >= minCount) {
+              return result.count;
+            }
+          } catch (error) {
+            // Transient errors (e.g. a 429 from a circuit breaker) keep polling until the deadline;
+            // anything else is a real failure and surfaces immediately.
+            if (!isTransientEsError(error)) {
+              throw error;
+            }
+            log.debug(
+              `waitForAlerts: retrying after transient Elasticsearch error: ${error.message}`
+            );
           }
           await new Promise((resolve) => setTimeout(resolve, WAIT_FOR_ALERTS_POLL_INTERVAL_MS));
         }
