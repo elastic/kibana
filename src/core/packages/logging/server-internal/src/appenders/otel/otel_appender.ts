@@ -19,16 +19,16 @@ import { withTimeout } from '@kbn/std';
 import type { DisposableAppender, Layout, LogLevel, LogRecord } from '@kbn/logging';
 import {
   ROOT_CONTEXT,
+  SeverityNumber,
   TraceFlags,
   metrics,
   trace,
   type Context,
   type Attributes,
   type AttributeValue,
+  type Logger,
   type MeterProvider,
 } from '@opentelemetry/api';
-import type { AnyValueMap } from '@opentelemetry/api-logs';
-import { SeverityNumber, type Logger } from '@opentelemetry/api-logs';
 import {
   BatchLogRecordProcessor,
   LoggerProvider,
@@ -430,7 +430,7 @@ export class OtelAppender implements DisposableAppender {
 
     const layoutConfig = resolveLayoutConfig(config.layout);
     this.layout = Layouts.create(layoutConfig);
-    // JSON layout → sanitised LogRecord as AnyValueMap → indexed as body.structured.
+    // JSON layout → sanitised LogRecord as an OTel Attributes map → indexed as body.structured.
     // Pattern layout → formatted string → indexed as body.text (aliased to `message`).
     this.useStructuredBody = layoutConfig.type !== 'pattern';
     this.transformAttributes = config.transformAttributes;
@@ -475,7 +475,7 @@ export class OtelAppender implements DisposableAppender {
 }
 
 const omitDeepNilValues = (obj: Ecs) => {
-  const result: AnyValueMap = {};
+  const result: Attributes = {};
   Object.entries(getFlattenedObject(obj))
     .filter(([_, value]) => !isNil(value))
     .forEach(([key, value]) => set(result, key, value));

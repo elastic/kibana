@@ -140,6 +140,45 @@ describe('selectEndpointHost', () => {
     ).toEqual({ kind: 'found', candidate: originCandidates[0] });
   });
 
+  it('dispatch reports not_found, not ambiguous, when only linked-project candidates exist', () => {
+    // Dispatching goes through origin Fleet, so candidates the origin project
+    // has no record of are not dispatchable: origin presence outranks
+    // ambiguity, same rule as the hostname walk.
+    expect(
+      selectEndpointHost(
+        [
+          candidate('linked-a', { sortKey: '2026-01-02T00:00:00.000Z' }),
+          candidate('linked-b', { sortKey: '2026-01-01T00:00:00.000Z' }),
+        ],
+        { truncated: false, dispatch: { originCandidates: [] } }
+      )
+    ).toEqual({ kind: 'not_found' });
+  });
+
+  it('dispatch reports not_found before ambiguity even when the candidate set is truncated', () => {
+    expect(
+      selectEndpointHost([candidate('linked-a'), candidate('linked-b'), candidate('linked-c')], {
+        truncated: true,
+        dispatch: { originCandidates: [] },
+      })
+    ).toEqual({ kind: 'not_found' });
+  });
+
+  it('dispatch reports ambiguous when the origin itself holds several claimable candidates', () => {
+    const originCandidates = [
+      candidate('origin-a', { sortKey: '2026-01-02T00:00:00.000Z' }),
+      candidate('origin-b', { sortKey: '2026-01-01T00:00:00.000Z' }),
+    ];
+
+    const result = selectEndpointHost(originCandidates, {
+      truncated: false,
+      dispatch: { originCandidates },
+    });
+
+    expect(result.kind).toBe('ambiguous');
+    expect(ids(result)).toEqual(['origin-a', 'origin-b']);
+  });
+
   it('bounds a truncated ambiguity to MAX_AMBIGUOUS_CANDIDATES', () => {
     const candidates = Array.from({ length: MAX_AMBIGUOUS_CANDIDATES + 2 }, (_, i) =>
       candidate(`agent-${i}`, {

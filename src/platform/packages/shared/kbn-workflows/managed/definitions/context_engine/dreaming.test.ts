@@ -69,14 +69,16 @@ describe('CONTEXT_ENGINE_DREAMING_WORKFLOW', () => {
     });
   });
 
-  it('names the instance after its AI index and keys its concurrency to it', () => {
+  it('names the instance after its AI index and queues on its memory concurrency key', () => {
     const workflow = render();
 
     expect(workflow.name).toBe('Dreaming: support-cases');
     expect(workflow.settings.concurrency).toEqual({
-      key: 'context-engine-dreaming-support-cases-0123456789abcdef',
-      strategy: 'drop',
+      key: 'context-engine-memory-support-cases-0123456789abcdef',
+      strategy: 'queue',
       max: 1,
+      'queue-size': 10,
+      'queue-ttl': '24h',
     });
   });
 
@@ -98,46 +100,38 @@ describe('CONTEXT_ENGINE_DREAMING_WORKFLOW', () => {
   });
 
   it('reads memories since the given time, else after the last memory the last run read, else since the last run', () => {
-    const filters = findStep(render().steps, 'read_memories').with?.query?.bool
-      ?.filter as unknown[];
-    const window = filters.find((filter) => JSON.stringify(filter).includes('updated_at'));
+    const read = findStep(render().steps, 'read_memories');
     const engine = createWorkflowLiquidEngine();
     const lastRun = { output: { since: '2026-11-01T00:00:00.000Z' } };
     const lastOutput = (resumeFrom: string, resumeAfterId: string) => ({
       output: { context: { output: { resume_from: resumeFrom, resume_after_id: resumeAfterId } } },
     });
-    const rendered = (scope: Record<string, unknown>) =>
-      JSON.parse(engine.parseAndRenderSync(JSON.stringify(window), scope));
-    const after = (since: string, afterId: string) => ({
-      bool: {
-        should: [
-          { range: { updated_at: { gt: since } } },
-          {
-            bool: { filter: [{ term: { updated_at: since } }, { range: { id: { gt: afterId } } }] },
-          },
-        ],
-        minimum_should_match: 1,
-      },
+    const rendered = (scope: Record<string, unknown>) => ({
+      since: engine.parseAndRenderSync(String(read.with?.since), scope),
+      after: engine.parseAndRenderSync(String(read.with?.after), scope),
     });
 
-    expect(rendered({ inputs: {}, steps: { last_run: lastRun } })).toEqual(
-      after('2026-11-01T00:00:00.000Z', '')
-    );
+    expect(read.type).toBe('context-engine.readSessionMemories');
+    expect(read.with?.ai_index_id).toBe('{{ consts.ai_index_id }}');
+    expect(rendered({ inputs: {}, steps: { last_run: lastRun } })).toEqual({
+      since: '2026-11-01T00:00:00.000Z',
+      after: '',
+    });
     expect(
       rendered({ inputs: {}, steps: { last_run: lastRun, last_output: lastOutput('', '') } })
-    ).toEqual(after('2026-11-01T00:00:00.000Z', ''));
+    ).toEqual({ since: '2026-11-01T00:00:00.000Z', after: '' });
     expect(
       rendered({
         inputs: {},
         steps: { last_run: lastRun, last_output: lastOutput('2026-10-20T00:00:00.000Z', 'm-9') },
       })
-    ).toEqual(after('2026-10-20T00:00:00.000Z', 'm-9'));
+    ).toEqual({ since: '2026-10-20T00:00:00.000Z', after: 'm-9' });
     expect(
       rendered({
         inputs: { since: '2026-10-01T00:00:00.000Z' },
         steps: { last_run: lastRun, last_output: lastOutput('2026-10-20T00:00:00.000Z', 'm-9') },
       })
-    ).toEqual(after('2026-10-01T00:00:00.000Z', ''));
+    ).toEqual({ since: '2026-10-01T00:00:00.000Z', after: '' });
   });
 
   it('reads the last run output only when it is not given a time and there is a last run', () => {
@@ -163,28 +157,17 @@ describe('CONTEXT_ENGINE_DREAMING_WORKFLOW', () => {
     ]);
   });
 
-  it('outputs where to resume when it read as many memories as it can, and nothing otherwise', () => {
-    const readMemories = findStep(render().steps, 'read_memories').with;
+  it('outputs where the memory read stopped, so the next run resumes there', () => {
     const active = findStep(render().steps, 'active').with;
     const output = findStep(render().steps, 'output_result').with;
-    const hits = (count: number) =>
-      Array.from({ length: count }, (_, index) => ({
-        _source: {
-          id: `m-${index}`,
-          updated_at: `2026-11-01T00:00:${String(index % 60).padStart(2, '0')}.000Z`,
-        },
-      }));
-    const rendered = (template: unknown, count: number) =>
-      createWorkflowLiquidEngine().parseAndRenderSync(String(template), {
-        steps: { read_memories: { output: { hits: { hits: hits(count) } } } },
-      });
-    const size = readMemories?.size as number;
 
-    expect(readMemories?._source).toEqual(['updated_at', 'id']);
-    expect(rendered(active?.resume_from, size)).toBe(hits(size).at(-1)?._source.updated_at);
-    expect(rendered(active?.resume_after_id, size)).toBe(`m-${size - 1}`);
-    expect(rendered(active?.resume_from, 3)).toBe('');
-    expect(rendered(active?.resume_after_id, 3)).toBe('');
+    expect(active).toEqual(
+      expect.objectContaining({
+        memories: '${{ steps.read_memories.output.memories }}',
+        resume_from: '{{ steps.read_memories.output.resume_from }}',
+        resume_after_id: '{{ steps.read_memories.output.resume_after_id }}',
+      })
+    );
     expect(output).toEqual(
       expect.objectContaining({
         resume_from: '{{ variables.resume_from }}',
@@ -291,6 +274,12 @@ describe('CONTEXT_ENGINE_DREAMING_WORKFLOW', () => {
       expect(rendered).toContain(`MEMORIES (one per line):\n${JSON.stringify(memory)}\n`);
       expect(rendered).toContain(JSON.stringify(existing));
       expect(rendered).not.toContain('"Gone"');
+    });
+
+    it('tells the model to leave a person-edited item as it is', () => {
+      expect(prompt()).toContain(
+        'An EXISTING item with attributes["memory.edited_by"] was edited by a person, and its text cannot change. When a memory changes or contradicts what it says, write what the memory says as a new item, and do not return the edited item\'s ref for that memory.'
+      );
     });
 
     it('tells the model not to create a kind with no types configured', () => {
@@ -447,61 +436,5 @@ describe('CONTEXT_ENGINE_DREAMING_WORKFLOW', () => {
     expect(paused.steps).toEqual([
       expect.objectContaining({ type: 'workflow.output', status: 'cancelled' }),
     ]);
-  });
-
-  it('keeps tombstones and expired revisions in the memory query, so collapse finds each memory latest revision', () => {
-    const readMemories = findStep(render().steps, 'read_memories').with;
-
-    expect(readMemories?.sort).toEqual([{ updated_at: 'asc' }, { id: 'asc' }]);
-    expect(readMemories?.collapse).toEqual({
-      field: 'id',
-      inner_hits: expect.objectContaining({
-        name: 'latest',
-        size: 1,
-        sort: [{ updated_at: 'desc' }],
-        _source: {
-          includes: expect.arrayContaining(['governance.lifecycle.status', 'permissions']),
-        },
-        docvalue_fields: [{ field: 'expires_at', format: 'strict_date_time' }],
-      }),
-    });
-    expect(readMemories?.query?.bool).not.toHaveProperty('must_not');
-    expect(JSON.stringify(readMemories?.query)).not.toContain('expires_at');
-  });
-
-  it('dreams only on the latest revisions that are neither deleted nor expired, oldest first', () => {
-    const memories = findStep(render().steps, 'active').with?.memories ?? '';
-    const latest = (
-      id: string,
-      { status, expiresAt }: { status?: string; expiresAt?: string } = {}
-    ) => ({
-      inner_hits: {
-        latest: {
-          hits: {
-            hits: [
-              {
-                _source: { id, ...(status && { governance: { lifecycle: { status } } }) },
-                ...(expiresAt && { fields: { expires_at: [expiresAt] } }),
-              },
-            ],
-          },
-        },
-      },
-    });
-    const hits = [
-      latest('m-1'),
-      latest('m-2', { status: 'deleted' }),
-      latest('m-3', { status: 'active', expiresAt: '2026-12-01T00:00:00.000Z' }),
-      latest('m-4', { status: 'verification_failed' }),
-      latest('m-5', { expiresAt: '2026-11-01T00:00:00.000Z' }),
-    ];
-
-    expect(memories.startsWith('${{') && memories.endsWith('}}')).toBe(true);
-    expect(
-      createWorkflowLiquidEngine().evalValueSync(memories.slice(3, -2).trim(), {
-        execution: { startedAt: '2026-11-09T12:00:00.000Z' },
-        steps: { read_memories: { output: { hits: { hits } } } },
-      })
-    ).toEqual([{ id: 'm-1' }, { id: 'm-3', governance: { lifecycle: { status: 'active' } } }]);
   });
 });

@@ -246,7 +246,7 @@ function TabStack({ title, items, switchState, switchFunc }) {
   );
 }
 
-const DatePickerWithInput = ({ date, onChange, minDate, setIsValid, tab }) => {
+function DatePickerWithInput({ date, onChange, minDate, setIsValid, tab }) {
   const [dateString, setDateString] = useState(date.format(TIME_FORMAT));
   const [currentTab, setCurrentTab] = useState(tab);
 
@@ -297,7 +297,7 @@ const DatePickerWithInput = ({ date, onChange, minDate, setIsValid, tab }) => {
       />
     </>
   );
-};
+}
 
 TimeRangeSelector.propTypes = {
   startTime: PropTypes.object.isRequired,

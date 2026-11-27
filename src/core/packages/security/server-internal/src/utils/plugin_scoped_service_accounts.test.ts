@@ -21,6 +21,7 @@ const createDelegate = (): jest.Mocked<ServiceAccountsServiceContract> => ({
   delete: jest.fn(),
   bindWorkload: jest.fn(),
   unbindWorkload: jest.fn(),
+  bulkUpdateWorkloadBindings: jest.fn(),
   getWorkloadBinding: jest.fn(),
   getWorkloadServiceAccountSummary: jest.fn(),
   withScopedRequestForWorkload: jest.fn(),
@@ -50,6 +51,7 @@ describe('createPluginScopedServiceAccounts', () => {
   it('exposes exactly the public service accounts contract', () => {
     expect(Object.keys(scopedTo('alerting')).sort()).toEqual([
       'bindWorkload',
+      'bulkUpdateWorkloadBindings',
       'create',
       'delete',
       'getWorkloadBinding',
@@ -76,6 +78,89 @@ describe('createPluginScopedServiceAccounts', () => {
 
       await scopedTo('alerting').unbindWorkload(request, WORKLOAD);
       expect(delegate.unbindWorkload).toHaveBeenCalledWith('alerting', request, WORKLOAD);
+    });
+
+    it('bulk updates bindings with the plugin id first', async () => {
+      const request = httpServerMock.createKibanaRequest();
+      const changes = [
+        { op: 'bind' as const, ...WORKLOAD, serviceAccountId: 'sa-1' },
+        { op: 'unbind' as const, workloadType: 'rule', workloadId: 'other-rule-id' },
+      ];
+      const results = [] as never;
+      delegate.bulkUpdateWorkloadBindings.mockResolvedValue(results);
+
+      await expect(scopedTo('alerting').bulkUpdateWorkloadBindings(request, changes)).resolves.toBe(
+        results
+      );
+      expect(delegate.bulkUpdateWorkloadBindings).toHaveBeenCalledWith(
+        'alerting',
+        request,
+        changes
+      );
+    });
+
+    it('passes the delegate a copy of the changes, with only the fields a change has', async () => {
+      const changes = [
+        { op: 'bind' as const, ...WORKLOAD, serviceAccountId: 'sa-1', spaceId: 'other-space' },
+        {
+          op: 'unbind' as const,
+          workloadType: 'rule',
+          workloadId: 'other',
+          serviceAccountId: 'sa-2',
+        },
+      ];
+
+      await scopedTo('alerting').bulkUpdateWorkloadBindings(
+        httpServerMock.createKibanaRequest(),
+        changes
+      );
+
+      const [[, , passed]] = delegate.bulkUpdateWorkloadBindings.mock.calls;
+      expect(passed).not.toBe(changes);
+      expect(passed).toStrictEqual([
+        { op: 'bind', ...WORKLOAD, serviceAccountId: 'sa-1' },
+        { op: 'unbind', workloadType: 'rule', workloadId: 'other' },
+      ]);
+    });
+
+    it('applies what it checked, even when the caller changes its changes meanwhile', async () => {
+      const changes = [{ op: 'bind' as const, ...WORKLOAD, serviceAccountId: 'sa-1' }];
+      delegate.bulkUpdateWorkloadBindings.mockImplementation(async () => {
+        changes[0].workloadType = 'job';
+        return [];
+      });
+
+      await scopedTo('alerting').bulkUpdateWorkloadBindings(
+        httpServerMock.createKibanaRequest(),
+        changes
+      );
+
+      const [[, , passed]] = delegate.bulkUpdateWorkloadBindings.mock.calls;
+      expect(passed).toStrictEqual([{ op: 'bind', ...WORKLOAD, serviceAccountId: 'sa-1' }]);
+    });
+
+    it('passes an empty bulk update through', async () => {
+      const request = httpServerMock.createKibanaRequest();
+      delegate.bulkUpdateWorkloadBindings.mockResolvedValue([]);
+
+      await expect(scopedTo('alerting').bulkUpdateWorkloadBindings(request, [])).resolves.toEqual(
+        []
+      );
+      expect(delegate.bulkUpdateWorkloadBindings).toHaveBeenCalledWith('alerting', request, []);
+    });
+
+    it('accepts a bulk update of exactly the maximum number of changes', async () => {
+      const changes = Array.from({ length: 1000 }, (_, index) => ({
+        op: 'unbind' as const,
+        workloadType: 'rule',
+        workloadId: `rule-${index}`,
+      }));
+
+      await scopedTo('alerting').bulkUpdateWorkloadBindings(
+        httpServerMock.createKibanaRequest(),
+        changes
+      );
+      expect(delegate.bulkUpdateWorkloadBindings).toHaveBeenCalledTimes(1);
     });
 
     it('gets a binding with the plugin id first', async () => {
@@ -162,6 +247,14 @@ describe('createPluginScopedServiceAccounts', () => {
           scoped.unbindWorkload(httpServerMock.createKibanaRequest(), unregistered),
       ],
       [
+        'bulkUpdateWorkloadBindings',
+        (scoped: ReturnType<typeof scopedTo>) =>
+          scoped.bulkUpdateWorkloadBindings(httpServerMock.createKibanaRequest(), [
+            { op: 'unbind', ...WORKLOAD },
+            { op: 'bind', ...unregistered, serviceAccountId: 'sa-1' },
+          ]),
+      ],
+      [
         'getWorkloadBinding',
         (scoped: ReturnType<typeof scopedTo>) =>
           scoped.getWorkloadBinding({ ...unregistered, spaceId: 'default' }),
@@ -181,6 +274,7 @@ describe('createPluginScopedServiceAccounts', () => {
 
       expect(delegate.bindWorkload).not.toHaveBeenCalled();
       expect(delegate.unbindWorkload).not.toHaveBeenCalled();
+      expect(delegate.bulkUpdateWorkloadBindings).not.toHaveBeenCalled();
       expect(delegate.getWorkloadBinding).not.toHaveBeenCalled();
       expect(delegate.getWorkloadServiceAccountSummary).not.toHaveBeenCalled();
       expect(delegate.withScopedRequestForWorkload).not.toHaveBeenCalled();
@@ -208,6 +302,13 @@ describe('createPluginScopedServiceAccounts', () => {
             }),
         ],
         [
+          'bulkUpdateWorkloadBindings',
+          (scoped: ReturnType<typeof scopedTo>) =>
+            scoped.bulkUpdateWorkloadBindings(httpServerMock.createKibanaRequest(), [
+              { op: 'bind', ...WORKLOAD, workloadId, serviceAccountId: 'sa-1' },
+            ]),
+        ],
+        [
           'getWorkloadBinding',
           (scoped: ReturnType<typeof scopedTo>) =>
             scoped.getWorkloadBinding({ ...WORKLOAD_IN_SPACE, workloadId }),
@@ -227,6 +328,7 @@ describe('createPluginScopedServiceAccounts', () => {
     const expectNoDelegateCalls = () => {
       expect(delegate.bindWorkload).not.toHaveBeenCalled();
       expect(delegate.unbindWorkload).not.toHaveBeenCalled();
+      expect(delegate.bulkUpdateWorkloadBindings).not.toHaveBeenCalled();
       expect(delegate.getWorkloadBinding).not.toHaveBeenCalled();
       expect(delegate.getWorkloadServiceAccountSummary).not.toHaveBeenCalled();
       expect(delegate.withScopedRequestForWorkload).not.toHaveBeenCalled();
@@ -258,6 +360,111 @@ describe('createPluginScopedServiceAccounts', () => {
 
       await expect(scopedTo('alerting').getWorkloadBinding(params)).resolves.toBeNull();
       expect(delegate.getWorkloadBinding).toHaveBeenCalledWith('alerting', params);
+    });
+  });
+
+  describe('for a bind that names no usable service account', () => {
+    const binds = (serviceAccountId: unknown) =>
+      [
+        [
+          'bindWorkload',
+          (scoped: ReturnType<typeof scopedTo>) =>
+            scoped.bindWorkload(httpServerMock.createKibanaRequest(), {
+              ...WORKLOAD,
+              serviceAccountId,
+            } as never),
+        ],
+        [
+          'bulkUpdateWorkloadBindings',
+          (scoped: ReturnType<typeof scopedTo>) =>
+            scoped.bulkUpdateWorkloadBindings(httpServerMock.createKibanaRequest(), [
+              { op: 'unbind', workloadType: 'rule', workloadId: 'other-rule-id' },
+              { op: 'bind', ...WORKLOAD, serviceAccountId } as never,
+            ]),
+        ],
+      ] as const;
+
+    const expectNoDelegateCalls = () => {
+      expect(delegate.bindWorkload).not.toHaveBeenCalled();
+      expect(delegate.bulkUpdateWorkloadBindings).not.toHaveBeenCalled();
+    };
+
+    it.each([
+      ...binds('').map(([name, call]) => [name, 'an empty ID', call] as const),
+      ...binds(undefined).map(([name, call]) => [name, 'a missing ID', call] as const),
+      ...binds(42).map(([name, call]) => [name, 'an ID that is not a string', call] as const),
+    ])('%s rejects %s without reaching the delegate', async (_name, _case, call) => {
+      await expect(call(scopedTo('alerting'))).rejects.toThrow(
+        'Plugin [alerting] supplied an empty service account ID; a bind must name the service account as a non-empty string.'
+      );
+      expectNoDelegateCalls();
+    });
+
+    it.each(binds('x'.repeat(1025)))(
+      '%s rejects an ID longer than 1024 characters without reaching the delegate',
+      async (_name, call) => {
+        await expect(call(scopedTo('alerting'))).rejects.toThrow(
+          'Plugin [alerting] supplied a service account ID that is too long: it must be at most 1024 characters, but got 1025.'
+        );
+        expectNoDelegateCalls();
+      }
+    );
+
+    it('accepts an ID of exactly 1024 characters', async () => {
+      const params = { ...WORKLOAD, serviceAccountId: 'x'.repeat(1024) };
+
+      await scopedTo('alerting').bindWorkload(httpServerMock.createKibanaRequest(), params);
+      expect(delegate.bindWorkload).toHaveBeenCalledWith('alerting', expect.anything(), params);
+    });
+  });
+
+  describe('for a malformed bulk update', () => {
+    it.each([
+      [
+        'more than the maximum number of changes',
+        Array.from({ length: 1001 }, (_, index) => ({
+          op: 'unbind',
+          workloadType: 'rule',
+          workloadId: `rule-${index}`,
+        })),
+        'Plugin [alerting] supplied too many service account workload binding changes: at most 1000 are allowed in one call, but got 1001.',
+      ],
+      [
+        'two changes to the same workload',
+        [
+          { op: 'bind', ...WORKLOAD, serviceAccountId: 'sa-1' },
+          { op: 'unbind', ...WORKLOAD },
+        ],
+        'Plugin [alerting] supplied more than one service account workload binding change for workload [rule/rule-id].',
+      ],
+      [
+        'an unknown operation',
+        [{ op: 'rebind', ...WORKLOAD, serviceAccountId: 'sa-1' }],
+        'Plugin [alerting] supplied a service account workload binding change with an unknown operation; it must be "bind" or "unbind".',
+      ],
+      [
+        'changes that are not an array',
+        { op: 'unbind', ...WORKLOAD },
+        'Plugin [alerting] supplied service account workload binding changes that are not an array.',
+      ],
+    ])('rejects %s without reaching the delegate', async (_name, changes, expectedMessage) => {
+      await expect(
+        scopedTo('alerting').bulkUpdateWorkloadBindings(
+          httpServerMock.createKibanaRequest(),
+          changes as never
+        )
+      ).rejects.toThrow(expectedMessage);
+      expect(delegate.bulkUpdateWorkloadBindings).not.toHaveBeenCalled();
+    });
+
+    it('accepts the same workload ID under two workload types', async () => {
+      workloadTypes.register('alerting', { type: 'backfill', name: 'Alerting backfill' });
+
+      await scopedTo('alerting').bulkUpdateWorkloadBindings(httpServerMock.createKibanaRequest(), [
+        { op: 'unbind', workloadType: 'rule', workloadId: 'shared-id' },
+        { op: 'unbind', workloadType: 'backfill', workloadId: 'shared-id' },
+      ]);
+      expect(delegate.bulkUpdateWorkloadBindings).toHaveBeenCalledTimes(1);
     });
   });
 

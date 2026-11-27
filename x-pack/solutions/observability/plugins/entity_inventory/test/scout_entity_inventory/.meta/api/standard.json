@@ -1,9 +1,281 @@
 {
-  "sha1": "25e3d90b9c330b5546a22e7503821150eb8add33",
+  "sha1": "9571c0fac5e734fda4f5601c888846d924c0d420",
   "testChannels": [
     "ci-on-commit"
   ],
   "tests": [
+    {
+      "id": "0aea6caa61cbce3-8c14b010525bd2b",
+      "title": "POST /internal/entity_inventory/filters/_values lists the clusters, merged from both sources",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/entity_inventory/test/scout_entity_inventory/api/tests/filter_values.spec.ts",
+        "line": 54,
+        "column": 13
+      }
+    },
+    {
+      "id": "0aea6caa61cbce3-454292dae38c3a1",
+      "title": "POST /internal/entity_inventory/filters/_values lists the namespaces, which are part of the identity",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/entity_inventory/test/scout_entity_inventory/api/tests/filter_values.spec.ts",
+        "line": 68,
+        "column": 17
+      }
+    },
+    {
+      "id": "0aea6caa61cbce3-d3f1009423fa556",
+      "title": "POST /internal/entity_inventory/filters/_values lists the values of documents that live only in the time-series index, through the TS plan",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/entity_inventory/test/scout_entity_inventory/api/tests/filter_values.spec.ts",
+        "line": 79,
+        "column": 19
+      }
+    },
+    {
+      "id": "0aea6caa61cbce3-e8f23b657202a02",
+      "title": "POST /internal/entity_inventory/filters/_values narrows the values by the selections of the other filters",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/entity_inventory/test/scout_entity_inventory/api/tests/filter_values.spec.ts",
+        "line": 97,
+        "column": 13
+      }
+    },
+    {
+      "id": "0aea6caa61cbce3-3e53d4278fbcff6",
+      "title": "POST /internal/entity_inventory/filters/_values narrows an attribute by an identity selection",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/entity_inventory/test/scout_entity_inventory/api/tests/filter_values.spec.ts",
+        "line": 118,
+        "column": 27
+      }
+    },
+    {
+      "id": "0aea6caa61cbce3-f006490ed8e17de",
+      "title": "POST /internal/entity_inventory/filters/_values reports a selected value that is no longer offered",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/entity_inventory/test/scout_entity_inventory/api/tests/filter_values.spec.ts",
+        "line": 142,
+        "column": 54
+      }
+    },
+    {
+      "id": "0aea6caa61cbce3-e12350ead3c7b01",
+      "title": "POST /internal/entity_inventory/filters/_values cuts the values at limit and reports truncated",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/entity_inventory/test/scout_entity_inventory/api/tests/filter_values.spec.ts",
+        "line": 158,
+        "column": 97
+      }
+    },
+    {
+      "id": "0aea6caa61cbce3-e70d263324b1443",
+      "title": "POST /internal/entity_inventory/filters/_values is not truncated when limit equals the number of values",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/entity_inventory/test/scout_entity_inventory/api/tests/filter_values.spec.ts",
+        "line": 167,
+        "column": 24
+      }
+    },
+    {
+      "id": "0aea6caa61cbce3-9712c8df0342f82",
+      "title": "POST /internal/entity_inventory/filters/_values rejects an attribute no type suggests with 400",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/entity_inventory/test/scout_entity_inventory/api/tests/filter_values.spec.ts",
+        "line": 180,
+        "column": 20
+      }
+    },
+    {
+      "id": "0aea6caa61cbce3-5c349af9933c2f6",
+      "title": "POST /internal/entity_inventory/filters/_values answers 404 for a type with no entity definition",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/entity_inventory/test/scout_entity_inventory/api/tests/filter_values.spec.ts",
+        "line": 190,
+        "column": 24
+      }
+    },
+    {
+      "id": "0aea6caa61cbce3-4733781593882c3",
+      "title": "POST /internal/entity_inventory/filters/_values rejects from equal to or after to with 400",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/entity_inventory/test/scout_entity_inventory/api/tests/filter_values.spec.ts",
+        "line": 201,
+        "column": 82
+      }
+    },
+    {
+      "id": "0aea6caa61cbce3-d79486709f0a5a7",
+      "title": "POST /internal/entity_inventory/filters/_values rejects a request with no types with 400",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/entity_inventory/test/scout_entity_inventory/api/tests/filter_values.spec.ts",
+        "line": 207,
+        "column": 89
+      }
+    },
+    {
+      "id": "0aea6caa61cbce3-90a9814b31720a3",
+      "title": "POST /internal/entity_inventory/filters/_values rejects a limit below 1 or above 9,999 with 400",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/entity_inventory/test/scout_entity_inventory/api/tests/filter_values.spec.ts",
+        "line": 209,
+        "column": 79
+      }
+    },
+    {
+      "id": "0aea6caa61cbce3-5e3252261755c03",
+      "title": "POST /internal/entity_inventory/filters/_values rejects documentFilter in the body with 400",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/entity_inventory/test/scout_entity_inventory/api/tests/filter_values.spec.ts",
+        "line": 219,
+        "column": 36
+      }
+    },
+    {
+      "id": "0aea6caa61cbce3-c4275e2c0b7072b",
+      "title": "POST /internal/entity_inventory/filters/_values rejects a request without the kbn-xsrf header with 400",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/entity_inventory/test/scout_entity_inventory/api/tests/filter_values.spec.ts",
+        "line": 227,
+        "column": 62
+      }
+    },
+    {
+      "id": "0aea6caa61cbce3-d1da5506d3f7e56",
+      "title": "POST /internal/entity_inventory/filters/_values returns values to a viewer, which can read the source indices",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/entity_inventory/test/scout_entity_inventory/api/tests/filter_values.spec.ts",
+        "line": 239,
+        "column": 15
+      }
+    },
+    {
+      "id": "0aea6caa61cbce3-b3154a4eafc3f69",
+      "title": "POST /internal/entity_inventory/filters/_values returns no values and reports every source to a user without index privileges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/entity_inventory/test/scout_entity_inventory/api/tests/filter_values.spec.ts",
+        "line": 255,
+        "column": 25
+      }
+    },
     {
       "id": "5f3e82013678cd8-ec706ad4689f75a",
       "title": "POST /internal/entity_inventory/entities/{type}/_list returns one row per deployment, merged from the Agent and OpenTelemetry sources",
@@ -16,7 +288,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/entity_inventory/test/scout_entity_inventory/api/tests/list.spec.ts",
-        "line": 80,
+        "line": 79,
         "column": 13
       }
     },
@@ -32,7 +304,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/entity_inventory/test/scout_entity_inventory/api/tests/list.spec.ts",
-        "line": 105,
+        "line": 104,
         "column": 11
       }
     },
@@ -48,13 +320,13 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/entity_inventory/test/scout_entity_inventory/api/tests/list.spec.ts",
-        "line": 148,
+        "line": 144,
         "column": 6
       }
     },
     {
-      "id": "5f3e82013678cd8-5c7e494ef05a18e",
-      "title": "POST /internal/entity_inventory/entities/{type}/_list returns the columns in column order, the same as the types route",
+      "id": "5f3e82013678cd8-fa26270eee1261d",
+      "title": "POST /internal/entity_inventory/entities/{type}/_list returns the columns in column order, the same names and kinds as the types route",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -64,7 +336,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/entity_inventory/test/scout_entity_inventory/api/tests/list.spec.ts",
-        "line": 165,
+        "line": 161,
         "column": 17
       }
     },
@@ -80,8 +352,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/entity_inventory/test/scout_entity_inventory/api/tests/list.spec.ts",
-        "line": 200,
-        "column": 53
+        "line": 199,
+        "column": 36
       }
     },
     {
@@ -96,8 +368,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/entity_inventory/test/scout_entity_inventory/api/tests/list.spec.ts",
-        "line": 214,
-        "column": 53
+        "line": 213,
+        "column": 16
       }
     },
     {
@@ -112,8 +384,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/entity_inventory/test/scout_entity_inventory/api/tests/list.spec.ts",
-        "line": 227,
-        "column": 13
+        "line": 224,
+        "column": 84
       }
     },
     {
@@ -129,7 +401,7 @@
       "location": {
         "file": "x-pack/solutions/observability/plugins/entity_inventory/test/scout_entity_inventory/api/tests/list.spec.ts",
         "line": 235,
-        "column": 74
+        "column": 24
       }
     },
     {
@@ -144,8 +416,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/entity_inventory/test/scout_entity_inventory/api/tests/list.spec.ts",
-        "line": 245,
-        "column": 7
+        "line": 240,
+        "column": 19
       }
     },
     {
@@ -160,8 +432,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/entity_inventory/test/scout_entity_inventory/api/tests/list.spec.ts",
-        "line": 259,
-        "column": 32
+        "line": 255,
+        "column": 7
       }
     },
     {
@@ -176,7 +448,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/entity_inventory/test/scout_entity_inventory/api/tests/list.spec.ts",
-        "line": 298,
+        "line": 295,
         "column": 13
       }
     },
@@ -192,8 +464,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/entity_inventory/test/scout_entity_inventory/api/tests/list.spec.ts",
-        "line": 345,
-        "column": 23
+        "line": 341,
+        "column": 25
       }
     },
     {
@@ -208,8 +480,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/entity_inventory/test/scout_entity_inventory/api/tests/list.spec.ts",
-        "line": 375,
-        "column": 19
+        "line": 371,
+        "column": 9
       }
     },
     {
@@ -224,8 +496,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/entity_inventory/test/scout_entity_inventory/api/tests/list.spec.ts",
-        "line": 388,
-        "column": 68
+        "line": 387,
+        "column": 16
       }
     },
     {
@@ -240,8 +512,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/entity_inventory/test/scout_entity_inventory/api/tests/list.spec.ts",
-        "line": 395,
-        "column": 68
+        "line": 391,
+        "column": 11
       }
     },
     {
@@ -256,8 +528,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/entity_inventory/test/scout_entity_inventory/api/tests/list.spec.ts",
-        "line": 407,
-        "column": 14
+        "line": 403,
+        "column": 9
       }
     },
     {
@@ -272,8 +544,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/entity_inventory/test/scout_entity_inventory/api/tests/list.spec.ts",
-        "line": 412,
-        "column": 55
+        "line": 411,
+        "column": 71
       }
     },
     {
@@ -288,8 +560,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/entity_inventory/test/scout_entity_inventory/api/tests/list.spec.ts",
-        "line": 419,
-        "column": 14
+        "line": 415,
+        "column": 13
       }
     },
     {
@@ -304,8 +576,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/entity_inventory/test/scout_entity_inventory/api/tests/list.spec.ts",
-        "line": 423,
-        "column": 89
+        "line": 421,
+        "column": 7
       }
     },
     {
@@ -320,8 +592,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/entity_inventory/test/scout_entity_inventory/api/tests/list.spec.ts",
-        "line": 425,
-        "column": 28
+        "line": 424,
+        "column": 61
       }
     },
     {
@@ -336,8 +608,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/entity_inventory/test/scout_entity_inventory/api/tests/list.spec.ts",
-        "line": 428,
-        "column": 14
+        "line": 425,
+        "column": 68
       }
     },
     {
@@ -352,8 +624,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/entity_inventory/test/scout_entity_inventory/api/tests/list.spec.ts",
-        "line": 440,
-        "column": 67
+        "line": 437,
+        "column": 14
       }
     },
     {
@@ -368,8 +640,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/entity_inventory/test/scout_entity_inventory/api/tests/list.spec.ts",
-        "line": 453,
-        "column": 13
+        "line": 449,
+        "column": 14
       }
     },
     {
@@ -384,8 +656,40 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/entity_inventory/test/scout_entity_inventory/api/tests/types.spec.ts",
-        "line": 40,
-        "column": 25
+        "line": 48,
+        "column": 18
+      }
+    },
+    {
+      "id": "ae4e9e8902d076f-7433801200f31b3",
+      "title": "GET /internal/entity_inventory/types returns the labels of the k8s.deployment columns",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/entity_inventory/test/scout_entity_inventory/api/tests/types.spec.ts",
+        "line": 61,
+        "column": 14
+      }
+    },
+    {
+      "id": "ae4e9e8902d076f-7579f40658b8e87",
+      "title": "GET /internal/entity_inventory/types returns the suggested filters of the built-in host",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/entity_inventory/test/scout_entity_inventory/api/tests/types.spec.ts",
+        "line": 73,
+        "column": 62
       }
     },
     {
@@ -400,8 +704,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/entity_inventory/test/scout_entity_inventory/api/tests/types.spec.ts",
-        "line": 51,
-        "column": 43
+        "line": 84,
+        "column": 18
       }
     },
     {
@@ -416,8 +720,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/entity_inventory/test/scout_entity_inventory/api/tests/types.spec.ts",
-        "line": 62,
-        "column": 18
+        "line": 90,
+        "column": 55
       }
     },
     {
@@ -432,8 +736,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/entity_inventory/test/scout_entity_inventory/api/tests/types.spec.ts",
-        "line": 74,
-        "column": 23
+        "line": 105,
+        "column": 7
       }
     }
   ]

@@ -8,15 +8,19 @@
  */
 
 import fs from 'node:fs';
+import fsPromises from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
 import type * as WorkerThreads from 'node:worker_threads';
 import { loggerMock } from '@kbn/logging-mocks';
 import { createWorkerLogger, type WorkerLogger } from '@kbn/core-threads-server-internal';
 import { MAX_MESSAGE_FRAMES_LENGTH, runWatchdogWorker, type WatchdogWorkerDeps } from './worker';
-import type { ProfileLogMeta, StatsLogMeta, WatchdogWorkerData } from './types';
+import type { FileCounts, ProfileLogMeta, StatsLogMeta, WatchdogWorkerData } from './types';
 import type { CpuProfile, InspectorSession } from './profile_capture';
+import { prepareProfile } from './profile_file';
 import {
+  FILES_PER_HOUR,
+  HOUR_MS,
   ONGOING_REPORT_AFTER_MS,
   REPORT_REFILL_MS,
   SLOT_COUNT,
@@ -24,6 +28,7 @@ import {
   WATCHDOG_WORKER_NAME,
 } from './constants';
 import { MAX_LOCATION_LENGTH, MAX_NAME_LENGTH } from './sanitize';
+import { PROFILING_DIR_MAX_LENGTH } from '../ops_config';
 
 jest.mock('node:worker_threads', () => ({ isMainThread: true, threadId: 99 }));
 const workerThreads = jest.requireMock<typeof WorkerThreads>('node:worker_threads');
@@ -179,16 +184,15 @@ describe('runWatchdogWorker', () => {
     return session;
   };
   const posted = (session = 0) => sessions[session].post.mock.calls.map(([method]) => method);
-  /** Lets the fake session's replies settle. */
+  /** Runs enough microtask hops for the fake Inspector replies and capture pipeline to finish. */
   const settle = async () => {
-    for (let i = 0; i < 10; i++) {
+    for (let i = 0; i < 20; i++) {
       await Promise.resolve();
     }
   };
-  const profileLines = () =>
-    logger.info.mock.calls.filter(([message]) =>
-      String(message).startsWith('Event loop block profile #')
-    );
+  const isCaptureLine = ([message]: unknown[]) =>
+    String(message).startsWith('Event loop block profile #');
+  const profileLines = () => logger.info.mock.calls.filter(isCaptureLine);
   const allStats = () =>
     logger.info.mock.calls
       .filter(([message]) => String(message).startsWith('Event loop watchdog stats'))
@@ -198,7 +202,9 @@ describe('runWatchdogWorker', () => {
   const totalProfilingStats = () =>
     allStats().reduce<Record<string, number>>((totals, { profiling }) => {
       for (const [key, value] of Object.entries(profiling)) {
-        totals[key] = (totals[key] ?? 0) + value;
+        if (typeof value === 'number') {
+          totals[key] = (totals[key] ?? 0) + value;
+        }
       }
       return totals;
     }, {});
@@ -375,7 +381,7 @@ describe('runWatchdogWorker', () => {
     expect(statsMeta().starting).toMatchObject({ blocks: 6, suppressed: 1 });
   });
 
-  it('says how many blocks were not reported before a warning', () => {
+  it('says how many blocks were rate-limited, not logged, before a warning', () => {
     start();
     for (let i = 0; i < 7; i++) {
       block(300);
@@ -384,7 +390,7 @@ describe('runWatchdogWorker', () => {
     block(300);
     expect(logger.warn).toHaveBeenCalledTimes(6);
     expect(logger.warn.mock.calls[5][0]).toBe(
-      'Event loop blocked for ~300ms; 2 blocks before it not reported'
+      'Event loop blocked for ~300ms; 2 rate-limited, not logged'
     );
     expect(logger.warn.mock.calls[5][1]).toMatchObject({
       kibana: { event_loop_watchdog: { suppressedBlocks: 2 } },
@@ -426,6 +432,7 @@ describe('runWatchdogWorker', () => {
         skippedCooldown: 0,
         profilingActiveMs: 0,
         maxStopHeartbeatGapMs: 0,
+        files: { written: 0, sameFrame: 0, hourLimit: 0, writeFailed: 0 },
       },
     });
   });
@@ -573,6 +580,7 @@ describe('runWatchdogWorker', () => {
         nodes: 5,
         heapUsed: 1234,
         stopReason: 'block_ended',
+        file: 'no_directory',
         // The block ended one poll before the stop resolved.
         stopHeartbeatGapMs: 25,
       });
@@ -902,7 +910,12 @@ describe('runWatchdogWorker', () => {
       profile = emptyProfile;
       startProfiling();
       await profiledBlock(1_500);
-      expect(profileMeta()).toMatchObject({ samples: 0, frames: [], kibanaFrames: [] });
+      expect(profileMeta()).toMatchObject({
+        samples: 0,
+        frames: [],
+        kibanaFrames: [],
+        file: 'empty',
+      });
       idle(STATS_INTERVAL_MS);
       expect(lastStats().profiling).toMatchObject({ profiled: 0, emptyTooLate: 1 });
     });
@@ -1052,6 +1065,10 @@ describe('runWatchdogWorker', () => {
       expect(profileMeta().captureDurationMs).toBe(525);
     });
 
+    const LONGEST_DIR = `/${'d'.repeat(PROFILING_DIR_MAX_LENGTH - 1)}`;
+    const MAX_HOSTNAME_LENGTH = 63;
+    const MAX_PID_DIGITS = 7;
+
     /** Logs one capture with every name built from `noisyName`, through a real worker logger. */
     const logCaptureLine = async (
       noisyName: string
@@ -1115,6 +1132,9 @@ describe('runWatchdogWorker', () => {
 
       jest.replaceProperty(workerThreads, 'isMainThread', false);
       jest.spyOn(process, 'uptime').mockReturnValue(999_999.999_999_999);
+      jest.spyOn(fsPromises, 'writeFile').mockResolvedValue();
+      // Pair the longest supported directory and hostname to exercise the maximum output path.
+      jest.spyOn(os, 'hostname').mockReturnValue('h'.repeat(MAX_HOSTNAME_LENGTH));
 
       const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'watchdog-line-size-'));
       const logFile = path.join(tmpDir, 'worker.log');
@@ -1140,6 +1160,7 @@ describe('runWatchdogWorker', () => {
               startAfterMs: { starting: 60_000, running: 60_000 },
               maxDurationMs: { starting: 100_000, running: 100_000 },
               cooldownMs: { starting: 60_000, running: 60_000 },
+              diagnosticDir: LONGEST_DIR,
             },
           },
           () => nowUs,
@@ -1182,11 +1203,22 @@ describe('runWatchdogWorker', () => {
       // every name and location in the line is at its cap. Kibana names and paths are ASCII.
       const { line, droppedLogLines } = await logCaptureLine('a_long_function_name_'.repeat(4));
       expect(droppedLogLines).toBe(0);
-      const lineBytes = Buffer.byteLength(line, 'utf8');
+      // Account for the longest PID width without trying to replace the read-only `process.pid`.
+      // The PID is in the line twice: in the file name and in `process.pid`.
+      const lineBytes =
+        Buffer.byteLength(line, 'utf8') + 2 * (MAX_PID_DIGITS - String(process.pid).length);
       expect(lineBytes).toBeLessThanOrEqual(4_094);
 
       const parsed = JSON.parse(line);
-      expect(parsed.message).not.toMatch(/\[truncated\]$/);
+      expect(parsed.message.endsWith(' [truncated]')).toBe(false);
+      expect(parsed.message).toContain(
+        'stopped: block_ended. Writing event-loop-block-starting-100000ms-'
+      );
+      expect(parsed.message).not.toContain(LONGEST_DIR);
+      expect(parsed.message).toContain(
+        `-${'h'.repeat(MAX_HOSTNAME_LENGTH)}-${process.pid}.cpuprofile. Top: `
+      );
+      expect(parsed.kibana.event_loop_watchdog.profile.file).toBe('admitted');
       expect(parsed.message).toContain('Kibana code: 45.5% ');
       // The frame lists are cut at their cap; the full lists are in `profile`.
       const frameLists = parsed.message.slice(parsed.message.indexOf('Top: '));
@@ -1216,16 +1248,16 @@ describe('runWatchdogWorker', () => {
     });
 
     it('keeps the whole message and drops the profile data when non-ASCII names push the line past 4,094 bytes', async () => {
-      // The ASCII worst case is 3,843 bytes; '€' takes 3 bytes, so these names add well over the 251 left.
+      // The ASCII worst case is 4,016 bytes; '€' takes 3 bytes, so these names add well over the 78 left.
       const { line, droppedLogLines } = await logCaptureLine('€'.repeat(84));
       expect(droppedLogLines).toBe(0);
       expect(Buffer.byteLength(line, 'utf8')).toBeLessThanOrEqual(4_094);
       const parsed = JSON.parse(line);
       expect(parsed.kibana?.event_loop_watchdog).toBeUndefined();
-      expect(parsed.message).toMatch(/\[truncated\]$/);
-      expect(parsed.message).toMatch(
-        /^Event loop block profile #1: block ~100000ms .* stopped: block_ended\. Top: /
-      );
+      expect(parsed.message.endsWith(' [truncated]')).toBe(true);
+      expect(parsed.message).toContain('Event loop block profile #1: block ~100000ms ');
+      expect(parsed.message).toContain('stopped: block_ended. Writing ');
+      expect(parsed.message).toContain('.cpuprofile. Top: ');
       // The message itself is not cut: the frame lists are all there, up to their own `...` cap.
       const frameLists = parsed.message.slice(
         parsed.message.indexOf('Top: '),
@@ -1234,6 +1266,241 @@ describe('runWatchdogWorker', () => {
       expect(frameLists).toContain('Kibana code: 45.5% ');
       expect(frameLists).toHaveLength(MAX_MESSAGE_FRAMES_LENGTH);
       expect(frameLists.endsWith('...')).toBe(true);
+    });
+
+    describe('files', () => {
+      const DIR = '/diag';
+      /** 10:00 UTC: the start of a clock hour. */
+      const HOUR_START = Date.UTC(2026, 10, 20, 10);
+      let wallMs = HOUR_START;
+      const startWriting = () => {
+        start({ profiling: { ...profilingData, diagnosticDir: DIR } }, undefined, {
+          wallClockMs: () => wallMs,
+        });
+        setSlot(Slot.profiling, 1);
+      };
+      /**
+       * A new profile like `sampledProfile`, with its top Kibana frame in a file of its own. Writing
+       * a file changes the profile in place, so each capture needs its own, as from the inspector.
+       */
+      const profileInFrame = (frame: number): CpuProfile => ({
+        ...sampledProfile,
+        nodes: [
+          node(1, '(root)', { children: [2] }),
+          node(2, 'runStep', {
+            url: `file://${ROOT}/x-pack/plugins/workflows/server/step.ts`,
+            lineNumber: 19,
+            children: [3],
+          }),
+          node(3, 'spin', {
+            url: `file://${ROOT}/src/core/server/spin_${frame}.ts`,
+            lineNumber: 9,
+          }),
+        ],
+        samples: [3, 3],
+        timeDeltas: [1_000_000, 1_000_000],
+      });
+      /** Profiles a block in each of `frames`, waiting out the cooldown after each. */
+      const profiledBlocksInFrames = async (frames: number[]) => {
+        for (const frame of frames) {
+          profile = profileInFrame(frame);
+          await profiledBlock(2_000);
+          idle(profilingData.cooldownMs.starting);
+        }
+      };
+      const warnLines = () => logger.warn.mock.calls.filter(isCaptureLine);
+      const warnLineOrder = () =>
+        logger.warn.mock.invocationCallOrder[logger.warn.mock.calls.findIndex(isCaptureLine)];
+      const fileCounts = () => {
+        idle(STATS_INTERVAL_MS);
+        return lastStats().profiling.files;
+      };
+      /** Sums a file-outcome counter across stats periods, which reset after each period. */
+      const summedFiles = (key: keyof FileCounts) => {
+        idle(STATS_INTERVAL_MS);
+        return allStats().reduce((sum, { profiling }) => sum + profiling.files[key], 0);
+      };
+      /** Frames 0 to FILES_PER_HOUR - 1: enough distinct frames to fill a clock hour. */
+      const hourOfFrames = Array.from({ length: FILES_PER_HOUR }, (_, frame) => frame);
+
+      beforeEach(() => {
+        wallMs = HOUR_START;
+      });
+      afterEach(() => jest.restoreAllMocks());
+
+      it('logs the capture at warn with the file name, then writes the prepared profile', async () => {
+        const writeFile = jest.spyOn(fsPromises, 'writeFile').mockResolvedValue();
+        startWriting();
+        await profiledBlock(2_000);
+
+        expect(writeFile).toHaveBeenCalledTimes(1);
+        const [file, data] = writeFile.mock.calls[0];
+        expect(path.dirname(String(file))).toBe(DIR);
+        expect(path.basename(String(file))).toContain('event-loop-block-starting-002000ms-');
+        expect(path.basename(String(file))).toContain('.cpuprofile');
+        expect(JSON.parse(String(data))).toEqual(
+          JSON.parse(JSON.stringify(prepareProfile(sampledProfile, ROOT)))
+        );
+        expect(profileLines()).toHaveLength(0);
+        expect(warnLines()).toHaveLength(1);
+        const [message, meta] = warnLines()[0];
+        expect(message).toContain(
+          `stopped: block_ended. Writing ${path.basename(String(file))}. Top: 100% spin`
+        );
+        expect((meta as ProfileLogMeta).kibana.event_loop_watchdog.profile.file).toBe('admitted');
+        expect(warnLineOrder()).toBeLessThan(writeFile.mock.invocationCallOrder[0]);
+        expect(fileCounts()).toEqual({ written: 1, sameFrame: 0, hourLimit: 0, writeFailed: 0 });
+      });
+
+      it('logs a failed write once at error after the capture', async () => {
+        jest
+          .spyOn(fsPromises, 'writeFile')
+          .mockRejectedValue(
+            Object.assign(new Error('EACCES: permission denied'), { code: 'EACCES' })
+          );
+        startWriting();
+        await profiledBlock(2_000);
+
+        expect(logger.error).toHaveBeenCalledTimes(1);
+        expect(logger.error).toHaveBeenCalledWith(
+          'Failed to write an event loop block profile: EACCES: permission denied',
+          { tags: ['event-loop-watchdog'] }
+        );
+        expect(warnLines()).toHaveLength(1);
+        expect(warnLines()[0][0]).toContain('Writing event-loop-block-starting-');
+        expect(warnLineOrder()).toBeLessThan(logger.error.mock.invocationCallOrder[0]);
+        expect(fileCounts()).toMatchObject({ written: 0, writeFailed: 1 });
+      });
+
+      it("doesn't write or ask admission without a directory", async () => {
+        const writeFile = jest.spyOn(fsPromises, 'writeFile');
+        startProfiling();
+        await profiledBlock(2_000);
+
+        expect(writeFile).not.toHaveBeenCalled();
+        expect(profileMeta().file).toBe('no_directory');
+        expect(fileCounts()).toEqual({ written: 0, sameFrame: 0, hourLimit: 0, writeFailed: 0 });
+      });
+
+      it("doesn't write a capture with no busy samples", async () => {
+        const writeFile = jest.spyOn(fsPromises, 'writeFile');
+        profile = { nodes: [node(1, '(root)')], startTime: 0, endTime: 1_000 };
+        startWriting();
+        await profiledBlock(2_000);
+
+        expect(writeFile).not.toHaveBeenCalled();
+        expect(profileMeta().file).toBe('empty');
+      });
+
+      it('logs a capture in a frame the hour already wrote at info, without writing it', async () => {
+        const writeFile = jest.spyOn(fsPromises, 'writeFile').mockResolvedValue();
+        startWriting();
+        await profiledBlocksInFrames([0, 0]);
+
+        expect(writeFile).toHaveBeenCalledTimes(1);
+        expect(warnLines()).toHaveLength(1);
+        expect(profileLines()).toHaveLength(1);
+        expect(profileLines()[0][0]).not.toContain('Writing ');
+        expect(profileMeta().file).toBe('same_frame');
+        expect(summedFiles('written')).toBe(1);
+        expect(summedFiles('sameFrame')).toBe(1);
+      });
+
+      it('refuses a new frame once the clock hour has FILES_PER_HOUR files', async () => {
+        const writeFile = jest.spyOn(fsPromises, 'writeFile').mockResolvedValue();
+        startWriting();
+        await profiledBlocksInFrames([...hourOfFrames, FILES_PER_HOUR]);
+
+        expect(writeFile).toHaveBeenCalledTimes(FILES_PER_HOUR);
+        expect(profileMeta().file).toBe('hour_limit');
+        expect(summedFiles('written')).toBe(FILES_PER_HOUR);
+        expect(summedFiles('hourLimit')).toBe(1);
+      });
+
+      it('counts a failed write toward the clock hour', async () => {
+        jest.spyOn(fsPromises, 'writeFile').mockRejectedValue(new Error('ENOSPC'));
+        startWriting();
+        await profiledBlocksInFrames([...hourOfFrames, FILES_PER_HOUR]);
+
+        expect(profileMeta().file).toBe('hour_limit');
+        expect(summedFiles('writeFailed')).toBe(FILES_PER_HOUR);
+        expect(summedFiles('hourLimit')).toBe(1);
+      });
+
+      it('writes the same frame again in the next clock hour', async () => {
+        const writeFile = jest.spyOn(fsPromises, 'writeFile').mockResolvedValue();
+        startWriting();
+        await profiledBlocksInFrames([0]);
+        wallMs = HOUR_START + HOUR_MS;
+        await profiledBlocksInFrames([0]);
+
+        expect(writeFile).toHaveBeenCalledTimes(2);
+        expect(warnLines()).toHaveLength(2);
+        expect(profileLines()).toHaveLength(0);
+      });
+
+      it('shares the clock hour between the starting and running phases', async () => {
+        const writeFile = jest.spyOn(fsPromises, 'writeFile').mockResolvedValue();
+        startWriting();
+        await profiledBlocksInFrames([0]);
+        setSlot(Slot.runningSince, nowUs);
+        profile = profileInFrame(0);
+        await profiledBlock(2_000, profilingData.startAfterMs.running);
+
+        expect(writeFile).toHaveBeenCalledTimes(1);
+        expect(profileMeta()).toMatchObject({ phase: 'running', file: 'same_frame' });
+      });
+
+      it('writes to the full directory but logs only the file name, with the directory in the stats', async () => {
+        const writeFile = jest.spyOn(fsPromises, 'writeFile').mockResolvedValue();
+        const longDir = `/${'d'.repeat(PROFILING_DIR_MAX_LENGTH - 1)}`;
+        start({ profiling: { ...profilingData, diagnosticDir: longDir } }, undefined, {
+          wallClockMs: () => wallMs,
+        });
+        setSlot(Slot.profiling, 1);
+        await profiledBlock(2_000);
+
+        const file = String(writeFile.mock.calls[0][0]);
+        expect(path.dirname(file)).toBe(longDir);
+        expect(warnLines()[0][0]).toContain(`Writing ${path.basename(file)}.`);
+        expect(warnLines()[0][0]).not.toContain(longDir);
+        jest.advanceTimersByTime(STATS_INTERVAL_MS);
+        expect(lastStats().profiling.diagnosticDir).toBe(longDir);
+      });
+
+      it('gives the directory in the stats only while profiling is on', () => {
+        start({ profiling: { ...profilingData, diagnosticDir: DIR } });
+        jest.advanceTimersByTime(STATS_INTERVAL_MS);
+        expect(lastStats().profiling.diagnosticDir).toBeUndefined();
+        setSlot(Slot.profiling, 1);
+        jest.advanceTimersByTime(STATS_INTERVAL_MS);
+        expect(lastStats().profiling.diagnosticDir).toBe(DIR);
+        setSlot(Slot.profiling, 0);
+        jest.advanceTimersByTime(STATS_INTERVAL_MS);
+        expect(lastStats().profiling.diagnosticDir).toBeUndefined();
+      });
+
+      it('leaves a directory longer than PROFILING_DIR_MAX_LENGTH off the stats', () => {
+        const tooLong = `/${'d'.repeat(PROFILING_DIR_MAX_LENGTH)}`;
+        start({ profiling: { ...profilingData, diagnosticDir: tooLong } });
+        setSlot(Slot.profiling, 1);
+        jest.advanceTimersByTime(STATS_INTERVAL_MS);
+        const { profiling } = lastStats();
+        expect(profiling.diagnosticDir).toBeUndefined();
+        expect(profiling.files).toEqual({ written: 0, sameFrame: 0, hourLimit: 0, writeFailed: 0 });
+      });
+
+      it('writes a running-phase capture with the running phase in the file name', async () => {
+        const writeFile = jest.spyOn(fsPromises, 'writeFile').mockResolvedValue();
+        startWriting();
+        setSlot(Slot.runningSince, nowUs);
+        await profiledBlock(2_000, profilingData.startAfterMs.running);
+
+        expect(path.basename(String(writeFile.mock.calls[0][0]))).toContain(
+          'event-loop-block-running-002000ms-'
+        );
+        expect(fileCounts()).toMatchObject({ written: 1 });
+      });
     });
 
     it('reports the active profiling time per stats period, splitting a capture across two', async () => {

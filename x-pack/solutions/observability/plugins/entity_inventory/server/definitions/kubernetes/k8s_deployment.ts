@@ -38,6 +38,10 @@ export const k8sDeploymentDefinition: RegistrableEntityDefinition = {
     documentsFilter: getPresenceFilter([['kubernetes.namespace', 'kubernetes.deployment.name']]),
   },
   dynamic: {
+    displayLabels: [
+      { name: 'kubernetes.namespace', label: 'Namespace' },
+      { name: 'k8s.cluster.name', label: 'Cluster' },
+    ],
     sources: [
       {
         indexPattern: 'metrics-kubernetes.state_deployment-*',
@@ -60,5 +64,6 @@ export const k8sDeploymentDefinition: RegistrableEntityDefinition = {
         ],
       },
     ],
+    suggestedFilters: ['k8s.cluster.name', 'kubernetes.namespace'],
   },
 };

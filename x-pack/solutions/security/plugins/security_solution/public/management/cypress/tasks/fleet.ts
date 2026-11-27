@@ -25,9 +25,6 @@ import type {
   PostAgentReassignResponse,
   UpdateAgentPolicyResponse,
 } from '@kbn/fleet-plugin/common/types';
-import { uninstallTokensRouteService } from '@kbn/fleet-plugin/common/services/routes';
-import type { GetUninstallTokensMetadataResponse } from '@kbn/fleet-plugin/common/types/rest_spec/uninstall_token';
-import type { UninstallToken } from '@kbn/fleet-plugin/common/types/models/uninstall_token';
 import { logger } from './logger';
 import type { IndexedFleetEndpointPolicyResponse } from '../../../../common/endpoint/data_loaders/index_fleet_endpoint_policy';
 import { request } from './common';
@@ -141,20 +138,6 @@ export const enableAgentTamperProtectionFeatureFlagInPolicy = (
   });
 };
 
-export const getUninstallToken = (agentPolicyId: string) => {
-  return request<GetUninstallTokensMetadataResponse>({
-    method: 'GET',
-    url: `${uninstallTokensRouteService.getListPath()}?policyId=${agentPolicyId}`,
-    headers: { 'Elastic-Api-Version': API_VERSIONS.public.v1 },
-  }).then((uninstallTokenResponse) => {
-    return request<{ item: UninstallToken }>({
-      method: 'GET',
-      url: uninstallTokensRouteService.getInfoPath(uninstallTokenResponse.body.items[0].id),
-      headers: { 'Elastic-Api-Version': API_VERSIONS.public.v1 },
-    });
-  });
-};
-
 export const unenrollAgent = (agentId: string): Cypress.Chainable<boolean> => {
   return request({
     method: 'POST',
@@ -192,26 +175,6 @@ export const reAssignFleetAgentToPolicy = (
     .then((agentPolicy) => {
       return waitForHasAgentPolicyChanged(agentId, policyId, agentPolicy.revision);
     });
-};
-
-// only used in "real" endpoint tests not in mocked ones
-export const uninstallAgentFromHost = (
-  hostname: string,
-  uninstallToken?: string
-): Cypress.Chainable<string> => {
-  return cy.task('uninstallAgentFromHost', {
-    hostname,
-    uninstallToken,
-  });
-};
-
-// only used in "real" endpoint tests not in mocked ones
-export const isAgentAndEndpointUninstalledFromHost = (
-  hostname: string
-): Cypress.Chainable<boolean> => {
-  return cy.task('isAgentAndEndpointUninstalledFromHost', {
-    hostname,
-  });
 };
 
 const waitForIsAgentUnenrolled = (agentId: string): Cypress.Chainable<boolean> => {

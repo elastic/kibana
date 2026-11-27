@@ -77,7 +77,7 @@ export type {
   FeatureFlagsStart,
   FeatureFlagsSetup,
 } from '@kbn/core-feature-flags-server';
-export { defineTopic } from '@kbn/core-pubsub-server';
+export { defineTopic, PUBSUB_MAX_ID_LENGTH } from '@kbn/core-pubsub-server';
 export type {
   PubSubEvent,
   PubSubEventInit,

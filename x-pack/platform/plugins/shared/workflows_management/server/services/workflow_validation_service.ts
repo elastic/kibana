@@ -119,6 +119,9 @@ export class WorkflowValidationService {
    * reporting endpoint sets them. ES|QL rules check indices and fields against
    * the current user's cluster, which can differ from the one at run time, so
    * they stay report-only until elastic/security-team#18778 lands.
+   *
+   * `isManaged` has no default either: only the YAML of a managed workflow may
+   * use `managed_only` steps, and the YAML doesn't say whether it's managed.
    */
   async validateWorkflow(
     yaml: string,
@@ -127,7 +130,8 @@ export class WorkflowValidationService {
     {
       includeVariableRules,
       includeEsqlRules,
-    }: { includeVariableRules: boolean; includeEsqlRules: boolean }
+      isManaged,
+    }: { includeVariableRules: boolean; includeEsqlRules: boolean; isManaged: boolean }
   ): Promise<ValidateWorkflowResponseDto> {
     // Resolved once, so the schema and the registry cannot disagree about a
     // connector and the contracts are not built twice per request.
@@ -141,6 +145,7 @@ export class WorkflowValidationService {
     const esql = includeEsqlRules ? this.createEsqlCallbacks(request) : undefined;
     const result = await validateWorkflowYaml(yaml, zodSchema, {
       triggerDefinitions,
+      isManaged,
       ...(includeVariableRules && {
         variableValidationRegistry: this.createContextRegistry(allConnectors),
         loadCalledWorkflowOutputs: (workflowIds: string[]) =>

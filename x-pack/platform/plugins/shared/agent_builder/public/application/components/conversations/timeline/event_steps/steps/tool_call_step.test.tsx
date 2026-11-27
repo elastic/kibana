@@ -50,45 +50,52 @@ const makeStep = (results: ToolResult[], intent?: string) =>
   });
 
 describe('ToolCallStep', () => {
-  it('shows "tool: search" and "running…" and is clickable (opens parameters flyout)', async () => {
+  it('shows a running intent and opens the tool flyout on click', async () => {
     const user = userEvent.setup();
-    renderWithProviders(<ToolCallStep step={makeStep([])} />);
-    const status = screen.getByRole('status');
-    expect(status.querySelector('.euiBadge')).toHaveTextContent('tool: search');
-    expect(status).toHaveTextContent('running…');
-    await user.click(screen.getByRole('button'));
-    expect(screen.getByText('tool: search')).toBeInTheDocument();
-  });
-
-  it('shows the intent before the tool badge when the step has one', () => {
     renderWithProviders(<ToolCallStep step={makeStep([], 'Searching for failed logins')} />);
-    const intent = screen.getByTestId('agentBuilderToolCallIntent');
-    expect(intent).toHaveTextContent('Searching for failed logins');
-    const badge = screen.getByRole('status').querySelector('.euiBadge')!;
-    expect(badge).toHaveTextContent('tool: search');
-    // eslint-disable-next-line no-bitwise
-    expect(intent.compareDocumentPosition(badge) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(screen.queryByText('running…')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('agentBuilderToolCallBadge')).not.toBeInTheDocument();
+    await user.click(screen.getByText('Searching for failed logins'));
+    expect(screen.getByRole('dialog')).toBeInTheDocument();
   });
 
-  it('lets the headline shrink so a long intent can be truncated', () => {
-    renderWithProviders(<ToolCallStep step={makeStep([], 'A very long intent '.repeat(20))} />);
-    const labelItem = screen.getByRole('status').closest('.euiFlexItem')!;
-    expect(window.getComputedStyle(labelItem).minWidth).toBe('0');
+  it('allows long intent text to wrap, including words wider than the container', () => {
+    const intent = 'Searching for failed logins '.repeat(20);
+    renderWithProviders(<ToolCallStep step={makeStep([], intent)} />);
+    const label = screen.getByTestId('agentBuilderToolCallIntent');
+    expect(label).toHaveTextContent(intent.trim());
+    expect(window.getComputedStyle(screen.getByRole('status'))).toMatchObject({
+      minWidth: '0',
+      whiteSpace: 'normal',
+      overflowWrap: 'anywhere',
+    });
   });
 
-  it('does not render an intent when the step has none', () => {
-    renderWithProviders(<ToolCallStep step={makeStep([])} />);
+  it.each([undefined, '', '   '])('falls back to the tool badge for intent %p', (intent) => {
+    renderWithProviders(<ToolCallStep step={makeStep([], intent)} />);
+    expect(screen.getByTestId('agentBuilderToolCallBadge')).toHaveTextContent('tool: search');
     expect(screen.queryByTestId('agentBuilderToolCallIntent')).not.toBeInTheDocument();
   });
 
-  it('shows "tool: search" and "ran" and opens the response flyout directly on click', async () => {
+  it('shows a completed intent and opens the response flyout on click', async () => {
     const user = userEvent.setup();
-    renderWithProviders(<ToolCallStep step={makeStep([otherResult('r1')])} />);
-    const status = screen.getByRole('status');
-    expect(status.querySelector('.euiBadge')).toHaveTextContent('tool: search');
-    expect(status).toHaveTextContent('ran');
+    renderWithProviders(
+      <ToolCallStep step={makeStep([otherResult('r1')], 'Searching for failed logins')} />
+    );
+    expect(screen.queryByText('ran')).not.toBeInTheDocument();
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
-    await user.click(screen.getByRole('button'));
+    await user.click(screen.getByText('Searching for failed logins'));
+    expect(screen.getByRole('dialog')).toBeInTheDocument();
+  });
+
+  it.each(['{Enter}', ' '])('opens the flyout with the keyboard using %s', async (key) => {
+    const user = userEvent.setup();
+    renderWithProviders(
+      <ToolCallStep step={makeStep([otherResult('r1')], 'Searching for failed logins')} />
+    );
+    await user.tab();
+    expect(screen.getByRole('button')).toHaveFocus();
+    await user.keyboard(key);
     expect(screen.getByRole('dialog')).toBeInTheDocument();
   });
 
@@ -101,11 +108,29 @@ describe('ToolCallStep', () => {
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
   });
 
-  it('still shows "ran" for an error result, with the danger badge color', () => {
+  it('preserves the danger badge when an error result has no intent', () => {
     renderWithProviders(<ToolCallStep step={makeStep([errorResult('r1')])} />);
-    const badge = screen.getByRole('status').querySelector('.euiBadge');
+    const badge = screen.getByTestId('agentBuilderToolCallBadge');
     expect(badge).toHaveTextContent('tool: search');
-    expect(badge?.className).toContain('danger');
+    expect(badge.className).toContain('danger');
+    expect(screen.queryByText('ran')).not.toBeInTheDocument();
+  });
+
+  it('shows failed beside the intent for an error result', () => {
+    renderWithProviders(
+      <ToolCallStep step={makeStep([errorResult('r1')], 'Searching for failed logins')} />
+    );
+    expect(screen.getByRole('status')).toHaveTextContent('Searching for failed logins — failed');
+    expect(screen.getByText('failed')).toBeInTheDocument();
+    expect(screen.queryByText('ran')).not.toBeInTheDocument();
+  });
+
+  it('shows failed rather than stopped for an error in an aborted turn', () => {
+    renderWithProviders(
+      <ToolCallStep step={makeStep([errorResult('r1')], 'Searching logs')} isAborted />
+    );
+    expect(screen.getByText('failed')).toBeInTheDocument();
+    expect(screen.queryByText('stopped')).not.toBeInTheDocument();
   });
 
   it('shows a stopped flyout when the turn is aborted and the step has no results', async () => {
@@ -121,6 +146,23 @@ describe('ToolCallStep', () => {
     await user.click(screen.getByRole('button'));
     expect(screen.getByRole('dialog')).toHaveTextContent('Stopped');
     expect(screen.queryByRole('progressbar')).not.toBeInTheDocument();
+  });
+
+  it('keeps stopped beside the intent for an aborted call without results', () => {
+    renderWithProviders(
+      <ToolCallStep step={makeStep([], 'Searching for failed logins')} isAborted />
+    );
+    expect(screen.getByTestId('agentBuilderToolCallIntent')).toHaveTextContent(
+      'Searching for failed logins'
+    );
+    expect(screen.getByRole('status')).toHaveTextContent('Searching for failed logins — stopped');
+  });
+
+  it('does not mark a completed call as stopped when its turn is aborted', () => {
+    renderWithProviders(
+      <ToolCallStep step={makeStep([otherResult('r1')], 'Searching for failed logins')} isAborted />
+    );
+    expect(screen.getByRole('status')).toHaveTextContent(/^Searching for failed logins$/);
   });
 
   describe('with FlyoutStackContext', () => {
@@ -148,7 +190,7 @@ describe('ToolCallStep', () => {
       progression: [{ message: 'started', metadata: { agent_execution_id: 'exec-1' } }],
     });
     renderWithProviders(<ToolCallStep step={step} />);
-    expect(screen.getByRole('status')).toHaveTextContent('running…');
+    expect(screen.queryByText('running…')).not.toBeInTheDocument();
     expect(screen.getByRole('button')).toBeInTheDocument();
   });
 });

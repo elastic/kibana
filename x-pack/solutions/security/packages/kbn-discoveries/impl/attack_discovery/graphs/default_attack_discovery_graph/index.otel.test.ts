@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AsyncHooksContextManager } from '@opentelemetry/context-async-hooks';
+import { AsyncLocalStorageContextManager } from '@opentelemetry/context-async-hooks';
 import { context } from '@opentelemetry/api';
 import { defaultResource } from '@opentelemetry/resources';
 import { InMemorySpanExporter, SimpleSpanProcessor } from '@opentelemetry/sdk-trace';
@@ -35,7 +35,7 @@ const prompts = {
 
 describe('default attack discovery graph with a real tracer', () => {
   const exporter = new InMemorySpanExporter();
-  const contextManager = new AsyncHooksContextManager();
+  const contextManager = new AsyncLocalStorageContextManager();
 
   beforeAll(() => {
     contextManager.enable();

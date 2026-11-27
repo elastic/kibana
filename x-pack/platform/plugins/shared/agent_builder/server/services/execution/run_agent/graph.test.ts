@@ -115,7 +115,7 @@ const createTestGraph = ({
     configuration: {
       instructions: '',
       aiIndices: [],
-      capabilities: { attachmentTools: true, apiTools: true },
+      capabilities: { attachmentTools: true, apiTools: true, bashTool: true },
     },
     logger: {} as Logger,
     events: { emit: jest.fn() } as unknown as AgentEventEmitter,

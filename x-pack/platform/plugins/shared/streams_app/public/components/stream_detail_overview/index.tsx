@@ -7,7 +7,7 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, useIsWithinBreakpoints } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { isDraftGetResponse, Streams } from '@kbn/streams-schema';
+import { Streams } from '@kbn/streams-schema';
 import React, { type CSSProperties, type ReactNode, useMemo } from 'react';
 import { useStreamDetail } from '../../hooks/use_stream_detail';
 import { useStreamsPrivileges } from '../../hooks/use_streams_privileges';
@@ -29,7 +29,6 @@ export function StreamOverview() {
   } = useStreamsPrivileges();
 
   const isIngest = Streams.ingest.all.GetResponse.is(definition);
-  const isDraft = isDraftGetResponse(definition);
   /** Match EuiFlexGroup responsive `m` max-breakpoint so sidebar stacks above main when narrow. */
   const isStackedOverviewLayout = useIsWithinBreakpoints(['xs', 's', 'm']);
   const isMobileOverviewLayout = useIsWithinBreakpoints(['xs', 's']);
@@ -46,7 +45,7 @@ export function StreamOverview() {
 
   const mainSections: OverviewSection[] = [
     { id: 'ingest-rate-chart', node: <IngestRateChart />, show: true },
-    { id: 'dataset-quality', node: <DataQualityCard />, show: isIngest && !isDraft },
+    { id: 'dataset-quality', node: <DataQualityCard />, show: isIngest },
   ];
 
   const sidebarSections: OverviewSection[] = [

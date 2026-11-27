@@ -414,4 +414,46 @@ describe('initializeAlertsClient', () => {
     );
     spy1.mockRestore();
   });
+
+  test.each([
+    [
+      'passes shouldUntrackOrphanedAlerts on when the caller sets it',
+      true,
+      expect.objectContaining({ shouldUntrackOrphanedAlerts: true }),
+    ],
+    [
+      'does not ask to untrack orphaned alerts when the caller does not set it',
+      undefined,
+      expect.not.objectContaining({ shouldUntrackOrphanedAlerts: true }),
+    ],
+  ])('%s', async (_, shouldUntrackOrphanedAlerts, expectedInitializeExecutionOpts) => {
+    alertsService.createAlertsClient.mockImplementationOnce(() => alertsClient);
+    await initializeAlertsClient({
+      alertsService,
+      context: {
+        alertingEventLogger,
+        flappingSettings: DEFAULT_FLAPPING_SETTINGS,
+        maintenanceWindowsService,
+        logger,
+        request: fakeRequest,
+        ruleId: RULE_ID,
+        ruleLogPrefix: `${RULE_TYPE_ID}:${RULE_ID}: '${RULE_NAME}'`,
+        ruleRunMetricsStore,
+        spaceId: asSpaceId('default'),
+        isServerless: false,
+      },
+      executionId: 'abc',
+      logger,
+      maxAlerts: 100,
+      rule: mockedRule,
+      ruleType: ruleTypeWithAlerts,
+      shouldUntrackOrphanedAlerts,
+      startedAt: mockedTaskInstance.startedAt,
+      taskInstance: mockedTaskInstance,
+    });
+
+    expect(alertsClient.initializeExecution).toHaveBeenLastCalledWith(
+      expectedInitializeExecutionOpts
+    );
+  });
 });

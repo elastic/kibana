@@ -69,9 +69,10 @@ jobs:
         env:
           ELASTICSEARCH_URL: ${{ secrets.CODE_SCANNING_ES_HOST }}
           ELASTICSEARCH_API_KEY: ${{ secrets.CODE_SCANNING_ES_API_KEY }}
+          SETUP_TEMPLATE: ${{ github.event.inputs.setup_template }}
         run: |
           TEMPLATE_ARG=""
-          if [ "${{ github.event.inputs.setup_template }}" = "true" ]; then
+          if [ "$SETUP_TEMPLATE" = "true" ]; then
             TEMPLATE_ARG="--setup-template"
           fi
 

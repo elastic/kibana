@@ -1,0 +1,59 @@
+# Building @kbn/ui-app-menu
+
+## Prerequisites
+
+- Node.js (version from Kibana's `.nvmrc`)
+- Kibana repository bootstrapped (`pnpm kbn bootstrap`)
+
+## Build
+
+The publish pipeline invokes `packaging/scripts/build.sh` directly. To build
+locally:
+
+```bash
+src/platform/kbn-ui/app-menu/packaging/scripts/build.sh
+```
+
+## Output
+
+Artifacts in `src/platform/kbn-ui/app-menu/target/`:
+
+| File | Description |
+|------|-------------|
+| `index.js` (+ `index.js.map`) | Bundled CommonJS + source map |
+| `index.d.ts` | TypeScript declarations |
+| `package.json` | Package manifest |
+| `metadata.json` | Build metadata (name, version, gitSha, buildTimestamp, peerDependencies) |
+| `kbn-ui-app-menu-<version>.tgz` | Installable npm tarball |
+
+## Build steps
+
+1. **Type validation**: `tsc --noEmit` checks that the standalone types in
+   `packaging/react/types.ts` match the source types and exports in both
+   directions (`packaging/react/type_validation.ts`).
+2. **Webpack bundle**: compiles and bundles the components, replacing
+   `@kbn/i18n` and `@kbn/i18n-react` with a local stub and
+   `@kbn/ui-chrome-layout` with its prebuilt target via resolver aliases.
+   `lodash` is bundled; peer dependencies stay external.
+3. **Declaration generation**: emits `index.d.ts` as a regular ES module so
+   consumers can import types directly from `@kbn/ui-app-menu`.
+4. **Manifest copy**: copies `package.json` into the output directory.
+5. **Version stamp**: writes a content-hash version into `target/package.json`.
+6. **Metadata**: writes `metadata.json` with name, version, git SHA, build
+   timestamp, and peer dependencies. Override the SHA with `BUILD_GIT_SHA`.
+7. **Tarball**: `npm pack --force` produces `kbn-ui-app-menu-<version>.tgz`.
+   The `--force` flag is required because the manifest is marked `private`.
+
+Before step 1, the script builds `@kbn/ui-chrome-layout` if
+`src/platform/kbn-ui/chrome-layout/target/index.js` is missing, because both
+the type validation and the bundle read from that target.
+
+## Consumer smoke test
+
+```bash
+mkdir app-menu-check && cd app-menu-check
+npm init -y
+npm i <path-to>/kbn-ui-app-menu-<version>.tgz \
+      @elastic/eui @emotion/react react react-dom
+node -e "console.log(Object.keys(require('@kbn/ui-app-menu')))"
+```

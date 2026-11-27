@@ -378,6 +378,28 @@ describe('DestinationValidator', () => {
       expect(validator.finalize().diagnostics).toEqual([]);
     });
 
+    it('validates attachment YAML as a workflow that is not managed', async () => {
+      const validateWorkflow = jest.fn().mockResolvedValue({ valid: true, diagnostics: [] });
+      const validator = createValidator({
+        attachmentIndex: {
+          inMemoryWorkflowIds: new Set(['wf-1']),
+          attachmentToWorkflowId: new Map(),
+          inMemoryWorkflowIdToYaml: new Map([['wf-1', YAML_MANUAL_TRIGGER_WITH_PAYLOAD_REF]]),
+        },
+        validateWorkflow,
+        request: mockRequest,
+      });
+
+      await validator.resolveFromAttachments('wf-1');
+
+      expect(validateWorkflow).toHaveBeenCalledWith(
+        YAML_MANUAL_TRIGGER_WITH_PAYLOAD_REF,
+        'default',
+        mockRequest,
+        { isManaged: false }
+      );
+    });
+
     it('records an error when destinationId matches an attachment ID (not workflowId)', async () => {
       const validator = createValidator({
         attachmentIndex: {
@@ -441,6 +463,37 @@ describe('DestinationValidator', () => {
       expect(getWorkflow).toHaveBeenCalledWith('wf-1', 'default');
       expect(validator.finalize().diagnostics).toEqual([]);
     });
+
+    it.each([
+      { managed: true, isManaged: true },
+      { managed: false, isManaged: false },
+      { managed: undefined, isManaged: false },
+    ])(
+      'validates the YAML with isManaged $isManaged when the workflow has managed $managed',
+      async ({ managed, isManaged }) => {
+        const validateWorkflow = jest.fn().mockResolvedValue({ valid: true, diagnostics: [] });
+        const validator = createValidator({
+          persistedWorkflowLookup: {
+            getWorkflow: jest.fn().mockResolvedValue({
+              id: 'wf-1',
+              yaml: YAML_MANUAL_TRIGGER_WITH_PAYLOAD_REF,
+              managed,
+            }),
+          },
+          validateWorkflow,
+          request: mockRequest,
+        });
+
+        await validator.resolveFromPersistedWorkflow('wf-1');
+
+        expect(validateWorkflow).toHaveBeenCalledWith(
+          YAML_MANUAL_TRIGGER_WITH_PAYLOAD_REF,
+          'default',
+          mockRequest,
+          { isManaged }
+        );
+      }
+    );
 
     it('returns true with no diagnostics when persisted workflow has no yaml', async () => {
       const validator = createValidator({
@@ -1019,7 +1072,8 @@ steps:
       expect(validateWorkflow).toHaveBeenCalledWith(
         YAML_MANUAL_TRIGGER_WITH_PAYLOAD_REF,
         'default',
-        mockRequest
+        mockRequest,
+        { isManaged: false }
       );
       expect(() => validator.finalize()).toThrow(
         /\[1\] \[error\] \[invalidVariablePath\] Unknown path "episodez" \(at steps\.0\.with\.message\)/

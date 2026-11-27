@@ -142,6 +142,28 @@ describe('SlackTriggerEditor', () => {
     );
   });
 
+  it('flags a saved channel when its only binding was deleted', async () => {
+    mockUseAllRelayAppBindings.mockReturnValue({ ...connected, bindings: [] });
+    render(<Editor kind="slack_message" initialChannels={['C1']} />);
+
+    const pill = screen.getByTestId('automationSlackTriggerChannels');
+    expect(pill).toHaveAttribute('aria-invalid', 'true');
+    fireEvent.click(pill);
+
+    expect(await screen.findByTestId('automationSlackTriggerChannelsInputHelp')).toHaveTextContent(
+      'Not connected: C1. Messages there will not start this automation.'
+    );
+  });
+
+  it('does not flag a legacy channel name that matches a connected channel', () => {
+    render(<Editor kind="slack_message" initialChannels={['#alerts']} />);
+
+    expect(screen.getByTestId('automationSlackTriggerChannels')).toHaveAttribute(
+      'aria-invalid',
+      'false'
+    );
+  });
+
   it('links to Settings when no channels are connected', async () => {
     mockUseAllRelayAppBindings.mockReturnValue({ ...connected, bindings: [] });
     render(<Editor kind="slack_message" />);
@@ -171,6 +193,24 @@ describe('SlackTriggerEditor', () => {
     );
 
     expect(screen.getByText('#alerts')).toBeInTheDocument();
+  });
+
+  it.each([
+    [['C1'], false],
+    [['C1', 'C9'], true],
+  ])('marks the read only channel badge for %j as invalid: %s', (channels, isInvalid) => {
+    render(
+      <I18nProvider>
+        <SlackTriggerEditor
+          readOnly
+          trigger={{ kind: 'slack_message', channels, users: [], bots: [], messageFilter: '' }}
+          onChange={onChange}
+        />
+      </I18nProvider>
+    );
+
+    const badge = screen.getByTestId('automationSlackTriggerChannels');
+    expect(badge.querySelector('[data-euiicon-type="warning"]') !== null).toBe(isInvalid);
   });
 
   describe('message filter', () => {

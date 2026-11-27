@@ -15,6 +15,9 @@ export const TIME_ZONE = 'America/New_York';
 /** The environment of the page loads below, which no other mock data uses. */
 export const TIME_ZONE_ENVIRONMENT = 'time-zone-test';
 
+/** The application of the page loads below, which no other mock data uses. */
+export const TIME_ZONE_APP = 'otel-clock';
+
 /**
  * Page loads on either side of New York's local midnight and noon, by the local start of the
  * bucket each one falls in.
@@ -60,12 +63,12 @@ const documents = Object.values(LOCAL_PAGE_LOADS)
         event_name: 'browser.navigation_timing',
         resource: {
           attributes: {
-            'service.name': 'otel-clock',
+            'service.name': TIME_ZONE_APP,
             'telemetry.sdk.language': 'webjs',
             'deployment.environment.name': TIME_ZONE_ENVIRONMENT,
           },
         },
-        attributes: { 'url.full': 'https://otel-clock.example.com/' },
+        attributes: { 'url.full': `https://${TIME_ZONE_APP}.example.com/` },
       },
     };
   });

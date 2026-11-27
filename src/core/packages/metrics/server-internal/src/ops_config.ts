@@ -10,12 +10,15 @@
 import { schema } from '@kbn/config-schema';
 import type { ServiceConfigDescriptor } from '@kbn/core-base-server-internal';
 import type { Duration } from 'moment';
+import { PROFILING_DIR_MAX_LENGTH } from './event_loop_watchdog/sanitize';
 
 /** @internal */
 export const OPS_CONFIG_PATH = 'ops' as const;
 
 /** @internal */
 const OPS_METRICS_INTERVAL = '5s';
+
+export { PROFILING_DIR_MAX_LENGTH };
 
 /** @internal */
 interface OpsConfigCGroupOverridesOps {
@@ -34,7 +37,7 @@ export interface OpsConfigEventLoopWatchdogProfiling {
 export interface OpsConfigEventLoopWatchdog {
   enabled: boolean;
   blockThreshold: Duration;
-  profiling: OpsConfigEventLoopWatchdogProfiling;
+  profiling: OpsConfigEventLoopWatchdogProfiling & { dir?: string };
   startup: {
     blockThreshold?: Duration;
     profiling: Partial<OpsConfigEventLoopWatchdogProfiling>;
@@ -79,6 +82,11 @@ const configSchema = schema.object({
       maxDuration: schema.duration({ defaultValue: '10s', ...maxDurationBounds }),
       // Minimum wait after a capture before another can start.
       cooldown: schema.duration({ defaultValue: '1m', ...cooldownBounds }),
+      // Directory for profile files. Use an absolute path; a relative one resolves against the
+      // directory Kibana was started from. Defaults to Node's `--diagnostic-dir`; without either,
+      // no files are written. `bin/kibana` sets `--diagnostic-dir` to its `data` directory on
+      // Linux, macOS and in Docker.
+      dir: schema.maybe(schema.string({ minLength: 1, maxLength: PROFILING_DIR_MAX_LENGTH })),
     }),
     startup: schema.object({
       // Same for blocks that start in the `starting` phase; falls back to `blockThreshold`.

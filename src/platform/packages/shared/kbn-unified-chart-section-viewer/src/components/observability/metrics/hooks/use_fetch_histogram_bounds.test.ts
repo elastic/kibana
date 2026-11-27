@@ -42,11 +42,10 @@ type BoundsRow = Record<string, number | string | null>;
 const emptyRawResponse: ExecuteEsqlResult<BoundsRow>['rawResponse'] = {
   columns: [],
   values: [],
-  requestParams: { query: '' },
 };
 
 const resolved = (documents: BoundsRow[]): Promise<ExecuteEsqlResult<BoundsRow>> =>
-  Promise.resolve({ documents, rawResponse: emptyRawResponse, requestParams: { query: '' } });
+  Promise.resolve({ documents, rawResponse: emptyRawResponse });
 
 const deferred = () => {
   let resolve: (rows: BoundsRow[]) => void = () => {};
@@ -55,7 +54,6 @@ const deferred = () => {
       resolvePromise({
         documents: rows,
         rawResponse: emptyRawResponse,
-        requestParams: { query: '' },
       });
   });
   return { promise, resolve };
@@ -88,7 +86,7 @@ const gauge = createMetric({
 });
 
 const services = {
-  data: { search: { search: jest.fn() } },
+  data: { search: { esql: jest.fn() } },
   uiSettings: {},
 } as unknown as ChartSectionProps['services'];
 

@@ -20,7 +20,11 @@ import { getRecordImprovementsStepDefinition } from './record_improvements';
 import { getApplyDreamChangesStepDefinition } from './apply_dream_changes';
 import { getApplyDreamRelationshipsStepDefinition } from './apply_dream_relationships';
 import { getDreamingStatusStepDefinition } from './get_dreaming_status';
-import { getReadTraceTranscriptsStepDefinition } from './read_trace_transcripts';
+import { getReadSessionMemoriesStepDefinition } from './read_session_memories';
+import { getReadSessionTranscriptsStepDefinition } from './read_session_transcripts';
+import { getGatherMaintenanceStepDefinition } from './gather_maintenance';
+import { getApplyMaintenanceChangesStepDefinition } from './apply_maintenance_changes';
+import { getRecordMaintenanceRunStepDefinition } from './record_maintenance_run';
 
 /** Registers the KI, feedback analysis and dreaming workflow steps. */
 export const registerStepDefinitions = ({
@@ -41,7 +45,11 @@ export const registerStepDefinitions = ({
   workflowsExtensions.registerStepDefinition(getFeedbackContextStepDefinition(feedbackAnalysis));
   workflowsExtensions.registerStepDefinition(getRecordImprovementsStepDefinition(feedbackAnalysis));
   workflowsExtensions.registerStepDefinition(getDreamingStatusStepDefinition(dreaming));
-  workflowsExtensions.registerStepDefinition(getReadTraceTranscriptsStepDefinition(dreaming));
+  workflowsExtensions.registerStepDefinition(getReadSessionMemoriesStepDefinition(dreaming));
+  workflowsExtensions.registerStepDefinition(getReadSessionTranscriptsStepDefinition(dreaming));
   workflowsExtensions.registerStepDefinition(getApplyDreamChangesStepDefinition(deps));
   workflowsExtensions.registerStepDefinition(getApplyDreamRelationshipsStepDefinition(deps));
+  workflowsExtensions.registerStepDefinition(getGatherMaintenanceStepDefinition(deps));
+  workflowsExtensions.registerStepDefinition(getApplyMaintenanceChangesStepDefinition(deps));
+  workflowsExtensions.registerStepDefinition(getRecordMaintenanceRunStepDefinition(deps));
 };

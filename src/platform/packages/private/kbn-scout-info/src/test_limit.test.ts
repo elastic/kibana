@@ -78,7 +78,9 @@ describe('testLimits', () => {
   it('exposes every selection method / target attribute combination', () => {
     expect(testLimits.all.map((limit) => limit.playwrightTag)).toEqual([
       '@limit/only-fips',
+      '@limit/only-upgradeAssistant',
       '@limit/except-fips',
+      '@limit/except-upgradeAssistant',
     ]);
   });
 
@@ -121,15 +123,26 @@ describe('testLimits', () => {
   });
 
   describe('unsatisfiedBy', () => {
-    it('reports only-fips as unsatisfied without the fips attribute', () => {
+    it('leaves out every only tag when the run has no attributes', () => {
       expect(testLimits.unsatisfiedBy([]).map((limit) => limit.playwrightTag)).toEqual([
         '@limit/only-fips',
+        '@limit/only-upgradeAssistant',
       ]);
     });
 
-    it('reports except-fips as unsatisfied with the fips attribute', () => {
+    it('leaves out except-fips and only-upgradeAssistant when the run has fips', () => {
       expect(testLimits.unsatisfiedBy(['fips']).map((limit) => limit.playwrightTag)).toEqual([
+        '@limit/only-upgradeAssistant',
         '@limit/except-fips',
+      ]);
+    });
+
+    it('leaves out every except tag when the run has both attributes', () => {
+      const unsatisfied = testLimits.unsatisfiedBy(['fips', 'upgradeAssistant']);
+
+      expect(unsatisfied.map((limit) => limit.playwrightTag)).toEqual([
+        '@limit/except-fips',
+        '@limit/except-upgradeAssistant',
       ]);
     });
   });

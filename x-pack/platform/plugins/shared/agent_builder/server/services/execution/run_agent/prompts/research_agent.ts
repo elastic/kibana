@@ -7,6 +7,7 @@
 
 import type { BaseMessageLike } from '@langchain/core/messages';
 import { cleanPrompt } from '@kbn/agent-builder-genai-utils/prompts';
+import { INTENT_PARAM } from '@kbn/agent-builder-genai-utils/langchain';
 import type { SerializedMetadataValue } from '@kbn/agent-builder-common';
 import type { ConversationTemplatesService } from '@kbn/agent-builder-server/runner/conversation_templates_service';
 import { getSkillsInstructions, getRelevantSkillsPointerInstructions } from './utils/skills';
@@ -119,7 +120,7 @@ const getAgentSystemMessage = async ({
   configuration: {
     instructions: customInstructions,
     aiIndexCatalog,
-    capabilities: { attachmentTools },
+    capabilities: { attachmentTools, bashTool },
   },
   outputSchema,
   skills,
@@ -146,9 +147,12 @@ const getAgentSystemMessage = async ({
     conversationMetadataWritable
   );
 
+  // The same per-run availability gates the FILESYSTEM section and the render-payload workflow.
+  const bashEnabled = experimentalFeatures.bash && bashTool;
+
   const customRenderingSection = getCustomRenderingSection(
     attachmentTools,
-    renderRenderersPrompt(renderers, { bashEnabled: experimentalFeatures.bash })
+    renderRenderersPrompt(renderers, { bashEnabled })
   );
 
   // An agent with no skills gets no skill tools, so it gets none of the skill instructions either.
@@ -224,6 +228,7 @@ When sending user-facing text, you're writing for a person, not logging to a con
 Assume users can't see most tool calls or thinking - only your text output.
 - Before your first tool call, briefly state what you're about to do.
 - Before tool calls, briefly explain why you are calling this or those tools.
+- Also set \`${INTENT_PARAM}\` on each tool call that accepts it: a few words on what the call does (e.g. "List all indices"). Clients may show it to the user as that step's label.
 - While working, give short updates at key moments: when you find something load-bearing, when changing direction, when you've made progress without an update.
 
 ## OUTPUT STYLE
@@ -232,7 +237,7 @@ ${
   customRenderingSection ? '- Use custom rendering when appropriate.\n' : ''
 }- Use minimal Markdown for readability (short bullets; code blocks for queries/JSON when helpful).
 
-${getFileSystemInstructions({ bashEnabled: experimentalFeatures.bash })}
+${getFileSystemInstructions({ bashEnabled })}
 
 ${experimentalFeatures.dynamicTools ? getDynamicToolsInstructions() : ''}
 

@@ -146,6 +146,7 @@ function DevToolsWrapper({
     () =>
       devTools.map((currentDevTool) => ({
         id: currentDevTool.id,
+        'data-test-subj': `${currentDevTool.id}Tab`,
         label: currentDevTool.title,
         isSelected: currentDevTool === activeDevTool,
         disabled: currentDevTool.isDisabled(),
@@ -169,6 +170,7 @@ function DevToolsWrapper({
           {devTools.map((currentDevTool) => (
             <EuiTab
               key={currentDevTool.id}
+              data-test-subj={`${currentDevTool.id}Tab`}
               disabled={currentDevTool.isDisabled()}
               isSelected={currentDevTool === activeDevTool}
               onClick={() => {

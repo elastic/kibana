@@ -55,8 +55,9 @@ export const isOneOf = <T extends string>(options: readonly T[], value: unknown)
  * Identity and namespace source fields from entity definitions. The alert enrich rebuilds
  * each row's EUID filter from them; without the namespace sources (e.g. `event.module`)
  * the filter derives a different namespace and misses unstamped alerts. Identity fields that
- * the definition does not store (such as `user.entity.id`) are left out: the entity records
- * have no such column, so keeping them would fail the query.
+ * the definition does not store are left out: the entity records have no such column, so
+ * keeping them would fail the query. `user.entity.id` is stored, so AWS rows keep it and
+ * their alerts resolve to the ARN entity.
  */
 const IDENTITY_KEEP_FIELDS = [
   ...new Set([

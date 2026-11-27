@@ -154,6 +154,7 @@
             "type": "string"
           },
           "height": {
+            "nullable": true,
             "readOnly": true,
             "type": "integer"
           },
@@ -187,6 +188,7 @@
             "type": "string"
           },
           "width": {
+            "nullable": true,
             "readOnly": true,
             "type": "integer"
           }
@@ -217,16 +219,31 @@
         "type": "object"
       },
       "CollaboratorObject": {
-        "properties": {
-          "email": {
-            "format": "email",
+        "oneOf": [
+          {
+            "format": "int64",
+            "type": "integer"
+          },
+          {
             "type": "string"
           },
-          "name": {
-            "type": "string"
+          {
+            "additionalProperties": true,
+            "properties": {
+              "email": {
+                "format": "email",
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "email"
+            ],
+            "type": "object"
           }
-        },
-        "type": "object"
+        ]
       },
       "CurrentUserResponse": {
         "properties": {
@@ -266,10 +283,6 @@
               "user_email": {
                 "type": "string"
               },
-              "user_id": {
-                "format": "int64",
-                "type": "integer"
-              },
               "user_name": {
                 "type": "string"
               }
@@ -293,8 +306,15 @@
             "type": "string"
           },
           "user_id": {
-            "format": "int64",
-            "type": "integer"
+            "oneOf": [
+              {
+                "format": "int64",
+                "type": "integer"
+              },
+              {
+                "type": "string"
+              }
+            ]
           },
           "user_name": {
             "nullable": true,
@@ -487,8 +507,15 @@
       "TicketFieldValueInput": {
         "properties": {
           "id": {
-            "format": "int64",
-            "type": "integer"
+            "oneOf": [
+              {
+                "format": "int64",
+                "type": "integer"
+              },
+              {
+                "type": "string"
+              }
+            ]
           },
           "value": {
             "oneOf": [
@@ -506,6 +533,9 @@
                   "type": "string"
                 },
                 "type": "array"
+              },
+              {
+                "type": "null"
               }
             ]
           }
@@ -551,9 +581,18 @@
             "writeOnly": true
           },
           "brand_id": {
-            "format": "int64",
-            "nullable": true,
-            "type": "integer"
+            "oneOf": [
+              {
+                "format": "int64",
+                "type": "integer"
+              },
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
           },
           "collaborator_ids": {
             "items": {
@@ -579,7 +618,21 @@
           },
           "custom_fields": {
             "items": {
-              "$ref": "#/components/schemas/TicketFieldValueInput"
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/TicketFieldValueInput"
+                },
+                {
+                  "additionalProperties": true,
+                  "minProperties": 1,
+                  "not": {
+                    "required": [
+                      "id"
+                    ]
+                  },
+                  "type": "object"
+                }
+              ]
             },
             "type": "array"
           },
@@ -622,7 +675,21 @@
           },
           "fields": {
             "items": {
-              "$ref": "#/components/schemas/TicketFieldValueInput"
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/TicketFieldValueInput"
+                },
+                {
+                  "additionalProperties": true,
+                  "minProperties": 1,
+                  "not": {
+                    "required": [
+                      "id"
+                    ]
+                  },
+                  "type": "object"
+                }
+              ]
             },
             "type": "array"
           },
@@ -686,8 +753,15 @@
           },
           "macro_ids": {
             "items": {
-              "format": "int64",
-              "type": "integer"
+              "oneOf": [
+                {
+                  "format": "int64",
+                  "type": "integer"
+                },
+                {
+                  "type": "string"
+                }
+              ]
             },
             "type": "array",
             "writeOnly": true
@@ -725,7 +799,29 @@
             "type": "string"
           },
           "recipient": {
-            "type": "string"
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "properties": {
+                  "email": {
+                    "format": "email",
+                    "type": "string"
+                  },
+                  "name": {
+                    "type": "string"
+                  }
+                },
+                "type": "object"
+              }
+            ]
           },
           "requester": {
             "oneOf": [
@@ -1626,6 +1722,77 @@
       "basicAuth": {
         "scheme": "basic",
         "type": "http"
+      },
+      "oauth2": {
+        "flows": {
+          "authorizationCode": {
+            "authorizationUrl": "/oauth/authorizations/new",
+            "refreshUrl": "/oauth/tokens",
+            "scopes": {
+              "account_settings:read": "View account settings. Includes account configuration, ticket and user fields, and workspaces.",
+              "account_settings:write": "Create, edit, and delete account settings. Includes account configuration, ticket and user fields, and workspaces.",
+              "accounts:read": "Accounts read scope.",
+              "accounts:write": "Accounts write scope.",
+              "ai_agents:chat": "Ai agents chat scope.",
+              "ai_agents:list": "Ai agents list scope.",
+              "any_channel:write": "Push messages from an external channel into Zendesk. Includes creating tickets, comments, and users from an integrated channel. Write only.",
+              "apps:read": "View installed apps and their settings. Includes a list of installed apps and each app's settings.",
+              "apps:write": "Install, configure, and remove apps. Includes installing and uninstalling apps, changing settings, and uploading custom app packages.",
+              "auditlogs:read": "View audit logs, which provide an account-wide record of who changed what and when.",
+              "automations:read": "View automations and their details.",
+              "automations:write": "Create, edit, and delete automations.",
+              "brands:read": "View brands and their agent assignments.",
+              "brands:write": "Create, edit, and delete brands and their agent assignments.",
+              "custom_objects:read": "View custom objects. Includes custom object definitions and record attachments.",
+              "custom_objects:write": "Create, edit, and delete custom objects. Includes definitions and record attachments.",
+              "deletion_schedules:read": "View deletion schedules. Includes data retention policies that automatically delete tickets, users, and other data.",
+              "deletion_schedules:write": "Delete deletion schedules. Includes deleting data retention policies.",
+              "dynamic_content:read": "View dynamic content items and language variants.",
+              "dynamic_content:write": "Create, edit, and delete dynamic content items and language variants.",
+              "groups:read": "View groups and their memberships.",
+              "groups:write": "Create, edit, and delete groups and their memberships.",
+              "hc:read": "View Help Center content. Includes articles, sections, categories, community posts and comments.",
+              "hc:write": "Create, edit, and delete Help Center content. Includes articles, sections, categories, community posts and comments.",
+              "impersonate": "Allows Zendesk Support admins to make requests on behalf of end users. See [Making API requests on behalf of end users](/documentation/ticketing/using-the-zendesk-api/making-api-requests-on-behalf-of-end-users/).",
+              "macros:read": "View macros, their categories, and attachments.",
+              "macros:write": "Create, edit, and delete macros and their attachments.",
+              "organizations:read": "View organizations and their details. Includes memberships, subscriptions, and merge history.",
+              "organizations:write": "Create, edit, and delete organizations and manage their memberships. Includes adding and removing users, managing subscriptions, and merging organizations.",
+              "read": "Read all data. Gives access to GET endpoints, including permission to sideload related resources.",
+              "requests:read": "View support requests and their comments.",
+              "requests:write": "Submit and edit support requests. Includes creating new requests and adding comments to existing ones.",
+              "satisfaction_ratings:read": "View satisfaction ratings, scores, and reasons.",
+              "satisfaction_ratings:write": "Submit satisfaction ratings. Includes rating a ticket as good or bad with an optional reason.",
+              "security:read": "View security and sign-in settings. Includes password policies, session timeouts, IP restrictions, and SSO configuration. Read only.",
+              "side_conversations:read": "Side conversations read scope.",
+              "side_conversations:write": "Side conversations write scope.",
+              "sla_policies:read": "View SLA and group SLA policies.",
+              "sla_policies:write": "Create, edit, delete, and reorder SLA and group SLA policies.",
+              "targets:read": "View targets and their delivery failures.",
+              "targets:write": "Create, edit, and delete targets.",
+              "themes:read": "View Guide themes and their files.",
+              "themes:write": "Create, edit, and delete Guide themes. Includes importing, updating, publishing, exporting, and deleting themes.",
+              "ticket_attachments:read": "View files attached to tickets.",
+              "ticket_attachments:write": "Upload, edit, and delete ticket attachments. Includes uploading files, updating and deleting attachments, and redacting them.",
+              "ticket_views:read": "View ticket views and the tickets they return.",
+              "ticket_views:write": "Create, edit, and delete ticket views.",
+              "tickets:read": "View tickets. Includes ticket contents, comments and conversation history, tags, forms and fields, audits, events, and metrics.",
+              "tickets:write": "Create, edit, and delete tickets. Includes adding comments, tags, merging tickets, marking spam, attachments, forms, and custom statuses.",
+              "triggers:read": "View triggers, trigger categories, and their revision history.",
+              "triggers:write": "Create, edit, delete, and reorder triggers and trigger categories.",
+              "users:read": "View users. Includes identities, active sessions, group, organization, and brand memberships, roles, and settings.",
+              "users:write": "Create, edit, and delete users and manage their access. Includes resetting passwords, ending sessions, adding identities, changing memberships, and managing custom roles.",
+              "web_widget:write": "Edit Web Widget settings and configuration. Write only.",
+              "webhooks:read": "View webhooks and their activity history.",
+              "webhooks:write": "Create, edit, test, and delete webhooks.",
+              "write": "Write all data. Gives access to POST, PUT, and DELETE endpoints.",
+              "zis:read": "View private integrations. Includes configurations, connections, and inbound webhooks.",
+              "zis:write": "Create, edit, and delete private integrations. Includes configurations, connections, and inbound webhooks."
+            },
+            "tokenUrl": "/oauth/tokens"
+          }
+        },
+        "type": "oauth2"
       }
     }
   },
@@ -1661,6 +1828,24 @@
             }
           },
           {
+            "in": "query",
+            "name": "brand_id",
+            "schema": {
+              "oneOf": [
+                {
+                  "enum": [
+                    "all"
+                  ],
+                  "type": "string"
+                },
+                {
+                  "format": "int64",
+                  "type": "integer"
+                }
+              ]
+            }
+          },
+          {
             "$ref": "#/components/parameters/SearchInclude"
           }
         ],
@@ -1674,7 +1859,14 @@
               }
             }
           }
-        }
+        },
+        "security": [
+          {
+            "oauth2": [
+              "read"
+            ]
+          }
+        ]
       }
     },
     "/api/v2/tickets": {
@@ -1708,13 +1900,6 @@
           },
           {
             "$ref": "#/components/parameters/TicketsInclude"
-          },
-          {
-            "in": "query",
-            "name": "start_time",
-            "schema": {
-              "type": "integer"
-            }
           }
         ],
         "responses": {
@@ -1727,7 +1912,14 @@
               }
             }
           }
-        }
+        },
+        "security": [
+          {
+            "oauth2": [
+              "tickets:read"
+            ]
+          }
+        ]
       }
     },
     "/api/v2/tickets/{ticket_id}": {
@@ -1765,7 +1957,14 @@
               }
             }
           }
-        }
+        },
+        "security": [
+          {
+            "oauth2": [
+              "tickets:read"
+            ]
+          }
+        ]
       }
     },
     "/api/v2/tickets/{ticket_id}/comments": {
@@ -1801,6 +2000,17 @@
             }
           },
           {
+            "in": "query",
+            "name": "sort",
+            "schema": {
+              "enum": [
+                "created_at",
+                "-created_at"
+              ],
+              "type": "string"
+            }
+          },
+          {
             "$ref": "#/components/parameters/CursorPaginationPage"
           }
         ],
@@ -1814,7 +2024,14 @@
               }
             }
           }
-        }
+        },
+        "security": [
+          {
+            "oauth2": [
+              "tickets:read"
+            ]
+          }
+        ]
       },
       "parameters": [
         {

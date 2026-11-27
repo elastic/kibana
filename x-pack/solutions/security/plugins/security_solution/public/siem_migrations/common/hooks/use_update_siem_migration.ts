@@ -11,12 +11,15 @@ import { i18n } from '@kbn/i18n';
 import type { MigrationType } from '../../../../common/siem_migrations/types';
 import type { UpdateRuleMigrationRequestBody } from '../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
 import type { UpdateDashboardMigrationRequestBody } from '../../../../common/siem_migrations/model/api/dashboards/dashboard_migration.gen';
+import type { UpdateWorkflowMigrationRequestBody } from '../../../../common/siem_migrations/model/api/workflows/workflow_migration.gen';
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
 import { useKibana } from '../../../common/lib/kibana';
 
 export type UpdateMigrationBody<T extends MigrationType> = T extends 'rule'
   ? UpdateRuleMigrationRequestBody
-  : UpdateDashboardMigrationRequestBody;
+  : T extends 'dashboard'
+  ? UpdateDashboardMigrationRequestBody
+  : UpdateWorkflowMigrationRequestBody;
 
 export interface UpdateMigrationArgs<T extends MigrationType> {
   migrationId: string;
@@ -48,8 +51,10 @@ export function useUpdateSiemMigration<T extends MigrationType>(
     (params: UpdateMigrationArgs<T>) => {
       if (migrationType === 'rule') {
         return siemMigrations.rules.api.updateMigration(params);
-      } else {
+      } else if (migrationType === 'dashboard') {
         return siemMigrations.dashboards.api.updateDashboardMigration(params);
+      } else {
+        return siemMigrations.workflows.api.updateWorkflowMigration(params);
       }
     },
     [siemMigrations, migrationType]

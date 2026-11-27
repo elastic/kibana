@@ -78,6 +78,7 @@ export const shouldSkipAsNoOp = ({
   return (
     latest.status === candidate.status &&
     latest.severity === severity &&
+    latest.summary === candidate.input.summary &&
     !addsRule &&
     !changesMemberVerdict(history, candidate.input.signals)
   );

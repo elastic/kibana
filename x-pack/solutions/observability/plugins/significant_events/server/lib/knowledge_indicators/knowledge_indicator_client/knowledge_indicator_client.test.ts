@@ -427,8 +427,9 @@ describe('KnowledgeIndicatorClient.deleteIndicators', () => {
     expect(documents.every((d: StoredTombstone) => d.deleted === true)).toBe(true);
   });
 
-  it('throws when the tombstone write reports errors', async () => {
-    const { client, create, runEsql } = makeClient();
+  it('throws and reports no change when the tombstone write reports errors', async () => {
+    const onWrite = jest.fn();
+    const { client, create, runEsql } = makeClient({ onWrite });
     runEsql.mockResolvedValueOnce({ hits: [createFeatureDoc({ id: 'feat-1' })] });
     create.mockResolvedValueOnce({
       errors: true,
@@ -440,6 +441,8 @@ describe('KnowledgeIndicatorClient.deleteIndicators', () => {
     });
 
     await expect(client.deleteIndicators(SOURCE)).rejects.toThrow(/Failed to delete indicators/);
+    // A change reported before the write commits would let a subscriber re-read stale state.
+    expect(onWrite).not.toHaveBeenCalled();
   });
 
   it('is a no-op when there are no active revisions', async () => {
@@ -449,6 +452,19 @@ describe('KnowledgeIndicatorClient.deleteIndicators', () => {
     await client.deleteIndicators(SOURCE);
 
     expect(create).not.toHaveBeenCalled();
+  });
+});
+
+describe('KnowledgeIndicatorClient onWrite', () => {
+  it('reports the source once a bulk write commits', async () => {
+    const onWrite = jest.fn();
+    const { client, runEsql } = makeClient({ onWrite });
+    runEsql.mockResolvedValueOnce({ hits: [createFeatureDoc({ id: 'feat-1' })] });
+
+    await client.bulk(SOURCE, [{ delete: { type: KI_TYPE_FEATURE, id: 'feat-1' } }]);
+
+    expect(onWrite).toHaveBeenCalledTimes(1);
+    expect(onWrite).toHaveBeenCalledWith(SOURCE);
   });
 });
 

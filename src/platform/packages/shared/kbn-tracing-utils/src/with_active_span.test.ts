@@ -13,7 +13,7 @@ import { of, throwError } from 'rxjs';
 import type { WithActiveSpan } from './with_active_span';
 import { withActiveSpan } from './with_active_span';
 import { last } from 'lodash';
-import { AsyncHooksContextManager } from '@opentelemetry/context-async-hooks';
+import { AsyncLocalStorageContextManager } from '@opentelemetry/context-async-hooks';
 import {
   AlwaysOnSampler,
   InMemorySpanExporter,
@@ -55,10 +55,10 @@ const setupInMemoryTracer = () => {
 };
 
 describe('withActiveSpan', () => {
-  let cm: AsyncHooksContextManager;
+  let cm: AsyncLocalStorageContextManager;
 
   beforeAll(() => {
-    cm = new AsyncHooksContextManager().enable();
+    cm = new AsyncLocalStorageContextManager().enable();
     context.setGlobalContextManager(cm);
   });
 

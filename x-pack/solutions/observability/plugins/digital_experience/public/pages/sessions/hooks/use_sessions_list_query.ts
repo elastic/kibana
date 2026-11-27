@@ -20,6 +20,9 @@ const FILTER_KEYS = [
   'entryPage',
   'withJsErrors',
   'withFailedRequests',
+  'withFrustration',
+  'frustrationTarget',
+  'frustrationPage',
   'duration',
 ] as const satisfies ReadonlyArray<keyof SessionsListUrlQuery>;
 
@@ -31,6 +34,9 @@ export interface SessionsListState {
   entryPage?: string;
   withJsErrors: boolean;
   withFailedRequests: boolean;
+  withFrustration: boolean;
+  frustrationTarget?: string;
+  frustrationPage?: string;
   duration?: DurationBucket;
   sortField: SessionSortField;
   sortDirection: 'asc' | 'desc';
@@ -47,6 +53,9 @@ export const sessionsListStateOf = (query: SessionsListUrlQuery): SessionsListSt
   entryPage: query.entryPage,
   withJsErrors: query.withJsErrors ?? false,
   withFailedRequests: query.withFailedRequests ?? false,
+  withFrustration: query.withFrustration ?? false,
+  frustrationTarget: query.frustrationTarget,
+  frustrationPage: query.frustrationPage,
   duration: query.duration,
   sortField: query.sortField ?? 'start_time',
   sortDirection: query.sortDirection ?? 'desc',

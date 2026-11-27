@@ -5,10 +5,14 @@
  * 2.0.
  */
 
+import React, { Suspense } from 'react';
+import { render, screen } from '@testing-library/react';
 import { SecurityPageName } from '@kbn/security-solution-plugin/common';
 import { ProductFeatureKey } from '@kbn/security-solution-features/keys';
 
 import { upsellingPages, upsellingSections } from './upsellings';
+import { registerUpsellings } from './register_upsellings';
+import { mockServices } from '../common/services/__mocks__/services.mock';
 import { getEnabledProductFeatures } from '../../common/pli/pli_features';
 import { ProductLine, ProductTier } from '../../common/product';
 import type { SecurityProductTypes } from '../../common/config';
@@ -49,4 +53,78 @@ describe('Cloud Defend integration upselling', () => {
       }
     }
   );
+});
+
+describe('Endpoint policy upselling', () => {
+  const securityEssentials = {
+    product_line: ProductLine.security,
+    product_tier: ProductTier.essentials,
+  } as const;
+
+  it.each([
+    ['Security Essentials only', [securityEssentials], false, false],
+    [
+      'Security Essentials with Endpoint Essentials',
+      [
+        securityEssentials,
+        { product_line: ProductLine.endpoint, product_tier: ProductTier.essentials },
+      ],
+      true,
+      false,
+    ],
+    [
+      'Security Essentials with Endpoint Complete',
+      [
+        securityEssentials,
+        { product_line: ProductLine.endpoint, product_tier: ProductTier.complete },
+      ],
+      true,
+      true,
+    ],
+  ] as const)(
+    'gates policy protections and protection updates for %s',
+    (_name, productTypes, protectionsEnabled, protectionUpdatesEnabled) => {
+      const enabledProductFeatures = getEnabledProductFeatures([...productTypes]);
+      const protectionsUpsell = upsellingSections.find(
+        ({ id }) => id === 'endpointPolicyProtections'
+      );
+      const protectionUpdatesUpsell = upsellingSections.find(
+        ({ id }) => id === 'endpoint_protection_updates'
+      );
+
+      expect(protectionsUpsell?.pli).toBe(ProductFeatureKey.endpointPolicyProtections);
+      expect(protectionUpdatesUpsell?.pli).toBe(ProductFeatureKey.endpointProtectionUpdates);
+      expect(enabledProductFeatures.includes(ProductFeatureKey.endpointPolicyProtections)).toBe(
+        protectionsEnabled
+      );
+      expect(enabledProductFeatures.includes(ProductFeatureKey.endpointProtectionUpdates)).toBe(
+        protectionUpdatesEnabled
+      );
+    }
+  );
+
+  it('renders the registered policy protections upsell for Security Essentials only', async () => {
+    registerUpsellings([securityEssentials], mockServices);
+
+    const ProtectionsUpsell = mockServices.securitySolution
+      .getUpselling()
+      .getSectionsValue()
+      .get('endpointPolicyProtections');
+
+    expect(ProtectionsUpsell).toBeDefined();
+    if (!ProtectionsUpsell) {
+      return;
+    }
+
+    render(
+      <Suspense fallback={null}>
+        <ProtectionsUpsell />
+      </Suspense>
+    );
+
+    expect(
+      await screen.findByTestId('endpointPolicy-protectionsLockedCard-title')
+    ).toBeInTheDocument();
+    expect(screen.getByTestId('endpointPolicy-protectionsLockedCard')).toBeInTheDocument();
+  });
 });
