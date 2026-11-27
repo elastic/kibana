@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { escapeRegExp } from 'lodash';
 import type { Locator } from '../../../..';
 import { expect } from '../..';
 import type { EsqlControlOptions } from '../../ui_components';
@@ -93,6 +94,17 @@ export abstract class DiscoverLayout extends DiscoverSave {
       .or(this.page.testSubj.locator('dataView-switch-link'));
   }
 
+  /**
+   * Asserts the data view switch shows `name`. The accessible name may include the visible
+   * "Data view" prefix, so match it as optional instead of comparing the full string.
+   */
+  async expectSelectedDataView(name: string, options?: { timeout?: number }) {
+    await expect(this.getSelectedDataView()).toHaveAccessibleName(
+      new RegExp(`^(Data view )?${escapeRegExp(name)}$`),
+      options
+    );
+  }
+
   private async fillAndSubmitDataViewEditor({
     name,
     adHoc = false,
@@ -147,7 +159,7 @@ export abstract class DiscoverLayout extends DiscoverSave {
         adHoc ? 'exploreIndexPatternButton' : 'saveIndexPatternButton'
       );
 
-      await expect(this.getSelectedDataView()).toHaveAccessibleName(title, { timeout: 20_000 });
+      await this.expectSelectedDataView(title, { timeout: 20_000 });
     }).toPass({ timeout: 45_000, intervals: [0] });
 
     // New empty tabs stay uninitialized after a data-view change; the caller knows

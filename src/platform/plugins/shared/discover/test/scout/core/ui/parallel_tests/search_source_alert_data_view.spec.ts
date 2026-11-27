@@ -223,9 +223,7 @@ spaceTest.describe(
         const contextLink = await getGeneratedContextLink(esClient, outputIndex, ruleId);
 
         const assertAdHocResults = async () => {
-          await expect(pageObjects.discover.getSelectedDataView()).toHaveAccessibleName(
-            sourceIndex
-          );
+          await pageObjects.discover.expectSelectedDataView(sourceIndex);
           await expect.poll(() => pageObjects.discover.getHitCountInt()).toBe(5);
           await expect(pageObjects.dataGrid.getCell(0, '_source')).toContainText(
             'runtime-message-field'

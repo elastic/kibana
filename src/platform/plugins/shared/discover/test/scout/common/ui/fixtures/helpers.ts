@@ -285,7 +285,7 @@ export const expectSearchSourceAlertInitialResults = async (
 ): Promise<void> => {
   expect(await pageObjects.filterBar.getFilterCount()).toBe(0);
   expect(await pageObjects.queryBar.getQuery()).toBe('');
-  await expect(pageObjects.discover.getSelectedDataView()).toHaveAccessibleName(dataViewName);
+  await pageObjects.discover.expectSelectedDataView(dataViewName);
   await pageObjects.discover.getCurrentDataViewId();
   await expect.poll(() => pageObjects.discover.getHitCountInt()).toBe(5);
 };

@@ -98,9 +98,7 @@ spaceTest.describe('Data view without timefield', { tag: '@local-stateful-classi
       await page.goBack();
       await pageObjects.dataGrid.waitForDocTableRendered();
 
-      await expect(pageObjects.discover.getSelectedDataView()).toHaveAccessibleName(
-        'without-timefield'
-      );
+      await pageObjects.discover.expectSelectedDataView('without-timefield');
 
       await expectTimePickerState(pageObjects.datePicker, 'disabled');
     }
