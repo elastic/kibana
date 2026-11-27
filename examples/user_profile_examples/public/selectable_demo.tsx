@@ -60,15 +60,35 @@ export const SelectableDemo: FunctionComponent = () => {
     },
   ];
 
+  const [bulkSelectedOptions, setBulkSelectedOptions] = useState<UserProfileWithAvatar[]>(
+    selectedOptions.slice(0, 1)
+  );
+  const [mixedOptions, setMixedOptions] = useState<UserProfileWithAvatar[]>(
+    defaultOptions.slice(0, 1)
+  );
+
   return (
-    <PanelWithCodeBlock title="Selectable" code={code}>
-      <UserProfilesSelectable
-        selectedOptions={selectedOptions}
-        defaultOptions={defaultOptions}
-        onChange={setSelectedOptions}
-        limit={2}
-      />
-    </PanelWithCodeBlock>
+    <>
+      <PanelWithCodeBlock title="Selectable" code={code}>
+        <UserProfilesSelectable
+          selectedOptions={selectedOptions}
+          defaultOptions={defaultOptions}
+          onChange={setSelectedOptions}
+          limit={2}
+        />
+      </PanelWithCodeBlock>
+      <PanelWithCodeBlock title="Selectable with mixed states" code={mixedCode}>
+        <UserProfilesSelectable
+          selectedOptions={bulkSelectedOptions}
+          mixedOptions={mixedOptions}
+          defaultOptions={defaultOptions}
+          onChange={(nextSelectedOptions, nextMixedOptions) => {
+            setBulkSelectedOptions(nextSelectedOptions);
+            setMixedOptions(nextMixedOptions ?? []);
+          }}
+        />
+      </PanelWithCodeBlock>
+    </>
   );
 };
 
@@ -88,3 +108,16 @@ const [selectedOptions, setSelectedOptions] = useState([
 ]);
 
 <UserProfilesSelectable selectedOptions={selectedOptions} onChange={setSelectedOptions} />`;
+
+const mixedCode = `// Users assigned to every item are selected; users assigned to some items are mixed.
+const [selectedOptions, setSelectedOptions] = useState([alice]);
+const [mixedOptions, setMixedOptions] = useState([bob]);
+
+<UserProfilesSelectable
+  selectedOptions={selectedOptions}
+  mixedOptions={mixedOptions}
+  onChange={(selected, mixed) => {
+    setSelectedOptions(selected);
+    setMixedOptions(mixed ?? []);
+  }}
+/>`;

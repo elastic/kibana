@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { intersection } from 'lodash';
+import { difference, intersection, union } from 'lodash';
 import React, { memo, useCallback, useMemo } from 'react';
 
 import type { TimelineItem } from '@kbn/securitysolution-timeline-common';
@@ -32,16 +32,16 @@ const BulkAlertAssigneesPanelComponent: React.FC<BulkAlertAssigneesPanelComponen
   onSubmit,
 }) => {
   const alertIds = useMemo(() => alertItems.map((item) => item._id), [alertItems]);
-  const assignedUserIds = useMemo(
-    () =>
-      intersection(
-        ...alertItems.map(
-          (item) =>
-            item.data.find((data) => data.field === ALERT_WORKFLOW_ASSIGNEE_IDS)?.value ?? []
-        )
-      ),
-    [alertItems]
-  );
+  const { assignedUserIds, mixedUserIds } = useMemo(() => {
+    const assigneesByAlert = alertItems.map(
+      (item) => item.data.find((data) => data.field === ALERT_WORKFLOW_ASSIGNEE_IDS)?.value ?? []
+    );
+    const commonUserIds = intersection(...assigneesByAlert);
+    return {
+      assignedUserIds: commonUserIds,
+      mixedUserIds: difference(union(...assigneesByAlert), commonUserIds),
+    };
+  }, [alertItems]);
 
   const onSuccess = useCallback(() => {
     if (refresh) refresh();
@@ -61,7 +61,11 @@ const BulkAlertAssigneesPanelComponent: React.FC<BulkAlertAssigneesPanelComponen
 
   return (
     <div data-test-subj="alert-assignees-selectable-menu">
-      <AssigneesApplyPanel assignedUserIds={assignedUserIds} onApply={handleApplyAssignees} />
+      <AssigneesApplyPanel
+        assignedUserIds={assignedUserIds}
+        mixedUserIds={mixedUserIds}
+        onApply={handleApplyAssignees}
+      />
     </div>
   );
 };
