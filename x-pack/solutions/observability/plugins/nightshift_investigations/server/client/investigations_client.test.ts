@@ -637,7 +637,7 @@ describe('NightshiftInvestigationsClient.start()', () => {
     expect(investigationQuotaCallback).toHaveBeenCalledTimes(2);
   });
 
-  it('labels a manual run without a title with its prompt so it does not read as "manual" while running', async () => {
+  it('labels a manual run with its prompt so it does not read as "manual" while running', async () => {
     mockManagement.getWorkflow.mockResolvedValue({
       id: BOUND_WORKFLOW_ID,
       enabled: true,
@@ -647,6 +647,7 @@ describe('NightshiftInvestigationsClient.start()', () => {
     mockManagement.runWorkflow.mockResolvedValue('exec-manual');
 
     await startFromApi(makeClient(), {
+      title: 'Latency is too high',
       subject: { type: 'manual', id: 'manual' },
       trigger_type: 'manual',
       message: '  Why did payment\n  timeouts increase?  ',
@@ -683,6 +684,7 @@ describe('NightshiftInvestigationsClient.start()', () => {
     mockManagement.runWorkflow.mockResolvedValue('exec-manual');
 
     await startFromApi(makeClient(), {
+      title: 'Latency is too high',
       subject: { type: 'manual', id: 'manual' },
       trigger_type: 'manual',
       message: 'a'.repeat(500),
@@ -693,63 +695,6 @@ describe('NightshiftInvestigationsClient.start()', () => {
     };
     expect(context.summary).toHaveLength(200);
     expect(context.summary.endsWith('…')).toBe(true);
-  });
-
-  describe('manual subject summary from the caller title', () => {
-    const startManual = async (request: Partial<StartInvestigationRequest>) => {
-      mockManagement.getWorkflow.mockResolvedValue({
-        id: BOUND_WORKFLOW_ID,
-        enabled: true,
-        valid: true,
-        definition: BOUND_DEFINITION,
-      });
-      mockManagement.runWorkflow.mockResolvedValue('exec-manual');
-
-      await startFromApi(makeClient(), {
-        subject: { type: 'manual', id: 'manual' },
-        trigger_type: 'manual',
-        message: 'In traces-* on production, why are checkout spans failing?',
-        ...request,
-      } as StartInvestigationRequest);
-
-      return mockManagement.runWorkflow.mock.calls[0][2] as {
-        message: string;
-        context: Record<string, unknown>;
-        subjects: Array<{ summary?: string }>;
-      };
-    };
-
-    it('uses the title rather than the prompt as the summary', async () => {
-      const inputs = await startManual({ title: '  Checkout spans\n failing ' });
-
-      expect(inputs.subjects[0].summary).toBe('Checkout spans failing');
-      expect(inputs.context.summary).toBe('Checkout spans failing');
-      expect(inputs.message).toContain('why are checkout spans failing?');
-    });
-
-    it('truncates a long title', async () => {
-      const inputs = await startManual({ title: 'a'.repeat(500) });
-
-      expect(inputs.subjects[0].summary).toHaveLength(200);
-      expect(inputs.subjects[0].summary?.endsWith('…')).toBe(true);
-    });
-
-    it('falls back to the prompt for a whitespace-only title', async () => {
-      const inputs = await startManual({ title: '   ' });
-
-      expect(inputs.subjects[0].summary).toBe(
-        'In traces-* on production, why are checkout spans failing?'
-      );
-    });
-
-    it('keeps an explicit subject summary over the title', async () => {
-      const inputs = await startManual({
-        title: 'Checkout spans failing',
-        subject: { type: 'manual', id: 'manual', summary: 'Checkout latency' },
-      });
-
-      expect(inputs.subjects[0].summary).toBe('Checkout latency');
-    });
   });
 
   it('keeps an explicit subject summary over the prompt', async () => {
@@ -1602,11 +1547,12 @@ describe('NightshiftInvestigationsClient.start() on investigations', () => {
     mockManagement.runWorkflow.mockResolvedValue('exec-1');
   });
 
-  it('claims the subjects and runs the workflow with them, which `_ensure` records if the start did not', async () => {
+  it('claims the subjects, runs the workflow, and leaves recording the subjects to it', async () => {
     await expect(startAlerts('alert-1', 'alert-2')).resolves.toEqual({
       investigation_id: 'inv-new',
     });
 
+    expect(subjectsClient.upsertSubjects).not.toHaveBeenCalled();
     expect(subjectsClient.claimSubjects).toHaveBeenCalledWith(
       expect.objectContaining({
         conversationId: 'inv-new',
@@ -1647,39 +1593,6 @@ describe('NightshiftInvestigationsClient.start() on investigations', () => {
     );
   });
 
-  it('records the subjects on the conversation it creates, so the investigation is named right away', async () => {
-    await expect(startAlerts('alert-1', 'alert-2')).resolves.toEqual({
-      investigation_id: 'inv-new',
-    });
-
-    expect(subjectsClient.upsertSubjects).toHaveBeenCalledTimes(1);
-    expect(subjectsClient.upsertSubjects).toHaveBeenCalledWith('inv-new', runInputs().subjects);
-    expect(conversations.create.mock.invocationCallOrder[0]).toBeLessThan(
-      subjectsClient.upsertSubjects.mock.invocationCallOrder[0]
-    );
-  });
-
-  it("records a manual start's title as the subject summary on the conversation it creates", async () => {
-    await startFromApi(makeClient(), {
-      title: 'Checkout spans failing',
-      subject: { type: 'manual', id: 'manual' },
-      trigger_type: 'manual',
-      message: 'In traces-* on production, why are checkout spans failing?',
-    });
-
-    expect(subjectsClient.upsertSubjects).toHaveBeenCalledWith('inv-new', [
-      expect.objectContaining({ type: 'manual', summary: 'Checkout spans failing' }),
-    ]);
-  });
-
-  it('still starts the investigation when recording the subjects on its conversation fails', async () => {
-    subjectsClient.upsertSubjects.mockRejectedValueOnce(new Error('Subject write failed'));
-
-    await expect(startAlerts('alert-1')).resolves.toEqual({ investigation_id: 'inv-new' });
-
-    expect(mockLogger.warn).toHaveBeenCalledWith(expect.stringContaining('Subject write failed'));
-  });
-
   it('does not record the run again when the workflow created the conversation first', async () => {
     withConversations(makeConversation({ id: 'inv-new', workflowExecutionIds: ['exec-1'] }));
 
@@ -1687,7 +1600,6 @@ describe('NightshiftInvestigationsClient.start() on investigations', () => {
 
     expect(conversations.create).not.toHaveBeenCalled();
     expect(conversations.patchMetadata).not.toHaveBeenCalled();
-    expect(subjectsClient.upsertSubjects).not.toHaveBeenCalled();
   });
 
   it('still starts the investigation when creating its conversation fails', async () => {

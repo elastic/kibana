@@ -175,35 +175,30 @@ const isAlertRecoveredFollowUp = (inputs: Record<string, unknown> | undefined): 
 /** Keeps a derived summary to one readable line, since it is rendered as a list headline. */
 const MAX_DERIVED_SUBJECT_SUMMARY_LENGTH = 200;
 
-/** Collapses whitespace and caps the length, returning undefined when nothing is left. */
-const toDerivedSummary = (text: string | undefined): string | undefined => {
-  const collapsed = text?.replace(/\s+/g, ' ').trim();
-  if (!collapsed) {
-    return undefined;
-  }
-
-  return collapsed.length > MAX_DERIVED_SUBJECT_SUMMARY_LENGTH
-    ? `${collapsed.slice(0, MAX_DERIVED_SUBJECT_SUMMARY_LENGTH - 1).trimEnd()}…`
-    : collapsed;
-};
-
 /**
  * A manual investigation's subject id is the placeholder `manual`, so the subject would carry no
- * description of the run. The caller's title, when it sent one, names the run best (an onboarding
- * suggestion sends its headline); otherwise the prompt stands in as the subject summary.
+ * description of the run. The prompt is the only thing that describes the run at this point, so
+ * it stands in as the subject summary.
  */
 const withDerivedSubjectSummary = (
   subject: InvestigationSubject,
-  message: string,
-  title?: string
+  message: string
 ): InvestigationSubject => {
   if (subject.type !== 'manual' || subject.summary) {
     return subject;
   }
 
-  const summary = toDerivedSummary(title) ?? toDerivedSummary(message);
+  const collapsed = message.replace(/\s+/g, ' ').trim();
+  if (!collapsed) {
+    return subject;
+  }
 
-  return summary ? { ...subject, summary } : subject;
+  const summary =
+    collapsed.length > MAX_DERIVED_SUBJECT_SUMMARY_LENGTH
+      ? `${collapsed.slice(0, MAX_DERIVED_SUBJECT_SUMMARY_LENGTH - 1).trimEnd()}…`
+      : collapsed;
+
+  return { ...subject, summary };
 };
 
 const MAX_SLACK_THREAD_TITLE_LENGTH = 80;
@@ -598,7 +593,7 @@ export class NightshiftInvestigationsClient {
     });
 
     const prepared = this.prepareAgentInput(subject, message, context);
-    const resolvedSubject = withDerivedSubjectSummary(subject, prepared.message, title);
+    const resolvedSubject = withDerivedSubjectSummary(subject, prepared.message);
 
     const spaceId = this.getSpaceId();
     this.warnOnSpaceMismatch(spaceId);
@@ -630,7 +625,6 @@ export class NightshiftInvestigationsClient {
     let isFollowUp: boolean;
     let executionId: string;
     let claimedNew = false;
-    let newSubjects: WorkflowSubjectInput[];
     // A start that fails before its workflow launches runs nothing, so it gives its slots back and
     // drops the claims it took: a retry then opens a new investigation, and is charged for it.
     try {
@@ -673,7 +667,7 @@ export class NightshiftInvestigationsClient {
       // step's visibility retry: the workflow owns that, and this request path should not pay for it.
       await this.installAgents(agentBuilder, spaceId);
 
-      newSubjects = withoutRecordedSubjects(subjects, recorded);
+      const newSubjects = withoutRecordedSubjects(subjects, recorded);
       const newAlertIds = new Set(newSubjects.map(({ id }) => id));
 
       const roundMessage = isFollowUp
@@ -690,9 +684,8 @@ export class NightshiftInvestigationsClient {
           instructions,
           isSlackMessage: subject.type === 'slack_thread' && instructions !== undefined,
         }),
-        // Kept as a workflow input for callers that read it off the run. A manual start also uses it
-        // as the subject summary, which names the investigation until Agent Builder titles it from
-        // the first round.
+        // Kept as a workflow input for callers that read it off the run. Agent Builder titles the
+        // investigation from the first round instead.
         ...(title ? { title } : {}),
         ...(connector_id?.trim() ? { connector_id: resolvedConnectorId } : {}),
         investigation_id: investigationId,
@@ -722,13 +715,7 @@ export class NightshiftInvestigationsClient {
     }
 
     if (!isFollowUp) {
-      await this.createAcceptedInvestigation({
-        conversations,
-        agenticInvestigations,
-        investigationId,
-        executionId,
-        subjects: newSubjects,
-      });
+      await this.createAcceptedInvestigation({ conversations, investigationId, executionId });
     }
 
     const correlation = correlationFromContext(prepared.context);
@@ -759,42 +746,30 @@ export class NightshiftInvestigationsClient {
 
   /**
    * Creates the conversation of a new investigation as soon as its start is accepted, with the
-   * accepted run and its subjects recorded, so the investigation is listed as in progress, and
-   * named after its subject, right away. The subjects are what names an investigation until Agent
-   * Builder titles it; left to the run's `_ensure` step, they would only appear once the workflow
-   * has started, seconds later. It also keeps the subject claims pointing at an open investigation
-   * even while the run waits in a busy task queue. Without it, a claim older than its pending
-   * window would look abandoned and the next start for the same subject would open a second
-   * investigation. The run's `_ensure` step gets this conversation and records any subject that is
-   * still missing. A failure here does not fail the start: the run creates the conversation, and
-   * records the subjects, itself.
+   * accepted run recorded, so the investigation is listed as in progress right away and the
+   * subject claims point at an open investigation even while the run waits in a busy task queue.
+   * Without it, a claim older than its pending window would look abandoned and the next start for
+   * the same subject would open a second investigation. The run's `_ensure` step gets this
+   * conversation and records the subjects. A failure here does not fail the start: the run creates
+   * the conversation itself.
    */
   private async createAcceptedInvestigation({
     conversations,
-    agenticInvestigations,
     investigationId,
     executionId,
-    subjects,
   }: {
     conversations: ConversationPublicClient;
-    agenticInvestigations: AgenticInvestigationsPluginStart;
     investigationId: string;
     executionId: string;
-    subjects: WorkflowSubjectInput[];
   }): Promise<void> {
     try {
       // Records the run in the creating write. If the run's `_ensure` step created the
-      // conversation first, it already recorded itself and the subjects, so there is nothing to add.
-      const conversation = await getOrCreateInvestigationConversation({
+      // conversation first, it already recorded itself, so there is nothing to add.
+      await getOrCreateInvestigationConversation({
         conversations,
         id: investigationId,
         workflowExecutionId: executionId,
       });
-      if (conversation.created && subjects.length > 0) {
-        await agenticInvestigations
-          .getSubjectsClient(this.request)
-          .upsertSubjects(investigationId, subjects);
-      }
     } catch (error) {
       this.logger.warn(
         `Could not create the conversation of investigation "${investigationId}" on start; its run creates it: ${

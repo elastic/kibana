@@ -125,12 +125,12 @@ describe('InvestigationCard', () => {
 
   it.each([
     [
-      'the first subject',
+      "the first alert's rule name",
       investigation({ title: 'New conversation', title_pending: true }),
       'Latency rule',
     ],
     [
-      "a Slack thread's question rather than its channel",
+      "a generic title rather than a Slack thread's question",
       investigation({
         title: 'New conversation',
         title_pending: true,
@@ -144,7 +144,23 @@ describe('InvestigationCard', () => {
           },
         ],
       }),
-      'why is checkout slow?',
+      'New investigation',
+    ],
+    [
+      "a generic title rather than a manual start's question",
+      investigation({
+        title: 'New conversation',
+        title_pending: true,
+        subjects: [
+          {
+            type: 'manual',
+            id: 'manual',
+            summary: 'why is checkout slow?',
+            created_at: '2026-07-28T14:00:00.000Z',
+          },
+        ],
+      }),
+      'New investigation',
     ],
     [
       'a generic title without a subject',
