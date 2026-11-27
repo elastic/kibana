@@ -8,8 +8,10 @@ import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elasti
 import type { DataViewsServicePublic } from '@kbn/data-views-plugin/public/types';
 import { i18n } from '@kbn/i18n';
 import { LensConfigBuilder, type LensSeriesLayer } from '@kbn/lens-embeddable-utils';
-import type { LensByValueInput, LensPublicStart } from '@kbn/lens-plugin/public';
-import React, { useState } from 'react';
+import type { LensApi, LensByValueInput, LensPublicStart } from '@kbn/lens-plugin/public';
+import type { Action } from '@kbn/ui-actions-plugin/public';
+import { ON_OPEN_PANEL_MENU } from '@kbn/ui-actions-plugin/common/trigger_ids';
+import React, { useCallback, useMemo, useRef } from 'react';
 import type { AsyncState } from 'react-use/lib/useAsync';
 import useAsync from 'react-use/lib/useAsync';
 import type {
@@ -55,7 +57,25 @@ function Lens({
     });
   }, [indexPattern, dataViews, timeField]);
 
-  const [isSaveModalOpen, setIsSaveModalOpen] = useState(false);
+  const lensApiRef = useRef<LensApi>();
+  const onApiAvailable = useCallback((api: unknown) => {
+    lensApiRef.current = api as LensApi;
+  }, []);
+
+  const openInLensAction = useMemo(() => lens.actions.createOpenInLensAction(), [lens]);
+  const saveAction = useMemo(
+    () => lens.actions.createSaveToDashboardAction({ isSaveable: true }),
+    [lens]
+  );
+
+  // the actions are provided by the Lens embeddable, to run on its API
+  const runAction = useCallback((action: Action) => {
+    const embeddable = lensApiRef.current;
+    if (embeddable) {
+      const context = { embeddable, trigger: { id: ON_OPEN_PANEL_MENU } };
+      action.execute(context);
+    }
+  }, []);
 
   const lensEmbeddableInputAsync: AsyncState<LensByValueInput | undefined> = useAsync(async () => {
     if (!dataViewAsync.value) {
@@ -99,9 +119,7 @@ function Lens({
               <EuiButton
                 data-test-subj="observabilityAiAssistantLensOpenInLensButton"
                 iconType="lensApp"
-                onClick={() => {
-                  lens.navigateToPrefilledEditor(lensEmbeddableInput);
-                }}
+                onClick={() => runAction(openInLensAction)}
               >
                 {i18n.translate('xpack.observabilityAiAssistant.lensFunction.openInLens', {
                   defaultMessage: 'Open in Lens',
@@ -112,9 +130,7 @@ function Lens({
               <EuiButton
                 data-test-subj="observabilityAiAssistantLensSaveButton"
                 iconType="save"
-                onClick={() => {
-                  setIsSaveModalOpen(() => true);
-                }}
+                onClick={() => runAction(saveAction)}
               >
                 {i18n.translate('xpack.observabilityAiAssistant.lensFunction.save', {
                   defaultMessage: 'Save',
@@ -129,17 +145,10 @@ function Lens({
             style={{
               height: 240,
             }}
+            onApiAvailable={onApiAvailable}
           />
         </EuiFlexItem>
       </EuiFlexGroup>
-      {isSaveModalOpen ? (
-        <lens.SaveModalComponent
-          initialInput={lensEmbeddableInput}
-          onClose={() => {
-            setIsSaveModalOpen(() => false);
-          }}
-        />
-      ) : null}
     </>
   );
 }

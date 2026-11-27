@@ -6,9 +6,13 @@
  */
 
 import { EuiLoadingSpinner } from '@elastic/eui';
-import type { InlineEditLensEmbeddableContext } from '@kbn/lens-plugin/public';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
+import type {
+  InlineEditLensEmbeddableContext,
+  LensApi,
+  TypedLensByValueInput,
+} from '@kbn/lens-plugin/public';
+import { ON_OPEN_PANEL_MENU } from '@kbn/ui-actions-plugin/common/trigger_ids';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   ActionButtonType,
   type ActionButton,
@@ -61,7 +65,7 @@ export function BaseVisualization({
   height = DEFAULT_VISUALIZATION_HEIGHT,
 }: BaseVisualizationProps) {
   const { lens, uiActions, application, unifiedSearch } = services;
-  const [isSaveModalOpen, setIsSaveModalOpen] = useState(false);
+  const lensApiRef = useRef<LensApi>();
   const [lensLoadEvent, setLensLoadEvent] = useState<
     InlineEditLensEmbeddableContext['lensEvent'] | null
   >(null);
@@ -92,8 +96,20 @@ export function BaseVisualization({
     []
   );
 
-  const onOpenSave = useCallback(() => setIsSaveModalOpen(true), []);
-  const onCloseSave = useCallback(() => setIsSaveModalOpen(false), []);
+  const saveToDashboardAction = useMemo(
+    () => lens.actions.createSaveToDashboardAction({ telemetrySource: 'chat' }),
+    [lens]
+  );
+  const onApiAvailable = useCallback((api: unknown) => {
+    lensApiRef.current = api as LensApi;
+  }, []);
+  const onOpenSave = useCallback(() => {
+    const embeddable = lensApiRef.current;
+    if (embeddable) {
+      const context = { embeddable, trigger: { id: ON_OPEN_PANEL_MENU } };
+      saveToDashboardAction.execute(context);
+    }
+  }, [saveToDashboardAction]);
   const saveToDashboard = useCallback(() => {
     if (canWriteDashboards) {
       onOpenSave();
@@ -166,18 +182,11 @@ export function BaseVisualization({
               style={{ height: '100%' }}
               onBrushEnd={onBrushEnd}
               onLoad={onLoad}
+              onApiAvailable={onApiAvailable}
             />
           )
         )}
       </div>
-      {isSaveModalOpen && lensInputWithTimeRange && (
-        <lens.SaveModalComponent
-          initialInput={lensInputWithTimeRange}
-          onClose={onCloseSave}
-          isSaveable={false}
-          telemetrySource="chat"
-        />
-      )}
     </>
   );
 }

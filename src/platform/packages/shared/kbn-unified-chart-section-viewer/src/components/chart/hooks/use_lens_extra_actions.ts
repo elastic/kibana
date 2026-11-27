@@ -9,6 +9,7 @@
 import { i18n } from '@kbn/i18n';
 import { OPEN_IN_DISCOVER_TAB_LABEL } from '@kbn/discover-utils';
 import type { Action } from '@kbn/ui-actions-plugin/public';
+import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import { useMemo } from 'react';
 import {
   ACTION_COPY_TO_DASHBOARD,
@@ -20,8 +21,10 @@ interface ActionEventHandler {
   onClick: () => void;
 }
 
+type LensActions = Pick<LensPublicStart['actions'], 'createSaveToDashboardAction'>;
+
 interface UseLensExtraActions {
-  copyToDashboard?: ActionEventHandler;
+  copyToDashboard?: LensActions;
   viewDetails?: ActionEventHandler;
   exploreInDiscoverTab?: ActionEventHandler;
 }
@@ -29,8 +32,8 @@ export const useLensExtraActions = (config: UseLensExtraActions): Action[] => {
   const extraActions = useMemo(() => {
     const actions: Action[] = [];
 
-    if (config.copyToDashboard?.onClick) {
-      actions.push(getCopyToDashboardAction(config.copyToDashboard.onClick));
+    if (config.copyToDashboard) {
+      actions.push(getCopyToDashboardAction(config.copyToDashboard));
     }
 
     if (config.viewDetails?.onClick) {
@@ -42,11 +45,7 @@ export const useLensExtraActions = (config: UseLensExtraActions): Action[] => {
     }
 
     return actions;
-  }, [
-    config.copyToDashboard?.onClick,
-    config.viewDetails?.onClick,
-    config.exploreInDiscoverTab?.onClick,
-  ]);
+  }, [config.copyToDashboard, config.viewDetails?.onClick, config.exploreInDiscoverTab?.onClick]);
 
   return extraActions;
 };
@@ -95,24 +94,13 @@ const getExploreInDiscoverTabAction = (onExecute: () => void): Action => {
   };
 };
 
-const getCopyToDashboardAction = (onExecute: () => void): Action => {
-  return {
-    id: ACTION_COPY_TO_DASHBOARD,
-    order: 1,
-    type: 'actionButton',
-    getDisplayName() {
-      return i18n.translate('metricsExperience.lens.actions.copyToDashboard', {
-        defaultMessage: 'Copy to dashboard',
-      });
-    },
-    getIconType() {
-      return 'addToDashboard';
-    },
-    async isCompatible() {
-      return true;
-    },
-    async execute() {
-      onExecute();
-    },
-  };
-};
+const getCopyToDashboardAction = (lensActions: LensActions): Action => ({
+  ...lensActions.createSaveToDashboardAction({
+    displayName: i18n.translate('metricsExperience.lens.actions.copyToDashboard', {
+      defaultMessage: 'Copy to dashboard',
+    }),
+  }),
+  // the id and the order are relied on by the quick actions row and the tests
+  id: ACTION_COPY_TO_DASHBOARD,
+  order: 1,
+});

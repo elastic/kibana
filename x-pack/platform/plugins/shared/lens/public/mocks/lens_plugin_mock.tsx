@@ -27,6 +27,10 @@ export const lensPluginMock = {
         .mockResolvedValue(() => <span>Lens Config Panel Component</span>),
       canUseEditor: jest.fn(() => true),
       navigateToPrefilledEditor: jest.fn(),
+      actions: {
+        createOpenInLensAction: jest.fn(),
+        createSaveToDashboardAction: jest.fn(),
+      },
       getXyVisTypes: jest
         .fn()
         .mockReturnValue(new Promise((resolve) => resolve(visualizationSubtypes))),

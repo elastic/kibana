@@ -95,6 +95,10 @@ const mockLens = {
     );
   }),
   SaveModalComponent: jest.fn(() => <div>mockSaveModalComponent</div>),
+  actions: {
+    createOpenInLensAction: jest.fn(() => ({ id: 'openInLens' })),
+    createSaveToDashboardAction: jest.fn(() => ({ id: 'save' })),
+  },
 } as unknown as LensPublicStart;
 const mockActions: ActionTypes[] = ['addToCase', 'openInLens'];
 
