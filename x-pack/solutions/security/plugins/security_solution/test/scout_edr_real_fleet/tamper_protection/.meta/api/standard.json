@@ -1,9 +1,35 @@
 {
-  "sha1": "91bd27a9903a7f7711fce6acbd60684648c1a9be",
+  "sha1": "fced03e93699201036d1ebc0d1a70a74240950f6",
   "testChannels": [
     "ci-on-commit"
   ],
   "tests": [
+    {
+      "id": "1e32db59d186138-611083788592886",
+      "title": "Unenroll an agent from Fleet after moving it from a tamper protected to an unprotected policy the agent acknowledges a Fleet unenroll once it is on the unprotected policy",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_edr_real_fleet/tamper_protection/api/tests/unenroll_agent_changing_policy_from_enabled_to_disabled.spec.ts",
+        "line": 28,
+        "column": 7
+      }
+    },
+    {
+      "id": "708c8c2fd468c49-a2c3aae2769282e",
+      "title": "Unenroll an agent from Fleet when tamper protection is disabled the agent acknowledges a Fleet unenroll",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_edr_real_fleet/tamper_protection/api/tests/unenroll_agent_with_tamper_protection_disabled.spec.ts",
+        "line": 26,
+        "column": 7
+      }
+    },
     {
       "id": "7e7ba89b17c6e8e-547ae70d8260400",
       "title": "Unenroll an agent from Fleet when tamper protection is enabled the agent acknowledges a Fleet unenroll",

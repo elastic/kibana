@@ -10,7 +10,6 @@ import type {
   GetAgentsResponse,
   GetInfoResponse,
   GetPackagePoliciesResponse,
-  GetOneAgentPolicyResponse,
   CreateAgentPolicyResponse,
 } from '@kbn/fleet-plugin/common';
 import {
@@ -21,11 +20,9 @@ import {
   agentPolicyRouteService,
 } from '@kbn/fleet-plugin/common';
 import type {
-  GetOneAgentResponse,
   PostAgentReassignResponse,
   UpdateAgentPolicyResponse,
 } from '@kbn/fleet-plugin/common/types';
-import { logger } from './logger';
 import type { IndexedFleetEndpointPolicyResponse } from '../../../../common/endpoint/data_loaders/index_fleet_endpoint_policy';
 import { request } from './common';
 
@@ -136,111 +133,4 @@ export const enableAgentTamperProtectionFeatureFlagInPolicy = (
     headers: { 'Elastic-Api-Version': API_VERSIONS.public.v1 },
     ...(overwrite ?? {}),
   });
-};
-
-export const unenrollAgent = (agentId: string): Cypress.Chainable<boolean> => {
-  return request({
-    method: 'POST',
-    url: agentRouteService.getUnenrollPath(agentId),
-    headers: { 'Elastic-Api-Version': API_VERSIONS.public.v1 },
-  }).then(() => {
-    return waitForIsAgentUnenrolled(agentId);
-  });
-};
-
-export const fetchFleetAgentPolicy = (
-  agentPolicyId: string
-): Cypress.Chainable<GetOneAgentPolicyResponse['item']> => {
-  return request<GetOneAgentPolicyResponse>({
-    method: 'GET',
-    url: agentPolicyRouteService.getInfoPath(agentPolicyId),
-  }).then((res) => res.body.item);
-};
-
-export const reAssignFleetAgentToPolicy = (
-  agentId: string,
-  policyId: string
-): Cypress.Chainable<boolean> => {
-  return fetchFleetAgentPolicy(policyId)
-    .then((agentPolicy) => {
-      return request({
-        method: 'POST',
-        url: agentRouteService.getReassignPath(agentId),
-        body: {
-          policy_id: policyId,
-        },
-        headers: { 'Elastic-Api-Version': API_VERSIONS.public.v1 },
-      }).then(() => agentPolicy);
-    })
-    .then((agentPolicy) => {
-      return waitForHasAgentPolicyChanged(agentId, policyId, agentPolicy.revision);
-    });
-};
-
-const waitForIsAgentUnenrolled = (agentId: string): Cypress.Chainable<boolean> => {
-  let isUnenrolled = false;
-  return cy
-    .waitUntil(
-      () => {
-        return request<GetOneAgentResponse>({
-          method: 'GET',
-          url: agentRouteService.getInfoPath(agentId),
-          headers: {
-            'elastic-api-version': API_VERSIONS.public.v1,
-          },
-        }).then((response) => {
-          if (response.body.item.status === 'unenrolled' && !response.body.item.active) {
-            isUnenrolled = true;
-            return true;
-          }
-
-          return false;
-        });
-      },
-      { timeout: 120000 }
-    )
-    .then(() => {
-      return isUnenrolled;
-    });
-};
-
-const waitForHasAgentPolicyChanged = (
-  agentId: string,
-  policyId: string,
-  /** The minimum revision number that the agent must report before it is considered "changed" */
-  policyRevision: number
-): Cypress.Chainable<boolean> => {
-  let isPolicyUpdated = false;
-
-  return cy
-    .waitUntil(
-      () => {
-        return request<GetOneAgentResponse>({
-          method: 'GET',
-          url: agentRouteService.getInfoPath(agentId),
-          headers: {
-            'elastic-api-version': API_VERSIONS.public.v1,
-          },
-        }).then((response) => {
-          const { status, policy_revision, policy_id } = response.body.item;
-
-          logger.debug('Checking policy data:', { status, policy_revision, policy_id });
-
-          if (
-            status !== 'updating' &&
-            (policy_revision ?? 0) >= policyRevision &&
-            policy_id === policyId
-          ) {
-            isPolicyUpdated = true;
-          }
-
-          return cy.wrap(isPolicyUpdated);
-        });
-      },
-      { timeout: 120000 },
-      `Wait for Fleet Agent to report policy id [${policyId}] with revision [${policyRevision}]`
-    )
-    .then(() => {
-      return isPolicyUpdated;
-    });
 };

@@ -112,7 +112,10 @@ export const unenrollAgent = async (
     body: {},
   });
 
-/** Polls until Fleet reports the agent's ack: unenrolled, inactive and unenrolled_at set. */
+/**
+ * Polls until Fleet reports the agent's ack: unenrolled, inactive, unenrolled_at set, and
+ * unenrollment_started_at set (only a graceful unenroll sets it; a revoke does not).
+ */
 export const waitForAgentUnenrolled = async (
   apiClient: ApiClientFixture,
   headers: RequestHeaders,
@@ -126,8 +129,18 @@ export const waitForAgentUnenrolled = async (
           return `status ${statusCode}: ${JSON.stringify(body)}`;
         }
 
-        const { status, active, unenrolled_at: unenrolledAt } = body.item;
-        return { status, active, unenrolledAtSet: Boolean(unenrolledAt) };
+        const {
+          status,
+          active,
+          unenrolled_at: unenrolledAt,
+          unenrollment_started_at: unenrollmentStartedAt,
+        } = body.item;
+        return {
+          status,
+          active,
+          unenrolledAtSet: Boolean(unenrolledAt),
+          unenrollmentStartedAtSet: Boolean(unenrollmentStartedAt),
+        };
       },
       {
         message: `agent ${agentId} acknowledges the unenroll`,
@@ -135,7 +148,12 @@ export const waitForAgentUnenrolled = async (
         intervals: [5_000],
       }
     )
-    .toStrictEqual({ status: 'unenrolled', active: false, unenrolledAtSet: true });
+    .toStrictEqual({
+      status: 'unenrolled',
+      active: false,
+      unenrolledAtSet: true,
+      unenrollmentStartedAtSet: true,
+    });
 };
 
 /** Decrypted uninstall token of `agentPolicyId`. Throws when Fleet does not return it. */
