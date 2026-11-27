@@ -249,9 +249,10 @@ If set to false, or if the workflow does not complete within the timeout, the to
 `),
     schema: executeWorkflowSchema,
     // Hides the tool when Workflows is unavailable or the caller could not run a workflow anyway.
-    // The privilege is per user, so the result cannot be cached.
+    // The privilege is per user, so the result is cached per principal. It is a hint only: the
+    // handler checks the privilege again when the tool runs.
     availability: {
-      cacheMode: 'none',
+      cacheMode: 'space-user',
       handler: async ({ request, spaceId }) => {
         if (!workflowApi.isWorkflowsAvailable) {
           return { status: 'unavailable', reason: 'Workflows is not available.' };
