@@ -528,9 +528,8 @@ export class DataStreamDataClient<
     if (pendingIndexes.length > 0) {
       // Several items may target the same id; each keeps its own slot in the response.
       const uniqueIds = Array.from(new Set(pendingIndexes.map((i) => items[i].document.id)));
-      const { versions, confirmedMissing } = await this.deps.versionManager.bulkGetVersions(
-        uniqueIds
-      );
+      const { versions, confirmedMissing } =
+        await this.deps.versionManager.bulkGetVersions(uniqueIds);
 
       for (const i of pendingIndexes) {
         const item = items[i];
