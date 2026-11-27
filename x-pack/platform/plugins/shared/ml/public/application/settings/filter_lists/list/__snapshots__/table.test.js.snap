@@ -83,6 +83,7 @@ exports[`Filter Lists Table renders with filter lists and selection supplied 1`]
               class="emotion-euiButtonDisplayContent"
             >
               <span
+                aria-hidden="true"
                 color="inherit"
                 data-euiicon-type="trash"
               />
@@ -133,6 +134,7 @@ exports[`Filter Lists Table renders with filter lists and selection supplied 1`]
                           class="euiCheckboxControl emotion-euiCheckboxControl-unselected"
                         >
                           <span
+                            aria-hidden="true"
                             class="emotion-euiCheckbox__icon-check"
                             data-euiicon-type="empty"
                             role="presentation"
@@ -176,6 +178,7 @@ exports[`Filter Lists Table renders with filter lists and selection supplied 1`]
                         ID
                       </span>
                       <span
+                        aria-hidden="true"
                         class="euiTableSortIcon"
                         data-euiicon-type="sortUp"
                       />
@@ -209,6 +212,7 @@ exports[`Filter Lists Table renders with filter lists and selection supplied 1`]
                         Description
                       </span>
                       <span
+                        aria-hidden="true"
                         class="euiTableSortIcon euiTableSortIcon--sortable"
                         color="subdued"
                         data-euiicon-type="sortable"
@@ -243,6 +247,7 @@ exports[`Filter Lists Table renders with filter lists and selection supplied 1`]
                         Item count
                       </span>
                       <span
+                        aria-hidden="true"
                         class="euiTableSortIcon euiTableSortIcon--sortable"
                         color="subdued"
                         data-euiicon-type="sortable"
@@ -277,6 +282,7 @@ exports[`Filter Lists Table renders with filter lists and selection supplied 1`]
                         In use
                       </span>
                       <span
+                        aria-hidden="true"
                         class="euiTableSortIcon euiTableSortIcon--sortable"
                         color="subdued"
                         data-euiicon-type="sortable"
@@ -314,6 +320,7 @@ exports[`Filter Lists Table renders with filter lists and selection supplied 1`]
                           class="euiCheckboxControl emotion-euiCheckboxControl-disabled-unselected"
                         >
                           <span
+                            aria-hidden="true"
                             class="emotion-euiCheckbox__icon-check"
                             data-euiicon-type="empty"
                             role="presentation"
@@ -415,6 +422,7 @@ exports[`Filter Lists Table renders with filter lists and selection supplied 1`]
                           class="euiCheckboxControl emotion-euiCheckboxControl-unselected"
                         >
                           <span
+                            aria-hidden="true"
                             class="emotion-euiCheckbox__icon-check"
                             data-euiicon-type="empty"
                             role="presentation"
@@ -522,6 +530,7 @@ exports[`Filter Lists Table renders with filter lists and selection supplied 1`]
                     10
                   </span>
                   <span
+                    aria-hidden="true"
                     color="inherit"
                     data-euiicon-type="chevronSingleDown"
                   />
@@ -692,6 +701,7 @@ exports[`Filter Lists Table renders with filter lists supplied 1`] = `
               class="emotion-euiButtonDisplayContent"
             >
               <span
+                aria-hidden="true"
                 color="inherit"
                 data-euiicon-type="trash"
               />
@@ -742,6 +752,7 @@ exports[`Filter Lists Table renders with filter lists supplied 1`] = `
                           class="euiCheckboxControl emotion-euiCheckboxControl-unselected"
                         >
                           <span
+                            aria-hidden="true"
                             class="emotion-euiCheckbox__icon-check"
                             data-euiicon-type="empty"
                             role="presentation"
@@ -785,6 +796,7 @@ exports[`Filter Lists Table renders with filter lists supplied 1`] = `
                         ID
                       </span>
                       <span
+                        aria-hidden="true"
                         class="euiTableSortIcon"
                         data-euiicon-type="sortUp"
                       />
@@ -818,6 +830,7 @@ exports[`Filter Lists Table renders with filter lists supplied 1`] = `
                         Description
                       </span>
                       <span
+                        aria-hidden="true"
                         class="euiTableSortIcon euiTableSortIcon--sortable"
                         color="subdued"
                         data-euiicon-type="sortable"
@@ -852,6 +865,7 @@ exports[`Filter Lists Table renders with filter lists supplied 1`] = `
                         Item count
                       </span>
                       <span
+                        aria-hidden="true"
                         class="euiTableSortIcon euiTableSortIcon--sortable"
                         color="subdued"
                         data-euiicon-type="sortable"
@@ -886,6 +900,7 @@ exports[`Filter Lists Table renders with filter lists supplied 1`] = `
                         In use
                       </span>
                       <span
+                        aria-hidden="true"
                         class="euiTableSortIcon euiTableSortIcon--sortable"
                         color="subdued"
                         data-euiicon-type="sortable"
@@ -923,6 +938,7 @@ exports[`Filter Lists Table renders with filter lists supplied 1`] = `
                           class="euiCheckboxControl emotion-euiCheckboxControl-disabled-unselected"
                         >
                           <span
+                            aria-hidden="true"
                             class="emotion-euiCheckbox__icon-check"
                             data-euiicon-type="empty"
                             role="presentation"
@@ -1024,6 +1040,7 @@ exports[`Filter Lists Table renders with filter lists supplied 1`] = `
                           class="euiCheckboxControl emotion-euiCheckboxControl-unselected"
                         >
                           <span
+                            aria-hidden="true"
                             class="emotion-euiCheckbox__icon-check"
                             data-euiicon-type="empty"
                             role="presentation"
@@ -1131,6 +1148,7 @@ exports[`Filter Lists Table renders with filter lists supplied 1`] = `
                     10
                   </span>
                   <span
+                    aria-hidden="true"
                     color="inherit"
                     data-euiicon-type="chevronSingleDown"
                   />

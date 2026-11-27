@@ -15,7 +15,8 @@ import {
   OnboardingLandingPage,
   SearchStep,
 } from '@kbn/vectordb-onboarding';
-import { HomePage } from './home_page';
+import { HomePage, IntegratedHomeApp } from './home_page';
+import { useKibana } from './hooks/use_kibana';
 
 interface AppRoutesProps {
   onOnboardingExit: () => void;
@@ -40,7 +41,7 @@ const Home = ({ onOnboardingExit }: AppRoutesProps) => {
   return <HomePage />;
 };
 
-export const AppRoutes = ({ onOnboardingExit }: AppRoutesProps) => (
+const HomeAndGettingStartedRoutes = ({ onOnboardingExit }: AppRoutesProps) => (
   <Routes>
     <Route
       exact
@@ -59,3 +60,15 @@ export const AppRoutes = ({ onOnboardingExit }: AppRoutesProps) => (
     <Route render={() => <Redirect to="/" />} />
   </Routes>
 );
+
+export const AppRoutes = ({ onOnboardingExit }: AppRoutesProps) => {
+  const {
+    services: { elasticsearchHome },
+  } = useKibana();
+
+  if (elasticsearchHome.useIntegratedOnboardingEnabled()) {
+    return <IntegratedHomeApp />;
+  }
+
+  return <HomeAndGettingStartedRoutes onOnboardingExit={onOnboardingExit} />;
+};

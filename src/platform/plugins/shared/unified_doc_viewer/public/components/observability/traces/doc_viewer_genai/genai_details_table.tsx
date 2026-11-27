@@ -25,6 +25,7 @@ import {
   ATTRIBUTE_GEN_AI_USAGE_CACHE_READ_INPUT_TOKENS,
   ATTRIBUTE_GEN_AI_USAGE_INPUT_TOKENS,
   ATTRIBUTE_GEN_AI_USAGE_OUTPUT_TOKENS,
+  ATTRIBUTE_GEN_AI_USAGE_REASONING_OUTPUT_TOKENS,
 } from '@kbn/genai-common';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
@@ -34,16 +35,18 @@ import { ContentFrameworkTable } from '../../../content_framework';
 import { FormattedValue } from '../../../content_framework/table/components/formatted_value';
 
 /**
- * Expands a canonical `attributes.gen_ai.*` field name into the three key
+ * Expands a canonical `attributes.gen_ai.*` field name into the four key
  * shapes produced by the different ingest paths:
  *   1. attributes.gen_ai.*  — OTel / EDOT ingest
  *   2. gen_ai.*             — bare OTel (no attributes. prefix)
  *   3. labels.gen_ai_*      — APM Server ingest (dots → underscores)
+ *   4. numeric_labels.gen_ai_* — APM Server ingest of numeric attributes
  * Only fields present on the hit are rendered by ContentFrameworkTable.
  */
 const fallbackShapes = (attributeName: string): string[] => {
   const bare = attributeName.replace(/^attributes\./, '');
-  return [attributeName, bare, `labels.${bare.replace(/\./g, '_')}`];
+  const labelName = bare.replace(/\./g, '_');
+  return [attributeName, bare, `labels.${labelName}`, `numeric_labels.${labelName}`];
 };
 
 const PROVIDER_TITLE = i18n.translate(
@@ -73,6 +76,10 @@ const DETAIL_FIELD_TITLES: Record<string, string> = {
   [ATTRIBUTE_GEN_AI_USAGE_OUTPUT_TOKENS]: i18n.translate(
     'unifiedDocViewer.observability.traces.genAi.details.outputTokens',
     { defaultMessage: 'Output tokens' }
+  ),
+  [ATTRIBUTE_GEN_AI_USAGE_REASONING_OUTPUT_TOKENS]: i18n.translate(
+    'unifiedDocViewer.observability.traces.genAi.details.reasoningOutputTokensLabel',
+    { defaultMessage: 'Reasoning output tokens' }
   ),
   // Shown with their share of the input tokens, see buildFieldConfigurations.
   [ATTRIBUTE_GEN_AI_USAGE_CACHE_READ_INPUT_TOKENS]: i18n.translate(
@@ -116,7 +123,8 @@ export type GenAiDetailsTableProps = Pick<
 /**
  * Resolves each canonical detail attribute to the single field name it is
  * actually stored under on this hit, picking the first present shape in
- * priority order (mirrors `rawValue()` in `get_genai_fields.ts`). A document
+ * priority order (like `rawValue()` in `get_genai_fields.ts`, which does not try
+ * the `numeric_labels.*` shape, so the table can show rows it does not). A document
  * can carry a value under more than one shape at once (e.g. a derived bare
  * `gen_ai.*` field alongside the mapped `attributes.gen_ai.*` one) — without
  * this de-duplication every present shape would render as its own row.

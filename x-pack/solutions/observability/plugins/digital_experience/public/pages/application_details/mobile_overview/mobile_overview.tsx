@@ -7,7 +7,6 @@
 
 import React, { useMemo } from 'react';
 import {
-  EuiButton,
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
@@ -19,8 +18,6 @@ import {
 import { i18n } from '@kbn/i18n';
 import { getEbtProps } from '@kbn/ebt-click';
 import { KbnWarningCallout } from '@kbn/ui-callout';
-import { ApplicationTabToolbar } from '../../../components/application_tab_toolbar';
-import { FacetFilter } from '../../../components/facet_filter';
 import {
   DIGITAL_EXPERIENCE_EBT_ACTIONS,
   MOBILE_APPLICATION_EBT_ELEMENTS,
@@ -28,10 +25,8 @@ import {
 import { MobileOnboardingPrompt } from '../../../components/mobile_onboarding_prompt';
 import { MobileUnreadableDataPrompt } from '../../../components/mobile_unreadable_data_prompt';
 import { LoadErrorPrompt } from '../../../components/load_error_prompt';
-import { useEnvironment } from '../../../hooks/use_environment';
 import { useFormatters, type Formatters } from '../../../hooks/use_formatters';
 import { useQueryParam } from '../../../hooks/use_query_param';
-import { useUpdateUrlQuery } from '../../../hooks/use_update_url_query';
 import {
   COMPARE_LABEL,
   MOBILE_ERROR_RATE_DESCRIPTION,
@@ -40,16 +35,9 @@ import {
 import { ComparedKpiPanel } from '../../../components/compared_kpi_panel';
 import type { ComparedKpiPanelProps } from '../../../components/compared_kpi_panel';
 import { ReleaseHealth } from './release_health/release_health';
-import type { MobileReleasesState } from './release_health/use_mobile_releases';
+import { useMobileReleases } from './release_health/use_mobile_releases';
+import { MobileToolbar, useMobileFilters } from './mobile_toolbar';
 import type { MobileKpisState } from './use_mobile_kpis';
-
-const OS_LABEL = i18n.translate('xpack.digitalExperience.mobile.filter.os', {
-  defaultMessage: 'OS',
-});
-
-const RELEASE_LABEL = i18n.translate('xpack.digitalExperience.mobile.filter.release', {
-  defaultMessage: 'Release',
-});
 
 type MobileKpi = 'sessions' | 'users' | 'errorRate';
 
@@ -158,45 +146,29 @@ const NO_MATCHES_BODY = i18n.translate('xpack.digitalExperience.mobile.noMatches
     'No mobile data for this application matches the selected environment, OS and release. Clear the filters, or try a wider time range.',
 });
 
-const ClearFiltersButton = ({ onClear }: { onClear: () => void }) => (
-  <EuiButton
-    data-test-subj="digitalExperienceMobileClearFilters"
-    {...getEbtProps({
-      action: DIGITAL_EXPERIENCE_EBT_ACTIONS.CLEAR_FILTERS,
-      element: MOBILE_APPLICATION_EBT_ELEMENTS.CLEAR_FILTERS,
-    })}
-    onClick={onClear}
-  >
-    {i18n.translate('xpack.digitalExperience.mobile.clearFilters', {
-      defaultMessage: 'Clear filters',
-    })}
-  </EuiButton>
-);
-
 /**
- * The body of a mobile application's page, all its platforms: the toolbar its tabs share, with the
- * OS and release filters, the health summary and the release health. The sibling issues add their
- * sections below it as they fill them.
+ * The Overview of a mobile application's page, all its platforms: the toolbar its tabs share, the
+ * health summary and the release health. The sibling issues add their sections below it as they
+ * fill them.
  */
 export function MobileOverview({
+  serviceName,
   kpisState: { kpis, currentKpis, isLoading, error, refresh: refreshKpis },
-  releasesState,
 }: {
+  serviceName: string;
   /** Fetched by the page, whose header shows its platforms. */
   kpisState: MobileKpisState;
-  /** Fetched by the page, so the toolbar's refresh reloads it with the KPIs. */
-  releasesState: MobileReleasesState;
 }) {
+  // Fetched here, so only the Overview runs its queries; the toolbar's refresh reloads it with the KPIs.
+  const releasesState = useMobileReleases(serviceName);
   const refresh = () => {
     refreshKpis();
     releasesState.refresh();
   };
-  const { environment } = useEnvironment();
   const formatters = useFormatters();
   const { formatNumber } = formatters;
-  // In the URL, so a reload or a shared link keeps them.
+  // In the URL, so a reload or a shared link keeps them; the toolbar sets the OS and release.
   const { value: release, setValue: setRelease } = useQueryParam('release');
-  const { value: osName, setValue: setOsName } = useQueryParam('osName');
   const { value: compare, setValue: setCompare } = useQueryParam('compare');
   const isComparing = compare === 'true';
   const healthSummaryTitleId = useGeneratedHtmlId({ prefix: 'healthSummaryTitle' });
@@ -207,12 +179,7 @@ export function MobileOverview({
   );
 
   const hasNoData = currentKpis !== undefined && !currentKpis.hasData;
-  const isFiltered = environment !== undefined || osName !== undefined || release !== undefined;
-  const updateUrlQuery = useUpdateUrlQuery();
-  // One history entry, so Back restores every filter at once.
-  const clearFilters = () =>
-    updateUrlQuery({ environment: undefined, osName: undefined, release: undefined });
-  const clearFiltersButton = isFiltered ? <ClearFiltersButton onClear={clearFilters} /> : undefined;
+  const { isFiltered, clearFiltersButton } = useMobileFilters();
   const errorPrompt = error ? (
     <LoadErrorPrompt
       data-test-subj="digitalExperienceMobileKpisError"
@@ -226,37 +193,7 @@ export function MobileOverview({
 
   return (
     <>
-      {/* The toolbar of every application tab: the filters keep their width when one is picked,
-      and the date picker its place, so the page doesn't move. */}
-      <ApplicationTabToolbar
-        environments={kpis?.environments}
-        isLoading={isLoading}
-        onRefresh={refresh}
-        filters={
-          <>
-            <FacetFilter
-              data-test-subj="digitalExperienceMobileOsFilter"
-              ebtElement={MOBILE_APPLICATION_EBT_ELEMENTS.OS_FILTER}
-              label={OS_LABEL}
-              buckets={kpis?.osNames ?? []}
-              selected={osName}
-              onChange={setOsName}
-              formatters={formatters}
-              isLoading={isLoading && !kpis}
-            />
-            <FacetFilter
-              data-test-subj="digitalExperienceMobileReleaseFilter"
-              ebtElement={MOBILE_APPLICATION_EBT_ELEMENTS.RELEASE_FILTER}
-              label={RELEASE_LABEL}
-              buckets={kpis?.releases ?? []}
-              selected={release}
-              onChange={setRelease}
-              formatters={formatters}
-              isLoading={isLoading && !kpis}
-            />
-          </>
-        }
-      />
+      <MobileToolbar kpis={kpis} isLoading={isLoading} onRefresh={refresh} />
       <EuiSpacer size="m" />
       {!errorPrompt && !hasNoData && currentKpis?.isPartial && (
         <>

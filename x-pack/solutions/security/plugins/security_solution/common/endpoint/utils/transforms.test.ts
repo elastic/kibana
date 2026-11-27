@@ -27,12 +27,14 @@ const metadataSearchResult = (distinctAgents: number) => ({
   aggregations: { agents: { value: distinctAgents } },
 });
 
-const createEsClient = (startTransform: jest.Mock, search?: jest.Mock): Client =>
+const createEsClient = (
+  startTransform: jest.Mock,
+  search?: jest.Mock,
+  transforms: Array<{ id: string }> = [{ id: CURRENT_TRANSFORM_ID }, { id: UNITED_TRANSFORM_ID }]
+): Client =>
   ({
     transform: {
-      getTransformStats: jest.fn().mockResolvedValue({
-        transforms: [{ id: CURRENT_TRANSFORM_ID }, { id: UNITED_TRANSFORM_ID }],
-      }),
+      getTransformStats: jest.fn().mockResolvedValue({ transforms }),
       startTransform,
     },
     search: search ?? jest.fn().mockResolvedValue(metadataSearchResult(1)),
@@ -124,6 +126,28 @@ describe('startMetadataTransforms', () => {
         },
       })
     );
+  });
+
+  it('rejects when the metadata transforms do not exist', async () => {
+    jest.useFakeTimers();
+    const startTransform = jest.fn().mockResolvedValue({});
+    const pending = startMetadataTransforms(
+      createEsClient(startTransform, undefined, []),
+      ['agent-1'],
+      '9.6.0'
+    );
+    const assertion = expect(pending).rejects.toThrow(
+      'Metadata transforms for endpoint package version [9.6.0] not found after waiting; endpoint metadata is unavailable'
+    );
+
+    try {
+      await jest.runAllTimersAsync();
+      await assertion;
+    } finally {
+      jest.useRealTimers();
+    }
+
+    expect(startTransform).not.toHaveBeenCalled();
   });
 
   it('rejects when the united index never has the agent', async () => {

@@ -70,6 +70,9 @@ describe('useApplicationLinks', () => {
     expect(result.current.overviewHref).toBe(
       '/app/digital_experience/shop-mobile?applicationType=mobile&osName=iOS&rangeFrom=now-15m&rangeTo=now&release=2.0.0&source=otel'
     );
+    expect(result.current.crashesHref).toBe(
+      '/app/digital_experience/shop-mobile/crashes?applicationType=mobile&osName=iOS&rangeFrom=now-15m&rangeTo=now&release=2.0.0&source=otel'
+    );
   });
 
   it("keeps a mobile application's Compare, so its breadcrumb and tab lead back to it", () => {

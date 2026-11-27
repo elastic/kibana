@@ -10,8 +10,25 @@ import React from 'react';
 import { QueryClientProvider, QueryClient } from '@kbn/react-query';
 import { useKibana } from '../common/lib/kibana';
 import { useUpdatePack } from './use_update_pack';
+import { addSharedIntegrationWarningToasts } from './shared_integration_warning_toast';
 
 jest.mock('../common/lib/kibana');
+jest.mock('./shared_integration_warning_toast', () => {
+  const actual = jest.requireActual('./shared_integration_warning_toast');
+
+  // Keep the real behavior, but make the call observable.
+  return {
+    ...actual,
+    addSharedIntegrationWarningToasts: jest.fn(actual.addSharedIntegrationWarningToasts),
+  };
+});
+
+const addWarningsMock = addSharedIntegrationWarningToasts as jest.MockedFunction<
+  typeof addSharedIntegrationWarningToasts
+>;
+const getUrlForApp = jest.fn(
+  (app: string, { path }: { path?: string } = {}) => `/app/${app}${path}`
+);
 
 const useKibanaMock = useKibana as jest.MockedFunction<typeof useKibana>;
 
@@ -24,17 +41,30 @@ const createWrapper = (queryClient: QueryClient) => {
 
 describe('useUpdatePack error toast (6.9)', () => {
   let mockHttp: { put: jest.Mock };
-  let mockToasts: { addSuccess: jest.Mock; addError: jest.Mock; remove: jest.Mock };
+  let mockToasts: {
+    addSuccess: jest.Mock;
+    addError: jest.Mock;
+    addWarning: jest.Mock;
+    remove: jest.Mock;
+  };
   let queryClient: QueryClient;
 
   beforeEach(() => {
     jest.clearAllMocks();
     mockHttp = { put: jest.fn() };
-    mockToasts = { addSuccess: jest.fn(), addError: jest.fn(), remove: jest.fn() };
+    mockToasts = {
+      addSuccess: jest.fn(),
+      addError: jest.fn(),
+      addWarning: jest.fn(),
+      remove: jest.fn(),
+    };
 
     useKibanaMock.mockReturnValue({
       services: {
-        application: { navigateToApp: jest.fn() },
+        application: { navigateToApp: jest.fn(), getUrlForApp },
+        analytics: {},
+        i18n: {},
+        theme: {},
         http: mockHttp,
         notifications: { toasts: mockToasts },
       },
@@ -96,5 +126,65 @@ describe('useUpdatePack error toast (6.9)', () => {
 
     expect(invalidateSpy).toHaveBeenCalledWith(['packList']);
     expect(invalidateSpy).toHaveBeenCalledWith(['pack', { packId: 'pack-1' }]);
+  });
+
+  it('shows a warning toast naming the additional agent policies when the response carries warnings', async () => {
+    queryClient.setQueryData(
+      ['agentPolicies'],
+      [
+        { id: 'policy-a', name: 'Policy A' },
+        { id: 'policy-b', name: 'Policy B' },
+      ]
+    );
+    mockHttp.put.mockResolvedValue({
+      data: { name: 'my-pack' },
+      warnings: [
+        {
+          code: 'shared_integration_overdelivery',
+          package_policy_id: 'pp-shared',
+          package_policy_name: 'Shared osquery',
+          additional_policy_ids: ['policy-b', 'policy-missing'],
+        },
+      ],
+    });
+
+    const { result } = renderHook(() => useUpdatePack({ withRedirect: false }), {
+      wrapper: createWrapper(queryClient),
+    });
+
+    await act(async () => {
+      result.current.mutate({ id: 'pack-1', name: 'my-pack', policy_ids: ['policy-a'] });
+    });
+
+    await waitFor(() => expect(mockToasts.addWarning).toHaveBeenCalledTimes(1));
+    const [toast] = mockToasts.addWarning.mock.calls[0];
+    expect(toast.title).toBe('Pack also runs on other agent policies');
+    expect(typeof toast.text).toBe('function');
+    expect(addWarningsMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        packId: 'pack-1',
+        warnings: [expect.objectContaining({ package_policy_id: 'pp-shared' })],
+        toasts: mockToasts,
+        queryClient,
+        getUrlForApp,
+        startServices: { analytics: {}, i18n: {}, theme: {} },
+      })
+    );
+    expect(mockToasts.addSuccess).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not show a warning toast when the response has no warnings', async () => {
+    mockHttp.put.mockResolvedValue({ data: { name: 'my-pack' } });
+
+    const { result } = renderHook(() => useUpdatePack({ withRedirect: false }), {
+      wrapper: createWrapper(queryClient),
+    });
+
+    await act(async () => {
+      result.current.mutate({ id: 'pack-1', name: 'my-pack' });
+    });
+
+    await waitFor(() => expect(mockToasts.addSuccess).toHaveBeenCalled());
+    expect(mockToasts.addWarning).not.toHaveBeenCalled();
   });
 });

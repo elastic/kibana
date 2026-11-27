@@ -1411,6 +1411,7 @@ export class ManagedWorkflowsService {
       lightweightValidation: true,
       now,
       spaceId,
+      isManaged: true,
     });
 
     const managedWorkflowData = {

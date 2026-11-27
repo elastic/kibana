@@ -48,7 +48,11 @@ export function OverviewToolbar({
   formatters: Pick<Formatters, 'formatNumber'>;
 }) {
   const pinnedFilters = visibleFilters(filterOptions, filters);
-  const { count: fittingCount, containerRef } = useFittingCount({
+  const {
+    count: fittingCount,
+    isWrapped,
+    containerRef,
+  } = useFittingCount({
     total: pinnedFilters.length,
     resetKey: `${pinnedFilters.join()}|${pinnedFilters
       .filter((name) => (filters[name] ?? []).length > 0)
@@ -59,6 +63,7 @@ export function OverviewToolbar({
   return (
     <ApplicationTabToolbar
       containerRef={containerRef}
+      isFiltersOnOwnRow={isWrapped}
       environments={environments}
       isLoading={isLoading}
       onRefresh={onRefresh}

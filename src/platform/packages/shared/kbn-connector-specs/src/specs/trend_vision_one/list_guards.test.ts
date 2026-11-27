@@ -1,0 +1,327 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import { filterHeader } from './client';
+import { ACTION_DESCRIPTIONS } from './descriptions';
+import { TrendVisionOne } from './trend_vision_one';
+import {
+  API,
+  ctx,
+  ok,
+  parseInput,
+  request,
+  resetMocksAroundEachTest,
+  run,
+  sent,
+} from './test_helpers';
+
+resetMocksAroundEachTest();
+
+describe('TrendAI Vision One listEndpoints input guards', () => {
+  it('refuses endpointName and filter values with characters above U+00FF before any request', async () => {
+    for (const input of [{ endpointName: 'PC1東京' }, { filter: "endpointName eq 'PC1東京'" }]) {
+      const parsed = parseInput('listEndpoints', input);
+      expect(parsed.success).toBe(false);
+      expect(JSON.stringify(parsed.error)).toContain('characters above U+00FF');
+    }
+    // The guard in the header builder also holds when the schema is bypassed.
+    await expect(
+      TrendVisionOne.actions.listEndpoints.handler(ctx, { endpointName: 'PC1東京' })
+    ).rejects.toThrow('characters above U+00FF');
+    expect(request).not.toHaveBeenCalled();
+  });
+
+  it('sends endpointName values up to U+00FF unchanged', async () => {
+    request.mockResolvedValueOnce(ok({ items: [] }));
+    await run('listEndpoints', { endpointName: 'café-ÿ' });
+    expect(sent().headers['TMV1-Filter']).toBe("endpointName eq 'café-ÿ'");
+  });
+
+  it.each(['?top=1000', '?skipToken=1&top=201', '?top=500'])(
+    'refuses the nextLink %s with a page size above 200 before any request',
+    async (query) => {
+      await expect(
+        run('listEndpoints', { nextLink: `${API}/endpointSecurity/endpoints${query}` })
+      ).rejects.toThrow('nextLink asks for a page size');
+      expect(request).not.toHaveBeenCalled();
+    }
+  );
+
+  it.each(['', '?skipToken=2', '?top=200&skipToken=2', '?top=10'])(
+    'reads the nextLink %j (no top, or top within 200)',
+    async (query) => {
+      request.mockResolvedValueOnce(ok({ items: [] }));
+      await run('listEndpoints', { nextLink: `${API}/endpointSecurity/endpoints${query}` });
+      expect(sent().url).toBe(`${API}/endpointSecurity/endpoints${query}`);
+    }
+  );
+
+  it('refuses a nextLink with a user name or password before any request', async () => {
+    await expect(
+      run('listEndpoints', {
+        nextLink: 'https://u:p@api.in.xdr.trendmicro.com/v3.0/endpointSecurity/endpoints?top=10',
+      })
+    ).rejects.toThrow('nextLink must not contain a user name or password');
+    expect(request).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    ['the caller nextLink', `${API}/endpointSecurity/endpoints?top=10&skipToken=abc`],
+    [
+      'the caller nextLink in another form',
+      '/v3.0/endpointSecurity/endpoints?skipToken=abc&top=10#x',
+    ],
+  ])('returns no nextLink when the product answers %s again', async (_what, returned) => {
+    request.mockResolvedValueOnce(ok({ totalCount: 5, count: 1, items: [{}], nextLink: returned }));
+    const result = await run('listEndpoints', {
+      nextLink: `${API}/endpointSecurity/endpoints?top=10&skipToken=abc`,
+    });
+    expect(result).toMatchObject({ count: 1, nextLink: null });
+  });
+
+  it('returns no nextLink when the product links back to the first page', async () => {
+    request.mockResolvedValueOnce(
+      ok({ items: [{}], nextLink: `${API}/endpointSecurity/endpoints?top=50` })
+    );
+    await expect(run('listEndpoints', { top: 50 })).resolves.toMatchObject({ nextLink: null });
+  });
+
+  it('returns a different nextLink of the product unchanged', async () => {
+    const next = `${API}/endpointSecurity/endpoints?top=10&skipToken=def`;
+    request.mockResolvedValueOnce(ok({ items: [{}], nextLink: next }));
+    await expect(
+      run('listEndpoints', { nextLink: `${API}/endpointSecurity/endpoints?top=10&skipToken=abc` })
+    ).resolves.toMatchObject({ nextLink: next });
+  });
+});
+
+describe('TrendAI Vision One listObservedAttackTechniques input guards', () => {
+  it('refuses a filter with characters above U+00FF before any request', async () => {
+    const parsed = parseInput('listObservedAttackTechniques', {
+      filter: "endpointName eq 'PC1東京'",
+    });
+    expect(parsed.success).toBe(false);
+    expect(JSON.stringify(parsed.error)).toContain('characters above U+00FF');
+    await expect(
+      TrendVisionOne.actions.listObservedAttackTechniques.handler(ctx, {
+        filter: "endpointName eq 'PC1東京'",
+      })
+    ).rejects.toThrow('characters above U+00FF');
+    expect(request).not.toHaveBeenCalled();
+  });
+
+  it.each(['?top=101', '?top=1000', '?skipToken=1&top=200'])(
+    'refuses the nextLink %s with a page size above 100 before any request',
+    async (query) => {
+      await expect(
+        run('listObservedAttackTechniques', { nextLink: `${API}/oat/detections${query}` })
+      ).rejects.toThrow('nextLink asks for a page size');
+      expect(request).not.toHaveBeenCalled();
+    }
+  );
+
+  it.each(['', '?skipToken=2', '?top=100&skipToken=2', '?top=50'])(
+    'reads the nextLink %j (no top, or top within 100)',
+    async (query) => {
+      request.mockResolvedValueOnce(ok({ items: [] }));
+      await run('listObservedAttackTechniques', { nextLink: `${API}/oat/detections${query}` });
+      expect(sent().url).toBe(`${API}/oat/detections${query}`);
+    }
+  );
+
+  it('refuses a nextLink with a user name or password before any request', async () => {
+    await expect(
+      run('listObservedAttackTechniques', {
+        nextLink: 'https://u:p@api.in.xdr.trendmicro.com/v3.0/oat/detections?skipToken=1',
+      })
+    ).rejects.toThrow('nextLink must not contain a user name or password');
+    expect(request).not.toHaveBeenCalled();
+  });
+
+  it('returns no nextLink when the product answers the caller nextLink again', async () => {
+    const link = `${API}/oat/detections?top=50&skipToken=abc`;
+    request.mockResolvedValueOnce(
+      ok({
+        totalCount: 9,
+        count: 1,
+        items: [{ id: 'oat-1' }],
+        nextLink: `${API}/oat/detections?skipToken=abc&top=50`,
+      })
+    );
+    await expect(run('listObservedAttackTechniques', { nextLink: link })).resolves.toMatchObject({
+      count: 1,
+      nextLink: null,
+    });
+  });
+
+  it('returns no nextLink when the product links back to the first page', async () => {
+    request.mockResolvedValueOnce(ok({ items: [{}], nextLink: `${API}/oat/detections?top=100` }));
+    await expect(run('listObservedAttackTechniques', { top: 100 })).resolves.toMatchObject({
+      nextLink: null,
+    });
+  });
+
+  it('tells that an ingestion range alone still covers only the last hour of detections', () => {
+    expect(ACTION_DESCRIPTIONS.listObservedAttackTechniques).toContain(
+      'An ingestion range alone still returns only the last hour of detections; give a detection range to read more.'
+    );
+  });
+
+  it.each([
+    ['detectedStartDateTime', 'detectedEndDateTime'],
+    ['ingestedStartDateTime', 'ingestedEndDateTime'],
+  ])('rejects impossible %s values at the schema and accepts valid edges', (start, end) => {
+    for (const value of ['2026-02-31T25:61:61Z', '2026-02-29T00:00:00Z', '2026-01-01T24:00:00Z']) {
+      const parsed = parseInput('listObservedAttackTechniques', { [start]: value, [end]: value });
+      expect(parsed.success).toBe(false);
+      expect(JSON.stringify(parsed.error)).toContain('Use a real date and time');
+    }
+    for (const value of ['2024-02-29T23:59:59Z', '2026-12-31T00:00:00Z']) {
+      expect(
+        parseInput('listObservedAttackTechniques', { [start]: value, [end]: value }).success
+      ).toBe(true);
+    }
+  });
+});
+
+describe('TrendAI Vision One filters padded with ideographic space', () => {
+  const PAD = '\u3000';
+
+  it('accepts a value padded with U+3000 and sends the trimmed value', async () => {
+    const input = {
+      endpointName: `${PAD}PC1${PAD}`,
+      filter: `${PAD}osPlatform eq 'windows'${PAD}`,
+    };
+    expect(parseInput('listEndpoints', input).success).toBe(true);
+    request.mockResolvedValueOnce(ok({ items: [] }));
+    await run('listEndpoints', input);
+    expect(sent().headers['TMV1-Filter']).toBe(
+      "endpointName eq 'PC1' and (osPlatform eq 'windows')"
+    );
+  });
+
+  it('ignores a filter and an endpointName made only of U+3000', async () => {
+    const input = { endpointName: `${PAD}${PAD}`, filter: `${PAD} ${PAD}` };
+    expect(parseInput('listEndpoints', input).success).toBe(true);
+    request.mockResolvedValueOnce(ok({ items: [] }));
+    await run('listEndpoints', input);
+    expect(sent().headers).toBeUndefined();
+  });
+
+  it('still refuses a real character above U+00FF in the padded value, in the schema and in filterHeader', () => {
+    expect(parseInput('listEndpoints', { endpointName: `${PAD}東京${PAD}` }).success).toBe(false);
+    expect(parseInput('listObservedAttackTechniques', { filter: `${PAD}東京` }).success).toBe(
+      false
+    );
+    expect(() => filterHeader(`${PAD}東京${PAD}`)).toThrow('characters above U+00FF');
+  });
+});
+
+describe('TrendAI Vision One paged results put the cursor before the items', () => {
+  it.each([
+    ['listAlerts', `${API}/workbench/alerts`, { id: 'WB-1' }],
+    ['listObservedAttackTechniques', `${API}/oat/detections`, { uuid: 'd1' }],
+    ['listEndpoints', `${API}/endpointSecurity/endpoints`, { agentGuid: 'g1' }],
+  ])(
+    '%s returns nextLink before items, so a cut page still shows the cursor',
+    async (name, path, item) => {
+      request.mockResolvedValueOnce(
+        ok({ totalCount: 51, count: 1, items: [item], nextLink: `${path}?skipToken=abc` })
+      );
+      const result = await run(name, {});
+      expect(Object.keys(result as Record<string, unknown>)).toEqual([
+        'totalCount',
+        'count',
+        'nextLink',
+        'items',
+      ]);
+      expect(JSON.stringify(result).indexOf('"nextLink"')).toBeLessThan(
+        JSON.stringify(result).indexOf('"items"')
+      );
+    }
+  );
+});
+
+describe('TrendAI Vision One listObservedAttackTechniques fields', () => {
+  const detection = (n: number) => ({
+    uuid: `d${n}`,
+    source: 'detections',
+    detectedDateTime: '2026-11-25T01:00:00Z',
+    ingestedDateTime: '2026-11-25T01:00:05Z',
+    entityType: 'host',
+    entityName: `host-${n}`,
+    endpoint: { endpointName: `host-${n}`, agentGuid: 'g1' },
+    filters: [{ id: 'f1', name: 'Rule', riskLevel: 'high' }],
+    detail: { big: 'x'.repeat(2000) },
+  });
+  const page = (items: unknown[]) =>
+    ok({
+      totalCount: 51,
+      count: items.length,
+      nextLink: `${API}/oat/detections?nextBatchToken=abc`,
+      items,
+    });
+
+  it('returns only the named fields of each detection and keeps the cursor and the counts', async () => {
+    request.mockResolvedValueOnce(page([detection(1), detection(2)]));
+    const result = (await run('listObservedAttackTechniques', {
+      fields: ['uuid', 'detectedDateTime', 'entityName'],
+    })) as {
+      totalCount: number;
+      count: number;
+      nextLink: string;
+      items: Array<Record<string, unknown>>;
+    };
+    expect(result.items).toEqual([
+      { uuid: 'd1', detectedDateTime: '2026-11-25T01:00:00Z', entityName: 'host-1' },
+      { uuid: 'd2', detectedDateTime: '2026-11-25T01:00:00Z', entityName: 'host-2' },
+    ]);
+    expect(result).toMatchObject({
+      totalCount: 51,
+      count: 2,
+      nextLink: `${API}/oat/detections?nextBatchToken=abc`,
+    });
+    expect(Object.keys(result)).toEqual(['totalCount', 'count', 'nextLink', 'items']);
+    // the projection is ours: it is never sent to the product
+    expect(JSON.stringify(sent(0))).not.toContain('fields');
+  });
+
+  it('makes a page of 50 small enough for an agent when detail is left out', async () => {
+    request.mockResolvedValueOnce(page(Array.from({ length: 50 }, (_v, n) => detection(n))));
+    const small = await run('listObservedAttackTechniques', {
+      fields: ['uuid', 'detectedDateTime', 'entityName', 'entityType'],
+    });
+    request.mockResolvedValueOnce(page(Array.from({ length: 50 }, (_v, n) => detection(n))));
+    const full = await run('listObservedAttackTechniques', {});
+    expect(JSON.stringify(small).length).toBeLessThan(JSON.stringify(full).length / 10);
+  });
+
+  it('returns every field when fields is not given', async () => {
+    request.mockResolvedValueOnce(page([detection(1)]));
+    const result = (await run('listObservedAttackTechniques', {})) as { items: unknown[] };
+    expect(result.items).toEqual([detection(1)]);
+  });
+
+  it.each([
+    ['an unknown field name', ['detial']],
+    ['an empty list', []],
+    ['more names than there are fields', Array.from({ length: 10 }, () => 'uuid')],
+  ])('rejects %s', (_label, fields) => {
+    expect(parseInput('listObservedAttackTechniques', { fields }).success).toBe(false);
+  });
+
+  it('works with nextLink: the caller gives the same fields again', async () => {
+    request.mockResolvedValueOnce(page([detection(3)]));
+    const result = (await run('listObservedAttackTechniques', {
+      nextLink: `${API}/oat/detections?nextBatchToken=prev`,
+      fields: ['uuid'],
+    })) as { items: unknown[] };
+    expect(result.items).toEqual([{ uuid: 'd3' }]);
+  });
+});
