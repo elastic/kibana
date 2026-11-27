@@ -38,9 +38,9 @@ export function ClusterView({ clusterDetails }: Props) {
         <KbnWarningCallout
           announceOnMount
           size="s"
-          title={i18n.translate('inspector.requests.clusters.timedOutMessage', {
+          title={i18n.translate('inspector.requests.clusters.incompleteRequestMessage', {
             defaultMessage:
-              'Request timed out before completion. Results may be incomplete or empty.',
+              'Request stopped before completion. Results may be incomplete or empty.',
           })}
         />
       ) : null}
