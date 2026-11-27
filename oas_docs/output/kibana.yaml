@@ -14212,6 +14212,8 @@ paths:
                           base: FROM metrics-* | STATS avg_cpu = AVG(host.cpu.usage) BY host.name
                           breach:
                             segment: WHERE avg_cpu > 0.9
+                        reason:
+                          template: 'CPU on {{data.host.name}} is high: {{data.avg_cpu}}'
                         recovery:
                           strategy: no_breach
                         schedule:
@@ -14355,6 +14357,8 @@ paths:
                     base: FROM metrics-* | STATS avg_cpu = AVG(host.cpu.usage) BY host.name
                     breach:
                       segment: WHERE avg_cpu > 0.9
+                  reason:
+                    template: 'CPU on {{data.host.name}} is high: {{data.avg_cpu}}'
                   recovery:
                     strategy: no_breach
                   schedule:
@@ -14399,6 +14403,8 @@ paths:
                       base: FROM metrics-* | STATS avg_cpu = AVG(host.cpu.usage) BY host.name
                       breach:
                         segment: WHERE avg_cpu > 0.9
+                    reason:
+                      template: 'CPU on {{data.host.name}} is high: {{data.avg_cpu}}'
                     recovery:
                       strategy: no_breach
                     schedule:
@@ -14553,6 +14559,8 @@ paths:
                         base: FROM metrics-* | STATS avg_cpu = AVG(host.cpu.usage) BY host.name
                         breach:
                           segment: WHERE avg_cpu > 0.9
+                      reason:
+                        template: 'CPU on {{data.host.name}} is high: {{data.avg_cpu}}'
                       recovery:
                         strategy: no_breach
                       schedule:
@@ -14584,6 +14592,8 @@ paths:
                         base: FROM metrics-* | STATS avg_cpu = AVG(host.cpu.usage) BY host.name
                         breach:
                           segment: WHERE avg_cpu > 0.9
+                      reason:
+                        template: 'CPU on {{data.host.name}} is high: {{data.avg_cpu}}'
                       recovery:
                         strategy: no_breach
                       schedule:
@@ -14630,6 +14640,8 @@ paths:
                           base: FROM metrics-* | STATS avg_cpu = AVG(host.cpu.usage) BY host.name
                           breach:
                             segment: WHERE avg_cpu > 0.9
+                        reason:
+                          template: 'CPU on {{data.host.name}} is high: {{data.avg_cpu}}'
                         recovery:
                           strategy: no_breach
                         schedule:
@@ -14668,6 +14680,8 @@ paths:
                           base: FROM metrics-* | STATS avg_cpu = AVG(host.cpu.usage) BY host.name
                           breach:
                             segment: WHERE avg_cpu > 0.9
+                        reason:
+                          template: 'CPU on {{data.host.name}} is high: {{data.avg_cpu}}'
                         recovery:
                           strategy: no_breach
                         schedule:
@@ -15192,6 +15206,8 @@ paths:
                           base: FROM metrics-* | STATS avg_cpu = AVG(host.cpu.usage) BY host.name
                           breach:
                             segment: WHERE avg_cpu > 0.9
+                        reason:
+                          template: 'CPU on {{data.host.name}} is high: {{data.avg_cpu}}'
                         recovery:
                           strategy: no_breach
                         schedule:
@@ -16070,6 +16086,8 @@ paths:
                       base: FROM metrics-* | STATS avg_cpu = AVG(host.cpu.usage) BY host.name
                       breach:
                         segment: WHERE avg_cpu > 0.9
+                    reason:
+                      template: 'CPU on {{data.host.name}} is high: {{data.avg_cpu}}'
                     recovery:
                       strategy: no_breach
                     schedule:
@@ -16253,6 +16271,8 @@ paths:
                       base: FROM metrics-* | STATS avg_cpu = AVG(host.cpu.usage) BY host.name
                       breach:
                         segment: WHERE avg_cpu > 0.9
+                    reason:
+                      template: 'CPU on {{data.host.name}} is high: {{data.avg_cpu}}'
                     recovery:
                       strategy: no_breach
                     schedule:
@@ -16429,6 +16449,8 @@ paths:
                     base: FROM metrics-* | STATS avg_cpu = AVG(host.cpu.usage) BY host.name
                     breach:
                       segment: WHERE avg_cpu > 0.9
+                  reason:
+                    template: 'CPU on {{data.host.name}} is high: {{data.avg_cpu}}'
                   recovery:
                     strategy: no_breach
                   schedule:
@@ -16473,6 +16495,8 @@ paths:
                       base: FROM metrics-* | STATS avg_cpu = AVG(host.cpu.usage) BY host.name
                       breach:
                         segment: WHERE avg_cpu > 0.9
+                    reason:
+                      template: 'CPU on {{data.host.name}} is high: {{data.avg_cpu}}'
                     recovery:
                       strategy: no_breach
                     schedule:
@@ -16521,6 +16545,8 @@ paths:
                       base: FROM metrics-* | STATS avg_cpu = AVG(host.cpu.usage) BY host.name
                       breach:
                         segment: WHERE avg_cpu > 0.9
+                    reason:
+                      template: 'CPU on {{data.host.name}} is high: {{data.avg_cpu}}'
                     recovery:
                       strategy: no_breach
                     schedule:
@@ -16689,6 +16715,8 @@ paths:
                       base: FROM metrics-* | STATS avg_cpu = AVG(host.cpu.usage) BY host.name
                       breach:
                         segment: WHERE avg_cpu > 0.9
+                    reason:
+                      template: 'CPU on {{data.host.name}} is high: {{data.avg_cpu}}'
                     recovery:
                       strategy: no_breach
                     schedule:
@@ -16875,6 +16903,8 @@ paths:
                       base: FROM metrics-* | STATS avg_cpu = AVG(host.cpu.usage) BY host.name
                       breach:
                         segment: WHERE avg_cpu > 0.9
+                    reason:
+                      template: 'CPU on {{data.host.name}} is high: {{data.avg_cpu}}'
                     recovery:
                       strategy: no_breach
                     schedule:
@@ -29657,7 +29687,8 @@ paths:
                             spaces:
                               description: The IDs of the spaces where the data view is available.
                               items:
-                                maxLength: 1000
+                                maxLength: 512
+                                minLength: 1
                                 type: string
                               maxItems: 100
                               type: array
@@ -29761,6 +29792,8 @@ paths:
                   minLength: 1
                   title: Data view name
                   type: string
+                spaces:
+                  $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-data-view-spaces-schema'
                 time_field:
                   $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-time-field-schema'
               required:
@@ -29814,7 +29847,8 @@ paths:
                       spaces:
                         description: The IDs of the spaces where the data view is available.
                         items:
-                          maxLength: 1000
+                          maxLength: 512
+                          minLength: 1
                           type: string
                         maxItems: 100
                         type: array
@@ -29833,7 +29867,7 @@ paths:
                   - meta
           description: The data view was created.
         '400':
-          description: The request is invalid, for example when a field format type does not exist.
+          description: The request is invalid, for example when a field format type does not exist or `spaces` does not include the current space.
         '403':
           description: forbidden
         '409':
@@ -29954,7 +29988,8 @@ paths:
                       spaces:
                         description: The IDs of the spaces where the data view is available.
                         items:
-                          maxLength: 1000
+                          maxLength: 512
+                          minLength: 1
                           type: string
                         maxItems: 100
                         type: array
@@ -29989,7 +30024,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Creates the data view with the ID in the path, or replaces its definition if it already exists. Returns `201` when the request creates a data view and `200` when it replaces one. A replacement removes any optional property you omit, such as `time_field`, and also removes any deprecated scripted fields the data view has. Scripted fields can't be set through this API; sending `scripted_fields` fails with a `400`.<br/><br/>[Required authorization] Route required privileges: indexPatterns:manage.
+        Creates the data view with the ID in the path, or replaces its definition if it already exists. Returns `201` when the request creates a data view and `200` when it replaces one. A replacement removes any optional property you omit, such as `time_field`, and also removes any deprecated scripted fields the data view has. Scripted fields can't be set through this API; sending `scripted_fields` fails with a `400`. When provided, `spaces` must include the current space or the request fails with a `400`; when omitted, the data view is available only in the current space.<br/><br/>[Required authorization] Route required privileges: indexPatterns:manage.
       operationId: put-data-views-v2-id
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -30041,6 +30076,8 @@ paths:
                   minLength: 1
                   title: Data view name
                   type: string
+                spaces:
+                  $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-data-view-spaces-schema'
                 time_field:
                   $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-time-field-schema'
               required:
@@ -30094,7 +30131,8 @@ paths:
                       spaces:
                         description: The IDs of the spaces where the data view is available.
                         items:
-                          maxLength: 1000
+                          maxLength: 512
+                          minLength: 1
                           type: string
                         maxItems: 100
                         type: array
@@ -30160,7 +30198,8 @@ paths:
                       spaces:
                         description: The IDs of the spaces where the data view is available.
                         items:
-                          maxLength: 1000
+                          maxLength: 512
+                          minLength: 1
                           type: string
                         maxItems: 100
                         type: array
@@ -60851,7 +60890,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Called by the CloudFormation stack launched from Kibana to report the IAM role ARN and stack ARN it created. The request is not authenticated: present the one-time token issued when the callback was created in the `x-elastic-callback-token` header. The token is not an Elasticsearch credential and admits nothing but this report. `role_arn` and `stack_arn` must be in the same AWS account. While the record is pending, a repeat report with the same values succeeds and different values return 409; an expired or cancelled record returns 410.
+        Called by the deployment launched from Kibana to report what it created. The request is not authenticated: present the one-time token issued when the callback was created in the `x-elastic-callback-token` header. The token is not an Elasticsearch credential and admits nothing but this report. The body is shaped for the record's cloud provider and carries `origin_proof`, the provider's proof that the report was sent from the account of what it reports, bound to this callback and these values; a report whose proof does not verify returns 401 and leaves the record waiting. A deployment launched from a blueprint that sends the proof (for AWS, `aws/workload_identity_federation` 1.5.0 and later, as recorded on the callback at launch) must send it, and a report without one is a 400; a deployment launched before that may still report without it. For AWS, the CloudFormation stack's Lambda reports `role_arn` and `stack_arn`, which must be in the same account, and the proof is an STS `GetCallerIdentity` request signed from that account with the callback id and the SHA-256 of the reported values among its signed headers; Kibana forwards it to `sts.<region>.amazonaws.com`, so it needs egress to the regional STS endpoints. The signer must also be named as the stack's callback function and its role would be, which only turns away a stray principal: anyone in the account can pick those names, so the account is what the proof establishes. While the record is pending, a repeat report with the same values succeeds and different values return 409; an expired or cancelled record returns 410.
       operationId: receive-provisioning-callback
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -60861,7 +60900,7 @@ paths:
           schema:
             example: 'true'
             type: string
-        - description: ID of the callback record, as issued to the stack.
+        - description: ID of the callback record, as issued to the launched deployment.
           in: path
           name: callbackId
           required: true
@@ -60874,15 +60913,50 @@ paths:
           application/json:
             examples:
               receiveProvisioningCallbackRequestExample:
-                description: The report the launched CloudFormation stack sends once its IAM role exists
-                summary: Report a created IAM role
+                description: What the CloudFormation stack launched from Kibana sends once its IAM role exists; other providers report their own values and proof
+                summary: AWS report of a created IAM role
                 value:
+                  origin_proof:
+                    body: Action=GetCallerIdentity&Version=2011-06-15
+                    headers:
+                      Authorization: AWS4-HMAC-SHA256 Credential=ASIAEXAMPLE/20261113/us-east-1/sts/aws4_request, SignedHeaders=content-type;host;x-amz-date;x-amz-security-token;x-elastic-callback-id;x-elastic-report-sha256, Signature=5d41402abc4b2a76b9719d911017c592e5c0c8d3b0d4c3d6b0b1e0d8f9a1b2c3
+                      Content-Type: application/x-www-form-urlencoded
+                      X-Amz-Date: 20261113T100000Z
+                      X-Amz-Security-Token: IQoJb3JpZ2luX2VjEXAMPLE
+                      x-elastic-callback-id: 0f5d7a5e-2b1c-4a3d-9e8f-123456789abc
+                      x-elastic-report-sha256: 9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08
+                    region: us-east-1
                   role_arn: arn:aws:iam::123456789012:role/ElasticWorkloadIdentity-abc123
                   stack_arn: arn:aws:cloudformation:us-east-1:123456789012:stack/elastic-identity/11111111-2222-3333-4444-555555555555
             schema:
               additionalProperties: false
               type: object
               properties:
+                origin_proof:
+                  additionalProperties: false
+                  description: 'The proof that the report was sent from the account of the reported role and stack: a signed STS `GetCallerIdentity` request, made by the callback function with the callback id and the SHA-256 of the reported values among its signed headers. Kibana forwards it to the regional STS endpoint; whoever answers identifies the signer. Optional while stacks launched before the proof was sent can still report.'
+                  type: object
+                  properties:
+                    body:
+                      description: The signed request body.
+                      enum:
+                        - Action=GetCallerIdentity&Version=2011-06-15
+                      type: string
+                    headers:
+                      additionalProperties:
+                        maxLength: 8192
+                        type: string
+                      description: 'The signed request headers: `Authorization`, `X-Amz-Date`, `X-Amz-Security-Token`, `Content-Type`, and the signed `x-elastic-callback-id` and `x-elastic-report-sha256` headers that bind the proof to this record and this report.'
+                      type: object
+                    region:
+                      description: Region of the STS endpoint the request was signed for.
+                      maxLength: 32
+                      minLength: 1
+                      type: string
+                  required:
+                    - region
+                    - headers
+                    - body
                 role_arn:
                   description: ARN of the IAM role the stack created.
                   maxLength: 2048
@@ -60911,7 +60985,7 @@ paths:
                 type: object
                 properties:
                   status:
-                    description: 'State of the callback record. `pending`: waiting for the stack. `receiving`: a report is being applied. `received`: values stored and the identity exists. `cancelled`: the form stopped waiting and the token is refused.'
+                    description: 'State of the callback record. `pending`: waiting for the deployment. `receiving`: a report is being applied. `received`: values stored and the identity exists. `cancelled`: the form stopped waiting and the token is refused.'
                     enum:
                       - pending
                       - receiving
@@ -60951,6 +61025,36 @@ paths:
                   - message
                   - attributes
           description: Bad Request
+        '401':
+          content:
+            application/json:
+              examples:
+                unverifiedExample:
+                  description: 'For AWS: STS did not vouch that the report was signed from the account and partition of the reported role, the signer is not named as the stack callback function, or the proof was made for another callback or other values'
+                  summary: Proof of the sending account did not verify
+                  value:
+                    error: Unauthorized
+                    message: The report was not signed from the account of what it reports
+                    statusCode: 401
+              schema:
+                additionalProperties: false
+                description: Generic Error
+                type: object
+                properties:
+                  attributes:
+                    nullable: true
+                  error:
+                    type: string
+                  errorType:
+                    type: string
+                  message:
+                    type: string
+                  statusCode:
+                    type: number
+                required:
+                  - message
+                  - attributes
+          description: Unauthorized
         '404':
           content:
             application/json:
@@ -77007,6 +77111,12 @@ paths:
           required: false
           schema:
             $ref: '#/components/schemas/Security_Osquery_API_SortOrderOrUndefined'
+        - description: Set to `true` to include `effective_policy_ids` for each pack. Reads Fleet integrations, so leave it unset when you do not need it.
+          in: query
+          name: withEffectivePolicyIds
+          required: false
+          schema:
+            type: boolean
       responses:
         '200':
           content:
@@ -77019,6 +77129,8 @@ paths:
                       - created_at: '2025-02-26T13:37:30.452Z'
                         created_by: elastic
                         description: My pack
+                        effective_policy_ids:
+                          - my_policy_id
                         enabled: true
                         name: my_pack
                         queries:
@@ -77167,6 +77279,12 @@ paths:
           required: true
           schema:
             $ref: '#/components/schemas/Security_Osquery_API_PackId'
+        - description: Set to `true` to include `effective_policy_ids`. Reads Fleet integrations, so leave it unset when you do not need it.
+          in: query
+          name: withEffectivePolicyIds
+          required: false
+          schema:
+            type: boolean
       responses:
         '200':
           content:
@@ -77179,6 +77297,8 @@ paths:
                       created_at: '2025-02-26T13:37:30.452Z'
                       created_by: elastic
                       description: My pack
+                      effective_policy_ids:
+                        - my_policy_id
                       enabled: true
                       name: my_pack
                       policy_ids:
@@ -147794,6 +147914,8 @@ paths:
     get:
       description: |
         Get the health status of the Kibana task manager.
+
+        Per-task-type details are returned only to users with the `manage_taskManager` Kibana privilege (included in the `all` base privilege when granted in all spaces) or the `monitor` cluster privilege. For other users, fields keyed by task type, such as `workload.task_types`, `workload.schedule`, `runtime.drift_by_type`, and the per-type `runtime.execution` stats, are returned empty, so an empty value does not mean there are no tasks of that type.
       operationId: task-manager-health
       responses:
         '200':
@@ -165360,6 +165482,18 @@ components:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_no_data'
         query:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_query'
+        reason:
+          additionalProperties: false
+          description: Alert reason configuration. Only allowed when kind is "alert". `template` is the alert reason template, for example "CPU on {{data.host.name}} was {{data.cpu_pct}}%." Whitespace is preserved. Empty or whitespace-only templates are rejected. Omit to leave it unset. Null is not accepted.
+          type: object
+          properties:
+            template:
+              description: Alert reason template.
+              maxLength: 1024
+              minLength: 1
+              type: string
+          required:
+            - template
         recovery:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_recovery'
         schedule:
@@ -165774,6 +165908,18 @@ components:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_no_data'
         query:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_query'
+        reason:
+          additionalProperties: false
+          description: Alert reason configuration. Only allowed when kind is "alert". `template` is the alert reason template, for example "CPU on {{data.host.name}} was {{data.cpu_pct}}%." Whitespace is preserved. Empty or whitespace-only templates are rejected. Omit to leave it unset. Null is not accepted.
+          type: object
+          properties:
+            template:
+              description: Alert reason template.
+              maxLength: 1024
+              minLength: 1
+              type: string
+          required:
+            - template
         recovery:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_recovery'
         schedule:
@@ -165896,6 +166042,18 @@ components:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_no_data'
         query:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_query'
+        reason:
+          additionalProperties: false
+          description: Alert reason configuration. Only allowed when kind is "alert". `template` is the alert reason template, for example "CPU on {{data.host.name}} was {{data.cpu_pct}}%." Whitespace is preserved. Empty or whitespace-only templates are rejected. Omit to leave it unset on create or clear it when replacing an existing rule. Null is not accepted.
+          type: object
+          properties:
+            template:
+              description: Alert reason template.
+              maxLength: 1024
+              minLength: 1
+              type: string
+          required:
+            - template
         recovery:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_recovery'
         schedule:
@@ -166438,6 +166596,18 @@ components:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_no_data'
         query:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_query'
+        reason:
+          additionalProperties: false
+          description: Alert reason configuration. Only allowed when kind is "alert". `template` is the alert reason template, for example "CPU on {{data.host.name}} was {{data.cpu_pct}}%." Whitespace is preserved. Empty or whitespace-only templates are rejected. Absent when no reason template is set.
+          type: object
+          properties:
+            template:
+              description: Alert reason template.
+              maxLength: 1024
+              minLength: 1
+              type: string
+          required:
+            - template
         recovery:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_recovery'
         schedule:
@@ -166705,6 +166875,19 @@ components:
           nullable: true
         query:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_query_patch'
+        reason:
+          additionalProperties: false
+          description: Alert reason configuration. Only allowed when kind is "alert". `template` is the alert reason template, for example "CPU on {{data.host.name}} was {{data.cpu_pct}}%." Whitespace is preserved. Empty or whitespace-only templates are rejected. Omit to preserve the current value; send null to clear it.
+          nullable: true
+          type: object
+          properties:
+            template:
+              description: Alert reason template.
+              maxLength: 1024
+              minLength: 1
+              type: string
+          required:
+            - template
         recovery:
           allOf:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_recovery'
@@ -178600,6 +178783,15 @@ components:
         - ref_id
       title: Data view reference
       type: object
+    Kibana_HTTP_APIs_kbn-data-view-spaces-schema:
+      description: 'The IDs of the spaces where the data view is available. Use `*` to make it available in all spaces. Example: ["default", "marketing"].'
+      items:
+        maxLength: 512
+        minLength: 1
+        type: string
+      maxItems: 100
+      title: Spaces
+      type: array
     Kibana_HTTP_APIs_kbn-data-view-spec-schema:
       additionalProperties: false
       properties:
@@ -180285,6 +180477,8 @@ components:
           description: 'Deprecated scripted fields, keyed by field name. This property is read-only: it is only returned in responses, and sending it in a create or update request fails with a 400.'
           title: Scripted fields
           type: object
+        spaces:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-data-view-spaces-schema'
         time_field:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-time-field-schema'
       required:
@@ -221390,6 +221584,29 @@ components:
           required:
             - saved_object_id
             - name
+        warnings:
+          description: Additional agent policies receiving this enabled pack through a shared integration.
+          items:
+            type: object
+            properties:
+              additional_policy_ids:
+                items:
+                  type: string
+                type: array
+              code:
+                enum:
+                  - shared_integration_overdelivery
+                type: string
+              package_policy_id:
+                type: string
+              package_policy_name:
+                type: string
+            required:
+              - code
+              - package_policy_id
+              - package_policy_name
+              - additional_policy_ids
+          type: array
       required:
         - data
     Security_Osquery_API_CreateSavedQueryRequestBody:
@@ -221946,6 +222163,11 @@ components:
               type: string
             description:
               $ref: '#/components/schemas/Security_Osquery_API_PackDescriptionOrUndefined'
+            effective_policy_ids:
+              description: Agent policies that receive this pack through Fleet, including those that share an Osquery Manager integration with a selected agent policy. Returned only when the request sets `withEffectivePolicyIds=true`, and absent when Fleet state is unavailable.
+              items:
+                type: string
+              type: array
             enabled:
               $ref: '#/components/schemas/Security_Osquery_API_EnabledOrUndefined'
             interval:
@@ -222042,6 +222264,11 @@ components:
                 type: string
               description:
                 $ref: '#/components/schemas/Security_Osquery_API_PackDescriptionOrUndefined'
+              effective_policy_ids:
+                description: Agent policies that receive this pack through Fleet, including those that share an Osquery Manager integration with a selected agent policy. Returned only when the request sets `withEffectivePolicyIds=true`, and absent when Fleet state is unavailable.
+                items:
+                  type: string
+                type: array
               enabled:
                 $ref: '#/components/schemas/Security_Osquery_API_EnabledOrUndefined'
               interval:
@@ -223066,6 +223293,29 @@ components:
             version:
               description: The pack version number.
               type: integer
+        warnings:
+          description: Additional agent policies receiving this enabled pack through a shared integration.
+          items:
+            type: object
+            properties:
+              additional_policy_ids:
+                items:
+                  type: string
+                type: array
+              code:
+                enum:
+                  - shared_integration_overdelivery
+                type: string
+              package_policy_id:
+                type: string
+              package_policy_name:
+                type: string
+            required:
+              - code
+              - package_policy_id
+              - package_policy_name
+              - additional_policy_ids
+          type: array
     Security_Osquery_API_UpdateSavedQueryRequestBody:
       example:
         id: updated_my_saved_query_name

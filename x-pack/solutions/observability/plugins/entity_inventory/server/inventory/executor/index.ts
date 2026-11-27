@@ -22,4 +22,4 @@ export type { PlanAvailability } from './plan_result';
 export type { MergeResult, PlanResult } from './types';
 export { executeEsql, toEsqlRequestBody } from './esql_client';
 export type { EsqlQueryResult, EsqlStats, ExecuteEsqlOptions } from './esql_client';
-export { toSourceError, isVerificationError } from './errors/source_error';
+export { toErrorDetail, isVerificationError } from './errors/source_error';

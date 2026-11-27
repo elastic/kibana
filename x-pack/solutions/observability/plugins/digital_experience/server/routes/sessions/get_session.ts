@@ -35,7 +35,7 @@ import {
 } from '../../../common/otel_data';
 import {
   SESSIONS_INDEX_PATTERN,
-  SESSIONS_MAX_SESSION_HOURS,
+  SESSIONS_MAX_SESSION_MS,
   SESSIONS_SOURCE_INDICES,
   emptyWebVitals,
   toPagePath,
@@ -83,7 +83,6 @@ export const NOT_ANOTHER_SDK: QueryDslQueryContainer = {
 };
 /** Widens the raw event window so events just before the summary start are not cut off. */
 const TIMELINE_SLACK_MS = 60_000;
-const MAX_SESSION_MS = SESSIONS_MAX_SESSION_HOURS * 60 * 60 * 1000;
 
 const HTTP_URL = 'http.url';
 const ERROR_TYPE = 'error.type';
@@ -362,7 +361,7 @@ const journeyQuery = (): QueryDslQueryContainer => ({
  */
 const timelineTimeRange = (startMs: number) =>
   Number.isFinite(startMs)
-    ? dateRangeQuery(startMs - TIMELINE_SLACK_MS, startMs + MAX_SESSION_MS)
+    ? dateRangeQuery(startMs - TIMELINE_SLACK_MS, startMs + SESSIONS_MAX_SESSION_MS)
     : [];
 
 /** Loads a session summary and its raw events as the given (current) user. */

@@ -104,6 +104,24 @@ describe('utils', () => {
       expect(result.metadata.routing_tags).toEqual(['sre']);
     });
 
+    it('stores the reason template at the top level', () => {
+      const result = transformCreateRuleBodyToRuleSoAttributes(
+        {
+          ...baseCreateData,
+          reason: { template: 'CPU on {{data.host.name}} is {{data.cpu_pct}}%' },
+        },
+        serverFields
+      );
+
+      expect(result.reason).toEqual({ template: 'CPU on {{data.host.name}} is {{data.cpu_pct}}%' });
+    });
+
+    it('leaves reason unset when not provided', () => {
+      const result = transformCreateRuleBodyToRuleSoAttributes(baseCreateData, serverFields);
+
+      expect(result.reason).toBeUndefined();
+    });
+
     it('stores the server-provided template in metadata', () => {
       const result = transformCreateRuleBodyToRuleSoAttributes(baseCreateData, {
         ...serverFields,
@@ -318,6 +336,56 @@ describe('utils', () => {
       });
 
       expect(result.metadata.tags).toEqual(['prod', 'infra']);
+    });
+
+    it('preserves the reason when update omits it', () => {
+      const existing = createRuleSoAttributes({
+        reason: { template: 'High CPU on {{data.host.name}}' },
+      });
+
+      const result = buildUpdateRuleAttributes(
+        existing,
+        { metadata: { name: 'renamed' } },
+        { updatedBy: { profile_uid: 'user-2' }, updatedAt: '2025-01-02T00:00:00.000Z', version: 2 }
+      );
+
+      expect(result.reason).toEqual({ template: 'High CPU on {{data.host.name}}' });
+    });
+
+    it('replaces the reason when update sends a new value', () => {
+      const existing = createRuleSoAttributes({ reason: { template: 'old' } });
+
+      const result = buildUpdateRuleAttributes(
+        existing,
+        { reason: { template: 'new' } },
+        { updatedBy: { profile_uid: 'user-2' }, updatedAt: '2025-01-02T00:00:00.000Z', version: 2 }
+      );
+
+      expect(result.reason).toEqual({ template: 'new' });
+    });
+
+    it('clears the reason when update sends null', () => {
+      const existing = createRuleSoAttributes({ reason: { template: 'old' } });
+
+      const result = buildUpdateRuleAttributes(
+        existing,
+        { reason: null },
+        { updatedBy: { profile_uid: 'user-2' }, updatedAt: '2025-01-02T00:00:00.000Z', version: 2 }
+      );
+
+      expect(result.reason).toBeUndefined();
+    });
+
+    it('carries a reason through an update of a rule that has none', () => {
+      const existing = createRuleSoAttributes();
+
+      const result = buildUpdateRuleAttributes(
+        existing,
+        { reason: { template: 'new' } },
+        { updatedBy: { profile_uid: 'user-2' }, updatedAt: '2025-01-02T00:00:00.000Z', version: 2 }
+      );
+
+      expect(result.reason).toEqual({ template: 'new' });
     });
 
     it('clears routing tags when update sends null', () => {
@@ -807,6 +875,26 @@ describe('utils', () => {
       expect(() => ruleResponseSchema.parse(result)).not.toThrow();
     });
 
+    it('returns the reason in a response that satisfies the schema', () => {
+      const attrs = createRuleSoAttributes({
+        reason: { template: 'High CPU on {{data.host.name}}' },
+      });
+
+      const result = transformRuleSoAttributesToRuleApiResponse('rule-id-1', attrs);
+
+      expect(result.reason).toEqual({ template: 'High CPU on {{data.host.name}}' });
+      expect(() => ruleResponseSchema.parse(result)).not.toThrow();
+    });
+
+    it('returns no reason for a rule stored without one', () => {
+      const result = transformRuleSoAttributesToRuleApiResponse(
+        'rule-id-1',
+        createRuleSoAttributes()
+      );
+
+      expect(result.reason).toBeUndefined();
+    });
+
     it('omits metadata.template from the response even when it is stored', () => {
       const attrs = createRuleSoAttributes({
         metadata: { name: 'test-rule', template: { id: 'template-1' } },
@@ -1061,6 +1149,26 @@ describe('utils', () => {
       const attrs = createRuleSoAttributes({ kind: 'alert' });
 
       expect(() => validateMergedRuleAttributes('rule-1', attrs)).not.toThrow();
+    });
+
+    it('does not throw for an alert rule with a reason', () => {
+      const attrs = createRuleSoAttributes({ kind: 'alert', reason: { template: 'High CPU' } });
+
+      expect(() => validateMergedRuleAttributes('rule-1', attrs)).not.toThrow();
+    });
+
+    it('throws when a signal rule has a reason', () => {
+      const attrs = createRuleSoAttributes({
+        kind: 'signal',
+        recovery: undefined,
+        no_data: undefined,
+        query: { base: 'FROM logs-* | LIMIT 1' },
+        reason: { template: 'High CPU' },
+      });
+
+      expect(() => validateMergedRuleAttributes('rule-1', attrs)).toThrow(
+        'reason is only allowed when kind is "alert".'
+      );
     });
 
     it('does not throw for a valid signal rule, which carries no lifecycle objects', () => {

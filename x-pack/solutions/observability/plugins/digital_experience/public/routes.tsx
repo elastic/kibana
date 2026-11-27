@@ -18,6 +18,7 @@ import {
 import { DigitalExperienceLayout } from './application/digital_experience_layout';
 import { useDigitalExperienceParams } from './hooks/use_digital_experience_params';
 import type { ApplicationTabId } from '../common/types/applications';
+import { MAX_CRASH_FINGERPRINT_LENGTH } from '../common/mobile/crash_fingerprint';
 import { ApplicationPage } from './pages/application_details/application_page';
 import { FrustrationPage } from './pages/frustration/frustration_page';
 import { ApplicationsListPage } from './pages/applications_list/applications_list_page';
@@ -120,6 +121,13 @@ const digitalExperienceRoutes = {
           },
           '/{serviceName}/reports': {
             element: <ApplicationRoute tab="reports" />,
+          },
+          '/{serviceName}/crashes': {
+            element: <ApplicationRoute tab="crashes" />,
+            // The crash group whose flyout is open, so a reload or a shared link reopens it.
+            params: t.type({
+              query: t.partial({ crashGroup: boundedParamRt(MAX_CRASH_FINGERPRINT_LENGTH) }),
+            }),
           },
           '/{serviceName}': {
             element: <ApplicationRoute tab="overview" />,
