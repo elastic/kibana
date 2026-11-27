@@ -28,6 +28,13 @@ export class MonitorDetailsPage {
     await this.page.testSubj.click(`monitor-page-link-${monitorId}`);
   }
 
+  async gotoMonitorDetails(monitorId: string, params?: Record<string, string>): Promise<void> {
+    await this.page.gotoApp(`uptime/monitor/${btoa(monitorId)}`, {
+      params,
+      readyWhen: this.page.testSubj.locator('uptimeMonitorPage'),
+    });
+  }
+
   async selectFilterItem(filterType: string, itemArg: string | string[]): Promise<void> {
     const itemList = Array.isArray(itemArg) ? itemArg : [itemArg];
     await this.page.testSubj.click(`o11yFilterGroupButton-${filterType}`);
