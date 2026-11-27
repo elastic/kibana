@@ -142,6 +142,16 @@ export const ALERTING_ERROR_CODES = {
   /** A test notification targeted workflows that are not destinations of the action policy. */
   ACTION_POLICY_TEST_INVALID_DESTINATIONS: 'ACTION_POLICY_TEST_INVALID_DESTINATIONS',
 
+  // ─────────────────────── External sources ────────────────────
+  /** An external source with the given identifier does not exist. */
+  EXTERNAL_SOURCE_NOT_FOUND: 'EXTERNAL_SOURCE_NOT_FOUND',
+  /** An external source with the given identifier already exists. */
+  EXTERNAL_SOURCE_ALREADY_EXISTS: 'EXTERNAL_SOURCE_ALREADY_EXISTS',
+  /** An external source was modified by another writer since it was loaded. */
+  EXTERNAL_SOURCE_VERSION_CONFLICT: 'EXTERNAL_SOURCE_VERSION_CONFLICT',
+  /** The submitted external source body failed schema validation. */
+  INVALID_EXTERNAL_SOURCE_DATA: 'INVALID_EXTERNAL_SOURCE_DATA',
+
   // ──────────────────────── Alert actions ────────────────────
   /**
    * The supplied `series_id` is not a well-formed series identifier: not
@@ -218,9 +228,9 @@ export type AlertingV2ErrorCode = (typeof ALERTING_ERROR_CODES)[keyof typeof ALE
  * The domain matches the subsystem that owns the failure, so an operator can
  * filter a whole area with a prefix: `ROUTES_*`, `RULE_*` (rule executor /
  * rules client), `DIRECTOR_*`, `DISPATCH_*`, `POLICY_*` / `ACTION_POLICY_*`,
- * `EXECUTION_HISTORY_*`, `EVENTS_*`, `STORAGE_*`, `QUERY_*`, `RESOURCES_*`,
- * `RETRY_*`, `MAINTENANCE_WINDOW_*`, `SAVED_OBJECTS_*`, `AGENT_BUILDER_*`,
- * `TASKS_*`, `TELEMETRY_*`.
+ * `EXTERNAL_SOURCE_*`, `EXECUTION_HISTORY_*`, `EVENTS_*`, `STORAGE_*`,
+ * `QUERY_*`, `RESOURCES_*`, `RETRY_*`, `MAINTENANCE_WINDOW_*`,
+ * `SAVED_OBJECTS_*`, `AGENT_BUILDER_*`, `TASKS_*`, `TELEMETRY_*`.
  *
  * The suffix encodes the outcome, from a closed vocabulary:
  * - `warn` (degraded but continued): `_FAILED`, `_SKIPPED`, `_TIMED_OUT`,
@@ -568,6 +578,16 @@ export const ALERTING_LOG_CODES = {
    * caller for that destination; the other destinations still run.
    */
   ACTION_POLICY_TEST_RUN_FAILED: 'ACTION_POLICY_TEST_RUN_FAILED',
+
+  // ─────────────────────────── External sources ────────────────────────
+  /**
+   * A stored external source has no `connector` saved object reference. Reads
+   * fall back to the `connector_id` attribute, which can point at the wrong
+   * connector after a saved object import or copy to space. The next update
+   * of the import writes the reference again. Operator should check how the
+   * import was written, since the external source client always writes it.
+   */
+  EXTERNAL_SOURCE_CONNECTOR_REFERENCE_NOT_FOUND: 'EXTERNAL_SOURCE_CONNECTOR_REFERENCE_NOT_FOUND',
 
   // ─────────────────────────── Rule executor ─────────────────────────
   /**

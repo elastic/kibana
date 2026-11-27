@@ -122,6 +122,15 @@ backwards compatible. Renaming or removing a code is a breaking change.
 | `ACTION_POLICY_CLOUD_API_KEY_NOT_SUPPORTED` | 400 | Create / update / upsert / API key rotation is rejected because the request is authenticated with a user-created Cloud API key (a raw `essu_` credential), which has no key id and cannot be stored or used by the dispatcher. `bulk_update_api_key` reports it per item. | — |
 | `ACTION_POLICY_TEST_INVALID_DESTINATIONS` | 400 | Send test notification (`_test`) names workflows that are not destinations of the policy. Checked before any workflow runs. | `{ action_policy_id, destination_ids }` |
 
+### External sources (`server/lib/external_source_client/`)
+
+| Code                             | Status | When                                                                                                                     | `details`               |
+| -------------------------------- | ------ | ------------------------------------------------------------------------------------------------------------------------ | ----------------------- |
+| `EXTERNAL_SOURCE_NOT_FOUND`        | 404    | `getExternalSource` / `updateExternalSource` / `deleteExternalSource` cannot find an external source by id                       | `{ external_source_id }`  |
+| `EXTERNAL_SOURCE_ALREADY_EXISTS`   | 409    | `createExternalSource` collides with an existing id                                                                        | `{ external_source_id }`  |
+| `EXTERNAL_SOURCE_VERSION_CONFLICT` | 409    | An update races another writer                                                                                           | `{ external_source_id }`  |
+| `INVALID_EXTERNAL_SOURCE_DATA`     | 400    | The submitted body fails the domain-level schema check. In-process callers only (HTTP callers are rejected at the route) | `{ context, errors }`   |
+
 ### Alert actions (`server/lib/alert_actions_client/`)
 
 | Code                               | Status               | When                                                                                                                                                                                                                                                     | `details`                                                 |
@@ -207,8 +216,9 @@ where no route validation has run:
 | `BAD_REQUEST`                | Every HTTP caller               |
 | `INVALID_RULE_DATA`          | In-process `RulesClient` callers |
 | `INVALID_ACTION_POLICY_DATA` | In-process `ActionPolicyClient` callers |
+| `INVALID_EXTERNAL_SOURCE_DATA` | In-process `ExternalSourceClient` callers |
 
-All three carry the same treeified `details.errors`. Only `details.source` is a
+All four carry the same treeified `details.errors`. Only `details.source` is a
 stable key; the `details.errors` tree is library-owned and must not be branched
 on (see [`details` stability](#details-stability)).
 
