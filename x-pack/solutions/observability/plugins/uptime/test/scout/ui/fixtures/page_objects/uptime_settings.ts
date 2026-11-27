@@ -81,7 +81,9 @@ export class UptimeSettingsPage {
     return this.page.testSubj.locator('default-connectors-input-loaded').locator('input');
   }
 
-  getFormErrorText() {
-    return this.page.locator('.euiFormErrorText');
+  getFormErrorText(text: string) {
+    // EuiFormRow gives each error the id `<rowId>-error-<index>`, the same
+    // message also shows in a page level callout
+    return this.page.locator('[id*="-error-"]', { hasText: text });
   }
 }

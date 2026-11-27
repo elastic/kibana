@@ -12,7 +12,75 @@ import { readFileSync } from 'fs';
 import { resolve } from 'path';
 
 import { createEmulatorFetch } from '../fetch/create_emulator_fetch';
-import { grantedScopes } from './token_endpoints';
+import { grantedScopes, resolveTokenUrlAgainstServers } from './token_endpoints';
+
+describe('resolveTokenUrlAgainstServers', () => {
+  it('keeps an absolute token URL', () => {
+    expect(
+      resolveTokenUrlAgainstServers('https://id.example.com/token', ['https://api.example.com/v1'])
+    ).toEqual(['https://id.example.com/token']);
+  });
+
+  it('resolves a relative token URL against each server', () => {
+    expect(
+      resolveTokenUrlAgainstServers('/oauth2/v1/token', [
+        'https://api.example.com/v1',
+        'https://eu.example.com/v1',
+      ])
+    ).toEqual([
+      'https://api.example.com/oauth2/v1/token',
+      'https://eu.example.com/oauth2/v1/token',
+    ]);
+  });
+
+  // `new URL` lowercases `{yourOktaDomain}` and rejects `{protocol}://{name}`, which would leave
+  // a token URL that matches nothing. Okta and Datadog declare both shapes.
+  it('resolves against templated servers without touching the variables', () => {
+    expect(resolveTokenUrlAgainstServers('/oauth2/v1/token', ['https://{yourOktaDomain}'])).toEqual(
+      ['https://{yourOktaDomain}/oauth2/v1/token']
+    );
+    // A server whose scheme is itself a variable has no parseable origin, so its token URL
+    // matches on the path alone, as it does for a relative server such as `/v1`.
+    expect(
+      resolveTokenUrlAgainstServers('/oauth2/v1/token', [
+        'https://{subdomain}.{site}',
+        '{protocol}://{name}',
+      ])
+    ).toEqual(['https://{subdomain}.{site}/oauth2/v1/token', '/oauth2/v1/token']);
+  });
+
+  it('falls back to the server OpenAPI assumes when a spec declares none', () => {
+    expect(resolveTokenUrlAgainstServers('/oauth2/v1/token', [])).toEqual(['/oauth2/v1/token']);
+  });
+
+  it('resolves a scheme-relative token URL on each scheme a templated server allows', () => {
+    const server = (allowed?: string[]) => ({
+      url: '{protocol}://api.example.com/v1',
+      variables: { protocol: { default: 'http', ...(allowed ? { enum: allowed } : {}) } },
+    });
+    expect(resolveTokenUrlAgainstServers('//auth.example.com/token', [server()])).toEqual([
+      'http://auth.example.com/token',
+    ]);
+    expect(
+      resolveTokenUrlAgainstServers('//auth.example.com/token', [server(['http', 'https'])])
+    ).toEqual(['http://auth.example.com/token', 'https://auth.example.com/token']);
+  });
+
+  it('uses https for a scheme-relative token URL when the server has no scheme', () => {
+    expect(resolveTokenUrlAgainstServers('//auth.example.com/token', [])).toEqual([
+      'https://auth.example.com/token',
+    ]);
+    expect(resolveTokenUrlAgainstServers('//auth.example.com/token', ['/v1'])).toEqual([
+      'https://auth.example.com/token',
+    ]);
+  });
+
+  it('takes the scheme from the server for a scheme-relative token URL', () => {
+    expect(
+      resolveTokenUrlAgainstServers('//auth.example.com/token', ['https://api.example.com/v1'])
+    ).toEqual(['https://auth.example.com/token']);
+  });
+});
 
 const spec = {
   openapi: '3.0.3',
@@ -70,6 +138,78 @@ describe('token endpoints', () => {
       ['OAuth token', 200],
       ['GET /items', 200],
     ]);
+  });
+
+  it('serves a scheme-relative token URL on its host when the server has no scheme', async () => {
+    const schemeRelative = {
+      ...spec,
+      servers: [{ url: '/v1' }],
+      components: {
+        securitySchemes: {
+          oauth: {
+            type: 'oauth2',
+            flows: { clientCredentials: { tokenUrl: '//auth.example.com/token', scopes: {} } },
+          },
+        },
+      },
+    };
+    const { fetch: mockFetch } = createEmulatorFetch({ specs: [schemeRelative] });
+    const post = (url: string) =>
+      mockFetch(url, {
+        method: 'POST',
+        headers: FORM,
+        body: 'grant_type=client_credentials&client_id=id',
+      });
+
+    const served = await post('https://auth.example.com/token');
+    const otherHost = await post('https://other.example.com/token');
+    const asPath = await post('https://other.example.com//auth.example.com/token');
+
+    expect([served.status, otherHost.status, asPath.status]).toEqual([200, 404, 404]);
+  });
+
+  it('serves a scheme-relative token URL on each scheme a templated server allows', async () => {
+    // The token request's status at http and at https, with `protocol` restricted to `allowed`
+    const statuses = (allowed: string[]) => {
+      const { fetch: mockFetch } = createEmulatorFetch({
+        specs: [
+          {
+            ...spec,
+            servers: [
+              {
+                url: '{protocol}://api.example.com/v1',
+                variables: { protocol: { default: 'http', enum: allowed } },
+              },
+            ],
+            components: {
+              securitySchemes: {
+                oauth: {
+                  type: 'oauth2',
+                  flows: {
+                    clientCredentials: { tokenUrl: '//auth.example.com/token', scopes: {} },
+                  },
+                },
+              },
+            },
+          },
+        ],
+      });
+      return Promise.all(
+        ['http', 'https'].map(
+          async (scheme) =>
+            (
+              await mockFetch(`${scheme}://auth.example.com/token`, {
+                method: 'POST',
+                headers: FORM,
+                body: 'grant_type=client_credentials&client_id=id',
+              })
+            ).status
+        )
+      );
+    };
+
+    expect(await statuses(['http', 'https'])).toEqual([200, 200]);
+    expect(await statuses(['http'])).toEqual([200, 404]);
   });
 
   it('resolves relative token and refresh URLs against the server', async () => {
