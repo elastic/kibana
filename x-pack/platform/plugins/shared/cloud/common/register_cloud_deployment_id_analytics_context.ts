@@ -14,6 +14,8 @@ export interface CloudDeploymentMetadata {
   organization_id?: string;
   trial_end_date?: string;
   is_elastic_staff_owned?: boolean;
+  isFedrampHigh?: boolean;
+  isElasticCloudHosted?: boolean;
   deployment_url?: string;
   serverless?: {
     project_id?: string;
@@ -36,6 +38,8 @@ export function registerCloudDeploymentMetadataAnalyticsContext(
     organization_id: organizationId,
     trial_end_date: cloudTrialEndDate,
     is_elastic_staff_owned: cloudIsElasticStaffOwned,
+    isFedrampHigh,
+    isElasticCloudHosted,
     serverless: {
       project_id: projectId,
       project_type: projectType,
@@ -62,6 +66,8 @@ export function registerCloudDeploymentMetadataAnalyticsContext(
         cloudTrialEndDate,
         cloudInTrial,
         cloudIsElasticStaffOwned,
+        isFedrampHigh,
+        isElasticCloudHosted,
         projectId,
         projectType,
         productTier,
@@ -96,6 +102,21 @@ export function registerCloudDeploymentMetadataAnalyticsContext(
         type: 'boolean',
         _meta: {
           description: '`true` if the owner of the deployment is an Elastician',
+          optional: true,
+        },
+      },
+      isFedrampHigh: {
+        type: 'boolean',
+        _meta: {
+          description: '`true` when running on FedRAMP High. Unset or `false` otherwise.',
+          optional: true,
+        },
+      },
+      isElasticCloudHosted: {
+        type: 'boolean',
+        _meta: {
+          description:
+            '`true` when running on Elastic Cloud Hosted (ECH). Unset or `false` on ECE and self-managed.',
           optional: true,
         },
       },

@@ -10,3 +10,4 @@ export {
   type UseCloudConnectStatusHook,
   type UseCloudConnectStatusResult,
 } from './use_cloud_connect_status';
+export { createUseEchAutoOpsStatusHook } from './use_ech_autoops_status';
