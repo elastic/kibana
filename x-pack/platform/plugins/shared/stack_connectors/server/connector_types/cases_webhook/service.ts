@@ -14,6 +14,7 @@ import { request } from '@kbn/actions-plugin/server/lib/axios_utils';
 import type { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
 import {
   combineHeadersWithBasicAuthHeader,
+  getSecretHeaderNames,
   mergeConfigHeadersWithSecretHeaders,
 } from '@kbn/actions-plugin/server/lib';
 import type { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
@@ -93,6 +94,7 @@ export const createExternalService = (
   }
 
   const mergedHeaders = mergeConfigHeadersWithSecretHeaders(headers, secrets?.secretHeaders);
+  const secretHeaderNames = getSecretHeaderNames(secrets?.secretHeaders);
 
   const headersWithBasicAuth = combineHeadersWithBasicAuthHeader({
     username: basicAuth.auth?.username,
@@ -149,6 +151,7 @@ export const createExternalService = (
         configurationUtilities,
         sslOverrides,
         connectorUsageCollector,
+        secretHeaderNames,
       });
 
       throwDescriptiveErrorIfResponseIsNotValid({
@@ -197,6 +200,7 @@ export const createExternalService = (
         configurationUtilities,
         sslOverrides,
         connectorUsageCollector,
+        secretHeaderNames,
       });
 
       const { status, statusText, data } = res;
@@ -283,6 +287,7 @@ export const createExternalService = (
         configurationUtilities,
         sslOverrides,
         connectorUsageCollector,
+        secretHeaderNames,
       });
 
       throwDescriptiveErrorIfResponseIsNotValid({
@@ -357,6 +362,7 @@ export const createExternalService = (
         configurationUtilities,
         sslOverrides,
         connectorUsageCollector,
+        secretHeaderNames,
       });
 
       throwDescriptiveErrorIfResponseIsNotValid({

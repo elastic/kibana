@@ -616,6 +616,8 @@ describe('execute()', () => {
       connectorUsageCollector,
     });
 
+    expect(requestMock.mock.calls[0][0].secretHeaderNames).toEqual(['secretKey']);
+
     delete requestMock.mock.calls[0][0].configurationUtilities;
     expect(requestMock.mock.calls[0][0]).toMatchSnapshot({
       axios: undefined,
@@ -781,6 +783,7 @@ describe('execute()', () => {
           "warn": [MockFunction],
         },
         "method": "post",
+        "secretHeaderNames": Array [],
         "sslOverrides": Object {
           "cert": Object {
             "data": Array [
@@ -1041,6 +1044,7 @@ describe('execute()', () => {
           "warn": [MockFunction],
         },
         "method": "post",
+        "secretHeaderNames": Array [],
         "sslOverrides": Object {},
         "url": "https://abc.def/my-webhook",
       }

@@ -48,16 +48,29 @@ export const isSameOriginRedirect = (fromUrl: unknown, toUrl: unknown): boolean 
 };
 
 /**
- * Returns the names of the headers that are not safe to send to another origin.
+ * Returns the names of the headers that are not safe to send to another origin. Headers named in
+ * `secretHeaderNames` count as unsafe even when their name is in the safe list, because a connector
+ * may store a secret under any name.
  */
-export const getCrossOriginUnsafeHeaderNames = (headers: Record<string, unknown>): string[] =>
-  Object.keys(headers).filter((name) => !CROSS_ORIGIN_SAFE_HEADERS.has(name.toLowerCase()));
+export const getCrossOriginUnsafeHeaderNames = (
+  headers: Record<string, unknown>,
+  secretHeaderNames: readonly string[] = []
+): string[] => {
+  const secretNames = new Set(secretHeaderNames.map((name) => name.toLowerCase()));
+  return Object.keys(headers).filter((name) => {
+    const lowerName = name.toLowerCase();
+    return secretNames.has(lowerName) || !CROSS_ORIGIN_SAFE_HEADERS.has(lowerName);
+  });
+};
 
 /**
  * Deletes every header that is not safe to send to another origin and returns the removed names.
  */
-export const removeCrossOriginUnsafeHeaders = (headers: Record<string, unknown>): string[] => {
-  const removed = getCrossOriginUnsafeHeaderNames(headers);
+export const removeCrossOriginUnsafeHeaders = (
+  headers: Record<string, unknown>,
+  secretHeaderNames: readonly string[] = []
+): string[] => {
+  const removed = getCrossOriginUnsafeHeaderNames(headers, secretHeaderNames);
   for (const name of removed) {
     delete headers[name];
   }

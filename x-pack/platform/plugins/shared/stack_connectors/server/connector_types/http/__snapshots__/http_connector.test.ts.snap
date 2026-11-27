@@ -46,6 +46,9 @@ Object {
   "method": "POST",
   "proxyOverrides": undefined,
   "responseType": "arraybuffer",
+  "secretHeaderNames": Array [
+    "secretKey",
+  ],
   "signal": undefined,
   "sslOverrides": Object {},
   "url": "https://abc.def/my-endpoint",
@@ -97,6 +100,9 @@ Object {
   "method": "POST",
   "proxyOverrides": undefined,
   "responseType": "arraybuffer",
+  "secretHeaderNames": Array [
+    "Authorization",
+  ],
   "signal": undefined,
   "sslOverrides": Object {},
   "url": "https://abc.def/my-endpoint",
@@ -148,6 +154,7 @@ Object {
   "method": "POST",
   "proxyOverrides": undefined,
   "responseType": "arraybuffer",
+  "secretHeaderNames": Array [],
   "signal": undefined,
   "sslOverrides": Object {},
   "url": "https://abc.def/my-endpoint",

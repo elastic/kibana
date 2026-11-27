@@ -348,8 +348,26 @@ describe('Cases webhook service', () => {
         configurationUtilities,
         sslOverrides: defaultSSLOverrides,
         connectorUsageCollector: expect.any(ConnectorUsageCollector),
+        secretHeaderNames: [],
         method: WebhookMethods.GET,
       });
+    });
+
+    it('passes the secret header names so redirects can drop them', async () => {
+      requestMock.mockImplementation(() => createAxiosResponse(axiosRes));
+      const serviceWithSecretHeaders = createExternalService(
+        actionId,
+        { config, secrets: { ...secrets, secretHeaders: { 'User-Agent': 'secret-value' } } },
+        logger,
+        configurationUtilities,
+        connectorUsageCollector
+      );
+
+      await serviceWithSecretHeaders.getIncident('1');
+
+      expect(requestMock).toHaveBeenCalledWith(
+        expect.objectContaining({ secretHeaderNames: ['User-Agent'] })
+      );
     });
 
     it('it should call request with correct arguments when authType=SSL', async () => {
@@ -394,6 +412,7 @@ describe('Cases webhook service', () => {
             "warn": [MockFunction],
           },
           "method": "get",
+          "secretHeaderNames": Array [],
           "sslOverrides": Object {
             "cert": Object {
               "data": Array [
@@ -605,6 +624,7 @@ describe('Cases webhook service', () => {
         configurationUtilities,
         sslOverrides: defaultSSLOverrides,
         connectorUsageCollector: expect.any(ConnectorUsageCollector),
+        secretHeaderNames: [],
         method: WebhookMethods.POST,
         data: '{"id": "1" }',
       });
@@ -669,6 +689,7 @@ describe('Cases webhook service', () => {
             "warn": [MockFunction],
           },
           "method": "post",
+          "secretHeaderNames": Array [],
           "sslOverrides": Object {
             "cert": Object {
               "data": Array [
@@ -892,6 +913,7 @@ describe('Cases webhook service', () => {
         sslOverrides: defaultSSLOverrides,
         data: `{"fields":{"title":"title","description":"desc","tags":["hello","world"],"project":{"key":"ROC"},"issuetype":{"id":"10024"}}}`,
         connectorUsageCollector: expect.any(ConnectorUsageCollector),
+        secretHeaderNames: [],
       });
     });
 
@@ -978,6 +1000,7 @@ describe('Cases webhook service', () => {
             "warn": [MockFunction],
           },
           "method": "post",
+          "secretHeaderNames": Array [],
           "sslOverrides": Object {
             "cert": Object {
               "data": Array [
@@ -1199,6 +1222,7 @@ describe('Cases webhook service', () => {
           },
         }),
         connectorUsageCollector: expect.any(ConnectorUsageCollector),
+        secretHeaderNames: [],
       });
     });
 
@@ -1252,6 +1276,7 @@ describe('Cases webhook service', () => {
             "warn": [MockFunction],
           },
           "method": "put",
+          "secretHeaderNames": Array [],
           "sslOverrides": Object {
             "cert": Object {
               "data": Array [
@@ -1489,6 +1514,7 @@ describe('Cases webhook service', () => {
         url: 'https://coolsite.net/issue/1/comment',
         data: `{"body":"comment"}`,
         connectorUsageCollector: expect.any(ConnectorUsageCollector),
+        secretHeaderNames: [],
       });
     });
 
@@ -1542,6 +1568,7 @@ describe('Cases webhook service', () => {
             "warn": [MockFunction],
           },
           "method": "post",
+          "secretHeaderNames": Array [],
           "sslOverrides": Object {
             "cert": Object {
               "data": Array [
@@ -1756,6 +1783,7 @@ describe('Cases webhook service', () => {
         data: `{"body":"comment","id":"1"}`,
         sslOverrides: defaultSSLOverrides,
         connectorUsageCollector: expect.any(ConnectorUsageCollector),
+        secretHeaderNames: [],
       });
     });
 
@@ -1798,6 +1826,7 @@ describe('Cases webhook service', () => {
         data: `{"body":"comment","id":1}`,
         sslOverrides: defaultSSLOverrides,
         connectorUsageCollector: expect.any(ConnectorUsageCollector),
+        secretHeaderNames: [],
       });
     });
   });

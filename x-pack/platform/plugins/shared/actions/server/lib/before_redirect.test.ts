@@ -177,6 +177,18 @@ describe('getBeforeRedirectFn', () => {
     expect(message).not.toContain('Host');
   });
 
+  test('drops secret headers with a safe name on a cross-origin redirect only', () => {
+    const hook = getBeforeRedirectFn(configurationUtilities, logger, '.webhook', ['user-agent']);
+
+    const sameOrigin = redirect(hook, 'https://api.example.com/a', 'https://api.example.com/b');
+    const crossOrigin = redirect(hook, 'https://api.example.com/a', 'https://evil.example.org/a');
+
+    expect(sameOrigin['User-Agent']).toBe('Kibana/9.6.0');
+    expect(crossOrigin).not.toHaveProperty('User-Agent');
+    expect(crossOrigin).toHaveProperty('Content-Type', 'application/json');
+    expect(logger.debug.mock.calls[0][0]).toContain('User-Agent');
+  });
+
   test('does not record a redirect to a host that is not allowed', () => {
     configurationUtilities.ensureHostnameAllowed.mockImplementationOnce(() => {
       throw new Error('not allowed');

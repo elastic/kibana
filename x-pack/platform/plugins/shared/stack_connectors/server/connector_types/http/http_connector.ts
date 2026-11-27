@@ -581,6 +581,7 @@ export async function executor(
       connectorUsageCollector,
       keepAlive,
       maxRedirects,
+      secretHeaderNames: Object.keys(normalizeSecretHeaders(execOptions.secrets.secretHeaders)),
       ...(fetcher?.max_content_length != null && {
         maxContentLength: fetcher.max_content_length,
         maxBodyLength: fetcher.max_content_length,

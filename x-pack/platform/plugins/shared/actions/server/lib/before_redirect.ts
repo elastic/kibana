@@ -33,11 +33,13 @@ interface RedirectRequestDetails {
 /**
  * Returns the follow-redirects hook used by connector HTTP requests: it rejects redirects to hosts
  * outside xpack.actions.allowedHosts and drops all but a few safe headers on cross-origin redirects.
+ * Headers named in `secretHeaderNames` are always dropped on cross-origin redirects.
  */
 export const getBeforeRedirectFn = (
   configurationUtilities: ActionsConfigurationUtilities,
   logger: Logger,
-  connectorType?: string
+  connectorType?: string,
+  secretHeaderNames: readonly string[] = []
 ): NonNullable<AxiosRequestConfig['beforeRedirect']> => {
   return (
     options: RedirectOptions,
@@ -60,12 +62,12 @@ export const getBeforeRedirectFn = (
     // so the removed names come from the previous request's headers. Node sets Host per request.
     const previousHeaders = requestDetails?.headers ?? headers ?? {};
     const removed = crossOrigin
-      ? getCrossOriginUnsafeHeaderNames(previousHeaders).filter(
+      ? getCrossOriginUnsafeHeaderNames(previousHeaders, secretHeaderNames).filter(
           (name) => name.toLowerCase() !== 'host'
         )
       : [];
     if (crossOrigin && headers != null) {
-      removeCrossOriginUnsafeHeaders(headers);
+      removeCrossOriginUnsafeHeaders(headers, secretHeaderNames);
     }
 
     recordConnectorRedirect({

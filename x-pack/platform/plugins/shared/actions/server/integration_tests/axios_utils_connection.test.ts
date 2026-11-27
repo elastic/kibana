@@ -381,6 +381,28 @@ describe('axios connections', () => {
         expect(data.headers).not.toHaveProperty('x-routing-key');
       });
 
+      test('it drops secret headers with a safe name when redirecting to another origin', async () => {
+        const targetUrl = await listen(echoRequest);
+        const redirectUrl = await listen((req, res) => {
+          res.writeHead(307, { Location: `${targetUrl}/landing` });
+          res.end();
+        });
+
+        const { data } = await request({
+          axios,
+          url: redirectUrl,
+          method: 'post',
+          data: { hello: 'world' },
+          headers: { ...headers, Accept: 'confidential-accept' },
+          secretHeaderNames: ['accept'],
+          logger,
+          configurationUtilities: getACUfromConfig(),
+        });
+
+        expect(data.headers['content-type']).toBe('application/json');
+        expect(data.headers.accept).not.toBe('confidential-accept');
+      });
+
       test('it keeps credential headers when redirecting within the same origin', async () => {
         const targetUrl = await listen((req, res) => {
           if (req.url === '/start') {
