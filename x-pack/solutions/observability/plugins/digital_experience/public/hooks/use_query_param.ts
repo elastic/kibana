@@ -23,19 +23,22 @@ const QUERY_PARAM_ROUTES = {
   osName: '/{serviceName}',
   release: '/{serviceName}',
   compare: '/{serviceName}',
+  crashGroup: '/{serviceName}/crashes',
 } as const;
 
 type QueryParam = keyof typeof QUERY_PARAM_ROUTES;
 
 type ListQuery = TypeOf<DigitalExperienceRoutes, '/'>['query'];
 type ApplicationQuery = TypeOf<DigitalExperienceRoutes, '/{serviceName}'>['query'];
+type CrashesQuery = TypeOf<DigitalExperienceRoutes, '/{serviceName}/crashes'>['query'];
 
 /** Their values as the routes validate them, e.g. an application source for `sourceFilter`. */
 type QueryParams = Pick<
   ListQuery,
   'environment' | 'sourceFilter' | 'platformFilter' | 'applicationType'
 > &
-  Pick<ApplicationQuery, 'osName' | 'release' | 'compare'>;
+  Pick<ApplicationQuery, 'osName' | 'release' | 'compare'> &
+  Pick<CrashesQuery, 'crashGroup'>;
 
 export interface QueryParamState<TValue> {
   /** The param's value, `undefined` when unset. */
