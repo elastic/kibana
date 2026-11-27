@@ -30,6 +30,7 @@ export interface PrimaryMenuItemProps extends Omit<MenuItem, 'href'> {
   isHorizontal?: boolean;
   isNew: boolean;
   onClick?: () => void;
+  shortcutNumber?: number;
   'aria-posinset'?: number;
   'aria-setsize'?: number;
 }
@@ -51,6 +52,7 @@ export const PrimaryMenuItem = forwardRef<
       isHighlighted,
       isHorizontal,
       isNew,
+      shortcutNumber,
       ...props
     },
     ref: ForwardedRef<HTMLAnchorElement | HTMLButtonElement>
@@ -99,6 +101,7 @@ export const PrimaryMenuItem = forwardRef<
         isLabelVisible={!isCollapsed}
         isNew={isNew}
         ref={ref}
+        shortcutNumber={shortcutNumber}
         {...props}
       >
         {children}
