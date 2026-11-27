@@ -66,6 +66,28 @@ components:
       required:
         - data
       properties:
+        warnings:
+          description: Additional agent policies receiving this enabled pack through a shared integration.
+          type: array
+          items:
+            type: object
+            required:
+              - code
+              - package_policy_id
+              - package_policy_name
+              - additional_policy_ids
+            properties:
+              code:
+                type: string
+                enum: [shared_integration_overdelivery]
+              package_policy_id:
+                type: string
+              package_policy_name:
+                type: string
+              additional_policy_ids:
+                type: array
+                items:
+                  type: string
         data:
           type: object
           required:

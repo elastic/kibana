@@ -188,6 +188,8 @@ export interface RelayClientContract {
    * read subsequent pages of the cursor-paginated endpoint.
    */
   listBindings(tenantKey: string, options?: RelayListBindingsOptions): Promise<RelayBindingsPage>;
+  /** Whether this deployment owns the channel's binding. Only a 404 with reason `not_bound` means no; any other failure throws. */
+  isChannelBound(tenantKey: string, channelId: string): Promise<boolean>;
   /** Public channels the bot is in that no deployment has bound. 429 if Slack throttled the listing. */
   listAvailableChannels(tenantKey: string): Promise<RelayAvailableChannelsPage>;
   /** Claim an unclaimed channel for this deployment (put-if-absent; 409 if already claimed). */

@@ -116,6 +116,8 @@ const LINKS: ReturnType<typeof useApplicationLinks> = {
   errorsHref: '/errors-href',
   networkHref: '/network-href',
   reportsHref: '/reports-href',
+  frustrationHref: '/frustration-href',
+  crashesHref: '/crashes-href',
   sessionsHref: () => '/sessions-href',
   sessionHref: () => '/session-href',
 };
@@ -464,6 +466,15 @@ describe('ApplicationPage', () => {
 
     expect(screen.queryByTestId('mobileApplicationPage')).toBeNull();
     expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent('my-app');
+  });
+
+  it('replaces the Crashes route of an EDOT Browser application, a mobile tab, with its Overview', () => {
+    useKibanaServicesMock.mockReturnValue({} as ReturnType<typeof useKibanaServices>);
+
+    render(<ApplicationPage serviceName="my-app" source="otel" selectedTab="crashes" />);
+
+    expect(historyReplace).toHaveBeenCalled();
+    expect(screen.queryByTestId('digitalExperienceTab-crashes')).not.toBeInTheDocument();
   });
 
   it('never redirects an EDOT Browser application', () => {

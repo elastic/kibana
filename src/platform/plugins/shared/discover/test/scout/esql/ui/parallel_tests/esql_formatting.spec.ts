@@ -8,11 +8,11 @@
  */
 
 /**
- * Smoke test for ES|QL results formatting via `columnsMeta`: when an ES|QL
+ * Smoke test for ES|QL results formatting by column type: when an ES|QL
  * column shares its name with a data-view field but has a different type
  * (here `DistanceMiles` is numeric in the `kibana_sample_data_flights` data
  * view but a string array in the query), the value must be formatted from the
- * ES|QL `columnsMeta` rather than the data-view field format — in the Summary
+ * ES|QL column type rather than the data-view field format — in the Summary
  * column, an added column, and the doc-viewer flyout.
  *
  * Migrated from `src/platform/test/functional/apps/discover/esql_1/_esql_formatting.ts`.
@@ -23,19 +23,19 @@ import { spaceTest } from '../fixtures';
 
 // Extra columns (col1–col5) push the result past the table-view column
 // threshold so the grid renders the Summary column.
-const COLUMNS_META_QUERY =
+const MISMATCHED_TYPE_QUERY =
   'ROW DistanceMiles = ["w1", "w2", "w3"], recent = ["w1", "w3"], col1 = 1, col2 = 2, col3 = 3, col4 = 4, col5 = 5 | EVAL DistanceMiles = COALESCE(recent, DistanceMiles)';
 
 // The COALESCE result: the ES|QL string-array value, not a numeric format.
 const EXPECTED_VALUE = '[w1, w3]';
 
 spaceTest.describe(
-  'Discover ES|QL results formatting with columnsMeta',
+  'Discover ES|QL results formatting by column type',
   { tag: '@local-stateful-classic' },
   () => {
     spaceTest.beforeAll(async ({ discoverScoutSpace }) => {
       // Load the flights data view so a numeric `DistanceMiles` field format
-      // exists — that is what the ES|QL columnsMeta format must override.
+      // exists — that is what the ES|QL column type format must override.
       await discoverScoutSpace.setupDiscoverDefaults({ loadFlightsDataView: true });
     });
 
@@ -50,11 +50,11 @@ spaceTest.describe(
     });
 
     spaceTest(
-      'formats ES|QL columns using columnsMeta when the type differs from the data-view field',
+      'formats ES|QL columns by the column type when it differs from the data-view field',
       async ({ page, pageObjects }) => {
         const { discover, dataGrid, unifiedFieldList } = pageObjects;
 
-        await discover.writeAndSubmitEsqlQuery(COLUMNS_META_QUERY);
+        await discover.writeAndSubmitEsqlQuery(MISMATCHED_TYPE_QUERY);
 
         await spaceTest.step('Summary column shows the string-array values', async () => {
           await expect(dataGrid.getDocumentColumnFieldValue(0, 'recent')).toHaveText(

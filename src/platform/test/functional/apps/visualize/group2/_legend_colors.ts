@@ -56,7 +56,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await queryBar.clickQuerySubmitButton();
 
       await visChart.openLegendOptionColorsForXY('Count', `[data-title="${visName}"]`);
-      const overwriteColor = '#64d8d5';
+      const overwriteColor = '#55d3c0';
       await visChart.selectNewLegendColorChoice(overwriteColor);
 
       await dashboard.saveDashboard(dashboardName, { saveAsNew: false });

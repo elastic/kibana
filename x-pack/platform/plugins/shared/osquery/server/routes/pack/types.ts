@@ -24,6 +24,7 @@ export interface PackResponseData {
   updated_by: string | undefined;
   updated_by_profile_uid?: string;
   policy_ids?: string[];
+  effective_policy_ids?: string[];
   shards?: SOShard;
   read_only?: boolean;
   /** Pack-level schedule type (discriminated read response). */
@@ -54,6 +55,7 @@ export interface ReadPackResponseData {
   updated_by: string | undefined;
   updated_by_profile_uid?: string;
   policy_ids?: string[];
+  effective_policy_ids?: string[];
   shards: Record<string, number>;
   read_only?: boolean;
   type: string;

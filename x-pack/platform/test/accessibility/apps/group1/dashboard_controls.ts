@@ -21,8 +21,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   ]);
   const browser = getService('browser');
 
-  // Failing: See https://github.com/elastic/kibana/issues/294192
-  describe.skip('Dashboard controls a11y tests', () => {
+  describe('Dashboard controls a11y tests', () => {
     before(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
       await sampleData.testResources.installKibanaSampleData('flights');

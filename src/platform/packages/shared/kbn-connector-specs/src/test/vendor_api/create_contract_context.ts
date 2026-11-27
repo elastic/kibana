@@ -123,6 +123,8 @@ const placeholdersFor = (key: string): readonly string[] => [
   ...(key in DECODED_PLACEHOLDERS ? [DECODED_PLACEHOLDERS[key]()] : []),
   `contract-mock-${key}`,
   'https://contract-mock.invalid/',
+  // For schemas that fix the path of a URL, such as ThreatQ's `/api/token`.
+  'https://contract-mock.invalid/api/token',
   'contract-mock@example.com',
   samplePrivateKey(),
 ];
