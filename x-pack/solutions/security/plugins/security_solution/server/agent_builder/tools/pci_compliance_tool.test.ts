@@ -82,6 +82,14 @@ describe('pciComplianceTool (consolidated)', () => {
       expect(result.success).toBe(true);
     });
 
+    it('accepts a check request that cites the legacy pre-v4.0.1 id 4.1', () => {
+      const result = tool.schema.safeParse({
+        mode: 'check',
+        requirements: ['4.1'],
+      });
+      expect(result.success).toBe(true);
+    });
+
     it('accepts a well-formed report request with `all`', () => {
       const result = tool.schema.safeParse({
         mode: 'report',
@@ -133,6 +141,34 @@ describe('pciComplianceTool (consolidated)', () => {
 
       const call = mockExecuteEsql.mock.calls[0][0];
       expect(call.query).toContain('FROM cluster-a:logs-pci-*');
+    });
+  });
+
+  describe('legacy requirement ids', () => {
+    it('runs the v4.0.1 weak-TLS check (4.2.1) when the caller asks for the legacy id 4.1', async () => {
+      const result = (await tool.handler(
+        {
+          mode: 'check',
+          requirements: ['4.1'],
+          indices: ['logs-*'],
+          timeRange: { from: '2024-01-01T00:00:00Z', to: '2024-01-08T00:00:00Z' },
+          includeEvidence: true,
+          format: 'summary',
+          includeRecommendations: true,
+        },
+        createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
+      )) as ToolHandlerStandardReturn;
+
+      expect(result.results.some((r) => r.type === ToolResultType.error)).toBe(false);
+
+      const summary = result.results.find((r) => r.type === ToolResultType.other);
+      const data = summary?.data as { scopeClaim: { requirementsEvaluated: string[] } };
+      expect(data.scopeClaim.requirementsEvaluated).toEqual(['4.2.1']);
+
+      const queries = mockExecuteEsql.mock.calls.map(([call]) => (call as { query: string }).query);
+      expect(
+        queries.some((query) => query.includes('tls.version IN ("1.0", "1.1", "SSLv3", "SSLv2")'))
+      ).toBe(true);
     });
   });
 
