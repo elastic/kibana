@@ -50,6 +50,7 @@ import { importExtraneousDependenciesOverrides } from './import_compat.mts';
 import { restrictedImportsOverrides } from './restricted_imports.mts';
 import { monacoRules } from './monaco.mts';
 import { nestedConfigOverrides, teamOverrides } from './team_overrides.mts';
+import { releaseBranchOverrides } from './release_branch_overrides.mts';
 
 const movedFromEslintOverrides: OxlintOverride[] = [
   ...javascriptOverrides,
@@ -170,6 +171,7 @@ export default defineConfig<OxlintConfig>({
       excludeFiles: ['**/.buildkite/**', '**/.github/**', '**/.storybook/**'],
       rules: Object.fromEntries([...movedFromEslintRuleNames].map((name) => [name, 'off'])),
     },
+    ...releaseBranchOverrides,
   ],
   // oxlint's parser rejects TypeScript grammar errors (TS1016: required parameter after an
   // optional one) that ESLint's parser and tsc's `skipLibCheck` let through in this declaration.
