@@ -16,16 +16,15 @@ import { useRouteBreadcrumb } from '../../../breadcrumbs/use_route_breadcrumb';
 import { DIGITAL_EXPERIENCE_EBT_ACTIONS } from '../../../ebt_constants';
 import { useApplicationLinks } from '../../../hooks/use_application_links';
 import { useApplicationsHref } from '../../../hooks/use_applications_href';
-import { useQueryParam } from '../../../hooks/use_query_param';
 import { useShareAction } from '../../../hooks/use_share_action';
 import {
   APPLICATIONS_LABEL,
   APPLICATION_TAB_LABELS,
-  COMPARE_LABEL,
   OPEN_IN_DISCOVER_LABEL,
   PLATFORM_LABELS,
 } from '../../../labels';
 import { MobileOverview } from './mobile_overview';
+import { useMobileReleases } from './release_health/use_mobile_releases';
 import { useMobileDiscoverHref } from './use_mobile_discover_href';
 import { useMobileKpis } from './use_mobile_kpis';
 
@@ -42,8 +41,8 @@ const platformBadges = (platforms: MobilePlatform[]): AppHeaderBadge[] =>
 
 /**
  * A mobile application's page, all its platforms: its header, with its platforms as badges and
- * Compare and Open in Discover as actions, as the Session page has them, and its Overview, its only
- * tab, which shows the KPIs the page fetches.
+ * Open in Discover as an action, as the Session page has it, and its Overview, its only
+ * tab, which shows the KPIs and the release health the page fetches.
  */
 export function MobileApplicationPage({
   serviceName,
@@ -58,9 +57,7 @@ export function MobileApplicationPage({
   const shareAction = useShareAction({ serviceName, source: SOURCE, tab: 'overview' });
   const discoverHref = useMobileDiscoverHref(serviceName);
   const kpisState = useMobileKpis(serviceName);
-  // In the URL, so a reload or Share keeps it.
-  const { value: compare, setValue: setCompare } = useQueryParam('compare');
-  const isComparing = compare === 'true';
+  const releasesState = useMobileReleases(serviceName);
 
   // Any other tab's URL is replaced by the Overview's.
   const isOverview = selectedTab === 'overview';
@@ -84,21 +81,11 @@ export function MobileApplicationPage({
         badges={platformBadges(kpisState.kpis?.platforms ?? [])}
         menu={{
           items: [
-            {
-              id: 'compare',
-              order: 1,
-              label: COMPARE_LABEL,
-              iconType: 'compare',
-              isSelected: isComparing,
-              run: () => setCompare(isComparing ? undefined : 'true'),
-              testId: 'digitalExperienceMobileCompareToggle',
-              ebt: { action: DIGITAL_EXPERIENCE_EBT_ACTIONS.TOGGLE_COMPARE },
-            },
             ...(discoverHref
               ? [
                   {
                     id: 'openInDiscover',
-                    order: 2,
+                    order: 1,
                     label: OPEN_IN_DISCOVER_LABEL,
                     iconType: 'discoverApp',
                     href: discoverHref,
@@ -121,7 +108,7 @@ export function MobileApplicationPage({
       />
       {isOverview && (
         <EuiPageSection paddingSize="m" restrictWidth={false}>
-          <MobileOverview kpisState={kpisState} />
+          <MobileOverview kpisState={kpisState} releasesState={releasesState} />
         </EuiPageSection>
       )}
     </>

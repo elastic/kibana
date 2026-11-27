@@ -96,6 +96,10 @@ export class DigitalExperiencePage {
   public readonly mobileTab: Locator;
   public readonly mobileApplicationsTable: EuiBasicTableObject;
   public readonly mobileKpis: Locator;
+  public readonly mobileReleaseHealth: Locator;
+  public readonly mobileReleaseTable: Locator;
+  public readonly mobileReleaseErrorRateChart: Locator;
+  public readonly mobileReleaseAdoptionChart: Locator;
   public readonly mobilePagePlatforms: Locator;
   public readonly mobileOsFilter: Locator;
   public readonly mobileCompareToggle: Locator;
@@ -175,6 +179,14 @@ export class DigitalExperiencePage {
       'digitalExperienceMobileApplicationsTable'
     );
     this.mobileKpis = page.getByTestId('digitalExperienceMobileKpis');
+    this.mobileReleaseHealth = page.getByTestId('digitalExperienceMobileReleaseHealth');
+    this.mobileReleaseTable = page.getByTestId('digitalExperienceMobileReleaseTable');
+    this.mobileReleaseErrorRateChart = page.getByTestId(
+      'digitalExperienceMobileReleaseErrorRateChart'
+    );
+    this.mobileReleaseAdoptionChart = page.getByTestId(
+      'digitalExperienceMobileReleaseAdoptionChart'
+    );
     // The header's badges, one per platform the application reported on.
     this.mobilePagePlatforms = page.getByTestId(/^digitalExperienceMobilePlatformBadge-/);
     this.mobileOsFilter = page.getByTestId('digitalExperienceMobileOsFilter');
@@ -193,6 +205,30 @@ export class DigitalExperiencePage {
   mobileApplicationRow(serviceName: string): Locator {
     return this.mobileApplicationsTable.rows.filter({
       has: this.page.getByRole('link', { name: serviceName, exact: true }),
+    });
+  }
+
+  /**
+   * The legend item of `release` in a Release health chart (`chart`), which only shows once the
+   * chart is drawn. `@elastic/charts` names it by the series; there's no test subject to add.
+   */
+  mobileReleaseChartSeries(chart: Locator, release: string): Locator {
+    return chart.locator(`[data-ech-series-name="${release}"]`);
+  }
+
+  /** The control in the Release health table that filters the page by `release`. */
+  mobileReleaseFilter(release: string): Locator {
+    return this.mobileReleaseTable.getByRole('button', {
+      name: `Filter by release ${release}`,
+      exact: true,
+    });
+  }
+
+  /** The selected release's pill in the Release health table, which takes the filter off. */
+  mobileReleaseFilterRemove(release: string): Locator {
+    return this.mobileReleaseTable.getByRole('button', {
+      name: `Stop filtering by release ${release}`,
+      exact: true,
     });
   }
 
@@ -220,14 +256,8 @@ export class DigitalExperiencePage {
     await this.page.getByTestId(`digitalExperienceMobileOsFilterOption-${osName}`).click();
   }
 
-  /**
-   * Turns the mobile page's Compare on or off from its header, whose narrow layouts move the menu
-   * items into the overflow menu.
-   */
+  /** Turns Compare on or off from the mobile page's Health summary. */
   async toggleMobileCompare(): Promise<void> {
-    if (!(await this.mobileCompareToggle.isVisible())) {
-      await this.page.getByTestId('app-menu-overflow-button').click();
-    }
     await this.mobileCompareToggle.click();
   }
 

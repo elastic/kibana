@@ -8,7 +8,7 @@
 import { lazySchema, z } from '@kbn/zod/v4';
 import { getRequestAbortedSignal } from '@kbn/data-plugin/server';
 import { OTEL_LOGS_INDEX, OTEL_TRACES_INDEX } from '../../../common/otel_data';
-import type { MobileKpisResponse } from '../../../common/types/mobile';
+import type { MobileKpisResponse, MobileReleasesResponse } from '../../../common/types/mobile';
 import { MAX_OS_NAME_LENGTH, MAX_RELEASE_LENGTH } from '../../lib/constants';
 import {
   APPLICATION_TAB_ROUTE_OPTIONS,
@@ -22,29 +22,67 @@ import {
   isStartBeforeEnd,
   serviceNameParam,
   timeRangeShape,
+  timeZoneShape,
 } from '../params';
 import { getMobileKpis } from './get_mobile_kpis';
+import { getMobileReleases } from './get_mobile_releases';
 
 export const MOBILE_KPIS_ENDPOINT =
   'GET /internal/digital_experience/mobile_applications/{serviceName}/kpis';
 
+export const MOBILE_RELEASES_ENDPOINT =
+  'GET /internal/digital_experience/mobile_applications/{serviceName}/releases';
+
+const mobileFiltersShape = () => ({
+  ...timeRangeShape(),
+  osName: z.string().min(1).max(MAX_OS_NAME_LENGTH).optional(),
+  release: z.string().min(1).max(MAX_RELEASE_LENGTH).optional(),
+});
+
+const mobileFiltersParams = () =>
+  z.object({
+    path: z.object({ serviceName: serviceNameParam() }),
+    query: z.object(mobileFiltersShape()).refine(isStartBeforeEnd, START_AFTER_END_ISSUE),
+  });
+
+const mobileSeriesParams = () =>
+  z.object({
+    path: z.object({ serviceName: serviceNameParam() }),
+    query: z
+      .object({ ...mobileFiltersShape(), ...timeZoneShape() })
+      .refine(isStartBeforeEnd, START_AFTER_END_ISSUE),
+  });
+
+const releasesRoute = createDigitalExperienceServerRoute({
+  endpoint: MOBILE_RELEASES_ENDPOINT,
+  options: APPLICATION_TAB_ROUTE_OPTIONS,
+  security: APPLICATION_TAB_ROUTE_SECURITY,
+  params: lazySchema(mobileSeriesParams),
+  handler: async ({ params, context, request, logger }): Promise<MobileReleasesResponse> => {
+    const { osName, release, timeZone } = params.query;
+    const { esClient, serviceName, start, end, environment } = await toApplicationSearch({
+      params,
+      context,
+      request,
+      logger,
+    });
+    return getMobileReleases({
+      esClient,
+      filters: { serviceName, osName, release },
+      start,
+      end,
+      environment,
+      timeZone,
+    });
+  },
+});
+
 /** The KPI row of the mobile application page. */
-export const mobileRouteRepository = createDigitalExperienceServerRoute({
+const kpisRoute = createDigitalExperienceServerRoute({
   endpoint: MOBILE_KPIS_ENDPOINT,
   options: APPLICATION_TAB_ROUTE_OPTIONS,
   security: APPLICATION_TAB_ROUTE_SECURITY,
-  params: lazySchema(() =>
-    z.object({
-      path: z.object({ serviceName: serviceNameParam() }),
-      query: z
-        .object({
-          ...timeRangeShape(),
-          osName: z.string().min(1).max(MAX_OS_NAME_LENGTH).optional(),
-          release: z.string().min(1).max(MAX_RELEASE_LENGTH).optional(),
-        })
-        .refine(isStartBeforeEnd, START_AFTER_END_ISSUE),
-    })
-  ),
+  params: lazySchema(mobileFiltersParams),
   handler: async ({ params, context, request, logger }): Promise<MobileKpisResponse> => {
     const { osName, release } = params.query;
     const { esClient, serviceName, start, end, environment } = await toApplicationSearch({
@@ -74,3 +112,5 @@ export const mobileRouteRepository = createDigitalExperienceServerRoute({
     return { ...kpis, isPartial };
   },
 });
+
+export const mobileRouteRepository = { ...kpisRoute, ...releasesRoute };

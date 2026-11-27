@@ -3496,6 +3496,7 @@ ssl.test: 123
           auth_type: 'keytab',
           config_path: '/etc/krb5.conf',
           keytab: '/etc/kafka.keytab',
+          username: 'kafka',
           realm: 'EXAMPLE.COM',
         },
       } as any);
@@ -3505,6 +3506,7 @@ ssl.test: 123
         enabled: true,
         auth_type: 'keytab',
         keytab: '/etc/kafka.keytab',
+        username: 'kafka',
         config_path: '/etc/krb5.conf',
         realm: 'EXAMPLE.COM',
       });

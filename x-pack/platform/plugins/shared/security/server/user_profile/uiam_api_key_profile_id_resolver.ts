@@ -9,7 +9,7 @@ import { createHash } from 'crypto';
 
 import type { IClusterClient, KibanaRequest, Logger } from '@kbn/core/server';
 
-import { getDetailedErrorMessage, getErrorStatusCode } from '../errors';
+import { getErrorStatusCode } from '../errors';
 import type { UiamServicePublic } from '../uiam';
 
 /**
@@ -31,8 +31,9 @@ export type UiamApiKeyProfileIdResolver = (request: KibanaRequest) => Promise<st
 /**
  * Creates a function that resolves the profile ID of the user who created the UIAM API key a
  * request carries, as {@link UiamServicePublic.getApiKeyCreator} reports it. The ID is not
- * available for a key created by another API key or by an organization service account. Failures
- * are logged and resolve to `undefined`.
+ * available for a key created by another API key or by an organization service account, or for a
+ * key that no longer authenticates. Any other failure throws, so that a caller can tell a failed
+ * lookup from a key that no user created.
  */
 export const createUiamApiKeyProfileIdResolver = ({
   uiam,
@@ -61,13 +62,7 @@ export const createUiamApiKeyProfileIdResolver = ({
         logger.debug(`The UIAM API key no longer authenticates, cannot retrieve profile id.`);
         return undefined;
       }
-
-      logger.error(
-        `Failed to resolve the creator of a UIAM API key for user profile retrieval: ${getDetailedErrorMessage(
-          error
-        )}`
-      );
-      return undefined;
+      throw error;
     }
   };
 };

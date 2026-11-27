@@ -21,6 +21,7 @@ import { ENTITY_INVENTORY_PAGES, ENTITY_INVENTORY_TITLE } from '../pages';
 import type { EntityInventoryAppPublicConfig, EntityInventoryAppStartDependencies } from '../types';
 import { entityInventoryRouter } from '../routes/config';
 import { EntityTablePreferencesProvider } from './context/entity_table_preferences_context';
+import { EntityInventoryDateRangeProvider } from './context/date_range_context';
 import { EntityTypesProvider } from './context/entity_types_context';
 import { createHttpEntityInventoryApiClient } from '../inventory_api/http_client';
 import { withPerformanceRecording } from '../inventory_api/with_performance_recording';
@@ -65,7 +66,9 @@ export function EntityInventoryShell({ PageTemplate }: EntityInventoryShellProps
       <EuiPageSection paddingSize="m" grow restrictWidth={false}>
         <EntityTypesProvider>
           <EntityTablePreferencesProvider>
-            <RouteRenderer />
+            <EntityInventoryDateRangeProvider>
+              <RouteRenderer />
+            </EntityInventoryDateRangeProvider>
           </EntityTablePreferencesProvider>
         </EntityTypesProvider>
       </EuiPageSection>

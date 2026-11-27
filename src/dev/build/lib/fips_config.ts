@@ -8,7 +8,7 @@
  */
 
 export const FIPS_BASE_IMAGE =
-  'docker.elastic.co/wolfi/chainguard-base-fips:latest@sha256:7824197a82332b490acc89c7b0c3f3a7347733e7e282d26f9920d6670f76f186';
+  'docker.elastic.co/wolfi/chainguard-base-fips:latest@sha256:f19b5eb8fd5fa97f10767ffd9a19b646fb65d5c76e181c9d5cfc212a929a635e';
 
 export const OPENSSL_FIPS_VERSION = '3.1.2';
 export const OPENSSL_FIPS_SOURCE_URL = `https://github.com/openssl/openssl/releases/download/openssl-${OPENSSL_FIPS_VERSION}/openssl-${OPENSSL_FIPS_VERSION}.tar.gz`;

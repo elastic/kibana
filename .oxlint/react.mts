@@ -74,7 +74,7 @@ const strictReactRules: DummyRuleMap = {
   'react/jsx-no-target-blank': 'error',
   'react/jsx-fragments': 'error',
   'react/display-name': 'error',
-  'react/jsx-no-literals': 'error',
+  'react/jsx-no-literals': ['error', { allowedStrings: ['&nbsp;'] }],
   '@kbn/compat/react-boolean-prop-naming': 'error',
   '@kbn/compat/react-no-deprecated': 'error',
   '@kbn/compat/react-no-typos': 'error',

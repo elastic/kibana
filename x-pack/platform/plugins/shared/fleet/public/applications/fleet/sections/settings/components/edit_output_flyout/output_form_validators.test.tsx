@@ -609,6 +609,15 @@ describe('Output form validation', () => {
         expect(validate('value')).toBeUndefined();
       });
 
+      it('should limit the length of the username, as the API does', () => {
+        expect(validateKafkaKerberosUsername('a'.repeat(256))).toBeUndefined();
+        expect(validateKafkaKerberosUsername('a'.repeat(257))).toEqual([
+          'Username must be 256 characters or fewer',
+        ]);
+        // the form trims the value before it sends it
+        expect(validateKafkaKerberosUsername(`  ${'a'.repeat(256)}  `)).toBeUndefined();
+      });
+
       it('should not accept a value that is only white space, except for the password', () => {
         expect(validateKafkaKerberosRealm('  ')).toHaveLength(1);
         expect(validateKafkaKerberosPassword('  ')).toBeUndefined();

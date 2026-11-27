@@ -31,7 +31,7 @@ describe('getTimeChartXDomain', () => {
   it.each([
     // Histogram mode draws the bars past `max` by one interval.
     [true, { min: 1_000, max: 2_000, minInterval: SECOND }],
-    // Areas end at the last bucket's start, so the interval is added for its shading.
+    // Lines and areas end at the last bucket's start, so the domain reaches the bucket's end.
     [false, { min: 1_000, max: 3_000, minInterval: SECOND }],
   ])('spans the range up to its last bucket when hasBars is %s', (hasBars, xDomain) => {
     const range = { start: 1_500, end: 2_500 };
@@ -43,7 +43,7 @@ describe('getTimeChartXDomain', () => {
         timeZone: 'UTC',
         hasBars,
       })
-    ).toEqual({ ...xDomain, range, hasBars });
+    ).toEqual({ ...xDomain, range, hasBars, lastBucketEnd: 3_000 });
   });
 
   it('reaches the end of a range past the last bucket', () => {
@@ -55,6 +55,29 @@ describe('getTimeChartXDomain', () => {
         hasBars: true,
       })
     ).toMatchObject({ min: 1_000, max: 4_000, minInterval: SECOND });
+  });
+
+  it("ends a line or area chart's domain at the last calendar bucket's real end", () => {
+    const months = ['2026-01-01', '2026-02-01', '2026-03-01'].map((day) => {
+      return { timestamp: Date.parse(`${day}T00:00:00.000Z`) };
+    });
+
+    // March is longer than a nominal month, and the range ends inside it
+    expect(
+      getTimeChartXDomain({
+        points: months,
+        histogram: {
+          interval: MONTH,
+          start: months[0].timestamp,
+          end: Date.parse('2026-03-31T12:00:00.000Z'),
+        },
+        timeZone: 'UTC',
+        hasBars: false,
+      })
+    ).toMatchObject({
+      max: Date.parse('2026-04-01T00:00:00.000Z'),
+      lastBucketEnd: Date.parse('2026-04-01T00:00:00.000Z'),
+    });
   });
 
   it('measures calendar buckets by the shortest one, February', () => {

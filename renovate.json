@@ -413,7 +413,13 @@
       "matchDepNames": [
         "monaco-yaml",
         "monaco-editor",
-        "monaco-promql"
+        "monaco-promql",
+        "@codemirror/autocomplete",
+        "@codemirror/language",
+        "@codemirror/lint",
+        "@codemirror/state",
+        "@codemirror/view",
+        "@lezer/common"
       ],
       "reviewers": ["team:appex-sharedux"],
       "matchBaseBranches": ["main"],
