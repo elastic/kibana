@@ -9,7 +9,8 @@
 
 import { borealis, SURFACES, type Mode } from '../borealis';
 import snapshot from '../test/check_palettes.snap.json';
-import { DEFAULT_PARAMS, ROLES, type Hex, type Role } from '.';
+import { DEFAULT_PARAMS, ROLES, hexToOklch, type Hex, type Role } from '.';
+import { FADE_BELOW_LC } from './contrast_roles';
 
 type Snapshot = Record<Mode, { surface: Hex; hues: Record<string, Record<Role, { hex: Hex }>> }>;
 
@@ -39,5 +40,41 @@ describe.each(MODES)('borealis on %s', (mode) => {
       const at = borealis.rolesAt(role.angle, surface, DEFAULT_PARAMS);
       expect(at).toEqual(Object.fromEntries(ROLES.map((k) => [k, role[k]])));
     }
+  });
+
+  it('fades every hue into what it is measured against at Lc 0', () => {
+    const { faint } = roles[0];
+    for (const { angle } of roles) {
+      expect(borealis.contrastColor(angle, 0, surface, DEFAULT_PARAMS).hex).toBe(surface);
+      expect(
+        borealis.contrastColor(angle, 0, surface, DEFAULT_PARAMS, { against: faint }).hex
+      ).toBe(faint);
+    }
+    expect(borealis.contrastColor(null, 0, surface, DEFAULT_PARAMS).hex).toBe(surface);
+  });
+
+  it('fades a faint lowered to Lc 0 into the surface', () => {
+    const p = { ...DEFAULT_PARAMS, lc: { ...DEFAULT_PARAMS.lc, faint: 0 } };
+    for (const { angle } of roles) {
+      expect(borealis.rolesAt(angle, surface, p).faint).toBe(surface);
+    }
+  });
+
+  // About 3x for 3x the target. If the fade also moved lightness, it would be about 9x.
+  it('fades only chroma and hue, so lightness stays where the solver put it', () => {
+    const { L: surfaceL } = hexToOklch(surface);
+    for (const { angle } of roles) {
+      const [low, high] = [1, 3].map(
+        (target) => borealis.contrastColor(angle, target, surface, DEFAULT_PARAMS).L - surfaceL
+      );
+      expect(high / low).toBeCloseTo(3, 0);
+    }
+  });
+});
+
+describe('the fade', () => {
+  // On purpose: faint keeps its full chroma.
+  it("starts below faint's default", () => {
+    expect(FADE_BELOW_LC).toBe(DEFAULT_PARAMS.lc.faint);
   });
 });

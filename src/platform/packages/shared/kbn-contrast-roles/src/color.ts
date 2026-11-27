@@ -8,7 +8,7 @@
  */
 
 import { ColorSpace, contrastAPCA, sRGB } from 'colorjs.io/fn';
-import { formatHex, lrgb, oklch, rgb, wcagContrast } from 'culori';
+import { formatHex, lrgb, oklab, oklch, rgb, wcagContrast } from 'culori';
 import type { Hex, Oklch } from './types';
 
 ColorSpace.register(sRGB);
@@ -37,6 +37,16 @@ export const oklchToHex = (L: number, C: number, h: number): Hex =>
 export function hexToOklch(hex: Hex): Oklch {
   const { l, c, h } = oklch(hex)!;
   return { L: l, C: c, h: h ?? 0 };
+}
+
+export function tintToward({ L, C, h }: Oklch, to: Hex, t: number): Oklch {
+  const target = oklab(to)!;
+  const rad = (h * Math.PI) / 180;
+  const a = C * Math.cos(rad);
+  const b = C * Math.sin(rad);
+  const toA = a + (target.a - a) * t;
+  const toB = b + (target.b - b) * t;
+  return { L, C: Math.hypot(toA, toB), h: ((Math.atan2(toB, toA) * 180) / Math.PI + 360) % 360 };
 }
 
 // Tight on purpose: a loose tolerance once broke teal's cusp near black.

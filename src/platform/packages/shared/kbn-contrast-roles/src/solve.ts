@@ -8,18 +8,44 @@
  */
 
 import { apcaLc, oklchToHex } from './color';
+import { DEFAULT_PARAMS } from './defaults';
 import type { Hex } from './types';
 
 const L_MIN = 0.03;
 const L_MAX = 0.985;
-export const clampL = (L: number) => Math.min(L_MAX, Math.max(L_MIN, L));
+// `reach` widens the range, so a color can sit on a background past the limits, like white.
+export const clampL = (L: number, reach = L_MIN) =>
+  Math.min(Math.max(L_MAX, reach), Math.max(Math.min(L_MIN, reach), L));
 
 const ITERATIONS = 30;
 const CACHE_LIMIT = 20000;
 
-// APCA reports 0 below |Lc| 7.3 (loClip 0.1 minus the 0.027 offset), so lower targets can't be bisected for. They
-// get lightness linearly between the background and where Lc 7.3 is reached.
+// APCA reads 0 below Lc 7.3, so lower targets step off the background in lightness instead, capped so dark and light
+// match. Above PERCEPTUAL_BELOW the step blends into the real Lc 7.3 lightness, so there's no jump.
 const APCA_FLOOR = 7.3;
+const PERCEPTUAL_BELOW = DEFAULT_PARAMS.lc.faint;
+
+const grayFloorStep = () => {
+  let lo = 0;
+  let hi = 0.5;
+  for (let i = 0; i < ITERATIONS; i++) {
+    const mid = (lo + hi) / 2;
+    if (Math.abs(apcaLc(oklchToHex(1 - mid, 0, 0), '#FFFFFF')) < APCA_FLOOR) lo = mid;
+    else hi = mid;
+  }
+  return hi;
+};
+const SUB_FLOOR_STEP = grayFloorStep();
+
+// Lightness for a target below the floor, given where the floor is reached.
+const belowFloor = (target: number, from: number, floor: number) => {
+  const toFloor = floor - from;
+  const step = Math.sign(toFloor) * Math.min(Math.abs(toFloor), SUB_FLOOR_STEP);
+  const t = Math.max(0, target);
+  if (t <= PERCEPTUAL_BELOW) return from + (step * t) / APCA_FLOOR;
+  const knee = from + (step * PERCEPTUAL_BELOW) / APCA_FLOOR;
+  return knee + ((floor - knee) * (t - PERCEPTUAL_BELOW)) / (APCA_FLOOR - PERCEPTUAL_BELOW);
+};
 
 interface LightnessQuery {
   angle: number; // hue
@@ -40,7 +66,7 @@ export function createSolver() {
     if (target < APCA_FLOOR) {
       // chromaAt may depend on the original target, so it stays in the key.
       const floor = solveLightness({ ...query, target: APCA_FLOOR, key: `${key}|below ${target}` });
-      return from + (floor - from) * (Math.max(0, target) / APCA_FLOOR);
+      return belowFloor(target, from, floor);
     }
     const k = [angle, target, against, from, to, key].join('|');
     const hit = cache.get(k);

@@ -30,9 +30,11 @@ export const hueRules = (angle: number): HueRules =>
 export const cuspOffset = (angle: number, { base }: Params) =>
   base.cuspPull * Math.max(0, shell(angle).cuspL - base.cuspRef);
 
-// Share of the correction: 1 at base, linear to 0 at the surface and the far end.
-export function correctionShare(L0: number, Ls: number, end: number, Lb0: number) {
-  const toward = (L0 - Ls) / (Lb0 - Ls);
+// Share of the correction: 1 at base, falling to 0 at `from` (the surface or a fill) and at the far end. None from a
+// fill past base.
+export function correctionShare(L0: number, from: number, end: number, Lb0: number) {
+  if (Lb0 === from) return 0;
+  const toward = (L0 - from) / (Lb0 - from);
   const away = (end - L0) / (end - Lb0);
   return Math.max(0, Math.min(1, toward, away));
 }

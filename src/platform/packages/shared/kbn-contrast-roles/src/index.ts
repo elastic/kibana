@@ -11,6 +11,7 @@
 export type {
   BaseColor,
   Color,
+  ContrastColorOptions,
   Hex,
   Hue,
   HueInput,

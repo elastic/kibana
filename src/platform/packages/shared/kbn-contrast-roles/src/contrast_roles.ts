@@ -7,11 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { apcaLc, hexToOklch, maxChroma, oklchToHex } from './color';
+import { apcaLc, hexToOklch, maxChroma, oklchToHex, tintToward } from './color';
 import { capChroma, correctionShare, cuspOffset, fixedChroma, hueRules } from './corrections';
 import { clampL, createSolver } from './solve';
 import {
   ROLES,
+  type ContrastColorOptions,
   type BaseColor,
   type Color,
   type Hex,
@@ -19,9 +20,11 @@ import {
   type Oklch,
   type Palettes,
   type Params,
+  type Polarity,
   type Role,
   type RoleColors,
   type Theme,
+  type Toward,
 } from './types';
 function assemble(
   hues: Hue[],
@@ -68,6 +71,8 @@ function assemble(
 const NEUTRAL_DL = 0.025;
 // Below this chroma a surface uses the theme's neutralTint.
 const ACHROMATIC = 0.005;
+// Colors fade only below this Lc, so faint and the roles above it keep their chroma.
+export const FADE_BELOW_LC = 5;
 
 export type ContrastRoles = ReturnType<typeof createContrastRoles>;
 
@@ -86,13 +91,17 @@ export function createContrastRoles(theme: Theme) {
   const neutralTint = theme.neutralTint ? hexToOklch(theme.neutralTint) : null;
   const tintOf = (s: Oklch) => (s.C < ACHROMATIC && neutralTint ? neutralTint : s);
 
-  // What to solve toward: the far end or, with polarity, whichever surface has more contrast with `against`. Measured
-  // with APCA rather than a luminance cutoff: its light and dark polarities aren't symmetric.
-  function endFor(Ls: number, against: Hex, polarity: boolean) {
-    if (!polarity) return farEnd(Ls);
+  // Whichever surface has more contrast with `against`. Measured with APCA rather than a luminance cutoff: its light
+  // and dark polarities aren't symmetric.
+  function towardFor(against: Hex): Toward {
     const { light, dark } = theme.surfaces;
-    const toLight = Math.abs(apcaLc(light, against)) >= Math.abs(apcaLc(dark, against));
-    return hexToOklch(toLight ? light : dark).L;
+    return Math.abs(apcaLc(light, against)) >= Math.abs(apcaLc(dark, against)) ? 'light' : 'dark';
+  }
+
+  // What to solve toward: the far end, with polarity true the surface towardFor picks, or the one given.
+  function endFor(Ls: number, against: Hex, polarity: Polarity) {
+    if (polarity === false) return farEnd(Ls);
+    return hexToOklch(theme.surfaces[polarity === true ? towardFor(against) : polarity]).L;
   }
 
   const solveLightness = createSolver();
@@ -127,6 +136,15 @@ export function createContrastRoles(theme: Theme) {
     return { hex: oklchToHex(L, C, angle), L, L0, C, h: angle };
   }
 
+  // Fades chroma and hue into the background, reaching it at Lc 0; the solver handles lightness. Without it, colors
+  // fade to gray, which doesn't match dark's blue surface. Squared, so targets just below keep most of their chroma.
+  function fadeIntoAgainst(color: Color, target: number, against: Hex): Color {
+    const share = Math.max(0, 1 - Math.abs(target) / FADE_BELOW_LC) ** 2;
+    if (share === 0) return color;
+    const { L, C, h } = tintToward(color, against, share);
+    return { hex: oklchToHex(L, C, h), L, C, h };
+  }
+
   // angle null: a gray in the surface's tint at the tint's chroma, as the diverging middle. No hue, so no base, no
   // correction and no hue rules; fixedC and strict don't apply.
   function contrastColor(
@@ -134,10 +152,27 @@ export function createContrastRoles(theme: Theme) {
     target: number,
     surface: Hex,
     p: Params,
-    against: Hex = surface,
-    fixedC: number | null = null, // 'even' mode's chroma
-    strict = false, // the correction may add contrast but never take it away
-    polarity = false // allow toward whichever surface has more contrast with `against`, not always the far end
+    {
+      against = surface,
+      fixedC = null,
+      strict = false,
+      polarity = false,
+      exact = false,
+    }: ContrastColorOptions = {}
+  ): Color {
+    return fadeIntoAgainst(
+      solveContrastColor(angle, target, surface, p, { against, fixedC, strict, polarity, exact }),
+      target,
+      against
+    );
+  }
+
+  function solveContrastColor(
+    angle: number | null,
+    target: number,
+    surface: Hex,
+    p: Params,
+    { against, fixedC, strict, polarity, exact }: Required<ContrastColorOptions>
   ): Color {
     const Ls = hexToOklch(surface).L;
     const end = endFor(Ls, against, polarity);
@@ -162,7 +197,7 @@ export function createContrastRoles(theme: Theme) {
     const base = baseColor(angle, surface, p);
 
     const { hueAt } = hueRules(angle);
-    const h = (L: number) => hueAt(L, base.L);
+    const h = (L: number) => hueAt(L, base.L, Ls);
 
     const chromaAt =
       fixedC === null
@@ -180,8 +215,10 @@ export function createContrastRoles(theme: Theme) {
       key: `${base.C}|${base.L}|${p.chroma.taper}|${p.chroma.taperDark}|${p.lc.base}|${fixedC}`,
     });
 
-    const share = flipped ? 0 : correctionShare(L0, Ls, end, base.L0);
-    const corrected = clampL(L0 + (base.L - base.L0) * share);
+    // From `from`, so a mark just off a fill gets little correction, like one just off the surface.
+    const share = flipped || exact ? 0 : correctionShare(L0, from, end, base.L0);
+    // Up to `from`, so faint colors can step off white.
+    const corrected = clampL(L0 + (base.L - base.L0) * share, from);
     const towardBackground = Math.sign(corrected - L0) === Math.sign(from - L0);
     const L = strict && towardBackground ? L0 : corrected;
     const C = chromaAt(L);
@@ -197,7 +234,10 @@ export function createContrastRoles(theme: Theme) {
   ) {
     const untapered = { ...p, chroma: { ...p.chroma, taper: 0 } };
     const max = hues.map((h) =>
-      maxChroma(contrastColor(h.angle, target, surface, untapered, againstFor(h.angle)).L, h.angle)
+      maxChroma(
+        contrastColor(h.angle, target, surface, untapered, { against: againstFor(h.angle) }).L,
+        h.angle
+      )
     );
     return Math.min(p.chroma.ceiling, ...max);
   }
@@ -211,7 +251,7 @@ export function createContrastRoles(theme: Theme) {
 
   function neutralRoles(surface: Hex, p: Params): Record<Role, Hex> {
     const at = (target: number, against: Hex) =>
-      contrastColor(null, target, surface, p, against).hex;
+      contrastColor(null, target, surface, p, { against }).hex;
     const faint = at(p.lc.faint, surface);
     return {
       faint,
@@ -231,14 +271,9 @@ export function createContrastRoles(theme: Theme) {
     // Faint, also what ink is measured against.
     const faintHex = (angle: number, C: number | null) => {
       const cap = hueRules(angle).faintChroma(Ls);
-      return contrastColor(
-        angle,
-        p.lc.faint,
-        surface,
-        p,
-        surface,
-        cap === null ? C : Math.min(C ?? cap, cap)
-      ).hex;
+      return contrastColor(angle, p.lc.faint, surface, p, {
+        fixedC: cap === null ? C : Math.min(C ?? cap, cap),
+      }).hex;
     };
 
     const evenC: Partial<Record<Role, number>> = {};
@@ -256,27 +291,18 @@ export function createContrastRoles(theme: Theme) {
       // A shared muted is light's, on both surfaces.
       if (k === 'muted' && hueRules(angle).sharedMuted) {
         const light = theme.surfaces.light;
-        return contrastColor(
-          angle,
-          p.lc.muted,
-          light,
-          p,
-          light,
-          even ? evenChroma(p.lc.muted, light, p) : null
-        ).hex;
+        return contrastColor(angle, p.lc.muted, light, p, {
+          fixedC: even ? evenChroma(p.lc.muted, light, p) : null,
+        }).hex;
       }
-      if (k !== 'ink') return contrastColor(angle, p.lc[k], surface, p, surface, C).hex;
+      if (k !== 'ink') return contrastColor(angle, p.lc[k], surface, p, { fixedC: C }).hex;
 
       // Ink is measured against faint.
-      return contrastColor(
-        angle,
-        p.lc.ink,
-        surface,
-        p,
-        faintHex(angle, even ? evenC.faint! : null),
-        C,
-        true
-      ).hex;
+      return contrastColor(angle, p.lc.ink, surface, p, {
+        against: faintHex(angle, even ? evenC.faint! : null),
+        fixedC: C,
+        strict: true,
+      }).hex;
     };
     return role;
   }
@@ -298,7 +324,7 @@ export function createContrastRoles(theme: Theme) {
       if (target === p.lc.base) return baseColor(angle, surface, p).hex;
       if (even && !(target in rampC)) rampC[target] = evenChroma(target, surface, p);
 
-      return contrastColor(angle, target, surface, p, surface, even ? rampC[target] : null).hex;
+      return contrastColor(angle, target, surface, p, { fixedC: even ? rampC[target] : null }).hex;
     };
     return assemble(hues, role, ramp, neutralColor(surface), p.lines.order, p.stack.pair);
   }

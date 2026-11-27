@@ -33,6 +33,20 @@ export interface Hue {
   anchor?: Hex;
 }
 
+export type Toward = 'light' | 'dark';
+export type Polarity = boolean | Toward;
+
+// `contrastColor`'s optional settings.
+export interface ContrastColorOptions {
+  against?: Hex; // what contrast is measured against; default: the surface
+  fixedC?: number | null; // 'even' mode's chroma; default: none
+  strict?: boolean; // the correction can add contrast but not remove it
+  // Which way to solve. false (default): the far end. true: whichever surface contrasts more with `against`.
+  // 'light' or 'dark': that surface, so marks on one fill can share a direction.
+  polarity?: Polarity;
+  exact?: boolean; // no correction, so the color sits exactly at its contrast with `against`
+}
+
 export type StackPair = 'muted' | 'strong';
 export interface Params {
   lc: Record<Role, number>;
@@ -45,7 +59,7 @@ export interface Params {
 
 // A hue's exceptions to the system (`hueRules` in corrections.ts). surfaceL: the surface's OKLab L.
 export interface HueRules {
-  hueAt: (L: number, baseL: number) => number; // the hue at lightness L; plain: the hue's angle
+  hueAt: (L: number, baseL: number, surfaceL: number) => number; // the hue at lightness L; plain: the hue's angle
   baseChroma: (surfaceL: number) => number; // share of base's chroma; plain: 1
   faintChroma: (surfaceL: number) => number | null; // cap on faint's chroma; plain: none
   sharedMuted: boolean; // muted is one color in both modes, like base; plain: false
