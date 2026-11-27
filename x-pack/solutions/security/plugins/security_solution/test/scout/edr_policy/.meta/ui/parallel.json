@@ -1,5 +1,5 @@
 {
-  "sha1": "c820a2cb7ca978f4a6c71723e5d8b40a135c62e0",
+  "sha1": "108a858bdb62ba19ac21029e7aa2c7efdc75c881",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -13,6 +13,20 @@
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_policy/ui/parallel_tests/global.setup.ts",
         "line": 5,
         "column": 1
+      }
+    },
+    {
+      "id": "1dc101a07f33d6e-089aa1aebe1bae9",
+      "title": "Agent policy settings tamper protection on Security Complete shows the tamper protection controls without an upsell",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_policy/ui/parallel_tests/agent_policy_tamper_protection_complete.spec.ts",
+        "line": 15,
+        "column": 15
       }
     },
     {
