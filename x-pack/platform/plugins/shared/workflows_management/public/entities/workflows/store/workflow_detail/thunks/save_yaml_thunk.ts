@@ -106,6 +106,8 @@ export const saveYamlThunk = createAsyncThunk<
 
         // For consistency, dispatch the loadWorkflow thunk to update the workflow in the store to the latest version from the API
         await dispatch(loadWorkflowThunk({ id }));
+        // Queries under the workflow's key, such as the page status, depend on the saved YAML.
+        queryClient.invalidateQueries({ queryKey: ['workflows', id] });
       } else {
         // A draft seeded by "Remix with AI" is saved through the library, which
         // records the template it started from.

@@ -209,17 +209,20 @@ apiTest.describe(
           }
         } finally {
           // A run still in flight blocks the delete, so stop it first.
-          await apiClient.put(`s/${space}/api/workflows/workflow/${pageCId}`, {
-            headers: getContext().headers,
-            body: { enabled: false },
-          });
-          await apiClient.post(`s/${space}/api/workflows/workflow/${pageCId}/executions/cancel`, {
-            headers: getContext().headers,
-          });
-          await deleteBoundWorkflow(apiClient, getContext().headers, {
-            spaceId: space,
-            workflowId: pageCId,
-          });
+          try {
+            await apiClient.put(`s/${space}/api/workflows/workflow/${pageCId}`, {
+              headers: getContext().headers,
+              body: { enabled: false },
+            });
+            await apiClient.post(`s/${space}/api/workflows/workflow/${pageCId}/executions/cancel`, {
+              headers: getContext().headers,
+            });
+          } finally {
+            await deleteBoundWorkflow(apiClient, getContext().headers, {
+              spaceId: space,
+              workflowId: pageCId,
+            });
+          }
         }
 
         expect(await listExecutions(apiClient, pageA.id)).toStrictEqual([]);
