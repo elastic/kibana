@@ -699,4 +699,43 @@ describe('AppHeaderView', () => {
       );
     });
   });
+
+  describe('sticky z-index with a fullscreen EuiDataGrid', () => {
+    // jsdom resolves the nested `.euiDataGrid__restrictBody &` rule through getComputedStyle.
+    // `toHaveStyleRule` cannot: it ignores the ancestor selector and reports the wrong rule.
+    const FULLSCREEN_BODY_CLASS = 'euiDataGrid__restrictBody';
+
+    afterEach(() => {
+      document.body.classList.remove(FULLSCREEN_BODY_CLASS);
+    });
+
+    const getLevels = () => renderHook(() => useEuiTheme()).result.current.euiTheme.levels;
+
+    it('keeps the mask z-index for a sticky header when no grid is fullscreen', () => {
+      const { mask } = getLevels();
+      render(<AppHeaderView title="Dashboard" sticky />);
+
+      const root = screen.getByTestId(APP_HEADER_TEST_SUBJECTS.root);
+      expect(getComputedStyle(root).zIndex).toBe(String(mask));
+    });
+
+    it('drops a sticky header to the content z-index while a grid is fullscreen', () => {
+      const { mask, content } = getLevels();
+      document.body.classList.add(FULLSCREEN_BODY_CLASS);
+      render(<AppHeaderView title="Dashboard" sticky />);
+
+      const root = screen.getByTestId(APP_HEADER_TEST_SUBJECTS.root);
+      expect(content).toBe(0);
+      expect(getComputedStyle(root).zIndex).toBe(String(content));
+      expect(getComputedStyle(root).zIndex).not.toBe(String(mask));
+    });
+
+    it('does not set a z-index when the header is not sticky', () => {
+      document.body.classList.add(FULLSCREEN_BODY_CLASS);
+      render(<AppHeaderView title="Dashboard" sticky={false} />);
+
+      const root = screen.getByTestId(APP_HEADER_TEST_SUBJECTS.root);
+      expect(getComputedStyle(root).zIndex).toBe('');
+    });
+  });
 });
