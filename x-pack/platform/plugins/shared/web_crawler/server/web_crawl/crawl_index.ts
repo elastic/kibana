@@ -72,28 +72,36 @@ export const createCrawlIndex = async (
  */
 export const addCrawlFields = async (
   esClient: ElasticsearchClient,
+  indexName: string,
   mappingsByIndex: Record<string, estypes.MappingTypeMapping>
 ): Promise<void> => {
   const missingByIndex: Record<string, Record<string, estypes.MappingProperty>> = {};
-  for (const [indexName, { properties = {} }] of Object.entries(mappingsByIndex)) {
+  for (const [concreteName, { properties = {} }] of Object.entries(mappingsByIndex)) {
+    missingByIndex[concreteName] = {};
     for (const [field, property] of Object.entries(CRAWL_FIELDS)) {
       const existing = properties[field];
       if (!existing) {
-        missingByIndex[indexName] = { ...missingByIndex[indexName], [field]: property };
+        missingByIndex[concreteName][field] = property;
       } else if (!COMPATIBLE_TYPES[property.type].includes(existing.type ?? 'object')) {
         throw new IncompatibleCrawlIndexError(
-          `Index ${indexName} maps ${field} as ${
+          `Index ${concreteName} maps ${field} as ${
             existing.type ?? 'object'
           }, and a crawl needs it to be ${property.type}`
         );
       }
     }
   }
-  // One request per index: behind an alias, each index can be missing different fields
+  const [first, ...rest] = Object.values(missingByIndex);
+  const isSameEverywhere = rest.every(
+    (missing) => Object.keys(missing).join() === Object.keys(first).join()
+  );
+  // Update through the name we were given when we can: privileges on an alias don't cover requests
+  // that name the indices behind it. Those indices can be missing different fields though.
+  const updates = isSameEverywhere ? { [indexName]: first ?? {} } : missingByIndex;
   await Promise.all(
-    Object.entries(missingByIndex).map(([indexName, properties]) =>
-      esClient.indices.putMapping({ index: indexName, properties })
-    )
+    Object.entries(updates)
+      .filter(([, properties]) => Object.keys(properties).length > 0)
+      .map(([index, properties]) => esClient.indices.putMapping({ index, properties }))
   );
 };
 

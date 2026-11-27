@@ -98,7 +98,7 @@ describe('addCrawlFields', () => {
   it('adds only the fields the index does not have', async () => {
     const { depth, crawl_id: crawlId, ...missing } = CRAWL_FIELDS;
 
-    await addCrawlFields(esClient, {
+    await addCrawlFields(esClient, INDEX_NAME, {
       [INDEX_NAME]: {
         properties: { title: { type: 'text' }, depth: { type: 'long' }, crawl_id: crawlId },
       },
@@ -111,10 +111,18 @@ describe('addCrawlFields', () => {
     });
   });
 
+  it('updates through an alias when every index behind it is missing the same fields', async () => {
+    await addCrawlFields(esClient, 'docs', { 'docs-1': {}, 'docs-2': { properties: {} } });
+
+    expect(esClient.indices.putMapping.mock.calls).toEqual([
+      [{ index: 'docs', properties: CRAWL_FIELDS }],
+    ]);
+  });
+
   it('adds to each index behind an alias only what that index is missing', async () => {
     const { depth, ...withoutDepth } = CRAWL_FIELDS;
 
-    await addCrawlFields(esClient, {
+    await addCrawlFields(esClient, 'docs', {
       'docs-1': { properties: { ...withoutDepth, depth: { type: 'long' } } },
       'docs-2': { properties: withoutDepth },
     });
@@ -125,7 +133,7 @@ describe('addCrawlFields', () => {
   });
 
   it('leaves an index that has them all alone', async () => {
-    await addCrawlFields(esClient, { [INDEX_NAME]: { properties: CRAWL_FIELDS } });
+    await addCrawlFields(esClient, INDEX_NAME, { [INDEX_NAME]: { properties: CRAWL_FIELDS } });
 
     expect(esClient.indices.putMapping).not.toHaveBeenCalled();
   });
@@ -135,7 +143,7 @@ describe('addCrawlFields', () => {
     ['an object', { properties: {} }, 'object'],
   ])('refuses an index that maps one of them as %s', async (_, urlPath, type) => {
     await expect(
-      addCrawlFields(esClient, {
+      addCrawlFields(esClient, INDEX_NAME, {
         [INDEX_NAME]: { properties: { ...CRAWL_FIELDS, url_path: urlPath } },
       })
     ).rejects.toThrow(
