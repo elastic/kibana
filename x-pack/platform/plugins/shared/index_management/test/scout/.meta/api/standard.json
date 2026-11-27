@@ -1,5 +1,5 @@
 {
-  "sha1": "251a42c820f8eeedd4801ebff34cbc68d601a499",
+  "sha1": "04f60cfa057df2747f0ad64fa80983cbce557376",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -1531,8 +1531,8 @@
       }
     },
     {
-      "id": "d945ff8c0d5e3b4-c30cebebee2e6a7",
-      "title": "Index doc count API returns counts per index and fills missing buckets with 0",
+      "id": "d945ff8c0d5e3b4-6faa30c892b6e95",
+      "title": "Index doc count through the ES|QL search strategy returns counts per index and fills missing buckets with 0",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -1540,13 +1540,13 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/index_management/test/scout/api/tests/indices/index_doc_count.spec.ts",
-        "line": 48,
-        "column": 30
+        "line": 59,
+        "column": 18
       }
     },
     {
-      "id": "d945ff8c0d5e3b4-918059dbd8060fa",
-      "title": "Index doc count API returns counts for more than 10 indices",
+      "id": "d945ff8c0d5e3b4-fb21af851a7e45d",
+      "title": "Index doc count through the ES|QL search strategy returns counts for more than 10 indices",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -1554,36 +1554,22 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/index_management/test/scout/api/tests/indices/index_doc_count.spec.ts",
-        "line": 69,
+        "line": 83,
+        "column": 45
+      }
+    },
+    {
+      "id": "d945ff8c0d5e3b4-d2cc9725d7b76ab",
+      "title": "Index doc count through the ES|QL search strategy supports 255 character index names",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/index_management/test/scout/api/tests/indices/index_doc_count.spec.ts",
+        "line": 98,
         "column": 71
-      }
-    },
-    {
-      "id": "d945ff8c0d5e3b4-02b6f187c319b50",
-      "title": "Index doc count API supports 255 character index names",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/index_management/test/scout/api/tests/indices/index_doc_count.spec.ts",
-        "line": 86,
-        "column": 46
-      }
-    },
-    {
-      "id": "d945ff8c0d5e3b4-9ec5e4084fb5726",
-      "title": "Index doc count API rejects an empty list of index names",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/index_management/test/scout/api/tests/indices/index_doc_count.spec.ts",
-        "line": 109,
-        "column": 61
       }
     },
     {

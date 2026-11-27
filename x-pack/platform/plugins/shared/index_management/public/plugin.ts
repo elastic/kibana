@@ -227,6 +227,7 @@ export class IndexMgmtUIPlugin
       ml,
       licensing,
       reindexService,
+      data,
     } = plugins;
     const { docLinks, fatalErrors, application, uiSettings, executionContext, settings, http } =
       core;
@@ -254,6 +255,7 @@ export class IndexMgmtUIPlugin
         ml,
         licensing,
         reindexService,
+        data,
       },
       services: {
         extensionsService: this.extensionsService,

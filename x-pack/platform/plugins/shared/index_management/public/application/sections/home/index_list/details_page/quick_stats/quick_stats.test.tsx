@@ -16,7 +16,7 @@ jest.mock('../../../../../app_context', () => ({
 }));
 
 jest.mock('../../../../../services/api', () => ({
-  loadIndexDocCount: jest.fn().mockResolvedValue({ data: { 'test-index': 0 } }),
+  fetchIndexDocCounts: jest.fn().mockResolvedValue({ 'test-index': 0 }),
   loadIndexVectorCount: jest.fn().mockResolvedValue({ data: { vectorCount: 5 } }),
 }));
 
@@ -28,19 +28,22 @@ jest.mock('./data_stream_details', () => ({ DataStreamDetails: () => null }));
 
 const mockUseAppContext = jest.mocked(useAppContext);
 const mockLoadIndexVectorCount = jest.mocked(loadIndexVectorCount);
+const plugins = { data: { search: { search: jest.fn() } } };
 
 describe('QuickStats', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockUseAppContext.mockReturnValue({
       config: { enableSizeAndDocCount: true, enableVectorCount: true },
-    } as ReturnType<typeof useAppContext>);
+      plugins,
+    } as unknown as ReturnType<typeof useAppContext>);
   });
 
   it('does not call loadIndexVectorCount when enableVectorCount is disabled', async () => {
     mockUseAppContext.mockReturnValue({
       config: { enableSizeAndDocCount: true, enableVectorCount: false },
-    } as ReturnType<typeof useAppContext>);
+      plugins,
+    } as unknown as ReturnType<typeof useAppContext>);
 
     await act(async () => {
       render(<QuickStats indexDetails={{ name: 'test-index' }} />);

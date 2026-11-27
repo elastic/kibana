@@ -99,6 +99,7 @@ export function getIndexManagementDependencies({
       streams: startDependencies.streams,
       licensing: startDependencies.licensing,
       reindexService,
+      data: startDependencies.data,
     },
     services: {
       httpService,

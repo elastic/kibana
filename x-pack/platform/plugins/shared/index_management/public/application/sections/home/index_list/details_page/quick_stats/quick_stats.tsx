@@ -10,7 +10,7 @@ import { EuiFlexGrid, useIsWithinMinBreakpoint } from '@elastic/eui';
 import { formatBytes } from '../../../../../lib/format_bytes';
 import { isClosedIndexStatus } from '../../../../../lib/is_closed_index_status';
 import type { Index } from '../../../../../../../common';
-import { loadIndexDocCount, loadIndexVectorCount } from '../../../../../services/api';
+import { fetchIndexDocCounts, loadIndexVectorCount } from '../../../../../services/api';
 import { useAppContext } from '../../../../../app_context';
 import { StorageDetails } from './storage_details';
 import { StatusDetails } from './status_details';
@@ -40,6 +40,11 @@ export const QuickStats = ({ indexDetails }: Props) => {
   const isLarge = useIsWithinMinBreakpoint('xl');
   const {
     config: { enableSizeAndDocCount, enableVectorCount },
+    plugins: {
+      data: {
+        search: { search },
+      },
+    },
   } = useAppContext();
   const {
     name,
@@ -74,24 +79,11 @@ export const QuickStats = ({ indexDetails }: Props) => {
       return;
     }
     try {
-      const { data, error } = await loadIndexDocCount(name);
-      if (error || !data) {
-        // Fall back to the metadata count (already available from the index stats response).
-        // Only mark as an error when there's nothing to show.
-        if (metadataDocCount !== undefined) {
-          setDocCount({
-            count: metadataDocCount,
-            isLoading: false,
-            isError: false,
-            approximateReason: 'requires_read',
-          });
-        } else {
-          setDocCount({ isLoading: false, isError: true });
-        }
-      } else {
-        setDocCount({ count: data[name], isLoading: false, isError: false });
-      }
+      const counts = await fetchIndexDocCounts(search, [name]);
+      setDocCount({ count: counts[name], isLoading: false, isError: false });
     } catch {
+      // Fall back to the metadata count (already available from the index stats response).
+      // Only mark as an error when there's nothing to show.
       if (metadataDocCount !== undefined) {
         setDocCount({
           count: metadataDocCount,
@@ -103,7 +95,7 @@ export const QuickStats = ({ indexDetails }: Props) => {
         setDocCount({ isLoading: false, isError: true });
       }
     }
-  }, [name, isClosed, metadataDocCount]);
+  }, [search, name, isClosed, metadataDocCount]);
 
   useEffect(() => {
     fetchDocCount();
