@@ -14,7 +14,7 @@ const request = httpServerMock.createKibanaRequest();
 const withList = (list: jest.Mock) =>
   ({
     getInvestigationsClient: jest.fn().mockReturnValue({ list }),
-  } as unknown as Pick<AgenticInvestigationsPluginStart, 'getInvestigationsClient'>);
+  }) as unknown as Pick<AgenticInvestigationsPluginStart, 'getInvestigationsClient'>;
 
 describe('resolveInvestigationStatuses', () => {
   it('reports pending while in progress, complete otherwise, and omits unknown ids', async () => {

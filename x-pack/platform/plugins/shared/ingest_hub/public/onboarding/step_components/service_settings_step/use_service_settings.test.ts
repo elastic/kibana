@@ -458,7 +458,7 @@ describe('useServiceSettings — lazy serviceVars prune', () => {
 });
 
 describe('getIncompleteInstances — required set follows the matrix view', () => {
-  const def = (name: string) => ({ name, type: 'text', required: true, show_user: true } as any);
+  const def = (name: string) => ({ name, type: 'text', required: true, show_user: true }) as any;
   const base = {
     id: 'cloudtrail',
     name: 'CloudTrail',

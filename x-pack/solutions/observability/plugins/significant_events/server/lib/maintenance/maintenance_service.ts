@@ -401,7 +401,7 @@ export const createSignificantEventsMaintenanceService = ({
     // A reassert keeps whoever paused the space; it only falls back to its own actor when the
     // document recorded none.
     const actor =
-      run.mode === 'pause' ? updatedBy : existing?.updatedBy ?? MAINTENANCE_REASSERT_ACTOR;
+      run.mode === 'pause' ? updatedBy : (existing?.updatedBy ?? MAINTENANCE_REASSERT_ACTOR);
 
     // 1. Blocking intent first (skip when already paused — reassert/re-pause).
     await persistPausedIntent({ spaceId, existing, actor, operation: run.mode });

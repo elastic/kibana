@@ -740,8 +740,8 @@ export class RuleEventsClient {
       assessmentNote: assessmentNote?.trim()
         ? assessmentNote
         : change.kind === 'operator'
-        ? operatorFallbackAssessmentNote(change.status)
-        : undefined,
+          ? operatorFallbackAssessmentNote(change.status)
+          : undefined,
       timestamp: new Date().toISOString(),
     });
     if (!decision.write) {

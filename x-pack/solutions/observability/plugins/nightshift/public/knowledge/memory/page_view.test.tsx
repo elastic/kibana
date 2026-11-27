@@ -83,7 +83,7 @@ const asDetail = (
     isLoading: false,
     isError: false,
     data: { page: page(overrides), version: VERSION, ...data },
-  } as unknown as ReturnType<typeof useMemoryPage>);
+  }) as unknown as ReturnType<typeof useMemoryPage>;
 
 const renderView = (
   onDeleted = jest.fn(),
@@ -388,7 +388,7 @@ describe('MemoryPageView', () => {
         isLoading: false,
         isError: false,
         data: { page: page(), version, usefulness: 0.5, confidence: 0.8 },
-      } as unknown as ReturnType<typeof useMemoryPage>);
+      }) as unknown as ReturnType<typeof useMemoryPage>;
     mockUseMemoryPage.mockReturnValue(detail(VERSION));
     const { rerenderView } = renderView();
 

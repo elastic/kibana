@@ -16,15 +16,12 @@ import type {
   SecuritySolutionEssPluginStartDeps,
 } from './types';
 
-export class SecuritySolutionEssPlugin
-  implements
-    Plugin<
-      SecuritySolutionEssPluginSetup,
-      SecuritySolutionEssPluginStart,
-      SecuritySolutionEssPluginSetupDeps,
-      SecuritySolutionEssPluginStartDeps
-    >
-{
+export class SecuritySolutionEssPlugin implements Plugin<
+  SecuritySolutionEssPluginSetup,
+  SecuritySolutionEssPluginStart,
+  SecuritySolutionEssPluginSetupDeps,
+  SecuritySolutionEssPluginStartDeps
+> {
   public setup(_coreSetup: CoreSetup, pluginsSetup: SecuritySolutionEssPluginSetupDeps) {
     registerProductFeatures(pluginsSetup, DEFAULT_PRODUCT_FEATURES);
     return {};

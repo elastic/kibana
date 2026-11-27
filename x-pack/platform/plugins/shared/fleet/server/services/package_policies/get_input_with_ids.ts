@@ -45,8 +45,8 @@ export function getInputsWithIds(
       isEndpointPackage && packagePolicyId
         ? packagePolicyId
         : input.id
-        ? input.id
-        : getInputId(input, packagePolicyId, packageInfo);
+          ? input.id
+          : getInputId(input, packagePolicyId, packageInfo);
 
     if (validateIds) {
       validateNoPathTraversalId(inputId);
@@ -60,8 +60,8 @@ export function getInputsWithIds(
         const streamId = stream?.id
           ? stream.id
           : packagePolicyId
-          ? `${getInputEffectiveName(input)}-${stream.data_stream.dataset}-${packagePolicyId}`
-          : `${getInputEffectiveName(input)}-${stream.data_stream.dataset}`;
+            ? `${getInputEffectiveName(input)}-${stream.data_stream.dataset}-${packagePolicyId}`
+            : `${getInputEffectiveName(input)}-${stream.data_stream.dataset}`;
 
         if (validateIds) {
           validateNoPathTraversalId(streamId);

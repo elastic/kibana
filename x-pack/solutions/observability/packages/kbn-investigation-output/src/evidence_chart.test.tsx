@@ -61,7 +61,7 @@ const uiSettingsWithTimeZone = (timeZone: string, dateFormat?: string): IUiSetti
       }
       return key === 'dateFormat' ? dateFormat : undefined;
     }),
-  } as unknown as IUiSettingsClient);
+  }) as unknown as IUiSettingsClient;
 
 describe('EvidenceChart', () => {
   beforeEach(() => {

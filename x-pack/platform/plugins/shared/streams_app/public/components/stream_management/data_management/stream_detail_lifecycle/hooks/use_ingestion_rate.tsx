@@ -304,13 +304,16 @@ export const useIngestionRatePerTier = ({
             return acc;
           }
 
-          const countByTier = indices.buckets.reduce((tiers, index) => {
-            const phase = indexToPhase[index.key];
-            const tier =
-              phase && phase in ilmPhases ? (phase as PhaseNameWithoutDelete) : fallbackTier;
-            tiers[tier] = (tiers[tier] ?? 0) + index.doc_count;
-            return tiers;
-          }, {} as Record<PhaseNameWithoutDelete, number>);
+          const countByTier = indices.buckets.reduce(
+            (tiers, index) => {
+              const phase = indexToPhase[index.key];
+              const tier =
+                phase && phase in ilmPhases ? (phase as PhaseNameWithoutDelete) : fallbackTier;
+              tiers[tier] = (tiers[tier] ?? 0) + index.doc_count;
+              return tiers;
+            },
+            {} as Record<PhaseNameWithoutDelete, number>
+          );
 
           for (const entry of Object.entries(countByTier)) {
             const tier = entry[0] as PhaseNameWithoutDelete;

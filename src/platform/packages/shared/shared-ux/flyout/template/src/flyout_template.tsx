@@ -102,7 +102,7 @@ const FlyoutTemplateResolved = ({
     headerAttrs?.titleText ?? (typeof menuTitle === 'string' ? menuTitle : undefined);
   const flyoutAriaLabelledBy =
     ariaLabelledBy ?? (!ariaLabel && headerItem ? flyoutTitleId : undefined);
-  const flyoutAriaLabel = flyoutAriaLabelledBy ? undefined : ariaLabel ?? menuTitleString;
+  const flyoutAriaLabel = flyoutAriaLabelledBy ? undefined : (ariaLabel ?? menuTitleString);
 
   // Feed the title text to EUI's flyout menu for history/navigation. Without it EUI falls back to a
   // placeholder title, so a header whose title is a node needs `titleText` to be named there.

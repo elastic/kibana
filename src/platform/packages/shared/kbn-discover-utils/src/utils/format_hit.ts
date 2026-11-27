@@ -27,7 +27,7 @@ import { getDataViewFieldFromDataSource } from './get_data_view_field_from_data_
 type PartialHitReactPair = [
   fieldDisplayName: string,
   formattedValue: ReactNode | undefined,
-  fieldName: string | null
+  fieldName: string | null,
 ];
 
 interface FormatHitReactOptions {

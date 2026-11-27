@@ -470,7 +470,7 @@ const hasPropertyDefault = (
     return false;
   }
   const resolvedSchema = propertySchema.$ref
-    ? resolveRef(propertySchema.$ref, rootSchema) ?? propertySchema
+    ? (resolveRef(propertySchema.$ref, rootSchema) ?? propertySchema)
     : propertySchema;
   return resolvedSchema.default !== undefined;
 };

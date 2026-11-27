@@ -566,7 +566,7 @@ describe('WorkflowTaskManager', () => {
     const wakeId = getWorkflowWakeTaskId(executionId);
     const timerId = getWorkflowGlobalTimeoutResumeTaskId(executionId);
     const task = (id: string, status: TaskStatus, attempts = 0) =>
-      ({ id, status, attempts } as any);
+      ({ id, status, attempts }) as any;
     const mockSearch = (...docs: any[]) =>
       mockTaskManager.fetch.mockResolvedValue({ docs, versionMap: new Map() } as any);
     const mockFreshRead = (...docs: any[]) =>

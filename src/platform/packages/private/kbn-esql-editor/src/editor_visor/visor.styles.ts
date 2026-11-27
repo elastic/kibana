@@ -39,8 +39,9 @@ export const visorStyles = (
       width: 100%;
       position: relative;
       z-index: ${euiTheme.levels.menu};
-      ${isInline
-        ? `
+      ${
+        isInline
+          ? `
           min-height: ${isVisible ? euiTheme.size.xl : '0'};
           height: ${isVisible ? euiTheme.size.xl : '0'};
           max-height: ${isVisible ? euiTheme.size.xl : '0'};
@@ -51,7 +52,8 @@ export const visorStyles = (
             hasOutline ? ', margin-top 0.3s cubic-bezier(0.25, 0.1, 0.25, 1)' : ''
           };
         `
-        : `min-height: ${euiTheme.size.xl};`}
+          : `min-height: ${euiTheme.size.xl};`
+      }
       ${hasOutline ? `margin-top: ${isVisible ? euiTheme.size.s : '0'};` : ''}
     `,
     inputSlot: css`

@@ -51,10 +51,10 @@ export function detectServiceVarsDrift(
       if (deployedInstanceIds?.has(instanceId)) {
         const service = servicesMap.get(getServiceId(instanceId));
         const deployedDefault = service
-          ? toSOServiceVars(
+          ? (toSOServiceVars(
               { [instanceId]: { enabledDataStreams: service.dataStreams, varsByDataStream: {} } },
               servicesMap
-            )[instanceId] ?? {}
+            )[instanceId] ?? {})
           : {};
         if (!isEqual(deployedDefault, soServiceVars[instanceId])) {
           dirty.push(instanceId);
@@ -79,7 +79,7 @@ export function detectServiceVarsDrift(
       // (e.g. elb__dup-1) resolve to the correct servicesMap entry.
       const service = servicesMap.get(getServiceId(instanceId));
       const deployedDefault = service
-        ? toSOServiceVars(
+        ? (toSOServiceVars(
             {
               [instanceId]: {
                 enabledDataStreams: service.dataStreams,
@@ -87,7 +87,7 @@ export function detectServiceVarsDrift(
               },
             },
             servicesMap
-          )[instanceId] ?? {}
+          )[instanceId] ?? {})
         : {};
       if (!isEqual(typedSession[instanceId], deployedDefault)) {
         dirty.push(instanceId);

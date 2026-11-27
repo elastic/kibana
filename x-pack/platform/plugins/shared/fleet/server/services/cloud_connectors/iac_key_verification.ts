@@ -125,7 +125,7 @@ export const getIacKeyOutcome = async (
     // anything else; 0 is reserved for "no response".
     const httpStatus =
       error instanceof IacProvisionerRequestError || error instanceof IacProvisionerUnavailableError
-        ? error.statusCode ?? 0
+        ? (error.statusCode ?? 0)
         : 500;
     const errorCodes = error instanceof IacProvisionerRequestError ? error.errorCodes : [];
     reportIacProvisionerRenderCompleted({

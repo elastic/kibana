@@ -123,7 +123,7 @@ const createMockWorkflow = (overrides: Partial<EsWorkflow> = {}): EsWorkflow =>
     definition: {},
     yaml: 'steps: []',
     ...overrides,
-  } as EsWorkflow);
+  }) as EsWorkflow;
 
 describe('WorkflowExecuteStepImpl', () => {
   afterEach(() => {

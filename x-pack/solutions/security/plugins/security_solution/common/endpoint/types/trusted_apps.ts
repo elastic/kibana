@@ -23,8 +23,9 @@ export enum OperatorFieldIds {
   matches = 'matches',
 }
 
-export interface TrustedAppConditionEntry<T extends ConditionEntryField = ConditionEntryField>
-  extends ConditionEntry {
+export interface TrustedAppConditionEntry<
+  T extends ConditionEntryField = ConditionEntryField,
+> extends ConditionEntry {
   field: T;
   type: TrustedAppEntryTypes;
   operator: 'included';

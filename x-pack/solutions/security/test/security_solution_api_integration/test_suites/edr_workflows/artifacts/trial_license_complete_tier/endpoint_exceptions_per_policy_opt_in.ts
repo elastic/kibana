@@ -83,9 +83,8 @@ export default function endpointExceptionsPerPolicyOptInTests({ getService }: Ft
 
           describe('functionality', () => {
             it('should store the opt-in status, reason, user, and timestamp in reference data', async () => {
-              const initialOptInStatusSO = await findEndpointExceptionsPerPolicyOptInSO(
-                kibanaServer
-              );
+              const initialOptInStatusSO =
+                await findEndpointExceptionsPerPolicyOptInSO(kibanaServer);
               expect(initialOptInStatusSO?.attributes.metadata.status).to.be(false);
 
               await superuser
@@ -106,9 +105,8 @@ export default function endpointExceptionsPerPolicyOptInTests({ getService }: Ft
             });
 
             it('should have an idempotent behavior', async () => {
-              const initialOptInStatusSO = await findEndpointExceptionsPerPolicyOptInSO(
-                kibanaServer
-              );
+              const initialOptInStatusSO =
+                await findEndpointExceptionsPerPolicyOptInSO(kibanaServer);
               expect(initialOptInStatusSO?.attributes.metadata.status).to.be(false);
 
               await superuser

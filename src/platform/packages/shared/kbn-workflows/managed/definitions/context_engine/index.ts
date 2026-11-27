@@ -13,8 +13,7 @@ import type { ManagedWorkflowDefinition, ManagedWorkflowTemplateValues } from '.
 export const CONTEXT_ENGINE_FEEDBACK_ANALYSIS_WORKFLOW_ID =
   'system-context-engine-feedback-analysis';
 
-export interface ContextEngineFeedbackAnalysisWorkflowTemplateValues
-  extends ManagedWorkflowTemplateValues {
+export interface ContextEngineFeedbackAnalysisWorkflowTemplateValues extends ManagedWorkflowTemplateValues {
   /** The AI index this instance analyzes. */
   aiIndexId: string;
   /** How often the workflow runs. */

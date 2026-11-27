@@ -126,7 +126,7 @@ export const ActionPoliciesTableContent = ({
   const { items } = useContentListItems();
   const policyToView = useMemo(
     () =>
-      policyToViewId ? items.map(toPolicy).find((p) => p.id === policyToViewId) ?? null : null,
+      policyToViewId ? (items.map(toPolicy).find((p) => p.id === policyToViewId) ?? null) : null,
     [policyToViewId, items]
   );
   const updatedByUids = useMemo(
@@ -206,8 +206,8 @@ export const ActionPoliciesTableContent = ({
                         }
                       )
                     : isEnableBlockedByLicense
-                    ? ACTION_POLICIES_LICENSE_REQUIRED_MESSAGE
-                    : undefined
+                      ? ACTION_POLICIES_LICENSE_REQUIRED_MESSAGE
+                      : undefined
                 }
                 onChange={() => {
                   if (policy.enabled) {

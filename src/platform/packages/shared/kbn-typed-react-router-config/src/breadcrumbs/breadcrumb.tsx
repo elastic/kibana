@@ -12,12 +12,11 @@ import type { RequiredKeys } from 'utility-types';
 import { useRouterBreadcrumb } from './use_router_breadcrumb';
 import type { PathsOf, RouteMap, TypeOf } from '../types';
 
-type AsParamsProps<TObject extends Record<string, any>> = RequiredKeys<TObject> extends never
-  ? {}
-  : { params: TObject };
+type AsParamsProps<TObject extends Record<string, any>> =
+  RequiredKeys<TObject> extends never ? {} : { params: TObject };
 
 export type RouterBreadcrumb<TRouteMap extends RouteMap> = <
-  TRoutePath extends PathsOf<TRouteMap>
+  TRoutePath extends PathsOf<TRouteMap>,
 >({}: {
   title: string;
   children: React.ReactNode;
@@ -26,7 +25,7 @@ export type RouterBreadcrumb<TRouteMap extends RouteMap> = <
 
 export function RouterBreadcrumb<
   TRouteMap extends RouteMap,
-  TRoutePath extends PathsOf<TRouteMap>
+  TRoutePath extends PathsOf<TRouteMap>,
 >({
   title,
   path,

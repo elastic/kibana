@@ -12,11 +12,10 @@ import { registerYaraLanguage, YARA_LANG_ID, YARA_THEME_ID } from '../../yara_la
 
 registerYaraLanguage();
 
-export interface YaraCodeEditorProps
-  extends Pick<
-    CodeEditorProps,
-    'value' | 'onChange' | 'editorDidMount' | 'height' | 'isCopyable' | 'aria-label'
-  > {
+export interface YaraCodeEditorProps extends Pick<
+  CodeEditorProps,
+  'value' | 'onChange' | 'editorDidMount' | 'height' | 'isCopyable' | 'aria-label'
+> {
   readOnly?: boolean;
   /** The editor grows with its content up to this number of lines, then it scrolls. Overrides `height`. */
   maxLines?: number;

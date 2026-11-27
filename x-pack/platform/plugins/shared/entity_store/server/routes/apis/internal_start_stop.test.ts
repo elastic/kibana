@@ -19,7 +19,7 @@ const engine = (overrides: Partial<EngineDescriptor>): EngineDescriptor =>
     status: ENGINE_STATUS.STARTED,
     nonPriorityStatus: ENGINE_STATUS.STARTED,
     ...overrides,
-  } as EngineDescriptor);
+  }) as EngineDescriptor;
 
 const createCtx = (engines: EngineDescriptor[]) => {
   const assetManager = {
@@ -51,11 +51,11 @@ const createRes = () =>
   ({
     ok: jest.fn(({ body }) => ({ status: 200, payload: body })),
     badRequest: jest.fn(({ body }) => ({ status: 400, payload: body })),
-  } as unknown as KibanaResponseFactory);
+  }) as unknown as KibanaResponseFactory;
 
 type StartStopRequest = Parameters<typeof handleInternalStart>[1];
 
-const createReq = (body: object) => ({ body } as unknown as StartStopRequest);
+const createReq = (body: object) => ({ body }) as unknown as StartStopRequest;
 
 describe('internal start/stop', () => {
   describe('handleInternalStop', () => {

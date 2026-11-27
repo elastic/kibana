@@ -65,7 +65,7 @@ const buildHit = (extra: Record<string, unknown> = {}): DataTableRecord =>
       ...extra,
     },
     isAnchor: false,
-  } as unknown as DataTableRecord);
+  }) as unknown as DataTableRecord;
 
 const renderTab = (
   hit: DataTableRecord,

@@ -46,7 +46,7 @@ describe('attachRuleTool', () => {
       logger: loggerService,
       getRulesClient: () => ({ getRule }),
       getPrivilegeChecker: () =>
-        ({ canRead, canWrite: jest.fn().mockResolvedValue(true) } as unknown as PrivilegeChecker),
+        ({ canRead, canWrite: jest.fn().mockResolvedValue(true) }) as unknown as PrivilegeChecker,
     });
   };
 

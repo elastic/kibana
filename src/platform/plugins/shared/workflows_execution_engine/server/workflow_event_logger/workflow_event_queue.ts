@@ -31,7 +31,10 @@ export class WorkflowEventQueue {
   private events: WorkflowLogEvent[] = [];
   private inFlight: Promise<void> | undefined;
 
-  constructor(private logsRepository: LogsRepository, private logger: Logger) {}
+  constructor(
+    private logsRepository: LogsRepository,
+    private logger: Logger
+  ) {}
 
   public push(event: WorkflowLogEvent): void {
     this.events.push(event);

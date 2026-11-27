@@ -15,7 +15,7 @@ const createLog = (): ToolingLog =>
     error: jest.fn(),
     debug: jest.fn(),
     warning: jest.fn(),
-  } as unknown as ToolingLog);
+  }) as unknown as ToolingLog;
 
 // ~150 distinct tokens — comfortably above the 120-token filter threshold
 const ADEQUATE_BODY = Array.from({ length: 150 }, (_, i) => `word${i}`).join(' ');

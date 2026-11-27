@@ -20,8 +20,8 @@ export const isSingleLocationExternalOverviewRow = (
 ): boolean =>
   Boolean(
     config.locations[0]?.id &&
-      config.locations.length <= 1 &&
-      (config.remote?.remoteName || config.origin === 'heartbeat')
+    config.locations.length <= 1 &&
+    (config.remote?.remoteName || config.origin === 'heartbeat')
   );
 
 /**

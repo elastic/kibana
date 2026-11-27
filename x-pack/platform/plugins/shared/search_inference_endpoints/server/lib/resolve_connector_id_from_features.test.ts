@@ -22,7 +22,7 @@ const createServices = (
   ({
     features: { get: jest.fn(get) },
     endpoints: { getForFeature },
-  } as unknown as SearchInferenceEndpointsPluginStart);
+  }) as unknown as SearchInferenceEndpointsPluginStart;
 
 describe('normalizeConnectorFeatureIds', () => {
   it('keeps a single id and drops blanks from a list', () => {

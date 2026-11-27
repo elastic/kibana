@@ -15,7 +15,10 @@ import { getNotifications, getData } from './services';
 import type { VegaView } from './vega_view/vega_view';
 import { createVegaStateRestorer } from './lib/vega_state_restorer';
 
-export type VegaVisType = new (el: HTMLDivElement, fireEvent: VegaEventHandler) => {
+export type VegaVisType = new (
+  el: HTMLDivElement,
+  fireEvent: VegaEventHandler
+) => {
   render(visData: VegaParser): Promise<void>;
   resize(dimensions?: { height: number; width: number }): Promise<void>;
   destroy(): void;
@@ -32,7 +35,10 @@ export const createVegaVisualization = (
       isActive: () => Boolean(this.vegaView?._parser?.restoreSignalValuesOnRefresh),
     });
 
-    constructor(private el: HTMLDivElement, private fireEvent: VegaEventHandler) {}
+    constructor(
+      private el: HTMLDivElement,
+      private fireEvent: VegaEventHandler
+    ) {}
 
     async render(visData: VegaParser) {
       const { toasts } = getNotifications();

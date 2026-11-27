@@ -30,7 +30,7 @@ export class ServerStepRegistry {
   public register<
     Input extends z.ZodType = z.ZodType,
     Output extends z.ZodType = z.ZodType,
-    Config extends z.ZodObject = z.ZodObject
+    Config extends z.ZodObject = z.ZodObject,
   >(definitionOrLoader: ServerStepDefinitionOrLoader<Input, Output, Config>): void {
     if (typeof definitionOrLoader === 'function') {
       const promise = definitionOrLoader()
@@ -59,7 +59,7 @@ export class ServerStepRegistry {
   private addToRegistry<
     Input extends z.ZodType = z.ZodType,
     Output extends z.ZodType = z.ZodType,
-    Config extends z.ZodObject = z.ZodObject
+    Config extends z.ZodObject = z.ZodObject,
   >(definition: ServerStepDefinition<Input, Output, Config>): void {
     if (this.registry.has(definition.id)) {
       throw new Error(

@@ -282,11 +282,10 @@ const ExpandedEntityTreeConnector: React.FC<ChildTreeConnectorProps> = ({ isLast
   </div>
 );
 
-interface ExpandedEntityGroupProps
-  extends Omit<
-    ExpandedEntityRowProps,
-    'child' | 'isLast' | 'isEnriching' | 'isMainEntity' | 'columnsById'
-  > {
+interface ExpandedEntityGroupProps extends Omit<
+  ExpandedEntityRowProps,
+  'child' | 'isLast' | 'isEnriching' | 'isMainEntity' | 'columnsById'
+> {
   columns: EuiDataGridColumn[];
   entityId: string;
   timeRange: TimeRange;

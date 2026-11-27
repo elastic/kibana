@@ -585,10 +585,10 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
     // Stable via useCallback (no deps) — the returned function reads item properties at call time.
     const toToolbarItemsFn = useCallback(
       (
-          itemsFn: (
-            node: NodeProps
-          ) => Array<ItemExpandPopoverListItemProps | SeparatorExpandPopoverListItemProps>
-        ) =>
+        itemsFn: (
+          node: NodeProps
+        ) => Array<ItemExpandPopoverListItemProps | SeparatorExpandPopoverListItemProps>
+      ) =>
         (node: NodeProps) =>
           (itemsFn(node) ?? []).flatMap((item) =>
             item.type === 'item'

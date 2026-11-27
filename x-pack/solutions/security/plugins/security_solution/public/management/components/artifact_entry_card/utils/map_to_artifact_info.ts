@@ -26,7 +26,7 @@ export const mapToArtifactInfo = (_item: MaybeImmutable<AnyArtifact>): ArtifactI
     comments: isTrustedApp(item) ? [] : item.comments,
     tags: isTrustedApp(item) ? [] : item.tags,
     entries: entries as unknown as ArtifactInfo['entries'],
-    os: isTrustedApp(item) ? [item.os] : item.os_types ?? [],
+    os: isTrustedApp(item) ? [item.os] : (item.os_types ?? []),
     effectScope: isTrustedApp(item) ? item.effectScope : getEffectScopeFromExceptionItem(item),
   };
 };

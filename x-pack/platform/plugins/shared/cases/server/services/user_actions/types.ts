@@ -424,8 +424,7 @@ export interface BulkCreateBulkUpdateCaseUserActions extends IndexRefresh {
 }
 
 export interface BulkCreateAttachmentUserAction
-  extends Omit<CommonUserActionArgs, 'owner'>,
-    IndexRefresh {
+  extends Omit<CommonUserActionArgs, 'owner'>, IndexRefresh {
   attachments: Array<{
     id: string;
     owner: string;
@@ -435,8 +434,7 @@ export interface BulkCreateAttachmentUserAction
 }
 
 export interface BulkCreateAttachmentBulkDeletionUserAction
-  extends CommonUserActionArgs,
-    IndexRefresh {
+  extends CommonUserActionArgs, IndexRefresh {
   deletions: Array<{
     attachmentType: string;
     count: number;

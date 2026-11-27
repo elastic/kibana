@@ -108,8 +108,8 @@ export const AwsCredentialsAuth: AuthTypeSpec<AuthSchemaType> = {
           typeof config.data === 'string'
             ? config.data
             : config.data != null
-            ? JSON.stringify(config.data)
-            : undefined;
+              ? JSON.stringify(config.data)
+              : undefined;
 
         // Collect existing headers for signing
         const existingHeaders: Record<string, string> = {};

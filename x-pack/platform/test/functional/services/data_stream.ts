@@ -120,11 +120,11 @@ export function DataStreamProvider({ getService, getPageObject }: FtrProviderCon
         settings: !mode
           ? { mode: undefined }
           : mode === 'logsdb'
-          ? { mode: 'logsdb' }
-          : {
-              mode: 'time_series',
-              routing_path: 'request',
-            },
+            ? { mode: 'logsdb' }
+            : {
+                mode: 'time_series',
+                routing_path: 'request',
+              },
         mappings: {
           properties: mapping,
         },

@@ -231,7 +231,7 @@ export const createRememberTool = ({
 
       const document: StoredMemoryDocument = {
         '@timestamp':
-          aiIndex.dest.type === 'data_stream' ? now : existingDocument?.['@timestamp'] ?? now,
+          aiIndex.dest.type === 'data_stream' ? now : (existingDocument?.['@timestamp'] ?? now),
         id: logicalId,
         type: params.type,
         title: params.title,
@@ -240,8 +240,8 @@ export const createRememberTool = ({
         ...(params.tags !== undefined
           ? { tags: params.tags }
           : existingDocument?.tags !== undefined
-          ? { tags: existingDocument.tags }
-          : {}),
+            ? { tags: existingDocument.tags }
+            : {}),
         ...(params.expires_at === null
           ? {}
           : {

@@ -10,7 +10,7 @@ import type { ESSearchResponse } from '@kbn/es-types';
 
 export async function typedSearch<
   DocumentSource extends unknown,
-  TParams extends estypes.SearchRequest
+  TParams extends estypes.SearchRequest,
 >(
   esClient: ElasticsearchClient,
   params: TParams

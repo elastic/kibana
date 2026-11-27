@@ -118,14 +118,14 @@ const setup = ({
         ({
           getProposalsService: () => service,
           getProposalPrivileges: () => privileges,
-        } as never),
+        }) as never,
       getWorkflowsManagement: () => management as never,
       getConversations: () =>
         ({
           getScopedClient: async () => ({
             get: async () => ({ metadata: { status: investigationStatus } }),
           }),
-        } as never),
+        }) as never,
       isGroupingEnabled: async () => groupingEnabled,
       logger: logger as never,
     });
@@ -137,7 +137,7 @@ const setup = ({
         getContext: () => ({ workflow: { spaceId: SPACE } }),
         getFakeRequest: () => ({}),
       },
-    } as unknown as StepHandlerContext<unknown, unknown>);
+    }) as unknown as StepHandlerContext<unknown, unknown>;
   return {
     logger,
     service,

@@ -302,7 +302,7 @@ describe('getInputsWithIds', () => {
             ],
           },
         ],
-      } as any);
+      }) as any;
 
     it('throws when a client-supplied input id contains a traversal sequence', () => {
       expect(() =>

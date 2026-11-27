@@ -38,9 +38,8 @@ export function createBurnRatePanelAction(
       if (!apiIsPresentationContainer(embeddable)) throw new IncompatibleActionError();
 
       try {
-        const { openConfiguration } = await import(
-          '../embeddable/slo/burn_rate/open_configuration'
-        );
+        const { openConfiguration } =
+          await import('../embeddable/slo/burn_rate/open_configuration');
         const initialState = await openConfiguration(coreStart, pluginsStart, sloClient);
         embeddable.addNewPanel(
           {

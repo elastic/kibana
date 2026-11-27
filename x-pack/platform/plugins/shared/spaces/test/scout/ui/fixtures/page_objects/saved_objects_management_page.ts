@@ -20,7 +20,10 @@ const spacePrefix = (spaceId?: string) => (spaceId && spaceId !== 'default' ? `/
 export class SavedObjectsManagementPage {
   public readonly table: Locator;
 
-  constructor(private readonly page: ScoutPage, private readonly kbnUrl: KibanaUrl) {
+  constructor(
+    private readonly page: ScoutPage,
+    private readonly kbnUrl: KibanaUrl
+  ) {
     this.table = this.page.testSubj.locator('savedObjectsTable');
   }
 

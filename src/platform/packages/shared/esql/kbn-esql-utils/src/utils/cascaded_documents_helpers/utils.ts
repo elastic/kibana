@@ -140,10 +140,13 @@ export function getStatsCommandAtIndexSummary(esqlQuery: EsqlQuery, commandIndex
   const summarizedStatsCommand = getSummaryPerCommand(esqlQuery.src, declarationCommand);
 
   // Transform to map format for easy access
-  const groupingsMap = Array.from(summarizedStatsCommand.grouping ?? []).reduce((acc, grouping) => {
-    acc[grouping.field] = grouping;
-    return acc;
-  }, {} as Record<string, FieldSummary>);
+  const groupingsMap = Array.from(summarizedStatsCommand.grouping ?? []).reduce(
+    (acc, grouping) => {
+      acc[grouping.field] = grouping;
+      return acc;
+    },
+    {} as Record<string, FieldSummary>
+  );
 
   const aggregatesMap = Array.from(summarizedStatsCommand.aggregates ?? []).reduce(
     (acc, aggregate) => {
@@ -185,7 +188,7 @@ export function getFieldParamDefinition(
 
 export function getStatsGroupFieldType<
   T extends FieldSummary | undefined,
-  R = T extends FieldSummary ? string : undefined
+  R = T extends FieldSummary ? string : undefined,
 >(groupByFields: T): R {
   if (!groupByFields) {
     return undefined as R;

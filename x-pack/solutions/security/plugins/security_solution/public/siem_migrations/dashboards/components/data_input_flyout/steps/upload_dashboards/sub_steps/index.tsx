@@ -30,7 +30,7 @@ type SubStep =
   | 2 /* copy query */
   | 3 /* file */
   | 4 /* check resources */
-  | typeof END /* END */;
+  | typeof END; /* END */
 
 export const DashboardsUploadSubSteps = React.memo(function DashboardsUploadSubSteps({
   migrationStats,

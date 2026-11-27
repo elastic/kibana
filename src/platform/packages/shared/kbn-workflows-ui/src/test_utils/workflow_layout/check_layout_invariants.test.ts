@@ -28,7 +28,7 @@ const workflow = (steps: unknown, triggers = [{ type: 'manual', enabled: true }]
     enabled: true,
     triggers,
     steps,
-  } as unknown as WorkflowYaml);
+  }) as unknown as WorkflowYaml;
 
 const http = (name: string) => ({ name, type: 'http' });
 const ifStep = (name: string, then: unknown[], otherwise: unknown[] = []) => ({

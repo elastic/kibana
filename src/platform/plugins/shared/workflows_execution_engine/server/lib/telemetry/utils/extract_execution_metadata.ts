@@ -357,8 +357,8 @@ function extractEmitToStartMs(workflowExecution: EsWorkflowExecution): number | 
     typeof dispatchTimestamp === 'string'
       ? Date.parse(dispatchTimestamp)
       : typeof dispatchTimestamp === 'number'
-      ? dispatchTimestamp
-      : Number.NaN;
+        ? dispatchTimestamp
+        : Number.NaN;
 
   if (Number.isNaN(dispatchMs)) {
     return undefined;

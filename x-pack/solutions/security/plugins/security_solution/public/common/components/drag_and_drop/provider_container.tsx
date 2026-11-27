@@ -24,7 +24,8 @@ const ProviderContainerComponent = styled.div<ProviderContainerProps>`
         z-index: ${({ theme }) => theme.eui.euiZLevel0} !important;
 
         &::before {
-          background-image: linear-gradient(
+          background-image:
+            linear-gradient(
               135deg,
               ${({ theme }) => theme.eui.euiColorMediumShade} 25%,
               transparent 25%
@@ -44,7 +45,11 @@ const ProviderContainerComponent = styled.div<ProviderContainerProps>`
               transparent 75%,
               ${({ theme }) => theme.eui.euiColorMediumShade} 75%
             );
-          background-position: 0 0, 1px 0, 1px -1px, 0px 1px;
+          background-position:
+            0 0,
+            1px 0,
+            1px -1px,
+            0px 1px;
           background-size: 2px 2px;
           bottom: 2px;
           content: '';
@@ -68,7 +73,8 @@ const ProviderContainerComponent = styled.div<ProviderContainerProps>`
       .${STATEFUL_EVENT_CSS_CLASS_NAME}:hover &,
       tr:hover & {
         &::before {
-          background-image: linear-gradient(
+          background-image:
+            linear-gradient(
               135deg,
               ${({ theme }) => theme.eui.euiColorDarkShade} 25%,
               transparent 25%
@@ -106,7 +112,8 @@ const ProviderContainerComponent = styled.div<ProviderContainerProps>`
         }
 
         &::before {
-          background-image: linear-gradient(
+          background-image:
+            linear-gradient(
               135deg,
               ${({ theme }) => theme.eui.euiColorEmptyShade} 25%,
               transparent 25%

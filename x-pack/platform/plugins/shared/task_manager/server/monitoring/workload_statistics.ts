@@ -207,7 +207,7 @@ export function createWorkloadAggregator({
         aggregations,
         hits: { total },
       } = result;
-      const count = typeof total === 'number' ? total : total?.value ?? 0;
+      const count = typeof total === 'number' ? total : (total?.value ?? 0);
 
       if (!hasAggregations(aggregations)) {
         throw new Error(`Invalid workload: ${JSON.stringify(result)}`);

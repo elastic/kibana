@@ -594,7 +594,7 @@ describe('writeAndAttach', () => {
   const owner = () =>
     ({
       get: jest.fn().mockResolvedValue({ permissions: { update_access_control: true } }),
-    } as unknown as ConversationPublicClient);
+    }) as unknown as ConversationPublicClient;
 
   it('writes the index after confirming the conversation is readable, then creates the by-reference attachment', async () => {
     const { storage, service } = setup();

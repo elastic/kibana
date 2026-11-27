@@ -98,10 +98,10 @@ export function DuplicateServiceModal({
     const activeInputs = dsVars.enabledInputs.length
       ? dsVars.enabledInputs
       : singleDs
-      ? dsInfo?.inputs ?? []
-      : dsInfo?.defaultEnabledInputs?.length
-      ? dsInfo.defaultEnabledInputs
-      : dsInfo?.inputs?.slice(0, 1) ?? [];
+        ? (dsInfo?.inputs ?? [])
+        : dsInfo?.defaultEnabledInputs?.length
+          ? dsInfo.defaultEnabledInputs
+          : (dsInfo?.inputs?.slice(0, 1) ?? []);
     const dsView = makeDsView(service, dsId);
     return activeInputs.some((inp) => {
       // The copied (or changed) var_group selection decides which fields are required.
@@ -113,7 +113,7 @@ export function DuplicateServiceModal({
       return getRequiredTextFields(dsView, inp, selections).some((f) => {
         const meta = resolveFieldMeta(dsView, inp, f);
         const raw = dsVars.varsByInput[inp]?.[f];
-        const effective = meta ? toTyped(raw, meta) : raw ?? '';
+        const effective = meta ? toTyped(raw, meta) : (raw ?? '');
         if (Array.isArray(effective)) return effective.length === 0;
         return typeof effective === 'string' && !effective.trim();
       });
@@ -127,10 +127,10 @@ export function DuplicateServiceModal({
         defaultMessage: 'A service name is required.',
       })
     : nameTaken
-    ? i18n.translate('xpack.ingestHub.serviceSettingsStep.duplicateModal.name.errorTaken', {
-        defaultMessage: 'This name is already in use. Choose a different name.',
-      })
-    : undefined;
+      ? i18n.translate('xpack.ingestHub.serviceSettingsStep.duplicateModal.name.errorTaken', {
+          defaultMessage: 'This name is already in use. Choose a different name.',
+        })
+      : undefined;
 
   const handleAdd = () => {
     if (!canAdd) {
@@ -211,8 +211,8 @@ export function DuplicateServiceModal({
             setDraftByDs((prev) => {
               const dsInfo = service.varDefsByDataStream?.[dsId];
               const defaultInputs = singleDs
-                ? dsInfo?.inputs ?? []
-                : dsInfo?.defaultEnabledInputs ?? [];
+                ? (dsInfo?.inputs ?? [])
+                : (dsInfo?.defaultEnabledInputs ?? []);
               const existing = prev[dsId] ?? { enabledInputs: defaultInputs, varsByInput: {} };
               return {
                 ...prev,
@@ -230,8 +230,8 @@ export function DuplicateServiceModal({
             setDraftByDs((prev) => {
               const dsInfo = service.varDefsByDataStream?.[dsId];
               const defaultInputs = singleDs
-                ? dsInfo?.inputs ?? []
-                : dsInfo?.defaultEnabledInputs ?? [];
+                ? (dsInfo?.inputs ?? [])
+                : (dsInfo?.defaultEnabledInputs ?? []);
               const existing = prev[dsId] ?? { enabledInputs: defaultInputs, varsByInput: {} };
               return {
                 ...prev,
@@ -252,8 +252,8 @@ export function DuplicateServiceModal({
             setDraftByDs((prev) => {
               const dsInfo = service.varDefsByDataStream?.[dsId];
               const defaultInputs = singleDs
-                ? dsInfo?.inputs ?? []
-                : dsInfo?.defaultEnabledInputs ?? [];
+                ? (dsInfo?.inputs ?? [])
+                : (dsInfo?.defaultEnabledInputs ?? []);
               const existing = prev[dsId] ?? { enabledInputs: defaultInputs, varsByInput: {} };
               return {
                 ...prev,

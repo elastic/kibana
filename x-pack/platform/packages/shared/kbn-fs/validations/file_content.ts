@@ -11,11 +11,12 @@ import { validateFileSize } from './file_size';
 
 import { validateMimeType } from './file_mimetype';
 
-type ValidatedContent<T> = T extends Iterable<unknown>
-  ? Buffer
-  : T extends Stream | AsyncIterable<unknown>
-  ? T // Preserve original type for Stream/AsyncIterable
-  : T | Buffer;
+type ValidatedContent<T> =
+  T extends Iterable<unknown>
+    ? Buffer
+    : T extends Stream | AsyncIterable<unknown>
+      ? T // Preserve original type for Stream/AsyncIterable
+      : T | Buffer;
 
 export function validateAndSanitizeFileData<T extends WriteFileContent>(
   data: T,

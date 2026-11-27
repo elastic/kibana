@@ -31,7 +31,10 @@ const KI_EVENT_TYPE_BY_ACTION: Record<KiWriteAction, string> = {
  * propagates to the caller.
  */
 export class ContextEngineAnalyticsService {
-  constructor(private readonly analytics: AnalyticsServiceSetup, private readonly logger: Logger) {}
+  constructor(
+    private readonly analytics: AnalyticsServiceSetup,
+    private readonly logger: Logger
+  ) {}
 
   registerContextEngineEventTypes(): void {
     contextEngineServerEbtEvents.forEach((eventConfig) => {

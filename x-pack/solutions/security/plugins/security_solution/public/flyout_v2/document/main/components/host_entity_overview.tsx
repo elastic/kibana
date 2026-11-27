@@ -231,12 +231,12 @@ export const HostEntityOverview: React.FC<HostEntityOverviewProps> = ({
       {
         title: FAMILY,
         description: hostOSFamilyValue
-          ? renderCellActions({
+          ? (renderCellActions({
               field: 'host.os.family',
               value: hostOSFamilyValue,
               scopeId,
               children: <>{hostOSFamilyValue}</>,
-            }) ?? getEmptyTagValue()
+            }) ?? getEmptyTagValue())
           : getEmptyTagValue(),
       },
     ],
@@ -271,7 +271,7 @@ export const HostEntityOverview: React.FC<HostEntityOverviewProps> = ({
 
   const [hostRiskLevel] = useMemo(() => {
     const level = hostRiskData?.host?.risk?.calculated_level;
-    const severity = level != null ? normalizeRiskLevel(level) ?? (level as RiskSeverity) : null;
+    const severity = level != null ? (normalizeRiskLevel(level) ?? (level as RiskSeverity)) : null;
     return [
       {
         title: (

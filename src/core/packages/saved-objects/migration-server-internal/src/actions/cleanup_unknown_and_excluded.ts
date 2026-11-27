@@ -91,9 +91,8 @@ export const cleanupUnknownAndExcluded = ({
     }),
 
     // calculate exclude filters (we use them to build the query for documents that must be deleted)
-    TaskEither.chainW(
-      (): TaskEither.TaskEither<RetryableEsClientError, CalculatedExcludeFilter> =>
-        calculateExcludeFilters({ client, excludeFromUpgradeFilterHooks, hookTimeoutMs })
+    TaskEither.chainW((): TaskEither.TaskEither<RetryableEsClientError, CalculatedExcludeFilter> =>
+      calculateExcludeFilters({ client, excludeFromUpgradeFilterHooks, hookTimeoutMs })
     ),
 
     // actively delete unwanted documents

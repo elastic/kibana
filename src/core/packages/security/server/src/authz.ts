@@ -33,7 +33,7 @@ export class AuthzDisabled {
 }
 
 export const unwindNestedSecurityPrivileges = <
-  T extends Array<string | { allOf?: string[]; anyOf?: string[] }>
+  T extends Array<string | { allOf?: string[]; anyOf?: string[] }>,
 >(
   privileges: T
 ): string[] =>

@@ -94,9 +94,12 @@ export interface SandboxPluginStart {
   getSessionForSpace(spaceId: string, sessionId: string): SandboxSession;
 }
 
-export class SandboxPlugin
-  implements Plugin<SandboxPluginSetup, SandboxPluginStart, {}, SandboxPluginStartDeps>
-{
+export class SandboxPlugin implements Plugin<
+  SandboxPluginSetup,
+  SandboxPluginStart,
+  {},
+  SandboxPluginStartDeps
+> {
   private readonly logger: Logger;
   private apiClient?: SandboxApiClient;
   private readonly sessions = new Map<string, SandboxSession>();

@@ -64,7 +64,7 @@ const createMockHit = (overrides: Record<string, unknown> = {}): DataTableRecord
       ...overrides,
     },
     isAnchor: false,
-  } as unknown as DataTableRecord);
+  }) as unknown as DataTableRecord;
 
 describe('AISummarySection', () => {
   const mockUseEventDetails = jest.mocked(useEventDetails);

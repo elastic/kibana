@@ -22,15 +22,12 @@ import type {
 } from './types';
 import { ENTITY_INVENTORY_PAGES, ENTITY_INVENTORY_TITLE } from './pages';
 
-export class EntityInventoryAppPlugin
-  implements
-    Plugin<
-      EntityInventoryAppPublicSetup,
-      EntityInventoryAppPublicStart,
-      EntityInventoryAppSetupDependencies,
-      EntityInventoryAppStartDependencies
-    >
-{
+export class EntityInventoryAppPlugin implements Plugin<
+  EntityInventoryAppPublicSetup,
+  EntityInventoryAppPublicStart,
+  EntityInventoryAppSetupDependencies,
+  EntityInventoryAppStartDependencies
+> {
   setup(
     core: CoreSetup<EntityInventoryAppStartDependencies, EntityInventoryAppPublicStart>,
     _plugins: EntityInventoryAppSetupDependencies

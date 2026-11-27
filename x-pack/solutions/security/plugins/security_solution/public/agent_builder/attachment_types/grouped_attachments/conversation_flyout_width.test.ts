@@ -18,7 +18,7 @@ const rect = (width: number): DOMRect =>
     x: 0,
     y: 0,
     toJSON: () => ({}),
-  } as DOMRect);
+  }) as DOMRect;
 
 const mountFlyout = (testSubj: string, width: number): HTMLElement => {
   const flyout = document.createElement('div');

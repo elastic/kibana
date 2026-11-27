@@ -75,7 +75,7 @@ const createMockLabelNode = (): NodeProps =>
       color: 'primary',
       shape: 'label',
     },
-  } as unknown as NodeProps);
+  }) as unknown as NodeProps;
 
 const createMockSingleEventNode = (): NodeProps => {
   const base = createMockLabelNode();

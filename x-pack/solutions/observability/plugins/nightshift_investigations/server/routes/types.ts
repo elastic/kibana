@@ -40,8 +40,7 @@ export type GetDecisionTreeStore = (request: KibanaRequest) => DecisionTreeStore
 /** Request-scoped store: reads and writes run as the caller's Elasticsearch user. */
 export type GetMemoryPageStore = (request: KibanaRequest) => MemoryPageStore;
 
-export interface NightshiftInvestigationsRouteHandlerResources
-  extends DefaultRouteHandlerResources {
+export interface NightshiftInvestigationsRouteHandlerResources extends DefaultRouteHandlerResources {
   getInvestigationsClient: GetInvestigationsClient;
   getTriggerEmitter: GetTriggerEmitter;
   getAlertsClient: GetAlertsClient;

@@ -191,7 +191,7 @@ describe('EdgeContents', () => {
           resources: [],
           metrics,
         },
-      } as unknown as ServiceMapEdge);
+      }) as unknown as ServiceMapEdge;
 
     const renderEdge = (edge: ServiceMapEdge) =>
       render(

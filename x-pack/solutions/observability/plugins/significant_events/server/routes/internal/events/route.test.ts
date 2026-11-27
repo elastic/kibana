@@ -522,7 +522,7 @@ describe('POST /internal/significant_events/events/{id}/update', () => {
         getEventSearchClient: () =>
           asRuleEventsClient(
             { findLatestByEventId },
-            { getAlertEventsClient: async () => ({ createAlertEvent } as never), emitTrigger }
+            { getAlertEventsClient: async () => ({ createAlertEvent }) as never, emitTrigger }
           ),
       }),
       server: {},

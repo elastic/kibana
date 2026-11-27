@@ -93,11 +93,11 @@ export const registerCompareExperimentsRoute = ({
           const totalHitsBaseline =
             typeof responseBaseline.hits.total === 'number'
               ? responseBaseline.hits.total
-              : responseBaseline.hits.total?.value ?? 0;
+              : (responseBaseline.hits.total?.value ?? 0);
           const totalHitsTarget =
             typeof responseTarget.hits.total === 'number'
               ? responseTarget.hits.total
-              : responseTarget.hits.total?.value ?? 0;
+              : (responseTarget.hits.total?.value ?? 0);
           const truncatedBaseline = totalHitsBaseline > MAX_SCORES_PER_EXPERIMENT;
           const truncatedTarget = totalHitsTarget > MAX_SCORES_PER_EXPERIMENT;
 

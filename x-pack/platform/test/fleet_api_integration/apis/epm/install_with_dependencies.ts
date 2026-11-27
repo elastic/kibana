@@ -104,7 +104,9 @@ export default function (providerContext: FtrProviderContext) {
       expect(parentInstallResult.status).toBe(400);
       const body = parentInstallResult.body as { message?: string; error?: string };
       const message =
-        typeof body === 'object' && body !== null ? body.message ?? body.error ?? '' : String(body);
+        typeof body === 'object' && body !== null
+          ? (body.message ?? body.error ?? '')
+          : String(body);
       expect(message).toMatch(
         /not compatible with installed version|downgrade|PackageDependencyError/
       );

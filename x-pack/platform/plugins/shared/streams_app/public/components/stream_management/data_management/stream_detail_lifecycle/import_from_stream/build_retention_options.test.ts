@@ -25,7 +25,7 @@ const makeStream = (
     effective_lifecycle: effectiveLifecycle,
     effective_failure_store: effectiveFailureStore,
     privileges: { read_failure_store: readFailureStore },
-  } as unknown as ListStreamDetail);
+  }) as unknown as ListStreamDetail;
 
 describe('buildImportRetentionOptions', () => {
   it('excludes the current stream', () => {

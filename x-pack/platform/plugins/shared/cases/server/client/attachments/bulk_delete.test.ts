@@ -780,7 +780,7 @@ describe('bulk_delete', () => {
           fileKind: constructFileKindIdByOwner('securitySolution'),
           meta: { caseIds, owner: ['securitySolution'] },
         },
-      } as unknown as File);
+      }) as unknown as File;
 
     const deleteFileAttachments = () =>
       bulkDeleteFileAttachments({ caseId, fileIds: [fileId] }, clientArgs, casesClient);

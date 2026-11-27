@@ -161,7 +161,7 @@ export const useSelectedStepExecution = ({
 
   const { data: fullStepExecution, isLoading: isLoadingStepData } = useStepExecution(
     resolvedExecutionId,
-    isPseudoStep ? undefined : selectedStepExecutionId ?? undefined,
+    isPseudoStep ? undefined : (selectedStepExecutionId ?? undefined),
     selectedLightStep?.status
   );
 

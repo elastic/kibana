@@ -115,7 +115,7 @@ const buildCaseData = (comments: unknown[]) =>
     id: 'case-1',
     owner: 'securitySolution',
     comments,
-  } as CommonAttachmentListViewProps['caseData']);
+  }) as CommonAttachmentListViewProps['caseData'];
 
 const liveAttack = {
   id: 'attack-id-1',

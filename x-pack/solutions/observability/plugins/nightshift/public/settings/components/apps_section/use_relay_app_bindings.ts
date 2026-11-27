@@ -136,7 +136,7 @@ export function useAllRelayAppBindings(): UseAllRelayAppBindings {
 }
 
 export const formatChannelLabel = (binding: SlackChannelBinding): string =>
-  binding.displayName != null ? `#${binding.displayName}` : binding.channel ?? '';
+  binding.displayName != null ? `#${binding.displayName}` : (binding.channel ?? '');
 
 /** Label for a stored channel value; a value that is not a connected channel id is kept as is. */
 export const formatChannelValue = (value: string, bindings: SlackChannelBinding[]): string => {

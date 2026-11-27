@@ -44,7 +44,7 @@ const createMockHit = (
     raw,
     flattened,
     isAnchor: false,
-  } as DataTableRecord);
+  }) as DataTableRecord;
 
 const alertHit = createMockHit({
   'kibana.alert.workflow_status': 'open',

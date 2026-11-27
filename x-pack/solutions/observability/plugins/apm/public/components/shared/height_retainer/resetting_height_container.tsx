@@ -19,7 +19,7 @@ export function ResettingHeightRetainer(
   const minHeightRef = useRef(0);
 
   if (resetRef.current !== reset) {
-    minHeightRef.current = reset ? 0 : containerRef.current?.clientHeight ?? 0;
+    minHeightRef.current = reset ? 0 : (containerRef.current?.clientHeight ?? 0);
 
     resetRef.current = reset;
   }

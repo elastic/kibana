@@ -27,12 +27,10 @@ const tokenize = (text: string): TokenTuple[][] => {
   return monaco.editor
     .tokenize(text, YARA_LANG_ID)
     .map((lineTokens, lineIndex) =>
-      lineTokens.map(
-        ({ offset, type }, tokenIndex): TokenTuple => [
-          lines[lineIndex].slice(offset, lineTokens[tokenIndex + 1]?.offset),
-          type.replace(/\.yara$/, ''),
-        ]
-      )
+      lineTokens.map(({ offset, type }, tokenIndex): TokenTuple => [
+        lines[lineIndex].slice(offset, lineTokens[tokenIndex + 1]?.offset),
+        type.replace(/\.yara$/, ''),
+      ])
     );
 };
 
@@ -320,9 +318,10 @@ describe('YARA language', () => {
       ['[10-]', ['10', '-']],
       ['[-]', ['-']],
     ])('should tokenize the %s jump', (jump, jumpContent) => {
-      const contentTokens = jumpContent.map(
-        (text): TokenTuple => [text, text === '-' ? 'operator' : 'number']
-      );
+      const contentTokens = jumpContent.map((text): TokenTuple => [
+        text,
+        text === '-' ? 'operator' : 'number',
+      ]);
 
       expect(tokenize(`={${jump}}`)).toEqual([
         [

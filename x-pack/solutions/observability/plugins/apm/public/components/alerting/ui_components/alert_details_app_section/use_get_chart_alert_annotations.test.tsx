@@ -27,7 +27,7 @@ const createMockAlert = (overrides: Partial<Record<string, unknown>> = {}): TopA
       [ALERT_EVALUATION_THRESHOLD]: 1500,
       ...overrides,
     },
-  } as unknown as TopAlert);
+  }) as unknown as TopAlert;
 
 const DATE_FORMAT = 'HH:mm:ss';
 

@@ -578,7 +578,7 @@ describe('classifyDetectionsStepDefinition', () => {
       rawInput: input,
       contextManager: { getScopedEsClient: jest.fn(() => esClient) },
       abortSignal: new AbortController().signal,
-    } as never);
+    }) as never;
 
   const runHandler = async (
     definition: ReturnType<typeof createDefinition>['definition'],

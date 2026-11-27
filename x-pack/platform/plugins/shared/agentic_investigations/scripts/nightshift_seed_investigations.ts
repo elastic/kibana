@@ -1086,7 +1086,7 @@ const executionStatus = async (client: SeedClient, executionId: string): Promise
     undefined,
     [404]
   );
-  return status === 404 ? 'not_found' : body.status ?? 'unknown';
+  return status === 404 ? 'not_found' : (body.status ?? 'unknown');
 };
 
 /**
@@ -1104,9 +1104,12 @@ const cleanSeeds = async (client: SeedClient, log: ToolingLog): Promise<void> =>
       if (TERMINAL_EXECUTION_STATUSES.includes(await executionStatus(client, executionId))) {
         continue;
       }
-      await client.publicApi('POST', `/api/workflows/executions/${executionId}/cancel`, undefined, [
-        404,
-      ]);
+      await client.publicApi(
+        'POST',
+        `/api/workflows/executions/${executionId}/cancel`,
+        undefined,
+        [404]
+      );
       await waitFor(`gate workflow ${executionId} to stop`, async () => {
         const status = await executionStatus(client, executionId);
         return TERMINAL_EXECUTION_STATUSES.includes(status) || status === 'not_found'

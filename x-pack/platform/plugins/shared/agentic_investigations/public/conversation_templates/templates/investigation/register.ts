@@ -113,16 +113,14 @@ export const investigationTemplate: TemplateDefinition = {
       });
 
     const LazyProposedActionsSlot = makeLazyWithSharedClient(async () => {
-      const { ProposedActionsSlot } = await import(
-        '../../shared/proposed_actions/proposed_actions_slot'
-      );
+      const { ProposedActionsSlot } =
+        await import('../../shared/proposed_actions/proposed_actions_slot');
       return ProposedActionsSlot;
     });
 
     const LazyProposedActionsCount = makeLazyWithSharedClient(async () => {
-      const { ProposedActionsCount } = await import(
-        '../../shared/proposed_actions/proposed_actions_count'
-      );
+      const { ProposedActionsCount } =
+        await import('../../shared/proposed_actions/proposed_actions_count');
       return ProposedActionsCount;
     });
 
@@ -146,9 +144,8 @@ export const investigationTemplate: TemplateDefinition = {
     );
 
     const LazySeverityPicker = makeLazyWithSharedClient<SeveritySlotRenderProps>(async () => {
-      const { ConnectedSeverityPicker } = await import(
-        '../../shared/connected_severity/connected_severity_picker'
-      );
+      const { ConnectedSeverityPicker } =
+        await import('../../shared/connected_severity/connected_severity_picker');
       return ConnectedSeverityPicker;
     });
 

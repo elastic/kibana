@@ -33,9 +33,9 @@ export const getCasesMapMock = () =>
 export const openAddToExistingCaseModalMock = jest.fn();
 
 const uiMock: jest.MockedObject<CasesService['ui']> = {
-  getCasesContext: jest
-    .fn()
-    .mockImplementation(() => ({ children }: PropsWithChildren) => <>{children}</>),
+  getCasesContext: jest.fn().mockImplementation(() => ({ children }: PropsWithChildren) => (
+    <>{children}</>
+  )),
 };
 
 const hooksMock: jest.MockedObject<CasesService['hooks']> = {

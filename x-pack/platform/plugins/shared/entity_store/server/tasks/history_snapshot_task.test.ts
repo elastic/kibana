@@ -58,11 +58,11 @@ describe('runHistorySnapshotTask — schedule reconciliation', () => {
 
     jest
       .mocked(EntityStoreGlobalStateClient)
-      .mockImplementation(() => ({ find: mockFind } as unknown as EntityStoreGlobalStateClient));
+      .mockImplementation(() => ({ find: mockFind }) as unknown as EntityStoreGlobalStateClient);
     jest
       .mocked(HistorySnapshotClient)
       .mockImplementation(
-        () => ({ runHistorySnapshot: mockRunHistorySnapshot } as unknown as HistorySnapshotClient)
+        () => ({ runHistorySnapshot: mockRunHistorySnapshot }) as unknown as HistorySnapshotClient
       );
 
     core = {

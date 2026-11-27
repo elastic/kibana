@@ -39,7 +39,7 @@ export const resolveCanvasSearch = (
  */
 export const applyCanvasSearch = <
   NodeType extends ClassicCanvasNode,
-  EdgeType extends ClassicCanvasEdge
+  EdgeType extends ClassicCanvasEdge,
 >(
   nodes: NodeType[],
   edges: EdgeType[],

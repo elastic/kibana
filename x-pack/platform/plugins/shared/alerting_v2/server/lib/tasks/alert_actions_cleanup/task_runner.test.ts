@@ -19,7 +19,7 @@ const createConfig = (dataRetention: string) =>
     get: jest
       .fn()
       .mockReturnValue({ retention: { alertActions: { dispatcher: { dataRetention } } } }),
-  } as unknown as PluginInitializerContext<PluginConfig>['config']);
+  }) as unknown as PluginInitializerContext<PluginConfig>['config'];
 
 describe('AlertActionsCleanupTaskRunner', () => {
   const esClient = elasticsearchServiceMock.createElasticsearchClient();

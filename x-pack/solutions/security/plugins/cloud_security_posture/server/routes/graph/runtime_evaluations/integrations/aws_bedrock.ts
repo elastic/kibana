@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-/* eslint-disable prettier/prettier */
 /* eslint-disable @typescript-eslint/naming-convention */
 
-import type { IntegrationEvaluations } from "../types";
+import type { IntegrationEvaluations } from '../types';
 
 export const aws_bedrockEvaluations = {
   integration: 'aws_bedrock',

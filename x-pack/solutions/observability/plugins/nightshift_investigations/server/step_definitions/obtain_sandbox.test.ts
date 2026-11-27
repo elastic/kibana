@@ -43,7 +43,7 @@ describe('obtainSandboxStepDefinition', () => {
       abortSignal: new AbortController().signal,
       stepId: 'obtain_sandbox',
       stepType: 'nightshift.obtainSandbox',
-    } as never);
+    }) as never;
 
   it('allocates the sandbox and returns the space-scoped sandbox_id', async () => {
     const sandboxStart = makeSandboxStart();
@@ -143,7 +143,7 @@ describe('obtainSandboxStepDefinition', () => {
           getSessionForSpace: jest.fn(() => {
             throw new Error('sandbox is not configured');
           }),
-        } as unknown as SandboxPluginStart),
+        }) as unknown as SandboxPluginStart,
     ],
     [
       'workspace allocation',
@@ -178,7 +178,7 @@ describe('obtainSandboxStepDefinition', () => {
           getSessionForSpace: jest.fn(() => {
             throw new Error('session failed');
           }),
-        } as unknown as SandboxPluginStart),
+        }) as unknown as SandboxPluginStart,
     ],
     [
       'workspace allocation',

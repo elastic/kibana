@@ -35,7 +35,7 @@ const createActionsConfigUtilsMock = (
       ssl: { pfx: { enabled: overrides.pfxEnabled ?? true } },
     })),
     isEarsEnabled: jest.fn(() => overrides.earsEnabled ?? false),
-  } as unknown as ActionsConfigurationUtilities);
+  }) as unknown as ActionsConfigurationUtilities;
 
 describe('getConnectorSpecRoute', () => {
   it('registers the route with correct path', async () => {

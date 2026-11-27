@@ -38,7 +38,7 @@ const createStore = (trees: DecisionTreeDetail[]): jest.Mocked<DecisionTreeStore
     listVersions: jest.fn(),
     getVersion: jest.fn(),
     archive: jest.fn(),
-  } as jest.Mocked<DecisionTreeStore>);
+  }) as jest.Mocked<DecisionTreeStore>;
 
 const createSession = () => ({
   mkdirs: jest.fn().mockResolvedValue([true]),

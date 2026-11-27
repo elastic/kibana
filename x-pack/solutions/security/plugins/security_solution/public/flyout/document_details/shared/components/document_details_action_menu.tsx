@@ -78,8 +78,8 @@ export const getDocumentActionGroups = ({
   const exceptionActionItems = showAlertActions
     ? exceptionItems
     : showEventFilter
-    ? eventFilterItems
-    : [];
+      ? eventFilterItems
+      : [];
   const responseActionItems = [
     ...(isAlert ? runAlertWorkflowItems : documentWorkflowItems),
     ...hostIsolationItems,

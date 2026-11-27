@@ -33,8 +33,7 @@ export interface FieldsMetadataServiceStart {
 }
 
 export interface GetFieldsMetadataOptions
-  extends Partial<IntegrationFieldsSearchParams>,
-    Partial<StreamsFieldsSearchParams> {
+  extends Partial<IntegrationFieldsSearchParams>, Partial<StreamsFieldsSearchParams> {
   source?: FieldSource | FieldSource[];
 }
 

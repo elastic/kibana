@@ -8,9 +8,10 @@
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import type { MitreAttackPublicSetup, MitreAttackPublicStart } from './types';
 
-export class MitreAttackPublicPlugin
-  implements Plugin<MitreAttackPublicSetup, MitreAttackPublicStart>
-{
+export class MitreAttackPublicPlugin implements Plugin<
+  MitreAttackPublicSetup,
+  MitreAttackPublicStart
+> {
   private readonly config: { managedSourceEnabled: boolean };
 
   constructor(context: PluginInitializerContext) {

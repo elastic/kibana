@@ -15,7 +15,10 @@ export class SyntheticsAppPage {
   public readonly ruleMonitorCount: Locator;
   public readonly kibanaMonacoEditor: KibanaCodeEditorWrapper;
 
-  constructor(private readonly page: ScoutPage, private readonly kbnUrl: KibanaUrl) {
+  constructor(
+    private readonly page: ScoutPage,
+    private readonly kbnUrl: KibanaUrl
+  ) {
     this.ruleMonitorCount = page.testSubj.locator('syntheticsStatusRuleVizMonitorCount');
     this.kibanaMonacoEditor = new KibanaCodeEditorWrapper(page);
   }

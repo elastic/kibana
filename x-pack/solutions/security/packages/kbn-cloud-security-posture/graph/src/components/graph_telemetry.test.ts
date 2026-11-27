@@ -151,7 +151,7 @@ describe('GraphTelemetryEvent node_action typing', () => {
         type: 'node_action';
         nodeType: 'event';
         action: 'show_grouped_events';
-      }>
+      }>,
     ] = [false, false, false, false, false, false, false, false];
 
     expect(rejected).toEqual([false, false, false, false, false, false, false, false]);
@@ -194,7 +194,7 @@ describe('GraphTelemetryEvent node_action typing', () => {
         nodeType: 'grouped_event';
         action: 'show_related_events';
         state: 'hide';
-      }>
+      }>,
     ] = [true, true, true, true, true, true, true, true];
 
     expect(accepted).toEqual([true, true, true, true, true, true, true, true]);

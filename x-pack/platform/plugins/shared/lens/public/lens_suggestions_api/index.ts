@@ -82,7 +82,7 @@ export const suggestionsApi = ({
   // so that each visualization's suggestion logic can preserve its own settings (e.g. XY chart
   // preserves legend, axis titles, etc. via its buildSuggestion when it receives currentState).
   const preferredVisualization = preferredVisAttributes
-    ? visualizationMap[preferredVisAttributes.visualizationType] ?? initialVisualization
+    ? (visualizationMap[preferredVisAttributes.visualizationType] ?? initialVisualization)
     : initialVisualization;
   const previousVisualizationState = preferredVisAttributes
     ? preferredVisAttributes.state.visualization
@@ -104,9 +104,9 @@ export const suggestionsApi = ({
 
   const primarySuggestion =
     preferredVisAttributes && preferredVisualization
-      ? suggestions.find(
+      ? (suggestions.find(
           (suggestion) => suggestion.visualizationId === preferredVisualization.id
-        ) ?? suggestions[0]
+        ) ?? suggestions[0])
       : suggestions[0];
   const activeVisualization = visualizationMap[primarySuggestion.visualizationId];
   if (

@@ -32,8 +32,7 @@ import { RulesApi } from '../../services/rules_api';
 import type { RuleAttachment } from './rule_attachment_definition';
 
 export interface RuleCanvasContentProps
-  extends AttachmentRenderProps<RuleAttachment>,
-    CanvasRenderCallbacks {}
+  extends AttachmentRenderProps<RuleAttachment>, CanvasRenderCallbacks {}
 
 export const RuleCanvasContent = ({
   attachment,

@@ -38,7 +38,7 @@ const makeCaseSO = (
     type: 'cases',
     references: [],
     attributes: { owner, template } as unknown as CasePersistedAttributes,
-  } as SavedObject<CasePersistedAttributes>);
+  }) as SavedObject<CasePersistedAttributes>;
 
 // Minimal template SO factory
 const makeTemplateSO = (
@@ -59,7 +59,7 @@ const makeTemplateSO = (
       definition: yamlStringify({ fields: [] }),
       ...attrs,
     } as Template,
-  } as SavedObject<Template>);
+  }) as SavedObject<Template>;
 
 // Minimal field-def SO factory
 const makeFieldDefSO = (
@@ -75,7 +75,7 @@ const makeFieldDefSO = (
       definition: '',
       ...attrs,
     } as FieldDefinition,
-  } as SavedObject<FieldDefinition>);
+  }) as SavedObject<FieldDefinition>;
 
 describe('import_export utils', () => {
   describe('getAttachmentsAndUserActionsForCases', () => {

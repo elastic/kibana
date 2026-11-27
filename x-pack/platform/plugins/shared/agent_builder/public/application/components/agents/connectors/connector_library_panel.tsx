@@ -53,7 +53,7 @@ export const ConnectorLibraryPanel: React.FC<ConnectorLibraryPanelProps> = ({
       allConnectors.map((c) => ({
         ...c,
         description: actionTypeRegistry.has(c.actionTypeId)
-          ? actionTypeRegistry.get(c.actionTypeId).actionTypeTitle ?? c.actionTypeId
+          ? (actionTypeRegistry.get(c.actionTypeId).actionTypeTitle ?? c.actionTypeId)
           : c.actionTypeId,
       })),
     [allConnectors, actionTypeRegistry]

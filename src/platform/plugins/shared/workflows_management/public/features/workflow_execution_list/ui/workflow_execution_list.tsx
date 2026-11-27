@@ -293,10 +293,10 @@ export const WorkflowExecutionList = ({
                 defaultMessage: 'Loading more executions',
               })
             : hasNextPage
-            ? null
-            : i18n.translate('workflows.workflowExecutionList.endOfHistoryA11y', {
-                defaultMessage: 'End of execution history',
-              })}
+              ? null
+              : i18n.translate('workflows.workflowExecutionList.endOfHistoryA11y', {
+                  defaultMessage: 'End of execution history',
+                })}
         </div>
       </>
     );

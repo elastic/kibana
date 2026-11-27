@@ -91,14 +91,12 @@ export const registerAutocompleteRoute = ({
         });
 
         const body: SmlAutocompleteHttpResponse = {
-          results: results.map(
-            ({ id, type, origin, title }): SmlAutocompleteHttpResultItem => ({
-              id,
-              type,
-              origin,
-              title,
-            })
-          ),
+          results: results.map(({ id, type, origin, title }): SmlAutocompleteHttpResultItem => ({
+            id,
+            type,
+            origin,
+            title,
+          })),
         };
 
         return response.ok({ body });

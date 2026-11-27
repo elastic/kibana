@@ -102,14 +102,14 @@ export const AutomationsToolbar = ({
           values: { from, to, count: visibleCount },
         })
       : hasActiveFilters
-      ? i18n.translate('xpack.nightshift.automations.showingFilteredCount', {
-          defaultMessage: 'Showing {count} of {total} automations',
-          values: { count: visibleCount, total: totalCount },
-        })
-      : i18n.translate('xpack.nightshift.automations.showingCount', {
-          defaultMessage: 'Showing {count, plural, one {# automation} other {# automations}}',
-          values: { count: visibleCount },
-        });
+        ? i18n.translate('xpack.nightshift.automations.showingFilteredCount', {
+            defaultMessage: 'Showing {count} of {total} automations',
+            values: { count: visibleCount, total: totalCount },
+          })
+        : i18n.translate('xpack.nightshift.automations.showingCount', {
+            defaultMessage: 'Showing {count, plural, one {# automation} other {# automations}}',
+            values: { count: visibleCount },
+          });
 
   return (
     <>

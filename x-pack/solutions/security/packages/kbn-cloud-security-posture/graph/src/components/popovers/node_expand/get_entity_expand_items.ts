@@ -223,9 +223,8 @@ export const getEntityFilterSpec = (
     // replace exactly those prefix clauses with observed exact values — no more, no less.
     const prefixFields = euidApi
       ? new Set(
-          euidApi.euid.getEuidNamespaceSourceFields(
-            euidApi.getBuiltInEntityDefinition(entityType)
-          ).prefixMatchFields
+          euidApi.euid.getEuidNamespaceSourceFields(euidApi.getBuiltInEntityDefinition(entityType))
+            .prefixMatchFields
         )
       : new Set<string>();
     const namespaceSourceValues = Object.fromEntries(
@@ -474,10 +473,10 @@ export const getRelatedEventsFilter = (
     type === 'user'
       ? { field: RELATED_USER, values: valuesForPrefix('user.') }
       : type === 'host'
-      ? { field: RELATED_HOST, values: valuesForPrefix('host.') }
-      : type === 'service'
-      ? { field: RELATED_ENTITY, values: valuesForPrefix('service.') }
-      : { field: RELATED_ENTITY, values: valuesForPrefix('entity.') };
+        ? { field: RELATED_HOST, values: valuesForPrefix('host.') }
+        : type === 'service'
+          ? { field: RELATED_ENTITY, values: valuesForPrefix('service.') }
+          : { field: RELATED_ENTITY, values: valuesForPrefix('entity.') };
 
   // No usable values: emit nothing rather than a filter that cannot match.
   return values.length > 0 ? { field, values } : undefined;

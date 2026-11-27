@@ -109,7 +109,7 @@ export function StickySpanProperties({ span, transaction }: Props) {
                 {transactionName}
               </TransactionDetailLink>
             ) : (
-              transactionName ?? NOT_AVAILABLE_LABEL
+              (transactionName ?? NOT_AVAILABLE_LABEL)
             ),
           width: '25%',
         },

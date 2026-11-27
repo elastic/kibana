@@ -114,14 +114,12 @@ describe('Reporting server createConfig', () => {
   it.each(['0', '0.0', '0.0.0', '0.0.0.0', '0000:0000:0000:0000:0000:0000:0000:0000', '::'])(
     `apply failover logic when hostname is given as "%s"`,
     (hostname) => {
-      mockCoreSetup.http.getServerInfo = jest.fn(
-        (): HttpServerInfo => ({
-          name: 'cool server',
-          hostname,
-          port: 5601,
-          protocol: 'http',
-        })
-      );
+      mockCoreSetup.http.getServerInfo = jest.fn((): HttpServerInfo => ({
+        name: 'cool server',
+        hostname,
+        port: 5601,
+        protocol: 'http',
+      }));
 
       const mockConfig = createMockConfigSchema({
         encryptionKey: 'aaaaaaaaaaaaabbbbbbbbbbbbaaaaaaaaa',

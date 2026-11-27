@@ -127,18 +127,16 @@ export class EsqlPlugin implements Plugin<EsqlPluginSetup, EsqlPluginStart> {
       UPDATE_ESQL_QUERY_TRIGGER,
       ACTION_UPDATE_ESQL_QUERY,
       async () => {
-        const { UpdateESQLQueryAction } = await import(
-          './triggers/update_esql_query/update_esql_query_actions'
-        );
+        const { UpdateESQLQueryAction } =
+          await import('./triggers/update_esql_query/update_esql_query_actions');
         const appendESQLAction = new UpdateESQLQueryAction(data);
         return appendESQLAction;
       }
     );
 
     uiActions.addTriggerActionAsync(ESQL_CONTROL_TRIGGER, ACTION_CREATE_ESQL_CONTROL, async () => {
-      const { CreateESQLControlAction } = await import(
-        './triggers/esql_controls/esql_control_action'
-      );
+      const { CreateESQLControlAction } =
+        await import('./triggers/esql_controls/esql_control_action');
       const createESQLControlAction = new CreateESQLControlAction(
         core,
         data.search.search,
