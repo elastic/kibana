@@ -14,7 +14,6 @@ import type {
   WorkflowServiceAccount,
 } from '../../../../entities/service_accounts';
 import { useServiceAccountDirectory } from '../../../../entities/service_accounts';
-import { registerFocusRunAs } from '../../../../shared/focus_run_as';
 
 interface ServiceAccountReference {
   id: string;
@@ -175,19 +174,4 @@ export const useServiceAccountDecorations = ({
     const registration = registerServiceAccountDecorations(editor, directory);
     return () => registration.dispose();
   }, [editor, isEditorMounted, directory]);
-
-  useEffect(() => {
-    if (!editor || !isEditorMounted) return;
-    return registerFocusRunAs(() => {
-      const model = editor.getModel();
-      const reference = model ? getReference(model) : null;
-      if (!reference) return;
-      editor.revealLineInCenter(reference.range.startLineNumber);
-      editor.setPosition({
-        lineNumber: reference.range.startLineNumber,
-        column: reference.range.startColumn,
-      });
-      editor.focus();
-    });
-  }, [editor, isEditorMounted]);
 };

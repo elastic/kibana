@@ -50,7 +50,6 @@ import {
 } from './page_share_model';
 import type { WorkflowPageResponse } from '../../../../common/pages';
 import { useKibana } from '../../../hooks/use_kibana';
-import { focusRunAsSetting } from '../../../shared/focus_run_as';
 
 const NO_MANAGE_PRIVILEGE = i18n.translate('workflows.pageShare.noManagePrivilege', {
   defaultMessage: 'You need the Manage pages privilege.',
@@ -251,6 +250,8 @@ export const WorkflowPageShareModal = ({
       try {
         await request();
         setConfirming(undefined);
+        // Wait for the new link, so Copy and Open never hand out the revoked one.
+        await queryClient.invalidateQueries({ queryKey });
         if (action === 'rotate') {
           notifications.toasts.addSuccess({
             title: i18n.translate('workflows.pageShare.rotatedToastTitle', {
@@ -262,7 +263,6 @@ export const WorkflowPageShareModal = ({
           });
           setFocusCopyToken((token) => token + 1);
         }
-        await queryClient.invalidateQueries({ queryKey });
       } catch (error) {
         setActionError(getErrorMessage(error));
       } finally {
@@ -293,13 +293,6 @@ export const WorkflowPageShareModal = ({
     );
   const rotate = () =>
     run('rotate', () => http.post(pagePath('/_rotate'), WORKFLOW_PAGE_API_VERSION));
-
-  const showServiceAccount = () => {
-    onClose();
-    // The modal returns focus to the header button as it closes. Focus the
-    // setting after that, or the editor never keeps the cursor.
-    window.setTimeout(() => focusRunAsSetting(), 0);
-  };
 
   const reasons = page?.status.reasons ?? [];
   const blockers = reasons.filter(isBlockingPageReason);
@@ -351,29 +344,15 @@ export const WorkflowPageShareModal = ({
         })}
         data-test-subj="workflowPageShareBlockers"
         text={
-          <>
-            {serviceAccountId && (
-              <p>
-                <FormattedMessage
-                  id="workflows.pageShare.configuredAccount"
-                  defaultMessage="settings.run_as is {account}."
-                  values={{ account: <EuiCode>{serviceAccountId}</EuiCode> }}
-                />
-              </p>
-            )}
+          serviceAccountId && (
             <p>
-              <EuiButtonEmpty
-                onClick={showServiceAccount}
-                flush="both"
-                size="xs"
-                data-test-subj="workflowPageShareServiceAccount"
-              >
-                {i18n.translate('workflows.pageShare.showRunAs', {
-                  defaultMessage: 'Show settings.run_as',
-                })}
-              </EuiButtonEmpty>
+              <FormattedMessage
+                id="workflows.pageShare.configuredAccount"
+                defaultMessage="settings.run_as is {account}."
+                values={{ account: <EuiCode>{serviceAccountId}</EuiCode> }}
+              />
             </p>
-          </>
+          )
         }
       >
         <ul>
@@ -386,7 +365,6 @@ export const WorkflowPageShareModal = ({
     if (blockersCallout && page.access == null) {
       return blockersCallout;
     }
-    const online = page.status.online;
     if (page.access == null) {
       return (
         <>
@@ -441,7 +419,6 @@ export const WorkflowPageShareModal = ({
                   <EuiFieldText
                     value={absoluteUrl}
                     readOnly
-                    disabled={!online}
                     fullWidth
                     onFocus={(event) => event.target.select()}
                     data-test-subj="workflowPageShareUrl"

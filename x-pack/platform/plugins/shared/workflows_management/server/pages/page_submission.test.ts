@@ -180,6 +180,14 @@ describe('isPageRequestVerified', () => {
 });
 
 describe('validatePageSubmission', () => {
+  it('keeps the schema error of a field named like an object method', () => {
+    const result = validatePageSubmission({ toString: 'ab' }, {
+      type: 'object',
+      properties: { toString: { type: 'string', minLength: 3 } },
+    } as PageTrigger['inputs']);
+    expect(result).toEqual({ errors: [expect.stringContaining('toString')] });
+  });
+
   it('returns parse errors and schema errors together', () => {
     const result = validatePageSubmission({ count: 'many' }, trigger.inputs);
     expect(result).toEqual({

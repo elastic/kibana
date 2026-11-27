@@ -174,7 +174,7 @@ describe('WorkflowPageShareModal', () => {
     ).toBeVisible();
     expect(screen.queryByTestId('workflowPageShareOfflineReasons')).not.toBeInTheDocument();
     expect(screen.getByTestId('workflowPageShareStatus')).toHaveTextContent('Offline');
-    expect(screen.getByTestId('workflowPageShareUrl')).toBeDisabled();
+    expect(screen.getByTestId('workflowPageShareUrl')).toBeEnabled();
     expect(screen.getByTestId('workflowPageShareOpen')).toHaveAttribute('href');
   });
 
@@ -183,7 +183,7 @@ describe('WorkflowPageShareModal', () => {
 
     expect(await screen.findByText(/The workflow is disabled/)).toBeVisible();
     expect(screen.getByTestId('workflowPageShareOfflineReasons')).toBeVisible();
-    expect(screen.getByTestId('workflowPageShareUrl')).toBeDisabled();
+    expect(screen.getByTestId('workflowPageShareUrl')).toBeEnabled();
     expect(screen.getByTestId('workflowPageShareOpen')).toHaveAttribute('href');
   });
 

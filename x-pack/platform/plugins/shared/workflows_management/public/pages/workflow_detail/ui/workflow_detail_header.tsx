@@ -18,7 +18,7 @@ import { ChangeHistoryModalContext } from '@kbn/change-history-ui';
 import type { AppMenuConfig, AppMenuItemType } from '@kbn/core-chrome-app-menu-components';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { i18n } from '@kbn/i18n';
-import { useQuery } from '@kbn/react-query';
+import { useQuery, useQueryClient } from '@kbn/react-query';
 import { getPageTriggerId, isPageTrigger } from '@kbn/workflows';
 import { useWorkflowsCapabilities } from '@kbn/workflows-ui';
 import {
@@ -341,6 +341,19 @@ export const WorkflowDetailHeader = React.memo(
       enabled: Boolean(workflowId && pageId && canSharePage),
       refetchOnWindowFocus: false,
     });
+    // Saving or toggling the workflow can change the page status, which has its own query.
+    const queryClient = useQueryClient();
+    useEffect(() => {
+      if (!workflowId || !pageId) return;
+      void queryClient.invalidateQueries({ queryKey: workflowPageQueryKey(workflowId, pageId) });
+    }, [
+      queryClient,
+      workflowId,
+      pageId,
+      workflow?.enabled,
+      workflow?.valid,
+      workflow?.lastUpdatedAt,
+    ]);
     const pageShareStatus = useMemo(
       () => (sharedPage ? getPageShareStatusView(sharedPage, 'header') : undefined),
       [sharedPage]

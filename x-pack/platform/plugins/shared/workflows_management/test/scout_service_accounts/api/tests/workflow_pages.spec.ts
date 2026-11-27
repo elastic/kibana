@@ -10,6 +10,7 @@ import type { ApiClientFixture } from '@kbn/scout';
 import { apiTest, AUDIT_LOG_PATH } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import type { WorkflowExecutionDto } from '@kbn/workflows';
+import { deleteBoundWorkflow } from '../fixtures/bound_workflows';
 import {
   authenticationStep,
   createServiceAccountSuite,
@@ -89,8 +90,11 @@ apiTest.describe(
       `${spacePrefix}internal/workflows/workflow/${id}/pages/default`;
 
     /** Creates a workflow in a named space. The caller disables it before it deletes the space. */
-    const createInSpace = async (apiClient: ApiClientFixture, space: string, yaml: string) => {
-      const id = `pages-space-${Date.now()}`;
+    const createInSpace = async (
+      apiClient: ApiClientFixture,
+      { space, id }: { space: string; id: string },
+      yaml: string
+    ) => {
       const response = await apiClient.post(`s/${space}/api/workflows/workflow`, {
         headers: getContext().headers,
         body: { id, yaml },
@@ -103,10 +107,10 @@ apiTest.describe(
     /** Creates a bound workflow with a page, publishes the page, and returns its public path. */
     const createPublishedPage = async (
       apiClient: ApiClientFixture,
-      { yaml, space }: { yaml?: string; space?: string } = {}
+      { yaml, space }: { yaml?: string; space?: { space: string; id: string } } = {}
     ) => {
       const { accountId, create } = getContext();
-      const spacePrefix = space ? `s/${space}/` : '';
+      const spacePrefix = space ? `s/${space.space}/` : '';
       const id = space
         ? await createInSpace(apiClient, space, yaml ?? pageYaml(accountId))
         : await create(apiClient, yaml ?? pageYaml(accountId));
@@ -162,19 +166,34 @@ apiTest.describe(
     apiTest(
       'a valid secret does not open another workflow, page, or space',
       async ({ apiClient, kbnClient }) => {
+        apiTest.setTimeout(RUN_TEST_TIMEOUT_MS);
         const pageA = await createPublishedPage(apiClient);
         const pageB = await createPublishedPage(apiClient);
         const secretA = pageA.path.split('/k/')[1];
         const space = `pages-isolation-${Date.now()}`;
         await kbnClient.spaces.create({ id: space, name: space });
-        let pageCId: string | undefined;
+        // Known before the create, so the cleanup deletes it even when publishing fails.
+        const pageCId = `pages-space-${Date.now()}`;
 
         try {
           // The link of a page in a named space carries the space, and opens there.
-          const pageC = await createPublishedPage(apiClient, { space });
-          pageCId = pageC.id;
+          const pageC = await createPublishedPage(apiClient, { space: { space, id: pageCId } });
           expect(pageC.path.startsWith(`s/${space}/pages/`)).toBe(true);
           expect(await apiClient.get(pageC.path, { responseType: 'text' })).toHaveStatusCode(200);
+          expect(await submit(apiClient, pageC.path, 'summary=Login+fails')).toHaveStatusCode(303);
+          // The run starts and completes in the page's space, not the default one.
+          await expect
+            .poll(
+              async () => {
+                const runs = await apiClient.get(
+                  `s/${space}/api/workflows/workflow/${pageC.id}/executions`,
+                  { headers: getContext().headers, responseType: 'json' }
+                );
+                return (runs.body.results as WorkflowExecutionDto[]).map(({ status }) => status);
+              },
+              { timeout: RUN_TEST_TIMEOUT_MS / 2 }
+            )
+            .toStrictEqual(['completed']);
           const secretC = pageC.path.split('/k/')[1];
 
           for (const path of [
@@ -189,13 +208,10 @@ apiTest.describe(
             );
           }
         } finally {
-          if (pageCId) {
-            await apiClient.put(`s/${space}/api/workflows/workflow/${pageCId}`, {
-              headers: getContext().headers,
-              body: { enabled: false },
-            });
-          }
-          await kbnClient.spaces.delete(space);
+          await deleteBoundWorkflow(apiClient, getContext().headers, {
+            spaceId: space,
+            workflowId: pageCId,
+          });
         }
 
         expect(await listExecutions(apiClient, pageA.id)).toStrictEqual([]);

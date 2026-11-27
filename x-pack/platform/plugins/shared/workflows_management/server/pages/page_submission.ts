@@ -155,7 +155,7 @@ export const validatePageSubmission = (
   const schemaErrors = result.success
     ? []
     : result.error.issues
-        .filter(({ path }) => !(String(path[0]) in parseErrors))
+        .filter(({ path }) => !Object.hasOwn(parseErrors, String(path[0])))
         .map(({ path, message }) => (path.length > 0 ? `${path.join('.')}: ${message}` : message));
   return { errors: [...Object.values(parseErrors), ...schemaErrors] };
 };
