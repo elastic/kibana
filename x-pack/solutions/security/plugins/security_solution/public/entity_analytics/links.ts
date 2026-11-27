@@ -38,6 +38,7 @@ export const entityAnalyticsAiSecurityLinks: LinkItem = {
     defaultMessage: 'AI security',
   }),
   path: ENTITY_ANALYTICS_AI_SECURITY_PATH,
+  globalNavPosition: 7.5,
   globalSearchKeywords: [
     i18n.translate('xpack.securitySolution.appLinks.entityAnalyticsAiSecurity.agents', {
       defaultMessage: 'AI agents',
