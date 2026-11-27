@@ -11,6 +11,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
 import {
+  OTLP_AZURE_AUTH_MINIMUM_AGENT_VERSION,
   otlpAuthScheme,
   otlpAuthType,
   otlpAzureAuthMethod,
@@ -317,8 +318,11 @@ export const OtlpAuthentication: React.FunctionComponent<{
           isAzure ? (
             <FormattedMessage
               id="xpack.fleet.settings.editOutputFlyout.otlpAuthTypeAzureHelpText"
-              defaultMessage="The collector requests a Microsoft Entra ID token, and sends it in the {header} header. Requires HTTP/Protobuf and https:// endpoints."
-              values={{ header: <code>{'Authorization'}</code> }}
+              defaultMessage="The collector requests a Microsoft Entra ID token, and sends it in the {header} header. Requires HTTP/Protobuf, https:// endpoints, and Elastic Agent {minAgentVersion} or later."
+              values={{
+                header: <code>{'Authorization'}</code>,
+                minAgentVersion: OTLP_AZURE_AUTH_MINIMUM_AGENT_VERSION,
+              }}
             />
           ) : (
             <FormattedMessage

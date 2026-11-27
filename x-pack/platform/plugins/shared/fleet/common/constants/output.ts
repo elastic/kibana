@@ -177,6 +177,9 @@ export const otlpAzureAuthMethod = {
 /** The OTel Collector extension that authenticates the exporter with a Microsoft Entra ID token. */
 export const OTLP_AZURE_AUTH_EXTENSION = 'azure_auth';
 
+/** The first Elastic Agent version whose collector includes the `azure_auth` extension. */
+export const OTLP_AZURE_AUTH_MINIMUM_AGENT_VERSION = '9.3.0';
+
 export const otlpAuthScheme = {
   ApiKey: 'api_key',
   BearerToken: 'bearer_token',
