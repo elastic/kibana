@@ -36,7 +36,7 @@ const identity: AgentIdentity = {
 
 const agent: AgentRow = {
   ...identity,
-  hostName: 'build-01',
+  hostName: 'ci-build-01',
   version: '2.1.332',
   watchlistIds: [],
   accountEmails: [],
@@ -45,67 +45,65 @@ const agent: AgentRow = {
   dataSources: [],
 };
 
+const renderHeader = (props: Partial<React.ComponentProps<typeof AiAgentHeader>> = {}) =>
+  render(
+    <TestProviders>
+      <AiAgentHeader identity={identity} agent={agent} isLoading={false} {...props} />
+    </TestProviders>
+  );
+
 describe('AiAgentHeader', () => {
-  it('says there is no score yet when the agent has no risk', () => {
-    render(
-      <TestProviders>
-        <AiAgentHeader identity={identity} agent={agent} isLoading={false} />
-      </TestProviders>
-    );
-    expect(screen.getByTestId(AI_AGENT_TEST_IDS.noScoreBadge)).toHaveTextContent('no score yet');
-    expect(screen.getByText('Not signed in yet')).toBeInTheDocument();
-    expect(screen.getByText('2.1.332')).toBeInTheDocument();
+  it('titles the install with the agent, OS user and host name', () => {
+    renderHeader();
+    expect(screen.getByText('Claude Code · ec2-user@ci-build-01')).toBeInTheDocument();
+    expect(screen.getByText('AI agent')).toBeInTheDocument();
+  });
+
+  it('shows no risk badge when the agent has no score', () => {
+    renderHeader();
+    expect(screen.queryByTestId(AI_AGENT_TEST_IDS.riskBadge)).not.toBeInTheDocument();
+    expect(screen.getByTestId(AI_AGENT_TEST_IDS.header)).not.toHaveTextContent('Risk');
   });
 
   it('shows the normalised score and risk level once the agent is scored', () => {
-    render(
-      <TestProviders>
-        <AiAgentHeader
-          identity={identity}
-          agent={{ ...agent, riskLevel: 'Moderate', riskScore: 64.7641 }}
-          signedInAs="alex@example.com"
-          isLoading={false}
-        />
-      </TestProviders>
-    );
+    renderHeader({ agent: { ...agent, riskLevel: 'Moderate', riskScore: 64.7641 } });
     expect(screen.getByTestId(AI_AGENT_TEST_IDS.riskBadge)).toHaveTextContent(
       'Risk: 64.76 Moderate'
     );
-    expect(screen.getByText('alex@example.com')).toBeInTheDocument();
   });
 
   it("names the agent's own watchlists, with the risk modifier in a tooltip", async () => {
-    render(
-      <TestProviders>
-        <AiAgentHeader
-          identity={identity}
-          agent={{ ...agent, watchlistIds: ['agents-for-departing-employees'] }}
-          isLoading={false}
-        />
-      </TestProviders>
-    );
+    renderHeader({ agent: { ...agent, watchlistIds: ['agents-for-departing-employees'] } });
     const badge = screen.getByText('Agents acting for departing employees');
-    expect(screen.getByTestId(AI_AGENT_TEST_IDS.headerWatchlists)).toContainElement(badge);
+    expect(screen.getByTestId(AI_AGENT_TEST_IDS.headerWatchlist)).toContainElement(badge);
     fireEvent.mouseOver(badge);
     await waitFor(() => expect(screen.getByText('Risk modifier 1.5')).toBeInTheDocument());
   });
 
-  it('says None when the agent is on no watchlist', () => {
-    render(
-      <TestProviders>
-        <AiAgentHeader identity={identity} agent={agent} isLoading={false} />
-      </TestProviders>
+  it('renders nothing for watchlists when the agent is on none', () => {
+    renderHeader();
+    expect(screen.queryByTestId(AI_AGENT_TEST_IDS.headerWatchlist)).not.toBeInTheDocument();
+    expect(screen.queryByText('None')).not.toBeInTheDocument();
+  });
+
+  it('shows when the agent was last seen as relative time', () => {
+    renderHeader({
+      agent: { ...agent, lastSeen: new Date(Date.now() - 12 * 3_600_000).toISOString() },
+    });
+    expect(screen.getByTestId(AI_AGENT_TEST_IDS.lastSeen)).toHaveTextContent(
+      'Last seen 12 hours ago'
     );
-    expect(screen.getByTestId(AI_AGENT_TEST_IDS.headerWatchlists)).toHaveTextContent('None');
+  });
+
+  it('keeps version and lifecycle dates out of the header', () => {
+    renderHeader({ agent: { ...agent, firstSeen: '2026-11-20T10:00:00.000Z' } });
+    expect(screen.queryByText('2.1.332')).not.toBeInTheDocument();
+    expect(screen.queryByText('First seen')).not.toBeInTheDocument();
   });
 
   it('falls back to the install ID fields when there is no store row', () => {
-    render(
-      <TestProviders>
-        <AiAgentHeader identity={identity} isLoading={false} />
-      </TestProviders>
-    );
+    renderHeader({ agent: undefined });
     expect(screen.getByText('Claude Code · ec2-user@host-1')).toBeInTheDocument();
-    expect(screen.getByText('Unknown')).toBeInTheDocument();
+    expect(screen.queryByTestId(AI_AGENT_TEST_IDS.lastSeen)).not.toBeInTheDocument();
   });
 });

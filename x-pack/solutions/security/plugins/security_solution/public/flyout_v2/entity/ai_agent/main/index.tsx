@@ -6,7 +6,7 @@
  */
 
 import type { FC } from 'react';
-import React, { memo, useCallback, useState } from 'react';
+import React, { memo, useCallback, useRef, useState } from 'react';
 import {
   EuiFlyoutBody,
   EuiFlyoutHeader,
@@ -22,9 +22,11 @@ import { parseAgentId } from '../../../../entity_analytics/components/ai_securit
 import { useFlyoutApi } from '../../../use_flyout_api';
 import { FLYOUT_ORIGIN } from '../../../../common/lib/telemetry';
 import { AiAgentHeader } from './header';
-import { ContextSection } from './components/context_section';
+import { AttributionSection } from './components/attribution_section';
 import { RiskSummarySection } from './components/risk_summary_section';
 import { AlertsSection } from './components/alerts_section';
+import { RelatedAgentsSection } from './components/related_agents_section';
+import { InstallDetailsSection } from './components/install_details_section';
 import { AgentActivity } from './components/agent_activity';
 import { GraphTab } from './components/graph_tab';
 import { AI_AGENT_TEST_IDS } from './test_ids';
@@ -42,13 +44,14 @@ export interface AiAgentProps {
 type TabId = 'overview' | 'activity' | 'graph';
 
 /**
- * AI agent flyout (proof of concept). The overview leads with identity and context (who the agent
- * acts for, its host, the local user it runs as, other installs on the account) with the shared risk
- * summary below the store context, then its alerts.
- * Agent activity and the relationships graph have their own tabs.
+ * AI agent flyout (proof of concept). The overview reads top down: attribution (who signed in,
+ * the host and the OS user), the shared risk summary, alerts worst first, related agents and
+ * install details. Agent activity and the relationships graph have their own tabs.
  */
 export const AiAgent: FC<AiAgentProps> = memo(function AiAgent({ entityId, entityName, scopeId }) {
   const [selectedTab, setSelectedTab] = useState<TabId>('overview');
+  const [isRelatedAgentsOpen, setIsRelatedAgentsOpen] = useState(false);
+  const relatedAgentsRef = useRef<HTMLDivElement>(null);
   const { data, isLoading, isError } = useAiAgentContext(entityId);
   const { openAiAgentFlyoutAsChild } = useFlyoutApi();
   const identity = data?.identity ?? parseAgentId(entityId);
@@ -65,6 +68,13 @@ export const AiAgent: FC<AiAgentProps> = memo(function AiAgent({ entityId, entit
       }),
     [openAiAgentFlyoutAsChild, entityId, entityName, scopeId]
   );
+
+  const onShowRelatedAgents = useCallback(() => {
+    setIsRelatedAgentsOpen(true);
+    requestAnimationFrame(() =>
+      relatedAgentsRef.current?.scrollIntoView?.({ behavior: 'smooth', block: 'start' })
+    );
+  }, []);
 
   if (!identity) {
     return (
@@ -83,12 +93,7 @@ export const AiAgent: FC<AiAgentProps> = memo(function AiAgent({ entityId, entit
   return (
     <>
       <EuiFlyoutHeader hasBorder>
-        <AiAgentHeader
-          identity={identity}
-          agent={agent}
-          signedInAs={data?.signedInAs}
-          isLoading={isLoading}
-        />
+        <AiAgentHeader identity={identity} agent={agent} isLoading={isLoading} />
         <EuiSpacer size="s" />
         <EuiTabs size="s" bottomBorder={false} data-test-subj={AI_AGENT_TEST_IDS.tabs}>
           {tabs.map((tab) => (
@@ -110,20 +115,31 @@ export const AiAgent: FC<AiAgentProps> = memo(function AiAgent({ entityId, entit
             <EuiSkeletonText lines={8} />
           ) : (
             <>
-              <ContextSection
+              <AttributionSection
                 context={data}
+                identity={identity}
                 scopeId={scopeId}
-                riskSummary={
-                  <RiskSummarySection
-                    entityId={entityId}
-                    entityName={agentName}
-                    scopeId={scopeId}
-                    onShowAgent={onShowAgent}
-                  />
-                }
+                onShowRelatedAgents={onShowRelatedAgents}
               />
-              <EuiHorizontalRule margin="m" />
+              <EuiSpacer size="m" />
+              <RiskSummarySection
+                entityId={entityId}
+                entityName={agentName}
+                scopeId={scopeId}
+                onShowAgent={onShowAgent}
+              />
               <AlertsSection entityId={entityId} />
+              <EuiHorizontalRule margin="m" />
+              <div ref={relatedAgentsRef}>
+                <RelatedAgentsSection
+                  sameAccount={data.otherInstallsOnAccount}
+                  sameHost={data.otherAgentsOnHost}
+                  scopeId={scopeId}
+                  isOpen={isRelatedAgentsOpen}
+                  onToggle={setIsRelatedAgentsOpen}
+                />
+              </div>
+              <InstallDetailsSection entityId={entityId} agent={agent} />
             </>
           ))}
         {selectedTab === 'activity' && <AgentActivity agent={agent ?? identity} />}

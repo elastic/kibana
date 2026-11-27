@@ -25,6 +25,7 @@ import { useAiAgentsInventory } from '../components/ai_security/hooks/use_ai_age
 import { AiAgentsTable } from '../components/ai_security/components/ai_agents_table';
 import { AI_SECURITY_SCOPE_ID } from '../components/ai_security/constants';
 import type { AgentInventoryRow } from '../components/ai_security/types';
+import { getAgentTitle } from '../components/ai_security/utils';
 import {
   ALERTS_UNAVAILABLE,
   EMPTY_BODY,
@@ -61,7 +62,7 @@ export const EntityAnalyticsAiSecurityPage = () => {
     (row: AgentInventoryRow) =>
       openAiAgentFlyout({
         entityId: row.entityId,
-        entityName: row.entityName,
+        entityName: getAgentTitle(row, row.hostName),
         scopeId: AI_SECURITY_SCOPE_ID,
       }),
     [openAiAgentFlyout]

@@ -103,6 +103,12 @@ const AGENT_DISPLAY_NAMES: Readonly<Record<string, string>> = {
 export const getAgentDisplayName = (agentName: string): string =>
   AGENT_DISPLAY_NAMES[agentName] ?? agentName;
 
+/** Display title of an install: `Claude Code · ec2-user@ci-build-01`. */
+export const getAgentTitle = (
+  { agentName, userName, hostId }: AgentIdentity,
+  hostName?: string
+): string => `${getAgentDisplayName(agentName)} · ${userName}@${hostName ?? hostId}`;
+
 export const isClaudeCode = (agentName: string): boolean => agentName === 'claude_code';
 
 /**

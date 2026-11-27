@@ -104,18 +104,6 @@ export const WATCHLISTS_OVERFLOW_TITLE = i18n.translate(
   { defaultMessage: 'Additional watchlists' }
 );
 
-export const UNKNOWN_VERSION = i18n.translate(
-  'xpack.securitySolution.entityAnalytics.aiSecurity.unknownVersion',
-  {
-    defaultMessage: 'Unknown',
-  }
-);
-export const NO_SCORE_YET = i18n.translate(
-  'xpack.securitySolution.entityAnalytics.aiSecurity.noScoreYet',
-  {
-    defaultMessage: 'No score yet',
-  }
-);
 export const ALERTS_UNAVAILABLE = i18n.translate(
   'xpack.securitySolution.entityAnalytics.aiSecurity.alertsUnavailable',
   {
