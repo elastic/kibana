@@ -177,6 +177,21 @@ describe('getBeforeRedirectFn', () => {
     expect(message).not.toContain('Host');
   });
 
+  test('does not count headers follow-redirects drops when it rewrites POST to GET', () => {
+    const hook = getBeforeRedirectFn(configurationUtilities, logger, '.webhook');
+
+    hook(
+      { hostname: 'evil.example.org', href: 'https://evil.example.org/a', headers: {} },
+      responseDetails,
+      { headers: { 'Content-MD5': 'abc' }, method: 'POST', url: 'https://api.example.com/a' }
+    );
+
+    expect(recordConnectorRedirect).toHaveBeenCalledWith(
+      expect.objectContaining({ crossOrigin: true, headersRemoved: false })
+    );
+    expect(logger.debug).not.toHaveBeenCalled();
+  });
+
   test('drops secret headers with a safe name on a cross-origin redirect only', () => {
     const hook = getBeforeRedirectFn(configurationUtilities, logger, '.webhook', ['user-agent']);
 

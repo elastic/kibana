@@ -9,11 +9,10 @@ import type { AxiosRequestConfig } from 'axios';
 import type { Logger } from '@kbn/core/server';
 import type { ActionsConfigurationUtilities } from '../actions_config';
 import { recordConnectorRedirect } from './connector_metrics';
-import {
-  getCrossOriginUnsafeHeaderNames,
-  isSameOriginRedirect,
-  removeCrossOriginUnsafeHeaders,
-} from './redirect_headers';
+import { isSameOriginRedirect, removeCrossOriginUnsafeHeaders } from './redirect_headers';
+
+// The headers follow-redirects itself removes on a redirect to another host.
+const FOLLOW_REDIRECTS_CREDENTIAL_HEADER = /^(?:authorization|proxy-authorization|cookie)$/i;
 
 interface RedirectOptions {
   hostname?: unknown;
@@ -58,17 +57,19 @@ export const getBeforeRedirectFn = (
     configurationUtilities.ensureHostnameAllowed(hostname);
 
     const crossOrigin = !isSameOriginRedirect(requestDetails?.url, href);
-    // follow-redirects already strips Authorization and Cookie from `headers` on a cross-host hop,
-    // so the removed names come from the previous request's headers. Node sets Host per request.
-    const previousHeaders = requestDetails?.headers ?? headers ?? {};
-    const removed = crossOrigin
-      ? getCrossOriginUnsafeHeaderNames(previousHeaders, secretHeaderNames).filter(
-          (name) => name.toLowerCase() !== 'host'
+    // follow-redirects strips its credential headers before this hook runs on a cross-host hop,
+    // so count those from the previous request's headers along with the ones removed here.
+    // Headers it drops for a POST to GET rewrite are not counted.
+    const currentHeaders = headers ?? {};
+    const strippedCredentials = crossOrigin
+      ? Object.keys(requestDetails?.headers ?? {}).filter(
+          (name) => FOLLOW_REDIRECTS_CREDENTIAL_HEADER.test(name) && !(name in currentHeaders)
         )
       : [];
-    if (crossOrigin && headers != null) {
-      removeCrossOriginUnsafeHeaders(headers, secretHeaderNames);
-    }
+    const removedHere = crossOrigin
+      ? removeCrossOriginUnsafeHeaders(currentHeaders, secretHeaderNames)
+      : [];
+    const removed = [...strippedCredentials, ...removedHere];
 
     recordConnectorRedirect({
       connectorType,
