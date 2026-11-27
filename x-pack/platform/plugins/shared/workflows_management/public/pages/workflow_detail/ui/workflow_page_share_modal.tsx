@@ -251,12 +251,8 @@ export const WorkflowPageShareModal = ({
     setFocusTarget({ testSubj: 'workflowPageShareConfirmCancel' });
   };
   const cancelConfirm = () => {
-    // While the change runs, the share view could still show the old link, so leave the modal.
-    if (pending !== undefined) {
-      onClose();
-      return;
-    }
-    if (!confirming) return;
+    // Stay until the change settles, so its result or error is always shown.
+    if (!confirming || pending !== undefined) return;
     setFocusTarget({ testSubj: TRIGGER_TEST_SUBJ[confirming] });
     setConfirming(undefined);
   };
