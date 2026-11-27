@@ -108,7 +108,7 @@ export const getSharedProcessorIds = (unit: Unit, ref: ProcessingNodeRef): Set<s
   const elsewhere = unit.unit.pipelines.flatMap(({ id, config }) => [
     ...(isOwnSlot(id) ? [] : readEntryIds(config, PIPELINE_ENTRY.processors)),
     ...readRoutes(config).flatMap((route, routeIndex) =>
-      isOwnSlot(id, routeIndex) ? [] : route.processors ?? []
+      isOwnSlot(id, routeIndex) ? [] : (route.processors ?? [])
     ),
   ]);
   return new Set(elsewhere.filter((id) => own.has(id)));

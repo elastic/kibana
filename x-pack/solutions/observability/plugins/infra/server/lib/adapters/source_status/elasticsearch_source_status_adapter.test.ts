@@ -21,12 +21,12 @@ describe('InfraElasticsearchSourceStatusAdapter', () => {
           },
         },
       }),
-    } as unknown as InfraPluginRequestHandlerContext);
+    }) as unknown as InfraPluginRequestHandlerContext;
 
   const createFramework = (callWithRequest: jest.Mock) =>
     ({
       callWithRequest,
-    } as unknown as KibanaFramework);
+    }) as unknown as KibanaFramework;
 
   /** A valid _resolve/cluster response with matching indices on the local cluster. */
   const makeResolveResponse = (matchingIndices: boolean) => ({

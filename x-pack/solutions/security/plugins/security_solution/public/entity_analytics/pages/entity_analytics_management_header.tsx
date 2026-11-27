@@ -154,8 +154,8 @@ export const EntityAnalyticsManagementHeader = ({
     pendingAction === 'disable'
       ? DISABLING_LABEL
       : pendingAction === 'enable'
-      ? ENABLING_LABEL
-      : LOADING_STATUS_LABEL;
+        ? ENABLING_LABEL
+        : LOADING_STATUS_LABEL;
   // Turning the toggle ON installs or starts the Entity Store, so it requires the full
   // enablement privilege set. Turning it OFF stops engines via user-scoped SO updates on
   // entity-engine-descriptor-v2, so it requires SO write privileges, but not the full

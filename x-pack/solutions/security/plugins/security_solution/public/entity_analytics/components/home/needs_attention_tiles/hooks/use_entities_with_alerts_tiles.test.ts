@@ -11,7 +11,7 @@ import { parseAlertBasedTilesResponse } from './use_entities_with_alerts_tiles';
 const makeResponse = (
   columns: Array<{ name: string; type: string }>,
   values: Array<Array<unknown>>
-): ESQLSearchResponse => ({ columns, values } as unknown as ESQLSearchResponse);
+): ESQLSearchResponse => ({ columns, values }) as unknown as ESQLSearchResponse;
 
 describe('parseAlertBasedTilesResponse', () => {
   it('returns zeros and empty arrays when there are no rows', () => {

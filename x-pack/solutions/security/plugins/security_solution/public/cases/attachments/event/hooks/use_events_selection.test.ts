@@ -10,7 +10,7 @@ import { act, renderHook } from '@testing-library/react';
 import { useEventsSelection } from './use_events_selection';
 
 const checkboxEvent = (checked: boolean) =>
-  ({ target: { checked } } as ChangeEvent<HTMLInputElement>);
+  ({ target: { checked } }) as ChangeEvent<HTMLInputElement>;
 
 describe('useEventsSelection', () => {
   const pageIds = ['event-1', 'event-2'];

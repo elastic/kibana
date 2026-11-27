@@ -98,7 +98,7 @@ export const parseEsqlResolutionScoreRow =
       number,
       string | string[],
       string | string[],
-      string
+      string,
     ];
 
     const baseParsed = parseEsqlBaseScoreRow(

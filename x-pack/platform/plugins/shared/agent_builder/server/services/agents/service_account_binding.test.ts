@@ -73,7 +73,7 @@ const createServiceAccounts = (
     getWorkloadBinding: jest.fn().mockResolvedValue(null),
     withScopedRequestForWorkload: jest.fn(),
     ...overrides,
-  } as unknown as jest.Mocked<CoreServiceAccountsService>);
+  }) as unknown as jest.Mocked<CoreServiceAccountsService>;
 
 describe('assertCanConfigureExecutionIdentity', () => {
   const bindings = { serviceAccounts: createServiceAccounts() };

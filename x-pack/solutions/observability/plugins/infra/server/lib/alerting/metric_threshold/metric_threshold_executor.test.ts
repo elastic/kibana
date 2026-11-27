@@ -3668,8 +3668,8 @@ describe('The metric threshold rule type', () => {
         ...(actionGroup === FIRED_ACTIONS.id
           ? { [ALERT_SEVERITY]: ALERT_SEVERITY_CRITICAL }
           : actionGroup === WARNING_ACTIONS.id
-          ? { [ALERT_SEVERITY]: ALERT_SEVERITY_WARNING }
-          : {}),
+            ? { [ALERT_SEVERITY]: ALERT_SEVERITY_WARNING }
+            : {}),
         ...(tags ? { tags } : {}),
         ...(ecsGroups ? ecsGroups : {}),
         ...(grouping ? { [ALERT_GROUPING]: grouping } : {}),

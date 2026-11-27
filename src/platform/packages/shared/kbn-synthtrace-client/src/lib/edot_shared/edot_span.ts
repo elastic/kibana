@@ -32,7 +32,7 @@ export type EdotSpanDocument<TKind extends string, TStatusCode extends string> =
  * carries no APM-specific fields and is not meant to go through the APM OTel pipeline.
  */
 export class EdotSpan<
-  TDocument extends EdotSpanDocument<string, string>
+  TDocument extends EdotSpanDocument<string, string>,
 > extends Serializable<TDocument> {
   duration(durationMs: number) {
     this.fields.duration = Math.round(durationMs * 1_000_000);

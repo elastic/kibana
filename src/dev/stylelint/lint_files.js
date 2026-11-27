@@ -18,7 +18,7 @@ const stylelintPath = path.resolve(__dirname, '..', '..', '..', '.stylelintrc');
 const styleLintConfig = parse(fs.readFileSync(stylelintPath, 'utf8'));
 
 /**
- * Lints a list of files with eslint. eslint reports are written to the log
+ * Lints a list of files with stylelint. stylelint reports are written to the log
  * and a FailError is thrown when linting errors occur.
  *
  * @param  {ToolingLog} log

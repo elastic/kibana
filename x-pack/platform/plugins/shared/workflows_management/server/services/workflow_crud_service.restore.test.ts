@@ -48,7 +48,7 @@ const makeHistoryEvent = (overrides: Partial<ChangeHistoryDocument> = {}): Chang
     ecs: { version: '9.3.0' },
     service: { type: 'kibana', version: '9.0.0' },
     ...overrides,
-  } as ChangeHistoryDocument);
+  }) as ChangeHistoryDocument;
 
 const makeChangeHistoryService = (
   overrides: Partial<IWorkflowChangeHistoryService> = {}
@@ -159,6 +159,7 @@ describe('WorkflowCrudService.restoreWorkflowVersion', () => {
       'default',
       request,
       WorkflowChangeHistoryAction.workflowRestore,
+      { isManaged: false },
       {
         eventId: 'event-v3',
         sequence: 3,
@@ -328,7 +329,7 @@ describe('WorkflowCrudService.restoreWorkflowVersion integration', () => {
           authc: {
             getCurrentUser: jest.fn().mockReturnValue({ username: 'alice' }),
           },
-        } as any),
+        }) as any,
       workflowsExtensions: { getAllTriggerDefinitions: () => [] } as any,
       getTaskScheduler: () => null,
       executionQueryService: {

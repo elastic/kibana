@@ -82,7 +82,7 @@ const createMockHit = (
     },
     flattened,
     isAnchor: false,
-  } as DataTableRecord);
+  }) as DataTableRecord;
 
 const mockHit = createMockHit({
   'event.kind': 'signal',

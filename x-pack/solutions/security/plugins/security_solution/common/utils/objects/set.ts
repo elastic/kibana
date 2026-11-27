@@ -48,8 +48,8 @@ export type SetProp<P extends string, V, T extends object> = Expand<
       ? { [k in keyof T]: k extends K ? SetProp<Tail, V, EmptyObject> : T[k] }
       : { [k in K]: SetProp<Tail, V, EmptyObject> } & (T extends EmptyObject ? {} : T)
     : P extends keyof T
-    ? { [k in keyof T]: k extends P ? V : T[k] }
-    : { [k in P]: V } & (T extends EmptyObject ? {} : T)
+      ? { [k in keyof T]: k extends P ? V : T[k] }
+      : { [k in P]: V } & (T extends EmptyObject ? {} : T)
 >;
 
 export function setProp<T extends object, P extends string, V>(

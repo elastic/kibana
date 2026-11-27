@@ -9,7 +9,8 @@ import React from 'react';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { RequestAdapter, apiHasInspectorAdapters } from '@kbn/inspector-plugin/public';
 import { render, screen, act, waitFor } from '@testing-library/react';
-import type { DataView } from '@kbn/data-views-plugin/common';
+import { EsqlSource } from '@kbn/data-source';
+import type { FilterableSource } from '@kbn/data-source';
 import { ChatEventType, TimelineEventType } from '@kbn/agent-builder-common';
 import { customContentEmbeddableFactory } from './custom_content_embeddable';
 import type { CustomContentApi } from './custom_content_embeddable';
@@ -121,16 +122,24 @@ const mockTelemetry = {
 
 jest.mock('./telemetry', () => ({ getTelemetry: () => mockTelemetry }));
 
-const mockGetESQLAdHocDataview = jest.fn();
-jest.mock('@kbn/esql-utils', () => ({
-  ...jest.requireActual('@kbn/esql-utils'),
-  getESQLAdHocDataview: (...args: unknown[]) => mockGetESQLAdHocDataview(...args),
-}));
+// Parsing a query can throw, e.g. a pathological one: the marker stands for such a query.
+jest.mock('@kbn/esql-utils', () => {
+  const actual = jest.requireActual('@kbn/esql-utils');
+  return {
+    ...actual,
+    getSourceCommandQueryFromESQLQuery: (query: string) => {
+      if (query.includes('unparseable')) throw new Error('cannot parse the query');
+      return actual.getSourceCommandQueryFromESQLQuery(query);
+    },
+  };
+});
+
+const mockHttpPost = jest.fn();
 
 jest.mock('./services', () => ({
   getServices: () => ({
     agentBuilder: mockAgentBuilder,
-    core: { http: {} },
+    core: { http: { post: (...args: unknown[]) => mockHttpPost(...args) } },
     search: jest.fn(),
   }),
 }));
@@ -150,7 +159,7 @@ const buildEmbeddable = async (
     initializeDrilldownsManager: jest.fn(),
     initialState,
     parentApi,
-    finalizeApi: (api) => ({ ...api, uuid, parentApi } as unknown as CustomContentApi),
+    finalizeApi: (api) => ({ ...api, uuid, parentApi }) as unknown as CustomContentApi,
     uuid,
   });
 
@@ -253,33 +262,46 @@ describe('customContentEmbeddableFactory', () => {
     });
   });
 
-  describe('data views', () => {
-    // One fake data view per index and time field, like the real ad-hoc ones (their id is made of
-    // both): `FROM logs | …` is the data view of `logs`, and a query that uses `?_tstart` on
+  describe('data sources', () => {
+    // One source per index and time field, like the datasets of real queries (their id is made of
+    // both): `FROM logs | …` reads the dataset of `logs`, and a query that uses `?_tstart` on
     // `sale_date` gives it that time field.
     const indexOf = (query: string) => query.replace(/^FROM (\S+).*$/, '$1');
     const timeFieldOf = (query: string) => (query.includes('?_tstart') ? 'sale_date' : undefined);
     const titles = (embeddable: { api: { dataSources$: { getValue: () => unknown } } }) =>
-      ((embeddable.api.dataSources$.getValue() as DataView[] | undefined) ?? []).map((dataView) =>
-        dataView.getIndexPattern()
+      ((embeddable.api.dataSources$.getValue() as FilterableSource[] | undefined) ?? []).map(
+        ({ title }) => title
       );
+    let mockForDataset: jest.SpyInstance;
 
     beforeEach(() => {
-      mockGetESQLAdHocDataview.mockReset();
-      mockGetESQLAdHocDataview.mockImplementation(async ({ query }: { query: string }) => {
-        if (query.startsWith('FROM broken')) throw new Error('cannot resolve');
-        const timeFieldName = timeFieldOf(query);
-        return {
-          id: [indexOf(query), timeFieldName].filter(Boolean).join('-'),
-          timeFieldName,
-          getIndexPattern: () => indexOf(query),
-        };
-      });
+      mockForDataset = jest
+        .spyOn(EsqlSource, 'forDataset')
+        .mockImplementation(async ({ query }: { query: string }) => {
+          if (query.startsWith('FROM broken')) throw new Error('cannot resolve');
+          const timeFieldName = timeFieldOf(query);
+          return {
+            kind: 'esql',
+            toFilterableSource: async () => ({
+              kind: 'esql',
+              id: [indexOf(query), timeFieldName].filter(Boolean).join('-'),
+              title: indexOf(query),
+              timeFieldName,
+              fields: [],
+              getFieldByName: () => undefined,
+              isTimeBased: () => Boolean(timeFieldName),
+            }),
+          } as unknown as EsqlSource;
+        });
+    });
+
+    afterEach(() => {
+      mockForDataset.mockRestore();
     });
 
     // The dashboard uses these for the filter bar's field suggestions and to decide whether to
     // offer its time picker, and every query is fetched with the dashboard's time range.
-    it('publishes a data view for every query, not only the main one', async () => {
+    it('publishes a source for every query, not only the main one', async () => {
       const { embeddable } = await buildEmbeddable({
         ...baseState,
         esql_query: ['FROM logs | LIMIT 1', 'FROM metrics | LIMIT 1', 'FROM traces | LIMIT 1'],
@@ -288,7 +310,7 @@ describe('customContentEmbeddableFactory', () => {
       await waitFor(() => expect(titles(embeddable)).toEqual(['logs', 'metrics', 'traces']));
     });
 
-    it('publishes a data view once when several queries read the same index', async () => {
+    it('publishes a source once when several queries read the same dataset', async () => {
       const { embeddable } = await buildEmbeddable({
         ...baseState,
         esql_query: ['FROM logs | STATS a = COUNT(*)', 'FROM logs | STATS b = COUNT(*) BY host'],
@@ -297,9 +319,9 @@ describe('customContentEmbeddableFactory', () => {
       await waitFor(() => expect(titles(embeddable)).toEqual(['logs']));
     });
 
-    // A time field is what makes the dashboard offer its time picker, so a data view that has one
+    // A time field is what makes the dashboard offer its time picker, so a source that has one
     // must not be dropped because another query on the same index has none.
-    it('publishes both data views when queries on one index resolve different time fields', async () => {
+    it('publishes both sources when queries on one index resolve different time fields', async () => {
       const { embeddable } = await buildEmbeddable({
         ...baseState,
         esql_query: [
@@ -309,13 +331,13 @@ describe('customContentEmbeddableFactory', () => {
       });
 
       await waitFor(() => expect(titles(embeddable)).toEqual(['sales', 'sales']));
-      const timeFields = (embeddable.api.dataSources$.getValue() as DataView[]).map(
+      const timeFields = (embeddable.api.dataSources$.getValue() as FilterableSource[]).map(
         ({ timeFieldName }) => timeFieldName
       );
       expect(timeFields).toEqual([undefined, 'sale_date']);
     });
 
-    it('keeps the data views of the other queries when one cannot be resolved', async () => {
+    it('keeps the sources of the other queries when one cannot be resolved', async () => {
       const { embeddable } = await buildEmbeddable({
         ...baseState,
         esql_query: ['FROM broken | LIMIT 1', 'FROM metrics | LIMIT 1'],
@@ -324,12 +346,65 @@ describe('customContentEmbeddableFactory', () => {
       await waitFor(() => expect(titles(embeddable)).toEqual(['metrics']));
     });
 
+    // `ROW` and the like read no dataset, so there is no source to offer to the dashboard.
+    it('publishes no source for a query that reads no dataset, and keeps the others', async () => {
+      const { embeddable } = await buildEmbeddable({
+        ...baseState,
+        esql_query: ['ROW greeting = "hello"', 'FROM metrics | LIMIT 1'],
+      });
+
+      await waitFor(() => expect(titles(embeddable)).toEqual(['metrics']));
+      expect(mockForDataset).toHaveBeenCalledTimes(1);
+    });
+
+    it('clears the published sources when a panel changes to a query that reads no dataset', async () => {
+      const { embeddable } = await buildEmbeddable(baseState);
+      await waitFor(() => expect(titles(embeddable)).toEqual(['logs']));
+
+      act(() => {
+        embeddable.api.applySerializedState({
+          ...baseState,
+          esql_query: ['ROW greeting = "hello"'],
+        });
+      });
+
+      await waitFor(() => expect(embeddable.api.dataSources$.getValue()).toBeUndefined());
+    });
+
+    it('keeps the other sources, and keeps following the queries, when one cannot be parsed', async () => {
+      const { embeddable } = await buildEmbeddable({
+        ...baseState,
+        esql_query: ['FROM unparseable | LIMIT 1', 'FROM metrics | LIMIT 1'],
+      });
+      await waitFor(() => expect(titles(embeddable)).toEqual(['metrics']));
+
+      act(() => {
+        embeddable.api.applySerializedState({
+          ...baseState,
+          esql_query: ['FROM traces | LIMIT 1'],
+        });
+      });
+
+      await waitFor(() => expect(titles(embeddable)).toEqual(['traces']));
+    });
+
+    it('publishes none when no query reads a dataset', async () => {
+      const { embeddable } = await buildEmbeddable({
+        ...baseState,
+        esql_query: ['ROW greeting = "hello"'],
+      });
+
+      await act(async () => {});
+      expect(embeddable.api.dataSources$.getValue()).toBeUndefined();
+      expect(mockForDataset).not.toHaveBeenCalled();
+    });
+
     it('publishes none when the panel has no query', async () => {
       const { embeddable } = await buildEmbeddable({ ...baseState, esql_query: undefined });
 
       await act(async () => {});
       expect(embeddable.api.dataSources$.getValue()).toBeUndefined();
-      expect(mockGetESQLAdHocDataview).not.toHaveBeenCalled();
+      expect(mockForDataset).not.toHaveBeenCalled();
     });
 
     it('follows the additional queries when they change', async () => {
@@ -345,13 +420,13 @@ describe('customContentEmbeddableFactory', () => {
       await waitFor(() => expect(titles(embeddable)).toEqual(['logs', 'metrics']));
     });
 
-    it('does not resolve the data views again when nothing about the queries changed', async () => {
+    it('does not resolve the sources again when nothing about the queries changed', async () => {
       const { embeddable } = await buildEmbeddable({
         ...baseState,
         esql_query: ['FROM logs | LIMIT 1', 'FROM metrics | LIMIT 1'],
       });
       await waitFor(() => expect(titles(embeddable)).toEqual(['logs', 'metrics']));
-      const calls = mockGetESQLAdHocDataview.mock.calls.length;
+      const calls = mockForDataset.mock.calls.length;
 
       act(() => {
         embeddable.api.applySerializedState({
@@ -361,10 +436,48 @@ describe('customContentEmbeddableFactory', () => {
       });
       await act(async () => {});
 
-      expect(mockGetESQLAdHocDataview).toHaveBeenCalledTimes(calls);
+      expect(mockForDataset).toHaveBeenCalledTimes(calls);
     });
   });
 
+  // Only the HTTP requests are mocked, so the source goes through the real `EsqlSource` conversion.
+  describe('data sources of the real source conversion', () => {
+    const columns = [
+      { name: '@timestamp', esType: 'date' },
+      { name: 'host.name', esType: 'keyword' },
+      { name: 'bytes', esType: 'long' },
+    ];
+
+    beforeEach(() => {
+      mockHttpPost.mockImplementation(async (route: string) =>
+        route.endsWith('source_info') ? { columns } : { timeField: '@timestamp' }
+      );
+    });
+
+    afterEach(() => {
+      mockHttpPost.mockReset();
+    });
+
+    it('publishes the fields of the dataset of an aggregate query, not its output', async () => {
+      const { embeddable } = await buildEmbeddable({
+        ...baseState,
+        esql_query: ['FROM real-conversion-logs | STATS total = COUNT(*) BY host.name'],
+      });
+
+      await waitFor(() => expect(embeddable.api.dataSources$.getValue()).toHaveLength(1));
+      const [source] = embeddable.api.dataSources$.getValue() as FilterableSource[];
+      const fieldNames = source.fields.map(({ name }) => name);
+
+      expect(source.title).toBe('real-conversion-logs');
+      expect(source.timeFieldName).toBe('@timestamp');
+      expect(fieldNames).toEqual(expect.arrayContaining(['host.name', 'bytes']));
+      expect(fieldNames).not.toContain('total');
+      const sourceInfoRequest = mockHttpPost.mock.calls.find(([route]) =>
+        String(route).endsWith('source_info')
+      );
+      expect(JSON.parse(sourceInfoRequest?.[1].body).query).toBe('FROM real-conversion-logs');
+    });
+  });
   describe('additional queries', () => {
     const multiQueryState = {
       ...baseState,
@@ -989,9 +1102,8 @@ describe('customContentEmbeddableFactory', () => {
     });
 
     it('applies the update from the first run of a new conversation', async () => {
-      const { embeddable, emit, activeConversation$, getChatEvents$ } = await renderGeneratingPanel(
-        true
-      );
+      const { embeddable, emit, activeConversation$, getChatEvents$ } =
+        await renderGeneratingPanel(true);
       expect(getChatEvents$).not.toHaveBeenCalled();
 
       // The chat creates the conversation before sending, so its id is published before the run streams

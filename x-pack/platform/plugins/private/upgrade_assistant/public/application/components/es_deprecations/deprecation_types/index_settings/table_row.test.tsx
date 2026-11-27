@@ -34,7 +34,7 @@ const mockAddContent = jest.fn<
       props: {
         removeIndexSettings: (index: string, settings: string[]) => Promise<void>;
       };
-    }
+    },
   ]
 >();
 const mockRemoveContent = jest.fn<void, [id: string]>();

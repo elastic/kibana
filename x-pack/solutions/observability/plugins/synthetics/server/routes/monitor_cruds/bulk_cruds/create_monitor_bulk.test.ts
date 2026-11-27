@@ -38,7 +38,7 @@ const mockRouteContext = (response = mockResponse()) =>
     response,
     spaceId: 'default',
     server: { logger: { error: jest.fn() } },
-  } as any);
+  }) as any;
 
 const installPreprocessResult = (result: unknown) => {
   const { CreateMonitorBulkAPI } = jest.requireMock('../services/create_monitor_bulk_api');

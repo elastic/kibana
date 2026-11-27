@@ -1343,7 +1343,7 @@ describe('Create Default Policy tests ', () => {
           name: string,
           config: AnyPolicyCreateConfig | undefined,
           license: ILicense,
-          productFeatures: 'default' | 'serverlessEssentials'
+          productFeatures: 'default' | 'serverlessEssentials',
         ]
       >([
         [

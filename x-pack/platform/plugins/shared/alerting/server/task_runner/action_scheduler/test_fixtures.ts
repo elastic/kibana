@@ -126,7 +126,7 @@ export const getRule = (overrides = {}) =>
     ],
     consumer: 'test-consumer',
     ...overrides,
-  } as unknown as SanitizedRule<RuleTypeParams>);
+  }) as unknown as SanitizedRule<RuleTypeParams>;
 
 export const getRuleType = (): NormalizedRuleType<
   RuleTypeParams,
@@ -172,7 +172,7 @@ export const getDefaultSchedulerContext = <
   Context extends AlertInstanceContext,
   ActionGroupIds extends string,
   RecoveryActionGroupId extends string,
-  AlertData extends RuleAlertData
+  AlertData extends RuleAlertData,
 >(
   loggerMock: Logger,
   actionsPluginMock: jest.Mocked<PluginStartContract>,

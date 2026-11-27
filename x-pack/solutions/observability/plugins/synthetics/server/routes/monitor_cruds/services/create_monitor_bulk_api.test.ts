@@ -45,7 +45,7 @@ const preparedMonitors = {
 } as unknown as BulkCreatePreprocessResult;
 
 const mockRouteContext = (response = mockResponse()) =>
-  ({ response, spaceId: 'default' } as unknown as RouteContext);
+  ({ response, spaceId: 'default' }) as unknown as RouteContext;
 
 describe('CreateMonitorBulkAPI.validateCreateAccess', () => {
   beforeEach(() => {

@@ -26,7 +26,9 @@ export interface ConnectorRef {
 }
 
 /**
- * The connectors assigned to the investigation agent
+ * The connectors assigned to the investigation agent. Assigning and unassigning show no success
+ * toast: every caller renders the new state in place, and a toast would cover the onboarding
+ * Proceed button.
  */
 export function useAgentConnectors(): {
   assignedIds: string[];
@@ -70,19 +72,6 @@ export function useAgentConnectors(): {
       if (!agents) throw new Error('Agent Builder is unavailable');
       const params = { agentId: NIGHTSHIFT_INVESTIGATION_AGENT_ID, connectorId: connector.id };
       return add ? agents.addConnectorToAgent(params) : agents.removeConnectorFromAgent(params);
-    },
-    onSuccess: (_result, { connector, add }) => {
-      notifications.toasts.addSuccess({
-        title: add
-          ? i18n.translate('xpack.nightshift.agentConnectors.assignedToast', {
-              defaultMessage: '{name} added',
-              values: { name: connector.name },
-            })
-          : i18n.translate('xpack.nightshift.agentConnectors.unassignedToast', {
-              defaultMessage: '{name} removed',
-              values: { name: connector.name },
-            }),
-      });
     },
     onError: (err) => {
       notifications.toasts.addError(err, {

@@ -16,7 +16,7 @@ spaceTest.describe(
     const dataViewName = `graph-persistence-${Date.now()}`;
     const workspaceName = `graph presentation ${Date.now()}`;
     const customLabel = 'custom admin path';
-    const customColor = '#16C5C0';
+    const customColor = '#00BDA0';
 
     spaceTest.beforeAll(async ({ apiServices, scoutSpace }) => {
       const { data } = await apiServices.dataViews.create({

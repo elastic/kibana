@@ -8,9 +8,8 @@
 import { errors } from '@elastic/elasticsearch';
 import type { Type } from '@kbn/config-schema';
 import type { IRouter, RequestHandler } from '@kbn/core/server';
-import { elasticsearchServiceMock, httpServerMock } from '@kbn/core/server/mocks';
+import { httpServerMock } from '@kbn/core/server/mocks';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
-import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import { registerSessionEventsRoutes } from './session_events';
 import {
   MAX_MEMORY_ID_LENGTH,
@@ -20,9 +19,8 @@ import {
   SESSION_EVENTS_SAVE_PATH,
 } from '../../common/constants';
 import { apiPrivileges } from '../../common/features';
-import { AiIndexNotFoundError } from '../ai_indices/errors';
-import type { AiIndexService } from '../ai_indices/service';
-import type { SessionEventsService } from '../session_events/types';
+import type { SessionMemoryClient } from '../session_memory_client/client';
+import { MemoryForbiddenError } from '../session_memory_client/errors';
 
 interface RegisteredRoute {
   config: {
@@ -46,72 +44,29 @@ const toolEvent = {
   status: 'failed',
 };
 
-const aiIndex = (id: string) => ({ id, dest: { type: 'data_stream', value: `ai-index-ds-${id}` } });
-
 describe('session events routes', () => {
   let route: RegisteredRoute;
   let response: ReturnType<typeof httpServerMock.createResponseFactory>;
-  let featureFlagEnabled: boolean;
-  let memoryEnabled: boolean;
-  let profileUid: string | null;
-  let getProfileId: jest.Mock<Promise<string | null>>;
-  let authzResult: Record<string, boolean>;
-  let esClient: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;
-  let aiIndexService: { get: jest.Mock };
-  let auditLog: jest.Mock;
-  let service: jest.Mocked<SessionEventsService>;
-
-  const createContext = () =>
-    ({
-      core: Promise.resolve({
-        uiSettings: {
-          client: { get: jest.fn().mockImplementation(async () => featureFlagEnabled) },
-        },
-        security: { audit: { logger: { log: auditLog } } },
-        userProfile: { getCurrentProfileId: getProfileId },
-        elasticsearch: { client: { asCurrentUser: esClient } },
-      }),
-    } as unknown as Parameters<RequestHandler>[0]);
+  let client: jest.Mocked<Pick<SessionMemoryClient, 'saveEvents'>>;
+  let getSessionMemoryClient: jest.Mock;
 
   const validateBody = (body: unknown) => route.validate.request.body.validate(body);
 
   const callRoute = (body: Record<string, unknown>) =>
     route.handler(
-      createContext(),
-      Object.assign(httpServerMock.createKibanaRequest({ body: validateBody(body) }), {
-        authzResult,
-      }),
+      {} as Parameters<RequestHandler>[0],
+      httpServerMock.createKibanaRequest({ body: validateBody(body) }),
       response
     );
 
-  const savedScope = () => service.saveEvents.mock.calls[0][0];
-  const savedInput = () => service.saveEvents.mock.calls[0][1];
-  const auditedEvents = () => auditLog.mock.calls.map(([event]) => event);
-
-  const writableIndices = (writable: Record<string, boolean>) =>
-    esClient.security.hasPrivileges.mockResolvedValueOnce({
-      index: Object.fromEntries(Object.entries(writable).map(([name, write]) => [name, { write }])),
-    } as never);
-
   beforeEach(() => {
-    featureFlagEnabled = true;
-    memoryEnabled = true;
-    profileUid = 'u_jdoe_profile';
-    getProfileId = jest.fn(async () => profileUid);
-    authzResult = {};
-    esClient = elasticsearchServiceMock.createElasticsearchClient();
-    aiIndexService = {
-      get: jest.fn(async (id: string) => aiIndex(id)),
-    };
-    auditLog = jest.fn();
     response = httpServerMock.createResponseFactory();
-    service = {
-      saveEvents: jest.fn(async (_scope, { events }) => ({
+    client = {
+      saveEvents: jest.fn(async ({ events }) => ({
         results: events.map(({ id }) => ({ id, status: 'created' as const })),
       })),
-      listEvents: jest.fn(),
-      getTurn: jest.fn(),
     };
+    getSessionMemoryClient = jest.fn(async () => client);
 
     const router = {
       versioned: {
@@ -126,82 +81,54 @@ describe('session events routes', () => {
       },
     } as unknown as IRouter;
 
-    registerSessionEventsRoutes({
-      router,
-      getSpaces: async () =>
-        ({ spacesService: { getSpaceId: () => 'marketing' } } as unknown as SpacesPluginStart),
-      getSessionEventsService: async () => service,
-      getAiIndexService: () => aiIndexService as unknown as AiIndexService,
-      isMemoryEnabled: async () => memoryEnabled,
-    });
+    registerSessionEventsRoutes({ router, getSessionMemoryClient });
   });
 
-  it('registers a public experimental route that needs write, checks manage memory and takes 10 MB', () => {
+  it('registers a public experimental route that needs write, declares manage memory and takes 10 MB', () => {
     expect(route.config).toMatchObject({
       path: '/api/context_engine/memory/_save_event',
       access: 'public',
-      security: {
-        authz: {
-          requiredPrivileges: [apiPrivileges.writeContextEngine],
-          extendedPrivileges: [apiPrivileges.manageMemory],
-        },
-      },
+      security: { authz: { requiredPrivileges: [apiPrivileges.writeContextEngine] } },
       options: { availability: { stability: 'experimental' } },
     });
+    expect(route.config.security.authz.extendedPrivileges).toEqual([apiPrivileges.manageMemory]);
     expect(SESSION_EVENTS_SAVE_PATH).toBe(route.config.path);
     expect(route.config.options.body.maxBytes).toBe(10 * 1024 * 1024);
   });
 
-  it('returns 404 and saves nothing when the context engine is disabled', async () => {
-    featureFlagEnabled = false;
-
-    await callRoute({ session_id: 's1', events: [userEvent] });
-
-    expect(response.notFound).toHaveBeenCalledTimes(1);
-    expect(service.saveEvents).not.toHaveBeenCalled();
-  });
-
-  it('returns 404 and saves nothing when memory is turned off', async () => {
-    memoryEnabled = false;
-
-    await callRoute({ session_id: 's1', events: [userEvent] });
-
-    expect(response.notFound).toHaveBeenCalledWith({
-      body: { message: 'Context Engine memory is turned off.' },
-    });
-    expect(service.saveEvents).not.toHaveBeenCalled();
-  });
-
-  it('saves the events for the caller in the request space and returns every result in order', async () => {
-    writableIndices({ 'ai-index-ds-ops-memory': true });
-    service.saveEvents.mockResolvedValueOnce({
+  it('saves through the client of the request and returns every result in order', async () => {
+    client.saveEvents.mockResolvedValueOnce({
       results: [
         { id: 'evt-1', status: 'created' },
         { id: 'evt-2', status: 'failed', error: 'inference failed' },
-        { id: 'evt-3', status: 'created' },
       ],
     });
 
     await callRoute({
       session_id: 's1',
-      ai_index_ids: ['ops-memory'],
-      events: [userEvent, toolEvent, { ...base, id: 'evt-3', type: 'assistant', content: 'Done.' }],
+      user_id: 'u_other',
+      ai_index_ids: ['ops', 'ops'],
+      events: [userEvent, toolEvent],
     });
 
-    expect(savedScope()).toEqual({ space: 'marketing', userId: 'u_jdoe_profile' });
-    expect(savedInput()).toMatchObject({ sessionId: 's1', aiIndexIds: ['ops-memory'] });
+    expect(getSessionMemoryClient).toHaveBeenCalledTimes(1);
+    expect(client.saveEvents).toHaveBeenCalledWith({
+      sessionId: 's1',
+      userId: 'u_other',
+      aiIndexIds: ['ops', 'ops'],
+      events: [userEvent, toolEvent],
+    });
     expect(response.ok).toHaveBeenCalledWith({
       body: {
         results: [
           { id: 'evt-1', status: 'created' },
           { id: 'evt-2', status: 'failed', error: 'inference failed' },
-          { id: 'evt-3', status: 'created' },
         ],
       },
     });
   });
 
-  it('passes events to the service with their unknown fields unchanged', async () => {
+  it('passes events with their unknown fields unchanged', async () => {
     const events = [
       { ...userEvent, harness: { name: 'claude-code', cwd: '/srv' }, tool_name: 'not-a-tool' },
       { ...toolEvent, result: 'timed out', duration_ms: 30000 },
@@ -214,299 +141,54 @@ describe('session events routes', () => {
         tool_calls: [{ id: 'call-1', name: 'search_logs', args: '{}', type: 'function' }],
       },
       { ...base, id: 'evt-6', type: 'meta', model: 'claude-opus' },
-      {
-        ...base,
-        id: 'evt-7',
-        type: 'assistant',
-        tool_calls: [
-          { id: 'toolu_01', name: 'Read', args: { file_path: '/srv/app.ts', limit: 40 } },
-          { id: 'toolu_02', name: 'Bash', args: ['ls', '-la'] },
-        ],
-      },
     ];
 
     await callRoute({ session_id: 's1', events });
 
-    expect(savedInput().events).toEqual(events);
+    expect(client.saveEvents.mock.calls[0][0].events).toEqual(events);
   });
 
-  describe('user_id', () => {
-    it("is the caller's id when it is left out, without manage memory", async () => {
-      authzResult = { [apiPrivileges.manageMemory]: false };
+  it('maps client errors to their responses', async () => {
+    client.saveEvents.mockRejectedValueOnce(new MemoryForbiddenError('no profile'));
 
-      await callRoute({ session_id: 's1', events: [userEvent] });
+    await callRoute({ session_id: 's1', events: [userEvent] });
 
-      expect(savedScope()).toEqual({ space: 'marketing', userId: 'u_jdoe_profile' });
-      expect(response.ok).toHaveBeenCalledTimes(1);
-    });
-
-    it('files the events under another user when user_id names one, with manage memory', async () => {
-      authzResult = { [apiPrivileges.manageMemory]: true };
-      await callRoute({ session_id: 's1', user_id: 'u_other', events: [userEvent] });
-
-      expect(savedScope()).toEqual({ space: 'marketing', userId: 'u_other' });
-      expect(response.forbidden).not.toHaveBeenCalled();
-      expect(response.ok).toHaveBeenCalledTimes(1);
-    });
-
-    it('returns 403 and saves nothing for a caller without a profile and without user_id', async () => {
-      profileUid = null;
-
-      await callRoute({ session_id: 's1', events: [userEvent] });
-
-      expect(response.forbidden).toHaveBeenCalledWith({
-        body: { message: expect.stringContaining('The caller has no user profile') },
-      });
-      expect(service.saveEvents).not.toHaveBeenCalled();
-    });
-
-    it('returns 403, audits and saves nothing when user_id names another user without manage memory', async () => {
-      authzResult = { [apiPrivileges.manageMemory]: false };
-
-      await callRoute({ session_id: 's1', user_id: 'u_other', events: [userEvent] });
-
-      expect(response.forbidden).toHaveBeenCalledWith({
-        body: { message: expect.stringContaining(apiPrivileges.manageMemory) },
-      });
-      expect(service.saveEvents).not.toHaveBeenCalled();
-      expect(auditedEvents()).toEqual([
-        expect.objectContaining({
-          event: expect.objectContaining({ action: 'memory_save_event', outcome: 'failure' }),
-          user: { target: { id: 'u_other' } },
-        }),
-      ]);
-    });
-
-    it('accepts the caller naming itself in user_id without manage memory', async () => {
-      authzResult = { [apiPrivileges.manageMemory]: false };
-
-      await callRoute({ session_id: 's1', user_id: 'u_jdoe_profile', events: [userEvent] });
-
-      expect(savedScope()).toEqual({ space: 'marketing', userId: 'u_jdoe_profile' });
-      expect(response.forbidden).not.toHaveBeenCalled();
-    });
-
-    it('saves for the named user when the caller has no profile, with manage memory', async () => {
-      profileUid = null;
-      authzResult = { [apiPrivileges.manageMemory]: true };
-
-      await callRoute({ session_id: 's1', user_id: 'u_someone', events: [userEvent] });
-
-      expect(savedScope()).toEqual({ space: 'marketing', userId: 'u_someone' });
-      expect(response.forbidden).not.toHaveBeenCalled();
-    });
+    expect(response.forbidden).toHaveBeenCalledWith({ body: { message: 'no profile' } });
   });
 
-  describe('ai_index_ids', () => {
-    it("checks the caller's write privilege and deduplicates ai_index_ids before saving", async () => {
-      writableIndices({ 'ai-index-ds-ops': true, 'ai-index-ds-sales': true });
-
-      await callRoute({
-        session_id: 's1',
-        ai_index_ids: ['ops', 'sales', 'ops'],
-        events: [userEvent],
-      });
-
-      expect(aiIndexService.get.mock.calls).toEqual([
-        ['ops', 'marketing'],
-        ['sales', 'marketing'],
-      ]);
-      expect(esClient.security.hasPrivileges).toHaveBeenCalledWith({
-        index: [{ names: ['ai-index-ds-ops', 'ai-index-ds-sales'], privileges: ['write'] }],
-      });
-      expect(savedInput()).toMatchObject({ aiIndexIds: ['ops', 'sales'] });
-    });
-
-    it('returns 403 and saves nothing when one AI index is not writable', async () => {
-      writableIndices({ 'ai-index-ds-ops': true, 'ai-index-ds-sales': false });
-
-      await callRoute({ session_id: 's1', ai_index_ids: ['ops', 'sales'], events: [userEvent] });
-
-      expect(response.forbidden).toHaveBeenCalledWith({
-        body: { message: expect.stringContaining("AI index 'sales' is not writable") },
-      });
-      expect(service.saveEvents).not.toHaveBeenCalled();
-    });
-
-    it('returns 404, audits, and saves nothing when an AI index does not exist', async () => {
-      aiIndexService.get.mockRejectedValueOnce(new AiIndexNotFoundError('missing'));
-
-      await callRoute({ session_id: 's1', ai_index_ids: ['missing'], events: [userEvent] });
-
-      expect(response.notFound).toHaveBeenCalledWith({
-        body: { message: expect.stringContaining("'missing' not found") },
-      });
-      expect(service.saveEvents).not.toHaveBeenCalled();
-      expect(auditedEvents()).toEqual([
-        expect.objectContaining({
-          event: expect.objectContaining({ action: 'memory_save_event', outcome: 'failure' }),
-          error: expect.objectContaining({ code: 'AiIndexNotFoundError' }),
-        }),
-      ]);
-    });
-
-    it('audits and rethrows unexpected errors while checking AI index privileges', async () => {
-      esClient.security.hasPrivileges.mockRejectedValueOnce(new Error('es unreachable'));
-
-      await expect(
-        callRoute({ session_id: 's1', ai_index_ids: ['ops'], events: [userEvent] })
-      ).rejects.toThrow('es unreachable');
-      expect(service.saveEvents).not.toHaveBeenCalled();
-      expect(auditedEvents()).toEqual([
-        expect.objectContaining({
-          event: expect.objectContaining({ action: 'memory_save_event', outcome: 'failure' }),
-          error: { code: 'Error', message: 'es unreachable' },
-        }),
-      ]);
-    });
-
-    it('checks nothing when the request names no AI index', async () => {
-      await callRoute({ session_id: 's1', events: [userEvent] });
-
-      expect(aiIndexService.get).not.toHaveBeenCalled();
-      expect(esClient.security.hasPrivileges).not.toHaveBeenCalled();
-      expect(savedInput()).toMatchObject({ aiIndexIds: [] });
-    });
-  });
-
-  describe('audit', () => {
-    it('writes one event per request with the target user and the counts', async () => {
-      service.saveEvents.mockResolvedValueOnce({
-        results: [
-          { id: 'evt-1', status: 'created' },
-          { id: 'evt-2', status: 'failed', error: 'inference failed' },
-        ],
-      });
-
-      await callRoute({ session_id: 's1', events: [userEvent, toolEvent] });
-
-      expect(auditedEvents()).toEqual([
-        expect.objectContaining({
-          message: 'User has saved 1 event(s) of session [id=s1], 1 failed',
-          event: expect.objectContaining({ action: 'memory_save_event', outcome: 'success' }),
-          user: { target: { id: 'u_jdoe_profile' } },
-          kibana: { saved_object: { type: 'session_events', id: 's1' } },
-        }),
-      ]);
-    });
-
-    it('records failure when every event in the batch failed', async () => {
-      service.saveEvents.mockResolvedValueOnce({
-        results: [{ id: 'evt-1', status: 'failed', error: 'inference failed' }],
-      });
-
-      await callRoute({ session_id: 's1', events: [userEvent] });
-
-      expect(auditedEvents()).toEqual([
-        expect.objectContaining({
-          message: 'Failed to save 1 event(s) of session [id=s1]',
-          event: expect.objectContaining({ action: 'memory_save_event', outcome: 'failure' }),
-          user: { target: { id: 'u_jdoe_profile' } },
-        }),
-      ]);
-    });
-
-    it('records the named user as the target of the events', async () => {
-      authzResult = { [apiPrivileges.manageMemory]: true };
-      await callRoute({ session_id: 's1', user_id: 'u_other', events: [userEvent] });
-
-      expect(auditedEvents()).toEqual([
-        expect.objectContaining({
-          event: expect.objectContaining({ action: 'memory_save_event', outcome: 'success' }),
-          user: { target: { id: 'u_other' } },
-        }),
-      ]);
-    });
-
-    it('audits and rethrows when resolving the user profile fails', async () => {
-      getProfileId.mockRejectedValueOnce(new Error('profile activation failed'));
-
-      await expect(callRoute({ session_id: 's1', events: [userEvent] })).rejects.toThrow(
-        'profile activation failed'
-      );
-      expect(auditedEvents()).toEqual([
-        expect.objectContaining({
-          event: expect.objectContaining({ action: 'memory_save_event', outcome: 'failure' }),
-          error: { code: 'Error', message: 'profile activation failed' },
-        }),
-      ]);
-    });
-
-    it('records a rejected request as a failure', async () => {
-      profileUid = null;
-
-      await callRoute({ session_id: 's1', events: [userEvent] });
-
-      expect(auditedEvents()).toEqual([
-        expect.objectContaining({
-          event: expect.objectContaining({ action: 'memory_save_event', outcome: 'failure' }),
-          error: expect.objectContaining({ code: 'Forbidden' }),
-        }),
-      ]);
-    });
-
-    it('records a failed write and rethrows it', async () => {
-      service.saveEvents.mockRejectedValueOnce(new Error('cluster unavailable'));
-
-      await expect(callRoute({ session_id: 's1', events: [userEvent] })).rejects.toThrow(
-        'cluster unavailable'
-      );
-      expect(auditedEvents()).toEqual([
-        expect.objectContaining({
-          event: expect.objectContaining({ outcome: 'failure' }),
-          error: { code: 'Error', message: 'cluster unavailable' },
-        }),
-      ]);
-    });
-
-    it('propagates Elasticsearch 429 responses and audits them as failures', async () => {
-      const tooManyRequests = new errors.ResponseError(
+  it('returns 429 when Elasticsearch rejects the request because it is overloaded', async () => {
+    client.saveEvents.mockRejectedValueOnce(
+      new errors.ResponseError(
         elasticsearchClientMock.createApiResponse({
           statusCode: 429,
           body: {
             error: { type: 'es_rejected_execution_exception', reason: 'too many requests' },
           },
         })
-      );
-      service.saveEvents.mockRejectedValueOnce(tooManyRequests);
+      )
+    );
 
-      await callRoute({ session_id: 's1', events: [userEvent] });
+    await callRoute({ session_id: 's1', events: [userEvent] });
 
-      expect(response.customError).toHaveBeenCalledWith({
-        statusCode: 429,
-        body: { message: 'es_rejected_execution_exception: too many requests' },
-      });
-      expect(auditedEvents()).toEqual([
-        expect.objectContaining({
-          event: expect.objectContaining({ action: 'memory_save_event', outcome: 'failure' }),
-        }),
-      ]);
+    expect(response.customError).toHaveBeenCalledWith({
+      statusCode: 429,
+      body: { message: 'es_rejected_execution_exception: too many requests' },
     });
+  });
 
-    it('rethrows non-429 Elasticsearch response errors instead of forwarding their status', async () => {
-      const esBadRequest = new errors.ResponseError(
-        elasticsearchClientMock.createApiResponse({
-          statusCode: 400,
-          body: {
-            error: { type: 'illegal_argument_exception', reason: 'internal failure' },
-          },
-        })
-      );
-      service.saveEvents.mockRejectedValueOnce(esBadRequest);
+  it('rethrows other Elasticsearch errors instead of forwarding their status', async () => {
+    const esBadRequest = new errors.ResponseError(
+      elasticsearchClientMock.createApiResponse({
+        statusCode: 400,
+        body: { error: { type: 'illegal_argument_exception', reason: 'internal failure' } },
+      })
+    );
+    client.saveEvents.mockRejectedValueOnce(esBadRequest);
 
-      await expect(callRoute({ session_id: 's1', events: [userEvent] })).rejects.toThrow(
-        esBadRequest
-      );
-      expect(response.customError).not.toHaveBeenCalled();
-    });
-
-    it('writes nothing while Context Engine or memory is turned off', async () => {
-      memoryEnabled = false;
-
-      await callRoute({ session_id: 's1', events: [userEvent] });
-
-      expect(auditLog).not.toHaveBeenCalled();
-    });
+    await expect(callRoute({ session_id: 's1', events: [userEvent] })).rejects.toThrow(
+      esBadRequest
+    );
+    expect(response.customError).not.toHaveBeenCalled();
   });
 
   describe('validation', () => {

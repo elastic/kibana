@@ -115,6 +115,121 @@ export const doAnyChangesMatch = async (
   return anyFilesMatchRequired;
 };
 
+const getPrContext = (
+  owner = process.env.GITHUB_PR_BASE_OWNER,
+  repo = process.env.GITHUB_PR_BASE_REPO,
+  prNumber: undefined | string | number = process.env.GITHUB_PR_NUMBER
+) => {
+  if (!owner || !repo || !prNumber) {
+    throw Error("Couldn't retrieve Github PR info from environment variables");
+  }
+  return {
+    owner,
+    repo,
+    pull_number: typeof prNumber === 'number' ? prNumber : parseInt(prNumber, 10),
+  };
+};
+
+/** The PR's current labels, read live (unlike the GITHUB_PR_LABELS snapshot taken at build start). */
+export const getLivePrLabels = async (): Promise<string[]> => {
+  const { owner, repo, pull_number: issueNumber } = getPrContext();
+  const labels = await github.paginate(github.issues.listLabelsOnIssue, {
+    owner,
+    repo,
+    issue_number: issueNumber,
+    per_page: 100,
+  });
+  return labels.map(({ name }) => name);
+};
+
+/** The PR's commit SHAs, oldest first (GitHub returns at most 250). */
+export const getPrCommitShas = async (): Promise<string[]> => {
+  const commits = await github.paginate(github.pulls.listCommits, {
+    ...getPrContext(),
+    per_page: 100,
+  });
+  return commits.map(({ sha }) => sha);
+};
+
+/** The latest commit status with `context` on `sha`, if any. */
+export const getCommitStatus = async (sha: string, context: string) => {
+  const { owner, repo } = getPrContext();
+  // The combined status holds the latest status per context, unlike the paginated history.
+  const { data } = await github.repos.getCombinedStatusForRef({
+    owner,
+    repo,
+    ref: sha,
+    per_page: 100,
+  });
+  return data.statuses.find((status) => status.context === context);
+};
+
+// GitHub truncates a comparison's file list at this many files.
+const COMPARE_FILES_LIMIT = 300;
+
+/** Files changed between two commits, or `undefined` when GitHub truncated the list. */
+export const getChangedFilesBetween = async (
+  baseSha: string,
+  headSha: string
+): Promise<string[] | undefined> => {
+  const { owner, repo } = getPrContext();
+  const { data } = await github.repos.compareCommitsWithBasehead({
+    owner,
+    repo,
+    basehead: `${baseSha}...${headSha}`,
+  });
+  const files = data.files ?? [];
+  if (files.length >= COMPARE_FILES_LIMIT) {
+    return undefined;
+  }
+  return files.flatMap(({ filename, previous_filename: previousFilename }) =>
+    previousFilename ? [filename, previousFilename] : [filename]
+  );
+};
+
+/** A text file's content on a branch of the repository, read through the API. */
+export const getFileOnBranch = async (
+  path: string,
+  ref: string,
+  owner = process.env.GITHUB_PR_BASE_OWNER || 'elastic',
+  repo = process.env.GITHUB_PR_BASE_REPO || 'kibana'
+): Promise<string> => {
+  const { data } = await github.repos.getContent({ owner, repo, path, ref });
+  if (Array.isArray(data) || data.type !== 'file' || !('content' in data)) {
+    throw new Error(`${path} is not a file on ${ref}`);
+  }
+  return Buffer.from(data.content, 'base64').toString('utf-8');
+};
+
+/** Posts a commit status, e.g. a non-Buildkite PR check. */
+export function setCommitStatus(
+  {
+    sha,
+    state,
+    context,
+    description,
+    targetUrl,
+  }: {
+    sha: string;
+    state: 'error' | 'failure' | 'pending' | 'success';
+    context: string;
+    description: string;
+    targetUrl?: string;
+  },
+  owner = process.env.GITHUB_PR_BASE_OWNER || 'elastic',
+  repo = process.env.GITHUB_PR_BASE_REPO || 'kibana'
+) {
+  return github.repos.createCommitStatus({
+    owner,
+    repo,
+    sha,
+    state,
+    context,
+    description,
+    target_url: targetUrl,
+  });
+}
+
 export function addComment(
   comment: string,
   owner = process.env.GITHUB_PR_BASE_OWNER,

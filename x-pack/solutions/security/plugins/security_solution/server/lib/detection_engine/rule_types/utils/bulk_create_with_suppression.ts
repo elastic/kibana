@@ -36,7 +36,7 @@ export interface GenericBulkCreateResponse<T extends DetectionAlertLatest> {
 }
 
 export const bulkCreateWithSuppression = async <
-  T extends SuppressionFieldsLatest & DetectionAlertLatest
+  T extends SuppressionFieldsLatest & DetectionAlertLatest,
 >({
   sharedParams,
   wrappedDocs,

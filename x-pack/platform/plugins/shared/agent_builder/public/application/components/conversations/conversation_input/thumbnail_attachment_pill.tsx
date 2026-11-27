@@ -74,11 +74,13 @@ export const ThumbnailAttachmentPill: React.FC<ThumbnailAttachmentPillProps> = (
         border-radius: ${euiTheme.size.s};
         background-color: ${euiTheme.colors.backgroundBaseSubdued};
         box-shadow: 0 0 0 ${euiTheme.border.width.thin}
-          ${isHighlighted
-            ? euiTheme.colors.borderStrongPrimary
-            : isInteractive && isHovered
-            ? euiTheme.colors.borderBasePrimary
-            : euiTheme.colors.borderBaseSubdued};
+          ${
+            isHighlighted
+              ? euiTheme.colors.borderStrongPrimary
+              : isInteractive && isHovered
+                ? euiTheme.colors.borderBasePrimary
+                : euiTheme.colors.borderBaseSubdued
+          };
         overflow: hidden;
         flex-shrink: 0;
 

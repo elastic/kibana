@@ -279,6 +279,7 @@ export const SortRenderer = ({
         })}
         options={options}
         onChange={handleSelectChange}
+        listProps={{ paddingSize: 's' }}
         data-test-subj={CONTENT_LIST_TEST_SUBJECTS.sortSelectOptions}
       >
         {(list) => list}

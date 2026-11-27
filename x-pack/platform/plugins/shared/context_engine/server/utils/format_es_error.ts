@@ -35,5 +35,5 @@ export const formatErrorMessage = (error: unknown): string =>
   isResponseError(error)
     ? formatEsError(error)
     : error instanceof Error
-    ? error.message
-    : String(error);
+      ? error.message
+      : String(error);

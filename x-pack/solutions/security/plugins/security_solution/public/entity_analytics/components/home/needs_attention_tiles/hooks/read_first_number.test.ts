@@ -9,7 +9,7 @@ import type { ESQLSearchResponse } from '@kbn/es-types';
 import { readFirstNumber } from './read_first_number';
 
 const response = (columns: string[], values: unknown[][]) =>
-  ({ columns: columns.map((name) => ({ name })), values } as unknown as ESQLSearchResponse);
+  ({ columns: columns.map((name) => ({ name })), values }) as unknown as ESQLSearchResponse;
 
 describe('readFirstNumber', () => {
   it('reads the named column of the first row, wherever it is', () => {

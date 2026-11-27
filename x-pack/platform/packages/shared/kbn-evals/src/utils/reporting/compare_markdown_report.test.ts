@@ -32,6 +32,39 @@ const makeResult = (overrides: Partial<ComparisonResult> = {}): ComparisonResult
 });
 
 describe('formatMarkdownCompareReport', () => {
+  describe('merge gate verdict', () => {
+    const firstLine = (
+      regressionGateVerdict: Parameters<
+        typeof formatMarkdownCompareReport
+      >[0]['regressionGateVerdict']
+    ) =>
+      formatMarkdownCompareReport({
+        targetExperimentId: 'exp-a',
+        baselineExperimentId: 'exp-b',
+        results: [makeResult()],
+        regressionGateVerdict,
+      }).split('\n')[0];
+
+    it('leads with a regression and how to override it', () => {
+      expect(firstLine({ state: 'regression', summary: 'goal_pass 0.55 → 0.32 (p<0.001)' })).toBe(
+        '**Merge gate: regression.** goal_pass 0.55 → 0.32 (p<0.001). Fix it, or add the `evals:accept-regression` label to merge anyway.'
+      );
+    });
+
+    it('leads with a pass or an inconclusive result', () => {
+      expect(
+        firstLine({ state: 'pass', summary: 'no regression in goal_pass (0.55 → 0.53)' })
+      ).toBe('**Merge gate: passed.** No regression in goal_pass (0.55 → 0.53).');
+      expect(firstLine({ state: 'inconclusive', summary: 'baseline is 5 days old' })).toBe(
+        '**Merge gate: not enforced.** The comparison is inconclusive: baseline is 5 days old.'
+      );
+    });
+
+    it('is omitted when the suite has no gate', () => {
+      expect(firstLine(undefined)).toBe('**PR run**: exp-a | **Baseline (main)**: exp-b');
+    });
+  });
+
   it('renders a basic comparison table', () => {
     const output = formatMarkdownCompareReport({
       targetExperimentId: 'exp-a',

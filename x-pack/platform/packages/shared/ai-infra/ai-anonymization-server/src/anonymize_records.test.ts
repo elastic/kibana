@@ -477,7 +477,7 @@ describe('anonymizeRecords', () => {
         name: 'Legacy',
         entityClass,
         pattern,
-      } as RegexAnonymizationRule);
+      }) as RegexAnonymizationRule;
     const run = (
       rules: AnonymizationRule[],
       options: { onFailure?: 'block' | 'allow_unsafe'; content?: string } = {}

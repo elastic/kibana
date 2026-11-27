@@ -66,7 +66,7 @@ const AGENTS = [
   { id: 'agent-3', policy_id: 'policy-1' },
 ].map(
   ({ id, policy_id: policyId }) =>
-    ({ id, policy_id: policyId, policy_base_id: policyId, sort: [id] } as unknown as Agent)
+    ({ id, policy_id: policyId, policy_base_id: policyId, sort: [id] }) as unknown as Agent
 );
 
 describe('ReassignActionRunner', () => {

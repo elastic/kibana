@@ -245,11 +245,11 @@ const isMetaGetterCall = (node) => {
   const callee = unwrapExpression(unwrapped.callee);
   return Boolean(
     callee &&
-      callee.type === esTypes.MemberExpression &&
-      !callee.computed &&
-      callee.property.type === esTypes.Identifier &&
-      callee.property.name === 'meta' &&
-      unwrapped.arguments.length === 0
+    callee.type === esTypes.MemberExpression &&
+    !callee.computed &&
+    callee.property.type === esTypes.Identifier &&
+    callee.property.name === 'meta' &&
+    unwrapped.arguments.length === 0
   );
 };
 
@@ -387,8 +387,8 @@ const isEagerDerivedSchemaChain = (init, state, sourceCode) => {
   const root = getChainRootIdentifier(init);
   return Boolean(
     root &&
-      !resolvesToImportedName(root, sourceCode, state.zodNamespaces) &&
-      (state.schemaBindings.has(root.name) || state.schemaFactoryBindings.has(root.name))
+    !resolvesToImportedName(root, sourceCode, state.zodNamespaces) &&
+    (state.schemaBindings.has(root.name) || state.schemaFactoryBindings.has(root.name))
   );
 };
 
@@ -693,9 +693,9 @@ const isLazySchemaBinding = (node, state, sourceCode) => {
   const definition = findDefinition(node, sourceCode);
   return Boolean(
     definition?.type === 'Variable' &&
-      definition.node.id.type === esTypes.Identifier &&
-      definition.node.init &&
-      isLazySchemaCall(definition.node.init, state, sourceCode)
+    definition.node.id.type === esTypes.Identifier &&
+    definition.node.init &&
+    isLazySchemaCall(definition.node.init, state, sourceCode)
   );
 };
 
@@ -944,8 +944,8 @@ module.exports = {
           const returned = getReturnedExpression(call.arguments[0]);
           doubleWrapped = Boolean(
             returned &&
-              (isLazySchemaCall(returned, state, sourceCode) ||
-                isCloneOfLazySchemaBinding(returned, state, sourceCode))
+            (isLazySchemaCall(returned, state, sourceCode) ||
+              isCloneOfLazySchemaBinding(returned, state, sourceCode))
           );
         } else if (isLazySchemaCall(call, state, sourceCode)) {
           doubleWrapped = isZodLazyCall(
@@ -961,8 +961,8 @@ module.exports = {
           const argument = index >= 0 ? call.arguments[index] : undefined;
           doubleWrapped = Boolean(
             argument &&
-              argument.type !== esTypes.SpreadElement &&
-              isLazySchemaBinding(argument, state, sourceCode)
+            argument.type !== esTypes.SpreadElement &&
+            isLazySchemaBinding(argument, state, sourceCode)
           );
         }
         if (

@@ -83,6 +83,24 @@ describe('ComparedKpiPanel', () => {
     expect(screen.queryByTestId('kpiChange')).not.toBeInTheDocument();
   });
 
+  it('keeps a value and its unit on one line, but lets an empty label wrap', () => {
+    const { unmount } = renderPanel({ value: { value: 270, previous: null, delta: null } });
+    expect(screen.getByTestId('kpiValue').parentElement).toHaveStyle({ whiteSpace: 'nowrap' });
+    unmount();
+
+    renderPanel({ value: { value: null, previous: null, delta: null } });
+    expect(screen.getByTestId('kpiValue').parentElement).not.toHaveStyle({
+      whiteSpace: 'nowrap',
+    });
+  });
+
+  it('shows its own empty label when set, e.g. "No data" for a value nothing reports', () => {
+    renderPanel({ value: { value: null, previous: 3, delta: null }, emptyLabel: 'No data' });
+
+    expect(screen.getByTestId('kpiValue')).toHaveTextContent('No data');
+    expect(screen.queryByTestId('kpiChange')).not.toBeInTheDocument();
+  });
+
   it('shows the change of a share in percentage points', () => {
     renderPanel({
       value: { value: 0.99, previous: 0.98, delta: 0.01 },

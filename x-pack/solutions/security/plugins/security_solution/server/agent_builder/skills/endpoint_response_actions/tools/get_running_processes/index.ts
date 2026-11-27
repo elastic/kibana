@@ -142,7 +142,7 @@ export const getRunningProcessesTool = (
                     }
                   : // Why a failed action failed (bounded); without it the model
                     // sees only `status: failed`.
-                    summarizeActionErrors(actionDetails.errors) ?? {}),
+                    (summarizeActionErrors(actionDetails.errors) ?? {})),
                 // Bounded: `outputs` carries one entry per running process, each
                 // with its full command line, so a busy host would otherwise blow
                 // the result budget and have generic truncation discard process

@@ -63,7 +63,10 @@ export class PhaseCallbackHandler extends BaseCallbackHandler {
   private debounceTimer: ReturnType<typeof setTimeout> | null = null;
   private pendingPhase: DataStreamPhase | null = null;
 
-  constructor(private readonly reportPhase: ReportPhaseFn, private readonly logger?: Logger) {
+  constructor(
+    private readonly reportPhase: ReportPhaseFn,
+    private readonly logger?: Logger
+  ) {
     super();
   }
 

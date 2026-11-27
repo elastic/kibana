@@ -11,7 +11,7 @@ import type { DashboardState } from '@kbn/as-code-dashboard-schema';
 import { assignMissingIds, getGeneratedIdPrefix } from './missing_ids';
 
 const state = (overrides: Partial<DashboardState> = {}) =>
-  ({ title: 'Logs', panels: [], ...overrides } as DashboardState);
+  ({ title: 'Logs', panels: [], ...overrides }) as DashboardState;
 
 const panel = (id?: string) => ({ ...(id !== undefined && { id }), type: 'testPanelType' });
 

@@ -23,7 +23,7 @@ const createContext = (input: Record<string, unknown>, callKibanaApi: jest.Mock)
     input,
     contextManager: { callKibanaApi },
     logger: { warn: jest.fn() },
-  } as unknown as StepHandlerContext<unknown, unknown>);
+  }) as unknown as StepHandlerContext<unknown, unknown>;
 
 const taskManagerWithLag = (lagMs: number | 'fails') =>
   ({
@@ -31,7 +31,7 @@ const taskManagerWithLag = (lagMs: number | 'fails') =>
       if (lagMs === 'fails') throw new Error('aggregate failed');
       return { aggregations: { oldest: { value: lagMs === 0 ? null : Date.now() - lagMs } } };
     }),
-  } as unknown as Pick<TaskManagerStartContract, 'aggregate'>);
+  }) as unknown as Pick<TaskManagerStartContract, 'aggregate'>;
 
 const liveExecutions = (ids: string[]) =>
   jest
@@ -211,7 +211,7 @@ describe('triage load alerts step', () => {
         getContext: () => ({ workflow: { spaceId: 'team-a' } }),
       },
       logger: { warn: jest.fn() },
-    } as unknown as StepHandlerContext<unknown, unknown>);
+    }) as unknown as StepHandlerContext<unknown, unknown>;
   const loadWith = (loadAlertDocuments: jest.Mock) =>
     getTriageLoadAlertsStepDefinition({
       getWorkflowsManagement: () => ({ loadAlertDocuments }),

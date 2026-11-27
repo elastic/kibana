@@ -25,6 +25,7 @@ import type {
   MobilePlatform,
   WebApplicationSummary,
 } from '../../../common/types/applications';
+import type { ApplicationsIngestResponse } from '../../../common/types/applications_ingest';
 import { TimeRangePicker } from '../../components/time_range_picker';
 import { EnvironmentFilter } from '../../components/environment_filter';
 import { SourceFilter } from './web/source_filter';
@@ -61,10 +62,36 @@ const mockTimeRange = (range: ReturnType<typeof useTimeRange>['timeRange']) =>
     setTimeRange: jest.fn(),
   });
 
+const INGEST_ENDPOINT = 'GET /internal/digital_experience/applications/ingest';
+
+// The list and its ingest are fetched apart, so each has its own mock and call count.
 const mockFetch = jest.fn();
+const mockIngestFetch = jest.fn();
 jest.mock('@kbn/server-route-repository-client', () => ({
-  createRepositoryClient: jest.fn(() => ({ fetch: (...args: unknown[]) => mockFetch(...args) })),
+  createRepositoryClient: jest.fn(() => ({
+    fetch: (endpoint: string, ...args: unknown[]) =>
+      endpoint === INGEST_ENDPOINT
+        ? mockIngestFetch(endpoint, ...args)
+        : mockFetch(endpoint, ...args),
+  })),
 }));
+
+const respondWithIngest = (
+  applications: ApplicationsIngestResponse['applications'] = [],
+  overrides: Partial<ApplicationsIngestResponse> = {}
+) =>
+  mockIngestFetch.mockResolvedValue({
+    applications,
+    overTime: {
+      histogram: { interval: { value: 30, unit: 's' }, start: 0, end: 0 },
+      series: [],
+      other: { otel: [], classic: [] },
+    },
+    missingPrivileges: false,
+    skippedRemoteIndices: false,
+    hasFailures: false,
+    ...overrides,
+  });
 
 const setEnvironment = jest.fn();
 
@@ -238,6 +265,7 @@ const renderPage = ({
 
 beforeEach(() => {
   jest.clearAllMocks();
+  respondWithIngest();
   // The visible columns are kept in local storage.
   window.localStorage.clear();
   mockTimeRange(timeRange);
@@ -742,9 +770,13 @@ describe('ApplicationsListPage', () => {
         httpRequests: { count: 0, failedCount: 0 },
       }),
     ]);
+    // With an estimate, so the ingest is no dash.
+    respondWithIngest([
+      { serviceName: 'app-a', applicationType: 'web', source: 'classic', bytes: 100 },
+    ]);
     renderPage();
 
-    await screen.findByTestId('digitalExperienceApplicationLink');
+    await screen.findByTestId('digitalExperienceApplicationIngest');
     expect(screen.queryByTestId('digitalExperienceVital-lcp')).not.toBeInTheDocument();
     // LCP, INP, CLS and failed HTTP; FCP and TTFB are hidden by default.
     expect(
@@ -868,7 +900,7 @@ describe('ApplicationsListPage', () => {
     expect(screen.getByTestId('digitalExperienceColumnSelector')).toHaveTextContent('6/9');
   });
 
-  it('always shows the page loads, which the table is sorted by', async () => {
+  it('always shows the ingest, which the table is sorted by, and the page loads', async () => {
     window.localStorage.setItem(
       'xpack.digitalExperience.applications.hiddenColumns',
       JSON.stringify([
@@ -887,7 +919,168 @@ describe('ApplicationsListPage', () => {
     renderPage();
     await screen.findByTestId('digitalExperienceApplicationLink');
 
+    expect(screen.getByRole('columnheader', { name: /Ingest/ })).toBeInTheDocument();
     expect(screen.getByRole('columnheader', { name: /Page loads/ })).toBeInTheDocument();
+  });
+
+  describe('ingest, which loads apart from the list', () => {
+    const webIngest = (
+      serviceName: string,
+      bytes: number,
+      source: 'otel' | 'classic' = 'classic'
+    ) => ({
+      serviceName,
+      applicationType: 'web' as const,
+      source,
+      bytes,
+    });
+
+    const rowNames = () =>
+      screen.getAllByTestId('digitalExperienceApplicationLink').map((link) => link.textContent);
+
+    it('shows the rows before their ingest, in the list order, then sorts them by ingest', async () => {
+      let resolveIngest: (value: unknown) => void = () => {};
+      mockIngestFetch.mockReturnValue(new Promise((resolve) => (resolveIngest = resolve)));
+      respondWith([
+        app({ serviceName: 'small', pageLoads: 300 }),
+        app({ serviceName: 'large', pageLoads: 100 }),
+      ]);
+      renderPage();
+      await screen.findAllByTestId('digitalExperienceApplicationLink');
+
+      expect(rowNames()).toEqual(['small', 'large']);
+      expect(screen.getAllByTestId('digitalExperienceApplicationIngestLoading')).toHaveLength(2);
+
+      await act(async () =>
+        resolveIngest({
+          applications: [webIngest('small', 1024), webIngest('large', 5 * 1024 * 1024)],
+          overTime: {
+            histogram: { interval: { value: 30, unit: 's' }, start: 0, end: 0 },
+            series: [],
+            other: { otel: [], classic: [] },
+          },
+          missingPrivileges: false,
+          skippedRemoteIndices: false,
+          hasFailures: false,
+        })
+      );
+
+      expect(rowNames()).toEqual(['large', 'small']);
+      expect(
+        screen.getAllByTestId('digitalExperienceApplicationIngest').map((cell) => cell.textContent)
+      ).toEqual(['5 MB', '1 KB']);
+    });
+
+    it("asks for the ingest of the tab's applications, with the list time range and environment", async () => {
+      mockEnvironment('production');
+      respondWith([app()]);
+      renderPage();
+      await screen.findByTestId('digitalExperienceApplicationLink');
+
+      expect(mockIngestFetch).toHaveBeenCalledWith(INGEST_ENDPOINT, {
+        signal: expect.any(AbortSignal),
+        params: {
+          query: expect.objectContaining({ environment: 'production', applicationType: 'web' }),
+        },
+      });
+    });
+
+    it('totals the ingest of the summarized rows of the selected source', async () => {
+      mockSourceFilter('otel');
+      respondWith([app({ serviceName: 'shop', source: 'otel' }), app({ serviceName: 'docs' })]);
+      respondWithIngest([webIngest('shop', 2048, 'otel'), webIngest('docs', 1024 * 1024)]);
+      renderPage();
+
+      await waitFor(() =>
+        expect(screen.getByTestId('digitalExperienceSummary-ingest')).toHaveTextContent('2 KB')
+      );
+    });
+
+    it("leaves the mobile applications out of the Web tab's total", async () => {
+      respondWith([app({ serviceName: 'shop', source: 'otel' }), mobileApp('shop-mobile')]);
+      respondWithIngest([
+        webIngest('shop', 2048, 'otel'),
+        {
+          serviceName: 'shop-mobile',
+          applicationType: 'mobile',
+          source: 'otel',
+          bytes: 1024 * 1024,
+        },
+      ]);
+      renderPage();
+
+      await waitFor(() =>
+        expect(screen.getByTestId('digitalExperienceSummary-ingest')).toHaveTextContent('2 KB')
+      );
+    });
+
+    it('shows no estimates of the previous environment while the next ones load', async () => {
+      respondWith([app({ serviceName: 'shop' })]);
+      respondWithIngest([webIngest('shop', 2048)]);
+      const { rerender } = renderPage();
+      await screen.findByTestId('digitalExperienceApplicationIngest');
+
+      mockEnvironment('production');
+      mockIngestFetch.mockReturnValue(new Promise(() => {}));
+      rerender(<ApplicationsListPage />);
+
+      await screen.findByTestId('digitalExperienceApplicationIngestLoading');
+      expect(screen.queryByTestId('digitalExperienceApplicationIngest')).toBeNull();
+    });
+
+    it('shows a dash for a row without an estimate, and says why', async () => {
+      respondWith([app({ serviceName: 'shop' })]);
+      respondWithIngest([], { missingPrivileges: true });
+      renderPage();
+      await screen.findByTestId('digitalExperienceApplicationLink');
+      await waitFor(() =>
+        expect(screen.queryByTestId('digitalExperienceApplicationIngestLoading')).toBeNull()
+      );
+
+      expect(screen.queryByTestId('digitalExperienceApplicationIngest')).toBeNull();
+      fireEvent.mouseOver(screen.getByTestId('digitalExperienceSummaryIngestLabel'));
+      expect(
+        await screen.findByText(/it needs the monitor privilege on their indices/)
+      ).toBeInTheDocument();
+    });
+
+    it('keeps the list when the ingest request fails', async () => {
+      mockIngestFetch.mockRejectedValue(new Error('boom'));
+      respondWith([app({ serviceName: 'shop' })]);
+      renderPage();
+
+      expect(await screen.findByTestId('digitalExperienceApplicationLink')).toHaveTextContent(
+        'shop'
+      );
+      expect(screen.queryByTestId('digitalExperienceApplicationsError')).toBeNull();
+    });
+
+    it('sorts the mobile applications by ingest', async () => {
+      mockApplicationType('mobile');
+      respondWith([mobileApp('few-bytes'), mobileApp('many-bytes')]);
+      respondWithIngest([
+        { serviceName: 'few-bytes', applicationType: 'mobile', source: 'otel', bytes: 10 },
+        { serviceName: 'many-bytes', applicationType: 'mobile', source: 'otel', bytes: 10_000 },
+      ]);
+      renderPage();
+
+      await waitFor(() =>
+        expect(
+          screen
+            .getAllByTestId('digitalExperienceMobileApplicationLink')
+            .map((link) => link.textContent)
+        ).toEqual(['many-bytes', 'few-bytes'])
+      );
+      // Only the mobile ones: the web searches count documents the tab doesn't show.
+      expect(mockIngestFetch).toHaveBeenCalledWith(INGEST_ENDPOINT, {
+        signal: expect.any(AbortSignal),
+        params: { query: expect.objectContaining({ applicationType: 'mobile' }) },
+      });
+      expect(mockIngestFetch).not.toHaveBeenCalledWith(INGEST_ENDPOINT, {
+        signal: expect.any(AbortSignal),
+        params: { query: expect.objectContaining({ applicationType: 'web' }) },
+      });
+    });
   });
 
   it('keeps the summary on every application while the search narrows the table', async () => {

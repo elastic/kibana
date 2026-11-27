@@ -68,7 +68,7 @@ describe('runAutomationHandler', () => {
         updateWorkflow: updateWorkflowMock,
         getWorkflowExecution: getWorkflowExecutionMock,
         validateWorkflow: validateWorkflowMock,
-      } as never),
+      }) as never,
   });
 
   beforeEach(() => {

@@ -10,13 +10,18 @@
 import { BehaviorSubject, skip, filter, map } from 'rxjs';
 import type { Observable } from 'rxjs';
 import type { AnalyticsServiceStart } from '@kbn/core/public';
-import type { DiscoverSessionTab, SavedSearch } from '@kbn/saved-search-plugin/common/types';
+import type { SavedSearch } from '@kbn/saved-search-plugin/common/types';
 import {
   apiCanFocusPanel,
   apiPublishesSavedObjectId,
   type PublishingSubject,
 } from '@kbn/presentation-publishing';
-import type { SearchEmbeddableSerializedAttributes, SearchEmbeddableStateManager } from './types';
+import type {
+  SearchEmbeddableSerializedAttributes,
+  SearchEmbeddableSessionTab,
+  SearchEmbeddableStateManager,
+} from './types';
+import { toSessionTabAttributes } from './utils/panel_tab';
 import {
   DISCOVER_IN_DASHBOARD_EVENT_TYPE,
   DiscoverInDashboardEventDataKeys,
@@ -25,7 +30,9 @@ import {
 
 // This type forces our snapshot to include all keys so we don't overlook new ones
 type InlineEditSnapshot = {
-  [K in keyof Required<SearchEmbeddableSerializedAttributes>]: SearchEmbeddableSerializedAttributes[K];
+  [
+    K in keyof Required<SearchEmbeddableSerializedAttributes>
+  ]: SearchEmbeddableSerializedAttributes[K];
 };
 
 interface SearchEmbeddableDeps {
@@ -61,7 +68,7 @@ export const initializeInlineEditingApi = ({
 }: {
   uuid: string;
   parentApi: unknown;
-  tabs: DiscoverSessionTab[];
+  tabs: SearchEmbeddableSessionTab[];
   analytics: AnalyticsServiceStart;
   selectedTabId$: BehaviorSubject<string | undefined>;
   savedObjectId$: BehaviorSubject<string | undefined>;
@@ -105,7 +112,7 @@ export const initializeInlineEditingApi = ({
 
     inlineEditStateSnapshot ??= createSnapshot(searchEmbeddable);
 
-    return applyEmbeddableState(tab);
+    return applyEmbeddableState(toSessionTabAttributes(tab));
   };
 
   const restoreInlineEditSnapshot = async () => {
@@ -171,7 +178,7 @@ export const initializeInlineEditingApi = ({
     analytics.reportEvent(DISCOVER_IN_DASHBOARD_EVENT_TYPE, {
       [DiscoverInDashboardEventDataKeys.EVENT_NAME]: DiscoverInDashboardEventName.tabSwitched,
       [DiscoverInDashboardEventDataKeys.DASHBOARD_ID]: apiPublishesSavedObjectId(parentApi)
-        ? parentApi.savedObjectId$.getValue() ?? 'new'
+        ? (parentApi.savedObjectId$.getValue() ?? 'new')
         : undefined,
       [DiscoverInDashboardEventDataKeys.EMBEDDABLE_PANEL_ID]: uuid,
       [DiscoverInDashboardEventDataKeys.SAVED_SESSION_ID]: savedObjectId$.getValue(),

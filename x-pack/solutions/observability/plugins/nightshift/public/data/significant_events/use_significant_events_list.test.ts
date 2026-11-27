@@ -65,7 +65,7 @@ const createEvent = (investigationState: SignificantEventResponse['investigation
     severity: 'high',
     confidence: 0.9,
     investigation_state: investigationState,
-  } as SignificantEventResponse);
+  }) as SignificantEventResponse;
 
 describe('useSignificantEventsList', () => {
   beforeEach(() => {

@@ -29,7 +29,10 @@ export class PiiRegexWorkerService {
   private worker?: Piscina;
   private readonly config: WorkflowAnonymizationWorkerConfig;
 
-  constructor(config: WorkflowAnonymizationWorkerConfig, private readonly logger: Logger) {
+  constructor(
+    config: WorkflowAnonymizationWorkerConfig,
+    private readonly logger: Logger
+  ) {
     this.config = config;
     this.enabled = config.enabled;
 

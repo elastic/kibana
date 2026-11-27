@@ -21,7 +21,7 @@ const forbidden = () =>
   });
 
 const dataStream = (name: string, lifecycle?: IndicesDataStream['lifecycle']) =>
-  ({ name, lifecycle } as IndicesDataStream);
+  ({ name, lifecycle }) as IndicesDataStream;
 
 const DATA_STREAMS = [dataStream('logs', { enabled: true, effective_retention: '30d' })];
 

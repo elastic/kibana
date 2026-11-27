@@ -42,7 +42,7 @@ export const matchPrebuiltRuleState = Annotation.Root({
   }),
   elastic_rule: Annotation<ElasticRulePartial>({
     reducer: (state, action) => ({ ...state, ...action }),
-    default: () => ({} as ElasticRulePartial),
+    default: () => ({}) as ElasticRulePartial,
   }),
   translation_result: Annotation<MigrationTranslationResult>(),
   comments: Annotation<RuleMigrationRule['comments']>({

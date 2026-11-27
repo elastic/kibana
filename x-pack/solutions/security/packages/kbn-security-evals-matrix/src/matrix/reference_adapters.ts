@@ -245,8 +245,8 @@ export function collectExamples(mod: Record<string, unknown>): DatasetExample[] 
     const arr = Array.isArray(value)
       ? value
       : Array.isArray((value as { examples?: unknown })?.examples)
-      ? ((value as { examples: DatasetExample[] }).examples as DatasetExample[])
-      : undefined;
+        ? ((value as { examples: DatasetExample[] }).examples as DatasetExample[])
+        : undefined;
     if (arr && !seen.has(arr)) {
       seen.add(arr);
       examples.push(...(arr as DatasetExample[]));

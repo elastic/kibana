@@ -173,7 +173,7 @@ export const isSeededWorkspaceRead = ({
 }: InvestigationToolCall): boolean => isSeededWorkspaceAccess(toolId, params);
 
 const renderToolResultValue = (value: unknown, limit: number): string =>
-  typeof value === 'string' ? value : JSON.stringify(value, boundToolCallResult(limit)) ?? '';
+  typeof value === 'string' ? value : (JSON.stringify(value, boundToolCallResult(limit)) ?? '');
 
 // Top-level string fields (e.g. `stdout`) are rendered raw so command output isn't JSON-escaped.
 const renderToolResultData = (data: unknown, limit: number): string => {
@@ -277,8 +277,8 @@ export const buildRoundMessages = ({
     const result = isSeededWorkspaceRead(call)
       ? SEEDED_READ_PLACEHOLDER
       : call.results && call.results.length > 0
-      ? renderToolCallResults(call.results, MAX_TURN_RESULT_CHARS)
-      : NO_RESULT_PLACEHOLDER;
+        ? renderToolCallResults(call.results, MAX_TURN_RESULT_CHARS)
+        : NO_RESULT_PLACEHOLDER;
     const size = JSON.stringify(params).length + result.length;
     if (used + size > MAX_TURNS_TOTAL_CHARS) {
       messages.push(
@@ -375,10 +375,10 @@ export const createLlmProposeWikiEdits = ({
                 currentConversationId === undefined
                   ? ''
                   : page.authored_by?.includes(currentConversationId)
-                  ? ' [this investigation]'
-                  : roundKind !== 'initial' && page.conversation_id === currentConversationId
-                  ? ' [confirmed by this investigation]'
-                  : '';
+                    ? ' [this investigation]'
+                    : roundKind !== 'initial' && page.conversation_id === currentConversationId
+                      ? ' [confirmed by this investigation]'
+                      : '';
               const summary = page.description?.replace(/\s+/g, ' ').trim();
               const summarySuffix = summary ? ` — ${summary}` : '';
               return `- slug=${slug} | ${page.entity_type} | ${page.status} | ${page.title} (${page.corroborations}x)${fromThisInvestigation}${summarySuffix}`;
@@ -663,10 +663,10 @@ export const applyWikiEdits = async ({
       const status = !existing
         ? 'tentative'
         : alreadyTouched || !confirms
-        ? existing.status === 'archived'
-          ? 'tentative'
-          : existing.status
-        : statusAfterCorroboration(existing.status, corroborations ?? 0);
+          ? existing.status === 'archived'
+            ? 'tentative'
+            : existing.status
+          : statusAfterCorroboration(existing.status, corroborations ?? 0);
       const afterContent = proposedContent ?? existing?.content ?? '';
       const written = await store.upsert({
         entityType: edit.entity_type,
@@ -810,16 +810,17 @@ export const optimizeWiki = async ({
       (page) => !isTouchedHere(page) && !isNamed(page) && isRelatedServicePage(page)
     ),
   ].slice(0, MAX_PAGE_BODIES);
-  const pageBodies = (await Promise.all(wanted.map((page) => store.get(page.id)))).flatMap((page) =>
-    page && page.status !== 'archived'
-      ? [
-          {
-            slug: slugOf(page),
-            entity_type: page.entity_type,
-            content: page.content,
-          },
-        ]
-      : []
+  const pageBodies = (await Promise.all(wanted.map((page) => store.get(page.id)))).flatMap(
+    (page) =>
+      page && page.status !== 'archived'
+        ? [
+            {
+              slug: slugOf(page),
+              entity_type: page.entity_type,
+              content: page.content,
+            },
+          ]
+        : []
   );
 
   const { edits } = await proposeEdits({

@@ -16,7 +16,7 @@ type TimeSpanProperty = {
   [Name in keyof SchemaProperties]: SchemaProperties[Name] extends {
     readonly anyOf: readonly [
       { readonly properties: { readonly took_millis: unknown } },
-      ...unknown[]
+      ...unknown[],
     ];
   }
     ? Name
@@ -54,10 +54,30 @@ interface OperatorName {
   detail?: string;
 }
 
+/** One operator as it ran in one driver. */
+export interface AggregatedOperatorDriver {
+  /** The node the driver ran on. Plan node ids only mean something together with it. */
+  nodeName?: string;
+  /** The id of the plan node the operator was built from, when ES reports it. */
+  planNodeId?: string;
+  processNanos: number;
+  timeReported: boolean;
+}
+
+/** Where in the query a plan node came from. */
+export interface PlanNodeSource {
+  /** Line and column of the command in the query, counting from 1. */
+  line: number;
+  column: number;
+  /** The command as ES saw it. */
+  text: string;
+}
+
 /** One kind of operator, summed over all the drivers it ran in. */
 export interface AggregatedOperator extends OperatorName, OperatorMeasures {
   /** Share of summed process time, from 0 to 1. */
   share: number;
+  drivers: AggregatedOperatorDriver[];
 }
 
 /** One operator inside a single driver, in that driver's pipeline order. */
@@ -102,6 +122,8 @@ export interface QueryProfileView {
   planningPhases: PlanningPhase[];
   driverCount: number;
   operators: AggregatedOperator[];
+  /** The source of each plan node that has one, by `planNodeKey` of its node and id. */
+  planNodeSources: Record<string, PlanNodeSource>;
   /** True when at least one driver has a usable start and stop. */
   hasTimeline: boolean;
   timeline: QueryProfileTimeline;

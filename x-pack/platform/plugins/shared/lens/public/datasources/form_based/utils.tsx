@@ -115,7 +115,7 @@ export function isSamplingValueEnabled(layer: FormBasedLayer) {
  * @returns
  */
 export function getSamplingValue(layer: FormBasedLayer) {
-  return isSamplingValueEnabled(layer) ? layer.sampling ?? 1 : 1;
+  return isSamplingValueEnabled(layer) ? (layer.sampling ?? 1) : 1;
 }
 
 export function isColumnInvalid(
@@ -377,7 +377,7 @@ export function getUnsupportedOperationsWarningMessage(
           ([id, fieldColumn]) =>
             [fieldColumn, layer.columns[getReferenceRoot(layer, id)]] as [
               FieldBasedIndexPatternColumn,
-              ReferenceBasedIndexPatternColumn | undefined
+              ReferenceBasedIndexPatternColumn | undefined,
             ]
         );
     });
@@ -460,10 +460,13 @@ export function getPrecisionErrorWarningMessages(
 
   if (state && activeData) {
     Object.entries(activeData)
-      .reduce((acc, [layerId, { columns }]) => {
-        acc.push(...columns.map((column) => ({ layerId, column })));
-        return acc;
-      }, [] as Array<{ layerId: string; column: DatatableColumn }>)
+      .reduce(
+        (acc, [layerId, { columns }]) => {
+          acc.push(...columns.map((column) => ({ layerId, column })));
+          return acc;
+        },
+        [] as Array<{ layerId: string; column: DatatableColumn }>
+      )
       .forEach(({ layerId, column }) => {
         const currentLayer = state.layers[layerId];
         const currentColumn = currentLayer?.columns[column.id];

@@ -132,8 +132,8 @@ function toGlobalSearchProviderResult(
   const type = Streams.ClassicStream.Definition.is(definition)
     ? 'Classic stream'
     : Streams.WiredStream.Definition.is(definition)
-    ? 'Wired stream'
-    : 'Stream';
+      ? 'Wired stream'
+      : 'Stream';
 
   return {
     id,

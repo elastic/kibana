@@ -138,7 +138,7 @@ const makeUserActionSO = (
       type,
       payload,
     } as UserActionPersistedAttributes,
-  } as SavedObject<UserActionPersistedAttributes>);
+  }) as SavedObject<UserActionPersistedAttributes>;
 
 /** One fixture per UserActionType — keys exhaust the enum. */
 const PER_TYPE_FIXTURES: {

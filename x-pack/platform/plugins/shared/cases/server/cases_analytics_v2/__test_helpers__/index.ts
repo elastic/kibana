@@ -80,7 +80,7 @@ export const makeCase = (
       external_service: null,
       settings: { syncAlerts: false },
     } as unknown as CasePersistedAttributes,
-  } as SavedObject<CasePersistedAttributes>);
+  }) as SavedObject<CasePersistedAttributes>;
 
 /**
  * Build a `cases-user-actions` SO with safe defaults, for the activity
@@ -125,7 +125,7 @@ export const makeUserAction = (
           : opts.createdBy,
       ...(opts.source !== undefined ? { source: opts.source } : {}),
     } as UserActionPersistedAttributes,
-  } as SavedObject<UserActionPersistedAttributes>);
+  }) as SavedObject<UserActionPersistedAttributes>;
 
 /**
  * Build a `cases-templates` SO with the persisted shape the analytics-v2
@@ -161,7 +161,7 @@ export const makeTemplate = (
     namespaces: ['default'],
     references: [],
     attributes: { owner, definition: stringifyYaml({ fields }) },
-  } as unknown as SavedObject<TemplateLike>);
+  }) as unknown as SavedObject<TemplateLike>;
 
 /**
  * Build a `cases-field-definitions` SO the analytics-v2 data view service
@@ -199,7 +199,7 @@ export const makeFieldDefinition = (
       isGlobal,
       definition: stringifyYaml({ name, type, control }),
     },
-  } as unknown as SavedObject<FieldDefinitionLike>);
+  }) as unknown as SavedObject<FieldDefinitionLike>;
 
 // ----- SO client `find` stub -----
 
@@ -263,7 +263,7 @@ const toFindResponse = <T>(
     total: page.length,
     per_page: perPage,
     page: 1,
-  } as SavedObjectsFindResponse<T>);
+  }) as SavedObjectsFindResponse<T>;
 
 /**
  * Route the SO client's `find` by requested `type`, each type serving its
@@ -379,7 +379,7 @@ export const makeMockDvService = (): MockDvService => {
 export const makeDataViewsPluginStart = (dvService: MockDvService): DataViewsServerPluginStart =>
   ({
     dataViewsServiceFactory: jest.fn().mockResolvedValue(dvService),
-  } as unknown as DataViewsServerPluginStart);
+  }) as unknown as DataViewsServerPluginStart;
 
 /**
  * Mock data view that round-trips its runtime field map through
@@ -415,7 +415,7 @@ export const makeDataViewWithRuntime = (
         id,
         title: '.cases,.cases-activity,.cases-attachments',
         runtimeFieldMap: { ...dv.__runtimeFieldMap },
-      } as DataViewSpec)
+      }) as DataViewSpec
   );
   // Mirror the real method's behavior so any test that later calls
   // `toSpec` sees the updated map.

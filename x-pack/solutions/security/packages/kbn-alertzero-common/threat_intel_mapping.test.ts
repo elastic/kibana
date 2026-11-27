@@ -14,7 +14,7 @@ import {
 const INDEX = '.kibana-threat-reports';
 
 const mappingsOf = (properties: Record<string, unknown>) =>
-  ({ [INDEX]: { mappings: { properties } } } as never);
+  ({ [INDEX]: { mappings: { properties } } }) as never;
 
 describe('getSemanticTextInferenceId', () => {
   it('resolves a nested semantic_text field to its inference_id', () => {

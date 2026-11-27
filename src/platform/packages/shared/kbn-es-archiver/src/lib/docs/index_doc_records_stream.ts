@@ -43,7 +43,7 @@ export function createIndexDocRecordsStream(
             const op = doc.data_stream ? BulkOperation.Create : operation;
             const index = doc.data_stream || doc.index;
             // generate id for valid targets if it doesn't exist yet
-            const id = targetsWithoutIdGeneration.includes(index) ? doc.id : doc.id ?? uuidv4();
+            const id = targetsWithoutIdGeneration.includes(index) ? doc.id : (doc.id ?? uuidv4());
             ops.set(body, {
               [op]: {
                 _index: index,

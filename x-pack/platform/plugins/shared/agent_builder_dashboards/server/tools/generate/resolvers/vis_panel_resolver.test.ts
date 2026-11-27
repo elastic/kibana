@@ -28,7 +28,7 @@ const createMockLogger = (): Logger =>
     error: jest.fn(),
     info: jest.fn(),
     warn: jest.fn(),
-  } as unknown as Logger);
+  }) as unknown as Logger;
 
 describe('createVisPanelResolver', () => {
   const logger = createMockLogger();
@@ -43,7 +43,7 @@ describe('createVisPanelResolver', () => {
       selectedChartType: 'metric',
       authoringNote: 'Created a titleless metric showing total requests.',
       esqlQuery: 'FROM logs-* | STATS count = COUNT(*)',
-    } as Awaited<ReturnType<typeof buildLensConfig>>);
+    }) as Awaited<ReturnType<typeof buildLensConfig>>;
 
   beforeEach(() => {
     mockedBuildLensConfig.mockReset();
@@ -145,7 +145,7 @@ describe('createVisPanelResolver', () => {
     );
   });
 
-  it('creates a Vega panel in the attachment API shape (config.spec) when type is "vega"', async () => {
+  it('creates a native Vega panel when type is "vega"', async () => {
     const spec = '{"$schema":"https://vega.github.io/schema/vega-lite/v6.json"}';
     mockedBuildVegaConfig.mockResolvedValue({
       spec,
@@ -166,7 +166,7 @@ describe('createVisPanelResolver', () => {
       type: 'success',
       panelContent: {
         type: VEGA_VIS_TYPE,
-        config: { spec, title: 'Requests by host' },
+        config: { spec: { format: 'hjson', value: spec }, title: 'Requests by host' },
       },
       authoringNote: 'Created a bar chart of requests by host with a concise title.',
     });
@@ -192,7 +192,7 @@ describe('createVisPanelResolver', () => {
     expect(mockedBuildLensConfig).toHaveBeenCalled();
   });
 
-  it('reuses the embedded spec when editing a Vega panel', async () => {
+  it('reuses the embedded spec and keeps the panel settings when editing a Vega panel', async () => {
     const existingSpec = '{"$schema":"vega-lite","mark":"bar"}';
     const nextSpec = '{"$schema":"vega-lite","mark":"line"}';
     mockedBuildVegaConfig.mockResolvedValue({
@@ -210,7 +210,11 @@ describe('createVisPanelResolver', () => {
       existingPanel: {
         id: 'panel-1',
         type: VEGA_VIS_TYPE,
-        config: { spec: existingSpec },
+        config: {
+          spec: { format: 'json', value: JSON.parse(existingSpec) },
+          title: 'Requests',
+          query: { language: 'kql', expression: 'host.name: "a"' },
+        },
         grid: { w: 24, h: 12, x: 0, y: 0 },
       },
     });
@@ -219,7 +223,11 @@ describe('createVisPanelResolver', () => {
       type: 'success',
       panelContent: {
         type: VEGA_VIS_TYPE,
-        config: { spec: nextSpec },
+        config: {
+          spec: { format: 'hjson', value: nextSpec },
+          title: 'Requests',
+          query: { language: 'kql', expression: 'host.name: "a"' },
+        },
       },
       authoringNote: 'Changed the panel to a line chart.',
     });
@@ -240,7 +248,7 @@ describe('createVisPanelResolver', () => {
       existingPanel: {
         id: 'panel-1',
         type: VEGA_VIS_TYPE,
-        config: { spec: '{"mark":"bar"}' },
+        config: { spec: { format: 'hjson', value: '{"mark":"bar"}' } },
         grid: { w: 24, h: 10, x: 0, y: 0 },
       },
     });

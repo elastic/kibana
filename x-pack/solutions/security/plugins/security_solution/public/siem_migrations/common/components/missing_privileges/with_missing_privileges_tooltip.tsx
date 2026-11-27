@@ -41,7 +41,7 @@ export const WithMissingPrivilegesTooltip = <P extends { isAuthorized: boolean }
         ({
           ...props,
           isAuthorized,
-        } as P),
+        }) as P,
       [props, isAuthorized]
     );
 

@@ -44,7 +44,7 @@ const collectMatches = (
   { value, periodTail }: RedactableSecret,
   matches: Array<[start: number, end: number]>
 ): void => {
-  for (let i = text.indexOf(value); i !== -1; ) {
+  for (let i = text.indexOf(value); i !== -1;) {
     const start = i;
     let end = i + value.length;
     // An occurrence one period later overlaps this one, so only its last `period` characters are

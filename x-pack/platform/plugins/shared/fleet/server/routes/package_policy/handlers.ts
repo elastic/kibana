@@ -534,7 +534,7 @@ export const updatePackagePolicyHandler: FleetRequestHandler<
           restOfBody.policy_id === undefined ? packagePolicy.policy_id : restOfBody.policy_id,
         enabled:
           'enabled' in restOfBody
-            ? restOfBody.enabled ?? packagePolicy.enabled
+            ? (restOfBody.enabled ?? packagePolicy.enabled)
             : packagePolicy.enabled,
         package: pkg ?? packagePolicy.package,
         inputs: restOfBody.inputs ?? packagePolicyInputs,
@@ -781,7 +781,7 @@ export const upgradePackagePolicyHandler: FleetRequestHandler<
   const failures = body.filter((item) => item.statusCode && item.statusCode !== 200);
   const otherFailure = failures.find((item) => !item.body?.attributes?.agent_version_block);
   const isPartialAgentVersionBlock = body.some((item) => item.success) && !otherFailure;
-  const firstFatalError = isPartialAgentVersionBlock ? undefined : otherFailure ?? failures[0];
+  const firstFatalError = isPartialAgentVersionBlock ? undefined : (otherFailure ?? failures[0]);
 
   if (firstFatalError) {
     return response.customError({

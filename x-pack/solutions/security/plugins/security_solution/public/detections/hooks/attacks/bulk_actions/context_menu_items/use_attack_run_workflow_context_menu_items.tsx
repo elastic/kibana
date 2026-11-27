@@ -15,8 +15,10 @@ import type {
   BulkAttackContextMenuItems,
 } from '../types';
 
-export interface UseAttackRunWorkflowContextMenuItemsProps
-  extends Omit<BaseAttackContextMenuItemsProps, 'telemetrySource'> {
+export interface UseAttackRunWorkflowContextMenuItemsProps extends Omit<
+  BaseAttackContextMenuItemsProps,
+  'telemetrySource'
+> {
   /** Attacks to run the workflow against. Each must have an index to be eligible. */
   attacksForWorkflowRun: Omit<BaseAttackProps, 'relatedAlertIds'>[];
 }

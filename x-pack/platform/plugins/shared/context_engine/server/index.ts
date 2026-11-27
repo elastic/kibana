@@ -14,6 +14,21 @@ import type {
 } from './types';
 
 export type { ContextEnginePluginSetup, ContextEnginePluginStart } from './types';
+export type {
+  ForgetSessionMemoriesInput,
+  RememberSessionMemoryInput,
+  SaveSessionEventsInput,
+  SessionMemoryClient,
+} from './session_memory_client/client';
+export { AiIndexNotFoundError } from './ai_indices/errors/ai_index_not_found_error';
+export { AiIndexWriteForbiddenError } from './ai_indices/errors/ai_index_write_forbidden_error';
+export {
+  ContextEngineDisabledError,
+  MemoryDisabledError,
+  MemoryForbiddenError,
+  RememberCapacityError,
+  SessionMemoryNotFoundError,
+} from './session_memory_client/errors';
 
 export const plugin: PluginInitializer<
   ContextEnginePluginSetup,

@@ -100,7 +100,7 @@ describe('TextBasedDimensionEditor', () => {
           ],
         },
       },
-    } as unknown as TextBasedDimensionEditorProps['state']);
+    }) as unknown as TextBasedDimensionEditorProps['state'];
 
   beforeEach(() => {
     jest.clearAllMocks();

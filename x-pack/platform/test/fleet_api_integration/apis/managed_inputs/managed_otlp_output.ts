@@ -562,6 +562,143 @@ export default function (providerContext: FtrProviderContext) {
       });
     });
 
+    describe('sending queue', () => {
+      // matches xpack.cloud.managed_otlp.url in config.managed_inputs.ts
+      const MANAGED_ENDPOINT = 'managed-otlp.ftr-test.invalid:443';
+      const OTHER_ENDPOINT = 'https://otlp.example.com:4317';
+
+      const createOutput = async (endpoint: string, sendingQueue: unknown) => {
+        const { body } = await supertest
+          .post('/api/fleet/outputs')
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: `otlp-queue-${uuidv4()}`,
+            type: 'otlp',
+            otlp_exporter: { endpoint, protocol: 'grpc', sending_queue: sendingQueue },
+          })
+          .expect(200);
+        return body.item.id as string;
+      };
+
+      const updateQueue = (id: string, endpoint: string, sendingQueue: unknown) =>
+        supertest
+          .put(`/api/fleet/outputs/${id}`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({ otlp_exporter: { endpoint, protocol: 'grpc', sending_queue: sendingQueue } });
+
+      const getQueue = async (id: string) => {
+        const { body } = await supertest.get(`/api/fleet/outputs/${id}`).expect(200);
+        return body.item.otlp_exporter.sending_queue;
+      };
+
+      it('fills the settings that are null or left out with the Elastic defaults on the managed endpoint', async () => {
+        const id = await createOutput(MANAGED_ENDPOINT, {
+          queue_size: null,
+          batch: { min_size: null },
+        });
+
+        expect(await getQueue(id)).to.eql({
+          enabled: true,
+          sizer: 'bytes',
+          queue_size: 50_000_000,
+          block_on_overflow: true,
+          batch: { flush_timeout: '1s', min_size: 1_000_000, max_size: 4_000_000, sizer: 'bytes' },
+        });
+      });
+
+      it('resets a setting to the Elastic default when an update sets it to null', async () => {
+        const id = await createOutput(MANAGED_ENDPOINT, { queue_size: 10_000_000 });
+        expect((await getQueue(id)).queue_size).to.be(10_000_000);
+
+        await updateQueue(id, MANAGED_ENDPOINT, { queue_size: null }).expect(200);
+
+        expect((await getQueue(id)).queue_size).to.be(50_000_000);
+      });
+
+      it('does not fill the Elastic queue size, in bytes, for a queue that counts requests', async () => {
+        const id = await createOutput(MANAGED_ENDPOINT, { sizer: 'requests', batch: null });
+
+        expect(await getQueue(id)).to.eql({
+          enabled: true,
+          sizer: 'requests',
+          block_on_overflow: true,
+          batch: null,
+        });
+      });
+
+      it('keeps the stored settings that a partial update leaves out', async () => {
+        const id = await createOutput(MANAGED_ENDPOINT, {
+          queue_size: 10_000_000,
+          block_on_overflow: false,
+        });
+
+        await updateQueue(id, MANAGED_ENDPOINT, { batch: { min_size: 2_000_000 } }).expect(200);
+
+        expect(await getQueue(id)).to.eql({
+          enabled: true,
+          sizer: 'bytes',
+          queue_size: 10_000_000,
+          block_on_overflow: false,
+          batch: { flush_timeout: '1s', min_size: 2_000_000, max_size: 4_000_000, sizer: 'bytes' },
+        });
+      });
+
+      it('keeps a null sending queue as an opt-out on the managed endpoint', async () => {
+        const id = await createOutput(MANAGED_ENDPOINT, null);
+
+        expect(await getQueue(id)).to.be(null);
+      });
+
+      it('clears a stored queue with null, and keeps it cleared through a later update', async () => {
+        const id = await createOutput(MANAGED_ENDPOINT, undefined);
+        expect((await getQueue(id)).queue_size).to.be(50_000_000);
+
+        await updateQueue(id, MANAGED_ENDPOINT, null).expect(200);
+        expect(await getQueue(id)).to.be(null);
+
+        // an update that leaves the queue out does not bring back the managed defaults
+        await updateQueue(id, MANAGED_ENDPOINT, undefined).expect(200);
+        expect(await getQueue(id)).to.be(null);
+      });
+
+      it('returns 400 when creating an output with sizes that the collector rejects', async () => {
+        const { body } = await supertest
+          .post('/api/fleet/outputs')
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: `otlp-queue-${uuidv4()}`,
+            type: 'otlp',
+            otlp_exporter: {
+              endpoint: OTHER_ENDPOINT,
+              protocol: 'grpc',
+              sending_queue: { sizer: 'items', queue_size: 100, batch: { sizer: 'items' } },
+            },
+          })
+          .expect(400);
+
+        expect(body.message).to.contain(
+          'sending_queue.batch.min_size (8192) can not be more than sending_queue.queue_size (100)'
+        );
+      });
+
+      it('returns 400 when an update makes the stored sizes invalid', async () => {
+        const id = await createOutput(OTHER_ENDPOINT, {
+          sizer: 'items',
+          queue_size: 10_000,
+          batch: { sizer: 'items', min_size: 500 },
+        });
+
+        // the stored minimum of 500 does not fit in a queue of 100
+        const { body } = await updateQueue(id, OTHER_ENDPOINT, { queue_size: 100 }).expect(400);
+        expect(body.message).to.contain(
+          'sending_queue.batch.min_size (500) can not be more than sending_queue.queue_size (100)'
+        );
+
+        // the stored queue is unchanged
+        expect((await getQueue(id)).queue_size).to.be(10_000);
+      });
+    });
+
     describe('DELETE /api/fleet/outputs/{id}', () => {
       it('removes all associated ESO secrets when an OTLP output is deleted', async () => {
         const { body: createBody } = await supertest
@@ -712,9 +849,8 @@ export default function (providerContext: FtrProviderContext) {
       });
 
       it('allows assigning the OTLP output to a pure-OTel agent policy', async () => {
-        const { otlpOutputId, policyId, policyName } = await createOtlpOutputAndOtelPolicy(
-          'allowed'
-        );
+        const { otlpOutputId, policyId, policyName } =
+          await createOtlpOutputAndOtelPolicy('allowed');
 
         // Assigning OTLP output to a pure-OTel policy must succeed
         await supertest
@@ -725,9 +861,8 @@ export default function (providerContext: FtrProviderContext) {
       });
 
       it('rejects assigning the OTLP output to a mixed OTel+beats agent policy', async () => {
-        const { otlpOutputId, policyId, policyName } = await createOtlpOutputAndOtelPolicy(
-          'rejected'
-        );
+        const { otlpOutputId, policyId, policyName } =
+          await createOtlpOutputAndOtelPolicy('rejected');
 
         // Also add a non-OTel (beats) package policy to make the policy mixed
         await supertest
@@ -1023,9 +1158,8 @@ export default function (providerContext: FtrProviderContext) {
           expect(newCredentialId).not.to.be(credentialId);
 
           // the update publishes a new revision, so agents stop using the replaced secret
-          const { revision_idx: revision, data: publishedPolicy } = await getPublishedPolicy(
-            policyId
-          );
+          const { revision_idx: revision, data: publishedPolicy } =
+            await getPublishedPolicy(policyId);
           expect(revision).to.be.greaterThan(previousRevision);
           expect(publishedPolicy.exporters[`otlp/${outputId}`].headers).to.eql({
             Authorization: `ApiKey $co.elastic.secret{${newCredentialId}}`,
@@ -1048,9 +1182,8 @@ export default function (providerContext: FtrProviderContext) {
             .send({ auth: null })
             .expect(200);
 
-          const { revision_idx: revision, data: publishedPolicy } = await getPublishedPolicy(
-            policyId
-          );
+          const { revision_idx: revision, data: publishedPolicy } =
+            await getPublishedPolicy(policyId);
           expect(revision).to.be.greaterThan(previousRevision);
           expect(publishedPolicy.exporters[`otlp/${outputId}`]).to.eql({
             endpoint: 'otlp.example.com:4317',

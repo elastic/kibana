@@ -47,7 +47,7 @@ const indexPattern = {
   ],
 } as DataView;
 
-indexPattern.fields.getByName = (name) => ({ name } as unknown as DataViewField);
+indexPattern.fields.getByName = (name) => ({ name }) as unknown as DataViewField;
 
 const singleTerm = {
   aggs: [

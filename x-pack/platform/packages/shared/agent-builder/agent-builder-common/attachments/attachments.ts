@@ -12,7 +12,7 @@ import type { AttachmentType, AttachmentDataOf } from './attachment_types';
  */
 export interface Attachment<
   Type extends string = string,
-  DataType = Type extends AttachmentType ? AttachmentDataOf<Type> : Record<string, unknown>
+  DataType = Type extends AttachmentType ? AttachmentDataOf<Type> : Record<string, unknown>,
 > {
   /** Unique identifier for the attachment */
   id: string;

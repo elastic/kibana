@@ -1,5 +1,5 @@
 {
-  "sha1": "92a48913d0f6735182c5c06e73205873b08cca32",
+  "sha1": "e2ca361c6543863e25a538706667f3ddbace2cd1",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -494,6 +494,132 @@
         "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/api/tests/mobile_partial_index_access.spec.ts",
         "line": 91,
         "column": 15
+      }
+    },
+    {
+      "id": "f72cccb296ccc7b-20920adee43453b",
+      "title": "Digital Experience mobile releases API authorization answers 403 naming the apm privilege, without it",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/api/tests/mobile_releases_authorization.spec.ts",
+        "line": 20,
+        "column": 9
+      }
+    },
+    {
+      "id": "6cb2d5f54f9f127-a987db76224fafe",
+      "title": "Digital Experience mobile releases API answers the releases of an application with their sessions, users and error rate, and where they first appear",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/api/tests/mobile_releases.spec.ts",
+        "line": 26,
+        "column": 17
+      }
+    },
+    {
+      "id": "6cb2d5f54f9f127-a7e7c80eef8964f",
+      "title": "Digital Experience mobile releases API marks each release at its first document, in order",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/api/tests/mobile_releases.spec.ts",
+        "line": 46,
+        "column": 95
+      }
+    },
+    {
+      "id": "6cb2d5f54f9f127-18b7a06af247c4a",
+      "title": "Digital Experience mobile releases API gives no marker to a release with documents before the range",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/api/tests/mobile_releases.spec.ts",
+        "line": 59,
+        "column": 4
+      }
+    },
+    {
+      "id": "6cb2d5f54f9f127-016a04f1238974c",
+      "title": "Digital Experience mobile releases API names the top 5 releases by sessions and groups the rest as one Other row, each session once",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/api/tests/mobile_releases.spec.ts",
+        "line": 74,
+        "column": 7
+      }
+    },
+    {
+      "id": "6cb2d5f54f9f127-45924e971432b8e",
+      "title": "Digital Experience mobile releases API computes the error rate of a release and of its time bucket alike, above both floors",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/api/tests/mobile_releases.spec.ts",
+        "line": 115,
+        "column": 20
+      }
+    },
+    {
+      "id": "6cb2d5f54f9f127-7f2f2c4fbb3a53a",
+      "title": "Digital Experience mobile releases API lines the buckets up with the user's time zone, the empty ones too",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/api/tests/mobile_releases.spec.ts",
+        "line": 144,
+        "column": 32
+      }
+    },
+    {
+      "id": "6cb2d5f54f9f127-f9a31927e306335",
+      "title": "Digital Experience mobile releases API respects the release and environment filters",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/api/tests/mobile_releases.spec.ts",
+        "line": 172,
+        "column": 32
+      }
+    },
+    {
+      "id": "6cb2d5f54f9f127-e8658d54f68896b",
+      "title": "Digital Experience mobile releases API answers 400 for a range that starts after it ends",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/api/tests/mobile_releases.spec.ts",
+        "line": 191,
+        "column": 14
       }
     },
     {

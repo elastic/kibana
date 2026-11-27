@@ -12,20 +12,19 @@ import { EuiButtonEmpty, EuiText, EuiTourStep } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { useKibana } from '../../hooks/use_kibana';
 
-interface TourCalloutBaseProps
-  extends Pick<
-    EuiTourStepProps,
-    | 'title'
-    | 'content'
-    | 'step'
-    | 'stepsTotal'
-    | 'anchorPosition'
-    | 'minWidth'
-    | 'maxWidth'
-    | 'hasArrow'
-    | 'subtitle'
-    | 'maxWidth'
-  > {
+interface TourCalloutBaseProps extends Pick<
+  EuiTourStepProps,
+  | 'title'
+  | 'content'
+  | 'step'
+  | 'stepsTotal'
+  | 'anchorPosition'
+  | 'minWidth'
+  | 'maxWidth'
+  | 'hasArrow'
+  | 'subtitle'
+  | 'maxWidth'
+> {
   children: ReactElement;
   isOpen?: boolean;
   footerButtonLabel?: string;
