@@ -78,9 +78,11 @@ export const startMetadataTransforms = usageTracker.track(
     );
 
     if (!currentTransformId || !unitedTransformId) {
-      // eslint-disable-next-line no-console
-      console.warn('metadata transforms not found after waiting, skipping transform start');
-      return;
+      // Returning here skips the waitForMetadataDocs guards below, so the caller gets
+      // hosts the endpoint metadata API cannot resolve instead of a seeding failure.
+      throw new Error(
+        `Metadata transforms for endpoint package version [${version}] not found after waiting; endpoint metadata is unavailable`
+      );
     }
 
     await startTransformWithRetry(esClient, currentTransformId);

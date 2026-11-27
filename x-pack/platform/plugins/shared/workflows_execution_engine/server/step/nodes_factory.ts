@@ -201,8 +201,7 @@ export class NodesFactory {
           node as EnterForeachNode,
           this.workflowRuntime,
           stepExecutionRuntime,
-          stepLogger,
-          this.stepIoService
+          stepLogger
         );
       case 'enter-foreach-iteration':
         return new EnterForeachIterationNodeImpl(
@@ -218,26 +217,21 @@ export class NodesFactory {
           node as ExitForeachNode,
           stepExecutionRuntime,
           this.workflowRuntime,
-          stepLogger,
-          this.stepIoService,
-          this.workflowGraph
+          stepLogger
         );
       case 'enter-while':
         return new EnterWhileNodeImpl(
           node as EnterWhileNode,
           this.workflowRuntime,
           stepExecutionRuntime,
-          stepLogger,
-          this.stepIoService
+          stepLogger
         );
       case 'exit-while':
         return new ExitWhileNodeImpl(
           node as ExitWhileNode,
           stepExecutionRuntime,
           this.workflowRuntime,
-          stepLogger,
-          this.stepIoService,
-          this.workflowGraph
+          stepLogger
         );
       case 'enter-parallel':
         return new EnterParallelNodeImpl(
@@ -258,9 +252,7 @@ export class NodesFactory {
           stepExecutionRuntime,
           this.workflowRuntime,
           stepLogger,
-          this.stepExecutionRuntimeFactory,
-          this.stepIoService,
-          this.workflowGraph
+          this.stepExecutionRuntimeFactory
         );
       case 'loop-continue':
         return new LoopContinueNodeImpl(
@@ -268,9 +260,7 @@ export class NodesFactory {
           stepExecutionRuntime,
           this.workflowRuntime,
           stepLogger,
-          this.stepExecutionRuntimeFactory,
-          this.stepIoService,
-          this.workflowGraph
+          this.stepExecutionRuntimeFactory
         );
       case 'enter-retry':
         return new EnterRetryNodeImpl(

@@ -20,9 +20,11 @@ exports[`NetworkTopNFlow Select direction rendering it renders the basic switch 
         class="euiSwitch__icons emotion-euiSwitch__icons-on-enabled"
       >
         <span
+          aria-hidden="true"
           data-euiicon-type="check"
         />
         <span
+          aria-hidden="true"
           data-euiicon-type="cross"
         />
       </span>

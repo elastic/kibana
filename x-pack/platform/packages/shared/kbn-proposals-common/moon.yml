@@ -19,6 +19,7 @@ project:
 dependsOn:
   - '@kbn/i18n'
   - '@kbn/workflows'
+  - '@kbn/workflows-extensions'
   - '@kbn/zod'
 tags:
   - shared-common

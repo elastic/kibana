@@ -1,0 +1,53 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { StepHandlerContext } from '@kbn/workflows-extensions/server';
+import {
+  FP_DECISION_BLOCKING_VERDICT_TAGS,
+  hashOfDecisionId,
+  strictKeyTag,
+} from '../../../alert_triage/fp_decisions';
+import { findKeyTagsWithVerdicts } from '../ports';
+
+type KibanaApi = Pick<StepHandlerContext['contextManager'], 'callKibanaApi'>;
+
+/** Decisions per search: the key tags go in one `terms` clause, which stays far below its limit. */
+const DECISIONS_PER_SEARCH = 500;
+
+/**
+ * Which of the given approved decisions have a key that an alert already carries with a true
+ * positive or inconclusive verdict. The decision was approved on evidence from before, and a later
+ * verdict for the same key is evidence against it. One search covers up to 500 decisions. A read
+ * that fails throws, so the caller closes nothing on a guess. It takes no deadline: a lookup cut
+ * short would leave decisions out, and the caller would read them as having no conflict.
+ */
+export const findDecisionsWithConflictingVerdicts = async (
+  api: KibanaApi,
+  decisionIds: readonly string[]
+): Promise<Set<string>> => {
+  const found = new Set<string>();
+  for (let from = 0; from < decisionIds.length; from += DECISIONS_PER_SEARCH) {
+    const idByKeyTag = new Map(
+      decisionIds.slice(from, from + DECISIONS_PER_SEARCH).map((id) => {
+        const hash = hashOfDecisionId(id);
+        // An id that is not a decision id has no key to look up: never read that as "no conflict".
+        if (hash === undefined) throw new Error(`${id} is not a decision id`);
+        return [strictKeyTag(hash), id];
+      })
+    );
+    const withVerdicts = await findKeyTagsWithVerdicts(
+      api,
+      [...idByKeyTag.keys()],
+      FP_DECISION_BLOCKING_VERDICT_TAGS
+    );
+    withVerdicts.forEach((keyTag) => {
+      const id = idByKeyTag.get(keyTag);
+      if (id !== undefined) found.add(id);
+    });
+  }
+  return found;
+};

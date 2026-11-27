@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { AppMenu } from '@kbn/scout-oblt';
 import type {
   EuiBasicTableObject,
   EuiSelectableObject,
@@ -15,6 +16,8 @@ import type {
 import { TIME_RANGE } from '../../../common/fixtures/constants';
 
 const APP_PATH = '/app/digital_experience';
+
+const panelHeadingTestId = (title: string) => `embeddablePanelHeading-${title.replace(/\s/g, '')}`;
 
 type OverviewFilterName =
   | 'browser'
@@ -57,6 +60,13 @@ export class DigitalExperiencePage {
   public readonly networkSlowestResources: Locator;
   public readonly otelOverviewTopClicks: Locator;
   public readonly otelOverviewFrustration: Locator;
+  public readonly frustrationDashboardLink: Locator;
+  public readonly frustrationPageTitle: Locator;
+  public readonly frustrationDashboardSlot: Locator;
+  public readonly frustrationDashboardErrors: Locator;
+  public readonly frustrationPanelsRendering: Locator;
+  public readonly frustrationSaveAsDashboard: Locator;
+  public readonly appMenu: AppMenu;
   public readonly overviewClearFilters: Locator;
   public readonly overviewAllFilters: Locator;
   public readonly overviewFiltersFlyout: Locator;
@@ -104,6 +114,14 @@ export class DigitalExperiencePage {
   public readonly mobileOsFilter: Locator;
   public readonly mobileCompareToggle: Locator;
   public readonly mobileOpenInDiscover: Locator;
+  public readonly mobileOverviewTab: Locator;
+  public readonly mobileCrashesTab: Locator;
+  public readonly mobileCrashGroupLinks: Locator;
+  public readonly mobileCrashGroupNewBadges: Locator;
+  public readonly mobileCrashFlyout: Locator;
+  public readonly mobileCrashStacktrace: Locator;
+  public readonly mobileCrashTimeline: EuiBasicTableObject;
+  public readonly mobileCrashOpenSession: Locator;
   public readonly platformFilter: Locator;
   public readonly platformList: EuiSelectableObject;
 
@@ -135,6 +153,24 @@ export class DigitalExperiencePage {
     this.networkSlowestResources = page.getByTestId('digitalExperienceNetworkSlowestResources');
     this.otelOverviewTopClicks = page.getByTestId('digitalExperienceOverviewTopClicks');
     this.otelOverviewFrustration = page.getByTestId('digitalExperienceOverviewFrustration');
+    this.frustrationDashboardLink = page.getByTestId(
+      'digitalExperienceOverviewFrustrationDashboardLink'
+    );
+    this.frustrationPageTitle = page.getByRole('heading', {
+      level: 1,
+      name: 'Frustration signals',
+    });
+    this.frustrationDashboardSlot = page.getByTestId('digitalExperienceFrustrationDashboardSlot');
+    this.frustrationDashboardErrors = this.frustrationDashboardSlot.locator(
+      '[data-test-subj="embeddableError"], [data-test-subj="embeddable-lens-failure"]'
+    );
+    this.frustrationPanelsRendering = this.frustrationDashboardSlot.locator(
+      '[data-test-subj="embeddablePanel"]:not([data-render-complete="true"])'
+    );
+    this.frustrationSaveAsDashboard = page.getByTestId(
+      'digitalExperienceFrustrationSaveAsDashboard'
+    );
+    this.appMenu = new AppMenu(page);
     this.overviewClearFilters = page.getByTestId('digitalExperienceOverviewClearFilters');
     this.overviewAllFilters = page.getByTestId('digitalExperienceOverviewAllFilters');
     this.overviewFiltersFlyout = page.getByTestId('digitalExperienceOverviewFiltersFlyout');
@@ -192,6 +228,14 @@ export class DigitalExperiencePage {
     this.mobileOsFilter = page.getByTestId('digitalExperienceMobileOsFilter');
     this.mobileCompareToggle = page.getByTestId('digitalExperienceMobileCompareToggle');
     this.mobileOpenInDiscover = page.getByTestId('digitalExperienceMobileOpenInDiscover');
+    this.mobileOverviewTab = page.getByTestId('digitalExperienceTab-overview');
+    this.mobileCrashesTab = page.getByTestId('digitalExperienceTab-crashes');
+    this.mobileCrashGroupLinks = page.getByTestId('digitalExperienceMobileCrashGroup');
+    this.mobileCrashGroupNewBadges = page.getByTestId('digitalExperienceMobileCrashGroupNew');
+    this.mobileCrashFlyout = page.getByTestId('digitalExperienceMobileCrashFlyout');
+    this.mobileCrashStacktrace = page.getByTestId('digitalExperienceMobileCrashStacktrace');
+    this.mobileCrashTimeline = page.components.basicTable('digitalExperienceMobileCrashTimeline');
+    this.mobileCrashOpenSession = page.getByTestId('digitalExperienceMobileCrashOpenSession');
     this.platformFilter = page.getByTestId('digitalExperiencePlatformFilter');
     this.platformList = page.components.selectable('digitalExperiencePlatformFilterList');
   }
@@ -290,6 +334,21 @@ export class DigitalExperiencePage {
   ): Promise<void> {
     const search = new URLSearchParams({ ...timeRange, source: 'otel', ...query });
     await this.page.goto(this.kbnUrl.get(`${APP_PATH}/${serviceName}/sessions?${search}`));
+  }
+
+  /** Opens a mobile application's Crashes tab with the given URL query, by default the time range. */
+  async gotoMobileCrashes(
+    serviceName: string,
+    query: Record<string, string> = {},
+    timeRange: Record<string, string> = TIME_RANGE
+  ): Promise<void> {
+    const search = new URLSearchParams({
+      ...timeRange,
+      source: 'otel',
+      applicationType: 'mobile',
+      ...query,
+    });
+    await this.page.goto(this.kbnUrl.get(`${APP_PATH}/${serviceName}/crashes?${search}`));
   }
 
   async gotoLegacyUserExperience(): Promise<void> {
@@ -420,6 +479,33 @@ export class DigitalExperiencePage {
   /** The row of an element in the Overview's Frustration panel, found by its CSS selector. */
   frustrationRow(selector: string): Locator {
     return this.page.getByTestId(`digitalExperienceOverviewFrustrationRow-${selector}`);
+  }
+
+  /** The heading of a panel of the frustration dashboard, found by its title. */
+  frustrationPanelHeading(title: string): Locator {
+    return this.frustrationDashboardSlot.getByTestId(panelHeadingTestId(title));
+  }
+
+  /** The heading of a panel of a dashboard the frustration panels were saved as. */
+  savedDashboardPanelHeading(title: string): Locator {
+    return this.page.getByTestId(panelHeadingTestId(title));
+  }
+
+  /** A panel of the frustration dashboard, with its heading and content, found by its title. */
+  frustrationPanel(title: string): Locator {
+    return this.frustrationDashboardSlot
+      .getByTestId('embeddablePanel')
+      .filter({ has: this.page.getByTestId(panelHeadingTestId(title)) });
+  }
+
+  /** The button that collapses or expands a section of the frustration dashboard. */
+  frustrationSectionToggle(sectionId: string): Locator {
+    return this.frustrationDashboardSlot.getByTestId(`kbnGridSectionTitle-${sectionId}`);
+  }
+
+  /** The metric of a metric panel of the frustration dashboard, found by its title. */
+  frustrationMetric(title: string): Locator {
+    return this.frustrationPanel(title).getByTestId('mtrVis');
   }
 
   /** The "Open sessions" link of an element's row in the Frustration panel. */
