@@ -11,7 +11,7 @@ import type { ParsedQuery } from 'query-string';
 import queryString from 'query-string';
 import { format as formatUrl } from 'url';
 import { parseUrl, parseUrlHash } from './parse';
-import { url as urlUtils } from '..';
+import { url as urlUtils } from '../url';
 
 export function replaceUrlQuery(
   rawUrl: string,

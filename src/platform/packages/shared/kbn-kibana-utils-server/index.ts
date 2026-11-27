@@ -7,16 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export type { Get, Set } from './src';
+export type { Get, Set } from '@kbn/kibana-utils-common';
 export {
   AbortError,
   abortSignalToPromise,
   createGetterSetter,
   fieldWildcardFilter,
   fieldWildcardMatcher,
-  getKbnServerError,
-  KbnServerError,
   mergeMigrationFunctionMaps,
-  reportServerError,
   url,
-} from './src';
+} from '@kbn/kibana-utils-common';
+
+export { KbnServerError, reportServerError, getKbnServerError } from './src/report_server_error';

@@ -16,7 +16,7 @@ import ReactDOM from 'react-dom';
 import type { ApplicationStart, HttpStart, ToastsSetup } from '@kbn/core/public';
 import type { ThemeServiceStart } from '@kbn/core/public';
 import type { UserProfileService } from '@kbn/core-user-profile-browser';
-import type { SavedObjectNotFound } from '..';
+import type { SavedObjectNotFound } from '@kbn/kibana-utils-common';
 import { KibanaThemeProvider } from '../theme';
 
 type MarkdownRendererProps = {

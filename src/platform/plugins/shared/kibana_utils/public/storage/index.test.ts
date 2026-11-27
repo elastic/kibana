@@ -8,18 +8,28 @@
  */
 
 describe('legacy Storage entry point', () => {
-  it('can be imported without browser globals', () => {
-    const windowDescriptor = Object.getOwnPropertyDescriptor(globalThis, 'window');
-    Reflect.deleteProperty(globalThis, 'window');
+  it('does not access sessionStorage during import', () => {
+    const sessionStorageDescriptor = Object.getOwnPropertyDescriptor(window, 'sessionStorage');
+    if (!sessionStorageDescriptor) {
+      throw new Error('Expected sessionStorage to be defined');
+    }
+
+    let sessionStorageAccessed = false;
+    Object.defineProperty(window, 'sessionStorage', {
+      configurable: true,
+      get: () => {
+        sessionStorageAccessed = true;
+        throw new Error('sessionStorage was accessed during import');
+      },
+    });
 
     try {
       expect(() => {
         jest.isolateModules(() => require('.'));
       }).not.toThrow();
+      expect(sessionStorageAccessed).toBe(false);
     } finally {
-      if (windowDescriptor) {
-        Object.defineProperty(globalThis, 'window', windowDescriptor);
-      }
+      Object.defineProperty(window, 'sessionStorage', sessionStorageDescriptor);
     }
   });
 });
