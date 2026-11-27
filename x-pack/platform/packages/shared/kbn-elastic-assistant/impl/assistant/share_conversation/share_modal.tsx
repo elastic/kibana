@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import {
   EuiButton,
   EuiModal,
@@ -34,6 +34,21 @@ interface Props {
   setIsModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
+const getSharedWithUsers = (
+  selectedConversation: Conversation | undefined,
+  conversationOwner: ReturnType<typeof getCurrentConversationOwner>
+): UserProfile[] =>
+  selectedConversation?.users
+    // do not show current user in UI
+    .filter((user) => user.id !== conversationOwner?.id && user.name !== conversationOwner?.name)
+    .map(({ name, id }) => ({
+      // id or name will be defined, empty string is fallback for TS
+      uid: id ?? name ?? '',
+      enabled: true,
+      user: { username: name ?? id ?? '' },
+      data: {},
+    })) ?? [];
+
 const ShareModalComponent: React.FC<Props> = ({
   refetchCurrentConversation,
   refetchCurrentUserConversations,
@@ -44,28 +59,14 @@ const ShareModalComponent: React.FC<Props> = ({
   const { copyConversationUrl, updateConversationUsers } = useConversation();
 
   const { toasts } = useAssistantContext();
-  const [nextUsers, setNextUsers] = useState<UserProfile[]>([]);
-
   const conversationOwner = useMemo(
     () => getCurrentConversationOwner(selectedConversation),
     [selectedConversation]
   );
-  useEffect(() => {
-    const conversationUsers =
-      selectedConversation?.users
-        // do not show current user in UI
-        .filter(
-          (user) => user.id !== conversationOwner?.id && user.name !== conversationOwner?.name
-        )
-        .map(({ name, id }) => ({
-          // id or name will be defined, empty string is fallback for TS
-          uid: id ?? name ?? '',
-          enabled: true,
-          user: { username: name ?? id ?? '' },
-          data: {},
-        })) || [];
-    setNextUsers(conversationUsers);
-  }, [conversationOwner, selectedConversation]);
+  // Seeded once per modal open, so a conversation refetch cannot discard an in-progress selection
+  const [nextUsers, setNextUsers] = useState<UserProfile[]>(() =>
+    getSharedWithUsers(selectedConversation, conversationOwner)
+  );
   const handleCopyUrl = useCallback(
     () => copyConversationUrl(selectedConversation),
     [copyConversationUrl, selectedConversation]

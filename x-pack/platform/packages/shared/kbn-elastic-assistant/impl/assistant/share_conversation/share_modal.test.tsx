@@ -9,7 +9,7 @@ import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { ShareModal } from './share_modal';
 import { TestProviders } from '../../mock/test_providers/test_providers';
-import { welcomeConvo } from '../../mock/conversation';
+import { MOCK_USER_PROFILE, welcomeConvo } from '../../mock/conversation';
 import type { IToasts } from '@kbn/core-notifications-browser';
 
 const mockRefetchCurrentConversation = jest.fn();
@@ -26,6 +26,14 @@ jest.mock('../use_conversation', () => ({
     copyConversationUrl: mockCopyConversationUrl,
     updateConversationUsers: mockUpdateConversationUsers,
   }),
+}));
+
+jest.mock('./use_user_profiles', () => ({
+  useUserProfiles: () => ({ data: [] }),
+}));
+
+jest.mock('./use_suggest_user_profiles', () => ({
+  useSuggestUserProfiles: () => ({ data: [MOCK_USER_PROFILE], isLoading: false }),
 }));
 
 const toastsMock = { addSuccess: mockAddSuccess, addError: mockAddError } as unknown as IToasts;
@@ -90,6 +98,34 @@ describe('ShareModal', () => {
       expect(mockRefetchCurrentUserConversations).toHaveBeenCalled();
       expect(mockRefetchCurrentConversation).toHaveBeenCalled();
       expect(mockAddSuccess).toHaveBeenCalled();
+    });
+  });
+
+  it('keeps an in-progress selection when the conversation is refetched', async () => {
+    mockUpdateConversationUsers.mockResolvedValueOnce({});
+    const { rerender } = render(
+      <TestProviders providerContext={{ toasts: toastsMock }}>
+        <ShareModal {...testProps} />
+      </TestProviders>
+    );
+    fireEvent.click(
+      screen.getByTestId(`userProfileSelectableOption-${MOCK_USER_PROFILE.user.username}`)
+    );
+    // a background refetch hands down a new conversation object for the same conversation
+    rerender(
+      <TestProviders providerContext={{ toasts: toastsMock }}>
+        <ShareModal {...testProps} selectedConversation={{ ...welcomeConvo }} />
+      </TestProviders>
+    );
+    fireEvent.click(screen.getByTestId('shareConversation'));
+    await waitFor(() => {
+      expect(mockUpdateConversationUsers).toHaveBeenCalledWith({
+        conversationId: welcomeConvo.id,
+        updatedUsers: [
+          { id: MOCK_USER_PROFILE.uid, name: MOCK_USER_PROFILE.user.username },
+          welcomeConvo.createdBy,
+        ],
+      });
     });
   });
 
