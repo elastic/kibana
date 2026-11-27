@@ -23,12 +23,12 @@ const MAX_TIMEOUT_MS = 2 ** 31 - 1;
 /** Rows asked of Elasticsearch: the kept ones plus one, which only says whether there were more. */
 const QUERY_ROW_LIMIT = EVIDENCE_MAX_ROWS + 1;
 
-/** What a run cancelled before or while its query ran gets. Frozen, because every caller shares it. */
-const ABORTED: EvidenceResult = Object.freeze({
+/** What a run cancelled before or while its query ran gets. */
+const ABORTED: EvidenceResult = {
   result: 'error',
   reason: 'aborted',
   message: 'evidence query aborted',
-});
+};
 
 /**
  * A cell as the response may carry it. The client types a cell as a scalar, but ES|QL also returns
