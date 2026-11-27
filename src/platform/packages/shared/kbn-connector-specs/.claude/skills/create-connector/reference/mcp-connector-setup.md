@@ -175,11 +175,13 @@ The vendor API contract test needs `vendor_api/` artifacts or an exemption for e
 MCP-native connector calls MCP tools, not operations of an OpenAPI spec. Record it as an MCP source
 first, in this order:
 
-1. A URL where a plain `GET` returns the `tools/list` result as JSON (`{ "tools": [...] }`): use it as
-   the source. The recorder only reads the URL; it doesn't send an MCP request or open a session, so a
-   server that only answers `tools/list` over JSON-RPC doesn't qualify, even without credentials.
+1. A URL that returns the `tools/list` result to a plain `GET` without credentials, bare
+   (`{ "tools": [...] }`) or wrapped in JSON-RPC (`{ "result": { "tools": [...] } }`): use it as the
+   source. This keeps drift checked automatically.
 2. The tool definitions the vendor publishes, one document per tool (`--tool name=url`).
-3. A `tools/list` captured once (`captured`), for a server that only answers an MCP request.
+3. Anything a plain `GET` can't fetch, because it needs credentials or an MCP request: fetch the
+   `tools/list` result yourself, save it to a file and record with `--capture`. The source is pinned,
+   so drift is only found when someone captures it again.
 
 See "GraphQL and MCP sources" in the package README. Only if none of these is possible, add it to
 `src/platform/packages/shared/kbn-connector-specs/src/test/vendor_api/vendor_api_exemptions.json`, in the PR that adds the connector:
