@@ -454,6 +454,15 @@ export const ConnectorIconsMap: Map<
         )
     ),
   ],
+  [
+    '.microsoft_defender_endpoint2',
+    lazy(
+      () =>
+        import(
+          /* webpackChunkName: "connectorIconMicrosoftDefenderForEndpoint" */ './specs/microsoft_defender_for_endpoint/icon'
+        )
+    ),
+  ],
 
   [
     '.microsoft_sql_server',
@@ -469,6 +478,18 @@ export const ConnectorIconsMap: Map<
     '.sentinelone2',
     lazy(
       () => import(/* webpackChunkName: "connectorIconSentinelone2" */ './specs/sentinelone/icon')
+    ),
+  ],
+
+  ['.redis', lazy(() => import(/* webpackChunkName: "connectorIconredis" */ './specs/redis/icon'))],
+
+  [
+    '.trend_vision_one',
+    lazy(
+      () =>
+        import(
+          /* webpackChunkName: "connectorIconTrendVisionOne" */ './specs/trend_vision_one/icon'
+        )
     ),
   ],
 ]);

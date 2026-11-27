@@ -226,7 +226,7 @@
   "sources": {
     "v1": {
       "apiVersion": "v1",
-      "fetchedAt": "2026-10-07T20:20:04.256Z",
+      "fetchedAt": "2026-11-23T11:13:25.360Z",
       "format": "openapi",
       "url": "https://rootly-heroku.s3.amazonaws.com/swagger/v1/swagger.json"
     }

@@ -32,7 +32,9 @@
     "@kbn/core-security-server",
     "@kbn/index-management-shared-types",
     "@kbn/share-plugin",
-    "@kbn/router-utils"
+    "@kbn/router-utils",
+    "@kbn/react-kibana-mount",
+    "@kbn/ui-callout"
   ],
   "exclude": [
     "target/**/*"

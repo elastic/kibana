@@ -47,6 +47,15 @@
             ],
             "type": "string"
           },
+          "managementType": {
+            "enum": [
+              "MANAGEMENT_TYPE_UNSPECIFIED",
+              "SELF_MANAGED",
+              "HUB"
+            ],
+            "readOnly": true,
+            "type": "string"
+          },
           "name": {
             "type": "string"
           },
@@ -108,22 +117,7 @@
         "parameters": [
           {
             "in": "query",
-            "name": "oauth_token",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "prettyPrint",
-            "schema": {
-              "default": "true",
-              "type": "boolean"
-            }
-          },
-          {
-            "in": "query",
-            "name": "access_token",
+            "name": "uploadType",
             "schema": {
               "type": "string"
             }
@@ -144,18 +138,7 @@
           },
           {
             "in": "query",
-            "name": "$.xgafv",
-            "schema": {
-              "enum": [
-                "1",
-                "2"
-              ],
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "key",
+            "name": "access_token",
             "schema": {
               "type": "string"
             }
@@ -164,6 +147,17 @@
             "in": "query",
             "name": "upload_protocol",
             "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "$.xgafv",
+            "schema": {
+              "enum": [
+                "1",
+                "2"
+              ],
               "type": "string"
             }
           },
@@ -189,14 +183,29 @@
           },
           {
             "in": "query",
-            "name": "uploadType",
+            "name": "key",
             "schema": {
               "type": "string"
             }
           },
           {
             "in": "query",
-            "name": "filter",
+            "name": "prettyPrint",
+            "schema": {
+              "default": "true",
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "oauth_token",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "pageToken",
             "schema": {
               "type": "string"
             }
@@ -211,7 +220,7 @@
           },
           {
             "in": "query",
-            "name": "pageToken",
+            "name": "filter",
             "schema": {
               "type": "string"
             }
@@ -231,7 +240,11 @@
         "security": [
           {
             "Oauth2": [
-              "https://www.googleapis.com/auth/cloud-platform",
+              "https://www.googleapis.com/auth/cloud-platform"
+            ]
+          },
+          {
+            "Oauth2": [
               "https://www.googleapis.com/auth/cloud-platform.read-only"
             ]
           }

@@ -8,6 +8,7 @@
  */
 
 import type { DataView } from '@kbn/data-views-plugin/common';
+import type { Filter } from '@kbn/es-query';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type { DefaultEmbeddableApi, HasDrilldowns } from '@kbn/embeddable-plugin/public';
 import type { HasInspectorAdapters } from '@kbn/inspector-plugin/public';
@@ -32,10 +33,10 @@ import type {
   SupportsJsonExport,
 } from '@kbn/presentation-publishing';
 import type {
-  DiscoverSessionTab,
-  SavedSearch,
-  SerializableSavedSearch,
-} from '@kbn/saved-search-plugin/common/types';
+  DiscoverSessionApiEmbeddableOverrides,
+  DiscoverSessionApiEmbeddableTab,
+} from '@kbn/as-code-discover-schema';
+import type { SavedSearch, SerializableSavedSearch } from '@kbn/saved-search-plugin/common/types';
 import type { EsqlSource } from '@kbn/data-source';
 import type { BehaviorSubject } from 'rxjs';
 import type { IDslPagination } from '@kbn/search-types';
@@ -96,6 +97,18 @@ export type SearchEmbeddableSerializedAttributes = Omit<
 > &
   Pick<SerializableSavedSearch, 'serializedSearchSource' | 'tabTypeState'>;
 
+/** A session tab as a linked panel shows it. */
+export interface SearchEmbeddableSessionTab {
+  id: string;
+  label: string;
+  /** Undefined for a Classic tab saved without a Data View, which the panel cannot show */
+  tab?: DiscoverSessionApiEmbeddableTab;
+  /** ID of the tab's inline Data View, so filters that reference the view still match it */
+  inlineDataViewId?: string;
+  /** Stored filters of a Classic tab, which the public format cannot always represent */
+  filters?: Filter[];
+}
+
 export type SearchEmbeddableRuntimeState = SearchEmbeddableSerializedAttributes &
   SerializedTitles &
   SerializedTimeRange &
@@ -104,8 +117,13 @@ export type SearchEmbeddableRuntimeState = SearchEmbeddableSerializedAttributes 
     savedObjectId?: string;
     savedObjectDescription?: string;
     nonPersistedDisplayOptions?: NonPersistedDisplayOptions;
+    /** Tab of a by-value panel */
+    tab?: DiscoverSessionApiEmbeddableTab;
     selectedTabId?: string;
-    tabs?: DiscoverSessionTab[];
+    /** Session tabs of a linked panel */
+    tabs?: SearchEmbeddableSessionTab[];
+    /** Overrides of a linked panel, as stored by the dashboard */
+    overrides?: DiscoverSessionApiEmbeddableOverrides;
   };
 
 export type SearchEmbeddableApi = DefaultEmbeddableApi<SearchEmbeddablePanelApiState> &

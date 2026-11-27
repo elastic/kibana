@@ -175,7 +175,7 @@ The files you may change, and only these:
 - `.agents/skills/flaky-test-investigator/`: the investigation skill the investigator and fixer read.
 - `docs/extend/testing/`: the Scout testing docs the guidelines link to and the fixer reads. Change one when the lesson is about how to write the test, not about how the workflow runs.
 
-Prompt bodies and the guidelines are loaded at run time, so a merged change takes effect on the next run without recompiling the lock files.
+Prompt bodies and the guidelines are loaded at run time, so a merged change takes effect on the next run. Each workflow's lock file still records a hash of its prompt body, and CI fails while that hash is stale. You cannot recompile, so when you edit a workflow prompt, say so in the review notes. The shared guidelines, the skill and the docs have no lock file.
 
 ## Steps
 
@@ -209,7 +209,7 @@ Prompt bodies and the guidelines are loaded at run time, so a merged change take
 
    ### Review notes
 
-   - Prompt bodies load at run time, so no lock file recompile is needed for this change.
+   - <when a workflow prompt changed: "Before merging, run `node scripts/ensure_gh_aw_version.js` to get the repo-pinned compiler, then `gh aw compile <workflow>` for <each edited workflow>, and push the lock files. The lock validation check fails until then." Otherwise: "No lock file recompile is needed: only files without a lock changed.">
    - <any file you considered editing but did not, and why>
    ```
 

@@ -26,6 +26,9 @@ export const WIKI_OPTIMIZE_DATASET_ID = 'wiki-optimize';
  */
 export const REINFORCEMENT_DATASET_ID = 'reinforcement';
 
+/** The CI ORCA shard, whole (`orcabench`) or one slice of it (`orcabench-<index>-of-<count>`). */
+const ORCA_SHARD_ID = /^orcabench(?:-\d+-of-\d+)?$/;
+
 const ALL_DATASETS = 'all';
 const EVAL_IDS: readonly string[] = [
   INVESTIGATION_DATASET_ID,
@@ -119,7 +122,8 @@ export const resolveEvalSelection = (
       storedDatasetIds: [],
     };
   }
-  const orca = env.EVAL_SHARD_ID === 'orcabench' || env.NIGHTSHIFT_DATASETS?.trim() === 'orcabench';
+  const orca =
+    ORCA_SHARD_ID.test(env.EVAL_SHARD_ID ?? '') || env.NIGHTSHIFT_DATASETS?.trim() === 'orcabench';
   if (orca) {
     if (!env.SANDBOX_API_KEY) throw new Error('ORCA investigations require SANDBOX_API_KEY');
     if (env.NIGHTSHIFT_CONNECTOR_SET !== 'orcabench') {

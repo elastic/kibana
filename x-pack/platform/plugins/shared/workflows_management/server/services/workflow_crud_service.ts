@@ -704,6 +704,7 @@ export class WorkflowCrudService {
     spaceId: string;
     request?: KibanaRequest;
     yaml: string;
+    isManaged: boolean;
   }): Promise<{ id: string; workflowData: WorkflowProperties; definition?: WorkflowYaml }> {
     const allTriggerDefinitions = this.deps.workflowsExtensions?.getAllTriggerDefinitions() ?? [];
     const registeredTriggers = toCustomTriggerSchemaConfigs(allTriggerDefinitions);
@@ -730,6 +731,7 @@ export class WorkflowCrudService {
       spaceId: params.spaceId,
       triggerDefinitions,
       logger: this.deps.logger,
+      isManaged: params.isManaged,
     });
     const profileId = params.request
       ? (await this.deps
@@ -921,6 +923,8 @@ export class WorkflowCrudService {
       triggerDefinitions,
       nameFallback: options?.nameFallback,
       logger: this.deps.logger,
+      // Only the managed workflows service creates managed workflows, through prepareWorkflowDocumentForStorage.
+      isManaged: false,
     });
     Object.assign(workflowData, pickTemplateOriginFields(options?.templateOrigin));
 
@@ -1024,6 +1028,7 @@ export class WorkflowCrudService {
           spaceId,
           triggerDefinitions,
           logger: this.deps.logger,
+          isManaged: false,
         });
 
         if (profileId) {
@@ -1203,6 +1208,7 @@ export class WorkflowCrudService {
     spaceId: string,
     request: KibanaRequest,
     historyAction: WorkflowChangeHistoryActionType,
+    { isManaged }: { isManaged: boolean },
     restoreMetadata?: WorkflowRestoreMetadata
   ): Promise<ApplyWorkflowUpdateResult> {
     const authenticatedUser = getAuthenticatedUser(request, this.deps.getSecurity());
@@ -1215,6 +1221,7 @@ export class WorkflowCrudService {
     const workflowYaml = workflow.yaml;
     const yamlUpdate = workflowYaml
       ? await this.prepareYamlUpdate(workflowYaml, id, spaceId, request, {
+          isManaged,
           logger: this.deps.logger,
         })
       : undefined;
@@ -1313,7 +1320,7 @@ export class WorkflowCrudService {
     workflowId: string,
     spaceId: string,
     request: KibanaRequest,
-    logging: { logger?: Logger } = {}
+    { isManaged, logger }: { isManaged: boolean; logger?: Logger }
   ): Promise<Awaited<ReturnType<typeof applyYamlUpdate>> | undefined> {
     const zodSchema = await this.deps.validationService.getWorkflowZodSchema(
       { loose: false },
@@ -1328,7 +1335,8 @@ export class WorkflowCrudService {
       zodSchema,
       triggerDefinitions: this.deps.workflowsExtensions?.getAllTriggerDefinitions() ?? [],
       workflowId,
-      ...logging,
+      isManaged,
+      logger,
     });
   }
 
@@ -1338,11 +1346,13 @@ export class WorkflowCrudService {
    */
   async getDefinitionToStore(
     yaml: string,
-    { id, enabled }: { id: string; enabled: boolean },
+    { id, enabled, managed }: { id: string; enabled: boolean; managed: boolean },
     spaceId: string,
     request: KibanaRequest
   ): Promise<EsWorkflow['definition'] | null> {
-    const yamlResult = await this.prepareYamlUpdate(yaml, id, spaceId, request);
+    const yamlResult = await this.prepareYamlUpdate(yaml, id, spaceId, request, {
+      isManaged: managed,
+    });
     if (!yamlResult) {
       return null;
     }
@@ -1350,11 +1360,13 @@ export class WorkflowCrudService {
     return valid ? definition ?? null : null;
   }
 
+  /** `isManaged` is the stored workflow's: its YAML is validated before the document is read. */
   async updateWorkflow(
     id: string,
     workflow: Partial<EsWorkflow>,
     spaceId: string,
-    request: KibanaRequest
+    request: KibanaRequest,
+    { isManaged }: { isManaged: boolean }
   ): Promise<UpdatedWorkflowResponseDto> {
     try {
       const { response } = await this.applyWorkflowUpdate(
@@ -1362,7 +1374,8 @@ export class WorkflowCrudService {
         workflow,
         spaceId,
         request,
-        WorkflowChangeHistoryAction.workflowUpdate
+        WorkflowChangeHistoryAction.workflowUpdate,
+        { isManaged }
       );
 
       return response;
@@ -1409,6 +1422,8 @@ export class WorkflowCrudService {
       spaceId,
       request,
       WorkflowChangeHistoryAction.workflowRestore,
+      // The API refuses to restore managed workflows.
+      { isManaged: false },
       {
         eventId,
         ...(sequence != null ? { sequence } : {}),

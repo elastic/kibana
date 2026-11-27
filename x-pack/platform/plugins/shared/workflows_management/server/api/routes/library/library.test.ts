@@ -349,7 +349,7 @@ describe('Library Routes', () => {
           templateOrigin: {
             templateSlug: 'demo',
             templateVersion: '1.0.0',
-            templateOrigin: 'install',
+            templateOrigin: 'catalog',
           },
         }
       );
@@ -648,7 +648,7 @@ describe('Library Routes', () => {
 
       expect(mockAnalytics.reportEvent).toHaveBeenCalledWith(TEMPLATE_INSTALLED_EVENT_TYPE, {
         success: true,
-        templateOrigin: 'install',
+        templateOrigin: 'catalog',
         sourceMode: 'http',
         templateSlug: 'demo',
         templateVersion: '1.0.0',
@@ -683,7 +683,7 @@ describe('Library Routes', () => {
 
       expect(mockAnalytics.reportEvent).toHaveBeenCalledWith(TEMPLATE_INSTALLED_EVENT_TYPE, {
         success: false,
-        templateOrigin: 'install',
+        templateOrigin: 'catalog',
         sourceMode: 'http',
         errorType: 'template_not_found',
       });
@@ -696,7 +696,7 @@ describe('Library Routes', () => {
 
       expect(mockAnalytics.reportEvent).toHaveBeenCalledWith(TEMPLATE_INSTALLED_EVENT_TYPE, {
         success: false,
-        templateOrigin: 'install',
+        templateOrigin: 'catalog',
         sourceMode: 'http',
         errorType: 'fetch_failed',
         fetchErrorReason: 'timeout',

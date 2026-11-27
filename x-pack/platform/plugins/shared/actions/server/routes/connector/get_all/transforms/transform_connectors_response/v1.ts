@@ -11,7 +11,10 @@ import { omitIngestTokenHashFromConfig } from '../../../common_transforms/omit_i
 
 export const transformGetAllConnectorsResponse = (
   results: ConnectorWithExtraFindData[],
-  { includeInboundEventsField }: { includeInboundEventsField: boolean }
+  {
+    includeInboundEventsField,
+    includeSpecVersionField,
+  }: { includeInboundEventsField: boolean; includeSpecVersionField: boolean }
 ): GetAllConnectorsResponseV1 => {
   return results.map(
     ({
@@ -27,6 +30,7 @@ export const transformGetAllConnectorsResponse = (
       isConnectorTypeDeprecated,
       authMode,
       isInboundEventsEnabled,
+      specVersion,
     }) => ({
       id,
       name,
@@ -41,6 +45,9 @@ export const transformGetAllConnectorsResponse = (
       ...(authMode !== undefined ? { auth_mode: authMode } : {}),
       ...(includeInboundEventsField && isInboundEventsEnabled !== undefined
         ? { is_inbound_events_enabled: isInboundEventsEnabled }
+        : {}),
+      ...(includeSpecVersionField && specVersion !== undefined
+        ? { spec_version: specVersion }
         : {}),
     })
   );

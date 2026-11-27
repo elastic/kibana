@@ -118,6 +118,19 @@ describe('<PreviewListItem />', () => {
       expect(screen.getByRole('button', { name: /pin field/i })).toBeInTheDocument();
     });
 
+    it('should expose the "Pin field" label when the field is not pinned', () => {
+      setup({ field: { key: 'test', value: 'test', formattedValue: 'test', isPinned: false } });
+
+      expect(screen.getByRole('button', { name: 'Pin field' })).toBeInTheDocument();
+    });
+
+    it('should expose the "Unpin field" label when the field is pinned', () => {
+      setup({ field: { key: 'test', value: 'test', formattedValue: 'test', isPinned: true } });
+
+      expect(screen.getByRole('button', { name: 'Unpin field' })).toBeInTheDocument();
+      expect(screen.queryByRole('button', { name: 'Pin field' })).not.toBeInTheDocument();
+    });
+
     describe('when clicked', () => {
       it('should call toggleIsPined', async () => {
         // When

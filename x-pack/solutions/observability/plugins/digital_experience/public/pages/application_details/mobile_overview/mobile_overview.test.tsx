@@ -21,9 +21,10 @@ import { useUpdateUrlQuery } from '../../../hooks/use_update_url_query';
 import { createUiSettingsMock } from '../../../test_utils/ui_settings_mock';
 import { MobileOverview } from './mobile_overview';
 import { ReleaseHealth } from './release_health/release_health';
-import type { MobileReleasesState } from './release_health/use_mobile_releases';
+import { useMobileReleases, type MobileReleasesState } from './release_health/use_mobile_releases';
 import { useMobileKpis } from './use_mobile_kpis';
 
+jest.mock('./release_health/use_mobile_releases');
 jest.mock('./release_health/release_health', () => ({
   ReleaseHealth: jest.fn(() => <div data-test-subj="digitalExperienceMobileReleaseHealth" />),
 }));
@@ -98,13 +99,14 @@ const RELEASES_STATE: MobileReleasesState = {
 };
 
 const Overview = () => (
-  <MobileOverview kpisState={useMobileKpis('shop-mobile')} releasesState={RELEASES_STATE} />
+  <MobileOverview serviceName="shop-mobile" kpisState={useMobileKpis('shop-mobile')} />
 );
 
 const renderPage = () => render(<Overview />, { wrapper: Wrapper });
 
 beforeEach(() => {
   jest.clearAllMocks();
+  jest.mocked(useMobileReleases).mockReturnValue(RELEASES_STATE);
   fetch.mockResolvedValue(KPIS);
   jest
     .mocked(useApiClient)
@@ -458,6 +460,12 @@ describe('MobileOverview', () => {
 
     await waitFor(() => expect(screen.queryByTestId('digitalExperienceMobileKpis')).toBeNull());
     expect(screen.queryByTestId('digitalExperienceMobileReleaseHealth')).toBeNull();
+  });
+
+  it("fetches the application's release health itself, so only the Overview runs it", async () => {
+    renderPage();
+
+    await waitFor(() => expect(useMobileReleases).toHaveBeenCalledWith('shop-mobile'));
   });
 
   it('refreshes the release health with the KPIs from the toolbar', async () => {
