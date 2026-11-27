@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { BehaviorSubject, Subject } from 'rxjs';
+import { ESQLVariableType } from '@kbn/esql-types';
 import { RequestAdapter, apiHasInspectorAdapters } from '@kbn/inspector-plugin/public';
 import { render, screen, act, waitFor } from '@testing-library/react';
 import { EsqlSource } from '@kbn/data-source';
@@ -32,6 +33,8 @@ const mockApiIsPresentationContainer = apiIsPresentationContainer as jest.Mocked
 let capturedComponentProps:
   | {
       esqlQueries?: readonly string[];
+      esqlVariables?: unknown;
+      isFetchContextReady?: boolean;
       isGenerating?: boolean;
       requestAdapter?: unknown;
       onGenerateWithChat?: () => void;
@@ -664,6 +667,26 @@ describe('customContentEmbeddableFactory', () => {
       const el = screen.getByTestId('mockCustomContentComponent');
       expect(el).toHaveAttribute('data-esql-query', baseState.esql_query?.[0]);
       expect(el).toHaveAttribute('data-saved-template', '<div>static html</div>');
+    });
+  });
+
+  describe('fetch context', () => {
+    it('holds the panel back until the dashboard publishes its control values', async () => {
+      const isFetchPaused$ = new BehaviorSubject(true);
+      const region = { key: 'region', value: 'All', type: ESQLVariableType.VALUES };
+      const esqlVariables$ = new BehaviorSubject([region]);
+      const { embeddable } = await buildEmbeddable(baseState, { isFetchPaused$, esqlVariables$ });
+      await act(async () => render(<embeddable.Component />));
+
+      expect(capturedComponentProps?.isFetchContextReady).toBe(false);
+
+      await act(async () => {
+        isFetchPaused$.next(false);
+        await new Promise((resolve) => setTimeout(resolve, 0));
+      });
+
+      expect(capturedComponentProps?.isFetchContextReady).toBe(true);
+      expect(capturedComponentProps?.esqlVariables).toEqual([region]);
     });
   });
 

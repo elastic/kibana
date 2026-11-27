@@ -38,6 +38,11 @@ export interface UseCustomContentHtmlParams {
   query: Query | AggregateQuery | undefined;
   filters: Filter[] | undefined;
   esqlVariables: ESQLControlVariable[] | undefined;
+  /**
+   * False until the host has the context to fetch with (time range, filters, control variables).
+   * A panel with queries stays loading meanwhile instead of fetching without them.
+   */
+  isFetchContextReady?: boolean;
   isInteractive: boolean;
   /** Records the panel's ES|QL request for the Inspect action. */
   requestAdapter?: RequestAdapter;
@@ -75,6 +80,7 @@ export function useCustomContentHtml({
   query,
   filters,
   esqlVariables,
+  isFetchContextReady = true,
   isInteractive,
   requestAdapter,
   setApproximationApplied,
@@ -92,6 +98,12 @@ export function useCustomContentHtml({
     if (trimmedTemplate && stableEsqlQueries.length === 0) {
       setFilledHtml(stripMarkdownFences(trimmedTemplate));
       setIsLoading(false);
+      setError(undefined);
+      return;
+    }
+
+    if (trimmedTemplate && !isFetchContextReady) {
+      setIsLoading(true);
       setError(undefined);
       return;
     }
@@ -147,6 +159,7 @@ export function useCustomContentHtml({
     query,
     filters,
     esqlVariables,
+    isFetchContextReady,
     requestAdapter,
     http,
     uiSettings,

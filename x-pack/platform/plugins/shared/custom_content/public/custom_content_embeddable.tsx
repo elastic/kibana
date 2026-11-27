@@ -219,6 +219,9 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
     const query$ = new BehaviorSubject<Query | AggregateQuery | undefined>(undefined);
     const filters$ = new BehaviorSubject<Filter[] | undefined>(undefined);
     const esqlVariables$ = new BehaviorSubject<ESQLControlVariable[] | undefined>(undefined);
+    // A dashboard holds fetch$ back until its controls have published their values; fetching
+    // before the first fetch$ would send a query without them.
+    const hasFetchContext$ = new BehaviorSubject<boolean>(false);
     // The range the panel actually renders with: fetch$ resolves the panel's own override over the
     // dashboard's. Seeded from the parent for the first render.
     const effectiveTimeRange$ = new BehaviorSubject<TimeRange | undefined>(
@@ -443,6 +446,7 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
       if (!ctx.isReload) {
         previewHtml$.next(null);
       }
+      hasFetchContext$.next(true);
     });
 
     const viewMode$ = getViewModeSubject(api) ?? new BehaviorSubject<ViewMode>('edit');
@@ -459,6 +463,7 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
           query,
           filters,
           esqlVariables,
+          hasFetchContext,
           previewHtml,
           timeRange,
           isGenerating,
@@ -472,6 +477,7 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
           query$,
           filters$,
           esqlVariables$,
+          hasFetchContext$,
           previewHtml$,
           effectiveTimeRange$,
           isGenerating$,
@@ -596,6 +602,7 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
               query={query}
               filters={filters}
               esqlVariables={esqlVariables}
+              isFetchContextReady={hasFetchContext}
               previewHtml={previewHtml}
               isAiAvailable={Boolean(agentBuilder) && viewMode === 'edit'}
               isGenerating={isGenerating}

@@ -32,6 +32,8 @@ export interface CustomContentComponentProps {
   query: Query | AggregateQuery | undefined;
   filters: Filter[] | undefined;
   esqlVariables: ESQLControlVariable[] | undefined;
+  /** False until the host has the context to fetch with; a panel with queries waits for it. */
+  isFetchContextReady?: boolean;
   previewHtml: string | null;
   /** Whether the host can hand an empty panel over to the agent. Drives the empty prompt's copy. */
   isAiAvailable?: boolean;
@@ -82,6 +84,7 @@ export const CustomContentComponent = ({
   query,
   filters,
   esqlVariables,
+  isFetchContextReady,
   previewHtml,
   isAiAvailable = false,
   isGenerating = false,
@@ -107,6 +110,7 @@ export const CustomContentComponent = ({
     query,
     filters,
     esqlVariables,
+    isFetchContextReady,
     isInteractive,
     requestAdapter,
     setApproximationApplied,
