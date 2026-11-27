@@ -20,7 +20,7 @@ import { createDiscoverServicesMock } from '../../../../__mocks__/services';
 import { getDiscoverInternalStateMock } from '../../../../__mocks__/discover_state.mock';
 import { DiscoverToolkitTestProvider } from '../../../../__mocks__/test_provider';
 import { internalStateActions, selectTabRuntimeState } from '../../state_management/redux';
-import { GroupSimilarMessagesButton } from './group_similar_messages_button';
+import { FindPatternsButton } from './find_patterns_button';
 
 const createColumn = (name: string, esType: string): DatatableColumn => ({
   id: name,
@@ -60,20 +60,20 @@ const setup = async ({
   );
   await toolkit.initializeSingleTab({ tabId, skipWaitForDataFetching: true });
   const { scopedEbtManager$ } = selectTabRuntimeState(toolkit.runtimeStateManager, tabId);
-  const trackClick = jest.spyOn(scopedEbtManager$.getValue(), 'trackGroupSimilarMessagesClick');
+  const trackClick = jest.spyOn(scopedEbtManager$.getValue(), 'trackFindPatternsClick');
   toolkit.getCurrentTabDataStateContainer().data$.documents$.next({
     dataSource: createMockEsqlSource([], resultColumns, undefined, sourceEsql),
     fetchStatus,
   });
   renderWithKibanaRenderContext(
     <DiscoverToolkitTestProvider toolkit={toolkit}>
-      <GroupSimilarMessagesButton />
+      <FindPatternsButton />
     </DiscoverToolkitTestProvider>
   );
   return { toolkit, trackClick };
 };
 
-describe('GroupSimilarMessagesButton', () => {
+describe('FindPatternsButton', () => {
   it('groups the current results by message and tracks one click', async () => {
     const { toolkit, trackClick } = await setup();
     const button = screen.getByRole('button', { name: 'Find patterns in message' });
@@ -112,7 +112,7 @@ describe('GroupSimilarMessagesButton', () => {
 
   it('hides the action below the CATEGORIZE license level', async () => {
     await setup({ licenseType: 'basic' });
-    expect(screen.queryByTestId('dscGroupSimilarMessagesButton')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('dscFindPatternsButton')).not.toBeInTheDocument();
   });
 
   it.each([
@@ -122,6 +122,6 @@ describe('GroupSimilarMessagesButton', () => {
     { fetchStatus: FetchStatus.LOADING },
   ])('hides the action without current message results (%j)', async (options) => {
     await setup(options);
-    expect(screen.queryByTestId('dscGroupSimilarMessagesButton')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('dscFindPatternsButton')).not.toBeInTheDocument();
   });
 });

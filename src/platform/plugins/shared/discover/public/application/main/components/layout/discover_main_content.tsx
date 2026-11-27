@@ -27,7 +27,7 @@ import { useAppStateSelector } from '../../state_management/redux';
 import { PanelsToggle } from '../../../../components/panels_toggle';
 import { PatternAnalysisTab } from '../pattern_analysis/pattern_analysis_tab';
 import { PATTERN_ANALYSIS_VIEW_CLICK } from '../pattern_analysis/constants';
-import { GroupSimilarMessagesButton } from '../group_similar_messages/group_similar_messages_button';
+import { FindPatternsButton } from '../find_patterns/find_patterns_button';
 import { useIsEsqlMode } from '../../hooks/use_is_esql_mode';
 import {
   internalStateActions,
@@ -138,7 +138,7 @@ export const DiscoverMainContent = ({
             isEsqlMode &&
             viewMode === VIEW_MODE.DOCUMENT_LEVEL &&
             hitsCounterVariant !== 'groups' ? (
-              <GroupSimilarMessagesButton />
+              <FindPatternsButton />
             ) : undefined
           }
           prepend={

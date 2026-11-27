@@ -53,15 +53,15 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await discover.waitUntilSearchingHasFinished();
     });
 
-    it('groups similar messages and drills back into the filtered results', async () => {
+    it('finds patterns and drills back into the filtered results', async () => {
       const source = 'FROM logstash-* | WHERE @message IS NOT NULL | LIMIT 1000 | KEEP @message';
       await monacoEditor.setCodeEditorValue(source);
       await testSubjects.click('querySubmitButton');
       await discover.waitUntilTabIsLoaded();
-      expect(await testSubjects.getVisibleText('dscGroupSimilarMessagesButton')).to.contain(
+      expect(await testSubjects.getVisibleText('dscFindPatternsButton')).to.contain(
         'Find patterns in @message'
       );
-      await testSubjects.click('dscGroupSimilarMessagesButton');
+      await testSubjects.click('dscFindPatternsButton');
       await discover.waitUntilTabIsLoaded();
       await unifiedFieldList.waitUntilFieldlistHasCountOfFields(2);
       expect(await dataGrid.getHeaderFields()).to.eql(['count', 'pattern']);

@@ -7,12 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { getMatchingMessagesQuery, groupSimilarMessages } from './group_similar_messages_query';
+import { getMatchingMessagesQuery, findPatterns } from './find_patterns_query';
 
-describe('groupSimilarMessages', () => {
+describe('findPatterns', () => {
   it('retains the source pipeline and escapes tokens in the matching query', () => {
     const source = 'FROM logs-* | WHERE service.name == "checkout" // selected service';
-    const grouped = groupSimilarMessages(source, 'log text');
+    const grouped = findPatterns(source, 'log text');
     expect(getMatchingMessagesQuery(grouped, 'log text', 'say "hello"')).toEqual(
       source +
         '\n  | WHERE MATCH(TO_TEXT(TO_STRING(`log text`)), "say \\"hello\\"", {"auto_generate_synonyms_phrase_query": false, "fuzziness": 0, "operator": "AND"})'

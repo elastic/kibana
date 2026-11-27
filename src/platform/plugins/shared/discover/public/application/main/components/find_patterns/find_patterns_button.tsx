@@ -26,9 +26,9 @@ import {
   useCurrentTabDataStateContainer,
   useInternalStateDispatch,
 } from '../../state_management/redux';
-import { groupSimilarMessages } from './group_similar_messages_query';
+import { findPatterns } from './find_patterns_query';
 
-export const GroupSimilarMessagesButton = () => {
+export const FindPatternsButton = () => {
   const dispatch = useInternalStateDispatch();
   const updateESQLQuery = useCurrentTabAction(internalStateActions.updateESQLQuery);
   const { scopedEBTManager } = useScopedServices();
@@ -59,14 +59,14 @@ export const GroupSimilarMessagesButton = () => {
     return null;
   }
 
-  const label = i18n.translate('discover.esql.groupSimilarMessages.buttonLabel', {
+  const label = i18n.translate('discover.esql.findPatterns.buttonLabel', {
     defaultMessage: 'Find patterns in {field}',
     values: { field },
   });
 
   return (
     <EuiToolTip
-      content={i18n.translate('discover.esql.groupSimilarMessages.tooltip', {
+      content={i18n.translate('discover.esql.findPatterns.tooltip', {
         defaultMessage: 'Group {field} by pattern to spot trends and anomalies.',
         values: { field },
       })}
@@ -75,14 +75,12 @@ export const GroupSimilarMessagesButton = () => {
         color="primary"
         iconType="bulb"
         onClick={() => {
-          scopedEBTManager.trackGroupSimilarMessagesClick();
-          dispatch(
-            updateESQLQuery({ queryOrUpdater: (esql) => groupSimilarMessages(esql, field) })
-          );
+          scopedEBTManager.trackFindPatternsClick();
+          dispatch(updateESQLQuery({ queryOrUpdater: (esql) => findPatterns(esql, field) }));
         }}
         onClickAriaLabel={label}
         title=""
-        data-test-subj="dscGroupSimilarMessagesButton"
+        data-test-subj="dscFindPatternsButton"
       >
         {label}
       </EuiBadge>

@@ -12,7 +12,7 @@ import { escapeEsqlColumnName, escapeStringValue } from '@kbn/esql-utils';
 const groupingCommands = (field: string) =>
   `\n  | STATS count = COUNT(*) BY pattern = CATEGORIZE(${escapeEsqlColumnName(field)})\n  | SORT count DESC`;
 
-export const groupSimilarMessages = (esql: string, field: string) => esql + groupingCommands(field);
+export const findPatterns = (esql: string, field: string) => esql + groupingCommands(field);
 
 export const getMatchingMessagesQuery = (
   esql: string,

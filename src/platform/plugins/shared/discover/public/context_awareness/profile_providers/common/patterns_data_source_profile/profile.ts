@@ -20,7 +20,7 @@ import type {
   DataGridCellValueElementProps,
 } from '@kbn/unified-data-table';
 import { createElement } from 'react';
-import { getMatchingMessagesQuery } from '../../../../application/main/components/group_similar_messages/group_similar_messages_query';
+import { getMatchingMessagesQuery } from '../../../../application/main/components/find_patterns/find_patterns_query';
 import { DataSourceType, isDataSourceType } from '../../../../../common/data_sources';
 import type { DataSourceProfileProvider } from '../../../profiles';
 import { DataSourceCategory } from '../../../profiles';
