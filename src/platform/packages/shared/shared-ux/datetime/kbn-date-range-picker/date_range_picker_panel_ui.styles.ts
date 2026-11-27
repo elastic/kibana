@@ -58,11 +58,11 @@ export const subPanelHeadingStyles = ({ euiTheme }: UseEuiTheme) => {
 
     &:where(a, button):not(:disabled) {
       &:hover,
-      &:focus {
+      &:focus-visible {
         text-decoration: underline;
       }
 
-      &:focus {
+      &:focus-visible {
         background-color: ${euiTheme.focus.backgroundColor};
       }
     }
