@@ -93,7 +93,8 @@ export function useOtlpAuthInputs(
     isSelected && isHeaderAuth ? validateOtlpAuthCredentialSecret : undefined,
     disabled
   );
-  useCancelHiddenSecretEdit(otlpAuthCredentialInput, storedCredential, isHeaderAuth);
+  // the rows are also removed while another output type is selected
+  useCancelHiddenSecretEdit(otlpAuthCredentialInput, storedCredential, isSelected && isHeaderAuth);
 
   const otlpAzureAuthMethodInput = useInput(
     azureAuth?.azure_auth_method ?? otlpAzureAuthMethod.ManagedIdentity,
@@ -130,7 +131,7 @@ export function useOtlpAuthInputs(
   useCancelHiddenSecretEdit(
     otlpAzureClientSecretInput,
     storedAzureClientSecret,
-    isServicePrincipal
+    isSelected && isServicePrincipal
   );
 
   // the settings of one method do not apply to the other: switching the method clears them
@@ -191,6 +192,15 @@ export const getSelectedOtlpAuthHeaderName = (inputs: OtlpAuthInputs): string | 
     : OTLP_AUTHORIZATION_HEADER;
 };
 
+const isHttpsUrlWithHost = (endpoint: string): boolean => {
+  try {
+    const url = new URL(endpoint);
+    return url.protocol === 'https:' && url.hostname !== '';
+  } catch {
+    return false;
+  }
+};
+
 /**
  * Why the exporter cannot be authenticated with Azure, if it cannot: the `azure_auth` extension
  * only authenticates HTTP requests, and the bearer token must only be sent over verified TLS.
@@ -205,7 +215,7 @@ export const getOtlpAzureAuthError = (
         'Azure authentication requires the HTTP/Protobuf protocol. Select HTTP/Protobuf, or another authentication type.',
     });
   }
-  if (endpoints.some((endpoint) => !/^https:\/\//i.test(endpoint.trim()))) {
+  if (endpoints.some((endpoint) => !isHttpsUrlWithHost(endpoint.trim()))) {
     return i18n.translate('xpack.fleet.settings.editOutputFlyout.otlpAzureAuthHttpsError', {
       defaultMessage: 'Azure authentication requires https:// endpoints.',
     });

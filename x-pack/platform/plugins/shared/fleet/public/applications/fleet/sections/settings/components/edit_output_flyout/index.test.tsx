@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { fireEvent, waitFor, within } from '@testing-library/react';
+import { act, fireEvent, waitFor, within } from '@testing-library/react';
 
 import type { Output } from '../../../../types';
 import { createFleetTestRendererMock } from '../../../../../../mock';
@@ -2747,21 +2747,57 @@ describe('EditOutputFlyout', () => {
             utils.getByText(/Azure authentication requires the HTTP\/Protobuf protocol/)
           ).toBeInTheDocument();
           fireEvent.click(utils.getByText('Save and apply settings'));
-          await waitFor(() => {
-            expect(mockSendPutOutput).not.toHaveBeenCalled();
-          });
-        });
+          // let the submit handler run before checking that it did not save
+          await act(async () => {});
+          expect(mockSendPutOutput).not.toHaveBeenCalled();
 
-        it('should show an error for an endpoint that is not https', () => {
-          const { utils } = renderFlyout(otlpOutputWithAzureAuth);
+          // the same output saves once the protocol is HTTP/Protobuf again
+          fireEvent.click(utils.getByLabelText('HTTP/Protobuf'));
           fireEvent.change(utils.getByTestId('settingsOutputsFlyout.otlpEndpointInput'), {
-            target: { value: 'http://collector.example.com:4318' },
+            target: { value: 'https://collector.example.com:4318' },
           });
-
-          expect(
-            utils.getByText('Azure authentication requires https:// endpoints.')
-          ).toBeInTheDocument();
+          fireEvent.click(utils.getByText('Save and apply settings'));
+          await waitFor(() => {
+            expect(mockSendPutOutput).toHaveBeenCalled();
+          });
         });
+
+        it('should drop a replacement client secret when another output type is selected', async () => {
+          const { utils } = renderFlyout(otlpOutputWithAzureAuth);
+          fireEvent.click(utils.getByText('Replace Client secret'));
+          fireEvent.change(utils.getByTestId('settingsOutputsFlyout.otlpAzureClientSecretInput'), {
+            target: { value: 'unseen-secret' },
+          });
+          fireEvent.change(utils.getByTestId('settingsOutputsFlyout.typeInput'), {
+            target: { value: 'elasticsearch' },
+          });
+          fireEvent.change(utils.getByTestId('settingsOutputsFlyout.typeInput'), {
+            target: { value: 'otlp' },
+          });
+          fireEvent.change(utils.getByTestId('settingsOutputsFlyout.nameInput'), {
+            target: { value: 'otlp output updated' },
+          });
+          fireEvent.click(utils.getByText('Save and apply settings'));
+
+          await waitFor(() => {
+            expect(mockSendPutOutput).toHaveBeenCalled();
+          });
+          expect((mockSendPutOutput.mock.calls[0][1] as any).secrets).toBeUndefined();
+        });
+
+        it.each(['http://collector.example.com:4318', 'https://'])(
+          'should show an error for the endpoint %s',
+          (endpoint) => {
+            const { utils } = renderFlyout(otlpOutputWithAzureAuth);
+            fireEvent.change(utils.getByTestId('settingsOutputsFlyout.otlpEndpointInput'), {
+              target: { value: endpoint },
+            });
+
+            expect(
+              utils.getByText('Azure authentication requires https:// endpoints.')
+            ).toBeInTheDocument();
+          }
+        );
 
         it('should keep the stored client secret when it is not edited', async () => {
           const { utils } = renderFlyout(otlpOutputWithAzureAuth);
