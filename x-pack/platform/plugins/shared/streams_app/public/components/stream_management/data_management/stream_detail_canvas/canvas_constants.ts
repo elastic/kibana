@@ -20,6 +20,8 @@ export const GRID_SIZE = 16;
 
 export const SNAP_SIZE = 12;
 
+export const STRAIGHT_SNAP_THRESHOLD = 8;
+
 /** Center-to-center horizontal distance between successive layout columns (px). */
 export const COLUMN_GAP = 360;
 
