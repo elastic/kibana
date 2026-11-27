@@ -8,11 +8,8 @@
 import { useAbortableAsync } from '@kbn/react-hooks';
 import type { MobileReleasesResponse } from '../../../../../common/types/mobile';
 import { useApiClient } from '../../../../hooks/use_api_client';
-import { useEnvironment } from '../../../../hooks/use_environment';
 import { useFormatters } from '../../../../hooks/use_formatters';
-import { useQueryParam } from '../../../../hooks/use_query_param';
-import { useTimeRange } from '../../../../hooks/use_time_range';
-import { toTimeRangeQuery } from '../../../../utils/time_range_query';
+import { useMobileFiltersQuery } from '../use_mobile_filters_query';
 
 export interface MobileReleasesState {
   /** The response of the current filters, `undefined` while they load. */
@@ -25,21 +22,10 @@ export interface MobileReleasesState {
 /** A mobile application's release health, over the URL's filters and range. */
 export const useMobileReleases = (serviceName: string): MobileReleasesState => {
   const apiClient = useApiClient();
-  const { timeRange } = useTimeRange();
-  const { environment } = useEnvironment();
-  const { value: osName } = useQueryParam('osName');
-  const { value: release } = useQueryParam('release');
   const { timeZone } = useFormatters();
-
+  const { toQuery, key } = useMobileFiltersQuery(timeZone);
   // The URL's params, not the times they resolve to, so a refresh resolves "now" again
-  const paramsKey = JSON.stringify([
-    serviceName,
-    timeRange,
-    environment,
-    timeZone,
-    osName,
-    release,
-  ]);
+  const paramsKey = JSON.stringify([serviceName, key]);
 
   const {
     value: fetched,
@@ -55,12 +41,12 @@ export const useMobileReleases = (serviceName: string): MobileReleasesState => {
           signal,
           params: {
             path: { serviceName },
-            query: { ...toTimeRangeQuery(timeRange, environment, timeZone), osName, release },
+            query: toQuery(),
           },
         }
       ),
     }),
-    [apiClient, serviceName, timeRange, environment, timeZone, osName, release, paramsKey],
+    [apiClient, serviceName, toQuery, paramsKey],
     { unsetValueOnError: true }
   );
   // Loading from the render the params change in, so no frame shows the last response's rows

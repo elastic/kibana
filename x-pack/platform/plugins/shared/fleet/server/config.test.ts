@@ -142,6 +142,15 @@ describe('Config schema', () => {
     }).not.toThrow();
   });
 
+  it('should only allow an HTTPS agentless.api.rumUrl', () => {
+    expect(() =>
+      config.schema.validate({ agentless: { api: { rumUrl: 'https://rum.agentless.api.url' } } })
+    ).not.toThrow();
+    expect(() =>
+      config.schema.validate({ agentless: { api: { rumUrl: 'http://rum.agentless.api.url' } } })
+    ).toThrow();
+  });
+
   it('should allow to specify iacProvisioner.api.url and tls with a single CA path', () => {
     expect(() => {
       config.schema.validate({

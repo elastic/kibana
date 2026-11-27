@@ -1,0 +1,134 @@
+overlay: 1.0.0
+info:
+  title: Zoom OAuth scope corrections
+  version: 1.0.0
+actions:
+  - target: $.components.securitySchemes
+    description: >-
+      Zoom publishes its OAuth scopes per operation in the API reference, and the OpenAPI files
+      served from developers.zoom.us/api/zoap only declare the bearer token. Declaring the OAuth
+      scheme again lets the vendor-contract test check that the connector requests a scope each
+      operation accepts.
+    update:
+      openapi_oauth:
+        type: oauth2
+        flows:
+          authorizationCode:
+            authorizationUrl: https://zoom.us/oauth/authorize
+            tokenUrl: https://zoom.us/oauth/token
+            scopes:
+              cloud_recording:read:list_recording_files: cloud_recording:read:list_recording_files
+              cloud_recording:read:list_recording_files:admin: cloud_recording:read:list_recording_files:admin
+              cloud_recording:read:list_recording_files:master: cloud_recording:read:list_recording_files:master
+              cloud_recording:read:list_user_recordings: cloud_recording:read:list_user_recordings
+              cloud_recording:read:list_user_recordings:admin: cloud_recording:read:list_user_recordings:admin
+              cloud_recording:read:list_user_recordings:master: cloud_recording:read:list_user_recordings:master
+              meeting:read: meeting:read
+              meeting:read:admin: meeting:read:admin
+              meeting:read:list_meetings: meeting:read:list_meetings
+              meeting:read:list_meetings:admin: meeting:read:list_meetings:admin
+              meeting:read:list_past_participants: meeting:read:list_past_participants
+              meeting:read:list_past_participants:admin: meeting:read:list_past_participants:admin
+              meeting:read:list_registrants: meeting:read:list_registrants
+              meeting:read:list_registrants:admin: meeting:read:list_registrants:admin
+              meeting:read:meeting: meeting:read:meeting
+              meeting:read:meeting:admin: meeting:read:meeting:admin
+              meeting:read:past_meeting: meeting:read:past_meeting
+              meeting:read:past_meeting:admin: meeting:read:past_meeting:admin
+              phone_recording:read:admin: phone_recording:read:admin
+              recording:read: recording:read
+              recording:read:admin: recording:read:admin
+              user:read: user:read
+              user:read:admin: user:read:admin
+              user:read:user: user:read:user
+              user:read:user:admin: user:read:user:admin
+              user:write: user:write
+              user:write:admin: user:write:admin
+              user_info:read: user_info:read
+              user_profile: user_profile
+  - target: $.paths['/meetings/{meetingId}'].get.security[0]
+    description: >-
+      Zoom accepts any of these scopes for this operation, as listed in its API reference. Added to
+      the bearer requirement, which the published file lists alone.
+    update:
+      openapi_oauth:
+        - meeting:read
+        - meeting:read:admin
+        - meeting:read:meeting
+        - meeting:read:meeting:admin
+  - target: $.paths['/meetings/{meetingId}/recordings'].get.security[0]
+    description: >-
+      Zoom accepts any of these scopes for this operation, as listed in its API reference. Added to
+      the bearer requirement, which the published file lists alone.
+    update:
+      openapi_oauth:
+        - recording:read
+        - phone_recording:read:admin
+        - cloud_recording:read:list_recording_files:admin
+        - cloud_recording:read:list_recording_files
+        - cloud_recording:read:list_recording_files:master
+  - target: $.paths['/meetings/{meetingId}/registrants'].get.security[0]
+    description: >-
+      Zoom accepts any of these scopes for this operation, as listed in its API reference. Added to
+      the bearer requirement, which the published file lists alone.
+    update:
+      openapi_oauth:
+        - meeting:read:admin
+        - meeting:read
+        - meeting:read:list_registrants
+        - meeting:read:list_registrants:admin
+  - target: $.paths['/past_meetings/{meetingId}'].get.security[0]
+    description: >-
+      Zoom accepts any of these scopes for this operation, as listed in its API reference. Added to
+      the bearer requirement, which the published file lists alone.
+    update:
+      openapi_oauth:
+        - meeting:read:admin
+        - meeting:read
+        - meeting:read:past_meeting
+        - meeting:read:past_meeting:admin
+  - target: $.paths['/past_meetings/{meetingId}/participants'].get.security[0]
+    description: >-
+      Zoom accepts any of these scopes for this operation, as listed in its API reference. Added to
+      the bearer requirement, which the published file lists alone.
+    update:
+      openapi_oauth:
+        - meeting:read:admin
+        - meeting:read
+        - meeting:read:list_past_participants
+        - meeting:read:list_past_participants:admin
+  - target: $.paths['/users/{userId}/meetings'].get.security[0]
+    description: >-
+      Zoom accepts any of these scopes for this operation, as listed in its API reference. Added to
+      the bearer requirement, which the published file lists alone.
+    update:
+      openapi_oauth:
+        - meeting:read:admin
+        - meeting:read
+        - meeting:read:list_meetings
+        - meeting:read:list_meetings:admin
+  - target: $.paths['/users/{userId}/recordings'].get.security[0]
+    description: >-
+      Zoom accepts any of these scopes for this operation, as listed in its API reference. Added to
+      the bearer requirement, which the published file lists alone.
+    update:
+      openapi_oauth:
+        - recording:read:admin
+        - recording:read
+        - cloud_recording:read:list_user_recordings
+        - cloud_recording:read:list_user_recordings:master
+        - cloud_recording:read:list_user_recordings:admin
+  - target: $.paths['/users/{userId}'].get.security[0]
+    description: >-
+      Zoom accepts any of these scopes for this operation, as listed in its API reference. Added to
+      the bearer requirement, which the published file lists alone.
+    update:
+      openapi_oauth:
+        - user:read
+        - user:write
+        - user:read:admin
+        - user:write:admin
+        - user_profile
+        - user_info:read
+        - user:read:user
+        - user:read:user:admin

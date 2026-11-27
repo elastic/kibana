@@ -26,6 +26,7 @@ import {
   GEN_AI_SETTINGS_TOKEN_USAGE_TRACKING,
 } from '@kbn/management-settings-ids';
 import { WORKFLOWS_UI_SETTING_ID } from '@kbn/workflows';
+import { DATA_TEST_SUBJ_SETTING_DEFINITIONS_RETRY } from '@kbn/management-settings-hooks';
 
 // Mock the context hook
 jest.mock('../contexts/enabled_features_context');
@@ -93,6 +94,8 @@ describe('GenAiSettingsApp', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    coreStart.settings.client.get.mockReset();
+    coreStart.settings.client.isDeclared.mockReset();
 
     coreStart.application.capabilities = {
       ...coreStart.application.capabilities,
@@ -110,6 +113,9 @@ describe('GenAiSettingsApp', () => {
 
     // Mock settings client with default settings
     coreStart.settings.client.getAll.mockReturnValue(createSettingsMock() as any);
+    coreStart.settings.metadata.getAll.mockImplementation(async () =>
+      coreStart.settings.client.getAll()
+    );
     coreStart.http.fetch.mockResolvedValue({
       page: 1,
       perPage: 20,
@@ -121,7 +127,11 @@ describe('GenAiSettingsApp', () => {
     mockUseEnabledFeatures.mockReturnValue(createFeatureFlagsMock());
   });
 
-  const renderComponent = (props = {}, servicesOverrides: Record<string, unknown> = {}) => {
+  const renderComponent = (
+    props = {},
+    servicesOverrides: Record<string, unknown> = {},
+    queryClient = new QueryClient()
+  ) => {
     const services = {
       ...coreStart,
       productDocBase: mockProductDocBase,
@@ -135,7 +145,7 @@ describe('GenAiSettingsApp', () => {
     };
     return renderWithI18n(
       <MockAppHeaderProvider>
-        <QueryClientProvider client={new QueryClient()}>
+        <QueryClientProvider client={queryClient}>
           <KibanaContextProvider services={services}>
             <SettingsContextProvider>
               <GenAiSettingsApp setBreadcrumbs={setBreadcrumbs} {...props} />
@@ -170,6 +180,68 @@ describe('GenAiSettingsApp', () => {
           text: 'GenAI Settings',
         },
       ]);
+    });
+  });
+
+  describe('loading and error states', () => {
+    it('should show a spinner while the setting definitions load, then remove it', async () => {
+      let resolveDefinitions: (definitions: Record<string, unknown>) => void = () => {};
+      coreStart.settings.metadata.getAll.mockImplementation(
+        () =>
+          new Promise((resolve) => {
+            resolveDefinitions = resolve as typeof resolveDefinitions;
+          })
+      );
+
+      renderComponent();
+
+      expect(screen.getByTestId('genAiSettingsLoading')).toBeInTheDocument();
+      expect(screen.queryByTestId('genAiSettingsLoadError')).not.toBeInTheDocument();
+
+      resolveDefinitions(createSettingsMock());
+
+      await waitFor(() => {
+        expect(screen.queryByTestId('genAiSettingsLoading')).not.toBeInTheDocument();
+      });
+      expect(screen.queryByTestId('genAiSettingsLoadError')).not.toBeInTheDocument();
+    });
+
+    it('should show an error callout that replaces the spinner when the setting definitions fail to load', async () => {
+      coreStart.settings.metadata.getAll.mockRejectedValue(new Error('Internal Server Error'));
+
+      renderComponent(
+        {},
+        {},
+        new QueryClient({
+          logger: { log: () => {}, warn: () => {}, error: () => {} },
+          defaultOptions: { queries: { retry: false } },
+        })
+      );
+
+      const loadError = await screen.findByTestId('genAiSettingsLoadError');
+      expect(loadError).toHaveTextContent('Unable to load settings');
+      expect(loadError).toHaveTextContent('Internal Server Error');
+      expect(screen.queryByTestId('genAiSettingsLoading')).not.toBeInTheDocument();
+      expect(coreStart.notifications.toasts.addDanger).not.toHaveBeenCalled();
+
+      coreStart.settings.metadata.getAll.mockImplementation(async () =>
+        coreStart.settings.client.getAll()
+      );
+      fireEvent.click(screen.getByTestId(DATA_TEST_SUBJ_SETTING_DEFINITIONS_RETRY));
+
+      await waitFor(() => {
+        expect(screen.queryByTestId('genAiSettingsLoadError')).not.toBeInTheDocument();
+      });
+      expect(coreStart.settings.metadata.getAll).toHaveBeenCalledTimes(2);
+    });
+
+    it('should not show the spinner or the error callout once the settings have loaded', async () => {
+      renderComponent();
+
+      await waitFor(() => {
+        expect(screen.queryByTestId('genAiSettingsLoading')).not.toBeInTheDocument();
+      });
+      expect(screen.queryByTestId('genAiSettingsLoadError')).not.toBeInTheDocument();
     });
   });
 
@@ -421,8 +493,65 @@ describe('GenAiSettingsApp', () => {
 
       renderComponent();
 
-      // Settings fields load asynchronously; until then `currentChatExperience` falls back to Agent.
       await waitFor(() => {
+        expect(screen.queryByTestId('genAiSettingsLoading')).not.toBeInTheDocument();
+      });
+      expect(screen.queryByTestId('documentationSection')).not.toBeInTheDocument();
+    });
+
+    describe('when the setting definitions fail to load', () => {
+      const renderWithLoadError = async (chatExperience: {
+        value: AIChatExperience;
+        userValue?: AIChatExperience;
+      }) => {
+        mockUseEnabledFeatures.mockReturnValue(createFeatureFlagsMock());
+        coreStart.settings.client.isDeclared.mockImplementation(
+          (key: string) => key === AI_CHAT_EXPERIENCE_TYPE
+        );
+        // Like the real client, a default override replaces the registered default.
+        coreStart.settings.client.get.mockImplementation(
+          (key: string, defaultOverride?: unknown) => {
+            if (key !== AI_CHAT_EXPERIENCE_TYPE) {
+              return defaultOverride;
+            }
+            return chatExperience.userValue ?? defaultOverride ?? chatExperience.value;
+          }
+        );
+        coreStart.settings.metadata.getAll.mockRejectedValue(new Error('Internal Server Error'));
+
+        renderComponent(
+          {},
+          {},
+          new QueryClient({
+            logger: { log: () => {}, warn: () => {}, error: () => {} },
+            defaultOptions: { queries: { retry: false } },
+          })
+        );
+
+        expect(await screen.findByTestId('genAiSettingsLoadError')).toBeInTheDocument();
+      };
+
+      it('shows Documentation section when the saved chat experience is Agent', async () => {
+        await renderWithLoadError({
+          value: AIChatExperience.Classic,
+          userValue: AIChatExperience.Agent,
+        });
+
+        expect(screen.getByTestId('documentationSection')).toBeInTheDocument();
+      });
+
+      it('hides Documentation section when the saved chat experience is Classic', async () => {
+        await renderWithLoadError({
+          value: AIChatExperience.Agent,
+          userValue: AIChatExperience.Classic,
+        });
+
+        expect(screen.queryByTestId('documentationSection')).not.toBeInTheDocument();
+      });
+
+      it('hides Documentation section when nothing is saved and the default chat experience is Classic', async () => {
+        await renderWithLoadError({ value: AIChatExperience.Classic });
+
         expect(screen.queryByTestId('documentationSection')).not.toBeInTheDocument();
       });
     });
@@ -443,8 +572,11 @@ describe('GenAiSettingsApp', () => {
 
       renderComponent();
 
+      await waitFor(() => {
+        expect(screen.queryByTestId('genAiSettingsLoading')).not.toBeInTheDocument();
+      });
       // Documentation section should be visible in Agent mode
-      expect(await screen.findByTestId('documentationSection')).toBeInTheDocument();
+      expect(screen.getByTestId('documentationSection')).toBeInTheDocument();
     });
   });
 

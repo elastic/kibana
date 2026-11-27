@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-import { MAX_NAME_LENGTH, validateName } from './validation';
+import {
+  MAX_INDEX_PATTERN_LENGTH,
+  MAX_NAME_LENGTH,
+  isValidPriority,
+  validateIndexPattern,
+  validateName,
+} from './validation';
 
 describe('validateName', () => {
   it.each(['catalog', 'catalog-fast', 'logs_2026', '7d-retention', 'a'])('accepts %p', (name) => {
@@ -37,5 +43,58 @@ describe('validateName', () => {
       message:
         'Use lowercase letters, numbers, hyphens, and underscores, starting with a letter or number.',
     });
+  });
+});
+
+describe('validateIndexPattern', () => {
+  it.each(['products', 'logs-*', '*', '.internal-*', 'logs-oracle-xyz-*'])(
+    'accepts %p',
+    (pattern) => {
+      expect(validateIndexPattern(pattern)).toBeUndefined();
+    }
+  );
+
+  it.each(['', '   '])('requires a pattern, rejecting %p', (pattern) => {
+    expect(validateIndexPattern(pattern)).toEqual({
+      code: 'required',
+      message: 'Enter a pattern or name.',
+    });
+  });
+
+  it('accepts up to the maximum length and rejects longer patterns', () => {
+    expect(validateIndexPattern('a'.repeat(MAX_INDEX_PATTERN_LENGTH))).toBeUndefined();
+    expect(validateIndexPattern('a'.repeat(MAX_INDEX_PATTERN_LENGTH + 1))).toEqual({
+      code: 'tooLong',
+      message: 'Use 255 bytes or fewer.',
+    });
+  });
+
+  it('counts the length in bytes, like Elasticsearch does for index names', () => {
+    // "é" takes two bytes.
+    expect(validateIndexPattern('é'.repeat(127))).toBeUndefined();
+    expect(validateIndexPattern('é'.repeat(128))).toEqual({
+      code: 'tooLong',
+      message: 'Use 255 bytes or fewer.',
+    });
+  });
+
+  it.each(['logs-*,metrics-*', 'logs-* metrics-*', ' logs-*', 'logs-*\t'])(
+    'rejects more than one target in %p',
+    (pattern) => {
+      expect(validateIndexPattern(pattern)).toEqual({
+        code: 'notSingleTarget',
+        message: 'Enter one pattern or name, without commas or spaces.',
+      });
+    }
+  );
+});
+
+describe('isValidPriority', () => {
+  it.each([0, 1, 10, Number.MAX_SAFE_INTEGER])('accepts %p', (priority) => {
+    expect(isValidPriority(priority)).toBe(true);
+  });
+
+  it.each([-1, 1.5, Number.NaN, Number.MAX_SAFE_INTEGER + 1])('rejects %p', (priority) => {
+    expect(isValidPriority(priority)).toBe(false);
   });
 });
