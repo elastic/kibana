@@ -28,8 +28,6 @@ import {
   EuiSwitch,
   EuiText,
   EuiToolTip,
-  useEuiFontSize,
-  useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
@@ -84,8 +82,7 @@ const CONFIRM = {
       defaultMessage: 'The current link stops working. Share the new one again.',
     }),
     confirm: ROTATE_BUTTON,
-    iconType: 'refresh',
-    color: 'text',
+    color: 'warning',
   },
   unpublish: {
     title: i18n.translate('workflows.pageShare.unpublishConfirmTitle', {
@@ -95,7 +92,6 @@ const CONFIRM = {
       defaultMessage: 'Publishing again brings back the same link. Rotate it if it leaked.',
     }),
     confirm: UNPUBLISH,
-    iconType: 'linkSlash',
     color: 'danger',
   },
 } as const;
@@ -112,8 +108,6 @@ const ShareActionRow = ({
   actions: React.ReactNode;
   'data-test-subj'?: string;
 }) => {
-  const { euiTheme } = useEuiTheme();
-  const { lineHeight } = useEuiFontSize('xs');
   return (
     <EuiPanel
       hasShadow={false}
@@ -130,56 +124,13 @@ const ShareActionRow = ({
               <strong>{title}</strong>
             </p>
           </EuiText>
-          {/* Two lines for every description, so confirming does not change the row height. */}
-          <EuiText size="xs" color="subdued" css={{ minBlockSize: `calc(${lineHeight} * 2)` }}>
+          <EuiText size="xs" color="subdued">
             <p>{description}</p>
           </EuiText>
         </EuiFlexItem>
-        {/* Wide enough for Cancel and the confirm button, so the text does not reflow. */}
-        <EuiFlexItem
-          grow={false}
-          css={{ minInlineSize: euiTheme.base * 13, alignItems: 'flex-end' }}
-        >
-          {actions}
-        </EuiFlexItem>
+        <EuiFlexItem grow={false}>{actions}</EuiFlexItem>
       </EuiFlexGroup>
     </EuiPanel>
-  );
-};
-
-/** Confirm and cancel, shown in place of the row's action button. */
-const ConfirmActions = ({
-  kind,
-  isLoading,
-  onConfirm,
-  onCancel,
-}: {
-  kind: keyof typeof CONFIRM;
-  isLoading: boolean;
-  onConfirm: () => void;
-  onCancel: () => void;
-}) => {
-  const { confirm, iconType, color } = CONFIRM[kind];
-  return (
-    <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-      <EuiFlexItem grow={false}>
-        <EuiButtonEmpty size="s" color="text" onClick={onCancel} isDisabled={isLoading}>
-          {CANCEL}
-        </EuiButtonEmpty>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiButton
-          size="s"
-          color={color}
-          iconType={iconType}
-          onClick={onConfirm}
-          isLoading={isLoading}
-          data-test-subj="workflowPageShareConfirm"
-        >
-          {confirm}
-        </EuiButton>
-      </EuiFlexItem>
-    </EuiFlexGroup>
   );
 };
 
@@ -231,7 +182,8 @@ export const WorkflowPageShareModal = ({
   const [pending, setPending] = useState<Action>();
   const [actionError, setActionError] = useState<string>();
   const [confirming, setConfirming] = useState<'rotate' | 'unpublish'>();
-  const [focusCopyToken, setFocusCopyToken] = useState(0);
+  // The swapped content unmounts the focused button, so focus moves on explicitly.
+  const [focusTarget, setFocusTarget] = useState<{ testSubj: string }>();
 
   const {
     data: page,
@@ -249,7 +201,6 @@ export const WorkflowPageShareModal = ({
       setActionError(undefined);
       try {
         await request();
-        setConfirming(undefined);
         // Wait for the new link, so Copy and Open never hand out the revoked one.
         await queryClient.invalidateQueries({ queryKey });
         if (action === 'rotate') {
@@ -261,11 +212,13 @@ export const WorkflowPageShareModal = ({
               defaultMessage: 'Copy the new link. The previous one stopped working.',
             }),
           });
-          setFocusCopyToken((token) => token + 1);
+          setFocusTarget({ testSubj: 'workflowPageShareCopy' });
         }
       } catch (error) {
         setActionError(getErrorMessage(error));
       } finally {
+        // Back to the share view, which shows the new state or the error.
+        setConfirming(undefined);
         setPending(undefined);
       }
     },
@@ -273,9 +226,20 @@ export const WorkflowPageShareModal = ({
   );
 
   useEffect(() => {
-    if (focusCopyToken === 0) return;
-    document.querySelector<HTMLElement>('[data-test-subj="workflowPageShareCopy"]')?.focus();
-  }, [focusCopyToken]);
+    if (!focusTarget) return;
+    document.querySelector<HTMLElement>(`[data-test-subj="${focusTarget.testSubj}"]`)?.focus();
+  }, [focusTarget]);
+
+  const startConfirm = (kind: 'rotate' | 'unpublish') => {
+    setConfirming(kind);
+    setFocusTarget({ testSubj: 'workflowPageShareConfirmCancel' });
+  };
+  const cancelConfirm = () => {
+    setFocusTarget({
+      testSubj: confirming === 'rotate' ? 'workflowPageShareRotate' : 'workflowPageShareUnpublish',
+    });
+    setConfirming(undefined);
+  };
 
   const setAccess = (published: boolean) =>
     run(published ? 'publish' : 'unpublish', () =>
@@ -487,75 +451,39 @@ export const WorkflowPageShareModal = ({
           {absoluteUrl && (
             <>
               <ShareActionRow
-                title={confirming === 'rotate' ? CONFIRM.rotate.title : ROTATE_TITLE}
-                description={confirming === 'rotate' ? CONFIRM.rotate.text : ROTATE_DESCRIPTION}
-                data-test-subj={
-                  confirming === 'rotate' ? 'workflowPageShareConfirm-rotate' : undefined
-                }
-                actions={
-                  confirming === 'rotate' ? (
-                    <ConfirmActions
-                      kind="rotate"
-                      isLoading={pending === 'rotate'}
-                      onConfirm={rotate}
-                      onCancel={() => setConfirming(undefined)}
-                    />
-                  ) : (
-                    withManageTooltip(
-                      <EuiButton
-                        size="s"
-                        color="text"
-                        iconType="refresh"
-                        onClick={() => setConfirming('rotate')}
-                        isDisabled={
-                          !canManageWorkflowPages ||
-                          pending !== undefined ||
-                          confirming !== undefined
-                        }
-                        data-test-subj="workflowPageShareRotate"
-                      >
-                        {ROTATE_BUTTON}
-                      </EuiButton>
-                    )
-                  )
-                }
+                title={ROTATE_TITLE}
+                description={ROTATE_DESCRIPTION}
+                actions={withManageTooltip(
+                  <EuiButton
+                    size="s"
+                    color="text"
+                    iconType="refresh"
+                    onClick={() => startConfirm('rotate')}
+                    isDisabled={!canManageWorkflowPages || pending !== undefined}
+                    data-test-subj="workflowPageShareRotate"
+                  >
+                    {ROTATE_BUTTON}
+                  </EuiButton>
+                )}
               />
               <EuiHorizontalRule margin="none" />
             </>
           )}
           <ShareActionRow
-            title={confirming === 'unpublish' ? CONFIRM.unpublish.title : UNPUBLISH_TITLE}
-            description={
-              confirming === 'unpublish' ? CONFIRM.unpublish.text : UNPUBLISH_DESCRIPTION
-            }
-            data-test-subj={
-              confirming === 'unpublish' ? 'workflowPageShareConfirm-unpublish' : undefined
-            }
-            actions={
-              confirming === 'unpublish' ? (
-                <ConfirmActions
-                  kind="unpublish"
-                  isLoading={pending === 'unpublish'}
-                  onConfirm={() => setAccess(false)}
-                  onCancel={() => setConfirming(undefined)}
-                />
-              ) : (
-                withManageTooltip(
-                  <EuiButton
-                    size="s"
-                    color="danger"
-                    iconType="linkSlash"
-                    onClick={() => setConfirming('unpublish')}
-                    isDisabled={
-                      !canManageWorkflowPages || pending !== undefined || confirming !== undefined
-                    }
-                    data-test-subj="workflowPageShareUnpublish"
-                  >
-                    {UNPUBLISH}
-                  </EuiButton>
-                )
-              )
-            }
+            title={UNPUBLISH_TITLE}
+            description={UNPUBLISH_DESCRIPTION}
+            actions={withManageTooltip(
+              <EuiButton
+                size="s"
+                color="danger"
+                iconType="linkSlash"
+                onClick={() => startConfirm('unpublish')}
+                isDisabled={!canManageWorkflowPages || pending !== undefined}
+                data-test-subj="workflowPageShareUnpublish"
+              >
+                {UNPUBLISH}
+              </EuiButton>
+            )}
           />
         </EuiPanel>
       </>
@@ -567,6 +495,46 @@ export const WorkflowPageShareModal = ({
       {status.label}
     </EuiBadge>
   );
+
+  // The confirmation replaces the modal's content, not the modal, so the overlay does not blink.
+  if (confirming) {
+    const { title, text, confirm, color } = CONFIRM[confirming];
+    return (
+      <EuiModal
+        onClose={cancelConfirm}
+        aria-labelledby={titleId}
+        maxWidth={560}
+        data-test-subj={`workflowPageShareConfirm-${confirming}`}
+      >
+        <EuiModalHeader>
+          <EuiModalHeaderTitle id={titleId}>{title}</EuiModalHeaderTitle>
+        </EuiModalHeader>
+        <EuiModalBody>
+          <EuiText size="s">
+            <p>{text}</p>
+          </EuiText>
+        </EuiModalBody>
+        <EuiModalFooter>
+          <EuiButtonEmpty
+            onClick={cancelConfirm}
+            isDisabled={pending !== undefined}
+            data-test-subj="workflowPageShareConfirmCancel"
+          >
+            {CANCEL}
+          </EuiButtonEmpty>
+          <EuiButton
+            fill
+            color={color}
+            onClick={confirming === 'rotate' ? rotate : () => setAccess(false)}
+            isLoading={pending !== undefined}
+            data-test-subj="workflowPageShareConfirm"
+          >
+            {confirm}
+          </EuiButton>
+        </EuiModalFooter>
+      </EuiModal>
+    );
+  }
 
   return (
     <EuiModal onClose={onClose} aria-labelledby={titleId} maxWidth={560}>

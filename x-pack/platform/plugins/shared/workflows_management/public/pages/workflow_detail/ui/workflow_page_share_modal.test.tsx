@@ -132,6 +132,7 @@ describe('WorkflowPageShareModal', () => {
   it('asks before it rotates the link', async () => {
     const { services } = setup();
     fireEvent.click(await screen.findByTestId('workflowPageShareRotate'));
+    const modal = screen.getByRole('dialog');
 
     expect(screen.getByTestId('workflowPageShareConfirm-rotate')).toHaveTextContent(
       'The current link stops working. Share the new one again.'
@@ -151,6 +152,8 @@ describe('WorkflowPageShareModal', () => {
       text: 'Copy the new link. The previous one stopped working.',
     });
     expect(document.activeElement).toBe(screen.getByTestId('workflowPageShareCopy'));
+    // The same modal node stays mounted, so the overlay does not fade out and back in.
+    expect(screen.getByRole('dialog')).toBe(modal);
   });
 
   it('turns submissions off and explains that the link stays the same', async () => {
@@ -203,9 +206,11 @@ describe('WorkflowPageShareModal', () => {
       'Rotate it if it leaked.'
     );
     expect(screen.queryByTestId('workflowPageShareUnpublish')).not.toBeInTheDocument();
-    fireEvent.click(screen.getByText('Cancel'));
+    expect(screen.getByTestId('workflowPageShareConfirmCancel')).toHaveFocus();
+    fireEvent.click(screen.getByTestId('workflowPageShareConfirmCancel'));
 
     expect(screen.queryByTestId('workflowPageShareConfirm-unpublish')).not.toBeInTheDocument();
+    expect(screen.getByTestId('workflowPageShareUnpublish')).toHaveFocus();
     expect(services.http.put).not.toHaveBeenCalled();
   });
 
