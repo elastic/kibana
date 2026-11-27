@@ -14,11 +14,11 @@ import type { SetupWizardStep } from './types';
 
 const mockSave = jest.fn<Promise<boolean>, []>();
 
-// A step that saves its draft on Continue.
+// A step with changes, so Continue saves them.
 const savingStep = createTestStep({
   id: 'saving',
   Content: ({ layout }) => (
-    <SetupWizardStepLayout {...layout} canContinue onSave={mockSave}>
+    <SetupWizardStepLayout {...layout} canContinue hasChanges onSave={mockSave}>
       <div />
     </SetupWizardStepLayout>
   ),
@@ -196,7 +196,6 @@ describe('SetupWizard', () => {
     const { onClose, services } = renderWizard({ doneStepIds: ['b', 'c'] });
 
     expect(screen.getByTestId('contextSetupWizardSkip')).toHaveTextContent('Skip and finish');
-    expect(screen.getByTestId('contextSetupWizardContinue')).toHaveTextContent('Finish setup');
 
     fireEvent.click(screen.getByTestId('contextSetupWizardSkip'));
 
@@ -285,7 +284,6 @@ describe('SetupWizard', () => {
 
       await waitFor(() => expect(onSaved).toHaveBeenCalled());
       expect(screen.getByTestId('contextSetupWizardContinue')).toBeDisabled();
-      expect(screen.getByTestId('contextSetupWizardSkip')).toBeDisabled();
       expect(screen.getByTestId('contextSetupWizardBack')).toBeDisabled();
       expect(screen.getByTestId('contextSetupWizardExit')).toBeDisabled();
       expect(onClose).not.toHaveBeenCalled();
@@ -344,7 +342,6 @@ describe('SetupWizard', () => {
 
     act(() => reportBusy(true));
 
-    expect(screen.getByTestId('contextSetupWizardContinue')).toBeDisabled();
     expect(screen.getByTestId('contextSetupWizardSkip')).toBeDisabled();
     expect(screen.getByTestId('contextSetupWizardBack')).toBeDisabled();
     expect(screen.getByTestId('contextSetupWizardExit')).toBeDisabled();

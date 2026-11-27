@@ -70,7 +70,7 @@ describe('SetupWizardStepLayout', () => {
   it('tells which step each click came from', () => {
     renderLayout();
 
-    ['Exit', 'Back', 'Skip', 'Continue'].forEach((name) => {
+    ['Exit', 'Back', 'Skip'].forEach((name) => {
       expect(screen.getByTestId(`contextSetupWizard${name}`)).toHaveAttribute(
         'data-ebt-detail',
         'a'
@@ -83,31 +83,52 @@ describe('SetupWizardStepLayout', () => {
     );
   });
 
-  it('labels Skip and Continue as finishing on the last open step', () => {
-    renderLayout({ controls: { isLastStep: true, isDone: true } });
+  it.each([
+    [
+      'a step that is not done and has no changes',
+      false,
+      false,
+      'Skip',
+      ebtAction.SKIP,
+      'Continue',
+    ],
+    ['a step with changes', false, true, 'Continue', ebtAction.CONTINUE, 'Skip'],
+    ['a step that is done', true, false, 'Continue', ebtAction.CONTINUE, 'Skip'],
+  ])(
+    'shows one primary button on %s, and its click is tracked as that button',
+    (_label, isDone, hasChanges, shown, action, hidden) => {
+      renderLayout({ controls: { isDone }, hasChanges });
 
-    expect(screen.getByTestId('contextSetupWizardSkip')).toHaveTextContent('Skip and finish');
-    expect(screen.getByTestId('contextSetupWizardSkip')).toHaveAttribute(
+      const button = screen.getByTestId(`contextSetupWizard${shown}`);
+      expect(button).toHaveAttribute('data-ebt-action', action);
+      expect(button).toHaveAttribute('data-ebt-detail', 'a');
+      expect(screen.queryByTestId(`contextSetupWizard${hidden}`)).not.toBeInTheDocument();
+    }
+  );
+
+  it.each([
+    [false, 'Skip', 'Skip and finish', ebtAction.SKIP_AND_FINISH],
+    [true, 'Continue', 'Finish setup', ebtAction.FINISH],
+  ])('on the last open step (done: %s), %s finishes setup', (isDone, button, label, action) => {
+    renderLayout({ controls: { isLastStep: true, isDone } });
+
+    expect(screen.getByTestId(`contextSetupWizard${button}`)).toHaveTextContent(label);
+    expect(screen.getByTestId(`contextSetupWizard${button}`)).toHaveAttribute(
       'data-ebt-action',
-      ebtAction.SKIP_AND_FINISH
-    );
-    expect(screen.getByTestId('contextSetupWizardContinue')).toHaveTextContent('Finish setup');
-    expect(screen.getByTestId('contextSetupWizardContinue')).toHaveAttribute(
-      'data-ebt-action',
-      ebtAction.FINISH
+      action
     );
   });
 
   it.each([
-    ['a required step that is not done', { isDone: false }, false],
+    ['a required step with changes', {}, false],
     ['a required step that is done', { isDone: true }, true],
     [
-      'an optional step that is not done',
+      'an optional step with changes',
       { step: createTestStep({ id: 'opt', isOptional: true }) },
       true,
     ],
   ])('Continue on %s: enabled is %s', (_label, controls, isEnabled) => {
-    renderLayout({ controls });
+    renderLayout({ controls, hasChanges: true });
 
     expect(screen.getByTestId('contextSetupWizardContinue').hasAttribute('disabled')).toBe(
       !isEnabled
@@ -120,13 +141,16 @@ describe('SetupWizardStepLayout', () => {
     expect(screen.getByTestId('contextSetupWizardContinue')).toBeDisabled();
   });
 
-  it('passes the step save to Continue', () => {
+  it.each([
+    ['saves the changes', true, true],
+    ['saves nothing without changes', false, false],
+  ])('Continue on a done step %s', (_label, hasChanges, isSaved) => {
     const onSave = jest.fn();
-    const { onContinue } = renderLayout({ controls: { isDone: true }, onSave });
+    const { onContinue } = renderLayout({ controls: { isDone: true }, hasChanges, onSave });
 
     fireEvent.click(screen.getByTestId('contextSetupWizardContinue'));
 
-    expect(onContinue).toHaveBeenCalledWith(onSave);
+    expect(onContinue).toHaveBeenCalledWith(isSaved ? onSave : undefined);
   });
 
   it('calls Back, Skip and Exit', () => {

@@ -37,6 +37,8 @@ interface SourcesPanelProps {
    * own saves: each save sends the whole AI index, and a stale one would drop the new sources.
    */
   onSavingChange?: (isSaving: boolean) => void;
+  /** Gets the sources picked in an add panel but not added yet. */
+  onPendingChange?: (sources: SelectedSource[]) => void;
 }
 
 export const SourcesPanel = ({
@@ -46,6 +48,7 @@ export const SourcesPanel = ({
   isManaged,
   showDescription = true,
   onSavingChange,
+  onPendingChange,
 }: SourcesPanelProps) => {
   const { saveSources, isSaving: isSavingRequest } = useSaveAiIndexSources();
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -170,6 +173,7 @@ export const SourcesPanel = ({
                 onAdd={addSources}
                 onClose={closeAdd}
                 isSaving={isSaving}
+                onPendingChange={onPendingChange}
               />
             ) : null}
             {!isManaged && addingKind !== 'elasticsearch' ? (
@@ -224,6 +228,7 @@ export const SourcesPanel = ({
                 onAdd={addSources}
                 onClose={closeAdd}
                 isSaving={isSaving}
+                onPendingChange={onPendingChange}
               />
             ) : null}
           </SourceTypePanel>

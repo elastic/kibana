@@ -19,11 +19,11 @@ const { useSaveAiIndexDescription } = jest.requireMock(
 
 const mockSaveDescription = jest.fn();
 
-const renderStep = () => {
-  const layout = createTestLayoutControls(describeStep);
+const renderStep = ({ aiIndex = testAiIndex, isDone = false } = {}) => {
+  const layout = createTestLayoutControls(describeStep, { isDone });
   const { Content } = describeStep;
   renderWithServices(
-    <Content aiIndex={testAiIndex} onSaved={jest.fn()} onBusyChange={jest.fn()} layout={layout} />
+    <Content aiIndex={aiIndex} onSaved={jest.fn()} onBusyChange={jest.fn()} layout={layout} />
   );
   return layout;
 };
@@ -65,11 +65,33 @@ describe('describeStep', () => {
     expect(screen.queryByRole('textbox', { name: /name/i })).not.toBeInTheDocument();
   });
 
-  it('disables Continue while the description is empty, with no message', () => {
+  it('offers Skip while the description is empty, with no message', () => {
     renderStep();
 
-    expect(screen.getByTestId('contextSetupWizardContinue')).toBeDisabled();
+    expect(screen.getByTestId('contextSetupWizardSkip')).toBeEnabled();
+    expect(screen.queryByTestId('contextSetupWizardContinue')).not.toBeInTheDocument();
     expect(screen.queryByText('Enter a description.')).not.toBeInTheDocument();
+  });
+
+  it('offers Skip again when the typed text is removed', () => {
+    renderStep();
+
+    typeDescription('Checkout failures.');
+    expect(screen.getByTestId('contextSetupWizardContinue')).toBeEnabled();
+
+    typeDescription('');
+    expect(screen.getByTestId('contextSetupWizardSkip')).toBeEnabled();
+  });
+
+  it('Continue on a saved description that is not changed saves nothing', () => {
+    const { onContinue } = renderStep({
+      aiIndex: { ...testAiIndex, description: 'Checkout failures.' },
+      isDone: true,
+    });
+
+    fireEvent.click(screen.getByTestId('contextSetupWizardContinue'));
+
+    expect(onContinue).toHaveBeenCalledWith(undefined);
   });
 
   it('explains why Continue is off when the description is only spaces', () => {

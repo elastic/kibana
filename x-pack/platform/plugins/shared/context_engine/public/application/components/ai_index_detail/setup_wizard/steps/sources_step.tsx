@@ -6,8 +6,11 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import React from 'react';
+import React, { useState } from 'react';
+import { useSaveAiIndexSources } from '../../../../hooks/use_save_ai_index_sources';
+import { toSelectedSources } from '../../../../utils/sources';
 import { SourcesPanel } from '../../sources/sources_panel';
+import type { SelectedSource } from '../../sources/types';
 import { SetupWizardStepLayout } from '../setup_wizard_step_layout';
 import type { SetupWizardStep, SetupWizardStepContentProps } from '../types';
 
@@ -17,18 +20,31 @@ const SourcesStepContent = ({
   onSaved,
   onBusyChange,
   layout,
-}: SetupWizardStepContentProps) => (
-  <SetupWizardStepLayout {...layout}>
-    <SourcesPanel
-      isLoading={false}
-      aiIndex={aiIndex}
-      onSaved={onSaved}
-      isManaged={false}
-      showDescription={false}
-      onSavingChange={onBusyChange}
-    />
-  </SetupWizardStepLayout>
-);
+}: SetupWizardStepContentProps) => {
+  const { saveSources } = useSaveAiIndexSources();
+  // Picked in an add panel but not added yet. Continue adds them, so they are not lost.
+  const [pendingSources, setPendingSources] = useState<SelectedSource[]>([]);
+
+  return (
+    <SetupWizardStepLayout
+      {...layout}
+      hasChanges={pendingSources.length > 0}
+      onSave={() =>
+        saveSources(aiIndex, [...toSelectedSources(aiIndex.sources), ...pendingSources])
+      }
+    >
+      <SourcesPanel
+        isLoading={false}
+        aiIndex={aiIndex}
+        onSaved={onSaved}
+        isManaged={false}
+        showDescription={false}
+        onSavingChange={onBusyChange}
+        onPendingChange={setPendingSources}
+      />
+    </SetupWizardStepLayout>
+  );
+};
 
 export const sourcesStep: SetupWizardStep = {
   id: 'sources',

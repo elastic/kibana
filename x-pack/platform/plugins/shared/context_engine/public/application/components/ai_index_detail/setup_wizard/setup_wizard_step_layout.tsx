@@ -68,7 +68,9 @@ const finishLabel = i18n.translate('xpack.contextEngine.setupWizard.finish', {
 interface SetupWizardStepLayoutProps extends SetupWizardStepLayoutControls {
   /** Left out: Continue works once the step is done, or right away for an optional step. */
   canContinue?: boolean;
-  /** Saves the step's draft on Continue. Resolves false when saving failed. */
+  /** True once the user changed something in the step, so the primary button saves it. */
+  hasChanges?: boolean;
+  /** Saves the step's changes on Continue. Resolves false when saving failed. */
   onSave?: () => Promise<boolean>;
   children: ReactNode;
 }
@@ -86,6 +88,7 @@ export const SetupWizardStepLayout = ({
   onExit,
   onContinue,
   canContinue = isDone || step.isOptional === true,
+  hasChanges = false,
   onSave,
   children,
 }: SetupWizardStepLayoutProps) => {
@@ -93,6 +96,8 @@ export const SetupWizardStepLayout = ({
     services: { docLinks },
   } = useKibana();
   const { id, texts, isOptional } = step;
+  // One primary button: Skip while the step is untouched and not done, else Continue.
+  const isSkipping = !isDone && !hasChanges;
 
   return (
     <EuiPanel hasBorder paddingSize="none" data-test-subj={`contextSetupWizardPanel-${id}`}>
@@ -161,34 +166,36 @@ export const SetupWizardStepLayout = ({
             </EuiFlexItem>
           )}
           <EuiFlexItem grow={false}>
-            <EuiButton
-              onClick={onSkip}
-              isDisabled={isBusy}
-              data-test-subj="contextSetupWizardSkip"
-              {...getEbtProps({
-                element: ebtElement,
-                action: isLastStep ? ebtAction.SKIP_AND_FINISH : ebtAction.SKIP,
-                detail: id,
-              })}
-            >
-              {isLastStep ? skipAndFinishLabel : skipLabel}
-            </EuiButton>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButton
-              fill
-              onClick={() => onContinue(onSave)}
-              isDisabled={!canContinue}
-              isLoading={isBusy}
-              data-test-subj="contextSetupWizardContinue"
-              {...getEbtProps({
-                element: ebtElement,
-                action: isLastStep ? ebtAction.FINISH : ebtAction.CONTINUE,
-                detail: id,
-              })}
-            >
-              {isLastStep ? finishLabel : continueLabel}
-            </EuiButton>
+            {isSkipping ? (
+              <EuiButton
+                fill
+                onClick={onSkip}
+                isDisabled={isBusy}
+                data-test-subj="contextSetupWizardSkip"
+                {...getEbtProps({
+                  element: ebtElement,
+                  action: isLastStep ? ebtAction.SKIP_AND_FINISH : ebtAction.SKIP,
+                  detail: id,
+                })}
+              >
+                {isLastStep ? skipAndFinishLabel : skipLabel}
+              </EuiButton>
+            ) : (
+              <EuiButton
+                fill
+                onClick={() => onContinue(hasChanges ? onSave : undefined)}
+                isDisabled={!canContinue}
+                isLoading={isBusy}
+                data-test-subj="contextSetupWizardContinue"
+                {...getEbtProps({
+                  element: ebtElement,
+                  action: isLastStep ? ebtAction.FINISH : ebtAction.CONTINUE,
+                  detail: id,
+                })}
+              >
+                {isLastStep ? finishLabel : continueLabel}
+              </EuiButton>
+            )}
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiPanel>

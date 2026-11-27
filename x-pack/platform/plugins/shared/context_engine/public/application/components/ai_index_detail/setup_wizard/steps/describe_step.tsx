@@ -20,7 +20,8 @@ const blankDescriptionError = i18n.translate('xpack.contextEngine.setupWizard.de
 
 const DescribeStepContent = ({ aiIndex, layout }: SetupWizardStepContentProps) => {
   const { saveDescription } = useSaveAiIndexDescription();
-  const [description, setDescription] = useState(aiIndex.description ?? '');
+  const savedDescription = aiIndex.description ?? '';
+  const [description, setDescription] = useState(savedDescription);
 
   const trimmedDescription = description.trim();
   const validation = validateTextInput({
@@ -33,6 +34,7 @@ const DescribeStepContent = ({ aiIndex, layout }: SetupWizardStepContentProps) =
   return (
     <SetupWizardStepLayout
       {...layout}
+      hasChanges={description !== savedDescription}
       canContinue={trimmedDescription.length > 0 && validation.valid}
       onSave={() => saveDescription(aiIndex, trimmedDescription)}
     >
