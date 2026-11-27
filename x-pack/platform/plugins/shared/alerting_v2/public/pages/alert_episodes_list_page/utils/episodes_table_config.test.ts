@@ -81,6 +81,22 @@ describe('episodes_table_config', () => {
       expect(mergeEpisodesTableConfig(null, null)).toEqual(DEFAULT_EPISODES_TABLE_CONFIG);
       expect(mergeEpisodesTableConfig(undefined, undefined)).toEqual(DEFAULT_EPISODES_TABLE_CONFIG);
     });
+
+    it('keeps a time sort, since the time column is always shown', () => {
+      const result = mergeEpisodesTableConfig({
+        visibleColumns: ['tags'],
+        sort: { sortField: '@timestamp', sortDirection: 'asc' },
+      });
+      expect(result.sort).toEqual({ sortField: '@timestamp', sortDirection: 'asc' });
+    });
+
+    it('resets the sort to the default when the sorted column is hidden', () => {
+      const result = mergeEpisodesTableConfig(
+        { sort: { sortField: 'duration', sortDirection: 'asc' } },
+        { visibleColumns: ['tags'] }
+      );
+      expect(result.sort).toEqual(DEFAULT_EPISODES_TABLE_CONFIG.sort);
+    });
   });
 
   describe('readEpisodesTableConfigFromStorage / writeEpisodesTableConfigToStorage', () => {
@@ -213,9 +229,29 @@ describe('episodes_table_config', () => {
       expect(readEpisodesTableConfigFromUrl(urlStorage)?.sort).toBeUndefined();
     });
 
-    it('ignores empty visibleColumns arrays', async () => {
+    it('reads an empty visibleColumns array', async () => {
       const urlStorage = await createKbnTestUrlStorage({ visibleColumns: [] });
-      expect(readEpisodesTableConfigFromUrl(urlStorage)?.visibleColumns).toBeUndefined();
+      expect(readEpisodesTableConfigFromUrl(urlStorage)?.visibleColumns).toEqual([]);
+    });
+
+    it('drops unknown visibleColumns ids', async () => {
+      const urlStorage = await createKbnTestUrlStorage({
+        visibleColumns: ['tags', 'unknown.field'],
+      });
+      expect(readEpisodesTableConfigFromUrl(urlStorage)?.visibleColumns).toEqual(['tags']);
+    });
+
+    it('ignores a visibleColumns list with only unknown ids so a saved layout applies', async () => {
+      const urlStorage = await createKbnTestUrlStorage({
+        visibleColumns: ['old.field', '@timestamp'],
+      });
+      const storage = createMockStorage({ visibleColumns: ['tags'] });
+
+      const merged = mergeEpisodesTableConfig(
+        readEpisodesTableConfigFromStorage(storage as any),
+        readEpisodesTableConfigFromUrl(urlStorage)
+      );
+      expect(merged.visibleColumns).toEqual(['tags']);
     });
   });
 

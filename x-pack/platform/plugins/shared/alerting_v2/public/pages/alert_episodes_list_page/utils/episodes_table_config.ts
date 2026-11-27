@@ -12,6 +12,8 @@ import { ALERTING_V2_EPISODES_APP_ID, ALERTING_V2_SECTION_ID } from '@kbn/alerti
 import {
   DEFAULT_EPISODES_TABLE_CONFIG,
   episodesTableConfigSchema,
+  resolveEpisodesTableVisibleColumns,
+  resolveSortForVisibleColumns,
   type EpisodesTableConfig,
 } from '@kbn/alerting-v2-episodes-ui/utils/episodes_table_config';
 
@@ -57,6 +59,15 @@ const decodeEpisodesTableConfig = (raw: unknown): Partial<EpisodesTableConfig> |
     }
     result[field] = parsed.data;
   }
+  if (result.visibleColumns) {
+    // An unusable list is dropped so the next source (localStorage, then defaults) applies.
+    const visibleColumns = resolveEpisodesTableVisibleColumns(result.visibleColumns);
+    if (visibleColumns) {
+      result.visibleColumns = visibleColumns;
+    } else {
+      delete result.visibleColumns;
+    }
+  }
   // `result` was built generically per schema field above, so it matches EpisodesTableConfig's
   // shape by construction — TS just can't verify that field-by-field.
   return Object.keys(result).length > 0 ? (result as Partial<EpisodesTableConfig>) : undefined;
@@ -82,11 +93,14 @@ const encodeEpisodesTableConfig = (
 export const mergeEpisodesTableConfig = (
   fromStorage?: Partial<EpisodesTableConfig> | null,
   fromUrl?: Partial<EpisodesTableConfig> | null
-): EpisodesTableConfig => ({
-  ...DEFAULT_EPISODES_TABLE_CONFIG,
-  ...(fromStorage ?? {}),
-  ...(fromUrl ?? {}),
-});
+): EpisodesTableConfig => {
+  const merged: EpisodesTableConfig = {
+    ...DEFAULT_EPISODES_TABLE_CONFIG,
+    ...(fromStorage ?? {}),
+    ...(fromUrl ?? {}),
+  };
+  return { ...merged, sort: resolveSortForVisibleColumns(merged.sort, merged.visibleColumns) };
+};
 
 export const readEpisodesTableConfigFromStorage = (
   storage: Storage

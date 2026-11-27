@@ -16,6 +16,7 @@ import {
   EuiText,
   EuiToolTip,
   logicalCSS,
+  useDataGridColumnSelector,
   useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
@@ -51,6 +52,7 @@ import {
   getRowHeight,
   type CustomCellRenderer,
   type CustomGridColumnsConfiguration,
+  type UnifiedDataTableRenderCustomToolbar,
   type UnifiedDataTableSettings,
 } from '@kbn/unified-data-table';
 import type { EpisodesFilterState, EpisodesSortState } from '@kbn/alerting-v2-common-queries';
@@ -87,8 +89,17 @@ import {
   DEFAULT_EPISODES_TABLE_CONFIG,
   DEFAULT_EPISODES_TABLE_SORT,
   DEFAULT_EPISODES_TABLE_VISIBLE_COLUMNS,
+  EPISODES_TABLE_COLUMN_IDS,
+  EPISODES_TABLE_TIME_COLUMN_ID,
+  isEpisodesTableColumnId,
+  resolveSortForVisibleColumns,
   type EpisodesTableColumnSettings,
 } from '../../utils/episodes_table_config';
+import {
+  EPISODES_TABLE_COLUMN_LABELS,
+  SELECTOR_COLUMNS,
+  SELECTOR_OPTIONS,
+} from './episodes_table_columns';
 import {
   EPISODES_LIST_COLUMN_ALERT_TAGS,
   EPISODES_LIST_COLUMN_ASSIGNEES,
@@ -140,18 +151,25 @@ const COLUMN_CUSTOMIZATIONS: CustomGridColumnsConfiguration = {
     displayAsText: EPISODES_LIST_COLUMN_REASON,
     isSortable: false,
   }),
+  // Always shown, including when the data view has no time field and the grid would offer Remove.
+  [EPISODES_TABLE_TIME_COLUMN_ID]: ({ column }) =>
+    column.actions ? { ...column, actions: { ...column.actions, showHide: false } } : column,
 };
 
-// Drops the default column actions this table can't support yet.
-// - showHide: there is no way to add a column back, so a removed column would be lost for good.
-const removeUnsupportedDefaultActions = (column: EuiDataGridColumn): EuiDataGridColumn =>
-  column.actions ? { ...column, actions: { ...column.actions, showHide: false } } : column;
+/*
+ * The Columns popover is the only way to reorder, so its order (hidden columns included) is the
+ * single source of column order. Header moves would change the visible order behind its back.
+ */
+const withoutMoveActions = (column: EuiDataGridColumn): EuiDataGridColumn =>
+  column.actions
+    ? { ...column, actions: { ...column.actions, showMoveLeft: false, showMoveRight: false } }
+    : column;
 
 const CUSTOM_GRID_COLUMNS_CONFIGURATION: CustomGridColumnsConfiguration = Object.fromEntries(
-  DEFAULT_EPISODES_TABLE_VISIBLE_COLUMNS.map((columnId) => [
+  [EPISODES_TABLE_TIME_COLUMN_ID, ...EPISODES_TABLE_COLUMN_IDS].map((columnId) => [
     columnId,
     (props: Parameters<CustomGridColumnsConfiguration[string]>[0]) =>
-      removeUnsupportedDefaultActions(COLUMN_CUSTOMIZATIONS[columnId]?.(props) ?? props.column),
+      withoutMoveActions(COLUMN_CUSTOMIZATIONS[columnId]?.(props) ?? props.column),
   ])
 );
 
@@ -441,52 +459,84 @@ export const EpisodesTable = ({
     [height, minHeight, maxHeight, rowHeight, loadedEpisodesCount]
   );
 
-  const renderCustomToolbar = useMemo(
-    () =>
-      getRenderCustomToolbarWithElements({
-        leftSide: (
-          <EuiFlexGroup
-            alignItems="center"
-            responsive={false}
-            gutterSize="xs"
-            css={css`
-              ${logicalCSS('padding-horizontal', euiTheme.size.s)}
-            `}
-          >
-            <EuiFlexItem grow={false}>
-              {isEpisodeListCapped ? (
-                <EuiToolTip content={EPISODES_LIST_ITEM_COUNT_CAPPED_TOOLTIP(fetchSize)}>
-                  <EuiText size="xs" data-test-subj="alertEpisodesItemCount" tabIndex={0}>
-                    {EPISODES_LIST_ITEM_COUNT_CAPPED(fetchSize)}
-                  </EuiText>
-                </EuiToolTip>
-              ) : (
-                <EuiText size="xs" data-test-subj="alertEpisodesItemCount">
-                  {EPISODES_LIST_ITEM_COUNT(loadedEpisodesCount)}
-                </EuiText>
-              )}
-            </EuiFlexItem>
-            {renderAdditionalToolbarControls ? (
-              <>
-                <EuiFlexItem grow={false}>
-                  <EuiText size="xs" color="subdued">
-                    |
-                  </EuiText>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>{renderAdditionalToolbarControls()}</EuiFlexItem>
-              </>
-            ) : null}
-          </EuiFlexGroup>
-        ),
-      }),
-    [
-      euiTheme.size.s,
-      fetchSize,
-      isEpisodeListCapped,
-      loadedEpisodesCount,
-      renderAdditionalToolbarControls,
-    ]
+  const applyVisibleColumns = useCallback(
+    (columnIds: string[]) => {
+      const nextVisibleColumns = columnIds.filter(isEpisodesTableColumnId);
+      setVisibleColumns(nextVisibleColumns);
+      const nextSort = resolveSortForVisibleColumns(episodesSort, nextVisibleColumns);
+      if (
+        nextSort.sortField !== episodesSort.sortField ||
+        nextSort.sortDirection !== episodesSort.sortDirection
+      ) {
+        setSort(nextSort);
+      }
+    },
+    [episodesSort, setSort, setVisibleColumns]
   );
+
+  const gridColumns = useMemo(
+    () => [EPISODES_TABLE_TIME_COLUMN_ID, ...visibleColumns],
+    [visibleColumns]
+  );
+
+  const [columnSelector] = useDataGridColumnSelector(
+    SELECTOR_COLUMNS,
+    { visibleColumns, setVisibleColumns: applyVisibleColumns },
+    SELECTOR_OPTIONS,
+    EPISODES_TABLE_COLUMN_LABELS
+  );
+
+  const renderCustomToolbar = useMemo<UnifiedDataTableRenderCustomToolbar>(() => {
+    const renderToolbar = getRenderCustomToolbarWithElements({
+      leftSide: (
+        <EuiFlexGroup
+          alignItems="center"
+          responsive={false}
+          gutterSize="xs"
+          css={css`
+            ${logicalCSS('padding-horizontal', euiTheme.size.s)}
+          `}
+        >
+          <EuiFlexItem grow={false}>
+            {isEpisodeListCapped ? (
+              <EuiToolTip content={EPISODES_LIST_ITEM_COUNT_CAPPED_TOOLTIP(fetchSize)}>
+                <EuiText size="xs" data-test-subj="alertEpisodesItemCount" tabIndex={0}>
+                  {EPISODES_LIST_ITEM_COUNT_CAPPED(fetchSize)}
+                </EuiText>
+              </EuiToolTip>
+            ) : (
+              <EuiText size="xs" data-test-subj="alertEpisodesItemCount">
+                {EPISODES_LIST_ITEM_COUNT(loadedEpisodesCount)}
+              </EuiText>
+            )}
+          </EuiFlexItem>
+          {renderAdditionalToolbarControls ? (
+            <>
+              <EuiFlexItem grow={false}>
+                <EuiText size="xs" color="subdued">
+                  |
+                </EuiText>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>{renderAdditionalToolbarControls()}</EuiFlexItem>
+            </>
+          ) : null}
+        </EuiFlexGroup>
+      ),
+    });
+    // The grid's own column control can only reorder, so the selector takes its toolbar slot.
+    return (props) =>
+      renderToolbar({
+        ...props,
+        toolbarProps: { ...props.toolbarProps, columnControl: columnSelector },
+      });
+  }, [
+    columnSelector,
+    euiTheme.size.s,
+    fetchSize,
+    isEpisodeListCapped,
+    loadedEpisodesCount,
+    renderAdditionalToolbarControls,
+  ]);
 
   const renderDocumentView = useCallback<RenderDocumentViewCallback>(
     (hit) => {
@@ -588,13 +638,6 @@ export const EpisodesTable = ({
     onSuccess: invalidateEpisodeQueries,
   });
 
-  const onSetColumns = useCallback(
-    (cols: string[], _hideTimeCol: boolean) => {
-      setVisibleColumns(cols);
-    },
-    [setVisibleColumns]
-  );
-
   const externalCustomRenderers = useMemo<CustomCellRenderer>(
     () => ({
       'episode.status': (props) => <EpisodeStatusCell {...props} />,
@@ -658,9 +701,9 @@ export const EpisodesTable = ({
           }}
           rowLineHeightOverride={TABLE_ROW_LINE_HEIGHT}
           dataView={dataView}
-          columns={visibleColumns}
-          onSetColumns={onSetColumns}
-          canDragAndDropColumns
+          columns={gridColumns}
+          onSetColumns={applyVisibleColumns}
+          isColumnSelectorEnabled={false}
           showTimeCol={!!dataView.timeFieldName}
           customGridColumnsConfiguration={CUSTOM_GRID_COLUMNS_CONFIGURATION}
           externalCustomRenderers={externalCustomRenderers}

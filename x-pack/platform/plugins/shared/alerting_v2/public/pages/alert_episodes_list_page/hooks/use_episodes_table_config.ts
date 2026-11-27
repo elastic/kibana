@@ -71,38 +71,33 @@ export const useEpisodesTableConfig = (storage: Storage) => {
     [storage, urlStateStorage]
   );
 
-  const setVisibleColumns = useCallback(
-    (visibleColumns: string[]) => {
-      const next: EpisodesTableConfig = { ...configRef.current, visibleColumns };
+  // Updates the ref immediately so setters called in the same tick build on each other.
+  const updateConfig = useCallback(
+    (patch: Partial<EpisodesTableConfig>) => {
+      const next: EpisodesTableConfig = { ...configRef.current, ...patch };
+      configRef.current = next;
       setConfigInternal(next);
       void persistConfig(next);
     },
     [persistConfig]
   );
 
-  const setSort = useCallback(
-    (sort: EpisodesSortState) => {
-      const next: EpisodesTableConfig = { ...configRef.current, sort };
-      setConfigInternal(next);
-      void persistConfig(next);
-    },
-    [persistConfig]
+  const setVisibleColumns = useCallback(
+    (visibleColumns: string[]) => updateConfig({ visibleColumns }),
+    [updateConfig]
   );
+
+  const setSort = useCallback((sort: EpisodesSortState) => updateConfig({ sort }), [updateConfig]);
 
   const setRowHeight = useCallback(
-    (rowHeight: number) => {
-      const next: EpisodesTableConfig = { ...configRef.current, rowHeight };
-      setConfigInternal(next);
-      void persistConfig(next);
-    },
-    [persistConfig]
+    (rowHeight: number) => updateConfig({ rowHeight }),
+    [updateConfig]
   );
 
   const onResize = useCallback(
     ({ columnId, width }: { columnId: string; width: number | undefined }) => {
       const prevColumnSettings = configRef.current.columnSettings;
-      const next: EpisodesTableConfig = {
-        ...configRef.current,
+      updateConfig({
         columnSettings: {
           ...prevColumnSettings,
           [columnId]: {
@@ -110,17 +105,15 @@ export const useEpisodesTableConfig = (storage: Storage) => {
             width,
           },
         },
-      };
-      setConfigInternal(next);
-      void persistConfig(next);
+      });
     },
-    [persistConfig]
+    [updateConfig]
   );
 
-  const resetToDefaults = useCallback(() => {
-    setConfigInternal(DEFAULT_EPISODES_TABLE_CONFIG);
-    void persistConfig(DEFAULT_EPISODES_TABLE_CONFIG);
-  }, [persistConfig]);
+  const resetToDefaults = useCallback(
+    () => updateConfig(DEFAULT_EPISODES_TABLE_CONFIG),
+    [updateConfig]
+  );
 
   return {
     visibleColumns: config.visibleColumns,

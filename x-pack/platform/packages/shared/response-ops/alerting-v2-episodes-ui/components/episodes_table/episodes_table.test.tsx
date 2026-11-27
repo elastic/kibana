@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React from 'react';
-import { act, render, screen } from '@testing-library/react';
+import React, { useState } from 'react';
+import { act, fireEvent, render, screen } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { I18nProvider } from '@kbn/i18n-react';
 import { UnifiedDataTable, getRowHeight } from '@kbn/unified-data-table';
@@ -20,6 +20,24 @@ import {
   type EpisodesTableProps,
   type EpisodesTableServices,
 } from './episodes_table';
+import {
+  DEFAULT_EPISODES_TABLE_SORT,
+  DEFAULT_EPISODES_TABLE_VISIBLE_COLUMNS,
+} from '../../utils/episodes_table_config';
+
+// Captures the column selector's drag handler, since drag-and-drop can't measure layout in jsdom.
+let mockColumnSelectorDragEnd: ((result: unknown) => void) | undefined;
+jest.mock('@elastic/eui/test-env/components/drag_and_drop', () => {
+  const actual = jest.requireActual('@elastic/eui/test-env/components/drag_and_drop');
+  const { createElement } = jest.requireActual('react');
+  return {
+    ...actual,
+    EuiDragDropContext: (props: { onDragEnd: (result: unknown) => void }) => {
+      mockColumnSelectorDragEnd = props.onDragEnd;
+      return createElement(actual.EuiDragDropContext, props);
+    },
+  };
+});
 
 const episode = (id: string) => ({ 'episode.id': id, 'rule.id': `rule-${id}` });
 
@@ -48,13 +66,26 @@ const lastGridProps = () => {
 jest.mock('@kbn/unified-data-table', () => ({
   DataLoadingState: { loading: 'loading', loaded: 'loaded' },
   ROWS_HEIGHT_OPTIONS: { auto: -1, single: 1, default: 3 },
-  UnifiedDataTable: jest.fn((props: { renderCustomToolbar?: () => React.ReactNode }) =>
-    props.renderCustomToolbar ? props.renderCustomToolbar() : null
+  UnifiedDataTable: jest.fn(
+    (props: {
+      renderCustomToolbar?: (toolbar: {
+        toolbarProps: Record<string, unknown>;
+        gridProps: Record<string, unknown>;
+      }) => React.ReactNode;
+    }) =>
+      props.renderCustomToolbar
+        ? props.renderCustomToolbar({ toolbarProps: {}, gridProps: {} })
+        : null
   ),
   getRenderCustomToolbarWithElements: jest.fn(
     ({ leftSide }: { leftSide: React.ReactNode }) =>
-      () =>
-        leftSide
+      ({ toolbarProps }: { toolbarProps: { columnControl?: React.ReactNode } }) =>
+        (
+          <>
+            {leftSide}
+            {toolbarProps.columnControl}
+          </>
+        )
   ),
   getRowHeight: jest.fn(() => 1),
 }));
@@ -137,6 +168,7 @@ const renderTable = (
 describe('EpisodesTable', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockColumnSelectorDragEnd = undefined;
     (getRowHeight as unknown as jest.Mock).mockReturnValue(1);
     setEpisodes([]);
     setRulesCache({});
@@ -295,6 +327,243 @@ describe('EpisodesTable', () => {
     const labelId = lastGridProps().ariaLabelledBy;
     expect(labelId).not.toBe('alertingEpisodesTableAriaLabel');
     expect(container.querySelector(`span[id="${labelId}"]`)).toBeInTheDocument();
+  });
+
+  const openColumnSelector = async () => {
+    fireEvent.click(screen.getByTestId('dataGridColumnSelectorButton'));
+    await screen.findByTestId('dataGridColumnSelectorSearch');
+  };
+
+  describe('column visibility', () => {
+    it("disables the grid's column selector", () => {
+      renderTable();
+
+      expect(lastGridProps().isColumnSelectorEnabled).toBe(false);
+    });
+
+    it('keeps the header remove action on every non-time column', () => {
+      renderTable();
+
+      DEFAULT_EPISODES_TABLE_VISIBLE_COLUMNS.forEach((id) => {
+        const column = lastGridProps().customGridColumnsConfiguration[id]({
+          column: { id, actions: { showHide: { label: 'Remove column' } } },
+        });
+        expect(column.actions.showHide).toEqual({ label: 'Remove column' });
+      });
+    });
+
+    it('leaves columns without actions untouched', () => {
+      renderTable();
+
+      DEFAULT_EPISODES_TABLE_VISIBLE_COLUMNS.forEach((id) => {
+        const column = lastGridProps().customGridColumnsConfiguration[id]({
+          column: { id, actions: false },
+        });
+        expect(column.actions).toBe(false);
+      });
+    });
+
+    it('lists every column in the selector, including hidden ones, but not the time column', async () => {
+      renderTable({ visibleColumns: ['reason'], onVisibleColumnsChange: jest.fn() });
+      await openColumnSelector();
+
+      DEFAULT_EPISODES_TABLE_VISIBLE_COLUMNS.forEach((id) => {
+        expect(screen.getByTestId(`dataGridColumnSelectorColumnItem-${id}`)).toBeInTheDocument();
+      });
+      expect(
+        screen.queryByTestId('dataGridColumnSelectorColumnItem-@timestamp')
+      ).not.toBeInTheDocument();
+    });
+
+    it('reports the remaining columns when one is toggled off', async () => {
+      const onVisibleColumnsChange = jest.fn();
+      renderTable({ visibleColumns: ['tags', 'reason'], onVisibleColumnsChange });
+      await openColumnSelector();
+
+      fireEvent.click(screen.getByTestId('dataGridColumnSelectorToggleColumnVisibility-tags'));
+
+      expect(onVisibleColumnsChange).toHaveBeenCalledWith(['reason']);
+    });
+
+    it('reports every column on Show all and none on Hide all', async () => {
+      const onVisibleColumnsChange = jest.fn();
+      renderTable({ visibleColumns: ['tags'], onVisibleColumnsChange });
+      await openColumnSelector();
+
+      fireEvent.click(screen.getByTestId('dataGridColumnSelectorShowAllButton'));
+      expect(onVisibleColumnsChange).toHaveBeenLastCalledWith(
+        DEFAULT_EPISODES_TABLE_VISIBLE_COLUMNS
+      );
+
+      fireEvent.click(screen.getByTestId('dataGridColumnSelectorHideAllButton'));
+      expect(onVisibleColumnsChange).toHaveBeenLastCalledWith([]);
+    });
+
+    it('passes only the time column to the grid for an empty selection', () => {
+      renderTable({ visibleColumns: [], onVisibleColumnsChange: jest.fn() });
+
+      expect(lastGridProps().columns).toEqual(['@timestamp']);
+    });
+
+    it('keeps the time column out of the selection reported back from the grid', () => {
+      const onVisibleColumnsChange = jest.fn();
+      renderTable({ onVisibleColumnsChange });
+
+      act(() => lastGridProps().onSetColumns(['@timestamp', 'tags'], false));
+
+      expect(onVisibleColumnsChange).toHaveBeenCalledWith(['tags']);
+    });
+
+    it('drops unknown columns that come back from the grid', () => {
+      const onVisibleColumnsChange = jest.fn();
+      renderTable({ onVisibleColumnsChange });
+
+      act(() => lastGridProps().onSetColumns(['tags', 'unknown.field'], false));
+
+      expect(onVisibleColumnsChange).toHaveBeenCalledWith(['tags']);
+    });
+
+    it('resets the sort when the sorted column is hidden', () => {
+      const onSortChange = jest.fn();
+      renderTable({
+        onVisibleColumnsChange: jest.fn(),
+        sort: { sortField: 'duration', sortDirection: 'asc' },
+        onSortChange,
+      });
+
+      act(() => lastGridProps().onSetColumns(['tags'], false));
+
+      expect(onSortChange).toHaveBeenCalledWith(DEFAULT_EPISODES_TABLE_SORT);
+    });
+
+    it('keeps the sort when the sorted column stays visible', () => {
+      const onSortChange = jest.fn();
+      renderTable({
+        onVisibleColumnsChange: jest.fn(),
+        sort: { sortField: 'duration', sortDirection: 'asc' },
+        onSortChange,
+      });
+
+      act(() => lastGridProps().onSetColumns(['duration'], false));
+
+      expect(onSortChange).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('column order', () => {
+    const ControlledTable = ({
+      initialColumns,
+      onVisibleColumnsChange,
+    }: {
+      initialColumns: string[];
+      onVisibleColumnsChange: jest.Mock;
+    }) => {
+      const [visibleColumns, setVisibleColumns] = useState(initialColumns);
+      return (
+        <EpisodesTable
+          services={services}
+          filterState={{}}
+          timeRange={{ from: 'now-15m', to: 'now' }}
+          visibleColumns={visibleColumns}
+          onVisibleColumnsChange={(next) => {
+            onVisibleColumnsChange(next);
+            setVisibleColumns(next);
+          }}
+        />
+      );
+    };
+
+    const renderControlledTable = (initialColumns: string[], onVisibleColumnsChange: jest.Mock) =>
+      render(
+        <I18nProvider>
+          <QueryClientProvider client={new QueryClient()}>
+            <AlertHostProvider value={{ canWriteAlerts: true }}>
+              <ControlledTable
+                initialColumns={initialColumns}
+                onVisibleColumnsChange={onVisibleColumnsChange}
+              />
+            </AlertHostProvider>
+          </QueryClientProvider>
+        </I18nProvider>
+      );
+
+    it('turns off header drag and the header move actions', () => {
+      renderTable();
+
+      expect(lastGridProps().canDragAndDropColumns).toBeFalsy();
+      DEFAULT_EPISODES_TABLE_VISIBLE_COLUMNS.forEach((id) => {
+        const column = lastGridProps().customGridColumnsConfiguration[id]({
+          column: { id, actions: { showMoveLeft: true, showMoveRight: true } },
+        });
+        expect(column.actions).toEqual(
+          expect.objectContaining({ showMoveLeft: false, showMoveRight: false })
+        );
+      });
+    });
+
+    it('reorders the table when a column is dragged in the selector', async () => {
+      const onVisibleColumnsChange = jest.fn();
+      renderControlledTable(DEFAULT_EPISODES_TABLE_VISIBLE_COLUMNS, onVisibleColumnsChange);
+      await openColumnSelector();
+
+      act(() => mockColumnSelectorDragEnd?.({ source: { index: 0 }, destination: { index: 2 } }));
+
+      const reordered = [
+        'alerting_source',
+        'severity',
+        'episode.status',
+        ...DEFAULT_EPISODES_TABLE_VISIBLE_COLUMNS.slice(3),
+      ];
+      expect(onVisibleColumnsChange).toHaveBeenLastCalledWith(reordered);
+      expect(lastGridProps().columns).toEqual(['@timestamp', ...reordered]);
+    });
+
+    it('brings a reordered column back to its position after it is hidden and shown again', async () => {
+      const onVisibleColumnsChange = jest.fn();
+      const tagsFirst = [
+        'tags',
+        ...DEFAULT_EPISODES_TABLE_VISIBLE_COLUMNS.filter((id) => id !== 'tags'),
+      ];
+      renderControlledTable(tagsFirst, onVisibleColumnsChange);
+
+      await openColumnSelector();
+      fireEvent.click(screen.getByTestId('dataGridColumnSelectorToggleColumnVisibility-tags'));
+      fireEvent.click(screen.getByTestId('dataGridColumnSelectorToggleColumnVisibility-tags'));
+
+      expect(onVisibleColumnsChange).toHaveBeenLastCalledWith(tagsFirst);
+    });
+  });
+
+  describe('time column', () => {
+    it('passes the time column to the grid first, ahead of the selection', () => {
+      renderTable({ visibleColumns: ['tags', 'reason'], onVisibleColumnsChange: jest.fn() });
+
+      expect(lastGridProps().columns).toEqual(['@timestamp', 'tags', 'reason']);
+      expect(lastGridProps().showTimeCol).toBe(true);
+    });
+
+    it('never offers the header remove action on the time column', () => {
+      renderTable();
+
+      const column = lastGridProps().customGridColumnsConfiguration['@timestamp']({
+        column: { id: '@timestamp', actions: { showHide: { label: 'Remove column' } } },
+      });
+
+      expect(column.actions.showHide).toBe(false);
+    });
+
+    it('keeps an oldest-first time sort when other columns are hidden', () => {
+      const onSortChange = jest.fn();
+      renderTable({
+        onVisibleColumnsChange: jest.fn(),
+        sort: { sortField: '@timestamp', sortDirection: 'asc' },
+        onSortChange,
+      });
+
+      act(() => lastGridProps().onSetColumns(['@timestamp', 'tags'], false));
+
+      expect(onSortChange).not.toHaveBeenCalled();
+    });
   });
 
   describe('rule flyout coordination', () => {
