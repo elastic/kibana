@@ -14,6 +14,7 @@ import {
   EuiFlexItem,
   EuiToolTip,
   EuiIcon,
+  EuiMark,
   EuiText,
   EuiLink,
   EuiSpacer,
@@ -66,11 +67,24 @@ const Name = ({ name }: NameProps) => <EuiText size="s">{name}</EuiText>;
 
 interface DescriptionProps {
   description: string;
+  /** A sentence of the description to mark, e.g. why the rule matched a search. */
+  highlight?: string;
 }
 
-export const Description = ({ description }: DescriptionProps) => (
-  <EuiText size="s">{description}</EuiText>
-);
+export const Description = ({ description, highlight }: DescriptionProps) => {
+  const at = highlight ? description.indexOf(highlight.replace(/…$/, '')) : -1;
+  if (!highlight || at < 0) {
+    return <EuiText size="s">{description}</EuiText>;
+  }
+  const end = at + highlight.replace(/…$/, '').length;
+  return (
+    <EuiText size="s">
+      {description.slice(0, at)}
+      <EuiMark>{description.slice(at, end)}</EuiMark>
+      {description.slice(end)}
+    </EuiText>
+  );
+};
 
 interface AuthorProps {
   author: string[];
@@ -277,6 +291,8 @@ interface PrepareAboutSectionListItemsProps {
   rule: Partial<RuleResponse>;
   hideName?: boolean;
   hideDescription?: boolean;
+  /** When a header around the section already shows them. */
+  hideSeverityAndRisk?: boolean;
 }
 
 // eslint-disable-next-line complexity
@@ -284,6 +300,7 @@ const prepareAboutSectionListItems = ({
   rule,
   hideName,
   hideDescription,
+  hideSeverityAndRisk,
 }: PrepareAboutSectionListItemsProps): EuiDescriptionListProps['listItems'] => {
   const aboutSectionListItems: EuiDescriptionListProps['listItems'] = [];
 
@@ -319,7 +336,7 @@ const prepareAboutSectionListItems = ({
     });
   }
 
-  if (rule.severity) {
+  if (!hideSeverityAndRisk && rule.severity) {
     aboutSectionListItems.push({
       title: (
         <span data-test-subj="severityPropertyTitle">
@@ -350,7 +367,7 @@ const prepareAboutSectionListItems = ({
     );
   }
 
-  if (rule.risk_score) {
+  if (!hideSeverityAndRisk && rule.risk_score) {
     aboutSectionListItems.push({
       title: (
         <span data-test-subj="riskScorePropertyTitle">
@@ -499,6 +516,7 @@ export interface RuleAboutSectionProps extends React.ComponentProps<typeof EuiDe
   columnWidths?: EuiDescriptionListProps['columnWidths'];
   hideName?: boolean;
   hideDescription?: boolean;
+  hideSeverityAndRisk?: boolean;
 }
 
 export const RuleAboutSection = ({
@@ -506,9 +524,11 @@ export const RuleAboutSection = ({
   columnWidths = DEFAULT_DESCRIPTION_LIST_COLUMN_WIDTHS,
   hideName,
   hideDescription,
+  hideSeverityAndRisk,
   ...descriptionListProps
 }: RuleAboutSectionProps) => {
   const aboutSectionListItems = prepareAboutSectionListItems({
+    hideSeverityAndRisk,
     rule,
     hideName,
     hideDescription,

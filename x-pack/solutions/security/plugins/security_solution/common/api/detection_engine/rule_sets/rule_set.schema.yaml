@@ -1,0 +1,303 @@
+openapi: 3.0.0
+info:
+  title: Rule set schemas
+  version: 'not applicable'
+paths: {}
+components:
+  x-codegen-enabled: true
+  schemas:
+    RuleSetId:
+      type: string
+      minLength: 1
+      maxLength: 256
+      description: The saved object id of a rule set.
+
+    RuleSetRuleId:
+      type: string
+      minLength: 1
+      maxLength: 256
+      description: The `rule_id` of a rule. It stays the same through import, upgrade and revert.
+
+    RuleSetVisibility:
+      type: string
+      enum: [space, private]
+      description: |
+        `space`: every user of the space sees the set.
+        `private`: only the user who created the set sees it.
+
+    RuleSetValue:
+      type: string
+      minLength: 1
+      maxLength: 1024
+
+    RuleSetValues:
+      type: object
+      additionalProperties: false
+      description: |
+        Values of one rule field that can have several values. A rule matches when it has the
+        `include` values (all of them with `match: all`, any of them with `match: any`) and none of
+        the `exclude` values.
+      properties:
+        include:
+          type: array
+          maxItems: 100
+          items:
+            $ref: '#/components/schemas/RuleSetValue'
+        exclude:
+          type: array
+          maxItems: 100
+          items:
+            $ref: '#/components/schemas/RuleSetValue'
+        match:
+          type: string
+          enum: [all, any]
+          description: How the `include` values combine. The server always stores it.
+
+    RuleSetRuleType:
+      type: string
+      enum:
+        - query
+        - saved_query
+        - eql
+        - esql
+        - threshold
+        - threat_match
+        - machine_learning
+        - new_terms
+
+    RuleSetRuleTypes:
+      type: object
+      additionalProperties: false
+      description: A rule matches when its type is one of `include` and none of `exclude`.
+      properties:
+        include:
+          type: array
+          maxItems: 8
+          items:
+            $ref: '#/components/schemas/RuleSetRuleType'
+        exclude:
+          type: array
+          maxItems: 8
+          items:
+            $ref: '#/components/schemas/RuleSetRuleType'
+
+    RuleSetSeverities:
+      type: object
+      additionalProperties: false
+      description: A rule matches when its severity is one of `include` and none of `exclude`.
+      properties:
+        include:
+          type: array
+          maxItems: 4
+          items:
+            $ref: '../model/rule_schema/common_attributes.schema.yaml#/components/schemas/Severity'
+        exclude:
+          type: array
+          maxItems: 4
+          items:
+            $ref: '../model/rule_schema/common_attributes.schema.yaml#/components/schemas/Severity'
+
+    RuleSetLastRunOutcome:
+      type: string
+      enum: [succeeded, warning, failed]
+
+    RuleSetLastRunOutcomes:
+      type: object
+      additionalProperties: false
+      description: |
+        The outcome of the last rule run (the "Last response" of the rules table). A rule matches
+        when its outcome is one of `include` and none of `exclude`. The value changes on every run,
+        so membership by this condition changes too.
+      properties:
+        include:
+          type: array
+          maxItems: 3
+          items:
+            $ref: '#/components/schemas/RuleSetLastRunOutcome'
+        exclude:
+          type: array
+          maxItems: 3
+          items:
+            $ref: '#/components/schemas/RuleSetLastRunOutcome'
+
+    RuleSetRuleSource:
+      type: object
+      additionalProperties: false
+      required: [include]
+      description: '`external`: Elastic prebuilt rules. `internal`: rules created in Kibana.'
+      properties:
+        include:
+          type: array
+          minItems: 1
+          maxItems: 1
+          items:
+            type: string
+            enum: [external, internal]
+
+    RuleSetSearch:
+      type: object
+      additionalProperties: false
+      required: [term, mode]
+      description: Free-text search. `legacy` is the search of the rules table (rule name, index patterns, MITRE ATT&CK).
+      properties:
+        term:
+          type: string
+          minLength: 1
+          maxLength: 256
+        mode:
+          type: string
+          enum: [legacy]
+
+    RuleSetConditions:
+      type: object
+      additionalProperties: false
+      description: |
+        Rules that match ALL filled conditions are in the set. New rules that match join the set
+        automatically. Field names are the names of the rule API. `related_integrations` takes
+        integration package names, for example `endpoint` or `okta`.
+      properties:
+        tags:
+          $ref: '#/components/schemas/RuleSetValues'
+        related_integrations:
+          $ref: '#/components/schemas/RuleSetValues'
+        type:
+          $ref: '#/components/schemas/RuleSetRuleTypes'
+        severity:
+          $ref: '#/components/schemas/RuleSetSeverities'
+        rule_source:
+          $ref: '#/components/schemas/RuleSetRuleSource'
+        mitre_tactic:
+          $ref: '#/components/schemas/RuleSetValues'
+        mitre_technique:
+          $ref: '#/components/schemas/RuleSetValues'
+        tag_categories:
+          $ref: '#/components/schemas/RuleSetTagCategories'
+        enabled:
+          type: boolean
+          description: Only enabled (`true`) or only disabled (`false`) rules. Enabling or disabling a rule changes its membership.
+        last_run_outcome:
+          $ref: '#/components/schemas/RuleSetLastRunOutcomes'
+        search:
+          $ref: '#/components/schemas/RuleSetSearch'
+
+    RuleSetTagCategories:
+      type: object
+      maxProperties: 50
+      description: |
+        Tags grouped by their prefix, for example `OS` for `OS: Windows`. Each key is a prefix and
+        holds full tag values. Values of one category combine with its `match` (`any` by default);
+        categories combine with AND, like the filter per logical group of prebuilt tags.
+      additionalProperties:
+        $ref: '#/components/schemas/RuleSetValues'
+
+    RuleScope:
+      type: object
+      additionalProperties: false
+      description: |
+        Limits the rules to a saved rule set (`rule_set_id`); to a saved set with other conditions
+        (`rule_set_id` and `conditions`: its picked and left-out rules stay, an unsaved change of the
+        set); or to a rule set definition that is not saved (`conditions`, `included_rule_ids`,
+        `excluded_rule_ids`). `rule_set_id` and the rule id lists do not go together.
+        `rule_set_id` with `members` lists only the set's picked or left-out rules.
+      properties:
+        rule_set_id:
+          $ref: '#/components/schemas/RuleSetId'
+        members:
+          type: string
+          enum: [picked, left_out]
+          description: With `rule_set_id`, only the rules picked into the set or only the rules left out of it.
+        conditions:
+          $ref: '#/components/schemas/RuleSetConditions'
+        included_rule_ids:
+          type: array
+          maxItems: 10000
+          items:
+            $ref: '#/components/schemas/RuleSetRuleId'
+        excluded_rule_ids:
+          type: array
+          maxItems: 10000
+          items:
+            $ref: '#/components/schemas/RuleSetRuleId'
+
+    RuleSetDefinition:
+      type: object
+      additionalProperties: false
+      required: [name, visibility, conditions, included_rule_ids, excluded_rule_ids]
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 256
+        description:
+          type: string
+          maxLength: 2048
+        visibility:
+          $ref: '#/components/schemas/RuleSetVisibility'
+        conditions:
+          $ref: '#/components/schemas/RuleSetConditions'
+        included_rule_ids:
+          type: array
+          maxItems: 10000
+          description: '`rule_id`s of rules that are in the set even if they do not match the conditions.'
+          items:
+            $ref: '#/components/schemas/RuleSetRuleId'
+        excluded_rule_ids:
+          type: array
+          maxItems: 10000
+          description: '`rule_id`s of rules that match the conditions but are never in the set.'
+          items:
+            $ref: '#/components/schemas/RuleSetRuleId'
+
+    RuleSetMeta:
+      type: object
+      required: [id, is_owner, version]
+      properties:
+        id:
+          $ref: '#/components/schemas/RuleSetId'
+        created_by:
+          type: string
+          description: Profile uid of the user who created the set.
+        created_at:
+          type: string
+        updated_at:
+          type: string
+        is_owner:
+          type: boolean
+          description: True when the current user created the set.
+        version:
+          type: string
+          description: Saved object version, for optimistic concurrency on update.
+
+    RuleSet:
+      description: A rule set with its full definition.
+      allOf:
+        - $ref: '#/components/schemas/RuleSetDefinition'
+        - $ref: '#/components/schemas/RuleSetMeta'
+
+    RuleSetSummary:
+      description: A rule set without the picked and left-out rule lists, for lists of sets.
+      allOf:
+        - $ref: '#/components/schemas/RuleSetMeta'
+        - type: object
+          required: [name, visibility, conditions, included_rules_count, excluded_rules_count]
+          properties:
+            name:
+              type: string
+            description:
+              type: string
+            visibility:
+              $ref: '#/components/schemas/RuleSetVisibility'
+            conditions:
+              $ref: '#/components/schemas/RuleSetConditions'
+            included_rules_count:
+              type: integer
+              description: How many rules were picked by hand.
+            excluded_rules_count:
+              type: integer
+              description: How many rules were left out by hand.
+            rules_count:
+              type: integer
+              description: How many rules are in the set now. Only with `with_counts`.
+            failed_count:
+              type: integer
+              description: How many rules of the set failed on the last run. Only with `with_counts`.

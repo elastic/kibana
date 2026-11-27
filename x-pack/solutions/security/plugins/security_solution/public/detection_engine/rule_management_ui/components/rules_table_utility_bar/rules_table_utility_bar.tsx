@@ -9,6 +9,7 @@ import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
 import { EuiContextMenu } from '@elastic/eui';
 import React, { useCallback } from 'react';
 import { getLastUpdated } from '@kbn/securitysolution-timeline-components';
+import { RuleSetsUtilityActions } from '../../../rule_sets/components/rule_sets_utility_actions';
 
 import {
   UtilityBar,
@@ -84,15 +85,16 @@ export const RulesTableUtilityBar = React.memo<RulesTableUtilityBarProps>(
                 {i18n.SELECTED_RULES(selectedRulesCount)}
               </UtilityBarText>
 
-              {canBulkEdit && (
+              {/* Bulk actions by query use the keyword search; relevant rules are selected by row. */}
+              {canBulkEdit && rulesTableContext.state.searchMode !== 'semantic' && (
                 <UtilityBarAction
                   disabled={hasDisabledActions}
                   dataTestSubj="selectAllRules"
-                  iconType={isAllSelected ? 'cross' : 'pagesSelect'}
+                  iconType={isAllSelected ? 'cross' : 'documentsCheck'}
                   iconSide="left"
                   onClick={onToggleSelectAll}
                 >
-                  {isAllSelected ? i18n.CLEAR_SELECTION : i18n.SELECT_ALL_RULES(pagination.total)}
+                  {isAllSelected ? i18n.CLEAR_SELECTION : i18n.SELECT_ALL_MATCHING_RULES}
                 </UtilityBarAction>
               )}
 
@@ -110,6 +112,8 @@ export const RulesTableUtilityBar = React.memo<RulesTableUtilityBarProps>(
                 </UtilityBarAction>
               )}
 
+              {canBulkEdit && <RuleSetsUtilityActions />}
+
               <UtilityBarAction
                 disabled={hasDisabledActions}
                 dataTestSubj="refreshRulesAction"
@@ -119,16 +123,18 @@ export const RulesTableUtilityBar = React.memo<RulesTableUtilityBarProps>(
               >
                 {i18n.REFRESH}
               </UtilityBarAction>
-              {!rulesTableContext.state.isDefault && (
-                <UtilityBarAction
-                  dataTestSubj="clearTableFilters"
-                  iconSide="left"
-                  iconType="cross"
-                  onClick={rulesTableContext.actions.clearFilters}
-                >
-                  {i18n.CLEAR_RULES_TABLE_FILTERS}
-                </UtilityBarAction>
-              )}
+              {/* Inside a set the filters are the set's conditions: Reset is in the filter bar. */}
+              {!rulesTableContext.state.isDefault &&
+                !rulesTableContext.state.filterOptions.ruleSetId && (
+                  <UtilityBarAction
+                    dataTestSubj="clearTableFilters"
+                    iconSide="left"
+                    iconType="cross"
+                    onClick={rulesTableContext.actions.clearFilters}
+                  >
+                    {i18n.CLEAR_RULES_TABLE_FILTERS}
+                  </UtilityBarAction>
+                )}
             </UtilityBarGroup>
           </>
         </UtilityBarSection>

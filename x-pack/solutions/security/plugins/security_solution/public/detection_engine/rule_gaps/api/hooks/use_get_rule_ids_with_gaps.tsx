@@ -33,6 +33,7 @@ export const useGetRuleIdsWithGaps = (
     hasFilledIntervals,
     excludedReasons,
     schedulerId,
+    ruleIds,
   }: {
     gapRange: GapRangeValue;
     gapFillStatuses: string[];
@@ -41,6 +42,7 @@ export const useGetRuleIdsWithGaps = (
     hasFilledIntervals?: boolean;
     excludedReasons?: string[];
     schedulerId?: string;
+    ruleIds?: string[];
   },
   options?: UseQueryOptions<GetRuleIdsWithGapResponseBody>
 ) => {
@@ -54,6 +56,7 @@ export const useGetRuleIdsWithGaps = (
       hasFilledIntervals,
       ...(excludedReasons ?? []),
       schedulerId,
+      ruleIds,
     ],
     async ({ signal }) => {
       const { start, end } = getGapRange(gapRange);
@@ -67,6 +70,7 @@ export const useGetRuleIdsWithGaps = (
         hasFilledIntervals,
         excludedReasons,
         schedulerId,
+        ruleIds,
       });
 
       return response;

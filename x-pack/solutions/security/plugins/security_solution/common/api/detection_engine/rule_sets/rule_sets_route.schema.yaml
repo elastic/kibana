@@ -1,0 +1,155 @@
+openapi: 3.0.0
+info:
+  title: Rule sets API endpoints
+  version: '2023-10-31'
+paths:
+  /api/detection_engine/rule_sets:
+    get:
+      x-labels: [ess, serverless]
+      x-codegen-enabled: true
+      x-state: Technical Preview
+      operationId: FindRuleSets
+      summary: List rule sets
+      description: |
+        Lists the shared rule sets of the space and the private rule sets of the current user.
+        The response does not include the picked and left-out rule lists; get one rule set for them.
+      tags:
+        - Security Detections API
+      parameters:
+        - name: with_counts
+          in: query
+          required: false
+          description: Count the rules in each set now. Without counts the response is faster.
+          schema:
+            type: boolean
+            default: true
+      responses:
+        200:
+          description: The rule sets that the current user can see, sorted by name.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, total]
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: './rule_set.schema.yaml#/components/schemas/RuleSetSummary'
+                  total:
+                    type: integer
+    post:
+      x-labels: [ess, serverless]
+      x-codegen-enabled: true
+      x-state: Technical Preview
+      operationId: CreateRuleSet
+      summary: Create a rule set
+      description: |
+        Creates a rule set: conditions on rule fields, plus rules picked and left out by `rule_id`.
+        The rules do not change.
+      tags:
+        - Security Detections API
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: './rule_set.schema.yaml#/components/schemas/RuleSetDefinition'
+            examples:
+              okta:
+                summary: Okta rules of the identity team
+                value:
+                  name: 'Identity team: Okta'
+                  visibility: space
+                  conditions:
+                    tags:
+                      include: ['Data Source: Okta']
+                      match: all
+                  included_rule_ids: ['dafa3235-76dc-40e2-9f71-1773b96d24cf']
+                  excluded_rule_ids: ['f960e8a4-31c1-4a6e-b172-8f5c8e5c8c2a']
+      responses:
+        200:
+          description: The created rule set.
+          content:
+            application/json:
+              schema:
+                $ref: './rule_set.schema.yaml#/components/schemas/RuleSet'
+
+  /api/detection_engine/rule_sets/{id}:
+    get:
+      x-labels: [ess, serverless]
+      x-codegen-enabled: true
+      x-state: Technical Preview
+      operationId: GetRuleSet
+      summary: Get a rule set
+      description: Returns one rule set with its full definition.
+      tags:
+        - Security Detections API
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            $ref: './rule_set.schema.yaml#/components/schemas/RuleSetId'
+      responses:
+        200:
+          description: The rule set.
+          content:
+            application/json:
+              schema:
+                $ref: './rule_set.schema.yaml#/components/schemas/RuleSet'
+    put:
+      x-labels: [ess, serverless]
+      x-codegen-enabled: true
+      x-state: Technical Preview
+      operationId: UpdateRuleSet
+      summary: Replace a rule set
+      description: |
+        Replaces the definition of a rule set. Send `version` from the last read: if someone changed
+        the set since then, the request fails with 409.
+      tags:
+        - Security Detections API
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            $ref: './rule_set.schema.yaml#/components/schemas/RuleSetId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: './rule_set.schema.yaml#/components/schemas/RuleSetDefinition'
+                - type: object
+                  properties:
+                    version:
+                      type: string
+                      maxLength: 256
+                      description: The version that the client read. A newer version on the server gives 409.
+      responses:
+        200:
+          description: The updated rule set.
+          content:
+            application/json:
+              schema:
+                $ref: './rule_set.schema.yaml#/components/schemas/RuleSet'
+    delete:
+      x-labels: [ess, serverless]
+      x-codegen-enabled: true
+      x-state: Technical Preview
+      operationId: DeleteRuleSet
+      summary: Delete a rule set
+      description: Deletes a rule set. The rules do not change.
+      tags:
+        - Security Detections API
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            $ref: './rule_set.schema.yaml#/components/schemas/RuleSetId'
+      responses:
+        200:
+          description: Deleted.

@@ -39,6 +39,7 @@ import { createDetectionCoverageSkill } from './detection_coverage';
 import { createEndpointForensicAnalysisSkill } from './endpoint_forensic_analysis';
 import { createElasticDefendPolicyManagementSkill } from './elastic_defend_policy_management';
 import { SIEM_READINESS_AGENT_BUILDER_ENABLED } from '../siem_readiness_feature_flag';
+import { getSuggestRuleSetsSkill } from './suggest_rule_sets';
 
 interface RegisterSkillsOpts {
   agentBuilder: AgentBuilderPluginSetup;
@@ -95,6 +96,7 @@ export const registerSkills = async ({
 
   await agentBuilder.skills.register(createDetectionCoverageSkill());
 
+  agentBuilder.skills.register(getSuggestRuleSetsSkill(getStartServices));
   await agentBuilder.skills.register(
     findSecurityMlJobsSkill({ getStartServices, isEntityStoreV2Enabled, logger, ml })
   );

@@ -28,11 +28,6 @@ jest.mock('react-router-dom', () => ({
   useLocation: jest.fn(() => ({ search: '?query=test' })),
 }));
 
-const mockUseRuleManagementFilters = jest.fn();
-jest.mock('../../../rule_management/logic/use_rule_management_filters', () => ({
-  useRuleManagementFilters: () => mockUseRuleManagementFilters(),
-}));
-
 const mockUsePrebuiltRulesStatus = jest.fn();
 jest.mock('../../../rule_management/logic/prebuilt_rules/use_prebuilt_rules_status', () => ({
   usePrebuiltRulesStatus: () => mockUsePrebuiltRulesStatus(),
@@ -45,26 +40,14 @@ jest.mock('../../../../common/components/user_privileges', () => ({
 
 const setup = ({
   tabName = AllRulesTabs.management,
-  customCount = 3,
-  prebuiltInstalledCount = 4,
   rulesToUpgrade = 2,
   canReadRules = true,
 }: {
   tabName?: AllRulesTabs;
-  customCount?: number;
-  prebuiltInstalledCount?: number;
   rulesToUpgrade?: number;
   canReadRules?: boolean;
 } = {}) => {
   mockUseRouteSpy.mockReturnValue([{ tabName }]);
-  mockUseRuleManagementFilters.mockReturnValue({
-    data: {
-      rules_summary: {
-        custom_count: customCount,
-        prebuilt_installed_count: prebuiltInstalledCount,
-      },
-    },
-  });
   mockUsePrebuiltRulesStatus.mockReturnValue({
     data: { stats: { num_prebuilt_rules_to_upgrade: rulesToUpgrade } },
   });
@@ -80,12 +63,12 @@ describe('useRulesTableHeaderTabs', () => {
     jest.clearAllMocks();
   });
 
-  it('returns installed, monitoring and updates tabs with count badges', () => {
+  it('shows a count badge only on the updates tab', () => {
     const tabs = setup();
 
     expect(tabs.map(({ id, badge }) => ({ id, badge }))).toEqual([
-      { id: AllRulesTabs.management, badge: 7 },
-      { id: AllRulesTabs.monitoring, badge: 7 },
+      { id: AllRulesTabs.management, badge: undefined },
+      { id: AllRulesTabs.monitoring, badge: undefined },
       { id: AllRulesTabs.updates, badge: 2 },
     ]);
   });
@@ -114,13 +97,6 @@ describe('useRulesTableHeaderTabs', () => {
     const [installedTab] = setup();
 
     expect(installedTab.href).toBe('/app/securitySolutionUI/rules/management?query=test');
-  });
-
-  it('omits the badge when there are no installed rules', () => {
-    const [installedTab, monitoringTab] = setup({ customCount: 0, prebuiltInstalledCount: 0 });
-
-    expect(installedTab.badge).toBeUndefined();
-    expect(monitoringTab.badge).toBeUndefined();
   });
 
   it('hides the updates tab when there are no rules to upgrade', () => {

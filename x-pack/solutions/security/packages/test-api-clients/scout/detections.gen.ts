@@ -26,6 +26,18 @@ import type {
   AlertsMigrationCleanupRequestBodyInput,
   AlertsMigrationCleanupResponse,
 } from '@kbn/security-solution-plugin/common/api/detection_engine/signals_migration/delete_signals_migration/delete_signals_migration.gen';
+import type {
+  BulkAssignRuleSetsRequestBodyInput,
+  BulkAssignRuleSetsResponse,
+  DeletePrivateRuleSetRequestParamsInput,
+  FindAllPrivateRuleSetsResponse,
+  GetRuleSetGapsSummaryRequestBodyInput,
+  GetRuleSetGapsSummaryResponse,
+  GetRuleSetsMembershipRequestBodyInput,
+  GetRuleSetsMembershipResponse,
+  PreviewRuleSetRequestBodyInput,
+  PreviewRuleSetResponse,
+} from '@kbn/security-solution-plugin/common/api/detection_engine/rule_sets/rule_sets_internal_route.gen';
 import type { CreateAlertsIndexResponse } from '@kbn/security-solution-plugin/common/api/detection_engine/index_management/create_index/create_index.gen';
 import type {
   CreateAlertsMigrationRequestBodyInput,
@@ -35,6 +47,18 @@ import type {
   CreateRuleRequestBodyInput,
   CreateRuleResponse,
 } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management/crud/create_rule/create_rule_route.gen';
+import type {
+  CreateRuleSetRequestBodyInput,
+  CreateRuleSetResponse,
+  DeleteRuleSetRequestParamsInput,
+  FindRuleSetsRequestQueryInput,
+  FindRuleSetsResponse,
+  GetRuleSetRequestParamsInput,
+  GetRuleSetResponse,
+  UpdateRuleSetRequestParamsInput,
+  UpdateRuleSetRequestBodyInput,
+  UpdateRuleSetResponse,
+} from '@kbn/security-solution-plugin/common/api/detection_engine/rule_sets/rule_sets_route.gen';
 import type { DeleteAlertsIndexResponse } from '@kbn/security-solution-plugin/common/api/detection_engine/index_management/delete_index/delete_index.gen';
 import type {
   DeleteRuleRequestQueryInput,
@@ -229,6 +253,30 @@ to the relevant index, causing it to be deleted after 30 days, and removes other
     );
   },
   /**
+      * Adding a rule removes it from the left-out list, and picks it only if the set conditions do not match it.
+Removing a rule unpicks it, and leaves it out if the set conditions still match it. The rules do not change.
+
+      */
+  async bulkAssignRuleSets<TResponseType extends ScoutResponseType = 'json'>(
+    props: BulkAssignRuleSetsProps,
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<ApiClientResponse<ScoutResponseBody<TResponseType, BulkAssignRuleSetsResponse>>> {
+    const basePath =
+      options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
+    const path = `${basePath}/internal/detection_engine/rule_sets/_bulk_assign`;
+
+    return apiClient.post<ScoutResponseBody<TResponseType, BulkAssignRuleSetsResponse>>(path, {
+      headers: {
+        'kbn-xsrf': 'true',
+        [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
+        ...options.headers,
+      },
+      body: props.body,
+      responseType: options.responseType ?? 'json',
+    });
+  },
+  /**
       * Creates an index for Elastic Security alerts. Calling this API is not
 required for the detection engine to function properly. You can create
 rules and alerts without calling this API.
@@ -357,6 +405,30 @@ For detailed information on Kibana actions and alerting, and additional API call
     });
   },
   /**
+      * Creates a rule set: conditions on rule fields, plus rules picked and left out by `rule_id`.
+The rules do not change.
+
+      */
+  async createRuleSet<TResponseType extends ScoutResponseType = 'json'>(
+    props: CreateRuleSetProps,
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<ApiClientResponse<ScoutResponseBody<TResponseType, CreateRuleSetResponse>>> {
+    const basePath =
+      options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
+    const path = `${basePath}/api/detection_engine/rule_sets`;
+
+    return apiClient.post<ScoutResponseBody<TResponseType, CreateRuleSetResponse>>(path, {
+      headers: {
+        'kbn-xsrf': 'true',
+        [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
+        ...options.headers,
+      },
+      body: props.body,
+      responseType: options.responseType ?? 'json',
+    });
+  },
+  /**
       * Permanently deletes the Elastic Security alerts backing index in the current space, including the alerts
 stored in it. Use with caution; prefer lifecycle policies or the UI when available.
 Call `GET /api/detection_engine/index` first to confirm the index that will be removed.
@@ -373,6 +445,31 @@ Call `GET /api/detection_engine/index` first to confirm the index that will be r
       headers: {
         'kbn-xsrf': 'true',
         [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
+        ...options.headers,
+      },
+      body: options.body,
+      responseType: options.responseType ?? 'json',
+    });
+  },
+  /**
+   * Needs the `manage_security` cluster privilege. The rules do not change.
+   */
+  async deletePrivateRuleSet<TResponseType extends ScoutResponseType = 'json'>(
+    props: DeletePrivateRuleSetProps,
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<ApiClientResponse<ScoutResponseBody<TResponseType>>> {
+    const basePath =
+      options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
+    const path = `${basePath}${replaceParams(
+      '/internal/detection_engine/rule_sets/_private/{id}',
+      encodePathParams(props.params)
+    )}`;
+
+    return apiClient.delete<ScoutResponseBody<TResponseType>>(path, {
+      headers: {
+        'kbn-xsrf': 'true',
+        [ELASTIC_HTTP_VERSION_HEADER]: '1',
         [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
         ...options.headers,
       },
@@ -412,6 +509,31 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
         responseType: options.responseType ?? 'json',
       }
     );
+  },
+  /**
+   * Deletes a rule set. The rules do not change.
+   */
+  async deleteRuleSet<TResponseType extends ScoutResponseType = 'json'>(
+    props: DeleteRuleSetProps,
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<ApiClientResponse<ScoutResponseBody<TResponseType>>> {
+    const basePath =
+      options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
+    const path = `${basePath}${replaceParams(
+      '/api/detection_engine/rule_sets/{id}',
+      encodePathParams(props.params)
+    )}`;
+
+    return apiClient.delete<ScoutResponseBody<TResponseType>>(path, {
+      headers: {
+        'kbn-xsrf': 'true',
+        [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
+        ...options.headers,
+      },
+      body: options.body,
+      responseType: options.responseType ?? 'json',
+    });
   },
   /**
       * Export detection rules to an `.ndjson` file. The following configuration items are also included in the `.ndjson` file:
@@ -476,6 +598,29 @@ finishes and then call this operation once.
     });
   },
   /**
+      * Needs the `manage_security` cluster privilege. It lets an administrator find and delete the
+private sets of users who left. The response has no rule lists.
+
+      */
+  async findAllPrivateRuleSets<TResponseType extends ScoutResponseType = 'json'>(
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<ApiClientResponse<ScoutResponseBody<TResponseType, FindAllPrivateRuleSetsResponse>>> {
+    const basePath =
+      options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
+    const path = `${basePath}/internal/detection_engine/rule_sets/_private`;
+
+    return apiClient.get<ScoutResponseBody<TResponseType, FindAllPrivateRuleSetsResponse>>(path, {
+      headers: {
+        'kbn-xsrf': 'true',
+        [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
+        ...options.headers,
+      },
+      body: options.body,
+      responseType: options.responseType ?? 'json',
+    });
+  },
+  /**
    * Retrieve a paginated list of detection rules. By default, the first page is returned, with 20 results per page.
    */
   async findRules<TResponseType extends ScoutResponseType = 'json'>(
@@ -499,6 +644,101 @@ finishes and then call this operation once.
         responseType: options.responseType ?? 'json',
       }
     );
+  },
+  /**
+      * Lists the shared rule sets of the space and the private rule sets of the current user.
+The response does not include the picked and left-out rule lists; get one rule set for them.
+
+      */
+  async findRuleSets<TResponseType extends ScoutResponseType = 'json'>(
+    props: FindRuleSetsProps,
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<ApiClientResponse<ScoutResponseBody<TResponseType, FindRuleSetsResponse>>> {
+    const basePath =
+      options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
+    const path = `${basePath}/api/detection_engine/rule_sets`;
+
+    return apiClient.get<ScoutResponseBody<TResponseType, FindRuleSetsResponse>>(
+      `${path}?${queryString.stringify(props.query, { arrayFormat: 'none' })}`,
+      {
+        headers: {
+          'kbn-xsrf': 'true',
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+          [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
+          ...options.headers,
+        },
+        body: options.body,
+        responseType: options.responseType ?? 'json',
+      }
+    );
+  },
+  /**
+   * Returns one rule set with its full definition.
+   */
+  async getRuleSet<TResponseType extends ScoutResponseType = 'json'>(
+    props: GetRuleSetProps,
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<ApiClientResponse<ScoutResponseBody<TResponseType, GetRuleSetResponse>>> {
+    const basePath =
+      options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
+    const path = `${basePath}${replaceParams(
+      '/api/detection_engine/rule_sets/{id}',
+      encodePathParams(props.params)
+    )}`;
+
+    return apiClient.get<ScoutResponseBody<TResponseType, GetRuleSetResponse>>(path, {
+      headers: {
+        'kbn-xsrf': 'true',
+        [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
+        ...options.headers,
+      },
+      body: options.body,
+      responseType: options.responseType ?? 'json',
+    });
+  },
+  /**
+      * The rule ids stay on the server, so a large set does not travel to the browser and back.
+Gap reasons that the space settings exclude are excluded, as in the rules table.
+
+      */
+  async getRuleSetGapsSummary<TResponseType extends ScoutResponseType = 'json'>(
+    props: GetRuleSetGapsSummaryProps,
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<ApiClientResponse<ScoutResponseBody<TResponseType, GetRuleSetGapsSummaryResponse>>> {
+    const basePath =
+      options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
+    const path = `${basePath}/internal/detection_engine/rule_sets/_gaps_summary`;
+
+    return apiClient.post<ScoutResponseBody<TResponseType, GetRuleSetGapsSummaryResponse>>(path, {
+      headers: {
+        'kbn-xsrf': 'true',
+        [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
+        ...options.headers,
+      },
+      body: props.body,
+      responseType: options.responseType ?? 'json',
+    });
+  },
+  async getRuleSetsMembership<TResponseType extends ScoutResponseType = 'json'>(
+    props: GetRuleSetsMembershipProps,
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<ApiClientResponse<ScoutResponseBody<TResponseType, GetRuleSetsMembershipResponse>>> {
+    const basePath =
+      options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
+    const path = `${basePath}/internal/detection_engine/rule_sets/_membership`;
+
+    return apiClient.post<ScoutResponseBody<TResponseType, GetRuleSetsMembershipResponse>>(path, {
+      headers: {
+        'kbn-xsrf': 'true',
+        [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
+        ...options.headers,
+      },
+      body: props.body,
+      responseType: options.responseType ?? 'json',
+    });
   },
   /**
       * Import detection rules from an `.ndjson` file, including actions and exception lists. The request must include:
@@ -638,6 +878,25 @@ The edit action is idempotent, meaning that if you add a tag to a rule that alre
         responseType: options.responseType ?? 'json',
       }
     );
+  },
+  async previewRuleSet<TResponseType extends ScoutResponseType = 'json'>(
+    props: PreviewRuleSetProps,
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<ApiClientResponse<ScoutResponseBody<TResponseType, PreviewRuleSetResponse>>> {
+    const basePath =
+      options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
+    const path = `${basePath}/internal/detection_engine/rule_sets/_preview`;
+
+    return apiClient.post<ScoutResponseBody<TResponseType, PreviewRuleSetResponse>>(path, {
+      headers: {
+        'kbn-xsrf': 'true',
+        [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
+        ...options.headers,
+      },
+      body: props.body,
+      responseType: options.responseType ?? 'json',
+    });
   },
   /**
       * Returns the backing Elasticsearch index for Elastic Security detection alerts in the current space, and
@@ -1325,6 +1584,33 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
       responseType: options.responseType ?? 'json',
     });
   },
+  /**
+      * Replaces the definition of a rule set. Send `version` from the last read: if someone changed
+the set since then, the request fails with 409.
+
+      */
+  async updateRuleSet<TResponseType extends ScoutResponseType = 'json'>(
+    props: UpdateRuleSetProps,
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<ApiClientResponse<ScoutResponseBody<TResponseType, UpdateRuleSetResponse>>> {
+    const basePath =
+      options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
+    const path = `${basePath}${replaceParams(
+      '/api/detection_engine/rule_sets/{id}',
+      encodePathParams(props.params)
+    )}`;
+
+    return apiClient.put<ScoutResponseBody<TResponseType, UpdateRuleSetResponse>>(path, {
+      headers: {
+        'kbn-xsrf': 'true',
+        [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
+        ...options.headers,
+      },
+      body: props.body,
+      responseType: options.responseType ?? 'json',
+    });
+  },
 });
 
 export function SecuritySolutionScoutApiServiceProvider(apiClient: ApiClientFixture) {
@@ -1334,14 +1620,26 @@ export function SecuritySolutionScoutApiServiceProvider(apiClient: ApiClientFixt
 export interface AlertsMigrationCleanupProps {
   body: AlertsMigrationCleanupRequestBodyInput;
 }
+export interface BulkAssignRuleSetsProps {
+  body: BulkAssignRuleSetsRequestBodyInput;
+}
 export interface CreateAlertsMigrationProps {
   body: CreateAlertsMigrationRequestBodyInput;
 }
 export interface CreateRuleProps {
   body: CreateRuleRequestBodyInput;
 }
+export interface CreateRuleSetProps {
+  body: CreateRuleSetRequestBodyInput;
+}
+export interface DeletePrivateRuleSetProps {
+  params: DeletePrivateRuleSetRequestParamsInput;
+}
 export interface DeleteRuleProps {
   query: DeleteRuleRequestQueryInput;
+}
+export interface DeleteRuleSetProps {
+  params: DeleteRuleSetRequestParamsInput;
 }
 export interface ExportRulesProps {
   query: ExportRulesRequestQueryInput;
@@ -1353,6 +1651,18 @@ export interface FinalizeAlertsMigrationProps {
 export interface FindRulesProps {
   query: FindRulesRequestQueryInput;
 }
+export interface FindRuleSetsProps {
+  query: FindRuleSetsRequestQueryInput;
+}
+export interface GetRuleSetProps {
+  params: GetRuleSetRequestParamsInput;
+}
+export interface GetRuleSetGapsSummaryProps {
+  body: GetRuleSetGapsSummaryRequestBodyInput;
+}
+export interface GetRuleSetsMembershipProps {
+  body: GetRuleSetsMembershipRequestBodyInput;
+}
 export interface ImportRulesProps {
   query: ImportRulesRequestQueryInput;
 }
@@ -1362,6 +1672,9 @@ export interface PatchRuleProps {
 export interface PerformRulesBulkActionProps {
   query: PerformRulesBulkActionRequestQueryInput;
   body: PerformRulesBulkActionRequestBodyInput;
+}
+export interface PreviewRuleSetProps {
+  body: PreviewRuleSetRequestBodyInput;
 }
 export interface ReadAlertsMigrationStatusProps {
   query: ReadAlertsMigrationStatusRequestQueryInput;
@@ -1435,4 +1748,8 @@ export interface SuggestUserProfilesProps {
 }
 export interface UpdateRuleProps {
   body: UpdateRuleRequestBodyInput;
+}
+export interface UpdateRuleSetProps {
+  params: UpdateRuleSetRequestParamsInput;
+  body: UpdateRuleSetRequestBodyInput;
 }

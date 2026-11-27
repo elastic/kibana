@@ -25,6 +25,7 @@ import type {
 } from '../../../../common/api/detection_engine/model/rule_schema';
 import type {
   CoverageOverviewFilter,
+  GranularRulesFacetCategory,
   GranularRulesFilter,
   SearchRulesAggregations,
   SearchRulesResponse,
@@ -32,6 +33,10 @@ import type {
   GranularRulesSearch,
   PatchRuleRequestBody,
 } from '../../../../common/api/detection_engine/rule_management';
+import type {
+  RuleScope,
+  RuleSetConditions,
+} from '../../../../common/api/detection_engine/rule_sets';
 import { FindRulesSortField } from '../../../../common/api/detection_engine/rule_management';
 export interface CreateRulesProps {
   rule: RuleCreateProps;
@@ -105,6 +110,8 @@ export const SortingOptions = lazySchema(() =>
 
 export interface FilterOptions {
   filter: string;
+  /** AI search on or off (`keyword`); unset means on when it is ready in the space. */
+  searchMode?: RuleSearchBoxMode;
   showCustomRules: boolean;
   showElasticRules: boolean;
   tags: string[];
@@ -114,7 +121,24 @@ export interface FilterOptions {
   ruleSource?: RuleCustomizationStatus[]; // undefined is to display all the rules
   gapFillStatuses?: GapFillStatus[];
   includeRuleTypes?: Type[];
+  /** Show only the rules of this rule set. The server resolves the group. */
+  ruleSetId?: string;
+  /**
+   * Facet selections, in the shape of rule set conditions. Without a set they are `filter_params`;
+   * with a set they are the set's conditions, changed or not (see `rule_sets/table_query.ts`).
+   */
+  conditions?: RuleSetConditions;
+  /** The set whose saved conditions the facets started from; until then the set is shown as saved. */
+  draftOf?: string;
+  /** Inside a set: show only its picked or only its left-out rules. */
+  members?: 'picked' | 'left_out';
+  /** One value of one facet, picked in "Browse by". */
+  browse?: { category: GranularRulesFacetCategory; value: string };
+  /** Split the table into sections by this field. */
+  groupBy?: GranularRulesFacetCategory;
 }
+
+export type RuleSearchBoxMode = 'ai' | 'keyword';
 
 export interface FetchRulesResponse {
   page: number;
@@ -137,6 +161,8 @@ export interface FetchSearchRulesProps {
   gaps_range_start?: string;
   gaps_range_end?: string;
   gap_auto_fill_scheduler_id?: string;
+  rule_scope?: RuleScope;
+  filter_params?: RuleSetConditions;
   signal?: AbortSignal;
 }
 

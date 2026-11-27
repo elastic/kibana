@@ -52,6 +52,10 @@ paths:
                 filter:
                   description: Structured KQL filter applied to detection rules (alert saved objects).
                   $ref: '../granular_rules/granular_rules_contract.schema.yaml#/components/schemas/GranularRulesFilter'
+                rule_scope:
+                  $ref: '../../rule_sets/rule_set.schema.yaml#/components/schemas/RuleScope'
+                filter_params:
+                  $ref: '../../rule_sets/rule_set.schema.yaml#/components/schemas/RuleSetConditions'
                 aggregations:
                   $ref: '../granular_rules/granular_rules_contract.schema.yaml#/components/schemas/SearchRulesAggregations'
                 search:
@@ -148,6 +152,41 @@ paths:
                       $ref: '#/components/schemas/SearchRulesSearchAfterItem'
                   counts:
                     $ref: '../granular_rules/granular_rules_contract.schema.yaml#/components/schemas/FacetCounts'
+                  tag_category_counts:
+                    $ref: '../granular_rules/granular_rules_contract.schema.yaml#/components/schemas/FacetCounts'
+                  search_mode:
+                    $ref: '../granular_rules/granular_rules_contract.schema.yaml#/components/schemas/GranularRulesSearchMode'
+                    description: The search mode that ran; `legacy` when `semantic` was asked but search by meaning is not ready in the space (see `search_fallback_reason`).
+                  search_highlights:
+                    type: object
+                    additionalProperties:
+                      type: object
+                      required:
+                        - text
+                        - source
+                      properties:
+                        text:
+                          type: string
+                        source:
+                          type: string
+                          enum:
+                            - description
+                            - mitre
+                            - integrations
+                            - false_positives
+                            - index_patterns
+                    description: For a search by meaning, why each rule of the page matched, by rule id - the sentence of the rule card closest in meaning to the text, and where it comes from.
+                  search_fallback_reason:
+                    type: string
+                    enum:
+                      - ai_off
+                      - no_model
+                      - no_workflows
+                      - 'off'
+                      - not_indexed
+                      - error
+                    description: |
+                      Why `semantic` ran as `legacy`: "Use AI features" is off in the space (`ai_off`), the cluster lacks the embedding or the rerank model (`no_model`), Workflows is not available (`no_workflows`), the rule search index workflow of the space is off (`off`) or has not finished its first run (`not_indexed`), or the search failed or timed out (`error`).
                 required:
                   - page
                   - perPage

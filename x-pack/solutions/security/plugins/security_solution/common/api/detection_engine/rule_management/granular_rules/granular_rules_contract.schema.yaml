@@ -9,10 +9,14 @@ components:
     GranularRulesSearchMode:
       type: string
       description: |
-        Search mode for free-text search combined with `filter`.
+        Search mode for free-text search combined with `filter`. `legacy`: the keyword search of
+        the rules table (rule name, index patterns, MITRE ATT&CK). `semantic`: hybrid search by
+        meaning and by words over a rule search index; the result is the relevant rules in
+        relevance order, and `filter`, facets and the rule scope apply to them. Falls back to
+        `legacy` when no model is available. Without a mode, `legacy`.
       enum:
         - legacy
-      default: legacy
+        - semantic
 
     GranularRulesSearch:
       type: object
@@ -60,6 +64,11 @@ components:
         - lastRunOutcome
         - isCustomized
         - type
+        - integration
+        - tactic
+        - technique
+        - source
+        - severity
 
 
     SearchRulesAggregations:
@@ -70,9 +79,25 @@ components:
       properties:
         counts:
           type: array
+          maxItems: 20
           description: Facet categories for which to compute counts over the filtered + searched set.
           items:
             $ref: '#/components/schemas/GranularRulesFacetCategory'
+        exclude_own_filter:
+          type: boolean
+          description: |
+            Count each category without the `filter_params` condition on the same field, so a
+            facet shows the other values a user can add (disjunctive facets). Group by leaves it off.
+        tag_categories:
+          type: array
+          maxItems: 50
+          description: |
+            Tag prefixes, for example `OS`. Counts the tags of each prefix without the
+            `filter_params.tag_categories` condition of that prefix.
+          items:
+            type: string
+            minLength: 1
+            maxLength: 256
 
     FacetCounts:
       type: object

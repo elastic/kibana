@@ -5,20 +5,33 @@
  * 2.0.
  */
 
+import type {
+  EuiContextMenuPanelDescriptor,
+  EuiContextMenuPanelItemDescriptor,
+} from '@elastic/eui';
 import {
   EuiBasicTable,
+  useEuiTheme,
   EuiConfirmModal,
-  EuiEmptyPrompt,
   EuiProgress,
   useGeneratedHtmlId,
   EuiSpacer,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useCallback, useEffect, useMemo, useRef } from 'react';
+import { css } from '@emotion/react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { RulesFilterBar } from '../../../rule_sets/components/rules_group_by_control';
+import { SearchModeLine } from '../../../rule_sets/search/search_mode_line';
+import { RulesTableNoItems } from '../../../rule_sets/search/rules_table_no_items';
+import { RuleFlyoutProvider } from './rule_flyout';
+import { WhyMatchedRow } from '../../../rule_sets/search/why_matched_row';
+import { useRulesTableActions } from './use_rules_table_actions';
+import { GroupedRulesTable } from '../../../rule_sets/components/grouped_rules_table';
 import { Loader } from '../../../../common/components/loader';
 import { useBoolState } from '../../../../common/hooks/use_bool_state';
 import { PrePackagedRulesPrompt } from '../pre_packaged_rules/load_empty_prompt';
 import type { Rule } from '../../../rule_management/logic';
+import type { FilterOptions } from '../../../rule_management/logic/types';
 import * as i18n from '../../../common/translations';
 import type { EuiBasicTableOnChange } from '../../../common/types';
 import { BulkActionDryRunConfirmation } from './bulk_actions/bulk_action_dry_run_confirmation';
@@ -57,9 +70,22 @@ interface RulesTableProps {
   selectedTab: AllRulesTabs;
 }
 
-const NO_ITEMS_MESSAGE = (
-  <EuiEmptyPrompt title={<h3>{i18n.NO_RULES}</h3>} titleSize="xs" body={i18n.NO_RULES_BODY} />
-);
+type MenuItemClick = (event: React.MouseEvent) => unknown;
+
+const wrapMenuItemClick = (
+  item: EuiContextMenuPanelItemDescriptor,
+  wrap: (onClick: () => unknown) => Promise<void>
+): EuiContextMenuPanelItemDescriptor => {
+  const { onClick } = item as { onClick?: MenuItemClick };
+  return onClick
+    ? ({
+        ...item,
+        onClick: (event: React.MouseEvent) => wrap(() => onClick(event)),
+      } as EuiContextMenuPanelItemDescriptor)
+    : item;
+};
+
+const NO_ITEMS_MESSAGE = <RulesTableNoItems />;
 
 /**
  * Table Component for displaying all Rules for a given cluster. Provides the ability to filter
@@ -85,9 +111,10 @@ export const RulesTables = React.memo<RulesTableProps>(({ selectedTab }) => {
     state: {
       rules,
       filterOptions,
+      searchMode,
+      searchHighlights,
       isPreflightInProgress,
       isAllSelected,
-      isFetched,
       isLoading,
       isRefetching,
       loadingRuleIds,
@@ -115,8 +142,12 @@ export const RulesTables = React.memo<RulesTableProps>(({ selectedTab }) => {
     onFinish: hideDeleteConfirmation,
   });
 
+  // Rules count of a Group by section action while it runs; the dialogs show it instead of the selection.
+  const [sectionRulesCount, setSectionRulesCount] = useState<number>();
+
   // If no rules are selected, we are deleting a single rule
-  const rulesToDeleteCount = isAllSelected ? pagination.total : selectedRuleIds.length || 1;
+  const rulesToDeleteCount =
+    sectionRulesCount ?? (isAllSelected ? pagination.total : selectedRuleIds.length || 1);
 
   const {
     bulkActionsDryRunResult,
@@ -183,6 +214,28 @@ export const RulesTables = React.memo<RulesTableProps>(({ selectedTab }) => {
     executeBulkActionsDryRun,
   });
 
+  const getSectionBulkItems = useCallback(
+    (
+      closePopover: () => void,
+      scope: FilterOptions,
+      rulesCount: number
+    ): EuiContextMenuPanelDescriptor[] =>
+      getBulkItemsPopoverContent(closePopover, scope).map((panel) => ({
+        ...panel,
+        items: panel.items?.map((item) =>
+          wrapMenuItemClick(item, async (onClick) => {
+            setSectionRulesCount(rulesCount);
+            try {
+              await onClick();
+            } finally {
+              setSectionRulesCount(undefined);
+            }
+          })
+        ),
+      })),
+    [getBulkItemsPopoverContent]
+  );
+
   const paginationMemo = useMemo(() => {
     return {
       pageIndex: pagination.page - 1,
@@ -214,6 +267,11 @@ export const RulesTables = React.memo<RulesTableProps>(({ selectedTab }) => {
     confirmDeletion,
   });
 
+  const ruleActions = useRulesTableActions({
+    showExceptionsDuplicateConfirmation: showBulkDuplicateConfirmation,
+    showManualRuleRunConfirmation,
+    confirmDeletion,
+  });
   const monitoringColumns = useMonitoringColumns({
     isLoadingJobs,
     mlJobs,
@@ -280,10 +338,68 @@ export const RulesTables = React.memo<RulesTableProps>(({ selectedTab }) => {
       break;
   }
 
-  const shouldShowLinearProgress =
-    (isFetched && isRefetching) || isInitializingPrebuiltRulesPackage;
-  const shouldShowLoadingOverlay = (!isFetched && isRefetching) || isPreflightInProgress;
-  const rulesCount = Math.max(isAllSelected ? pagination.total : selectedRuleIds?.length ?? 0, 1);
+  // New filters keep the current rows under a progress line: an overlay on every facet click
+  // reads as a frozen page. The overlay stays for the bulk action preflight.
+  const shouldShowLinearProgress = isRefetching || isInitializingPrebuiltRulesPackage;
+  const shouldShowLoadingOverlay = isPreflightInProgress;
+  const rulesCount =
+    sectionRulesCount ??
+    Math.max(isAllSelected ? pagination.total : selectedRuleIds?.length ?? 0, 1);
+
+  // In AI search, why each rule matched goes under its row, across the table, and the name
+  // column is wider: the rule names are what people read first.
+  const aiSearchColumns = useMemo(
+    () =>
+      tableProps.columns.map((column) =>
+        'field' in column && column.field === 'name' ? { ...column, width: '38%' } : column
+      ),
+    [tableProps.columns]
+  );
+  const { euiTheme } = useEuiTheme();
+  // Why a rule matched belongs to the rule above it: no tint and no line between the two, and
+  // they are hovered together.
+  const whyMatchedRowsCss = useMemo(
+    () => css`
+      container-type: inline-size;
+
+      .euiTableRow-isExpandedRow {
+        background-color: transparent;
+      }
+      .euiTableRow-isExpandedRow > td {
+        border-top: none;
+      }
+      .euiTableRow-isExpandedRow .euiTableCellContent {
+        padding-block-start: 0;
+      }
+      .euiTableRow-isExpandable:hover + .euiTableRow-isExpandedRow,
+      .euiTableRow-isExpandable:has(+ .euiTableRow-isExpandedRow:hover),
+      .euiTableRow-isExpandedRow:hover {
+        background-color: ${euiTheme.colors.backgroundBaseInteractiveHover};
+      }
+    `,
+    [euiTheme]
+  );
+  const whyMatchedRows = useMemo(
+    () =>
+      searchMode === 'semantic'
+        ? Object.fromEntries(
+            rules.flatMap((rule) =>
+              searchHighlights[rule.id]
+                ? [
+                    [
+                      rule.id,
+                      <WhyMatchedRow
+                        highlight={searchHighlights[rule.id]}
+                        search={filterOptions.filter}
+                      />,
+                    ],
+                  ]
+                : []
+            )
+          )
+        : undefined,
+    [searchMode, rules, searchHighlights, filterOptions.filter]
+  );
 
   return (
     <>
@@ -333,7 +449,7 @@ export const RulesTables = React.memo<RulesTableProps>(({ selectedTab }) => {
         <BulkFillRuleGapsModal
           onCancel={cancelBulkFillRuleGaps}
           onConfirm={confirmBulkFillRuleGaps}
-          rulesCount={selectedRuleIds.length}
+          rulesCount={sectionRulesCount ?? selectedRuleIds.length}
         />
       )}
       {isManualRuleRunLimitErrorVisible && (
@@ -383,6 +499,9 @@ export const RulesTables = React.memo<RulesTableProps>(({ selectedTab }) => {
             </>
           )}
           <RulesTableFilters selectedTab={selectedTab} />
+          <EuiSpacer size="s" />
+          <RulesFilterBar />
+          <SearchModeLine />
           <RulesTableWarnings warnings={warnings} />
           <RulesTableUtilityBar
             canBulkEdit={canReadRules}
@@ -390,26 +509,52 @@ export const RulesTables = React.memo<RulesTableProps>(({ selectedTab }) => {
             onToggleSelectAll={toggleSelectAll}
             isBulkActionInProgress={isBulkActionsDryRunLoading || loadingRulesAction != null}
           />
-          <EuiBasicTable
-            itemId="id"
-            items={rules}
-            tableCaption={i18n.RULES_TABLE_CAPTION}
-            noItemsMessage={NO_ITEMS_MESSAGE}
-            onChange={tableOnChangeCallback}
-            pagination={paginationMemo}
-            selection={isTableSelectable ? euiBasicTableSelectionProps : undefined}
-            sorting={{
-              sort: {
-                // EuiBasicTable has incorrect `sort.field` types which accept only `keyof Item` and reject fields in dot notation
-                field: sortingOptions.field as keyof Rule,
-                direction: sortingOptions.order,
-              },
-            }}
-            {...tableProps}
-            tableLayout="auto"
-            scrollableInline
-            responsiveBreakpoint={false}
-          />
+          <RuleFlyoutProvider
+            snippets={searchHighlights}
+            rules={rules}
+            columns={rulesColumns}
+            actions={ruleActions}
+          >
+            {filterOptions.groupBy ? (
+              <GroupedRulesTable
+                key={filterOptions.groupBy}
+                columns={tableProps.columns}
+                getSectionBulkItems={getSectionBulkItems}
+              />
+            ) : (
+              <EuiBasicTable
+                itemId="id"
+                items={rules}
+                itemIdToExpandedRowMap={whyMatchedRows}
+                cellProps={(rule) =>
+                  whyMatchedRows?.[rule.id] ? { style: { borderBlockEnd: 'none' } } : {}
+                }
+                css={whyMatchedRows ? whyMatchedRowsCss : undefined}
+                tableCaption={i18n.RULES_TABLE_CAPTION}
+                noItemsMessage={NO_ITEMS_MESSAGE}
+                onChange={tableOnChangeCallback}
+                pagination={paginationMemo}
+                selection={isTableSelectable ? euiBasicTableSelectionProps : undefined}
+                // Relevant rules (semantic search) come best first; columns do not sort them.
+                sorting={
+                  searchMode === 'semantic'
+                    ? undefined
+                    : {
+                        sort: {
+                          // EuiBasicTable has incorrect `sort.field` types which accept only `keyof Item` and reject fields in dot notation
+                          field: sortingOptions.field as keyof Rule,
+                          direction: sortingOptions.order,
+                        },
+                      }
+                }
+                {...tableProps}
+                columns={searchMode === 'semantic' ? aiSearchColumns : tableProps.columns}
+                tableLayout="auto"
+                scrollableInline
+                responsiveBreakpoint={false}
+              />
+            )}
+          </RuleFlyoutProvider>
         </>
       )}
     </>

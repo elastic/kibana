@@ -19,6 +19,7 @@ import {
   useEuiTheme,
   type EuiBasicTableColumn,
 } from '@elastic/eui';
+import { useInvalidateRuleSetStats, useRuleSetOutcomesQuery } from '../../../rule_sets/api';
 import { DonutChart } from '../../../../common/components/charts/donutchart';
 import { ChartLabel } from '../../../../overview/components/detection_response/alerts_by_status/chart_label';
 import {
@@ -43,19 +44,27 @@ export const LastResponseSummaryChart: React.FC<LastResponseSummaryChartProps> =
   enabled = true,
 }) => {
   const { euiTheme } = useEuiTheme();
-  const { data: spaceHealth, isLoading, isError } = useGetSpaceHealth({}, { enabled });
-
   const {
-    state: { lastUpdated: rulesTableLastUpdatedAt },
+    state: { lastUpdated: rulesTableLastUpdatedAt, filterOptions },
   } = useRulesTableContext();
+  const { ruleSetId } = filterOptions;
+  const spaceHealthQuery = useGetSpaceHealth({}, { enabled: enabled && !ruleSetId });
+  // With a rule set selected, the chart counts only the rules of the group.
+  const groupOutcomesQuery = useRuleSetOutcomesQuery(enabled ? ruleSetId : undefined);
+  const { isLoading, isError } = ruleSetId ? groupOutcomesQuery : spaceHealthQuery;
+  const numberOfRules = ruleSetId
+    ? groupOutcomesQuery.data
+    : spaceHealthQuery.data?.health?.state_at_the_moment?.number_of_rules;
   const invalidateSpaceHealthQuery = useInvalidateGetSpaceHealthQuery();
 
+  const invalidateRuleSetStats = useInvalidateRuleSetStats();
   useEffect(() => {
     invalidateSpaceHealthQuery();
-  }, [rulesTableLastUpdatedAt, invalidateSpaceHealthQuery]);
+    invalidateRuleSetStats();
+  }, [rulesTableLastUpdatedAt, invalidateSpaceHealthQuery, invalidateRuleSetStats]);
 
   const { chartData, tableData, total, fillColor } = useMemo(() => {
-    if (!spaceHealth?.health?.state_at_the_moment?.number_of_rules) {
+    if (!numberOfRules) {
       return {
         chartData: null,
         tableData: [],
@@ -64,7 +73,7 @@ export const LastResponseSummaryChart: React.FC<LastResponseSummaryChartProps> =
       };
     }
 
-    const { by_outcome: byOutcome, all } = spaceHealth.health.state_at_the_moment.number_of_rules;
+    const { by_outcome: byOutcome, all } = numberOfRules;
 
     const succeeded = byOutcome?.succeeded?.total ?? 0;
     const warning = byOutcome?.warning?.total ?? 0;
@@ -104,7 +113,7 @@ export const LastResponseSummaryChart: React.FC<LastResponseSummaryChartProps> =
       total: all.total,
       fillColor: (key: string) => colorMap[key] ?? euiTheme.colors.lightShade,
     };
-  }, [spaceHealth, euiTheme]);
+  }, [numberOfRules, euiTheme]);
 
   const columns: Array<EuiBasicTableColumn<StatusRow>> = useMemo(
     () => [

@@ -644,18 +644,25 @@ export const SEARCH_PLACEHOLDER = i18n.translate(
   }
 );
 
-export const SHOWING_RULES = (firstInPage: number, lastOfPage: number, totalRules: number) =>
-  i18n.translate('xpack.securitySolution.detectionEngine.rules.allRules.showingRulesTitle', {
+export const SHOWING_RULES = (firstInPage: number, lastOfPage: number, totalRules: number) => {
+  if (firstInPage <= 1 && lastOfPage === totalRules) {
+    return i18n.translate('xpack.securitySolution.detectionEngine.rules.allRules.showingTotal', {
+      values: { totalRules },
+      defaultMessage: 'Showing {totalRules, plural, one {# rule} other {# rules}}',
+    });
+  }
+
+  return i18n.translate('xpack.securitySolution.detectionEngine.rules.allRules.showingRulesTitle', {
     values: { firstInPage, lastOfPage, totalRules },
     defaultMessage:
       'Showing {firstInPage}-{lastOfPage} of {totalRules} {totalRules, plural, =1 {rule} other {rules}}',
   });
+};
 
-export const SELECT_ALL_RULES = (totalRules: number) =>
-  i18n.translate('xpack.securitySolution.detectionEngine.rules.allRules.selectAllRulesTitle', {
-    values: { totalRules },
-    defaultMessage: 'Select all {totalRules} {totalRules, plural, =1 {rule} other {rules}}',
-  });
+export const SELECT_ALL_MATCHING_RULES = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.selectAllMatchingRules',
+  { defaultMessage: 'Select all matching rules' }
+);
 
 export const CLEAR_SELECTION = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.allRules.clearSelectionTitle',

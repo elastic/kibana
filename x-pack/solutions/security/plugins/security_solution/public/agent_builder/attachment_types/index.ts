@@ -520,3 +520,5 @@ export const registerAttackDiscoveryVerdictAttachment = ({
     register({ attachments });
   });
 };
+
+export { registerRuleSetAttachment } from './rule_set_attachment';

@@ -289,6 +289,7 @@ export const AGENT_BUILDER_BUILTIN_SKILLS = [
   'detection-rule-edit',
   'alertzero-action-discovery',
   'recommend-prebuilt-rules',
+  'suggest-rule-sets',
   'threat-hunting',
   'find-security-rules',
   'detection-coverage',
@@ -416,6 +417,7 @@ export const AGENT_BUILDER_BUILTIN_ATTACHMENTS = [
   'security.investigation.iocs',
   'security.investigation.timeline',
   'security.rule',
+  'security.rule_set',
   'security.siem_readiness',
   // gated behind experimentalFeatures.rulePreviewAttachmentEnabled
   'security.rule.preview',

@@ -54,43 +54,35 @@ This skill has two inline tools:
 
 | Tool | When to use | Returns |
 |---|---|---|
-| \`security.discover_rule_tags\` | **Always call this first** — gets available tag values for reasoning | Tag buckets + counts |
-| \`security.find_rules\` | Default to \`security.find_rules\` for rule queries — list, filter, sort, count | Rule names + metadata + total |
+| \`security.discover_rule_tags\` | List available tags and counts or resolve unknown exact tag values | Tag buckets + counts |
+| \`security.find_rules\` | Default to \`security.find_rules\` for rule queries. It searches by meaning and supports exact filters, sorting, and counts. | Rule names + metadata + total |
 
-**Every response that calls \`security.find_rules\` MUST also call \`security.discover_rule_tags\` in that same response, immediately before \`security.find_rules\`.** Do NOT call \`security.find_rules\` without first calling \`security.discover_rule_tags\` in the same turn — even if discovery was run in a previous turn. Use the freshly discovered tag list to decide which tag values (if any) belong in the filter.
+Call \`security.find_rules\` directly. Use \`query\` when the user describes what the rules should detect. Include any explicit structured constraints such as severity or enabled state in the same call. Use \`searchTerm\` for a keyword lookup, such as when the user supplies part of a rule name. Tag discovery is only needed when the user asks about available tags or the exact tag value for a requested filter is unknown.
 
 ## Grounding
 
 Call \`security.find_rules\` for every new or different rule query. Do not reuse a previous rule list when the user changes the criteria.
 
-Every tag name, index pattern, rule name, rule ID, alert count, and total in the response must come from a tool result in this conversation. If a filter returns zero results, say so.
+Reported rule names, IDs, index patterns, tags, alert counts, and totals must come from a tool result in this conversation. State which filters were tried, including exact tag values supplied by the user. If a filter returns zero results, say so.
 
-In a multi-turn conversation, do not infer tag values from rule results — rule \`tags\` arrays in \`security.find_rules\` responses only reflect the rules already fetched. Use tag values from the most recent \`security.discover_rule_tags\` call.
-
-When the user refines a previous query — phrases like "which of them are network", "now show the Windows ones", "filter by endpoint" — make a fresh \`security.discover_rule_tags\` call to get current tag values, then call \`security.find_rules\` with the matching tags and any carry-over filters (e.g. severity). Do not filter the in-memory results from the previous response.
+When the user refines a previous query with phrases like "which of them are network" or "now show the Windows ones", run a fresh \`security.find_rules\` query with the refinement and any relevant carry-over filters. Use \`query\` for the detected behavior or topic. Keep explicit constraints such as severity. The previous result page is not a complete rule list.
 
 ## Tag Discovery
 
-Tag values are environment-specific. Even widely-used names like "MITRE" may be spelled, cased, or absent differently in this space.
+Tag values are specific to the space. Apply exact tag values supplied by the user or already identified from a tool result directly in \`tags\` or \`excludeTags\`. A rule's tags show what that rule has and do not enumerate the space's catalog.
 
-**Before filtering by tag, call \`security.discover_rule_tags\` with \`{}\`** to enumerate available tag values. This gives you the full list so you can choose exact tag values that match the user's intent. Discovery is one cheap aggregation call — run it fresh in every turn that calls \`security.find_rules\`. Do not reuse a tag list from a previous turn.
-
-After discovery:
-1. Scan all returned tag values — both prebuilt tags (which follow a \`Category: Value\` pattern like \`Domain: Network\`, \`Use Case: Network Security Monitoring\`, \`Tactic: Execution\`) and custom tags (which may be free-form like \`my-team\` or \`prod\`). Find every tag that matches the user's intent, across all categories and formats.
-2. Call \`security.find_rules\` with \`tags: ["<value1>", "<value2>", ...]\` including every matching tag. Tags are OR-ed, so the result includes rules with any of them. If no tag matches, omit the tags filter.
-
-If no returned tag matches the user's intent, say so and mention the closest available values.
+When the user asks to browse tags or the exact tag values for their requested filter are unknown, call \`security.discover_rule_tags\` with \`{}\`. Select only values that match the requested tag filter. Values inside \`tags\` are OR-ed. If no exact value can be resolved, explain that and show the closest values when available. Keep the requested tag constraint explicit when discussing the results.
 
 ## MITRE ATT&CK Routing
 
-Detection rules carry MITRE data in two places: the structured \`threat[]\` field (tactic ID + name, technique ID + name) and free-form \`tags\` (entries like \`Tactic: Execution\` or \`Technique: T1059\`). Tag coverage is inconsistent — some rules have only the structured field. **Always filter MITRE intent through the structured parameters \`mitreTechnique\` and \`mitreTactic\`**, never through the \`tags\` filter. Do not put a \`Tactic: ...\` or \`Technique: ...\` value into the \`tags\` filter for a MITRE query, even if it appears in the \`security.discover_rule_tags\` result. Discovery still runs every turn (as required for non-MITRE tag filtering); the rule here is only about which filter parameter the MITRE intent ends up in.
+Detection rules carry MITRE data in two places: the structured \`threat[]\` field (tactic ID + name, technique ID + name) and free-form \`tags\` (entries like \`Tactic: Execution\` or \`Technique: T1059\`). Tag coverage is inconsistent — some rules have only the structured field. Use the structured parameters \`mitreTechnique\` and \`mitreTactic\` for exact MITRE filters. Do not put a \`Tactic: ...\` or \`Technique: ...\` value into the \`tags\` filter for a MITRE query, even if it appears in the \`security.discover_rule_tags\` result.
 
 Priority order:
 
-1. **Technique ID** (\`T1059\`, \`T1059.001\`) -> \`{ mitreTechnique: "T1059" }\`.
+1. **Technique ID** (\`T1059\`, \`T1059.001\`) -> pass the supplied ID to \`mitreTechnique\`, including the subtechnique suffix when present.
 2. **Tactic ID** (\`TA0001\`) -> \`{ mitreTactic: "TA0001" }\`.
 3. **Tactic name** matching the table below -> convert to its ID and use \`{ mitreTactic: "<TA-ID>" }\`. Prefer IDs over names because IDs are stable across MITRE versions.
-4. **Anything else** (typo, technique name like "Phishing", informal phrasing) -> \`{ searchTerm: "<phrase>" }\`. Do not guess an ID.
+4. **Anything else** (typo, technique name like "Phishing", informal phrasing) -> \`{ query: "<phrase>" }\`. Do not guess an ID.
 
 Canonical MITRE tactics (Enterprise ATT&CK):
 
@@ -117,7 +109,7 @@ Examples:
 - "rules for Stealth" -> \`{ mitreTactic: "TA0005" }\`
 - "rules for Defense Impairment" -> \`{ mitreTactic: "TA0112" }\`
 - "rules for TA0006" -> \`{ mitreTactic: "TA0006" }\`
-- "rules for phishing" (technique-flavored, no exact name) -> \`{ searchTerm: "phishing" }\`
+- "rules for phishing" (technique-flavored, no exact name) -> \`{ query: "phishing" }\`
 
 ## Noisy Rules
 
@@ -135,7 +127,7 @@ Examples:
 
 All filter parameters are flat and optional. Different parameters are ANDed together. Array parameters (\`severity\`, \`ruleType\`, \`tags\`) are ORed within the same field.
 
-Parameters: \`searchTerm\`, \`enabled\`, \`ruleSource\`, \`severity\`, \`ruleType\`, \`tags\`, \`excludeTags\`, \`mitreTechnique\`, \`mitreTactic\`, \`ruleId\`.
+Parameters include \`query\`, \`searchTerm\`, \`enabled\`, \`ruleSource\`, \`severity\`, \`ruleType\`, \`tags\`, \`excludeTags\`, \`mitreTechnique\`, \`mitreTactic\`, \`ruleId\`.
 
 **Omit \`perPage\`** unless the user explicitly states a number ("show me 50") or asks for more/all results. When omitted, the tool defaults to 10. Never set \`perPage\` above 10 unless the user explicitly states a number or requests more results. Never increase it on follow-up turns just because the previous result was truncated — narrow the filter instead.
 
@@ -144,7 +136,8 @@ Examples:
 - Critical or high severity: \`{ severity: ["critical", "high"] }\`
 - MITRE-tagged, exclude Custom: \`{ tags: ["MITRE"], excludeTags: ["Custom"] }\`
 - Custom query rules: \`{ ruleSource: "custom", ruleType: ["query"] }\`
-- Text search: \`{ searchTerm: "PowerShell" }\`
+- Find enabled rules that detect a behavior: \`{ query: "someone wipes the logs to hide what they did", enabled: true }\`
+- Keyword lookup by rule name: \`{ searchTerm: "PowerShell" }\`
 - Highest-risk enabled rules: \`{ enabled: true, sortField: "risk_score", sortOrder: "desc", perPage: 5 }\`
 
 ## Rendering

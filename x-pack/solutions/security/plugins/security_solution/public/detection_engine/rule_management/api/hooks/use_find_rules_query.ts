@@ -17,8 +17,13 @@ import type {
   SearchRulesAggregations,
   SearchRulesSearchAfterItem,
   GranularRulesSearch,
+  SearchRulesResponse,
 } from '../../../../../common/api/detection_engine/rule_management';
 import { RULE_MANAGEMENT_RULES_URL_SEARCH } from '../../../../../common/api/detection_engine/rule_management/urls';
+import type {
+  RuleScope,
+  RuleSetConditions,
+} from '../../../../../common/api/detection_engine/rule_sets';
 import type { PaginationOptions } from '../../logic';
 import { fetchSearchRules } from '../api';
 import { DEFAULT_QUERY_OPTIONS } from './constants';
@@ -36,6 +41,8 @@ export interface FindRulesQueryArgs {
   gaps_range_start?: string;
   gaps_range_end?: string;
   gap_auto_fill_scheduler_id?: string;
+  rule_scope?: RuleScope;
+  filter_params?: RuleSetConditions;
 }
 
 const FIND_RULES_QUERY_KEY = ['POST', RULE_MANAGEMENT_RULES_URL_SEARCH];
@@ -44,7 +51,17 @@ export interface RulesQueryResponse {
   rules: RuleResponse[];
   total: number;
   warnings?: WarningSchema[];
+  /** The search mode that ran, when the query had a search text. */
+  searchMode?: 'legacy' | 'semantic';
+  /** Why a search by meaning ran as the keyword search. */
+  searchFallbackReason?: SearchFallbackReason;
+  /** Why each rule matched a search by meaning, by rule id. */
+  searchHighlights?: Record<string, SearchHighlight>;
 }
+
+export type SearchFallbackReason = NonNullable<SearchRulesResponse['search_fallback_reason']>;
+/** Why a rule matched a search by meaning: a sentence of the rule card and where it comes from. */
+export type SearchHighlight = NonNullable<SearchRulesResponse['search_highlights']>[string];
 
 /**
  * A wrapper around useQuery provides default values to the underlying query,
@@ -73,7 +90,14 @@ export const useFindRulesQuery = (
         ...queryArgs,
       });
 
-      return { rules: response.data, total: response.total, warnings: response.warnings };
+      return {
+        rules: response.data,
+        total: response.total,
+        warnings: response.warnings,
+        searchMode: response.search_mode,
+        searchFallbackReason: response.search_fallback_reason,
+        searchHighlights: response.search_highlights,
+      };
     },
     {
       ...DEFAULT_QUERY_OPTIONS,
@@ -132,6 +156,9 @@ export const useUpdateRulesCache = () => {
                 rules: updateRules(currentData.rules, newRules),
                 total: currentData.total,
                 warnings: currentData.warnings,
+                searchMode: currentData.searchMode,
+                searchFallbackReason: currentData.searchFallbackReason,
+                searchHighlights: currentData.searchHighlights,
               }
             : undefined
       );

@@ -92,6 +92,10 @@ interface RuleOverviewTabProps {
   columnWidths?: EuiDescriptionListProps['columnWidths'];
   expandedOverviewSections: Record<keyof typeof defaultOverviewOpenSections, boolean>;
   toggleOverviewSection: Record<keyof typeof defaultOverviewOpenSections, () => void>;
+  /** A sentence of the description to mark, e.g. why the rule matched a search. */
+  highlight?: string;
+  /** When a header around the tab already shows them. */
+  hideSeverityAndRisk?: boolean;
 }
 
 export const RuleOverviewTab = ({
@@ -99,6 +103,8 @@ export const RuleOverviewTab = ({
   columnWidths = DEFAULT_DESCRIPTION_LIST_COLUMN_WIDTHS,
   expandedOverviewSections,
   toggleOverviewSection,
+  highlight,
+  hideSeverityAndRisk,
 }: RuleOverviewTabProps) => {
   return (
     <>
@@ -108,8 +114,14 @@ export const RuleOverviewTab = ({
         isOpen={expandedOverviewSections.about}
         toggle={toggleOverviewSection.about}
       >
-        {rule.description && <Description description={rule.description} />}
-        <RuleAboutSection rule={rule} columnWidths={columnWidths} hideDescription hideName />
+        {rule.description && <Description description={rule.description} highlight={highlight} />}
+        <RuleAboutSection
+          rule={rule}
+          columnWidths={columnWidths}
+          hideDescription
+          hideName
+          hideSeverityAndRisk={hideSeverityAndRisk}
+        />
       </ExpandableSection>
       <EuiHorizontalRule margin="m" />
       <ExpandableSection

@@ -17,11 +17,17 @@
 import { z, lazySchema } from '@kbn/zod/v4';
 
 /**
-  * Search mode for free-text search combined with `filter`.
+  * Search mode for free-text search combined with `filter`. `legacy`: the keyword search of
+the rules table (rule name, index patterns, MITRE ATT&CK). `semantic`: hybrid search by
+meaning and by words over a rule search index; the result is the relevant rules in
+relevance order, and `filter`, facets and the rule scope apply to them. Falls back to
+`legacy` when no model is available. Without a mode, `legacy`.
 
   */
-export const GranularRulesSearchMode = lazySchema(() => z.literal('legacy').default('legacy'));
+export const GranularRulesSearchMode = lazySchema(() => z.enum(['legacy', 'semantic']));
 export type GranularRulesSearchMode = z.infer<typeof GranularRulesSearchMode>;
+export type GranularRulesSearchModeEnum = typeof GranularRulesSearchMode.enum;
+export const GranularRulesSearchModeEnum = GranularRulesSearchMode.enum;
 
 /**
   * Free-text search combined with `filter`. Interpreted according to search mode.
@@ -59,7 +65,20 @@ export const GranularRulesFilter = lazySchema(() =>
 export type GranularRulesFilter = z.infer<typeof GranularRulesFilter>;
 
 export const GranularRulesFacetCategory = lazySchema(() =>
-  z.enum(['tags', 'enabled', 'updatedBy', 'createdBy', 'lastRunOutcome', 'isCustomized', 'type'])
+  z.enum([
+    'tags',
+    'enabled',
+    'updatedBy',
+    'createdBy',
+    'lastRunOutcome',
+    'isCustomized',
+    'type',
+    'integration',
+    'tactic',
+    'technique',
+    'source',
+    'severity',
+  ])
 );
 export type GranularRulesFacetCategory = z.infer<typeof GranularRulesFacetCategory>;
 export type GranularRulesFacetCategoryEnum = typeof GranularRulesFacetCategory.enum;
@@ -77,8 +96,32 @@ export const SearchRulesAggregations = lazySchema(() =>
        */
       counts: z
         .array(GranularRulesFacetCategory)
+        .max(20)
         .optional()
         .describe('Facet categories for which to compute counts over the filtered + searched set.'),
+      /**
+      * Count each category without the `filter_params` condition on the same field, so a
+facet shows the other values a user can add (disjunctive facets). Group by leaves it off.
+
+      */
+      exclude_own_filter: z
+        .boolean()
+        .optional()
+        .describe(
+          'Count each category without the `filter_params` condition on the same field, so a\nfacet shows the other values a user can add (disjunctive facets). Group by leaves it off.\n'
+        ),
+      /**
+      * Tag prefixes, for example `OS`. Counts the tags of each prefix without the
+`filter_params.tag_categories` condition of that prefix.
+
+      */
+      tag_categories: z
+        .array(z.string().min(1).max(256))
+        .max(50)
+        .optional()
+        .describe(
+          'Tag prefixes, for example `OS`. Counts the tags of each prefix without the\n`filter_params.tag_categories` condition of that prefix.\n'
+        ),
     })
     .strict()
 );

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { Logger } from '@kbn/core/server';
+import type { Logger, StartServicesAccessor } from '@kbn/core/server';
 import type { ConfigType } from '../../../../config';
-import type { SetupPlugins } from '../../../../plugin_contract';
+import type { SetupPlugins, StartPlugins } from '../../../../plugin_contract';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 
 import { performBulkActionRoute } from './rules/bulk_actions/route';
@@ -30,7 +30,8 @@ export const registerRuleManagementRoutes = (
   router: SecuritySolutionPluginRouter,
   config: ConfigType,
   ml: SetupPlugins['ml'],
-  logger: Logger
+  logger: Logger,
+  getStartServices: StartServicesAccessor<StartPlugins>
 ) => {
   // Rules CRUD
   createRuleRoute(router);
@@ -48,7 +49,7 @@ export const registerRuleManagementRoutes = (
 
   // Rules search
   findRulesRoute(router, logger);
-  searchRulesRoute(router, logger);
+  searchRulesRoute(router, logger, getStartServices);
 
   // Rule tags
   readTagsRoute(router);

@@ -6,11 +6,12 @@
  */
 
 import { useEffect } from 'react';
+import { hasRuleSetConditions } from '../../../../../../common/detection_engine/rule_sets/rule_set_conditions';
 import { useReplaceUrlParams } from '../../../../../common/utils/global_query_string/helpers';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { URL_PARAM_KEY } from '../../../../../common/hooks/use_url_state';
-import { RULES_TABLE_STATE_STORAGE_KEY } from '../constants';
 import { useRulesTableContext } from './rules_table_context';
+import { useRulesTableStorageKey } from './use_rules_table_storage_key';
 import type {
   RulesTableStorageSavedState,
   RulesTableUrlSavedState,
@@ -28,6 +29,7 @@ export function useSyncRulesTableSavedState(): void {
     services: { sessionStorage },
   } = useKibana();
   const replaceUrlParams = useReplaceUrlParams();
+  const storageKey = useRulesTableStorageKey();
 
   useEffect(() => {
     const urlStateToSave: RulesTableUrlSavedState = {};
@@ -36,6 +38,11 @@ export function useSyncRulesTableSavedState(): void {
     if (state.filterOptions.filter.length > 0) {
       urlStateToSave.searchTerm = state.filterOptions.filter;
       storageStateToSave.searchTerm = state.filterOptions.filter;
+    }
+
+    if (state.filterOptions.searchMode) {
+      urlStateToSave.searchMode = state.filterOptions.searchMode;
+      storageStateToSave.searchMode = state.filterOptions.searchMode;
     }
 
     if (state.filterOptions.showElasticRules || state.filterOptions.showCustomRules) {
@@ -79,6 +86,21 @@ export function useSyncRulesTableSavedState(): void {
       storageStateToSave.ruleExecutionStatus = state.filterOptions.ruleExecutionStatus;
     }
 
+    if (state.filterOptions.ruleSetId) {
+      urlStateToSave.ruleSetId = state.filterOptions.ruleSetId;
+      storageStateToSave.ruleSetId = state.filterOptions.ruleSetId;
+    }
+
+    if (state.filterOptions.groupBy) {
+      urlStateToSave.groupBy = state.filterOptions.groupBy;
+      storageStateToSave.groupBy = state.filterOptions.groupBy;
+    }
+
+    if (state.filterOptions.conditions && hasRuleSetConditions(state.filterOptions.conditions)) {
+      urlStateToSave.conditions = state.filterOptions.conditions;
+      storageStateToSave.conditions = state.filterOptions.conditions;
+    }
+
     const hasUrlStateToSave = Object.keys(urlStateToSave).length > 0;
     const hasStorageStateToSave = Object.keys(storageStateToSave).length > 0;
 
@@ -87,7 +109,7 @@ export function useSyncRulesTableSavedState(): void {
     }
 
     if (!hasStorageStateToSave) {
-      sessionStorage.remove(RULES_TABLE_STATE_STORAGE_KEY);
+      sessionStorage.remove(storageKey);
     }
 
     if (!hasUrlStateToSave && !hasStorageStateToSave) {
@@ -95,6 +117,6 @@ export function useSyncRulesTableSavedState(): void {
     }
 
     replaceUrlParams({ [URL_PARAM_KEY.rulesTable]: urlStateToSave });
-    sessionStorage.set(RULES_TABLE_STATE_STORAGE_KEY, storageStateToSave);
-  }, [replaceUrlParams, sessionStorage, state]);
+    sessionStorage.set(storageKey, storageStateToSave);
+  }, [replaceUrlParams, sessionStorage, state, storageKey]);
 }

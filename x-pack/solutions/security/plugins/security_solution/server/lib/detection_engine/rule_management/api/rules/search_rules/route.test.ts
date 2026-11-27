@@ -55,7 +55,7 @@ describe('search rules route', () => {
       searchAfter: [1234567890, 'abc'],
     });
 
-    searchRulesRoute(server.router, logger);
+    searchRulesRoute(server.router, logger, jest.fn());
   });
 
   afterEach(() => {

@@ -21,7 +21,9 @@ import {
   SearchRulesAggregations,
   GranularRulesSearch,
   FacetCounts,
+  GranularRulesSearchMode,
 } from '../granular_rules/granular_rules_contract.gen';
+import { RuleScope, RuleSetConditions } from '../../rule_sets/rule_set.gen';
 import { FindRulesSortField } from '../find_rules/find_rules_route.gen';
 import { SortOrder } from '../../model/sorting.gen';
 import { GapFillStatus } from '../../model/rule_schema/common_attributes.gen';
@@ -69,6 +71,8 @@ export const SearchRulesRequestBody = lazySchema(() =>
       filter: GranularRulesFilter.optional().describe(
         'Structured KQL filter applied to detection rules (alert saved objects).'
       ),
+      rule_scope: RuleScope.optional(),
+      filter_params: RuleSetConditions.optional(),
       aggregations: SearchRulesAggregations.optional(),
       search: GranularRulesSearch.optional(),
       sort_field: FindRulesSortField.optional(),
@@ -152,6 +156,44 @@ at or past the default 10,000-result max) or the request used `search_after`.
           'Sort values of the last hit on this page, for use as `search_after` on the next\nrequest. Only included when deep pagination applies (offset\nat or past the default 10,000-result max) or the request used `search_after`.\n'
         ),
       counts: FacetCounts.optional(),
+      tag_category_counts: FacetCounts.optional(),
+      /**
+       * The search mode that ran; `legacy` when `semantic` was asked but search by meaning is not ready in the space (see `search_fallback_reason`).
+       */
+      search_mode: GranularRulesSearchMode.optional().describe(
+        'The search mode that ran; `legacy` when `semantic` was asked but search by meaning is not ready in the space (see `search_fallback_reason`).'
+      ),
+      /**
+       * For a search by meaning, why each rule of the page matched, by rule id - the sentence of the rule card closest in meaning to the text, and where it comes from.
+       */
+      search_highlights: z
+        .object({})
+        .catchall(
+          z.object({
+            text: z.string(),
+            source: z.enum([
+              'description',
+              'mitre',
+              'integrations',
+              'false_positives',
+              'index_patterns',
+            ]),
+          })
+        )
+        .optional()
+        .describe(
+          'For a search by meaning, why each rule of the page matched, by rule id - the sentence of the rule card closest in meaning to the text, and where it comes from.'
+        ),
+      /**
+      * Why `semantic` ran as `legacy`: "Use AI features" is off in the space (`ai_off`), the cluster lacks the embedding or the rerank model (`no_model`), Workflows is not available (`no_workflows`), the rule search index workflow of the space is off (`off`) or has not finished its first run (`not_indexed`), or the search failed or timed out (`error`).
+
+      */
+      search_fallback_reason: z
+        .enum(['ai_off', 'no_model', 'no_workflows', 'off', 'not_indexed', 'error'])
+        .optional()
+        .describe(
+          'Why `semantic` ran as `legacy`: "Use AI features" is off in the space (`ai_off`), the cluster lacks the embedding or the rerank model (`no_model`), Workflows is not available (`no_workflows`), the rule search index workflow of the space is off (`off`) or has not finished its first run (`not_indexed`), or the search failed or timed out (`error`).\n'
+        ),
     })
     .strict()
 );

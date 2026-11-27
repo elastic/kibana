@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { isEqual } from 'lodash';
+import { isEqual, isUndefined, omit, omitBy } from 'lodash';
 import React, {
   createContext,
   useCallback,
@@ -23,6 +23,13 @@ import {
 } from '../../../../../../common/constants';
 import { useGapAutoFillSchedulerContext } from '../../../../rule_gaps/context/gap_auto_fill_scheduler_context';
 import { convertRulesFilterToKQL } from '../../../../../../common/detection_engine/rule_management/rule_filtering';
+import {
+  hasRuleSetConditions,
+  liftTagCategories,
+  normalizeRuleSetConditions,
+} from '../../../../../../common/detection_engine/rule_sets/rule_set_conditions';
+import { ruleQueryParams } from '../../../../rule_sets/table_query';
+import type { RuleSetLastRunOutcome } from '../../../../../../common/api/detection_engine/rule_sets';
 import { invariant } from '../../../../../../common/utils/invariant';
 import { URL_PARAM_KEY } from '../../../../../common/hooks/use_url_state';
 import { useKibana, useUiSetting$ } from '../../../../../common/lib/kibana';
@@ -34,9 +41,16 @@ import type {
   RulesSnoozeSettingsMap,
   SortingOptions,
 } from '../../../../rule_management/logic/types';
-import type { WarningSchema } from '../../../../../../common/api/detection_engine';
+import type {
+  RuleExecutionStatus,
+  WarningSchema,
+} from '../../../../../../common/api/detection_engine';
 import { useFindRules } from '../../../../rule_management/logic/use_find_rules';
-import { RULES_TABLE_STATE_STORAGE_KEY } from '../constants';
+import type {
+  SearchFallbackReason,
+  SearchHighlight,
+} from '../../../../rule_management/api/hooks/use_find_rules_query';
+
 import {
   DEFAULT_FILTER_OPTIONS,
   DEFAULT_PAGE,
@@ -45,8 +59,12 @@ import {
 } from './rules_table_defaults';
 import { RuleSource } from './rules_table_saved_state';
 import { useRulesTableSavedState } from './use_rules_table_saved_state';
+import { useRulesTableStorageKey } from './use_rules_table_storage_key';
 import { defaultRangeValue } from '../../../../rule_gaps/constants';
 import { getGapRange } from '../../../../rule_gaps/api/hooks/utils';
+
+/** One empty object, so that the table context does not change on every render. */
+const NO_HIGHLIGHTS: Record<string, SearchHighlight> = {};
 
 interface RulesSnoozeSettings {
   /**
@@ -63,6 +81,13 @@ interface RulesSnoozeSettings {
   isFetching: boolean;
   isError: boolean;
 }
+
+/** The last response filter of earlier versions as a last run outcome. */
+const LEGACY_OUTCOMES: Partial<Record<RuleExecutionStatus, RuleSetLastRunOutcome>> = {
+  succeeded: 'succeeded',
+  'partial failure': 'warning',
+  failed: 'failed',
+};
 
 export interface RulesTableState {
   /**
@@ -101,6 +126,8 @@ export interface RulesTableState {
    * Is true whenever a background refetch is in-flight, which does not include initial loading
    */
   isRefetching: boolean;
+  /** The visible rules came from the previous query while the current query loads. */
+  isPreviousData: boolean;
   /**
    * Indicates whether we should refetch table data in the background
    */
@@ -141,6 +168,12 @@ export interface RulesTableState {
    * Warning, such as when the number of rules with gaps is greater than the limit.
    */
   warnings?: WarningSchema[];
+  /** The search mode that ran: `semantic` lists the relevant rules in relevance order. */
+  searchMode?: 'legacy' | 'semantic';
+  /** Why a search by meaning ran as the keyword search. */
+  searchFallbackReason?: SearchFallbackReason;
+  /** Why each rule of the page matched a search by meaning, by rule id. */
+  searchHighlights: Record<string, SearchHighlight>;
 }
 
 export type LoadingRuleAction =
@@ -209,6 +242,7 @@ export const RulesTableContextProvider = ({ children }: RulesTableContextProvide
     idleTimeout: number;
   }>(DEFAULT_RULES_TABLE_REFRESH_SETTING);
   const { sessionStorage, uiSettings } = useKibana().services;
+  const storageKey = useRulesTableStorageKey();
   const excludedReasons = uiSettings.get<string[]>(EXCLUDED_GAP_REASONS_KEY);
   const {
     filter: savedFilter,
@@ -216,19 +250,34 @@ export const RulesTableContextProvider = ({ children }: RulesTableContextProvide
     pagination: savedPagination,
   } = useRulesTableSavedState();
 
-  const [filterOptions, setFilterOptions] = useState<FilterOptions>({
-    filter: savedFilter?.searchTerm ?? DEFAULT_FILTER_OPTIONS.filter,
-    tags: savedFilter?.tags ?? DEFAULT_FILTER_OPTIONS.tags,
-    showCustomRules: savedFilter?.source
-      ? savedFilter.source === RuleSource.Custom
-      : DEFAULT_FILTER_OPTIONS.showCustomRules,
-    showElasticRules: savedFilter?.source
-      ? savedFilter.source === RuleSource.Prebuilt
-      : DEFAULT_FILTER_OPTIONS.showElasticRules,
-    enabled: savedFilter?.enabled,
-    ruleExecutionStatus:
-      savedFilter?.ruleExecutionStatus ?? DEFAULT_FILTER_OPTIONS.ruleExecutionStatus,
-    gapFillStatuses: DEFAULT_FILTER_OPTIONS.gapFillStatuses,
+  // Tags, source, enabled and last response are facets now: a saved table state or a link with
+  // the old filters opens with the same rules, shown in the facet panel.
+  const [filterOptions, setFilterOptions] = useState<FilterOptions>(() => {
+    const outcome = savedFilter?.ruleExecutionStatus
+      ? LEGACY_OUTCOMES[savedFilter.ruleExecutionStatus]
+      : undefined;
+    const conditions = normalizeRuleSetConditions({
+      ...(savedFilter?.tags?.length ? { tags: { include: savedFilter.tags, match: 'all' } } : {}),
+      ...(savedFilter?.source
+        ? {
+            rule_source: {
+              include: [savedFilter.source === RuleSource.Custom ? 'internal' : 'external'],
+            },
+          }
+        : {}),
+      ...(savedFilter?.enabled != null ? { enabled: savedFilter.enabled } : {}),
+      ...(outcome ? { last_run_outcome: { include: [outcome] } } : {}),
+      ...savedFilter?.conditions,
+    });
+    return {
+      ...DEFAULT_FILTER_OPTIONS,
+      filter: savedFilter?.searchTerm ?? DEFAULT_FILTER_OPTIONS.filter,
+      searchMode: savedFilter?.searchMode,
+      gapFillStatuses: DEFAULT_FILTER_OPTIONS.gapFillStatuses,
+      ruleSetId: savedFilter?.ruleSetId,
+      groupBy: savedFilter?.groupBy,
+      conditions: liftTagCategories(conditions),
+    };
   });
 
   const [sortingOptions, setSortingOptions] = useState<SortingOptions>({
@@ -253,7 +302,6 @@ export const RulesTableContextProvider = ({ children }: RulesTableContextProvide
   const pagination = useMemo(() => ({ page, perPage }), [page, perPage]);
 
   const findRulesQueryArgs = useMemo(() => {
-    const searchTerm = filterOptions.filter?.trim();
     const structuredKql = convertRulesFilterToKQL({ ...filterOptions, filter: '' });
 
     const shouldApplyGaps = Boolean(filterOptions.gapFillStatuses?.length);
@@ -264,15 +312,21 @@ export const RulesTableContextProvider = ({ children }: RulesTableContextProvide
       sort_field: sortingOptions.field,
       sort_order: sortingOptions.order,
       pagination,
-      ...(searchTerm !== '' ? { search: { term: searchTerm, mode: 'legacy' as const } } : {}),
       ...(shouldApplyGaps ? { gap_fill_statuses: filterOptions.gapFillStatuses } : {}),
       ...(gapRange ? { gaps_range_start: gapRange.start, gaps_range_end: gapRange.end } : {}),
       ...(activeSchedulerId ? { gap_auto_fill_scheduler_id: activeSchedulerId } : {}),
+      ...ruleQueryParams(filterOptions),
     };
   }, [filterOptions, sortingOptions, pagination, activeSchedulerId]);
 
   const handleFilterOptionsChange = useCallback((newFilter: Partial<FilterOptions>) => {
-    setFilterOptions((currentFilter) => ({ ...currentFilter, ...newFilter }));
+    setFilterOptions((currentFilter) =>
+      // Another rule set starts with clear filters: a search or tag from the previous view can
+      // hide all rules of the group.
+      'ruleSetId' in newFilter && newFilter.ruleSetId !== currentFilter.ruleSetId
+        ? { ...DEFAULT_FILTER_OPTIONS, ...newFilter }
+        : { ...currentFilter, ...newFilter }
+    );
     setPage(1);
     setSelectedRuleIds([]);
     setIsAllSelected(false);
@@ -285,7 +339,7 @@ export const RulesTableContextProvider = ({ children }: RulesTableContextProvide
 
   const replaceUrlParams = useReplaceUrlParams();
   const clearFilters = useCallback(() => {
-    setFilterOptions({
+    setFilterOptions((current) => ({
       filter: DEFAULT_FILTER_OPTIONS.filter,
       showElasticRules: DEFAULT_FILTER_OPTIONS.showElasticRules,
       showCustomRules: DEFAULT_FILTER_OPTIONS.showCustomRules,
@@ -293,7 +347,12 @@ export const RulesTableContextProvider = ({ children }: RulesTableContextProvide
       enabled: undefined,
       ruleExecutionStatus: DEFAULT_FILTER_OPTIONS.ruleExecutionStatus,
       gapFillStatuses: undefined,
-    });
+      conditions: undefined,
+      // The selected rule set is where the user is, not a filter. Keep it.
+      ruleSetId: current.ruleSetId,
+      groupBy: current.groupBy,
+      searchMode: current.searchMode,
+    }));
     setSortingOptions({
       field: DEFAULT_SORTING_OPTIONS.field,
       order: DEFAULT_SORTING_OPTIONS.order,
@@ -302,8 +361,16 @@ export const RulesTableContextProvider = ({ children }: RulesTableContextProvide
     setPerPage(DEFAULT_RULES_PER_PAGE);
 
     replaceUrlParams({ [URL_PARAM_KEY.rulesTable]: null });
-    sessionStorage.remove(RULES_TABLE_STATE_STORAGE_KEY);
-  }, [setFilterOptions, setSortingOptions, setPage, setPerPage, replaceUrlParams, sessionStorage]);
+    sessionStorage.remove(storageKey);
+  }, [
+    setFilterOptions,
+    setSortingOptions,
+    setPage,
+    setPerPage,
+    replaceUrlParams,
+    sessionStorage,
+    storageKey,
+  ]);
 
   useEffect(() => {
     // pause table auto refresh when any of rule selected
@@ -322,13 +389,25 @@ export const RulesTableContextProvider = ({ children }: RulesTableContextProvide
 
   // Fetch rules
   const {
-    data: { rules, total, warnings } = { rules: [], total: 0, warnings: [] },
+    data: {
+      rules,
+      total,
+      warnings,
+      searchMode,
+      searchFallbackReason,
+      searchHighlights = NO_HIGHLIGHTS,
+    } = {
+      rules: [],
+      total: 0,
+      warnings: [],
+    },
     refetch,
     dataUpdatedAt,
     isFetched,
     isFetching,
     isLoading,
     isRefetching,
+    isPreviousData,
   } = useFindRules(findRulesQueryArgs, {
     // We don't need refreshes on windows focus and reconnects if auto-refresh if off
     refetchOnWindowFocus: isRefreshOn && !isActionInProgress,
@@ -431,6 +510,7 @@ export const RulesTableContextProvider = ({ children }: RulesTableContextProvide
         isFetching,
         isLoading,
         isRefetching,
+        isPreviousData,
         isRefreshOn,
         lastUpdated: dataUpdatedAt,
         loadingRuleIds: loadingRules.ids,
@@ -443,6 +523,9 @@ export const RulesTableContextProvider = ({ children }: RulesTableContextProvide
           total,
         }),
         warnings,
+        searchMode,
+        searchFallbackReason,
+        searchHighlights,
       },
       actions,
     };
@@ -463,6 +546,7 @@ export const RulesTableContextProvider = ({ children }: RulesTableContextProvide
     isFetching,
     isLoading,
     isRefetching,
+    isPreviousData,
     isRefreshOn,
     dataUpdatedAt,
     loadingRules.ids,
@@ -471,6 +555,9 @@ export const RulesTableContextProvider = ({ children }: RulesTableContextProvide
     sortingOptions,
     actions,
     warnings,
+    searchMode,
+    searchFallbackReason,
+    searchHighlights,
   ]);
 
   return <RulesTableContext.Provider value={providerValue}>{children}</RulesTableContext.Provider>;
@@ -494,8 +581,10 @@ function isDefaultState(
   sorting: SortingOptions,
   pagination: PaginationOptions
 ): boolean {
+  const activeFilters = omit(filter, ['conditions', 'groupBy', 'searchMode']);
   return (
-    isEqual(filter, DEFAULT_FILTER_OPTIONS) &&
+    !hasRuleSetConditions(filter.conditions ?? {}) &&
+    isEqual(omitBy(activeFilters, isUndefined), omitBy(DEFAULT_FILTER_OPTIONS, isUndefined)) &&
     isEqual(sorting, DEFAULT_SORTING_OPTIONS) &&
     pagination.page === DEFAULT_PAGE &&
     pagination.perPage === DEFAULT_RULES_PER_PAGE

@@ -7,6 +7,8 @@
 
 import * as z from '@kbn/zod/v4';
 import { lazySchema } from '@kbn/zod/v4';
+import { GranularRulesFacetCategory } from '../../../../../../common/api/detection_engine/rule_management';
+import { RuleSetConditions } from '../../../../../../common/api/detection_engine/rule_sets';
 import { RuleExecutionStatus } from '../../../../../../common/api/detection_engine';
 import { PaginationOptions, SortingOptions } from '../../../../rule_management/logic';
 
@@ -19,10 +21,14 @@ export const RulesTableSavedFilter = lazySchema(() =>
   z
     .object({
       searchTerm: z.string(),
+      searchMode: z.enum(['ai', 'keyword']),
       source: z.nativeEnum(RuleSource),
       tags: z.array(z.string()),
       enabled: z.boolean(),
       ruleExecutionStatus: RuleExecutionStatus,
+      ruleSetId: z.string(),
+      groupBy: GranularRulesFacetCategory,
+      conditions: RuleSetConditions,
     })
     .partial()
 );

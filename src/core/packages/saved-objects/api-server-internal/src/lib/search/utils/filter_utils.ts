@@ -15,7 +15,8 @@ import type { IndexMapping } from '@kbn/core-saved-objects-base-server-internal'
 
 type KueryNode = any;
 
-const astFunctionType = ['is', 'range', 'nested'];
+// Functions whose first argument is a field name that must be validated (and rewritten) here.
+const astFunctionType = ['is', 'range', 'nested', 'terms'];
 
 export const validateConvertFilterToKueryNode = (
   allowedTypes: string[],
