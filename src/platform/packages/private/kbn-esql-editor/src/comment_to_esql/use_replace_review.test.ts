@@ -289,6 +289,30 @@ describe('useReplaceReview', () => {
     expect(params.onAfterAccept).not.toHaveBeenCalled();
   });
 
+  it('publishing is enabled again before the removal edit, so the edited query reaches the parent', async () => {
+    const previewPendingRef = { current: true };
+    const params = makeParams({ previewPendingRef });
+    const { editor, executeEdits, emitContentChange } = buildEditor();
+    params.editorRef.current = editor;
+    params.editorModel.current = buildModel(20);
+    let pendingDuringRemoval: boolean | undefined;
+    executeEdits.mockImplementation(() => {
+      pendingDuringRemoval = previewPendingRef.current;
+    });
+
+    const { result } = renderHook(() => useReplaceReview(params));
+
+    act(() => result.current.showReview(REVIEW_STATE));
+    act(() => emitContentChange());
+    await act(async () => {
+      await Promise.resolve();
+    });
+
+    // The editor publishes the removal edit through its change handler, which skips
+    // publishing while the flag is set.
+    expect(pendingDuringRemoval).toBe(false);
+  });
+
   it('an edit that already replaced the suggestion still publishes the new text', async () => {
     const params = makeParams();
     const { editor, executeEdits, emitContentChange, setTrackedRange } = buildEditor();

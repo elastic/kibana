@@ -35,6 +35,9 @@ const buildModel = (initial: string) => {
   let value = initial;
   return {
     getValue: () => value,
+    setValue: (next: string) => {
+      value = next;
+    },
     appendText: (text: string) => {
       value += text;
     },
@@ -75,10 +78,10 @@ const buildEditor = (model: ReturnType<typeof buildModel>) => {
 };
 
 describe('useCommentToEsql', () => {
-  const renderComment = () => {
+  const renderComment = (response: Promise<unknown> | undefined = undefined) => {
     const model = buildModel(COMMENT);
     const { editor, executeEdits } = buildEditor(model);
-    const post = jest.fn().mockResolvedValue({ content: GENERATED });
+    const post = jest.fn(() => response ?? Promise.resolve({ content: GENERATED }));
     const previewPendingRef = { current: false };
     const dismissReviewRef: { current: (() => void) | undefined } = { current: undefined };
     const dismissAllReviews = jest.fn(() => dismissReviewRef.current?.());
@@ -99,7 +102,15 @@ describe('useCommentToEsql', () => {
     );
     dismissReviewRef.current = () => rendered.result.current.dismissReview();
 
-    return { ...rendered, post, previewPendingRef, dismissAllReviews, executeEdits, onSubmit };
+    return {
+      ...rendered,
+      model,
+      post,
+      previewPendingRef,
+      dismissAllReviews,
+      executeEdits,
+      onSubmit,
+    };
   };
 
   it('inserts the generated code below the comment and shows the review', async () => {
@@ -142,5 +153,48 @@ describe('useCommentToEsql', () => {
     });
 
     expect(onSubmit).toHaveBeenCalledTimes(1);
+  });
+
+  it('leaves other flows’ previews alone when the comment was deleted during generation', async () => {
+    let respond: (value: unknown) => void = () => {};
+    const response = new Promise((resolve) => {
+      respond = resolve;
+    });
+    const { result, model, dismissAllReviews, executeEdits } = renderComment(response);
+
+    let generation: Promise<void> = Promise.resolve();
+    act(() => {
+      generation = result.current.generateFromComment();
+    });
+    model.setValue('FROM logs-*');
+    await act(async () => {
+      respond({ content: GENERATED });
+      await generation;
+    });
+
+    expect(dismissAllReviews).not.toHaveBeenCalled();
+    expect(executeEdits).not.toHaveBeenCalled();
+  });
+
+  it('does not insert a result that arrives after the generation was cancelled', async () => {
+    let respond: (value: unknown) => void = () => {};
+    const response = new Promise((resolve) => {
+      respond = resolve;
+    });
+    const { result, previewPendingRef, executeEdits } = renderComment(response);
+
+    let generation: Promise<void> = Promise.resolve();
+    act(() => {
+      generation = result.current.generateFromComment();
+    });
+    // The query was replaced, for example from History.
+    act(() => result.current.cancelGeneration());
+    await act(async () => {
+      respond({ content: GENERATED });
+      await generation;
+    });
+
+    expect(executeEdits).not.toHaveBeenCalled();
+    expect(previewPendingRef.current).toBe(false);
   });
 });

@@ -161,6 +161,7 @@ const ESQLEditorInternal = function ESQLEditor({
   const pendingReviewRef = useRef<PendingReviewActions>({
     accept: () => false,
     dismiss: () => {},
+    cancel: () => {},
   });
   useImperativeHandle(
     editorApiRef,
@@ -673,6 +674,7 @@ const ESQLEditorInternal = function ESQLEditor({
     isGeneratingRef,
     acceptReview: acceptCommentReview,
     dismissReview: dismissCommentReview,
+    cancelGeneration: cancelCommentGeneration,
   } = useCommentToEsql({
     editorRef,
     editorModel,
@@ -779,6 +781,7 @@ const ESQLEditorInternal = function ESQLEditor({
   // The first review that reports it was pending wins; accepting submits the query itself.
   pendingReviewRef.current = {
     accept: () => acceptCommentReview() || acceptFixReview() || acceptVisorReview(),
+    cancel: cancelCommentGeneration,
     dismiss: () => {
       dismissCommentReview();
       dismissFixReview();

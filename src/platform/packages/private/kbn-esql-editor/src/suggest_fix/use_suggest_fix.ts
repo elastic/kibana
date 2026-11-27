@@ -206,10 +206,13 @@ export const useSuggestFix = ({
           return;
         }
 
+        const fixedQuery = result.content.replace(/\n+$/, '');
+        // Leave other flows' previews alone when there is nothing to show.
+        if (fixedQuery === queryString.replace(/\n+$/, '')) return;
+
         // The request took a while, so another flow may have shown a preview meanwhile.
         dismissAllReviews();
 
-        const fixedQuery = result.content.replace(/\n+$/, '');
         const originalLines = model.getValue().split('\n');
         const fixedLines = fixedQuery.split('\n');
 

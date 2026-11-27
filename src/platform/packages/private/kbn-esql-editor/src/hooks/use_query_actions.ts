@@ -23,6 +23,8 @@ export interface PendingReviewActions {
   accept: () => boolean;
   /** Ends the pending review and removes its generated lines from the editor. */
   dismiss: () => void;
+  /** Cancels AI requests still running, whose result would belong to the previous query. */
+  cancel: () => void;
 }
 
 interface UseQueryActionsParams {
@@ -96,6 +98,7 @@ export const useQueryActions = ({
         telemetryService.trackQueryHistoryClicked(querySource === QuerySource.STARRED);
       }
       // The new query supersedes whatever a pending AI proposal was about to change.
+      pendingReviewRef.current.cancel();
       pendingReviewRef.current.dismiss();
       // Update the query state first, then submit on the next tick so React
       // processes the state change before the submit reads the editor value.

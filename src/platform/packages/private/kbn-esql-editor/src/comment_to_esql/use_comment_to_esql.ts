@@ -151,12 +151,16 @@ export const useCommentToEsql = ({
       }),
   });
 
-  const cleanup = useCallback(() => {
-    dismissReview();
+  const cancelGeneration = useCallback(() => {
     clearCommentAnchor();
     clearGeneratingDecoration();
     abortInFlight();
-  }, [dismissReview, clearCommentAnchor, clearGeneratingDecoration, abortInFlight]);
+  }, [clearCommentAnchor, clearGeneratingDecoration, abortInFlight]);
+
+  const cleanup = useCallback(() => {
+    dismissReview();
+    cancelGeneration();
+  }, [dismissReview, cancelGeneration]);
 
   const generateESQL = useCallback(
     async (
@@ -305,14 +309,22 @@ export const useCommentToEsql = ({
         result.content.trimEnd().split('\n').length
       );
 
-      // Another flow may have shown a preview while this request was running.
+      const liveModel = editorModel.current;
+      const getCommentLine = () => commentAnchorRef.current?.getRanges()[0]?.startLineNumber;
+
+      // Check there is still a comment to insert after before touching other flows' previews.
+      const commentLineBefore = getCommentLine();
+      if (!commentLineBefore || !isModelStillValid(liveModel, commentLineBefore)) {
+        clearCommentAnchor();
+        return;
+      }
+
+      // Another flow may have shown a preview while this request was running. Removing it can
+      // move the comment line, so read it again afterwards.
       dismissAllReviews();
 
-      const liveModel = editorModel.current;
-      const anchorRanges = commentAnchorRef.current?.getRanges() ?? [];
+      const currentCommentLine = getCommentLine();
       clearCommentAnchor();
-
-      const currentCommentLine = anchorRanges[0]?.startLineNumber;
       if (!currentCommentLine || !isModelStillValid(liveModel, currentCommentLine)) return;
 
       insertPendingPreview(previewPendingRef, () => {
@@ -380,8 +392,9 @@ export const useCommentToEsql = ({
     isReviewActiveRef: reviewStateRef,
     isGeneratingRef,
     acceptReview,
-    // Only the review: the editor calls this while a generation of this hook may be running,
-    // and that generation still needs its comment anchor.
+    // Separate on purpose: the editor dismisses reviews while a generation of this hook may be
+    // running, and that generation still needs its comment anchor.
     dismissReview,
+    cancelGeneration,
   };
 };

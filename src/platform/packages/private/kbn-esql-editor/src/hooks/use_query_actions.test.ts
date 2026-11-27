@@ -53,7 +53,9 @@ const defaultParams = () => ({
     .mockResolvedValue(undefined) as unknown as ESQLEditorProps['onTextLangQuerySubmit'],
   onQueryUpdate: jest.fn(),
   telemetryService: createMockTelemetryService(),
-  pendingReviewRef: { current: { accept: jest.fn(() => false), dismiss: jest.fn() } },
+  pendingReviewRef: {
+    current: { accept: jest.fn(() => false), dismiss: jest.fn(), cancel: jest.fn() },
+  },
 });
 
 describe('useQueryActions', () => {
@@ -181,6 +183,7 @@ describe('useQueryActions', () => {
       });
 
       expect(params.pendingReviewRef.current.dismiss).toHaveBeenCalledTimes(1);
+      expect(params.pendingReviewRef.current.cancel).toHaveBeenCalledTimes(1);
       expect(params.onQueryUpdate).toHaveBeenCalledWith('FROM new_index');
       expect(params.telemetryService.trackQueryHistoryClicked).toHaveBeenCalledWith(false);
 
