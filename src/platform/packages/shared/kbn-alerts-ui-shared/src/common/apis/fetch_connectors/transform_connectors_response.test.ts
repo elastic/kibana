@@ -15,6 +15,7 @@ describe('transformConnectorsResponse', () => {
       {
         id: 'test-connector-1',
         name: 'Test-1',
+        spec_version: '1.3',
         connector_type_id: 'test-1',
         is_preconfigured: false,
         is_deprecated: false,
@@ -51,6 +52,7 @@ describe('transformConnectorsResponse', () => {
         isPreconfigured: false,
         isSystemAction: false,
         name: 'Test-1',
+        specVersion: '1.3',
         referencedByCount: 0,
         secrets: {},
         isConnectorTypeDeprecated: false,

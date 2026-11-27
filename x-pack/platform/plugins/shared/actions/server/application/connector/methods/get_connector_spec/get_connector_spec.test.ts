@@ -132,6 +132,9 @@ describe('getConnectorSpecAsJsonSchema', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     authorization.ensureAuthorized.mockResolvedValue(undefined);
+    actionTypeRegistry.has.mockImplementation(
+      (id) => Object.hasOwn(specsById, id) || id === serverLogRow.id
+    );
     actionTypeRegistry.get.mockImplementation((id: string) =>
       getConnectorType({ id, spec: specsById[id] })
     );
@@ -208,6 +211,29 @@ describe('getConnectorSpecAsJsonSchema', () => {
         expect(result.actions.map(({ name }) => name)).toEqual(Object.keys(spec.actions));
       }
     );
+
+    it.each(['2', '2.0'])('serves a versioned-only spec for selector %s', async (specVersion) => {
+      actionTypeRegistry.get.mockReturnValue(
+        getConnectorType({
+          id: catalogOnly.metadata.id,
+          specs: new Map([['2.0', secondSpec]]),
+        })
+      );
+      actionTypeRegistry.getSpec.mockReturnValue(undefined);
+
+      const result = await getConnectorSpecAsJsonSchema({
+        context: createContext(),
+        id: catalogOnly.metadata.id,
+        specVersion,
+        configurationUtilities: catalogConfigurationUtilities,
+      });
+
+      expect(result.metadata).toEqual({ ...secondSpec.metadata, specVersion: '2.0' });
+      expect(result.authTypeIds).toEqual(['basic']);
+      expect(result.schema).toHaveProperty(['properties', 'config', 'properties', 'region'], {
+        type: 'string',
+      });
+    });
 
     it.each(['', 'latest', '1.3.0', '01', '3', '1.2'])(
       'rejects invalid or unavailable version %j without falling back',
@@ -461,15 +487,22 @@ describe('getConnectorSpecAsJsonSchema', () => {
     expect(result).toHaveProperty('isTestable', false);
   });
 
-  it('rejects with 404 when the connector type has no spec', async () => {
-    await expect(
-      getConnectorSpecAsJsonSchema({
-        context: createContext(),
-        id: '__no_such_spec_connector__',
-        configurationUtilities,
-      })
-    ).rejects.toMatchObject({ output: { statusCode: 404 } });
-  });
+  it.each([false, true])(
+    'rejects with 404 for an unknown connector type with catalog enabled set to %s',
+    async (isCatalogEnabled) => {
+      await expect(
+        getConnectorSpecAsJsonSchema({
+          context: createContext(),
+          id: '__no_such_spec_connector__',
+          configurationUtilities: {
+            ...configurationUtilities,
+            isCatalogEnabled: () => isCatalogEnabled,
+          },
+        })
+      ).rejects.toMatchObject({ output: { statusCode: 404 } });
+      expect(actionTypeRegistry.get).not.toHaveBeenCalled();
+    }
+  );
 
   it('resolves a spec registered at runtime that is not in the bundled map', async () => {
     const result = await getConnectorSpecAsJsonSchema({

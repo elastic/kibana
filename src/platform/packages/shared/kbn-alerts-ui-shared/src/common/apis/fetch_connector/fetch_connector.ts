@@ -35,6 +35,7 @@ export const transformConnectorResponse = (
     is_connector_type_deprecated: isConnectorTypeDeprecated,
     auth_mode: authMode,
     is_inbound_events_enabled: isInboundEventsEnabled,
+    spec_version: specVersion,
     ...res
   } = result;
   return {
@@ -47,6 +48,7 @@ export const transformConnectorResponse = (
     isConnectorTypeDeprecated,
     ...(authMode !== undefined ? { authMode } : {}),
     ...(isInboundEventsEnabled !== undefined ? { isInboundEventsEnabled } : {}),
+    ...(specVersion !== undefined ? { specVersion } : {}),
     ...res,
   };
 };

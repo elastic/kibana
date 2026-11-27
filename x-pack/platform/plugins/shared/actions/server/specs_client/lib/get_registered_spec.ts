@@ -17,9 +17,10 @@ export interface RegisteredSpec {
 
 export const getRegisteredSpec = (
   registry: Pick<ActionTypeRegistryContract, 'getSpec' | 'list'>,
-  id: string
+  id: string,
+  selectedSpec?: ConnectorSpec
 ): RegisteredSpec => {
-  const spec = registry.getSpec(id);
+  const spec = selectedSpec ?? registry.getSpec(id);
   if (!spec) {
     throw Boom.notFound(`Spec for connector type "${id}" not found.`);
   }

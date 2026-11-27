@@ -196,6 +196,9 @@ export const EditConnectorFlyoutContent: React.FC<EditConnectorFlyoutContentProp
     connectorContext?.services
   );
 
+  const isCatalogEnabled =
+    connectorContext?.services.isCatalogEnabled ?? services.actions?.isCatalogEnabled;
+
   const isMounted = useRef(false);
   const canSave = hasSaveActionsCapability(capabilities);
   const { isLoading: isUpdatingConnector, updateConnector } = useUpdateConnector();
@@ -252,6 +255,8 @@ export const EditConnectorFlyoutContent: React.FC<EditConnectorFlyoutContentProp
   const [revealedInboundConnector, setRevealedInboundConnector] = useState<ActionConnector | null>(
     null
   );
+  const savedConnector = formConnector ?? connector;
+  const specVersion = isCatalogEnabled ? savedConnector.specVersion : undefined;
   const { preSubmitValidator, submit, isValid: isFormValid, isSubmitting } = formState;
   const hasErrors = isFormValid === false;
   const isSaving = isUpdatingConnector || isSubmitting || isExecutingConnector || isRotating;
@@ -267,6 +272,7 @@ export const EditConnectorFlyoutContent: React.FC<EditConnectorFlyoutContentProp
     http,
     docLinks,
     uiSettings,
+    specVersion,
   });
 
   const isSpecConnector = !actionTypeRegistry.has(connector.actionTypeId);
@@ -420,6 +426,7 @@ export const EditConnectorFlyoutContent: React.FC<EditConnectorFlyoutContentProp
         name: name ?? '',
         config: config ?? {},
         secrets: secrets ?? {},
+        ...(specVersion !== undefined ? { specVersion } : {}),
         ...isInboundEventsEnabledPayload(
           connector.actionTypeId,
           isInboundEventsEnabled,
@@ -492,6 +499,7 @@ export const EditConnectorFlyoutContent: React.FC<EditConnectorFlyoutContentProp
     preSubmitValidator,
     connector,
     isClusterInboundEventsEnabled,
+    specVersion,
     updateConnector,
     onFormModifiedChange,
     revealedInboundConnector,
@@ -644,8 +652,6 @@ export const EditConnectorFlyoutContent: React.FC<EditConnectorFlyoutContentProp
   const renderConnectorRulesList = useCallback(() => {
     return <ConnectorRulesList connector={connector} />;
   }, [connector]);
-
-  const savedConnector = formConnector ?? connector;
 
   // This specific logic can be removed once inference connectors are no longer experimental. Tracked here https://github.com/elastic/kibana/issues/244985
   const isExperimental: boolean | undefined = useMemo(() => {

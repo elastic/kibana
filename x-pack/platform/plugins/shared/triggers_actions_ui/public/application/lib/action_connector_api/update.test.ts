@@ -52,6 +52,28 @@ describe('updateActionConnector', () => {
     `);
   });
 
+  test('maps spec_version on the update request and response', async () => {
+    http.put.mockResolvedValueOnce({
+      id: '123',
+      name: 'My test',
+      connector_type_id: 'test',
+      config: {},
+      spec_version: '1.3',
+    });
+
+    const result = await updateActionConnector({
+      http,
+      id: '123',
+      connector: { name: 'My test', config: {}, secrets: {}, specVersion: '1.3' },
+    });
+
+    expect(http.put).toHaveBeenCalledWith('/api/actions/connector/123', {
+      body: JSON.stringify({ name: 'My test', config: {}, secrets: {}, spec_version: '1.3' }),
+    });
+    expect(result.specVersion).toBe('1.3');
+    expect(result).not.toHaveProperty('spec_version');
+  });
+
   test('should map auth_mode from the API response to authMode', async () => {
     const id = '123';
     const apiResponse = {
