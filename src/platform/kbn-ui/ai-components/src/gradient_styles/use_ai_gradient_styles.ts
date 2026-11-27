@@ -155,7 +155,7 @@ const plainLabelCss = (euiTheme: UseEuiTheme['euiTheme'], color: string) => css`
   -webkit-background-clip: initial !important;
   color: ${color} !important;
   -webkit-text-fill-color: currentColor !important;
-  
+
   @media (forced-colors: active) {
     color: CanvasText !important;
     -webkit-text-fill-color: CanvasText !important;
