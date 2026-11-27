@@ -25,19 +25,41 @@ import {
   isProvisioningCallbackTokenValid,
   mintProvisioningCallbackToken,
 } from './provisioning_callback_token';
+import { verifyCallerIdentity } from './provisioning_callback_providers/aws/caller_identity';
+import { awsProvisioningCallbackProvider } from './provisioning_callback_providers/aws';
+import { reportIacProvisionerCallbackReceived } from './telemetry/iac_provisioner_telemetry';
 
 jest.mock('./app_context');
 jest.mock('./audit_logging');
+// Only the STS round trip is mocked; the patterns the AWS report schema uses stay real.
+jest.mock('./provisioning_callback_providers/aws/caller_identity', () => ({
+  ...jest.requireActual('./provisioning_callback_providers/aws/caller_identity'),
+  verifyCallerIdentity: jest.fn(),
+}));
+jest.mock('./telemetry/iac_provisioner_telemetry');
 jest.mock('uuid', () => ({ v4: () => 'cb-1' }));
 
 const mockedAudit = jest.mocked(auditLoggingService);
+const mockedVerify = jest.mocked(verifyCallerIdentity);
+const mockedReportReceived = jest.mocked(reportIacProvisionerCallbackReceived);
 
 const ROLE_ARN = 'arn:aws:iam::123456789012:role/ElasticWorkloadIdentity-abc';
 const STACK_ARN = 'arn:aws:cloudformation:us-east-1:123456789012:stack/elastic/uuid-1';
+/** The values the stack reports, as the record stores them. */
 const PAYLOAD = {
   role_arn: ROLE_ARN,
   stack_arn: STACK_ARN,
 };
+/** The proof of the sending account, as the Lambda attaches it. Judged by the mocked verifier. */
+const PROOF = {
+  region: 'us-east-1',
+  headers: { Authorization: 'AWS4-HMAC-SHA256 ...', 'x-elastic-callback-id': 'cb-1' },
+  body: 'Action=GetCallerIdentity&Version=2011-06-15',
+};
+/** The report as received: the values plus the proof. */
+const REPORT = { ...PAYLOAD, origin_proof: PROOF };
+const CALLER_ARN =
+  'arn:aws:sts::123456789012:assumed-role/elastic-ElasticCallbackFunctionRole-1A2B3C/elastic-ElasticCallbackFunction-A1B2C3';
 
 const NOW = new Date('2026-10-13T10:00:00.000Z');
 const FUTURE = '2026-10-13T12:00:00.000Z';
@@ -101,6 +123,7 @@ describe('provisioningCallbackService', () => {
     soClient.find.mockResolvedValue(EMPTY_FIND);
     logger = loggerMock.create();
     jest.mocked(appContextService.getLogger).mockReturnValue(logger);
+    mockedVerify.mockResolvedValue({ verified: true, account: '123456789012', arn: CALLER_ARN });
     jest.mocked(appContextService.getInternalUserSOClientForSpaceId).mockReturnValue(soClient);
     jest.spyOn(cloudConnectorService, 'create').mockResolvedValue({
       id: 'cc-1',
@@ -472,6 +495,47 @@ describe('provisioningCallbackService', () => {
       });
     };
 
+    it("is invalid when the report is not shaped for the record's provider, before any proof is checked", async () => {
+      mockRecord(pendingAttrs());
+      const result = await provisioningCallbackService.receive(soClient, 'cb-1', {
+        token: TOKEN,
+        payload: { principal_id: 'not-an-aws-report', origin_proof: PROOF } as any,
+      });
+      expect(result).toEqual({ outcome: 'invalid', message: expect.stringMatching(/role_arn/) });
+      expect(mockedVerify).not.toHaveBeenCalled();
+      expect(soClient.update).not.toHaveBeenCalled();
+    });
+
+    it("judges the report with the record's provider module", async () => {
+      const validateReport = jest.spyOn(awsProvisioningCallbackProvider, 'validateReport');
+      const verifyOrigin = jest.spyOn(awsProvisioningCallbackProvider, 'verifyOrigin');
+      mockRecord(pendingAttrs());
+      await provisioningCallbackService.receive(soClient, 'cb-1', {
+        token: TOKEN,
+        payload: REPORT,
+      });
+      expect(validateReport).toHaveBeenCalledWith(PAYLOAD);
+      expect(verifyOrigin).toHaveBeenCalledWith(
+        PROOF,
+        { callbackId: 'cb-1', report: PAYLOAD },
+        { verifierUrl: undefined }
+      );
+    });
+
+    it('is invalid for a record whose provider has no receiver, before any proof is checked', async () => {
+      mockRecord(pendingAttrs({ provider: 'azure' }));
+      const result = await provisioningCallbackService.receive(soClient, 'cb-1', {
+        token: TOKEN,
+        payload: REPORT,
+      });
+      expect(result).toEqual({
+        outcome: 'invalid',
+        message: expect.stringContaining('azure'),
+      });
+      expect(mockedVerify).not.toHaveBeenCalled();
+      expect(soClient.update).not.toHaveBeenCalled();
+    });
+
     it('is not_found for an unknown record', async () => {
       soClient.get.mockRejectedValue(
         SavedObjectsErrorHelpers.createGenericNotFoundError(
@@ -481,7 +545,7 @@ describe('provisioningCallbackService', () => {
       );
       const result = await provisioningCallbackService.receive(soClient, 'nope', {
         token: TOKEN,
-        payload: PAYLOAD,
+        payload: REPORT,
       });
       expect(result).toEqual({ outcome: 'not_found' });
       expect(soClient.update).not.toHaveBeenCalled();
@@ -491,10 +555,12 @@ describe('provisioningCallbackService', () => {
       mockRecord(pendingAttrs());
       const result = await provisioningCallbackService.receive(soClient, 'cb-1', {
         token: OTHER_TOKEN,
-        payload: PAYLOAD,
+        payload: REPORT,
       });
       expect(result).toEqual({ outcome: 'not_found' });
       expect(soClient.update).not.toHaveBeenCalled();
+      // A caller without the token is not worth an STS round trip.
+      expect(mockedVerify).not.toHaveBeenCalled();
       expect(mockedAudit.writeCustomAuditLog).toHaveBeenCalledTimes(1);
       expect(mockedAudit.writeCustomAuditLog).toHaveBeenCalledWith({
         message: 'Provisioning callback report rejected: unknown record or token',
@@ -516,7 +582,7 @@ describe('provisioningCallbackService', () => {
       mockRecord(pendingAttrs());
       const result = await provisioningCallbackService.receive(soClient, 'cb-1', {
         token: undefined,
-        payload: PAYLOAD,
+        payload: REPORT,
       });
       expect(result).toEqual({ outcome: 'not_found' });
       expect(soClient.update).not.toHaveBeenCalled();
@@ -527,7 +593,7 @@ describe('provisioningCallbackService', () => {
       mockRecord(pendingAttrs({ expires_at: '2026-10-13T13:00:00.000Z' }));
       const result = await provisioningCallbackService.receive(soClient, 'cb-1', {
         token: TOKEN,
-        payload: PAYLOAD,
+        payload: REPORT,
       });
       expect(result).toEqual({ outcome: 'not_found' });
       expect(soClient.update).not.toHaveBeenCalled();
@@ -539,7 +605,7 @@ describe('provisioningCallbackService', () => {
       mockRecord({ ...expired, token_hash: tokenHash });
       const result = await provisioningCallbackService.receive(soClient, 'cb-1', {
         token,
-        payload: PAYLOAD,
+        payload: REPORT,
       });
       expect(result).toEqual({ outcome: 'gone' });
       expect(soClient.update).not.toHaveBeenCalled();
@@ -549,7 +615,7 @@ describe('provisioningCallbackService', () => {
       mockRecord(pendingAttrs({ status: 'cancelled' }));
       const result = await provisioningCallbackService.receive(soClient, 'cb-1', {
         token: TOKEN,
-        payload: PAYLOAD,
+        payload: REPORT,
       });
       expect(result).toEqual({ outcome: 'gone' });
       expect(soClient.update).not.toHaveBeenCalled();
@@ -567,17 +633,271 @@ describe('provisioningCallbackService', () => {
       });
     });
 
+    it('is gone for a cancelled or expired record of a launch whose blueprint sends a proof, before the proof is asked for', async () => {
+      const launched = {
+        iac_blueprint_id: 'aws/workload_identity_federation',
+        iac_blueprint_version: '1.5.0',
+      };
+      mockRecord(pendingAttrs({ status: 'cancelled', ...launched }));
+      expect(
+        await provisioningCallbackService.receive(soClient, 'cb-1', {
+          token: TOKEN,
+          payload: PAYLOAD,
+        })
+      ).toEqual({ outcome: 'gone' });
+
+      const expired = pendingAttrs({ expires_at: PAST, ...launched });
+      const { token, tokenHash } = mintFor(expired);
+      mockRecord({ ...expired, token_hash: tokenHash });
+      expect(
+        await provisioningCallbackService.receive(soClient, 'cb-1', { token, payload: PAYLOAD })
+      ).toEqual({ outcome: 'gone' });
+
+      // Nothing can come of either record, so neither report was accepted or refused.
+      expect(mockedReportReceived).not.toHaveBeenCalled();
+      expect(soClient.update).not.toHaveBeenCalled();
+    });
+
+    it('is gone when the record expires while its proof is being verified, without a claim', async () => {
+      mockRecord(pendingAttrs());
+      mockedVerify.mockImplementation(async () => {
+        jest.setSystemTime(new Date(FUTURE));
+        return { verified: true, account: '123456789012', arn: CALLER_ARN };
+      });
+
+      const result = await provisioningCallbackService.receive(soClient, 'cb-1', {
+        token: TOKEN,
+        payload: REPORT,
+      });
+
+      expect(result).toEqual({ outcome: 'gone' });
+      expect(soClient.update).not.toHaveBeenCalled();
+      expect(cloudConnectorService.create).not.toHaveBeenCalled();
+      expect(mockedReportReceived).not.toHaveBeenCalled();
+    });
+
     it('is invalid when the role ARN and the stack ARN are in different accounts', async () => {
       mockRecord(pendingAttrs());
       const result = await provisioningCallbackService.receive(soClient, 'cb-1', {
         token: TOKEN,
-        payload: { ...PAYLOAD, role_arn: 'arn:aws:iam::999999999999:role/other' },
+        payload: { ...REPORT, role_arn: 'arn:aws:iam::999999999999:role/other' },
       });
       expect(result).toEqual({
         outcome: 'invalid',
         message: 'role_arn and stack_arn must be in the same AWS account',
       });
       expect(soClient.update).not.toHaveBeenCalled();
+      expect(mockedVerify).not.toHaveBeenCalled();
+    });
+
+    it("ignores a verifier URL configured for another provider than the record's", async () => {
+      mockRecord(pendingAttrs());
+      jest.mocked(appContextService.getConfig).mockReturnValue({
+        developer: { provisioningCallbackVerifierUrls: { azure: 'http://localhost:8092/' } },
+      } as any);
+
+      await provisioningCallbackService.receive(soClient, 'cb-1', {
+        token: TOKEN,
+        payload: REPORT,
+      });
+
+      expect(mockedVerify).toHaveBeenCalledWith(expect.anything(), expect.anything(), {
+        stsUrl: undefined,
+      });
+    });
+
+    it('has the proof verified against the record id and the values, at the configured STS', async () => {
+      mockRecord(pendingAttrs());
+      jest.mocked(appContextService.getConfig).mockReturnValue({
+        developer: { provisioningCallbackVerifierUrls: { aws: 'http://localhost:8091/' } },
+      } as any);
+
+      await provisioningCallbackService.receive(soClient, 'cb-1', {
+        token: TOKEN,
+        payload: REPORT,
+      });
+
+      expect(mockedVerify).toHaveBeenCalledWith(
+        PROOF,
+        { callbackId: 'cb-1', report: PAYLOAD },
+        { stsUrl: 'http://localhost:8091/' }
+      );
+      expect(logger.info).toHaveBeenCalledWith(
+        `Provisioning callback report [id=cb-1] caller identity verified [account=123456789012] [principal=${CALLER_ARN}]`
+      );
+      expect(mockedReportReceived).toHaveBeenCalledWith({
+        provider: 'aws',
+        originProof: 'verified',
+      });
+    });
+
+    it('counts a report once, when it is first applied, not when it is replayed or turned away', async () => {
+      // A replay of a received record is not another accepted report.
+      mockRecord(pendingAttrs({ status: 'received', received_at: PAST, ...PAYLOAD }));
+      await provisioningCallbackService.receive(soClient, 'cb-1', {
+        token: TOKEN,
+        payload: PAYLOAD,
+      });
+      expect(mockedReportReceived).not.toHaveBeenCalled();
+
+      // A report to a cancelled record is counted as nothing either: it was not accepted.
+      mockRecord(pendingAttrs({ status: 'cancelled' }));
+      await provisioningCallbackService.receive(soClient, 'cb-1', {
+        token: TOKEN,
+        payload: PAYLOAD,
+      });
+      expect(mockedReportReceived).not.toHaveBeenCalled();
+    });
+
+    it('refuses a report without a proof from a launch whose blueprint sends one, before any write', async () => {
+      mockRecord(
+        pendingAttrs({
+          iac_blueprint_id: 'aws/workload_identity_federation',
+          iac_blueprint_version: '1.5.0',
+        })
+      );
+
+      const result = await provisioningCallbackService.receive(soClient, 'cb-1', {
+        token: TOKEN,
+        payload: PAYLOAD,
+      });
+
+      expect(result).toEqual({
+        outcome: 'invalid',
+        message:
+          'origin_proof is required: the deployment was launched from aws/workload_identity_federation 1.5.0, which sends one',
+      });
+      expect(mockedVerify).not.toHaveBeenCalled();
+      expect(soClient.update).not.toHaveBeenCalled();
+      expect(cloudConnectorService.create).not.toHaveBeenCalled();
+      // A refused report, not a legacy one: the legacy count stays honest.
+      expect(mockedReportReceived).toHaveBeenCalledWith({
+        provider: 'aws',
+        originProof: 'rejected',
+      });
+      expect(mockedAudit.writeCustomAuditLog).toHaveBeenCalledWith(
+        expect.objectContaining({
+          message:
+            'Provisioning callback report rejected: origin_proof is required: the deployment was launched from aws/workload_identity_federation 1.5.0, which sends one',
+          event: expect.objectContaining({ type: ['denied'], outcome: 'failure' }),
+        })
+      );
+    });
+
+    it('accepts a report without a proof, as a stack launched before its Lambda sent one, and counts it', async () => {
+      mockRecord(
+        pendingAttrs({
+          iac_blueprint_id: 'aws/workload_identity_federation',
+          iac_blueprint_version: '1.4.0',
+        })
+      );
+
+      const result = await provisioningCallbackService.receive(soClient, 'cb-1', {
+        token: TOKEN,
+        payload: PAYLOAD,
+      });
+
+      expect(result).toMatchObject({ outcome: 'received' });
+      expect(mockedVerify).not.toHaveBeenCalled();
+      expect(cloudConnectorService.create).toHaveBeenCalled();
+      // Until every launched stack sends a proof, its absence is accepted as every report was
+      // before proofs existed, and counted so the proof can be required once the count is zero.
+      expect(logger.warn).toHaveBeenCalledWith(
+        'Provisioning callback report [id=cb-1] carries no origin proof; accepted as a report of a deployment launched before proofs were sent'
+      );
+      expect(mockedReportReceived).toHaveBeenCalledWith({
+        provider: 'aws',
+        originProof: 'missing',
+      });
+    });
+
+    it('counts a report when it is first accepted, so one whose connector the poll makes later is not missed', async () => {
+      mockRecord(pendingAttrs());
+      jest
+        .mocked(cloudConnectorService.create)
+        .mockRejectedValueOnce(new CloudConnectorCreateError('boom'));
+
+      await expect(
+        provisioningCallbackService.receive(soClient, 'cb-1', { token: TOKEN, payload: PAYLOAD })
+      ).rejects.toThrow('boom');
+      // The report is on the record, to be applied by a retry or by the browser's poll.
+      expect(mockedReportReceived).toHaveBeenCalledTimes(1);
+      expect(mockedReportReceived).toHaveBeenCalledWith({
+        provider: 'aws',
+        originProof: 'missing',
+      });
+
+      // The retry of that report, against the record handed back pending with its values, applies
+      // it without counting it again.
+      mockRecord(pendingAttrs(PAYLOAD));
+      expect(
+        await provisioningCallbackService.receive(soClient, 'cb-1', {
+          token: TOKEN,
+          payload: PAYLOAD,
+        })
+      ).toMatchObject({ outcome: 'received' });
+      expect(mockedReportReceived).toHaveBeenCalledTimes(1);
+    });
+
+    it('is unverified, writes nothing and audit-logs when the proof does not verify', async () => {
+      mockRecord(pendingAttrs());
+      mockedVerify.mockResolvedValue({ verified: false, reason: 'account_mismatch' });
+
+      const result = await provisioningCallbackService.receive(soClient, 'cb-1', {
+        token: TOKEN,
+        payload: REPORT,
+      });
+
+      expect(result).toEqual({ outcome: 'unverified', reason: 'account_mismatch' });
+      expect(mockedReportReceived).toHaveBeenCalledWith({
+        provider: 'aws',
+        originProof: 'rejected',
+      });
+      // The record stays pending for a report that does verify.
+      expect(soClient.update).not.toHaveBeenCalled();
+      expect(cloudConnectorService.create).not.toHaveBeenCalled();
+      expect(logger.warn).toHaveBeenCalledWith(
+        'Provisioning callback report [id=cb-1] caller identity not verified [reason=account_mismatch]'
+      );
+      expect(mockedAudit.writeCustomAuditLog).toHaveBeenCalledWith({
+        message:
+          'Provisioning callback report rejected: caller identity not verified (account_mismatch)',
+        event: {
+          action: 'provisioning_callback_report',
+          category: ['web'],
+          type: ['denied'],
+          outcome: 'failure',
+        },
+        kibana: { saved_object: { type: PROVISIONING_CALLBACK_SAVED_OBJECT_TYPE, id: 'cb-1' } },
+        labels: { role_arn: ROLE_ARN, stack_arn: STACK_ARN },
+      });
+      // The proof is never written anywhere.
+      expect(JSON.stringify(mockedAudit.writeCustomAuditLog.mock.calls)).not.toContain(
+        'AWS4-HMAC-SHA256'
+      );
+    });
+
+    it('carries the detail of a rejection to the caller result, for the log line', async () => {
+      mockRecord(pendingAttrs());
+      mockedVerify.mockResolvedValue({
+        verified: false,
+        reason: 'sts_unreachable',
+        detail: 'TimeoutError',
+      });
+
+      const result = await provisioningCallbackService.receive(soClient, 'cb-1', {
+        token: TOKEN,
+        payload: REPORT,
+      });
+
+      expect(result).toEqual({
+        outcome: 'unverified',
+        reason: 'sts_unreachable',
+        detail: 'TimeoutError',
+      });
+      expect(logger.warn).toHaveBeenCalledWith(
+        'Provisioning callback report [id=cb-1] caller identity not verified [reason=sts_unreachable] [detail=TimeoutError]'
+      );
     });
 
     it('claims the record, creates the connector under its id and audit-logs', async () => {
@@ -585,7 +905,7 @@ describe('provisioningCallbackService', () => {
 
       const result = await provisioningCallbackService.receive(soClient, 'cb-1', {
         token: TOKEN,
-        payload: PAYLOAD,
+        payload: REPORT,
       });
 
       // The claim is guarded by the version read, so two reports cannot both take it.
@@ -680,7 +1000,7 @@ describe('provisioningCallbackService', () => {
 
       await provisioningCallbackService.receive(soClient, 'cb-1', {
         token: TOKEN,
-        payload: PAYLOAD,
+        payload: REPORT,
       });
 
       expect(cloudConnectorService.create).toHaveBeenCalledWith(
@@ -717,7 +1037,7 @@ describe('provisioningCallbackService', () => {
 
       const result = await provisioningCallbackService.receive(soClient, 'cb-1', {
         token: TOKEN,
-        payload: PAYLOAD,
+        payload: REPORT,
       });
 
       expect(cloudConnectorService.create).toHaveBeenNthCalledWith(
@@ -746,7 +1066,7 @@ describe('provisioningCallbackService', () => {
 
       const result = await provisioningCallbackService.receive(soClient, 'cb-1', {
         token: TOKEN,
-        payload: PAYLOAD,
+        payload: REPORT,
       });
 
       expect(result).toMatchObject({
@@ -763,7 +1083,7 @@ describe('provisioningCallbackService', () => {
 
       const result = await provisioningCallbackService.receive(soClient, 'cb-1', {
         token: TOKEN,
-        payload: PAYLOAD,
+        payload: REPORT,
       });
 
       expect(cloudConnectorService.create).not.toHaveBeenCalled();
@@ -799,7 +1119,7 @@ describe('provisioningCallbackService', () => {
 
       const result = await provisioningCallbackService.receive(soClient, 'cb-1', {
         token: TOKEN,
-        payload: PAYLOAD,
+        payload: REPORT,
       });
 
       expect(result).toMatchObject({ outcome: 'receiving', item: { status: 'receiving' } });
@@ -820,7 +1140,7 @@ describe('provisioningCallbackService', () => {
 
       const result = await provisioningCallbackService.receive(soClient, 'cb-1', {
         token: TOKEN,
-        payload: PAYLOAD,
+        payload: REPORT,
       });
 
       expect(result).toMatchObject({ outcome: 'receiving', item: { status: 'receiving' } });
@@ -841,7 +1161,7 @@ describe('provisioningCallbackService', () => {
 
       const result = await provisioningCallbackService.receive(soClient, 'cb-1', {
         token: TOKEN,
-        payload: PAYLOAD,
+        payload: REPORT,
       });
 
       expect(result).toMatchObject({ outcome: 'receiving', item: { status: 'receiving' } });
@@ -872,7 +1192,7 @@ describe('provisioningCallbackService', () => {
 
       const result = await provisioningCallbackService.receive(soClient, 'cb-1', {
         token: TOKEN,
-        payload: PAYLOAD,
+        payload: REPORT,
       });
 
       expect(result).toMatchObject({
@@ -901,7 +1221,7 @@ describe('provisioningCallbackService', () => {
 
       const result = await provisioningCallbackService.receive(soClient, 'cb-1', {
         token: TOKEN,
-        payload: PAYLOAD,
+        payload: REPORT,
       });
 
       expect(soClient.update).toHaveBeenCalledTimes(3);
@@ -948,7 +1268,7 @@ describe('provisioningCallbackService', () => {
 
       const result = await provisioningCallbackService.receive(soClient, 'cb-1', {
         token: TOKEN,
-        payload: PAYLOAD,
+        payload: REPORT,
       });
 
       expect(result).toMatchObject({
@@ -966,7 +1286,7 @@ describe('provisioningCallbackService', () => {
       await expect(
         provisioningCallbackService.receive(soClient, 'cb-1', {
           token: TOKEN,
-          payload: PAYLOAD,
+          payload: REPORT,
         })
       ).rejects.toThrow('boom');
       // Back to pending, so a retry of the report or a cancel from the browser can proceed. The
@@ -1008,7 +1328,7 @@ describe('provisioningCallbackService', () => {
       await expect(
         provisioningCallbackService.receive(soClient, 'cb-1', {
           token: TOKEN,
-          payload: PAYLOAD,
+          payload: REPORT,
         })
       ).rejects.toThrow('boom');
       expect(jest.mocked(appContextService.getLogger)().warn).not.toHaveBeenCalled();
@@ -1024,7 +1344,7 @@ describe('provisioningCallbackService', () => {
       await expect(
         provisioningCallbackService.receive(soClient, 'cb-1', {
           token: TOKEN,
-          payload: PAYLOAD,
+          payload: REPORT,
         })
       ).rejects.toThrow('boom');
     });
@@ -1033,7 +1353,7 @@ describe('provisioningCallbackService', () => {
       mockRecord(CLAIMED);
       const result = await provisioningCallbackService.receive(soClient, 'cb-1', {
         token: TOKEN,
-        payload: { ...PAYLOAD, role_arn: 'arn:aws:iam::123456789012:role/another' },
+        payload: { ...REPORT, role_arn: 'arn:aws:iam::123456789012:role/another' },
       });
       expect(result).toMatchObject({ outcome: 'conflict' });
       expect(soClient.update).not.toHaveBeenCalled();
@@ -1043,7 +1363,7 @@ describe('provisioningCallbackService', () => {
       mockRecord(pendingAttrs({ status: 'received', received_at: PAST, ...PAYLOAD }));
       const result = await provisioningCallbackService.receive(soClient, 'cb-1', {
         token: TOKEN,
-        payload: PAYLOAD,
+        payload: REPORT,
       });
       expect(result).toMatchObject({ outcome: 'received' });
       expect(soClient.update).not.toHaveBeenCalled();
@@ -1053,7 +1373,7 @@ describe('provisioningCallbackService', () => {
       mockRecord(pendingAttrs({ status: 'received', received_at: PAST, ...PAYLOAD }));
       const result = await provisioningCallbackService.receive(soClient, 'cb-1', {
         token: TOKEN,
-        payload: { ...PAYLOAD, role_arn: 'arn:aws:iam::123456789012:role/another' },
+        payload: { ...REPORT, role_arn: 'arn:aws:iam::123456789012:role/another' },
       });
       expect(result).toMatchObject({ outcome: 'conflict' });
       expect(soClient.update).not.toHaveBeenCalled();

@@ -26,6 +26,8 @@ const AccountTypeSchema = schema.oneOf([
  * report creates.
  */
 export const ProvisioningCallbackSchemaV1 = schema.object({
+  // Model version 1 has shipped and is immutable. The first non-AWS provider adds model
+  // version 2 with the wider literal; the route and service are already provider-neutral.
   provider: schema.literal('aws'),
   status: ProvisioningCallbackStatusSchema,
   token_hash: schema.string({ minLength: 64, maxLength: 64 }),

@@ -8,12 +8,14 @@
 import type { AnalyticsServiceSetup } from '@kbn/core/server';
 
 import type {
+  IacCallbackReceivedFields,
   IacKeyVerificationCompletedFields,
   IacProvisionerRenderCompletedFields,
   IacProvisionerRenderRequestedFields,
   IacUpgradeCheckCompletedFields,
 } from '../../../common/telemetry/iac_provisioner_events';
 import {
+  IAC_PROVISIONER_CALLBACK_RECEIVED_EVENT,
   IAC_PROVISIONER_KEY_VERIFICATION_COMPLETED_EVENT,
   IAC_PROVISIONER_RENDER_COMPLETED_EVENT,
   IAC_PROVISIONER_RENDER_REQUESTED_EVENT,
@@ -50,4 +52,8 @@ export const reportIacProvisionerUpgradeCheckCompleted = (
   fields: IacUpgradeCheckCompletedFields
 ): void => {
   analytics?.reportEvent(IAC_PROVISIONER_UPGRADE_CHECK_COMPLETED_EVENT.eventType, fields);
+};
+
+export const reportIacProvisionerCallbackReceived = (fields: IacCallbackReceivedFields): void => {
+  analytics?.reportEvent(IAC_PROVISIONER_CALLBACK_RECEIVED_EVENT.eventType, fields);
 };

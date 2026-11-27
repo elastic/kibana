@@ -17,7 +17,7 @@ import type {
   CloudConnectorCallback,
   CloudConnectorCallbackIdentity,
 } from '../../../../common/types/models/provisioning_callback';
-import type { AccountType } from '../../../../common/types/models/cloud_connector';
+import type { AccountType, CloudProvider } from '../../../../common/types/models/cloud_connector';
 import { IAC_PROVISIONER_API_ROUTES } from '../../../../common/constants';
 
 export const PROVISIONING_CALLBACK_POLL_INTERVAL_MS = 3_000;
@@ -124,8 +124,11 @@ const toIdentityBody = (
 
 export const useProvisioningCallback = ({
   enabled,
+  provider,
 }: {
   enabled: boolean;
+  /** The cloud the deployment is launched in; the record is created for it. */
+  provider: CloudProvider;
 }): UseProvisioningCallbackResult => {
   // The server decides whether the stack could call back: `server.publicBaseUrl` must be set and
   // be https. It is also the URL the stack is given.
@@ -303,7 +306,7 @@ export const useProvisioningCallback = ({
       }
 
       const { data, error } = await sendCreateProvisioningCallback({
-        provider: 'aws',
+        provider,
         ...toIdentityBody(identity),
       });
       if (error?.statusCode === 412) {
@@ -333,7 +336,7 @@ export const useProvisioningCallback = ({
         ElasticCallbackToken: data.token,
       };
     },
-    [enabled, kibanaUrl, recheckAvailability, stopPolling, startPolling]
+    [enabled, provider, kibanaUrl, recheckAvailability, stopPolling, startPolling]
   );
 
   useEffect(() => {

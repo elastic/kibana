@@ -13,12 +13,14 @@ import {
   CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
   PROVISIONING_CALLBACK_SAVED_OBJECT_TYPE,
 } from '../../common/constants';
+import type { IacCallbackOriginProof } from '../../common/telemetry/iac_provisioner_events';
+import type { CloudProvider } from '../../common/types/models/cloud_connector';
 import type {
   CloudConnectorCallback,
   CloudConnectorCallbackIdentity,
   CloudConnectorCallbackReceivedValues,
+  CloudConnectorCallbackReport,
 } from '../../common/types/models/provisioning_callback';
-import type { CloudConnectorIacState } from '../../common/types/models/cloud_connector';
 import type {
   CloudConnectorSOAttributes,
   ProvisioningCallbackSOAttributes,
@@ -32,6 +34,9 @@ import {
   isProvisioningCallbackTokenValid,
   mintProvisioningCallbackToken,
 } from './provisioning_callback_token';
+import { getProvisioningCallbackProvider } from './provisioning_callback_providers/registry';
+import { reportIacProvisionerCallbackReceived } from './telemetry/iac_provisioner_telemetry';
+import type { RegisteredProvisioningCallbackProvider } from './provisioning_callback_providers/registry';
 
 /** How long the stack has to call back. Also the lifetime of the token bound to the record. */
 export const PROVISIONING_CALLBACK_TTL_MS = 2 * 60 * 60 * 1000;
@@ -44,7 +49,7 @@ export const PROVISIONING_CALLBACK_CLAIM_STALE_MS = 60 * 1000;
 const EXPIRED_SWEEP_SIZE = 100;
 
 export interface CreateProvisioningCallbackOptions {
-  provider: 'aws';
+  provider: CloudProvider;
   createdBy?: string;
   spaceId?: string;
   /** Name, account type and template details for the cloud connector created when the stack reports back. */
@@ -61,20 +66,13 @@ const IDENTITY_FIELDS: Array<keyof CloudConnectorCallbackIdentity> = [
 
 const CONNECTOR_NAME_MAX_LENGTH = 255;
 
-/** Last path segment of an IAM role ARN, used when the browser has not named the identity yet. */
-const roleNameFromArn = (roleArn: string): string => {
-  const resource = roleArn.split(':role/')[1] ?? '';
-  const name = resource.split('/').pop()?.trim() ?? '';
-  return name.slice(0, CONNECTOR_NAME_MAX_LENGTH) || 'aws-workload-identity';
-};
-
 const isDuplicateName = (error: unknown): boolean =>
   error instanceof CloudConnectorCreateError && error.message.includes('already exists');
 
 export interface ProvisioningCallbackReceiveInput {
   /** The token the caller presented; undefined when it sent none. */
   token: string | undefined;
-  payload: CloudConnectorCallbackReceivedValues;
+  payload: CloudConnectorCallbackReport;
 }
 
 export type ProvisioningCallbackReceiveResult =
@@ -89,11 +87,20 @@ export type ProvisioningCallbackReceiveResult =
   /** Past its expiry, or cancelled by the browser. */
   | { outcome: 'gone' }
   /** Fields are individually well-formed but disagree with each other. */
-  | { outcome: 'invalid'; message: string };
+  | { outcome: 'invalid'; message: string }
+  /**
+   * The proof of the sending AWS account did not verify: STS did not vouch for the account of the
+   * reported role and stack, or the proof was made for another record or other values. The
+   * record is left as it was, for a report that does verify.
+   */
+  | { outcome: 'unverified'; reason: string; detail?: string };
 
-/** Audit log entry for each outcome of a report. The `invalid` message comes from the check that failed. */
+/**
+ * Audit log entry for each outcome of a report. The `invalid` and `unverified` messages come from
+ * the check that failed.
+ */
 const REPORT_AUDIT: Record<
-  Exclude<ProvisioningCallbackReceiveResult['outcome'], 'invalid'>,
+  Exclude<ProvisioningCallbackReceiveResult['outcome'], 'invalid' | 'unverified'>,
   { message: string; type: string; outcome: string }
 > = {
   received: {
@@ -128,7 +135,34 @@ const RECEIVED_FIELDS: Array<keyof CloudConnectorCallbackReceivedValues> = [
   'stack_arn',
 ];
 
-const accountIdOfArn = (arn: string): string | undefined => arn.split(':')[4];
+/** The identity fields of a record, as the browser stored them at launch. */
+const identityOf = (
+  attributes: ProvisioningCallbackSOAttributes
+): CloudConnectorCallbackIdentity => {
+  const identity: CloudConnectorCallbackIdentity = {};
+  for (const field of IDENTITY_FIELDS) {
+    if (attributes[field] !== undefined) {
+      (identity as Record<string, unknown>)[field] = attributes[field];
+    }
+  }
+  return identity;
+};
+
+/**
+ * The module for the record's provider. Every record was created for a registered provider, so
+ * a miss means a record written by a Kibana with a receiver this one lacks.
+ */
+const receiverOf = (
+  attributes: ProvisioningCallbackSOAttributes
+): RegisteredProvisioningCallbackProvider => {
+  const receiver = getProvisioningCallbackProvider(attributes.provider);
+  if (!receiver) {
+    throw new Error(
+      `provider ${attributes.provider} has no provisioning callback receiver in this Kibana`
+    );
+  }
+  return receiver;
+};
 
 const toItem = (
   id: string,
@@ -295,7 +329,10 @@ class ProvisioningCallbackService {
     soClient: SavedObjectsClientContract,
     so: SavedObject<ProvisioningCallbackSOAttributes>
   ): Promise<CloudConnectorCallback> {
-    const payload = { role_arn: so.attributes.role_arn!, stack_arn: so.attributes.stack_arn! };
+    const payload = receiverOf(so.attributes).storedReport(so.attributes);
+    if (!payload) {
+      return toItem(so.id, so.attributes);
+    }
     const taken = await this.claim(soClient, so, payload);
     if (!taken) {
       return toItem(so.id, so.attributes);
@@ -346,6 +383,12 @@ class ProvisioningCallbackService {
     } else if (result.outcome === 'invalid') {
       this.auditReport(id, input.payload, {
         message: `Provisioning callback report rejected: ${result.message}`,
+        type: 'denied',
+        outcome: 'failure',
+      });
+    } else if (result.outcome === 'unverified') {
+      this.auditReport(id, input.payload, {
+        message: `Provisioning callback report rejected: caller identity not verified (${result.reason})`,
         type: 'denied',
         outcome: 'failure',
       });
@@ -402,32 +445,130 @@ class ProvisioningCallbackService {
       return { outcome: 'not_found' };
     }
 
-    if (accountIdOfArn(payload.role_arn) !== accountIdOfArn(payload.stack_arn)) {
+    // The record's provider decides how its report is judged. A record of a provider this
+    // Kibana has no receiver for (written by a newer Kibana, then rolled back) is refused
+    // before any of its report is looked at.
+    const receiver = getProvisioningCallbackProvider(so.attributes.provider);
+    if (!receiver) {
       return {
         outcome: 'invalid',
-        message: 'role_arn and stack_arn must be in the same AWS account',
+        message: `provider ${so.attributes.provider} has no provisioning callback receiver in this Kibana`,
       };
+    }
+
+    // The route accepted a report shaped for some registered provider; it has to be this one's.
+    try {
+      receiver.reportSchema.validate(payload);
+    } catch (error) {
+      return { outcome: 'invalid', message: error.message };
+    }
+    const { origin_proof: proof, ...report } = payload;
+    const invalid = receiver.validateReport(report);
+    if (invalid) {
+      return { outcome: 'invalid', message: invalid };
+    }
+
+    // A record nothing can come of any more is turned away before its proof is asked for or
+    // costs a round trip.
+    if (
+      so.attributes.status === 'cancelled' ||
+      (so.attributes.status === 'pending' &&
+        new Date(so.attributes.expires_at).getTime() <= Date.now())
+    ) {
+      return { outcome: 'gone' };
+    }
+
+    // The token proves the caller was given the launch; the proof says which account the report
+    // was sent from. Checked before anything is written, so a report from elsewhere leaves the
+    // record waiting for the real one.
+    // How the report proved its origin, counted when the record first takes the report, so a
+    // replay or a report the record's state turns away does not count as an accepted report.
+    let originProof: IacCallbackOriginProof;
+    if (proof === undefined) {
+      if (receiver.requiresOriginProof(identityOf(so.attributes))) {
+        // The launch this record was created for sends a proof; a report without one is not from
+        // it. Refused as a report, so the token alone creates nothing.
+        reportIacProvisionerCallbackReceived({
+          provider: so.attributes.provider,
+          originProof: 'rejected',
+        });
+        return {
+          outcome: 'invalid',
+          message: `origin_proof is required: the deployment was launched from ${so.attributes.iac_blueprint_id} ${so.attributes.iac_blueprint_version}, which sends one`,
+        };
+      }
+      // A deployment launched from a template that predates the proof. Accepted as every report
+      // was before proofs existed, and counted, so the proof can be required once no such
+      // deployment reports any more.
+      this.logger.warn(
+        `Provisioning callback report [id=${so.id}] carries no origin proof; accepted as a report of a deployment launched before proofs were sent`
+      );
+      originProof = 'missing';
+    } else {
+      const verification = await receiver.verifyOrigin(
+        proof,
+        { callbackId: so.id, report },
+        {
+          verifierUrl:
+            appContextService.getConfig()?.developer?.provisioningCallbackVerifierUrls?.[
+              so.attributes.provider
+            ],
+        }
+      );
+      if (!verification.verified) {
+        reportIacProvisionerCallbackReceived({
+          provider: so.attributes.provider,
+          originProof: 'rejected',
+        });
+        this.logger.warn(
+          `Provisioning callback report [id=${so.id}] caller identity not verified [reason=${
+            verification.reason
+          }]${verification.detail ? ` [detail=${verification.detail}]` : ''}`
+        );
+        return {
+          outcome: 'unverified',
+          reason: verification.reason,
+          ...(verification.detail ? { detail: verification.detail } : {}),
+        };
+      }
+      this.logger.info(
+        `Provisioning callback report [id=${so.id}] caller identity verified [account=${verification.account}] [principal=${verification.principal}]`
+      );
+      originProof = 'verified';
     }
 
     let { attributes, version } = so;
     let updatedAt = so.updated_at;
     let claimedHere = false;
     if (attributes.status === 'pending') {
+      // Checked again here, right before the claim: the record may have expired while the proof
+      // was being verified, and the deadline passing changes nothing the claim's version guard
+      // would notice.
       if (new Date(attributes.expires_at).getTime() <= Date.now()) {
         return { outcome: 'gone' };
       }
-      const claimed = await this.claim(soClient, so, payload);
+      // A pending record holding values had its report accepted already: the connector could
+      // not be made and the claim was released, so this is a retry or the browser poll's turn.
+      const firstReport = !receiver.storedReport(attributes);
+      const claimed = await this.claim(soClient, so, report);
       if (!claimed) {
         return { outcome: 'not_found' };
       }
       ({ attributes, version, updatedAt, claimedHere } = claimed);
+      if (claimedHere && firstReport) {
+        // Counted here, at the first durable acceptance, rather than once the connector exists:
+        // when the connector is only made later by the browser poll, this is the only request
+        // that saw how the report proved its origin.
+        reportIacProvisionerCallbackReceived({ provider: so.attributes.provider, originProof });
+      }
     }
 
     if (attributes.status === 'cancelled') {
+      // Cancelled while the record was being read, or by whoever won the claim.
       return { outcome: 'gone' };
     }
 
-    if (!isSamePayload(attributes, payload)) {
+    if (!isSamePayload(attributes, report)) {
       // A different report is a conflict, whether the first one has finished or not.
       return { outcome: 'conflict', item: toItem(so.id, attributes) };
     }
@@ -444,7 +585,7 @@ class ProvisioningCallbackService {
       if (!isClaimStale(updatedAt)) {
         return { outcome: 'receiving', item: toItem(so.id, attributes) };
       }
-      const taken = await this.claim(soClient, { ...so, attributes, version }, payload);
+      const taken = await this.claim(soClient, { ...so, attributes, version }, report);
       if (!taken) {
         return { outcome: 'not_found' };
       }
@@ -454,7 +595,7 @@ class ProvisioningCallbackService {
       ({ attributes, version } = taken);
     }
 
-    const item = await this.apply(soClient, so.id, attributes, payload, version);
+    const item = await this.apply(soClient, so.id, attributes, report, version);
     return { outcome: 'received', item };
   }
 
@@ -663,8 +804,7 @@ class ProvisioningCallbackService {
   > {
     const update: Partial<ProvisioningCallbackSOAttributes> = {
       status: 'receiving',
-      role_arn: payload.role_arn,
-      stack_arn: payload.stack_arn,
+      ...receiverOf(so.attributes).storedFields(payload),
     };
     try {
       const updated = await soClient.update<ProvisioningCallbackSOAttributes>(
@@ -751,42 +891,21 @@ class ProvisioningCallbackService {
     attributes: ProvisioningCallbackSOAttributes,
     payload: CloudConnectorCallbackReceivedValues
   ): Promise<CreatedCloudConnector> {
-    const preferred =
-      attributes.connector_name?.trim().slice(0, CONNECTOR_NAME_MAX_LENGTH) ||
-      roleNameFromArn(payload.role_arn);
-
-    const iac: CloudConnectorIacState = { iac_deployment_id: payload.stack_arn };
-    if (attributes.iac_key !== undefined) {
-      iac.iac_key = attributes.iac_key;
-    }
-    if (attributes.iac_blueprint_id !== undefined) {
-      iac.iac_blueprint_id = attributes.iac_blueprint_id;
-    }
-    if (attributes.iac_blueprint_version !== undefined) {
-      iac.iac_blueprint_version = attributes.iac_blueprint_version;
-    }
+    const connector = receiverOf(attributes).toConnector(payload, identityOf(attributes));
 
     const create = (name: string) =>
-      cloudConnectorService.create(
-        spaceClient,
-        {
-          name,
-          cloudProvider: 'aws',
-          ...(attributes.account_type ? { accountType: attributes.account_type } : {}),
-          vars: { role_arn: { type: 'text', value: payload.role_arn } },
-          ...iac,
-        },
-        { id: callbackId }
-      );
+      cloudConnectorService.create(spaceClient, { ...connector, name }, { id: callbackId });
 
     try {
-      return await create(preferred);
+      return await create(connector.name);
     } catch (error) {
       if (!isDuplicateName(error)) {
         throw error;
       }
       const suffix = ` ${callbackId.slice(0, 8)}`;
-      return create(`${preferred.slice(0, CONNECTOR_NAME_MAX_LENGTH - suffix.length)}${suffix}`);
+      return create(
+        `${connector.name.slice(0, CONNECTOR_NAME_MAX_LENGTH - suffix.length)}${suffix}`
+      );
     }
   }
 
