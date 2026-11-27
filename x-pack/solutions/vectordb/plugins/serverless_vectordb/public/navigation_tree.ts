@@ -59,10 +59,8 @@ const PROJECT_PERFORMANCE_TITLE = i18n.translate(
 
 export function createNavigationTree({
   core,
-  showAiAssistant = true,
 }: ApplicationStart & {
   core: CoreStart;
-  showAiAssistant?: boolean;
 }): NavigationTreeDefinition {
   return {
     body: [
@@ -234,14 +232,6 @@ export function createNavigationTree({
               { link: 'management:genAiSettings', breadcrumbStatus: 'hidden' },
               { link: 'management:aiAnonymizationSettings', breadcrumbStatus: 'hidden' },
               { link: 'management:evals', breadcrumbStatus: 'hidden' },
-              ...(showAiAssistant
-                ? [
-                    {
-                      link: 'management:observabilityAiAssistantManagement' as const,
-                      breadcrumbStatus: 'hidden' as const,
-                    },
-                  ]
-                : []),
             ],
           },
           {

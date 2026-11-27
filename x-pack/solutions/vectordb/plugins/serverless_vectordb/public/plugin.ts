@@ -5,13 +5,11 @@
  * 2.0.
  */
 
-import { BehaviorSubject, combineLatest, map, of, type Subscription } from 'rxjs';
+import { BehaviorSubject, of, type Subscription } from 'rxjs';
 import type { AppDeepLink, AppUpdater, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { hasSeenOnboarding } from '@kbn/vectordb-onboarding';
-import { AIChatExperience } from '@kbn/ai-assistant-common';
-import { AI_CHAT_EXPERIENCE_TYPE } from '@kbn/management-settings-ids';
 import {
   VECTORDB_APP_ID,
   GETTING_STARTED_DEEP_LINK_ID,
@@ -108,18 +106,7 @@ export class ServerlessVectordbPlugin
         this.updateApp();
       });
 
-    const chatExperience$ = core.settings.client.get$<AIChatExperience>(AI_CHAT_EXPERIENCE_TYPE);
-
-    const navigationTree$ = combineLatest([of(core.application), chatExperience$]).pipe(
-      map(([application, chatExperience]) => {
-        const showAiAssistant = chatExperience !== AIChatExperience.Agent;
-        return createNavigationTree({
-          ...application,
-          core,
-          showAiAssistant,
-        });
-      })
-    );
+    const navigationTree$ = of(createNavigationTree({ ...core.application, core }));
     navigation.initNavigation('vectordb', navigationTree$, 'serverlessVectordb');
     return {};
   }

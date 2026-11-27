@@ -35,8 +35,6 @@
     "@kbn/i18n",
     "@kbn/core-application-browser",
     "@kbn/deeplinks-management",
-    "@kbn/ai-assistant-common",
-    "@kbn/management-settings-ids",
     "@kbn/deeplinks-workflows",
     "@kbn/data-views-plugin",
     "@kbn/navigation-plugin",

@@ -129,34 +129,8 @@ describe('Navigation Tree', () => {
     );
   });
 
-  it('shows AI section with GenAI settings and AI Assistant when AI Assistant is enabled', () => {
+  it('shows AI section with GenAI settings and without the classic AI Assistant', () => {
     const { footer } = createNavigationTree(mockApplication);
-
-    const adminAndSettingsNode = footer?.find((item: any) => item.id === 'admin_and_settings');
-    const aiSection = adminAndSettingsNode?.children?.find(
-      (item: any) => item.id === 'settings_ai'
-    );
-
-    expect(aiSection).toBeDefined();
-    expect(aiSection?.children).toContainEqual(
-      expect.objectContaining({
-        link: 'management:genAiSettings',
-      })
-    );
-    expect(aiSection?.children).toContainEqual(
-      expect.objectContaining({
-        link: 'management:evals',
-      })
-    );
-    expect(aiSection?.children).toContainEqual(
-      expect.objectContaining({
-        link: 'management:observabilityAiAssistantManagement',
-      })
-    );
-  });
-
-  it('shows AI section with GenAI settings but hides AI Assistant when AI Assistant is disabled', () => {
-    const { footer } = createNavigationTree({ ...mockApplication, showAiAssistant: false });
 
     const adminAndSettingsNode = footer?.find((item: any) => item.id === 'admin_and_settings');
     const aiSection = adminAndSettingsNode?.children?.find(

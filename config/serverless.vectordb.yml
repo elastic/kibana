@@ -6,6 +6,11 @@ plugins.allowlistPluginGroups: ['platform', 'vectordb']
 xpack.osquery.enabled: false
 xpack.alerting_v2.enabled: false
 
+# The classic AI Assistant is disabled, Agent Builder is the only chat experience
+xpack.observabilityAIAssistant.enabled: false
+aiAssistantManagementSelection.preferredChatExperience: "agent"
+uiSettings.overrides.aiAssistant:preferredChatExperience: "agent"
+
 ## Fine-tune the vectordb solution feature privileges. Also, refer to `serverless.yml` for the project-agnostic overrides.
 xpack.features.overrides:
   ### Agent Builder feature is moved from Analytics category to the VectorDB one.

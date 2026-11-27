@@ -63406,8 +63406,6 @@
     "xpack.serverlessObservability.navigation.flameGraphsLinkLabel": "火焰图",
     "xpack.serverlessObservability.navigation.functionsLinkLabel": "函数",
     "xpack.serverlessObservability.navigation.stacktracesLinkLabel": "堆栈跟踪",
-    "xpack.serverlessSearch.aiAssistantManagementDescription": "管理知识库并控制助手行为，包括响应语言。",
-    "xpack.serverlessSearch.aiAssistantManagementTitle": "AI 助手",
     "xpack.serverlessSearch.app.home.title": "主页",
     "xpack.serverlessSearch.back": "返回",
     "xpack.serverlessSearch.comingSoon": "即将推出",
