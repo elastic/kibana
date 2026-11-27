@@ -42,6 +42,7 @@ export interface UnsecuredActionsClientOpts {
   kibanaIndices: string[];
   logger: Logger;
   connectorTypeRegistry: ActionTypeRegistry;
+  waitForCatalog: () => Promise<void>;
 }
 
 type UnsecuredExecuteOptions = Omit<ExecuteOptions, 'source'> & {
@@ -75,6 +76,8 @@ export class UnsecuredActionsClient {
       );
     }
 
+    await this.opts.waitForCatalog();
+
     if (!relatedSavedObjects) {
       this.opts.logger.warn(
         `Calling "execute" in UnsecuredActionsClient without any relatedSavedObjects data. Consider including this for traceability.`
@@ -103,6 +106,8 @@ export class UnsecuredActionsClient {
         `"${requesterId}" feature is not allow-listed for UnsecuredActionsClient access.`
       );
     }
+
+    await this.opts.waitForCatalog();
 
     // Inject source based on requesterId
     const actionsToEnqueue = actionsToExecute.map((action) => {

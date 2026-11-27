@@ -18,6 +18,7 @@ import {
   buildStatsByEntityClause,
   getRiskScoreIndex,
   OWN_RISK_SCORE_CONDITION,
+  SET_UNMAPPED_NULLIFY,
   toList,
 } from './esql';
 import type { EnrichedFields, SortPageContext } from './types';
@@ -79,6 +80,7 @@ const buildRiskScoreChangeSteps = (
 
 /** The scored entities in view with a change, by it; only these rows join their docs. */
 const buildRiskScoreChangeSortWithValueQuery = (args: QueryArgs, limit: number): string[] => [
+  SET_UNMAPPED_NULLIFY,
   ...buildRiskScoreChangeSteps(args, [`${RISK_SCORE_NORM_FIELD} IS NOT NULL`]),
   `| WHERE ${RISK_SCORE_CHANGE_FIELD} IS NOT NULL`,
   ...buildSortSuffix(RISK_SCORE_CHANGE_FIELD, args.sort.direction, limit),
@@ -89,6 +91,7 @@ const buildRiskScoreChangeSortWithValueQuery = (args: QueryArgs, limit: number):
 ];
 
 const buildRiskScoreChangeSortAllQuery = (args: QueryArgs): string[] => [
+  SET_UNMAPPED_NULLIFY,
   ...buildRiskScoreChangeSteps(args),
   ...buildJoinedPageSteps(args, RISK_SCORE_CHANGE_FIELD),
 ];

@@ -14,7 +14,9 @@
     "**/*.tsx"
   ],
   "exclude": [
-    "target/**/*"
+    "target/**/*",
+    "packaging/target/**/*",
+    "packaging/example/**/*"
   ],
   "kbn_references": [
     "@kbn/i18n",

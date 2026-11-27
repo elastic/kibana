@@ -595,6 +595,42 @@ describe('ThreatAttachmentInlineContent', () => {
     );
   });
 
+  it('files a placeholder email under Not hunted with an Example address tooltip, whatever its stored tier', async () => {
+    const http = {
+      fetch: jest.fn().mockResolvedValue({
+        reportId: 'r-placeholder-email',
+        content: { title: 'Placeholder Emails' },
+        extracted: {
+          iocs: [
+            { type: 'email', value: 'actor@malicious.org', tier: 'uncertain' },
+            { type: 'email', value: 'test@test.com', tier: 'uncertain' },
+            { type: 'email', value: 'address@host.name', tier: 'reference' },
+          ],
+        },
+      }),
+    } as unknown as HttpStart;
+    render(
+      <ThreatAttachmentInlineContent
+        {...renderProps(buildAttachment({ report_id: 'r-placeholder-email' }), http)}
+      />
+    );
+    await waitFor(() => {
+      expect(screen.getByText('actor@malicious.org')).toBeInTheDocument();
+    });
+    expect(screen.getByText('1 indicator')).toBeInTheDocument();
+    expect(screen.queryByText('test@test.com')).not.toBeInTheDocument();
+    expect(screen.getByTestId('alertzeroThreatAttachmentIocNotHuntedToggle')).toHaveTextContent(
+      'Show (2)'
+    );
+
+    fireEvent.click(screen.getByTestId('alertzeroThreatAttachmentIocNotHuntedToggle'));
+    fireEvent.mouseOver(screen.getByText('test@test.com'));
+    expect(await screen.findByText('Example address')).toBeInTheDocument();
+    fireEvent.mouseOut(screen.getByText('test@test.com'));
+    fireEvent.mouseOver(screen.getByText('address@host.name'));
+    expect(await screen.findByText('Example address')).toBeInTheDocument();
+  });
+
   it('still renders Indicators with 0 count when only not-hunted IOCs remain', async () => {
     const http = {
       fetch: jest.fn().mockResolvedValue({

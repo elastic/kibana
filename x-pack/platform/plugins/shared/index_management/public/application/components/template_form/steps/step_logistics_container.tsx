@@ -14,9 +14,10 @@ import { StepLogistics } from './step_logistics';
 interface Props {
   isLegacy?: boolean;
   isEditing?: boolean;
+  hasDataStreamOptions?: boolean;
 }
 
-export const StepLogisticsContainer = ({ isEditing, isLegacy }: Props) => {
+export const StepLogisticsContainer = ({ isEditing, isLegacy, hasDataStreamOptions }: Props) => {
   const { defaultValue, updateContent } = Forms.useContent<WizardContent, 'logistics'>('logistics');
 
   return (
@@ -25,6 +26,7 @@ export const StepLogisticsContainer = ({ isEditing, isLegacy }: Props) => {
       onChange={updateContent}
       isEditing={isEditing}
       isLegacy={isLegacy}
+      hasDataStreamOptions={hasDataStreamOptions}
     />
   );
 };

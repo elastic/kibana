@@ -38,25 +38,27 @@ export const updateConnectorRoute = (
         summary: `Update a connector`,
         tags: ['oas-tag:connectors'],
       },
-      validate: () => {
-        const includeInboundEventsField = actionsConfigUtils.isInboundEventsEnabled();
-        const includeSpecVersionField = actionsConfigUtils.isCatalogEnabled();
-        return {
-          request: {
-            body: getUpdateConnectorBodySchemaV1(includeInboundEventsField),
-            params: updateConnectorParamsSchemaV1,
+      validate: {
+        request: {
+          body: getUpdateConnectorBodySchemaV1(
+            actionsConfigUtils.isInboundEventsEnabled(),
+            actionsConfigUtils.isCatalogEnabled()
+          ),
+          params: updateConnectorParamsSchemaV1,
+        },
+        response: {
+          200: {
+            description: 'Indicates a successful call.',
+            body: () =>
+              getConnectorResponseSchemaV1(
+                actionsConfigUtils.isInboundEventsEnabled(),
+                actionsConfigUtils.isCatalogEnabled()
+              ),
           },
-          response: {
-            200: {
-              description: 'Indicates a successful call.',
-              body: () =>
-                getConnectorResponseSchemaV1(includeInboundEventsField, includeSpecVersionField),
-            },
-            403: {
-              description: 'Indicates that this call is forbidden.',
-            },
+          403: {
+            description: 'Indicates that this call is forbidden.',
           },
-        };
+        },
       },
     },
     router.handleLegacyErrors(
@@ -64,10 +66,12 @@ export const updateConnectorRoute = (
         try {
           const actionsClient = (await context.actions).getActionsClient();
           const { id }: UpdateConnectorParamsV1 = req.params;
+
           const {
             name,
             config,
             secrets,
+            spec_version: specVersion,
             is_inbound_events_enabled: isInboundEventsEnabled,
           }: UpdateConnectorBodyV1 = req.body;
 
@@ -77,6 +81,7 @@ export const updateConnectorRoute = (
                 id,
                 action: {
                   name,
+                  specVersion,
                   config,
                   secrets,
                   ...(isInboundEventsEnabled !== undefined ? { isInboundEventsEnabled } : {}),

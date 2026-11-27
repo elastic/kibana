@@ -66,6 +66,32 @@
               "$ref": "#/components/schemas/APIErrorResponse"
             }
           }
+        },
+        "headers": {
+          "X-RateLimit-Limit": {
+            "schema": {
+              "format": "int64",
+              "type": "integer"
+            }
+          },
+          "X-RateLimit-Period": {
+            "schema": {
+              "format": "int64",
+              "type": "integer"
+            }
+          },
+          "X-RateLimit-Remaining": {
+            "schema": {
+              "format": "int64",
+              "type": "integer"
+            }
+          },
+          "X-RateLimit-Reset": {
+            "schema": {
+              "format": "int64",
+              "type": "integer"
+            }
+          }
         }
       },
       "UnauthorizedResponse": {
@@ -1385,6 +1411,9 @@
           "impacts": {
             "$ref": "#/components/schemas/RelationshipToIncidentImpacts"
           },
+          "incident_type": {
+            "$ref": "#/components/schemas/RelationshipToIncidentType"
+          },
           "integrations": {
             "$ref": "#/components/schemas/RelationshipToIncidentIntegrationMetadatas"
           },
@@ -1458,6 +1487,13 @@
         "default": "incidents",
         "enum": [
           "incidents"
+        ],
+        "type": "string"
+      },
+      "IncidentTypeType": {
+        "default": "incident_types",
+        "enum": [
+          "incident_types"
         ],
         "type": "string"
       },
@@ -1673,7 +1709,7 @@
           "limit": {
             "default": 10,
             "format": "int32",
-            "maximum": 1000,
+            "maximum": 5000,
             "type": "integer"
           }
         },
@@ -2062,6 +2098,32 @@
         ],
         "type": "object"
       },
+      "RelationshipToIncidentType": {
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/RelationshipToIncidentTypeData"
+          }
+        },
+        "required": [
+          "data"
+        ],
+        "type": "object"
+      },
+      "RelationshipToIncidentTypeData": {
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "type": {
+            "$ref": "#/components/schemas/IncidentTypeType"
+          }
+        },
+        "required": [
+          "id",
+          "type"
+        ],
+        "type": "object"
+      },
       "RelationshipToIncidentUserDefinedFieldData": {
         "properties": {
           "id": {
@@ -2304,20 +2366,25 @@
           "authorizationCode": {
             "authorizationUrl": "/oauth2/v1/authorize",
             "scopes": {
+              "agent_builder_run": "Run agents created with Agent Builder.",
               "ai_gateway_config_read": "View AI Gateway configuration.",
               "ai_gateway_config_write": "Create, update, and delete AI Gateway configuration.",
               "ai_gateway_usage": "Use AI Gateway and view configuration applicable to the authenticated user.",
+              "ai_guard_evaluate": "Evaluate conversations for security threats with AI Guard.",
               "apm_api_catalog_read": "View API catalog and API definitions.",
               "apm_api_catalog_write": "Add, modify, and delete API catalog definitions.",
               "apm_read": "Read and query APM and Trace Analytics.",
               "apm_service_catalog_read": "View service catalog and service definitions.",
               "apm_service_catalog_write": "Add, modify, and delete service catalog definitions when those definitions are maintained by Datadog.",
               "appsec_vm_read": "View infrastructure, application code, and library vulnerability findings.",
+              "assistant_access": "Access Bits Chat.",
               "aws_configurations_manage": "Manage AWS integration account configurations and related integration settings.",
               "billing_edit": "Edit your organization's billing information.",
               "billing_read": "View your organization's billing information.",
+              "bits_dev_write": "Create and interact with Bits Code sessions.",
               "bits_investigations_read": "View Bits AI investigations.",
               "bits_investigations_write": "Create and manage Bits AI investigations.",
+              "bits_security_analyst_write": "Create and manage Bits AI Security Analyst investigations.",
               "cases_read": "View Cases.",
               "cases_shared_settings_write": "Update shared case management settings.",
               "cases_write": "Create and update cases.",
@@ -2336,6 +2403,8 @@
               "dashboards_public_share": "Generate public and authenticated links to share dashboards or embeddable graphs externally.",
               "dashboards_read": "View dashboards.",
               "dashboards_write": "Create and change dashboards.",
+              "data_observability_catalog_read": "Read Data Observability catalog resources and owners.",
+              "data_observability_catalog_write": "Create, update, and delete Data Observability catalog resources and manage owners.",
               "data_scanner_read": "View Data Scanner configurations.",
               "data_scanner_write": "Edit Data Scanner configurations.",
               "embeddable_graphs_share": "Generate public links to share embeddable graphs externally.",
@@ -2357,6 +2426,7 @@
               "incident_settings_write": "Configure Incident Settings.",
               "incident_write": "Create, view, and manage incidents in Datadog.",
               "integrations_read": "View configured integrations and their settings.",
+              "late_metrics_config_write": "Edit and save historical metrics configurations.",
               "logs_modify_indexes": "Modify log indexes, filters, exclusion filters, and configurations.",
               "logs_read_data": "Read log data.",
               "logs_read_index_data": "Read indexed log data.",
@@ -2376,6 +2446,8 @@
               "product_analytics_settings_read": "View Product Analytics Settings.",
               "product_analytics_settings_write": "Edit Product Analytics Settings.",
               "product_analytics_warehouse_model_write": "Create, edit, and delete Product Analytics Warehouse Models.",
+              "repo_info_read": "View data from Git repositories.",
+              "rum_apps_read": "View RUM Applications data.",
               "security_comments_read": "Read comments of vulnerabilities.",
               "security_monitoring_critical_assets_read": "Read Critical Assets.",
               "security_monitoring_critical_assets_write": "Write Critical Assets.",
@@ -2411,7 +2483,9 @@
               "user_access_read": "View users and their roles and settings.",
               "workflows_read": "View workflows.",
               "workflows_run": "Run workflows.",
-              "workflows_write": "Create, edit, and delete workflows."
+              "workflows_write": "Create, edit, and delete workflows.",
+              "workload_identity_federation_read": "View workload identity federation providers and mappings.",
+              "workload_identity_federation_write": "Create, update, and delete workload identity federation providers and mappings."
             },
             "tokenUrl": "/oauth2/v1/token"
           }

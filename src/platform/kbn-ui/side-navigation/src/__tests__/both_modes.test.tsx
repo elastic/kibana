@@ -33,6 +33,13 @@ const advancedSettingsItemId = basicMock.navItems.footerItems[2].sections?.[0].i
 const detectionRulesItemId = securityMock.navItems.primaryItems[2].id;
 const alertsItemId = securityMock.navItems.primaryItems[3].id;
 const mlItemId = securityMock.navItems.primaryItems[11].id;
+const itemsWithLateDeepLink: NavigationStructure = {
+  ...securityMock.navItems,
+  primaryItems: [
+    ...securityMock.navItems.primaryItems,
+    { id: 'late-deep-link', label: 'Late deep link', href: '/late-deep-link', iconType: 'empty' },
+  ],
+};
 
 // Observability mock reusable IDs
 const appsItemId = observabilityMock.navItems.primaryItems[6].id;
@@ -778,6 +785,56 @@ describe('Both modes', () => {
         const mlHeader = await within(morePopover).findByText('Machine learning');
 
         expect(mlHeader).toBeInTheDocument();
+      });
+
+      /**
+       * GIVEN the "More" popover was opened by a click
+       * WHEN the navigation publishes a new primary item set
+       * THEN the popover stays open with its items across the remeasure it triggers
+       */
+      it('should keep the popover open when the primary item set changes', async () => {
+        const { rerender } = render(<TestComponent items={securityMock.navItems} />);
+
+        const moreButton = await screen.findByTestId(moreMenuId);
+
+        await user.click(moreButton);
+
+        expect(screen.getByTestId(morePopoverId)).toBeInTheDocument();
+
+        act(() => {
+          rerender(<TestComponent items={itemsWithLateDeepLink} />);
+        });
+
+        expect(screen.getByTestId(moreMenuId)).toHaveAttribute('aria-expanded', 'true');
+        expect(
+          within(screen.getByTestId(morePopoverId)).getByTestId(secondaryItemId('late-deep-link'))
+        ).toBeInTheDocument();
+      });
+
+      /**
+       * GIVEN a nested panel of the "More" popover is open
+       * WHEN the navigation publishes a new primary item set
+       * THEN the nested panel and its focus survive the remeasure
+       */
+      it('should keep an open nested panel when the primary item set changes', async () => {
+        const { rerender } = render(<TestComponent items={securityMock.navItems} />);
+
+        await user.click(await screen.findByTestId(moreMenuId));
+        await user.click(
+          within(screen.getByTestId(morePopoverId)).getByTestId(secondaryItemId(mlItemId))
+        );
+
+        const focusedElement = document.activeElement;
+
+        act(() => {
+          rerender(<TestComponent items={itemsWithLateDeepLink} />);
+        });
+
+        expect(within(screen.getByTestId(morePopoverId)).getByRole('heading')).toHaveTextContent(
+          'Machine learning'
+        );
+        expect(focusedElement).not.toBe(document.body);
+        expect(document.activeElement).toBe(focusedElement);
       });
     });
   });

@@ -5,17 +5,20 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { SERVICE_ACCOUNT_ID_MAX_LENGTH } from '@kbn/core-security-common';
+import { lazySchema, z } from '@kbn/zod';
 
 import {
   SERVICE_ACCOUNT_DESCRIPTION_MAX_LENGTH,
-  SERVICE_ACCOUNT_MAX_STRING_FIELD_LENGTH,
   SERVICE_ACCOUNT_NAME_MAX_LENGTH,
   SERVICE_ACCOUNT_NAME_REGEX,
 } from './constants';
 import type { ServiceAccountRoleLimits } from './constants';
 
-export const serviceAccountIdSchema = z.string().max(SERVICE_ACCOUNT_MAX_STRING_FIELD_LENGTH);
+// The same bound Core holds a binding's account to, so an ID the API accepts can always be bound.
+export const serviceAccountIdSchema = lazySchema(() =>
+  z.string().max(SERVICE_ACCOUNT_ID_MAX_LENGTH)
+);
 
 /**
  * Validates the name a caller asks for. Beyond the create parameters it is also what a refused

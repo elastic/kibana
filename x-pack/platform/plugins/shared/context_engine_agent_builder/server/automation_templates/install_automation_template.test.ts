@@ -10,7 +10,7 @@ import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { AiIndexService } from '@kbn/context-engine-plugin/server/ai_indices/service';
 import { saveWorkflowToAiIndex } from '../agent_builder/tools/save_automation/handler';
 import { assertContextEngineWriteAccess } from '../agent_builder/assert_context_engine_write_access';
-import { AUTOMATION_TEMPLATE_TAGS } from '../agent_builder/tools/install_automation_template/render';
+import { AUTOMATION_TEMPLATE_TAGS } from '@kbn/context-engine-plugin/server/automation_templates/render';
 import { InvalidTemplateParamsError } from '../errors';
 import {
   installAutomationTemplate,

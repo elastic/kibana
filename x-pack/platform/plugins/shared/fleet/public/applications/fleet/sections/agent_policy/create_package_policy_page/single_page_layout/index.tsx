@@ -243,6 +243,9 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
     submitAttempted,
     createDatasetTemplates,
     setCreateDatasetTemplates,
+    acknowledgeAgentVersionIncompatibility,
+    setAcknowledgeAgentVersionIncompatibility,
+    serverAgentVersionBlock,
   } = useOnSubmit({
     agentCount,
     packageInfo,
@@ -417,8 +420,16 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
 
   const incompatibleAgentVersion = useIncompatibleAgentVersionStatus(
     packageInfo,
-    agentPolicyData?.items
+    agentPolicyData?.items,
+    serverAgentVersionBlock
   );
+  // The package policy can't be created on these agent policies without acknowledging that some
+  // agents would stop collecting the integration's data
+  const isAgentVersionAcknowledgementMissing =
+    incompatibleAgentVersion.status !== 'NONE' &&
+    incompatibleAgentVersion.requiresAcknowledgement &&
+    !isAgentlessSelected &&
+    !acknowledgeAgentVersionIncompatibility;
 
   useEffect(() => {
     if (
@@ -448,9 +459,18 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
 
   useEffect(() => {
     addIntegrationFlyoutProps?.updateHasErrors(
-      Boolean(packageInfo && (formState === 'INVALID' || hasAgentPolicyError))
+      Boolean(
+        packageInfo &&
+          (formState === 'INVALID' || hasAgentPolicyError || isAgentVersionAcknowledgementMissing)
+      )
     );
-  }, [packageInfo, formState, hasAgentPolicyError, addIntegrationFlyoutProps]);
+  }, [
+    packageInfo,
+    formState,
+    hasAgentPolicyError,
+    isAgentVersionAcknowledgementMissing,
+    addIntegrationFlyoutProps,
+  ]);
 
   const handleExtensionViewOnChange = useCallback<
     PackagePolicyEditExtensionComponentProps['onChange']
@@ -569,12 +589,11 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
   }
   const { getAgentlessStatusForPackage } = useAgentless();
   const { isAgentless, isDefaultDeploymentMode } = getAgentlessStatusForPackage(packageInfo);
-  const enableSimplifiedAgentlessUX = ExperimentalFeaturesService.get().enableSimplifiedAgentlessUX;
   const { enableIntegrationTileClickToAdd } = ExperimentalFeaturesService.get();
 
   const useCheckableCardsForSetupTechnologySelector = useMemo(() => {
-    return !replaceDefineStepView && enableSimplifiedAgentlessUX && isDefaultDeploymentMode;
-  }, [replaceDefineStepView, enableSimplifiedAgentlessUX, isDefaultDeploymentMode]);
+    return !replaceDefineStepView && isDefaultDeploymentMode;
+  }, [replaceDefineStepView, isDefaultDeploymentMode]);
 
   const replaceStepConfigurePackagePolicy =
     replaceDefineStepView && packageInfo?.name ? (
@@ -887,6 +906,16 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
         <IncompatibleAgentVersionCallout
           incompatibility={incompatibleAgentVersion.status}
           versionCondition={incompatibleAgentVersion.versionCondition}
+          blockedCount={incompatibleAgentVersion.blockedCount}
+          observedVersions={incompatibleAgentVersion.observedVersions}
+          minVersion={incompatibleAgentVersion.minVersion}
+          agentPolicyCount={incompatibleAgentVersion.agentPolicyCount}
+          acknowledged={acknowledgeAgentVersionIncompatibility}
+          onAcknowledgeChange={
+            incompatibleAgentVersion.requiresAcknowledgement
+              ? setAcknowledgeAgentVersionIncompatibility
+              : undefined
+          }
         />
       )}
 
@@ -1044,7 +1073,8 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
                           formState !== 'VALID' ||
                           hasAgentPolicyError ||
                           !validationResults ||
-                          isFleetExtensionLoaded === false
+                          isFleetExtensionLoaded === false ||
+                          isAgentVersionAcknowledgementMissing
                         }
                         iconType="save"
                         color="primary"

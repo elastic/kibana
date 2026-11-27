@@ -100,6 +100,21 @@ function VisitBadges({ visit, requests }: Pick<PageVisitEvents, 'visit' | 'reque
           </EuiBadge>
         </EuiFlexItem>
       )}
+      {visit.frustrationCount > 0 && (
+        <EuiFlexItem grow={false}>
+          <EuiBadge
+            color="danger"
+            iconType="faceSad"
+            data-test-subj="digitalExperienceVisitFrustration"
+          >
+            {i18n.translate('xpack.digitalExperience.sessionDetail.journey.frustrationLabel', {
+              defaultMessage:
+                '{count, plural, one {# frustration signal} other {# frustration signals}}',
+              values: { count: visit.frustrationCount },
+            })}
+          </EuiBadge>
+        </EuiFlexItem>
+      )}
       <EuiFlexItem grow={false}>
         <WebVitalBadges webVitals={visit.webVitals} />
       </EuiFlexItem>

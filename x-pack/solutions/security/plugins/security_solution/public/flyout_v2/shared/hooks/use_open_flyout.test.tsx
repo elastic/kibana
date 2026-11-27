@@ -48,7 +48,10 @@ const createOverlayRef = () => {
   const onClose = new Promise<void>((resolve) => {
     resolveClose = resolve;
   });
-  return { ref: { onClose, close: jest.fn() }, resolveClose: () => resolveClose() };
+  return {
+    ref: { onClose, close: jest.fn(), setTitle: jest.fn() },
+    resolveClose: () => resolveClose(),
+  };
 };
 
 describe('useOpenFlyout', () => {

@@ -13,7 +13,8 @@ import {
 } from '../../../../../../data/relay_apps/use_relay_app_bindings';
 import { actionLabels } from '../../actions/automation_actions_section';
 import type { SlackTriggerFormValues, TriggerFormValues } from '../../automation_form_values';
-import { findUnconnectedChannels, SlackChannelComboBox } from '../../slack_channel_combo_box';
+import { SlackChannelComboBox } from '../../slack_channel_combo_box';
+import { findUnconnectedChannels } from '../../../../utils/unconnected_slack_channels';
 import { ListPill } from '../pills/list_pill';
 import { PillPopover } from '../pills/pill_popover';
 import { Sentence, SentenceIcon } from '../pills/sentence';
@@ -33,12 +34,24 @@ const ChannelPill = ({
     channels.map((value) => formatChannelValue(value, connected.bindings)).join(', ') ||
     triggerLabels.selectChannels;
 
-  if (readOnly) return <EuiBadge>{label}</EuiBadge>;
+  const isInvalid = findUnconnectedChannels(channels, connected).length > 0;
+
+  if (readOnly) {
+    return (
+      <EuiBadge
+        color={isInvalid ? 'danger' : 'default'}
+        iconType={isInvalid ? 'warning' : undefined}
+        data-test-subj="automationSlackTriggerChannels"
+      >
+        {label}
+      </EuiBadge>
+    );
+  }
   return (
     <PillPopover
       ariaLabel={triggerLabels.selectChannels}
       label={label}
-      isInvalid={findUnconnectedChannels(channels, connected).length > 0}
+      isInvalid={isInvalid}
       testSubject="automationSlackTriggerChannels"
     >
       {() => (

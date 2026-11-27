@@ -80,7 +80,7 @@ Restore message groups
 :   Restore previously quarantined or trashed message groups back to user mailboxes. Same parameters as quarantine. Returns a `task_id`.
 
 Get task
-:   Retrieve the status of an asynchronous task (`pending`, `started`, `succeeded`, `failed`, or `retrying`). Quarantine, trash, and restore run asynchronously. Poll this action with the returned `task_id` to confirm the outcome.
+:   Retrieve the status of an asynchronous task (`started`, `succeeded`, or `failed`). Quarantine, trash, and restore run asynchronously. Poll this action with the returned `task_id` to confirm the outcome.
     - `taskId` (required): The task ID.
 
 ## Connector networking configuration [sublime-security-connector-networking-configuration]

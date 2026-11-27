@@ -6,6 +6,7 @@
  */
 
 import { expect } from '@kbn/scout-security/ui';
+import { PARALLEL_HOST_SEED_TIMEOUT_MS } from '../../common/get_file_spec_helpers';
 import { spaceTest, tags } from '../fixtures';
 import {
   seedResponseConsoleFromCase,
@@ -28,8 +29,9 @@ spaceTest.describe(
     let seeded: SeededResponseConsoleCase | undefined;
 
     spaceTest.beforeAll(async ({ esClient, kbnClient, scoutSpace, config, apiServices }) => {
-      // Endpoint host indexing installs Fleet and waits on metadata transforms.
-      spaceTest.setTimeout(600_000);
+      // Endpoint host indexing installs Fleet and waits on metadata transforms, after the other
+      // worker's metadata-transform lock.
+      spaceTest.setTimeout(PARALLEL_HOST_SEED_TIMEOUT_MS);
       // Serverless forces xpack.spaces.allowSolutionVisibility off, so the
       // solution property cannot be set. A security project is already that view.
       if (!config.serverless) {

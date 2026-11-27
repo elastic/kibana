@@ -15,11 +15,10 @@ import type {
 } from '@kbn/core/server';
 import { DEFAULT_APP_CATEGORIES, SavedObjectsClient } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
-import { LockAcquisitionError, LockManagerService } from '@kbn/lock-manager';
+import { LockManagerService } from '@kbn/lock-manager';
 import { AlertsLocatorDefinition, sloFeatureId } from '@kbn/observability-plugin/common';
 import { SLO_ALERTING_FEATURES } from '@kbn/rule-data-utils';
 import { mapValues } from 'lodash';
-import { LOCK_ID_RESOURCE_INSTALLER } from '../common/constants';
 import { registerDataProviders } from './agent_builder/register_data_provider';
 import { getSloClientWithRequest } from './client';
 import { registerSloUsageCollector } from './lib/collectors/register';
@@ -36,6 +35,7 @@ import type { SLORoutesDependencies } from './routes/utils/types';
 import {
   slo,
   sloComposite,
+  sloGlobalSettings,
   sloSettings,
   SO_SLO_COMPOSITE_TYPE,
   SO_SLO_SETTINGS_TYPE,
@@ -47,6 +47,7 @@ import {
   DefaultSLODefinitionRepository,
   DefaultSummaryTransformManager,
   DefaultTransformManager,
+  ResourceInstallState,
 } from './services';
 import { DefaultCompositeSLORepository } from './services/composites/composite_slo_repository';
 import { DefaultSLOSettingsRepository } from './services/slo_settings_repository';
@@ -56,10 +57,11 @@ import { BulkDeleteTask } from './services/tasks/bulk_delete/bulk_delete_task';
 import { CompositeSloSummaryTask } from './services/tasks/composite_slo_summary_task/composite_slo_summary_task';
 import { HealthScanTask } from './services/tasks/health_scan_task/health_scan_task';
 import { OrphanSummaryCleanupTask } from './services/tasks/orphan_summary_cleanup_task/orphan_summary_cleanup_task';
+import { ResourcesReconcileTask } from './services/tasks/resources_reconcile_task/resources_reconcile_task';
 import { StaleInstancesCleanupTask } from './services/tasks/stale_instances_cleanup_task/stale_instances_cleanup_task';
 import { TempSummaryCleanupTask } from './services/tasks/temp_summary_cleanup_task/temp_summary_cleanup_task';
 import { createTransformGenerators } from './services/transform_generators';
-import { REQUEST_RETRY_OPTIONS } from './utils/retry';
+import { DEFAULT_RETRY_OPTIONS, REQUEST_RETRY_OPTIONS } from './utils/retry';
 import type {
   SLOConfig,
   SLOPluginSetupDependencies,
@@ -81,6 +83,7 @@ export class SLOPlugin
   private tempSummaryCleanupTask?: TempSummaryCleanupTask;
   private staleInstancesCleanupTask?: StaleInstancesCleanupTask;
   private compositeSloSummaryTask?: CompositeSloSummaryTask;
+  private resourcesReconcileTask?: ResourcesReconcileTask;
 
   constructor(private readonly initContext: PluginInitializerContext) {
     this.logger = this.initContext.logger.get();
@@ -161,6 +164,7 @@ export class SLOPlugin
     core.savedObjects.registerType(slo);
     core.savedObjects.registerType(sloSettings);
     core.savedObjects.registerType(sloComposite);
+    core.savedObjects.registerType(sloGlobalSettings);
 
     registerBurnRateRule(plugins.alerting, core.http.basePath, this.isCpsEnabled);
     registerSloUsageCollector(
@@ -188,29 +192,29 @@ export class SLOPlugin
 
     registerDataProviders({ core, plugins, logger: this.logger });
 
-    const commonResourcesInstalled = core
-      .getStartServices()
-      .then(async ([coreStart]) => {
-        const esInternalClient = coreStart.elasticsearch.client.asInternalUser;
-        const sloResourceInstaller = new DefaultResourceInstaller(esInternalClient, this.logger);
-        await lockManager.withLock(LOCK_ID_RESOURCE_INSTALLER, () =>
-          sloResourceInstaller.ensureCommonResourcesInstalled()
+    const resourceInstallState = new ResourceInstallState({
+      installerFactory: async (retryOptions) => {
+        const [coreStart] = await core.getStartServices();
+        return new DefaultResourceInstaller(
+          coreStart.elasticsearch.client.asInternalUser,
+          this.logger,
+          retryOptions
         );
-      })
-      .catch((err) => {
-        if (err instanceof LockAcquisitionError) {
-          this.logger.debug('Cannot install SLO resources, another process is already doing it');
-        } else {
-          this.logger.error(`Failed to install SLO common resources: ${err.message}`);
-        }
-      });
+      },
+      lockManager,
+      logger: this.logger,
+    });
+
+    resourceInstallState.ensureInstalled(DEFAULT_RETRY_OPTIONS).catch((err) => {
+      this.logger.error(`Failed to install SLO common resources: ${err.message}`);
+    });
 
     registerServerRoutes({
       core,
       dependencies: {
         corePlugins: core,
         plugins: mappedPlugins,
-        commonResourcesInstalled,
+        resourceInstallState,
         config: {
           isServerless: this.isServerless,
           isCpsEnabled: this.isCpsEnabled,
@@ -321,6 +325,12 @@ export class SLOPlugin
       config: this.config,
     });
 
+    this.resourcesReconcileTask = new ResourcesReconcileTask({
+      taskManager: plugins.taskManager,
+      logFactory: this.initContext.logger,
+      resourceInstallState,
+    });
+
     new BulkDeleteTask({
       core,
       taskManager: plugins.taskManager,
@@ -350,6 +360,7 @@ export class SLOPlugin
     this.tempSummaryCleanupTask?.start(plugins).catch(() => {});
     this.staleInstancesCleanupTask?.start(plugins).catch(() => {});
     this.compositeSloSummaryTask?.start(plugins).catch(() => {});
+    this.resourcesReconcileTask?.start(plugins).catch(() => {});
 
     return {
       getSloClientWithRequest: async (request: KibanaRequest) => {

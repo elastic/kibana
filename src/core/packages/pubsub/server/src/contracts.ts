@@ -10,14 +10,24 @@
 import type { Topic } from './topic';
 
 /**
+ * Maximum `id.length` of a producer-supplied event id, in UTF-16 code units. Longer ids are
+ * rejected. One emoji outside the basic multilingual plane counts as two units, so 129 of them
+ * exceed this limit.
+ *
+ * @public
+ */
+export const PUBSUB_MAX_ID_LENGTH = 256;
+
+/**
  * The event a producer writes.
  *
  * @public
  */
 export interface PubSubEventInit<TData> {
   /**
-   * Stable, source-derived id, unique within the topic. Reuse it when retrying the same delivery
-   * so a durable bus can recognise the duplicate. Phase 1 does not deduplicate.
+   * Stable, source-derived id, unique within the topic, at most {@link PUBSUB_MAX_ID_LENGTH}
+   * UTF-16 code units. Reuse it when retrying the same delivery so a durable bus can recognise
+   * the duplicate. Phase 1 does not deduplicate.
    */
   readonly id: string;
   /**
@@ -97,14 +107,15 @@ export interface PubSubSetup {
  */
 export interface PubSubStart {
   /**
-   * Accepts an event and returns once it is queued. Does not wait for handlers.
+   * Accepts an event and returns. Does not wait for handlers.
    *
-   * Delivery is best effort and local to this Kibana node; a resolved promise means the event
-   * was accepted, not that any consumer ran. A consumer's copy is dropped when that consumer
-   * already has 1000 events pending. The overflow is logged once, then again with the drop count
-   * when the queue drains. Events still queued when Kibana stops are discarded, and a publish
-   * after stop resolves without queueing the event (logged at debug). Consumers on other nodes
-   * never see the event.
+   * Delivery is best effort and local to this Kibana node. A resolved promise means the event
+   * was accepted, not that any consumer ran. Each current subscriber receives its own queued copy.
+   * A topic with no subscribers has no queue: the event is discarded, and that drop is not logged.
+   * A consumer's copy is dropped when that consumer already has 1000 events pending. The overflow
+   * is logged once, then again with the drop count when the queue drains. Events still queued when
+   * Kibana stops are discarded, and a publish after stop resolves without queueing the event
+   * (logged at debug). Consumers on other nodes never see the event.
    */
   publish<TData>(
     topic: Topic<TData>,

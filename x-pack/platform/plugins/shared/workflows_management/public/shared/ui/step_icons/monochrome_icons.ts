@@ -16,6 +16,7 @@ export const MonochromeIcons = new Set([
   'wait',
   'workflow.execute',
   'workflow.executeAsync',
+  'workflow.awaitExecutions',
   'workflow.output',
   'workflow.fail',
   'while',

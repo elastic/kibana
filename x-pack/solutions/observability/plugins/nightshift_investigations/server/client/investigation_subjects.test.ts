@@ -10,9 +10,11 @@ import {
   buildFollowUpMessage,
   recoverSubjectsFromInputs,
   toSlackThreadKey,
+  toAutomationVia,
   toStartSubjects,
   toSubjectKeys,
   withoutRecordedSubjects,
+  workflowSubjectInputSchema,
 } from './investigation_subjects';
 
 const makeAlert = (id: string): AlertSnapshot => ({
@@ -35,7 +37,55 @@ describe('toSlackThreadKey', () => {
   });
 });
 
+describe('toAutomationVia', () => {
+  it('records the automation name, linking to its page through the automation locator', () => {
+    expect(toAutomationVia({ id: 'a1', name: 'Payments alerts' })).toEqual({
+      label: 'Payments alerts',
+      locator: { id: 'NIGHTSHIFT_AUTOMATION_LOCATOR', params: { automationId: 'a1' } },
+    });
+  });
+
+  it('cuts a long name, and links no id longer than a subject records', () => {
+    expect(toAutomationVia({ id: 'a'.repeat(300), name: 'n'.repeat(600) })).toEqual({
+      label: 'n'.repeat(500),
+    });
+  });
+
+  it.each([{}, { id: 'a1' }, { name: 'Payments alerts' }, { id: '', name: '' }])(
+    'records nothing for %p',
+    (automation) => {
+      expect(toAutomationVia(automation)).toBeUndefined();
+    }
+  );
+});
+
 describe('toStartSubjects', () => {
+  it('records the via on every subject of a start an automation made', () => {
+    const via = { label: 'Payments alerts' };
+
+    expect(
+      toStartSubjects({
+        subject: { type: 'alert', id: 'alert-1' },
+        alerts: [makeAlert('alert-1'), makeAlert('alert-2')],
+        triggerType: 'automatic',
+        investigationId: 'inv-1',
+        slackThread: { workspace: 'T1', channel: 'C1', thread_ts: '1.1' },
+        via,
+      }).map((subject) => subject.via)
+    ).toEqual([via, via, via]);
+  });
+
+  it('records no via for a start without one', () => {
+    const subjects = toStartSubjects({
+      subject: { type: 'alert', id: 'alert-1' },
+      alerts: [makeAlert('alert-1')],
+      triggerType: 'manual',
+      investigationId: 'inv-1',
+    });
+
+    expect(subjects[0]).not.toHaveProperty('via');
+  });
+
   it('records one alert subject per snapshot, carrying the snapshot', () => {
     expect(
       toStartSubjects({
@@ -240,5 +290,29 @@ describe('buildFollowUpMessage', () => {
         newAlerts: [],
       })
     ).toMatch(/^This continues the investigation[\s\S]*\n\nCheckout errors re-opened$/);
+  });
+});
+
+describe('workflowSubjectInputSchema', () => {
+  const withParams = (params: Record<string, string>) => ({
+    type: 'alert',
+    id: 'alert-1',
+    via: { label: 'Payments alerts', locator: { id: 'SOME_LOCATOR', params } },
+  });
+
+  it('accepts a via the subject store accepts', () => {
+    expect(workflowSubjectInputSchema.safeParse(withParams({ automationId: 'a-1' })).success).toBe(
+      true
+    );
+  });
+
+  it('rejects locator params the subject store would reject', () => {
+    const tooManyKeys = Object.fromEntries(
+      Array.from({ length: 51 }, (_, index) => [`key${index}`, 'x'])
+    );
+    expect(workflowSubjectInputSchema.safeParse(withParams(tooManyKeys)).success).toBe(false);
+    expect(
+      workflowSubjectInputSchema.safeParse(withParams({ automationId: 'x'.repeat(8_000) })).success
+    ).toBe(false);
   });
 });

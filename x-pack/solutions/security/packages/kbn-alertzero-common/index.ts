@@ -289,4 +289,5 @@ export {
   isHuntEligibleIoc,
   type HuntEligibleIocTier,
 } from './impl/hunt/hunt_eligible_ioc';
+export { isPlaceholderEmailHost, isPlaceholderEmailIoc } from './impl/hunt/placeholder_email';
 export { isNonRoutableIPv4, isNonRoutableIPv6, isNonRoutableIpIoc } from './impl/ip_ranges';

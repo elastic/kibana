@@ -22,17 +22,45 @@ import { auditLoggingService } from '../audit_logging';
 import { agentPolicyService } from '../agent_policy';
 import { isSpaceAwarenessEnabled } from '../spaces/helpers';
 import { getAgentTemplateAssetsMap } from '../epm/packages/get';
+import { getPackageInfo } from '../epm/packages';
 
+import { getAgentVersionBlocks } from './agent_version_guard';
 import {
   _getUpgradePackagePolicyInfo,
   _packagePoliciesBulkUpgrade,
   _packagePoliciesGetUpgradeDryRunDiff,
+  _packagePoliciesGetUpgradeDryRunDiffs,
   _packagePoliciesUpgrade,
 } from './upgrade';
 
 jest.mock('../spaces/helpers');
 
 jest.mock('../license');
+
+jest.mock('./agent_version_guard', () => {
+  const mockGetAgentVersionBlocks = jest.fn().mockResolvedValue(new Map());
+  return {
+    ...jest.requireActual('./agent_version_guard'),
+    getAgentVersionBlocks: mockGetAgentVersionBlocks,
+    // Same as the actual function, on top of the mocked `getAgentVersionBlocks`
+    getAgentVersionBlocksOrErrors: async (
+      items: Array<{ key: string; pkgInfo: { conditions?: { agent?: { version?: string } } } }>
+    ) => {
+      try {
+        return { blocks: await mockGetAgentVersionBlocks(items), errors: new Map() };
+      } catch (error) {
+        return {
+          blocks: new Map(),
+          errors: new Map(
+            items
+              .filter(({ pkgInfo }) => pkgInfo.conditions?.agent?.version)
+              .map(({ key }) => [key, error])
+          ),
+        };
+      }
+    },
+  };
+});
 
 async function mockedGetInstallation(params: any) {
   let pkg;
@@ -52,6 +80,13 @@ async function mockedGetPackageInfo(params: any) {
   if (params.pkgName === 'test') {
     pkg = {
       version: '1.0.2',
+    };
+  }
+  if (params.pkgName === 'test-agent-condition') {
+    pkg = {
+      name: 'test-agent-condition',
+      version: '1.0.2',
+      conditions: { agent: { version: '^9.4.0' } },
     };
   }
   if (params.pkgName === 'test-conflict') {
@@ -305,6 +340,141 @@ describe('Upgrade', () => {
       });
 
       expect(res.hasErrors).toBeFalsy();
+      expect(res.agent_version_block).toBeUndefined();
+    });
+
+    it('should report the agents blocking the upgrade without an error', async () => {
+      const agentVersionBlock = {
+        package_name: 'test',
+        package_version: '1.0.2',
+        version_condition: '^9.4.0',
+        blocked_count: 2,
+        observed_versions: ['9.3.1'],
+        min_version: '9.4.0',
+      };
+      jest
+        .mocked(getAgentVersionBlocks)
+        .mockResolvedValueOnce(new Map([['package-policy-id', agentVersionBlock]]));
+
+      const res = await _packagePoliciesGetUpgradeDryRunDiff({
+        id: 'package-policy-id',
+        soClient: savedObjectsClient,
+        packagePolicyService,
+        packagePolicy: {
+          id: '123',
+          name: 'test-123',
+          package: { title: 'test', name: 'test', version: '1.0.1' },
+          namespace: 'default',
+          policy_ids: ['agent-policy-1'],
+          inputs: [{ id: 'toto', enabled: true, streams: [], type: 'logs' }],
+        } as any,
+        pkgVersion: '1.0.2',
+      });
+
+      expect(res.hasErrors).toBeFalsy();
+      expect(res.statusCode).toBeUndefined();
+      expect(res.agent_version_block).toEqual(agentVersionBlock);
+      expect(getAgentVersionBlocks).toHaveBeenCalledWith([
+        expect.objectContaining({
+          key: 'package-policy-id',
+          pkgInfo: expect.objectContaining({ version: '1.0.2' }),
+          agentPolicyIds: ['agent-policy-1'],
+        }),
+      ]);
+    });
+
+    it('should pass the condition of the current package version', async () => {
+      // Both package versions have an agent version condition
+      (getPackageInfo as jest.Mock).mockImplementation(async (params) => ({
+        ...(await mockedGetPackageInfo(params)),
+        conditions: { agent: { version: params.pkgVersion === '1.0.2' ? '^9.4.0' : '^9.3.0' } },
+      }));
+      try {
+        await _packagePoliciesGetUpgradeDryRunDiff({
+          id: 'package-policy-id',
+          soClient: savedObjectsClient,
+          packagePolicyService,
+          packagePolicy: {
+            id: '123',
+            name: 'test-123',
+            package: { title: 'test', name: 'test', version: '1.0.1' },
+            namespace: 'default',
+            policy_ids: ['agent-policy-1'],
+            inputs: [{ id: 'toto', enabled: true, streams: [], type: 'logs' }],
+          } as any,
+          pkgVersion: '1.0.2',
+        });
+      } finally {
+        (getPackageInfo as jest.Mock).mockImplementation(mockedGetPackageInfo);
+      }
+
+      expect(getAgentVersionBlocks).toHaveBeenLastCalledWith([
+        expect.objectContaining({
+          key: 'package-policy-id',
+          currentCondition: { versionCondition: '^9.3.0', agentPolicyIds: ['agent-policy-1'] },
+        }),
+      ]);
+    });
+
+    it('should check the agents of several package policies with a single query', async () => {
+      jest.mocked(getAgentVersionBlocks).mockClear();
+      const getPackagePolicy = jest.fn(
+        async (_soClient: unknown, id: string) =>
+          ({
+            id,
+            name: `test-${id}`,
+            package: { title: 'test', name: 'test', version: '1.0.1' },
+            namespace: 'default',
+            policy_ids: [`agent-policy-${id}`],
+            inputs: [{ id: 'toto', enabled: true, streams: [], type: 'logs' }],
+          } as any)
+      );
+
+      const res = await _packagePoliciesGetUpgradeDryRunDiffs({
+        ids: ['1', '2'],
+        soClient: savedObjectsClient,
+        packagePolicyService: { ...packagePolicyService, get: getPackagePolicy } as any,
+        pkgVersion: '1.0.2',
+      });
+
+      expect(res).toHaveLength(2);
+      expect(getAgentVersionBlocks).toHaveBeenCalledTimes(1);
+      expect(getAgentVersionBlocks).toHaveBeenCalledWith([
+        expect.objectContaining({ key: '1', agentPolicyIds: ['agent-policy-1'] }),
+        expect.objectContaining({ key: '2', agentPolicyIds: ['agent-policy-2'] }),
+      ]);
+    });
+
+    it('should only fail the upgrades that needed the agents when they cannot be checked', async () => {
+      jest.mocked(getAgentVersionBlocks).mockRejectedValueOnce(new FleetError('boom'));
+      const packagePolicyOf = (id: string, pkgName: string) =>
+        ({
+          id,
+          name: `test-${id}`,
+          package: { title: pkgName, name: pkgName, version: '1.0.1' },
+          namespace: 'default',
+          policy_ids: [`agent-policy-${id}`],
+          inputs: [{ id: 'toto', enabled: true, streams: [], type: 'logs' }],
+        } as any);
+      const getPackagePolicy = jest.fn(async (_soClient: unknown, id: string) =>
+        id === 'with-condition'
+          ? packagePolicyOf(id, 'test-agent-condition')
+          : packagePolicyOf(id, 'test')
+      );
+
+      const [withoutCondition, withCondition] = await _packagePoliciesGetUpgradeDryRunDiffs({
+        ids: ['without-condition', 'with-condition'],
+        soClient: savedObjectsClient,
+        packagePolicyService: { ...packagePolicyService, get: getPackagePolicy } as any,
+        pkgVersion: '1.0.2',
+      });
+
+      // The package without agent version condition didn't need the agents
+      expect(withoutCondition.hasErrors).toBe(false);
+      expect(withoutCondition.diff).toHaveLength(2);
+      // The upgrade that needed them is not presented as eligible
+      expect(withCondition.hasErrors).toBe(true);
+      expect(withCondition.body?.message).toBe('boom');
     });
 
     it('should return errors if there is a conflict to upgrade', async () => {

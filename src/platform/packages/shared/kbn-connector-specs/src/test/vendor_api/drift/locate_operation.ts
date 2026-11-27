@@ -36,7 +36,10 @@ const serverPaths = (document: OpenApiDocument): string[] => [
 ];
 
 // Azure specs keep the paths that differ only in their query in `x-ms-paths`.
-const pathItem = (document: OpenApiDocument, path: string): Record<string, unknown> | undefined => {
+export const pathItemOf = (
+  document: OpenApiDocument,
+  path: string
+): Record<string, unknown> | undefined => {
   for (const key of ['paths', 'x-ms-paths']) {
     const paths = document[key];
     const item = isRecord(paths) ? paths[path] : undefined;
@@ -48,7 +51,7 @@ const pathItem = (document: OpenApiDocument, path: string): Record<string, unkno
 };
 
 const has = (document: OpenApiDocument, path: string, method?: string): boolean => {
-  const item = pathItem(document, path);
+  const item = pathItemOf(document, path);
   return item !== undefined && (method === undefined || method.toLowerCase() in item);
 };
 

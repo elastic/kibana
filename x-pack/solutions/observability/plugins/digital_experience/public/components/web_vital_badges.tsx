@@ -6,7 +6,8 @@
  */
 
 import React from 'react';
-import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
+import type { ReactNode } from 'react';
+import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiTextColor, EuiToolTip } from '@elastic/eui';
 import type { CoreWebVital } from '../../common/core_web_vitals';
 import { CORE_WEB_VITALS, getVitalRating } from '../../common/core_web_vitals';
 import type { SessionWebVitals } from '../../common/sessions';
@@ -36,6 +37,40 @@ export function WebVitalBadge({
           ? `${VITAL_LABELS[vital]} ${formatVital(vital, value)}`
           : formatVital(vital, value)}
       </EuiBadge>
+    </EuiToolTip>
+  );
+}
+
+/**
+ * One vital's value as text colored by its rating, e.g. in a table column named after the vital,
+ * with the rating (or `tooltip`) on hover.
+ */
+export function WebVitalValue({
+  vital,
+  value,
+  tooltip,
+  'data-test-subj': dataTestSubj,
+  'data-sample-count': sampleCount,
+}: {
+  vital: CoreWebVital;
+  value: number;
+  /** Replaces the rating on hover, e.g. with the share of samples of each rating. */
+  tooltip?: ReactNode;
+  'data-test-subj': string;
+  'data-sample-count'?: number;
+}) {
+  const rating = getVitalRating(vital, value);
+  return (
+    <EuiToolTip content={tooltip ?? RATING_LABELS[rating]}>
+      <EuiTextColor
+        tabIndex={0}
+        color={RATING_COLORS[rating]}
+        data-test-subj={dataTestSubj}
+        data-rating={rating}
+        data-sample-count={sampleCount}
+      >
+        {formatVital(vital, value)}
+      </EuiTextColor>
     </EuiToolTip>
   );
 }

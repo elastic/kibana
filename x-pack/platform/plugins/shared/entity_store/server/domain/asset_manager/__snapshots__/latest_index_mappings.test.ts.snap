@@ -1,0 +1,603 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`getLatestIndexMappingProperties please bump 'LATEST_INDEX_MAPPINGS_VERSION' when the latest index mappings change 1`] = `
+Object {
+  "properties": Object {
+    "@timestamp": Object {
+      "type": "date",
+    },
+    "agent.id": Object {
+      "type": "keyword",
+    },
+    "agent.type": Object {
+      "type": "keyword",
+    },
+    "asset.business_unit": Object {
+      "type": "keyword",
+    },
+    "asset.criticality": Object {
+      "type": "keyword",
+    },
+    "asset.environment": Object {
+      "type": "keyword",
+    },
+    "asset.id": Object {
+      "type": "keyword",
+    },
+    "asset.model": Object {
+      "type": "keyword",
+    },
+    "asset.name": Object {
+      "type": "keyword",
+    },
+    "asset.owner": Object {
+      "type": "keyword",
+    },
+    "asset.serial_number": Object {
+      "type": "keyword",
+    },
+    "asset.vendor": Object {
+      "type": "keyword",
+    },
+    "cloud.account.id": Object {
+      "type": "keyword",
+    },
+    "cloud.account.name": Object {
+      "type": "keyword",
+    },
+    "cloud.availability_zone": Object {
+      "type": "keyword",
+    },
+    "cloud.instance.id": Object {
+      "type": "keyword",
+    },
+    "cloud.instance.name": Object {
+      "type": "keyword",
+    },
+    "cloud.machine.type": Object {
+      "type": "keyword",
+    },
+    "cloud.project.id": Object {
+      "type": "keyword",
+    },
+    "cloud.project.name": Object {
+      "type": "keyword",
+    },
+    "cloud.provider": Object {
+      "type": "keyword",
+    },
+    "cloud.region": Object {
+      "type": "keyword",
+    },
+    "cloud.service.name": Object {
+      "type": "keyword",
+    },
+    "data_stream.dataset": Object {
+      "type": "keyword",
+    },
+    "endpoint.id": Object {
+      "type": "keyword",
+    },
+    "entity.EngineMetadata.Type": Object {
+      "type": "keyword",
+    },
+    "entity.EngineMetadata.UntypedId": Object {
+      "type": "keyword",
+    },
+    "entity.attributes.asset": Object {
+      "type": "boolean",
+    },
+    "entity.attributes.known_redirects": Object {
+      "type": "keyword",
+    },
+    "entity.attributes.managed": Object {
+      "type": "boolean",
+    },
+    "entity.attributes.mfa_enabled": Object {
+      "type": "boolean",
+    },
+    "entity.attributes.oauth_consent_restriction": Object {
+      "type": "keyword",
+    },
+    "entity.attributes.permissions": Object {
+      "type": "keyword",
+    },
+    "entity.attributes.storage_class": Object {
+      "type": "keyword",
+    },
+    "entity.attributes.watchlists": Object {
+      "type": "keyword",
+    },
+    "entity.behaviors.anomaly_job_ids": Object {
+      "type": "keyword",
+    },
+    "entity.behaviors.rule_names": Object {
+      "type": "keyword",
+    },
+    "entity.confidence": Object {
+      "type": "keyword",
+    },
+    "entity.id": Object {
+      "type": "keyword",
+    },
+    "entity.lifecycle.first_seen": Object {
+      "type": "date",
+    },
+    "entity.lifecycle.last_activity": Object {
+      "type": "date",
+    },
+    "entity.lifecycle.last_seen": Object {
+      "type": "date",
+    },
+    "entity.name": Object {
+      "type": "keyword",
+    },
+    "entity.namespace": Object {
+      "type": "keyword",
+    },
+    "entity.relationships.accesses_frequently.ids": Object {
+      "type": "keyword",
+    },
+    "entity.relationships.accesses_frequently.raw_identifiers.host.id": Object {
+      "type": "keyword",
+    },
+    "entity.relationships.accesses_frequently.raw_identifiers.host.name": Object {
+      "type": "keyword",
+    },
+    "entity.relationships.accesses_frequently.raw_identifiers.service.name": Object {
+      "type": "keyword",
+    },
+    "entity.relationships.accesses_frequently.raw_identifiers.user.email": Object {
+      "type": "keyword",
+    },
+    "entity.relationships.accesses_frequently.raw_identifiers.user.id": Object {
+      "type": "keyword",
+    },
+    "entity.relationships.accesses_frequently.raw_identifiers.user.name": Object {
+      "type": "keyword",
+    },
+    "entity.relationships.accesses_infrequently.ids": Object {
+      "type": "keyword",
+    },
+    "entity.relationships.accesses_infrequently.raw_identifiers.host.id": Object {
+      "type": "keyword",
+    },
+    "entity.relationships.accesses_infrequently.raw_identifiers.host.name": Object {
+      "type": "keyword",
+    },
+    "entity.relationships.accesses_infrequently.raw_identifiers.service.name": Object {
+      "type": "keyword",
+    },
+    "entity.relationships.accesses_infrequently.raw_identifiers.user.email": Object {
+      "type": "keyword",
+    },
+    "entity.relationships.accesses_infrequently.raw_identifiers.user.id": Object {
+      "type": "keyword",
+    },
+    "entity.relationships.accesses_infrequently.raw_identifiers.user.name": Object {
+      "type": "keyword",
+    },
+    "entity.relationships.administers.ids": Object {
+      "type": "keyword",
+    },
+    "entity.relationships.administers.raw_identifiers.host.id": Object {
+      "type": "keyword",
+    },
+    "entity.relationships.administers.raw_identifiers.host.name": Object {
+      "type": "keyword",
+    },
+    "entity.relationships.administers.raw_identifiers.service.name": Object {
+      "type": "keyword",
+    },
+    "entity.relationships.administers.raw_identifiers.user.email": Object {
+      "type": "keyword",
+    },
+    "entity.relationships.administers.raw_identifiers.user.id": Object {
+      "type": "keyword",
+    },
+    "entity.relationships.administers.raw_identifiers.user.name": Object {
+      "type": "keyword",
+    },
+    "entity.relationships.communicates_with.ids": Object {
+      "type": "keyword",
+    },
+    "entity.relationships.communicates_with.raw_identifiers.host.id": Object {
+      "type": "keyword",
+    },
+    "entity.relationships.communicates_with.raw_identifiers.host.name": Object {
+      "type": "keyword",
+    },
+    "entity.relationships.communicates_with.raw_identifiers.service.name": Object {
+      "type": "keyword",
+    },
+    "entity.relationships.communicates_with.raw_identifiers.user.email": Object {
+      "type": "keyword",
+    },
+    "entity.relationships.communicates_with.raw_identifiers.user.id": Object {
+      "type": "keyword",
+    },
+    "entity.relationships.communicates_with.raw_identifiers.user.name": Object {
+      "type": "keyword",
+    },
+    "entity.relationships.depends_on.ids": Object {
+      "type": "keyword",
+    },
+    "entity.relationships.depends_on.raw_identifiers.host.id": Object {
+      "type": "keyword",
+    },
+    "entity.relationships.depends_on.raw_identifiers.host.name": Object {
+      "type": "keyword",
+    },
+    "entity.relationships.depends_on.raw_identifiers.service.name": Object {
+      "type": "keyword",
+    },
+    "entity.relationships.depends_on.raw_identifiers.user.email": Object {
+      "type": "keyword",
+    },
+    "entity.relationships.depends_on.raw_identifiers.user.id": Object {
+      "type": "keyword",
+    },
+    "entity.relationships.depends_on.raw_identifiers.user.name": Object {
+      "type": "keyword",
+    },
+    "entity.relationships.owns.ids": Object {
+      "type": "keyword",
+    },
+    "entity.relationships.owns.raw_identifiers.host.id": Object {
+      "type": "keyword",
+    },
+    "entity.relationships.owns.raw_identifiers.host.name": Object {
+      "type": "keyword",
+    },
+    "entity.relationships.owns.raw_identifiers.service.name": Object {
+      "type": "keyword",
+    },
+    "entity.relationships.owns.raw_identifiers.user.email": Object {
+      "type": "keyword",
+    },
+    "entity.relationships.owns.raw_identifiers.user.id": Object {
+      "type": "keyword",
+    },
+    "entity.relationships.owns.raw_identifiers.user.name": Object {
+      "type": "keyword",
+    },
+    "entity.relationships.owns_inferred.ids": Object {
+      "type": "keyword",
+    },
+    "entity.relationships.owns_inferred.raw_identifiers.host.id": Object {
+      "type": "keyword",
+    },
+    "entity.relationships.owns_inferred.raw_identifiers.host.name": Object {
+      "type": "keyword",
+    },
+    "entity.relationships.owns_inferred.raw_identifiers.service.name": Object {
+      "type": "keyword",
+    },
+    "entity.relationships.owns_inferred.raw_identifiers.user.email": Object {
+      "type": "keyword",
+    },
+    "entity.relationships.owns_inferred.raw_identifiers.user.id": Object {
+      "type": "keyword",
+    },
+    "entity.relationships.owns_inferred.raw_identifiers.user.name": Object {
+      "type": "keyword",
+    },
+    "entity.relationships.resolution.resolved_to": Object {
+      "type": "keyword",
+    },
+    "entity.relationships.resolution.risk.calculated_level": Object {
+      "type": "keyword",
+    },
+    "entity.relationships.resolution.risk.calculated_score": Object {
+      "type": "float",
+    },
+    "entity.relationships.resolution.risk.calculated_score_norm": Object {
+      "type": "float",
+    },
+    "entity.relationships.supervises.ids": Object {
+      "type": "keyword",
+    },
+    "entity.relationships.supervises.raw_identifiers.host.id": Object {
+      "type": "keyword",
+    },
+    "entity.relationships.supervises.raw_identifiers.host.name": Object {
+      "type": "keyword",
+    },
+    "entity.relationships.supervises.raw_identifiers.service.name": Object {
+      "type": "keyword",
+    },
+    "entity.relationships.supervises.raw_identifiers.user.email": Object {
+      "type": "keyword",
+    },
+    "entity.relationships.supervises.raw_identifiers.user.id": Object {
+      "type": "keyword",
+    },
+    "entity.relationships.supervises.raw_identifiers.user.name": Object {
+      "type": "keyword",
+    },
+    "entity.risk.calculated_level": Object {
+      "type": "keyword",
+    },
+    "entity.risk.calculated_score": Object {
+      "type": "float",
+    },
+    "entity.risk.calculated_score_norm": Object {
+      "type": "float",
+    },
+    "entity.source": Object {
+      "type": "keyword",
+    },
+    "entity.sub_type": Object {
+      "type": "keyword",
+    },
+    "entity.type": Object {
+      "type": "keyword",
+    },
+    "entity.url": Object {
+      "type": "keyword",
+    },
+    "event.category": Object {
+      "type": "keyword",
+    },
+    "event.dataset": Object {
+      "type": "keyword",
+    },
+    "event.ingested": Object {
+      "type": "date",
+    },
+    "event.kind": Object {
+      "type": "keyword",
+    },
+    "event.module": Object {
+      "type": "keyword",
+    },
+    "event.outcome": Object {
+      "type": "keyword",
+    },
+    "event.type": Object {
+      "type": "keyword",
+    },
+    "host.architecture": Object {
+      "type": "keyword",
+    },
+    "host.boot.id": Object {
+      "type": "keyword",
+    },
+    "host.cpu.usage": Object {
+      "scaling_factor": 1000,
+      "type": "scaled_float",
+    },
+    "host.disk.read.bytes": Object {
+      "type": "long",
+    },
+    "host.disk.write.bytes": Object {
+      "type": "long",
+    },
+    "host.domain": Object {
+      "type": "keyword",
+    },
+    "host.entity.id": Object {
+      "type": "keyword",
+    },
+    "host.geo.city_name": Object {
+      "type": "keyword",
+    },
+    "host.geo.continent_code": Object {
+      "type": "keyword",
+    },
+    "host.geo.continent_name": Object {
+      "type": "keyword",
+    },
+    "host.geo.country_iso_code": Object {
+      "type": "keyword",
+    },
+    "host.geo.country_name": Object {
+      "type": "keyword",
+    },
+    "host.geo.name": Object {
+      "type": "keyword",
+    },
+    "host.geo.postal_code": Object {
+      "type": "keyword",
+    },
+    "host.geo.region_iso_code": Object {
+      "type": "keyword",
+    },
+    "host.geo.region_name": Object {
+      "type": "keyword",
+    },
+    "host.geo.timezone": Object {
+      "type": "keyword",
+    },
+    "host.hostname": Object {
+      "type": "keyword",
+    },
+    "host.id": Object {
+      "type": "keyword",
+    },
+    "host.ip": Object {
+      "type": "ip",
+    },
+    "host.mac": Object {
+      "type": "keyword",
+    },
+    "host.name": Object {
+      "type": "keyword",
+    },
+    "host.network.egress.bytes": Object {
+      "type": "long",
+    },
+    "host.network.egress.packets": Object {
+      "type": "long",
+    },
+    "host.network.ingress.bytes": Object {
+      "type": "long",
+    },
+    "host.network.ingress.packets": Object {
+      "type": "long",
+    },
+    "host.os.family": Object {
+      "type": "keyword",
+    },
+    "host.os.full": Object {
+      "type": "keyword",
+    },
+    "host.os.kernel": Object {
+      "type": "keyword",
+    },
+    "host.os.name": Object {
+      "fields": Object {
+        "text": Object {
+          "type": "match_only_text",
+        },
+      },
+      "type": "keyword",
+    },
+    "host.os.platform": Object {
+      "type": "keyword",
+    },
+    "host.os.type": Object {
+      "type": "keyword",
+    },
+    "host.os.version": Object {
+      "type": "keyword",
+    },
+    "host.pid_ns_ino": Object {
+      "type": "keyword",
+    },
+    "host.type": Object {
+      "type": "keyword",
+    },
+    "host.uptime": Object {
+      "type": "long",
+    },
+    "labels": Object {
+      "type": "object",
+    },
+    "orchestrator.api_version": Object {
+      "type": "keyword",
+    },
+    "orchestrator.cluster.id": Object {
+      "type": "keyword",
+    },
+    "orchestrator.cluster.name": Object {
+      "type": "keyword",
+    },
+    "orchestrator.cluster.url": Object {
+      "type": "keyword",
+    },
+    "orchestrator.cluster.version": Object {
+      "type": "keyword",
+    },
+    "orchestrator.namespace": Object {
+      "type": "keyword",
+    },
+    "orchestrator.organization": Object {
+      "type": "keyword",
+    },
+    "orchestrator.resource.annotation": Object {
+      "type": "keyword",
+    },
+    "orchestrator.resource.id": Object {
+      "type": "keyword",
+    },
+    "orchestrator.resource.ip": Object {
+      "type": "ip",
+    },
+    "orchestrator.resource.label": Object {
+      "type": "keyword",
+    },
+    "orchestrator.resource.name": Object {
+      "type": "keyword",
+    },
+    "orchestrator.resource.parent.type": Object {
+      "type": "keyword",
+    },
+    "orchestrator.resource.type": Object {
+      "type": "keyword",
+    },
+    "orchestrator.type": Object {
+      "type": "keyword",
+    },
+    "service.address": Object {
+      "type": "keyword",
+    },
+    "service.entity.id": Object {
+      "type": "keyword",
+    },
+    "service.environment": Object {
+      "type": "keyword",
+    },
+    "service.ephemeral_id": Object {
+      "type": "keyword",
+    },
+    "service.id": Object {
+      "type": "keyword",
+    },
+    "service.name": Object {
+      "type": "keyword",
+    },
+    "service.node.name": Object {
+      "type": "keyword",
+    },
+    "service.node.role": Object {
+      "type": "keyword",
+    },
+    "service.node.roles": Object {
+      "type": "keyword",
+    },
+    "service.state": Object {
+      "type": "keyword",
+    },
+    "service.type": Object {
+      "type": "keyword",
+    },
+    "service.version": Object {
+      "type": "keyword",
+    },
+    "tags": Object {
+      "ignore_above": 1024,
+      "type": "keyword",
+    },
+    "user.domain": Object {
+      "type": "keyword",
+    },
+    "user.email": Object {
+      "type": "keyword",
+    },
+    "user.entity.id": Object {
+      "type": "keyword",
+    },
+    "user.full_name": Object {
+      "fields": Object {
+        "text": Object {
+          "type": "match_only_text",
+        },
+      },
+      "type": "keyword",
+    },
+    "user.group.domain": Object {
+      "type": "keyword",
+    },
+    "user.group.id": Object {
+      "type": "keyword",
+    },
+    "user.group.name": Object {
+      "type": "keyword",
+    },
+    "user.hash": Object {
+      "type": "keyword",
+    },
+    "user.id": Object {
+      "type": "keyword",
+    },
+    "user.name": Object {
+      "type": "keyword",
+    },
+    "user.roles": Object {
+      "type": "keyword",
+    },
+  },
+  "version": 1,
+}
+`;

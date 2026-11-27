@@ -282,11 +282,11 @@ export const mockLineLayer = {
     properties: {
       fill_color: {
         type: 'STATIC',
-        options: { color: '#A6EDEA' },
+        options: { color: '#93F0D9' },
       },
       line_color: {
         type: 'STATIC',
-        options: { color: '#A6EDEA' },
+        options: { color: '#93F0D9' },
       },
       line_width: {
         type: 'DYNAMIC',
@@ -347,11 +347,11 @@ export const mockClientServerLineLayer = {
     properties: {
       fill_color: {
         type: 'STATIC',
-        options: { color: '#A6EDEA' },
+        options: { color: '#93F0D9' },
       },
       line_color: {
         type: 'STATIC',
-        options: { color: '#A6EDEA' },
+        options: { color: '#93F0D9' },
       },
       line_width: {
         type: 'DYNAMIC',

@@ -20,7 +20,7 @@ import {
 
 import { NewAgentActionSchema } from '../models';
 
-import { validateKuery } from '../../routes/utils/filter_utils';
+import { validateAgentField, validateKuery } from '../../routes/utils/filter_utils';
 import { ListResponseSchema } from '../../routes/schema/utils';
 
 const validateAgentsKueryField = (value: string) => {
@@ -29,6 +29,8 @@ const validateAgentsKueryField = (value: string) => {
     return validationObj?.error;
   }
 };
+
+const AGENT_FIELD_MAX_LENGTH = 256;
 
 export const AGENT_ID_MAX_LENGTH = 512;
 // The Fleet UI "select all" bulk selection excludes every managed and agentless agent by ID
@@ -121,6 +123,7 @@ export const GetAgentsRequestSchema = {
         schema.querySortField.warn({
           label: 'fleet.agents.sortField',
           meta: { description: 'Field to sort results by' },
+          validate: validateAgentField,
         })
       ),
       sortOrder: schema.maybe(
@@ -1303,11 +1306,14 @@ export const PostGenerateAgentsReportRequestSchema = {
         },
       }),
     ]),
-    fields: schema.arrayOf(schema.string(), { maxSize: 100 }),
+    fields: schema.arrayOf(
+      schema.boundedString({ maxLength: AGENT_FIELD_MAX_LENGTH, validate: validateAgentField }),
+      { maxSize: 100 }
+    ),
     timezone: schema.maybe(schema.string()),
     sort: schema.maybe(
       schema.object({
-        field: schema.maybe(schema.string()),
+        field: schema.maybe(schema.querySortField({ validate: validateAgentField })),
         direction: schema.maybe(schema.oneOf([schema.literal('asc'), schema.literal('desc')])),
       })
     ),

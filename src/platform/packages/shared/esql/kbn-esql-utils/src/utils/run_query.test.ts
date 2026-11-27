@@ -14,29 +14,12 @@ import { ESQLVariableType, type ESQLControlVariable } from '@kbn/esql-types';
 import {
   getStartEndParams,
   getNamedParams,
-  getEsqlSearchParams,
   getESQLQueryColumnsRaw,
   getESQLQueryColumns,
-  getESQLResults,
   formatESQLColumns,
 } from './run_query';
 
 describe('run query helpers', () => {
-  it('passes the supplied session to the ES|QL search', async () => {
-    const search = jest
-      .fn()
-      .mockReturnValue(
-        of({ isRunning: false, isPartial: false, rawResponse: { columns: [], values: [] } })
-      );
-
-    await getESQLResults({ esqlQuery: 'FROM foo', search, sessionId: 'cached-session' });
-
-    expect(search).toHaveBeenCalledWith(
-      expect.anything(),
-      expect.objectContaining({ sessionId: 'cached-session', strategy: 'esql_async' })
-    );
-  });
-
   describe('formatESQLColumns', () => {
     it('carries the column _meta over as esMeta', () => {
       const columns = formatESQLColumns([
@@ -326,40 +309,6 @@ describe('run query helpers', () => {
       );
     });
 
-    it('getESQLResults does not request column_metadata by default', async () => {
-      search.mockReturnValue(
-        of({ isRunning: false, rawResponse: { columns: [], values: [] } } as any)
-      );
-
-      await getESQLResults({ esqlQuery: 'FROM foo', search });
-
-      expect(search).toHaveBeenCalledWith(
-        expect.objectContaining({
-          params: expect.not.objectContaining({
-            settings: expect.anything(),
-          }),
-        }),
-        expect.anything()
-      );
-    });
-
-    it('getESQLResults requests column_metadata when includeColumnMetadata is true', async () => {
-      search.mockReturnValue(
-        of({ isRunning: false, rawResponse: { columns: [], values: [] } } as any)
-      );
-
-      await getESQLResults({ esqlQuery: 'FROM foo', search, includeColumnMetadata: true });
-
-      expect(search).toHaveBeenCalledWith(
-        expect.objectContaining({
-          params: expect.objectContaining({
-            settings: { column_metadata: true },
-          }),
-        }),
-        expect.anything()
-      );
-    });
-
     const mockRawResponseWithMeta = () =>
       of({
         isRunning: false,
@@ -428,48 +377,5 @@ describe('run query helpers', () => {
         expect.not.objectContaining({ projectRouting: expect.anything() })
       );
     });
-  });
-});
-
-describe('getEsqlSearchParams', () => {
-  const query = 'FROM logs | WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend';
-  const timeRange = { from: '2024-01-01T00:00:00.000Z', to: '2024-01-02T00:00:00.000Z' };
-
-  it('returns only the query when nothing else applies', () => {
-    expect(getEsqlSearchParams({ esqlQuery: 'FROM logs' })).toEqual({ query: 'FROM logs' });
-  });
-
-  it('adds the filter, the named params, the time zone and the column metadata setting', () => {
-    const filter = { bool: { filter: [] } };
-
-    const params = getEsqlSearchParams({
-      esqlQuery: query,
-      filter,
-      timeRange,
-      timezone: 'UTC',
-      includeColumnMetadata: true,
-      dropNullColumns: true,
-    });
-
-    expect(params).toEqual({
-      filter,
-      query,
-      dropNullColumns: true,
-      params: getNamedParams(query, timeRange),
-      time_zone: 'UTC',
-      settings: { column_metadata: true },
-    });
-  });
-
-  it('only includes the named params the query uses', () => {
-    const params = getEsqlSearchParams({
-      esqlQuery: 'FROM logs | WHERE host == ?host',
-      variables: [
-        { key: 'host', value: 'a', type: ESQLVariableType.VALUES },
-        { key: 'unused', value: 'b', type: ESQLVariableType.VALUES },
-      ],
-    });
-
-    expect(params.params).toEqual([{ host: 'a' }]);
   });
 });

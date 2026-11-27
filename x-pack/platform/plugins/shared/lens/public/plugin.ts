@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-import type { AppMountParameters, CoreSetup, CoreStart, DocLinksStart } from '@kbn/core/public';
+import type {
+  AppMountParameters,
+  CoreSetup,
+  CoreStart,
+  DocLinksStart,
+  PluginInitializerContext,
+} from '@kbn/core/public';
 import type { FieldFormatsSetup, FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type {
   UsageCollectionSetup,
@@ -304,6 +310,8 @@ export type LensSuggestionsApi = (
 ) => Suggestion[] | undefined;
 
 export class LensPlugin {
+  constructor(private readonly initializerContext: PluginInitializerContext) {}
+
   private datatableVisualization: DatatableVisualizationType | undefined;
   private editorFrameService: EditorFrameServiceType | undefined;
   private editorFrameSetup: EditorFrameSetup | undefined;
@@ -412,7 +420,10 @@ export class LensPlugin {
       this.setupPendingTasks.push(
         core.getStartServices().then(async ([{ featureFlags }]) => {
           // This loads the feature flags async to allow synchronous access to flags via getLensFeatureFlags
-          const flags = await setLensFeatureFlags(featureFlags);
+          const flags = await setLensFeatureFlags(
+            featureFlags,
+            this.initializerContext.env.mode.dev
+          );
 
           // This loads the builder async to allow synchronous access to builder via getLensBuilder
           await setLensBuilder(flags.apiFormat);
