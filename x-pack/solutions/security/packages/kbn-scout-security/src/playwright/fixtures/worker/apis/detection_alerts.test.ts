@@ -66,13 +66,17 @@ describe('detectionAlerts.waitForAlerts', () => {
     count.mockRejectedValueOnce(createResponseError(429)).mockRejectedValue(lastError);
 
     const result = service.waitForAlerts(RULE_NAME, 1, 3_000);
-    const assertion = expect(result).rejects.toMatchObject({
-      message: expect.stringMatching(/the last poll failed with: status_503$/),
-      cause: lastError,
-    });
+    const rejection = result.then(
+      () => {
+        throw new Error('waitForAlerts resolved instead of timing out');
+      },
+      (error: Error) => error
+    );
     await jest.advanceTimersByTimeAsync(3_000);
 
-    await assertion;
+    const error = await rejection;
+    expect(error.message).toMatch(/the last poll failed with: status_503$/);
+    expect(error.cause).toBe(lastError);
     await expect(result).rejects.not.toThrow(/status_429/);
   });
 
