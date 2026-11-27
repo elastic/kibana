@@ -10,12 +10,13 @@ import type { KibanaRequest } from '@kbn/core/server';
 import type { ConcreteTaskInstance, TaskInstance } from '@kbn/task-manager-plugin/server';
 
 import { ScheduleType } from '@kbn/reporting-server';
-import { EXPORT_TYPE_SINGLE } from '@kbn/reporting-common';
+import { EXPORT_TYPE_SINGLE, JOB_STATUS } from '@kbn/reporting-common';
 import type { ReportTaskParams } from '.';
 import { REPORTING_EXECUTE_TYPE } from '.';
 import { SavedReport } from '../store';
 import type { ReportProcessingFields } from '../store/store';
 import { errorLogger } from './error_logger';
+import { InterruptedReportError } from './interrupted_report_error';
 import type { PrepareJobResults } from './run_report';
 import { RunReportTask } from './run_report';
 import type { RenderRetryState } from './render_retry';
@@ -40,6 +41,24 @@ export class RunSingleReportTask extends RunReportTask<ReportTaskParams> {
 
     if (report.status === 'completed') {
       throw new Error(`Can not claim the report job: it is already completed!`);
+    }
+
+    if (newAttempt) {
+      const hasNoAttemptsLeft = report.attempts >= this.getMaxAttempts().maxTaskAttempts;
+      // An attempt that ends, however badly, moves the report out of processing or clears its
+      // expiration. One cut short by Kibana stopping does neither.
+      const wasInterrupted =
+        report.status === JOB_STATUS.PROCESSING && Boolean(report.process_expiration);
+      if (
+        wasInterrupted &&
+        (hasNoAttemptsLeft || (await this.isAbandonedWhenInterrupted(report.jobtype)))
+      ) {
+        throw new InterruptedReportError(report);
+      }
+      // Task Manager no longer enforces this limit, as it is allowed one attempt more.
+      if (hasNoAttemptsLeft) {
+        throw new Error(`Can not claim the report job: it has no attempts left!`);
+      }
     }
 
     const m = moment();
@@ -105,6 +124,14 @@ export class RunSingleReportTask extends RunReportTask<ReportTaskParams> {
       // Track report in UI
       this.opts.reporting.trackReport(jobId);
     } catch (failedToClaim) {
+      if (failedToClaim instanceof InterruptedReportError) {
+        this.logger.warn(
+          `${failedToClaim.message}, most likely because Kibana stopped unexpectedly. It will not be generated again.`,
+          { tags: [jobId] }
+        );
+        return { jobId, report: failedToClaim.report, task, isInterrupted: true };
+      }
+
       // error claiming report - log the error
       // could be version conflict, or too many attempts or no longer connected to ES
       errorLogger(this.logger, `Error in claiming ${jobId}`, failedToClaim);
@@ -125,7 +152,9 @@ export class RunSingleReportTask extends RunReportTask<ReportTaskParams> {
   public getTaskDefinition() {
     const queueTimeout = this.getQueueTimeoutAsInterval();
     const maxConcurrency = this.getMaxConcurrency();
-    const maxAttempts = this.getMaxAttempts().maxTaskAttempts;
+    // One more than a report gets. When Kibana stops during the last attempt, the extra run only
+    // marks the report as failed; without it the task is deleted and the report stays processing.
+    const maxAttempts = this.getMaxAttempts().maxTaskAttempts + 1;
 
     return {
       type: REPORTING_EXECUTE_TYPE,

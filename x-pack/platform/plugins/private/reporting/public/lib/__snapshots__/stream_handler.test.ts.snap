@@ -145,6 +145,59 @@ Array [
 ]
 `;
 
+exports[`stream handler showNotifications show failed job toast explaining why the report was not retried 1`] = `
+Array [
+  Array [
+    Object {
+      "data-test-subj": "completeReportFailure",
+      "iconType": undefined,
+      "text": MountPoint {
+        "reactNode": <React.Fragment>
+          <EuiCallOut
+            color="danger"
+            data-test-errorText="this is the failed report error"
+            size="m"
+          >
+            Can't generate this report because the browser closed unexpectedly. The report was not retried because it would likely fail again. Try reducing the amount of data in the report.
+          </EuiCallOut>
+          <EuiSpacer />
+          <p>
+            <Memo(MemoizedFormattedMessage)
+              defaultMessage="Go to {path} for details."
+              id="xpack.reporting.publicNotifier.error.checkManagement"
+              values={
+                Object {
+                  "path": <a
+                    href="/#management"
+                  >
+                    <Memo(MemoizedFormattedMessage)
+                      defaultMessage="Stack Management > Kibana > Reporting"
+                      id="xpack.reporting.publicNotifier.error.reportingSectionUrlLinkLabel"
+                    />
+                  </a>,
+                }
+              }
+            />
+          </p>
+        </React.Fragment>,
+      },
+      "title": MountPoint {
+        "reactNode": <Memo(MemoizedFormattedMessage)
+          defaultMessage="Cannot create {reportType} report for ''{reportObjectTitle}''."
+          id="xpack.reporting.publicNotifier.error.couldNotCreateReportTitle"
+          values={
+            Object {
+              "reportObjectTitle": "Yas 7",
+              "reportType": "yas",
+            }
+          }
+        />,
+      },
+    },
+  ],
+]
+`;
+
 exports[`stream handler showNotifications show max length warning 1`] = `
 Array [
   Array [

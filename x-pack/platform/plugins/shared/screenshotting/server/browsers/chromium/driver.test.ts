@@ -133,4 +133,38 @@ describe('chromium driver', () => {
     expect(testSpy).toHaveBeenCalledTimes(1);
     expect(testSpy).toHaveBeenCalledWith({ height: 10, width: 100 });
   });
+
+  describe('browser exit', () => {
+    beforeEach(() => {
+      // Puppeteer keeps reporting the page as open when the browser dies
+      mockPage.isClosed = jest.fn().mockReturnValue(false);
+    });
+
+    const createDriver = () =>
+      new HeadlessChromiumDriver(mockScreenshotModeSetup, mockConfig, mockBasePath, mockPage);
+
+    it('reports the page as open while the browser is running', () => {
+      expect(createDriver().isPageOpen()).toBe(true);
+    });
+
+    it('reports the page as closed once the browser exits', () => {
+      const driver = createDriver();
+
+      driver.onBrowserExit(new Error('browser exited'));
+
+      expect(driver.isPageOpen()).toBe(false);
+    });
+
+    it('emits the first exit error only', () => {
+      const driver = createDriver();
+      const exitErrors: Error[] = [];
+      driver.browserExit$.subscribe((error) => exitErrors.push(error));
+
+      const firstError = new Error('page crashed');
+      driver.onBrowserExit(firstError);
+      driver.onBrowserExit(new Error('browser disconnected'));
+
+      expect(exitErrors).toEqual([firstError]);
+    });
+  });
 });

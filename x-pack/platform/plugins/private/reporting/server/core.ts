@@ -95,6 +95,8 @@ export interface ReportingInternalStart {
   logger: Logger;
   notifications: NotificationsPluginStart;
   screenshotting?: ScreenshottingStart;
+  /** Set when page-render-service renders PNG and PDF reports, instead of this Kibana's browser. */
+  pageRenderScreenshotting?: ScreenshottingStart;
   security?: SecurityPluginStart;
   securityService: SecurityServiceStart;
   taskManager: TaskManagerStartContract;

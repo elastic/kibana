@@ -115,7 +115,7 @@ export class PdfWorkerOutOfMemoryError extends ReportingError {
 
   public humanFriendlyMessage() {
     return i18n.translate('reporting.common.pdfWorkerOutOfMemoryErrorMessage', {
-      defaultMessage: `Can't generate a PDF due to insufficient memory. Try making a smaller PDF and retrying this report.`,
+      defaultMessage: `Can't generate a PDF due to insufficient memory. The report was not retried because it would likely fail again. Try making a smaller PDF.`,
     });
   }
 }
@@ -138,6 +138,12 @@ export class BrowserUnexpectedlyClosedError extends ReportingError {
   public get code(): string {
     return BrowserUnexpectedlyClosedError.code;
   }
+
+  public humanFriendlyMessage() {
+    return i18n.translate('reporting.common.browserUnexpectedlyClosedErrorMessage', {
+      defaultMessage: `Can't generate this report because the browser closed unexpectedly. The report was not retried because it would likely fail again. Try reducing the amount of data in the report.`,
+    });
+  }
 }
 
 export class BrowserScreenshotError extends ReportingError {
@@ -151,6 +157,19 @@ export class KibanaShuttingDownError extends ReportingError {
   static code = 'kibana_shutting_down_error' as const;
   public get code(): string {
     return KibanaShuttingDownError.code;
+  }
+}
+
+export class KibanaStoppedUnexpectedlyError extends ReportingError {
+  static code = 'kibana_stopped_unexpectedly_error' as const;
+  public get code(): string {
+    return KibanaStoppedUnexpectedlyError.code;
+  }
+
+  public humanFriendlyMessage() {
+    return i18n.translate('reporting.common.kibanaStoppedUnexpectedlyErrorMessage', {
+      defaultMessage: `Can't generate this report because Kibana stopped unexpectedly while generating it. The report was not retried because it would likely fail again. Try reducing the amount of data in the report.`,
+    });
   }
 }
 

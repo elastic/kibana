@@ -170,6 +170,26 @@ describe('stream handler', () => {
       });
     });
 
+    it('show failed job toast explaining why the report was not retried', (done) => {
+      const sh = new TestReportingNotifierStreamHandler(jobQueueClientMock, core);
+      sh.testShowNotifications({
+        completed: [],
+        failed: [
+          {
+            id: 'yas7',
+            title: 'Yas 7',
+            jobtype: 'yas',
+            status: 'failed',
+            errorCode: 'browser_unexpectedly_closed_error',
+          } as JobSummary,
+        ],
+      }).subscribe(() => {
+        expect(mockShowDanger).toHaveBeenCalledTimes(1);
+        expect(mockShowDanger.mock.calls).toMatchSnapshot();
+        done();
+      });
+    });
+
     it('show multiple toast', (done) => {
       const sh = new TestReportingNotifierStreamHandler(jobQueueClientMock, core);
       sh.testShowNotifications({
