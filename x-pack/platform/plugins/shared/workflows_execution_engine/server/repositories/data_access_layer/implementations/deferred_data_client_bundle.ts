@@ -7,8 +7,7 @@
 
 import { withSpan } from '@kbn/apm-utils';
 import type { CoreSetup, CoreStart, Logger } from '@kbn/core/server';
-import { DataStreamDataClientBundle } from './data_stream/data_stream_data_client_bundle';
-import { PlainIndexDataClientBundle } from './plain_index/plain_index_data_client_bundle';
+import { EntityPairDataClientBundle } from './entity_pair_data_client_bundle';
 import type {
   DataClient,
   DataClientBundle,
@@ -48,8 +47,8 @@ export class DeferredDataClientBundle implements DataClientBundle {
   /** Registers both backends once. Later switches only start the selected one. */
   initSetup(coreSetup: CoreSetup): Promise<void> {
     if (!this.setupPromise) {
-      const plain = new PlainIndexDataClientBundle(this.deps);
-      const dataStream = new DataStreamDataClientBundle(this.deps);
+      const plain = new EntityPairDataClientBundle('plain_index', this.deps);
+      const dataStream = new EntityPairDataClientBundle('data_stream', this.deps);
       this.setupPromise = Promise.all([
         plain.initSetup(coreSetup),
         dataStream.initSetup(coreSetup),
@@ -150,17 +149,7 @@ export class DeferredDataClientBundle implements DataClientBundle {
   }
 
   private createDataClientBundle(source: ExecutionStorageSource): DataClientBundle {
-    const deps = { ...this.deps, source };
-    switch (source) {
-      case 'plain_index':
-        return new PlainIndexDataClientBundle(deps);
-      case 'data_stream':
-        return new DataStreamDataClientBundle(deps);
-      default: {
-        const unexpected: never = source;
-        throw new Error(`Unsupported storage source: ${unexpected}`);
-      }
-    }
+    return new EntityPairDataClientBundle(source, this.deps);
   }
 
   private createReady(): Promise<void> {

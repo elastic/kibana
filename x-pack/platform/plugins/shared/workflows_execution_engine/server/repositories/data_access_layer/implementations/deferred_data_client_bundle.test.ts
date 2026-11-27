@@ -7,19 +7,18 @@
 
 import { coreMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
-import { DataStreamDataClientBundle } from './data_stream/data_stream_data_client_bundle';
 import { DeferredDataClientBundle } from './deferred_data_client_bundle';
-import { PlainIndexDataClientBundle } from './plain_index/plain_index_data_client_bundle';
+import {
+  EntityPairDataClientBundle,
+  type EntityPairDataClientBundleDeps,
+} from './entity_pair_data_client_bundle';
 import { createMockStepDataClient, createMockWorkflowDataClient } from '../mocks';
+import type { ExecutionStorageSource } from '../types';
 
-jest.mock('./plain_index/plain_index_data_client_bundle');
-jest.mock('./data_stream/data_stream_data_client_bundle');
+jest.mock('./entity_pair_data_client_bundle');
 
-const MockBundle = PlainIndexDataClientBundle as jest.MockedClass<
-  typeof PlainIndexDataClientBundle
->;
-const MockDataStreamBundle = DataStreamDataClientBundle as jest.MockedClass<
-  typeof DataStreamDataClientBundle
+const MockPairBundle = EntityPairDataClientBundle as jest.MockedClass<
+  typeof EntityPairDataClientBundle
 >;
 
 const flushMicrotasks = async () => {
@@ -63,9 +62,11 @@ describe('DeferredDataClientBundle', () => {
       createStepDataClient: jest.fn().mockReturnValue(createMockStepDataClient()),
     };
 
-    MockBundle.mockImplementation(() => innerBundle as unknown as PlainIndexDataClientBundle);
-    MockDataStreamBundle.mockImplementation(
-      () => registeredDataStreamBundle as unknown as DataStreamDataClientBundle
+    MockPairBundle.mockImplementation(
+      (source: ExecutionStorageSource, _deps: EntityPairDataClientBundleDeps) =>
+        (source === 'data_stream'
+          ? registeredDataStreamBundle
+          : innerBundle) as unknown as EntityPairDataClientBundle
     );
 
     coreSetup = coreMock.createSetup();
@@ -275,13 +276,11 @@ describe('DeferredDataClientBundle', () => {
     });
 
     it('does not build another bundle when the source is unchanged', async () => {
-      MockBundle.mockClear();
-      MockDataStreamBundle.mockClear();
+      MockPairBundle.mockClear();
 
       await bundle.switchSource('plain_index');
 
-      expect(MockBundle).not.toHaveBeenCalled();
-      expect(MockDataStreamBundle).not.toHaveBeenCalled();
+      expect(MockPairBundle).not.toHaveBeenCalled();
       expect(innerBundle.stop).not.toHaveBeenCalled();
     });
 
@@ -294,8 +293,11 @@ describe('DeferredDataClientBundle', () => {
       streamClient.search.mockResolvedValue({ hits: { hits: [] } } as never);
       const dataStreamBundle = createInnerBundle();
       dataStreamBundle.createWorkflowDataClient.mockReturnValue(streamClient);
-      MockDataStreamBundle.mockImplementation(
-        () => dataStreamBundle as unknown as DataStreamDataClientBundle
+      MockPairBundle.mockImplementation(
+        (source: ExecutionStorageSource, _deps: EntityPairDataClientBundleDeps) =>
+          (source === 'data_stream'
+            ? dataStreamBundle
+            : innerBundle) as unknown as EntityPairDataClientBundle
       );
 
       await bundle.initSetup(coreSetup);
@@ -323,16 +325,22 @@ describe('DeferredDataClientBundle', () => {
           resolveDataStreamStart = resolve;
         })
       );
-      MockDataStreamBundle.mockImplementation(
-        () => dataStreamBundle as unknown as DataStreamDataClientBundle
+      MockPairBundle.mockImplementation(
+        (source: ExecutionStorageSource, _deps: EntityPairDataClientBundleDeps) =>
+          (source === 'data_stream'
+            ? dataStreamBundle
+            : innerBundle) as unknown as EntityPairDataClientBundle
       );
 
       await bundle.initSetup(coreSetup);
       await bundle.initStart(coreStart);
 
       const secondPlainBundle = createInnerBundle();
-      MockBundle.mockImplementation(
-        () => secondPlainBundle as unknown as PlainIndexDataClientBundle
+      MockPairBundle.mockImplementation(
+        (source: ExecutionStorageSource, _deps: EntityPairDataClientBundleDeps) =>
+          (source === 'data_stream'
+            ? dataStreamBundle
+            : secondPlainBundle) as unknown as EntityPairDataClientBundle
       );
 
       const firstSwitch = bundle.switchSource('data_stream');
@@ -367,8 +375,11 @@ describe('DeferredDataClientBundle', () => {
       streamClient.search.mockResolvedValue({ hits: { hits: [] } } as never);
       const dataStreamBundle = createInnerBundle();
       dataStreamBundle.createWorkflowDataClient.mockReturnValue(streamClient);
-      MockDataStreamBundle.mockImplementation(
-        () => dataStreamBundle as unknown as DataStreamDataClientBundle
+      MockPairBundle.mockImplementation(
+        (source: ExecutionStorageSource, _deps: EntityPairDataClientBundleDeps) =>
+          (source === 'data_stream'
+            ? dataStreamBundle
+            : innerBundle) as unknown as EntityPairDataClientBundle
       );
 
       await bundle.initSetup(coreSetup);
@@ -402,8 +413,11 @@ describe('DeferredDataClientBundle', () => {
           resolveNextStart = resolve;
         })
       );
-      MockDataStreamBundle.mockImplementation(
-        () => dataStreamBundle as unknown as DataStreamDataClientBundle
+      MockPairBundle.mockImplementation(
+        (source: ExecutionStorageSource, _deps: EntityPairDataClientBundleDeps) =>
+          (source === 'data_stream'
+            ? dataStreamBundle
+            : innerBundle) as unknown as EntityPairDataClientBundle
       );
 
       await bundle.initSetup(coreSetup);
@@ -439,8 +453,11 @@ describe('DeferredDataClientBundle', () => {
           resolveNextStart = resolve;
         })
       );
-      MockDataStreamBundle.mockImplementation(
-        () => dataStreamBundle as unknown as DataStreamDataClientBundle
+      MockPairBundle.mockImplementation(
+        (source: ExecutionStorageSource, _deps: EntityPairDataClientBundleDeps) =>
+          (source === 'data_stream'
+            ? dataStreamBundle
+            : innerBundle) as unknown as EntityPairDataClientBundle
       );
 
       await bundle.initSetup(coreSetup);
