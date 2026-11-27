@@ -27,6 +27,7 @@ interface UseVisorNlToEsqlParams {
   onAfterInsert?: () => void;
   telemetryService?: ESQLEditorTelemetryService;
   previewPendingRef: PreviewPendingRef;
+  publishQuery: (query: string) => void;
 }
 
 export const useVisorNlToEsql = ({
@@ -36,6 +37,7 @@ export const useVisorNlToEsql = ({
   onAfterInsert,
   telemetryService,
   previewPendingRef,
+  publishQuery,
 }: UseVisorNlToEsqlParams) => {
   const { euiTheme } = useEuiTheme();
   const reviewRef = useRef<Parameters<VisorNlResultHandler>[1] | undefined>(undefined);
@@ -46,8 +48,6 @@ export const useVisorNlToEsql = ({
         action: AiReviewAction.ACCEPT,
         linesChanged: generatedLineEnd - generatedLineStart + 1,
       });
-      // Submit the editor text after the original lines are removed, including
-      // any edits the user made to the generated lines.
       onSubmit(acceptedQuery);
       reviewRef.current?.onAccept();
     },
@@ -79,7 +79,6 @@ export const useVisorNlToEsql = ({
     showReview,
     dismiss,
     accept: acceptReview,
-    cleanup: discardReview,
   } = useReplaceReview({
     editorRef,
     editorModel,
@@ -88,7 +87,7 @@ export const useVisorNlToEsql = ({
     rejectAction,
     editSourceId: 'nl-to-esql-visor',
     previewPendingRef,
-    onRunEditedQuery: onSubmit,
+    publishQuery,
     onAfterAccept,
     onAfterReject,
   });
@@ -138,5 +137,5 @@ export const useVisorNlToEsql = ({
     [editorRef, editorModel, dismiss, showReview, onAfterInsert, previewPendingRef]
   );
 
-  return { showVisorReview, acceptReview, discardReview };
+  return { showVisorReview, acceptReview, dismissReview: dismiss };
 };

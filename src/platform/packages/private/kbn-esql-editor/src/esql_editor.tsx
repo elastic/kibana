@@ -160,7 +160,7 @@ const ESQLEditorInternal = function ESQLEditor({
   // (comment-to-ES|QL, Fix with AI, visor) is pending; populated below by those hooks.
   const pendingReviewRef = useRef<PendingReviewActions>({
     accept: () => false,
-    discard: () => {},
+    dismiss: () => {},
   });
   useImperativeHandle(
     editorApiRef,
@@ -396,14 +396,6 @@ const ESQLEditorInternal = function ESQLEditor({
       }
     }
   }, [code, fixedQuery]);
-
-  // The preview is never published, so a query change while one is pending came from
-  // outside, for example a tab switch. Drop the preview instead of keeping it in the new query.
-  useEffect(() => {
-    if (!previewPendingRef.current) return;
-    previewPendingRef.current = false;
-    pendingReviewRef.current.discard();
-  }, [fixedQuery]);
 
   // If variables are passed to the editor, sync them with the variables service.
   // This ensures that the latest variables are always available for suggestions.
@@ -669,7 +661,7 @@ const ESQLEditorInternal = function ESQLEditor({
     isReviewActiveRef,
     isGeneratingRef,
     acceptReview: acceptCommentReview,
-    discardReview: discardCommentReview,
+    dismissReview: dismissCommentReview,
   } = useCommentToEsql({
     editorRef,
     editorModel,
@@ -681,6 +673,7 @@ const ESQLEditorInternal = function ESQLEditor({
     telemetryService,
     onAfterInsert: expandToFitContent,
     previewPendingRef,
+    publishQuery: onQueryUpdate,
   });
 
   const onGenerateFromCommentRef = useRef(onGenerateFromComment);
@@ -735,7 +728,7 @@ const ESQLEditorInternal = function ESQLEditor({
       },
     });
 
-  const { acceptReview: acceptFixReview, discardReview: discardFixReview } = useSuggestFix({
+  const { acceptReview: acceptFixReview, dismissReview: dismissFixReview } = useSuggestFix({
     editorRef,
     editorModel,
     http: core.http,
@@ -745,6 +738,7 @@ const ESQLEditorInternal = function ESQLEditor({
     telemetryService,
     onAfterInsert: expandToFitContent,
     previewPendingRef,
+    publishQuery: onQueryUpdate,
   });
 
   const focusEditor = useCallback(() => editorRef.current?.focus(), []);
@@ -757,7 +751,7 @@ const ESQLEditorInternal = function ESQLEditor({
   const {
     showVisorReview,
     acceptReview: acceptVisorReview,
-    discardReview: discardVisorReview,
+    dismissReview: dismissVisorReview,
   } = useVisorNlToEsql({
     editorRef,
     editorModel,
@@ -765,15 +759,16 @@ const ESQLEditorInternal = function ESQLEditor({
     onAfterInsert: expandToFitContent,
     telemetryService,
     previewPendingRef,
+    publishQuery: onQueryUpdate,
   });
 
   // The first review that reports it was pending wins; accepting submits the query itself.
   pendingReviewRef.current = {
     accept: () => acceptCommentReview() || acceptFixReview() || acceptVisorReview(),
-    discard: () => {
-      discardCommentReview();
-      discardFixReview();
-      discardVisorReview();
+    dismiss: () => {
+      dismissCommentReview();
+      dismissFixReview();
+      dismissVisorReview();
     },
   };
 

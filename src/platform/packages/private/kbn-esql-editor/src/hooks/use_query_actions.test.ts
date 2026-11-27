@@ -53,7 +53,7 @@ const defaultParams = () => ({
     .mockResolvedValue(undefined) as unknown as ESQLEditorProps['onTextLangQuerySubmit'],
   onQueryUpdate: jest.fn(),
   telemetryService: createMockTelemetryService(),
-  pendingReviewRef: { current: { accept: jest.fn(() => false), discard: jest.fn() } },
+  pendingReviewRef: { current: { accept: jest.fn(() => false), dismiss: jest.fn() } },
 });
 
 describe('useQueryActions', () => {
@@ -171,7 +171,7 @@ describe('useQueryActions', () => {
   });
 
   describe('onUpdateAndSubmitQuery', () => {
-    it('discards a pending AI review, updates the query, then submits', () => {
+    it('dismisses a pending AI review, updates the query, then submits', () => {
       jest.useFakeTimers();
       const params = defaultParams();
       const { result } = renderHook(() => useQueryActions(params));
@@ -180,7 +180,7 @@ describe('useQueryActions', () => {
         result.current.onUpdateAndSubmitQuery('FROM new_index', QuerySource.HISTORY);
       });
 
-      expect(params.pendingReviewRef.current.discard).toHaveBeenCalledTimes(1);
+      expect(params.pendingReviewRef.current.dismiss).toHaveBeenCalledTimes(1);
       expect(params.onQueryUpdate).toHaveBeenCalledWith('FROM new_index');
       expect(params.telemetryService.trackQueryHistoryClicked).toHaveBeenCalledWith(false);
 
@@ -203,6 +203,24 @@ describe('useQueryActions', () => {
 
       expect(params.telemetryService.trackQueryHistoryClicked).toHaveBeenCalledWith(true);
       jest.useRealTimers();
+    });
+  });
+
+  describe('onPrettifyQuery', () => {
+    it('dismisses a pending AI review before formatting the query', () => {
+      const params = defaultParams();
+      const { result } = renderHook(() => useQueryActions(params));
+
+      act(() => {
+        result.current.onPrettifyQuery();
+      });
+
+      expect(params.pendingReviewRef.current.dismiss).toHaveBeenCalledTimes(1);
+      const dismissOrder = (params.pendingReviewRef.current.dismiss as jest.Mock).mock
+        .invocationCallOrder[0];
+      const readOrder = (params.editorRef.current?.getValue as jest.Mock).mock
+        .invocationCallOrder[0];
+      expect(dismissOrder).toBeLessThan(readOrder);
     });
   });
 

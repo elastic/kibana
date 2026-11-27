@@ -48,6 +48,7 @@ interface UseCommentToEsqlParams {
   autoAcceptCallbackRef?: MutableRefObject<((finalQuery: string) => void) | undefined>;
   onAfterInsert?: () => void;
   previewPendingRef?: PreviewPendingRef;
+  publishQuery: (query: string) => void;
 }
 
 export const useCommentToEsql = ({
@@ -62,6 +63,7 @@ export const useCommentToEsql = ({
   autoAcceptCallbackRef,
   onAfterInsert,
   previewPendingRef,
+  publishQuery,
 }: UseCommentToEsqlParams) => {
   const { euiTheme } = useEuiTheme();
   // Aborts the in-flight nl_to_esql HTTP request when the user retriggers or accepts/rejects.
@@ -117,7 +119,7 @@ export const useCommentToEsql = ({
   const {
     showReview,
     accept: acceptReview,
-    cleanup: discardReview,
+    dismiss: dismissReview,
     reviewStateRef,
   } = useReplaceReview({
     editorRef,
@@ -132,7 +134,7 @@ export const useCommentToEsql = ({
     isReplaceMode: ({ firstChangedOriginalLine, lastChangedOriginalLine }) =>
       lastChangedOriginalLine >= firstChangedOriginalLine,
     previewPendingRef,
-    onRunEditedQuery: onSubmit,
+    publishQuery,
     onAfterAccept: ({ generatedLineStart, generatedLineEnd }, acceptedQuery) => {
       telemetryService?.trackCommentToEsqlReviewed({
         action: AiReviewAction.ACCEPT,
@@ -148,11 +150,11 @@ export const useCommentToEsql = ({
   });
 
   const cleanup = useCallback(() => {
-    discardReview();
+    dismissReview();
     clearCommentAnchor();
     clearGeneratingDecoration();
     abortInFlight();
-  }, [discardReview, clearCommentAnchor, clearGeneratingDecoration, abortInFlight]);
+  }, [dismissReview, clearCommentAnchor, clearGeneratingDecoration, abortInFlight]);
 
   const generateESQL = useCallback(
     async (
@@ -372,6 +374,6 @@ export const useCommentToEsql = ({
     isReviewActiveRef: reviewStateRef,
     isGeneratingRef,
     acceptReview,
-    discardReview: cleanup,
+    dismissReview: cleanup,
   };
 };

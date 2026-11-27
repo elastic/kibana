@@ -74,6 +74,7 @@ interface UseSuggestFixParams {
   telemetryService?: ESQLEditorTelemetryService;
   onAfterInsert?: () => void;
   previewPendingRef?: PreviewPendingRef;
+  publishQuery: (query: string) => void;
 }
 
 export const useSuggestFix = ({
@@ -86,6 +87,7 @@ export const useSuggestFix = ({
   telemetryService,
   onAfterInsert,
   previewPendingRef,
+  publishQuery,
 }: UseSuggestFixParams) => {
   const { euiTheme } = useEuiTheme();
 
@@ -127,7 +129,7 @@ export const useSuggestFix = ({
     showReview,
     reject: rejectFix,
     accept: acceptReview,
-    cleanup: discardReview,
+    dismiss: dismissReview,
   } = useReplaceReview({
     editorRef,
     editorModel,
@@ -141,7 +143,7 @@ export const useSuggestFix = ({
     },
     editSourceId: 'esql-suggest-fix',
     previewPendingRef,
-    onRunEditedQuery: onSubmit,
+    publishQuery,
     onAfterAccept: (state, acceptedQuery) => {
       trackFixReview(AiReviewAction.ACCEPT, state.generatedLineEnd - state.generatedLineStart + 1);
       onSubmit(acceptedQuery);
@@ -294,5 +296,5 @@ export const useSuggestFix = ({
     };
   }, [isEnabled, runSuggestFix, editorModel]);
 
-  return { acceptReview, discardReview };
+  return { acceptReview, dismissReview };
 };

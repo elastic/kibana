@@ -91,6 +91,7 @@ describe('useVisorNlToEsql', () => {
     };
     const onSubmit = jest.fn();
     const previewPendingRef = { current: false };
+    const publishQuery = jest.fn();
 
     const rendered = renderHook(() =>
       useVisorNlToEsql({
@@ -98,6 +99,7 @@ describe('useVisorNlToEsql', () => {
         editorModel,
         onSubmit,
         previewPendingRef,
+        publishQuery,
       })
     );
 
@@ -105,6 +107,7 @@ describe('useVisorNlToEsql', () => {
       ...rendered,
       onSubmit,
       previewPendingRef,
+      publishQuery,
       executeEdits,
       emitContentChange,
       collapseGeneratedBlock,
@@ -140,32 +143,36 @@ describe('useVisorNlToEsql', () => {
     expect(onSubmit).toHaveBeenCalledWith('FROM metrics-*\n| LIMIT 50');
   });
 
-  it('drops an edited suggestion and runs the user query', () => {
+  it('ends the suggestion on the first edit and publishes the user query', async () => {
     const model = buildModel(ORIGINAL);
     const onReject = jest.fn();
-    const { result, onSubmit, emitContentChange } = renderVisor(model);
+    const { result, onSubmit, publishQuery, emitContentChange } = renderVisor(model);
 
     act(() => {
       result.current.showVisorReview(GENERATED, { onAccept: jest.fn(), onReject });
     });
     model.setValue(`FROM traces-*\n${GENERATED}`);
     emitContentChange();
+    await act(async () => {
+      await Promise.resolve();
+    });
 
+    expect(model.getValue()).toBe('FROM traces-*');
+    expect(publishQuery).toHaveBeenCalledWith('FROM traces-*');
+    expect(onReject).not.toHaveBeenCalled();
+
+    // Nothing is pending any more, so Run submits the editor's own query.
     let accepted = true;
     act(() => {
       accepted = result.current.acceptReview();
     });
-
-    expect(accepted).toBe(true);
-    expect(onSubmit).toHaveBeenCalledTimes(1);
-    expect(onSubmit).toHaveBeenCalledWith('FROM traces-*');
-    expect(onReject).not.toHaveBeenCalled();
-    expect(model.getValue()).toBe('FROM traces-*');
+    expect(accepted).toBe(false);
+    expect(onSubmit).not.toHaveBeenCalled();
   });
 
-  it('runs a fully replaced buffer instead of restoring the suggestion', () => {
+  it('publishes a fully replaced buffer without restoring the suggestion', async () => {
     const model = buildModel(ORIGINAL);
-    const { result, onSubmit, executeEdits, emitContentChange, collapseGeneratedBlock } =
+    const { result, executeEdits, publishQuery, emitContentChange, collapseGeneratedBlock } =
       renderVisor(model);
 
     act(() => {
@@ -173,17 +180,26 @@ describe('useVisorNlToEsql', () => {
     });
     model.setValue('FROM traces-*');
     collapseGeneratedBlock();
-    emitContentChange();
     executeEdits.mockClear();
-
-    let accepted = true;
-    act(() => {
-      accepted = result.current.acceptReview();
+    emitContentChange();
+    await act(async () => {
+      await Promise.resolve();
     });
 
-    expect(accepted).toBe(true);
-    expect(onSubmit).toHaveBeenCalledWith('FROM traces-*');
     expect(executeEdits).not.toHaveBeenCalled();
+    expect(publishQuery).toHaveBeenCalledWith('FROM traces-*');
     expect(model.getValue()).toBe('FROM traces-*');
+  });
+
+  it('removes the suggestion when it is dismissed from outside, for example by History', () => {
+    const model = buildModel(ORIGINAL);
+    const { result } = renderVisor(model);
+
+    act(() => {
+      result.current.showVisorReview(GENERATED, { onAccept: jest.fn() });
+    });
+    act(() => result.current.dismissReview());
+
+    expect(model.getValue()).toBe(ORIGINAL);
   });
 });
