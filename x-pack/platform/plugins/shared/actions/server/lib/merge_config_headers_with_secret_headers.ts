@@ -14,3 +14,7 @@ export function mergeConfigHeadersWithSecretHeaders(
     ...(secretHeaders ?? {}),
   };
 }
+
+/** Returns the names of a connector's secret headers, so redirects can drop them. */
+export const getSecretHeaderNames = (secretHeaders?: Record<string, string> | null): string[] =>
+  Object.keys(secretHeaders ?? {});

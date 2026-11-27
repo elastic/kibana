@@ -131,6 +131,7 @@ describe('requestOAuthClientCredentialsToken', () => {
             Symbol(kCapture): false,
           },
           "maxContentLength": 1000000,
+          "maxRedirects": 0,
           "method": "post",
           "proxy": false,
           "timeout": 360000,

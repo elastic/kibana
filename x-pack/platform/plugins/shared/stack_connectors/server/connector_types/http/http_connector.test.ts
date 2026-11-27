@@ -1388,6 +1388,43 @@ describe('execute()', () => {
       expect(call.headers['Content-Type']).toBeUndefined();
     });
 
+    test('does not mark the generated multipart Content-Type as a secret header', async () => {
+      await connectorType.executor?.({
+        actionId: 'some-id',
+        services,
+        config: baseConfig,
+        secrets: {
+          ...emptySecrets,
+          secretHeaders: { 'Content-Type': 'secret-value', 'X-Token': 'secret-token' },
+        },
+        params: {
+          method: 'POST',
+          path: '/upload',
+          form_data: { field: { content: 'value' } },
+        },
+        configurationUtilities,
+        logger: mockedLogger,
+        connectorUsageCollector,
+      });
+
+      expect(requestMock.mock.calls[0][0].secretHeaderNames).toEqual(['X-Token']);
+    });
+
+    test('does not mark a secret header replaced by a params header as secret', async () => {
+      await connectorType.executor?.({
+        actionId: 'some-id',
+        services,
+        config: baseConfig,
+        secrets: { ...emptySecrets, secretHeaders: { 'X-Token': 'secret-token' } },
+        params: { method: 'GET', path: '/', headers: { 'X-Token': 'public' } },
+        configurationUtilities,
+        logger: mockedLogger,
+        connectorUsageCollector,
+      });
+
+      expect(requestMock.mock.calls[0][0].secretHeaderNames).toEqual([]);
+    });
+
     test('strips user-supplied Content-Type so axios can set the multipart boundary', async () => {
       await connectorType.executor?.({
         actionId: 'some-id',

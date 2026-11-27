@@ -15,15 +15,29 @@ interface ConnectorUsage {
 
 export class ConnectorUsageCollector {
   private connectorId: string;
+  private connectorTypeId?: string;
   private usage: ConnectorUsage = {
     requestBodyBytes: 0,
   };
 
   private logger: Logger;
 
-  constructor({ logger, connectorId }: { logger: Logger; connectorId: string }) {
+  constructor({
+    logger,
+    connectorId,
+    connectorTypeId,
+  }: {
+    logger: Logger;
+    connectorId: string;
+    connectorTypeId?: string;
+  }) {
     this.logger = logger;
     this.connectorId = connectorId;
+    this.connectorTypeId = connectorTypeId;
+  }
+
+  public getConnectorTypeId(): string | undefined {
+    return this.connectorTypeId;
   }
 
   public addRequestBodyBytes(result?: AxiosError | AxiosResponse, body: string | object = '') {

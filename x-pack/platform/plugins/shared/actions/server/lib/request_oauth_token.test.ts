@@ -50,6 +50,51 @@ describe('requestOAuthToken', () => {
     }
   );
 
+  test.each(['client_credentials', 'authorization_code', 'refresh_token'])(
+    'does not follow a redirect from the token endpoint for the %s grant',
+    async (grantType) => {
+      axiosInstanceMock.mockResolvedValueOnce({
+        status: 307,
+        headers: { location: 'https://other.example.com/token' },
+        data: '',
+      });
+
+      await expect(
+        requestOAuthToken('https://test/token', grantType, actionsConfigMock.create(), mockLogger, {
+          clientId: 'id',
+          clientSecret: 'secret',
+        })
+      ).rejects.toThrow(
+        'OAuth token endpoint returned a redirect (HTTP 307). Configure the token URL it redirects to.'
+      );
+      expect(axiosInstanceMock).toHaveBeenCalledWith(
+        'https://test/token',
+        expect.objectContaining({ maxRedirects: 0 })
+      );
+    }
+  );
+
+  test('keeps credentials in the token URL out of the redirect error and log', async () => {
+    axiosInstanceMock.mockResolvedValueOnce({ status: 302, headers: {}, data: '' });
+    const tokenUrl = 'https://user:pass@test/token?client_secret=confidential';
+
+    const result = requestOAuthToken(
+      tokenUrl,
+      'client_credentials',
+      actionsConfigMock.create(),
+      mockLogger,
+      { clientId: 'id', clientSecret: 'secret' }
+    );
+
+    await expect(result).rejects.toThrow(
+      'OAuth token endpoint returned a redirect (HTTP 302). Configure the token URL it redirects to.'
+    );
+    const [logged] = mockLogger.warn.mock.calls[mockLogger.warn.mock.calls.length - 1];
+    expect(logged).toContain('Token URL: https://test/token');
+    expect(logged).not.toContain('pass');
+    expect(logged).not.toContain('confidential');
+  });
+
   test('making a token request with the required options', async () => {
     const configurationUtilities = actionsConfigMock.create();
     axiosInstanceMock.mockReturnValueOnce({
@@ -120,6 +165,7 @@ describe('requestOAuthToken', () => {
             Symbol(kCapture): false,
           },
           "maxContentLength": 1000000,
+          "maxRedirects": 0,
           "method": "post",
           "proxy": false,
           "timeout": 360000,

@@ -39,6 +39,7 @@ export const request = async <T = unknown>({
   timeout,
   connectorUsageCollector,
   keepAlive,
+  secretHeaderNames,
   ...config
 }: {
   axios: AxiosInstance;
@@ -57,6 +58,8 @@ export const request = async <T = unknown>({
    *  It will be ignored for non-proxied http connections, this issue is tracked in https://github.com/elastic/kibana/issues/252991
    **/
   keepAlive?: boolean;
+  /** Names of headers that hold secrets; they are never sent to another origin on a redirect. */
+  secretHeaderNames?: readonly string[];
 } & AxiosRequestConfig): Promise<AxiosResponse> => {
   configurationUtilities.ensureUriAllowed(url);
 
@@ -106,7 +109,12 @@ export const request = async <T = unknown>({
       proxy: false,
       maxContentLength,
       timeout: Math.max(settingsTimeout, timeout ?? 0),
-      beforeRedirect: getBeforeRedirectFn(configurationUtilities),
+      beforeRedirect: getBeforeRedirectFn(
+        configurationUtilities,
+        logger,
+        connectorUsageCollector?.getConnectorTypeId(),
+        secretHeaderNames
+      ),
     });
 
     if (connectorUsageCollector) {

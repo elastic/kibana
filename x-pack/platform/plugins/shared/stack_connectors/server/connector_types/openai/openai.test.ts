@@ -6,6 +6,7 @@
  */
 
 import type { AxiosError } from 'axios';
+import OpenAI from 'openai';
 import { OpenAIConnector } from './openai';
 import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
 import {
@@ -21,6 +22,7 @@ import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 import { initDashboard } from '../lib/gen_ai/create_gen_ai_dashboard';
 import { PassThrough, Transform } from 'stream';
 import { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
+import { RedirectNotAllowedError } from '@kbn/actions-plugin/server/lib/create_redirect_safe_fetch';
 import { TaskErrorSource, getErrorSource } from '@kbn/task-manager-plugin/server/task_running';
 
 const DEFAULT_OTHER_OPENAI_MODEL = 'local-model';
@@ -615,6 +617,25 @@ describe('OpenAIConnector', () => {
     });
 
     describe('invokeAsyncIterator', () => {
+      it('gives the OpenAI client a fetch that checks redirects', () => {
+        jest.mocked(OpenAI).mockClear();
+        new OpenAIConnector({
+          configurationUtilities: actionsConfigMock.create(),
+          connector: { id: '1', type: CONNECTOR_ID },
+          config: {
+            apiUrl: 'https://api.openai.com/v1/chat/completions',
+            apiProvider: OpenAiProviderType.OpenAi,
+          },
+          secrets: { apiKey: '123' },
+          logger,
+          services: actionsMock.createServices(),
+        });
+
+        expect(OpenAI).toHaveBeenCalledWith(
+          expect.objectContaining({ fetch: expect.any(Function) })
+        );
+      });
+
       it('the API call is successful with correct request parameters', async () => {
         await connector.invokeAsyncIterator(sampleOpenAiBody, connectorUsageCollector);
         expect(mockRequest).toHaveBeenCalledTimes(0);
@@ -658,6 +679,20 @@ describe('OpenAIConnector', () => {
         await expect(
           connector.invokeAsyncIterator(sampleOpenAiBody, connectorUsageCollector)
         ).rejects.toThrow('API Error');
+      });
+
+      it('explains a redirect to a host that is not allowed instead of a generic connection error', async () => {
+        mockCreate.mockImplementationOnce(() => {
+          throw Object.assign(new Error('Connection error.'), {
+            cause: new RedirectNotAllowedError('evil.example.org'),
+          });
+        });
+
+        await expect(
+          connector.invokeAsyncIterator(sampleOpenAiBody, connectorUsageCollector)
+        ).rejects.toThrow(
+          'Unexpected API Error: Connector request was redirected to "evil.example.org", which is not added to the Kibana config xpack.actions.allowedHosts'
+        );
       });
 
       it('marks 429 errors as user errors', async () => {

@@ -12,7 +12,7 @@ import { getEarsEndpointsForProvider, resolveEarsUrl } from './url';
 import { request } from '../axios_utils';
 import type { ActionsConfigurationUtilities } from '../../actions_config';
 import type { OAuthTokenResponse } from '../request_oauth_token';
-import { EarsRequestError, getEarsRequestId } from './ears_request_error';
+import { EarsRequestError, getEarsRedirectError, getEarsRequestId } from './ears_request_error';
 
 export type EarsTokenResponse = OAuthTokenResponse & { earsRequestId?: string };
 
@@ -51,10 +51,18 @@ export async function requestEarsToken(
     },
     configurationUtilities,
     sslOverrides: configurationUtilities.getEARSSSLSettings(),
+    // The body carries the authorization code or refresh token; never resend it to a redirect target.
+    maxRedirects: 0,
     validateStatus: () => true,
   });
 
   const earsRequestId = getEarsRequestId(res.headers);
+
+  const redirectError = getEarsRedirectError(res.status, earsRequestId);
+  if (redirectError) {
+    logger.warn(redirectError.message);
+    throw redirectError;
+  }
 
   if (res.status === 200) {
     return {

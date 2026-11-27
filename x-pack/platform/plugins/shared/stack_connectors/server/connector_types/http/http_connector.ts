@@ -175,6 +175,15 @@ function normalizeSecretHeaders(secretHeaders: unknown): Record<string, string> 
   return headers;
 }
 
+// Only secret headers that are still sent with their secret value count: params headers can
+// replace them, and form_data requests drop Content-Type so axios can set the multipart boundary.
+function getSentSecretHeaderNames(
+  secretHeaders: Record<string, string>,
+  sentHeaders: Record<string, unknown>
+): string[] {
+  return Object.keys(secretHeaders).filter((name) => sentHeaders[name] === secretHeaders[name]);
+}
+
 interface SandboxAuthHeadersOptions {
   config: Record<string, unknown>;
   secrets: Record<string, unknown>;
@@ -581,6 +590,10 @@ export async function executor(
       connectorUsageCollector,
       keepAlive,
       maxRedirects,
+      secretHeaderNames: getSentSecretHeaderNames(
+        normalizeSecretHeaders(execOptions.secrets.secretHeaders),
+        finalHeaders
+      ),
       ...(fetcher?.max_content_length != null && {
         maxContentLength: fetcher.max_content_length,
         maxBodyLength: fetcher.max_content_length,

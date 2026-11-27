@@ -10,6 +10,7 @@ import type { ServiceParams } from '@kbn/actions-plugin/server';
 import { SubActionConnector } from '@kbn/actions-plugin/server';
 import type { AxiosError } from 'axios';
 import OpenAI from 'openai';
+import type { Fetch } from 'openai/core';
 import { PassThrough } from 'stream';
 import type { Agent as HttpsAgent } from 'https';
 import type { Agent as HttpAgent, IncomingMessage } from 'http';
@@ -23,6 +24,10 @@ import { trace } from '@opentelemetry/api';
 import type { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
 import { TaskErrorSource, createTaskRunError } from '@kbn/task-manager-plugin/server';
 import { getCustomAgents } from '@kbn/actions-plugin/server/lib/get_custom_agents';
+import {
+  createRedirectSafeFetch,
+  RedirectNotAllowedError,
+} from '@kbn/actions-plugin/server/lib/create_redirect_safe_fetch';
 import {
   DEFAULT_MODEL,
   DEFAULT_TIMEOUT_MS,
@@ -160,6 +165,13 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
       defaultHeaders,
       httpAgent,
       defaultQuery,
+      // node-fetch's own redirect handling skips allowedHosts and forwards headers like api-key.
+      // The SDK types its fetch with web fetch types, but in Node it calls node-fetch, which this wraps.
+      fetch: createRedirectSafeFetch({
+        configurationUtilities: this.configurationUtilities,
+        logger: this.logger,
+        connectorType: this.connector.type,
+      }) as unknown as Fetch,
     });
   }
 
@@ -440,7 +452,11 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
       return { consumerStream: teed[0], tokenCountStream: teed[1] };
       // since we do not use the sub action connector request method, we need to do our own error handling
     } catch (e) {
-      const errorMessage = this.getResponseErrorMessage(e);
+      // The SDK wraps fetch errors in a generic "Connection error."; keep the allowedHosts reason.
+      const errorMessage =
+        e.cause instanceof RedirectNotAllowedError
+          ? `Unexpected API Error: ${e.cause.message}`
+          : this.getResponseErrorMessage(e);
 
       // Based on the OpenAI API documentation, the error contains the status code in the `status` property
       if (e.status === 429) {

@@ -13,6 +13,7 @@ import { getOrElse, map } from 'fp-ts/Option';
 import type { ActionTypeExecutorResult as ConnectorTypeExecutorResult } from '@kbn/actions-plugin/server/types';
 
 import { request } from '@kbn/actions-plugin/server/lib/axios_utils';
+import { getSecretHeaderNames } from '@kbn/actions-plugin/server/lib';
 import {
   AlertingConnectorFeatureId,
   SecurityConnectorFeatureId,
@@ -140,6 +141,7 @@ export async function executor(
       configurationUtilities,
       sslOverrides,
       connectorUsageCollector,
+      secretHeaderNames: getSecretHeaderNames(execOptions.secrets.secretHeaders),
     })
   );
 

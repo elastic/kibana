@@ -16,6 +16,7 @@ import { duration as momentDuration } from 'moment';
 import getPort from 'get-port';
 
 import { request } from '../lib/axios_utils';
+import { createRedirectSafeFetch } from '../lib/create_redirect_safe_fetch';
 import { ByteSizeValue } from '@kbn/config-schema';
 import type { Logger } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
@@ -335,6 +336,167 @@ describe('axios connections', () => {
         await request({ axios, url: redirectUrl, logger, configurationUtilities });
       await expect(fn()).rejects.toThrow('Redirected');
     });
+
+    describe('headers', () => {
+      const headers = {
+        'Content-Type': 'application/json',
+        Authorization: 'Bearer confidential',
+        'X-API-Key': 'confidential',
+        'X-Routing-Key': 'confidential',
+      };
+      const servers: http.Server[] = [];
+      const listen = async (handler: http.RequestListener): Promise<string> => {
+        const { url, server } = await startHttpServer(handler);
+        servers.push(server);
+        return url;
+      };
+
+      afterEach(() => {
+        // close() leaves active connections open, so a redirect socket that never closes would
+        // keep the Jest worker alive instead of failing the test.
+        servers.splice(0).forEach((server) => {
+          server.closeAllConnections();
+          server.close();
+        });
+      });
+
+      test('it drops credential headers when redirecting to another origin', async () => {
+        const targetUrl = await listen(echoRequest);
+        const redirectUrl = await listen((req, res) => {
+          // 307 keeps the method and body, so the safe content headers must survive the redirect
+          res.writeHead(307, { Location: `${targetUrl}/landing` });
+          res.end();
+        });
+
+        const configurationUtilities = getACUfromConfig();
+        const { data } = await request({
+          axios,
+          url: redirectUrl,
+          method: 'post',
+          data: { hello: 'world' },
+          headers,
+          logger,
+          configurationUtilities,
+        });
+
+        expect(data.headers['content-type']).toBe('application/json');
+        expect(data.body).toBe('{"hello":"world"}');
+        expect(data.headers).not.toHaveProperty('authorization');
+        expect(data.headers).not.toHaveProperty('x-api-key');
+        expect(data.headers).not.toHaveProperty('x-routing-key');
+      });
+
+      test('it drops secret headers with a safe name when redirecting to another origin', async () => {
+        const targetUrl = await listen(echoRequest);
+        const redirectUrl = await listen((req, res) => {
+          res.writeHead(307, { Location: `${targetUrl}/landing` });
+          res.end();
+        });
+
+        const { data } = await request({
+          axios,
+          url: redirectUrl,
+          method: 'post',
+          data: { hello: 'world' },
+          headers: { ...headers, Accept: 'confidential-accept' },
+          secretHeaderNames: ['accept'],
+          logger,
+          configurationUtilities: getACUfromConfig(),
+        });
+
+        expect(data.headers['content-type']).toBe('application/json');
+        expect(data.headers.accept).not.toBe('confidential-accept');
+      });
+
+      test('it keeps credential headers when redirecting within the same origin', async () => {
+        const targetUrl = await listen((req, res) => {
+          if (req.url === '/start') {
+            res.writeHead(302, { Location: '/landing' });
+            res.end();
+            return;
+          }
+          echoRequest(req, res);
+        });
+
+        const configurationUtilities = getACUfromConfig();
+        const { data } = await request({
+          axios,
+          url: `${targetUrl}/start`,
+          headers,
+          logger,
+          configurationUtilities,
+        });
+
+        expect(data.path).toBe('/landing');
+        expect(data.headers.authorization).toBe('Bearer confidential');
+        expect(data.headers['x-api-key']).toBe('confidential');
+        expect(data.headers['x-routing-key']).toBe('confidential');
+      });
+
+      test('the fetch for non-axios SDKs drops credential headers on a cross-origin redirect', async () => {
+        const targetUrl = await listen(echoRequest);
+        const redirectUrl = await listen((req, res) => {
+          res.writeHead(307, { Location: `${targetUrl}/landing` });
+          res.end();
+        });
+
+        const fetch = createRedirectSafeFetch({
+          configurationUtilities: getACUfromConfig(),
+          logger,
+        });
+        const response = await fetch(redirectUrl, {
+          method: 'POST',
+          body: '{"hello":"world"}',
+          headers,
+        });
+        const data = await response.json();
+
+        expect(data.path).toBe('/landing');
+        expect(data.headers['content-type']).toBe('application/json');
+        expect(data.body).toBe('{"hello":"world"}');
+        expect(data.headers).not.toHaveProperty('authorization');
+        expect(data.headers).not.toHaveProperty('x-api-key');
+        expect(data.headers).not.toHaveProperty('x-routing-key');
+      });
+
+      test('the fetch for non-axios SDKs closes the connection of a redirect whose body never ends', async () => {
+        const targetUrl = await listen(echoRequest);
+        let redirectClosed: () => void = () => {};
+        const closed = new Promise<void>((resolve) => {
+          redirectClosed = resolve;
+        });
+        const redirectUrl = await listen((req, res) => {
+          res.on('close', () => redirectClosed());
+          res.writeHead(302, { Location: `${targetUrl}/landing` });
+          res.write('never ends');
+        });
+
+        const fetch = createRedirectSafeFetch({
+          configurationUtilities: getACUfromConfig(),
+          logger,
+        });
+        const response = await fetch(redirectUrl, { headers });
+
+        expect((await response.json()).path).toBe('/landing');
+        await closed;
+      });
+
+      test('the fetch for non-axios SDKs rejects a redirect to a host that is not allowed', async () => {
+        const redirectUrl = await listen((req, res) => {
+          res.writeHead(302, { Location: 'http://127.0.0.1:1/capture' });
+          res.end();
+        });
+
+        const fetch = createRedirectSafeFetch({
+          configurationUtilities: getACUfromConfig({ allowedHosts: ['localhost'] }),
+          logger,
+        });
+
+        await expect(fetch(redirectUrl, { headers })).rejects.toThrow(
+          'is not added to the Kibana config xpack.actions.allowedHosts'
+        );
+      });
+    });
   });
 
   // targetHttps and proxyHttps should also range over [false, true], but currently
@@ -578,6 +740,28 @@ const TlsOptions = {
   key: KIBANA_KEY,
   ca: CA,
 };
+
+function echoRequest(req: http.IncomingMessage, res: http.ServerResponse) {
+  let body = '';
+  req.on('data', (chunk) => (body += chunk));
+  req.on('end', () => {
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({ path: req.url, headers: req.headers, body }));
+  });
+}
+
+async function startHttpServer(
+  handler: http.RequestListener
+): Promise<{ url: string; server: http.Server }> {
+  const port = await getPort();
+  const server = http.createServer(handler);
+  server.unref();
+  const readySignal = createReadySignal<{ url: string; server: http.Server }>();
+  server.listen(port, 'localhost', () => {
+    readySignal.signal({ url: `http://localhost:${port}`, server });
+  });
+  return readySignal.wait();
+}
 
 interface CreateServerOptions {
   useHttps: boolean;
