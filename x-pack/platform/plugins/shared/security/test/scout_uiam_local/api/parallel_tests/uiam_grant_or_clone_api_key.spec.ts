@@ -72,7 +72,7 @@ apiTest.describe('[NON-MKI] UIAM API Keys grant or clone', { tag: tags.serverles
     await kibanaAgent.close();
   });
 
-  /** Asks UIAM, as Kibana, who an API key is, and so who created it. */
+  /** Asks UIAM, as Kibana, who an API key is, who created it, and whether it is an internal key. */
   const authenticateAtUiam = async (apiKey: string) => {
     const response = await fetch(UIAM_AUTHENTICATE_URL, {
       method: 'POST',
@@ -83,8 +83,14 @@ apiTest.describe('[NON-MKI] UIAM API Keys grant or clone', { tag: tags.serverles
       },
       dispatcher: kibanaAgent,
     });
-    const body = (await response.json()) as { credentials?: { creator?: UiamCreator } };
-    return { status: response.status, creator: body.credentials?.creator };
+    const body = (await response.json()) as {
+      credentials?: { creator?: UiamCreator; internal?: boolean };
+    };
+    return {
+      status: response.status,
+      creator: body.credentials?.creator,
+      internal: body.credentials?.internal,
+    };
   };
 
   const callTestEndpoint = async (
@@ -181,10 +187,12 @@ apiTest.describe('[NON-MKI] UIAM API Keys grant or clone', { tag: tags.serverles
 
       expect(response).toHaveStatusCode(200);
       expect(response.body.name).toBe('copy-test-from-external-key');
-      // The copy is made by the user who created the external key, not by the key. The seeded key
-      // takes the creator of whoever logged in last, so no particular user is expected.
+      // The copy is an internal key, made by the user who created the external key and not by the
+      // key. The seeded key takes the creator of whoever logged in last, so no particular user is
+      // expected.
       const copy = await authenticateAtUiam(response.body.api_key);
       expect(copy.status).toBe(200);
+      expect(copy.internal).toBe(true);
       expect(copy.creator?.type).toBe('user');
     }
   );

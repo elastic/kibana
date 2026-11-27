@@ -33,9 +33,10 @@ export interface UiamAPIKeysType {
    * that key instead, so the new key keeps the source key's creator and expiration, and actions it
    * performs can be traced back to the user who created the source key.
    *
-   * A clone UIAM refuses because of Kibana and not the key (it does not accept Kibana as a project
-   * service account, or has no clone endpoint) throws a server error, as does any other failure,
-   * such as a revoked source key.
+   * A clone that UIAM answers with a 401, 403 or 404, which points at the project's UIAM
+   * configuration, throws a server error (500). Any other failure, such as a revoked source key
+   * (UIAM's 400), is thrown as UIAM's own error, so callers can tell a bad credential from a problem
+   * with the project.
    *
    * @param request The Kibana request instance containing the credential to grant or clone from.
    * @param params The parameters for creating the API key (name).

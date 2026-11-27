@@ -613,6 +613,10 @@ describe('UiamAPIKeys', () => {
         );
         expect((failure as Boom.Boom).output.statusCode).toBe(500);
         expect((failure as Boom.Boom).message).toContain(refusal.message);
+        // UIAM's compact `[code] message` is in it, the whole serialized payload is not.
+        expect((failure as Boom.Boom).message).not.toContain(
+          JSON.stringify(refusal.output.payload)
+        );
         expect(mockUiam.grantApiKey).not.toHaveBeenCalled();
         expect(logger.error).toHaveBeenCalledWith(
           expect.stringContaining('Failed to clone API key')

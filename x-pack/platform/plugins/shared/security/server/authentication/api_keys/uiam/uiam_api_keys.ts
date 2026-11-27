@@ -165,10 +165,11 @@ export class UiamAPIKeys implements UiamAPIKeysType {
    * that key instead, so the new key keeps the source key's creator and expiration, and is limited to
    * the applications of projects.
    *
-   * If UIAM refuses the clone because of Kibana and not the key (401, 403 or 404: a client
-   * certificate it does not accept, or no clone endpoint), it throws a server error: that is a
-   * project configuration problem to fix, not to hide behind a grant that loses the creator. Any
-   * other clone failure, such as a revoked source key, is thrown as it is.
+   * If UIAM answers the clone with a 401, 403 or 404 (a client certificate it does not accept, no
+   * clone endpoint, or a source key without access to the project), it throws a server error (500):
+   * that points at the project's UIAM configuration, to fix and not to hide behind a grant that
+   * loses the creator. Any other clone failure, such as a revoked source key (UIAM's 400), is thrown
+   * as UIAM's own error.
    *
    * @param request The Kibana request carrying the credential to grant or clone from.
    * @param params The name of the new API key.
@@ -199,11 +200,12 @@ export class UiamAPIKeys implements UiamAPIKeysType {
         throw e;
       }
 
-      // The caller must not see UIAM's 401 or 403 as if its own credentials were wrong.
+      // The caller must not see UIAM's 401 or 403 as if its own credentials were wrong. The message
+      // carries UIAM's compact `[code/type] message`; the whole payload is in the log above.
       throw Boom.badImplementation(
         `UIAM refused to clone an API key (${e.output.statusCode}). This points to the project's ` +
           `UIAM configuration, such as the client certificate or the UIAM version, or to the ` +
-          `source key's access to the project: ${getDetailedErrorMessage(e)}`,
+          `source key's access to the project: ${e.message}`,
         e
       );
     }
