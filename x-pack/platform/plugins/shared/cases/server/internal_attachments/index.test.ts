@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { INCIDENT_TIMELINE_ENTRY_ATTACHMENT_TYPE } from '../../common/constants/attachments';
 import { isUnifiedOnlyAttachmentType } from '../../common/utils/attachments';
 import { UnifiedAttachmentTypeRegistry } from '../attachment_framework/unified_attachment_registry';
 import { getAttachmentTypeTransformers } from '../common/attachments';
@@ -27,5 +28,15 @@ describe('registerInternalAttachments', () => {
 
     expect(registry.list().length).toBeGreaterThan(0);
     expect(missingTransformer).toEqual([]);
+  });
+
+  it('registers the incident timeline entry type only when the flag is on', () => {
+    const disabled = new UnifiedAttachmentTypeRegistry();
+    registerInternalAttachments(disabled);
+    expect(disabled.has(INCIDENT_TIMELINE_ENTRY_ATTACHMENT_TYPE)).toBe(false);
+
+    const enabled = new UnifiedAttachmentTypeRegistry();
+    registerInternalAttachments(enabled, { incidentTimelineEnabled: true });
+    expect(enabled.has(INCIDENT_TIMELINE_ENTRY_ATTACHMENT_TYPE)).toBe(true);
   });
 });

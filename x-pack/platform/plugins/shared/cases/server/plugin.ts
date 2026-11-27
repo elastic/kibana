@@ -128,7 +128,9 @@ export class CasePlugin
 
     initUiSettings(core.uiSettings);
 
-    registerInternalAttachments(this.unifiedAttachmentTypeRegistry);
+    registerInternalAttachments(this.unifiedAttachmentTypeRegistry, {
+      incidentTimelineEnabled: this.caseConfig.incidentTimeline.enabled,
+    });
 
     registerCaseFileKinds(this.caseConfig.files, plugins.files, core.security.fips.isEnabled());
     registerCasesAnalyticsIndexesTasks({

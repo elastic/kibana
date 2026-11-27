@@ -36,6 +36,7 @@ export const AIOPS_LOG_RATE_ANALYSIS_ATTACHMENT_TYPE = 'aiops.log_rate_analysis'
 export const DASHBOARD_ATTACHMENT_TYPE = 'dashboard';
 export const DISCOVER_SESSION_ATTACHMENT_TYPE = 'discoverSession';
 export const MAP_ATTACHMENT_TYPE = 'map';
+export const INCIDENT_TIMELINE_ENTRY_ATTACHMENT_TYPE = 'incident_timeline_entry';
 
 /**
  * Saved-object type identifiers as understood by core saved-objects and the
