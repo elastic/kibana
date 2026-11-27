@@ -38,11 +38,8 @@ export const useApplyUnpublishedChanges = (): {
     dashboardInternalApi.publishedEsqlVariables$,
     dashboardInternalApi.unpublishedEsqlVariables$
   );
+  // only emits once the children have settled, so it holds its value while a control recomputes its filters
   const hasUnpublishedFilters = useObservable(dashboardApi.hasUnpublishedFilters$, false);
-
-  // The children's filters and their "awaiting required filters" state are only staged once every child is
-  // done loading, so what is staged mid-load is already out of date: nothing can be applied until loading settles.
-  const childFiltersLoading = useObservable(dashboardApi.childFiltersLoading$, true);
 
   const hasUnpublishedTimeslice = useMemo(
     () => !deepEqual(publishedTimeslice, unpublishedTimeslice),
@@ -67,8 +64,7 @@ export const useApplyUnpublishedChanges = (): {
 
   return {
     hasUnpublishedChanges:
-      !childFiltersLoading &&
-      (hasUnpublishedFilters || hasUnpublishedTimeslice || hasUnpublishedVariables),
+      hasUnpublishedFilters || hasUnpublishedTimeslice || hasUnpublishedVariables,
     applyUnpublishedChanges,
   };
 };

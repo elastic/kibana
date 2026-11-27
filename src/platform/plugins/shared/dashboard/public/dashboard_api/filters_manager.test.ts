@@ -954,3 +954,77 @@ describe('filters manager: awaiting required filters', () => {
     expect(states.filter(({ pending }) => !pending)).toHaveLength(2);
   });
 });
+
+describe('filters manager: hasUnpublishedFilters$ while the children settle', () => {
+  const tick = () => new Promise((resolve) => setTimeout(resolve, 0));
+  const city = { meta: { key: 'city' }, query: { match_phrase: { city: 'Paris' } } } as Filter;
+
+  /** like a real control: flags that it is loading as soon as its selection changes, and outputs its filter later */
+  const select = async (
+    control: ReturnType<typeof buildControl>,
+    filters: Filter[] | undefined
+  ) => {
+    control.filtersLoading$.next(true);
+    await tick();
+    control.appliedFilters$.next(filters);
+    control.filtersLoading$.next(false);
+    await flush();
+  };
+
+  test('changes once per settled change, including when a selection is undone', async () => {
+    const { filtersManager, setChildren } = buildSetup(['control1'], { autoApplyFilters: false });
+    const control = buildControl('control1');
+    setChildren([control]);
+    await flush();
+
+    const states: boolean[] = [];
+    filtersManager.api.hasUnpublishedFilters$.subscribe((value) => states.push(value));
+    expect(states).toEqual([false]);
+
+    await select(control, [region]);
+    expect(states).toEqual([false, true]);
+
+    // another pending selection keeps it flagged throughout
+    await select(control, [city]);
+    expect(states).toEqual([false, true]);
+
+    // back to what is published: no stale `true` once loading is done but before the filters are staged
+    await select(control, undefined);
+    expect(states).toEqual([false, true, false]);
+  });
+
+  test('holds its value while a control is loading', async () => {
+    const { filtersManager, setChildren } = buildSetup(['control1'], { autoApplyFilters: false });
+    const control = buildControl('control1');
+    setChildren([control]);
+    await flush();
+    await select(control, [region]);
+
+    const states: boolean[] = [];
+    filtersManager.api.hasUnpublishedFilters$.subscribe((value) => states.push(value));
+    control.filtersLoading$.next(true);
+    await flush();
+    expect(states).toEqual([true]);
+
+    control.appliedFilters$.next(undefined);
+    control.filtersLoading$.next(false);
+    await flush();
+    expect(states).toEqual([true, false]);
+  });
+
+  test('is never flagged by the saved filters that the initial publish applies', async () => {
+    const { filtersManager, setChildren } = buildSetup(['control1'], { autoApplyFilters: false });
+    const states: boolean[] = [];
+    filtersManager.api.hasUnpublishedFilters$.subscribe((value) => states.push(value));
+
+    const control = buildControl('control1', { loading: true });
+    setChildren([control]);
+    await flush();
+    control.appliedFilters$.next([region]);
+    control.filtersLoading$.next(false);
+    await flush();
+
+    expect(filtersManager.api.publishedChildFilters$.value).toEqual([region]);
+    expect(states).toEqual([false]);
+  });
+});

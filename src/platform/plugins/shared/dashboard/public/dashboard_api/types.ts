@@ -267,7 +267,6 @@ export type DashboardApi = CanExpandPanels &
 
     publishedChildFilters$: PublishingSubject<Filter[] | undefined>;
     hasUnpublishedFilters$: Observable<boolean>;
-    childFiltersLoading$: Observable<boolean>;
     publishFilters: () => void;
 
     publishedTimeslice$: PublishingSubject<TimeSlice | undefined>;

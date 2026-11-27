@@ -65,6 +65,14 @@ interface ChildFiltersState {
   awaitingRequiredFilters: boolean;
 }
 
+/** Whether two snapshots of the children's output hold the same filters and the same awaiting state. */
+const areChildFiltersStatesEqual = (
+  stateA: ChildFiltersState,
+  stateB: ChildFiltersState
+): boolean =>
+  stateA.awaitingRequiredFilters === stateB.awaitingRequiredFilters &&
+  areFiltersEqual(stateA.childFilters, stateB.childFilters);
+
 export const initializeFiltersManager = (
   unifiedSearchManager: ReturnType<typeof initializeUnifiedSearchManager>,
   layoutManager: ReturnType<typeof initializeLayoutManager>,
@@ -230,15 +238,26 @@ export const initializeFiltersManager = (
    * `true` while the staged child filters, or the staged awaiting state, differ from what is published. The
    * awaiting state can change without the filters changing (e.g. a required control is made optional,
    * unpinned or deleted), and still needs to be applied.
+   *
+   * What is staged is out of date while the children are loading, until their settled output is staged, and
+   * until the initial publish. Nothing is emitted in the meantime, so the last value stands instead of
+   * flipping back and forth while a selection is changed or undone.
    */
   const hasUnpublishedFilters$ = combineLatest([
     unpublishedFilters$,
     publishedChildFilters$,
     awaitingRequiredFilters$,
+    childFiltersState$,
+    childFiltersLoading$,
+    initialPublishPending$,
   ]).pipe(
+    filter(
+      ([staged, , , childFiltersState, loading, initialPublishPending]) =>
+        !loading && !initialPublishPending && areChildFiltersStatesEqual(staged, childFiltersState)
+    ),
     map(
-      ([{ childFilters, awaitingRequiredFilters }, published, awaiting]) =>
-        !areFiltersEqual(published, childFilters) || awaitingRequiredFilters !== awaiting
+      ([staged, childFilters, awaitingRequiredFilters]) =>
+        !areChildFiltersStatesEqual(staged, { childFilters, awaitingRequiredFilters })
     ),
     distinctUntilChanged()
   );
