@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { ConnectorCoverageDocument } from '../connector_coverage/connector_coverage';
 import type { ConnectorDrift, DriftReportEntry } from './detect_drift';
 import { DRIFT_ISSUE_LABEL } from './issue_marker';
 import { drifted, healthy } from './drift_fixtures';
@@ -228,6 +229,39 @@ describe('surfaceDrift', () => {
     expect(summary.refresh).toEqual(['.other']);
     expect(summary.refreshPrBody).toContain('### `.other`');
     expect(tracker.create).not.toHaveBeenCalled();
+  });
+
+  it('summarizes the coverage when given the coverage report, and only then', async () => {
+    const { tracker } = createTracker();
+    const covered: ConnectorDrift = {
+      ...healthy,
+      coverage: {
+        trackedActions: 1,
+        totalActions: 1,
+        followingSources: ['main'],
+        pinnedSources: [],
+        unmatchedRequests: 0,
+      },
+    };
+    const coverageDocuments: ConnectorCoverageDocument[] = [
+      {
+        connector_id: covered.connector,
+        total_actions: 1,
+        drift_checkable: true,
+      } as ConnectorCoverageDocument,
+      {
+        connector_id: '.mysql',
+        total_actions: 2,
+        drift_checkable: false,
+        exemption_category: 'permanent',
+      } as ConnectorCoverageDocument,
+    ];
+
+    const summary = await surface([covered], tracker, { coverageDocuments });
+
+    expect(summary.coverage?.totals).toMatchObject({ connectors: 2, recorded: 1, exempt: 1 });
+    expect(summary.coverageAnnotation).toContain('**Coverage:** 1 of 2 connectors recorded');
+    expect(await surface([covered], createTracker().tracker)).not.toHaveProperty('coverage');
   });
 
   it('reports connectors the check failed on, and failed GitHub writes, without stopping', async () => {

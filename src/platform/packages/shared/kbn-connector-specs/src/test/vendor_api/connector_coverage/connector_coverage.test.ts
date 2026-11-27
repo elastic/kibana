@@ -15,7 +15,6 @@ import {
   getAvailability,
   getDirection,
   getEmulationBlocker,
-  getExemptApiType,
   getMockResponses,
   getOauthEmulation,
   getRecordedApiTypeActions,
@@ -82,30 +81,6 @@ describe('getDirection', () => {
     ['both', spec('.c', ['run'], ['pushed'])],
   ])('reports %s', (direction, connector) => {
     expect(getDirection(connector)).toBe(direction);
-  });
-});
-
-describe('getExemptApiType', () => {
-  it.each([
-    ['MCP connector: all actions go through the hosted MCP server', 'mcp'],
-    ['Talks to Azure SQL Database through the mssql driver', 'database'],
-    ['GraphQL-only: every action POSTs a query to NerdGraph', 'graphql'],
-    ['JSON-RPC 2.0 API: every call is a POST to a single endpoint', 'jsonrpc'],
-    [
-      'Inbound webhook receiver. It makes no outbound requests to any vendor API.',
-      'not_an_api_client',
-    ],
-    ['Signs tokens locally. It sends no requests to a vendor API.', 'not_an_api_client'],
-    ['Generic connector: the caller picks the path', 'generic'],
-    ['Self-hosted Jenkins at a user-configured base URL', 'self_hosted'],
-    ['On-premises SharePoint Server REST API. Microsoft publishes no OpenAPI.', 'self_hosted'],
-    ['The endpoints were deprecated. The connector needs to migrate to /v3/.', 'spec_mismatch'],
-    ['AbuseIPDB publishes only HTML docs and no OpenAPI/Swagger', 'no_public_spec'],
-    ['No static, vendor-published OpenAPI for the core REST API', 'no_public_spec'],
-    ['The spec is served per tenant, behind authentication', 'no_public_spec'],
-    ['Something nobody wrote a rule for', 'other'],
-  ])('reads %s as %s', (reason, apiType) => {
-    expect(getExemptApiType(reason)).toBe(apiType);
   });
 });
 
@@ -222,14 +197,18 @@ describe('buildCoverageDocument', () => {
     });
   });
 
-  it('keeps the reason of an exempt connector', () => {
-    expect(
-      buildCoverageDocument({
-        spec: spec('.sql', ['query']),
-        exemptionReason: 'Talks to the database through a driver',
-        facts: facts(),
-      })
-    ).toMatchObject({
+  it('takes the API type, category and reason of a permanent exemption', () => {
+    const document = buildCoverageDocument({
+      spec: spec('.sql', ['query']),
+      exemption: {
+        category: 'permanent',
+        apiType: 'database',
+        reason: 'Talks to the database through a driver',
+      },
+      facts: facts(),
+    });
+
+    expect(document).toMatchObject({
       connector_id: '.sql',
       direction: 'outbound',
       api_types: ['database'],
@@ -237,6 +216,28 @@ describe('buildCoverageDocument', () => {
       emulated: false,
       drift_protection: 'none',
       exemption_reason: 'Talks to the database through a driver',
+      exemption_category: 'permanent',
+    });
+    expect(document).not.toHaveProperty('exemption_blocked_by');
+  });
+
+  it('takes the API type from the exemption, not from its reason', () => {
+    expect(
+      buildCoverageDocument({
+        spec: spec('.box', ['search', 'download']),
+        exemption: {
+          category: 'temporary',
+          blockedBy: 303330,
+          apiType: 'mcp',
+          reason: 'Talks to the vendor through a driver of its own',
+        },
+        facts: facts(),
+      })
+    ).toMatchObject({
+      api_types: ['mcp'],
+      api_type_actions: { mcp: 2 },
+      exemption_category: 'temporary',
+      exemption_blocked_by: 303330,
     });
   });
 
@@ -419,7 +420,12 @@ describe('buildCoverageDocument facts', () => {
     expect(
       buildCoverageDocument({
         spec: spec('.salesforce', ['query']),
-        exemptionReason: 'No static, vendor-published OpenAPI',
+        exemption: {
+          category: 'temporary',
+          blockedBy: 303330,
+          apiType: 'no_public_spec',
+          reason: 'No static, vendor-published OpenAPI',
+        },
         facts: facts({ authTypes: [oauth()] }),
       })
     ).toMatchObject({

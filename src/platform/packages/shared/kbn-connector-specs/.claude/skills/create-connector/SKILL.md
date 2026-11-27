@@ -383,9 +383,11 @@ snapshot of the vendor's spec, so the connector is checked offline against it on
        update:
          maximum: 100
    ```
-5. **No usable spec?** Add the connector to `vendor_api_exemptions.json` with a reason that names what
-   is missing (no public spec, a database protocol rather than HTTP). New connectors can be exempted in
-   the PR that adds them, and reviewers check the reason. Connectors that already exist can't be added.
+5. **No usable spec?** Add the connector to `vendor_api_exemptions.json` with a `category`, an `apiType`
+   and a `reason` that names what is missing (no public spec, a database protocol rather than HTTP). Use
+   `permanent` when no tooling could record it, or `temporary` with the issue it waits on in `blockedBy`
+   (a spec behind credentials). The package README lists the API types. New connectors can be exempted
+   in the PR that adds them, and reviewers check the entry. Connectors that already exist can't be added.
 6. **Run the contract test** and commit the whole `vendor_api/` folder:
 
    ```bash

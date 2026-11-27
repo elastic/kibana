@@ -141,6 +141,13 @@ describe('detectDrift', () => {
           fieldChanges: [],
         },
       ],
+      coverage: {
+        trackedActions: 1,
+        totalActions: 1,
+        followingSources: ['main'],
+        pinnedSources: [],
+        unmatchedRequests: 0,
+      },
       otherProblems: { snapshot: [], latest: [] },
       staleCorrections: [],
     });

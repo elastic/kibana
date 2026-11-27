@@ -74,31 +74,31 @@ describe('collectCoverage', () => {
     }
   });
 
-  // An exemption's API type is read from its free-text reason, so rewording one can drop it
-  // into the catch-all without anyone noticing. This fails when that happens.
-  it('classifies every exempt connector by its reason, never as a catch-all', async () => {
+  it('describes every exempt connector by its committed exemption', async () => {
     const documents = await collectCoverage(REPO_ROOT);
     const byId = new Map(documents.map((document) => [document.connector_id, document]));
     // Driven by the committed list, not by the documents: filtering on `exemption_reason`
-    // would drop a connector whose reason the collector lost, and pass on the rest.
-    const exempted = Object.keys(
-      vendorApiExemptionsSchema.parse(
-        JSON.parse(await fs.readFile(EXEMPTIONS_FILE, 'utf8'))
-      ) as Record<string, string>
+    // would drop a connector whose exemption the collector lost, and pass on the rest.
+    const exemptions = vendorApiExemptionsSchema.parse(
+      JSON.parse(await fs.readFile(EXEMPTIONS_FILE, 'utf8'))
     );
 
-    expect(exempted.length).toBeGreaterThan(0);
-    for (const id of exempted) {
+    expect(Object.keys(exemptions).length).toBeGreaterThan(0);
+    for (const [id, exemption] of Object.entries(exemptions)) {
       const document = byId.get(id);
-      expect({ id, found: document !== undefined }).toEqual({ id, found: true });
-      expect({ id, reason: document?.exemption_reason }).toEqual({
+      expect({
         id,
-        reason: expect.any(String),
+        apiTypes: document?.api_types,
+        reason: document?.exemption_reason,
+        category: document?.exemption_category,
+        blockedBy: document?.exemption_blocked_by,
+      }).toEqual({
+        id,
+        apiTypes: [exemption.apiType],
+        reason: exemption.reason,
+        category: exemption.category,
+        blockedBy: exemption.category === 'temporary' ? exemption.blockedBy : undefined,
       });
-      const catchAll = document?.api_types.filter((type) =>
-        ['other', 'unexplained'].includes(type)
-      );
-      expect({ id, catchAll }).toEqual({ id, catchAll: [] });
     }
   });
 

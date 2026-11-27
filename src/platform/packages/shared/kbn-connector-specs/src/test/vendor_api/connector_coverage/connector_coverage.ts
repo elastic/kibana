@@ -9,11 +9,17 @@
 
 import type { ConnectorSpec } from '../../../connector_spec';
 import { connectorSpecHasEvents } from '../../../connector_spec_has_events';
+import type { ExemptApiType, VendorApiExemption } from '../exemptions';
 import type { ManifestSource, VendorApiManifest } from '../manifest';
 import { isAglioFormat, isMarkdownFormat } from '../manifest';
 
 export type CoverageDirection = 'outbound' | 'inbound' | 'both';
 
+/**
+ * The kind of vendor API a connector calls: a recorded source's format, an exemption's `apiType`,
+ * `other` for a recorded connector whose manifest lists no source, and `unexplained` for a
+ * connector that is neither recorded nor exempt.
+ */
 export type CoverageApiType =
   | 'openapi'
   | 'swagger'
@@ -21,15 +27,9 @@ export type CoverageApiType =
   | 'smithy'
   | 'markdown'
   | 'html'
-  | 'mcp'
-  | 'database'
   | 'graphql'
-  | 'jsonrpc'
-  | 'generic'
-  | 'self_hosted'
-  | 'no_public_spec'
-  | 'spec_mismatch'
-  | 'not_an_api_client'
+  | 'mcp'
+  | ExemptApiType
   | 'other'
   | 'unexplained';
 
@@ -114,6 +114,10 @@ export interface ConnectorCoverageDocument {
   /** `full` when the connector is recorded; `none` when it is exempt or not yet recorded. */
   readonly drift_protection: 'full' | 'none';
   readonly exemption_reason?: string;
+  /** `permanent`, or `temporary` until the issue in `exemption_blocked_by` is done. */
+  readonly exemption_category?: VendorApiExemption['category'];
+  /** The elastic/kibana issue a temporary exemption waits on. */
+  readonly exemption_blocked_by?: number;
 }
 
 const hasActions = (spec: ConnectorSpec): boolean => Object.keys(spec.actions).length > 0;
@@ -124,29 +128,6 @@ export const getDirection = (spec: ConnectorSpec): CoverageDirection => {
   if (inbound && hasActions(spec)) return 'both';
   return inbound ? 'inbound' : 'outbound';
 };
-
-/** Checked in order; the first match wins, so an MCP connector that also mentions a driver stays `mcp`. */
-const EXEMPT_API_TYPE_RULES: ReadonlyArray<readonly [CoverageApiType, RegExp]> = [
-  ['mcp', /\bMCP\b/],
-  ['database', /\bdriver\b|\bTDS\b|\bdatabase\b/i],
-  ['graphql', /GraphQL-only/i],
-  ['jsonrpc', /JSON-RPC/i],
-  ['not_an_api_client', /makes no outbound|sends no requests/i],
-  ['generic', /^Generic connector/i],
-  ['self_hosted', /\bself-hosted\b|\bon-premises\b/i],
-  ['spec_mismatch', /\bdeprecated\b|needs to migrate/i],
-  [
-    'no_public_spec',
-    /publishes (only|no)\b|\bno (static|public|publicly)\b|behind authentication/i,
-  ],
-];
-
-/**
- * Stopgap until exemptions carry a category: reads the free-text reason. `other` means a reason
- * that no rule recognises; `unexplained` means the connector has no reason at all.
- */
-export const getExemptApiType = (reason: string): CoverageApiType =>
-  EXEMPT_API_TYPE_RULES.find(([, pattern]) => pattern.test(reason))?.[0] ?? 'other';
 
 export interface AuthTypeFact {
   readonly type: string;
@@ -352,15 +333,26 @@ const describeApiTypes = (
   api_type_actions: apiTypeActions,
 });
 
+const describeExemption = (
+  exemption: VendorApiExemption
+): Pick<
+  ConnectorCoverageDocument,
+  'exemption_reason' | 'exemption_category' | 'exemption_blocked_by'
+> => ({
+  exemption_reason: exemption.reason,
+  exemption_category: exemption.category,
+  ...(exemption.category === 'temporary' ? { exemption_blocked_by: exemption.blockedBy } : {}),
+});
+
 export const buildCoverageDocument = ({
   spec,
   manifest,
-  exemptionReason,
+  exemption,
   facts,
 }: {
   spec: ConnectorSpec;
   manifest?: VendorApiManifest;
-  exemptionReason?: string;
+  exemption?: VendorApiExemption;
   facts: ConnectorArtifactFacts;
 }): ConnectorCoverageDocument => {
   const emulated = manifest !== undefined;
@@ -391,12 +383,10 @@ export const buildCoverageDocument = ({
   return {
     ...base,
     ...describeApiTypes({
-      [exemptionReason ? getExemptApiType(exemptionReason) : 'unexplained']: Object.keys(
-        spec.actions
-      ).length,
+      [exemption?.apiType ?? 'unexplained']: Object.keys(spec.actions).length,
     }),
     emulated,
     drift_protection: 'none',
-    ...(exemptionReason ? { exemption_reason: exemptionReason } : {}),
+    ...(exemption ? describeExemption(exemption) : {}),
   };
 };

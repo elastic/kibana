@@ -42,6 +42,7 @@ import {
 import { createSpecCache } from '../src/test/vendor_api/spec/spec_cache';
 import { surfaceDrift } from '../src/test/vendor_api/drift/surface_drift';
 import { updateVendorApi } from '../src/test/vendor_api/record/update_vendor_api';
+import { errorMessage } from '../src/test/vendor_api/values';
 
 const SPEC_CACHE = path.join(REPO_ROOT, 'data', 'connector_vendor_api');
 const DRIFT_REPORT = path.join(REPO_ROOT, 'target', 'connector_vendor_api', 'drift.json');
@@ -197,6 +198,13 @@ run(
             .map(({ connector }) => connector.metadata.id)
         ),
         buildUrl: process.env.BUILDKITE_BUILD_URL,
+        // Read from the committed artifacts, as --coverage does, so the summary can say what
+        // share of the repository's connectors and actions the check covers. It only adds to
+        // the summary, so failing to read it must not stop the issues from being surfaced.
+        coverageDocuments: await collectCoverage(REPO_ROOT).catch((error) => {
+          log.warning(`Leaving coverage out of the summary: ${errorMessage(error)}`);
+          return undefined;
+        }),
         log,
       });
       const summaryPath = path.resolve(flagsReader.string('summary') ?? DRIFT_SUMMARY);
@@ -428,6 +436,7 @@ run(
                      with --json)
         --surface    Turn the --report into GitHub issues in --github-repo, with gh and its
                      GITHUB_TOKEN, and write a summary listing the connectors to refresh
+                     and how much of every connector the check covers
         --github-repo  With --surface, the repository of the issues, for example elastic/kibana
         --coverage   Write one document per connector with its direction, API type, emulator and
                      drift coverage, read from the committed artifacts; needs no network
