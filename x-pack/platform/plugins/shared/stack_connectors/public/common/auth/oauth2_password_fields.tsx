@@ -9,15 +9,20 @@ import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { UseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { Field, PasswordField } from '@kbn/es-ui-shared-plugin/static/forms/components';
 import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
+import { TokenTypeField } from './oauth2_fields';
 import * as i18n from './translations';
 
 const { emptyField, urlField } = fieldValidators;
 
 interface OAuth2PasswordFieldsProps {
   readOnly: boolean;
+  isTokenTypeEnabled?: boolean;
 }
 
-export const OAuth2PasswordFields: React.FC<OAuth2PasswordFieldsProps> = ({ readOnly }) => (
+export const OAuth2PasswordFields: React.FC<OAuth2PasswordFieldsProps> = ({
+  readOnly,
+  isTokenTypeEnabled = false,
+}) => (
   <EuiFlexGroup justifyContent="spaceBetween" data-test-subj="oauth2PasswordFields">
     <EuiFlexItem>
       <UseField
@@ -75,6 +80,12 @@ export const OAuth2PasswordFields: React.FC<OAuth2PasswordFieldsProps> = ({ read
           euiFieldProps: { readOnly, 'data-test-subj': 'passwordOAuth2Password' },
         }}
       />
+      {isTokenTypeEnabled && (
+        <>
+          <EuiSpacer size="s" />
+          <TokenTypeField readOnly={readOnly} />
+        </>
+      )}
     </EuiFlexItem>
   </EuiFlexGroup>
 );

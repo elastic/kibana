@@ -183,6 +183,7 @@ const HttpActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsPr
           isEdit={isEdit}
           isPfxEnabled={isPfxEnabled}
           isOAuth2Enabled={true}
+          isOAuthTokenTypeEnabled={true}
         />
       </React.Suspense>
       <EuiSpacer size="m" />
