@@ -17,12 +17,53 @@ import type {
 } from '@kbn/unified-data-table';
 import { createElement } from 'react';
 import { DataSourceType, isDataSourceType } from '../../../../../common/data_sources';
+import type { AdditionalCellActionContext } from '../../../types';
 import type { DataSourceProfileProvider } from '../../../profiles';
 import { DataSourceCategory } from '../../../profiles';
 import { getPatternCellRenderer } from './pattern_cell_renderer';
 import type { ProfileProviderServices } from '../../profile_provider_services';
 import { SparklineCellRenderer } from '../sparkline_data_source_profile/sparkline_cell_renderer';
 import { getMatchingResultsQuery } from './get_matching_results_query';
+
+const getCellMatchingResultsQuery = ({
+  query,
+  dataView,
+  esqlVariables,
+  field,
+  value,
+}: AdditionalCellActionContext) => {
+  if (!isOfAggregateQueryType(query) || !dataView || !field || typeof value !== 'string') {
+    return undefined;
+  }
+  return getMatchingResultsQuery({
+    query,
+    dataView,
+    esqlVariables,
+    patternColumn: field.name,
+    pattern: value,
+  });
+};
+
+const searchesBeyondSample = (cell: AdditionalCellActionContext) => {
+  if (!isOfAggregateQueryType(cell.query)) {
+    return false;
+  }
+  const { commands } = Parser.parse(cell.query.esql).root;
+  const statsIndex = commands.findLastIndex(({ name }) => name === 'stats');
+  const sampledInputs = commands.filter(
+    ({ name }, index) => name === 'sample' && index < statsIndex
+  );
+  if (!sampledInputs.length) {
+    return false;
+  }
+
+  const drilldown = getCellMatchingResultsQuery(cell);
+  return (
+    !!drilldown &&
+    Parser.parse(drilldown.esql).root.commands.filter(({ name }) => name === 'sample').length <
+      sampledInputs.length
+  );
+};
 
 export const createPatternsDataSourceProfileProvider = (
   services: ProfileProviderServices
@@ -106,16 +147,12 @@ export const createPatternsDataSourceProfileProvider = (
           ...prev(),
           {
             id: 'patterns-action-view-docs-in-discover',
-            getDisplayName: ({ query }) => {
-              if (isOfAggregateQueryType(query)) {
-                const { root } = Parser.parse(query.esql);
-                const statsIndex = root.commands.findLastIndex(({ name }) => name === 'stats');
-                if (root.commands[statsIndex - 1]?.name === 'sample') {
-                  return i18n.translate(
-                    'discover.docViews.patterns.cellAction.viewResultsBeyondSampleLabel',
-                    { defaultMessage: 'View matching results (searches beyond the sample)' }
-                  );
-                }
+            getDisplayName: (cell) => {
+              if (searchesBeyondSample(cell)) {
+                return i18n.translate(
+                  'discover.docViews.patterns.cellAction.viewResultsBeyondSampleLabel',
+                  { defaultMessage: 'View matching results (searches beyond the sample)' }
+                );
               }
 
               return i18n.translate('discover.docViews.patterns.cellAction.viewResults', {
@@ -131,19 +168,8 @@ export const createPatternsDataSourceProfileProvider = (
               }
               return patternColumns.includes(field.name);
             },
-            execute: async ({ query, dataView, esqlVariables, field, value, timeRange }) => {
-              if (!isOfAggregateQueryType(query) || !dataView || typeof value !== 'string') {
-                return;
-              }
-
-              const matchingResultsQuery = getMatchingResultsQuery({
-                query,
-                dataView,
-                esqlVariables,
-                patternColumn: field.name,
-                pattern: value,
-              });
-
+            execute: async (cell) => {
+              const matchingResultsQuery = getCellMatchingResultsQuery(cell);
               if (!matchingResultsQuery) {
                 return;
               }
@@ -155,7 +181,7 @@ export const createPatternsDataSourceProfileProvider = (
 
               const discoverLink = services.locator.getRedirectUrl({
                 query: matchingResultsQuery,
-                timeRange,
+                timeRange: cell.timeRange,
                 hideChart: false,
               });
               window.open(discoverLink, '_blank');

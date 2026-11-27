@@ -268,6 +268,25 @@ describe('patternsDataSourceProfileProvider', () => {
       expect(newQuery).not.toContain('SAMPLE');
     });
 
+    it('warns when opening a renamed pattern drops the sample in the index-only fallback', async () => {
+      const updateESQLQuery = jest.fn();
+      const { action } = getViewMatchingResultsAction(updateESQLQuery);
+      const context = createContext({
+        field: { ...PATTERN_FIELD, name: 'p' },
+        query: {
+          esql: 'FROM logs-* | SAMPLE 0.1 | WHERE service.name == "checkout" | STATS Count = COUNT(*) BY Pattern = CATEGORIZE(message) | RENAME Pattern AS p',
+        },
+      });
+
+      expect(action.getDisplayName(context)).toBe(
+        'View matching results (searches beyond the sample)'
+      );
+      await action.execute(context);
+      const [newQuery] = updateESQLQuery.mock.calls[0];
+      expect(newQuery).toContain('WHERE MATCH(message,');
+      expect(newQuery).not.toContain('SAMPLE');
+    });
+
     it('uses the regular label when the query has no sample or retains an earlier sample', () => {
       const { action } = getViewMatchingResultsAction();
       expect(action.getDisplayName(createContext())).toBe('View matching results');
