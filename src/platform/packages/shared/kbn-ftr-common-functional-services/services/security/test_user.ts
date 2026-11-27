@@ -8,6 +8,7 @@
  */
 
 import { format as formatUrl } from 'url';
+import { wrapKibanaSupertestAgent } from '@kbn/test';
 import supertest from 'supertest';
 
 import { fipsIsEnabled } from '@kbn/test';
@@ -152,10 +153,14 @@ export function TestUserSupertestProvider({ getService }: FtrProviderContext) {
   const config = getService('config');
   const kibanaServerConfig = config.get('servers.kibana');
 
-  return supertest(
-    formatUrl({
-      ...kibanaServerConfig,
-      auth: `${TEST_USER_NAME}:${TEST_USER_PASSWORD}`,
-    })
+  const maxRetryMs = config.get('timeouts.try') as number;
+  return wrapKibanaSupertestAgent(
+    supertest(
+      formatUrl({
+        ...kibanaServerConfig,
+        auth: `${TEST_USER_NAME}:${TEST_USER_PASSWORD}`,
+      })
+    ),
+    { maxRetryMs }
   );
 }

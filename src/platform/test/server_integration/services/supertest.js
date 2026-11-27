@@ -9,6 +9,7 @@
 
 import { format as formatUrl } from 'url';
 
+import { wrapKibanaSupertestAgent } from '@kbn/test';
 import supertest from 'supertest';
 
 export function createKibanaSupertestProvider({ certificateAuthorities, kibanaUrl } = {}) {
@@ -16,9 +17,11 @@ export function createKibanaSupertestProvider({ certificateAuthorities, kibanaUr
     const config = getService('config');
     kibanaUrl = kibanaUrl ?? formatUrl(config.get('servers.kibana'));
 
-    return certificateAuthorities
+    const maxRetryMs = config.get('timeouts.try');
+    const agent = certificateAuthorities
       ? supertest.agent(kibanaUrl, { ca: certificateAuthorities })
       : supertest(kibanaUrl);
+    return wrapKibanaSupertestAgent(agent, { maxRetryMs });
   };
 }
 
@@ -26,11 +29,15 @@ export function KibanaSupertestWithoutAuthProvider({ getService }) {
   const config = getService('config');
   const kibanaServerConfig = config.get('servers.kibana');
 
-  return supertest(
-    formatUrl({
-      ...kibanaServerConfig,
-      auth: false,
-    })
+  const maxRetryMs = config.get('timeouts.try');
+  return wrapKibanaSupertestAgent(
+    supertest(
+      formatUrl({
+        ...kibanaServerConfig,
+        auth: false,
+      })
+    ),
+    { maxRetryMs }
   );
 }
 
