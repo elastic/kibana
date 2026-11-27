@@ -30,9 +30,11 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { css } from '@emotion/css';
+import { getEbtProps } from '@kbn/ebt-click';
 import { FormattedMessage, FormattedNumber, FormattedRelative } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { getNightshiftCapabilities } from '@kbn/nightshift-shared';
+import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_ELEMENTS } from '../../../common/ebt_constants';
 import { useKibana } from '../../../hooks/use_kibana';
 import { getMemoryArchiveReasonLabel } from './labels';
 import { MemoryMergedFromRow } from './lineage';
@@ -159,6 +161,12 @@ export function MemoryPageView({
                 isLoading={isArchiving}
                 onClick={() => setArchived({ id: page.id, archived: !page.archived })}
                 data-test-subj="nightshiftMemoryArchiveToggle"
+                {...getEbtProps({
+                  action: page.archived
+                    ? NIGHTSHIFT_EBT_ACTIONS.RESTORE_MEMORY_PAGE
+                    : NIGHTSHIFT_EBT_ACTIONS.ARCHIVE_MEMORY_PAGE,
+                  element: NIGHTSHIFT_EBT_ELEMENTS.MEMORY_PAGE,
+                })}
               >
                 {page.archived ? (
                   <FormattedMessage
@@ -184,6 +192,10 @@ export function MemoryPageView({
               isDisabled={isDeleting}
               onClick={() => setDeleteTarget({ id: page.id, version: data.version })}
               data-test-subj="nightshiftMemoryDeleteButton"
+              {...getEbtProps({
+                action: NIGHTSHIFT_EBT_ACTIONS.DELETE_MEMORY_PAGE,
+                element: NIGHTSHIFT_EBT_ELEMENTS.MEMORY_PAGE,
+              })}
             >
               <FormattedMessage
                 id="xpack.nightshift.knowledge.memory.deleteButton"
@@ -311,6 +323,10 @@ export function MemoryPageView({
                             getSourceTaskPath(conversationId, page.agent_id)
                           )}
                           data-test-subj="nightshiftMemorySourceTaskLink"
+                          {...getEbtProps({
+                            action: NIGHTSHIFT_EBT_ACTIONS.VIEW_MEMORY_SOURCE_TASK,
+                            element: NIGHTSHIFT_EBT_ELEMENTS.MEMORY_PAGE,
+                          })}
                         >
                           {sourceTask}
                         </EuiLink>
@@ -385,6 +401,14 @@ export function MemoryPageView({
             />
           }
           buttonColor="danger"
+          cancelButtonProps={{ 'data-test-subj': 'nightshiftMemoryPageViewCancelButton' }}
+          confirmButtonProps={{
+            'data-test-subj': 'nightshiftMemoryPageViewDeletePermanentlyButton',
+            ...getEbtProps({
+              action: NIGHTSHIFT_EBT_ACTIONS.CONFIRM_DELETE_MEMORY_PAGE,
+              element: NIGHTSHIFT_EBT_ELEMENTS.MEMORY_PAGE,
+            }),
+          }}
           data-test-subj="nightshiftMemoryDeleteConfirm"
           onConfirm={() => {
             setDeleteTarget(undefined);

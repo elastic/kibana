@@ -15,9 +15,11 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { getEbtProps } from '@kbn/ebt-click';
 import type { KnowledgeIndicator } from '@kbn/nightshift-ai';
 import React from 'react';
 import { useIsMobile } from '../../../hooks/use_is_mobile';
+import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_ELEMENTS } from '../../../common/ebt_constants';
 import { TableTitle } from './components/table_title';
 import { KnowledgeIndicatorsTypeFilter } from './components/knowledge_indicators_type_filter';
 import { KnowledgeIndicatorsSubtypeFilter } from './components/knowledge_indicators_subtype_filter';
@@ -227,6 +229,10 @@ export function KnowledgeIndicatorsToolbar({
               <EuiFlexItem grow={false}>
                 <EuiButtonEmpty
                   data-test-subj="significantEventsAppKnowledgeIndicatorsToolbarRestoreButton"
+                  {...getEbtProps({
+                    action: NIGHTSHIFT_EBT_ACTIONS.BULK_RESTORE_KNOWLEDGE_INDICATORS,
+                    element: NIGHTSHIFT_EBT_ELEMENTS.KNOWLEDGE_INDICATORS_TOOLBAR,
+                  })}
                   iconType="eye"
                   size="xs"
                   aria-label={RESTORE_SELECTED_LABEL}
@@ -243,6 +249,10 @@ export function KnowledgeIndicatorsToolbar({
                 <EuiToolTip content={activityBlockTooltip}>
                   <EuiButtonEmpty
                     data-test-subj="significantEventsAppKnowledgeIndicatorsToolbarPromoteButton"
+                    {...getEbtProps({
+                      action: NIGHTSHIFT_EBT_ACTIONS.BULK_PROMOTE_KNOWLEDGE_INDICATORS,
+                      element: NIGHTSHIFT_EBT_ELEMENTS.KNOWLEDGE_INDICATORS_TOOLBAR,
+                    })}
                     iconType="plusCircle"
                     size="xs"
                     isDisabled={
@@ -263,6 +273,10 @@ export function KnowledgeIndicatorsToolbar({
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
                 data-test-subj="significantEventsAppKnowledgeIndicatorsToolbarDeleteButton"
+                {...getEbtProps({
+                  action: NIGHTSHIFT_EBT_ACTIONS.BULK_DELETE_KNOWLEDGE_INDICATORS,
+                  element: NIGHTSHIFT_EBT_ELEMENTS.KNOWLEDGE_INDICATORS_TOOLBAR,
+                })}
                 iconType="trash"
                 color="danger"
                 size="xs"
@@ -295,6 +309,10 @@ function BulkExcludeButton({
   const button = (
     <EuiButtonEmpty
       data-test-subj="significantEventsAppBulkExcludeButtonButton"
+      {...getEbtProps({
+        action: NIGHTSHIFT_EBT_ACTIONS.BULK_EXCLUDE_KNOWLEDGE_INDICATORS,
+        element: NIGHTSHIFT_EBT_ELEMENTS.KNOWLEDGE_INDICATORS_TOOLBAR,
+      })}
       iconType="eyeSlash"
       color="warning"
       size="xs"

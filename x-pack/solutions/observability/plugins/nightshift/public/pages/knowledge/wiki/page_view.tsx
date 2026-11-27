@@ -20,8 +20,10 @@ import {
   EuiTitle,
   useGeneratedHtmlId,
 } from '@elastic/eui';
+import { getEbtProps } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, FormattedRelative } from '@kbn/i18n-react';
+import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_ELEMENTS } from '../../../common/ebt_constants';
 import { getWikiEntityTypeLabel, getWikiStatusLabel } from './entity_type_labels';
 import { useArchiveWikiPage, useRestoreWikiPage, useWikiPage } from './use_wiki';
 import { contentWithoutDuplicateTitle, pageMarkdownCss } from '../page_markdown';
@@ -99,6 +101,10 @@ export function WikiPageView({ pageId, canManage, onArchived }: WikiPageViewProp
                 })
               }
               data-test-subj="nightshiftWikiPageRestore"
+              {...getEbtProps({
+                action: NIGHTSHIFT_EBT_ACTIONS.RESTORE_WIKI_PAGE,
+                element: NIGHTSHIFT_EBT_ELEMENTS.WIKI_PAGE,
+              })}
             >
               <FormattedMessage
                 id="xpack.nightshift.knowledge.wiki.pageRestoreButton"
@@ -115,6 +121,10 @@ export function WikiPageView({ pageId, canManage, onArchived }: WikiPageViewProp
               color="danger"
               onClick={() => setIsConfirmingArchive(true)}
               data-test-subj="nightshiftWikiPageArchive"
+              {...getEbtProps({
+                action: NIGHTSHIFT_EBT_ACTIONS.ARCHIVE_WIKI_PAGE,
+                element: NIGHTSHIFT_EBT_ELEMENTS.WIKI_PAGE,
+              })}
             >
               <FormattedMessage
                 id="xpack.nightshift.knowledge.wiki.pageArchiveButton"
@@ -198,6 +208,14 @@ export function WikiPageView({ pageId, canManage, onArchived }: WikiPageViewProp
             { defaultMessage: 'Archive' }
           )}
           buttonColor="danger"
+          cancelButtonProps={{ 'data-test-subj': 'nightshiftWikiPageViewCancelButton' }}
+          confirmButtonProps={{
+            'data-test-subj': 'nightshiftWikiPageViewArchiveButton',
+            ...getEbtProps({
+              action: NIGHTSHIFT_EBT_ACTIONS.CONFIRM_ARCHIVE_WIKI_PAGE,
+              element: NIGHTSHIFT_EBT_ELEMENTS.WIKI_PAGE,
+            }),
+          }}
           data-test-subj="nightshiftWikiArchiveConfirm"
         >
           <p>

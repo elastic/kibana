@@ -138,6 +138,9 @@ export const AppTabs = React.memo<AppTabsProps>(({ tabs }) => {
             onClick={tab.onClick}
             href={tab.href}
             data-test-subj={tab['data-test-subj']}
+            data-ebt-action={tab['data-ebt-action']}
+            data-ebt-element={tab['data-ebt-element']}
+            data-ebt-detail={tab['data-ebt-detail']}
             disabled={tab.disabled}
             append={renderTabAppend(tab)}
           >
