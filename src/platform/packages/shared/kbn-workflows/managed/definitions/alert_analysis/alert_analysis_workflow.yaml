@@ -455,7 +455,7 @@ steps:
       connector_id_by_feature: ""
       # Feature ids runPrompt_step attributes its LLM calls to (token usage feature_id /
       # parent_feature_id, EIS use-case header). apply_caller_input_overrides swaps in the Worker's
-      # ids. runAgent_step does not use them, so it keeps Agent Builder's own attribution.
+      # ids. runAgent_step does not use them: it is always attributed to alertzero_alert_triage.
       prompt_plugin_id: security_alert_analysis
       prompt_aggregate_by: ""
       # True when each batch is classified with ai.prompt instead of ai.agent. The space's
@@ -1630,6 +1630,11 @@ steps:
             connector-id-by-feature:
               - alertzero_template_models
               - "{{ variables.connector_id_by_feature }}"
+            # Attribute the agent's calls to the Alert Triage Worker under the Alertzero parent, the
+            # same ids the Worker's prompt calls use. Without a plugin-id they would count as
+            # generic Agent Builder usage (feature_id agent_builder) with no Alertzero rollup.
+            plugin-id: alertzero_alert_triage
+            aggregate-by: alertzero_parent
             create-conversation: "${{ variables.create_conversation }}"
             # Without this the conversation is private to the workflow's run-as identity, and the
             # analyst who started the run cannot open the link written on the verdict note.
