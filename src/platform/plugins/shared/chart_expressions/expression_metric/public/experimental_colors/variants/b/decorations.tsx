@@ -22,11 +22,10 @@ import { bTargets } from './targets';
 
 /*
  * This is very hacky: this styling belongs in @elastic/charts, but this is an experiment.
- * It adds gradients and reaches into the chart's DOM to style the trend and the top border.
+ * It adds gradients and reaches into the chart's DOM to style the trend.
  */
 const TREND_LINE_WIDTH = '1px';
 const TREND_LINE_BLEED = '2px';
-const TOP_BORDER_WIDTH = '1.5px';
 
 const trendGradientId = (prefix: string, i: number) => `${prefix}-${i}`;
 
@@ -72,26 +71,6 @@ const trendStyles = (
     })
   );
 
-const topBorderStyles = (borders: Array<string | undefined>): CSSObject =>
-  Object.assign(
-    {},
-    ...borders.map((border, i) =>
-      border
-        ? {
-            [`${tileSelector(i)} .echMetric::before`]: {
-              content: '""',
-              position: 'absolute',
-              inset: `0 0 auto`,
-              height: TOP_BORDER_WIDTH,
-              background: border,
-              pointerEvents: 'none',
-              zIndex: 1,
-            },
-          }
-        : {}
-    )
-  );
-
 const TrendGradients = ({
   tiles,
   prefix,
@@ -115,7 +94,7 @@ const TrendGradients = ({
   </svg>
 );
 
-/** Variant B's trend gradients, trend lines and top borders, styled into the chart it wraps. */
+/** Variant B's trend gradients and trend lines, styled into the chart it wraps. */
 export const BDecorations = ({
   tiles,
   children,
@@ -126,30 +105,25 @@ export const BDecorations = ({
   const targets = useSyncExternalStore(bTargets.subscribe, bTargets.get);
   const gradientPrefix = useGeneratedHtmlId({ prefix: 'metricTrendGradient' });
 
-  const colors = Array.from(tiles, (tile) =>
-    tile && !tile.noColor
-      ? metricTileColors(tile.color, tile.mode, {
+  const trends = Array.from(tiles, (tile) => {
+    if (!tile?.isBackground) return undefined;
+    const tileColors = tile.noColor
+      ? undefined
+      : metricTileColors(tile.color, tile.mode, {
           ramp: tile.ramp,
           hasTrend: tile.hasTrend,
           targets,
-        })
-      : undefined
-  );
-  const trends = colors.map((tileColors, i) => {
-    const tile = tiles[i];
-    if (!tile?.isBackground) return undefined;
+        });
     // A tile with no color or no hue keeps its background and gets a neutral trend.
     return tileColors ?? neutralTrendColors(tile.color, tile.mode, targets);
   });
-  const { showTrendLine, trendGradient, topBorder } = targets;
-  const borders = colors.map((tileColors) => (topBorder ? tileColors?.border : undefined));
+  const { showTrendLine, trendGradient } = targets;
 
   return (
     <div
       css={[
         { display: 'contents' },
         trendStyles(trends, { gradientPrefix, showLine: showTrendLine, gradient: trendGradient }),
-        topBorderStyles(borders),
       ]}
     >
       {trendGradient && <TrendGradients tiles={trends} prefix={gradientPrefix} />}

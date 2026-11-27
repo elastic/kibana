@@ -29,7 +29,7 @@ describe('metricTileColors', () => {
     const { faint, base } = borealis.palettes(SURFACES[mode], DEFAULT_PARAMS).roles[1];
     const targets = { ...DEFAULT_B_TARGETS, fill: DEFAULT_PARAMS.lc.faint, fillTaper: 100 };
     expect(metricTileColors(light.base, mode, { ramp: false, hasTrend: true, targets })).toEqual(
-      expect.objectContaining({ fill: faint, border: base })
+      expect.objectContaining({ fill: faint, bar: base })
     );
   });
 

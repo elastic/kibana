@@ -28,7 +28,7 @@ const controls: ReadonlyArray<Control<keyof BTargets>> = [
     label: i18n.translate('expressionMetricVis.experimentalColors.b.fillTaperLabel', {
       defaultMessage: 'Fill taper (%)',
     }),
-    max: 100,
+    max: 600,
   },
   {
     type: 'range',
@@ -60,7 +60,7 @@ const controls: ReadonlyArray<Control<keyof BTargets>> = [
     label: i18n.translate('expressionMetricVis.experimentalColors.b.trendTaperLabel', {
       defaultMessage: 'Trend taper (%)',
     }),
-    max: 100,
+    max: 600,
   },
   {
     type: 'range',
@@ -92,13 +92,6 @@ const controls: ReadonlyArray<Control<keyof BTargets>> = [
     }),
   },
   {
-    type: 'switch',
-    key: 'topBorder',
-    label: i18n.translate('expressionMetricVis.experimentalColors.b.topBorderLabel', {
-      defaultMessage: 'Top border',
-    }),
-  },
-  {
     type: 'range',
     key: 'noTrendExtraFill',
     label: i18n.translate('expressionMetricVis.experimentalColors.b.noTrendExtraFillLabel', {
@@ -125,7 +118,7 @@ export const variantB: Variant = {
         fill: colors.fill,
         valueColor: colors.ink,
         titleColor: colors.ink,
-        bar: colors.border,
+        bar: colors.bar,
       }
     );
   },

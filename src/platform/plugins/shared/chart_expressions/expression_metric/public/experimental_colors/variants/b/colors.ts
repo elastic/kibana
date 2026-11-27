@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { easing } from 'ts-easing';
 import {
   DEFAULT_PARAMS,
   SURFACES,
@@ -51,8 +50,6 @@ export type BTargets = Readonly<{
   showTrendLine: boolean;
   /** Fades the trend's area from bottom to top. Off, it's flat. */
   trendGradient: boolean;
-  /** A border along the top of the tile, in the hue's base. */
-  topBorder: boolean;
 }>;
 
 export const DEFAULT_B_TARGETS: BTargets = {
@@ -69,23 +66,14 @@ export const DEFAULT_B_TARGETS: BTargets = {
   noTrendExtraFill: 0,
   showTrendLine: true,
   trendGradient: true,
-  topBorder: false,
 };
 
 /** The trend's area: Lens's gradient area fill at 2/3 of its opacity, so it costs the value less contrast. */
 export const TREND_OPACITY = 2 / 3;
-// Eased like Lens's area gradient (expression_xy's data_layers.tsx), but stronger and with fewer stops.
-const TREND_GRADIENT_START = 0.2 * TREND_OPACITY;
-const TREND_GRADIENT_END = 0.8 * TREND_OPACITY;
-const TREND_GRADIENT_STOP_COUNT = 4;
-export const TREND_GRADIENT_STOPS = Array.from({ length: TREND_GRADIENT_STOP_COUNT }, (_, i) => {
-  const offset = i / (TREND_GRADIENT_STOP_COUNT - 1);
-  return {
-    offset,
-    opacity:
-      TREND_GRADIENT_START + (TREND_GRADIENT_END - TREND_GRADIENT_START) * easing.inOutSine(offset),
-  };
-});
+export const TREND_GRADIENT_STOPS = [
+  { offset: 0, opacity: 0.1 * TREND_OPACITY },
+  { offset: 1, opacity: 0.7 * TREND_OPACITY },
+];
 // Slack for the solver's rounding.
 const TARGET_TOLERANCE = 0.5;
 // WCAG 2 AA for large text (1.4.3), which the value always is.
@@ -112,7 +100,8 @@ export interface TrendColors {
 export interface MetricTileColors extends TrendColors {
   fill: Hex;
   ink: Hex;
-  border: Hex;
+  /** The progress bar: the hue's base. */
+  bar: Hex;
 }
 
 export interface MetricTileOptions {
@@ -226,7 +215,7 @@ const resolve = (
   };
   const ink = towardFarEnd(mode, inkToward, (hex) => Math.max(0, WCAG_LARGE_TEXT_AA - ratio(hex)));
 
-  return { fill, ink, border: model.baseColor(angle, surface, p).hex, trend, trendLine };
+  return { fill, ink, bar: model.baseColor(angle, surface, p).hex, trend, trendLine };
 };
 
 const channels = (hex: Hex) => [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16));
