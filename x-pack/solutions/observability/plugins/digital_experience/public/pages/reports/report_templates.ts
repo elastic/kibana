@@ -6,16 +6,15 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import type { ReportTemplateId } from '../../../common/types/applications';
 
-export type ReportTemplateId = 'scorecard';
+export type { ReportTemplateId };
 
 export interface ReportTemplate {
   id: ReportTemplateId;
   title: string;
   description: string;
   iconType: string;
-  /** Templates that are listed but can't be opened yet. */
-  isAvailable: boolean;
 }
 
 /** The reports an application can have, in display order; fixed in code. */
@@ -29,7 +28,6 @@ export const REPORT_TEMPLATES: readonly ReportTemplate[] = [
       defaultMessage:
         'Page loads, load time, errors and Core Web Vitals, each compared with the previous period.',
     }),
-    iconType: 'visArea',
-    isAvailable: false,
+    iconType: 'chartArea',
   },
 ];

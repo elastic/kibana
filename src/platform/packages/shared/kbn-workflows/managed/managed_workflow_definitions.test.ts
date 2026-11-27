@@ -30,6 +30,7 @@ import {
   CONTEXT_ENGINE_RELATIONSHIPS_WORKFLOW_ID,
   CONTEXT_ENGINE_TRANSCRIPT_DREAMING_BATCH_WORKFLOW_ID,
   CONTEXT_ENGINE_TRANSCRIPT_DREAMING_WORKFLOW_ID,
+  DIGITAL_EXPERIENCE_SCORECARD_REPORT_WORKFLOW_ID,
   EXAMPLE_MANAGED_WORKFLOW_ID,
   EXAMPLE_SERVICE_ACCOUNT_WORKFLOW_ID,
   NIGHTSHIFT_BOUND_AGENT_OPTIMIZE_WORKFLOW_ID,
@@ -199,6 +200,19 @@ const templateRepresentativeValuesById: ManagedWorkflowTemplateValuesById = {
     flakyRuleDetectionThreshold: 10,
     flakyRuleProbeAfterMinutes: 360,
     flakyRuleExemptSeverityScore: 80,
+  },
+  [DIGITAL_EXPERIENCE_SCORECARD_REPORT_WORKFLOW_ID]: {
+    name: 'Weekly scorecard: checkout-web',
+    serviceName: 'checkout-web',
+    environment: 'production',
+    lookbackDays: 7,
+    frequency: 'WEEKLY',
+    weekday: 'MO',
+    hour: 9,
+    minute: 0,
+    timeZone: 'UTC',
+    connectorId: 'email-connector-1',
+    recipients: ['team@example.com'],
   },
 };
 

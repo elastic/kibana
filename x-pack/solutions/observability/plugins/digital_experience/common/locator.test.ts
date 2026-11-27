@@ -53,6 +53,22 @@ describe('DigitalExperienceLocatorDefinition', () => {
     );
   });
 
+  it('opens the report of the Reports tab, and the gallery without a known one', async () => {
+    expect(
+      await pathOf({ serviceName: 'storefront-web', tab: 'reports', report: 'scorecard' })
+    ).toBe('/storefront-web/reports/scorecard');
+    expect(
+      await pathOf({
+        serviceName: 'storefront-web',
+        tab: 'reports',
+        report: '../admin' as DigitalExperienceLocatorParams['report'],
+      })
+    ).toBe('/storefront-web/reports');
+    expect(
+      await pathOf({ serviceName: 'storefront-web', tab: 'errors', report: 'scorecard' })
+    ).toBe('/storefront-web/errors');
+  });
+
   it('opens the Overview for a tab it does not know', async () => {
     expect(
       await pathOf({

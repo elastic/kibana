@@ -16,10 +16,13 @@ import type {
 import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { UxPluginStart } from '@kbn/ux-plugin/public';
+import type { WorkflowsExtensionsPublicPluginSetup } from '@kbn/workflows-extensions/public';
 
 export interface DigitalExperienceSetupDeps {
   observabilityShared: ObservabilitySharedPluginSetup;
   share: SharePluginSetup;
+  /** Optional: the scorecard step is only registered where Workflows is. */
+  workflowsExtensions?: WorkflowsExtensionsPublicPluginSetup;
 }
 
 export interface DigitalExperienceStartDeps {

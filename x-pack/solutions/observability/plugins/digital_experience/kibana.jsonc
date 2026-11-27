@@ -17,7 +17,8 @@
       "encryptedSavedObjects",
       "security",
       "dashboard",
-      "lens"
+      "lens",
+      "workflowsExtensions"
     ],
     "requiredBundles": ["kibanaReact", "fieldFormats", "observability", "charts"]
   }

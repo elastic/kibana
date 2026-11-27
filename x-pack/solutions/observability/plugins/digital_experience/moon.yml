@@ -74,6 +74,8 @@ dependsOn:
   - '@kbn/utility-types'
   - '@kbn/ux-plugin'
   - '@kbn/visualization-utils'
+  - '@kbn/workflows'
+  - '@kbn/workflows-extensions'
   - '@kbn/zod'
   - '@kbn/core-test-helpers-deprecations-getters'
 tags:

@@ -54,6 +54,7 @@ export interface ApplicationLinks {
    */
   frustrationHref: string;
   crashesHref: string;
+  scorecardReportHref: string;
   sessionsHref: (sessionsQuery?: SessionsListUrlQuery) => string;
   sessionHref: (sessionId: string, sessionsQuery?: SessionsListUrlQuery) => string;
 }
@@ -62,7 +63,7 @@ export interface ApplicationLinks {
  * Links to an application's pages. They keep the applications list's query, so its breadcrumb
  * leads back to the same list, and the Overview's filters and KQL query, which the Sessions keep
  * only for the ones it has too (browser, OS and country, with one included value), and the
- * sessions list's state where given.
+ * sessions list's state where given. The reports' links keep none of the filters.
  */
 export const useApplicationLinks = (
   serviceName: string,
@@ -99,6 +100,8 @@ export const useApplicationLinks = (
       source,
     };
     const query = { ...listQuery, ...sharedFilters, compare, source };
+    // The reports cover the whole application, so the Overview's filters and query don't carry over.
+    const reportsQuery = { ...listQuery, compare, source };
     const overviewPath = router.link('/{serviceName}', {
       path: { serviceName },
       query: tabQuery,
@@ -113,13 +116,19 @@ export const useApplicationLinks = (
         router.link('/{serviceName}/network', { path: { serviceName }, query: tabQuery })
       ),
       reportsHref: toHref(
-        router.link('/{serviceName}/reports', { path: { serviceName }, query: tabQuery })
+        router.link('/{serviceName}/reports', { path: { serviceName }, query: reportsQuery })
       ),
       frustrationHref: toHref(
         router.link('/{serviceName}/frustration', { path: { serviceName }, query: tabQuery })
       ),
       crashesHref: toHref(
         router.link('/{serviceName}/crashes', { path: { serviceName }, query: tabQuery })
+      ),
+      scorecardReportHref: toHref(
+        router.link('/{serviceName}/reports/scorecard', {
+          path: { serviceName },
+          query: reportsQuery,
+        })
       ),
       sessionsHref: (sessionsQuery = {}) =>
         toHref(
