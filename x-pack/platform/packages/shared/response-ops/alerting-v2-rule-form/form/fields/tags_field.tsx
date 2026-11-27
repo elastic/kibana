@@ -15,6 +15,7 @@ import type { FormValues } from '../types';
 import { useRuleFormMeta, useRuleFormServices } from '../contexts';
 import { useFetchRuleTags } from '../hooks/use_fetch_rule_tags';
 import { OPTIONAL_LABEL } from '../optional_field_label';
+import { FormLabelWithQuestionTip } from './form_label_with_help';
 
 export const validateTags = (value?: string[]): true | string => {
   if (value?.some((tag) => tag.length > MAX_TAG_LENGTH)) {
@@ -54,9 +55,18 @@ export const TagsField = () => {
 
         return (
           <EuiFormRow
-            label={i18n.translate('xpack.alertingV2.ruleForm.tagsLabel', {
-              defaultMessage: 'Tags',
-            })}
+            label={
+              <FormLabelWithQuestionTip
+                label={i18n.translate('xpack.alertingV2.ruleForm.tagsLabel', {
+                  defaultMessage: 'Tags',
+                })}
+                tip={i18n.translate('xpack.alertingV2.ruleForm.tagsTooltip', {
+                  defaultMessage:
+                    "Labels for finding and organizing rules. Tags don't control notifications.",
+                })}
+                data-test-subj="ruleTagsHelpTip"
+              />
+            }
             labelAppend={OPTIONAL_LABEL}
             isInvalid={!!error}
             error={error?.message}

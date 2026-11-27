@@ -13,8 +13,18 @@ import { Controller, useFormContext, useWatch } from 'react-hook-form';
 import type { FormValues } from '../types';
 import { LookbackWindow } from './lookback_window';
 import { useRuleFormMeta } from '../contexts';
+import { FormLabelWithQuestionTip } from './form_label_with_help';
 
 const LOOKBACK_WINDOW_ROW_ID = 'ruleV2FormLookbackWindowField';
+
+const LOOKBACK_LABEL = i18n.translate('xpack.alertingV2.ruleForm.lookbackWindowLabel', {
+  defaultMessage: 'Lookback Window',
+});
+
+const LOOKBACK_TIP = i18n.translate('xpack.alertingV2.ruleForm.lookbackWindowTooltip', {
+  defaultMessage:
+    'How far back each run searches, using the time field. This is separate from how often the rule runs.',
+});
 
 const LOOKBACK_LESS_THAN_INTERVAL_WARNING = i18n.translate(
   'xpack.alertingV2.ruleForm.schedule.lookbackLessThanIntervalWarning',
@@ -57,9 +67,13 @@ export const LookbackWindowField = () => {
         return (
           <EuiFormRow
             id={LOOKBACK_WINDOW_ROW_ID}
-            label={i18n.translate('xpack.alertingV2.ruleForm.lookbackWindowLabel', {
-              defaultMessage: 'Lookback Window',
-            })}
+            label={
+              <FormLabelWithQuestionTip
+                label={LOOKBACK_LABEL}
+                tip={LOOKBACK_TIP}
+                data-test-subj="ruleLookbackWindowHelpTip"
+              />
+            }
             helpText={showIntervalWarning ? LOOKBACK_LESS_THAN_INTERVAL_WARNING : undefined}
             isInvalid={!!error}
             fullWidth

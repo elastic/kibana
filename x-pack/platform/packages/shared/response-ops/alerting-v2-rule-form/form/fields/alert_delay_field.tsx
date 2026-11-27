@@ -15,6 +15,7 @@ import { deriveAlertDelayModeFromStateTransition } from '../utils/state_transiti
 import { StateTransitionCountField } from './state_transition_count_field';
 import { StateTransitionTimeframeField } from './state_transition_timeframe_field';
 import { useRuleFormMeta } from '../contexts';
+import { FormLabelWithQuestionTip } from './form_label_with_help';
 
 type DelayMode =
   | typeof DELAY_MODE.immediate
@@ -125,9 +126,18 @@ export const AlertDelayField = () => {
 
   return (
     <EuiFormRow
-      label={i18n.translate('xpack.alertingV2.ruleForm.alertDelay.label', {
-        defaultMessage: 'Alert delay',
-      })}
+      label={
+        <FormLabelWithQuestionTip
+          label={i18n.translate('xpack.alertingV2.ruleForm.alertDelay.label', {
+            defaultMessage: 'Alert delay',
+          })}
+          tip={i18n.translate('xpack.alertingV2.ruleForm.alertDelay.tooltip', {
+            defaultMessage:
+              'How long a match must persist before the alert becomes active. Use this to reduce noise from brief spikes.',
+          })}
+          data-test-subj="alertDelayHelpTip"
+        />
+      }
       fullWidth
       data-test-subj="alertDelayFormRow"
     >

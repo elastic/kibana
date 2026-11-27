@@ -21,9 +21,15 @@ import {
   renderRoutingTagOption,
   type RoutingTagOption,
 } from './routing_tag_suggestion';
+import { FormLabelWithQuestionTip } from './form_label_with_help';
 
 const ROUTING_TAGS_LABEL = i18n.translate('xpack.alertingV2.ruleForm.routingTagsLabel', {
   defaultMessage: 'Routing tags',
+});
+
+const ROUTING_TAGS_TIP = i18n.translate('xpack.alertingV2.ruleForm.routingTagsTooltip', {
+  defaultMessage:
+    "Unlike tags, routing tags connect this rule's alerts to action policies. They don't organize the rules list.",
 });
 
 const SUGGESTION_ROW_HEIGHT_MULTIPLIER = 3;
@@ -51,7 +57,13 @@ export const RoutingTagsField = () => {
 
         return (
           <EuiFormRow
-            label={ROUTING_TAGS_LABEL}
+            label={
+              <FormLabelWithQuestionTip
+                label={ROUTING_TAGS_LABEL}
+                tip={ROUTING_TAGS_TIP}
+                data-test-subj="ruleRoutingTagsHelpTip"
+              />
+            }
             labelAppend={OPTIONAL_LABEL}
             helpText={i18n.translate('xpack.alertingV2.ruleForm.routingTagsHelpText', {
               defaultMessage:

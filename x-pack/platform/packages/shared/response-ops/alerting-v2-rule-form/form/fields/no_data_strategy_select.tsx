@@ -10,6 +10,7 @@ import { EuiFormRow, EuiSuperSelect, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { NoDataStrategy } from '@kbn/alerting-v2-schemas';
 import { noDataStrategy } from '@kbn/alerting-v2-schemas';
+import { FormLabelWithQuestionTip } from './form_label_with_help';
 
 export const DEFAULT_NO_DATA_STRATEGY: NoDataStrategy = noDataStrategy.ignore;
 
@@ -24,6 +25,11 @@ interface NoDataStrategySelectProps {
 
 const LABEL_TEXT = i18n.translate('xpack.alertingV2.ruleForm.noDataStrategyField.label', {
   defaultMessage: 'No data behavior',
+});
+
+const LABEL_TIP = i18n.translate('xpack.alertingV2.ruleForm.noDataStrategyField.tooltip', {
+  defaultMessage:
+    'What happens to an alert when its group has no data for a run. Quiet data and a healthy group can look the same without this setting.',
 });
 
 const KEEP_LAST_TITLE = i18n.translate(
@@ -91,7 +97,18 @@ export const NoDataStrategySelect = ({
   error,
   'data-test-subj': dataTestSubj = 'ruleV2NoDataStrategySelect',
 }: NoDataStrategySelectProps) => (
-  <EuiFormRow label={LABEL_TEXT} fullWidth isInvalid={error != null} error={error}>
+  <EuiFormRow
+    label={
+      <FormLabelWithQuestionTip
+        label={LABEL_TEXT}
+        tip={LABEL_TIP}
+        data-test-subj="noDataStrategyHelpTip"
+      />
+    }
+    fullWidth
+    isInvalid={error != null}
+    error={error}
+  >
     <EuiSuperSelect<NoDataStrategy>
       options={NO_DATA_STRATEGY_OPTIONS}
       valueOfSelected={value}

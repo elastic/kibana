@@ -12,6 +12,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { RuleKind, RuleQuery } from '../../../form/types';
 import { getBreachQuery } from '../../../form/utils/query_helpers';
 import { QueryBlock, QuerySummary } from '../query_summary';
+import { FormLabelWithQuestionTip } from '../../../form/fields/form_label_with_help';
 
 export type EsqlSummaryState =
   | 'before_apply'
@@ -148,9 +149,18 @@ const BASE_QUERY_LABEL = (
 );
 
 const ALERT_CONDITION_LABEL = (
-  <FormattedMessage
-    id="xpack.alertingV2.composeDiscover.esqlSummary.alertConditionLabel"
-    defaultMessage="Alert condition"
+  <FormLabelWithQuestionTip
+    label={
+      <FormattedMessage
+        id="xpack.alertingV2.composeDiscover.esqlSummary.alertConditionLabel"
+        defaultMessage="Alert condition"
+      />
+    }
+    tip={i18n.translate('xpack.alertingV2.composeDiscover.esqlSummary.alertConditionTooltip', {
+      defaultMessage:
+        'The alert condition is the part of the query that decides which rows are a match (breach). Without it, every row from the base query is treated as a match.',
+    })}
+    data-test-subj="esqlAlertConditionHelpTip"
   />
 );
 

@@ -13,13 +13,27 @@ import {
   validateMinDuration,
 } from '@kbn/alerting-v2-schemas';
 import { i18n } from '@kbn/i18n';
-import { EuiFormRow, EuiIconTip } from '@elastic/eui';
+import { EuiFormRow } from '@elastic/eui';
 import { Controller, useFormContext } from 'react-hook-form';
 import type { FormValues } from '../types';
 import { RuleSchedule } from './rule_schedule';
 import { useRuleFormMeta, useRuleFormServices } from '../contexts';
+import { FormLabelWithQuestionTip } from './form_label_with_help';
 
 const SCHEDULE_ROW_ID = 'ruleV2FormScheduleField';
+
+const SCHEDULE_LABEL = i18n.translate('xpack.alertingV2.ruleForm.scheduleLabel', {
+  defaultMessage: 'Schedule',
+});
+
+const SCHEDULE_TIP = i18n.translate('xpack.alertingV2.ruleForm.scheduleTooltip', {
+  defaultMessage:
+    "How often the rule runs. Checks can be delayed by Kibana's polling frequency.",
+});
+
+const SCHEDULE_HELP_TEXT = i18n.translate('xpack.alertingV2.ruleForm.scheduleHelpText', {
+  defaultMessage: 'Use units such as 1m or 5m.',
+});
 
 export const ScheduleField = () => {
   const { control } = useFormContext<FormValues>();
@@ -54,26 +68,15 @@ export const ScheduleField = () => {
       render={({ field, fieldState: { error } }) => (
         <EuiFormRow
           id={SCHEDULE_ROW_ID}
-          label={i18n.translate('xpack.alertingV2.ruleForm.scheduleLabel', {
-            defaultMessage: 'Schedule',
-          })}
-          fullWidth
-          helpText={
-            <>
-              {i18n.translate('xpack.alertingV2.ruleForm.scheduleHelpText', {
-                defaultMessage: 'Set the frequency to check the alert conditions',
-              })}
-              &nbsp;
-              <EuiIconTip
-                position="right"
-                type="question"
-                content={i18n.translate('xpack.alertingV2.ruleForm.scheduleTooltip', {
-                  defaultMessage:
-                    'The frequency of how often the rule runs. This check can be delayed based on the Kibana polling frequency.',
-                })}
-              />
-            </>
+          label={
+            <FormLabelWithQuestionTip
+              label={SCHEDULE_LABEL}
+              tip={SCHEDULE_TIP}
+              data-test-subj="ruleScheduleHelpTip"
+            />
           }
+          fullWidth
+          helpText={SCHEDULE_HELP_TEXT}
           isInvalid={!!error}
         >
           <RuleSchedule

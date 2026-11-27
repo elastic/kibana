@@ -17,6 +17,7 @@ import type {
 } from '../types';
 import type { FormValues, RecoveryStrategy } from '../../../form/types';
 import { RecoveryDelayField } from '../../../form/fields/recovery_delay_field';
+import { FormLabelWithQuestionTip } from '../../../form/fields/form_label_with_help';
 
 const defaultRecoveryLabel = i18n.translate(
   'xpack.alertingV2.composeDiscover.recoveryCondition.defaultRecoveryDropDownOptionLabel',
@@ -90,9 +91,22 @@ const RecoveryTypeSelector: React.FC<RecoveryTypeSelectorProps> = ({
   onRecoveryTypeChange,
 }) => (
   <EuiFormRow
-    label={i18n.translate('xpack.alertingV2.composeDiscover.recoveryCondition.recoveryTypeLabel', {
-      defaultMessage: 'Recovery',
-    })}
+    label={
+      <FormLabelWithQuestionTip
+        label={i18n.translate(
+          'xpack.alertingV2.composeDiscover.recoveryCondition.recoveryTypeLabel',
+          { defaultMessage: 'Recovery' }
+        )}
+        tip={i18n.translate(
+          'xpack.alertingV2.composeDiscover.recoveryCondition.recoveryTypeTooltip',
+          {
+            defaultMessage:
+              'How the rule decides an alert has recovered. Default closes the alert when the group no longer matches the alert condition.',
+          }
+        )}
+        data-test-subj="recoveryTypeHelpTip"
+      />
+    }
     isInvalid={Boolean(error)}
     error={error}
     fullWidth

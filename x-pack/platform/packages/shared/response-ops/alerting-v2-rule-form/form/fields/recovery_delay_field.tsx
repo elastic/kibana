@@ -15,6 +15,7 @@ import { deriveRecoveryDelayModeFromStateTransition } from '../utils/state_trans
 import { StateTransitionCountField } from './state_transition_count_field';
 import { StateTransitionTimeframeField } from './state_transition_timeframe_field';
 import { useRuleFormMeta } from '../contexts';
+import { FormLabelWithQuestionTip } from './form_label_with_help';
 
 type DelayMode =
   | typeof DELAY_MODE.immediate
@@ -127,9 +128,18 @@ export const RecoveryDelayField = () => {
 
   return (
     <EuiFormRow
-      label={i18n.translate('xpack.alertingV2.ruleForm.recoveryDelay.label', {
-        defaultMessage: 'Recovery delay',
-      })}
+      label={
+        <FormLabelWithQuestionTip
+          label={i18n.translate('xpack.alertingV2.ruleForm.recoveryDelay.label', {
+            defaultMessage: 'Recovery delay',
+          })}
+          tip={i18n.translate('xpack.alertingV2.ruleForm.recoveryDelay.tooltip', {
+            defaultMessage:
+              'How long recovery must persist before the alert closes. Use this to avoid flapping when a condition clears briefly.',
+          })}
+          data-test-subj="recoveryDelayHelpTip"
+        />
+      }
       fullWidth
       data-test-subj="recoveryDelayFormRow"
     >

@@ -20,6 +20,10 @@ import { EsqlQuerySummarySection, getEsqlSummaryState } from './esql_query_summa
 import type { RuleFormServices } from '../../../form/contexts/rule_form_context';
 import { useComposeDiscoverTimeField } from '../use_compose_discover_time_field';
 import { getTimeFieldResolutionQuery } from '../get_time_field_resolution_query';
+import {
+  FormLabelWithInfoPopover,
+  FormLabelWithQuestionTip,
+} from '../../../form/fields/form_label_with_help';
 
 interface AlertConditionStepProps {
   state: ComposeDiscoverState;
@@ -159,9 +163,22 @@ export function AlertConditionStep({
 
       <EuiSpacer size="m" />
       <EuiFormRow
-        label={i18n.translate('xpack.alertingV2.composeDiscover.alertCondition.timeFieldLabel', {
-          defaultMessage: 'Time field',
-        })}
+        label={
+          <FormLabelWithQuestionTip
+            label={i18n.translate(
+              'xpack.alertingV2.composeDiscover.alertCondition.timeFieldLabel',
+              { defaultMessage: 'Time field' }
+            )}
+            tip={i18n.translate(
+              'xpack.alertingV2.composeDiscover.alertCondition.timeFieldTooltip',
+              {
+                defaultMessage:
+                  'Timestamp used to apply the lookback window. Defaults to @timestamp.',
+              }
+            )}
+            data-test-subj="composeDiscoverTimeFieldHelpTip"
+          />
+        }
         fullWidth
         isInvalid={timeFieldInvalid}
         error={
@@ -189,9 +206,26 @@ export function AlertConditionStep({
       </EuiFormRow>
       <EuiSpacer size="m" />
       <EuiFormRow
-        label={i18n.translate('xpack.alertingV2.composeDiscover.alertCondition.groupFieldsLabel', {
-          defaultMessage: 'Group fields',
-        })}
+        label={
+          <FormLabelWithInfoPopover
+            label={i18n.translate(
+              'xpack.alertingV2.composeDiscover.alertCondition.groupFieldsLabel',
+              { defaultMessage: 'Group fields' }
+            )}
+            title={i18n.translate(
+              'xpack.alertingV2.composeDiscover.alertCondition.groupFieldsHelpTitle',
+              { defaultMessage: 'Group fields' }
+            )}
+            body={i18n.translate(
+              'xpack.alertingV2.composeDiscover.alertCondition.groupFieldsHelpBody',
+              {
+                defaultMessage:
+                  "Each unique combination of these fields becomes its own alert series with a separate lifecycle. Values should match the columns from your query's STATS … BY clause. Leave empty if you want one series for the whole rule.",
+              }
+            )}
+            data-test-subj="composeDiscoverGroupFieldsHelp"
+          />
+        }
         fullWidth
       >
         <EuiComboBox
