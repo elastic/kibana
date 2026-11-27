@@ -28,7 +28,7 @@ interface SecretAuditEventParams {
   readonly action: SecretAuditAction;
   /** The secret the event is about. Omitted when a list fails. */
   readonly savedObject?: { type: string; id: string; name?: string };
-  readonly error?: Error;
+  readonly error?: AuditEvent['error'];
 }
 
 const secretAuditEvent = ({ action, savedObject, error }: SecretAuditEventParams): AuditEvent => {
@@ -47,7 +47,7 @@ const secretAuditEvent = ({ action, savedObject, error }: SecretAuditEventParams
       outcome: error ? 'failure' : 'success',
     },
     kibana: { saved_object: savedObject },
-    error: error && { code: error.name, message: error.message },
+    error,
   };
 };
 
@@ -90,7 +90,12 @@ export const createAuditedSecretsClient = ({
             id: getSecretSavedObjectId({ spaceId, name }),
             ...(auditLogger.includeSavedObjectNames ? { name } : {}),
           };
-    auditLogger.log(secretAuditEvent({ action, savedObject, error }));
+    const auditError = error && {
+      code: error.name,
+      // Several error messages name the secret, so they are left out with the names.
+      ...(auditLogger.includeSavedObjectNames ? { message: error.message } : {}),
+    };
+    auditLogger.log(secretAuditEvent({ action, savedObject, error: auditError }));
   };
 
   /** Runs an operation and records its failure; success is recorded by the caller. */

@@ -98,6 +98,10 @@ export const createSecretsClient = ({
       return withoutValue(entry);
     },
 
-    delete: async ({ name }) => storage.delete({ name }),
+    delete: async ({ name }) => {
+      // A malformed name is reported as such, not as a missing secret.
+      validateSecret({ name });
+      return storage.delete({ name });
+    },
   };
 };

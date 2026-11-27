@@ -5,12 +5,10 @@
  * 2.0.
  */
 
-import {
-  secretNameParamsSchema,
-  toSecretsErrorResponse,
-  updateSecretBodySchema,
-} from '@kbn/secrets-plugin/server';
-import { SECRET_PATH, type SecretsRouteDependencies } from './types';
+import { secretNameParamsSchema, updateSecretBodySchema } from '@kbn/secrets-plugin/server';
+import { SECRET_PATH } from './constants';
+import { toSecretsRouteErrorResponse } from './secrets_route_error_response';
+import type { SecretsRouteDependencies } from './types';
 import { INTERNAL_API_VERSION } from '../utils/route_constants';
 import { SECRETS_MANAGE_SECURITY } from '../utils/route_security';
 import { withAvailabilityCheck } from '../utils/with_availability_check';
@@ -40,7 +38,7 @@ export const registerUpdateSecretRoute = ({
             const { name } = request.params;
             return response.ok({ body: await client.update({ name, ...request.body }) });
           } catch (error) {
-            return toSecretsErrorResponse({ response, error });
+            return toSecretsRouteErrorResponse({ response, error });
           }
         },
         { bootstrapExecutionDataViews: false }

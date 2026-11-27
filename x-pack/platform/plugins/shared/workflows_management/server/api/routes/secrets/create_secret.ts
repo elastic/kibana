@@ -5,8 +5,10 @@
  * 2.0.
  */
 
-import { createSecretBodySchema, toSecretsErrorResponse } from '@kbn/secrets-plugin/server';
-import { SECRETS_PATH, type SecretsRouteDependencies } from './types';
+import { createSecretBodySchema } from '@kbn/secrets-plugin/server';
+import { SECRETS_PATH } from './constants';
+import { toSecretsRouteErrorResponse } from './secrets_route_error_response';
+import type { SecretsRouteDependencies } from './types';
 import { INTERNAL_API_VERSION } from '../utils/route_constants';
 import { SECRETS_MANAGE_SECURITY } from '../utils/route_security';
 import { withAvailabilityCheck } from '../utils/with_availability_check';
@@ -31,7 +33,7 @@ export const registerCreateSecretRoute = ({
             const client = await getSecretsClient(request);
             return response.created({ body: await client.create(request.body) });
           } catch (error) {
-            return toSecretsErrorResponse({ response, error });
+            return toSecretsRouteErrorResponse({ response, error });
           }
         },
         { bootstrapExecutionDataViews: false }

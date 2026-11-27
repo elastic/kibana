@@ -353,6 +353,27 @@ describe('secrets on Elasticsearch', () => {
   });
 
   describe('audit', () => {
+    it('records one find event for each secret a list returns', async () => {
+      const spaceId = 'audited_list';
+      const names = ['first_token', 'second_token'];
+      const { client, events } = getAuditedClient({ spaceId });
+      for (const name of names) {
+        await client.create({ name, value: VALUE });
+      }
+      const createEvents = events().length;
+
+      await client.list();
+
+      const findEvents = events().slice(createEvents);
+      expect(findEvents.map((auditEvent) => auditEvent?.event?.action)).toEqual([
+        'secret_find',
+        'secret_find',
+      ]);
+      expect(findEvents.map((auditEvent) => auditEvent?.kibana?.saved_object?.name).sort()).toEqual(
+        names
+      );
+    });
+
     it('records a failed attempt with its error', async () => {
       const spaceId = 'audited_failure';
       const name = 'taken_token';
@@ -383,13 +404,20 @@ describe('secrets on Elasticsearch', () => {
       const { client, events } = getAuditedClient({ spaceId, includeSavedObjectNames: false });
 
       await client.create({ name, value: VALUE });
+      await expect(client.create({ name, value: VALUE })).rejects.toThrow(SecretAlreadyExistsError);
 
       expect(events()).toEqual([
         expect.objectContaining({
           message: `User has created secret [id=${id}]`,
           kibana: { saved_object: { type, id } },
         }),
+        expect.objectContaining({
+          message: `Failed attempt to create secret [id=${id}]`,
+          kibana: { saved_object: { type, id } },
+          error: { code: 'SecretAlreadyExistsError' },
+        }),
       ]);
+      expect(JSON.stringify(events())).not.toContain(name);
     });
   });
 });

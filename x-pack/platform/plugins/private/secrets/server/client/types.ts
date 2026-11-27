@@ -35,6 +35,9 @@ export interface SecretsClient {
    * decrypts, and `SecretConflictError` when another request changed the secret during the update.
    */
   update(params: UpdateSecretParams): Promise<SecretMetadata>;
-  /** Throws `SecretNotFoundError` when the space has no secret with this name. */
+  /**
+   * Throws `SecretValidationError` when the name breaks a rule, and `SecretNotFoundError` when
+   * the space has no secret with this name.
+   */
   delete(params: DeleteSecretParams): Promise<void>;
 }

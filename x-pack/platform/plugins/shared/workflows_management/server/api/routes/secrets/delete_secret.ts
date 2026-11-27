@@ -5,8 +5,10 @@
  * 2.0.
  */
 
-import { secretNameParamsSchema, toSecretsErrorResponse } from '@kbn/secrets-plugin/server';
-import { SECRET_PATH, type SecretsRouteDependencies } from './types';
+import { secretNameParamsSchema } from '@kbn/secrets-plugin/server';
+import { SECRET_PATH } from './constants';
+import { toSecretsRouteErrorResponse } from './secrets_route_error_response';
+import type { SecretsRouteDependencies } from './types';
 import { INTERNAL_API_VERSION } from '../utils/route_constants';
 import { SECRETS_MANAGE_SECURITY } from '../utils/route_security';
 import { withAvailabilityCheck } from '../utils/with_availability_check';
@@ -21,6 +23,7 @@ export const registerDeleteSecretRoute = ({
       access: 'internal',
       security: SECRETS_MANAGE_SECURITY,
       summary: 'Delete a secret',
+      description: 'Deletes a secret from the space.',
     })
     .addVersion(
       { version: INTERNAL_API_VERSION, validate: { request: { params: secretNameParamsSchema } } },
@@ -31,7 +34,7 @@ export const registerDeleteSecretRoute = ({
             await client.delete(request.params);
             return response.noContent();
           } catch (error) {
-            return toSecretsErrorResponse({ response, error });
+            return toSecretsRouteErrorResponse({ response, error });
           }
         },
         { bootstrapExecutionDataViews: false }

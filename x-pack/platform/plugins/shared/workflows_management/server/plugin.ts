@@ -159,10 +159,13 @@ export class WorkflowsPlugin
       analytics: core.analytics,
       getSecretsClient: plugins.secrets
         ? async (request) => {
-            const [, { secrets }] = await core.getStartServices();
+            const [, { secrets, spaces: spacesStart }] = await core.getStartServices();
             if (!secrets) {
               throw new Error('The secrets plugin is set up but did not start');
             }
+            // Route authorization checks the privileges of the space in the URL, not that it
+            // exists. Throws a not found error for a space that does not exist.
+            await spacesStart.spacesService.getActiveSpace(request);
             return secrets.getClient({ request });
           }
         : undefined,

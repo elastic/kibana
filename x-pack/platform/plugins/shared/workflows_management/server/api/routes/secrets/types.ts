@@ -9,6 +9,3 @@ import type { RouteDependencies } from '../types';
 
 export type SecretsRouteDependencies = Pick<RouteDependencies, 'router'> &
   Required<Pick<RouteDependencies, 'getSecretsClient'>>;
-
-export const SECRETS_PATH = '/internal/workflows/secrets';
-export const SECRET_PATH = `${SECRETS_PATH}/{name}`;
