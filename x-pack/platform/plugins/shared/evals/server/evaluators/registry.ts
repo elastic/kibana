@@ -21,6 +21,11 @@ import {
   toolCallsEvaluatorDef,
 } from './trace_metrics';
 import { toBuiltIn } from './to_built_in';
+import { skillSecretScannerEvaluator } from './skill_secret_scanner';
+import { skillPromptInjectionEvaluator } from './skill_prompt_injection';
+import { skillPiiEvaluator } from './skill_pii';
+import { esqlCompileEvaluator } from './esql_compile';
+import { indexResolvesEvaluator } from './index_resolves';
 import { compileUserDefinedEvaluator } from './user_defined/compile';
 import type {
   EvaluatorDefinition,
@@ -36,6 +41,11 @@ const BUILT_IN_EVALUATORS: readonly EvaluatorDefinition[] = [
   inputTokensEvaluatorDef,
   outputTokensEvaluatorDef,
   toolCallsEvaluatorDef,
+  skillSecretScannerEvaluator,
+  skillPromptInjectionEvaluator,
+  skillPiiEvaluator,
+  esqlCompileEvaluator,
+  indexResolvesEvaluator,
 ];
 
 const latestOf = (versions: Map<string, EvaluatorDefinition>): EvaluatorDefinition | undefined => {
