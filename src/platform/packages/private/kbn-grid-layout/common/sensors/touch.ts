@@ -22,28 +22,43 @@ export const getTouchSensorPosition = ({ touches }: UserTouchEvent) => ({
 
 /*
  * This function should be attached to `touchstart` event listener.
- * It follows the flow of `touchstart` -> `touchmove` -> `touchend` where the consumer is responsible for handling the interaction logic and defining what happens on each event.
+ * It follows the flow of `touchstart` -> `touchmove` -> `touchend` / `touchcancel` where the consumer is
+ * responsible for handling the interaction logic and defining what happens on each event.
+ * When the browser aborts the touch (`touchcancel`), `onCancel` is called to revert the interaction; without it, `onEnd` is the fallback.
  */
-
 export const startTouchInteraction = ({
   e,
   onMove,
   onEnd,
+  onCancel,
   onStart,
 }: {
   e: UserTouchEvent;
   onStart: (e: UserInteractionEvent) => void;
   onMove: (e: UserInteractionEvent) => void;
   onEnd: () => void;
+  onCancel?: () => void;
 }) => {
   if (e.touches.length > 1) return;
 
-  const handleEnd = () => {
+  const teardown = () => {
     e.target!.removeEventListener('touchmove', onMove);
+    e.target!.removeEventListener('touchend', handleEnd);
+    e.target!.removeEventListener('touchcancel', handleCancel);
+  };
+
+  const handleEnd = () => {
+    teardown();
     onEnd();
   };
 
+  const handleCancel = () => {
+    teardown();
+    (onCancel ?? onEnd)();
+  };
+
   e.target!.addEventListener('touchmove', onMove);
-  e.target!.addEventListener('touchend', handleEnd, { once: true });
+  e.target!.addEventListener('touchend', handleEnd);
+  e.target!.addEventListener('touchcancel', handleCancel);
   onStart(e);
 };

@@ -9,6 +9,8 @@
 
 import React from 'react';
 
+import { EuiProvider } from '@elastic/eui';
+
 import {
   registerEmbeddablePublicDefinition,
   type EmbeddablePublicDefinition,
@@ -83,7 +85,8 @@ describe('control group renderer', () => {
         onApiAvailable={(newApi) => {
           controlGroupApi = newApi;
         }}
-      />
+      />,
+      { wrapper: EuiProvider }
     );
     await waitFor(() => {
       expect(controlGroupApi).toBeDefined();

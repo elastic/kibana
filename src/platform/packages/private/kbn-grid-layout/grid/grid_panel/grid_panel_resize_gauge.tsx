@@ -8,10 +8,10 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import { css } from '@emotion/react';
 import { combineLatest, skip } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import { useGridPanelState } from './use_panel_grid_data';
+import { resizeGaugeStyles } from '../../common/resize_styles';
 import { useGridLayoutContext } from '../use_grid_layout_context';
 
 export const ResizeGauge = React.memo(({ panelId }: { panelId: string }) => {
@@ -59,7 +59,7 @@ export const ResizeGauge = React.memo(({ panelId }: { panelId: string }) => {
   }, [panel$, gridLayoutStateManager]);
 
   return isResizing ? (
-    <div css={outerStyles} className="kbnGridPanel--resizeGauge">
+    <div css={resizeGaugeStyles} className="kbnGridPanel--resizeGauge">
       <div className="kbnGridPanel--resizeGauge--inner">
         <span className="kbnGridPanel--resizeGauge--text">
           {i18n.translate('kbnGridLayout.resizeGauge.widthByHeight', {
@@ -71,12 +71,5 @@ export const ResizeGauge = React.memo(({ panelId }: { panelId: string }) => {
     </div>
   ) : null;
 });
-
-const outerStyles = () =>
-  css({
-    right: '0',
-    top: '0',
-    position: 'absolute',
-  });
 
 ResizeGauge.displayName = 'KbnGridLayoutResizeGauge';

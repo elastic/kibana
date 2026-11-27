@@ -29,7 +29,7 @@ import { deleteSection } from '../utils/section_management';
 import { DeleteGridSectionModal } from './delete_grid_section_modal';
 import { GridSectionTitle } from './grid_section_title';
 import type { CollapsibleSection } from './types';
-import type { UserInteractionEvent } from '../use_grid_layout_events/types';
+import type { UserInteractionEvent } from '../../common/types';
 
 export interface GridSectionHeaderProps {
   sectionId: string;

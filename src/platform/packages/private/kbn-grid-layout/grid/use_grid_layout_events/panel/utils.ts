@@ -13,9 +13,8 @@ import { getScrollDimensions, isAtBottomOfPage } from '@kbn/core-chrome-layout-u
 import type { ActivePanelEvent, GridPanelData } from '../../grid_panel';
 import type { GridLayoutStateManager, RuntimeGridSettings } from '../../types';
 import { updateClientY } from '../keyboard_utils';
-import { getSensorPosition, isKeyboardEvent, isMouseEvent, isTouchEvent } from '../sensors';
-import { KeyboardCode, type UserKeyboardEvent } from '../sensors/keyboard/types';
-import type { PointerPosition, UserInteractionEvent } from '../types';
+import { KeyboardCode, type UserKeyboardEvent } from '../../../common/sensors/keyboard/types';
+import type { PointerPosition } from '../../../common/types';
 
 export const getDefaultResizeOptions = (runtimeSettings: RuntimeGridSettings) => ({
   minWidth: 1,
@@ -84,37 +83,6 @@ export const getResizePreviewRect = ({
     ),
   };
 };
-
-// Calculates the preview rect coordinates for a dragged panel
-export const getDragPreviewRect = ({
-  pointerPixel,
-  activePanel,
-}: {
-  pointerPixel: PointerPosition;
-  activePanel: ActivePanelEvent;
-}) => {
-  return {
-    left: pointerPixel.clientX - activePanel.sensorOffsets.left,
-    top: pointerPixel.clientY - activePanel.sensorOffsets.top,
-    bottom: pointerPixel.clientY - activePanel.sensorOffsets.bottom,
-    right: pointerPixel.clientX - activePanel.sensorOffsets.right,
-  };
-};
-
-// Calculates the sensor's offset relative to the active panel's edges (top, left, right, bottom).
-// This ensures the dragged or resized panel maintains its position under the cursor during the interaction.
-export function getSensorOffsets(e: UserInteractionEvent, { top, left, right, bottom }: DOMRect) {
-  if (!isTouchEvent(e) && !isMouseEvent(e) && !isKeyboardEvent(e)) {
-    throw new Error('Unsupported event type: only mouse, touch, or keyboard events are handled.');
-  }
-  const { clientX, clientY } = getSensorPosition(e);
-  return {
-    top: clientY - top,
-    left: clientX - left,
-    right: clientX - right,
-    bottom: clientY - bottom,
-  };
-}
 
 const KEYBOARD_DRAG_BOTTOM_LIMIT = parseInt(euiThemeVars.euiSizeS, 10);
 

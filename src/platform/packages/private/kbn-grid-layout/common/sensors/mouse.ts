@@ -35,12 +35,14 @@ export const startMouseInteraction = ({
   onStart,
   onMove,
   onEnd,
+  onCancel,
   scrollContainer,
 }: {
   e: UserMouseEvent;
   onStart: (e: UserInteractionEvent) => void;
   onMove: (e: UserInteractionEvent) => void;
   onEnd: () => void;
+  onCancel?: () => void;
   scrollContainer: ScrollContainer;
 }) => {
   if (e.button !== MOUSE_BUTTON_LEFT) return;
@@ -52,15 +54,30 @@ export const startMouseInteraction = ({
     onMove(ev);
   };
 
-  const handleEnd = (ev: Event) => {
+  // removes every document-level listener installed below, however the interaction ends
+  const teardown = () => {
     document.removeEventListener('scroll', onMove);
     document.removeEventListener('mousemove', handleMouseMove);
+    document.removeEventListener('mouseup', handleEnd);
+    document.removeEventListener('keydown', handleKeyDown);
     stopAutoScroll();
+  };
+
+  const handleEnd = () => {
+    teardown();
     onEnd();
+  };
+
+  // pressing Escape mid-drag restores the original state; the following `mouseup` is ignored
+  const handleKeyDown = (ev: KeyboardEvent) => {
+    if (ev.key !== 'Escape' || !onCancel) return;
+    teardown();
+    onCancel();
   };
 
   document.addEventListener('scroll', onMove, { passive: true });
   document.addEventListener('mousemove', handleMouseMove, { passive: true });
   document.addEventListener('mouseup', handleEnd, { once: true, passive: true });
+  document.addEventListener('keydown', handleKeyDown);
   onStart(e);
 };

@@ -11,6 +11,7 @@ import { useEffect, useMemo, useRef } from 'react';
 import { BehaviorSubject, distinctUntilChanged, filter, map } from 'rxjs';
 
 import type { OrderedLayout } from '../types';
+import { nonNullable } from '../../common/utils';
 import { useGridLayoutContext } from '../use_grid_layout_context';
 import { isGridDataEqual } from '../utils/equality_checks';
 import type { GridPanelData } from './types';
@@ -70,7 +71,3 @@ const getPanelState = (
   }
   return undefined;
 };
-
-function nonNullable<T>(value: T): value is NonNullable<T> {
-  return value !== null && value !== undefined;
-}

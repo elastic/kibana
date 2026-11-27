@@ -21,6 +21,13 @@ type ControlWidth =
   | typeof CONTROL_WIDTH_MEDIUM
   | typeof CONTROL_WIDTH_LARGE;
 
+/** the pixel width the flex layout renders for each control width option */
+export const CONTROL_WIDTH_PIXELS: Readonly<Record<ControlWidth, number>> = {
+  [CONTROL_WIDTH_SMALL]: 224,
+  [CONTROL_WIDTH_MEDIUM]: 400,
+  [CONTROL_WIDTH_LARGE]: 800,
+};
+
 export const DEFAULT_PINNED_CONTROL_STATE = {
   width: CONTROL_WIDTH_MEDIUM as ControlWidth,
   grow: false,

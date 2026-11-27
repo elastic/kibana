@@ -429,7 +429,11 @@ export abstract class DiscoverLayout extends DiscoverSave {
     // editor can still be mounting after the tab reports loaded, for instance right after
     // adding a new Discover panel. `createControlFromEditorSuggestion` waits for that before typing.
     await this.esqlEditor.createControlFromEditorSuggestion(query, options);
-    await this.page.testSubj.locator('controls-group-wrapper').waitFor({ state: 'visible' });
+    // the wrapper is `display: contents` (no box of its own), so wait on the flex layout it contains
+    await this.page.testSubj
+      .locator('controls-group-wrapper')
+      .locator('[data-test-subj="kbnFlexLayout"]')
+      .waitFor({ state: 'visible' });
   }
 
   // ── Sidebar ───────────────────────────────────────────────────────────────
