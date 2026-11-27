@@ -4287,11 +4287,11 @@ importers:
         specifier: 1.8.4
         version: 1.8.4(@aws-sdk/credential-provider-node@3.972.97)(@langchain/core@1.4.0(@opentelemetry/api@1.10.0)(@opentelemetry/exporter-trace-otlp-proto@0.301.1(@opentelemetry/api@1.10.0))(openai@4.104.0(ws@8.23.0)(zod@4.6.5))(ws@8.23.0))(@smithy/signature-v4@5.7.5)(google-auth-library@11.3.4(supports-color@10.2.2))(undici@7.30.2)(ws@8.23.0)
       '@launchdarkly/node-server-sdk':
-        specifier: 9.16.4
-        version: 9.16.4(supports-color@10.2.2)
+        specifier: 9.16.5
+        version: 9.16.5(supports-color@10.2.2)
       '@launchdarkly/openfeature-node-server':
-        specifier: 2.1.7
-        version: 2.1.7(@launchdarkly/node-server-sdk@9.16.4(supports-color@10.2.2))(@openfeature/server-sdk@1.23.0(@openfeature/core@1.12.0))
+        specifier: 2.1.8
+        version: 2.1.8(@launchdarkly/node-server-sdk@9.16.5(supports-color@10.2.2))(@openfeature/server-sdk@1.23.0(@openfeature/core@1.12.0))
       '@lezer/common':
         specifier: 1.5.5
         version: 1.5.5
@@ -12447,19 +12447,19 @@ packages:
   '@launchdarkly/js-sdk-common@2.32.2':
     resolution: {integrity: sha512-LnJUCx9FZocgSVYN50lpXrxWt2CpxB7SZEd/fHf+im5hf+cGEaxQIylhXYBzN1tmse3n/vkODBgsZJNZ3pAcxA==}
 
-  '@launchdarkly/js-server-sdk-common@2.26.4':
-    resolution: {integrity: sha512-DF6G7xVeK7FNEY8+88YF/oQVPwBeQEjyU3tY/SuMdbvehBDsY5Mit8JXWtZUu41SyYX9EjaogTy93TJcynhM/w==}
+  '@launchdarkly/js-server-sdk-common@2.26.5':
+    resolution: {integrity: sha512-v0dypdjJsInZ36NCsC1li/ZDfiAtR4j5EP19gO13QjeM2S8SFTkkyWiDBkEfNYDTSs1uKa5oWzhiekZZ/Onyxw==}
 
-  '@launchdarkly/node-server-sdk@9.16.4':
-    resolution: {integrity: sha512-1bOYuh1pEEVLNiHy1mynJlpzeriUnokFGMYAk+6lpWgahnyG2oHacC3LkMJd9dOJR0Ud5P4swl3DTti51RLOOQ==}
+  '@launchdarkly/node-server-sdk@9.16.5':
+    resolution: {integrity: sha512-RyYzmG91bBOlF0ZGVAYb4Ce8GKD2+P1mWXIYK+pdQGNPiwLDn6fgYXMcVFDCyqmBqcOcR56csENKpf/kotdW+Q==}
 
   '@launchdarkly/openfeature-js-server-common@2.2.3':
     resolution: {integrity: sha512-3etyrFp+C1OzrpjBnaGzXP2BN/OUAIWjhSVG2sJggdx4cnGwD0PHl9z8Y1YSTyhE7aTh7t4D3VgBP75aJ1KlaQ==}
     peerDependencies:
       '@openfeature/server-sdk': ^1.16.0
 
-  '@launchdarkly/openfeature-node-server@2.1.7':
-    resolution: {integrity: sha512-PtXI3e0XbkJa6/Yhl8g8ktshBMfn4OoieFJTPrTYdiPY/iiPvrNw2tn2GEtobuu8DN/LWgkBA4aE6OUo4kgb1g==}
+  '@launchdarkly/openfeature-node-server@2.1.8':
+    resolution: {integrity: sha512-4F0TAcYX5IjfXxMeHT6jNSUCXsxZHYCT4lNz/jqph78jxq4zQMI49dgEguJMwGdWPmyjLN3ELOAusn234B5CHA==}
     engines: {node: '>=20'}
     peerDependencies:
       '@launchdarkly/node-server-sdk': ^9.0.0
@@ -28655,15 +28655,15 @@ snapshots:
 
   '@launchdarkly/js-sdk-common@2.32.2': {}
 
-  '@launchdarkly/js-server-sdk-common@2.26.4':
+  '@launchdarkly/js-server-sdk-common@2.26.5':
     dependencies:
       '@launchdarkly/js-sdk-common': 2.32.2
       semver: 7.5.4
 
-  '@launchdarkly/node-server-sdk@9.16.4(supports-color@10.2.2)':
+  '@launchdarkly/node-server-sdk@9.16.5(supports-color@10.2.2)':
     dependencies:
       '@launchdarkly/eventsource': 0.2.4
-      '@launchdarkly/js-server-sdk-common': 2.26.4
+      '@launchdarkly/js-server-sdk-common': 2.26.5
       https-proxy-agent: 7.0.6(supports-color@10.2.2)
     transitivePeerDependencies:
       - supports-color
@@ -28673,9 +28673,9 @@ snapshots:
       '@launchdarkly/js-sdk-common': 2.32.2
       '@openfeature/server-sdk': 1.23.0(@openfeature/core@1.12.0)
 
-  '@launchdarkly/openfeature-node-server@2.1.7(@launchdarkly/node-server-sdk@9.16.4(supports-color@10.2.2))(@openfeature/server-sdk@1.23.0(@openfeature/core@1.12.0))':
+  '@launchdarkly/openfeature-node-server@2.1.8(@launchdarkly/node-server-sdk@9.16.5(supports-color@10.2.2))(@openfeature/server-sdk@1.23.0(@openfeature/core@1.12.0))':
     dependencies:
-      '@launchdarkly/node-server-sdk': 9.16.4(supports-color@10.2.2)
+      '@launchdarkly/node-server-sdk': 9.16.5(supports-color@10.2.2)
       '@launchdarkly/openfeature-js-server-common': 2.2.3(@openfeature/server-sdk@1.23.0(@openfeature/core@1.12.0))
       '@openfeature/server-sdk': 1.23.0(@openfeature/core@1.12.0)
 
