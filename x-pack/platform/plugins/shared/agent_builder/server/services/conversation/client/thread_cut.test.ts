@@ -156,7 +156,7 @@ describe('toThreadView', () => {
       type: TimelineEventType.threadStarted,
       created_at: '2026-01-01T00:02:00.000Z',
       actor: { type: EventActorType.user, id: 'u1', username: 'user1' },
-      data: { parent_conversation_id: 'parent', parent_title: 'Parent' },
+      data: { parent_conversation_id: 'parent' },
     } as TimelineEvent;
     const events = [
       ...completedRoundTimeline('r1'),

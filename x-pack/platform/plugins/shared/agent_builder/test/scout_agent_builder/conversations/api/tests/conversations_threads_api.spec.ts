@@ -85,7 +85,12 @@ apiTest.describe(
         const thread = await asAdmin.get(CONVERSATION_PATH(threadId), { responseType: 'json' });
         expect(thread).toHaveStatusCode(200);
 
-        const { events, parent_conversation: parentLink } = thread.body as GetConversationResponse;
+        const {
+          title,
+          events,
+          parent_conversation: parentLink,
+        } = thread.body as GetConversationResponse;
+        expect(title).toBe('Side question');
         expect(events?.[0].type).toBe(TimelineEventType.threadStarted);
         expect(events?.some(({ type }) => type === TimelineEventType.userMessage)).toBe(false);
         expect(parentLink).toStrictEqual({ id: parentId, relation: 'thread' });
@@ -96,7 +101,7 @@ apiTest.describe(
             type === TimelineEventType.threadCreated &&
             (data as { thread_id: string }).thread_id === threadId
         );
-        expect((threadCreated?.data as { title: string } | undefined)?.title).toBe('Side question');
+        expect(threadCreated).toBeDefined();
       }
     );
 

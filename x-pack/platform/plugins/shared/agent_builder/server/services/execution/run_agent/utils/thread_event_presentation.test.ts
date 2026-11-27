@@ -26,7 +26,7 @@ const threadStarted: ThreadStartedEvent = {
   type: TimelineEventType.threadStarted,
   created_at: T1,
   actor,
-  data: { parent_conversation_id: 'parent', parent_title: 'Disk <alerts>' },
+  data: { parent_conversation_id: 'parent' },
 };
 
 const threadCreated: ThreadCreatedEvent = {
@@ -34,22 +34,20 @@ const threadCreated: ThreadCreatedEvent = {
   type: TimelineEventType.threadCreated,
   created_at: T1,
   actor,
-  data: { thread_id: 'thread', title: 'Check host-1' },
+  data: { thread_id: 'thread' },
 };
 
 describe('formatThreadEvent', () => {
-  it('renders thread_started as the boundary notice, escaping the parent title', () => {
-    const rendered = formatThreadEvent(threadStarted);
-
-    expect(rendered).toContain('This conversation is a thread started from another conversation');
-    expect(rendered).toContain('Disk &lt;alerts&gt;');
+  it('renders thread_started as the boundary notice', () => {
+    expect(formatThreadEvent(threadStarted)).toContain(
+      'This conversation is a thread started from another conversation'
+    );
   });
 
   it('renders thread_created as one notice naming who started it', () => {
-    const rendered = formatThreadEvent(threadCreated);
-
-    expect(rendered).toContain('jane started a thread from this conversation');
-    expect(rendered).toContain('Check host-1');
+    expect(formatThreadEvent(threadCreated)).toContain(
+      'jane started a thread from this conversation'
+    );
   });
 });
 

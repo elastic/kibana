@@ -1237,7 +1237,6 @@ class ConversationClientImpl implements ConversationClient {
 
     const copy = copyForThread(parent, cutEventId);
     const actor = currentUserActor(this.getUser());
-    const threadTitle = title ?? DEFAULT_THREAD_TITLE;
     const resolvedCutEventId = cutEventId ?? copy.cutEventId;
 
     const threadStarted: ThreadStartedEvent = {
@@ -1247,7 +1246,6 @@ class ConversationClientImpl implements ConversationClient {
       actor,
       data: {
         parent_conversation_id: parentId,
-        parent_title: parent.title,
         ...(resolvedCutEventId ? { cut_event_id: resolvedCutEventId } : {}),
         ...(highlight ? { highlight } : {}),
       },
@@ -1260,7 +1258,7 @@ class ConversationClientImpl implements ConversationClient {
         {
           id: threadId,
           agent_id: parent.agent_id,
-          title: threadTitle,
+          title: title ?? DEFAULT_THREAD_TITLE,
           rounds: copy.rounds,
           events: [...copy.events, threadStarted],
           parent_conversation: { id: parentId, relation: ConversationParentRelation.thread },
@@ -1294,7 +1292,6 @@ class ConversationClientImpl implements ConversationClient {
       actor,
       data: {
         thread_id: threadId,
-        title: thread.title,
         ...(resolvedCutEventId ? { cut_event_id: resolvedCutEventId } : {}),
         ...(highlight ? { highlight } : {}),
       },

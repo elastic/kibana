@@ -222,7 +222,6 @@ export type MessageEvent = UserMessageEvent | AgentMessageEvent;
 
 export interface ThreadStartedEventData {
   parent_conversation_id: string;
-  parent_title: string;
   /** The parent event the copied history ends at, absent when the parent had no history. */
   cut_event_id?: string;
   highlight?: { text: string };
@@ -235,7 +234,6 @@ export type ThreadStartedEvent = BaseTimelineEvent<
 
 export interface ThreadCreatedEventData {
   thread_id: string;
-  title: string;
   cut_event_id?: string;
   highlight?: { text: string };
 }

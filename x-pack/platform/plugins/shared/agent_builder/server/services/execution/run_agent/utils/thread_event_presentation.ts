@@ -9,7 +9,7 @@ import type { ThreadCreatedEvent, ThreadStartedEvent } from '@kbn/agent-builder-
 import { getEventActorDisplayName, isThreadStartedEvent } from '@kbn/agent-builder-common';
 import { generateXmlTree } from '@kbn/agent-builder-genai-utils/tools/utils';
 
-/** Renders a thread boundary or a thread creation notice for the LLM, escaping the titles. */
+/** Renders a thread boundary or a thread creation notice for the LLM. */
 export const formatThreadEvent = (event: ThreadStartedEvent | ThreadCreatedEvent): string => {
   if (isThreadStartedEvent(event)) {
     return generateXmlTree({
@@ -21,7 +21,6 @@ export const formatThreadEvent = (event: ThreadStartedEvent | ThreadCreatedEvent
             'This conversation is a thread started from another conversation. The history above was copied from it up to where the thread was started. It is earlier context, not new requests.',
           ],
         },
-        { tagName: 'parent_conversation_title', children: [event.data.parent_title] },
       ],
     });
   }
@@ -37,7 +36,6 @@ export const formatThreadEvent = (event: ThreadStartedEvent | ThreadCreatedEvent
           } started a thread from this conversation. Its messages are not part of this conversation.`,
         ],
       },
-      { tagName: 'thread_title', children: [event.data.title] },
     ],
   });
 };

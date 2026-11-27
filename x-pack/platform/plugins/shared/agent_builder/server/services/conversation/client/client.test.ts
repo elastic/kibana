@@ -449,12 +449,13 @@ describe('ConversationClient', () => {
       expect(threadCreated).toMatchObject({
         id: `thread_created-${THREAD_ID}`,
         type: TimelineEventType.threadCreated,
-        data: {
-          thread_id: THREAD_ID,
-          title: 'Side question',
-          highlight: { text: 'Why is the disk full?' },
-        },
       });
+      expect(threadCreated?.data).toEqual({
+        thread_id: THREAD_ID,
+        cut_event_id: 'r2::execution_terminated',
+        highlight: { text: 'Why is the disk full?' },
+      });
+      expect(indexedDocument(THREAD_ID)?.title).toBe('Side question');
     });
 
     it('refuses to start a thread from a thread', async () => {
@@ -514,7 +515,7 @@ describe('ConversationClient', () => {
         type: TimelineEventType.threadStarted,
         created_at: '2026-01-01T00:05:00.000Z',
         actor: { type: EventActorType.user, id: 'user-1', username: 'test-user' },
-        data: { parent_conversation_id: 'parent-1', parent_title: 'Parent' },
+        data: { parent_conversation_id: 'parent-1' },
       };
 
       mockGetDocumentResponse(
