@@ -119,6 +119,7 @@ export const APPLICATION_OVERVIEW_EBT_ELEMENTS = {
   OS_SESSIONS_LINK: 'overviewOsSessionsLink',
   FRUSTRATION_SESSIONS_LINK: 'overviewFrustrationSessionsLink',
   ENTRY_PAGE_SESSIONS_LINK: 'overviewEntryPageSessionsLink',
+  ENTRY_PAGES_SET_UP_LINK: 'overviewEntryPagesSetUpLink',
   ENTRIES_RETRY: 'overviewEntryPagesRetry',
   DISCOVER_LINK: 'overviewDiscoverLink',
   FRUSTRATION_DASHBOARD_LINK: 'overviewFrustrationDashboardLink',

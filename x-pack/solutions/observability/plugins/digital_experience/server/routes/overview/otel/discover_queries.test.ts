@@ -77,6 +77,32 @@ describe('overviewDiscoverQueries', () => {
     expect(all).not.toContain('environment');
   });
 
+  it('counts the events with a session id in the session tiles', () => {
+    const { sessions, errorFreeSessions, pageLoads } = overviewDiscoverQueries(SCOPE);
+
+    expect(sessions).toContain('IS NOT NULL');
+    expect(errorFreeSessions).toContain('IS NOT NULL');
+    expect(pageLoads).not.toContain('session.id');
+  });
+
+  it('opens every request with a duration for the latency tile, whatever its outcome', () => {
+    const { requestLatency } = overviewDiscoverQueries(SCOPE);
+
+    expect(requestLatency).toContain('is_http_request AND duration IS NOT NULL');
+    expect(requestLatency).not.toContain('no_response)');
+  });
+
+  it('hides the columns that only the conditions read', () => {
+    const { requestLatency, sessions } = overviewDiscoverQueries({
+      ...SCOPE,
+      filters: { browser: [{ value: 'Firefox', exclude: false }] },
+    });
+
+    expect(requestLatency).toContain('DROP filter_browser, is_http_request, no_response');
+    expect(sessions).toContain('DROP filter_browser');
+    expect(sessions).not.toContain('is_http_request');
+  });
+
   it('does not add a KQL condition for a blank query', () => {
     expect(overviewDiscoverQueries({ ...SCOPE, kuery: '  ' }).sessions).not.toContain('KQL(');
   });

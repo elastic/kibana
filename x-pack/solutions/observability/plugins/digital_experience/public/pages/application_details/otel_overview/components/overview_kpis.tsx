@@ -16,6 +16,8 @@ import {
   ComparedKpiPanel,
   type ComparedKpiPanelProps,
 } from '../../../../components/compared_kpi_panel';
+import { OpenInDiscoverButton } from '../../../../components/open_in_discover_button';
+import { APPLICATION_OVERVIEW_EBT_ELEMENTS } from '../../../../ebt_constants';
 import { useFormatters } from '../../../../hooks/use_formatters';
 import { loadTimeLabel, PAGE_LOADS_LABEL, SESSIONS_LABEL } from '../../../../labels';
 import { formatDurationMs } from '../../../../utils/format_duration';
@@ -30,6 +32,12 @@ const NO_COUNTS: KpiCounts = {
   httpRequests: 0,
   failedHttpRequests: 0,
 };
+
+/** The sessions without an error have no events of their own to open, so it opens the errors. */
+const ERROR_FREE_DISCOVER_LABEL = i18n.translate(
+  'xpack.digitalExperience.overview.kpis.errorFreeSessionsDiscover',
+  { defaultMessage: 'Open the errors that lower this share in Discover' }
+);
 
 const loadTimeHint = (sampleCount: number) =>
   i18n.translate('xpack.digitalExperience.overview.kpis.loadTimeTooltip', {
@@ -207,7 +215,17 @@ export function OverviewKpis({
             key={kpi}
             {...panel}
             value={kpis?.[kpi]}
-            discoverHref={discoverHrefs[kpi]}
+            discoverAction={
+              discoverHrefs[kpi] && (
+                <OpenInDiscoverButton
+                  href={discoverHrefs[kpi]}
+                  tileLabel={panel.title}
+                  tooltip={kpi === 'errorFreeSessions' ? ERROR_FREE_DISCOVER_LABEL : undefined}
+                  ebtElement={APPLICATION_OVERVIEW_EBT_ELEMENTS.DISCOVER_LINK}
+                  data-test-subj={`${panel['data-test-subj']}Discover`}
+                />
+              )
+            }
             isComparing={isComparing}
             isLoading={isLoading}
           />

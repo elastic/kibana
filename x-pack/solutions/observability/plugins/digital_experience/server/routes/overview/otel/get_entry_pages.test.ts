@@ -69,7 +69,7 @@ describe('buildEntryPagesRequest', () => {
 });
 
 describe('getEntryPages', () => {
-  it('lists the pages with their sessions and bounce rate, and the total of the sessions', async () => {
+  it('lists the pages with their sessions and bounce rate', async () => {
     const client = elasticsearchServiceMock.createElasticsearchClient();
     client.search.mockResolvedValue({
       took: 1,
@@ -91,7 +91,6 @@ describe('getEntryPages', () => {
         { page: '/', sessions: 30, bounceRate: 0.4 },
         { page: '/products', sessions: 15, bounceRate: 0 },
       ],
-      totalSessions: 50,
     });
   });
 
@@ -106,7 +105,6 @@ describe('getEntryPages', () => {
 
     await expect(getEntryPages(client, PARAMS)).resolves.toEqual({
       entryPages: [],
-      totalSessions: 0,
     });
   });
 });

@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useRef, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, useEuiTheme } from '@elastic/eui';
+import { omit } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { APPLICATION_SOURCE } from '../../../../common/application_source';
 import { NO_WEB_VITALS } from '../../../../common/core_web_vitals';
-import { toggleFilterValue } from '../../../../common/filter_values';
+import { singleIncludedValue, toggleFilterValue } from '../../../../common/filter_values';
 import type {
   OverviewFilterName,
   OverviewFilters,
@@ -18,11 +19,14 @@ import type {
   OverviewPercentileParam,
   OverviewSearchParams,
 } from '../../../../common/overview_filters';
+import { PAGE_FILTER_NAMES } from '../../../../common/overview_filters';
+import { encodeOverviewFilters } from '../../../../common/overview_filters_param';
 import type {
   ApplicationEntryPagesResponse,
   ApplicationOverview,
   ApplicationOverviewKpisResponse,
   ApplicationOverviewResponse,
+  OverviewDiscoverQueries,
 } from '../../../../common/types/overview';
 import type { HistogramBuckets } from '../../../../common/types/applications';
 import type { ApplicationUsageResponse } from '../../../../common/types/usage';
@@ -37,6 +41,7 @@ import { useOverviewPercentile, useOverviewSearchParams } from '../../../hooks/u
 import { useQueryParam } from '../../../hooks/use_query_param';
 import { useTimeRange } from '../../../hooks/use_time_range';
 import type { TimeRangeSelect } from '../../../utils/brush_time_range';
+import { SHARED_FILTER_NAMES } from '../../../utils/overview_filters_query';
 import { withOverviewFilters } from '../../../utils/with_overview_filters';
 import { JsErrorsPanel } from '../../errors/components/js_errors_panel';
 import { ERRORS_FETCH_ERROR_TITLE } from '../../errors/errors_tab';
@@ -60,6 +65,9 @@ import {
 import { VitalsTrendPanel } from './components/vitals_trend_panel';
 import { usePickerOptions } from './hooks/use_picker_options';
 import { EMPTY_USAGE, usageRequestOf } from './utils/usage_request';
+
+/** The filters the Sessions tab has no filter for. */
+const DEVICE_AND_VERSION_FILTER_NAMES = ['device', 'appVersion'] as const;
 
 const FETCH_ERROR_TITLE = i18n.translate('xpack.digitalExperience.overview.fetchErrorTitle', {
   defaultMessage: 'Could not load the Overview',
@@ -195,6 +203,8 @@ function UsageAndErrorsPanels({
   entryPages,
   topErrors,
   filters,
+  hasUnappliedFilters,
+  isDrilldownBroader,
   onSelectFilter,
 }: {
   serviceName: string;
@@ -203,6 +213,10 @@ function UsageAndErrorsPanels({
   topErrors: ApplicationErrors;
   /** The Overview's filters, to show which rows are selected. */
   filters: OverviewFilters;
+  /** Whether a filter or query is set that the entry pages, from the session summaries, can't use. */
+  hasUnappliedFilters: boolean;
+  /** Whether a filter is set that the Sessions tab can't take, which a page's link leaves out. */
+  isDrilldownBroader: boolean;
   /** Includes the value in a filter, or takes it off when it is included already. */
   onSelectFilter: (name: OverviewFilterName, value: string) => void;
 }) {
@@ -268,6 +282,8 @@ function UsageAndErrorsPanels({
           entryPages={entryPages.response?.entryPages ?? []}
           isLoading={entryPages.isLoading}
           sessionsHref={sessionsHref}
+          hasUnappliedFilters={hasUnappliedFilters}
+          isDrilldownBroader={isDrilldownBroader}
         />
       )}
       <EuiSpacer size="m" />
@@ -347,18 +363,34 @@ export function OtelOverview({ serviceName }: { serviceName: string }) {
   const overview = useApplicationData(serviceName, overviewRequest);
   const kpis = useApplicationData(serviceName, kpisRequest);
   const usage = useApplicationData(serviceName, usageRequest);
-  const entryPagesRequest = useMemo(() => entryPagesRequestOf(searchParams), [searchParams]);
-  const entryPages = useApplicationData(serviceName, entryPagesRequest);
-  // The queries are the KPI request's, so they are as current as the tiles they open.
-  const discoverHrefs = useOverviewDiscoverHrefs(
-    kpis.isLoading ? undefined : kpis.response?.discover
+  // Only the filters the session summaries have, so a change of the query or a page filter, which
+  // cannot change the table, leaves it in place instead of loading it again.
+  const summaryFilters = encodeOverviewFilters(omit(filters, PAGE_FILTER_NAMES));
+  const entryPagesRequest = useMemo(
+    () => entryPagesRequestOf(summaryFilters ? { filters: summaryFilters } : {}),
+    [summaryFilters]
   );
+  const entryPages = useApplicationData(serviceName, entryPagesRequest);
+  // The queries are the KPI request's, so they are as current as the tiles they open. The last
+  // ones stay while the next load runs, so the buttons don't unmount on every reload.
+  const latestDiscover = useRef<OverviewDiscoverQueries>();
+  if (!kpis.isLoading && kpis.response) {
+    latestDiscover.current = kpis.response.discover;
+  }
+  const discoverHrefs = useOverviewDiscoverHrefs(latestDiscover.current);
   const topErrors = useApplicationErrors(serviceName);
   // The pickers swap their lists for a spinner while loading, so they only load until they have one.
   const pickerOptions = usePickerOptions(serviceName, overview.response);
 
   const selectFilterValue = (name: OverviewFilterName, value: string) =>
     setFilter(name, toggleFilterValue(filters[name] ?? [], value, false));
+
+  // The Sessions tab takes one included browser, OS and country, and no device or app version.
+  const isDrilldownBroader =
+    DEVICE_AND_VERSION_FILTER_NAMES.some((name) => (filters[name] ?? []).length > 0) ||
+    SHARED_FILTER_NAMES.some(
+      (name) => (filters[name] ?? []).length > 0 && singleIncludedValue(filters[name]) === undefined
+    );
 
   const refreshAll = () => {
     setLastReloadRequestTime(Date.now());
@@ -446,6 +478,11 @@ export function OtelOverview({ serviceName }: { serviceName: string }) {
         entryPages={entryPages}
         topErrors={topErrors}
         filters={filters}
+        hasUnappliedFilters={
+          PAGE_FILTER_NAMES.some((name) => (filters[name] ?? []).length > 0) ||
+          Boolean(searchParams.kuery)
+        }
+        isDrilldownBroader={isDrilldownBroader}
         onSelectFilter={selectFilterValue}
       />
     </>

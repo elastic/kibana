@@ -6,6 +6,7 @@
  */
 
 import { useMemo } from 'react';
+import { getDateISORange } from '@kbn/timerange';
 import {
   DISCOVER_TILES,
   type DiscoverTile,
@@ -25,10 +26,19 @@ export const useOverviewDiscoverHrefs = (
   queries: OverviewDiscoverQueries | undefined
 ): OverviewDiscoverHrefs => {
   const { timeRange } = useTimeRange();
-  const discoverTimeRange = useMemo(
-    () => ({ from: timeRange.rangeFrom, to: timeRange.rangeTo }),
-    [timeRange.rangeFrom, timeRange.rangeTo]
-  );
+  // Absolute bounds, resolved when the queries arrive: a relative range such as `now-3d` is
+  // resolved again by Discover when the link is opened, which could be a window later than the one
+  // the tile counted. Every response brings new queries, which resolve the range again.
+  const discoverTimeRange = useMemo(() => {
+    if (!queries) {
+      return undefined;
+    }
+    const { startDate, endDate } = getDateISORange({
+      from: timeRange.rangeFrom,
+      to: timeRange.rangeTo,
+    });
+    return { from: startDate, to: endDate };
+  }, [queries, timeRange.rangeFrom, timeRange.rangeTo]);
   const hrefOf = useDiscoverHrefOf(discoverTimeRange);
 
   return useMemo(() => {

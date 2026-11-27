@@ -122,6 +122,4 @@ export interface EntryPage {
 export interface ApplicationEntryPagesResponse {
   /** Up to ten, with the most sessions first. */
   entryPages: EntryPage[];
-  /** The sessions with an entry page, the denominator of each page's share. */
-  totalSessions: number;
 }

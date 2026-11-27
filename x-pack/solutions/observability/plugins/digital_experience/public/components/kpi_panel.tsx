@@ -8,7 +8,6 @@
 import React from 'react';
 import type { ReactNode } from 'react';
 import {
-  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIconTip,
@@ -16,15 +15,8 @@ import {
   EuiSkeletonTitle,
   EuiText,
   EuiTitle,
-  EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
-import { getEbtProps } from '@kbn/ebt-click';
-import {
-  APPLICATION_OVERVIEW_EBT_ELEMENTS,
-  DIGITAL_EXPERIENCE_EBT_ACTIONS,
-} from '../ebt_constants';
-import { OPEN_IN_DISCOVER_LABEL } from '../labels';
 
 /**
  * A KPI panel of a KPI row: the label on top, and the value with the change and the previous value
@@ -35,7 +27,7 @@ import { OPEN_IN_DISCOVER_LABEL } from '../labels';
 export function KpiPanel({
   label,
   hint,
-  discoverHref,
+  discoverAction,
   value,
   isEmpty = false,
   isLoading,
@@ -46,8 +38,8 @@ export function KpiPanel({
   label: string;
   /** How the value is calculated. */
   hint?: string;
-  /** Opens the events behind the value in Discover; no button without it. */
-  discoverHref?: string;
+  /** A button that opens the events behind the value in Discover; none without it. */
+  discoverAction?: ReactNode;
   value: ReactNode;
   /** The value says there is none, e.g. not enough data: shown as a note, not as a number. */
   isEmpty?: boolean;
@@ -78,24 +70,7 @@ export function KpiPanel({
                 {label}
               </EuiText>
             </EuiFlexItem>
-            {discoverHref && (
-              <EuiFlexItem grow={false}>
-                <EuiToolTip content={OPEN_IN_DISCOVER_LABEL} disableScreenReaderOutput>
-                  <EuiButtonIcon
-                    iconType="discoverApp"
-                    size="xs"
-                    color="text"
-                    href={discoverHref}
-                    aria-label={`${OPEN_IN_DISCOVER_LABEL}: ${label}`}
-                    data-test-subj={`${dataTestSubj}Discover`}
-                    {...getEbtProps({
-                      action: DIGITAL_EXPERIENCE_EBT_ACTIONS.OPEN_IN_DISCOVER,
-                      element: APPLICATION_OVERVIEW_EBT_ELEMENTS.DISCOVER_LINK,
-                    })}
-                  />
-                </EuiToolTip>
-              </EuiFlexItem>
-            )}
+            {discoverAction && <EuiFlexItem grow={false}>{discoverAction}</EuiFlexItem>}
             {hint && (
               <EuiFlexItem grow={false}>
                 <EuiIconTip

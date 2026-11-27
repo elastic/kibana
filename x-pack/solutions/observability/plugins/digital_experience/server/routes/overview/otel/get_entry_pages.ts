@@ -12,8 +12,7 @@ import type { OverviewFilterName, OverviewFilters } from '../../../../common/ove
 import { SESSIONS_INDEX_PATTERN } from '../../../../common/sessions';
 import type { ApplicationEntryPagesResponse } from '../../../../common/types/overview';
 import type { CountedTermsAggregation } from '../../../lib/helpers/aggregations';
-import { totalHitsOf } from '../../../lib/helpers/values';
-import { sessionScopeFilters } from '../../sessions/list_sessions';
+import { SESSION_FACET_FIELDS, sessionScopeFilters } from '../../sessions/list_sessions';
 
 /** How many entry pages the Overview lists. */
 export const ENTRY_PAGES_SIZE = 10;
@@ -24,10 +23,10 @@ export const ENTRY_PAGES_SIZE = 10;
  * KQL query read single events, which a summary doesn't keep.
  */
 const SUMMARY_FILTER_FIELDS: ReadonlyArray<readonly [OverviewFilterName, string]> = [
-  ['browser', 'user_agent.browser'],
-  ['os', 'user_agent.os'],
+  ['browser', SESSION_FACET_FIELDS.browsers],
+  ['os', SESSION_FACET_FIELDS.os],
   ['device', 'user_agent.device'],
-  ['country', 'geo.country_iso'],
+  ['country', SESSION_FACET_FIELDS.countries],
   ['appVersion', 'service.version'],
 ];
 
@@ -68,7 +67,7 @@ export const buildEntryPagesRequest = ({
   ignore_unavailable: true,
   allow_no_indices: true,
   size: 0,
-  track_total_hits: true,
+  allow_partial_search_results: false,
   query: {
     bool: {
       filter: [
@@ -94,10 +93,12 @@ export const buildEntryPagesRequest = ({
 /** The pages the application's sessions started on, from the session summaries. */
 export const getEntryPages = async (
   client: ElasticsearchClient,
-  params: Parameters<typeof buildEntryPagesRequest>[0]
+  params: Parameters<typeof buildEntryPagesRequest>[0],
+  signal?: AbortSignal
 ): Promise<ApplicationEntryPagesResponse> => {
   const response: SearchResponse<unknown, EntryPagesAggs> = await client.search(
-    buildEntryPagesRequest(params)
+    buildEntryPagesRequest(params),
+    { signal }
   );
   const aggs = response.aggregations;
   return {
@@ -106,6 +107,5 @@ export const getEntryPages = async (
       sessions: bucket.doc_count,
       bounceRate: bucket.doc_count > 0 ? bucket.bounced.doc_count / bucket.doc_count : 0,
     })),
-    totalSessions: totalHitsOf(response.hits.total),
   };
 };

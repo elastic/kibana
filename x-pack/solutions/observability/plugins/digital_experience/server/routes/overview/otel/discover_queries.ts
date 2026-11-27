@@ -6,15 +6,9 @@
  */
 
 import { esql } from '@elastic/esql';
-import {
-  DURATION,
-  ENVIRONMENT_ALL_VALUE,
-  ENVIRONMENT_NOT_DEFINED_VALUE,
-  OTEL_EVENT_NAME,
-  SERVICE_NAME,
-  TELEMETRY_SDK_LANGUAGE,
-} from '@kbn/apm-types';
+import { DURATION, OTEL_EVENT_NAME, SERVICE_NAME, TELEMETRY_SDK_LANGUAGE } from '@kbn/apm-types';
 import { escapeStringValue } from '@kbn/esql-utils';
+import { cleanedValue, esqlEnvironmentCondition } from '../../../../common/esql_values';
 import type { OverviewFilters } from '../../../../common/overview_filters';
 import {
   BROWSER_SDK_LANGUAGE,
@@ -24,7 +18,10 @@ import {
   OTEL_LOGS_INDEX,
   OTEL_TRACES_INDEX,
 } from '../../../../common/otel_data';
-import { SOURCE_LOAD_EVENT_END_FIELD } from '../../../../common/otel_source_fields';
+import {
+  SOURCE_LOAD_EVENT_END_FIELD,
+  SOURCE_SESSION_ID_FIELD,
+} from '../../../../common/otel_source_fields';
 import type { DiscoverTile, OverviewDiscoverQueries } from '../../../../common/types/overview';
 import {
   esqlDocumentConditions,
@@ -49,34 +46,17 @@ export interface DiscoverScope {
 /** Discover fills `?_tstart` and `?_tend` with its time range; the end is exclusive, as here. */
 const IN_DISCOVER_TIME_RANGE = '@timestamp >= ?_tstart AND @timestamp < ?_tend';
 
-/**
- * The documents in `environment`, as the routes' `environmentFilter` keeps them: either
- * environment field, or "Not defined" for APM's sentinel or neither; all for all environments.
- */
-const environmentCondition = (environment: string | undefined): string | undefined => {
-  if (!environment || environment === ENVIRONMENT_ALL_VALUE) {
-    return undefined;
-  }
-  if (environment === ENVIRONMENT_NOT_DEFINED_VALUE) {
-    const notSet = ENVIRONMENT_FIELDS.map((field) => `${field} IS NULL`).join(' AND ');
-    const sentinel = ENVIRONMENT_FIELDS.map(
-      (field) => `${field} == ${escapeStringValue(ENVIRONMENT_NOT_DEFINED_VALUE)}`
-    ).join(' OR ');
-    return `(${sentinel} OR (${notSet}))`;
-  }
-  return `(${ENVIRONMENT_FIELDS.map(
-    (field) => `${field} == ${escapeStringValue(environment)}`
-  ).join(' OR ')})`;
-};
+/** The sessions count the events that have a session id, which the KPI cleans like the summaries. */
+const HAS_SESSION_ID = `${cleanedValue(SOURCE_SESSION_ID_FIELD)} IS NOT NULL`;
 
 const IS_JS_ERROR = `${OTEL_EVENT_NAME} == ${escapeStringValue(EVENT_EXCEPTION)}`;
 
 /** The tile's events, besides the Overview's filters, and how Discover sorts them. */
 const TILE_EVENTS: Record<DiscoverTile, { condition?: string; sort: string }> = {
-  sessions: { sort: '@timestamp DESC' },
-  // The events that make a session count as having an error.
+  sessions: { condition: HAS_SESSION_ID, sort: '@timestamp DESC' },
+  // The events that make a session count as having an error, which lower the rate.
   errorFreeSessions: {
-    condition: `(${IS_JS_ERROR} OR (${HTTP_REQUEST_CONDITIONS.http_failed_request_count}))`,
+    condition: `(${IS_JS_ERROR} OR (${HTTP_REQUEST_CONDITIONS.http_failed_request_count})) AND ${HAS_SESSION_ID}`,
     sort: '@timestamp DESC',
   },
   pageLoads: {
@@ -95,9 +75,9 @@ const TILE_EVENTS: Record<DiscoverTile, { condition?: string; sort: string }> = 
     condition: HTTP_REQUEST_CONDITIONS.http_failed_request_count,
     sort: '@timestamp DESC',
   },
-  // The slowest requests first.
+  // The slowest requests first: every request with a duration, as the average reads them.
   requestLatency: {
-    condition: HTTP_REQUEST_CONDITIONS.http_request_count,
+    condition: `is_http_request AND ${DURATION} IS NOT NULL`,
     sort: `${DURATION} DESC`,
   },
 };
@@ -117,8 +97,14 @@ const discoverQueryOf = (
   const logConditions = esqlLogConditions(filters);
   const pageLoadConditions =
     tile === 'pageLoads' || tile === 'loadTime' ? esqlPageLoadConditions(filters) : [];
-  const environmentWhere = environmentCondition(environment);
-  const evals = [...filterEvals, ...(NEEDS_HTTP_EVALS.includes(tile) ? [HTTP_REQUEST_EVALS] : [])];
+  const environmentWhere = esqlEnvironmentCondition(environment, ENVIRONMENT_FIELDS);
+  const needsHttpEvals = NEEDS_HTTP_EVALS.includes(tile);
+  const evals = [...filterEvals, ...(needsHttpEvals ? [HTTP_REQUEST_EVALS] : [])];
+  // The columns only the conditions read, which Discover would list as fields.
+  const helperColumns = [
+    ...filterEvals.map((expression) => expression.split(' = ')[0]),
+    ...(needsHttpEvals ? ['is_http_request', 'no_response'] : []),
+  ];
   const tileConditions = [...(condition ? [condition] : []), ...pageLoadConditions];
   const documentConditions = esqlDocumentConditions(filters);
 
@@ -138,6 +124,7 @@ const discoverQueryOf = (
       ? [`| WHERE ${OTEL_EVENT_NAME} IS NULL OR (${logConditions.join(' AND ')})`]
       : []),
     ...(tileConditions.length > 0 ? [`| WHERE ${tileConditions.join(' AND ')}`] : []),
+    ...(helperColumns.length > 0 ? [`| DROP ${helperColumns.join(', ')}`] : []),
     `| SORT ${sort}`,
   ].join('\n');
 

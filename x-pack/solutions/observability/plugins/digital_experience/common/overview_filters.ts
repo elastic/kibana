@@ -30,6 +30,15 @@ export type OverviewFilterName = (typeof OVERVIEW_FILTER_NAMES)[number];
 export const URL_FILTER_NAMES = ['pageContains'] as const satisfies readonly OverviewFilterName[];
 
 /**
+ * The filters on a page, which read single events: the session summaries keep no URL to match, so
+ * the entry pages leave them out.
+ */
+export const PAGE_FILTER_NAMES = [
+  'pageUrl',
+  'pageContains',
+] as const satisfies readonly OverviewFilterName[];
+
+/**
  * The filters whose values the user writes, as there is no list to pick them from: text that the
  * page URL contains.
  */

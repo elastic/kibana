@@ -10,6 +10,7 @@ import { EuiBasicTable, EuiLink } from '@elastic/eui';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import { getEbtProps } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import type { EntryPage } from '../../../../../common/types/overview';
 import {
   entryPageFilterRt,
@@ -36,7 +37,7 @@ const SUBTITLE = i18n.translate('xpack.digitalExperience.overview.entryPages.sub
 
 const FILTERS_NOTE = i18n.translate('xpack.digitalExperience.overview.entryPages.filtersNote', {
   defaultMessage:
-    'Narrowed by the environment, browser, operating system, device, country and app version. The page filters and the query read single events, which the session summaries do not keep, so they leave this table whole.',
+    'The page filters and the query read single events, which the session summaries do not keep, so they leave this table whole.',
 });
 
 const PAGE_LABEL = i18n.translate('xpack.digitalExperience.overview.entryPages.pageLabel', {
@@ -48,10 +49,15 @@ const BOUNCE_RATE_LABEL = i18n.translate(
   { defaultMessage: 'Bounce rate' }
 );
 
-const EMPTY_MESSAGE = i18n.translate('xpack.digitalExperience.overview.entryPages.empty', {
+const DRILLDOWN_NOTE = i18n.translate('xpack.digitalExperience.overview.entryPages.drilldownNote', {
   defaultMessage:
-    'No sessions with a page in this time range. Sessions are summarized in the background, so the most recent ones can take a few minutes to show.',
+    'The Sessions tab has no filter for the device or the app version, nor for several browsers, systems or countries, so a page opens its sessions from all of them.',
 });
+
+const SESSIONS_TAB_LINK = i18n.translate(
+  'xpack.digitalExperience.overview.entryPages.sessionsTabLink',
+  { defaultMessage: 'Sessions tab' }
+);
 
 const sessionsLinkLabel = (page: string) =>
   i18n.translate('xpack.digitalExperience.overview.entryPages.sessionsLink', {
@@ -67,11 +73,17 @@ export function EntryPagesPanel({
   entryPages,
   isLoading,
   sessionsHref,
+  hasUnappliedFilters,
+  isDrilldownBroader,
 }: {
   entryPages: EntryPage[];
   isLoading: boolean;
   /** The sessions of the application, narrowed by the given filters. */
   sessionsHref: (query: SessionsListUrlQuery) => string;
+  /** A page filter or the KQL query is set, which leave this table whole. */
+  hasUnappliedFilters: boolean;
+  /** A selected filter that the Sessions tab can't take, so a page opens more sessions than it lists. */
+  isDrilldownBroader: boolean;
 }) {
   const { formatNumber, formatPercent } = useFormatters();
 
@@ -116,10 +128,33 @@ export function EntryPagesPanel({
   return (
     <DataPanel
       title={TITLE}
-      subtitle={`${SUBTITLE} ${FILTERS_NOTE}`}
+      subtitle={[
+        SUBTITLE,
+        ...(hasUnappliedFilters ? [FILTERS_NOTE] : []),
+        ...(isDrilldownBroader ? [DRILLDOWN_NOTE] : []),
+      ].join(' ')}
       isLoading={isLoading}
       isEmpty={entryPages.length === 0}
-      emptyMessage={EMPTY_MESSAGE}
+      emptyMessage={
+        <FormattedMessage
+          id="xpack.digitalExperience.overview.entryPages.empty"
+          defaultMessage="No sessions with a page in this time range. Entry pages come from the session summaries: they are built in the background, so the latest sessions can take a few minutes to show, and none exist until sessions are set up on the {sessionsLink}."
+          values={{
+            sessionsLink: (
+              <EuiLink
+                href={sessionsHref({})}
+                data-test-subj="digitalExperienceOverviewEntryPagesSetUpLink"
+                {...getEbtProps({
+                  action: DIGITAL_EXPERIENCE_EBT_ACTIONS.VIEW_SESSIONS,
+                  element: APPLICATION_OVERVIEW_EBT_ELEMENTS.ENTRY_PAGES_SET_UP_LINK,
+                })}
+              >
+                {SESSIONS_TAB_LINK}
+              </EuiLink>
+            ),
+          }}
+        />
+      }
       data-test-subj="digitalExperienceOverviewEntryPages"
     >
       <EuiBasicTable<EntryPage>

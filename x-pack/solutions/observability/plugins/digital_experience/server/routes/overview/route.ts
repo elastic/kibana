@@ -24,6 +24,7 @@ import {
   toApplicationSearch,
 } from '../application_tab_route';
 import { createDigitalExperienceServerRoute } from '../create_digital_experience_server_route';
+import { toReadError } from '../read_error';
 import {
   START_AFTER_END_ISSUE,
   filteredTimeRangeShape,
@@ -31,7 +32,6 @@ import {
   serviceNameParam,
   timeZoneShape,
 } from '../params';
-import { toReadError } from '../sessions/route';
 import { getEntryPages } from './otel/get_entry_pages';
 import { getOtelOverview } from './otel/get_otel_overview';
 import { getOtelOverviewKpis } from './otel/get_otel_overview_kpis';
@@ -127,17 +127,21 @@ const entryPagesRoute = createDigitalExperienceServerRoute({
   options: APPLICATION_TAB_ROUTE_OPTIONS,
   security: { authz: { requiredPrivileges: [DIGITAL_EXPERIENCE_API_PRIVILEGES.read] } },
   params: filteredApplicationTabRouteParams,
-  handler: async ({ params, context, logger }): Promise<ApplicationEntryPagesResponse> => {
+  handler: async ({ params, context, logger, request }): Promise<ApplicationEntryPagesResponse> => {
     const { elasticsearch } = await context.core;
     const { start, end, environment, filters } = params.query;
     try {
-      return await getEntryPages(elasticsearch.client.asCurrentUser, {
-        serviceName: params.path.serviceName,
-        start: Date.parse(start),
-        end: Date.parse(end),
-        environment,
-        filters: readOverviewFilters(filters),
-      });
+      return await getEntryPages(
+        elasticsearch.client.asCurrentUser,
+        {
+          serviceName: params.path.serviceName,
+          start: Date.parse(start),
+          end: Date.parse(end),
+          environment,
+          filters: readOverviewFilters(filters),
+        },
+        getRequestAbortedSignal(request.events.aborted$)
+      );
     } catch (error) {
       throw toReadError(error, logger, 'the entry pages');
     }

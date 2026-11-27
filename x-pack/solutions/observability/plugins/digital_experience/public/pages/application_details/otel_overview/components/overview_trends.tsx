@@ -20,7 +20,6 @@ import {
 } from '@elastic/charts';
 import {
   EuiButtonGroup,
-  EuiButtonIcon,
   EuiSelect,
   EuiFlexGroup,
   EuiFlexItem,
@@ -29,7 +28,6 @@ import {
   EuiSpacer,
   EuiText,
   EuiTitle,
-  EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
 import { getEbtProps } from '@kbn/ebt-click';
@@ -44,6 +42,7 @@ import type { OverviewPercentile } from '../../../../../common/overview_filters'
 import type { HistogramBuckets } from '../../../../../common/types/applications';
 import type { OverviewTrendPoint } from '../../../../../common/types/overview';
 import { ChartArea } from '../../../../components/chart_area';
+import { OpenInDiscoverButton } from '../../../../components/open_in_discover_button';
 import { PartialBucketsEndzones } from '../../../../components/partial_buckets_endzones';
 import { getTimeChartXDomain, type TimeChartXDomain } from '../../../../utils/histogram_interval';
 import {
@@ -52,7 +51,7 @@ import {
 } from '../../../../ebt_constants';
 import { usePersistedChoice } from '../../../../hooks/use_persisted_choice';
 import { useFormatters } from '../../../../hooks/use_formatters';
-import { loadTimeLabel, OPEN_IN_DISCOVER_LABEL, PAGE_LOADS_LABEL } from '../../../../labels';
+import { loadTimeLabel, PAGE_LOADS_LABEL } from '../../../../labels';
 import type { TimeRangeSelect } from '../../../../utils/brush_time_range';
 import { onBrushTimeRange } from '../../../../utils/brush_time_range';
 import { formatDurationMs } from '../../../../utils/format_duration';
@@ -258,20 +257,12 @@ function TrendRow({
         </EuiFlexItem>
         {discoverHref && (
           <EuiFlexItem grow={false}>
-            <EuiToolTip content={OPEN_IN_DISCOVER_LABEL} disableScreenReaderOutput>
-              <EuiButtonIcon
-                iconType="discoverApp"
-                size="xs"
-                color="text"
-                href={discoverHref}
-                aria-label={`${OPEN_IN_DISCOVER_LABEL}: ${label}`}
-                data-test-subj={`${dataTestSubj}Discover`}
-                {...getEbtProps({
-                  action: DIGITAL_EXPERIENCE_EBT_ACTIONS.OPEN_IN_DISCOVER,
-                  element: APPLICATION_OVERVIEW_EBT_ELEMENTS.DISCOVER_LINK,
-                })}
-              />
-            </EuiToolTip>
+            <OpenInDiscoverButton
+              href={discoverHref}
+              tileLabel={label}
+              ebtElement={APPLICATION_OVERVIEW_EBT_ELEMENTS.DISCOVER_LINK}
+              data-test-subj={`${dataTestSubj}Discover`}
+            />
           </EuiFlexItem>
         )}
         {!isLoading && (

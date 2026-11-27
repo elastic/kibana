@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import type { ReactNode } from 'react';
 import { css } from '@emotion/react';
 import { EuiBadge, EuiText, EuiToolTip } from '@elastic/eui';
 import type { EuiBadgeProps } from '@elastic/eui';
@@ -24,8 +25,8 @@ export interface ComparedKpiPanelProps {
   title: string;
   /** How the value is calculated. */
   tooltip: string;
-  /** Opens the events behind the value in Discover. */
-  discoverHref?: string;
+  /** A button that opens the events behind the value in Discover. */
+  discoverAction?: ReactNode;
   value: ComparedValue | undefined;
   formatValue: (value: number) => string;
   changeUnit: ChangeUnit;
@@ -74,7 +75,7 @@ const previousPeriodLabel = (previous: string) =>
 export function ComparedKpiPanel({
   title,
   tooltip,
-  discoverHref,
+  discoverAction,
   value,
   formatValue,
   changeUnit,
@@ -91,7 +92,7 @@ export function ComparedKpiPanel({
       data-test-subj={dataTestSubj}
       label={title}
       hint={tooltip}
-      discoverHref={discoverHref}
+      discoverAction={discoverAction}
       isLoading={isLoading}
       isEmpty={!value || value.value === null}
       value={

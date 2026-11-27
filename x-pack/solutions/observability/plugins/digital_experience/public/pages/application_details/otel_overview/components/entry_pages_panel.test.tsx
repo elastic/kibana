@@ -8,6 +8,7 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { EuiProvider } from '@elastic/eui';
+import { I18nProvider } from '@kbn/i18n-react';
 import type { EntryPage } from '../../../../../common/types/overview';
 import { useKibanaServices } from '../../../../hooks/use_kibana_services';
 import { createUiSettingsMock } from '../../../../test_utils/ui_settings_mock';
@@ -20,12 +21,29 @@ const ENTRY_PAGES: EntryPage[] = [
   { page: '/products/{slug}', sessions: 30, bounceRate: 0 },
 ];
 
+const Providers = ({ children }: { children: React.ReactNode }) => (
+  <I18nProvider>
+    <EuiProvider>{children}</EuiProvider>
+  </I18nProvider>
+);
+
 const sessionsHref = jest.fn((query: { entryPage?: string }) => `/sessions?e=${query.entryPage}`);
 
-const renderPanel = (entryPages = ENTRY_PAGES, isLoading = false) =>
+const renderPanel = (
+  entryPages = ENTRY_PAGES,
+  isLoading = false,
+  hasUnappliedFilters = false,
+  isDrilldownBroader = false
+) =>
   render(
-    <EntryPagesPanel entryPages={entryPages} isLoading={isLoading} sessionsHref={sessionsHref} />,
-    { wrapper: EuiProvider }
+    <EntryPagesPanel
+      entryPages={entryPages}
+      isLoading={isLoading}
+      sessionsHref={sessionsHref}
+      hasUnappliedFilters={hasUnappliedFilters}
+      isDrilldownBroader={isDrilldownBroader}
+    />,
+    { wrapper: Providers }
   );
 
 beforeEach(() => {
@@ -54,17 +72,48 @@ describe('EntryPagesPanel', () => {
     expect(sessionsHref).toHaveBeenCalledWith({ entryPage: '/' });
   });
 
-  it('says what narrows it', () => {
-    renderPanel();
+  it('says what it ignores only while a page filter or the query is set', () => {
+    const { unmount } = renderPanel();
+    expect(screen.queryByText(/leave this table whole/)).not.toBeInTheDocument();
+    unmount();
 
+    renderPanel(ENTRY_PAGES, false, true);
     expect(screen.getByText(/leave this table whole/)).toBeInTheDocument();
+  });
+
+  it('says that a page opens more sessions than it lists, only when a filter was left out of the link', () => {
+    const { unmount } = renderPanel();
+    expect(
+      screen.queryByText(/has no filter for the device or the app version/)
+    ).not.toBeInTheDocument();
+    unmount();
+
+    renderPanel(ENTRY_PAGES, false, false, true);
+    expect(screen.getByText(/has no filter for the device or the app version/)).toBeInTheDocument();
+  });
+
+  it('links an empty table to the Sessions tab, where sessions are set up', () => {
+    renderPanel([]);
+
+    expect(screen.getByTestId('digitalExperienceOverviewEntryPagesSetUpLink')).toHaveAttribute(
+      'href',
+      '/sessions?e=undefined'
+    );
   });
 
   it('shows an empty message without sessions, and a spinner while loading', () => {
     const { rerender } = renderPanel([]);
     expect(screen.getByTestId('digitalExperienceOverviewEntryPagesEmpty')).toBeInTheDocument();
 
-    rerender(<EntryPagesPanel entryPages={[]} isLoading sessionsHref={sessionsHref} />);
+    rerender(
+      <EntryPagesPanel
+        entryPages={[]}
+        isLoading
+        sessionsHref={sessionsHref}
+        hasUnappliedFilters={false}
+        isDrilldownBroader={false}
+      />
+    );
     expect(screen.getByTestId('digitalExperienceOverviewEntryPagesLoading')).toBeInTheDocument();
   });
 });

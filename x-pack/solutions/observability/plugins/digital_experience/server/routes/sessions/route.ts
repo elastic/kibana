@@ -8,12 +8,10 @@
 import { forbidden, internal, notFound } from '@hapi/boom';
 import type { Logger } from '@kbn/core/server';
 import type { SecurityRequestHandlerContext } from '@kbn/core-security-server';
-import { isResponseError } from '@kbn/es-errors';
 import { i18n } from '@kbn/i18n';
 import { isoDateTime, lazySchema, z } from '@kbn/zod/v4';
 import { DIGITAL_EXPERIENCE_API_PRIVILEGES } from '../../../common/feature';
 import {
-  ALL_SESSIONS_INDEX_PATTERN,
   SESSIONS_LIST_DEFAULT_PER_PAGE,
   SESSIONS_LIST_MAX_DURATION_MS,
   SESSIONS_LIST_MAX_FACET_LENGTHS,
@@ -22,7 +20,6 @@ import {
   SESSIONS_LIST_MAX_PER_PAGE,
   SESSIONS_LIST_MAX_SEARCH_LENGTH,
   SESSIONS_MAX_ID_LENGTH,
-  SESSIONS_SOURCE_INDICES,
   SESSION_SORT_FIELDS,
   type SessionDetailResponse,
   type SessionListResponse,
@@ -51,6 +48,7 @@ import { getSessionsStatusResponse } from '../../services/sessions/sessions_stat
 import { MAX_ENVIRONMENT_LENGTH } from '../../lib/constants';
 import { describeError } from '../../lib/helpers/errors';
 import { createDigitalExperienceServerRoute } from '../create_digital_experience_server_route';
+import { LOAD_FAILED_MESSAGE, toReadError } from '../read_error';
 import { serviceNameParam } from '../params';
 import { getSession } from './get_session';
 import { listSessions } from './list_sessions';
@@ -62,19 +60,6 @@ export const SESSIONS_LIST_ENDPOINT =
   'GET /internal/digital_experience/applications/{serviceName}/sessions';
 export const SESSION_DETAIL_ENDPOINT =
   'GET /internal/digital_experience/applications/{serviceName}/sessions/{sessionId}';
-
-const NO_ACCESS_MESSAGE = i18n.translate('xpack.digitalExperience.sessions.api.noAccess', {
-  defaultMessage:
-    'Reading sessions requires the read index privilege on {sessionsIndex}, and on {sourceIndices} for the session timeline.',
-  values: {
-    sessionsIndex: ALL_SESSIONS_INDEX_PATTERN,
-    sourceIndices: SESSIONS_SOURCE_INDICES.join(', '),
-  },
-});
-
-const LOAD_FAILED_MESSAGE = i18n.translate('xpack.digitalExperience.sessions.api.loadFailed', {
-  defaultMessage: 'Could not load the sessions. Check the Kibana server logs for details.',
-});
 
 const ENABLE_FAILED_MESSAGE = i18n.translate('xpack.digitalExperience.sessions.api.enableFailed', {
   defaultMessage: 'Could not enable sessions. Check the Kibana server logs for details.',
@@ -133,18 +118,6 @@ const sessionNotFoundMessage = (sessionId: string) =>
     defaultMessage: 'Session [{sessionId}] not found',
     values: { sessionId },
   });
-
-/**
- * Maps a read failure to a client error: an Elasticsearch 403 names the index privileges the
- * reads need; anything else is logged and hidden, as Elasticsearch details name users and indices.
- */
-export const toReadError = (error: unknown, logger: Logger, what: string) => {
-  if (isResponseError(error) && error.statusCode === 403) {
-    return forbidden(NO_ACCESS_MESSAGE);
-  }
-  logger.error(`Could not load ${what}: ${describeError(error)}`);
-  return internal(LOAD_FAILED_MESSAGE);
-};
 
 /**
  * Maps an enable failure to a client error: the privilege checks explain themselves, and a failed

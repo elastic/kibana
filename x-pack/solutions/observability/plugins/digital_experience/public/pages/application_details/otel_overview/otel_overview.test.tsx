@@ -144,7 +144,6 @@ const ENTRY_PAGES_RESPONSE: ApplicationEntryPagesResponse = {
     { page: '/', sessions: 30, bounceRate: 0.4 },
     { page: '/products', sessions: 10, bounceRate: 0.1 },
   ],
-  totalSessions: 40,
 };
 
 const NO_VITAL = { p75Ms: null, sampleCount: 0, ratings: null };
