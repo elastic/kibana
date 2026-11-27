@@ -36,10 +36,16 @@ export const FP_DECISION_MIN_ALERTS = 3;
 export const FP_DECISIONS_MAX_PER_APPROVAL = 20;
 
 /**
- * Verdicts that stop a key from becoming a decision: the model judged an alert of this pattern differently.
- * Only the batch writes the strict key tag, so the `az:inconclusive` a dismissal's skip adds never blocks.
+ * Close reasons that say nothing against a false positive: the decision's own, a correct detection
+ * of harmless activity, a duplicate, and a close by automation. Any other reason, custom ones
+ * included, is an analyst's verdict against the pattern.
  */
-export const FP_DECISION_BLOCKING_VERDICT_TAGS = ['az:true_positive', 'az:inconclusive'] as const;
+export const FP_DECISION_NEUTRAL_CLOSE_REASONS = [
+  'false_positive',
+  'benign_positive',
+  'duplicate',
+  'automated_closure',
+] as const;
 
 const MAX_CONDITION_VALUE_LENGTH = 1000;
 

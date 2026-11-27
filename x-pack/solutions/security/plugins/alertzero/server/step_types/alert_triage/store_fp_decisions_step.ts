@@ -14,7 +14,6 @@ import {
 } from '../../../common/step_types/alert_triage';
 import type { DecisionAutoCloseMode } from '../../alert_triage/constants';
 import {
-  FP_DECISION_BLOCKING_VERDICT_TAGS,
   FP_DECISION_MIN_ALERTS,
   buildDecisionDocument,
   decisionId,
@@ -99,26 +98,27 @@ export const getTriageStoreFpDecisionsStepDefinition = ({
         const entries = alerts.map((doc) => ({ id: String(doc._id), doc }));
         // The approval keeps earlier closures, so an alert that is already closed can be in the
         // proposal. One closed as a true positive is no evidence of a false positive, and its
-        // pattern is blocked. One closed with no reason is no evidence either, but it says nothing
-        // against the pattern, so it only leaves the count.
-        const { closedAsOther, closedWithoutReason } =
+        // pattern is blocked. One closed with no reason or a neutral one is no evidence either, but
+        // it says nothing against the pattern, so it only leaves the count.
+        const { closedAsOther, closedWithoutVerdict } =
           kind === 'false_positive'
             ? await findAlertsClosedWithoutFalsePositiveReason(
                 contextManager,
                 entries.map(({ id }) => id)
               )
-            : { closedAsOther: [], closedWithoutReason: [] };
+            : { closedAsOther: [], closedWithoutVerdict: [] };
         const blockingIds = new Set(closedAsOther);
-        // Alerts closed as another reason are left out of the grouping by `blockingIds`, so the
-        // evidence filter only has the ones closed with no reason left to take out.
-        const noEvidenceIds = new Set(closedWithoutReason);
+        // Alerts closed with a verdict are left out of the grouping by `blockingIds`, so the
+        // evidence filter only has the ones closed with no reason or a neutral one left to take out.
+        const noEvidenceIds = new Set(closedWithoutVerdict);
         const conflictedKeys = groupByStrictKey({
           alerts: entries.filter(({ id }) => blockingIds.has(id)),
           spaceId,
         }).groups.map(({ hash }) => hash);
         // Every key the proposal has is counted, whatever its evidence: an approval whose alerts
-        // were all closed with no reason has keys, and reports them below the minimum, not as
-        // having none. The evidence filter only decides how many alerts a key has for the minimum.
+        // were all closed with no reason or a neutral one has keys, and reports them below the
+        // minimum, not as having none. The evidence filter only decides how many alerts a key has
+        // for the minimum.
         const grouped = groupByStrictKey({
           alerts: entries.filter(({ id }) => !blockingIds.has(id)),
           spaceId,
@@ -143,11 +143,7 @@ export const getTriageStoreFpDecisionsStepDefinition = ({
               .filter(({ alertIds }) => alertIds.length >= FP_DECISION_MIN_ALERTS)
               .map(({ hash }) => [strictKeyTag(hash), hash])
           );
-          const withVerdicts = await findKeyTagsWithVerdicts(
-            contextManager,
-            [...tagToHash.keys()],
-            FP_DECISION_BLOCKING_VERDICT_TAGS
-          );
+          const withVerdicts = await findKeyTagsWithVerdicts(contextManager, [...tagToHash.keys()]);
           for (const tag of withVerdicts) {
             const hash = tagToHash.get(tag);
             if (hash !== undefined) blocked.add(hash);

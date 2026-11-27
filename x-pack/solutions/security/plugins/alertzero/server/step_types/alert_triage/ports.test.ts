@@ -157,20 +157,52 @@ describe('findKeyTagsWithVerdicts', () => {
     body: { aggregations: { keys: { buckets: keys.map((key) => ({ key })) } } },
   });
 
-  it('asks for alerts that carry a key tag and a verdict tag, and returns only the key tags', async () => {
+  // A model false positive whose proposal failed, expired or was never reviewed is re-tagged
+  // `az:inconclusive` and keeps `az:model_fp`: nobody judged it otherwise, so it must not block.
+  // An analyst who closes an alert as a true positive adds no verdict tag, only the close reason.
+  it('asks for alerts of the keys with a judged verdict against a false positive', async () => {
     const callKibanaApi = jest.fn().mockResolvedValue(answer(['k1']));
 
-    const found = await findKeyTagsWithVerdicts(
-      { callKibanaApi },
-      ['k1', 'k2'],
-      ['az:true_positive']
-    );
+    const found = await findKeyTagsWithVerdicts({ callKibanaApi }, ['k1', 'k2']);
 
     expect([...found]).toEqual(['k1']);
     const { body } = callKibanaApi.mock.calls[0][0];
     expect(body.query.bool.filter).toEqual([
       { terms: { 'kibana.alert.workflow_tags': ['k1', 'k2'] } },
-      { terms: { 'kibana.alert.workflow_tags': ['az:true_positive'] } },
+      {
+        bool: {
+          should: [
+            { term: { 'kibana.alert.workflow_tags': 'az:true_positive' } },
+            {
+              bool: {
+                filter: [{ term: { 'kibana.alert.workflow_tags': 'az:inconclusive' } }],
+                must_not: [{ term: { 'kibana.alert.workflow_tags': 'az:model_fp' } }],
+              },
+            },
+            {
+              bool: {
+                filter: [
+                  { term: { 'kibana.alert.workflow_status': 'closed' } },
+                  { exists: { field: 'kibana.alert.workflow_reason' } },
+                ],
+                must_not: [
+                  {
+                    terms: {
+                      'kibana.alert.workflow_reason': [
+                        'false_positive',
+                        'benign_positive',
+                        'duplicate',
+                        'automated_closure',
+                      ],
+                    },
+                  },
+                ],
+              },
+            },
+          ],
+          minimum_should_match: 1,
+        },
+      },
     ]);
     expect(body.aggs.keys.terms).toEqual(
       expect.objectContaining({ include: ['k1', 'k2'], size: 2 })
@@ -185,7 +217,7 @@ describe('findKeyTagsWithVerdicts', () => {
       .mockResolvedValueOnce(answer(['k600']))
       .mockResolvedValueOnce(answer([]));
 
-    const found = await findKeyTagsWithVerdicts({ callKibanaApi }, keys, ['az:inconclusive']);
+    const found = await findKeyTagsWithVerdicts({ callKibanaApi }, keys);
 
     expect(callKibanaApi).toHaveBeenCalledTimes(3);
     expect([...found]).toEqual(['k1', 'k600']);
@@ -194,9 +226,9 @@ describe('findKeyTagsWithVerdicts', () => {
   it('fails instead of reporting no verdicts when the response has no aggregation', async () => {
     const callKibanaApi = jest.fn().mockResolvedValue({ status: 200, headers: {}, body: {} });
 
-    await expect(
-      findKeyTagsWithVerdicts({ callKibanaApi }, ['k1'], ['az:inconclusive'])
-    ).rejects.toThrow('Key verdicts missing');
+    await expect(findKeyTagsWithVerdicts({ callKibanaApi }, ['k1'])).rejects.toThrow(
+      'Key verdicts missing'
+    );
   });
 });
 
@@ -811,10 +843,7 @@ describe('countClosedByDecision', () => {
 describe('helpers that drive a write, on a partial search result', () => {
   const helpers: Array<[string, (api: { callKibanaApi: jest.Mock }) => Promise<unknown>]> = [
     ['countClosedByDecision', (api) => countClosedByDecision(api, 'fp-decision-1', 0)],
-    [
-      'findKeyTagsWithVerdicts',
-      (api) => findKeyTagsWithVerdicts(api, ['k1'], ['az:true_positive']),
-    ],
+    ['findKeyTagsWithVerdicts', (api) => findKeyTagsWithVerdicts(api, ['k1'])],
     [
       'findAlertsClosedWithoutFalsePositiveReason',
       (api) => findAlertsClosedWithoutFalsePositiveReason(api, ['a']),
@@ -871,7 +900,8 @@ describe('helpers that drive a write, on a partial search result', () => {
 });
 
 describe('findAlertsClosedWithoutFalsePositiveReason', () => {
-  it('tells a close for another reason apart from a close with no reason, and leaves false positives out of the query', async () => {
+  // A duplicate or a close by automation is no evidence for the pattern and none against it.
+  it('tells a close with a verdict apart from one with no reason or a neutral reason, and leaves false positives out of the query', async () => {
     const callKibanaApi = jest.fn().mockResolvedValue({
       status: 200,
       headers: {},
@@ -879,20 +909,29 @@ describe('findAlertsClosedWithoutFalsePositiveReason', () => {
         hits: {
           hits: [
             { _id: 'tp', _source: { 'kibana.alert.workflow_reason': 'true_positive' } },
+            { _id: 'custom', _source: { 'kibana.alert.workflow_reason': 'my_own_reason' } },
             { _id: 'none', _source: {} },
+            { _id: 'auto', _source: { 'kibana.alert.workflow_reason': 'automated_closure' } },
+            { _id: 'dup', _source: { 'kibana.alert.workflow_reason': 'duplicate' } },
+            { _id: 'benign', _source: { 'kibana.alert.workflow_reason': 'benign_positive' } },
           ],
         },
       },
     });
 
-    const found = await findAlertsClosedWithoutFalsePositiveReason({ callKibanaApi }, [
-      'tp',
-      'none',
-      'fp',
-    ]);
+    const ids = ['tp', 'custom', 'none', 'auto', 'dup', 'benign', 'fp'];
 
-    expect(found).toEqual({ closedAsOther: ['tp'], closedWithoutReason: ['none'] });
+    const found = await findAlertsClosedWithoutFalsePositiveReason({ callKibanaApi }, ids);
+
+    expect(found).toEqual({
+      closedAsOther: ['tp', 'custom'],
+      closedWithoutVerdict: ['none', 'auto', 'dup', 'benign'],
+    });
     const { query } = callKibanaApi.mock.calls[0][0].body;
+    expect(query.bool.filter).toEqual([
+      { ids: { values: ids } },
+      { term: { 'kibana.alert.workflow_status': 'closed' } },
+    ]);
     expect(query.bool.must_not).toEqual([
       { term: { 'kibana.alert.workflow_reason': 'false_positive' } },
     ]);

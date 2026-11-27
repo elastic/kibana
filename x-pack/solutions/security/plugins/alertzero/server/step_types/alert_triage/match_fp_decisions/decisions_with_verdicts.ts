@@ -6,11 +6,7 @@
  */
 
 import type { StepHandlerContext } from '@kbn/workflows-extensions/server';
-import {
-  FP_DECISION_BLOCKING_VERDICT_TAGS,
-  hashOfDecisionId,
-  strictKeyTag,
-} from '../../../alert_triage/fp_decisions';
+import { hashOfDecisionId, strictKeyTag } from '../../../alert_triage/fp_decisions';
 import { findKeyTagsWithVerdicts } from '../ports';
 
 type KibanaApi = Pick<StepHandlerContext['contextManager'], 'callKibanaApi'>;
@@ -19,11 +15,12 @@ type KibanaApi = Pick<StepHandlerContext['contextManager'], 'callKibanaApi'>;
 const DECISIONS_PER_SEARCH = 500;
 
 /**
- * Which of the given approved decisions have a key that an alert already carries with a true
- * positive or inconclusive verdict. The decision was approved on evidence from before, and a later
- * verdict for the same key is evidence against it. One search covers up to 500 decisions. A read
- * that fails throws, so the caller closes nothing on a guess. It takes no deadline: a lookup cut
- * short would leave decisions out, and the caller would read them as having no conflict.
+ * Which of the given approved decisions have a key that an alert already carries with a verdict
+ * against a false positive (`findKeyTagsWithVerdicts` says which verdicts count). The decision was
+ * approved on evidence from before, and a later verdict for the same key is evidence against it.
+ * One search covers up to 500 decisions. A read that fails throws, so the caller closes nothing on
+ * a guess. It takes no deadline: a lookup cut short would leave decisions out, and the caller would
+ * read them as having no conflict.
  */
 export const findDecisionsWithConflictingVerdicts = async (
   api: KibanaApi,
@@ -39,11 +36,7 @@ export const findDecisionsWithConflictingVerdicts = async (
         return [strictKeyTag(hash), id];
       })
     );
-    const withVerdicts = await findKeyTagsWithVerdicts(
-      api,
-      [...idByKeyTag.keys()],
-      FP_DECISION_BLOCKING_VERDICT_TAGS
-    );
+    const withVerdicts = await findKeyTagsWithVerdicts(api, [...idByKeyTag.keys()]);
     withVerdicts.forEach((keyTag) => {
       const id = idByKeyTag.get(keyTag);
       if (id !== undefined) found.add(id);

@@ -40,7 +40,7 @@ const setup = ({
   bulkResponse = { errors: false, items: [] as unknown[] },
   searchFails = false,
   closedAsOther = [],
-  closedWithoutReason = [],
+  closedWithoutVerdict = [],
   mode = 'shadow',
   runSpace = 'default',
 }: {
@@ -52,7 +52,7 @@ const setup = ({
   /** Ids of alerts an analyst closed with a reason other than false positive. */
   closedAsOther?: string[];
   /** Ids of alerts that are closed with no reason at all. */
-  closedWithoutReason?: string[];
+  closedWithoutVerdict?: string[];
   mode?: 'off' | 'shadow' | 'on';
   /** The space of the workflow run. */
   runSpace?: string;
@@ -77,7 +77,7 @@ const setup = ({
                 _id,
                 _source: { 'kibana.alert.workflow_reason': 'true_positive' },
               })),
-              ...closedWithoutReason.map((_id) => ({ _id, _source: {} })),
+              ...closedWithoutVerdict.map((_id) => ({ _id, _source: {} })),
             ],
           },
         },
@@ -145,7 +145,7 @@ describe('triage store decisions step', () => {
   it('reports a key below the minimum, not "no strict keys", when all its alerts were closed with no reason', async () => {
     const { run, bulk } = setup({
       alerts: alertsOf([['a.exe', 3]]),
-      closedWithoutReason: ['a.exe-0', 'a.exe-1', 'a.exe-2'],
+      closedWithoutVerdict: ['a.exe-0', 'a.exe-1', 'a.exe-2'],
     });
 
     const { output } = await run({});
@@ -159,7 +159,7 @@ describe('triage store decisions step', () => {
   it('does not count an alert closed with no reason as evidence of a false positive', async () => {
     const { run, bulk } = setup({
       alerts: alertsOf([['a.exe', 3]]),
-      closedWithoutReason: ['a.exe-0'],
+      closedWithoutVerdict: ['a.exe-0'],
     });
 
     const { output } = await run({});
@@ -171,7 +171,7 @@ describe('triage store decisions step', () => {
   it('does not block a pattern for an alert closed with no reason, when the rest is enough evidence', async () => {
     const { run, bulk } = setup({
       alerts: alertsOf([['a.exe', 4]]),
-      closedWithoutReason: ['a.exe-0'],
+      closedWithoutVerdict: ['a.exe-0'],
     });
 
     const { output } = await run({});
