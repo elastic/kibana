@@ -140,7 +140,11 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         const tag = uuidv4();
         await cases.common.addTag(tag);
 
-        // validate tag was added
+        // validate tag was added; the sidebar renders only committed tags, so its pill appears
+        // once the case refetch lands, after the global loading indicator has cleared
+        await find.byCssSelector(
+          `[data-test-subj="case-tags"] [data-test-subj="euiComboBoxPill"][title="${tag}"]`
+        );
         expect(await comboBox.getComboBoxSelectedOptions('case-tags')).to.contain(tag);
 
         // validate user action
