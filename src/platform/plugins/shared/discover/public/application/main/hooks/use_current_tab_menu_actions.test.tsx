@@ -165,4 +165,39 @@ describe('useCurrentTabMenuActions', () => {
       dataViewId: dataViewWithTimefieldMock.id,
     });
   });
+
+  it('switches to classic when the project has no data view', async () => {
+    const { services, toolkit, tabId } = await setup();
+
+    toolkit.internalState.dispatch(
+      internalStateActions.setInitializationState({ hasESData: false, hasDataView: false })
+    );
+    toolkit.internalState.dispatch(
+      internalStateActions.transitionFromDataViewToESQL({
+        tabId,
+        dataView: dataViewWithTimefieldMock,
+      })
+    );
+
+    const { result } = renderHook(
+      () => useCurrentTabMenuActions({ currentDataView: dataViewWithTimefieldMock }),
+      {
+        wrapper: ({ children }) => (
+          <DiscoverToolkitTestProvider toolkit={toolkit}>{children}</DiscoverToolkitTestProvider>
+        ),
+      }
+    );
+
+    expect(result.current.isDataViewMode).toBe(false);
+
+    await act(async () => {
+      result.current.switchLanguageMode();
+    });
+
+    expect(services.trackUiMetric).toHaveBeenCalledWith(
+      METRIC_TYPE.CLICK,
+      'esql:back_to_classic_clicked'
+    );
+    expect(result.current.isDataViewMode).toBe(true);
+  });
 });

@@ -43,6 +43,8 @@ import { VIEW_MODE } from '../../../../../common/constants';
 import { useAppStateSelector } from '../../state_management/redux';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { DiscoverNoResults } from '../no_results';
+import { DiscoverOnboardingEmptyState } from '../onboarding/discover_onboarding_empty_state';
+import { isMissingSourceError } from '../onboarding/is_missing_source_error';
 import { LoadingSpinner } from '../loading_spinner/loading_spinner';
 import { DiscoverSidebarResponsive } from '../sidebar';
 import type { DiscoverTopNavProps } from '../top_nav/discover_topnav';
@@ -140,6 +142,7 @@ export function DiscoverLayout() {
   const dataViewLoading = useCurrentTabSelector((state) => state.isDataViewLoading);
   const dataState: DataMainMsg = useDataState(main$);
   const discoverSession = useInternalStateSelector((state) => state.persistedDiscoverSession);
+  const hasESData = useInternalStateSelector((state) => state.initializationState.hasESData);
 
   const fetchCounter = useRef<number>(0);
 
@@ -311,7 +314,8 @@ export function DiscoverLayout() {
     filterManager.setFilters(disabledFilters);
   }, [filterManager]);
 
-  const contentCentered = resultState === 'uninitialized' || resultState === 'none';
+  // Uninitialized centers its own content so a top banner can stay at the top of the panel.
+  const contentCentered = resultState === 'none';
   const documentState = useDataState(dataStateContainer.data$.documents$);
 
   const esqlModeWarning = useMemo(() => {
@@ -320,11 +324,15 @@ export function DiscoverLayout() {
     }
   }, [documentState.esqlHeaderWarning, isEsqlMode]);
 
+  // A missing source on an empty project is the no-data case, not a failed search.
+  const showMissingSourceAsEmpty =
+    !hasESData && isEsqlMode && isMissingSourceError(dataState.error);
+
   const esqlModeErrors = useMemo(() => {
-    if (isEsqlMode) {
+    if (isEsqlMode && !showMissingSourceAsEmpty) {
       return dataState.error;
     }
-  }, [dataState.error, isEsqlMode]);
+  }, [dataState.error, isEsqlMode, showMissingSourceAsEmpty]);
 
   const [{ dragging }] = useDragDropContext();
   const draggingFieldName = dragging?.id;
@@ -372,9 +380,18 @@ export function DiscoverLayout() {
     () => new BehaviorSubject<SidebarToggleState>({ isCollapsed: false, toggle: () => {} })
   );
 
-  const isSidebarHidden = resultState === 'uninitialized';
+  const showOnboardingEmptyState =
+    !hasESData &&
+    (resultState === 'uninitialized' ||
+      resultState === 'loading' ||
+      (resultState === 'none' && showMissingSourceAsEmpty));
+  const isSidebarHidden = resultState === 'uninitialized' || showOnboardingEmptyState;
 
   const mainDisplay = useMemo(() => {
+    if (showOnboardingEmptyState && resultState !== 'none') {
+      return <DiscoverOnboardingEmptyState />;
+    }
+
     if (resultState === 'uninitialized') {
       addLog('[DiscoverLayout] uninitialized triggers data fetching');
       return <DiscoverUninitialized onRefresh={() => dataStateContainer.fetch()} />;
@@ -396,6 +413,7 @@ export function DiscoverLayout() {
     );
   }, [
     resultState,
+    showOnboardingEmptyState,
     dataView,
     currentColumns,
     viewMode,
@@ -545,15 +563,19 @@ export function DiscoverLayout() {
               <div css={styles.dscPageContentWrapper}>
                 {resultState === 'none' ? (
                   <>
-                    <div css={styles.mainPanel}>
-                      <PanelsToggle omitChartButton omitTableButton dataTestSubjSuffix="InPage" />
-                    </div>
-                    {dataState.error ? (
+                    {showOnboardingEmptyState ? null : (
+                      <div css={styles.mainPanel}>
+                        <PanelsToggle omitChartButton omitTableButton dataTestSubjSuffix="InPage" />
+                      </div>
+                    )}
+                    {dataState.error && !showMissingSourceAsEmpty ? (
                       errorAiHelp ? (
                         <div css={styles.errorContainer}>{errorCallout}</div>
                       ) : (
                         errorCallout
                       )
+                    ) : showOnboardingEmptyState ? (
+                      <DiscoverOnboardingEmptyState />
                     ) : (
                       <DiscoverNoResults
                         isTimeBased={isTimeBased}

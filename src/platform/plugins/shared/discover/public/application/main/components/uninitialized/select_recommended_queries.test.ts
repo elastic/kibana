@@ -57,4 +57,37 @@ describe('selectRecommendedQueries', () => {
       )
     ).toEqual(['e1', 'e2', 'e3', 'e4', 'e5', 'e6']);
   });
+
+  it('drops index-only and solution queries when the source is a federated dataset', () => {
+    expect(
+      labels(
+        selectRecommendedQueries({
+          extensionQueries: queries('Search all metrics'),
+          staticQueries: [
+            {
+              label: 'Search all fields',
+              description: '',
+              queryString: 'FROM btc | WHERE KQL("term")',
+            },
+            {
+              label: 'Aggregate with STATS',
+              description: '',
+              queryString: 'FROM btc | STATS count = COUNT(*)',
+            },
+            {
+              label: 'Load unmapped fields',
+              description: '',
+              queryString: 'SET unmapped_fields = "LOAD"; FROM btc',
+            },
+            {
+              label: 'Create a conditional with CASE',
+              description: '',
+              queryString: 'FROM btc | EVAL x = CASE(true, "a")',
+            },
+          ],
+          federatedOnly: true,
+        })
+      )
+    ).toEqual(['Aggregate with STATS', 'Create a conditional with CASE']);
+  });
 });

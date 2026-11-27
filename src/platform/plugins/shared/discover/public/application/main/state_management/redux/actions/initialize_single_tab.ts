@@ -14,7 +14,9 @@ import { cloneDeep, isEqual, pick } from 'lodash';
 import type { GlobalQueryStateFromUrl } from '@kbn/data-plugin/public';
 import type { ControlPanelsState } from '@kbn/control-group-renderer';
 import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
-import type { EsqlSource } from '@kbn/data-source';
+import { EsqlSource, registerEsqlSourceInDataViewsCache } from '@kbn/data-source';
+import { DATASETS_ROUTE, type EsqlDatasetsResult } from '@kbn/esql-types';
+import { ENABLE_ESQL } from '@kbn/esql-utils';
 import { internalStateSlice, type TabActionPayload } from '../internal_state';
 import {
   getConfiguredDefaultEsqlQuery,
@@ -49,6 +51,10 @@ import type { TabsUrlState } from '../../../../../../common/types';
 import { fromSavedObjectTabToSearchSource } from '../tab_mapping_utils';
 import { createInternalStateAsyncThunk, extractEsqlVariables } from '../utils';
 import { isNonEmptyEsqlQuery } from '../../utils/is_non_empty_esql_query';
+import {
+  getFederatedDefaultEsqlQuery,
+  isGeneratedOpeningEsql,
+} from '../../utils/get_federated_default_esql_query';
 import { fetchData, updateAttributes } from './tab_state';
 import { initializeAndSync } from './tab_sync';
 import { resolveEsqlSource } from '../../../data_fetching/resolve_esql_source';
@@ -190,14 +196,38 @@ export const initializeSingleTab = createInternalStateAsyncThunk(
     const urlTabId = urlStateStorage.get<TabsUrlState>(TAB_STATE_URL_KEY)?.tabId;
     const isUrlOwnedByTab =
       getTabState() === tabStateBeforeAvailability && (!urlTabId || urlTabId === tabId);
-    const { urlGlobalState, urlAppState, urlProfileState, hasGlobalState, initialQuery } =
-      isUrlOwnedByTab ? readUrlState() : initialUrlState;
-    const isEsqlMode = isOfAggregateQueryType(initialQuery);
-    const { hasESData, hasDataView } = await loadDataAvailability(initialQuery);
+    const {
+      urlGlobalState,
+      urlAppState,
+      urlProfileState,
+      hasGlobalState,
+      initialQuery: restoredQuery,
+    } = isUrlOwnedByTab ? readUrlState() : initialUrlState;
+    const { hasESData, hasDataView } = await loadDataAvailability(restoredQuery);
+    const esqlEnabled = Boolean(services.uiSettings.get(ENABLE_ESQL));
+    // An empty project stays in the editor. Nothing is fetched until the user runs
+    // a query, so the results area can show how to add data immediately.
+    let openedWithoutData = false;
+    let initialQuery = restoredQuery;
+    // Same editor as a new tab: empty text, so the ES|QL placeholder shows.
+    // A saved search keeps the query stored on it. Profile, space, and URL
+    // defaults would otherwise prefill this screen.
+    const blankEditor =
+      esqlEnabled && !hasESData && !isNonEmptyEsqlQuery(persistedTab?.serializedSearchSource.query);
 
     if (!hasESData && !hasDataView) {
-      return { showNoDataPage: true };
+      if (!esqlEnabled) {
+        return { showNoDataPage: true };
+      }
+
+      openedWithoutData = true;
     }
+
+    if (blankEditor) {
+      initialQuery = { esql: '' };
+    }
+
+    const isEsqlMode = isOfAggregateQueryType(initialQuery);
 
     // Started after the shared availability checks so the duration only covers loading this tab.
     const discoverTabLoadTracker = scopedEbtManager$
@@ -251,6 +281,52 @@ export const initializeSingleTab = createInternalStateAsyncThunk(
       dataView: DataView;
       esqlSource?: EsqlSource;
     }> => {
+      // Each solution generates its own FROM. None of those name a dataset, and a
+      // dataset has no @timestamp or startedAt column. A query the user wrote stays.
+      const profileQuery = defaultProfileEsqlQuery?.query;
+      const savedEsql = isOfAggregateQueryType(persistedTab?.serializedSearchSource.query)
+        ? persistedTab?.serializedSearchSource.query.esql
+        : undefined;
+      const urlQuery = urlAppState?.query;
+      const urlEsql = isOfAggregateQueryType(urlQuery) ? urlQuery.esql : undefined;
+      const savedIsUserQuery =
+        Boolean(savedEsql) && !isGeneratedOpeningEsql(savedEsql, profileQuery);
+      const urlIsUserQuery = Boolean(urlEsql) && !isGeneratedOpeningEsql(urlEsql, profileQuery);
+      const keepExistingQuery = savedIsUserQuery || urlIsUserQuery;
+      if (esqlEnabled && !keepExistingQuery) {
+        const hasLocalOrRemoteESData = await services.dataViews.hasData
+          .hasESData()
+          .catch(() => false);
+        const datasetName = hasLocalOrRemoteESData
+          ? undefined
+          : await services.core.http
+              .get<EsqlDatasetsResult>(DATASETS_ROUTE)
+              .then((result) => result?.datasets?.[0]?.name)
+              .catch(() => undefined);
+        const federatedQuery = getFederatedDefaultEsqlQuery({
+          hasLocalOrRemoteESData,
+          datasetName,
+        });
+        if (federatedQuery) {
+          return {
+            query: { esql: federatedQuery },
+            ...(await resolveEsqlQuerySource(federatedQuery)),
+          };
+        }
+      }
+
+      if (openedWithoutData && !isNonEmptyEsqlQuery(initialQuery)) {
+        // No schema lookup: an empty query has nothing to resolve, and waiting on it
+        // is the loading state the empty project should not show.
+        const esqlSource = await EsqlSource.create({
+          query: '',
+          resolveTimeField: false,
+        });
+        services.dataSourceService.registerEsqlSource(esqlSource);
+        const dataView = await registerEsqlSourceInDataViewsCache(services.dataViews, esqlSource);
+        return { query: { esql: '' }, dataView, esqlSource };
+      }
+
       if (isNonEmptyEsqlQuery(initialQuery)) {
         return { query: initialQuery, ...(await resolveEsqlQuerySource(initialQuery.esql)) };
       }
@@ -294,9 +370,21 @@ export const initializeSingleTab = createInternalStateAsyncThunk(
       dispatch(appendAdHocDataViews(dataView));
     }
 
-    // Get the initial app state based on a combo of the URL and persisted tab saved search
+    // URL app state is spread over the opening query, so a default already stored
+    // in the address bar would replace the query decided above.
+    const urlEsql = isOfAggregateQueryType(urlAppState?.query) ? urlAppState.query.esql : undefined;
+    const openingEsql = isOfAggregateQueryType(openingQuery) ? openingQuery.esql : undefined;
+    const urlHoldsGeneratedQuery = isGeneratedOpeningEsql(urlEsql, defaultProfileEsqlQuery?.query);
+    const overrideUrlQuery = blankEditor || (urlHoldsGeneratedQuery && openingEsql !== urlEsql);
+    const {
+      query: urlQueryToReplace,
+      dataSource: urlDataSourceToReplace,
+      ...urlStateWithoutQuery
+    } = urlAppState ?? {};
     const initialAppState = getInitialAppState({
-      initialUrlState: urlAppState,
+      initialUrlState: overrideUrlQuery
+        ? { ...urlStateWithoutQuery, ...(openingQuery ? { query: openingQuery } : {}) }
+        : urlAppState,
       hasGlobalState,
       persistedTab,
       dataView,
@@ -431,7 +519,7 @@ export const initializeSingleTab = createInternalStateAsyncThunk(
     // the persisted signal — restore the flag so a later switch to classic does
     // not treat the tab as search-on-page-load and get stuck in LOADING.
     const shouldSkipInitialFetch =
-      tabState.skipInitialFetch || isEmptyEsqlQuery(initialAppState.query);
+      tabState.skipInitialFetch || isEmptyEsqlQuery(initialAppState.query) || openedWithoutData;
 
     if (shouldSkipInitialFetch && !tabState.skipInitialFetch) {
       dispatch(
@@ -440,6 +528,14 @@ export const initializeSingleTab = createInternalStateAsyncThunk(
           skipInitialFetch: true,
         })
       );
+    }
+
+    if (blankEditor) {
+      // The container was created before this query existed, so search-on-page-load
+      // may already have marked it LOADING. Put it back and ignore the sync that
+      // applies this opening state.
+      dataStateContainer.reset();
+      dataStateContainer.disableNextFetchOnStateChange$.next(true);
     }
 
     if (isCurrentTabActive()) {

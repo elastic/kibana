@@ -280,6 +280,7 @@ export const useTopNavLinks = ({
           : i18n.translate('discover.localMenu.switchToClassicTitle', {
               defaultMessage: 'Switch to Classic',
             }),
+        disableButton: false,
         tooltipContent: isDataViewMode
           ? i18n.translate('discover.localMenu.switchToESQLTooltip', {
               defaultMessage:
