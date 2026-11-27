@@ -11,7 +11,7 @@ import { NEW_INVESTIGATION_TITLE } from './translations';
 
 /**
  * The investigation's title, or while Agent Builder has not generated it yet (it does on the
- * first round), what the first subject is called, or else a generic "New investigation".
+ * first round), the first alert's rule name, or else a generic "New investigation".
  */
 export const getInvestigationDisplayTitle = ({
   title,
@@ -22,5 +22,7 @@ export const getInvestigationDisplayTitle = ({
     return title;
   }
   const [first] = subjects;
-  return first ? getSubjectTitle(first) : NEW_INVESTIGATION_TITLE;
+  // A question (manual or Slack) would read as a long interim headline that Agent Builder's
+  // title soon replaces, so only an alert's rule name stands in for the title.
+  return first?.type === 'alert' ? getSubjectTitle(first) : NEW_INVESTIGATION_TITLE;
 };
