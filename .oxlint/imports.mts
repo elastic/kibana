@@ -212,17 +212,6 @@ export const importsOverrides: OxlintOverride[] = [
     },
   },
   {
-    // GitHub Actions executes these files directly with Node's native TypeScript support.
-    files: [
-      '.github/scripts/label_flaky_fix_pr.ts',
-      '.github/scripts/label_flaky_fix_pr_test.ts',
-      '.github/scripts/find_duplicate_fix_prs.js',
-    ],
-    rules: {
-      '@kbn/imports/uniform_imports': ['error', { preserveFileExtensions: true }],
-    },
-  },
-  {
     files: [
       // TODO @kibana/operations
       'scripts/create_observability_rules.js', // is importing "@kbn/observability-alerting-test-data" (observability/private)
