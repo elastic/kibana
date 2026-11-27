@@ -56,6 +56,8 @@ export const EDITED_AT_ATTRIBUTE = 'memory.edited_at';
 
 /** Maximum items in each list of a change set. */
 export const MAX_DREAMING_CHANGE_SET_ITEMS = 200;
+/** Maximum items in each list of a change set the dreaming model returns; those past the first MAX_DREAMING_CHANGE_SET_ITEMS are rejected. */
+export const MAX_DREAMING_CHANGE_SET_INPUT_ITEMS = 1000;
 /** Maximum memories one dreaming step takes. */
 export const MAX_DREAMING_STEP_MEMORIES = 200;
 

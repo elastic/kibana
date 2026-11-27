@@ -9,6 +9,7 @@ import {
   DREAMING_TYPE_PATTERN,
   ENTITY_TYPE_PREFIX,
   FACT_TYPE_PREFIX,
+  MAX_DREAMING_CHANGE_SET_ITEMS,
   dreamingTypesOf,
   type AiIndexDreamingConfig,
 } from '../../common/dreaming';
@@ -93,9 +94,22 @@ export interface ResolvedChangeSet {
   rejected: Array<{ item: string; reason: string }>;
 }
 
+const isNewRef = ({ ref }: { ref: string }): boolean => ref.startsWith(NEW_REF_PREFIX);
+
+/** Splits a list of a change set into the items applied and those past the limit, keeping changes to existing items first. */
+const withinLimit = <Item extends { ref: string }>(
+  items: readonly Item[]
+): { applied: Item[]; over: Item[] } => {
+  const byPriority = [...items.filter((item) => !isNewRef(item)), ...items.filter(isNewRef)];
+  const over = new Set(byPriority.slice(MAX_DREAMING_CHANGE_SET_ITEMS));
+  return { applied: items.filter((item) => !over.has(item)), over: [...over] };
+};
+
 /** The ids of the existing KIs a change set refers to. */
 export const referencedIds = ({ entities, facts }: DreamChangeSet): string[] => {
-  const refs = [...entities, ...facts].map(({ ref }) => ref);
+  const refs = [...withinLimit(entities).applied, ...withinLimit(facts).applied].map(
+    ({ ref }) => ref
+  );
   return [...new Set(refs.filter((ref) => !ref.startsWith(NEW_REF_PREFIX)))];
 };
 
@@ -158,7 +172,8 @@ export const resolveChangeSet = (
     return ki;
   };
 
-  for (const entity of changeSet.entities) {
+  const entities = withinLimit(changeSet.entities);
+  for (const entity of entities.applied) {
     attempt(`entity ${entity.ref}`, () => {
       if (vocabulary.entityTypes.size === 0) {
         reject('this AI index does not build entities');
@@ -214,7 +229,15 @@ export const resolveChangeSet = (
     });
   }
 
-  for (const fact of changeSet.facts) {
+  for (const { ref } of entities.over) {
+    rejected.push({
+      item: `entity ${ref}`,
+      reason: `over the limit of ${MAX_DREAMING_CHANGE_SET_ITEMS} entities a change set`,
+    });
+  }
+
+  const facts = withinLimit(changeSet.facts);
+  for (const fact of facts.applied) {
     attempt(`fact ${fact.ref}`, () => {
       if (vocabulary.factTypes.size === 0) {
         reject('this AI index does not build facts');
@@ -251,6 +274,12 @@ export const resolveChangeSet = (
         sourceMemoryIds,
         ...lastSeenAtOf(sourceMemoryIds),
       });
+    });
+  }
+  for (const { ref } of facts.over) {
+    rejected.push({
+      item: `fact ${ref}`,
+      reason: `over the limit of ${MAX_DREAMING_CHANGE_SET_ITEMS} facts a change set`,
     });
   }
 

@@ -282,6 +282,35 @@ describe('CONTEXT_ENGINE_DREAMING_WORKFLOW', () => {
       );
     });
 
+    it('shares the extraction rules of trace dreaming', () => {
+      const rendered = prompt();
+
+      expect(rendered).toContain('counts as much as its main point');
+      expect(rendered).toContain('Keep lists whole.');
+      expect(rendered).toContain('the small ones too');
+      expect(rendered).toContain(
+        'write the latest value and keep the earlier ones with when they held'
+      );
+      expect(rendered).toContain(
+        'give dates in full rather than as "yesterday" or "next week", working them out from when the memory was saved (its updated_at)'
+      );
+      expect(rendered).toContain('Name each entity by its canonical name, the same way every time');
+    });
+
+    it('dates what happened from when the memory was saved, and keeps unnamed entities', () => {
+      const rendered = prompt();
+
+      expect(rendered).toContain(
+        'without saying when, write when it was known, such as "as of January 8, 2023", from when the memory was saved'
+      );
+      expect(rendered).toContain(
+        "Something the MEMORIES do not name, such as the user's sister, is still an entity"
+      );
+      expect(rendered).toContain(
+        'with what tells it apart when they say, such as "Sister" or "Older sister"'
+      );
+    });
+
     it('tells the model not to create a kind with no types configured', () => {
       expect(prompt({ entityTypes: [] })).toContain(
         'ENTITY TYPES:\nnone: do not create entities.\n\nINSTRUCTIONS:'
