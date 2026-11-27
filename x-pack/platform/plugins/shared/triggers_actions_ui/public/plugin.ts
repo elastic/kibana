@@ -633,6 +633,7 @@ export class Plugin implements CorePlugin<
       getRulesList: (props: RulesListProps) => {
         return getRulesListLazy({
           connectorServices: this.connectorServices!,
+          isServerless: this.isServerless,
           rulesListProps: props,
         });
       },

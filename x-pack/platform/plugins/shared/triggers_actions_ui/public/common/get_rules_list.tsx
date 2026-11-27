@@ -17,10 +17,13 @@ const queryClient = new QueryClient();
 
 export const getRulesListLazy = (props: {
   connectorServices: ConnectorServices;
+  isServerless?: boolean;
   rulesListProps: RulesListProps;
 }) => {
   return (
-    <ConnectorProvider value={{ services: props.connectorServices }}>
+    <ConnectorProvider
+      value={{ services: props.connectorServices, isServerless: !!props.isServerless }}
+    >
       <QueryClientProvider client={queryClient}>
         <PerformanceContextProvider>
           <RulesList {...props.rulesListProps} />

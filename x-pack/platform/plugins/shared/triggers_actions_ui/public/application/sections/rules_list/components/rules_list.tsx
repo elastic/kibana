@@ -23,7 +23,7 @@ import { toMountPoint } from '@kbn/react-kibana-mount';
 import { RuleTypeModal } from '@kbn/response-ops-rule-form';
 import { capitalize, isEmpty, isEqual, sortBy } from 'lodash';
 import type { ReactNode } from 'react';
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 
 import type { RuleExecutionStatus } from '@kbn/alerting-plugin/common';
@@ -69,7 +69,9 @@ import { unsnoozeRule } from '../../../lib/rule_api/unsnooze';
 import { bulkUpdateAPIKey } from '../../../lib/rule_api/update_api_key';
 
 import { getIsExperimentalFeatureEnabled } from '../../../../common/get_experimental_features';
+import { VIEW_LICENSE_OPTIONS_LINK } from '../../../../common/constants';
 import { useKibana } from '../../../../common/lib/kibana';
+import { ConnectorContext } from '../../../context/connector_context';
 import { RulesDeleteModalConfirmation } from '../../../components/rules_delete_modal_confirmation';
 import { UpdateApiKeyModalConfirmation } from '../../../components/update_api_key_modal_confirmation';
 import { DEFAULT_SEARCH_PAGE_SIZE } from '../../../constants';
@@ -174,6 +176,7 @@ export const RulesList = ({
   navigateToCreateRuleFromTemplateForm,
 }: RulesListProps) => {
   const history = useHistory();
+  const connectorContext = useContext(ConnectorContext);
   const kibanaServices = useKibana().services;
   const {
     actionTypeRegistry,
@@ -1031,7 +1034,9 @@ export const RulesList = ({
                 ruleTypeId={manageLicenseModalOpts.ruleTypeId}
                 onConfirm={() => {
                   window.open(
-                    `${http.basePath.get()}/app/management/stack/license_management`,
+                    connectorContext?.isServerless
+                      ? VIEW_LICENSE_OPTIONS_LINK
+                      : `${http.basePath.get()}/app/management/stack/license_management`,
                     '_blank'
                   );
                   setManageLicenseModalOpts(null);
