@@ -40,7 +40,13 @@ export const k8sDeploymentDefinition: RegistrableEntityDefinition = {
   dynamic: {
     displayLabels: [
       { name: 'kubernetes.namespace', label: 'Namespace' },
+      { name: 'kubernetes.deployment.name', label: 'Deployment' },
       { name: 'k8s.cluster.name', label: 'Cluster' },
+      { name: 'k8s.deployment.available', label: 'Available replicas' },
+      { name: 'k8s.deployment.desired', label: 'Desired replicas' },
+      { name: 'k8s.deployment.paused', label: 'Paused' },
+      { name: 'k8s.deployment.label.app', label: 'App' },
+      { name: 'k8s.deployment.uid', label: 'UID' },
     ],
     sources: [
       {
@@ -65,5 +71,17 @@ export const k8sDeploymentDefinition: RegistrableEntityDefinition = {
       },
     ],
     suggestedFilters: ['k8s.cluster.name', 'kubernetes.namespace'],
+    category: 'kubernetes',
+    icon: 'logoKubernetes',
+    // The identity ranks the namespace first, so its first field would name the namespace.
+    nameFields: ['kubernetes.deployment.name'],
+    // Last seen stands in for restarts and up time until metric columns exist.
+    defaultColumns: [
+      'kubernetes.namespace',
+      'k8s.cluster.name',
+      'k8s.deployment.available',
+      'last_seen',
+    ],
+    badgeColumns: ['k8s.cluster.name'],
   },
 };

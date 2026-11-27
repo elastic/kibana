@@ -34,11 +34,23 @@ export const MAX_DISPLAY_LABELS =
   MAX_SOURCES * MAX_ATTRIBUTES_PER_SOURCE + MAX_DYNAMIC_IDENTITY_FIELDS;
 /** Longest display label. */
 export const MAX_DISPLAY_LABEL_LENGTH = 256;
+/** Longest category slug. */
+export const MAX_CATEGORY_LENGTH = 64;
+/** Longest icon token. */
+export const MAX_ICON_LENGTH = 64;
+/** Most columns one block may try, in order, for the entity name. */
+export const MAX_NAME_FIELDS = 16;
+/** Most default columns one block may declare: every identity field and attribute, plus `last_seen`. */
+export const MAX_DEFAULT_COLUMNS = MAX_DISPLAY_LABELS + 1;
+/** Most columns one block may render as badges. */
+export const MAX_BADGE_COLUMNS = 16;
 
 /** A mapped field path: dot-separated segments, no wildcards, expressions, quoting or whitespace. */
 export const LITERAL_FIELD_PATH_PATTERN = /^[A-Za-z0-9_@-]+(?:\.[A-Za-z0-9_@-]+)*$/;
 /** One index pattern per source: no whitespace and no comma-separated list. */
 export const INDEX_PATTERN_PATTERN = /^[^\s,]+$/;
+/** A category slug: lowercase letters, digits, `_` and `-`. */
+export const CATEGORY_PATTERN = /^[a-z0-9_-]+$/;
 
 /** Whether `value` is a non-empty literal field path within `MAX_FIELD_PATH_LENGTH`. */
 export const isLiteralFieldPath = (value: string): boolean =>
@@ -160,21 +172,63 @@ export const dynamicBlockSchema = lazySchema(() =>
       // Names of the columns the inventory offers as dropdown filters, in display order. Each is an
       // attribute or an identity field, which the whole-definition rules check.
       suggestedFilters: z.array(literalFieldPathSchema).max(MAX_SUGGESTED_FILTERS).optional(),
-    })
-    .superRefine(({ displayLabels = [], suggestedFilters = [] }, ctx) => {
-      addDuplicateIssues(
-        ctx,
-        displayLabels.map(({ name }) => name),
-        (name, index) => ({
-          path: ['displayLabels', index, 'name'],
-          message: `display label name "${name}" is already declared; names are unique within a block`,
+      // The rest of the block is presentation only: query generation never reads it, and the
+      // whole-definition rules check which columns each list may name.
+      // The inventory page the type is listed under, such as `hosts`.
+      category: z
+        .string()
+        .min(1)
+        .max(MAX_CATEGORY_LENGTH)
+        .regex(CATEGORY_PATTERN, {
+          message: 'must be a slug of lowercase letters, digits, `_` and `-`',
         })
-      );
-      addDuplicateIssues(ctx, suggestedFilters, (name, index) => ({
-        path: ['suggestedFilters', index],
-        message: `suggested filter "${name}" is listed more than once`,
-      }));
+        .optional(),
+      // An icon token shown beside the entity name; opaque to the store.
+      icon: z.string().min(1).max(MAX_ICON_LENGTH).optional(),
+      // Columns tried in order for the entity name: the first non-null value names the entity.
+      nameFields: z.array(literalFieldPathSchema).min(1).max(MAX_NAME_FIELDS).optional(),
+      // Columns visible by default, in display order.
+      defaultColumns: z.array(literalFieldPathSchema).max(MAX_DEFAULT_COLUMNS).optional(),
+      // Columns whose values render as badges.
+      badgeColumns: z.array(literalFieldPathSchema).max(MAX_BADGE_COLUMNS).optional(),
     })
+    .superRefine(
+      (
+        {
+          displayLabels = [],
+          suggestedFilters = [],
+          nameFields = [],
+          defaultColumns = [],
+          badgeColumns = [],
+        },
+        ctx
+      ) => {
+        addDuplicateIssues(
+          ctx,
+          displayLabels.map(({ name }) => name),
+          (name, index) => ({
+            path: ['displayLabels', index, 'name'],
+            message: `display label name "${name}" is already declared; names are unique within a block`,
+          })
+        );
+        addDuplicateIssues(ctx, suggestedFilters, (name, index) => ({
+          path: ['suggestedFilters', index],
+          message: `suggested filter "${name}" is listed more than once`,
+        }));
+        addDuplicateIssues(ctx, nameFields, (name, index) => ({
+          path: ['nameFields', index],
+          message: `name field "${name}" is listed more than once`,
+        }));
+        addDuplicateIssues(ctx, defaultColumns, (name, index) => ({
+          path: ['defaultColumns', index],
+          message: `default column "${name}" is listed more than once`,
+        }));
+        addDuplicateIssues(ctx, badgeColumns, (name, index) => ({
+          path: ['badgeColumns', index],
+          message: `badge column "${name}" is listed more than once`,
+        }));
+      }
+    )
 );
 
 /** The `dynamic` block of an entity definition. */

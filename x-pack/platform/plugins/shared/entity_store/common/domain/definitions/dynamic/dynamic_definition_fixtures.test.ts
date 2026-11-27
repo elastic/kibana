@@ -46,4 +46,10 @@ describe('dynamic definition fixtures', () => {
     const result = entitySchema.safeParse({ ...definition, id: 'host' });
     expect(result.success).toBe(true);
   });
+
+  it('built-in host is listed under hosts and named by host.name before its first identity field, host.id', () => {
+    const { dynamic } = getBuiltInEntityDefinition('host');
+    expect(dynamic?.category).toBe('hosts');
+    expect(dynamic?.nameFields).toEqual(['host.name', 'host.hostname', 'host.id']);
+  });
 });

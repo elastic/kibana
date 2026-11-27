@@ -27,13 +27,13 @@ No body and no parameters. It returns one entry per registered definition that h
       "columns": [
         { "name": "entity.id", "kind": "id", "label": "ID" },
         { "name": "kubernetes.namespace", "kind": "identity", "label": "Namespace" },
-        { "name": "kubernetes.deployment.name", "kind": "identity" },
+        { "name": "kubernetes.deployment.name", "kind": "identity", "label": "Deployment" },
         { "name": "k8s.cluster.name", "kind": "attribute", "label": "Cluster" },
-        { "name": "k8s.deployment.available", "kind": "attribute" },
-        { "name": "k8s.deployment.desired", "kind": "attribute" },
-        { "name": "k8s.deployment.paused", "kind": "attribute" },
-        { "name": "k8s.deployment.label.app", "kind": "attribute" },
-        { "name": "k8s.deployment.uid", "kind": "attribute" },
+        { "name": "k8s.deployment.available", "kind": "attribute", "label": "Available replicas" },
+        { "name": "k8s.deployment.desired", "kind": "attribute", "label": "Desired replicas" },
+        { "name": "k8s.deployment.paused", "kind": "attribute", "label": "Paused" },
+        { "name": "k8s.deployment.label.app", "kind": "attribute", "label": "App" },
+        { "name": "k8s.deployment.uid", "kind": "attribute", "label": "UID" },
         { "name": "last_seen", "kind": "last_seen", "label": "Last seen" }
       ],
       "suggestedFilters": ["k8s.cluster.name", "kubernetes.namespace"],
@@ -43,13 +43,28 @@ No body and no parameters. It returns one entry per registered definition that h
           "filter": "metricset.name == \"state_deployment\""
         },
         { "indexPattern": "metrics-k8sclusterreceiver.otel-*" }
-      ]
+      ],
+      "category": "kubernetes",
+      "icon": "logoKubernetes",
+      "nameFields": ["kubernetes.deployment.name"],
+      "defaultColumns": ["kubernetes.namespace", "k8s.cluster.name", "k8s.deployment.available", "last_seen"],
+      "badgeColumns": ["k8s.cluster.name"]
     }
   ]
 }
 ```
 
 A column's optional `label` is its user-facing text. It comes from the definition's `dynamic.displayLabels` (a list of `{ name, label }`, where `name` is an identity field or an attribute), with built-in defaults for `entity.id` ("ID") and `last_seen` ("Last seen"). A column with no label is shown by its `name`. Only this route returns labels; the `_list` response columns stay `{ name, kind }`.
+
+The optional presentation fields come from the definition's `dynamic` block as declared. The route fills in no defaults and leaves a field out when the definition does, so the app can tell a type without metadata and apply its own fallbacks:
+
+| Field | Meaning |
+| --- | --- |
+| `category` | The inventory page the type is listed under, such as `hosts` or `kubernetes`. The app does not read it yet and still picks a page by type ID prefix. Once it does, a type without one is listed only under All resources |
+| `icon` | The EUI icon token shown beside the entity name |
+| `nameFields` | The columns tried in order for the entity name: the first non-null value names the entity |
+| `defaultColumns` | The columns visible by default, in display order. They may include `last_seen` |
+| `badgeColumns` | The columns whose values render as badges |
 
 ### `POST /internal/entity_inventory/entities/{type}/_list`
 

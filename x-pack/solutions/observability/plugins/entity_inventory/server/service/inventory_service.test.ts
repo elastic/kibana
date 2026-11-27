@@ -142,6 +142,50 @@ describe('InventoryService.listTypes', () => {
     expect(type.suggestedFilters).toStrictEqual(['kubernetes.namespace', 'paused']);
   });
 
+  it('returns the presentation fields a definition declares', async () => {
+    const presented = {
+      ...k8sDeploymentOtelAndAgentFixture,
+      dynamic: {
+        ...getDynamicBlock(k8sDeploymentOtelAndAgentFixture),
+        category: 'kubernetes',
+        icon: 'logoKubernetes',
+        nameFields: ['kubernetes.deployment.name', 'k8s.deployment.name'],
+        defaultColumns: ['kubernetes.namespace', 'available_replicas', 'last_seen'],
+        badgeColumns: ['k8s.cluster.name'],
+      },
+    };
+    const { service } = createService([presented]);
+
+    const {
+      types: [type],
+    } = await service.listTypes();
+
+    expect(type).toMatchObject({
+      category: 'kubernetes',
+      icon: 'logoKubernetes',
+      nameFields: ['kubernetes.deployment.name', 'k8s.deployment.name'],
+      defaultColumns: ['kubernetes.namespace', 'available_replicas', 'last_seen'],
+      badgeColumns: ['k8s.cluster.name'],
+    });
+  });
+
+  it('leaves out the presentation fields a definition does not declare', async () => {
+    const { service } = createService([k8sDeploymentOtelAndAgentFixture]);
+
+    const {
+      types: [type],
+    } = await service.listTypes();
+
+    const { category, icon, nameFields, defaultColumns, badgeColumns } = type;
+    expect({ category, icon, nameFields, defaultColumns, badgeColumns }).toEqual({
+      category: undefined,
+      icon: undefined,
+      nameFields: undefined,
+      defaultColumns: undefined,
+      badgeColumns: undefined,
+    });
+  });
+
   it('omits definitions without a dynamic block', async () => {
     const { dynamic, ...withoutDynamic } = k8sNodeFixture;
     const { service } = createService([withoutDynamic, hostLikeFixture]);
