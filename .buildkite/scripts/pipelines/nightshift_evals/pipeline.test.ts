@@ -28,7 +28,6 @@ describe('nightshift_evals pipeline generation', () => {
     jest.resetAllMocks();
     jest.resetModules();
     process.env = { ...ORIGINAL_ENV };
-    delete process.env.EVAL_PREEMPTIBLE;
   });
 
   afterAll(() => {

@@ -13,7 +13,6 @@ import {
   NIGHTSHIFT_EVAL_LABEL,
   getNightshiftEvalSteps,
   getNightshiftEvalTriggerStep,
-  isPreemptibleEnabled,
   parseNightshiftTasks,
 } from './nightshift_evals_pipeline.ts';
 
@@ -27,7 +26,6 @@ const ORIGINAL_ENV = process.env;
 describe('nightshift_evals_pipeline', () => {
   beforeEach(() => {
     process.env = { ...ORIGINAL_ENV };
-    delete process.env.EVAL_PREEMPTIBLE;
   });
 
   afterAll(() => {
@@ -132,8 +130,8 @@ tasks:
       },
       other_task: { args: [] },
     };
-    const build = (preemptible = false) =>
-      parseSteps(getNightshiftEvalSteps({ tasks: TASKS, preemptible }));
+    const SHA = 'a'.repeat(40);
+    const build = (ref?: string) => parseSteps(getNightshiftEvalSteps({ tasks: TASKS, ref }));
 
     it('runs one step per task with the default model', () => {
       const [ki, other] = build();
@@ -155,17 +153,21 @@ tasks:
       expect(other.timeout_in_minutes).toBe(90);
     });
 
-    it('uses preemptible agents only when asked', () => {
-      const [plain] = build(false);
-      expect(plain.agents.preemptible).toBeUndefined();
-      expect(plain.retry.automatic).toEqual([{ exit_status: '*', limit: 1 }]);
+    it('runs on regular agents with no automatic retry', () => {
+      const [run] = build();
+      expect(run.agents.preemptible).toBeUndefined();
+      expect(run.retry).toBeUndefined();
+    });
 
-      const [spot] = build(true);
-      expect(spot.agents.preemptible).toBe(true);
-      expect(spot.retry.automatic).toEqual([
-        { exit_status: '-1', limit: 3 },
-        { exit_status: '*', limit: 1 },
-      ]);
+    it('pins every run step to the commit the plan step read', () => {
+      const [ki, other] = build(SHA);
+      expect(ki.env.NIGHTSHIFT_EVALS_REF).toBe(SHA);
+      expect(other.env.NIGHTSHIFT_EVALS_REF).toBe(SHA);
+      expect(build()[0].env.NIGHTSHIFT_EVALS_REF).toBeUndefined();
+    });
+
+    it.each(['main', 'abc123', ''])('rejects the ref %p, which is not a full SHA', (ref) => {
+      expect(() => getNightshiftEvalSteps({ tasks: TASKS, ref })).toThrow('full commit SHA');
     });
 
     it('posts the PR comment after every run, even when one failed', () => {
@@ -178,23 +180,6 @@ tasks:
       ]);
       expect(comment.allow_dependency_failure).toBe(true);
       expect(comment.env.NIGHTSHIFT_EVAL_TASKS).toBe('ki_feature_extraction,other_task');
-    });
-  });
-
-  describe('isPreemptibleEnabled', () => {
-    it.each([
-      [undefined, true],
-      ['1', true],
-      ['0', false],
-      ['false', false],
-      [' No ', false],
-    ])('EVAL_PREEMPTIBLE=%p -> %p', (value, expected) => {
-      if (value === undefined) {
-        delete process.env.EVAL_PREEMPTIBLE;
-      } else {
-        process.env.EVAL_PREEMPTIBLE = value;
-      }
-      expect(isPreemptibleEnabled()).toBe(expected);
     });
   });
 });

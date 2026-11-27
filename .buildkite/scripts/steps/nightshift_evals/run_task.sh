@@ -27,12 +27,14 @@ cleanup() {
   trap - EXIT
   # The config holds the results cluster API key and the key file holds GCS credentials.
   rm -rf "$TMP_DIR"
+  # The artifact globs are relative to the Kibana checkout, and the run moved into nightshift-evals.
+  cd "$KIBANA_DIR"
   if command -v buildkite-agent >/dev/null 2>&1; then
     buildkite-agent artifact upload "target/nightshift-evals/${NIGHTSHIFT_EVAL_TASK}-${connector_key}/**/*" || true
     summaries="$(find "$OUT_DIR" -name summary.md | sort)"
     if [[ -n "$summaries" ]]; then
       # shellcheck disable=SC2086
-      cat $summaries | buildkite-agent annotate \
+      { printf 'nightshift-evals at `%s`\n\n' "${NIGHTSHIFT_EVALS_SHA:-unknown}"; cat $summaries; } | buildkite-agent annotate \
         --style "$([[ $exit_status -eq 0 ]] && echo info || echo warning)" \
         --context "nightshift-evals-${NIGHTSHIFT_EVAL_TASK}-${connector_key}" || true
     fi
@@ -52,6 +54,7 @@ export PATH="$UV_INSTALL_DIR:$PATH"
 
 echo "--- Clone nightshift-evals"
 nightshift_clone
+NIGHTSHIFT_EVALS_SHA="$(git -C "$NIGHTSHIFT_EVALS_DIR" rev-parse HEAD)"
 
 cd "$NIGHTSHIFT_EVALS_DIR"
 
@@ -82,7 +85,8 @@ if [[ "$NIGHTSHIFT_EVAL_DOWNLOADS" != "[]" ]]; then
   unset CLOUDSDK_CONFIG
 fi
 
-# A config file keeps the results cluster key out of the environment of every child process.
+# nightshift-evals reads the results cluster key from this file, so the key is unset in the
+# environment of the run below.
 CONFIG_FILE="$TMP_DIR/config.yaml"
 (
   umask 077
@@ -97,7 +101,10 @@ CONFIG_FILE="$TMP_DIR/config.yaml"
 
 echo "--- Run ${NIGHTSHIFT_EVAL_TASK} (${connector_key})"
 read -r -a extra_args <<<"$NIGHTSHIFT_EVAL_ARGS"
-uv run eval "$NIGHTSHIFT_EVAL_TASK" \
+# The run, and the Kibana it starts from this checkout, do not need the results key, the whole Vault
+# config or the GCS credentials that setup_job_env.sh exports for KBN_EVALS=1 steps.
+env -u EVAL_KBN_API_KEY -u KBN_EVALS_CONFIG_B64 -u GCS_CREDENTIALS \
+  uv run eval "$NIGHTSHIFT_EVAL_TASK" \
   --config "$CONFIG_FILE" \
   --results-dir "$OUT_DIR/results" \
   --stack-logs "$OUT_DIR/logs" \

@@ -14,6 +14,7 @@ export const NIGHTSHIFT_EVAL_LABEL = 'ci:nightshift-evals';
 
 const DEFAULT_TIMEOUT_IN_MINUTES = 90;
 const TASK_NAME_PATTERN = /^[A-Za-z0-9_-]+$/;
+const COMMIT_SHA_PATTERN = /^[0-9a-f]{40}$/;
 
 export interface NightshiftEvalDownload {
   // A gs:// path, copied to `dest` relative to the nightshift-evals checkout.
@@ -105,28 +106,18 @@ const normalizeBuildkiteKey = (value: string): string =>
 
 const runStepKey = (task: string): string => `nightshift-evals-${normalizeBuildkiteKey(task)}`;
 
-const agentLines = (machineType: string, extra: string[] = []): string[] => [
+const agentLines = (machineType: string): string[] => [
   `    agents:`,
   `      image: family/kibana-ubuntu-2404`,
   `      imageProject: elastic-images-prod`,
   `      provider: gcp`,
   `      machineType: ${machineType}`,
-  ...extra,
 ];
 
 /**
  * YAML double-quoted scalar with `$` escaped to `$$` so Buildkite upload won't interpolate it.
  */
 const toYamlString = (value: string): string => JSON.stringify(value).replace(/\$/g, '$$$$');
-
-/**
- * Heavy steps run on preemptible (spot) agents unless `EVAL_PREEMPTIBLE` is `0`, `false` or `no`.
- * The PR pipeline sets `0`, so a lost worker does not silently re-run the experiment.
- */
-export const isPreemptibleEnabled = (): boolean => {
-  const raw = (process.env.EVAL_PREEMPTIBLE ?? '').trim().toLowerCase();
-  return !['0', 'false', 'no'].includes(raw);
-};
 
 /** Whether the PR labels (a comma-separated string) contain the start label. */
 const hasNightshiftEvalLabel = (githubPrLabels: string): boolean =>
@@ -162,11 +153,16 @@ export const getNightshiftEvalTriggerStep = (githubPrLabels: string): string | n
 /** One run step per task and one PR comment step after all of them, as a YAML fragment. */
 export const getNightshiftEvalSteps = ({
   tasks,
-  preemptible,
+  ref,
 }: {
   tasks: Record<string, NightshiftEvalTaskConfig>;
-  preemptible: boolean;
+  // The nightshift-evals commit the plan step read `ci/tasks.yaml` from. The run steps check out
+  // the same commit, so the args and the scoring code come from one revision.
+  ref?: string;
 }): string => {
+  if (ref !== undefined && !COMMIT_SHA_PATTERN.test(ref)) {
+    throw new Error(`The nightshift-evals ref must be a full commit SHA, got "${ref}"`);
+  }
   const taskNames = Object.keys(tasks);
 
   const runSteps = taskNames.map((task) => {
@@ -183,15 +179,11 @@ export const getNightshiftEvalSteps = ({
       `      NIGHTSHIFT_EVAL_CONNECTOR_ID: ""`,
       `      NIGHTSHIFT_EVAL_ARGS: ${toYamlString(args.join(' '))}`,
       `      NIGHTSHIFT_EVAL_DOWNLOADS: ${toYamlString(JSON.stringify(downloads))}`,
+      ...(ref ? [`      NIGHTSHIFT_EVALS_REF: ${toYamlString(ref)}`] : []),
       `    timeout_in_minutes: ${timeoutMinutes}`,
-      ...agentLines('n2-standard-8', preemptible ? [`      preemptible: true`] : []),
-      `    retry:`,
-      `      automatic:`,
-      // Preemptible only: retry lost workers (-1). Dropped otherwise so a lost
-      // worker/timeout doesn't silently re-run the whole task.
-      ...(preemptible ? [`        - exit_status: '-1'`, `          limit: 3`] : []),
-      `        - exit_status: '*'`,
-      `          limit: 1`,
+      // No retry and no spot agents: a failed or lost run would otherwise re-run for up to the
+      // timeout again, spend the tokens twice, and leave partial scores in the results cluster.
+      ...agentLines('n2-standard-8'),
     ].join('\n');
   });
 

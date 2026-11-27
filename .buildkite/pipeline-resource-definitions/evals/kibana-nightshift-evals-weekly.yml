@@ -3,7 +3,7 @@ apiVersion: backstage.io/v1alpha1
 kind: Resource
 metadata:
   name: bk-kibana-nightshift-evals-weekly
-  description: 'Runs the hardcoded nightshift-evals experiment weekly'
+  description: 'Runs the nightshift-evals tasks listed in its ci/tasks.yaml weekly'
   links:
     - url: 'https://buildkite.com/elastic/kibana-nightshift-evals-weekly'
       title: Pipeline link
@@ -16,7 +16,7 @@ spec:
     kind: Pipeline
     metadata:
       name: 'Kibana / Nightshift Evals / Weekly'
-      description: 'Runs the hardcoded nightshift-evals experiment on a weekly schedule'
+      description: 'Runs the nightshift-evals tasks listed in its ci/tasks.yaml on a weekly schedule'
     spec:
       env:
         SLACK_NOTIFICATIONS_CHANNEL: '#kbn-evals-notifications'

@@ -10,6 +10,11 @@ source .buildkite/scripts/steps/nightshift_evals/common.sh
 
 nightshift_clone
 
+# Resolve the revision once. The run steps check out this commit, so the args and downloads
+# read below and the code that scores the run come from the same revision.
+NIGHTSHIFT_EVALS_REF="$(git -C "$NIGHTSHIFT_EVALS_DIR" rev-parse HEAD)"
+export NIGHTSHIFT_EVALS_REF
+
 PLAN_FILE="$(mktemp -t nightshift-evals-plan.XXXXXX.yml)"
 trap 'rm -f "$PLAN_FILE"' EXIT
 

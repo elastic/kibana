@@ -19,7 +19,6 @@ import Fs from 'fs';
 import Path from 'path';
 import {
   getNightshiftEvalSteps,
-  isPreemptibleEnabled,
   parseNightshiftTasks,
 } from '../../../pipelines/nightshift_evals/nightshift_evals_pipeline.ts';
 
@@ -33,8 +32,9 @@ try {
   const tasks = parseNightshiftTasks(
     Fs.readFileSync(Path.join(evalsDir, 'ci', 'tasks.yaml'), 'utf-8')
   );
-  console.log(
-    ['steps:', getNightshiftEvalSteps({ tasks, preemptible: isPreemptibleEnabled() })].join('\n')
+  // The pinned commit, set by plan_steps.sh. Stdout is the uploaded YAML, so no `console.log`.
+  process.stdout.write(
+    `steps:\n${getNightshiftEvalSteps({ tasks, ref: process.env.NIGHTSHIFT_EVALS_REF })}\n`
   );
 } catch (error) {
   console.error(error instanceof Error ? error.message : String(error));
