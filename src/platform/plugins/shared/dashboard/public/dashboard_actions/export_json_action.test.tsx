@@ -129,6 +129,17 @@ describe('Export JSON action', () => {
       expect(embeddableWithLibrary.serializeState).not.toHaveBeenCalled();
     });
 
+    it('marks a linked panel that cannot be unlinked as by reference', async () => {
+      await action.execute({
+        embeddable: { ...embeddableWithLibrary, savedObjectId$: new BehaviorSubject('id') },
+      });
+
+      expect(await renderFlyoutContent()).toMatchObject({
+        isByReference: true,
+        canExportByValue: false,
+      });
+    });
+
     it('uses serializeState when embeddable does not support library transforms', async () => {
       await action.execute(context);
       const { getExportJson } = await renderFlyoutContent();

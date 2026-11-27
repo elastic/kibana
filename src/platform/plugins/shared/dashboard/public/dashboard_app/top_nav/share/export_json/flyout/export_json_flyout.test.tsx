@@ -69,6 +69,7 @@ describe('DashboardPanelExportJsonFlyout', () => {
         closeFlyout={jest.fn()}
         getExportJson={getExportJson}
         isByReference
+        canExportByValue
         sanitizeState={sanitizeState}
         titleId="dashboardPanelExportJsonTitle"
       />
@@ -97,5 +98,23 @@ describe('DashboardPanelExportJsonFlyout', () => {
       content: '{}',
       type: 'application/json',
     });
+  });
+
+  it('shows the library notice without the switch when a linked panel cannot be exported by value', () => {
+    renderWithI18n(
+      <DashboardPanelExportJsonFlyout
+        title="Panel"
+        objectType="search"
+        closeFlyout={jest.fn()}
+        getExportJson={jest.fn(() => ({}))}
+        isByReference
+        canExportByValue={false}
+        sanitizeState={jest.fn(async (state: object) => ({ data: state, warnings: [] }))}
+        titleId="dashboardPanelExportJsonTitle"
+      />
+    );
+
+    expect(screen.getByText(/This panel is linked to the library/)).toBeInTheDocument();
+    expect(screen.queryByRole('switch')).not.toBeInTheDocument();
   });
 });
