@@ -112,7 +112,7 @@ class TutorialDirectoryUi extends React.Component<
     this._isMounted = true;
     this.setBreadcrumbs();
     // Registered app titles name the page the back link returns to.
-    this.appsSubscription = getServices().application.applications$?.subscribe((apps) => {
+    this.appsSubscription = getServices().application.applications$.subscribe((apps) => {
       const appTitles = new Map<string, string>();
       apps.forEach(({ id, title }) => appTitles.set(id, title));
       this.setState({ appTitles });
@@ -183,11 +183,7 @@ class TutorialDirectoryUi extends React.Component<
       const tabExists = this.tabs.some((tab) => tab.id === newTab);
       if (!tabExists) {
         // If the tab does not exist, redirect to the default tab
-        getServices().history.push(
-          `#/tutorial_directory/${SAMPLE_DATA_TAB_ID}${getHashQuery(
-            getServices().history.location.hash
-          )}`
-        );
+        this.pushTab(SAMPLE_DATA_TAB_ID);
       } else if (newTab !== this.state.selectedTabId) {
         this.setState({
           selectedTabId: newTab,
@@ -237,11 +233,13 @@ class TutorialDirectoryUi extends React.Component<
     this.setState({
       selectedTabId: id,
     });
-    // Update URL to reflect the selected tab
-    // Keep the query so the return params survive tab changes.
-    getServices().history.push(
-      `#/tutorial_directory/${id}${getHashQuery(getServices().history.location.hash)}`
-    );
+    this.pushTab(id);
+  };
+
+  // Updates the URL to reflect the tab, keeping the query so the return params survive tab changes.
+  pushTab = (id: string) => {
+    const { history } = getServices();
+    history.push(`#/tutorial_directory/${id}${getHashQuery(history.location.hash)}`);
   };
 
   getTabs = (): AppHeaderTab[] => {
