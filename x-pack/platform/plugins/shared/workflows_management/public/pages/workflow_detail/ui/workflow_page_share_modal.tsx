@@ -28,6 +28,8 @@ import {
   EuiSwitch,
   EuiText,
   EuiToolTip,
+  useEuiFontSize,
+  useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
@@ -59,7 +61,7 @@ const ROTATE_TITLE = i18n.translate('workflows.pageShare.rotate', {
   defaultMessage: 'Rotate link',
 });
 const ROTATE_DESCRIPTION = i18n.translate('workflows.pageShare.rotateDescription', {
-  defaultMessage: 'Replace the current link. The old one stops working immediately.',
+  defaultMessage: 'Get a new link. The current one stops working at once.',
 });
 const ROTATE_BUTTON = i18n.translate('workflows.pageShare.rotateButton', {
   defaultMessage: 'Rotate',
@@ -80,8 +82,7 @@ const CONFIRM = {
       defaultMessage: 'Rotate the link?',
     }),
     text: i18n.translate('workflows.pageShare.rotateConfirmText', {
-      defaultMessage:
-        'The current link stops working at once. Copy the new link and share it again.',
+      defaultMessage: 'The current link stops working. Share the new one again.',
     }),
     confirm: ROTATE_BUTTON,
     iconType: 'refresh',
@@ -92,8 +93,7 @@ const CONFIRM = {
       defaultMessage: 'Unpublish the page?',
     }),
     text: i18n.translate('workflows.pageShare.unpublishConfirmText', {
-      defaultMessage:
-        'The link stops working. Publishing again brings back the same link, so rotate it if it leaked.',
+      defaultMessage: 'Publishing again brings back the same link. Rotate it if it leaked.',
     }),
     confirm: UNPUBLISH,
     iconType: 'linkSlash',
@@ -112,30 +112,41 @@ const ShareActionRow = ({
   description: string;
   actions: React.ReactNode;
   'data-test-subj'?: string;
-}) => (
-  <EuiPanel
-    hasShadow={false}
-    hasBorder={false}
-    color="transparent"
-    borderRadius="none"
-    paddingSize="m"
-    data-test-subj={dataTestSubj}
-  >
-    <EuiFlexGroup alignItems="center" gutterSize="l" responsive={false}>
-      <EuiFlexItem>
-        <EuiText size="s">
-          <p>
-            <strong>{title}</strong>
-          </p>
-        </EuiText>
-        <EuiText size="xs" color="subdued">
-          <p>{description}</p>
-        </EuiText>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>{actions}</EuiFlexItem>
-    </EuiFlexGroup>
-  </EuiPanel>
-);
+}) => {
+  const { euiTheme } = useEuiTheme();
+  const { lineHeight } = useEuiFontSize('xs');
+  return (
+    <EuiPanel
+      hasShadow={false}
+      hasBorder={false}
+      color="transparent"
+      borderRadius="none"
+      paddingSize="m"
+      data-test-subj={dataTestSubj}
+    >
+      <EuiFlexGroup alignItems="center" gutterSize="l" responsive={false}>
+        <EuiFlexItem>
+          <EuiText size="s">
+            <p>
+              <strong>{title}</strong>
+            </p>
+          </EuiText>
+          {/* Two lines for every description, so confirming does not change the row height. */}
+          <EuiText size="xs" color="subdued" css={{ minBlockSize: `calc(${lineHeight} * 2)` }}>
+            <p>{description}</p>
+          </EuiText>
+        </EuiFlexItem>
+        {/* Wide enough for Cancel and the confirm button, so the text does not reflow. */}
+        <EuiFlexItem
+          grow={false}
+          css={{ minInlineSize: euiTheme.base * 13, alignItems: 'flex-end' }}
+        >
+          {actions}
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiPanel>
+  );
+};
 
 /** Confirm and cancel, shown in place of the row's action button. */
 const ConfirmActions = ({
@@ -183,30 +194,19 @@ const getErrorMessage = (error: unknown): string =>
     ? error.message
     : String(error);
 
-/** The risk, with a link to `settings.run_as` instead of the raw account id. */
-const ExposureWarning = ({ onShowServiceAccount }: { onShowServiceAccount: () => void }) => (
+/** The risk, naming the account submissions run as. */
+const ExposureWarning = ({ serviceAccountId }: { serviceAccountId?: string }) => (
   <FormattedMessage
     id="workflows.pageShare.exposureWarning"
-    defaultMessage="Anyone with this link can run this workflow as its <account>service account</account>. Treat the link as a password and rotate it if it leaks."
-    values={{
-      account: (chunks: React.ReactNode) => (
-        <EuiButtonEmpty
-          onClick={onShowServiceAccount}
-          flush="both"
-          size="xs"
-          data-test-subj="workflowPageShareServiceAccount"
-        >
-          {chunks}
-        </EuiButtonEmpty>
-      ),
-    }}
+    defaultMessage="Anyone with this link can run this workflow as {account}. Treat the link as a password and rotate it if it leaks."
+    values={{ account: <strong>{serviceAccountId}</strong> }}
   />
 );
 
 export interface WorkflowPageShareModalProps {
   workflowId: string;
   pageId: string;
-  /** The `settings.run_as` of the saved workflow. Blockers name it; the lead links to the setting. */
+  /** The `settings.run_as` of the saved workflow, so the author knows who submissions run as. */
   serviceAccountId?: string;
   onClose: () => void;
 }
@@ -396,7 +396,7 @@ export const WorkflowPageShareModal = ({
                 id="workflows.pageShare.notPublished"
                 defaultMessage="Publish the page to get a link."
               />{' '}
-              <ExposureWarning onShowServiceAccount={showServiceAccount} />
+              <ExposureWarning serviceAccountId={serviceAccountId} />
             </p>
           </EuiText>
         </>
@@ -407,7 +407,7 @@ export const WorkflowPageShareModal = ({
         {blockersCallout || (
           <EuiText size="s">
             <p>
-              <ExposureWarning onShowServiceAccount={showServiceAccount} />
+              <ExposureWarning serviceAccountId={serviceAccountId} />
             </p>
           </EuiText>
         )}

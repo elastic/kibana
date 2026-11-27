@@ -61,14 +61,11 @@ describe('WorkflowPageShareModal', () => {
     expect(screen.getByTestId<HTMLInputElement>('workflowPageShareUrl').value).toBe(
       `${window.location.origin}/s/team/pages/wf-1/default/k/secret-1`
     );
-    expect(screen.getByTestId('workflowPageShareServiceAccount')).toHaveTextContent(
-      'service account'
-    );
     expect(screen.getByText(/Treat the link as a password/)).toBeInTheDocument();
-    expect(screen.queryByText('kibana/pages')).not.toBeInTheDocument();
+    expect(screen.getByText('kibana/pages')).toBeInTheDocument();
     expect(screen.getByText('Rotate link')).toBeInTheDocument();
     expect(
-      screen.getByText('Replace the current link. The old one stops working immediately.')
+      screen.getByText('Get a new link. The current one stops working at once.')
     ).toBeInTheDocument();
     expect(
       screen.getByText('The link stops working. Publishing again brings back the same link.')
@@ -137,10 +134,10 @@ describe('WorkflowPageShareModal', () => {
     fireEvent.click(await screen.findByTestId('workflowPageShareRotate'));
 
     expect(screen.getByTestId('workflowPageShareConfirm-rotate')).toHaveTextContent(
-      'The current link stops working at once.'
+      'The current link stops working. Share the new one again.'
     );
     expect(
-      screen.queryByText('Replace the current link. The old one stops working immediately.')
+      screen.queryByText('Get a new link. The current one stops working at once.')
     ).not.toBeInTheDocument();
     expect(screen.queryByTestId('workflowPageShareRotate')).not.toBeInTheDocument();
     expect(services.http.post).not.toHaveBeenCalled();
@@ -203,7 +200,7 @@ describe('WorkflowPageShareModal', () => {
     fireEvent.click(await screen.findByTestId('workflowPageShareUnpublish'));
 
     expect(screen.getByTestId('workflowPageShareConfirm-unpublish')).toHaveTextContent(
-      'so rotate it if it leaked'
+      'Rotate it if it leaked.'
     );
     expect(screen.queryByTestId('workflowPageShareUnpublish')).not.toBeInTheDocument();
     fireEvent.click(screen.getByText('Cancel'));
