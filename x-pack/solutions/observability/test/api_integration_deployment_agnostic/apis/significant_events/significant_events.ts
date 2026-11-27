@@ -63,6 +63,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           failure_store: { inherit: {} },
         },
       };
+      // Deleting a source cascades to its queries and rules, so a failed body must not own that cleanup.
+      const createdSourceIds: string[] = [];
 
       beforeEach(async () => {
         await putStream(apiClient, STREAM_NAME, {
@@ -72,6 +74,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       afterEach(async () => {
+        for (const sourceId of createdSourceIds.splice(0)) {
+          await deleteTestSource(roleScopedSupertest, sourceId);
+        }
         await deleteStream(apiClient, STREAM_NAME);
       });
 
@@ -137,6 +142,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           'Wired parent query source',
           `FROM ${STREAM_NAME}`
         );
+        createdSourceIds.push(parentSource.id);
         const parentQuery = `FROM ${parentSource.viewName} | WHERE KQL("message:\\"irrelevant\\"")`;
         await bulkQueries(apiClient, parentSource.id, [
           {
@@ -185,6 +191,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           'Wired child query source',
           'FROM logs.otel.queries-test.child'
         );
+        createdSourceIds.push(childSource.id);
         const childQuery = `FROM ${childSource.viewName} | WHERE KQL("message:\\"irrelevant\\"")`;
         await bulkQueries(apiClient, childSource.id, [
           {
@@ -207,6 +214,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           'Wired grandchild query source',
           'FROM logs.otel.queries-test.child.first'
         );
+        createdSourceIds.push(grandchildSource.id);
         const grandchildQuery = `FROM ${grandchildSource.viewName} | WHERE KQL("message:\\"irrelevant\\"")`;
         await bulkQueries(apiClient, grandchildSource.id, [
           {
@@ -249,10 +257,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             item.metadata.name === 'should not be deleted (match count)'
         );
         expect(parentRules).to.have.length(1);
-
-        await deleteTestSource(roleScopedSupertest, parentSource.id);
-        await deleteTestSource(roleScopedSupertest, childSource.id);
-        await deleteTestSource(roleScopedSupertest, grandchildSource.id);
       });
     });
 
