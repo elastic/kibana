@@ -11,7 +11,7 @@ import { DataStreamDataClient } from './data_stream_data_client';
 import { DataStreamMetadataManager } from './data_stream_metadata_manager';
 import { DocumentVersionManager } from './document_version_manager';
 import { createRetryingEsClient } from '../../../../lib/create_retrying_es_client';
-import type { DataClient, EntityDataClient } from '../../types';
+import type { DataClient, EntityLifecycle } from '../../types';
 
 export interface DataStreamEntityDefinition {
   name: string;
@@ -24,7 +24,7 @@ export interface DataStreamEntityDefinition {
   mappings: MappingsDefinition;
 }
 
-export interface DataStreamEntityDataClientDeps<TDoc extends { id: string }> {
+export interface DataStreamEntityLifecycleDeps<TDoc extends { id: string }> {
   logger: Logger;
   dataRetention: string;
   definition: DataStreamEntityDefinition;
@@ -32,14 +32,14 @@ export interface DataStreamEntityDataClientDeps<TDoc extends { id: string }> {
   additionalIndexesToQuery: string[];
 }
 
-/** One data-stream execution entity. Setup registers the stream; start initializes it. */
-export class DataStreamEntityDataClient<TDoc extends { id: string }>
-  implements EntityDataClient<DataClient<TDoc>>
+/** Lifecycle for one data-stream execution entity. Setup registers the stream; start initializes it. */
+export class DataStreamEntityLifecycle<TDoc extends { id: string }>
+  implements EntityLifecycle<DataClient<TDoc>>
 {
   private esClient: ElasticsearchClient | undefined;
   private metadataManager: DataStreamMetadataManager | undefined;
 
-  constructor(private readonly deps: DataStreamEntityDataClientDeps<TDoc>) {}
+  constructor(private readonly deps: DataStreamEntityLifecycleDeps<TDoc>) {}
 
   async initSetup(coreSetup: CoreSetup): Promise<void> {
     const { definition, dataRetention } = this.deps;
@@ -78,7 +78,7 @@ export class DataStreamEntityDataClient<TDoc extends { id: string }>
     const { esClient, metadataManager } = this;
     if (!esClient || !metadataManager) {
       throw new Error(
-        'DataStreamEntityDataClient.initStart() must complete before creating clients'
+        'DataStreamEntityLifecycle.initStart() must complete before creating clients'
       );
     }
 

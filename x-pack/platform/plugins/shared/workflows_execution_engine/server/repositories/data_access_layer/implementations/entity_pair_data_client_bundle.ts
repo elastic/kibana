@@ -11,8 +11,8 @@ import {
   STEP_EXECUTIONS_DATA_STREAM_DEFINITION,
   WORKFLOW_EXECUTIONS_DATA_STREAM_DEFINITION,
 } from './data_stream/data_stream_definitions';
-import { DataStreamEntityDataClient } from './data_stream/data_stream_entity_data_client';
-import { PlainIndexEntityDataClient } from './plain_index/plain_index_entity_data_client';
+import { DataStreamEntityLifecycle } from './data_stream/data_stream_entity_lifecycle';
+import { PlainIndexEntityLifecycle } from './plain_index/plain_index_entity_lifecycle';
 import {
   WORKFLOWS_EXECUTIONS_INDEX,
   WORKFLOWS_STEP_EXECUTIONS_INDEX,
@@ -21,7 +21,7 @@ import { WORKFLOWS_STEP_EXECUTIONS_INDEX_MAPPINGS } from '../mappings/step_execu
 import { WORKFLOWS_EXECUTIONS_INDEX_MAPPINGS } from '../mappings/workflow_executions_mappings';
 import type {
   DataClientBundle,
-  EntityDataClient,
+  EntityLifecycle,
   ExecutionStorageSource,
   StepExecutionsDataClient,
   WorkflowExecutionsDataClient,
@@ -33,8 +33,8 @@ export interface EntityPairDataClientBundleDeps {
 }
 
 interface EntityPair {
-  workflow: EntityDataClient<WorkflowExecutionsDataClient>;
-  step: EntityDataClient<StepExecutionsDataClient>;
+  workflow: EntityLifecycle<WorkflowExecutionsDataClient>;
+  step: EntityLifecycle<StepExecutionsDataClient>;
 }
 
 const createEntityPair = (
@@ -45,12 +45,12 @@ const createEntityPair = (
   switch (source) {
     case 'plain_index':
       return {
-        workflow: new PlainIndexEntityDataClient<EsWorkflowExecution>({
+        workflow: new PlainIndexEntityLifecycle<EsWorkflowExecution>({
           logger,
           indexName: WORKFLOWS_EXECUTIONS_INDEX,
           mappings: WORKFLOWS_EXECUTIONS_INDEX_MAPPINGS,
         }),
-        step: new PlainIndexEntityDataClient<EsWorkflowStepExecution>({
+        step: new PlainIndexEntityLifecycle<EsWorkflowStepExecution>({
           logger,
           indexName: WORKFLOWS_STEP_EXECUTIONS_INDEX,
           mappings: WORKFLOWS_STEP_EXECUTIONS_INDEX_MAPPINGS,
@@ -58,14 +58,14 @@ const createEntityPair = (
       };
     case 'data_stream':
       return {
-        workflow: new DataStreamEntityDataClient<EsWorkflowExecution>({
+        workflow: new DataStreamEntityLifecycle<EsWorkflowExecution>({
           logger,
           dataRetention,
           definition: WORKFLOW_EXECUTIONS_DATA_STREAM_DEFINITION,
           dateField: 'createdAt',
           additionalIndexesToQuery: ['.workflows-executions'],
         }),
-        step: new DataStreamEntityDataClient<EsWorkflowStepExecution>({
+        step: new DataStreamEntityLifecycle<EsWorkflowStepExecution>({
           logger,
           dataRetention,
           definition: STEP_EXECUTIONS_DATA_STREAM_DEFINITION,
@@ -82,8 +82,8 @@ const createEntityPair = (
 
 /** Workflow and step entity clients for one storage source. */
 export class EntityPairDataClientBundle implements DataClientBundle {
-  private readonly workflow: EntityDataClient<WorkflowExecutionsDataClient>;
-  private readonly step: EntityDataClient<StepExecutionsDataClient>;
+  private readonly workflow: EntityLifecycle<WorkflowExecutionsDataClient>;
+  private readonly step: EntityLifecycle<StepExecutionsDataClient>;
 
   constructor(source: ExecutionStorageSource, deps: EntityPairDataClientBundleDeps) {
     const pair = createEntityPair(source, deps);

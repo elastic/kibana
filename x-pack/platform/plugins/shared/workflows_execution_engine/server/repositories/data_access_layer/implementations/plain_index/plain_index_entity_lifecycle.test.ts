@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-
 import { coreMock, elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 
-import { PlainIndexEntityDataClient } from './plain_index_entity_data_client';
+import { PlainIndexEntityLifecycle } from './plain_index_entity_lifecycle';
 import {
   WORKFLOWS_EXECUTIONS_INDEX,
   WORKFLOWS_STEP_EXECUTIONS_INDEX,
@@ -17,7 +16,7 @@ import {
 import { WORKFLOWS_STEP_EXECUTIONS_INDEX_MAPPINGS } from '../../mappings/step_executions_mappings';
 import { WORKFLOWS_EXECUTIONS_INDEX_MAPPINGS } from '../../mappings/workflow_executions_mappings';
 
-describe('PlainIndexEntityDataClient', () => {
+describe('PlainIndexEntityLifecycle', () => {
   it('creates workflow and step clients backed by their system indices', async () => {
     const esClient = elasticsearchServiceMock.createElasticsearchClient();
     esClient.search.mockResolvedValue({ hits: { hits: [] } } as never);
@@ -32,12 +31,12 @@ describe('PlainIndexEntityDataClient', () => {
     });
 
     const logger = loggerMock.create();
-    const workflow = new PlainIndexEntityDataClient({
+    const workflow = new PlainIndexEntityLifecycle({
       logger,
       indexName: WORKFLOWS_EXECUTIONS_INDEX,
       mappings: WORKFLOWS_EXECUTIONS_INDEX_MAPPINGS,
     });
-    const step = new PlainIndexEntityDataClient({
+    const step = new PlainIndexEntityLifecycle({
       logger,
       indexName: WORKFLOWS_STEP_EXECUTIONS_INDEX,
       mappings: WORKFLOWS_STEP_EXECUTIONS_INDEX_MAPPINGS,

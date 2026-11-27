@@ -110,8 +110,8 @@ export type DataClient<TExecution extends { id: string }> = ReadonlyDataClient<T
 export type WorkflowExecutionsDataClient = DataClient<EsWorkflowExecution>;
 export type StepExecutionsDataClient = DataClient<EsWorkflowStepExecution>;
 
-/** Lifecycle and factory for one execution entity (workflow or step). */
-export interface EntityDataClient<TClient> {
+/** Lifecycle and factory for one execution entity (workflow or step). Same role as `ExecutionsIoLifecycle`. */
+export interface EntityLifecycle<TClient> {
   initSetup: (coreSetup: CoreSetup) => Promise<void>;
   initStart: (coreStart: CoreStart) => Promise<void>;
   stop: () => Promise<void>;

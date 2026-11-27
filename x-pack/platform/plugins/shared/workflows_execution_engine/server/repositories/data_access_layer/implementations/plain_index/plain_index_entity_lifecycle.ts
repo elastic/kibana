@@ -14,24 +14,24 @@ import {
 } from './helpers';
 import { PlainIndexDataClient } from './plain_index_data_client';
 import { createRetryingEsClient } from '../../../../lib/create_retrying_es_client';
-import type { DataClient, EntityDataClient } from '../../types';
+import type { DataClient, EntityLifecycle } from '../../types';
 
 const UNKNOWN_RESOURCE_TIMEOUT_MS = 20 * 60 * 1000;
 
-export interface PlainIndexEntityDataClientDeps<TDoc extends { id: string }> {
+export interface PlainIndexEntityLifecycleDeps<TDoc extends { id: string }> {
   logger: Logger;
   indexName: string;
   mappings: MappingTypeMapping;
 }
 
-/** One plain-index execution entity. Index creation runs at start; setup has nothing to register. */
-export class PlainIndexEntityDataClient<TDoc extends { id: string }>
-  implements EntityDataClient<DataClient<TDoc>>
+/** Lifecycle for one plain-index execution entity. Index creation runs at start; setup has nothing to register. */
+export class PlainIndexEntityLifecycle<TDoc extends { id: string }>
+  implements EntityLifecycle<DataClient<TDoc>>
 {
   private esClient: ElasticsearchClient | undefined;
   private stopped = false;
 
-  constructor(private readonly deps: PlainIndexEntityDataClientDeps<TDoc>) {}
+  constructor(private readonly deps: PlainIndexEntityLifecycleDeps<TDoc>) {}
 
   initSetup(_coreSetup: CoreSetup): Promise<void> {
     return Promise.resolve();
@@ -52,7 +52,7 @@ export class PlainIndexEntityDataClient<TDoc extends { id: string }>
   createClient(): DataClient<TDoc> {
     if (!this.esClient) {
       throw new Error(
-        'PlainIndexEntityDataClient.initStart() must complete before creating clients'
+        'PlainIndexEntityLifecycle.initStart() must complete before creating clients'
       );
     }
 
