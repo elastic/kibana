@@ -93,18 +93,15 @@ export {
 } from './flyout/compose_discover/compose_discover_form/use_action_policy_connector_types';
 
 // Threshold rule-builder ES|QL parser + types — consumed by the episode trend chart
-export { parseThresholdEsql } from './flyout/compose_discover/rule_builder/threshold/parse_esql';
-export {
-  Aggregation,
-  Comparator,
-} from './flyout/compose_discover/rule_builder/threshold/form_types';
+export { parseThresholdEsql } from '@kbn/alerting-v2-rule-builders';
+export { Aggregation, Comparator } from '@kbn/alerting-v2-rule-builders';
 export type {
   ThresholdFormValues,
   StatDefinition,
   EvaluationDefinition,
   AlertCondition,
   ConditionOperator,
-} from './flyout/compose_discover/rule_builder/threshold/form_types';
+} from '@kbn/alerting-v2-rule-builders';
 
 export {
   resolveDashboardsByIds,

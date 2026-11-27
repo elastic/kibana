@@ -25,7 +25,7 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import type { AlertEventSeverity } from '@kbn/alerting-v2-schemas';
-import type { AlertCondition, SeverityConfig, SeverityLevel } from './form_types';
+import type { AlertCondition, SeverityConfig, SeverityLevel } from '@kbn/alerting-v2-rule-builders';
 import {
   compareSeverity,
   createDefaultSeverityConfig,
@@ -36,7 +36,7 @@ import {
   nextSeverityLevel,
   nextSeverityThreshold,
   MAX_SEVERITY_LEVELS,
-} from './form_types';
+} from '@kbn/alerting-v2-rule-builders';
 import { SEVERITY_LEVEL_OPTIONS, SEVERITY_VALIDATION_ERRORS } from './translations';
 
 interface SeverityValidationCalloutProps {

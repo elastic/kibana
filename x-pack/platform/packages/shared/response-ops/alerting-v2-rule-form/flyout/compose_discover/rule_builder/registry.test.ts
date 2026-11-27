@@ -11,7 +11,7 @@ import {
   Comparator,
   DEFAULT_THRESHOLD_FORM_VALUES,
   type ThresholdFormValues,
-} from './threshold/form_types';
+} from '@kbn/alerting-v2-rule-builders';
 import type { ComposeDiscoverState } from '../types';
 
 const STATE = {} as ComposeDiscoverState;

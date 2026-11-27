@@ -14,7 +14,7 @@ import {
   getSeverityValidationError,
   type AlertCondition,
   type SeverityConfig,
-} from './form_types';
+} from '@kbn/alerting-v2-rule-builders';
 
 const condition = (overrides: Partial<AlertCondition> = {}): AlertCondition => ({
   id: 'c1',

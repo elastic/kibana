@@ -11,9 +11,13 @@ import { FormProvider, useForm, useFormContext, useFormState } from 'react-hook-
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { BuilderRecoveryForm } from './recovery_condition_step';
 import { BuilderStateProvider } from '../builder_state_context';
-import type { ThresholdFormValues } from './form_types';
-import { Aggregation, Comparator, DEFAULT_THRESHOLD_FORM_VALUES } from './form_types';
-import { buildRecoveryBlock } from './build_esql';
+import type { ThresholdFormValues } from '@kbn/alerting-v2-rule-builders';
+import {
+  Aggregation,
+  Comparator,
+  DEFAULT_THRESHOLD_FORM_VALUES,
+} from '@kbn/alerting-v2-rule-builders';
+import { buildRecoveryBlock } from '@kbn/alerting-v2-rule-builders';
 import type { FormValues } from '../../../../form/types';
 import type { ComposeDiscoverAction } from '../../types';
 import { createInitialState } from '../../use_compose_discover_state';
