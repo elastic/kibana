@@ -75,21 +75,21 @@ interface Props {
   history: WorkflowExecutionHistoryModel[];
 }
 
-export const WorkflowTriggersAndSteps = ({ triggers, steps, history }: Props) => {
+export const WorkflowTriggersAndSteps = React.memo(({ triggers, steps, history }: Props) => {
   const { euiTheme } = useEuiTheme();
   const containerRef = useRef<HTMLDivElement>(null);
   const [containerWidth, setContainerWidth] = useState(0);
   const getFormattedDateTime = useGetFormattedDateTime();
 
+  // The RRule evaluation walks from `dtstart`, so compute it once per input change, not per render.
+  const scheduledNextExecution = useMemo(() => {
+    const nextExecutionTime = getWorkflowNextExecutionTime(triggers, history);
+    return nextExecutionTime ? getFormattedDateTime(nextExecutionTime) : undefined;
+  }, [triggers, history, getFormattedDateTime]);
+
   const getNextExecution = useCallback(
-    (triggerType: string) => {
-      if (triggerType !== 'scheduled') {
-        return undefined;
-      }
-      const nextExecutionTime = getWorkflowNextExecutionTime(triggers, history);
-      return nextExecutionTime ? getFormattedDateTime(nextExecutionTime) : undefined;
-    },
-    [triggers, history, getFormattedDateTime]
+    (triggerType: string) => (triggerType === 'scheduled' ? scheduledNextExecution : undefined),
+    [scheduledNextExecution]
   );
 
   const uniqueStepBaseTypes = useMemo(() => {
@@ -237,4 +237,5 @@ export const WorkflowTriggersAndSteps = ({ triggers, steps, history }: Props) =>
       </EuiFlexGroup>
     </div>
   );
-};
+});
+WorkflowTriggersAndSteps.displayName = 'WorkflowTriggersAndSteps';
