@@ -36,6 +36,8 @@ export const AWS_ONBOARDING_PACKAGE_NAME = 'aws';
 // hiding tiles that are included in the AWS onboarding flow: https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/shared/ingest_hub/public/onboarding/aws_service_matrix.ts#L188
 export const HIDDEN_TILE_NAMES = new Set([
   ...AWS_ONBOARDING_PACKAGE_NAMES,
+  // Input package `aws_otel` requires; the flow does not deploy it, but its tiles stay hidden too.
+  'aws_cloudwatch_input_otel',
   // Content packages of the flow's services.
   'aws_cloudtrail_otel',
   'aws_ec2_otel',

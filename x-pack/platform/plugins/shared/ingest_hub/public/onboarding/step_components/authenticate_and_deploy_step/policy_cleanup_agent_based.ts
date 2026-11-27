@@ -15,7 +15,13 @@ import {
 import { getEffectiveNamespace } from '../../common/effective_namespace';
 import { getDefaultEnabledDataStreams } from '../../aws_service_matrix';
 import type { ServiceVars } from '../service_settings_step/use_service_settings';
-import { buildPackageInputs, buildPackageVars, getPackageVarNames } from './package_inputs';
+import {
+  buildPackageInputs,
+  applyInputVars,
+  buildPackageVars,
+  disableUnselectedStreams,
+  getPackageVarNames,
+} from './package_inputs';
 import {
   detectSecretRefs,
   fetchPackagePolicySecretRefs,
@@ -174,6 +180,7 @@ export async function updateAgentBasedPolicy(
   // send an empty vars block that clears AWS credentials already stored as Fleet secrets.
   type ExistingVarValue = string | { isSecretRef: boolean; id: string };
   const existingVarValues: Record<string, ExistingVarValue> = {};
+  const existingInputVarValues = new Map<string, Record<string, ExistingVarValue>>();
   let existingSecretRefs: ExistingSecretRefs | undefined;
   try {
     const existing = await sendGetOnePackagePolicy(policyId);
@@ -183,6 +190,33 @@ export async function updateAgentBasedPolicy(
     existingVersion = existing.data?.item?.package?.version;
     existingPolicyIds = existing.data?.item?.policy_ids;
     existingSecretRefs = detectSecretRefs(existing.data?.item);
+    // Input-level vars (composable packages like aws_otel keep region and credentials there),
+    // keyed like the request inputs, for the same merge as the package-level vars below.
+    for (const input of (existing.data?.item?.inputs ?? []) as Array<{
+      type: string;
+      policy_template?: string;
+      vars?: Record<string, { value: unknown }>;
+    }>) {
+      const values: Record<string, ExistingVarValue> = {};
+      for (const [name, entry] of Object.entries(input.vars ?? {})) {
+        const v = entry?.value;
+        if (typeof v === 'string') {
+          values[name] = v;
+        } else if (
+          v &&
+          typeof v === 'object' &&
+          (v as Record<string, unknown>).isSecretRef === true
+        ) {
+          values[name] = v as { isSecretRef: boolean; id: string };
+        }
+      }
+      if (Object.keys(values).length > 0) {
+        existingInputVarValues.set(
+          input.policy_template ? `${input.policy_template}-${input.type}` : input.type,
+          values
+        );
+      }
+    }
     for (const [key, entry] of Object.entries(
       (existing.data?.item?.vars ?? {}) as Record<string, { value: unknown }>
     )) {
@@ -242,6 +276,8 @@ export async function updateAgentBasedPolicy(
     }
   }
 
+  disableUnselectedStreams(inputs, pkgInfo);
+
   const { staticKeys } = authenticateAndDeployStep;
   const pkgVarNames = getPackageVarNames(pkgInfo as { vars?: Array<{ name: string }> });
   const builtVars = buildPackageVars(
@@ -252,6 +288,26 @@ export async function updateAgentBasedPolicy(
     authenticateAndDeployStep.existingSecretRefs ?? existingSecretRefs,
     getPolicyVarSettingsUpdate(policySettings, 'agent_based', pkgVarNames)
   );
+  applyInputVars(inputs, pkgInfo, (inputVarNames, inputKey) => {
+    const built = buildPackageVars(
+      globalRegion,
+      staticKeys,
+      inputVarNames,
+      agentCredentials,
+      authenticateAndDeployStep.existingSecretRefs ?? existingSecretRefs,
+      getPolicyVarSettingsUpdate(policySettings, 'agent_based', inputVarNames)
+    );
+    // Like the package-level vars: new credentials replace the existing ones, and without any in
+    // memory the existing values are the base, so a redeploy of only service vars keeps the auth.
+    if (agentCredentials) return built;
+    const existing = Object.fromEntries(
+      Object.entries(existingInputVarValues.get(inputKey) ?? {}).filter(([name]) =>
+        inputVarNames.has(name)
+      )
+    );
+    const merged = { ...existing, ...(built ?? {}) } as typeof built;
+    return merged && Object.keys(merged).length > 0 ? merged : undefined;
+  });
   // When new credentials are explicitly provided, use only the newly built vars — merging the
   // existing values would retain stale fields from the old credential method (e.g. access_key_id
   // left over after switching to shared_credentials). When no credentials are in memory (access/

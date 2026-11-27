@@ -47,18 +47,14 @@ beforeEach(() => {
 
 describe('useAwsOnboardingTelemetry — gating', () => {
   it('calls helpers when source is aws_quickstart and package matches', () => {
-    const { result } = renderHook(() =>
-      useAwsOnboardingTelemetry({ pkgName: 'aws_cloudwatch_input_otel' })
-    );
+    const { result } = renderHook(() => useAwsOnboardingTelemetry({ pkgName: 'aws_otel' }));
     act(() => result.current.reportCredentialsAdded());
     expect(reportAwsOnboardingCredentialsAdded).toHaveBeenCalledWith(mockAnalytics, sessionStorage);
   });
 
   it('no-ops when telemetrySource is not aws_quickstart', () => {
     (useIntraAppState as jest.Mock).mockReturnValue({ telemetrySource: undefined });
-    const { result } = renderHook(() =>
-      useAwsOnboardingTelemetry({ pkgName: 'aws_cloudwatch_input_otel' })
-    );
+    const { result } = renderHook(() => useAwsOnboardingTelemetry({ pkgName: 'aws_otel' }));
     act(() => result.current.reportCredentialsAdded());
     expect(reportAwsOnboardingCredentialsAdded).not.toHaveBeenCalled();
   });
@@ -79,9 +75,7 @@ describe('useAwsOnboardingTelemetry — gating', () => {
 
   it('no-ops when analytics is unavailable', () => {
     (useStartServices as jest.Mock).mockReturnValue({ analytics: undefined });
-    const { result } = renderHook(() =>
-      useAwsOnboardingTelemetry({ pkgName: 'aws_cloudwatch_input_otel' })
-    );
+    const { result } = renderHook(() => useAwsOnboardingTelemetry({ pkgName: 'aws_otel' }));
     act(() => result.current.reportCredentialsAdded());
     expect(reportAwsOnboardingCredentialsAdded).not.toHaveBeenCalled();
   });
@@ -89,9 +83,7 @@ describe('useAwsOnboardingTelemetry — gating', () => {
 
 describe('useAwsOnboardingTelemetry — reportDeployClicked', () => {
   it('passes path and services to the helper', () => {
-    const { result } = renderHook(() =>
-      useAwsOnboardingTelemetry({ pkgName: 'aws_cloudwatch_input_otel' })
-    );
+    const { result } = renderHook(() => useAwsOnboardingTelemetry({ pkgName: 'aws_otel' }));
     act(() => result.current.reportDeployClicked('agentless', ['cloudwatch']));
     expect(reportAwsOnboardingDeployClicked).toHaveBeenCalledWith(mockAnalytics, sessionStorage, {
       path: 'agentless',
@@ -100,9 +92,7 @@ describe('useAwsOnboardingTelemetry — reportDeployClicked', () => {
   });
 
   it('passes cloudformation path without services', () => {
-    const { result } = renderHook(() =>
-      useAwsOnboardingTelemetry({ pkgName: 'aws_cloudwatch_input_otel' })
-    );
+    const { result } = renderHook(() => useAwsOnboardingTelemetry({ pkgName: 'aws_otel' }));
     act(() => result.current.reportDeployClicked('aws_cloudformation'));
     expect(reportAwsOnboardingDeployClicked).toHaveBeenCalledWith(mockAnalytics, sessionStorage, {
       path: 'aws_cloudformation',
@@ -113,9 +103,7 @@ describe('useAwsOnboardingTelemetry — reportDeployClicked', () => {
 
 describe('useAwsOnboardingTelemetry — reportEnrollmentSucceeded', () => {
   it('calls the helper when conditions are met', () => {
-    const { result } = renderHook(() =>
-      useAwsOnboardingTelemetry({ pkgName: 'aws_cloudwatch_input_otel' })
-    );
+    const { result } = renderHook(() => useAwsOnboardingTelemetry({ pkgName: 'aws_otel' }));
     act(() => result.current.reportEnrollmentSucceeded());
     expect(reportAwsOnboardingEnrollmentSucceeded).toHaveBeenCalledWith(
       mockAnalytics,

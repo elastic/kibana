@@ -6,13 +6,17 @@
  */
 
 import type { AwsServiceMatrixEntry } from '../../aws_service_matrix';
+import type { PackageInputEntry } from './package_inputs';
 import type { ServiceInstance, ServiceVars } from '../service_settings_step/use_service_settings';
 import { buildDeployGroups } from './deploy_groups';
 import {
   buildIacIntegrations,
   buildPackageInputs,
   buildPackageVars,
+  applyInputVars,
   buildStreamVars,
+  disableUnselectedStreams,
+  getInputVarNames,
   toSOServiceVars,
 } from './package_inputs';
 
@@ -120,7 +124,7 @@ describe('buildIacIntegrations', () => {
     const otel = makeService({
       id: 'rds_otel',
       policyTemplate: 'aws.rds',
-      packageName: 'aws_cloudwatch_input_otel',
+      packageName: 'aws_otel',
       dataStreams: ['rds_otel'],
       inputs: ['aws/metrics'],
     });
@@ -129,7 +133,7 @@ describe('buildIacIntegrations', () => {
     expect(buildIacIntegrations([original(otel), original(rds)], {})).toEqual([
       { name: 'aws', policyTemplates: [{ name: 'rds', enabledInputs: ['aws/metrics'] }] },
       {
-        name: 'aws_cloudwatch_input_otel',
+        name: 'aws_otel',
         policyTemplates: [{ name: 'aws.rds', enabledInputs: ['aws/metrics'] }],
       },
     ]);
@@ -180,14 +184,14 @@ describe('buildIacIntegrations', () => {
     const service = makeService({
       id: 'ec2_otel',
       policyTemplate: 'aws.ec2',
-      packageName: 'aws_cloudwatch_input_otel',
+      packageName: 'aws_otel',
       dataStreams: ['ec2_otel'],
       inputs: ['aws/metrics'],
     });
 
     expect(buildIacIntegrations([original(service)], {})).toEqual([
       {
-        name: 'aws_cloudwatch_input_otel',
+        name: 'aws_otel',
         policyTemplates: [{ name: 'aws.ec2', enabledInputs: ['aws/metrics'] }],
       },
     ]);
@@ -315,7 +319,7 @@ describe('buildIacIntegrations ↔ Deploy parity', () => {
     const rdsOtel = makeService({
       id: 'rds_otel',
       policyTemplate: 'aws.rds',
-      packageName: 'aws_cloudwatch_input_otel',
+      packageName: 'aws_otel',
       dataStreams: ['rds_otel'],
       inputs: ['aws/metrics'],
     });
@@ -805,5 +809,135 @@ describe('buildStreamVars — package vars from the shared settings', () => {
     expect(buildStreamVars(notDeclaring, dsVars(), '', 'aws-s3', policyVars)).not.toHaveProperty(
       'proxy_url'
     );
+  });
+});
+
+describe('composable package streams (aws_otel)', () => {
+  const ec2 = makeService({
+    id: 'ec2_otel',
+    packageName: 'aws_otel',
+    policyTemplate: 'aws',
+    signalTypes: ['metrics'],
+    dataStreams: ['ec2'],
+    inputs: ['otelcol'],
+    defaultEnabledInputs: ['otelcol'],
+    varDefsByDataStream: {
+      ec2: {
+        inputs: ['otelcol'],
+        defaultEnabledInputs: ['otelcol'],
+        dataset: 'aws.ec2',
+        varDefsByInput: {},
+      },
+    },
+  });
+  const storedVars: Record<string, ServiceVars> = {
+    ec2_otel: {
+      enabledDataStreams: ['ec2'],
+      varsByDataStream: { ec2: { enabledInputs: ['otelcol'], varsByInput: { otelcol: {} } } },
+    },
+  };
+  const pkgInfo = {
+    policy_templates: [
+      {
+        name: 'aws',
+        data_streams: ['ec2', 'sqs'],
+        inputs: [{ type: 'otelcol' }],
+      },
+    ],
+    data_streams: [
+      { path: 'ec2', dataset: 'aws.ec2', streams: [{ input: 'otelcol' }] },
+      { path: 'sqs', dataset: 'aws.sqs', streams: [{ input: 'otelcol' }] },
+    ],
+  };
+
+  it('keys the stream by the dataset the data stream pins', () => {
+    const inputs = buildPackageInputs([ec2], storedVars, 'us-east-1');
+    expect(Object.keys(inputs['aws-otelcol'].streams)).toEqual(['aws.ec2']);
+  });
+
+  it('disables the sibling streams of the shared template that were not selected', () => {
+    const inputs = buildPackageInputs([ec2], storedVars, 'us-east-1');
+    disableUnselectedStreams(inputs, pkgInfo);
+    expect(inputs['aws-otelcol'].streams['aws.ec2'].enabled).toBe(true);
+    expect(inputs['aws-otelcol'].streams['aws.sqs']).toEqual({ enabled: false, vars: {} });
+  });
+
+  it('leaves inputs that are not selected untouched', () => {
+    const inputs: Record<string, PackageInputEntry> = {
+      'aws-otelcol': { enabled: false, streams: {} },
+    };
+    disableUnselectedStreams(inputs, pkgInfo);
+    expect(inputs['aws-otelcol'].streams).toEqual({});
+  });
+});
+
+describe('input-level vars (aws_otel)', () => {
+  const pkgInfo = {
+    policy_templates: [
+      {
+        name: 'aws',
+        inputs: [
+          {
+            type: 'otelcol',
+            vars: [{ name: 'region' }, { name: 'access_key_id' }, { name: 'secret_access_key' }],
+          },
+        ],
+      },
+      { name: 'no_vars', inputs: [{ type: 'aws-s3' }] },
+    ],
+  };
+  const staticKeys = { access_key_id: 'AKIA', secret_access_key: 'secret' } as any;
+
+  it('lists the vars each input declares, keyed like the request inputs', () => {
+    const names = getInputVarNames(pkgInfo);
+    expect([...names.keys()]).toEqual(['aws-otelcol']);
+    expect([...names.get('aws-otelcol')!]).toEqual([
+      'region',
+      'access_key_id',
+      'secret_access_key',
+    ]);
+  });
+
+  it('sets the region and credentials on the selected input', () => {
+    const inputs: Record<string, PackageInputEntry> = {
+      'aws-otelcol': { enabled: true, streams: {} },
+    };
+    applyInputVars(inputs, pkgInfo, (names) => buildPackageVars('us-east-1', staticKeys, names));
+    expect(inputs['aws-otelcol'].vars).toEqual({
+      region: 'us-east-1',
+      access_key_id: 'AKIA',
+      secret_access_key: 'secret',
+    });
+  });
+
+  it('keeps a stored secret ref instead of a typed credential', () => {
+    const ref = { isSecretRef: true as const, id: 'secret-1' };
+    const inputs: Record<string, PackageInputEntry> = {
+      'aws-otelcol': { enabled: true, streams: {} },
+    };
+    applyInputVars(inputs, pkgInfo, (names) =>
+      buildPackageVars(
+        'us-east-1',
+        {} as any,
+        names,
+        undefined,
+        new Map([
+          ['access_key_id', ref],
+          ['secret_access_key', ref],
+        ])
+      )
+    );
+    expect(inputs['aws-otelcol'].vars).toMatchObject({
+      access_key_id: ref,
+      secret_access_key: ref,
+    });
+  });
+
+  it('leaves an input that is not selected without vars', () => {
+    const inputs: Record<string, PackageInputEntry> = {
+      'aws-otelcol': { enabled: false, streams: {} },
+    };
+    applyInputVars(inputs, pkgInfo, (names) => buildPackageVars('us-east-1', staticKeys, names));
+    expect(inputs['aws-otelcol'].vars).toBeUndefined();
   });
 });

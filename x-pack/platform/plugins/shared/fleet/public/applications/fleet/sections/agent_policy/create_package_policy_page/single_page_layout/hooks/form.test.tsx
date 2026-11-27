@@ -1294,7 +1294,7 @@ describe('useOnSubmit', () => {
     const mockReportDeployClicked = jest.fn();
 
     const awsPackageInfo: PackageInfo = {
-      name: 'aws_cloudwatch_input_otel',
+      name: 'aws_otel',
       version: '0.5.0',
       description: '',
       format_version: '',

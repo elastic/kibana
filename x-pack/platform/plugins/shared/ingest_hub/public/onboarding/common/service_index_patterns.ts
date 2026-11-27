@@ -20,7 +20,7 @@ const OTELCOL_INPUT = 'otelcol';
  * OTel entries (`dataFormat === 'otel'`) use service-specific OTel data streams:
  * - ECF OTel log services (`ecfLogType` set): dataset is `aws.<ecfLogType>.otel`, type is `logs`.
  *   The OTel ECF template takes no namespace, so these always use `*`.
- * - OTel input packages (e.g. `aws_cloudwatch_input_otel`): dataset and type are read from
+ * - OTel input packages (e.g. `aws_otel`): dataset and type are read from
  *   the `data_stream.dataset` / `data_stream.type` variable defaults in `varDefsByInput`.
  *
  * ECS-derived `dsInfo.dataset` values are intentionally ignored for OTel entries — they come
@@ -37,11 +37,12 @@ export function getServiceIndexPatterns(
     patterns.push(`logs-aws.${entry.ecfLogType}.otel-*`);
   } else if (entry.varDefsByDataStream) {
     for (const [, dsInfo] of Object.entries(entry.varDefsByDataStream)) {
-      // OTel input packages (e.g. aws_cloudwatch_input_otel) store the actual data stream
+      // OTel input packages (e.g. aws_otel) store the actual data stream
       // coordinates as variable defaults under varDefsByInput rather than at the top level.
+      // Composable packages (e.g. aws_otel) pin the dataset on the data stream manifest instead.
       const baseDataset =
         entry.dataFormat === 'otel'
-          ? getInputVarDefault(dsInfo.varDefsByInput, 'data_stream.dataset')
+          ? getInputVarDefault(dsInfo.varDefsByInput, 'data_stream.dataset') ?? dsInfo.dataset
           : dsInfo.dataset;
       // Data ingested through the `otelcol` input lands in `<dataset>.otel`, not in the manifest default.
       const dataset =

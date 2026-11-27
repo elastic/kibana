@@ -15,7 +15,13 @@ import {
 import { getEffectiveNamespace } from '../../common/effective_namespace';
 import { getDefaultEnabledDataStreams } from '../../aws_service_matrix';
 import type { ServiceVars } from '../service_settings_step/use_service_settings';
-import { buildPackageInputs, buildPackageVars, getPackageVarNames } from './package_inputs';
+import {
+  buildPackageInputs,
+  applyInputVars,
+  buildPackageVars,
+  disableUnselectedStreams,
+  getPackageVarNames,
+} from './package_inputs';
 import {
   detectSecretRefs,
   fetchAgentlessSecretRefs,
@@ -218,6 +224,8 @@ export async function updateManagedIntegrationsPolicy(
     }
   }
 
+  disableUnselectedStreams(inputs, pkgInfo);
+
   const { staticKeys } = authenticateAndDeployStep;
   const pkgVarNames = getPackageVarNames(pkgInfo as { vars?: Array<{ name: string }> });
 
@@ -254,6 +262,18 @@ export async function updateManagedIntegrationsPolicy(
       ? undefined
       : authenticateAndDeployStep.existingSecretRefs ?? detectSecretRefs(existingGetResult.item),
     getPolicyVarSettingsUpdate(policySettings, 'managed_integration', pkgVarNames)
+  );
+  applyInputVars(inputs, pkgInfo, (inputVarNames) =>
+    buildPackageVars(
+      globalRegion,
+      staticKeys,
+      inputVarNames,
+      undefined,
+      cloudConnector
+        ? undefined
+        : authenticateAndDeployStep.existingSecretRefs ?? detectSecretRefs(existingGetResult.item),
+      getPolicyVarSettingsUpdate(policySettings, 'managed_integration', inputVarNames)
+    )
   );
 
   await sendUpdateAgentlessPolicy(

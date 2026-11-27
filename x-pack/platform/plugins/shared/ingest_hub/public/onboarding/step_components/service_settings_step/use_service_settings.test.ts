@@ -1041,15 +1041,13 @@ describe('useServiceSettings — integration name and description', () => {
     const { result } = renderHook(() => useServiceSettings({ onContinue: jest.fn() }));
 
     await waitFor(() => expect(result.current.integrationName).toBe('aws-2'));
-    expect(mockSendGetPackagePolicies.mock.calls[0][0].kuery).toContain(
-      'package.name:aws_cloudwatch_input_otel'
-    );
+    expect(mockSendGetPackagePolicies.mock.calls[0][0].kuery).toContain('package.name:aws_otel');
   });
 
   it('needs no package suffix for the OTel package, the only one an OTel deploy uses', async () => {
     mockServices([
       makeEntry('svc_o', {
-        packageName: 'aws_cloudwatch_input_otel',
+        packageName: 'aws_otel',
         deploymentMethods: policyService.deploymentMethods,
       }),
     ]);
@@ -1057,7 +1055,7 @@ describe('useServiceSettings — integration name and description', () => {
     const { result } = renderHook(() => useServiceSettings({ onContinue: jest.fn() }));
 
     await waitFor(() => expect(result.current.integrationName).toBe('aws-1'));
-    expect(result.current.bareNamePackage).toBe('aws_cloudwatch_input_otel');
+    expect(result.current.bareNamePackage).toBe('aws_otel');
   });
 
   it('prefills ECF-only selections too, since the name describes the onboarding', async () => {

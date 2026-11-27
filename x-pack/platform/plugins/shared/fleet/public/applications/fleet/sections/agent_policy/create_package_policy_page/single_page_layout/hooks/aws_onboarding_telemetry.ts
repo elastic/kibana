@@ -22,7 +22,7 @@ import type { CreatePackagePolicyRouteState } from '../../../../../../../types';
  * Returns telemetry report callbacks for the AWS onboarding funnel, to be called at key moments in
  * the create-package-policy flow. All helpers no-op silently when:
  * - The page was NOT reached from the AWS quickstart (telemetrySource ≠ 'aws_quickstart').
- * - The package is not aws_cloudwatch_input_otel.
+ * - The package is not aws_otel.
  * - The event was already reported in this session (single-fire guard, stored in sessionStorage).
  *
  * Helpers are framework-agnostic; they read analytics from core start-services so callers don't

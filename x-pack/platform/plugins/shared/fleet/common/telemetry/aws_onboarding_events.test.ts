@@ -221,11 +221,11 @@ describe('reportAwsOnboardingFirstDataArrived', () => {
     const analytics = makeAnalytics();
     const storage = makeStorage();
     writeState(storage, { deployClickedAt: Date.now() - 3000 });
-    reportAwsOnboardingFirstDataArrived(analytics, storage, 'aws_cloudwatch_input_otel');
+    reportAwsOnboardingFirstDataArrived(analytics, storage, 'aws_otel');
     expect(analytics.reportEvent).toHaveBeenCalledWith(
       AWS_ONBOARDING_FIRST_DATA_ARRIVED_EVENT.eventType,
       expect.objectContaining({
-        package_name: 'aws_cloudwatch_input_otel',
+        package_name: 'aws_otel',
         duration_ms: expect.any(Number),
       })
     );
@@ -234,11 +234,7 @@ describe('reportAwsOnboardingFirstDataArrived', () => {
   it('does not fire when deployClickedAt is missing', () => {
     const analytics = makeAnalytics();
     const storage = makeStorage();
-    const result = reportAwsOnboardingFirstDataArrived(
-      analytics,
-      storage,
-      'aws_cloudwatch_input_otel'
-    );
+    const result = reportAwsOnboardingFirstDataArrived(analytics, storage, 'aws_otel');
     expect(result).toBe(false);
     expect(analytics.reportEvent).not.toHaveBeenCalled();
   });
@@ -247,8 +243,8 @@ describe('reportAwsOnboardingFirstDataArrived', () => {
     const analytics = makeAnalytics();
     const storage = makeStorage();
     writeState(storage, { deployClickedAt: Date.now() });
-    reportAwsOnboardingFirstDataArrived(analytics, storage, 'aws_cloudwatch_input_otel');
-    reportAwsOnboardingFirstDataArrived(analytics, storage, 'aws_cloudwatch_input_otel');
+    reportAwsOnboardingFirstDataArrived(analytics, storage, 'aws_otel');
+    reportAwsOnboardingFirstDataArrived(analytics, storage, 'aws_otel');
     expect(analytics.reportEvent).toHaveBeenCalledTimes(1);
   });
 });
@@ -258,21 +254,17 @@ describe('reportAwsOnboardingFirstDataTimeout', () => {
     const analytics = makeAnalytics();
     const storage = makeStorage();
     writeState(storage, { deployClickedAt: Date.now() });
-    reportAwsOnboardingFirstDataTimeout(analytics, storage, 'aws_cloudwatch_input_otel');
+    reportAwsOnboardingFirstDataTimeout(analytics, storage, 'aws_otel');
     expect(analytics.reportEvent).toHaveBeenCalledWith(
       AWS_ONBOARDING_FIRST_DATA_TIMEOUT_EVENT.eventType,
-      { package_name: 'aws_cloudwatch_input_otel' }
+      { package_name: 'aws_otel' }
     );
   });
 
   it('does not fire when deployClickedAt is missing', () => {
     const analytics = makeAnalytics();
     const storage = makeStorage();
-    const result = reportAwsOnboardingFirstDataTimeout(
-      analytics,
-      storage,
-      'aws_cloudwatch_input_otel'
-    );
+    const result = reportAwsOnboardingFirstDataTimeout(analytics, storage, 'aws_otel');
     expect(result).toBe(false);
     expect(analytics.reportEvent).not.toHaveBeenCalled();
   });
@@ -281,8 +273,8 @@ describe('reportAwsOnboardingFirstDataTimeout', () => {
     const analytics = makeAnalytics();
     const storage = makeStorage();
     writeState(storage, { deployClickedAt: Date.now() });
-    reportAwsOnboardingFirstDataTimeout(analytics, storage, 'aws_cloudwatch_input_otel');
-    reportAwsOnboardingFirstDataTimeout(analytics, storage, 'aws_cloudwatch_input_otel');
+    reportAwsOnboardingFirstDataTimeout(analytics, storage, 'aws_otel');
+    reportAwsOnboardingFirstDataTimeout(analytics, storage, 'aws_otel');
     expect(analytics.reportEvent).toHaveBeenCalledTimes(1);
   });
 

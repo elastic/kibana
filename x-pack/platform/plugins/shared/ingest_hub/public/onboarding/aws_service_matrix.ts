@@ -224,6 +224,11 @@ type AwsServiceStaticEntry = Omit<
   name?: string;
   /** Data stream ids to exclude from this policy template (e.g. firewall_metrics until agentless ships). */
   excludedDataStreams?: string[];
+  /**
+   * Restrict the policy template to this single data stream. For packages that expose several
+   * services as data streams of one policy template (e.g. `aws_otel`'s `aws` template).
+   */
+  dataStream?: string;
   /** Override which inputs are enabled by default when the manifest doesn't differentiate. */
   defaultEnabledInputs?: string[];
   /** Static fallback shown before the manifest loads or if the manifest is unavailable. */
@@ -507,70 +512,79 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
     packageName: 'aws_logs',
   },
 
-  // ── aws_cloudwatch_input_otel package — OTel metrics (managed integration) ──
-  // Input package: signal type is declared on each policy template (pt.type = 'metrics').
+  // ── aws_otel package — OTel metrics (managed integration) ──
+  // Composable integration: one `aws` policy template, one data stream per service.
   {
     id: 'ec2_otel',
     name: 'Amazon EC2',
     dataFormat: 'otel',
-    policyTemplate: 'aws.ec2',
-    packageName: 'aws_cloudwatch_input_otel',
+    policyTemplate: 'aws',
+    dataStream: 'ec2',
+    packageName: 'aws_otel',
   },
   {
     id: 'lambda_otel',
     name: 'AWS Lambda',
     dataFormat: 'otel',
-    policyTemplate: 'aws.lambda',
-    packageName: 'aws_cloudwatch_input_otel',
+    policyTemplate: 'aws',
+    dataStream: 'lambda',
+    packageName: 'aws_otel',
   },
   {
     id: 'rds_otel',
     name: 'Amazon RDS',
     dataFormat: 'otel',
-    policyTemplate: 'aws.rds',
-    packageName: 'aws_cloudwatch_input_otel',
+    policyTemplate: 'aws',
+    dataStream: 'rds',
+    packageName: 'aws_otel',
   },
   {
     id: 'sqs_otel',
     name: 'Amazon SQS',
     dataFormat: 'otel',
-    policyTemplate: 'aws.sqs',
-    packageName: 'aws_cloudwatch_input_otel',
+    policyTemplate: 'aws',
+    dataStream: 'sqs',
+    packageName: 'aws_otel',
   },
   {
     id: 'elb_alb_otel',
     name: 'Application Load Balancer',
     dataFormat: 'otel',
-    policyTemplate: 'aws.elb',
-    packageName: 'aws_cloudwatch_input_otel',
+    policyTemplate: 'aws',
+    dataStream: 'elb',
+    packageName: 'aws_otel',
   },
   {
     id: 'elb_clb_otel',
     name: 'Classic Load Balancer',
     dataFormat: 'otel',
-    policyTemplate: 'aws.elb_classic',
-    packageName: 'aws_cloudwatch_input_otel',
+    policyTemplate: 'aws',
+    dataStream: 'elb_classic',
+    packageName: 'aws_otel',
   },
   {
     id: 'elb_nlb_otel',
     name: 'Network Load Balancer',
     dataFormat: 'otel',
-    policyTemplate: 'aws.elb_network',
-    packageName: 'aws_cloudwatch_input_otel',
+    policyTemplate: 'aws',
+    dataStream: 'elb_network',
+    packageName: 'aws_otel',
   },
   {
     id: 'elb_gwlb_otel',
     name: 'Gateway Load Balancer',
     dataFormat: 'otel',
-    policyTemplate: 'aws.elb_gateway',
-    packageName: 'aws_cloudwatch_input_otel',
+    policyTemplate: 'aws',
+    dataStream: 'elb_gateway',
+    packageName: 'aws_otel',
   },
   {
     id: 'ecs_otel',
     name: 'Amazon ECS',
     dataFormat: 'otel',
-    policyTemplate: 'aws.ecs',
-    packageName: 'aws_cloudwatch_input_otel',
+    policyTemplate: 'aws',
+    dataStream: 'ecs',
+    packageName: 'aws_otel',
   },
 
   // ── aws_billing package — Cloud Financial Management ─────────────────────
@@ -867,7 +881,7 @@ export function buildAwsServiceMatrix(
   erroredPackageNames: Set<string> = new Set()
 ): AwsServiceMatrixEntry[] {
   return staticEntries.map((entry) => {
-    const { deploymentMethods: staticMethods, excludedDataStreams, ...rest } = entry;
+    const { deploymentMethods: staticMethods, excludedDataStreams, dataStream, ...rest } = entry;
 
     let name = entry.name;
     let inputs = entry.inputs;
@@ -938,7 +952,8 @@ export function buildAwsServiceMatrix(
               .map((ds: any) => ds.path as string)
               .filter((dsId) => !otherPtDataStreamIds.has(dsId));
         const includedDsIds = ptDataStreamIds.filter(
-          (dsId) => !(excludedDataStreams ?? []).includes(dsId)
+          (dsId) =>
+            !(excludedDataStreams ?? []).includes(dsId) && (!dataStream || dsId === dataStream)
         );
 
         // Regular package: iterate data streams.

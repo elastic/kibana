@@ -47,7 +47,7 @@ describe('CloudwatchIntegrationRedirect', () => {
     await waitFor(() => expect(get).toHaveBeenCalledTimes(1));
 
     expect(get).toHaveBeenCalledWith(
-      '/api/fleet/epm/packages/aws_cloudwatch_input_otel',
+      '/api/fleet/epm/packages/aws_otel',
       expect.objectContaining({
         query: { prerelease: true },
         signal: expect.any(AbortSignal),
@@ -60,7 +60,7 @@ describe('CloudwatchIntegrationRedirect', () => {
 
     await waitFor(() =>
       expect(navigateToApp).toHaveBeenCalledWith('integrations', {
-        path: '/detail/aws_cloudwatch_input_otel-0.2.1/add-integration',
+        path: '/detail/aws_otel-0.2.1/add-integration',
         state: {
           onCancelNavigateTo: ['observabilityOnboarding', { path: '?category=cloud' }],
           onCancelUrl: '/app/observabilityOnboarding?category=cloud',
@@ -125,7 +125,7 @@ describe('CloudwatchIntegrationRedirect', () => {
 
     await waitFor(() =>
       expect(navigateToApp).toHaveBeenCalledWith('integrations', {
-        path: '/detail/aws_cloudwatch_input_otel-0.2.1/add-integration',
+        path: '/detail/aws_otel-0.2.1/add-integration',
         state: {
           onCancelNavigateTo: ['observabilityOnboarding', { path: '' }],
           onCancelUrl: '/app/observabilityOnboarding',
@@ -174,7 +174,7 @@ describe('CloudwatchIntegrationRedirect', () => {
       expect(navigateToApp).toHaveBeenCalledWith(
         'integrations',
         expect.objectContaining({
-          path: '/detail/aws_cloudwatch_input_otel-0.2.1/add-integration',
+          path: '/detail/aws_otel-0.2.1/add-integration',
         })
       )
     );
