@@ -146,6 +146,7 @@ describe('summarizeDriftCoverage', () => {
         detectVendorChanges: 1,
         pinnedOnly: 1,
         unreachable: 0,
+        detectionUnknown: 0,
         withoutCoverage: 0,
         trackedActions: 4,
         checkedActions: 7,
@@ -178,23 +179,41 @@ describe('summarizeDriftCoverage', () => {
     expect(connectors[0].unreachableSources).toEqual(['rest']);
   });
 
-  // Such a report reads `unchanged` for a source pinned to a commit too, so its sources can't
-  // tell whether the connector follows the vendor.
-  it('leaves it unknown whether connectors of a report without coverage detect changes', () => {
+  // Such a report reads `unchanged` for a source pinned to a commit too, so a fetched source
+  // can't tell whether the connector follows the vendor; `pinned` and `unreachable` still can.
+  it('reads the definite source statuses of a report without coverage, and only those', () => {
     const old = [
       legacy('.github', { rest: { status: 'unchanged' } }),
       legacy('.box', { mcp: { status: 'pinned' } }),
+      legacy('.zoom', { rest: { status: 'unreachable', error: '503' } }),
     ];
 
     const { totals, connectors } = summarizeDriftCoverage(documents, old);
 
     expect(connectors).toEqual([]);
     expect(totals).toMatchObject({
-      checked: 2,
-      withoutCoverage: 2,
+      checked: 3,
+      withoutCoverage: 3,
       detectVendorChanges: 0,
-      pinnedOnly: 0,
+      pinnedOnly: 1,
+      unreachable: 1,
+      detectionUnknown: 1,
     });
+  });
+
+  it('gives each checked connector one outcome', () => {
+    const { totals } = summarizeDriftCoverage(documents, [
+      drift('.github'),
+      drift('.box', pinned, { mcp: { status: 'pinned' } }),
+      drift('.zoom', {}, { rest: { status: 'unreachable', error: '503' } }),
+      legacy('.zendesk', { rest: { status: 'changed' } }),
+      legacy('.sentry', { rest: { status: 'unreachable', error: '503' } }),
+    ]);
+
+    expect(
+      totals.detectVendorChanges + totals.pinnedOnly + totals.unreachable + totals.detectionUnknown
+    ).toBe(totals.checked);
+    expect(totals).toMatchObject({ unreachable: 2, detectionUnknown: 1 });
   });
 });
 

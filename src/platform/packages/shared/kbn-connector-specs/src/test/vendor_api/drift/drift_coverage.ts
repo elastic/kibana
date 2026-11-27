@@ -65,9 +65,12 @@ export interface CoverageTotals {
   /** Checked connectors a source of which couldn't be fetched this run. */
   readonly unreachable: number;
   /**
-   * Checked connectors whose drift entry has no coverage, from a report written before it. Neither
-   * their actions nor whether they can detect a vendor change are known.
+   * Checked connectors of which it isn't known whether they can detect a vendor change: entries
+   * of a report written before `coverage` whose sources were fetched. Such a report reads
+   * `unchanged` for a source pinned to a commit too.
    */
+  readonly detectionUnknown: number;
+  /** Checked connectors whose drift entry has no coverage, so their actions aren't known. */
   readonly withoutCoverage: number;
   /** Tracked actions of the checked connectors that have coverage. */
   readonly trackedActions: number;
@@ -96,6 +99,24 @@ const unreachableSourcesOf = ({ sources }: ConnectorDrift): string[] =>
     .filter((name) => sources[name].status === 'unreachable')
     .sort();
 
+type Detection = 'detects' | 'pinned_only' | 'unreachable' | 'unknown';
+
+/**
+ * Whether a checked connector could notice a vendor change on this run. `coverage` names the
+ * sources that follow the vendor, from the manifest. Without it only two statuses are definite: a
+ * source that couldn't be fetched, and sources that are all captured (`pinned`).
+ */
+const detectionOf = (entry: ConnectorDrift): Detection => {
+  if (unreachableSourcesOf(entry).length > 0) return 'unreachable';
+  if (entry.coverage) {
+    return entry.coverage.followingSources.length > 0 ? 'detects' : 'pinned_only';
+  }
+  const statuses = Object.values(entry.sources).map(({ status }) => status);
+  return statuses.length > 0 && statuses.every((status) => status === 'pinned')
+    ? 'pinned_only'
+    : 'unknown';
+};
+
 /**
  * Combines the coverage report, which describes every connector, with a drift report, which
  * describes the recorded ones it checked. Both of a connector's action counts come from the drift
@@ -107,7 +128,8 @@ export const summarizeDriftCoverage = (
   report: readonly DriftReportEntry[]
 ): DriftCoverageSummary => {
   const checked = report.filter(isChecked);
-  const unreachable = checked.filter((entry) => unreachableSourcesOf(entry).length > 0);
+  const detections = checked.map(detectionOf);
+  const count = (detection: Detection) => detections.filter((found) => found === detection).length;
   const connectors = checked
     .flatMap((entry): ConnectorCoverageRow[] =>
       entry.coverage
@@ -138,14 +160,10 @@ export const summarizeDriftCoverage = (
       unrecorded: documents.length - recorded - exempt.length,
       checked: checked.length,
       failed: report.length - checked.length,
-      // Only `coverage` says which sources follow the vendor: a report written before it reads
-      // `unchanged` for a source pinned to a commit too, so its connectors are left unknown.
-      detectVendorChanges: connectors.filter(
-        ({ followingSources, unreachableSources }) =>
-          followingSources.length > 0 && unreachableSources.length === 0
-      ).length,
-      pinnedOnly: connectors.filter(({ followingSources }) => followingSources.length === 0).length,
-      unreachable: unreachable.length,
+      detectVendorChanges: count('detects'),
+      pinnedOnly: count('pinned_only'),
+      unreachable: count('unreachable'),
+      detectionUnknown: count('unknown'),
       withoutCoverage: checked.length - connectors.length,
       trackedActions: sum(connectors.map(({ trackedActions }) => trackedActions)),
       checkedActions: sum(connectors.map(({ totalActions }) => totalActions)),
@@ -172,8 +190,8 @@ const checkedSentence = (totals: CoverageTotals): string => {
       ? `${verb(totals.pinnedOnly, 'only has', 'only have')} pinned sources`
       : '',
     totals.unreachable > 0 ? `${totals.unreachable} had a source that couldn't be fetched` : '',
-    totals.withoutCoverage > 0
-      ? `unknown for ${plural(totals.withoutCoverage, 'connector')} the report has no coverage for`
+    totals.detectionUnknown > 0
+      ? `unknown for ${plural(totals.detectionUnknown, 'connector')} the report has no coverage for`
       : '',
   ].filter(Boolean);
   const unknown =
