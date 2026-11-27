@@ -287,7 +287,7 @@ const PacksTableComponent = ({ hasAssetsToInstall }: { hasAssetsToInstall?: bool
           // misleading 0, but keep live targets if Fleet still delivers it (failed detach).
           const effectiveIds =
             item.enabled || item.effective_policy_ids?.length
-              ? item.effective_policy_ids ?? policyIds
+              ? (item.effective_policy_ids ?? policyIds)
               : policyIds;
           const effectiveCount = effectiveIds?.length ?? 0;
           // Count by identity, not by length: an effective set can drop a saved policy

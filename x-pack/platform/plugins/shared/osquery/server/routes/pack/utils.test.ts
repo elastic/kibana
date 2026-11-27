@@ -2351,7 +2351,7 @@ const targetingPackagePolicy = (
     policy_ids: policyIds,
     package: { name: 'osquery_manager', version },
     inputs: [{ config: { osquery: { value: { packs } } } }],
-  } as unknown as PackagePolicy);
+  }) as unknown as PackagePolicy;
 
 describe('resolveSharedIntegrationOverdelivery', () => {
   const shared = targetingPackagePolicy('shared', ['A', 'C', 'B', 'B']);
@@ -2453,7 +2453,7 @@ describe('computeEffectivePolicyIds', () => {
 
       return ids
         .filter((id) => id !== 'missing')
-        .map((id) => ({ id: typeof id === 'string' ? id : id.id } as AgentPolicy));
+        .map((id) => ({ id: typeof id === 'string' ? id : id.id }) as AgentPolicy);
     });
   });
 

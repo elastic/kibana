@@ -551,12 +551,12 @@ const PolicyAssignmentListComponent: React.FC<PolicyAssignmentListProps> = ({
           defaultMessage: 'Select all matching policies',
         })
     : allVisibleSelected
-    ? i18n.translate('xpack.osquery.pack.policyList.unselectAllAriaLabel', {
-        defaultMessage: 'Un-select all policies',
-      })
-    : i18n.translate('xpack.osquery.pack.policyList.selectAllAriaLabel', {
-        defaultMessage: 'Select all policies',
-      });
+      ? i18n.translate('xpack.osquery.pack.policyList.unselectAllAriaLabel', {
+          defaultMessage: 'Un-select all policies',
+        })
+      : i18n.translate('xpack.osquery.pack.policyList.selectAllAriaLabel', {
+          defaultMessage: 'Select all policies',
+        });
 
   // `useAgentPolicies` uses `initialData: []`, so an empty map alone is not a
   // settled Fleet response — gate empty / error / loading on fetch status.

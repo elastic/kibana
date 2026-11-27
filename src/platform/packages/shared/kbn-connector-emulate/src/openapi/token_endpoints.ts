@@ -140,7 +140,7 @@ const resolveTokenUrl = (
     const declared =
       templated === undefined
         ? [origin.split(':')[0]]
-        : variable?.enum ?? (variable === undefined ? [] : [variable.default]);
+        : (variable?.enum ?? (variable === undefined ? [] : [variable.default]));
     const schemes = [...new Set(declared.filter((scheme) => scheme !== ''))];
     return (schemes.length > 0 ? schemes : ['https']).map((scheme) => ({
       url: withoutQuery(`${scheme}:${url}`),

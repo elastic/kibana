@@ -46,8 +46,8 @@ const KIND = {
 const eventKind = () =>
   esql.exp`CASE(
     ${mobileColumn('spanKind')} == ${SPAN_KIND_CLIENT} AND ${mobileColumn(
-    'httpMethod'
-  )} IS NOT NULL,
+      'httpMethod'
+    )} IS NOT NULL,
     ${KIND.request},
     ${mobileColumn('scopeName')} == ${VIEW_CONTROLLER_SCOPE}
       OR ${mobileColumn('spanName')} == ${SCREEN_LOAD_SPAN},
@@ -57,8 +57,8 @@ const eventKind = () =>
     ${mobileColumn('eventName')} == ${EVENT_EXCEPTION},
     ${KIND.error},
     ${mobileColumn('eventName')} IS NULL AND ${mobileColumn(
-    'severityNumber'
-  )} >= ${OTEL_SEVERITY_WARN},
+      'severityNumber'
+    )} >= ${OTEL_SEVERITY_WARN},
     ${KIND.log},
     NULL
   )`;
@@ -123,22 +123,22 @@ export const sessionEventsBefore = ({
         ${is(KIND.log)}, ${mobileColumn('severity')},
         ${is(KIND.screen)}, COALESCE(${mobileColumn('screenName')}, ${mobileColumn('spanName')}),
         COALESCE(${mobileColumn('widgetName')}, ${mobileColumn('widgetId')}, ${mobileColumn(
-    'screenName'
-  )})
+          'screenName'
+        )})
       ), ${eventKindColumn}),
       ${resultColumn('detail')} = CASE(
         ${is(KIND.request)}, ${mobileColumn('urlFull')},
         COALESCE(${mobileColumn('exceptionMessage')}, ${mobileColumn('logBody')})
       ),
       ${resultColumn('stacktrace')} = CASE(${is(KIND.error)}, ${mobileColumn(
-    'exceptionStacktrace'
-  )}, NULL),
+        'exceptionStacktrace'
+      )}, NULL),
       ${resultColumn('statusCode')} = CASE(${is(KIND.request)}, ${mobileColumn(
-    'httpStatusCode'
-  )}, NULL),
+        'httpStatusCode'
+      )}, NULL),
       ${resultColumn('durationMs')} = CASE(${is(KIND.request)}, ${mobileColumn(
-    'spanDuration'
-  )} / 1000000.0, NULL),
+        'spanDuration'
+      )} / 1000000.0, NULL),
       ${resultColumn('page')} = ${mobileColumn('screenName')}`.pipe`KEEP @timestamp, ${[
     eventKindColumn,
     resultColumn('name'),

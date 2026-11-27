@@ -21,15 +21,12 @@ import type {
 const NO_ENCRYPTION_KEY_REASON =
   'Secrets are unavailable: set xpack.encryptedSavedObjects.encryptionKey in kibana.yml to store them encrypted.';
 
-export class SecretsPlugin
-  implements
-    Plugin<
-      SecretsPluginSetup,
-      SecretsPluginStart,
-      SecretsPluginSetupDependencies,
-      SecretsPluginStartDependencies
-    >
-{
+export class SecretsPlugin implements Plugin<
+  SecretsPluginSetup,
+  SecretsPluginStart,
+  SecretsPluginSetupDependencies,
+  SecretsPluginStartDependencies
+> {
   private readonly logger: Logger;
   private canEncrypt = false;
 

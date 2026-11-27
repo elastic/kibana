@@ -40,7 +40,7 @@ export function setFlapping<
  */
 export function setFlappingOnOngoingRecoveredAlerts<
   State extends AlertInstanceState,
-  Context extends AlertInstanceContext
+  Context extends AlertInstanceContext,
 >(
   flappingSettings: RulesSettingsFlappingProperties,
   ongoingRecoveredAlerts: Record<string, Alert<State, Context>> = {}

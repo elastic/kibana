@@ -1692,7 +1692,7 @@ describe('RuleEventsClient', () => {
           { name: 'rule.id', type: 'keyword' },
         ],
         values: rows.map(([ruleId, latest]) => [latest, ruleId]),
-      } as unknown as ESQLSearchResponse);
+      }) as unknown as ESQLSearchResponse;
 
     it('returns an empty map without querying when no rules are requested', async () => {
       const { client, query } = createClient(async () => latestResponse([]));
