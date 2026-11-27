@@ -10,6 +10,7 @@ import {
   FIELD_BROWSER_MODAL,
   FIELD_BROWSER_MODAL_CLOSE_BUTTON,
   INDICATORS_TABLE,
+  INDICATORS_TABLE_MORE_ACTION_BUTTON_ICON,
   INSPECTOR_BUTTON,
   QUERY_INPUT,
 } from '../../screens/threat_intelligence/indicators';
@@ -27,6 +28,18 @@ export const navigateToIndicatorsTablePage = (index: number) => {
 export const enterQuery = (text: string) => {
   cy.get(QUERY_INPUT).focus();
   cy.get(QUERY_INPUT).type(text);
+};
+
+/**
+ * Narrow the indicators table to the single file indicator with the given sha256.
+ *
+ * The table requests no sort, so row positions are not stable across runs: select an indicator by
+ * its value rather than by its row index.
+ */
+export const filterIndicatorsTableByFileSha256 = (sha256: string) => {
+  enterQuery(`threat.indicator.file.hash.sha256: "${sha256}"{enter}`);
+  cy.get(INDICATORS_TABLE_MORE_ACTION_BUTTON_ICON).should('have.length', 1);
+  cy.get(INDICATORS_TABLE).should('contain.text', sha256);
 };
 
 /**

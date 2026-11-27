@@ -18,6 +18,7 @@ import {
   openAddToBlockListFlyoutFromTable,
   openAddToBlocklistFromFlyout,
 } from '../../../tasks/threat_intelligence/blocklist';
+import { filterIndicatorsTableByFileSha256 } from '../../../tasks/threat_intelligence/indicators';
 import { login } from '../../../tasks/login';
 import {
   BLOCK_LIST_VALUE_INPUT,
@@ -68,6 +69,7 @@ describe('Block list interactions', { tags: ['@ess'] }, () => {
 
     cy.log('add to blocklist from the table more action menu');
 
+    filterIndicatorsTableByFileSha256(firstIndicatorId);
     openIndicatorsTableMoreActions();
     openAddToBlockListFlyoutFromTable();
 
@@ -88,7 +90,8 @@ describe('Block list interactions', { tags: ['@ess'] }, () => {
 
     cy.log('add to blocklist from the flyout');
 
-    openFlyout(1);
+    filterIndicatorsTableByFileSha256(secondIndicatorId);
+    openFlyout();
     openFlyoutTakeAction();
     openAddToBlocklistFromFlyout();
 
