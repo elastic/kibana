@@ -41,6 +41,10 @@ export interface IBaseSearchOptions {
   inspector?: {
     adapter: RequestAdapter;
     title: string;
+    /**
+     * Identifies the request in the adapter. A request started with the same id replaces the previous one.
+     */
+    id?: string;
     description?: string;
     getRequestStats?: () => RequestStatistics;
   };
