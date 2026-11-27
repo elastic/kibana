@@ -7,7 +7,7 @@
 
 import type { Evaluator } from '@kbn/evals';
 import { createTrajectoryEvaluator } from '@kbn/evals';
-import { CLASSIFICATIONS, type Classification } from './constants';
+import { CLASSIFICATIONS, HARNESS_TOOL_IDS, type Classification } from './constants';
 import type { AlertAnalysisVerdict } from './workflow_task';
 
 interface ExpectedVerdict {
@@ -80,11 +80,20 @@ export const validVerdict: Evaluator = {
 
 /**
  * L2 guardrail: the workflow pre-builds context, so the `ai.agent` step should not call tools.
- * Golden path is empty; any tool call fails trajectory.
+ * Golden path is empty; any domain tool call fails trajectory. Runtime-injected harness tools
+ * (`HARNESS_TOOL_IDS`) are not domain tool use: they are ignored for the score and reported as
+ * `harnessToolCalls` in the result metadata.
+ *
+ * The join needs agent spans keyed by the step's `conversation_id`. A connector that needs a
+ * prompt template also stores a conversation but produces no agent spans, so its trajectory stays
+ * N/A. The step output does not distinguish that path, so it cannot be skipped up front.
  */
+const isHarnessTool = (id: string) => HARNESS_TOOL_IDS.includes(id);
+
 export const createAlertAnalysisTrajectoryEvaluator = (): Evaluator => {
   const inner = createTrajectoryEvaluator({
-    extractToolCalls: (output) => asVerdict(output).toolCallIds ?? [],
+    extractToolCalls: (output) =>
+      (asVerdict(output).toolCallIds ?? []).filter((id) => !isHarnessTool(id)),
     goldenPathExtractor: () => [],
     orderWeight: 1,
     coverageWeight: 0,
@@ -101,7 +110,9 @@ export const createAlertAnalysisTrajectoryEvaluator = (): Evaluator => {
           explanation: 'Workflow trace unavailable — skipping trajectory evaluation.',
         };
       }
-      return inner.evaluate(args);
+      const result = await inner.evaluate(args);
+      const harnessToolCalls = (asVerdict(args.output).toolCallIds ?? []).filter(isHarnessTool);
+      return { ...result, metadata: { ...result.metadata, harnessToolCalls } };
     },
   };
 };
