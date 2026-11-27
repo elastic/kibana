@@ -44,7 +44,7 @@ const setup = () => {
 };
 
 it.each(['sent', 'failed'] as const)(
-  'keeps the disconnected channel reason on the selected run when the follow-up is %s',
+  'keeps the Slack message on the selected run when the follow-up is %s',
   async (followUpStatus) => {
     const { client, call } = setup();
     const routing = await client.initialize('shared-child', NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID, [
@@ -52,10 +52,12 @@ it.each(['sent', 'failed'] as const)(
       { type: 'slack', connector_id: 'slack', params: { channel: '#ops' } },
     ]);
     const [checkout, ops] = routing.destinations;
+    const message = 'Channel C1 is not connected. Connect it in the Elastic Slack app settings.';
     await client.claim('shared-child', checkout.id, 'started', 'start', true);
     await client.record('start', {
       status: 'failed',
-      error: 'Channel C1 is not connected. Connect it in the Elastic Slack app settings.',
+      error: message,
+      is_user_facing_error: true,
     });
     await client.selectTerminalPhase('shared-child', 'completed');
     await client.claim('shared-child', checkout.id, 'completed', 'result', false);
@@ -81,7 +83,7 @@ it.each(['sent', 'failed'] as const)(
           attemptedAt: expect.any(String),
           phase: 'completed',
           status: 'failed',
-          reason: 'channel_not_connected',
+          message,
         },
         {
           id: ops.id,
@@ -97,7 +99,7 @@ it.each(['sent', 'failed'] as const)(
         expect.objectContaining({
           id: checkout.id,
           status: followUpStatus,
-          reason: followUpStatus === 'failed' ? 'thread_missing' : undefined,
+          message: followUpStatus === 'failed' ? MISSING_NOTIFICATION_THREAD : undefined,
         }),
       ])
     );
@@ -107,37 +109,45 @@ it.each(['sent', 'failed'] as const)(
 it.each([
   {
     error: 'Slack rate-limited this request. Try again shortly.',
-    reason: 'start_rate_limited',
+    isUserFacing: true as const,
+    message: 'Slack rate-limited this request. Try again shortly.',
   },
   {
     error: 'Relay request to /v1/slack/trigger failed with status 500',
-    reason: 'thread_missing',
+    message: MISSING_NOTIFICATION_THREAD,
   },
-])('explains findings blocked by a failed start ($reason)', async ({ error, reason }) => {
-  const { client, call } = setup();
-  const routing = await client.initialize('shared-child', NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID, [
-    { type: 'slack', connector_id: 'slack', params: { channel: '#ops' } },
-  ]);
-  const [ops] = routing.destinations;
-  await client.claim('shared-child', ops.id, 'started', 'ops-start', true);
-  await client.record('ops-start', { status: 'failed', error });
-  await client.selectTerminalPhase('shared-child', 'completed');
-  await client.claim('shared-child', ops.id, 'completed', 'ops-result', false);
-  await client.record('ops-result', { status: 'failed', error: MISSING_NOTIFICATION_THREAD });
-
-  for (const executionId of [undefined, 'bound-parent']) {
-    expect((await call(executionId)).deliveries).toEqual([
-      {
-        id: ops.id,
-        channel: '#ops',
-        attemptedAt: expect.any(String),
-        phase: 'completed',
-        status: 'failed',
-        reason,
-      },
+])(
+  'explains findings blocked by a failed start ($message)',
+  async ({ error, isUserFacing, message }) => {
+    const { client, call } = setup();
+    const routing = await client.initialize('shared-child', NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID, [
+      { type: 'slack', connector_id: 'slack', params: { channel: '#ops' } },
     ]);
+    const [ops] = routing.destinations;
+    await client.claim('shared-child', ops.id, 'started', 'ops-start', true);
+    await client.record('ops-start', {
+      status: 'failed',
+      error,
+      is_user_facing_error: isUserFacing,
+    });
+    await client.selectTerminalPhase('shared-child', 'completed');
+    await client.claim('shared-child', ops.id, 'completed', 'ops-result', false);
+    await client.record('ops-result', { status: 'failed', error: MISSING_NOTIFICATION_THREAD });
+
+    for (const executionId of [undefined, 'bound-parent']) {
+      expect((await call(executionId)).deliveries).toEqual([
+        {
+          id: ops.id,
+          channel: '#ops',
+          attemptedAt: expect.any(String),
+          phase: 'completed',
+          status: 'failed',
+          message,
+        },
+      ]);
+    }
   }
-});
+);
 
 it('shows a recent claim as sending until an uncertain outcome is recorded or the claim ages out', async () => {
   jest.useFakeTimers();

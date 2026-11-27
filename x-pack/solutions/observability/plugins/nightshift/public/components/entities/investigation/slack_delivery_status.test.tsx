@@ -12,7 +12,7 @@ import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { RELAY_APP_BINDINGS_QUERY_KEY } from '../../../data/relay_apps/use_relay_app_bindings';
 import { SlackDeliveryStatus } from './slack_delivery_status';
 
-it('keeps channel names across delivery states and updates the guidance after reconnecting', async () => {
+it('keeps channel names across delivery states and shows the recorded Slack message', async () => {
   jest.useFakeTimers();
   const queryClient = new QueryClient();
   try {
@@ -22,6 +22,8 @@ it('keeps channel names across delivery states and updates the guidance after re
       attemptedAt: '2026-11-24T10:00:00.000Z',
     };
     const review = { ...destination, id: 'slack-review', channel: 'C08REVIEW01' };
+    const message =
+      'Channel #review is not connected. Connect it in the Elastic Slack app settings.';
     const fetch = jest
       .fn()
       .mockResolvedValueOnce({ deliveries: [] })
@@ -34,7 +36,7 @@ it('keeps channel names across delivery states and updates the guidance after re
       .mockResolvedValueOnce({
         deliveries: [
           { ...destination, status: 'sent', phase: 'started' },
-          { ...review, status: 'failed', phase: 'completed', reason: 'thread_missing' },
+          { ...review, status: 'failed', phase: 'completed' },
         ],
       })
       .mockResolvedValue({
@@ -44,7 +46,7 @@ it('keeps channel names across delivery states and updates the guidance after re
             ...review,
             status: 'failed',
             phase: 'completed',
-            reason: 'channel_not_connected',
+            message,
           },
         ],
       });
@@ -86,11 +88,15 @@ it('keeps channel names across delivery states and updates the guidance after re
 
     expect(await screen.findByText('Delivered')).toBeInTheDocument();
     expect(screen.getByText('#review')).toBeVisible();
+    expect(
+      screen.getByText('Check the Slack connector and its access to this channel.')
+    ).toBeVisible();
 
     await act(async () => jest.advanceTimersByTime(30_000));
 
     expect(await screen.findByText('Failed')).toBeInTheDocument();
     expect(await screen.findByText('#review')).toBeVisible();
+    expect(screen.getByText(message)).toBeVisible();
     expect(await screen.findByRole('link', { name: 'Open Slack settings' })).toHaveAttribute(
       'href',
       '/app/nightshift/settings/general'
@@ -106,10 +112,7 @@ it('keeps channel names across delivery states and updates the guidance after re
       });
     });
 
-    expect(
-      await screen.findByText('This channel was not connected when delivery was attempted.')
-    ).toBeVisible();
-    expect(screen.queryByRole('link', { name: 'Open Slack settings' })).not.toBeInTheDocument();
+    expect(screen.getByText(message)).toBeVisible();
   } finally {
     queryClient.clear();
     jest.useRealTimers();
@@ -117,7 +120,7 @@ it('keeps channel names across delivery states and updates the guidance after re
 });
 
 it.each(['an HTTP error', 'an invalid response'])(
-  'can refresh from %s and gives read-only users an actionable instruction',
+  'can refresh from %s and shows the recorded message to read-only users',
   async (failure) => {
     const queryClient = new QueryClient({ logger: { ...console, error: jest.fn() } });
     const fetch = jest.fn();
@@ -139,7 +142,7 @@ it.each(['an HTTP error', 'an invalid response'])(
           attemptedAt: '2026-11-24T10:00:00.000Z',
           phase: 'completed',
           status: 'failed',
-          reason: 'channel_not_connected',
+          message: 'Channel C0OPS is not connected. Connect it in the Elastic Slack app settings.',
         },
       ],
     });
@@ -164,9 +167,7 @@ it.each(['an HTTP error', 'an invalid response'])(
       }
       fireEvent.click(refresh);
 
-      expect(
-        await screen.findByText(/Ask a nightshift admin to connect this channel/)
-      ).toBeVisible();
+      expect(await screen.findByText(/Channel C0OPS is not connected/)).toBeVisible();
       expect(screen.getByText('C0OPS')).toBeVisible();
       expect(screen.queryByRole('link', { name: 'Open Slack settings' })).not.toBeInTheDocument();
       expect(get).toHaveBeenCalledTimes(1);

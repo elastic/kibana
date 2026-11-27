@@ -8,7 +8,6 @@
 import { z, lazySchema } from '@kbn/zod/v4';
 import { types } from '@kbn/storage-adapter';
 import { MAX_TEXT_LENGTH } from '@kbn/significant-events-schema';
-import type { SlackDeliveryFailureReason } from '@kbn/connector-specs';
 import { defineInvestigationAttachment } from '@kbn/agentic-investigations-plugin/server';
 import { investigationNotificationDestinationSchema } from '../../../common';
 
@@ -38,7 +37,7 @@ export const notificationAttemptSchema = lazySchema(() =>
       external_conversation_id: identifier.optional(),
       sent_at: timestamp.optional(),
       error: z.string().max(MAX_TEXT_LENGTH).optional(),
-      failure_reason_code: z.string().min(1).max(100).optional(),
+      is_user_facing_error: z.literal(true).optional(),
     })
     .loose()
 );
@@ -91,11 +90,10 @@ export type NotificationPhase = z.infer<typeof notificationPhaseSchema>;
 export type NotificationAttempt = z.infer<typeof notificationAttemptSchema>;
 export type NotificationOutcome = Pick<
   NotificationAttempt,
-  'message_ts' | 'external_conversation_id' | 'sent_at' | 'error'
+  'message_ts' | 'external_conversation_id' | 'sent_at' | 'error' | 'is_user_facing_error'
 > & {
   status: z.infer<typeof outcomeStatusSchema>;
   channel?: string;
-  failure_reason_code?: SlackDeliveryFailureReason;
 };
 export type NotificationRouting = z.infer<typeof notificationRoutingSchema>;
 export type StoredNotificationRouting = z.infer<typeof storedNotificationRoutingSchema>;

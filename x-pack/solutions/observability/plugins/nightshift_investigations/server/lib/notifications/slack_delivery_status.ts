@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { isSlackDeliveryFailureReason } from '@kbn/connector-specs';
-import type { SlackDeliveryFailureReason } from '@kbn/connector-specs';
 import { MISSING_NOTIFICATION_THREAD, notificationPhaseSchema } from './notification_routing';
 import type {
   NotificationAttempt,
@@ -17,40 +15,13 @@ import { readSlackNotificationParams } from './slack_notification';
 
 const SENDING_WINDOW_MS = 30_000;
 
-type DeliveryFailureReason =
-  | SlackDeliveryFailureReason
-  | 'start_rate_limited'
-  | 'thread_missing'
-  | 'thread_unconfirmed';
-
-const getRecordedDeliveryFailureReason = (
-  attempt?: NotificationAttempt
-): DeliveryFailureReason | undefined => {
-  const failureReason = attempt?.failure_reason_code;
-  if (isSlackDeliveryFailureReason(failureReason)) return failureReason;
-  const error = attempt?.error;
-  if (!error) return;
-  if (error.includes('is not connected. Connect it in the Elastic Slack app settings.')) {
-    return 'channel_not_connected';
-  }
-  if (error.includes('The Elastic Slack app is no longer installed in this workspace')) {
-    return 'app_disconnected';
-  }
-  if (/Slack rate-limited this request|\bratelimited\b/i.test(error)) {
-    return 'rate_limited';
-  }
-  if (error.includes('A previous root delivery is unconfirmed')) {
-    return 'thread_unconfirmed';
-  }
-};
-
 export interface SlackDeliveryStatus {
   id: string;
   channel: string;
   phase?: NotificationPhase;
   status: 'sent' | 'failed' | 'sending' | 'unconfirmed';
   attemptedAt: string;
-  reason?: DeliveryFailureReason;
+  message?: string;
 }
 
 const getAttemptStatus = (
@@ -66,30 +37,22 @@ const getAttemptStatus = (
   return 'unconfirmed';
 };
 
-const getAttemptFailureReason = (
+const getAttemptMessage = (
   attempt: NotificationAttempt,
   attempts: NotificationAttempt[]
-): DeliveryFailureReason | undefined => {
-  if (attempt.status === 'sent') return;
-  const recordedFailureReason = getRecordedDeliveryFailureReason(attempt);
-  if (recordedFailureReason) return recordedFailureReason;
-  if (attempt.status === 'failed' && attempt.error === MISSING_NOTIFICATION_THREAD) {
-    const started = attempts.find(
-      (entry) =>
-        entry.execution_id === attempt.execution_id &&
-        entry.destination_id === attempt.destination_id &&
-        entry.phase === 'started' &&
-        entry.status === 'failed'
-    );
-    const startFailureReason = getRecordedDeliveryFailureReason(started);
-    if (
-      startFailureReason === 'channel_not_connected' ||
-      startFailureReason === 'app_disconnected'
-    ) {
-      return startFailureReason;
-    }
-    return startFailureReason === 'rate_limited' ? 'start_rate_limited' : 'thread_missing';
-  }
+): string | undefined => {
+  if (attempt.status !== 'failed') return;
+  if (attempt.is_user_facing_error) return attempt.error;
+  if (attempt.error !== MISSING_NOTIFICATION_THREAD) return;
+
+  const start = attempts.find(
+    (entry) =>
+      entry.execution_id === attempt.execution_id &&
+      entry.destination_id === attempt.destination_id &&
+      entry.phase === 'started' &&
+      entry.status === 'failed'
+  );
+  return (start?.is_user_facing_error && start.error) || MISSING_NOTIFICATION_THREAD;
 };
 
 const isPreferredAttempt = (
@@ -141,7 +104,7 @@ export const getSlackDeliveryStatus = (
         phase: phase.success ? phase.data : undefined,
         status: getAttemptStatus(attempt, now),
         attemptedAt: attempt.attempted_at,
-        reason: getAttemptFailureReason(attempt, routing.attempts),
+        message: getAttemptMessage(attempt, routing.attempts),
       },
     ];
   });

@@ -1367,12 +1367,12 @@ describe('generateExecutorFunction', () => {
     });
 
     it.each([
-      { statusCode: 403, reason: 'channel_not_connected', subAction: 'sendMessage' },
-      { statusCode: 409, reason: 'app_disconnected', subAction: 'updateMessage' },
-      { statusCode: 429, reason: 'rate_limited', subAction: 'sendMessage' },
+      { statusCode: 403, message: 'is not connected', subAction: 'sendMessage' },
+      { statusCode: 409, message: 'is no longer installed', subAction: 'updateMessage' },
+      { statusCode: 429, message: 'rate-limited this request', subAction: 'sendMessage' },
     ])(
-      'returns $reason metadata for Slack Relay $statusCode',
-      async ({ statusCode, reason, subAction }) => {
+      'returns the user-facing message for Slack Relay $statusCode',
+      async ({ statusCode, message, subAction }) => {
         const relay = {
           trigger: jest
             .fn()
@@ -1401,7 +1401,8 @@ describe('generateExecutorFunction', () => {
 
         expect(result).toMatchObject({
           status: 'error',
-          errorMeta: { slackDeliveryFailureReason: reason },
+          message: expect.stringContaining(message),
+          errorMeta: { isUserFacing: true },
         });
       }
     );

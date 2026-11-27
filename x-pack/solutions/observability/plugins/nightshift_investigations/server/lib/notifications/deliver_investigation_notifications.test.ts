@@ -313,7 +313,8 @@ describe('investigation notification lifecycle', () => {
     execute.mockResolvedValueOnce({
       status: 'error',
       message,
-      errorMeta: { slackDeliveryFailureReason: 'channel_not_connected' },
+      serviceMessage: 'Internal Relay diagnostic',
+      errorMeta: { isUserFacing: true },
     } as never);
     expect(await send('started')).toEqual({ sent: 0, failed: 1, unconfirmed: 0 });
     const started = await client.get();
@@ -321,10 +322,10 @@ describe('investigation notification lifecycle', () => {
       phase: 'started',
       status: 'failed',
       error: message,
-      failure_reason_code: 'channel_not_connected',
+      is_user_facing_error: true,
     });
     expect(started && getSlackDeliveryStatus(started)).toMatchObject([
-      { phase: 'started', status: 'failed', reason: 'channel_not_connected' },
+      { phase: 'started', status: 'failed', message },
     ]);
     const record = jest.spyOn(client, 'record');
 
@@ -336,7 +337,7 @@ describe('investigation notification lifecycle', () => {
       error: MISSING_NOTIFICATION_THREAD,
     });
     expect(completed && getSlackDeliveryStatus(completed, new Set(['exec-1']))).toMatchObject([
-      { phase: 'completed', status: 'failed', reason: 'channel_not_connected' },
+      { phase: 'completed', status: 'failed', message },
     ]);
     expect(await send('completed')).toEqual({ sent: 0, failed: 1, unconfirmed: 0 });
     expect(execute).toHaveBeenCalledTimes(1);
