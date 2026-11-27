@@ -29,6 +29,10 @@ export const createAlertDetectionsNavigationTree = (): RootNodePanelOpenerDefini
           id: SecurityPageName.alerts,
           link: securityLink(SecurityPageName.alerts),
         },
+        {
+          id: SecurityPageName.detonate,
+          link: securityLink(SecurityPageName.detonate),
+        },
       ],
     },
   ],

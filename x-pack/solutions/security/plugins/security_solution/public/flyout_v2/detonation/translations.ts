@@ -1,0 +1,249 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { i18n } from '@kbn/i18n';
+
+export const DETONATION_REPORT_TITLE = i18n.translate(
+  'xpack.securitySolution.flyoutV2.detonation.reportTitle',
+  { defaultMessage: 'Detonation report' }
+);
+export const DETONATE_ACTION = i18n.translate(
+  'xpack.securitySolution.flyoutV2.detonation.detonateAction',
+  { defaultMessage: 'Detonate' }
+);
+export const DETONATING = i18n.translate('xpack.securitySolution.flyoutV2.detonation.detonating', {
+  defaultMessage: 'Detonating',
+});
+export const DETONATING_SANDBOX = i18n.translate(
+  'xpack.securitySolution.flyoutV2.detonation.detonatingSandbox',
+  { defaultMessage: 'Running the sample in an isolated sandbox.' }
+);
+export const DETONATING_DURATION = i18n.translate(
+  'xpack.securitySolution.flyoutV2.detonation.detonatingDuration',
+  { defaultMessage: 'Detonating can take 10 minutes.' }
+);
+export const DETONATING_NOTIFY = i18n.translate(
+  'xpack.securitySolution.flyoutV2.detonation.detonatingNotify',
+  { defaultMessage: "You'll be notified when it's done." }
+);
+export const MALICIOUS = i18n.translate('xpack.securitySolution.flyoutV2.detonation.malicious', {
+  defaultMessage: 'Malicious',
+});
+export const REPORT_ID = i18n.translate('xpack.securitySolution.flyoutV2.detonation.reportId', {
+  defaultMessage: 'Report ID',
+});
+export const SHA_256 = i18n.translate('xpack.securitySolution.flyoutV2.detonation.sha256', {
+  defaultMessage: 'SHA-256',
+});
+export const SUBMITTED = i18n.translate('xpack.securitySolution.flyoutV2.detonation.submitted', {
+  defaultMessage: 'Submitted',
+});
+export const SOURCE = i18n.translate('xpack.securitySolution.flyoutV2.detonation.source', {
+  defaultMessage: 'Source',
+});
+export const WHY_THIS_VERDICT = i18n.translate(
+  'xpack.securitySolution.flyoutV2.detonation.whyThisVerdict',
+  { defaultMessage: 'Why this verdict' }
+);
+export const NETWORK_ACTIVITY = i18n.translate(
+  'xpack.securitySolution.flyoutV2.detonation.networkActivity',
+  { defaultMessage: 'Network activity' }
+);
+export const FILE_AND_SYSTEM_ACTIVITY = i18n.translate(
+  'xpack.securitySolution.flyoutV2.detonation.fileAndSystemActivity',
+  { defaultMessage: 'File and system activity' }
+);
+export const SURICATA_AND_YARA = i18n.translate(
+  'xpack.securitySolution.flyoutV2.detonation.suricataAndYara',
+  { defaultMessage: 'Suricata and YARA matches' }
+);
+export const FILE_CONTEXT = i18n.translate(
+  'xpack.securitySolution.flyoutV2.detonation.fileContext',
+  { defaultMessage: 'File context' }
+);
+export const ENRICHMENT = i18n.translate('xpack.securitySolution.flyoutV2.detonation.enrichment', {
+  defaultMessage: 'Enrichment',
+});
+export const OPTIONAL = i18n.translate('xpack.securitySolution.flyoutV2.detonation.optional', {
+  defaultMessage: 'Optional',
+});
+export const DOMAIN_OR_IP = i18n.translate(
+  'xpack.securitySolution.flyoutV2.detonation.domainOrIp',
+  { defaultMessage: 'Domain / IP' }
+);
+export const PORT = i18n.translate('xpack.securitySolution.flyoutV2.detonation.port', {
+  defaultMessage: 'Port',
+});
+export const FLAG = i18n.translate('xpack.securitySolution.flyoutV2.detonation.flag', {
+  defaultMessage: 'Flag',
+});
+export const ACTION = i18n.translate('xpack.securitySolution.flyoutV2.detonation.action', {
+  defaultMessage: 'Action',
+});
+export const PATH = i18n.translate('xpack.securitySolution.flyoutV2.detonation.path', {
+  defaultMessage: 'Path',
+});
+export const FILE = i18n.translate('xpack.securitySolution.flyoutV2.detonation.file', {
+  defaultMessage: 'File',
+});
+export const RELATION = i18n.translate('xpack.securitySolution.flyoutV2.detonation.relation', {
+  defaultMessage: 'Relation',
+});
+export const VERDICT = i18n.translate('xpack.securitySolution.flyoutV2.detonation.verdict', {
+  defaultMessage: 'Verdict',
+});
+export const RELATED_FILES = i18n.translate(
+  'xpack.securitySolution.flyoutV2.detonation.relatedFiles',
+  { defaultMessage: 'Related files' }
+);
+export const SURICATA = i18n.translate('xpack.securitySolution.flyoutV2.detonation.suricata', {
+  defaultMessage: 'Suricata',
+});
+export const YARA = i18n.translate('xpack.securitySolution.flyoutV2.detonation.yara', {
+  defaultMessage: 'YARA',
+});
+export const THREAT_SCORE_LABEL = i18n.translate(
+  'xpack.securitySolution.flyoutV2.detonation.threatScore',
+  { defaultMessage: 'Threat score 92 / 100 · High confidence' }
+);
+export const FILE_CONTEXT_CALLOUT_TITLE = i18n.translate(
+  'xpack.securitySolution.flyoutV2.detonation.fileContextCalloutTitle',
+  { defaultMessage: 'Created 6 days ago' }
+);
+export const FILE_CONTEXT_CALLOUT_TEXT = i18n.translate(
+  'xpack.securitySolution.flyoutV2.detonation.fileContextCalloutText',
+  { defaultMessage: 'Files under 30 days old are treated as more suspicious.' }
+);
+export const COPY_PERMALINK = i18n.translate(
+  'xpack.securitySolution.flyoutV2.detonation.copyPermalink',
+  { defaultMessage: 'Copy permalink' }
+);
+export const OPEN_FULL_REPORT = i18n.translate(
+  'xpack.securitySolution.flyoutV2.detonation.openFullReport',
+  { defaultMessage: 'Open full report' }
+);
+export const TAB_FILES = i18n.translate('xpack.securitySolution.flyoutV2.detonation.tabFiles', {
+  defaultMessage: 'Files',
+});
+export const TAB_PROCESSES = i18n.translate(
+  'xpack.securitySolution.flyoutV2.detonation.tabProcesses',
+  { defaultMessage: 'Processes' }
+);
+export const TAB_REGISTRY = i18n.translate(
+  'xpack.securitySolution.flyoutV2.detonation.tabRegistry',
+  { defaultMessage: 'Registry' }
+);
+export const TAB_ALL = i18n.translate('xpack.securitySolution.flyoutV2.detonation.tabAll', {
+  defaultMessage: 'All',
+});
+export const COPY_TO_CLIPBOARD = i18n.translate(
+  'xpack.securitySolution.flyoutV2.detonation.copyToClipboard',
+  { defaultMessage: 'Copy to clipboard' }
+);
+
+export const AI_SUMMARY = i18n.translate('xpack.securitySolution.flyoutV2.detonation.aiSummary', {
+  defaultMessage: 'AI summary',
+});
+export const AFFECTED_ENTITIES = i18n.translate(
+  'xpack.securitySolution.flyoutV2.detonation.affectedEntities',
+  { defaultMessage: 'Affected entities' }
+);
+export const RECOMMENDED_ACTIONS = i18n.translate(
+  'xpack.securitySolution.flyoutV2.detonation.recommendedActions',
+  { defaultMessage: 'Recommended actions' }
+);
+export const GENERATED_BY_AI = (timestamp: string) =>
+  i18n.translate('xpack.securitySolution.flyoutV2.detonation.generatedByAi', {
+    defaultMessage: 'Generated by AI on {timestamp}',
+    values: { timestamp },
+  });
+export const COPY_SUMMARY = i18n.translate(
+  'xpack.securitySolution.flyoutV2.detonation.copySummary',
+  { defaultMessage: 'Copy summary' }
+);
+export const RISK_LABEL = (risk: string, score: number) =>
+  i18n.translate('xpack.securitySolution.flyoutV2.detonation.riskLabel', {
+    defaultMessage: '{risk} risk · {score}',
+    values: { risk, score },
+  });
+
+export const HIGHLIGHTED_FIELDS = i18n.translate(
+  'xpack.securitySolution.flyoutV2.detonation.highlightedFields',
+  { defaultMessage: 'Highlighted fields' }
+);
+export const FIELD = i18n.translate('xpack.securitySolution.flyoutV2.detonation.fieldColumn', {
+  defaultMessage: 'Field',
+});
+export const VALUE = i18n.translate('xpack.securitySolution.flyoutV2.detonation.valueColumn', {
+  defaultMessage: 'Value',
+});
+export const EDIT = i18n.translate('xpack.securitySolution.flyoutV2.detonation.edit', {
+  defaultMessage: 'Edit',
+});
+
+export const TAKE_ACTION = i18n.translate('xpack.securitySolution.flyoutV2.detonation.takeAction', {
+  defaultMessage: 'Take action',
+});
+export const ISOLATE_HOST = i18n.translate(
+  'xpack.securitySolution.flyoutV2.detonation.isolateHost',
+  {
+    defaultMessage: 'Isolate host',
+  }
+);
+export const ADD_TO_NEW_CASE = i18n.translate(
+  'xpack.securitySolution.flyoutV2.detonation.addToNewCase',
+  { defaultMessage: 'Add to new case' }
+);
+export const OPEN_GH_ISSUE = i18n.translate(
+  'xpack.securitySolution.flyoutV2.detonation.openGhIssue',
+  { defaultMessage: 'Open GH issue with AI Agent' }
+);
+export const AI_GENERATED_ACTION = i18n.translate(
+  'xpack.securitySolution.flyoutV2.detonation.aiAction',
+  { defaultMessage: 'AI-assisted action' }
+);
+export const SEE_DETONATIONS = i18n.translate(
+  'xpack.securitySolution.flyoutV2.detonation.seeDetonations',
+  { defaultMessage: 'See detonations' }
+);
+export const TAB_OVERVIEW = i18n.translate(
+  'xpack.securitySolution.flyoutV2.detonation.tabOverview',
+  {
+    defaultMessage: 'Overview',
+  }
+);
+export const TAB_DETAILS = i18n.translate('xpack.securitySolution.flyoutV2.detonation.tabDetails', {
+  defaultMessage: 'Details',
+});
+export const TURN_ON_RULE = i18n.translate(
+  'xpack.securitySolution.flyoutV2.detonation.turnOnRule',
+  {
+    defaultMessage: 'Turn on rule',
+  }
+);
+export const TURN_ON_RULE_DESCRIPTION = (ruleName: string) =>
+  i18n.translate('xpack.securitySolution.flyoutV2.detonation.turnOnRuleDescription', {
+    defaultMessage:
+      'The file is malicious. Turn on {ruleName} to prevent this behavior, and open a case to track the response.',
+    values: { ruleName },
+  });
+export const ADJUST_RULE = i18n.translate('xpack.securitySolution.flyoutV2.detonation.adjustRule', {
+  defaultMessage: 'Adjust rule',
+});
+export const ADJUST_RULE_DESCRIPTION = (ruleName: string) =>
+  i18n.translate('xpack.securitySolution.flyoutV2.detonation.adjustRuleDescription', {
+    defaultMessage:
+      'The file is not malicious, so this alert is a false positive. Adjust {ruleName} and open a GH ticket to inform the Detections team.',
+    values: { ruleName },
+  });
+export const OPEN_CASE = i18n.translate('xpack.securitySolution.flyoutV2.detonation.openCase', {
+  defaultMessage: 'Open a case',
+});
+export const OPEN_GH_TICKET = i18n.translate(
+  'xpack.securitySolution.flyoutV2.detonation.openGhTicket',
+  { defaultMessage: 'Open GH ticket' }
+);

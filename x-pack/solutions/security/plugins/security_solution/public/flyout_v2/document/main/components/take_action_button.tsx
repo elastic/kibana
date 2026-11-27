@@ -5,12 +5,14 @@
  * 2.0.
  */
 
-import React, { memo, useCallback, useMemo, useState } from 'react';
+import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
 import { EuiButton, EuiPopover } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { getFieldValue } from '@kbn/discover-utils';
 import { isNonLocalIndexName } from '@kbn/es-query';
+import { toMountPoint } from '@kbn/react-kibana-mount';
 import { ALERT_WORKFLOW_STATUS, EVENT_KIND } from '@kbn/rule-data-utils';
 import type { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
@@ -35,10 +37,29 @@ import { AddExceptionFlyoutWrapper } from '../../../../detections/components/ale
 import { getOsqueryActionItem } from '../../../../detections/components/osquery/osquery_action_item';
 import { OsqueryFlyout } from '../../../../detections/components/osquery/osquery_flyout';
 import { getAlertDetailsFieldValue } from '../../../../common/lib/endpoint/utils/get_event_details_field_values';
+import { APP_UI_ID, SecurityPageName } from '../../../../../common/constants';
 import { useKibana } from '../../../../common/lib/kibana';
 import { getTimelineEventsDetailsFromRecord } from '../utils/get_timeline_events_details_from_record';
 import { useFlyoutTelemetry } from '../../../shared/hooks/use_flyout_telemetry';
-import { ADD_NOTE_ACTION_ID } from '../../../../common/constants/action_ids';
+import { ADD_NOTE_ACTION_ID, DETONATE_ACTION_ID } from '../../../../common/constants/action_ids';
+import { useFlyoutApi } from '../../../use_flyout_api';
+import { DETONATE_ACTION } from '../../../detonation/translations';
+import type { DetonateSample } from '../../../detonation/submit_modal';
+import { DetonateSubmitModal } from '../../../detonation/submit_modal';
+import { DetonateChat } from '../../../detonation/detonate_chat';
+import type { DetonateFileOption } from '../../../detonation/select_file_panel';
+import {
+  DETONATE_FILE_PANEL_ID,
+  DETONATE_FILE_PANEL_WIDTH,
+  DetonateSelectFilePanel,
+} from '../../../detonation/select_file_panel';
+import * as detonateFileI18n from '../../../detonation/select_file_translations';
+import { useFlowVariant } from '../../../detonation/flow_variant';
+import { addPendingDetonation } from '../../../detonation/pending_detonations';
+import {
+  DETONATION_SUBMITTED_TITLE,
+  DetonationSubmittedToastContent,
+} from '../../../detonation/submitted_toast';
 import { FLYOUT_FOOTER_DROPDOWN_BUTTON_TEST_ID } from './test_ids';
 import { ActionMenu, getActionGroups } from './action_menu';
 
@@ -200,9 +221,151 @@ export const TakeActionButton = memo(
       closePopover: closePopoverHandler,
     });
 
-    const endpointResponseActionsConsoleItems = useResponderActionItem(
+    const responderActionItems = useResponderActionItem(
       dataFormattedForFieldBrowser,
       closePopoverHandler
+    );
+
+    // Prototype: "Detonate" opens a submit modal; submitting opens a fake detonation report flyout.
+    const { openDetonationFlyoutAsChild } = useFlyoutApi();
+    const [detonateSample, setDetonateSample] = useState<DetonateSample | null>(null);
+    const flowVariant = useFlowVariant();
+    const kibanaServices = useKibana().services;
+    const [isDetonateSubmitting, setIsDetonateSubmitting] = useState(false);
+    const detonateTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+    useEffect(
+      () => () => {
+        if (detonateTimeoutRef.current) clearTimeout(detonateTimeoutRef.current);
+      },
+      []
+    );
+
+    // "Flow toast": no modal. Spin briefly, then confirm with a toast linking to the Detonate page.
+    const submitDetonationWithToast = useCallback(
+      (file: Pick<DetonateFileOption, 'fileName' | 'hostName' | 'sha256'>) => {
+        setIsDetonateSubmitting(true);
+        detonateTimeoutRef.current = setTimeout(() => {
+          setIsDetonateSubmitting(false);
+          closePopoverHandler();
+          // The detonation keeps running after the toast: the Detonate page shows it as a pending row.
+          addPendingDetonation(file);
+          const { notifications, application } = kibanaServices;
+          const toast = notifications.toasts.addSuccess({
+            title: DETONATION_SUBMITTED_TITLE,
+            text: toMountPoint(
+              <DetonationSubmittedToastContent
+                onView={() => {
+                  notifications.toasts.remove(toast);
+                  application.navigateToApp(APP_UI_ID, { deepLinkId: SecurityPageName.detonate });
+                }}
+              />,
+              kibanaServices
+            ),
+            toastLifeTimeMs: 15000,
+          });
+        }, 2000);
+      },
+      [closePopoverHandler, kibanaServices]
+    );
+    const hostName = (getFieldValue(hit, 'host.name') as string | undefined) ?? '-';
+    const detonateFiles = useMemo<DetonateFileOption[]>(
+      () => [
+        {
+          id: 'alert-file',
+          fileName:
+            (getFieldValue(hit, 'file.name') as string | undefined) ??
+            (getFieldValue(hit, 'process.name') as string | undefined) ??
+            'invoice_Q3_final.exe',
+          sha256:
+            (getFieldValue(hit, 'file.hash.sha256') as string | undefined) ??
+            '275a021bbfb6489e54d471899f7db9d1663fc695ec2fe2a2c4538aabf651fd0f',
+          hostName,
+          description: 'File on the host that triggered this alert',
+          badge: detonateFileI18n.BADGE_DETONATED,
+          badgeColor: 'danger',
+          isDetonated: true,
+        },
+        {
+          id: 'dropped-file',
+          fileName: 'svchost32.exe',
+          sha256: 'a41f09c2d7e83b6f1c5a9d04e7b2c8f13a6d5e90b4c7f2a1d8e6b3095c4a77c2',
+          hostName,
+          description: 'Dropped by the process in %APPDATA%\\Roaming',
+        },
+        {
+          id: 'downloaded-file',
+          fileName: 'update_helper.dll',
+          sha256: 'e0c7bb53a19d4f8e62b07c3d5a1f9e84d6b2c70a3f5e19d8c4b6a2071e3f1d90',
+          hostName,
+          description: 'Downloaded from 185.220.101.47 over HTTPS',
+        },
+      ],
+      [hit, hostName]
+    );
+    const [isDetonateChatOpen, setIsDetonateChatOpen] = useState(false);
+    const detonateItems = useMemo(
+      () => [
+        flowVariant === 'chat'
+          ? {
+              'data-test-subj': DETONATE_ACTION_ID,
+              key: DETONATE_ACTION_ID,
+              name: DETONATE_ACTION,
+              onClick: () => {
+                closePopoverHandler();
+                setIsDetonateChatOpen(true);
+              },
+            }
+          : {
+              'data-test-subj': DETONATE_ACTION_ID,
+              key: DETONATE_ACTION_ID,
+              name: DETONATE_ACTION,
+              panel: DETONATE_FILE_PANEL_ID,
+            },
+      ],
+      [flowVariant, closePopoverHandler]
+    );
+    const detonatePanels = useMemo<EuiContextMenuPanelDescriptor[]>(
+      () => [
+        {
+          id: DETONATE_FILE_PANEL_ID,
+          title: detonateFileI18n.PANEL_TITLE,
+          width: DETONATE_FILE_PANEL_WIDTH,
+          content: (
+            <DetonateSelectFilePanel
+              files={detonateFiles}
+              isSubmitting={isDetonateSubmitting}
+              submitLabel={flowVariant === 'toast' ? DETONATE_ACTION : undefined}
+              onContinue={(file) => {
+                if (flowVariant === 'toast') {
+                  submitDetonationWithToast(file);
+                } else {
+                  closePopoverHandler();
+                  setDetonateSample(file);
+                }
+              }}
+            />
+          ),
+        },
+      ],
+      [
+        detonateFiles,
+        closePopoverHandler,
+        flowVariant,
+        isDetonateSubmitting,
+        submitDetonationWithToast,
+      ]
+    );
+    const handleDetonateSubmit = useCallback(() => {
+      setDetonateSample(null);
+      openDetonationFlyoutAsChild();
+    }, [openDetonationFlyoutAsChild]);
+    const handleSeeAnalysis = useCallback(() => {
+      setDetonateSample(null);
+      openDetonationFlyoutAsChild({ skipDetonation: true });
+    }, [openDetonationFlyoutAsChild]);
+    const endpointResponseActionsConsoleItems = useMemo(
+      () => [...responderActionItems, ...detonateItems],
+      [responderActionItems, detonateItems]
     );
 
     const [osqueryAgentId, setOsqueryAgentId] = useState<string | null>(null);
@@ -339,6 +502,21 @@ export const TakeActionButton = memo(
             onClose={() => setIsolateAction(null)}
           />
         )}
+        {detonateSample && (
+          <DetonateSubmitModal
+            sample={detonateSample}
+            onClose={() => setDetonateSample(null)}
+            onSubmit={handleDetonateSubmit}
+            onSeeAnalysis={handleSeeAnalysis}
+          />
+        )}
+        {isDetonateChatOpen && (
+          <DetonateChat
+            files={detonateFiles}
+            onClose={() => setIsDetonateChatOpen(false)}
+            onViewReport={handleSeeAnalysis}
+          />
+        )}
         {osqueryAgentId && (
           <OsqueryFlyout
             agentId={osqueryAgentId}
@@ -363,6 +541,7 @@ export const TakeActionButton = memo(
             alertAssigneePanels={alertAssigneesPanels}
             alertTagItems={alertTagsItems}
             alertTagPanels={alertTagsPanels}
+            detonatePanels={detonatePanels}
             documentWorkflowItems={documentWorkflowMenuItem}
             endpointResponseItems={endpointResponseActionsConsoleItems}
             exceptionItems={exceptionActionItems}

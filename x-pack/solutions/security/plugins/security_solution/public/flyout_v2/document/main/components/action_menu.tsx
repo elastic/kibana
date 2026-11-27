@@ -115,6 +115,8 @@ export const getActionGroups = ({
 
 interface ActionMenuProps extends ActionMenuGroupsProps {
   alertAssigneePanels: EuiContextMenuPanelDescriptor[];
+  /** Prototype: panels opened by the "Detonate" item. */
+  detonatePanels?: EuiContextMenuPanelDescriptor[];
   alertTagPanels: EuiContextMenuPanelDescriptor[];
   reportActionClicked: (params: ReportActionClickedParams) => void;
   runAlertWorkflowPanels: EuiContextMenuPanelDescriptor[];
@@ -149,6 +151,7 @@ export const ActionMenu = ({
   alertAssigneePanels,
   alertTagItems,
   alertTagPanels,
+  detonatePanels,
   documentWorkflowItems,
   endpointResponseItems,
   exceptionItems,
@@ -232,10 +235,12 @@ export const ActionMenu = ({
       ...(!isRemoteDocument && isAlert ? alertTagPanels : []),
       ...(!isRemoteDocument && isAlert ? runAlertWorkflowPanels : []),
       ...(!isRemoteDocument && !isAlert ? runDocumentWorkflowPanels : []),
+      ...(detonatePanels ?? []),
     ],
     [
       alertAssigneePanels,
       alertTagPanels,
+      detonatePanels,
       isAlert,
       isRemoteDocument,
       runAlertWorkflowPanels,
