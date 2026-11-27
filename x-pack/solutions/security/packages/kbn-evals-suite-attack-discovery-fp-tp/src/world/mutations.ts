@@ -6,7 +6,7 @@
  */
 
 import type { Ad2IndexedRawEvent } from '@kbn/evals-suite-attack-discovery-agent-builder';
-import type { FpTpChainDestination, FpTpChainParentProcess } from './chain';
+import { ALERT_DELAY_MS, type FpTpChainDestination, type FpTpChainParentProcess } from './chain';
 import { asRecord, withFieldMessage } from './event_message';
 import type { FpTpWorld } from './types';
 
@@ -125,6 +125,136 @@ export const withNetworkDestination = (
     (event) => asRecord(event.source.destination).domain === fromDomain,
     (event) => ({ ...event, source: { ...event.source, destination } })
   );
+
+/**
+ * Removes `host.id` from every alert, leaving `host.name`. Each per-alert branch
+ * search keys on its alert's host id and falls back to the name, so with no ids
+ * every branch must match by name. Raw events keep their ids: only the alerts
+ * drive the key.
+ */
+export const withoutAlertHostId = (world: FpTpWorld): FpTpWorld => ({
+  ...world,
+  alerts: world.alerts.map((alert) => {
+    const { id: _hostId, ...host } = asRecord(alert.source.host);
+    return { ...alert, source: { ...alert.source, host } };
+  }),
+});
+
+/**
+ * Rewrites the stage timestamps of a chain world so its alerts' `kibana.alert.original_time`
+ * span `days`. Spreads the stage anchor times evenly across the span, keeping each stage
+ * after its cited events: a stage's alert is its latest cited event plus the delay. Events
+ * keep their relative offsets within the chain hour, and the first stage keeps its time, so
+ * the chain and the attack still start an hour before it.
+ *
+ * Retimes only the ALERTS: the raw events keep the chain-hour timestamps they were built
+ * with, so per-alert branch windows after the first alert are empty. A world whose events
+ * must follow their stages across the span needs `withStageEventSpan` as well, so each
+ * per-alert branch window actually contains its own stage's events.
+ */
+export const withStageSpan = (world: FpTpWorld, days: number): FpTpWorld => {
+  const alerts = [...world.alerts].sort(
+    (left, right) =>
+      Date.parse(String(left.source['kibana.alert.original_time'])) -
+      Date.parse(String(right.source['kibana.alert.original_time']))
+  );
+  if (alerts.length === 0) {
+    return world;
+  }
+  const spanMs = days * 24 * 60 * 60 * 1000;
+  // Anchored on the earliest alert so the span the alerts cover is exactly `days`.
+  const firstMs = Date.parse(String(alerts[0].source['kibana.alert.original_time']));
+  const anchored = new Map<string, number>();
+  alerts.forEach((alert, position) => {
+    anchored.set(alert.id, firstMs + (spanMs * position) / (alerts.length - 1 || 1));
+  });
+  const retime = (source: Record<string, unknown>): Record<string, unknown> => {
+    const ancestors = source['kibana.alert.ancestors'];
+    const citedTimes = Array.isArray(ancestors)
+      ? ancestors
+          .map((ancestor) => anchored.get(String((ancestor as Record<string, unknown>).id)))
+          .filter((time): time is number => time !== undefined)
+      : [];
+    const time =
+      citedTimes.length > 0
+        ? Math.max(...citedTimes)
+        : anchored.get(String(source['kibana.alert.uuid']));
+    return time === undefined
+      ? source
+      : {
+          ...source,
+          '@timestamp': new Date(time).toISOString(),
+          'kibana.alert.original_time': new Date(time).toISOString(),
+        };
+  };
+  return {
+    ...world,
+    alerts: world.alerts.map((alert) => ({ ...alert, source: retime(alert.source) })),
+  };
+};
+
+/**
+ * `withStageSpan`, but every raw event follows its stage. After the alerts are spread
+ * across the span, each event is retimed to its citing stage's alert: an event cited by
+ * exactly one stage moves to that alert's time minus the same alert-to-event delay
+ * (`ALERT_DELAY_MS` in chain.ts), and an event cited by several stages is placed just
+ * before the EARLIEST citing alert. That puts it inside every citing branch window only
+ * while the citing alerts sit within `FP_TP_RAW_EVENT_WINDOW_MS` (±2h) of that earliest
+ * alert — the chain fixtures keep a stage's citing alerts inside one window, but this
+ * helper does not itself enforce that bound. Events no alert cites keep their time —
+ * they are bystanders, not branch evidence. Every event of a stage lands on the SAME
+ * timestamp (its alert's time minus the delay): the chain's intra-stage offsets
+ * collapse, so intra-stage order is NOT preserved — the per-alert search sorts
+ * oldest-first and dedups, which is all the branch reads need.
+ *
+ * Use on its own (it spreads the alerts itself) or after `withStageSpan`, which is
+ * idempotent here: re-anchoring on the already-spread alert times moves nothing.
+ */
+export const withStageEventSpan = (world: FpTpWorld, days: number): FpTpWorld => {
+  const spread = withStageSpan(world, days);
+  const alerts = [...spread.alerts].sort(
+    (left, right) =>
+      Date.parse(String(left.source['kibana.alert.original_time'])) -
+      Date.parse(String(right.source['kibana.alert.original_time']))
+  );
+  if (alerts.length === 0) {
+    return spread;
+  }
+  const alertTime = new Map(
+    alerts.map((alert) => [
+      alert.id,
+      Date.parse(String(alert.source['kibana.alert.original_time'])),
+    ])
+  );
+  // Earliest citing alert per event, by alert time.
+  const citingAlert = new Map<string, string>();
+  for (const alert of alerts) {
+    const ancestors = alert.source['kibana.alert.ancestors'];
+    if (Array.isArray(ancestors)) {
+      for (const ancestor of ancestors) {
+        const eventId = String((ancestor as Record<string, unknown>).id);
+        if (!citingAlert.has(eventId)) {
+          citingAlert.set(eventId, alert.id);
+        }
+      }
+    }
+  }
+  const events = spread.events.map((event): Ad2IndexedRawEvent => {
+    const stageAlertMs = alertTime.get(citingAlert.get(event.id) ?? '');
+    if (stageAlertMs === undefined) {
+      return event;
+    }
+    const time = stageAlertMs - ALERT_DELAY_MS;
+    return {
+      ...event,
+      source: {
+        ...event.source,
+        '@timestamp': new Date(time).toISOString(),
+      },
+    };
+  });
+  return { ...spread, events };
+};
 
 /** Drops the raw events with the given ids. Alerts still cite them, as they would after data loss. */
 export const withoutEventIds = (world: FpTpWorld, eventIds: readonly string[]): FpTpWorld => {
