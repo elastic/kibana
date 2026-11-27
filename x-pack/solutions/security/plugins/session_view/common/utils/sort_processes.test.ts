@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { Process } from '..';
 import { sortProcesses } from './sort_processes';
 import { mockProcessMap } from '../mocks/constants/session_view_process.mock';
 
@@ -27,5 +28,34 @@ describe('sortProcesses(a, b)', () => {
           new Date(current.getDetails().process!.start!)
       ).toBeTruthy();
     }
+  });
+});
+
+describe('sortProcesses with mixed timestamp precision', () => {
+  const processWithStart = (start?: string) =>
+    ({ getDetails: () => ({ process: { start } }) } as unknown as Process);
+
+  it('orders millisecond and nanosecond timestamps chronologically', () => {
+    const starts = [
+      '2026-11-18T20:13:18Z',
+      '2026-11-18T20:13:18.125Z',
+      '2026-11-18T20:13:18.125000001Z',
+      '2026-11-18T20:13:18.124999999Z',
+      '2026-11-18T20:13:17.999999999Z',
+      undefined,
+    ];
+    const sorted = starts
+      .map(processWithStart)
+      .sort(sortProcesses)
+      .map((process) => process.getDetails().process?.start);
+
+    expect(sorted).toEqual([
+      undefined,
+      '2026-11-18T20:13:17.999999999Z',
+      '2026-11-18T20:13:18Z',
+      '2026-11-18T20:13:18.124999999Z',
+      '2026-11-18T20:13:18.125Z',
+      '2026-11-18T20:13:18.125000001Z',
+    ]);
   });
 });

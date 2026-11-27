@@ -7,17 +7,32 @@
 
 import type { Process } from '..';
 
-export const sortProcesses = (a: Process, b: Process) => {
-  const eventAStartTime = a.getDetails()?.process?.start || 0;
-  const eventBStartTime = b.getDetails()?.process?.start || 0;
+// digits after the millisecond part of an ISO timestamp's fraction (e.g. date_nanos values)
+const SUB_MILLIS_REGEX = /T[\d:]+\.\d{3}(\d{1,6})/;
 
-  if (eventAStartTime < eventBStartTime) {
-    return -1;
-  }
-
-  if (eventAStartTime > eventBStartTime) {
-    return 1;
-  }
-
-  return 0;
+const getSubMillis = (timestamp: string): number => {
+  const match = SUB_MILLIS_REGEX.exec(timestamp);
+  return match ? Number(match[1].padEnd(6, '0')) : 0;
 };
+
+/**
+ * Compares ISO timestamps chronologically. String comparison is not safe when values mix
+ * millisecond and nanosecond precision (e.g. `logsdb` and `logsdb_columnar` backing indices).
+ */
+const compareTimestamps = (a: string | undefined, b: string | undefined): number => {
+  const millisA = a ? Date.parse(a) : 0;
+  const millisB = b ? Date.parse(b) : 0;
+
+  if (Number.isNaN(millisA) || Number.isNaN(millisB)) {
+    return (a ?? '').localeCompare(b ?? '');
+  }
+
+  if (millisA !== millisB) {
+    return millisA < millisB ? -1 : 1;
+  }
+
+  return Math.sign(getSubMillis(a ?? '') - getSubMillis(b ?? ''));
+};
+
+export const sortProcesses = (a: Process, b: Process) =>
+  compareTimestamps(a.getDetails()?.process?.start, b.getDetails()?.process?.start);
