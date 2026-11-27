@@ -38,6 +38,8 @@ export interface UseCustomContentHtmlParams {
   query: Query | AggregateQuery | undefined;
   filters: Filter[] | undefined;
   esqlVariables: ESQLControlVariable[] | undefined;
+  /** False until the host has the filters and control values to fetch with; a panel with queries waits. */
+  isFetchContextReady?: boolean;
   isInteractive: boolean;
   /** Records the panel's ES|QL request for the Inspect action. */
   requestAdapter?: RequestAdapter;
@@ -75,12 +77,16 @@ export function useCustomContentHtml({
   query,
   filters,
   esqlVariables,
+  isFetchContextReady = true,
   isInteractive,
   requestAdapter,
   setApproximationApplied,
 }: UseCustomContentHtmlParams): UseCustomContentHtmlResult {
   const [filledHtml, setFilledHtml] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
+  // A panel with queries starts loading, so its host never sees it as done before it has fetched.
+  const [isLoading, setIsLoading] = useState(
+    () => Boolean(savedTemplate?.trim()) && esqlQueries.length > 0
+  );
   const [error, setError] = useState<string | undefined>();
 
   const trimmedTemplate = savedTemplate?.trim() || undefined;
@@ -92,6 +98,12 @@ export function useCustomContentHtml({
     if (trimmedTemplate && stableEsqlQueries.length === 0) {
       setFilledHtml(stripMarkdownFences(trimmedTemplate));
       setIsLoading(false);
+      setError(undefined);
+      return;
+    }
+
+    if (trimmedTemplate && !isFetchContextReady) {
+      setIsLoading(true);
       setError(undefined);
       return;
     }
@@ -147,6 +159,7 @@ export function useCustomContentHtml({
     query,
     filters,
     esqlVariables,
+    isFetchContextReady,
     requestAdapter,
     http,
     uiSettings,

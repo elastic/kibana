@@ -28,7 +28,7 @@ import {
   timeRangeComparators,
   initializeStateApi,
   useBatchedPublishingSubjects,
-  apiPublishesReload,
+  apiPublishesPauseFetch,
   apiPublishesTimeRange,
   apiIsPresentationContainer,
   fetch$,
@@ -219,6 +219,7 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
     const query$ = new BehaviorSubject<Query | AggregateQuery | undefined>(undefined);
     const filters$ = new BehaviorSubject<Filter[] | undefined>(undefined);
     const esqlVariables$ = new BehaviorSubject<ESQLControlVariable[] | undefined>(undefined);
+    const isFetchContextReady$ = new BehaviorSubject<boolean>(false);
     // The range the panel actually renders with: fetch$ resolves the panel's own override over the
     // dashboard's. Seeded from the parent for the first render.
     const effectiveTimeRange$ = new BehaviorSubject<TimeRange | undefined>(
@@ -231,6 +232,8 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
     // Starts true so the panel is not reported as render-complete before its first fetch resolves;
     // screenshotting would otherwise capture an empty panel.
     const dataLoading$ = new BehaviorSubject<boolean | undefined>(true);
+    const isComponentLoading$ = new BehaviorSubject<boolean>(true);
+    const reloadCount$ = new BehaviorSubject<number>(0);
 
     const serializeState = (): CustomContentEmbeddableState => ({
       ...titleManager.getLatestState(),
@@ -440,10 +443,23 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
       filters$.next(ctx.filters);
       esqlVariables$.next(ctx.esqlVariables);
       effectiveTimeRange$.next(ctx.timeRange);
-      if (!ctx.isReload) {
+      if (ctx.isReload) {
+        reloadCount$.next(reloadCount$.getValue() + 1);
+      } else {
         previewHtml$.next(null);
       }
+      isFetchContextReady$.next(true);
     });
+
+    // An offscreen panel that has never fetched (deferred loading) must not hold up the dashboard's
+    // auto-refresh; one waiting for the dashboard's controls, or with a request in flight, is loading.
+    const dataLoadingSubscription = combineLatest([
+      isComponentLoading$,
+      apiPublishesPauseFetch(api) ? api.isFetchPaused$ : of(false),
+      isFetchContextReady$,
+    ]).subscribe(([isLoading, isPausedOffscreen, isFetchContextReady]) =>
+      dataLoading$.next(isLoading && !(isPausedOffscreen && !isFetchContextReady))
+    );
 
     const viewMode$ = getViewModeSubject(api) ?? new BehaviorSubject<ViewMode>('edit');
 
@@ -459,6 +475,8 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
           query,
           filters,
           esqlVariables,
+          isFetchContextReady,
+          generationVersion,
           previewHtml,
           timeRange,
           isGenerating,
@@ -472,25 +490,21 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
           query$,
           filters$,
           esqlVariables$,
+          isFetchContextReady$,
+          reloadCount$,
           previewHtml$,
           effectiveTimeRange$,
           isGenerating$,
           viewMode$
         );
-        const [generationVersion, setGenerationVersion] = useState(0);
 
         useEffect(() => {
           return () => {
             esqlUsageSubscription.unsubscribe();
             dataSourcesSubscription.unsubscribe();
             fetchSubscription.unsubscribe();
+            dataLoadingSubscription.unsubscribe();
           };
-        }, []);
-
-        useEffect(() => {
-          if (!apiPublishesReload(parentApi)) return;
-          const sub = parentApi.reload$.subscribe(() => setGenerationVersion((v) => v + 1));
-          return () => sub.unsubscribe();
         }, []);
 
         useEffect(() => registerPanelPreviewHandler(uuid, applyAttachmentData), []);
@@ -545,7 +559,7 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
         }, []);
 
         const handleLoadingChange = useCallback((isLoading: boolean) => {
-          dataLoading$.next(isLoading);
+          isComponentLoading$.next(isLoading);
         }, []);
 
         const setApproximationApplied = useCallback((value: boolean | undefined) => {
@@ -596,6 +610,7 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
               query={query}
               filters={filters}
               esqlVariables={esqlVariables}
+              isFetchContextReady={isFetchContextReady}
               previewHtml={previewHtml}
               isAiAvailable={Boolean(agentBuilder) && viewMode === 'edit'}
               isGenerating={isGenerating}

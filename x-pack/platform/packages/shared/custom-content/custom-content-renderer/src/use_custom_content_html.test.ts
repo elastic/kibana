@@ -500,6 +500,70 @@ describe('useCustomContentHtml', () => {
     });
   });
 
+  describe('waiting for the fetch context', () => {
+    const esqlParams = {
+      ...baseParams,
+      esqlQueries: ['FROM logs | WHERE region == ?region | STATS c = COUNT(*)'],
+      savedTemplate: '{% for row in rows %}{{ row["c"].value }}{% endfor %}',
+    };
+    const variables = [{ key: 'region', value: 'All', type: ESQLVariableType.VALUES }];
+
+    it('stays loading without fetching until the fetch context is ready, then fetches once with it', async () => {
+      interface Props {
+        isFetchContextReady: boolean;
+        esqlVariables: typeof variables | undefined;
+      }
+      const { result, rerender } = renderHook(
+        ({ isFetchContextReady, esqlVariables }: Props) =>
+          useCustomContentHtml({ ...esqlParams, isFetchContextReady, esqlVariables }),
+        { initialProps: { isFetchContextReady: false, esqlVariables: undefined } as Props }
+      );
+
+      await waitFor(() => expect(result.current.isLoading).toBe(true));
+      expect(mockFetchEsqlData).not.toHaveBeenCalled();
+      expect(result.current.error).toBeUndefined();
+
+      rerender({ isFetchContextReady: true, esqlVariables: variables });
+
+      await waitFor(() => expect(result.current.isLoading).toBe(false));
+      expect(mockFetchEsqlData).toHaveBeenCalledTimes(1);
+      expect(mockFetchEsqlData).toHaveBeenCalledWith(
+        mockSearch,
+        mockHttp,
+        esqlParams.esqlQueries[0],
+        undefined,
+        expect.any(AbortSignal),
+        expect.objectContaining({ esqlVariables: variables })
+      );
+    });
+
+    it('is loading from its first render, so a host never sees it as done before it fetches', () => {
+      const firstValues: boolean[] = [];
+      renderHook(() => {
+        const result = useCustomContentHtml({ ...esqlParams, isFetchContextReady: false });
+        firstValues.push(result.isLoading);
+        return result;
+      });
+
+      expect(firstValues[0]).toBe(true);
+      expect(firstValues).not.toContain(false);
+    });
+
+    it('renders a static panel right away, since it fetches nothing', async () => {
+      const { result } = renderHook(() =>
+        useCustomContentHtml({
+          ...baseParams,
+          savedTemplate: VALID_HTML,
+          isFetchContextReady: false,
+        })
+      );
+
+      await waitFor(() => expect(result.current.html).not.toBe(''));
+      expect(result.current.isLoading).toBe(false);
+      expect(mockFetchEsqlData).not.toHaveBeenCalled();
+    });
+  });
+
   describe('esqlVariables — dashboard ES|QL control variables', () => {
     const esqlParams = {
       ...baseParams,

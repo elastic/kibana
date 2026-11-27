@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { BehaviorSubject, Subject } from 'rxjs';
+import { ESQLVariableType, type ESQLControlVariable } from '@kbn/esql-types';
 import { RequestAdapter, apiHasInspectorAdapters } from '@kbn/inspector-plugin/public';
 import { render, screen, act, waitFor } from '@testing-library/react';
 import { EsqlSource } from '@kbn/data-source';
@@ -32,6 +33,9 @@ const mockApiIsPresentationContainer = apiIsPresentationContainer as jest.Mocked
 let capturedComponentProps:
   | {
       esqlQueries?: readonly string[];
+      esqlVariables?: ESQLControlVariable[];
+      isFetchContextReady?: boolean;
+      generationVersion?: number;
       isGenerating?: boolean;
       requestAdapter?: unknown;
       onGenerateWithChat?: () => void;
@@ -151,7 +155,8 @@ const baseState: CustomContentEmbeddableState = {
 
 const buildEmbeddable = async (
   initialState: CustomContentEmbeddableState,
-  parentApi: Record<string, unknown> = {}
+  parentApi: Record<string, unknown> = {},
+  apiExtras: Record<string, unknown> = {}
 ) => {
   const uuid = 'test-uuid';
 
@@ -159,7 +164,8 @@ const buildEmbeddable = async (
     initializeDrilldownsManager: jest.fn(),
     initialState,
     parentApi,
-    finalizeApi: (api) => ({ ...api, uuid, parentApi } as unknown as CustomContentApi),
+    finalizeApi: (api) =>
+      ({ ...api, ...apiExtras, uuid, parentApi } as unknown as CustomContentApi),
     uuid,
   });
 
@@ -664,6 +670,102 @@ describe('customContentEmbeddableFactory', () => {
       const el = screen.getByTestId('mockCustomContentComponent');
       expect(el).toHaveAttribute('data-esql-query', baseState.esql_query?.[0]);
       expect(el).toHaveAttribute('data-saved-template', '<div>static html</div>');
+    });
+  });
+
+  describe('fetch context', () => {
+    it('holds the panel back until the dashboard publishes its control values', async () => {
+      const isFetchPaused$ = new BehaviorSubject(true);
+      const region = { key: 'region', value: 'All', type: ESQLVariableType.VALUES };
+      const esqlVariables$ = new BehaviorSubject([region]);
+      const { embeddable } = await buildEmbeddable(baseState, { isFetchPaused$, esqlVariables$ });
+      await act(async () => render(<embeddable.Component />));
+      // Give fetch$ and the batched props time to land, so false means held back, not just early.
+      await act(async () => new Promise((resolve) => setTimeout(resolve, 0)));
+      await act(async () => new Promise((resolve) => setTimeout(resolve, 0)));
+
+      expect(capturedComponentProps?.isFetchContextReady).toBe(false);
+
+      await act(async () => isFetchPaused$.next(false));
+
+      await waitFor(() => {
+        expect(capturedComponentProps?.isFetchContextReady).toBe(true);
+        expect(capturedComponentProps?.esqlVariables).toEqual([region]);
+      });
+    });
+
+    it('counts a visible panel waiting for the dashboard controls as loading, so exports wait for it', async () => {
+      const { embeddable } = await buildEmbeddable(baseState, {
+        isFetchPaused$: new BehaviorSubject(true),
+      });
+      await act(async () => render(<embeddable.Component />));
+
+      await act(async () => capturedComponentProps?.onLoadingChange?.(true));
+      expect(embeddable.api.dataLoading$.getValue()).toBe(true);
+
+      await act(async () => capturedComponentProps?.onLoadingChange?.(false));
+      expect(embeddable.api.dataLoading$.getValue()).toBe(false);
+    });
+
+    it('reloads with the dashboard, but not while deferred offscreen, catching up once visible', async () => {
+      const reload$ = new Subject<void>();
+      const isPausedOffscreen$ = new BehaviorSubject(false);
+      const { embeddable } = await buildEmbeddable(
+        baseState,
+        { reload$ },
+        { isFetchPaused$: isPausedOffscreen$ }
+      );
+      await act(async () => render(<embeddable.Component />));
+      await waitFor(() => expect(capturedComponentProps?.isFetchContextReady).toBe(true));
+      expect(capturedComponentProps?.generationVersion).toBe(0);
+
+      await act(async () => reload$.next());
+      await waitFor(() => expect(capturedComponentProps?.generationVersion).toBe(1));
+
+      await act(async () => {
+        isPausedOffscreen$.next(true);
+        reload$.next();
+        reload$.next();
+      });
+      await new Promise((resolve) => setTimeout(resolve, 50));
+      expect(capturedComponentProps?.generationVersion).toBe(1);
+
+      await act(async () => isPausedOffscreen$.next(false));
+      await waitFor(() => expect(capturedComponentProps?.generationVersion).toBe(2));
+    });
+
+    it('keeps a request in flight counted as loading when the panel scrolls offscreen', async () => {
+      const isPausedOffscreen$ = new BehaviorSubject(false);
+      const { embeddable } = await buildEmbeddable(
+        baseState,
+        {},
+        { isFetchPaused$: isPausedOffscreen$ }
+      );
+      await act(async () => render(<embeddable.Component />));
+      await waitFor(() => expect(capturedComponentProps?.isFetchContextReady).toBe(true));
+
+      await act(async () => capturedComponentProps?.onLoadingChange?.(true));
+      await act(async () => isPausedOffscreen$.next(true));
+      expect(embeddable.api.dataLoading$.getValue()).toBe(true);
+
+      await act(async () => capturedComponentProps?.onLoadingChange?.(false));
+      expect(embeddable.api.dataLoading$.getValue()).toBe(false);
+    });
+
+    it('does not count a panel deferred offscreen as loading until it becomes visible', async () => {
+      const isPausedOffscreen$ = new BehaviorSubject(true);
+      const { embeddable } = await buildEmbeddable(
+        baseState,
+        {},
+        { isFetchPaused$: isPausedOffscreen$ }
+      );
+      await act(async () => render(<embeddable.Component />));
+
+      await act(async () => capturedComponentProps?.onLoadingChange?.(true));
+      expect(embeddable.api.dataLoading$.getValue()).toBe(false);
+
+      await act(async () => isPausedOffscreen$.next(false));
+      expect(embeddable.api.dataLoading$.getValue()).toBe(true);
     });
   });
 

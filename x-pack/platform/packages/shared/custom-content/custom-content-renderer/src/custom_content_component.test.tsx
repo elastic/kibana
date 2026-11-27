@@ -80,6 +80,29 @@ describe('CustomContentComponent', () => {
     expect(onLoadingChange).toHaveBeenCalledWith(true);
   });
 
+  it('reports loading while it waits for the fetch context, so a dashboard export waits for it', () => {
+    const onLoadingChange = jest.fn();
+    mockUseCustomContentHtml.mockReturnValue({
+      html: '',
+      isLoading: true,
+      error: undefined,
+      noContent: false,
+    });
+
+    render(
+      <CustomContentComponent
+        {...defaultProps}
+        isFetchContextReady={false}
+        onLoadingChange={onLoadingChange}
+      />
+    );
+
+    expect(mockUseCustomContentHtml).toHaveBeenCalledWith(
+      expect.objectContaining({ isFetchContextReady: false })
+    );
+    expect(onLoadingChange).toHaveBeenLastCalledWith(true);
+  });
+
   it('sandboxes the iframe so that only user-initiated top navigation is allowed', () => {
     const { container } = render(<CustomContentComponent {...defaultProps} />);
 
