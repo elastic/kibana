@@ -270,8 +270,7 @@ describe('ControlsRenderer', () => {
   describe('control resizing', () => {
     // drag resizing is temporarily disabled in the renderer styles. Resize behavior (keyboard and
     // pointer) is covered at the FlexLayout layer in `kbn-grid-layout/flex/flex_layout.test.tsx`
-    const getResizeHandle = (id: string) =>
-      within(getPanel(id)).getByLabelText(/resize panel/i);
+    const getResizeHandle = (id: string) => within(getPanel(id)).getByLabelText(/resize panel/i);
 
     it('keeps the resize handle unavailable in view mode', () => {
       renderControls(getControls(), getParentApi('view'));
