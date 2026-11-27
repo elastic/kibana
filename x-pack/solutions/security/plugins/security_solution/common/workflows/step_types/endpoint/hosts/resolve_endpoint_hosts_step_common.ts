@@ -8,7 +8,7 @@
 import { z, lazySchema } from '@kbn/zod/v4';
 import { i18n } from '@kbn/i18n';
 import { StepCategory } from '@kbn/workflows';
-import type { BaseStepDefinition } from '@kbn/workflows';
+import type { CommonStepDefinition } from '@kbn/workflows-extensions/common';
 import { truncationSchema } from '../../common/truncation';
 import {
   MAX_HOST_RECORDS,
@@ -46,7 +46,7 @@ export const resolveEndpointHostsOutputSchema = lazySchema(() =>
   })
 );
 
-export const resolveEndpointHostsStepCommonDefinition: BaseStepDefinition<
+export const resolveEndpointHostsStepCommonDefinition: CommonStepDefinition<
   typeof resolveEndpointHostsInputSchema,
   typeof resolveEndpointHostsOutputSchema
 > = {
@@ -63,6 +63,7 @@ export const resolveEndpointHostsStepCommonDefinition: BaseStepDefinition<
   ),
   category: StepCategory.KibanaSecurity,
   stability: 'tech_preview',
+  exposure: 'managed_only',
   inputSchema: resolveEndpointHostsInputSchema,
   outputSchema: resolveEndpointHostsOutputSchema,
   documentation: {

@@ -8,7 +8,7 @@
 import { z, lazySchema } from '@kbn/zod/v4';
 import { i18n } from '@kbn/i18n';
 import { StepCategory } from '@kbn/workflows';
-import type { BaseStepDefinition } from '@kbn/workflows';
+import type { CommonStepDefinition } from '@kbn/workflows-extensions/common';
 import {
   MAX_HOST_TARGETS,
   diagnosticsPartValues,
@@ -51,7 +51,7 @@ export const getEndpointHostDiagnosticsOutputSchema = lazySchema(() =>
   })
 );
 
-export const getEndpointHostDiagnosticsStepCommonDefinition: BaseStepDefinition<
+export const getEndpointHostDiagnosticsStepCommonDefinition: CommonStepDefinition<
   typeof getEndpointHostDiagnosticsInputSchema,
   typeof getEndpointHostDiagnosticsOutputSchema
 > = {
@@ -68,6 +68,7 @@ export const getEndpointHostDiagnosticsStepCommonDefinition: BaseStepDefinition<
   ),
   category: StepCategory.KibanaSecurity,
   stability: 'tech_preview',
+  exposure: 'managed_only',
   inputSchema: getEndpointHostDiagnosticsInputSchema,
   outputSchema: getEndpointHostDiagnosticsOutputSchema,
   documentation: {

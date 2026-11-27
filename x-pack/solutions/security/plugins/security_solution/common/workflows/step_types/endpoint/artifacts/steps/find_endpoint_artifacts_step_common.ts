@@ -8,7 +8,7 @@
 import { z, lazySchema } from '@kbn/zod/v4';
 import { i18n } from '@kbn/i18n';
 import { StepCategory } from '@kbn/workflows';
-import type { BaseStepDefinition } from '@kbn/workflows';
+import type { CommonStepDefinition } from '@kbn/workflows-extensions/common';
 import {
   DEFAULT_FIND_LIMIT,
   FETCH_CAP_DEFAULT,
@@ -66,7 +66,7 @@ export const findEndpointArtifactsOutputSchema = lazySchema(() =>
   })
 );
 
-export const findEndpointArtifactsStepCommonDefinition: BaseStepDefinition<
+export const findEndpointArtifactsStepCommonDefinition: CommonStepDefinition<
   typeof findEndpointArtifactsInputSchema,
   typeof findEndpointArtifactsOutputSchema
 > = {
@@ -83,6 +83,7 @@ export const findEndpointArtifactsStepCommonDefinition: BaseStepDefinition<
   ),
   category: StepCategory.KibanaSecurity,
   stability: 'tech_preview',
+  exposure: 'managed_only',
   inputSchema: findEndpointArtifactsInputSchema,
   outputSchema: findEndpointArtifactsOutputSchema,
   documentation: {

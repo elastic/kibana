@@ -8,7 +8,7 @@
 import { z, lazySchema } from '@kbn/zod/v4';
 import { i18n } from '@kbn/i18n';
 import { StepCategory } from '@kbn/workflows';
-import type { BaseStepDefinition } from '@kbn/workflows';
+import type { CommonStepDefinition } from '@kbn/workflows-extensions/common';
 import { countSchema, endpointPartSchema, inventoryPartValues } from './hosts_contracts';
 
 export const GetEndpointInventoryCountsStepId = 'security.getEndpointInventoryCounts' as const;
@@ -25,7 +25,7 @@ export const getEndpointInventoryCountsOutputSchema = lazySchema(() =>
   })
 );
 
-export const getEndpointInventoryCountsStepCommonDefinition: BaseStepDefinition<
+export const getEndpointInventoryCountsStepCommonDefinition: CommonStepDefinition<
   typeof getEndpointInventoryCountsInputSchema,
   typeof getEndpointInventoryCountsOutputSchema
 > = {
@@ -42,6 +42,7 @@ export const getEndpointInventoryCountsStepCommonDefinition: BaseStepDefinition<
   ),
   category: StepCategory.KibanaSecurity,
   stability: 'tech_preview',
+  exposure: 'managed_only',
   inputSchema: getEndpointInventoryCountsInputSchema,
   outputSchema: getEndpointInventoryCountsOutputSchema,
   documentation: {
