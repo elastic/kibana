@@ -16,6 +16,11 @@ import { ESQLMenu } from '.';
 import { EsqlEditorActionsProvider } from '../editor_actions_context';
 import { EsqlEditorActionsRegister } from '../editor_actions_register';
 
+const mockUseNlToEsqlCheck = jest.fn(() => false);
+jest.mock('../hooks/use_nl_to_esql_check', () => ({
+  useNlToEsqlCheck: () => mockUseNlToEsqlCheck(),
+}));
+
 jest.mock('./help_popover', () => {
   const ReactActual = jest.requireActual('react');
   return {
@@ -74,6 +79,21 @@ describe('ESQLMenu', () => {
   });
 
   describe('when collapseActions is set', () => {
+    afterEach(() => mockUseNlToEsqlCheck.mockReturnValue(false));
+
+    it('renders the natural-language search row in the overflow menu without crashing', async () => {
+      mockUseNlToEsqlCheck.mockReturnValue(true);
+      await renderMenu(
+        { collapseActions: true, onPrettifyQuery: jest.fn(), enableCreateView: true },
+        { editorIsInline: true, currentQuery: 'FROM logs-*' }
+      );
+
+      fireEvent.click(screen.getByTestId('ESQLEditor-more-actions'));
+
+      const panel = await screen.findByTestId('ESQLEditor-more-actions-panel');
+      expect(within(panel).getByTestId('esql-menu-button')).toBeInTheDocument();
+    });
+
     it('keeps only the first three actions inline and moves the rest under an ellipsis button', async () => {
       await renderMenu(
         { collapseActions: true, onPrettifyQuery: jest.fn(), enableCreateView: true },

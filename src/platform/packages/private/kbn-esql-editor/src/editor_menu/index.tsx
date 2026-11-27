@@ -302,7 +302,8 @@ export function ESQLMenu({
         inline: visorAction,
         menuItem: {
           name: searchPlaceholder,
-          icon: isNlToEsqlEnabled ? MagnifySparklesIcon : 'search',
+          // context menu items take an icon name or an element, not a bare icon component
+          icon: isNlToEsqlEnabled ? <EuiIcon type={MagnifySparklesIcon} aria-hidden /> : 'search',
           disabled: !onToggleVisor,
           'data-test-subj': 'esql-menu-button',
           onClick: () => {
