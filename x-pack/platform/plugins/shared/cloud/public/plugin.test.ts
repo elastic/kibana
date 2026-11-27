@@ -328,6 +328,29 @@ describe('Cloud Plugin', () => {
       return { coreSetup, plugin };
     };
 
+    describe('isEce', () => {
+      const createCoreStart = () => {
+        const coreStart = coreMock.createStart();
+        coreStart.http.get.mockResolvedValue({});
+        return coreStart;
+      };
+
+      it('is true when isSaasContainer is false', () => {
+        const { plugin } = startPlugin({ isSaasContainer: false });
+        expect(plugin.start(createCoreStart()).isEce).toBe(true);
+      });
+
+      it('is false when isSaasContainer is true', () => {
+        const { plugin } = startPlugin({ isSaasContainer: true });
+        expect(plugin.start(createCoreStart()).isEce).toBe(false);
+      });
+
+      it('is undefined for self-managed deployments', () => {
+        const { plugin } = startPlugin({ id: undefined });
+        expect(plugin.start(createCoreStart()).isEce).toBeUndefined();
+      });
+    });
+
     it('registers help support URL: default', async () => {
       const { plugin } = startPlugin({
         id: undefined,

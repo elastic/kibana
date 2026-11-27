@@ -121,6 +121,10 @@ export interface CloudStart extends CloudBasicUrls {
    */
   isCloudEnabled: boolean;
   /**
+   * `true` when running on ECE (Elastic Cloud Enterprise). See `CloudSetup.isEce`.
+   */
+  isEce?: boolean;
+  /**
    * Cloud ID.
    */
   cloudId?: string;
