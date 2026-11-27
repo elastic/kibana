@@ -447,9 +447,10 @@ const HypothesisTreeCanvas = ({ input }: { input: HypothesisTreeInput }): React.
 };
 
 /**
- * Draws the investigation as a hypothesis tree in a push flyout. It opens as a new main flyout in
- * the conversation details flyout's history group, so the flyout menu offers Back to it, and as a
- * push flyout it leaves the chat beside it visible.
+ * Draws the investigation as a hypothesis tree in an overlay flyout. It opens as a new main flyout
+ * in the conversation details flyout's history group, so the flyout menu offers Back to it. It
+ * overlays the page rather than pushing it, since a wide, resizable push flyout would squeeze the
+ * page behind it (e.g. the Nightshift onboarding layout).
  */
 export const HypothesisTreeFlyout = ({
   input,
@@ -469,7 +470,7 @@ export const HypothesisTreeFlyout = ({
         session="start"
         historyKey={CONVERSATION_DETAILS_FLYOUT_HISTORY_KEY}
         flyoutMenuProps={{ title: HYPOTHESIS_TREE_TITLE, hideTitle: true }}
-        type="push"
+        type="overlay"
         size="m"
         resizable
       >
